@@ -1,0 +1,27 @@
+<Configuration Version="1.0">
+  <RunType Alias="Physics">
+    <Configuration Alias="Default" Calibration="0" DAC="Default" Detector="Default" FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+  </RunType>
+  <RunType Alias="SCurve">
+    <Configuration Alias="Default 1x1"          Calibration="1" DAC="Default" Detector="Default" FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Default BPix 1x1"     Calibration="1" DAC="Default" Detector="BPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Default FPix 1x1"     Calibration="1" DAC="Default" Detector="FPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Latest DACs 1x1"      Calibration="1" DAC="Latest"  Detector="Default" FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Latest DACs BPix 1x1" Calibration="1" DAC="Latest"  Detector="BPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Latest DACs FPix 1x1" Calibration="1" DAC="Latest"  Detector="FPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Default 3x3"          Calibration="2" DAC="Default" Detector="Default" FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Default BPix 3x3"     Calibration="2" DAC="Default" Detector="BPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Default FPix 3x3"     Calibration="2" DAC="Default" Detector="FPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Latest DACs 3x3"      Calibration="2" DAC="Latest"  Detector="Default" FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Latest DACs BPix 3x3" Calibration="2" DAC="Latest"  Detector="BPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Latest DACs FPix 3x3" Calibration="2" DAC="Latest"  Detector="FPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+  </RunType>
+  <RunType Alias="PixelAlive">
+    <Configuration Alias="Default"      Calibration="3" DAC="Default" Detector="Default" FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Default BPix" Calibration="3" DAC="Default" Detector="BPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Default FPix" Calibration="3" DAC="Default" Detector="FPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Latest"       Calibration="3" DAC="Latest"  Detector="Default" FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Latest BPix"  Calibration="3" DAC="Latest"  Detector="BPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+    <Configuration Alias="Latest FPix"  Calibration="3" DAC="Latest"  Detector="FPix"    FEW="Default" FER="Default" Mask="Default" ModuleToFE="Default"></Configuration>
+  </RunType>
+</Configuration>

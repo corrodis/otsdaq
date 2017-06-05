@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ROOT xmlns="http://www.w3.org/2001/XMLSchema-instance">
+
+  <DATA xmlns="">
+    <experiments xmlns="">
+      <experiment xmlns="">hgcal-testbeam
+        <create_time xmlns="">1470671461</create_time>
+        <creator xmlns=""></creator>
+      </experiment>
+    </experiments>
+  </DATA>
+
+</ROOT>

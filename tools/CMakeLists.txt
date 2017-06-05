@@ -1,0 +1,13 @@
+cet_script(
+	generateAggregatorMain.rb
+	generateAggregator.rb
+	generateBoardReaderMain.rb
+	generateEventBuilderMain.rb
+	generateEventBuilder.rb
+	generateJSONDispatcher.rb
+	generateUDP.rb
+	ots_utilities.rb
+	setupOtsEnvironment.sh
+	xt_cmd.sh
+	StartOTS.sh
+)

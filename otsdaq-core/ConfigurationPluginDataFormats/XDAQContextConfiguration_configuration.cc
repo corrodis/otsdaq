@@ -1,0 +1,614 @@
+#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+#include "otsdaq-core/Macros/ConfigurationPluginMacros.h"
+#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+
+#include <iostream>
+#include <fstream>      // std::fstream
+#include <stdio.h>
+
+using namespace ots;
+
+
+#define XDAQ_RUN_FILE			std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ std::string(getenv("XDAQ_CONFIGURATION_XML")) + ".xml"
+//#define XDAQ_SCRIPT				std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartXDAQ_gen.sh"
+//#define ARTDAQ_MPI_SCRIPT		std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartMPI_gen.sh"
+
+//========================================================================================================================
+XDAQContextConfiguration::XDAQContextConfiguration(void)
+: ConfigurationBase("XDAQContextConfiguration")
+{
+ 	//////////////////////////////////////////////////////////////////////
+	//WARNING: the names used in C++ MUST match the Configuration INFO  //
+	//////////////////////////////////////////////////////////////////////
+
+	//	<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	//	 <ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+	//	   <CONFIGURATION Name="XDAQContextConfiguration">
+	//	     <VIEW Name="XDAQ_CONTEXT_CONFIGURATION" Type="File,Database,DatabaseTest">
+	//           <COLUMN Type="UID" 	           Name="ContextUID" 	                 StorageName="CONTEXT_UID" 		                 DataType="VARCHAR2"/>
+	//           <COLUMN Type="ChildLink-0" 	   Name="LinkToApplicationConfiguration" StorageName="LINK_TO_APPLICATION_CONFIGURATION" DataType="VARCHAR2"/>
+	//           <COLUMN Type="ChildLinkGroupID-0" Name="ApplicationGroupID" 	         StorageName="APPLICATION_GROUP_ID"              DataType="VARCHAR2"/>
+	//           <COLUMN Type="OnOff" 	           Name="Status" 	                     StorageName="STATUS" 	   	                     DataType="VARCHAR2"/>
+	//           <COLUMN Type="Data" 	           Name="Id" 	                         StorageName="ID" 		                         DataType="VARCHAR2"/>
+	//           <COLUMN Type="Data" 	           Name="Address" 	                     StorageName="ADDRESS" 		                     DataType="VARCHAR2"/>
+	//           <COLUMN Type="Data" 	           Name="Port"                         	 StorageName="PORT" 		                     DataType="VARCHAR2"/>
+	//           <COLUMN Type="Comment" 	       Name="CommentDescription" 	         StorageName="COMMENT_DESCRIPTION" 	             DataType="VARCHAR2"/>
+	//           <COLUMN Type="Author" 	           Name="Author" 	                     StorageName="AUTHOR" 		                     DataType="VARCHAR2"/>
+	//           <COLUMN Type="Timestamp" 	       Name="RecordInsertionTime" 	         StorageName="RECORD_INSERTION_TIME"             DataType="TIMESTAMP WITH TIMEZONE"/>
+	//	     </VIEW>
+	//	   </CONFIGURATION>
+	//	 </ROOT>
+}
+
+//========================================================================================================================
+XDAQContextConfiguration::~XDAQContextConfiguration(void)
+{}
+
+//========================================================================================================================
+void XDAQContextConfiguration::init(ConfigurationManager* configManager)
+{
+	extractContexts(configManager);
+
+	/////////////////////////
+	//generate xdaq run parameter file
+	std::fstream fs;
+	fs.open(XDAQ_RUN_FILE, std::fstream::out | std::fstream::trunc);
+	if(fs.fail())
+	{
+		__SS__ << "Failed to open XDAQ run file: " << XDAQ_RUN_FILE << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+	outputXDAQXML((std::ostream &)fs);
+	fs.close();
+
+//	/////////////////////////
+//	//generate mpi script file
+//	fs.open(ARTDAQ_MPI_SCRIPT, std::fstream::out | std::fstream::trunc);
+//	if(fs.fail())
+//	{
+//		__SS__ << "Failed to open ARTDAQ script file: " << ARTDAQ_MPI_SCRIPT << std::endl;
+//		throw std::runtime_error(ss.str());
+//	}
+//	outputARTDAQScript((std::ostream &)fs);
+//	fs.close();
+//
+//	/////////////////////////
+//	//generate xdaq script file
+//	fs.open(XDAQ_SCRIPT, std::fstream::out | std::fstream::trunc);
+//	if(fs.fail())
+//	{
+//		__SS__ << "Failed to open XDAQ script file: " << XDAQ_SCRIPT << std::endl;
+//		throw std::runtime_error(ss.str());
+//	}
+//	outputXDAQScript((std::ostream &)fs);
+//	fs.close();
+}
+
+//========================================================================================================================
+//isARTDAQContext
+bool XDAQContextConfiguration::isARTDAQContext(const std::string &contextUID)
+{
+	return (contextUID.find("ART") == 0 ||
+			contextUID.find("ARTDAQ") == 0);
+}
+
+//========================================================================================================================
+//isARTDAQContext
+//	looks through all active artdaq contexts for UID
+//	throws exception if not found
+//
+//	if contextUID == "X" (which happens automatically for broken link)
+//		then highest possible rank plus 1 is returned
+unsigned int XDAQContextConfiguration::getARTDAQAppRank(const std::string &contextUID) const
+{
+	//	__MOUT__ << "artdaqContexts_.size() = " <<
+	//			artdaqContexts_.size() << std::endl;
+
+	unsigned int rank = 0;
+
+	for(auto &i : artdaqBoardReaders_)
+	{
+		if(contexts_[i].contextUID_ == contextUID)
+			return rank;
+		++rank;
+	}
+	for(auto &i : artdaqEventBuilders_)
+	{
+		if(contexts_[i].contextUID_ == contextUID)
+			return rank;
+		++rank;
+	}
+	for(auto &i : artdaqAggregators_)
+	{
+		if(contexts_[i].contextUID_ == contextUID)
+			return rank;
+		++rank;
+	}
+
+	if(contextUID == "X")
+		return rank; //assume first undefined rank is desired
+
+	__SS__ << "ARTDAQ rank could not be found for context UID '" <<
+			contextUID << "' - there were " << rank
+			<< " active ARTDAQ context UID(s) checked." << std::endl;
+	__MOUT_ERR__ << "\n" << ss.str();
+	throw std::runtime_error(ss.str());
+	return -1; //should never happen!
+}
+
+//========================================================================================================================
+std::vector<const XDAQContextConfiguration::XDAQContext *> XDAQContextConfiguration::getBoardReaderContexts() const
+{
+	std::vector<const XDAQContext *> retVec;
+	for(auto &i : artdaqBoardReaders_)
+		retVec.push_back(&contexts_[i]);
+	return retVec;
+}
+//========================================================================================================================
+std::vector<const XDAQContextConfiguration::XDAQContext *> XDAQContextConfiguration::getEventBuilderContexts() const
+{
+	std::vector<const XDAQContext *> retVec;
+	for(auto &i : artdaqEventBuilders_)
+		retVec.push_back(&contexts_[i]);
+	return retVec;
+
+}
+//========================================================================================================================
+std::vector<const XDAQContextConfiguration::XDAQContext *> XDAQContextConfiguration::getAggregatorContexts() const
+{
+	std::vector<const XDAQContext *> retVec;
+	for(auto &i : artdaqAggregators_)
+		retVec.push_back(&contexts_[i]);
+	return retVec;
+}
+
+//========================================================================================================================
+ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(ConfigurationManager *configManager,
+		const std::string &contextUID, const std::string &appUID) const
+{
+	return configManager->__SELF_NODE__.getNode(
+			contextUID + "/" +
+			colContext_.colLinkToApplicationConfiguration_ + "/" +
+			appUID + "/" +
+			colApplication_.colLinkToSupervisorConfiguration_);
+
+
+	//			auto supervisorConfigLink =
+	//					appChild.second.getNode(colApplication_.colLinkToSupervisorConfiguration_);
+	//
+	//			contexts_.back().applications_.back().supervisorConfigUID_ =
+	//					supervisorConfigLink.getValue();
+	//			__MOUT__ << "application supervisorConfigUID_ : " <<
+	//					supervisorConfigLink.getValueAsString() << std::endl;
+	//			if(!supervisorConfigLink.isDisconnected())
+	//			{
+	//				//add xdaq applications to this context
+	//				auto supervisorConfigChildren = supervisorConfigLink.getChildren();
+	//				for(auto supervisorConfigChild:supervisorConfigChildren)
+	//				{
+	//					__MOUT__ << "Loop: " << appChild.first << "/" <<
+	//							supervisorConfigChild.first << std::endl;
+	//				}
+	//			}
+	//			__MOUT__ << "application supervisorConfigUID_ : " <<
+	//					contexts_.back().applic
+}
+
+//========================================================================================================================
+//extractContexts
+//	Could be called by other tables if they need to access the context.
+//		This doesn't re-write config files, it just re-makes constructs in software.
+void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManager)
+{
+	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+
+	//	__MOUT__ << configManager->getNode(this->getConfigurationName()).getValueAsString()
+	//		  											  << std::endl;
+
+	auto children = configManager->__SELF_NODE__.getChildren();
+
+	contexts_.clear(); //reset
+	artdaqContexts_.clear();
+
+	artdaqBoardReaders_.clear();
+	artdaqEventBuilders_.clear();
+	artdaqAggregators_.clear();
+
+	for(auto &child:children)
+	{
+		contexts_.push_back(XDAQContext());
+		//__MOUT__ << child.first << std::endl;
+		//		__MOUT__ << child.second.getNode(colContextUID_) << std::endl;
+
+		contexts_.back().contextUID_   = child.first;
+
+		contexts_.back().sourceConfig_ = child.second.getConfigurationName() + "_v" +
+				child.second.getConfigurationVersion().toString() + " @ " +
+				std::to_string(child.second.getConfigurationCreationTime());
+		child.second.getNode(colContext_.colContextUID_	).getValue(contexts_.back().contextUID_);
+		child.second.getNode(colContext_.colStatus_	    ).getValue(contexts_.back().status_);
+		child.second.getNode(colContext_.colId_		    ).getValue(contexts_.back().id_);
+		child.second.getNode(colContext_.colAddress_    ).getValue(contexts_.back().address_);
+		child.second.getNode(colContext_.colPort_	    ).getValue(contexts_.back().port_);
+
+		//__MOUT__ << contexts_.back().address_ << std::endl;
+		auto appLink = child.second.getNode(colContext_.colLinkToApplicationConfiguration_);
+		if(appLink.isDisconnected())
+		{
+			__SS__ << "Application link is disconnected!" << std::endl;
+			throw std::runtime_error(ss.str());
+		}
+
+		//add xdaq applications to this context
+		auto appChildren = appLink.getChildren();
+		for(auto appChild:appChildren)
+		{
+			//__MOUT__ << "Loop: " << child.first << "/" << appChild.first << std::endl;
+
+			contexts_.back().applications_.push_back(XDAQApplication());
+
+			contexts_.back().applications_.back().applicationGroupID_ = child.first;
+			contexts_.back().applications_.back().sourceConfig_ = appChild.second.getConfigurationName() + "_v" +
+					appChild.second.getConfigurationVersion().toString() + " @ " +
+					std::to_string(appChild.second.getConfigurationCreationTime());
+
+			appChild.second.getNode(colApplication_.colApplicationUID_               ).getValue(contexts_.back().applications_.back().applicationUID_);
+			appChild.second.getNode(colApplication_.colStatus_	                     ).getValue(contexts_.back().applications_.back().status_);
+			appChild.second.getNode(colApplication_.colClass_	                     ).getValue(contexts_.back().applications_.back().class_);
+			appChild.second.getNode(colApplication_.colId_	   	                     ).getValue(contexts_.back().applications_.back().id_);
+			appChild.second.getNode(colApplication_.colInstance_                     ).getValue(contexts_.back().applications_.back().instance_);
+			appChild.second.getNode(colApplication_.colNetwork_	                     ).getValue(contexts_.back().applications_.back().network_);
+			appChild.second.getNode(colApplication_.colGroup_	                     ).getValue(contexts_.back().applications_.back().group_);
+			appChild.second.getNode(colApplication_.colModule_	                     ).getValue(contexts_.back().applications_.back().module_);
+		}
+
+		//check artdaq type
+		if(isARTDAQContext(contexts_.back().contextUID_))
+		{
+			artdaqContexts_.push_back(contexts_.size()-1);
+
+			if(contexts_.back().applications_.size() != 1)
+			{
+				__SS__ << "ARTDAQ Context must only have one Application!" <<
+					contexts_.back().applications_.size() << " were found. " << std::endl;
+				throw std::runtime_error(ss.str());
+			}
+
+			if(!contexts_.back().status_) continue; //skip if disabled
+
+			if(contexts_.back().applications_[0].class_ == //if board reader
+					"ots::ARTDAQDataManagerSupervisor")
+				artdaqBoardReaders_.push_back(contexts_.size()-1);
+			else if(contexts_.back().applications_[0].class_ == //if event builder
+					"ots::EventBuilderApp")
+				artdaqEventBuilders_.push_back(contexts_.size()-1);
+			else if(contexts_.back().applications_[0].class_ == //if aggregator
+					"ots::AggregatorApp")
+				artdaqAggregators_.push_back(contexts_.size()-1);
+			else
+			{
+				__SS__ << "ARTDAQ Context must be have Application of an allowed class type:\n " <<
+						"\tots::ARTDAQDataManagerSupervisor\n" <<
+						"\tots::EventBuilderApp\n" <<
+						"\tots::AggregatorApp\n" << "\nClass found was " <<
+						contexts_.back().applications_[0].class_ << std::endl;
+				throw std::runtime_error(ss.str());
+			}
+
+		}
+
+	}
+}
+
+//========================================================================================================================
+//void XDAQContextConfiguration::outputXDAQScript(std::ostream &out)
+//{
+	/*
+	the file will look something like this:
+			#!/bin/sh
+
+			echo
+			echo
+
+			echo "Launching XDAQ contexts..."
+
+			#for each XDAQ context
+			xdaq.exe -p ${CONTEXT_PORT} -e ${XDAQ_ARGS} &
+
+	*/
+
+//	out << "#!/bin/sh\n\n";
+//
+//	out << "echo\necho\n\n";
+//
+//	out << "echo \"Launching XDAQ contexts...\"\n\n";
+//	out << "#for each XDAQ context\n";
+//
+//
+//	std::stringstream ss;
+//	int count = 0;
+//	//for each non-"ART" or "ARTDAQ" context make a xdaq entry
+//	for(XDAQContext &context:contexts_)
+//	{
+//		if(isARTDAQContext(context.contextUID_))
+//			continue;		//skip if UID does identify as artdaq
+//
+//		if(!context.status_)
+//			continue;		//skip if disabled
+//
+//		//at this point we have a xdaq context.. so make an xdaq entry
+//
+//		++count;
+//		ss << "echo \"xdaq.exe -p " <<
+//				context.port_ << " -e ${XDAQ_ARGS} &\"\n";
+//		ss << "xdaq.exe -p " <<
+//				context.port_ << " -e ${XDAQ_ARGS} & " <<
+//				"#" << context.contextUID_ << "\n";
+//	}
+//
+//
+//	if(count == 0) //if no artdaq contexts at all
+//	{
+//		out << "echo \"No XDAQ (non-artdaq) contexts found.\"\n\n";
+//		out << "echo\necho\n";
+//		return;
+//	}
+//
+//	out << ss.str();
+//
+//	out << "\n\n";
+//}
+
+////========================================================================================================================
+//void XDAQContextConfiguration::outputARTDAQScript(std::ostream &out)
+//{
+	/*
+	the file will look something like this:
+			#!/bin/sh
+
+
+			echo
+			echo
+			while [ 1 ]; do
+
+				echo "Cleaning up old MPI instance..."
+				killall mpirun
+
+
+				echo "Starting mpi run..."
+				echo "$1"
+				echo
+				echo
+
+				echo mpirun $1 \
+					   -np 1 xdaq.exe -p ${ARTDAQ_BOARDREADER_PORT1} -e ${XDAQ_ARGS} : \
+					   -np 1 xdaq.exe -p ${ARTDAQ_BOARDREADER_PORT2} -e ${XDAQ_ARGS} : \
+					   -np 1 xdaq.exe -p ${ARTDAQ_BUILDER_PORT}      -e ${XDAQ_ARGS} : \
+					   -np 1 xdaq.exe -p ${ARTDAQ_AGGREGATOR_PORT}   -e ${XDAQ_ARGS} &
+
+				echo
+				echo
+
+				ret=mpirun $1 \
+					-np 1 xdaq.exe -p ${ARTDAQ_BOARDREADER_PORT1} -e ${XDAQ_ARGS} : \
+					-np 1 xdaq.exe -p ${ARTDAQ_BOARDREADER_PORT2} -e ${XDAQ_ARGS} : \
+					-np 1 xdaq.exe -p ${ARTDAQ_BUILDER_PORT}      -e ${XDAQ_ARGS} : \
+					-np 1 xdaq.exe -p ${ARTDAQ_AGGREGATOR_PORT}   -e ${XDAQ_ARGS}
+
+				if [ $ret -eq 0 ]; then
+					exit
+				fi
+
+			done
+	 */
+
+//	__MOUT__ << artdaqContexts_.size() << " total artdaq context(s)." << std::endl;
+//	__MOUT__ << artdaqBoardReaders_.size() << " active artdaq board reader(s)." << std::endl;
+//	__MOUT__ << artdaqEventBuilders_.size() << " active artdaq event builder(s)." << std::endl;
+//	__MOUT__ << artdaqAggregators_.size() << " active artdaq aggregator(s)." << std::endl;
+//
+//	out << "#!/bin/sh\n\n";
+//
+//	out << "\techo\n\techo\n\n";
+//	//out << "while [ 1 ]; do\n\n";
+//
+//	//out << "\techo \"Cleaning up old MPI instance...\"\n";
+//
+//	out << "\techo \"" <<
+//			artdaqContexts_.size() << " artdaq Contexts." <<
+//			"\"\n";
+//	out << "\techo \"\t" <<
+//			artdaqBoardReaders_.size() << " artdaq board readers." <<
+//			"\"\n";
+//	out << "\techo \"\t" <<
+//			artdaqEventBuilders_.size() << " artdaq event builders." <<
+//			"\"\n";
+//	out << "\techo \"\t" <<
+//			artdaqAggregators_.size() << " artdaq aggregators_." <<
+//			"\"\n";
+//
+//	//out << "\tkillall mpirun\n";
+//	out << "\techo\n\techo\n\n";
+//
+//	out << "\techo \"Starting mpi run...\"\n";
+//	out << "\techo \"$1\"\n\techo\n\techo\n\n";
+//
+//
+//
+//	std::stringstream ss,ssUID;
+//	int count = 0;
+//
+//	//ss << "\tret=`mpirun $1 \\\n"; `
+//
+//	ss << "\tmpirun $1 \\\n";
+//
+//	//for each "ART" or "ARTDAQ" context make an mpi entry
+//	//make an mpi entry for board readers, then event builders, then aggregators
+//
+//	for(auto &i:artdaqBoardReaders_)
+//	{
+//		if(count++) //add line breaks if not first context
+//			ss << ": \\\n";
+//
+//		ss << "     -np 1 xdaq.exe -p " <<
+//				contexts_[i].port_ << " -e ${XDAQ_ARGS} ";
+//
+//		ssUID << "\n\t#board reader \t context.port_ \t " << contexts_[i].port_ <<
+//				": \t" << contexts_[i].contextUID_;
+//	}
+//
+//	for(auto &i:artdaqEventBuilders_)
+//	{
+//		if(count++) //add line breaks if not first context
+//			ss << ": \\\n";
+//
+//		ss << "     -np 1 xdaq.exe -p " <<
+//				contexts_[i].port_ << " -e ${XDAQ_ARGS} ";
+//
+//		ssUID << "\n\t#event builder \t context.port_ \t " << contexts_[i].port_ <<
+//				": \t" << contexts_[i].contextUID_;
+//	}
+//
+//	for(auto &i:artdaqAggregators_)
+//	{
+//		if(count++) //add line breaks if not first context
+//			ss << ": \\\n";
+//
+//		ss << "     -np 1 xdaq.exe -p " <<
+//				contexts_[i].port_ << " -e ${XDAQ_ARGS} ";
+//
+//		ssUID << "\n\t#aggregator \t context.port_ \t " << contexts_[i].port_ <<
+//				": \t" << contexts_[i].contextUID_;
+//	}
+//
+//
+//	if(count == 0) //if no artdaq contexts at all
+//	{
+//		out << "\techo \"No ARTDAQ contexts found. So no mpirun necessary.\"\n\n";
+//		out << "\techo\necho\n";
+//		return;
+//	}
+//
+//	out << "\techo \"" << ss.str() << "\""; //print mpirun
+//	out << "\t\n\techo\n\techo\n\n";
+//	out << ssUID.str() << "\n\n";
+//	out << ss.str();			//run mpirun
+//
+//	out << "\n\n";
+//	//out << ""\tif [ ${ret:-1} -eq 0 ]; then\n\t\texit\n\tfi\n";
+//	//out << "\ndone\n";
+//}
+//
+//========================================================================================================================
+void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
+{
+	//each generated context will look something like this:
+	//<xc:Context id="0" url="http://${SUPERVISOR_SERVER}:${PORT}">
+	////<xc:Application class="ots::FESupervisor" id="${FEW_SUPERVISOR_ID}" instance="1" network="local" group="daq"/>
+	////<xc:Module>${OTSDAQ_LIB}/libCoreSupervisors.so</xc:Module>
+	//</xc:Context>
+
+	//print xml header information and declare xc partition
+	out << "<?xml version='1.0'?>\n" <<
+			"<xc:Partition \txmlns:xsi\t= \"http://www.w3.org/2001/XMLSchema-instance\"\n" <<
+			"\t\txmlns:soapenc\t= \"http://schemas.xmlsoap.org/soap/encoding/\"\n" <<
+			"\t\txmlns:xc\t= \"http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30\">\n\n";
+
+	//print partition open
+	//for each context
+	//	open context
+	//	for each app in context
+	//		print application
+	//		print module
+	//	close context
+	//close partition
+
+	char tmp[200];
+	for(XDAQContext &context:contexts_)
+	{
+
+		//__MOUT__ << context.contextUID_ << std::endl;
+
+		sprintf(tmp,"\t<!-- ContextUID='%s' sourceConfig='%s' -->",
+				context.contextUID_.c_str(), context.sourceConfig_.c_str());
+		out << tmp << "\n";
+
+		if(!context.status_)	//comment out if disabled
+			out << "\t<!--\n";
+
+		sprintf(tmp,"\t<xc:Context id=\"%u\" url=\"%s:%u\">", context.id_, context.address_.c_str(), context.port_);
+		out << tmp << "\n\n";
+
+		for(XDAQApplication &app:context.applications_)
+		{
+			//__MOUT__ << app.name_ << std::endl;
+
+
+			if(context.status_)
+			{
+				sprintf(tmp,"\t\t<!-- Application GroupID = '%s' UID='%s' sourceConfig='%s' -->",
+						 app.applicationGroupID_.c_str(), app.applicationUID_.c_str(), app.sourceConfig_.c_str());
+				out << tmp << "\n";
+
+				if(!app.status_) //comment out if disabled
+					out << "\t\t<!--\n";
+			}
+
+			sprintf(tmp,"\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" network=\"%s\" group=\"%s\"/>\n",
+					app.class_.c_str(), app.id_, app.instance_, app.network_.c_str(), app.group_.c_str());
+			out << tmp;
+
+			sprintf(tmp,"\t\t<xc:Module>%s</xc:Module>\n", app.module_.c_str());
+			out << tmp;
+
+			if(context.status_ && !app.status_)
+				out << "\t\t-->\n";
+			out << "\n";
+		}
+
+		out << "\t</xc:Context>\n";
+		if(!context.status_)
+			out << "\t-->\n";
+		out << "\n";
+	}
+
+	out << "</xc:Partition>\n\n\n";
+
+}
+
+//========================================================================================================================
+std::string XDAQContextConfiguration::getContextUID(const std::string &url) const
+{
+	for(auto context: contexts_)
+	{
+		if(!context.status_) continue;
+
+		if(url == context.address_ + ":" + std::to_string(context.port_))
+			return context.contextUID_;
+	}
+	return "";
+}
+
+//========================================================================================================================
+std::string XDAQContextConfiguration::getApplicationUID(const std::string &url, unsigned int id) const
+{
+	for(auto context: contexts_)
+	{
+		if(!context.status_) continue;
+
+		if(url == context.address_ + ":" + std::to_string(context.port_))
+			for(auto application: context.applications_)
+			{
+				if(!application.status_) continue;
+
+				if(application.id_ == id)
+				{
+					return application.applicationUID_;
+				}
+			}
+	}
+	return "";
+}
+
+DEFINE_OTS_CONFIGURATION(XDAQContextConfiguration)

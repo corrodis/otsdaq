@@ -1,0 +1,45 @@
+#ifndef _ots_ReceiverSocket_h_
+#define _ots_ReceiverSocket_h_
+
+#include "otsdaq-core/NetworkUtilities/Socket.h"
+
+#include <string>
+#include <vector>
+#include <mutex>        //for std::mutex
+
+namespace ots
+{
+
+class ReceiverSocket : public virtual Socket
+{
+public:
+	ReceiverSocket(std::string IPAddress, unsigned int port=0);
+	virtual ~ReceiverSocket(void);
+
+	int receive(std::string& buffer, unsigned int timeoutSeconds=1, unsigned int timeoutUSeconds=0, bool verbose=true);
+	int receive(std::vector<uint32_t>& buffer, unsigned int timeoutSeconds=1, unsigned int timeoutUSeconds=0, bool verbose=true);
+	int receive(std::string& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds=1, unsigned int timeoutUSeconds=0,  bool verbose=true);
+	int receive(std::vector<uint32_t>& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds=1, unsigned int timeoutUSeconds=0, bool verbose=true);
+
+protected:
+	ReceiverSocket(void);
+
+private:
+	fd_set             fileDescriptor_;
+	struct timeval     timeout_;
+	struct sockaddr_in fromAddress_;
+	socklen_t          addressLength_;
+	int                numberOfBytes_;
+
+	unsigned long      dummyIPAddress_;
+	unsigned short     dummyPort_;
+	unsigned int       readCounter_;
+
+	std::mutex	receiveMutex_; //to make receiver socket thread safe
+							//	i.e. multiple threads can share a socket and call receive()
+
+};
+
+}
+
+#endif

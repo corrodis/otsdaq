@@ -1,0 +1,39 @@
+include_directories(${MPI_INCLUDE_PATH})
+include_directories(${CMAKE_BINARY_DIR}/artdaq)
+
+cet_make(LIBRARY_NAME FECore
+		 LIBRARIES
+         ${XDAQ_BASIC_LIB_LIST}
+		 ConfigurationInterface
+		 SupervisorDescriptorInfo
+		 SystemMessenger
+         WorkLoopManager
+         FiniteStateMachine
+         CgiDataUtilities
+         WebUsersUtilities
+         NetworkUtilities
+         PluginMakers
+         DataManager
+		 ${CETLIB}
+         artdaq_Application
+         artdaq_Application_MPI2
+         artdaq_BuildInfo
+		 ${ARTDAQ_APPLICATION}
+		 ${ARTDAQ_APPLICATION_MPI2}		 
+		 ${ARTDAQ_BUILDINFO}
+		 ${ART_PERSISTENCY_PROVENANCE}		 
+		 ${Boost_SYSTEM_LIBRARY}
+		 ${ART_UTILITIES}
+		 ${CETLIB}
+		 ${FHICLCPP}
+		 MessageFacility
+		 ${MF_UTILITIES}
+         ${XDAQ_BASIC_LIB_LIST}
+         ${ROOT_CORE}
+         
+         ##temp add by RAR until tree is used
+         #otsdaq-core_ConfigurationPluginDataFormats_FEConfiguration_configuration
+)
+
+install_headers()
+install_source()

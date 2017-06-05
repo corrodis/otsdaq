@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+		<CONFIGURATION Name="XDAQApplicationConfiguration">
+			<VIEW Name="XDAQ_APPLICATION_CONFIGURATION" Type="File,Database,DatabaseTest">
+				<COLUMN Type="GroupID-0" 	 Name="ApplicationGroupID" 	 StorageName="APPLICATION_GROUP_ID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="UID" 	 Name="ApplicationUID" 	 StorageName="APPLICATION_UID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLink-0" 	 Name="LinkToSupervisorConfiguration" 	 StorageName="LINK_TO_SUPERVISOR_CONFIGURATION" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLinkUID-0" 	 Name="LinkToSupervisorUID" 	 StorageName="LINK_TO_SUPERVISOR_UID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="Class" 	 StorageName="CLASS" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="Id" 	 StorageName="ID" 		DataType="NUMBER"/>
+				<COLUMN Type="Data" 	 Name="Instance" 	 StorageName="INSTANCE" 		DataType="NUMBER"/>
+				<COLUMN Type="Data" 	 Name="Network" 	 StorageName="NETWORK" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="Group" 	 StorageName="GROUP" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="Module" 	 StorageName="MODULE" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE"/>
+			</VIEW>
+		</CONFIGURATION>
+	</ROOT>

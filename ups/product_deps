@@ -1,0 +1,49 @@
+# The parent line must be the first non-comment line in the file
+# This line defines the product name and version
+parent otsdaq	v1_01_00
+defaultqual	e10:s46
+
+# These optional lines define the installed directories where
+# headers, libraries, and executables will be found
+# Use them only if your product does not conform to the defaults
+# Format: directory_type directory_path directory_name
+# The only recognized values of the first field are incdir, libdir, and bindir
+# The only recognized values of the second field are product_dir and fq_dir
+# The third field is not constrained
+# The examples here reflect the defaults
+incdir      product_dir include
+libdir      fq_dir      lib
+bindir      fq_dir      bin
+fcldir      -
+
+#
+product		 version	optional
+artdaq              v2_03_00
+artdaq_database     v1_04_22
+xdaq                -
+artdaq_mfextensions v1_01_08   	-        optional
+smc_compiler        v6_6_0      -        only_for_build
+cetbuildtools       v5_08_01    -        only_for_build
+end_product_list
+
+# e6  - with gcc 4.9.1 and -std=c++1y
+# s6  - with art v1_12_05
+# s7  - with art v1_13_01
+# -nq- here means there is no qualifier
+# a "-" here means the dependent product is not required by the parent and will not be setup
+qualifier    	   artdaq	 	 artdaq_database	xdaq   	   artdaq_mfextensions 	notes
+e10:s48:prof       e10:s48:eth:prof    	 e10:s48:prof 		e10:prof   e10:s48:prof 	-std=c++1y
+e10:s48:debug      e10:s48:eth:debug   	 e10:s48:debug		e10:debug  e10:s48:debug 	-std=c++1y
+e10:s47:prof       e10:s47:eth:prof    	 e10:s47:prof 		e10:prof   e10:s47:prof 	-std=c++1y
+e10:s47:debug      e10:s47:eth:debug   	 e10:s47:debug		e10:debug  e10:s47:debug 	-std=c++1y
+e10:s46:prof       e10:s46:eth:prof    	 e10:s46:prof 		e10:prof   e10:s46:prof 	-std=c++1y
+e10:s46:debug      e10:s46:eth:debug   	 e10:s46:debug		e10:debug  e10:s46:debug 	-std=c++1y
+end_qualifier_list
+
+# Preserve tabs and formatting in emacs and vi / vim:
+
+### Local Variables:
+### tab-width: 8
+### End:
+
+# vi:set ts=8 noexpandtab:

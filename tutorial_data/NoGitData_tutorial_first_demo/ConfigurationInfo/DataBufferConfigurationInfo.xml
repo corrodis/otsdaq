@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+		<CONFIGURATION Name="DataBufferConfiguration">
+			<VIEW Name="DATA_BUFFER_CONFIGURATION" Type="File,Database,DatabaseTest">
+				<COLUMN Type="GroupID-0" 	 Name="DataBufferGroupID" 	 StorageName="DATA_BUFFER_GROUP_ID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="UID" 	 Name="ProcessorUID" 	 StorageName="PROCESSOR_UID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="ProcessorType" 	 StorageName="PROCESSOR_TYPE" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="ProcessorPluginName" 	 StorageName="PROCESSOR_PLUGIN_NAME" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLink-0" 	 Name="LinkToProcessorConfiguration" 	 StorageName="LINK_TO_PROCESSOR_CONFIGURATION" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLinkUID-0" 	 Name="LinkToProcessorUID" 	 StorageName="LINK_TO_PROCESSOR_UID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="OnOff" 	 Name="ProcessorStatus" 	 StorageName="PROCESSOR_STATUS" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE"/>
+			</VIEW>
+		</CONFIGURATION>
+	</ROOT>

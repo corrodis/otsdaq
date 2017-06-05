@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+		<CONFIGURATION Name="ARTDAQBuilderOutputsConfiguration">
+			<VIEW Name="ARTDAQ_BUILDER_OUTPUTS_CONFIGURATION" Type="File,Database,DatabaseTest">
+				<COLUMN Type="UID" 	 Name="outputsUID" 	 StorageName="OUTPUTS_UID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="TrueFalse" 	 Name="rootMPIOutputEnabled" 	 StorageName="ROOT_MPI_OUTPUT_ENABLED" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="rootMPIOutputSelectEvents" 	 StorageName="ROOT_MPI_OUTPUT_SELECT_EVENTS" 		DataType="VARCHAR2"/>
+				<COLUMN Type="TrueFalse" 	 Name="normalOutputEnabled" 	 StorageName="NORMAL_OUTPUT_ENABLED" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="normalOutputFileName" 	 StorageName="NORMAL_OUTPUT_FILE_NAME" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="normalOutputSelectEvents" 	 StorageName="NORMAL_OUTPUT_SELECT_EVENTS" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE"/>
+			</VIEW>
+		</CONFIGURATION>
+	</ROOT>

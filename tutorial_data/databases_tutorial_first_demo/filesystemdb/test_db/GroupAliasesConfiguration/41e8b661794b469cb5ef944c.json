@@ -1,0 +1,95 @@
+{
+"document" : {
+"data" : {
+"NAME" : "GROUP_ALIASES_CONFIGURATION",
+"COMMENT" : "Default Backbone.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1480654219,
+"COL_TYPES" : {
+"GROUP_KEY_ALIAS" : "VARCHAR2",
+"GROUP_NAME" : "VARCHAR2",
+"GROUP_KEY" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"GROUP_KEY_ALIAS" : "defaultContextAlias",
+"GROUP_NAME" : "defaultContext",
+"GROUP_KEY" : "0",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480651795"
+},
+{
+"GROUP_KEY_ALIAS" : "defaultSystemAlias",
+"GROUP_NAME" : "defaultConfig",
+"GROUP_KEY" : "0",
+"COMMENT_DESCRIPTION" : "This Group Alias was automatically setup by the server.",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480654219"
+}
+]
+},
+"metadata" : {
+"comments" : {
+"empty" : "empty"
+}
+},
+"search" : [
+{
+"name" : "find any",
+"query" : "not defined"
+}
+]
+},
+"origin" : {
+"format" : "json"
+},
+"version" : "0",
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"name" : "GroupAliasWizBackbone_v0",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+}
+],
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"changelog" : "empty",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : true,
+"created" : "Tue Dec 29 18:19:25 2015",
+"updates" : [
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setVersion" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setConfigurableEntity" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+}
+]
+},
+"configurable_entity" : {
+"name" : "OTSROOT"
+},
+"_id" : {
+"_oid" : "41e8b661794b469cb5ef944c"
+}
+}

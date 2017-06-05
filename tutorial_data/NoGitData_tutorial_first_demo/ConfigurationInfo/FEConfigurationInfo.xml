@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+		<CONFIGURATION Name="FEConfiguration">
+			<VIEW Name="FE_CONFIGURATION" Type="File,Database,DatabaseTest">
+				<COLUMN Type="Data" 	 Name="SupervisorType" 	 StorageName="SUPERVISOR_TYPE" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="SupervisorInstance" 	 StorageName="SUPERVISOR_INSTANCE" 		DataType="VARCHAR2"/>
+				<COLUMN Type="UID" 	 Name="FrontEndId" 	 StorageName="FRONT_END_ID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Data" 	 Name="FrontEndType" 	 StorageName="FRONT_END_TYPE" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE"/>
+			</VIEW>
+		</CONFIGURATION>
+	</ROOT>

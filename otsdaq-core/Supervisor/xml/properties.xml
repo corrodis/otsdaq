@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+<xc:Partition xmlns:xsi     = "http://www.w3.org/2001/XMLSchema-instance"
+              xmlns:soapenc = "http://schemas.xmlsoap.org/soap/encoding/"
+              xmlns:xc      = "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30">
+
+  <!-- Declare a context that contain applcation -->
+  <xc:Context url="http://rulinux01.dhcp.fnal.gov:1972">
+		
+    <!-- Declare a HelloWorld application -->
+    <xc:Application class="mypackage::myApplication" id="254" instance="0" network="local">
+      <properties xmlns="urn:xdaq-application:MyApplication"
+                  xsi:type="soapenc:Struct">
+        <myCounter xsi:type="xsd:long">10</myCounter>
+        <myVector xsi:type="soapenc:Array" soapenc:arrayType="xsd:ur-type[2]">
+          <item xsi:type="xsd:integer" soapenc:position="[0]">1234</item>
+          <item xsi:type="xsd:integer" soapenc:position="[1]">4321</item>
+        </myVector>
+      </properties>
+    </xc:Application>
+
+    <!-- Shared object library that contains the HelloWorld inplementation -->		
+    <!--xc:Module>${HOME}/public_html/myproject/mypackage/lib/linux/x86_64_slc5/libmypackage.so</xc:Module-->
+    <xc:Module>${BUILD_HOME}/myproject/mypackage1/lib/linux/x86_64_slc5/libmypackage1.so</xc:Module>
+  </xc:Context>
+
+</xc:Partition>

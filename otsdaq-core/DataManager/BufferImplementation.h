@@ -1,0 +1,97 @@
+#ifndef _ots_BufferImplementation_h_
+#define _ots_BufferImplementation_h_
+
+#include "otsdaq-core/MessageFacility/MessageFacility.h"
+#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/DataManager/CircularBufferBase.h"
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <atomic>
+
+namespace ots
+{
+
+template <class D, class H>
+class BufferImplementation
+{
+	struct ConsumerStruct
+	{
+		CircularBufferBase::ConsumerPriority priority_;
+		int                                  readPointer_;
+		std::atomic_bool*                    subBuffersStatus_;// Status of the Circular Buffer:
+	};
+
+public:
+	BufferImplementation(std::string producerName="", unsigned int numberOfSubBuffers=10);
+	BufferImplementation(const BufferImplementation<D,H>& toCopy);
+	BufferImplementation<D,H>& operator=(const BufferImplementation<D,H>& toCopy);
+	virtual ~BufferImplementation(void);
+
+	void init                          (void);
+	void reset                         (void);
+	void resetConsumerList             (void);
+	void registerConsumer              (std::string name, CircularBufferBase::ConsumerPriority priority);
+	void unregisterConsumer            (std::string name);
+	int  attachToEmptySubBuffer        (D*& data,H*& header);
+	int  setWrittenSubBuffer           (void);
+	int  write                         (const D& buffer, const H& header=H());
+	int  read                          (D& buffer, const std::string& consumer);
+	int  read                          (D& buffer, H& header, const std::string& consumer);
+	int  read                          (D*& buffer, H*& header, const std::string& consumer);
+	int  setReadSubBuffer              (const std::string& consumer);//Must be used in conjunction with attachToEmptySubBuffer because it attach to the nextWritePointer buffer
+
+	bool         isEmpty               (void);
+	unsigned int bufferSize            (void){return numberOfSubBuffers_;}
+	unsigned int numberOfWrittenBuffers(void);
+
+private:
+	enum
+	{
+		ErrorBufferFull          = -1,
+		ErrorBufferLocked        = -2,
+		ErrorBufferNotAvailable  = -3,
+		ErrorReadBufferOutOfSync = -4
+	};
+	std::string                           producerName_;
+	unsigned int                          numberOfSubBuffers_;
+	std::map<std::string, ConsumerStruct> consumers_;       // Pointers to the blocks which the consumers are reading
+	int                                   writePointer_;    //Pointer to the available free buffer, -1 means no free buffers!
+	std::atomic_bool*                     subBuffersStatus_;// Status of the Circular Buffer:
+	std::vector<H>                        headers_         ;// Buffer Header
+	std::vector<D>                        subBuffers_      ;// Buffers filled with data
+	const bool                            bufferFree_;
+
+	unsigned int      nextWritePointer  (void);
+	unsigned int      nextReadPointer   (const std::string& consumer);
+	int               getFreeBufferIndex(void);//can return -1 if there are no free buffers!
+	unsigned int      getReadPointer    (const std::string& consumer);
+	void              setWritten        (unsigned int subBuffer);
+	void              setFree           (unsigned int subBuffer, const std::string& consumer);
+	std::atomic_bool& isFree            (unsigned int subBuffer);
+	std::atomic_bool& isFree            (unsigned int subBuffer, const std::string& consumer);
+	void              dumpStatus        (void);
+	H&                getHeader         (unsigned int subBuffer);
+	D&                getSubBuffer      (unsigned int subBuffer);
+	void              writeSubBuffer    (unsigned int subBuffer, const D& buffer, const H& header);
+
+};
+#include "otsdaq-core/DataManager/BufferImplementation.icc"
+
+}
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+

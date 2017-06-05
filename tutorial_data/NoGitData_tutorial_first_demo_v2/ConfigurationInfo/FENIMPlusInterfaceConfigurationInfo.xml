@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+		<CONFIGURATION Name="FENIMPlusInterfaceConfiguration">
+			<VIEW Name="FENIM_PLUS_INTERFACE_CONFIGURATION" Type="File,Database,DatabaseTest" Description="OutputSourceSelect%20%5B0%3A%20sig_log%2C%201%3A%20sig_norm%2Fch0%5D%0ADelayAndWidth%20%5Beach%20bit%20is%203ns%5D%0AOutputTimeVetoDuration%20%5Bunits%20of%203ns%5D%0AOutputMuxSelect%20%5B0%3A%20sig_norm%2Fch0%2C%201%3A%20sig_cms1%2Fch1%2C%202%3A%20sig_cms2%2Fch2%5D%0ABurstDataMuxSelect%20%5B0%3A%20event%20counters%2C%201%3A%204-channel%20scope%20data%2C%202%3A%20time-deltas%5D">
+				<COLUMN Type="UID" 	 Name="InterfaceID" 	 StorageName="INTERFACE_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="FirmwareVersion" 	 StorageName="FIRMWARE_VERSION" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="InterfaceIPAddress" 	 StorageName="INTERFACE_IP_ADDRESS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="InterfacePort" 	 StorageName="INTERFACE_PORT" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="HostIPAddress" 	 StorageName="HOST_IP_ADDRESS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="HostPort" 	 StorageName="HOST_PORT" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="StreamToIPAddress" 	 StorageName="STREAM_TO_IP_ADDRESS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="StreamToPort" 	 StorageName="STREAM_TO_PORT" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="EnableClockResetDuringConfigure" 	 StorageName="ENABLE_CLOCK_RESET_DURING_CONFIGURE" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="EnableDACSetupDuringConfigure" 	 StorageName="ENABLE_DAC_SETUP_DURING_CONFIGURE" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DACValueChannelA" 	 StorageName="DAC_VALUE_CHANNEL_A" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DACValueChannelB" 	 StorageName="DAC_VALUE_CHANNEL_B" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DACValueChannelC" 	 StorageName="DAC_VALUE_CHANNEL_C" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DACValueChannelD" 	 StorageName="DAC_VALUE_CHANNEL_D" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="OnOff" 	 Name="EnableInputChannelA" 	 StorageName="ENABLE_INPUT_CHANNEL_A" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayAndWidthInputChannelA" 	 StorageName="DELAY_AND_WIDTH_INPUT_CHANNEL_A" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="OnOff" 	 Name="EnableInputChannelB" 	 StorageName="ENABLE_INPUT_CHANNEL_B" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayAndWidthInputChannelB" 	 StorageName="DELAY_AND_WIDTH_INPUT_CHANNEL_B" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="OnOff" 	 Name="EnableInputChannelC" 	 StorageName="ENABLE_INPUT_CHANNEL_C" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayAndWidthInputChannelC" 	 StorageName="DELAY_AND_WIDTH_INPUT_CHANNEL_C" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="OnOff" 	 Name="EnableInputChannelD" 	 StorageName="ENABLE_INPUT_CHANNEL_D" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayAndWidthInputChannelD" 	 StorageName="DELAY_AND_WIDTH_INPUT_CHANNEL_D" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableBackPressureInputA" 	 StorageName="ENABLE_BACK_PRESSURE_INPUT_A" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableBackPressureInputB" 	 StorageName="ENABLE_BACK_PRESSURE_INPUT_B" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="TriggerClockMask" 	 StorageName="TRIGGER_CLOCK_MASK" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputSourceSelectChannel0" 	 StorageName="OUTPUT_SOURCE_SELECT_CHANNEL0" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayAndWidthOutputChannel0" 	 StorageName="DELAY_AND_WIDTH_OUTPUT_CHANNEL0" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputTimeVetoDurationChannel0" 	 StorageName="OUTPUT_TIME_VETO_DURATION_CHANNEL0" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputPrescaleCountChannel0" 	 StorageName="OUTPUT_PRESCALE_COUNT_CHANNEL0" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="OutputBackpressureSelectChannel0" 	 StorageName="OUTPUT_BACKPRESSURE_SELECT_CHANNEL0" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableClockMaskChannel0" 	 StorageName="ENABLE_CLOCK_MASK_CHANNEL0" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputSourceSelectChannel1" 	 StorageName="OUTPUT_SOURCE_SELECT_CHANNEL1" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayAndWidthOutputChannel1" 	 StorageName="DELAY_AND_WIDTH_OUTPUT_CHANNEL1" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputTimeVetoDurationChannel1" 	 StorageName="OUTPUT_TIME_VETO_DURATION_CHANNEL1" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputPrescaleCountChannel1" 	 StorageName="OUTPUT_PRESCALE_COUNT_CHANNEL1" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="OutputBackpressureSelectChannel1" 	 StorageName="OUTPUT_BACKPRESSURE_SELECT_CHANNEL1" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableClockMaskChannel1" 	 StorageName="ENABLE_CLOCK_MASK_CHANNEL1" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputSourceSelectChannel2" 	 StorageName="OUTPUT_SOURCE_SELECT_CHANNEL2" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayAndWidthOutputChannel2" 	 StorageName="DELAY_AND_WIDTH_OUTPUT_CHANNEL2" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputTimeVetoDurationChannel2" 	 StorageName="OUTPUT_TIME_VETO_DURATION_CHANNEL2" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputPrescaleCountChannel2" 	 StorageName="OUTPUT_PRESCALE_COUNT_CHANNEL2" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="OutputBackpressureSelectChannel2" 	 StorageName="OUTPUT_BACKPRESSURE_SELECT_CHANNEL2" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableClockMaskChannel2" 	 StorageName="ENABLE_CLOCK_MASK_CHANNEL2" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputMuxSelectChannelA" 	 StorageName="OUTPUT_MUX_SELECT_CHANNEL_A" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputMuxSelectChannelB" 	 StorageName="OUTPUT_MUX_SELECT_CHANNEL_B" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputMuxSelectChannelC" 	 StorageName="OUTPUT_MUX_SELECT_CHANNEL_C" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="OutputMuxSelectChannelD" 	 StorageName="OUTPUT_MUX_SELECT_CHANNEL_D" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableBurstData" 	 StorageName="ENABLE_BURST_DATA" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="BurstDataMuxSelect" 	 StorageName="BURST_DATA_MUX_SELECT" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
+			</VIEW>
+		</CONFIGURATION>
+	</ROOT>

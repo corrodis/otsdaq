@@ -1,0 +1,311 @@
+{
+"document" : {
+"data" : {
+"NAME" : "XDAQ_APPLICATION_CONFIGURATION",
+"COMMENT" : "Example applications with receiving data path (data managers, visualizers, and artdaq) off with environment variables.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1487706921,
+"COL_TYPES" : {
+"APPLICATION_GROUP_ID" : "VARCHAR2",
+"APPLICATION_UID" : "VARCHAR2",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "VARCHAR2",
+"SUPERVISOR_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"CLASS" : "VARCHAR2",
+"ID" : "NUMBER",
+"INSTANCE" : "NUMBER",
+"NETWORK" : "VARCHAR2",
+"GROUP" : "VARCHAR2",
+"MODULE" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "Supervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "TheSupervisorConfiguration",
+"SUPERVISOR_UID" : "Supervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::Supervisor",
+"ID" : "200",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq/lib/libSupervisor.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "FESupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "FESupervisorConfiguration",
+"SUPERVISOR_UID" : "FESupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::FESupervisor",
+"ID" : "210",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq/lib/libCoreSupervisors.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "ChatSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "ChatSupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::ChatSupervisor",
+"ID" : "250",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq_utilities/lib/libChat.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "ConsoleSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "ConsoleSupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::ConsoleSupervisor",
+"ID" : "260",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq_utilities/lib/libConsole.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "DataManagerSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"SUPERVISOR_UID" : "DataManagerSupervisor0",
+"STATUS" : "Off",
+"CLASS" : "ots::DataManagerSupervisor",
+"ID" : "310",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq/lib/libCoreSupervisors.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "LogbookSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "LogbookSupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::LogbookSupervisor",
+"ID" : "261",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq_utilities/lib/libLogbook.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "VisualSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"SUPERVISOR_UID" : "VisualSupervisor0",
+"STATUS" : "Off",
+"CLASS" : "ots::VisualSupervisor",
+"ID" : "270",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq_utilities/lib/libVisualization.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "ConfigurationGUISupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "ConfigurationGUISupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::ConfigurationGUISupervisor",
+"ID" : "281",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq_utilities/lib/libConfigurationGUI.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "ControlsDashboardSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "ControlsDashboardSupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::ControlsDashboardSupervisor",
+"ID" : "282",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq_utilities/lib/libControlsDashboard.so",
+"COMMENT_DESCRIPTION" : "Used for arbitrary controls guis",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "MacroMakerSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "MacroMakerSupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::MacroMakerSupervisor",
+"ID" : "300",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq_utilities/lib/libMacroMaker.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "ARTDataManager0",
+"APPLICATION_UID" : "ARTDataManager0",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"SUPERVISOR_UID" : "ARTDataManagerSupervisor0",
+"STATUS" : "Off",
+"CLASS" : "ots::ARTDAQDataManagerSupervisor",
+"ID" : "220",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq/lib/libCoreSupervisors.so",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "ARTDataManager1",
+"APPLICATION_UID" : "ARTDataManager1",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"SUPERVISOR_UID" : "ARTDataManagerSupervisor1",
+"STATUS" : "Off",
+"CLASS" : "ots::ARTDAQDataManagerSupervisor",
+"ID" : "221",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq/lib/libCoreSupervisors.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "ARTEventBuilder0",
+"APPLICATION_UID" : "ARTEventBuilder0",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "ARTDAQBuilderConfiguration",
+"SUPERVISOR_UID" : "ARTEventBuilderSupervisor0",
+"STATUS" : "Off",
+"CLASS" : "ots::EventBuilderApp",
+"ID" : "230",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq/lib/libEventBuilderApp.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+},
+{
+"APPLICATION_GROUP_ID" : "ARTAggregator",
+"APPLICATION_UID" : "ARTAggregator",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "ARTDAQAggregatorConfiguration",
+"SUPERVISOR_UID" : "ARTAggregatorSupervisor",
+"STATUS" : "Off",
+"CLASS" : "ots::AggregatorApp",
+"ID" : "240",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "${MRB_BUILDDIR}/otsdaq/lib/libAggregatorApp.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1487706921"
+}
+]
+},
+"metadata" : {
+"comments" : {
+"empty" : "empty"
+}
+},
+"search" : [
+{
+"name" : "find any",
+"query" : "not defined"
+}
+]
+},
+"origin" : {
+"format" : "json"
+},
+"version" : "5",
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Wed Mar  1 15:03:02 2017"
+},
+{
+"name" : "testContext_v5",
+"assigned" : "Wed Mar  1 15:03:02 2017"
+}
+],
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"changelog" : "empty",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : true,
+"created" : "Tue Dec 29 18:19:25 2015",
+"updates" : [
+{
+"addToGlobalConfig" : "Wed Mar  1 15:03:02 2017"
+},
+{
+"setVersion" : "Wed Mar  1 15:03:02 2017"
+},
+{
+"setConfigurableEntity" : "Wed Mar  1 15:03:02 2017"
+},
+{
+"addToGlobalConfig" : "Wed Mar  1 15:03:02 2017"
+}
+]
+},
+"configurable_entity" : {
+"name" : "OTSROOT"
+},
+"_id" : {
+"_oid" : "7231fafe0cbd42d6ad439ba3"
+}
+}

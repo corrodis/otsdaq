@@ -1,0 +1,110 @@
+{
+"document" : {
+"data" : {
+"NAME" : "FE_OTS_UDP_TEMPLATE_INTERFACE_CONFIGURATION",
+"COMMENT" : "testing off",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1480654198,
+"COL_TYPES" : {
+"INTERFACE_ID" : "VARCHAR2",
+"FIRMWARE_VERSION" : "NUMBER",
+"INTERFACE_IP_ADDRESS" : "VARCHAR2",
+"INTERFACE_PORT" : "NUMBER",
+"HOST_IP_ADDRESS" : "VARCHAR2",
+"HOST_PORT" : "NUMBER",
+"STREAM_TO_IP_ADDRESS" : "VARCHAR2",
+"STREAM_TO_PORT" : "NUMBER",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"INTERFACE_ID" : "OtsInterface0",
+"FIRMWARE_VERSION" : "-1",
+"INTERFACE_IP_ADDRESS" : "127.0.0.1",
+"INTERFACE_PORT" : "4000",
+"HOST_IP_ADDRESS" : "127.0.0.1",
+"HOST_PORT" : "4001",
+"STREAM_TO_IP_ADDRESS" : "127.0.0.1",
+"STREAM_TO_PORT" : "4121",
+"COMMENT_DESCRIPTION" : "Using HW emulator port 4000",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480654198"
+},
+{
+"INTERFACE_ID" : "KC705_Interface0",
+"FIRMWARE_VERSION" : "0",
+"INTERFACE_IP_ADDRESS" : "192.168.133.4",
+"INTERFACE_PORT" : "4020",
+"HOST_IP_ADDRESS" : "127.0.0.1",
+"HOST_PORT" : "4021",
+"STREAM_TO_IP_ADDRESS" : "127.0.0.1",
+"STREAM_TO_PORT" : "4131",
+"COMMENT_DESCRIPTION" : "Using KC705 with data gen FW",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480652283"
+}
+]
+},
+"metadata" : {
+"comments" : {
+"empty" : "empty"
+}
+},
+"search" : [
+{
+"name" : "find any",
+"query" : "not defined"
+}
+]
+},
+"origin" : {
+"format" : "json"
+},
+"version" : "0",
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"name" : "defaultConfig_v0",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+}
+],
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"changelog" : "empty",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : true,
+"created" : "Tue Dec 29 18:19:25 2015",
+"updates" : [
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setVersion" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setConfigurableEntity" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+}
+]
+},
+"configurable_entity" : {
+"name" : "OTSROOT"
+},
+"_id" : {
+"_oid" : "4fcf7b1f6224440d881b8900"
+}
+}

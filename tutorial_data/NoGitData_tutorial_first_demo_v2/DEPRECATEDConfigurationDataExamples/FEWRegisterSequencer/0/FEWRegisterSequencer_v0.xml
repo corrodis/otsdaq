@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<ROOT xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
+ <HEADER>
+  <TYPE>
+   <EXTENSION_TABLE_NAME>FEW_REGISTER_SEQUENCER</EXTENSION_TABLE_NAME>
+   <NAME>FEWRegisterSequencer</NAME>
+  </TYPE>
+   <RUN>
+   <RUN_TYPE>FEWRegisterSequencer</RUN_TYPE>
+   <RUN_NUMBER>1</RUN_NUMBER>
+   <RUN_BEGIN_TIMESTAMP>2013-01-29 17:22:10</RUN_BEGIN_TIMESTAMP>
+   <LOCATION>CERN P5</LOCATION>
+  </RUN>
+ </HEADER>
+
+  <DATA_SET>
+   <PART>
+    <NAME_LABEL>CMS--ROOT</NAME_LABEL>
+    <KIND_OF_PART>Detector ROOT</KIND_OF_PART>
+   </PART>
+   <VERSION>0</VERSION>
+   <COMMENT_DESCRIPTION>Ciao</COMMENT_DESCRIPTION>
+   <CREATED_BY_USER>Parilla</CREATED_BY_USER>
+  <!-- -->
+    <!--FEW_0-->
+    <!-- Initialize    -->
+    <!-- Configuration -->
+    <!-- Start		   -->
+    <!-- Halt 		   -->
+    <!-- Pause 		   -->
+    <!-- Resume		   -->
+
+    <!--FEW_1-->
+    <!-- Initialize    -->
+    <!-- Configuration -->
+    <!-- Start		   -->
+    <!-- Halt 		   -->
+    <!-- Pause 		   -->
+    <!-- Resume		   -->  	
+  
+    <!--FEW_2-->
+    <!-- Initialize    -->
+    <!-- Configuration -->
+    <!-- Start		   -->
+    <!-- Halt 		   -->
+    <!-- Pause 		   -->
+    <!-- Resume		   --> 
+  </ROOT>

@@ -1,0 +1,55 @@
+#ifndef _ots_JSONConfigurationHandler_h_
+#define _ots_JSONConfigurationHandler_h_
+
+#include <string>
+#include <xercesc/util/XMLChar.hpp>
+#include <xercesc/dom/DOMDocument.hpp>
+
+//fixme this is forward declared outside of the ots namespace because
+//Json.h isn't declared in the ots namespace. maybe this is fine.
+class Json;
+namespace ots
+{
+
+class ConfigurationBase;
+
+
+class JSONConfigurationHandler
+{
+public:
+    JSONConfigurationHandler(void);
+    virtual ~JSONConfigurationHandler(void);
+    virtual void read (ConfigurationBase& configuration)
+    {
+        ;
+    }
+    virtual void write(const ConfigurationBase& configuration)
+    {
+        ;
+    }
+    
+    static std::string XMLFileToJSON   (std::string fileName);
+    static std::string XMLStringToJSON (std::string xmlString);
+
+    static void readJSON (ConfigurationBase& configuration, unsigned int version, Json& json);
+    static void readJSON (ConfigurationBase* configuration, unsigned int version, Json* json);
+    static std::string writeJSON(const ConfigurationBase& configuration);//returns the file name
+    static std::string writeJSON(const ConfigurationBase* configuration);//returns the file name
+
+    static std::string getSimpleJSON(const ConfigurationBase* configuration);//returns a simple JSON string based on row/col table
+
+    static std::string  getXMLDir        (const ConfigurationBase* configuration);
+
+private:
+    static void         initPlatform     (void);
+    static void         terminatePlatform(void);
+    static bool         validateNode     (XMLCh* tagName, xercesc::DOMNode* node, const std::string& expectedValue);
+    static void         outputJSON       (xercesc::DOMDocument* pmyDOMDocument, std::string fileName);
+    static std::string  getXMLFileName   (const ConfigurationBase& configuration, unsigned int version);
+    static std::string  getJSONFileName   (const ConfigurationBase& configuration, unsigned int version);
+
+};
+
+}
+
+#endif //ots_JSONConfigurationHandler_h

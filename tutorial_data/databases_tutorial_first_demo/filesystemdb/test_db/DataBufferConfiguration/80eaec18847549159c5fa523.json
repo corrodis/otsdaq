@@ -1,0 +1,191 @@
+{
+"document" : {
+"data" : {
+"NAME" : "DATA_BUFFER_CONFIGURATION",
+"COMMENT" : "Added artdaq producers/consumers. Added streaming DQM at Buffer 1. Have a UDP listener and Raw Data Saver consumer for the hw emulator.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1480437202,
+"COL_TYPES" : {
+"DATA_BUFFER_GROUP_ID" : "VARCHAR2",
+"PROCESSOR_UID" : "VARCHAR2",
+"PROCESSOR_TYPE" : "VARCHAR2",
+"PROCESSOR_PLUGIN_NAME" : "VARCHAR2",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "VARCHAR2",
+"LINK_TO_PROCESSOR_UID" : "VARCHAR2",
+"PROCESSOR_STATUS" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"DATA_BUFFER_GROUP_ID" : "DBGroup0",
+"PROCESSOR_UID" : "DB0Producer0",
+"PROCESSOR_TYPE" : "Producer",
+"PROCESSOR_PLUGIN_NAME" : "UDPDataListenerProducer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "UDPDataListenerProducerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "UDPListener0",
+"PROCESSOR_STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479488752"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "DBGroup0",
+"PROCESSOR_UID" : "DB0Consumer0",
+"PROCESSOR_TYPE" : "Consumer",
+"PROCESSOR_PLUGIN_NAME" : "RawDataSaverConsumer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "RawDataSaverConsumerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "RAWSaver0",
+"PROCESSOR_STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479770727"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "DBGroup0",
+"PROCESSOR_UID" : "DB0Consumer1",
+"PROCESSOR_TYPE" : "Consumer",
+"PROCESSOR_PLUGIN_NAME" : "UDPDataStreamerConsumer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "UDPDataStreamerConsumerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "UDPStreamer0",
+"PROCESSOR_STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479826252"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "DBGroup1",
+"PROCESSOR_UID" : "DB1Producer0",
+"PROCESSOR_TYPE" : "Producer",
+"PROCESSOR_PLUGIN_NAME" : "UDPDataListenerProducer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "UDPDataListenerProducerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "UDPListener1",
+"PROCESSOR_STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479826252"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "DBGroup1",
+"PROCESSOR_UID" : "DB1Consumer1",
+"PROCESSOR_TYPE" : "Consumer",
+"PROCESSOR_PLUGIN_NAME" : "DQMHistosConsumer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "DQMHistosConsumerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "DQMHistos0",
+"PROCESSOR_STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479826252"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "ART_S0_DM0_DataBuffer0",
+"PROCESSOR_UID" : "ART_S0_DM0_DB0_Listener0",
+"PROCESSOR_TYPE" : "Producer",
+"PROCESSOR_PLUGIN_NAME" : "UDPDataListenerProducer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "UDPDataListenerProducerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "ART_S0_DM0_DB0_Listener0",
+"PROCESSOR_STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480437202"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "ART_S0_DM0_DataBuffer0",
+"PROCESSOR_UID" : "ART_S0_DM0_DB0_ARTConsumer0",
+"PROCESSOR_TYPE" : "Consumer",
+"PROCESSOR_PLUGIN_NAME" : "ARTDAQConsumer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "ARTDAQConsumerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "ART_S0_DM0_DB0_ARTConsumer0",
+"PROCESSOR_STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480437202"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "ART_S1_DM0_DataBuffer0",
+"PROCESSOR_UID" : "ART_S1_DM0_DB0_Listener0",
+"PROCESSOR_TYPE" : "Producer",
+"PROCESSOR_PLUGIN_NAME" : "UDPDataListenerProducer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "UDPDataListenerProducerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "ART_S1_DM0_DB0_Listener0",
+"PROCESSOR_STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480437202"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "ART_S1_DM0_DataBuffer0",
+"PROCESSOR_UID" : "ART_S1_DM0_DB0_ARTConsumer0",
+"PROCESSOR_TYPE" : "Consumer",
+"PROCESSOR_PLUGIN_NAME" : "ARTDAQConsumer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "ARTDAQConsumerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "ART_S1_DM0_DB0_ARTConsumer0",
+"PROCESSOR_STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480437202"
+}
+]
+},
+"metadata" : {
+"comments" : {
+"empty" : "empty"
+}
+},
+"search" : [
+{
+"name" : "find any",
+"query" : "not defined"
+}
+]
+},
+"origin" : {
+"format" : "json"
+},
+"version" : "0",
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"name" : "defaultConfig_v0",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+}
+],
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"changelog" : "empty",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : true,
+"created" : "Tue Dec 29 18:19:25 2015",
+"updates" : [
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setVersion" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setConfigurableEntity" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+}
+]
+},
+"configurable_entity" : {
+"name" : "OTSROOT"
+},
+"_id" : {
+"_oid" : "80eaec18847549159c5fa523"
+}
+}

@@ -1,0 +1,65 @@
+#ifndef _ots_Utilities_Macro_h_
+#define _ots_Utilities_Macro_h_
+
+
+#include <string.h> //for strstr
+
+//take filename only after srcs/ (this gives by repo name)
+#define __SHORTFILE__ 	(strstr(&__FILE__[0], "/srcs/") ? strstr(&__FILE__[0], "/srcs/") + 6 : __FILE__)
+
+//take only file name
+#define __FILENAME__ 	(strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+//#define __COUT_HDR__     __FILE__ << " : " << __PRETTY_FUNCTION__ << " [" << __LINE__ << "]\t"
+#define __COUT_HDR_FL__  __SHORTFILE__ << " [" << __LINE__ << "]\t"
+#define __COUT_HDR_FP__  __SHORTFILE__ << " : " << __PRETTY_FUNCTION__ << "\t"
+#define __COUT_HDR_PL__  __PRETTY_FUNCTION__ << " [" << __LINE__ << "]\t"
+#define __COUT_HDR_F__   __SHORTFILE__ << "\t"
+#define __COUT_HDR_L__   __LINE__ << "\t"
+#define __COUT_HDR_P__   __PRETTY_FUNCTION__ << "\t"
+#define __COUT_HDR__     __COUT_HDR_PL__
+
+
+//////// ==============================================================
+//////// Use __MOUT__ for Message Facility use (easy to switch to cout for debugging):
+////////
+
+#define	__MF_SUBJECT__	"ots" 	//default subject.. others can #undef and re-#define
+//Note: to turn off MF everywhere, just replace with std::cout here at __MF_TYPE__(X)!
+
+#define Q(X) #X
+#define QUOTE(X) Q(X)
+//#define __MF_TYPE__(X)	FIXME ?? how to do this ...(getenv("OTSDAQ_USING_MF")=="1"? mf::X (__MF_SUBJECT__) : std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":")
+#define __MF_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":"
+//#define __MF_TYPE__(X)	mf::X (__MF_SUBJECT__)
+
+
+#define __MF_HDR__		__COUT_HDR_FL__
+#define __MOUT_ERR__  	__MF_TYPE__(LogError) 	<< __MF_HDR__
+#define __MOUT_WARN__  	__MF_TYPE__(LogWarning) << __MF_HDR__
+#define __MOUT_INFO__  	__MF_TYPE__(LogInfo) 	<< __MF_HDR__
+#define __MOUT__  		__MF_TYPE__(LogDebug)	<< __MF_HDR__
+//#define __MOUT__  		std::cout << __PRETTY_FUNCTION__ << " [" << __LINE__ << "]\t"
+#define __SS__			std::stringstream ss; ss << __MF_HDR__
+
+//////// ==============================================================
+
+
+
+
+
+//========================================================================================================================
+//const_cast away the const
+//	so that otsdaq is compatible with slf6 and slf7 versions of xdaq
+//	where they changed to const xdaq::ApplicationDescriptor* in slf7
+#ifdef XDAQ_NOCONST
+#define XDAQ_CONST_CALL
+#else
+#define XDAQ_CONST_CALL const
+#endif
+//========================================================================================================================
+
+
+
+
+#endif

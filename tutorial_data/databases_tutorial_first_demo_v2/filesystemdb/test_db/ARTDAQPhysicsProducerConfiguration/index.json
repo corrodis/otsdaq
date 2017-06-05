@@ -1,0 +1,20 @@
+{
+"version" : {
+"3" : [
+"f9ee52dba72945759b61ca91"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"f9ee52dba72945759b61ca91"
+],
+"artdaqFclTest_v3" : [
+"f9ee52dba72945759b61ca91"
+]
+},
+"configurable_entity.name" : {
+"OTSROOT" : [
+"f9ee52dba72945759b61ca91"
+]
+}
+}

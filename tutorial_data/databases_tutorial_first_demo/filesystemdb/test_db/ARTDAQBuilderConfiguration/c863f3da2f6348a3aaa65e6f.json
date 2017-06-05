@@ -1,0 +1,87 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_BUILDER_CONFIGURATION",
+"COMMENT" : "removed white space",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1480439603,
+"COL_TYPES" : {
+"SUPERVISOR_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"CONFIGURATION_STRING" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"SUPERVISOR_UID" : "ARTEventBuilderSupervisor0",
+"STATUS" : "On",
+"CONFIGURATION_STRING" : "daq:{event_builder:{expected_fragments_per_event:2 first_fragment_receiver_rank:0 fragment_receiver_count:2 mpi_buffer_count:16 print_event_store_stats:true send_triggers:true trigger_port:5001 use_art:true verbose:false} max_fragment_size_words:2.097152e6} outputs:{netMonOutput:{module_type:\"RootMPIOutput\"}} physics:{analyzers:{wf: {module_type:\"WFViewer\" fragment_ids:[0] fragment_type_labels:[ \"DataGen\" ] prescale:60 write_to_file:true fileName:\"/tmp/otsdaqdemo_onmon_evb.root\"}} my_output_modules:[\"netMonOutput\"]} process_name:\"DAQ\" services:{Timing:{summaryOnly:true} scheduler:{fileMode:\"NOMERGE\" errorOnFailureToPut: false} user:{NetMonTransportServiceInterface:{data_receiver_count:1 first_data_receiver_rank:3 max_fragment_size_words:2.097152e6 mpi_buffer_count:8 service_provider:\"NetMonTransportService\"}}} source:{fragment_type_map:[[1,\"UDP\"], [4,\"DataGen\"]] module_type:\"RawInput\" resume_after_timeout:true waiting_time:900}",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480439603"
+}
+]
+},
+"metadata" : {
+"comments" : {
+"empty" : "empty"
+}
+},
+"search" : [
+{
+"name" : "find any",
+"query" : "not defined"
+}
+]
+},
+"origin" : {
+"format" : "json"
+},
+"version" : "0",
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"name" : "defaultConfig_v0",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+}
+],
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"changelog" : "empty",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : true,
+"created" : "Tue Dec 29 18:19:25 2015",
+"updates" : [
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setVersion" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setConfigurableEntity" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+}
+]
+},
+"configurable_entity" : {
+"name" : "OTSROOT"
+},
+"_id" : {
+"_oid" : "c863f3da2f6348a3aaa65e6f"
+}
+}

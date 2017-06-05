@@ -1,0 +1,9 @@
+*~
+\#*\#
+download
+products
+build_*
+setupARTDAQOTS
+otsdaq-core/tmp/
+otsdaq-core/DataManager/MoreJunk/
+otsdaq-core/Junk/

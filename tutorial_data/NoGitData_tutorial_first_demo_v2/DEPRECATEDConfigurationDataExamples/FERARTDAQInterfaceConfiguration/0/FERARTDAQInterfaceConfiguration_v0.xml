@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../ConfigurationBase.xsd">
+
+ <HEADER>
+  <TYPE>
+   <EXTENSION_TABLE_NAME>FER_ARTDAQ_INTERFACE_CONFIGURATION</EXTENSION_TABLE_NAME>
+   <NAME>FERARTDAQInterfaceConfiguration</NAME>
+  </TYPE>
+  <RUN>
+   <RUN_TYPE>FERARTDAQInterfaceConfiguration</RUN_TYPE>
+   <RUN_NUMBER>1</RUN_NUMBER>
+   <RUN_BEGIN_TIMESTAMP>2013-01-29 17:22:10</RUN_BEGIN_TIMESTAMP>
+   <LOCATION>CERN P5</LOCATION>
+  </RUN>
+ </HEADER>
+
+  <DATA_SET>
+ 
+   <PART>
+    <NAME_LABEL>CMS--ROOT</NAME_LABEL>
+    <KIND_OF_PART>Detector ROOT</KIND_OF_PART>
+   </PART>
+   <VERSION>0</VERSION>
+   <COMMENT_DESCRIPTION></COMMENT_DESCRIPTION>
+   <CREATED_BY_USER></CREATED_BY_USER>
+  
+   <DATA>
+    <INTERFACE_ID>0</INTERFACE_ID>
+    <STATUS>on</STATUS>
+    <CONFIGURATION_STRING>daq:{fragment_receiver:{board_id:0 event_builder_count:1 first_event_builder_rank:1 fragment_id:0 fragment_type:"STIB" generator:"STIBReceiver" ip:"127.0.0.1" mpi_buffer_count:16 mpi_sync_interval:50 port:3001 trigger_mode:ignore sleep_on_stop_us:500000 trigger_port:5001} max_fragment_size_words:262144}</CONFIGURATION_STRING>
+   </DATA>
+
+  
+ </DATA_SET>
+</ROOT> 

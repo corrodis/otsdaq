@@ -1,0 +1,423 @@
+//#include "otsdaq-core/MessageFacility/MessageFacility.h"
+#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+
+#include <iostream>
+#include <stdlib.h>
+
+//========================================================================================================================
+template<class D, class H>
+BufferImplementation<D,H>::BufferImplementation(std::string producerName, unsigned int numberOfSubBuffers)
+: producerName_      (producerName) 
+  , numberOfSubBuffers_(numberOfSubBuffers)
+  , writePointer_      (-1)//Can only be set to -1 directly!
+  , subBuffersStatus_  (new std::atomic_bool[numberOfSubBuffers_])
+  , headers_           (numberOfSubBuffers,H())
+  , subBuffers_        (numberOfSubBuffers,D())
+  , bufferFree_        (true)
+  {
+	reset();	
+  }
+
+//========================================================================================================================
+template<class D, class H>
+BufferImplementation<D,H>::BufferImplementation(const BufferImplementation<D,H>& toCopy)
+{
+	*this = toCopy;
+}
+
+//========================================================================================================================
+template<class D, class H>
+BufferImplementation<D,H>& BufferImplementation<D,H>::operator=(const BufferImplementation<D,H>& toCopy)
+{
+	producerName_       = toCopy.producerName_; 
+	numberOfSubBuffers_ = toCopy.numberOfSubBuffers_;
+	for(auto& it: toCopy.consumers_)
+	{
+		consumers_[it.first].priority_         = it.second.priority_;
+		consumers_[it.first].readPointer_      = it.second.readPointer_;
+		consumers_[it.first].subBuffersStatus_ = new std::atomic_bool[numberOfSubBuffers_];
+		for(unsigned int i=0; i<numberOfSubBuffers_; i++)
+			consumers_[it.first].subBuffersStatus_[i] = it.second.subBuffersStatus_[i].load();			
+	}
+	writePointer_       = toCopy.writePointer_;
+	subBuffersStatus_   = new std::atomic_bool[numberOfSubBuffers_];
+	for(unsigned int i=0; i<numberOfSubBuffers_; i++)
+		subBuffersStatus_[i] = toCopy.subBuffersStatus_[i].load();
+	headers_            = toCopy.headers_;
+	subBuffers_         = toCopy.subBuffers_;
+	return *this;
+}
+//========================================================================================================================
+template<class D, class H>
+BufferImplementation<D,H>::~BufferImplementation(void)
+{
+	for(auto& it : consumers_)
+		if(it.second.subBuffersStatus_ != nullptr)
+		{
+			delete[] it.second.subBuffersStatus_;
+			it.second.subBuffersStatus_ = nullptr;
+		}
+	delete[] subBuffersStatus_;
+	subBuffersStatus_ = nullptr;
+}
+
+//========================================================================================================================
+template<class D, class H>
+void BufferImplementation<D,H>::reset(void)
+{
+	writePointer_ = -1;//Can only be set to -1 directly!
+	for(unsigned int buffer=0; buffer<numberOfSubBuffers_; buffer++)
+		subBuffersStatus_[buffer] = bufferFree_;
+	for(auto& it: consumers_)
+	{
+		it.second.readPointer_ = 0;
+		if(it.second.subBuffersStatus_ != nullptr)
+			delete[] it.second.subBuffersStatus_;
+		it.second.subBuffersStatus_ = new std::atomic_bool[numberOfSubBuffers_];
+		for(unsigned int i=0; i<numberOfSubBuffers_; i++)
+			it.second.subBuffersStatus_[i] = bufferFree_;			
+	}
+}
+
+//========================================================================================================================
+template<class D, class H>
+int BufferImplementation<D,H>::attachToEmptySubBuffer(D*& data, H*& header)
+{
+	int subBuffer = getFreeBufferIndex();
+	if(subBuffer == -1)
+	{
+		std::cout << __COUT_HDR_FL__ << __COUT_HDR_FL__ << "There are no free buffers!" << std::endl;
+		dumpStatus();
+		std::cout << __COUT_HDR_FL__ 
+		<< __PRETTY_FUNCTION__ 
+		<< "Producer: " << producerName_ 
+		<< " write pointer: " << writePointer_ 
+		<< " written buffers: " << (100*numberOfWrittenBuffers())/numberOfSubBuffers_ << "%";
+		return ErrorBufferFull;
+	}
+	if(false && subBuffer%(numberOfSubBuffers_/1) == 0)
+	{
+		//dumpStatus();
+		std::cout << __COUT_HDR_FL__ 
+		<< __COUT_HDR_FL__ 
+		<< "Producer: " << producerName_ 
+		<< " writing buffer: " << subBuffer 
+		<< " write pointer: " << writePointer_ 
+		<< " Buffer free: " << isFree(subBuffer) 
+		<< " written buffers: " << (100*numberOfWrittenBuffers())/numberOfSubBuffers_ << "%";
+		for(auto& it: consumers_)
+		{
+			std::cout << __COUT_HDR_FL__ << " Read point: " << it.first << " = "<< it.second.readPointer_  << std::endl;
+			if(it.second.readPointer_ > writePointer_)
+				std::cout << __COUT_HDR_FL__ << " I read already! Delta: " << subBuffer-it.second.readPointer_ << std::endl;
+		}
+		
+	}
+
+	data   = &(subBuffers_[subBuffer]);
+	header = &(headers_   [subBuffer]);
+	return subBuffer;
+}
+
+//========================================================================================================================
+template<class D, class H>
+int BufferImplementation<D,H>::setWrittenSubBuffer(void)//Must be used in conjunction with attachToEmptySubBuffer because it attach to the nextWritePointer buffer
+{
+	writePointer_ = nextWritePointer();//Already protected in nextWritePointer with %numSubBuffers_
+	setWritten(writePointer_);
+	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "Write pointer:" << writePointer_ << std::endl;
+	return writePointer_;
+
+}
+
+//========================================================================================================================
+template<class D, class H>
+int BufferImplementation<D,H>::write(const D& buffer, const H& header)
+{
+	int subBuffer = getFreeBufferIndex();
+	if(subBuffer == -1)
+	{
+		std::cout << __COUT_HDR_FL__ << __COUT_HDR_FL__ << "There are no free buffers!" << std::endl;
+		dumpStatus();
+		std::cout << __COUT_HDR_FL__ 
+		<< __PRETTY_FUNCTION__ 
+		<< "Producer: " << producerName_ 
+		<< " writing buffer: " << subBuffer 
+		<< " write pointer: " << writePointer_ 
+		<< " Buffer free: " << isFree(subBuffer) 
+		<< " written buffers: " << (100*numberOfWrittenBuffers())/numberOfSubBuffers_ << "%";
+		return ErrorBufferFull;
+	}
+
+	if(false && subBuffer%(numberOfSubBuffers_/1) == 0)
+	{
+		//dumpStatus();
+		std::cout << __COUT_HDR_FL__ 
+		<< __COUT_HDR_FL__ 
+		<< "Producer: " << producerName_ 
+		<< " writing buffer: " << subBuffer 
+		<< " write pointer: " << writePointer_ 
+		<< " Buffer free: " << isFree(subBuffer) 
+		<< " written buffers: " << (100*numberOfWrittenBuffers())/numberOfSubBuffers_ << "%";
+		for(auto& it: consumers_)
+		{
+			std::cout << __COUT_HDR_FL__ << " Read point: " << it.first << " = "<< it.second.readPointer_  << std::endl;
+			if(it.second.readPointer_ > writePointer_)
+				std::cout << __COUT_HDR_FL__ << " I read already! Delta: " << subBuffer-it.second.readPointer_ << std::endl;
+		}
+		
+	}
+	//
+	//  Here write data
+	//
+	writeSubBuffer (subBuffer, buffer, header);
+	writePointer_ = subBuffer;//Already protected in nextWritePointer with %numSubBuffers_
+	setWritten     (subBuffer);
+
+	return writePointer_;
+}
+
+//========================================================================================================================
+template<class D, class H>
+int BufferImplementation<D,H>::read (D& buffer, const std::string& consumer)
+{
+	std::map<std::string,std::string> dummyHeader;
+	return read(buffer,dummyHeader, consumer);
+}
+
+//========================================================================================================================
+template<class D, class H>
+int BufferImplementation<D,H>::read(D& buffer, H& header, const std::string& consumer)
+{
+	int subBuffer = getReadPointer(consumer);
+	if(isFree(subBuffer) || isFree(subBuffer,consumer))//The second condition is checked to make sure that consumer didn't read that buffer alredy when it wrapped around
+	{
+		//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "Is Not written: " << subBuffersStatus_[subBuffer] <<  "     " << std::endl;
+		return ErrorBufferNotAvailable;
+	}
+	//
+	// Here read data
+	//
+	buffer = getSubBuffer(subBuffer);
+	header = getHeader   (subBuffer);
+
+	consumers_[consumer].readPointer_ = nextReadPointer(consumer);//Already protected in nextReadPointer with %numSubBuffers_
+	setFree(subBuffer, consumer);
+	return subBuffer;
+}
+
+//========================================================================================================================
+template<class D, class H>
+int BufferImplementation<D,H>::read(D*& buffer, H*& header, const std::string& consumer)
+{
+	int subBuffer = getReadPointer(consumer);
+	if(isFree(subBuffer) || isFree(subBuffer,consumer))//The second condition is checked to make sure that consumer didn't read that buffer alredy when it wrapped around
+	{
+		//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "Is Not written: " << subBuffersStatus_[subBuffer] <<  "     " << std::endl;
+		return ErrorBufferNotAvailable;
+	}
+	//
+	// Here read data
+	//
+	buffer = &(getSubBuffer(subBuffer));
+	header = &(getHeader   (subBuffer));
+
+	return subBuffer;
+}
+
+//========================================================================================================================
+template<class D, class H>
+int BufferImplementation<D,H>::setReadSubBuffer(const std::string& consumer)//Must be used in conjunction with attachToEmptySubBuffer because it attach to the nextWritePointer buffer
+{
+	setFree(consumers_[consumer].readPointer_, consumer);
+	consumers_[consumer].readPointer_ = nextReadPointer(consumer);//Already protected in nextReadPointer with %numSubBuffers_
+	return consumers_[consumer].readPointer_;
+}
+
+//========================================================================================================================
+template<class D, class H>
+void BufferImplementation<D,H>::registerConsumer(std::string consumer, CircularBufferBase::ConsumerPriority priority)
+{
+	consumers_[consumer].readPointer_ = 0;//This MUST Start at 0 if the write pointer is reset!
+	consumers_[consumer].priority_    = priority;
+	consumers_[consumer].subBuffersStatus_ = new std::atomic_bool[numberOfSubBuffers_];
+	for(unsigned int i=0; i<numberOfSubBuffers_; i++)
+		consumers_[consumer].subBuffersStatus_[i] = bufferFree_;			
+}
+
+//========================================================================================================================
+template<class D, class H>
+void BufferImplementation<D,H>::unregisterConsumer(std::string consumer)
+{
+	auto toBeErased = consumers_.find(consumer);
+	if(toBeErased != consumers_.end())
+	{
+		if(toBeErased->second.subBuffersStatus_ != nullptr)
+			delete[] toBeErased->second.subBuffersStatus_;
+		consumers_.erase(toBeErased);
+	}
+}
+
+//========================================================================================================================
+template<class D, class H>
+void BufferImplementation<D,H>::writeSubBuffer(unsigned int subBuffer, const D& buffer, const H& header)
+{
+	subBuffers_[subBuffer] = buffer;
+	headers_   [subBuffer] = header;
+}
+
+//========================================================================================================================
+//template<class D, class H>
+//void BufferImplementation<D,H>::flush(std::string consumer)
+//{
+//	std::cout << __COUT_HDR_FL__ << "MUST BE IMPLEMENTED!" << std::endl;
+//}
+
+//========================================================================================================================
+template<class D, class H>
+void BufferImplementation<D,H>::resetConsumerList(void)
+{
+	for(auto& it : consumers_)
+		if(it.subBuffersStatus_ == nullptr)
+		{
+			delete[] it.subBuffersStatus_;
+			it.subBuffersStatus_ = nullptr;
+		}
+	consumers_.clear();
+}
+
+//========================================================================================================================
+template<class D, class H>
+unsigned int BufferImplementation<D,H>::nextWritePointer(void)
+{
+	return (unsigned int)((writePointer_ + 1)%numberOfSubBuffers_);
+}
+
+//========================================================================================================================
+template<class D, class H>
+unsigned int BufferImplementation<D,H>::nextReadPointer(const std::string& consumer)
+{
+	return (getReadPointer(consumer) + 1)%numberOfSubBuffers_;
+
+}
+
+//========================================================================================================================
+template<class D, class H>
+int BufferImplementation<D,H>::getFreeBufferIndex(void)
+{
+	if(isFree(nextWritePointer()))
+		return nextWritePointer();
+	else
+		return -1;
+}
+
+//========================================================================================================================
+template<class D, class H>
+D& BufferImplementation<D,H>::getSubBuffer(unsigned int subBuffer)
+{
+	return subBuffers_[subBuffer];
+}
+
+//========================================================================================================================
+template<class D, class H>
+H& BufferImplementation<D,H>::getHeader(unsigned int subBuffer )
+{
+	return headers_[subBuffer];
+}
+
+//========================================================================================================================
+template<class D, class H>
+void BufferImplementation<D,H>::dumpStatus(void)
+{
+//	
+//	for (unsigned int i=0; i<numberOfSubBuffers_; i++)
+//	{
+//		std::cout << __COUT_HDR_FL__
+//		<< "Buffer: " << i 
+//		<< " status: " << isFree(i);
+//		for(auto& it: consumers_)
+//		{
+//			std::cout << __COUT_HDR_FL__ << " consumer " << it.first << " status: " << it.second.subBuffersStatus_[i] << std::endl;  
+//		}
+//		
+//	}
+	std::cout << __COUT_HDR_FL__ 
+	<< __COUT_HDR_FL__ 
+	<< "Write pointer: " << writePointer_;
+	for(auto& it: consumers_)
+		std::cout << __COUT_HDR_FL__ << " Read pointer for consumer: " << it.first << " = "<< it.second.readPointer_ << std::endl; 
+	
+
+
+
+}
+
+//========================================================================================================================
+template<class D, class H>
+void BufferImplementation<D,H>::setWritten(unsigned int subBuffer)
+{
+	//The consumers status must be set first because the consumers check for the producer subBufferStatus
+	for(auto& it: consumers_)
+		it.second.subBuffersStatus_[subBuffer] = !bufferFree_;  
+	//As soon as this one is set to full then the consumers try to read it
+	subBuffersStatus_[subBuffer] = !bufferFree_;
+}
+
+//========================================================================================================================
+template<class D, class H>
+void BufferImplementation<D,H>::setFree(unsigned int subBuffer, const std::string& consumer)
+{
+	//The consumers status must be set first because the producer checks for the producer subBufferStatus
+	consumers_[consumer].subBuffersStatus_[subBuffer] = bufferFree_;
+	for(auto it: consumers_)
+		if(it.second.subBuffersStatus_[subBuffer] != bufferFree_)
+			return;
+	//As soon as this one is set to empty then the producer might try to write it
+	subBuffersStatus_[subBuffer] = bufferFree_;
+}
+
+//========================================================================================================================
+template<class D, class H>
+std::atomic_bool& BufferImplementation<D,H>::isFree(unsigned int subBuffer)
+{
+	return subBuffersStatus_[subBuffer];
+}
+
+//========================================================================================================================
+template<class D, class H>
+std::atomic_bool& BufferImplementation<D,H>::isFree(unsigned int subBuffer, const std::string& consumer)
+{
+	return consumers_[consumer].subBuffersStatus_[subBuffer];
+}
+
+//========================================================================================================================
+template<class D, class H>
+unsigned int BufferImplementation<D,H>::getReadPointer(const std::string& consumer)
+{
+	return consumers_[consumer].readPointer_;
+}
+
+//========================================================================================================================
+template<class D, class H>
+bool BufferImplementation<D,H>::isEmpty(void)
+{
+	for(unsigned int i=0; i<numberOfSubBuffers_; i++)
+		if(!isFree(i))
+		{
+			std::cout << __COUT_HDR_FL__ << __COUT_HDR_FL__ << "i: " << i << " is free? " << isFree(i) << std::endl;
+			dumpStatus();
+			return false;
+		}
+	return true;
+}
+
+//========================================================================================================================
+template<class D, class H>
+unsigned int BufferImplementation<D,H>::numberOfWrittenBuffers(void)
+{
+	unsigned int numberOfWrittenBuffers = 0;
+	for(unsigned int i=0; i<numberOfSubBuffers_; i++)
+		if(!isFree(i))
+			numberOfWrittenBuffers++;
+	return numberOfWrittenBuffers;
+}

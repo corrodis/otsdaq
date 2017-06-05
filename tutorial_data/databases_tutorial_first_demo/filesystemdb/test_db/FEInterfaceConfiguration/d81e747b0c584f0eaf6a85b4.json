@@ -1,0 +1,134 @@
+{
+"document" : {
+"data" : {
+"NAME" : "FE_INTERFACE_CONFIGURATION",
+"COMMENT" : "testing off",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1480908867,
+"COL_TYPES" : {
+"FE_INTERFACE_GROUP_ID" : "VARCHAR2",
+"FE_INTERFACE_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"FE_INTERFACE_PLUGIN_NAME" : "VARCHAR2",
+"LINK_TO_FE_TYPE_CONFIGURATION" : "VARCHAR2",
+"LINK_TO_FE_TYPE_UID" : "VARCHAR2",
+"LINK_TO_SLOW_CONTROL_CHANNELS_CONFIGURATION" : "VARCHAR2",
+"LINK_TO_SLOW_CONTROL_CHANNELS_GROUP_ID" : "VARCHAR2",
+"LINK_TO_SLOW_CONTROLS_MONITOR_CONFIGURATION" : "VARCHAR2",
+"LINK_TO_SLOW_CONTROLS_MONITOR_UID" : "VARCHAR2",
+"SLOW_CONTROLS_TX_SOCKET_IP_ADDRESS" : "VARCHAR2",
+"SLOW_CONTROLS_TX_SOCKET_PORT" : "NUMBER",
+"SLOW_CONTROLS_LOCAL_AGGREGATE_SAVING_ENABLED" : "VARCHAR2",
+"SLOW_CONTROLS_LOCAL_FILE_PATH" : "VARCHAR2",
+"SLOW_CONTROLS_RADIX_FILE_NAME" : "VARCHAR2",
+"SLOW_CONTROLS_SAVE_BINARY_FILE" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"FE_INTERFACE_GROUP_ID" : "FEGroup0",
+"FE_INTERFACE_UID" : "FEI0",
+"STATUS" : "Off",
+"FE_INTERFACE_PLUGIN_NAME" : "FEOtsUDPTemplateInterface",
+"LINK_TO_FE_TYPE_CONFIGURATION" : "FEOtsUDPTemplateInterfaceConfiguration",
+"LINK_TO_FE_TYPE_UID" : "OtsInterface0",
+"LINK_TO_SLOW_CONTROL_CHANNELS_CONFIGURATION" : "NO_LINK",
+"LINK_TO_SLOW_CONTROL_CHANNELS_GROUP_ID" : "OtsHwEmulatorGroup0",
+"LINK_TO_SLOW_CONTROLS_MONITOR_CONFIGURATION" : "NO_LINK",
+"LINK_TO_SLOW_CONTROLS_MONITOR_UID" : "0",
+"SLOW_CONTROLS_TX_SOCKET_IP_ADDRESS" : "127.0.0.1",
+"SLOW_CONTROLS_TX_SOCKET_PORT" : "4200",
+"SLOW_CONTROLS_LOCAL_AGGREGATE_SAVING_ENABLED" : "Yes",
+"SLOW_CONTROLS_LOCAL_FILE_PATH" : "/tmp/",
+"SLOW_CONTROLS_RADIX_FILE_NAME" : "SlowControls",
+"SLOW_CONTROLS_SAVE_BINARY_FILE" : "False",
+"COMMENT_DESCRIPTION" : "using for hw emulator slow controls.",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480908867"
+},
+{
+"FE_INTERFACE_GROUP_ID" : "FEGroup0",
+"FE_INTERFACE_UID" : "FEI1",
+"STATUS" : "Off",
+"FE_INTERFACE_PLUGIN_NAME" : "FEOtsUDPTemplateInterface",
+"LINK_TO_FE_TYPE_CONFIGURATION" : "FEOtsUDPTemplateInterfaceConfiguration",
+"LINK_TO_FE_TYPE_UID" : "KC705_Interface0",
+"LINK_TO_SLOW_CONTROL_CHANNELS_CONFIGURATION" : "NO_LINK",
+"LINK_TO_SLOW_CONTROL_CHANNELS_GROUP_ID" : "OtsHwEmulatorGroup0",
+"LINK_TO_SLOW_CONTROLS_MONITOR_CONFIGURATION" : "NO_LINK",
+"LINK_TO_SLOW_CONTROLS_MONITOR_UID" : "0",
+"SLOW_CONTROLS_TX_SOCKET_IP_ADDRESS" : "127.0.0.1",
+"SLOW_CONTROLS_TX_SOCKET_PORT" : "4201",
+"SLOW_CONTROLS_LOCAL_AGGREGATE_SAVING_ENABLED" : "Yes",
+"SLOW_CONTROLS_LOCAL_FILE_PATH" : "/tmp/",
+"SLOW_CONTROLS_RADIX_FILE_NAME" : "SlowControls",
+"SLOW_CONTROLS_SAVE_BINARY_FILE" : "False",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480908867"
+}
+]
+},
+"metadata" : {
+"comments" : {
+"empty" : "empty"
+}
+},
+"search" : [
+{
+"name" : "find any",
+"query" : "not defined"
+}
+]
+},
+"origin" : {
+"format" : "json"
+},
+"version" : "0",
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"name" : "defaultConfig_v0",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+}
+],
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"changelog" : "empty",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : true,
+"created" : "Tue Dec 29 18:19:25 2015",
+"updates" : [
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setVersion" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setConfigurableEntity" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+}
+]
+},
+"configurable_entity" : {
+"name" : "OTSROOT"
+},
+"_id" : {
+"_oid" : "d81e747b0c584f0eaf6a85b4"
+}
+}

@@ -1,0 +1,3 @@
+add_subdirectory(ConfigurationInterface)
+add_subdirectory(SimpleSoap)
+add_subdirectory(InterfacePluginTest)

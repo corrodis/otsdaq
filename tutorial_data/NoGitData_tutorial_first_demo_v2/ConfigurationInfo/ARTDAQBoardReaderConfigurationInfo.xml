@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+		<CONFIGURATION Name="ARTDAQBoardReaderConfiguration">
+			<VIEW Name="ARTDAQ_BOARD_READER_CONFIGURATION" Type="File,Database,DatabaseTest">
+				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLink-sharedDaqParameters" 	 Name="daqSharedParametersLink" 	 StorageName="DAQ_SHARED_PARAMETERS_LINK" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLinkGroupID-sharedDaqParameters" 	 Name="daqSharedParametersLinkGroupID" 	 StorageName="DAQ_SHARED_PARAMETERS_LINK_GROUP_ID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLink-uniqueDaqParameters" 	 Name="daqUniqueParametersLink" 	 StorageName="DAQ_UNIQUE_PARAMETERS_LINK" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLinkGroupID-uniqueDaqParameters" 	 Name="daqUniqueParametersLinkGroupID" 	 StorageName="DAQ_UNIQUE_PARAMETERS_LINK_GROUP_ID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLink-destinations" 	 Name="daqDestinationsLink" 	 StorageName="DAQ_DESTINATIONS_LINK" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLinkGroupID-destinations" 	 Name="daqDestinationsLinkGroupID" 	 StorageName="DAQ_DESTINATIONS_LINK_GROUP_ID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLink-metrics" 	 Name="daqMetricsLink" 	 StorageName="DAQ_METRICS_LINK" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLinkGroupID-metrics" 	 Name="daqMetricsLinkUID" 	 StorageName="DAQ_METRICS_LINK_UID" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2"/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE"/>
+			</VIEW>
+		</CONFIGURATION>
+	</ROOT>

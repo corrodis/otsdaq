@@ -1,0 +1,28 @@
+{
+"version" : {
+"1" : [
+"8030d88119ce4aa2a72b53ce"
+],
+"4" : [
+"98a92c124ea04ac3b4e6afa6"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"8030d88119ce4aa2a72b53ce",
+"98a92c124ea04ac3b4e6afa6"
+],
+"artdaqConfig_v1" : [
+"8030d88119ce4aa2a72b53ce"
+],
+"defaultConfig_v4" : [
+"98a92c124ea04ac3b4e6afa6"
+]
+},
+"configurable_entity.name" : {
+"OTSROOT" : [
+"8030d88119ce4aa2a72b53ce",
+"98a92c124ea04ac3b4e6afa6"
+]
+}
+}

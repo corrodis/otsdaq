@@ -1,0 +1,96 @@
+//#include "otsdaq-core/Utilities/DataManager/CircularBuffer.h"
+//#include "otsdaq-core/MessageFacility/MessageFacility.h"
+#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+
+#include <iostream>
+#include <stdlib.h>
+#include <cassert>
+
+//========================================================================================================================
+template<class D, class H>
+CircularBuffer<D,H>::CircularBuffer(void)
+: megaCounter_(0)
+{
+}
+
+//========================================================================================================================
+template<class D, class H>
+CircularBuffer<D,H>::~CircularBuffer(void)
+{
+}
+
+//========================================================================================================================
+template<class D, class H>
+void CircularBuffer<D,H>::reset(void)
+{
+	for(auto& it: theBuffer_)
+		it.second.reset();
+}
+
+//========================================================================================================================
+template<class D, class H>
+bool CircularBuffer<D,H>::isEmpty(void)
+{
+	for(auto& it: theBuffer_)
+		if(!it.second.isEmpty())
+			return false;
+	return true;
+}
+
+//========================================================================================================================
+template<class D, class H>
+unsigned int CircularBuffer<D,H>::getNumberOfBuffers(void)
+{
+	unsigned int numberOfBuffers = 0;
+	for(auto& it: theBuffer_)
+		numberOfBuffers += it.second.bufferSize();
+	return numberOfBuffers;	
+}
+
+//========================================================================================================================
+template<class D, class H>
+void CircularBuffer<D,H>::registerProducer(std::string producerID, unsigned int bufferSize)
+{
+	if(theBuffer_.find(producerID) != theBuffer_.end())
+	{
+		std::cout << __COUT_HDR_FL__ << "There is already a producer with name: " << producerID << "...Aborting" << std::endl;
+		assert(0);
+	}
+	
+	theBuffer_[producerID] = BufferImplementation<D,H>(producerID, bufferSize);
+	std::cout << __COUT_HDR_FL__ << "PRODUCER NAME: " << producerID << " SIZE: " << theBuffer_.size() << std::endl;
+}
+
+//========================================================================================================================
+template<class D, class H>
+void CircularBuffer<D,H>::registerConsumer(std::string consumerID, CircularBufferBase::ConsumerPriority priority)
+{
+	for(auto& it: theBuffer_)
+		it.second.registerConsumer(consumerID, priority);
+	lastReadBuffer_[consumerID]  = theBuffer_.begin();
+}
+//========================================================================================================================
+template<class D, class H>
+void CircularBuffer<D,H>::unregisterConsumer(std::string consumerID)
+{
+	for(auto& it: theBuffer_)
+		it.second.unregisterConsumer(consumerID);
+	lastReadBuffer_.erase(consumerID);
+}
+
+//========================================================================================================================
+template<class D, class H>
+void CircularBuffer<D,H>::resetConsumerList(void)
+{
+	for(auto& it: theBuffer_)
+		it.second.resetConsumerList();
+}
+
+//========================================================================================================================
+template<class D, class H>
+void CircularBuffer<D,H>:: setNextProducerBuffer(const std::string& consumerID)
+{
+	if(++lastReadBuffer_[consumerID] ==  theBuffer_.end())
+		lastReadBuffer_[consumerID] = theBuffer_.begin();
+}
+

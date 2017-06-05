@@ -1,0 +1,89 @@
+{
+"document" : {
+"data" : {
+"NAME" : "DQM_HISTOS_CONSUMER_CONFIGURATION",
+"COMMENT" : "DQM for HW emulator.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1480909105,
+"COL_TYPES" : {
+"PROCESSOR_ID" : "VARCHAR2",
+"FILE_PATH" : "VARCHAR2",
+"RADIX_FILE_NAME" : "VARCHAR2",
+"SAVE_FILE" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"PROCESSOR_ID" : "DQMHistos0",
+"FILE_PATH" : "/tmp/",
+"RADIX_FILE_NAME" : "myROOT",
+"SAVE_FILE" : "Yes",
+"COMMENT_DESCRIPTION" : "DQM for hw emulator",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480909105"
+}
+]
+},
+"metadata" : {
+"comments" : {
+"empty" : "empty"
+}
+},
+"search" : [
+{
+"name" : "find any",
+"query" : "not defined"
+}
+]
+},
+"origin" : {
+"format" : "json"
+},
+"version" : "0",
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"name" : "defaultConfig_v0",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+}
+],
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"changelog" : "empty",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : true,
+"created" : "Tue Dec 29 18:19:25 2015",
+"updates" : [
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setVersion" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setConfigurableEntity" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+}
+]
+},
+"configurable_entity" : {
+"name" : "OTSROOT"
+},
+"_id" : {
+"_oid" : "0832070cdeb843189c5908d2"
+}
+}

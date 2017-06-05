@@ -1,0 +1,20 @@
+{
+"version" : {
+"3" : [
+"9ca8751c643943ce8c0c0c44"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"9ca8751c643943ce8c0c0c44"
+],
+"artdaqFclTest_v3" : [
+"9ca8751c643943ce8c0c0c44"
+]
+},
+"configurable_entity.name" : {
+"OTSROOT" : [
+"9ca8751c643943ce8c0c0c44"
+]
+}
+}

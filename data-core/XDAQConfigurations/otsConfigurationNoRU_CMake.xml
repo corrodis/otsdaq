@@ -1,0 +1,84 @@
+<?xml version='1.0'?>
+<xc:Partition 	xmlns:xsi	= "http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:soapenc	= "http://schemas.xmlsoap.org/soap/encoding/"
+		xmlns:xc	= "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30">
+
+	<!-- ContextUID='MainContext' sourceConfig='XDAQContextConfiguration_v25 @ 1490827420' -->
+	<xc:Context id="0" url="http://ftbftracker02.fnal.gov:2015">
+
+		<!-- Application GroupID = 'MainContext' UID='Supervisor' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::Supervisor" id="200" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq/lib/libSupervisor.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='FESupervisorFSSR0' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::FESupervisor" id="210" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='FESupervisorFSSR1' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::FESupervisor" id="211" instance="2" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='FESupervisorFSSR2' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::FESupervisor" id="212" instance="3" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='FESupervisorNetworkMaster' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::FESupervisor" id="214" instance="4" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='ChatSupervisor' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::ChatSupervisor" id="250" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq_utilities/lib/libChat.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='ConsoleSupervisor' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::ConsoleSupervisor" id="260" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq_utilities/lib/libConsole.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='DataManagerSupervisorFSSR0' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::DataManagerSupervisor" id="310" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='DataManagerSupervisorFSSR1' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::DataManagerSupervisor" id="311" instance="2" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='DataManagerSupervisorFSSR2' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::DataManagerSupervisor" id="312" instance="3" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='LogbookSupervisor' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<!--
+		<xc:Application class="ots::LogbookSupervisor" id="260" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq_utilities/lib/libLogbook.so</xc:Module>
+		-->
+
+		<!-- Application GroupID = 'MainContext' UID='VisualSupervisor' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::VisualSupervisor" id="270" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq_utilities/lib/libVisualization.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='ConfigurationGUISupervisor' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::ConfigurationGUISupervisor" id="281" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq_utilities/lib/libConfigurationGUI.so</xc:Module>
+
+		<!-- Application GroupID = 'MainContext' UID='MacroMakerSupervisor' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::MacroMakerSupervisor" id="300" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq_utilities/lib/libMacroMaker.so</xc:Module>
+
+	</xc:Context>
+
+	<!-- ContextUID='CMSTimingContext' sourceConfig='XDAQContextConfiguration_v25 @ 1490827420' -->
+	<xc:Context id="1" url="http://ftbftracker02.fnal.gov:2020">
+
+		<!-- Application GroupID = 'CMSTimingContext' UID='FESupervisorCMSTiming0' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::FESupervisor" id="213" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so</xc:Module>
+
+		<!-- Application GroupID = 'CMSTimingContext' UID='DataManagerSupervisorCMSTiming0' sourceConfig='XDAQApplicationConfiguration_v27 @ 1490827037' -->
+		<xc:Application class="ots::DataManagerSupervisor" id="313" instance="1" network="local" group="daq"/>
+		<xc:Module>/home/cmstestbeam/Programming/mrbots/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so</xc:Module>
+
+	</xc:Context>
+
+</xc:Partition>
+
+

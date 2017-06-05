@@ -1,0 +1,23 @@
+{
+"version" : {
+"2" : [
+"c9d4cd557d6945eaa97b36e1"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"c9d4cd557d6945eaa97b36e1"
+],
+"artdaqContext_v2" : [
+"c9d4cd557d6945eaa97b36e1"
+],
+"testContext_v5" : [
+"c9d4cd557d6945eaa97b36e1"
+]
+},
+"configurable_entity.name" : {
+"OTSROOT" : [
+"c9d4cd557d6945eaa97b36e1"
+]
+}
+}

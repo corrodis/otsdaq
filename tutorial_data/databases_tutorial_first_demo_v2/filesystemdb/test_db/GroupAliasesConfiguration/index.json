@@ -1,0 +1,28 @@
+{
+"version" : {
+"0" : [
+"c8da4fbe05ff4354a882254c"
+],
+"6" : [
+"315ba8b1b5024cddadc1501e"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"315ba8b1b5024cddadc1501e",
+"c8da4fbe05ff4354a882254c"
+],
+"GroupAliasWizBackbone_v0" : [
+"c8da4fbe05ff4354a882254c"
+],
+"GroupAliasWizBackbone_v6" : [
+"315ba8b1b5024cddadc1501e"
+]
+},
+"configurable_entity.name" : {
+"OTSROOT" : [
+"315ba8b1b5024cddadc1501e",
+"c8da4fbe05ff4354a882254c"
+]
+}
+}

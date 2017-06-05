@@ -1,0 +1,295 @@
+{
+"document" : {
+"data" : {
+"NAME" : "XDAQ_APPLICATION_CONFIGURATION",
+"COMMENT" : "Example VM applications with receiving data path (data managers, visualizers, and artdaq) off.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1480709131,
+"COL_TYPES" : {
+"APPLICATION_GROUP_ID" : "VARCHAR2",
+"APPLICATION_UID" : "VARCHAR2",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "VARCHAR2",
+"SUPERVISOR_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"CLASS" : "VARCHAR2",
+"ID" : "NUMBER",
+"INSTANCE" : "NUMBER",
+"NETWORK" : "VARCHAR2",
+"GROUP" : "VARCHAR2",
+"MODULE" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "Supervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "TheSupervisorConfiguration",
+"SUPERVISOR_UID" : "Supervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::Supervisor",
+"ID" : "200",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq/lib/libSupervisor.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "FESupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "FESupervisorConfiguration",
+"SUPERVISOR_UID" : "FESupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::FESupervisor",
+"ID" : "210",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "ChatSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "ChatSupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::ChatSupervisor",
+"ID" : "250",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq_utilities/lib/libChat.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "ConsoleSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "ConsoleSupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::ConsoleSupervisor",
+"ID" : "260",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq_utilities/lib/libConsole.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "DataManagerSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"SUPERVISOR_UID" : "DataManagerSupervisor0",
+"STATUS" : "Off",
+"CLASS" : "ots::DataManagerSupervisor",
+"ID" : "310",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "LogbookSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "LogbookSupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::LogbookSupervisor",
+"ID" : "261",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq_utilities/lib/libLogbook.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "VisualSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"SUPERVISOR_UID" : "VisualSupervisor0",
+"STATUS" : "Off",
+"CLASS" : "ots::VisualSupervisor",
+"ID" : "270",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq_utilities/lib/libVisualization.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "ConfigurationGUISupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "ConfigurationGUISupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::ConfigurationGUISupervisor",
+"ID" : "281",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq_utilities/lib/libConfigurationGUI.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "testContextApps",
+"APPLICATION_UID" : "MacroMakerSupervisor",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"SUPERVISOR_UID" : "MacroMakerSupervisor0",
+"STATUS" : "On",
+"CLASS" : "ots::MacroMakerSupervisor",
+"ID" : "300",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq_utilities/lib/libMacroMaker.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "ARTDataManager0",
+"APPLICATION_UID" : "ARTDataManager0",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"SUPERVISOR_UID" : "ARTDataManagerSupervisor0",
+"STATUS" : "Off",
+"CLASS" : "ots::ARTDAQDataManagerSupervisor",
+"ID" : "220",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "ARTDataManager1",
+"APPLICATION_UID" : "ARTDataManager1",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"SUPERVISOR_UID" : "ARTDataManagerSupervisor1",
+"STATUS" : "Off",
+"CLASS" : "ots::ARTDAQDataManagerSupervisor",
+"ID" : "221",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq/lib/libCoreSupervisors.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "ARTEventBuilder0",
+"APPLICATION_UID" : "ARTEventBuilder0",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "ARTDAQBuilderConfiguration",
+"SUPERVISOR_UID" : "ARTEventBuilderSupervisor0",
+"STATUS" : "Off",
+"CLASS" : "ots::EventBuilderApp",
+"ID" : "230",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq/lib/libEventBuilderApp.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+},
+{
+"APPLICATION_GROUP_ID" : "ARTAggregator",
+"APPLICATION_UID" : "ARTAggregator",
+"LINK_TO_SUPERVISOR_CONFIGURATION" : "ARTDAQAggregatorConfiguration",
+"SUPERVISOR_UID" : "ARTAggregatorSupervisor",
+"STATUS" : "Off",
+"CLASS" : "ots::AggregatorApp",
+"ID" : "240",
+"INSTANCE" : "1",
+"NETWORK" : "local",
+"GROUP" : "daq",
+"MODULE" : "/opt/otsdaq-mrb-base/build_slf6.x86_64/otsdaq/lib/libAggregatorApp.so",
+"COMMENT_DESCRIPTION" : "DEFAULT",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480709131"
+}
+]
+},
+"metadata" : {
+"comments" : {
+"empty" : "empty"
+}
+},
+"search" : [
+{
+"name" : "find any",
+"query" : "not defined"
+}
+]
+},
+"origin" : {
+"format" : "json"
+},
+"version" : "0",
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"name" : "defaultContext_v0",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+}
+],
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"changelog" : "empty",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : true,
+"created" : "Tue Dec 29 18:19:25 2015",
+"updates" : [
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setVersion" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setConfigurableEntity" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+}
+]
+},
+"configurable_entity" : {
+"name" : "OTSROOT"
+},
+"_id" : {
+"_oid" : "942d82a254554f0e8d94ced2"
+}
+}

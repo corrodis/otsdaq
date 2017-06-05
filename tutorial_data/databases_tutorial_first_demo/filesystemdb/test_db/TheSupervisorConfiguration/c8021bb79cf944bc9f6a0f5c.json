@@ -1,0 +1,85 @@
+{
+"document" : {
+"data" : {
+"NAME" : "THE_SUPERVISOR_CONFIGURATION",
+"COMMENT" : "State Machine Alias Filter.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1480545465,
+"COL_TYPES" : {
+"SUPERVISOR_UID" : "VARCHAR2",
+"STATE_MACHINE_SYSTEM_ALIAS_FILTER" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"SUPERVISOR_UID" : "Supervisor0",
+"STATE_MACHINE_SYSTEM_ALIAS_FILTER" : "!*Context*",
+"COMMENT_DESCRIPTION" : "Only show non-context aliases in the state machine.",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480545465"
+}
+]
+},
+"metadata" : {
+"comments" : {
+"empty" : "empty"
+}
+},
+"search" : [
+{
+"name" : "find any",
+"query" : "not defined"
+}
+]
+},
+"origin" : {
+"format" : "json"
+},
+"version" : "0",
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"name" : "defaultConfig_v0",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+}
+],
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"changelog" : "empty",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : true,
+"created" : "Tue Dec 29 18:19:25 2015",
+"updates" : [
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setVersion" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setConfigurableEntity" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+}
+]
+},
+"configurable_entity" : {
+"name" : "OTSROOT"
+},
+"_id" : {
+"_oid" : "c8021bb79cf944bc9f6a0f5c"
+}
+}

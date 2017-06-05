@@ -1,0 +1,251 @@
+{
+"document" : {
+"data" : {
+"NAME" : "DESKTOP_ICON_CONFIGURATION",
+"COMMENT" : "Example for VM first demo tutorial.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1480714274,
+"COL_TYPES" : {
+"ICON_NAME" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"CAPTION" : "VARCHAR2",
+"ALTERNATE_TEXT" : "VARCHAR2",
+"FORCE_ONLY_ONE_INSTANCE" : "VARCHAR2",
+"REQUIRED_PERMISSION_LEVEL" : "VARCHAR2",
+"IMAGE_URL" : "VARCHAR2",
+"WINDOW_CONTENT_URL" : "VARCHAR2",
+"LINK_TO_APPLICATION_CONFIGURATION" : "VARCHAR2",
+"APPLICATION_UID" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"ICON_NAME" : "Calibrate",
+"STATUS" : "Off",
+"CAPTION" : "Calibrate",
+"ALTERNATE_TEXT" : "CAL",
+"FORCE_ONLY_ONE_INSTANCE" : "True",
+"REQUIRED_PERMISSION_LEVEL" : "100",
+"IMAGE_URL" : "icon-Calibrate.png",
+"WINDOW_CONTENT_URL" : "/WebPath/html/Calibrations.html",
+"LINK_TO_APPLICATION_CONFIGURATION" : "NO_LINK",
+"APPLICATION_UID" : "",
+"COMMENT_DESCRIPTION" : "",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"ICON_NAME" : "FSM",
+"STATUS" : "On",
+"CAPTION" : "State Machine",
+"ALTERNATE_TEXT" : "FSM",
+"FORCE_ONLY_ONE_INSTANCE" : "True",
+"REQUIRED_PERMISSION_LEVEL" : "1",
+"IMAGE_URL" : "icon-Physics.gif",
+"WINDOW_CONTENT_URL" : "/WebPath/html/Physics.html",
+"LINK_TO_APPLICATION_CONFIGURATION" : "NO_LINK",
+"APPLICATION_UID" : "",
+"COMMENT_DESCRIPTION" : "",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479782293"
+},
+{
+"ICON_NAME" : "Chat",
+"STATUS" : "On",
+"CAPTION" : "Chat",
+"ALTERNATE_TEXT" : "CHAT",
+"FORCE_ONLY_ONE_INSTANCE" : "True",
+"REQUIRED_PERMISSION_LEVEL" : "1",
+"IMAGE_URL" : "icon-Chat.png",
+"WINDOW_CONTENT_URL" : "/urn:xdaq-application:lid=",
+"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"APPLICATION_UID" : "ChatSupervisor",
+"COMMENT_DESCRIPTION" : "The id number will be appended from the linked XDAQ supervisor urn",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479418167"
+},
+{
+"ICON_NAME" : "SystemStatus",
+"STATUS" : "Off",
+"CAPTION" : "System Status",
+"ALTERNATE_TEXT" : "SYS",
+"FORCE_ONLY_ONE_INSTANCE" : "True",
+"REQUIRED_PERMISSION_LEVEL" : "1",
+"IMAGE_URL" : "icon-SystemStatus.png",
+"WINDOW_CONTENT_URL" : "/WebPath/html/SystemStatus.html",
+"LINK_TO_APPLICATION_CONFIGURATION" : "NO_LINK",
+"APPLICATION_UID" : "",
+"COMMENT_DESCRIPTION" : "",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"ICON_NAME" : "Logbook",
+"STATUS" : "On",
+"CAPTION" : "Logbook",
+"ALTERNATE_TEXT" : "LOG",
+"FORCE_ONLY_ONE_INSTANCE" : "True",
+"REQUIRED_PERMISSION_LEVEL" : "1",
+"IMAGE_URL" : "icon-Logbook.png",
+"WINDOW_CONTENT_URL" : "/urn:xdaq-application:lid=",
+"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"APPLICATION_UID" : "LogbookSupervisor",
+"COMMENT_DESCRIPTION" : "lid number must match XDAQ supervisor urn",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"ICON_NAME" : "Visualizer",
+"STATUS" : "Off",
+"CAPTION" : "Visualize",
+"ALTERNATE_TEXT" : "VIS",
+"FORCE_ONLY_ONE_INSTANCE" : "False",
+"REQUIRED_PERMISSION_LEVEL" : "10",
+"IMAGE_URL" : "icon-Visualizer.png",
+"WINDOW_CONTENT_URL" : "/WebPath/html/Visualization.html?urn=",
+"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"APPLICATION_UID" : "VisualSupervisor",
+"COMMENT_DESCRIPTION" : "urn must match XDAQ supervisor urn",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480714274"
+},
+{
+"ICON_NAME" : "ConfigureGUI",
+"STATUS" : "On",
+"CAPTION" : "Configure",
+"ALTERNATE_TEXT" : "CFG",
+"FORCE_ONLY_ONE_INSTANCE" : "False",
+"REQUIRED_PERMISSION_LEVEL" : "10",
+"IMAGE_URL" : "icon-Configure.png",
+"WINDOW_CONTENT_URL" : "/urn:xdaq-application:lid=",
+"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"APPLICATION_UID" : "ConfigurationGUISupervisor",
+"COMMENT_DESCRIPTION" : "lid number must match XDAQ supervisor urn",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"ICON_NAME" : "MacroMaker",
+"STATUS" : "On",
+"CAPTION" : "Macro Maker",
+"ALTERNATE_TEXT" : "MM",
+"FORCE_ONLY_ONE_INSTANCE" : "True",
+"REQUIRED_PERMISSION_LEVEL" : "1",
+"IMAGE_URL" : "icon-MacroMaker.png",
+"WINDOW_CONTENT_URL" : "/WebPath/html/MacroMaker.html?urn=",
+"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"APPLICATION_UID" : "MacroMakerSupervisor",
+"COMMENT_DESCRIPTION" : "lid number must match XDAQ supervisor urn",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"ICON_NAME" : "NOvA Log",
+"STATUS" : "Off",
+"CAPTION" : "NOvA Log",
+"ALTERNATE_TEXT" : "NOVA",
+"FORCE_ONLY_ONE_INSTANCE" : "True",
+"REQUIRED_PERMISSION_LEVEL" : "1",
+"IMAGE_URL" : "0",
+"WINDOW_CONTENT_URL" : "http://dbweb6.fnal.gov:8080/ECL/nova/E/index",
+"LINK_TO_APPLICATION_CONFIGURATION" : "NO_LINK",
+"APPLICATION_UID" : "",
+"COMMENT_DESCRIPTION" : "0 means use ALT for icon",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"ICON_NAME" : "DB Utilities",
+"STATUS" : "Off",
+"CAPTION" : "DB Utilities",
+"ALTERNATE_TEXT" : "DB",
+"FORCE_ONLY_ONE_INSTANCE" : "True",
+"REQUIRED_PERMISSION_LEVEL" : "10",
+"IMAGE_URL" : "0",
+"WINDOW_CONTENT_URL" : "http://127.0.0.1:8080/db/client.html",
+"LINK_TO_APPLICATION_CONFIGURATION" : "NO_LINK",
+"APPLICATION_UID" : "",
+"COMMENT_DESCRIPTION" : "0 means use ALT for icon",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"ICON_NAME" : "Console",
+"STATUS" : "On",
+"CAPTION" : "Console",
+"ALTERNATE_TEXT" : "CON",
+"FORCE_ONLY_ONE_INSTANCE" : "True",
+"REQUIRED_PERMISSION_LEVEL" : "255",
+"IMAGE_URL" : "icon-Console.png",
+"WINDOW_CONTENT_URL" : "/WebPath/html/Console.html?urn=",
+"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"APPLICATION_UID" : "ConsoleSupervisor",
+"COMMENT_DESCRIPTION" : "urn must match XDAQ supervisor urn",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479816784"
+}
+]
+},
+"metadata" : {
+"comments" : {
+"empty" : "empty"
+}
+},
+"search" : [
+{
+"name" : "find any",
+"query" : "not defined"
+}
+]
+},
+"origin" : {
+"format" : "json"
+},
+"version" : "0",
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"name" : "defaultContext_v0",
+"assigned" : "Sun Dec  4 21:38:53 2016"
+}
+],
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"changelog" : "empty",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : true,
+"created" : "Tue Dec 29 18:19:25 2015",
+"updates" : [
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setVersion" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"setConfigurableEntity" : "Sun Dec  4 21:38:53 2016"
+},
+{
+"addToGlobalConfig" : "Sun Dec  4 21:38:53 2016"
+}
+]
+},
+"configurable_entity" : {
+"name" : "OTSROOT"
+},
+"_id" : {
+"_oid" : "c1447d29662f4a49885e407e"
+}
+}
