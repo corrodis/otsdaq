@@ -74,18 +74,24 @@ fi
 export CONFIGURATION_TYPE=File
 
 # Setup environment when building with MRB (As there's no setupARTDAQOTS file)
-if [ "x$MRB_BUILDDIR" != "x" ]; then
+if [ "x$MRB_BUILDDIR" != "x" ] && [ -e $OTSDAQ_DEMO_DIR/CMakeLists.txt ]; then
   export OTSDAQDEMO_BUILD=${MRB_BUILDDIR}/otsdaq_demo
   export OTSDAQ_DEMO_LIB=${MRB_BUILDDIR}/otsdaq_demo/lib
   export OTSDAQDEMO_REPO=$OTSDAQ_DEMO_DIR
   unset  OTSDAQ_DEMO_DIR
+fi
+
+if [ "x$MRB_BUILDDIR" != "x" ] && [ -e $OTSDAQ_DIR/CMakeLists.txt ]; then
   export OTSDAQ_BUILD=${MRB_BUILDDIR}/otsdaq
   export OTSDAQ_LIB=${MRB_BUILDDIR}/otsdaq/lib
   export OTSDAQ_REPO=$OTSDAQ_DIR
+  export FHICL_FILE_PATH=.:$OTSDAQ_REPO/tools/fcl:$FHICL_FILE_PATH
+fi
+  
+if [ "x$MRB_BUILDDIR" != "x" ] && [ -e $OTSDAQ_UTILITIES_DIR/CMakeLists.txt ]; then
   export OTSDAQUTILITIES_BUILD=${MRB_BUILDDIR}/otsdaq_utilities
   export OTSDAQ_UTILITIES_LIB=${MRB_BUILDDIR}/otsdaq_utilities/lib
   export OTSDAQUTILITIES_REPO=$OTSDAQ_UTILITIES_DIR
-  export FHICL_FILE_PATH=.:$OTSDAQ_REPO/tools/fcl:$FHICL_FILE_PATH
 fi
 
 if [ "x$OTSDAQ_DEMO_DIR" == "x" ]; then
