@@ -137,7 +137,7 @@ void Supervisor::init(void)
 	if(!configLinkNode.isDisconnected())
 		supervisorUID = configLinkNode.getValue();
 	else
-		supervisorUID = "NO_LINK";
+		supervisorUID = ViewColumnInfo::DATATYPE_LINK_DEFAULT;
 
 	__MOUT__ << "Supervisor UID:" << supervisorUID	<< std::endl;
 }

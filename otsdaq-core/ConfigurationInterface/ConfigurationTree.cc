@@ -624,7 +624,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 				}
 				catch(...)
 				{
-					__MOUT_WARN__ << "Found disconnected node! Failed link target from nodeName=" <<
+					if(configView_->getDataView()[row_][linkPair.first] !=
+							ViewColumnInfo::DATATYPE_LINK_DEFAULT)
+						__MOUT_WARN__ << "Found disconnected node! Failed link target from nodeName=" <<
 							nodeName << " to table:id=" <<
 							configView_->getDataView()[row_][linkPair.first] << ":" <<
 							configView_->getDataView()[row_][linkPair.second] <<
