@@ -21,9 +21,26 @@ if [[ "$1"  == "--verbose" || "$2"  == "--verbose" || "$1"  == "-v" || "$2"  == 
 	QUIET=0
 fi
 
+#############################
+#initializing StartOTS action file
+#attempt to mkdir for full path so that it exists to move the database to
+# assuming mkdir is non-destructive
+echo "StartOTS_action file path = ${USER_DATA}/ServiceData/StartOTS_action.cmd"
+SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
+SAP_PATH=""
+for SAP_EL in ${SAP_ARR[@]}
+do
+	#echo $SAP_EL
+	SAP_PATH="$SAP_PATH/$SAP_EL"
+	#echo $SAP_PATH
+	mkdir $SAP_PATH &>/dev/null #hide output
+done
+
 #exit any old action loops
 OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action.cmd"
 echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
+#done initializing StartOTS action file
+#############################
 
 if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
     echo "******************************************************"

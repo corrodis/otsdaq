@@ -29,7 +29,7 @@ using namespace ots;
 #define USERS_LOGIN_HISTORY_FILETYPE	"hist"
 #define USERS_PREFERENCES_FILETYPE 		"pref"
 #define SYSTEM_PREFERENCES_PREFIX 		"system.preset"
-
+#define USER_WITH_LOCK_FILE				WEB_LOGIN_DB_PATH + "/user_with_lock.dat"
 
 #define HASHES_DB_GLOBAL_STRING 		"hashData"
 #define HASHES_DB_ENTRY_STRING 			"hashEntry"
@@ -65,7 +65,7 @@ const std::string WebUsers::DEFAULT_ADMIN_DISPLAY_NAME = "Administrator";
 
 WebUsers::WebUsers() 
 {
-	//deleteUserData();
+	//deleteUserData(); //for debugging to reset user data
 
 	usersNextUserId_ = 0;		//first UID, default to 0 but get from database
 	usersUsernameWithLock_ = "";	//init to no user with lock
@@ -97,6 +97,7 @@ WebUsers::WebUsers()
 		__MOUT__ << "FATAL USER DATABASE ERROR - failed to load!!!" << std::endl;
 
 	loadSecuritySelection();
+	loadUserWithLock();
 
 	//print out admin new user code for ease of use
 	uint64_t i;
@@ -1643,6 +1644,9 @@ std::string WebUsers::getTooltipFilename(
 	std::string filename = (std::string)WEB_LOGIN_DB_PATH + TOOLTIP_DB_PATH + "/";
 
 	//make tooltip directory if not there
+	//	note: this is static so WebUsers constructor has not necessarily been called
+	mkdir(((std::string)WEB_LOGIN_DB_PATH).c_str(), 0755);
+	mkdir(((std::string)WEB_LOGIN_DB_PATH + USERS_DB_PATH).c_str(), 0755);
 	mkdir(filename.c_str(), 0755);
 
 	for(const char& c: username)
@@ -2019,6 +2023,22 @@ bool WebUsers::setUserWithLock(uint64_t uid_master, bool lock, std::string usern
 		usersUsernameWithLock_ = "";
 	else
 		return false;
+
+	//save username with lock
+	{
+		std::string securityFileName = USER_WITH_LOCK_FILE;
+		FILE *fp = fopen(securityFileName.c_str(),"w");
+		if(!fp)
+		{
+			__MOUT_INFO__ << "USER_WITH_LOCK_FILE " << USER_WITH_LOCK_FILE <<
+					" not found. Ignoring." << std::endl;
+		}
+		else
+		{
+			fprintf(fp,"%s",usersUsernameWithLock_.c_str());
+			fclose(fp);
+		}
+	}
 	return true;
 }
 
@@ -2126,6 +2146,39 @@ uint64_t WebUsers::getAdminUserID()
 	uint64_t uid = searchUsersDatabaseForUsername(DEFAULT_ADMIN_USERNAME);
 	return uid;
 }
+
+
+//========================================================================================================================
+//WebUsers::loadUserWithLock
+//	//load username with lock from file
+void WebUsers::loadUserWithLock()
+{
+	std::string securityFileName = USER_WITH_LOCK_FILE;
+	FILE *fp = fopen(securityFileName.c_str(),"r");
+	if(!fp)
+	{
+		__MOUT_INFO__ << "USER_WITH_LOCK_FILE " << USER_WITH_LOCK_FILE <<
+				" not found. Ignoring." << std::endl;
+		return;
+	}
+
+	char username[300] = ""; //assume username is less than 300 chars
+	fgets(username,300,fp);
+	username[299] = '\0'; //likely does nothing, but make sure there is closure on string
+	fclose(fp);
+
+	//attempt to set lock
+	__MOUT__ << "Attempting to load username with lock: " << username << std::endl;
+	uint64_t i = searchUsersDatabaseForUsername(username);
+	if(i == NOT_FOUND_IN_DATABASE)
+	{
+		__MOUT_INFO__ << "username " << username <<
+				" not found in database. Ignoring." << std::endl;
+		return;
+	}
+	setUserWithLock(UsersUserIdVector[i],true,username);
+}
+
 //========================================================================================================================
 //WebUsers::getSecurity
 //

@@ -17,7 +17,8 @@
 #define TOOLTIP_DB_PATH 				USERS_DB_PATH + "/TooltipData/"
 
 
-//TODO -- include IP address handling!?
+
+//TODO -- include IP address handling!? Note from RAR -- I think IP addresses are being recorded now upon login.
 
 namespace ots
 {
@@ -106,6 +107,7 @@ public:
 
 private:
     void			loadSecuritySelection       ();
+    void			loadUserWithLock			();
 	unsigned int 	hexByteStrToInt				(const char *h);
 	void 			intToHexStr					(uint8_t i, char *h);
 	std::string		sha512						(std::string user, std::string password, std::string &salt);
