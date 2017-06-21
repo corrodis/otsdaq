@@ -192,6 +192,7 @@ protected:
 		const ViewColumnInfo *columnInfo_;
 	};
 	std::vector<ConfigurationTree::RecordField>		getCommonFields(const std::vector<std::string /*relative-path*/> &recordList, const std::vector<std::string /*relative-path*/> &fieldFilterList, unsigned int depth = -1) const;
+	std::set<std::string /*unique-value*/>			getUniqueValuesForField(const std::vector<std::string /*relative-path*/> &recordList, const std::string &fieldName) const;
 
 
 public:

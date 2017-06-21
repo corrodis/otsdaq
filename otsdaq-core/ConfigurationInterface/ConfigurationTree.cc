@@ -931,6 +931,42 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 }
 
 //==============================================================================
+//getUniqueValuesForField
+//
+//	returns sorted unique values for the specified records and field
+//
+std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForField(
+		const std::vector<std::string /*relative-path*/> &recordList,
+		const std::string &fieldName) const
+{
+	//enforce that starting point is a table node
+	if(!isConfigurationNode())
+	{
+		__SS__ << "Can only get getCommonFields from a table node! " <<
+				"The node type is " << getNodeType() << std::endl;
+		__MOUT__ << "\n" << ss.str() << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+
+	std::set<std::string /*unique-value*/> uniqueValues;
+
+	//for each record in <record list>
+	//	emplace value at field into set
+	//
+	//return result
+
+	for(unsigned int i=0;i<recordList.size();++i)
+	{
+		__MOUT__ << "Checking " << recordList[i] << std::endl;
+
+		auto recordFieldNode = getNode(recordList[i]).getNode(fieldName);
+		uniqueValues.emplace(recordFieldNode.getValueAsString());
+	}
+
+	return uniqueValues;
+}
+
+//==============================================================================
 //recursiveGetCommonFields
 //	wrapper is ...getCommonFields
 void ConfigurationTree::recursiveGetCommonFields(
