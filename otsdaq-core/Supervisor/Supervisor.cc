@@ -9,6 +9,7 @@
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
 #include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
 #include <cgicc/HTMLClasses.h>
 #include <cgicc/HTTPCookie.h>
@@ -945,6 +946,10 @@ throw (toolbox::fsm::exception::Exception)
 	try
 	{
 		theConfigurationManager_->loadConfigurationGroup(theGroup.first, theGroup.second, true);
+
+		//When configured, set the translated System Alias to be persistently active
+		ConfigurationManagerRW tmpCfgMgr("TheSupervisor");
+		tmpCfgMgr.activateConfigurationGroup(theGroup.first, theGroup.second);
 	}
 	catch(...)
 	{
