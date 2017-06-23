@@ -489,6 +489,31 @@ ConfigurationTree ConfigurationTree::recurse(const ConfigurationTree& tree, cons
 }
 
 //==============================================================================
+//getRecordFieldValueAsString
+//
+//	This function throws error if not called on a record (uid node)
+//
+//Note: that ConfigurationTree maps both fields associated with a link
+//	to the same node instance.
+//The behavior is likely not expected as response for this function..
+//	so for links return actual value for field name specified
+//	i.e. if Table of link is requested give that; if linkID is requested give that.
+std::string ConfigurationTree::getRecordFieldValueAsString(std::string fieldName) const
+{
+	//enforce that starting point is a table node
+	if(!isUIDNode())
+	{
+		__SS__ << "Can only get getRecordFieldValueAsString from a uid node! " <<
+				"The node type is " << getNodeType() << std::endl;
+		__MOUT__ << "\n" << ss.str() << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+
+	unsigned int c = configView_->findCol(fieldName);
+	return configView_->getDataView()[row_][c];
+}
+
+//==============================================================================
 //getNode
 //	nodeString can be a multi-part path using / delimiter
 //	use:
@@ -959,8 +984,13 @@ std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForFiel
 	{
 		__MOUT__ << "Checking " << recordList[i] << std::endl;
 
-		auto recordFieldNode = getNode(recordList[i]).getNode(fieldName);
-		uniqueValues.emplace(recordFieldNode.getValueAsString());
+		//Note: that ConfigurationTree maps both fields associated with a link
+		//	to the same node instance.
+		//The behavior is likely not expected as response for this function..
+		//	so for links return actual value for field name specified
+		//	i.e. if Table of link is requested give that; if linkID is requested give that.
+
+		uniqueValues.emplace(getNode(recordList[i]).getRecordFieldValueAsString(fieldName));
 	}
 
 	return uniqueValues;

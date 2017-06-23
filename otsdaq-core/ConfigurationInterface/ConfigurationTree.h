@@ -226,6 +226,8 @@ private:
 
 	void						recursiveGetCommonFields(std::vector<ConfigurationTree::RecordField> &fieldCandidateList, std::vector<int> &fieldCount, const std::vector<std::string /*relative-path*/> &fieldFilterList, unsigned int depth, const std::string &relativePathBase, bool inFirstRecord) const;
 
+	std::string					getRecordFieldValueAsString(std::string fieldName) const;
+
 	//Any given ConfigurationTree is either a config, uid, or value node:
 	//	- config node is a pointer to a config table
 	//	- uid node is a pointer to a row in a config table
