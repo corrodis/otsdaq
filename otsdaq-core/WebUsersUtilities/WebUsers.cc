@@ -97,7 +97,7 @@ WebUsers::WebUsers()
 		__MOUT__ << "FATAL USER DATABASE ERROR - failed to load!!!" << std::endl;
 
 	loadSecuritySelection();
-	loadUserWithLock();
+
 
 	//print out admin new user code for ease of use
 	uint64_t i;
@@ -122,6 +122,9 @@ WebUsers::WebUsers()
 				tmpTimeStr,user).detach();
 
 	}
+
+	//default user with lock to admin
+	loadUserWithLock(); //and then try to load last user with lock
 
 	srand (time(0)); //seed random for hash salt generation
 
@@ -2153,22 +2156,34 @@ uint64_t WebUsers::getAdminUserID()
 //	//load username with lock from file
 void WebUsers::loadUserWithLock()
 {
+	char username[300] = ""; //assume username is less than 300 chars
+
 	std::string securityFileName = USER_WITH_LOCK_FILE;
 	FILE *fp = fopen(securityFileName.c_str(),"r");
 	if(!fp)
 	{
 		__MOUT_INFO__ << "USER_WITH_LOCK_FILE " << USER_WITH_LOCK_FILE <<
-				" not found. Ignoring." << std::endl;
-		return;
-	}
+				" not found. Defaulting to admin lock." << std::endl;
 
-	char username[300] = ""; //assume username is less than 300 chars
-	fgets(username,300,fp);
-	username[299] = '\0'; //likely does nothing, but make sure there is closure on string
-	fclose(fp);
+		//default to admin lock if no file exists
+		sprintf(username,"%s",DEFAULT_ADMIN_USERNAME.c_str());
+	}
+	else
+	{
+		fgets(username,300,fp);
+		username[299] = '\0'; //likely does nothing, but make sure there is closure on string
+		fclose(fp);
+	}
 
 	//attempt to set lock
 	__MOUT__ << "Attempting to load username with lock: " << username << std::endl;
+
+	if(strlen(username) == 0)
+	{
+		__MOUT_INFO__ << "Loaded state for user-with-lock is unlocked." << std::endl;
+		return;
+	}
+
 	uint64_t i = searchUsersDatabaseForUsername(username);
 	if(i == NOT_FOUND_IN_DATABASE)
 	{
