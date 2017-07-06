@@ -80,6 +80,11 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	//Some configuration plug-ins use getenv("SERVICE_DATA_PATH") in init() so define it
 	setenv("SERVICE_DATA_PATH",(std::string(getenv("USER_DATA")) + "/ServiceData").c_str(),1);
 
+	//Some configuration plug-ins use getenv("OTSDAQ_LIB") and getenv("OTSDAQ_UTILITIES_LIB") in init() so define it
+	//	to a non-sense place is ok
+	setenv("OTSDAQ_LIB",(std::string(getenv("USER_DATA")) + "/").c_str(),1);
+	setenv("OTSDAQ_UTILITIES_LIB",(std::string(getenv("USER_DATA")) + "/").c_str(),1);
+
 	//also xdaq envs for XDAQContextConfiguration
 	setenv("XDAQ_CONFIGURATION_DATA_PATH",(std::string(getenv("USER_DATA")) + "/XDAQConfigurations").c_str(),1);
 	setenv("XDAQ_CONFIGURATION_XML","otsConfigurationNoRU_CMake",1);
