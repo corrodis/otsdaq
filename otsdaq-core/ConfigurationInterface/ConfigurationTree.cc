@@ -918,11 +918,24 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 					//check field accept filter list
 					found = fieldAcceptList.size()?false:true; //accept if no filter list
 					for(const auto &fieldFilter : fieldAcceptList)
-						if(fieldNode.first == fieldFilter)
+						if(fieldFilter[0] == '*') //leading wildcard
 						{
-							found = true;
-							break;
+							if(fieldNode.first ==
+									fieldFilter.substr(1))
+							{
+								found = true;
+								break;
+							}
 						}
+						else //no leading wildcard
+						{
+							if(fieldNode.first == fieldFilter)
+							{
+								found = true;
+								break;
+							}
+						}
+
 
 					if(found)
 					{
@@ -930,11 +943,24 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 
 						found = true; //accept if no filter list
 						for(const auto &fieldFilter : fieldRejectList)
-							if(fieldNode.first == fieldFilter)
+							if(fieldFilter[0] == '*') //leading wildcard
 							{
-								found = false; //reject if match
-								break;
+								if(fieldNode.first ==
+										fieldFilter.substr(1))
+								{
+									found = false; //reject if match
+									break;
+								}
 							}
+							else //no leading wildcard
+							{
+								if(fieldNode.first == fieldFilter)
+								{
+									found = false; //reject if match
+									break;
+								}
+							}
+
 					}
 
 					//if found, guaranteed field (all these fields must be common for UIDs in same table)
@@ -1101,11 +1127,23 @@ void ConfigurationTree::recursiveGetCommonFields(
 				//check field accept filter list
 				found = fieldAcceptList.size()?false:true; //accept if no filter list
 				for(const auto &fieldFilter : fieldAcceptList)
-					if((relativePathBase + fieldNode.first) ==
-							fieldFilter)
+					if(fieldFilter[0] == '*') //leading wildcard
 					{
-						found = true;
-						break;
+						if(fieldNode.first ==
+								fieldFilter.substr(1))
+						{
+							found = true;
+							break;
+						}
+					}
+					else //no leading wildcard
+					{
+						if((relativePathBase + fieldNode.first) ==
+							fieldFilter)
+						{
+							found = true;
+							break;
+						}
 					}
 
 				if(found)
@@ -1114,11 +1152,23 @@ void ConfigurationTree::recursiveGetCommonFields(
 
 					found = true; //accept if no filter list
 					for(const auto &fieldFilter : fieldRejectList)
-						if((relativePathBase + fieldNode.first) ==
-								fieldFilter)
+						if(fieldFilter[0] == '*') //leading wildcard
 						{
-							found = false; //reject if match
-							break;
+							if(fieldNode.first ==
+									fieldFilter.substr(1))
+							{
+								found = false; //reject if match
+								break;
+							}
+						}
+						else //no leading wildcard
+						{
+							if((relativePathBase + fieldNode.first) ==
+									fieldFilter)
+							{
+								found = false; //reject if match
+								break;
+							}
 						}
 				}
 
