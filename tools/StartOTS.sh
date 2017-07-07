@@ -550,17 +550,19 @@ printMainURL() {
 		exit
 	fi
 	
+	echo
+	echo
+	echo "Open the URL below in your Google Chrome or Mozilla Firefox web browser:"
+	#if [ $QUIET == 0 ]; then
+		sleep 3
+	#fi
+	
+
 	#launch chrome here if enabled
 	if [ $CHROME == 1 ]; then
 		google-chrome $MAIN_URL &
 	fi
-	
-	echo
-	echo
-	echo "Open the URL below in your Google Chrome or Mozilla Firefox web browser:"
-	if [ $QUIET == 0 ]; then
-		sleep 3
-	fi
+
 	
 	for i in {1..5}
 	do
