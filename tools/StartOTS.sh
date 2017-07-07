@@ -7,7 +7,7 @@ echo
 ISCONFIG=0
 QUIET=1
 CHROME=0
-DONOTNILL=0
+DONOTKILL=0
 
 #check for wiz mode
 if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then
@@ -30,7 +30,7 @@ fi
 
 if [[ "$1"  == "--donotkill" || "$2"  == "--donotkill" || "$1"  == "-d" || "$2"  == "-d"  ]]; then
     echo "*************   DO-NOT-KILL ENABLED!    ************"
-	DONOTNILL=1
+	DONOTKILL=1
 fi
 
 #############################
@@ -67,7 +67,7 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	exit
 fi
 
-if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $DONOTNILL == 0 && "$1x" != "x" ]]; then
+if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $DONOTKILL == 0 && "$1x" != "x" ]]; then
 	echo 
 	echo "Unrecognized paramater $1"
 	echo
