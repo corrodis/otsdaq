@@ -6,6 +6,7 @@ echo
 
 ISCONFIG=0
 QUIET=1
+CHROME=0
 
 #check for wiz mode
 if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then
@@ -19,6 +20,11 @@ fi
 if [[ "$1"  == "--verbose" || "$2"  == "--verbose" || "$1"  == "-v" || "$2"  == "-v"  ]]; then
     echo "*************   VERBOSE MODE ENABLED!    ************"
 	QUIET=0
+fi
+
+if [[ "$1"  == "--chrome" || "$2"  == "--chrome" || "$1"  == "-c" || "$2"  == "-c"  ]]; then
+    echo "*************   GOOGLE-CHROME LAUNCH ENABLED!    ************"
+	CHROME=1
 fi
 
 #############################
@@ -55,7 +61,7 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	exit
 fi
 
-if [[ $ISCONFIG == 0 && $QUIET == 1 && "$1x" != "x" ]]; then
+if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && "$1x" != "x" ]]; then
 	echo 
 	echo "Unrecognized paramater $1"
 	echo
@@ -70,6 +76,10 @@ if [[ $ISCONFIG == 0 && $QUIET == 1 && "$1x" != "x" ]]; then
 	echo "To start otsdaq with 'verbose mode' enabled, add one of these options:"
 	echo "	--verbose  -v"
 	echo "	e.g.: StartOTS.sh --wiz -v     or    StartOTS.sh --verbose"
+	echo
+	echo "To start otsdaq and launch google-chrome, add one of these options:"
+	echo "	--chrome  -c"
+	echo "	e.g.: StartOTS.sh --wiz -c     or    StartOTS.sh --chrome"
 	echo
 	echo "To kill all otsdaq running processes, please use any of these options:"
 	echo "	--killall  --kill  --kx  -k"
@@ -227,6 +237,8 @@ launchOTSWiz() {
 
 	if [ "x$OTS_WIZ_MODE_MAIN_PORT" != "x" ]; then
 	  MAIN_PORT=${OTS_WIZ_MODE_MAIN_PORT}
+	elif [ "x$OTS_MAIN_PORT" != "x" ]; then
+	  MAIN_PORT=${OTS_MAIN_PORT}
 	elif [ $USER == rrivera ]; then
 	  MAIN_PORT=1983
 	elif [ $USER == lukhanin ]; then
@@ -525,6 +537,11 @@ printMainURL() {
 	OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
 	if [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
 		exit
+	fi
+	
+	#launch chrome here if enabled
+	if [ $CHROME == 1 ]; then
+		google-chrome $MAIN_URL &
 	fi
 	
 	echo

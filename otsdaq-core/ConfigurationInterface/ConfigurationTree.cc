@@ -831,14 +831,17 @@ bool ConfigurationTree::isUIDNode(void) const
 //
 //	Field := {Table, UID, Column Name, Relative Path, ViewColumnInfo}
 //
-//	if fieldFilterList not empty, then rejects any that are not in field filter list
+//	if fieldAcceptList or fieldRejectList are not empty,
+//		then reject any that are not in field accept filter list
+//		and reject any that are in field reject filter list
 //
 //	will only go to specified depth looking for fields
 //		(careful to prevent infinite loops in tree navigation)
 //
 std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		const std::vector<std::string /*uid*/> &recordList,
-		const std::vector<std::string /*relative-path*/> &fieldFilterList,
+		const std::vector<std::string /*relative-path*/> &fieldAcceptList,
+		const std::vector<std::string /*relative-path*/> &fieldRejectList,
 		unsigned int depth) const
 {
 	//enforce that starting point is a table node
@@ -912,14 +915,27 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 				//__MOUT__ << "isValueNode " << fieldNode.first << std::endl;
 				if(!i) //first uid record
 				{
-					//check field filter list
-					found = fieldFilterList.size()?false:true; //accept if no filter list
-					for(const auto &fieldFilter : fieldFilterList)
+					//check field accept filter list
+					found = fieldAcceptList.size()?false:true; //accept if no filter list
+					for(const auto &fieldFilter : fieldAcceptList)
 						if(fieldNode.first == fieldFilter)
 						{
 							found = true;
 							break;
 						}
+
+					if(found)
+					{
+						//check field reject filter list
+
+						found = true; //accept if no filter list
+						for(const auto &fieldFilter : fieldRejectList)
+							if(fieldNode.first == fieldFilter)
+							{
+								found = false; //reject if match
+								break;
+							}
+					}
 
 					//if found, guaranteed field (all these fields must be common for UIDs in same table)
 					if(found)
@@ -946,7 +962,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 				fieldNode.second.recursiveGetCommonFields(
 						fieldCandidateList,
 						fieldCount,
-						fieldFilterList,
+						fieldAcceptList,
+						fieldRejectList,
 						depth,
 						fieldNode.first + "/", //relativePathBase
 						!i	//launch inFirstRecord (or not) depth search
@@ -1032,7 +1049,8 @@ std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForFiel
 void ConfigurationTree::recursiveGetCommonFields(
 		std::vector<ConfigurationTree::RecordField> &fieldCandidateList,
 		std::vector<int> &fieldCount,
-		const std::vector<std::string /*relative-path*/> &fieldFilterList,
+		const std::vector<std::string /*relative-path*/> &fieldAcceptList,
+		const std::vector<std::string /*relative-path*/> &fieldRejectList,
 		unsigned int depth,
 		const std::string &relativePathBase,
 		bool inFirstRecord
@@ -1080,15 +1098,29 @@ void ConfigurationTree::recursiveGetCommonFields(
 			//__MOUT__ << "isValueNode " << fieldNode.first << std::endl;
 			if(inFirstRecord) //first uid record
 			{
-				//check field filter list
-				found = fieldFilterList.size()?false:true; //accept if no filter list
-				for(const auto &fieldFilter : fieldFilterList)
+				//check field accept filter list
+				found = fieldAcceptList.size()?false:true; //accept if no filter list
+				for(const auto &fieldFilter : fieldAcceptList)
 					if((relativePathBase + fieldNode.first) ==
 							fieldFilter)
 					{
 						found = true;
 						break;
 					}
+
+				if(found)
+				{
+					//check field reject filter list
+
+					found = true; //accept if no filter list
+					for(const auto &fieldFilter : fieldRejectList)
+						if((relativePathBase + fieldNode.first) ==
+								fieldFilter)
+						{
+							found = false; //reject if match
+							break;
+						}
+				}
 
 				//if found, new field (since this is first record)
 				if(found)
@@ -1133,7 +1165,8 @@ void ConfigurationTree::recursiveGetCommonFields(
 			fieldNode.second.recursiveGetCommonFields(
 					fieldCandidateList,
 					fieldCount,
-					fieldFilterList,
+					fieldAcceptList,
+					fieldRejectList,
 					depth,
 					(relativePathBase + fieldNode.first) + "/", //relativePathBase
 					inFirstRecord	//continue inFirstRecord (or not) depth search
@@ -1151,7 +1184,7 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 {
 	std::vector<std::pair<std::string,ConfigurationTree> > retMap;
 
-	__MOUT__ << "Children of node: " << getValueAsString() << std::endl;
+	//__MOUT__ << "Children of node: " << getValueAsString() << std::endl;
 
 	bool filtering = filterMap.size();
 	bool skip;
@@ -1160,7 +1193,7 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 	std::vector<std::string> childrenNames = getChildrenNames();
 	for(auto &childName : childrenNames)
 	{
-	  __MOUT__ << "\tChild: " << childName << std::endl;
+		//__MOUT__ << "\tChild: " << childName << std::endl;
 
 		if(filtering)
 		{
@@ -1221,7 +1254,7 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 				this->getNode(childName, true)));
 	}
 
-	__MOUT__ << "Done w/Children of node: " << getValueAsString() << std::endl;
+	//__MOUT__ << "Done w/Children of node: " << getValueAsString() << std::endl;
 	return retMap;
 }
 

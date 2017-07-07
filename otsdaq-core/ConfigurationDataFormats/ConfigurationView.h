@@ -111,7 +111,11 @@ public:
 					theDataView_[row][col];
 
 			if(!isNumber(data))
-				throw std::runtime_error(data + " is not a number!");
+			{
+				__SS__ << (data + " is not a number!") << std::endl;
+				__MOUT__ << "\n" << ss.str();
+				throw std::runtime_error(ss.str());
+			}
 
 			if(typeid(double) == typeid(value))
 				value = strtod(data.c_str(),0);

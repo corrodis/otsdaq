@@ -251,7 +251,6 @@ void ConfigurationView::init(void)
 			throw std::runtime_error(ss.str());
 		}
 
-
 		//check that any TYPE_UNIQUE_DATA columns are really unique (no repeats)
 		colPos = (unsigned int)-1;
 		while((colPos = findColByType(ViewColumnInfo::TYPE_UNIQUE_DATA,colPos+1)) != INVALID)
@@ -1233,16 +1232,19 @@ void ConfigurationView::print (std::ostream &out) const
 		for(int c=0;c<(int)getNumberOfColumns();++c)
 		{
 			out << c << ":";
-			if(columnsInfo_[c].getDataType() == "NUMBER")
-			{
-				getValue(num,r,c,false);
-				out << num;
-			}
-			else
-			{
-				getValue(val,r,c,false);
-				out << val;
-			}
+			out << theDataView_[r][c];
+			//stopped using below, because it is called sometimes during debugging when
+			//	numbers are set to environment variables:
+			//			if(columnsInfo_[c].getDataType() == "NUMBER")
+			//			{
+			//				getValue(num,r,c,false);
+			//				out << num;
+			//			}
+			//			else
+			//			{
+			//				getValue(val,r,c,false);
+			//				out << val;
+			//			}
 			out << "\t\t";
 		}
 		out << std::endl;
@@ -2044,7 +2046,7 @@ throw(std::runtime_error)
 		return -1;
 	}
 
-	//print();
+	//print(); //for debugging
 
 	//setup sourceColumnNames_ to be correct
 	sourceColumnNames_.clear();
@@ -2053,9 +2055,10 @@ throw(std::runtime_error)
 
 	init(); //verify new table (throws runtime_errors)
 
-	__SS__ << "\n";
-	print(ss);
-	__MOUT__ << "\n" << ss.str() << std::endl;
+	//printout for debugging
+	//	__SS__ << "\n";
+	//	print(ss);
+	//	__MOUT__ << "\n" << ss.str() << std::endl;
 
 	return 0;
 }

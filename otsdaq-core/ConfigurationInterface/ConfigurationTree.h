@@ -191,7 +191,7 @@ protected:
 
 		const ViewColumnInfo *columnInfo_;
 	};
-	std::vector<ConfigurationTree::RecordField>		getCommonFields(const std::vector<std::string /*relative-path*/> &recordList, const std::vector<std::string /*relative-path*/> &fieldFilterList, unsigned int depth = -1) const;
+	std::vector<ConfigurationTree::RecordField>		getCommonFields(const std::vector<std::string /*relative-path*/> &recordList, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth = -1) const;
 	std::set<std::string /*unique-value*/>			getUniqueValuesForField(const std::vector<std::string /*relative-path*/> &recordList, const std::string &fieldName) const;
 
 
@@ -224,7 +224,7 @@ private:
 	static ConfigurationTree	recurse		  (const ConfigurationTree& t, const std::string& childPath);
 	static void 				recursivePrint(const ConfigurationTree& t, unsigned int depth, std::ostream &out, std::string space);
 
-	void						recursiveGetCommonFields(std::vector<ConfigurationTree::RecordField> &fieldCandidateList, std::vector<int> &fieldCount, const std::vector<std::string /*relative-path*/> &fieldFilterList, unsigned int depth, const std::string &relativePathBase, bool inFirstRecord) const;
+	void						recursiveGetCommonFields(std::vector<ConfigurationTree::RecordField> &fieldCandidateList, std::vector<int> &fieldCount, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth, const std::string &relativePathBase, bool inFirstRecord) const;
 
 	//std::string					getRecordFieldValueAsString(std::string fieldName) const;
 
