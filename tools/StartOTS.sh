@@ -7,6 +7,7 @@ echo
 ISCONFIG=0
 QUIET=1
 CHROME=0
+DONOTNILL=0
 
 #check for wiz mode
 if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then
@@ -25,6 +26,11 @@ fi
 if [[ "$1"  == "--chrome" || "$2"  == "--chrome" || "$1"  == "-c" || "$2"  == "-c"  ]]; then
     echo "*************   GOOGLE-CHROME LAUNCH ENABLED!    ************"
 	CHROME=1
+fi
+
+if [[ "$1"  == "--donotkill" || "$2"  == "--donotkill" || "$1"  == "-d" || "$2"  == "-d"  ]]; then
+    echo "*************   DO-NOT-KILL ENABLED!    ************"
+	DONOTNILL=1
 fi
 
 #############################
@@ -61,7 +67,7 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	exit
 fi
 
-if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && "$1x" != "x" ]]; then
+if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $DONOTNILL == 0 && "$1x" != "x" ]]; then
 	echo 
 	echo "Unrecognized paramater $1"
 	echo
@@ -80,6 +86,10 @@ if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && "$1x" != "x" ]]; then
 	echo "To start otsdaq and launch google-chrome, add one of these options:"
 	echo "	--chrome  -c"
 	echo "	e.g.: StartOTS.sh --wiz -c     or    StartOTS.sh --chrome"
+	echo
+	echo "To start otsdaq and launch google-chrome, add one of these options:"
+	echo "	--donotkill  -d"
+	echo "	e.g.: StartOTS.sh --wiz -d     or    StartOTS.sh --donotkill"
 	echo
 	echo "To kill all otsdaq running processes, please use any of these options:"
 	echo "	--killall  --kill  --kx  -k"
@@ -200,17 +210,18 @@ fi
 export XDAQ_CONFIGURATION_XML=otsConfigurationNoRU_CMake #-> 
 ##############################################################################
 
-#kill all things otsdaq, before launching new things
-echo
-echo "Killing all existing otsdaq Applications..."
-killall -9 mpirun
-killall -9 xdaq.exe
-killall -9 mf_rcv_n_fwd #message viewer display without decoration
+if [ $DONOTKILL == 0 ]; then
+	#kill all things otsdaq, before launching new things
+	echo
+	echo "Killing all existing otsdaq Applications..."
+	killall -9 mpirun
+	killall -9 xdaq.exe
+	killall -9 mf_rcv_n_fwd #message viewer display without decoration
 
 
-#give time for killall
-sleep 1
-
+	#give time for killall
+	sleep 1
+fi
 
 
 
