@@ -110,7 +110,7 @@ fi
  #Can be File, Database, DatabaseTest
 export CONFIGURATION_TYPE=File
 
-# Setup environment when building with MRB (As there's no setupARTDAQOTS file)
+# Setup environment when building with MRB
 if [ "x$MRB_BUILDDIR" != "x" ] && [ -e $OTSDAQ_DEMO_DIR/CMakeLists.txt ]; then
   export OTSDAQDEMO_BUILD=${MRB_BUILDDIR}/otsdaq_demo
   export OTSDAQ_DEMO_LIB=${MRB_BUILDDIR}/otsdaq_demo/lib
