@@ -142,11 +142,11 @@ fi
 #setup web path as XDAQ is setup.. 
 #then make a link to user specified web path.
 WEB_PATH=${OTSDAQ_UTILITIES_DIR}/WebGUI
-echo "WEB_PATH=$WEB_PATH"
-echo "USER_WEB_PATH=$USER_WEB_PATH"
-echo "Making symbolic link to USER_WEB_PATH"
-echo "ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
-ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath
+#echo "WEB_PATH=$WEB_PATH"
+#echo "USER_WEB_PATH=$USER_WEB_PATH"
+#echo "Making symbolic link to USER_WEB_PATH"
+#echo "ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
+ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath &>/dev/null #hide output
 
 
 if [ "x$USER_DATA" == "x" ]; then
@@ -553,16 +553,9 @@ printMainURL() {
 	echo
 	echo
 	echo "Open the URL below in your Google Chrome or Mozilla Firefox web browser:"
-	#if [ $QUIET == 0 ]; then
+	if [ $QUIET == 0 ]; then
 		sleep 3
-	#fi
-	
-
-	#launch chrome here if enabled
-	if [ $CHROME == 1 ]; then
-		google-chrome $MAIN_URL &
 	fi
-
 	
 	for i in {1..5}
 	do
@@ -696,5 +689,9 @@ otsActionHandler &
 printMainURL &
 sleep 1 #so that the terminal comes back after the printouts in quiet mode
 
-
+#launch chrome here if enabled
+if [ $CHROME == 1 ]; then
+	sleep 3 #give time for server to be live
+	google-chrome $MAIN_URL &
+fi
 
