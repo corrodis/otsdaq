@@ -311,8 +311,8 @@ void ConfigurationView::init(void)
 					}
 					if(!found)
 					{
-						__SS__ << "Configuration Error:\t" << theDataView_[row][col] << " in column " <<
-								columnsInfo_[col].getName() << " is not a valid Fixed Choice option." <<
+						__SS__ << "Configuration Error:\t'" << theDataView_[row][col] << "' in column " <<
+								columnsInfo_[col].getName() << " is not a valid Fixed Choice option. " <<
 								"Possible values are as follows: ";
 
 						for(unsigned int i = 0; i < columnsInfo_[col].getDataChoices().size(); ++i)

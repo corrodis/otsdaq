@@ -75,7 +75,7 @@ public:
 	std::map<std::string, ConfigurationVersion >                          loadConfigurationGroup		  (const std::string &configGroupName, ConfigurationGroupKey configGroupKey, bool doActivate=false, ProgressBar* progressBar=0, std::string *accumulateWarnings=0, std::string *groupComment=0, std::string	*groupAuthor=0,	std::string *groupCreateTime=0, bool doNotLoadMember=false);
 	void										                          loadMemberMap					  (const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
 	ConfigurationGroupKey							                      loadConfigurationBackbone       (void);
-	void											                      restoreActiveConfigurationGroups(void);
+	void											                      restoreActiveConfigurationGroups(bool throwErrors=false);
 	int																	  getTypeOfGroup				  (const std::string &configGroupName, ConfigurationGroupKey configGroupKey, const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
 	const std::string&													  convertGroupTypeIdToName		  (int groupTypeId);
 
