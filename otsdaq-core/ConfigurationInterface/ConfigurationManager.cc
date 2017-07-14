@@ -147,7 +147,7 @@ void ConfigurationManager::init(void)
 //		the same configurationGroups surviving software system restarts
 void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 {
-	destroy(); //reset everything
+	destroyConfigurationGroup("",true); //deactivate all
 
 	std::string fn = ACTIVE_GROUP_FILENAME;
 	FILE *fp = fopen(fn.c_str(),"r");
@@ -162,6 +162,7 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 	char strVal[500];
 
 	std::string groupName;
+	std::string errorStr = "";
 
 	for(int i=0;i<3;++i)
 	{
@@ -177,22 +178,27 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 		}
 		catch(std::runtime_error &e)
 		{
-			__MOUT_INFO__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
+			__SS__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
 					groupName << "_v" << strVal << "'" << std::endl;
-			__MOUT_INFO__ << e.what() << std::endl;
+			ss << e.what() << std::endl;
 
-			if(throwErrors)	{fclose(fp);throw;}
+			__MOUT_INFO__ << "\n" << ss.str();
+			errorStr += ss.str();
 		}
 		catch(...)
 		{
-			__MOUT_INFO__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
+			__SS__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
 					groupName << "_v" << strVal << "'" << std::endl;
 
-			if(throwErrors)	{fclose(fp);throw;}
+			__MOUT_INFO__ << "\n" << ss.str();
+			errorStr += ss.str();
 		}
 	}
 
 	fclose(fp);
+
+	if(throwErrors)
+		throw std::runtime_error(errorStr);
 }
 
 //==============================================================================
@@ -741,117 +747,112 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 			__MOUT__ << "groupToDeactivate '" << groupToDeactivate << "'" << std::endl;
 			destroyConfigurationGroup(groupToDeactivate,true);
 		}
+//		else
+//		{
+//			//Getting here, is kind of strange:
+//			//	- this group may have only been partially loaded before
+//			//Solution: destroy en by targeting member map
+//
+//		}
 	}
 
 	if(progressBar) progressBar->step();
 
 	__MOUT__ << "Activating chosen group:" << std::endl;
 
-	try //catch errors and destroy (partial) activated group if error
+
+	loadMemberMap(memberMap);
+
+	if(progressBar) progressBar->step();
+
+	if(accumulatedTreeErrors)
 	{
-		loadMemberMap(memberMap);
+		__MOUT__ << "Checking chosen group for tree errors..." << std::endl;
 
-		if(progressBar) progressBar->step();
-
-		if(accumulatedTreeErrors)
+		getChildren(&memberMap, accumulatedTreeErrors);
+		if(*accumulatedTreeErrors != "")
 		{
-			__MOUT__ << "Checking chosen group for tree errors..." << std::endl;
-
-			getChildren(&memberMap, accumulatedTreeErrors);
-			if(*accumulatedTreeErrors != "")
-			{
-				__MOUT_ERR__ << "Errors detected while loading Configuration Group: " << configGroupName <<
-						"(" << configGroupKey << "). Aborting." << std::endl;
-				return memberMap; //return member name map to version
-			}
-		}
-
-		if(progressBar) progressBar->step();
-
-		//	for each member
-		//		if doActivate, configBase->init()
-		if(doActivate)
-			for(auto &memberPair:memberMap)
-			{
-				//do NOT allow activating Scratch versions if tracking is ON!
-				if(ConfigurationInterface::isVersionTrackingEnabled() &&
-						memberPair.second.isScratchVersion())
-				{
-					__SS__ << "Error while activating member Table '" <<
-							nameToConfigurationMap_[memberPair.first]->getConfigurationName() <<
-							"-v" << memberPair.second <<
-							" for Configuration Group '" << configGroupName <<
-							"(" << configGroupKey << ")'. When version tracking is enabled, Scratch views" <<
-							" are not allowed! Please only use unique, persistent versions when version tracking is enabled."
-							<< std::endl;
-					__MOUT_ERR__ << "\n" << ss.str();
-					throw std::runtime_error(ss.str());
-				}
-
-
-				//attempt to init using the configuration's specific init
-				//	this could be risky user code, try and catch
-				try
-				{
-					nameToConfigurationMap_[memberPair.first]->init(this);
-				}
-				catch(std::runtime_error& e)
-				{
-					__SS__ << "Error detected calling " <<
-							nameToConfigurationMap_[memberPair.first]->getConfigurationName() <<
-							".init()!\n\n " << e.what() << std::endl;
-					throw std::runtime_error(ss.str());
-				}
-				catch(...)
-				{
-					__SS__ << "Error detected calling " <<
-							nameToConfigurationMap_[memberPair.first]->getConfigurationName() <<
-							".init()!\n\n " << std::endl;
-					throw std::runtime_error(ss.str());
-				}
-
-			}
-
-		if(progressBar) progressBar->step();
-
-
-		//	if doActivate
-		//		set theConfigurationGroup_, theContextGroup_, or theBackboneGroup_ on success
-
-		if(doActivate)
-		{
-			if(groupType == CONTEXT_TYPE) //
-			{
-				__MOUT_INFO__ << "Context Configuration Group loaded: " << configGroupName <<
-						"(" << configGroupKey << ")" << std::endl;
-				theContextGroup_ = configGroupName;
-				theContextGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
-			}
-			else if(groupType == BACKBONE_TYPE)
-			{
-				__MOUT_INFO__ << "Backbone Configuration Group loaded: " << configGroupName <<
-						"(" << configGroupKey << ")" << std::endl;
-				theBackboneGroup_ = configGroupName;
-				theBackboneGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
-			}
-			else //is theConfigurationGroup_
-			{
-				__MOUT_INFO__ << "The Configuration Group loaded: " << configGroupName <<
-						"(" << configGroupKey << ")" << std::endl;
-				theConfigurationGroup_ = configGroupName;
-				theConfigurationGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
-			}
+			__MOUT_ERR__ << "Errors detected while loading Configuration Group: " << configGroupName <<
+					"(" << configGroupKey << "). Aborting." << std::endl;
+			return memberMap; //return member name map to version
 		}
 	}
-	catch(...)
-	{
-		//catch errors and attempt to destroy (partial) activated group if error
-		try
+
+	if(progressBar) progressBar->step();
+
+	//	for each member
+	//		if doActivate, configBase->init()
+	if(doActivate)
+		for(auto &memberPair:memberMap)
 		{
-			destroyConfigurationGroup(configGroupName);
+			//do NOT allow activating Scratch versions if tracking is ON!
+			if(ConfigurationInterface::isVersionTrackingEnabled() &&
+					memberPair.second.isScratchVersion())
+			{
+				__SS__ << "Error while activating member Table '" <<
+						nameToConfigurationMap_[memberPair.first]->getConfigurationName() <<
+						"-v" << memberPair.second <<
+						" for Configuration Group '" << configGroupName <<
+						"(" << configGroupKey << ")'. When version tracking is enabled, Scratch views" <<
+						" are not allowed! Please only use unique, persistent versions when version tracking is enabled."
+						<< std::endl;
+				__MOUT_ERR__ << "\n" << ss.str();
+				throw std::runtime_error(ss.str());
+			}
+
+
+			//attempt to init using the configuration's specific init
+			//	this could be risky user code, try and catch
+			try
+			{
+				nameToConfigurationMap_[memberPair.first]->init(this);
+			}
+			catch(std::runtime_error& e)
+			{
+				__SS__ << "Error detected calling " <<
+						nameToConfigurationMap_[memberPair.first]->getConfigurationName() <<
+						".init()!\n\n " << e.what() << std::endl;
+				throw std::runtime_error(ss.str());
+			}
+			catch(...)
+			{
+				__SS__ << "Error detected calling " <<
+						nameToConfigurationMap_[memberPair.first]->getConfigurationName() <<
+						".init()!\n\n " << std::endl;
+				throw std::runtime_error(ss.str());
+			}
+
 		}
-		catch(...){} //ignore any errors, since may be a partial target
-		throw;
+
+	if(progressBar) progressBar->step();
+
+
+	//	if doActivate
+	//		set theConfigurationGroup_, theContextGroup_, or theBackboneGroup_ on success
+
+	if(doActivate)
+	{
+		if(groupType == CONTEXT_TYPE) //
+		{
+			__MOUT_INFO__ << "Context Configuration Group loaded: " << configGroupName <<
+					"(" << configGroupKey << ")" << std::endl;
+			theContextGroup_ = configGroupName;
+			theContextGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
+		}
+		else if(groupType == BACKBONE_TYPE)
+		{
+			__MOUT_INFO__ << "Backbone Configuration Group loaded: " << configGroupName <<
+					"(" << configGroupKey << ")" << std::endl;
+			theBackboneGroup_ = configGroupName;
+			theBackboneGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
+		}
+		else //is theConfigurationGroup_
+		{
+			__MOUT_INFO__ << "The Configuration Group loaded: " << configGroupName <<
+					"(" << configGroupKey << ")" << std::endl;
+			theConfigurationGroup_ = configGroupName;
+			theConfigurationGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
+		}
 	}
 
 	if(progressBar) progressBar->step();
