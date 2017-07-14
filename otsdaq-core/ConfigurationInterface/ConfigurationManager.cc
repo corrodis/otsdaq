@@ -197,7 +197,7 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 
 	fclose(fp);
 
-	if(throwErrors)
+	if(throwErrors && errorStr != "")
 		throw std::runtime_error(errorStr);
 }
 
