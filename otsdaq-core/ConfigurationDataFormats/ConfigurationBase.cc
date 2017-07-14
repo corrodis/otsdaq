@@ -405,7 +405,7 @@ const ConfigurationView& ConfigurationBase::getView(void) const
 {
 	if(!activeConfigurationView_)
 	{
-		__SS__ << "activeConfigurationView_ pointer is null! (likely active configuration was not setup properly.)";
+		__SS__ << "activeConfigurationView_ pointer is null! (...likely the active view was not setup properly. Check your system setup.)";
 		throw std::runtime_error(ss.str());
 	}
 	return *activeConfigurationView_;
@@ -416,7 +416,7 @@ ConfigurationView* ConfigurationBase::getViewP(void)
 {
 	if(!activeConfigurationView_)
 	{
-		__SS__ << "activeConfigurationView_ pointer is null! (likely active configuration was not setup properly.)";
+		__SS__ << "activeConfigurationView_ pointer is null! (...likely the active view was not setup properly. Check your system setup.)";
 		throw std::runtime_error(ss.str());
 	}
 	return activeConfigurationView_;

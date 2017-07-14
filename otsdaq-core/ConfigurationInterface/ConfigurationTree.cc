@@ -927,6 +927,16 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 								break;
 							}
 						}
+						else if(fieldFilter.size() &&
+								fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
+						{
+							if(fieldNode.first.substr(0,fieldFilter.size()-1) ==
+									fieldFilter.substr(0,fieldFilter.size()-1))
+							{
+								found = true;
+								break;
+							}
+						}
 						else //no leading wildcard
 						{
 							if(fieldNode.first == fieldFilter)
@@ -947,6 +957,16 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 							{
 								if(fieldNode.first ==
 										fieldFilter.substr(1))
+								{
+									found = false; //reject if match
+									break;
+								}
+							}
+							else if(fieldFilter.size() &&
+									fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
+							{
+								if(fieldNode.first.substr(0,fieldFilter.size()-1) ==
+										fieldFilter.substr(0,fieldFilter.size()-1))
 								{
 									found = false; //reject if match
 									break;
@@ -1136,6 +1156,17 @@ void ConfigurationTree::recursiveGetCommonFields(
 							break;
 						}
 					}
+					else if(fieldFilter.size() &&
+							fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
+					{
+						if((relativePathBase + fieldNode.first).substr(
+								0,fieldFilter.size()-1) ==
+								fieldFilter.substr(0,fieldFilter.size()-1))
+						{
+							found = true;
+							break;
+						}
+					}
 					else //no leading wildcard
 					{
 						if((relativePathBase + fieldNode.first) ==
@@ -1156,6 +1187,17 @@ void ConfigurationTree::recursiveGetCommonFields(
 						{
 							if(fieldNode.first ==
 									fieldFilter.substr(1))
+							{
+								found = false; //reject if match
+								break;
+							}
+						}
+						else if(fieldFilter.size() &&
+								fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
+						{
+							if((relativePathBase + fieldNode.first).substr(
+									0,fieldFilter.size()-1) ==
+									fieldFilter.substr(0,fieldFilter.size()-1))
 							{
 								found = false; //reject if match
 								break;
