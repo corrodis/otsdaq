@@ -51,7 +51,7 @@ public:
 	ConfigurationManager			();
 	virtual ~ConfigurationManager	(void);
 
-	void init                		(void);
+	void init                		(std::string *accumulatedErrors = 0);
 	void destroy             		(void);
 	void destroyConfigurationGroup	(const std::string &theGroup = "", bool onlyDeactivate = false);
 

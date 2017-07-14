@@ -131,13 +131,28 @@ ConfigurationManager::~ConfigurationManager()
 }
 
 //==============================================================================
-void ConfigurationManager::init(void)
+//init
+//	if accumulatedErrors is not null.. fill it with errors
+//	else throw errors (but do not ask restoreActiveConfigurationGroups to throw errors)
+void ConfigurationManager::init(std::string *accumulatedErrors)
 {
+	if(accumulatedErrors) *accumulatedErrors = "";
+
 	//destroy();
 
 	// once Interface is false (using artdaq db) .. then can call
 	if(theInterface_->getMode() == false)
-		restoreActiveConfigurationGroups();
+	{
+		try
+		{
+			restoreActiveConfigurationGroups(accumulatedErrors?true:false);
+		}
+		catch(std::runtime_error &e)
+		{
+			if(accumulatedErrors) *accumulatedErrors = e.what();
+			else throw;
+		}
+	}
 }
 
 //==============================================================================

@@ -213,7 +213,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 	__MOUT__ << "Extracting list of Configuration tables complete" << std::endl;
 
 	//call init to load active versions by default
-	init();
+	init(accumulatedErrors);
 
 	return allConfigurationInfo_;
 }
