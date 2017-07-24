@@ -301,7 +301,16 @@ void ConfigurationView::init(void)
 					//check against default value first
 					if(theDataView_[row][col] == rowDefaults[col])
 						continue; //default is always ok
-					for(const auto &choice:columnsInfo_[col].getDataChoices())
+
+					const std::vector<std::string>& theDataChoices =
+							columnsInfo_[col].getDataChoices();
+
+					//check if arbitrary values allowed
+					if(theDataChoices.size() && theDataChoices[0] ==
+							"arbitraryBool=1")
+						continue; //arbitrary values allowed
+
+					for(const auto &choice:theDataChoices)
 					{
 						if(theDataView_[row][col] == choice)
 						{
