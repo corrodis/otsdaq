@@ -8,20 +8,9 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationTree.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationVersion.h"
 
-#include <memory>
-
-#include <cxxabi.h> //for getting type name using typeid and GCC
-
-
-
 namespace ots {
 
-///////////////////////////////////////////////////
-//class RegisterBase;
-class DACStream;
-//class DACsConfigurationBase;
 class ProgressBar;
-///////////////////////////////////////////////////
 
 #define __GET_CONFIG__(X)  getConfiguration<X>(QUOTE(X))
 
@@ -77,6 +66,7 @@ public:
 	ConfigurationGroupKey							                      loadConfigurationBackbone       (void);
 	void											                      restoreActiveConfigurationGroups(bool throwErrors=false);
 	int																	  getTypeOfGroup				  (const std::string &configGroupName, ConfigurationGroupKey configGroupKey, const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
+	const std::string&													  getTypeNameOfGroup   		      (const std::string &configGroupName, ConfigurationGroupKey configGroupKey, const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
 	const std::string&													  convertGroupTypeIdToName		  (int groupTypeId);
 
 	//==============================================================================
@@ -104,8 +94,6 @@ public:
 	const std::set<std::string>&					                      getBackboneMemberNames		(void) const {return backboneMemberNames_;}
 
 	static std::string													  encodeURIComponent(const std::string &sourceStr);
-	//const DACStream&                               	getDACStream                   	(std::string fecName);
-	//ConfigurationVersion                           	getConfigurationBackboneVersion	(void);
 
 	//==============================================================================
 	//Setters/Modifiers
@@ -125,10 +113,6 @@ private:
 	const std::set<std::string>	                   	backboneMemberNames_;  //list of backbone members
 
 	ConfigurationBase								groupMetadataTable_; //special table - version saved each time a group is created
-
-	//std::map<std::string, DACStream>              	theDACStreams_;
-	//	std::map<std::string, DACsConfigurationBase*> 	theDACsConfigurations_;
-	//	RegisterBase*                                 	registerBase_;
 
 };
 }

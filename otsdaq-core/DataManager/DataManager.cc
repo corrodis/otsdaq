@@ -96,7 +96,7 @@ void DataManager::configure(void)
 			{
 //				__MOUT__ << theConfigurationPath_ << std::endl;
 //				__MOUT__ << buffer.first << std::endl;
-//				__MOUT__ << producer << std::endl;
+				__MOUT__ << bufferConfigurationList[producerLocation].first << std::endl;
 //				__MOUT__ << bufferConfigurationMap[producer].getNode("ProcessorPluginName").getValue<std::string>() << std::endl;
 //				__MOUT__ << bufferConfigurationMap[producer].getNode("LinkToProcessorConfiguration") << std::endl;
 //				__MOUT__ << "THIS DATA MANAGER POINTER: " << this << std::endl;
@@ -111,15 +111,16 @@ void DataManager::configure(void)
 								, theXDAQContextConfigTree_
 								, theConfigurationPath_ + "/LinkToDataManagerConfiguration/" + buffer.first + "/LinkToDataBufferConfiguration/" + bufferConfigurationList[producerLocation].first + "/LinkToProcessorConfiguration"
 						))));
+				__MOUT__ << bufferConfigurationList[producerLocation].first << " has been created!" << std::endl;
 			}
 			for(auto& consumerLocation: consumersVectorLocation)
 			{
 //				__MOUT__ << theConfigurationPath_ << std::endl;
 //				__MOUT__ << buffer.first << std::endl;
-//				__MOUT__ << consumer << std::endl;
+				__MOUT__ << bufferConfigurationList[consumerLocation].first << std::endl;
 //				__MOUT__ << bufferConfigurationMap[consumer].getNode("ProcessorPluginName").getValue<std::string>() << std::endl;
 //				__MOUT__ << bufferConfigurationMap[consumer].getNode("LinkToProcessorConfiguration") << std::endl;
-				__MOUT__ << theXDAQContextConfigTree_.getBackNode(theConfigurationPath_) << std::endl;
+//				__MOUT__ << theXDAQContextConfigTree_.getBackNode(theConfigurationPath_) << std::endl;
 //				__MOUT__ << "THIS DATA MANAGER POINTER: " << this << std::endl;
 //				__MOUT__ << "PASSED" << std::endl;
 				buffers_[buffer.first].consumers_.push_back( std::shared_ptr<DataConsumer>(dynamic_cast<DataConsumer*>(
@@ -132,6 +133,7 @@ void DataManager::configure(void)
 								, theXDAQContextConfigTree_
 								, theConfigurationPath_ + "/LinkToDataManagerConfiguration/" + buffer.first + "/LinkToDataBufferConfiguration/" + bufferConfigurationList[consumerLocation].first + "/LinkToProcessorConfiguration"
 						))));
+				__MOUT__ << bufferConfigurationList[consumerLocation].first << " has been created!" << std::endl;
 			}
 		}
 		//__MOUT__ << "Interface Name: "<< interface.first << std::endl;

@@ -186,6 +186,10 @@ export LOGBOOK_DATA_PATH=${USER_DATA}/ServiceData/LogbookData
 export PROGRESS_BAR_DATA_PATH=${USER_DATA}/ServiceData/ProgressBarData
 export ROOT_DISPLAY_CONFIG_PATH=${USER_DATA}/RootDisplayConfigData
 
+if [ "x$OTSDAQ_DATA" == "x" ];then
+	export OTSDAQ_DATA=/tmp
+fi
+
 if [ "x$ROOT_BROWSER_PATH" == "x" ];then
 	export ROOT_BROWSER_PATH=${OTSDAQ_DEMO_DIR}
 fi
