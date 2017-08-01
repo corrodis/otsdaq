@@ -3,6 +3,7 @@
 
 #include "xgi/Method.h" 								//for cgicc::Cgicc
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h" 	//for xdaq::ApplicationDescriptor
+#include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h" //for ConfigurationGroupKey
 
 #include <string>
 #include <iostream>
@@ -49,11 +50,12 @@ public:
 			uint64_t 						*activeSessionIndex = 0);
 
 
-	std::string		getActiveUserList					(const xdaq::ApplicationDescriptor* supervisorDescriptor);
-	void			sendSystemMessage					(const xdaq::ApplicationDescriptor* supervisorDescriptor,	const std::string& toUser, const std::string& msg);
-	void			makeSystemLogbookEntry			      (const xdaq::ApplicationDescriptor* supervisorDescriptor,	const std::string& entryText);
+	std::string															getActiveUserList					(const xdaq::ApplicationDescriptor* supervisorDescriptor);
+	void																sendSystemMessage					(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &toUser, const std::string& msg);
+	void																makeSystemLogbookEntry			   	(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &entryText);
+	std::pair<std::string /*group name*/, ConfigurationGroupKey>		getLastConfigGroup					(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &actionOfLastGroup, std::string &actionTimeString); //actionOfLastGroup = "Configured" or "Started", for example
 
-	bool			isWizardMode						(const SupervisorDescriptorInfo& theSupervisorsDescriptorInfo);
+	bool																isWizardMode						(const SupervisorDescriptorInfo& theSupervisorsDescriptorInfo);
 
 private:
 	bool			cookieCodeIsActiveForRequest(

@@ -7,7 +7,6 @@
 #include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
 
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
 #include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
@@ -30,12 +29,12 @@
 using namespace ots;
 
 
-#define ICON_FILE_NAME 					std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
-#define RUN_NUMBER_PATH		 			std::string(getenv("SERVICE_DATA_PATH")) + "/RunNumber/"
-#define RUN_NUMBER_FILE_NAME 			"NextRunNumber.txt"
-#define FSM_LAST_GROUP_ALIAS_PATH		std::string(getenv("SERVICE_DATA_PATH")) + "/RunControlData/"
-#define FSM_LAST_GROUP_ALIAS_FILE_START	std::string("FSMLastGroupAlias-")
-#define FSM_USERS_PREFERENCES_FILETYPE	"pref"
+#define ICON_FILE_NAME 							std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
+#define RUN_NUMBER_PATH		 					std::string(getenv("SERVICE_DATA_PATH")) + "/RunNumber/"
+#define RUN_NUMBER_FILE_NAME 					"NextRunNumber.txt"
+#define FSM_LAST_GROUP_ALIAS_PATH				std::string(getenv("SERVICE_DATA_PATH")) + "/RunControlData/"
+#define FSM_LAST_GROUP_ALIAS_FILE_START			std::string("FSMLastGroupAlias-")
+#define FSM_USERS_PREFERENCES_FILETYPE			"pref"
 
 
 #undef 	__MF_SUBJECT__
@@ -79,11 +78,12 @@ Supervisor::Supervisor(xdaq::ApplicationStub * s) throw (xdaq::exception::Except
 	xgi::bind(this, &Supervisor::infoRequestResultHandler, "InfoRequestResultHandler");
 	xgi::bind(this, &Supervisor::tooltipRequest,           "TooltipRequest");
 
-	xoap::bind(this, &Supervisor::supervisorCookieCheck,        "SupervisorCookieCheck",        XDAQ_NS_URI);
-	xoap::bind(this, &Supervisor::supervisorGetActiveUsers,     "SupervisorGetActiveUsers",     XDAQ_NS_URI);
-	xoap::bind(this, &Supervisor::supervisorSystemMessage,      "SupervisorSystemMessage",      XDAQ_NS_URI);
-	xoap::bind(this, &Supervisor::supervisorGetUserInfo,        "SupervisorGetUserInfo",        XDAQ_NS_URI);
-	xoap::bind(this, &Supervisor::supervisorSystemLogbookEntry, "SupervisorSystemLogbookEntry", XDAQ_NS_URI);
+	xoap::bind(this, &Supervisor::supervisorCookieCheck,        	"SupervisorCookieCheck",        	XDAQ_NS_URI);
+	xoap::bind(this, &Supervisor::supervisorGetActiveUsers,     	"SupervisorGetActiveUsers",     	XDAQ_NS_URI);
+	xoap::bind(this, &Supervisor::supervisorSystemMessage,      	"SupervisorSystemMessage",      	XDAQ_NS_URI);
+	xoap::bind(this, &Supervisor::supervisorGetUserInfo,        	"SupervisorGetUserInfo",        	XDAQ_NS_URI);
+	xoap::bind(this, &Supervisor::supervisorSystemLogbookEntry, 	"SupervisorSystemLogbookEntry", 	XDAQ_NS_URI);
+	xoap::bind(this, &Supervisor::supervisorLastConfigGroupRequest, "SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
 
 
 	//old:
@@ -913,10 +913,9 @@ throw (toolbox::fsm::exception::Exception)
 	theProgressBar_.step();
 
 	//Translate the system alias to a group name/key
-	std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup;
 	try
 	{
-		theGroup = theConfigurationManager_->getConfigurationGroupFromAlias(systemAlias);
+		theConfigurationGroup_ = theConfigurationManager_->getConfigurationGroupFromAlias(systemAlias);
 	}
 	catch(...)
 	{
@@ -925,7 +924,7 @@ throw (toolbox::fsm::exception::Exception)
 
 	theProgressBar_.step();
 
-	if(theGroup.second.isInvalid())
+	if(theConfigurationGroup_.second.isInvalid())
 	{
 		__SS__ << "\nTransition to Configuring interrupted! System Alias " <<
 				systemAlias << " could not be translated to a group name and key." << std::endl;
@@ -937,25 +936,33 @@ throw (toolbox::fsm::exception::Exception)
 
 	theProgressBar_.step();
 
-	__MOUT__ << "Configuration group name: " << theGroup.first << " key: " <<
-			theGroup.second << std::endl;
+	__MOUT__ << "Configuration group name: " << theConfigurationGroup_.first << " key: " <<
+			theConfigurationGroup_.second << std::endl;
+
+	//make logbook entry
+	{
+		std::stringstream ss;
+		ss << "Configuring '" << systemAlias << "' which translates to " <<
+				theConfigurationGroup_.first << " (" << theConfigurationGroup_.second << ").";
+		makeSystemLogbookEntry(ss.str());
+	}
 
 	theProgressBar_.step();
 
 	//load and activate
 	try
 	{
-		theConfigurationManager_->loadConfigurationGroup(theGroup.first, theGroup.second, true);
+		theConfigurationManager_->loadConfigurationGroup(theConfigurationGroup_.first, theConfigurationGroup_.second, true);
 
 		//When configured, set the translated System Alias to be persistently active
 		ConfigurationManagerRW tmpCfgMgr("TheSupervisor");
-		tmpCfgMgr.activateConfigurationGroup(theGroup.first, theGroup.second);
+		tmpCfgMgr.activateConfigurationGroup(theConfigurationGroup_.first, theConfigurationGroup_.second);
 	}
 	catch(...)
 	{
 		__SS__ << "\nTransition to Configuring interrupted! System Alias " <<
-				systemAlias << " was translated to " << theGroup.first <<
-				" (" << theGroup.second << ") but could not be loaded and initialized." << std::endl;
+				systemAlias << " was translated to " << theConfigurationGroup_.first <<
+				" (" << theConfigurationGroup_.second << ") but could not be loaded and initialized." << std::endl;
 		ss << "\n\nTo debug this problem, try activating this group in the Configuration GUI " <<
 				" and detailed errors will be shown." << std::endl;
 		__MOUT_ERR__ << "\n" << ss.str();
@@ -1014,8 +1021,8 @@ throw (toolbox::fsm::exception::Exception)
 
 	theProgressBar_.step();
 	SOAPParameters parameters;
-	parameters.addParameter("ConfigurationGroupName", theGroup.first);
-	parameters.addParameter("ConfigurationGroupKey", theGroup.second.toString());
+	parameters.addParameter("ConfigurationGroupName", theConfigurationGroup_.first);
+	parameters.addParameter("ConfigurationGroupKey", theConfigurationGroup_.second.toString());
 
 	//xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand(), parameters);
 	xoap::MessageReference message = theStateMachine_.getCurrentMessage();
@@ -1024,6 +1031,10 @@ throw (toolbox::fsm::exception::Exception)
 	theProgressBar_.step();
 	// Advertise the exiting of this method
 	//diagService_->reportError("Supervisor::stateConfiguring: Exiting",DIAGINFO);
+
+	//save last configured group name/key
+	saveGroupNameAndKey(theConfigurationGroup_,FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
+
 	__MOUT__ << "Done" << std::endl;
 	theProgressBar_.complete();
 }
@@ -1145,6 +1156,9 @@ throw (toolbox::fsm::exception::Exception)
 	makeSystemLogbookEntry("Run " + runNumber + " starting.");
 
 	broadcastMessage(theStateMachine_.getCurrentMessage());
+
+	//save last started group name/key
+	saveGroupNameAndKey(theConfigurationGroup_,FSM_LAST_STARTED_GROUP_ALIAS_FILE);
 }
 
 //========================================================================================================================
@@ -2376,6 +2390,61 @@ throw (xoap::exception::Exception)
 	return SOAPUtilities::makeSOAPMessageReference("SystemLogbookResponse");
 }
 
+//===================================================================================================================
+//supervisorLastConfigGroupRequest
+//	return the group name and key for the last state machine activity
+//
+//	Note: same as OtsConfigurationWizardSupervisor::supervisorLastConfigGroupRequest
+xoap::MessageReference Supervisor::supervisorLastConfigGroupRequest(
+		xoap::MessageReference message)
+throw (xoap::exception::Exception)
+{
+	SOAPParameters parameters;
+	parameters.addParameter("ActionOfLastGroup");
+	receive(message, parameters);
+
+	return Supervisor::lastConfigGroupRequestHandler(parameters);
+}
+
+//===================================================================================================================
+//xoap::lastConfigGroupRequestHandler
+//	handles last config group request.
+//	called by both:
+//		Supervisor::supervisorLastConfigGroupRequest
+//		OtsConfigurationWizardSupervisor::supervisorLastConfigGroupRequest
+xoap::MessageReference Supervisor::lastConfigGroupRequestHandler(
+		const SOAPParameters &parameters)
+{
+	std::string action = parameters.getValue("ActionOfLastGroup");
+	__MOUT__ << "ActionOfLastGroup: " << action.substr(
+			0, 10) << std::endl;
+
+	std::string fileName = "";
+	if(action == "Configured")
+		fileName = FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE;
+	else if(action == "Started")
+		fileName = FSM_LAST_STARTED_GROUP_ALIAS_FILE;
+	else
+	{
+		__MOUT_ERR__ << "Invalid last group action requested." << std::endl;
+		return SOAPUtilities::makeSOAPMessageReference("LastConfigGroupResponseFailure");
+	}
+	std::string timeString;
+	std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup =
+			loadGroupNameAndKey(fileName,timeString);
+
+	//fill return parameters
+	SOAPParameters retParameters;
+	retParameters.addParameter("GroupName", theGroup.first);
+	retParameters.addParameter("GroupKey", theGroup.second.toString());
+	retParameters.addParameter("GroupAction", action);
+	retParameters.addParameter("GroupActionTime", timeString);
+
+
+	return SOAPUtilities::makeSOAPMessageReference("LastConfigGroupResponse",
+			retParameters);
+}
+
 //========================================================================================================================
 //getNextRunNumber
 //
@@ -2445,6 +2514,81 @@ bool Supervisor::setNextRunNumber(unsigned int runNumber, const std::string &fsm
 	runNumberFile.close();
 	return true;
 }
+
+//========================================================================================================================
+//loadGroupNameAndKey
+//	loads group name and key (and time) from specified file
+//	returns time string in returnedTimeString
+//
+//	Note: this is static so the OtsConfigurationWizardSupervisor can call it
+std::pair<std::string /*group name*/,
+		ConfigurationGroupKey> Supervisor::loadGroupNameAndKey(const std::string &fileName,
+				std::string &returnedTimeString)
+{
+	std::string fullPath = FSM_LAST_GROUP_ALIAS_PATH + "/" + fileName;
+
+	FILE *groupFile = fopen(fullPath.c_str(),"r");
+	if (!groupFile)
+	{
+		__MOUT__ << "Can't open file: " << fullPath << std::endl;
+
+		__MOUT__ << "Returning empty groupName and key -1" << std::endl;
+
+		return std::pair<std::string /*group name*/,
+				ConfigurationGroupKey>("",ConfigurationGroupKey());
+	}
+
+	char line[500]; //assuming no group names longer than 500 chars
+	//name and then key
+	std::pair<std::string /*group name*/,
+			ConfigurationGroupKey> theGroup;
+
+	fgets(line,500,groupFile); //name
+	theGroup.first = line;
+
+	fgets(line,500,groupFile); //key
+	int key;
+	sscanf(line,"%d",&key);
+	theGroup.second = key;
+
+	fgets(line,500,groupFile); //time
+	time_t timestamp;
+	sscanf(line,"%ld",&timestamp); //type long int
+	struct tm tmstruct;
+	::localtime_r(&timestamp, &tmstruct);
+	::strftime(line, 30, "%c %Z", &tmstruct);
+	returnedTimeString = line;
+	fclose(groupFile);
+
+
+	__MOUT__ << "theGroup.first= " << theGroup.first <<
+			" theGroup.second= " << theGroup.second << std::endl;
+
+	return theGroup;
+}
+
+//========================================================================================================================
+void Supervisor::saveGroupNameAndKey(const std::pair<std::string /*group name*/,
+		ConfigurationGroupKey> &theGroup,
+		const std::string &fileName)
+{
+	std::string fullPath = FSM_LAST_GROUP_ALIAS_PATH + "/" + fileName;
+
+	std::ofstream groupFile(fullPath.c_str());
+	if (!groupFile.is_open())
+	{
+		__SS__ << "Can't open file: " << fullPath << std::endl;
+		__MOUT_ERR__ << "\n" << ss.str();
+		throw std::runtime_error("Error.\n" + ss.str());
+	}
+	std::stringstream outss;
+	outss << theGroup.first << "\n" << theGroup.second << "\n" << time(0);
+	groupFile << outss.str().c_str();
+	groupFile.close();
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 

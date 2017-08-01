@@ -8,6 +8,7 @@
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq-core/Supervisor/SupervisorsInfo.h"
 #include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
+#include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -21,6 +22,10 @@
 #include <string>
 #include <set>
 
+//defines used also by OtsConfigurationWizardSupervisor
+#define FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE	std::string("FSMLastConfiguredGroupAlias.hist")
+#define FSM_LAST_STARTED_GROUP_ALIAS_FILE		std::string("FSMLastStartedGroupAlias.hist")
+
 
 namespace ots
 {
@@ -31,6 +36,8 @@ class WorkLoopManager;
 
 class Supervisor: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
+	friend class OtsConfigurationWizardSupervisor;
+
 public:
 
     XDAQ_INSTANTIATOR();
@@ -65,6 +72,7 @@ public:
     xoap::MessageReference 		supervisorSystemMessage		 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
     xoap::MessageReference 		supervisorGetUserInfo 		 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
     xoap::MessageReference 		supervisorSystemLogbookEntry 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
+    xoap::MessageReference 		supervisorLastConfigGroupRequest(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
 
     //Finite State Machine States
     void stateInitial    		(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
@@ -90,9 +98,13 @@ public:
    // void simpleFunction () { std::cout << __COUT_HDR_FL__ << "hi\n" << std::endl;}
 
 private:
-    unsigned int getNextRunNumber(const std::string &fsmName = "");
-    bool         setNextRunNumber(unsigned int runNumber, const std::string &fsmName = "");
-    bool         broadcastMessage(xoap::MessageReference msg);
+    unsigned int 														getNextRunNumber(const std::string &fsmName = "");
+    bool         														setNextRunNumber(unsigned int runNumber, const std::string &fsmName = "");
+    static std::pair<std::string /*group name*/, ConfigurationGroupKey>	loadGroupNameAndKey(const std::string &fileName, std::string &returnedTimeString);
+    void																saveGroupNameAndKey(const std::pair<std::string /*group name*/,	ConfigurationGroupKey> &theGroup, const std::string &fileName);
+    static xoap::MessageReference 										lastConfigGroupRequestHandler(const SOAPParameters &parameters);
+
+    bool         														broadcastMessage(xoap::MessageReference msg);
 
     bool								supervisorGuiHasBeenLoaded_	; //use to indicate first access by user of ots since execution
 
@@ -114,6 +126,7 @@ private:
 
     std::string							activeStateMachineName_; //when multiple state machines, this is the name of the state machine which executed the configure transition
     std::string							activeStateMachineWindowName_;
+    std::pair<std::string /*group name*/, ConfigurationGroupKey> theConfigurationGroup_; //used to track the active configuration group at states after the configure state
 
     //Trash tests
     void wait(int milliseconds, std::string who="") const;
