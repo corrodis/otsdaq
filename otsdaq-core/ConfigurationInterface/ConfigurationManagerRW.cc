@@ -213,7 +213,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 	__MOUT__ << "Extracting list of Configuration tables complete" << std::endl;
 
 	//call init to load active versions by default
-	init();
+	init(accumulatedErrors);
 
 	return allConfigurationInfo_;
 }
@@ -496,7 +496,7 @@ void ConfigurationManagerRW::eraseTemporaryVersion(const std::string &configurat
 }
 
 //==============================================================================
-//eraseCachedVersions
+//clearCachedVersions
 //	clear ALL cached persistent versions (does not erase temporary versions)
 //
 //	maintains allConfigurationInfo_ also while erasing (trivial, do nothing)
@@ -505,6 +505,17 @@ void ConfigurationManagerRW::clearCachedVersions(const std::string &configuratio
 	ConfigurationBase* config = getConfigurationByName(configurationName);
 
 	config->trimCache(0);
+}
+
+//==============================================================================
+//clearAllCachedVersions
+//	clear ALL cached persistent versions (does not erase temporary versions)
+//
+//	maintains allConfigurationInfo_ also while erasing (trivial, do nothing)
+void ConfigurationManagerRW::clearAllCachedVersions()
+{
+	for(auto configInfo: allConfigurationInfo_)
+		configInfo.second.configurationPtr_->trimCache(0);
 }
 
 //==============================================================================

@@ -63,6 +63,7 @@ public:
 	ConfigurationVersion								copyViewToCurrentColumns				(const std::string &configurationName, ConfigurationVersion sourceVersion);
 	void												eraseTemporaryVersion					(const std::string &configurationName, ConfigurationVersion targetVersion = ConfigurationVersion());
 	void												clearCachedVersions						(const std::string &configurationName);
+	void												clearAllCachedVersions					();
 
 	//==============================================================================
 	//modifiers of configuration groups

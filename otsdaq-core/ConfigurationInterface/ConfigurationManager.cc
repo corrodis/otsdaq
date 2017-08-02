@@ -1,10 +1,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"//All configurable objects are included here
-//#include "otsdaq-core/ConfigurationInterface/DACStream.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
 #include "otsdaq-core/ProgressBar/ProgressBar.h"
-
-//#include "otsdaq-core/ConfigurationInterface/FileConfigurationInterface.h"
 
 #include <fstream>      // std::ofstream
 
@@ -27,8 +24,8 @@ const std::string ConfigurationManager::SCRATCH_VERSION_ALIAS = "Scratch";
 #define CORE_TABLE_INFO_FILENAME ((getenv("SERVICE_DATA_PATH") == NULL)?(std::string(getenv("USER_DATA"))+"/ServiceData"):(std::string(getenv("SERVICE_DATA_PATH")))) + "/CoreTableInfoNames.dat"
 
 
-const std::string ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT = "Context";
-const std::string ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE = "Backbone";
+const std::string ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT       = "Context";
+const std::string ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE      = "Backbone";
 const std::string ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION = "Configuration";
 
 
@@ -131,13 +128,28 @@ ConfigurationManager::~ConfigurationManager()
 }
 
 //==============================================================================
-void ConfigurationManager::init(void)
+//init
+//	if accumulatedErrors is not null.. fill it with errors
+//	else throw errors (but do not ask restoreActiveConfigurationGroups to throw errors)
+void ConfigurationManager::init(std::string *accumulatedErrors)
 {
+	if(accumulatedErrors) *accumulatedErrors = "";
+
 	//destroy();
 
 	// once Interface is false (using artdaq db) .. then can call
 	if(theInterface_->getMode() == false)
-		restoreActiveConfigurationGroups();
+	{
+		try
+		{
+			restoreActiveConfigurationGroups(accumulatedErrors?true:false);
+		}
+		catch(std::runtime_error &e)
+		{
+			if(accumulatedErrors) *accumulatedErrors = e.what();
+			else throw;
+		}
+	}
 }
 
 //==============================================================================
@@ -145,8 +157,10 @@ void ConfigurationManager::init(void)
 //	load the active groups from file
 //	Note: this should be used by the Supervisor to maintain
 //		the same configurationGroups surviving software system restarts
-void ConfigurationManager::restoreActiveConfigurationGroups(void)
+void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 {
+	destroyConfigurationGroup("",true); //deactivate all
+
 	std::string fn = ACTIVE_GROUP_FILENAME;
 	FILE *fp = fopen(fn.c_str(),"r");
 
@@ -154,11 +168,13 @@ void ConfigurationManager::restoreActiveConfigurationGroups(void)
 
 	if(!fp) return;
 
+	__MOUT__ << "throwErrors: " << throwErrors << std::endl;
 
 	char tmp[500];
 	char strVal[500];
 
 	std::string groupName;
+	std::string errorStr = "";
 
 	for(int i=0;i<3;++i)
 	{
@@ -174,19 +190,27 @@ void ConfigurationManager::restoreActiveConfigurationGroups(void)
 		}
 		catch(std::runtime_error &e)
 		{
-			__MOUT_INFO__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
+			__SS__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
 					groupName << "_v" << strVal << "'" << std::endl;
-			__MOUT_INFO__ << e.what() << std::endl;
+			ss << e.what() << std::endl;
+
+			__MOUT_INFO__ << "\n" << ss.str();
+			errorStr += ss.str();
 		}
 		catch(...)
 		{
-			__MOUT_INFO__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
+			__SS__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
 					groupName << "_v" << strVal << "'" << std::endl;
+
+			__MOUT_INFO__ << "\n" << ss.str();
+			errorStr += ss.str();
 		}
 	}
 
 	fclose(fp);
 
+	if(throwErrors && errorStr != "")
+		throw std::runtime_error(errorStr);
 }
 
 //==============================================================================
@@ -194,8 +218,7 @@ void ConfigurationManager::restoreActiveConfigurationGroups(void)
 //	destroy all if theGroup == ""
 //	else destroy that group
 // 	if onlyDeactivate, then don't delete, just deactivate view
-void ConfigurationManager::destroyConfigurationGroup(const std::string& theGroup,
-		bool onlyDeactivate)
+void ConfigurationManager::destroyConfigurationGroup(const std::string& theGroup, bool onlyDeactivate)
 {
 	//delete
 	bool isContext       = theGroup == "" || theGroup == theContextGroup_;
@@ -222,11 +245,11 @@ void ConfigurationManager::destroyConfigurationGroup(const std::string& theGroup
 	{
 		contextFindIt = contextMemberNames_.find(it->first);
 		backboneFindIt = backboneMemberNames_.find(it->first);
-		if( 	(isContext  && contextFindIt != contextMemberNames_.end()) ||
+		if(theGroup == "" || ( 	(isContext  && contextFindIt != contextMemberNames_.end()) ||
 				(isBackbone && backboneFindIt != backboneMemberNames_.end()) ||
 				(!isContext && !isBackbone &&
 						contextFindIt == contextMemberNames_.end() &&
-						backboneFindIt == backboneMemberNames_.end()))
+						backboneFindIt == backboneMemberNames_.end())))
 		{
 			//__MOUT__ << "\t" << it->first << std::endl;
 			//if(it->second->isActive())
@@ -423,6 +446,19 @@ int ConfigurationManager::getTypeOfGroup(
 	return isContext?CONTEXT_TYPE:(isBackbone?BACKBONE_TYPE:CONFIGURATION_TYPE);
 }
 
+//==============================================================================
+//getTypeNameOfGroup
+//	return
+//		0 for context
+//		1 for backbone
+//		2 for configuration (others)
+const std::string& ConfigurationManager::getTypeNameOfGroup(
+		const std::string &configGroupName,
+		ConfigurationGroupKey configGroupKey,
+		const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap)
+{
+	return convertGroupTypeIdToName(getTypeOfGroup(configGroupName, configGroupKey, memberMap));
+}
 //==============================================================================
 //loadMemberMap
 //	loads tables given by name/version pairs in memberMap
@@ -735,11 +771,20 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 			__MOUT__ << "groupToDeactivate '" << groupToDeactivate << "'" << std::endl;
 			destroyConfigurationGroup(groupToDeactivate,true);
 		}
+//		else
+//		{
+//			//Getting here, is kind of strange:
+//			//	- this group may have only been partially loaded before
+//			//Solution: destroy en by targeting member map
+//
+//		}
 	}
 
 	if(progressBar) progressBar->step();
 
 	__MOUT__ << "Activating chosen group:" << std::endl;
+
+
 	loadMemberMap(memberMap);
 
 	if(progressBar) progressBar->step();

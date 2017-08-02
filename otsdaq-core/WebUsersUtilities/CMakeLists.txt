@@ -5,6 +5,7 @@ cet_make(LIBRARY_NAME WebUsersUtilities
 		 SOAPUtilities
 		 XmlUtilities
 		 CgiDataUtilities
+		 ConfigurationDataFormats
 		 SupervisorDescriptorInfo
 )
 

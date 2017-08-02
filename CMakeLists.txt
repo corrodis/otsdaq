@@ -22,6 +22,7 @@ set(CMAKE_MODULE_PATH
         $ENV{ART_DIR}/Modules
         $ENV{CETBUILDTOOLS_DIR}/Modules
         $ENV{XDAQ_DIR}/Modules
+        $ENV{ARTDAQ_UTILITIES_DIR}/Modules
         ${CMAKE_MODULE_PATH})
 message(STATUS "CMAKE_MODULE_PATH is ${CMAKE_MODULE_PATH}")
 
@@ -89,6 +90,9 @@ add_subdirectory(tools)
 # tools
 FILE(COPY tools DESTINATION .)
 INSTALL(DIRECTORY tools DESTINATION ${product}/${version})
+
+# Documentation
+add_subdirectory(doc)
 
 # test programs
 add_subdirectory(test)

@@ -1,5 +1,0 @@
-<ModuleToFE Version="1.0">
-  <DetectorElement Name="FPix_BmI_D1_BLD1_PNL1_PLQ1_ROC0" FEW="0" FER="0"></DetectorElement>
-  <DetectorElement Name="FPix_BmI_D1_BLD1_PNL1_PLQ1_ROC*" FEW="0" FER="0"></DetectorElement>
-  <DetectorElement Name="FPix_BmI_D1_BLD1_PNL*" FEW="0" FER="0"></DetectorElement>
-</ModuleToFE>

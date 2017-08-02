@@ -158,7 +158,7 @@ public:
 	void									getValue			        (std::string& value) const;
 	std::string								getValue			        (void) const;
 	std::string								getEscapedValue		        (void) const;
-	const std::string&						getValueAsString	        (void) const;
+	const std::string&						getValueAsString	        (bool returnLinkTableValue=false) const;
 	const std::string&						getUIDAsString		        (void) const;
 	const std::string&						getValueDataType	        (void) const;
 	const std::string&						getValueType	        	(void) const;
@@ -191,7 +191,8 @@ protected:
 
 		const ViewColumnInfo *columnInfo_;
 	};
-	std::vector<ConfigurationTree::RecordField>		getCommonFields(const std::vector<std::string /*relative-path*/> &recordList, const std::vector<std::string /*relative-path*/> &fieldFilterList, unsigned int depth = -1) const;
+	std::vector<ConfigurationTree::RecordField>		getCommonFields(const std::vector<std::string /*relative-path*/> &recordList, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth = -1) const;
+	std::set<std::string /*unique-value*/>			getUniqueValuesForField(const std::vector<std::string /*relative-path*/> &recordList, const std::string &fieldName) const;
 
 
 public:
@@ -218,12 +219,14 @@ public:
 	}
 private:
 	//privately ONLY allow full access to member variables through constructor
-	ConfigurationTree(const ConfigurationManager* const& configMgr, const ConfigurationBase* const& config, const std::string& groupId, const std::string &linkColName, const std::string& disconnectedTargetName, const std::string& disconnectedLinkID, const std::string &childLinkIndex, const unsigned int row  = ConfigurationView::INVALID, const unsigned int col = ConfigurationView::INVALID);
+	ConfigurationTree(const ConfigurationManager* const& configMgr, const ConfigurationBase* const& config, const std::string& groupId, const std::string &linkColName, const std::string &linkColValue, const std::string& disconnectedTargetName, const std::string& disconnectedLinkID, const std::string &childLinkIndex, const unsigned int row  = ConfigurationView::INVALID, const unsigned int col = ConfigurationView::INVALID);
 
 	static ConfigurationTree	recurse		  (const ConfigurationTree& t, const std::string& childPath);
 	static void 				recursivePrint(const ConfigurationTree& t, unsigned int depth, std::ostream &out, std::string space);
 
-	void						recursiveGetCommonFields(std::vector<ConfigurationTree::RecordField> &fieldCandidateList, std::vector<int> &fieldCount, const std::vector<std::string /*relative-path*/> &fieldFilterList, unsigned int depth, const std::string &relativePathBase, bool inFirstRecord) const;
+	void						recursiveGetCommonFields(std::vector<ConfigurationTree::RecordField> &fieldCandidateList, std::vector<int> &fieldCount, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth, const std::string &relativePathBase, bool inFirstRecord) const;
+
+	//std::string					getRecordFieldValueAsString(std::string fieldName) const;
 
 	//Any given ConfigurationTree is either a config, uid, or value node:
 	//	- config node is a pointer to a config table
@@ -234,7 +237,8 @@ private:
 	const ConfigurationManager* configMgr_;
 	const ConfigurationBase* 	configuration_; //config node
 	const std::string			groupId_;		//group config node
-	const std::string			linkColName_;	//link node
+	const std::string			linkColName_;	//link node field name
+	const std::string			linkColValue_;	//link node field value
 	const std::string			disconnectedTargetName_;	//only used if disconnected to determine target table name
 	const std::string			disconnectedLinkID_;	//only used if disconnected to determine target link ID
 	const std::string			childLinkIndex_;//child link index

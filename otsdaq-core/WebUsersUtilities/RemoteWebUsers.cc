@@ -122,7 +122,7 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 
 	//const_cast away the const
-	//	so that this line is compatible with slf6 and slf7 versionss of xdaq
+	//	so that this line is compatible with slf6 and slf7 versions of xdaq
 	//	where they changed to const xdaq::ApplicationDescriptor* in slf7
 	//
 	// XDAQ_CONST_CALL is defined in "otsdaq-core/Macros/CoutHeaderMacros.h"
@@ -305,6 +305,45 @@ std::string RemoteWebUsers::getActiveUserList(const xdaq::ApplicationDescriptor*
 	else
 		return ActiveUserList_;
 }
+
+//========================================================================================================================
+//getLastConfigGroup
+//	request last "Configured" or "Started" group, for example
+//	returns empty "" for actionTimeString on failure
+//	returns "Wed Dec 31 18:00:01 1969 CST" for actionTimeString (in CST) if action never has occurred
+std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::getLastConfigGroup(
+		const xdaq::ApplicationDescriptor* supervisorDescriptor,
+		const std::string &actionOfLastGroup,
+		std::string &actionTimeString)
+{
+	actionTimeString = "";
+	xoap::MessageReference retMsg = ots::SOAPMessenger::sendWithSOAPReply(
+			supervisorDescriptor,"SupervisorLastConfigGroupRequest",
+			SOAPParameters("ActionOfLastGroup",actionOfLastGroup));
+
+
+	SOAPParameters retParameters;
+	retParameters.addParameter("GroupName");
+	retParameters.addParameter("GroupKey");
+	retParameters.addParameter("GroupAction");
+	retParameters.addParameter("GroupActionTime");
+	receive(retMsg, retParameters);
+
+	std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup;
+	if(retParameters.getValue("GroupAction") != actionOfLastGroup) //if action doesn't match.. weird
+	{
+		__MOUT_WARN__ << "Returned group action '" << retParameters.getValue("GroupAction") <<
+				"' does not match requested group action '" << actionOfLastGroup << ".'" << std::endl;
+		return theGroup; //return empty and invalid
+	}
+	//else we have an action match
+
+	theGroup.first = retParameters.getValue("GroupName");
+	theGroup.second = strtol(retParameters.getValue("GroupKey").c_str(),0,0);
+	actionTimeString = retParameters.getValue("GroupActionTime");
+	return theGroup;
+}
+
 //========================================================================================================================
 //getUserInfoForCookie
 //	get username and display name for user based on cookie code

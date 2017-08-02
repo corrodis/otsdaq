@@ -1,29 +1,57 @@
 #!/bin/sh
 echo
-echo
 echo "Starting otsdaq..."
 echo
 
 ISCONFIG=0
 QUIET=1
+CHROME=0
+DONOTKILL=0
 
 #check for wiz mode
 if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then
-    echo "*****************************************************"
-    echo "*************      WIZ MODE ENABLED!    *************"
-    echo "*****************************************************"
+	echo "*****************************************************"
+	echo "*************      WIZ MODE ENABLED!    *************"
+	echo "*****************************************************"
     ISCONFIG=1
 fi
 
 
 if [[ "$1"  == "--verbose" || "$2"  == "--verbose" || "$1"  == "-v" || "$2"  == "-v"  ]]; then
-    echo "*************   VERBOSE MODE ENABLED!    ************"
+	echo "*************   VERBOSE MODE ENABLED!    ************"
 	QUIET=0
 fi
+
+if [[ "$1"  == "--chrome" || "$2"  == "--chrome" || "$1"  == "-c" || "$2"  == "-c"  ]]; then
+	echo "*************   GOOGLE-CHROME LAUNCH ENABLED!    ************"
+	CHROME=1
+fi
+
+if [[ "$1"  == "--donotkill" || "$2"  == "--donotkill" || "$1"  == "-d" || "$2"  == "-d"  ]]; then
+	echo "*************   DO-NOT-KILL ENABLED!    ************"
+	DONOTKILL=1
+fi
+
+#############################
+#initializing StartOTS action file
+#attempt to mkdir for full path so that it exists to move the database to
+# assuming mkdir is non-destructive
+echo "StartOTS_action file path = ${USER_DATA}/ServiceData/StartOTS_action.cmd"
+SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
+SAP_PATH=""
+for SAP_EL in ${SAP_ARR[@]}
+do
+	#echo $SAP_EL
+	SAP_PATH="$SAP_PATH/$SAP_EL"
+	#echo $SAP_PATH
+	mkdir -p $SAP_PATH &>/dev/null #hide output
+done
 
 #exit any old action loops
 OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action.cmd"
 echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
+#done initializing StartOTS action file
+#############################
 
 if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
     echo "******************************************************"
@@ -31,14 +59,14 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
     echo "******************************************************"
 
 
-	killall -9 mpirun
-	killall -9 xdaq.exe
-	killall -9 mf_rcv_n_fwd #message viewer display without decoration
+	killall -9 mpirun &>/dev/null #hide output
+	killall -9 xdaq.exe &>/dev/null #hide output
+	killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
 
 	exit
 fi
 
-if [[ $ISCONFIG == 0 && $QUIET == 1 && "$1x" != "x" ]]; then
+if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $DONOTKILL == 0 && "$1x" != "x" ]]; then
 	echo 
 	echo "Unrecognized paramater $1"
 	echo
@@ -53,6 +81,14 @@ if [[ $ISCONFIG == 0 && $QUIET == 1 && "$1x" != "x" ]]; then
 	echo "To start otsdaq with 'verbose mode' enabled, add one of these options:"
 	echo "	--verbose  -v"
 	echo "	e.g.: StartOTS.sh --wiz -v     or    StartOTS.sh --verbose"
+	echo
+	echo "To start otsdaq and launch google-chrome, add one of these options:"
+	echo "	--chrome  -c"
+	echo "	e.g.: StartOTS.sh --wiz -c     or    StartOTS.sh --chrome"
+	echo
+	echo "To start otsdaq and launch google-chrome, add one of these options:"
+	echo "	--donotkill  -d"
+	echo "	e.g.: StartOTS.sh --wiz -d     or    StartOTS.sh --donotkill"
 	echo
 	echo "To kill all otsdaq running processes, please use any of these options:"
 	echo "	--killall  --kill  --kx  -k"
@@ -73,7 +109,7 @@ fi
  #Can be File, Database, DatabaseTest
 export CONFIGURATION_TYPE=File
 
-# Setup environment when building with MRB (As there's no setupARTDAQOTS file)
+# Setup environment when building with MRB
 if [ "x$MRB_BUILDDIR" != "x" ] && [ -e $OTSDAQ_DEMO_DIR/CMakeLists.txt ]; then
   export OTSDAQDEMO_BUILD=${MRB_BUILDDIR}/otsdaq_demo
   export OTSDAQ_DEMO_LIB=${MRB_BUILDDIR}/otsdaq_demo/lib
@@ -105,11 +141,11 @@ fi
 #setup web path as XDAQ is setup.. 
 #then make a link to user specified web path.
 WEB_PATH=${OTSDAQ_UTILITIES_DIR}/WebGUI
-echo "WEB_PATH=$WEB_PATH"
-echo "USER_WEB_PATH=$USER_WEB_PATH"
-echo "Making symbolic link to USER_WEB_PATH"
-echo "ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
-ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath
+#echo "WEB_PATH=$WEB_PATH"
+#echo "USER_WEB_PATH=$USER_WEB_PATH"
+#echo "Making symbolic link to USER_WEB_PATH"
+#echo "ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
+ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath &>/dev/null #hide output
 
 
 if [ "x$USER_DATA" == "x" ]; then
@@ -137,8 +173,7 @@ if [ ! -d $USER_DATA ]; then
 	exit   
 fi
 
-echo "Environment variable USER_DATA is setup!"
-echo "User data folder is at " ${USER_DATA}
+echo "Environment variable USER_DATA is setup and points to folder" ${USER_DATA}
 
 export CONFIGURATION_DATA_PATH=${USER_DATA}/ConfigurationDataExamples
 export CONFIGURATION_INFO_PATH=${USER_DATA}/ConfigurationInfo
@@ -148,6 +183,10 @@ export LOGIN_DATA_PATH=${USER_DATA}/ServiceData/LoginData
 export LOGBOOK_DATA_PATH=${USER_DATA}/ServiceData/LogbookData
 export PROGRESS_BAR_DATA_PATH=${USER_DATA}/ServiceData/ProgressBarData
 export ROOT_DISPLAY_CONFIG_PATH=${USER_DATA}/RootDisplayConfigData
+
+if [ "x$OTSDAQ_DATA" == "x" ];then
+	export OTSDAQ_DATA=/tmp
+fi
 
 if [ "x$ROOT_BROWSER_PATH" == "x" ];then
 	export ROOT_BROWSER_PATH=${OTSDAQ_DEMO_DIR}
@@ -173,17 +212,18 @@ fi
 export XDAQ_CONFIGURATION_XML=otsConfigurationNoRU_CMake #-> 
 ##############################################################################
 
-#kill all things otsdaq, before launching new things
-echo
-echo "Killing all existing otsdaq Applications..."
-killall -9 mpirun
-killall -9 xdaq.exe
-killall -9 mf_rcv_n_fwd #message viewer display without decoration
+if [ $DONOTKILL == 0 ]; then
+	#kill all things otsdaq, before launching new things
+	echo
+	echo "Killing all existing otsdaq Applications..."
+	killall -9 mpirun &>/dev/null #hide output
+	killall -9 xdaq.exe &>/dev/null #hide output
+	killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
 
-
-#give time for killall
-sleep 1
-
+	#give time for killall
+	sleep 1
+	echo "...Applications killed!"
+fi
 
 
 
@@ -210,6 +250,8 @@ launchOTSWiz() {
 
 	if [ "x$OTS_WIZ_MODE_MAIN_PORT" != "x" ]; then
 	  MAIN_PORT=${OTS_WIZ_MODE_MAIN_PORT}
+	elif [ "x$OTS_MAIN_PORT" != "x" ]; then
+	  MAIN_PORT=${OTS_MAIN_PORT}
 	elif [ $USER == rrivera ]; then
 	  MAIN_PORT=1983
 	elif [ $USER == lukhanin ]; then
@@ -245,7 +287,7 @@ launchOTSWiz() {
 	else
 		xdaq.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &
 	fi
-	
+
 	################
 	# start node db server
 	
@@ -280,15 +322,15 @@ launchOTS() {
 	
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityGen.fcl
 	#this fcl tells the MF library used by ots source how to behave
-	echo "OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
+	#echo "OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
 	
 	
 	USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
 	USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
 			
 	
-	echo "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
-	echo "USE_QT_VIEWER" ${USE_QT_VIEWER}
+	#echo "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
+	#echo "USE_QT_VIEWER" ${USE_QT_VIEWER}
 	
 	
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
@@ -337,11 +379,11 @@ launchOTS() {
 	#echo "XDAQ Configuration XML:"
 	#echo ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
-	echo
-	echo "XDAQ ARGS PASSED TO xdaq.exe:"
-	echo ${XDAQ_ARGS}
-	echo
-	echo
+	#echo
+	#echo "XDAQ ARGS PASSED TO xdaq.exe:"
+	#echo ${XDAQ_ARGS}
+	#echo
+	#echo
 	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`
 	#echo "$value"
 	#re="http://(${HOSTNAME}):([0-9]+)"
@@ -426,13 +468,14 @@ launchOTS() {
 		fi   
 	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 	
+	echo
 	echo "Launching all otsdaq Applications for this host..."
 	i=0	
 	for port in "${xdaqPort[@]}"
 	do
 	  : 
-	  echo
 	  echo "xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+	  echo
 		  
 	
 	  if [ $QUIET == 1 ]; then
@@ -511,7 +554,6 @@ printMainURL() {
 	fi
 	
 	echo
-	echo
 	echo "Open the URL below in your Google Chrome or Mozilla Firefox web browser:"
 	if [ $QUIET == 0 ]; then
 		sleep 3
@@ -525,7 +567,6 @@ printMainURL() {
 			exit
 		fi
 		
-		echo
 		echo
 		echo "*********************************************************************"
 		echo $MAIN_URL
@@ -649,5 +690,9 @@ otsActionHandler &
 printMainURL &
 sleep 1 #so that the terminal comes back after the printouts in quiet mode
 
-
+#launch chrome here if enabled
+if [ $CHROME == 1 ]; then
+	sleep 3 #give time for server to be live
+	google-chrome $MAIN_URL &
+fi
 

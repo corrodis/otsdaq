@@ -207,8 +207,8 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 		std::string s;
 		while (getline(f, s, ',')) dataChoices_.push_back(
 				ConfigurationView::decodeURIComponent(s));
-		for(const auto &dc: dataChoices_)
-			__MOUT__ << dc << std::endl;
+		//for(const auto &dc: dataChoices_)
+		//	__MOUT__ << dc << std::endl;
 	}
 
 	try
