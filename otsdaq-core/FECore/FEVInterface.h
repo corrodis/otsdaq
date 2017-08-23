@@ -110,11 +110,15 @@ protected:
 	std::map<std::string, FESlowControlsChannel> 	mapOfSlowControlsChannels_;
 	FESlowControlsWorkLoop							slowControlsWorkLoop_;
 
-	//Map of FE Macro functions members
-	std::map<std::string, frontEndMacroStruct_t>	mapOfFEMacroFunctions_;
+
+	//FE Macro Function members and helper functions:
+
+	std::map<std::string, frontEndMacroStruct_t>	mapOfFEMacroFunctions_; //Map of FE Macro functions members
 	std::array<std::string, 3> testarr_;
 	//void											registerFEMacroFunction(const std::string &feMacroName, frontEndMacroFunction_t feMacroFunction, unsigned int numOfInputArgs, unsigned int numOfOutputArgs, uint8_t requiredUserPermissions);
 	void											registerFEMacroFunction(const std::string &feMacroName, frontEndMacroFunction_t feMacroFunction, const std::vector<std::string> &namesOfInputArgs, const std::vector<std::string> &namesOfOutputArgs,uint8_t requiredUserPermissions);
+	const std::string&								getFEMacroInputArgument(frontEndMacroInArgs_t &argsIn, const std::string &argName);
+	std::string&									getFEMacroOutputArgument(frontEndMacroOutArgs_t &argsOut, const std::string& argName);
 };
 
 }
