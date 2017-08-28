@@ -169,6 +169,29 @@ public:
 	const std::string&						getChildLinkIndex			(void) const;
 	std::vector<std::string>				getFixedChoices				(void) const;
 
+public:
+
+
+	//boolean info
+	bool									isDefaultValue				(void) const;
+	bool									isConfigurationNode	        (void) const;
+	bool									isValueNode			        (void) const;
+	bool									isDisconnected		        (void) const;
+	bool									isLinkNode			        (void) const;
+	bool									isGroupLinkNode		        (void) const;
+	bool									isUIDLinkNode		        (void) const;
+	bool									isUIDNode			        (void) const;
+
+
+	void         			 				print				        (const unsigned int &depth = -1, std::ostream &out = std::cout) const;
+
+	//make stream output easy
+	friend std::ostream& operator<<	(std::ostream& out, const ConfigurationTree& t)
+	{
+		out << t.getValueAsString();
+		return out;
+	}
+
 protected:
 	const unsigned int&						getRow			        	(void) const;
 	const unsigned int&						getColumn		        	(void) const;
@@ -194,29 +217,6 @@ protected:
 	std::vector<ConfigurationTree::RecordField>		getCommonFields(const std::vector<std::string /*relative-path*/> &recordList, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth = -1) const;
 	std::set<std::string /*unique-value*/>			getUniqueValuesForField(const std::vector<std::string /*relative-path*/> &recordList, const std::string &fieldName) const;
 
-
-public:
-
-
-	//boolean info
-	bool									isDefaultValue				(void) const;
-	bool									isConfigurationNode	        (void) const;
-	bool									isValueNode			        (void) const;
-	bool									isDisconnected		        (void) const;
-	bool									isLinkNode			        (void) const;
-	bool									isGroupLinkNode		        (void) const;
-	bool									isUIDLinkNode		        (void) const;
-	bool									isUIDNode			        (void) const;
-
-
-	void         			 				print				        (const unsigned int &depth = -1, std::ostream &out = std::cout) const;
-
-	//make stream output easy
-	friend std::ostream& operator<<	(std::ostream& out, const ConfigurationTree& t)
-	{
-		out << t.getValueAsString();
-		return out;
-	}
 private:
 	//privately ONLY allow full access to member variables through constructor
 	ConfigurationTree(const ConfigurationManager* const& configMgr, const ConfigurationBase* const& config, const std::string& groupId, const std::string &linkColName, const std::string &linkColValue, const std::string& disconnectedTargetName, const std::string& disconnectedLinkID, const std::string &childLinkIndex, const unsigned int row  = ConfigurationView::INVALID, const unsigned int col = ConfigurationView::INVALID);

@@ -357,8 +357,9 @@ ConfigurationBase* ConfigurationManagerRW::getConfigurationByName(const std::str
 {
 	if(nameToConfigurationMap_.find(configurationName) == nameToConfigurationMap_.end())
 	{
-		__MOUT_ERR__ << "\nConfiguration not found with name: " << configurationName << std::endl;
-		throw std::runtime_error("Configuration not found with name '" + configurationName + ".'");
+		__SS__ << "\nConfiguration not found with name: " << configurationName << std::endl;
+		__MOUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
 	}
 	return nameToConfigurationMap_[configurationName];
 }
