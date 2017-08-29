@@ -104,7 +104,7 @@ private:
     void																saveGroupNameAndKey(const std::pair<std::string /*group name*/,	ConfigurationGroupKey> &theGroup, const std::string &fileName);
     static xoap::MessageReference 										lastConfigGroupRequestHandler(const SOAPParameters &parameters);
 
-    bool         														broadcastMessage(xoap::MessageReference msg);
+    bool         														broadcastMessage(xoap::MessageReference msg) throw (toolbox::fsm::exception::Exception);
 
     bool								supervisorGuiHasBeenLoaded_	; //use to indicate first access by user of ots since execution
 

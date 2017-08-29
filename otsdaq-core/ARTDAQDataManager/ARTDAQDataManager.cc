@@ -1,6 +1,8 @@
 #include "otsdaq-core/ARTDAQDataManager/ARTDAQDataManager.h"
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQConsumer.h"
 
+#include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
+
 #include <iostream>
 #include <cassert>
 
@@ -11,11 +13,17 @@ using namespace ots;
 ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath)
 : DataManager (theXDAQContextConfigTree, supervisorConfigurationPath)
 {
+	INIT_MF("BoardReaderDataManager");
 	__MOUT__ << "Begin!" << std::endl;
 	__MOUT__ << "Begin!" << std::endl;
 	__MOUT__ << "Begin!" << std::endl;
 	__MOUT__ << "Begin!" << std::endl;
 	__MOUT__ << "Begin!" << std::endl;
+	mf::LogDebug("BoardReader") << "artdaq version " <<
+	//    mf::LogDebug(supervisorApplicationUID_) << " artdaq version " <<
+				artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion()
+				<< ", built " <<
+				artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
 	theMPIProcess_.init("BoardReader", artdaq::TaskType::BoardReaderTask);
 	__MOUT__ << "Initialized!" << std::endl;
 	__MOUT__ << "Initialized!" << std::endl;

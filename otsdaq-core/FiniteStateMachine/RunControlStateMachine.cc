@@ -111,11 +111,18 @@ throw (xoap::exception::Exception)
 	{
 		theStateMachine_.execTransition(command,message);
 		//__MOUT__ << "I don't know what is going on!" << std::endl;
+
+		if(theStateMachine_.getCurrentStateName() == "Failed")
+		{
+			result = command + "Failed";
+			__MOUT_ERR__ << "Unexpected Failure state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
+		}
 	}
 	catch (toolbox::fsm::exception::Exception& e)
 	{
 		result = command + "Failed";
-		__MOUT__ << e.what() << std::endl;
+		__SS__ << "Run Control Message Handling Failed: " << e.what() << std::endl;
+		__MOUT_ERR__ << ss.str();
 	}
 
 	theProgressBar_.complete();

@@ -588,8 +588,23 @@ throw (toolbox::fsm::exception::Exception)
 
 
 	//Now that the configuration manager has all the necessary configurations I can create all objects dependent of the configuration
-	for(auto& it: theStateMachineImplementation_)
-		it->configure();
+	try
+	{
+		for(auto& it: theStateMachineImplementation_)
+			it->configure();
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "Error was caught during transition: " << e.what() << std::endl;
+		__MOUT_ERR__ << ss.str();
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transitionConfiguring" /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+				);
+	}
 
 }
 

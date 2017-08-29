@@ -71,6 +71,7 @@ protected:
     FiniteStateMachine theStateMachine_;
     ProgressBar		   theProgressBar_;
     std::string        stateMachineName_;
+
 };
 
 }
