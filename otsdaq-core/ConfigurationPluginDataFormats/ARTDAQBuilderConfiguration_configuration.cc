@@ -49,11 +49,31 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 
 	const XDAQContextConfiguration *contextConfig = configManager_->__GET_CONFIG__(XDAQContextConfiguration);
 
-	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+//	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+//
+//	for(auto &child:childrenMap)
+//		if(child.second.getNode("Status").getValue<bool>())
+//			outputFHICL(child.second, contextConfig);
 
-	for(auto &child:childrenMap)
-		if(child.second.getNode("Status").getValue<bool>())
-			outputFHICL(child.second, contextConfig);
+	std::vector<const XDAQContextConfiguration::XDAQContext *> builderContexts =
+				contextConfig->getEventBuilderContexts();
+
+	//for each aggregator context
+	//	output associated fcl config file
+	for(auto &builderContext: builderContexts)
+	{
+		ConfigurationTree builderConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+				builderContext->contextUID_, builderContext->applications_[0].applicationUID_);
+
+		__MOUT__ << "Path for this aggregator config is " <<
+				builderContext->contextUID_ << "/" <<
+				builderContext->applications_[0].applicationUID_ << "/" <<
+				builderConfigNode.getValueAsString() <<
+				std::endl;
+
+		outputFHICL(builderConfigNode,
+				contextConfig);
+	}
 }
 
 //========================================================================================================================
@@ -213,6 +233,17 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << std::endl;
 		throw std::runtime_error(ss.str());
 	}
+
+
+	//no primary link to configuration tree for reader node!
+	if(builderNode.isDisconnected())
+	{
+		//create empty fcl
+		OUT << "{}\n\n";
+		out.close();
+		return;
+	}
+
 
 	//--------------------------------------
 	//handle services

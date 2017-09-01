@@ -690,12 +690,14 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 		std::string 			*groupComment,
 		std::string 			*groupAuthor,
 		std::string	 			*groupCreateTime,
-		bool					doNotLoadMember)
+		bool					doNotLoadMember,
+		std::string				*groupTypeString)
 {
 	if(accumulatedTreeErrors) 	*accumulatedTreeErrors	= "";
 	if(groupComment) 			*groupComment 			= "";
 	if(groupAuthor) 			*groupAuthor 			= "";
 	if(groupCreateTime) 		*groupCreateTime 		= "";
+	if(groupTypeString)			*groupTypeString 				= "";
 
 	//	load all members of configuration group
 	//	if doActivate
@@ -756,11 +758,13 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
 
 	int groupType = -1;
+
+	//determine the type configuration group
+	groupType = getTypeOfGroup(configGroupName,configGroupKey,memberMap);
+	if(groupTypeString) *groupTypeString = convertGroupTypeIdToName(groupType);
+
 	if(doActivate)
 	{
-		//determine the type configuration group
-		groupType = getTypeOfGroup(configGroupName,configGroupKey,memberMap);
-
 		std::string groupToDeactivate =
 				groupType==CONTEXT_TYPE?theContextGroup_:
 						(groupType==BACKBONE_TYPE?theBackboneGroup_:theConfigurationGroup_);
@@ -774,9 +778,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 //		else
 //		{
 //			//Getting here, is kind of strange:
-//			//	- this group may have only been partially loaded before
-//			//Solution: destroy en by targeting member map
-//
+//			//	- this group may have only been partially loaded before?
 //		}
 	}
 

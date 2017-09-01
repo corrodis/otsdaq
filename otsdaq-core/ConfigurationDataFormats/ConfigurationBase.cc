@@ -253,7 +253,7 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 		if(viewPair.second.getNumberOfRows() != rows)
 			continue; //row mismatch
 
-		if(viewPair.second.getSourceColumnSize() != cols ||
+		if(viewPair.second.getDataColumnSize() != cols ||
 				viewPair.second.getSourceColumnMismatch() != 0)
 			continue; //col mismatch
 
@@ -262,6 +262,7 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 
 		auto srcColNameIt = viewPair.second.getSourceColumnNames().begin();
 		for(unsigned int col=0; match &&
+			viewPair.second.getSourceColumnNames().size() > 3 &&
 			col<viewPair.second.getSourceColumnNames().size()-3;++col,srcColNameIt++)
 			if(*srcColNameIt !=
 					needleView->getColumnsInfo()[col].getName())

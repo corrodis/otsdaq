@@ -1053,30 +1053,35 @@ const bool& ConfigurationView::getLooseColumnMatching(void) const
 }
 
 //==============================================================================
-const unsigned int ConfigurationView::getSourceColumnSize(void) const
+//getDataColumnSize
+const unsigned int ConfigurationView::getDataColumnSize(void) const
 {
-	//if no rows.. then assume source had no data
-	//	(and give benefit of the doubt that columns were ok for the phantom data)
+	//if no data, give benefit of the doubt that phantom data has mockup column size
 	if(!getNumberOfRows()) return getNumberOfColumns();
-	return sourceColumnNames_.size();
+	return theDataView_[0].size(); //number of columns in first row of data
 }
 
 //==============================================================================
+//getSourceColumnMismatch
+//	The source information is only valid after modifying the table with ::fillFromJSON
 const unsigned int& ConfigurationView::getSourceColumnMismatch(void) const
 {
 	return sourceColumnMismatchCount_;
 }
 
 //==============================================================================
+//getSourceColumnMissing
+//	The source information is only valid after modifying the table with ::fillFromJSON
 const unsigned int& ConfigurationView::getSourceColumnMissing(void) const
 {
 	return sourceColumnMissingCount_;
 }
 
 //==============================================================================
+//getSourceColumnNames
+//	The source information is only valid after modifying the table with ::fillFromJSON
 const std::set<std::string>& ConfigurationView::getSourceColumnNames(void) const
 {
-
 	return sourceColumnNames_;
 }
 

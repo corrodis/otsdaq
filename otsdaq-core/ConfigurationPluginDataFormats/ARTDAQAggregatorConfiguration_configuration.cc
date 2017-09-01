@@ -53,7 +53,7 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager* configManager)
 	//	output associated fcl config file
 	for(auto &aggContext: aggContexts)
 	{
-		auto aggConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+		ConfigurationTree aggConfigNode = contextConfig->getSupervisorConfigNode(configManager,
 				aggContext->contextUID_, aggContext->applications_[0].applicationUID_);
 
 		__MOUT__ << "Path for this aggregator config is " <<
@@ -239,6 +239,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 
 	__MOUT__ << "selfRank = " << selfRank << std::endl;
 
+
 	/////////////////////////
 	//generate xdaq run parameter file
 	std::fstream out;
@@ -251,6 +252,15 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 	{
 		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << std::endl;
 		throw std::runtime_error(ss.str());
+	}
+
+	//no primary link to configuration tree for aggregator node!
+	if(aggregatorNode.isDisconnected())
+	{
+		//create empty fcl
+		OUT << "{}\n\n";
+		out.close();
+		return;
 	}
 
 	//--------------------------------------

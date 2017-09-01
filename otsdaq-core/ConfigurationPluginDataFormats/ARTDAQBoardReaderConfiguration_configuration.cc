@@ -47,18 +47,38 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 
 	const XDAQContextConfiguration *contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);
 
-	//ConfigurationTree contextNode = configManager->getNode(contextConfig->getConfigurationName());
+//	//ConfigurationTree contextNode = configManager->getNode(contextConfig->getConfigurationName());
+//
+//	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+//
+//	//std::string appUID, buffUID, consumerUID;
+//	for(auto &child:childrenMap)
+//		if(child.second.getNode("Status").getValue<bool>())
+//		{
+////			getBoardReaderParents(child.second, contextConfig,
+////					contextNode, appUID, buffUID, consumerUID);
+//			outputFHICL(child.second, contextConfig);
+//		}
 
-	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+	std::vector<const XDAQContextConfiguration::XDAQContext *> readerContexts =
+			contextConfig->getBoardReaderContexts();
 
-	std::string appUID, buffUID, consumerUID;
-	for(auto &child:childrenMap)
-		if(child.second.getNode("Status").getValue<bool>())
-		{
-//			getBoardReaderParents(child.second, contextConfig,
-//					contextNode, appUID, buffUID, consumerUID);
-			outputFHICL(child.second, contextConfig);
-		}
+	//for each reader context
+	//	output associated fcl config file
+	for(auto &readerContext: readerContexts)
+	{
+		ConfigurationTree readerConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+				readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
+
+		__MOUT__ << "Path for this reader config is " <<
+				readerContext->contextUID_ << "/" <<
+				readerContext->applications_[0].applicationUID_ << "/" <<
+				readerConfigNode.getValueAsString() <<
+				std::endl;
+
+		outputFHICL(readerConfigNode,
+				contextConfig);
+	}
 }
 
 ////========================================================================================================================
@@ -202,6 +222,14 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 		throw std::runtime_error(ss.str());
 	}
 
+	//no primary link to configuration tree for reader node!
+	if(boardReaderNode.isDisconnected())
+	{
+		//create empty fcl
+		OUT << "{}\n\n";
+		out.close();
+		return;
+	}
 
 	//--------------------------------------
 	//handle daq

@@ -564,6 +564,13 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 		//__MOUT__ << row_ << " " << col_ <<  " " << groupId_ << " " << configView_ << std::endl;
 		if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)
 		{
+			if(!configView_)
+			{
+				__SS__ << "Missing configView pointer! Likely attempting to access a child node through a disconnected link node." << std::endl;
+				__MOUT_ERR__ << ss.str();
+				throw std::runtime_error(ss.str());
+			}
+
 			//this node is config node, so return uid node considering groupid
 			return recurse(ConfigurationTree(
 					configMgr_,
@@ -583,8 +590,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 		}
 		else if(row_ == ConfigurationView::INVALID)
 		{
-			//__MOUT__ << std::endl;
-			throw std::runtime_error("Malformed ConfigurationTree");
+			__SS__ << "Malformed ConfigurationTree" << std::endl;
+			__MOUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
 		}
 		else if(col_ == ConfigurationView::INVALID)
 		{
@@ -597,6 +605,13 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 			//if the value is a group link
 			//return a config node with group string
 			//else.. return value node
+
+			if(!configView_)
+			{
+				__SS__ << "Missing configView pointer! Likely attempting to access a child node through a disconnected link node." << std::endl;
+				__MOUT_ERR__ << ss.str();
+				throw std::runtime_error(ss.str());
+			}
 
 			unsigned int c = configView_->findCol(nodeName);
 			std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
@@ -718,6 +733,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 	catch(std::runtime_error &e)
 	{
 		__SS__ << "\n\nError occurred descending from node '" << getValue() <<
+				"' in table '" << getConfigurationName() <<
 				"' looking for child '" << nodeName << "'\n\n" << std::endl;
 		ss << "--- Additional error detail: \n\n" << e.what() << std::endl;
 		throw std::runtime_error(ss.str());
@@ -725,12 +741,15 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 	catch(...)
 	{
 		__SS__ << "\n\nError occurred descending from node '" << getValue() <<
+				"' in table '" << getConfigurationName() <<
 				"' looking for child '" << nodeName << "'\n\n" << std::endl;
 		throw std::runtime_error(ss.str());
 	}
 
 	//this node is value node, so has no node to choose from
-	__SS__ << "\n\nError occurred looking for nodeName=" << nodeName << "\n\n" <<
+	__SS__ << "\n\nError occurred descending from node '" << getValue() <<
+			"' in table '" << getConfigurationName() <<
+			"' looking for child '" << nodeName << "'\n\n" <<
 			"Invalid depth! getNode() called from a value point in the Configuration Tree." << std::endl;
 	throw std::runtime_error(ss.str());	// this node is value node, cant go any deeper!
 }

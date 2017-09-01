@@ -561,24 +561,24 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 	ConfigurationGroupKey key;
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> compareToMemberMap;
 	bool isDifferent;
-	for(auto &fullName: groupNames)
+	for(const std::string& fullName: groupNames)
 	{
 		ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
 
-		__MOUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
+		//__MOUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
 		if( name != groupName) continue;
 
-		__MOUT__ << name << " == " << groupName << std::endl;
+		//__MOUT__ << name << " == " << groupName << std::endl;
 		compareToMemberMap = theInterface_->getConfigurationGroupMembers(fullName);
 
 		isDifferent = false;
 		for(auto &memberPair: groupMemberMap)
 		{
-			__MOUT__ << memberPair.first << " - " << memberPair.second << std::endl;
+			//__MOUT__ << memberPair.first << " - " << memberPair.second << std::endl;
 			if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||	//name is missing
 					memberPair.second != compareToMemberMap[memberPair.first]) //or version mismatch
 			{	//then different
-				__MOUT__ << "mismatch found!" << std::endl;
+				//__MOUT__ << "mismatch found!" << std::endl;
 				isDifferent = true;
 				break;
 			}
@@ -592,7 +592,7 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 		//else found an exact match!
 		return key;
 	}
-	__MOUT__ << "no match found!" << std::endl;
+	__MOUT__ << "No match found - this group is new!" << std::endl;
 	//if here, then no match found
 	return ConfigurationGroupKey(); //return invalid key
 }
@@ -615,7 +615,6 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 	//	verify groupNameWithKey
 	//	verify store
 
-	__MOUT__ << std::endl;
 	//determine new group key
 	ConfigurationGroupKey newKey;
 	if(!previousVersion.isInvalid())	//if previous provided, bump that

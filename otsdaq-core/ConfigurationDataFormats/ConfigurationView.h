@@ -69,7 +69,7 @@ public:
 	const time_t& 					getCreationTime   			(void) const;
 	const time_t& 					getLastAccessTime  			(void) const;
 	const bool&						getLooseColumnMatching 		(void) const;
-	const unsigned int				getSourceColumnSize 		(void) const;
+	const unsigned int				getDataColumnSize	 		(void) const;
 	const unsigned int&				getSourceColumnMismatch		(void) const;
 	const unsigned int&				getSourceColumnMissing		(void) const;
 	const std::set<std::string>&	getSourceColumnNames		(void) const;
