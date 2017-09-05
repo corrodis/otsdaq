@@ -1367,7 +1367,7 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 
 				__SS__ << "Received reply: " << reply <<
 						". Can NOT " << command << " ARTDAQFEDataManagerSupervisors, instance = " << it.first;
-				__MOUT_WARN__ << ss.str() << std::endl;
+				__MOUT_WARN__ << "\n" << ss.str() << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
@@ -1415,7 +1415,7 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 		//
 		//	__SS__ << "Received reply: " << reply <<
 		//			". Can NOT " << command << " ARTDAQDataManagerSupervisor, instance = " << it.first;
-		//	__MOUT_WARN__ << ss.str() << std::endl;
+		//	__MOUT_WARN__ << "\n" << ss.str() << std::endl;
 		//	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 		//	proceed = false;
 		//}
@@ -1462,7 +1462,7 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 
 				__SS__ << "Received reply: " << reply <<
 						". Can NOT " << command << " ARTDAQDataManagerSupervisor, instance = " << it.first;
-				__MOUT_WARN__ << ss.str() << std::endl;
+				__MOUT_WARN__ << "\n" << ss.str() << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
@@ -1509,7 +1509,7 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 			{
 				__SS__ << "Received reply: " << reply <<
 						". Can NOT " << command << " ARTDAQBuilderSupervisor, instance = " << it.first;
-				__MOUT_WARN__ << ss.str() << std::endl;
+				__MOUT_WARN__ << "\n" << ss.str() << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
@@ -1556,7 +1556,7 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 			{
 				__SS__ << "Received reply: " << reply <<
 						". Can NOT " << command << " ARTDAQAggregatorSupervisor, instance = " << it.first;
-				__MOUT_WARN__ << ss.str() << std::endl;
+				__MOUT_WARN__ << "\n" << ss.str() << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}

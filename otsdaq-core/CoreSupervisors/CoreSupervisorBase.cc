@@ -596,7 +596,7 @@ throw (toolbox::fsm::exception::Exception)
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Error was caught during transition: " << e.what() << std::endl;
-		__MOUT_ERR__ << ss.str();
+		__MOUT_ERR__ << "\n" << ss.str();
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,

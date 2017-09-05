@@ -97,7 +97,7 @@ void ConfigurationView::init(void)
 			__SS__ << "Configuration Error:\t" <<
 					" Columns names must be unique! There are " << columnsInfo_.size() <<
 					" columns and the unique name count is " << colNameSet.size() << std::endl;
-			__MOUT_ERR__ << ss.str();
+			__MOUT_ERR__ << "\n" << ss.str();
 
 			throw std::runtime_error(ss.str());
 		}
@@ -113,7 +113,7 @@ void ConfigurationView::init(void)
 				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_COMMENT <<
 						" data type column must have name=" <<
 						"CommentDescription" << std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 
@@ -123,7 +123,7 @@ void ConfigurationView::init(void)
 						" data type in column " <<
 						columnsInfo_[colPos].getName() <<
 						" is repeated. This is not allowed." << std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 
@@ -132,7 +132,7 @@ void ConfigurationView::init(void)
 				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_COMMENT <<
 						" data type column must be 3rd to last (in column " <<
 						getNumberOfColumns()-3 << ")." << std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 		}
@@ -140,7 +140,7 @@ void ConfigurationView::init(void)
 		{
 			__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_COMMENT <<
 					" data type column " <<" is missing. This is not allowed." << std::endl;
-			__MOUT_ERR__ << ss.str();
+			__MOUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 
@@ -153,7 +153,7 @@ void ConfigurationView::init(void)
 						" data type in column " <<
 						columnsInfo_[colPos].getName() <<
 						" is repeated. This is not allowed." << std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 
@@ -162,7 +162,7 @@ void ConfigurationView::init(void)
 				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_AUTHOR <<
 						" data type column must be 2nd to last (in column " <<
 						getNumberOfColumns()-2 << ")." << std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 		}
@@ -170,7 +170,7 @@ void ConfigurationView::init(void)
 		{
 			__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_AUTHOR <<
 					" data type column " <<" is missing. This is not allowed." << std::endl;
-			__MOUT_ERR__ << ss.str();
+			__MOUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 
@@ -183,7 +183,7 @@ void ConfigurationView::init(void)
 						" data type in column " <<
 						columnsInfo_[colPos].getName() << " is repeated. This is not allowed." <<
 						std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 
@@ -192,7 +192,7 @@ void ConfigurationView::init(void)
 				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_TIMESTAMP <<
 						" data type column must be last (in column " <<
 						getNumberOfColumns()-1 << ")." << std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 		}
@@ -200,7 +200,7 @@ void ConfigurationView::init(void)
 		{
 			__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_TIMESTAMP <<
 					" data type column " <<" is missing. This is not allowed." << std::endl;
-			__MOUT_ERR__ << ss.str();
+			__MOUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 
@@ -214,7 +214,7 @@ void ConfigurationView::init(void)
 			{
 				__SS__ << ("Entries in UID are not unique. Specifically at row=" +
 						std::to_string(row) + " value=" + theDataView_[row][colUID_])<< std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 
@@ -247,7 +247,7 @@ void ConfigurationView::init(void)
 			__SS__ << "Entries in UID are not unique!" <<
 					"There are " << getNumberOfRows() <<
 					" rows and the unique UID count is " << uidSet.size() << std::endl;
-			__MOUT_ERR__ << ss.str();
+			__MOUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 
@@ -265,7 +265,7 @@ void ConfigurationView::init(void)
 							(" are not unique. Specifically at row=" +
 							std::to_string(row) + " value=" + theDataView_[row][colPos]) <<
 							std::endl;
-					__MOUT_ERR__ << ss.str();
+					__MOUT_ERR__ << "\n" << ss.str();
 					throw std::runtime_error(ss.str());
 				}
 				uDataSet.insert(theDataView_[row][colPos]);
@@ -276,7 +276,7 @@ void ConfigurationView::init(void)
 							columnsInfo_[colPos].getName() << " are not unique!" <<
 						"There are " << getNumberOfRows() <<
 						" rows and the unique data count is " << uDataSet.size() << std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 		}
@@ -330,7 +330,7 @@ void ConfigurationView::init(void)
 							ss << columnsInfo_[col].getDataChoices()[i];
 						}
 						ss << "." << std::endl;
-						__MOUT_ERR__ << ss.str();
+						__MOUT_ERR__ << "\n" << ss.str();
 						throw std::runtime_error(ss.str());
 					}
 				}
@@ -346,7 +346,7 @@ void ConfigurationView::init(void)
 					{
 						__SS__ << "Configuration Error:\t" << theDataView_[row][col] << " in column " <<
 								columnsInfo_[col].getName() << " is not a valid Type (On/Off) std::string. Possible values are 1, on, On, ON, 0, off, Off, OFF." << std::endl;
-						__MOUT_ERR__ << ss.str();
+						__MOUT_ERR__ << "\n" << ss.str();
 						throw std::runtime_error(ss.str());
 					}
 				}
@@ -361,7 +361,7 @@ void ConfigurationView::init(void)
 					{
 						__SS__ << "Configuration Error:\t" << theDataView_[row][col] << " in column " <<
 								columnsInfo_[col].getName() << " is not a valid Type (True/False) std::string. Possible values are 1, true, True, TRUE, 0, false, False, FALSE." << std::endl;
-						__MOUT_ERR__ << ss.str();
+						__MOUT_ERR__ << "\n" << ss.str();
 						throw std::runtime_error("Invalid true/false usage");
 					}
 				}
@@ -376,7 +376,7 @@ void ConfigurationView::init(void)
 					{
 						__SS__ << "Configuration Error:\t" << theDataView_[row][col] << " in column " <<
 								columnsInfo_[col].getName() << " is not a valid Type (Yes/No) std::string. Possible values are 1, yes, Yes, YES, 0, no, No, NO." << std::endl;
-						__MOUT_ERR__ << ss.str();
+						__MOUT_ERR__ << "\n" << ss.str();
 						throw std::runtime_error(ss.str());
 					}
 				}
@@ -413,7 +413,7 @@ void ConfigurationView::init(void)
 							columnsInfo_[col].getDataType() <<
 							"'. The data type for Child Link columns must be " <<
 							ViewColumnInfo::DATATYPE_STRING << std::endl;
-					__MOUT_ERR__ << ss.str();
+					__MOUT_ERR__ << "\n" << ss.str();
 					throw std::runtime_error(ss.str());
 				}
 
@@ -439,7 +439,7 @@ void ConfigurationView::init(void)
 			__SS__ << ("GroupId Labels are not unique!") <<
 					"There are " << groupIdIndexesCount <<
 					" GroupId Labels and the unique count is " << groupIdIndexes.size() << std::endl;
-			__MOUT_ERR__ << ss.str();
+			__MOUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 		if(childLinkIndexes.size() != childLinkIndexesCount)
@@ -447,7 +447,7 @@ void ConfigurationView::init(void)
 			__SS__ << ("Child Link Labels are not unique!") <<
 					"There are " << childLinkIndexesCount <<
 					" Child Link Labels and the unique count is " << childLinkIndexes.size() << std::endl;
-			__MOUT_ERR__ << ss.str();
+			__MOUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 		if(childLinkIdLabels.size() != childLinkIdLabelsCount)
@@ -455,7 +455,7 @@ void ConfigurationView::init(void)
 			__SS__ << ("Child Link ID Labels are not unique!") <<
 					"There are " << childLinkIdLabelsCount <<
 					" Child Link ID Labels and the unique count is " << childLinkIdLabels.size() << std::endl;
-			__MOUT_ERR__ << ss.str();
+			__MOUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 
@@ -928,9 +928,10 @@ const unsigned int ConfigurationView::getColLinkGroupID(const std::string &child
 	for(unsigned int col=0; col<columnsInfo_.size(); ++col)
 		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << std::endl;
 
-	__SS__ << ("Missing column with data type " +
+	__SS__ << ("Incompatible table for this group link. Table '" +
+			tableName_ + "' is missing a GroupID column with data type '" +
 			(ViewColumnInfo::TYPE_START_GROUP_ID + "-" + childLinkIndex) +
-			" in config named " + tableName_) << std::endl;
+			"'." ) << std::endl;
 	__MOUT_ERR__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
@@ -951,7 +952,7 @@ unsigned int ConfigurationView::findRow(unsigned int col, const std::string& val
 			<< std::endl;
 	//Note: findRow gets purposely called by configuration GUI a lot looking for exceptions
 	//	so may not want to print out
-	//__MOUT__ << ss.str();
+	//__MOUT__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
 
@@ -973,7 +974,7 @@ unsigned int ConfigurationView::findRowInGroup(unsigned int col, const std::stri
 			columnsInfo_[col].getType() << " and GroupID: " <<
 			groupId << " in column " << groupIdCol <<
 			" with GroupID child link index " << childLinkIndex << std::endl;
-	__MOUT__ << ss.str();
+	__MOUT__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
 
@@ -2056,7 +2057,7 @@ throw(std::runtime_error)
 	if(!countRowsModified)
 	{
 		__SS__ << "No rows were modified! No reason to fill a view with same content." << std::endl;
-		__MOUT__ << ss.str();
+		__MOUT__ << "\n" << ss.str();
 		return -1;
 	}
 

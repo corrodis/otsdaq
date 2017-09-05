@@ -281,7 +281,7 @@ const std::string& FEVInterface::getFEMacroInputArgument(frontEndMacroInArgs_t& 
 			return pair.second;
 	}
 	__SS__ << "Requested input argument not found with name '" << argName << "'" << std::endl;
-	__MOUT_ERR__ << ss.str();
+	__MOUT_ERR__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
 
@@ -299,7 +299,7 @@ std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& args
 			return pair.second;
 	}
 	__SS__ << "Requested output argument not found with name '" << argName << "'" << std::endl;
-	__MOUT_ERR__ << ss.str();
+	__MOUT_ERR__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
 

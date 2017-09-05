@@ -334,8 +334,6 @@ const std::string& ConfigurationManager::convertGroupTypeIdToName(int groupTypeI
 //		1 for backbone
 //		2 for configuration (others)
 int ConfigurationManager::getTypeOfGroup(
-		const std::string &configGroupName,
-		ConfigurationGroupKey configGroupKey,
 		const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap)
 {
 
@@ -351,9 +349,7 @@ int ConfigurationManager::getTypeOfGroup(
 		//__MOUT__ << "Member name: = "<< memberPair.first << std::endl;
 		inGroup = false; //check context
 		for(auto &contextMemberString:contextMemberNames_)
-			//if(!isContext) break;
-			//else
-				if(memberPair.first == contextMemberString)
+			if(memberPair.first == contextMemberString)
 			{
 				inGroup = true;
 				inContext = true;
@@ -365,8 +361,7 @@ int ConfigurationManager::getTypeOfGroup(
 			isContext = false;
 			if(inContext) //there was a member in context!
 			{
-				__SS__ << "This group is an incomplete match to contextMemberNames_: " +
-						configGroupName + "(" + configGroupKey.toString() + ")\n";
+				__SS__ << "This group is an incomplete match to a Context group.\n";
 				ss << "\nTo be a Context group, the members must exactly match" <<
 						"the following members:\n";
 				int i = 0;
@@ -379,9 +374,7 @@ int ConfigurationManager::getTypeOfGroup(
 
 		inGroup = false; //check backbone
 		for(auto &backboneMemberString:backboneMemberNames_)
-			//if(!isBackbone) break;
-			//else
-				if(memberPair.first == backboneMemberString)
+			if(memberPair.first == backboneMemberString)
 			{
 				inGroup = true;
 				inBackbone = true;
@@ -393,8 +386,7 @@ int ConfigurationManager::getTypeOfGroup(
 			isBackbone = false;
 			if(inBackbone) //there was a member in backbone!
 			{
-				__SS__ << "This group is an incomplete match to backboneMemberNames_: " +
-						configGroupName + "(" + configGroupKey.toString() + ")\n";
+				__SS__ << "This group is an incomplete match to a Backbone group.\n";
 				ss << "\nTo be a Backbone group, the members must exactly match" <<
 						"the following members:\n";
 				int i = 0;
@@ -409,8 +401,7 @@ int ConfigurationManager::getTypeOfGroup(
 
 	if(isContext && matchCount != contextMemberNames_.size())
 	{
-		__SS__ << "This group is an incomplete match to contextMemberNames_: " +
-				configGroupName + "(" + configGroupKey.toString() + ")" +
+		__SS__ << "This group is an incomplete match to a Context group: " <<
 				" Size=" << matchCount << " but should be " << contextMemberNames_.size() <<
 				std::endl;
 		ss << "\nThe members currently are...\n";
@@ -427,8 +418,7 @@ int ConfigurationManager::getTypeOfGroup(
 
 	if(isBackbone && matchCount != backboneMemberNames_.size())
 	{
-		__SS__ << "This group is an incomplete match to backboneMemberNames_: " +
-				configGroupName + "(" + configGroupKey.toString() + ")" +
+		__SS__ << "This group is an incomplete match to a Backbone group: " <<
 				" Size=" << matchCount << " but should be " << backboneMemberNames_.size() <<
 				std::endl;
 		ss << "\nThe members currently are...\n";
@@ -448,16 +438,14 @@ int ConfigurationManager::getTypeOfGroup(
 
 //==============================================================================
 //getTypeNameOfGroup
-//	return
+//	return string for
 //		0 for context
 //		1 for backbone
 //		2 for configuration (others)
 const std::string& ConfigurationManager::getTypeNameOfGroup(
-		const std::string &configGroupName,
-		ConfigurationGroupKey configGroupKey,
 		const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap)
 {
-	return convertGroupTypeIdToName(getTypeOfGroup(configGroupName, configGroupKey, memberMap));
+	return convertGroupTypeIdToName(getTypeOfGroup(memberMap));
 }
 //==============================================================================
 //loadMemberMap
@@ -760,7 +748,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	int groupType = -1;
 
 	//determine the type configuration group
-	groupType = getTypeOfGroup(configGroupName,configGroupKey,memberMap);
+	groupType = getTypeOfGroup(memberMap);
 	if(groupTypeString) *groupTypeString = convertGroupTypeIdToName(groupType);
 
 	if(doActivate)

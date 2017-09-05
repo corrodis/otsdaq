@@ -76,7 +76,7 @@ ConfigurationTree::ConfigurationTree(
 				"\n\tconfiguration_=" << configuration_ <<
 				"\n\tconfigView_=" << configView_ <<
 				std::endl;
-		__MOUT__ << ss.str();
+		__MOUT__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 
@@ -89,7 +89,7 @@ ConfigurationTree::ConfigurationTree(
 	{
 		__SS__ << "Missing UID column (must column of type  " << ViewColumnInfo::TYPE_UID <<
 				") in config view : " << configView_->getTableName() << std::endl;
-		__MOUT__ << ss.str();
+		__MOUT__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 }
@@ -567,7 +567,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 			if(!configView_)
 			{
 				__SS__ << "Missing configView pointer! Likely attempting to access a child node through a disconnected link node." << std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 
@@ -591,7 +591,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 		else if(row_ == ConfigurationView::INVALID)
 		{
 			__SS__ << "Malformed ConfigurationTree" << std::endl;
-			__MOUT_ERR__ << ss.str();
+			__MOUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 		else if(col_ == ConfigurationView::INVALID)
@@ -609,7 +609,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 			if(!configView_)
 			{
 				__SS__ << "Missing configView pointer! Likely attempting to access a child node through a disconnected link node." << std::endl;
-				__MOUT_ERR__ << ss.str();
+				__MOUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 
@@ -782,7 +782,7 @@ bool ConfigurationTree::isDisconnected(void) const
 	if(!isLinkNode())
 	{
 		__SS__ << "This is not a Link node! Only a Link node can be disconnected." << std::endl;
-		__MOUT__ << ss.str();
+		__MOUT__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 

@@ -122,7 +122,7 @@ throw (xoap::exception::Exception)
 	{
 		result = command + "Failed";
 		__SS__ << "Run Control Message Handling Failed: " << e.what() << std::endl;
-		__MOUT_ERR__ << ss.str();
+		__MOUT_ERR__ << "\n" << ss.str();
 	}
 
 	theProgressBar_.complete();
