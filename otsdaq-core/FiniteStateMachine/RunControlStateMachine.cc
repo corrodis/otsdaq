@@ -12,6 +12,7 @@
 
 using namespace ots;
 
+const std::string RunControlStateMachine::FAILED_STATE_NAME = "Failed";
 
 //========================================================================================================================
 RunControlStateMachine::RunControlStateMachine(std::string name)
@@ -29,7 +30,7 @@ RunControlStateMachine::RunControlStateMachine(std::string name)
 	//exceptions like..
 	//	XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());)
 	//	take state machine to "failed" otherwise
-	theStateMachine_.setStateName('F',"Failed");//x
+	theStateMachine_.setStateName('F',RunControlStateMachine::FAILED_STATE_NAME);//x
 	theStateMachine_.setFailedStateTransitionAction (this, &RunControlStateMachine::enteringError);
 	theStateMachine_.setFailedStateTransitionChanged(this, &RunControlStateMachine::inError);
 
@@ -112,15 +113,15 @@ throw (xoap::exception::Exception)
 		theStateMachine_.execTransition(command,message);
 		//__MOUT__ << "I don't know what is going on!" << std::endl;
 
-		if(theStateMachine_.getCurrentStateName() == "Failed")
+		if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
 		{
-			result = command + "Failed";
+			result = command + RunControlStateMachine::FAILED_STATE_NAME;
 			__MOUT_ERR__ << "Unexpected Failure state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
 		}
 	}
 	catch (toolbox::fsm::exception::Exception& e)
 	{
-		result = command + "Failed";
+		result = command + RunControlStateMachine::FAILED_STATE_NAME;
 		__SS__ << "Run Control Message Handling Failed: " << e.what() << std::endl;
 		__MOUT_ERR__ << "\n" << ss.str();
 	}

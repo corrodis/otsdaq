@@ -1591,32 +1591,6 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 }
 
 //========================================================================================================================
-/*
- xoap::MessageReference Supervisor::runControlMessageHandler(xoap::MessageReference message) throw (xoap::exception::Exception)
-
-{
- __MOUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
- //__MOUT__ << SOAPUtilities::translate(message).getParameters().getValue("ConfigurationAlias") << std::endl;
- std::string command = SOAPUtilities::translate(message).getCommand();
- std::string result = command + "Done";
- try
-
-{
- theStateMachine_.execTransition(command,message);
- }
- catch (toolbox::fsm::exception::Exception& e)
-
-{
- result = command + "Failed";
- __MOUT__ << e.what() << std::endl;
- }
-
- __MOUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
- //diagService_->reportError("Entered SOAP message callback method Supervisor::Initialize", DIAGINFO);
- return SOAPUtilities::makeSOAPMessageReference(result);
- }
- */
-//========================================================================================================================
 void Supervisor::wait(int milliseconds, std::string who) const
 {
 	for (int s = 1; s <= milliseconds; s++)
