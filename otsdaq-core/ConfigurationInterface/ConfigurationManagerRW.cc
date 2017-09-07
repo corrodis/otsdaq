@@ -301,7 +301,21 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 
 	std::string fn = ConfigurationManager::ACTIVE_GROUP_FILENAME;
 	FILE *fp = fopen(fn.c_str(),"w");
-	if(!fp) return;
+	if(!fp)
+	{
+		__SS__ << "Fatal Error! Unable to open the file " <<
+				ConfigurationManager::ACTIVE_GROUP_FILENAME << " for editing! Is there a permissions problem?" << std::endl;
+		__MOUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+		return;
+	}
+
+	__MOUT__ << theContextGroup_ << "(" <<
+			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__MOUT__ << theBackboneGroup_ << "(" <<
+			(theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__MOUT__ << theConfigurationGroup_ << "(" <<
+			(theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1") << ")" << std::endl;
 
 	fprintf(fp,"%s\n",theContextGroup_.c_str());
 	fprintf(fp,"%s\n",theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1");
