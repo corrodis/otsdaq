@@ -599,6 +599,7 @@ throw (toolbox::fsm::exception::Exception)
 	{
 		__SS__ << "Error was caught while configuring: " << e.what() << std::endl;
 		__MOUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
@@ -637,6 +638,7 @@ throw (toolbox::fsm::exception::Exception)
 			{
 				__SS__ << "Error was caught while halting: " << e.what() << std::endl;
 				__MOUT_ERR__ << "\n" << ss.str();
+				theStateMachine_.setErrorMessage(ss.str());
 				throw toolbox::fsm::exception::Exception(
 						"Transition Error" /*name*/,
 						ss.str() /* message*/,
@@ -674,6 +676,7 @@ throw (toolbox::fsm::exception::Exception)
 	{
 		__SS__ << "Error was caught while pausing: " << e.what() << std::endl;
 		__MOUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
@@ -702,6 +705,7 @@ throw (toolbox::fsm::exception::Exception)
 	{
 		__SS__ << "Error was caught while resuming: " << e.what() << std::endl;
 		__MOUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
@@ -730,6 +734,7 @@ throw (toolbox::fsm::exception::Exception)
 	{
 		__SS__ << "Error was caught while starting: " << e.what() << std::endl;
 		__MOUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
@@ -755,6 +760,7 @@ throw (toolbox::fsm::exception::Exception)
 	{
 		__SS__ << "Error was caught while pausing: " << e.what() << std::endl;
 		__MOUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,

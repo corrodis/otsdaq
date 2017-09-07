@@ -125,6 +125,7 @@ throw (xoap::exception::Exception)
 		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " + theStateMachine_.getErrorMessage();
 		__SS__ << "Run Control Message Handling Failed: " << e.what() << std::endl;
 		__MOUT_ERR__ << "\n" << ss.str();
+		__MOUT_ERR__ << "Error message was as follows:\n" << theStateMachine_.getErrorMessage() << std::endl;
 	}
 
 	theProgressBar_.complete();
