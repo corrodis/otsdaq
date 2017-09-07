@@ -180,9 +180,29 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 	{
 		fgets(tmp,500,fp);
 		sscanf(tmp,"%s",strVal); //sscanf to remove '\n'
+		for(unsigned int j=0;j<strlen(strVal);++j)
+			if(!(
+					(strVal[j] >= 'a' && strVal[j] <= 'z') ||
+					(strVal[j] >= 'A' && strVal[j] <= 'Z') ||
+					(strVal[j] >= '0' && strVal[j] <= '9')))
+				{
+					strVal[j] = '\0';
+					__MOUT_INFO__ << "Illegal character found, so truncating group name!" << std::endl;
+					break;
+				}
+
 		groupName = strVal;
 		fgets(tmp,500,fp);
 		sscanf(tmp,"%s",strVal);  //sscanf to remove '\n'
+
+		for(unsigned int j=0;j<strlen(strVal);++j)
+			if(!(
+					(strVal[j] >= '0' && strVal[j] <= '9')))
+				{
+					strVal[j] = '\0';
+					__MOUT_INFO__ << "Illegal character found, so truncating key string!" << std::endl;
+					break;
+				}
 		try
 		{
 			//load and doActivate
