@@ -115,13 +115,14 @@ throw (xoap::exception::Exception)
 
 		if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
 		{
-			result = command + RunControlStateMachine::FAILED_STATE_NAME;
+			result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " + theStateMachine_.getErrorMessage();
 			__MOUT_ERR__ << "Unexpected Failure state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
+			__MOUT_ERR__ << "Error message was as follows:\n" << theStateMachine_.getErrorMessage() << std::endl;
 		}
 	}
 	catch (toolbox::fsm::exception::Exception& e)
 	{
-		result = command + RunControlStateMachine::FAILED_STATE_NAME;
+		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " + theStateMachine_.getErrorMessage();
 		__SS__ << "Run Control Message Handling Failed: " << e.what() << std::endl;
 		__MOUT_ERR__ << "\n" << ss.str();
 	}

@@ -793,7 +793,7 @@ throw (toolbox::fsm::exception::Exception)
 			theStateMachine_.getStateName(failedEvent.getFromState()) <<
 			" to " << failedEvent.getToState() << "-" <<
 			theStateMachine_.getStateName(failedEvent.getToState()) <<
-			".\n\nException:\n" << failedEvent.getException().what();
+			".\n\nException:\n" << failedEvent.getException().what() << std::endl;
 	__MOUT_ERR__ << "\n" << ss.str();
 
 	theStateMachine_.setErrorMessage(ss.str());
@@ -1216,13 +1216,15 @@ throw (toolbox::fsm::exception::Exception)
 		if (reply != command + "Done")
 		{
 			//diagService_->reportError("FESupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-			std::stringstream error;
-			error << "Can't " << command << " FESupervisor, instance = " << it.first;
-			XCEPT_RAISE(toolbox::fsm::exception::Exception, error.str());
-			__MOUT__ << error.str() << std::endl;
+
+			__SS__ << "Can NOT " << command << " FESupervisor, instance = " << it.first << ".\n\n" <<
+					reply;
+			__MOUT_ERR__ << ss.str() << std::endl;
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
 			//}
-		} else
+		}
+		else
 		{
 			__MOUT__ << "FESupervisor supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 		}
@@ -1239,13 +1241,13 @@ throw (toolbox::fsm::exception::Exception)
 		std::string reply = send(it.second, message);
 		if (reply != command + "Done")
 		{
-			//diagService_->reportError("DataManagerSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-			std::stringstream error;
-			error << "Can't " << command << " DataManagerSupervisor, instance = " << it.first;
-			XCEPT_RAISE(toolbox::fsm::exception::Exception, error.str());
-			__MOUT__ << error.str() << std::endl;
+			__SS__ << "Can NOT " << command << " DataManagerSupervisor, instance = " << it.first << ".\n\n" <<
+					reply;
+			__MOUT_ERR__ << ss.str() << std::endl;
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
-		} else
+		}
+		else
 		{
 			__MOUT__ << "DataManagerSupervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 		}
@@ -1262,13 +1264,13 @@ throw (toolbox::fsm::exception::Exception)
 		std::string reply = send(it.second, message);
 		if (reply != command + "Done")
 		{
-			//diagService_->reportError("FEDataManagerSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-			std::stringstream error;
-			error << "Can't " << command << " FEDataManagerSupervisor, instance = " << it.first;
-			XCEPT_RAISE(toolbox::fsm::exception::Exception, error.str());
-			__MOUT__ << error.str() << std::endl;
+			__SS__ << "Can NOT " << command << " FEDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
+					reply;
+			__MOUT_ERR__ << ss.str() << std::endl;
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
-		} else
+		}
+		else
 		{
 			__MOUT__ << "FEDataManagerSupervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 		}
@@ -1285,14 +1287,13 @@ throw (toolbox::fsm::exception::Exception)
 		std::string reply = send(it.second, message);
 		if (reply != command + "Done")
 		{
-			//diagService_->reportError("ARTAQAggregatorSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-			std::stringstream error;
-			error << "Can't " << command
-					<< " VisualSupervisor, instance = " << it.first;
-			XCEPT_RAISE(toolbox::fsm::exception::Exception, error.str());
-			__MOUT__ << error.str() << std::endl;
+			__SS__ << "Can NOT " << command << " VisualSupervisor, instance = " << it.first << ".\n\n" <<
+					reply;
+			__MOUT_ERR__ << ss.str() << std::endl;
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
-		} else
+		}
+		else
 		{
 			__MOUT__ << "VisualSupervisor supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 		}
@@ -1363,11 +1364,9 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 			std::string reply = send(it.second, message);
 			if (reply != command + "Done")
 			{
-				//diagService_->reportError("FERSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-
-				__SS__ << "Received reply: " << reply <<
-						". Can NOT " << command << " ARTDAQFEDataManagerSupervisors, instance = " << it.first;
-				__MOUT_WARN__ << "\n" << ss.str() << std::endl;
+				__SS__ << "Can NOT " << command << " ARTDAQFEDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
+						reply;
+				__MOUT_ERR__ << ss.str() << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
@@ -1458,11 +1457,9 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 			std::string reply = send(it.second, message);
 			if (reply != command + "Done")
 			{
-				//diagService_->reportError("FERSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-
-				__SS__ << "Received reply: " << reply <<
-						". Can NOT " << command << " ARTDAQDataManagerSupervisor, instance = " << it.first;
-				__MOUT_WARN__ << "\n" << ss.str() << std::endl;
+				__SS__ << "Can NOT " << command << " ARTDAQDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
+						reply;
+				__MOUT_ERR__ << ss.str() << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
@@ -1554,9 +1551,9 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 			std::string reply = send(it.second, message);
 			if (reply != command + "Done")
 			{
-				__SS__ << "Received reply: " << reply <<
-						". Can NOT " << command << " ARTDAQAggregatorSupervisor, instance = " << it.first;
-				__MOUT_WARN__ << "\n" << ss.str() << std::endl;
+				__SS__ << "Can NOT " << command << " ARTDAQAggregatorSupervisor, instance = " << it.first << ".\n\n" <<
+						reply;
+				__MOUT_ERR__ << ss.str() << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}

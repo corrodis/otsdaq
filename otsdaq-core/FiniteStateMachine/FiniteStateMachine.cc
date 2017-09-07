@@ -129,6 +129,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		inTransition_ = false;
 		std::ostringstream error;
 		error << transition << " is not in the list of the transitions from current state " << getStateName (getCurrentState());
+		__MOUT_ERR__ << error.str() << std::endl;
 		XCEPT_RAISE (toolbox::fsm::exception::Exception, error.str());
 		//__MOUT__ << error << std::endl;
 //		__MOUT__ << "Transition?" << inTransition_ << std::endl;
@@ -147,7 +148,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		transitionSuccessful = false;
 		std::ostringstream error;
 		error << "Transition " << transition << " cannot be executed from current state " << getStateName (getCurrentState());
-		__MOUT__ << error.str() << std::endl;
+		__MOUT_ERR__ << error.str() << std::endl;
 		//diagService_->reportError(err.str(),DIAGERROR);
 		XCEPT_RAISE (toolbox::fsm::exception::Exception, error.str());//This make everything crash so you know for sure there is something wrong
 	}
