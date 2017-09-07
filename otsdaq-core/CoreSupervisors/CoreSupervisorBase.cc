@@ -209,7 +209,10 @@ xoap::MessageReference CoreSupervisorBase::stateMachineErrorMessageRequest(xoap:
 throw (xoap::exception::Exception)
 {
 	__MOUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
-	return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getErrorMessage());
+
+	SOAPParameters retParameters;
+	retParameters.addParameter("ErrorMessage",theStateMachine_.getErrorMessage());
+	return SOAPUtilities::makeSOAPMessageReference("stateMachineErrorMessageRequestReply",retParameters);
 }
 
 //========================================================================================================================

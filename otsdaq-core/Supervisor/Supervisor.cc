@@ -1222,8 +1222,12 @@ throw (toolbox::fsm::exception::Exception)
 			__MOUT_ERR__ << ss.str() << std::endl;
 
 			__MOUT__ << "Getting error message..." << std::endl;
-			std::string errorMessage = send(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
-			__MOUT_ERR__ << "errorMessage = " << errorMessage << std::endl;
+			xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+			SOAPParameters parameters;
+			parameters.addParameter("ErrorMessage");
+			SOAPMessenger::receive(errorMessage, parameters);
+			__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+			ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
 			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
 			//}
