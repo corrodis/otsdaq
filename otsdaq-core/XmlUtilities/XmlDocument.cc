@@ -172,7 +172,17 @@ xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, 
         		<< XML_TO_CHAR(e.getMessage()) << ". Very likely you have a name that starts with a number and that's not allowed!" << std::endl;
     }
     parent->appendChild(child);
-   	child->appendChild(theDocument_->createTextNode(CONVERT_TO_XML(childText)));
+
+    try
+    {
+    	child->appendChild(theDocument_->createTextNode(CONVERT_TO_XML(childText)));
+    }
+    catch(...) //sometimes see TranscodingException
+    {
+    	__MOUT_ERR__ << "Error caught attempting to create a text node for this text: " <<
+    			childText << ". Converting instead to 'Illegal text..'" << std::endl;
+    	child->appendChild(theDocument_->createTextNode(CONVERT_TO_XML("Illegal text content blocked.")));
+    }
 
     return child;
 }

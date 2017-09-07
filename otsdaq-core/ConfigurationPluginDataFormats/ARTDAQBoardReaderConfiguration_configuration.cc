@@ -240,15 +240,15 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 	OUT << "fragment_receiver: {\n";
 
 	PUSHTAB;
-	{	//shared parameters
-		auto parametersLink = boardReaderNode.getNode("daqSharedParametersLink");
+	{	//shared and unique parameters
+		auto parametersLink = boardReaderNode.getNode("daqParametersLink");
 		if(!parametersLink.isDisconnected())
 		{
 
 			auto parameters = parametersLink.getChildren();
 			for(auto &parameter:parameters)
 			{
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					PUSHCOMMENT;
 
 				auto comment = parameter.second.getNode("CommentDescription");
@@ -259,37 +259,37 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 						"\n";
 
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					POPCOMMENT;
 			}
 		}
-		OUT << "\n";	//end shared daq board reader parameters
+		OUT << "\n";	//end daq board reader parameters
 	}
-	{	//unique parameters
-		auto parametersLink = boardReaderNode.getNode("daqUniqueParametersLink");
-		if(!parametersLink.isDisconnected())
-		{
-
-			auto parameters = parametersLink.getChildren();
-			for(auto &parameter:parameters)
-			{
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
-					PUSHCOMMENT;
-
-				auto comment = parameter.second.getNode("CommentDescription");
-				OUT << parameter.second.getNode("daqParameterKey").getValue() <<
-						": " <<
-						parameter.second.getNode("daqParameterValue").getValue()
-						<<
-						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
-						"\n";
-
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
-					POPCOMMENT;
-			}
-		}
-		OUT << "\n";	//end shared daq board reader parameters
-	}
+//	{	//unique parameters
+//		auto parametersLink = boardReaderNode.getNode("daqUniqueParametersLink");
+//		if(!parametersLink.isDisconnected())
+//		{
+//
+//			auto parameters = parametersLink.getChildren();
+//			for(auto &parameter:parameters)
+//			{
+//				if(!parameter.second.getNode("Status").getValue<bool>())
+//					PUSHCOMMENT;
+//
+//				auto comment = parameter.second.getNode("CommentDescription");
+//				OUT << parameter.second.getNode("daqParameterKey").getValue() <<
+//						": " <<
+//						parameter.second.getNode("daqParameterValue").getValue()
+//						<<
+//						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
+//						"\n";
+//
+//				if(!parameter.second.getNode("Status").getValue<bool>())
+//					POPCOMMENT;
+//			}
+//		}
+//		OUT << "\n";	//end shared daq board reader parameters
+//	}
 
 	OUT << "destinations: {\n";
 
@@ -351,7 +351,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 				auto metricParameters = metricParametersGroup.getChildren();
 				for(auto &metricParameter:metricParameters)
 				{
-					if(!metricParameter.second.getNode("Enabled").getValue<bool>())
+					if(!metricParameter.second.getNode("Status").getValue<bool>())
 						PUSHCOMMENT;
 
 					OUT << metricParameter.second.getNode("metricParameterKey").getValue() <<
@@ -359,7 +359,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 							metricParameter.second.getNode("metricParameterValue").getValue()
 							<< "\n";
 
-					if(!metricParameter.second.getNode("Enabled").getValue<bool>())
+					if(!metricParameter.second.getNode("Status").getValue<bool>())
 						POPCOMMENT;
 
 				}
