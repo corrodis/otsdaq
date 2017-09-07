@@ -50,8 +50,9 @@ throw (xdaq::exception::Exception)
 	xgi::bind (this, &CoreSupervisorBase::stateMachineXgiHandler, "StateMachineXgiHandler");
 	xgi::bind (this, &CoreSupervisorBase::request, 				  "Request");
 
-	xoap::bind(this, &CoreSupervisorBase::stateMachineStateRequest,    "StateMachineStateRequest",    XDAQ_NS_URI );
-	xoap::bind(this, &CoreSupervisorBase::macroMakerSupervisorRequest, "MacroMakerSupervisorRequest", XDAQ_NS_URI );
+	xoap::bind(this, &CoreSupervisorBase::stateMachineStateRequest,    		"StateMachineStateRequest",    		XDAQ_NS_URI );
+	xoap::bind(this, &CoreSupervisorBase::stateMachineErrorMessageRequest,  "StateMachineErrorMessageRequest",  XDAQ_NS_URI );
+	xoap::bind(this, &CoreSupervisorBase::macroMakerSupervisorRequest, 		"MacroMakerSupervisorRequest", 		XDAQ_NS_URI );
 
 	try
 	{
@@ -199,8 +200,16 @@ bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 xoap::MessageReference CoreSupervisorBase::stateMachineStateRequest(xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	__MOUT__<< theStateMachine_.getCurrentStateName() << std::endl;
+	__MOUT__<< "theStateMachine_.getCurrentStateName() = " << theStateMachine_.getCurrentStateName() << std::endl;
 	return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getCurrentStateName());
+}
+
+//========================================================================================================================
+xoap::MessageReference CoreSupervisorBase::stateMachineErrorMessageRequest(xoap::MessageReference message)
+throw (xoap::exception::Exception)
+{
+	__MOUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
+	return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getErrorMessage());
 }
 
 //========================================================================================================================

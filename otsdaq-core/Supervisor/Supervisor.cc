@@ -1220,6 +1220,10 @@ throw (toolbox::fsm::exception::Exception)
 			__SS__ << "Can NOT " << command << " FESupervisor, instance = " << it.first << ".\n\n" <<
 					reply;
 			__MOUT_ERR__ << ss.str() << std::endl;
+
+			__MOUT__ << "Getting error message..." << std::endl;
+			std::string errorMessage = send(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+			__MOUT_ERR__ << "errorMessage = " << errorMessage << std::endl;
 			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
 			//}
