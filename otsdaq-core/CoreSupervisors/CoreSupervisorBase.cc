@@ -555,7 +555,9 @@ throw (toolbox::fsm::exception::Exception)
 void CoreSupervisorBase::enteringError (toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
+	__MOUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()
+			<< "\n\nError Message: " <<
+			theStateMachine_.getErrorMessage() << std::endl;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
 	std::ostringstream error;
 	error << "Failure performing transition from "
@@ -563,7 +565,7 @@ throw (toolbox::fsm::exception::Exception)
 			<<  " to "
 			<< failedEvent.getToState()
 			<< " exception: " << failedEvent.getException().what();
-	__MOUT__<< error.str() << std::endl;
+	__MOUT_ERR__<< error.str() << std::endl;
 	//diagService_->reportError(errstr.str(),DIAGERROR);
 
 }

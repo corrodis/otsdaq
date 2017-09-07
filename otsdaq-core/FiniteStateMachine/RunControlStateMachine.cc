@@ -117,7 +117,7 @@ throw (xoap::exception::Exception)
 		{
 			result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " + theStateMachine_.getErrorMessage();
 			__MOUT_ERR__ << "Unexpected Failure state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
-			__MOUT_ERR__ << "Error message was as follows:\n" << theStateMachine_.getErrorMessage() << std::endl;
+			__MOUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
 		}
 	}
 	catch (toolbox::fsm::exception::Exception& e)
@@ -125,11 +125,12 @@ throw (xoap::exception::Exception)
 		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " + theStateMachine_.getErrorMessage();
 		__SS__ << "Run Control Message Handling Failed: " << e.what() << std::endl;
 		__MOUT_ERR__ << "\n" << ss.str();
-		__MOUT_ERR__ << "Error message was as follows:\n" << theStateMachine_.getErrorMessage() << std::endl;
+		__MOUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
 	}
 
 	theProgressBar_.complete();
 	__MOUT__ << "Ending state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
+	__MOUT__ << "result = " << result << std::endl;
 	return SOAPUtilities::makeSOAPMessageReference(result);
 }
 
