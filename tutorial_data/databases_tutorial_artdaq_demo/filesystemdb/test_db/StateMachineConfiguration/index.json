@@ -1,59 +1,26 @@
 {
 "ouid" : [
-"2867c2f90d8d4cd194845866"
+"d6b2128c4d194ae8880271a8"
 ],
 "version" : {
 "2" : [
-"2867c2f90d8d4cd194845866"
+"d6b2128c4d194ae8880271a8"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"2867c2f90d8d4cd194845866"
-],
-"testContext_v2" : [
-"2867c2f90d8d4cd194845866"
-],
-"testContext_v3" : [
-"2867c2f90d8d4cd194845866"
-],
-"testContext_v4" : [
-"2867c2f90d8d4cd194845866"
-],
-"testContext_v5" : [
-"2867c2f90d8d4cd194845866"
-],
-"testContext_v6" : [
-"2867c2f90d8d4cd194845866"
-],
-"testContext_v7" : [
-"2867c2f90d8d4cd194845866"
-],
-"testContext_v8" : [
-"2867c2f90d8d4cd194845866"
-],
-"artdaqContext_v0" : [
-"2867c2f90d8d4cd194845866"
-],
-"artdaqContext_v1" : [
-"2867c2f90d8d4cd194845866"
+"d6b2128c4d194ae8880271a8"
 ],
 "artdaqContext_v2" : [
-"2867c2f90d8d4cd194845866"
+"d6b2128c4d194ae8880271a8"
 ],
-"artdaqContext_v3" : [
-"2867c2f90d8d4cd194845866"
-],
-"artdaqContext_v4" : [
-"2867c2f90d8d4cd194845866"
-],
-"artdaqContext_v5" : [
-"2867c2f90d8d4cd194845866"
+"testContext_v4" : [
+"d6b2128c4d194ae8880271a8"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"2867c2f90d8d4cd194845866"
+"d6b2128c4d194ae8880271a8"
 ]
 },
 "aliases.active.name" : {

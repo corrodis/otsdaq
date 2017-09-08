@@ -1,65 +1,26 @@
 {
 "ouid" : [
-"787a8c569f084d02810033f9",
-"d6972c31b83d4b8a8b402c8b"
+"ca1c64242d024c3e88571f8f"
 ],
 "version" : {
 "2" : [
-"d6972c31b83d4b8a8b402c8b"
-],
-"3" : [
-"787a8c569f084d02810033f9"
+"ca1c64242d024c3e88571f8f"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"787a8c569f084d02810033f9",
-"d6972c31b83d4b8a8b402c8b"
-],
-"testContext_v2" : [
-"d6972c31b83d4b8a8b402c8b"
-],
-"testContext_v3" : [
-"d6972c31b83d4b8a8b402c8b"
-],
-"testContext_v4" : [
-"d6972c31b83d4b8a8b402c8b"
-],
-"testContext_v5" : [
-"d6972c31b83d4b8a8b402c8b"
-],
-"testContext_v6" : [
-"d6972c31b83d4b8a8b402c8b"
-],
-"testContext_v7" : [
-"d6972c31b83d4b8a8b402c8b"
-],
-"testContext_v8" : [
-"d6972c31b83d4b8a8b402c8b"
-],
-"artdaqContext_v0" : [
-"d6972c31b83d4b8a8b402c8b"
-],
-"artdaqContext_v1" : [
-"d6972c31b83d4b8a8b402c8b"
+"ca1c64242d024c3e88571f8f"
 ],
 "artdaqContext_v2" : [
-"787a8c569f084d02810033f9"
+"ca1c64242d024c3e88571f8f"
 ],
-"artdaqContext_v3" : [
-"787a8c569f084d02810033f9"
-],
-"artdaqContext_v4" : [
-"787a8c569f084d02810033f9"
-],
-"artdaqContext_v5" : [
-"787a8c569f084d02810033f9"
+"testContext_v4" : [
+"ca1c64242d024c3e88571f8f"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"787a8c569f084d02810033f9",
-"d6972c31b83d4b8a8b402c8b"
+"ca1c64242d024c3e88571f8f"
 ]
 },
 "aliases.active.name" : {
