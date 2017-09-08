@@ -1,0 +1,238 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_BUILDER_CONFIGURATION",
+"COMMENT" : "",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1504816784,
+"COL_TYPES" : {
+"SUPERVISOR_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"CONFIGURATION_STRING" : "VARCHAR2",
+"SERVICES_LINK" : "VARCHAR2",
+"SERVICES_LINK_UID" : "VARCHAR2",
+"DAQ_LINK" : "VARCHAR2",
+"DAQ_LINK_UID" : "VARCHAR2",
+"OUTPUTS_LINK" : "VARCHAR2",
+"OUTPUTS_LINK_UID" : "VARCHAR2",
+"PHYSICS_LINK" : "VARCHAR2",
+"PHYSICS_LINK_UID" : "VARCHAR2",
+"SOURCE_LINK" : "VARCHAR2",
+"SOURCE_LINK_UID" : "VARCHAR2",
+"ARTDAQ_GLOBAL_CONFIGURATION_FOR_PROCESS_NAME_LINK" : "VARCHAR2",
+"ARTDAQ_GLOBAL_CONFIGURATION_FOR_PROCESS_NAME_LINK_UID" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"SUPERVISOR_UID" : "builder0",
+"STATUS" : "On",
+"CONFIGURATION_STRING" : "DEFAULT",
+"SERVICES_LINK" : "ARTDAQBuilderServicesConfiguration",
+"SERVICES_LINK_UID" : "builder0services0",
+"DAQ_LINK" : "ARTDAQBuilderDaqConfiguration",
+"DAQ_LINK_UID" : "builder0daq0",
+"OUTPUTS_LINK" : "NO_LINK",
+"OUTPUTS_LINK_UID" : "DEFAULT",
+"PHYSICS_LINK" : "NO_LINK",
+"PHYSICS_LINK_UID" : "DEFAULT",
+"SOURCE_LINK" : "NO_LINK",
+"SOURCE_LINK_UID" : "DEFAULT",
+"ARTDAQ_GLOBAL_CONFIGURATION_FOR_PROCESS_NAME_LINK" : "NO_LINK",
+"ARTDAQ_GLOBAL_CONFIGURATION_FOR_PROCESS_NAME_LINK_UID" : "DEFAULT",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Thu Sep 07 15:39:44 2017",
+"rawdata" : [
+
+]
+},
+"version" : "3",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 07 15:39:44 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Thu Sep 07 15:39:44 2017"
+},
+{
+"name" : "artdaqConfig_v17",
+"assigned" : "Thu Sep 07 15:39:45 2017"
+},
+{
+"name" : "artdaqConfig_v18",
+"assigned" : "Thu Sep 07 15:46:42 2017"
+},
+{
+"name" : "artdaqConfig_v19",
+"assigned" : "Thu Sep 07 15:50:44 2017"
+},
+{
+"name" : "artdaqConfig_v20",
+"assigned" : "Thu Sep 07 16:04:49 2017"
+},
+{
+"name" : "artdaqConfig_v21",
+"assigned" : "Thu Sep 07 16:07:27 2017"
+},
+{
+"name" : "artdaqConfig_v22",
+"assigned" : "Thu Sep 07 16:10:08 2017"
+},
+{
+"name" : "artdaqConfig_v23",
+"assigned" : "Thu Sep 07 16:11:17 2017"
+},
+{
+"name" : "artdaqConfig_v24",
+"assigned" : "Thu Sep 07 16:12:03 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:39:44 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Thu Sep 07 15:39:44 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Thu Sep 07 15:39:44 2017",
+"value" : {
+"name" : "3",
+"assigned" : "Thu Sep 07 15:39:44 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Thu Sep 07 15:39:44 2017",
+"value" : {
+"name" : "ARTDAQBuilderConfiguration",
+"assigned" : "Thu Sep 07 15:39:44 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Thu Sep 07 15:39:44 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 07 15:39:44 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:39:45 2017",
+"value" : {
+"name" : "artdaqConfig_v17",
+"assigned" : "Thu Sep 07 15:39:45 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:46:42 2017",
+"value" : {
+"name" : "artdaqConfig_v18",
+"assigned" : "Thu Sep 07 15:46:42 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:50:44 2017",
+"value" : {
+"name" : "artdaqConfig_v19",
+"assigned" : "Thu Sep 07 15:50:44 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:04:49 2017",
+"value" : {
+"name" : "artdaqConfig_v20",
+"assigned" : "Thu Sep 07 16:04:49 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:07:27 2017",
+"value" : {
+"name" : "artdaqConfig_v21",
+"assigned" : "Thu Sep 07 16:07:27 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:10:08 2017",
+"value" : {
+"name" : "artdaqConfig_v22",
+"assigned" : "Thu Sep 07 16:10:08 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:11:17 2017",
+"value" : {
+"name" : "artdaqConfig_v23",
+"assigned" : "Thu Sep 07 16:11:17 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:12:03 2017",
+"value" : {
+"name" : "artdaqConfig_v24",
+"assigned" : "Thu Sep 07 16:12:03 2017"
+}
+}
+],
+"created" : "Thu Sep 07 15:39:44 2017"
+},
+"_id" : {
+"$oid" : "859c05c4282946d6b4375973"
+},
+"collection" : "ARTDAQBuilderConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

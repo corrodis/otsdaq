@@ -1,0 +1,202 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_AGGREGATOR_DAQ_CONFIGURATION",
+"COMMENT" : "Empty table.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1504822216,
+"COL_TYPES" : {
+"DAQ_UID" : "VARCHAR2",
+"DAQ_AGGREGATOR_PARAMETERS_LINK" : "VARCHAR2",
+"DAQ_AGGREGATOR_PARAMETERS_LINK_GROUP_ID" : "VARCHAR2",
+"DAQ_AGGREGATOR_SOURCES_LINK" : "VARCHAR2",
+"DAQ_AGGREGATOR_SOURCES_LINK_GROUP_ID" : "VARCHAR2",
+"DAQ_METRICS_LINK" : "VARCHAR2",
+"DAQ_METRICS_LINK_GROUP_ID" : "VARCHAR2",
+"DAQ_AGGREGATOR_DESTINATIONS_LINK" : "VARCHAR2",
+"DAQ_AGGREGATOR_DESTINATIONS_LINK_GROUP_ID" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"DAQ_UID" : "aggregator0daq0",
+"DAQ_AGGREGATOR_PARAMETERS_LINK" : "ARTDAQAggregatorDaqParameterConfiguration",
+"DAQ_AGGREGATOR_PARAMETERS_LINK_GROUP_ID" : "aggregator0daq0PGroup",
+"DAQ_AGGREGATOR_SOURCES_LINK" : "ARTDAQDaqSourceConfiguration",
+"DAQ_AGGREGATOR_SOURCES_LINK_GROUP_ID" : "aggregator0sources",
+"DAQ_METRICS_LINK" : "ARTDAQDaqMetricConfiguration",
+"DAQ_METRICS_LINK_GROUP_ID" : "aggreator0Metrics",
+"DAQ_AGGREGATOR_DESTINATIONS_LINK" : "ARTDAQDaqDestinationConfiguration",
+"DAQ_AGGREGATOR_DESTINATIONS_LINK_GROUP_ID" : "aggregator0destinations",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Thu Sep 07 17:10:16 2017",
+"rawdata" : [
+
+]
+},
+"version" : "3",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 07 17:10:16 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Thu Sep 07 17:10:16 2017"
+},
+{
+"name" : "artdaqConfig_v33",
+"assigned" : "Thu Sep 07 17:10:17 2017"
+},
+{
+"name" : "artdaqConfig_v34",
+"assigned" : "Thu Sep 07 17:15:45 2017"
+},
+{
+"name" : "artdaqConfig_v35",
+"assigned" : "Thu Sep 07 17:30:03 2017"
+},
+{
+"name" : "artdaqConfig_v36",
+"assigned" : "Thu Sep 07 17:38:02 2017"
+},
+{
+"name" : "artdaqConfig_v37",
+"assigned" : "Thu Sep 07 17:42:06 2017"
+},
+{
+"name" : "artdaqConfig_v38",
+"assigned" : "Fri Sep 08 07:07:15 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:10:16 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Thu Sep 07 17:10:16 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Thu Sep 07 17:10:16 2017",
+"value" : {
+"name" : "3",
+"assigned" : "Thu Sep 07 17:10:16 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Thu Sep 07 17:10:16 2017",
+"value" : {
+"name" : "ARTDAQAggregatorDaqConfiguration",
+"assigned" : "Thu Sep 07 17:10:16 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Thu Sep 07 17:10:16 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 07 17:10:16 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:10:17 2017",
+"value" : {
+"name" : "artdaqConfig_v33",
+"assigned" : "Thu Sep 07 17:10:17 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:15:45 2017",
+"value" : {
+"name" : "artdaqConfig_v34",
+"assigned" : "Thu Sep 07 17:15:45 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:30:03 2017",
+"value" : {
+"name" : "artdaqConfig_v35",
+"assigned" : "Thu Sep 07 17:30:03 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:38:02 2017",
+"value" : {
+"name" : "artdaqConfig_v36",
+"assigned" : "Thu Sep 07 17:38:02 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:42:06 2017",
+"value" : {
+"name" : "artdaqConfig_v37",
+"assigned" : "Thu Sep 07 17:42:06 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 08 07:07:15 2017",
+"value" : {
+"name" : "artdaqConfig_v38",
+"assigned" : "Fri Sep 08 07:07:15 2017"
+}
+}
+],
+"created" : "Thu Sep 07 17:10:16 2017"
+},
+"_id" : {
+"$oid" : "90871a4c8485429d8e3f522c"
+},
+"collection" : "ARTDAQAggregatorDaqConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

@@ -1,0 +1,404 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_BUILDER_SERVICES_DESTINATION_CONFIGURATION",
+"COMMENT" : "",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1504813564,
+"COL_TYPES" : {
+"DESTINATION_GROUP_ID" : "VARCHAR2",
+"DESTINATION_UID" : "VARCHAR2",
+"DESTINATION_KEY" : "VARCHAR2",
+"TRANSFER_PLUGIN_TYPE" : "VARCHAR2",
+"DESTINATION_ARTDAQ_CONTEXT_LINK" : "VARCHAR2",
+"DESTINATION_ARTDAQ_CONTEXT_LINK_UID" : "VARCHAR2",
+"ARTDAQ_GLOBAL_CONFIGURATION_LINK" : "VARCHAR2",
+"ARTDAQ_GLOBAL_CONFIGURATION_LINK_UID" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"DESTINATION_GROUP_ID" : "builder0services0Destinations",
+"DESTINATION_UID" : "builder0services0_destination0",
+"DESTINATION_KEY" : "d4",
+"TRANSFER_PLUGIN_TYPE" : "MPI",
+"DESTINATION_ARTDAQ_CONTEXT_LINK" : "XDAQContextConfiguration",
+"DESTINATION_ARTDAQ_CONTEXT_LINK_UID" : "ARTDAQAggregator0",
+"ARTDAQ_GLOBAL_CONFIGURATION_LINK" : "ARTDAQGlobalConfiguration",
+"ARTDAQ_GLOBAL_CONFIGURATION_LINK_UID" : "artdaq0",
+"COMMENT_DESCRIPTION" : "link to global config for fragment size",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Thu Sep 07 14:46:04 2017",
+"rawdata" : [
+
+]
+},
+"version" : "1",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 07 14:46:04 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Thu Sep 07 14:46:04 2017"
+},
+{
+"name" : "artdaqConfig_v16",
+"assigned" : "Thu Sep 07 14:46:05 2017"
+},
+{
+"name" : "artdaqConfig_v17",
+"assigned" : "Thu Sep 07 15:39:45 2017"
+},
+{
+"name" : "artdaqConfig_v18",
+"assigned" : "Thu Sep 07 15:46:42 2017"
+},
+{
+"name" : "artdaqConfig_v19",
+"assigned" : "Thu Sep 07 15:50:44 2017"
+},
+{
+"name" : "artdaqConfig_v20",
+"assigned" : "Thu Sep 07 16:04:49 2017"
+},
+{
+"name" : "artdaqConfig_v21",
+"assigned" : "Thu Sep 07 16:07:28 2017"
+},
+{
+"name" : "artdaqConfig_v22",
+"assigned" : "Thu Sep 07 16:10:08 2017"
+},
+{
+"name" : "artdaqConfig_v23",
+"assigned" : "Thu Sep 07 16:11:17 2017"
+},
+{
+"name" : "artdaqConfig_v24",
+"assigned" : "Thu Sep 07 16:12:03 2017"
+},
+{
+"name" : "artdaqConfig_v25",
+"assigned" : "Thu Sep 07 16:18:40 2017"
+},
+{
+"name" : "artdaqConfig_v26",
+"assigned" : "Thu Sep 07 16:28:17 2017"
+},
+{
+"name" : "artdaqConfig_v27",
+"assigned" : "Thu Sep 07 16:33:02 2017"
+},
+{
+"name" : "artdaqConfig_v28",
+"assigned" : "Thu Sep 07 16:39:48 2017"
+},
+{
+"name" : "artdaqConfig_v29",
+"assigned" : "Thu Sep 07 16:45:07 2017"
+},
+{
+"name" : "artdaqConfig_v30",
+"assigned" : "Thu Sep 07 16:49:00 2017"
+},
+{
+"name" : "artdaqConfig_v31",
+"assigned" : "Thu Sep 07 16:51:47 2017"
+},
+{
+"name" : "artdaqConfig_v32",
+"assigned" : "Thu Sep 07 16:55:24 2017"
+},
+{
+"name" : "artdaqConfig_v33",
+"assigned" : "Thu Sep 07 17:10:18 2017"
+},
+{
+"name" : "artdaqConfig_v34",
+"assigned" : "Thu Sep 07 17:15:45 2017"
+},
+{
+"name" : "artdaqConfig_v35",
+"assigned" : "Thu Sep 07 17:30:03 2017"
+},
+{
+"name" : "artdaqConfig_v36",
+"assigned" : "Thu Sep 07 17:38:02 2017"
+},
+{
+"name" : "artdaqConfig_v37",
+"assigned" : "Thu Sep 07 17:42:06 2017"
+},
+{
+"name" : "artdaqConfig_v38",
+"assigned" : "Fri Sep 08 07:07:15 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 14:46:04 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Thu Sep 07 14:46:04 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Thu Sep 07 14:46:04 2017",
+"value" : {
+"name" : "1",
+"assigned" : "Thu Sep 07 14:46:04 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Thu Sep 07 14:46:04 2017",
+"value" : {
+"name" : "ARTDAQBuilderServicesDestinationConfiguration",
+"assigned" : "Thu Sep 07 14:46:04 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Thu Sep 07 14:46:04 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 07 14:46:04 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 14:46:05 2017",
+"value" : {
+"name" : "artdaqConfig_v16",
+"assigned" : "Thu Sep 07 14:46:05 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:39:45 2017",
+"value" : {
+"name" : "artdaqConfig_v17",
+"assigned" : "Thu Sep 07 15:39:45 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:46:42 2017",
+"value" : {
+"name" : "artdaqConfig_v18",
+"assigned" : "Thu Sep 07 15:46:42 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:50:44 2017",
+"value" : {
+"name" : "artdaqConfig_v19",
+"assigned" : "Thu Sep 07 15:50:44 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:04:49 2017",
+"value" : {
+"name" : "artdaqConfig_v20",
+"assigned" : "Thu Sep 07 16:04:49 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:07:28 2017",
+"value" : {
+"name" : "artdaqConfig_v21",
+"assigned" : "Thu Sep 07 16:07:28 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:10:08 2017",
+"value" : {
+"name" : "artdaqConfig_v22",
+"assigned" : "Thu Sep 07 16:10:08 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:11:17 2017",
+"value" : {
+"name" : "artdaqConfig_v23",
+"assigned" : "Thu Sep 07 16:11:17 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:12:03 2017",
+"value" : {
+"name" : "artdaqConfig_v24",
+"assigned" : "Thu Sep 07 16:12:03 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:18:40 2017",
+"value" : {
+"name" : "artdaqConfig_v25",
+"assigned" : "Thu Sep 07 16:18:40 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:28:17 2017",
+"value" : {
+"name" : "artdaqConfig_v26",
+"assigned" : "Thu Sep 07 16:28:17 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:33:02 2017",
+"value" : {
+"name" : "artdaqConfig_v27",
+"assigned" : "Thu Sep 07 16:33:02 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:39:48 2017",
+"value" : {
+"name" : "artdaqConfig_v28",
+"assigned" : "Thu Sep 07 16:39:48 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:45:07 2017",
+"value" : {
+"name" : "artdaqConfig_v29",
+"assigned" : "Thu Sep 07 16:45:07 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:49:00 2017",
+"value" : {
+"name" : "artdaqConfig_v30",
+"assigned" : "Thu Sep 07 16:49:00 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:51:47 2017",
+"value" : {
+"name" : "artdaqConfig_v31",
+"assigned" : "Thu Sep 07 16:51:47 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:55:24 2017",
+"value" : {
+"name" : "artdaqConfig_v32",
+"assigned" : "Thu Sep 07 16:55:24 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:10:18 2017",
+"value" : {
+"name" : "artdaqConfig_v33",
+"assigned" : "Thu Sep 07 17:10:18 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:15:45 2017",
+"value" : {
+"name" : "artdaqConfig_v34",
+"assigned" : "Thu Sep 07 17:15:45 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:30:03 2017",
+"value" : {
+"name" : "artdaqConfig_v35",
+"assigned" : "Thu Sep 07 17:30:03 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:38:02 2017",
+"value" : {
+"name" : "artdaqConfig_v36",
+"assigned" : "Thu Sep 07 17:38:02 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:42:06 2017",
+"value" : {
+"name" : "artdaqConfig_v37",
+"assigned" : "Thu Sep 07 17:42:06 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 08 07:07:15 2017",
+"value" : {
+"name" : "artdaqConfig_v38",
+"assigned" : "Fri Sep 08 07:07:15 2017"
+}
+}
+],
+"created" : "Thu Sep 07 14:46:04 2017"
+},
+"_id" : {
+"$oid" : "776f98febf1c439c8de2206d"
+},
+"collection" : "ARTDAQBuilderServicesDestinationConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

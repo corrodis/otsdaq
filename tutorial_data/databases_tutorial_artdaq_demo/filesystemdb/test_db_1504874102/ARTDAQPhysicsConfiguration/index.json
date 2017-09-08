@@ -1,0 +1,29 @@
+{
+"ouid" : [
+"e5686f7c62464102957c955b"
+],
+"version" : {
+"1" : [
+"e5686f7c62464102957c955b"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"e5686f7c62464102957c955b"
+],
+"artdaqConfig_v1" : [
+"e5686f7c62464102957c955b"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"e5686f7c62464102957c955b"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

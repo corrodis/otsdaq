@@ -1,0 +1,352 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_DAQ_METRIC_PARAMETER_CONFIGURATION",
+"COMMENT" : "No comment.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1504818676,
+"COL_TYPES" : {
+"METRIC_PARAMETER_GROUP_ID" : "VARCHAR2",
+"METRIC_PARAMETER_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"METRIC_PARAMETER_KEY" : "VARCHAR2",
+"METRIC_PARAMETER_VALUE" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"METRIC_PARAMETER_GROUP_ID" : "reader0MetricPGroup",
+"METRIC_PARAMETER_UID" : "readerFileP0",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "fileName",
+"METRIC_PARAMETER_VALUE" : "\"/tmp/boardreader/br_%UID%_metrics.log\"",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "reader0MetricPGroup",
+"METRIC_PARAMETER_UID" : "readerMetricP0",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "uniquify",
+"METRIC_PARAMETER_VALUE" : "true",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "builder0MetricPGroup",
+"METRIC_PARAMETER_UID" : "builderFileP0",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "fileName",
+"METRIC_PARAMETER_VALUE" : "\"/tmp/eventbuilder/evb_%UID%_metrics.log\"",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "builder0MetricPGroup",
+"METRIC_PARAMETER_UID" : "builderMetricP0",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "uniquify",
+"METRIC_PARAMETER_VALUE" : "true",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "builder0GangliaPGroup",
+"METRIC_PARAMETER_UID" : "gangliaMetricP1",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "reporting_interval",
+"METRIC_PARAMETER_VALUE" : "15.0",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "builder0GangliaPGroup",
+"METRIC_PARAMETER_UID" : "gangliaFileP1",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "configFile",
+"METRIC_PARAMETER_VALUE" : "\"/etc/ganglia/gmond.conf\"",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "builder0GangliaPGroup",
+"METRIC_PARAMETER_UID" : "gangliaMetricP2",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "group",
+"METRIC_PARAMETER_VALUE" : "\"ARTDAQ\"",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "builder0MessageFacilityPGroup",
+"METRIC_PARAMETER_UID" : "builderMessageFacilityMetricP0",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "output_message_application_name",
+"METRIC_PARAMETER_VALUE" : "\"ARTDAQ Metric\"",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1504818676"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "builder0MessageFacilityPGroup",
+"METRIC_PARAMETER_UID" : "builderMessageFacilityMetricP1",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "output_message_severity",
+"METRIC_PARAMETER_VALUE" : "0",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1504818676"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "builder0GraphiteMetricPGroup",
+"METRIC_PARAMETER_UID" : "builderGraphiteMetricP0",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "DEFAULT",
+"METRIC_PARAMETER_VALUE" : "DEFAULT",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "builder0GraphiteMetricPGroup",
+"METRIC_PARAMETER_UID" : "builderGraphiteMetricP1",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "DEFAULT",
+"METRIC_PARAMETER_VALUE" : "DEFAULT",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"METRIC_PARAMETER_GROUP_ID" : "builder0GraphiteMetricPGroup",
+"METRIC_PARAMETER_UID" : "builderGraphiteMetricP2",
+"STATUS" : "On",
+"METRIC_PARAMETER_KEY" : "DEFAULT",
+"METRIC_PARAMETER_VALUE" : "DEFAULT",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Thu Sep 07 16:11:16 2017",
+"rawdata" : [
+
+]
+},
+"version" : "5",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 07 16:11:16 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Thu Sep 07 16:11:16 2017"
+},
+{
+"name" : "artdaqConfig_v23",
+"assigned" : "Thu Sep 07 16:11:17 2017"
+},
+{
+"name" : "artdaqConfig_v24",
+"assigned" : "Thu Sep 07 16:12:03 2017"
+},
+{
+"name" : "artdaqConfig_v25",
+"assigned" : "Thu Sep 07 16:18:40 2017"
+},
+{
+"name" : "artdaqConfig_v26",
+"assigned" : "Thu Sep 07 16:28:17 2017"
+},
+{
+"name" : "artdaqConfig_v27",
+"assigned" : "Thu Sep 07 16:33:02 2017"
+},
+{
+"name" : "artdaqConfig_v28",
+"assigned" : "Thu Sep 07 16:39:48 2017"
+},
+{
+"name" : "artdaqConfig_v29",
+"assigned" : "Thu Sep 07 16:45:07 2017"
+},
+{
+"name" : "artdaqConfig_v30",
+"assigned" : "Thu Sep 07 16:49:01 2017"
+},
+{
+"name" : "artdaqConfig_v31",
+"assigned" : "Thu Sep 07 16:51:47 2017"
+},
+{
+"name" : "artdaqConfig_v32",
+"assigned" : "Thu Sep 07 16:55:24 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:11:16 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Thu Sep 07 16:11:16 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Thu Sep 07 16:11:16 2017",
+"value" : {
+"name" : "5",
+"assigned" : "Thu Sep 07 16:11:16 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Thu Sep 07 16:11:16 2017",
+"value" : {
+"name" : "ARTDAQDaqMetricParameterConfiguration",
+"assigned" : "Thu Sep 07 16:11:16 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Thu Sep 07 16:11:16 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 07 16:11:16 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:11:17 2017",
+"value" : {
+"name" : "artdaqConfig_v23",
+"assigned" : "Thu Sep 07 16:11:17 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:12:03 2017",
+"value" : {
+"name" : "artdaqConfig_v24",
+"assigned" : "Thu Sep 07 16:12:03 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:18:40 2017",
+"value" : {
+"name" : "artdaqConfig_v25",
+"assigned" : "Thu Sep 07 16:18:40 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:28:17 2017",
+"value" : {
+"name" : "artdaqConfig_v26",
+"assigned" : "Thu Sep 07 16:28:17 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:33:02 2017",
+"value" : {
+"name" : "artdaqConfig_v27",
+"assigned" : "Thu Sep 07 16:33:02 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:39:48 2017",
+"value" : {
+"name" : "artdaqConfig_v28",
+"assigned" : "Thu Sep 07 16:39:48 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:45:07 2017",
+"value" : {
+"name" : "artdaqConfig_v29",
+"assigned" : "Thu Sep 07 16:45:07 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:49:01 2017",
+"value" : {
+"name" : "artdaqConfig_v30",
+"assigned" : "Thu Sep 07 16:49:01 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:51:47 2017",
+"value" : {
+"name" : "artdaqConfig_v31",
+"assigned" : "Thu Sep 07 16:51:47 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:55:24 2017",
+"value" : {
+"name" : "artdaqConfig_v32",
+"assigned" : "Thu Sep 07 16:55:24 2017"
+}
+}
+],
+"created" : "Thu Sep 07 16:11:16 2017"
+},
+"_id" : {
+"$oid" : "69205c9e98d548249eafeccf"
+},
+"collection" : "ARTDAQDaqMetricParameterConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

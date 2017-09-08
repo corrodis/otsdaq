@@ -1,0 +1,29 @@
+{
+"ouid" : [
+"db770f2214e54775b2f16313"
+],
+"version" : {
+"1" : [
+"db770f2214e54775b2f16313"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"db770f2214e54775b2f16313"
+],
+"artdaqConfig_v1" : [
+"db770f2214e54775b2f16313"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"db770f2214e54775b2f16313"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

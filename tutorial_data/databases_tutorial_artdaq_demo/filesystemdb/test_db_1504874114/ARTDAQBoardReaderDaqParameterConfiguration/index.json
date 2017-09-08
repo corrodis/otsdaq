@@ -1,0 +1,29 @@
+{
+"ouid" : [
+"e590a2221ad843419115a281"
+],
+"version" : {
+"1" : [
+"e590a2221ad843419115a281"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"e590a2221ad843419115a281"
+],
+"artdaqConfig_v1" : [
+"e590a2221ad843419115a281"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"e590a2221ad843419115a281"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

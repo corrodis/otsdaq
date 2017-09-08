@@ -1,0 +1,29 @@
+{
+"ouid" : [
+"bca547cf88de4247b97c3f64"
+],
+"version" : {
+"1" : [
+"bca547cf88de4247b97c3f64"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"bca547cf88de4247b97c3f64"
+],
+"artdaqConfig_v1" : [
+"bca547cf88de4247b97c3f64"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"bca547cf88de4247b97c3f64"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

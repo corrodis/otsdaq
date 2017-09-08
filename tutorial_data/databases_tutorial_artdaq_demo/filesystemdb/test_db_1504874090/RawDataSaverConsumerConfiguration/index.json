@@ -1,0 +1,32 @@
+{
+"ouid" : [
+"690acabb1bd24229819ef170"
+],
+"version" : {
+"1" : [
+"690acabb1bd24229819ef170"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"690acabb1bd24229819ef170"
+],
+"artdaqConfig_v1" : [
+"690acabb1bd24229819ef170"
+],
+"defaultConfig_v3" : [
+"690acabb1bd24229819ef170"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"690acabb1bd24229819ef170"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

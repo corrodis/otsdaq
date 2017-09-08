@@ -1,0 +1,29 @@
+{
+"ouid" : [
+"ba12830ce71647dea578ce15"
+],
+"version" : {
+"1" : [
+"ba12830ce71647dea578ce15"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"ba12830ce71647dea578ce15"
+],
+"artdaqConfig_v1" : [
+"ba12830ce71647dea578ce15"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"ba12830ce71647dea578ce15"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

@@ -1,0 +1,126 @@
+{
+"document" : {
+"data" : {
+"NAME" : "",
+"COMMENT" : "",
+"AUTHOR" : "",
+"CREATION_TIME" : 1502903144,
+"COL_TYPES" : {
+"UNUSED_UID" : "NUMBER",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"GROUP_CREATION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"UNUSED_UID" : "0",
+"COMMENT_DESCRIPTION" : "Default%20config%20group%20for%20artdaq%20tutorial.",
+"AUTHOR" : "admin",
+"GROUP_CREATION_TIME" : "1504229970"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Thu Aug 31 20:39:30 2017",
+"rawdata" : [
+
+]
+},
+"version" : "24",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Thu Aug 31 20:39:30 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Thu Aug 31 20:39:30 2017"
+},
+{
+"name" : "artdaqConfig_v0",
+"assigned" : "Thu Aug 31 20:39:30 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 20:39:30 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Thu Aug 31 20:39:30 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Thu Aug 31 20:39:30 2017",
+"value" : {
+"name" : "24",
+"assigned" : "Thu Aug 31 20:39:30 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Thu Aug 31 20:39:30 2017",
+"value" : {
+"name" : "ConfigurationGroupMetadata",
+"assigned" : "Thu Aug 31 20:39:30 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Thu Aug 31 20:39:30 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Thu Aug 31 20:39:30 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 20:39:30 2017",
+"value" : {
+"name" : "artdaqConfig_v0",
+"assigned" : "Thu Aug 31 20:39:30 2017"
+}
+}
+],
+"created" : "Thu Aug 31 20:39:30 2017"
+},
+"_id" : {
+"$oid" : "55714638b8464e4b99170613"
+},
+"collection" : "ConfigurationGroupMetadata",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

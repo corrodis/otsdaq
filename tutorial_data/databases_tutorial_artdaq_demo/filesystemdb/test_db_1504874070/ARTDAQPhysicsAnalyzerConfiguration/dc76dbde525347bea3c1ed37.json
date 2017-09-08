@@ -1,0 +1,162 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_PHYSICS_ANALYZER_CONFIGURATION",
+"COMMENT" : "",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1504823402,
+"COL_TYPES" : {
+"ANALYZER_GROUP_ID" : "VARCHAR2",
+"ANALYZER_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"ANALYZER_KEY" : "VARCHAR2",
+"ANALYZER_MODULE_TYPE" : "VARCHAR2",
+"ANALYZER_MODULE_PARAMETER_LINK" : "VARCHAR2",
+"ANALYZER_MODULE_PARAMETER_LINK_GROUP_ID" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"ANALYZER_GROUP_ID" : "builder0PhysicsAnalyzers | builder0PhysicsAnalyzerPGroup",
+"ANALYZER_UID" : "builderPhysicsAnalyzer0",
+"STATUS" : "On",
+"ANALYZER_KEY" : "wf",
+"ANALYZER_MODULE_TYPE" : "\"WFViewer\"",
+"ANALYZER_MODULE_PARAMETER_LINK" : "ARTDAQPhysicsAnalyzerParameterConfiguration",
+"ANALYZER_MODULE_PARAMETER_LINK_GROUP_ID" : "builder0PhysicsAnalyzer0PGroup",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"ANALYZER_GROUP_ID" : "builder0PhysicsAnalyzers | builder0PhysicsAnalyzerPGroup",
+"ANALYZER_UID" : "builderPhysicsAnalyzer1",
+"STATUS" : "Off",
+"ANALYZER_KEY" : "checkintegrity",
+"ANALYZER_MODULE_TYPE" : "\"CheckIntegrity\"",
+"ANALYZER_MODULE_PARAMETER_LINK" : "NO_LINK",
+"ANALYZER_MODULE_PARAMETER_LINK_GROUP_ID" : "DEFAULT",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"ANALYZER_GROUP_ID" : "aggregator0PhysicsAnalyzers",
+"ANALYZER_UID" : "aggregatorPhysicsAnalyzer0",
+"STATUS" : "On",
+"ANALYZER_KEY" : "wf",
+"ANALYZER_MODULE_TYPE" : "\"WFViewer\"",
+"ANALYZER_MODULE_PARAMETER_LINK" : "NO_LINK",
+"ANALYZER_MODULE_PARAMETER_LINK_GROUP_ID" : "DEFAULT",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Thu Sep 07 17:30:02 2017",
+"rawdata" : [
+
+]
+},
+"version" : "3",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 07 17:30:02 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Thu Sep 07 17:30:02 2017"
+},
+{
+"name" : "artdaqConfig_v35",
+"assigned" : "Thu Sep 07 17:30:04 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:30:02 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Thu Sep 07 17:30:02 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Thu Sep 07 17:30:02 2017",
+"value" : {
+"name" : "3",
+"assigned" : "Thu Sep 07 17:30:02 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Thu Sep 07 17:30:02 2017",
+"value" : {
+"name" : "ARTDAQPhysicsAnalyzerConfiguration",
+"assigned" : "Thu Sep 07 17:30:02 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Thu Sep 07 17:30:02 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 07 17:30:02 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:30:04 2017",
+"value" : {
+"name" : "artdaqConfig_v35",
+"assigned" : "Thu Sep 07 17:30:04 2017"
+}
+}
+],
+"created" : "Thu Sep 07 17:30:02 2017"
+},
+"_id" : {
+"$oid" : "dc76dbde525347bea3c1ed37"
+},
+"collection" : "ARTDAQPhysicsAnalyzerConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

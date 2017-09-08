@@ -1,0 +1,270 @@
+{
+"document" : {
+"data" : {
+"NAME" : "XDAQ_CONTEXT_CONFIGURATION",
+"COMMENT" : "Example context with artdaq off with environment variables.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1503852834,
+"COL_TYPES" : {
+"CONTEXT_UID" : "VARCHAR2",
+"LINK_TO_APPLICATION_CONFIGURATION" : "VARCHAR2",
+"APPLICATION_GROUP_ID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"ID" : "NUMBER",
+"ADDRESS" : "VARCHAR2",
+"PORT" : "NUMBER",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"CONTEXT_UID" : "mainContext",
+"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"APPLICATION_GROUP_ID" : "testContextApps",
+"STATUS" : "On",
+"ID" : "0",
+"ADDRESS" : "http://${HOSTNAME}",
+"PORT" : "${OTS_MAIN_PORT}",
+"COMMENT_DESCRIPTION" : "main context",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1499441274"
+},
+{
+"CONTEXT_UID" : "ARTDAQBoardReader0",
+"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"APPLICATION_GROUP_ID" : "BoardReader0Apps",
+"STATUS" : "On",
+"ID" : "0",
+"ADDRESS" : "http://${HOSTNAME}",
+"PORT" : "1984",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"CONTEXT_UID" : "ARTDAQEventBuilder0",
+"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"APPLICATION_GROUP_ID" : "EventBuilder0Apps",
+"STATUS" : "On",
+"ID" : "0",
+"ADDRESS" : "http://${HOSTNAME}",
+"PORT" : "1985",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+},
+{
+"CONTEXT_UID" : "ARTDAQAggregator0",
+"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"APPLICATION_GROUP_ID" : "Aggregator0Apps",
+"STATUS" : "On",
+"ID" : "0",
+"ADDRESS" : "http://${HOSTNAME}",
+"PORT" : "1986",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Sun Aug 27 11:53:54 2017",
+"rawdata" : [
+
+]
+},
+"version" : "4",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Sun Aug 27 11:53:54 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Sun Aug 27 11:53:54 2017"
+},
+{
+"name" : "testContext_v5",
+"assigned" : "Sun Aug 27 11:53:55 2017"
+},
+{
+"name" : "testContext_v7",
+"assigned" : "Sun Aug 27 12:29:59 2017"
+},
+{
+"name" : "testContext_v8",
+"assigned" : "Mon Aug 28 09:07:18 2017"
+},
+{
+"name" : "artdaqContext_v0",
+"assigned" : "Thu Aug 31 20:39:52 2017"
+},
+{
+"name" : "artdaqContext_v1",
+"assigned" : "Fri Sep 01 21:01:20 2017"
+},
+{
+"name" : "artdaqContext_v2",
+"assigned" : "Tue Sep 05 11:17:57 2017"
+},
+{
+"name" : "artdaqContext_v3",
+"assigned" : "Tue Sep 05 11:20:11 2017"
+},
+{
+"name" : "artdaqContext_v4",
+"assigned" : "Thu Sep 07 14:41:45 2017"
+},
+{
+"name" : "artdaqContext_v5",
+"assigned" : "Thu Sep 07 16:49:03 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Sun Aug 27 11:53:54 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Sun Aug 27 11:53:54 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Sun Aug 27 11:53:54 2017",
+"value" : {
+"name" : "4",
+"assigned" : "Sun Aug 27 11:53:54 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Sun Aug 27 11:53:54 2017",
+"value" : {
+"name" : "XDAQContextConfiguration",
+"assigned" : "Sun Aug 27 11:53:54 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Sun Aug 27 11:53:54 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Sun Aug 27 11:53:54 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Sun Aug 27 11:53:55 2017",
+"value" : {
+"name" : "testContext_v5",
+"assigned" : "Sun Aug 27 11:53:55 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Sun Aug 27 12:29:59 2017",
+"value" : {
+"name" : "testContext_v7",
+"assigned" : "Sun Aug 27 12:29:59 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Mon Aug 28 09:07:18 2017",
+"value" : {
+"name" : "testContext_v8",
+"assigned" : "Mon Aug 28 09:07:18 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 20:39:52 2017",
+"value" : {
+"name" : "artdaqContext_v0",
+"assigned" : "Thu Aug 31 20:39:52 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 21:01:20 2017",
+"value" : {
+"name" : "artdaqContext_v1",
+"assigned" : "Fri Sep 01 21:01:20 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 05 11:17:57 2017",
+"value" : {
+"name" : "artdaqContext_v2",
+"assigned" : "Tue Sep 05 11:17:57 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 05 11:20:11 2017",
+"value" : {
+"name" : "artdaqContext_v3",
+"assigned" : "Tue Sep 05 11:20:11 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 14:41:45 2017",
+"value" : {
+"name" : "artdaqContext_v4",
+"assigned" : "Thu Sep 07 14:41:45 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:49:03 2017",
+"value" : {
+"name" : "artdaqContext_v5",
+"assigned" : "Thu Sep 07 16:49:03 2017"
+}
+}
+],
+"created" : "Sun Aug 27 11:53:54 2017"
+},
+"_id" : {
+"$oid" : "983779afdf1e4f228887442e"
+},
+"collection" : "XDAQContextConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

@@ -1,0 +1,29 @@
+{
+"ouid" : [
+"dd970cba03c047358cf18455"
+],
+"version" : {
+"1" : [
+"dd970cba03c047358cf18455"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"dd970cba03c047358cf18455"
+],
+"artdaqConfig_v1" : [
+"dd970cba03c047358cf18455"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"dd970cba03c047358cf18455"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

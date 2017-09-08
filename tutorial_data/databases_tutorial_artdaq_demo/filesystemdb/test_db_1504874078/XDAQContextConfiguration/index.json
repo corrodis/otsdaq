@@ -1,0 +1,32 @@
+{
+"ouid" : [
+"0ca120ef494f44db8c4b14f9"
+],
+"version" : {
+"2" : [
+"0ca120ef494f44db8c4b14f9"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"0ca120ef494f44db8c4b14f9"
+],
+"artdaqContext_v2" : [
+"0ca120ef494f44db8c4b14f9"
+],
+"testContext_v4" : [
+"0ca120ef494f44db8c4b14f9"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"0ca120ef494f44db8c4b14f9"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

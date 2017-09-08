@@ -1,0 +1,726 @@
+{
+"document" : {
+"data" : {
+"NAME" : "DATA_BUFFER_CONFIGURATION",
+"COMMENT" : "Data Buffer table for tutorial.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1501079048,
+"COL_TYPES" : {
+"DATA_BUFFER_GROUP_ID" : "VARCHAR2",
+"PROCESSOR_UID" : "VARCHAR2",
+"PROCESSOR_TYPE" : "VARCHAR2",
+"PROCESSOR_PLUGIN_NAME" : "VARCHAR2",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "VARCHAR2",
+"LINK_TO_PROCESSOR_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"DATA_BUFFER_GROUP_ID" : "DBGroup0",
+"PROCESSOR_UID" : "DB0Producer0",
+"PROCESSOR_TYPE" : "Producer",
+"PROCESSOR_PLUGIN_NAME" : "UDPDataListenerProducer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "UDPDataListenerProducerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "UDPListener0",
+"STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479488752"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "DBGroup0",
+"PROCESSOR_UID" : "DB0Consumer0",
+"PROCESSOR_TYPE" : "Consumer",
+"PROCESSOR_PLUGIN_NAME" : "RawDataSaverConsumer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "RawDataSaverConsumerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "RAWSaver0",
+"STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479770727"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "DBGroup0",
+"PROCESSOR_UID" : "DB0Consumer1",
+"PROCESSOR_TYPE" : "Consumer",
+"PROCESSOR_PLUGIN_NAME" : "UDPDataStreamerConsumer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "UDPDataStreamerConsumerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "UDPStreamer0",
+"STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479826252"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "DBGroup1",
+"PROCESSOR_UID" : "DB1Producer0",
+"PROCESSOR_TYPE" : "Producer",
+"PROCESSOR_PLUGIN_NAME" : "UDPDataListenerProducer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "UDPDataListenerProducerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "UDPListener1",
+"STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479826252"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "DBGroup1",
+"PROCESSOR_UID" : "DB1Consumer1",
+"PROCESSOR_TYPE" : "Consumer",
+"PROCESSOR_PLUGIN_NAME" : "DemoDQMHistosConsumer",
+"LINK_TO_PROCESSOR_CONFIGURATION" : "DQMHistosConsumerConfiguration",
+"LINK_TO_PROCESSOR_UID" : "DQMHistos0",
+"STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479826252"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Wed Jul 26 14:33:23 2017",
+"rawdata" : [
+
+]
+},
+"version" : "1",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+},
+{
+"name" : "defaultConfig_v1",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+},
+{
+"name" : "defaultConfig_v2",
+"assigned" : "Wed Aug 16 12:06:11 2017"
+},
+{
+"name" : "defaultArtdaqConfig_v0",
+"assigned" : "Wed Aug 30 14:04:58 2017"
+},
+{
+"name" : "defaultArtdaqConfig_v1",
+"assigned" : "Wed Aug 30 14:07:46 2017"
+},
+{
+"name" : "test_v9",
+"assigned" : "Wed Aug 30 14:14:48 2017"
+},
+{
+"name" : "test_v10",
+"assigned" : "Thu Aug 31 12:44:19 2017"
+},
+{
+"name" : "defaultArtdaqConfig_v2",
+"assigned" : "Thu Aug 31 20:38:26 2017"
+},
+{
+"name" : "artdaqConfig_v0",
+"assigned" : "Thu Aug 31 20:39:30 2017"
+},
+{
+"name" : "artdaqConfig_v1",
+"assigned" : "Fri Sep 01 12:19:59 2017"
+},
+{
+"name" : "artdaqConfig_v2",
+"assigned" : "Fri Sep 01 20:44:43 2017"
+},
+{
+"name" : "artdaqConfig_v3",
+"assigned" : "Fri Sep 01 20:54:28 2017"
+},
+{
+"name" : "artdaqConfig_v4",
+"assigned" : "Fri Sep 01 20:54:36 2017"
+},
+{
+"name" : "artdaqConfig_v5",
+"assigned" : "Fri Sep 01 20:56:28 2017"
+},
+{
+"name" : "artdaqConfig_v6",
+"assigned" : "Fri Sep 01 21:00:17 2017"
+},
+{
+"name" : "artdaqConfig_v7",
+"assigned" : "Fri Sep 01 21:01:12 2017"
+},
+{
+"name" : "artdaqConfig_v8",
+"assigned" : "Tue Sep 05 11:03:47 2017"
+},
+{
+"name" : "artdaqConfig_v9",
+"assigned" : "Tue Sep 05 14:01:56 2017"
+},
+{
+"name" : "artdaqConfig_v10",
+"assigned" : "Tue Sep 05 14:02:25 2017"
+},
+{
+"name" : "artdaqConfig_v11",
+"assigned" : "Thu Sep 07 10:00:09 2017"
+},
+{
+"name" : "artdaqConfig_v12",
+"assigned" : "Thu Sep 07 10:29:17 2017"
+},
+{
+"name" : "artdaqConfig_v13",
+"assigned" : "Thu Sep 07 10:40:01 2017"
+},
+{
+"name" : "artdaqConfig_v14",
+"assigned" : "Thu Sep 07 10:46:53 2017"
+},
+{
+"name" : "artdaqConfig_v15",
+"assigned" : "Thu Sep 07 14:41:43 2017"
+},
+{
+"name" : "artdaqConfig_v16",
+"assigned" : "Thu Sep 07 14:46:06 2017"
+},
+{
+"name" : "artdaqConfig_v17",
+"assigned" : "Thu Sep 07 15:39:46 2017"
+},
+{
+"name" : "artdaqConfig_v18",
+"assigned" : "Thu Sep 07 15:46:43 2017"
+},
+{
+"name" : "artdaqConfig_v19",
+"assigned" : "Thu Sep 07 15:50:44 2017"
+},
+{
+"name" : "artdaqConfig_v20",
+"assigned" : "Thu Sep 07 16:04:50 2017"
+},
+{
+"name" : "artdaqConfig_v21",
+"assigned" : "Thu Sep 07 16:07:28 2017"
+},
+{
+"name" : "artdaqConfig_v22",
+"assigned" : "Thu Sep 07 16:10:09 2017"
+},
+{
+"name" : "artdaqConfig_v23",
+"assigned" : "Thu Sep 07 16:11:18 2017"
+},
+{
+"name" : "artdaqConfig_v24",
+"assigned" : "Thu Sep 07 16:12:04 2017"
+},
+{
+"name" : "artdaqConfig_v25",
+"assigned" : "Thu Sep 07 16:18:41 2017"
+},
+{
+"name" : "artdaqConfig_v26",
+"assigned" : "Thu Sep 07 16:28:18 2017"
+},
+{
+"name" : "artdaqConfig_v27",
+"assigned" : "Thu Sep 07 16:33:03 2017"
+},
+{
+"name" : "artdaqConfig_v28",
+"assigned" : "Thu Sep 07 16:39:49 2017"
+},
+{
+"name" : "artdaqConfig_v29",
+"assigned" : "Thu Sep 07 16:45:08 2017"
+},
+{
+"name" : "artdaqConfig_v30",
+"assigned" : "Thu Sep 07 16:49:01 2017"
+},
+{
+"name" : "artdaqConfig_v31",
+"assigned" : "Thu Sep 07 16:51:48 2017"
+},
+{
+"name" : "artdaqConfig_v32",
+"assigned" : "Thu Sep 07 16:55:25 2017"
+},
+{
+"name" : "artdaqConfig_v33",
+"assigned" : "Thu Sep 07 17:10:19 2017"
+},
+{
+"name" : "artdaqConfig_v34",
+"assigned" : "Thu Sep 07 17:15:46 2017"
+},
+{
+"name" : "artdaqConfig_v35",
+"assigned" : "Thu Sep 07 17:30:04 2017"
+},
+{
+"name" : "artdaqConfig_v36",
+"assigned" : "Thu Sep 07 17:38:03 2017"
+},
+{
+"name" : "artdaqConfig_v37",
+"assigned" : "Thu Sep 07 17:42:07 2017"
+},
+{
+"name" : "artdaqConfig_v38",
+"assigned" : "Fri Sep 08 07:07:16 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Jul 26 14:33:23 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Wed Jul 26 14:33:23 2017",
+"value" : {
+"name" : "1",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Wed Jul 26 14:33:23 2017",
+"value" : {
+"name" : "DataBufferConfiguration",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Wed Jul 26 14:33:23 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Jul 26 14:33:23 2017",
+"value" : {
+"name" : "defaultConfig_v1",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Aug 16 12:06:11 2017",
+"value" : {
+"name" : "defaultConfig_v2",
+"assigned" : "Wed Aug 16 12:06:11 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Aug 30 14:04:58 2017",
+"value" : {
+"name" : "defaultArtdaqConfig_v0",
+"assigned" : "Wed Aug 30 14:04:58 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Aug 30 14:07:46 2017",
+"value" : {
+"name" : "defaultArtdaqConfig_v1",
+"assigned" : "Wed Aug 30 14:07:46 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Aug 30 14:14:48 2017",
+"value" : {
+"name" : "test_v9",
+"assigned" : "Wed Aug 30 14:14:48 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 12:44:19 2017",
+"value" : {
+"name" : "test_v10",
+"assigned" : "Thu Aug 31 12:44:19 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 20:38:26 2017",
+"value" : {
+"name" : "defaultArtdaqConfig_v2",
+"assigned" : "Thu Aug 31 20:38:26 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 20:39:30 2017",
+"value" : {
+"name" : "artdaqConfig_v0",
+"assigned" : "Thu Aug 31 20:39:30 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 12:19:59 2017",
+"value" : {
+"name" : "artdaqConfig_v1",
+"assigned" : "Fri Sep 01 12:19:59 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 20:44:43 2017",
+"value" : {
+"name" : "artdaqConfig_v2",
+"assigned" : "Fri Sep 01 20:44:43 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 20:54:28 2017",
+"value" : {
+"name" : "artdaqConfig_v3",
+"assigned" : "Fri Sep 01 20:54:28 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 20:54:36 2017",
+"value" : {
+"name" : "artdaqConfig_v4",
+"assigned" : "Fri Sep 01 20:54:36 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 20:56:28 2017",
+"value" : {
+"name" : "artdaqConfig_v5",
+"assigned" : "Fri Sep 01 20:56:28 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 21:00:17 2017",
+"value" : {
+"name" : "artdaqConfig_v6",
+"assigned" : "Fri Sep 01 21:00:17 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 21:01:12 2017",
+"value" : {
+"name" : "artdaqConfig_v7",
+"assigned" : "Fri Sep 01 21:01:12 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 05 11:03:47 2017",
+"value" : {
+"name" : "artdaqConfig_v8",
+"assigned" : "Tue Sep 05 11:03:47 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 05 14:01:56 2017",
+"value" : {
+"name" : "artdaqConfig_v9",
+"assigned" : "Tue Sep 05 14:01:56 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 05 14:02:25 2017",
+"value" : {
+"name" : "artdaqConfig_v10",
+"assigned" : "Tue Sep 05 14:02:25 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 10:00:09 2017",
+"value" : {
+"name" : "artdaqConfig_v11",
+"assigned" : "Thu Sep 07 10:00:09 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 10:29:17 2017",
+"value" : {
+"name" : "artdaqConfig_v12",
+"assigned" : "Thu Sep 07 10:29:17 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 10:40:01 2017",
+"value" : {
+"name" : "artdaqConfig_v13",
+"assigned" : "Thu Sep 07 10:40:01 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 10:46:53 2017",
+"value" : {
+"name" : "artdaqConfig_v14",
+"assigned" : "Thu Sep 07 10:46:53 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 14:41:43 2017",
+"value" : {
+"name" : "artdaqConfig_v15",
+"assigned" : "Thu Sep 07 14:41:43 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 14:46:06 2017",
+"value" : {
+"name" : "artdaqConfig_v16",
+"assigned" : "Thu Sep 07 14:46:06 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:39:46 2017",
+"value" : {
+"name" : "artdaqConfig_v17",
+"assigned" : "Thu Sep 07 15:39:46 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:46:43 2017",
+"value" : {
+"name" : "artdaqConfig_v18",
+"assigned" : "Thu Sep 07 15:46:43 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:50:44 2017",
+"value" : {
+"name" : "artdaqConfig_v19",
+"assigned" : "Thu Sep 07 15:50:44 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:04:50 2017",
+"value" : {
+"name" : "artdaqConfig_v20",
+"assigned" : "Thu Sep 07 16:04:50 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:07:28 2017",
+"value" : {
+"name" : "artdaqConfig_v21",
+"assigned" : "Thu Sep 07 16:07:28 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:10:09 2017",
+"value" : {
+"name" : "artdaqConfig_v22",
+"assigned" : "Thu Sep 07 16:10:09 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:11:18 2017",
+"value" : {
+"name" : "artdaqConfig_v23",
+"assigned" : "Thu Sep 07 16:11:18 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:12:04 2017",
+"value" : {
+"name" : "artdaqConfig_v24",
+"assigned" : "Thu Sep 07 16:12:04 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:18:41 2017",
+"value" : {
+"name" : "artdaqConfig_v25",
+"assigned" : "Thu Sep 07 16:18:41 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:28:18 2017",
+"value" : {
+"name" : "artdaqConfig_v26",
+"assigned" : "Thu Sep 07 16:28:18 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:33:03 2017",
+"value" : {
+"name" : "artdaqConfig_v27",
+"assigned" : "Thu Sep 07 16:33:03 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:39:49 2017",
+"value" : {
+"name" : "artdaqConfig_v28",
+"assigned" : "Thu Sep 07 16:39:49 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:45:08 2017",
+"value" : {
+"name" : "artdaqConfig_v29",
+"assigned" : "Thu Sep 07 16:45:08 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:49:01 2017",
+"value" : {
+"name" : "artdaqConfig_v30",
+"assigned" : "Thu Sep 07 16:49:01 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:51:48 2017",
+"value" : {
+"name" : "artdaqConfig_v31",
+"assigned" : "Thu Sep 07 16:51:48 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:55:25 2017",
+"value" : {
+"name" : "artdaqConfig_v32",
+"assigned" : "Thu Sep 07 16:55:25 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:10:19 2017",
+"value" : {
+"name" : "artdaqConfig_v33",
+"assigned" : "Thu Sep 07 17:10:19 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:15:46 2017",
+"value" : {
+"name" : "artdaqConfig_v34",
+"assigned" : "Thu Sep 07 17:15:46 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:30:04 2017",
+"value" : {
+"name" : "artdaqConfig_v35",
+"assigned" : "Thu Sep 07 17:30:04 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:38:03 2017",
+"value" : {
+"name" : "artdaqConfig_v36",
+"assigned" : "Thu Sep 07 17:38:03 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:42:07 2017",
+"value" : {
+"name" : "artdaqConfig_v37",
+"assigned" : "Thu Sep 07 17:42:07 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 08 07:07:16 2017",
+"value" : {
+"name" : "artdaqConfig_v38",
+"assigned" : "Fri Sep 08 07:07:16 2017"
+}
+}
+],
+"created" : "Wed Jul 26 14:33:23 2017"
+},
+"_id" : {
+"$oid" : "d263c4e6d82f4d9f84765977"
+},
+"collection" : "DataBufferConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

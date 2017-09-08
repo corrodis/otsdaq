@@ -1,0 +1,132 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_AGGREGATOR_SERVICES_CONFIGURATION",
+"COMMENT" : "",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1504820939,
+"COL_TYPES" : {
+"SERVICES_UID" : "VARCHAR2",
+"SCHEDULER_FILE_MODE" : "VARCHAR2",
+"SCHEDULER_ERROR_ON_FAILTURE_TO_PUT" : "VARCHAR2",
+"NET_MON_TRASPORT_SERVICE_INTERFACE_SERVICE_PROVIDER" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"SERVICES_UID" : "aggregator0services0",
+"SCHEDULER_FILE_MODE" : "NOMERGE",
+"SCHEDULER_ERROR_ON_FAILTURE_TO_PUT" : "False",
+"NET_MON_TRASPORT_SERVICE_INTERFACE_SERVICE_PROVIDER" : "NetMonTransportService",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Fri Sep 08 07:34:30 2017",
+"rawdata" : [
+
+]
+},
+"version" : "1",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Fri Sep 08 07:34:30 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Fri Sep 08 07:34:30 2017"
+},
+{
+"name" : "artdaqConfig_v1",
+"assigned" : "Fri Sep 08 07:34:31 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 08 07:34:30 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Fri Sep 08 07:34:30 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Fri Sep 08 07:34:30 2017",
+"value" : {
+"name" : "1",
+"assigned" : "Fri Sep 08 07:34:30 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Fri Sep 08 07:34:30 2017",
+"value" : {
+"name" : "ARTDAQAggregatorServicesConfiguration",
+"assigned" : "Fri Sep 08 07:34:30 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Fri Sep 08 07:34:30 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Fri Sep 08 07:34:30 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 08 07:34:31 2017",
+"value" : {
+"name" : "artdaqConfig_v1",
+"assigned" : "Fri Sep 08 07:34:31 2017"
+}
+}
+],
+"created" : "Fri Sep 08 07:34:30 2017"
+},
+"_id" : {
+"$oid" : "daefbb5798b34ad28754bf27"
+},
+"collection" : "ARTDAQAggregatorServicesConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

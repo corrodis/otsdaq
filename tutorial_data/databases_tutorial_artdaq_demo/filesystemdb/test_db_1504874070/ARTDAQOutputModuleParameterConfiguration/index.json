@@ -1,0 +1,158 @@
+{
+"ouid" : [
+"51167f0919994611b3888b48",
+"8a2b54d81b3545999cddd1c8",
+"b24cc52a8bde41feb295a7e2"
+],
+"version" : {
+"0" : [
+"51167f0919994611b3888b48"
+],
+"1" : [
+"8a2b54d81b3545999cddd1c8"
+],
+"2" : [
+"b24cc52a8bde41feb295a7e2"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"51167f0919994611b3888b48",
+"8a2b54d81b3545999cddd1c8",
+"b24cc52a8bde41feb295a7e2"
+],
+"test_v10" : [
+"51167f0919994611b3888b48"
+],
+"defaultArtdaqConfig_v2" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v0" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v1" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v2" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v3" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v4" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v5" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v6" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v7" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v9" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v10" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v11" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v12" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v13" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v14" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v15" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v16" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v17" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v18" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v19" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v20" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v21" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v22" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v23" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v24" : [
+"51167f0919994611b3888b48"
+],
+"artdaqConfig_v25" : [
+"8a2b54d81b3545999cddd1c8"
+],
+"artdaqConfig_v26" : [
+"8a2b54d81b3545999cddd1c8"
+],
+"artdaqConfig_v27" : [
+"8a2b54d81b3545999cddd1c8"
+],
+"artdaqConfig_v28" : [
+"8a2b54d81b3545999cddd1c8"
+],
+"artdaqConfig_v29" : [
+"8a2b54d81b3545999cddd1c8"
+],
+"artdaqConfig_v30" : [
+"8a2b54d81b3545999cddd1c8"
+],
+"artdaqConfig_v31" : [
+"8a2b54d81b3545999cddd1c8"
+],
+"artdaqConfig_v32" : [
+"8a2b54d81b3545999cddd1c8"
+],
+"artdaqConfig_v33" : [
+"8a2b54d81b3545999cddd1c8"
+],
+"artdaqConfig_v34" : [
+"b24cc52a8bde41feb295a7e2"
+],
+"artdaqConfig_v35" : [
+"b24cc52a8bde41feb295a7e2"
+],
+"artdaqConfig_v36" : [
+"b24cc52a8bde41feb295a7e2"
+],
+"artdaqConfig_v37" : [
+"b24cc52a8bde41feb295a7e2"
+],
+"artdaqConfig_v38" : [
+"b24cc52a8bde41feb295a7e2"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"51167f0919994611b3888b48",
+"8a2b54d81b3545999cddd1c8",
+"b24cc52a8bde41feb295a7e2"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

@@ -1,0 +1,126 @@
+{
+"document" : {
+"data" : {
+"NAME" : "",
+"COMMENT" : "",
+"AUTHOR" : "",
+"CREATION_TIME" : 1502903144,
+"COL_TYPES" : {
+"UNUSED_UID" : "NUMBER",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"GROUP_CREATION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"UNUSED_UID" : "0",
+"COMMENT_DESCRIPTION" : "",
+"AUTHOR" : "admin",
+"GROUP_CREATION_TIME" : "1504317689"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Fri Sep 01 21:01:29 2017",
+"rawdata" : [
+
+]
+},
+"version" : "38",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Fri Sep 01 21:01:29 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Fri Sep 01 21:01:29 2017"
+},
+{
+"name" : "GroupAliasTreeEditWizBackbone_v5",
+"assigned" : "Fri Sep 01 21:01:29 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 21:01:29 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Fri Sep 01 21:01:29 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Fri Sep 01 21:01:29 2017",
+"value" : {
+"name" : "38",
+"assigned" : "Fri Sep 01 21:01:29 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Fri Sep 01 21:01:29 2017",
+"value" : {
+"name" : "ConfigurationGroupMetadata",
+"assigned" : "Fri Sep 01 21:01:29 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Fri Sep 01 21:01:29 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Fri Sep 01 21:01:29 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 21:01:29 2017",
+"value" : {
+"name" : "GroupAliasTreeEditWizBackbone_v5",
+"assigned" : "Fri Sep 01 21:01:29 2017"
+}
+}
+],
+"created" : "Fri Sep 01 21:01:29 2017"
+},
+"_id" : {
+"$oid" : "d10389292f3d4adca489461a"
+},
+"collection" : "ConfigurationGroupMetadata",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

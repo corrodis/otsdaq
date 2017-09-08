@@ -1,0 +1,71 @@
+{
+"ouid" : [
+"16c155ad0d0a4cc591abc675",
+"3c3df2d77359455ca8ec4831"
+],
+"version" : {
+"2" : [
+"16c155ad0d0a4cc591abc675"
+],
+"3" : [
+"3c3df2d77359455ca8ec4831"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"16c155ad0d0a4cc591abc675",
+"3c3df2d77359455ca8ec4831"
+],
+"testContext_v2" : [
+"16c155ad0d0a4cc591abc675"
+],
+"testContext_v3" : [
+"16c155ad0d0a4cc591abc675"
+],
+"testContext_v4" : [
+"16c155ad0d0a4cc591abc675"
+],
+"testContext_v5" : [
+"16c155ad0d0a4cc591abc675"
+],
+"testContext_v6" : [
+"3c3df2d77359455ca8ec4831"
+],
+"testContext_v7" : [
+"3c3df2d77359455ca8ec4831"
+],
+"testContext_v8" : [
+"3c3df2d77359455ca8ec4831"
+],
+"artdaqContext_v0" : [
+"3c3df2d77359455ca8ec4831"
+],
+"artdaqContext_v1" : [
+"3c3df2d77359455ca8ec4831"
+],
+"artdaqContext_v2" : [
+"3c3df2d77359455ca8ec4831"
+],
+"artdaqContext_v3" : [
+"3c3df2d77359455ca8ec4831"
+],
+"artdaqContext_v4" : [
+"3c3df2d77359455ca8ec4831"
+],
+"artdaqContext_v5" : [
+"3c3df2d77359455ca8ec4831"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"16c155ad0d0a4cc591abc675",
+"3c3df2d77359455ca8ec4831"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

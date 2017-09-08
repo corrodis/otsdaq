@@ -1,0 +1,29 @@
+{
+"ouid" : [
+"ba64022f118c4b00b3103bf2"
+],
+"version" : {
+"1" : [
+"ba64022f118c4b00b3103bf2"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"ba64022f118c4b00b3103bf2"
+],
+"artdaqConfig_v1" : [
+"ba64022f118c4b00b3103bf2"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"ba64022f118c4b00b3103bf2"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

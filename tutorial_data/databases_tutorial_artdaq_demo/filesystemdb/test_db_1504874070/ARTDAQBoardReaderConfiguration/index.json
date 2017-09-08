@@ -1,0 +1,236 @@
+{
+"ouid" : [
+"1334bc71cd22476782d2a7fd",
+"2942336719d043bb87310a91",
+"3aacec48ef9b488aa5600139",
+"4b7298b9087349858b366316",
+"510363f813f64291a749535e",
+"5588923a4f6e42d1b655701b",
+"55a7608444eb4cfaabe6f297",
+"5a95c1a250a441a5899742d1",
+"8e302fb405de47a1b70bbb87",
+"af1ac2a0025046bdaa670ae3",
+"caff71bc3c2b4e7994c9f1c5",
+"cdf3a6c5273d4a2ea6836fea",
+"d3a3f66934e645a5a9a9f545",
+"d5c87f1a97d44821acecd441"
+],
+"version" : {
+"0" : [
+"cdf3a6c5273d4a2ea6836fea"
+],
+"1" : [
+"1334bc71cd22476782d2a7fd"
+],
+"2" : [
+"3aacec48ef9b488aa5600139"
+],
+"3" : [
+"2942336719d043bb87310a91"
+],
+"4" : [
+"510363f813f64291a749535e"
+],
+"5" : [
+"55a7608444eb4cfaabe6f297"
+],
+"6" : [
+"4b7298b9087349858b366316"
+],
+"7" : [
+"af1ac2a0025046bdaa670ae3"
+],
+"8" : [
+"5588923a4f6e42d1b655701b"
+],
+"9" : [
+"d3a3f66934e645a5a9a9f545"
+],
+"10" : [
+"5a95c1a250a441a5899742d1"
+],
+"11" : [
+"d5c87f1a97d44821acecd441"
+],
+"12" : [
+"caff71bc3c2b4e7994c9f1c5"
+],
+"13" : [
+"8e302fb405de47a1b70bbb87"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"1334bc71cd22476782d2a7fd",
+"2942336719d043bb87310a91",
+"3aacec48ef9b488aa5600139",
+"4b7298b9087349858b366316",
+"510363f813f64291a749535e",
+"5588923a4f6e42d1b655701b",
+"55a7608444eb4cfaabe6f297",
+"5a95c1a250a441a5899742d1",
+"8e302fb405de47a1b70bbb87",
+"af1ac2a0025046bdaa670ae3",
+"caff71bc3c2b4e7994c9f1c5",
+"cdf3a6c5273d4a2ea6836fea",
+"d3a3f66934e645a5a9a9f545",
+"d5c87f1a97d44821acecd441"
+],
+"defaultArtdaqConfig_v0" : [
+"cdf3a6c5273d4a2ea6836fea"
+],
+"defaultArtdaqConfig_v1" : [
+"1334bc71cd22476782d2a7fd"
+],
+"test_v9" : [
+"1334bc71cd22476782d2a7fd"
+],
+"test_v10" : [
+"1334bc71cd22476782d2a7fd"
+],
+"defaultArtdaqConfig_v2" : [
+"1334bc71cd22476782d2a7fd"
+],
+"artdaqConfig_v0" : [
+"1334bc71cd22476782d2a7fd"
+],
+"artdaqConfig_v1" : [
+"510363f813f64291a749535e"
+],
+"artdaqConfig_v2" : [
+"4b7298b9087349858b366316"
+],
+"artdaqConfig_v3" : [
+"af1ac2a0025046bdaa670ae3"
+],
+"artdaqConfig_v4" : [
+"af1ac2a0025046bdaa670ae3"
+],
+"artdaqConfig_v5" : [
+"5588923a4f6e42d1b655701b"
+],
+"artdaqConfig_v6" : [
+"5588923a4f6e42d1b655701b"
+],
+"artdaqConfig_v7" : [
+"d3a3f66934e645a5a9a9f545"
+],
+"artdaqConfig_v8" : [
+"d3a3f66934e645a5a9a9f545"
+],
+"artdaqConfig_v9" : [
+"5a95c1a250a441a5899742d1"
+],
+"artdaqConfig_v10" : [
+"5a95c1a250a441a5899742d1"
+],
+"artdaqConfig_v11" : [
+"d5c87f1a97d44821acecd441"
+],
+"artdaqConfig_v12" : [
+"d5c87f1a97d44821acecd441"
+],
+"artdaqConfig_v13" : [
+"caff71bc3c2b4e7994c9f1c5"
+],
+"artdaqConfig_v14" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v15" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v16" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v17" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v18" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v19" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v20" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v21" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v22" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v23" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v24" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v25" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v26" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v27" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v28" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v29" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v30" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v31" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v32" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v33" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v34" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v35" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v36" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v37" : [
+"8e302fb405de47a1b70bbb87"
+],
+"artdaqConfig_v38" : [
+"8e302fb405de47a1b70bbb87"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"1334bc71cd22476782d2a7fd",
+"2942336719d043bb87310a91",
+"3aacec48ef9b488aa5600139",
+"4b7298b9087349858b366316",
+"510363f813f64291a749535e",
+"5588923a4f6e42d1b655701b",
+"55a7608444eb4cfaabe6f297",
+"5a95c1a250a441a5899742d1",
+"8e302fb405de47a1b70bbb87",
+"af1ac2a0025046bdaa670ae3",
+"caff71bc3c2b4e7994c9f1c5",
+"cdf3a6c5273d4a2ea6836fea",
+"d3a3f66934e645a5a9a9f545",
+"d5c87f1a97d44821acecd441"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}

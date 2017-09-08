@@ -1,0 +1,706 @@
+{
+"document" : {
+"data" : {
+"NAME" : "FE_SLOW_CONTROLS_CONFIGURATION",
+"COMMENT" : "1 second period. w/latched alarms field true, w/alarms and text format. first try with hw emulator slow controls. w/ valid data type. w/status.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1480280002,
+"COL_TYPES" : {
+"FE_GROUP_ID" : "VARCHAR2",
+"CHANNEL_NAME" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"CHANNEL_DATA_TYPE" : "VARCHAR2",
+"UNIVERSAL_INTERFACE_ADDRESS" : "VARCHAR2",
+"UNIVERSAL_DATA_BIT_OFFSET" : "NUMBER",
+"READ_ACCESS" : "VARCHAR2",
+"WRITE_ACCESS" : "VARCHAR2",
+"RECORD_CHANGES_ONLY" : "VARCHAR2",
+"DELAY_BETWEEN_SAMPLES_IN_SECONDS" : "NUMBER",
+"MONITORING_ENABLED" : "VARCHAR2",
+"LOCAL_SAVING_ENABLED" : "VARCHAR2",
+"LOCAL_FILE_PATH" : "VARCHAR2",
+"RADIX_FILE_NAME" : "VARCHAR2",
+"SAVE_BINARY_FILE" : "VARCHAR2",
+"ALARMS_ENABLED" : "VARCHAR2",
+"LATCH_ALARMS" : "VARCHAR2",
+"LOW_LOW_THRESHOLD" : "VARCHAR2",
+"LOW_THRESHOLD" : "VARCHAR2",
+"HIGH_THRESHOLD" : "VARCHAR2",
+"HIGH_HIGH_THRESHOLD" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"FE_GROUP_ID" : "OtsHwEmulatorGroup0",
+"CHANNEL_NAME" : "BurstDataCount",
+"STATUS" : "On",
+"CHANNEL_DATA_TYPE" : "unsigned long long",
+"UNIVERSAL_INTERFACE_ADDRESS" : "0x1001",
+"UNIVERSAL_DATA_BIT_OFFSET" : "0",
+"READ_ACCESS" : "Yes",
+"WRITE_ACCESS" : "Yes",
+"RECORD_CHANGES_ONLY" : "True",
+"DELAY_BETWEEN_SAMPLES_IN_SECONDS" : "1",
+"MONITORING_ENABLED" : "Yes",
+"LOCAL_SAVING_ENABLED" : "Yes",
+"LOCAL_FILE_PATH" : "/home/rrivera/ots/tmp/",
+"RADIX_FILE_NAME" : "SlowControls",
+"SAVE_BINARY_FILE" : "False",
+"ALARMS_ENABLED" : "Yes",
+"LATCH_ALARMS" : "True",
+"LOW_LOW_THRESHOLD" : "0",
+"LOW_THRESHOLD" : "1",
+"HIGH_THRESHOLD" : "9",
+"HIGH_HIGH_THRESHOLD" : "10",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1480280002"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Wed Jul 26 14:33:23 2017",
+"rawdata" : [
+
+]
+},
+"version" : "1",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+},
+{
+"name" : "defaultConfig_v1",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+},
+{
+"name" : "defaultConfig_v2",
+"assigned" : "Wed Aug 16 12:06:12 2017"
+},
+{
+"name" : "defaultArtdaqConfig_v0",
+"assigned" : "Wed Aug 30 14:04:59 2017"
+},
+{
+"name" : "defaultArtdaqConfig_v1",
+"assigned" : "Wed Aug 30 14:07:46 2017"
+},
+{
+"name" : "test_v9",
+"assigned" : "Wed Aug 30 14:14:49 2017"
+},
+{
+"name" : "test_v10",
+"assigned" : "Thu Aug 31 12:44:19 2017"
+},
+{
+"name" : "defaultArtdaqConfig_v2",
+"assigned" : "Thu Aug 31 20:38:27 2017"
+},
+{
+"name" : "artdaqConfig_v0",
+"assigned" : "Thu Aug 31 20:39:31 2017"
+},
+{
+"name" : "artdaqConfig_v1",
+"assigned" : "Fri Sep 01 12:19:59 2017"
+},
+{
+"name" : "artdaqConfig_v2",
+"assigned" : "Fri Sep 01 20:44:43 2017"
+},
+{
+"name" : "artdaqConfig_v3",
+"assigned" : "Fri Sep 01 20:54:28 2017"
+},
+{
+"name" : "artdaqConfig_v4",
+"assigned" : "Fri Sep 01 20:54:36 2017"
+},
+{
+"name" : "artdaqConfig_v5",
+"assigned" : "Fri Sep 01 20:56:28 2017"
+},
+{
+"name" : "artdaqConfig_v6",
+"assigned" : "Fri Sep 01 21:00:17 2017"
+},
+{
+"name" : "artdaqConfig_v7",
+"assigned" : "Fri Sep 01 21:01:12 2017"
+},
+{
+"name" : "artdaqConfig_v8",
+"assigned" : "Tue Sep 05 11:03:47 2017"
+},
+{
+"name" : "artdaqConfig_v9",
+"assigned" : "Tue Sep 05 14:01:56 2017"
+},
+{
+"name" : "artdaqConfig_v10",
+"assigned" : "Tue Sep 05 14:02:25 2017"
+},
+{
+"name" : "artdaqConfig_v11",
+"assigned" : "Thu Sep 07 10:00:09 2017"
+},
+{
+"name" : "artdaqConfig_v12",
+"assigned" : "Thu Sep 07 10:29:18 2017"
+},
+{
+"name" : "artdaqConfig_v13",
+"assigned" : "Thu Sep 07 10:40:01 2017"
+},
+{
+"name" : "artdaqConfig_v14",
+"assigned" : "Thu Sep 07 10:46:54 2017"
+},
+{
+"name" : "artdaqConfig_v15",
+"assigned" : "Thu Sep 07 14:41:43 2017"
+},
+{
+"name" : "artdaqConfig_v16",
+"assigned" : "Thu Sep 07 14:46:06 2017"
+},
+{
+"name" : "artdaqConfig_v17",
+"assigned" : "Thu Sep 07 15:39:46 2017"
+},
+{
+"name" : "artdaqConfig_v18",
+"assigned" : "Thu Sep 07 15:46:43 2017"
+},
+{
+"name" : "artdaqConfig_v19",
+"assigned" : "Thu Sep 07 15:50:45 2017"
+},
+{
+"name" : "artdaqConfig_v20",
+"assigned" : "Thu Sep 07 16:04:50 2017"
+},
+{
+"name" : "artdaqConfig_v21",
+"assigned" : "Thu Sep 07 16:07:29 2017"
+},
+{
+"name" : "artdaqConfig_v22",
+"assigned" : "Thu Sep 07 16:10:09 2017"
+},
+{
+"name" : "artdaqConfig_v23",
+"assigned" : "Thu Sep 07 16:11:18 2017"
+},
+{
+"name" : "artdaqConfig_v24",
+"assigned" : "Thu Sep 07 16:12:04 2017"
+},
+{
+"name" : "artdaqConfig_v25",
+"assigned" : "Thu Sep 07 16:18:41 2017"
+},
+{
+"name" : "artdaqConfig_v26",
+"assigned" : "Thu Sep 07 16:28:18 2017"
+},
+{
+"name" : "artdaqConfig_v27",
+"assigned" : "Thu Sep 07 16:33:03 2017"
+},
+{
+"name" : "artdaqConfig_v28",
+"assigned" : "Thu Sep 07 16:39:49 2017"
+},
+{
+"name" : "artdaqConfig_v29",
+"assigned" : "Thu Sep 07 16:45:08 2017"
+},
+{
+"name" : "artdaqConfig_v30",
+"assigned" : "Thu Sep 07 16:49:02 2017"
+},
+{
+"name" : "artdaqConfig_v31",
+"assigned" : "Thu Sep 07 16:51:48 2017"
+},
+{
+"name" : "artdaqConfig_v32",
+"assigned" : "Thu Sep 07 16:55:25 2017"
+},
+{
+"name" : "artdaqConfig_v33",
+"assigned" : "Thu Sep 07 17:10:19 2017"
+},
+{
+"name" : "artdaqConfig_v34",
+"assigned" : "Thu Sep 07 17:15:47 2017"
+},
+{
+"name" : "artdaqConfig_v35",
+"assigned" : "Thu Sep 07 17:30:04 2017"
+},
+{
+"name" : "artdaqConfig_v36",
+"assigned" : "Thu Sep 07 17:38:03 2017"
+},
+{
+"name" : "artdaqConfig_v37",
+"assigned" : "Thu Sep 07 17:42:07 2017"
+},
+{
+"name" : "artdaqConfig_v38",
+"assigned" : "Fri Sep 08 07:07:16 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Jul 26 14:33:23 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Wed Jul 26 14:33:23 2017",
+"value" : {
+"name" : "1",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Wed Jul 26 14:33:23 2017",
+"value" : {
+"name" : "FESlowControlsConfiguration",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Wed Jul 26 14:33:23 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Jul 26 14:33:23 2017",
+"value" : {
+"name" : "defaultConfig_v1",
+"assigned" : "Wed Jul 26 14:33:23 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Aug 16 12:06:12 2017",
+"value" : {
+"name" : "defaultConfig_v2",
+"assigned" : "Wed Aug 16 12:06:12 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Aug 30 14:04:59 2017",
+"value" : {
+"name" : "defaultArtdaqConfig_v0",
+"assigned" : "Wed Aug 30 14:04:59 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Aug 30 14:07:46 2017",
+"value" : {
+"name" : "defaultArtdaqConfig_v1",
+"assigned" : "Wed Aug 30 14:07:46 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Wed Aug 30 14:14:49 2017",
+"value" : {
+"name" : "test_v9",
+"assigned" : "Wed Aug 30 14:14:49 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 12:44:19 2017",
+"value" : {
+"name" : "test_v10",
+"assigned" : "Thu Aug 31 12:44:19 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 20:38:27 2017",
+"value" : {
+"name" : "defaultArtdaqConfig_v2",
+"assigned" : "Thu Aug 31 20:38:27 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 20:39:31 2017",
+"value" : {
+"name" : "artdaqConfig_v0",
+"assigned" : "Thu Aug 31 20:39:31 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 12:19:59 2017",
+"value" : {
+"name" : "artdaqConfig_v1",
+"assigned" : "Fri Sep 01 12:19:59 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 20:44:43 2017",
+"value" : {
+"name" : "artdaqConfig_v2",
+"assigned" : "Fri Sep 01 20:44:43 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 20:54:28 2017",
+"value" : {
+"name" : "artdaqConfig_v3",
+"assigned" : "Fri Sep 01 20:54:28 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 20:54:36 2017",
+"value" : {
+"name" : "artdaqConfig_v4",
+"assigned" : "Fri Sep 01 20:54:36 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 20:56:28 2017",
+"value" : {
+"name" : "artdaqConfig_v5",
+"assigned" : "Fri Sep 01 20:56:28 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 21:00:17 2017",
+"value" : {
+"name" : "artdaqConfig_v6",
+"assigned" : "Fri Sep 01 21:00:17 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 21:01:12 2017",
+"value" : {
+"name" : "artdaqConfig_v7",
+"assigned" : "Fri Sep 01 21:01:12 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 05 11:03:47 2017",
+"value" : {
+"name" : "artdaqConfig_v8",
+"assigned" : "Tue Sep 05 11:03:47 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 05 14:01:56 2017",
+"value" : {
+"name" : "artdaqConfig_v9",
+"assigned" : "Tue Sep 05 14:01:56 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 05 14:02:25 2017",
+"value" : {
+"name" : "artdaqConfig_v10",
+"assigned" : "Tue Sep 05 14:02:25 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 10:00:09 2017",
+"value" : {
+"name" : "artdaqConfig_v11",
+"assigned" : "Thu Sep 07 10:00:09 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 10:29:18 2017",
+"value" : {
+"name" : "artdaqConfig_v12",
+"assigned" : "Thu Sep 07 10:29:18 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 10:40:01 2017",
+"value" : {
+"name" : "artdaqConfig_v13",
+"assigned" : "Thu Sep 07 10:40:01 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 10:46:54 2017",
+"value" : {
+"name" : "artdaqConfig_v14",
+"assigned" : "Thu Sep 07 10:46:54 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 14:41:43 2017",
+"value" : {
+"name" : "artdaqConfig_v15",
+"assigned" : "Thu Sep 07 14:41:43 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 14:46:06 2017",
+"value" : {
+"name" : "artdaqConfig_v16",
+"assigned" : "Thu Sep 07 14:46:06 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:39:46 2017",
+"value" : {
+"name" : "artdaqConfig_v17",
+"assigned" : "Thu Sep 07 15:39:46 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:46:43 2017",
+"value" : {
+"name" : "artdaqConfig_v18",
+"assigned" : "Thu Sep 07 15:46:43 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 15:50:45 2017",
+"value" : {
+"name" : "artdaqConfig_v19",
+"assigned" : "Thu Sep 07 15:50:45 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:04:50 2017",
+"value" : {
+"name" : "artdaqConfig_v20",
+"assigned" : "Thu Sep 07 16:04:50 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:07:29 2017",
+"value" : {
+"name" : "artdaqConfig_v21",
+"assigned" : "Thu Sep 07 16:07:29 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:10:09 2017",
+"value" : {
+"name" : "artdaqConfig_v22",
+"assigned" : "Thu Sep 07 16:10:09 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:11:18 2017",
+"value" : {
+"name" : "artdaqConfig_v23",
+"assigned" : "Thu Sep 07 16:11:18 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:12:04 2017",
+"value" : {
+"name" : "artdaqConfig_v24",
+"assigned" : "Thu Sep 07 16:12:04 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:18:41 2017",
+"value" : {
+"name" : "artdaqConfig_v25",
+"assigned" : "Thu Sep 07 16:18:41 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:28:18 2017",
+"value" : {
+"name" : "artdaqConfig_v26",
+"assigned" : "Thu Sep 07 16:28:18 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:33:03 2017",
+"value" : {
+"name" : "artdaqConfig_v27",
+"assigned" : "Thu Sep 07 16:33:03 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:39:49 2017",
+"value" : {
+"name" : "artdaqConfig_v28",
+"assigned" : "Thu Sep 07 16:39:49 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:45:08 2017",
+"value" : {
+"name" : "artdaqConfig_v29",
+"assigned" : "Thu Sep 07 16:45:08 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:49:02 2017",
+"value" : {
+"name" : "artdaqConfig_v30",
+"assigned" : "Thu Sep 07 16:49:02 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:51:48 2017",
+"value" : {
+"name" : "artdaqConfig_v31",
+"assigned" : "Thu Sep 07 16:51:48 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:55:25 2017",
+"value" : {
+"name" : "artdaqConfig_v32",
+"assigned" : "Thu Sep 07 16:55:25 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:10:19 2017",
+"value" : {
+"name" : "artdaqConfig_v33",
+"assigned" : "Thu Sep 07 17:10:19 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:15:47 2017",
+"value" : {
+"name" : "artdaqConfig_v34",
+"assigned" : "Thu Sep 07 17:15:47 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:30:04 2017",
+"value" : {
+"name" : "artdaqConfig_v35",
+"assigned" : "Thu Sep 07 17:30:04 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:38:03 2017",
+"value" : {
+"name" : "artdaqConfig_v36",
+"assigned" : "Thu Sep 07 17:38:03 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 17:42:07 2017",
+"value" : {
+"name" : "artdaqConfig_v37",
+"assigned" : "Thu Sep 07 17:42:07 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 08 07:07:16 2017",
+"value" : {
+"name" : "artdaqConfig_v38",
+"assigned" : "Fri Sep 08 07:07:16 2017"
+}
+}
+],
+"created" : "Wed Jul 26 14:33:23 2017"
+},
+"_id" : {
+"$oid" : "d720293d6fdf4101bc202335"
+},
+"collection" : "FESlowControlsConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

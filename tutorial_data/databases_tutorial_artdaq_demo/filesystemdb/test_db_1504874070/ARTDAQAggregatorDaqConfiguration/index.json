@@ -1,0 +1,176 @@
+{
+"ouid" : [
+"505f07f16e2d46318915a0b9",
+"689985aa890d4813a927d3c6",
+"8f5b7e3fb9b24c0eadfcb9e5",
+"90871a4c8485429d8e3f522c"
+],
+"version" : {
+"0" : [
+"689985aa890d4813a927d3c6"
+],
+"1" : [
+"8f5b7e3fb9b24c0eadfcb9e5"
+],
+"2" : [
+"505f07f16e2d46318915a0b9"
+],
+"3" : [
+"90871a4c8485429d8e3f522c"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"505f07f16e2d46318915a0b9",
+"689985aa890d4813a927d3c6",
+"8f5b7e3fb9b24c0eadfcb9e5",
+"90871a4c8485429d8e3f522c"
+],
+"defaultArtdaqConfig_v0" : [
+"689985aa890d4813a927d3c6"
+],
+"defaultArtdaqConfig_v1" : [
+"689985aa890d4813a927d3c6"
+],
+"test_v9" : [
+"689985aa890d4813a927d3c6"
+],
+"test_v10" : [
+"689985aa890d4813a927d3c6"
+],
+"defaultArtdaqConfig_v2" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v0" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v1" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v2" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v3" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v4" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v5" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v6" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v7" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v8" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v9" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v10" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v11" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v12" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v13" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v14" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v15" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v16" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v17" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v18" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v19" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v20" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v21" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v22" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v23" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v24" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v25" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v26" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v27" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v28" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v29" : [
+"689985aa890d4813a927d3c6"
+],
+"artdaqConfig_v30" : [
+"8f5b7e3fb9b24c0eadfcb9e5"
+],
+"artdaqConfig_v31" : [
+"8f5b7e3fb9b24c0eadfcb9e5"
+],
+"artdaqConfig_v32" : [
+"505f07f16e2d46318915a0b9"
+],
+"artdaqConfig_v33" : [
+"90871a4c8485429d8e3f522c"
+],
+"artdaqConfig_v34" : [
+"90871a4c8485429d8e3f522c"
+],
+"artdaqConfig_v35" : [
+"90871a4c8485429d8e3f522c"
+],
+"artdaqConfig_v36" : [
+"90871a4c8485429d8e3f522c"
+],
+"artdaqConfig_v37" : [
+"90871a4c8485429d8e3f522c"
+],
+"artdaqConfig_v38" : [
+"90871a4c8485429d8e3f522c"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"505f07f16e2d46318915a0b9",
+"689985aa890d4813a927d3c6",
+"8f5b7e3fb9b24c0eadfcb9e5",
+"90871a4c8485429d8e3f522c"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+}
+}
