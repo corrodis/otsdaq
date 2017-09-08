@@ -165,6 +165,7 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 	FILE *fp = fopen(fn.c_str(),"r");
 
 	__MOUT__ << "ACTIVE_GROUP_FILENAME = " << ACTIVE_GROUP_FILENAME << std::endl;
+	__MOUT__ << "ARTDAQ_DATABASE_URI = " << std::string(getenv("ARTDAQ_DATABASE_URI")) << std::endl;
 
 	if(!fp) return;
 

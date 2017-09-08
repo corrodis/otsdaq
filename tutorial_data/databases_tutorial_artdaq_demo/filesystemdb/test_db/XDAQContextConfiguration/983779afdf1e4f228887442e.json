@@ -110,6 +110,30 @@
 {
 "name" : "testContext_v8",
 "assigned" : "Mon Aug 28 09:07:18 2017"
+},
+{
+"name" : "artdaqContext_v0",
+"assigned" : "Thu Aug 31 20:39:52 2017"
+},
+{
+"name" : "artdaqContext_v1",
+"assigned" : "Fri Sep 01 21:01:20 2017"
+},
+{
+"name" : "artdaqContext_v2",
+"assigned" : "Tue Sep 05 11:17:57 2017"
+},
+{
+"name" : "artdaqContext_v3",
+"assigned" : "Tue Sep 05 11:20:11 2017"
+},
+{
+"name" : "artdaqContext_v4",
+"assigned" : "Thu Sep 07 14:41:45 2017"
+},
+{
+"name" : "artdaqContext_v5",
+"assigned" : "Thu Sep 07 16:49:03 2017"
 }
 ],
 "changelog" : "notprovided",
@@ -171,6 +195,54 @@
 "value" : {
 "name" : "testContext_v8",
 "assigned" : "Mon Aug 28 09:07:18 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 20:39:52 2017",
+"value" : {
+"name" : "artdaqContext_v0",
+"assigned" : "Thu Aug 31 20:39:52 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Fri Sep 01 21:01:20 2017",
+"value" : {
+"name" : "artdaqContext_v1",
+"assigned" : "Fri Sep 01 21:01:20 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 05 11:17:57 2017",
+"value" : {
+"name" : "artdaqContext_v2",
+"assigned" : "Tue Sep 05 11:17:57 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 05 11:20:11 2017",
+"value" : {
+"name" : "artdaqContext_v3",
+"assigned" : "Tue Sep 05 11:20:11 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 14:41:45 2017",
+"value" : {
+"name" : "artdaqContext_v4",
+"assigned" : "Thu Sep 07 14:41:45 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 07 16:49:03 2017",
+"value" : {
+"name" : "artdaqContext_v5",
+"assigned" : "Thu Sep 07 16:49:03 2017"
 }
 }
 ],

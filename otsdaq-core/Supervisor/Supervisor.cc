@@ -1252,6 +1252,13 @@ throw (toolbox::fsm::exception::Exception)
 			__SS__ << "Can NOT " << command << " DataManagerSupervisor, instance = " << it.first << ".\n\n" <<
 					reply;
 			__MOUT_ERR__ << ss.str() << std::endl;
+			__MOUT__ << "Getting error message..." << std::endl;
+			xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+			SOAPParameters parameters;
+			parameters.addParameter("ErrorMessage");
+			SOAPMessenger::receive(errorMessage, parameters);
+			__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+			ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
 			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
 		}
@@ -1275,6 +1282,13 @@ throw (toolbox::fsm::exception::Exception)
 			__SS__ << "Can NOT " << command << " FEDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
 					reply;
 			__MOUT_ERR__ << ss.str() << std::endl;
+			__MOUT__ << "Getting error message..." << std::endl;
+			xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+			SOAPParameters parameters;
+			parameters.addParameter("ErrorMessage");
+			SOAPMessenger::receive(errorMessage, parameters);
+			__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+			ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
 			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
 		}
@@ -1298,6 +1312,13 @@ throw (toolbox::fsm::exception::Exception)
 			__SS__ << "Can NOT " << command << " VisualSupervisor, instance = " << it.first << ".\n\n" <<
 					reply;
 			__MOUT_ERR__ << ss.str() << std::endl;
+			__MOUT__ << "Getting error message..." << std::endl;
+			xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+			SOAPParameters parameters;
+			parameters.addParameter("ErrorMessage");
+			SOAPMessenger::receive(errorMessage, parameters);
+			__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+			ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
 			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
 		}
@@ -1375,6 +1396,13 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 				__SS__ << "Can NOT " << command << " ARTDAQFEDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
 						reply;
 				__MOUT_ERR__ << ss.str() << std::endl;
+				__MOUT__ << "Getting error message..." << std::endl;
+				xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+				SOAPParameters parameters;
+				parameters.addParameter("ErrorMessage");
+				SOAPMessenger::receive(errorMessage, parameters);
+				__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+				ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
@@ -1468,6 +1496,13 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 				__SS__ << "Can NOT " << command << " ARTDAQDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
 						reply;
 				__MOUT_ERR__ << ss.str() << std::endl;
+				__MOUT__ << "Getting error message..." << std::endl;
+				xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+				SOAPParameters parameters;
+				parameters.addParameter("ErrorMessage");
+				SOAPMessenger::receive(errorMessage, parameters);
+				__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+				ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
@@ -1512,9 +1547,16 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 			std::string reply = send(it.second, message);
 			if (reply != command + "Done")
 			{
-				__SS__ << "Received reply: " << reply <<
-						". Can NOT " << command << " ARTDAQBuilderSupervisor, instance = " << it.first;
-				__MOUT_WARN__ << "\n" << ss.str() << std::endl;
+				__SS__ << "Can NOT " << command << " ARTDAQBuilderSupervisor, instance = " << it.first << ".\n\n" <<
+						reply;
+				__MOUT_ERR__ << ss.str() << std::endl;
+				__MOUT__ << "Getting error message..." << std::endl;
+				xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+				SOAPParameters parameters;
+				parameters.addParameter("ErrorMessage");
+				SOAPMessenger::receive(errorMessage, parameters);
+				__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+				ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
@@ -1562,6 +1604,13 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 				__SS__ << "Can NOT " << command << " ARTDAQAggregatorSupervisor, instance = " << it.first << ".\n\n" <<
 						reply;
 				__MOUT_ERR__ << ss.str() << std::endl;
+				__MOUT__ << "Getting error message..." << std::endl;
+				xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+				SOAPParameters parameters;
+				parameters.addParameter("ErrorMessage");
+				SOAPMessenger::receive(errorMessage, parameters);
+				__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+				ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}

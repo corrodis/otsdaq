@@ -266,6 +266,10 @@
 {
 "name" : "testContext_v8",
 "assigned" : "Mon Aug 28 09:07:18 2017"
+},
+{
+"name" : "artdaqContext_v0",
+"assigned" : "Thu Aug 31 20:39:52 2017"
 }
 ],
 "changelog" : "notprovided",
@@ -311,6 +315,14 @@
 "value" : {
 "name" : "testContext_v8",
 "assigned" : "Mon Aug 28 09:07:18 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Aug 31 20:39:52 2017",
+"value" : {
+"name" : "artdaqContext_v0",
+"assigned" : "Thu Aug 31 20:39:52 2017"
 }
 }
 ],
