@@ -617,9 +617,8 @@ otsActionHandler() {
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 			echo " "
 			echo "Rebuilding. . ."
-			echo " "
-			#echo "1" > mrbresult.num; mrb b > otsdaq_startots_mrbreport.txt && echo "0" > mrbresult.num
-			echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
+			echo " "			
+			#echo "1" > mrbresult.num; mrb b > otsdaq_startots_mrbreport.txt && echo "0" > mrbresult.num			
 			echo " "
 			#grep -A 1 -B 1 "INFO: Stage build successful." otsdaq_startots_mrbreport.txt
 			echo " "
@@ -639,10 +638,6 @@ otsActionHandler() {
 				$MPI_RUN_CMD &
 			fi			
 			
-			
-			echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
-			
-			
 			#sleep 5
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_WIZ" ]; then
 			
@@ -656,8 +651,6 @@ otsActionHandler() {
 			
 			launchOTSWiz
 
-			echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
-			
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_OTS" ]; then
 				
 			echo
@@ -669,8 +662,6 @@ otsActionHandler() {
 			sleep 1
 			
 			launchOTS
-
-			echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE				
 
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "FLATTEN_TO_SYSTEM_ALIASES" ]; then
 
@@ -684,7 +675,7 @@ otsActionHandler() {
 				otsdaq_flatten_system_aliases 0 &> otsdaq_quiet_run-flatten.txt &
 			else
 				otsdaq_flatten_system_aliases 0 &
-			fi			
+			fi		
 						
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
 		    exit
@@ -692,6 +683,8 @@ otsActionHandler() {
 			echo "Exiting StartOTS.sh.. Unrecognized command OTSDAQ_STARTOTS_ACTION=${OTSDAQ_STARTOTS_ACTION}"			
 			exit
 		fi
+		
+		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
 		sleep 1
 	done
 
