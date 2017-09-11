@@ -174,6 +174,10 @@ void ConfigurationTree::getValue(std::string& value) const
 			//	this allows a number to be read as a string, for example, without exceptions
 			value =	configView_->validateValueForColumn(
 					valueAsTreeNode.getValueAsString(),col_);
+
+
+			__MOUT__ << "Successful value!" << std::endl;
+
 			//else
 			//	value = configView_->validateValueForColumn<T>(
 			//		valueAsTreeNode.getValueAsString(),col_);
@@ -182,7 +186,7 @@ void ConfigurationTree::getValue(std::string& value) const
 		}
 		catch(...) //tree node path interpretation failed
 		{
-			__MOUT__ << "Invalid path, just returning normal value." << std::endl;
+			//__MOUT__ << "Invalid path, just returning normal value." << std::endl;
 		}
 
 		//else normal return

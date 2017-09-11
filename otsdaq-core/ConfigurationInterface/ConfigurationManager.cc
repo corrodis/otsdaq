@@ -1130,7 +1130,9 @@ const ConfigurationBase* ConfigurationManager::getConfigurationByName(const std:
 				"\n\t StartOTS.sh --wiz" <<
 				"\n\n\n\n"
 				<< std::endl;
-		__MOUT_WARN__ << "\n" << ss.str();
+		//prints out too often
+		//if(configurationName != ViewColumnInfo::DATATYPE_LINK_DEFAULT)
+		//	__MOUT_WARN__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 	return it->second;

@@ -14,15 +14,25 @@ namespace ots
 
 class ConfigurationManager;
 class ConfigurationBase;
-//class ConfigurationView;
+class ConfigurationView;
 
-//template <typename T> 	T handleValidateValueForColumn    (ConfigurationView* configView, std::string value, unsigned int col)
+
+template<typename T>
+struct identity { typedef T type; };
+
+
+//
+//template <class T> 	T handleValidateValueForColumn    (ConfigurationView* configView, std::string value, unsigned int col)
 //{
 //	std::cout << "22:::::" << "handleValidateValueForColumn<T>" << std::endl;
+//	return configView->validateValueForColumn<T>(
+//			value,col);
 //}
-//template <>            	std::string handleValidateValueForColumn<std::string>(ConfigurationView* configView)
+//template <>            	std::string handleValidateValueForColumn<std::string>(ConfigurationView* configView, std::string value, unsigned int col)
 //{
 //	std::cout << "22:::::" << "handleValidateValueForColumn<std::string>" << std::endl;
+//	return configView->validateValueForColumn(
+//			value,col);
 //}
 
 class ConfigurationTree
@@ -122,12 +132,15 @@ public:
 //				else
 				//	value = (T)configView_->validateValueForColumn<T>(
 				//		valueAsTreeNode.getValueAsString(),col_);
-				throw ("");
+				value = handleValidateValueForColumn(configView_,
+						valueAsTreeNode.getValueAsString(),col_,identity<T>());
+
+				__MOUT__ << "Successful value!" << std::endl;
 				return;
 			}
 			catch(...) //tree node path interpretation failed
 			{
-				__MOUT__ << "Invalid path, just returning normal value." << std::endl;
+				//__MOUT__ << "Invalid path, just returning normal value." << std::endl;
 			}
 
 			//else normal return
@@ -193,6 +206,36 @@ public:
 	//special version of getValue for string type
 	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
 	std::string								getValue			        (void) const;
+
+private:
+	template<typename T>
+	T handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<T>) const
+	{
+		if(!configView)
+		{
+			__SS__ << "Null configView" << std::endl;
+			__MOUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+		std::cout << "210:::::" << "handleValidateValueForColumn<T>" << std::endl;
+		return configView->validateValueForColumn<T>(
+				value,col);
+	}
+
+	std::string handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<std::string>) const
+	{
+		if(!configView)
+		{
+			__SS__ << "Null configView" << std::endl;
+			__MOUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+		std::cout << "210:::::" << "handleValidateValueForColumn<string>" << std::endl;
+		return configView->validateValueForColumn(
+				value,col);
+	}
+
+public:
 
 	//navigating between nodes
 	ConfigurationTree						getNode				        (const std::string& nodeName, bool doNotThrowOnBrokenUIDLinks=false) const;

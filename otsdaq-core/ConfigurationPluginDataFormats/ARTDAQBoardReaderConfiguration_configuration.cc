@@ -251,11 +251,11 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 				if(!parameter.second.getNode("Status").getValue<bool>())
 					PUSHCOMMENT;
 
-				__MOUT__ << parameter.second.getNode("daqParameterKey").getValue() <<
-						": " <<
-						parameter.second.getNode("daqParameterValue").getValue()
-						<<
-						"\n";
+				//				__MOUT__ << parameter.second.getNode("daqParameterKey").getValue() <<
+				//						": " <<
+				//						parameter.second.getNode("daqParameterValue").getValue()
+				//						<<
+				//						"\n";
 
 				auto comment = parameter.second.getNode("CommentDescription");
 				OUT << parameter.second.getNode("daqParameterKey").getValue() <<
