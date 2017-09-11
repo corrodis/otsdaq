@@ -1,8 +1,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationTree.h"
-
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 
+#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
 #include <typeinfo>
 
@@ -153,12 +152,42 @@ void ConfigurationTree::recursivePrint(const ConfigurationTree &t, unsigned int 
 
 //==============================================================================
 //getValue (only std::string value)
+//special version of getValue for string type
+//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
 void ConfigurationTree::getValue(std::string& value) const
 {
 	//__MOUT__ << row_ << " " << col_ << " p: " << configView_<< std::endl;
 
 	if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
+	{
+		//attempt to interpret the value as a tree node path itself
+		try
+		{
+			ConfigurationTree valueAsTreeNode = getValueAsTreeNode();
+			//valueAsTreeNode.getValue<T>(value);
+			__MOUT__ << "Success following path to tree node!" << std::endl;
+			//value has been interpreted as a tree node value
+			//now verify result under the rules of this column
+			//if(typeid(std::string) == typeid(value))
+
+			//Note: want to interpret table value as though it is in column of different table
+			//	this allows a number to be read as a string, for example, without exceptions
+			value =	configView_->validateValueForColumn(
+					valueAsTreeNode.getValueAsString(),col_);
+			//else
+			//	value = configView_->validateValueForColumn<T>(
+			//		valueAsTreeNode.getValueAsString(),col_);
+
+			return;
+		}
+		catch(...) //tree node path interpretation failed
+		{
+			__MOUT__ << "Invalid path, just returning normal value." << std::endl;
+		}
+
+		//else normal return
 		configView_->getValue(value,row_,col_);
+	}
 	else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
 	{
 		if(isLinkNode() && isDisconnected())
@@ -190,33 +219,40 @@ void ConfigurationTree::getValue(std::string& value) const
 //	NOTE: getValueAsString() method should be preferred if getting the Link UID
 //		because when disconnected will return "X". getValue() would return the
 //		column name of the link when disconnected.
+//
+////special version of getValue for string type
+//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
 std::string ConfigurationTree::getValue() const
 {
+	std::string value;
+	ConfigurationTree::getValue(value);
+	return value;
+
 	//__MOUT__ << row_ << " " << col_ << " p: " << configView_<< std::endl;
 
-	std::string value = "";
-	if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
-		configView_->getValue(value,row_,col_);
-	else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
-	{
-		if(isLinkNode() && isDisconnected())
-			value = (groupId_ == "") ? getValueName():groupId_; //a disconnected link still knows its table name or groupId
-		else
-			value = (groupId_ == "") ? configuration_->getConfigurationName():groupId_;
-	}
-	else if(row_ == ConfigurationView::INVALID)
-	{
-		__MOUT__ << std::endl;
-		throw std::runtime_error("Malformed ConfigurationTree");
-	}
-	else if(col_ == ConfigurationView::INVALID)						//this node is uid node
-		configView_->getValue(value,row_,configView_->getColUID());
-	else
-	{
-		__MOUT__ << std::endl;
-		throw std::runtime_error("Impossible.");
-	}
-	return value;
+//	std::string value = "";
+//	if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
+//		configView_->getValue(value,row_,col_);
+//	else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
+//	{
+//		if(isLinkNode() && isDisconnected())
+//			value = (groupId_ == "") ? getValueName():groupId_; //a disconnected link still knows its table name or groupId
+//		else
+//			value = (groupId_ == "") ? configuration_->getConfigurationName():groupId_;
+//	}
+//	else if(row_ == ConfigurationView::INVALID)
+//	{
+//		__MOUT__ << std::endl;
+//		throw std::runtime_error("Malformed ConfigurationTree");
+//	}
+//	else if(col_ == ConfigurationView::INVALID)						//this node is uid node
+//		configView_->getValue(value,row_,configView_->getColUID());
+//	else
+//	{
+//		__MOUT__ << std::endl;
+//		throw std::runtime_error("Impossible.");
+//	}
+//	return value;
 
 }
 
@@ -1449,6 +1485,55 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(void) const
 
 	return retSet;
 }
+
+
+//==============================================================================
+//getValueAsTreeNode
+//	returns tree node for value of this node, treating the value
+//		as a string for the absolute path string from root of tree
+ConfigurationTree ConfigurationTree::getValueAsTreeNode(void) const
+{
+	//check if first character is a /, .. if so try to get value in tree
+	//	if exception, just take value
+	//note: this call will throw an error, in effect, if not a "value" node
+	if(!configView_)
+	{
+		__SS__ << "Invalid node for get value." << std::endl;
+		__MOUT__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
+
+	std::string valueString = configView_->getValueAsString(row_,col_,true /* convertEnvironmentVariables */);
+	//__MOUT__ << valueString << std::endl;
+	if(valueString.size() && valueString[0] == '/')
+	{
+		__MOUT__ << "Starts with '/' - check if valid tree path: " << valueString << std::endl;
+		try
+		{
+			ConfigurationTree retNode = configMgr_->getNode(valueString);
+			__MOUT__ << "Success!" << std::endl;
+			return retNode;
+		}
+		catch(...)
+		{
+			__SS__ << "Invalid tree path." << std::endl;
+			__MOUT__ << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+	}
+
+
+	{
+		__SS__ << "Invalid value string '" << valueString <<
+				"' - must start with a '/' character." << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+}
+
+
+
+
+
 
 
 

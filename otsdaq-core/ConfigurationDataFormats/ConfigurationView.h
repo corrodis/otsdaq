@@ -14,6 +14,7 @@
 #include <vector>
 #include <cassert>
 #include <stdlib.h>
+#include <time.h>       /* time_t, time, ctime */
 
 std::string ots_demangle(const char* name);
 
@@ -103,12 +104,123 @@ public:
 	void getValue(T& value, unsigned int row, unsigned int col, bool convertEnvironmentVariables=true) const
 	{
 		if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
-			throw std::runtime_error("Invalid row col requested");
+		{
+			__SS__ << "Invalid row col requested" << std::endl;
+			__MOUT_ERR__ << "\n" << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+
+		value = validateValueForColumn<T>(theDataView_[row][col],col,convertEnvironmentVariables);
+//
+//		if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_NUMBER) //handle numbers
+//		{
+//			std::string data = convertEnvironmentVariables?convertEnvVariables(theDataView_[row][col]):
+//					theDataView_[row][col];
+//
+//			if(!isNumber(data))
+//			{
+//				__SS__ << (data + " is not a number!") << std::endl;
+//				__MOUT__ << "\n" << ss.str();
+//				throw std::runtime_error(ss.str());
+//			}
+//
+//			if(typeid(double) == typeid(value))
+//				value = strtod(data.c_str(),0);
+//			else if(typeid(float) == typeid(value))
+//				value = strtof(data.c_str(),0);
+//			else if(data.size() > 2 && data[1] == 'x') //assume hex value
+//				value = strtol(data.c_str(),0,16);
+//			else if(data.size() > 1 && data[0] == 'b') //assume binary value
+//				value = strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
+//			else
+//				value = strtol(data.c_str(),0,10);
+//		}
+//		else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
+//				columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
+//				(typeid(int) == typeid(value) ||
+//						typeid(unsigned int) == typeid(value)))
+//		{
+//			//this case is for if fixed choice type but int is requested
+//			//	then return index in fixed choice list
+//			//	(always consider DEFAULT as index 0)
+//			//throw error if no match
+//
+//			if(theDataView_[row][col] == ViewColumnInfo::DATATYPE_STRING_DEFAULT)
+//				value = 0;
+//			else
+//			{
+//				std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
+//				for(value=1;value-1<(T)choices.size();++value)
+//					if(theDataView_[row][col] == choices[value-1])
+//						return; //value has been set to selected choice index, so return
+//
+//				__SS__ << "\tInvalid value for column data type: " << columnsInfo_[col].getDataType()
+//						<< " in configuration " << tableName_
+//						<< " at column=" << columnsInfo_[col].getName()
+//						<< " for getValue with type '" << ots_demangle(typeid(value).name())
+//						<< ".'"
+//						<< "Attempting to get index of '" << theDataView_[row][col]
+//						<< " in fixed choice array, but was not found in array. "
+//						<< "Here are the valid choices:\n";
+//				ss << "\t" << ViewColumnInfo::DATATYPE_STRING_DEFAULT << "\n";
+//				for(const auto &choice:choices)
+//					ss << "\t" << choice << "\n";
+//				__MOUT__ << "\n" << ss.str();
+//				throw std::runtime_error(ss.str());
+//			}
+//		}
+//		else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
+//				typeid(bool) == typeid(value)) //handle bool
+//		{
+//			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_ON_OFF)
+//				value = (theDataView_[row][col] == ViewColumnInfo::TYPE_VALUE_ON) ? true:false;
+//			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_TRUE_FALSE)
+//				value = (theDataView_[row][col] == ViewColumnInfo::TYPE_VALUE_TRUE) ? true:false;
+//			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_YES_NO)
+//				value = (theDataView_[row][col] == ViewColumnInfo::TYPE_VALUE_YES) ? true:false;
+//		}
+//		else
+//		{
+//			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
+//				__MOUT_WARN__ << "For column type " << ViewColumnInfo::TYPE_FIXED_CHOICE_DATA
+//					<< " the only valid numeric types are 'int' and 'unsigned int.'";
+//
+//			__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
+//					<< " and column type: " << columnsInfo_[col].getType()
+//					<< ", in configuration " << tableName_
+//					<< " at column=" << columnsInfo_[col].getName()
+//					<< " for getValue with type '" << ots_demangle(typeid(value).name())
+//					<< "'" << std::endl;
+//			throw std::runtime_error(ss.str());
+//		}
+	}
+	//special version of getValue for string type
+	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
+	void 		getValue(std::string& value, unsigned int row, unsigned int col, bool convertEnvironmentVariables=true) const;
+
+	//==============================================================================
+	//validateValueForColumn
+	//	validates value against data rules for specified column.
+	//	throws exception if invalid.
+	//
+	//	on success returns what the value would be for get value
+	template<class T>
+	T validateValueForColumn(const std::string& value, unsigned int col,
+			bool convertEnvironmentVariables=true) const
+	{
+		if(col >= columnsInfo_.size())
+		{
+			__SS__ << "Invalid col requested" << std::endl;
+			__MOUT_ERR__ << "\n" << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+
+		T retValue;
 
 		if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_NUMBER) //handle numbers
 		{
-			std::string data = convertEnvironmentVariables?convertEnvVariables(theDataView_[row][col]):
-					theDataView_[row][col];
+			std::string data = convertEnvironmentVariables?convertEnvVariables(value):
+					value;
 
 			if(!isNumber(data))
 			{
@@ -117,42 +229,42 @@ public:
 				throw std::runtime_error(ss.str());
 			}
 
-			if(typeid(double) == typeid(value))
-				value = strtod(data.c_str(),0);
-			else if(typeid(float) == typeid(value))
-				value = strtof(data.c_str(),0);
+			if(typeid(double) == typeid(retValue))
+				retValue = strtod(data.c_str(),0);
+			else if(typeid(float) == typeid(retValue))
+				retValue = strtof(data.c_str(),0);
 			else if(data.size() > 2 && data[1] == 'x') //assume hex value
-				value = strtol(data.c_str(),0,16);
+				retValue = strtol(data.c_str(),0,16);
 			else if(data.size() > 1 && data[0] == 'b') //assume binary value
-				value = strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
+				retValue = strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
 			else
-				value = strtol(data.c_str(),0,10);
+				retValue = strtol(data.c_str(),0,10);
 		}
 		else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
 				columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
-				(typeid(int) == typeid(value) ||
-						typeid(unsigned int) == typeid(value)))
+				(typeid(int) == typeid(retValue) ||
+						typeid(unsigned int) == typeid(retValue)))
 		{
-			//if fixed choice type but int is requested
+			//this case is for if fixed choice type but int is requested
 			//	then return index in fixed choice list
 			//	(always consider DEFAULT as index 0)
 			//throw error if no match
 
-			if(theDataView_[row][col] == ViewColumnInfo::DATATYPE_STRING_DEFAULT)
-				value = 0;
+			if(value == ViewColumnInfo::DATATYPE_STRING_DEFAULT)
+				retValue = 0;
 			else
 			{
 				std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
-				for(value=1;value-1<(T)choices.size();++value)
-					if(theDataView_[row][col] == choices[value-1])
-						return; //value has been set to selected choice index, so return
+				for(retValue=1;retValue-1<(T)choices.size();++retValue)
+					if(value == choices[retValue-1])
+						return retValue; //value has been set to selected choice index, so return
 
 				__SS__ << "\tInvalid value for column data type: " << columnsInfo_[col].getDataType()
 						<< " in configuration " << tableName_
 						<< " at column=" << columnsInfo_[col].getName()
-						<< " for getValue with type '" << ots_demangle(typeid(value).name())
+						<< " for getValue with type '" << ots_demangle(typeid(retValue).name())
 						<< ".'"
-						<< "Attempting to get index of '" << theDataView_[row][col]
+						<< "Attempting to get index of '" << value
 						<< " in fixed choice array, but was not found in array. "
 						<< "Here are the valid choices:\n";
 				ss << "\t" << ViewColumnInfo::DATATYPE_STRING_DEFAULT << "\n";
@@ -163,14 +275,14 @@ public:
 			}
 		}
 		else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
-				typeid(bool) == typeid(value)) //handle bool
+				typeid(bool) == typeid(retValue)) //handle bool
 		{
 			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_ON_OFF)
-				value = (theDataView_[row][col] == ViewColumnInfo::TYPE_VALUE_ON) ? true:false;
+				retValue = (value == ViewColumnInfo::TYPE_VALUE_ON) ? true:false;
 			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_TRUE_FALSE)
-				value = (theDataView_[row][col] == ViewColumnInfo::TYPE_VALUE_TRUE) ? true:false;
+				retValue = (value == ViewColumnInfo::TYPE_VALUE_TRUE) ? true:false;
 			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_YES_NO)
-				value = (theDataView_[row][col] == ViewColumnInfo::TYPE_VALUE_YES) ? true:false;
+				retValue = (value == ViewColumnInfo::TYPE_VALUE_YES) ? true:false;
 		}
 		else
 		{
@@ -182,12 +294,17 @@ public:
 					<< " and column type: " << columnsInfo_[col].getType()
 					<< ", in configuration " << tableName_
 					<< " at column=" << columnsInfo_[col].getName()
-					<< " for getValue with type '" << ots_demangle(typeid(value).name())
+					<< " for getValue with type '" << ots_demangle(typeid(retValue).name())
 					<< "'" << std::endl;
 			throw std::runtime_error(ss.str());
 		}
-	}
-	void 		getValue(std::string &value, unsigned int row, unsigned int col, bool convertEnvironmentVariables=true) const;
+
+		return retValue;
+	} // end validateValueForColumn()
+	//special version of getValue for string type
+	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
+	std::string validateValueForColumn(const std::string& value, unsigned int col, bool convertEnvironmentVariables=true) const;
+
 	std::string getValueAsString(unsigned int row, unsigned int col, bool convertEnvironmentVariables=true) const;
 	std::string getEscapedValueAsString(unsigned int row, unsigned int col, bool convertEnvironmentVariables=true) const;
 	bool		isURIEncodedCommentTheSame(const std::string &comment) const;

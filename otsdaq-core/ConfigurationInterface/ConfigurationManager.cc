@@ -930,7 +930,7 @@ ConfigurationTree ConfigurationManager::getSupervisorConfigurationNode(
 //==============================================================================
 ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString) const
 {
-	//__MOUT__ << "nodeString=" << nodeString << " " << nodeString.length() << std::endl;
+	__MOUT__ << "nodeString=" << nodeString << " " << nodeString.length() << std::endl;
 
 	//get nodeName (in case of / syntax)
 	if(nodeString.length() < 1) throw std::runtime_error("Invalid empty node name");
@@ -938,14 +938,15 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString) c
 	bool startingSlash = (nodeString[0] == '/');
 
 	std::string nodeName = nodeString.substr(startingSlash?1:0, nodeString.find('/',1)-(startingSlash?1:0));
-	//__MOUT__ << "nodeName=" << nodeName << " " << nodeName.length() << std::endl;
+	__MOUT__ << "nodeName=" << nodeName << " " << nodeName.length() << std::endl;
 	if(nodeName.length() < 1) throw std::runtime_error("Invalid node name: " + nodeName);
 
 	std::string childPath = nodeString.substr(nodeName.length() + (startingSlash?1:0));
 
-	//__MOUT__ << "childPath=" << childPath << " " << childPath.length() << std::endl;
+	__MOUT__ << "childPath=" << childPath << " " << childPath.length() << std::endl;
 
 	ConfigurationTree configTree(this, getConfigurationByName(nodeName));
+
 	if(childPath.length() > 1)
 		return configTree.getNode(childPath);
 	else
@@ -1129,6 +1130,7 @@ const ConfigurationBase* ConfigurationManager::getConfigurationByName(const std:
 				"\n\t StartOTS.sh --wiz" <<
 				"\n\n\n\n"
 				<< std::endl;
+		__MOUT_WARN__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 	return it->second;

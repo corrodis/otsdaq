@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <sstream>
-#include <time.h>       /* time_t, time, ctime */
 #include <cstdlib>
 #include <regex>
 
@@ -470,38 +469,99 @@ void ConfigurationView::init(void)
 //==============================================================================
 //getValue
 //	string version
+//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
 void ConfigurationView::getValue(std::string& value, unsigned int row, unsigned int col, bool convertEnvironmentVariables) const
 {
-	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
-		throw std::runtime_error("Invalid row col requested");
+	//getValue<std::string>(value,row,col,convertEnvironmentVariables);
 
-	if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING)
+	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 	{
-		value = theDataView_[row][col];
-		if(convertEnvironmentVariables)
-			value = convertEnvVariables(value);
-	}
-	else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_TIME)
-	{
-		value.resize(30); //known fixed size: Thu Aug 23 14:55:02 2001 CST
-		time_t timestamp(strtol(theDataView_[row][col].c_str(),0,10));
-		struct tm tmstruct;
-		::localtime_r(&timestamp, &tmstruct);
-		::strftime(&value[0], 30, "%c %Z", &tmstruct);
-		value.resize(strlen(value.c_str()));
-	}
-	else
-	{
-		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
-								<< " in configuration " << tableName_
-								<< " at column=" << columnsInfo_[col].getName()
-								<< " for getValue with type '" << ots_demangle(typeid(value).name())
-								<< "'" << std::endl;
+		__SS__ << "Invalid row col requested" << std::endl;
+		__MOUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 
+	value = validateValueForColumn(theDataView_[row][col],col,convertEnvironmentVariables);
+
+//	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
+//	{
+//		__SS__ << "Invalid row col requested" << std::endl;
+//		__MOUT_ERR__ << "\n" << ss.str();
+//		throw std::runtime_error(ss.str());
+//	}
+//
+//
+//	if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING)
+//	{
+//		value = theDataView_[row][col];
+//		if(convertEnvironmentVariables)
+//			value = convertEnvVariables(value);
+//	}
+//	else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_TIME)
+//	{
+//		value.resize(30); //known fixed size: Thu Aug 23 14:55:02 2001 CST
+//		time_t timestamp(strtol(theDataView_[row][col].c_str(),0,10));
+//		struct tm tmstruct;
+//		::localtime_r(&timestamp, &tmstruct);
+//		::strftime(&value[0], 30, "%c %Z", &tmstruct);
+//		value.resize(strlen(value.c_str()));
+//	}
+//	else
+//	{
+//		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
+//								<< " in configuration " << tableName_
+//								<< " at column=" << columnsInfo_[col].getName()
+//								<< " for getValue with type '" << ots_demangle(typeid(value).name())
+//								<< "'" << std::endl;
+//		throw std::runtime_error(ss.str());
+//	}
+
 
 }
+
+
+//==============================================================================
+//validateValueForColumn
+//	string version
+//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
+std::string ConfigurationView::validateValueForColumn(const std::string& value, unsigned int col, bool convertEnvironmentVariables) const
+{
+		//return validateValueForColumn<std::string>(value,col,convertEnvironmentVariables);
+		if(col >= columnsInfo_.size())
+		{
+			__SS__ << "Invalid col requested" << std::endl;
+			__MOUT_ERR__ << "\n" << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+
+		std::string retValue;
+
+		if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING)
+			retValue = convertEnvironmentVariables?convertEnvVariables(value):value;
+		else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_TIME)
+		{
+			retValue.resize(30); //known fixed size: Thu Aug 23 14:55:02 2001 CST
+			time_t timestamp(
+					strtol((convertEnvironmentVariables?convertEnvVariables(value):value).c_str(),
+							0,10));
+			struct tm tmstruct;
+			::localtime_r(&timestamp, &tmstruct);
+			::strftime(&retValue[0], 30, "%c %Z", &tmstruct);
+			retValue.resize(strlen(retValue.c_str()));
+		}
+		else
+		{
+			__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
+				<< " in configuration " << tableName_
+				<< " at column=" << columnsInfo_[col].getName()
+				<< " for getValue with type '" << ots_demangle(typeid(retValue).name())
+				<< "'" << std::endl;
+			__MOUT_ERR__ << "\n" << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+
+		return retValue;
+	}
 
 
 //==============================================================================
@@ -514,6 +574,7 @@ std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int c
 	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 		throw std::runtime_error("Invalid row col requested");
 
+	//__MOUT__ << columnsInfo_[col].getType() << " " << col << std::endl;
 
 	if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_ON_OFF)
 	{
@@ -537,6 +598,7 @@ std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int c
 			return ViewColumnInfo::TYPE_VALUE_NO;
 	}
 
+	//__MOUT__ << std::endl;
 	return convertEnvironmentVariables?convertEnvVariables(theDataView_[row][col]):
 			theDataView_[row][col];
 }

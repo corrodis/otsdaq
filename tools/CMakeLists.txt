@@ -10,5 +10,4 @@ cet_script(
 	setupOtsEnvironment.sh
 	xt_cmd.sh
 	StartOTS.sh
-	TestFlatten.sh
 )

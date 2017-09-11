@@ -2,8 +2,7 @@
 #define _ots_ConfigurationTree_h_
 
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationView.h"
-//#include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
-//#include <xercesc/dom/DOMElement.hpp>
+
 
 #include <iostream>       // std::cout
 #include <string>
@@ -15,7 +14,16 @@ namespace ots
 
 class ConfigurationManager;
 class ConfigurationBase;
-class ConfigurationView;
+//class ConfigurationView;
+
+//template <typename T> 	T handleValidateValueForColumn    (ConfigurationView* configView, std::string value, unsigned int col)
+//{
+//	std::cout << "22:::::" << "handleValidateValueForColumn<T>" << std::endl;
+//}
+//template <>            	std::string handleValidateValueForColumn<std::string>(ConfigurationView* configView)
+//{
+//	std::cout << "22:::::" << "handleValidateValueForColumn<std::string>" << std::endl;
+//}
 
 class ConfigurationTree
 {
@@ -98,7 +106,33 @@ public:
 	void getValue(T& value) const
 	{
 		if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
+		{
+			//attempt to interpret the value as a tree node path itself
+			try
+			{
+				ConfigurationTree valueAsTreeNode = getValueAsTreeNode();
+				//valueAsTreeNode.getValue<T>(value);
+				__MOUT__ << "Success following path to tree node!" << std::endl;
+				//value has been interpreted as a tree node value
+				//now verify result under the rules of this column
+//				if(typeid(std::string) == typeid(value) ||
+//						typeid(std::basic_string<char>) == typeid(value))
+//					value =	configView_->validateValueForColumn(
+//						valueAsTreeNode.getValueAsString(),col_);
+//				else
+				//	value = (T)configView_->validateValueForColumn<T>(
+				//		valueAsTreeNode.getValueAsString(),col_);
+				throw ("");
+				return;
+			}
+			catch(...) //tree node path interpretation failed
+			{
+				__MOUT__ << "Invalid path, just returning normal value." << std::endl;
+			}
+
+			//else normal return
 			configView_->getValue(value,row_,col_);
+		}
 		else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
 			throw std::runtime_error("Requesting getValue on config node level. Must be a value node.");
 		else if(row_ == ConfigurationView::INVALID)
@@ -114,6 +148,10 @@ public:
 			throw std::runtime_error("Impossible");
 		}
 	}
+	//special version of getValue for string type
+	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
+	void									getValue			        (std::string& value) const;
+
 
 	//==============================================================================
 	//getValue (not std::string value)
@@ -122,26 +160,39 @@ public:
 	T getValue(void) const
 	{
 		T value;
-		if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
-		{
-			configView_->getValue(value,row_,col_);
-			return value;
-		}
-		else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
-			throw std::runtime_error("Requesting getValue on config node level. Must be a value node.");
-		else if(row_ == ConfigurationView::INVALID)
-		{
-			std::cout << __COUT_HDR_FL__ << std::endl;
-			throw std::runtime_error("Malformed ConfigurationTree");
-		}
-		else if(col_ == ConfigurationView::INVALID)						//this node is uid node
-			throw std::runtime_error("Requesting getValue on uid node level. Must be a value node.");
-		else
-		{
-			std::cout << __COUT_HDR_FL__ << std::endl;
-			throw std::runtime_error("Impossible");
-		}
+//		if(typeid(std::basic_string<char>) == typeid(value) ||
+//				typeid(std::string) == typeid(value))
+//		{
+//			std::string stringValue;
+//			ConfigurationTree::getValue(stringValue);
+//			return stringValue;
+//		}
+//		else
+			ConfigurationTree::getValue<T>(value);
+		return value;
+//		if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
+//		{
+//			configView_->getValue(value,row_,col_);
+//			return value;
+//		}
+//		else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
+//			throw std::runtime_error("Requesting getValue on config node level. Must be a value node.");
+//		else if(row_ == ConfigurationView::INVALID)
+//		{
+//			std::cout << __COUT_HDR_FL__ << std::endl;
+//			throw std::runtime_error("Malformed ConfigurationTree");
+//		}
+//		else if(col_ == ConfigurationView::INVALID)						//this node is uid node
+//			throw std::runtime_error("Requesting getValue on uid node level. Must be a value node.");
+//		else
+//		{
+//			std::cout << __COUT_HDR_FL__ << std::endl;
+//			throw std::runtime_error("Impossible");
+//		}
 	}
+	//special version of getValue for string type
+	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
+	std::string								getValue			        (void) const;
 
 	//navigating between nodes
 	ConfigurationTree						getNode				        (const std::string& nodeName, bool doNotThrowOnBrokenUIDLinks=false) const;
@@ -155,8 +206,6 @@ public:
 	std::vector<std::string>				getChildrenNames	        (void) const;
 	std::vector<std::pair<std::string,ConfigurationTree> >	getChildren	(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap = std::map<std::string /*relative-path*/, std::string /*value*/>()) const;
 	std::map<std::string,ConfigurationTree> getChildrenMap	            (void) const;
-	void									getValue			        (std::string& value) const;
-	std::string								getValue			        (void) const;
 	std::string								getEscapedValue		        (void) const;
 	const std::string&						getValueAsString	        (bool returnLinkTableValue=false) const;
 	const std::string&						getUIDAsString		        (void) const;
@@ -225,8 +274,7 @@ private:
 	static void 				recursivePrint(const ConfigurationTree& t, unsigned int depth, std::ostream &out, std::string space);
 
 	void						recursiveGetCommonFields(std::vector<ConfigurationTree::RecordField> &fieldCandidateList, std::vector<int> &fieldCount, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth, const std::string &relativePathBase, bool inFirstRecord) const;
-
-	//std::string					getRecordFieldValueAsString(std::string fieldName) const;
+	ConfigurationTree			getValueAsTreeNode			(void) const;
 
 	//Any given ConfigurationTree is either a config, uid, or value node:
 	//	- config node is a pointer to a config table
