@@ -1,0 +1,128 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_AGGREGATOR_SOURCE_CONFIGURATION",
+"COMMENT" : "",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1504872434,
+"COL_TYPES" : {
+"SOURCE_UID" : "VARCHAR2",
+"SOURCE_MODULE_TYPE" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"SOURCE_UID" : "aggregator0source0",
+"SOURCE_MODULE_TYPE" : "NetMonInput",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Tue Sep 12 10:57:51 2017",
+"rawdata" : [
+
+]
+},
+"version" : "1",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Tue Sep 12 10:57:51 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Tue Sep 12 10:57:51 2017"
+},
+{
+"name" : "artdaqConfig_v1",
+"assigned" : "Tue Sep 12 10:57:53 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 12 10:57:51 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Tue Sep 12 10:57:51 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Tue Sep 12 10:57:51 2017",
+"value" : {
+"name" : "1",
+"assigned" : "Tue Sep 12 10:57:51 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Tue Sep 12 10:57:51 2017",
+"value" : {
+"name" : "ARTDAQAggregatorSourceConfiguration",
+"assigned" : "Tue Sep 12 10:57:51 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Tue Sep 12 10:57:51 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Tue Sep 12 10:57:51 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Tue Sep 12 10:57:53 2017",
+"value" : {
+"name" : "artdaqConfig_v1",
+"assigned" : "Tue Sep 12 10:57:53 2017"
+}
+}
+],
+"created" : "Tue Sep 12 10:57:51 2017"
+},
+"_id" : {
+"$oid" : "94c9ddf88a8040fe978a4ae7"
+},
+"collection" : "ARTDAQAggregatorSourceConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}
