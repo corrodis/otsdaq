@@ -1511,17 +1511,17 @@ ConfigurationTree ConfigurationTree::getValueAsTreeNode(void) const
 	//__MOUT__ << valueString << std::endl;
 	if(valueString.size() && valueString[0] == '/')
 	{
-		__MOUT__ << "Starts with '/' - check if valid tree path: " << valueString << std::endl;
+		//__MOUT__ << "Starts with '/' - check if valid tree path: " << valueString << std::endl;
 		try
 		{
 			ConfigurationTree retNode = configMgr_->getNode(valueString);
-			__MOUT__ << "Success!" << std::endl;
+			__MOUT__ << "Found a valid tree path in value!" << std::endl;
 			return retNode;
 		}
 		catch(...)
 		{
 			__SS__ << "Invalid tree path." << std::endl;
-			__MOUT__ << ss.str();
+			//__MOUT__ << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 	}

@@ -19,15 +19,13 @@ ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub *
 	__MOUT__ << "Begin!" << std::endl;
 	__MOUT__ << "Begin!" << std::endl;
 
-	CoreSupervisorBase::theStateMachineImplementation_.push_back
-	(
-			DataManagerSingleton::getInstance<ARTDAQDataManager>
-	(
-			CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
-			CoreSupervisorBase::supervisorConfigurationPath_,
-			CoreSupervisorBase::supervisorApplicationUID_
-	)
+	CoreSupervisorBase::theStateMachineImplementation_.push_back(
+			DataManagerSingleton::getInstance<ARTDAQDataManager>(
+					CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
+					CoreSupervisorBase::supervisorConfigurationPath_,
+					CoreSupervisorBase::supervisorApplicationUID_)
 	);
+
 	__MOUT__ << "Initialized!" << std::endl;
 	__MOUT__ << "Initialized!" << std::endl;
 	__MOUT__ << "Initialized!" << std::endl;

@@ -39,6 +39,7 @@ ARTDAQDataManager::~ARTDAQDataManager(void)
 //========================================================================================================================
 void ARTDAQDataManager::configure(void)
 {
+	__MOUT__ << "Data manager configuring..." << std::endl;
 	DataManager::configure();
 	__MOUT__ << "Data manager configured now pass the MPI stuff" << std::endl;
 	for(auto it=DataManager::buffers_.begin(); it!=DataManager::buffers_.end(); it++)

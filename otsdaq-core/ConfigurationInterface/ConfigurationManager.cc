@@ -176,9 +176,13 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 
 	std::string groupName;
 	std::string errorStr = "";
+	bool skip;
+
+	__SS__;
 
 	for(int i=0;i<3;++i)
 	{
+		skip = false;
 		fgets(tmp,500,fp);
 		sscanf(tmp,"%s",strVal); //sscanf to remove '\n'
 		for(unsigned int j=0;j<strlen(strVal);++j)
@@ -188,9 +192,13 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 					(strVal[j] >= '0' && strVal[j] <= '9')))
 				{
 					strVal[j] = '\0';
-					__MOUT_INFO__ << "Illegal character found, so truncating group name!" << std::endl;
+					__MOUT_INFO__ << "Illegal character found, so skipping!" << std::endl;
+
+					skip = true;
 					break;
 				}
+
+		if(skip) continue;
 
 		groupName = strVal;
 		fgets(tmp,500,fp);
@@ -201,9 +209,14 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 					(strVal[j] >= '0' && strVal[j] <= '9')))
 				{
 					strVal[j] = '\0';
-					__MOUT_INFO__ << "Illegal character found, so truncating key string!" << std::endl;
+					__MOUT_INFO__ << "Illegal character found, so skipping!" << std::endl;
+
+					skip = true;
 					break;
 				}
+
+		if(skip) continue;
+
 		try
 		{
 			//load and doActivate
@@ -211,19 +224,17 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 		}
 		catch(std::runtime_error &e)
 		{
-			__SS__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
+			ss << "Failed to load config group in ConfigurationManager::init() with name '" <<
 					groupName << "_v" << strVal << "'" << std::endl;
 			ss << e.what() << std::endl;
 
-			__MOUT_INFO__ << "\n" << ss.str();
 			errorStr += ss.str();
 		}
 		catch(...)
 		{
-			__SS__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
+			ss << "Failed to load config group in ConfigurationManager::init() with name '" <<
 					groupName << "_v" << strVal << "'" << std::endl;
 
-			__MOUT_INFO__ << "\n" << ss.str();
 			errorStr += ss.str();
 		}
 	}
@@ -231,7 +242,10 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 	fclose(fp);
 
 	if(throwErrors && errorStr != "")
+	{
+		__MOUT_INFO__ << "\n" << ss.str();
 		throw std::runtime_error(errorStr);
+	}
 }
 
 //==============================================================================
