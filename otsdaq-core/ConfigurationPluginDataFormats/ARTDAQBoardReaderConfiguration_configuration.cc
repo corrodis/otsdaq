@@ -63,22 +63,59 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 	std::vector<const XDAQContextConfiguration::XDAQContext *> readerContexts =
 			contextConfig->getBoardReaderContexts();
 
+
+
+
 	//for each reader context
-	//	output associated fcl config file
+	//	do NOT output associated fcl config file
+	//  but do check the link is to a DataManager-esque thing
 	for(auto &readerContext: readerContexts)
 	{
-		ConfigurationTree readerConfigNode = contextConfig->getSupervisorConfigNode(configManager,
-				readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
+		try
+		{
+			ConfigurationTree readerConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+					readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
 
-		__MOUT__ << "Path for this reader config is " <<
-				readerContext->contextUID_ << "/" <<
-				readerContext->applications_[0].applicationUID_ << "/" <<
-				readerConfigNode.getValueAsString() <<
-				std::endl;
+			__MOUT__ << "Path for this reader config is " <<
+					readerContext->contextUID_ << "/" <<
+					readerContext->applications_[0].applicationUID_ << "/" <<
+					readerConfigNode.getValueAsString() <<
+					std::endl;
 
-		outputFHICL(readerConfigNode,
-				contextConfig);
+			__MOUT__ << "Checking that this reader supervisor node is DataManager-like." << std::endl;
+
+			readerConfigNode.getNode("LinkToDataManagerConfiguration").getChildren();
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "artdaq Board Readers must be instantiated as a Consumer within a DataManager configuration. Error found while checking for LinkToDataManagerConfiguration: " <<
+					e.what() << std::endl;
+			__MOUT_ERR__ << ss.str();
+			__MOUT__ << "Path for this reader config is " <<
+								readerContext->contextUID_ << "/" <<
+								readerContext->applications_[0].applicationUID_ << "/X" << std::endl;
+			__MOUT_ERR__ << "This board reader will likely not get instantiated properly! Proceeding anyway with fcl generation." << std::endl;
+
+			//proceed anyway, because it was really annoying to not be able to activate the configuration group when the context is being developed also.
+			//throw std::runtime_error(ss.str());
+		}
+
+		//artdaq Reader is not at Supervisor level like other apps
+		//	it is at Consumer level!
+		//outputFHICL(readerConfigNode,
+		//		contextConfig);
 	}
+
+	//handle fcl file generation, wherever the level of this configuration
+
+	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+	std::string appUID, buffUID, consumerUID;
+
+	for(auto &child:childrenMap)
+		if(child.second.getNode("Status").getValue<bool>())
+		{
+			outputFHICL(child.second, contextConfig);
+		}
 }
 
 ////========================================================================================================================
@@ -223,12 +260,20 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 	}
 
 	//no primary link to configuration tree for reader node!
-	if(boardReaderNode.isDisconnected())
+	try
 	{
-		//create empty fcl
-		OUT << "{}\n\n";
-		out.close();
-		return;
+		if(boardReaderNode.isDisconnected())
+		{
+			//create empty fcl
+			OUT << "{}\n\n";
+			out.close();
+			return;
+		}
+	}
+	catch(const std::runtime_error)
+	{
+		//error is expected here for UIDs.. so just ignore
+		// this check is valuable if source node is a unique-Link node, rather than UID
 	}
 
 	//--------------------------------------

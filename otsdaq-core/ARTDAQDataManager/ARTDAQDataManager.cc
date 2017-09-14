@@ -39,9 +39,11 @@ ARTDAQDataManager::~ARTDAQDataManager(void)
 //========================================================================================================================
 void ARTDAQDataManager::configure(void)
 {
-	__MOUT__ << "Data manager configuring..." << std::endl;
+	__MOUT__ << "ARTDAQDataManager configuring..." << std::endl;
+
 	DataManager::configure();
-	__MOUT__ << "Data manager configured now pass the MPI stuff" << std::endl;
+
+	__MOUT__ << "ARTDAQDataManager DataManager configured now pass the MPI stuff" << std::endl;
 	for(auto it=DataManager::buffers_.begin(); it!=DataManager::buffers_.end(); it++)
 		for(auto& itc: it->second.consumers_)
 			if(dynamic_cast<ARTDAQConsumer*>(itc.get()))
@@ -50,6 +52,9 @@ void ARTDAQDataManager::configure(void)
 				return;//There can only be 1 ARTDAQConsumer for each ARTDAQDataManager!!!!!!!
 			}
 
+	__SS__ << "There was no ARTDAQ Consumer found on a buffer!" << std::endl;
+	__MOUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
 }
 
 

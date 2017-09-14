@@ -942,9 +942,10 @@ ConfigurationTree ConfigurationManager::getSupervisorConfigurationNode(
 }
 
 //==============================================================================
-ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString) const
+ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString,
+		bool doNotThrowOnBrokenUIDLinks) const
 {
-	__MOUT__ << "nodeString=" << nodeString << " " << nodeString.length() << std::endl;
+	//__MOUT__ << "nodeString=" << nodeString << " " << nodeString.length() << std::endl;
 
 	//get nodeName (in case of / syntax)
 	if(nodeString.length() < 1) throw std::runtime_error("Invalid empty node name");
@@ -952,17 +953,17 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString) c
 	bool startingSlash = (nodeString[0] == '/');
 
 	std::string nodeName = nodeString.substr(startingSlash?1:0, nodeString.find('/',1)-(startingSlash?1:0));
-	__MOUT__ << "nodeName=" << nodeName << " " << nodeName.length() << std::endl;
+	//__MOUT__ << "nodeName=" << nodeName << " " << nodeName.length() << std::endl;
 	if(nodeName.length() < 1) throw std::runtime_error("Invalid node name: " + nodeName);
 
 	std::string childPath = nodeString.substr(nodeName.length() + (startingSlash?1:0));
 
-	__MOUT__ << "childPath=" << childPath << " " << childPath.length() << std::endl;
+	//__MOUT__ << "childPath=" << childPath << " " << childPath.length() << std::endl;
 
 	ConfigurationTree configTree(this, getConfigurationByName(nodeName));
 
 	if(childPath.length() > 1)
-		return configTree.getNode(childPath);
+		return configTree.getNode(childPath,doNotThrowOnBrokenUIDLinks);
 	else
 		return configTree;
 }

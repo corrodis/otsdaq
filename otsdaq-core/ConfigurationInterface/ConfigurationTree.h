@@ -313,7 +313,7 @@ private:
 	//privately ONLY allow full access to member variables through constructor
 	ConfigurationTree(const ConfigurationManager* const& configMgr, const ConfigurationBase* const& config, const std::string& groupId, const std::string &linkColName, const std::string &linkColValue, const std::string& disconnectedTargetName, const std::string& disconnectedLinkID, const std::string &childLinkIndex, const unsigned int row  = ConfigurationView::INVALID, const unsigned int col = ConfigurationView::INVALID);
 
-	static ConfigurationTree	recurse		  (const ConfigurationTree& t, const std::string& childPath);
+	static ConfigurationTree	recurse		  (const ConfigurationTree& t, const std::string& childPath, bool doNotThrowOnBrokenUIDLinks);
 	static void 				recursivePrint(const ConfigurationTree& t, unsigned int depth, std::ostream &out, std::string space);
 
 	void						recursiveGetCommonFields(std::vector<ConfigurationTree::RecordField> &fieldCandidateList, std::vector<int> &fieldCount, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth, const std::string &relativePathBase, bool inFirstRecord) const;

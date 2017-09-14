@@ -538,13 +538,14 @@ const std::string& ConfigurationTree::getValueName(void) const
 //==============================================================================
 //recurse
 //	Used by ConfigurationTree to handle / syntax of getNode
-ConfigurationTree ConfigurationTree::recurse(const ConfigurationTree& tree, const std::string& childPath)
+ConfigurationTree ConfigurationTree::recurse(const ConfigurationTree& tree,
+		const std::string& childPath,  bool doNotThrowOnBrokenUIDLinks)
 {
 	//__MOUT__ << tree.row_ << " " << tree.col_ << std::endl;
 	//__MOUT__ << "childPath=" << childPath << " " << childPath.length() << std::endl;
 	if(childPath.length() <= 1) //only "/" or ""
 		return tree;
-	return tree.getNode(childPath);
+	return tree.getNode(childPath,doNotThrowOnBrokenUIDLinks);
 }
 
 ////==============================================================================
@@ -584,6 +585,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 		bool doNotThrowOnBrokenUIDLinks) const
 {
 	//__MOUT__ << "nodeString=" << nodeString << " " << nodeString.length() << std::endl;
+	//__MOUT__ << "doNotThrowOnBrokenUIDLinks=" << doNotThrowOnBrokenUIDLinks << std::endl;
 
 	//get nodeName (in case of / syntax)
 	if(nodeString.length() < 1) throw std::runtime_error("Invalid node name!");
@@ -626,7 +628,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 							configView_->findRow(configView_->getColUID(),nodeName)
 							: configView_->findRowInGroup(configView_->getColUID(),
 									nodeName,groupId_,childLinkIndex_) ),
-					childPath);
+					childPath, doNotThrowOnBrokenUIDLinks);
 		}
 		else if(row_ == ConfigurationView::INVALID)
 		{
@@ -708,7 +710,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 								childConfig->getView().findRow(childConfig->getView().getColUID(),
 										configView_->getDataView()[row_][linkPair.second])
 						),
-						childPath);
+						childPath, doNotThrowOnBrokenUIDLinks);
 			}
 			else if(isLink)
 			{
@@ -756,7 +758,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 								"", //ignore since is connected
 								configView_->getColumnInfo(c).getChildLinkIndex()
 						),
-						childPath);
+						childPath, doNotThrowOnBrokenUIDLinks);
 			}
 			else
 			{
@@ -821,7 +823,12 @@ bool ConfigurationTree::isDisconnected(void) const
 {
 	if(!isLinkNode())
 	{
-		__SS__ << "This is not a Link node! Only a Link node can be disconnected." << std::endl;
+		__SS__ << "\n\nError occurred testing link connection at node with value '" <<
+						getValue() <<
+						"' in table '" << getConfigurationName() <<
+						"'\n\n" << std::endl;
+		ss << "This is not a Link node! It is node type '" <<
+				getNodeType() << ".' Only a Link node can be disconnected." << std::endl;
 		__MOUT__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
