@@ -2144,7 +2144,12 @@ throw(std::runtime_error)
 //setURIEncodedValue
 //	converts all %## to the ascii character
 //	returns true if value was different than original value
-bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsigned int &r, const unsigned int &c)
+//
+//
+//	if author == "", do nothing special for author and timestamp column
+//	if author != "", assign author for any row that has been modified, and assign now as timestamp
+bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsigned int &r,
+		const unsigned int &c, const std::string &author)
 {
 	if(!(c < columnsInfo_.size() && r < getNumberOfRows()))
 	{
@@ -2154,6 +2159,8 @@ bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsig
 
 	std::string valueStr = decodeURIComponent(value);
 	std::string originalValueStr = getValueAsString(r,c,false); //do not convert env variables
+
+
 	//__MOUT__ << "valueStr " << valueStr << std::endl;
 	//__MOUT__ << "originalValueStr " << originalValueStr << std::endl;
 
@@ -2189,8 +2196,19 @@ bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsig
 	else
 		theDataView_[r][c] = valueStr;
 
+	bool rowWasModified = (originalValueStr != getValueAsString(r,c,false));  //do not convert env variables
 
-	return(originalValueStr != getValueAsString(r,c,false)); //do not convert env variables
+	//if row was modified, assign author and timestamp
+	if(author != "" && rowWasModified)
+	{
+		__MOUT__ << "Row=" << r << " was modified!" << std::endl;
+		int authorCol = findColByType(ViewColumnInfo::TYPE_AUTHOR);
+		int timestampCol = findColByType(ViewColumnInfo::TYPE_TIMESTAMP);
+		setValue(author,r,authorCol);
+		setValue(time(0),r,timestampCol);
+	}
+
+	return rowWasModified;
 }
 
 //==============================================================================
@@ -2236,7 +2254,7 @@ void ConfigurationView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //addRow
 //	returns index of added row, always is last row
 //	return -1 on failure (throw error)
-int ConfigurationView::addRow (void)
+int ConfigurationView::addRow (const std::string &author)
 {
 	int row = getNumberOfRows();
 	theDataView_.resize(getNumberOfRows()+1,std::vector<std::string>(getNumberOfColumns()));
@@ -2247,6 +2265,15 @@ int ConfigurationView::addRow (void)
 	//fill each col of new row with default values
 	for(unsigned int col=0;col<getNumberOfColumns();++col)
 		theDataView_[row][col] = defaultRowValues[col];
+
+	if(author != "")
+	{
+		__MOUT__ << "Row=" << row << " was created!" << std::endl;
+		int authorCol = findColByType(ViewColumnInfo::TYPE_AUTHOR);
+		int timestampCol = findColByType(ViewColumnInfo::TYPE_TIMESTAMP);
+		setValue(author,row,authorCol);
+		setValue(time(0),row,timestampCol);
+	}
 
 	return row;
 }

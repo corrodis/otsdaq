@@ -376,7 +376,7 @@ public:
 
 	//==============================================================================
 	void				resizeDataView		(unsigned int nRows, unsigned int nCols);
-	int					addRow        		(void); //returns index of added row, always is last row
+	int					addRow        		(const std::string &author = ""); //returns index of added row, always is last row
 	void 				deleteRow     		(int r); //returns true on success
 
 	//Lore did not like this.. wants special access through separate Supervisor for "Database Management" int		addColumn(std::string name, std::string viewName, std::string viewType); //returns index of added column, always is last column unless
@@ -391,7 +391,7 @@ public:
 	void           		printJSON			(std::ostream &out = std::cout) const;
 	int            		fillFromJSON		(const std::string &json);
 	int            		fillFromCSV			(const std::string &data, const int &dataOffset = 0, const std::string &author = "") throw(std::runtime_error);
-	bool				setURIEncodedValue	(const std::string &value, const unsigned int &row, const unsigned int &col);
+	bool				setURIEncodedValue	(const std::string &value, const unsigned int &row, const unsigned int &col, const std::string &author = "");
 
 	static std::string 	decodeURIComponent 	(const std::string& data);
 

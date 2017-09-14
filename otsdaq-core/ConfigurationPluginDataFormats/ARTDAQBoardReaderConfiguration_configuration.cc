@@ -272,6 +272,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 	}
 	catch(const std::runtime_error)
 	{
+		__MOUT__ << "Ignoring error, assume this a valid UID node." << std::endl;
 		//error is expected here for UIDs.. so just ignore
 		// this check is valuable if source node is a unique-Link node, rather than UID
 	}
@@ -285,7 +286,20 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 	OUT << "fragment_receiver: {\n";
 
 	PUSHTAB;
-	{	//shared and unique parameters
+	{
+		//plugin type and fragment data-type
+		OUT << "generator" <<
+				": " <<
+				boardReaderNode.getNode("daqGeneratorPluginType").getValue()<<
+				("\t #daq generator plug-in type") <<
+				"\n";
+		OUT << "fragment_type" <<
+				": " <<
+				boardReaderNode.getNode("daqGeneratorFragmentType").getValue() <<
+				("\t #generator data fragment type") <<
+				"\n\n";
+
+		//shared and unique parameters
 		auto parametersLink = boardReaderNode.getNode("daqParametersLink");
 		if(!parametersLink.isDisconnected())
 		{
