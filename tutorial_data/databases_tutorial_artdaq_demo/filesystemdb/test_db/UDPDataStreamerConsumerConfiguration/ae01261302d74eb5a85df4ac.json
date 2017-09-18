@@ -1,0 +1,156 @@
+{
+"document" : {
+"data" : {
+"NAME" : "UDP_DATA_STREAMER_CONSUMER_CONFIGURATION",
+"COMMENT" : "streaming to DQM DB1",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1505175065,
+"COL_TYPES" : {
+"PROCESSOR_UID" : "VARCHAR2",
+"HOST_IP_ADDRESS" : "VARCHAR2",
+"HOST_PORT" : "NUMBER",
+"STREAM_TO_IP_ADDRESS" : "VARCHAR2",
+"STREAM_TO_PORT" : "NUMBER",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"PROCESSOR_UID" : "UDPStreamer0",
+"HOST_IP_ADDRESS" : "127.0.0.1",
+"HOST_PORT" : "4100",
+"STREAM_TO_IP_ADDRESS" : "127.0.0.1",
+"STREAM_TO_PORT" : "4101",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479826470"
+},
+{
+"PROCESSOR_UID" : "UDPStreamer1",
+"HOST_IP_ADDRESS" : "127.0.0.1",
+"HOST_PORT" : "3000",
+"STREAM_TO_IP_ADDRESS" : "127.0.0.1",
+"STREAM_TO_PORT" : "3001",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Mon Sep 18 11:30:08 2017",
+"rawdata" : [
+
+]
+},
+"version" : "1",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Mon Sep 18 11:30:08 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Mon Sep 18 11:30:08 2017"
+},
+{
+"name" : "artdaqConfig_v1",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+},
+{
+"name" : "defaultConfig_v3",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Mon Sep 18 11:30:08 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Mon Sep 18 11:30:08 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Mon Sep 18 11:30:08 2017",
+"value" : {
+"name" : "1",
+"assigned" : "Mon Sep 18 11:30:08 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Mon Sep 18 11:30:08 2017",
+"value" : {
+"name" : "UDPDataStreamerConsumerConfiguration",
+"assigned" : "Mon Sep 18 11:30:08 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Mon Sep 18 11:30:08 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Mon Sep 18 11:30:08 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Mon Sep 18 11:30:09 2017",
+"value" : {
+"name" : "artdaqConfig_v1",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Mon Sep 18 11:30:09 2017",
+"value" : {
+"name" : "defaultConfig_v3",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+}
+}
+],
+"created" : "Mon Sep 18 11:30:08 2017"
+},
+"_id" : {
+"$oid" : "ae01261302d74eb5a85df4ac"
+},
+"collection" : "UDPDataStreamerConsumerConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

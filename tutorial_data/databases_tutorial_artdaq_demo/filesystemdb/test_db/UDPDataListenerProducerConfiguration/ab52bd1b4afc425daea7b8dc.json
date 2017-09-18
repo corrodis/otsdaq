@@ -1,0 +1,141 @@
+{
+"document" : {
+"data" : {
+"NAME" : "UDP_DATA_LISTENER_PRODUCER_CONFIGURATION",
+"COMMENT" : "UDP Listener for HW emulator. and UDP Listener for DQM",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1505234995,
+"COL_TYPES" : {
+"PROCESSOR_UID" : "VARCHAR2",
+"BUFFER_SIZE" : "NUMBER",
+"HOST_IP_ADDRESS" : "VARCHAR2",
+"HOST_PORT" : "NUMBER",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"PROCESSOR_UID" : "UDPListener0",
+"BUFFER_SIZE" : "100",
+"HOST_IP_ADDRESS" : "127.0.0.1",
+"HOST_PORT" : "4005",
+"COMMENT_DESCRIPTION" : "Listening to hardware emulator which is sending to 4005.",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479826574"
+},
+{
+"PROCESSOR_UID" : "UDPListener1",
+"BUFFER_SIZE" : "100",
+"HOST_IP_ADDRESS" : "127.0.0.1",
+"HOST_PORT" : "4101",
+"COMMENT_DESCRIPTION" : "Listening to DB0 streamer.",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1479826574"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Mon Sep 18 11:30:09 2017",
+"rawdata" : [
+
+]
+},
+"version" : "3",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+},
+{
+"name" : "defaultConfig_v3",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Mon Sep 18 11:30:09 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Mon Sep 18 11:30:09 2017",
+"value" : {
+"name" : "3",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Mon Sep 18 11:30:09 2017",
+"value" : {
+"name" : "UDPDataListenerProducerConfiguration",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Mon Sep 18 11:30:09 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Mon Sep 18 11:30:09 2017",
+"value" : {
+"name" : "defaultConfig_v3",
+"assigned" : "Mon Sep 18 11:30:09 2017"
+}
+}
+],
+"created" : "Mon Sep 18 11:30:09 2017"
+},
+"_id" : {
+"$oid" : "ab52bd1b4afc425daea7b8dc"
+},
+"collection" : "UDPDataListenerProducerConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}
