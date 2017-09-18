@@ -38,8 +38,9 @@ rm -rf ${SRC}/NoGitData_tutorial_artdaq_demo;
 cp -r ${UDATA} ${SRC}/NoGitData_tutorial_artdaq_demo; 
 rm ${SRC}/NoGitData_tutorial_artdaq_demo/ServiceData/ActiveConfigurationGroups.cfg.*; 
 rm -rf ${SRC}/NoGitData_tutorial_artdaq_demo/ConfigurationInfo.*
-
-
+rm -rf ${SRC}/NoGitData_tutorial_artdaq_demo/OutputData/*
+rm -rf ${SRC}/NoGitData_tutorial_artdaq_demo/ServiceData/RunNumber/*
+rm -rf ${SRC}/NoGitData_tutorial_artdaq_demo/ServiceData/MacroHistory/*
 
 #from home/tmp, make artdaq zips from repo
 rm tutorial_artdaq_Data.zip; 

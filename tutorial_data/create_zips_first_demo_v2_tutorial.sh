@@ -38,7 +38,9 @@ rm -rf ${SRC}/NoGitData_tutorial_first_demo_v2;
 cp -r ${UDATA} ${SRC}/NoGitData_tutorial_first_demo_v2; 
 rm ${SRC}/NoGitData_tutorial_first_demo_v2/ServiceData/ActiveConfigurationGroups.cfg.*; 
 rm -rf ${SRC}/NoGitData_tutorial_first_demo_v2/ConfigurationInfo.*
-
+rm -rf ${SRC}/NoGitData_tutorial_first_demo_v2/OutputData/*
+rm -rf ${SRC}/NoGitData_tutorial_first_demo_v2/ServiceData/RunNumber/*
+rm -rf ${SRC}/NoGitData_tutorial_first_demo_v2/ServiceData/MacroHistory/*
 
 
 #from home/tmp, make demo zips from repo
