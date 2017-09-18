@@ -51,7 +51,9 @@ throw (xdaq::exception::Exception)
 	xgi::bind (this, &EventBuilderApp::Default,                "Default" );
 	xgi::bind (this, &EventBuilderApp::stateMachineXgiHandler, "StateMachineXgiHandler");
 
-	xoap::bind(this, &EventBuilderApp::stateMachineStateRequest, "StateMachineStateRequest", XDAQ_NS_URI );
+	xoap::bind(this, &EventBuilderApp::stateMachineStateRequest, 			"StateMachineStateRequest", XDAQ_NS_URI );
+	xoap::bind(this, &EventBuilderApp::stateMachineErrorMessageRequest,  "StateMachineErrorMessageRequest",  XDAQ_NS_URI );
+
 	try
 	{
 		supervisorContextUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getContextUID(getApplicationContext()->getContextDescriptor()->getURL());
@@ -204,6 +206,17 @@ throw (xoap::exception::Exception)
 }
 
 //========================================================================================================================
+xoap::MessageReference EventBuilderApp::stateMachineErrorMessageRequest(xoap::MessageReference message)
+throw (xoap::exception::Exception)
+{
+	__MOUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
+
+	SOAPParameters retParameters;
+	retParameters.addParameter("ErrorMessage",theStateMachine_.getErrorMessage());
+	return SOAPUtilities::makeSOAPMessageReference("stateMachineErrorMessageRequestReply",retParameters);
+}
+
+//========================================================================================================================
 void EventBuilderApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm)
 throw (toolbox::fsm::exception::Exception)
 {
@@ -334,12 +347,30 @@ throw (toolbox::fsm::exception::Exception)
 		}
 	}
 	__MOUT__ << fileFclString << std::endl;
-	fhicl::make_ParameterSet(fileFclString, pset);
 
-	//fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(), pset);
+	try
+	{
+		fhicl::make_ParameterSet(fileFclString, pset);
 
-	for(std::map<int,EventBuilderInterface*>::iterator it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->configure(pset);
+		//fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(), pset);
+
+		for(std::map<int,EventBuilderInterface*>::iterator it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
+			it->second->configure(pset);
+	}
+	catch(const cet::coded_exception<fhicl::error, &fhicl::detail::translate>& e)
+	{
+		__SS__ << "Error was caught while configuring: " << e.what() << std::endl;
+		__MOUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"EventBuilderApp::transitionConfiguring" /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+				);
+	}
+
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 
 }

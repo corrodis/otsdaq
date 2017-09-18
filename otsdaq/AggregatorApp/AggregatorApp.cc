@@ -47,7 +47,9 @@ AggregatorApp::AggregatorApp(xdaq::ApplicationStub * s) throw (xdaq::exception::
     xgi::bind (this, &AggregatorApp::Default,                "Default" );
     xgi::bind (this, &AggregatorApp::stateMachineXgiHandler, "StateMachineXgiHandler");
 
-    xoap::bind(this, &AggregatorApp::stateMachineStateRequest, "StateMachineStateRequest", XDAQ_NS_URI );
+    xoap::bind(this, &AggregatorApp::stateMachineStateRequest, 			"StateMachineStateRequest", XDAQ_NS_URI );
+    xoap::bind(this, &AggregatorApp::stateMachineErrorMessageRequest,  	"StateMachineErrorMessageRequest",  XDAQ_NS_URI );
+
 	try
 	{
 		supervisorContextUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getContextUID(getApplicationContext()->getContextDescriptor()->getURL());
@@ -187,6 +189,17 @@ xoap::MessageReference AggregatorApp::stateMachineStateRequest(xoap::MessageRefe
 {
     std::cout << __COUT_HDR_FL__ << theStateMachine_.getCurrentStateName() << std::endl;
     return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getCurrentStateName());
+}
+
+//========================================================================================================================
+xoap::MessageReference AggregatorApp::stateMachineErrorMessageRequest(xoap::MessageReference message)
+throw (xoap::exception::Exception)
+{
+	__MOUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
+
+	SOAPParameters retParameters;
+	retParameters.addParameter("ErrorMessage",theStateMachine_.getErrorMessage());
+	return SOAPUtilities::makeSOAPMessageReference("stateMachineErrorMessageRequestReply",retParameters);
 }
 
 //========================================================================================================================
