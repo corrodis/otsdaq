@@ -185,22 +185,22 @@ void ARTDAQProducer::halt(void)
         report_string_.append(name_ + ".");
     }
 }
-//
-////========================================================================================================================
-//void ARTDAQProducer::pauseProcessingData(void)
-//{
-//    std::cout << __COUT_HDR_FL__ << "\tPause" << std::endl;
-//    //FIXME These are passed as parameters
-//    uint64_t timeout   = 45;
-//    uint64_t timestamp = 184467440737095516;
-//    report_string_ = "";
-//    external_request_status_ = fragment_receiver_ptr_->pause(timeout, timestamp);
-//    if (! external_request_status_)
-//    {
-//        report_string_ = "Error pausing ";
-//        report_string_.append(name_ + ".");
-//    }
-//
+
+//========================================================================================================================
+void ARTDAQProducer::pauseProcessingData(void)
+{
+    std::cout << __COUT_HDR_FL__ << "\tPause" << std::endl;
+    //FIXME These are passed as parameters
+    uint64_t timeout   = 45;
+    uint64_t timestamp = 184467440737095516;
+    report_string_ = "";
+    external_request_status_ = fragment_receiver_ptr_->pause(timeout, timestamp);
+    if (! external_request_status_)
+    {
+        report_string_ = "Error pausing ";
+        report_string_.append(name_ + ".");
+    }
+
 //    if (fragment_processing_future_.valid())
 //    {
 //        int number_of_fragments_sent = fragment_processing_future_.get();
@@ -208,76 +208,76 @@ void ARTDAQProducer::halt(void)
 //        << "Number of fragments sent = " << number_of_fragments_sent
 //        << ".";
 //    }
-//}
-//
-////========================================================================================================================
-//void ARTDAQProducer::resumeProcessingData(void)
-//{
-//    std::cout << __COUT_HDR_FL__ << "\tResume" << std::endl;
-//    //FIXME These are passed as parameters
-//    uint64_t timeout   = 45;
-//    uint64_t timestamp = 184467440737095516;
-//    report_string_ = "";
-//    external_request_status_ = fragment_receiver_ptr_->resume(timeout, timestamp);
-//    if (! external_request_status_)
-//    {
-//        report_string_ = "Error resuming ";
-//        report_string_.append(name_ + ".");
-//    }
-//
-//    fragment_processing_future_ = std::async(std::launch::async, &artdaq::BoardReaderCore::process_fragments, fragment_receiver_ptr_.get());
-//
-//}
-//
-////========================================================================================================================
-//void ARTDAQProducer::startProcessingData(std::string runNumber)
-//{
-//    std::cout << __COUT_HDR_FL__ << "\tStart" << std::endl;
-//
-//    art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(runNumber));
-//
-//    //FIXME These are passed as parameters
-//    uint64_t timeout   = 45;
-//    uint64_t timestamp = 184467440737095516;
-//
-//    report_string_ = "";
-//    std::cout << __COUT_HDR_FL__ << "\tStart run: " << runId << std::endl;
-//    external_request_status_ = fragment_receiver_ptr_->start(runId, timeout, timestamp);
-//    std::cout << __COUT_HDR_FL__ << "\tStart already crashed "<< std::endl;
-//    if (! external_request_status_)
-//    {
-//        report_string_ = "Error starting ";
-//        report_string_.append(name_ + " ");
-//        report_string_.append("for run number ");
-//        report_string_.append(boost::lexical_cast<std::string>(runId.run()));
-//        report_string_.append(", timeout ");
-//        report_string_.append(boost::lexical_cast<std::string>(timeout));
-//        report_string_.append(", timestamp ");
-//        report_string_.append(boost::lexical_cast<std::string>(timestamp));
-//        report_string_.append(".");
-//    }
+}
+
+//========================================================================================================================
+void ARTDAQProducer::resumeProcessingData(void)
+{
+    std::cout << __COUT_HDR_FL__ << "\tResume" << std::endl;
+    //FIXME These are passed as parameters
+    uint64_t timeout   = 45;
+    uint64_t timestamp = 184467440737095516;
+    report_string_ = "";
+    external_request_status_ = fragment_receiver_ptr_->resume(timeout, timestamp);
+    if (! external_request_status_)
+    {
+        report_string_ = "Error resuming ";
+        report_string_.append(name_ + ".");
+    }
+
+    //fragment_processing_future_ = std::async(std::launch::async, &artdaq::BoardReaderCore::process_fragments, fragment_receiver_ptr_.get());
+
+}
+
+//========================================================================================================================
+void ARTDAQProducer::startProcessingData(std::string runNumber)
+{
+    std::cout << __COUT_HDR_FL__ << "\tStart" << std::endl;
+
+    art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(runNumber));
+
+    //FIXME These are passed as parameters
+    uint64_t timeout   = 45;
+    uint64_t timestamp = 184467440737095516;
+
+    report_string_ = "";
+    std::cout << __COUT_HDR_FL__ << "\tStart run: " << runId << std::endl;
+    external_request_status_ = fragment_receiver_ptr_->start(runId, timeout, timestamp);
+    std::cout << __COUT_HDR_FL__ << "\tStart already crashed "<< std::endl;
+    if (! external_request_status_)
+    {
+        report_string_ = "Error starting ";
+        report_string_.append(name_ + " ");
+        report_string_.append("for run number ");
+        report_string_.append(boost::lexical_cast<std::string>(runId.run()));
+        report_string_.append(", timeout ");
+        report_string_.append(boost::lexical_cast<std::string>(timeout));
+        report_string_.append(", timestamp ");
+        report_string_.append(boost::lexical_cast<std::string>(timestamp));
+        report_string_.append(".");
+    }
 //
 //    std::cout << __COUT_HDR_FL__ << "STARTING BOARD READER THREAD" << std::endl;
 //    fragment_processing_future_ = std::async(std::launch::async, &artdaq::BoardReaderCore::process_fragments, fragment_receiver_ptr_.get());
 //
-//}
-//
-////========================================================================================================================
-//void ARTDAQProducer::stopProcessingData(void)
-//{
-//    std::cout << __COUT_HDR_FL__ << "\tStop" << std::endl;
-//    //FIXME These are passed as parameters
-//    uint64_t timeout   = 45;
-//    uint64_t timestamp = 184467440737095516;
-//    report_string_ = "";
-//    external_request_status_ = fragment_receiver_ptr_->stop(timeout, timestamp);
-//    if (! external_request_status_)
-//    {
-//        report_string_ = "Error stopping ";
-//        report_string_.append(name_ + ".");
-//        //return false;
-//    }
-//
+}
+
+//========================================================================================================================
+void ARTDAQProducer::stopProcessingData(void)
+{
+    std::cout << __COUT_HDR_FL__ << "\tStop" << std::endl;
+    //FIXME These are passed as parameters
+    uint64_t timeout   = 45;
+    uint64_t timestamp = 184467440737095516;
+    report_string_ = "";
+    external_request_status_ = fragment_receiver_ptr_->stop(timeout, timestamp);
+    if (! external_request_status_)
+    {
+        report_string_ = "Error stopping ";
+        report_string_.append(name_ + ".");
+        //return false;
+    }
+
 //    if (fragment_processing_future_.valid())
 //    {
 //        int number_of_fragments_sent = fragment_processing_future_.get();
@@ -285,7 +285,7 @@ void ARTDAQProducer::halt(void)
 //        << "Number of fragments sent = " << number_of_fragments_sent
 //        << ".";
 //    }
-//
-//}
+
+}
 
 DEFINE_OTS_PROCESSOR(ARTDAQProducer)

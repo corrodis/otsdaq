@@ -72,7 +72,7 @@ source: {
 outputs: {
 	normalOutput: {
 		module_type: RootOutput
-		fileName: "/data/otsdaq/data/CM1/artdaqdemo_r%r_s%s_%#.root"
+		fileName: "/home/rrivera/ots/NoGitData/OutputData/artdaqdemo_r%r_s%s_%#.root"
 	}
 
 }

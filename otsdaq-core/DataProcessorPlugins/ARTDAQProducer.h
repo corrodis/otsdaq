@@ -26,10 +26,10 @@ public:
     //void configure         (fhicl::ParameterSet const& pset);
     void configure           (int rank);
     void halt                (void);
-//    void pauseProcessingData (void);
-//    void resumeProcessingData(void);
-//    void startProcessingData (std::string runNumber) override;
-//    void stopProcessingData  (void);
+    void pauseProcessingData (void);
+    void resumeProcessingData(void);
+    void startProcessingData (std::string runNumber) override;
+    void stopProcessingData  (void);
     //int universalRead	  (char *address, char *returnValue) override {;}
     //void universalWrite	  (char *address, char *writeValue) override {;}
     //artdaq::BoardReaderCore* getFragmentReceiverPtr(){return fragment_receiver_ptr_.get();}
