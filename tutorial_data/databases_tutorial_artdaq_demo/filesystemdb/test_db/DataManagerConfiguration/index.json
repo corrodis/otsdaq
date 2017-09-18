@@ -1,32 +1,32 @@
 {
 "ouid" : [
-"6dcedef4fa634ec38b64d91b",
-"e0dc25b9d7da4ad19bc6ea96"
+"26765f2b98594379b4a277f7",
+"a68898a2f910499a90ae04da"
 ],
 "version" : {
 "1" : [
-"e0dc25b9d7da4ad19bc6ea96"
+"a68898a2f910499a90ae04da"
 ],
 "3" : [
-"6dcedef4fa634ec38b64d91b"
+"26765f2b98594379b4a277f7"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"6dcedef4fa634ec38b64d91b",
-"e0dc25b9d7da4ad19bc6ea96"
+"26765f2b98594379b4a277f7",
+"a68898a2f910499a90ae04da"
 ],
 "artdaqConfig_v1" : [
-"e0dc25b9d7da4ad19bc6ea96"
+"a68898a2f910499a90ae04da"
 ],
 "defaultConfig_v3" : [
-"6dcedef4fa634ec38b64d91b"
+"26765f2b98594379b4a277f7"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"6dcedef4fa634ec38b64d91b",
-"e0dc25b9d7da4ad19bc6ea96"
+"26765f2b98594379b4a277f7",
+"a68898a2f910499a90ae04da"
 ]
 },
 "aliases.active.name" : {

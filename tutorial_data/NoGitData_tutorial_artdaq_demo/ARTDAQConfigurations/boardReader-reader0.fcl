@@ -30,8 +30,8 @@ daq: {
 		throttle_usecs: 100000
 		distribution_type: 1
 		timestamp_scale_factor: 1
-		port: 4121	 # receiving port
-		ip: 127.0.0.1	 # receiving ip
+		port: 4121
+		ip: "127.0.0.1"
 		
 		destinations: {
 			d2: { transferPluginType: MPI destination_rank: 1 max_fragment_size_words: 2097152}

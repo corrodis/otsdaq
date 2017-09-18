@@ -22,6 +22,22 @@ simple_plugin(ARTDAQConsumer "processor"
 		MessageFacility
 		${MF_UTILITIES}
   )
+  
+simple_plugin(ARTDAQProducer "processor"
+  		${CETLIB}
+  		DataManager
+        artdaq_Application
+        artdaq_Application_MPI2
+        artdaq_BuildInfo
+		${ARTDAQ_APPLICATION}
+		${ARTDAQ_APPLICATION_MPI2}		 
+		${ARTDAQ_BUILDINFO}
+		canvas	 
+		${Boost_SYSTEM_LIBRARY}
+		${FHICLCPP}
+		MessageFacility
+		${MF_UTILITIES}
+  )
 
 simple_plugin(UDPDataListenerProducer "processor"
 	DataManager

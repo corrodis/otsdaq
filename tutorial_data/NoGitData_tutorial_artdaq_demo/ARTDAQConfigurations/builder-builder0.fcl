@@ -21,8 +21,8 @@ daq: {
 		print_event_store_stats: true
 		verbose: false
 		send_requests: false
-		request_port: 
-		request_address: 
+		# request_port: 
+		# request_address: 
 		
 		sources: {
 			s1: { transferPluginType: MPI source_rank: 0 max_fragment_size_words: 2097152}
@@ -38,28 +38,28 @@ daq: {
 			uniquify: true
 		}
 
-		ganglia: {
-			metricPluginType: "ganglia"
-			level: %{ganglia_level}
-			reporting_interval: 15.0
-			configFile: "/etc/ganglia/gmond.conf"
-			group: "ARTDAQ"
-		}
+		# ganglia: {
+			# metricPluginType: "ganglia"
+			# level: %{ganglia_level}
+			# reporting_interval: 15.0
+			# configFile: "/etc/ganglia/gmond.conf"
+			# group: "ARTDAQ"
+		# }
 
-		msgfac: {
-			metricPluginType: "msgFacility"
-			level: %{mf_level}
-			output_message_application_name: "ARTDAQ Metric"
-			output_message_severity: 0
-		}
+		# msgfac: {
+			# metricPluginType: "msgFacility"
+			# level: %{mf_level}
+			# output_message_application_name: "ARTDAQ Metric"
+			# output_message_severity: 0
+		# }
 
-		graphite: {
-			metricPluginType: "graphite"
-			level: %{graphite_level}
-			DEFAULT: DEFAULT
-			DEFAULT: DEFAULT
-			DEFAULT: DEFAULT
-		}
+		# graphite: {
+			# metricPluginType: "graphite"
+			# level: %{graphite_level}
+			# DEFAULT: DEFAULT
+			# DEFAULT: DEFAULT
+			# DEFAULT: DEFAULT
+		# }
 
 	}
 

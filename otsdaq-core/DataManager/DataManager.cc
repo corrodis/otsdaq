@@ -80,13 +80,15 @@ void DataManager::configure(void)
 				++location;
 
 			}
-			if(producersVectorLocation.size() == 0 || consumersVectorLocation.size() == 0)
+
+			if(producersVectorLocation.size() == 0)// || consumersVectorLocation.size() == 0)
 			{
 				__SS__ << "Node Data Buffer "
 						<< buffer.first
 						<< " has " << producersVectorLocation.size() << " Producers"
 						<< " and " << consumersVectorLocation.size() << " Consumers"
-						<< " there must be at least 1 of both configured for the buffer!" << std::endl;
+						<< " there must be at least 1 Producer " << //	of both configured
+						"for the buffer!" << std::endl;
 				throw std::runtime_error(ss.str());
 
 			}

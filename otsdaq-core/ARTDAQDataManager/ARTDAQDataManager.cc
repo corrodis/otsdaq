@@ -1,5 +1,6 @@
 #include "otsdaq-core/ARTDAQDataManager/ARTDAQDataManager.h"
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQConsumer.h"
+#include "otsdaq-core/DataProcessorPlugins/ARTDAQProducer.h"
 
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 
@@ -53,6 +54,20 @@ void ARTDAQDataManager::configure(void)
 			}
 
 	__SS__ << "There was no ARTDAQ Consumer found on a buffer!" << std::endl;
+	__MOUT__ << ss.str();
+
+	__MOUT__ << "Looking for an ARTDAQ Producer..." << std::endl;
+
+	for(auto it=DataManager::buffers_.begin(); it!=DataManager::buffers_.end(); it++)
+		for(auto& itc: it->second.producers_)
+			if(dynamic_cast<ARTDAQProducer*>(itc.get()))
+			{
+				dynamic_cast<ARTDAQProducer*>(itc.get())->initLocalGroup(theMPIProcess_.getRank());
+				return;//There can only be 1 ARTDAQProducer for each ARTDAQDataManager!!!!!!!
+			}
+
+	__MOUT__ << "No ARTDAQ Producers found either... so error!" << std::endl;
+
 	__MOUT_ERR__ << ss.str();
 	throw std::runtime_error(ss.str());
 }
