@@ -967,8 +967,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		auto recordChildren = getNode(recordList[i]).getChildren();
 		for(const auto &fieldNode : recordChildren)
 		{
-			__MOUT__ << "All... " << fieldNode.second.getNodeType() <<
-					" -- " << fieldNode.first << std::endl;
+			//			__MOUT__ << "All... " << fieldNode.second.getNodeType() <<
+			//					" -- " << fieldNode.first << std::endl;
 			if(fieldNode.second.isValueNode())
 			{
 				//skip author and record insertion time
@@ -1120,9 +1120,9 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		}
 	}
 
-	for(unsigned int i=0;i<fieldCandidateList.size();++i)
-		__MOUT__ << "Final " << fieldCandidateList[i].relativePath_ <<
-				fieldCandidateList[i].columnName_ << std::endl;
+//	for(unsigned int i=0;i<fieldCandidateList.size();++i)
+//		__MOUT__ << "Final " << fieldCandidateList[i].relativePath_ <<
+//				fieldCandidateList[i].columnName_ << std::endl;
 
 	return fieldCandidateList;
 }
@@ -1458,9 +1458,9 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 bool ConfigurationTree::wildCardMatch(const std::string& needle, const std::string& haystack)
 try
 {
-	__MOUT__ << "\t\t wildCardMatch: " << needle <<
-			" =in= " << haystack << " ??? " <<
-			std::endl;
+//	__MOUT__ << "\t\t wildCardMatch: " << needle <<
+//			" =in= " << haystack << " ??? " <<
+//			std::endl;
 
 	if(needle.size() == 0)
 		return true; //if empty needle, always "found"
