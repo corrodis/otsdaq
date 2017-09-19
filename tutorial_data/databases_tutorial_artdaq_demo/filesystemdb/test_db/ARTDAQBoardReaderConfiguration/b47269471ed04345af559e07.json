@@ -1,0 +1,144 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_BOARD_READER_CONFIGURATION",
+"COMMENT" : "Empty table.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1505423060,
+"COL_TYPES" : {
+"SUPERVISOR_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"DAQ_GENERATOR_PLUGIN_TYPE" : "VARCHAR2",
+"DAQ_GENERATOR_FRAGMENT_TYPE" : "VARCHAR2",
+"DAQ_PARAMETERS_LINK" : "VARCHAR2",
+"DAQ_PARAMETERS_LINK_GROUP_ID" : "VARCHAR2",
+"DAQ_DESTINATIONS_LINK" : "VARCHAR2",
+"DAQ_DESTINATIONS_LINK_GROUP_ID" : "VARCHAR2",
+"DAQ_METRICS_LINK" : "VARCHAR2",
+"DAQ_METRICS_LINK_UID" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"SUPERVISOR_UID" : "reader0",
+"STATUS" : "On",
+"DAQ_GENERATOR_PLUGIN_TYPE" : "UDPReceiver",
+"DAQ_GENERATOR_FRAGMENT_TYPE" : "UDP",
+"DAQ_PARAMETERS_LINK" : "ARTDAQBoardReaderDaqParameterConfiguration",
+"DAQ_PARAMETERS_LINK_GROUP_ID" : "reader0PGroup",
+"DAQ_DESTINATIONS_LINK" : "ARTDAQDaqDestinationConfiguration",
+"DAQ_DESTINATIONS_LINK_GROUP_ID" : "reader0DestGroup",
+"DAQ_METRICS_LINK" : "ARTDAQDaqMetricConfiguration",
+"DAQ_METRICS_LINK_UID" : "reader0Metrics",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1505423015"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Mon Sep 18 14:41:26 2017",
+"rawdata" : [
+
+]
+},
+"version" : "1",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Mon Sep 18 14:41:26 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Mon Sep 18 14:41:26 2017"
+},
+{
+"name" : "artdaqConfig_v1",
+"assigned" : "Mon Sep 18 14:41:27 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Mon Sep 18 14:41:26 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Mon Sep 18 14:41:26 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Mon Sep 18 14:41:26 2017",
+"value" : {
+"name" : "1",
+"assigned" : "Mon Sep 18 14:41:26 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Mon Sep 18 14:41:26 2017",
+"value" : {
+"name" : "ARTDAQBoardReaderConfiguration",
+"assigned" : "Mon Sep 18 14:41:26 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Mon Sep 18 14:41:26 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Mon Sep 18 14:41:26 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Mon Sep 18 14:41:27 2017",
+"value" : {
+"name" : "artdaqConfig_v1",
+"assigned" : "Mon Sep 18 14:41:27 2017"
+}
+}
+],
+"created" : "Mon Sep 18 14:41:26 2017"
+},
+"_id" : {
+"$oid" : "b47269471ed04345af559e07"
+},
+"collection" : "ARTDAQBoardReaderConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}
