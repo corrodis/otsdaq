@@ -315,6 +315,7 @@ private:
 
 	static ConfigurationTree	recurse		  (const ConfigurationTree& t, const std::string& childPath, bool doNotThrowOnBrokenUIDLinks);
 	static void 				recursivePrint(const ConfigurationTree& t, unsigned int depth, std::ostream &out, std::string space);
+	static bool					wildCardMatch (const std::string& needle, const std::string& haystack);
 
 	void						recursiveGetCommonFields(std::vector<ConfigurationTree::RecordField> &fieldCandidateList, std::vector<int> &fieldCount, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth, const std::string &relativePathBase, bool inFirstRecord) const;
 	ConfigurationTree			getValueAsTreeNode			(void) const;

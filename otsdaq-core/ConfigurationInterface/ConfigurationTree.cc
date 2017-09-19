@@ -967,8 +967,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		auto recordChildren = getNode(recordList[i]).getChildren();
 		for(const auto &fieldNode : recordChildren)
 		{
-			//__MOUT__ << "All... " << fieldNode.second.getNodeType() <<
-			//		" -- " << fieldNode.first << std::endl;
+			__MOUT__ << "All... " << fieldNode.second.getNodeType() <<
+					" -- " << fieldNode.first << std::endl;
 			if(fieldNode.second.isValueNode())
 			{
 				//skip author and record insertion time
@@ -978,39 +978,45 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 								ViewColumnInfo::TYPE_TIMESTAMP)
 					continue;
 
-				//__MOUT__ << "isValueNode " << fieldNode.first << std::endl;
+				__MOUT__ << "isValueNode " << fieldNode.first << std::endl;
 				if(!i) //first uid record
 				{
 					//check field accept filter list
 					found = fieldAcceptList.size()?false:true; //accept if no filter list
 					for(const auto &fieldFilter : fieldAcceptList)
-						if(fieldFilter[0] == '*') //leading wildcard
+						if(ConfigurationTree::wildCardMatch(
+								fieldFilter,fieldNode.first))
 						{
-							if(fieldNode.first ==
-									fieldFilter.substr(1))
-							{
-								found = true;
-								break;
-							}
+							found = true;
+							break;
 						}
-						else if(fieldFilter.size() &&
-								fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
-						{
-							if(fieldNode.first.substr(0,fieldFilter.size()-1) ==
-									fieldFilter.substr(0,fieldFilter.size()-1))
-							{
-								found = true;
-								break;
-							}
-						}
-						else //no leading wildcard
-						{
-							if(fieldNode.first == fieldFilter)
-							{
-								found = true;
-								break;
-							}
-						}
+//						if(fieldFilter[0] == '*') //leading wildcard
+//						{
+//							if(fieldNode.first ==
+//									fieldFilter.substr(1))
+//							{
+//								found = true;
+//								break;
+//							}
+//						}
+//						else if(fieldFilter.size() &&
+//								fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
+//						{
+//							if(fieldNode.first.substr(0,fieldFilter.size()-1) ==
+//									fieldFilter.substr(0,fieldFilter.size()-1))
+//							{
+//								found = true;
+//								break;
+//							}
+//						}
+//						else //no leading wildcard
+//						{
+//							if(fieldNode.first == fieldFilter)
+//							{
+//								found = true;
+//								break;
+//							}
+//						}
 
 
 					if(found)
@@ -1019,33 +1025,40 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 
 						found = true; //accept if no filter list
 						for(const auto &fieldFilter : fieldRejectList)
-							if(fieldFilter[0] == '*') //leading wildcard
+							if(ConfigurationTree::wildCardMatch(
+									fieldFilter,fieldNode.first))
 							{
-								if(fieldNode.first ==
-										fieldFilter.substr(1))
-								{
-									found = false; //reject if match
-									break;
-								}
+								found = false; //reject if match
+								break;
 							}
-							else if(fieldFilter.size() &&
-									fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
-							{
-								if(fieldNode.first.substr(0,fieldFilter.size()-1) ==
-										fieldFilter.substr(0,fieldFilter.size()-1))
-								{
-									found = false; //reject if match
-									break;
-								}
-							}
-							else //no leading wildcard
-							{
-								if(fieldNode.first == fieldFilter)
-								{
-									found = false; //reject if match
-									break;
-								}
-							}
+
+//							if(fieldFilter[0] == '*') //leading wildcard
+//							{
+//								if(fieldNode.first ==
+//										fieldFilter.substr(1))
+//								{
+//									found = false; //reject if match
+//									break;
+//								}
+//							}
+//							else if(fieldFilter.size() &&
+//									fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
+//							{
+//								if(fieldNode.first.substr(0,fieldFilter.size()-1) ==
+//										fieldFilter.substr(0,fieldFilter.size()-1))
+//								{
+//									found = false; //reject if match
+//									break;
+//								}
+//							}
+//							else //no leading wildcard
+//							{
+//								if(fieldNode.first == fieldFilter)
+//								{
+//									found = false; //reject if match
+//									break;
+//								}
+//							}
 
 					}
 
@@ -1213,35 +1226,41 @@ void ConfigurationTree::recursiveGetCommonFields(
 				//check field accept filter list
 				found = fieldAcceptList.size()?false:true; //accept if no filter list
 				for(const auto &fieldFilter : fieldAcceptList)
-					if(fieldFilter[0] == '*') //leading wildcard
+					if(ConfigurationTree::wildCardMatch(
+							fieldFilter,fieldNode.first))
 					{
-						if(fieldNode.first ==
-								fieldFilter.substr(1))
-						{
-							found = true;
-							break;
-						}
+						found = true;
+						break;
 					}
-					else if(fieldFilter.size() &&
-							fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
-					{
-						if((relativePathBase + fieldNode.first).substr(
-								0,fieldFilter.size()-1) ==
-								fieldFilter.substr(0,fieldFilter.size()-1))
-						{
-							found = true;
-							break;
-						}
-					}
-					else //no leading wildcard
-					{
-						if((relativePathBase + fieldNode.first) ==
-							fieldFilter)
-						{
-							found = true;
-							break;
-						}
-					}
+//					if(fieldFilter[0] == '*') //leading wildcard
+//					{
+//						if(fieldNode.first ==
+//								fieldFilter.substr(1))
+//						{
+//							found = true;
+//							break;
+//						}
+//					}
+//					else if(fieldFilter.size() &&
+//							fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
+//					{
+//						if((relativePathBase + fieldNode.first).substr(
+//								0,fieldFilter.size()-1) ==
+//								fieldFilter.substr(0,fieldFilter.size()-1))
+//						{
+//							found = true;
+//							break;
+//						}
+//					}
+//					else //no leading wildcard
+//					{
+//						if((relativePathBase + fieldNode.first) ==
+//							fieldFilter)
+//						{
+//							found = true;
+//							break;
+//						}
+//					}
 
 				if(found)
 				{
@@ -1249,35 +1268,41 @@ void ConfigurationTree::recursiveGetCommonFields(
 
 					found = true; //accept if no filter list
 					for(const auto &fieldFilter : fieldRejectList)
-						if(fieldFilter[0] == '*') //leading wildcard
+						if(ConfigurationTree::wildCardMatch(
+								fieldFilter,fieldNode.first))
 						{
-							if(fieldNode.first ==
-									fieldFilter.substr(1))
-							{
-								found = false; //reject if match
-								break;
-							}
+							found = false; //reject if match
+							break;
 						}
-						else if(fieldFilter.size() &&
-								fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
-						{
-							if((relativePathBase + fieldNode.first).substr(
-									0,fieldFilter.size()-1) ==
-									fieldFilter.substr(0,fieldFilter.size()-1))
-							{
-								found = false; //reject if match
-								break;
-							}
-						}
-						else //no leading wildcard
-						{
-							if((relativePathBase + fieldNode.first) ==
-									fieldFilter)
-							{
-								found = false; //reject if match
-								break;
-							}
-						}
+//						if(fieldFilter[0] == '*') //leading wildcard
+//						{
+//							if(fieldNode.first ==
+//									fieldFilter.substr(1))
+//							{
+//								found = false; //reject if match
+//								break;
+//							}
+//						}
+//						else if(fieldFilter.size() &&
+//								fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
+//						{
+//							if((relativePathBase + fieldNode.first).substr(
+//									0,fieldFilter.size()-1) ==
+//									fieldFilter.substr(0,fieldFilter.size()-1))
+//							{
+//								found = false; //reject if match
+//								break;
+//							}
+//						}
+//						else //no leading wildcard
+//						{
+//							if((relativePathBase + fieldNode.first) ==
+//									fieldFilter)
+//							{
+//								found = false; //reject if match
+//								break;
+//							}
+//						}
 				}
 
 				//if found, new field (since this is first record)
@@ -1365,7 +1390,6 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 				try
 				{
 
-
 					//extract field value list
 					std::istringstream f(filterPair.second);
 
@@ -1379,17 +1403,28 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 						//	so for links return actual value for field name specified
 						//	i.e. if Table of link is requested give that; if linkID is requested give that.
 						//use TRUE in getValueAsString for proper behavior
+
 						__MOUT__ << "\t\tCheck: " << filterPair.first <<
 								" == " << fieldValue << " ??? " <<
 								this->getNode(filterPath).getValueAsString(true) <<
 								std::endl;
-						if(this->getNode(filterPath).getValueAsString(true) ==
-								ConfigurationView::decodeURIComponent(fieldValue))
+
+						if(ConfigurationTree::wildCardMatch(
+								ConfigurationView::decodeURIComponent(fieldValue),
+								this->getNode(filterPath).getValueAsString(true) ))
 						{
 							//found a match for the field/value pair
 							skip = false;
 							break;
 						}
+
+//						if(this->getNode(filterPath).getValueAsString(true) ==
+//								ConfigurationView::decodeURIComponent(fieldValue))
+//						{
+//							//found a match for the field/value pair
+//							skip = false;
+//							break;
+//						}
 					}
 				}
 				catch(...)
@@ -1415,6 +1450,41 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 	//__MOUT__ << "Done w/Children of node: " << getValueAsString() << std::endl;
 	return retMap;
 }
+
+//==============================================================================
+//wildCardMatch
+//	find needle in haystack
+//		allow needle to have leading and/or trailing wildcard '*'
+bool ConfigurationTree::wildCardMatch(const std::string& needle, const std::string& haystack)
+try
+{
+	__MOUT__ << "\t\t wildCardMatch: " << needle <<
+			" =in= " << haystack << " ??? " <<
+			std::endl;
+
+	if(needle.size() == 0)
+		return true; //if empty needle, always "found"
+
+	if(needle[0] == '*' && //leading wildcard
+					needle[needle.size()-1] == '*' ) //and trailing wildcard
+		return std::string::npos != haystack.find(needle.substr(1,needle.size()-2));
+
+	if(needle[0] == '*') //leading wildcard
+		return needle.substr(1) ==
+				haystack.substr(haystack.size() - (needle.size()-1));
+
+	if(needle[needle.size()-1] == '*') //trailing wildcard
+		return needle.substr(0,needle.size()-1) ==
+				haystack.substr(0,needle.size()-1);
+
+	//else //no wildcards
+	return needle == haystack;
+}
+catch(...)
+{
+	return false; //if out of range
+}
+
 
 //==============================================================================
 //getChildren

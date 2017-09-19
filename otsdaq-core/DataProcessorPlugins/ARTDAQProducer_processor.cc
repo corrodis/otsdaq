@@ -201,13 +201,13 @@ void ARTDAQProducer::pauseProcessingData(void)
         report_string_.append(name_ + ".");
     }
 
-//    if (fragment_processing_future_.valid())
-//    {
-//        int number_of_fragments_sent = fragment_processing_future_.get();
-//        mf::LogDebug(name_+"App::do_pause(uint64_t, uint64_t)")
-//        << "Number of fragments sent = " << number_of_fragments_sent
-//        << ".";
-//    }
+    if (fragment_processing_future_.valid())
+    {
+        int number_of_fragments_sent = fragment_processing_future_.get();
+        mf::LogDebug(name_+"App::do_pause(uint64_t, uint64_t)")
+        << "Number of fragments sent = " << number_of_fragments_sent
+        << ".";
+    }
 }
 
 //========================================================================================================================
@@ -225,7 +225,7 @@ void ARTDAQProducer::resumeProcessingData(void)
         report_string_.append(name_ + ".");
     }
 
-    //fragment_processing_future_ = std::async(std::launch::async, &artdaq::BoardReaderCore::process_fragments, fragment_receiver_ptr_.get());
+    fragment_processing_future_ = std::async(std::launch::async, &artdaq::BoardReaderCore::process_fragments, fragment_receiver_ptr_.get());
 
 }
 
@@ -256,10 +256,10 @@ void ARTDAQProducer::startProcessingData(std::string runNumber)
         report_string_.append(boost::lexical_cast<std::string>(timestamp));
         report_string_.append(".");
     }
-//
-//    std::cout << __COUT_HDR_FL__ << "STARTING BOARD READER THREAD" << std::endl;
-//    fragment_processing_future_ = std::async(std::launch::async, &artdaq::BoardReaderCore::process_fragments, fragment_receiver_ptr_.get());
-//
+
+    std::cout << __COUT_HDR_FL__ << "STARTING BOARD READER THREAD" << std::endl;
+    fragment_processing_future_ = std::async(std::launch::async, &artdaq::BoardReaderCore::process_fragments, fragment_receiver_ptr_.get());
+
 }
 
 //========================================================================================================================
@@ -278,13 +278,13 @@ void ARTDAQProducer::stopProcessingData(void)
         //return false;
     }
 
-//    if (fragment_processing_future_.valid())
-//    {
-//        int number_of_fragments_sent = fragment_processing_future_.get();
-//        mf::LogDebug(name_ + "App::do_stop(uint64_t, uint64_t)")
-//        << "Number of fragments sent = " << number_of_fragments_sent
-//        << ".";
-//    }
+    if (fragment_processing_future_.valid())
+    {
+        int number_of_fragments_sent = fragment_processing_future_.get();
+        mf::LogDebug(name_ + "App::do_stop(uint64_t, uint64_t)")
+        << "Number of fragments sent = " << number_of_fragments_sent
+        << ".";
+    }
 
 }
 
