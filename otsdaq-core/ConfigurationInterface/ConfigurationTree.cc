@@ -21,6 +21,7 @@ ConfigurationTree::ConfigurationTree()
 : configMgr_				(0),
   configuration_			(0),
   groupId_					(""),
+  linkParentConfig_			(0),
   linkColName_				(""),
   linkColValue_				(""),
   disconnectedTargetName_	(""),
@@ -35,7 +36,10 @@ ConfigurationTree::ConfigurationTree()
 }
 //==============================================================================
 ConfigurationTree::ConfigurationTree(const ConfigurationManager* const &configMgr, const ConfigurationBase* const &config)
-: ConfigurationTree(configMgr, config, "", "", "", "", "" /*disconnectedLinkID_*/, "", ConfigurationView::INVALID, ConfigurationView::INVALID)
+: ConfigurationTree(configMgr, config, "" /*groupId_*/, 0 /*linkParentConfig_*/,
+		"" /*linkColName_*/, "" /*linkColValue_*/, "" /*disconnectedTargetName_*/,
+		"" /*disconnectedLinkID_*/, "" /*childLinkIndex_*/,
+		ConfigurationView::INVALID /*row_*/, ConfigurationView::INVALID /*col_*/)
 {
 	//std::cout << __PRETTY_FUNCTION__ << std::endl;
 	//std::cout << __PRETTY_FUNCTION__ << "SHORT CONTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
@@ -46,6 +50,7 @@ ConfigurationTree::ConfigurationTree(
 		const ConfigurationManager* const& configMgr,
 		const ConfigurationBase* const&    config,
 		const std::string&                 groupId,
+		const ConfigurationBase* const&    linkParentConfig,
 		const std::string&                 linkColName,
 		const std::string&                 linkColValue,
 		const std::string&                 disconnectedTargetName,
@@ -56,6 +61,7 @@ ConfigurationTree::ConfigurationTree(
 : configMgr_				(configMgr),
   configuration_			(config),
   groupId_					(groupId),
+  linkParentConfig_			(linkParentConfig),
   linkColName_				(linkColName),
   linkColValue_				(linkColValue),
   disconnectedTargetName_ 	(disconnectedTargetName),
@@ -344,17 +350,52 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 	}
 
 	if(getValueType() != ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
-			getValueType() != ViewColumnInfo::TYPE_BITMAP_DATA)
+			getValueType() != ViewColumnInfo::TYPE_BITMAP_DATA &&
+			!isLinkNode())
 	{
 		__SS__ << "Can't get fixed choices of node with value type of '" <<
-				getValueType() << ".' Value type must be '" <<
+				getValueType() << ".' Node must be a link or a value node with type '" <<
 				ViewColumnInfo::TYPE_BITMAP_DATA << "' or '" <<
 				ViewColumnInfo::TYPE_FIXED_CHOICE_DATA << ".'" << std::endl;
 		throw std::runtime_error(ss.str());
 	}
 
-	//return vector of default + data choices
 	std::vector<std::string> retVec;
+
+	if(isLinkNode())
+	{
+		if(!linkParentConfig_)
+		{
+			__SS__ << "Can't get fixed choices of node with no parent config view pointer!" << std::endl;
+			throw std::runtime_error(ss.str());
+		}
+
+		__MOUT__ << getChildLinkIndex() << std::endl;
+		__MOUT__ << linkColName_ << std::endl;
+
+		//for links, col_ = -1, column c needs to change (to ChildLink column of pair)
+		// get column from parent config pointer
+
+		const ConfigurationView* parentView = &(linkParentConfig_->getView());
+		int c = parentView->findCol(linkColName_);
+
+		__MOUT__ << "Link " << c << std::endl;
+
+		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
+		bool isGroupLink;
+		parentView->getChildLink(c, isGroupLink, linkPair);
+		c = linkPair.first;
+
+		__MOUT__ << "Link " << c << std::endl;
+
+		std::vector<std::string> choices = parentView->getColumnInfo(c).getDataChoices();
+		for(const auto &choice:choices)
+			retVec.push_back(choice);
+
+		return retVec;
+	}
+
+	//return vector of default + data choices
 	retVec.push_back(configView_->getColumnInfo(col_).getDefaultValue());
 	std::vector<std::string> choices = configView_->getColumnInfo(col_).getDataChoices();
 	for(const auto &choice:choices)
@@ -618,6 +659,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 					configMgr_,
 					configuration_,
 					"", //no new groupId string, not a link
+					0 /*linkParentConfig_*/,
 					"", //link node name, not a link
 					"", //link node value, not a link
 					"",	//ignored disconnected target name, not a link
@@ -658,7 +700,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 			unsigned int c = configView_->findCol(nodeName);
 			std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
 			bool isGroupLink, isLink;
-			if((isLink = configView_->getChildLink(c, &isGroupLink, &linkPair)) &&
+			if((isLink = configView_->getChildLink(c, isGroupLink, linkPair)) &&
 					!isGroupLink)
 			{
 				//__MOUT__ << "nodeName=" << nodeName << " " << nodeName.length() << std::endl;
@@ -690,6 +732,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 							configMgr_,
 							0,
 							"",
+							configuration_, //linkParentConfig_
 							nodeName,
 							configView_->getDataView()[row_][c], //this the link node field associated value (matches targeted column)
 							configView_->getDataView()[row_][linkPair.first], //give disconnected target name
@@ -702,6 +745,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 								configMgr_,
 								childConfig,
 								"", //no new groupId string
+								configuration_, //linkParentConfig_
 								nodeName, //this is a link node
 								configView_->getDataView()[row_][c], //this the link node field associated value (matches targeted column)
 								"", //ignore since is connected
@@ -738,7 +782,8 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 
 					//do not recurse further
 					return ConfigurationTree(configMgr_,0,
-							configView_->getDataView()[row_][linkPair.second],
+							configView_->getDataView()[row_][linkPair.second], //groupID
+							configuration_, //linkParentConfig_
 							nodeName,
 							configView_->getDataView()[row_][c], //this the link node field associated value (matches targeted column)
 							configView_->getDataView()[row_][linkPair.first], //give disconnected target name
@@ -752,6 +797,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 								configMgr_,
 								childConfig,
 								configView_->getDataView()[row_][linkPair.second],	//groupId string
+								configuration_, //linkParentConfig_
 								nodeName,  //this is a link node
 								configView_->getDataView()[row_][c], //this the link node field associated value (matches targeted column)
 								"", //ignore since is connected
@@ -766,7 +812,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 				//return value node
 				return ConfigurationTree(
 						configMgr_,
-						configuration_,"","","","",""/*disconnectedLinkID*/,"",
+						configuration_,"",
+						0 /*linkParentConfig_*/,
+						"","","",""/*disconnectedLinkID*/,"",
 						row_,c);
 			}
 		}

@@ -86,15 +86,15 @@ public:
 	//	only by using isEntryInGroup ...
 	//	This is so that multiple group handling is consistent
 private:
-	bool			 			    isEntryInGroupCol			(const unsigned int &row, const unsigned int &groupCol, const std::string &groupNeedle, std::set<std::string> *groupIDList = 0) const;
+	bool			 			    isEntryInGroupCol			(const unsigned int& row, const unsigned int& groupCol, const std::string& groupNeedle, std::set<std::string>* groupIDList = 0) const;
 public:
 	//std::set<std::string /*GroupId*/>
-	std::set<std::string>			getSetOfGroupIDs			(const std::string &childLinkIndex, unsigned int row = -1) const;
-	bool			 			    isEntryInGroup				(const unsigned int &row, const std::string &childLinkIndex, const std::string &groupNeedle) const;
-	const bool	 					getChildLink				(const unsigned int &col, bool *isGroup, std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> *linkPair) const;
-	const unsigned int 			    getColLinkGroupID			(const std::string &childLinkIndex) const;
-	void			 			    addRowToGroup				(const unsigned int &row, const unsigned int &col, const std::string &groupID, const std::string &colDefault);
-	void			 			    removeRowFromGroup			(const unsigned int &row, const unsigned int &col, const std::string &groupID);
+	std::set<std::string>			getSetOfGroupIDs			(const std::string& childLinkIndex, unsigned int row = -1) const;
+	bool			 			    isEntryInGroup				(const unsigned int& row, const std::string& childLinkIndex, const std::string& groupNeedle) const;
+	const bool	 					getChildLink				(const unsigned int& col, bool& isGroup, std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>& linkPair) const;
+	const unsigned int 			    getColLinkGroupID			(const std::string& childLinkIndex) const;
+	void			 			    addRowToGroup				(const unsigned int& row, const unsigned int& col, const std::string& groupID, const std::string& colDefault);
+	void			 			    removeRowFromGroup			(const unsigned int& row, const unsigned int& col, const std::string& groupID);
 
 	//==============================================================================
 	//Philosophy: force type validation by passing value to fill by reference..

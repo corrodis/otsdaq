@@ -293,6 +293,14 @@ void ConfigurationView::init(void)
 		{
 			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
 			{
+				const std::vector<std::string>& theDataChoices =
+						columnsInfo_[col].getDataChoices();
+
+				//check if arbitrary values allowed
+				if(theDataChoices.size() && theDataChoices[0] ==
+						"arbitraryBool=1")
+					continue; //arbitrary values allowed
+
 				bool found;
 				for(unsigned int row = 0; row < getNumberOfRows(); ++row)
 				{
@@ -301,13 +309,47 @@ void ConfigurationView::init(void)
 					if(theDataView_[row][col] == rowDefaults[col])
 						continue; //default is always ok
 
-					const std::vector<std::string>& theDataChoices =
-							columnsInfo_[col].getDataChoices();
+					for(const auto &choice:theDataChoices)
+					{
+						if(theDataView_[row][col] == choice)
+						{
+							found = true;
+							break;
+						}
+					}
+					if(!found)
+					{
+						__SS__ << "Configuration Error:\t'" << theDataView_[row][col] << "' in column " <<
+								columnsInfo_[col].getName() << " is not a valid Fixed Choice option. " <<
+								"Possible values are as follows: ";
 
-					//check if arbitrary values allowed
-					if(theDataChoices.size() && theDataChoices[0] ==
-							"arbitraryBool=1")
-						continue; //arbitrary values allowed
+						for(unsigned int i = 0; i < columnsInfo_[col].getDataChoices().size(); ++i)
+						{
+							if(i) ss << ", ";
+							ss << columnsInfo_[col].getDataChoices()[i];
+						}
+						ss << "." << std::endl;
+						__MOUT_ERR__ << "\n" << ss.str();
+						throw std::runtime_error(ss.str());
+					}
+				}
+			}
+			if(columnsInfo_[col].isChildLink())
+			{
+				//check if forcing fixed choices
+
+				const std::vector<std::string>& theDataChoices =
+						columnsInfo_[col].getDataChoices();
+
+				//check if arbitrary values allowed
+				if(!theDataChoices.size() ||
+						theDataChoices[0] == "arbitraryBool=1")
+					continue; //arbitrary values allowed
+
+				bool found;
+				for(unsigned int row = 0; row < getNumberOfRows(); ++row)
+				{
+					found = false;
 
 					for(const auto &choice:theDataChoices)
 					{
@@ -2309,19 +2351,26 @@ void ConfigurationView::deleteRow(int r)
 //  a group link is defined by two columns: TYPE_START_CHILD_LINK, TYPE_START_CHILD_LINK_GROUP_ID
 //
 //	returns true if column is member of a group or unique link.
-const bool ConfigurationView::getChildLink(const unsigned int &c, bool *isGroup,
-		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> *linkPair) const
+const bool ConfigurationView::getChildLink(const unsigned int& c, bool& isGroup,
+		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>& linkPair) const
 {
+
+	if(!(c < columnsInfo_.size()))
+	{
+		__SS__ << "Invalid col (" << c << ") requested!" << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+
 	//__MOUT__ << "getChildLink for col: " << c << "-" <<
 	//		columnsInfo_[c].getType() << "-" << columnsInfo_[c].getName() << std::endl;
 
 	//check if column is a child link UID
-	if((*isGroup = columnsInfo_[c].isChildLinkGroupID()) ||
+	if((isGroup = columnsInfo_[c].isChildLinkGroupID()) ||
 			columnsInfo_[c].isChildLinkUID())
 	{
 		//must be part of unique link, (or invalid table?)
 		//__MOUT__ << "col: " << c << std::endl;
-		linkPair->second = c;
+		linkPair.second = c;
 		std::string index = columnsInfo_[c].getChildLinkIndex();
 
 		//__MOUT__ << "index: " << index << std::endl;
@@ -2336,7 +2385,7 @@ const bool ConfigurationView::getChildLink(const unsigned int &c, bool *isGroup,
 			{
 				//found match!
 				__MOUT__ << "getChildLink Found match for col: " << c << " at " << col << std::endl;
-				linkPair->first = col;
+				linkPair.first = col;
 				return true;
 			}
 		}
@@ -2351,7 +2400,7 @@ const bool ConfigurationView::getChildLink(const unsigned int &c, bool *isGroup,
 		return false; //cant be unique link
 
 	//this is child link, so find pair link uid or gid column
-	linkPair->first = c;
+	linkPair.first = c;
 	std::string index = columnsInfo_[c].getChildLinkIndex();
 
 	//__MOUT__ << "index: " << index << std::endl;
@@ -2372,13 +2421,13 @@ const bool ConfigurationView::getChildLink(const unsigned int &c, bool *isGroup,
 		//		if(columnsInfo_[col].isChildLinkGroupID())
 		//			__MOUT__ << "-L" << columnsInfo_[col].getChildLinkIndex() << std::endl;
 
-		if(((columnsInfo_[col].isChildLinkUID() && !(*isGroup = false)) ||
-				(columnsInfo_[col].isChildLinkGroupID() && (*isGroup = true)))
+		if(((columnsInfo_[col].isChildLinkUID() && !(isGroup = false)) ||
+				(columnsInfo_[col].isChildLinkGroupID() && (isGroup = true)))
 				&& index == columnsInfo_[col].getChildLinkIndex())
 		{
 			//found match!
 			//__MOUT__ << "getChildLink Found match for col: " << c << " at " << col << std::endl;
-			linkPair->second = col;
+			linkPair.second = col;
 			return true;
 		}
 	}
