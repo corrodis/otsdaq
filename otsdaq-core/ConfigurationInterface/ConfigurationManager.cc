@@ -267,13 +267,15 @@ void ConfigurationManager::destroyConfigurationGroup(const std::string& theGroup
 	}
 
 	std::string dbgHeader = onlyDeactivate?"Deactivating":"Destroying";
-	if(isContext)
-		__MOUT__ << dbgHeader << " Context group: " << theGroup << std::endl;
-	if(isBackbone)
-		__MOUT__ << dbgHeader << " Backbone group: " << theGroup << std::endl;
-	if(isConfiguration)
-		__MOUT__ << dbgHeader << " Configuration group: " << theGroup << std::endl;
-
+	if(theGroup != "")
+	{
+		if(isContext)
+			__MOUT__ << dbgHeader << " Context group: " << theGroup << std::endl;
+		if(isBackbone)
+			__MOUT__ << dbgHeader << " Backbone group: " << theGroup << std::endl;
+		if(isConfiguration)
+			__MOUT__ << dbgHeader << " Configuration group: " << theGroup << std::endl;
+	}
 
 	std::set<std::string>::const_iterator contextFindIt, backboneFindIt;
 	for(auto it = nameToConfigurationMap_.begin(); it != nameToConfigurationMap_.end(); /*no increment*/)
@@ -750,8 +752,8 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	if(metaTablePair !=
 			memberMap.end())
 	{
-		__MOUT__ << "Found group meta data. v" <<
-				metaTablePair->second << std::endl;
+		//__MOUT__ << "Found group meta data. v" << metaTablePair->second << std::endl;
+
 		//clear table
 		while(groupMetadataTable_.getView().getNumberOfRows())
 			groupMetadataTable_.getViewP()->deleteRow(0);
@@ -776,7 +778,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 
 	if(progressBar) progressBar->step();
 
-	__MOUT__ << "memberMap loaded size = " << memberMap.size() << std::endl;
+	//__MOUT__ << "memberMap loaded size = " << memberMap.size() << std::endl;
 
 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
 
@@ -807,7 +809,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 
 	if(progressBar) progressBar->step();
 
-	__MOUT__ << "Activating chosen group:" << std::endl;
+	//__MOUT__ << "Activating chosen group:" << std::endl;
 
 
 	loadMemberMap(memberMap);
@@ -905,7 +907,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	}
 
 	if(progressBar) progressBar->step();
-	__MOUT__ << "Load complete." << std::endl;
+	//__MOUT__ << "Load complete." << std::endl;
 	return memberMap;
 }
 
