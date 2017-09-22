@@ -1026,7 +1026,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 								ViewColumnInfo::TYPE_TIMESTAMP)
 					continue;
 
-				__MOUT__ << "isValueNode " << fieldNode.first << std::endl;
+				//__MOUT__ << "isValueNode " << fieldNode.first << std::endl;
 				if(!i) //first uid record
 				{
 					//check field accept filter list
