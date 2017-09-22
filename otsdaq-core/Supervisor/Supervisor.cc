@@ -2172,6 +2172,23 @@ throw (xgi::exception::Exception)
 				xmldoc.addTextElementToData("config_key",
 						ConfigurationGroupKey::getFullGroupString(aliasMapPair.second.first,
 								aliasMapPair.second.second).c_str());
+
+				std::string groupComment, groupAuthor, groupCreationTime;
+				try
+				{
+					theConfigurationManager_->loadConfigurationGroup(
+							aliasMapPair.second.first,aliasMapPair.second.second,
+							false,0,0,
+							&groupComment, &groupAuthor, &groupCreationTime, false /*false to not load member map*/);
+
+					xmldoc.addTextElementToData("config_comment", groupComment);
+					xmldoc.addTextElementToData("config_author", groupAuthor);
+					xmldoc.addTextElementToData("config_create_time", groupCreationTime);
+				}
+				catch(...)
+				{
+					__MOUT_WARN__ << "Failed to load group metadata." << std::endl;
+				}
 			}
 		}
 
