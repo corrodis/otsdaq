@@ -1008,6 +1008,7 @@ throw (toolbox::fsm::exception::Exception)
 					theConfigurationManager_->dumpActiveConfiguration(
 							fsmLinkNode.getNode(activeStateMachineName_ +
 									"/ConfigurationDumpOnConfigureFilePath").getValue<std::string>() +
+							"/" +
 							fsmLinkNode.getNode(activeStateMachineName_ +
 									"/ConfigurationDumpOnConfigureFileRadix").getValue<std::string>() +
 							"_" +
@@ -1141,13 +1142,16 @@ throw (toolbox::fsm::exception::Exception)
 					theConfigurationManager_->dumpActiveConfiguration(
 							fsmLinkNode.getNode(activeStateMachineName_ +
 									"/ConfigurationDumpOnRunFilePath").getValue<std::string>() +
-									fsmLinkNode.getNode(activeStateMachineName_ +
-											"/ConfigurationDumpOnRunFileRadix").getValue<std::string>() +
-											"_Run" +
-											runNumber +
-											".dump",
-											fsmLinkNode.getNode(activeStateMachineName_ +
-													"/ConfigurationDumpOnRunFormat").getValue<std::string>()
+							"/" +
+							fsmLinkNode.getNode(activeStateMachineName_ +
+									"/ConfigurationDumpOnRunFileRadix").getValue<std::string>() +
+							"_Run" +
+							runNumber +
+							"_" +
+							std::to_string(time(0)) +
+							".dump",
+							fsmLinkNode.getNode(activeStateMachineName_ +
+									"/ConfigurationDumpOnRunFormat").getValue<std::string>()
 					);
 				}
 				else

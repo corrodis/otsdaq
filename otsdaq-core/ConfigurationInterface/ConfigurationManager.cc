@@ -550,9 +550,11 @@ void ConfigurationManager::dumpActiveConfiguration(
 		(*out) << "\n\n************************" << std::endl;
 		(*out) << "Active Tables:" << std::endl;
 		(*out) << "Active Tables count = " << activeTables.size() << std::endl;
+
+		unsigned int i = 0;
 		for(auto &table:activeTables)
 		{
-			(*out) << "\t" << table.first << "-v" <<
+			(*out) << "\t" << ++i << ". " << table.first << "-v" <<
 					table.second << std::endl;
 		}
 	};
@@ -575,16 +577,17 @@ void ConfigurationManager::dumpActiveConfiguration(
 									group.second.first,
 									group.second.second));
 
-			(*out) << "\tMember count = " << memberMap.size() << std::endl;
+			(*out) << "\tMember table count = " << memberMap.size() << std::endl;
 			tableCount += memberMap.size();
 
+			unsigned int i = 0;
 			for(auto &member:memberMap)
 			{
-				(*out) << "\t\t" << member.first << "-v" <<
+				(*out) << "\t\t" << ++i << ". " << member.first << "-v" <<
 						member.second << std::endl;
 			}
 		}
-		(*out) << "Active Group Members total count = " << tableCount << std::endl;
+		(*out) << "\nActive Group Members total table count = " << tableCount << std::endl;
 	};
 
 	auto localDumpActiveTableContents = [](const ConfigurationManager *cfgMgr, std::ostream *out) {
@@ -592,10 +595,14 @@ void ConfigurationManager::dumpActiveConfiguration(
 						cfgMgr->getActiveVersions();
 
 		(*out) << "\n\n************************" << std::endl;
-		(*out) << "Active Table Contents:" << std::endl;
+		(*out) << "Active Table Contents (table count = " << activeTables.size()
+				<< "):" << std::endl;
+		unsigned int i = 0;
 		for(auto &table:activeTables)
 		{
-			(*out) << "\t" << table.first << "-v" <<
+			(*out) << "\n\n==============================================================================" << std::endl;
+			(*out) << "==============================================================================" << std::endl;
+			(*out) << "\t" << ++i << ". " << table.first << "-v" <<
 					table.second << std::endl;
 
 			cfgMgr->nameToConfigurationMap_.find(table.first)->second->print(*out);
