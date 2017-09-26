@@ -24,8 +24,11 @@ void MPIInitializer::init(std::string name, artdaq::TaskType taskType)
 
 	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "BEGIN" << std::endl;
 
+	INIT_MF((name + "App").c_str());
 	//artdaq::configureMessageFacility("boardreader");
 	//artdaq::configureMessageFacility(name.c_str());
+
+	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "MF initialized" << std::endl;
 
 	// initialization
 	//FIXME This was FUNNELED

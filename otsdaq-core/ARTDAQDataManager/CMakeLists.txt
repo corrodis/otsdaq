@@ -6,6 +6,7 @@ cet_make(LIBRARY_NAME ARTDAQDataManager
 		DataManager
 		MPICore
         otsdaq-core_DataProcessorPlugins_ARTDAQConsumer_processor
+        otsdaq-core_DataProcessorPlugins_ARTDAQProducer_processor
         )
 install_headers()
 install_source()

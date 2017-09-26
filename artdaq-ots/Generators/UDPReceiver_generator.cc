@@ -62,7 +62,12 @@ ots::UDPReceiver::~UDPReceiver()
 }
 
 void ots::UDPReceiver::start() {
-  receiverThread_ = std::thread(&UDPReceiver::receiveLoop_,this);
+
+
+	std::cout << __COUT_HDR_FL__ << "Start." << std::endl;
+	mf::LogInfo("UDPReceiver") << "Starting..." << std::endl;
+
+	receiverThread_ = std::thread(&UDPReceiver::receiveLoop_,this);
 }
 
 void ots::UDPReceiver::receiveLoop_() {
@@ -76,7 +81,7 @@ void ots::UDPReceiver::receiveLoop_() {
     int rv = poll(ufds, 1, 1000);
     if(rv > 0) 
 	  {
-		//std::cout << __COUT_HDR_FL__ << "revents: " << ufds[0].revents << ", " << ufds[1].revents << std::endl;
+		std::cout << __COUT_HDR_FL__ << "revents: " << ufds[0].revents << ", " << std::endl;// ufds[1].revents << std::endl;
 		if(ufds[0].revents == POLLIN || ufds[0].revents == POLLPRI) 
 		  {
 
@@ -88,7 +93,7 @@ void ots::UDPReceiver::receiveLoop_() {
 					 (struct sockaddr *) &si_data_, (socklen_t*)sizeof(si_data_));
 
 			mf::LogInfo("UDPReceiver") << "Received UDP Packet with sequence number " << std::hex << "0x" << (int)peekBuffer[1] << "!" << std::dec;
-			//std::cout << __COUT_HDR_FL__ << "peekBuffer[1] == expectedPacketNumber_: " << std::hex << (int)peekBuffer[1] << " =?= " << (int)expectedPacketNumber_ << std::endl;
+			std::cout << __COUT_HDR_FL__ << "peekBuffer[1] == expectedPacketNumber_: " << std::hex << (int)peekBuffer[1] << " =?= " << (int)expectedPacketNumber_ << std::endl;
 
 			uint32_t seqNum = peekBuffer[5];
 			//ReturnCode dataCode = getReturnCode(peekBuffer[0]);
@@ -137,7 +142,10 @@ void ots::UDPReceiver::receiveLoop_() {
 			++expectedPacketNumber_;
 		  }
 	  }
+    std::cout << __COUT_HDR_FL__ << "waiting..." << std::endl;
+
   }
+  mf::LogInfo("UDPReceiver") << "receive Loop exiting..." << std::endl;
 }
 
 bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs & output)

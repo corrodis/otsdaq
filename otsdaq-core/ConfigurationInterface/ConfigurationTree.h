@@ -2,8 +2,7 @@
 #define _ots_ConfigurationTree_h_
 
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationView.h"
-//#include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
-//#include <xercesc/dom/DOMElement.hpp>
+
 
 #include <iostream>       // std::cout
 #include <string>
@@ -16,6 +15,25 @@ namespace ots
 class ConfigurationManager;
 class ConfigurationBase;
 class ConfigurationView;
+
+
+template<typename T>
+struct identity { typedef T type; };
+
+
+//
+//template <class T> 	T handleValidateValueForColumn    (ConfigurationView* configView, std::string value, unsigned int col)
+//{
+//	std::cout << "22:::::" << "handleValidateValueForColumn<T>" << std::endl;
+//	return configView->validateValueForColumn<T>(
+//			value,col);
+//}
+//template <>            	std::string handleValidateValueForColumn<std::string>(ConfigurationView* configView, std::string value, unsigned int col)
+//{
+//	std::cout << "22:::::" << "handleValidateValueForColumn<std::string>" << std::endl;
+//	return configView->validateValueForColumn(
+//			value,col);
+//}
 
 class ConfigurationTree
 {
@@ -98,7 +116,36 @@ public:
 	void getValue(T& value) const
 	{
 		if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
+		{
+			//attempt to interpret the value as a tree node path itself
+			try
+			{
+				ConfigurationTree valueAsTreeNode = getValueAsTreeNode();
+				//valueAsTreeNode.getValue<T>(value);
+				__MOUT__ << "Success following path to tree node!" << std::endl;
+				//value has been interpreted as a tree node value
+				//now verify result under the rules of this column
+//				if(typeid(std::string) == typeid(value) ||
+//						typeid(std::basic_string<char>) == typeid(value))
+//					value =	configView_->validateValueForColumn(
+//						valueAsTreeNode.getValueAsString(),col_);
+//				else
+				//	value = (T)configView_->validateValueForColumn<T>(
+				//		valueAsTreeNode.getValueAsString(),col_);
+				value = handleValidateValueForColumn(configView_,
+						valueAsTreeNode.getValueAsString(),col_,identity<T>());
+
+				__MOUT__ << "Successful value!" << std::endl;
+				return;
+			}
+			catch(...) //tree node path interpretation failed
+			{
+				//__MOUT__ << "Invalid path, just returning normal value." << std::endl;
+			}
+
+			//else normal return
 			configView_->getValue(value,row_,col_);
+		}
 		else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
 			throw std::runtime_error("Requesting getValue on config node level. Must be a value node.");
 		else if(row_ == ConfigurationView::INVALID)
@@ -114,6 +161,10 @@ public:
 			throw std::runtime_error("Impossible");
 		}
 	}
+	//special version of getValue for string type
+	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
+	void									getValue			        (std::string& value) const;
+
 
 	//==============================================================================
 	//getValue (not std::string value)
@@ -122,26 +173,69 @@ public:
 	T getValue(void) const
 	{
 		T value;
-		if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
-		{
-			configView_->getValue(value,row_,col_);
-			return value;
-		}
-		else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
-			throw std::runtime_error("Requesting getValue on config node level. Must be a value node.");
-		else if(row_ == ConfigurationView::INVALID)
-		{
-			std::cout << __COUT_HDR_FL__ << std::endl;
-			throw std::runtime_error("Malformed ConfigurationTree");
-		}
-		else if(col_ == ConfigurationView::INVALID)						//this node is uid node
-			throw std::runtime_error("Requesting getValue on uid node level. Must be a value node.");
-		else
-		{
-			std::cout << __COUT_HDR_FL__ << std::endl;
-			throw std::runtime_error("Impossible");
-		}
+//		if(typeid(std::basic_string<char>) == typeid(value) ||
+//				typeid(std::string) == typeid(value))
+//		{
+//			std::string stringValue;
+//			ConfigurationTree::getValue(stringValue);
+//			return stringValue;
+//		}
+//		else
+			ConfigurationTree::getValue<T>(value);
+		return value;
+//		if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
+//		{
+//			configView_->getValue(value,row_,col_);
+//			return value;
+//		}
+//		else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
+//			throw std::runtime_error("Requesting getValue on config node level. Must be a value node.");
+//		else if(row_ == ConfigurationView::INVALID)
+//		{
+//			std::cout << __COUT_HDR_FL__ << std::endl;
+//			throw std::runtime_error("Malformed ConfigurationTree");
+//		}
+//		else if(col_ == ConfigurationView::INVALID)						//this node is uid node
+//			throw std::runtime_error("Requesting getValue on uid node level. Must be a value node.");
+//		else
+//		{
+//			std::cout << __COUT_HDR_FL__ << std::endl;
+//			throw std::runtime_error("Impossible");
+//		}
 	}
+	//special version of getValue for string type
+	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
+	std::string								getValue			        (void) const;
+
+private:
+	template<typename T>
+	T handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<T>) const
+	{
+		if(!configView)
+		{
+			__SS__ << "Null configView" << std::endl;
+			__MOUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+		std::cout << "210:::::" << "handleValidateValueForColumn<T>" << std::endl;
+		return configView->validateValueForColumn<T>(
+				value,col);
+	}
+
+	std::string handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<std::string>) const
+	{
+		if(!configView)
+		{
+			__SS__ << "Null configView" << std::endl;
+			__MOUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+		std::cout << "210:::::" << "handleValidateValueForColumn<string>" << std::endl;
+		return configView->validateValueForColumn(
+				value,col);
+	}
+
+public:
 
 	//navigating between nodes
 	ConfigurationTree						getNode				        (const std::string& nodeName, bool doNotThrowOnBrokenUIDLinks=false) const;
@@ -155,8 +249,6 @@ public:
 	std::vector<std::string>				getChildrenNames	        (void) const;
 	std::vector<std::pair<std::string,ConfigurationTree> >	getChildren	(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap = std::map<std::string /*relative-path*/, std::string /*value*/>()) const;
 	std::map<std::string,ConfigurationTree> getChildrenMap	            (void) const;
-	void									getValue			        (std::string& value) const;
-	std::string								getValue			        (void) const;
 	std::string								getEscapedValue		        (void) const;
 	const std::string&						getValueAsString	        (bool returnLinkTableValue=false) const;
 	const std::string&						getUIDAsString		        (void) const;
@@ -168,6 +260,29 @@ public:
 	const std::string&						getDisconnectedLinkID		(void) const;
 	const std::string&						getChildLinkIndex			(void) const;
 	std::vector<std::string>				getFixedChoices				(void) const;
+
+public:
+
+
+	//boolean info
+	bool									isDefaultValue				(void) const;
+	bool									isConfigurationNode	        (void) const;
+	bool									isValueNode			        (void) const;
+	bool									isDisconnected		        (void) const;
+	bool									isLinkNode			        (void) const;
+	bool									isGroupLinkNode		        (void) const;
+	bool									isUIDLinkNode		        (void) const;
+	bool									isUIDNode			        (void) const;
+
+
+	void         			 				print				        (const unsigned int &depth = -1, std::ostream &out = std::cout) const;
+
+	//make stream output easy
+	friend std::ostream& operator<<	(std::ostream& out, const ConfigurationTree& t)
+	{
+		out << t.getValueAsString();
+		return out;
+	}
 
 protected:
 	const unsigned int&						getRow			        	(void) const;
@@ -194,39 +309,16 @@ protected:
 	std::vector<ConfigurationTree::RecordField>		getCommonFields(const std::vector<std::string /*relative-path*/> &recordList, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth = -1) const;
 	std::set<std::string /*unique-value*/>			getUniqueValuesForField(const std::vector<std::string /*relative-path*/> &recordList, const std::string &fieldName) const;
 
-
-public:
-
-
-	//boolean info
-	bool									isDefaultValue				(void) const;
-	bool									isConfigurationNode	        (void) const;
-	bool									isValueNode			        (void) const;
-	bool									isDisconnected		        (void) const;
-	bool									isLinkNode			        (void) const;
-	bool									isGroupLinkNode		        (void) const;
-	bool									isUIDLinkNode		        (void) const;
-	bool									isUIDNode			        (void) const;
-
-
-	void         			 				print				        (const unsigned int &depth = -1, std::ostream &out = std::cout) const;
-
-	//make stream output easy
-	friend std::ostream& operator<<	(std::ostream& out, const ConfigurationTree& t)
-	{
-		out << t.getValueAsString();
-		return out;
-	}
 private:
 	//privately ONLY allow full access to member variables through constructor
-	ConfigurationTree(const ConfigurationManager* const& configMgr, const ConfigurationBase* const& config, const std::string& groupId, const std::string &linkColName, const std::string &linkColValue, const std::string& disconnectedTargetName, const std::string& disconnectedLinkID, const std::string &childLinkIndex, const unsigned int row  = ConfigurationView::INVALID, const unsigned int col = ConfigurationView::INVALID);
+	ConfigurationTree(const ConfigurationManager* const& configMgr, const ConfigurationBase* const& config, const std::string& groupId, const ConfigurationBase* const& linkParentConfig, const std::string &linkColName, const std::string &linkColValue, const std::string& disconnectedTargetName, const std::string& disconnectedLinkID, const std::string &childLinkIndex, const unsigned int row  = ConfigurationView::INVALID, const unsigned int col = ConfigurationView::INVALID);
 
-	static ConfigurationTree	recurse		  (const ConfigurationTree& t, const std::string& childPath);
+	static ConfigurationTree	recurse		  (const ConfigurationTree& t, const std::string& childPath, bool doNotThrowOnBrokenUIDLinks);
 	static void 				recursivePrint(const ConfigurationTree& t, unsigned int depth, std::ostream &out, std::string space);
+	static bool					wildCardMatch (const std::string& needle, const std::string& haystack);
 
 	void						recursiveGetCommonFields(std::vector<ConfigurationTree::RecordField> &fieldCandidateList, std::vector<int> &fieldCount, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth, const std::string &relativePathBase, bool inFirstRecord) const;
-
-	//std::string					getRecordFieldValueAsString(std::string fieldName) const;
+	ConfigurationTree			getValueAsTreeNode			(void) const;
 
 	//Any given ConfigurationTree is either a config, uid, or value node:
 	//	- config node is a pointer to a config table
@@ -237,6 +329,7 @@ private:
 	const ConfigurationManager* configMgr_;
 	const ConfigurationBase* 	configuration_; //config node
 	const std::string			groupId_;		//group config node
+	const ConfigurationBase* 	linkParentConfig_; //link node parent config pointer (could be used to traverse backwards through tree)
 	const std::string			linkColName_;	//link node field name
 	const std::string			linkColValue_;	//link node field value
 	const std::string			disconnectedTargetName_;	//only used if disconnected to determine target table name

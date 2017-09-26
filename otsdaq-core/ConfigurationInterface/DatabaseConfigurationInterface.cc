@@ -103,7 +103,7 @@ throw(std::runtime_error)
 	__SS__ << "\n\nDBI Error while filling '" << configuration->getConfigurationName() <<
 			"' version '" << versionstring << "' - are you sure this version exists?" <<
 			"Here is the error:\n\n" << result.second << std::endl;
-	std::cout << __COUT_HDR_FL__ << ss.str();
+	std::cout << __COUT_HDR_FL__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
 
@@ -130,7 +130,7 @@ throw(std::runtime_error)
 		return;
 
 	__SS__ << "DBI Error:" << result.second << std::endl;
-	std::cout << __COUT_HDR_FL__ << ss.str();
+	std::cout << __COUT_HDR_FL__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
 

@@ -617,9 +617,8 @@ otsActionHandler() {
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 			echo " "
 			echo "Rebuilding. . ."
-			echo " "
-			#echo "1" > mrbresult.num; mrb b > otsdaq_startots_mrbreport.txt && echo "0" > mrbresult.num
-			echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
+			echo " "			
+			#echo "1" > mrbresult.num; mrb b > otsdaq_startots_mrbreport.txt && echo "0" > mrbresult.num			
 			echo " "
 			#grep -A 1 -B 1 "INFO: Stage build successful." otsdaq_startots_mrbreport.txt
 			echo " "
@@ -639,10 +638,6 @@ otsActionHandler() {
 				$MPI_RUN_CMD &
 			fi			
 			
-			
-			echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
-			
-			
 			#sleep 5
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_WIZ" ]; then
 			
@@ -656,28 +651,40 @@ otsActionHandler() {
 			
 			launchOTSWiz
 
-			echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
-			
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_OTS" ]; then
 				
-				echo
-				echo "Starting otsdaq in normal mode for this host..."
-				echo
-				killall -9 xdaq.exe
-				killall -9 mf_rcv_n_fwd #message viewer display without decoration
-				killall -9 mpirun
-				sleep 1
-				
-				launchOTS
-
-				echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE				
+			echo
+			echo "Starting otsdaq in normal mode for this host..."
+			echo
+			killall -9 xdaq.exe
+			killall -9 mf_rcv_n_fwd #message viewer display without decoration
+			killall -9 mpirun
+			sleep 1
 			
+			launchOTS
+
+		elif [ "$OTSDAQ_STARTOTS_ACTION" == "FLATTEN_TO_SYSTEM_ALIASES" ]; then
+
+			echo
+			echo "Removing unused tables and groups based on active System Aliases..."
+			echo "otsdaq_flatten_system_aliases 0"
+			echo	
+			echo 
+			if [ $QUIET == 1 ]; then
+				echo "Quiet mode redirecting output to *** otsdaq_quiet_run-flatten.txt ***"	
+				otsdaq_flatten_system_aliases 0 &> otsdaq_quiet_run-flatten.txt &
+			else
+				otsdaq_flatten_system_aliases 0 &
+			fi		
+						
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
 		    exit
 		elif [ "$OTSDAQ_STARTOTS_ACTION" != "0" ]; then
 			echo "Exiting StartOTS.sh.. Unrecognized command OTSDAQ_STARTOTS_ACTION=${OTSDAQ_STARTOTS_ACTION}"			
 			exit
 		fi
+		
+		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
 		sleep 1
 	done
 
@@ -695,4 +702,16 @@ if [ $CHROME == 1 ]; then
 	sleep 3 #give time for server to be live
 	google-chrome $MAIN_URL &
 fi
+
+
+
+
+
+
+
+
+
+
+
+
 

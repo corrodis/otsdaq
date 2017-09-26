@@ -106,6 +106,7 @@ throw (xdaq::exception::Exception)
 				*(theApplication_->getApplicationDescriptor()),
 				*d);
 		std::string replyString = receive(reply);
+		std::cout << __COUT_HDR_FL__ << "replyString " << replyString << std::endl;
 		return replyString;
 	}
 	catch (xdaq::exception::Exception& e)

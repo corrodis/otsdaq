@@ -47,16 +47,73 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 
 	const XDAQContextConfiguration *contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);
 
-	//ConfigurationTree contextNode = configManager->getNode(contextConfig->getConfigurationName());
+//	//ConfigurationTree contextNode = configManager->getNode(contextConfig->getConfigurationName());
+//
+//	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+//
+//	//std::string appUID, buffUID, consumerUID;
+//	for(auto &child:childrenMap)
+//		if(child.second.getNode("Status").getValue<bool>())
+//		{
+////			getBoardReaderParents(child.second, contextConfig,
+////					contextNode, appUID, buffUID, consumerUID);
+//			outputFHICL(child.second, contextConfig);
+//		}
+
+	std::vector<const XDAQContextConfiguration::XDAQContext *> readerContexts =
+			contextConfig->getBoardReaderContexts();
+
+
+
+
+	//for each reader context
+	//	do NOT output associated fcl config file
+	//  but do check the link is to a DataManager-esque thing
+	for(auto &readerContext: readerContexts)
+	{
+		try
+		{
+			ConfigurationTree readerConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+					readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
+
+			__MOUT__ << "Path for this reader config is " <<
+					readerContext->contextUID_ << "/" <<
+					readerContext->applications_[0].applicationUID_ << "/" <<
+					readerConfigNode.getValueAsString() <<
+					std::endl;
+
+			__MOUT__ << "Checking that this reader supervisor node is DataManager-like." << std::endl;
+
+			readerConfigNode.getNode("LinkToDataManagerConfiguration").getChildren();
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "artdaq Board Readers must be instantiated as a Consumer within a DataManager configuration. Error found while checking for LinkToDataManagerConfiguration: " <<
+					e.what() << std::endl;
+			__MOUT_ERR__ << ss.str();
+			__MOUT__ << "Path for this reader config is " <<
+								readerContext->contextUID_ << "/" <<
+								readerContext->applications_[0].applicationUID_ << "/X" << std::endl;
+			__MOUT_ERR__ << "This board reader will likely not get instantiated properly! Proceeding anyway with fcl generation." << std::endl;
+
+			//proceed anyway, because it was really annoying to not be able to activate the configuration group when the context is being developed also.
+			//throw std::runtime_error(ss.str());
+		}
+
+		//artdaq Reader is not at Supervisor level like other apps
+		//	it is at Consumer level!
+		//outputFHICL(readerConfigNode,
+		//		contextConfig);
+	}
+
+	//handle fcl file generation, wherever the level of this configuration
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
-
 	std::string appUID, buffUID, consumerUID;
+
 	for(auto &child:childrenMap)
 		if(child.second.getNode("Status").getValue<bool>())
 		{
-//			getBoardReaderParents(child.second, contextConfig,
-//					contextNode, appUID, buffUID, consumerUID);
 			outputFHICL(child.second, contextConfig);
 		}
 }
@@ -202,6 +259,23 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 		throw std::runtime_error(ss.str());
 	}
 
+	//no primary link to configuration tree for reader node!
+	try
+	{
+		if(boardReaderNode.isDisconnected())
+		{
+			//create empty fcl
+			OUT << "{}\n\n";
+			out.close();
+			return;
+		}
+	}
+	catch(const std::runtime_error)
+	{
+		__MOUT__ << "Ignoring error, assume this a valid UID node." << std::endl;
+		//error is expected here for UIDs.. so just ignore
+		// this check is valuable if source node is a unique-Link node, rather than UID
+	}
 
 	//--------------------------------------
 	//handle daq
@@ -212,16 +286,35 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 	OUT << "fragment_receiver: {\n";
 
 	PUSHTAB;
-	{	//shared parameters
-		auto parametersLink = boardReaderNode.getNode("daqSharedParametersLink");
+	{
+		//plugin type and fragment data-type
+		OUT << "generator" <<
+				": " <<
+				boardReaderNode.getNode("daqGeneratorPluginType").getValue()<<
+				("\t #daq generator plug-in type") <<
+				"\n";
+		OUT << "fragment_type" <<
+				": " <<
+				boardReaderNode.getNode("daqGeneratorFragmentType").getValue() <<
+				("\t #generator data fragment type") <<
+				"\n\n";
+
+		//shared and unique parameters
+		auto parametersLink = boardReaderNode.getNode("daqParametersLink");
 		if(!parametersLink.isDisconnected())
 		{
 
 			auto parameters = parametersLink.getChildren();
 			for(auto &parameter:parameters)
 			{
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					PUSHCOMMENT;
+
+				//				__MOUT__ << parameter.second.getNode("daqParameterKey").getValue() <<
+				//						": " <<
+				//						parameter.second.getNode("daqParameterValue").getValue()
+				//						<<
+				//						"\n";
 
 				auto comment = parameter.second.getNode("CommentDescription");
 				OUT << parameter.second.getNode("daqParameterKey").getValue() <<
@@ -231,37 +324,37 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 						"\n";
 
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					POPCOMMENT;
 			}
 		}
-		OUT << "\n";	//end shared daq board reader parameters
+		OUT << "\n";	//end daq board reader parameters
 	}
-	{	//unique parameters
-		auto parametersLink = boardReaderNode.getNode("daqUniqueParametersLink");
-		if(!parametersLink.isDisconnected())
-		{
-
-			auto parameters = parametersLink.getChildren();
-			for(auto &parameter:parameters)
-			{
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
-					PUSHCOMMENT;
-
-				auto comment = parameter.second.getNode("CommentDescription");
-				OUT << parameter.second.getNode("daqParameterKey").getValue() <<
-						": " <<
-						parameter.second.getNode("daqParameterValue").getValue()
-						<<
-						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
-						"\n";
-
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
-					POPCOMMENT;
-			}
-		}
-		OUT << "\n";	//end shared daq board reader parameters
-	}
+//	{	//unique parameters
+//		auto parametersLink = boardReaderNode.getNode("daqUniqueParametersLink");
+//		if(!parametersLink.isDisconnected())
+//		{
+//
+//			auto parameters = parametersLink.getChildren();
+//			for(auto &parameter:parameters)
+//			{
+//				if(!parameter.second.getNode("Status").getValue<bool>())
+//					PUSHCOMMENT;
+//
+//				auto comment = parameter.second.getNode("CommentDescription");
+//				OUT << parameter.second.getNode("daqParameterKey").getValue() <<
+//						": " <<
+//						parameter.second.getNode("daqParameterValue").getValue()
+//						<<
+//						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
+//						"\n";
+//
+//				if(!parameter.second.getNode("Status").getValue<bool>())
+//					POPCOMMENT;
+//			}
+//		}
+//		OUT << "\n";	//end shared daq board reader parameters
+//	}
 
 	OUT << "destinations: {\n";
 
@@ -323,7 +416,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 				auto metricParameters = metricParametersGroup.getChildren();
 				for(auto &metricParameter:metricParameters)
 				{
-					if(!metricParameter.second.getNode("Enabled").getValue<bool>())
+					if(!metricParameter.second.getNode("Status").getValue<bool>())
 						PUSHCOMMENT;
 
 					OUT << metricParameter.second.getNode("metricParameterKey").getValue() <<
@@ -331,7 +424,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 							metricParameter.second.getNode("metricParameterValue").getValue()
 							<< "\n";
 
-					if(!metricParameter.second.getNode("Enabled").getValue<bool>())
+					if(!metricParameter.second.getNode("Status").getValue<bool>())
 						POPCOMMENT;
 
 				}

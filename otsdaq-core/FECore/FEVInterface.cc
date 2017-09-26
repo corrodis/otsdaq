@@ -265,3 +265,68 @@ void FEVInterface::registerFEMacroFunction(
 							requiredUserPermissions
 					)));
 }
+
+
+//========================================================================================================================
+//getInputArgumentString
+//	helper function for getting the value of an argument
+const std::string& FEVInterface::getFEMacroInputArgument(frontEndMacroInArgs_t& argsIn,
+		const std::string& argName)
+{
+
+	for(const std::pair<const std::string /* input arg name */ , const std::string /* arg input value */ >&
+			pair : argsIn)
+	{
+		if(pair.first == argName)
+			return pair.second;
+	}
+	__SS__ << "Requested input argument not found with name '" << argName << "'" << std::endl;
+	__MOUT_ERR__ << "\n" << ss.str();
+	throw std::runtime_error(ss.str());
+}
+
+//========================================================================================================================
+//getOutputArgumentString
+//	helper function for getting the value of an argument
+std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& argsOut,
+		const std::string& argName)
+{
+
+	for(std::pair<const std::string /* output arg name */ , std::string /* arg output value */ >&
+			pair : argsOut)
+	{
+		if(pair.first == argName)
+			return pair.second;
+	}
+	__SS__ << "Requested output argument not found with name '" << argName << "'" << std::endl;
+	__MOUT_ERR__ << "\n" << ss.str();
+	throw std::runtime_error(ss.str());
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -53,7 +53,7 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager* configManager)
 	//	output associated fcl config file
 	for(auto &aggContext: aggContexts)
 	{
-		auto aggConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+		ConfigurationTree aggConfigNode = contextConfig->getSupervisorConfigNode(configManager,
 				aggContext->contextUID_, aggContext->applications_[0].applicationUID_);
 
 		__MOUT__ << "Path for this aggregator config is " <<
@@ -239,6 +239,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 
 	__MOUT__ << "selfRank = " << selfRank << std::endl;
 
+
 	/////////////////////////
 	//generate xdaq run parameter file
 	std::fstream out;
@@ -251,6 +252,15 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 	{
 		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << std::endl;
 		throw std::runtime_error(ss.str());
+	}
+
+	//no primary link to configuration tree for aggregator node!
+	if(aggregatorNode.isDisconnected())
+	{
+		//create empty fcl
+		OUT << "{}\n\n";
+		out.close();
+		return;
 	}
 
 	//--------------------------------------
@@ -311,7 +321,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 			auto parameters = parametersLink.getChildren();
 			for(auto &parameter:parameters)
 			{
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					PUSHCOMMENT;
 
 				auto comment = parameter.second.getNode("CommentDescription");
@@ -322,7 +332,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 						"\n";
 
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					POPCOMMENT;
 			}
 		}
@@ -389,7 +399,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 					auto metricParameters = metricParametersGroup.getChildren();
 					for(auto &metricParameter:metricParameters)
 					{
-						if(!metricParameter.second.getNode("Enabled").getValue<bool>())
+						if(!metricParameter.second.getNode("Status").getValue<bool>())
 							PUSHCOMMENT;
 
 						auto comment = metricParameter.second.getNode("CommentDescription");
@@ -400,7 +410,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 								(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 								"\n";
 
-						if(!metricParameter.second.getNode("Enabled").getValue<bool>())
+						if(!metricParameter.second.getNode("Status").getValue<bool>())
 							POPCOMMENT;
 
 					}
@@ -485,7 +495,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 				auto pluginParameters = pluginParameterLink.getChildren();
 				for(auto &pluginParameter:pluginParameters)
 				{
-					if(!pluginParameter.second.getNode("Enabled").getValue<bool>())
+					if(!pluginParameter.second.getNode("Status").getValue<bool>())
 						PUSHCOMMENT;
 
 					auto comment = pluginParameter.second.getNode("CommentDescription");
@@ -496,7 +506,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 							(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 							"\n";
 
-					if(!pluginParameter.second.getNode("Enabled").getValue<bool>())
+					if(!pluginParameter.second.getNode("Status").getValue<bool>())
 						POPCOMMENT;
 				}
 			}
@@ -547,7 +557,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							PUSHCOMMENT;
 
 						auto comment = moduleParameter.second.getNode("CommentDescription");
@@ -558,7 +568,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 								(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 								"\n";
 
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							POPCOMMENT;
 					}
 				}
@@ -597,7 +607,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							PUSHCOMMENT;
 
 						auto comment = moduleParameter.second.getNode("CommentDescription");
@@ -608,7 +618,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 								(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 								"\n";
 
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							POPCOMMENT;
 					}
 				}
@@ -648,7 +658,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							PUSHCOMMENT;
 
 						auto comment = moduleParameter.second.getNode("CommentDescription");
@@ -659,7 +669,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 							(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 							"\n";
 
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							POPCOMMENT;
 					}
 				}
@@ -681,7 +691,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 			auto physicsParameters = otherParameterLink.getChildren();
 			for(auto &parameter:physicsParameters)
 			{
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					PUSHCOMMENT;
 
 				auto comment = parameter.second.getNode("CommentDescription");
@@ -692,7 +702,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 						"\n";
 
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					POPCOMMENT;
 			}
 		}

@@ -165,6 +165,7 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 	FILE *fp = fopen(fn.c_str(),"r");
 
 	__MOUT__ << "ACTIVE_GROUP_FILENAME = " << ACTIVE_GROUP_FILENAME << std::endl;
+	__MOUT__ << "ARTDAQ_DATABASE_URI = " << std::string(getenv("ARTDAQ_DATABASE_URI")) << std::endl;
 
 	if(!fp) return;
 
@@ -175,14 +176,47 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 
 	std::string groupName;
 	std::string errorStr = "";
+	bool skip;
+
+	__SS__;
 
 	for(int i=0;i<3;++i)
 	{
+		skip = false;
 		fgets(tmp,500,fp);
 		sscanf(tmp,"%s",strVal); //sscanf to remove '\n'
+		for(unsigned int j=0;j<strlen(strVal);++j)
+			if(!(
+					(strVal[j] >= 'a' && strVal[j] <= 'z') ||
+					(strVal[j] >= 'A' && strVal[j] <= 'Z') ||
+					(strVal[j] >= '0' && strVal[j] <= '9')))
+				{
+					strVal[j] = '\0';
+					__MOUT_INFO__ << "Illegal character found, so skipping!" << std::endl;
+
+					skip = true;
+					break;
+				}
+
+		if(skip) continue;
+
 		groupName = strVal;
 		fgets(tmp,500,fp);
 		sscanf(tmp,"%s",strVal);  //sscanf to remove '\n'
+
+		for(unsigned int j=0;j<strlen(strVal);++j)
+			if(!(
+					(strVal[j] >= '0' && strVal[j] <= '9')))
+				{
+					strVal[j] = '\0';
+					__MOUT_INFO__ << "Illegal character found, so skipping!" << std::endl;
+
+					skip = true;
+					break;
+				}
+
+		if(skip) continue;
+
 		try
 		{
 			//load and doActivate
@@ -190,19 +224,17 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 		}
 		catch(std::runtime_error &e)
 		{
-			__SS__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
+			ss << "Failed to load config group in ConfigurationManager::init() with name '" <<
 					groupName << "_v" << strVal << "'" << std::endl;
 			ss << e.what() << std::endl;
 
-			__MOUT_INFO__ << "\n" << ss.str();
 			errorStr += ss.str();
 		}
 		catch(...)
 		{
-			__SS__ << "Failed to load config group in ConfigurationManager::init() with name '" <<
+			ss << "Failed to load config group in ConfigurationManager::init() with name '" <<
 					groupName << "_v" << strVal << "'" << std::endl;
 
-			__MOUT_INFO__ << "\n" << ss.str();
 			errorStr += ss.str();
 		}
 	}
@@ -210,7 +242,10 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 	fclose(fp);
 
 	if(throwErrors && errorStr != "")
+	{
+		__MOUT_INFO__ << "\n" << ss.str();
 		throw std::runtime_error(errorStr);
+	}
 }
 
 //==============================================================================
@@ -232,13 +267,15 @@ void ConfigurationManager::destroyConfigurationGroup(const std::string& theGroup
 	}
 
 	std::string dbgHeader = onlyDeactivate?"Deactivating":"Destroying";
-	if(isContext)
-		__MOUT__ << dbgHeader << " Context group: " << theGroup << std::endl;
-	if(isBackbone)
-		__MOUT__ << dbgHeader << " Backbone group: " << theGroup << std::endl;
-	if(isConfiguration)
-		__MOUT__ << dbgHeader << " Configuration group: " << theGroup << std::endl;
-
+	if(theGroup != "")
+	{
+		if(isContext)
+			__MOUT__ << dbgHeader << " Context group: " << theGroup << std::endl;
+		if(isBackbone)
+			__MOUT__ << dbgHeader << " Backbone group: " << theGroup << std::endl;
+		if(isConfiguration)
+			__MOUT__ << dbgHeader << " Configuration group: " << theGroup << std::endl;
+	}
 
 	std::set<std::string>::const_iterator contextFindIt, backboneFindIt;
 	for(auto it = nameToConfigurationMap_.begin(); it != nameToConfigurationMap_.end(); /*no increment*/)
@@ -334,8 +371,6 @@ const std::string& ConfigurationManager::convertGroupTypeIdToName(int groupTypeI
 //		1 for backbone
 //		2 for configuration (others)
 int ConfigurationManager::getTypeOfGroup(
-		const std::string &configGroupName,
-		ConfigurationGroupKey configGroupKey,
 		const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap)
 {
 
@@ -351,9 +386,7 @@ int ConfigurationManager::getTypeOfGroup(
 		//__MOUT__ << "Member name: = "<< memberPair.first << std::endl;
 		inGroup = false; //check context
 		for(auto &contextMemberString:contextMemberNames_)
-			//if(!isContext) break;
-			//else
-				if(memberPair.first == contextMemberString)
+			if(memberPair.first == contextMemberString)
 			{
 				inGroup = true;
 				inContext = true;
@@ -365,8 +398,7 @@ int ConfigurationManager::getTypeOfGroup(
 			isContext = false;
 			if(inContext) //there was a member in context!
 			{
-				__SS__ << "This group is an incomplete match to contextMemberNames_: " +
-						configGroupName + "(" + configGroupKey.toString() + ")\n";
+				__SS__ << "This group is an incomplete match to a Context group.\n";
 				ss << "\nTo be a Context group, the members must exactly match" <<
 						"the following members:\n";
 				int i = 0;
@@ -379,9 +411,7 @@ int ConfigurationManager::getTypeOfGroup(
 
 		inGroup = false; //check backbone
 		for(auto &backboneMemberString:backboneMemberNames_)
-			//if(!isBackbone) break;
-			//else
-				if(memberPair.first == backboneMemberString)
+			if(memberPair.first == backboneMemberString)
 			{
 				inGroup = true;
 				inBackbone = true;
@@ -393,8 +423,7 @@ int ConfigurationManager::getTypeOfGroup(
 			isBackbone = false;
 			if(inBackbone) //there was a member in backbone!
 			{
-				__SS__ << "This group is an incomplete match to backboneMemberNames_: " +
-						configGroupName + "(" + configGroupKey.toString() + ")\n";
+				__SS__ << "This group is an incomplete match to a Backbone group.\n";
 				ss << "\nTo be a Backbone group, the members must exactly match" <<
 						"the following members:\n";
 				int i = 0;
@@ -409,8 +438,7 @@ int ConfigurationManager::getTypeOfGroup(
 
 	if(isContext && matchCount != contextMemberNames_.size())
 	{
-		__SS__ << "This group is an incomplete match to contextMemberNames_: " +
-				configGroupName + "(" + configGroupKey.toString() + ")" +
+		__SS__ << "This group is an incomplete match to a Context group: " <<
 				" Size=" << matchCount << " but should be " << contextMemberNames_.size() <<
 				std::endl;
 		ss << "\nThe members currently are...\n";
@@ -427,8 +455,7 @@ int ConfigurationManager::getTypeOfGroup(
 
 	if(isBackbone && matchCount != backboneMemberNames_.size())
 	{
-		__SS__ << "This group is an incomplete match to backboneMemberNames_: " +
-				configGroupName + "(" + configGroupKey.toString() + ")" +
+		__SS__ << "This group is an incomplete match to a Backbone group: " <<
 				" Size=" << matchCount << " but should be " << backboneMemberNames_.size() <<
 				std::endl;
 		ss << "\nThe members currently are...\n";
@@ -448,16 +475,14 @@ int ConfigurationManager::getTypeOfGroup(
 
 //==============================================================================
 //getTypeNameOfGroup
-//	return
+//	return string for
 //		0 for context
 //		1 for backbone
 //		2 for configuration (others)
 const std::string& ConfigurationManager::getTypeNameOfGroup(
-		const std::string &configGroupName,
-		ConfigurationGroupKey configGroupKey,
 		const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap)
 {
-	return convertGroupTypeIdToName(getTypeOfGroup(configGroupName, configGroupKey, memberMap));
+	return convertGroupTypeIdToName(getTypeOfGroup(memberMap));
 }
 //==============================================================================
 //loadMemberMap
@@ -525,9 +550,11 @@ void ConfigurationManager::dumpActiveConfiguration(
 		(*out) << "\n\n************************" << std::endl;
 		(*out) << "Active Tables:" << std::endl;
 		(*out) << "Active Tables count = " << activeTables.size() << std::endl;
+
+		unsigned int i = 0;
 		for(auto &table:activeTables)
 		{
-			(*out) << "\t" << table.first << "-v" <<
+			(*out) << "\t" << ++i << ". " << table.first << "-v" <<
 					table.second << std::endl;
 		}
 	};
@@ -550,16 +577,17 @@ void ConfigurationManager::dumpActiveConfiguration(
 									group.second.first,
 									group.second.second));
 
-			(*out) << "\tMember count = " << memberMap.size() << std::endl;
+			(*out) << "\tMember table count = " << memberMap.size() << std::endl;
 			tableCount += memberMap.size();
 
+			unsigned int i = 0;
 			for(auto &member:memberMap)
 			{
-				(*out) << "\t\t" << member.first << "-v" <<
+				(*out) << "\t\t" << ++i << ". " << member.first << "-v" <<
 						member.second << std::endl;
 			}
 		}
-		(*out) << "Active Group Members total count = " << tableCount << std::endl;
+		(*out) << "\nActive Group Members total table count = " << tableCount << std::endl;
 	};
 
 	auto localDumpActiveTableContents = [](const ConfigurationManager *cfgMgr, std::ostream *out) {
@@ -567,10 +595,14 @@ void ConfigurationManager::dumpActiveConfiguration(
 						cfgMgr->getActiveVersions();
 
 		(*out) << "\n\n************************" << std::endl;
-		(*out) << "Active Table Contents:" << std::endl;
+		(*out) << "Active Table Contents (table count = " << activeTables.size()
+				<< "):" << std::endl;
+		unsigned int i = 0;
 		for(auto &table:activeTables)
 		{
-			(*out) << "\t" << table.first << "-v" <<
+			(*out) << "\n\n==============================================================================" << std::endl;
+			(*out) << "==============================================================================" << std::endl;
+			(*out) << "\t" << ++i << ". " << table.first << "-v" <<
 					table.second << std::endl;
 
 			cfgMgr->nameToConfigurationMap_.find(table.first)->second->print(*out);
@@ -690,12 +722,14 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 		std::string 			*groupComment,
 		std::string 			*groupAuthor,
 		std::string	 			*groupCreateTime,
-		bool					doNotLoadMember)
+		bool					doNotLoadMember,
+		std::string				*groupTypeString)
 {
 	if(accumulatedTreeErrors) 	*accumulatedTreeErrors	= "";
 	if(groupComment) 			*groupComment 			= "";
 	if(groupAuthor) 			*groupAuthor 			= "";
 	if(groupCreateTime) 		*groupCreateTime 		= "";
+	if(groupTypeString)			*groupTypeString 				= "";
 
 	//	load all members of configuration group
 	//	if doActivate
@@ -725,8 +759,8 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	if(metaTablePair !=
 			memberMap.end())
 	{
-		__MOUT__ << "Found group meta data. v" <<
-				metaTablePair->second << std::endl;
+		//__MOUT__ << "Found group meta data. v" << metaTablePair->second << std::endl;
+
 		//clear table
 		while(groupMetadataTable_.getView().getNumberOfRows())
 			groupMetadataTable_.getViewP()->deleteRow(0);
@@ -751,16 +785,18 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 
 	if(progressBar) progressBar->step();
 
-	__MOUT__ << "memberMap loaded size = " << memberMap.size() << std::endl;
+	//__MOUT__ << "memberMap loaded size = " << memberMap.size() << std::endl;
 
 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
 
 	int groupType = -1;
+
+	//determine the type configuration group
+	groupType = getTypeOfGroup(memberMap);
+	if(groupTypeString) *groupTypeString = convertGroupTypeIdToName(groupType);
+
 	if(doActivate)
 	{
-		//determine the type configuration group
-		groupType = getTypeOfGroup(configGroupName,configGroupKey,memberMap);
-
 		std::string groupToDeactivate =
 				groupType==CONTEXT_TYPE?theContextGroup_:
 						(groupType==BACKBONE_TYPE?theBackboneGroup_:theConfigurationGroup_);
@@ -774,15 +810,13 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 //		else
 //		{
 //			//Getting here, is kind of strange:
-//			//	- this group may have only been partially loaded before
-//			//Solution: destroy en by targeting member map
-//
+//			//	- this group may have only been partially loaded before?
 //		}
 	}
 
 	if(progressBar) progressBar->step();
 
-	__MOUT__ << "Activating chosen group:" << std::endl;
+	//__MOUT__ << "Activating chosen group:" << std::endl;
 
 
 	loadMemberMap(memberMap);
@@ -880,7 +914,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	}
 
 	if(progressBar) progressBar->step();
-	__MOUT__ << "Load complete." << std::endl;
+	//__MOUT__ << "Load complete." << std::endl;
 	return memberMap;
 }
 
@@ -917,7 +951,8 @@ ConfigurationTree ConfigurationManager::getSupervisorConfigurationNode(
 }
 
 //==============================================================================
-ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString) const
+ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString,
+		bool doNotThrowOnBrokenUIDLinks) const
 {
 	//__MOUT__ << "nodeString=" << nodeString << " " << nodeString.length() << std::endl;
 
@@ -935,8 +970,9 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString) c
 	//__MOUT__ << "childPath=" << childPath << " " << childPath.length() << std::endl;
 
 	ConfigurationTree configTree(this, getConfigurationByName(nodeName));
+
 	if(childPath.length() > 1)
-		return configTree.getNode(childPath);
+		return configTree.getNode(childPath,doNotThrowOnBrokenUIDLinks);
 	else
 		return configTree;
 }
@@ -1118,6 +1154,9 @@ const ConfigurationBase* ConfigurationManager::getConfigurationByName(const std:
 				"\n\t StartOTS.sh --wiz" <<
 				"\n\n\n\n"
 				<< std::endl;
+		//prints out too often
+		//if(configurationName != ViewColumnInfo::DATATYPE_LINK_DEFAULT)
+		//	__MOUT_WARN__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 	return it->second;

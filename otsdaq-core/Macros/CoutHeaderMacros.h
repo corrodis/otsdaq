@@ -11,11 +11,11 @@
 #define __FILENAME__ 	(strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
 //#define __COUT_HDR__     __FILE__ << " : " << __PRETTY_FUNCTION__ << " [" << __LINE__ << "]\t"
-#define __COUT_HDR_FL__  __SHORTFILE__ << " [" << __LINE__ << "]\t"
+#define __COUT_HDR_FL__  __SHORTFILE__ << " [" << std::dec << __LINE__ << "]\t"
 #define __COUT_HDR_FP__  __SHORTFILE__ << " : " << __PRETTY_FUNCTION__ << "\t"
-#define __COUT_HDR_PL__  __PRETTY_FUNCTION__ << " [" << __LINE__ << "]\t"
+#define __COUT_HDR_PL__  __PRETTY_FUNCTION__ << " [" << std::dec << __LINE__ << "]\t"
 #define __COUT_HDR_F__   __SHORTFILE__ << "\t"
-#define __COUT_HDR_L__   __LINE__ << "\t"
+#define __COUT_HDR_L__   std::dec << __LINE__ << "\t"
 #define __COUT_HDR_P__   __PRETTY_FUNCTION__ << "\t"
 #define __COUT_HDR__     __COUT_HDR_PL__
 

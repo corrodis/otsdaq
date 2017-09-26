@@ -257,9 +257,23 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 			appChild.second.getNode(colApplication_.colStatus_	                     ).getValue(contexts_.back().applications_.back().status_);
 			appChild.second.getNode(colApplication_.colClass_	                     ).getValue(contexts_.back().applications_.back().class_);
 			appChild.second.getNode(colApplication_.colId_	   	                     ).getValue(contexts_.back().applications_.back().id_);
-			appChild.second.getNode(colApplication_.colInstance_                     ).getValue(contexts_.back().applications_.back().instance_);
-			appChild.second.getNode(colApplication_.colNetwork_	                     ).getValue(contexts_.back().applications_.back().network_);
-			appChild.second.getNode(colApplication_.colGroup_	                     ).getValue(contexts_.back().applications_.back().group_);
+
+			//convert defaults to values
+			if(appChild.second.getNode(colApplication_.colInstance_		).isDefaultValue())
+				contexts_.back().applications_.back().instance_ = 1;
+			else
+				appChild.second.getNode(colApplication_.colInstance_	    ).getValue(contexts_.back().applications_.back().instance_);
+
+			if(appChild.second.getNode(colApplication_.colNetwork_		).isDefaultValue())
+				contexts_.back().applications_.back().network_ = "local";
+			else
+				appChild.second.getNode(colApplication_.colNetwork_	       	).getValue(contexts_.back().applications_.back().network_);
+
+			if(appChild.second.getNode(colApplication_.colGroup_		).isDefaultValue())
+				contexts_.back().applications_.back().group_ = "daq";
+			else
+				appChild.second.getNode(colApplication_.colGroup_	  		).getValue(contexts_.back().applications_.back().group_);
+
 			appChild.second.getNode(colApplication_.colModule_	                     ).getValue(contexts_.back().applications_.back().module_);
 		}
 
@@ -270,7 +284,8 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 
 			if(contexts_.back().applications_.size() != 1)
 			{
-				__SS__ << "ARTDAQ Context must only have one Application!" <<
+				__SS__ << "ARTDAQ Context '" << contexts_.back().contextUID_ <<
+						"' must have one Application! " <<
 					contexts_.back().applications_.size() << " were found. " << std::endl;
 				throw std::runtime_error(ss.str());
 			}

@@ -224,7 +224,7 @@ void ConfigurationBase::trimTemporary(ConfigurationVersion targetVersion)
 //	Note: ignoreVersion is useful if you know another view is already identical
 //		like when converting from temporary to persistent
 //
-//	Return invalid of no matches
+//	Return invalid if no matches
 ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion needleVersion,
 		ConfigurationVersion ignoreVersion) const
 {
@@ -253,7 +253,7 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 		if(viewPair.second.getNumberOfRows() != rows)
 			continue; //row mismatch
 
-		if(viewPair.second.getSourceColumnSize() != cols ||
+		if(viewPair.second.getDataColumnSize() != cols ||
 				viewPair.second.getSourceColumnMismatch() != 0)
 			continue; //col mismatch
 
@@ -262,6 +262,7 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 
 		auto srcColNameIt = viewPair.second.getSourceColumnNames().begin();
 		for(unsigned int col=0; match &&
+			viewPair.second.getSourceColumnNames().size() > 3 &&
 			col<viewPair.second.getSourceColumnNames().size()-3;++col,srcColNameIt++)
 			if(*srcColNameIt !=
 					needleView->getColumnsInfo()[col].getName())

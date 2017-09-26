@@ -112,6 +112,14 @@ bool ConfigurationVersion::isScratchVersion() const
 }
 
 //==============================================================================
+//isMockupVersion
+//	the INVALID index represents the mockup version
+bool ConfigurationVersion::isMockupVersion() const
+{
+    return (version_ == ConfigurationVersion::INVALID);
+}
+
+//==============================================================================
 //getNextVersion
 //	returns next version given the most recent version
 //		if given nothing returns DEFAULT as first version

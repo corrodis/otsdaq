@@ -56,7 +56,7 @@ private:
         time_t		             requestLastTimeChecked;
         xoap::MessageReference   message;
     };
-    HttpXmlDocument processRequest          (std::string workLoopName, const xoap::MessageReference* message=0);
+    HttpXmlDocument   processRequest          (std::string workLoopName, const xoap::MessageReference* message=0);
     bool              removeWorkLoop          (toolbox::task::WorkLoop* workLoop);
     bool              removeWorkLoop          (RequestNumber requestNumber);
     bool              removeTimedOutRequests  (void);

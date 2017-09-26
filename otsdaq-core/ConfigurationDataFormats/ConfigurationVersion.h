@@ -25,6 +25,7 @@ public:
     unsigned int 			version					(void) const;
     bool					isTemporaryVersion		(void) const;
     bool					isScratchVersion		(void) const;
+    bool					isMockupVersion			(void) const;
     bool					isInvalid				(void) const;
     std::string				toString				(void) const;
 
@@ -43,6 +44,8 @@ public:
     {
     	if(version.isScratchVersion())
     		out << "ScratchVersion";
+    	else if(version.isMockupVersion())
+    		out << "Mock-up";
     	else if(version.isInvalid())
     		out << "InvalidVersion";
     	else

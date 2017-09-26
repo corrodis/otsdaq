@@ -49,11 +49,31 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 
 	const XDAQContextConfiguration *contextConfig = configManager_->__GET_CONFIG__(XDAQContextConfiguration);
 
-	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+//	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+//
+//	for(auto &child:childrenMap)
+//		if(child.second.getNode("Status").getValue<bool>())
+//			outputFHICL(child.second, contextConfig);
 
-	for(auto &child:childrenMap)
-		if(child.second.getNode("Status").getValue<bool>())
-			outputFHICL(child.second, contextConfig);
+	std::vector<const XDAQContextConfiguration::XDAQContext *> builderContexts =
+				contextConfig->getEventBuilderContexts();
+
+	//for each aggregator context
+	//	output associated fcl config file
+	for(auto &builderContext: builderContexts)
+	{
+		ConfigurationTree builderConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+				builderContext->contextUID_, builderContext->applications_[0].applicationUID_);
+
+		__MOUT__ << "Path for this aggregator config is " <<
+				builderContext->contextUID_ << "/" <<
+				builderContext->applications_[0].applicationUID_ << "/" <<
+				builderConfigNode.getValueAsString() <<
+				std::endl;
+
+		outputFHICL(builderConfigNode,
+				contextConfig);
+	}
 }
 
 //========================================================================================================================
@@ -214,6 +234,17 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 		throw std::runtime_error(ss.str());
 	}
 
+
+	//no primary link to configuration tree for reader node!
+	if(builderNode.isDisconnected())
+	{
+		//create empty fcl
+		OUT << "{}\n\n";
+		out.close();
+		return;
+	}
+
+
 	//--------------------------------------
 	//handle services
 	auto services = builderNode.getNode("servicesLink");
@@ -298,7 +329,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 			auto parameters = parametersLink.getChildren();
 			for(auto &parameter:parameters)
 			{
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << parameter.second.getNode("daqParameterKey").getValue() <<
@@ -306,7 +337,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 						parameter.second.getNode("daqParameterValue").getValue()
 						<< "\n";
 
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					POPCOMMENT;
 			}
 		}
@@ -374,7 +405,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 					auto metricParameters = metricParametersGroup.getChildren();
 					for(auto &metricParameter:metricParameters)
 					{
-						if(!metricParameter.second.getNode("Enabled").getValue<bool>())
+						if(!metricParameter.second.getNode("Status").getValue<bool>())
 							PUSHCOMMENT;
 
 						OUT << metricParameter.second.getNode("metricParameterKey").getValue() <<
@@ -382,7 +413,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 								metricParameter.second.getNode("metricParameterValue").getValue()
 								<< "\n";
 
-						if(!metricParameter.second.getNode("Enabled").getValue<bool>())
+						if(!metricParameter.second.getNode("Status").getValue<bool>())
 							POPCOMMENT;
 
 					}
@@ -428,7 +459,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 				auto pluginParameters = pluginParameterLink.getChildren();
 				for(auto &pluginParameter:pluginParameters)
 				{
-					if(!pluginParameter.second.getNode("Enabled").getValue<bool>())
+					if(!pluginParameter.second.getNode("Status").getValue<bool>())
 						PUSHCOMMENT;
 
 					OUT << pluginParameter.second.getNode("outputParameterKey").getValue() <<
@@ -436,7 +467,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 							pluginParameter.second.getNode("outputParameterValue").getValue()
 							<< "\n";
 
-					if(!pluginParameter.second.getNode("Enabled").getValue<bool>())
+					if(!pluginParameter.second.getNode("Status").getValue<bool>())
 						POPCOMMENT;
 				}
 			}
@@ -487,7 +518,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							PUSHCOMMENT;
 
 						OUT << moduleParameter.second.getNode("analyzerParameterKey").getValue() <<
@@ -495,7 +526,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 								moduleParameter.second.getNode("analyzerParameterValue").getValue()
 								<< "\n";
 
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							POPCOMMENT;
 					}
 				}
@@ -534,7 +565,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							PUSHCOMMENT;
 
 						OUT << moduleParameter.second.getNode("producerParameterKey").getValue() <<
@@ -542,7 +573,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 								moduleParameter.second.getNode("producerParameterValue").getValue()
 								<< "\n";
 
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							POPCOMMENT;
 					}
 				}
@@ -582,7 +613,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							PUSHCOMMENT;
 
 						OUT << moduleParameter.second.getNode("filterParameterKey").getValue()
@@ -590,7 +621,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 																												moduleParameter.second.getNode("filterParameterValue").getValue()
 																												<< "\n";
 
-						if(!moduleParameter.second.getNode("Enabled").getValue<bool>())
+						if(!moduleParameter.second.getNode("Status").getValue<bool>())
 							POPCOMMENT;
 					}
 				}
@@ -612,7 +643,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 			auto physicsParameters = otherParameterLink.getChildren();
 			for(auto &parameter:physicsParameters)
 			{
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << parameter.second.getNode("physicsParameterKey").getValue() <<
@@ -620,7 +651,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 						parameter.second.getNode("physicsParameterValue").getValue()
 						<< "\n";
 
-				if(!parameter.second.getNode("Enabled").getValue<bool>())
+				if(!parameter.second.getNode("Status").getValue<bool>())
 					POPCOMMENT;
 			}
 		}

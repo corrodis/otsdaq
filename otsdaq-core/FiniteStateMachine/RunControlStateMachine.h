@@ -67,10 +67,13 @@ public:
     //Run Control Messages
     xoap::MessageReference runControlMessageHandler(xoap::MessageReference message) throw (xoap::exception::Exception);
 
+    static const std::string FAILED_STATE_NAME;
+
 protected:
-    FiniteStateMachine theStateMachine_;
+	FiniteStateMachine theStateMachine_;
     ProgressBar		   theProgressBar_;
     std::string        stateMachineName_;
+
 };
 
 }

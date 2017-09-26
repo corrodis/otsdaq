@@ -301,7 +301,21 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 
 	std::string fn = ConfigurationManager::ACTIVE_GROUP_FILENAME;
 	FILE *fp = fopen(fn.c_str(),"w");
-	if(!fp) return;
+	if(!fp)
+	{
+		__SS__ << "Fatal Error! Unable to open the file " <<
+				ConfigurationManager::ACTIVE_GROUP_FILENAME << " for editing! Is there a permissions problem?" << std::endl;
+		__MOUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+		return;
+	}
+
+	__MOUT__ << theContextGroup_ << "(" <<
+			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__MOUT__ << theBackboneGroup_ << "(" <<
+			(theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__MOUT__ << theConfigurationGroup_ << "(" <<
+			(theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1") << ")" << std::endl;
 
 	fprintf(fp,"%s\n",theContextGroup_.c_str());
 	fprintf(fp,"%s\n",theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1");
@@ -357,8 +371,9 @@ ConfigurationBase* ConfigurationManagerRW::getConfigurationByName(const std::str
 {
 	if(nameToConfigurationMap_.find(configurationName) == nameToConfigurationMap_.end())
 	{
-		__MOUT_ERR__ << "\nConfiguration not found with name: " << configurationName << std::endl;
-		throw std::runtime_error("Configuration not found with name '" + configurationName + ".'");
+		__SS__ << "\nConfiguration not found with name: " << configurationName << std::endl;
+		__MOUT_ERR__ << "\n" << ss.str();
+		throw std::runtime_error(ss.str());
 	}
 	return nameToConfigurationMap_[configurationName];
 }
@@ -560,24 +575,24 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 	ConfigurationGroupKey key;
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> compareToMemberMap;
 	bool isDifferent;
-	for(auto &fullName: groupNames)
+	for(const std::string& fullName: groupNames)
 	{
 		ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
 
-		__MOUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
+		//__MOUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
 		if( name != groupName) continue;
 
-		__MOUT__ << name << " == " << groupName << std::endl;
+		//__MOUT__ << name << " == " << groupName << std::endl;
 		compareToMemberMap = theInterface_->getConfigurationGroupMembers(fullName);
 
 		isDifferent = false;
 		for(auto &memberPair: groupMemberMap)
 		{
-			__MOUT__ << memberPair.first << " - " << memberPair.second << std::endl;
+			//__MOUT__ << memberPair.first << " - " << memberPair.second << std::endl;
 			if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||	//name is missing
 					memberPair.second != compareToMemberMap[memberPair.first]) //or version mismatch
 			{	//then different
-				__MOUT__ << "mismatch found!" << std::endl;
+				//__MOUT__ << "mismatch found!" << std::endl;
 				isDifferent = true;
 				break;
 			}
@@ -591,7 +606,7 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 		//else found an exact match!
 		return key;
 	}
-	__MOUT__ << "no match found!" << std::endl;
+	__MOUT__ << "No match found - this group is new!" << std::endl;
 	//if here, then no match found
 	return ConfigurationGroupKey(); //return invalid key
 }
@@ -614,7 +629,6 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 	//	verify groupNameWithKey
 	//	verify store
 
-	__MOUT__ << std::endl;
 	//determine new group key
 	ConfigurationGroupKey newKey;
 	if(!previousVersion.isInvalid())	//if previous provided, bump that

@@ -225,7 +225,28 @@ throw (xgi::exception::Exception)
 		makeSystemLogbookEntry("ots started.");
 
 	*out <<
-			"<!DOCTYPE HTML><html lang='en'><head><title>ots</title></head>" <<
+			"<!DOCTYPE HTML><html lang='en'><head><title>ots</title>" <<
+			//show ots icon
+			//	from http://www.favicon-generator.org/
+			"<link rel='apple-touch-icon' sizes='57x57' href='/WebPath/images/otsdaqIcons/apple-icon-57x57.png'>\
+        <link rel='apple-touch-icon' sizes='60x60' href='/WebPath/images/otsdaqIcons/apple-icon-60x60.png'>\
+        <link rel='apple-touch-icon' sizes='72x72' href='/WebPath/images/otsdaqIcons/apple-icon-72x72.png'>\
+        <link rel='apple-touch-icon' sizes='76x76' href='/WebPath/images/otsdaqIcons/apple-icon-76x76.png'>\
+        <link rel='apple-touch-icon' sizes='114x114' href='/WebPath/images/otsdaqIcons/apple-icon-114x114.png'>\
+        <link rel='apple-touch-icon' sizes='120x120' href='/WebPath/images/otsdaqIcons/apple-icon-120x120.png'>\
+        <link rel='apple-touch-icon' sizes='144x144' href='/WebPath/images/otsdaqIcons/apple-icon-144x144.png'>\
+        <link rel='apple-touch-icon' sizes='152x152' href='/WebPath/images/otsdaqIcons/apple-icon-152x152.png'>\
+        <link rel='apple-touch-icon' sizes='180x180' href='/WebPath/images/otsdaqIcons/apple-icon-180x180.png'>\
+        <link rel='icon' type='image/png' sizes='192x192'  href='/WebPath/images/otsdaqIcons/android-icon-192x192.png'>\
+        <link rel='icon' type='image/png' sizes='32x32' href='/WebPath/images/otsdaqIcons/favicon-32x32.png'>\
+        <link rel='icon' type='image/png' sizes='96x96' href='/WebPath/images/otsdaqIcons/favicon-96x96.png'>\
+        <link rel='icon' type='image/png' sizes='16x16' href='/WebPath/images/otsdaqIcons/favicon-16x16.png'>\
+        <link rel='manifest' href='/WebPath/images/otsdaqIcons/manifest.json'>\
+        <meta name='msapplication-TileColor' content='#ffffff'>\
+        <meta name='msapplication-TileImage' content='/ms-icon-144x144.png'>\
+        <meta name='theme-color' content='#ffffff'>" <<
+			//end show ots icon
+			"</head>" <<
 			"<frameset col='100%' row='100%'>" <<
 			"<frame src='/WebPath/html/Supervisor.html?urn=" <<
 			this->getApplicationDescriptor()->getLocalId() << "=securityType=" <<
@@ -772,7 +793,7 @@ throw (toolbox::fsm::exception::Exception)
 			theStateMachine_.getStateName(failedEvent.getFromState()) <<
 			" to " << failedEvent.getToState() << "-" <<
 			theStateMachine_.getStateName(failedEvent.getToState()) <<
-			".\n\nException:\n" << failedEvent.getException().what();
+			".\n\nException:\n" << failedEvent.getException().what() << std::endl;
 	__MOUT_ERR__ << "\n" << ss.str();
 
 	theStateMachine_.setErrorMessage(ss.str());
@@ -987,6 +1008,7 @@ throw (toolbox::fsm::exception::Exception)
 					theConfigurationManager_->dumpActiveConfiguration(
 							fsmLinkNode.getNode(activeStateMachineName_ +
 									"/ConfigurationDumpOnConfigureFilePath").getValue<std::string>() +
+							"/" +
 							fsmLinkNode.getNode(activeStateMachineName_ +
 									"/ConfigurationDumpOnConfigureFileRadix").getValue<std::string>() +
 							"_" +
@@ -1120,13 +1142,16 @@ throw (toolbox::fsm::exception::Exception)
 					theConfigurationManager_->dumpActiveConfiguration(
 							fsmLinkNode.getNode(activeStateMachineName_ +
 									"/ConfigurationDumpOnRunFilePath").getValue<std::string>() +
-									fsmLinkNode.getNode(activeStateMachineName_ +
-											"/ConfigurationDumpOnRunFileRadix").getValue<std::string>() +
-											"_Run" +
-											runNumber +
-											".dump",
-											fsmLinkNode.getNode(activeStateMachineName_ +
-													"/ConfigurationDumpOnRunFormat").getValue<std::string>()
+							"/" +
+							fsmLinkNode.getNode(activeStateMachineName_ +
+									"/ConfigurationDumpOnRunFileRadix").getValue<std::string>() +
+							"_Run" +
+							runNumber +
+							"_" +
+							std::to_string(time(0)) +
+							".dump",
+							fsmLinkNode.getNode(activeStateMachineName_ +
+									"/ConfigurationDumpOnRunFormat").getValue<std::string>()
 					);
 				}
 				else
@@ -1178,9 +1203,13 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 bool Supervisor::broadcastMessage(xoap::MessageReference message)
+throw (toolbox::fsm::exception::Exception)
 {
 	std::string command = SOAPUtilities::translate(message).getCommand();
 	bool proceed = true;
+	std::string reply;
+
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	// Send a SOAP message to FESupervisor
 	for(auto& it: theSupervisorDescriptorInfo_.getFEDescriptors())
 	{
@@ -1190,22 +1219,47 @@ bool Supervisor::broadcastMessage(xoap::MessageReference message)
 		__MOUT__ << "Sending message to FESupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
 		__MOUT__ << "Sending message to FESupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
 		__MOUT__ << "Sending message to FESupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-		std::string reply = send(it.second, message);
+
+		try
+		{
+			reply = send(it.second, message);
+		}
+		catch(const xdaq::exception::Exception &e) //due to xoap send failure
+		{
+			//do not kill whole system if xdaq xoap failure
+			__SS__ << "Can NOT " << command << " FESupervisors, instance = " << it.first << ".\n\n" <<
+					"Xoap failure. Did the target Supervisor crash? Try restarting re-initializing or restarting otsdaq." << std::endl;
+			__MOUT_ERR__ << ss.str();
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+			proceed = false;
+		}
+
 		if (reply != command + "Done")
 		{
 			//diagService_->reportError("FESupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-			std::stringstream error;
-			error << "Can't " << command << " FESupervisor, instance = " << it.first;
-			XCEPT_RAISE(xdaq::exception::Exception, error.str());
-			__MOUT__ << error.str() << std::endl;
+
+			__SS__ << "Can NOT " << command << " FESupervisor, instance = " << it.first << ".\n\n" <<
+					reply;
+			__MOUT_ERR__ << ss.str() << std::endl;
+
+			__MOUT__ << "Getting error message..." << std::endl;
+			xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+			SOAPParameters parameters;
+			parameters.addParameter("ErrorMessage");
+			SOAPMessenger::receive(errorMessage, parameters);
+			__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+			ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
 			//}
-		} else
+		}
+		else
 		{
 			__MOUT__ << "FESupervisor supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 		}
 	}
 
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	for(auto& it: theSupervisorDescriptorInfo_.getDataManagerDescriptors())
 	{
 		RunControlStateMachine::theProgressBar_.step();
@@ -1214,21 +1268,43 @@ bool Supervisor::broadcastMessage(xoap::MessageReference message)
 		__MOUT__ << "Sending message to DataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
 		__MOUT__ << "Sending message to DataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
 		__MOUT__ << "Sending message to DataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-		std::string reply = send(it.second, message);
+
+		try
+		{
+			reply = send(it.second, message);
+		}
+		catch(const xdaq::exception::Exception &e) //due to xoap send failure
+		{
+			//do not kill whole system if xdaq xoap failure
+			__SS__ << "Can NOT " << command << " DataManagerSupervisors, instance = " << it.first << ".\n\n" <<
+					"Xoap failure. Did the target Supervisor crash? Try restarting re-initializing or restarting otsdaq." << std::endl;
+			__MOUT_ERR__ << ss.str();
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+			proceed = false;
+		}
+
 		if (reply != command + "Done")
 		{
-			//diagService_->reportError("DataManagerSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-			std::stringstream error;
-			error << "Can't " << command << " DataManagerSupervisor, instance = " << it.first;
-			XCEPT_RAISE(xdaq::exception::Exception, error.str());
-			__MOUT__ << error.str() << std::endl;
+			__SS__ << "Can NOT " << command << " DataManagerSupervisor, instance = " << it.first << ".\n\n" <<
+					reply;
+			__MOUT_ERR__ << ss.str() << std::endl;
+			__MOUT__ << "Getting error message..." << std::endl;
+			xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+			SOAPParameters parameters;
+			parameters.addParameter("ErrorMessage");
+			SOAPMessenger::receive(errorMessage, parameters);
+			__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+			ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
-		} else
+		}
+		else
 		{
 			__MOUT__ << "DataManagerSupervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 		}
 	}
 
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	for (auto& it: theSupervisorDescriptorInfo_.getFEDataManagerDescriptors())
 	{
 		RunControlStateMachine::theProgressBar_.step();
@@ -1237,21 +1313,43 @@ bool Supervisor::broadcastMessage(xoap::MessageReference message)
 		__MOUT__ << "Sending message to FEDataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
 		__MOUT__ << "Sending message to FEDataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
 		__MOUT__ << "Sending message to FEDataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-		std::string reply = send(it.second, message);
+
+		try
+		{
+			reply = send(it.second, message);
+		}
+		catch(const xdaq::exception::Exception &e) //due to xoap send failure
+		{
+			//do not kill whole system if xdaq xoap failure
+			__SS__ << "Can NOT " << command << " FEDataManagerSupervisors, instance = " << it.first << ".\n\n" <<
+					"Xoap failure. Did the target Supervisor crash? Try restarting re-initializing or restarting otsdaq." << std::endl;
+			__MOUT_ERR__ << ss.str();
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+			proceed = false;
+		}
+
 		if (reply != command + "Done")
 		{
-			//diagService_->reportError("FEDataManagerSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-			std::stringstream error;
-			error << "Can't " << command << " FEDataManagerSupervisor, instance = " << it.first;
-			XCEPT_RAISE(xdaq::exception::Exception, error.str());
-			__MOUT__ << error.str() << std::endl;
+			__SS__ << "Can NOT " << command << " FEDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
+					reply;
+			__MOUT_ERR__ << ss.str() << std::endl;
+			__MOUT__ << "Getting error message..." << std::endl;
+			xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+			SOAPParameters parameters;
+			parameters.addParameter("ErrorMessage");
+			SOAPMessenger::receive(errorMessage, parameters);
+			__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+			ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
-		} else
+		}
+		else
 		{
 			__MOUT__ << "FEDataManagerSupervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 		}
 	}
 
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	for(auto& it: theSupervisorDescriptorInfo_.getVisualDescriptors())
 	{
 		RunControlStateMachine::theProgressBar_.step();
@@ -1260,22 +1358,47 @@ bool Supervisor::broadcastMessage(xoap::MessageReference message)
 		__MOUT__ << "Sending message to VisualSupervisor: " << it.second->getLocalId() << " : " << command << std::endl;
 		__MOUT__ << "Sending message to VisualSupervisor: " << it.second->getLocalId() << " : " << command << std::endl;
 		__MOUT__ << "Sending message to VisualSupervisor: " << it.second->getLocalId() << " : " << command << std::endl;
-		std::string reply = send(it.second, message);
+
+
+		try
+		{
+			reply = send(it.second, message);
+		}
+		catch(const xdaq::exception::Exception &e) //due to xoap send failure
+		{
+			//do not kill whole system if xdaq xoap failure
+			__SS__ << "Can NOT " << command << " VisualSupervisor, instance = " << it.first << ".\n\n" <<
+					"Xoap failure. Did the target Supervisor crash? Try restarting re-initializing or restarting otsdaq." << std::endl;
+			__MOUT_ERR__ << ss.str();
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+			proceed = false;
+		}
+
+
 		if (reply != command + "Done")
 		{
-			//diagService_->reportError("ARTAQAggregatorSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-			std::stringstream error;
-			error << "Can't " << command
-					<< " VisualSupervisor, instance = " << it.first;
-			XCEPT_RAISE(xdaq::exception::Exception, error.str());
-			__MOUT__ << error.str() << std::endl;
+			__SS__ << "Can NOT " << command << " VisualSupervisor, instance = " << it.first << ".\n\n" <<
+					reply;
+			__MOUT_ERR__ << ss.str() << std::endl;
+			__MOUT__ << "Getting error message..." << std::endl;
+			xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+			SOAPParameters parameters;
+			parameters.addParameter("ErrorMessage");
+			SOAPMessenger::receive(errorMessage, parameters);
+			__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+			ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			proceed = false;
-		} else
+		}
+		else
 		{
 			__MOUT__ << "VisualSupervisor supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 		}
 	}
 
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 	bool artdaqRestarted = false;
 	bool artdaqWasRestarted = false;
@@ -1323,10 +1446,11 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 		for(int i=0;i<ARTDAQ_RESTART_DELAY;++i)
 		{
 			sleep(1);
-			__MOUT__ << "Waiting on artdaq reboot... " << i << " for " << artdaqRestartCount << "x" << std::endl;
+			__MOUT_INFO__ << "Waiting on artdaq reboot... " << i << " for " << artdaqRestartCount << "x" << std::endl;
 		}
 	}
 
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	for(auto& it: theSupervisorDescriptorInfo_.getARTDAQFEDataManagerDescriptors())
 	{
 		RunControlStateMachine::theProgressBar_.step();
@@ -1338,22 +1462,45 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 
 		try
 		{
-			std::string reply = send(it.second, message);
+			reply = send(it.second, message);
 			if (reply != command + "Done")
 			{
-				//diagService_->reportError("FERSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-				std::stringstream error;
-				error << "Can't " << command << " ARTDAQFEDataManagerSupervisor, instance = " << it.first;
-				XCEPT_RAISE(xdaq::exception::Exception, error.str());
-				__MOUT__ << error.str() << std::endl;
+				__SS__ << "Can NOT " << command << " ARTDAQFEDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
+						reply;
+				__MOUT_ERR__ << ss.str() << std::endl;
+				__MOUT__ << "Getting error message..." << std::endl;
+				xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+				SOAPParameters parameters;
+				parameters.addParameter("ErrorMessage");
+				SOAPMessenger::receive(errorMessage, parameters);
+				__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+				ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
+				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
 			else
 			{
-				__MOUT__ << "ARTDAQFEDataManagerSupervisor supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
+				__MOUT__ << "ARTDAQFEDataManagerSupervisors supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 			}
 		}
-		catch(xdaq::exception::Exception &e)
+		catch(const xdaq::exception::Exception &e) //due to xoap send failure
+		{
+			if(artdaqRestarted && !artdaqWasRestarted)
+			{
+				artdaqWasRestarted = true;
+				goto ARTDAQ_RETRY;
+			}
+			else
+			{
+				//do not kill whole system if xdaq xoap failure
+				__SS__ << "Can NOT " << command << " ARTDAQFEDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
+						"Xoap failure. Did the target Supervisor crash? Try restarting re-initializing or restarting otsdaq." << std::endl;
+				__MOUT_ERR__ << ss.str();
+				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+				proceed = false;
+			}
+		}
+		catch(const toolbox::fsm::exception::Exception &e) //due to state machine failure
 		{
 			if(artdaqRestarted && !artdaqWasRestarted)
 			{
@@ -1365,69 +1512,63 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 		}
 	}
 
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
+	// Whe artdaq FEs exist
 	//	for(auto& it: theSupervisorDescriptorInfo_.getARTDAQFEDescriptors())
 	//	{
-	//		RunControlStateMachine::theProgressBar_.step();
-	//		__MOUT__ << "Sending message to ARTDAQFESupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-	//		__MOUT__ << "Sending message to ARTDAQFESupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-	//		__MOUT__ << "Sending message to ARTDAQFESupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-	//		__MOUT__ << "Sending message to ARTDAQFESupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-	//		__MOUT__ << "Sending message to ARTDAQFESupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-	//		try
-	//		{
-	//			std::string reply = send(it.second, message);
-	//			if (reply != command + "Done")
-	//			{
-	//				//diagService_->reportError("FERSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-	//				std::stringstream error;
-	//				error << "Can't " << command << " ARTDAQFESupervisors, instance = " << it.first;
-	//				XCEPT_RAISE(xdaq::exception::Exception, error.str());
-	//				__MOUT__ << error.str() << std::endl;
-	//				proceed = false;
-	//			}
-	//			else
-	//			{
-	//				__MOUT__ << "ARTDAQFESupervisors supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
-	//			}
-	//		}
-	//		catch(xdaq::exception::Exception &e)
-	//		{
-	//			if(artdaqRestarted && !artdaqWasRestarted)
-	//			{
-	//				artdaqWasRestarted = true;
-	//				goto ARTDAQ_RETRY;
-	//			}
-	//			else
-	//				throw;
-	//		}
-	//	}
+		// ...
+		//}
 
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	for(auto& it: theSupervisorDescriptorInfo_.getARTDAQDataManagerDescriptors())
 	{
 		RunControlStateMachine::theProgressBar_.step();
-		__MOUT__ << "Sending message to ARTDAQDataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-		__MOUT__ << "Sending message to ARTDAQDataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-		__MOUT__ << "Sending message to ARTDAQDataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-		__MOUT__ << "Sending message to ARTDAQDataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
-		__MOUT__ << "Sending message to ARTDAQDataManagerSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
+		__MOUT__ << "Sending message to ARTDAQDataManagerSupervisor: " << it.second->getLocalId() << " : " << command << std::endl;
+		__MOUT__ << "Sending message to ARTDAQDataManagerSupervisor: " << it.second->getLocalId() << " : " << command << std::endl;
+		__MOUT__ << "Sending message to ARTDAQDataManagerSupervisor: " << it.second->getLocalId() << " : " << command << std::endl;
+		__MOUT__ << "Sending message to ARTDAQDataManagerSupervisor: " << it.second->getLocalId() << " : " << command << std::endl;
+		__MOUT__ << "Sending message to ARTDAQDataManagerSupervisor: " << it.second->getLocalId() << " : " << command << std::endl;
 		try
 		{
-			std::string reply = send(it.second, message);
+			reply = send(it.second, message);
 			if (reply != command + "Done")
 			{
-				//diagService_->reportError("FERSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-				std::stringstream error;
-				error << "Can't " << command << " ARTDAQDataManagerSupervisors, instance = " << it.first;
-				XCEPT_RAISE(xdaq::exception::Exception, error.str());
-				__MOUT__ << error.str() << std::endl;
+				__SS__ << "Can NOT " << command << " ARTDAQDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
+						reply;
+				__MOUT_ERR__ << ss.str() << std::endl;
+				__MOUT__ << "Getting error message..." << std::endl;
+				xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+				SOAPParameters parameters;
+				parameters.addParameter("ErrorMessage");
+				SOAPMessenger::receive(errorMessage, parameters);
+				__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+				ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
+				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
 			else
 			{
-				__MOUT__ << "ARTDAQDataManagerSupervisors supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
+				__MOUT__ << "ARTDAQDataManagerSupervisor supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 			}
 		}
-		catch(xdaq::exception::Exception &e)
+		catch(const xdaq::exception::Exception &e) //due to xoap send failure
+		{
+			if(artdaqRestarted && !artdaqWasRestarted)
+			{
+				artdaqWasRestarted = true;
+				goto ARTDAQ_RETRY;
+			}
+			else
+			{
+				//do not kill whole system if xdaq xoap failure
+				__SS__ << "Can NOT " << command << " ARTDAQDataManagerSupervisor, instance = " << it.first << ".\n\n" <<
+						"Xoap failure. Did the target Supervisor crash? Try restarting re-initializing or restarting otsdaq." << std::endl;
+				__MOUT_ERR__ << ss.str();
+				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+				proceed = false;
+			}
+		}
+		catch(const toolbox::fsm::exception::Exception &e) //due to state machine failure
 		{
 			if(artdaqRestarted && !artdaqWasRestarted)
 			{
@@ -1438,6 +1579,8 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 				throw;
 		}
 	}
+
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	for(auto& it: theSupervisorDescriptorInfo_.getARTDAQBuilderDescriptors())
 	{
 		RunControlStateMachine::theProgressBar_.step();
@@ -1449,14 +1592,20 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 
 		try
 		{
-			std::string reply = send(it.second, message);
+			reply = send(it.second, message);
 			if (reply != command + "Done")
 			{
-				//diagService_->reportError("FERSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-				std::stringstream error;
-				error << "Can't " << command << " ARTDAQBuilderSupervisor, instance = " << it.first;
-				XCEPT_RAISE(xdaq::exception::Exception, error.str());
-				__MOUT__ << error.str() << std::endl;
+				__SS__ << "Can NOT " << command << " ARTDAQBuilderSupervisor, instance = " << it.first << ".\n\n" <<
+						reply;
+				__MOUT_ERR__ << ss.str() << std::endl;
+				__MOUT__ << "Getting error message..." << std::endl;
+				xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+				SOAPParameters parameters;
+				parameters.addParameter("ErrorMessage");
+				SOAPMessenger::receive(errorMessage, parameters);
+				__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+				ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
+				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
 			else
@@ -1464,7 +1613,24 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 				__MOUT__ << "ARTDAQBuilderSupervisor supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 			}
 		}
-		catch(xdaq::exception::Exception &e)
+		catch(const xdaq::exception::Exception &e) //due to xoap send failure
+		{
+			if(artdaqRestarted && !artdaqWasRestarted)
+			{
+				artdaqWasRestarted = true;
+				goto ARTDAQ_RETRY;
+			}
+			else
+			{
+				//do not kill whole system if xdaq xoap failure
+				__SS__ << "Can NOT " << command << " ARTDAQBuilderSupervisor, instance = " << it.first << ".\n\n" <<
+						"Xoap failure. Did the target Supervisor crash? Try restarting re-initializing or restarting otsdaq." << std::endl;
+				__MOUT_ERR__ << ss.str();
+				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+				proceed = false;
+			}
+		}
+		catch(const toolbox::fsm::exception::Exception &e) //due to state machine failure
 		{
 			if(artdaqRestarted && !artdaqWasRestarted)
 			{
@@ -1476,6 +1642,7 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 		}
 	}
 
+	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	for(auto& it: theSupervisorDescriptorInfo_.getARTDAQAggregatorDescriptors())
 	{
 		RunControlStateMachine::theProgressBar_.step();
@@ -1487,14 +1654,20 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 
 		try
 		{
-			std::string reply = send(it.second, message);
+			reply = send(it.second, message);
 			if (reply != command + "Done")
 			{
-				//diagService_->reportError("FERSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
-				std::stringstream error;
-				error << "Can't " << command << " ARTDAQAggregatorSupervisor, instance = " << it.first;
-				XCEPT_RAISE(xdaq::exception::Exception, error.str());
-				__MOUT__ << error.str() << std::endl;
+				__SS__ << "Can NOT " << command << " ARTDAQAggregatorSupervisor, instance = " << it.first << ".\n\n" <<
+						reply;
+				__MOUT_ERR__ << ss.str() << std::endl;
+				__MOUT__ << "Getting error message..." << std::endl;
+				xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+				SOAPParameters parameters;
+				parameters.addParameter("ErrorMessage");
+				SOAPMessenger::receive(errorMessage, parameters);
+				__MOUT_ERR__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+				ss << "\n\nError Message: " << parameters.getValue("ErrorMessage") << std::endl;
+				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				proceed = false;
 			}
 			else
@@ -1502,7 +1675,24 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 				__MOUT__ << "ARTDAQAggregatorSupervisor supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
 			}
 		}
-		catch(xdaq::exception::Exception &e)
+		catch(const xdaq::exception::Exception &e) //due to xoap send failure
+		{
+			if(artdaqRestarted && !artdaqWasRestarted)
+			{
+				artdaqWasRestarted = true;
+				goto ARTDAQ_RETRY;
+			}
+			else
+			{
+				//do not kill whole system if xdaq xoap failure
+				__SS__ << "Can NOT " << command << " ARTDAQAggregatorSupervisor, instance = " << it.first << ".\n\n" <<
+						"Xoap failure. Did the target Supervisor crash? Try restarting re-initializing or restarting otsdaq." << std::endl;
+				__MOUT_ERR__ << ss.str();
+				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+				proceed = false;
+			}
+		}
+		catch(const toolbox::fsm::exception::Exception &e) //due to state machine failure
 		{
 			if(artdaqRestarted && !artdaqWasRestarted)
 			{
@@ -1517,32 +1707,6 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 	return proceed;
 }
 
-//========================================================================================================================
-/*
- xoap::MessageReference Supervisor::runControlMessageHandler(xoap::MessageReference message) throw (xoap::exception::Exception)
-
-{
- __MOUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
- //__MOUT__ << SOAPUtilities::translate(message).getParameters().getValue("ConfigurationAlias") << std::endl;
- std::string command = SOAPUtilities::translate(message).getCommand();
- std::string result = command + "Done";
- try
-
-{
- theStateMachine_.execTransition(command,message);
- }
- catch (toolbox::fsm::exception::Exception& e)
-
-{
- result = command + "Failed";
- __MOUT__ << e.what() << std::endl;
- }
-
- __MOUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
- //diagService_->reportError("Entered SOAP message callback method Supervisor::Initialize", DIAGINFO);
- return SOAPUtilities::makeSOAPMessageReference(result);
- }
- */
 //========================================================================================================================
 void Supervisor::wait(int milliseconds, std::string who) const
 {
@@ -2012,6 +2176,23 @@ throw (xgi::exception::Exception)
 				xmldoc.addTextElementToData("config_key",
 						ConfigurationGroupKey::getFullGroupString(aliasMapPair.second.first,
 								aliasMapPair.second.second).c_str());
+
+				std::string groupComment, groupAuthor, groupCreationTime;
+				try
+				{
+					theConfigurationManager_->loadConfigurationGroup(
+							aliasMapPair.second.first,aliasMapPair.second.second,
+							false,0,0,
+							&groupComment, &groupAuthor, &groupCreationTime, false /*false to not load member map*/);
+
+					xmldoc.addTextElementToData("config_comment", groupComment);
+					xmldoc.addTextElementToData("config_author", groupAuthor);
+					xmldoc.addTextElementToData("config_create_time", groupCreationTime);
+				}
+				catch(...)
+				{
+					__MOUT_WARN__ << "Failed to load group metadata." << std::endl;
+				}
 			}
 		}
 
