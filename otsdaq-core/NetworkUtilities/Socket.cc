@@ -133,9 +133,9 @@ void Socket::initialize(void)
     if(!socketInitialized)
     {
     	std::stringstream ss;
-		ss << __COUT_HDR_FL__ << __LINE__ << "FATAL: Socket could not initialize socket." << std::endl;
+		ss << __COUT_HDR_FL__ << "FATAL: Socket could not initialize socket. Perhaps it is already in use?" << std::endl;
 		std::cout << ss.str();
-		//throw std::runtime_error(ss.str());
+		throw std::runtime_error(ss.str());
     }
 }
 
