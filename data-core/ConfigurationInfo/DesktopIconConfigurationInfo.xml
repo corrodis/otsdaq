@@ -10,7 +10,7 @@
 				<COLUMN Type="Data" 	 Name="RequiredPermissionLevel" 	 StorageName="REQUIRED_PERMISSION_LEVEL" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="ImageURL" 	 StorageName="IMAGE_URL" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="WindowContentURL" 	 StorageName="WINDOW_CONTENT_URL" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="ChildLink-app" 	 Name="LinkToApplicationConfiguration" 	 StorageName="LINK_TO_APPLICATION_CONFIGURATION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-app" 	 Name="LinkToApplicationConfiguration" 	 StorageName="LINK_TO_APPLICATION_CONFIGURATION" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,XDAQApplicationConfiguration"/>
 				<COLUMN Type="ChildLinkUID-app" 	 Name="LinkToApplicationUID" 	 StorageName="LINK_TO_APPLICATION_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-windowParameters" 	 Name="LinkToParameterConfiguration" 	 StorageName="LINK_TO_PARAMETER_CONFIGURATION" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLinkGroupID-windowParameters" 	 Name="LinkToParameterUID" 	 StorageName="LINK_TO_PARAMETER_UID" 		DataType="VARCHAR2" 		DataChoices=""/>

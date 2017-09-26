@@ -1351,6 +1351,27 @@ void ConfigurationView::print (std::ostream &out) const
 		for(int c=0;c<(int)getNumberOfColumns();++c)
 		{
 			out << c << ":";
+
+			//if fixed choice type, print index in choice
+			if(columnsInfo_[c].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
+			{
+				int choiceIndex = -1;
+				std::vector<std::string> choices = columnsInfo_[c].getDataChoices();
+				val = convertEnvVariables(theDataView_[r][c]);
+
+				if(val == columnsInfo_[c].getDefaultValue())
+					choiceIndex = 0;
+				else
+				{
+					for(int i=0;i<(int)choices.size();++i)
+						if(val == choices[i])
+							choiceIndex = i+1;
+				}
+
+				out << "ChoiceIndex=" << choiceIndex << ":";
+			}
+
+
 			out << theDataView_[r][c];
 			//stopped using below, because it is called sometimes during debugging when
 			//	numbers are set to environment variables:
