@@ -19,7 +19,7 @@
 #define __COUT_HDR_F__   __SHORTFILE__ << "\t"
 #define __COUT_HDR_L__   std::dec << __LINE__ << "\t"
 #define __COUT_HDR_P__   __PRETTY_FUNCTION__ << "\t"
-#define __COUT_HDR__     __COUT_HDR_PL__
+#define __COUT_HDR__     __COUT_HDR_FL__
 
 
 #define __COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":"
