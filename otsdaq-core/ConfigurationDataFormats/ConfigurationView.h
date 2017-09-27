@@ -106,7 +106,7 @@ public:
 		if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 		{
 			__SS__ << "Invalid row col requested" << std::endl;
-			__MOUT_ERR__ << "\n" << ss.str();
+			__COUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 
@@ -120,7 +120,7 @@ public:
 //			if(!isNumber(data))
 //			{
 //				__SS__ << (data + " is not a number!") << std::endl;
-//				__MOUT__ << "\n" << ss.str();
+//				__COUT__ << "\n" << ss.str();
 //				throw std::runtime_error(ss.str());
 //			}
 //
@@ -165,7 +165,7 @@ public:
 //				ss << "\t" << ViewColumnInfo::DATATYPE_STRING_DEFAULT << "\n";
 //				for(const auto &choice:choices)
 //					ss << "\t" << choice << "\n";
-//				__MOUT__ << "\n" << ss.str();
+//				__COUT__ << "\n" << ss.str();
 //				throw std::runtime_error(ss.str());
 //			}
 //		}
@@ -182,7 +182,7 @@ public:
 //		else
 //		{
 //			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
-//				__MOUT_WARN__ << "For column type " << ViewColumnInfo::TYPE_FIXED_CHOICE_DATA
+//				__COUT_WARN__ << "For column type " << ViewColumnInfo::TYPE_FIXED_CHOICE_DATA
 //					<< " the only valid numeric types are 'int' and 'unsigned int.'";
 //
 //			__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
@@ -211,7 +211,7 @@ public:
 		if(col >= columnsInfo_.size())
 		{
 			__SS__ << "Invalid col requested" << std::endl;
-			__MOUT_ERR__ << "\n" << ss.str();
+			__COUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 
@@ -225,7 +225,7 @@ public:
 			if(!isNumber(data))
 			{
 				__SS__ << (data + " is not a number!") << std::endl;
-				__MOUT__ << "\n" << ss.str();
+				__COUT__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 
@@ -270,7 +270,7 @@ public:
 				ss << "\t" << ViewColumnInfo::DATATYPE_STRING_DEFAULT << "\n";
 				for(const auto &choice:choices)
 					ss << "\t" << choice << "\n";
-				__MOUT__ << "\n" << ss.str();
+				__COUT__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 		}
@@ -287,7 +287,7 @@ public:
 		else
 		{
 			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
-				__MOUT_WARN__ << "For column type " << ViewColumnInfo::TYPE_FIXED_CHOICE_DATA
+				__COUT_WARN__ << "For column type " << ViewColumnInfo::TYPE_FIXED_CHOICE_DATA
 					<< " the only valid numeric types are 'int' and 'unsigned int.'";
 
 			__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()

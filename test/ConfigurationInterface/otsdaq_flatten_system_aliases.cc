@@ -230,14 +230,22 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	std::string currentDir = getenv("ARTDAQ_DATABASE_URI");
 
 	if(currentDir.find("filesystemdb://") != 0)
-		throw std::runtime_error("filesystemdb:// was not found in $ARTDAQ_DATABASE_URI!");
+	{
+		__SS__ << "filesystemdb:// was not found in $ARTDAQ_DATABASE_URI!" << std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
+		throw std::runtime_error(ss.str());
+	}
 
 	currentDir = currentDir.substr(std::string("filesystemdb://").length());
 	while(currentDir.length() && currentDir[currentDir.length()-1] == '/') //remove trailing '/'s
 		currentDir = currentDir.substr(0,currentDir.length()-1);
 	std::string moveToDir = currentDir + "_" + nowTime;
 	if(argc < 2)
-		throw std::runtime_error("Aborting move! Must at least give version argument to flatten to!");
+	{
+		__SS__ << ("Aborting move! Must at least give version argument to flatten to!") << std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
+		throw std::runtime_error(ss.str());
+	}
 
 	if(pathToSwapIn != "")
 	{

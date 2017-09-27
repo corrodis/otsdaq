@@ -42,8 +42,8 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 	//make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
-	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 	const XDAQContextConfiguration *contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);
 
@@ -76,13 +76,13 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 			ConfigurationTree readerConfigNode = contextConfig->getSupervisorConfigNode(configManager,
 					readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
 
-			__MOUT__ << "Path for this reader config is " <<
+			__COUT__ << "Path for this reader config is " <<
 					readerContext->contextUID_ << "/" <<
 					readerContext->applications_[0].applicationUID_ << "/" <<
 					readerConfigNode.getValueAsString() <<
 					std::endl;
 
-			__MOUT__ << "Checking that this reader supervisor node is DataManager-like." << std::endl;
+			__COUT__ << "Checking that this reader supervisor node is DataManager-like." << std::endl;
 
 			readerConfigNode.getNode("LinkToDataManagerConfiguration").getChildren();
 		}
@@ -90,11 +90,11 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 		{
 			__SS__ << "artdaq Board Readers must be instantiated as a Consumer within a DataManager configuration. Error found while checking for LinkToDataManagerConfiguration: " <<
 					e.what() << std::endl;
-			__MOUT_ERR__ << ss.str();
-			__MOUT__ << "Path for this reader config is " <<
+			__COUT_ERR__ << ss.str();
+			__COUT__ << "Path for this reader config is " <<
 								readerContext->contextUID_ << "/" <<
 								readerContext->applications_[0].applicationUID_ << "/X" << std::endl;
-			__MOUT_ERR__ << "This board reader will likely not get instantiated properly! Proceeding anyway with fcl generation." << std::endl;
+			__COUT_ERR__ << "This board reader will likely not get instantiated properly! Proceeding anyway with fcl generation." << std::endl;
 
 			//proceed anyway, because it was really annoying to not be able to activate the configuration group when the context is being developed also.
 			//throw std::runtime_error(ss.str());
@@ -130,7 +130,7 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 //========================================================================================================================
 std::string ARTDAQBoardReaderConfiguration::getFHICLFilename(const ConfigurationTree &boardReaderNode)
 {
-	__MOUT__ << "ARTDAQ BoardReader UID: " << boardReaderNode.getValue() << std::endl;
+	__COUT__ << "ARTDAQ BoardReader UID: " << boardReaderNode.getValue() << std::endl;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
 	std::string uid = boardReaderNode.getValue();
 	for(unsigned int i=0;i<uid.size();++i)
@@ -141,7 +141,7 @@ std::string ARTDAQBoardReaderConfiguration::getFHICLFilename(const Configuration
 
 	filename += ".fcl";
 
-	__MOUT__ << "fcl: " << filename << std::endl;
+	__COUT__ << "fcl: " << filename << std::endl;
 
 	return filename;
 }
@@ -272,7 +272,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 	}
 	catch(const std::runtime_error)
 	{
-		__MOUT__ << "Ignoring error, assume this a valid UID node." << std::endl;
+		__COUT__ << "Ignoring error, assume this a valid UID node." << std::endl;
 		//error is expected here for UIDs.. so just ignore
 		// this check is valuable if source node is a unique-Link node, rather than UID
 	}
@@ -310,7 +310,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 				if(!parameter.second.getNode("Status").getValue<bool>())
 					PUSHCOMMENT;
 
-				//				__MOUT__ << parameter.second.getNode("daqParameterKey").getValue() <<
+				//				__COUT__ << parameter.second.getNode("daqParameterKey").getValue() <<
 				//						": " <<
 				//						parameter.second.getNode("daqParameterValue").getValue()
 				//						<<

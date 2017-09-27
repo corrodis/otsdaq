@@ -25,8 +25,8 @@
 
 using namespace ots;
 
-#undef 	__MOUT_HDR__
-#define __MOUT_HDR__ 	"ConfigInfoReader"
+#undef 	__COUT_HDR__
+#define __COUT_HDR__ 	"ConfigInfoReader"
 
 
 //==============================================================================
@@ -140,7 +140,7 @@ bool ConfigurationInfoReader::checkViewType(std::string type)
 	};
 	if(systemType != allowedNames[0] && systemType != allowedNames[1] && systemType != allowedNames[2] )
 	{
-		__MOUT__ << "The type defined in CONFIGURATION_TYPE ("
+		__COUT__ << "The type defined in CONFIGURATION_TYPE ("
 				<< systemType << ") doesn't match with any of the allowed types: File,Database or DatabaseTest"
 				<< std::endl;
 
@@ -150,7 +150,7 @@ bool ConfigurationInfoReader::checkViewType(std::string type)
 	{
 		if(types[i] != allowedNames[0] && types[i] != allowedNames[1] && types[i] != allowedNames[2] )
 		{
-			__MOUT__ << "The type defined in the info file ("
+			__COUT__ << "The type defined in the info file ("
 					<< types[i] << ") doesn't match with any of the allowed types: "
 					<< allowedNames[0] << ", " << allowedNames[1] << " or " << allowedNames[2]
 																							<< std::endl;
@@ -174,11 +174,11 @@ xercesc::DOMNode* ConfigurationInfoReader::getNode(XMLCh* tagName, xercesc::DOME
 	if( !nodeList )
 	{
 		throw(std::runtime_error( std::string("Can't find ") + XML_TO_CHAR(tagName) + " tag!"));
-		__MOUT__ << (std::string("Can't find ") + XML_TO_CHAR(tagName) + " tag!") << std::endl;
+		__COUT__ << (std::string("Can't find ") + XML_TO_CHAR(tagName) + " tag!") << std::endl;
 	}
-	//    __MOUT__<< "Name: "  << XML_TO_CHAR(nodeList->item(itemNumber)->getNodeName()) << std::endl;
+	//    __COUT__<< "Name: "  << XML_TO_CHAR(nodeList->item(itemNumber)->getNodeName()) << std::endl;
 	//    if( nodeList->item(itemNumber)->getFirstChild() != 0 )
-	//        __MOUT__<< "Value: " << XML_TO_CHAR(nodeList->item(itemNumber)->getFirstChild()->getNodeValue()) << std::endl;
+	//        __COUT__<< "Value: " << XML_TO_CHAR(nodeList->item(itemNumber)->getFirstChild()->getNodeValue()) << std::endl;
 	return nodeList->item(itemNumber);
 }
 
@@ -208,9 +208,9 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 
 
 	//These environment variables are required
-	if(getenv("CONFIGURATION_TYPE"     ) == NULL)	__MOUT__ << "Missing env variable: CONFIGURATION_TYPE. It must be set!" << std::endl;
-	if(getenv("CONFIGURATION_DATA_PATH") == NULL) 	__MOUT__ << "Missing env variable: CONFIGURATION_DATA_PATH. It must be set!" << std::endl;
-	if(getenv("CONFIGURATION_INFO_PATH") == NULL) 	__MOUT__ << "Missing env variable: CONFIGURATION_INFO_PATH. It must be set!" << std::endl;
+	if(getenv("CONFIGURATION_TYPE"     ) == NULL)	__COUT__ << "Missing env variable: CONFIGURATION_TYPE. It must be set!" << std::endl;
+	if(getenv("CONFIGURATION_DATA_PATH") == NULL) 	__COUT__ << "Missing env variable: CONFIGURATION_DATA_PATH. It must be set!" << std::endl;
+	if(getenv("CONFIGURATION_INFO_PATH") == NULL) 	__COUT__ << "Missing env variable: CONFIGURATION_INFO_PATH. It must be set!" << std::endl;
 
 
 	//example c++ setting of necessary environment variables
@@ -221,20 +221,40 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 
 	std::string configurationDataDir = std::string(getenv("CONFIGURATION_INFO_PATH")) + "/";
 	std::string configFile = configurationDataDir + configuration.getConfigurationName() + "Info.xml";
-	//__MOUT__ << configFile << std::endl;
+	//__COUT__ << configFile << std::endl;
 	struct stat fileStatus;
 
 	int iretStat = stat(configFile.c_str(), &fileStatus);
 	if( iretStat == ENOENT )
-		throw ( std::runtime_error("Path file_name does not exist, or path is an empty std::string.") );
+	{
+		__SS__ << ("Path file_name does not exist, or path is an empty std::string.") << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
 	else if( iretStat == ENOTDIR )
-		throw ( std::runtime_error("A component of the path is not a directory."));
+	{
+		__SS__ << ("A component of the path is not a directory.") << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
 	else if( iretStat == ELOOP )
-		throw ( std::runtime_error("Too many symbolic links encountered while traversing the path."));
+	{
+		__SS__ << ("Too many symbolic links encountered while traversing the path.") << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
 	else if( iretStat == EACCES )
-		throw ( std::runtime_error("Permission denied."));
+	{
+		__SS__ << ("Permission denied.") << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
 	else if( iretStat == ENAMETOOLONG )
-		throw ( std::runtime_error("File can not be read\n"));
+	{
+		__SS__ << ("File can not be read. Name too long.") << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
 
 	xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser;
 	// Configure DOM parser.
@@ -271,7 +291,7 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 
 			delete parser;
 			delete errorHandler;
-			__MOUT_ERR__ << "\n" << ss.str();
+			__COUT_ERR__ << "\n" << ss.str();
 			throw(std::runtime_error( ss.str()));
 		}
 		//<VIEW>
@@ -287,7 +307,7 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 
 			delete parser;
 			delete errorHandler;
-			__MOUT_ERR__ << "\n" << ss.str();
+			__COUT_ERR__ << "\n" << ss.str();
 			throw(std::runtime_error( ss.str()));
 		}
 
@@ -306,7 +326,7 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 			{
 				//<COLUMN>
 				xercesc::DOMElement* columnElement = dynamic_cast< xercesc::DOMElement* >( columnNodeList->item(column) );
-				//__MOUT__ << XML_TO_CHAR(columnElement->getAttribute(columnNameAttributeTag_)) << std::endl;
+				//__COUT__ << XML_TO_CHAR(columnElement->getAttribute(columnNameAttributeTag_)) << std::endl;
 
 				//automatically delete the persistent version of the column info
 				std::string capturedException;
@@ -334,13 +354,13 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 
 			configuration.setConfigurationDescription(
 					ConfigurationView::decodeURIComponent(configurationDescription));
-			//__MOUT__ << "configurationDescription = " << configurationDescription << std::endl;
+			//__COUT__ << "configurationDescription = " << configurationDescription << std::endl;
 
 			//</VIEW>
 		}
 		if( !storageTypeFound )
 		{
-			__MOUT__ << "The type defined in CONFIGURATION_TYPE ("
+			__COUT__ << "The type defined in CONFIGURATION_TYPE ("
 					<< getenv("CONFIGURATION_TYPE") << ") doesn't match with any of the types defined in " << configFile << std::endl;
 
 			delete parser;
@@ -358,7 +378,7 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 	delete parser;
 	delete errorHandler;
 
-	//__MOUT__ << std::endl;
+	//__COUT__ << std::endl;
 
 	//if exceptions have been accumulated
 	//	then in allowIllegalColumns mode

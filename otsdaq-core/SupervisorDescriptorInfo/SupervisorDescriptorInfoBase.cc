@@ -35,7 +35,11 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
         std::cout << __COUT_HDR_FL__ << "Can't find application descriptor called \"ots::OtsConfigurationWizardSupervisor\" (Must have been removed from the xdaq context configuration)" << std::endl;
 
     if(theWizard_ == 0 && theSupervisor_ == 0)
-        throw std::runtime_error("Must have THE Supervisor (or THE OtsConfigurationWizardSupervisor) as part of the context configuration!");
+    {
+        __SS__ << "Must have THE Supervisor (or THE OtsConfigurationWizardSupervisor) as part of the context configuration!" << std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
+		throw std::runtime_error(ss.str());
+    }
 
 
     theLogbookSupervisor_ = *(applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::LogbookSupervisor").begin());

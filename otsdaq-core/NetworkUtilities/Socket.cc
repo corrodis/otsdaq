@@ -28,7 +28,7 @@ using namespace ots;
 Socket::Socket(void)
 {
 	__SS__ << "ERROR: This method should never be called. There is something wrong in your inheritance scheme!" << std::endl;
-	__MOUT__ << "\n" << ss.str();
+	__COUT__ << "\n" << ss.str();
 	//FIXME: this is getting called during configure?!
 	//throw std::runtime_error(ss.str());
 }
@@ -40,18 +40,18 @@ Socket::Socket(const std::string &IPAddress, unsigned int port)
 , port_        (port)
 //    maxSocketSize_(maxSocketSize)
 {
-	__MOUT__ << std::endl;
+	__COUT__ << std::endl;
 	//network stuff
     socketAddress_.sin_family = AF_INET;// use IPv4 host byte order
     socketAddress_.sin_port   = htons(port);// short, network byte order
 
-    __MOUT__ << "IPAddress: " << IPAddress << " port: " << port << " htons: " <<  socketAddress_.sin_port << std::endl;
+    __COUT__ << "IPAddress: " << IPAddress << " port: " << port << " htons: " <<  socketAddress_.sin_port << std::endl;
     if(inet_aton(IPAddress.c_str(), &socketAddress_.sin_addr) == 0)
     {
     	__SS__ << "FATAL: Invalid IP/Port combination. Is it already in use? " <<
     			IPAddress << "/" << port << std::endl;
         //assert(0); //RAR changed to exception on 8/17/2016
-        __MOUT__ << "\n" << ss.str();
+        __COUT__ << "\n" << ss.str();
         throw std::runtime_error(ss.str());
     }
 
@@ -61,7 +61,7 @@ Socket::Socket(const std::string &IPAddress, unsigned int port)
 //========================================================================================================================
 Socket::~Socket(void)
 {
-    __MOUT__ << "CLOSING THE SOCKET #" << socketNumber_  << " IP: " << IPAddress_ << " port: " << port_ << " htons: " << socketAddress_.sin_port << std::endl;
+    __COUT__ << "CLOSING THE SOCKET #" << socketNumber_  << " IP: " << IPAddress_ << " port: " << port_ << " htons: " << socketAddress_.sin_port << std::endl;
 	if(socketNumber_ != -1)
 		close(socketNumber_);
 }
@@ -69,7 +69,7 @@ Socket::~Socket(void)
 //========================================================================================================================
 void Socket::initialize(void)
 {
-    __MOUT__ << " htons: " <<  socketAddress_.sin_port << std::endl;
+    __COUT__ << " htons: " <<  socketAddress_.sin_port << std::endl;
     struct addrinfo  hints;
     struct addrinfo* res;
     int status    =  0;

@@ -25,7 +25,7 @@ std::string CgiDataUtilities::getOrPostData(cgicc::Cgicc& cgi, const std::string
 std::string CgiDataUtilities::postData(cgicc::Cgicc& cgi, const std::string& needle)
 {
 	std::string postData = "&"+cgi.getEnvironment().getPostData();
-	//__MOUT__ << "PostData: " + postData << std::endl;
+	//__COUT__ << "PostData: " + postData << std::endl;
 	size_t start_pos = postData.find("&"+needle+"="); //add & and = to make sure found field and not part of a value
 	if(start_pos == std::string::npos) return ""; //needle not found
 
@@ -36,7 +36,7 @@ std::string CgiDataUtilities::postData(cgicc::Cgicc& cgi, const std::string& nee
 	end_pos = postData.find('&',start_pos); //skip needle and = sign
 	if(end_pos == std::string::npos) postData.length(); //not found, so take data to end
 
-	//__MOUT__ << "start_pos=" << start_pos
+	//__COUT__ << "start_pos=" << start_pos
 	//		<< "end_pos=" << end_pos << std::endl;
 	return postData.substr(start_pos,end_pos-start_pos); //return value
 }
@@ -48,7 +48,7 @@ std::string CgiDataUtilities::postData(cgicc::Cgicc& cgi, const std::string& nee
 std::string CgiDataUtilities::getData(cgicc::Cgicc &cgi, const std::string &needle)
 {
 	std::string getData = "&"+cgi.getEnvironment().getQueryString();
-	//__MOUT__ << "getData: " + getData << std::endl;
+	//__COUT__ << "getData: " + getData << std::endl;
 
 	size_t start_pos = getData.find("&"+needle+"="); //add & and = to make sure found field and not part of a value
 	if(start_pos == std::string::npos) return ""; //needle not found
@@ -60,7 +60,7 @@ std::string CgiDataUtilities::getData(cgicc::Cgicc &cgi, const std::string &need
 	end_pos = getData.find('&',start_pos); //skip needle and = sign
 	if(end_pos != std::string::npos) end_pos -= start_pos; //found, so determine sz of field
 
-	//__MOUT__ << "start_pos=" << start_pos << " '" << getData[start_pos] <<
+	//__COUT__ << "start_pos=" << start_pos << " '" << getData[start_pos] <<
 	//			"' end_pos=" << end_pos << " := " << getData.substr(start_pos,end_pos) << std::endl;
 
 	return getData.substr(start_pos,end_pos); //return value

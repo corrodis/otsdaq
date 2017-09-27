@@ -48,8 +48,10 @@ std::set<ConfigurationVersion> FileConfigurationInterface::getVersions(const Con
 
     if((dp = opendir(configDir.c_str())) == 0)
     {
-        std::cout << __COUT_HDR_FL__<< "ERROR:(" << errno << ").  Can't open directory: " << configDir << std::endl;
-        throw std::runtime_error("Error in File Interface getVersion!");
+        __SS__ << "ERROR:(" << errno << ").  Can't open directory: " << configDir << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+
     }
 
     const unsigned char isDir = 0x4;

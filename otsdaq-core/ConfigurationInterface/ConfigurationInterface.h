@@ -56,7 +56,7 @@ public:
 
 			if(configuration == 0)
 			{
-				//__MOUT__ << "Using ConfigurationBase object with configuration name " << configurationName << std::endl;
+				//__COUT__ << "Using ConfigurationBase object with configuration name " << configurationName << std::endl;
 
 				//try making configuration base..
 				//	if it fails, then probably something wrong with Info file
@@ -66,7 +66,7 @@ public:
 				}
 				catch(...)	//failure so cleanup any halfway complete configuration work
 				{
-					__MOUT_WARN__ << "Failed to even use ConfigurationBase!" << std::endl;
+					__COUT_WARN__ << "Failed to even use ConfigurationBase!" << std::endl;
 					if(configuration)
 						delete configuration;
 					configuration = 0;
@@ -74,7 +74,7 @@ public:
 				}
 
 			}
-			//__MOUT__ << "Configuration constructed!" << std::endl;
+			//__COUT__ << "Configuration constructed!" << std::endl;
 		}
 
 		if(groupKey != 0 && groupName != 0)
@@ -89,7 +89,7 @@ public:
 			if(version == ConfigurationVersion::INVALID &&
 					(version=findLatestVersion(configuration)) == ConfigurationVersion::INVALID)
 			{
-				__MOUT__ << "FATAL ERROR: Can't ask to fill a configuration object with a negative version! " <<
+				__COUT__ << "FATAL ERROR: Can't ask to fill a configuration object with a negative version! " <<
 						configurationName << std::endl;
 				__SS__  << "FATAL ERROR: Invalid latest version." <<
 						std::endl << std::endl << std::endl <<
@@ -120,7 +120,7 @@ public:
 		//take advantage of version possibly being cached
 		if(configuration->isStored(version))
 		{
-			//__MOUT__ << "Using archived version: " << version << std::endl;
+			//__COUT__ << "Using archived version: " << version << std::endl;
 
 			//Make sure this version is not already active
 			if(!configuration->isActive() || version != configuration->getViewVersion())
@@ -134,7 +134,7 @@ public:
 		{
 			if(version.isTemporaryVersion())
 			{
-				__MOUT_ERR__ << "FATAL ERROR: Can not use interface to fill a configuration object with a temporary version!" << std::endl;
+				__COUT_ERR__ << "FATAL ERROR: Can not use interface to fill a configuration object with a temporary version!" << std::endl;
 				__SS__ << "FATAL ERROR: Invalid temporary version v" << version << std::endl;
 				throw std::runtime_error(ss.str());
 			}
@@ -152,7 +152,7 @@ public:
 			//verify the new view
 			if(configuration->getViewP()->getVersion() != version)
 			{
-				__MOUT__ << "Version mismatch!! " <<
+				__COUT__ << "Version mismatch!! " <<
 						configuration->getViewP()->getVersion() <<
 						" vs " << version << std::endl;
 				throw;
@@ -186,7 +186,7 @@ public:
 				configuration->getViewP()->setTableName(configuration->getMockupViewP()->getTableName());
 			else //configuration->getViewP()->getTableName() != configuration->getMockupViewP()->getTableName())
 			{
-				__MOUT__ << "View Table Name mismatch!! " <<
+				__COUT__ << "View Table Name mismatch!! " <<
 						configuration->getViewP()->getTableName() <<
 						" vs " << configuration->getMockupViewP()->getTableName() << std::endl;
 				throw;
@@ -198,9 +198,9 @@ public:
 		}
 		catch(...)
 		{
-			__MOUT__ << "Error occurred while getting and filling Configuration \"" <<
+			__COUT__ << "Error occurred while getting and filling Configuration \"" <<
 					configurationName << "\" version:" << version << std::endl;
-			__MOUT__ << "\t-Configuration interface mode=" << theMode_ << std::endl;
+			__COUT__ << "\t-Configuration interface mode=" << theMode_ << std::endl;
 			throw;
 		}
 
@@ -208,17 +208,17 @@ public:
 	}
 
 
-	virtual std::set<std::string /*name*/> 					getAllConfigurationNames() 		const throw(std::runtime_error) { throw std::runtime_error("ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
+	virtual std::set<std::string /*name*/> 					getAllConfigurationNames() 		const throw(std::runtime_error) { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
 	virtual std::set<ConfigurationVersion>					getVersions 			(const ConfigurationBase* configuration) const = 0;
 	const bool&												getMode					() const {return theMode_;}
 	ConfigurationVersion  			        				saveNewVersion			(ConfigurationBase* configuration, ConfigurationVersion temporaryVersion, ConfigurationVersion newVersion = ConfigurationVersion());
 
 
 
-	virtual std::set<std::string /*name*/> 					getAllConfigurationGroupNames(const std::string &filterString = "") const throw(std::runtime_error) { throw std::runtime_error("ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
-	virtual std::set<ConfigurationGroupKey> 				getKeys(const std::string &groupName) const { throw std::runtime_error("ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
-	virtual std::map<std::string /*name*/, ConfigurationVersion /*version*/> getConfigurationGroupMembers(std::string const& /*globalConfiguration*/, bool includeMetaDataTable = false) const throw(std::runtime_error) { throw std::runtime_error("ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
-	virtual void 											saveConfigurationGroup(std::map<std::string /*name*/, ConfigurationVersion /*version*/> const& /*configurationMap*/, std::string const& /*globalConfiguration*/) const throw(std::runtime_error) { throw std::runtime_error("ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");};
+	virtual std::set<std::string /*name*/> 					getAllConfigurationGroupNames(const std::string &filterString = "") const throw(std::runtime_error) { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
+	virtual std::set<ConfigurationGroupKey> 				getKeys(const std::string &groupName) const { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
+	virtual std::map<std::string /*name*/, ConfigurationVersion /*version*/> getConfigurationGroupMembers(std::string const& /*globalConfiguration*/, bool includeMetaDataTable = false) const throw(std::runtime_error) { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
+	virtual void 											saveConfigurationGroup(std::map<std::string /*name*/, ConfigurationVersion /*version*/> const& /*configurationMap*/, std::string const& /*globalConfiguration*/) const throw(std::runtime_error) { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");};
 
 protected:
 	ConfigurationInterface(void);//Protected constructor

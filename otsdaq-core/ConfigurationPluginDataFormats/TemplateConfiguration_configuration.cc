@@ -31,10 +31,10 @@ TemplateConfiguration::~TemplateConfiguration(void)
 void TemplateConfiguration::init(ConfigurationManager *configManager)
 {
 	//do something to validate or refactor table
-	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
-	//	__MOUT__ << configManager->getNode(this->getConfigurationName()).getValueAsString()
+	//	__COUT__ << configManager->getNode(this->getConfigurationName()).getValueAsString()
 	//		  											  << std::endl;
 
 	std::string value;
@@ -42,8 +42,8 @@ void TemplateConfiguration::init(ConfigurationManager *configManager)
 	for(auto &childPair: childrenMap)
 	{
 		//do something for each row in table
-		__MOUT__ << childPair.first << std::endl;
-		//		__MOUT__ << childPair.second.getNode(colNames_.colColumnName_) << std::endl;
+		__COUT__ << childPair.first << std::endl;
+		//		__COUT__ << childPair.second.getNode(colNames_.colColumnName_) << std::endl;
 		childPair.second.getNode(colNames_.colColumnName_	).getValue(value);
 	}
 }

@@ -41,11 +41,11 @@ throw (xdaq::exception::Exception)
 , supervisorClass_              (getApplicationDescriptor()->getClassName())
 , supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 {
-	__MOUT__ << "Begin!" << std::endl;
-	__MOUT__ << "Begin!" << std::endl;
-	__MOUT__ << "Begin!" << std::endl;
-	__MOUT__ << "Begin!" << std::endl;
-	__MOUT__ << "Begin!" << std::endl;
+	__COUT__ << "Begin!" << std::endl;
+	__COUT__ << "Begin!" << std::endl;
+	__COUT__ << "Begin!" << std::endl;
+	__COUT__ << "Begin!" << std::endl;
+	__COUT__ << "Begin!" << std::endl;
 	xgi::bind (this, &CoreSupervisorBase::Default,                "Default" );
 	xgi::bind (this, &CoreSupervisorBase::stateMachineXgiHandler, "StateMachineXgiHandler");
 	xgi::bind (this, &CoreSupervisorBase::request, 				  "Request");
@@ -60,7 +60,7 @@ throw (xdaq::exception::Exception)
 	}
 	catch(...)
 	{
-		__MOUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Context Group." <<
+		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Context Group." <<
 				" The XDAQContextConfigurationName = " << XDAQContextConfigurationName_ <<
 				". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
@@ -75,17 +75,17 @@ throw (xdaq::exception::Exception)
 	}
 	catch(...)
 	{
-		__MOUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Application Group."
+		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Application Group."
 				<< " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
 	}
 	supervisorConfigurationPath_  = "/" + supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
 
 	setStateMachineName(supervisorApplicationUID_);
-	__MOUT__ << "Done!" << std::endl;
-	__MOUT__ << "Done!" << std::endl;
-	__MOUT__ << "Done!" << std::endl;
-	__MOUT__ << "Done!" << std::endl;
+	__COUT__ << "Done!" << std::endl;
+	__COUT__ << "Done!" << std::endl;
+	__COUT__ << "Done!" << std::endl;
+	__COUT__ << "Done!" << std::endl;
 
 	init();
 }
@@ -99,13 +99,13 @@ CoreSupervisorBase::~CoreSupervisorBase(void)
 void CoreSupervisorBase::init(void)
 {
 	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
-	__MOUT__ << "CONTEXT!" << std::endl;
-	__MOUT__ << "CONTEXT!" << std::endl;
-	__MOUT__ << "CONTEXT!" << std::endl;
+	__COUT__ << "CONTEXT!" << std::endl;
+	__COUT__ << "CONTEXT!" << std::endl;
+	__COUT__ << "CONTEXT!" << std::endl;
 	supervisorDescriptorInfo_.init(getApplicationContext());
-	__MOUT__ << "Done!" << std::endl;
-	__MOUT__ << "Done!" << std::endl;
-	__MOUT__ << "Done!" << std::endl;
+	__COUT__ << "Done!" << std::endl;
+	__COUT__ << "Done!" << std::endl;
+	__COUT__ << "Done!" << std::endl;
 	//RunControlStateMachine::reset();
 }
 
@@ -123,7 +123,7 @@ throw (xgi::exception::Exception)
 {
 
 
-	__MOUT__<< "Supervisor class " << supervisorClass_ << std::endl;
+	__COUT__<< "Supervisor class " << supervisorClass_ << std::endl;
 
 	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='/WebPath/html/" << supervisorClassNoNamespace_ << "Supervisor.html?urn=" <<
 			this->getApplicationDescriptor()->getLocalId() << //getenv((theSupervisorClassNoNamespace_ + "_SUPERVISOR_ID").c_str()) <<
@@ -141,12 +141,12 @@ throw (xgi::exception::Exception)
 	std::string addr = CgiDataUtilities::getOrPostData(cgi,"addr");
 	std::string data = CgiDataUtilities::getOrPostData(cgi,"data");
 
-	__MOUT__<< "write " << write << " addr: " << addr << " data: " << data << std::endl;
+	__COUT__<< "write " << write << " addr: " << addr << " data: " << data << std::endl;
 
 	unsigned long long int addr64,data64;
 	sscanf(addr.c_str(),"%llu",&addr64);
 	sscanf(data.c_str(),"%llu",&data64);
-	__MOUT__<< "write " << write << " addr: " << addr64 << " data: " << data64 << std::endl;
+	__COUT__<< "write " << write << " addr: " << addr64 << " data: " << data64 << std::endl;
 
 	*out << "done";
 }
@@ -165,10 +165,10 @@ throw (xgi::exception::Exception)
 xoap::MessageReference CoreSupervisorBase::stateMachineXoapHandler(xoap::MessageReference message )
 throw (xoap::exception::Exception)
 {
-	__MOUT__<< "Soap Handler!" << std::endl;
+	__COUT__<< "Soap Handler!" << std::endl;
 	stateMachineWorkLoopManager_.removeProcessedRequests();
 	stateMachineWorkLoopManager_.processRequest(message);
-	__MOUT__<< "Done - Soap Handler!" << std::endl;
+	__COUT__<< "Done - Soap Handler!" << std::endl;
 	return message;
 }
 
@@ -176,10 +176,10 @@ throw (xoap::exception::Exception)
 xoap::MessageReference CoreSupervisorBase::stateMachineResultXoapHandler(xoap::MessageReference message )
 throw (xoap::exception::Exception)
 {
-	__MOUT__<< "Soap Handler!" << std::endl;
+	__COUT__<< "Soap Handler!" << std::endl;
 	//stateMachineWorkLoopManager_.removeProcessedRequests();
 	//stateMachineWorkLoopManager_.processRequest(message);
-	__MOUT__<< "Done - Soap Handler!" << std::endl;
+	__COUT__<< "Done - Soap Handler!" << std::endl;
 	return message;
 }
 
@@ -187,10 +187,10 @@ throw (xoap::exception::Exception)
 bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 {
 	stateMachineSemaphore_.take();
-	__MOUT__<< "Re-sending message..." << SOAPUtilities::translate(stateMachineWorkLoopManager_.getMessage(workLoop)).getCommand() << std::endl;
+	__COUT__<< "Re-sending message..." << SOAPUtilities::translate(stateMachineWorkLoopManager_.getMessage(workLoop)).getCommand() << std::endl;
 	std::string reply = send(this->getApplicationDescriptor(),stateMachineWorkLoopManager_.getMessage(workLoop));
 	stateMachineWorkLoopManager_.report(workLoop, reply, 100, true);
-	__MOUT__<< "Done with message" << std::endl;
+	__COUT__<< "Done with message" << std::endl;
 	stateMachineSemaphore_.give();
 	return false;//execute once and automatically remove the workloop so in WorkLoopManager the try workLoop->remove(job_) could be commented out
 	//return true;//go on and then you must do the workLoop->remove(job_) in WorkLoopManager
@@ -200,7 +200,7 @@ bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 xoap::MessageReference CoreSupervisorBase::stateMachineStateRequest(xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	__MOUT__<< "theStateMachine_.getCurrentStateName() = " << theStateMachine_.getCurrentStateName() << std::endl;
+	__COUT__<< "theStateMachine_.getCurrentStateName() = " << theStateMachine_.getCurrentStateName() << std::endl;
 	return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getCurrentStateName());
 }
 
@@ -208,7 +208,7 @@ throw (xoap::exception::Exception)
 xoap::MessageReference CoreSupervisorBase::stateMachineErrorMessageRequest(xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	__MOUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
+	__COUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("ErrorMessage",theStateMachine_.getErrorMessage());
@@ -226,7 +226,7 @@ xoap::MessageReference CoreSupervisorBase::macroMakerSupervisorRequest(
 		xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	__MOUT__<< "$$$$$$$$$$$$$$$$$" << std::endl;
+	__COUT__<< "$$$$$$$$$$$$$$$$$" << std::endl;
 
 	//locate theFEInterfacesManager in state machines vector
 	FEVInterfacesManager*          theFEInterfacesManager = 0;
@@ -236,19 +236,25 @@ throw (xoap::exception::Exception)
 		{
 			theFEInterfacesManager =
 					dynamic_cast<FEVInterfacesManager*>(theStateMachineImplementation_[i]);
-			if(!theFEInterfacesManager) throw std::runtime_error(""); //dynamic_cast returns null pointer on failure
-			__MOUT__ << "State Machine " << i << " WAS of type FEVInterfacesManager" << std::endl;
+			if(!theFEInterfacesManager)
+			{
+				//dynamic_cast returns null pointer on failure
+				__SS__ << "Dynamic cast failure!" << std::endl;
+				__COUT_ERR__ << ss.str();
+				throw std::runtime_error(ss.str());
+			}
+			__COUT__ << "State Machine " << i << " WAS of type FEVInterfacesManager" << std::endl;
 
 			break;
 		}
 		catch(...)
 		{
-			__MOUT__ << "State Machine " << i << " was NOT of type FEVInterfacesManager" << std::endl;
+			__COUT__ << "State Machine " << i << " was NOT of type FEVInterfacesManager" << std::endl;
 		}
 	}
 
 
-	__MOUT__ << "theFEInterfacesManager pointer = " << theFEInterfacesManager << std::endl;
+	__COUT__ << "theFEInterfacesManager pointer = " << theFEInterfacesManager << std::endl;
 
 	//receive request parameters
 	SOAPParameters parameters;
@@ -270,9 +276,9 @@ throw (xoap::exception::Exception)
 	std::string dataStr = parameters.getValue("Data");
 	std::string InterfaceID = parameters.getValue("InterfaceID");
 
-	__MOUT__<< "request: " << request << std::endl;
+	__COUT__<< "request: " << request << std::endl;
 
-	__MOUT__<<  "Address: " << addressStr << " Data: "
+	__COUT__<<  "Address: " << addressStr << " Data: "
 			<< dataStr << " InterfaceID: " << InterfaceID << std::endl;
 
 	SOAPParameters retParameters;
@@ -292,7 +298,7 @@ throw (xoap::exception::Exception)
 	{
 		if(!theFEInterfacesManager)
 		{
-			__MOUT_INFO__ << "No FE Interface Manager! (So no write occurred)" << std::endl;
+			__COUT_INFO__ << "No FE Interface Manager! (So no write occurred)" << std::endl;
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "DataWritten",retParameters);
 		}
 
@@ -301,9 +307,9 @@ throw (xoap::exception::Exception)
 
 
 
-		__MOUT__<< "theFEInterfacesManager->getInterfaceUniversalAddressSize(index) " <<
+		__COUT__<< "theFEInterfacesManager->getInterfaceUniversalAddressSize(index) " <<
 				theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID) << std::endl;
-		__MOUT__<< "theFEInterfacesManager->getInterfaceUniversalDataSize(index) " <<
+		__COUT__<< "theFEInterfacesManager->getInterfaceUniversalDataSize(index) " <<
 				theFEInterfacesManager->getInterfaceUniversalDataSize(InterfaceID) << std::endl;
 
 		//Converting std::string to char*
@@ -313,7 +319,7 @@ throw (xoap::exception::Exception)
 		tmpHex[2] = '\0';
 
 
-		__MOUT__<< "Translating address: ";
+		__COUT__<< "Translating address: ";
 
 		char address[theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID)];
 
@@ -337,7 +343,7 @@ throw (xoap::exception::Exception)
 
 		std::cout << std::endl;
 
-		__MOUT__<< "Translating data: ";
+		__COUT__<< "Translating data: ";
 
 		char data[theFEInterfacesManager->getInterfaceUniversalDataSize(InterfaceID)];
 
@@ -380,7 +386,7 @@ throw (xoap::exception::Exception)
 	{
 		if(!theFEInterfacesManager)
 		{
-			__MOUT_INFO__ << "No FE Interface Manager! (So no read occurred)" << std::endl;
+			__COUT_INFO__ << "No FE Interface Manager! (So no read occurred)" << std::endl;
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa",retParameters);
 		}
 
@@ -388,16 +394,16 @@ throw (xoap::exception::Exception)
 		// parameter address and data
 		//unsigned int index = stoi(indexStr);	// As long as the supervisor has only one interface, this index will remain 0?
 
-		__MOUT__<< "theFEInterfacesManager->getInterfaceUniversalAddressSize(index) "
+		__COUT__<< "theFEInterfacesManager->getInterfaceUniversalAddressSize(index) "
 				<< theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID) << std::endl;
-		__MOUT__<< "theFEInterfacesManager->getInterfaceUniversalDataSize(index) "
+		__COUT__<< "theFEInterfacesManager->getInterfaceUniversalDataSize(index) "
 				<<theFEInterfacesManager->getInterfaceUniversalDataSize(InterfaceID) << std::endl;
 
 		char tmpHex[3]; //for use converting hex to binary
 		tmpHex[2] = '\0';
 
 
-		__MOUT__<< "Translating address: ";
+		__COUT__<< "Translating address: ";
 
 		char address[theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID)];
 
@@ -427,7 +433,7 @@ throw (xoap::exception::Exception)
 
 
 		//    	std::string result = theFEInterfacesManager->universalRead(index,address,data);
-		//    	__MOUT__<< result << std::endl << std::endl;
+		//    	__COUT__<< result << std::endl << std::endl;
 
 		if(theFEInterfacesManager->universalRead(InterfaceID, address, data) < 0)
 		{
@@ -440,7 +446,7 @@ throw (xoap::exception::Exception)
 		{
 			std::string str8(data);
 			str8.resize(8);
-			__MOUT__<< "decResult[" << dataSz << " bytes]: " <<
+			__COUT__<< "decResult[" << dataSz << " bytes]: " <<
 					*((unsigned long long *)(&str8[0])) << std::endl;
 
 		}
@@ -454,7 +460,7 @@ throw (xoap::exception::Exception)
 			sprintf(&hexResult[i*2],"%2.2X", (unsigned char)data[dataSz-1-i]);
 		}
 
-		__MOUT__<< "hexResult[" << strlen(hexResult) << " nibbles]: " << std::string(hexResult) << std::endl;
+		__COUT__<< "hexResult[" << strlen(hexResult) << " nibbles]: " << std::string(hexResult) << std::endl;
 
 
 
@@ -499,7 +505,7 @@ throw (xoap::exception::Exception)
 			__SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId()
 					<< " the FE Macro named '" << feMacroName << "' with tartget FE '"
 					<< InterfaceID << "' failed. Here is the error:\n\n" << e.what() << std::endl;
-			__MOUT_ERR__ << "\n" << ss.str();
+			__COUT_ERR__ << "\n" << ss.str();
 			success = false;
 			outputArgs = ss.str();
 		}
@@ -513,7 +519,7 @@ throw (xoap::exception::Exception)
 	}
 	else
 	{
-		__MOUT_WARN__ << "Unrecognized request received! '" << request << "'" << std::endl;
+		__COUT_WARN__ << "Unrecognized request received! '" << request << "'" << std::endl;
 	}
 
 
@@ -524,42 +530,42 @@ throw (xoap::exception::Exception)
 void CoreSupervisorBase::stateInitial(toolbox::fsm::FiniteStateMachine& fsm)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__ << "CoreSupervisorBase::stateInitial" << std::endl;
+	__COUT__ << "CoreSupervisorBase::stateInitial" << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__ << "CoreSupervisorBase::stateHalted" << std::endl;
+	__COUT__ << "CoreSupervisorBase::stateHalted" << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::stateRunning(toolbox::fsm::FiniteStateMachine& fsm)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__ << "CoreSupervisorBase::stateRunning" << std::endl;
+	__COUT__ << "CoreSupervisorBase::stateRunning" << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__ << "CoreSupervisorBase::stateConfigured" << std::endl;
+	__COUT__ << "CoreSupervisorBase::stateConfigured" << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::statePaused(toolbox::fsm::FiniteStateMachine& fsm)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__ << "CoreSupervisorBase::statePaused" << std::endl;
+	__COUT__ << "CoreSupervisorBase::statePaused" << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::inError (toolbox::fsm::FiniteStateMachine & fsm)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
+	__COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
 	//rcmsStateNotifier_.stateChanged("Error", "");
 }
 
@@ -567,7 +573,7 @@ throw (toolbox::fsm::exception::Exception)
 void CoreSupervisorBase::enteringError (toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()
+	__COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()
 			<< "\n\nError Message: " <<
 			theStateMachine_.getErrorMessage() << std::endl;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
@@ -577,7 +583,7 @@ throw (toolbox::fsm::exception::Exception)
 			<<  " to "
 			<< failedEvent.getToState()
 			<< " exception: " << failedEvent.getException().what();
-	__MOUT_ERR__<< error.str() << std::endl;
+	__COUT_ERR__<< error.str() << std::endl;
 	//diagService_->reportError(errstr.str(),DIAGERROR);
 
 }
@@ -586,7 +592,7 @@ throw (toolbox::fsm::exception::Exception)
 void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__ << "transitionConfiguring" << std::endl;
+	__COUT__ << "transitionConfiguring" << std::endl;
 
 	std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup(
 			SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
@@ -594,7 +600,7 @@ throw (toolbox::fsm::exception::Exception)
 			ConfigurationGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
 					getParameters().getValue("ConfigurationGroupKey")));
 
-	__MOUT__ << "Configuration group name: " << theGroup.first << " key: " <<
+	__COUT__ << "Configuration group name: " << theGroup.first << " key: " <<
 			theGroup.second << std::endl;
 
 	theConfigurationManager_->loadConfigurationGroup(
@@ -612,7 +618,7 @@ throw (toolbox::fsm::exception::Exception)
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Error was caught while configuring: " << e.what() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
@@ -631,7 +637,7 @@ throw (toolbox::fsm::exception::Exception)
 void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__ << "transitionHalting" << std::endl;
+	__COUT__ << "transitionHalting" << std::endl;
 
 	for(auto& it: theStateMachineImplementation_)
 	{
@@ -645,13 +651,13 @@ throw (toolbox::fsm::exception::Exception)
 			if(theStateMachine_.getProvenanceStateName() ==
 					RunControlStateMachine::FAILED_STATE_NAME)
 			{
-				__MOUT_INFO__ << "Error was caught while halting (but ignoring because previous state was '" <<
+				__COUT_INFO__ << "Error was caught while halting (but ignoring because previous state was '" <<
 						RunControlStateMachine::FAILED_STATE_NAME << "'): " << e.what() << std::endl;
 			}
 			else //if not previously in Failed state, then fail
 			{
 				__SS__ << "Error was caught while halting: " << e.what() << std::endl;
-				__MOUT_ERR__ << "\n" << ss.str();
+				__COUT_ERR__ << "\n" << ss.str();
 				theStateMachine_.setErrorMessage(ss.str());
 				throw toolbox::fsm::exception::Exception(
 						"Transition Error" /*name*/,
@@ -669,7 +675,7 @@ throw (toolbox::fsm::exception::Exception)
 void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__ << "transitionInitializing" << std::endl;
+	__COUT__ << "transitionInitializing" << std::endl;
 
 	//    for(auto& it: theStateMachineImplementation_)
 	//it->initialize();
@@ -679,7 +685,7 @@ throw (toolbox::fsm::exception::Exception)
 void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__ << "transitionPausing" << std::endl;
+	__COUT__ << "transitionPausing" << std::endl;
 
 	try
 	{
@@ -689,7 +695,7 @@ throw (toolbox::fsm::exception::Exception)
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Error was caught while pausing: " << e.what() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
@@ -708,7 +714,7 @@ throw (toolbox::fsm::exception::Exception)
 	//NOTE: I want to first start the data manager first if this is a FEDataManagerSupervisor
 
 
-	__MOUT__ << "transitionResuming" << std::endl;
+	__COUT__ << "transitionResuming" << std::endl;
 
 	try
 	{
@@ -718,7 +724,7 @@ throw (toolbox::fsm::exception::Exception)
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Error was caught while resuming: " << e.what() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
@@ -737,7 +743,7 @@ throw (toolbox::fsm::exception::Exception)
 
 	//NOTE: I want to first start the data manager first if this is a FEDataManagerSupervisor
 
-	__MOUT__ << "transitionStarting" << std::endl;
+	__COUT__ << "transitionStarting" << std::endl;
 
 	try
 	{
@@ -747,7 +753,7 @@ throw (toolbox::fsm::exception::Exception)
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Error was caught while starting: " << e.what() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
@@ -763,7 +769,7 @@ throw (toolbox::fsm::exception::Exception)
 void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
-	__MOUT__ << "transitionStopping" << std::endl;
+	__COUT__ << "transitionStopping" << std::endl;
 
 	try
 	{
@@ -773,7 +779,7 @@ throw (toolbox::fsm::exception::Exception)
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Error was caught while pausing: " << e.what() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,

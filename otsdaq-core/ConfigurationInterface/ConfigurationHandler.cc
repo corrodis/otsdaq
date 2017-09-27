@@ -32,8 +32,8 @@
 
 using namespace ots;
 
-#undef 	__MOUT_HDR__
-#define __MOUT_HDR__ 	"ConfigHandler"
+#undef 	__COUT_HDR__
+#define __COUT_HDR__ 	"ConfigHandler"
 
 
 //The tag values must be given after the XML platform is initialized so they are defined in initPlatform
@@ -141,13 +141,13 @@ bool ConfigurationHandler::validateNode(XMLCh* tagName, xercesc::DOMNode* node, 
 {
 	if( node->getFirstChild() == 0 )
 	{
-		__MOUT__<< "Tag " << XML_TO_CHAR(tagName) << " doesn't have a value!" << std::endl;
+		__COUT__<< "Tag " << XML_TO_CHAR(tagName) << " doesn't have a value!" << std::endl;
 		return false;
 	}
 
 	if( XML_TO_STRING(node->getFirstChild()->getNodeValue()) != expectedValue)
 	{
-		__MOUT__<< "The tag " << XML_TO_CHAR(tagName) << " with value " << XML_TO_CHAR(node->getFirstChild()->getNodeValue())
+		__COUT__<< "The tag " << XML_TO_CHAR(tagName) << " with value " << XML_TO_CHAR(node->getFirstChild()->getNodeValue())
         		<< " doesn't match the expected value " << expectedValue << std::endl;
 		return false;
 	}
@@ -169,12 +169,12 @@ xercesc::DOMNode* ConfigurationHandler::getNode(XMLCh* tagName, xercesc::DOMElem
 	if( !nodeList )
 	{
 		throw(std::runtime_error( std::string("Can't find ") + XML_TO_STRING(tagName) + " tag!"));
-		__MOUT__ << (std::string("Can't find ") + XML_TO_STRING(tagName) + " tag!") << std::endl;
+		__COUT__ << (std::string("Can't find ") + XML_TO_STRING(tagName) + " tag!") << std::endl;
 	}
 
-	//    __MOUT__<< "Name: "  << XML_TO_CHAR(nodeList->item(itemNumber)->getNodeName()) << std::endl;
+	//    __COUT__<< "Name: "  << XML_TO_CHAR(nodeList->item(itemNumber)->getNodeName()) << std::endl;
 	//    if( nodeList->item(itemNumber)->getFirstChild() != 0 )
-	//        __MOUT__<< "Value: " << XML_TO_CHAR(nodeList->item(itemNumber)->getFirstChild()->getNodeValue()) << std::endl;
+	//        __COUT__<< "Value: " << XML_TO_CHAR(nodeList->item(itemNumber)->getFirstChild()->getNodeValue()) << std::endl;
 	return nodeList->item(itemNumber);
 }
 
@@ -203,10 +203,10 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 	initPlatform();
 	std::string configFile = getXMLFileName(configuration,version);
 
-	__MOUT__ << "Reading: " << configFile << std::endl;
-	__MOUT__ << "Into View with Table Name: " <<
+	__COUT__ << "Reading: " << configFile << std::endl;
+	__COUT__ << "Into View with Table Name: " <<
 			configuration.getViewP()->getTableName() << std::endl;
-	__MOUT__ << "Into View with version: " <<
+	__COUT__ << "Into View with version: " <<
 			configuration.getViewP()->getVersion() << " and version-to-read: " <<
 			version << std::endl;
 
@@ -214,19 +214,23 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 	//stat returns -1 on error, status in errno
 	if(stat(configFile.c_str(), &fileStatus) < 0)
 	{
-		__MOUT__ << "Error reading path: " << configFile << std::endl;
+		__COUT__ << "Error reading path: " << configFile << std::endl;
+		std::stringstream ss; ss << __MF_HDR__;
 		if( errno == ENOENT )
-			throw ( std::runtime_error("Path file_name does not exist.") );
+			ss << ("Path file_name does not exist.");
 		else if( errno == ENOTDIR )
-			throw ( std::runtime_error("A component of the path is not a directory."));
+			ss << ("A component of the path is not a directory.");
 		else if( errno == ELOOP )
-			throw ( std::runtime_error("Too many symbolic links encountered while traversing the path."));
+			ss << ("Too many symbolic links encountered while traversing the path.");
 		else if( errno == EACCES )
-			throw ( std::runtime_error("Permission denied."));
+			ss << ("Permission denied.");
 		else if( errno == ENAMETOOLONG )
-			throw ( std::runtime_error("File name too long.\n"));
+			ss << ("File name too long.");
 		else
-			throw ( std::runtime_error("File can not be read.\n"));
+			ss << ("File can not be read.");
+		ss << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
 	}
 
 	xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser;
@@ -240,12 +244,12 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 	DOMTreeErrorReporter* errorHandler = new DOMTreeErrorReporter() ;
 	parser->setErrorHandler(errorHandler);
 
-	//__MOUT__ << configFile << std::endl;
+	//__COUT__ << configFile << std::endl;
 	try
 	{
-		//__MOUT__ << "Parsing" << std::endl;
+		//__COUT__ << "Parsing" << std::endl;
 		parser->parse( configFile.c_str() );
-		//__MOUT__ << "Parsed" << std::endl;
+		//__COUT__ << "Parsed" << std::endl;
 
 		// no need to free this pointer - owned by the parent parser object
 		xercesc::DOMDocument* document = parser->getDocument();
@@ -255,12 +259,12 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 
 		if( !elementRoot ) throw(std::runtime_error( "empty XML document" ));
 		//<HEADER>
-		//__MOUT__ << "Reading header" << std::endl;
+		//__COUT__ << "Reading header" << std::endl;
 		xercesc::DOMNode* headerNode = getNode(headerTag_, elementRoot, 0);
 		if( !headerNode ) throw(std::runtime_error( std::string("The document is missing the mandatory tag: ") + XML_TO_STRING(headerTag_ )));
 
 		//<TYPE>
-		//__MOUT__ << "Reading type" << std::endl;
+		//__COUT__ << "Reading type" << std::endl;
 		xercesc::DOMElement* typeElement            = getElement(typeTag_,               headerNode, 0);
 		if( !typeElement ) throw(std::runtime_error( std::string("The document is missing the mandatory tag: ") + XML_TO_STRING(typeTag_ )));
 		xercesc::DOMNode*    extensionTableNameNode = getNode   (extensionTableNameTag_, typeElement, 0);
@@ -270,10 +274,10 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 		if(!validateNode(nameTag_,nameNode,configuration.getConfigurationName()))
 			throw(std::runtime_error( std::string("The document is missing the mandatory tag: ") + XML_TO_STRING(nameTag_ )));
 
-		//__MOUT__ << configFile << std::endl;
+		//__COUT__ << configFile << std::endl;
 		//</TYPE>
 		//<RUN>
-		//__MOUT__ << "Reading run" << std::endl;
+		//__COUT__ << "Reading run" << std::endl;
 		xercesc::DOMElement* runElement            = getElement(runTag_,               headerNode,0);
 		if( !runElement ) throw(std::runtime_error( std::string("The document is missing the mandatory tag: ") + XML_TO_STRING(runTag_ )));
 		xercesc::DOMNode*    runTypeNode           = getNode   (runTypeTag_,           runElement, 0);
@@ -285,17 +289,17 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 		xercesc::DOMNode*    locationNode          = getNode   (locationTag_,          runElement, 0);
 		if( !locationNode ) throw(std::runtime_error( std::string("The document is missing the mandatory tag: ") + XML_TO_STRING(locationTag_ )));
 
-		//__MOUT__ << configFile << std::endl;
+		//__COUT__ << configFile << std::endl;
 		//</RUN>
 		//</HEADER>
 
 		//<DATA_SET>
-		//__MOUT__ << "Reading Data Set" << std::endl;
+		//__COUT__ << "Reading Data Set" << std::endl;
 		xercesc::DOMElement* datasetElement = getElement(datasetTag_, elementRoot, 0);
 		if( !datasetElement ) throw(std::runtime_error( std::string("The document is missing the mandatory tag: ") + XML_TO_STRING(datasetTag_ )));
 
 		//   <PART>
-		//__MOUT__ << "Reading Part" << std::endl;
+		//__COUT__ << "Reading Part" << std::endl;
 		xercesc::DOMNode*    partNode       = getNode   (partTag_,       datasetElement, 0);
 		xercesc::DOMNode*    nameLabelNode  = getNode   (nameLabelTag_,  partNode, 0);
 		xercesc::DOMNode*    kindOfPartNode = getNode   (kindOfPartTag_, partNode, 0);
@@ -311,7 +315,7 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 		{
 			char tmpVersionStr[100];
 			sprintf(tmpVersionStr, "%d", version.version());
-			__MOUT__ << version << "-" << XML_TO_CHAR(versionNode->getFirstChild()->getNodeValue()) << std::endl;
+			__COUT__ << version << "-" << XML_TO_CHAR(versionNode->getFirstChild()->getNodeValue()) << std::endl;
 			if(strcmp(tmpVersionStr,XML_TO_CHAR(versionNode->getFirstChild()->getNodeValue())) != 0)
 				throw(std::runtime_error( std::string("Mis-matched version tag: ")  + XML_TO_CHAR(versionNode->getFirstChild()->getNodeValue()) +
 						" vs " + tmpVersionStr));
@@ -328,13 +332,13 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 			configuration.getViewP()->setAuthor(XML_TO_CHAR(createdByUserNode->getFirstChild()->getNodeValue()));
 
 		//<DATA>
-		//__MOUT__ << "Reading Data" << std::endl;
+		//__COUT__ << "Reading Data" << std::endl;
 		xercesc::DOMNodeList* dataNodeList = datasetElement->getElementsByTagName(dataTag_);
 
 		if( !dataNodeList )
 			throw(std::runtime_error( std::string("Can't find ") + XML_TO_STRING(dataTag_) + " tag!"));
 
-		//__MOUT__ << "Number of data nodes: " << dataNodeList->getLength() << std::endl;
+		//__COUT__ << "Number of data nodes: " << dataNodeList->getLength() << std::endl;
 		//First I need to setup the data container which is a [row][col] matrix where each <dataTag_> is a row
 		//and row 0 has the names of the column which will go in the columnInfo container
 		if(!dataNodeList->getLength())//I must have at least 1 data!
@@ -343,7 +347,7 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 			throw std::runtime_error(ss.str());
 		}
 
-		//__MOUT__ << configuration.getView().getColumnsInfo().size() << std::endl;
+		//__COUT__ << configuration.getView().getColumnsInfo().size() << std::endl;
 		//First I can build the matrix and then fill it since I know the number of rows and columns
 		configuration.getViewP()->resizeDataView(dataNodeList->getLength(), configuration.getView().getNumberOfColumns());
 
@@ -353,10 +357,10 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 			xercesc::DOMNodeList* columnNodeList = dataNodeList->item(row)->getChildNodes();
 			unsigned int colNumber = 0;
 			
-			//__MOUT__ << "Row: " << row << " w " <<  columnNodeList->getLength() << std::endl;
+			//__COUT__ << "Row: " << row << " w " <<  columnNodeList->getLength() << std::endl;
 			for( XMLSize_t col = 0; col < columnNodeList->getLength(); col++ )
 			{
-				//__MOUT__ << "Col: " << col << std::endl;
+				//__COUT__ << "Col: " << col << std::endl;
 
 				if( !columnNodeList->item(col)->getNodeType() || columnNodeList->item(col)->getNodeType() != xercesc::DOMNode::ELEMENT_NODE )//true is not 0 && is element
 					continue;
@@ -394,12 +398,12 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 	}
 	catch( xercesc::XMLException& e )
 	{
-		__MOUT__ << "Error parsing file: " << configFile << std::endl;
+		__COUT__ << "Error parsing file: " << configFile << std::endl;
 		std::ostringstream errBuf;
 		errBuf << "Error parsing file: " << XML_TO_CHAR(e.getMessage()) << std::flush;
 	}
 
-	__MOUT__ << "Done with configuration file: " << configFile << std::endl;
+	__COUT__ << "Done with configuration file: " << configFile << std::endl;
 
 	delete parser;
 	delete errorHandler;
@@ -539,7 +543,7 @@ std::string ConfigurationHandler::writeXML(const ConfigurationBase& configuratio
 		catch(const xercesc::XMLException& e)
 		{
 			std::string message = XML_TO_STRING(e.getMessage());
-			__MOUT__ << "Error Message: " << message << std::endl;
+			__COUT__ << "Error Message: " << message << std::endl;
 			//return 1;
 			return message;
 		}
@@ -565,7 +569,7 @@ std::string ConfigurationHandler::writeXML(const ConfigurationBase& configuratio
 void ConfigurationHandler::outputXML(xercesc::DOMDocument* pmyDOMDocument, std::string fileName)
 {
 	std::string directory = fileName.substr(0,fileName.rfind("/")+1);
-	__MOUT__ << "Saving Configuration to " << fileName  << " in directory: " << directory << std::endl;
+	__COUT__ << "Saving Configuration to " << fileName  << " in directory: " << directory << std::endl;
 
 	mkdir(directory.c_str(), 0755);
 
@@ -631,7 +635,7 @@ void ConfigurationHandler::outputXML(xercesc::DOMDocument* pmyDOMDocument, std::
 	output->release();
 
 #endif
-	__MOUT__ << "Done writing " << std::endl;
+	__COUT__ << "Done writing " << std::endl;
 }
 
 //==============================================================================

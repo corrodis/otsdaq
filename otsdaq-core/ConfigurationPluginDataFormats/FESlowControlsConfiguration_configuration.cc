@@ -47,10 +47,10 @@ FESlowControlsConfiguration::~FESlowControlsConfiguration(void)
 void FESlowControlsConfiguration::init(ConfigurationManager *configManager)
 {
 	//check for valid data types
-	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
-	//	__MOUT__ << configManager->getNode(this->getConfigurationName()).getValueAsString()
+	//	__COUT__ << configManager->getNode(this->getConfigurationName()).getValueAsString()
 	//		  											  << std::endl;
 
 	std::string childType;
@@ -58,9 +58,9 @@ void FESlowControlsConfiguration::init(ConfigurationManager *configManager)
 	for(auto &childPair: childrenMap)
 	{
 		//check each row in table
-		__MOUT__ << childPair.first << std::endl;
+		__COUT__ << childPair.first << std::endl;
 		childPair.second.getNode(colNames_.colDataType_).getValue(childType);
-		__MOUT__ << "childType=" << childType << std::endl;
+		__COUT__ << "childType=" << childType << std::endl;
 
 		if(childType[childType.size()-1] == 'b') //if ends in 'b' then take that many bits
 		{
@@ -72,7 +72,7 @@ void FESlowControlsConfiguration::init(ConfigurationManager *configManager)
 						childPair.first << " is invalid. " <<
 						" The bit size given was " << sz <<
 						" and it must be between 1 and 64." << std::endl;
-				__MOUT_ERR__ << "\n" << ss.str();
+				__COUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 		}
@@ -100,7 +100,7 @@ void FESlowControlsConfiguration::init(ConfigurationManager *configManager)
 					"B), float (" << sizeof(float) <<
 					"B), double (" << sizeof(double) <<
 					"B)." << std::endl;
-			__MOUT_ERR__ << "\n" << ss.str();
+			__COUT_ERR__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
 	}

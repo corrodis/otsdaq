@@ -21,7 +21,7 @@ WorkLoopManager::WorkLoopManager(toolbox::task::ActionSignature* job) :
         requestNumber_(0),
         requestName_  (job_->name())
 {
-    __MOUT__ << "Request name: " << requestName_ << " jobName: " << job_->name() << std::endl;
+    __COUT__ << "Request name: " << requestName_ << " jobName: " << job_->name() << std::endl;
 
 }
 
@@ -50,13 +50,13 @@ HttpXmlDocument WorkLoopManager::processRequest(std::string workLoopName, const 
     requestNumberStream << requestNumber;
     std::stringstream reportStream;
 
-    __MOUT__ << "Processing request! WorkLoops: " << workLoops_.size() << " req: " << requestNumber << std::endl;
+    __COUT__ << "Processing request! WorkLoops: " << workLoops_.size() << " req: " << requestNumber << std::endl;
     if(workLoops_.size() >= maxWorkLoops)
     {
         if(!removeTimedOutRequests())
         {
             reportStream << "Too many running requests (" << workLoops_.size() << "), try later!" << std::endl;
-            __MOUT__ << "ERROR: " << reportStream.str() << std::endl;
+            __COUT__ << "ERROR: " << reportStream.str() << std::endl;
 
             xmlDocument.addTextElementToData("RequestStatus", "ERROR");
             xmlDocument.addTextElementToData("RequestName"  , getWorkLoopRequest(workLoopName));
@@ -81,7 +81,7 @@ HttpXmlDocument WorkLoopManager::processRequest(std::string workLoopName, const 
     catch (xcept::Exception & e)
     {
         reportStream << "Can't create workloop, try again." << std::endl;
-        __MOUT__ << "ERROR: " << reportStream.str() << std::endl;
+        __COUT__ << "ERROR: " << reportStream.str() << std::endl;
         xmlDocument.addTextElementToData("RequestStatus", "ERROR");
         xmlDocument.addTextElementToData("RequestName"  , getWorkLoopRequest(workLoopName));
         xmlDocument.addTextElementToData("RequestNumber", requestNumberStream.str());
@@ -97,7 +97,7 @@ HttpXmlDocument WorkLoopManager::processRequest(std::string workLoopName, const 
     catch (xcept::Exception & e)
     {
         reportStream << "Can't submit workloop job, try again." << std::endl;
-        __MOUT__ << "ERROR: " << reportStream.str() << std::endl;
+        __COUT__ << "ERROR: " << reportStream.str() << std::endl;
         xmlDocument.addTextElementToData("RequestStatus", "ERROR");
         xmlDocument.addTextElementToData("RequestName"  , getWorkLoopRequest(workLoopName));
         xmlDocument.addTextElementToData("RequestNumber", requestNumberStream.str());
@@ -112,7 +112,7 @@ HttpXmlDocument WorkLoopManager::processRequest(std::string workLoopName, const 
     catch (xcept::Exception & e)
     {
         reportStream << "Can't activate workloop, try again." << std::endl;
-        __MOUT__ << "ERROR: " << reportStream.str() << std::endl;
+        __COUT__ << "ERROR: " << reportStream.str() << std::endl;
         xmlDocument.addTextElementToData("RequestStatus", "ERROR");
         xmlDocument.addTextElementToData("RequestName"  , getWorkLoopRequest(workLoopName));
         xmlDocument.addTextElementToData("RequestNumber", requestNumberStream.str());
@@ -121,7 +121,7 @@ HttpXmlDocument WorkLoopManager::processRequest(std::string workLoopName, const 
         return xmlDocument;
     }
 
-    __MOUT__ << "SUCCESS: Request is being processed!" << std::endl;
+    __COUT__ << "SUCCESS: Request is being processed!" << std::endl;
 
     xmlDocument.addTextElementToData("RequestStatus", "SUCCESS");
     xmlDocument.addTextElementToData("RequestName"  , getWorkLoopRequest(workLoopName));
@@ -136,10 +136,10 @@ bool WorkLoopManager::report(toolbox::task::WorkLoop* workLoop, std::string resu
     RequestNumber requestNumber = getWorkLoopRequestNumber(workLoop);
 
     /*
-        __MOUT__ << "Reporting result for request " << getWorkLoopRequest(workLoop) << " with req#: " << requestNumber << std::endl;
+        __COUT__ << "Reporting result for request " << getWorkLoopRequest(workLoop) << " with req#: " << requestNumber << std::endl;
         if(workLoops_.find(requestNumber) == workLoops_.end())
         {
-            __MOUT__ << "This MUST NEVER happen. You must find out what is wrong!" << std::endl;
+            __COUT__ << "This MUST NEVER happen. You must find out what is wrong!" << std::endl;
             assert(0);
         }
     */
@@ -163,13 +163,13 @@ bool WorkLoopManager::getRequestResult(cgicc::Cgicc &cgi, HttpXmlDocument &xmlDo
     std::string requestNumberString = cgi.getElement("RequestNumber")->getValue();
     RequestNumber requestNumber = strtoull(requestNumberString.c_str(), 0 , 10);
 
-    __MOUT__ << "Request: " << requestName_ << " RequestNumber=" << requestNumberString
+    __COUT__ << "Request: " << requestName_ << " RequestNumber=" << requestNumberString
     << " assigned # " << requestNumber << std::endl;
 
     if(workLoops_.find(requestNumber) == workLoops_.end())
     {
         reportStream << "Can't find request " << requestNumber << " within the currently active " << workLoops_.size() << " requests!";
-        __MOUT__ << "WARNING: " << reportStream.str() << std::endl;
+        __COUT__ << "WARNING: " << reportStream.str() << std::endl;
         xmlDocument.addTextElementToData("RequestStatus", "WARNING");
         xmlDocument.addTextElementToData("RequestName"  , "Unknown");
         xmlDocument.addTextElementToData("RequestNumber", requestNumberString);
@@ -180,7 +180,7 @@ bool WorkLoopManager::getRequestResult(cgicc::Cgicc &cgi, HttpXmlDocument &xmlDo
     if(!workLoops_[requestNumber].done)
     {
         reportStream << "Still processing request " << requestNumber;
-        __MOUT__ << "WARNING: " << reportStream.str() << std::endl;
+        __COUT__ << "WARNING: " << reportStream.str() << std::endl;
         //Resetting timer since there is a listener
         time(&(workLoops_[requestNumber].requestLastTimeChecked));
 
@@ -217,13 +217,13 @@ bool WorkLoopManager::removeWorkLoop(RequestNumber requestNumber)
 {
     if(workLoops_.find(requestNumber) == workLoops_.end())
     {
-        __MOUT__ << "WorkLoop " << requestNumber << " is not in the WorkLoops list!" << std::endl;
+        __COUT__ << "WorkLoop " << requestNumber << " is not in the WorkLoops list!" << std::endl;
         return false;
     }
 
     if(workLoops_[requestNumber].workLoop == 0)
     {
-        __MOUT__ << "WorkLoop " << requestNumber << " was not created at all!" << std::endl;
+        __COUT__ << "WorkLoop " << requestNumber << " was not created at all!" << std::endl;
         workLoops_.erase(requestNumber);
         return false;
     }
@@ -234,7 +234,7 @@ bool WorkLoopManager::removeWorkLoop(RequestNumber requestNumber)
     }
     catch (xcept::Exception & e)
     {
-        __MOUT__ << "Can't cancel WorkLoop " << requestNumber << std::endl;
+        __COUT__ << "Can't cancel WorkLoop " << requestNumber << std::endl;
         //diagService_->reportError("Failed to start Job Control monitoring. Exception: "+string(e.what()),DIAGWARN);
         return false;
     }
@@ -248,9 +248,9 @@ bool WorkLoopManager::removeWorkLoop(RequestNumber requestNumber)
         // If the workloop job thread returns false, then the workloop job is automatically removed and it can't be removed again
         // Leaving this try catch allows me to be general in the job threads so I can return true (repeat loop) or false ( loop only once)
         // without crashing
-        // __MOUT__ << "WARNING: Can't remove request WorkLoop: " << requestNumber << std::endl;
+        // __COUT__ << "WARNING: Can't remove request WorkLoop: " << requestNumber << std::endl;
     }
-    __MOUT__ << "Deleting WorkLoop " << requestNumber << std::endl;
+    __COUT__ << "Deleting WorkLoop " << requestNumber << std::endl;
     toolbox::task::getWorkLoopFactory()->removeWorkLoop(workLoops_[requestNumber].workLoopName, cWorkLoopType_);//delete workLoops_[requestNumber].workLoop; is done by the factory
     workLoops_.erase(requestNumber);
     return true;
@@ -274,15 +274,15 @@ bool WorkLoopManager::removeTimedOutRequests(void)
     time_t now;
     time(&now);
     std::map<RequestNumber, WorkLoopStruct>::iterator it = workLoops_.begin();
-    __MOUT__ << "Removing timed out " << std::endl;
+    __COUT__ << "Removing timed out " << std::endl;
     for( ; it != workLoops_.end(); it++)
         if(it->second.done && difftime(now,it->second.requestLastTimeChecked) > timeOutInSeconds)
         {
-            __MOUT__ << "Removing timed out request #" << it->first  << " after " << difftime(now,it->second.requestLastTimeChecked) << " seconds." << std::endl;
+            __COUT__ << "Removing timed out request #" << it->first  << " after " << difftime(now,it->second.requestLastTimeChecked) << " seconds." << std::endl;
             removeWorkLoop(it->first);
             return true;//since I return I don't care if the iterator pointer is screwed after I erase the element
         }
-    __MOUT__ << "Done Removing timed out " << std::endl;
+    __COUT__ << "Done Removing timed out " << std::endl;
     return false;
 }
 
@@ -294,7 +294,7 @@ std::string WorkLoopManager::composeWorkLoopName(RequestNumber requestNumber, cg
 {
     std::stringstream name;
     name << requestNumber << "-" << cgi.getElement(requestName_)->getValue();
-    __MOUT__ << "Request: " << requestName_
+    __COUT__ << "Request: " << requestName_
     << " Value=" << cgi.getElement(requestName_)->getValue()
     << " WLName: " << name.str()
     << std::endl;
@@ -307,7 +307,7 @@ std::string WorkLoopManager::composeWorkLoopName(RequestNumber requestNumber, co
     SOAPCommand soapCommand(message);
     std::stringstream name;
     name << requestNumber << "-" << soapCommand.getCommand();
-    __MOUT__ << "Request: " << requestName_
+    __COUT__ << "Request: " << requestName_
     << " Value=" <<  soapCommand.getCommand()
     << " WLName: " << name.str()
     << std::endl;
@@ -357,7 +357,7 @@ void WorkLoopManager::translateWorkLoopName(toolbox::task::WorkLoop* workLoop, S
     std::string request = getWorkLoopRequest(workLoop);
     if(request.find('<') == std::string::npos)
     {
-        __MOUT__ << "Simple request" << std::endl;
+        __COUT__ << "Simple request" << std::endl;
         soapCommand.setCommand(request);
     }
     else
@@ -374,12 +374,12 @@ void WorkLoopManager::translateWorkLoopName(toolbox::task::WorkLoop* workLoop, S
             orPosition = request.find('|',begin);
             soapCommand.setParameter(request.substr(begin,orPosition-begin),request.substr(orPosition+1,commaPosition-orPosition-1));
             begin = commaPosition+1;
-            __MOUT__ << "Comma: " << commaPosition << std::endl;
+            __COUT__ << "Comma: " << commaPosition << std::endl;
         }
         orPosition = request.find('|',begin);
         soapCommand.setParameter(request.substr(begin,orPosition-begin),request.substr(orPosition+1,gtPosition-orPosition-1));
     }
-    __MOUT__ << soapCommand << std::endl;
-    //__MOUT__ << name.substr(name.find(',')+1,name.find('/')-name.find(',')-1) << std::endl;
+    __COUT__ << soapCommand << std::endl;
+    //__COUT__ << name.substr(name.find(',')+1,name.find('/')-name.find(',')-1) << std::endl;
 }
 

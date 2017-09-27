@@ -114,7 +114,11 @@ ConfigurationVersion ConfigurationInterface::saveNewVersion(ConfigurationBase* c
 
 		//throw error if version already exists and this is not the rewriteable version
 		if(!rewriteableExists || ConfigurationInterface::isVersionTrackingEnabled())
-			throw std::runtime_error("New version already exists!");
+		{
+			__SS__ << ("New version already exists!") << std::endl;
+			std::cout << __COUT_HDR_FL__ << ss.str();
+			throw std::runtime_error(ss.str());
+		}
 	}
 
 	std::cout << __COUT_HDR_FL__ << "Version number to save is " << newVersion << std::endl;

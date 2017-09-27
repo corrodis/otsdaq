@@ -44,8 +44,8 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 	//make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
-	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 	const XDAQContextConfiguration *contextConfig = configManager_->__GET_CONFIG__(XDAQContextConfiguration);
 
@@ -65,7 +65,7 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 		ConfigurationTree builderConfigNode = contextConfig->getSupervisorConfigNode(configManager,
 				builderContext->contextUID_, builderContext->applications_[0].applicationUID_);
 
-		__MOUT__ << "Path for this aggregator config is " <<
+		__COUT__ << "Path for this aggregator config is " <<
 				builderContext->contextUID_ << "/" <<
 				builderContext->applications_[0].applicationUID_ << "/" <<
 				builderConfigNode.getValueAsString() <<
@@ -79,7 +79,7 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 //========================================================================================================================
 std::string ARTDAQBuilderConfiguration::getFHICLFilename(const ConfigurationTree &builderNode)
 {
-	__MOUT__ << "ARTDAQ Builder UID: " << builderNode.getValue() << std::endl;
+	__COUT__ << "ARTDAQ Builder UID: " << builderNode.getValue() << std::endl;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
 	std::string uid = builderNode.getValue();
 	for(unsigned int i=0;i<uid.size();++i)
@@ -90,7 +90,7 @@ std::string ARTDAQBuilderConfiguration::getFHICLFilename(const ConfigurationTree
 
 	filename += ".fcl";
 
-	__MOUT__ << "fcl: " << filename << std::endl;
+	__COUT__ << "fcl: " << filename << std::endl;
 
 	return filename;
 }

@@ -94,7 +94,7 @@ WebUsers::WebUsers()
 
 
 	if(!loadDatabases())
-		__MOUT__ << "FATAL USER DATABASE ERROR - failed to load!!!" << std::endl;
+		__COUT__ << "FATAL USER DATABASE ERROR - failed to load!!!" << std::endl;
 
 	loadSecuritySelection();
 
@@ -104,7 +104,7 @@ WebUsers::WebUsers()
 	std::string user = DEFAULT_ADMIN_USERNAME;
 	if((i = searchUsersDatabaseForUsername(user)) == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "user: " << user << " is not found" << std::endl;
+		__COUT__ << "user: " << user << " is not found" << std::endl;
 		assert(0); //
 		exit(0); //THIS CAN NOT HAPPEN?! There must be an admin user
 	}
@@ -128,7 +128,7 @@ WebUsers::WebUsers()
 
 	srand (time(0)); //seed random for hash salt generation
 
-	__MOUT__ << "Done with Web Users initialization!" << std::endl;
+	__COUT__ << "Done with Web Users initialization!" << std::endl;
 
 	// FIXME -- can delete this commented section eventually
 	// this is for debugging the registering and login functionality
@@ -142,7 +142,7 @@ WebUsers::WebUsers()
 	// 	std::string newAccountCode = "60546";
 	// 	std::string pw = "testbeam";
 	//
-	//	__MOUT__ << "user: " << user <<  std::endl << std::endl;
+	//	__COUT__ << "user: " << user <<  std::endl << std::endl;
 	//
 	//
 	//	if(1) //test salt functionality
@@ -150,10 +150,10 @@ WebUsers::WebUsers()
 	//		std::string salt = "";  //don't want to modify saved salt
 	//		std::string hash1 = sha512(user,pw,salt);
 	//		std::string hash2 = sha512(user,pw,salt);
-	//		__MOUT__ << hash1 << std::endl;
-	//		__MOUT__ << hash2 << std::endl;
+	//		__COUT__ << hash1 << std::endl;
+	//		__COUT__ << hash2 << std::endl;
 	//
-	//		__MOUT__ << "String comparison result: " << strcmp(hash1.c_str(),hash2.c_str()) << std::endl;
+	//		__COUT__ << "String comparison result: " << strcmp(hash1.c_str(),hash2.c_str()) << std::endl;
 	//	}
 	//
 	//	if(0) //login attempt
@@ -161,24 +161,24 @@ WebUsers::WebUsers()
 	//		//search users for username
 	//		if((i = searchUsersDatabaseForUsername(user)) == NOT_FOUND_IN_DATABASE)
 	//		{
-	//			__MOUT__ << "user: " << user << " is not found" << std::endl;
+	//			__COUT__ << "user: " << user << " is not found" << std::endl;
 	//			return;// NOT_FOUND_IN_DATABASE;
 	//		}
 	//
-	//		__MOUT__ << "user: " << user <<  std::endl << std::endl;
+	//		__COUT__ << "user: " << user <<  std::endl << std::endl;
 	//
 	//		std::string salt = UsersSaltVector[i];  //don't want to modify saved salt
-	//		__MOUT__ << salt<< " " << i << std::endl;
+	//		__COUT__ << salt<< " " << i << std::endl;
 	//		if(searchHashesDatabaseForHash(sha512(user,pw,salt)) == NOT_FOUND_IN_DATABASE)
 	//		{
-	//			__MOUT__ << "not found?" << std::endl;
+	//			__COUT__ << "not found?" << std::endl;
 	//			++UsersLoginFailureCountVector[i];
 	//			if(UsersLoginFailureCountVector[i] >= USERS_MAX_LOGIN_FAILURES)
 	//				UsersPermissionsVector[i] = 0; //Lock account
 	//
-	//			__MOUT__ << "\tUser/pw for user: " << user << " was not correct Failed Attempt #" << (int)(UsersLoginFailureCountVector[i]) << std::endl;
+	//			__COUT__ << "\tUser/pw for user: " << user << " was not correct Failed Attempt #" << (int)(UsersLoginFailureCountVector[i]) << std::endl;
 	//			if(!UsersPermissionsVector[i])
-	//				__MOUT__ << "Account is locked!" << std::endl;
+	//				__COUT__ << "Account is locked!" << std::endl;
 	//
 	//			saveDatabaseToFile(DB_USERS); //users db modified, so save
 	//			return;//NOT_FOUND_IN_DATABASE;
@@ -191,34 +191,34 @@ WebUsers::WebUsers()
 	//		//search users for username
 	//		if((i = searchUsersDatabaseForUsername(user)) == NOT_FOUND_IN_DATABASE)
 	//		{
-	//			__MOUT__ << "user: " << user << " is not found" << std::endl;
+	//			__COUT__ << "user: " << user << " is not found" << std::endl;
 	//			return;// NOT_FOUND_IN_DATABASE;
 	//		}
-	//		__MOUT__ << "user: " << user <<  std::endl << std::endl;
+	//		__COUT__ << "user: " << user <<  std::endl << std::endl;
 	//
 	//		UsersLastLoginAttemptVector[i] = time(0);
 	//		if(!UsersPermissionsVector[i])
 	//		{
-	//			__MOUT__ << "user: " << user << " account INACTIVE (could be due to failed logins)" << std::endl;
+	//			__COUT__ << "user: " << user << " account INACTIVE (could be due to failed logins)" << std::endl;
 	//			return;// NOT_FOUND_IN_DATABASE;
 	//		}
-	//		__MOUT__ << "user: " << user <<  std::endl << std::endl;
+	//		__COUT__ << "user: " << user <<  std::endl << std::endl;
 	//
 	//		if(UsersSaltVector[i] == "") //first login
 	//		{
-	//			__MOUT__ << "First login attempt for user: " << user << std::endl;
+	//			__COUT__ << "First login attempt for user: " << user << std::endl;
 	//
 	//			char charTimeStr[10];
 	//			sprintf(charTimeStr,"%d",int(UsersAccountCreatedTimeVector[i] & 0xffff));
 	//			std::string tmpTimeStr = charTimeStr;
 	//			if(newAccountCode != tmpTimeStr)
 	//			{
-	//				__MOUT__ << "New account code did not match: " << tmpTimeStr << " != " << newAccountCode << std::endl;
+	//				__COUT__ << "New account code did not match: " << tmpTimeStr << " != " << newAccountCode << std::endl;
 	//				saveDatabaseToFile(DB_USERS); //users db modified, so save
 	//				return;// NOT_FOUND_IN_DATABASE;
 	//			}
 	//
-	//			__MOUT__ << "First login attempt for user: " << user << std::endl;
+	//			__COUT__ << "First login attempt for user: " << user << std::endl;
 	//			//initial user account setup
 	//
 	//			//add until no collision (should 'never' be a collision)
@@ -230,10 +230,10 @@ WebUsers::WebUsers()
 	//			}
 	//
 	//
-	//			__MOUT__ << "\tHash added: " << HashesVector[0] << std::endl;
+	//			__COUT__ << "\tHash added: " << HashesVector[0] << std::endl;
 	//		}
 	//
-	//		__MOUT__ << "Login successful for: " << user << std::endl;
+	//		__COUT__ << "Login successful for: " << user << std::endl;
 	//
 	//		UsersLoginFailureCountVector[i] = 0;
 	//
@@ -257,34 +257,34 @@ WebUsers::WebUsers()
 	//			intToHexStr((((uint8_t *)(&sha512_context))[i] + (i<32)?rand():0),hexStr);
 	//			salt.append(hexStr);
 	//		}
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//
 	//		std::string strToHash = salt + user + password;
 	//
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//		unsigned char hash[SHA512_DIGEST_LENGTH];
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//		char retHash[SHA512_DIGEST_LENGTH*2+1];
-	//		__MOUT__ << strToHash.length() << " " << strToHash << std::endl;
+	//		__COUT__ << strToHash.length() << " " << strToHash << std::endl;
 	//		SHA512_Update(&sha512_context, strToHash.c_str(), strToHash.length());
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//		SHA512_Final(hash, &sha512_context);
 	//
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//		int i = 0;
 	//		for(i = 0; i < SHA512_DIGEST_LENGTH; i++)
 	//			sprintf(retHash + (i * 2), "%02x", hash[i]);
 	//
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//		retHash[SHA512_DIGEST_LENGTH*2] = '\0';
 	//
-	//		__MOUT__ << "retHash: " <<  retHash << std::endl;
+	//		__COUT__ << "retHash: " <<  retHash << std::endl;
 	//	}
 	//
 	//	//check it
 	//
 	//	{
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//
 	//		for(unsigned int i=0;i<sizeof(SHA512_CTX);++i)
 	//			((uint8_t *)(&sha512_context))[i] = hexByteStrToInt(&(salt.c_str()[i*2]));
@@ -292,24 +292,24 @@ WebUsers::WebUsers()
 	//
 	//		std::string strToHash = salt + user + password;
 	//
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//		unsigned char hash[SHA512_DIGEST_LENGTH];
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//		char retHash[SHA512_DIGEST_LENGTH*2+1];
-	//		__MOUT__ << strToHash.length() << " " << strToHash << std::endl;
+	//		__COUT__ << strToHash.length() << " " << strToHash << std::endl;
 	//		SHA512_Update(&sha512_context, strToHash.c_str(), strToHash.length());
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//		SHA512_Final(hash, &sha512_context);
 	//
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//		int i = 0;
 	//		for(i = 0; i < SHA512_DIGEST_LENGTH; i++)
 	//			sprintf(retHash + (i * 2), "%02x", hash[i]);
 	//
-	//		__MOUT__ << salt << std::endl;
+	//		__COUT__ << salt << std::endl;
 	//		retHash[SHA512_DIGEST_LENGTH*2] = '\0';
 	//
-	//		__MOUT__ << "retHash: " <<  retHash << std::endl;
+	//		__COUT__ << "retHash: " <<  retHash << std::endl;
 	//	}
 }
 
@@ -336,15 +336,15 @@ bool WebUsers::loadDatabases()
 	//		</hashData>
 
 	fn = (std::string)WEB_LOGIN_DB_PATH + (std::string)HASHES_DB_FILE;
-	__MOUT__ << fn << std::endl;
+	__COUT__ << fn << std::endl;
 	fp = fopen(fn.c_str(),"r");
 	if(!fp) //need to create file
 	{
 		mkdir(((std::string)WEB_LOGIN_DB_PATH + (std::string)HASHES_DB_PATH).c_str(), 0755);
-		__MOUT__ << ((std::string)WEB_LOGIN_DB_PATH + (std::string)HASHES_DB_PATH).c_str() << std::endl;
+		__COUT__ << ((std::string)WEB_LOGIN_DB_PATH + (std::string)HASHES_DB_PATH).c_str() << std::endl;
 		fp = fopen(fn.c_str(),"w");
 		if(!fp) return false;		
-		__MOUT__ << "Hashes database created: " << fn << std::endl;
+		__COUT__ << "Hashes database created: " << fn << std::endl;
 
 		saveToDatabase(fp,HASHES_DB_GLOBAL_STRING,"",DB_SAVE_OPEN);
 		saveToDatabase(fp,HASHES_DB_GLOBAL_STRING,"",DB_SAVE_CLOSE);
@@ -372,7 +372,7 @@ bool WebUsers::loadDatabases()
 						break;
 					line[i] = '\0'; //close std::string
 
-					//__MOUT__ << "Found Hashes field " << c/2 << " " << &line[si] << std::endl;
+					//__COUT__ << "Found Hashes field " << c/2 << " " << &line[si] << std::endl;
 
 					f = c/2-1;
 					if(f == 0)	//hash
@@ -384,7 +384,7 @@ bool WebUsers::loadDatabases()
 					}
 				}
 		}
-		__MOUT__ << HashesAccessTimeVector.size() << " Hashes found." << std::endl;
+		__COUT__ << HashesAccessTimeVector.size() << " Hashes found." << std::endl;
 
 		fclose(fp);
 	}
@@ -403,10 +403,10 @@ bool WebUsers::loadDatabases()
 	if(!fp) //need to create file
 	{
 		mkdir(((std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_DB_PATH).c_str(), 0755);
-		__MOUT__ << ((std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_DB_PATH).c_str() << std::endl;
+		__COUT__ << ((std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_DB_PATH).c_str() << std::endl;
 		fp = fopen(fn.c_str(),"w"); 	
 		if(!fp) return false;
-		__MOUT__ << "Users database created: " << fn << std::endl;
+		__COUT__ << "Users database created: " << fn << std::endl;
 
 		saveToDatabase(fp,USERS_DB_GLOBAL_STRING,"",DB_SAVE_OPEN);
 		char nidStr[100];
@@ -441,7 +441,7 @@ bool WebUsers::loadDatabases()
 			}
 		}	
 
-		__MOUT__ << "Found Users database next user Id: " << usersNextUserId_ << std::endl;
+		__COUT__ << "Found Users database next user Id: " << usersNextUserId_ << std::endl;
 
 		//trusting file construction, assuming fields based >'s and <'s and each entry on one line
 		while(fgets(line,LINE_LEN,fp))
@@ -452,7 +452,7 @@ bool WebUsers::loadDatabases()
 			len = strlen(line); //save len, strlen will change because of \0 manipulations
 			if(len >= LINE_LEN)
 			{
-				__MOUT__ << "Line buffer too small: " << len << std::endl;
+				__COUT__ << "Line buffer too small: " << len << std::endl;
 				break;
 			}
 
@@ -471,7 +471,7 @@ bool WebUsers::loadDatabases()
 					line[i] = '\0'; //close std::string
 					f = c/2-1;
 
-					//__MOUT__ << "Found Users field " << f << " " << &line[si] << std::endl;
+					//__COUT__ << "Found Users field " << f << " " << &line[si] << std::endl;
 
 					if(f == 0)	//username
 						UsersUsernameVector.push_back(&line[si]);
@@ -519,13 +519,13 @@ bool WebUsers::loadDatabases()
 			{
 				if(f != 7) //original database was size 8, so is ok to not match
 				{
-					__MOUT__ << "FATAL ERROR - invalid database found with field number " << f << std::endl;
+					__COUT__ << "FATAL ERROR - invalid database found with field number " << f << std::endl;
 					fclose(fp);
 					return false;
 				}
 
 				//fix here if database size was 8
-				__MOUT__ << "Update database to current version - adding fields: " <<
+				__COUT__ << "Update database to current version - adding fields: " <<
 						(UsersDatabaseEntryFields.size()-1-f) << std::endl;
 				//add db updates -- THIS IS FOR VERSION WITH UsersDatabaseEntryFields.size() == 10 !!
 				UsersLastModifiedTimeVector.push_back(0);
@@ -535,7 +535,7 @@ bool WebUsers::loadDatabases()
 		fclose(fp);
 	}
 
-	__MOUT__ << UsersLastModifiedTimeVector.size() << " Users found." << std::endl;
+	__COUT__ << UsersLastModifiedTimeVector.size() << " Users found." << std::endl;
 	return true;
 }
 
@@ -565,12 +565,12 @@ void WebUsers::saveToDatabase	(FILE * fp,std::string field, std::string value, u
 
 bool WebUsers::saveDatabaseToFile	(uint8_t db)
 {
-	__MOUT__ << "Save Database: " << (int)db << std::endl;
+	__COUT__ << "Save Database: " << (int)db << std::endl;
 
 	std::string fn = (std::string)WEB_LOGIN_DB_PATH +
 			((db==DB_USERS)?(std::string)USERS_DB_FILE:(std::string)HASHES_DB_FILE);
 
-	__MOUT__ << "Save Database Filename: " << fn << std::endl;
+	__COUT__ << "Save Database Filename: " << fn << std::endl;
 
 	//backup file organized by day
 	{
@@ -581,7 +581,7 @@ bool WebUsers::saveDatabaseToFile	(uint8_t db)
 				((db==DB_USERS)?(std::string)USERS_DB_FILE:(std::string)HASHES_DB_FILE) +
 				(std::string)dayAppend;
 
-		__MOUT__ << "Backup file: " << bkup_fn << std::endl;
+		__COUT__ << "Backup file: " << bkup_fn << std::endl;
 
 		std::string shell_command = "mv " + fn + " " + bkup_fn;
 		system(shell_command.c_str());
@@ -599,17 +599,17 @@ bool WebUsers::saveDatabaseToFile	(uint8_t db)
 		sprintf(fldStr,"%lu",usersNextUserId_);
 		saveToDatabase(fp,USERS_DB_NEXT_UID_STRING,fldStr,DB_SAVE_OPEN_AND_CLOSE);
 
-		__MOUT__ << "Saving " << UsersUsernameVector.size() << " Users." << std::endl;
+		__COUT__ << "Saving " << UsersUsernameVector.size() << " Users." << std::endl;
 
 		for(uint64_t i=0;i<UsersUsernameVector.size();++i)
 		{
-			//__MOUT__ << "Saving User: " << UsersUsernameVector[i] << std::endl;
+			//__COUT__ << "Saving User: " << UsersUsernameVector[i] << std::endl;
 
 			saveToDatabase(fp,USERS_DB_ENTRY_STRING,"",DB_SAVE_OPEN,false);
 
 			for(unsigned int f=0;f<UsersDatabaseEntryFields.size();++f)
 			{
-				//__MOUT__ << "Saving Field: " << f << std::endl;
+				//__COUT__ << "Saving Field: " << f << std::endl;
 				if(f == 0)	//username
 					saveToDatabase(fp,UsersDatabaseEntryFields[f],UsersUsernameVector[i],DB_SAVE_OPEN_AND_CLOSE,false);
 				else if(f == 1)	//displayName
@@ -660,10 +660,10 @@ bool WebUsers::saveDatabaseToFile	(uint8_t db)
 	{		
 		saveToDatabase(fp,HASHES_DB_GLOBAL_STRING,"",DB_SAVE_OPEN);
 
-		__MOUT__ << "Saving " << HashesVector.size() << " Hashes." << std::endl;
+		__COUT__ << "Saving " << HashesVector.size() << " Hashes." << std::endl;
 		for(uint64_t i=0;i<HashesVector.size();++i)
 		{
-			__MOUT__ << "Saving " << HashesVector[i] << " Hashes." << std::endl;
+			__COUT__ << "Saving " << HashesVector[i] << " Hashes." << std::endl;
 			saveToDatabase(fp,HASHES_DB_ENTRY_STRING,"",DB_SAVE_OPEN,false);
 			for(unsigned int f=0;f<HashesDatabaseEntryFields.size();++f)
 			{
@@ -695,12 +695,12 @@ bool WebUsers::saveDatabaseToFile	(uint8_t db)
 //		Special case if first user name!! max permissions given (super user made)
 bool WebUsers::createNewAccount(std::string Username, std::string DisplayName) 
 {
-	__MOUT__ << "Creating account: " << Username << std::endl;
+	__COUT__ << "Creating account: " << Username << std::endl;
 	//check if username already exists
 	uint64_t i;	
 	if((i = searchUsersDatabaseForUsername(Username)) != NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "Username: " << Username << " already exists" << std::endl;
+		__COUT__ << "Username: " << Username << " already exists" << std::endl;
 		return false;
 	}
 
@@ -712,7 +712,7 @@ bool WebUsers::createNewAccount(std::string Username, std::string DisplayName)
 	UsersUserIdVector.push_back(usersNextUserId_++);
 	if(usersNextUserId_ == (uint64_t)-1) //error wrap around case
 	{
-		__MOUT__ << "usersNextUserId_ wrap around!! Too many users??? Notify Admins." << std::endl;
+		__COUT__ << "usersNextUserId_ wrap around!! Too many users??? Notify Admins." << std::endl;
 		usersNextUserId_ = 1; //for safety to avoid wierd issues at -1 and 0 (if used for error indication)
 	}
 	UsersLastLoginAttemptVector.push_back(0);
@@ -798,40 +798,40 @@ uint64_t WebUsers::attemptActiveSession(std::string uuid, std::string &jumbledUs
 	//search login sessions for uuid
 	if((i = searchLoginSessionDatabaseForUUID(uuid)) == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "uuid: " << uuid << " is not found" << std::endl;
+		__COUT__ << "uuid: " << uuid << " is not found" << std::endl;
 		newAccountCode = "1"; //to indicate uuid was not found
 		return NOT_FOUND_IN_DATABASE;
 	}
 	++LoginSessionAttemptsVector[i];
 
 	std::string user = dejumble(jumbledUser,LoginSessionIdVector[i]);
-	__MOUT__ << "DejumbledUser = " << user << std::endl;
+	__COUT__ << "DejumbledUser = " << user << std::endl;
 	std::string pw = dejumble(jumbledPw,LoginSessionIdVector[i]);
 
 	//search users for username
 	if((i = searchUsersDatabaseForUsername(user)) == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "user: " << user << " is not found" << std::endl;
+		__COUT__ << "user: " << user << " is not found" << std::endl;
 		return NOT_FOUND_IN_DATABASE;
 	}
 
 	UsersLastLoginAttemptVector[i] = time(0);
 	if(!UsersPermissionsVector[i])
 	{
-		__MOUT__ << "user: " << user << " account INACTIVE (could be due to failed logins)" << std::endl;
+		__COUT__ << "user: " << user << " account INACTIVE (could be due to failed logins)" << std::endl;
 		return NOT_FOUND_IN_DATABASE;
 	}
 
 	if(UsersSaltVector[i] == "") //first login
 	{
-		__MOUT__ << "First login attempt for user: " << user << std::endl;
+		__COUT__ << "First login attempt for user: " << user << std::endl;
 
 		char charTimeStr[10];
 		sprintf(charTimeStr,"%d",int(UsersAccountCreatedTimeVector[i] & 0xffff));
 		std::string tmpTimeStr = charTimeStr;
 		if(newAccountCode != tmpTimeStr)
 		{
-			__MOUT__ << "New account code did not match: " << tmpTimeStr << " != " << newAccountCode << std::endl;
+			__COUT__ << "New account code did not match: " << tmpTimeStr << " != " << newAccountCode << std::endl;
 			saveDatabaseToFile(DB_USERS); //users db modified, so save
 			return NOT_FOUND_IN_DATABASE;
 		}
@@ -847,29 +847,29 @@ uint64_t WebUsers::attemptActiveSession(std::string uuid, std::string &jumbledUs
 		}
 
 
-		__MOUT__ << "\tHash added: " << HashesVector[HashesVector.size()-1] << std::endl;
+		__COUT__ << "\tHash added: " << HashesVector[HashesVector.size()-1] << std::endl;
 	}
 	else
 	{		
 		std::string salt = UsersSaltVector[i];  //don't want to modify saved salt
-		__MOUT__ << salt<< " " << i << std::endl;
+		__COUT__ << salt<< " " << i << std::endl;
 		if(searchHashesDatabaseForHash(sha512(user,pw,salt)) == NOT_FOUND_IN_DATABASE)
 		{
-			__MOUT__ << "not found?" << std::endl;
+			__COUT__ << "not found?" << std::endl;
 			++UsersLoginFailureCountVector[i];
 			if(UsersLoginFailureCountVector[i] >= USERS_MAX_LOGIN_FAILURES)
 				UsersPermissionsVector[i] = 0; //Lock account
 
-			__MOUT__ << "\tUser/pw for user: " << user << " was not correct Failed Attempt #" << (int)(UsersLoginFailureCountVector[i]) << std::endl;
+			__COUT__ << "\tUser/pw for user: " << user << " was not correct Failed Attempt #" << (int)(UsersLoginFailureCountVector[i]) << std::endl;
 			if(!UsersPermissionsVector[i])
-				__MOUT__ << "Account is locked!" << std::endl;
+				__COUT__ << "Account is locked!" << std::endl;
 
 			saveDatabaseToFile(DB_USERS); //users db modified, so save
 			return NOT_FOUND_IN_DATABASE;
 		}				    	
 	}	
 
-	__MOUT__ << "Login successful for: " << user << std::endl;
+	__COUT__ << "Login successful for: " << user << std::endl;
 
 	UsersLoginFailureCountVector[i] = 0;
 
@@ -887,7 +887,7 @@ uint64_t WebUsers::attemptActiveSession(std::string uuid, std::string &jumbledUs
 				histXml.removeDataElement();    	
 		} 
 		else  	
-			__MOUT__ << "No previous login history found." << std::endl;
+			__COUT__ << "No previous login history found." << std::endl;
 
 		//add new entry to history
 		char entryStr[500];
@@ -983,17 +983,17 @@ uint64_t WebUsers::searchLoginSessionDatabaseForUUID(std::string uuid) const
 uint64_t WebUsers::searchHashesDatabaseForHash(std::string hash)
 {
 	uint64_t i=0;	
-	__MOUT__ << i << " " << HashesVector.size()<<  " " << HashesAccessTimeVector.size() <<
+	__COUT__ << i << " " << HashesVector.size()<<  " " << HashesAccessTimeVector.size() <<
 			hash << std::endl;
 	for(;i<HashesVector.size();++i)
 		if(HashesVector[i] == hash) break;
 		else
-			__MOUT__ << HashesVector[i] << " ?????? " << std::endl;
-	__MOUT__ << i << std::endl;
+			__COUT__ << HashesVector[i] << " ?????? " << std::endl;
+	__COUT__ << i << std::endl;
 	if(i < HashesAccessTimeVector.size()) //if found, means login successful, so update access time
 		HashesAccessTimeVector.push_back((time(0) + (rand()%2?1:-1)*(rand() % 30*24*60*60)) & 0x0FFFFFFFFFE000000 );
 
-	__MOUT__ << i << std::endl;
+	__COUT__ << i << std::endl;
 	return (i == HashesVector.size())?NOT_FOUND_IN_DATABASE:i;
 }
 
@@ -1005,7 +1005,7 @@ bool WebUsers::addToHashesDatabase(std::string hash)
 {
 	if(searchHashesDatabaseForHash(hash) != NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "Hash collision: " << hash << std::endl;
+		__COUT__ << "Hash collision: " << hash << std::endl;
 		return false;
 	}
 	HashesVector.push_back(hash);	
@@ -1139,7 +1139,7 @@ uint64_t WebUsers::isCookieCodeActiveForLogin(std::string uuid,std::string &cook
 		return getAdminUserID(); //always successful
 
 	//else
-	//	__MOUT__ << "I care about cookies?!?!?!*************************************************" << std::endl;
+	//	__COUT__ << "I care about cookies?!?!?!*************************************************" << std::endl;
 
 	if(!ActiveSessionStartTimeVector.size()) return NOT_FOUND_IN_DATABASE; //no active sessions, so do nothing
 
@@ -1148,7 +1148,7 @@ uint64_t WebUsers::isCookieCodeActiveForLogin(std::string uuid,std::string &cook
 	//find uuid in login session database else return "0"	
 	if((i = searchLoginSessionDatabaseForUUID(uuid)) == NOT_FOUND_IN_DATABASE) 
 	{
-		__MOUT__ << "uuid not found: " << uuid << std::endl;
+		__COUT__ << "uuid not found: " << uuid << std::endl;
 		return NOT_FOUND_IN_DATABASE;
 	}
 
@@ -1157,21 +1157,21 @@ uint64_t WebUsers::isCookieCodeActiveForLogin(std::string uuid,std::string &cook
 	//search active users for cookie code	
 	if((i = searchActiveSessionDatabaseForCookie(cookieCode)) == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "Cookie code not found" << std::endl;
+		__COUT__ << "Cookie code not found" << std::endl;
 		return NOT_FOUND_IN_DATABASE;
 	}
 
 	//search users for user id	
 	if((j = searchUsersDatabaseForUserId(ActiveSessionUserIdVector[i])) == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "User ID not found" << std::endl;
+		__COUT__ << "User ID not found" << std::endl;
 		return NOT_FOUND_IN_DATABASE;
 	}
 
 	//match username, with one found
 	if(UsersUsernameVector[j] != username)
 	{
-		__MOUT__ << "username: " << username << " is not found" << std::endl;
+		__COUT__ << "username: " << username << " is not found" << std::endl;
 		return NOT_FOUND_IN_DATABASE;
 	}
 
@@ -1205,7 +1205,7 @@ uint64_t WebUsers::getActiveSessionCountForUser(uint64_t uid)
 				uniqueAsi.push_back(ActiveSessionIndex[i]);
 		}
 
-	__MOUT__ << "Found " << uniqueAsi.size() << " active sessions for uid " << uid << std::endl;
+	__COUT__ << "Found " << uniqueAsi.size() << " active sessions for uid " << uid << std::endl;
 
 	return uniqueAsi.size();
 }
@@ -1247,14 +1247,14 @@ uint64_t WebUsers::cookieCodeLogout(std::string cookieCode, bool logoutOtherUser
 	//search active users for cookie code
 	if((i = searchActiveSessionDatabaseForCookie(cookieCode)) == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "Cookie code not found" << std::endl;
+		__COUT__ << "Cookie code not found" << std::endl;
 		return NOT_FOUND_IN_DATABASE;
 	}    
 
 	//check ip
 	if(ActiveSessionIpVector[i] != ip)
 	{
-		__MOUT__ << "IP does not match active session" << std::endl;
+		__COUT__ << "IP does not match active session" << std::endl;
 		return NOT_FOUND_IN_DATABASE;
 	}
 
@@ -1277,7 +1277,7 @@ uint64_t WebUsers::cookieCodeLogout(std::string cookieCode, bool logoutOtherUser
 				(!logoutOtherUserSessions && ActiveSessionUserIdVector[i] == uid &&
 						ActiveSessionIndex[i] == asi) )
 		{
-			__MOUT__ << "Logging out of active session " << ActiveSessionUserIdVector[i]
+			__COUT__ << "Logging out of active session " << ActiveSessionUserIdVector[i]
 																										  << "-" << ActiveSessionIndex[i] << std::endl;
 			removeActiveSessionEntry(i); 
 			++logoutCount;
@@ -1286,7 +1286,7 @@ uint64_t WebUsers::cookieCodeLogout(std::string cookieCode, bool logoutOtherUser
 			++i;
 	}	
 
-	__MOUT__ << "Found and removed active session count = " << logoutCount << std::endl;
+	__COUT__ << "Found and removed active session count = " << logoutCount << std::endl;
 
 	return logoutCount;
 }
@@ -1314,14 +1314,14 @@ bool WebUsers::getUserInfoForCookie(std::string &cookieCode,
 	//search active users for cookie code
 	if((i = searchActiveSessionDatabaseForCookie(cookieCode)) == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "cookieCode NOT_FOUND_IN_DATABASE" << std::endl;
+		__COUT__ << "cookieCode NOT_FOUND_IN_DATABASE" << std::endl;
 		return false;
 	}
 
 	//get Users record
 	if((j = searchUsersDatabaseForUserId(ActiveSessionUserIdVector[i])) == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "ActiveSessionUserIdVector NOT_FOUND_IN_DATABASE" << std::endl;
+		__COUT__ << "ActiveSessionUserIdVector NOT_FOUND_IN_DATABASE" << std::endl;
 		return false;
 	}
 
@@ -1351,7 +1351,7 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string &cookieCode,
 
 	uint64_t  i,j;
 
-	//__MOUT__ << "I care about cookie codes: " << CareAboutCookieCodes_ << std::endl;
+	//__COUT__ << "I care about cookie codes: " << CareAboutCookieCodes_ << std::endl;
 
 
 	if(!CareAboutCookieCodes_) //No Security, so grant admin
@@ -1369,7 +1369,7 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string &cookieCode,
 	//search active users for cookie code
 	if((i = searchActiveSessionDatabaseForCookie(cookieCode)) == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "Cookie code not found" << std::endl;
+		__COUT__ << "Cookie code not found" << std::endl;
 		cookieCode = REQ_NO_LOGIN_RESPONSE;
 		return false;
 	}
@@ -1377,7 +1377,7 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string &cookieCode,
 	//check ip
 	if(ActiveSessionIpVector[i] != ip)
 	{
-		__MOUT__ << "IP does not match active session" << std::endl;
+		__COUT__ << "IP does not match active session" << std::endl;
 		cookieCode = REQ_NO_LOGIN_RESPONSE;
 		return false;
 	}
@@ -1385,7 +1385,7 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string &cookieCode,
 	//get Users record
 	if((j = searchUsersDatabaseForUserId(ActiveSessionUserIdVector[i])) == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT__ << "User ID not found" << std::endl;
+		__COUT__ << "User ID not found" << std::endl;
 		cookieCode = REQ_NO_LOGIN_RESPONSE;
 		return false;
 	}
@@ -1433,7 +1433,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string> *loggedOutUsername
 		if(LoginSessionStartTimeVector[i] + LOGIN_SESSION_EXPIRATION_TIME < time(0) || //expired
 				LoginSessionAttemptsVector[i] > LOGIN_SESSION_ATTEMPTS_MAX)
 		{
-			//__MOUT__ << "Found expired userId: " << LoginSessionUUIDVector[i] <<
+			//__COUT__ << "Found expired userId: " << LoginSessionUUIDVector[i] <<
 			//	" at time " << LoginSessionStartTimeVector[i] << " with attempts " << LoginSessionAttemptsVector[i] << std::endl;
 
 			removeLoginSessionEntry(i);
@@ -1446,7 +1446,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string> *loggedOutUsername
 	//	char tstr[200];
 	//	timeinfo = localtime ( &(tmpt=time(0)) );
 	//	sprintf(tstr,"\"%s\"",asctime (timeinfo)); tstr[strlen(tstr)-2] = '\"';
-	//__MOUT__ << "Current time is: " << time(0) << " " << tstr << std::endl;
+	//__COUT__ << "Current time is: " << time(0) << " " << tstr << std::endl;
 
 	//remove expired entries from Active Session
 	for(i=0;i<ActiveSessionStartTimeVector.size();++i)
@@ -1454,7 +1454,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string> *loggedOutUsername
 		{
 			//timeinfo = localtime (&(tmpt=ActiveSessionStartTimeVector[i]));
 			//sprintf(tstr,"\"%s\"",asctime (timeinfo)); tstr[strlen(tstr)-2] = '\"';
-			//__MOUT__ << "Found expired user: " << ActiveSessionUserIdVector[i] <<
+			//__COUT__ << "Found expired user: " << ActiveSessionUserIdVector[i] <<
 			//	" start time " << tstr << " i: " << i << " size: " << ActiveSessionStartTimeVector.size()
 			//	<< std::endl;
 			tmpUid = ActiveSessionUserIdVector[i];
@@ -1477,13 +1477,13 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string> *loggedOutUsername
 	//			timeinfo = localtime (&(tmpt=ActiveSessionStartTimeVector[i] + ACTIVE_SESSION_EXPIRATION_TIME));
 	//			sprintf(tstr,"\"%s\"",asctime (timeinfo)); tstr[strlen(tstr)-2] = '\"';
 	//
-	//			//__MOUT__ << "Found user: " << ActiveSessionUserIdVector[i] << "-" << ActiveSessionIndex[i] <<
+	//			//__COUT__ << "Found user: " << ActiveSessionUserIdVector[i] << "-" << ActiveSessionIndex[i] <<
 	//			//	" expires " << tstr <<
 	//    		//	" sec left " << ActiveSessionStartTimeVector[i] + ACTIVE_SESSION_EXPIRATION_TIME - time(0) << std::endl;
 	//
 	//		}
 
-	//__MOUT__ << "Found usersUsernameWithLock_: " << usersUsernameWithLock_ << " - " << userWithLockVerified << std::endl;
+	//__COUT__ << "Found usersUsernameWithLock_: " << usersUsernameWithLock_ << " - " << userWithLockVerified << std::endl;
 	if(CareAboutCookieCodes_ && !isUsernameActive(usersUsernameWithLock_)) //unlock if user no longer logged in
 		usersUsernameWithLock_ = "";
 }
@@ -1497,14 +1497,14 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string> *loggedOutUsername
 //		return "" on failure
 std::string WebUsers::createNewLoginSession(std::string UUID,std::string ip) 
 {
-	__MOUT__ << "UUID: " << UUID <<  std::endl << std::endl;
+	__COUT__ << "UUID: " << UUID <<  std::endl << std::endl;
 	uint64_t i=0;
 	for(;i<LoginSessionUUIDVector.size();++i)
 		if(LoginSessionUUIDVector[i] == UUID) break;
 
 	if(i != LoginSessionUUIDVector.size())
 	{
-		__MOUT__ << "UUID: " << UUID << " is not unique" << std::endl;
+		__COUT__ << "UUID: " << UUID << " is not unique" << std::endl;
 		return "";
 	}
 	//else UUID is unique
@@ -1552,12 +1552,12 @@ std::string	WebUsers::sha512(std::string user, std::string password, std::string
 
 			salt.append(hexStr);
 		}		
-		__MOUT__ << salt << std::endl;
+		__COUT__ << salt << std::endl;
 	}
 	else //use existing context
 	{		
 
-		__MOUT__ << salt << std::endl;
+		__COUT__ << salt << std::endl;
 
 		for(unsigned int i=0;i<sizeof(SHA512_CTX);++i)
 			((uint8_t *)(&sha512_context))[i] = hexByteStrToInt(&(salt.c_str()[i*2]));
@@ -1565,28 +1565,28 @@ std::string	WebUsers::sha512(std::string user, std::string password, std::string
 
 	std::string strToHash = salt + user + password;
 
-	__MOUT__ << salt << std::endl;
+	__COUT__ << salt << std::endl;
 	unsigned char hash[SHA512_DIGEST_LENGTH];
-	__MOUT__ << salt << std::endl;
+	__COUT__ << salt << std::endl;
 	char retHash[SHA512_DIGEST_LENGTH*2+1];
-	__MOUT__ << strToHash.length() << " " << strToHash << std::endl;
+	__COUT__ << strToHash.length() << " " << strToHash << std::endl;
 
 
-	__MOUT__ << "If crashing occurs here, may be an illegal salt context." << std::endl;
+	__COUT__ << "If crashing occurs here, may be an illegal salt context." << std::endl;
 	SHA512_Update(&sha512_context, strToHash.c_str(), strToHash.length());
 
 	SHA512_Final(hash, &sha512_context);
 
-	__MOUT__ << salt << std::endl;
+	__COUT__ << salt << std::endl;
 	int i = 0;
 	for(i = 0; i < SHA512_DIGEST_LENGTH; i++)
 		sprintf(retHash + (i * 2), "%02x", hash[i]);
 
-	__MOUT__ << salt << std::endl;
+	__COUT__ << salt << std::endl;
 	retHash[SHA512_DIGEST_LENGTH*2] = '\0';
 
 
-	__MOUT__ << salt << std::endl;
+	__COUT__ << salt << std::endl;
 
 
 	return retHash;
@@ -1684,7 +1684,7 @@ std::string WebUsers::getTooltipFilename(
 				(c >= '0' && c <= '9') )
 			filename += c;
 	filename += ".tip";
-	__MOUT__ << "filename " << filename << std::endl;
+	__COUT__ << "filename " << filename << std::endl;
 	return filename;
 }
 
@@ -1697,7 +1697,7 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
 		const std::string &srcId, bool doNeverShow, bool temporarySilence)
 {
 
-	__MOUT__ << "Setting tooltip never show for user: " << username <<
+	__COUT__ << "Setting tooltip never show for user: " << username <<
 			" to " << doNeverShow << " (temporarySilence=" <<
 			temporarySilence << ")" << std::endl;
 
@@ -1713,7 +1713,7 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
 		fclose(fp);
 	}
 	else //default to show tool tip
-		__MOUT_ERR__ << "Big problme with tooltips! File not accessible: " << filename << std::endl;
+		__COUT_ERR__ << "Big problme with tooltips! File not accessible: " << filename << std::endl;
 }
 
 //========================================================================================================================
@@ -1735,11 +1735,11 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 		return;
 	}
 
-	//	__MOUT__ << "username " << username << std::endl;
-	//	__MOUT__ << "srcFile " << srcFile << std::endl;
-	//	__MOUT__ << "srcFunc " << srcFunc << std::endl;
-	//	__MOUT__ << "srcId " << srcId << std::endl;
-	__MOUT__ << "Checking tooltip for user: " << username << std::endl;
+	//	__COUT__ << "username " << username << std::endl;
+	//	__COUT__ << "srcFile " << srcFile << std::endl;
+	//	__COUT__ << "srcFunc " << srcFunc << std::endl;
+	//	__COUT__ << "srcId " << srcId << std::endl;
+	__COUT__ << "Checking tooltip for user: " << username << std::endl;
 
 
 
@@ -1752,7 +1752,7 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 		fgets(line,100,fp);
 		//int val = fgetc(fp);
 		sscanf(line,"%ld",&val);
-		__MOUT__ << "tooltip value read = " << val << std::endl;
+		__COUT__ << "tooltip value read = " << val << std::endl;
 		fclose(fp);
 
 		//if first line in file is a 1 then do not show
@@ -1770,7 +1770,7 @@ void WebUsers::resetAllUserTooltips	(const std::string &userNeedle)
 {
 	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + TOOLTIP_DB_PATH +
 			"/" + userNeedle).c_str());
-	__MOUT__ << "Successfully reset Tooltips for user " << userNeedle << std::endl;
+	__COUT__ << "Successfully reset Tooltips for user " << userNeedle << std::endl;
 }
 
 //========================================================================================================================
@@ -1797,17 +1797,17 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument *xmldoc, bool
 	if(!p) return; //not an active user
 
 	uint64_t	userIndex =	searchUsersDatabaseForUserId(uid);
-	__MOUT__ << "Gettings settings for user: " << UsersUsernameVector[userIndex] << std::endl;
+	__COUT__ << "Gettings settings for user: " << UsersUsernameVector[userIndex] << std::endl;
 
 	std::string fn = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_PREFERENCES_PATH + UsersUsernameVector[userIndex] + "." + (std::string)USERS_PREFERENCES_FILETYPE;
 
 	HttpXmlDocument prefXml;
 
-	__MOUT__ << "Preferences file: " << fn << std::endl;
+	__COUT__ << "Preferences file: " << fn << std::endl;
 
 	if(!prefXml.loadXmlDocument(fn))
 	{
-		__MOUT__ << "Preferences are defaults." << std::endl;
+		__COUT__ << "Preferences are defaults." << std::endl;
 		//insert defaults, no pref document found
 		xmldoc->addTextElementToData(PREF_XML_BGCOLOR_FIELD,PREF_XML_BGCOLOR_DEFAULT);
 		xmldoc->addTextElementToData(PREF_XML_DBCOLOR_FIELD,PREF_XML_DBCOLOR_DEFAULT);
@@ -1816,7 +1816,7 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument *xmldoc, bool
 	}
 	else
 	{
-		__MOUT__ << "Saved Preferences found." << std::endl;
+		__COUT__ << "Saved Preferences found." << std::endl;
 		xmldoc->copyDataChildren(prefXml);
 	}
 
@@ -1825,7 +1825,7 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument *xmldoc, bool
 	//add settings if super user
 	if (includeAccounts && p == (uint8_t)-1) {
 
-		__MOUT__ << "Super User on our hands" << std::endl;
+		__COUT__ << "Super User on our hands" << std::endl;
 
 		xmldoc->addTextElementToData(PREF_XML_ACCOUNTS_FIELD,"");
 
@@ -1850,13 +1850,13 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument *xmldoc, bool
 			(std::string)SYSTEM_PREFERENCES_PREFIX + "." + (std::string)USERS_PREFERENCES_FILETYPE;
 	if(!prefXml.loadXmlDocument(fn))
 	{
-		__MOUT__ << "System Preferences are defaults." << std::endl;
+		__COUT__ << "System Preferences are defaults." << std::endl;
 		//insert defaults, no pref document found
 		xmldoc->addTextElementToData(PREF_XML_SYSLAYOUT_FIELD,PREF_XML_SYSLAYOUT_DEFAULT);
 	}
 	else
 	{
-		__MOUT__ << "Saved System Preferences found." << std::endl;
+		__COUT__ << "Saved System Preferences found." << std::endl;
 		xmldoc->copyDataChildren(prefXml);
 	}
 
@@ -1877,7 +1877,7 @@ void WebUsers::setGenericPreference (uint64_t uid, const std::string &preference
 		const std::string &preferenceValue)
 {
 	uint64_t	userIndex =	searchUsersDatabaseForUserId(uid);
-	//__MOUT__ << "setGenericPreference for user: " << UsersUsernameVector[userIndex] << std::endl;
+	//__COUT__ << "setGenericPreference for user: " << UsersUsernameVector[userIndex] << std::endl;
 
 	//force alpha-numeric with dash/underscore
 	std::string safePreferenceName = "";
@@ -1897,7 +1897,7 @@ void WebUsers::setGenericPreference (uint64_t uid, const std::string &preference
 	std::string fn = UsersUsernameVector[userIndex] + "_" + safePreferenceName +
 			"." + (std::string)USERS_PREFERENCES_FILETYPE;
 
-	__MOUT__ << "Preferences file: " << (dir+fn) << std::endl;
+	__COUT__ << "Preferences file: " << (dir+fn) << std::endl;
 
 	FILE *fp = fopen((dir+fn).c_str(),"w");
 	if(fp)
@@ -1906,7 +1906,7 @@ void WebUsers::setGenericPreference (uint64_t uid, const std::string &preference
 		fclose(fp);
 	}
 	else
-		__MOUT_ERR__ << "Preferences file could not be opened for writing!" << std::endl;
+		__COUT_ERR__ << "Preferences file could not be opened for writing!" << std::endl;
 }
 
 //========================================================================================================================
@@ -1917,7 +1917,7 @@ std::string WebUsers::getGenericPreference (uint64_t uid, const std::string &pre
 		HttpXmlDocument *xmldoc) const
 {
 	uint64_t	userIndex =	searchUsersDatabaseForUserId(uid);
-	//__MOUT__ << "getGenericPreference for user: " << UsersUsernameVector[userIndex] << std::endl;
+	//__COUT__ << "getGenericPreference for user: " << UsersUsernameVector[userIndex] << std::endl;
 
 	//force alpha-numeric with dash/underscore
 	std::string safePreferenceName = "";
@@ -1934,7 +1934,7 @@ std::string WebUsers::getGenericPreference (uint64_t uid, const std::string &pre
 	std::string fn = UsersUsernameVector[userIndex] + "_" + safePreferenceName +
 			"." + (std::string)USERS_PREFERENCES_FILETYPE;
 
-	__MOUT__ << "Preferences file: " << (dir+fn) << std::endl;
+	__COUT__ << "Preferences file: " << (dir+fn) << std::endl;
 
 	//read from preferences file
 	FILE *fp = fopen((dir+fn).c_str(),"rb");
@@ -1947,12 +1947,12 @@ std::string WebUsers::getGenericPreference (uint64_t uid, const std::string &pre
 		fgets(line,size+1,fp);
 		fclose(fp);
 
-		__MOUT__ << "Read value " << line << std::endl;
+		__COUT__ << "Read value " << line << std::endl;
 		if(xmldoc) xmldoc->addTextElementToData(safePreferenceName,line);
 		return line;
 	}
 	else
-		__MOUT__ << "Using default value." << std::endl;
+		__COUT__ << "Using default value." << std::endl;
 
 	//default preference is empty string
 	if(xmldoc) xmldoc->addTextElementToData(safePreferenceName,"");
@@ -1968,11 +1968,11 @@ void WebUsers::changeSettingsForUser (uint64_t uid, const std::string &bgcolor, 
 	if(!p) return; //not an active user
 
 	uint64_t	userIndex =	searchUsersDatabaseForUserId(uid);
-	__MOUT__ << "Changing settings for user: " << UsersUsernameVector[userIndex] << std::endl;
+	__COUT__ << "Changing settings for user: " << UsersUsernameVector[userIndex] << std::endl;
 
 	std::string fn = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_PREFERENCES_PATH + UsersUsernameVector[userIndex] + "." + (std::string)USERS_PREFERENCES_FILETYPE;
 
-	__MOUT__ << "Preferences file: " << fn << std::endl;
+	__COUT__ << "Preferences file: " << fn << std::endl;
 
 	HttpXmlDocument prefXml;
 	prefXml.addTextElementToData(PREF_XML_BGCOLOR_FIELD,bgcolor);
@@ -2005,11 +2005,11 @@ bool WebUsers::setUserWithLock(uint64_t uid_master, bool lock, std::string usern
 {
 	uint8_t p = getPermissionsForUser(uid_master);
 
-	__MOUT__ << "permissions " << (int)p << std::endl;
-	__MOUT__ << "usersUsernameWithLock_ " << usersUsernameWithLock_ << std::endl;
-	__MOUT__ << "lock " << lock << std::endl;
-	__MOUT__ << "username " << username << std::endl;
-	__MOUT__ << "isUsernameActive(username) " << isUsernameActive(username) << std::endl;
+	__COUT__ << "permissions " << (int)p << std::endl;
+	__COUT__ << "usersUsernameWithLock_ " << usersUsernameWithLock_ << std::endl;
+	__COUT__ << "lock " << lock << std::endl;
+	__COUT__ << "username " << username << std::endl;
+	__COUT__ << "isUsernameActive(username) " << isUsernameActive(username) << std::endl;
 
 	if(p != (uint8_t)-1) return false; //not a super user
 
@@ -2017,7 +2017,7 @@ bool WebUsers::setUserWithLock(uint64_t uid_master, bool lock, std::string usern
 	{
 		if(!CareAboutCookieCodes_ && username != DEFAULT_ADMIN_USERNAME)
 		{
-			__MOUT__ << "User tried to lock for a user other than admin in wiz mode. Not allowed." << std::endl;
+			__COUT__ << "User tried to lock for a user other than admin in wiz mode. Not allowed." << std::endl;
 			return false;
 		}
 		usersUsernameWithLock_ = username;
@@ -2033,7 +2033,7 @@ bool WebUsers::setUserWithLock(uint64_t uid_master, bool lock, std::string usern
 		FILE *fp = fopen(securityFileName.c_str(),"w");
 		if(!fp)
 		{
-			__MOUT_INFO__ << "USER_WITH_LOCK_FILE " << USER_WITH_LOCK_FILE <<
+			__COUT_INFO__ << "USER_WITH_LOCK_FILE " << USER_WITH_LOCK_FILE <<
 					" not found. Ignoring." << std::endl;
 		}
 		else
@@ -2056,28 +2056,28 @@ void WebUsers::modifyAccountSettings (uint64_t uid_master, uint8_t cmd_type, std
 	uint64_t modi = searchUsersDatabaseForUsername(username);
 	if(modi == 0) 
 	{
-		__MOUT__ << "Cannot modify first user" << std::endl;
+		__COUT__ << "Cannot modify first user" << std::endl;
 		return;
 	}
 
 	if(username.length() < USERNAME_LENGTH ||  displayname.length() < DISPLAY_NAME_LENGTH)
 	{
-		__MOUT__ << "Invalid Username or Display Name must be length " << USERNAME_LENGTH << " or " << DISPLAY_NAME_LENGTH << std::endl;
+		__COUT__ << "Invalid Username or Display Name must be length " << USERNAME_LENGTH << " or " << DISPLAY_NAME_LENGTH << std::endl;
 		return;
 	} 
 
 	int inputp;
 	sscanf(permissions.c_str(),"%d",&inputp);
 
-	__MOUT__ << "Input Permissions " << inputp << std::endl;
+	__COUT__ << "Input Permissions " << inputp << std::endl;
 
 	switch(cmd_type)
 	{
 	case MOD_TYPE_UPDATE:
-		__MOUT__ << "MOD_TYPE_UPDATE " << username << " := " << inputp << std::endl;
+		__COUT__ << "MOD_TYPE_UPDATE " << username << " := " << inputp << std::endl;
 		if(modi == NOT_FOUND_IN_DATABASE)
 		{
-			__MOUT__ << "User not found!? Should not happen." << std::endl;
+			__COUT__ << "User not found!? Should not happen." << std::endl;
 			return;
 		}
 
@@ -2097,7 +2097,7 @@ void WebUsers::modifyAccountSettings (uint64_t uid_master, uint8_t cmd_type, std
 			uint64_t i = searchUsersDatabaseForUserId(uid_master);
 			if(i == NOT_FOUND_IN_DATABASE)
 			{
-				__MOUT__ << "Master User not found!? Should not happen." << std::endl;
+				__COUT__ << "Master User not found!? Should not happen." << std::endl;
 				return;
 			}
 			UsersLastModifierUsernameVector[modi] = UsersUsernameVector[i];
@@ -2105,15 +2105,15 @@ void WebUsers::modifyAccountSettings (uint64_t uid_master, uint8_t cmd_type, std
 		}
 		break;
 	case MOD_TYPE_ADD:
-		__MOUT__ << "MOD_TYPE_ADD " << username << " - " << displayname << std::endl;
+		__COUT__ << "MOD_TYPE_ADD " << username << " - " << displayname << std::endl;
 		createNewAccount(username,displayname);
 		break;
 	case MOD_TYPE_DELETE:
-		__MOUT__ << "MOD_TYPE_DELETE " << username << " - " << displayname << std::endl;
+		__COUT__ << "MOD_TYPE_DELETE " << username << " - " << displayname << std::endl;
 		deleteAccount(username,displayname);
 		break;
 	default:
-		__MOUT__ << "Undefined command - do nothing " << username << std::endl;
+		__COUT__ << "Undefined command - do nothing " << username << std::endl;
 	}	
 
 	saveDatabaseToFile(DB_USERS);
@@ -2162,7 +2162,7 @@ void WebUsers::loadUserWithLock()
 	FILE *fp = fopen(securityFileName.c_str(),"r");
 	if(!fp)
 	{
-		__MOUT_INFO__ << "USER_WITH_LOCK_FILE " << USER_WITH_LOCK_FILE <<
+		__COUT_INFO__ << "USER_WITH_LOCK_FILE " << USER_WITH_LOCK_FILE <<
 				" not found. Defaulting to admin lock." << std::endl;
 
 		//default to admin lock if no file exists
@@ -2176,18 +2176,18 @@ void WebUsers::loadUserWithLock()
 	}
 
 	//attempt to set lock
-	__MOUT__ << "Attempting to load username with lock: " << username << std::endl;
+	__COUT__ << "Attempting to load username with lock: " << username << std::endl;
 
 	if(strlen(username) == 0)
 	{
-		__MOUT_INFO__ << "Loaded state for user-with-lock is unlocked." << std::endl;
+		__COUT_INFO__ << "Loaded state for user-with-lock is unlocked." << std::endl;
 		return;
 	}
 
 	uint64_t i = searchUsersDatabaseForUsername(username);
 	if(i == NOT_FOUND_IN_DATABASE)
 	{
-		__MOUT_INFO__ << "username " << username <<
+		__COUT_INFO__ << "username " << username <<
 				" not found in database. Ignoring." << std::endl;
 		return;
 	}
@@ -2224,7 +2224,7 @@ void WebUsers::loadSecuritySelection()
 	else
 		securityType_ = SECURITY_TYPE_DIGEST_ACCESS; // default, if illegal
 
-	__MOUT__ << "The current security type is " << securityType_ << std::endl;
+	__COUT__ << "The current security type is " << securityType_ << std::endl;
 
 	if(fp) fclose(fp);
 
@@ -2234,7 +2234,7 @@ void WebUsers::loadSecuritySelection()
 	else
 		CareAboutCookieCodes_ = true;
 
-	__MOUT__ << "CareAboutCookieCodes_: " <<
+	__COUT__ << "CareAboutCookieCodes_: " <<
 			CareAboutCookieCodes_ << std::endl;
 
 }
@@ -2254,11 +2254,11 @@ void WebUsers::NACDisplayThread(std::string nac, std::string user)
 	for (; i < 5; ++i)
 	{
 		std::this_thread::sleep_for (std::chrono::seconds(2));
-		__MOUT__ << __COUT_HDR_P__ << "\n******************************************************************** " << std::endl;
-		__MOUT__ << __COUT_HDR_P__ << "\n******************************************************************** " << std::endl;
-		__MOUT__ << __COUT_HDR_P__ << "\n\nNew account code = " << nac << " for user: " << user << "\n" << std::endl;
-		__MOUT__ << __COUT_HDR_P__ << "\n******************************************************************** " << std::endl;
-		__MOUT__ << __COUT_HDR_P__ << "\n******************************************************************** " << std::endl;
+		__COUT__ << __COUT_HDR_P__ << "\n******************************************************************** " << std::endl;
+		__COUT__ << __COUT_HDR_P__ << "\n******************************************************************** " << std::endl;
+		__COUT__ << __COUT_HDR_P__ << "\n\nNew account code = " << nac << " for user: " << user << "\n" << std::endl;
+		__COUT__ << __COUT_HDR_P__ << "\n******************************************************************** " << std::endl;
+		__COUT__ << __COUT_HDR_P__ << "\n******************************************************************** " << std::endl;
 	}
 }
 

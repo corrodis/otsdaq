@@ -58,7 +58,7 @@ void RawDataSaverConsumerBase::openFile(std::string runNumber)
 	if(!outFile_.is_open())
 	{
 		__SS__ << "Can't open file " << fileName.str() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 

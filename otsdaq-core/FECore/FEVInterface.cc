@@ -18,11 +18,11 @@ void FEVInterface::configureSlowControls(void)
 
 	if(slowControlsGroupLink.isDisconnected())
 	{
-		__MOUT__ << "slowControlsGroupLink is disconnected, so done configuring slow controls." <<
+		__COUT__ << "slowControlsGroupLink is disconnected, so done configuring slow controls." <<
 				std::endl;
 		return;
 	}
-	__MOUT__ << "slowControlsGroupLink is valid! Configuring slow controls..." <<
+	__COUT__ << "slowControlsGroupLink is valid! Configuring slow controls..." <<
 			std::endl;
 
 	mapOfSlowControlsChannels_.clear();
@@ -33,7 +33,7 @@ void FEVInterface::configureSlowControls(void)
 		//skip channels that are off
 		if(!(groupLinkChild.second.getNode("Status").getValue<bool>())) continue;
 
-		__MOUT__ << "Channel:" << getInterfaceUID() <<
+		__COUT__ << "Channel:" << getInterfaceUID() <<
 				"/" <<  groupLinkChild.first << "\t Type:" <<
 				groupLinkChild.second.getNode("ChannelDataType") <<
 				std::endl;
@@ -72,7 +72,7 @@ void FEVInterface::configureSlowControls(void)
 //========================================================================================================================
 bool FEVInterface::slowControlsRunning(void)
 {
-	__MOUT__ << "slowControlsRunning" << std::endl;
+	__COUT__ << "slowControlsRunning" << std::endl;
 	std::string readVal;
 	readVal.resize(universalDataSize_); //size to data in advance
 
@@ -93,12 +93,12 @@ bool FEVInterface::slowControlsRunning(void)
 
 	if(slowControlsInterfaceLink.isDisconnected())
 	{
-		__MOUT__ << "slowControlsInterfaceLink is disconnected, so no socket made." <<
+		__COUT__ << "slowControlsInterfaceLink is disconnected, so no socket made." <<
 				std::endl;
 	}
 	else
 	{
-		__MOUT__ << "slowControlsInterfaceLink is valid! Create tx socket..." <<
+		__COUT__ << "slowControlsInterfaceLink is valid! Create tx socket..." <<
 				std::endl;
 		txSocket.reset(new UDPDataStreamerBase(
 				FEInterfaceNode.getNode("SlowControlsTxSocketIPAddress").getValue	<std::string>(),
@@ -119,7 +119,7 @@ bool FEVInterface::slowControlsRunning(void)
 		aggregateFileIsBinaryFormat =
 				FEInterfaceNode.getNode("SlowControlsSaveBinaryFile").getValue<bool>();
 
-		__MOUT_INFO__ << "Slow Controls Aggregate Saving turned On BinaryFormat=" <<
+		__COUT_INFO__ << "Slow Controls Aggregate Saving turned On BinaryFormat=" <<
 				aggregateFileIsBinaryFormat << std::endl;
 
 		std::string saveFullFileName =
@@ -137,16 +137,16 @@ bool FEVInterface::slowControlsRunning(void)
 						"ab":"a");
 		if(!fp)
 		{
-			__MOUT_ERR__ << "Failed to open slow controls channel file: " <<
+			__COUT_ERR__ << "Failed to open slow controls channel file: " <<
 					saveFullFileName << std::endl;
 			//continue on, just nothing will be saved
 		}
 		else
-			__MOUT_INFO__ << "Slow controls aggregate file opened: " <<
+			__COUT_INFO__ << "Slow controls aggregate file opened: " <<
 			saveFullFileName << std::endl;
 	}
 	else
-		__MOUT_INFO__ << "Slow Controls Aggregate Saving turned off." << std::endl;
+		__COUT_INFO__ << "Slow Controls Aggregate Saving turned off." << std::endl;
 
 
 	time_t	timeCounter = 0;
@@ -157,12 +157,12 @@ bool FEVInterface::slowControlsRunning(void)
 		++timeCounter;
 
 		if(txBuffer.size())
-			__MOUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
+			__COUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
 
 		txBuffer.resize(0); //clear buffer a la txBuffer = "";
 
-		//__MOUT__ << "timeCounter=" << timeCounter << std::endl;
-		//__MOUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
+		//__COUT__ << "timeCounter=" << timeCounter << std::endl;
+		//__COUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
 
 		for(auto &slowControlsChannelPair : mapOfSlowControlsChannels_)
 		{
@@ -175,9 +175,9 @@ bool FEVInterface::slowControlsRunning(void)
 			if(timeCounter % channel->delayBetweenSamples_) continue;
 
 
-			__MOUT__ << "Channel:" << getInterfaceUID() <<
+			__COUT__ << "Channel:" << getInterfaceUID() <<
 					"/" << slowControlsChannelPair.first << std::endl;
-			__MOUT__ << "Monitoring..." << std::endl;
+			__COUT__ << "Monitoring..." << std::endl;
 
 			universalRead(channel->getUniversalAddress(),
 					&readVal[0]);
@@ -188,19 +188,19 @@ bool FEVInterface::slowControlsRunning(void)
 			//					ss << std::hex << (int)((readVal[i]>>4)&0xF) <<
 			//					(int)((readVal[i])&0xF) << " " << std::dec;
 			//				ss << std::endl;
-			//				__MOUT__ << "Sampled.\n" << ss.str();
+			//				__COUT__ << "Sampled.\n" << ss.str();
 			//			}
 
 			//have sample
 			channel->handleSample(readVal,txBuffer, fp, aggregateFileIsBinaryFormat);
 			if(txBuffer.size())
-				__MOUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
+				__COUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
 
 			//make sure buffer hasn't exploded somehow
 			if(txBuffer.size() > txBufferSz)
 			{
 				__SS__ << "This should never happen hopefully!" << std::endl;
-				__MOUT_ERR__ << "\n" << ss.str();
+				__COUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 
@@ -208,7 +208,7 @@ bool FEVInterface::slowControlsRunning(void)
 			if(txSocket &&
 					txBuffer.size() > txBufferFullThreshold)
 			{
-				__MOUT__ << "Sending now! txBufferFullThreshold=" << txBufferFullThreshold << std::endl;
+				__COUT__ << "Sending now! txBufferFullThreshold=" << txBufferFullThreshold << std::endl;
 				txSocket->send(txBuffer);
 				txBuffer.resize(0); //clear buffer a la txBuffer = "";
 			}
@@ -217,13 +217,13 @@ bool FEVInterface::slowControlsRunning(void)
 		}
 
 		if(txBuffer.size())
-			__MOUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
+			__COUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
 
 		//send anything left
 		if(txSocket &&
 				txBuffer.size())
 		{
-			__MOUT__ << "Sending now!" << std::endl;
+			__COUT__ << "Sending now!" << std::endl;
 			txSocket->send(txBuffer);
 		}
 
@@ -251,7 +251,7 @@ void FEVInterface::registerFEMacroFunction(
 			mapOfFEMacroFunctions_.end())
 	{
 		__SS__ << "feMacroName '" << feMacroName << "' already exists! Not allowed." << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 
@@ -281,7 +281,7 @@ const std::string& FEVInterface::getFEMacroInputArgument(frontEndMacroInArgs_t& 
 			return pair.second;
 	}
 	__SS__ << "Requested input argument not found with name '" << argName << "'" << std::endl;
-	__MOUT_ERR__ << "\n" << ss.str();
+	__COUT_ERR__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
 
@@ -299,7 +299,7 @@ std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& args
 			return pair.second;
 	}
 	__SS__ << "Requested output argument not found with name '" << argName << "'" << std::endl;
-	__MOUT_ERR__ << "\n" << ss.str();
+	__COUT_ERR__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
 

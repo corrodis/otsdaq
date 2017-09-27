@@ -17,7 +17,7 @@ ReceiverSocket::ReceiverSocket(void)
 , numberOfBytes_(0)
 , readCounter_  (0)
 {
-	//__MOUT__ << std::endl;
+	//__COUT__ << std::endl;
 }
 
 //========================================================================================================================
@@ -27,7 +27,7 @@ ReceiverSocket::ReceiverSocket(std::string IPAddress, unsigned int port)
 , numberOfBytes_(0)
 , readCounter_  (0)
 {
-	//__MOUT__ << std::endl;
+	//__COUT__ << std::endl;
 }
 
 //========================================================================================================================
@@ -63,7 +63,7 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, u
 		buffer.resize(maxSocketSize_); //NOTE: this is inexpensive according to Lorenzo/documentation in C++11 (only increases size once and doesn't decrease size)
 		if ((numberOfBytes_ = recvfrom(socketNumber_, &buffer[0], maxSocketSize_, 0, (struct sockaddr *)&fromAddress_, &addressLength_)) == -1)
 		{
-			__MOUT__ << "At socket with IPAddress: " << getIPAddress() << " port: " << getPort() << std::endl;
+			__COUT__ << "At socket with IPAddress: " << getIPAddress() << " port: " << getPort() << std::endl;
 			__SS__ << "Error reading buffer from\tIP:\t";
 			for(int i  = 0; i < 4; i++)
 			{
@@ -72,7 +72,7 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, u
 					ss << ".";
 			}
 			ss << "\tPort\t" << fromPort << std::endl;
-			__MOUT__ << "\n" << ss.str();
+			__COUT__ << "\n" << ss.str();
 			return -1;
 		}
 		//char address[INET_ADDRSTRLEN];
@@ -80,11 +80,11 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, u
 		fromIPAddress = fromAddress_.sin_addr.s_addr;
 		fromPort      = fromAddress_.sin_port;
 
-		//__MOUT__ << __PRETTY_FUNCTION__ << "IP: " << std::hex << fromIPAddress << std::dec << " port: " << fromPort << std::endl;
-		//__MOUT__ << "Socket Number: " << socketNumber_ << " number of bytes: " << nOfBytes << std::endl;
+		//__COUT__ << __PRETTY_FUNCTION__ << "IP: " << std::hex << fromIPAddress << std::dec << " port: " << fromPort << std::endl;
+		//__COUT__ << "Socket Number: " << socketNumber_ << " number of bytes: " << nOfBytes << std::endl;
 		//gettimeofday(&tvend,NULL);
-		//__MOUT__ << "started at" << tvbegin.tv_sec << ":" <<tvbegin.tv_usec << std::endl;
-		//__MOUT__ << "ended at" << tvend.tv_sec << ":" <<tvend.tv_usec << std::endl;
+		//__COUT__ << "started at" << tvbegin.tv_sec << ":" <<tvbegin.tv_usec << std::endl;
+		//__COUT__ << "ended at" << tvend.tv_sec << ":" <<tvend.tv_usec << std::endl;
 
 		//NOTE: this is inexpensive according to Lorenzo/documentation in C++11 (only increases size once and doesn't decrease size)
 		buffer.resize(numberOfBytes_);
@@ -98,7 +98,7 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, u
 		getsockname(socketNumber_, (struct sockaddr *)&sin, &len);
 
 		if(verbose)
-			__MOUT__
+			__COUT__
 				<< "No new messages for " << timeoutSeconds+timeoutUSeconds/1000.
 				<< "s (Total " << readCounter_*(timeoutSeconds+timeoutUSeconds/1000.)
 				<< "s). Read request timed out for port: " << ntohs(sin.sin_port)
@@ -131,14 +131,14 @@ int ReceiverSocket::receive(std::vector<uint32_t>& buffer, unsigned long& fromIP
 	FD_ZERO(&fileDescriptor_);
 	FD_SET(socketNumber_  , &fileDescriptor_);
 	select(socketNumber_+1, &fileDescriptor_, 0, 0, &timeout_);
-	__MOUT__ << "Is this a successful reeeaaad???" << std::endl;
+	__COUT__ << "Is this a successful reeeaaad???" << std::endl;
 
 	if(FD_ISSET(socketNumber_, &fileDescriptor_))
 	{
 		buffer.resize(maxSocketSize_/sizeof(uint32_t)); //NOTE: this is inexpensive according to Lorezno/documentation in C++11 (only increases size once and doesn't decrease size)
 		if ((numberOfBytes_ = recvfrom(socketNumber_, &buffer[0], maxSocketSize_, 0, (struct sockaddr *)&fromAddress_, &addressLength_)) == -1)
 		{
-			__MOUT__ << "At socket with IPAddress: " << getIPAddress() << " port: " << getPort() << std::endl;
+			__COUT__ << "At socket with IPAddress: " << getIPAddress() << " port: " << getPort() << std::endl;
 			__SS__ << "Error reading buffer from\tIP:\t";
 			for(int i  = 0; i < 4; i++)
 			{
@@ -147,7 +147,7 @@ int ReceiverSocket::receive(std::vector<uint32_t>& buffer, unsigned long& fromIP
 					ss << ".";
 			}
 			ss << "\tPort\t" << fromPort << std::endl;
-			__MOUT__ << "\n" << ss.str();
+			__COUT__ << "\n" << ss.str();
 			return -1;
 		}
 		//char address[INET_ADDRSTRLEN];
@@ -155,11 +155,11 @@ int ReceiverSocket::receive(std::vector<uint32_t>& buffer, unsigned long& fromIP
 		fromIPAddress = fromAddress_.sin_addr.s_addr;
 		fromPort      = fromAddress_.sin_port;
 
-		//__MOUT__ << __PRETTY_FUNCTION__ << "IP: " << std::hex << fromIPAddress << std::dec << " port: " << fromPort << std::endl;
-		//__MOUT__ << "Socket Number: " << socketNumber_ << " number of bytes: " << nOfBytes << std::endl;
+		//__COUT__ << __PRETTY_FUNCTION__ << "IP: " << std::hex << fromIPAddress << std::dec << " port: " << fromPort << std::endl;
+		//__COUT__ << "Socket Number: " << socketNumber_ << " number of bytes: " << nOfBytes << std::endl;
 		//gettimeofday(&tvend,NULL);
-		//__MOUT__ << "started at" << tvbegin.tv_sec << ":" <<tvbegin.tv_usec << std::endl;
-		//__MOUT__ << "ended at" << tvend.tv_sec << ":" <<tvend.tv_usec << std::endl;
+		//__COUT__ << "started at" << tvbegin.tv_sec << ":" <<tvbegin.tv_usec << std::endl;
+		//__COUT__ << "ended at" << tvend.tv_sec << ":" <<tvend.tv_usec << std::endl;
 
 		//NOTE: this is inexpensive according to Lorenzo/documentation in C++11 (only increases size once and doesn't decrease size)
 		buffer.resize(numberOfBytes_/sizeof(uint32_t));
@@ -173,13 +173,13 @@ int ReceiverSocket::receive(std::vector<uint32_t>& buffer, unsigned long& fromIP
 		getsockname(socketNumber_, (struct sockaddr *)&sin, &len);
 
 		if(verbose)
-			__MOUT__ << __COUT_HDR_FL__
+			__COUT__ << __COUT_HDR_FL__
 				<< "No new messages for " << timeoutSeconds+timeoutUSeconds/1000.
 				<< "s (Total " << readCounter_*(timeoutSeconds+timeoutUSeconds/1000.)
 				<< "s). Read request timed out for port: " << ntohs(sin.sin_port)
 				<< std::endl;
 		return -1;
 	}
-	__MOUT__ << "This a successful reeeaaad" << std::endl;
+	__COUT__ << "This a successful reeeaaad" << std::endl;
 	return 0;
 }

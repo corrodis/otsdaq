@@ -42,8 +42,8 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager* configManager)
 	//make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
-	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 	const XDAQContextConfiguration *contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);
 	std::vector<const XDAQContextConfiguration::XDAQContext *> aggContexts =
@@ -56,7 +56,7 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager* configManager)
 		ConfigurationTree aggConfigNode = contextConfig->getSupervisorConfigNode(configManager,
 				aggContext->contextUID_, aggContext->applications_[0].applicationUID_);
 
-		__MOUT__ << "Path for this aggregator config is " <<
+		__COUT__ << "Path for this aggregator config is " <<
 				aggContext->contextUID_ << "/" <<
 				aggContext->applications_[0].applicationUID_ << "/" <<
 				aggConfigNode.getValueAsString() <<
@@ -71,7 +71,7 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager* configManager)
 //========================================================================================================================
 std::string ARTDAQAggregatorConfiguration::getFHICLFilename(const ConfigurationTree &aggregatorNode)
 {
-	__MOUT__ << "ARTDAQ Aggregator UID: " << aggregatorNode.getValue() << std::endl;
+	__COUT__ << "ARTDAQ Aggregator UID: " << aggregatorNode.getValue() << std::endl;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
 	std::string uid = aggregatorNode.getValue();
 	for(unsigned int i=0;i<uid.size();++i)
@@ -82,7 +82,7 @@ std::string ARTDAQAggregatorConfiguration::getFHICLFilename(const ConfigurationT
 
 	filename += ".fcl";
 
-	__MOUT__ << "fcl: " << filename << std::endl;
+	__COUT__ << "fcl: " << filename << std::endl;
 
 	return filename;
 }
@@ -237,7 +237,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 
 	std::string filename = getFHICLFilename(aggregatorNode);
 
-	__MOUT__ << "selfRank = " << selfRank << std::endl;
+	__COUT__ << "selfRank = " << selfRank << std::endl;
 
 
 	/////////////////////////

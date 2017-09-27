@@ -66,7 +66,7 @@ void UDPDataListenerProducer::slowWrite(void)
 
 		while(DataProducer::write(data_, header_) < 0)
 		{
-			__MOUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
+			__COUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
 			usleep(10000);
 			return;
 		}
@@ -80,7 +80,7 @@ void UDPDataListenerProducer::fastWrite(void)
 
 	if(DataProducer::attachToEmptySubBuffer(dataP_, headerP_) < 0)
 	{
-		__MOUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
+		__COUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
 		usleep(10000);
 		return;
 	}
@@ -91,7 +91,7 @@ void UDPDataListenerProducer::fastWrite(void)
 		(*headerP_)["Port"]      = NetworkConverters::networkToStringPort(port_);
 		//unsigned long long value;
 		//memcpy((void *)&value, (void *) dataP_->substr(2).data(),8); //make data counter
-		//__MOUT__ << "Got data: " << dataP_->length()
+		//__COUT__ << "Got data: " << dataP_->length()
 		//		<< std::hex << value << std::dec
 		//		<< " from port: " << NetworkConverters::networkToUnsignedPort(port_)
 		//										 << std::endl;

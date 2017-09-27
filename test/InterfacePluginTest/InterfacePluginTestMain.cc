@@ -8,8 +8,6 @@
 #include "otsdaq-core/FECore/FEVInterface.h"
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/Configurations.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/FEConfiguration.h"
 #include <iostream>
 #include <memory>
 #include "otsdaq-core/PluginMakers/MakeInterfaceConfiguration.h"

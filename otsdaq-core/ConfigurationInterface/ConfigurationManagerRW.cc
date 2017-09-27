@@ -38,7 +38,7 @@ using namespace ots;
 ConfigurationManagerRW::ConfigurationManagerRW(std::string username)
 : ConfigurationManager(username) //for use as author of new views
 {
-	__MOUT__ << "Using Config Mgr with Write Access! (for " << username << ")" << std::endl;
+	__COUT__ << "Using Config Mgr with Write Access! (for " << username << ")" << std::endl;
 
 
 	//FIXME only necessarily temporarily while Lore is still using fileSystem xml
@@ -69,7 +69,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 	//existing configurations are defined by which infos are in CONFIGURATION_INFO_PATH
 	//can test that the class exists based on this
 	//and then which versions
-	__MOUT__ << "Extracting list of Configuration tables" << std::endl;
+	__COUT__ << "Extracting list of Configuration tables" << std::endl;
 	DIR *pDIR;
 	struct dirent *entry;
 	std::string path = CONFIGURATION_INFO_PATH;
@@ -92,7 +92,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 
 			entry->d_name[strlen(entry->d_name) - strlen(fileExt)] = '\0'; //remove file extension to get config name
 
-			//__MOUT__ << entry->d_name << std::endl;
+			//__COUT__ << entry->d_name << std::endl;
 
 			//0 will force the creation of new instance (and reload from Info)
 			configuration = 0;
@@ -109,7 +109,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 				if(configuration) delete configuration;
 				configuration = 0;
 
-				__MOUT__ << "Skipping! No valid class found for... " << entry->d_name << "\n";
+				__COUT__ << "Skipping! No valid class found for... " << entry->d_name << "\n";
 				continue;
 			}
 			catch(std::runtime_error &e)
@@ -117,8 +117,8 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 				if(configuration) delete configuration;
 				configuration = 0;
 
-				__MOUT__ << "Skipping! No valid class found for... " << entry->d_name << "\n";
-				__MOUT__ << "Error: " << e.what() << std::endl;
+				__COUT__ << "Skipping! No valid class found for... " << entry->d_name << "\n";
+				__COUT__ << "Error: " << e.what() << std::endl;
 
 
 				//for a runtime_error, it is likely that columns are the problem
@@ -138,7 +138,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 					}
 
 					//attempt to recover and build a mock-up
-					__MOUT__ << "Attempting to allow illegal columns!" << std::endl;
+					__COUT__ << "Attempting to allow illegal columns!" << std::endl;
 
 
 					std::string returnedAccumulatedErrors;
@@ -149,11 +149,11 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 					}
 					catch(...)
 					{
-						__MOUT__ << "Skipping! Allowing illegal columns didn't work either... " <<
+						__COUT__ << "Skipping! Allowing illegal columns didn't work either... " <<
 								entry->d_name << "\n";
 						continue;
 					}
-					__MOUT__ << "Error (but allowed): " << returnedAccumulatedErrors << std::endl;
+					__COUT__ << "Error (but allowed): " << returnedAccumulatedErrors << std::endl;
 
 					if(errorFilterName == "" ||
 							errorFilterName == entry->d_name)
@@ -164,7 +164,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 					continue;
 			}
 
-			//__MOUT__ << "Instance created: " << entry->d_name << "\n"; //found!
+			//__COUT__ << "Instance created: " << entry->d_name << "\n"; //found!
 
 			if(nameToConfigurationMap_[entry->d_name]) //handle if instance existed
 			{
@@ -174,7 +174,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 				for(auto &version:versions)
 					if(version.isTemporaryVersion())
 					{
-						__MOUT__ << "copying tmp = " << version << std::endl;
+						__COUT__ << "copying tmp = " << version << std::endl;
 
 						try //do NOT let ConfigurationView::init() throw here
 						{
@@ -187,7 +187,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 						catch(...) //do NOT let invalid temporary version throw at this point
 						{}	//just trust configurationBase throws out the failed version
 					}
-				//__MOUT__ << "deleting: " << entry->d_name << "\n"; //found!
+				//__COUT__ << "deleting: " << entry->d_name << "\n"; //found!
 				delete nameToConfigurationMap_[entry->d_name];
 				nameToConfigurationMap_[entry->d_name] = 0;
 			}
@@ -204,13 +204,13 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 			for(auto &version:versions)
 				if(version.isTemporaryVersion())
 				{
-					__MOUT__ << "surviving tmp = " << version << std::endl;
+					__COUT__ << "surviving tmp = " << version << std::endl;
 					allConfigurationInfo_[entry->d_name].versions_.emplace(version);
 				}
 		}
 		closedir(pDIR);
 	}
-	__MOUT__ << "Extracting list of Configuration tables complete" << std::endl;
+	__COUT__ << "Extracting list of Configuration tables complete" << std::endl;
 
 	//call init to load active versions by default
 	init(accumulatedErrors);
@@ -224,7 +224,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 std::map<std::string,std::map<std::string,ConfigurationVersion> >
 ConfigurationManagerRW::getActiveVersionAliases(void) const
 {
-	__MOUT__ << "getActiveVersionAliases()" << std::endl;
+	__COUT__ << "getActiveVersionAliases()" << std::endl;
 	std::map<std::string,std::map<std::string,ConfigurationVersion> > retMap;
 
 	std::map<std::string, ConfigurationVersion> activeVersions = getActiveVersions();
@@ -233,11 +233,11 @@ ConfigurationManagerRW::getActiveVersionAliases(void) const
 	{
 		__SS__ << "Active version of VersionAliases  missing!" <<
 				"Make sure you have a valid active Backbone Group." << std::endl;
-		__MOUT_WARN__ << "\n" << ss.str();
+		__COUT_WARN__ << "\n" << ss.str();
 		return retMap;
 	}
 
-	__MOUT__ << "activeVersions[\"VersionAliasesConfiguration\"]=" <<
+	__COUT__ << "activeVersions[\"VersionAliasesConfiguration\"]=" <<
 			activeVersions[versionAliasesTableName] << std::endl;
 
 	//always have scratch alias for each table that has a scratch version
@@ -289,14 +289,14 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 	if(accumulatedTreeErrors &&
 			*accumulatedTreeErrors != "")
 	{
-		__MOUT_ERR__ << "Errors were accumulated so de-activating group: " <<
+		__COUT_ERR__ << "Errors were accumulated so de-activating group: " <<
 				configGroupName << " (" << configGroupKey << ")" << std::endl;
 		try //just in case any lingering pieces, lets deactivate
 		{ destroyConfigurationGroup(configGroupName,true); }
 		catch(...){}
 	}
 
-	__MOUT_INFO__ << "Updating persistent active groups to " <<
+	__COUT_INFO__ << "Updating persistent active groups to " <<
 			ConfigurationManager::ACTIVE_GROUP_FILENAME << " ..."  << std::endl;
 
 	std::string fn = ConfigurationManager::ACTIVE_GROUP_FILENAME;
@@ -305,16 +305,16 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 	{
 		__SS__ << "Fatal Error! Unable to open the file " <<
 				ConfigurationManager::ACTIVE_GROUP_FILENAME << " for editing! Is there a permissions problem?" << std::endl;
-		__MOUT_ERR__ << ss.str();
+		__COUT_ERR__ << ss.str();
 		throw std::runtime_error(ss.str());
 		return;
 	}
 
-	__MOUT__ << theContextGroup_ << "(" <<
+	__COUT__ << theContextGroup_ << "(" <<
 			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-	__MOUT__ << theBackboneGroup_ << "(" <<
+	__COUT__ << theBackboneGroup_ << "(" <<
 			(theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-	__MOUT__ << theConfigurationGroup_ << "(" <<
+	__COUT__ << theConfigurationGroup_ << "(" <<
 			(theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1") << ")" << std::endl;
 
 	fprintf(fp,"%s\n",theContextGroup_.c_str());
@@ -332,7 +332,7 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 // 	returns temporary version number (which is always negative)
 ConfigurationVersion ConfigurationManagerRW::createTemporaryBackboneView(ConfigurationVersion sourceViewVersion)
 {
-	__MOUT_INFO__ << "Creating temporary backbone view from version " <<
+	__COUT_INFO__ << "Creating temporary backbone view from version " <<
 			sourceViewVersion << std::endl;
 
 	//find common available temporary version among backbone members
@@ -346,7 +346,7 @@ ConfigurationVersion ConfigurationManagerRW::createTemporaryBackboneView(Configu
 			tmpVersion = retTmpVersion;
 	}
 
-	__MOUT__ << "Common temporary backbone version found as " <<
+	__COUT__ << "Common temporary backbone version found as " <<
 			tmpVersion << std::endl;
 
 	//create temporary views from source version to destination temporary version
@@ -355,9 +355,10 @@ ConfigurationVersion ConfigurationManagerRW::createTemporaryBackboneView(Configu
 		retTmpVersion = getConfigurationByName(name)->createTemporaryView(sourceViewVersion, tmpVersion);
 		if(retTmpVersion != tmpVersion)
 		{
-			__MOUT_ERR__ << "Failure! Temporary view requested was " <<
+			__SS__ << "Failure! Temporary view requested was " <<
 					tmpVersion << ". Mismatched temporary view created: " << retTmpVersion << std::endl;
-			throw std::runtime_error("Mismatched temporary view created!");
+			__COUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
 		}
 	}
 
@@ -372,7 +373,7 @@ ConfigurationBase* ConfigurationManagerRW::getConfigurationByName(const std::str
 	if(nameToConfigurationMap_.find(configurationName) == nameToConfigurationMap_.end())
 	{
 		__SS__ << "\nConfiguration not found with name: " << configurationName << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 	return nameToConfigurationMap_[configurationName];
@@ -427,7 +428,7 @@ ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(const std::str
 	while(!newVersion.isScratchVersion() && allConfigurationInfo_[configurationName].versions_.find(newVersion) !=
 			allConfigurationInfo_[configurationName].versions_.end())
 	{
-		__MOUT_ERR__ << "What happenened!?? ERROR::: newVersion v" << newVersion <<
+		__COUT_ERR__ << "What happenened!?? ERROR::: newVersion v" << newVersion <<
 				" already exists!? How is it possible? Retrace your steps and tell an admin." << std::endl;
 
 		//create a new temporary version of the target view
@@ -438,7 +439,7 @@ ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(const std::str
 		else
 			newVersion = ConfigurationVersion::getNextVersion(newVersion);
 
-		__MOUT_WARN__ << "Attempting to recover and use v" << newVersion << std::endl;
+		__COUT_WARN__ << "Attempting to recover and use v" << newVersion << std::endl;
 
 
 		if(!makeTemporary) //saveNewVersion makes the new version the active version
@@ -451,14 +452,14 @@ ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(const std::str
 	{
 		__SS__ << "Something went wrong saving the new version v" << newVersion <<
 				". What happened?! (duplicates? database error?)" << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 
 	//update allConfigurationInfo_ with the new version
 	allConfigurationInfo_[configurationName].versions_.insert(newVersion);
 
-	__MOUT__ << "New version added to info " << newVersion << std::endl;
+	__COUT__ << "New version added to info " << newVersion << std::endl;
 
 	return newVersion;
 }
@@ -488,7 +489,7 @@ void ConfigurationManagerRW::eraseTemporaryVersion(const std::string &configurat
 		{
 			if(it->isTemporaryVersion())
 			{
-				__MOUT__ << "Removing version info: " << *it << std::endl;
+				__COUT__ << "Removing version info: " << *it << std::endl;
 				allConfigurationInfo_[configurationName].versions_.erase(it++);
 			}
 			else
@@ -497,16 +498,16 @@ void ConfigurationManagerRW::eraseTemporaryVersion(const std::string &configurat
 	}
 	else //erase target version only
 	{
-		__MOUT__ << "Removing version info: " << targetVersion << std::endl;
+		__COUT__ << "Removing version info: " << targetVersion << std::endl;
 		auto it = allConfigurationInfo_[configurationName].versions_.find(targetVersion);
 		if(it == allConfigurationInfo_[configurationName].versions_.end())
 		{
-			__MOUT__ << "Target version was not found in info versions..." << std::endl;
+			__COUT__ << "Target version was not found in info versions..." << std::endl;
 			return;
 		}
 		allConfigurationInfo_[configurationName].versions_.erase(
 				allConfigurationInfo_[configurationName].versions_.find(targetVersion));
-		__MOUT__ << "Target version was erased from info." << std::endl;
+		__COUT__ << "Target version was erased from info." << std::endl;
 	}
 }
 
@@ -579,20 +580,20 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 	{
 		ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
 
-		//__MOUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
+		//__COUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
 		if( name != groupName) continue;
 
-		//__MOUT__ << name << " == " << groupName << std::endl;
+		//__COUT__ << name << " == " << groupName << std::endl;
 		compareToMemberMap = theInterface_->getConfigurationGroupMembers(fullName);
 
 		isDifferent = false;
 		for(auto &memberPair: groupMemberMap)
 		{
-			//__MOUT__ << memberPair.first << " - " << memberPair.second << std::endl;
+			//__COUT__ << memberPair.first << " - " << memberPair.second << std::endl;
 			if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||	//name is missing
 					memberPair.second != compareToMemberMap[memberPair.first]) //or version mismatch
 			{	//then different
-				//__MOUT__ << "mismatch found!" << std::endl;
+				//__COUT__ << "mismatch found!" << std::endl;
 				isDifferent = true;
 				break;
 			}
@@ -602,11 +603,11 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 		//check member size for exact match
 		if(groupMemberMap.size() != compareToMemberMap.size()) continue; //different size, so not same (groupMemberMap is a subset of memberPairs)
 
-		__MOUT__ << "Found exact match with key: " << key << std::endl;
+		__COUT__ << "Found exact match with key: " << key << std::endl;
 		//else found an exact match!
 		return key;
 	}
-	__MOUT__ << "No match found - this group is new!" << std::endl;
+	__COUT__ << "No match found - this group is new!" << std::endl;
 	//if here, then no match found
 	return ConfigurationGroupKey(); //return invalid key
 }
@@ -642,7 +643,7 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 			newKey = ConfigurationGroupKey::getDefaultKey();
 	}
 
-	__MOUT__ << "New Key for group: " << groupName << " found as " << newKey << std::endl;
+	__COUT__ << "New Key for group: " << groupName << " found as " << newKey << std::endl;
 
 	//	verify group members
 	//		- use all config info
@@ -652,27 +653,32 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 		//check member name
 		if(allCfgInfo.find(memberPair.first) == allCfgInfo.end())
 		{
-			__MOUT_ERR__ << "Group member \"" << memberPair.first << "\" not found in configuration!";
+			__COUT_ERR__ << "Group member \"" << memberPair.first << "\" not found in configuration!";
 
 			if(groupMetadataTable_.getConfigurationName() ==
 					memberPair.first)
 			{
-				__MOUT_WARN__ << "Looks like this is the groupMetadataTable_. " <<
+				__COUT_WARN__ << "Looks like this is the groupMetadataTable_. " <<
 						"Note that this table is added to the member map when groups are saved." <<
 						"It should not be part of member map when calling this function." << std::endl;
-				__MOUT__ << "Attempting to recover." << std::endl;
+				__COUT__ << "Attempting to recover." << std::endl;
 				groupMembers.erase(groupMembers.find(memberPair.first));
 			}
 			else
-				throw std::runtime_error("Group member not found!");
+			{
+				__SS__ << ("Group member not found!") << std::endl;
+				__COUT_ERR__ << ss.str();
+				throw std::runtime_error(ss.str());
+			}
 		}
 		//check member version
 		if(allCfgInfo[memberPair.first].versions_.find(memberPair.second) ==
 				allCfgInfo[memberPair.first].versions_.end())
 		{
-			__MOUT_ERR__ << "Group member  \"" << memberPair.first << "\" version \"" <<
+			__SS__ << "Group member  \"" << memberPair.first << "\" version \"" <<
 					memberPair.second << "\" not found in configuration!";
-			throw std::runtime_error("Group member version not found!");
+			__COUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
 		}
 	}
 
@@ -681,7 +687,7 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 	{
 		//save meta data for group; reuse groupMetadataTable_
 
-		//__MOUT__ << username_ << " " << time(0) << " " << groupComment << std::endl;
+		//__COUT__ << username_ << " " << time(0) << " " << groupComment << std::endl;
 		//columns are uid,comment,author,time
 		groupMetadataTable_.getViewP()->setValue(groupComment,0,1);
 		groupMetadataTable_.getViewP()->setValue(username_,0,2);
@@ -702,17 +708,17 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 
 		theInterface_->saveConfigurationGroup(groupMembers,
 				ConfigurationGroupKey::getFullGroupString(groupName,newKey));
-		__MOUT__ << "Created config group: " << groupName << ":" << newKey << std::endl;
+		__COUT__ << "Created config group: " << groupName << ":" << newKey << std::endl;
 	}
 	catch(std::runtime_error &e)
 	{
-		__MOUT_ERR__ << "Failed to create config group: " << groupName << ":" << newKey << std::endl;
-		__MOUT_ERR__ << "\n\n" << e.what() << std::endl;
+		__COUT_ERR__ << "Failed to create config group: " << groupName << ":" << newKey << std::endl;
+		__COUT_ERR__ << "\n\n" << e.what() << std::endl;
 		throw;
 	}
 	catch(...)
 	{
-		__MOUT_ERR__ << "Failed to create config group: " << groupName << ":" << newKey << std::endl;
+		__COUT_ERR__ << "Failed to create config group: " << groupName << ":" << newKey << std::endl;
 		throw;
 	}
 
@@ -726,7 +732,7 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 //	INVALID will give a new backbone from mockup
 ConfigurationVersion ConfigurationManagerRW::saveNewBackbone(ConfigurationVersion temporaryVersion)
 {
-	__MOUT_INFO__ << "Creating new backbone from temporary version " <<
+	__COUT_INFO__ << "Creating new backbone from temporary version " <<
 			temporaryVersion << std::endl;
 
 	//find common available temporary version among backbone members
@@ -736,13 +742,13 @@ ConfigurationVersion ConfigurationManagerRW::saveNewBackbone(ConfigurationVersio
 	for (auto& name : backboneMemberNames)
 	{
 		retNewVersion = ConfigurationManager::getConfigurationByName(name)->getNextVersion();
-		__MOUT__ << "New version for backbone member (" << name << "): " <<
+		__COUT__ << "New version for backbone member (" << name << "): " <<
 				retNewVersion << std::endl;
 		if(retNewVersion > newVersion)
 			newVersion = retNewVersion;
 	}
 
-	__MOUT__ << "Common new backbone version found as " <<
+	__COUT__ << "Common new backbone version found as " <<
 			newVersion << std::endl;
 
 	//create new views from source temporary version
@@ -753,9 +759,10 @@ ConfigurationVersion ConfigurationManagerRW::saveNewBackbone(ConfigurationVersio
 				getConfigurationByName(name), temporaryVersion, newVersion);
 		if(retNewVersion != newVersion)
 		{
-			__MOUT_ERR__ << "Failure! New view requested was " <<
+			__SS__ << "Failure! New view requested was " <<
 					newVersion << ". Mismatched new view created: " << retNewVersion << std::endl;
-			throw std::runtime_error("Mismatched temporary view created!");
+			__COUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
 		}
 	}
 
@@ -767,7 +774,7 @@ void ConfigurationManagerRW::testXDAQContext()
 {
 //	//test creating config group with author, create time, and comment
 //	{
-//		__MOUT__ << std::endl;
+//		__COUT__ << std::endl;
 //
 //		std::string groupName = "testGroup";
 //		ConfigurationGroupKey newKey;
@@ -794,9 +801,9 @@ void ConfigurationManagerRW::testXDAQContext()
 //			{
 //				std::map<std::string, ConfigurationVersion > memberMap =
 //						loadConfigurationGroup(groupName,newKey);
-//				__MOUT__ << "Group members:" << std::endl;
+//				__COUT__ << "Group members:" << std::endl;
 //				for(const auto &member: memberMap)
-//					__MOUT__ << member.first << " " << member.second << std::endl;
+//					__COUT__ << member.first << " " << member.second << std::endl;
 //			}
 //
 //
@@ -821,21 +828,21 @@ void ConfigurationManagerRW::testXDAQContext()
 //			{
 //				std::map<std::string, ConfigurationVersion > memberMap =
 //						loadConfigurationGroup(groupName,newKey);
-//				__MOUT__ << "Group members:" << std::endl;
+//				__COUT__ << "Group members:" << std::endl;
 //				for(const auto &member: memberMap)
-//					__MOUT__ << member.first << " " << member.second << std::endl;
+//					__COUT__ << member.first << " " << member.second << std::endl;
 //			}
 //
 //
 //		}
 //		catch(std::runtime_error &e)
 //		{
-//			__MOUT_ERR__ << "Failed to create config group: " << groupName << ":" << newKey << std::endl;
-//			__MOUT_ERR__ << "\n\n" << e.what() << std::endl;
+//			__COUT_ERR__ << "Failed to create config group: " << groupName << ":" << newKey << std::endl;
+//			__COUT_ERR__ << "\n\n" << e.what() << std::endl;
 //		}
 //		catch(...)
 //		{
-//			__MOUT_ERR__ << "Failed to create config group: " << groupName << ":" << newKey << std::endl;
+//			__COUT_ERR__ << "Failed to create config group: " << groupName << ":" << newKey << std::endl;
 //		}
 //
 //		return;
@@ -843,27 +850,27 @@ void ConfigurationManagerRW::testXDAQContext()
 
 //	//test creating config group and reading
 //	{
-//		__MOUT__ << std::endl;
+//		__COUT__ << std::endl;
 //
 //		auto gcfgs = theInterface_->getAllConfigurationGroupNames();
-//		__MOUT__ << "Global config size: " << gcfgs.size() << std::endl;
+//		__COUT__ << "Global config size: " << gcfgs.size() << std::endl;
 //		for(auto &g:gcfgs)
 //		{
-//			__MOUT__ << "Global config " << g << std::endl;
+//			__COUT__ << "Global config " << g << std::endl;
 //			auto gcMap = theInterface_->getConfigurationGroupMembers(g);
 //
 //			for(auto &cv:gcMap)
-//				__MOUT__ << "\tMember config " << cv.first << ":" << cv.second << std::endl;
+//				__COUT__ << "\tMember config " << cv.first << ":" << cv.second << std::endl;
 //		}
 //
 //		auto cfgs = theInterface_->getAllConfigurationNames();
-//		__MOUT__ << "Sub-config size: " << cfgs.size() << std::endl;
+//		__COUT__ << "Sub-config size: " << cfgs.size() << std::endl;
 //		for(auto &c:cfgs)
 //		{
-//			__MOUT__ << "config " << c << std::endl;
+//			__COUT__ << "config " << c << std::endl;
 //			auto vs = theInterface_->getVersions(getConfigurationByName(c));
 //			for(auto &v:vs)
-//				__MOUT__ << "\tversion " << v << std::endl;
+//				__COUT__ << "\tversion " << v << std::endl;
 //		}
 //
 //		if(0) //create a global config group (storeGlobalConfiguration)
@@ -877,12 +884,12 @@ void ConfigurationManagerRW::testXDAQContext()
 //				if(1 && vs.rbegin() != vs.rend()) //create latest!
 //				{
 //					gcMap[c] = *(vs.rbegin());
-//					__MOUT__ << "Adding config " << c << ":" << gcMap[c] << std::endl;
+//					__COUT__ << "Adding config " << c << ":" << gcMap[c] << std::endl;
 //				}
 //				else if(vs.begin() != vs.end())	//create oldest!
 //				{
 //					gcMap[c] = *(vs.begin());
-//					__MOUT__ << "Adding config " << c << ":" << gcMap[c] << std::endl;
+//					__COUT__ << "Adding config " << c << ":" << gcMap[c] << std::endl;
 //				}
 //			}
 //
@@ -900,13 +907,13 @@ void ConfigurationManagerRW::testXDAQContext()
 //						if(g == gcname) {found = true; break;}
 //				}
 //				while(found);
-//				__MOUT__ << "Trying Global config: " << gcname<< std::endl;
+//				__COUT__ << "Trying Global config: " << gcname<< std::endl;
 //
 //				try
 //				{
 //					theInterface_->saveConfigurationGroup(gcMap,gcname);
 //					done = true;
-//					__MOUT__ << "Created Global config: " << gcname<< std::endl;
+//					__COUT__ << "Created Global config: " << gcname<< std::endl;
 //				}
 //				catch(...) {++i;} //repeat names are not allowed, so increment name
 //			}
@@ -919,16 +926,16 @@ void ConfigurationManagerRW::testXDAQContext()
 	//this is to test config tree
 	try
 	{
-		__MOUT__ << "Loading config..." << std::endl;
+		__COUT__ << "Loading config..." << std::endl;
 		loadConfigurationGroup("FETest",ConfigurationGroupKey(2)); // Context_1
 		ConfigurationTree t = getNode("/FEConfiguration/DEFAULT/FrontEndType");
 
 		std::string v;
 
-		__MOUT__ << std::endl;
+		__COUT__ << std::endl;
 		t.getValue(v);
-		__MOUT__ << "Value: " << v << std::endl;
-		__MOUT__ << "Value index: " << t.getValue<int>() << std::endl;
+		__COUT__ << "Value: " << v << std::endl;
+		__COUT__ << "Value index: " << t.getValue<int>() << std::endl;
 
 		return;
 
@@ -937,40 +944,40 @@ void ConfigurationManagerRW::testXDAQContext()
 		//ConfigurationTree t = getNode("/FEConfiguration").getNode("OtsUDPFSSR3");
 //		ConfigurationTree t = getNode("/XDAQContextConfiguration/testContext/");
 //
-//		__MOUT__ << std::endl;
+//		__COUT__ << std::endl;
 //		t.getValue(v);
-//		__MOUT__ << "Value: " << v << std::endl;
+//		__COUT__ << "Value: " << v << std::endl;
 //
 //		if(!t.isValueNode())
 //		{
 //			auto C = t.getChildrenNames();
 //			for(auto &c: C)
-//				__MOUT__ << "\t+ " << c << std::endl;
+//				__COUT__ << "\t+ " << c << std::endl;
 //
 //			std::stringstream ss;
 //			t.print(-1,ss);
-//			__MOUT__ << "\n" << ss.str() << std::endl;
+//			__COUT__ << "\n" << ss.str() << std::endl;
 //
 //			try
 //			{
 //				ConfigurationTree tt = t.getNode("OtsUDPFSSR3");
 //				tt.getValue(v);
-//				__MOUT__ << "Value: " << v << std::endl;
+//				__COUT__ << "Value: " << v << std::endl;
 //
 //				C = tt.getChildrenNames();
 //				for(auto &c: C)
-//					__MOUT__ << "\t+ " << c << std::endl;
+//					__COUT__ << "\t+ " << c << std::endl;
 //			}
 //			catch(...)
 //			{
-//				__MOUT__ << "Failed to find extra node." << std::endl;
+//				__COUT__ << "Failed to find extra node." << std::endl;
 //			}
 //		}
 
 	}
 	catch(...)
 	{
-		__MOUT__ << "Failed to load config..." << std::endl;
+		__COUT__ << "Failed to load config..." << std::endl;
 	}
 
 
