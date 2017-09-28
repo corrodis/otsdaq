@@ -630,6 +630,14 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 	//	verify groupNameWithKey
 	//	verify store
 
+
+	if(groupMembers.size() == 0) //do not allow empty groups
+	{
+		__SS__ << "Empty group member list. Can not create a group without members!" << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
+
 	//determine new group key
 	ConfigurationGroupKey newKey;
 	if(!previousVersion.isInvalid())	//if previous provided, bump that

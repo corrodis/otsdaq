@@ -29,11 +29,13 @@ public:
 
 	static const std::string ACTIVE_GROUP_NAME_CONTEXT;
 	static const std::string ACTIVE_GROUP_NAME_BACKBONE;
+	static const std::string ACTIVE_GROUP_NAME_ITERATE;
 	static const std::string ACTIVE_GROUP_NAME_CONFIGURATION;
 
 	enum {
 		CONTEXT_TYPE,
 		BACKBONE_TYPE,
+		ITERATE_TYPE,
 		CONFIGURATION_TYPE
 	};
 
@@ -92,6 +94,7 @@ public:
 
 	const std::set<std::string>&					                      getContextMemberNames		  	(void) const {return contextMemberNames_;}
 	const std::set<std::string>&					                      getBackboneMemberNames		(void) const {return backboneMemberNames_;}
+	const std::set<std::string>&					                      getIterateMemberNames			(void) const {return iterateMemberNames_;}
 
 	static std::string													  encodeURIComponent(const std::string &sourceStr);
 
@@ -104,13 +107,14 @@ private:
 
 	std::string								 		username_;	//user of the configuration is READONLY_USER unless using ConfigurationManagerRW
 	ConfigurationInterface*                       	theInterface_;
-	std::shared_ptr<ConfigurationGroupKey>          theConfigurationGroupKey_,	theContextGroupKey_, 	theBackboneGroupKey_;
-	std::string										theConfigurationGroup_, 	theContextGroup_, 		theBackboneGroup_;
+	std::shared_ptr<ConfigurationGroupKey>          theConfigurationGroupKey_,	theContextGroupKey_, 	theBackboneGroupKey_,	theIterateGroupKey_;
+	std::string										theConfigurationGroup_, 	theContextGroup_, 		theBackboneGroup_,		theIterateGroup_;
 
 	std::map<std::string, ConfigurationBase* >     	nameToConfigurationMap_;
 
 	const std::set<std::string>                   	contextMemberNames_;  //list of context members
 	const std::set<std::string>	                   	backboneMemberNames_;  //list of backbone members
+	const std::set<std::string>	                   	iterateMemberNames_;  //list of iterate members
 
 	ConfigurationBase								groupMetadataTable_; //special table - version saved each time a group is created
 

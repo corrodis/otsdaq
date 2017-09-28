@@ -26,6 +26,7 @@ const std::string ConfigurationManager::SCRATCH_VERSION_ALIAS = "Scratch";
 
 const std::string ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT       = "Context";
 const std::string ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE      = "Backbone";
+const std::string ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE	    = "Iterate";
 const std::string ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION = "Configuration";
 
 
@@ -41,6 +42,7 @@ ConfigurationManager::ConfigurationManager()
 , theBackboneGroup_			("")
 , contextMemberNames_		({XDAQ_CONTEXT_CONFIG_NAME,"XDAQApplicationConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","TheSupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"})
 , backboneMemberNames_		({"GroupAliasesConfiguration","VersionAliasesConfiguration"})
+, iterateMemberNames_		({"IterateConfiguration","IterationPlanConfiguration"})
 {
 	theInterface_ = ConfigurationInterface::getInstance(false);  //false to use artdaq DB
 	//NOTE: in ConfigurationManagerRW using false currently.. think about consistency! FIXME
@@ -105,10 +107,16 @@ ConfigurationManager::ConfigurationManager()
 				fprintf(fp,"%s\n",name.c_str());
 			for(const auto &name:backboneMemberNames_)
 				fprintf(fp,"%s\n",name.c_str());
+			for(const auto &name:iterateMemberNames_)
+				fprintf(fp,"%s\n",name.c_str());
 			fclose(fp);
 		}
 		else
-			__COUT__ << "Failed to open core table info file: " << CORE_TABLE_INFO_FILENAME << std::endl;
+		{
+			__SS__ << "Failed to open core table info file: " << CORE_TABLE_INFO_FILENAME << std::endl;
+			__COUT_ERR__ << "\n" << ss.str();
+			throw std::runtime_error(ss.str());
+		}
 	}
 
 	init();
@@ -258,9 +266,10 @@ void ConfigurationManager::destroyConfigurationGroup(const std::string& theGroup
 	//delete
 	bool isContext       = theGroup == "" || theGroup == theContextGroup_;
 	bool isBackbone      = theGroup == "" || theGroup == theBackboneGroup_;
+	bool isIterate       = theGroup == "" || theGroup == theIterateGroup_;
 	bool isConfiguration = theGroup == "" || theGroup == theConfigurationGroup_;
 
-	if(!isContext && !isBackbone && !isConfiguration)
+	if(!isContext && !isBackbone && !isIterate && !isConfiguration)
 	{
 		__SS__ << "Invalid configuration group to destroy: " << theGroup << std::endl;
 		__COUT_ERR__ << ss.str();
@@ -274,20 +283,26 @@ void ConfigurationManager::destroyConfigurationGroup(const std::string& theGroup
 			__COUT__ << dbgHeader << " Context group: " << theGroup << std::endl;
 		if(isBackbone)
 			__COUT__ << dbgHeader << " Backbone group: " << theGroup << std::endl;
+		if(isIterate)
+			__COUT__ << dbgHeader << " Iterate group: " << theGroup << std::endl;
 		if(isConfiguration)
 			__COUT__ << dbgHeader << " Configuration group: " << theGroup << std::endl;
 	}
 
-	std::set<std::string>::const_iterator contextFindIt, backboneFindIt;
+	std::set<std::string>::const_iterator contextFindIt, backboneFindIt, iterateFindIt;
 	for(auto it = nameToConfigurationMap_.begin(); it != nameToConfigurationMap_.end(); /*no increment*/)
 	{
 		contextFindIt = contextMemberNames_.find(it->first);
 		backboneFindIt = backboneMemberNames_.find(it->first);
-		if(theGroup == "" || ( 	(isContext  && contextFindIt != contextMemberNames_.end()) ||
+		iterateFindIt = iterateMemberNames_.find(it->first);
+		if(theGroup == "" || (
+				(isContext  && contextFindIt != contextMemberNames_.end()) ||
 				(isBackbone && backboneFindIt != backboneMemberNames_.end()) ||
+				(isIterate && iterateFindIt != iterateMemberNames_.end()) ||
 				(!isContext && !isBackbone &&
 						contextFindIt == contextMemberNames_.end() &&
-						backboneFindIt == backboneMemberNames_.end())))
+						backboneFindIt == backboneMemberNames_.end()&&
+						iterateFindIt == iterateMemberNames_.end())))
 		{
 			//__COUT__ << "\t" << it->first << std::endl;
 			//if(it->second->isActive())
@@ -329,6 +344,15 @@ void ConfigurationManager::destroyConfigurationGroup(const std::string& theGroup
 			theBackboneGroupKey_.reset();
 		}
 	}
+	if(isIterate)
+	{
+		theIterateGroup_ = "";
+		if(theIterateGroupKey_ != 0)
+		{
+			__COUT__ << "Destroying Iterate Key: " << *theIterateGroupKey_ << std::endl;
+			theIterateGroupKey_.reset();
+		}
+	}
 	if(isContext)
 	{
 		theContextGroup_ = "";
@@ -362,29 +386,35 @@ const std::string& ConfigurationManager::convertGroupTypeIdToName(int groupTypeI
 			ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT:
 			(groupTypeId==BACKBONE_TYPE?
 					ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE:
-					ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION);
+					(groupTypeId==ITERATE_TYPE?
+							ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE:
+							ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION));
 }
 
 //==============================================================================
 //getTypeOfGroup
 //	return
-//		0 for context
-//		1 for backbone
-//		2 for configuration (others)
+//		CONTEXT_TYPE for context
+//		BACKBONE_TYPE for backbone
+//		ITERATE_TYPE for iterate
+//		CONFIGURATION_TYPE for configuration (others)
 int ConfigurationManager::getTypeOfGroup(
 		const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap)
 {
 
 	bool isContext = true;
 	bool isBackbone = true;
+	bool isIterate = true;
 	bool inGroup;
 	bool inContext = false;
 	bool inBackbone = false;
+	bool inIterate = false;
 	unsigned int matchCount = 0;
 
 	for(auto &memberPair:memberMap)
 	{
 		//__COUT__ << "Member name: = "<< memberPair.first << std::endl;
+		////////////////////////////////////////
 		inGroup = false; //check context
 		for(auto &contextMemberString:contextMemberNames_)
 			if(memberPair.first == contextMemberString)
@@ -410,6 +440,7 @@ int ConfigurationManager::getTypeOfGroup(
 			}
 		}
 
+		////////////////////////////////////////
 		inGroup = false; //check backbone
 		for(auto &backboneMemberString:backboneMemberNames_)
 			if(memberPair.first == backboneMemberString)
@@ -435,6 +466,31 @@ int ConfigurationManager::getTypeOfGroup(
 			}
 		}
 
+		////////////////////////////////////////
+		inGroup = false; //check iterate
+		for(auto &iterateMemberString:iterateMemberNames_)
+			if(memberPair.first == iterateMemberString)
+			{
+				inGroup = true;
+				inIterate = true;
+				++matchCount;
+				break;
+			}
+		if(!inGroup)
+		{
+			isIterate = false;
+			if(inIterate) //there was a member in iterate!
+			{
+				__SS__ << "This group is an incomplete match to a Iterate group.\n";
+				ss << "\nTo be a Iterate group, the members must exactly match" <<
+						"the following members:\n";
+				int i = 0;
+				for(auto &memberName:iterateMemberNames_)
+					ss << ++i << ". " << memberName << "\n";
+				__COUT_ERR__ << "\n" << ss.str();
+				throw std::runtime_error(ss.str());
+			}
+		}
 	}
 
 	if(isContext && matchCount != contextMemberNames_.size())
@@ -471,20 +527,35 @@ int ConfigurationManager::getTypeOfGroup(
 		throw std::runtime_error(ss.str());
 	}
 
-	return isContext?CONTEXT_TYPE:(isBackbone?BACKBONE_TYPE:CONFIGURATION_TYPE);
+	if(isIterate && matchCount != iterateMemberNames_.size())
+	{
+		__SS__ << "This group is an incomplete match to a Iterate group: " <<
+				" Size=" << matchCount << " but should be " << backboneMemberNames_.size() <<
+				std::endl;
+		ss << "\nThe members currently are...\n";
+		int i = 0;
+		for(auto &memberPair:memberMap)
+			ss << ++i << ". " << memberPair.first << "\n";
+		ss << "\nThe expected Iterate members are...\n";
+		i = 0;
+		for(auto &memberName:iterateMemberNames_)
+			ss << ++i << ". " << memberName << "\n";
+		__COUT_ERR__ << "\n" << ss.str();
+		throw std::runtime_error(ss.str());
+	}
+
+	return isContext?CONTEXT_TYPE:(isBackbone?BACKBONE_TYPE:(isIterate?ITERATE_TYPE:CONFIGURATION_TYPE));
 }
 
 //==============================================================================
 //getTypeNameOfGroup
-//	return string for
-//		0 for context
-//		1 for backbone
-//		2 for configuration (others)
+//	return string for group type
 const std::string& ConfigurationManager::getTypeNameOfGroup(
 		const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap)
 {
 	return convertGroupTypeIdToName(getTypeOfGroup(memberMap));
 }
+
 //==============================================================================
 //loadMemberMap
 //	loads tables given by name/version pairs in memberMap
@@ -703,8 +774,8 @@ void ConfigurationManager::loadMemberMap(
 //loadConfigurationGroup
 //	load all members of configuration group
 //	if doActivate
-//		DOES NOT theConfigurationGroup_, theContextGroup_, or theBackboneGroup_ on success
-//			this happens with ConfigurationManagerRW::activateConfigurationGroup
+//		DOES set theConfigurationGroup_, theContextGroup_, or theBackboneGroup_ on success
+//			this also happens with ConfigurationManagerRW::activateConfigurationGroup
 //		for each member
 //			configBase->init()
 //
@@ -800,7 +871,9 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	{
 		std::string groupToDeactivate =
 				groupType==CONTEXT_TYPE?theContextGroup_:
-						(groupType==BACKBONE_TYPE?theBackboneGroup_:theConfigurationGroup_);
+						(groupType==BACKBONE_TYPE?theBackboneGroup_:
+								(groupType==ITERATE_TYPE?
+										theIterateGroup_:theConfigurationGroup_));
 
 		//		deactivate all of that type (invalidate active view)
 		if(groupToDeactivate != "") //deactivate only if pre-existing group
@@ -905,6 +978,13 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 			theBackboneGroup_ = configGroupName;
 			theBackboneGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
 		}
+		else if(groupType == ITERATE_TYPE)
+		{
+			__COUT_INFO__ << "Iterate Configuration Group loaded: " << configGroupName <<
+					"(" << configGroupKey << ")" << std::endl;
+			theIterateGroup_ = configGroupName;
+			theIterateGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
+		}
 		else //is theConfigurationGroup_
 		{
 			__COUT_INFO__ << "The Configuration Group loaded: " << configGroupName <<
@@ -935,6 +1015,8 @@ std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > Configurat
 			std::pair<std::string,ConfigurationGroupKey>(theContextGroup_      ,theContextGroupKey_      ?*theContextGroupKey_      : ConfigurationGroupKey());
 	retMap[ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE]      =
 			std::pair<std::string,ConfigurationGroupKey>(theBackboneGroup_     ,theBackboneGroupKey_     ?*theBackboneGroupKey_     : ConfigurationGroupKey());
+	retMap[ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE]      =
+			std::pair<std::string,ConfigurationGroupKey>(theIterateGroup_      ,theIterateGroupKey_    	 ?*theIterateGroupKey_     : ConfigurationGroupKey());
 	retMap[ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION] =
 			std::pair<std::string,ConfigurationGroupKey>(theConfigurationGroup_,theConfigurationGroupKey_?*theConfigurationGroupKey_: ConfigurationGroupKey());
 	return retMap;
@@ -965,9 +1047,12 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString,
 		throw std::runtime_error(ss.str());
 	}
 
-	bool startingSlash = (nodeString[0] == '/');
+	//ignore multiple starting slashes
+	unsigned int startingIndex = 0;
+	while(startingIndex < nodeString.length() &&
+			nodeString[startingIndex] == '/') ++startingIndex;
 
-	std::string nodeName = nodeString.substr(startingSlash?1:0, nodeString.find('/',1)-(startingSlash?1:0));
+	std::string nodeName = nodeString.substr(startingIndex, nodeString.find('/',startingIndex)-startingIndex);
 	//__COUT__ << "nodeName=" << nodeName << " " << nodeName.length() << std::endl;
 	if(nodeName.length() < 1)
 	{
@@ -976,7 +1061,7 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString,
 		throw std::runtime_error(ss.str());
 	}
 
-	std::string childPath = nodeString.substr(nodeName.length() + (startingSlash?1:0));
+	std::string childPath = nodeString.substr(nodeName.length() + startingIndex);
 
 	//__COUT__ << "childPath=" << childPath << " " << childPath.length() << std::endl;
 
