@@ -7,3 +7,5 @@ XDAQApplicationConfiguration
 XDAQContextConfiguration
 GroupAliasesConfiguration
 VersionAliasesConfiguration
+IterateConfiguration
+IterationPlanConfiguration
