@@ -227,6 +227,7 @@ public:
 
 	//extracting information from node
 	const std::string&						getConfigurationName		(void) const;
+	const std::string&						getFieldConfigurationName	(void) const;
 	const ConfigurationVersion&				getConfigurationVersion		(void) const;
 	const time_t&							getConfigurationCreationTime(void) const;
 	std::vector<std::string>				getChildrenNames	        (void) const;
@@ -270,6 +271,8 @@ public:
 protected:
 	const unsigned int&						getRow			        	(void) const;
 	const unsigned int&						getColumn		        	(void) const;
+	const unsigned int&						getFieldRow		        	(void) const;
+	const unsigned int&						getFieldColumn	        	(void) const;
 	const ViewColumnInfo&					getColumnInfo	        	(void) const;
 
 	//extracting information from a list of records
@@ -294,7 +297,7 @@ protected:
 
 private:
 	//privately ONLY allow full access to member variables through constructor
-	ConfigurationTree(const ConfigurationManager* const& configMgr, const ConfigurationBase* const& config, const std::string& groupId, const ConfigurationBase* const& linkParentConfig, const std::string &linkColName, const std::string &linkColValue, const std::string& disconnectedTargetName, const std::string& disconnectedLinkID, const std::string &childLinkIndex, const unsigned int row  = ConfigurationView::INVALID, const unsigned int col = ConfigurationView::INVALID);
+	ConfigurationTree(const ConfigurationManager* const& configMgr, const ConfigurationBase* const& config, const std::string& groupId, const ConfigurationBase* const& linkParentConfig, const std::string &linkColName, const std::string &linkColValue, const unsigned int linkBackRow, const unsigned int linkBackCol, const std::string& disconnectedTargetName, const std::string& disconnectedLinkID, const std::string &childLinkIndex, const unsigned int row  = ConfigurationView::INVALID, const unsigned int col = ConfigurationView::INVALID);
 
 	static ConfigurationTree	recurse		  (const ConfigurationTree& t, const std::string& childPath, bool doNotThrowOnBrokenUIDLinks);
 	static void 				recursivePrint(const ConfigurationTree& t, unsigned int depth, std::ostream &out, std::string space);
@@ -315,6 +318,8 @@ private:
 	const ConfigurationBase* 	linkParentConfig_; //link node parent config pointer (could be used to traverse backwards through tree)
 	const std::string			linkColName_;	//link node field name
 	const std::string			linkColValue_;	//link node field value
+	const unsigned int			linkBackRow_;	//source table link row
+	const unsigned int			linkBackCol_;	//source table link col
 	const std::string			disconnectedTargetName_;	//only used if disconnected to determine target table name
 	const std::string			disconnectedLinkID_;	//only used if disconnected to determine target link ID
 	const std::string			childLinkIndex_;//child link index

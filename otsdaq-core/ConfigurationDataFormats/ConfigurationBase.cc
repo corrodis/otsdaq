@@ -534,6 +534,7 @@ throw(std::runtime_error)
 		eraseView(destinationVersion);
 		throw; //and rethrow
 	}
+
 	return destinationVersion;
 }
 

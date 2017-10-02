@@ -296,7 +296,7 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 		catch(...){}
 	}
 
-	__COUT_INFO__ << "Updating persistent active groups to " <<
+	__MOUT_INFO__ << "Updating persistent active groups to " <<
 			ConfigurationManager::ACTIVE_GROUP_FILENAME << " ..."  << std::endl;
 
 	std::string fn = ConfigurationManager::ACTIVE_GROUP_FILENAME;
@@ -310,17 +310,21 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 		return;
 	}
 
-	__COUT__ << theContextGroup_ << "(" <<
+	__MOUT_INFO__ << "Active Context: " << theContextGroup_ << "(" <<
 			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-	__COUT__ << theBackboneGroup_ << "(" <<
+	__MOUT_INFO__ << "Active Backbone: " << theBackboneGroup_ << "(" <<
 			(theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-	__COUT__ << theConfigurationGroup_ << "(" <<
+	__MOUT_INFO__ << "Active Iterate: " << theIterateGroup_ << "(" <<
+			(theIterateGroupKey_?theIterateGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__MOUT_INFO__ << "Active Configuration: " << theConfigurationGroup_ << "(" <<
 			(theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1") << ")" << std::endl;
 
 	fprintf(fp,"%s\n",theContextGroup_.c_str());
 	fprintf(fp,"%s\n",theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1");
 	fprintf(fp,"%s\n",theBackboneGroup_.c_str());
 	fprintf(fp,"%s\n",theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1");
+	fprintf(fp,"%s\n",theIterateGroup_.c_str());
+	fprintf(fp,"%s\n",theIterateGroupKey_?theIterateGroupKey_->toString().c_str():"-1");
 	fprintf(fp,"%s\n",theConfigurationGroup_.c_str());
 	fprintf(fp,"%s\n",theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1");
 	fclose(fp);

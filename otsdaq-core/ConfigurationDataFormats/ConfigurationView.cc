@@ -346,13 +346,21 @@ void ConfigurationView::init(void)
 						theDataChoices[0] == "arbitraryBool=1")
 					continue; //arbitrary values allowed
 
+				//skip one if arbitrary setting is embedded as first value
+				bool skipOne = (theDataChoices.size() &&
+						theDataChoices[0] == "arbitraryBool=0");
+				bool hasSkipped;
+
 				bool found;
 				for(unsigned int row = 0; row < getNumberOfRows(); ++row)
 				{
 					found = false;
 
+					hasSkipped = false;
 					for(const auto &choice:theDataChoices)
 					{
+						if(skipOne && !hasSkipped) {hasSkipped = true; continue;}
+
 						if(theDataView_[row][col] == choice)
 						{
 							found = true;
@@ -365,9 +373,9 @@ void ConfigurationView::init(void)
 								columnsInfo_[col].getName() << " is not a valid Fixed Choice option. " <<
 								"Possible values are as follows: ";
 
-						for(unsigned int i = 0; i < columnsInfo_[col].getDataChoices().size(); ++i)
+						for(unsigned int i = skipOne?1:0; i < columnsInfo_[col].getDataChoices().size(); ++i)
 						{
-							if(i) ss << ", ";
+							if(i == 1 + (skipOne?1:0)) ss << ", ";
 							ss << columnsInfo_[col].getDataChoices()[i];
 						}
 						ss << "." << std::endl;
@@ -942,7 +950,7 @@ std::set<std::string> ConfigurationView::getSetOfGroupIDs(const std::string &chi
 {
 	unsigned int c = getColLinkGroupID(childLinkIndex);
 
-	//__COUT__ << "GroupID col=" << c << std::endl;
+	//__COUT__ << "GroupID col=" << (int)c << std::endl;
 
 	std::set<std::string> retSet;
 
@@ -989,7 +997,7 @@ std::set<std::string> ConfigurationView::getSetOfGroupIDs(const std::string &chi
 			i=0;
 			j=0;
 
-			//__COUT__ << r << ": " << theDataView_[r][c] << std::endl;
+			//__COUT__ << (int)r << ": " << theDataView_[r][c] << std::endl;
 
 			//go through the full groupString extracting groups
 			//add each found groupId to set
@@ -1224,7 +1232,50 @@ std::vector<std::string> ConfigurationView::getDefaultRowValues(void) const
 
 	//fill each col of new row with default values
 	for(unsigned int col=0;col<getNumberOfColumns();++col)
-		retVec.push_back(columnsInfo_[col].getDefaultValue());
+	{
+		//if this is a fixed choice Link, and NO_LINK is not in list,
+		//	take first in list to avoid creating illegal rows.
+		//NOTE: this is not a problem for standard fixed choice fields
+		//	because the default value is always required.
+
+		if(columnsInfo_[col].isChildLink())
+		{
+			const std::vector<std::string>& theDataChoices =
+					columnsInfo_[col].getDataChoices();
+
+			//check if arbitrary values allowed
+			if(!theDataChoices.size() || //if so, use default
+					theDataChoices[0] == "arbitraryBool=1")
+				retVec.push_back(columnsInfo_[col].getDefaultValue());
+			else
+			{
+				bool skipOne = (theDataChoices.size() &&
+						theDataChoices[0] == "arbitraryBool=0");
+				bool hasSkipped;
+
+				//look for default value in list
+
+				bool foundDefault = false;
+				hasSkipped = false;
+				for(const auto &choice:theDataChoices)
+					if(skipOne && !hasSkipped) {hasSkipped = true; continue;}
+					else if(choice == columnsInfo_[col].getDefaultValue())
+					{
+						retVec.push_back(columnsInfo_[col].getDefaultValue());
+						foundDefault = true;
+						break;
+					}
+
+				//use first choice if possible
+				if(!foundDefault && theDataChoices.size() > (skipOne?1:0))
+					retVec.push_back(theDataChoices[(skipOne?1:0)]);
+				else //else stick with default
+					retVec.push_back(columnsInfo_[col].getDefaultValue());
+			}
+		}
+		else
+			retVec.push_back(columnsInfo_[col].getDefaultValue());
+	}
 
 	return retVec;
 }
@@ -1356,10 +1407,10 @@ void ConfigurationView::print (std::ostream &out) const
 	std::string val;
 	for(int r=0;r<(int)getNumberOfRows();++r)
 	{
-		out << r << ":\t";
+		out << (int)r << ":\t";
 		for(int c=0;c<(int)getNumberOfColumns();++c)
 		{
-			out << c << ":";
+			out << (int)c << ":";
 
 			//if fixed choice type, print index in choice
 			if(columnsInfo_[c].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
@@ -2065,7 +2116,7 @@ bool ConfigurationView::isURIEncodedCommentTheSame(const std::string &comment) c
 //
 //	if(!(c < columnsInfo_.size() && r < getNumberOfRows()))
 //	{
-//		__SS__ << "Invalid row (" << r << ") col (" << c << ") requested!" << std::endl;
+//		__SS__ << "Invalid row (" << (int)r << ") col (" << (int)c << ") requested!" << std::endl;
 //		throw std::runtime_error(ss.str());
 //	}
 //
@@ -2138,7 +2189,7 @@ throw(std::runtime_error)
 
 		while(j < k && j != (int)(std::string::npos))
 		{
-			//__COUT__ << "Col " << c << std::endl;
+			//__COUT__ << "Col " << (int)c << std::endl;
 
 			//skip last 2 columns
 			if(c >= (int)getNumberOfColumns()-2)
@@ -2160,7 +2211,7 @@ throw(std::runtime_error)
 		//if row was modified, assign author and timestamp
 		if(author != "" && rowWasModified)
 		{
-			__COUT__ << "Row=" << r << " was modified!" << std::endl;
+			__COUT__ << "Row=" << (int)r << " was modified!" << std::endl;
 			setValue(author,r,authorCol);
 			setValue(time(0),r,timestampCol);
 		}
@@ -2180,7 +2231,7 @@ throw(std::runtime_error)
 	while(r < (int)getNumberOfRows())
 	{
 		deleteRow(r);
-		__COUT__ << "Row deleted: " << r << std::endl;
+		__COUT__ << "Row deleted: " << (int)r << std::endl;
 		++countRowsModified;
 	}
 
@@ -2224,7 +2275,10 @@ bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsig
 {
 	if(!(c < columnsInfo_.size() && r < getNumberOfRows()))
 	{
-		__SS__ << "Invalid row (" << r << ") col (" << c << ") requested!" << std::endl;
+		__SS__ << "Invalid row (" << (int)r << ") col (" << (int)c << ") requested!" <<
+				"Number of Rows = " << getNumberOfRows() <<
+				"Number of Columns = " << columnsInfo_.size() << std::endl;
+		print(ss);
 		throw std::runtime_error(ss.str());
 	}
 
@@ -2272,7 +2326,7 @@ bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsig
 	//if row was modified, assign author and timestamp
 	if(author != "" && rowWasModified)
 	{
-		__COUT__ << "Row=" << r << " was modified!" << std::endl;
+		__COUT__ << "Row=" << (int)r << " was modified!" << std::endl;
 		int authorCol = findColByType(ViewColumnInfo::TYPE_AUTHOR);
 		int timestampCol = findColByType(ViewColumnInfo::TYPE_TIMESTAMP);
 		setValue(author,r,authorCol);
@@ -2357,7 +2411,7 @@ void ConfigurationView::deleteRow(int r)
 	if(r >= (int)getNumberOfRows())
 	{
 		//out of bounds
-		__SS__ << "Row " << r << " is out of bounds (Row Count = " <<
+		__SS__ << "Row " << (int)r << " is out of bounds (Row Count = " <<
 				getNumberOfRows() << ") and can not be deleted." <<
 				std::endl;
 		throw std::runtime_error(ss.str());
@@ -2386,11 +2440,11 @@ const bool ConfigurationView::getChildLink(const unsigned int& c, bool& isGroup,
 
 	if(!(c < columnsInfo_.size()))
 	{
-		__SS__ << "Invalid col (" << c << ") requested!" << std::endl;
+		__SS__ << "Invalid col (" << (int)c << ") requested!" << std::endl;
 		throw std::runtime_error(ss.str());
 	}
 
-	//__COUT__ << "getChildLink for col: " << c << "-" <<
+	//__COUT__ << "getChildLink for col: " << (int)c << "-" <<
 	//		columnsInfo_[c].getType() << "-" << columnsInfo_[c].getName() << std::endl;
 
 	//check if column is a child link UID
@@ -2398,7 +2452,7 @@ const bool ConfigurationView::getChildLink(const unsigned int& c, bool& isGroup,
 			columnsInfo_[c].isChildLinkUID())
 	{
 		//must be part of unique link, (or invalid table?)
-		//__COUT__ << "col: " << c << std::endl;
+		//__COUT__ << "col: " << (int)c << std::endl;
 		linkPair.second = c;
 		std::string index = columnsInfo_[c].getChildLinkIndex();
 
@@ -2413,7 +2467,7 @@ const bool ConfigurationView::getChildLink(const unsigned int& c, bool& isGroup,
 					index == columnsInfo_[col].getChildLinkIndex())
 			{
 				//found match!
-				__COUT__ << "getChildLink Found match for col: " << c << " at " << col << std::endl;
+				__COUT__ << "getChildLink Found match for col: " << (int)c << " at " << col << std::endl;
 				linkPair.first = col;
 				return true;
 			}
@@ -2455,7 +2509,7 @@ const bool ConfigurationView::getChildLink(const unsigned int& c, bool& isGroup,
 				&& index == columnsInfo_[col].getChildLinkIndex())
 		{
 			//found match!
-			//__COUT__ << "getChildLink Found match for col: " << c << " at " << col << std::endl;
+			//__COUT__ << "getChildLink Found match for col: " << (int)c << " at " << col << std::endl;
 			linkPair.second = col;
 			return true;
 		}

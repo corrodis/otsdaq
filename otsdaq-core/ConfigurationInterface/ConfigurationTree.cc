@@ -24,6 +24,8 @@ ConfigurationTree::ConfigurationTree()
   linkParentConfig_			(0),
   linkColName_				(""),
   linkColValue_				(""),
+  linkBackRow_				(0),
+  linkBackCol_				(0),
   disconnectedTargetName_	(""),
   disconnectedLinkID_		(""),
   childLinkIndex_			(""),
@@ -35,9 +37,12 @@ ConfigurationTree::ConfigurationTree()
 	//std::cout << __PRETTY_FUNCTION__ << "EMPTY CONSTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
 }
 //==============================================================================
-ConfigurationTree::ConfigurationTree(const ConfigurationManager* const &configMgr, const ConfigurationBase* const &config)
+ConfigurationTree::ConfigurationTree(const ConfigurationManager* const &configMgr,
+		const ConfigurationBase* const &config)
 : ConfigurationTree(configMgr, config, "" /*groupId_*/, 0 /*linkParentConfig_*/,
-		"" /*linkColName_*/, "" /*linkColValue_*/, "" /*disconnectedTargetName_*/,
+		"" /*linkColName_*/, "" /*linkColValue_*/,
+		ConfigurationView::INVALID /*linkBackRow_*/, ConfigurationView::INVALID /*linkBackCol_*/,
+		"" /*disconnectedTargetName_*/,
 		"" /*disconnectedLinkID_*/, "" /*childLinkIndex_*/,
 		ConfigurationView::INVALID /*row_*/, ConfigurationView::INVALID /*col_*/)
 {
@@ -53,6 +58,8 @@ ConfigurationTree::ConfigurationTree(
 		const ConfigurationBase* const&    linkParentConfig,
 		const std::string&                 linkColName,
 		const std::string&                 linkColValue,
+		const unsigned int                 linkBackRow,
+		const unsigned int                 linkBackCol,
 		const std::string&                 disconnectedTargetName,
 		const std::string&                 disconnectedLinkID,
 		const std::string&                 childLinkIndex,
@@ -64,6 +71,8 @@ ConfigurationTree::ConfigurationTree(
   linkParentConfig_			(linkParentConfig),
   linkColName_				(linkColName),
   linkColValue_				(linkColValue),
+  linkBackRow_				(linkBackRow),
+  linkBackCol_				(linkBackCol),
   disconnectedTargetName_ 	(disconnectedTargetName),
   disconnectedLinkID_		(disconnectedLinkID),
   childLinkIndex_			(childLinkIndex),
@@ -265,6 +274,26 @@ const std::string& ConfigurationTree::getConfigurationName(void) const
 		throw std::runtime_error(ss.str());
 	}
 	return configuration_->getConfigurationName();
+}
+
+//==============================================================================
+//getFieldConfigurationName
+//	returns the configuration name for the node's field.
+//		Note: for link nodes versus value nodes this has different functionality than getConfigurationName()
+const std::string& ConfigurationTree::getFieldConfigurationName(void) const
+{
+	//if link node, need config name from parent
+	if(isLinkNode())
+	{
+		if(!linkParentConfig_)
+		{
+			__SS__ << "Can't get configuration name of link node field with no parent configuration pointer!" << std::endl;
+			throw std::runtime_error(ss.str());
+		}
+		return linkParentConfig_->getConfigurationName();
+	}
+	else
+		return getConfigurationName();
 }
 
 //==============================================================================
@@ -515,12 +544,44 @@ const ViewColumnInfo& ConfigurationTree::getColumnInfo(void) const
 //==============================================================================
 //getRow
 const unsigned int& ConfigurationTree::getRow(void) const
-{	return row_;	}
+{
+	return row_;
+}
 
 //==============================================================================
 //getColumn
 const unsigned int& ConfigurationTree::getColumn(void) const
-{	return col_;	}
+{
+	return col_;
+}
+
+//==============================================================================
+//getFieldRow
+//	return field's row (different handling for value vs. link node)
+const unsigned int& ConfigurationTree::getFieldRow(void) const
+{
+	if(isLinkNode())
+	{
+		//for links, need to use parent info to determine
+		return linkBackRow_;
+	}
+	else
+		return row_;
+}
+
+//==============================================================================
+//getFieldColumn
+//	return field's column (different handling for value vs. link node)
+const unsigned int& ConfigurationTree::getFieldColumn(void) const
+{
+	if(isLinkNode())
+	{
+		//for links, need to use parent info to determine
+		return linkBackCol_;
+	}
+	else
+		return col_;
+}
 
 //==============================================================================
 //getChildLinkIndex
@@ -645,6 +706,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 					0 /*linkParentConfig_*/,
 					"", //link node name, not a link
 					"", //link node value, not a link
+					ConfigurationView::INVALID /*linkBackRow_*/, ConfigurationView::INVALID /*linkBackCol_*/,
 					"",	//ignored disconnected target name, not a link
 					"", //ignored disconnected link id, not a link
 					"",
@@ -718,6 +780,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 							configuration_, //linkParentConfig_
 							nodeName,
 							configView_->getDataView()[row_][c], //this the link node field associated value (matches targeted column)
+							row_ /*linkBackRow_*/, c /*linkBackCol_*/,
 							configView_->getDataView()[row_][linkPair.first], //give disconnected target name
 							configView_->getDataView()[row_][linkPair.second], //give disconnected link ID
 							configView_->getColumnInfo(c).getChildLinkIndex());
@@ -731,6 +794,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 								configuration_, //linkParentConfig_
 								nodeName, //this is a link node
 								configView_->getDataView()[row_][c], //this the link node field associated value (matches targeted column)
+								row_ /*linkBackRow_*/, c /*linkBackCol_*/,
 								"", //ignore since is connected
 								"", //ignore since is connected
 								configView_->getColumnInfo(c).getChildLinkIndex(),
@@ -769,6 +833,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 							configuration_, //linkParentConfig_
 							nodeName,
 							configView_->getDataView()[row_][c], //this the link node field associated value (matches targeted column)
+							row_ /*linkBackRow_*/, c /*linkBackCol_*/,
 							configView_->getDataView()[row_][linkPair.first], //give disconnected target name
 							configView_->getDataView()[row_][linkPair.second], //give disconnected target name
 							configView_->getColumnInfo(c).getChildLinkIndex()
@@ -783,6 +848,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 								configuration_, //linkParentConfig_
 								nodeName,  //this is a link node
 								configView_->getDataView()[row_][c], //this the link node field associated value (matches targeted column)
+								row_ /*linkBackRow_*/, c /*linkBackCol_*/,
 								"", //ignore since is connected
 								"", //ignore since is connected
 								configView_->getColumnInfo(c).getChildLinkIndex()
@@ -797,7 +863,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 						configMgr_,
 						configuration_,"",
 						0 /*linkParentConfig_*/,
-						"","","",""/*disconnectedLinkID*/,"",
+						"","",
+						ConfigurationView::INVALID /*linkBackRow_*/, ConfigurationView::INVALID /*linkBackCol_*/,
+						"",""/*disconnectedLinkID*/,"",
 						row_,c);
 			}
 		}

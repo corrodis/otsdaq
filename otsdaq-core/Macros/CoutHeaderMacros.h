@@ -39,8 +39,7 @@
 #define Q(X) #X
 #define QUOTE(X) Q(X)
 //#define __MF_TYPE__(X)	FIXME ?? how to do this ...(getenv("OTSDAQ_USING_MF")=="1"? mf::X (__MF_SUBJECT__) : std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":")
-#define __MF_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":"
-//#define __MF_TYPE__(X)	mf::X (__MF_SUBJECT__)
+#define __MF_TYPE__(X)	mf::X (__MF_SUBJECT__)
 
 
 

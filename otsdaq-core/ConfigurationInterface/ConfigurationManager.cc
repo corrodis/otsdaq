@@ -188,10 +188,11 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 
 	__SS__;
 
-	for(int i=0;i<3;++i)
+	while(fgets(tmp,500,fp))//for(int i=0;i<4;++i)
 	{
+		//fgets(tmp,500,fp);
+
 		skip = false;
-		fgets(tmp,500,fp);
 		sscanf(tmp,"%s",strVal); //sscanf to remove '\n'
 		for(unsigned int j=0;j<strlen(strVal);++j)
 			if(!(
@@ -222,6 +223,16 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 					skip = true;
 					break;
 				}
+
+		try
+		{
+			ConfigurationGroupKey::getFullGroupString(groupName,ConfigurationGroupKey(strVal));
+		}
+		catch(...)
+		{
+			__COUT__ << "illegal group accorging to ConfigurationGroupKey::getFullGroupString..." << std::endl;
+			skip = true;
+		}
 
 		if(skip) continue;
 
@@ -966,28 +977,28 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	{
 		if(groupType == CONTEXT_TYPE) //
 		{
-			__COUT_INFO__ << "Context Configuration Group loaded: " << configGroupName <<
+			__COUT_INFO__ << "Type=Context, Group loaded: " << configGroupName <<
 					"(" << configGroupKey << ")" << std::endl;
 			theContextGroup_ = configGroupName;
 			theContextGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
 		}
 		else if(groupType == BACKBONE_TYPE)
 		{
-			__COUT_INFO__ << "Backbone Configuration Group loaded: " << configGroupName <<
+			__COUT_INFO__ << "Type=Backbone, Group loaded: " << configGroupName <<
 					"(" << configGroupKey << ")" << std::endl;
 			theBackboneGroup_ = configGroupName;
 			theBackboneGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
 		}
 		else if(groupType == ITERATE_TYPE)
 		{
-			__COUT_INFO__ << "Iterate Configuration Group loaded: " << configGroupName <<
+			__COUT_INFO__ << "Type=Iterate, Group loaded: " << configGroupName <<
 					"(" << configGroupKey << ")" << std::endl;
 			theIterateGroup_ = configGroupName;
 			theIterateGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
 		}
 		else //is theConfigurationGroup_
 		{
-			__COUT_INFO__ << "The Configuration Group loaded: " << configGroupName <<
+			__COUT_INFO__ << "Type=Configuration, Group loaded: " << configGroupName <<
 					"(" << configGroupKey << ")" << std::endl;
 			theConfigurationGroup_ = configGroupName;
 			theConfigurationGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
