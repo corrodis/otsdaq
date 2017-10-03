@@ -812,7 +812,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	if(groupComment) 			*groupComment 			= "";
 	if(groupAuthor) 			*groupAuthor 			= "";
 	if(groupCreateTime) 		*groupCreateTime 		= "";
-	if(groupTypeString)			*groupTypeString 				= "";
+	if(groupTypeString)			*groupTypeString 		= "";
 
 	//	load all members of configuration group
 	//	if doActivate
@@ -868,15 +868,20 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 
 	if(progressBar) progressBar->step();
 
-	//__COUT__ << "memberMap loaded size = " << memberMap.size() << std::endl;
+	__COUT__ << "memberMap loaded size = " << memberMap.size() << std::endl;
+
+	int groupType = -1;
+	if(groupTypeString) //do before exit case
+	{
+		groupType = getTypeOfGroup(memberMap);
+		*groupTypeString = convertGroupTypeIdToName(groupType);
+	}
 
 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
 
-	int groupType = -1;
 
-	//determine the type configuration group
-	groupType = getTypeOfGroup(memberMap);
-	if(groupTypeString) *groupTypeString = convertGroupTypeIdToName(groupType);
+	//if not already done, determine the type configuration group
+	if(!groupTypeString) groupType = getTypeOfGroup(memberMap);
 
 	if(doActivate)
 	{
