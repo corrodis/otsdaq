@@ -374,8 +374,8 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 			throw std::runtime_error(ss.str());
 		}
 
-		__COUT__ << getChildLinkIndex() << std::endl;
-		__COUT__ << linkColName_ << std::endl;
+		//__COUT__ << getChildLinkIndex() << std::endl;
+		//__COUT__ << linkColName_ << std::endl;
 
 		//for links, col_ = -1, column c needs to change (to ChildLink column of pair)
 		// get column from parent config pointer
@@ -383,14 +383,10 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 		const ConfigurationView* parentView = &(linkParentConfig_->getView());
 		int c = parentView->findCol(linkColName_);
 
-		__COUT__ << "Link " << c << std::endl;
-
 		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
 		bool isGroupLink;
 		parentView->getChildLink(c, isGroupLink, linkPair);
 		c = linkPair.first;
-
-		__COUT__ << "Link " << c << std::endl;
 
 		std::vector<std::string> choices = parentView->getColumnInfo(c).getDataChoices();
 		for(const auto &choice:choices)

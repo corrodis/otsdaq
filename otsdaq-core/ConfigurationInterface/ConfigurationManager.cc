@@ -177,7 +177,7 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 
 	if(!fp) return;
 
-	__COUT__ << "throwErrors: " << throwErrors << std::endl;
+	//__COUT__ << "throwErrors: " << throwErrors << std::endl;
 
 	char tmp[500];
 	char strVal[500];

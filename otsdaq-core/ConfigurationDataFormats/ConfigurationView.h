@@ -93,8 +93,8 @@ public:
 	bool			 			    isEntryInGroup				(const unsigned int& row, const std::string& childLinkIndex, const std::string& groupNeedle) const;
 	const bool	 					getChildLink				(const unsigned int& col, bool& isGroup, std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>& linkPair) const;
 	const unsigned int 			    getColLinkGroupID			(const std::string& childLinkIndex) const;
-	void			 			    addRowToGroup				(const unsigned int& row, const unsigned int& col, const std::string& groupID, const std::string& colDefault);
-	void			 			    removeRowFromGroup			(const unsigned int& row, const unsigned int& col, const std::string& groupID);
+	void			 			    addRowToGroup				(const unsigned int& row, const unsigned int& col, const std::string& groupID);//, const std::string& colDefault);
+	void			 			    removeRowFromGroup			(const unsigned int& row, const unsigned int& col, const std::string& groupID, bool deleteRowIfNoGroupLeft=false);
 
 	//==============================================================================
 	//Philosophy: force type validation by passing value to fill by reference..
@@ -377,7 +377,7 @@ public:
 	//==============================================================================
 	void				resizeDataView		(unsigned int nRows, unsigned int nCols);
 	int					addRow        		(const std::string &author = ""); //returns index of added row, always is last row
-	void 				deleteRow     		(int r); //returns true on success
+	void 				deleteRow     		(int r);
 
 	//Lore did not like this.. wants special access through separate Supervisor for "Database Management" int		addColumn(std::string name, std::string viewName, std::string viewType); //returns index of added column, always is last column unless
 

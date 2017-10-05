@@ -800,8 +800,8 @@ const unsigned int ConfigurationView::getColUID	(void) const
 //	Group entry can include | to place a record in multiple groups
 void ConfigurationView::addRowToGroup(const unsigned int &row,
 		const unsigned int &col,
-		const std::string &groupID,
-		const std::string &colDefault)
+		const std::string &groupID)//,
+		//const std::string &colDefault)
 {
 	if(isEntryInGroupCol(row,col,groupID))
 	{
@@ -817,7 +817,7 @@ void ConfigurationView::addRowToGroup(const unsigned int &row,
 	//	if other groups
 	//		prepend groupId |
 	if(getDataView()[row][col] == "" ||
-			getDataView()[row][col] == colDefault)
+			getDataView()[row][col] == getDefaultRowValues()[col]) //colDefault)
 		setValue(
 				groupID,
 				row,col);
@@ -834,7 +834,8 @@ void ConfigurationView::addRowToGroup(const unsigned int &row,
 //	Group entry can include | to place a record in multiple groups
 void ConfigurationView::removeRowFromGroup(const unsigned int &row,
 		const unsigned int &col,
-		const std::string &groupNeedle)
+		const std::string &groupNeedle,
+		bool deleteRowIfNoGroupLeft)
 {
 	__COUT__ << "groupNeedle " << groupNeedle << std::endl;
 	std::set<std::string> groupIDList;
@@ -860,7 +861,14 @@ void ConfigurationView::removeRowFromGroup(const unsigned int &row,
 		if(cnt) newValue += " | ";
 		newValue += groupID;
 	}
-	setValue(newValue,row,col);
+
+	if(deleteRowIfNoGroupLeft && newValue == "")
+	{
+		__COUT__ << "Delete row since it no longer part of any group." << std::endl;
+		deleteRow(row);
+	}
+	else
+		setValue(newValue,row,col);
 
 	//__COUT__ << getDataView()[row][col] << std::endl;
 }
