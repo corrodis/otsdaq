@@ -2387,13 +2387,17 @@ void ConfigurationView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //addRow
 //	returns index of added row, always is last row
 //	return -1 on failure (throw error)
-int ConfigurationView::addRow (const std::string &author)
+//
+//	if baseNameAutoUID != "", creates a UID based on this base name
+//		and increments and appends an integer relative to the previous last row
+int ConfigurationView::addRow(const std::string &author, std::string baseNameAutoUID)
 {
 	int row = getNumberOfRows();
 	theDataView_.resize(getNumberOfRows()+1,std::vector<std::string>(getNumberOfColumns()));
 
 	std::vector<std::string> defaultRowValues =
 			getDefaultRowValues();
+
 
 	//fill each col of new row with default values
 	for(unsigned int col=0;col<getNumberOfColumns();++col)
@@ -2406,6 +2410,27 @@ int ConfigurationView::addRow (const std::string &author)
 		int timestampCol = findColByType(ViewColumnInfo::TYPE_TIMESTAMP);
 		setValue(author,row,authorCol);
 		setValue(time(0),row,timestampCol);
+	}
+
+	if(baseNameAutoUID != "")
+	{
+		std::string indexSubstring = "0";
+		//if there is a last row with baseName in it
+		if(theDataView_.size() > 1 &&
+				0 ==
+				theDataView_[theDataView_.size()-2][getColUID()].find(baseNameAutoUID))
+			//extract last index
+			indexSubstring = theDataView_[theDataView_.size()-2][getColUID()].substr(
+					baseNameAutoUID.size());
+
+		unsigned int index;
+		sscanf(indexSubstring.c_str(),"%u",&index);
+		++index; //increment
+		char indexString[100];
+		sprintf(indexString,"%u",index);
+
+		baseNameAutoUID += indexString;
+		setValue(baseNameAutoUID,row,getColUID());
 	}
 
 	return row;

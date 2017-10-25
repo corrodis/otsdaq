@@ -376,7 +376,11 @@ ConfigurationBase* ConfigurationManagerRW::getConfigurationByName(const std::str
 {
 	if(nameToConfigurationMap_.find(configurationName) == nameToConfigurationMap_.end())
 	{
-		__SS__ << "\nConfiguration not found with name: " << configurationName << std::endl;
+		__SS__ << "Configuration not found with name: " << configurationName << std::endl;
+		size_t f;
+		if((f=configurationName.find(' ')) != std::string::npos)
+			ss << "There was a space character found in the configuration name needle at position " <<
+				f << " in the string (was this intended?). " << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
