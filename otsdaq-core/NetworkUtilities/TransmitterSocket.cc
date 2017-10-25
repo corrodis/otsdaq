@@ -35,7 +35,7 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer)
 	//			" to-port: " << ntohs(toSocket.getSocketAddress().sin_port) << std::endl;
 
 	int sts = sendto(socketNumber_, buffer.c_str(), buffer.size(), 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
-	int offset = sts;
+	size_t offset = sts;
 	while (sts > 0 && offset < buffer.size())
 	{
 		sts = sendto(socketNumber_, buffer.c_str() + offset, buffer.size() - offset, 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
