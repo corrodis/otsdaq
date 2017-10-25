@@ -14,15 +14,14 @@ TransmitterSocket::TransmitterSocket(void)
 
 //========================================================================================================================
 TransmitterSocket::TransmitterSocket(const std::string &IPAddress, unsigned int port)
-: Socket(IPAddress, port)
+	: Socket(IPAddress, port)
 {
 	__COUT__ << std::endl;
 }
 
 //========================================================================================================================
 TransmitterSocket::~TransmitterSocket(void)
-{
-}
+{}
 
 //========================================================================================================================
 int TransmitterSocket::send(Socket& toSocket, const std::string& buffer)
@@ -31,13 +30,19 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer)
 	//lockout other senders for the remainder of the scope
 	std::lock_guard<std::mutex> lock(sendMutex_);
 
-//	__COUT__ << "Socket Descriptor #: " << socketNumber_ <<
-//			" from-port: " << ntohs(socketAddress_.sin_port) <<
-//			" to-port: " << ntohs(toSocket.getSocketAddress().sin_port) << std::endl;
+	//	__COUT__ << "Socket Descriptor #: " << socketNumber_ <<
+	//			" from-port: " << ntohs(socketAddress_.sin_port) <<
+	//			" to-port: " << ntohs(toSocket.getSocketAddress().sin_port) << std::endl;
 
-	if(sendto(socketNumber_, buffer.c_str(), buffer.size(), 0,
-			(struct sockaddr *)&(toSocket.getSocketAddress()),
-			sizeof(sockaddr_in)) < (int)(buffer.size()))
+	int sts = sendto(socketNumber_, buffer.c_str(), buffer.size(), 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
+	int offset = sts;
+	while (sts > 0 && offset < buffer.size())
+	{
+		sts = sendto(socketNumber_, buffer.c_str() + offset, buffer.size() - offset, 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
+		offset += sts;
+	}
+
+	if (sts < 0)
 	{
 		__COUT__ << "Error writing buffer for port " << ntohs(socketAddress_.sin_port) << std::endl;
 		return -1;
@@ -51,11 +56,11 @@ int TransmitterSocket::send(Socket& toSocket, const std::vector<uint32_t>& buffe
 	//lockout other senders for the remainder of the scope
 	std::lock_guard<std::mutex> lock(sendMutex_);
 
-//	__COUT__ << "Socket Descriptor #: " << socketNumber_ <<
-//			" from-port: " << ntohs(socketAddress_.sin_port) <<
-//			" to-port: " << ntohs(toSocket.getSocketAddress().sin_port) << std::endl;
+	//	__COUT__ << "Socket Descriptor #: " << socketNumber_ <<
+	//			" from-port: " << ntohs(socketAddress_.sin_port) <<
+	//			" to-port: " << ntohs(toSocket.getSocketAddress().sin_port) << std::endl;
 
-	if(sendto(socketNumber_, &buffer[0], buffer.size()*sizeof(uint32_t), 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in)) < (int)(buffer.size()*sizeof(uint32_t)))
+	if (sendto(socketNumber_, &buffer[0], buffer.size() * sizeof(uint32_t), 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in)) < (int)(buffer.size() * sizeof(uint32_t)))
 	{
 		__COUT__ << "Error writing buffer for port " << ntohs(socketAddress_.sin_port) << std::endl;
 		return -1;
