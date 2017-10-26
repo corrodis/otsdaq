@@ -1,5 +1,6 @@
 #include "otsdaq-core/ConfigurationPluginDataFormats/TemplateConfiguration.h"
 #include "otsdaq-core/Macros/ConfigurationPluginMacros.h"
+#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
 #include <iostream>
 #include <string>

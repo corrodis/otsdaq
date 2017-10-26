@@ -48,6 +48,12 @@ simple_plugin(MessageFacilityConfiguration "configuration"
   ConfigurationInterface
   ${CETLIB}
   )
+    
+simple_plugin(IterateConfiguration "configuration"
+  ConfigurationDataFormats
+  ConfigurationInterface
+  ${CETLIB}
+  )
 
 
   
