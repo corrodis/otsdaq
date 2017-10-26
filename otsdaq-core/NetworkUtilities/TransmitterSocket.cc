@@ -34,15 +34,18 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer)
 	//			" from-port: " << ntohs(socketAddress_.sin_port) <<
 	//			" to-port: " << ntohs(toSocket.getSocketAddress().sin_port) << std::endl;
 
-	int sts = sendto(socketNumber_, buffer.c_str(), buffer.size(), 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
-	size_t offset = sts;
-	while (sts > 0 && offset < buffer.size())
+	constexpr size_t MAX_SEND_SIZE = 1500;
+	size_t offset = 0;
+	int sts = 1;
+
+	while (offset < buffer.size() && sts > 0)
 	{
-		sts = sendto(socketNumber_, buffer.c_str() + offset, buffer.size() - offset, 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
+		auto thisSize = buffer.size() - offset > MAX_SEND_SIZE ? MAX_SEND_SIZE : buffer.size() - offset;
+		sts = sendto(socketNumber_, buffer.c_str() + offset, thisSize, 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
 		offset += sts;
 	}
 
-	if (sts < 0)
+	if (sts <= 0)
 	{
 		__COUT__ << "Error writing buffer for port " << ntohs(socketAddress_.sin_port) << ": " << strerror(errno) << std::endl;
 		return -1;
