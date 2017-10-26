@@ -18,6 +18,7 @@ public:
 
 	int send(Socket& toSocket, const std::string& buffer);
 	int send(Socket& toSocket, const std::vector<uint32_t>& buffer);
+	int send(Socket& toSocket, const std::vector<uint16_t>& buffer);
 
 protected:
 	TransmitterSocket(void);
