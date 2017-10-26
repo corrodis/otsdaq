@@ -44,7 +44,7 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer)
 
 	if (sts < 0)
 	{
-		__COUT__ << "Error writing buffer for port " << ntohs(socketAddress_.sin_port) << std::endl;
+		__COUT__ << "Error writing buffer for port " << ntohs(socketAddress_.sin_port) << ": " << strerror(errno) << std::endl;
 		return -1;
 	}
 	return 0;
