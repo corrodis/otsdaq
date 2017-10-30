@@ -38,7 +38,7 @@ using namespace ots;
 
 
 #undef 	__MF_SUBJECT__
-#define __MF_SUBJECT__ "OmniSuper"
+#define __MF_SUBJECT__ "GatewaySupervisor"
 
 
 XDAQ_INSTANTIATOR_IMPL(Supervisor)

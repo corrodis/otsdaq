@@ -10,13 +10,9 @@ class SupervisorInfo
 {
 public:
     SupervisorInfo (void) : status_("Unknown"), URL_("")
-    {
-        ;
-    }
+    {;}
     ~SupervisorInfo(void)
-    {
-        ;
-    }
+    {;}
 
     //Getters
     std::string getStatus(void) const

@@ -7,6 +7,7 @@
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq-core/Supervisor/SupervisorsInfo.h"
+#include "otsdaq-core/Supervisor/Iterator.h"
 #include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
 
@@ -124,9 +125,13 @@ private:
     std::string 						supervisorContextUID_		;
     std::string 						supervisorApplicationUID_	;
 
-    std::string							activeStateMachineName_; //when multiple state machines, this is the name of the state machine which executed the configure transition
-    std::string							activeStateMachineWindowName_;
+    std::string							activeStateMachineName_			; //when multiple state machines, this is the name of the state machine which executed the configure transition
+    std::string							activeStateMachineWindowName_	;
     std::pair<std::string /*group name*/, ConfigurationGroupKey> theConfigurationGroup_; //used to track the active configuration group at states after the configure state
+
+    Iterator							theIterator_					;
+
+
 
     //Trash tests
     void wait(int milliseconds, std::string who="") const;
