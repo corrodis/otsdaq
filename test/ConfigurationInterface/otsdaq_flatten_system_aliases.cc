@@ -105,6 +105,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	//create set of groups to persist
 	//	include active context
 	//	include active backbone
+	//	include active iterate group
 	//	include active config group
 	//		(keep key translation separate activeGroupKeys)
 	//	include all groups with system aliases
@@ -136,9 +137,10 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	std::map<std::pair<std::string,ConfigurationGroupKey>,
 		std::string> 							groupErrors;
 
-	std::string									activeBackboneTableName = "";
-	std::string									activeContextTableName = "";
-	std::string									activeConfigTableName = "";
+	std::string									activeBackboneGroupName = "";
+	std::string									activeContextGroupName = "";
+	std::string									activeIterateGroupName = "";
+	std::string									activeConfigGroupName = "";
 
 	std::string									nowTime = std::to_string(time(0));
 
@@ -175,21 +177,27 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 
 		if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE)
 		{
-			activeBackboneTableName = activeGroup.second.first;
-			std::cout << __COUT_HDR_FL__<< "found activeBackboneTableName = " <<
-					activeBackboneTableName << std::endl;
+			activeBackboneGroupName = activeGroup.second.first;
+			std::cout << __COUT_HDR_FL__<< "found activeBackboneGroupName = " <<
+					activeBackboneGroupName << std::endl;
 		}
 		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
 		{
-			activeContextTableName = activeGroup.second.first;
-			std::cout << __COUT_HDR_FL__<< "found activeContextTableName = " <<
-					activeContextTableName << std::endl;
+			activeContextGroupName = activeGroup.second.first;
+			std::cout << __COUT_HDR_FL__<< "found activeContextGroupName = " <<
+					activeContextGroupName << std::endl;
+		}
+		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE)
+		{
+			activeIterateGroupName = activeGroup.second.first;
+			std::cout << __COUT_HDR_FL__<< "found activeIterateGroupName = " <<
+					activeIterateGroupName << std::endl;
 		}
 		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
 		{
-			activeConfigTableName = activeGroup.second.first;
-			std::cout << __COUT_HDR_FL__<< "found activeConfigTableName = " <<
-					activeConfigTableName << std::endl;
+			activeConfigGroupName = activeGroup.second.first;
+			std::cout << __COUT_HDR_FL__<< "found activeConfigGroupName = " <<
+					activeConfigGroupName << std::endl;
 		}
 	}
 
@@ -605,7 +613,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 //		std::cout << __COUT_HDR_FL__ << activeGroup.first << ": " <<
 //			activeGroup.second.first << " => " << activeGroup.second.second << std::endl;
 //
-//	std::cout << __COUT_HDR_FL__ << activeBackboneTableName << " is the " <<
+//	std::cout << __COUT_HDR_FL__ << activeBackboneGroupName << " is the " <<
 //			ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE << "." << std::endl;
 //	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Active Groups end." << std::endl;
 
@@ -617,7 +625,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	//	modify group aliases and table aliases properly based on groupSet and modifiedTables
 	//	save new backbone with flatVersion to new DB
 
-	if(activeBackboneTableName == "")
+	if(activeBackboneGroupName == "")
 	{
 		std::cout << __COUT_HDR_FL__ << "No active Backbone table identified." << std::endl;
 		goto CLEAN_UP;
@@ -630,8 +638,8 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	{
 		memberMap =
 				cfgMgr->loadConfigurationGroup(
-						activeBackboneTableName,
-						activeGroupKeys[activeBackboneTableName].second,
+						activeBackboneGroupName,
+						activeGroupKeys[activeBackboneGroupName].second,
 						true,0,&accumulateErrors);
 
 		//modify GroupAliasesConfiguration and VersionAliasesConfiguration to point
@@ -752,14 +760,14 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 		//memberMap should now consist of members with new flat version, so save
 		theInterface_->saveConfigurationGroup(memberMap,
 				ConfigurationGroupKey::getFullGroupString(
-						activeBackboneTableName,
+						activeBackboneGroupName,
 						ConfigurationGroupKey(flatVersion)));
 
-		activeGroupKeys[activeBackboneTableName].second =
+		activeGroupKeys[activeBackboneGroupName].second =
 								ConfigurationGroupKey(flatVersion);
 
-		std::cout << __COUT_HDR_FL__ << "New to-be-active backbone group " << activeBackboneTableName <<
-				":v" << activeGroupKeys[activeBackboneTableName].second << std::endl;
+		std::cout << __COUT_HDR_FL__ << "New to-be-active backbone group " << activeBackboneGroupName <<
+				":v" << activeGroupKeys[activeBackboneGroupName].second << std::endl;
 	}
 
 
@@ -792,17 +800,20 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 		std::cout << __COUT_HDR_FL__ << "Backup file name: " << renameFile
 				<< std::endl;
 
-		ConfigurationGroupKey         	*theConfigurationGroupKey_,	*theContextGroupKey_, 	*theBackboneGroupKey_;
-		std::string						theConfigurationGroup_, 	theContextGroup_, 		theBackboneGroup_;
+		ConfigurationGroupKey         	*theConfigurationGroupKey_,	*theContextGroupKey_, 	*theBackboneGroupKey_,	*theIterateGroupKey_;
+		std::string						theConfigurationGroup_, 	theContextGroup_, 		theBackboneGroup_,		theIterateGroup_;
 
-		theConfigurationGroup_ = activeConfigTableName;
-		theConfigurationGroupKey_ = &(activeGroupKeys[activeConfigTableName].second);
+		theConfigurationGroup_ = activeConfigGroupName;
+		theConfigurationGroupKey_ = &(activeGroupKeys[activeConfigGroupName].second);
 
-		theContextGroup_ = activeContextTableName;
-		theContextGroupKey_ = &(activeGroupKeys[activeContextTableName].second);
+		theContextGroup_ = activeContextGroupName;
+		theContextGroupKey_ = &(activeGroupKeys[activeContextGroupName].second);
 
-		theBackboneGroup_ = activeBackboneTableName;
-		theBackboneGroupKey_ = &(activeGroupKeys[activeBackboneTableName].second);
+		theBackboneGroup_ = activeBackboneGroupName;
+		theBackboneGroupKey_ = &(activeGroupKeys[activeBackboneGroupName].second);
+
+		theIterateGroup_ = activeIterateGroupName;
+		theIterateGroupKey_ = &(activeGroupKeys[activeIterateGroupName].second);
 
 
 		//the following is copied from ConfigurationManagerRW::activateConfigurationGroup
@@ -820,6 +831,8 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			fprintf(fp,"%s\n",theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1");
 			fprintf(fp,"%s\n",theConfigurationGroup_.c_str());
 			fprintf(fp,"%s\n",theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1");
+			fprintf(fp,"%s\n",theIterateGroup_.c_str());
+			fprintf(fp,"%s\n",theIterateGroupKey_?theIterateGroupKey_->toString().c_str():"-1");
 			fclose(fp);
 		}
 	}
@@ -840,7 +853,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 		std::cout << __COUT_HDR_FL__ << "\t" << activeGroup.first << ": " <<
 			activeGroup.second.first << " => " << activeGroup.second.second << std::endl;
 
-	std::cout << __COUT_HDR_FL__ << activeBackboneTableName << " is the " <<
+	std::cout << __COUT_HDR_FL__ << activeBackboneGroupName << " is the " <<
 			ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE << "." << std::endl;
 	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Active Groups end." << std::endl;
 
