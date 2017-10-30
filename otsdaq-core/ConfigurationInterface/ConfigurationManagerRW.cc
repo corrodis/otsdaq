@@ -433,10 +433,11 @@ ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(const std::str
 		config->setActiveView(newVersion);
 
 	//if there is a problem, try to recover
-	while(!newVersion.isScratchVersion() && allConfigurationInfo_[configurationName].versions_.find(newVersion) !=
+	while(!makeTemporary && !newVersion.isScratchVersion() &&
+			allConfigurationInfo_[configurationName].versions_.find(newVersion) !=
 			allConfigurationInfo_[configurationName].versions_.end())
 	{
-		__COUT_ERR__ << "What happenened!?? ERROR::: newVersion v" << newVersion <<
+		__COUT_ERR__ << "What happenened!?? ERROR::: new persistent version v" << newVersion <<
 				" already exists!? How is it possible? Retrace your steps and tell an admin." << std::endl;
 
 		//create a new temporary version of the target view

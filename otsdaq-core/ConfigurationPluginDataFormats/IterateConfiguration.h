@@ -66,6 +66,7 @@ public:
 	{
 		std::string const GroupID_ = "IterationPlanGroupID";
 		std::string const CommandLink_ = "LinkToCommandUID";
+		std::string const CommandType_ = "CommandType";
 	} planTableCols_;
 
 	static struct IterateTableColumns

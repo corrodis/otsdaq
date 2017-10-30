@@ -832,7 +832,9 @@ void ConfigurationView::addRowToGroup(const unsigned int &row,
 //==============================================================================
 //removeRowFromGroup
 //	Group entry can include | to place a record in multiple groups
-void ConfigurationView::removeRowFromGroup(const unsigned int &row,
+//
+//	returns true if row was deleted because it had no group left
+bool ConfigurationView::removeRowFromGroup(const unsigned int &row,
 		const unsigned int &col,
 		const std::string &groupNeedle,
 		bool deleteRowIfNoGroupLeft)
@@ -862,15 +864,19 @@ void ConfigurationView::removeRowFromGroup(const unsigned int &row,
 		newValue += groupID;
 	}
 
+	bool wasDeleted = false;
 	if(deleteRowIfNoGroupLeft && newValue == "")
 	{
 		__COUT__ << "Delete row since it no longer part of any group." << std::endl;
 		deleteRow(row);
+		wasDeleted = true;
 	}
 	else
 		setValue(newValue,row,col);
 
 	//__COUT__ << getDataView()[row][col] << std::endl;
+
+	return wasDeleted;
 }
 
 //==============================================================================

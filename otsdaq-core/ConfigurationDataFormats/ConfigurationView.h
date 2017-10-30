@@ -94,7 +94,7 @@ public:
 	const bool	 					getChildLink				(const unsigned int& col, bool& isGroup, std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>& linkPair) const;
 	const unsigned int 			    getColLinkGroupID			(const std::string& childLinkIndex) const;
 	void			 			    addRowToGroup				(const unsigned int& row, const unsigned int& col, const std::string& groupID);//, const std::string& colDefault);
-	void			 			    removeRowFromGroup			(const unsigned int& row, const unsigned int& col, const std::string& groupID, bool deleteRowIfNoGroupLeft=false);
+	bool			 			    removeRowFromGroup			(const unsigned int& row, const unsigned int& col, const std::string& groupID, bool deleteRowIfNoGroupLeft=false);
 
 	//==============================================================================
 	//Philosophy: force type validation by passing value to fill by reference..
@@ -111,88 +111,6 @@ public:
 		}
 
 		value = validateValueForColumn<T>(theDataView_[row][col],col,convertEnvironmentVariables);
-//
-//		if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_NUMBER) //handle numbers
-//		{
-//			std::string data = convertEnvironmentVariables?convertEnvVariables(theDataView_[row][col]):
-//					theDataView_[row][col];
-//
-//			if(!isNumber(data))
-//			{
-//				__SS__ << (data + " is not a number!") << std::endl;
-//				__COUT__ << "\n" << ss.str();
-//				throw std::runtime_error(ss.str());
-//			}
-//
-//			if(typeid(double) == typeid(value))
-//				value = strtod(data.c_str(),0);
-//			else if(typeid(float) == typeid(value))
-//				value = strtof(data.c_str(),0);
-//			else if(data.size() > 2 && data[1] == 'x') //assume hex value
-//				value = strtol(data.c_str(),0,16);
-//			else if(data.size() > 1 && data[0] == 'b') //assume binary value
-//				value = strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
-//			else
-//				value = strtol(data.c_str(),0,10);
-//		}
-//		else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
-//				columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
-//				(typeid(int) == typeid(value) ||
-//						typeid(unsigned int) == typeid(value)))
-//		{
-//			//this case is for if fixed choice type but int is requested
-//			//	then return index in fixed choice list
-//			//	(always consider DEFAULT as index 0)
-//			//throw error if no match
-//
-//			if(theDataView_[row][col] == ViewColumnInfo::DATATYPE_STRING_DEFAULT)
-//				value = 0;
-//			else
-//			{
-//				std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
-//				for(value=1;value-1<(T)choices.size();++value)
-//					if(theDataView_[row][col] == choices[value-1])
-//						return; //value has been set to selected choice index, so return
-//
-//				__SS__ << "\tInvalid value for column data type: " << columnsInfo_[col].getDataType()
-//						<< " in configuration " << tableName_
-//						<< " at column=" << columnsInfo_[col].getName()
-//						<< " for getValue with type '" << ots_demangle(typeid(value).name())
-//						<< ".'"
-//						<< "Attempting to get index of '" << theDataView_[row][col]
-//						<< " in fixed choice array, but was not found in array. "
-//						<< "Here are the valid choices:\n";
-//				ss << "\t" << ViewColumnInfo::DATATYPE_STRING_DEFAULT << "\n";
-//				for(const auto &choice:choices)
-//					ss << "\t" << choice << "\n";
-//				__COUT__ << "\n" << ss.str();
-//				throw std::runtime_error(ss.str());
-//			}
-//		}
-//		else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
-//				typeid(bool) == typeid(value)) //handle bool
-//		{
-//			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_ON_OFF)
-//				value = (theDataView_[row][col] == ViewColumnInfo::TYPE_VALUE_ON) ? true:false;
-//			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_TRUE_FALSE)
-//				value = (theDataView_[row][col] == ViewColumnInfo::TYPE_VALUE_TRUE) ? true:false;
-//			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_YES_NO)
-//				value = (theDataView_[row][col] == ViewColumnInfo::TYPE_VALUE_YES) ? true:false;
-//		}
-//		else
-//		{
-//			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
-//				__COUT_WARN__ << "For column type " << ViewColumnInfo::TYPE_FIXED_CHOICE_DATA
-//					<< " the only valid numeric types are 'int' and 'unsigned int.'";
-//
-//			__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
-//					<< " and column type: " << columnsInfo_[col].getType()
-//					<< ", in configuration " << tableName_
-//					<< " at column=" << columnsInfo_[col].getName()
-//					<< " for getValue with type '" << ots_demangle(typeid(value).name())
-//					<< "'" << std::endl;
-//			throw std::runtime_error(ss.str());
-//		}
 	}
 	//special version of getValue for string type
 	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
