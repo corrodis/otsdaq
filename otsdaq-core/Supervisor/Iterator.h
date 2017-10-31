@@ -9,11 +9,13 @@
 namespace ots
 {
 
+class Supervisor;
+
 class Iterator
 {
 	
 public:
-    Iterator (void);
+    Iterator (Supervisor* supervisor);
     ~Iterator(void);
 
     void									playIterationPlan			(HttpXmlDocument& xmldoc, const std::string& planName);
@@ -30,6 +32,8 @@ private:
     volatile bool							activePlanIsRunning_;
     volatile bool							commandPlay_, commandPause_, commandHalt_; //commands are set by supervisor thread, and cleared by iterator thread
     std::string								activePlanName_;
+
+    Supervisor* 							theSupervisor_;
 };
 
 }

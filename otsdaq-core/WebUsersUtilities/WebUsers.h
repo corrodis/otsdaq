@@ -204,54 +204,6 @@ private:
     std::vector<time_t> 		HashesAccessTimeVector;
 };
 
-const std::string WebUsers::REQ_NO_LOGIN_RESPONSE 		= "NoLogin";
-const std::string WebUsers::REQ_NO_PERMISSION_RESPONSE 	= "NoPermission";
-const std::string WebUsers::REQ_USER_LOCKOUT_RESPONSE 	= "UserLockout";
-
-const std::string WebUsers::SECURITY_TYPE_NONE 			= "NoSecurity";
-const std::string WebUsers::SECURITY_TYPE_DIGEST_ACCESS = "DigestAccessAuthentication";
-const std::string WebUsers::SECURITY_TYPE_KERBEROS 		= "Kerberos";
-
-
-void WebUsers::deleteUserData ()
-{
-	//delete Login data
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + HASHES_DB_PATH + "/*").c_str());
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + USERS_DB_PATH + "/*").c_str());
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + USERS_LOGIN_HISTORY_PATH + "/*").c_str());
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + USERS_PREFERENCES_PATH + "/*").c_str());
-	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + TOOLTIP_DB_PATH).c_str());
-
-	std::string serviceDataPath = getenv("SERVICE_DATA_PATH");
-	//delete macro maker folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/MacroData/").c_str());
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/MacroHistory/").c_str());
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/MacroExport/").c_str());
-
-	//delete console folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/ConsolePreferences/").c_str());
-
-	//delete wizard folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/OtsWizardData/").c_str());
-
-	//delete progress bar folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/ProgressBarData/").c_str());
-
-	//delete The Supervisor run folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/RunNumber/").c_str());
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/RunControlData/").c_str());
-
-	//delete Visualizer folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/VisualizerData/").c_str());
-
-	//delete active groups file
-	std::system(("rm -f " + std::string(serviceDataPath) + "/ActiveConfigurationGroups.cfg").c_str());
-
-	//delete Logbook folders
-	std::system(("rm -rf " + std::string(getenv("LOGBOOK_DATA_PATH")) + "/").c_str());
-
-	std::cout << __COUT_HDR_FL__ << "$$$$$$$$$$$$$$ Successfully deleted ALL service user data $$$$$$$$$$$$" << std::endl;
-}
 }
 
 #endif

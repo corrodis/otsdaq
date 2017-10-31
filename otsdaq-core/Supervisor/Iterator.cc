@@ -2,6 +2,7 @@
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/Supervisor/Supervisor.h"
 
 #include <iostream>
 #include <thread>       //for std::thread
@@ -12,17 +13,15 @@
 using namespace ots;
 
 //========================================================================================================================
-Iterator::Iterator(void)
+Iterator::Iterator(Supervisor* supervisor)
 : workloopRunning_				(false)
 , activePlanIsRunning_			(false)
 , commandPlay_(false), commandPause_(false), commandHalt_(false)
 , activePlanName_				("")
+, theSupervisor_				(supervisor)
 {
 	__MOUT__ << "Iterator constructed." << std::endl;
 	__COUT__ << "Iterator constructed." << std::endl;
-
-	//start mf msg listener
-//		std::thread([](ConsoleSupervisor *cs){ ConsoleSupervisor::MFReceiverWorkLoop(cs); },this).detach();
 
 }
 
@@ -40,28 +39,103 @@ try
 
 	ConfigurationManager cfgMgr;
 	unsigned int commandIndex = (unsigned int)-1;
+	std::string activePlan = "";
+	bool running = false;
 
 	while(1)
 	{
 		//Process:
-		//	- if no plan running, wait for playCommand_.. then activePlanIsRunning_ becomes true
-		//	- else
-		//		- "listen" for commands
-		//		- if running, go through each command
+		//	- always "listen" for commands
+		//		- play: if no plan running, activePlanIsRunning_ = true,
+		//			and start or continue plan based on name/commandIndex
+		//		- pause: if plan playing, pause it, activePlanIsRunning_ = false
+		//			and do not clear commandIndex or name
+		//		- halt: if plan playing or not, activePlanIsRunning_ = false
+		//			and clear commandIndex or name
+		//	- when running
+		//		- go through each command and execute them
 
-
+		//start command handling
 		//define mutex scope
 		{
 			//lockout the messages array for the remainder of the scope
 			//this guarantees the reading thread can safely access the messages
 			std::lock_guard<std::mutex> lock(iterator->accessMutex_);
 
-			if(iterator->activePlanIsRunning_)
+			if(!iterator->commandPlay_)
 			{
+				iterator->commandPlay_ = false; //clear
+
+				if(!iterator->activePlanIsRunning_)
+				{
+					//valid PLAY command!
+
+					iterator->activePlanIsRunning_ = true;
+
+					if(activePlan != iterator->activePlanName_)
+					{
+						__COUT__ << "New plan name encountered old=" << activePlan <<
+								" vs new=" << iterator->activePlanName_ << std::endl;
+						commandIndex = -1; //reset for new plan
+					}
+
+					activePlan = iterator->activePlanName_;
+
+					if(commandIndex == (unsigned int)-1)
+						__MOUT__ << "Starting plan '" << activePlan << ".'" << std::endl;
+					else
+						__MOUT__ << "Continuing plan '" << activePlan << "' at command index " <<
+							commandIndex << ". " << std::endl;
+				}
+			}
+			else if(!iterator->commandPause_)
+			{
+				iterator->commandPause_ = false; //clear
+
+				if(iterator->activePlanIsRunning_)
+				{
+					//valid PAUSE command!
+
+					iterator->activePlanIsRunning_ = false;
+
+					__MOUT__ << "Paused plan '" << activePlan << "' at command index " <<
+						commandIndex << ". " << std::endl;
+				}
+			}
+			else if(!iterator->commandHalt_)
+			{
+				iterator->commandHalt_ = false; //clear
+
+				//valid HALT command!
+
+				iterator->activePlanIsRunning_ = false;
+
+				__MOUT__ << "Halted plan '" << activePlan << "' at command index " <<
+					commandIndex << ". " << std::endl;
+
+				activePlan = ""; //clear
+				commandIndex = -1; //clear
+			}
+
+			running = iterator->activePlanIsRunning_;
+		} //end command handling
+
+
+		////////////////
+		////////////////
+		//	handle running
+		if(running)
+		{
+			if(commandIndex == (unsigned int)-1)
+			{
+				__COUT__ << "Get commands" << std::endl;
 
 			}
-			//else do nothing, wait for active plan
-		}
+
+		} 	//end running
+		////////////////
+		////////////////
+
 
 		sleep(1); //do everything on steps of 1 second
 	}
@@ -92,7 +166,7 @@ void Iterator::playIterationPlan(HttpXmlDocument& xmldoc, const std::string& pla
 	//lockout the messages array for the remainder of the scope
 	//this guarantees the reading thread can safely access the messages
 	std::lock_guard<std::mutex> lock(accessMutex_);
-	if(!commandPlay_)
+	if(workloopRunning_ && !activePlanIsRunning_ && !commandPlay_)
 	{
 		activePlanName_ = planName;
 		commandPlay_ = true;
