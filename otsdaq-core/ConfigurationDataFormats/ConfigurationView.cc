@@ -1275,7 +1275,6 @@ std::vector<std::string> ConfigurationView::getDefaultRowValues(void) const
 					if(skipOne && !hasSkipped) {hasSkipped = true; continue;}
 					else if(choice == columnsInfo_[col].getDefaultValue())
 					{
-						retVec.push_back(columnsInfo_[col].getDefaultValue());
 						foundDefault = true;
 						break;
 					}
