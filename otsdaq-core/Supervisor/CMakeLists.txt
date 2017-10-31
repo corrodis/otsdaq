@@ -10,6 +10,7 @@ cet_make(LIBRARY_NAME Supervisor
          WebUsersUtilities
          #DetectorWriter
 		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
+		 otsdaq-core_ConfigurationPluginDataFormats_IterateConfiguration_configuration
 )
 
 

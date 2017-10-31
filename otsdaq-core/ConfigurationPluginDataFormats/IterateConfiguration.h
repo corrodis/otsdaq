@@ -20,6 +20,14 @@ public:
 
 	//Getters
 
+	struct Command {
+		std::string type;
+		std::vector< std::pair<
+		std::string /*param name*/,
+		std::string /*param value*/> > params;
+	};
+
+	std::vector<IterateConfiguration::Command> getPlanCommands(ConfigurationManager *configManager, const std::string& plan) const;
 
 
 	static const std::string COMMAND_BEGIN_LABEL;
@@ -62,17 +70,21 @@ public:
 	//			|-Command Type n
 
 	//Column names
-	static struct PlanTableColumns
-	{
-		std::string const GroupID_ = "IterationPlanGroupID";
-		std::string const CommandLink_ = "LinkToCommandUID";
-		std::string const CommandType_ = "CommandType";
-	} planTableCols_;
 
 	static struct IterateTableColumns
 	{
 		std::string const PlanLink_ = "LinkToIterationPlanConfiguration";
 	} iterateTableCols_;
+
+	static struct PlanTableColumns
+	{
+		std::string const Status_ = "Status";
+		std::string const GroupID_ = "IterationPlanGroupID";
+		std::string const CommandLink_ = "LinkToCommandUID";
+		std::string const CommandType_ = "CommandType";
+	} planTableCols_;
+
+
 
 };
 }

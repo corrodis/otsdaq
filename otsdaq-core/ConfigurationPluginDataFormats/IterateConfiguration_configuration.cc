@@ -26,6 +26,7 @@ const std::map<std::string,std::string> IterateConfiguration::commandToTableMap_
 IterateConfiguration::PlanTableColumns IterateConfiguration::planTableCols_;
 IterateConfiguration::IterateTableColumns IterateConfiguration::iterateTableCols_;
 
+
 //==============================================================================
 IterateConfiguration::IterateConfiguration(void)
 : ConfigurationBase(IterateConfiguration::ITERATE_TABLE)
@@ -53,6 +54,57 @@ void IterateConfiguration::init(ConfigurationManager *configManager)
 		//		__COUT__ << childPair.second.getNode(colNames_.colColumnName_) << std::endl;
 		//childPair.second.getNode(colNames_.colColumnName_	).getValue(value);
 	}
+}
+
+//==============================================================================
+std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands(
+		ConfigurationManager *configManager, const std::string& plan) const
+{
+	__COUT__ << configManager->__SELF_NODE__ << std::endl;
+
+	ConfigurationTree planNode = configManager->__SELF_NODE__.getNode(plan);
+
+	if(!planNode.getNode(IterateConfiguration::planTableCols_.Status_).getValue<bool>())
+	{
+		__SS__ << "Error! Attempt to access disabled plan (Status=FALSE)." << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
+
+	std::vector<IterateConfiguration::Command> commands;
+
+	auto commandChildren = planNode.getNode(
+			IterateConfiguration::iterateTableCols_.PlanLink_).getChildren();
+
+	for(auto &commandChild: commandChildren)
+	{
+		__COUT__ << "Command \t" << commandChild.first << std::endl;
+
+		if(!commandChild.second.getNode(
+				IterateConfiguration::planTableCols_.Status_).getValue<bool>())
+			continue; //skip disabled commands
+
+		__COUT__ << "\t\tType \t" << commandChild.second.getNode(
+				IterateConfiguration::planTableCols_.CommandType_) << std::endl;
+
+		auto commandSpecificFields = commandChild.second.getNode(
+				IterateConfiguration::planTableCols_.CommandLink_).getChildren();
+
+		for(auto &commandField: commandSpecificFields)
+		{
+			__COUT__ << "\t\tParameter \t" << commandField.first << std::endl;
+			__COUT__ << "\t\tParameter \t" << commandField.second << std::endl;
+
+
+//			for(auto &commandParameter: commandParameters)
+//			{
+//				__COUT__ << "\t\tParameter \t" << commandParameter.first << std::endl;
+//
+//			}
+		}
+	}
+
+	return commands;
 }
 
 DEFINE_OTS_CONFIGURATION(IterateConfiguration)

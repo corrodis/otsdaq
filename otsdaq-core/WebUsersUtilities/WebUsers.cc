@@ -2274,10 +2274,10 @@ void WebUsers::NACDisplayThread(std::string nac, std::string user)
 void WebUsers::deleteUserData ()
 {
 	//delete Login data
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + HASHES_DB_PATH + "/*").c_str());
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + USERS_DB_PATH + "/*").c_str());
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + USERS_LOGIN_HISTORY_PATH + "/*").c_str());
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + USERS_PREFERENCES_PATH + "/*").c_str());
+	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + HASHES_DB_PATH + "/*").c_str());
+	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + USERS_DB_PATH + "/*").c_str());
+	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + USERS_LOGIN_HISTORY_PATH + "/*").c_str());
+	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + USERS_PREFERENCES_PATH + "/*").c_str());
 	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + TOOLTIP_DB_PATH).c_str());
 
 	std::string serviceDataPath = getenv("SERVICE_DATA_PATH");
@@ -2303,7 +2303,7 @@ void WebUsers::deleteUserData ()
 	std::system(("rm -rf " + std::string(serviceDataPath) + "/VisualizerData/").c_str());
 
 	//delete active groups file
-	std::system(("rm -f " + std::string(serviceDataPath) + "/ActiveConfigurationGroups.cfg").c_str());
+	std::system(("rm -rf " + std::string(serviceDataPath) + "/ActiveConfigurationGroups.cfg").c_str());
 
 	//delete Logbook folders
 	std::system(("rm -rf " + std::string(getenv("LOGBOOK_DATA_PATH")) + "/").c_str());

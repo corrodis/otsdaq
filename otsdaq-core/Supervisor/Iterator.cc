@@ -1,8 +1,11 @@
 #include "otsdaq-core/Supervisor/Iterator.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/Supervisor/Supervisor.h"
+
+#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/IterateConfiguration.h"
+
 
 #include <iostream>
 #include <thread>       //for std::thread
@@ -16,6 +19,7 @@ using namespace ots;
 Iterator::Iterator(Supervisor* supervisor)
 : workloopRunning_				(false)
 , activePlanIsRunning_			(false)
+, iteratorBusy_					(false)
 , commandPlay_(false), commandPause_(false), commandHalt_(false)
 , activePlanName_				("")
 , theSupervisor_				(supervisor)
@@ -37,7 +41,10 @@ try
 	__MOUT__ << "Iterator work loop starting..." << std::endl;
 	__COUT__ << "Iterator work loop starting..." << std::endl;
 
-	ConfigurationManager cfgMgr;
+	ConfigurationManager theConfigurationManager;
+	ConfigurationManager* cfgMgr = &theConfigurationManager;
+	const IterateConfiguration* itConfig;
+
 	unsigned int commandIndex = (unsigned int)-1;
 	std::string activePlan = "";
 	bool running = false;
@@ -62,7 +69,7 @@ try
 			//this guarantees the reading thread can safely access the messages
 			std::lock_guard<std::mutex> lock(iterator->accessMutex_);
 
-			if(!iterator->commandPlay_)
+			if(iterator->commandPlay_)
 			{
 				iterator->commandPlay_ = false; //clear
 
@@ -71,6 +78,7 @@ try
 					//valid PLAY command!
 
 					iterator->activePlanIsRunning_ = true;
+					iterator->iteratorBusy_ = true;
 
 					if(activePlan != iterator->activePlanName_)
 					{
@@ -88,7 +96,7 @@ try
 							commandIndex << ". " << std::endl;
 				}
 			}
-			else if(!iterator->commandPause_)
+			else if(iterator->commandPause_)
 			{
 				iterator->commandPause_ = false; //clear
 
@@ -102,13 +110,14 @@ try
 						commandIndex << ". " << std::endl;
 				}
 			}
-			else if(!iterator->commandHalt_)
+			else if(iterator->commandHalt_)
 			{
 				iterator->commandHalt_ = false; //clear
 
 				//valid HALT command!
 
 				iterator->activePlanIsRunning_ = false;
+				iterator->iteratorBusy_ = false;
 
 				__MOUT__ << "Halted plan '" << activePlan << "' at command index " <<
 					commandIndex << ". " << std::endl;
@@ -124,12 +133,37 @@ try
 		////////////////
 		////////////////
 		//	handle running
+		__COUT__ << "thinking.." << running << " " << activePlan << " cmd=" <<
+				commandIndex << std::endl;
 		if(running)
 		{
 			if(commandIndex == (unsigned int)-1)
 			{
 				__COUT__ << "Get commands" << std::endl;
 
+				commandIndex = 0;
+
+				cfgMgr->init(); //completely reset to re-align with any changes
+				itConfig = cfgMgr->__GET_CONFIG__(IterateConfiguration);
+
+				std::vector<IterateConfiguration::Command> commands =
+						itConfig->getPlanCommands(cfgMgr,activePlan);
+
+				for(auto& command:commands)
+				{
+					__COUT__ << "command " <<
+							command.type << std::endl;
+					__COUT__ << "table " <<
+							IterateConfiguration::commandToTableMap_.at(command.type) << std::endl;
+					__COUT__ << "param count = " << command.params.size() << std::endl;
+
+					for(auto& param:command.params)
+					{
+						__COUT__ << "\t param " <<
+								param.first << " : " <<
+								param.second << std::endl;
+					}
+				}
 			}
 
 		} 	//end running
@@ -142,9 +176,43 @@ try
 
 	iterator->workloopRunning_ = false; //if we ever exit
 }
+catch(const std::runtime_error &e)
+{
+	__COUT_ERR__ << "Encountered error in Iterator thread:\n" << e.what() << std::endl;
+	iterator->workloopRunning_ = false; //if we ever exit
+
+}
 catch(...)
 {
+	__COUT_ERR__ << "Encountered unknown error in Iterator thread." << std::endl;
 	iterator->workloopRunning_ = false; //if we ever exit
+}
+
+//========================================================================================================================
+bool Iterator::handleCommand(HttpXmlDocument& xmldoc,
+		const std::string& command, const std::string& parameter)
+{
+	if(command == "iteratePlay")
+	{
+		playIterationPlan(xmldoc,parameter);
+		return true;
+	}
+	else if(command == "iteratePause")
+	{
+		pauseIterationPlan(xmldoc);
+		return true;
+	}
+	else if(command == "iterateHalt")
+	{
+		haltIterationPlan(xmldoc);
+		return true;
+	}
+	else
+	{
+		std::lock_guard<std::mutex> lock(accessMutex_);
+		if(iteratorBusy_) return true; //to block other commands
+	}
+	return false;
 }
 
 //========================================================================================================================

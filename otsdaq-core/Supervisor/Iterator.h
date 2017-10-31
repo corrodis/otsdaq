@@ -23,6 +23,8 @@ public:
     void									haltIterationPlan			(HttpXmlDocument& xmldoc);
     void									getIterationPlanStatus		(HttpXmlDocument& xmldoc);
 
+    bool									handleCommand				(HttpXmlDocument& xmldoc, const std::string& command, const std::string& parameter);
+
 private:
 
     static void								IteratorWorkLoop			(Iterator *iterator);
@@ -30,6 +32,7 @@ private:
     std::mutex								accessMutex_;
     volatile bool							workloopRunning_;
     volatile bool							activePlanIsRunning_;
+    volatile bool							iteratorBusy_;
     volatile bool							commandPlay_, commandPause_, commandHalt_; //commands are set by supervisor thread, and cleared by iterator thread
     std::string								activePlanName_;
 

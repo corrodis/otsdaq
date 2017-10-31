@@ -291,6 +291,7 @@ throw (xgi::exception::Exception)
 	fsmWindowName = CgiDataUtilities::decodeURIComponent(fsmWindowName);
 	std::string currentState = theStateMachine_.getCurrentStateName();
 
+	__COUT__ << "State Machine command = " << command << std::endl;
 	__COUT__ << "fsmName = " << fsmName << std::endl;
 	__COUT__ << "fsmWindowName = " << fsmWindowName << std::endl;
 	__COUT__ << "activeStateMachineName_ = " << activeStateMachineName_ << std::endl;
@@ -307,6 +308,17 @@ throw (xgi::exception::Exception)
 		xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
 		return;
 	}
+
+
+	if(theIterator_.handleCommand(xmldoc,command,fsmWindowName))
+	{
+		__COUT__ << "Handled by theIterator_" << std::endl;
+		xmldoc.outputXmlDocument((std::ostringstream*) out, false);
+		return;
+	}
+
+
+
 
 	/////////////////
 	//Validate FSM name
@@ -1978,7 +1990,7 @@ throw (xgi::exception::Exception)
 	//getFecList
 	//getSystemMessages
 	//setUserWithLock
-	//getStateMatchine
+	//getStateMachine
 	//stateMatchinePreferences
 	//getCurrentState
 	//getErrorInStateMatchine
