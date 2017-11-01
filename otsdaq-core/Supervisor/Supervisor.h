@@ -38,6 +38,7 @@ class WorkLoopManager;
 class Supervisor: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 	friend class OtsConfigurationWizardSupervisor;
+	friend class Iterator;
 
 public:
 

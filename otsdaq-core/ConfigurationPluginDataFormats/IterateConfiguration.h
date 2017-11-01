@@ -20,9 +20,18 @@ public:
 
 	//Getters
 
+	struct Command {
+		std::string type;
+		std::map<
+			std::string /*param name*/,
+			std::string /*param value*/> params;
+	};
+
+	std::vector<IterateConfiguration::Command> getPlanCommands(ConfigurationManager *configManager, const std::string& plan) const;
 
 
 	static const std::string COMMAND_BEGIN_LABEL;
+	static const std::string COMMAND_CHOOSE_FSM_LABEL;
 	static const std::string COMMAND_CONFIGURE_ACTIVE_GROUP;
 	static const std::string COMMAND_CONFIGURE_ALIAS;
 	static const std::string COMMAND_CONFIGURE_GROUP;
@@ -40,6 +49,7 @@ public:
 	{
 		std::map<std::string,std::string> m;
 		m[COMMAND_BEGIN_LABEL] 				=  "IterationCommandBeginLabelConfiguration";
+		m[COMMAND_CHOOSE_FSM_LABEL] 		=  "IterationCommandChooseFSMConfiguration";
 		m[COMMAND_CONFIGURE_ACTIVE_GROUP] 	=  ""; //no parameters
 		m[COMMAND_CONFIGURE_ALIAS] 			=  "IterationCommandConfigureAliasConfiguration";
 		m[COMMAND_CONFIGURE_GROUP] 			=  "IterationCommandConfigureGroupConfiguration";
@@ -50,6 +60,59 @@ public:
 		m[COMMAND_RUN] 						=  "IterationCommandRunConfiguration";
 		return m;
 	}
+
+	static struct CommandBeginLabelParams
+	{
+		const std::string Label_ 					= "Label";
+	} commandBeginLabelParams_;
+	static struct CommandChooseFSMParams
+	{
+		const std::string NameOfFSM_ 				= "NameOfStateMachine";
+	} commandChooseFSMParams_;
+	static struct CommandConfigureActiveParams
+	{
+		//no parameters
+	} commandConfigureActiveParams_;
+	static struct CommandConfigureAliasParams
+	{
+		const std::string SystemAlias_ 				= "SystemAlias";
+	} commandConfigureAliasParams_;
+	static struct CommandConfigureGroupParams
+	{
+		const std::string GroupName_ 				= "GroupName";
+		const std::string GroupKey_ 				= "GroupKey";
+	} commandConfigureGroupParams_;
+	static struct CommandExecuteFEMacroParams
+	{
+		//targets
+		const std::string FEMacroName_ 				= "FEMacroName";
+		//macro parameters
+	} commandExecuteFEMacroParams_;
+	static struct CommandExecuteMacroParams
+	{
+		//targets
+		const std::string MacroName_ 				= "MacroName";
+		//macro parameters
+	} commandExecuteMacroParams_;
+	static struct CommandModifyActiveParams
+	{
+		const std::string DoTrackGroupChanges_ 		= "DoTrackGroupChanges";
+		//targets
+		const std::string RelativePathToField_ 		= "RelativePathToField";
+		const std::string FieldStartValue_ 			= "FieldStartValue";
+		const std::string FieldIterationStepSize_ 	= "FieldIterationStepSize";
+	} commandModifyActiveParams_;
+	static struct CommandRepeatLabelParams
+	{
+		const std::string Label_ 					= "Label";
+		const std::string NumberOfRepetitions_ 		= "NumberOfRepetitions";
+	} commandRepeatLabelParams_;
+	static struct CommandRunParams
+	{
+		const std::string WaitOnRunningThreads_ 	= "WaitForAllFrontEndsRunningThread";
+		const std::string DurationInSeconds_	 	= "DurationInSeconds";
+		const std::string ConfigurationDumpType_ 	= "ConfigurationDumpType";
+	} commandRunParams_;
 
 
 
@@ -62,17 +125,21 @@ public:
 	//			|-Command Type n
 
 	//Column names
-	static struct PlanTableColumns
-	{
-		std::string const GroupID_ = "IterationPlanGroupID";
-		std::string const CommandLink_ = "LinkToCommandUID";
-		std::string const CommandType_ = "CommandType";
-	} planTableCols_;
 
 	static struct IterateTableColumns
 	{
-		std::string const PlanLink_ = "LinkToIterationPlanConfiguration";
+		const std::string PlanLink_ = "LinkToIterationPlanConfiguration";
 	} iterateTableCols_;
+
+	static struct PlanTableColumns
+	{
+		const std::string Status_ = ViewColumnInfo::COL_NAME_STATUS;
+		const std::string GroupID_ = "IterationPlanGroupID";
+		const std::string CommandLink_ = "LinkToCommandUID";
+		const std::string CommandType_ = "CommandType";
+	} planTableCols_;
+
+
 
 };
 }

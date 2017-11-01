@@ -15,7 +15,7 @@ using namespace ots;
 
 //MessageFacilityConfiguration Column names
 #define COL_NAME						"UID"
-#define COL_STATUS						"Status"
+#define COL_STATUS						ViewColumnInfo::COL_NAME_STATUS
 #define COL_ENABLE_FWD					"EnableUDPForwarding"
 
 #define COL_USE_WEB						"ForwardToWebConsoleGUI"

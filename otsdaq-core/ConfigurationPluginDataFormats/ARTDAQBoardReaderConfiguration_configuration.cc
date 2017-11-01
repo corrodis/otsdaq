@@ -53,7 +53,7 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 //
 //	//std::string appUID, buffUID, consumerUID;
 //	for(auto &child:childrenMap)
-//		if(child.second.getNode("Status").getValue<bool>())
+//		if(child.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 //		{
 ////			getBoardReaderParents(child.second, contextConfig,
 ////					contextNode, appUID, buffUID, consumerUID);
@@ -112,7 +112,7 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 	std::string appUID, buffUID, consumerUID;
 
 	for(auto &child:childrenMap)
-		if(child.second.getNode("Status").getValue<bool>())
+		if(child.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 		{
 			outputFHICL(child.second, contextConfig);
 		}
@@ -307,7 +307,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 			auto parameters = parametersLink.getChildren();
 			for(auto &parameter:parameters)
 			{
-				if(!parameter.second.getNode("Status").getValue<bool>())
+				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				//				__COUT__ << parameter.second.getNode("daqParameterKey").getValue() <<
@@ -324,7 +324,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 						"\n";
 
-				if(!parameter.second.getNode("Status").getValue<bool>())
+				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 		}
@@ -338,7 +338,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 //			auto parameters = parametersLink.getChildren();
 //			for(auto &parameter:parameters)
 //			{
-//				if(!parameter.second.getNode("Status").getValue<bool>())
+//				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 //					PUSHCOMMENT;
 //
 //				auto comment = parameter.second.getNode("CommentDescription");
@@ -349,7 +349,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 //						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 //						"\n";
 //
-//				if(!parameter.second.getNode("Status").getValue<bool>())
+//				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 //					POPCOMMENT;
 //			}
 //		}
@@ -396,7 +396,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 
 		for(auto &metric:metrics)
 		{
-			if(!metric.second.getNode("Status").getValue<bool>())
+			if(!metric.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 				PUSHCOMMENT;
 
 			OUT << metric.second.getNode("metricKey").getValue() <<
@@ -416,7 +416,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 				auto metricParameters = metricParametersGroup.getChildren();
 				for(auto &metricParameter:metricParameters)
 				{
-					if(!metricParameter.second.getNode("Status").getValue<bool>())
+					if(!metricParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 						PUSHCOMMENT;
 
 					OUT << metricParameter.second.getNode("metricParameterKey").getValue() <<
@@ -424,7 +424,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 							metricParameter.second.getNode("metricParameterValue").getValue()
 							<< "\n";
 
-					if(!metricParameter.second.getNode("Status").getValue<bool>())
+					if(!metricParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 						POPCOMMENT;
 
 				}
@@ -432,7 +432,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 			POPTAB;
 			OUT << "}\n\n";	//end metric
 
-			if(!metric.second.getNode("Status").getValue<bool>())
+			if(!metric.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 				POPCOMMENT;
 		}
 	}

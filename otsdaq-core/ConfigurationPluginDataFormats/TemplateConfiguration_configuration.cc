@@ -11,16 +11,9 @@ using namespace ots;
 TemplateConfiguration::TemplateConfiguration(void)
 : ConfigurationBase("TemplateConfiguration")
 {
-	//TemplateConfigurationInfo.xml
-	//<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-	//<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
-	//  <CONFIGURATION Name="TemplateConfiguration">
-	//    <VIEW Name="TEMPLATE_CONFIGURATION" Type="File,Database,DatabaseTest">
-	//      <COLUMN Name="ColumnName" StorageName="COLUMN_NAME" DataType="VARCHAR2"/>
-	//    </VIEW>
-	//  </CONFIGURATION>
-	//</ROOT>
-
+ 	////////////////////////////////////////////////////////////////////////////
+	//WARNING: the field names used in C++ MUST match the Configuration INFO  //
+	////////////////////////////////////////////////////////////////////////////
 }
 
 //==============================================================================
@@ -39,12 +32,13 @@ void TemplateConfiguration::init(ConfigurationManager *configManager)
 	//		  											  << std::endl;
 
 	std::string value;
-	auto childrenMap = configManager->__SELF_NODE__.getChildren();
-	for(auto &childPair: childrenMap)
+	std::vector<std::pair<std::string,ConfigurationTree> > children =
+			configManager->__SELF_NODE__.getChildren();
+	for(auto &childPair: children)
 	{
 		//do something for each row in table
 		__COUT__ << childPair.first << std::endl;
-		//		__COUT__ << childPair.second.getNode(colNames_.colColumnName_) << std::endl;
+		__COUT__ << childPair.second.getNode(colNames_.colColumnName_) << std::endl;
 		childPair.second.getNode(colNames_.colColumnName_	).getValue(value);
 	}
 }

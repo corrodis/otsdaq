@@ -31,7 +31,7 @@ void FEVInterface::configureSlowControls(void)
 	for(auto &groupLinkChild: groupLinkChildren)
 	{
 		//skip channels that are off
-		if(!(groupLinkChild.second.getNode("Status").getValue<bool>())) continue;
+		if(!(groupLinkChild.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())) continue;
 
 		__COUT__ << "Channel:" << getInterfaceUID() <<
 				"/" <<  groupLinkChild.first << "\t Type:" <<
