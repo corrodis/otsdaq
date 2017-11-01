@@ -41,6 +41,7 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer)
 	while (offset < buffer.size() && sts > 0)
 	{
 		auto thisSize = buffer.size() - offset > MAX_SEND_SIZE ? MAX_SEND_SIZE : buffer.size() - offset;
+		__COUT__ << "Sending size: " << thisSize << " remaining = " << (buffer.size() - offset - thisSize) << std::endl;
 		sts = sendto(socketNumber_, buffer.c_str() + offset, thisSize, 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
 		offset += sts;
 	}

@@ -1978,7 +1978,7 @@ throw (xgi::exception::Exception)
 	//getFecList
 	//getSystemMessages
 	//setUserWithLock
-	//getStateMatchine
+	//getStateMachine
 	//stateMatchinePreferences
 	//getCurrentState
 	//getErrorInStateMatchine
@@ -2276,6 +2276,8 @@ throw (xgi::exception::Exception)
 		stateStr[1] = '\0';
 		std::string transName;
 		std::string transParameter;
+
+		//bool addRun, addCfg;
 		for (unsigned int i = 0; i < states.size(); ++i)//get all states
 		{
 			stateStr[0] = states[i];
@@ -2290,14 +2292,78 @@ throw (xgi::exception::Exception)
 			trans = theStateMachine_.getTransitions(states[i]);
 			std::set<std::string> actionNames = theStateMachine_.getInputs(states[i]);
 
-			std::map<std::string, toolbox::fsm::State, std::less<std::string> >::iterator
-			it = trans.begin();
+			std::map<std::string, toolbox::fsm::State, std::less<std::string> >::iterator it =
+					trans.begin();
 			std::set<std::string>::iterator ait = actionNames.begin();
+
+//			addRun = false;
+//			addCfg = false;
+
+			//handle hacky way to keep "forward" moving states on right of FSM display
+			//must be first!
+
+			for (; it != trans.end() && ait != actionNames.end(); ++it, ++ait)
+			{
+				stateStr[0] = it->second;
+
+				if(stateStr[0] == 'R')
+				{
+					//addRun = true;
+					xmldoc.addTextElementToParent("state_transition", stateStr, stateParent);
+
+					//__COUT__ << states[i] << " => " << *ait << std::endl;
+
+					xmldoc.addTextElementToParent("state_transition_action", *ait, stateParent);
+
+					transName = theStateMachine_.getTransitionName(states[i], *ait);
+					//__COUT__ << states[i] << " => " << transName << std::endl;
+
+					xmldoc.addTextElementToParent("state_transition_name",
+							transName, stateParent);
+					transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
+					//__COUT__ << states[i] << " => " << transParameter<< std::endl;
+
+					xmldoc.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
+					break;
+				}
+				else if(stateStr[0] == 'C')
+				{
+					//addCfg = true;
+					xmldoc.addTextElementToParent("state_transition", stateStr, stateParent);
+
+					//__COUT__ << states[i] << " => " << *ait << std::endl;
+
+					xmldoc.addTextElementToParent("state_transition_action", *ait, stateParent);
+
+					transName = theStateMachine_.getTransitionName(states[i], *ait);
+					//__COUT__ << states[i] << " => " << transName << std::endl;
+
+					xmldoc.addTextElementToParent("state_transition_name",
+							transName, stateParent);
+					transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
+					//__COUT__ << states[i] << " => " << transParameter<< std::endl;
+
+					xmldoc.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
+					break;
+				}
+			}
+
+			//reset for 2nd pass
+			it = trans.begin();
+			ait = actionNames.begin();
+
+			//other states
 			for (; it != trans.end() && ait != actionNames.end(); ++it, ++ait)
 			{
 				//__COUT__ << states[i] << " => " << it->second << std::endl;
 
 				stateStr[0] = it->second;
+
+				if(stateStr[0] == 'R')
+					continue;
+				else if(stateStr[0] == 'C')
+					continue;
+
 				xmldoc.addTextElementToParent("state_transition", stateStr, stateParent);
 
 				//__COUT__ << states[i] << " => " << *ait << std::endl;
