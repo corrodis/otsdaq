@@ -243,7 +243,7 @@ catch(...)
 //========================================================================================================================
 void Iterator::startCommand(
 		std::vector<IterateConfiguration::Command>& commands,
-		unsigned int commandIndex)
+		unsigned int& commandIndex)
 {
 	std::string type = commands[commandIndex].type;
 	if(type == IterateConfiguration::COMMAND_BEGIN_LABEL)
@@ -293,6 +293,8 @@ void Iterator::startCommand(
 
 		if(numOfRepetitions <= 0) return; //no more repetitions
 
+		--numOfRepetitions;
+
 		unsigned int i;
 		for(i=commandIndex;i>0;--i) //assume 0 is always the fallback option
 			if(commands[i].type == IterateConfiguration::COMMAND_BEGIN_LABEL &&
@@ -326,7 +328,7 @@ void Iterator::startCommand(
 //========================================================================================================================
 bool Iterator::checkCommand(
 		std::vector<IterateConfiguration::Command>& commands,
-		unsigned int commandIndex)
+		unsigned int& commandIndex)
 {
 	std::string type = commands[commandIndex].type;
 	if(type == IterateConfiguration::COMMAND_BEGIN_LABEL)

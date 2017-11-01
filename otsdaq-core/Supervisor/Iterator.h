@@ -29,8 +29,8 @@ public:
 private:
 
     static void								IteratorWorkLoop			(Iterator *iterator);
-    void									startCommand				(std::vector<IterateConfiguration::Command>& commands, unsigned int commandIndex);
-    bool									checkCommand				(std::vector<IterateConfiguration::Command>& commands, unsigned int commandIndex);
+    void									startCommand				(std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
+    bool									checkCommand				(std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
     void									startCommandConfigureAlias	(const std::string& systemAlias);
     bool									checkCommandConfigureAlias	();
 //	m[COMMAND_BEGIN_LABEL] 				=  "IterationCommandBeginLabelConfiguration";
