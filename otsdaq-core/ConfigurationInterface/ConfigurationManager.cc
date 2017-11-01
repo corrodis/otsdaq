@@ -43,7 +43,7 @@ ConfigurationManager::ConfigurationManager()
 , contextMemberNames_		({XDAQ_CONTEXT_CONFIG_NAME,"XDAQApplicationConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","TheSupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"})
 , backboneMemberNames_		({"GroupAliasesConfiguration","VersionAliasesConfiguration"})
 , iterateMemberNames_		({"IterateConfiguration","IterationPlanConfiguration",
-	/*command specific tables*/"IterationCommandBeginLabelConfiguration","IterationCommandConfigureAliasConfiguration","IterationCommandConfigureGroupConfiguration","IterationCommandExecuteFEMacroConfiguration","IterationCommandExecuteMacroConfiguration","IterationCommandModifyGroupConfiguration","IterationCommandRepeatLabelConfiguration","IterationCommandRunConfiguration"})
+	/*command specific tables*/"IterationCommandBeginLabelConfiguration","IterationCommandChooseFSMConfiguration","IterationCommandConfigureAliasConfiguration","IterationCommandConfigureGroupConfiguration","IterationCommandExecuteFEMacroConfiguration","IterationCommandExecuteMacroConfiguration","IterationCommandModifyGroupConfiguration","IterationCommandRepeatLabelConfiguration","IterationCommandRunConfiguration"})
 {
 	theInterface_ = ConfigurationInterface::getInstance(false);  //false to use artdaq DB
 	//NOTE: in ConfigurationManagerRW using false currently.. think about consistency! FIXME

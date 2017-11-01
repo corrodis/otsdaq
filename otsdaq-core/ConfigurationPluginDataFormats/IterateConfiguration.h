@@ -67,7 +67,7 @@ public:
 	} commandBeginLabelParams_;
 	static struct CommandChooseFSMParams
 	{
-		const std::string NameOfFSM_ 				= "NameOfStateMachine";
+		const std::string NameOfFSM_ 				= "NameOfStateMachine"; //by default ""
 	} commandChooseFSMParams_;
 	static struct CommandConfigureActiveParams
 	{

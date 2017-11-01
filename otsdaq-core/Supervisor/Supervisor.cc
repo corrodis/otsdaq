@@ -273,10 +273,13 @@ throw (xgi::exception::Exception)
 		return;
 	}
 
+	std::string command = CgiDataUtilities::getData(cgi, "StateMachine");
+
 	//**** start LOCK GATEWAY CODE ***//
 	std::string username = "";
 	username = theWebUsers_.getUsersUsername(uid);
-	if (userWithLock != "" && userWithLock != username)
+	if (command != "getIterationPlanStatus" && //allow users to get status
+			userWithLock != "" && userWithLock != username)
 	{
 		*out << WebUsers::REQ_USER_LOCKOUT_RESPONSE;
 		__COUT__ << "User " << username << " is locked out. " << userWithLock << " has lock." << std::endl;
@@ -285,16 +288,11 @@ throw (xgi::exception::Exception)
 	//**** end LOCK GATEWAY CODE ***//
 
 	HttpXmlDocument xmldoc(cookieCode);
-	std::string command = CgiDataUtilities::getData(cgi, "StateMachine");
 	std::string fsmName = CgiDataUtilities::getData(cgi, "fsmName");
 	std::string fsmWindowName = CgiDataUtilities::getData(cgi, "fsmWindowName");
 	fsmWindowName = CgiDataUtilities::decodeURIComponent(fsmWindowName);
 	std::string currentState = theStateMachine_.getCurrentStateName();
 
-	__COUT__ << "State Machine command = " << command << std::endl;
-	__COUT__ << "fsmName = " << fsmName << std::endl;
-	__COUT__ << "fsmWindowName = " << fsmWindowName << std::endl;
-	__COUT__ << "activeStateMachineName_ = " << activeStateMachineName_ << std::endl;
 
 	//Do not allow transition while in transition
 	if (theStateMachine_.isInTransition())
@@ -308,7 +306,6 @@ throw (xgi::exception::Exception)
 		xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
 		return;
 	}
-
 
 
 	/////////////////
@@ -356,13 +353,17 @@ throw (xgi::exception::Exception)
 	//check if Iterator should handle
 	if(theIterator_.handleCommandRequest(xmldoc,command,fsmWindowName))
 	{
-		__COUT__ << "Handled by theIterator_" << std::endl;
+		//__COUT__ << "Handled by theIterator_" << std::endl;
 		xmldoc.outputXmlDocument((std::ostringstream*) out, false);
 		return;
 	}
 
 
 	//At this point, attempting transition!
+	__COUT__ << "State Machine command = " << command << std::endl;
+	__COUT__ << "fsmName = " << fsmName << std::endl;
+	__COUT__ << "fsmWindowName = " << fsmWindowName << std::endl;
+	__COUT__ << "activeStateMachineName_ = " << activeStateMachineName_ << std::endl;
 
 	SOAPParameters parameters;
 	if (command == "Configure")
@@ -1992,6 +1993,7 @@ throw (xgi::exception::Exception)
 	//setUserWithLock
 	//getStateMachine
 	//stateMatchinePreferences
+	//getStateMachineNames
 	//getCurrentState
 	//getErrorInStateMatchine
 	//getDesktopIcons
@@ -2328,6 +2330,25 @@ throw (xgi::exception::Exception)
 			}
 		}
 
+	}
+	else if (Command == "getStateMachineNames")
+	{
+		//get stateMachineAliasFilter if possible
+		ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorConfigurationNode(
+				supervisorContextUID_, supervisorApplicationUID_);
+
+		try
+		{
+			auto fsmNodes = configLinkNode.getNode(
+					"LinkToStateMachineConfiguration").getChildren();
+			for(const auto& fsmNode:fsmNodes)
+				xmldoc.addTextElementToData("stateMachineName", fsmNode.first);
+		}
+		catch(...) //else empty set of state machines.. can always choose ""
+		{
+			__COUT__ << "Caught exception, assuming no valid FSM names." << std::endl;
+			xmldoc.addTextElementToData("stateMachineName", "");
+		}
 	}
 	else if (Command == "getCurrentState")
 	{
