@@ -14,6 +14,7 @@ class Supervisor;
 
 class Iterator
 {
+	friend class Supervisor;
 	
 public:
     Iterator (Supervisor* supervisor);
@@ -29,8 +30,8 @@ public:
 private:
 
     static void								IteratorWorkLoop			(Iterator *iterator);
-    void									startCommand				(std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
-    bool									checkCommand				(std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
+    void									startCommand				(Iterator *iterator, std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
+    bool									checkCommand				(Iterator *iterator, std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
     void									startCommandConfigureAlias	(const std::string& systemAlias);
     bool									checkCommandConfigureAlias	();
 //	m[COMMAND_BEGIN_LABEL] 				=  "IterationCommandBeginLabelConfiguration";
@@ -49,6 +50,8 @@ private:
     volatile bool							iteratorBusy_;
     volatile bool							commandPlay_, commandPause_, commandHalt_; //commands are set by supervisor thread, and cleared by iterator thread
     std::string								activePlanName_, lastStartedPlanName_, lastFinishedPlanName_;
+    volatile unsigned int					activeCommandIndex_;
+    volatile time_t							activeCommandStartTime_;
 
     Supervisor* 							theSupervisor_;
 };

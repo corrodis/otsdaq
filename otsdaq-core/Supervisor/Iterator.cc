@@ -21,6 +21,8 @@ Iterator::Iterator(Supervisor* supervisor)
 , iteratorBusy_					(false)
 , commandPlay_(false), commandPause_(false), commandHalt_(false)
 , activePlanName_				("")
+, activeCommandIndex_			(-1)
+, activeCommandStartTime_		(0)
 , theSupervisor_				(supervisor)
 {
 	__MOUT__ << "Iterator constructed." << std::endl;
@@ -94,10 +96,17 @@ try
 					iterator->lastStartedPlanName_ = iterator->activePlanName_;
 
 					if(commandIndex == (unsigned int)-1)
+					{
+						__COUT__ << "Starting plan '" << activePlan << ".'" << std::endl;
 						__MOUT__ << "Starting plan '" << activePlan << ".'" << std::endl;
+					}
 					else
+					{
+						__COUT__ << "Continuing plan '" << activePlan << "' at command index " <<
+							commandIndex << ". " << std::endl;
 						__MOUT__ << "Continuing plan '" << activePlan << "' at command index " <<
 							commandIndex << ". " << std::endl;
+					}
 				}
 			}
 			else if(iterator->commandPause_)
@@ -110,6 +119,8 @@ try
 
 					iterator->activePlanIsRunning_ = false;
 
+					__COUT__ << "Paused plan '" << activePlan << "' at command index " <<
+						commandIndex << ". " << std::endl;
 					__MOUT__ << "Paused plan '" << activePlan << "' at command index " <<
 						commandIndex << ". " << std::endl;
 				}
@@ -123,6 +134,8 @@ try
 				iterator->activePlanIsRunning_ = false;
 				iterator->iteratorBusy_ = false;
 
+				__COUT__ << "Halted plan '" << activePlan << "' at command index " <<
+					commandIndex << ". " << std::endl;
 				__MOUT__ << "Halted plan '" << activePlan << "' at command index " <<
 					commandIndex << ". " << std::endl;
 
@@ -131,7 +144,14 @@ try
 			}
 
 			running = iterator->activePlanIsRunning_;
-		} //end command handling
+
+			if(commandIndex != iterator->activeCommandIndex_)
+			{
+				iterator->activeCommandIndex_ = commandIndex;
+				iterator->activeCommandStartTime_ = time(0); //reset on any change
+			}
+
+		} //end command handling and mutex
 
 
 		////////////////
@@ -180,7 +200,7 @@ try
 							commands[commandIndex].type << std::endl;
 					__MOUT__ << "Iterator starting command " << commandIndex+1 << ": " <<
 							commands[commandIndex].type << std::endl;
-					iterator->startCommand(commands,commandIndex);
+					iterator->startCommand(iterator,commands,commandIndex);
 				}
 				else if(commandIndex == commands.size()) //Done!
 				{
@@ -203,7 +223,7 @@ try
 			else if(commandBusy)
 			{
 				//check for command completion
-				if(iterator->checkCommand(commands,commandIndex))
+				if(iterator->checkCommand(iterator,commands,commandIndex))
 				{
 					commandBusy = false; //command complete
 
@@ -241,7 +261,7 @@ catch(...)
 }
 
 //========================================================================================================================
-void Iterator::startCommand(
+void Iterator::startCommand(Iterator *iterator,
 		std::vector<IterateConfiguration::Command>& commands,
 		unsigned int& commandIndex)
 {
@@ -253,32 +273,33 @@ void Iterator::startCommand(
 	}
 	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP)
 	{
-		//do nothing
+		//TODO
 		return;
 	}
 	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS)
 	{
-		//do nothing
+		iterator->startCommandConfigureAlias(commands[commandIndex].params[
+			IterateConfiguration::commandConfigureAliasParams_.SystemAlias_]);
 		return;
 	}
 	else if(type == IterateConfiguration::COMMAND_CONFIGURE_GROUP)
 	{
-		//do nothing
+		//TODO
 		return;
 	}
 	else if(type == IterateConfiguration::COMMAND_EXECUTE_FE_MACRO)
 	{
-		//do nothing
+		//TODO
 		return;
 	}
 	else if(type == IterateConfiguration::COMMAND_EXECUTE_MACRO)
 	{
-		//do nothing
+		//TODO
 		return;
 	}
 	else if(type == IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP)
 	{
-		//do nothing
+		//TODO
 		return;
 	}
 	else if(type == IterateConfiguration::COMMAND_REPEAT_LABEL)
@@ -314,7 +335,7 @@ void Iterator::startCommand(
 	}
 	else if(type == IterateConfiguration::COMMAND_RUN)
 	{
-		//do nothing
+		//TODO
 		return;
 	}
 	else
@@ -326,7 +347,7 @@ void Iterator::startCommand(
 }
 
 //========================================================================================================================
-bool Iterator::checkCommand(
+bool Iterator::checkCommand(Iterator *iterator,
 		std::vector<IterateConfiguration::Command>& commands,
 		unsigned int& commandIndex)
 {
@@ -385,6 +406,21 @@ bool Iterator::checkCommand(
 }
 
 //========================================================================================================================
+void Iterator::startCommandConfigureAlias(const std::string& systemAlias)
+{
+	__COUT__ << "systemAlias " << systemAlias << std::endl;
+
+}
+
+//========================================================================================================================
+//return true if done
+bool Iterator::checkCommandConfigureAlias()
+{
+	return true;
+}
+
+
+//========================================================================================================================
 bool Iterator::handleCommandRequest(HttpXmlDocument& xmldoc,
 		const std::string& command, const std::string& parameter)
 {
@@ -401,6 +437,11 @@ bool Iterator::handleCommandRequest(HttpXmlDocument& xmldoc,
 	else if(command == "iterateHalt")
 	{
 		haltIterationPlan(xmldoc);
+		return true;
+	}
+	else if(command == "getIterationPlanStatus")
+	{
+		getIterationPlanStatus(xmldoc);
 		return true;
 	}
 	else
@@ -510,21 +551,46 @@ void Iterator::haltIterationPlan(HttpXmlDocument& xmldoc)
 }
 
 //========================================================================================================================
+//	return state machine and iterator status
 void Iterator::getIterationPlanStatus(HttpXmlDocument& xmldoc)
 {
-//	xmldoc.addTextElementToData("current_state", theStateMachine_.getCurrentStateName());
-//	xmldoc.addTextElementToData("in_transition", theStateMachine_.isInTransition() ? "1" : "0");
-//	if (theStateMachine_.isInTransition())
-//		xmldoc.addTextElementToData("transition_progress", theProgressBar_.readPercentageString());
-//	else
-//		xmldoc.addTextElementToData("transition_progress", "100");
-//
-//
-//	char tmp[20];
-//	sprintf(tmp,"%lu",theStateMachine_.getTimeInState());
-//	xmldoc.addTextElementToData("time_in_state", tmp);
-//
-//
+
+
+	xmldoc.addTextElementToData("current_state", theSupervisor_->theStateMachine_.getCurrentStateName());
+	xmldoc.addTextElementToData("in_transition", theSupervisor_->theStateMachine_.isInTransition() ? "1" : "0");
+	if(theSupervisor_->theStateMachine_.isInTransition())
+		xmldoc.addTextElementToData("transition_progress",
+				theSupervisor_->theProgressBar_.readPercentageString());
+	else
+		xmldoc.addTextElementToData("transition_progress", "100");
+
+	char tmp[20];
+	sprintf(tmp,"%lu",theSupervisor_->theStateMachine_.getTimeInState());
+	xmldoc.addTextElementToData("time_in_state", tmp);
+
+
+
+	//lockout the messages array for the remainder of the scope
+	//this guarantees the reading thread can safely access the messages
+	std::lock_guard<std::mutex> lock(accessMutex_);
+
+	xmldoc.addTextElementToData("active_plan", activePlanName_);
+	xmldoc.addTextElementToData("last_started_plan", lastStartedPlanName_);
+	xmldoc.addTextElementToData("last_finished_plan", lastFinishedPlanName_);
+
+	sprintf(tmp,"%u",activeCommandIndex_);
+	xmldoc.addTextElementToData("current_command_index", tmp);
+	sprintf(tmp,"%ld",time(0) - activeCommandStartTime_);
+	xmldoc.addTextElementToData("current_command_duration", tmp);
+
+	if(activePlanIsRunning_ && iteratorBusy_)
+		xmldoc.addTextElementToData("active_plan_status", "Running");
+	else if(!activePlanIsRunning_ && iteratorBusy_)
+		xmldoc.addTextElementToData("active_plan_status", "Paused");
+	else
+		xmldoc.addTextElementToData("active_plan_status", "Inactive");
+
+
 //
 //	//__COUT__ << "current state: " << theStateMachine_.getCurrentStateName() << std::endl;
 //

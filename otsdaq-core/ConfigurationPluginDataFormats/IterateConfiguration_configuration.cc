@@ -9,13 +9,14 @@ using namespace ots;
 
 
 const std::string IterateConfiguration::COMMAND_BEGIN_LABEL 			= "BEGIN_LABEL";
-const std::string IterateConfiguration::COMMAND_REPEAT_LABEL 			= "REPEAT_LABEL";
+const std::string IterateConfiguration::COMMAND_CHOOSE_FSM_LABEL 		= "CHOOSE_FSM";
+const std::string IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP 	= "CONFIGURE_ACTIVE_GROUP";
 const std::string IterateConfiguration::COMMAND_CONFIGURE_ALIAS 		= "CONFIGURE_ALIAS";
 const std::string IterateConfiguration::COMMAND_CONFIGURE_GROUP 		= "CONFIGURE_GROUP";
-const std::string IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP 	= "MODIFY_ACTIVE_GROUP";
-const std::string IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP 	= "CONFIGURE_GROUP";
-const std::string IterateConfiguration::COMMAND_EXECUTE_MACRO 			= "EXECUTE_MACRO";
 const std::string IterateConfiguration::COMMAND_EXECUTE_FE_MACRO 		= "EXECUTE_FE_MACRO";
+const std::string IterateConfiguration::COMMAND_EXECUTE_MACRO 			= "EXECUTE_MACRO";
+const std::string IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP 	= "MODIFY_ACTIVE_GROUP";
+const std::string IterateConfiguration::COMMAND_REPEAT_LABEL 			= "REPEAT_LABEL";
 const std::string IterateConfiguration::COMMAND_RUN 					= "RUN";
 
 const std::string IterateConfiguration::ITERATE_TABLE	= "IterateConfiguration";
@@ -35,6 +36,7 @@ IterateConfiguration::CommandExecuteMacroParams 	IterateConfiguration::commandEx
 IterateConfiguration::CommandModifyActiveParams 	IterateConfiguration::commandModifyActiveParams_;
 IterateConfiguration::CommandRepeatLabelParams 		IterateConfiguration::commandRepeatLabelParams_;
 IterateConfiguration::CommandRunParams 				IterateConfiguration::commandRunParams_;
+IterateConfiguration::CommandChooseFSMParams 		IterateConfiguration::commandChooseFSMParams_;
 
 
 //==============================================================================
