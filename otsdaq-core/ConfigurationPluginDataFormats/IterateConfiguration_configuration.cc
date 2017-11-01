@@ -21,10 +21,20 @@ const std::string IterateConfiguration::COMMAND_RUN 					= "RUN";
 const std::string IterateConfiguration::ITERATE_TABLE	= "IterateConfiguration";
 const std::string IterateConfiguration::PLAN_TABLE		= "IterationPlanConfiguration";
 
-const std::map<std::string,std::string> IterateConfiguration::commandToTableMap_ = IterateConfiguration::createCommandToTableMap();
+const std::map<std::string,std::string> 			IterateConfiguration::commandToTableMap_ = IterateConfiguration::createCommandToTableMap();
 
-IterateConfiguration::PlanTableColumns IterateConfiguration::planTableCols_;
-IterateConfiguration::IterateTableColumns IterateConfiguration::iterateTableCols_;
+IterateConfiguration::PlanTableColumns 				IterateConfiguration::planTableCols_;
+IterateConfiguration::IterateTableColumns 			IterateConfiguration::iterateTableCols_;
+
+IterateConfiguration::CommandBeginLabelParams 		IterateConfiguration::commandBeginLabelParams_;
+IterateConfiguration::CommandConfigureActiveParams 	IterateConfiguration::commandConfigureActiveParams_;
+IterateConfiguration::CommandConfigureAliasParams 	IterateConfiguration::commandConfigureAliasParams_;
+IterateConfiguration::CommandConfigureGroupParams 	IterateConfiguration::commandConfigureGroupParams_;
+IterateConfiguration::CommandExecuteFEMacroParams 	IterateConfiguration::commandExecuteFEMacroParams_;
+IterateConfiguration::CommandExecuteMacroParams 	IterateConfiguration::commandExecuteMacroParams_;
+IterateConfiguration::CommandModifyActiveParams 	IterateConfiguration::commandModifyActiveParams_;
+IterateConfiguration::CommandRepeatLabelParams 		IterateConfiguration::commandRepeatLabelParams_;
+IterateConfiguration::CommandRunParams 				IterateConfiguration::commandRunParams_;
 
 
 //==============================================================================
@@ -102,7 +112,7 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].first << std::endl;
 			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].second << std::endl;
 
-			commands.back().params.push_back(std::pair<
+			commands.back().params.emplace(std::pair<
 					std::string /*param name*/,
 					std::string /*param value*/>(
 							commandSpecificFields[i].first,

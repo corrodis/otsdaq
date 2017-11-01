@@ -22,9 +22,9 @@ public:
 
 	struct Command {
 		std::string type;
-		std::vector< std::pair<
-		std::string /*param name*/,
-		std::string /*param value*/> > params;
+		std::map<
+			std::string /*param name*/,
+			std::string /*param value*/> params;
 	};
 
 	std::vector<IterateConfiguration::Command> getPlanCommands(ConfigurationManager *configManager, const std::string& plan) const;
@@ -59,6 +59,44 @@ public:
 		return m;
 	}
 
+	static struct CommandBeginLabelParams
+	{
+		const std::string Label_ = "Label";
+	} commandBeginLabelParams_;
+	static struct CommandConfigureActiveParams
+	{
+		const std::string Label_ = "Label";
+	} commandConfigureActiveParams_;
+	static struct CommandConfigureAliasParams
+	{
+		const std::string Label_ = "Label";
+	} commandConfigureAliasParams_;
+	static struct CommandConfigureGroupParams
+	{
+		const std::string Label_ = "Label";
+	} commandConfigureGroupParams_;
+	static struct CommandExecuteFEMacroParams
+	{
+		const std::string Label_ = "Label";
+	} commandExecuteFEMacroParams_;
+	static struct CommandExecuteMacroParams
+	{
+		const std::string Label_ = "Label";
+	} commandExecuteMacroParams_;
+	static struct CommandModifyActiveParams
+	{
+		const std::string Label_ = "Label";
+	} commandModifyActiveParams_;
+	static struct CommandRepeatLabelParams
+	{
+		const std::string Label_ = "Label";
+		const std::string NumberOfRepetitions_ = "NumberOfRepetitions";
+	} commandRepeatLabelParams_;
+	static struct CommandRunParams
+	{
+		const std::string Label_ = "Label";
+	} commandRunParams_;
+
 
 
 
@@ -73,15 +111,15 @@ public:
 
 	static struct IterateTableColumns
 	{
-		std::string const PlanLink_ = "LinkToIterationPlanConfiguration";
+		const std::string PlanLink_ = "LinkToIterationPlanConfiguration";
 	} iterateTableCols_;
 
 	static struct PlanTableColumns
 	{
-		std::string const Status_ = ViewColumnInfo::COL_NAME_STATUS;
-		std::string const GroupID_ = "IterationPlanGroupID";
-		std::string const CommandLink_ = "LinkToCommandUID";
-		std::string const CommandType_ = "CommandType";
+		const std::string Status_ = ViewColumnInfo::COL_NAME_STATUS;
+		const std::string GroupID_ = "IterationPlanGroupID";
+		const std::string CommandLink_ = "LinkToCommandUID";
+		const std::string CommandType_ = "CommandType";
 	} planTableCols_;
 
 

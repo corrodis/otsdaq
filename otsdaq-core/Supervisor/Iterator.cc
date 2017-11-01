@@ -61,7 +61,9 @@ try
 		//		- halt: if plan playing or not, activePlanIsRunning_ = false
 		//			and clear commandIndex or name, iteratorBusy_ = false
 		//	- when running
-		//		- go through each command and execute them
+		//		- go through each command
+		//			- start the command, commandBusy = true
+		//			- check for complete, then commandBusy = false
 
 		//start command handling
 		//define mutex scope
@@ -135,8 +137,8 @@ try
 		////////////////
 		////////////////
 		//	handle running
-		__COUT__ << "thinking.." << running << " " << activePlan << " cmd=" <<
-				commandIndex << std::endl;
+		//__COUT__ << "thinking.." << running << " " << activePlan << " cmd=" <<
+		//		commandIndex << std::endl;
 		if(running)
 		{
 			if(commandIndex == (unsigned int)-1)
@@ -174,7 +176,9 @@ try
 					//execute command
 					commandBusy = true;
 
-					__COUT__ << "Executing command " << commandIndex << ": " <<
+					__COUT__ << "Iterator starting command " << commandIndex+1 << ": " <<
+							commands[commandIndex].type << std::endl;
+					__MOUT__ << "Iterator starting command " << commandIndex+1 << ": " <<
 							commands[commandIndex].type << std::endl;
 					iterator->startCommand(commands,commandIndex);
 				}
@@ -205,7 +209,9 @@ try
 
 					++commandIndex;
 
-					__COUT__ << "Ready for next command " << commandIndex << " of " <<
+					__COUT__ << "Ready for next command. Done with " << commandIndex << " of " <<
+							commands.size() << std::endl;
+					__MOUT__ << "Iterator ready for next command. Done with " << commandIndex << " of " <<
 							commands.size() << std::endl;
 				}
 			}
@@ -277,7 +283,31 @@ void Iterator::startCommand(
 	}
 	else if(type == IterateConfiguration::COMMAND_REPEAT_LABEL)
 	{
-		//do nothing
+		//search for first matching label backward and set command to there
+
+		int numOfRepetitions;
+		sscanf(commands[commandIndex].params[
+			IterateConfiguration::commandRepeatLabelParams_.NumberOfRepetitions_].c_str(),
+				"%d",&numOfRepetitions);
+		__COUT__ << "numOfRepetitions remaining = " << numOfRepetitions << std::endl;
+
+		if(numOfRepetitions <= 0) return; //no more repetitions
+
+		unsigned int i;
+		for(i=commandIndex;i>0;--i) //assume 0 is always the fallback option
+			if(commands[i].type == IterateConfiguration::COMMAND_BEGIN_LABEL &&
+					commands[commandIndex].params[IterateConfiguration::commandRepeatLabelParams_.Label_] ==
+							commands[i].params[IterateConfiguration::commandBeginLabelParams_.Label_]) break;
+
+		char repStr[200];
+		sprintf(repStr,"%d",numOfRepetitions);
+		commands[commandIndex].params[
+			IterateConfiguration::commandRepeatLabelParams_.NumberOfRepetitions_] =
+					repStr; //re-store as string
+
+		commandIndex = i;
+		__COUT__ << "Jumping back to commandIndex " << commandIndex << std::endl;
+
 		return;
 	}
 	else if(type == IterateConfiguration::COMMAND_RUN)
@@ -374,7 +404,20 @@ bool Iterator::handleCommandRequest(HttpXmlDocument& xmldoc,
 	else
 	{
 		std::lock_guard<std::mutex> lock(accessMutex_);
-		if(iteratorBusy_) return true; //to block other commands
+		if(iteratorBusy_)
+		{
+			__SS__ << "Error - Can not accept request because the Iterator " <<
+					"is currently " <<
+					"in control of State Machine progress. ";
+			__COUT_ERR__ << "\n" << ss.str();
+			__MOUT_ERR__ << "\n" << ss.str();
+
+			xmldoc.addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
+			xmldoc.addTextElementToData("state_tranisition_attempted_err",
+					ss.str()); //indicate to GUI transition NOT attempted
+
+			return true; //to block other commands
+		}
 	}
 	return false;
 }

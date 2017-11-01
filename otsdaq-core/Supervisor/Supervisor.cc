@@ -299,7 +299,7 @@ throw (xgi::exception::Exception)
 	//Do not allow transition while in transition
 	if (theStateMachine_.isInTransition())
 	{
-		__SS__ << "Error - Can not accept request since State Machine is already in transition!" << std::endl;
+		__SS__ << "Error - Can not accept request because the State Machine is already in transition!" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
 
 		xmldoc.addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
@@ -308,15 +308,6 @@ throw (xgi::exception::Exception)
 		xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
 		return;
 	}
-
-
-	if(theIterator_.handleCommandRequest(xmldoc,command,fsmWindowName))
-	{
-		__COUT__ << "Handled by theIterator_" << std::endl;
-		xmldoc.outputXmlDocument((std::ostringstream*) out, false);
-		return;
-	}
-
 
 
 
@@ -336,7 +327,7 @@ throw (xgi::exception::Exception)
 		{
 			//illegal for this FSM name to attempt transition
 
-			__SS__ << "Error - Can not accept request since State Machine " <<
+			__SS__ << "Error - Can not accept request because the State Machine " <<
 					"with window name '" <<
 					activeStateMachineWindowName_ << "' (UID: " <<
 					activeStateMachineName_ << ") "
@@ -359,6 +350,15 @@ throw (xgi::exception::Exception)
 			activeStateMachineName_ = "";
 			activeStateMachineWindowName_ = "";
 		}
+	}
+
+
+	//check if Iterator should handle
+	if(theIterator_.handleCommandRequest(xmldoc,command,fsmWindowName))
+	{
+		__COUT__ << "Handled by theIterator_" << std::endl;
+		xmldoc.outputXmlDocument((std::ostringstream*) out, false);
+		return;
 	}
 
 
