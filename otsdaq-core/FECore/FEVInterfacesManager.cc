@@ -52,7 +52,7 @@ void FEVInterfacesManager::createInterfaces(void)
 	{
 		try
 		{
-			if(!interface.second.getNode("Status").getValue<bool>()) continue;
+			if(!interface.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>()) continue;
 		}
 		catch(...) //if Status column not there ignore (for backwards compatibility)
 		{

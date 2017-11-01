@@ -81,6 +81,7 @@ public:
 	unsigned int 					getNumberOfRows   			(void) const;
 	unsigned int 					getNumberOfColumns			(void) const;
 	const unsigned int 			    getColUID					(void) const;
+	const unsigned int 			    getColStatus				(void) const;
 
 	//Note: Group link handling should be done in this ConfigurationView class
 	//	only by using isEntryInGroup ...
@@ -315,6 +316,8 @@ public:
 
 private:
 	const unsigned int 	getOrInitColUID		(void);
+	const unsigned int 	getOrInitColStatus	(void);
+
 	//operator= is purposely undefined and private (DO NOT USE) - should use copy()
 	ConfigurationView& 	operator=		   	(const ConfigurationView src);
 
@@ -329,7 +332,7 @@ private:
 	std::string                			author_      	;
 	time_t		                		creationTime_	;	//used more like "construction"(constructor) time
 	time_t		                		lastAccessTime_ ;	//last time the ConfigurationInterface:get() retrieved this view
-	unsigned int						colUID_			; //special column pointers
+	unsigned int						colUID_, colStatus_; //special column pointers
 	std::map<std::string, unsigned int>	colLinkGroupIDs_; //map from child link index to column
 
 	bool								fillWithLooseColumnMatching_;

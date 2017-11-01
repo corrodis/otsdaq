@@ -24,6 +24,7 @@ ConfigurationView::ConfigurationView(const std::string &name)
 	creationTime_ 				(time(0)),
 	lastAccessTime_				(0),
 	colUID_ 					(INVALID),
+	colStatus_					(INVALID),
 	fillWithLooseColumnMatching_(false),
 	sourceColumnMismatchCount_	(0),
 	sourceColumnMissingCount_ 	(0)
@@ -102,6 +103,11 @@ void ConfigurationView::init(void)
 		}
 
 		getOrInitColUID(); //setup UID column
+		try
+		{
+			getOrInitColStatus(); //setup Status column
+		}
+		catch(...){} //ignore no Status column
 
 		//require one comment column
 		unsigned int colPos;
@@ -757,9 +763,9 @@ void ConfigurationView::setValueAsString(const std::string &value, unsigned int 
 }
 
 //==============================================================================
-//getColOfUID
+//getOrInitColUID
 //	if column not found throw error
-const unsigned int ConfigurationView::getOrInitColUID	(void)
+const unsigned int ConfigurationView::getOrInitColUID(void)
 {
 	if(colUID_ != INVALID) return colUID_;
 
@@ -780,7 +786,7 @@ const unsigned int ConfigurationView::getOrInitColUID	(void)
 //getColOfUID
 //	const version, so don't attempt to lookup
 //	if column not found throw error
-const unsigned int ConfigurationView::getColUID	(void) const
+const unsigned int ConfigurationView::getColUID(void) const
 {
 	if(colUID_ != INVALID) return colUID_;
 
@@ -789,6 +795,46 @@ const unsigned int ConfigurationView::getColUID	(void) const
 		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << std::endl;
 
 	__SS__ << ("Missing UID Column in config named " + tableName_ +
+			". (Possibly ConfigurationView was just not initialized?"  +
+			"This is the const call so can not alter class members)") << std::endl;
+	__COUT_ERR__ << "\n" << ss.str() << std::endl;
+	throw std::runtime_error(ss.str());
+}
+
+//==============================================================================
+//getOrInitColStatus
+//	if column not found throw error
+const unsigned int ConfigurationView::getOrInitColStatus(void)
+{
+	if(colStatus_ != INVALID) return colStatus_;
+
+	//if doesn't exist throw error! each view must have a UID column
+	colStatus_ = findCol(ViewColumnInfo::COL_NAME_STATUS);
+	if(colStatus_ == INVALID)
+	{
+		__SS__ << "\tMissing Status Column in table named '" << tableName_ << "'" << std::endl;
+		ss << "Column Types: " << std::endl;
+		for(unsigned int col=0; col<columnsInfo_.size(); ++col)
+			ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << std::endl;
+
+		//__COUT_ERR__ << "\n" << ss.str() << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+	return colStatus_;
+}
+//==============================================================================
+//getColStatus
+//	const version, so don't attempt to lookup
+//	if column not found throw error
+const unsigned int ConfigurationView::getColStatus(void) const
+{
+	if(colStatus_ != INVALID) return colStatus_;
+
+	__COUT__ << "Column Types: " << std::endl;
+	for(unsigned int col=0; col<columnsInfo_.size(); ++col)
+		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << std::endl;
+
+	__SS__ << ("Missing Status Column in config named " + tableName_ +
 			". (Possibly ConfigurationView was just not initialized?"  +
 			"This is the const call so can not alter class members)") << std::endl;
 	__COUT_ERR__ << "\n" << ss.str() << std::endl;

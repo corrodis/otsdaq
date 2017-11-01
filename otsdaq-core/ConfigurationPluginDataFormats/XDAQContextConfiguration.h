@@ -79,7 +79,7 @@ public:
 		std::string const colContextUID_                     = "ContextUID";
 		std::string const colLinkToApplicationConfiguration_ = "LinkToApplicationConfiguration";
 		std::string const colLinkToApplicationGroupID_       = "LinkToApplicationGroupID";
-		std::string const colStatus_                         = "Status";
+		std::string const colStatus_                         = ViewColumnInfo::COL_NAME_STATUS;
 		std::string const colId_                             = "Id";
 		std::string const colAddress_                        = "Address";
 		std::string const colPort_                           = "Port";
@@ -92,7 +92,7 @@ public:
 		std::string const colApplicationUID_                = "ApplicationUID";
 		std::string const colLinkToSupervisorConfiguration_ = "LinkToSupervisorConfiguration";
 		std::string const colLinkToSupervisorUID_           = "LinkToSupervisorUID";
-		std::string const colStatus_                        = "Status";
+		std::string const colStatus_                        = ViewColumnInfo::COL_NAME_STATUS;
 		std::string const colClass_                         = "Class";
 		std::string const colId_                            = "Id";
 		std::string const colInstance_                      = "Instance";

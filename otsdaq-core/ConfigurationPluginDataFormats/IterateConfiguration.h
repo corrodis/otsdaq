@@ -78,7 +78,7 @@ public:
 
 	static struct PlanTableColumns
 	{
-		std::string const Status_ = "Status";
+		std::string const Status_ = ViewColumnInfo::COL_NAME_STATUS;
 		std::string const GroupID_ = "IterationPlanGroupID";
 		std::string const CommandLink_ = "LinkToCommandUID";
 		std::string const CommandType_ = "CommandType";

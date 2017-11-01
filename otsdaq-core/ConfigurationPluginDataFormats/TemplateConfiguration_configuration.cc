@@ -11,6 +11,9 @@ using namespace ots;
 TemplateConfiguration::TemplateConfiguration(void)
 : ConfigurationBase("TemplateConfiguration")
 {
+ 	////////////////////////////////////////////////////////////////////////////
+	//WARNING: the field names used in C++ MUST match the Configuration INFO  //
+	////////////////////////////////////////////////////////////////////////////
 }
 
 //==============================================================================

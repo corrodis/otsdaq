@@ -80,12 +80,16 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 	{
 		__COUT__ << "Command \t" << commandChild.first << std::endl;
 
+		__COUT__ << "\t\tStatus \t" << commandChild.second.getNode(
+				IterateConfiguration::planTableCols_.Status_) << std::endl;
+
+		__COUT__ << "\t\tType \t" << commandChild.second.getNode(
+				IterateConfiguration::planTableCols_.CommandType_) << std::endl;
+
 		if(!commandChild.second.getNode(
 				IterateConfiguration::planTableCols_.Status_).getValue<bool>())
 			continue; //skip disabled commands
 
-		__COUT__ << "\t\tType \t" << commandChild.second.getNode(
-				IterateConfiguration::planTableCols_.CommandType_) << std::endl;
 
 		auto commandSpecificFields = commandChild.second.getNode(
 				IterateConfiguration::planTableCols_.CommandLink_).getChildren();

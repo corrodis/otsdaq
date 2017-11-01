@@ -11,7 +11,7 @@ using namespace ots;
 
 //DesktopIconConfiguration Column names
 #define COL_NAME						"IconName"
-#define COL_STATUS						"Status"
+#define COL_STATUS						ViewColumnInfo::COL_NAME_STATUS
 #define COL_CAPTION 					"Caption"
 #define COL_ALTERNATE_TEXT				"AlternateText"
 #define COL_FORCE_ONLY_ONE_INSTANCE		"ForceOnlyOneInstance"
