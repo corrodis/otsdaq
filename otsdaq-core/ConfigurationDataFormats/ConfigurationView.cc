@@ -2551,7 +2551,7 @@ const bool ConfigurationView::getChildLink(const unsigned int& c, bool& isGroup,
 					index == columnsInfo_[col].getChildLinkIndex())
 			{
 				//found match!
-				__COUT__ << "getChildLink Found match for col: " << (int)c << " at " << col << std::endl;
+				//__COUT__ << "getChildLink Found match for col: " << (int)c << " at " << col << std::endl;
 				linkPair.first = col;
 				return true;
 			}

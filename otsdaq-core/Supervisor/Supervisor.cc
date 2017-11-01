@@ -310,7 +310,7 @@ throw (xgi::exception::Exception)
 	}
 
 
-	if(theIterator_.handleCommand(xmldoc,command,fsmWindowName))
+	if(theIterator_.handleCommandRequest(xmldoc,command,fsmWindowName))
 	{
 		__COUT__ << "Handled by theIterator_" << std::endl;
 		xmldoc.outputXmlDocument((std::ostringstream*) out, false);

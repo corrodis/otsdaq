@@ -4,7 +4,6 @@
 #include "otsdaq-core/Supervisor/Supervisor.h"
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/IterateConfiguration.h"
 
 
 #include <iostream>
@@ -45,9 +44,11 @@ try
 	ConfigurationManager* cfgMgr = &theConfigurationManager;
 	const IterateConfiguration* itConfig;
 
+	std::vector<IterateConfiguration::Command> commands;
 	unsigned int commandIndex = (unsigned int)-1;
 	std::string activePlan = "";
 	bool running = false;
+	bool commandBusy = false;
 
 	while(1)
 	{
@@ -56,9 +57,9 @@ try
 		//		- play: if no plan running, activePlanIsRunning_ = true,
 		//			and start or continue plan based on name/commandIndex
 		//		- pause: if plan playing, pause it, activePlanIsRunning_ = false
-		//			and do not clear commandIndex or name
+		//			and do not clear commandIndex or name, iteratorBusy_ = true
 		//		- halt: if plan playing or not, activePlanIsRunning_ = false
-		//			and clear commandIndex or name
+		//			and clear commandIndex or name, iteratorBusy_ = false
 		//	- when running
 		//		- go through each command and execute them
 
@@ -88,6 +89,7 @@ try
 					}
 
 					activePlan = iterator->activePlanName_;
+					iterator->lastStartedPlanName_ = iterator->activePlanName_;
 
 					if(commandIndex == (unsigned int)-1)
 						__MOUT__ << "Starting plan '" << activePlan << ".'" << std::endl;
@@ -146,8 +148,7 @@ try
 				cfgMgr->init(); //completely reset to re-align with any changes
 				itConfig = cfgMgr->__GET_CONFIG__(IterateConfiguration);
 
-				std::vector<IterateConfiguration::Command> commands =
-						itConfig->getPlanCommands(cfgMgr,activePlan);
+				commands = itConfig->getPlanCommands(cfgMgr,activePlan);
 
 				for(auto& command:commands)
 				{
@@ -165,6 +166,51 @@ try
 					}
 				}
 			}
+
+			if(!commandBusy)
+			{
+				if(commandIndex < commands.size())
+				{
+					//execute command
+					commandBusy = true;
+
+					__COUT__ << "Executing command " << commandIndex << ": " <<
+							commands[commandIndex].type << std::endl;
+					iterator->startCommand(commands,commandIndex);
+				}
+				else if(commandIndex == commands.size()) //Done!
+				{
+					__COUT__ << "Finished Iteration Plan '" << activePlan << std::endl;
+					__MOUT__ << "Finished Iteration Plan '" << activePlan << std::endl;
+
+					//lockout the messages array for the remainder of the scope
+					//this guarantees the reading thread can safely access the messages
+					std::lock_guard<std::mutex> lock(iterator->accessMutex_);
+
+					//similar to halt
+					iterator->activePlanIsRunning_ = false;
+					iterator->iteratorBusy_ = false;
+
+					iterator->lastStartedPlanName_ = activePlan;
+					activePlan = ""; //clear
+					commandIndex = -1; //clear
+				}
+			}
+			else if(commandBusy)
+			{
+				//check for command completion
+				if(iterator->checkCommand(commands,commandIndex))
+				{
+					commandBusy = false; //command complete
+
+					++commandIndex;
+
+					__COUT__ << "Ready for next command " << commandIndex << " of " <<
+							commands.size() << std::endl;
+				}
+			}
+
+
 
 		} 	//end running
 		////////////////
@@ -189,7 +235,125 @@ catch(...)
 }
 
 //========================================================================================================================
-bool Iterator::handleCommand(HttpXmlDocument& xmldoc,
+void Iterator::startCommand(
+		std::vector<IterateConfiguration::Command>& commands,
+		unsigned int commandIndex)
+{
+	std::string type = commands[commandIndex].type;
+	if(type == IterateConfiguration::COMMAND_BEGIN_LABEL)
+	{
+		//do nothing
+		return;
+	}
+	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP)
+	{
+		//do nothing
+		return;
+	}
+	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS)
+	{
+		//do nothing
+		return;
+	}
+	else if(type == IterateConfiguration::COMMAND_CONFIGURE_GROUP)
+	{
+		//do nothing
+		return;
+	}
+	else if(type == IterateConfiguration::COMMAND_EXECUTE_FE_MACRO)
+	{
+		//do nothing
+		return;
+	}
+	else if(type == IterateConfiguration::COMMAND_EXECUTE_MACRO)
+	{
+		//do nothing
+		return;
+	}
+	else if(type == IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP)
+	{
+		//do nothing
+		return;
+	}
+	else if(type == IterateConfiguration::COMMAND_REPEAT_LABEL)
+	{
+		//do nothing
+		return;
+	}
+	else if(type == IterateConfiguration::COMMAND_RUN)
+	{
+		//do nothing
+		return;
+	}
+	else
+	{
+		__SS__ << "Attempt to start unrecognized command type = " << type << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
+}
+
+//========================================================================================================================
+bool Iterator::checkCommand(
+		std::vector<IterateConfiguration::Command>& commands,
+		unsigned int commandIndex)
+{
+	std::string type = commands[commandIndex].type;
+	if(type == IterateConfiguration::COMMAND_BEGIN_LABEL)
+	{
+		//do nothing
+		return true;
+	}
+	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP)
+	{
+		//do nothing
+		return true;
+	}
+	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS)
+	{
+		//do nothing
+		return true;
+	}
+	else if(type == IterateConfiguration::COMMAND_CONFIGURE_GROUP)
+	{
+		//do nothing
+		return true;
+	}
+	else if(type == IterateConfiguration::COMMAND_EXECUTE_FE_MACRO)
+	{
+		//do nothing
+		return true;
+	}
+	else if(type == IterateConfiguration::COMMAND_EXECUTE_MACRO)
+	{
+		//do nothing
+		return true;
+	}
+	else if(type == IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP)
+	{
+		//do nothing
+		return true;
+	}
+	else if(type == IterateConfiguration::COMMAND_REPEAT_LABEL)
+	{
+		//do nothing
+		return true;
+	}
+	else if(type == IterateConfiguration::COMMAND_RUN)
+	{
+		//do nothing
+		return true;
+	}
+	else
+	{
+		__SS__ << "Attempt to check unrecognized command type = " << type << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
+}
+
+//========================================================================================================================
+bool Iterator::handleCommandRequest(HttpXmlDocument& xmldoc,
 		const std::string& command, const std::string& parameter)
 {
 	if(command == "iteratePlay")

@@ -90,21 +90,23 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 				IterateConfiguration::planTableCols_.Status_).getValue<bool>())
 			continue; //skip disabled commands
 
+		commands.push_back(IterateConfiguration::Command());
+		commands.back().type = commandChild.second.getNode(
+				IterateConfiguration::planTableCols_.CommandType_).getValue<std::string>();
 
 		auto commandSpecificFields = commandChild.second.getNode(
 				IterateConfiguration::planTableCols_.CommandLink_).getChildren();
 
-		for(auto &commandField: commandSpecificFields)
+		for(unsigned int i=0; i<commandSpecificFields.size()-3; ++i) //ignore last three columns
 		{
-			__COUT__ << "\t\tParameter \t" << commandField.first << std::endl;
-			__COUT__ << "\t\tParameter \t" << commandField.second << std::endl;
+			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].first << std::endl;
+			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].second << std::endl;
 
-
-//			for(auto &commandParameter: commandParameters)
-//			{
-//				__COUT__ << "\t\tParameter \t" << commandParameter.first << std::endl;
-//
-//			}
+			commands.back().params.push_back(std::pair<
+					std::string /*param name*/,
+					std::string /*param value*/>(
+							commandSpecificFields[i].first,
+							commandSpecificFields[i].second.getValueAsString()));
 		}
 	}
 
