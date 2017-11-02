@@ -1170,6 +1170,9 @@ unsigned int ConfigurationView::findCol(const std::string& name) const
 
 	__SS__ << "\tIn view: " << tableName_ <<
 			", Can't find column named " << name << std::endl;
+	ss << "Existing columns:\n";
+	for(unsigned int col=0; col<columnsInfo_.size(); ++col)
+		ss << "\t" << columnsInfo_[col].getName() << "\n";
 	throw std::runtime_error(ss.str());
 }
 
