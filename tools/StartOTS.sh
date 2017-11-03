@@ -394,6 +394,8 @@ launchOTS() {
 	haveXDAQContextPort=false
 	insideContext=false
 	ignore=false
+	isLocal=false
+	mainHostname=""
 	while read line; do    
 		if [[ ($line == *"<!--"*) ]]; then
 		ignore=true
@@ -419,11 +421,14 @@ launchOTS() {
 						#fi
 				#echo ${BASH_REMATCH[1]}
 				#echo ${BASH_REMATCH[2]}
-				if [[ (${BASH_REMATCH[2]} == ${HOSTNAME}) || (${BASH_REMATCH[2]} == ${HOSTNAME}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
 					port=${BASH_REMATCH[3]}
 					host=${BASH_REMATCH[2]}
 					insideContext=true
 					#echo $port
+				if [[ (${BASH_REMATCH[2]} == ${HOSTNAME}) || (${BASH_REMATCH[2]} == ${HOSTNAME}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
+				    isLocal=true
+				else
+				    isLocal=false
 				fi
 				if [[ ${contextHostname[*]} != ${BASH_REMATCH[2]} ]]; then
 					contextHostname+=(${BASH_REMATCH[2]})
@@ -448,7 +453,7 @@ launchOTS() {
 			elif [[ ($line == *"ots::AggregatorApp"*) ]]; then 
 			  aggregatorPort+=($port)
 			  aggregatorHost+=($host)
-			elif [[ ($line == *"class"*) ]]; then #IT'S A XDAQ SUPERVISOR		
+			elif [[ ($line == *"class"*) ]] && [[ "${isLocal}" == "true" ]]; then #IT'S A XDAQ SUPERVISOR		
 	
 				if [[ ($haveXDAQContextPort == false) ]]; then 
 					xdaqPort+=($port)
@@ -458,6 +463,7 @@ launchOTS() {
 				
 				if [[ ($line == *"ots::Supervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
 					if [[ ($line =~ $superRe) ]]; then
+					    mainHostname=${host}
 						#echo ${BASH_REMATCH[1]}	#should be supervisor LID
 						MAIN_URL="http://${host}:${port}/urn:xdaq-application:lid=${BASH_REMATCH[1]}/"
 					fi
@@ -489,14 +495,21 @@ launchOTS() {
 	  i=$(( $i + 1 ))
 	done
 	
-	if [[ (${#boardReaderPort[@]} != 0) || (${#builderPort[@]} != 0) || (${#aggregatorPort[@]} != 0) ]]; then
-	  cmd="mpirun ${envString}"
+	if [[ (${#boardReaderPort[@]} != 0) || (${#builderPort[@]} != 0) || (${#aggregatorPort[@]} != 0) ]] && [[ "${HOSTNAME}" == "${mainHostname}" ]]; then
+	  cmdstart="mpirun -launcher ssh ${envString}"
+	  cmd=""
+	  mpiHosts=""
 	  i=0	
 	  for port in "${boardReaderPort[@]}"
 	  do
 		: 
 		#echo " -np xdaq.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
 		cmd=$cmd" -np 1 xdaq.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :"
+		if [[ "x$mpiHosts" == "x" ]]; then
+		    mpiHosts="${boardReaderHost[$i]}"
+		    else
+		mpiHosts=$mpiHosts",${boardReaderHost[$i]}"
+		fi
 		i=$(( $i + 1 ))
 	  done
 	  i=0	
@@ -505,6 +518,11 @@ launchOTS() {
 		: 
 		#echo " -np xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
 		cmd=$cmd" -np 1 xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :"
+		if [[ "x$mpiHosts" == "x" ]]; then
+		    mpiHosts="${builderHost[$i]}"
+		    else
+		mpiHosts=$mpiHosts",${builderHost[$i]}"
+		fi
 		i=$(( $i + 1 ))
 	  done	
 	  i=0	
@@ -513,9 +531,15 @@ launchOTS() {
 		: 
 		#echo " -np xdaq.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS}\n"
 		cmd=$cmd" -np 1 xdaq.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS}"
+		if [[ "x$mpiHosts" == "x" ]]; then
+		    mpiHosts="${aggregatorHost[$i]}"
+		    else
+		mpiHosts=$mpiHosts",${aggregatorHost[$i]}"
+		fi
 			i=$(( $i + 1 ))
 	  done
 	  echo
+	  cmd=$cmdstart" -host "$mpiHosts$cmd
 	  echo $cmd &
 	  MPI_RUN_CMD=$cmd
 		#if [ $QUIET == 1 ]; then
@@ -627,18 +651,17 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "RESET_MPI" ]; then
 			echo " "
 			echo "Restarting MPI . . ."
-			echo $MPI_RUN_CMD
-			echo " "
-			killall -9 mpirun
-			sleep 1
-			
-			if [ $QUIET == 1 ]; then
+			    echo $MPI_RUN_CMD
+			    echo " "
+			    killall -9 mpirun
+			    sleep 1
+			    
+			    if [ $QUIET == 1 ]; then
 				echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"	
 				$MPI_RUN_CMD &> otsdaq_quiet_run-mpi.txt &
-			else
+			    else
 				$MPI_RUN_CMD &
-			fi			
-			
+			    fi
 			#sleep 5
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_WIZ" ]; then
 			
