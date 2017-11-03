@@ -1,6 +1,6 @@
 #!/bin/sh
 echo
-echo "Starting otsdaq..."
+echo "Launching StartOTS.sh otsdaq script... on {${HOSTNAME}}."
 echo
 
 ISCONFIG=0
@@ -582,6 +582,11 @@ printMainURL() {
 	echo "Open the URL below in your Google Chrome or Mozilla Firefox web browser:"
 	if [ $QUIET == 0 ]; then
 		sleep 3
+	fi
+	
+	if [ $MAIN_URL == "unknown_url" ]; then
+		echo "INFO: No gateway supervisor found for node {${HOSTNAME}}."
+		exit
 	fi
 	
 	for i in {1..5}
