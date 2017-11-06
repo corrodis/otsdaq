@@ -656,17 +656,20 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "RESET_MPI" ]; then
 			echo " "
 			echo "Restarting MPI . . ."
-			    echo $MPI_RUN_CMD
-			    echo " "
-			    killall -9 mpirun
-			    sleep 1
-			    
-			    if [ $QUIET == 1 ]; then
+			echo $MPI_RUN_CMD
+			echo " "
+			killall -9 mpirun
+			sleep 1
+
+			export MPIEXEC_PORT_RANGE=8300:8349
+			export MPIR_CVAR_CH3_PORT_RANGE=8350:8700
+
+			if [ $QUIET == 1 ]; then
 				echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"	
 				$MPI_RUN_CMD &> otsdaq_quiet_run-mpi.txt &
-			    else
+			else
 				$MPI_RUN_CMD &
-			    fi
+			fi
 			#sleep 5
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_WIZ" ]; then
 			
