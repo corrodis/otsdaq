@@ -924,7 +924,7 @@ bool ConfigurationTree::isDisconnected(void) const
 						"'\n\n" << std::endl;
 		ss << "This is not a Link node! It is node type '" <<
 				getNodeType() << ".' Only a Link node can be disconnected." << std::endl;
-		__COUT__ << "\n" << ss.str();
+		//__COUT__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 

@@ -13,6 +13,7 @@ using namespace ots;
 //#define XDAQ_SCRIPT				std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartXDAQ_gen.sh"
 //#define ARTDAQ_MPI_SCRIPT		std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartMPI_gen.sh"
 
+
 //========================================================================================================================
 XDAQContextConfiguration::XDAQContextConfiguration(void)
 : ConfigurationBase("XDAQContextConfiguration")
@@ -128,6 +129,11 @@ unsigned int XDAQContextConfiguration::getARTDAQAppRank(const std::string &conte
 	if(contextUID == "X")
 		return rank; //assume first undefined rank is desired
 
+	if(!rank)
+	{
+		__COUT__ << "Assuming since there are 0 active ARTDAQ context UID(s), we can ignore rank failure." << std::endl;
+		return -1;
+	}
 	__SS__ << "ARTDAQ rank could not be found for context UID '" <<
 			contextUID << "' - there were " << rank
 			<< " active ARTDAQ context UID(s) checked." << std::endl;

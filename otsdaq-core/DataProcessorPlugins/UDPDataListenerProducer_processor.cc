@@ -89,6 +89,23 @@ void UDPDataListenerProducer::fastWrite(void)
 	{
 		(*headerP_)["IPAddress"] = NetworkConverters::networkToStringIP  (ipAddress_);
 		(*headerP_)["Port"]      = NetworkConverters::networkToStringPort(port_);
+
+		if( NetworkConverters::networkToUnsignedPort(port_) == 40005 )
+		{
+			__COUT__ << "Got data: " << dataP_->length() << std::endl;
+		}
+
+//		char str[5];
+//		for(unsigned int j=0;j<dataP_->length();++j)
+//		{
+//			sprintf(str,"%2.2x",((unsigned int)(*dataP_)[j]) & ((unsigned int)(0x0FF)));
+//
+//			if(j%64 == 0) std::cout << "RECV 0x\t";
+//			std::cout << str;
+//			if(j%8 == 7) std::cout << " ";
+//			if(j%64 == 63) std::cout << std::endl;
+//		}
+
 		//unsigned long long value;
 		//memcpy((void *)&value, (void *) dataP_->substr(2).data(),8); //make data counter
 		//__COUT__ << "Got data: " << dataP_->length()
