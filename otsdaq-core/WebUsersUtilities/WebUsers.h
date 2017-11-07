@@ -126,6 +126,7 @@ private:
 	bool			saveDatabaseToFile			(uint8_t db); 
 	bool			loadDatabases				(); 	
 
+public:
 	void			loadActiveSessions			();
 
 	uint64_t	    searchUsersDatabaseForUsername	        (std::string username) const;

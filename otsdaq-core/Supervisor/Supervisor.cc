@@ -1975,7 +1975,10 @@ throw (xgi::exception::Exception)
 	std::string userWithLock;
 
 	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions,
-			&uid, "0", Command != "getSystemMessages", &userWithLock))
+			&uid, "0",
+			Command != "getSystemMessages" &&
+				Command != "gatewayLaunchOTS",
+				&userWithLock))
 	{
 		*out << cookieCode;
 		return;
@@ -2547,19 +2550,20 @@ throw (xgi::exception::Exception)
 			//gateway launch is different, in that it saves user sessions
 			theWebUsers_.saveActiveSessions();
 
-			//no launch
-			__COUT_INFO__ << "Launching... " << std::endl;
-
-			FILE* fp = fopen((std::string(getenv("SERVICE_DATA_PATH")) +
-					"/StartOTS_action.cmd").c_str(),"w");
-			if(fp)
-			{
-				fprintf(fp,"LAUNCH_OTS");
-				fclose(fp);
-			}
-			else
-				__COUT_ERR__ << "Unable to open command file: " << (std::string(getenv("SERVICE_DATA_PATH")) +
-						"/StartOTS_action.cmd") << std::endl;
+			theWebUsers_.loadActiveSessions();
+//			//no launch
+//			__COUT_INFO__ << "Launching... " << std::endl;
+//
+//			FILE* fp = fopen((std::string(getenv("SERVICE_DATA_PATH")) +
+//					"/StartOTS_action.cmd").c_str(),"w");
+//			if(fp)
+//			{
+//				fprintf(fp,"LAUNCH_OTS");
+//				fclose(fp);
+//			}
+//			else
+//				__COUT_ERR__ << "Unable to open command file: " << (std::string(getenv("SERVICE_DATA_PATH")) +
+//						"/StartOTS_action.cmd") << std::endl;
 		}
 	}
 	else if(Command == "resetUserTooltips")
