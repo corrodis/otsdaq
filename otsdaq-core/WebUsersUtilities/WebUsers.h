@@ -105,6 +105,8 @@ public:
 
 	static void 	NACDisplayThread				(std::string nac, std::string user);
 
+	void			saveActiveSessions			();
+
 private:
     void			loadSecuritySelection       ();
     void			loadUserWithLock			();
@@ -123,6 +125,8 @@ private:
 	void			saveToDatabase				(FILE * fp, std::string field, std::string value, uint8_t type = DB_SAVE_OPEN_AND_CLOSE, bool addNewLine = true);
 	bool			saveDatabaseToFile			(uint8_t db); 
 	bool			loadDatabases				(); 	
+
+	void			loadActiveSessions			();
 
 	uint64_t	    searchUsersDatabaseForUsername	        (std::string username) const;
 	uint64_t		searchUsersDatabaseForUserId			(uint64_t uid) const;

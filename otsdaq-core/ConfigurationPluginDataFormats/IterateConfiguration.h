@@ -31,7 +31,7 @@ public:
 
 
 	static const std::string COMMAND_BEGIN_LABEL;
-	static const std::string COMMAND_CHOOSE_FSM_LABEL;
+	static const std::string COMMAND_CHOOSE_FSM;
 	static const std::string COMMAND_CONFIGURE_ACTIVE_GROUP;
 	static const std::string COMMAND_CONFIGURE_ALIAS;
 	static const std::string COMMAND_CONFIGURE_GROUP;
@@ -49,7 +49,7 @@ public:
 	{
 		std::map<std::string,std::string> m;
 		m[COMMAND_BEGIN_LABEL] 				=  "IterationCommandBeginLabelConfiguration";
-		m[COMMAND_CHOOSE_FSM_LABEL] 		=  "IterationCommandChooseFSMConfiguration";
+		m[COMMAND_CHOOSE_FSM] 		=  "IterationCommandChooseFSMConfiguration";
 		m[COMMAND_CONFIGURE_ACTIVE_GROUP] 	=  ""; //no parameters
 		m[COMMAND_CONFIGURE_ALIAS] 			=  "IterationCommandConfigureAliasConfiguration";
 		m[COMMAND_CONFIGURE_GROUP] 			=  "IterationCommandConfigureGroupConfiguration";

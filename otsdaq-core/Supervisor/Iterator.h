@@ -11,6 +11,7 @@ namespace ots
 {
 
 class Supervisor;
+class ConfigurationManagerRW;
 
 class Iterator
 {
@@ -29,20 +30,18 @@ public:
 
 private:
 
+    struct IteratorWorkLoopStruct
+	{
+    	std::string fsmName_;
+    	ConfigurationManagerRW* cfgMgr;
+	};
+
     static void								IteratorWorkLoop			(Iterator *iterator);
-    void									startCommand				(Iterator *iterator, std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
-    bool									checkCommand				(Iterator *iterator, std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
-    void									startCommandConfigureAlias	(const std::string& systemAlias);
-    bool									checkCommandConfigureAlias	();
-//	m[COMMAND_BEGIN_LABEL] 				=  "IterationCommandBeginLabelConfiguration";
-//	m[COMMAND_CONFIGURE_ACTIVE_GROUP] 	=  ""; //no parameters
-//	m[COMMAND_CONFIGURE_ALIAS] 			=  "IterationCommandConfigureAliasConfiguration";
-//	m[COMMAND_CONFIGURE_GROUP] 			=  "IterationCommandConfigureGroupConfiguration";
-//	m[COMMAND_EXECUTE_FE_MACRO] 		=  "IterationCommandExecuteFEMacroConfiguration";
-//	m[COMMAND_EXECUTE_MACRO] 			=  "IterationCommandExecuteMacroConfiguration";
-//	m[COMMAND_MODIFY_ACTIVE_GROUP] 		=  "IterationCommandModifyGroupConfiguration";
-//	m[COMMAND_REPEAT_LABEL] 			=  "IterationCommandRepeatLabelConfiguration";
-//	m[COMMAND_RUN] 						=  "IterationCommandRunConfiguration";
+    static void								startCommand				(Iterator *iterator, std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
+    static bool								checkCommand				(Iterator *iterator, std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
+    static void								startCommandChooseFSM		(const std::string& fsmName);
+    static void								startCommandConfigureAlias	(const std::string& systemAlias);
+    static bool								checkCommandConfigureAlias	();
 
     std::mutex								accessMutex_;
     volatile bool							workloopRunning_;

@@ -9,7 +9,7 @@ using namespace ots;
 
 
 const std::string IterateConfiguration::COMMAND_BEGIN_LABEL 			= "BEGIN_LABEL";
-const std::string IterateConfiguration::COMMAND_CHOOSE_FSM_LABEL 		= "CHOOSE_FSM";
+const std::string IterateConfiguration::COMMAND_CHOOSE_FSM		 		= "CHOOSE_FSM";
 const std::string IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP 	= "CONFIGURE_ACTIVE_GROUP";
 const std::string IterateConfiguration::COMMAND_CONFIGURE_ALIAS 		= "CONFIGURE_ALIAS";
 const std::string IterateConfiguration::COMMAND_CONFIGURE_GROUP 		= "CONFIGURE_GROUP";

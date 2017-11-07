@@ -22,6 +22,7 @@ using namespace ots;
 
 #define SECURITY_FILE_NAME 				std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
 
+#define USERS_ACTIVE_SESSIONS_FILE 		USERS_DB_PATH + "/activeSessions.sv"
 
 #define HASHES_DB_FILE 					HASHES_DB_PATH + "/hashes.xml"
 #define USERS_DB_FILE 					USERS_DB_PATH + "/users.xml"
@@ -133,6 +134,9 @@ WebUsers::WebUsers()
 
 	//default user with lock to admin
 	loadUserWithLock(); //and then try to load last user with lock
+
+	//attempt to load persistent user sessions
+	loadActiveSessions();
 
 	srand (time(0)); //seed random for hash salt generation
 
@@ -321,6 +325,80 @@ WebUsers::WebUsers()
 	//	}
 }
 
+//========================================================================================================================
+//saveActiveSessions
+//	save active sessions structure so that they can survive restart
+void WebUsers::saveActiveSessions()
+{
+	std::string fn;
+
+	fn = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_ACTIVE_SESSIONS_FILE;
+	__COUT__ << fn << std::endl;
+
+	FILE *fp = fopen(fn.c_str(),"w");
+	if(!fp)
+	{
+		__COUT_ERR__ << "Error! Persistent active sessions could not be saved." << std::endl;
+		return;
+	}
+
+	int version = 0;
+	fprintf(fp,"%d\n",version);
+	for(unsigned int i=0; i<ActiveSessionCookieCodeVector.size(); ++i)
+	{
+		fprintf(fp,"%s\n",ActiveSessionCookieCodeVector[i].c_str());
+		fprintf(fp,"%s\n",ActiveSessionIpVector[i].c_str());
+		fprintf(fp,"%lu\n",ActiveSessionUserIdVector[i]);
+		fprintf(fp,"%lu\n",ActiveSessionIndex[i]);
+		fprintf(fp,"%ld\n",ActiveSessionStartTimeVector[i]);
+	}
+
+	fclose(fp);
+}
+
+//====================================================================================================================
+//loadActiveSessions
+//	load active sessions structure so that they can survive restart
+void WebUsers::loadActiveSessions()
+{
+	std::string fn;
+
+	fn = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_ACTIVE_SESSIONS_FILE;
+	__COUT__ << fn << std::endl;
+	FILE *fp = fopen(fn.c_str(),"w");
+	if(!fp)
+	{
+		__COUT_ERR__ << "Error! Persistent active sessions could not be saved." << std::endl;
+		return;
+	}
+
+	int version;
+
+	const int LINELEN = 1000;
+	char line[LINELEN];
+	fgets(line,LINELEN,fp);
+	sscanf(line,"%d",&version);
+	if(version == 0)
+	{
+		__COUT__ << "Extracting active sessions..." << std::endl;
+
+	}
+
+	while(fgets(line,LINELEN,fp))
+	{
+		ActiveSessionCookieCodeVector.push_back(line);
+		fgets(line,LINELEN,fp);
+		ActiveSessionIpVector.push_back(line);
+		fgets(line,LINELEN,fp);
+		ActiveSessionUserIdVector.push_back(uint64_t());
+		sscanf(line,"%lu",&(ActiveSessionUserIdVector[ActiveSessionUserIdVector.size()-1]));
+		ActiveSessionIndex.push_back(uint64_t());
+		sscanf(line,"%lu",&(ActiveSessionIndex[ActiveSessionIndex.size()-1]));
+		ActiveSessionStartTimeVector.push_back(time_t());
+		sscanf(line,"%ld",&(ActiveSessionStartTimeVector[ActiveSessionStartTimeVector.size()-1]));
+	}
+	fclose(fp);
+}
 
 //========================================================================================================================
 //loadDatabaseFromFile

@@ -1997,8 +1997,10 @@ throw (xgi::exception::Exception)
 	//getCurrentState
 	//getErrorInStateMatchine
 	//getDesktopIcons
-	//launchConfig
+
 	//resetUserTooltips
+
+	//gatewayLaunchOTS
 
 
 	HttpXmlDocument xmldoc(cookieCode);
@@ -2452,7 +2454,20 @@ throw (xgi::exception::Exception)
 		xmldoc.addTextElementToData("iconList", iconList);
 
 	}
-	else if(Command == "launchConfig")
+//	else if(Command == "launchConfig")
+//	{
+//		if(userPermissions != 255)
+//		{
+//			__COUT__ << "Insufficient Permissions" << std::endl;
+//		}
+//		else
+//		{
+//			__COUT__ << "Self-destruct." << std::endl;
+//			//FIXME system("StartOTS.sh");
+//			//system("pwd; source /$OTSDAQ_DIR/../otsdaq_demo/tools/quick-start.sh; source setupARTDAQOTS; source StartOTS.sh");
+//		}
+//	}
+	else if(Command == "gatewayLaunchOTS")
 	{
 		if(userPermissions != 255)
 		{
@@ -2460,9 +2475,25 @@ throw (xgi::exception::Exception)
 		}
 		else
 		{
-			__COUT__ << "Self-destruct." << std::endl;
-			//FIXME system("StartOTS.sh");
-			//system("pwd; source /$OTSDAQ_DIR/../otsdaq_demo/tools/quick-start.sh; source setupARTDAQOTS; source StartOTS.sh");
+			__COUT_WARN__ << "launchOTS command received! " << std::endl;
+
+
+			//gateway launch is different, in that it saves user sessions
+			theWebUsers_.saveActiveSessions();
+
+			//no launch
+			__COUT_INFO__ << "Launching... " << std::endl;
+
+			FILE* fp = fopen((std::string(getenv("SERVICE_DATA_PATH")) +
+					"/StartOTS_action.cmd").c_str(),"w");
+			if(fp)
+			{
+				fprintf(fp,"LAUNCH_OTS");
+				fclose(fp);
+			}
+			else
+				__COUT_ERR__ << "Unable to open command file: " << (std::string(getenv("SERVICE_DATA_PATH")) +
+						"/StartOTS_action.cmd") << std::endl;
 		}
 	}
 	else if(Command == "resetUserTooltips")

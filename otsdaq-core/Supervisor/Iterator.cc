@@ -3,7 +3,7 @@
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
 #include "otsdaq-core/Supervisor/Supervisor.h"
 
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
 
 
 #include <iostream>
@@ -42,8 +42,11 @@ try
 	__MOUT__ << "Iterator work loop starting..." << std::endl;
 	__COUT__ << "Iterator work loop starting..." << std::endl;
 
-	ConfigurationManager theConfigurationManager;
-	ConfigurationManager* cfgMgr = &theConfigurationManager;
+	ConfigurationManagerRW theConfigurationManager("iterator"); //TODO make this username restricted!
+
+	IteratorWorkLoopStruct iteratorWorkLoopMembers;
+	iteratorWorkLoopMembers.cfgMgr = &theConfigurationManager;
+
 	const IterateConfiguration* itConfig;
 
 	std::vector<IterateConfiguration::Command> commands;
@@ -117,6 +120,12 @@ try
 				{
 					//valid PAUSE command!
 
+					//safely pause plan!
+					//	i.e. check that command is complete
+
+					while(!iterator->checkCommand(iterator,commands,commandIndex))
+						__COUT__ << "Waiting to pause..." << std::endl;
+
 					iterator->activePlanIsRunning_ = false;
 
 					__COUT__ << "Paused plan '" << activePlan << "' at command index " <<
@@ -128,6 +137,12 @@ try
 			else if(iterator->commandHalt_)
 			{
 				iterator->commandHalt_ = false; //clear
+
+				//safely end plan!
+				//	i.e. check that command is complete
+
+				while(!iterator->checkCommand(iterator,commands,commandIndex))
+					__COUT__ << "Waiting to halt..." << std::endl;
 
 				//valid HALT command!
 
@@ -167,10 +182,10 @@ try
 
 				commandIndex = 0;
 
-				cfgMgr->init(); //completely reset to re-align with any changes
-				itConfig = cfgMgr->__GET_CONFIG__(IterateConfiguration);
+				iteratorWorkLoopMembers.cfgMgr->init(); //completely reset to re-align with any changes
+				itConfig = iteratorWorkLoopMembers.cfgMgr->__GET_CONFIG__(IterateConfiguration);
 
-				commands = itConfig->getPlanCommands(cfgMgr,activePlan);
+				commands = itConfig->getPlanCommands(iteratorWorkLoopMembers.cfgMgr,activePlan);
 
 				for(auto& command:commands)
 				{
@@ -239,11 +254,13 @@ try
 
 
 		} 	//end running
+		else
+			sleep(1); //when inactive sleep a lot
+
 		////////////////
 		////////////////
 
 
-		sleep(1); //do everything on steps of 1 second
 	}
 
 	iterator->workloopRunning_ = false; //if we ever exit
@@ -269,6 +286,12 @@ void Iterator::startCommand(Iterator *iterator,
 	if(type == IterateConfiguration::COMMAND_BEGIN_LABEL)
 	{
 		//do nothing
+		return;
+	}
+	else if(type == IterateConfiguration::COMMAND_CHOOSE_FSM)
+	{
+		startCommandChooseFSM(commands[commandIndex].params[
+			IterateConfiguration::commandChooseFSMParams_.NameOfFSM_]);
 		return;
 	}
 	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP)
@@ -347,12 +370,28 @@ void Iterator::startCommand(Iterator *iterator,
 }
 
 //========================================================================================================================
+//checkCommand
+//	when busy for a while, start to sleep
+//		use sleep() or nanosleep()
 bool Iterator::checkCommand(Iterator *iterator,
 		std::vector<IterateConfiguration::Command>& commands,
 		unsigned int& commandIndex)
 {
+	//for out of range, return done
+	if(commandIndex >= commands.size())
+	{
+		__COUT__ << "Out of range commandIndex = " << commandIndex <<
+				" in size = " << commands.size() << std::endl;
+		return true;
+	}
+
 	std::string type = commands[commandIndex].type;
 	if(type == IterateConfiguration::COMMAND_BEGIN_LABEL)
+	{
+		//do nothing
+		return true;
+	}
+	else if(type == IterateConfiguration::COMMAND_CHOOSE_FSM)
 	{
 		//do nothing
 		return true;
@@ -406,10 +445,21 @@ bool Iterator::checkCommand(Iterator *iterator,
 }
 
 //========================================================================================================================
+void Iterator::startCommandChooseFSM(const std::string& fsmName)
+{
+	__COUT__ << "fsmName " << fsmName << std::endl;
+	//TODO
+	//fsmName .. just gives us run alias and next run number
+
+	//CAREFUL?? Threads
+	//theSupervisor_->activeStateMachineName_ = fsmName;
+}
+
+//========================================================================================================================
 void Iterator::startCommandConfigureAlias(const std::string& systemAlias)
 {
 	__COUT__ << "systemAlias " << systemAlias << std::endl;
-
+	//TODO
 }
 
 //========================================================================================================================
