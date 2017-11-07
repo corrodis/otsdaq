@@ -1874,6 +1874,59 @@ throw (xgi::exception::Exception)
 		makeSystemLogbookEntry(
 				theWebUsers_.getUsersUsername(uid) + " logged in.");
 	}
+	else if (Command == "cert")
+	{
+		//	If login attempt or create account, jumbled user and pw are submitted
+		//	if successful, valid cookie code and display name returned.
+		// 	if not, return 0
+		// 	params:
+		//		uuid 			- unique user id, to look up sessionId
+		//		nac				- new account code for first time logins
+		//		ju 				- jumbled user name
+		//		jp		 		- jumbled password
+
+		std::string uuid = CgiDataUtilities::postData(cgi, "uuid");
+		std::string jumbledEmail = CgiDataUtilities::postData(cgi, "ju");
+		std::string username = "";
+		std::string cookieCode = "";
+
+		__COUT__ << "jumbledEmail = " << jumbledEmail.substr(0, 10) << std::endl;
+		__COUT__ << "uuid = " << uuid << std::endl;
+
+		uint64_t uid = theWebUsers_.attemptActiveSessionWithCert(uuid, jumbledEmail,
+														 cookieCode, username); //after call jumbledUser holds displayName on success
+
+
+		if (uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
+		{
+			__COUT__ << "cookieCode invalid" << std::endl;
+			jumbledEmail = ""; //clear display name if failure
+			if (cookieCode != "1")//indicates uuid not found
+				cookieCode = "0";//clear cookie code if failure
+		}
+
+		__COUT__ << "new cookieCode = " << cookieCode.substr(0, 10) << std::endl;
+
+		HttpXmlDocument xmldoc(cookieCode, jumbledEmail);
+
+		theWebUsers_.insertSettingsForUser(uid, &xmldoc); //insert settings
+
+														  //insert active session count for user
+
+		if (uid != theWebUsers_.NOT_FOUND_IN_DATABASE)
+		{
+			uint64_t asCnt = theWebUsers_.getActiveSessionCountForUser(uid) - 1; //subtract 1 to remove just started session from count
+			char asStr[20];
+			sprintf(asStr, "%lu", asCnt);
+			xmldoc.addTextElementToData("user_active_session_count", asStr);
+		}
+
+		xmldoc.outputXmlDocument((std::ostringstream*) out);
+
+		//Log login in logbook for active experiment
+		makeSystemLogbookEntry(
+			theWebUsers_.getUsersUsername(uid) + " logged in.");
+	}
 	else if (Command == "logout")
 	{
 		std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
@@ -2049,6 +2102,7 @@ throw (xgi::exception::Exception)
 		std::string username = CgiDataUtilities::postData(cgi, "username");
 		std::string displayname = CgiDataUtilities::postData(cgi,
 				"displayname");
+		std::string email = CgiDataUtilities::postData(cgi, "useremail");
 		std::string permissions = CgiDataUtilities::postData(cgi,
 				"permissions");
 		std::string accounts = CgiDataUtilities::getData(cgi, "accounts");
@@ -2056,10 +2110,11 @@ throw (xgi::exception::Exception)
 		__COUT__ << "accountSettings Request" << std::endl;
 		__COUT__ << "type = " << type << " - " << type_int << std::endl;
 		__COUT__ << "username = " << username << std::endl;
+		__COUT__ << "useremail = " << email << std::endl;
 		__COUT__ << "displayname = " << displayname << std::endl;
 		__COUT__ << "permissions = " << permissions << std::endl;
 
-		theWebUsers_.modifyAccountSettings(uid, type_int, username, displayname,
+		theWebUsers_.modifyAccountSettings(uid, type_int, username, displayname,email,
 				permissions);
 
 		__COUT__ << "accounts = " << accounts << std::endl;

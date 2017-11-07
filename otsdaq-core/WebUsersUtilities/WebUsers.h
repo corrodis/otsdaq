@@ -57,6 +57,7 @@ public:
     
     static const std::string DEFAULT_ADMIN_USERNAME;
     static const std::string DEFAULT_ADMIN_DISPLAY_NAME;
+	static const std::string DEFAULT_ADMIN_EMAIL;
 
     static const std::string REQ_NO_LOGIN_RESPONSE;
     static const std::string REQ_NO_PERMISSION_RESPONSE;
@@ -64,13 +65,13 @@ public:
 
     static const std::string SECURITY_TYPE_NONE;
     static const std::string SECURITY_TYPE_DIGEST_ACCESS;
-    static const std::string SECURITY_TYPE_KERBEROS;
 
-	bool 			createNewAccount			    (std::string username, std::string displayName);
+	bool 			createNewAccount			    (std::string username, std::string displayName, std::string email);
 	void			cleanupExpiredEntries		    (std::vector<std::string> *loggedOutUsernames = 0);
 	std::string 	createNewLoginSession		    (std::string uuid, std::string ip = "0");
 	
-	uint64_t 		attemptActiveSession		    (std::string uuid, std::string &jumbledUser, std::string jumbledPw, std::string &newAccountCode);
+	uint64_t 		attemptActiveSession(std::string uuid, std::string &jumbledUser, std::string jumbledPw, std::string &newAccountCode);
+	uint64_t 		attemptActiveSessionWithCert(std::string uuid, std::string &jumbledEmail, std::string &cookieCode, std::string& username);
 	uint64_t	 	isCookieCodeActiveForLogin	    (std::string uuid, std::string &cookieCode,std::string &username);
 	bool	        cookieCodeIsActiveForRequest    (std::string &cookieCode, uint8_t *userPermissions = 0, uint64_t *uid = 0, std::string ip = "0", bool refresh = true,  std::string *userWithLock = 0);
 	uint64_t        cookieCodeLogout			    (std::string cookieCode, bool logoutOtherUserSessions, uint64_t *uid = 0, std::string ip = "0");
@@ -87,7 +88,7 @@ public:
     static void 	tooltipCheckForUsername			(const std::string& username, HttpXmlDocument *xmldoc, const std::string &srcFile, const std::string &srcFunc, const std::string &srcId);
     static void 	tooltipSetNeverShowForUsername	(const std::string& username, HttpXmlDocument *xmldoc, const std::string &srcFile, const std::string &srcFunc, const std::string &srcId, bool doNeverShow, bool temporarySilence);
     
-    void            modifyAccountSettings		    (uint64_t uid_master, uint8_t cmd_type, std::string username, std::string displayname, std::string permissions);
+    void            modifyAccountSettings		    (uint64_t uid_master, uint8_t cmd_type, std::string username, std::string displayname, std::string email, std::string permissions);
     bool            setUserWithLock				    (uint64_t uid_master, bool lock, std::string username);
     std::string     getUserWithLock				    () { return usersUsernameWithLock_; }
 
@@ -106,6 +107,8 @@ public:
 	static void 	NACDisplayThread				(std::string nac, std::string user);
 
 	void			saveActiveSessions			();
+
+	void			loadActiveSessions();
 
 private:
     void			loadSecuritySelection       ();
@@ -126,10 +129,8 @@ private:
 	bool			saveDatabaseToFile			(uint8_t db); 
 	bool			loadDatabases				(); 	
 
-public:
-	void			loadActiveSessions			();
-
 	uint64_t	    searchUsersDatabaseForUsername	        (std::string username) const;
+	uint64_t	    searchUsersDatabaseForUserEmail         (std::string useremail) const;
 	uint64_t		searchUsersDatabaseForUserId			(uint64_t uid) const;
 	uint64_t		searchLoginSessionDatabaseForUUID		(std::string uuid) const;
 	uint64_t		searchHashesDatabaseForHash				(std::string hash);
@@ -188,7 +189,7 @@ public:
 			//Username appends to preferences file, and login history file
 			//UsersLastModifierUsernameVector - is username of last master user to modify something about account
 			//UsersLastModifierTimeVector - is time of last modify by a master user
-    std::vector<std::string> 	UsersUsernameVector, UsersDisplayNameVector, UsersSaltVector, UsersLastModifierUsernameVector;
+    std::vector<std::string> 	UsersUsernameVector, UsersUserEmailVector, UsersDisplayNameVector, UsersSaltVector, UsersLastModifierUsernameVector;
     std::vector<uint8_t> 		UsersPermissionsVector;
    	std::vector<uint64_t> 		UsersUserIdVector;
    	std::vector<time_t>			UsersLastLoginAttemptVector, UsersAccountCreatedTimeVector, UsersLastModifiedTimeVector; 
