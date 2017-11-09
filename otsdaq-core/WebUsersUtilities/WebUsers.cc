@@ -93,6 +93,7 @@ WebUsers::WebUsers()
 	UsersDatabaseEntryFields.push_back("loginFailureCount");
 	UsersDatabaseEntryFields.push_back("lastModifiedTime");
 	UsersDatabaseEntryFields.push_back("lastModifierUsername");
+	UsersDatabaseEntryFields.push_back("useremail");
 
 	//attempt to make directory structure (just in case)
 	mkdir(((std::string)WEB_LOGIN_DB_PATH).c_str(), 0755);
@@ -605,25 +606,36 @@ bool WebUsers::loadDatabases()
 			//update in DB fields could cause inconsistencies!
 			if(f && f != UsersDatabaseEntryFields.size()-1)
 			{
-				if(f != 7) //original database was size 8, so is ok to not match
+				if(f != 7 && f != 9) //original database was size 8, so is ok to not match
 				{
 					__COUT__ << "FATAL ERROR - invalid database found with field number " << f << std::endl;
 					fclose(fp);
 					return false;
 				}
 
-				//fix here if database size was 8
-				__COUT__ << "Update database to current version - adding fields: " <<
-						(UsersDatabaseEntryFields.size()-1-f) << std::endl;
-				//add db updates -- THIS IS FOR VERSION WITH UsersDatabaseEntryFields.size() == 10 !!
-				UsersLastModifiedTimeVector.push_back(0);
-				UsersLastModifierUsernameVector.push_back("");
+				if (f == 7)
+				{
+					//fix here if database size was 8
+					__COUT__ << "Update database to current version - adding fields: " <<
+						(UsersDatabaseEntryFields.size() - 1 - f) << std::endl;
+					//add db updates -- THIS IS FOR VERSION WITH UsersDatabaseEntryFields.size() == 10 !!
+					UsersLastModifiedTimeVector.push_back(0);
+					UsersLastModifierUsernameVector.push_back("");
+				}
+				else
+				{
+					UsersUserEmailVector.push_back("");
+				}
 			}
 		}
 		fclose(fp);
 	}
 
 	__COUT__ << UsersLastModifiedTimeVector.size() << " Users found." << std::endl;
+	for (size_t ii = 0; ii < UsersLastModifiedTimeVector.size(); ++ii)
+	{
+		__COUT__ << "User " << UsersUserIdVector[ii] << ": Name: " << UsersUsernameVector[ii] << "\t\tDisplay Name: " << UsersDisplayNameVector[ii] << "\t\tEmail: " << UsersUserEmailVector[ii] << "\t\tPermissions: " << std::to_string(UsersPermissionsVector[ii]) << std::endl;
+	}
 	return true;
 }
 
@@ -1004,7 +1016,7 @@ uint64_t WebUsers::attemptActiveSession(std::string uuid, std::string &jumbledUs
 //WebUsers::attemptActiveSessionWithCert ---
 //	returns User Id, cookieCode, and displayName in jumbledEmail on success
 //	else returns -1 and cookieCode "0" 
-uint64_t WebUsers::attemptActiveSessionWithCert(std::string uuid, std::string &jumbledEmail,
+uint64_t WebUsers::attemptActiveSessionWithCert(std::string uuid, std::string &email,
 										std::string &cookieCode, std::string& user)
 {
 	cleanupExpiredEntries(); //remove expired active and login sessions
@@ -1012,11 +1024,17 @@ uint64_t WebUsers::attemptActiveSessionWithCert(std::string uuid, std::string &j
 	if (!CareAboutCookieCodes_) //NO SECURITY
 	{
 		uint64_t uid = getAdminUserID();
-		jumbledEmail = getUsersDisplayName(uid);
+		email = getUsersDisplayName(uid);
 		cookieCode = genCookieCode(); //return "dummy" cookie code by reference
 		return uid;
 	}
 	
+	if (email == "")
+	{
+		__COUT__ << "Rejecting logon with blank email" << std::endl;
+		return NOT_FOUND_IN_DATABASE;
+	}
+
 	uint64_t i;
 
 	//search login sessions for uuid
@@ -1028,11 +1046,10 @@ uint64_t WebUsers::attemptActiveSessionWithCert(std::string uuid, std::string &j
 	}
 	++LoginSessionAttemptsVector[i];
 
-	std::string email = dejumble(jumbledEmail, LoginSessionIdVector[i]);
 	__COUT__ << "DejumbledEmail = " << email << std::endl;
 
 	//search users for username
-	if ((i = searchUsersDatabaseForUserEmail(user)) == NOT_FOUND_IN_DATABASE)
+	if ((i = searchUsersDatabaseForUserEmail(email)) == NOT_FOUND_IN_DATABASE)
 	{
 		__COUT__ << "email: " << email << " is not found" << std::endl;
 		return NOT_FOUND_IN_DATABASE;
@@ -1088,7 +1105,7 @@ uint64_t WebUsers::attemptActiveSessionWithCert(std::string uuid, std::string &j
 
 	//SUCCESS!!
 	saveDatabaseToFile(DB_USERS); //users db modified, so save
-	jumbledEmail = UsersDisplayNameVector[i]; //pass by reference displayName
+	email = UsersDisplayNameVector[i]; //pass by reference displayName
 	cookieCode = createNewActiveSession(UsersUserIdVector[i]); //return cookie code by reference
 	return UsersUserIdVector[i]; //return user Id
 }
@@ -2029,7 +2046,15 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument *xmldoc, bool
 		{
 			xmldoc->addTextElementToParent("username",UsersUsernameVector[i],PREF_XML_ACCOUNTS_FIELD);
 			xmldoc->addTextElementToParent("display_name",UsersDisplayNameVector[i],PREF_XML_ACCOUNTS_FIELD);
-			xmldoc->addTextElementToParent("useremail", UsersUserEmailVector[i], PREF_XML_ACCOUNTS_FIELD);
+			if (UsersUserEmailVector.size() > i)
+			{
+				xmldoc->addTextElementToParent("useremail", UsersUserEmailVector[i], PREF_XML_ACCOUNTS_FIELD);
+			}
+			else
+			{
+				xmldoc->addTextElementToParent("useremail", "", PREF_XML_ACCOUNTS_FIELD);
+
+			}
 			sprintf(permStr,"%d",UsersPermissionsVector[i]);
 			xmldoc->addTextElementToParent("permissions",permStr,PREF_XML_ACCOUNTS_FIELD);
 			if(UsersSaltVector[i] == "") //only give nac if account has not been activated yet with password
@@ -2277,6 +2302,7 @@ void WebUsers::modifyAccountSettings (uint64_t uid_master, uint8_t cmd_type, std
 		}
 
 		UsersDisplayNameVector[modi] = displayname;
+		UsersUserEmailVector[modi] = email;
 
 		//account is currently inactive! if re-activiating, reset fail count and password,
 		//	this is account unlock mechanism.

@@ -1886,11 +1886,12 @@ throw (xgi::exception::Exception)
 		//		jp		 		- jumbled password
 
 		std::string uuid = CgiDataUtilities::postData(cgi, "uuid");
-		std::string jumbledEmail = CgiDataUtilities::postData(cgi, "ju");
+		std::string jumbledEmail = cgicc::form_urldecode(CgiDataUtilities::getData(cgi, "httpsUser"));
 		std::string username = "";
 		std::string cookieCode = "";
 
-		__COUT__ << "jumbledEmail = " << jumbledEmail.substr(0, 10) << std::endl;
+		__COUT__ << "CERTIFICATE LOGIN REUEST RECEVIED!!!" << std::endl;
+		__COUT__ << "jumbledEmail = " << jumbledEmail << std::endl;
 		__COUT__ << "uuid = " << uuid << std::endl;
 
 		uint64_t uid = theWebUsers_.attemptActiveSessionWithCert(uuid, jumbledEmail,
