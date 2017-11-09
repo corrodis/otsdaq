@@ -164,6 +164,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 				qtfs << "RECEIVE_PORT \t " << fwdPort << "\n";
 				child.second.getNode(COL_WEB_PORT1	).getValue(fwdPort);
 				qtfs << "DESTINATION_PORT \t " << fwdPort << "\n";
+				qtfs << "DESTINATION_IP \t " << fwdIP << "\n";
 				qtfs.close();
 			}
 

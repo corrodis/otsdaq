@@ -37,7 +37,7 @@ Socket::Socket(void)
 Socket::Socket(const std::string &IPAddress, unsigned int port)
 : socketNumber_(-1)
 , IPAddress_   (IPAddress)
-, port_        (port)
+, requestedPort_        (port)
 //    maxSocketSize_(maxSocketSize)
 {
 	__COUT__ << std::endl;
@@ -61,7 +61,7 @@ Socket::Socket(const std::string &IPAddress, unsigned int port)
 //========================================================================================================================
 Socket::~Socket(void)
 {
-    __COUT__ << "CLOSING THE SOCKET #" << socketNumber_  << " IP: " << IPAddress_ << " port: " << port_ << " htons: " << socketAddress_.sin_port << std::endl;
+    __COUT__ << "CLOSING THE SOCKET #" << socketNumber_  << " IP: " << IPAddress_ << " port: " << getPort() << " htons: " << socketAddress_.sin_port << std::endl;
 	if(socketNumber_ != -1)
 		close(socketNumber_);
 }
@@ -137,6 +137,14 @@ void Socket::initialize(void)
 		std::cout << ss.str();
 		throw std::runtime_error(ss.str());
     }
+}
+
+uint16_t Socket::getPort()
+{
+	struct sockaddr_in sin;
+	socklen_t len = sizeof(sin);
+	getsockname(socketNumber_, (struct sockaddr *)&sin, &len);
+	return ntohs(sin.sin_port);
 }
 
 //========================================================================================================================

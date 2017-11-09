@@ -3,6 +3,8 @@
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
 
 #include <iostream>
+#include <sstream>
+#include <iomanip> /* for setfill */
 
 using namespace ots;
 
@@ -24,7 +26,8 @@ TransmitterSocket::~TransmitterSocket(void)
 {}
 
 //========================================================================================================================
-int TransmitterSocket::send(Socket& toSocket, const std::string& buffer)
+int TransmitterSocket::send(Socket& toSocket, const std::string& buffer,
+		bool verbose)
 {
 
 	//lockout other senders for the remainder of the scope
@@ -41,7 +44,29 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer)
 	while (offset < buffer.size() && sts > 0)
 	{
 		auto thisSize = buffer.size() - offset > MAX_SEND_SIZE ? MAX_SEND_SIZE : buffer.size() - offset;
-		__COUT__ << "Sending size: " << thisSize << " remaining = " << (buffer.size() - offset - thisSize) << std::endl;
+
+		if(verbose) //debug
+		{
+			__COUT__ << "Sending " <<
+					" from: " << getIPAddress() <<
+					":" << ntohs(socketAddress_.sin_port) <<
+					" to: " << toSocket.getIPAddress() <<
+					":" << ntohs(toSocket.getSocketAddress().sin_port) <<
+					" size: " << thisSize << " remaining = " << (buffer.size() - offset - thisSize) << std::endl;
+			std::stringstream ss;
+			ss << "\t";
+			uint32_t begin = 0;
+			for(uint32_t i=begin; i<buffer.size(); i++)
+			{
+				if(i==begin+2) ss << ":::";
+				else if(i==begin+10) ss << ":::";
+				ss << std::setfill('0') << std::setw(2) << std::hex << (((int16_t) buffer[i]) &0xFF) << "-" << std::dec;
+			}
+			ss << std::endl;
+			std::cout << ss.str();
+		}
+
+
 		sts = sendto(socketNumber_, buffer.c_str() + offset, thisSize, 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
 		offset += sts;
 	}
@@ -55,7 +80,8 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer)
 }
 
 //========================================================================================================================
-int TransmitterSocket::send(Socket& toSocket, const std::vector<uint16_t>& buffer)
+int TransmitterSocket::send(Socket& toSocket, const std::vector<uint16_t>& buffer,
+		bool verbose)
 {
 
 	//lockout other senders for the remainder of the scope
@@ -85,7 +111,8 @@ int TransmitterSocket::send(Socket& toSocket, const std::vector<uint16_t>& buffe
 }
 
 //========================================================================================================================
-int TransmitterSocket::send(Socket& toSocket, const std::vector<uint32_t>& buffer)
+int TransmitterSocket::send(Socket& toSocket, const std::vector<uint32_t>& buffer,
+		bool verbose)
 {
 	//lockout other senders for the remainder of the scope
 	std::lock_guard<std::mutex> lock(sendMutex_);

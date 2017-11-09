@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <iomanip> /* for setfill */
 
 #include <arpa/inet.h>
 #include <sys/time.h>
@@ -36,7 +37,8 @@ ReceiverSocket::~ReceiverSocket(void)
 }
 
 //========================================================================================================================
-int ReceiverSocket::receive(std::string& buffer, unsigned int timeoutSeconds, unsigned int timeoutUSeconds,	bool verbose)
+int ReceiverSocket::receive(std::string& buffer, unsigned int timeoutSeconds,
+		unsigned int timeoutUSeconds,	bool verbose)
 {
 	return receive(buffer, dummyIPAddress_, dummyPort_,	timeoutSeconds, timeoutUSeconds, verbose);
 }
@@ -45,7 +47,9 @@ int ReceiverSocket::receive(std::string& buffer, unsigned int timeoutSeconds, un
 //receive ~~
 //	returns 0 on success, -1 on failure
 //	NOTE: must call Socket::initialize before receiving!
-int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
+int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress,
+		unsigned short& fromPort, unsigned int timeoutSeconds, unsigned int timeoutUSeconds,
+		bool verbose)
 {
 	//lockout other receivers for the remainder of the scope
 	std::lock_guard<std::mutex> lock(receiveMutex_);
@@ -65,13 +69,16 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, u
 		{
 			__COUT__ << "At socket with IPAddress: " << getIPAddress() << " port: " << getPort() << std::endl;
 			__SS__ << "Error reading buffer from\tIP:\t";
+			std::string fromIP = inet_ntoa(fromAddress_.sin_addr);
+			fromIPAddress = fromAddress_.sin_addr.s_addr;
+			fromPort      = fromAddress_.sin_port;
 			for(int i  = 0; i < 4; i++)
 			{
 				ss << ((fromIPAddress << (i * 8)) & 0xff);
 				if (i < 3)
 					ss << ".";
 			}
-			ss << "\tPort\t" << fromPort << std::endl;
+			ss << "\tPort\t" << ntohs(fromPort) << " IP " << fromIP << std::endl;
 			__COUT__ << "\n" << ss.str();
 			return -1;
 		}
@@ -89,19 +96,42 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, u
 		//NOTE: this is inexpensive according to Lorenzo/documentation in C++11 (only increases size once and doesn't decrease size)
 		buffer.resize(numberOfBytes_);
 		readCounter_ = 0;
+
+		if(verbose) //debug
+		{
+			std::string fromIP = inet_ntoa(fromAddress_.sin_addr);
+
+			__COUT__ << "Receiving " <<
+					" at: " << getIPAddress() <<
+					":" << getPort() <<
+					" from: " << fromIP;
+			std::cout << ":" << ntohs(fromPort) <<
+					" size: " << buffer.size() << std::endl;
+
+			std::stringstream ss;
+			ss << "\tRx";
+			uint32_t begin = 0;
+			for(uint32_t i=begin; i<buffer.size(); i++)
+			{
+				if(i==begin+2) ss << ":::";
+				else if(i==begin+10) ss << ":::";
+				ss << std::setfill('0') << std::setw(2) << std::hex << (((int16_t) buffer[i]) &0xFF) << "-" << std::dec;
+			}
+			ss << std::endl;
+			std::cout << ss.str();
+		}
 	}
 	else
 	{
 		++readCounter_;
-		struct sockaddr_in sin;
-		socklen_t len = sizeof(sin);
-		getsockname(socketNumber_, (struct sockaddr *)&sin, &len);
 
 		if(verbose)
 			__COUT__
 				<< "No new messages for " << timeoutSeconds+timeoutUSeconds/1000.
 				<< "s (Total " << readCounter_*(timeoutSeconds+timeoutUSeconds/1000.)
-				<< "s). Read request timed out for port: " << ntohs(sin.sin_port)
+				<< "s). Read request timed out receiving on " <<
+				" " << getIPAddress() <<
+				":" << getPort()
 				<< std::endl;
 		return -1;
 	}

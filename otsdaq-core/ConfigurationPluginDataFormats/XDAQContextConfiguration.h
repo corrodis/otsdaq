@@ -50,7 +50,7 @@ public:
 	std::string 						getApplicationUID		(const std::string &url, unsigned int id) const;
 
 
-	const std::vector<XDAQContext> & 	getContexts				() { return contexts_; }
+	const std::vector<XDAQContext> & 	getContexts				() const { return contexts_; }
 
 
 	ConfigurationTree 					getSupervisorConfigNode	(ConfigurationManager *configManager, const std::string &contextUID, const std::string &appUID) const;

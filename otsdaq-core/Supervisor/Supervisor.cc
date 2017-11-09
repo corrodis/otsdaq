@@ -2592,34 +2592,93 @@ throw (xgi::exception::Exception)
 //			//system("pwd; source /$OTSDAQ_DIR/../otsdaq_demo/tools/quick-start.sh; source setupARTDAQOTS; source StartOTS.sh");
 //		}
 //	}
-	else if(Command == "gatewayLaunchOTS")
+	else if(Command == "gatewayLaunchOTS" || Command == "gatewayLaunchWiz")
 	{
+		//NOTE: similar to ConfigurationGUI version but DOES keep active sessions
+
 		if(userPermissions != 255)
 		{
 			__COUT__ << "Insufficient Permissions" << std::endl;
 		}
 		else
 		{
-			__COUT_WARN__ << "launchOTS command received! " << std::endl;
+			__COUT_WARN__ << Command << " command received! " << std::endl;
+			__MOUT_WARN__ << Command << " command received! " << std::endl;
 
 
 			//gateway launch is different, in that it saves user sessions
 			theWebUsers_.saveActiveSessions();
 
-			theWebUsers_.loadActiveSessions();
-//			//no launch
-//			__COUT_INFO__ << "Launching... " << std::endl;
-//
-//			FILE* fp = fopen((std::string(getenv("SERVICE_DATA_PATH")) +
-//					"/StartOTS_action.cmd").c_str(),"w");
-//			if(fp)
+			//now launch
+			__COUT_INFO__ << "Launching... " << std::endl;
+
+
 //			{
-//				fprintf(fp,"LAUNCH_OTS");
-//				fclose(fp);
+//				FILE* fp = fopen((std::string(getenv("SERVICE_DATA_PATH")) +
+//						"/StartOTS_action.cmd").c_str(),"w");
+//				if(fp)
+//				{
+//					if(Command == "gatewayLaunchOTS")
+//						fprintf(fp,"LAUNCH_OTS");
+//					else if(Command == "gatewayLaunchWiz")
+//						fprintf(fp,"LAUNCH_WIZ");
+//
+//					fclose(fp);
+//				}
+//				else
+//					__COUT_ERR__ << "Unable to open command file: " << (std::string(getenv("SERVICE_DATA_PATH")) +
+//							"/StartOTS_action.cmd") << std::endl;
 //			}
-//			else
-//				__COUT_ERR__ << "Unable to open command file: " << (std::string(getenv("SERVICE_DATA_PATH")) +
-//						"/StartOTS_action.cmd") << std::endl;
+
+			__COUT__ << "Extracting target context hostnames... " << std::endl;
+			std::vector<std::string> hostnames;
+			try
+			{
+				theConfigurationManager_->init(); //completely reset to re-align with any changes
+
+				const XDAQContextConfiguration* contextConfiguration = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+
+				auto contexts = contextConfiguration->getContexts();
+				unsigned int i,j;
+				for(const auto& context: contexts)
+				{
+					if(!context.status_) continue;
+
+					//find last slash
+					j=0; //default to whole string
+					for(i=0;i<context.address_.size();++i)
+						if(context.address_[i] == '/')
+							j = i+1;
+					hostnames.push_back(context.address_.substr(j));
+					__COUT__ << "hostname = " << hostnames.back() << std::endl;
+				}
+			}
+			catch(...)
+			{
+				__SS__ << "\nTransition to Configuring interrupted! " <<
+						"The Configuration Manager could not be initialized." << std::endl;
+
+				__COUT_ERR__ << "\n" << ss.str();
+				return;
+			}
+
+			for(const auto& hostname: hostnames)
+			{
+				std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) +
+						"/StartOTS_action_" + hostname + ".cmd");
+				FILE* fp = fopen(fn.c_str(),"w");
+				if(fp)
+				{
+					if(Command == "gatewayLaunchOTS")
+						fprintf(fp,"LAUNCH_OTS");
+					else if(Command == "gatewayLaunchWiz")
+						fprintf(fp,"LAUNCH_WIZ");
+
+					fclose(fp);
+				}
+				else
+					__COUT_ERR__ << "Unable to open command file: " << fn << std::endl;
+			}
 		}
 	}
 	else if(Command == "resetUserTooltips")

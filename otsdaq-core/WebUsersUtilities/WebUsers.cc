@@ -133,11 +133,13 @@ WebUsers::WebUsers()
 
 	}
 
-	//default user with lock to admin
-	loadUserWithLock(); //and then try to load last user with lock
 
 	//attempt to load persistent user sessions
 	loadActiveSessions();
+
+	//default user with lock to admin and/or try to load last user with lock
+	//Note: this must happen after getting persistent active sessions
+	loadUserWithLock();
 
 	srand (time(0)); //seed random for hash salt generation
 
@@ -2233,6 +2235,7 @@ bool WebUsers::setUserWithLock(uint64_t uid_master, bool lock, std::string usern
 
 	if(p != (uint8_t)-1) return false; //not a super user
 
+
 	if(lock && (isUsernameActive(username) || !CareAboutCookieCodes_)) //lock and currently active
 	{
 		if(!CareAboutCookieCodes_ && username != DEFAULT_ADMIN_USERNAME)
@@ -2245,7 +2248,14 @@ bool WebUsers::setUserWithLock(uint64_t uid_master, bool lock, std::string usern
 	else if(!lock && usersUsernameWithLock_ == username) //unlock
 		usersUsernameWithLock_ = "";
 	else
+	{
+		if(!isUsernameActive(username))
+			__COUT__ << "User is inactive." << std::endl;
+		__MOUT_WARN__ << "Failed to lock for user '" << username << ".'" << std::endl;
 		return false;
+	}
+
+	__MOUT_INFO__ << "User '" << username << "' has locked out the system!" << std::endl;
 
 	//save username with lock
 	{
@@ -2412,6 +2422,7 @@ void WebUsers::loadUserWithLock()
 				" not found in database. Ignoring." << std::endl;
 		return;
 	}
+	__COUT__ << "Setting lock" << std::endl;
 	setUserWithLock(UsersUserIdVector[i],true,username);
 }
 

@@ -36,7 +36,10 @@ fi
 #initializing StartOTS action file
 #attempt to mkdir for full path so that it exists to move the database to
 # assuming mkdir is non-destructive
-echo "StartOTS_action file path = ${USER_DATA}/ServiceData/StartOTS_action.cmd"
+
+OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${HOSTNAME}.cmd"
+echo "StartOTS_action file path = ${OTSDAQ_STARTOTS_ACTION_FILE}"
+
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
 SAP_PATH=""
 for SAP_EL in ${SAP_ARR[@]}
@@ -48,7 +51,6 @@ do
 done
 
 #exit any old action loops
-OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action.cmd"
 echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 #done initializing StartOTS action file
 #############################
@@ -243,6 +245,62 @@ MPI_RUN_CMD=""
 ####################################################################
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 launchOTSWiz() {	
+	
+	####################################################################
+	########### start console & message facility handling ##############
+	####################################################################
+	#decide which MessageFacility console viewer to run
+	# and configure otsdaq MF library with MessageFacility*.fcl to use
+	
+	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityGen.fcl
+	#this fcl tells the MF library used by ots source how to behave
+	#echo "OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
+	
+	
+	USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
+	USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
+			
+	
+	#echo "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
+	#echo "USE_QT_VIEWER" ${USE_QT_VIEWER}
+	
+	
+	if [[ $USE_WEB_VIEWER == "1" ]]; then
+		echo "CONSOLE: Using web console viewer"
+		
+		#start quiet forwarder with receiving port and destination port parameter file
+	
+		if [ $QUIET == 1 ]; then
+			echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mf.txt ***"
+			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> otsdaq_quiet_run-mf.txt &
+		else
+			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
+		fi		 	
+	fi
+	
+	if [[ $USE_QT_VIEWER == "1" ]]; then
+		echo "CONSOLE: Using QT console viewer"
+		if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
+			echo
+			echo "Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
+			echo
+			exit
+		fi
+		
+		#start the QT Viewer (only if it is not already started)
+		if [ $( ps aux|egrep -c $USER.*msgviewer ) -eq 1 ]; then				
+			msgviewer -c ${USER_DATA}/MessageFacilityConfigurations/QTMessageViewerGen.fcl  &
+			sleep 2		
+		fi		
+	fi
+	
+	####################################################################
+	########### end console & message facility handling ################
+	####################################################################
+	
+	
+	
+	
 	#setup wiz mode environment variables
 	export CONSOLE_SUPERVISOR_ID=260
 	export CONFIGURATION_GUI_SUPERVISOR_ID=280
@@ -335,7 +393,7 @@ launchOTS() {
 	
 	
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
-		echo "Using web console viewer"
+		echo "CONSOLE: Using web console viewer"
 		
 		#start quiet forwarder with receiving port and destination port parameter file
 	
@@ -348,7 +406,7 @@ launchOTS() {
 	fi
 	
 	if [[ $USE_QT_VIEWER == "1" ]]; then
-		echo "Using QT console viewer"
+		echo "CONSOLE: Using QT console viewer"
 		if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
 			echo
 			echo "Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
@@ -476,7 +534,7 @@ launchOTS() {
 	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 	
 	echo
-	echo "Launching all otsdaq Applications for this host..."
+	echo "Launching all otsdaq Applications for host {${HOSTNAME}}..."
 	i=0	
 	for port in "${xdaqPort[@]}"
 	do
@@ -674,7 +732,7 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_WIZ" ]; then
 			
 			echo
-			echo "Starting otsdaq Wiz mode for this host..."
+			echo "Starting otsdaq Wiz mode for host {${HOSTNAME}}..."
 			echo
 			killall -9 xdaq.exe
 			killall -9 mf_rcv_n_fwd #message viewer display without decoration
@@ -686,7 +744,7 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_OTS" ]; then
 				
 			echo
-			echo "Starting otsdaq in normal mode for this host..."
+			echo "Starting otsdaq in normal mode for host {${HOSTNAME}}..."
 			echo
 			killall -9 xdaq.exe
 			killall -9 mf_rcv_n_fwd #message viewer display without decoration

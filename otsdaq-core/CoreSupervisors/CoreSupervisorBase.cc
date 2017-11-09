@@ -41,6 +41,8 @@ throw (xdaq::exception::Exception)
 , supervisorClass_              (getApplicationDescriptor()->getClassName())
 , supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 {
+	INIT_MF("CoreSupervisorBase");
+
 	__COUT__ << "Begin!" << std::endl;
 	__COUT__ << "Begin!" << std::endl;
 	__COUT__ << "Begin!" << std::endl;
@@ -435,8 +437,27 @@ throw (xoap::exception::Exception)
 		//    	std::string result = theFEInterfacesManager->universalRead(index,address,data);
 		//    	__COUT__<< result << std::endl << std::endl;
 
-		if(theFEInterfacesManager->universalRead(InterfaceID, address, data) < 0)
+		try
 		{
+			if(theFEInterfacesManager->universalRead(InterfaceID, address, data) < 0)
+			{
+				retParameters.addParameter("dataResult","Time Out Error");
+				return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa",retParameters);
+			}
+		}
+		catch(const std::runtime_error& e)
+		{
+			//do not allow read exception to crash everything when a macromaker command
+			__MOUT_ERR__ << "Exception caught during read: " << e.what() << std::endl;
+			__COUT_ERR__ << "Exception caught during read: " << e.what() << std::endl;
+			retParameters.addParameter("dataResult","Time Out Error");
+			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa",retParameters);
+		}
+		catch(...)
+		{
+			//do not allow read exception to crash everything when a macromaker command
+			__MOUT_ERR__ << "Exception caught during read." << std::endl;
+			__COUT_ERR__ << "Exception caught during read." << std::endl;
 			retParameters.addParameter("dataResult","Time Out Error");
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa",retParameters);
 		}

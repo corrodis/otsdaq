@@ -704,7 +704,7 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 	{
 		//save meta data for group; reuse groupMetadataTable_
 
-		//__COUT__ << username_ << " " << time(0) << " " << groupComment << std::endl;
+		__COUT__ << username_ << " " << time(0) << " " << groupComment << std::endl;
 		//columns are uid,comment,author,time
 		groupMetadataTable_.getViewP()->setValue(groupComment,0,1);
 		groupMetadataTable_.getViewP()->setValue(username_,0,2);
