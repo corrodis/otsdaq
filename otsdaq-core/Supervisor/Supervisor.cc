@@ -1747,8 +1747,7 @@ throw (xgi::exception::Exception)
 {
 	cgicc::Cgicc cgi(in);
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
-
-	__COUT__ << Command << std::endl;
+	__COUT__ << "*** Login RequestType = " << Command << std::endl;
 
 	//RequestType Commands:
 	//login
@@ -1810,6 +1809,8 @@ throw (xgi::exception::Exception)
 			jumbledUser = ""; //clear display name if failure
 			cookieCode = "0";//clear cookie code if failure
 		}
+		else
+			__COUT__ << "cookieCode is good." << std::endl;
 
 		//return xml holding cookie code and display name
 		HttpXmlDocument xmldoc(cookieCode, jumbledUser);
@@ -1962,7 +1963,7 @@ throw (xgi::exception::Exception)
 	cgicc::Cgicc cgi(in);
 
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
-	__COUT__ << Command <<  std::endl;
+	__COUT__ << "Tooltip RequestType = " << Command <<  std::endl;
 
 	//**** start LOGIN GATEWAY CODE ***//
 	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions, uint64_t uid
@@ -2568,12 +2569,12 @@ throw (xgi::exception::Exception)
 		}
 		if(iconFile.is_open())
 		{
-			__COUT__ << "Opened File: " << iconFileName << std::endl;
+			__COUT__ << "Getting Desktop Icons - opened file: " << iconFileName << std::endl;
 			while(std::getline(iconFile, line))
 			{
 				iconList = line;
 			}
-			__COUT__ << iconList << std::endl;
+			//__COUT__ << iconList << std::endl;
 
 			//Close file
 			iconFile.close();
