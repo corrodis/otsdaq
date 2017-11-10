@@ -115,8 +115,9 @@ WebUsers::WebUsers()
 	std::string user = DEFAULT_ADMIN_USERNAME;
 	if((i = searchUsersDatabaseForUsername(user)) == NOT_FOUND_IN_DATABASE)
 	{
-		__COUT__ << "user: " << user << " is not found" << std::endl;
-		assert(0); //
+		__SS__ << "user: " << user << " is not found" << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
 		exit(0); //THIS CAN NOT HAPPEN?! There must be an admin user
 	}
 	else if(UsersSaltVector[i] == "" && //admin password not setup, so print out NAC to help out
@@ -439,6 +440,10 @@ void WebUsers::loadActiveSessions()
 
 
 	fclose(fp);
+	//clear file after loading
+	fp = fopen(fn.c_str(),"w");
+	if(fp)fclose(fp);
+
 }
 
 //========================================================================================================================

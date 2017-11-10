@@ -2581,19 +2581,6 @@ throw (xgi::exception::Exception)
 		xmldoc.addTextElementToData("iconList", iconList);
 
 	}
-//	else if(Command == "launchConfig")
-//	{
-//		if(userPermissions != 255)
-//		{
-//			__COUT__ << "Insufficient Permissions" << std::endl;
-//		}
-//		else
-//		{
-//			__COUT__ << "Self-destruct." << std::endl;
-//			//FIXME system("StartOTS.sh");
-//			//system("pwd; source /$OTSDAQ_DIR/../otsdaq_demo/tools/quick-start.sh; source setupARTDAQOTS; source StartOTS.sh");
-//		}
-//	}
 	else if(Command == "gatewayLaunchOTS" || Command == "gatewayLaunchWiz")
 	{
 		//NOTE: similar to ConfigurationGUI version but DOES keep active sessions
