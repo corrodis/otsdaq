@@ -1796,9 +1796,9 @@ throw (xgi::exception::Exception)
 		jumbledUser = CgiDataUtilities::postData(cgi, "ju");
 		cookieCode = CgiDataUtilities::postData(cgi, "cc");
 
+		__COUT__ << "uuid = " << uuid << std::endl;
 		__COUT__ << "Cookie Code = " << cookieCode.substr(0, 10) << std::endl;
 		__COUT__ << "jumbledUser = " << jumbledUser.substr(0, 10) << std::endl;
-		__COUT__ << "uuid = " << uuid << std::endl;
 
 		//If cookie code is good, then refresh and return with display name, else return 0 as CookieCode value
 		uid = theWebUsers_.isCookieCodeActiveForLogin(uuid, cookieCode,
