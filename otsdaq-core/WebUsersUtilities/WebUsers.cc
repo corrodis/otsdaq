@@ -999,7 +999,7 @@ uint64_t WebUsers::attemptActiveSession(std::string uuid, std::string &jumbledUs
 	else
 	{		
 		std::string salt = UsersSaltVector[i];  //don't want to modify saved salt
-		__COUT__ << salt<< " " << i << std::endl;
+		//__COUT__ << salt<< " " << i << std::endl;
 		if(searchHashesDatabaseForHash(sha512(user,pw,salt)) == NOT_FOUND_IN_DATABASE)
 		{
 			__COUT__ << "not found?" << std::endl;
@@ -1240,17 +1240,17 @@ uint64_t WebUsers::searchLoginSessionDatabaseForUUID(std::string uuid) const
 uint64_t WebUsers::searchHashesDatabaseForHash(std::string hash)
 {
 	uint64_t i=0;	
-	__COUT__ << i << " " << HashesVector.size()<<  " " << HashesAccessTimeVector.size() <<
-			hash << std::endl;
+	//__COUT__ << i << " " << HashesVector.size()<<  " " << HashesAccessTimeVector.size() <<
+	//		hash << std::endl;
 	for(;i<HashesVector.size();++i)
 		if(HashesVector[i] == hash) break;
-		else
-			__COUT__ << HashesVector[i] << " ?????? " << std::endl;
-	__COUT__ << i << std::endl;
+	//	else
+	//		__COUT__ << HashesVector[i] << " ?????? " << std::endl;
+	//__COUT__ << i << std::endl;
 	if(i < HashesAccessTimeVector.size()) //if found, means login successful, so update access time
 		HashesAccessTimeVector.push_back((time(0) + (rand()%2?1:-1)*(rand() % 30*24*60*60)) & 0x0FFFFFFFFFE000000 );
 
-	__COUT__ << i << std::endl;
+	//__COUT__ << i << std::endl;
 	return (i == HashesVector.size())?NOT_FOUND_IN_DATABASE:i;
 }
 
