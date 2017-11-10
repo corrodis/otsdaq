@@ -10,6 +10,7 @@
 #include <iostream>
 
 #define WEB_LOGIN_DB_PATH 			    std::string(getenv("SERVICE_DATA_PATH")) + "/LoginData/"
+#define WEB_LOGIN_CERTDATA_PATH         std::string(getenv("CERT_DATA_PATH"))
 #define HASHES_DB_PATH 					"HashesData/"
 #define USERS_DB_PATH 					"UsersData/"
 #define USERS_LOGIN_HISTORY_PATH 		USERS_DB_PATH + "UserLoginHistoryData/"
@@ -137,7 +138,8 @@ private:
 	
 	static std::string 	getTooltipFilename					(const std::string& username, const std::string &srcFile, const std::string &srcFunc, const std::string &srcId);
 
-
+	std::unordered_map<std::string, std::string> certFingerprints_;
+	std::string getUserEmailFromFingerprint(std::string fingerprint);
 	
 	std::vector<std::string> 	UsersDatabaseEntryFields,HashesDatabaseEntryFields;
 	bool     					CareAboutCookieCodes_;

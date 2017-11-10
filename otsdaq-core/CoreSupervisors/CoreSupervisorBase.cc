@@ -44,10 +44,7 @@ throw (xdaq::exception::Exception)
 	INIT_MF("CoreSupervisorBase");
 
 	__COUT__ << "Begin!" << std::endl;
-	__COUT__ << "Begin!" << std::endl;
-	__COUT__ << "Begin!" << std::endl;
-	__COUT__ << "Begin!" << std::endl;
-	__COUT__ << "Begin!" << std::endl;
+
 	xgi::bind (this, &CoreSupervisorBase::Default,                "Default" );
 	xgi::bind (this, &CoreSupervisorBase::stateMachineXgiHandler, "StateMachineXgiHandler");
 	xgi::bind (this, &CoreSupervisorBase::request, 				  "Request");
@@ -84,9 +81,7 @@ throw (xdaq::exception::Exception)
 	supervisorConfigurationPath_  = "/" + supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
 
 	setStateMachineName(supervisorApplicationUID_);
-	__COUT__ << "Done!" << std::endl;
-	__COUT__ << "Done!" << std::endl;
-	__COUT__ << "Done!" << std::endl;
+
 	__COUT__ << "Done!" << std::endl;
 
 	init();
@@ -101,12 +96,10 @@ CoreSupervisorBase::~CoreSupervisorBase(void)
 void CoreSupervisorBase::init(void)
 {
 	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
-	__COUT__ << "CONTEXT!" << std::endl;
-	__COUT__ << "CONTEXT!" << std::endl;
-	__COUT__ << "CONTEXT!" << std::endl;
+	__COUT__ << "init CONTEXT!" << std::endl;
+
 	supervisorDescriptorInfo_.init(getApplicationContext());
-	__COUT__ << "Done!" << std::endl;
-	__COUT__ << "Done!" << std::endl;
+
 	__COUT__ << "Done!" << std::endl;
 	//RunControlStateMachine::reset();
 }
