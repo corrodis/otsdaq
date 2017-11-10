@@ -18,6 +18,8 @@ const std::string RunControlStateMachine::FAILED_STATE_NAME = "Failed";
 RunControlStateMachine::RunControlStateMachine(std::string name)
 : stateMachineName_(name)
 {
+	INIT_MF("RunControlStateMachine");
+
 	theStateMachine_.addState('I', "Initial",     this, &RunControlStateMachine::stateInitial);
 	theStateMachine_.addState('H', "Halted",      this, &RunControlStateMachine::stateHalted);
 	theStateMachine_.addState('C', "Configured",  this, &RunControlStateMachine::stateConfigured);

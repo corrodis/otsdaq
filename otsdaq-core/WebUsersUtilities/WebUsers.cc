@@ -97,6 +97,7 @@ WebUsers::WebUsers()
 
 	//attempt to make directory structure (just in case)
 	mkdir(((std::string)WEB_LOGIN_DB_PATH).c_str(), 0755);
+	mkdir(((std::string)WEB_LOGIN_DB_PATH + "bkup/" + USERS_DB_PATH).c_str(), 0755);
 	mkdir(((std::string)WEB_LOGIN_DB_PATH + HASHES_DB_PATH).c_str(), 0755);
 	mkdir(((std::string)WEB_LOGIN_DB_PATH + USERS_DB_PATH).c_str(), 0755);
 	mkdir(((std::string)WEB_LOGIN_DB_PATH + USERS_LOGIN_HISTORY_PATH).c_str(), 0755);
@@ -349,12 +350,21 @@ void WebUsers::saveActiveSessions()
 	fprintf(fp,"%d\n",version);
 	for(unsigned int i=0; i<ActiveSessionCookieCodeVector.size(); ++i)
 	{
+		//		__COUT__ << "SAVE " << ActiveSessionCookieCodeVector[i] << std::endl;
+		//		__COUT__ << "SAVE " << ActiveSessionIpVector[i] << std::endl;
+		//		__COUT__ << "SAVE " << ActiveSessionUserIdVector[i] << std::endl;
+		//		__COUT__ << "SAVE " << ActiveSessionIndex[i] << std::endl;
+		//		__COUT__ << "SAVE " << ActiveSessionStartTimeVector[i] << std::endl;
+
 		fprintf(fp,"%s\n",ActiveSessionCookieCodeVector[i].c_str());
 		fprintf(fp,"%s\n",ActiveSessionIpVector[i].c_str());
 		fprintf(fp,"%lu\n",ActiveSessionUserIdVector[i]);
 		fprintf(fp,"%lu\n",ActiveSessionIndex[i]);
 		fprintf(fp,"%ld\n",ActiveSessionStartTimeVector[i]);
 	}
+
+	__COUT__ << "ActiveSessionCookieCodeVector saved with size " <<
+			ActiveSessionCookieCodeVector.size() << std::endl;
 
 	fclose(fp);
 }
@@ -368,7 +378,7 @@ void WebUsers::loadActiveSessions()
 
 	fn = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_ACTIVE_SESSIONS_FILE;
 	__COUT__ << fn << std::endl;
-	FILE *fp = fopen(fn.c_str(),"w");
+	FILE *fp = fopen(fn.c_str(),"r");
 	if(!fp)
 	{
 		__COUT_ERR__ << "Error! Persistent active sessions could not be saved." << std::endl;
@@ -386,20 +396,48 @@ void WebUsers::loadActiveSessions()
 		__COUT__ << "Extracting active sessions..." << std::endl;
 
 	}
-
+	unsigned int i=0;
 	while(fgets(line,LINELEN,fp))
 	{
+		if(strlen(line)) line[strlen(line)-1] = '\0'; //remove new line
+		if(strlen(line) != COOKIE_CODE_LENGTH)
+		{
+			__COUT__ << "Illegal cookie code found: " << line << std::endl;
+
+			fclose(fp);
+			return;
+		}
 		ActiveSessionCookieCodeVector.push_back(line);
+
 		fgets(line,LINELEN,fp);
+		if(strlen(line)) line[strlen(line)-1] = '\0'; //remove new line
 		ActiveSessionIpVector.push_back(line);
+
 		fgets(line,LINELEN,fp);
 		ActiveSessionUserIdVector.push_back(uint64_t());
 		sscanf(line,"%lu",&(ActiveSessionUserIdVector[ActiveSessionUserIdVector.size()-1]));
+
+		fgets(line,LINELEN,fp);
 		ActiveSessionIndex.push_back(uint64_t());
 		sscanf(line,"%lu",&(ActiveSessionIndex[ActiveSessionIndex.size()-1]));
+
+		fgets(line,LINELEN,fp);
 		ActiveSessionStartTimeVector.push_back(time_t());
 		sscanf(line,"%ld",&(ActiveSessionStartTimeVector[ActiveSessionStartTimeVector.size()-1]));
+
+
+		//		__COUT__ << "LOAD " << ActiveSessionCookieCodeVector[i] << std::endl;
+		//		__COUT__ << "LOAD " << ActiveSessionIpVector[i] << std::endl;
+		//		__COUT__ << "LOAD " << ActiveSessionUserIdVector[i] << std::endl;
+		//		__COUT__ << "LOAD " << ActiveSessionIndex[i] << std::endl;
+		//		__COUT__ << "LOAD " << ActiveSessionStartTimeVector[i] << std::endl;
+		++i;
 	}
+
+	__COUT__ << "ActiveSessionCookieCodeVector loaded with size " <<
+			ActiveSessionCookieCodeVector.size() << std::endl;
+
+
 	fclose(fp);
 }
 
@@ -675,6 +713,7 @@ bool WebUsers::saveDatabaseToFile	(uint8_t db)
 	__COUT__ << "Save Database Filename: " << fn << std::endl;
 
 	//backup file organized by day
+	if(0)
 	{
 		char dayAppend[20];
 		sprintf(dayAppend,".%lu.bkup",time(0)/(3600*24));
@@ -1765,12 +1804,12 @@ std::string	WebUsers::sha512(std::string user, std::string password, std::string
 
 			salt.append(hexStr);
 		}		
-		__COUT__ << salt << std::endl;
+		//__COUT__ << salt << std::endl;
 	}
 	else //use existing context
 	{		
 
-		__COUT__ << salt << std::endl;
+		//__COUT__ << salt << std::endl;
 
 		for(unsigned int i=0;i<sizeof(SHA512_CTX);++i)
 			((uint8_t *)(&sha512_context))[i] = hexByteStrToInt(&(salt.c_str()[i*2]));
@@ -1778,28 +1817,28 @@ std::string	WebUsers::sha512(std::string user, std::string password, std::string
 
 	std::string strToHash = salt + user + password;
 
-	__COUT__ << salt << std::endl;
+	//__COUT__ << salt << std::endl;
 	unsigned char hash[SHA512_DIGEST_LENGTH];
-	__COUT__ << salt << std::endl;
+	//__COUT__ << salt << std::endl;
 	char retHash[SHA512_DIGEST_LENGTH*2+1];
-	__COUT__ << strToHash.length() << " " << strToHash << std::endl;
+	//__COUT__ << strToHash.length() << " " << strToHash << std::endl;
 
 
-	__COUT__ << "If crashing occurs here, may be an illegal salt context." << std::endl;
+	//__COUT__ << "If crashing occurs here, may be an illegal salt context." << std::endl;
 	SHA512_Update(&sha512_context, strToHash.c_str(), strToHash.length());
 
 	SHA512_Final(hash, &sha512_context);
 
-	__COUT__ << salt << std::endl;
+	//__COUT__ << salt << std::endl;
 	int i = 0;
 	for(i = 0; i < SHA512_DIGEST_LENGTH; i++)
 		sprintf(retHash + (i * 2), "%02x", hash[i]);
 
-	__COUT__ << salt << std::endl;
+	//__COUT__ << salt << std::endl;
 	retHash[SHA512_DIGEST_LENGTH*2] = '\0';
 
 
-	__COUT__ << salt << std::endl;
+	//__COUT__ << salt << std::endl;
 
 
 	return retHash;

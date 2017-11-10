@@ -2031,7 +2031,8 @@ throw (xgi::exception::Exception)
 	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions,
 			&uid, "0",
 			Command != "getSystemMessages" &&
-				Command != "gatewayLaunchOTS",
+				Command != "gatewayLaunchOTS" &&
+				Command != "gatewayLaunchWiz",
 				&userWithLock))
 	{
 		*out << cookieCode;
@@ -2058,6 +2059,7 @@ throw (xgi::exception::Exception)
 	//resetUserTooltips
 
 	//gatewayLaunchOTS
+	//gatewayLaunchWiz
 
 
 	HttpXmlDocument xmldoc(cookieCode);
@@ -2612,23 +2614,6 @@ throw (xgi::exception::Exception)
 			//now launch
 			__COUT_INFO__ << "Launching... " << std::endl;
 
-
-//			{
-//				FILE* fp = fopen((std::string(getenv("SERVICE_DATA_PATH")) +
-//						"/StartOTS_action.cmd").c_str(),"w");
-//				if(fp)
-//				{
-//					if(Command == "gatewayLaunchOTS")
-//						fprintf(fp,"LAUNCH_OTS");
-//					else if(Command == "gatewayLaunchWiz")
-//						fprintf(fp,"LAUNCH_WIZ");
-//
-//					fclose(fp);
-//				}
-//				else
-//					__COUT_ERR__ << "Unable to open command file: " << (std::string(getenv("SERVICE_DATA_PATH")) +
-//							"/StartOTS_action.cmd") << std::endl;
-//			}
 
 			__COUT__ << "Extracting target context hostnames... " << std::endl;
 			std::vector<std::string> hostnames;

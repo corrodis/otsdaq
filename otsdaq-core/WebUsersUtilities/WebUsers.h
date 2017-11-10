@@ -106,9 +106,8 @@ public:
 
 	static void 	NACDisplayThread				(std::string nac, std::string user);
 
-	void			saveActiveSessions			();
-
-	void			loadActiveSessions();
+	void			saveActiveSessions				();
+	void			loadActiveSessions				();
 
 private:
     void			loadSecuritySelection       ();
