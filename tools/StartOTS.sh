@@ -8,6 +8,16 @@ QUIET=1
 CHROME=0
 DONOTKILL=0
 
+function killprocs {
+    if [[ "x$1" == "x" ]]; then
+	ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'|xargs kill -9
+	ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'|xargs kill -9
+	ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'|xargs kill -9
+    else
+	ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'|xargs kill -9
+    fi
+}
+
 #check for wiz mode
 if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then
 	echo "*****************************************************"
@@ -60,10 +70,10 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	echo "*************    KILLING otsdaq!        **************"
     echo "******************************************************"
 
-
-	killall -9 mpirun &>/dev/null #hide output
-	killall -9 xdaq.exe &>/dev/null #hide output
-	killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
+    killprocs
+	#killall -9 mpirun &>/dev/null #hide output
+	#killall -9 xdaq.exe &>/dev/null #hide output
+	#killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
 
 	exit
 fi
@@ -218,9 +228,10 @@ if [ $DONOTKILL == 0 ]; then
 	#kill all things otsdaq, before launching new things
 	echo
 	echo "Killing all existing otsdaq Applications..."
-	killall -9 mpirun &>/dev/null #hide output
-	killall -9 xdaq.exe &>/dev/null #hide output
-	killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
+	killprocs
+	#killall -9 mpirun &>/dev/null #hide output
+	#killall -9 xdaq.exe &>/dev/null #hide output
+	#killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
 
 	#give time for killall
 	sleep 1
@@ -716,7 +727,8 @@ otsActionHandler() {
 			echo "Restarting MPI . . ."
 			echo $MPI_RUN_CMD
 			echo " "
-			killall -9 mpirun
+			killprocs mpirun
+			#killall -9 mpirun
 			sleep 1
 
 			export MPIEXEC_PORT_RANGE=8300:8349
@@ -734,9 +746,10 @@ otsActionHandler() {
 			echo
 			echo "Starting otsdaq Wiz mode for host {${HOSTNAME}}..."
 			echo
-			killall -9 xdaq.exe
-			killall -9 mf_rcv_n_fwd #message viewer display without decoration
-			killall -9 mpirun
+			killprocs
+			#killall -9 xdaq.exe
+			#killall -9 mf_rcv_n_fwd #message viewer display without decoration
+			#killall -9 mpirun
 			sleep 1
 			
 			launchOTSWiz
@@ -746,9 +759,10 @@ otsActionHandler() {
 			echo
 			echo "Starting otsdaq in normal mode for host {${HOSTNAME}}..."
 			echo
-			killall -9 xdaq.exe
-			killall -9 mf_rcv_n_fwd #message viewer display without decoration
-			killall -9 mpirun
+			killprocs
+			#killall -9 xdaq.exe
+			#killall -9 mf_rcv_n_fwd #message viewer display without decoration
+			#killall -9 mpirun
 			sleep 1
 			
 			launchOTS
