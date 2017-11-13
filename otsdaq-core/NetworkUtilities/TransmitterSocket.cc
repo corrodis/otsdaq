@@ -53,17 +53,17 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer,
 					" to: " << toSocket.getIPAddress() <<
 					":" << ntohs(toSocket.getSocketAddress().sin_port) <<
 					" size: " << thisSize << " remaining = " << (buffer.size() - offset - thisSize) << std::endl;
-			std::stringstream ss;
-			ss << "\t";
-			uint32_t begin = 0;
-			for(uint32_t i=begin; i<buffer.size(); i++)
-			{
-				if(i==begin+2) ss << ":::";
-				else if(i==begin+10) ss << ":::";
-				ss << std::setfill('0') << std::setw(2) << std::hex << (((int16_t) buffer[i]) &0xFF) << "-" << std::dec;
-			}
-			ss << std::endl;
-			std::cout << ss.str();
+//			std::stringstream ss;
+//			ss << "\t";
+//			uint32_t begin = 0;
+//			for(uint32_t i=begin; i<buffer.size(); i++)
+//			{
+//				if(i==begin+2) ss << ":::";
+//				else if(i==begin+10) ss << ":::";
+//				ss << std::setfill('0') << std::setw(2) << std::hex << (((int16_t) buffer[i]) &0xFF) << "-" << std::dec;
+//			}
+//			ss << std::endl;
+//			std::cout << ss.str();
 		}
 
 
