@@ -245,7 +245,7 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 	bool match;
 	unsigned int potentialMatchCount = 0;
 
-	needleView->print();
+	//needleView->print();
 
 	//for each table in cache
 	//	check each row,col
@@ -265,7 +265,7 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 		++potentialMatchCount;
 		__COUT__ << "Checking version... " << viewPair.first << std::endl;
 
-		viewPair.second.print();
+		//viewPair.second.print();
 
 		match = true;
 
@@ -277,9 +277,9 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 					needleView->getColumnsInfo()[col].getName())
 			{
 				match = false;
-				__COUT__ << "Column name mismatch " << col << ":" <<
-						viewColInfoIt->getName() << " vs " <<
-						needleView->getColumnsInfo()[col].getName() << std::endl;
+//				__COUT__ << "Column name mismatch " << col << ":" <<
+//						viewColInfoIt->getName() << " vs " <<
+//						needleView->getColumnsInfo()[col].getName() << std::endl;
 			}
 
 		for(unsigned int row=0;match && row<rows;++row)
@@ -290,13 +290,13 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 				{
 					match = false;
 
-					__COUT__ << "Value name mismatch " << col << ":" <<
-							viewPair.second.getDataView()[row][col] << "[" <<
-							viewPair.second.getDataView()[row][col].size() << "]" <<
-							" vs " <<
-							needleView->getDataView()[row][col] << "[" <<
-							needleView->getDataView()[row][col].size() << "]" <<
-							std::endl;
+//					__COUT__ << "Value name mismatch " << col << ":" <<
+//							viewPair.second.getDataView()[row][col] << "[" <<
+//							viewPair.second.getDataView()[row][col].size() << "]" <<
+//							" vs " <<
+//							needleView->getDataView()[row][col] << "[" <<
+//							needleView->getDataView()[row][col].size() << "]" <<
+//							std::endl;
 
 					break;
 				}

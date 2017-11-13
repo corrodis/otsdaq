@@ -1488,7 +1488,7 @@ throw (toolbox::fsm::exception::Exception)
 //				fclose(fp);
 //
 //			}
-		}
+		} //end mpi reset
 
 		artdaqRestarted = true;
 		//change message command to Initialize

@@ -24,14 +24,6 @@
 using namespace ots;
 
 
-//========================================================================================================================
-Socket::Socket(void)
-{
-	__SS__ << "ERROR: This method should never be called. There is something wrong in your inheritance scheme!" << std::endl;
-	__COUT__ << "\n" << ss.str();
-	//FIXME: this is getting called during configure?!
-	//throw std::runtime_error(ss.str());
-}
 
 //========================================================================================================================
 Socket::Socket(const std::string &IPAddress, unsigned int port)
@@ -59,6 +51,16 @@ Socket::Socket(const std::string &IPAddress, unsigned int port)
 }
 
 //========================================================================================================================
+//protected constructor
+Socket::Socket(void)
+{
+	__SS__ << "ERROR: This method should never be called. This is the protected constructor. There is something wrong in your inheritance scheme!" << std::endl;
+	__COUT__ << "\n" << ss.str();
+
+	throw std::runtime_error(ss.str());
+}
+
+//========================================================================================================================
 Socket::~Socket(void)
 {
     __COUT__ << "CLOSING THE SOCKET #" << socketNumber_  << " IP: " << IPAddress_ << " port: " << getPort() << " htons: " << socketAddress_.sin_port << std::endl;
@@ -67,7 +69,7 @@ Socket::~Socket(void)
 }
 
 //========================================================================================================================
-void Socket::initialize(void)
+void Socket::initialize(unsigned int socketReceiveBufferSize)
 {
     __COUT__ << " htons: " <<  socketAddress_.sin_port << std::endl;
     struct addrinfo  hints;
@@ -132,11 +134,30 @@ void Socket::initialize(void)
 
     if(!socketInitialized)
     {
-    	std::stringstream ss;
-		ss << __COUT_HDR_FL__ << "FATAL: Socket could not initialize socket. Perhaps it is already in use?" << std::endl;
+    	__SS__ << "FATAL: Socket could not initialize socket. Perhaps it is already in use?" << std::endl;
 		std::cout << ss.str();
 		throw std::runtime_error(ss.str());
     }
+
+
+	if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF,
+			(char*)&socketReceiveBufferSize,
+			sizeof(socketReceiveBufferSize)) < 0) {
+		__COUT_ERR__ << "Failed to set socket receive size to " <<
+				socketReceiveBufferSize << ". Attempting to revert to default." << std::endl;
+
+		socketReceiveBufferSize = defaultSocketReceiveSize_;
+		if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF,
+					(char*)&socketReceiveBufferSize,
+					sizeof(socketReceiveBufferSize)) < 0)
+		{
+			__SS__ << "Failed to set socket receive size to " <<
+					socketReceiveBufferSize << ". Attempting to revert to default." << std::endl;
+			std::cout << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+
+	}
 }
 
 uint16_t Socket::getPort()

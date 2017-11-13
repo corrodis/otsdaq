@@ -12,19 +12,22 @@
 
 using namespace ots;
 
+
 //========================================================================================================================
-ReceiverSocket::ReceiverSocket(void)
-: addressLength_(sizeof(fromAddress_))
+ReceiverSocket::ReceiverSocket(std::string IPAddress, unsigned int port)
+: Socket(IPAddress, port)
+, addressLength_(sizeof(fromAddress_))
 , numberOfBytes_(0)
 , readCounter_  (0)
 {
 	//__COUT__ << std::endl;
 }
 
+
 //========================================================================================================================
-ReceiverSocket::ReceiverSocket(std::string IPAddress, unsigned int port)
-: Socket(IPAddress, port)
-, addressLength_(sizeof(fromAddress_))
+//protected constructor
+ReceiverSocket::ReceiverSocket(void)
+: addressLength_(sizeof(fromAddress_))
 , numberOfBytes_(0)
 , readCounter_  (0)
 {

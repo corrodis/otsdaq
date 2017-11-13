@@ -33,7 +33,18 @@ UDPDataListenerProducer::UDPDataListenerProducer(std::string supervisorApplicati
 , dataP_       (nullptr)
 , headerP_     (nullptr)
 {
-	Socket::initialize();
+	unsigned int socketReceiveBufferSize;
+	try //if socketReceiveBufferSize is defined in configuration, use it
+	{
+		socketReceiveBufferSize = theXDAQContextConfigTree.getNode(configurationPath).getNode("SocketReceiveBufferSize").getValue<unsigned int>();
+	}
+	catch(...)
+	{
+		//for backwards compatibility, ignore
+		socketReceiveBufferSize = 0x1000000; //default to "large"
+	}
+
+	Socket::initialize(socketReceiveBufferSize);
 }
 
 //========================================================================================================================
