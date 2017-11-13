@@ -1429,13 +1429,65 @@ throw (toolbox::fsm::exception::Exception)
 		//		- Restart
 		//		- Send Initialize
 		//	this will place artdaq supervisors in Halt state, same as others
-		FILE *fp = fopen((std::string(getenv("SERVICE_DATA_PATH")) +
-				"/StartOTS_action.cmd").c_str(),"w");
-		if(fp)
-		{
-			fprintf(fp,"RESET_MPI");
-			fclose(fp);
 
+		{ //MPI relaunch in StartOTS.sh
+
+			__COUT__ << "Extracting target context hostnames... " << std::endl;
+			std::vector<std::string> hostnames;
+			try
+			{
+				theConfigurationManager_->init(); //completely reset to re-align with any changes
+
+				const XDAQContextConfiguration* contextConfiguration = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+
+				auto contexts = contextConfiguration->getContexts();
+				unsigned int i,j;
+				for(const auto& context: contexts)
+				{
+					if(!context.status_) continue;
+
+					//find last slash
+					j=0; //default to whole string
+					for(i=0;i<context.address_.size();++i)
+						if(context.address_[i] == '/')
+							j = i+1;
+					hostnames.push_back(context.address_.substr(j));
+					__COUT__ << "hostname = " << hostnames.back() << std::endl;
+				}
+			}
+			catch(...)
+			{
+				__SS__ << "\nTransition to Configuring interrupted! " <<
+						"The Configuration Manager could not be initialized." << std::endl;
+
+				__COUT_ERR__ << "\n" << ss.str();
+
+				XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());
+			}
+
+			for(const auto& hostname: hostnames)
+			{
+				std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) +
+						"/StartOTS_action_" + hostname + ".cmd");
+				FILE* fp = fopen(fn.c_str(),"w");
+				if(fp)
+				{
+					fprintf(fp,"RESET_MPI");
+					fclose(fp);
+				}
+				else
+					__COUT_ERR__ << "Unable to open command file: " << fn << std::endl;
+			}
+
+//
+//			FILE *fp = fopen((std::string(getenv("SERVICE_DATA_PATH")) +
+//					"/StartOTS_action.cmd").c_str(),"w");
+//			if(fp)
+//			{
+//				fprintf(fp,"RESET_MPI");
+//				fclose(fp);
+//
+//			}
 		}
 
 		artdaqRestarted = true;
@@ -2628,7 +2680,7 @@ throw (xgi::exception::Exception)
 			}
 			catch(...)
 			{
-				__SS__ << "\nTransition to Configuring interrupted! " <<
+				__SS__ << "\nRelaunch of otsdaq interrupted! " <<
 						"The Configuration Manager could not be initialized." << std::endl;
 
 				__COUT_ERR__ << "\n" << ss.str();

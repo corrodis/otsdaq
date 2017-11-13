@@ -243,6 +243,10 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 	unsigned int cols = needleView->getNumberOfColumns();
 
 	bool match;
+	unsigned int potentialMatchCount = 0;
+
+	needleView->print();
+
 	//for each table in cache
 	//	check each row,col
 	for(auto &viewPair: configurationViews_)
@@ -258,22 +262,44 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 			continue; //col mismatch
 
 
+		++potentialMatchCount;
+		__COUT__ << "Checking version... " << viewPair.first << std::endl;
+
+		viewPair.second.print();
+
 		match = true;
 
-		auto srcColNameIt = viewPair.second.getSourceColumnNames().begin();
-		for(unsigned int col=0; match &&
-			viewPair.second.getSourceColumnNames().size() > 3 &&
-			col<viewPair.second.getSourceColumnNames().size()-3;++col,srcColNameIt++)
-			if(*srcColNameIt !=
+		auto viewColInfoIt = viewPair.second.getColumnsInfo().begin();
+		for(unsigned int col=0; match && //note column size must already match
+			viewPair.second.getColumnsInfo().size() > 3 &&
+			col<viewPair.second.getColumnsInfo().size()-3;++col,viewColInfoIt++)
+			if(viewColInfoIt->getName() !=
 					needleView->getColumnsInfo()[col].getName())
+			{
 				match = false;
+				__COUT__ << "Column name mismatch " << col << ":" <<
+						viewColInfoIt->getName() << " vs " <<
+						needleView->getColumnsInfo()[col].getName() << std::endl;
+			}
 
 		for(unsigned int row=0;match && row<rows;++row)
 		{
 			for(unsigned int col=0;col<cols-2;++col) //do not consider author and timestamp
 				if(viewPair.second.getDataView()[row][col] !=
 						needleView->getDataView()[row][col])
-				{ match = false; break;	}
+				{
+					match = false;
+
+					__COUT__ << "Value name mismatch " << col << ":" <<
+							viewPair.second.getDataView()[row][col] << "[" <<
+							viewPair.second.getDataView()[row][col].size() << "]" <<
+							" vs " <<
+							needleView->getDataView()[row][col] << "[" <<
+							needleView->getDataView()[row][col].size() << "]" <<
+							std::endl;
+
+					break;
+				}
 		}
 		if(match)
 		{
@@ -282,6 +308,7 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 		}
 	}
 
+	__COUT__ << "No duplicates found in " << potentialMatchCount << " potential matches." << std::endl;
 	return ConfigurationVersion(); //return invalid if no matches
 }
 
