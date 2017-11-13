@@ -732,7 +732,7 @@ otsActionHandler() {
 			sleep 1
 
 			export MPIEXEC_PORT_RANGE=8300:8349
-			export MPIR_CVAR_CH3_PORT_RANGE=8350:8700
+			export MPIR_CVAR_CH3_PORT_RANGE=8450:8700
 
 			if [ $QUIET == 1 ]; then
 				echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"	
