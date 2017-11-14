@@ -37,7 +37,7 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer,
 	//			" from-port: " << ntohs(socketAddress_.sin_port) <<
 	//			" to-port: " << ntohs(toSocket.getSocketAddress().sin_port) << std::endl;
 
-	constexpr size_t MAX_SEND_SIZE = 1500;
+	constexpr size_t MAX_SEND_SIZE = 65500;
 	size_t offset = 0;
 	int sts = 1;
 
@@ -68,6 +68,7 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer,
 
 
 		sts = sendto(socketNumber_, buffer.c_str() + offset, thisSize, 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
+		usleep(10000);
 		offset += sts;
 	}
 
