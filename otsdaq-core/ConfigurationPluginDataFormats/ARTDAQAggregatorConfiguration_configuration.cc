@@ -344,22 +344,31 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 		auto sourcesGroup = daq.getNode("daqAggregatorSourcesLink");
 		if(!sourcesGroup.isDisconnected())
 		{
-			auto sources = sourcesGroup.getChildren();
-			for(auto &source:sources)
+			try
 			{
-				unsigned int sourceRank =
-						contextConfig->getARTDAQAppRank(
-								source.second.getNode("sourceARTDAQContextLink").getValue());
+				auto sources = sourcesGroup.getChildren();
+				for(auto &source:sources)
+				{
+					unsigned int sourceRank =
+							contextConfig->getARTDAQAppRank(
+									source.second.getNode("sourceARTDAQContextLink").getValue());
 
-				OUT << source.second.getNode("sourceKey").getValue() <<
-						": {" <<
-						" transferPluginType: " <<
-						source.second.getNode("transferPluginType").getValue() <<
-						" source_rank: " <<
-						sourceRank <<
-						" max_fragment_size_words: " <<
-						source.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
-						"}\n";
+					OUT << source.second.getNode("sourceKey").getValue() <<
+							": {" <<
+							" transferPluginType: " <<
+							source.second.getNode("transferPluginType").getValue() <<
+							" source_rank: " <<
+							sourceRank <<
+							" max_fragment_size_words: " <<
+							source.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
+							"}\n";
+				}
+			}
+			catch(const std::runtime_error& e)
+			{
+				__SS__ << "Are the DAQ sources valid? Error occurred looking for Aggregator DAQ sources: " << e.what() << std::endl;
+				__COUT_ERR__ << ss.str() << std::endl;
+				throw std::runtime_error(ss.str());
 			}
 		}
 		POPTAB;
@@ -429,23 +438,32 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 		auto destinationsGroup = daq.getNode("daqAggregatorDestinationsLink");
 		if(!destinationsGroup.isDisconnected())
 		{
-			auto destinations = destinationsGroup.getChildren();
-			for(auto &destination:destinations)
+			try
 			{
-				unsigned int destinationRank = contextConfig->getARTDAQAppRank(
+				auto destinations = destinationsGroup.getChildren();
+				for(auto &destination:destinations)
+				{
+					unsigned int destinationRank = contextConfig->getARTDAQAppRank(
 							destination.second.getNode("destinationARTDAQContextLink").getValueAsString());
 
-				OUT << destination.second.getNode("destinationKey").getValue() <<
-						": {" <<
-						" transferPluginType: " <<
-						destination.second.getNode("transferPluginType").getValue() <<
-						" source_rank: " <<
-						selfRank <<
-						" destination_rank: " <<
-						destinationRank <<
-						" max_fragment_size_words: " <<
-						destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
-						"}\n";
+					OUT << destination.second.getNode("destinationKey").getValue() <<
+							": {" <<
+							" transferPluginType: " <<
+							destination.second.getNode("transferPluginType").getValue() <<
+							" source_rank: " <<
+							selfRank <<
+							" destination_rank: " <<
+							destinationRank <<
+							" max_fragment_size_words: " <<
+							destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
+							"}\n";
+				}
+			}
+			catch(const std::runtime_error& e)
+			{
+				__SS__ << "Are the DAQ destinations valid? Error occurred looking for Aggregator DAQ destinations: " << e.what() << std::endl;
+				__COUT_ERR__ << ss.str() << std::endl;
+				throw std::runtime_error(ss.str());
 			}
 		}
 

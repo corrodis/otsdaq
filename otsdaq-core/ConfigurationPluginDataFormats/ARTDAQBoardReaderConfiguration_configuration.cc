@@ -362,21 +362,30 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 	auto destinationsGroup = boardReaderNode.getNode("daqDestinationsLink");
 	if(!destinationsGroup.isDisconnected())
 	{
-		auto destinations = destinationsGroup.getChildren();
-		for(auto &destination:destinations)
+		try
 		{
-			unsigned int destinationRank =
-					contextConfig->getARTDAQAppRank(
-							destination.second.getNode("destinationARTDAQContextLink").getValue());
-			OUT << destination.second.getNode("destinationKey").getValue() <<
-					": {" <<
-					" transferPluginType: " <<
-					destination.second.getNode("transferPluginType").getValue() <<
-					" destination_rank: " <<
-					destinationRank <<
-					" max_fragment_size_words: " <<
-					destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
-					"}\n";
+			auto destinations = destinationsGroup.getChildren();
+			for(auto &destination:destinations)
+			{
+				unsigned int destinationRank =
+						contextConfig->getARTDAQAppRank(
+								destination.second.getNode("destinationARTDAQContextLink").getValue());
+				OUT << destination.second.getNode("destinationKey").getValue() <<
+						": {" <<
+						" transferPluginType: " <<
+						destination.second.getNode("transferPluginType").getValue() <<
+						" destination_rank: " <<
+						destinationRank <<
+						" max_fragment_size_words: " <<
+						destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
+						"}\n";
+			}
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Are the DAQ destinations valid? Error occurred looking for Board Reader DAQ sources: " << e.what() << std::endl;
+			__COUT_ERR__ << ss.str() << std::endl;
+			throw std::runtime_error(ss.str());
 		}
 	}
 	POPTAB;

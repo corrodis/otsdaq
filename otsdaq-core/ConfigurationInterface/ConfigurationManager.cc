@@ -880,6 +880,9 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 
 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
 
+	if(doActivate)
+		__COUT__ << "------------------------------------- loadConfigurationGroup start" << std::endl;
+
 
 	//if not already done, determine the type configuration group
 	if(!groupTypeString) groupType = getTypeOfGroup(memberMap);
@@ -1012,7 +1015,10 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	}
 
 	if(progressBar) progressBar->step();
-	//__COUT__ << "Load complete." << std::endl;
+
+	if(doActivate)
+		__COUT__ << "------------------------------------- loadConfigurationGroup end" << std::endl;
+
 	return memberMap;
 }
 

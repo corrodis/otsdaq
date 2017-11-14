@@ -69,7 +69,8 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 	//existing configurations are defined by which infos are in CONFIGURATION_INFO_PATH
 	//can test that the class exists based on this
 	//and then which versions
-	__COUT__ << "Extracting list of Configuration tables" << std::endl;
+	__COUT__ << "======================================================== getAllConfigurationInfo start" << std::endl;
+	__COUT__ << "Refreshing all! Extracting list of Configuration tables..." << std::endl;
 	DIR *pDIR;
 	struct dirent *entry;
 	std::string path = CONFIGURATION_INFO_PATH;
@@ -214,6 +215,8 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 
 	//call init to load active versions by default
 	init(accumulatedErrors);
+
+	__COUT__ << "======================================================== getAllConfigurationInfo end" << std::endl;
 
 	return allConfigurationInfo_;
 }
@@ -579,13 +582,13 @@ ConfigurationVersion ConfigurationManagerRW::copyViewToCurrentColumns(const std:
 ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::string &groupName,
 		const std::map<std::string, ConfigurationVersion> &groupMemberMap)
 {
-	std::set<std::string /*name*/> groupNames =
+	std::set<std::string /*name*/> fullGroupNames =
 			theInterface_->getAllConfigurationGroupNames(groupName);
 	std::string name;
 	ConfigurationGroupKey key;
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> compareToMemberMap;
 	bool isDifferent;
-	for(const std::string& fullName: groupNames)
+	for(const std::string& fullName: fullGroupNames)
 	{
 		ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
 
