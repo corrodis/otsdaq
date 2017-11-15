@@ -81,6 +81,9 @@ private:
 	{
 		ACTIVE_USERS_UPDATE_THRESHOLD = 10, 		//10 seconds, min amount of time between Supervisor requests
 	};
+
+	std::string tmpUserWithLock_;
+	uint8_t 	tmpUserPermissions_;
 };
 
 const std::string RemoteWebUsers::REQ_NO_LOGIN_RESPONSE = "NoLogin";

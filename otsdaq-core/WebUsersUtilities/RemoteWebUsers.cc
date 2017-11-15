@@ -109,7 +109,7 @@ bool RemoteWebUsers::xmlLoginGateway(
 		std::string 					*userWithLock,
 		std::string 					*userName,
 		std::string 					*displayName,
-		uint64_t 						*activeSessionIndex )
+		uint64_t 						*activeSessionIndex)
 {
 	//initialized optional acquisition parameters to failed results
 	if(userPermissions) 	*userPermissions    = 0;
@@ -171,15 +171,15 @@ bool RemoteWebUsers::xmlLoginGateway(
 		parameters.addParameter("Permissions");
 		receive(retMsg, parameters);
 
-		uint8_t tmpUserPermissions;
-		sscanf(parameters.getValue("Permissions").c_str(),"%hhu",&tmpUserPermissions); //unsigned char
+		uint8_t tmpUserPermissions_;
+		sscanf(parameters.getValue("Permissions").c_str(),"%hhu",&tmpUserPermissions_); //unsigned char
 
-		if(userPermissions) 	*userPermissions = tmpUserPermissions;
+		if(userPermissions) 	*userPermissions = tmpUserPermissions_;
 
-		if(tmpUserPermissions < permissionsThreshold)
+		if(tmpUserPermissions_ < permissionsThreshold)
 		{
 			*out << RemoteWebUsers::REQ_NO_LOGIN_RESPONSE;
-			__COUT__ << "User has insufficient permissions: " << tmpUserPermissions << "<" <<
+			__COUT__ << "User has insufficient permissions: " << tmpUserPermissions_ << "<" <<
 					permissionsThreshold << std::endl;
 			return false;	//invalid cookie and present sequence, but not correct sequence
 		}
@@ -206,11 +206,10 @@ bool RemoteWebUsers::xmlLoginGateway(
 	parameters.addParameter("Permissions");
 	parameters.addParameter("UserWithLock");
 	receive(retMsg, parameters);
-	std::string tmpUserWithLock = parameters.getValue("UserWithLock");
-	uint8_t tmpUserPermissions;
-	sscanf(parameters.getValue("Permissions").c_str(),"%hhu",&tmpUserPermissions); //unsigned char
-	if(userWithLock)	*userWithLock = tmpUserWithLock;
-	if(userPermissions) *userPermissions = tmpUserPermissions;
+	tmpUserWithLock_ = parameters.getValue("UserWithLock");
+	sscanf(parameters.getValue("Permissions").c_str(),"%hhu",&tmpUserPermissions_); //unsigned char
+	if(userWithLock)	*userWithLock = tmpUserWithLock_;
+	if(userPermissions) *userPermissions = tmpUserPermissions_;
 
 	cookieCode = parameters.getValue("CookieCode");
 
@@ -222,10 +221,10 @@ bool RemoteWebUsers::xmlLoginGateway(
 		return false;	//invalid cookie and present sequence, but not correct sequence
 	}
 
-	if(tmpUserPermissions < permissionsThreshold)
+	if(tmpUserPermissions_ < permissionsThreshold)
 	{
 		*out << RemoteWebUsers::REQ_NO_PERMISSION_RESPONSE;
-		__COUT__ << "User has insufficient permissions: " << tmpUserPermissions << "<" <<
+		__COUT__ << "User has insufficient permissions: " << tmpUserPermissions_ << "<" <<
 				permissionsThreshold << std::endl;
 		return false;
 	}
@@ -236,7 +235,7 @@ bool RemoteWebUsers::xmlLoginGateway(
 	if(!userName && !displayName && !activeSessionIndex && !checkLock && !lockRequired)
 		return true; //done, no need to get user info for cookie
 
-	//__COUT__ << "User with Lock: " << tmpUserWithLock << std::endl;
+	//__COUT__ << "User with Lock: " << tmpUserWithLock_ << std::endl;
 
 
 	/////////////////////////////////////////////////////
@@ -256,17 +255,17 @@ bool RemoteWebUsers::xmlLoginGateway(
 	if(displayName)	*displayName = parameters.getValue("DisplayName");
 	if(activeSessionIndex) *activeSessionIndex = strtoul(parameters.getValue("ActiveSessionIndex").c_str(),0,0);
 
-	if(checkLock && tmpUserWithLock != "" && tmpUserWithLock != tmpUserName)
+	if(checkLock && tmpUserWithLock_ != "" && tmpUserWithLock_ != tmpUserName)
 	{
 		*out << RemoteWebUsers::REQ_USER_LOCKOUT_RESPONSE;
-		__COUT__ << "User " << tmpUserName << " is locked out. " << tmpUserWithLock << " has lock." << std::endl;
+		__COUT__ << "User " << tmpUserName << " is locked out. " << tmpUserWithLock_ << " has lock." << std::endl;
 		return false;
 	}
 
-	if(lockRequired && tmpUserWithLock != tmpUserName)
+	if(lockRequired && tmpUserWithLock_ != tmpUserName)
 	{
 		*out << RemoteWebUsers::REQ_LOCK_REQUIRED_RESPONSE;
-		__COUT__ << "User " << tmpUserName << " must have lock to proceed. (" << tmpUserWithLock << " has lock.)" << std::endl;
+		__COUT__ << "User " << tmpUserName << " must have lock to proceed. (" << tmpUserWithLock_ << " has lock.)" << std::endl;
 		return false;
 	}
 
