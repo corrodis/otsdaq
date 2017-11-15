@@ -40,7 +40,7 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer,
 	constexpr size_t MAX_SEND_SIZE = 65500;
 	size_t offset = 0;
 	int sts = 1;
-
+	bool delay = false;
 	while (offset < buffer.size() && sts > 0)
 	{
 		auto thisSize = buffer.size() - offset > MAX_SEND_SIZE ? MAX_SEND_SIZE : buffer.size() - offset;
@@ -67,8 +67,11 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer,
 		}
 
 
+		if(delay)
+			usleep(10000);
+		else
+			delay = true;
 		sts = sendto(socketNumber_, buffer.c_str() + offset, thisSize, 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
-		usleep(10000);
 		offset += sts;
 	}
 
