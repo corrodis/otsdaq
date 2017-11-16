@@ -583,19 +583,49 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 		const std::map<std::string, ConfigurationVersion> &groupMemberMap)
 {
 	std::set<std::string /*name*/> fullGroupNames =
-			theInterface_->getAllConfigurationGroupNames(groupName);
+			theInterface_->getAllConfigurationGroupNames(groupName); //db filter by group name
+
 	std::string name;
 	ConfigurationGroupKey key;
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> compareToMemberMap;
 	bool isDifferent;
+
+	const unsigned int MAX_DEPTH_TO_CHECK = 20;
+	unsigned int keyMinToCheck = 0;
+
+	//determine min key to check
+	if(fullGroupNames.size() > MAX_DEPTH_TO_CHECK)
+	{
+		//find keyMinToCheck to avoid looking at all groups
+		for(const std::string& fullName: fullGroupNames)
+		{
+			ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
+			if(key.key() > keyMinToCheck)
+				keyMinToCheck = key.key();
+		}
+
+		//just in case of craziness, check not crossing 0
+		if(keyMinToCheck >= MAX_DEPTH_TO_CHECK - 1)
+			keyMinToCheck -= MAX_DEPTH_TO_CHECK - 1;
+		else
+			keyMinToCheck = 0;
+
+		__COUT__ << "Checking groups back to key... " << keyMinToCheck << std::endl;
+	}
+	else
+		__COUT__ << "Checking all groups." << std::endl;
+
+	//have min key to check, now loop through and check groups
 	for(const std::string& fullName: fullGroupNames)
 	{
 		ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
 
-		//__COUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
-		if( name != groupName) continue;
+		if(key.key() < keyMinToCheck) continue; //skip keys that are too old
 
-		//__COUT__ << name << " == " << groupName << std::endl;
+		//__COUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
+		//if( name != groupName) continue; // superfluous check, but just to make sure the db filter worked
+
+		__COUT__ << "checking group... " << fullName << std::endl;
 		compareToMemberMap = theInterface_->getConfigurationGroupMembers(fullName);
 
 		isDifferent = false;

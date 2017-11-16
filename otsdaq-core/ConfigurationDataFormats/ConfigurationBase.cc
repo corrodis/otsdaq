@@ -21,7 +21,7 @@ using namespace ots;
 //	If accumulatedExceptions pointer = 0, then illegal columns throw std::runtime_error exception
 ConfigurationBase::ConfigurationBase(std::string configurationName,
 		std::string *accumulatedExceptions)
-:	MAX_VIEWS_IN_CACHE      (5)//This is done, so that inheriting configuration classes could have varying amounts of cache
+:	MAX_VIEWS_IN_CACHE      (20)//This is done, so that inheriting configuration classes could have varying amounts of cache
 ,	configurationName_      (configurationName)
 ,	activeConfigurationView_(0)
 {
@@ -247,32 +247,34 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 
 	//needleView->print();
 
+
 	//for each table in cache
 	//	check each row,col
-	for(auto &viewPair: configurationViews_)
+	auto viewPairReverseIterator = configurationViews_.rbegin();
+	for(;viewPairReverseIterator != configurationViews_.rend(); ++viewPairReverseIterator)
 	{
-		if(viewPair.first == needleVersion) continue; //skip needle version
-		if(viewPair.first == ignoreVersion) continue; //skip ignore version
+		if(viewPairReverseIterator->first == needleVersion) continue; //skip needle version
+		if(viewPairReverseIterator->first == ignoreVersion) continue; //skip ignore version
 
-		if(viewPair.second.getNumberOfRows() != rows)
+		if(viewPairReverseIterator->second.getNumberOfRows() != rows)
 			continue; //row mismatch
 
-		if(viewPair.second.getDataColumnSize() != cols ||
-				viewPair.second.getSourceColumnMismatch() != 0)
+		if(viewPairReverseIterator->second.getDataColumnSize() != cols ||
+				viewPairReverseIterator->second.getSourceColumnMismatch() != 0)
 			continue; //col mismatch
 
 
 		++potentialMatchCount;
-		__COUT__ << "Checking version... " << viewPair.first << std::endl;
+		__COUT__ << "Checking version... " << viewPairReverseIterator->first << std::endl;
 
-		//viewPair.second.print();
+		//viewPairReverseIterator->second.print();
 
 		match = true;
 
-		auto viewColInfoIt = viewPair.second.getColumnsInfo().begin();
+		auto viewColInfoIt = viewPairReverseIterator->second.getColumnsInfo().begin();
 		for(unsigned int col=0; match && //note column size must already match
-			viewPair.second.getColumnsInfo().size() > 3 &&
-			col<viewPair.second.getColumnsInfo().size()-3;++col,viewColInfoIt++)
+			viewPairReverseIterator->second.getColumnsInfo().size() > 3 &&
+			col<viewPairReverseIterator->second.getColumnsInfo().size()-3;++col,viewColInfoIt++)
 			if(viewColInfoIt->getName() !=
 					needleView->getColumnsInfo()[col].getName())
 			{
@@ -285,14 +287,14 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 		for(unsigned int row=0;match && row<rows;++row)
 		{
 			for(unsigned int col=0;col<cols-2;++col) //do not consider author and timestamp
-				if(viewPair.second.getDataView()[row][col] !=
+				if(viewPairReverseIterator->second.getDataView()[row][col] !=
 						needleView->getDataView()[row][col])
 				{
 					match = false;
 
 //					__COUT__ << "Value name mismatch " << col << ":" <<
-//							viewPair.second.getDataView()[row][col] << "[" <<
-//							viewPair.second.getDataView()[row][col].size() << "]" <<
+//							viewPairReverseIterator->second.getDataView()[row][col] << "[" <<
+//							viewPairReverseIterator->second.getDataView()[row][col].size() << "]" <<
 //							" vs " <<
 //							needleView->getDataView()[row][col] << "[" <<
 //							needleView->getDataView()[row][col].size() << "]" <<
@@ -303,8 +305,8 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 		}
 		if(match)
 		{
-			__COUT_INFO__ << "Duplicate version found: " << viewPair.first << std::endl;
-			return viewPair.first;
+			__COUT_INFO__ << "Duplicate version found: " << viewPairReverseIterator->first << std::endl;
+			return viewPairReverseIterator->first;
 		}
 	}
 
