@@ -525,8 +525,15 @@ bool Supervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 			stateMachineWorkLoopManager_.getMessage(workLoop));
 	stateMachineWorkLoopManager_.report(workLoop, reply, 100, true);
 
-	__COUT__ << "Done with message" << std::endl;
+	__COUT__ << "Done with message. Reply = " << reply << std::endl;
 	stateMachineSemaphore_.give();
+
+	if(reply == "Fault")
+	{
+		__SS__ << "Failure to send Workloop transition command! Unrecognized transition name." << std::endl;
+		__COUT_ERR__ << ss.str();
+		__MOUT_ERR__ << ss.str();
+	}
 	return false; //execute once and automatically remove the workloop so in WorkLoopManager the try workLoop->remove(job_) could be commented out
 	//return true;//go on and then you must do the workLoop->remove(job_) in WorkLoopManager
 }
@@ -1015,29 +1022,38 @@ throw (toolbox::fsm::exception::Exception)
 				supervisorContextUID_, supervisorApplicationUID_);
 		if(!configLinkNode.isDisconnected())
 		{
-			try //for backwards compatibility
+
+			try //errors in dump are not tolerated
 			{
-				ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration");
-				if(!fsmLinkNode.isDisconnected() &&
-						fsmLinkNode.getNode(activeStateMachineName_ +
-								"/EnableConfigurationDumpOnConfigureTransition").getValue<bool>())
+				bool dumpConfiguration = true;
+				ConfigurationTree fsmLinkNode;
+				try //for backwards compatibility
+				{
+					fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration").
+							getNode(activeStateMachineName_);
+					dumpConfiguration = fsmLinkNode.getNode("EnableConfigurationDumpOnConfigureTransition").
+							getValue<bool>();
+				}
+				catch(std::runtime_error &e)
+				{
+					__COUT_INFO__ << "FSM configuration dump Link disconnected." << std::endl;
+					dumpConfiguration = false;
+				}
+
+				if(dumpConfiguration)
 				{
 					//dump configuration
 					theConfigurationManager_->dumpActiveConfiguration(
-							fsmLinkNode.getNode(activeStateMachineName_ +
-									"/ConfigurationDumpOnConfigureFilePath").getValue<std::string>() +
-							"/" +
-							fsmLinkNode.getNode(activeStateMachineName_ +
-									"/ConfigurationDumpOnConfigureFileRadix").getValue<std::string>() +
-							"_" +
-							std::to_string(time(0)) +
-							".dump",
-							fsmLinkNode.getNode(activeStateMachineName_ +
-									"/ConfigurationDumpOnConfigureFormat").getValue<std::string>()
+							fsmLinkNode.getNode("ConfigurationDumpOnConfigureFilePath").getValue<std::string>() +
+									"/" +
+									fsmLinkNode.getNode("ConfigurationDumpOnConfigureFileRadix").getValue<std::string>() +
+											"_" +
+											std::to_string(time(0)) +
+											".dump",
+											fsmLinkNode.getNode("ConfigurationDumpOnConfigureFormat").getValue<std::string>()
 					);
 				}
-				else
-					__COUT_INFO__ << "FSM Link disconnected." << std::endl;
+
 			}
 			catch(std::runtime_error &e) {
 				__SS__ << "\nTransition to Configuring interrupted! There was an error identified " <<
@@ -1055,7 +1071,6 @@ throw (toolbox::fsm::exception::Exception)
 				XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());
 				return;
 			}
-
 		}
 	}
 
@@ -1149,34 +1164,42 @@ throw (toolbox::fsm::exception::Exception)
 				supervisorContextUID_, supervisorApplicationUID_);
 		if(!configLinkNode.isDisconnected())
 		{
-			try //for backwards compatibility
+			try //errors in dump are not tolerated
 			{
-				ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration");
-				if(!fsmLinkNode.isDisconnected() &&
-						fsmLinkNode.getNode(activeStateMachineName_ +
-								"/EnableConfigurationDumpOnRunTransition").getValue<bool>())
+				bool dumpConfiguration = true;
+				ConfigurationTree fsmLinkNode;
+				try //for backwards compatibility
+				{
+					fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration").
+							getNode(activeStateMachineName_);
+					dumpConfiguration = fsmLinkNode.getNode("EnableConfigurationDumpOnRunTransition").
+							getValue<bool>();
+				}
+				catch(std::runtime_error &e)
+				{
+					__COUT_INFO__ << "FSM configuration dump Link disconnected." << std::endl;
+					dumpConfiguration = false;
+				}
+
+				if(dumpConfiguration)
 				{
 					//dump configuration
 					theConfigurationManager_->dumpActiveConfiguration(
-							fsmLinkNode.getNode(activeStateMachineName_ +
-									"/ConfigurationDumpOnRunFilePath").getValue<std::string>() +
+							fsmLinkNode.getNode("ConfigurationDumpOnRunFilePath").getValue<std::string>() +
 							"/" +
-							fsmLinkNode.getNode(activeStateMachineName_ +
-									"/ConfigurationDumpOnRunFileRadix").getValue<std::string>() +
+							fsmLinkNode.getNode("ConfigurationDumpOnRunFileRadix").getValue<std::string>() +
 							"_Run" +
 							runNumber +
 							"_" +
 							std::to_string(time(0)) +
 							".dump",
-							fsmLinkNode.getNode(activeStateMachineName_ +
-									"/ConfigurationDumpOnRunFormat").getValue<std::string>()
+							fsmLinkNode.getNode("ConfigurationDumpOnRunFormat").getValue<std::string>()
 					);
 				}
-				else
-					__COUT_INFO__ << "FSM Link disconnected." << std::endl;
+
 			}
 			catch(std::runtime_error &e) {
-				__SS__ << "\nTransition to Configuring interrupted! There was an error identified " <<
+				__SS__ << "\nTransition to Running interrupted! There was an error identified " <<
 						"during the configuration dump attempt:\n\n " <<
 						e.what() << std::endl;
 				__COUT_ERR__ << "\n" << ss.str();
@@ -1184,14 +1207,13 @@ throw (toolbox::fsm::exception::Exception)
 				return;
 			}
 			catch(...) {
-				__SS__ << "\nTransition to Configuring interrupted! There was an error identified " <<
+				__SS__ << "\nTransition to Running interrupted! There was an error identified " <<
 						"during the configuration dump attempt.\n\n " <<
 						std::endl;
 				__COUT_ERR__ << "\n" << ss.str();
 				XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());
 				return;
 			}
-
 		}
 	}
 
@@ -2080,13 +2102,15 @@ throw (xgi::exception::Exception)
 	uint8_t userPermissions;
 	uint64_t uid;
 	std::string userWithLock;
+	bool refreshCookie = Command != "getSystemMessages" &&
+			Command != "getCurrentState" &&
+			Command != "gatewayLaunchOTS" &&
+			Command != "gatewayLaunchWiz";
 
 	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions,
 			&uid, "0",
-			Command != "getSystemMessages" &&
-				Command != "gatewayLaunchOTS" &&
-				Command != "gatewayLaunchWiz",
-				&userWithLock))
+			refreshCookie,
+			&userWithLock))
 	{
 		*out << cookieCode;
 		return;
@@ -2579,8 +2603,19 @@ throw (xgi::exception::Exception)
 					//else
 					//	__COUT_INFO__ << "FSM Link disconnected." << std::endl;
 				}
-				catch(std::runtime_error &e) { __COUT_INFO__ << e.what() << std::endl; }
-				catch(...) { __COUT_ERR__ << "Unknown error. Should never happen." << std::endl; }
+				catch(std::runtime_error &e)
+				{
+					//__COUT_INFO__ << e.what() << std::endl;
+					//__COUT_INFO__ << "No state machine Run alias. Ignoring and assuming alias of '" <<
+					//		stateMachineRunAlias << ".'" << std::endl;
+
+				}
+				catch(...) {
+					__COUT_ERR__ << "Unknown error. Should never happen." << std::endl;
+
+					__COUT_INFO__ << "No state machine Run alias. Ignoring and assuming alias of '" <<
+							stateMachineRunAlias << ".'" << std::endl;
+				}
 			}
 			//else
 			//	__COUT_INFO__ << "FSM Link disconnected." << std::endl;

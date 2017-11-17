@@ -1150,12 +1150,14 @@ unsigned int ConfigurationView::findRowInGroup(unsigned int col, const std::stri
 	}
 
 	__SS__ << "\tIn view: " << tableName_ << ", Can't find in group the value=" <<
-			value << " in column named " <<
-			columnsInfo_[col].getName() <<  " with type=" <<
-			columnsInfo_[col].getType() << " and GroupID: " <<
-			groupId << " in column " << groupIdCol <<
-			" with GroupID child link index " << childLinkIndex << std::endl;
-	__COUT__ << "\n" << ss.str();
+			value << " in column named '" <<
+			columnsInfo_[col].getName() <<  "' with type=" <<
+			columnsInfo_[col].getType() << " and GroupID: '" <<
+			groupId << "' in column '" << groupIdCol <<
+			"' with GroupID child link index '" << childLinkIndex << "'" << std::endl;
+	//Note: findRowInGroup gets purposely called by configuration GUI a lot looking for exceptions
+	//	so may not want to print out
+	//__COUT__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
 
@@ -1169,7 +1171,7 @@ unsigned int ConfigurationView::findCol(const std::string& name) const
 			return col;
 
 	__SS__ << "\tIn view: " << tableName_ <<
-			", Can't find column named " << name << std::endl;
+			", Can't find column named '" << name << "'" << std::endl;
 	ss << "Existing columns:\n";
 	for(unsigned int col=0; col<columnsInfo_.size(); ++col)
 		ss << "\t" << columnsInfo_[col].getName() << "\n";
