@@ -61,8 +61,8 @@ struct CommandPacket {
   uint64_t data[182];
 };
 
-  typedef std::array<uint8_t, 64050> packetBuffer_t;
-  typedef std::list<std::unique_ptr<packetBuffer_t>> packetBuffer_list_t;
+  typedef std::string packetBuffer_t;
+  typedef std::list<packetBuffer_t> packetBuffer_list_t;
 
   class UDPReceiver : public artdaq::CommandableFragmentGenerator {
   public:
