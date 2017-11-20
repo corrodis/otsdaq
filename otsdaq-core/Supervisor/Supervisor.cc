@@ -1026,13 +1026,17 @@ throw (toolbox::fsm::exception::Exception)
 			try //errors in dump are not tolerated
 			{
 				bool dumpConfiguration = true;
-				ConfigurationTree fsmLinkNode;
+				std::string dumpFilePath, dumpFileRadix, dumpFormat;
 				try //for backwards compatibility
 				{
-					fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration").
+					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration").
 							getNode(activeStateMachineName_);
 					dumpConfiguration = fsmLinkNode.getNode("EnableConfigurationDumpOnConfigureTransition").
 							getValue<bool>();
+					dumpFilePath = fsmLinkNode.getNode("ConfigurationDumpOnConfigureFilePath").getValue<std::string>();
+					dumpFileRadix = fsmLinkNode.getNode("ConfigurationDumpOnConfigureFileRadix").getValue<std::string>();
+					dumpFormat = fsmLinkNode.getNode("ConfigurationDumpOnConfigureFormat").getValue<std::string>();
+
 				}
 				catch(std::runtime_error &e)
 				{
@@ -1044,13 +1048,13 @@ throw (toolbox::fsm::exception::Exception)
 				{
 					//dump configuration
 					theConfigurationManager_->dumpActiveConfiguration(
-							fsmLinkNode.getNode("ConfigurationDumpOnConfigureFilePath").getValue<std::string>() +
-									"/" +
-									fsmLinkNode.getNode("ConfigurationDumpOnConfigureFileRadix").getValue<std::string>() +
-											"_" +
-											std::to_string(time(0)) +
-											".dump",
-											fsmLinkNode.getNode("ConfigurationDumpOnConfigureFormat").getValue<std::string>()
+							dumpFilePath +
+							"/" +
+							dumpFileRadix +
+							"_" +
+							std::to_string(time(0)) +
+							".dump",
+							dumpFormat
 					);
 				}
 
@@ -1167,13 +1171,16 @@ throw (toolbox::fsm::exception::Exception)
 			try //errors in dump are not tolerated
 			{
 				bool dumpConfiguration = true;
-				ConfigurationTree fsmLinkNode;
+				std::string dumpFilePath, dumpFileRadix, dumpFormat;
 				try //for backwards compatibility
 				{
-					fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration").
+					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration").
 							getNode(activeStateMachineName_);
 					dumpConfiguration = fsmLinkNode.getNode("EnableConfigurationDumpOnRunTransition").
 							getValue<bool>();
+					dumpFilePath = fsmLinkNode.getNode("ConfigurationDumpOnRunFilePath").getValue<std::string>();
+					dumpFileRadix = fsmLinkNode.getNode("ConfigurationDumpOnRunFileRadix").getValue<std::string>();
+					dumpFormat = fsmLinkNode.getNode("ConfigurationDumpOnRunFormat").getValue<std::string>();
 				}
 				catch(std::runtime_error &e)
 				{
@@ -1185,15 +1192,15 @@ throw (toolbox::fsm::exception::Exception)
 				{
 					//dump configuration
 					theConfigurationManager_->dumpActiveConfiguration(
-							fsmLinkNode.getNode("ConfigurationDumpOnRunFilePath").getValue<std::string>() +
+							dumpFilePath +
 							"/" +
-							fsmLinkNode.getNode("ConfigurationDumpOnRunFileRadix").getValue<std::string>() +
+							dumpFileRadix +
 							"_Run" +
 							runNumber +
 							"_" +
 							std::to_string(time(0)) +
 							".dump",
-							fsmLinkNode.getNode("ConfigurationDumpOnRunFormat").getValue<std::string>()
+							dumpFormat
 					);
 				}
 
