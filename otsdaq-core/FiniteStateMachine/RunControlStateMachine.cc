@@ -96,7 +96,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 		xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	__COUT__ << "Starting state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
+	__COUT__ << "Starting state for " << stateMachineName_ << " is " <<
+			theStateMachine_.getCurrentStateName() << std::endl;
 	__COUT__ << SOAPUtilities::translate(message) << std::endl;
 	std::string command = SOAPUtilities::translate(message).getCommand();
 	//__COUT__ << "Command:-" << command << "-" << std::endl;
@@ -110,6 +111,16 @@ throw (xoap::exception::Exception)
 		__SS__ << command << " was received! Immediately throwing FSM exception." << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
 		XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());
+		return SOAPUtilities::makeSOAPMessageReference(result);
+	}
+
+
+	//if already Halted, respond to Initialize with "done"
+	//	(this avoids race conditions involved with artdaq mpi reset)
+	if(command == "Initialize" &&
+			theStateMachine_.getCurrentStateName() == "Halted")
+	{
+		__COUT__ << "Already Initialized.. ignoring Initialize command." << std::endl;
 		return SOAPUtilities::makeSOAPMessageReference(result);
 	}
 

@@ -383,7 +383,8 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 		}
 		catch(const std::runtime_error& e)
 		{
-			__SS__ << "Are the DAQ destinations valid? Error occurred looking for Board Reader DAQ sources: " << e.what() << std::endl;
+			__SS__ << "Are the DAQ destinations valid? Error occurred looking for Board Reader DAQ sources for UID '" <<
+					boardReaderNode.getValue() << "': " << e.what() << std::endl;
 			__COUT_ERR__ << ss.str() << std::endl;
 			throw std::runtime_error(ss.str());
 		}
