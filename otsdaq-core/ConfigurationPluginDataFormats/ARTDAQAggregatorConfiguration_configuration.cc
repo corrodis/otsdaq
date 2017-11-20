@@ -366,7 +366,8 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 			}
 			catch(const std::runtime_error& e)
 			{
-				__SS__ << "Are the DAQ sources valid? Error occurred looking for Aggregator DAQ sources: " << e.what() << std::endl;
+				__SS__ << "Are the DAQ sources valid? Error occurred looking for Aggregator DAQ sources for UID '" <<
+						aggregatorNode.getValue() << "': " << e.what() << std::endl;
 				__COUT_ERR__ << ss.str() << std::endl;
 				throw std::runtime_error(ss.str());
 			}
@@ -461,7 +462,8 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 			}
 			catch(const std::runtime_error& e)
 			{
-				__SS__ << "Are the DAQ destinations valid? Error occurred looking for Aggregator DAQ destinations: " << e.what() << std::endl;
+				__SS__ << "Are the DAQ destinations valid? Error occurred looking for Aggregator DAQ destinations for UID '" <<
+						aggregatorNode.getValue() << "': " << e.what() << std::endl;
 				__COUT_ERR__ << ss.str() << std::endl;
 				throw std::runtime_error(ss.str());
 			}

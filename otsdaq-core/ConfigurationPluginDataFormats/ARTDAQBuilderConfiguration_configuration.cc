@@ -302,7 +302,8 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 			}
 			catch(const std::runtime_error& e)
 			{
-				__SS__ << "Are the Net Monitor Transport Service destinations valid? Error occurred looking for Event Builder transport service destinations: " << e.what() << std::endl;
+				__SS__ << "Are the Net Monitor Transport Service destinations valid? Error occurred looking for Event Builder transport service destinations for UID '" <<
+						builderNode.getValue() << "': " << e.what() << std::endl;
 				__COUT_ERR__ << ss.str() << std::endl;
 				throw std::runtime_error(ss.str());
 			}
@@ -381,7 +382,8 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 			}
 			catch(const std::runtime_error& e)
 			{
-				__SS__ << "Are the DAQ sources valid? Error occurred looking for Event Builder DAQ sources: " << e.what() << std::endl;
+				__SS__ << "Are the DAQ sources valid? Error occurred looking for Event Builder DAQ sources for UID '" <<
+						builderNode.getValue() << "': " << e.what() << std::endl;
 				__COUT_ERR__ << ss.str() << std::endl;
 				throw std::runtime_error(ss.str());
 			}
