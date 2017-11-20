@@ -44,6 +44,11 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const & ps)
         "UDPReceiver: Cannot bind data socket to port " << dataport_ << std::endl;
       exit(1);
 	}
+  /*if(fcntl(datasocket_, F_SETFL, O_NONBLOCK) == -1) {
+    
+      throw art::Exception(art::errors::Configuration) << 
+        "UDPReceiver: Cannot set socket to nonblocking!" << std::endl;
+	}*/
 
   si_data_.sin_family = AF_INET;
   si_data_.sin_port = htons(dataport_);
@@ -85,63 +90,75 @@ void ots::UDPReceiver::receiveLoop_() {
 		if(ufds[0].revents == POLLIN || ufds[0].revents == POLLPRI) 
 		  {
 
-			//FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
-			//FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
-			//FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
-			uint8_t peekBuffer[4];
-			recvfrom(datasocket_, peekBuffer, sizeof(peekBuffer), MSG_PEEK,
-					 (struct sockaddr *) &si_data_, (socklen_t*)sizeof(si_data_));
+		    //FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
+		    //FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
+		    //FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
+		    uint8_t peekBuffer[4];
+		      socklen_t dataSz = sizeof(si_data_);
+		    recvfrom(datasocket_, peekBuffer, sizeof(peekBuffer), MSG_PEEK,
+			     (struct sockaddr *) &si_data_, &dataSz);
 
-			mf::LogInfo("UDPReceiver") << "Received UDP Packet with sequence number " << std::hex << "0x" << static_cast<int>(peekBuffer[0]) << "!" << std::dec;
-			std::cout << __COUT_HDR_FL__ << "peekBuffer[0] == expectedPacketNumber_: " << std::hex << static_cast<int>(peekBuffer[0]) << " =?= " << (int)expectedPacketNumber_ << std::endl;
+		    mf::LogInfo("UDPReceiver") << "Received UDP Packet with sequence number " << std::hex << "0x" << static_cast<int>(peekBuffer[1]) << "!" << std::dec;
+		    std::cout << __COUT_HDR_FL__ << "peekBuffer[1] == expectedPacketNumber_: " << std::hex << static_cast<int>(peekBuffer[1]) << " =?= " << (int)expectedPacketNumber_ << std::endl;
+		    std::cout << __COUT_HDR_FL__ << "peekBuffer: 0: " << std::hex << static_cast<int>(peekBuffer[0]) 
+                                                           << ", 1: " << std::hex << static_cast<int>(peekBuffer[1]) 
+                                                           << ", 2: " << std::hex << static_cast<int>(peekBuffer[2]) 
+                                                           << ", 3: " << std::hex << static_cast<int>(peekBuffer[3])  << std::endl;
 
-			uint8_t seqNum = peekBuffer[0];
-			//ReturnCode dataCode = getReturnCode(peekBuffer[0]);
-			if(seqNum >= expectedPacketNumber_ || (seqNum < 10 && expectedPacketNumber_ > 240) || droppedPackets > 0 || expectedPacketNumber_ - seqNum > 20)
-			  {
-				if(seqNum != expectedPacketNumber_ && (seqNum >= expectedPacketNumber_ || (seqNum < 10 && expectedPacketNumber_ > 200)))
-				  {
-					int deltaHi = seqNum - expectedPacketNumber_;
-					int deltaLo = 4294967295 + seqNum - expectedPacketNumber_;
-					droppedPackets += deltaLo;// < 255 ? deltaLo : deltaHi;
-					mf::LogWarning("UDPReceiver") << "Dropped/Delayed packets detected: " << std::dec << std::to_string(droppedPackets);
-					expectedPacketNumber_ = seqNum;
-				  } else if (seqNum != expectedPacketNumber_) {
-				  int delta = expectedPacketNumber_ - seqNum;
-				  mf::LogWarning("UDPReceiver") << std::dec << "Sequence Number significantly different than expected! (delta: " << delta << ")";
-				}
+		    uint8_t seqNum = peekBuffer[1];
+		    //ReturnCode dataCode = getReturnCode(peekBuffer[0]);
+		    if(seqNum >= expectedPacketNumber_ || (seqNum < 10 && expectedPacketNumber_ > 240) || droppedPackets > 0 || expectedPacketNumber_ - seqNum > 20)		      {
+
+		      if(seqNum != expectedPacketNumber_ && (seqNum >= expectedPacketNumber_ || (seqNum < 10 && expectedPacketNumber_ > 200)))			  {
+			int deltaHi = seqNum - expectedPacketNumber_;
+			int deltaLo = 4294967295 + seqNum - expectedPacketNumber_;
+			droppedPackets += deltaLo;// < 255 ? deltaLo : deltaHi;
+			mf::LogWarning("UDPReceiver") << "Dropped/Delayed packets detected: " << std::dec << std::to_string(droppedPackets);
+			expectedPacketNumber_ = seqNum;
+		      } 
+		      else if (seqNum != expectedPacketNumber_) {
+			int delta = expectedPacketNumber_ - seqNum;
+			mf::LogWarning("UDPReceiver") << std::dec << "Sequence Number significantly different than expected! (delta: " << delta << ")";
+		      }
 				
-				packetBuffer_t buffer;
-				buffer.resize(65000);
-				int sts= recvfrom(datasocket_, &buffer[0], sizeof(buffer), 0,(struct sockaddr *) &si_data_, (socklen_t*)sizeof(si_data_));
-				if(sts > 0) {
-				  buffer.resize(sts);
-				}
+		      packetBuffer_t buffer;
+		      buffer.resize(1500);
+		      
+
+		      int sts = recvfrom(datasocket_, &buffer[0], sizeof(buffer), 0,(struct sockaddr *) &si_data_, &dataSz);
+		      if(sts == -1){
+			std::cout << __COUT_HDR_FL__ << "Error on socket: " << strerror(errno) << std::endl;
+		      } else {
+			std::cout << __COUT_HDR_FL__ << "Received " << sts << " bytes." << std::endl;
+		      }
+		      if(sts > 0) {
+			buffer.resize(sts);
+		      }
 				
-				if(droppedPackets == 0) {
-					std::lock_guard<std::mutex> lock(receiveBufferLock_);
-					receiveBuffers_.emplace_back(buffer);
-				}
-				else {
-				  bool found = false;
-				  for(packetBuffer_list_t::reverse_iterator it = packetBuffers_.rbegin(); it != packetBuffers_.rend(); ++it) {
-				    if(seqNum < static_cast<uint8_t>((it)->at(1))) {
-					std::lock_guard<std::mutex> lock(receiveBufferLock_);
-					receiveBuffers_.emplace(it.base(), buffer);
-					  droppedPackets--;
-					  expectedPacketNumber_--;
-					  found = true;
-					}
-				  }
-				  if(!found) {
-					std::lock_guard<std::mutex> lock(receiveBufferLock_);
-					receiveBuffers_.emplace_back(buffer);
-				  }
-				}
-				mf::LogInfo("UDPReceiver") << "Now placing UDP packet with sequence number " << std::hex << (int)seqNum << " into buffer." << std::dec;
+		      if(droppedPackets == 0) {
+			std::unique_lock<std::mutex> lock(receiveBufferLock_);
+			receiveBuffers_.push_back(buffer);
+		      }
+		      else {
+			bool found = false;
+			for(packetBuffer_list_t::reverse_iterator it = packetBuffers_.rbegin(); it != packetBuffers_.rend(); ++it) {
+			  if(seqNum < static_cast<uint8_t>((it)->at(1))) {
+			    std::unique_lock<std::mutex> lock(receiveBufferLock_);
+			    receiveBuffers_.insert(it.base(), buffer);
+			    droppedPackets--;
+			    expectedPacketNumber_--;
+			    found = true;
 			  }
+			}
+			if(!found) {
+			  std::unique_lock<std::mutex> lock(receiveBufferLock_);
+			  receiveBuffers_.push_back(buffer);
+			}
+		      }
+		      mf::LogInfo("UDPReceiver") << "Now placing UDP packet with sequence number " << std::hex << (int)seqNum << " into buffer." << std::dec;
+		    }
   
-			++expectedPacketNumber_;
+		    ++expectedPacketNumber_;
 		  }
 	  }
     std::cout << __COUT_HDR_FL__ << "waiting..." << std::endl;
@@ -156,17 +173,25 @@ bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs & output)
     return false;
   }
 
-  while(receiveBuffers_.size() == 0 && isTimerExpired_()) { usleep(1000); }
-
   {
-	std::lock_guard<std::mutex> lock(receiveBufferLock_);
+	std::unique_lock<std::mutex> lock(receiveBufferLock_);
 	  std::move(receiveBuffers_.begin(), receiveBuffers_.end(), std::inserter(packetBuffers_,packetBuffers_.end()));
       receiveBuffers_.clear();
   }
-  mf::LogInfo("UDPReceiver") << "Calling ProcessData";
+
+if(packetBuffers_.size() > 0) {
+  size_t packetBufferSize =0;
+  for(auto& buf : packetBuffers_) {
+    packetBufferSize += buf.size();
+  }
+  mf::LogInfo("UDPReceiver") << "Calling ProcessData, packetBuffers_.size() == " << std::to_string(packetBuffers_.size()) << ", sz = " << std::to_string(packetBufferSize);
   ProcessData_(output);
 
   mf::LogInfo("UDPReceiver") << "Returning output of size " << output.size() << " to TriggeredFragmentGenerator";
+ } else {
+  // Sleep 10 times per poll timeout
+  usleep(100000);
+ }
   return true;
 }
 
