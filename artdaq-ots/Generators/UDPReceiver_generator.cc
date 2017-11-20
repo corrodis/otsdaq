@@ -88,14 +88,14 @@ void ots::UDPReceiver::receiveLoop_() {
 			//FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
 			//FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
 			//FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
-			uint32_t peekBuffer[6];
+			uint8_t peekBuffer[4];
 			recvfrom(datasocket_, peekBuffer, sizeof(peekBuffer), MSG_PEEK,
 					 (struct sockaddr *) &si_data_, (socklen_t*)sizeof(si_data_));
 
-			mf::LogInfo("UDPReceiver") << "Received UDP Packet with sequence number " << std::hex << "0x" << (int)peekBuffer[1] << "!" << std::dec;
-			std::cout << __COUT_HDR_FL__ << "peekBuffer[1] == expectedPacketNumber_: " << std::hex << (int)peekBuffer[1] << " =?= " << (int)expectedPacketNumber_ << std::endl;
+			mf::LogInfo("UDPReceiver") << "Received UDP Packet with sequence number " << std::hex << "0x" << static_cast<int>(peekBuffer[0]) << "!" << std::dec;
+			std::cout << __COUT_HDR_FL__ << "peekBuffer[0] == expectedPacketNumber_: " << std::hex << static_cast<int>(peekBuffer[0]) << " =?= " << (int)expectedPacketNumber_ << std::endl;
 
-			uint32_t seqNum = peekBuffer[5];
+			uint8_t seqNum = peekBuffer[0];
 			//ReturnCode dataCode = getReturnCode(peekBuffer[0]);
 			if(seqNum >= expectedPacketNumber_ || (seqNum < 10 && expectedPacketNumber_ > 240) || droppedPackets > 0 || expectedPacketNumber_ - seqNum > 20)
 			  {
@@ -111,21 +111,23 @@ void ots::UDPReceiver::receiveLoop_() {
 				  mf::LogWarning("UDPReceiver") << std::dec << "Sequence Number significantly different than expected! (delta: " << delta << ")";
 				}
 				
-				packetBuffer_t* buffer = new packetBuffer_t();
-				memset(&((*buffer).at(0)),0,sizeof(packetBuffer_t));
-				int DJN= recvfrom(datasocket_, &(*buffer).at(0), sizeof(packetBuffer_t), 0,(struct sockaddr *) &si_data_, (socklen_t*)sizeof(si_data_));
-				mf::LogInfo("DJN UDPReceiver") << "UDP packet recvfrom got Nbytes="  << (int)DJN << " into buffer.";
+				packetBuffer_t buffer;
+				buffer.resize(65000);
+				int sts= recvfrom(datasocket_, &buffer[0], sizeof(buffer), 0,(struct sockaddr *) &si_data_, (socklen_t*)sizeof(si_data_));
+				if(sts > 0) {
+				  buffer.resize(sts);
+				}
 				
 				if(droppedPackets == 0) {
 					std::lock_guard<std::mutex> lock(receiveBufferLock_);
-				  receiveBuffers_.emplace_back(std::unique_ptr<packetBuffer_t>(buffer));
+					receiveBuffers_.emplace_back(buffer);
 				}
 				else {
 				  bool found = false;
 				  for(packetBuffer_list_t::reverse_iterator it = packetBuffers_.rbegin(); it != packetBuffers_.rend(); ++it) {
-					if(seqNum < (*it)->at(1)) {
+				    if(seqNum < static_cast<uint8_t>((it)->at(1))) {
 					std::lock_guard<std::mutex> lock(receiveBufferLock_);
-					receiveBuffers_.emplace(it.base(), std::unique_ptr<packetBuffer_t>(buffer));
+					receiveBuffers_.emplace(it.base(), buffer);
 					  droppedPackets--;
 					  expectedPacketNumber_--;
 					  found = true;
@@ -133,7 +135,7 @@ void ots::UDPReceiver::receiveLoop_() {
 				  }
 				  if(!found) {
 					std::lock_guard<std::mutex> lock(receiveBufferLock_);
-					receiveBuffers_.emplace_back(std::unique_ptr<packetBuffer_t>(buffer));
+					receiveBuffers_.emplace_back(buffer);
 				  }
 				}
 				mf::LogInfo("UDPReceiver") << "Now placing UDP packet with sequence number " << std::hex << (int)seqNum << " into buffer." << std::dec;
@@ -183,7 +185,7 @@ bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs & output)
   ots::UDPFragmentWriter thisFrag(*output.back());
 
   std::cout << __COUT_HDR_FL__ << "Received data, now placing data with UDP sequence number "
-            << std::hex << static_cast<int>((*packetBuffers_.front()).at(1)) 
+            << std::hex << static_cast<int>((packetBuffers_.front()).at(1)) 
             << " into UDPFragment" << std::endl;
   thisFrag.resize(64050 * packetBuffers_.size() + 1);
   std::ofstream rawOutput;
@@ -192,16 +194,16 @@ bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs & output)
     rawOutput.open(outputPath, std::ios::out | std::ios::app | std::ios::binary );
   }
 
-  DataType dataType = getDataType((*packetBuffers_.front()).at(0));
+  DataType dataType = getDataType((packetBuffers_.front()).at(0));
   thisFrag.set_hdr_type((int)dataType);
   int pos = 0;
   for(auto jj = packetBuffers_.begin(); jj != packetBuffers_.end(); ++jj) {
       for(int ii = 0; ii < 64050; ++ii) {
         // Null-terminate string types
-        if((*jj)->at(ii) == 0 && (dataType == DataType::JSON || dataType == DataType::String)) { break; }
+        if((jj)->at(ii) == 0 && (dataType == DataType::JSON || dataType == DataType::String)) { break; }
 
-        if(rawOutput_) rawOutput.write((char*)&((*jj)->at(ii)), sizeof(uint8_t));
-        *(thisFrag.dataBegin() + pos) = (*jj)->at(ii);
+        if(rawOutput_) rawOutput.write((char*)&((jj)->at(ii)), sizeof(uint8_t));
+        *(thisFrag.dataBegin() + pos) = (jj)->at(ii);
         ++pos;
       }
     }

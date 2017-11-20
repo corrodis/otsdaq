@@ -73,6 +73,8 @@ public:
 
     bool 								latestAndMockupColumnNumberMismatch	(void) const;
 
+    unsigned int             			getNumberOfStoredViews 	(void) const;
+
 protected:
     std::string 			configurationName_;
     std::string 			configurationDescription_;
@@ -83,7 +85,6 @@ protected:
     //Version and data associated to make it work like a cache.
     //It will be very likely just 1 version
     //NOTE: must be very careful to setVersion of view after manipulating (e.g. copy from different version view)
-    unsigned int             			getNumberOfStoredViews 	(void) const;
     std::map<ConfigurationVersion, ConfigurationView> configurationViews_;
 
 };

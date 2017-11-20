@@ -1617,7 +1617,7 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string &cookieCode,
 	uint64_t  i, j;
 
 	//__COUT__ << "I care about cookie codes: " << CareAboutCookieCodes_ << std::endl;
-
+	//__COUT__ << "refresh cookie " << refresh << std::endl;
 
 	if (!CareAboutCookieCodes_) //No Security, so grant admin
 	{
@@ -1625,7 +1625,8 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string &cookieCode,
 		if (uid) 			*uid = getAdminUserID();
 		if (userWithLock)	*userWithLock = usersUsernameWithLock_;
 
-		cookieCode = genCookieCode(); //return "dummy" cookie code
+		if(cookieCode.size() != COOKIE_CODE_LENGTH)
+			cookieCode = genCookieCode(); //return "dummy" cookie code
 
 		return true;
 	}
