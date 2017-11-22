@@ -21,10 +21,10 @@ public:
 	//Getters
 
 	struct Command {
-		std::string type;
+		std::string type_;
 		std::map<
 			std::string /*param name*/,
-			std::string /*param value*/> params;
+			std::string /*param value*/> params_;
 	};
 
 	std::vector<IterateConfiguration::Command> getPlanCommands(ConfigurationManager *configManager, const std::string& plan) const;

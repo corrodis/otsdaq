@@ -59,6 +59,7 @@ public:
     static const std::string DEFAULT_ADMIN_USERNAME;
     static const std::string DEFAULT_ADMIN_DISPLAY_NAME;
 	static const std::string DEFAULT_ADMIN_EMAIL;
+    static const std::string DEFAULT_ITERATOR_USERNAME;
 
     static const std::string REQ_NO_LOGIN_RESPONSE;
     static const std::string REQ_NO_PERMISSION_RESPONSE;

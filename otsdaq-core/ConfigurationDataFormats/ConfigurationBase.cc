@@ -255,6 +255,7 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 	{
 		if(viewPairReverseIterator->first == needleVersion) continue; //skip needle version
 		if(viewPairReverseIterator->first == ignoreVersion) continue; //skip ignore version
+		if(viewPairReverseIterator->first.isTemporaryVersion()) continue; //skip temporary versions
 
 		if(viewPairReverseIterator->second.getNumberOfRows() != rows)
 			continue; //row mismatch

@@ -260,6 +260,9 @@ throw (xgi::exception::Exception)
 void Supervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 throw (xgi::exception::Exception)
 {
+	//for simplicity assume all commands should be mutually exclusive with iterator thread state machine accesses (really should just be careful with RunControlStateMachine access)
+	std::lock_guard<std::mutex> lock(stateMachineAccessMutex_);
+
 	cgicc::Cgicc cgi(in);
 
 	uint8_t userPermissions;
@@ -2096,6 +2099,9 @@ throw (xgi::exception::Exception)
 void Supervisor::request(xgi::Input * in, xgi::Output * out)
 throw (xgi::exception::Exception)
 {
+	//for simplicity assume all commands should be mutually exclusive with iterator thread state machine accesses (really should just be careful with RunControlStateMachine access)
+	std::lock_guard<std::mutex> lock(stateMachineAccessMutex_);
+
 	cgicc::Cgicc cgi(in);
 
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
@@ -2582,7 +2588,8 @@ throw (xgi::exception::Exception)
 		//__COUT__ << "current state: " << theStateMachine_.getCurrentStateName() << std::endl;
 
 
-		//// ======================== get run name based on fsm name ====
+		//// ======================== get run alias based on fsm name ====
+
 		std::string fsmName = CgiDataUtilities::getData(cgi, "fsmName");
 		//		__COUT__ << "fsmName = " << fsmName << std::endl;
 		//		__COUT__ << "activeStateMachineName_ = " << activeStateMachineName_ << std::endl;
@@ -2630,8 +2637,9 @@ throw (xgi::exception::Exception)
 			//__COUT__ << "stateMachineRunAlias  = " << stateMachineRunAlias	<< std::endl;
 
 			xmldoc.addTextElementToData("stateMachineRunAlias", stateMachineRunAlias);
-			//// ======================== get run name based on fsm name ====
 
+
+			//// ======================== get run number based on fsm name ====
 
 
 			if(theStateMachine_.getCurrentStateName() == "Running" ||

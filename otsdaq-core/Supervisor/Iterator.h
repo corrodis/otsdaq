@@ -32,16 +32,36 @@ private:
 
     struct IteratorWorkLoopStruct
 	{
-    	std::string fsmName_;
-    	ConfigurationManagerRW* cfgMgr;
+    	IteratorWorkLoopStruct(Iterator* iterator, ConfigurationManagerRW* cfgMgr)
+    	:theIterator_			(iterator)
+    	,cfgMgr_			(cfgMgr)
+    	,running_			(false)
+    	,commandBusy_		(false)
+    	,commandIndex_		((unsigned int)-1)
+    	{}
+
+    	Iterator *									theIterator_;
+    	ConfigurationManagerRW* 					cfgMgr_;
+
+    	bool 										running_, commandBusy_;
+
+    	std::string 								activePlan_;
+    	std::vector<IterateConfiguration::Command> 	commands_;
+    	unsigned int 								commandIndex_;
+
+    	//associated with FSM
+    	std::string 								fsmName_, fsmRunAlias_;
+    	unsigned int 								fsmNextRunNumber_;
+
+
 	};
 
     static void								IteratorWorkLoop			(Iterator *iterator);
-    static void								startCommand				(Iterator *iterator, std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
-    static bool								checkCommand				(Iterator *iterator, std::vector<IterateConfiguration::Command>& commands, unsigned int& commandIndex);
-    static void								startCommandChooseFSM		(const std::string& fsmName);
-    static void								startCommandConfigureAlias	(const std::string& systemAlias);
-    static bool								checkCommandConfigureAlias	();
+    static void								startCommand				(IteratorWorkLoopStruct *iteratorStruct);
+    static bool								checkCommand				(IteratorWorkLoopStruct *iteratorStruct);
+    static void								startCommandChooseFSM		(IteratorWorkLoopStruct *iteratorStruct, std::string fsmName);
+    static void								startCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct, std::string systemAlias);
+    static bool								checkCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct);
 
     std::mutex								accessMutex_;
     volatile bool							workloopRunning_;

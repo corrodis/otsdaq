@@ -131,7 +131,7 @@ private:
     std::pair<std::string /*group name*/, ConfigurationGroupKey> theConfigurationGroup_; //used to track the active configuration group at states after the configure state
 
     Iterator							theIterator_					;
-
+    std::mutex							stateMachineAccessMutex_		; //for sharing state machine access with iterator thread
 
 
     //Trash tests

@@ -103,7 +103,7 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 			continue; //skip disabled commands
 
 		commands.push_back(IterateConfiguration::Command());
-		commands.back().type = commandChild.second.getNode(
+		commands.back().type_ = commandChild.second.getNode(
 				IterateConfiguration::planTableCols_.CommandType_).getValue<std::string>();
 
 		auto commandSpecificFields = commandChild.second.getNode(
@@ -114,7 +114,7 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].first << std::endl;
 			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].second << std::endl;
 
-			commands.back().params.emplace(std::pair<
+			commands.back().params_.emplace(std::pair<
 					std::string /*param name*/,
 					std::string /*param value*/>(
 							commandSpecificFields[i].first,
