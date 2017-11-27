@@ -30,6 +30,7 @@ public:
 
 private:
 
+    //begin declaration of iterator workloop members
     struct IteratorWorkLoopStruct
 	{
     	IteratorWorkLoopStruct(Iterator* iterator, ConfigurationManagerRW* cfgMgr)
@@ -53,15 +54,21 @@ private:
     	std::string 								fsmName_, fsmRunAlias_;
     	unsigned int 								fsmNextRunNumber_;
 
+    	std::vector<std::string> 					fsmCommandParameters_;
 
-	};
+
+	}; //end declaration of iterator workloop members
 
     static void								IteratorWorkLoop			(Iterator *iterator);
     static void								startCommand				(IteratorWorkLoopStruct *iteratorStruct);
     static bool								checkCommand				(IteratorWorkLoopStruct *iteratorStruct);
-    static void								startCommandChooseFSM		(IteratorWorkLoopStruct *iteratorStruct, std::string fsmName);
-    static void								startCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct, std::string systemAlias);
+    static void								startCommandChooseFSM		(IteratorWorkLoopStruct *iteratorStruct, const std::string& fsmName);
+    static void								startCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct, const std::string& systemAlias);
     static bool								checkCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct);
+    static void								startCommandRun				(IteratorWorkLoopStruct *iteratorStruct, bool waitOnRunningThreads, unsigned int durationInSeconds = 0);
+    static bool								checkCommandRun				(IteratorWorkLoopStruct *iteratorStruct);
+
+    static bool								haltStateMachine			(Supervisor* theSupervisor, const std::string& fsmName);
 
     std::mutex								accessMutex_;
     volatile bool							workloopRunning_;
@@ -71,6 +78,7 @@ private:
     std::string								activePlanName_, lastStartedPlanName_, lastFinishedPlanName_;
     volatile unsigned int					activeCommandIndex_;
     volatile time_t							activeCommandStartTime_;
+    std::string 							lastFsmName_;
     std::string 							errorMessage_;
 
     Supervisor* 							theSupervisor_;

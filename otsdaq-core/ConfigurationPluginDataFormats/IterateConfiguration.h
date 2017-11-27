@@ -111,7 +111,6 @@ public:
 	{
 		const std::string WaitOnRunningThreads_ 	= "WaitForAllFrontEndsRunningThread";
 		const std::string DurationInSeconds_	 	= "DurationInSeconds";
-		const std::string ConfigurationDumpType_ 	= "ConfigurationDumpType";
 	} commandRunParams_;
 
 

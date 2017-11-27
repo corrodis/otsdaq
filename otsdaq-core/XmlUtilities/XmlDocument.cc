@@ -525,8 +525,6 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
     for(unsigned int i=0; i<inString.length(); i++)
         if(inString[i] != ' ')
         {
-
-
 			if(doit) std::cout << __COUT_HDR_FL__<< inString[i] << ":" <<
 					(int)inString[i] << ":" << inString << std::endl;
 
@@ -537,36 +535,46 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
 					(inString[i] > char(126) && inString[i] < char(161))) //this is aggravated by the bug in MFextensions (though Eric says he fixed on 8/24/2016)
 					//Note: greater than 255 should be impossible if by byte (but there are html chracters in 300s and 8000s)
             {
-            	if(allowWhiteSpace &&  //maintain new lines and tabs
+            	if(//maintain new lines and tabs
             			inString[i] == '\n')
             	{
-            		sprintf(htmlTmp,"&#%3.3d",inString[i]);
-                	inString.insert(i,htmlTmp); //insert html str sequence
-                	inString.replace(i+5,1,1,';');        // replace special character with ;
-                	i+=6; //skip to next char to check
-                	--i;
-            	}
-            	else if(allowWhiteSpace &&  //maintain new lines and tabs
-            			inString[i] == '\t')
-            	{
-            		if(0)
+            		if(allowWhiteSpace)
             		{
-						//tab = 8 spaces
-						sprintf(htmlTmp,"&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160");
+						sprintf(htmlTmp,"&#%3.3d",inString[i]);
 						inString.insert(i,htmlTmp); //insert html str sequence
-						inString.replace(i+47,1,1,';');        // replace special character with ;
-						i+=48; //skip to next char to check
+						inString.replace(i+5,1,1,';');        // replace special character with ;
+						i+=6; //skip to next char to check
 						--i;
             		}
-            		else //tab =  0x09
+            		else //translate to ' '
+            			inString[i] = ' ';
+            	}
+            	else if(//maintain new lines and tabs
+            			inString[i] == '\t')
+            	{
+            		if(allowWhiteSpace)
             		{
+						if(0)
+						{
+							//tab = 8 spaces
+							sprintf(htmlTmp,"&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160");
+							inString.insert(i,htmlTmp); //insert html str sequence
+							inString.replace(i+47,1,1,';');        // replace special character with ;
+							i+=48; //skip to next char to check
+							--i;
+						}
+						else //tab =  0x09
+						{
 
-                		sprintf(htmlTmp,"&#009");
-                    	inString.insert(i,htmlTmp); //insert html str sequence
-                    	inString.replace(i+5,1,1,';');        // replace special character with ;
-                    	i+=6; //skip to next char to check
-                    	--i;
+							sprintf(htmlTmp,"&#009");
+							inString.insert(i,htmlTmp); //insert html str sequence
+							inString.replace(i+5,1,1,';');        // replace special character with ;
+							i+=6; //skip to next char to check
+							--i;
+						}
             		}
+					else //translate to ' '
+						inString[i] = ' ';
             	}
             	else
             	{

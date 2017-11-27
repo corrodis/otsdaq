@@ -154,6 +154,10 @@ try
 
 				//valid HALT command!
 
+				iterator->haltStateMachine(
+						iterator->theSupervisor_,
+						theIteratorStruct.fsmName_);
+
 				iterator->activePlanIsRunning_ = false;
 				iterator->iteratorBusy_ = false;
 
@@ -393,7 +397,21 @@ void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
 	}
 	else if(type == IterateConfiguration::COMMAND_RUN)
 	{
-		//TODO
+		bool waitOnRunningThreads = false;
+		if("True" == iteratorStruct->commands_[iteratorStruct->commandIndex_].params_[
+			IterateConfiguration::commandRunParams_.WaitOnRunningThreads_])
+			waitOnRunningThreads = true;
+
+		unsigned int durationInSeconds;
+		sscanf(iteratorStruct->commands_[iteratorStruct->commandIndex_].params_[
+			IterateConfiguration::commandRunParams_.DurationInSeconds_].c_str(),
+				"%u",&durationInSeconds);
+
+
+		startCommandRun(
+				iteratorStruct,
+				waitOnRunningThreads,
+				durationInSeconds);
 		return;
 	}
 	else
@@ -439,8 +457,8 @@ bool Iterator::checkCommand(IteratorWorkLoopStruct *iteratorStruct)
 	}
 	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS)
 	{
-		//do nothing
-		return true;
+		sleep(1); //sleep to give FSM time to transition
+		return checkCommandConfigureAlias(iteratorStruct);
 	}
 	else if(type == IterateConfiguration::COMMAND_CONFIGURE_GROUP)
 	{
@@ -469,8 +487,8 @@ bool Iterator::checkCommand(IteratorWorkLoopStruct *iteratorStruct)
 	}
 	else if(type == IterateConfiguration::COMMAND_RUN)
 	{
-		//do nothing
-		return true;
+		sleep(1); //sleep to give FSM time to transition
+		return checkCommandRun(iteratorStruct);
 	}
 	else
 	{
@@ -481,12 +499,14 @@ bool Iterator::checkCommand(IteratorWorkLoopStruct *iteratorStruct)
 }
 
 //========================================================================================================================
-void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct *iteratorStruct, std::string fsmName)
+void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct *iteratorStruct,
+		const std::string& fsmName)
 {
 	__COUT__ << "fsmName " << fsmName << std::endl;
 
 
 	iteratorStruct->fsmName_ = fsmName;
+	iteratorStruct->theIterator_->lastFsmName_ = fsmName;
 
 	//Translate fsmName
 	//	to gives us run alias (fsmRunAlias_) and next run number (fsmNextRunNumber_)
@@ -550,22 +570,123 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct *iteratorStruct, std
 }
 
 //========================================================================================================================
-void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct, std::string systemAlias)
+// return true if an action was attempted
+bool Iterator::haltStateMachine(Supervisor* theSupervisor, const std::string& fsmName)
 {
-	__COUT__ << "systemAlias " << systemAlias << std::endl;
+	std::vector<std::string> fsmCommandParameters;
+	std::string errorStr = "";
+	std::string currentState = theSupervisor->theStateMachine_.getCurrentStateName();
 
-	std::vector<std::string> commandParameters;
-	commandParameters.push_back(systemAlias);
-
-	std::string errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(0,0,
-			"Configure",iteratorStruct->fsmName_,
-			"" /*fsmWindowName*/,
-			WebUsers::DEFAULT_ITERATOR_USERNAME,
-			commandParameters);
+	if(currentState == "Initialized" ||
+			currentState == "Halted")
+	{
+		__COUT__ << "Do nothing. Already halted." << std::endl;
+		return false;
+	}
+	else if(currentState == "Running")
+		errorStr = theSupervisor->attemptStateMachineTransition(
+				0,0,
+				"Abort",fsmName,
+				WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+				WebUsers::DEFAULT_ITERATOR_USERNAME,
+				fsmCommandParameters);
+	else
+		errorStr = theSupervisor->attemptStateMachineTransition(
+				0,0,
+				"Halt",fsmName,
+				WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+				WebUsers::DEFAULT_ITERATOR_USERNAME,
+				fsmCommandParameters);
 
 	if(errorStr != "")
 	{
-		__SS__ << "Iterator failed to configure with system alias '" << systemAlias <<
+		__SS__ << "Iterator failed to halt because of the following error: " << errorStr;
+		throw std::runtime_error(ss.str());
+	}
+
+	//else successfully launched
+	__COUT__ << "FSM in transition = " << theSupervisor->theStateMachine_.isInTransition() << std::endl;
+	__COUT__ << "haltStateMachine launched." << std::endl;
+	return true;
+}
+
+//========================================================================================================================
+void Iterator::startCommandRun(
+		IteratorWorkLoopStruct *iteratorStruct,
+		bool waitOnRunningThreads,
+		unsigned int durationInSeconds)
+{
+	__COUT__ << "waitOnRunningThreads " << waitOnRunningThreads << std::endl;
+	__COUT__ << "durationInSeconds " << durationInSeconds << std::endl;
+
+	iteratorStruct->fsmCommandParameters_.clear();
+
+	std::string errorStr = "";
+	std::string currentState = iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
+
+	//execute first transition (may need two)
+
+	if(currentState == "Configured")
+		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
+				0,0,
+				"Start",iteratorStruct->fsmName_,
+				WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+				WebUsers::DEFAULT_ITERATOR_USERNAME,
+				iteratorStruct->fsmCommandParameters_);
+	else
+		errorStr = "Can only Run from the Configured state. The current state is " +
+			currentState;
+
+
+	if(errorStr != "")
+	{
+		__SS__ << "Iterator failed to run because of the following error: " << errorStr;
+		throw std::runtime_error(ss.str());
+	}
+
+	//else successfully launched
+	__COUT__ << "FSM in transition = " << iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition() << std::endl;
+	__COUT__ << "startCommandRun success." << std::endl;
+}
+
+//========================================================================================================================
+void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct,
+		const std::string& systemAlias)
+{
+	__COUT__ << "systemAlias " << systemAlias << std::endl;
+
+	iteratorStruct->fsmCommandParameters_.clear();
+	iteratorStruct->fsmCommandParameters_.push_back(systemAlias);
+
+	std::string errorStr = "";
+	std::string currentState = iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
+
+	//execute first transition (may need two)
+
+	if(currentState == "Initial")
+		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
+				0,0,
+				"Initialize",iteratorStruct->fsmName_,
+				WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+				WebUsers::DEFAULT_ITERATOR_USERNAME,
+				iteratorStruct->fsmCommandParameters_);
+	else if(currentState == "Halted")
+		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
+				0,0,
+				"Configure",iteratorStruct->fsmName_,
+				WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+				WebUsers::DEFAULT_ITERATOR_USERNAME,
+				iteratorStruct->fsmCommandParameters_);
+	else
+		errorStr = "Can only Configure from the Initial or Halted state. The current state is " +
+			currentState;
+
+
+
+	if(errorStr != "")
+	{
+		__SS__ << "Iterator failed to configure with system alias '" <<
+				iteratorStruct->fsmCommandParameters_[0] <<
 				"' because of the following error: " << errorStr;
 		throw std::runtime_error(ss.str());
 	}
@@ -577,9 +698,65 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 
 //========================================================================================================================
 //return true if done
+bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
+{
+	if(iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition())
+		return false;
+
+	std::string errorStr = "";
+	std::string currentState = iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
+
+	if(currentState != "Running")
+		errorStr = "Expected to be in Running. Unexpectedly, the current state is " +
+			currentState + ".";
+	else //else successfully done (in Configured state!)
+	{
+		__COUT__ << "checkCommandRun complete." << std::endl;
+		return true;
+	}
+
+	if(errorStr != "")
+	{
+		__SS__ << "Iterator failed to run because of the following error: " << errorStr;
+		throw std::runtime_error(ss.str());
+	}
+	return false;
+}
+
+//========================================================================================================================
+//return true if done
 bool Iterator::checkCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct)
 {
-	return true;
+	if(iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition())
+		return false;
+
+	std::string errorStr = "";
+	std::string currentState = iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
+
+	if(currentState == "Halted")
+		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
+				0,0,
+				"Configure",iteratorStruct->fsmName_,
+				WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+				WebUsers::DEFAULT_ITERATOR_USERNAME,
+				iteratorStruct->fsmCommandParameters_);
+	else if(currentState != "Configured")
+		errorStr = "Expected to be in Configure. Unexpectedly, the current state is " +
+			currentState + ".";
+	else //else successfully done (in Configured state!)
+	{
+		__COUT__ << "checkCommandConfigureAlias complete." << std::endl;
+		return true;
+	}
+
+	if(errorStr != "")
+	{
+		__SS__ << "Iterator failed to configure with system alias '" <<
+				iteratorStruct->fsmCommandParameters_[0] <<
+				"' because of the following error: " << errorStr;
+		throw std::runtime_error(ss.str());
+	}
+	return false;
 }
 
 
@@ -634,23 +811,25 @@ void Iterator::playIterationPlan(HttpXmlDocument& xmldoc, const std::string& pla
 	__MOUT__ << "Attempting to playing iteration plan '" << planName << ".'" << std::endl;
 	__COUT__ << "Attempting to playing iteration plan '" << planName << ".'" << std::endl;
 
-	if(!workloopRunning_)
-	{
-		//start thread with member variables initialized
 
-		workloopRunning_ = true;
-
-		//must start thread first
-		std::thread([](Iterator *iterator){ Iterator::IteratorWorkLoop(iterator); },this).detach();
-	}
 
 	//setup "play" command
 
 	//lockout the messages array for the remainder of the scope
 	//this guarantees the reading thread can safely access the messages
 	std::lock_guard<std::mutex> lock(accessMutex_);
-	if(workloopRunning_ && !activePlanIsRunning_ && !commandPlay_)
+	if(!activePlanIsRunning_ && !commandPlay_)
 	{
+		if(!workloopRunning_)
+		{
+			//start thread with member variables initialized
+
+			workloopRunning_ = true;
+
+			//must start thread first
+			std::thread([](Iterator *iterator){ Iterator::IteratorWorkLoop(iterator); },this).detach();
+		}
+
 		activePlanName_ = planName;
 		commandPlay_ = true;
 	}
@@ -684,7 +863,11 @@ void Iterator::pauseIterationPlan(HttpXmlDocument& xmldoc)
 	}
 	else
 	{
-		__MOUT__ << "Invalid pause command attempted." << std::endl;
+		__SS__ << "Invalid pause command attempted. Can only pause when running." << std::endl;
+		__MOUT__ << ss.str();
+
+		xmldoc.addTextElementToData("error_message", ss.str());
+
 		__COUT__ << "Invalid pause command attempted. " <<
 				workloopRunning_ << " " <<
 				activePlanIsRunning_ << " " <<
@@ -704,18 +887,52 @@ void Iterator::haltIterationPlan(HttpXmlDocument& xmldoc)
 	//lockout the messages array for the remainder of the scope
 	//this guarantees the reading thread can safely access the messages
 	std::lock_guard<std::mutex> lock(accessMutex_);
-	if(workloopRunning_ && activePlanIsRunning_ && !commandHalt_)
+	if(activePlanIsRunning_ && !commandHalt_)
 	{
-		commandHalt_ = true;
+		if(workloopRunning_)
+			commandHalt_ = true;
+		else //no thread, so reset 'Error' without command to thread
+		{
+			activePlanIsRunning_ = false;
+			iteratorBusy_ = false;
+
+			try
+			{
+				Iterator::haltStateMachine(theSupervisor_, lastFsmName_);
+			}
+			catch(const std::runtime_error& e)
+			{
+				xmldoc.addTextElementToData("error_message", e.what());
+			}
+		}
 	}
 	else
 	{
-		__MOUT__ << "Invalid halt command attempted." << std::endl;
-		__COUT__ << "Invalid halt command attempted. " <<
-				workloopRunning_ << " " <<
-				activePlanIsRunning_ << " " <<
-				commandHalt_ << " " <<
-				activePlanName_ << std::endl;
+		bool haltAttempted = false;
+		try
+		{
+			haltAttempted = Iterator::haltStateMachine(theSupervisor_, lastFsmName_);
+		}
+		catch(const std::runtime_error& e)
+		{
+			haltAttempted = false;
+		}
+
+		if(!haltAttempted) //then show error
+		{
+			__SS__ << "Invalid halt command attempted. Can only halt when there is an active iteration plan." << std::endl;
+			__MOUT__ << ss.str();
+
+			xmldoc.addTextElementToData("error_message", ss.str());
+
+			__COUT__ << "Invalid halt command attempted. " <<
+					workloopRunning_ << " " <<
+					activePlanIsRunning_ << " " <<
+					commandHalt_ << " " <<
+					activePlanName_ << std::endl;
+		}
+		else
+			__COUT__ << "Halt was attempted." << std::endl;
 	}
 }
 

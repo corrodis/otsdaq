@@ -281,8 +281,7 @@ throw (xgi::exception::Exception)
 	//**** start LOCK GATEWAY CODE ***//
 	std::string username = "";
 	username = theWebUsers_.getUsersUsername(uid);
-	if (command != "getIterationPlanStatus" && //allow users to get status
-			userWithLock != "" && userWithLock != username)
+	if (userWithLock != "" && userWithLock != username)
 	{
 		*out << WebUsers::REQ_USER_LOCKOUT_RESPONSE;
 		__COUT__ << "User " << username << " is locked out. " << userWithLock << " has lock." << std::endl;
@@ -296,7 +295,6 @@ throw (xgi::exception::Exception)
 	fsmWindowName = CgiDataUtilities::decodeURIComponent(fsmWindowName);
 	std::string currentState = theStateMachine_.getCurrentStateName();
 
-
 	//Do not allow transition while in transition
 	if (theStateMachine_.isInTransition())
 	{
@@ -307,6 +305,17 @@ throw (xgi::exception::Exception)
 		xmldoc.addTextElementToData("state_tranisition_attempted_err",
 				ss.str()); //indicate to GUI transition NOT attempted
 		xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
+		return;
+	}
+
+
+	//check if Iterator should handle
+	if((activeStateMachineWindowName_ == "" ||
+			activeStateMachineWindowName_ == "iterator") &&
+			theIterator_.handleCommandRequest(xmldoc,command,fsmWindowName))
+	{
+		//__COUT__ << "Handled by theIterator_" << std::endl;
+		xmldoc.outputXmlDocument((std::ostringstream*) out, false);
 		return;
 	}
 
@@ -353,13 +362,7 @@ throw (xgi::exception::Exception)
 	}
 
 
-	//check if Iterator should handle
-	if(theIterator_.handleCommandRequest(xmldoc,command,fsmWindowName))
-	{
-		//__COUT__ << "Handled by theIterator_" << std::endl;
-		xmldoc.outputXmlDocument((std::ostringstream*) out, false);
-		return;
-	}
+
 
 	//At this point, attempting transition!
 
@@ -2181,6 +2184,7 @@ throw (xgi::exception::Exception)
 	//stateMatchinePreferences
 	//getStateMachineNames
 	//getCurrentState
+	//getIterationPlanStatus
 	//getErrorInStateMatchine
 	//getDesktopIcons
 
@@ -2606,6 +2610,10 @@ throw (xgi::exception::Exception)
 			__COUT__ << "Caught exception, assuming no valid FSM names." << std::endl;
 			xmldoc.addTextElementToData("stateMachineName", "");
 		}
+	}
+	else if (Command == "getIterationPlanStatus")
+	{
+		theIterator_.handleCommandRequest(xmldoc,Command,"");
 	}
 	else if (Command == "getCurrentState")
 	{
