@@ -666,7 +666,8 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 	//get nodeName (in case of / syntax)
 	if(nodeString.length() < 1)
 	{
-		__SS__ << "Invalid node name!" << std::endl;
+		__SS__ << "Invalid empty node name! Looking for child node from node '" <<
+				getValue() << "'..." << std::endl;
 		__COUT_ERR__ << ss.str();
 		throw std::runtime_error(ss.str());
 	}

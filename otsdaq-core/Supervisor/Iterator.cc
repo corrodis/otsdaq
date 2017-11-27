@@ -43,6 +43,13 @@ try
 	__MOUT__ << "Iterator work loop starting..." << std::endl;
 	__COUT__ << "Iterator work loop starting..." << std::endl;
 
+	//mutex init scope
+	{
+		std::lock_guard<std::mutex> lock(iterator->accessMutex_);
+		iterator->errorMessage_ = ""; //clear error message
+	}
+
+
 	ConfigurationManagerRW theConfigurationManager(WebUsers::DEFAULT_ITERATOR_USERNAME); //this is a restricted username
 	IteratorWorkLoopStruct theIteratorStruct(iterator,
 			&theConfigurationManager);
@@ -175,7 +182,8 @@ try
 		//	handle running
 		//__COUT__ << "thinking.." << running << " " << activePlan << " cmd=" <<
 		//		commandIndex << std::endl;
-		if(theIteratorStruct.running_)
+		if(theIteratorStruct.running_ &&
+				theIteratorStruct.activePlan_ != "") //important, because after errors, still "running" until halt
 		{
 			if(theIteratorStruct.commandIndex_ == (unsigned int)-1)
 			{
@@ -270,14 +278,22 @@ try
 }
 catch(const std::runtime_error &e)
 {
-	__COUT_ERR__ << "Encountered error in Iterator thread:\n" << e.what() << std::endl;
+	__SS__ << "Encountered error in Iterator thread:\n" << e.what() << std::endl;
+	__COUT_ERR__ << ss.str();
+
+	std::lock_guard<std::mutex> lock(iterator->accessMutex_);
 	iterator->workloopRunning_ = false; //if we ever exit
+	iterator->errorMessage_ = ss.str();
 
 }
 catch(...)
 {
-	__COUT_ERR__ << "Encountered unknown error in Iterator thread." << std::endl;
+	__SS__ << "Encountered unknown error in Iterator thread." << std::endl;
+	__COUT_ERR__ << ss.str();
+
+		std::lock_guard<std::mutex> lock(iterator->accessMutex_);
 	iterator->workloopRunning_ = false; //if we ever exit
+	iterator->errorMessage_ = ss.str();
 }
 
 //========================================================================================================================
@@ -526,23 +542,37 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct *iteratorStruct, std
 	iteratorStruct->fsmNextRunNumber_  = iteratorStruct->theIterator_->theSupervisor_->getNextRunNumber(
 			iteratorStruct->fsmName_);
 
+	if(iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName() == "Running" ||
+			iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName() == "Paused")
+		--iteratorStruct->fsmNextRunNumber_; //current run number is one back
+
 	__COUT__ << "fsmNextRunNumber_  = " << iteratorStruct->fsmNextRunNumber_ << std::endl;
-//	if(iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName() == "Running" ||
-//			theStateMachine_.getCurrentStateName() == "Paused")
-//
-//		sprintf(tmp,"Current %s Number: %u",stateMachineRunAlias.c_str(),
-//
-//				iteratorStruct->theIterator_->theSupervisor_->getNextRunNumber(activeStateMachineName_)-1);
-//	else
-//		sprintf(tmp,"Next %s Number: %u",stateMachineRunAlias.c_str(),getNextRunNumber(fsmName));
-//	xmldoc.addTextElementToData("run_number", tmp);
 }
 
 //========================================================================================================================
 void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct, std::string systemAlias)
 {
 	__COUT__ << "systemAlias " << systemAlias << std::endl;
-	//TODO
+
+	std::vector<std::string> commandParameters;
+	commandParameters.push_back(systemAlias);
+
+	std::string errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(0,0,
+			"Configure",iteratorStruct->fsmName_,
+			"" /*fsmWindowName*/,
+			WebUsers::DEFAULT_ITERATOR_USERNAME,
+			commandParameters);
+
+	if(errorStr != "")
+	{
+		__SS__ << "Iterator failed to configure with system alias '" << systemAlias <<
+				"' because of the following error: " << errorStr;
+		throw std::runtime_error(ss.str());
+	}
+
+	//else successfully launched
+	__COUT__ << "FSM in transition = " << iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition() << std::endl;
+	__COUT__ << "startCommandConfigureAlias success." << std::endl;
 }
 
 //========================================================================================================================
@@ -606,6 +636,8 @@ void Iterator::playIterationPlan(HttpXmlDocument& xmldoc, const std::string& pla
 
 	if(!workloopRunning_)
 	{
+		//start thread with member variables initialized
+
 		workloopRunning_ = true;
 
 		//must start thread first
@@ -624,7 +656,11 @@ void Iterator::playIterationPlan(HttpXmlDocument& xmldoc, const std::string& pla
 	}
 	else
 	{
-		__MOUT__ << "Invalid play command attempted." << std::endl;
+		__SS__ << "Invalid play command attempted. Can only play when the Iterator is inactive or paused." << std::endl;
+		__MOUT__ << ss.str();
+
+		xmldoc.addTextElementToData("error_message", ss.str());
+
 		__COUT__ << "Invalid play command attempted. " <<
 				commandPlay_ << " " <<
 				activePlanName_ << std::endl;
@@ -717,65 +753,18 @@ void Iterator::getIterationPlanStatus(HttpXmlDocument& xmldoc)
 	xmldoc.addTextElementToData("current_command_duration", tmp);
 
 	if(activePlanIsRunning_ && iteratorBusy_)
-		xmldoc.addTextElementToData("active_plan_status", "Running");
+	{
+		if(workloopRunning_)
+			xmldoc.addTextElementToData("active_plan_status", "Running");
+		else
+			xmldoc.addTextElementToData("active_plan_status", "Error");
+	}
 	else if(!activePlanIsRunning_ && iteratorBusy_)
 		xmldoc.addTextElementToData("active_plan_status", "Paused");
 	else
 		xmldoc.addTextElementToData("active_plan_status", "Inactive");
 
-
-//
-//	//__COUT__ << "current state: " << theStateMachine_.getCurrentStateName() << std::endl;
-//
-//
-//	//// ======================== get run name based on fsm name ====
-//	std::string fsmName = CgiDataUtilities::getData(cgi, "fsmName");
-//	//		__COUT__ << "fsmName = " << fsmName << std::endl;
-//	//		__COUT__ << "activeStateMachineName_ = " << activeStateMachineName_ << std::endl;
-//	//		__COUT__ << "theStateMachine_.getProvenanceStateName() = " <<
-//	//				theStateMachine_.getProvenanceStateName() << std::endl;
-//	//		__COUT__ << "theStateMachine_.getCurrentStateName() = " <<
-//	//				theStateMachine_.getCurrentStateName() << std::endl;
-//
-//	if(!theStateMachine_.isInTransition())
-//	{
-//		std::string stateMachineRunAlias = "Run"; //default to "Run"
-//
-//		// get stateMachineAliasFilter if possible
-//		ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorConfigurationNode(
-//				supervisorContextUID_, supervisorApplicationUID_);
-//
-//		if(!configLinkNode.isDisconnected())
-//		{
-//			try //for backwards compatibility
-//			{
-//				ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration");
-//				if(!fsmLinkNode.isDisconnected())
-//					stateMachineRunAlias =
-//							fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").getValue<std::string>();
-//				//else
-//				//	__COUT_INFO__ << "FSM Link disconnected." << std::endl;
-//			}
-//			catch(std::runtime_error &e) { __COUT_INFO__ << e.what() << std::endl; }
-//			catch(...) { __COUT_ERR__ << "Unknown error. Should never happen." << std::endl; }
-//		}
-//		//else
-//		//	__COUT_INFO__ << "FSM Link disconnected." << std::endl;
-//
-//		//__COUT__ << "stateMachineRunAlias  = " << stateMachineRunAlias	<< std::endl;
-//
-//		xmldoc.addTextElementToData("stateMachineRunAlias", stateMachineRunAlias);
-//		//// ======================== get run name based on fsm name ====
-//
-//
-//
-//		if(theStateMachine_.getCurrentStateName() == "Running" ||
-//				theStateMachine_.getCurrentStateName() == "Paused")
-//			sprintf(tmp,"Current %s Number: %u",stateMachineRunAlias.c_str(),getNextRunNumber(activeStateMachineName_)-1);
-//		else
-//			sprintf(tmp,"Next %s Number: %u",stateMachineRunAlias.c_str(),getNextRunNumber(fsmName));
-//		xmldoc.addTextElementToData("run_number", tmp);
-//	}
+	xmldoc.addTextElementToData("error_message", errorMessage_);
 }
 
 

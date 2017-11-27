@@ -361,8 +361,25 @@ throw (xgi::exception::Exception)
 		return;
 	}
 
-
 	//At this point, attempting transition!
+
+	std::vector<std::string> parameters;
+	if(command == "Configure")
+		parameters.push_back(CgiDataUtilities::postData(cgi, "ConfigurationAlias"));
+	attemptStateMachineTransition(&xmldoc,out,command,fsmName,fsmWindowName,
+			username,parameters);
+}
+
+std::string Supervisor::attemptStateMachineTransition(
+		HttpXmlDocument* xmldoc, std::ostringstream* out,
+		const std::string& command,
+		const std::string& fsmName, const std::string& fsmWindowName,
+		const std::string& username,
+		const std::vector<std::string>& commandParameters)
+{
+	std::string errorStr = "";
+
+	std::string currentState = theStateMachine_.getCurrentStateName();
 	__COUT__ << "State Machine command = " << command << std::endl;
 	__COUT__ << "fsmName = " << fsmName << std::endl;
 	__COUT__ << "fsmWindowName = " << fsmWindowName << std::endl;
@@ -377,18 +394,35 @@ throw (xgi::exception::Exception)
 					"state is Halted. Perhaps your state machine is out of sync." <<
 					std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
+			errorStr = ss.str();
 
-			xmldoc.addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
-			xmldoc.addTextElementToData("state_tranisition_attempted_err",
+			if(xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
+			if(xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted_err",
 					ss.str()); //indicate to GUI transition NOT attempted
-			xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
-			return;
+			if(out) xmldoc->outputXmlDocument((std::ostringstream*) out, false, true);
+
+			return errorStr;
 		}
 
 		//NOTE Original name of the configuration key
 		//parameters.addParameter("RUN_KEY",CgiDataUtilities::postData(cgi,"ConfigurationAlias"));
+		if(!commandParameters.size())
+		{
+			__SS__ << "Error - Can only transition to Configured if a Configuration Alias parameter is provided." <<
+					std::endl;
+			__COUT_ERR__ << "\n" << ss.str();
+			errorStr = ss.str();
+
+			if(xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
+			if(xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted_err",
+					ss.str()); //indicate to GUI transition NOT attempted
+			if(out) xmldoc->outputXmlDocument((std::ostringstream*) out, false, true);
+
+			return errorStr;
+		}
+
 		parameters.addParameter("ConfigurationAlias",
-				CgiDataUtilities::postData(cgi, "ConfigurationAlias"));
+				commandParameters[0]);
 
 		std::string configurationAlias = parameters.getValue("ConfigurationAlias");
 		__COUT__ << "Configure --> Name: ConfigurationAlias Value: " <<
@@ -421,12 +455,14 @@ throw (xgi::exception::Exception)
 					"(Likely the server was restarted or another user changed the state)" <<
 					std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
+			errorStr = ss.str();
 
-			xmldoc.addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
-			xmldoc.addTextElementToData("state_tranisition_attempted_err",
+			if(xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
+			if(xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted_err",
 					ss.str()); //indicate to GUI transition NOT attempted
-			xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
-			return;
+			if(out) xmldoc->outputXmlDocument((std::ostringstream*) out, false, true);
+
+			return errorStr;
 		}
 
 		unsigned int runNumber = getNextRunNumber();
@@ -441,9 +477,11 @@ throw (xgi::exception::Exception)
 	//stateMachineWorkLoopManager_.removeProcessedRequests();
 	//stateMachineWorkLoopManager_.processRequest(message);
 
-	xmldoc.addTextElementToData("state_tranisition_attempted", "1"); //indicate to GUI transition attempted
-	xmldoc.outputXmlDocument((std::ostringstream*) out, false);
-	__COUT__ << "Done - Xgi Request!" << std::endl;
+	if(xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted", "1"); //indicate to GUI transition attempted
+	if(out) xmldoc->outputXmlDocument((std::ostringstream*) out, false);
+	__COUT__ << "FSM state transition launched!" << std::endl;
+
+	return errorStr;
 }
 
 //========================================================================================================================

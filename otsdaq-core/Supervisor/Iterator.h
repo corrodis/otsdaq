@@ -71,6 +71,7 @@ private:
     std::string								activePlanName_, lastStartedPlanName_, lastFinishedPlanName_;
     volatile unsigned int					activeCommandIndex_;
     volatile time_t							activeCommandStartTime_;
+    std::string 							errorMessage_;
 
     Supervisor* 							theSupervisor_;
 };

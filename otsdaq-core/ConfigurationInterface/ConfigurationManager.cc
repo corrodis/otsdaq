@@ -442,12 +442,12 @@ int ConfigurationManager::getTypeOfGroup(
 			if(inContext) //there was a member in context!
 			{
 				__SS__ << "This group is an incomplete match to a Context group.\n";
+				__COUT_ERR__ << "\n" << ss.str();
 				ss << "\nTo be a Context group, the members must exactly match" <<
 						"the following members:\n";
 				int i = 0;
 				for(auto &memberName:contextMemberNames_)
 					ss << ++i << ". " << memberName << "\n";
-				__COUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 		}
@@ -468,12 +468,13 @@ int ConfigurationManager::getTypeOfGroup(
 			if(inBackbone) //there was a member in backbone!
 			{
 				__SS__ << "This group is an incomplete match to a Backbone group.\n";
+				__COUT_ERR__ << "\n" << ss.str();
 				ss << "\nTo be a Backbone group, the members must exactly match" <<
 						"the following members:\n";
 				int i = 0;
 				for(auto &memberName:backboneMemberNames_)
 					ss << ++i << ". " << memberName << "\n";
-				__COUT_ERR__ << "\n" << ss.str();
+				//__COUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 		}
@@ -494,12 +495,13 @@ int ConfigurationManager::getTypeOfGroup(
 			if(inIterate) //there was a member in iterate!
 			{
 				__SS__ << "This group is an incomplete match to a Iterate group.\n";
+				__COUT_ERR__ << "\n" << ss.str();
 				ss << "\nTo be a Iterate group, the members must exactly match" <<
 						"the following members:\n";
 				int i = 0;
 				for(auto &memberName:iterateMemberNames_)
 					ss << ++i << ". " << memberName << "\n";
-				__COUT_ERR__ << "\n" << ss.str();
+				//__COUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
 		}
@@ -510,6 +512,7 @@ int ConfigurationManager::getTypeOfGroup(
 		__SS__ << "This group is an incomplete match to a Context group: " <<
 				" Size=" << matchCount << " but should be " << contextMemberNames_.size() <<
 				std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
 		ss << "\nThe members currently are...\n";
 		int i = 0;
 		for(auto &memberPair:memberMap)
@@ -518,7 +521,7 @@ int ConfigurationManager::getTypeOfGroup(
 		i = 0;
 		for(auto &memberName:contextMemberNames_)
 			ss << ++i << ". " << memberName << "\n";
-		__COUT_ERR__ << "\n" << ss.str();
+		//__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 
@@ -527,6 +530,7 @@ int ConfigurationManager::getTypeOfGroup(
 		__SS__ << "This group is an incomplete match to a Backbone group: " <<
 				" Size=" << matchCount << " but should be " << backboneMemberNames_.size() <<
 				std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
 		ss << "\nThe members currently are...\n";
 		int i = 0;
 		for(auto &memberPair:memberMap)
@@ -535,7 +539,7 @@ int ConfigurationManager::getTypeOfGroup(
 		i = 0;
 		for(auto &memberName:backboneMemberNames_)
 			ss << ++i << ". " << memberName << "\n";
-		__COUT_ERR__ << "\n" << ss.str();
+		//__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 
@@ -544,6 +548,7 @@ int ConfigurationManager::getTypeOfGroup(
 		__SS__ << "This group is an incomplete match to a Iterate group: " <<
 				" Size=" << matchCount << " but should be " << backboneMemberNames_.size() <<
 				std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
 		ss << "\nThe members currently are...\n";
 		int i = 0;
 		for(auto &memberPair:memberMap)
@@ -552,7 +557,7 @@ int ConfigurationManager::getTypeOfGroup(
 		i = 0;
 		for(auto &memberName:iterateMemberNames_)
 			ss << ++i << ". " << memberName << "\n";
-		__COUT_ERR__ << "\n" << ss.str();
+		//__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 
