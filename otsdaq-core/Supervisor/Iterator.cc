@@ -271,6 +271,22 @@ try
 							theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ << __E__;
 					__MOUT__ << "Iterator starting command " << theIteratorStruct.commandIndex_+1 << ": " <<
 							theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ << __E__;
+
+					//FIXME
+					//FIXME
+					//FIXME
+					//for debugging modify commands: FIXME
+//					if(theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ ==
+//							IterateConfiguration::COMMAND_CONFIGURE_ALIAS)
+//						theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ =
+//								IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP;
+//
+//					if(theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ ==
+//							IterateConfiguration::COMMAND_RUN)
+//						theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ =
+//								IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP;
+
+
 					iterator->startCommand(&theIteratorStruct);
 				}
 				else if(theIteratorStruct.commandIndex_ ==
@@ -384,8 +400,7 @@ void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
 	std::string type = iteratorStruct->commands_[iteratorStruct->commandIndex_].type_;
 	if(type == IterateConfiguration::COMMAND_BEGIN_LABEL)
 	{
-		//do nothing
-		return;
+		return startCommandBeginLabel(iteratorStruct);
 	}
 	else if(type == IterateConfiguration::COMMAND_CHOOSE_FSM)
 	{
@@ -395,8 +410,7 @@ void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
 				[iteratorStruct->commandIndex_].params_
 				[IterateConfiguration::commandChooseFSMParams_.NameOfFSM_]);
 	}
-	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS || //FIXME delete after debug
-			type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP)
+	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP)
 	{
 		return startCommandConfigureActive(iteratorStruct);
 	}
@@ -410,8 +424,7 @@ void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
 	}
 	else if(type == IterateConfiguration::COMMAND_CONFIGURE_GROUP)
 	{
-		//TODO
-		return;
+		return startCommandConfigureGroup(iteratorStruct);
 	}
 	else if(type == IterateConfiguration::COMMAND_EXECUTE_FE_MACRO)
 	{
@@ -425,8 +438,7 @@ void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
 	}
 	else if(type == IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP)
 	{
-		//TODO
-		return;
+		return startCommandModifyActive(iteratorStruct);
 	}
 	else if(type == IterateConfiguration::COMMAND_REPEAT_LABEL)
 	{
@@ -469,19 +481,11 @@ bool Iterator::checkCommand(IteratorWorkLoopStruct *iteratorStruct)
 		//do nothing
 		return true;
 	}
-	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP)
+	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS ||
+			type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP ||
+			type == IterateConfiguration::COMMAND_CONFIGURE_GROUP)
 	{
-		//do nothing
-		return true;
-	}
-	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS)
-	{
-		return checkCommandConfigureAlias(iteratorStruct);
-	}
-	else if(type == IterateConfiguration::COMMAND_CONFIGURE_GROUP)
-	{
-		//do nothing
-		return true;
+		return checkCommandConfigure(iteratorStruct);
 	}
 	else if(type == IterateConfiguration::COMMAND_EXECUTE_FE_MACRO)
 	{
@@ -628,6 +632,20 @@ bool Iterator::haltStateMachine(Supervisor* theSupervisor, const std::string& fs
 }
 
 //========================================================================================================================
+void Iterator::startCommandBeginLabel(IteratorWorkLoopStruct *iteratorStruct)
+{
+	__COUT__ << "Entering label '" <<
+			iteratorStruct->commands_
+			[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandBeginLabelParams_.Label_]
+			 << "'..." << std::endl;
+
+	//add new step index to stack
+	iteratorStruct->stepIndexStack_.push_back(0);
+}
+
+
+//========================================================================================================================
 void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct)
 {
 	//search for first matching label backward and set command to there
@@ -638,9 +656,18 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct)
 			"%d",&numOfRepetitions);
 	__COUT__ << "numOfRepetitions remaining = " << numOfRepetitions << __E__;
 
-	if(numOfRepetitions <= 0) return; //no more repetitions
+	if(numOfRepetitions <= 0)
+	{
+		//remove step index from stack
+		iteratorStruct->stepIndexStack_.pop_back();
+
+		return; //no more repetitions
+	}
 
 	--numOfRepetitions;
+
+	//increment step index in stack
+	++(iteratorStruct->stepIndexStack_.back());
 
 	unsigned int i;
 	for(i=iteratorStruct->commandIndex_;i>0;--i) //assume 0 is always the fallback option
@@ -697,7 +724,9 @@ void Iterator::startCommandConfigureActive(IteratorWorkLoopStruct *iteratorStruc
 {
 	__COUT__ << "startCommandConfigureActive " << __E__;
 
-	//get active config group
+	//steps:
+	//	get active config group
+	//	transition to configure with parameters describing group
 
 	std::string group = iteratorStruct->cfgMgr_->getActiveGroupName();
 	ConfigurationGroupKey key = iteratorStruct->cfgMgr_->getActiveGroupKey();
@@ -705,6 +734,39 @@ void Iterator::startCommandConfigureActive(IteratorWorkLoopStruct *iteratorStruc
 	__COUT__ << "group " << group << __E__;
 	__COUT__ << "key " << key << __E__;
 
+	//create special alias for this group using : separators
+
+	std::stringstream systemAlias;
+	systemAlias << "GROUP:" << group << ":" << key;
+	startCommandConfigureAlias(iteratorStruct,systemAlias.str());
+}
+
+//========================================================================================================================
+void Iterator::startCommandConfigureGroup(IteratorWorkLoopStruct *iteratorStruct)
+{
+	__COUT__ << "startCommandConfigureGroup " << __E__;
+
+	//steps:
+	//	transition to configure with parameters describing group
+
+	std::string group =
+			iteratorStruct->commands_
+			[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandConfigureGroupParams_.GroupName_];
+	ConfigurationGroupKey key = ConfigurationGroupKey(
+			iteratorStruct->commands_
+			[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandConfigureGroupParams_.GroupKey_])
+					;
+
+	__COUT__ << "group " << group << __E__;
+	__COUT__ << "key " << key << __E__;
+
+	//create special alias for this group using : separators
+
+	std::stringstream systemAlias;
+	systemAlias << "GROUP:" << group << ":" << key;
+	startCommandConfigureAlias(iteratorStruct,systemAlias.str());
 }
 
 //========================================================================================================================
@@ -744,7 +806,8 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 	if(errorStr != "")
 	{
 		__SS__ << "Iterator failed to configure with system alias '" <<
-				iteratorStruct->fsmCommandParameters_[0] <<
+				(iteratorStruct->fsmCommandParameters_.size()?
+						iteratorStruct->fsmCommandParameters_[0]:"UNKNOWN") <<
 				"' because of the following error: " << errorStr;
 		throw std::runtime_error(ss.str());
 	}
@@ -752,6 +815,54 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 	//else successfully launched
 	__COUT__ << "FSM in transition = " << iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition() << __E__;
 	__COUT__ << "startCommandConfigureAlias success." << __E__;
+}
+
+//========================================================================================================================
+void Iterator::startCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct)
+{
+	//Steps:
+	//	4 parameters commandModifyActiveParams_:
+	//		const std::string DoTrackGroupChanges_  TrueFalse
+	//		//targets
+	//		const std::string RelativePathToField_ 		= "RelativePathToField";
+	//		const std::string FieldStartValue_ 			= "FieldStartValue";
+	//		const std::string FieldIterationStepSize_ 	= "FieldIterationStepSize";
+	//
+	//	if tracking changes,
+	//		create a new group
+	//		for every enabled FE
+	//			set field = start value + stepSize * currentStepIndex_
+	//		activate group
+	//	else
+	//		load scratch group
+	//		for every enabled FE
+	//			set field = start value + stepSize * stepIndex
+	//		activate group
+
+	bool doTrackGroupChanges = false;
+	if("True" == iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandModifyActiveParams_.DoTrackGroupChanges_])
+		doTrackGroupChanges = true;
+
+	const std::string& pathToField =
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandModifyActiveParams_.RelativePathToField_];
+	const std::string& startValue =
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandModifyActiveParams_.FieldStartValue_];
+	const std::string& stepSize =
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandModifyActiveParams_.FieldIterationStepSize_];
+
+	const unsigned int stepIndex = iteratorStruct->stepIndexStack_.back();
+
+	ConfigurationManagerRW* cfgMgr = iteratorStruct->cfgMgr_;
+
+	__COUT__ << "doTrackGroupChanges " << (doTrackGroupChanges?"yes":"no") << std::endl;
+	__COUT__ << "stepIndex " << stepIndex << std::endl;
+	__COUT__ << "pathToField " << pathToField << std::endl;
+	__COUT__ << "startValue " << startValue << std::endl;
+	__COUT__ << "stepSize " << stepSize << std::endl;
 }
 
 //========================================================================================================================
@@ -1027,7 +1138,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 
 //========================================================================================================================
 //return true if done
-bool Iterator::checkCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct)
+bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct *iteratorStruct)
 {
 	sleep(1); //sleep to give FSM time to transition
 
@@ -1065,7 +1176,8 @@ bool Iterator::checkCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 	if(errorStr != "")
 	{
 		__SS__ << "Iterator failed to configure with system alias '" <<
-				iteratorStruct->fsmCommandParameters_[0] <<
+				(iteratorStruct->fsmCommandParameters_.size()?
+						iteratorStruct->fsmCommandParameters_[0]:"UNKNOWN") <<
 				"' because of the following error: " << errorStr;
 		throw std::runtime_error(ss.str());
 	}

@@ -42,7 +42,7 @@ ConfigurationManager::ConfigurationManager()
 , theBackboneGroup_			("")
 , contextMemberNames_		({XDAQ_CONTEXT_CONFIG_NAME,"XDAQApplicationConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","TheSupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"})
 , backboneMemberNames_		({"GroupAliasesConfiguration","VersionAliasesConfiguration"})
-, iterateMemberNames_		({"IterateConfiguration","IterationPlanConfiguration",
+, iterateMemberNames_		({"IterateConfiguration","IterationPlanConfiguration","IterationTargetConfiguration",
 	/*command specific tables*/"IterationCommandBeginLabelConfiguration","IterationCommandChooseFSMConfiguration","IterationCommandConfigureAliasConfiguration","IterationCommandConfigureGroupConfiguration","IterationCommandExecuteFEMacroConfiguration","IterationCommandExecuteMacroConfiguration","IterationCommandModifyGroupConfiguration","IterationCommandRepeatLabelConfiguration","IterationCommandRunConfiguration"})
 {
 	theInterface_ = ConfigurationInterface::getInstance(false);  //false to use artdaq DB
@@ -1344,21 +1344,45 @@ ConfigurationGroupKey ConfigurationManager::loadConfigurationBackbone()
 //Getters
 //==============================================================================
 //getConfigurationGroupKey
-//	use backbone to determine default key for runType.
+//	use backbone to determine default key for systemAlias.
 //		- runType translates to group key alias,
 //			which maps to a group name and key pair
-//	set
+//
+//	NOTE: temporary special aliases are also allowed
+//		with the following format:
+//		GROUP:<name>:<key>
 //
 //	return INVALID on failure
-//   pair<group name , ConfigurationGroupKey>
-std::pair<std::string, ConfigurationGroupKey> ConfigurationManager::getConfigurationGroupFromAlias(std::string runType,	ProgressBar* progressBar)
+//   else, pair<group name , ConfigurationGroupKey>
+std::pair<std::string, ConfigurationGroupKey> ConfigurationManager::getConfigurationGroupFromAlias(
+		std::string systemAlias,	ProgressBar* progressBar)
 {
+
 	//steps
-	//	load active backbone
+	//	check if special alias
+	//	if so, parse and return name/key
+	//	else, load active backbone
 	//	find runType in GroupAliasesConfiguration
 	//	return key
 
 	if(progressBar) progressBar->step();
+
+	if(systemAlias.find("GROUP:") == 0)
+	{
+		if(progressBar) progressBar->step();
+
+		unsigned int i = strlen("GROUP:");
+		unsigned int j = systemAlias.find(':',i);
+
+		if(progressBar) progressBar->step();
+		if(j>i) //success
+			return std::pair<std::string, ConfigurationGroupKey>(
+					systemAlias.substr(i,j-i),
+					ConfigurationGroupKey(systemAlias.substr(j+1)));
+		else	//failure
+			return std::pair<std::string, ConfigurationGroupKey>("",ConfigurationGroupKey());
+	}
+
 
 	loadConfigurationBackbone();
 
@@ -1367,11 +1391,16 @@ std::pair<std::string, ConfigurationGroupKey> ConfigurationManager::getConfigura
 	try
 	{
 		//	find runType in GroupAliasesConfiguration
-		ConfigurationTree entry = getNode("GroupAliasesConfiguration").getNode(runType);
+		ConfigurationTree entry = getNode("GroupAliasesConfiguration").getNode(systemAlias);
+
+		if(progressBar) progressBar->step();
+
 		return std::pair<std::string, ConfigurationGroupKey>(entry.getNode("GroupName").getValueAsString(),	ConfigurationGroupKey(entry.getNode("GroupKey").getValueAsString()));
 	}
 	catch(...)
 	{}
+
+	//on failure, here
 
 	if(progressBar) progressBar->step();
 

@@ -7,6 +7,7 @@
 
 using namespace ots;
 
+//instantiate static members
 
 const std::string IterateConfiguration::COMMAND_BEGIN_LABEL 			= "BEGIN_LABEL";
 const std::string IterateConfiguration::COMMAND_CHOOSE_FSM		 		= "CHOOSE_FSM";
@@ -21,6 +22,7 @@ const std::string IterateConfiguration::COMMAND_RUN 					= "RUN";
 
 const std::string IterateConfiguration::ITERATE_TABLE	= "IterateConfiguration";
 const std::string IterateConfiguration::PLAN_TABLE		= "IterationPlanConfiguration";
+const std::string IterateConfiguration::TARGET_TABLE	= "IterationTargetConfiguration";
 
 const std::map<std::string,std::string> 			IterateConfiguration::commandToTableMap_ = IterateConfiguration::createCommandToTableMap();
 
@@ -37,6 +39,10 @@ IterateConfiguration::CommandModifyActiveParams 	IterateConfiguration::commandMo
 IterateConfiguration::CommandRepeatLabelParams 		IterateConfiguration::commandRepeatLabelParams_;
 IterateConfiguration::CommandRunParams 				IterateConfiguration::commandRunParams_;
 IterateConfiguration::CommandChooseFSMParams 		IterateConfiguration::commandChooseFSMParams_;
+
+IterateConfiguration::TargetParams 					IterateConfiguration::targetParams_;
+IterateConfiguration::TargetColumns	 				IterateConfiguration::targetCols_;
+
 
 
 //==============================================================================
@@ -111,8 +117,8 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 
 		for(unsigned int i=0; i<commandSpecificFields.size()-3; ++i) //ignore last three columns
 		{
-			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].first << std::endl;
-			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].second << std::endl;
+			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].first << " = \t" <<
+					commandSpecificFields[i].second << std::endl;
 
 			commands.back().params_.emplace(std::pair<
 					std::string /*param name*/,

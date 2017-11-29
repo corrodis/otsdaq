@@ -20,8 +20,15 @@ public:
 
 	//Getters
 
+	struct CommandTarget {
+		std::string table_;
+		std::string UID_;
+	};
+
 	struct Command {
+		void addTarget() {targets_.push_back(CommandTarget());}
 		std::string type_;
+		std::vector<CommandTarget> targets_;
 		std::map<
 			std::string /*param name*/,
 			std::string /*param value*/> params_;
@@ -43,6 +50,7 @@ public:
 
 	static const std::string ITERATE_TABLE;
 	static const std::string PLAN_TABLE;
+	static const std::string TARGET_TABLE;
 
 	static const std::map<std::string,std::string> commandToTableMap_;
 	static std::map<std::string,std::string> createCommandToTableMap()
@@ -96,8 +104,8 @@ public:
 	} commandExecuteMacroParams_;
 	static struct CommandModifyActiveParams
 	{
-		const std::string DoTrackGroupChanges_ 		= "DoTrackGroupChanges";
 		//targets
+		const std::string DoTrackGroupChanges_ 		= "DoTrackGroupChanges";
 		const std::string RelativePathToField_ 		= "RelativePathToField";
 		const std::string FieldStartValue_ 			= "FieldStartValue";
 		const std::string FieldIterationStepSize_ 	= "FieldIterationStepSize";
@@ -114,6 +122,17 @@ public:
 	} commandRunParams_;
 
 
+	//for targets
+	static struct TargetParams
+	{
+		const std::string Tables_ 					= "CSVTargetTables";
+		const std::string UIDs_ 					= "CSVTargetUIDs";
+	} targetParams_;
+	static struct TargetColumns
+	{
+		const std::string GroupID_ 					= "IterationTargetGroupID";
+		const std::string TargetLink_ 				= "LinkToTarget";
+	} targetCols_;
 
 
 	//Table hierarchy is as follows:
@@ -127,15 +146,15 @@ public:
 
 	static struct IterateTableColumns
 	{
-		const std::string PlanLink_ = "LinkToIterationPlanConfiguration";
+		const std::string PlanLink_ 				= "LinkToIterationPlanConfiguration";
 	} iterateTableCols_;
 
 	static struct PlanTableColumns
 	{
-		const std::string Status_ = ViewColumnInfo::COL_NAME_STATUS;
-		const std::string GroupID_ = "IterationPlanGroupID";
-		const std::string CommandLink_ = "LinkToCommandUID";
-		const std::string CommandType_ = "CommandType";
+		const std::string Status_ 					= ViewColumnInfo::COL_NAME_STATUS;
+		const std::string GroupID_ 					= "IterationPlanGroupID";
+		const std::string CommandLink_ 				= "LinkToCommandUID";
+		const std::string CommandType_ 				= "CommandType";
 	} planTableCols_;
 
 

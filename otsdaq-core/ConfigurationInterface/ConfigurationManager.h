@@ -90,7 +90,7 @@ public:
 	//   map<alias      ,      pair<group name,  ConfigurationGroupKey> >
 	std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > getGroupAliasesConfiguration  (void);
 	//   pair<group name , ConfigurationGroupKey>
-	std::pair<std::string, ConfigurationGroupKey>                         getConfigurationGroupFromAlias(std::string runType, ProgressBar* progressBar=0);
+	std::pair<std::string, ConfigurationGroupKey>                         getConfigurationGroupFromAlias(std::string systemAlias, ProgressBar* progressBar=0);
 
 	std::map<std::string, ConfigurationVersion> 		  			      getActiveVersions		  		(void) const;
 
