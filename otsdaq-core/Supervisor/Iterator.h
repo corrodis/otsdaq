@@ -38,6 +38,9 @@ private:
     	,cfgMgr_			(cfgMgr)
     	,running_			(false)
     	,commandBusy_		(false)
+    	,doPauseAction_		(false)
+    	,doHaltAction_		(false)
+    	,doResumeAction_	(false)
     	,commandIndex_		((unsigned int)-1)
     	{}
 
@@ -45,6 +48,7 @@ private:
     	ConfigurationManagerRW* 					cfgMgr_;
 
     	bool 										running_, commandBusy_;
+    	bool										doPauseAction_, doHaltAction_, doResumeAction_;
 
     	std::string 								activePlan_;
     	std::vector<IterateConfiguration::Command> 	commands_;
@@ -65,7 +69,8 @@ private:
     static void								startCommandChooseFSM		(IteratorWorkLoopStruct *iteratorStruct, const std::string& fsmName);
     static void								startCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct, const std::string& systemAlias);
     static bool								checkCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct);
-    static void								startCommandRun				(IteratorWorkLoopStruct *iteratorStruct, bool waitOnRunningThreads, unsigned int durationInSeconds = 0);
+    static void								startCommandRepeatLabel		(IteratorWorkLoopStruct *iteratorStruct);
+    static void								startCommandRun				(IteratorWorkLoopStruct *iteratorStruct);
     static bool								checkCommandRun				(IteratorWorkLoopStruct *iteratorStruct);
 
     static bool								haltStateMachine			(Supervisor* theSupervisor, const std::string& fsmName);

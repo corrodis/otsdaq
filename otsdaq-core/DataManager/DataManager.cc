@@ -224,6 +224,7 @@ void DataManager::halt(void)
 //========================================================================================================================
 void DataManager::pause(void)
 {
+	__COUT__ << "Pausing..." << std::endl;
 	DataManager::pauseAllBuffers();
 }
 
@@ -410,6 +411,8 @@ void DataManager::resumeBuffer(std::string bufferUID)
 //========================================================================================================================
 void DataManager::pauseBuffer(std::string bufferUID)
 {
+	__COUT__ << "Pausing..." << std::endl;
+
 	for(auto& it: buffers_[bufferUID].producers_)
 		it->pauseProcessingData();
 	//Wait until all buffers are flushed

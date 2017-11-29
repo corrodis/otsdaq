@@ -29,6 +29,8 @@
 #define __COUT_INFO__  	__COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
 #define __COUT__  		__COUT_TYPE__(LogDebug)		<< __COUT_HDR__
 
+#define __E__			std::endl
+
 //////// ==============================================================
 //////// Use __MOUT__ for Message Facility use (easy to switch to cout for debugging):
 ////////

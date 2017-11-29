@@ -349,6 +349,29 @@ std::string FEVInterfacesManager::getFEMacrosString(const std::string &superviso
 	return retList;
 }
 
+//========================================================================================================================
+bool FEVInterfacesManager::allFEWorkloopsAreDone(void)
+{
+	bool allFEWorkloopsAreDone = true;
+	bool isActive;
+
+	for(const auto& FEInterface: theFEInterfaces_)
+	{
+		isActive = FEInterface.second->isActive();
+		__COUT__ << FEInterface.second->getInterfaceUID() << " of type " <<
+				FEInterface.second->getInterfaceType() << ": \t" <<
+				"workLoop_->isActive() " <<
+			(isActive?"yes":"no") << std::endl;
+
+		if(isActive) //then not done
+		{
+			allFEWorkloopsAreDone = false;
+			break;
+		}
+	}
+
+	return allFEWorkloopsAreDone;
+}
 
 //========================================================================================================================
 void FEVInterfacesManager::configure(void)

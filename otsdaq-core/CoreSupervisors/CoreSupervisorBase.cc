@@ -52,6 +52,7 @@ throw (xdaq::exception::Exception)
 	xoap::bind(this, &CoreSupervisorBase::stateMachineStateRequest,    		"StateMachineStateRequest",    		XDAQ_NS_URI );
 	xoap::bind(this, &CoreSupervisorBase::stateMachineErrorMessageRequest,  "StateMachineErrorMessageRequest",  XDAQ_NS_URI );
 	xoap::bind(this, &CoreSupervisorBase::macroMakerSupervisorRequest, 		"MacroMakerSupervisorRequest", 		XDAQ_NS_URI );
+	xoap::bind(this, &CoreSupervisorBase::workLoopStatusRequest,    		"WorkLoopStatusRequest",    		XDAQ_NS_URI );
 
 	try
 	{
@@ -224,32 +225,7 @@ throw (xoap::exception::Exception)
 	__COUT__<< "$$$$$$$$$$$$$$$$$" << std::endl;
 
 	//locate theFEInterfacesManager in state machines vector
-	FEVInterfacesManager*          theFEInterfacesManager = 0;
-	for(unsigned int i = 0; i<theStateMachineImplementation_.size();++i)
-	{
-		try
-		{
-			theFEInterfacesManager =
-					dynamic_cast<FEVInterfacesManager*>(theStateMachineImplementation_[i]);
-			if(!theFEInterfacesManager)
-			{
-				//dynamic_cast returns null pointer on failure
-				__SS__ << "Dynamic cast failure!" << std::endl;
-				__COUT_ERR__ << ss.str();
-				throw std::runtime_error(ss.str());
-			}
-			__COUT__ << "State Machine " << i << " WAS of type FEVInterfacesManager" << std::endl;
-
-			break;
-		}
-		catch(...)
-		{
-			__COUT__ << "State Machine " << i << " was NOT of type FEVInterfacesManager" << std::endl;
-		}
-	}
-
-
-	__COUT__ << "theFEInterfacesManager pointer = " << theFEInterfacesManager << std::endl;
+	FEVInterfacesManager* theFEInterfacesManager = extractFEInterfaceManager();
 
 	//receive request parameters
 	SOAPParameters parameters;
@@ -538,6 +514,65 @@ throw (xoap::exception::Exception)
 
 
 	return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "FailRequest",retParameters);
+}
+
+//========================================================================================================================
+xoap::MessageReference CoreSupervisorBase::workLoopStatusRequest(xoap::MessageReference message)
+throw (xoap::exception::Exception)
+{
+	//locate theFEInterfacesManager in state machines vector
+	FEVInterfacesManager* theFEInterfacesManager = extractFEInterfaceManager();
+
+	if(!theFEInterfacesManager)
+	{
+		__SS__ << "Invalid request for front-end workloop status from Supervisor without a FEVInterfacesManager."
+				<< std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
+
+	return SOAPUtilities::makeSOAPMessageReference(
+			(theFEInterfacesManager->allFEWorkloopsAreDone()?"Done":"Working"));
+}
+
+//========================================================================================================================
+//extractFEInterfaceManager
+//
+//	locates theFEInterfacesManager in state machines vector and
+//		returns 0 if not found.
+//
+//	Note: this code assumes a CoreSupervisorBase has only one
+//		FEVInterfacesManager in its vector of state machines
+FEVInterfacesManager* CoreSupervisorBase::extractFEInterfaceManager()
+{
+	FEVInterfacesManager* theFEInterfacesManager = 0;
+
+	for(unsigned int i = 0; i<theStateMachineImplementation_.size();++i)
+	{
+		try
+		{
+			theFEInterfacesManager =
+					dynamic_cast<FEVInterfacesManager*>(theStateMachineImplementation_[i]);
+			if(!theFEInterfacesManager)
+			{
+				//dynamic_cast returns null pointer on failure
+				__SS__ << "Dynamic cast failure!" << std::endl;
+				__COUT_ERR__ << ss.str();
+				throw std::runtime_error(ss.str());
+			}
+			__COUT__ << "State Machine " << i << " WAS of type FEVInterfacesManager" << std::endl;
+
+			break;
+		}
+		catch(...)
+		{
+			__COUT__ << "State Machine " << i << " was NOT of type FEVInterfacesManager" << std::endl;
+		}
+	}
+
+	__COUT__ << "theFEInterfacesManager pointer = " << theFEInterfacesManager << std::endl;
+
+	return theFEInterfacesManager;
 }
 
 //========================================================================================================================

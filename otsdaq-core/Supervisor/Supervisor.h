@@ -134,6 +134,9 @@ private:
     Iterator							theIterator_					;
     std::mutex							stateMachineAccessMutex_		; //for sharing state machine access with iterator thread
 
+    enum {
+    	VERBOSE_MUTEX = 0
+    };
 
     //Trash tests
     void wait(int milliseconds, std::string who="") const;

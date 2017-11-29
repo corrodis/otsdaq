@@ -44,6 +44,7 @@ public:
     void		  	    runFEMacro							(const std::string &interfaceID, const std::string &feMacroName, const std::string &inputArgs, std::string &outputArgs);	//used by MacroMaker
     unsigned int		getInterfaceUniversalAddressSize	(const std::string &interfaceID); 	//used by MacroMaker
     unsigned int		getInterfaceUniversalDataSize		(const std::string &interfaceID);	//used by MacroMaker
+    bool				allFEWorkloopsAreDone				(void); //used by Iterator, e.g.
 
     //void progDAC           (std::string dacName, std::string rocName="*");
     //void write             (long long address, const std::vector<long long>& data);
