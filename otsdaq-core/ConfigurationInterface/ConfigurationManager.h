@@ -77,6 +77,8 @@ public:
 
 	//   map<type,        pair     <groupName  , ConfigurationGroupKey>>
 	std::map<std::string, std::pair<std::string, ConfigurationGroupKey>>  getActiveConfigurationGroups  (void) const;
+	const std::string&													  getActiveGroupName 			(const std::string& type = "") const;
+	ConfigurationGroupKey		 										  getActiveGroupKey 			(const std::string& type = "") const;
 
 	ConfigurationTree 							   	                      getNode					    (const std::string &nodeString, bool doNotThrowOnBrokenUIDLinks=false) const;	//"root/parent/parent/"
 	ConfigurationTree													  getSupervisorConfigurationNode(const std::string &contextUID, const std::string &applicationUID) const;

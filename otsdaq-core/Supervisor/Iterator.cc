@@ -395,10 +395,10 @@ void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
 				[iteratorStruct->commandIndex_].params_
 				[IterateConfiguration::commandChooseFSMParams_.NameOfFSM_]);
 	}
-	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP)
+	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS || //FIXME delete after debug
+			type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP)
 	{
-		//TODO
-		return;
+		return startCommandConfigureActive(iteratorStruct);
 	}
 	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS)
 	{
@@ -690,6 +690,21 @@ void Iterator::startCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 	//else successfully launched
 	__COUT__ << "FSM in transition = " << iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition() << __E__;
 	__COUT__ << "startCommandRun success." << __E__;
+}
+
+//========================================================================================================================
+void Iterator::startCommandConfigureActive(IteratorWorkLoopStruct *iteratorStruct)
+{
+	__COUT__ << "startCommandConfigureActive " << __E__;
+
+	//get active config group
+
+	std::string group = iteratorStruct->cfgMgr_->getActiveGroupName();
+	ConfigurationGroupKey key = iteratorStruct->cfgMgr_->getActiveGroupKey();
+
+	__COUT__ << "group " << group << __E__;
+	__COUT__ << "key " << key << __E__;
+
 }
 
 //========================================================================================================================

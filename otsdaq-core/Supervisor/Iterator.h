@@ -67,6 +67,7 @@ private:
     static void								startCommand				(IteratorWorkLoopStruct *iteratorStruct);
     static bool								checkCommand				(IteratorWorkLoopStruct *iteratorStruct);
     static void								startCommandChooseFSM		(IteratorWorkLoopStruct *iteratorStruct, const std::string& fsmName);
+    static void								startCommandConfigureActive	(IteratorWorkLoopStruct *iteratorStruct);
     static void								startCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct, const std::string& systemAlias);
     static bool								checkCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct);
     static void								startCommandRepeatLabel		(IteratorWorkLoopStruct *iteratorStruct);

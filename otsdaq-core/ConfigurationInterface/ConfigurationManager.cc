@@ -1051,6 +1051,41 @@ std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > Configurat
 }
 
 //==============================================================================
+const std::string& ConfigurationManager::getActiveGroupName(const std::string& type) const
+{
+	if(type == "" || type == ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
+		return theConfigurationGroup_;
+	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+		return theContextGroup_;
+	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE)
+		return theBackboneGroup_;
+	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE)
+		return theIterateGroup_;
+
+	__SS__ << "Invalid type requested '" << type << "'" << std::endl;
+	__COUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
+}
+
+//==============================================================================
+ConfigurationGroupKey ConfigurationManager::getActiveGroupKey(const std::string& type) const
+{
+	if(type == "" || type == ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
+		return theConfigurationGroupKey_?*theConfigurationGroupKey_: ConfigurationGroupKey();
+	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+		return theContextGroupKey_    	 ?*theContextGroupKey_     : ConfigurationGroupKey();
+	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE)
+		return theBackboneGroupKey_    	 ?*theBackboneGroupKey_     : ConfigurationGroupKey();
+	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE)
+		return theIterateGroupKey_    	 ?*theIterateGroupKey_     : ConfigurationGroupKey();
+
+	__SS__ << "Invalid type requested '" << type << "'" << std::endl;
+	__COUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
+}
+
+
+//==============================================================================
 ConfigurationTree ConfigurationManager::getSupervisorConfigurationNode(
 		const std::string &contextUID, const std::string &applicationUID) const
 {
