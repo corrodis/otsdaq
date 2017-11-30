@@ -40,7 +40,7 @@ ConfigurationManager::ConfigurationManager()
 , theConfigurationGroup_	("")
 , theContextGroup_			("")
 , theBackboneGroup_			("")
-, contextMemberNames_		({XDAQ_CONTEXT_CONFIG_NAME,"XDAQApplicationConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","TheSupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"})
+, contextMemberNames_		({XDAQ_CONTEXT_CONFIG_NAME,"XDAQApplicationConfiguration","XDAQApplicationPropertyConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","TheSupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"})
 , backboneMemberNames_		({"GroupAliasesConfiguration","VersionAliasesConfiguration"})
 , iterateMemberNames_		({"IterateConfiguration","IterationPlanConfiguration",
 	/*command specific tables*/"IterationCommandBeginLabelConfiguration","IterationCommandChooseFSMConfiguration","IterationCommandConfigureAliasConfiguration","IterationCommandConfigureGroupConfiguration","IterationCommandExecuteFEMacroConfiguration","IterationCommandExecuteMacroConfiguration","IterationCommandModifyGroupConfiguration","IterationCommandRepeatLabelConfiguration","IterationCommandRunConfiguration"})

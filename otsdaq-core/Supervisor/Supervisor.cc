@@ -246,12 +246,12 @@ throw (xgi::exception::Exception)
         <meta name='msapplication-TileColor' content='#ffffff'>\
         <meta name='msapplication-TileImage' content='/ms-icon-144x144.png'>\
         <meta name='theme-color' content='#ffffff'>" <<
-			//end show ots icon
-			"</head>" <<
-			"<frameset col='100%' row='100%'>" <<
-			"<frame src='/WebPath/html/Supervisor.html?urn=" <<
-			this->getApplicationDescriptor()->getLocalId() << "=securityType=" <<
-			securityType_ << "'></frameset></html>";
+		//end show ots icon
+		"</head>" <<
+		"<frameset col='100%' row='100%'>" <<
+		"<frame src='/WebPath/html/Supervisor.html?urn=" <<
+		this->getApplicationDescriptor()->getLocalId() << "=securityType=" <<
+		securityType_ << "'></frameset></html>";
 }
 
 
@@ -1350,6 +1350,50 @@ throw (toolbox::fsm::exception::Exception)
 		}
 	}
 
+	for(auto& it: theSupervisorDescriptorInfo_.getDTCDescriptors())
+	{
+		RunControlStateMachine::theProgressBar_.step();
+		__COUT__ << "Sending message to DTCSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
+		__COUT__ << "Sending message to DTCSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
+		__COUT__ << "Sending message to DTCSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
+		__COUT__ << "Sending message to DTCSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
+		__COUT__ << "Sending message to DTCSupervisors: " << it.second->getLocalId() << " : " << command << std::endl;
+
+		try
+		{
+			reply = send(it.second, message);
+		}
+		catch(const xdaq::exception::Exception &e) //due to xoap send failure
+		{
+			//do not kill whole system if xdaq xoap failure
+			__SS__ << "Can NOT " << command << " DTCSupervisors, instance = " << it.first << ".\n\n" <<
+					"Xoap failure. Did the target Supervisor crash? Try restarting re-initializing or restarting otsdaq." << std::endl;
+			__COUT_ERR__ << ss.str();
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+			proceed = false;
+		}
+
+		if (reply != command + "Response")
+		{
+			//diagService_->reportError("DTCSupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
+
+			__SS__ << "Can NOT " << command << " DTCSupervisor, instance = " << it.first << ".\n\n" <<
+					reply;
+			__COUT_ERR__ << ss.str() << std::endl;
+
+			//xoap::MessageReference errorMessage = sendWithSOAPReply(it.second, SOAPUtilities::makeSOAPMessageReference("Special" + command));
+
+
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+			proceed = false;
+			//}
+		}
+		else
+		{
+			__COUT__ << "DTCSupervisor supervisor " << (it.first) << " was " << command << "'d correctly!" << std::endl;
+		}
+	}
+
 	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	for(auto& it: theSupervisorDescriptorInfo_.getDataManagerDescriptors())
 	{
@@ -1552,15 +1596,15 @@ throw (toolbox::fsm::exception::Exception)
 					__COUT_ERR__ << "Unable to open command file: " << fn << std::endl;
 			}
 
-//
-//			FILE *fp = fopen((std::string(getenv("SERVICE_DATA_PATH")) +
-//					"/StartOTS_action.cmd").c_str(),"w");
-//			if(fp)
-//			{
-//				fprintf(fp,"RESET_MPI");
-//				fclose(fp);
-//
-//			}
+			//
+			//			FILE *fp = fopen((std::string(getenv("SERVICE_DATA_PATH")) +
+			//					"/StartOTS_action.cmd").c_str(),"w");
+			//			if(fp)
+			//			{
+			//				fprintf(fp,"RESET_MPI");
+			//				fclose(fp);
+			//
+			//			}
 		} //end mpi reset
 
 		artdaqRestarted = true;
@@ -1579,7 +1623,7 @@ throw (toolbox::fsm::exception::Exception)
 	int artdaqRestartCount = 0;
 	bool preArtdaqProceed = proceed;
 
-ARTDAQ_RETRY: //label to jump back for artdaq retry
+	ARTDAQ_RETRY: //label to jump back for artdaq retry
 	if(artdaqWasRestarted) //wait longer
 	{
 		++artdaqRestartCount;
@@ -1659,8 +1703,8 @@ ARTDAQ_RETRY: //label to jump back for artdaq retry
 	// Whe artdaq FEs exist
 	//	for(auto& it: theSupervisorDescriptorInfo_.getARTDAQFEDescriptors())
 	//	{
-		// ...
-		//}
+	// ...
+	//}
 
 	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	for(auto& it: theSupervisorDescriptorInfo_.getARTDAQDataManagerDescriptors())
@@ -2021,7 +2065,7 @@ throw (xgi::exception::Exception)
 		__COUT__ << "uuid = " << uuid << std::endl;
 
 		uint64_t uid = theWebUsers_.attemptActiveSessionWithCert(uuid, jumbledEmail,
-														 cookieCode, username); //after call jumbledUser holds displayName on success
+				cookieCode, username); //after call jumbledUser holds displayName on success
 
 
 		if (uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
@@ -2038,7 +2082,7 @@ throw (xgi::exception::Exception)
 
 		theWebUsers_.insertSettingsForUser(uid, &xmldoc); //insert settings
 
-														  //insert active session count for user
+		//insert active session count for user
 
 		if (uid != theWebUsers_.NOT_FOUND_IN_DATABASE)
 		{
@@ -2052,7 +2096,7 @@ throw (xgi::exception::Exception)
 
 		//Log login in logbook for active experiment
 		makeSystemLogbookEntry(
-			theWebUsers_.getUsersUsername(uid) + " logged in.");
+				theWebUsers_.getUsersUsername(uid) + " logged in.");
 	}
 	else if (Command == "logout")
 	{
@@ -2127,7 +2171,7 @@ throw (xgi::exception::Exception)
 				CgiDataUtilities::getData(cgi, "srcFunc"),
 				CgiDataUtilities::getData(cgi, "srcId"),
 				CgiDataUtilities::getData(cgi, "doNeverShow") == "1"?true:false,
-				CgiDataUtilities::getData(cgi, "temporarySilence") == "1"?true:false);
+						CgiDataUtilities::getData(cgi, "temporarySilence") == "1"?true:false);
 
 	}
 	else
@@ -2262,7 +2306,7 @@ throw (xgi::exception::Exception)
 		const std::string DEFAULT_FSM_VIEW = "Default_FSM_View";
 		if(set == "1")
 			theWebUsers_.setGenericPreference(uid, DEFAULT_FSM_VIEW,
-				CgiDataUtilities::getData(cgi, DEFAULT_FSM_VIEW));
+					CgiDataUtilities::getData(cgi, DEFAULT_FSM_VIEW));
 		else
 			theWebUsers_.getGenericPreference(uid, DEFAULT_FSM_VIEW, &xmldoc);
 	}
@@ -2505,8 +2549,8 @@ throw (xgi::exception::Exception)
 					trans.begin();
 			std::set<std::string>::iterator ait = actionNames.begin();
 
-//			addRun = false;
-//			addCfg = false;
+			//			addRun = false;
+			//			addCfg = false;
 
 			//handle hacky way to keep "forward" moving states on right of FSM display
 			//must be first!
@@ -3080,8 +3124,8 @@ bool Supervisor::setNextRunNumber(unsigned int runNumber, const std::string &fsm
 //
 //	Note: this is static so the OtsConfigurationWizardSupervisor can call it
 std::pair<std::string /*group name*/,
-		ConfigurationGroupKey> Supervisor::loadGroupNameAndKey(const std::string &fileName,
-				std::string &returnedTimeString)
+ConfigurationGroupKey> Supervisor::loadGroupNameAndKey(const std::string &fileName,
+		std::string &returnedTimeString)
 {
 	std::string fullPath = FSM_LAST_GROUP_ALIAS_PATH + "/" + fileName;
 
@@ -3099,7 +3143,7 @@ std::pair<std::string /*group name*/,
 	char line[500]; //assuming no group names longer than 500 chars
 	//name and then key
 	std::pair<std::string /*group name*/,
-			ConfigurationGroupKey> theGroup;
+	ConfigurationGroupKey> theGroup;
 
 	fgets(line,500,groupFile); //name
 	theGroup.first = line;

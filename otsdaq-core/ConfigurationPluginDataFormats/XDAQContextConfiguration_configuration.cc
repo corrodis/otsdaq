@@ -206,8 +206,8 @@ ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(Configuratio
 //		This doesn't re-write config files, it just re-makes constructs in software.
 void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManager)
 {
-	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__COUT__ << configManager->__SELF_NODE__ << std::endl;
+	//__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	//__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 	//	__COUT__ << configManager->getNode(this->getConfigurationName()).getValueAsString()
 	//		  											  << std::endl;
@@ -281,6 +281,34 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 				appChild.second.getNode(colApplication_.colGroup_	  		).getValue(contexts_.back().applications_.back().group_);
 
 			appChild.second.getNode(colApplication_.colModule_	                     ).getValue(contexts_.back().applications_.back().module_);
+
+
+			auto appPropertyLink = appChild.second.getNode(colApplication_.colLinkToPropertyConfiguration_);
+			if(!appPropertyLink.isDisconnected())
+			{
+				//add xdaq application properties to this context
+
+				auto appPropertyChildren = appPropertyLink.getChildren();
+
+				//__COUT__ << "appPropertyChildren.size() " << appPropertyChildren.size() << std::endl;
+
+				for(auto appPropertyChild:appPropertyChildren)
+				{
+					contexts_.back().applications_.back().properties_.push_back(XDAQApplicationProperty());
+					contexts_.back().applications_.back().properties_.back().status_ =
+							appPropertyChild.second.getNode(colAppProperty_.colStatus_).getValue<bool>();
+					contexts_.back().applications_.back().properties_.back().name_ =
+							appPropertyChild.second.getNode(colAppProperty_.colPropertyName_).getValue<std::string>();
+					contexts_.back().applications_.back().properties_.back().type_ =
+							appPropertyChild.second.getNode(colAppProperty_.colPropertyType_).getValue<std::string>();
+					contexts_.back().applications_.back().properties_.back().value_ =
+							appPropertyChild.second.getNode(colAppProperty_.colPropertyValue_).getValue<std::string>();
+
+					//__COUT__ << contexts_.back().applications_.back().properties_.back().name_ << std::endl;
+				}
+			}
+			//else
+			//	__COUT__ << "Disconnected." << std::endl;
 		}
 
 		//check artdaq type
@@ -563,7 +591,7 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 
 		for(XDAQApplication &app:context.applications_)
 		{
-			//__COUT__ << app.name_ << std::endl;
+			//__COUT__ << app.id_ << std::endl;
 
 
 			if(context.status_)
@@ -576,9 +604,39 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 					out << "\t\t<!--\n";
 			}
 
-			sprintf(tmp,"\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" network=\"%s\" group=\"%s\"/>\n",
+			sprintf(tmp,"\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" network=\"%s\" group=\"%s\">\n",
 					app.class_.c_str(), app.id_, app.instance_, app.network_.c_str(), app.group_.c_str());
 			out << tmp;
+
+			////////////////////// properties
+			int foundColon = app.class_.rfind(':');
+			if(foundColon >= 0) ++foundColon;
+			out << "\t\t\t<properties xmlns=\"urn:xdaq-application:" <<
+					app.class_.substr(foundColon) <<
+					"\" xsi:type=\"soapenc:Struct\">\n";
+
+			//__COUT__ << "app.properties_ " << app.properties_.size() << std::endl;
+			for(XDAQApplicationProperty &appProperty:app.properties_)
+			{
+
+				if(!appProperty.status_)
+					out << "\t\t\t\t<!--\n";
+
+				sprintf(tmp,"\t\t\t\t<%s xsi:type=\"%s\">%s</%s>\n",
+						appProperty.name_.c_str(),
+						appProperty.type_.c_str(),
+						appProperty.value_.c_str(),
+						appProperty.name_.c_str());
+				out << tmp;
+
+				if(!appProperty.status_)
+					out << "\t\t\t\t-->\n";
+			}
+			out << "\t\t\t</properties>\n";
+			////////////////////// end properties
+
+			out << "\t\t</xc:Application>\n";
+
 
 			sprintf(tmp,"\t\t<xc:Module>%s</xc:Module>\n", app.module_.c_str());
 			out << tmp;

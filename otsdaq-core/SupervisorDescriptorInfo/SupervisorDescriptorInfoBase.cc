@@ -68,7 +68,17 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
         //assert(0);
     }
 
-    theFEDataManagerSupervisors_.clear();
+    theDTCSupervisors_.clear();
+    for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("Ph2TkDAQ::DTCSupervisor"))
+    	theDTCSupervisors_[it->getLocalId()] = it;
+
+    if(theDTCSupervisors_.size() == 0)
+    {
+        std::cout << __COUT_HDR_FL__ << "Can't find application descriptor called \"ots::DTCSupervisor\" (Must have been removed from the xdaq context configuration)" << std::endl;
+        //assert(0);
+    }
+
+   theFEDataManagerSupervisors_.clear();
     for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::FEDataManagerSupervisor"))
     	theFEDataManagerSupervisors_[it->getLocalId()] = it;
     if(theFEDataManagerSupervisors_.size() == 0)
@@ -141,6 +151,12 @@ const SupervisorDescriptors& SupervisorDescriptorInfoBase::getDataManagerDescrip
 const SupervisorDescriptors& SupervisorDescriptorInfoBase::getFEDescriptors(void) const
 {
     return theFESupervisors_;
+}
+
+//========================================================================================================================
+const SupervisorDescriptors& SupervisorDescriptorInfoBase::getDTCDescriptors(void) const
+{
+    return theDTCSupervisors_;
 }
 
 //========================================================================================================================
@@ -223,6 +239,14 @@ XDAQ_CONST_CALL xdaq::ApplicationDescriptor* SupervisorDescriptorInfoBase::getFE
 	if(theFESupervisors_.find(instance) == theFESupervisors_.end())
 		std::cout << __COUT_HDR_FL__ << "Couldn't find: " << instance << std::endl;
     return  theFESupervisors_.find(instance)->second;
+}
+
+//========================================================================================================================
+XDAQ_CONST_CALL xdaq::ApplicationDescriptor* SupervisorDescriptorInfoBase::getDTCDescriptor(xdata::UnsignedIntegerT instance) const
+{
+	if(theDTCSupervisors_.find(instance) == theDTCSupervisors_.end())
+		std::cout << __COUT_HDR_FL__ << "Couldn't find: " << instance << std::endl;
+    return  theDTCSupervisors_.find(instance)->second;
 }
 
 //========================================================================================================================

@@ -11,6 +11,13 @@ namespace ots
 class XDAQContextConfiguration : public ConfigurationBase
 {
 public:
+
+	struct XDAQApplicationProperty
+	{
+		bool		status_;
+		std::string name_, type_, value_;
+	};
+
 	struct XDAQApplication
 	{
 		std::string  applicationGroupID_;
@@ -23,6 +30,8 @@ public:
 		std::string  group_;
 		std::string  module_;
 		std::string  sourceConfig_;
+
+		std::vector<XDAQApplicationProperty> properties_;
 	};
 
 	struct XDAQContext
@@ -99,7 +108,23 @@ public:
 		std::string const colNetwork_                       = "Network";
 		std::string const colGroup_                         = "Group";
 		std::string const colModule_                        = "Module";
+		std::string const colLinkToPropertyConfiguration_	= "LinkToPropertyConfiguration";
+		std::string const colLinkToPropertyGroupID_	        = "LinkToPropertyGroupID";
+
 	} colApplication_;
+
+	//XDAQ App Property Column names
+	struct ColApplicationProperty
+	{
+		std::string const colPropertyGroupID_            	= "PropertyGroupID";
+		std::string const colPropertyUID_                	= "UID";
+		std::string const colStatus_                        = ViewColumnInfo::COL_NAME_STATUS;
+		std::string const colPropertyName_                  = "PropertyName";
+		std::string const colPropertyType_                  = "PropertyType";
+		std::string const colPropertyValue_                 = "PropertyValue";
+
+	} colAppProperty_;
+
 };
 }
 #endif
