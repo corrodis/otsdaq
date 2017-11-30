@@ -37,14 +37,15 @@ public:
     void request               (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
 
     //State Machine requests handlers
-    void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
-    void 			        stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
+    void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception);
+    void 			        stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception);
     xoap::MessageReference 	stateMachineXoapHandler      	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
     xoap::MessageReference 	stateMachineResultXoapHandler	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
 
     xoap::MessageReference 	stateMachineStateRequest     	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
     xoap::MessageReference 	stateMachineErrorMessageRequest	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
     xoap::MessageReference 	macroMakerSupervisorRequest  	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
+    xoap::MessageReference 	workLoopStatusRequest		  	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
 
     bool                    stateMachineThread           	(toolbox::task::WorkLoop* workLoop);
 
@@ -65,6 +66,11 @@ public:
     virtual void enteringError         (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
 
 protected:
+
+
+    FEVInterfacesManager*		   extractFEInterfaceManager();
+
+
     WorkLoopManager                stateMachineWorkLoopManager_;
     toolbox::BSem                  stateMachineSemaphore_;
 

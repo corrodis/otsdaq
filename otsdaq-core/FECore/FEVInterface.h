@@ -92,7 +92,7 @@ public:
 	const std::map<std::string, frontEndMacroStruct_t>&	getMapOfFEMacroFunctions() {return mapOfFEMacroFunctions_;}
 
 protected:
-	bool 					workLoopThread(toolbox::task::WorkLoop* workLoop){return running();}
+	bool 					workLoopThread(toolbox::task::WorkLoop* workLoop){continueWorkLoop_ = running(); /* in case users return false, without using continueWorkLoop_*/ return continueWorkLoop_;}
 	std::string             interfaceUID_;
 	std::string             interfaceType_;
 

@@ -38,6 +38,9 @@ private:
     	,cfgMgr_			(cfgMgr)
     	,running_			(false)
     	,commandBusy_		(false)
+    	,doPauseAction_		(false)
+    	,doHaltAction_		(false)
+    	,doResumeAction_	(false)
     	,commandIndex_		((unsigned int)-1)
     	{}
 
@@ -45,10 +48,12 @@ private:
     	ConfigurationManagerRW* 					cfgMgr_;
 
     	bool 										running_, commandBusy_;
+    	bool										doPauseAction_, doHaltAction_, doResumeAction_;
 
     	std::string 								activePlan_;
     	std::vector<IterateConfiguration::Command> 	commands_;
     	unsigned int 								commandIndex_;
+    	std::vector<unsigned int>					stepIndexStack_;
 
     	//associated with FSM
     	std::string 								fsmName_, fsmRunAlias_;
@@ -62,10 +67,19 @@ private:
     static void								IteratorWorkLoop			(Iterator *iterator);
     static void								startCommand				(IteratorWorkLoopStruct *iteratorStruct);
     static bool								checkCommand				(IteratorWorkLoopStruct *iteratorStruct);
+
     static void								startCommandChooseFSM		(IteratorWorkLoopStruct *iteratorStruct, const std::string& fsmName);
+
+    static void								startCommandConfigureActive	(IteratorWorkLoopStruct *iteratorStruct);
     static void								startCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct, const std::string& systemAlias);
-    static bool								checkCommandConfigureAlias	(IteratorWorkLoopStruct *iteratorStruct);
-    static void								startCommandRun				(IteratorWorkLoopStruct *iteratorStruct, bool waitOnRunningThreads, unsigned int durationInSeconds = 0);
+    static void								startCommandConfigureGroup	(IteratorWorkLoopStruct *iteratorStruct);
+    static bool								checkCommandConfigure		(IteratorWorkLoopStruct *iteratorStruct);
+    static void								startCommandModifyActive	(IteratorWorkLoopStruct *iteratorStruct);
+
+    static void								startCommandBeginLabel		(IteratorWorkLoopStruct *iteratorStruct);
+    static void								startCommandRepeatLabel		(IteratorWorkLoopStruct *iteratorStruct);
+
+    static void								startCommandRun				(IteratorWorkLoopStruct *iteratorStruct);
     static bool								checkCommandRun				(IteratorWorkLoopStruct *iteratorStruct);
 
     static bool								haltStateMachine			(Supervisor* theSupervisor, const std::string& fsmName);

@@ -32,7 +32,7 @@ WorkLoop::~WorkLoop(void)
 //========================================================================================================================
 void WorkLoop::startWorkLoop(void)
 {
-	//std::cout << __COUT_HDR_FL__ << "Starting WorkLoop: " << cWorkLoopName_ << std::endl;
+	//__COUT__ << "Starting WorkLoop: " << cWorkLoopName_ << std::endl;
 	continueWorkLoop_ = true;
 	try
 	{
@@ -40,7 +40,7 @@ void WorkLoop::startWorkLoop(void)
 	}
 	catch (xcept::Exception & e)
 	{
-		std::cout << __COUT_HDR_FL__ << "ERROR: Can't create WorkLoop job for " << cWorkLoopName_ << std::endl;
+		__COUT__ << "ERROR: Can't create WorkLoop job for " << cWorkLoopName_ << std::endl;
 		stopWorkLoop();
 	}
 
@@ -52,7 +52,7 @@ void WorkLoop::startWorkLoop(void)
 	}
 	catch (xcept::Exception & e)
 	{
-		std::cout << __COUT_HDR_FL__ << "ERROR: Can't submit WorkLoop job for " << cWorkLoopName_ << std::endl;
+		__COUT__ << "ERROR: Can't submit WorkLoop job for " << cWorkLoopName_ << std::endl;
 		stopWorkLoop();
 	}
 
@@ -62,7 +62,7 @@ void WorkLoop::startWorkLoop(void)
 	}
 	catch (xcept::Exception & e)
 	{
-		std::cout << __COUT_HDR_FL__ << "ERROR: Can't activate WorkLoop job for " << cWorkLoopName_
+		__COUT__ << "ERROR: Can't activate WorkLoop job for " << cWorkLoopName_
 				<< " Very likely because the name " << cWorkLoopName_  << " is not unique!" << std::endl;
 		stopWorkLoop();
 	}
@@ -71,13 +71,16 @@ void WorkLoop::startWorkLoop(void)
 //========================================================================================================================
 bool WorkLoop::stopWorkLoop()
 {
-	//std::cout << __COUT_HDR_FL__ << "Stopping WorkLoop: " << cWorkLoopName_ << std::endl;
+	__COUT__ << "Stopping WorkLoop: " << cWorkLoopName_ << std::endl;
+
 	continueWorkLoop_ = false;
 	if(workLoop_ == 0)
 	{
-		//std::cout << __COUT_HDR_FL__ << "MEASSAGE: WorkLoop " << cWorkLoopName_ << " was not created at all! This message will be commented in the future" << std::endl;
+		__COUT__ << "MEASSAGE: WorkLoop " << cWorkLoopName_ << " was not created at all! This message will be commented in the future" << std::endl;
 		return false;
 	}
+
+	__COUT__ << "initially workLoop_->isActive() " << (workLoop_->isActive()?"yes":"no") << std::endl;
 
 	try
 	{
@@ -86,9 +89,13 @@ bool WorkLoop::stopWorkLoop()
 	}
 	catch (xcept::Exception & e)
 	{
-		std::cout << __COUT_HDR_FL__ << "WARNING: Can't cancel WorkLoop job for " << cWorkLoopName_ << " because probably it has never been activated!"<< std::endl;
+		__COUT__ << "WARNING: Can't cancel WorkLoop job for " << cWorkLoopName_ <<
+				" because probably it has never been activated!" << std::endl;
+
+		__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive()?"yes":"no") << std::endl;
 		return true;
 	}
+
 	try
 	{
 		workLoop_->remove(job_);
@@ -99,9 +106,12 @@ bool WorkLoop::stopWorkLoop()
 		// If the workloop job thread returns false, then the workloop job is automatically removed and it can't be removed again
 		// Leaving this try catch allows me to be general in the job threads so I can return true (repeat loop) or false ( loop only once)
 		// without crashing
-		std::cout << __COUT_HDR_FL__ << "WARNING: Can't remove request WorkLoop: " << cWorkLoopName_ << std::endl;
+		__COUT__ << "WARNING: Can't remove request WorkLoop: " << cWorkLoopName_ << std::endl;
+		__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive()?"yes":"no") << std::endl;
 	}
-	//std::cout << __COUT_HDR_FL__ << "Stopped WorkLoop: " << cWorkLoopName_ << std::endl;
+
+	__COUT__ << "Stopped WorkLoop: " << cWorkLoopName_ << std::endl;
+	__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive()?"yes":"no") << std::endl;
 	return true;
 }
 
@@ -109,4 +119,10 @@ bool WorkLoop::stopWorkLoop()
 const std::string& WorkLoop::getWorkLoopName(void)
 {
 	return cWorkLoopName_;
+}
+
+//========================================================================================================================
+bool WorkLoop::isActive(void)
+{
+	return workLoop_->isActive() && continueWorkLoop_;
 }

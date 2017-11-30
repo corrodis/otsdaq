@@ -77,6 +77,8 @@ public:
 
 	//   map<type,        pair     <groupName  , ConfigurationGroupKey>>
 	std::map<std::string, std::pair<std::string, ConfigurationGroupKey>>  getActiveConfigurationGroups  (void) const;
+	const std::string&													  getActiveGroupName 			(const std::string& type = "") const;
+	ConfigurationGroupKey		 										  getActiveGroupKey 			(const std::string& type = "") const;
 
 	ConfigurationTree 							   	                      getNode					    (const std::string &nodeString, bool doNotThrowOnBrokenUIDLinks=false) const;	//"root/parent/parent/"
 	ConfigurationTree													  getSupervisorConfigurationNode(const std::string &contextUID, const std::string &applicationUID) const;
@@ -88,7 +90,7 @@ public:
 	//   map<alias      ,      pair<group name,  ConfigurationGroupKey> >
 	std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > getGroupAliasesConfiguration  (void);
 	//   pair<group name , ConfigurationGroupKey>
-	std::pair<std::string, ConfigurationGroupKey>                         getConfigurationGroupFromAlias(std::string runType, ProgressBar* progressBar=0);
+	std::pair<std::string, ConfigurationGroupKey>                         getConfigurationGroupFromAlias(std::string systemAlias, ProgressBar* progressBar=0);
 
 	std::map<std::string, ConfigurationVersion> 		  			      getActiveVersions		  		(void) const;
 

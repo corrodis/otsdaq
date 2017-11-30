@@ -261,7 +261,9 @@ void Supervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 throw (xgi::exception::Exception)
 {
 	//for simplicity assume all commands should be mutually exclusive with iterator thread state machine accesses (really should just be careful with RunControlStateMachine access)
+	if(VERBOSE_MUTEX) __COUT__ << "Waiting for FSM access" << std::endl;
 	std::lock_guard<std::mutex> lock(stateMachineAccessMutex_);
+	if(VERBOSE_MUTEX) __COUT__ << "Have FSM access" << std::endl;
 
 	cgicc::Cgicc cgi(in);
 
@@ -308,13 +310,14 @@ throw (xgi::exception::Exception)
 		return;
 	}
 
+	__COUT__ << "Check for Handled by theIterator_" << std::endl;
 
 	//check if Iterator should handle
 	if((activeStateMachineWindowName_ == "" ||
 			activeStateMachineWindowName_ == "iterator") &&
 			theIterator_.handleCommandRequest(xmldoc,command,fsmWindowName))
 	{
-		//__COUT__ << "Handled by theIterator_" << std::endl;
+		__COUT__ << "Handled by theIterator_" << std::endl;
 		xmldoc.outputXmlDocument((std::ostringstream*) out, false);
 		return;
 	}
@@ -748,7 +751,7 @@ void Supervisor::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
 throw (toolbox::fsm::exception::Exception)
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
-	__COUT__ << "Fsm is in transition?" << theStateMachine_.isInTransition() << std::endl;
+	__COUT__ << "Fsm is in transition? " << (theStateMachine_.isInTransition()?"yes":"no") << std::endl;
 
 
 	/*
@@ -886,25 +889,24 @@ throw (toolbox::fsm::exception::Exception)
 	//FIXME This need to be incorporated in the broadcast method
 	try
 	{
-		SupervisorDescriptors::const_iterator it =
-				theSupervisorDescriptorInfo_.getFEDescriptors().begin();
-		for (; it != theSupervisorDescriptorInfo_.getFEDescriptors().end();
-				it++)
+		for (auto& it : theSupervisorDescriptorInfo_.getFEDescriptors())
 		{
 			try
 			{
-				std::string state = send(it->second,
+				std::string state = send(it.second,
 						"StateMachineStateRequest");
 
-				theSupervisorsInfo_.getFESupervisorInfo(it->first).setStatus(
+				theSupervisorsInfo_.getFESupervisorInfo(it.first).setStatus(
 						state);
 				//diagService_->reportError("PixelFESupervisor instance "+stringF((*i_set_PixelFESupervisor)->getInstance())+" is in FSM state "+fsmState, DIAGDEBUG);
-				__COUT__ << "PixelFESupervisor instance " << it->first << " is in FSM state " << state << std::endl;
+				__COUT__ << "FESupervisor instance " << it.first << " is in FSM state " <<
+						state << std::endl;
 				__COUT__ << "Look! Here's a FEW! @@@" << std::endl;
 			}
 			catch (xdaq::exception::Exception& e)
 			{
-				//diagService_->reportError("PixelFESupervisor instance "+stringF((*i_set_PixelFESupervisor)->getInstance())+" could not report its FSM state", DIAGERROR);
+				__COUT_WARN__ << "Could not retrieve status from FESupervisor instance " <<
+						it.first << "." << std::endl;
 			}
 		}
 		//		it = theSupervisorDescriptorInfo_.getARTDAQFEDescriptors().begin();
@@ -933,12 +935,13 @@ throw (toolbox::fsm::exception::Exception)
 						"StateMachineStateRequest");
 				theSupervisorsInfo_.getARTDAQFEDataManagerSupervisorInfo(it.first).setStatus(
 						state);
-				__COUT__ << "PixelFERSupervisor instance " << it.first << " is in FSM state " << state << std::endl;
+				__COUT__ << "getARTDAQFEDataManagerDescriptors instance " << it.first << " is in FSM state " << state << std::endl;
 				__COUT__ << "Look! Here's a FER! @@@" << std::endl;
 			}
 			catch (xdaq::exception::Exception& e)
 			{
-				//diagService_->reportError("PixelFESupervisor instance "+stringF((*i_set_PixelFESupervisor)->getInstance())+" could not report its FSM state", DIAGERROR);
+				__COUT_WARN__ << "Could not retrieve status from getARTDAQFEDataManagerDescriptors instance " <<
+						it.first << "." << std::endl;
 			}
 		}
 		for (auto& it : theSupervisorDescriptorInfo_.getARTDAQDataManagerDescriptors())
@@ -949,21 +952,20 @@ throw (toolbox::fsm::exception::Exception)
 						"StateMachineStateRequest");
 				theSupervisorsInfo_.getARTDAQDataManagerSupervisorInfo(it.first).setStatus(
 						state);
-				__COUT__ << "PixelFERSupervisor instance " << it.first << " is in FSM state " << state << std::endl;
+				__COUT__ << "getARTDAQDataManagerSupervisorInfo instance " << it.first << " is in FSM state " << state << std::endl;
 				__COUT__ << "Look! Here's a FER! @@@" << std::endl;
 			}
 			catch (xdaq::exception::Exception& e)
 			{
-				//diagService_->reportError("PixelFESupervisor instance "+stringF((*i_set_PixelFESupervisor)->getInstance())+" could not report its FSM state", DIAGERROR);
+				__COUT_WARN__ << "Could not retrieve status from getARTDAQDataManagerSupervisorInfo instance " <<
+						it.first << "." << std::endl;
 			}
 		}
 	}
 	catch (xdaq::exception::Exception& e)
 	{
-		__COUT__
-		<< "No PixelFESupervisor found in the \"daq\" group in the Configuration XML file."
-		<< std::endl;
-		//diagService_->reportError("No PixelFESupervisor found in the \"daq\" group in the Configuration XML file.", DIAGERROR);
+		__COUT_WARN__ << "No FESupervisor found in the \"daq\" group in the Configuration XML file."
+				<< std::endl;
 	}
 
 }
@@ -2185,12 +2187,14 @@ void Supervisor::request(xgi::Input * in, xgi::Output * out)
 throw (xgi::exception::Exception)
 {
 	//for simplicity assume all commands should be mutually exclusive with iterator thread state machine accesses (really should just be careful with RunControlStateMachine access)
+	if(VERBOSE_MUTEX) __COUT__ << "Waiting for FSM access" <<  std::endl;
 	std::lock_guard<std::mutex> lock(stateMachineAccessMutex_);
+	if(VERBOSE_MUTEX) __COUT__ << "Have FSM access" <<  std::endl;
 
 	cgicc::Cgicc cgi(in);
 
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
-	//__COUT__ << Command <<  std::endl;
+
 
 	//**** start LOGIN GATEWAY CODE ***//
 	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions, uint64_t uid
@@ -2657,6 +2661,7 @@ throw (xgi::exception::Exception)
 	}
 	else if (Command == "getIterationPlanStatus")
 	{
+		//__COUT__ << "checking it status" << std::endl;
 		theIterator_.handleCommandRequest(xmldoc,Command,"");
 	}
 	else if (Command == "getCurrentState")

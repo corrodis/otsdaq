@@ -16,6 +16,7 @@ public:
 
     void startWorkLoop (void);
     bool stopWorkLoop  (void);
+    bool isActive	   (void);
 
 protected:
     volatile bool continueWorkLoop_;

@@ -33,12 +33,14 @@ void DataProducer::registerToBuffer(void)
 //========================================================================================================================
 void DataProducer::startProcessingData(std::string runNumber)
 {
+	__COUT__ << "startWorkLoop..." << std::endl;
 	WorkLoop::startWorkLoop();
 }
 
 //========================================================================================================================
 void DataProducer::stopProcessingData(void)
 {
+	__COUT__ << "stopWorkLoop..." << std::endl;
 	WorkLoop::stopWorkLoop();
 }
 
