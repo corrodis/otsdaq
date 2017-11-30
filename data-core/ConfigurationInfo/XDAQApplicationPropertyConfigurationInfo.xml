@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+		<CONFIGURATION Name="XDAQApplicationPropertyConfiguration">
+			<VIEW Name="XDAQ_APPLICATION_PROPERTY_CONFIGURATION" Type="File,Database,DatabaseTest" Description="No%20description.">
+				<COLUMN Type="GroupID-PropertyGroup" 	 Name="PropertyGroupID" 	 StorageName="PROPERTY_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="UID" 	 Name="UID" 	 StorageName="UID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="PropertyName" 	 StorageName="PROPERTY_NAME" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="FixedChoiceData" 	 Name="PropertyType" 	 StorageName="PROPERTY_TYPE" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,xsd%3Astring,xsd%3Ainteger,xsd%3AunsignedInt,xsd%3Aboolean,xsd%3AunsignedShort"/>
+				<COLUMN Type="Data" 	 Name="PropertyValue" 	 StorageName="PROPERTY_VALUE" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
+			</VIEW>
+		</CONFIGURATION>
+	</ROOT>
