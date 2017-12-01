@@ -174,9 +174,17 @@ public:
 			else
 			{
 				std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
-				for(retValue=1;retValue-1<(T)choices.size();++retValue)
+
+				//				for(const auto& choice: choices)
+				//					__COUT__ << "choice " << choice << __E__;
+
+				//consider arbitrary bool
+				bool skipOne = (choices.size() &&
+						choices[0].find("arbitraryBool=") == 0);
+
+				for(retValue=1 + (skipOne?1:0);retValue-1<(T)choices.size();++retValue)
 					if(value == choices[retValue-1])
-						return retValue; //value has been set to selected choice index, so return
+						return retValue - (skipOne?1:0); //value has been set to selected choice index, so return
 
 				__SS__ << "\tInvalid value for column data type: " << columnsInfo_[col].getDataType()
 						<< " in configuration " << tableName_
