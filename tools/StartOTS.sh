@@ -10,11 +10,11 @@ DONOTKILL=0
 
 function killprocs {
     if [[ "x$1" == "x" ]]; then
-	ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'|xargs kill -9
-	ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'|xargs kill -9
-	ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'|xargs kill -9
+	ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
+	ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
+	ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
     else
-	ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'|xargs kill -9
+	ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
     fi
 }
 
@@ -609,7 +609,7 @@ launchOTS() {
 	  done
 	  echo
 	  cmd=$cmdstart" -host "$mpiHosts$cmd
-	  echo $cmd &
+	  echo Command used to start MPI: $cmd &
 	  MPI_RUN_CMD=$cmd
 		#if [ $QUIET == 1 ]; then
 		#echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"		  
@@ -725,7 +725,7 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "RESET_MPI" ]; then
 			echo " "
 			echo "Restarting MPI . . ."
-			echo $MPI_RUN_CMD
+			#echo $MPI_RUN_CMD
 			echo " "
 			killprocs mpirun
 			#killall -9 mpirun
