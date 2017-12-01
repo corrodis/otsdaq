@@ -44,29 +44,29 @@ XmlDocument::XmlDocument(std::string rootName) :
         rootTagName_(rootName)
 {
 	INIT_MF("XmlDocument");
-    //__MOUT__ << "in" << std::endl;
+    //__COUT__ << "in" << std::endl;
     initDocument();
     rootElement_ = theDocument_->getDocumentElement();
-    //__MOUT__ << "out" << std::endl;
+    //__COUT__ << "out" << std::endl;
 }
 
 //==============================================================================
 XmlDocument::XmlDocument(const XmlDocument& doc) :
         rootTagName_(doc.rootTagName_)
 {
-    //__MOUT__ << "in" << std::endl;
+    //__COUT__ << "in" << std::endl;
     *this = doc;
-    //__MOUT__ << "out" << std::endl;
+    //__COUT__ << "out" << std::endl;
 }
 
 //==============================================================================
 XmlDocument& XmlDocument::operator=(const XmlDocument& doc)
 {
-    //__MOUT__ << "in" << std::endl;
+    //__COUT__ << "in" << std::endl;
     initDocument();
     rootElement_ = theDocument_->getDocumentElement();
     recursiveElementCopy(doc.rootElement_, rootElement_);
-    //__MOUT__ << "out" << std::endl;
+    //__COUT__ << "out" << std::endl;
     return *this;
 }
 
@@ -103,7 +103,7 @@ void XmlDocument::initDocument(void)
         }
         catch(const xercesc::XMLException& e)
         {
-            __MOUT__ << "Error Message: " << XML_TO_CHAR(e.getMessage()) << std::endl;
+            __COUT__ << "Error Message: " << XML_TO_CHAR(e.getMessage()) << std::endl;
         }
         catch (...)
         {
@@ -124,7 +124,7 @@ void XmlDocument::initPlatform(void)
     }
     catch( xercesc::XMLException& e )
     {
-      __MOUT__ << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
+      __COUT__ << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
     }
 
 }
@@ -149,7 +149,7 @@ void XmlDocument::terminatePlatform(void)
     }
     catch( xercesc::XMLException& e )
     {
-      __MOUT__ << "XML toolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
+      __COUT__ << "XML toolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
         //XMLString::release(&message);
     }
 }
@@ -168,7 +168,7 @@ xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, 
     }
     catch (xercesc::DOMException& e)
     {
-      __MOUT__ << "Can't use the name: " << childName << " to create the child element because the exception says: "
+      __COUT__ << "Can't use the name: " << childName << " to create the child element because the exception says: "
         		<< XML_TO_CHAR(e.getMessage()) << ". Very likely you have a name that starts with a number and that's not allowed!" << std::endl;
     }
     parent->appendChild(child);
@@ -179,7 +179,7 @@ xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, 
     }
     catch(...) //sometimes see TranscodingException
     {
-    	__MOUT_ERR__ << "Error caught attempting to create a text node for this text: " <<
+    	__COUT_ERR__ << "Error caught attempting to create a text node for this text: " <<
     			childText << ". Converting instead to 'Illegal text..'" << std::endl;
     	child->appendChild(theDocument_->createTextNode(CONVERT_TO_XML("Illegal text content blocked.")));
     }
@@ -197,7 +197,7 @@ xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, 
 
     if(parentIndex >= nodeList->getLength())
     {
-        __MOUT__ << "WARNING: Illegal parent index attempted in tags with name: " << parentName << ", index: " << parentIndex << std::endl;
+        __COUT__ << "WARNING: Illegal parent index attempted in tags with name: " << parentName << ", index: " << parentIndex << std::endl;
         return 0; //illegal index attempted
     }
 
@@ -272,7 +272,7 @@ unsigned int XmlDocument::addDataElement ( std::string field, std::string value,
 	DOMNodeList *nodeList = theDocument_->getElementsByTagName(CONVERT_TO_XML(parentName));
 	
 	if(parentNameIndex >= nodeList->getLength()) {
-		__MOUT__ << "illegal parent index attempted in tags with name: " << parentName << ", index: " << parentNameIndex << std::endl;
+		__COUT__ << "illegal parent index attempted in tags with name: " << parentName << ", index: " << parentNameIndex << std::endl;
 		return -1; //illegal index attempted
 	}
 	
@@ -292,7 +292,7 @@ unsigned int XmlDocument::addDataElement ( std::string field, std::string value,
 unsigned int XmlDocument::addDataElement ( std::string field, std::string value, unsigned int *parentIndexArray, unsigned int parentIndexArraySize)
 {
 	
-    //__MOUT__ << "field: " << field << ", value: " << value << ", parent: " << parentIndexArraySize << std::endl;
+    //__COUT__ << "field: " << field << ", value: " << value << ", parent: " << parentIndexArraySize << std::endl;
 	
 	DOMElement *parentEl = dataElement; // initialize parent to <DATA>			
 	
@@ -322,7 +322,7 @@ unsigned int XmlDocument::addDataElement ( std::string field, std::string value,
 			//if(parentEl->getFirstChild() != NULL && parentEl->getFirstChild()->getNodeType() == DOMNode::TEXT_NODE) ++tmpi;
 			
 			if(tmpi >= nodeList->getLength()) {
-				__MOUT__ << "illegal child index attempted in nested parents: " << parentIndexArray[i] << ", depth: " << i << ", tmpi: " << tmpi << std::endl;
+				__COUT__ << "illegal child index attempted in nested parents: " << parentIndexArray[i] << ", depth: " << i << ", tmpi: " << tmpi << std::endl;
 				return -1; //illegal child index attempted in nested parents
 			}
 			
@@ -525,8 +525,6 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
     for(unsigned int i=0; i<inString.length(); i++)
         if(inString[i] != ' ')
         {
-
-
 			if(doit) std::cout << __COUT_HDR_FL__<< inString[i] << ":" <<
 					(int)inString[i] << ":" << inString << std::endl;
 
@@ -537,36 +535,46 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
 					(inString[i] > char(126) && inString[i] < char(161))) //this is aggravated by the bug in MFextensions (though Eric says he fixed on 8/24/2016)
 					//Note: greater than 255 should be impossible if by byte (but there are html chracters in 300s and 8000s)
             {
-            	if(allowWhiteSpace &&  //maintain new lines and tabs
+            	if(//maintain new lines and tabs
             			inString[i] == '\n')
             	{
-            		sprintf(htmlTmp,"&#%3.3d",inString[i]);
-                	inString.insert(i,htmlTmp); //insert html str sequence
-                	inString.replace(i+5,1,1,';');        // replace special character with ;
-                	i+=6; //skip to next char to check
-                	--i;
-            	}
-            	else if(allowWhiteSpace &&  //maintain new lines and tabs
-            			inString[i] == '\t')
-            	{
-            		if(0)
+            		if(allowWhiteSpace)
             		{
-						//tab = 8 spaces
-						sprintf(htmlTmp,"&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160");
+						sprintf(htmlTmp,"&#%3.3d",inString[i]);
 						inString.insert(i,htmlTmp); //insert html str sequence
-						inString.replace(i+47,1,1,';');        // replace special character with ;
-						i+=48; //skip to next char to check
+						inString.replace(i+5,1,1,';');        // replace special character with ;
+						i+=6; //skip to next char to check
 						--i;
             		}
-            		else //tab =  0x09
+            		else //translate to ' '
+            			inString[i] = ' ';
+            	}
+            	else if(//maintain new lines and tabs
+            			inString[i] == '\t')
+            	{
+            		if(allowWhiteSpace)
             		{
+						if(0)
+						{
+							//tab = 8 spaces
+							sprintf(htmlTmp,"&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160");
+							inString.insert(i,htmlTmp); //insert html str sequence
+							inString.replace(i+47,1,1,';');        // replace special character with ;
+							i+=48; //skip to next char to check
+							--i;
+						}
+						else //tab =  0x09
+						{
 
-                		sprintf(htmlTmp,"&#009");
-                    	inString.insert(i,htmlTmp); //insert html str sequence
-                    	inString.replace(i+5,1,1,';');        // replace special character with ;
-                    	i+=6; //skip to next char to check
-                    	--i;
+							sprintf(htmlTmp,"&#009");
+							inString.insert(i,htmlTmp); //insert html str sequence
+							inString.replace(i+5,1,1,';');        // replace special character with ;
+							i+=6; //skip to next char to check
+							--i;
+						}
             		}
+					else //translate to ' '
+						inString[i] = ' ';
             	}
             	else
             	{

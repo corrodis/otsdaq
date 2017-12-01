@@ -24,34 +24,26 @@
 using namespace ots;
 
 
-//========================================================================================================================
-Socket::Socket(void)
-{
-	__SS__ << "ERROR: This method should never be called. There is something wrong in your inheritance scheme!" << std::endl;
-	__MOUT__ << "\n" << ss.str();
-	//FIXME: this is getting called during configure?!
-	//throw std::runtime_error(ss.str());
-}
 
 //========================================================================================================================
 Socket::Socket(const std::string &IPAddress, unsigned int port)
 : socketNumber_(-1)
 , IPAddress_   (IPAddress)
-, port_        (port)
+, requestedPort_        (port)
 //    maxSocketSize_(maxSocketSize)
 {
-	__MOUT__ << std::endl;
+	__COUT__ << std::endl;
 	//network stuff
     socketAddress_.sin_family = AF_INET;// use IPv4 host byte order
     socketAddress_.sin_port   = htons(port);// short, network byte order
 
-    __MOUT__ << "IPAddress: " << IPAddress << " port: " << port << " htons: " <<  socketAddress_.sin_port << std::endl;
+    __COUT__ << "IPAddress: " << IPAddress << " port: " << port << " htons: " <<  socketAddress_.sin_port << std::endl;
     if(inet_aton(IPAddress.c_str(), &socketAddress_.sin_addr) == 0)
     {
     	__SS__ << "FATAL: Invalid IP/Port combination. Is it already in use? " <<
     			IPAddress << "/" << port << std::endl;
         //assert(0); //RAR changed to exception on 8/17/2016
-        __MOUT__ << "\n" << ss.str();
+        __COUT__ << "\n" << ss.str();
         throw std::runtime_error(ss.str());
     }
 
@@ -59,17 +51,27 @@ Socket::Socket(const std::string &IPAddress, unsigned int port)
 }
 
 //========================================================================================================================
+//protected constructor
+Socket::Socket(void)
+{
+	__SS__ << "ERROR: This method should never be called. This is the protected constructor. There is something wrong in your inheritance scheme!" << std::endl;
+	__COUT__ << "\n" << ss.str();
+
+	throw std::runtime_error(ss.str());
+}
+
+//========================================================================================================================
 Socket::~Socket(void)
 {
-    __MOUT__ << "CLOSING THE SOCKET #" << socketNumber_  << " IP: " << IPAddress_ << " port: " << port_ << " htons: " << socketAddress_.sin_port << std::endl;
+    __COUT__ << "CLOSING THE SOCKET #" << socketNumber_  << " IP: " << IPAddress_ << " port: " << getPort() << " htons: " << socketAddress_.sin_port << std::endl;
 	if(socketNumber_ != -1)
 		close(socketNumber_);
 }
 
 //========================================================================================================================
-void Socket::initialize(void)
+void Socket::initialize(unsigned int socketReceiveBufferSize)
 {
-    __MOUT__ << " htons: " <<  socketAddress_.sin_port << std::endl;
+    __COUT__ << " htons: " <<  socketAddress_.sin_port << std::endl;
     struct addrinfo  hints;
     struct addrinfo* res;
     int status    =  0;
@@ -132,11 +134,38 @@ void Socket::initialize(void)
 
     if(!socketInitialized)
     {
-    	std::stringstream ss;
-		ss << __COUT_HDR_FL__ << "FATAL: Socket could not initialize socket. Perhaps it is already in use?" << std::endl;
+    	__SS__ << "FATAL: Socket could not initialize socket. Perhaps it is already in use?" << std::endl;
 		std::cout << ss.str();
 		throw std::runtime_error(ss.str());
     }
+
+
+	if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF,
+			(char*)&socketReceiveBufferSize,
+			sizeof(socketReceiveBufferSize)) < 0) {
+		__COUT_ERR__ << "Failed to set socket receive size to " <<
+				socketReceiveBufferSize << ". Attempting to revert to default." << std::endl;
+
+		socketReceiveBufferSize = defaultSocketReceiveSize_;
+		if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF,
+					(char*)&socketReceiveBufferSize,
+					sizeof(socketReceiveBufferSize)) < 0)
+		{
+			__SS__ << "Failed to set socket receive size to " <<
+					socketReceiveBufferSize << ". Attempting to revert to default." << std::endl;
+			std::cout << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+
+	}
+}
+
+uint16_t Socket::getPort()
+{
+	struct sockaddr_in sin;
+	socklen_t len = sizeof(sin);
+	getsockname(socketNumber_, (struct sockaddr *)&sin, &len);
+	return ntohs(sin.sin_port);
 }
 
 //========================================================================================================================

@@ -18,11 +18,14 @@ const std::string RunControlStateMachine::FAILED_STATE_NAME = "Failed";
 RunControlStateMachine::RunControlStateMachine(std::string name)
 : stateMachineName_(name)
 {
+	INIT_MF("RunControlStateMachine");
+
 	theStateMachine_.addState('I', "Initial",     this, &RunControlStateMachine::stateInitial);
 	theStateMachine_.addState('H', "Halted",      this, &RunControlStateMachine::stateHalted);
 	theStateMachine_.addState('C', "Configured",  this, &RunControlStateMachine::stateConfigured);
 	theStateMachine_.addState('R', "Running",     this, &RunControlStateMachine::stateRunning);
 	theStateMachine_.addState('P', "Paused",      this, &RunControlStateMachine::statePaused);
+	theStateMachine_.addState('S', "Shutdown",    this, &RunControlStateMachine::stateShutdown);
 	//theStateMachine_.addState('v', "Recovering",  this, &RunControlStateMachine::stateRecovering);
 	//theStateMachine_.addState('T', "TTSTestMode", this, &RunControlStateMachine::stateTTSTestMode);
 
@@ -35,29 +38,30 @@ RunControlStateMachine::RunControlStateMachine(std::string name)
 	theStateMachine_.setFailedStateTransitionChanged(this, &RunControlStateMachine::inError);
 
 	//this line was added to get out of Failed state
-	theStateMachine_.addStateTransition('F', 'H', "Halt"	  , "Halting"	  , this, &RunControlStateMachine::transitionHalting);
+	theStateMachine_.addStateTransition('F', 'H', "Halt"	  , "Halting"	   , this, &RunControlStateMachine::transitionHalting);
 		//this attempt to get out of fail state makes things crash FIXME
 	//end RAR added back in on 11/20/2016.. why was it removed..
 
-	theStateMachine_.addStateTransition('H', 'C', "Configure" , "Configuring" , "ConfigurationAlias", this, &RunControlStateMachine::transitionConfiguring);
+	theStateMachine_.addStateTransition('H', 'C', "Configure" , "Configuring"  , "ConfigurationAlias", this, &RunControlStateMachine::transitionConfiguring);
+	theStateMachine_.addStateTransition('H', 'S', "Shutdown"  , "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
+	theStateMachine_.addStateTransition('S', 'I', "Startup"   , "Starting Up"  , this, &RunControlStateMachine::transitionStartingUp);
 
 	//Every state can transition to halted
-	theStateMachine_.addStateTransition('I', 'H', "Initialize", "Initializing", this, &RunControlStateMachine::transitionInitializing);
-	theStateMachine_.addStateTransition('H', 'H', "Halt"      , "Halting"     , this, &RunControlStateMachine::transitionHalting);
-	theStateMachine_.addStateTransition('C', 'H', "Halt"      , "Halting"     , this, &RunControlStateMachine::transitionHalting);
-	theStateMachine_.addStateTransition('R', 'H', "Abort"     , "Aborting"    , this, &RunControlStateMachine::transitionHalting);
-	theStateMachine_.addStateTransition('P', 'H', "Abort"     , "Aborting"    , this, &RunControlStateMachine::transitionHalting);
+	theStateMachine_.addStateTransition('I', 'H', "Initialize", "Initializing" , this, &RunControlStateMachine::transitionInitializing);
+	theStateMachine_.addStateTransition('H', 'H', "Halt"      , "Halting"      , this, &RunControlStateMachine::transitionHalting);
+	theStateMachine_.addStateTransition('C', 'H', "Halt"      , "Halting"      , this, &RunControlStateMachine::transitionHalting);
+	theStateMachine_.addStateTransition('R', 'H', "Abort"     , "Aborting"     , this, &RunControlStateMachine::transitionHalting);
+	theStateMachine_.addStateTransition('P', 'H', "Abort"     , "Aborting"     , this, &RunControlStateMachine::transitionHalting);
 
 
-	theStateMachine_.addStateTransition('R', 'P', "Pause"     , "Pausing"     , this, &RunControlStateMachine::transitionPausing);
-	theStateMachine_.addStateTransition('P', 'R', "Resume"    , "Resuming"    , this, &RunControlStateMachine::transitionResuming);
-	theStateMachine_.addStateTransition('C', 'R', "Start"     , "Starting"    , this, &RunControlStateMachine::transitionStarting);
-	theStateMachine_.addStateTransition('R', 'C', "Stop"      , "Stopping"    , this, &RunControlStateMachine::transitionStopping);
-	theStateMachine_.addStateTransition('P', 'C', "Stop"      , "Stopping"    , this, &RunControlStateMachine::transitionStopping);
+	theStateMachine_.addStateTransition('R', 'P', "Pause"     , "Pausing"      , this, &RunControlStateMachine::transitionPausing);
+	theStateMachine_.addStateTransition('P', 'R', "Resume"    , "Resuming"     , this, &RunControlStateMachine::transitionResuming);
+	theStateMachine_.addStateTransition('C', 'R', "Start"     , "Starting"     , this, &RunControlStateMachine::transitionStarting);
+	theStateMachine_.addStateTransition('R', 'C', "Stop"      , "Stopping"     , this, &RunControlStateMachine::transitionStopping);
+	theStateMachine_.addStateTransition('P', 'C', "Stop"      , "Stopping"     , this, &RunControlStateMachine::transitionStopping);
 
 
 	// NOTE!! There must be a defined message handler for each transition name created above
-	// Also Note: The definition of theStateMachine above will get
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Initialize", XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Configure" , XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Start"     , XDAQ_NS_URI);
@@ -65,7 +69,9 @@ RunControlStateMachine::RunControlStateMachine(std::string name)
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Pause"     , XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Resume"    , XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Halt"      , XDAQ_NS_URI);
-	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Abort"     , XDAQ_NS_URI); //added for "Abort" transition name
+	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Abort"     , XDAQ_NS_URI);
+	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Shutdown"  , XDAQ_NS_URI);
+	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Startup"   , XDAQ_NS_URI);
 
 
 	reset();
@@ -79,10 +85,10 @@ RunControlStateMachine::~RunControlStateMachine(void)
 //========================================================================================================================
 void RunControlStateMachine::reset(void)
 {
-	__MOUT__ << stateMachineName_ << " is in transition?" << theStateMachine_.isInTransition() << std::endl;
+	__COUT__ << stateMachineName_ << " is in transition?" << theStateMachine_.isInTransition() << std::endl;
 	theStateMachine_.setInitialState('I');
 	theStateMachine_.reset();
-	__MOUT__ << stateMachineName_ << " is in transition?" << theStateMachine_.isInTransition() << std::endl;
+	__COUT__ << stateMachineName_ << " is in transition?" << theStateMachine_.isInTransition() << std::endl;
 }
 
 //========================================================================================================================
@@ -90,10 +96,11 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 		xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	__MOUT__ << "Starting state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
-	__MOUT__ << SOAPUtilities::translate(message) << std::endl;
+	__COUT__ << "Starting state for " << stateMachineName_ << " is " <<
+			theStateMachine_.getCurrentStateName() << std::endl;
+	__COUT__ << SOAPUtilities::translate(message) << std::endl;
 	std::string command = SOAPUtilities::translate(message).getCommand();
-	//__MOUT__ << "Command:-" << command << "-" << std::endl;
+	//__COUT__ << "Command:-" << command << "-" << std::endl;
 	theProgressBar_.reset(command,stateMachineName_);
 	std::string result = command + "Done";
 
@@ -102,8 +109,18 @@ throw (xoap::exception::Exception)
 	if(command == "Error" || command == "Fail")
 	{
 		__SS__ << command << " was received! Immediately throwing FSM exception." << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());
+		return SOAPUtilities::makeSOAPMessageReference(result);
+	}
+
+
+	//if already Halted, respond to Initialize with "done"
+	//	(this avoids race conditions involved with artdaq mpi reset)
+	if(command == "Initialize" &&
+			theStateMachine_.getCurrentStateName() == "Halted")
+	{
+		__COUT__ << "Already Initialized.. ignoring Initialize command." << std::endl;
 		return SOAPUtilities::makeSOAPMessageReference(result);
 	}
 
@@ -111,26 +128,26 @@ throw (xoap::exception::Exception)
 	try
 	{
 		theStateMachine_.execTransition(command,message);
-		//__MOUT__ << "I don't know what is going on!" << std::endl;
+		//__COUT__ << "I don't know what is going on!" << std::endl;
 
 		if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
 		{
 			result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " + theStateMachine_.getErrorMessage();
-			__MOUT_ERR__ << "Unexpected Failure state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
-			__MOUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
+			__COUT_ERR__ << "Unexpected Failure state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
+			__COUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
 		}
 	}
 	catch (toolbox::fsm::exception::Exception& e)
 	{
 		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " + theStateMachine_.getErrorMessage();
 		__SS__ << "Run Control Message Handling Failed: " << e.what() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
-		__MOUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
 	}
 
 	theProgressBar_.complete();
-	__MOUT__ << "Ending state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
-	__MOUT__ << "result = " << result << std::endl;
+	__COUT__ << "Ending state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
+	__COUT__ << "result = " << result << std::endl;
 	return SOAPUtilities::makeSOAPMessageReference(result);
 }
 

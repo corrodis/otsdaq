@@ -1,0 +1,132 @@
+{
+"document" : {
+"data" : {
+"NAME" : "DQM_HISTOS_CONSUMER_CONFIGURATION",
+"COMMENT" : "DQM for HW emulator.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1501088403,
+"COL_TYPES" : {
+"PROCESSOR_ID" : "VARCHAR2",
+"SAVE_DQM_FILE" : "VARCHAR2",
+"DQM_FILE_PATH" : "VARCHAR2",
+"DQM_FILE_NAME_PREFIX" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"PROCESSOR_ID" : "DQMHistos0",
+"SAVE_DQM_FILE" : "Yes",
+"DQM_FILE_PATH" : "${OTSDAQ_DATA}",
+"DQM_FILE_NAME_PREFIX" : "DQMHistosRun",
+"COMMENT_DESCRIPTION" : "DQM for hw emulator",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1501087901"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "Thu Sep 28 15:44:13 2017",
+"rawdata" : [
+
+]
+},
+"version" : "1",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 28 15:44:13 2017"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "Thu Sep 28 15:44:13 2017"
+},
+{
+"name" : "defaultConfig_v1",
+"assigned" : "Thu Sep 28 15:44:13 2017"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 28 15:44:13 2017",
+"value" : {
+"name" : "notprovided",
+"assigned" : "Thu Sep 28 15:44:13 2017"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "Thu Sep 28 15:44:13 2017",
+"value" : {
+"name" : "1",
+"assigned" : "Thu Sep 28 15:44:13 2017"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "Thu Sep 28 15:44:13 2017",
+"value" : {
+"name" : "DQMHistosConsumerConfiguration",
+"assigned" : "Thu Sep 28 15:44:13 2017"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "Thu Sep 28 15:44:13 2017",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "Thu Sep 28 15:44:13 2017"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "Thu Sep 28 15:44:13 2017",
+"value" : {
+"name" : "defaultConfig_v1",
+"assigned" : "Thu Sep 28 15:44:13 2017"
+}
+}
+],
+"created" : "Thu Sep 28 15:44:13 2017"
+},
+"_id" : {
+"$oid" : "ac3f9483467941c18eaf13c6"
+},
+"collection" : "DQMHistosConsumerConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

@@ -60,7 +60,7 @@ throw (xdaq::exception::Exception)
 	}
 	catch(...)
 	{
-		__MOUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Context Group." <<
+		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Context Group." <<
 				" The XDAQContextConfigurationName = " << XDAQContextConfigurationName_ <<
 				". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
@@ -75,7 +75,7 @@ throw (xdaq::exception::Exception)
 	}
 	catch(...)
 	{
-		__MOUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Application Group."
+		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Application Group."
 				<< " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
 	}
@@ -209,7 +209,7 @@ throw (xoap::exception::Exception)
 xoap::MessageReference EventBuilderApp::stateMachineErrorMessageRequest(xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	__MOUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
+	__COUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("ErrorMessage",theStateMachine_.getErrorMessage());
@@ -294,7 +294,7 @@ throw (toolbox::fsm::exception::Exception)
 			ConfigurationGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
 					getParameters().getValue("ConfigurationGroupKey")));
 
-	__MOUT__ << "Configuration group name: " << theGroup.first << " key: " <<
+	__COUT__ << "Configuration group name: " << theGroup.first << " key: " <<
 			theGroup.second << std::endl;
 
 	theConfigurationManager_->loadConfigurationGroup(
@@ -312,10 +312,10 @@ throw (toolbox::fsm::exception::Exception)
 	//2 BOARD READERS IN THE SYSTEM
 	//std::string configString = "daq:{event_builder:{expected_fragments_per_event:1 first_fragment_receiver_rank:0 fragment_receiver_count:1 mpi_buffer_count:16 print_event_store_stats:true send_triggers:true trigger_port:5001 use_art:true verbose:false} max_fragment_size_words:2.097152e6} outputs:{netMonOutput:{module_type:\"RootMPIOutput\"}} physics:{analyzers:{wf: {module_type:\"WFViewer\" fragment_ids:[0] fragment_type_labels:[ \"DataGen\" ] prescale:60 write_to_file:true fileName:\"/tmp/otsdaqdemo_onmon_evb.root\"}}  a1:[\"wf\"] my_output_modules:[\"netMonOutput\"]} process_name:\"DAQ\" services:{Timing:{summaryOnly:true} scheduler:{fileMode:\"NOMERGE\" errorOnFailureToPut: false} user:{NetMonTransportServiceInterface:{data_receiver_count:1 first_data_receiver_rank:2 max_fragment_size_words:2.097152e6 mpi_buffer_count:8 service_provider:\"NetMonTransportService\"}}} source:{fragment_type_map:[[1,\"UDP\"], [4,\"DataGen\"]] module_type:\"RawInput\" resume_after_timeout:true waiting_time:900}";
 
-	//__MOUT__ << configString << std::endl;
-	__MOUT__ << std::endl;
-	__MOUT__ << std::endl;
-	//__MOUT__ << theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>() << std::endl;
+	//__COUT__ << configString << std::endl;
+	__COUT__ << std::endl;
+	__COUT__ << std::endl;
+	//__COUT__ << theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>() << std::endl;
 	fhicl::ParameterSet pset;
 	//fhicl::make_ParameterSet(configString, pset);
 
@@ -323,7 +323,7 @@ throw (toolbox::fsm::exception::Exception)
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
 	std::string uid = theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getValue();
 
-	__MOUT__ << "uid: " << uid << std::endl;
+	__COUT__ << "uid: " << uid << std::endl;
 	for(unsigned int i=0;i<uid.size();++i)
 		if((uid[i] >= 'a' && uid[i] <= 'z') ||
 				(uid[i] >= 'A' && uid[i] <= 'Z') ||
@@ -331,7 +331,7 @@ throw (toolbox::fsm::exception::Exception)
 			filename += uid[i];
 	filename += ".fcl";
 
-	__MOUT__ << "filename: " << filename << std::endl;
+	__COUT__ << "filename: " << filename << std::endl;
 
 	std::string fileFclString;
 	{
@@ -346,7 +346,7 @@ throw (toolbox::fsm::exception::Exception)
 			in.close();
 		}
 	}
-	__MOUT__ << fileFclString << std::endl;
+	__COUT__ << fileFclString << std::endl;
 
 	try
 	{
@@ -360,7 +360,7 @@ throw (toolbox::fsm::exception::Exception)
 	catch(const cet::coded_exception<fhicl::error, &fhicl::detail::translate>& e)
 	{
 		__SS__ << "Error was caught while configuring: " << e.what() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,

@@ -11,6 +11,13 @@ namespace ots
 class XDAQContextConfiguration : public ConfigurationBase
 {
 public:
+
+	struct XDAQApplicationProperty
+	{
+		bool		status_;
+		std::string name_, type_, value_;
+	};
+
 	struct XDAQApplication
 	{
 		std::string  applicationGroupID_;
@@ -23,6 +30,8 @@ public:
 		std::string  group_;
 		std::string  module_;
 		std::string  sourceConfig_;
+
+		std::vector<XDAQApplicationProperty> properties_;
 	};
 
 	struct XDAQContext
@@ -50,7 +59,7 @@ public:
 	std::string 						getApplicationUID		(const std::string &url, unsigned int id) const;
 
 
-	const std::vector<XDAQContext> & getContexts			() { return contexts_; }
+	const std::vector<XDAQContext> & 	getContexts				() const { return contexts_; }
 
 
 	ConfigurationTree 					getSupervisorConfigNode	(ConfigurationManager *configManager, const std::string &contextUID, const std::string &appUID) const;
@@ -79,7 +88,7 @@ public:
 		std::string const colContextUID_                     = "ContextUID";
 		std::string const colLinkToApplicationConfiguration_ = "LinkToApplicationConfiguration";
 		std::string const colLinkToApplicationGroupID_       = "LinkToApplicationGroupID";
-		std::string const colStatus_                         = "Status";
+		std::string const colStatus_                         = ViewColumnInfo::COL_NAME_STATUS;
 		std::string const colId_                             = "Id";
 		std::string const colAddress_                        = "Address";
 		std::string const colPort_                           = "Port";
@@ -92,14 +101,30 @@ public:
 		std::string const colApplicationUID_                = "ApplicationUID";
 		std::string const colLinkToSupervisorConfiguration_ = "LinkToSupervisorConfiguration";
 		std::string const colLinkToSupervisorUID_           = "LinkToSupervisorUID";
-		std::string const colStatus_                        = "Status";
+		std::string const colStatus_                        = ViewColumnInfo::COL_NAME_STATUS;
 		std::string const colClass_                         = "Class";
 		std::string const colId_                            = "Id";
 		std::string const colInstance_                      = "Instance";
 		std::string const colNetwork_                       = "Network";
 		std::string const colGroup_                         = "Group";
 		std::string const colModule_                        = "Module";
+		std::string const colLinkToPropertyConfiguration_	= "LinkToPropertyConfiguration";
+		std::string const colLinkToPropertyGroupID_	        = "LinkToPropertyGroupID";
+
 	} colApplication_;
+
+	//XDAQ App Property Column names
+	struct ColApplicationProperty
+	{
+		std::string const colPropertyGroupID_            	= "PropertyGroupID";
+		std::string const colPropertyUID_                	= "UID";
+		std::string const colStatus_                        = ViewColumnInfo::COL_NAME_STATUS;
+		std::string const colPropertyName_                  = "PropertyName";
+		std::string const colPropertyType_                  = "PropertyType";
+		std::string const colPropertyValue_                 = "PropertyValue";
+
+	} colAppProperty_;
+
 };
 }
 #endif

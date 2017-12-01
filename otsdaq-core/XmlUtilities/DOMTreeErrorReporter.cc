@@ -8,8 +8,8 @@
 
 using namespace ots;
 
-#undef 	__MOUT_HDR__
-#define __MOUT_HDR__ 	"DOMTreeErrorReporter"
+#undef 	__COUT_HDR__
+#define __COUT_HDR__ 	"DOMTreeErrorReporter"
 
 //==============================================================================
 DOMTreeErrorReporter::DOMTreeErrorReporter()
@@ -22,21 +22,21 @@ DOMTreeErrorReporter::~DOMTreeErrorReporter()
 //==============================================================================
 void DOMTreeErrorReporter::warning(const xercesc::SAXParseException& ex)
 {
-	__MOUT__ << "Warning!" << std::endl;
+	__COUT__ << "Warning!" << std::endl;
 	throw std::runtime_error(reportParseException(ex));
 }
 
 //==============================================================================
 void DOMTreeErrorReporter::error(const xercesc::SAXParseException& ex)
 {
-	__MOUT__ << "Error!" << std::endl;
+	__COUT__ << "Error!" << std::endl;
     throw std::runtime_error(reportParseException(ex));
 }
 
 //==============================================================================
 void DOMTreeErrorReporter::fatalError(const xercesc::SAXParseException& ex)
 {
-	__MOUT__ << "Fatal Error!" << std::endl;
+	__COUT__ << "Fatal Error!" << std::endl;
     throw std::runtime_error(reportParseException(ex));
 }
 
@@ -59,6 +59,6 @@ std::string DOMTreeErrorReporter::reportParseException(const xercesc::SAXParseEx
 		<< xercesc::XMLString::transcode(exception.getMessage())
 		//<< " (check against xsd file)" //RAR commented, has no meaning to me or users..
 		<< "\n\n" ;
-    __MOUT__ << "\n" << ss.str() << std::endl;
+    __COUT__ << "\n" << ss.str() << std::endl;
     return ss.str();
 }

@@ -7,6 +7,7 @@
 #include <unistd.h>
 //#include <string.h> //memcpy
 #include <sstream>
+#include <fstream>
 
 using namespace ots;
 
@@ -22,6 +23,9 @@ RawDataSaverConsumerBase::RawDataSaverConsumerBase(std::string supervisorApplica
 , currentSubRunNumber_(0)
 
 {
+
+	FILE *fp = fopen( "/home/otsdaq/tsave.txt","w");
+	if(fp)fclose(fp);
 }
 
 //========================================================================================================================
@@ -58,7 +62,7 @@ void RawDataSaverConsumerBase::openFile(std::string runNumber)
 	if(!outFile_.is_open())
 	{
 		__SS__ << "Can't open file " << fileName.str() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 
@@ -78,6 +82,53 @@ void RawDataSaverConsumerBase::closeFile(void)
 //========================================================================================================================
 void RawDataSaverConsumerBase::save(const std::string& data)
 {
+
+	std::ofstream output;
+
+
+//	std::string outputPath = "/home/otsdaq/tsave.txt";
+//	if(0)
+//	{
+//		output.open(outputPath, std::ios::out | std::ios::app | std::ios::binary);
+//		output << data;
+//	}
+//	else
+//	{
+//		output.open(outputPath, std::ios::out | std::ios::app);
+//		output << data;
+//
+//		char str[5];
+//		for(unsigned int j=0;j<data.length();++j)
+//		{
+//			sprintf(str,"%2.2x",((unsigned int)data[j]) & ((unsigned int)(0x0FF)));
+//
+//			if(j%64 == 0) std::cout << "SAVE " << j << "\t: 0x\t";
+//			std::cout << str;
+//			if(j%8 == 7) std::cout << " ";
+//			if(j%64 == 63) std::cout << std::endl;
+//		}
+//		std::cout << std::endl;
+//		std::cout << std::endl;
+//	}
+//
+//	if(1)
+//	{
+//		char str[5];
+//		for(unsigned int j=0;j<data.length();++j)
+//		{
+//			sprintf(str,"%2.2x",((unsigned int)data[j]) & ((unsigned int)(0x0FF)));
+//
+//			if(j%64 == 0) std::cout << "SAVE " << j << "\t: 0x\t";
+//			std::cout << str;
+//			if(j%8 == 7) std::cout << " ";
+//			if(j%64 == 63) std::cout << std::endl;
+//		}
+//		std::cout << std::endl;
+//		std::cout << std::endl;
+//	}
+
+
+
 	if(maxFileSize_ > 0)
 	{
 		long length = outFile_.tellp();

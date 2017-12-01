@@ -7,6 +7,7 @@
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq-core/Supervisor/SupervisorsInfo.h"
+#include "otsdaq-core/Supervisor/Iterator.h"
 #include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
 
@@ -37,6 +38,7 @@ class WorkLoopManager;
 class Supervisor: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 	friend class OtsConfigurationWizardSupervisor;
+	friend class Iterator;
 
 public:
 
@@ -104,6 +106,7 @@ private:
     void																saveGroupNameAndKey(const std::pair<std::string /*group name*/,	ConfigurationGroupKey> &theGroup, const std::string &fileName);
     static xoap::MessageReference 										lastConfigGroupRequestHandler(const SOAPParameters &parameters);
 
+    std::string															attemptStateMachineTransition(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
     bool         														broadcastMessage(xoap::MessageReference msg) throw (toolbox::fsm::exception::Exception);
 
     bool								supervisorGuiHasBeenLoaded_	; //use to indicate first access by user of ots since execution
@@ -124,9 +127,16 @@ private:
     std::string 						supervisorContextUID_		;
     std::string 						supervisorApplicationUID_	;
 
-    std::string							activeStateMachineName_; //when multiple state machines, this is the name of the state machine which executed the configure transition
-    std::string							activeStateMachineWindowName_;
+    std::string							activeStateMachineName_			; //when multiple state machines, this is the name of the state machine which executed the configure transition
+    std::string							activeStateMachineWindowName_	;
     std::pair<std::string /*group name*/, ConfigurationGroupKey> theConfigurationGroup_; //used to track the active configuration group at states after the configure state
+
+    Iterator							theIterator_					;
+    std::mutex							stateMachineAccessMutex_		; //for sharing state machine access with iterator thread
+
+    enum {
+    	VERBOSE_MUTEX = 0
+    };
 
     //Trash tests
     void wait(int milliseconds, std::string who="") const;

@@ -46,6 +46,9 @@ public:
     //4. DCS nodes are allocated.
     virtual void stateHalted (toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception){;}
 
+    //1. Power supplies are turned off.
+    virtual void stateShutdown (toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception){;}
+
     //1. XDAQ applications are configured.
     //2. Run parameters have been distributed.
     //3. Hardware is configured.
@@ -57,6 +60,8 @@ public:
 
     virtual void transitionConfiguring (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception){;}
     virtual void transitionHalting     (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception){;}
+    virtual void transitionShuttingDown(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception){;}
+    virtual void transitionStartingUp  (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception){;}
     virtual void transitionInitializing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception){;}
     virtual void transitionPausing     (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception){;}
     virtual void transitionResuming    (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception){;}

@@ -26,6 +26,7 @@ public:
 
     const SupervisorDescriptors& getDataManagerDescriptors        (void) const;
     const SupervisorDescriptors& getFEDescriptors                 (void) const;
+    const SupervisorDescriptors& getDTCDescriptors                (void) const;
     const SupervisorDescriptors& getFEDataManagerDescriptors      (void) const;
     //const SupervisorDescriptors& getARTDAQFEDescriptors         (void) const;
     const SupervisorDescriptors& getARTDAQFEDataManagerDescriptors(void) const;
@@ -40,6 +41,7 @@ public:
     XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getWizardDescriptor 	         (void) const;
     XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDataManagerDescriptor        (xdata::UnsignedIntegerT instance) const;
     XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getFEDescriptor        	     (xdata::UnsignedIntegerT instance) const;
+    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDTCDescriptor        	     (xdata::UnsignedIntegerT instance) const;
     XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getFEDataManagerDescriptor      (xdata::UnsignedIntegerT instance) const;
     //xdaq::ApplicationDescriptor* getARTDAQFEDescriptor          (xdata::UnsignedIntegerT instance) const;
     XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getARTDAQFEDataManagerDescriptor(xdata::UnsignedIntegerT instance) const;
@@ -61,6 +63,7 @@ protected:
     SupervisorDescriptors        theVisualSupervisors_;
     SupervisorDescriptors        theDataManagerSupervisors_;
     SupervisorDescriptors        theFESupervisors_;
+    SupervisorDescriptors        theDTCSupervisors_;
     SupervisorDescriptors        theFEDataManagerSupervisors_;
     //SupervisorDescriptors        theARTDAQFESupervisors_;
     SupervisorDescriptors        theARTDAQFEDataManagerSupervisors_;

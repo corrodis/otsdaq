@@ -15,7 +15,7 @@ using namespace ots;
 
 //MessageFacilityConfiguration Column names
 #define COL_NAME						"UID"
-#define COL_STATUS						"Status"
+#define COL_STATUS						ViewColumnInfo::COL_NAME_STATUS
 #define COL_ENABLE_FWD					"EnableUDPForwarding"
 
 #define COL_USE_WEB						"ForwardToWebConsoleGUI"
@@ -66,9 +66,9 @@ MessageFacilityConfiguration::~MessageFacilityConfiguration(void)
 
 void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 {
-	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 
-	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 
 	bool 			status,enableFwd,useWeb,useQT;
@@ -139,7 +139,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 			//handle using web gui
 			if(useWeb)
 			{
-				__MOUT__ << "Forwarding to Web GUI with UDP forward MesageFacility configuration." << std::endl;
+				__COUT__ << "Forwarding to Web GUI with UDP forward MesageFacility configuration." << std::endl;
 
 				child.second.getNode(COL_WEB_PORT0	).getValue(fwdPort);
 				child.second.getNode(COL_WEB_IP		).getValue(fwdIP);
@@ -164,13 +164,14 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 				qtfs << "RECEIVE_PORT \t " << fwdPort << "\n";
 				child.second.getNode(COL_WEB_PORT1	).getValue(fwdPort);
 				qtfs << "DESTINATION_PORT \t " << fwdPort << "\n";
+				qtfs << "DESTINATION_IP \t " << fwdIP << "\n";
 				qtfs.close();
 			}
 
 			//handle using qt viewer
 			if(useQT)
 			{
-				__MOUT__ << "Forwarding to Web GUI with UDP forward MesageFacility configuration." << std::endl;
+				__COUT__ << "Forwarding to Web GUI with UDP forward MesageFacility configuration." << std::endl;
 
 				child.second.getNode(COL_QT_PORT	).getValue(fwdPort);
 				child.second.getNode(COL_QT_IP		).getValue(fwdIP);
@@ -205,7 +206,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 		}
 		else			//write cout config (not forwarding to external process)
 		{
-			__MOUT__ << "Using cout-only MesageFacility configuration." << std::endl;
+			__COUT__ << "Using cout-only MesageFacility configuration." << std::endl;
 			fs << "console: {\n";
 			fs << "\t" << "type: \"cout\"\n";
 			fs << "\t" << "threshold: \"DEBUG\"\n";

@@ -26,14 +26,14 @@ ARTDAQProducer::ARTDAQProducer (std::string supervisorApplicationUID, std::strin
 		//theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
 , Configurable     (theXDAQContextConfigTree, configurationPath)
 {
-	__MOUT__ << "ARTDAQ PRODUCER CONSTRUCTOR!!!" << std::endl;
-	//__MOUT__ << "Configuration string:-" << theXDAQContextConfigTree.getNode(configurationPath).getNode("ConfigurationString").getValue<std::string>() << "-" << std::endl;
+	__COUT__ << "ARTDAQ PRODUCER CONSTRUCTOR!!!" << std::endl;
+	//__COUT__ << "Configuration string:-" << theXDAQContextConfigTree.getNode(configurationPath).getNode("ConfigurationString").getValue<std::string>() << "-" << std::endl;
 
 
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
 	std::string uid = theXDAQContextConfigTree.getNode(configurationPath).getValue();
 
-	__MOUT__ << "uid: " << uid << std::endl;
+	__COUT__ << "uid: " << uid << std::endl;
 	for(unsigned int i=0;i<uid.size();++i)
 		if((uid[i] >= 'a' && uid[i] <= 'z') ||
 				(uid[i] >= 'A' && uid[i] <= 'Z') ||
@@ -41,9 +41,9 @@ ARTDAQProducer::ARTDAQProducer (std::string supervisorApplicationUID, std::strin
 			filename += uid[i];
 	filename += ".fcl";
 
-	__MOUT__ << std::endl;
-	__MOUT__ << std::endl;
-	__MOUT__ << "filename: " << filename << std::endl;
+	__COUT__ << std::endl;
+	__COUT__ << std::endl;
+	__COUT__ << "filename: " << filename << std::endl;
 
 	std::string fileFclString;
 	{
@@ -58,7 +58,7 @@ ARTDAQProducer::ARTDAQProducer (std::string supervisorApplicationUID, std::strin
 			in.close();
 		}
 	}
-	//__MOUT__ << fileFclString << std::endl;
+	//__COUT__ << fileFclString << std::endl;
 
 	//find fragment_receiver {
 	// and insert e.g.,
@@ -70,12 +70,12 @@ ARTDAQProducer::ARTDAQProducer (std::string supervisorApplicationUID, std::strin
 	if(fcli == std::string::npos)
 	{
 		__SS__ << "Could not find 'fragment_receiver: {' in Board Reader fcl string!" << std::endl;
-		__MOUT__ << "\n" << ss.str();
+		__COUT__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 
 	//get the parent IDs from configurationPath
-	__MOUT__ << "configurationPath " << configurationPath << std::endl;
+	__COUT__ << "configurationPath " << configurationPath << std::endl;
 
 	std::string consumerID, bufferID, appID;
 	unsigned int backSteps; //at 2, 4, and 7 are the important parent IDs
@@ -83,13 +83,13 @@ ARTDAQProducer::ARTDAQProducer (std::string supervisorApplicationUID, std::strin
 	backSteps = 7;
 	for(unsigned int i=0; i<backSteps; i++)
 	{
-		//__MOUT__ << "backsteps: " << i+1 << std::endl;
+		//__COUT__ << "backsteps: " << i+1 << std::endl;
 
 		backj = backi;
 		backi = configurationPath.rfind('/',backi-1);
 
-		//__MOUT__ << "backi:" << backi << " backj:" << backj << std::endl;
-		//__MOUT__ << "substr: " << configurationPath.substr(backi+1,backj-backi-1) << std::endl;
+		//__COUT__ << "backi:" << backi << " backj:" << backj << std::endl;
+		//__COUT__ << "substr: " << configurationPath.substr(backi+1,backj-backi-1) << std::endl;
 
 		if(i+1 == 2)
 			consumerID = configurationPath.substr(backi+1,backj-backi-1);
@@ -106,7 +106,7 @@ ARTDAQProducer::ARTDAQProducer (std::string supervisorApplicationUID, std::strin
 			"ProcessorUID: \"" +  consumerID + "\"\n" +
 			fileFclString.substr(fcli);
 
-	__MOUT__ << fileFclString << std::endl;
+	__COUT__ << fileFclString << std::endl;
 
 	fhicl::make_ParameterSet(fileFclString, fhiclConfiguration_);
 
@@ -125,7 +125,7 @@ ARTDAQProducer::ARTDAQProducer (std::string supervisorApplicationUID, std::strin
 ARTDAQProducer::~ARTDAQProducer(void)
 {
 	halt();
-	__MOUT__ << "DONE DELETING!" << std::endl;
+	__COUT__ << "DONE DELETING!" << std::endl;
 }
 
 //========================================================================================================================

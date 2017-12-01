@@ -44,15 +44,15 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 	//make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
-	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 	const XDAQContextConfiguration *contextConfig = configManager_->__GET_CONFIG__(XDAQContextConfiguration);
 
 //	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 //
 //	for(auto &child:childrenMap)
-//		if(child.second.getNode("Status").getValue<bool>())
+//		if(child.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 //			outputFHICL(child.second, contextConfig);
 
 	std::vector<const XDAQContextConfiguration::XDAQContext *> builderContexts =
@@ -65,7 +65,7 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 		ConfigurationTree builderConfigNode = contextConfig->getSupervisorConfigNode(configManager,
 				builderContext->contextUID_, builderContext->applications_[0].applicationUID_);
 
-		__MOUT__ << "Path for this aggregator config is " <<
+		__COUT__ << "Path for this aggregator config is " <<
 				builderContext->contextUID_ << "/" <<
 				builderContext->applications_[0].applicationUID_ << "/" <<
 				builderConfigNode.getValueAsString() <<
@@ -79,7 +79,7 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 //========================================================================================================================
 std::string ARTDAQBuilderConfiguration::getFHICLFilename(const ConfigurationTree &builderNode)
 {
-	__MOUT__ << "ARTDAQ Builder UID: " << builderNode.getValue() << std::endl;
+	__COUT__ << "ARTDAQ Builder UID: " << builderNode.getValue() << std::endl;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
 	std::string uid = builderNode.getValue();
 	for(unsigned int i=0;i<uid.size();++i)
@@ -90,7 +90,7 @@ std::string ARTDAQBuilderConfiguration::getFHICLFilename(const ConfigurationTree
 
 	filename += ".fcl";
 
-	__MOUT__ << "fcl: " << filename << std::endl;
+	__COUT__ << "fcl: " << filename << std::endl;
 
 	return filename;
 }
@@ -281,21 +281,31 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 		auto destinationsGroup = services.getNode("NetMonTrasportServiceInterfaceDestinationsLink");
 		if(!destinationsGroup.isDisconnected())
 		{
-			auto destinations = destinationsGroup.getChildren();
-			for(auto &destination:destinations)
+			try
 			{
-				unsigned int destinationRank =
-						contextConfig->getARTDAQAppRank(
-								destination.second.getNode("destinationARTDAQContextLink").getValue());
-				OUT << destination.second.getNode("destinationKey").getValue() <<
-						": {" <<
-						" transferPluginType: " <<
-						destination.second.getNode("transferPluginType").getValue() <<
-						" destination_rank: " <<
-						destinationRank <<
-						" max_fragment_size_words: " <<
-						destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
-						"}\n";
+				auto destinations = destinationsGroup.getChildren();
+				for(auto &destination:destinations)
+				{
+					unsigned int destinationRank =
+							contextConfig->getARTDAQAppRank(
+									destination.second.getNode("destinationARTDAQContextLink").getValue());
+					OUT << destination.second.getNode("destinationKey").getValue() <<
+							": {" <<
+							" transferPluginType: " <<
+							destination.second.getNode("transferPluginType").getValue() <<
+							" destination_rank: " <<
+							destinationRank <<
+							" max_fragment_size_words: " <<
+							destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
+							"}\n";
+				}
+			}
+			catch(const std::runtime_error& e)
+			{
+				__SS__ << "Are the Net Monitor Transport Service destinations valid? Error occurred looking for Event Builder transport service destinations for UID '" <<
+						builderNode.getValue() << "': " << e.what() << std::endl;
+				__COUT_ERR__ << ss.str() << std::endl;
+				throw std::runtime_error(ss.str());
 			}
 		}
 		POPTAB;
@@ -329,7 +339,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 			auto parameters = parametersLink.getChildren();
 			for(auto &parameter:parameters)
 			{
-				if(!parameter.second.getNode("Status").getValue<bool>())
+				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << parameter.second.getNode("daqParameterKey").getValue() <<
@@ -337,7 +347,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 						parameter.second.getNode("daqParameterValue").getValue()
 						<< "\n";
 
-				if(!parameter.second.getNode("Status").getValue<bool>())
+				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 		}
@@ -350,22 +360,32 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 		auto sourcesGroup = daq.getNode("daqEventBuilderSourcesLink");
 		if(!sourcesGroup.isDisconnected())
 		{
-			auto sources = sourcesGroup.getChildren();
-			for(auto &source:sources)
+			try
 			{
-				unsigned int sourceRank =
-						contextConfig->getARTDAQAppRank(
-								source.second.getNode("sourceARTDAQContextLink").getValue());
+				auto sources = sourcesGroup.getChildren();
+				for(auto &source:sources)
+				{
+					unsigned int sourceRank =
+							contextConfig->getARTDAQAppRank(
+									source.second.getNode("sourceARTDAQContextLink").getValue());
 
-				OUT << source.second.getNode("sourceKey").getValue() <<
-						": {" <<
-						" transferPluginType: " <<
-						source.second.getNode("transferPluginType").getValue() <<
-						" source_rank: " <<
-						sourceRank <<
-						" max_fragment_size_words: " <<
-						source.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
-						"}\n";
+					OUT << source.second.getNode("sourceKey").getValue() <<
+							": {" <<
+							" transferPluginType: " <<
+							source.second.getNode("transferPluginType").getValue() <<
+							" source_rank: " <<
+							sourceRank <<
+							" max_fragment_size_words: " <<
+							source.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
+							"}\n";
+				}
+			}
+			catch(const std::runtime_error& e)
+			{
+				__SS__ << "Are the DAQ sources valid? Error occurred looking for Event Builder DAQ sources for UID '" <<
+						builderNode.getValue() << "': " << e.what() << std::endl;
+				__COUT_ERR__ << ss.str() << std::endl;
+				throw std::runtime_error(ss.str());
 			}
 		}
 		POPTAB;
@@ -385,7 +405,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 
 			for(auto &metric:metrics)
 			{
-				if(!metric.second.getNode("Status").getValue<bool>())
+				if(!metric.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << metric.second.getNode("metricKey").getValue() <<
@@ -405,7 +425,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 					auto metricParameters = metricParametersGroup.getChildren();
 					for(auto &metricParameter:metricParameters)
 					{
-						if(!metricParameter.second.getNode("Status").getValue<bool>())
+						if(!metricParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							PUSHCOMMENT;
 
 						OUT << metricParameter.second.getNode("metricParameterKey").getValue() <<
@@ -413,7 +433,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 								metricParameter.second.getNode("metricParameterValue").getValue()
 								<< "\n";
 
-						if(!metricParameter.second.getNode("Status").getValue<bool>())
+						if(!metricParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							POPCOMMENT;
 
 					}
@@ -421,7 +441,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 				POPTAB;
 				OUT << "}\n\n";	//end metric
 
-				if(!metric.second.getNode("Status").getValue<bool>())
+				if(!metric.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 		}
@@ -444,7 +464,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 		auto outputPlugins = outputs.getChildren();
 		for(auto &outputPlugin:outputPlugins)
 		{
-			if(!outputPlugin.second.getNode("Status").getValue<bool>())
+			if(!outputPlugin.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 				PUSHCOMMENT;
 
 			OUT << outputPlugin.second.getNode("outputKey").getValue() <<
@@ -459,7 +479,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 				auto pluginParameters = pluginParameterLink.getChildren();
 				for(auto &pluginParameter:pluginParameters)
 				{
-					if(!pluginParameter.second.getNode("Status").getValue<bool>())
+					if(!pluginParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 						PUSHCOMMENT;
 
 					OUT << pluginParameter.second.getNode("outputParameterKey").getValue() <<
@@ -467,14 +487,14 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 							pluginParameter.second.getNode("outputParameterValue").getValue()
 							<< "\n";
 
-					if(!pluginParameter.second.getNode("Status").getValue<bool>())
+					if(!pluginParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 						POPCOMMENT;
 				}
 			}
 			POPTAB;
 			OUT << "}\n\n";	//end output module
 
-			if(!outputPlugin.second.getNode("Status").getValue<bool>())
+			if(!outputPlugin.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 				POPCOMMENT;
 		}
 
@@ -503,7 +523,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 			auto modules = analyzers.getChildren();
 			for(auto &module:modules)
 			{
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << module.second.getNode("analyzerKey").getValue() <<
@@ -518,7 +538,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							PUSHCOMMENT;
 
 						OUT << moduleParameter.second.getNode("analyzerParameterKey").getValue() <<
@@ -526,14 +546,14 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 								moduleParameter.second.getNode("analyzerParameterValue").getValue()
 								<< "\n";
 
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							POPCOMMENT;
 					}
 				}
 				POPTAB;
 				OUT << "}\n\n";	//end analyzer module
 
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 			POPTAB;
@@ -550,7 +570,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 			auto modules = producers.getChildren();
 			for(auto &module:modules)
 			{
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << module.second.getNode("producerKey").getValue() <<
@@ -565,7 +585,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							PUSHCOMMENT;
 
 						OUT << moduleParameter.second.getNode("producerParameterKey").getValue() <<
@@ -573,14 +593,14 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 								moduleParameter.second.getNode("producerParameterValue").getValue()
 								<< "\n";
 
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							POPCOMMENT;
 					}
 				}
 				POPTAB;
 				OUT << "}\n\n";	//end producer module
 
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 			POPTAB;
@@ -598,7 +618,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 			auto modules = filters.getChildren();
 			for(auto &module:modules)
 			{
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << module.second.getNode("filterKey").getValue() <<
@@ -613,7 +633,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							PUSHCOMMENT;
 
 						OUT << moduleParameter.second.getNode("filterParameterKey").getValue()
@@ -621,14 +641,14 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 																												moduleParameter.second.getNode("filterParameterValue").getValue()
 																												<< "\n";
 
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							POPCOMMENT;
 					}
 				}
 				POPTAB;
 				OUT << "}\n\n";	//end filter module
 
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 			POPTAB;
@@ -643,7 +663,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 			auto physicsParameters = otherParameterLink.getChildren();
 			for(auto &parameter:physicsParameters)
 			{
-				if(!parameter.second.getNode("Status").getValue<bool>())
+				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << parameter.second.getNode("physicsParameterKey").getValue() <<
@@ -651,7 +671,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 						parameter.second.getNode("physicsParameterValue").getValue()
 						<< "\n";
 
-				if(!parameter.second.getNode("Status").getValue<bool>())
+				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 		}

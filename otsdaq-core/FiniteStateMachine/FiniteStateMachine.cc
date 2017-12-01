@@ -14,7 +14,7 @@ FiniteStateMachine::FiniteStateMachine(void)
 , provenanceState_	('X')
 , theErrorMessage_ ("")
 {
-	__MOUT__ << "Transition? "<< inTransition_ << std::endl;
+	__COUT__ << "Transition? "<< inTransition_ << std::endl;
 }
 
 //========================================================================================================================
@@ -117,7 +117,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition) throw (to
 //========================================================================================================================
 bool FiniteStateMachine::execTransition(const std::string& transition, const xoap::MessageReference& message) throw (toolbox::fsm::exception::Exception)
 {
-//	__MOUT__ << "Transition?" << inTransition_ << std::endl;
+//	__COUT__ << "Transition?" << inTransition_ << std::endl;
 	if(inTransition_) return false;
 	inTransition_ = true;
 	bool transitionSuccessful = true;
@@ -129,10 +129,10 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		inTransition_ = false;
 		std::ostringstream error;
 		error << transition << " is not in the list of the transitions from current state " << getStateName (getCurrentState());
-		__MOUT_ERR__ << error.str() << std::endl;
+		__COUT_ERR__ << error.str() << std::endl;
 		XCEPT_RAISE (toolbox::fsm::exception::Exception, error.str());
-		//__MOUT__ << error << std::endl;
-//		__MOUT__ << "Transition?" << inTransition_ << std::endl;
+		//__COUT__ << error << std::endl;
+//		__COUT__ << "Transition?" << inTransition_ << std::endl;
 		return false;
 	}
 
@@ -148,14 +148,14 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		transitionSuccessful = false;
 		std::ostringstream error;
 		error << "Transition " << transition << " cannot be executed from current state " << getStateName (getCurrentState());
-		__MOUT_ERR__ << error.str() << std::endl;
+		__COUT_ERR__ << error.str() << std::endl;
 		//diagService_->reportError(err.str(),DIAGERROR);
 		XCEPT_RAISE (toolbox::fsm::exception::Exception, error.str());//This make everything crash so you know for sure there is something wrong
 	}
-//	__MOUT__ << "Transition?" << inTransition_ << std::endl;
+//	__COUT__ << "Transition?" << inTransition_ << std::endl;
 	inTransition_ = false;
-//	__MOUT__ << "Done with fsm transition" << std::endl;
-//	__MOUT__ << "Transition?" << inTransition_ << std::endl;
+//	__COUT__ << "Done with fsm transition" << std::endl;
+//	__COUT__ << "Transition?" << inTransition_ << std::endl;
 	stateEntranceTime_ = time(0);
 	return transitionSuccessful;
 }

@@ -10,6 +10,7 @@
 #include <iostream>
 
 #define WEB_LOGIN_DB_PATH 			    std::string(getenv("SERVICE_DATA_PATH")) + "/LoginData/"
+#define WEB_LOGIN_CERTDATA_PATH         std::string(getenv("CERT_DATA_PATH"))
 #define HASHES_DB_PATH 					"HashesData/"
 #define USERS_DB_PATH 					"UsersData/"
 #define USERS_LOGIN_HISTORY_PATH 		USERS_DB_PATH + "UserLoginHistoryData/"
@@ -57,6 +58,8 @@ public:
     
     static const std::string DEFAULT_ADMIN_USERNAME;
     static const std::string DEFAULT_ADMIN_DISPLAY_NAME;
+	static const std::string DEFAULT_ADMIN_EMAIL;
+    static const std::string DEFAULT_ITERATOR_USERNAME;
 
     static const std::string REQ_NO_LOGIN_RESPONSE;
     static const std::string REQ_NO_PERMISSION_RESPONSE;
@@ -64,13 +67,13 @@ public:
 
     static const std::string SECURITY_TYPE_NONE;
     static const std::string SECURITY_TYPE_DIGEST_ACCESS;
-    static const std::string SECURITY_TYPE_KERBEROS;
 
-	bool 			createNewAccount			    (std::string username, std::string displayName);
+	bool 			createNewAccount			    (std::string username, std::string displayName, std::string email);
 	void			cleanupExpiredEntries		    (std::vector<std::string> *loggedOutUsernames = 0);
 	std::string 	createNewLoginSession		    (std::string uuid, std::string ip = "0");
 	
-	uint64_t 		attemptActiveSession		    (std::string uuid, std::string &jumbledUser, std::string jumbledPw, std::string &newAccountCode);
+	uint64_t 		attemptActiveSession(std::string uuid, std::string &jumbledUser, std::string jumbledPw, std::string &newAccountCode);
+	uint64_t 		attemptActiveSessionWithCert(std::string uuid, std::string &jumbledEmail, std::string &cookieCode, std::string& username);
 	uint64_t	 	isCookieCodeActiveForLogin	    (std::string uuid, std::string &cookieCode,std::string &username);
 	bool	        cookieCodeIsActiveForRequest    (std::string &cookieCode, uint8_t *userPermissions = 0, uint64_t *uid = 0, std::string ip = "0", bool refresh = true,  std::string *userWithLock = 0);
 	uint64_t        cookieCodeLogout			    (std::string cookieCode, bool logoutOtherUserSessions, uint64_t *uid = 0, std::string ip = "0");
@@ -87,7 +90,7 @@ public:
     static void 	tooltipCheckForUsername			(const std::string& username, HttpXmlDocument *xmldoc, const std::string &srcFile, const std::string &srcFunc, const std::string &srcId);
     static void 	tooltipSetNeverShowForUsername	(const std::string& username, HttpXmlDocument *xmldoc, const std::string &srcFile, const std::string &srcFunc, const std::string &srcId, bool doNeverShow, bool temporarySilence);
     
-    void            modifyAccountSettings		    (uint64_t uid_master, uint8_t cmd_type, std::string username, std::string displayname, std::string permissions);
+    void            modifyAccountSettings		    (uint64_t uid_master, uint8_t cmd_type, std::string username, std::string displayname, std::string email, std::string permissions);
     bool            setUserWithLock				    (uint64_t uid_master, bool lock, std::string username);
     std::string     getUserWithLock				    () { return usersUsernameWithLock_; }
 
@@ -104,6 +107,9 @@ public:
 	static void 	resetAllUserTooltips			(const std::string &userNeedle = "*");
 
 	static void 	NACDisplayThread				(std::string nac, std::string user);
+
+	void			saveActiveSessions				();
+	void			loadActiveSessions				();
 
 private:
     void			loadSecuritySelection       ();
@@ -125,6 +131,7 @@ private:
 	bool			loadDatabases				(); 	
 
 	uint64_t	    searchUsersDatabaseForUsername	        (std::string username) const;
+	uint64_t	    searchUsersDatabaseForUserEmail         (std::string useremail) const;
 	uint64_t		searchUsersDatabaseForUserId			(uint64_t uid) const;
 	uint64_t		searchLoginSessionDatabaseForUUID		(std::string uuid) const;
 	uint64_t		searchHashesDatabaseForHash				(std::string hash);
@@ -132,7 +139,8 @@ private:
 	
 	static std::string 	getTooltipFilename					(const std::string& username, const std::string &srcFile, const std::string &srcFunc, const std::string &srcId);
 
-
+	std::unordered_map<std::string, std::string> certFingerprints_;
+	std::string getUserEmailFromFingerprint(std::string fingerprint);
 	
 	std::vector<std::string> 	UsersDatabaseEntryFields,HashesDatabaseEntryFields;
 	bool     					CareAboutCookieCodes_;
@@ -183,7 +191,7 @@ private:
 			//Username appends to preferences file, and login history file
 			//UsersLastModifierUsernameVector - is username of last master user to modify something about account
 			//UsersLastModifierTimeVector - is time of last modify by a master user
-    std::vector<std::string> 	UsersUsernameVector, UsersDisplayNameVector, UsersSaltVector, UsersLastModifierUsernameVector;
+    std::vector<std::string> 	UsersUsernameVector, UsersUserEmailVector, UsersDisplayNameVector, UsersSaltVector, UsersLastModifierUsernameVector;
     std::vector<uint8_t> 		UsersPermissionsVector;
    	std::vector<uint64_t> 		UsersUserIdVector;
    	std::vector<time_t>			UsersLastLoginAttemptVector, UsersAccountCreatedTimeVector, UsersLastModifiedTimeVector; 
@@ -204,54 +212,6 @@ private:
     std::vector<time_t> 		HashesAccessTimeVector;
 };
 
-const std::string WebUsers::REQ_NO_LOGIN_RESPONSE 		= "NoLogin";
-const std::string WebUsers::REQ_NO_PERMISSION_RESPONSE 	= "NoPermission";
-const std::string WebUsers::REQ_USER_LOCKOUT_RESPONSE 	= "UserLockout";
-
-const std::string WebUsers::SECURITY_TYPE_NONE 			= "NoSecurity";
-const std::string WebUsers::SECURITY_TYPE_DIGEST_ACCESS = "DigestAccessAuthentication";
-const std::string WebUsers::SECURITY_TYPE_KERBEROS 		= "Kerberos";
-
-
-void WebUsers::deleteUserData ()
-{
-	//delete Login data
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + HASHES_DB_PATH + "/*").c_str());
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + USERS_DB_PATH + "/*").c_str());
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + USERS_LOGIN_HISTORY_PATH + "/*").c_str());
-	std::system(("rm -f " + (std::string)WEB_LOGIN_DB_PATH + USERS_PREFERENCES_PATH + "/*").c_str());
-	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + TOOLTIP_DB_PATH).c_str());
-
-	std::string serviceDataPath = getenv("SERVICE_DATA_PATH");
-	//delete macro maker folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/MacroData/").c_str());
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/MacroHistory/").c_str());
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/MacroExport/").c_str());
-
-	//delete console folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/ConsolePreferences/").c_str());
-
-	//delete wizard folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/OtsWizardData/").c_str());
-
-	//delete progress bar folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/ProgressBarData/").c_str());
-
-	//delete The Supervisor run folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/RunNumber/").c_str());
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/RunControlData/").c_str());
-
-	//delete Visualizer folders
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/VisualizerData/").c_str());
-
-	//delete active groups file
-	std::system(("rm -f " + std::string(serviceDataPath) + "/ActiveConfigurationGroups.cfg").c_str());
-
-	//delete Logbook folders
-	std::system(("rm -rf " + std::string(getenv("LOGBOOK_DATA_PATH")) + "/").c_str());
-
-	std::cout << __COUT_HDR_FL__ << "$$$$$$$$$$$$$$ Successfully deleted ALL service user data $$$$$$$$$$$$" << std::endl;
-}
 }
 
 #endif

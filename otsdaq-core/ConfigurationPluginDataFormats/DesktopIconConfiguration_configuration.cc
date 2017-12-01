@@ -11,7 +11,7 @@ using namespace ots;
 
 //DesktopIconConfiguration Column names
 #define COL_NAME						"IconName"
-#define COL_STATUS						"Status"
+#define COL_STATUS						ViewColumnInfo::COL_NAME_STATUS
 #define COL_CAPTION 					"Caption"
 #define COL_ALTERNATE_TEXT				"AlternateText"
 #define COL_FORCE_ONLY_ONE_INSTANCE		"ForceOnlyOneInstance"
@@ -68,8 +68,8 @@ DesktopIconConfiguration::~DesktopIconConfiguration(void)
 //==============================================================================
 void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 {
-	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 
 	bool 			status;
@@ -100,7 +100,7 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 
 		child.second.getNode(COL_CAPTION	).getValue(val);
 		fs << removeCommas(val, false, true);
-		//__MOUT__ << "Icon caption: " << val << std::endl;
+		//__COUT__ << "Icon caption: " << val << std::endl;
 
 		fs << ",";
 		child.second.getNode(COL_ALTERNATE_TEXT	).getValue(val);
@@ -132,10 +132,10 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 			if(val[val.size()-1] != '=')
 				fs << "?urn=";
 
-			//__MOUT__ << "Following Application link." << std::endl;
+			//__COUT__ << "Following Application link." << std::endl;
 			child.second.getNode(COL_APP_LINK	).getNode(COL_APP_ID		).getValue(intVal);
 
-			//__MOUT__ << "URN/LID=" << intVal << std::endl;
+			//__COUT__ << "URN/LID=" << intVal << std::endl;
 			fs << intVal; //append number
 			addedAppId = true;
 		}

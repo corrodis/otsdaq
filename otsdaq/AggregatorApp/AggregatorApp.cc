@@ -56,7 +56,7 @@ AggregatorApp::AggregatorApp(xdaq::ApplicationStub * s) throw (xdaq::exception::
 	}
 	catch(...)
 	{
-		__MOUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Context Group." <<
+		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Context Group." <<
 				" The XDAQContextConfigurationName = " << XDAQContextConfigurationName_ <<
 				". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
@@ -71,7 +71,7 @@ AggregatorApp::AggregatorApp(xdaq::ApplicationStub * s) throw (xdaq::exception::
 	}
 	catch(...)
 	{
-		__MOUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Application Group."
+		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Application Group."
 				<< " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
 	}
@@ -195,7 +195,7 @@ xoap::MessageReference AggregatorApp::stateMachineStateRequest(xoap::MessageRefe
 xoap::MessageReference AggregatorApp::stateMachineErrorMessageRequest(xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	__MOUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
+	__COUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("ErrorMessage",theStateMachine_.getErrorMessage());
@@ -271,7 +271,7 @@ void AggregatorApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
     		    		ConfigurationGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
     		    		getParameters().getValue("ConfigurationGroupKey")));
 
-	__MOUT__ << "Configuration group name: " << theGroup.first << " key: " <<
+	__COUT__ << "Configuration group name: " << theGroup.first << " key: " <<
 			theGroup.second << std::endl;
 
     theConfigurationManager_->loadConfigurationGroup(
@@ -299,7 +299,7 @@ void AggregatorApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
 	std::string uid = theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getValue();
 
-	__MOUT__ << "uid: " << uid << std::endl;
+	__COUT__ << "uid: " << uid << std::endl;
 	for(unsigned int i=0;i<uid.size();++i)
 		if((uid[i] >= 'a' && uid[i] <= 'z') ||
 				(uid[i] >= 'A' && uid[i] <= 'Z') ||
@@ -308,9 +308,9 @@ void AggregatorApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
 	filename += ".fcl";
 
 
-	__MOUT__ << std::endl;
-	__MOUT__ << std::endl;
-	__MOUT__ << "filename: " << filename << std::endl;
+	__COUT__ << std::endl;
+	__COUT__ << std::endl;
+	__COUT__ << "filename: " << filename << std::endl;
 
 	std::string fileFclString;
 	{
@@ -326,7 +326,7 @@ void AggregatorApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
 		}
 	}
 
-	__MOUT__ << fileFclString << std::endl;
+	__COUT__ << fileFclString << std::endl;
 	fhicl::make_ParameterSet(fileFclString, pset);
 	//fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(), pset);
 

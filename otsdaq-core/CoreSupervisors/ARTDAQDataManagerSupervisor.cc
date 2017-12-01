@@ -13,11 +13,11 @@ ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub *
 //FIXME WE MUST ADD A MAP OF INSTANCES IN THE SINGLETON
 : CoreSupervisorBase(s)
 {
-	__MOUT__ << "Begin!" << std::endl;
-	__MOUT__ << "Begin!" << std::endl;
-	__MOUT__ << "Begin!" << std::endl;
-	__MOUT__ << "Begin!" << std::endl;
-	__MOUT__ << "Begin!" << std::endl;
+	__COUT__ << "Begin!" << std::endl;
+	__COUT__ << "Begin!" << std::endl;
+	__COUT__ << "Begin!" << std::endl;
+	__COUT__ << "Begin!" << std::endl;
+	__COUT__ << "Begin!" << std::endl;
 
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 			DataManagerSingleton::getInstance<ARTDAQDataManager>(
@@ -26,11 +26,11 @@ ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub *
 					CoreSupervisorBase::supervisorApplicationUID_)
 	);
 
-	__MOUT__ << "Initialized!" << std::endl;
-	__MOUT__ << "Initialized!" << std::endl;
-	__MOUT__ << "Initialized!" << std::endl;
-	__MOUT__ << "Initialized!" << std::endl;
-	__MOUT__ << "Initialized!" << std::endl;
+	__COUT__ << "Initialized!" << std::endl;
+	__COUT__ << "Initialized!" << std::endl;
+	__COUT__ << "Initialized!" << std::endl;
+	__COUT__ << "Initialized!" << std::endl;
+	__COUT__ << "Initialized!" << std::endl;
 
 }
 

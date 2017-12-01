@@ -201,13 +201,15 @@ try
 }
 catch (std::exception const& e)
 {
-	std::cout << __COUT_HDR_FL__ << "DBI Exception:" << e.what() << "\n";
-	throw std::runtime_error(e.what());
+	__SS__ << "DBI Exception:" << e.what() << "\n";
+	__COUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
 }
 catch (...)
 {
-	std::cout << __COUT_HDR_FL__ << "DBI Unknown exception.\n";
-	throw std::runtime_error("DBI Unknown exception.");
+	__SS__ << "DBI Unknown exception.\n";
+	__COUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
 }
 
 //==============================================================================
@@ -224,13 +226,15 @@ throw(std::runtime_error) try
 }
 catch (std::exception const& e)
 {
-	std::cout << __COUT_HDR_FL__ << "DBI Exception:" << e.what() << "\n";
-	throw std::runtime_error(e.what());
+	__SS__ << "DBI Exception:" << e.what() << "\n";
+	__COUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
 }
 catch (...)
 {
-	std::cout << __COUT_HDR_FL__ << "DBI Unknown exception.\n";
-	throw std::runtime_error("DBI Unknown exception.");
+	__SS__ << "DBI Unknown exception.\n";
+	__COUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
 }
 
 
@@ -278,13 +282,15 @@ try
 }
 catch (std::exception const& e)
 {
-	std::cout << __COUT_HDR_FL__ << "DBI Exception:" << e.what() << "\n";
-	throw std::runtime_error(e.what());
+	__SS__ << "DBI Exception:" << e.what() << "\n";
+	__COUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
 }
 catch (...)
 {
-	std::cout << __COUT_HDR_FL__ << "DBI Unknown exception.\n";
-	throw std::runtime_error("DBI Unknown exception.");
+	__SS__ << "DBI Unknown exception.\n";
+	__COUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
 }
 
 //==============================================================================
@@ -313,13 +319,15 @@ try
 }
 catch (std::exception const& e)
 {
-	std::cout << __COUT_HDR_FL__ << "DBI Exception:" << e.what() << "\n";
-	throw std::runtime_error(e.what());
+	__SS__ << "DBI Exception:" << e.what() << "\n";
+	__COUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
 }
 catch (...)
 {
-	std::cout << __COUT_HDR_FL__ << "DBI Unknown exception.\n";
-	throw std::runtime_error("DBI Unknown exception.");
+	__SS__ << "DBI Unknown exception.\n";
+	__COUT_ERR__ << ss.str();
+	throw std::runtime_error(ss.str());
 }
 
 

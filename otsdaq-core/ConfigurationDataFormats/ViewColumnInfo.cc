@@ -48,6 +48,8 @@ const std::string ViewColumnInfo::DATATYPE_NUMBER_DEFAULT			= "0";
 const std::string ViewColumnInfo::DATATYPE_TIME_DEFAULT				= "0";
 const std::string ViewColumnInfo::DATATYPE_LINK_DEFAULT		        = "NO_LINK";
 
+const std::string ViewColumnInfo::COL_NAME_STATUS		        	= "Status";
+
 
 //==============================================================================
 //ViewColumnInfo
@@ -201,14 +203,14 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 		}
 
 	//build data choices vector from URI encoded data
-	//__MOUT__ << "dataChoicesCSV " << dataChoicesCSV << std::endl;
+	//__COUT__ << "dataChoicesCSV " << dataChoicesCSV << std::endl;
 	{
 		std::istringstream f(dataChoicesCSV);
 		std::string s;
 		while (getline(f, s, ',')) dataChoices_.push_back(
 				ConfigurationView::decodeURIComponent(s));
 		//for(const auto &dc: dataChoices_)
-		//	__MOUT__ << dc << std::endl;
+		//	__COUT__ << dc << std::endl;
 	}
 
 	try
@@ -221,7 +223,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 		else throw;
 	}
 
-	//__MOUT__ << "dataChoicesCSV " << dataChoicesCSV << std::endl;
+	//__COUT__ << "dataChoicesCSV " << dataChoicesCSV << std::endl;
 }
 
 //==============================================================================
@@ -357,7 +359,7 @@ const std::string& ViewColumnInfo::getDefaultValue(void) const
 	else
 	{
 		__SS__ << "\tUnrecognized View data type: " << getDataType() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 }
@@ -442,7 +444,7 @@ const ViewColumnInfo::BitMapInfo& ViewColumnInfo::getBitMapInfo(void) const
 	//throw error at this point!
 	{
 		__SS__ << "getBitMapInfo request for non-BitMap column of type: " << getType() << std::endl;
-		__MOUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 
@@ -506,7 +508,11 @@ std::string	ViewColumnInfo::getChildLinkIndex	(void) const
 	else if(isGroupID())
 		return type_.substr(TYPE_START_GROUP_ID.length()+1);
 	else
-		throw std::runtime_error("Requesting a Link Index from a column that is not a child link member!");
+	{
+		__SS__ << ("Requesting a Link Index from a column that is not a child link member!") << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
 }
 
 

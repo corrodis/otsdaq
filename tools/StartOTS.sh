@@ -1,12 +1,22 @@
 #!/bin/sh
 echo
-echo "Starting otsdaq..."
+echo "Launching StartOTS.sh otsdaq script... on {${HOSTNAME}}."
 echo
 
 ISCONFIG=0
 QUIET=1
 CHROME=0
 DONOTKILL=0
+
+function killprocs {
+    if [[ "x$1" == "x" ]]; then
+	ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
+	ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
+	ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
+    else
+	ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
+    fi
+}
 
 #check for wiz mode
 if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then
@@ -36,7 +46,10 @@ fi
 #initializing StartOTS action file
 #attempt to mkdir for full path so that it exists to move the database to
 # assuming mkdir is non-destructive
-echo "StartOTS_action file path = ${USER_DATA}/ServiceData/StartOTS_action.cmd"
+
+OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${HOSTNAME}.cmd"
+echo "StartOTS_action file path = ${OTSDAQ_STARTOTS_ACTION_FILE}"
+
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
 SAP_PATH=""
 for SAP_EL in ${SAP_ARR[@]}
@@ -48,7 +61,6 @@ do
 done
 
 #exit any old action loops
-OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action.cmd"
 echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 #done initializing StartOTS action file
 #############################
@@ -58,10 +70,10 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	echo "*************    KILLING otsdaq!        **************"
     echo "******************************************************"
 
-
-	killall -9 mpirun &>/dev/null #hide output
-	killall -9 xdaq.exe &>/dev/null #hide output
-	killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
+    killprocs
+	#killall -9 mpirun &>/dev/null #hide output
+	#killall -9 xdaq.exe &>/dev/null #hide output
+	#killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
 
 	exit
 fi
@@ -216,9 +228,10 @@ if [ $DONOTKILL == 0 ]; then
 	#kill all things otsdaq, before launching new things
 	echo
 	echo "Killing all existing otsdaq Applications..."
-	killall -9 mpirun &>/dev/null #hide output
-	killall -9 xdaq.exe &>/dev/null #hide output
-	killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
+	killprocs
+	#killall -9 mpirun &>/dev/null #hide output
+	#killall -9 xdaq.exe &>/dev/null #hide output
+	#killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
 
 	#give time for killall
 	sleep 1
@@ -243,7 +256,64 @@ MPI_RUN_CMD=""
 ####################################################################
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 launchOTSWiz() {	
+	
+	####################################################################
+	########### start console & message facility handling ##############
+	####################################################################
+	#decide which MessageFacility console viewer to run
+	# and configure otsdaq MF library with MessageFacility*.fcl to use
+	
+	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityGen.fcl
+	#this fcl tells the MF library used by ots source how to behave
+	#echo "OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
+	
+	
+	USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
+	USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
+			
+	
+	#echo "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
+	#echo "USE_QT_VIEWER" ${USE_QT_VIEWER}
+	
+	
+	if [[ $USE_WEB_VIEWER == "1" ]]; then
+		echo "CONSOLE: Using web console viewer"
+		
+		#start quiet forwarder with receiving port and destination port parameter file
+	
+		if [ $QUIET == 1 ]; then
+			echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mf.txt ***"
+			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> otsdaq_quiet_run-mf.txt &
+		else
+			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
+		fi		 	
+	fi
+	
+	if [[ $USE_QT_VIEWER == "1" ]]; then
+		echo "CONSOLE: Using QT console viewer"
+		if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
+			echo
+			echo "Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
+			echo
+			exit
+		fi
+		
+		#start the QT Viewer (only if it is not already started)
+		if [ $( ps aux|egrep -c $USER.*msgviewer ) -eq 1 ]; then				
+			msgviewer -c ${USER_DATA}/MessageFacilityConfigurations/QTMessageViewerGen.fcl  &
+			sleep 2		
+		fi		
+	fi
+	
+	####################################################################
+	########### end console & message facility handling ################
+	####################################################################
+	
+	
+	
+	
 	#setup wiz mode environment variables
+	export CONSOLE_SUPERVISOR_ID=260
 	export CONFIGURATION_GUI_SUPERVISOR_ID=280
 	export OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID=290	
 	MAIN_PORT=2015
@@ -277,7 +347,7 @@ launchOTSWiz() {
 	envsubst <${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake.xml > ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml
 	
 	#use safe Message Facility fcl in config mode
-	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl
+	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacility.fcl #MessageFacilityWithCout.fcl
 	
 	echo ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml
 			
@@ -334,7 +404,7 @@ launchOTS() {
 	
 	
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
-		echo "Using web console viewer"
+		echo "CONSOLE: Using web console viewer"
 		
 		#start quiet forwarder with receiving port and destination port parameter file
 	
@@ -347,7 +417,7 @@ launchOTS() {
 	fi
 	
 	if [[ $USE_QT_VIEWER == "1" ]]; then
-		echo "Using QT console viewer"
+		echo "CONSOLE: Using QT console viewer"
 		if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
 			echo
 			echo "Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
@@ -393,6 +463,8 @@ launchOTS() {
 	haveXDAQContextPort=false
 	insideContext=false
 	ignore=false
+	isLocal=false
+	mainHostname=""
 	while read line; do    
 		if [[ ($line == *"<!--"*) ]]; then
 		ignore=true
@@ -418,11 +490,14 @@ launchOTS() {
 						#fi
 				#echo ${BASH_REMATCH[1]}
 				#echo ${BASH_REMATCH[2]}
-				if [[ (${BASH_REMATCH[2]} == ${HOSTNAME}) || (${BASH_REMATCH[2]} == ${HOSTNAME}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
 					port=${BASH_REMATCH[3]}
 					host=${BASH_REMATCH[2]}
 					insideContext=true
 					#echo $port
+				if [[ (${BASH_REMATCH[2]} == ${HOSTNAME}) || (${BASH_REMATCH[2]} == ${HOSTNAME}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
+				    isLocal=true
+				else
+				    isLocal=false
 				fi
 				if [[ ${contextHostname[*]} != ${BASH_REMATCH[2]} ]]; then
 					contextHostname+=(${BASH_REMATCH[2]})
@@ -447,7 +522,7 @@ launchOTS() {
 			elif [[ ($line == *"ots::AggregatorApp"*) ]]; then 
 			  aggregatorPort+=($port)
 			  aggregatorHost+=($host)
-			elif [[ ($line == *"class"*) ]]; then #IT'S A XDAQ SUPERVISOR		
+			elif [[ ($line == *"class"*) ]] && [[ "${isLocal}" == "true" ]]; then #IT'S A XDAQ SUPERVISOR		
 	
 				if [[ ($haveXDAQContextPort == false) ]]; then 
 					xdaqPort+=($port)
@@ -457,6 +532,7 @@ launchOTS() {
 				
 				if [[ ($line == *"ots::Supervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
 					if [[ ($line =~ $superRe) ]]; then
+					    mainHostname=${host}
 						#echo ${BASH_REMATCH[1]}	#should be supervisor LID
 						MAIN_URL="http://${host}:${port}/urn:xdaq-application:lid=${BASH_REMATCH[1]}/"
 					fi
@@ -469,7 +545,7 @@ launchOTS() {
 	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 	
 	echo
-	echo "Launching all otsdaq Applications for this host..."
+	echo "Launching all otsdaq Applications for host {${HOSTNAME}}..."
 	i=0	
 	for port in "${xdaqPort[@]}"
 	do
@@ -488,14 +564,21 @@ launchOTS() {
 	  i=$(( $i + 1 ))
 	done
 	
-	if [[ (${#boardReaderPort[@]} != 0) || (${#builderPort[@]} != 0) || (${#aggregatorPort[@]} != 0) ]]; then
-	  cmd="mpirun ${envString}"
+	if [[ (${#boardReaderPort[@]} != 0) || (${#builderPort[@]} != 0) || (${#aggregatorPort[@]} != 0) ]] && [[ "${HOSTNAME}" == "${mainHostname}" ]]; then
+	  cmdstart="mpirun -launcher ssh ${envString}"
+	  cmd=""
+	  mpiHosts=""
 	  i=0	
 	  for port in "${boardReaderPort[@]}"
 	  do
 		: 
 		#echo " -np xdaq.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
 		cmd=$cmd" -np 1 xdaq.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :"
+		if [[ "x$mpiHosts" == "x" ]]; then
+		    mpiHosts="${boardReaderHost[$i]}"
+		    else
+		mpiHosts=$mpiHosts",${boardReaderHost[$i]}"
+		fi
 		i=$(( $i + 1 ))
 	  done
 	  i=0	
@@ -504,6 +587,11 @@ launchOTS() {
 		: 
 		#echo " -np xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
 		cmd=$cmd" -np 1 xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :"
+		if [[ "x$mpiHosts" == "x" ]]; then
+		    mpiHosts="${builderHost[$i]}"
+		    else
+		mpiHosts=$mpiHosts",${builderHost[$i]}"
+		fi
 		i=$(( $i + 1 ))
 	  done	
 	  i=0	
@@ -512,10 +600,16 @@ launchOTS() {
 		: 
 		#echo " -np xdaq.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS}\n"
 		cmd=$cmd" -np 1 xdaq.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS}"
+		if [[ "x$mpiHosts" == "x" ]]; then
+		    mpiHosts="${aggregatorHost[$i]}"
+		    else
+		mpiHosts=$mpiHosts",${aggregatorHost[$i]}"
+		fi
 			i=$(( $i + 1 ))
 	  done
 	  echo
-	  echo $cmd &
+	  cmd=$cmdstart" -host "$mpiHosts$cmd
+	  echo Command used to start MPI: $cmd &
 	  MPI_RUN_CMD=$cmd
 		#if [ $QUIET == 1 ]; then
 		#echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"		  
@@ -557,6 +651,11 @@ printMainURL() {
 	echo "Open the URL below in your Google Chrome or Mozilla Firefox web browser:"
 	if [ $QUIET == 0 ]; then
 		sleep 3
+	fi
+	
+	if [ $MAIN_URL == "unknown_url" ]; then
+		echo "INFO: No gateway supervisor found for node {${HOSTNAME}}."
+		exit
 	fi
 	
 	for i in {1..5}
@@ -626,27 +725,31 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "RESET_MPI" ]; then
 			echo " "
 			echo "Restarting MPI . . ."
-			echo $MPI_RUN_CMD
+			#echo $MPI_RUN_CMD
 			echo " "
-			killall -9 mpirun
+			killprocs mpirun
+			#killall -9 mpirun
 			sleep 1
-			
+
+			export MPIEXEC_PORT_RANGE=8300:8349
+			export MPIR_CVAR_CH3_PORT_RANGE=8450:8700
+
 			if [ $QUIET == 1 ]; then
 				echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"	
 				$MPI_RUN_CMD &> otsdaq_quiet_run-mpi.txt &
 			else
 				$MPI_RUN_CMD &
-			fi			
-			
+			fi
 			#sleep 5
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_WIZ" ]; then
 			
 			echo
-			echo "Starting otsdaq Wiz mode for this host..."
+			echo "Starting otsdaq Wiz mode for host {${HOSTNAME}}..."
 			echo
-			killall -9 xdaq.exe
-			killall -9 mf_rcv_n_fwd #message viewer display without decoration
-			killall -9 mpirun
+			killprocs
+			#killall -9 xdaq.exe
+			#killall -9 mf_rcv_n_fwd #message viewer display without decoration
+			#killall -9 mpirun
 			sleep 1
 			
 			launchOTSWiz
@@ -654,11 +757,12 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_OTS" ]; then
 				
 			echo
-			echo "Starting otsdaq in normal mode for this host..."
+			echo "Starting otsdaq in normal mode for host {${HOSTNAME}}..."
 			echo
-			killall -9 xdaq.exe
-			killall -9 mf_rcv_n_fwd #message viewer display without decoration
-			killall -9 mpirun
+			killprocs
+			#killall -9 xdaq.exe
+			#killall -9 mf_rcv_n_fwd #message viewer display without decoration
+			#killall -9 mpirun
 			sleep 1
 			
 			launchOTS

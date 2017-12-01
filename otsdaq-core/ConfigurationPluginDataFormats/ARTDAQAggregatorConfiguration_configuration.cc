@@ -42,8 +42,8 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager* configManager)
 	//make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
-	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 	const XDAQContextConfiguration *contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);
 	std::vector<const XDAQContextConfiguration::XDAQContext *> aggContexts =
@@ -56,7 +56,7 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager* configManager)
 		ConfigurationTree aggConfigNode = contextConfig->getSupervisorConfigNode(configManager,
 				aggContext->contextUID_, aggContext->applications_[0].applicationUID_);
 
-		__MOUT__ << "Path for this aggregator config is " <<
+		__COUT__ << "Path for this aggregator config is " <<
 				aggContext->contextUID_ << "/" <<
 				aggContext->applications_[0].applicationUID_ << "/" <<
 				aggConfigNode.getValueAsString() <<
@@ -71,7 +71,7 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager* configManager)
 //========================================================================================================================
 std::string ARTDAQAggregatorConfiguration::getFHICLFilename(const ConfigurationTree &aggregatorNode)
 {
-	__MOUT__ << "ARTDAQ Aggregator UID: " << aggregatorNode.getValue() << std::endl;
+	__COUT__ << "ARTDAQ Aggregator UID: " << aggregatorNode.getValue() << std::endl;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
 	std::string uid = aggregatorNode.getValue();
 	for(unsigned int i=0;i<uid.size();++i)
@@ -82,7 +82,7 @@ std::string ARTDAQAggregatorConfiguration::getFHICLFilename(const ConfigurationT
 
 	filename += ".fcl";
 
-	__MOUT__ << "fcl: " << filename << std::endl;
+	__COUT__ << "fcl: " << filename << std::endl;
 
 	return filename;
 }
@@ -237,7 +237,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 
 	std::string filename = getFHICLFilename(aggregatorNode);
 
-	__MOUT__ << "selfRank = " << selfRank << std::endl;
+	__COUT__ << "selfRank = " << selfRank << std::endl;
 
 
 	/////////////////////////
@@ -321,7 +321,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 			auto parameters = parametersLink.getChildren();
 			for(auto &parameter:parameters)
 			{
-				if(!parameter.second.getNode("Status").getValue<bool>())
+				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				auto comment = parameter.second.getNode("CommentDescription");
@@ -332,7 +332,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 						"\n";
 
-				if(!parameter.second.getNode("Status").getValue<bool>())
+				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 		}
@@ -344,22 +344,32 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 		auto sourcesGroup = daq.getNode("daqAggregatorSourcesLink");
 		if(!sourcesGroup.isDisconnected())
 		{
-			auto sources = sourcesGroup.getChildren();
-			for(auto &source:sources)
+			try
 			{
-				unsigned int sourceRank =
-						contextConfig->getARTDAQAppRank(
-								source.second.getNode("sourceARTDAQContextLink").getValue());
+				auto sources = sourcesGroup.getChildren();
+				for(auto &source:sources)
+				{
+					unsigned int sourceRank =
+							contextConfig->getARTDAQAppRank(
+									source.second.getNode("sourceARTDAQContextLink").getValue());
 
-				OUT << source.second.getNode("sourceKey").getValue() <<
-						": {" <<
-						" transferPluginType: " <<
-						source.second.getNode("transferPluginType").getValue() <<
-						" source_rank: " <<
-						sourceRank <<
-						" max_fragment_size_words: " <<
-						source.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
-						"}\n";
+					OUT << source.second.getNode("sourceKey").getValue() <<
+							": {" <<
+							" transferPluginType: " <<
+							source.second.getNode("transferPluginType").getValue() <<
+							" source_rank: " <<
+							sourceRank <<
+							" max_fragment_size_words: " <<
+							source.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
+							"}\n";
+				}
+			}
+			catch(const std::runtime_error& e)
+			{
+				__SS__ << "Are the DAQ sources valid? Error occurred looking for Aggregator DAQ sources for UID '" <<
+						aggregatorNode.getValue() << "': " << e.what() << std::endl;
+				__COUT_ERR__ << ss.str() << std::endl;
+				throw std::runtime_error(ss.str());
 			}
 		}
 		POPTAB;
@@ -379,7 +389,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 
 			for(auto &metric:metrics)
 			{
-				if(!metric.second.getNode("Status").getValue<bool>())
+				if(!metric.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << metric.second.getNode("metricKey").getValue() <<
@@ -399,7 +409,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 					auto metricParameters = metricParametersGroup.getChildren();
 					for(auto &metricParameter:metricParameters)
 					{
-						if(!metricParameter.second.getNode("Status").getValue<bool>())
+						if(!metricParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							PUSHCOMMENT;
 
 						auto comment = metricParameter.second.getNode("CommentDescription");
@@ -410,7 +420,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 								(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 								"\n";
 
-						if(!metricParameter.second.getNode("Status").getValue<bool>())
+						if(!metricParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							POPCOMMENT;
 
 					}
@@ -418,7 +428,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 				POPTAB;
 				OUT << "}\n\n";	//end metric
 
-				if(!metric.second.getNode("Status").getValue<bool>())
+				if(!metric.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 		}
@@ -429,23 +439,33 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 		auto destinationsGroup = daq.getNode("daqAggregatorDestinationsLink");
 		if(!destinationsGroup.isDisconnected())
 		{
-			auto destinations = destinationsGroup.getChildren();
-			for(auto &destination:destinations)
+			try
 			{
-				unsigned int destinationRank = contextConfig->getARTDAQAppRank(
+				auto destinations = destinationsGroup.getChildren();
+				for(auto &destination:destinations)
+				{
+					unsigned int destinationRank = contextConfig->getARTDAQAppRank(
 							destination.second.getNode("destinationARTDAQContextLink").getValueAsString());
 
-				OUT << destination.second.getNode("destinationKey").getValue() <<
-						": {" <<
-						" transferPluginType: " <<
-						destination.second.getNode("transferPluginType").getValue() <<
-						" source_rank: " <<
-						selfRank <<
-						" destination_rank: " <<
-						destinationRank <<
-						" max_fragment_size_words: " <<
-						destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
-						"}\n";
+					OUT << destination.second.getNode("destinationKey").getValue() <<
+							": {" <<
+							" transferPluginType: " <<
+							destination.second.getNode("transferPluginType").getValue() <<
+							" source_rank: " <<
+							selfRank <<
+							" destination_rank: " <<
+							destinationRank <<
+							" max_fragment_size_words: " <<
+							destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
+							"}\n";
+				}
+			}
+			catch(const std::runtime_error& e)
+			{
+				__SS__ << "Are the DAQ destinations valid? Error occurred looking for Aggregator DAQ destinations for UID '" <<
+						aggregatorNode.getValue() << "': " << e.what() << std::endl;
+				__COUT_ERR__ << ss.str() << std::endl;
+				throw std::runtime_error(ss.str());
 			}
 		}
 
@@ -480,7 +500,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 		auto outputPlugins = outputs.getChildren();
 		for(auto &outputPlugin:outputPlugins)
 		{
-			if(!outputPlugin.second.getNode("Status").getValue<bool>())
+			if(!outputPlugin.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 				PUSHCOMMENT;
 
 			OUT << outputPlugin.second.getNode("outputKey").getValue() <<
@@ -495,7 +515,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 				auto pluginParameters = pluginParameterLink.getChildren();
 				for(auto &pluginParameter:pluginParameters)
 				{
-					if(!pluginParameter.second.getNode("Status").getValue<bool>())
+					if(!pluginParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 						PUSHCOMMENT;
 
 					auto comment = pluginParameter.second.getNode("CommentDescription");
@@ -506,14 +526,14 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 							(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 							"\n";
 
-					if(!pluginParameter.second.getNode("Status").getValue<bool>())
+					if(!pluginParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 						POPCOMMENT;
 				}
 			}
 			POPTAB;
 			OUT << "}\n\n";	//end output module
 
-			if(!outputPlugin.second.getNode("Status").getValue<bool>())
+			if(!outputPlugin.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 				POPCOMMENT;
 		}
 
@@ -542,7 +562,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 			auto modules = analyzers.getChildren();
 			for(auto &module:modules)
 			{
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << module.second.getNode("analyzerKey").getValue() <<
@@ -557,7 +577,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							PUSHCOMMENT;
 
 						auto comment = moduleParameter.second.getNode("CommentDescription");
@@ -568,14 +588,14 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 								(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 								"\n";
 
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							POPCOMMENT;
 					}
 				}
 				POPTAB;
 				OUT << "}\n\n";	//end analyzer module
 
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 			POPTAB;
@@ -592,7 +612,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 			auto modules = producers.getChildren();
 			for(auto &module:modules)
 			{
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << module.second.getNode("producerKey").getValue() <<
@@ -607,7 +627,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							PUSHCOMMENT;
 
 						auto comment = moduleParameter.second.getNode("CommentDescription");
@@ -618,14 +638,14 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 								(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 								"\n";
 
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							POPCOMMENT;
 					}
 				}
 				POPTAB;
 				OUT << "}\n\n";	//end producer module
 
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 			POPTAB;
@@ -643,7 +663,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 			auto modules = filters.getChildren();
 			for(auto &module:modules)
 			{
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				OUT << module.second.getNode("filterKey").getValue() <<
@@ -658,7 +678,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 					auto moduleParameters = moduleParameterLink.getChildren();
 					for(auto &moduleParameter:moduleParameters)
 					{
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							PUSHCOMMENT;
 
 						auto comment = moduleParameter.second.getNode("CommentDescription");
@@ -669,14 +689,14 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 							(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 							"\n";
 
-						if(!moduleParameter.second.getNode("Status").getValue<bool>())
+						if(!moduleParameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 							POPCOMMENT;
 					}
 				}
 				POPTAB;
 				OUT << "}\n\n";	//end filter module
 
-				if(!module.second.getNode("Status").getValue<bool>())
+				if(!module.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 			POPTAB;
@@ -691,7 +711,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 			auto physicsParameters = otherParameterLink.getChildren();
 			for(auto &parameter:physicsParameters)
 			{
-				if(!parameter.second.getNode("Status").getValue<bool>())
+				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					PUSHCOMMENT;
 
 				auto comment = parameter.second.getNode("CommentDescription");
@@ -702,7 +722,7 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 						(comment.isDefaultValue()?"":("\t # " + comment.getValue())) <<
 						"\n";
 
-				if(!parameter.second.getNode("Status").getValue<bool>())
+				if(!parameter.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 					POPCOMMENT;
 			}
 		}

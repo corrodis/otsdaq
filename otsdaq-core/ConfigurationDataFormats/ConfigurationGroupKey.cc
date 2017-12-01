@@ -1,4 +1,5 @@
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
+#include "otsdaq-core/Macros/CoutHeaderMacros.h"
 
 #include <string.h> 	//for strlen
 #include <stdexcept> 	//for runtime_error
@@ -149,10 +150,19 @@ std::string	 ConfigurationGroupKey::getFullGroupString(const std::string &groupN
 		const ConfigurationGroupKey& key)
 {
 	if(groupName.size() == 0)
-		throw std::runtime_error("ConfigurationGroupKey::getFullGroupString() Illegal Group Name! The Group Name was not provided.");
+	{
+
+		__SS__ << ("ConfigurationGroupKey::getFullGroupString() Illegal Group Name! The Group Name was not provided.\n");
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
 	else if(groupName.size() == 1)
-		throw std::runtime_error("ConfigurationGroupKey::getFullGroupString() Illegal Group Name! The Group Name is too short: \"" +
-			groupName + "\"");
+	{
+		__SS__ << ("ConfigurationGroupKey::getFullGroupString() Illegal Group Name! The Group Name is too short: \"" +
+				groupName + "\"") << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
 	else
 	{
 		for(unsigned int i=0;i<groupName.size();++i)
@@ -161,8 +171,12 @@ std::string	 ConfigurationGroupKey::getFullGroupString(const std::string &groupN
 					(groupName[i] >= 'A' &&groupName[i] <= 'Z') ||
 					(groupName[i] >= 'a' &&groupName[i] <= 'z') ||
 					(groupName[i] >= '0' &&groupName[i] <= '9') ) )
-				throw std::runtime_error("ConfigurationGroupKey::getFullGroupString() Illegal Group Name! Group Name must be alpha-numeric: \"" +
-						groupName + "\"");
+			{
+				__SS__ << ("ConfigurationGroupKey::getFullGroupString() Illegal Group Name! Group Name must be alpha-numeric: \"" +
+						groupName + "\"") << std::endl;
+				__COUT_ERR__ << ss.str();
+				throw std::runtime_error(ss.str());
+			}
 		}
 	}
 

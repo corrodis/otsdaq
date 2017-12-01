@@ -13,6 +13,7 @@ using namespace ots;
 //#define XDAQ_SCRIPT				std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartXDAQ_gen.sh"
 //#define ARTDAQ_MPI_SCRIPT		std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartMPI_gen.sh"
 
+
 //========================================================================================================================
 XDAQContextConfiguration::XDAQContextConfiguration(void)
 : ConfigurationBase("XDAQContextConfiguration")
@@ -101,7 +102,7 @@ bool XDAQContextConfiguration::isARTDAQContext(const std::string &contextUID)
 //		then highest possible rank plus 1 is returned
 unsigned int XDAQContextConfiguration::getARTDAQAppRank(const std::string &contextUID) const
 {
-	//	__MOUT__ << "artdaqContexts_.size() = " <<
+	//	__COUT__ << "artdaqContexts_.size() = " <<
 	//			artdaqContexts_.size() << std::endl;
 
 	unsigned int rank = 0;
@@ -128,10 +129,15 @@ unsigned int XDAQContextConfiguration::getARTDAQAppRank(const std::string &conte
 	if(contextUID == "X")
 		return rank; //assume first undefined rank is desired
 
+	if(!rank)
+	{
+		__COUT__ << "Assuming since there are 0 active ARTDAQ context UID(s), we can ignore rank failure." << std::endl;
+		return -1;
+	}
 	__SS__ << "ARTDAQ rank could not be found for context UID '" <<
 			contextUID << "' - there were " << rank
 			<< " active ARTDAQ context UID(s) checked." << std::endl;
-	__MOUT_ERR__ << "\n" << ss.str();
+	__COUT_ERR__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 	return -1; //should never happen!
 }
@@ -178,7 +184,7 @@ ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(Configuratio
 	//
 	//			contexts_.back().applications_.back().supervisorConfigUID_ =
 	//					supervisorConfigLink.getValue();
-	//			__MOUT__ << "application supervisorConfigUID_ : " <<
+	//			__COUT__ << "application supervisorConfigUID_ : " <<
 	//					supervisorConfigLink.getValueAsString() << std::endl;
 	//			if(!supervisorConfigLink.isDisconnected())
 	//			{
@@ -186,11 +192,11 @@ ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(Configuratio
 	//				auto supervisorConfigChildren = supervisorConfigLink.getChildren();
 	//				for(auto supervisorConfigChild:supervisorConfigChildren)
 	//				{
-	//					__MOUT__ << "Loop: " << appChild.first << "/" <<
+	//					__COUT__ << "Loop: " << appChild.first << "/" <<
 	//							supervisorConfigChild.first << std::endl;
 	//				}
 	//			}
-	//			__MOUT__ << "application supervisorConfigUID_ : " <<
+	//			__COUT__ << "application supervisorConfigUID_ : " <<
 	//					contexts_.back().applic
 }
 
@@ -200,10 +206,10 @@ ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(Configuratio
 //		This doesn't re-write config files, it just re-makes constructs in software.
 void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManager)
 {
-	__MOUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__MOUT__ << configManager->__SELF_NODE__ << std::endl;
+	//__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	//__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
-	//	__MOUT__ << configManager->getNode(this->getConfigurationName()).getValueAsString()
+	//	__COUT__ << configManager->getNode(this->getConfigurationName()).getValueAsString()
 	//		  											  << std::endl;
 
 	auto children = configManager->__SELF_NODE__.getChildren();
@@ -218,8 +224,8 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 	for(auto &child:children)
 	{
 		contexts_.push_back(XDAQContext());
-		//__MOUT__ << child.first << std::endl;
-		//		__MOUT__ << child.second.getNode(colContextUID_) << std::endl;
+		//__COUT__ << child.first << std::endl;
+		//		__COUT__ << child.second.getNode(colContextUID_) << std::endl;
 
 		contexts_.back().contextUID_   = child.first;
 
@@ -232,7 +238,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 		child.second.getNode(colContext_.colAddress_    ).getValue(contexts_.back().address_);
 		child.second.getNode(colContext_.colPort_	    ).getValue(contexts_.back().port_);
 
-		//__MOUT__ << contexts_.back().address_ << std::endl;
+		//__COUT__ << contexts_.back().address_ << std::endl;
 		auto appLink = child.second.getNode(colContext_.colLinkToApplicationConfiguration_);
 		if(appLink.isDisconnected())
 		{
@@ -244,7 +250,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 		auto appChildren = appLink.getChildren();
 		for(auto appChild:appChildren)
 		{
-			//__MOUT__ << "Loop: " << child.first << "/" << appChild.first << std::endl;
+			//__COUT__ << "Loop: " << child.first << "/" << appChild.first << std::endl;
 
 			contexts_.back().applications_.push_back(XDAQApplication());
 
@@ -275,6 +281,34 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 				appChild.second.getNode(colApplication_.colGroup_	  		).getValue(contexts_.back().applications_.back().group_);
 
 			appChild.second.getNode(colApplication_.colModule_	                     ).getValue(contexts_.back().applications_.back().module_);
+
+
+			auto appPropertyLink = appChild.second.getNode(colApplication_.colLinkToPropertyConfiguration_);
+			if(!appPropertyLink.isDisconnected())
+			{
+				//add xdaq application properties to this context
+
+				auto appPropertyChildren = appPropertyLink.getChildren();
+
+				//__COUT__ << "appPropertyChildren.size() " << appPropertyChildren.size() << std::endl;
+
+				for(auto appPropertyChild:appPropertyChildren)
+				{
+					contexts_.back().applications_.back().properties_.push_back(XDAQApplicationProperty());
+					contexts_.back().applications_.back().properties_.back().status_ =
+							appPropertyChild.second.getNode(colAppProperty_.colStatus_).getValue<bool>();
+					contexts_.back().applications_.back().properties_.back().name_ =
+							appPropertyChild.second.getNode(colAppProperty_.colPropertyName_).getValue<std::string>();
+					contexts_.back().applications_.back().properties_.back().type_ =
+							appPropertyChild.second.getNode(colAppProperty_.colPropertyType_).getValue<std::string>();
+					contexts_.back().applications_.back().properties_.back().value_ =
+							appPropertyChild.second.getNode(colAppProperty_.colPropertyValue_).getValue<std::string>();
+
+					//__COUT__ << contexts_.back().applications_.back().properties_.back().name_ << std::endl;
+				}
+			}
+			//else
+			//	__COUT__ << "Disconnected." << std::endl;
 		}
 
 		//check artdaq type
@@ -418,10 +452,10 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 			done
 	 */
 
-//	__MOUT__ << artdaqContexts_.size() << " total artdaq context(s)." << std::endl;
-//	__MOUT__ << artdaqBoardReaders_.size() << " active artdaq board reader(s)." << std::endl;
-//	__MOUT__ << artdaqEventBuilders_.size() << " active artdaq event builder(s)." << std::endl;
-//	__MOUT__ << artdaqAggregators_.size() << " active artdaq aggregator(s)." << std::endl;
+//	__COUT__ << artdaqContexts_.size() << " total artdaq context(s)." << std::endl;
+//	__COUT__ << artdaqBoardReaders_.size() << " active artdaq board reader(s)." << std::endl;
+//	__COUT__ << artdaqEventBuilders_.size() << " active artdaq event builder(s)." << std::endl;
+//	__COUT__ << artdaqAggregators_.size() << " active artdaq aggregator(s)." << std::endl;
 //
 //	out << "#!/bin/sh\n\n";
 //
@@ -543,7 +577,7 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 	for(XDAQContext &context:contexts_)
 	{
 
-		//__MOUT__ << context.contextUID_ << std::endl;
+		//__COUT__ << context.contextUID_ << std::endl;
 
 		sprintf(tmp,"\t<!-- ContextUID='%s' sourceConfig='%s' -->",
 				context.contextUID_.c_str(), context.sourceConfig_.c_str());
@@ -557,7 +591,7 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 
 		for(XDAQApplication &app:context.applications_)
 		{
-			//__MOUT__ << app.name_ << std::endl;
+			//__COUT__ << app.id_ << std::endl;
 
 
 			if(context.status_)
@@ -570,9 +604,39 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 					out << "\t\t<!--\n";
 			}
 
-			sprintf(tmp,"\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" network=\"%s\" group=\"%s\"/>\n",
+			sprintf(tmp,"\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" network=\"%s\" group=\"%s\">\n",
 					app.class_.c_str(), app.id_, app.instance_, app.network_.c_str(), app.group_.c_str());
 			out << tmp;
+
+			////////////////////// properties
+			int foundColon = app.class_.rfind(':');
+			if(foundColon >= 0) ++foundColon;
+			out << "\t\t\t<properties xmlns=\"urn:xdaq-application:" <<
+					app.class_.substr(foundColon) <<
+					"\" xsi:type=\"soapenc:Struct\">\n";
+
+			//__COUT__ << "app.properties_ " << app.properties_.size() << std::endl;
+			for(XDAQApplicationProperty &appProperty:app.properties_)
+			{
+
+				if(!appProperty.status_)
+					out << "\t\t\t\t<!--\n";
+
+				sprintf(tmp,"\t\t\t\t<%s xsi:type=\"%s\">%s</%s>\n",
+						appProperty.name_.c_str(),
+						appProperty.type_.c_str(),
+						appProperty.value_.c_str(),
+						appProperty.name_.c_str());
+				out << tmp;
+
+				if(!appProperty.status_)
+					out << "\t\t\t\t-->\n";
+			}
+			out << "\t\t\t</properties>\n";
+			////////////////////// end properties
+
+			out << "\t\t</xc:Application>\n";
+
 
 			sprintf(tmp,"\t\t<xc:Module>%s</xc:Module>\n", app.module_.c_str());
 			out << tmp;

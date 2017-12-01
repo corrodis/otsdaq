@@ -16,8 +16,9 @@ public:
 	TransmitterSocket(const std::string &IPAddress, unsigned int port=0);
 	virtual ~TransmitterSocket(void);
 
-	int send(Socket& toSocket, const std::string& buffer);
-	int send(Socket& toSocket, const std::vector<uint32_t>& buffer);
+	int send(Socket& toSocket, const std::string& buffer, bool verbose=true);
+	int send(Socket& toSocket, const std::vector<uint32_t>& buffer, bool verbose=true);
+	int send(Socket& toSocket, const std::vector<uint16_t>& buffer, bool verbose=true);
 
 protected:
 	TransmitterSocket(void);

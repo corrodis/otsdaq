@@ -25,20 +25,22 @@ DataProducer::~DataProducer(void)
 //========================================================================================================================
 void DataProducer::registerToBuffer(void)
 {
-	__MOUT__ << "\tProducerID: " << processorUID_ << " is registering to DataManager pointer: " << DataManagerSingleton::getInstance(supervisorApplicationUID_) << std::endl;
+	__COUT__ << "\tProducerID: " << processorUID_ << " is registering to DataManager pointer: " << DataManagerSingleton::getInstance(supervisorApplicationUID_) << std::endl;
 	(DataManagerSingleton::getInstance(supervisorApplicationUID_))->registerProducer(bufferUID_,this);
-	__MOUT__ << "\tProducerID: " << processorUID_ << "...registered" << std::endl;
+	__COUT__ << "\tProducerID: " << processorUID_ << "...registered" << std::endl;
 }
 
 //========================================================================================================================
 void DataProducer::startProcessingData(std::string runNumber)
 {
+	__COUT__ << "startWorkLoop..." << std::endl;
 	WorkLoop::startWorkLoop();
 }
 
 //========================================================================================================================
 void DataProducer::stopProcessingData(void)
 {
+	__COUT__ << "stopWorkLoop..." << std::endl;
 	WorkLoop::stopWorkLoop();
 }
 
