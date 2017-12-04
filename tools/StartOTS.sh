@@ -10,11 +10,19 @@ DONOTKILL=0
 
 function killprocs {
     if [[ "x$1" == "x" ]]; then
-	ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
-	ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
-	ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
+	PIDS=`ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'`
+	PIDS+=" "
+	PIDS+=`ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'`
+	PIDS+=" "
+	PIDS+=`ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'`
+	#echo Killing PIDs: $PIDS
+	kill $PIDS >/dev/null 2>&1
+	kill -9 $PIDS >/dev/null 2>&1
     else
-	ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'|xargs kill -9 >/dev/null 2>&1
+	PIDS=`ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'`
+	#echo Killing PIDs: $PIDS
+	kill $PIDS >/dev/null 2>&1
+	kill -9 $PIDS >/dev/null 2>&1
     fi
 }
 
@@ -442,7 +450,8 @@ launchOTS() {
 	# netstat -apn | grep node | grep 8080 | grep LISTEN | rev | cut -d'.' -f1 | cut -c 16-22 | rev
 	# kill result
 	NODESERVERPS="$(netstat -apn | grep node | grep 8080 | grep LISTEN | rev | cut -d'.' -f1 | cut -c 16-22 | rev)"
-	kill -9 $NODESERVERPS
+	killprocs $NODESERVERPS
+        #kill -9 $NODESERVERPS
 			
 	envString="-genv OTSDAQ_LOG_ROOT ${OTSDAQ_LOG_DIR} -genv ARTDAQ_OUTPUT_DIR ${ARTDAQ_OUTPUT_DIR}"
 	
