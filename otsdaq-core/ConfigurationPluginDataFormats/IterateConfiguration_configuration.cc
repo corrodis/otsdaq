@@ -41,7 +41,8 @@ IterateConfiguration::CommandRunParams 				IterateConfiguration::commandRunParam
 IterateConfiguration::CommandChooseFSMParams 		IterateConfiguration::commandChooseFSMParams_;
 
 IterateConfiguration::TargetParams 					IterateConfiguration::targetParams_;
-IterateConfiguration::TargetColumns	 				IterateConfiguration::targetCols_;
+IterateConfiguration::TargetTableColumns			IterateConfiguration::targetCols_;
+IterateConfiguration::CommandTargetColumns	 		IterateConfiguration::commandTargetCols_;
 
 
 
@@ -112,6 +113,10 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 		commands.back().type_ = commandChild.second.getNode(
 				IterateConfiguration::planTableCols_.CommandType_).getValue<std::string>();
 
+		if(commandChild.second.getNode(
+						IterateConfiguration::planTableCols_.CommandLink_).isDisconnected())
+			continue; //skip if no command parameters
+
 		auto commandSpecificFields = commandChild.second.getNode(
 				IterateConfiguration::planTableCols_.CommandLink_).getChildren();
 
@@ -120,7 +125,36 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].first << " = \t" <<
 					commandSpecificFields[i].second << std::endl;
 
-			commands.back().params_.emplace(std::pair<
+			if(commandSpecificFields[i].first ==
+					IterateConfiguration::commandTargetCols_.TargetsLink_)
+			{
+				__COUT__ << "Extracting targets..." << __E__;
+				auto targets = commandSpecificFields[i].second.getChildren();
+				for(auto& target:targets)
+				{
+					__COUT__ << "\t\t\tTarget \t" << target.first << __E__;
+
+					ConfigurationTree targetNode =
+							target.second.getNode(
+									IterateConfiguration::targetCols_.TargetLink_);
+					if(targetNode.isDisconnected())
+					{
+						__COUT_ERR__ << "Disconnected target!?" << __E__;
+						continue;
+					}
+
+					__COUT__ << "\t\t = \t" <<
+							"Table:" <<
+							targetNode.getConfigurationName() <<
+							" UID:" <<
+							targetNode.getValueAsString() << std::endl;
+					commands.back().addTarget();
+					commands.back().targets_.back().table_ = targetNode.getConfigurationName();
+					commands.back().targets_.back().UID_ = targetNode.getValueAsString();
+				}
+			}
+			else
+				commands.back().params_.emplace(std::pair<
 					std::string /*param name*/,
 					std::string /*param value*/>(
 							commandSpecificFields[i].first,

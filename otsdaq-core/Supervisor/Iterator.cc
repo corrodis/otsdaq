@@ -4,8 +4,6 @@
 #include "otsdaq-core/Supervisor/Supervisor.h"
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h"
 
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
-
 
 #include <iostream>
 #include <thread>       //for std::thread
@@ -56,6 +54,8 @@ try
 
 
 	ConfigurationManagerRW theConfigurationManager(WebUsers::DEFAULT_ITERATOR_USERNAME); //this is a restricted username
+	theConfigurationManager.getAllConfigurationInfo(true); // to prep all info
+
 	IteratorWorkLoopStruct theIteratorStruct(iterator,
 			&theConfigurationManager);
 
@@ -781,7 +781,7 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 	std::string errorStr = "";
 	std::string currentState = iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
 
-	//execute first transition (may need two)
+	//execute first transition (may need two in conjunction with checkCommandConfigure())
 
 	if(currentState == "Initial")
 		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
@@ -794,6 +794,13 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
 				0,0,
 				"Configure",iteratorStruct->fsmName_,
+				WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+				WebUsers::DEFAULT_ITERATOR_USERNAME,
+				iteratorStruct->fsmCommandParameters_);
+	else if(currentState == "Configured")
+		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
+				0,0,
+				"Halt",iteratorStruct->fsmName_,
 				WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
 				WebUsers::DEFAULT_ITERATOR_USERNAME,
 				iteratorStruct->fsmCommandParameters_);
@@ -844,26 +851,63 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct)
 			[IterateConfiguration::commandModifyActiveParams_.DoTrackGroupChanges_])
 		doTrackGroupChanges = true;
 
-	const std::string& pathToField =
-			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-			[IterateConfiguration::commandModifyActiveParams_.RelativePathToField_];
-	const std::string& startValue =
+	const std::string& startValueStr =
 			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
 			[IterateConfiguration::commandModifyActiveParams_.FieldStartValue_];
-	const std::string& stepSize =
+	const std::string& stepSizeStr =
 			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
 			[IterateConfiguration::commandModifyActiveParams_.FieldIterationStepSize_];
 
 	const unsigned int stepIndex = iteratorStruct->stepIndexStack_.back();
 
-	ConfigurationManagerRW* cfgMgr = iteratorStruct->cfgMgr_;
 
 	__COUT__ << "doTrackGroupChanges " << (doTrackGroupChanges?"yes":"no") << std::endl;
 	__COUT__ << "stepIndex " << stepIndex << std::endl;
-	__COUT__ << "pathToField " << pathToField << std::endl;
-	__COUT__ << "startValue " << startValue << std::endl;
-	__COUT__ << "stepSize " << stepSize << std::endl;
+
+	//two approaches: double or long handling
+
+	if(startValueStr.size() &&
+			startValueStr[startValueStr.size()-1] == 'f')
+	{
+		//handle as double
+		double startValue = strtod(startValueStr.c_str(),0);
+		double stepSize = strtod(stepSizeStr.c_str(),0);
+
+		__COUT__ << "startValue " << startValue << std::endl;
+		__COUT__ << "stepSize " << stepSize << std::endl;
+		__COUT__ << "currentValue " << startValue + stepSize*stepIndex << std::endl;
+
+		helpCommandModifyActive(iteratorStruct, startValue + stepSize*stepIndex);
+	}
+	else //handle as long
+	{
+		long int startValue;
+
+		if(startValueStr.size() > 2 && startValueStr[1] == 'x') //assume hex value
+			startValue = strtol(startValueStr.c_str(),0,16);
+		else if(startValueStr.size() > 1 && startValueStr[0] == 'b') //assume binary value
+			startValue = strtol(startValueStr.substr(1).c_str(),0,2); //skip first 'b' character
+		else
+			startValue = strtol(startValueStr.c_str(),0,10);
+
+		long int stepSize;
+
+		if(stepSizeStr.size() > 2 && stepSizeStr[1] == 'x') //assume hex value
+			stepSize = strtol(stepSizeStr.c_str(),0,16);
+		else if(stepSizeStr.size() > 1 && stepSizeStr[0] == 'b') //assume binary value
+			stepSize = strtol(stepSizeStr.substr(1).c_str(),0,2); //skip first 'b' character
+		else
+			stepSize = strtol(stepSizeStr.c_str(),0,10);
+
+		__COUT__ << "startValue " << startValue << std::endl;
+		__COUT__ << "stepSize " << stepSize << std::endl;
+		__COUT__ << "currentValue " << startValue + stepSize*stepIndex << std::endl;
+
+		helpCommandModifyActive(iteratorStruct, startValue + stepSize*stepIndex);
+	}
+
 }
+
 
 //========================================================================================================================
 //checkCommandRun
