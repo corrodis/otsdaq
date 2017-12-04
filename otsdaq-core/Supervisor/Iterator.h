@@ -37,17 +37,21 @@ private:
 	{
     	IteratorWorkLoopStruct(Iterator* iterator, ConfigurationManagerRW* cfgMgr)
     	:theIterator_			(iterator)
-    	,cfgMgr_			(cfgMgr)
-    	,running_			(false)
-    	,commandBusy_		(false)
-    	,doPauseAction_		(false)
-    	,doHaltAction_		(false)
-    	,doResumeAction_	(false)
-    	,commandIndex_		((unsigned int)-1)
+    	,cfgMgr_				(cfgMgr)
+    	,originalTrackChanges_	(false)
+    	,running_				(false)
+    	,commandBusy_			(false)
+    	,doPauseAction_			(false)
+    	,doHaltAction_			(false)
+    	,doResumeAction_		(false)
+    	,commandIndex_			((unsigned int)-1)
     	{}
 
     	Iterator *									theIterator_;
     	ConfigurationManagerRW* 					cfgMgr_;
+    	bool										originalTrackChanges_;
+    	std::string									originalConfigGroup_;
+    	ConfigurationGroupKey						originalConfigKey_;
 
     	bool 										running_, commandBusy_;
     	bool										doPauseAction_, doHaltAction_, doResumeAction_;
@@ -107,14 +111,17 @@ private:
     template<class T>
     static void								helpCommandModifyActive(
     		IteratorWorkLoopStruct *iteratorStruct,
-			const T& setValue)
+			const T& setValue,
+			bool doTrackGroupChanges)
     try
     {
     	__COUT__ << "Set value " << setValue << __E__;
+    	__COUT__ << "doTrackGroupChanges " << doTrackGroupChanges << __E__;
+
 
     	const std::string& pathToField =
     			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-    			[IterateConfiguration::commandModifyActiveParams_.RelativePathToField_];
+				[IterateConfiguration::commandModifyActiveParams_.RelativePathToField_];
 
     	__COUT__ << "pathToField " << pathToField << std::endl;
 
@@ -135,8 +142,8 @@ private:
     	std::map<std::string /*name*/, ConfigurationVersion /*version*/> memberMap;
     	try
     	{
-			memberMap = cfgMgr->loadConfigurationGroup(
-					groupName,
+    		memberMap = cfgMgr->loadConfigurationGroup(
+    				groupName,
 					originalKey,
 					0,0,0,0,0,0, //defaults
 					true); //doNotLoadMember
@@ -149,7 +156,7 @@ private:
     	}
 
     	for(const auto& member: memberMap)
-    		__COUT__ << member.first << "-v" << member.second << __E__;
+    		__COUT__ << "newGroup " << member.first << "-v" << member.second << __E__;
 
     	for(const auto& target:
     			iteratorStruct->commands_[iteratorStruct->commandIndex_].targets_)
@@ -179,15 +186,15 @@ private:
 
     		try
     		{
-				valueTable.cfgView_->setValueAsString(
-						valSS.str(),
+    			valueTable.cfgView_->setValueAsString(
+    					valSS.str(),
 						node.getFieldRow(),
 						node.getFieldColumn()
-						);
+    			);
 
 
-				valueTable.cfgView_->print();
-				valueTable.cfgView_->init(); //verify new table (throws runtime_errors)
+    			valueTable.cfgView_->print();
+    			valueTable.cfgView_->init(); //verify new table (throws runtime_errors)
     		}
     		catch(...)
     		{
@@ -206,9 +213,10 @@ private:
 
     		//at this point valid edited table.. so save
 
-			ConfigurationVersion newAssignedVersion;
+    		ConfigurationVersion newAssignedVersion;
 
     		//start save table code
+    		//	do not check for duplicates if not tracking changes
     		{
     			const std::string& configName 					= valueTable.configName_;
     			ConfigurationBase* config 						= valueTable.config_;
@@ -216,6 +224,7 @@ private:
 
 
     			//check for duplicate tables already in cache
+    			if(doTrackGroupChanges) //check for duplicates if tracking changes
     			{
     				__COUT__ << "Checking for duplicate tables..." << std::endl;
 
@@ -229,9 +238,9 @@ private:
     					auto versionReverseIterator = allCfgInfo.at(configName).versions_.rbegin(); //get reverse iterator
     					__COUT__ << "Filling up cached from " <<
     							config->getNumberOfStoredViews() <<
-    							" to max count of " << config->MAX_VIEWS_IN_CACHE << std::endl;
+								" to max count of " << config->MAX_VIEWS_IN_CACHE << std::endl;
     					for(;config->getNumberOfStoredViews() < config->MAX_VIEWS_IN_CACHE &&
-    						versionReverseIterator != allCfgInfo.at(configName).versions_.rend();++versionReverseIterator)
+    					versionReverseIterator != allCfgInfo.at(configName).versions_.rend();++versionReverseIterator)
     					{
     						__COUT__ << "Versions in reverse order " << *versionReverseIterator << std::endl;
     						cfgMgr->getVersionedConfigurationByName(configName,*versionReverseIterator); //load to cache
@@ -266,7 +275,7 @@ private:
 
     			}
 
-				__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << std::endl;
+    			__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << std::endl;
 
     		} //end save table code
 
@@ -282,7 +291,7 @@ private:
 
     	//member map should now be modified
     	for(const auto& member: memberMap)
-    		__COUT__ << member.first << "-v" << member.second << __E__;
+    		__COUT__ << "newGroup " << member.first << "-v" << member.second << __E__;
 
     	__COUT__ << "Saving new group..." << __E__;
 
@@ -290,24 +299,24 @@ private:
     	ConfigurationGroupKey newKey = cfgMgr->saveNewConfigurationGroup(
     			groupName,
 				memberMap,
-    			"Created by Iterator modify active configuration command.");
+				"Created by Iterator modify active configuration command.");
 
 
-		__COUT__ << "Final group key is " << groupName << "(" <<
-				newKey << ")" << std::endl;
+    	__COUT__ << "Final group key is " << groupName << "(" <<
+    			newKey << ")" << std::endl;
 
-		//now active new group
+    	//now active new group
     	__COUT__ << "Activating new group..." << __E__;
     	cfgMgr->activateConfigurationGroup(groupName,newKey);
 
-     } //end helpCommandModifyActive
+    } //end helpCommandModifyActive
     catch(const std::runtime_error& e)
     {
     	__SS__ << "Help modify command failed! " << e.what() << __E__;
 
+
     	throw std::runtime_error(ss.str());
     }
-
 };
 
 }

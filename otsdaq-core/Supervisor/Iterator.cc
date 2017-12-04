@@ -233,6 +233,8 @@ try
 		{
 			if(theIteratorStruct.commandIndex_ == (unsigned int)-1)
 			{
+				//initialize the running plan
+
 				__COUT__ << "Get commands" << __E__;
 
 				theIteratorStruct.commandIndex_ = 0;
@@ -258,7 +260,24 @@ try
 								param.second << __E__;
 					}
 				}
-			}
+
+
+				theIteratorStruct.originalTrackChanges_ =
+						ConfigurationInterface::isVersionTrackingEnabled();
+				theIteratorStruct.originalConfigGroup_ =
+						theIteratorStruct.cfgMgr_->getActiveGroupName();
+				theIteratorStruct.originalConfigKey_ =
+						theIteratorStruct.cfgMgr_->getActiveGroupKey();
+
+				__COUT__ << "originalTrackChanges " <<
+						theIteratorStruct.originalTrackChanges_ << __E__;
+				__COUT__ << "originalConfigGroup " <<
+						theIteratorStruct.originalConfigGroup_ << __E__;
+				__COUT__ << "originalConfigKey " <<
+						theIteratorStruct.originalConfigKey_ << __E__;
+
+			} //end initial section
+
 
 			if(!theIteratorStruct.commandBusy_)
 			{
@@ -272,21 +291,6 @@ try
 					__MOUT__ << "Iterator starting command " << theIteratorStruct.commandIndex_+1 << ": " <<
 							theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ << __E__;
 
-					//FIXME
-					//FIXME
-					//FIXME
-					//for debugging modify commands: FIXME
-//					if(theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ ==
-//							IterateConfiguration::COMMAND_CONFIGURE_ALIAS)
-//						theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ =
-//								IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP;
-//
-//					if(theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ ==
-//							IterateConfiguration::COMMAND_RUN)
-//						theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ =
-//								IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP;
-
-
 					iterator->startCommand(&theIteratorStruct);
 				}
 				else if(theIteratorStruct.commandIndex_ ==
@@ -294,6 +298,20 @@ try
 				{
 					__COUT__ << "Finished Iteration Plan '" << theIteratorStruct.activePlan_ << __E__;
 					__MOUT__ << "Finished Iteration Plan '" << theIteratorStruct.activePlan_ << __E__;
+
+					__COUT__ << "Reverting track changes." << __E__;
+			    	ConfigurationInterface::setVersionTrackingEnabled(theIteratorStruct.originalTrackChanges_);
+
+			    	__COUT__ << "Activating original group..." << __E__;
+			    	try
+			    	{
+			    		theIteratorStruct.cfgMgr_->activateConfigurationGroup(
+								theIteratorStruct.originalConfigGroup_,theIteratorStruct.originalConfigKey_);
+			    	}
+			    	catch(...)
+			    	{
+			    		__COUT_WARN__ << "Original group could not be activated." << __E__;
+			    	}
 
 					//lockout the messages array for the remainder of the scope
 					//this guarantees the reading thread can safely access the messages
@@ -379,6 +397,7 @@ catch(...)
 
 //========================================================================================================================
 void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
+try
 {
 	//should be mutually exclusive with Supervisor main thread state machine accesses
 	//lockout the messages array for the remainder of the scope
@@ -455,12 +474,31 @@ void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
 		throw std::runtime_error(ss.str());
 	}
 }
+catch(...)
+{
+	__COUT__ << "Error caught. Reverting track changes." << __E__;
+	ConfigurationInterface::setVersionTrackingEnabled(iteratorStruct->originalTrackChanges_);
+
+	__COUT__ << "Activating original group..." << __E__;
+	try
+	{
+		iteratorStruct->cfgMgr_->activateConfigurationGroup(
+				iteratorStruct->originalConfigGroup_,iteratorStruct->originalConfigKey_);
+	}
+	catch(...)
+	{
+		__COUT_WARN__ << "Original group could not be activated." << __E__;
+	}
+	throw;
+}
+
 
 //========================================================================================================================
 //checkCommand
 //	when busy for a while, start to sleep
 //		use sleep() or nanosleep()
 bool Iterator::checkCommand(IteratorWorkLoopStruct *iteratorStruct)
+try
 {
 	//for out of range, return done
 	if(iteratorStruct->commandIndex_ >= iteratorStruct->commands_.size())
@@ -517,6 +555,24 @@ bool Iterator::checkCommand(IteratorWorkLoopStruct *iteratorStruct)
 		__COUT_ERR__ << ss.str();
 		throw std::runtime_error(ss.str());
 	}
+}
+catch(...)
+{
+	__COUT__ << "Error caught. Reverting track changes." << __E__;
+	ConfigurationInterface::setVersionTrackingEnabled(iteratorStruct->originalTrackChanges_);
+
+	__COUT__ << "Activating original group..." << __E__;
+	try
+	{
+		iteratorStruct->cfgMgr_->activateConfigurationGroup(
+				iteratorStruct->originalConfigGroup_,iteratorStruct->originalConfigKey_);
+	}
+	catch(...)
+	{
+		__COUT_WARN__ << "Original group could not be activated." << __E__;
+	}
+
+	throw;
 }
 
 //========================================================================================================================
@@ -864,10 +920,13 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct)
 	__COUT__ << "doTrackGroupChanges " << (doTrackGroupChanges?"yes":"no") << std::endl;
 	__COUT__ << "stepIndex " << stepIndex << std::endl;
 
+	ConfigurationInterface::setVersionTrackingEnabled(doTrackGroupChanges);
+
 	//two approaches: double or long handling
 
 	if(startValueStr.size() &&
-			startValueStr[startValueStr.size()-1] == 'f')
+			(startValueStr[startValueStr.size()-1] == 'f' ||
+					startValueStr.find('.') != std::string::npos))
 	{
 		//handle as double
 		double startValue = strtod(startValueStr.c_str(),0);
@@ -877,7 +936,10 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct)
 		__COUT__ << "stepSize " << stepSize << std::endl;
 		__COUT__ << "currentValue " << startValue + stepSize*stepIndex << std::endl;
 
-		helpCommandModifyActive(iteratorStruct, startValue + stepSize*stepIndex);
+		helpCommandModifyActive(
+				iteratorStruct,
+				startValue + stepSize*stepIndex,
+				doTrackGroupChanges);
 	}
 	else //handle as long
 	{
@@ -903,7 +965,10 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct)
 		__COUT__ << "stepSize " << stepSize << std::endl;
 		__COUT__ << "currentValue " << startValue + stepSize*stepIndex << std::endl;
 
-		helpCommandModifyActive(iteratorStruct, startValue + stepSize*stepIndex);
+		helpCommandModifyActive(
+				iteratorStruct,
+				startValue + stepSize*stepIndex,
+				doTrackGroupChanges);
 	}
 
 }

@@ -59,7 +59,7 @@ public:
 	//==============================================================================
 	//modifiers of generic ConfigurationBase
 
-	ConfigurationVersion								saveNewConfiguration					(const std::string &configurationName, ConfigurationVersion temporaryVersion = ConfigurationVersion(), bool makeTemporary = false);
+	ConfigurationVersion								saveNewConfiguration					(const std::string &configurationName, ConfigurationVersion temporaryVersion = ConfigurationVersion(), bool makeTemporary = false);//, bool saveToScratchVersion = false);
 	ConfigurationVersion								copyViewToCurrentColumns				(const std::string &configurationName, ConfigurationVersion sourceVersion);
 	void												eraseTemporaryVersion					(const std::string &configurationName, ConfigurationVersion targetVersion = ConfigurationVersion());
 	void												clearCachedVersions						(const std::string &configurationName);

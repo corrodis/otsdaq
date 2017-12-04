@@ -431,8 +431,11 @@ ConfigurationBase* ConfigurationManagerRW::getVersionedConfigurationByName(const
 //==============================================================================
 //saveNewConfiguration
 //	saves version, makes the new version the active version, and returns new version
-ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(const std::string &configurationName,
-		ConfigurationVersion temporaryVersion, bool makeTemporary)
+ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(
+		const std::string &configurationName,
+		ConfigurationVersion temporaryVersion,
+		bool makeTemporary)//,
+		//bool saveToScratchVersion)
 {
 	ConfigurationVersion newVersion(temporaryVersion);
 
