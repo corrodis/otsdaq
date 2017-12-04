@@ -700,7 +700,8 @@ otsActionHandler() {
 	
 	#clear file initially
 	echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
-			
+	
+	FIRST_TIME=1
 	
 	#listen for file commands
 	while true; do
@@ -723,10 +724,15 @@ otsActionHandler() {
 			echo " "
 			sleep 5
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "RESET_MPI" ]; then
-			echo " "
-			echo "Restarting MPI . . ."
-			#echo $MPI_RUN_CMD
-			echo " "
+		
+			#only print first time
+			if [ $FIRST_TIME == 1 ]; then
+				echo " "
+				echo "Restarting MPI (future restarts will be silent) . . ."
+				#echo $MPI_RUN_CMD
+				echo " "
+			fi
+			
 			killprocs mpirun
 			#killall -9 mpirun
 			sleep 1
@@ -735,7 +741,12 @@ otsActionHandler() {
 			export MPIR_CVAR_CH3_PORT_RANGE=8450:8700
 
 			if [ $QUIET == 1 ]; then
-				echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"	
+				
+				#only print first time
+				if [ $FIRST_TIME == 1 ]; then
+					echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"
+					FIRST_TIME=0
+				fi
 				$MPI_RUN_CMD &> otsdaq_quiet_run-mpi.txt &
 			else
 				$MPI_RUN_CMD &
