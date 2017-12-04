@@ -38,6 +38,7 @@ struct identity { typedef T type; };
 class ConfigurationTree
 {
 	friend class ConfigurationGUISupervisor;
+	friend class Iterator;
 
 public:
 	//Note: due to const members, implicit copy constructor exists, but NOT assignment operator=
