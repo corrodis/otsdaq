@@ -192,7 +192,7 @@ try
 			while(!iterator->checkCommand(&theIteratorStruct))
 				__COUT__ << "Waiting to halt..." << __E__;
 
-			__COUT__ << "Completeing halt..." << __E__;
+			__COUT__ << "Completing halt..." << __E__;
 
 			theIteratorStruct.doHaltAction_ = false; //clear
 
@@ -312,6 +312,12 @@ try
 			    	{
 			    		__COUT_WARN__ << "Original group could not be activated." << __E__;
 			    	}
+
+			    	__COUT__ << "Completing halt..." << __E__;
+			    	//leave FSM halted
+			    	iterator->haltStateMachine(
+			    			iterator->theSupervisor_,
+							theIteratorStruct.fsmName_);
 
 					//lockout the messages array for the remainder of the scope
 					//this guarantees the reading thread can safely access the messages

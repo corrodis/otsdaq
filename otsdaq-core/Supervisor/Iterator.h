@@ -297,7 +297,6 @@ private:
     	ConfigurationGroupKey theKey =
     			cfgMgr->findConfigurationGroup(groupName,memberMap);
 
-
     	if(!theKey.isInvalid())
     	{
 			__COUT__ << "Found equivalent group key (" << theKey << ") for " <<
