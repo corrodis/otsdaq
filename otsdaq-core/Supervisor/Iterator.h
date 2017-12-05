@@ -293,21 +293,33 @@ private:
     	for(const auto& member: memberMap)
     		__COUT__ << "newGroup " << member.first << "-v" << member.second << __E__;
 
-    	__COUT__ << "Saving new group..." << __E__;
+    	__COUT__ << "Checking for duplicate groups..." << std::endl;
+    	ConfigurationGroupKey theKey =
+    			cfgMgr->findConfigurationGroup(groupName,memberMap);
 
-    	//save new group
-    	ConfigurationGroupKey newKey = cfgMgr->saveNewConfigurationGroup(
-    			groupName,
-				memberMap,
-				"Created by Iterator modify active configuration command.");
 
+    	if(!theKey.isInvalid())
+    	{
+			__COUT__ << "Found equivalent group key (" << theKey << ") for " <<
+					groupName << "." << std::endl;
+    	}
+    	else
+    	{
+			__COUT__ << "Saving new group..." << __E__;
+
+			//save new group
+			theKey = cfgMgr->saveNewConfigurationGroup(
+					groupName,
+					memberMap,
+					"Created by Iterator modify active configuration command.");
+    	}
 
     	__COUT__ << "Final group key is " << groupName << "(" <<
-    			newKey << ")" << std::endl;
+    			theKey << ")" << std::endl;
 
     	//now active new group
     	__COUT__ << "Activating new group..." << __E__;
-    	cfgMgr->activateConfigurationGroup(groupName,newKey);
+    	cfgMgr->activateConfigurationGroup(groupName,theKey);
 
     } //end helpCommandModifyActive
     catch(const std::runtime_error& e)

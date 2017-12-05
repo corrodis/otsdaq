@@ -589,10 +589,10 @@ ConfigurationVersion ConfigurationManagerRW::copyViewToCurrentColumns(const std:
 //	return group with same name and same members
 //	else return invalid key
 //
-// FIXME -- this is taking too long when there are a ton of groups.
+// Note: this is taking too long when there are a ton of groups.
 //	Change to going back only 20 or so.. (but the order also comes in alpha order from
 //	theInterface_->getAllConfigurationGroupNames which is a problem for choosing the
-//	most recent to check.
+//	most recent to check. )
 ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::string &groupName,
 		const std::map<std::string, ConfigurationVersion> &groupMemberMap)
 {
