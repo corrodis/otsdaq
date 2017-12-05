@@ -450,7 +450,7 @@ launchOTS() {
 	# netstat -apn | grep node | grep 8080 | grep LISTEN | rev | cut -d'.' -f1 | cut -c 16-22 | rev
 	# kill result
 	NODESERVERPS="$(netstat -apn | grep node | grep 8080 | grep LISTEN | rev | cut -d'.' -f1 | cut -c 16-22 | rev)"
-	killprocs $NODESERVERPS
+	#killprocs $NODESERVERPS
         #kill -9 $NODESERVERPS
 			
 	envString="-genv OTSDAQ_LOG_ROOT ${OTSDAQ_LOG_DIR} -genv ARTDAQ_OUTPUT_DIR ${ARTDAQ_OUTPUT_DIR}"
