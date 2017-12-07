@@ -351,13 +351,18 @@ launchOTSWiz() {
 	fi
 	export PORT=${MAIN_PORT}
 
-	if [ -d ${ARTDAQ_DATABASE_DIR}.bak.fromIndexRebuild ]; then
+	ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`
+		
+	echo "Checking for database migration at ${ARTDAQ_DATABASE_URI}..."
+	if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 		# Rebuild ARTDAQ_DATABASE indicies
-		rebuild_database_index; rebuild_database_index --uri=${ARTDAQ_DATABASE_URI} >/dev/null 2>&1
-		ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`
-			#mv ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}.bak.$$
-			mv ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}.bak.fromIndexRebuild
-			mv ${ARTDAQ_DATABASE_DIR}_new ${ARTDAQ_DATABASE_DIR}
+		rebuild_database_index >/dev/null 2>&1; rebuild_database_index --uri=${ARTDAQ_DATABASE_URI} >/dev/null 2>&1
+		
+		mv ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}.bak.$$		
+		mv ${ARTDAQ_DATABASE_DIR}_new ${ARTDAQ_DATABASE_DIR}
+		echo "rebuilt" > ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild
+	else
+		echo "${ARTDAQ_DATABASE_DIR}/fromIndexRebuild file exists, so not rebuilding indices."
 	fi
 	
 	#substitute environment variables into template wiz-mode xdaq config xml
