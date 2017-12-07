@@ -353,6 +353,7 @@ launchOTSWiz() {
 
 	ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`
 		
+	echo
 	echo "Checking for database migration at ${ARTDAQ_DATABASE_URI}..."
 	if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 		# Rebuild ARTDAQ_DATABASE indicies
@@ -364,6 +365,7 @@ launchOTSWiz() {
 	else
 		echo "${ARTDAQ_DATABASE_DIR}/fromIndexRebuild file exists, so not rebuilding indices."
 	fi
+	echo
 	
 	#substitute environment variables into template wiz-mode xdaq config xml
 	envsubst <${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake.xml > ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml
