@@ -351,12 +351,14 @@ launchOTSWiz() {
 	fi
 	export PORT=${MAIN_PORT}
 
-	# Rebuild ARTDAQ_DATABASE indicies
-	rebuild_database_index; rebuild_database_index --uri=${ARTDAQ_DATABASE_URI} >/dev/null 2>&1
-	ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`
-        mv ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}.bak.$$
-        mv ${ARTDAQ_DATABASE_DIR}_new ${ARTDAQ_DATABASE_DIR}
-
+	if [ -d ${ARTDAQ_DATABASE_DIR}.bak.fromIndexRebuild ]; then
+		# Rebuild ARTDAQ_DATABASE indicies
+		rebuild_database_index; rebuild_database_index --uri=${ARTDAQ_DATABASE_URI} >/dev/null 2>&1
+		ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`
+			#mv ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}.bak.$$
+			mv ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}.bak.fromIndexRebuild
+			mv ${ARTDAQ_DATABASE_DIR}_new ${ARTDAQ_DATABASE_DIR}
+	fi
 	
 	#substitute environment variables into template wiz-mode xdaq config xml
 	envsubst <${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake.xml > ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml
