@@ -10,11 +10,19 @@ DONOTKILL=0
 
 function killprocs {
     if [[ "x$1" == "x" ]]; then
-	ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'|xargs kill -9
-	ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'|xargs kill -9
-	ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'|xargs kill -9
+	PIDS=`ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'`
+	PIDS+=" "
+	PIDS+=`ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'`
+	PIDS+=" "
+	PIDS+=`ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'`
+	#echo Killing PIDs: $PIDS
+	kill $PIDS >/dev/null 2>&1
+	kill -9 $PIDS >/dev/null 2>&1
     else
-	ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'|xargs kill -9
+	PIDS=`ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'`
+	#echo Killing PIDs: $PIDS
+	kill $PIDS >/dev/null 2>&1
+	kill -9 $PIDS >/dev/null 2>&1
     fi
 }
 
@@ -187,6 +195,24 @@ fi
 
 echo "Environment variable USER_DATA is setup and points to folder" ${USER_DATA}
 
+
+ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`
+	
+echo
+echo "Checking database at ARTDAQ_DATABASE_URI=${ARTDAQ_DATABASE_URI}..."
+if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
+	# Rebuild ARTDAQ_DATABASE indicies
+	echo "Rebuilding database indices..."
+	rebuild_database_index >/dev/null 2>&1; rebuild_database_index --uri=${ARTDAQ_DATABASE_URI} >/dev/null 2>&1
+	
+	mv ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}.bak.$$		
+	mv ${ARTDAQ_DATABASE_DIR}_new ${ARTDAQ_DATABASE_DIR}
+	echo "rebuilt" > ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild
+else
+	echo "${ARTDAQ_DATABASE_DIR}/fromIndexRebuild file exists, so not rebuilding indices."
+fi
+echo
+
 export CONFIGURATION_DATA_PATH=${USER_DATA}/ConfigurationDataExamples
 export CONFIGURATION_INFO_PATH=${USER_DATA}/ConfigurationInfo
 export SERVICE_DATA_PATH=${USER_DATA}/ServiceData
@@ -235,7 +261,7 @@ if [ $DONOTKILL == 0 ]; then
 
 	#give time for killall
 	sleep 1
-	echo "...Applications killed!"
+	#echo "...Applications killed!"
 fi
 
 
@@ -277,7 +303,7 @@ launchOTSWiz() {
 	
 	
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
-		echo "CONSOLE: Using web console viewer"
+		#echo "CONSOLE: Using web console viewer"
 		
 		#start quiet forwarder with receiving port and destination port parameter file
 	
@@ -290,7 +316,7 @@ launchOTSWiz() {
 	fi
 	
 	if [[ $USE_QT_VIEWER == "1" ]]; then
-		echo "CONSOLE: Using QT console viewer"
+		#echo "CONSOLE: Using QT console viewer"
 		if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
 			echo
 			echo "Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
@@ -341,7 +367,7 @@ launchOTSWiz() {
 	elif [ $USER == bschneid ]; then
 	   MAIN_PORT=2050
 	fi
-	export PORT=${MAIN_PORT}
+	export PORT=${MAIN_PORT}	
 	
 	#substitute environment variables into template wiz-mode xdaq config xml
 	envsubst <${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake.xml > ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml
@@ -404,7 +430,7 @@ launchOTS() {
 	
 	
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
-		echo "CONSOLE: Using web console viewer"
+		#echo "CONSOLE: Using web console viewer"
 		
 		#start quiet forwarder with receiving port and destination port parameter file
 	
@@ -417,7 +443,7 @@ launchOTS() {
 	fi
 	
 	if [[ $USE_QT_VIEWER == "1" ]]; then
-		echo "CONSOLE: Using QT console viewer"
+		#echo "CONSOLE: Using QT console viewer"
 		if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
 			echo
 			echo "Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
@@ -442,7 +468,8 @@ launchOTS() {
 	# netstat -apn | grep node | grep 8080 | grep LISTEN | rev | cut -d'.' -f1 | cut -c 16-22 | rev
 	# kill result
 	NODESERVERPS="$(netstat -apn | grep node | grep 8080 | grep LISTEN | rev | cut -d'.' -f1 | cut -c 16-22 | rev)"
-	kill -9 $NODESERVERPS
+	#killprocs $NODESERVERPS
+        #kill -9 $NODESERVERPS
 			
 	envString="-genv OTSDAQ_LOG_ROOT ${OTSDAQ_LOG_DIR} -genv ARTDAQ_OUTPUT_DIR ${ARTDAQ_OUTPUT_DIR}"
 	
@@ -609,7 +636,7 @@ launchOTS() {
 	  done
 	  echo
 	  cmd=$cmdstart" -host "$mpiHosts$cmd
-	  echo $cmd &
+	  echo Command used to start MPI: $cmd &
 	  MPI_RUN_CMD=$cmd
 		#if [ $QUIET == 1 ]; then
 		#echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"		  
@@ -700,7 +727,8 @@ otsActionHandler() {
 	
 	#clear file initially
 	echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
-			
+	
+	FIRST_TIME=1
 	
 	#listen for file commands
 	while true; do
@@ -723,10 +751,15 @@ otsActionHandler() {
 			echo " "
 			sleep 5
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "RESET_MPI" ]; then
-			echo " "
-			echo "Restarting MPI . . ."
-			echo $MPI_RUN_CMD
-			echo " "
+		
+			#only print first time
+			if [ $FIRST_TIME == 1 ]; then
+				echo " "
+				echo "Restarting MPI (future restarts will be silent) . . ."
+				#echo $MPI_RUN_CMD
+				echo " "
+			fi
+			
 			killprocs mpirun
 			#killall -9 mpirun
 			sleep 1
@@ -735,7 +768,12 @@ otsActionHandler() {
 			export MPIR_CVAR_CH3_PORT_RANGE=8450:8700
 
 			if [ $QUIET == 1 ]; then
-				echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"	
+				
+				#only print first time
+				if [ $FIRST_TIME == 1 ]; then
+					echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"
+					FIRST_TIME=0
+				fi
 				$MPI_RUN_CMD &> otsdaq_quiet_run-mpi.txt &
 			else
 				$MPI_RUN_CMD &

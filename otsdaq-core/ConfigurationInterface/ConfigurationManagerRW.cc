@@ -299,6 +299,8 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 		catch(...){}
 	}
 
+	__COUT_INFO__ << "Updating persistent active groups to " <<
+			ConfigurationManager::ACTIVE_GROUP_FILENAME << " ..."  << std::endl;
 	__MOUT_INFO__ << "Updating persistent active groups to " <<
 			ConfigurationManager::ACTIVE_GROUP_FILENAME << " ..."  << std::endl;
 
@@ -312,6 +314,15 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 		throw std::runtime_error(ss.str());
 		return;
 	}
+
+	__COUT_INFO__ << "Active Context: " << theContextGroup_ << "(" <<
+			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__COUT_INFO__ << "Active Backbone: " << theBackboneGroup_ << "(" <<
+			(theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__COUT_INFO__ << "Active Iterate: " << theIterateGroup_ << "(" <<
+			(theIterateGroupKey_?theIterateGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__COUT_INFO__ << "Active Configuration: " << theConfigurationGroup_ << "(" <<
+			(theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1") << ")" << std::endl;
 
 	__MOUT_INFO__ << "Active Context: " << theContextGroup_ << "(" <<
 			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl;
@@ -420,8 +431,11 @@ ConfigurationBase* ConfigurationManagerRW::getVersionedConfigurationByName(const
 //==============================================================================
 //saveNewConfiguration
 //	saves version, makes the new version the active version, and returns new version
-ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(const std::string &configurationName,
-		ConfigurationVersion temporaryVersion, bool makeTemporary)
+ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(
+		const std::string &configurationName,
+		ConfigurationVersion temporaryVersion,
+		bool makeTemporary)//,
+		//bool saveToScratchVersion)
 {
 	ConfigurationVersion newVersion(temporaryVersion);
 
@@ -575,10 +589,10 @@ ConfigurationVersion ConfigurationManagerRW::copyViewToCurrentColumns(const std:
 //	return group with same name and same members
 //	else return invalid key
 //
-// FIXME -- this is taking too long when there are a ton of groups.
+// Note: this is taking too long when there are a ton of groups.
 //	Change to going back only 20 or so.. (but the order also comes in alpha order from
 //	theInterface_->getAllConfigurationGroupNames which is a problem for choosing the
-//	most recent to check.
+//	most recent to check. )
 ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::string &groupName,
 		const std::map<std::string, ConfigurationVersion> &groupMemberMap)
 {
@@ -664,7 +678,7 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 //	Note: groupMembers map will get modified with group metadata table version
 ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const std::string &groupName,
 		std::map<std::string, ConfigurationVersion> &groupMembers,
-		ConfigurationGroupKey previousVersion, const std::string &groupComment)
+		const std::string &groupComment)
 {
 	//steps:
 	//	determine new group key
@@ -682,9 +696,10 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 
 	//determine new group key
 	ConfigurationGroupKey newKey;
-	if(!previousVersion.isInvalid())	//if previous provided, bump that
-		newKey = ConfigurationGroupKey::getNextKey(previousVersion);
-	else							//get latest key from db, and bump
+	//CHANGED do not allow bumping, it is too risky.. because database allows it.. and then it corrupts database
+	//if(!previousVersion.isInvalid())	//if previous provided, bump that
+	//	newKey = ConfigurationGroupKey::getNextKey(previousVersion);
+	//else							//get latest key from db, and bump
 	{
 		std::set<ConfigurationGroupKey> keys = theInterface_->getKeys(groupName);
 		if(keys.size()) //if keys exist, bump the last

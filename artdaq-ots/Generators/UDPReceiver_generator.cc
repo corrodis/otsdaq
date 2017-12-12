@@ -78,6 +78,7 @@ void ots::UDPReceiver::start() {
 void ots::UDPReceiver::receiveLoop_() {
 
   uint8_t droppedPackets = 0;
+
   while(!should_stop()) {
     struct pollfd ufds[1];
     ufds[0].fd = datasocket_;
@@ -120,49 +121,42 @@ void ots::UDPReceiver::receiveLoop_() {
 			int delta = expectedPacketNumber_ - seqNum;
 			mf::LogWarning("UDPReceiver") << std::dec << "Sequence Number significantly different than expected! (delta: " << delta << ")";
 		      }
-				
-		      packetBuffer_t buffer;
-		      buffer.resize(1500);
-		      
 
-		      int sts = recvfrom(datasocket_, &buffer[0], sizeof(buffer), 0,(struct sockaddr *) &si_data_, &dataSz);
+		      packetBuffer_t receiveBuffer;
+		      receiveBuffer.resize(1500);
+		      int sts = recvfrom(datasocket_, &receiveBuffer[0], receiveBuffer.size(), 0,(struct sockaddr *) &si_data_, &dataSz);
 		      if(sts == -1){
 			std::cout << __COUT_HDR_FL__ << "Error on socket: " << strerror(errno) << std::endl;
 		      } else {
 			std::cout << __COUT_HDR_FL__ << "Received " << sts << " bytes." << std::endl;
 		      }
-		      if(sts > 0) {
-			buffer.resize(sts);
-		      }
 				
 		      if(droppedPackets == 0) {
 			std::unique_lock<std::mutex> lock(receiveBufferLock_);
-			receiveBuffers_.push_back(buffer);
+			receiveBuffers_.push_back(receiveBuffer);
 		      }
 		      else {
 			bool found = false;
-			for(packetBuffer_list_t::reverse_iterator it = packetBuffers_.rbegin(); it != packetBuffers_.rend(); ++it) {
-			  if(seqNum < static_cast<uint8_t>((it)->at(1))) {
 			    std::unique_lock<std::mutex> lock(receiveBufferLock_);
-			    receiveBuffers_.insert(it.base(), buffer);
+			for(packetBuffer_list_t::reverse_iterator it = receiveBuffers_.rbegin(); it != receiveBuffers_.rend(); ++it) {
+			  if(seqNum < static_cast<uint8_t>((it)->at(1))) {
+			    receiveBuffers_.insert(it.base(), receiveBuffer);
 			    droppedPackets--;
 			    expectedPacketNumber_--;
 			    found = true;
 			  }
 			}
 			if(!found) {
-			  std::unique_lock<std::mutex> lock(receiveBufferLock_);
-			  receiveBuffers_.push_back(buffer);
+			  receiveBuffers_.push_back(receiveBuffer);
 			}
 		      }
-		      mf::LogInfo("UDPReceiver") << "Now placing UDP packet with sequence number " << std::hex << (int)seqNum << " into buffer." << std::dec;
+
+		      std::cout << __COUT_HDR_FL__ << "Now placing UDP packet with sequence number " << std::hex << (int)seqNum << " into buffer." << std::dec << std::endl;
 		    }
   
 		    ++expectedPacketNumber_;
 		  }
 	  }
-    std::cout << __COUT_HDR_FL__ << "waiting..." << std::endl;
-
   }
   mf::LogInfo("UDPReceiver") << "receive Loop exiting..." << std::endl;
 }
@@ -174,24 +168,25 @@ bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs & output)
   }
 
   {
-	std::unique_lock<std::mutex> lock(receiveBufferLock_);
-	  std::move(receiveBuffers_.begin(), receiveBuffers_.end(), std::inserter(packetBuffers_,packetBuffers_.end()));
-      receiveBuffers_.clear();
+    std::unique_lock<std::mutex> lock(receiveBufferLock_);
+    std::move(receiveBuffers_.begin(), receiveBuffers_.end(), std::inserter(packetBuffers_,packetBuffers_.end()));
+    receiveBuffers_.clear();
   }
 
-if(packetBuffers_.size() > 0) {
-  size_t packetBufferSize =0;
-  for(auto& buf : packetBuffers_) {
-    packetBufferSize += buf.size();
-  }
-  mf::LogInfo("UDPReceiver") << "Calling ProcessData, packetBuffers_.size() == " << std::to_string(packetBuffers_.size()) << ", sz = " << std::to_string(packetBufferSize);
-  ProcessData_(output);
+  if(packetBuffers_.size() > 0) {
+    size_t packetBufferSize =0;
+    for(auto& buf : packetBuffers_) {
+      packetBufferSize += buf.size();
+    }
+    std::cout << __COUT_HDR_FL__ << "Calling ProcessData, packetBuffers_.size() == " << std::to_string(packetBuffers_.size()) << ", sz = " << std::to_string(packetBufferSize) << std::endl;
+    ProcessData_(output);
 
-  mf::LogInfo("UDPReceiver") << "Returning output of size " << output.size() << " to TriggeredFragmentGenerator";
- } else {
-  // Sleep 10 times per poll timeout
-  usleep(100000);
- }
+    packetBuffers_.clear();
+    std::cout << __COUT_HDR_FL__ << "Returning output of size " << output.size() << std::endl;
+  } else {
+    // Sleep 10 times per poll timeout
+    usleep(100000);
+  }
   return true;
 }
 
@@ -232,7 +227,6 @@ if(packetBuffers_.size() > 0) {
         ++pos;
       }
     }
-  packetBuffers_.clear();
 
   if(dataType == DataType::JSON || dataType == DataType::String) {
     *(thisFrag.dataBegin() + pos) = 0;

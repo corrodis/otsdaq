@@ -4,8 +4,6 @@
 #include "otsdaq-core/Supervisor/Supervisor.h"
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h"
 
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
-
 
 #include <iostream>
 #include <thread>       //for std::thread
@@ -56,6 +54,8 @@ try
 
 
 	ConfigurationManagerRW theConfigurationManager(WebUsers::DEFAULT_ITERATOR_USERNAME); //this is a restricted username
+	theConfigurationManager.getAllConfigurationInfo(true); // to prep all info
+
 	IteratorWorkLoopStruct theIteratorStruct(iterator,
 			&theConfigurationManager);
 
@@ -192,7 +192,7 @@ try
 			while(!iterator->checkCommand(&theIteratorStruct))
 				__COUT__ << "Waiting to halt..." << __E__;
 
-			__COUT__ << "Completeing halt..." << __E__;
+			__COUT__ << "Completing halt..." << __E__;
 
 			theIteratorStruct.doHaltAction_ = false; //clear
 
@@ -233,6 +233,8 @@ try
 		{
 			if(theIteratorStruct.commandIndex_ == (unsigned int)-1)
 			{
+				//initialize the running plan
+
 				__COUT__ << "Get commands" << __E__;
 
 				theIteratorStruct.commandIndex_ = 0;
@@ -258,7 +260,24 @@ try
 								param.second << __E__;
 					}
 				}
-			}
+
+
+				theIteratorStruct.originalTrackChanges_ =
+						ConfigurationInterface::isVersionTrackingEnabled();
+				theIteratorStruct.originalConfigGroup_ =
+						theIteratorStruct.cfgMgr_->getActiveGroupName();
+				theIteratorStruct.originalConfigKey_ =
+						theIteratorStruct.cfgMgr_->getActiveGroupKey();
+
+				__COUT__ << "originalTrackChanges " <<
+						theIteratorStruct.originalTrackChanges_ << __E__;
+				__COUT__ << "originalConfigGroup " <<
+						theIteratorStruct.originalConfigGroup_ << __E__;
+				__COUT__ << "originalConfigKey " <<
+						theIteratorStruct.originalConfigKey_ << __E__;
+
+			} //end initial section
+
 
 			if(!theIteratorStruct.commandBusy_)
 			{
@@ -272,21 +291,6 @@ try
 					__MOUT__ << "Iterator starting command " << theIteratorStruct.commandIndex_+1 << ": " <<
 							theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ << __E__;
 
-					//FIXME
-					//FIXME
-					//FIXME
-					//for debugging modify commands: FIXME
-//					if(theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ ==
-//							IterateConfiguration::COMMAND_CONFIGURE_ALIAS)
-//						theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ =
-//								IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP;
-//
-//					if(theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ ==
-//							IterateConfiguration::COMMAND_RUN)
-//						theIteratorStruct.commands_[theIteratorStruct.commandIndex_].type_ =
-//								IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP;
-
-
 					iterator->startCommand(&theIteratorStruct);
 				}
 				else if(theIteratorStruct.commandIndex_ ==
@@ -294,6 +298,26 @@ try
 				{
 					__COUT__ << "Finished Iteration Plan '" << theIteratorStruct.activePlan_ << __E__;
 					__MOUT__ << "Finished Iteration Plan '" << theIteratorStruct.activePlan_ << __E__;
+
+					__COUT__ << "Reverting track changes." << __E__;
+			    	ConfigurationInterface::setVersionTrackingEnabled(theIteratorStruct.originalTrackChanges_);
+
+			    	__COUT__ << "Activating original group..." << __E__;
+			    	try
+			    	{
+			    		theIteratorStruct.cfgMgr_->activateConfigurationGroup(
+								theIteratorStruct.originalConfigGroup_,theIteratorStruct.originalConfigKey_);
+			    	}
+			    	catch(...)
+			    	{
+			    		__COUT_WARN__ << "Original group could not be activated." << __E__;
+			    	}
+
+			    	__COUT__ << "Completing halt..." << __E__;
+			    	//leave FSM halted
+			    	iterator->haltStateMachine(
+			    			iterator->theSupervisor_,
+							theIteratorStruct.fsmName_);
 
 					//lockout the messages array for the remainder of the scope
 					//this guarantees the reading thread can safely access the messages
@@ -379,6 +403,7 @@ catch(...)
 
 //========================================================================================================================
 void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
+try
 {
 	//should be mutually exclusive with Supervisor main thread state machine accesses
 	//lockout the messages array for the remainder of the scope
@@ -455,12 +480,31 @@ void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
 		throw std::runtime_error(ss.str());
 	}
 }
+catch(...)
+{
+	__COUT__ << "Error caught. Reverting track changes." << __E__;
+	ConfigurationInterface::setVersionTrackingEnabled(iteratorStruct->originalTrackChanges_);
+
+	__COUT__ << "Activating original group..." << __E__;
+	try
+	{
+		iteratorStruct->cfgMgr_->activateConfigurationGroup(
+				iteratorStruct->originalConfigGroup_,iteratorStruct->originalConfigKey_);
+	}
+	catch(...)
+	{
+		__COUT_WARN__ << "Original group could not be activated." << __E__;
+	}
+	throw;
+}
+
 
 //========================================================================================================================
 //checkCommand
 //	when busy for a while, start to sleep
 //		use sleep() or nanosleep()
 bool Iterator::checkCommand(IteratorWorkLoopStruct *iteratorStruct)
+try
 {
 	//for out of range, return done
 	if(iteratorStruct->commandIndex_ >= iteratorStruct->commands_.size())
@@ -517,6 +561,24 @@ bool Iterator::checkCommand(IteratorWorkLoopStruct *iteratorStruct)
 		__COUT_ERR__ << ss.str();
 		throw std::runtime_error(ss.str());
 	}
+}
+catch(...)
+{
+	__COUT__ << "Error caught. Reverting track changes." << __E__;
+	ConfigurationInterface::setVersionTrackingEnabled(iteratorStruct->originalTrackChanges_);
+
+	__COUT__ << "Activating original group..." << __E__;
+	try
+	{
+		iteratorStruct->cfgMgr_->activateConfigurationGroup(
+				iteratorStruct->originalConfigGroup_,iteratorStruct->originalConfigKey_);
+	}
+	catch(...)
+	{
+		__COUT_WARN__ << "Original group could not be activated." << __E__;
+	}
+
+	throw;
 }
 
 //========================================================================================================================
@@ -781,7 +843,7 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 	std::string errorStr = "";
 	std::string currentState = iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
 
-	//execute first transition (may need two)
+	//execute first transition (may need two in conjunction with checkCommandConfigure())
 
 	if(currentState == "Initial")
 		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
@@ -794,6 +856,13 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
 				0,0,
 				"Configure",iteratorStruct->fsmName_,
+				WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+				WebUsers::DEFAULT_ITERATOR_USERNAME,
+				iteratorStruct->fsmCommandParameters_);
+	else if(currentState == "Configured")
+		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
+				0,0,
+				"Halt",iteratorStruct->fsmName_,
 				WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
 				WebUsers::DEFAULT_ITERATOR_USERNAME,
 				iteratorStruct->fsmCommandParameters_);
@@ -844,26 +913,72 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct)
 			[IterateConfiguration::commandModifyActiveParams_.DoTrackGroupChanges_])
 		doTrackGroupChanges = true;
 
-	const std::string& pathToField =
-			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-			[IterateConfiguration::commandModifyActiveParams_.RelativePathToField_];
-	const std::string& startValue =
+	const std::string& startValueStr =
 			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
 			[IterateConfiguration::commandModifyActiveParams_.FieldStartValue_];
-	const std::string& stepSize =
+	const std::string& stepSizeStr =
 			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
 			[IterateConfiguration::commandModifyActiveParams_.FieldIterationStepSize_];
 
 	const unsigned int stepIndex = iteratorStruct->stepIndexStack_.back();
 
-	ConfigurationManagerRW* cfgMgr = iteratorStruct->cfgMgr_;
 
 	__COUT__ << "doTrackGroupChanges " << (doTrackGroupChanges?"yes":"no") << std::endl;
 	__COUT__ << "stepIndex " << stepIndex << std::endl;
-	__COUT__ << "pathToField " << pathToField << std::endl;
-	__COUT__ << "startValue " << startValue << std::endl;
-	__COUT__ << "stepSize " << stepSize << std::endl;
+
+	ConfigurationInterface::setVersionTrackingEnabled(doTrackGroupChanges);
+
+	//two approaches: double or long handling
+
+	if(startValueStr.size() &&
+			(startValueStr[startValueStr.size()-1] == 'f' ||
+					startValueStr.find('.') != std::string::npos))
+	{
+		//handle as double
+		double startValue = strtod(startValueStr.c_str(),0);
+		double stepSize = strtod(stepSizeStr.c_str(),0);
+
+		__COUT__ << "startValue " << startValue << std::endl;
+		__COUT__ << "stepSize " << stepSize << std::endl;
+		__COUT__ << "currentValue " << startValue + stepSize*stepIndex << std::endl;
+
+		helpCommandModifyActive(
+				iteratorStruct,
+				startValue + stepSize*stepIndex,
+				doTrackGroupChanges);
+	}
+	else //handle as long
+	{
+		long int startValue;
+
+		if(startValueStr.size() > 2 && startValueStr[1] == 'x') //assume hex value
+			startValue = strtol(startValueStr.c_str(),0,16);
+		else if(startValueStr.size() > 1 && startValueStr[0] == 'b') //assume binary value
+			startValue = strtol(startValueStr.substr(1).c_str(),0,2); //skip first 'b' character
+		else
+			startValue = strtol(startValueStr.c_str(),0,10);
+
+		long int stepSize;
+
+		if(stepSizeStr.size() > 2 && stepSizeStr[1] == 'x') //assume hex value
+			stepSize = strtol(stepSizeStr.c_str(),0,16);
+		else if(stepSizeStr.size() > 1 && stepSizeStr[0] == 'b') //assume binary value
+			stepSize = strtol(stepSizeStr.substr(1).c_str(),0,2); //skip first 'b' character
+		else
+			stepSize = strtol(stepSizeStr.c_str(),0,10);
+
+		__COUT__ << "startValue " << startValue << std::endl;
+		__COUT__ << "stepSize " << stepSize << std::endl;
+		__COUT__ << "currentValue " << startValue + stepSize*stepIndex << std::endl;
+
+		helpCommandModifyActive(
+				iteratorStruct,
+				startValue + stepSize*stepIndex,
+				doTrackGroupChanges);
+	}
+
 }
+
 
 //========================================================================================================================
 //checkCommandRun
