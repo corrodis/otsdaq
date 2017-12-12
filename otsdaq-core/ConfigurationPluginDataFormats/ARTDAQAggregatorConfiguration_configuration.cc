@@ -469,40 +469,6 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 			}
 		}
 
-		//other destinations
-		auto transferLink = daq.getNode("daqAggregatorTransferLink");
-		if(!transferLink.isDisconnected())
-		{
-			try
-			{
-
-
-				unsigned int sourceRank = contextConfig->getARTDAQAppRank(
-						transferLink.getNode("sourceARTDAQContextLink").getValueAsString());
-				unsigned int destinationRank = contextConfig->getARTDAQAppRank(
-						transferLink.getNode("destinationARTDAQContextLink").getValueAsString());
-
-				OUT << transferLink.getNode("transferKey").getValue() <<
-						": {" <<
-						" transferPluginType: " <<
-						transferLink.getNode("transferPluginType").getValue() <<
-						" source_rank: " <<
-						sourceRank <<
-						" destination_rank: " <<
-						destinationRank <<
-						" max_fragment_size_words: " <<
-						transferLink.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
-						"}\n";
-			}
-			catch(const std::runtime_error& e)
-			{
-				__SS__ << "Are the Transfer sources and destinations valid? Error occurred looking for Aggregator DAQ transfer targets for UID '" <<
-						aggregatorNode.getValue() << "': " << e.what() << std::endl;
-				__COUT_ERR__ << ss.str() << std::endl;
-				throw std::runtime_error(ss.str());
-			}
-		}
-
 		POPTAB;
 		OUT << "}\n\n"; //end daq
 	}
