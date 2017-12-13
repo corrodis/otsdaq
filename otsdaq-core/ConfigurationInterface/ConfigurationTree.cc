@@ -686,8 +686,18 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 	{
 
 		//__COUT__ << row_ << " " << col_ <<  " " << groupId_ << " " << configView_ << std::endl;
-		if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)
+		if(!configuration_)
 		{
+			//root node
+			//so return config node
+			return recurse(
+					configMgr_->getNode(nodeName),
+					childPath, doNotThrowOnBrokenUIDLinks);
+		}
+		else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)
+		{
+			//config node
+
 			if(!configView_)
 			{
 				__SS__ << "Missing configView pointer! Likely attempting to access a child node through a disconnected link node." << std::endl;
@@ -949,8 +959,11 @@ const std::string ConfigurationTree::NODE_TYPE_GROUP_LINK	= "GroupLinkNode";
 const std::string ConfigurationTree::NODE_TYPE_UID_LINK		= "UIDLinkNode";
 const std::string ConfigurationTree::NODE_TYPE_VALUE		= "ValueNode";
 const std::string ConfigurationTree::NODE_TYPE_UID			= "UIDNode";
+const std::string ConfigurationTree::NODE_TYPE_ROOT      	= "RootNode";
+
 std::string ConfigurationTree::getNodeType(void) const
 {
+	if(!configuration_)							return ConfigurationTree::NODE_TYPE_ROOT;
 	if(isConfigurationNode() && groupId_ != "") return ConfigurationTree::NODE_TYPE_GROUP_TABLE;
 	if(isConfigurationNode())                   return ConfigurationTree::NODE_TYPE_TABLE;
 	if(isGroupLinkNode())                       return ConfigurationTree::NODE_TYPE_GROUP_LINK;
@@ -1007,9 +1020,9 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		unsigned int depth) const
 {
 	//enforce that starting point is a table node
-	if(!isConfigurationNode())
+	if(!isRootNode() && !isConfigurationNode())
 	{
-		__SS__ << "Can only get getCommonFields from a table node! " <<
+		__SS__ << "Can only get getCommonFields from a root or table node! " <<
 				"The node type is " << getNodeType() << std::endl;
 		__COUT__ << "\n" << ss.str() << std::endl;
 		throw std::runtime_error(ss.str());
@@ -1054,7 +1067,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 	//return result
 
 	bool found; //used in loops
-	auto tableName = getConfigurationName(); //all records will share this table name
+	//auto tableName = isRootNode()?"/":getConfigurationName();  //all records will share this table name
 
 	for(unsigned int i=0;i<recordList.size();++i)
 	{
@@ -1163,7 +1176,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 					{
 						fieldCandidateList.push_back(
 								ConfigurationTree::RecordField(
-										tableName,
+										fieldNode.second.getConfigurationName(),
 										recordList[i],
 										fieldNode.first,
 										"", //relative path, not including columnName_
@@ -1603,9 +1616,16 @@ std::map<std::string,ConfigurationTree> ConfigurationTree::getChildrenMap(void) 
 }
 
 //==============================================================================
+bool ConfigurationTree::isRootNode(void) const
+{
+	return (!configuration_);
+}
+
+//==============================================================================
 bool ConfigurationTree::isConfigurationNode(void) const
 {
-	return (row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID);
+	return (configuration_ &&
+			row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID);
 }
 
 //==============================================================================

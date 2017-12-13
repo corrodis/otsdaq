@@ -1119,9 +1119,12 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString,
 	//__COUT__ << "nodeName=" << nodeName << " " << nodeName.length() << std::endl;
 	if(nodeName.length() < 1)
 	{
-		__SS__ << "Invalid node name: " << nodeName << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		//return root node
+		return ConfigurationTree(this,0);
+
+		//		__SS__ << "Invalid node name: " << nodeName << std::endl;
+		//		__COUT_ERR__ << ss.str();
+		//		throw std::runtime_error(ss.str());
 	}
 
 	std::string childPath = nodeString.substr(nodeName.length() + startingIndex);

@@ -105,6 +105,7 @@ public:
 	static const std::string NODE_TYPE_UID_LINK;
 	static const std::string NODE_TYPE_VALUE;
 	static const std::string NODE_TYPE_UID;
+	static const std::string NODE_TYPE_ROOT;
 
 
 	//Methods
@@ -251,6 +252,7 @@ public:
 
 	//boolean info
 	bool									isDefaultValue				(void) const;
+	bool									isRootNode	        		(void) const;
 	bool									isConfigurationNode	        (void) const;
 	bool									isValueNode			        (void) const;
 	bool									isDisconnected		        (void) const;
@@ -313,7 +315,7 @@ private:
 	//	- value node is a pointer to a cell in a config table
 	//
 	//Assumption: uid column is present
-	const ConfigurationManager* configMgr_;
+	const ConfigurationManager* configMgr_; 	//root node
 	const ConfigurationBase* 	configuration_; //config node
 	const std::string			groupId_;		//group config node
 	const ConfigurationBase* 	linkParentConfig_; //link node parent config pointer (could be used to traverse backwards through tree)
