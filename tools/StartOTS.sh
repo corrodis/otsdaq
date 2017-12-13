@@ -592,59 +592,63 @@ launchOTS() {
 	done
 	
 	if [[ (${#boardReaderPort[@]} != 0) || (${#builderPort[@]} != 0) || (${#aggregatorPort[@]} != 0) ]] && [[ "${HOSTNAME}" == "${mainHostname}" ]]; then
-	  cmdstart="mpirun -launcher ssh ${envString}"
-	  cmd=""
-	  mpiHosts=""
-	  i=0	
-	  for port in "${boardReaderPort[@]}"
-	  do
+	    cmdstart="mpirun -launcher ssh ${envString}"
+	    cmd=""
+	    mpiHosts=""
+	    i=0
+
+	    for port in "${boardReaderPort[@]}"
+	    do
 		: 
 		#echo " -np xdaq.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
 		cmd=$cmd" -np 1 xdaq.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :"
 		if [[ "x$mpiHosts" == "x" ]]; then
 		    mpiHosts="${boardReaderHost[$i]}"
-		    else
-		mpiHosts=$mpiHosts",${boardReaderHost[$i]}"
+		else
+		    mpiHosts=$mpiHosts",${boardReaderHost[$i]}"
 		fi
 		i=$(( $i + 1 ))
-	  done
-	  i=0	
-	  for port in "${builderPort[@]}"
-	  do
+	    done
+	    i=0	
+	    for port in "${builderPort[@]}"
+	    do
 		: 
 		#echo " -np xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
-		cmd=$cmd" -np 1 xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :"
+		if [ $i -eq 0 ];then
+		    cmd=$cmd" -np 1 xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} "
+		else	
+		    cmd=$cmd": -np 1 xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} "
+		fi
 		if [[ "x$mpiHosts" == "x" ]]; then
 		    mpiHosts="${builderHost[$i]}"
-		    else
-		mpiHosts=$mpiHosts",${builderHost[$i]}"
+		else
+		    mpiHosts=$mpiHosts",${builderHost[$i]}"
 		fi
 		i=$(( $i + 1 ))
-	  done	
-	  i=0	
-	  for port in "${aggregatorPort[@]}"
-	  do
+	    done	
+	    i=0	
+	    for port in "${aggregatorPort[@]}"
+	    do
 		: 
 		#echo " -np xdaq.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS}\n"
-		cmd=$cmd" -np 1 xdaq.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS}"
+		cmd=$cmd": -np 1 xdaq.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS} "
 		if [[ "x$mpiHosts" == "x" ]]; then
 		    mpiHosts="${aggregatorHost[$i]}"
-		    else
-		mpiHosts=$mpiHosts",${aggregatorHost[$i]}"
+		else
+		    mpiHosts=$mpiHosts",${aggregatorHost[$i]}"
 		fi
-			i=$(( $i + 1 ))
-	  done
-	  echo
-	  cmd=$cmdstart" -host "$mpiHosts$cmd
-	  echo Command used to start MPI: $cmd &
-	  MPI_RUN_CMD=$cmd
+		i=$(( $i + 1 ))
+	    done
+	    echo
+	    cmd=$cmdstart" -host "$mpiHosts$cmd
+	    echo Command used to start MPI: $cmd &
+	    MPI_RUN_CMD=$cmd
 		#if [ $QUIET == 1 ]; then
 		#echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"		  
 		#$cmd &> otsdaq_quiet_run-mpi.txt &
 		#else
 		#$cmd &
-		#fi
-		  
+		#fi	  
 	fi
 	
 	if [[ (${#boardReaderPort[@]} == 0) && (${#builderPort[@]} == 0) && (${#aggregatorPort[@]} == 0) && (${#xdaqPort[@]} == 0) ]]; then

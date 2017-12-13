@@ -435,6 +435,9 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 		POPTAB;
 		OUT << "}\n\n";	//end metrics
 
+		OUT << "destinations: {\n";
+
+		PUSHTAB;
 		//other destinations
 		auto destinationsGroup = daq.getNode("daqAggregatorDestinationsLink");
 		if(!destinationsGroup.isDisconnected())
@@ -468,6 +471,8 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 				throw std::runtime_error(ss.str());
 			}
 		}
+		POPTAB;
+		OUT << "}\n\n";	//end destinations
 
 		POPTAB;
 		OUT << "}\n\n"; //end daq
