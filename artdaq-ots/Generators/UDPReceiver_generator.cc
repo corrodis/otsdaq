@@ -111,6 +111,7 @@ void ots::UDPReceiver::receiveLoop_()
 					if (seqNum != expectedPacketNumber_) {
 						int delta = expectedPacketNumber_ - seqNum;
 						TLOG_WARNING("UDPReceiver") << std::dec << "Sequence Number different than expected! (delta: " << delta << ")" << TLOG_ENDL;
+						expectedPacketNumber_ = seqNum;
 					}
 
 					packetBuffer_t receiveBuffer;
@@ -129,9 +130,9 @@ void ots::UDPReceiver::receiveLoop_()
 					TLOG_DEBUG("UDPReceiver") << "Now placing UDP packet with sequence number " << std::hex << (int)seqNum << " into buffer." << std::dec << TLOG_ENDL;
 					receiveBuffers_.push_back(receiveBuffer);
 
+					++expectedPacketNumber_;
 				}
 
-				++expectedPacketNumber_;
 			}
 		}
 	}
