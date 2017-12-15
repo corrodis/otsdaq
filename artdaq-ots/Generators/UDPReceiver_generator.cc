@@ -105,7 +105,7 @@ void ots::UDPReceiver::receiveLoop_()
 
 				uint8_t seqNum = peekBuffer[1];
 				//ReturnCode dataCode = getReturnCode(peekBuffer[0]);
-				if (seqNum >= expectedPacketNumber_ || (seqNum < 10 && expectedPacketNumber_ > 240))
+				if (seqNum >= expectedPacketNumber_ || (seqNum < 64 && expectedPacketNumber_ > 192))
 				{
 
 					if (seqNum != expectedPacketNumber_) {
@@ -131,6 +131,12 @@ void ots::UDPReceiver::receiveLoop_()
 					receiveBuffers_.push_back(receiveBuffer);
 
 					++expectedPacketNumber_;
+				}
+				else {
+					// Receiving out-of-order packet, then moving on...
+					packetBuffer_t receiveBuffer;
+					receiveBuffer.resize(1500);
+					int sts = recvfrom(datasocket_, &receiveBuffer[0], receiveBuffer.size(), 0, (struct sockaddr *) &si_data_, &dataSz);
 				}
 
 			}
