@@ -103,9 +103,9 @@ void ots::UDPReceiver::receiveLoop_()
 				recvfrom(datasocket_, peekBuffer, sizeof(peekBuffer), MSG_PEEK,
 					(struct sockaddr *) &si_data_, &dataSz);
 
-				TLOG_INFO("UDPReceiver") << "Received UDP Packet with sequence number " << std::hex << "0x" << static_cast<int>(peekBuffer[1]) << "!" << std::dec << TLOG_ENDL;
-				TLOG_DEBUG("UDPReceiver") << "peekBuffer[1] == expectedPacketNumber_: " << std::hex << static_cast<int>(peekBuffer[1]) << " =?= " << (int)expectedPacketNumber_ << TLOG_ENDL;
-				TLOG_DEBUG("UDPReceiver") << "peekBuffer: 0: " << std::hex << static_cast<int>(peekBuffer[0])
+				TLOG_DEBUG("UDPReceiver") << "Received UDP Datagram with sequence number " << std::hex << "0x" << static_cast<int>(peekBuffer[1]) << "!" << std::dec << TLOG_ENDL;
+				TLOG_TRACE("UDPReceiver") << "peekBuffer[1] == expectedPacketNumber_: " << std::hex << static_cast<int>(peekBuffer[1]) << " =?= " << (int)expectedPacketNumber_ << TLOG_ENDL;
+				TLOG_TRACE("UDPReceiver") << "peekBuffer: 0: " << std::hex << static_cast<int>(peekBuffer[0])
 					<< ", 1: " << std::hex << static_cast<int>(peekBuffer[1])
 					<< ", 2: " << std::hex << static_cast<int>(peekBuffer[2])
 					<< ", 3: " << std::hex << static_cast<int>(peekBuffer[3]) << TLOG_ENDL;
@@ -114,9 +114,8 @@ void ots::UDPReceiver::receiveLoop_()
 				//ReturnCode dataCode = getReturnCode(peekBuffer[0]);
 				if (seqNum >= expectedPacketNumber_ || (seqNum < 64 && expectedPacketNumber_ > 192))
 				{
-
 					if (seqNum != expectedPacketNumber_) {
-						int delta = expectedPacketNumber_ - seqNum;
+						int delta = seqNum - expectedPacketNumber_;
 						TLOG_WARNING("UDPReceiver") << std::dec << "Sequence Number different than expected! (delta: " << delta << ")" << TLOG_ENDL;
 						expectedPacketNumber_ = seqNum;
 					}
@@ -134,13 +133,14 @@ void ots::UDPReceiver::receiveLoop_()
 					}
 
 					std::unique_lock<std::mutex> lock(receiveBufferLock_);
-					TLOG_DEBUG("UDPReceiver") << "Now placing UDP packet with sequence number " << std::hex << (int)seqNum << " into buffer." << std::dec << TLOG_ENDL;
+					TLOG_DEBUG("UDPReceiver") << "Now placing UDP datagram with sequence number " << std::hex << (int)seqNum << " into buffer." << std::dec << TLOG_ENDL;
 					receiveBuffers_.push_back(receiveBuffer);
 
 					++expectedPacketNumber_;
 				}
 				else {
-					// Receiving out-of-order packet, then moving on...
+					// Receiving out-of-order datagram, then moving on...
+					TLOG_WARNING("UDPReceiver") << "Received out-of-order datagram: " << seqNum << " != " << expectedPacketNumber_ << " (expected)" << TLOG_ENDL;
 					packetBuffer_t receiveBuffer;
 					receiveBuffer.resize(1500);
 					int sts = recvfrom(datasocket_, &receiveBuffer[0], receiveBuffer.size(), 0, (struct sockaddr *) &si_data_, &dataSz);
