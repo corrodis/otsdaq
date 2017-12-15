@@ -96,6 +96,7 @@ struct CommandPacket {
 
     int dataport_;
     std::string ip_;
+	int rcvbuf_;
 
     //The packet number of the next packet. Used to discover dropped packets
     uint8_t expectedPacketNumber_;

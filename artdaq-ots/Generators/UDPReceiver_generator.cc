@@ -22,6 +22,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const & ps)
 	, rawPath_(ps.get<std::string>("raw_output_path", "/tmp"))
 	, dataport_(ps.get<int>("port", 6343))
 	, ip_(ps.get<std::string>("ip", "127.0.0.1"))
+	, rcvbuf_(ps.get<int>("rcvbuf", 0x1000000))
 	, expectedPacketNumber_(0)
 	, sendCommands_(ps.get<bool>("send_OtsUDP_commands", false))
 	, fragmentWindow_(ps.get<double>("fragment_time_window_ms", 1000))
@@ -33,7 +34,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const & ps)
 		throw art::Exception(art::errors::Configuration) << "UDPReceiver: Error creating socket!";
 		exit(1);
 	}
-
+	
 	struct sockaddr_in si_me_data;
 	si_me_data.sin_family = AF_INET;
 	si_me_data.sin_port = htons(dataport_);
@@ -48,6 +49,12 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const & ps)
 		throw art::Exception(art::errors::Configuration) <<
 		  "UDPReceiver: Cannot set socket to nonblocking!" << TLOG_ENDL;
 	  }*/
+
+	if (rcvbuf_ > 0 && setsockopt(datasocket_, SOL_SOCKET, SO_RCVBUF, &rcvbuf_, sizeof(rcvbuf_))) 
+	{
+		throw art::Exception(art::errors::Configuration) << "UDPReceiver: Could not set receive buffer size: " << rcvbuf_;
+		exit(1);
+	}
 
 	si_data_.sin_family = AF_INET;
 	si_data_.sin_port = htons(dataport_);
