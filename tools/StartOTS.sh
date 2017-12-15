@@ -10,19 +10,20 @@ DONOTKILL=0
 
 function killprocs {
     if [[ "x$1" == "x" ]]; then
-	PIDS=`ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'`
-	PIDS+=" "
-	PIDS+=`ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'`
-	PIDS+=" "
-	PIDS+=`ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'`
-	#echo Killing PIDs: $PIDS
-	kill $PIDS >/dev/null 2>&1
-	kill -9 $PIDS >/dev/null 2>&1
+		PIDS=`ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'`
+		PIDS+=" "
+		PIDS+=`ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'`
+		PIDS+=" "
+		PIDS+=`ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'`
+		
+		#echo Killing PIDs: $PIDS
+		kill $PIDS >/dev/null 2>&1
+		kill -9 $PIDS >/dev/null 2>&1
     else
-	PIDS=`ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'`
-	#echo Killing PIDs: $PIDS
-	kill $PIDS >/dev/null 2>&1
-	kill -9 $PIDS >/dev/null 2>&1
+		PIDS=`ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'`
+		#echo Killing PIDs: $PIDS
+		kill $PIDS >/dev/null 2>&1
+		kill -9 $PIDS >/dev/null 2>&1
     fi
 }
 
@@ -231,11 +232,11 @@ if [ "x$ROOT_BROWSER_PATH" == "x" ];then
 fi
 
 if [ "x$OTSDAQ_LOG_DIR" == "x" ];then
-    export OTSDAQ_LOG_DIR="${OTSDAQDEMO_BUILD}/Logs"
+    export OTSDAQ_LOG_DIR="${USER_DATA}/Logs"
 fi
 
 if [ "x${ARTDAQ_OUTPUT_DIR}" == "x" ]; then
-    export ARTDAQ_OUTPUT_DIR="${OTSDAQDEMO_BUILD}"
+    export ARTDAQ_OUTPUT_DIR="${USER_DATA}/ArtdaqData"
 fi
 
 if [ ! -d $ARTDAQ_OUTPUT_DIR ]; then
