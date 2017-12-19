@@ -41,7 +41,7 @@ UDPDataListenerProducer::UDPDataListenerProducer(std::string supervisorApplicati
 	catch(...)
 	{
 		//for backwards compatibility, ignore
-		socketReceiveBufferSize = 0x1000000; //default to "large"
+		socketReceiveBufferSize = 0x10000000; //default to "large"
 	}
 
 	Socket::initialize(socketReceiveBufferSize);
@@ -87,7 +87,7 @@ void UDPDataListenerProducer::slowWrite(void)
 //========================================================================================================================
 void UDPDataListenerProducer::fastWrite(void)
 {
-	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" << std::endl;
+	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ <<  << " running!" << std::endl;
 
 	if(DataProducer::attachToEmptySubBuffer(dataP_, headerP_) < 0)
 	{
@@ -100,10 +100,25 @@ void UDPDataListenerProducer::fastWrite(void)
 	{
 		(*headerP_)["IPAddress"] = NetworkConverters::networkToStringIP  (ipAddress_);
 		(*headerP_)["Port"]      = NetworkConverters::networkToStringPort(port_);
+	    //__COUT__ << "Data for ip: " << IPAddress_ << " listening on port: " << requestedPort_ << std::endl;
 
-		if( NetworkConverters::networkToUnsignedPort(port_) == 40005 )
+		if(
+				(requestedPort_ == 47000 ||  requestedPort_ == 47001 || requestedPort_ == 47002) &&
+				 dataP_->length() > 2)
 		{
-			__COUT__ << "Got data: " << dataP_->length() << std::endl;
+			unsigned char seqId = (*dataP_)[1];
+			if(!(lastSeqId_ + 1 == seqId ||
+					(lastSeqId_ == 255 && seqId == 0)))
+			{
+				__COUT__ << requestedPort_ <<
+						"?????? NOOOO Missing Packets: " <<
+						(unsigned int)lastSeqId_ << " v " << (unsigned int)seqId << __E__;
+			}
+
+			//if(seqId == 0)
+			//	__COUT__ << requestedPort_ << " test" << __E__;
+
+			lastSeqId_ = seqId;
 		}
 
 //		char str[5];

@@ -27,9 +27,9 @@ using namespace ots;
 
 //========================================================================================================================
 Socket::Socket(const std::string &IPAddress, unsigned int port)
-: socketNumber_(-1)
-, IPAddress_   (IPAddress)
-, requestedPort_        (port)
+: socketNumber_ (-1)
+, IPAddress_    (IPAddress)
+, requestedPort_(port)
 //    maxSocketSize_(maxSocketSize)
 {
 	__COUT__ << std::endl;
@@ -140,6 +140,8 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
     }
 
 
+    __COUT__ << "Setting socket receive buffer size = " << socketReceiveBufferSize <<
+    		" 0x" << std::hex << socketReceiveBufferSize << std::dec << __E__;
 	if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF,
 			(char*)&socketReceiveBufferSize,
 			sizeof(socketReceiveBufferSize)) < 0) {
@@ -147,6 +149,10 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
 				socketReceiveBufferSize << ". Attempting to revert to default." << std::endl;
 
 		socketReceiveBufferSize = defaultSocketReceiveSize_;
+
+
+	    __COUT__ << "Setting socket receive buffer size = " << socketReceiveBufferSize <<
+	    		" 0x" << std::hex << socketReceiveBufferSize << std::dec << __E__;
 		if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF,
 					(char*)&socketReceiveBufferSize,
 					sizeof(socketReceiveBufferSize)) < 0)

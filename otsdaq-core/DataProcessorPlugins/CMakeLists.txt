@@ -67,6 +67,11 @@ simple_plugin(RawDataSaverConsumer "processor"
 	DataManager
 	${CETLIB}
   )
+  
+simple_plugin(OtsDataSaverConsumer "processor"
+	DataManager
+	${CETLIB}
+  )
 
 #simple_plugin(DataDecoderConsumer "processor"
 #	DataManager

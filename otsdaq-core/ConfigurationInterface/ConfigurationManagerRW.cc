@@ -596,6 +596,11 @@ ConfigurationVersion ConfigurationManagerRW::copyViewToCurrentColumns(const std:
 ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::string &groupName,
 		const std::map<std::string, ConfigurationVersion> &groupMemberMap)
 {
+	//Taking too long..... taking out check for now
+	//if here, then no match found
+	return ConfigurationGroupKey(); //return invalid key
+
+	//NOTE: seems like this filter is taking the long amount of time
 	std::set<std::string /*name*/> fullGroupNames =
 			theInterface_->getAllConfigurationGroupNames(groupName); //db filter by group name
 
@@ -676,7 +681,8 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 //	else, bumps latest version found in db
 //
 //	Note: groupMembers map will get modified with group metadata table version
-ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const std::string &groupName,
+ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
+		const std::string &groupName,
 		std::map<std::string, ConfigurationVersion> &groupMembers,
 		const std::string &groupComment)
 {
