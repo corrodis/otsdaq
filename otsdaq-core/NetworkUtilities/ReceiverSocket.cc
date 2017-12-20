@@ -128,7 +128,7 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress,
 	{
 		++readCounter_;
 
-		if(verbose)
+		if(true)
 			__COUT__
 				<< "No new messages for " << timeoutSeconds+timeoutUSeconds/1000.
 				<< "s (Total " << readCounter_*(timeoutSeconds+timeoutUSeconds/1000.)

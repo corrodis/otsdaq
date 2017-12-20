@@ -32,6 +32,7 @@ protected:
 	unsigned long                         ipAddress_;
 	unsigned short                        port_;
 
+	unsigned char						lastSeqId_;
 	//bool getNextFragment(void);
 };
 
