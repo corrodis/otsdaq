@@ -34,7 +34,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const & ps)
 		throw art::Exception(art::errors::Configuration) << "UDPReceiver: Error creating socket!";
 		exit(1);
 	}
-	
+
 	struct sockaddr_in si_me_data;
 	si_me_data.sin_family = AF_INET;
 	si_me_data.sin_port = htons(dataport_);
@@ -50,7 +50,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const & ps)
 		  "UDPReceiver: Cannot set socket to nonblocking!" << TLOG_ENDL;
 	  }*/
 
-	if (rcvbuf_ > 0 && setsockopt(datasocket_, SOL_SOCKET, SO_RCVBUF, &rcvbuf_, sizeof(rcvbuf_))) 
+	if (rcvbuf_ > 0 && setsockopt(datasocket_, SOL_SOCKET, SO_RCVBUF, &rcvbuf_, sizeof(rcvbuf_)))
 	{
 		throw art::Exception(art::errors::Configuration) << "UDPReceiver: Could not set receive buffer size: " << rcvbuf_;
 		exit(1);
