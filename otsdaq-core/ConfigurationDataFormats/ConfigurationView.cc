@@ -2457,8 +2457,53 @@ int ConfigurationView::addRow(const std::string &author, std::string baseNameAut
 
 
 	//fill each col of new row with default values
+	//	if a row is a unique data row, increment last row in attempt to make a legal column
 	for(unsigned int col=0;col<getNumberOfColumns();++col)
-		theDataView_[row][col] = defaultRowValues[col];
+	{
+		__COUT__ << col << " " << columnsInfo_[col].getType() << " == " <<
+				ViewColumnInfo::TYPE_UNIQUE_DATA << __E__;
+		//if there is a last row, and this column is to be unique
+		if(row && columnsInfo_[col].getType() ==
+				ViewColumnInfo::TYPE_UNIQUE_DATA)
+		{
+
+			__COUT__ << "New unique data entry is '" << theDataView_[row][col] << "'" << __E__;
+
+			//find last non numeric character
+			unsigned int index;
+			std::string tmpString = theDataView_[row-1][col];
+			for(index = tmpString.length()-1;index < tmpString.length(); --index)
+				if(!(tmpString[index] >= '0' && tmpString[index] <= '9')) break; //if not numeric, break
+
+			__COUT__ << "index " << index << __E__;
+
+			if(tmpString.length() &&
+					index < tmpString.length()-1) //then found a numeric substring
+			{
+				//create numeric substring
+				std::string numString = tmpString.substr(index+1);
+				tmpString = tmpString.substr(0,index+1);
+
+				__COUT__ << "Found unique data base string '" <<
+						tmpString << "' and number string '" << numString <<
+						"' in last record '" << theDataView_[row-1][col] << "'" << __E__;
+
+				//extract number
+				sscanf(numString.c_str(),"%u",&index);
+				++index; //increment
+				char indexString[100];
+				sprintf(indexString,"%u",index);
+
+				theDataView_[row][col] = tmpString + indexString;
+
+				__COUT__ << "New unique data entry is '" << theDataView_[row][col] << "'" << __E__;
+			}
+			else	//no string found, so make one up
+				theDataView_[row][col] = "0"; //create a starting point
+		}
+		else
+			theDataView_[row][col] = defaultRowValues[col];
+	}
 
 	if(author != "")
 	{

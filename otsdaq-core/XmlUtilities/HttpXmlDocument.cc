@@ -132,10 +132,28 @@ void HttpXmlDocument::setHeader(std::string cookieCode, std::string displayName)
 }
 
 //==============================================================================
-xercesc::DOMElement* HttpXmlDocument::addTextElementToData(const std::string &childName, const std::string &childValue)
+xercesc::DOMElement* HttpXmlDocument::addTextElementToData(const std::string &childName,
+		const std::string &childValue)
 {
     //std::cout << __COUT_HDR_FL__ << "in - " << childName << " value: " << childValue <<std::endl << std::endl;
     return addTextElementToParent(childName,childValue,dataElement_);
+}
+
+//==============================================================================
+xercesc::DOMElement* HttpXmlDocument::addBinaryStringToData(const std::string &childName,
+		const std::string &binary)
+{
+	std::string convertStr = "";
+	char hexStr[3];
+	for(unsigned int i=0;i<binary.length();++i)
+	{
+		//for every byte make hex
+		sprintf(hexStr,"%2.2X",((unsigned char)binary[i]));
+		hexStr[2] = '\0';
+		convertStr += hexStr;
+	}
+
+	return addTextElementToParent(childName,convertStr,dataElement_);
 }
 
 //==============================================================================

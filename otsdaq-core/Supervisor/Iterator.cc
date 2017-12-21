@@ -242,7 +242,8 @@ try
 				theIteratorStruct.cfgMgr_->init(); //completely reset to re-align with any changes
 				itConfig = theIteratorStruct.cfgMgr_->__GET_CONFIG__(IterateConfiguration);
 
-				theIteratorStruct.commands_ = itConfig->getPlanCommands(theIteratorStruct.cfgMgr_,
+				theIteratorStruct.commands_ = itConfig->getPlanCommands(
+						theIteratorStruct.cfgMgr_,
 						theIteratorStruct.activePlan_);
 
 				for(auto& command:theIteratorStruct.commands_)
