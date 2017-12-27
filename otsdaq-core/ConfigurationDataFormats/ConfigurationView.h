@@ -303,7 +303,7 @@ public:
 
 	//==============================================================================
 	void				resizeDataView		(unsigned int nRows, unsigned int nCols);
-	int					addRow        		(const std::string &author = "", std::string baseNameAutoUID = ""); //returns index of added row, always is last row
+	int					addRow        		(const std::string &author = "", bool incrementUniqueData = false, std::string baseNameAutoUID = ""); //returns index of added row, always is last row
 	void 				deleteRow     		(int r);
 
 	//Lore did not like this.. wants special access through separate Supervisor for "Database Management" int		addColumn(std::string name, std::string viewName, std::string viewType); //returns index of added column, always is last column unless

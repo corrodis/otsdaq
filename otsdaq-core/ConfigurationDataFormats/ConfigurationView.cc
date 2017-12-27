@@ -2447,7 +2447,9 @@ void ConfigurationView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //
 //	if baseNameAutoUID != "", creates a UID based on this base name
 //		and increments and appends an integer relative to the previous last row
-int ConfigurationView::addRow(const std::string &author, std::string baseNameAutoUID)
+int ConfigurationView::addRow(const std::string &author,
+		bool incrementUniqueData,
+		std::string baseNameAutoUID)
 {
 	int row = getNumberOfRows();
 	theDataView_.resize(getNumberOfRows()+1,std::vector<std::string>(getNumberOfColumns()));
@@ -2455,51 +2457,97 @@ int ConfigurationView::addRow(const std::string &author, std::string baseNameAut
 	std::vector<std::string> defaultRowValues =
 			getDefaultRowValues();
 
+	char indexString[1000];
+	std::string tmpString, baseString;
+	bool foundAny;
+	unsigned int index;
+	unsigned int maxUniqueData;
+	std::string numString;
 
 	//fill each col of new row with default values
 	//	if a row is a unique data row, increment last row in attempt to make a legal column
 	for(unsigned int col=0;col<getNumberOfColumns();++col)
 	{
-		__COUT__ << col << " " << columnsInfo_[col].getType() << " == " <<
-				ViewColumnInfo::TYPE_UNIQUE_DATA << __E__;
-		//if there is a last row, and this column is to be unique
-		if(row && columnsInfo_[col].getType() ==
-				ViewColumnInfo::TYPE_UNIQUE_DATA)
+		//__COUT__ << col << " " << columnsInfo_[col].getType() << " == " <<
+		//		ViewColumnInfo::TYPE_UNIQUE_DATA << __E__;
+
+		//baseNameAutoUID indicates to attempt to make row unique
+		//	add index to max number
+		if(incrementUniqueData &&
+				(col == getColUID() || (row && columnsInfo_[col].getType() ==
+				ViewColumnInfo::TYPE_UNIQUE_DATA)))
 		{
+
+			//__COUT__ << "New unique data entry is '" << theDataView_[row][col] << "'" << __E__;
+
+			maxUniqueData = 0;
+			tmpString = "";
+			baseString = "";
+
+			//find max in rows
+
+			this->print();
+
+			for(unsigned int r=0;r<getNumberOfRows()-1;++r)
+			{
+				//find last non numeric character
+
+				foundAny = false;
+				tmpString = theDataView_[r][col];
+
+				//__COUT__ << "tmpString " << tmpString << __E__;
+
+				for(index = tmpString.length()-1;index < tmpString.length(); --index)
+				{
+					__COUT__ << index << " tmpString[index] " << tmpString[index] << __E__;
+					if(!(tmpString[index] >= '0' && tmpString[index] <= '9')) break; //if not numeric, break
+					foundAny = true;
+				}
+
+				//__COUT__ << "index " << index << __E__;
+
+				if(tmpString.length() &&
+						foundAny) //then found a numeric substring
+				{
+					//create numeric substring
+					numString = tmpString.substr(index+1);
+					tmpString = tmpString.substr(0,index+1);
+
+					//__COUT__ << "Found unique data base string '" <<
+					//		tmpString << "' and number string '" << numString <<
+					//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
+
+					//extract number
+					sscanf(numString.c_str(),"%u",&index);
+
+					if(index > maxUniqueData)
+					{
+						maxUniqueData = index;
+						baseString = tmpString;
+					}
+				}
+			}
+
+			++maxUniqueData; //increment
+
+			sprintf(indexString,"%u",maxUniqueData);
+			//__COUT__ << "indexString " << indexString << __E__;
+
+			//__COUT__ << "baseNameAutoUID " << baseNameAutoUID << __E__;
+			if(col == getColUID())
+			{
+				//handle UID case
+				if(baseNameAutoUID != "")
+					theDataView_[row][col] = baseNameAutoUID + indexString;
+				else
+					theDataView_[row][col] = baseString + indexString;
+			}
+			else
+				theDataView_[row][col] = baseString + indexString;
 
 			__COUT__ << "New unique data entry is '" << theDataView_[row][col] << "'" << __E__;
 
-			//find last non numeric character
-			unsigned int index;
-			std::string tmpString = theDataView_[row-1][col];
-			for(index = tmpString.length()-1;index < tmpString.length(); --index)
-				if(!(tmpString[index] >= '0' && tmpString[index] <= '9')) break; //if not numeric, break
-
-			__COUT__ << "index " << index << __E__;
-
-			if(tmpString.length() &&
-					index < tmpString.length()-1) //then found a numeric substring
-			{
-				//create numeric substring
-				std::string numString = tmpString.substr(index+1);
-				tmpString = tmpString.substr(0,index+1);
-
-				__COUT__ << "Found unique data base string '" <<
-						tmpString << "' and number string '" << numString <<
-						"' in last record '" << theDataView_[row-1][col] << "'" << __E__;
-
-				//extract number
-				sscanf(numString.c_str(),"%u",&index);
-				++index; //increment
-				char indexString[100];
-				sprintf(indexString,"%u",index);
-
-				theDataView_[row][col] = tmpString + indexString;
-
-				__COUT__ << "New unique data entry is '" << theDataView_[row][col] << "'" << __E__;
-			}
-			else	//no string found, so make one up
-				theDataView_[row][col] = "0"; //create a starting point
+			this->print();
 		}
 		else
 			theDataView_[row][col] = defaultRowValues[col];
@@ -2514,26 +2562,26 @@ int ConfigurationView::addRow(const std::string &author, std::string baseNameAut
 		setValue(time(0),row,timestampCol);
 	}
 
-	if(baseNameAutoUID != "")
-	{
-		std::string indexSubstring = "0";
-		//if there is a last row with baseName in it
-		if(theDataView_.size() > 1 &&
-				0 ==
-				theDataView_[theDataView_.size()-2][getColUID()].find(baseNameAutoUID))
-			//extract last index
-			indexSubstring = theDataView_[theDataView_.size()-2][getColUID()].substr(
-					baseNameAutoUID.size());
-
-		unsigned int index;
-		sscanf(indexSubstring.c_str(),"%u",&index);
-		++index; //increment
-		char indexString[100];
-		sprintf(indexString,"%u",index);
-
-		baseNameAutoUID += indexString;
-		setValue(baseNameAutoUID,row,getColUID());
-	}
+//	if(baseNameAutoUID != "")
+//	{
+//		std::string indexSubstring = "0";
+//		//if there is a last row with baseName in it
+//		if(theDataView_.size() > 1 &&
+//				0 ==
+//				theDataView_[theDataView_.size()-2][getColUID()].find(baseNameAutoUID))
+//			//extract last index
+//			indexSubstring = theDataView_[theDataView_.size()-2][getColUID()].substr(
+//					baseNameAutoUID.size());
+//
+//		unsigned int index;
+//		sscanf(indexSubstring.c_str(),"%u",&index);
+//		++index; //increment
+//		char indexString[100];
+//		sprintf(indexString,"%u",index);
+//
+//		baseNameAutoUID += indexString;
+//		setValue(baseNameAutoUID,row,getColUID());
+//	}
 
 	return row;
 }
