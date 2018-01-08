@@ -2,6 +2,7 @@
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
 #include "otsdaq-core/Supervisor/Supervisor.h"
+#include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h"
 
 
@@ -751,7 +752,7 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct)
 //========================================================================================================================
 void Iterator::startCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 {
-
+	iteratorStruct->runIsDone_ = false;
 	iteratorStruct->fsmCommandParameters_.clear();
 
 	std::string errorStr = "";
@@ -1104,9 +1105,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 
 	if(currentState != "Running")
 	{
-		if(iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-				[IterateConfiguration::commandRunParams_.DurationInSeconds_] ==
-						"DONE" &&
+		if(iteratorStruct->runIsDone_ &&
 				currentState == "Configured")
 		{
 			//indication of done
@@ -1155,7 +1154,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 					__COUT__ << "FESupervisor instance " << it.first <<
 							" has status = " << status << std::endl;
 
-					if(status != "Done")
+					if(status != CoreSupervisorBase::WORK_LOOP_DONE)
 					{
 						allFrontEndsAreDone = false;
 						break;
@@ -1195,9 +1194,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 				}
 
 				//write indication of run done into duration
-				iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-				[IterateConfiguration::commandRunParams_.DurationInSeconds_] =
-						"DONE";
+				iteratorStruct->runIsDone_ = true;
 
 				return false;
 			}
@@ -1236,9 +1233,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 			}
 
 			//write indication of run done into duration
-			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-				[IterateConfiguration::commandRunParams_.DurationInSeconds_] =
-					"DONE";
+			iteratorStruct->runIsDone_ = true;
 
 			return false;
 		}

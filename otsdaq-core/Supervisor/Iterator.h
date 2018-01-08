@@ -64,6 +64,7 @@ private:
     	//associated with FSM
     	std::string 								fsmName_, fsmRunAlias_;
     	unsigned int 								fsmNextRunNumber_;
+    	bool										runIsDone_;
 
     	std::vector<std::string> 					fsmCommandParameters_;
 
@@ -134,7 +135,7 @@ private:
     	ConfigurationGroupKey originalKey = cfgMgr->getActiveGroupKey();
 
     	__COUT__ << "Active group is '" << groupName << " (" <<
-    			originalKey << "'" << __E__;
+    			originalKey << ")'" << __E__;
 
     	//track member names and versions of active config group
     	//	modify versions as tables are modified..
