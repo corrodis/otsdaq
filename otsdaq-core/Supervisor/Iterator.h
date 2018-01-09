@@ -58,6 +58,7 @@ private:
 
     	std::string 								activePlan_;
     	std::vector<IterateConfiguration::Command> 	commands_;
+    	std::vector<unsigned int>				 	commandIterations_;
     	unsigned int 								commandIndex_;
     	std::vector<unsigned int>					stepIndexStack_;
 
@@ -99,7 +100,7 @@ private:
     volatile bool							iteratorBusy_;
     volatile bool							commandPlay_, commandPause_, commandHalt_; //commands are set by supervisor thread, and cleared by iterator thread
     std::string								activePlanName_, lastStartedPlanName_, lastFinishedPlanName_;
-    volatile unsigned int					activeCommandIndex_;
+    volatile unsigned int					activeCommandIndex_, activeCommandIteration_, activeLoopIteration_;
     volatile time_t							activeCommandStartTime_;
     std::string 							lastFsmName_;
     std::string 							errorMessage_;

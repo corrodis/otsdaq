@@ -143,6 +143,16 @@ try
 			{
 				iterator->activeCommandIndex_ = theIteratorStruct.commandIndex_;
 				iterator->activeCommandStartTime_ = time(0); //reset on any change
+
+				if(theIteratorStruct.commandIndex_ < theIteratorStruct.commandIterations_.size())
+					iterator->activeCommandIteration_ = theIteratorStruct.commandIterations_
+						[theIteratorStruct.commandIndex_];
+				else
+					iterator->activeCommandIteration_ = -1;
+				if(theIteratorStruct.stepIndexStack_.size())
+					iterator->activeLoopIteration_ = theIteratorStruct.stepIndexStack_.back();
+				else
+					iterator->activeLoopIteration_ = -1;
 			}
 
 		} //end command handling and iterator mutex
@@ -247,8 +257,11 @@ try
 						theIteratorStruct.cfgMgr_,
 						theIteratorStruct.activePlan_);
 
+				//reset commandIteration counts
+				theIteratorStruct.commandIterations_.clear();
 				for(auto& command:theIteratorStruct.commands_)
 				{
+					theIteratorStruct.commandIterations_.push_back(0);
 					__COUT__ << "command " <<
 							command.type_ << __E__;
 					__COUT__ << "table " <<
@@ -422,6 +435,9 @@ try
 				" in size = " << iteratorStruct->commands_.size() << __E__;
 		throw std::runtime_error(ss.str());
 	}
+
+	//increment iteration count for command
+	++iteratorStruct->commandIterations_[iteratorStruct->commandIndex_];
 
 
 	std::string type = iteratorStruct->commands_[iteratorStruct->commandIndex_].type_;
@@ -1525,6 +1541,10 @@ void Iterator::getIterationPlanStatus(HttpXmlDocument& xmldoc)
 	xmldoc.addTextElementToData("current_command_index", tmp);
 	sprintf(tmp,"%ld",time(0) - activeCommandStartTime_);
 	xmldoc.addTextElementToData("current_command_duration", tmp);
+	sprintf(tmp,"%u",activeCommandIteration_);
+	xmldoc.addTextElementToData("current_command_iteration", tmp);
+	sprintf(tmp,"%u",activeLoopIteration_);
+	xmldoc.addTextElementToData("current_loop_iteration", tmp);
 
 	if(activePlanIsRunning_ && iteratorBusy_)
 	{
