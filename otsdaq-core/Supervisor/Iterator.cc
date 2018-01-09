@@ -149,10 +149,14 @@ try
 						[theIteratorStruct.commandIndex_];
 				else
 					iterator->activeCommandIteration_ = -1;
-				if(theIteratorStruct.stepIndexStack_.size())
-					iterator->activeLoopIteration_ = theIteratorStruct.stepIndexStack_.back();
-				else
-					iterator->activeLoopIteration_ = -1;
+
+				iterator->depthIterationStack_.clear();
+				for(const auto& depthIteration:theIteratorStruct.stepIndexStack_)
+					iterator->depthIterationStack_.push_back(depthIteration);
+				//if(theIteratorStruct.stepIndexStack_.size())
+				//	iterator->activeLoopIteration_ = theIteratorStruct.stepIndexStack_.back();
+				//else
+				//	iterator->activeLoopIteration_ = -1;
 			}
 
 		} //end command handling and iterator mutex
@@ -173,7 +177,7 @@ try
 			while(!iterator->checkCommand(&theIteratorStruct))
 				__COUT__ << "Waiting to pause..." << __E__;
 
-			__COUT__ << "Completeing pause..." << __E__;
+			__COUT__ << "Completing pause..." << __E__;
 
 			theIteratorStruct.doPauseAction_ = false; //clear
 
@@ -736,10 +740,19 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct)
 			"%d",&numOfRepetitions);
 	__COUT__ << "numOfRepetitions remaining = " << numOfRepetitions << __E__;
 
+	char repStr[200];
+
 	if(numOfRepetitions <= 0)
 	{
+		//write original number of repetitions value back
+		sprintf(repStr,"%d",iteratorStruct->stepIndexStack_.back());
+		iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+		[IterateConfiguration::commandRepeatLabelParams_.NumberOfRepetitions_] =
+				repStr; //re-store as string
+
 		//remove step index from stack
 		iteratorStruct->stepIndexStack_.pop_back();
+
 
 		return; //no more repetitions
 	}
@@ -755,7 +768,6 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct)
 				iteratorStruct->commands_[iteratorStruct->commandIndex_].params_[IterateConfiguration::commandRepeatLabelParams_.Label_] ==
 						iteratorStruct->commands_[i].params_[IterateConfiguration::commandBeginLabelParams_.Label_]) break;
 
-	char repStr[200];
 	sprintf(repStr,"%d",numOfRepetitions);
 	iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
 		[IterateConfiguration::commandRepeatLabelParams_.NumberOfRepetitions_] =
@@ -1048,6 +1060,12 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 					WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
 					WebUsers::DEFAULT_ITERATOR_USERNAME,
 					iteratorStruct->fsmCommandParameters_);
+		else if(currentState == "Configured")
+		{
+			//no need to pause state machine, no run going on
+			__COUT__ << "In Configured state. No need to transition to Paused." << __E__;
+			return true;
+		}
 		else
 			errorStr = "Expected to be in Paused. Unexpectedly, the current state is " +
 				currentState + ". Last State Machine error message was as follows: " +
@@ -1076,6 +1094,13 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 			errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
 					0,0,
 					"Abort",iteratorStruct->fsmName_,
+					WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+					WebUsers::DEFAULT_ITERATOR_USERNAME,
+					iteratorStruct->fsmCommandParameters_);
+		else if(currentState == "Configured") //launch transition to halt
+			errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
+					0,0,
+					"Halt",iteratorStruct->fsmName_,
 					WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
 					WebUsers::DEFAULT_ITERATOR_USERNAME,
 					iteratorStruct->fsmCommandParameters_);
@@ -1543,8 +1568,12 @@ void Iterator::getIterationPlanStatus(HttpXmlDocument& xmldoc)
 	xmldoc.addTextElementToData("current_command_duration", tmp);
 	sprintf(tmp,"%u",activeCommandIteration_);
 	xmldoc.addTextElementToData("current_command_iteration", tmp);
-	sprintf(tmp,"%u",activeLoopIteration_);
-	xmldoc.addTextElementToData("current_loop_iteration", tmp);
+
+	for(const auto& depthIteration:depthIterationStack_)
+	{
+		sprintf(tmp,"%u",depthIteration);
+		xmldoc.addTextElementToData("depth_iteration", tmp);
+	}
 
 	if(activePlanIsRunning_ && iteratorBusy_)
 	{
