@@ -19,7 +19,11 @@ struct ConfigurationInfo {
 	{}
 
 	std::set<ConfigurationVersion>      		versions_;
-	ConfigurationBase* 					configurationPtr_;
+	ConfigurationBase* 							configurationPtr_;
+};
+
+struct GroupInfo {
+	std::set<ConfigurationGroupKey>      		keys_;
 };
 
 
@@ -79,12 +83,25 @@ public:
 	//modifiers of a configuration group based on alias, e.g. "Physics"
 	ConfigurationGroupKey								saveNewConfigurationGroup				(const std::string &groupName, std::map<std::string, ConfigurationVersion> &groupMembers, const std::string &groupComment = ViewColumnInfo::DATATYPE_COMMENT_DEFAULT);
 
+
+
+	//==============================================================================
+	//public group cache handling
+	const GroupInfo&									getAllGroupInfo							(const std::string &groupName);
+
 	void testXDAQContext(); //for debugging
 
 private:
+
+	//==============================================================================
+	//group cache handling
+	void												cacheGroupKey							(const std::string &groupName, ConfigurationGroupKey key);
+
+
 	//==============================================================================
 	//private members
 	std::map<std::string, ConfigurationInfo> 	allConfigurationInfo_;
+	std::map<std::string, GroupInfo> 			allGroupInfo_;
 
 };
 
