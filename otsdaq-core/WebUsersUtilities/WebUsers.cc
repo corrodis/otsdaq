@@ -860,7 +860,7 @@ bool WebUsers::createNewAccount(std::string Username, std::string DisplayName, s
 	UsersDisplayNameVector.push_back(DisplayName);
 	UsersUserEmailVector.push_back(Email);
 	UsersSaltVector.push_back("");
-	UsersPermissionsVector.push_back(UsersPermissionsVector.size() ? 0 : -1); //max permissions if first user
+	UsersPermissionsVector.push_back(UsersPermissionsVector.size() ? 1 : -1); //max permissions if first user
 	UsersUserIdVector.push_back(usersNextUserId_++);
 	if (usersNextUserId_ == (uint64_t)-1) //error wrap around case
 	{
