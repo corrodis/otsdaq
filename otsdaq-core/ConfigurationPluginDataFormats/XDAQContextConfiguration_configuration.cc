@@ -611,6 +611,12 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 			////////////////////// properties
 			int foundColon = app.class_.rfind(':');
 			if(foundColon >= 0) ++foundColon;
+			else
+			{
+				__SS__ << "Illegal XDAQApplication class name value of '" << app.class_
+						<< "' - please check the entry for app ID = " << app.id_ << __E__;
+				throw std::runtime_error(ss.str());
+			}
 			out << "\t\t\t<properties xmlns=\"urn:xdaq-application:" <<
 					app.class_.substr(foundColon) <<
 					"\" xsi:type=\"soapenc:Struct\">\n";
@@ -644,6 +650,8 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 			if(context.status_ && !app.status_)
 				out << "\t\t-->\n";
 			out << "\n";
+
+			//	__COUT__ << "DONE" << __E__;
 		}
 
 		out << "\t</xc:Context>\n";
@@ -652,6 +660,7 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 		out << "\n";
 	}
 
+	//__COUT__ << "DONE" << __E__;
 	out << "</xc:Partition>\n\n\n";
 
 }

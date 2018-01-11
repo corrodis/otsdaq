@@ -20,7 +20,7 @@ ReceiverSocket::ReceiverSocket(std::string IPAddress, unsigned int port)
 , numberOfBytes_(0)
 , readCounter_  (0)
 {
-	//__COUT__ << std::endl;
+	__COUT__ << "ReceiverSocket constructor " << IPAddress << ":" << port << __E__;
 }
 
 
@@ -31,7 +31,7 @@ ReceiverSocket::ReceiverSocket(void)
 , numberOfBytes_(0)
 , readCounter_  (0)
 {
-	//__COUT__ << std::endl;
+	__COUT__ << "ReceiverSocket constructor" << __E__;
 }
 
 //========================================================================================================================
@@ -68,7 +68,8 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress,
 	if(FD_ISSET(socketNumber_, &fileDescriptor_))
 	{
 		buffer.resize(maxSocketSize_); //NOTE: this is inexpensive according to Lorenzo/documentation in C++11 (only increases size once and doesn't decrease size)
-		if ((numberOfBytes_ = recvfrom(socketNumber_, &buffer[0], maxSocketSize_, 0, (struct sockaddr *)&fromAddress_, &addressLength_)) == -1)
+		if ((numberOfBytes_ = recvfrom(socketNumber_, &buffer[0], maxSocketSize_, 0,
+				(struct sockaddr *)&fromAddress_, &addressLength_)) == -1)
 		{
 			__COUT__ << "At socket with IPAddress: " << getIPAddress() << " port: " << getPort() << std::endl;
 			__SS__ << "Error reading buffer from\tIP:\t";
@@ -128,7 +129,7 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress,
 	{
 		++readCounter_;
 
-		if(true)
+		if(verbose)
 			__COUT__
 				<< "No new messages for " << timeoutSeconds+timeoutUSeconds/1000.
 				<< "s (Total " << readCounter_*(timeoutSeconds+timeoutUSeconds/1000.)

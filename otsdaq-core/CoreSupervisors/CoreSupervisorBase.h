@@ -65,6 +65,7 @@ public:
     virtual void transitionStopping    (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
     virtual void enteringError         (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
 
+    static const std::string	   WORK_LOOP_DONE, WORK_LOOP_WORKING;
 protected:
 
 
@@ -86,6 +87,7 @@ protected:
 
     SupervisorDescriptorInfo       supervisorDescriptorInfo_;
     std::vector<VStateMachine*>    theStateMachineImplementation_;
+
 };
 
 }

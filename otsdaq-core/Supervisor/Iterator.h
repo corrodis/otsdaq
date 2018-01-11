@@ -58,12 +58,14 @@ private:
 
     	std::string 								activePlan_;
     	std::vector<IterateConfiguration::Command> 	commands_;
+    	std::vector<unsigned int>				 	commandIterations_;
     	unsigned int 								commandIndex_;
     	std::vector<unsigned int>					stepIndexStack_;
 
     	//associated with FSM
     	std::string 								fsmName_, fsmRunAlias_;
     	unsigned int 								fsmNextRunNumber_;
+    	bool										runIsDone_;
 
     	std::vector<std::string> 					fsmCommandParameters_;
 
@@ -98,7 +100,8 @@ private:
     volatile bool							iteratorBusy_;
     volatile bool							commandPlay_, commandPause_, commandHalt_; //commands are set by supervisor thread, and cleared by iterator thread
     std::string								activePlanName_, lastStartedPlanName_, lastFinishedPlanName_;
-    volatile unsigned int					activeCommandIndex_;
+    volatile unsigned int					activeCommandIndex_, activeCommandIteration_;
+	std::vector<unsigned int>				depthIterationStack_;
     volatile time_t							activeCommandStartTime_;
     std::string 							lastFsmName_;
     std::string 							errorMessage_;
@@ -134,7 +137,7 @@ private:
     	ConfigurationGroupKey originalKey = cfgMgr->getActiveGroupKey();
 
     	__COUT__ << "Active group is '" << groupName << " (" <<
-    			originalKey << "'" << __E__;
+    			originalKey << ")'" << __E__;
 
     	//track member names and versions of active config group
     	//	modify versions as tables are modified..
@@ -323,7 +326,7 @@ private:
     } //end helpCommandModifyActive
     catch(const std::runtime_error& e)
     {
-    	__SS__ << "Help modify command failed! " << e.what() << __E__;
+    	__SS__ << "Modify command failed! " << e.what() << __E__;
 
 
     	throw std::runtime_error(ss.str());

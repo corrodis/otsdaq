@@ -2,6 +2,7 @@
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
 #include "otsdaq-core/Supervisor/Supervisor.h"
+#include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h"
 
 
@@ -142,6 +143,20 @@ try
 			{
 				iterator->activeCommandIndex_ = theIteratorStruct.commandIndex_;
 				iterator->activeCommandStartTime_ = time(0); //reset on any change
+
+				if(theIteratorStruct.commandIndex_ < theIteratorStruct.commandIterations_.size())
+					iterator->activeCommandIteration_ = theIteratorStruct.commandIterations_
+						[theIteratorStruct.commandIndex_];
+				else
+					iterator->activeCommandIteration_ = -1;
+
+				iterator->depthIterationStack_.clear();
+				for(const auto& depthIteration:theIteratorStruct.stepIndexStack_)
+					iterator->depthIterationStack_.push_back(depthIteration);
+				//if(theIteratorStruct.stepIndexStack_.size())
+				//	iterator->activeLoopIteration_ = theIteratorStruct.stepIndexStack_.back();
+				//else
+				//	iterator->activeLoopIteration_ = -1;
 			}
 
 		} //end command handling and iterator mutex
@@ -162,7 +177,7 @@ try
 			while(!iterator->checkCommand(&theIteratorStruct))
 				__COUT__ << "Waiting to pause..." << __E__;
 
-			__COUT__ << "Completeing pause..." << __E__;
+			__COUT__ << "Completing pause..." << __E__;
 
 			theIteratorStruct.doPauseAction_ = false; //clear
 
@@ -242,11 +257,15 @@ try
 				theIteratorStruct.cfgMgr_->init(); //completely reset to re-align with any changes
 				itConfig = theIteratorStruct.cfgMgr_->__GET_CONFIG__(IterateConfiguration);
 
-				theIteratorStruct.commands_ = itConfig->getPlanCommands(theIteratorStruct.cfgMgr_,
+				theIteratorStruct.commands_ = itConfig->getPlanCommands(
+						theIteratorStruct.cfgMgr_,
 						theIteratorStruct.activePlan_);
 
+				//reset commandIteration counts
+				theIteratorStruct.commandIterations_.clear();
 				for(auto& command:theIteratorStruct.commands_)
 				{
+					theIteratorStruct.commandIterations_.push_back(0);
 					__COUT__ << "command " <<
 							command.type_ << __E__;
 					__COUT__ << "table " <<
@@ -420,6 +439,9 @@ try
 				" in size = " << iteratorStruct->commands_.size() << __E__;
 		throw std::runtime_error(ss.str());
 	}
+
+	//increment iteration count for command
+	++iteratorStruct->commandIterations_[iteratorStruct->commandIndex_];
 
 
 	std::string type = iteratorStruct->commands_[iteratorStruct->commandIndex_].type_;
@@ -718,10 +740,19 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct)
 			"%d",&numOfRepetitions);
 	__COUT__ << "numOfRepetitions remaining = " << numOfRepetitions << __E__;
 
+	char repStr[200];
+
 	if(numOfRepetitions <= 0)
 	{
+		//write original number of repetitions value back
+		sprintf(repStr,"%d",iteratorStruct->stepIndexStack_.back());
+		iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+		[IterateConfiguration::commandRepeatLabelParams_.NumberOfRepetitions_] =
+				repStr; //re-store as string
+
 		//remove step index from stack
 		iteratorStruct->stepIndexStack_.pop_back();
+
 
 		return; //no more repetitions
 	}
@@ -737,7 +768,6 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct)
 				iteratorStruct->commands_[iteratorStruct->commandIndex_].params_[IterateConfiguration::commandRepeatLabelParams_.Label_] ==
 						iteratorStruct->commands_[i].params_[IterateConfiguration::commandBeginLabelParams_.Label_]) break;
 
-	char repStr[200];
 	sprintf(repStr,"%d",numOfRepetitions);
 	iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
 		[IterateConfiguration::commandRepeatLabelParams_.NumberOfRepetitions_] =
@@ -750,7 +780,7 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct)
 //========================================================================================================================
 void Iterator::startCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 {
-
+	iteratorStruct->runIsDone_ = false;
 	iteratorStruct->fsmCommandParameters_.clear();
 
 	std::string errorStr = "";
@@ -1030,6 +1060,12 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 					WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
 					WebUsers::DEFAULT_ITERATOR_USERNAME,
 					iteratorStruct->fsmCommandParameters_);
+		else if(currentState == "Configured")
+		{
+			//no need to pause state machine, no run going on
+			__COUT__ << "In Configured state. No need to transition to Paused." << __E__;
+			return true;
+		}
 		else
 			errorStr = "Expected to be in Paused. Unexpectedly, the current state is " +
 				currentState + ". Last State Machine error message was as follows: " +
@@ -1058,6 +1094,13 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 			errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
 					0,0,
 					"Abort",iteratorStruct->fsmName_,
+					WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+					WebUsers::DEFAULT_ITERATOR_USERNAME,
+					iteratorStruct->fsmCommandParameters_);
+		else if(currentState == "Configured") //launch transition to halt
+			errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
+					0,0,
+					"Halt",iteratorStruct->fsmName_,
 					WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
 					WebUsers::DEFAULT_ITERATOR_USERNAME,
 					iteratorStruct->fsmCommandParameters_);
@@ -1103,9 +1146,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 
 	if(currentState != "Running")
 	{
-		if(iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-				[IterateConfiguration::commandRunParams_.DurationInSeconds_] ==
-						"DONE" &&
+		if(iteratorStruct->runIsDone_ &&
 				currentState == "Configured")
 		{
 			//indication of done
@@ -1154,7 +1195,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 					__COUT__ << "FESupervisor instance " << it.first <<
 							" has status = " << status << std::endl;
 
-					if(status != "Done")
+					if(status != CoreSupervisorBase::WORK_LOOP_DONE)
 					{
 						allFrontEndsAreDone = false;
 						break;
@@ -1194,9 +1235,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 				}
 
 				//write indication of run done into duration
-				iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-				[IterateConfiguration::commandRunParams_.DurationInSeconds_] =
-						"DONE";
+				iteratorStruct->runIsDone_ = true;
 
 				return false;
 			}
@@ -1235,9 +1274,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 			}
 
 			//write indication of run done into duration
-			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-				[IterateConfiguration::commandRunParams_.DurationInSeconds_] =
-					"DONE";
+			iteratorStruct->runIsDone_ = true;
 
 			return false;
 		}
@@ -1529,6 +1566,14 @@ void Iterator::getIterationPlanStatus(HttpXmlDocument& xmldoc)
 	xmldoc.addTextElementToData("current_command_index", tmp);
 	sprintf(tmp,"%ld",time(0) - activeCommandStartTime_);
 	xmldoc.addTextElementToData("current_command_duration", tmp);
+	sprintf(tmp,"%u",activeCommandIteration_);
+	xmldoc.addTextElementToData("current_command_iteration", tmp);
+
+	for(const auto& depthIteration:depthIterationStack_)
+	{
+		sprintf(tmp,"%u",depthIteration);
+		xmldoc.addTextElementToData("depth_iteration", tmp);
+	}
 
 	if(activePlanIsRunning_ && iteratorBusy_)
 	{

@@ -34,7 +34,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const & ps)
 		throw art::Exception(art::errors::Configuration) << "UDPReceiver: Error creating socket!";
 		exit(1);
 	}
-	
+
 	struct sockaddr_in si_me_data;
 	si_me_data.sin_family = AF_INET;
 	si_me_data.sin_port = htons(dataport_);
@@ -50,7 +50,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const & ps)
 		  "UDPReceiver: Cannot set socket to nonblocking!" << TLOG_ENDL;
 	  }*/
 
-	if (rcvbuf_ > 0 && setsockopt(datasocket_, SOL_SOCKET, SO_RCVBUF, &rcvbuf_, sizeof(rcvbuf_))) 
+	if (rcvbuf_ > 0 && setsockopt(datasocket_, SOL_SOCKET, SO_RCVBUF, &rcvbuf_, sizeof(rcvbuf_)))
 	{
 		throw art::Exception(art::errors::Configuration) << "UDPReceiver: Could not set receive buffer size: " << rcvbuf_;
 		exit(1);
@@ -72,9 +72,6 @@ ots::UDPReceiver::~UDPReceiver()
 }
 
 void ots::UDPReceiver::start() {
-
-
-	TLOG_DEBUG("UDPReceiver") << "Start." << TLOG_ENDL;
 	TLOG_INFO("UDPReceiver") << "Starting..." << TLOG_ENDL;
 
 	receiverThread_ = std::thread(&UDPReceiver::receiveLoop_, this);
@@ -91,7 +88,7 @@ void ots::UDPReceiver::receiveLoop_()
 		int rv = poll(ufds, 1, 1000);
 		if (rv > 0)
 		{
-			TLOG_DEBUG("UDPReceiver") << "revents: " << ufds[0].revents << ", " << TLOG_ENDL;// ufds[1].revents << TLOG_ENDL;
+			TLOG_TRACE("UDPReceiver") << "revents: " << ufds[0].revents << ", " << TLOG_ENDL;// ufds[1].revents << TLOG_ENDL;
 			if (ufds[0].revents == POLLIN || ufds[0].revents == POLLPRI)
 			{
 
@@ -103,7 +100,7 @@ void ots::UDPReceiver::receiveLoop_()
 				recvfrom(datasocket_, peekBuffer, sizeof(peekBuffer), MSG_PEEK,
 					(struct sockaddr *) &si_data_, &dataSz);
 
-				TLOG_DEBUG("UDPReceiver") << "Received UDP Datagram with sequence number " << std::hex << "0x" << static_cast<int>(peekBuffer[1]) << "!" << std::dec << TLOG_ENDL;
+				TLOG_TRACE("UDPReceiver") << "Received UDP Datagram with sequence number " << std::hex << "0x" << static_cast<int>(peekBuffer[1]) << "!" << std::dec << TLOG_ENDL;
 				TLOG_TRACE("UDPReceiver") << "peekBuffer[1] == expectedPacketNumber_: " << std::hex << static_cast<int>(peekBuffer[1]) << " =?= " << (int)expectedPacketNumber_ << TLOG_ENDL;
 				TLOG_TRACE("UDPReceiver") << "peekBuffer: 0: " << std::hex << static_cast<int>(peekBuffer[0])
 					<< ", 1: " << std::hex << static_cast<int>(peekBuffer[1])
@@ -125,15 +122,15 @@ void ots::UDPReceiver::receiveLoop_()
 					int sts = recvfrom(datasocket_, &receiveBuffer[0], receiveBuffer.size(), 0, (struct sockaddr *) &si_data_, &dataSz);
 					if (sts == -1)
 					{
-						TLOG_DEBUG("UDPReceiver") << "Error on socket: " << strerror(errno) << TLOG_ENDL;
+						TLOG_WARNING("UDPReceiver") << "Error on socket: " << strerror(errno) << TLOG_ENDL;
 					}
 					else
 					{
-						TLOG_DEBUG("UDPReceiver") << "Received " << sts << " bytes." << TLOG_ENDL;
+						TLOG_TRACE("UDPReceiver") << "Received " << sts << " bytes." << TLOG_ENDL;
 					}
 
 					std::unique_lock<std::mutex> lock(receiveBufferLock_);
-					TLOG_DEBUG("UDPReceiver") << "Now placing UDP datagram with sequence number " << std::hex << (int)seqNum << " into buffer." << std::dec << TLOG_ENDL;
+					TLOG_TRACE("UDPReceiver") << "Now placing UDP datagram with sequence number " << std::hex << (int)seqNum << " into buffer." << std::dec << TLOG_ENDL;
 					receiveBuffers_.push_back(receiveBuffer);
 
 					++expectedPacketNumber_;
@@ -169,11 +166,11 @@ bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs & output)
 		for (auto& buf : packetBuffers_) {
 			packetBufferSize += buf.size();
 		}
-		TLOG_DEBUG("UDPReceiver") << "Calling ProcessData, packetBuffers_.size() == " << std::to_string(packetBuffers_.size()) << ", sz = " << std::to_string(packetBufferSize) << TLOG_ENDL;
+		TLOG_TRACE("UDPReceiver") << "Calling ProcessData, packetBuffers_.size() == " << std::to_string(packetBuffers_.size()) << ", sz = " << std::to_string(packetBufferSize) << TLOG_ENDL;
 		ProcessData_(output);
 
 		packetBuffers_.clear();
-		TLOG_DEBUG("UDPReceiver") << "Returning output of size " << output.size() << TLOG_ENDL;
+		TLOG_TRACE("UDPReceiver") << "Returning output of size " << output.size() << TLOG_ENDL;
 	}
 	else {
 		// Sleep 10 times per poll timeout
@@ -196,7 +193,7 @@ void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs & output) {
 	// We now have a fragment to contain this event:
 	ots::UDPFragmentWriter thisFrag(*output.back());
 
-	TLOG_DEBUG("UDPReceiver") << "Received data, now placing data with UDP sequence number "
+	TLOG_TRACE("UDPReceiver") << "Received data, now placing data with UDP sequence number "
 		<< std::hex << static_cast<int>((packetBuffers_.front()).at(1))
 		<< " into UDPFragment" << TLOG_ENDL;
 	thisFrag.resize(64050 * packetBuffers_.size() + 1);

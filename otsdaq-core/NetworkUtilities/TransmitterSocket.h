@@ -12,6 +12,8 @@ namespace ots
 
 class TransmitterSocket : public virtual Socket
 {
+	//TransceiverSocket is a "Friend" class of TransmitterSocket so has access to private members.
+	friend class TransceiverSocket;
 public:
 	TransmitterSocket(const std::string &IPAddress, unsigned int port=0);
 	virtual ~TransmitterSocket(void);
@@ -24,8 +26,8 @@ protected:
 	TransmitterSocket(void);
 
 private:
-	std::mutex	sendMutex_; //to make transmitter socket thread safe
-							//	i.e. multiple threads can share a socket and call send()
+	std::mutex			sendMutex_; //to make transmitter socket thread safe
+									//	i.e. multiple threads can share a socket and call send()
 
 };
 

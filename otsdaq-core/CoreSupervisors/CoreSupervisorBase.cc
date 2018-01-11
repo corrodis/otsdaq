@@ -26,6 +26,10 @@ using namespace ots;
 
 //XDAQ_INSTANTIATOR_IMPL(CoreSupervisorBase)
 
+
+const std::string		CoreSupervisorBase::WORK_LOOP_DONE 			= "Done";
+const std::string		CoreSupervisorBase::WORK_LOOP_WORKING 		= "Working";
+
 //========================================================================================================================
 CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 throw (xdaq::exception::Exception)
@@ -532,7 +536,9 @@ throw (xoap::exception::Exception)
 	}
 
 	return SOAPUtilities::makeSOAPMessageReference(
-			(theFEInterfacesManager->allFEWorkloopsAreDone()?"Done":"Working"));
+			(theFEInterfacesManager->allFEWorkloopsAreDone()?
+					CoreSupervisorBase::WORK_LOOP_DONE:
+					CoreSupervisorBase::WORK_LOOP_WORKING));
 }
 
 //========================================================================================================================
