@@ -62,6 +62,7 @@ const std::string WebUsers::DEFAULT_ADMIN_USERNAME = "admin";
 const std::string WebUsers::DEFAULT_ADMIN_DISPLAY_NAME = "Administrator";
 const std::string WebUsers::DEFAULT_ADMIN_EMAIL = "root@otsdaq.fnal.gov";
 const std::string WebUsers::DEFAULT_ITERATOR_USERNAME = "iterator";
+const std::string WebUsers::DEFAULT_STATECHANGER_USERNAME = "statechanger";
 
 const std::string WebUsers::REQ_NO_LOGIN_RESPONSE = "NoLogin";
 const std::string WebUsers::REQ_NO_PERMISSION_RESPONSE = "NoPermission";
@@ -849,7 +850,8 @@ bool WebUsers::createNewAccount(std::string Username, std::string DisplayName, s
 	//check if username already exists
 	uint64_t i;
 	if ((i = searchUsersDatabaseForUsername(Username)) != NOT_FOUND_IN_DATABASE ||
-			Username == WebUsers::DEFAULT_ITERATOR_USERNAME) //prevent reserved usernames from being created!
+			Username == WebUsers::DEFAULT_ITERATOR_USERNAME ||
+			Username == WebUsers::DEFAULT_STATECHANGER_USERNAME) //prevent reserved usernames from being created!
 	{
 		__COUT__ << "Username: " << Username << " already exists" << std::endl;
 		return false;

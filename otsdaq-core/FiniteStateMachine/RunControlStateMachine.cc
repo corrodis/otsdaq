@@ -85,10 +85,9 @@ RunControlStateMachine::~RunControlStateMachine(void)
 //========================================================================================================================
 void RunControlStateMachine::reset(void)
 {
-	__COUT__ << stateMachineName_ << " is in transition?" << theStateMachine_.isInTransition() << std::endl;
+	__COUT__ << "Resetting RunControlStateMachine with name '" << stateMachineName_ << "'..." << __E__;
 	theStateMachine_.setInitialState('I');
 	theStateMachine_.reset();
-	__COUT__ << stateMachineName_ << " is in transition?" << theStateMachine_.isInTransition() << std::endl;
 }
 
 //========================================================================================================================

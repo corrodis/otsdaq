@@ -14,7 +14,7 @@ FiniteStateMachine::FiniteStateMachine(void)
 , provenanceState_	('X')
 , theErrorMessage_ ("")
 {
-	__COUT__ << "Transition? "<< inTransition_ << std::endl;
+	__COUT__ << "Constructing FiniteStateMachine" << std::endl;
 }
 
 //========================================================================================================================

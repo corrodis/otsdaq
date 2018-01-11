@@ -10,6 +10,12 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
 #include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+
+
+#include "otsdaq-core/NetworkUtilities/TransceiverSocket.h" // for UDP state changer
+
+
+
 #include <cgicc/HTMLClasses.h>
 #include <cgicc/HTTPCookie.h>
 #include <cgicc/HTMLDoctype.h>
@@ -24,7 +30,7 @@
 #include <fstream>
 #include <thread>         	// std::this_thread::sleep_for
 #include <chrono>         	// std::chrono::seconds
-#include <sys/stat.h> 		//for mkdir
+#include <sys/stat.h> 		// for mkdir
 
 using namespace ots;
 
@@ -93,9 +99,6 @@ Supervisor::Supervisor(xdaq::ApplicationStub * s) throw (xdaq::exception::Except
 	//theConfigurationManager_ = Singleton<ConfigurationManager>::getInstance();
 
 	init();
-
-	//Note: print out handled by StartOTS.sh now
-	//std::thread([](Supervisor *supervisorPtr){ Supervisor::URLDisplayThread(supervisorPtr); }, this).detach();
 }
 
 //========================================================================================================================
@@ -131,10 +134,7 @@ void Supervisor::init(void)
 
 	ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorConfigurationNode(
 			supervisorContextUID_, supervisorApplicationUID_);
-	//			getNode(
-	//					"/XDAQContextConfiguration/" + supervisorContextUID_ +
-	//					"/LinkToApplicationConfiguration/" + supervisorApplicationUID_ +
-	//					"/LinkToSupervisorConfiguration");
+
 	std::string supervisorUID;
 	if(!configLinkNode.isDisconnected())
 		supervisorUID = configLinkNode.getValue();
@@ -142,28 +142,148 @@ void Supervisor::init(void)
 		supervisorUID = ViewColumnInfo::DATATYPE_LINK_DEFAULT;
 
 	__COUT__ << "Supervisor UID:" << supervisorUID	<< std::endl;
+
+
+
+	//setting up thread for UDP thread to drive state machine
+	bool enableStateChanges = false;
+	try
+	{
+		enableStateChanges =
+				configLinkNode.getNode("EnableStateChangesOverUDP").getValue<bool>();
+	}
+	catch(...)
+	{;} //ignore errors
+
+	if(enableStateChanges)
+	{
+		__COUT__ << "Enabling state changes over UDP..." << __E__;
+		//start state changer UDP listener thread
+		std::thread([](Supervisor *s){ Supervisor::StateChangerWorkLoop(s); },this).detach();
+	}
+	else
+		__COUT__ << "State changes over UDP are disabled." << __E__;
+
 }
 
 //========================================================================================================================
-void Supervisor::URLDisplayThread(Supervisor *supervisorPtr)
+//StateChangerWorkLoop
+//	child thread
+void Supervisor::StateChangerWorkLoop(Supervisor *theSupervisor)
 {
-	INIT_MF("Supervisor");
-	//_Exit(0); //Uncomment to stop print out
-	// child process
-	int i = 0;
-	for (; i < 5; ++i)
+	ConfigurationTree configLinkNode = theSupervisor->theConfigurationManager_->getSupervisorConfigurationNode(
+			theSupervisor->supervisorContextUID_, theSupervisor->supervisorApplicationUID_);
+
+
+	std::string myip = configLinkNode.getNode("IPAddressForStateChangesOverUDP").getValue<std::string>();
+	int myport = configLinkNode.getNode("PortForStateChangesOverUDP").getValue<int>();
+	bool ackEnabled = configLinkNode.getNode("EnableAckForStateChangesOverUDP").getValue<bool>();
+
+	__COUT__ << "ip = " << myip << __E__;
+	__COUT__ << "port = " << myport << __E__;
+	__COUT__ << "ackEnabled = " << ackEnabled << __E__;
+
+	TransceiverSocket sock(myip,myport); //Take Port from Configuration
+	try
 	{
-		std::this_thread::sleep_for (std::chrono::seconds(2));
-		std:: cout << __COUT_HDR_FL__ << "\n*********************************************************************" << std::endl;
-		std:: cout << __COUT_HDR_FL__ << "\n\n"
-				<< supervisorPtr->getApplicationContext()->getContextDescriptor()->getURL() //<<// ":" // getenv("SUPERVISOR_SERVER") << ":"
-				//<< this->getApplicationDescriptor()-> getenv("PORT") <<
-				<< "/urn:xdaq-application:lid="
-				<< supervisorPtr->getApplicationDescriptor()->getLocalId() << "/"
-				<< "\n" << std::endl;
-		std:: cout << __COUT_HDR_FL__ << "\n*********************************************************************" << std::endl;
+		sock.initialize();
 	}
-}
+	catch(...)
+	{
+
+		//generate special message to indicate failed socket
+		__SS__ << "FATAL Console error. Could not initialize socket at ip '" << myip <<
+				"' and port " <<
+				myport << ". Perhaps it is already in use? Exiting State Changer receive loop." << std::endl;
+		__COUT__ << ss.str();
+		throw std::runtime_error(ss.str());
+		return;
+	}
+
+	unsigned int i,firsti;
+	std::string buffer;
+	std::string errorStr;
+	std::string command, fsmName;
+	std::vector<std::string> parameters;
+	while(1)
+	{
+		//workloop procedure
+		//	if receive a UDP command
+		//		execute command
+		//	else
+		//		sleep
+
+
+		if(sock.receive(buffer,0 /*timeoutSeconds*/,1/*timeoutUSeconds*/,
+				false /*verbose*/) != -1)
+		{
+			__COUT__ << "UDP State Changer received size = " << buffer.size() << __E__;
+
+			command = "", fsmName = "";
+			parameters.clear();
+
+			//extract comma separated values: command,fsmname,parameter(s)
+			for(firsti=0,i=0;i<buffer.size();++i)
+			{
+				if(buffer[i] == ',')
+				{
+					if(command == "")
+					{
+						command = buffer.substr(firsti,i-firsti);
+						__COUT__ << "command = " << command << __E__;
+					}
+					else if(fsmName == "")
+					{
+						fsmName = buffer.substr(firsti,i-firsti);
+						__COUT__ << "fsmName = " << fsmName << __E__;
+					}
+					else //parameter
+					{
+						parameters.push_back(buffer.substr(firsti,i-firsti));
+
+						__COUT__ << "parameter[" << parameters.size()-1 <<
+								"] = " << command << __E__;
+					}
+					firsti = i+1;
+				}
+			}
+
+			//set scope of mutext
+			{
+				//should be mutually exclusive with Supervisor main thread state machine accesses
+				//lockout the messages array for the remainder of the scope
+				//this guarantees the reading thread can safely access the messages
+				if(theSupervisor->VERBOSE_MUTEX) __COUT__ << "Waiting for FSM access" << __E__;
+				std::lock_guard<std::mutex> lock(theSupervisor->stateMachineAccessMutex_);
+				if(theSupervisor->VERBOSE_MUTEX) __COUT__ << "Have FSM access" << __E__;
+
+				errorStr = theSupervisor->attemptStateMachineTransition(
+						0,0,
+						command,fsmName,
+						WebUsers::DEFAULT_STATECHANGER_USERNAME /*fsmWindowName*/,
+						WebUsers::DEFAULT_STATECHANGER_USERNAME,
+						parameters);
+			}
+
+			if(errorStr != "")
+			{
+				__SS__ << "UDP State Changer failed to execute command because of the following error: " << errorStr;
+				__COUT_ERR__ << ss.str();
+				__MOUT_ERR__ << ss.str();
+				if(ackEnabled) sock.acknowledge(errorStr,true /*verbose*/);
+			}
+			else
+			{
+				__SS__ << "Successfully executed state change command '" << command << ".'" << __E__;
+				__COUT_INFO__ << ss.str();
+				__MOUT_INFO__ << ss.str();
+				if(ackEnabled) sock.acknowledge("Done",true /*verbose*/);
+			}
+		}
+		else
+			sleep(1);
+	}
+} //end StateChangerWorkLoop
 
 //========================================================================================================================
 //makeSystemLogbookEntry
@@ -195,7 +315,8 @@ void Supervisor::makeSystemLogbookEntry(std::string entryText)
 		{
 			while((f=entryText.find(replace[i])) != std::string::npos)
 			{
-				entryText = entryText.substr(0,f) + with[i] + entryText.substr(f+replace[i].length());
+				entryText = entryText.substr(0,f) + with[i] +
+						entryText.substr(f+replace[i].length());
 				//__COUT__ << "found " << " " << entryText << std::endl;
 			}
 		}
@@ -206,7 +327,9 @@ void Supervisor::makeSystemLogbookEntry(std::string entryText)
 	//SOAPParametersV parameters(1);
 	//parameters[0].setName("EntryText"); parameters[0].setValue(entryText);
 
-	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(theSupervisorDescriptorInfo_.getLogbookDescriptor(), "MakeSystemLogbookEntry",parameters);
+	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(
+			theSupervisorDescriptorInfo_.getLogbookDescriptor(),
+			"MakeSystemLogbookEntry",parameters);
 
 	SOAPParameters retParameters("Status");
 	//SOAPParametersV retParameters(1);

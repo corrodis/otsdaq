@@ -48,7 +48,7 @@ public:
     virtual ~Supervisor(void);
 
     void 						init        				 	(void);
-    static void                 URLDisplayThread			 	(Supervisor *);
+
     void 						Default     				 	(xgi::Input* in, xgi::Output* out ) 	throw (xgi::exception::Exception);
 //    void 						TmpTest     				 	(xgi::Input* in, xgi::Output* out ) 	throw (xgi::exception::Exception);
 
@@ -100,14 +100,16 @@ public:
    // void simpleFunction () { std::cout << __COUT_HDR_FL__ << "hi\n" << std::endl;}
 
 private:
-    unsigned int 														getNextRunNumber(const std::string &fsmName = "");
-    bool         														setNextRunNumber(unsigned int runNumber, const std::string &fsmName = "");
-    static std::pair<std::string /*group name*/, ConfigurationGroupKey>	loadGroupNameAndKey(const std::string &fileName, std::string &returnedTimeString);
-    void																saveGroupNameAndKey(const std::pair<std::string /*group name*/,	ConfigurationGroupKey> &theGroup, const std::string &fileName);
-    static xoap::MessageReference 										lastConfigGroupRequestHandler(const SOAPParameters &parameters);
+    unsigned int 														getNextRunNumber					(const std::string &fsmName = "");
+    bool         														setNextRunNumber					(unsigned int runNumber, const std::string &fsmName = "");
+    static std::pair<std::string /*group name*/, ConfigurationGroupKey>	loadGroupNameAndKey					(const std::string &fileName, std::string &returnedTimeString);
+    void																saveGroupNameAndKey					(const std::pair<std::string /*group name*/,	ConfigurationGroupKey> &theGroup, const std::string &fileName);
+    static xoap::MessageReference 										lastConfigGroupRequestHandler		(const SOAPParameters &parameters);
 
-    std::string															attemptStateMachineTransition(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
-    bool         														broadcastMessage(xoap::MessageReference msg) throw (toolbox::fsm::exception::Exception);
+
+    static void															StateChangerWorkLoop				(Supervisor *supervisorPtr);
+    std::string															attemptStateMachineTransition		(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
+    bool         														broadcastMessage					(xoap::MessageReference msg) throw (toolbox::fsm::exception::Exception);
 
     bool								supervisorGuiHasBeenLoaded_	; //use to indicate first access by user of ots since execution
 

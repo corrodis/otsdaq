@@ -32,22 +32,39 @@ Socket::Socket(const std::string &IPAddress, unsigned int port)
 , requestedPort_(port)
 //    maxSocketSize_(maxSocketSize)
 {
-	__COUT__ << std::endl;
+	__COUT__ << "Socket constructor " << IPAddress << ":" << port << __E__;
+
+
+	if(port >= (1<<16))
+	{
+		__SS__ << "FATAL: Invalid Port " << port << ". Max port number is " <<
+				(1<<16)-1 << "." << std::endl;
+		//assert(0); //RAR changed to exception on 8/17/2016
+		__COUT_ERR__ << "\n" << ss.str();
+		throw std::runtime_error(ss.str());
+	}
+
+
 	//network stuff
     socketAddress_.sin_family = AF_INET;// use IPv4 host byte order
     socketAddress_.sin_port   = htons(port);// short, network byte order
 
     __COUT__ << "IPAddress: " << IPAddress << " port: " << port << " htons: " <<  socketAddress_.sin_port << std::endl;
+
     if(inet_aton(IPAddress.c_str(), &socketAddress_.sin_addr) == 0)
     {
-    	__SS__ << "FATAL: Invalid IP/Port combination. Is it already in use? " <<
-    			IPAddress << "/" << port << std::endl;
+    	__SS__ << "FATAL: Invalid IP:Port combination. Please verify... " <<
+    			IPAddress << ":" << port << std::endl;
         //assert(0); //RAR changed to exception on 8/17/2016
-        __COUT__ << "\n" << ss.str();
+    	__COUT_ERR__ << "\n" << ss.str();
         throw std::runtime_error(ss.str());
     }
 
     memset(&(socketAddress_.sin_zero), '\0', 8);// zero the rest of the struct
+
+    __COUT__ << "Constructed socket for port " << ntohs(socketAddress_.sin_port) <<
+    		" htons: " <<  socketAddress_.sin_port << std::endl;
+
 }
 
 //========================================================================================================================
@@ -55,7 +72,7 @@ Socket::Socket(const std::string &IPAddress, unsigned int port)
 Socket::Socket(void)
 {
 	__SS__ << "ERROR: This method should never be called. This is the protected constructor. There is something wrong in your inheritance scheme!" << std::endl;
-	__COUT__ << "\n" << ss.str();
+	__COUT_ERR__ << "\n" << ss.str();
 
 	throw std::runtime_error(ss.str());
 }
@@ -71,7 +88,8 @@ Socket::~Socket(void)
 //========================================================================================================================
 void Socket::initialize(unsigned int socketReceiveBufferSize)
 {
-    __COUT__ << " htons: " <<  socketAddress_.sin_port << std::endl;
+    __COUT__ << "Initializing port " << ntohs(socketAddress_.sin_port) <<
+    		" htons: " <<  socketAddress_.sin_port << std::endl;
     struct addrinfo  hints;
     struct addrinfo* res;
     int status    =  0;
@@ -95,19 +113,19 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
     {
         port.str("");
         port << p;
-        std::cout << __COUT_HDR_FL__ << __LINE__ << "]\tBinding port: " << port.str() << std::endl;
+        __COUT__ << "]\tBinding port: " << port.str() << std::endl;
         socketAddress_.sin_port   = htons(p);// short, network byte order
 
         if((status = getaddrinfo(NULL, port.str().c_str(), &hints, &res)) != 0)
         {
-            std::cout << __COUT_HDR_FL__ << __LINE__ << "]\tGetaddrinfo error status: " << status << std::endl;
+            __COUT__ << "]\tGetaddrinfo error status: " << status << std::endl;
             continue;
         }
 
         // make a socket:
         socketNumber_ = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
-        std::cout << __COUT_HDR_FL__ << __LINE__ << "]\tSocket Number: " << socketNumber_ << " for port: " << ntohs(socketAddress_.sin_port) << " initialized." << std::endl;
+        __COUT__ << "]\tSocket Number: " << socketNumber_ << " for port: " << ntohs(socketAddress_.sin_port) << " initialized." << std::endl;
         // bind it to the port we passed in to getaddrinfo():
         if(bind(socketNumber_, res->ai_addr, res->ai_addrlen) == -1)
         {
@@ -126,7 +144,7 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
             char yes = '1';
             setsockopt(socketNumber_,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int));
             socketInitialized = true;
-            std::cout << __COUT_HDR_FL__ << __LINE__ << "]\tSocket Number: " << socketNumber_ << " for port: " << ntohs(socketAddress_.sin_port) << " initialized." << std::endl;
+            __COUT__ << "]\tSocket Number: " << socketNumber_ << " for port: " << ntohs(socketAddress_.sin_port) << " initialized." << std::endl;
         }
 
         freeaddrinfo(res); // free the linked-list
