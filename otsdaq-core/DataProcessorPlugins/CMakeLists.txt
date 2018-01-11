@@ -68,6 +68,16 @@ simple_plugin(RawDataSaverConsumer "processor"
 	${CETLIB}
   )
   
+simple_plugin(RawDataVisualizerConsumer "processor"	    
+    DataManager
+    WorkLoopManager
+	MessageFacility
+    ConfigurationInterface
+    ConfigurationDataFormats
+	${MF_MESSAGELOGGER}
+  )
+  
+  
 simple_plugin(OtsDataSaverConsumer "processor"
 	DataManager
 	${CETLIB}
