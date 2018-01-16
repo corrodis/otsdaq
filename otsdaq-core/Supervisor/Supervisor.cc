@@ -610,6 +610,7 @@ std::string Supervisor::attemptStateMachineTransition(
 	if(out) xmldoc->outputXmlDocument((std::ostringstream*) out, false);
 	__COUT__ << "FSM state transition launched!" << std::endl;
 
+	stateMachineLastCommandInput_ = command;
 	return errorStr;
 }
 

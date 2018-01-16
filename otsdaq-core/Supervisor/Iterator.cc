@@ -55,6 +55,7 @@ try
 
 
 	ConfigurationManagerRW theConfigurationManager(WebUsers::DEFAULT_ITERATOR_USERNAME); //this is a restricted username
+	//theConfigurationManager.init();
 	theConfigurationManager.getAllConfigurationInfo(true); // to prep all info
 
 	IteratorWorkLoopStruct theIteratorStruct(iterator,
@@ -424,6 +425,17 @@ catch(...)
 void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
 try
 {
+
+	{
+		int i =0;
+		for(const auto& depthIteration:iteratorStruct->stepIndexStack_)
+		{
+			__COUT__ << i++ << ":" << depthIteration << __E__;
+
+		}
+	}
+
+
 	//should be mutually exclusive with Supervisor main thread state machine accesses
 	//lockout the messages array for the remainder of the scope
 	//this guarantees the reading thread can safely access the messages
@@ -1322,6 +1334,27 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct *iteratorStruct)
 	else //else successfully done (in Configured state!)
 	{
 		__COUT__ << "checkCommandConfigureAlias complete." << __E__;
+
+		//also activate the Iterator config manager to mimic active config
+		std::pair<std::string, ConfigurationGroupKey> newActiveGroup =
+				iteratorStruct->cfgMgr_->getConfigurationGroupFromAlias(iteratorStruct->fsmCommandParameters_[0]);
+		iteratorStruct->cfgMgr_->loadConfigurationGroup(newActiveGroup.first,newActiveGroup.second,true /*activate*/);
+
+
+		__COUT__ << "originalTrackChanges " <<
+				iteratorStruct->originalTrackChanges_ << __E__;
+		__COUT__ << "originalConfigGroup " <<
+				iteratorStruct->originalConfigGroup_ << __E__;
+		__COUT__ << "originalConfigKey " <<
+				iteratorStruct->originalConfigKey_ << __E__;
+
+		__COUT__ << "currentTrackChanges " <<
+				ConfigurationInterface::isVersionTrackingEnabled() << __E__;
+		__COUT__ << "originalConfigGroup " <<
+				iteratorStruct->cfgMgr_->getActiveGroupName() << __E__;
+		__COUT__ << "originalConfigKey " <<
+				iteratorStruct->cfgMgr_->getActiveGroupKey() << __E__;
+
 		return true;
 	}
 
@@ -1531,15 +1564,25 @@ void Iterator::haltIterationPlan(HttpXmlDocument& xmldoc)
 		}
 		else
 			__COUT__ << "Halt was attempted." << __E__;
+
 	}
+
+	//clear
+	activePlanName_ = "";
+	activeCommandIndex_ = -1;
 }
 
 //========================================================================================================================
 //	return state machine and iterator status
 void Iterator::getIterationPlanStatus(HttpXmlDocument& xmldoc)
 {
-	xmldoc.addTextElementToData("current_state", theSupervisor_->theStateMachine_.getCurrentStateName());
-	xmldoc.addTextElementToData("in_transition", theSupervisor_->theStateMachine_.isInTransition() ? "1" : "0");
+	xmldoc.addTextElementToData("current_state",
+			theSupervisor_->theStateMachine_.isInTransition()?
+					theSupervisor_->theStateMachine_.getCurrentTransitionName(
+							theSupervisor_->stateMachineLastCommandInput_):
+					theSupervisor_->theStateMachine_.getCurrentStateName());
+
+	//xmldoc.addTextElementToData("in_transition", theSupervisor_->theStateMachine_.isInTransition() ? "1" : "0");
 	if(theSupervisor_->theStateMachine_.isInTransition())
 		xmldoc.addTextElementToData("transition_progress",
 				theSupervisor_->theProgressBar_.readPercentageString());
