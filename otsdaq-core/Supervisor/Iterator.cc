@@ -1512,32 +1512,17 @@ void Iterator::haltIterationPlan(HttpXmlDocument& xmldoc)
 	std::lock_guard<std::mutex> lock(accessMutex_);
 	if(theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Have iterator access" << __E__;
 
-	if(activePlanIsRunning_ && !commandHalt_)
+	if(workloopRunning_)
 	{
-		if(workloopRunning_)
-		{
-			__COUT__ << "Passing halt command to iterator thread." << __E__;
-			commandHalt_ = true;
-		}
-		else //no thread, so reset 'Error' without command to thread
-		{
-			__COUT__ << "No thread, so conducting halt." << __E__;
-			activePlanIsRunning_ = false;
-			iteratorBusy_ = false;
-
-			try
-			{
-				Iterator::haltStateMachine(theSupervisor_, lastFsmName_);
-			}
-			catch(const std::runtime_error& e)
-			{
-				xmldoc.addTextElementToData("error_message", e.what());
-			}
-		}
+		__COUT__ << "activePlanIsRunning_: " << activePlanIsRunning_ << __E__;
+		__COUT__ << "Passing halt command to iterator thread." << __E__;
+		commandHalt_ = true;
 	}
-	else
+	else //no thread, so halt (and reset Error') without command to thread
 	{
 		__COUT__ << "No thread, so conducting halt." << __E__;
+		activePlanIsRunning_ = false;
+		iteratorBusy_ = false;
 
 		bool haltAttempted = false;
 		try
@@ -1547,12 +1532,13 @@ void Iterator::haltIterationPlan(HttpXmlDocument& xmldoc)
 		catch(const std::runtime_error& e)
 		{
 			haltAttempted = false;
+			__COUT__ << "Halt error: " << e.what() << __E__;
 		}
 
 		if(!haltAttempted) //then show error
 		{
 			__SS__ << "Invalid halt command attempted. Can only halt when there is an active iteration plan." << __E__;
-			__MOUT__ << ss.str();
+			__MOUT_ERR__ << ss.str();
 
 			xmldoc.addTextElementToData("error_message", ss.str());
 
