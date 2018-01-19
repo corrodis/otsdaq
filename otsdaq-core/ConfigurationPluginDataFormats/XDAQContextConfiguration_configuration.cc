@@ -144,12 +144,19 @@ unsigned int XDAQContextConfiguration::getARTDAQAppRank(const std::string &conte
 }
 
 //========================================================================================================================
-std::string XDAQContextConfiguration::getContextAddress(const std::string &contextUID) const
+std::string XDAQContextConfiguration::getContextAddress(const std::string &contextUID, bool wantHttp) const
 {
 	if (contextUID == "X") return "";
 	for (auto& i : contexts_)
 	{
-		if (i.contextUID_ == contextUID) return i.address_;
+		if (i.contextUID_ == contextUID) 
+		{
+			if (wantHttp) return i.address_;
+			auto address = i.address_;
+			if (address.find("http://") == 0) { address = address.replace(0,7, ""); }
+			if (address.find("https://") == 0) { address = address.replace(0,8, ""); }
+			return address;
+		}
 	}
 	return "";
 }
