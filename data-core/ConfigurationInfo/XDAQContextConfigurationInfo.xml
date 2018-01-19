@@ -9,6 +9,7 @@
 				<COLUMN Type="FixedChoiceData" 	 Name="Id" 	 StorageName="ID" 		DataType="NUMBER" 		DataChoices="arbitraryBool=1"/>
 				<COLUMN Type="Data" 	 Name="Address" 	 StorageName="ADDRESS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="Port" 	 StorageName="PORT" 		DataType="NUMBER" 		DataChoices=""/>
+        <COLUMN Type="Data" 	 Name="ARTDAQDataPort" 	 StorageName="ARTDAQ_DATA_PORT" 		DataType="NUMBER" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>

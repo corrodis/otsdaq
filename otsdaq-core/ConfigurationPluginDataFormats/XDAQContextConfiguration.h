@@ -42,6 +42,7 @@ public:
 		unsigned int id_;
 		std::string  address_;
 		unsigned int port_;
+		unsigned int artdaqDataPort_;
 		std::vector<XDAQApplication> applications_;
 	};
 
@@ -69,6 +70,8 @@ public:
 	std::vector<const XDAQContext *>	getEventBuilderContexts	() const;
 	std::vector<const XDAQContext *>	getAggregatorContexts	() const;
 	unsigned int						getARTDAQAppRank		(const std::string &contextUID = "X") const;
+	std::string                         getContextAddress(const std::string &contextUID = "X") const;
+	unsigned int                        getARTDAQDataPort(const std::string &contextUID = "X") const;
 	static bool							isARTDAQContext			(const std::string &contextUID);
 
 private:
@@ -92,6 +95,7 @@ public:
 		std::string const colId_                             = "Id";
 		std::string const colAddress_                        = "Address";
 		std::string const colPort_                           = "Port";
+		std::string const colARTDAQDataPort_ = "ARTDAQDataPort";
 	} colContext_;
 
 	//XDAQ App Column names
