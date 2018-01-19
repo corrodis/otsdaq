@@ -72,6 +72,9 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 			std::endl;
 
 		outputFHICL(builderConfigNode,
+			contextConfig->getARTDAQAppRank(builderContext->contextUID_),
+			contextConfig->getContextAddress(builderContext->contextUID_),
+			contextConfig->getARTDAQDataPort(builderContext->contextUID_),
 			contextConfig);
 	}
 }
@@ -96,7 +99,7 @@ std::string ARTDAQBuilderConfiguration::getFHICLFilename(const ConfigurationTree
 }
 
 //========================================================================================================================
-void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNode,
+void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
 	const XDAQContextConfiguration *contextConfig)
 {
 	/*
@@ -298,7 +301,8 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 						destinationRank <<
 						" max_fragment_size_words: " <<
 						destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
-						" host_map: [{rank: " << destinationRank << " host: \"" << host << "\" portOffset: " << std::to_string(port) << "}] " <<
+						" host_map: [{rank: " << destinationRank << " host: \"" << host << "\" portOffset: " << std::to_string(port) << "}, " <<
+						"{rank: " << selfRank << " host: \"" << selfHost << "\" portOffset: " << std::to_string(selfPort) << "}]" <<
 						"}\n";
 				}
 			}
@@ -380,7 +384,8 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 						sourceRank <<
 						" max_fragment_size_words: " <<
 						source.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() <<
-						" host_map: [{rank: " << sourceRank << " host: \"" << host << "\" portOffset: " << std::to_string(port) << "}] " <<
+						" host_map: [{rank: " << sourceRank << " host: \"" << host << "\" portOffset: " << std::to_string(port) << "}, " <<
+						"{rank: " << selfRank << " host: \"" << selfHost << "\" portOffset: " << std::to_string(selfPort) << "}]" <<
 						"}\n";
 				}
 			}
