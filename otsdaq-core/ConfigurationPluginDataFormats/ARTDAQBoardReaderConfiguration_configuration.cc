@@ -67,7 +67,6 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 	//for each reader context
 	//	do NOT output associated fcl config file
 	//  but do check the link is to a DataManager-esque thing
-	const XDAQContextConfiguration::XDAQContext * thisContext = nullptr;
 	for (auto &readerContext : readerContexts)
 	{
 		try
@@ -83,17 +82,8 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 
 			__COUT__ << "Checking that this reader supervisor node is DataManager-like." << std::endl;
 
-			auto dataManagerConfMap = readerConfigNode.getNode("LinkToDataManagerConfiguration").getChildren();
-			for (auto dmc : dataManagerConfMap) {
-				auto dataBufferConfMap = dmc.second.getNode("LinkToDataBufferConfiguration").getChildren();
-				for (auto dbc : dataBufferConfMap) {
-					auto processorConfUID = dbc.second.getNode("LinkToProcessorConfiguration").getUIDAsString();
-					if (processorConfUID == configManager->__SELF_NODE__.getUIDAsString()) {
-						__COUT__ << "Found match for context UID: " << readerContext->contextUID_ << std::endl;
-						thisContext = readerContext;
-					}
-				}
-			}
+			readerConfigNode.getNode("LinkToDataManagerConfiguration").getChildren();
+
 		}
 		catch (const std::runtime_error& e)
 		{
@@ -119,11 +109,29 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 	std::string appUID, buffUID, consumerUID;
-	if (thisContext == nullptr) {
-		__COUT_ERR__ << "Could not find matching context for this configuration!" << std::endl;
-	}
-	else {
-		for (auto &child : childrenMap)
+	for (auto &child : childrenMap)
+	{
+		const XDAQContextConfiguration::XDAQContext * thisContext = nullptr;
+		for (auto& readerContext : readerContexts) {
+			ConfigurationTree readerConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+				readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
+			auto dataManagerConfMap = readerConfigNode.getNode("LinkToDataManagerConfiguration").getChildren();
+			for (auto dmc : dataManagerConfMap) {
+				auto dataBufferConfMap = dmc.second.getNode("LinkToDataBufferConfiguration").getChildren();
+				for (auto dbc : dataBufferConfMap) {
+					auto processorConfUID = dbc.second.getNode("LinkToProcessorUID").getUIDAsString();
+					if (processorConfUID == child.second.getValue()) {
+						__COUT__ << "Found match for context UID: " << readerContext->contextUID_ << std::endl;
+						thisContext = readerContext;
+					}
+				}
+			}
+		}
+
+		if (thisContext == nullptr) {
+			__COUT_ERR__ << "Could not find matching context for this configuration!" << std::endl;
+		}
+		else {
 			if (child.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
 				outputFHICL(child.second,
@@ -132,6 +140,7 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 					contextConfig->getARTDAQDataPort(thisContext->contextUID_),
 					contextConfig);
 			}
+		}
 	}
 }
 
@@ -164,7 +173,7 @@ std::string ARTDAQBoardReaderConfiguration::getFHICLFilename(const Configuration
 }
 
 //========================================================================================================================
-void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardReaderNode,unsigned int selfRank, std::string selfHost, unsigned int selfPort,
+void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardReaderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
 	const XDAQContextConfiguration *contextConfig)
 {
 	/*
