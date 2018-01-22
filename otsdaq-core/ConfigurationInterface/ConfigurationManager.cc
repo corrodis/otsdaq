@@ -850,6 +850,8 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	{
 		//__COUT__ << "Found group meta data. v" << metaTablePair->second << std::endl;
 
+		memberMap.erase(metaTablePair); //remove from member map that is returned
+
 		//clear table
 		while(groupMetadataTable_.getView().getNumberOfRows())
 			groupMetadataTable_.getViewP()->deleteRow(0);
@@ -860,11 +862,22 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 			groupMetadataTable_.print();
 			__SS__ << "groupMetadataTable_ has wrong number of rows! Must be 1." << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+
+			if(groupComment) *groupComment = "NO COMMENT FOUND";
+			if(groupAuthor) *groupAuthor = "NO AUTHOR FOUND";
+			if(groupCreateTime) *groupCreateTime = "0";
+
+			int groupType = -1;
+			if(groupTypeString) //do before exit case
+			{
+				groupType = getTypeOfGroup(memberMap);
+				*groupTypeString = convertGroupTypeIdToName(groupType);
+			}
+			return memberMap;
+			//throw std::runtime_error(ss.str());
 		}
 		//groupMetadataTable_.print();
 
-		memberMap.erase(metaTablePair);
 
 		//extract fields
 		if(groupComment) *groupComment 			= groupMetadataTable_.getView().getValueAsString(0,1);

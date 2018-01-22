@@ -92,7 +92,7 @@ private:
     static void								startCommandRun				(IteratorWorkLoopStruct *iteratorStruct);
     static bool								checkCommandRun				(IteratorWorkLoopStruct *iteratorStruct);
 
-    static bool								haltStateMachine			(Supervisor* theSupervisor, const std::string& fsmName);
+    static bool								haltIterator				(Iterator *iterator, IteratorWorkLoopStruct *iteratorStruct = 0);//(Supervisor* theSupervisor, const std::string& fsmName);
 
     std::mutex								accessMutex_;
     volatile bool							workloopRunning_;
