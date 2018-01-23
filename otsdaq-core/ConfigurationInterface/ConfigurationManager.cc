@@ -799,6 +799,7 @@ void ConfigurationManager::loadMemberMap(
 //	if progressBar != 0, then do step handling, for finer granularity
 //
 // 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
+//	else NOTE: active views are changed! (when loading member map)
 //
 //	throws exception on failure.
 //   map<name       , ConfigurationVersion >
@@ -819,6 +820,18 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	if(groupAuthor) 			*groupAuthor 			= "";
 	if(groupCreateTime) 		*groupCreateTime 		= "";
 	if(groupTypeString)			*groupTypeString 		= "";
+
+	if(configGroupName == "defaultConfig")
+	{ //debug active versions
+		std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+		for(auto& activePair: allActivePairs)
+		{
+			__COUT__ << "Active table = " <<
+					activePair.first << "-v" <<
+					getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+		}
+	}
+
 
 	//	load all members of configuration group
 	//	if doActivate
@@ -896,6 +909,18 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 		*groupTypeString = convertGroupTypeIdToName(groupType);
 	}
 
+	if(configGroupName == "defaultConfig")
+		{ //debug active versions
+			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+			for(auto& activePair: allActivePairs)
+			{
+				__COUT__ << "Active table = " <<
+						activePair.first << "-v" <<
+						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+			}
+		}
+
+
 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
 
 	if(doActivate)
@@ -925,6 +950,16 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 //			//	- this group may have only been partially loaded before?
 //		}
 	}
+	if(configGroupName == "defaultConfig")
+		{ //debug active versions
+			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+			for(auto& activePair: allActivePairs)
+			{
+				__COUT__ << "Active table = " <<
+						activePair.first << "-v" <<
+						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+			}
+		}
 
 	if(progressBar) progressBar->step();
 

@@ -233,12 +233,9 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 			cacheGroupKey(name,key);
 		}
 
-		//for each group get comment, author, time, and type for latest key
+		//for each group get member map & comment, author, time, and type for latest key
 		for(auto& groupInfo:allGroupInfo_)
 		{
-			//load group so comments can be had
-			//	and also group metadata (author, comment, createTime)
-
 			try
 			{
 				groupInfo.second.latestKeyMemberMap_ = loadConfigurationGroup(
@@ -248,7 +245,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 						&groupInfo.second.latestKeyGroupComment_,
 						&groupInfo.second.latestKeyGroupAuthor_,
 						&groupInfo.second.latestKeyGroupCreationTime_,
-						false /*doNotLoadMember*/,
+						true /*doNotLoadMember*/,
 						&groupInfo.second.latestKeyGroupTypeString_);
 			}
 			catch(...)
