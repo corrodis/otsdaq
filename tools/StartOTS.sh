@@ -1,6 +1,6 @@
 #!/bin/sh
-echo
-echo "Launching StartOTS.sh otsdaq script... on {${HOSTNAME}}."
+echo -e "[${LINENO}]: \t ========================================================"
+echo -e "[${LINENO}]: \t Launching StartOTS.sh otsdaq script... on {${HOSTNAME}}."
 echo
 
 ISCONFIG=0
@@ -33,25 +33,25 @@ function killprocs {
 
 #check for wiz mode
 if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then
-	echo "*****************************************************"
-	echo "*************      WIZ MODE ENABLED!    *************"
-	echo "*****************************************************"
+	echo -e "[${LINENO}]: \t *****************************************************"
+	echo -e "[${LINENO}]: \t *************      WIZ MODE ENABLED!    *************"
+	echo -e "[${LINENO}]: \t *****************************************************"
     ISCONFIG=1
 fi
 
 
 if [[ "$1"  == "--verbose" || "$2"  == "--verbose" || "$1"  == "-v" || "$2"  == "-v"  ]]; then
-	echo "*************   VERBOSE MODE ENABLED!    ************"
+	echo -e "[${LINENO}]: \t *************   VERBOSE MODE ENABLED!    ************"
 	QUIET=0
 fi
 
 if [[ "$1"  == "--chrome" || "$2"  == "--chrome" || "$1"  == "-c" || "$2"  == "-c"  ]]; then
-	echo "*************   GOOGLE-CHROME LAUNCH ENABLED!    ************"
+	echo -e "[${LINENO}]: \t *************   GOOGLE-CHROME LAUNCH ENABLED!    ************"
 	CHROME=1
 fi
 
 if [[ "$1"  == "--donotkill" || "$2"  == "--donotkill" || "$1"  == "-d" || "$2"  == "-d"  ]]; then
-	echo "*************   DO-NOT-KILL ENABLED!    ************"
+	echo -e "[${LINENO}]: \t *************   DO-NOT-KILL ENABLED!    ************"
 	DONOTKILL=1
 fi
 
@@ -65,8 +65,8 @@ fi
 
 OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${HOSTNAME}.cmd"
 OTSDAQ_STARTOTS_QUIT_FILE="${USER_DATA}/ServiceData/StartOTS_action_quit.cmd"
-echo "StartOTS_action file path = ${OTSDAQ_STARTOTS_ACTION_FILE}"
-echo "StartOTS_quit file path = ${OTSDAQ_STARTOTS_QUIT_FILE}"
+echo -e "[${LINENO}]: \t StartOTS_action file path = ${OTSDAQ_STARTOTS_ACTION_FILE}"
+echo -e "[${LINENO}]: \t StartOTS_quit file path = ${OTSDAQ_STARTOTS_QUIT_FILE}"
 
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
 SAP_PATH=""
@@ -85,9 +85,9 @@ echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 #############################
 
 if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
-    echo "******************************************************"
-	echo "*************    KILLING otsdaq!        **************"
-    echo "******************************************************"
+	echo -e "[${LINENO}]: \t ******************************************************"
+	echo -e "[${LINENO}]: \t *************    KILLING otsdaq!        **************"
+    echo -e "[${LINENO}]: \t ******************************************************"
 
     killprocs
 	#killall -9 mpirun &>/dev/null #hide output
@@ -99,33 +99,33 @@ fi
 
 if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $DONOTKILL == 0 && "$1x" != "x" ]]; then
 	echo 
-	echo "Unrecognized paramater $1"
+	echo -e "[${LINENO}]: \t Unrecognized paramater $1"
 	echo
-    echo "******************************************************"
-	echo "*************    StartOTS.sh Usage      **************"
-    echo "******************************************************"
+    echo -e "[${LINENO}]: \t ******************************************************"
+	echo -e "[${LINENO}]: \t *************    StartOTS.sh Usage      **************"
+    echo -e "[${LINENO}]: \t ******************************************************"
 	echo
-	echo "To start otsdaq in 'wiz mode' please use any of these options:"
-	echo "	--configure  --config  --wizard  --wiz  -w"
-	echo "	e.g.: StartOTS.sh --wiz"
+	echo -e "[${LINENO}]: \t To start otsdaq in 'wiz mode' please use any of these options:"
+	echo -e "[${LINENO}]: \t 	--configure  --config  --wizard  --wiz  -w"
+	echo -e "[${LINENO}]: \t 	e.g.: StartOTS.sh --wiz"
 	echo
-	echo "To start otsdaq with 'verbose mode' enabled, add one of these options:"
-	echo "	--verbose  -v"
-	echo "	e.g.: StartOTS.sh --wiz -v     or    StartOTS.sh --verbose"
+	echo -e "[${LINENO}]: \t To start otsdaq with 'verbose mode' enabled, add one of these options:"
+	echo -e "[${LINENO}]: \t 	--verbose  -v"
+	echo -e "[${LINENO}]: \t 	e.g.: StartOTS.sh --wiz -v     or    StartOTS.sh --verbose"
 	echo
-	echo "To start otsdaq and launch google-chrome, add one of these options:"
-	echo "	--chrome  -c"
-	echo "	e.g.: StartOTS.sh --wiz -c     or    StartOTS.sh --chrome"
+	echo -e "[${LINENO}]: \t To start otsdaq and launch google-chrome, add one of these options:"
+	echo -e "[${LINENO}]: \t 	--chrome  -c"
+	echo -e "[${LINENO}]: \t 	e.g.: StartOTS.sh --wiz -c     or    StartOTS.sh --chrome"
 	echo
-	echo "To start otsdaq and launch google-chrome, add one of these options:"
-	echo "	--donotkill  -d"
-	echo "	e.g.: StartOTS.sh --wiz -d     or    StartOTS.sh --donotkill"
+	echo -e "[${LINENO}]: \t To start otsdaq and launch google-chrome, add one of these options:"
+	echo -e "[${LINENO}]: \t 	--donotkill  -d"
+	echo -e "[${LINENO}]: \t 	e.g.: StartOTS.sh --wiz -d     or    StartOTS.sh --donotkill"
 	echo
-	echo "To kill all otsdaq running processes, please use any of these options:"
-	echo "	--killall  --kill  --kx  -k"
-	echo "	e.g.: StartOTS.sh --kx"
+	echo -e "[${LINENO}]: \t To kill all otsdaq running processes, please use any of these options:"
+	echo -e "[${LINENO}]: \t 	--killall  --kill  --kx  -k"
+	echo -e "[${LINENO}]: \t 	e.g.: StartOTS.sh --kx"
 	echo
-	echo "aborting StartOTS.sh..."
+	echo -e "[${LINENO}]: \t aborting StartOTS.sh..."
 	exit
 fi
 
@@ -172,55 +172,55 @@ fi
 #setup web path as XDAQ is setup.. 
 #then make a link to user specified web path.
 WEB_PATH=${OTSDAQ_UTILITIES_DIR}/WebGUI
-#echo "WEB_PATH=$WEB_PATH"
-#echo "USER_WEB_PATH=$USER_WEB_PATH"
-#echo "Making symbolic link to USER_WEB_PATH"
-#echo "ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
+#echo -e "[${LINENO}]: \t WEB_PATH=$WEB_PATH"
+#echo -e "[${LINENO}]: \t USER_WEB_PATH=$USER_WEB_PATH"
+#echo -e "[${LINENO}]: \t Making symbolic link to USER_WEB_PATH"
+#echo -e "[${LINENO}]: \t ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
 ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath &>/dev/null #hide output
 
 
 if [ "x$USER_DATA" == "x" ]; then
 	echo
-	echo "Error."
-	echo "Environment variable USER_DATA not setup!"
-	echo "To setup, use 'export USER_DATA=<path to user data>'"
+	echo -e "[${LINENO}]: \t Error."
+	echo -e "[${LINENO}]: \t Environment variable USER_DATA not setup!"
+	echo -e "[${LINENO}]: \t To setup, use 'export USER_DATA=<path to user data>'"
 	echo 
 	echo
-	echo "(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
+	echo -e "[${LINENO}]: \t (If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
 	echo
 	exit    
 fi
 
 if [ ! -d $USER_DATA ]; then
 	echo
-	echo "Error."
-	echo "USER_DATA=$USER_DATA"
-	echo "Environment variable USER_DATA does not point to a valid directory!"
-	echo "To setup, use 'export USER_DATA=<path to user data>'"
+	echo -e "[${LINENO}]: \t Error."
+	echo -e "[${LINENO}]: \t USER_DATA=$USER_DATA"
+	echo -e "[${LINENO}]: \t Environment variable USER_DATA does not point to a valid directory!"
+	echo -e "[${LINENO}]: \t To setup, use 'export USER_DATA=<path to user data>'"
 	echo 
 	echo
-	echo "(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
+	echo -e "[${LINENO}]: \t (If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
 	echo
 	exit   
 fi
 
-echo "Environment variable USER_DATA is setup and points to folder" ${USER_DATA}
+echo -e "[${LINENO}]: \t Environment variable USER_DATA is setup and points to folder" ${USER_DATA}
 
 
 ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`
 	
 echo
-echo "Checking database at ARTDAQ_DATABASE_URI=${ARTDAQ_DATABASE_URI}..."
+echo -e "[${LINENO}]: \t Checking database at ARTDAQ_DATABASE_URI=${ARTDAQ_DATABASE_URI}..."
 if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 	# Rebuild ARTDAQ_DATABASE indicies
-	echo "Rebuilding database indices..."
+	echo -e "[${LINENO}]: \t Rebuilding database indices..."
 	rebuild_database_index >/dev/null 2>&1; rebuild_database_index --uri=${ARTDAQ_DATABASE_URI} >/dev/null 2>&1
 	
 	mv ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}.bak.$$		
 	mv ${ARTDAQ_DATABASE_DIR}_new ${ARTDAQ_DATABASE_DIR}
 	echo "rebuilt" > ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild
 else
-	echo "${ARTDAQ_DATABASE_DIR}/fromIndexRebuild file exists, so not rebuilding indices."
+	echo -e "[${LINENO}]: \t ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild file exists, so not rebuilding indices."
 fi
 echo
 
@@ -264,7 +264,7 @@ export XDAQ_CONFIGURATION_XML=otsConfigurationNoRU_CMake #->
 if [ $DONOTKILL == 0 ]; then
 	#kill all things otsdaq, before launching new things
 	echo
-	echo "Killing all existing otsdaq Applications..."
+	echo -e "[${LINENO}]: \t Killing all existing otsdaq Applications..."
 	killprocs
 	#killall -9 mpirun &>/dev/null #hide output
 	#killall -9 xdaq.exe &>/dev/null #hide output
@@ -272,12 +272,12 @@ if [ $DONOTKILL == 0 ]; then
 
 	#give time for killall
 	sleep 1
-	#echo "...Applications killed!"
+	#echo -e "[${LINENO}]: \t ...Applications killed!"
 fi
 
 
 
-#echo "ARTDAQ_MFEXTENSIONS_DIR=" ${ARTDAQ_MFEXTENSIONS_DIR}
+#echo -e "[${LINENO}]: \t ARTDAQ_MFEXTENSIONS_DIR=" ${ARTDAQ_MFEXTENSIONS_DIR}
 
 #at end print out connection instructions using MAIN_URL
 MAIN_URL="unknown_url"
@@ -302,35 +302,35 @@ launchOTSWiz() {
 	
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityGen.fcl
 	#this fcl tells the MF library used by ots source how to behave
-	#echo "OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
+	#echo -e "[${LINENO}]: \t OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
 	
 	
 	USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
 	USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
 			
 	
-	#echo "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
-	#echo "USE_QT_VIEWER" ${USE_QT_VIEWER}
+	#echo -e "[${LINENO}]: \t USE_WEB_VIEWER" ${USE_WEB_VIEWER}
+	#echo -e "[${LINENO}]: \t USE_QT_VIEWER" ${USE_QT_VIEWER}
 	
 	
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
-		#echo "CONSOLE: Using web console viewer"
+		#echo -e "[${LINENO}]: \t CONSOLE: Using web console viewer"
 		
 		#start quiet forwarder with receiving port and destination port parameter file
 	
 		if [ $QUIET == 1 ]; then
-			echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mf.txt ***"
-			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> otsdaq_quiet_run-mf.txt &
+			echo -e "[${LINENO}]: \t Quiet mode redirecting output to *** .otsdaq_quiet_run-mf-${HOSTNAME}.txt ***"
+			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> .otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 		else
 			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
 		fi		 	
 	fi
 	
 	if [[ $USE_QT_VIEWER == "1" ]]; then
-		#echo "CONSOLE: Using QT console viewer"
+		#echo -e "[${LINENO}]: \t CONSOLE: Using QT console viewer"
 		if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
 			echo
-			echo "Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
+			echo -e "[${LINENO}]: \t Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
 			echo
 			exit
 		fi
@@ -386,11 +386,13 @@ launchOTSWiz() {
 	#use safe Message Facility fcl in config mode
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacility.fcl #MessageFacilityWithCout.fcl
 	
-	echo ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml
+	echo -e "[${LINENO}]: \t Wiz mode xdaq config is ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml"
 			
 	if [ $QUIET == 1 ]; then
-		echo "Quiet mode redirecting output to *** otsdaq_quiet_run-wiz.txt ***"
-		xdaq.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &> otsdaq_quiet_run-wiz.txt &
+		echo
+		echo -e "[${LINENO}]: \t Quiet mode redirecting output to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***"
+		echo
+		xdaq.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &> .otsdaq_quiet_run-wiz-${HOSTNAME}.txt &
 	else
 		xdaq.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &
 	fi
@@ -398,7 +400,7 @@ launchOTSWiz() {
 	################
 	# start node db server
 	
-	#echo "ARTDAQ_UTILITIES_DIR=" ${ARTDAQ_UTILITIES_DIR}
+	#echo -e "[${LINENO}]: \t ARTDAQ_UTILITIES_DIR=" ${ARTDAQ_UTILITIES_DIR}
 	#cd $ARTDAQ_UTILITIES_DIR/node.js
 	#as root, once...
 	# chmod +x setupNodeServer.sh 
@@ -429,35 +431,35 @@ launchOTS() {
 	
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityGen.fcl
 	#this fcl tells the MF library used by ots source how to behave
-	#echo "OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
+	#echo -e "[${LINENO}]: \t OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
 	
 	
 	USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
 	USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
 			
 	
-	#echo "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
-	#echo "USE_QT_VIEWER" ${USE_QT_VIEWER}
+	#echo -e "[${LINENO}]: \t USE_WEB_VIEWER" ${USE_WEB_VIEWER}
+	#echo -e "[${LINENO}]: \t USE_QT_VIEWER" ${USE_QT_VIEWER}
 	
 	
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
-		#echo "CONSOLE: Using web console viewer"
+		#echo -e "[${LINENO}]: \t CONSOLE: Using web console viewer"
 		
 		#start quiet forwarder with receiving port and destination port parameter file
 	
 		if [ $QUIET == 1 ]; then
-			echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mf.txt ***"
-			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> otsdaq_quiet_run-mf.txt &
+			echo -e "[${LINENO}]: \t Quiet mode redirecting output to *** .otsdaq_quiet_run-mf-${HOSTNAME}.txt ***"
+			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> .otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 		else
 			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
 		fi		 	
 	fi
 	
 	if [[ $USE_QT_VIEWER == "1" ]]; then
-		#echo "CONSOLE: Using QT console viewer"
+		#echo -e "[${LINENO}]: \t CONSOLE: Using QT console viewer"
 		if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
 			echo
-			echo "Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
+			echo -e "[${LINENO}]: \t Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
 			echo
 			exit
 		fi
@@ -484,20 +486,20 @@ launchOTS() {
 			
 	envString="-genv OTSDAQ_LOG_ROOT ${OTSDAQ_LOG_DIR} -genv ARTDAQ_OUTPUT_DIR ${ARTDAQ_OUTPUT_DIR}"
 	
-	#echo "XDAQ Configuration XML:"
+	#echo -e "[${LINENO}]: \t XDAQ Configuration XML:"
 	#echo ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
 	#echo
-	#echo "XDAQ ARGS PASSED TO xdaq.exe:"
+	#echo -e "[${LINENO}]: \t XDAQ ARGS PASSED TO xdaq.exe:"
 	#echo ${XDAQ_ARGS}
 	#echo
 	#echo
 	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`
-	#echo "$value"
+	#echo -e "[${LINENO}]: \t $value"
 	#re="http://(${HOSTNAME}):([0-9]+)"
 	re="http(s*)://(.+):([0-9]+)"
 	superRe="id=\"([0-9]+)\""		
-	#echo "MATCHING REGEX"
+	#echo -e "[${LINENO}]: \t MATCHING REGEX"
 	haveXDAQContextPort=false
 	insideContext=false
 	ignore=false
@@ -542,13 +544,13 @@ launchOTS() {
 					#echo ${BASH_REMATCH[1]}    
 				fi
 			fi
-			#echo "------------------------------------------>>>>>>>>"
+			#echo -e "[${LINENO}]: \t ------------------------------------------>>>>>>>>"
 	
 		fi
 		if [[ $line == *"/xc:Context"* ]]; then
 			insideContext=false
 			haveXDAQContextPort=false
-			#echo "<<<<<<<------------------------------------------"
+			#echo -e "[${LINENO}]: \t <<<<<<<------------------------------------------"
 		fi
 		if [[ ($insideContext == true) ]]; then 
 			if [[ ($line == *"ots::ARTDAQDataManagerSupervisor"*) ]]; then
@@ -583,18 +585,18 @@ launchOTS() {
 	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 	
 	echo
-	echo "Launching all otsdaq Applications for host {${HOSTNAME}}..."
+	echo -e "[${LINENO}]: \t Launching all otsdaq Applications for host {${HOSTNAME}}..."
 	i=0	
 	for port in "${xdaqPort[@]}"
 	do
 	  : 
-	  echo "xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+	  echo -e "[${LINENO}]: \t xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 	  echo
 		  
 	
 	  if [ $QUIET == 1 ]; then
-		  echo "Quiet mode redirecting output to *** otsdaq_quiet_run-${port}.txt ***"
-		  xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> otsdaq_quiet_run-${port}.txt &
+		  echo -e "[${LINENO}]: \t Quiet mode redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***"
+		  xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
 	  else
 		  xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
 	  fi
@@ -611,7 +613,7 @@ launchOTS() {
 	    for port in "${boardReaderPort[@]}"
 	    do
 		: 
-		#echo " -np xdaq.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
+		#echo -e "[${LINENO}]: \t  -np xdaq.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
 		cmd=$cmd" -np 1 xdaq.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :"
 		if [[ "x$mpiHosts" == "x" ]]; then
 		    mpiHosts="${boardReaderHost[$i]}"
@@ -624,7 +626,7 @@ launchOTS() {
 	    for port in "${builderPort[@]}"
 	    do
 		: 
-		#echo " -np xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
+		#echo -e "[${LINENO}]: \t  -np xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
 		if [ $i -eq 0 ];then
 		    cmd=$cmd" -np 1 xdaq.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} "
 		else	
@@ -641,7 +643,7 @@ launchOTS() {
 	    for port in "${aggregatorPort[@]}"
 	    do
 		: 
-		#echo " -np xdaq.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS}\n"
+		#echo -e "[${LINENO}]: \t  -np xdaq.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS}\n"
 		cmd=$cmd": -np 1 xdaq.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS} "
 		if [[ "x$mpiHosts" == "x" ]]; then
 		    mpiHosts="${aggregatorHost[$i]}"
@@ -655,25 +657,25 @@ launchOTS() {
 	    echo Command used to start MPI: $cmd &
 	    MPI_RUN_CMD=$cmd
 		#if [ $QUIET == 1 ]; then
-		#echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"		  
-		#$cmd &> otsdaq_quiet_run-mpi.txt &
+		#echo -e "[${LINENO}]: \t Quiet mode redirecting output to *** .otsdaq_quiet_run-mpi-${HOSTNAME}.txt ***"		  
+		#$cmd &> .otsdaq_quiet_run-mpi-${HOSTNAME}.txt &
 		#else
 		#$cmd &
 		#fi	  
 	fi
 	
 	if [[ (${#boardReaderPort[@]} == 0) && (${#builderPort[@]} == 0) && (${#aggregatorPort[@]} == 0) && (${#xdaqPort[@]} == 0) ]]; then
-	  echo "********************************************************************************************************************************"
-	  echo "********************************************************************************************************************************"
-	  echo "WARNING: There are no configured processes for hostname ${HOSTNAME}." 
-	  echo "Are you sure your configuration is written for ${HOSTNAME}?" 
+	  echo -e "[${LINENO}]: \t ********************************************************************************************************************************"
+	  echo -e "[${LINENO}]: \t ********************************************************************************************************************************"
+	  echo -e "[${LINENO}]: \t WARNING: There are no configured processes for hostname ${HOSTNAME}." 
+	  echo -e "[${LINENO}]: \t Are you sure your configuration is written for ${HOSTNAME}?" 
 	  if [[ ${#contextHostname[@]} == 1 ]]; then 
-		echo "This is the ONLY host configured to run xdaq applications: ${contextHostname[@]}" 	    
+		echo -e "[${LINENO}]: \t This is the ONLY host configured to run xdaq applications: ${contextHostname[@]}" 	    
 	  else
-		echo "These are the hosts configured to run xdaq applications: ${contextHostname[@]}"
+		echo -e "[${LINENO}]: \t These are the hosts configured to run xdaq applications: ${contextHostname[@]}"
 	  fi
-	  echo "********************************************************************************************************************************"
-	  echo "********************************************************************************************************************************"
+	  echo -e "[${LINENO}]: \t ********************************************************************************************************************************"
+	  echo -e "[${LINENO}]: \t ********************************************************************************************************************************"
 	fi
 }   
 
@@ -690,13 +692,13 @@ printMainURL() {
 	fi
 	
 	echo
-	echo "Open the URL below in your Google Chrome or Mozilla Firefox web browser:"
+	echo -e "[${LINENO}]: \t Open the URL below in your Google Chrome or Mozilla Firefox web browser:"
 	if [ $QUIET == 0 ]; then
 		sleep 3
 	fi
 	
 	if [ $MAIN_URL == "unknown_url" ]; then
-		echo "INFO: No gateway supervisor found for node {${HOSTNAME}}."
+		echo -e "[${LINENO}]: \t INFO: No gateway supervisor found for node {${HOSTNAME}}."
 		exit
 	fi
 	
@@ -709,9 +711,9 @@ printMainURL() {
 		fi
 		
 		echo
-		echo "*********************************************************************"
+		echo -e "[${LINENO}]: \t *********************************************************************"
 		echo $MAIN_URL
-		echo "*********************************************************************"
+		echo -e "[${LINENO}]: \t *********************************************************************"
 		
 		if [ $QUIET == 1 ]; then
 			exit
@@ -739,7 +741,7 @@ fi
 otsActionHandler() {
 		
 	if [[ ($ISCONFIG == 1) || ("${HOSTNAME}" == "${mainHostname}") ]]; then
-		echo "${HOSTNAME} is gateway StartOTS.sh, so driving exit of other scripts."
+		echo -e "[${LINENO}]: \t This script on ${HOSTNAME} is gateway StartOTS.sh, so driving exit of other scripts."
 		echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
 		#time for other StartOTS to quit
 		sleep 5
@@ -761,24 +763,25 @@ otsActionHandler() {
 		#if cmd file is missing, exit StartOTS loop
 		
 		OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
+		OTSDAQ_STARTOTS_QUIT="$(cat ${OTSDAQ_STARTOTS_QUIT_FILE})"
 		
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
-			echo " "
-			echo "Rebuilding. . ."
-			echo " "			
+			echo -e "[${LINENO}]: \t  "
+			echo -e "[${LINENO}]: \t Rebuilding. . ."
+			echo -e "[${LINENO}]: \t  "			
 			#echo "1" > mrbresult.num; mrb b > otsdaq_startots_mrbreport.txt && echo "0" > mrbresult.num			
-			echo " "
+			echo -e "[${LINENO}]: \t  "
 			#grep -A 1 -B 1 "INFO: Stage build successful." otsdaq_startots_mrbreport.txt
-			echo " "
+			echo -e "[${LINENO}]: \t  "
 			sleep 5
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "RESET_MPI" ]; then
 		
 			#only print first time
 			if [ $FIRST_TIME == 1 ]; then
-				echo " "
-				echo "Restarting MPI (future restarts will be silent) . . ."
+				echo -e "[${LINENO}]: \t  "
+				echo -e "[${LINENO}]: \t Restarting MPI (future restarts will be silent) . . ."
 				#echo $MPI_RUN_CMD
-				echo " "
+				echo -e "[${LINENO}]: \t  "
 			fi
 			
 			killprocs mpirun
@@ -792,10 +795,10 @@ otsActionHandler() {
 				
 				#only print first time
 				if [ $FIRST_TIME == 1 ]; then
-					echo "Quiet mode redirecting output to *** otsdaq_quiet_run-mpi.txt ***"
+					echo -e "[${LINENO}]: \t Quiet mode redirecting output to *** .otsdaq_quiet_run-mpi-${HOSTNAME}.txt ***"
 					FIRST_TIME=0
 				fi
-				$MPI_RUN_CMD &> otsdaq_quiet_run-mpi.txt &
+				$MPI_RUN_CMD &> .otsdaq_quiet_run-mpi-${HOSTNAME}.txt &
 			else
 				$MPI_RUN_CMD &
 			fi
@@ -803,7 +806,7 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_WIZ" ]; then
 			
 			echo
-			echo "Starting otsdaq Wiz mode for host {${HOSTNAME}}..."
+			echo -e "[${LINENO}]: \t Starting otsdaq Wiz mode for host {${HOSTNAME}}..."
 			echo
 			killprocs
 			#killall -9 xdaq.exe
@@ -816,7 +819,7 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_OTS" ]; then
 				
 			echo
-			echo "Starting otsdaq in normal mode for host {${HOSTNAME}}..."
+			echo -e "[${LINENO}]: \t Starting otsdaq in normal mode for host {${HOSTNAME}}..."
 			echo
 			killprocs
 			#killall -9 xdaq.exe
@@ -829,21 +832,21 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "FLATTEN_TO_SYSTEM_ALIASES" ]; then
 
 			echo
-			echo "Removing unused tables and groups based on active System Aliases..."
-			echo "otsdaq_flatten_system_aliases 0"
+			echo -e "[${LINENO}]: \t Removing unused tables and groups based on active System Aliases..."
+			echo -e "[${LINENO}]: \t otsdaq_flatten_system_aliases 0"
 			echo	
 			echo 
 			if [ $QUIET == 1 ]; then
-				echo "Quiet mode redirecting output to *** otsdaq_quiet_run-flatten.txt ***"	
-				otsdaq_flatten_system_aliases 0 &> otsdaq_quiet_run-flatten.txt &
+				echo -e "[${LINENO}]: \t Quiet mode redirecting output to *** .otsdaq_quiet_run-flatten-${HOSTNAME}.txt ***"	
+				otsdaq_flatten_system_aliases 0 &> .otsdaq_quiet_run-flatten-${HOSTNAME}.txt &
 			else
 				otsdaq_flatten_system_aliases 0 &
 			fi		
 						
-		elif [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
+		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" ]]; then
 		    exit
 		elif [ "$OTSDAQ_STARTOTS_ACTION" != "0" ]; then
-			echo "Exiting StartOTS.sh.. Unrecognized command OTSDAQ_STARTOTS_ACTION=${OTSDAQ_STARTOTS_ACTION}"			
+			echo -e "[${LINENO}]: \t Exiting StartOTS.sh.. Unrecognized command OTSDAQ_STARTOTS_ACTION=${OTSDAQ_STARTOTS_ACTION}"			
 			exit
 		fi
 		
