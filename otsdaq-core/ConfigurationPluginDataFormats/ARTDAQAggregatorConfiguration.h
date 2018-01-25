@@ -20,7 +20,7 @@ public:
 
 	//Methods
 	void init						(ConfigurationManager *configManager);
-	void outputFHICL				(const ConfigurationTree &builderNode, unsigned int selfRank, const XDAQContextConfiguration *contextConfig);
+	void outputFHICL				(const ConfigurationTree &builderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort, const XDAQContextConfiguration *contextConfig);
 	std::string getFHICLFilename	(const ConfigurationTree &builderNode);
 
 

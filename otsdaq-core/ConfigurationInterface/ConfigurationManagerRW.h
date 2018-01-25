@@ -24,6 +24,11 @@ struct ConfigurationInfo {
 
 struct GroupInfo {
 	std::set<ConfigurationGroupKey>      		keys_;
+	std::string latestKeyGroupAuthor_, latestKeyGroupComment_,
+	latestKeyGroupCreationTime_, latestKeyGroupTypeString_;
+	std::map<std::string /*name*/, ConfigurationVersion /*version*/> latestKeyMemberMap_;
+
+	ConfigurationGroupKey getLatestKey() { return *(keys_.rbegin()); }
 };
 
 
@@ -87,7 +92,8 @@ public:
 
 	//==============================================================================
 	//public group cache handling
-	const GroupInfo&									getAllGroupInfo							(const std::string &groupName);
+	const GroupInfo&									getGroupInfo							(const std::string &groupName);
+	const std::map<std::string, GroupInfo>&				getAllGroupInfo							() {return allGroupInfo_;}
 
 	void testXDAQContext(); //for debugging
 

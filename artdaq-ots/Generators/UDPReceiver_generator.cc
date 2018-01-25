@@ -75,6 +75,7 @@ void ots::UDPReceiver::start() {
 	TLOG_INFO("UDPReceiver") << "Starting..." << TLOG_ENDL;
 
 	receiverThread_ = std::thread(&UDPReceiver::receiveLoop_, this);
+	start_();
 }
 
 void ots::UDPReceiver::receiveLoop_()
@@ -250,6 +251,11 @@ void ots::UDPReceiver::stop()
 void ots::UDPReceiver::stopNoMutex()
 {
 #pragma message "Using default implementation of UDPReceiver::stopNoMutex()"
+}
+
+void ots::UDPReceiver::start_()
+{
+#pragma message "Using default implementation of UDPReceiver::start_()"
 }
 
 // The following macro is defined in artdaq's GeneratorMacros.hh header

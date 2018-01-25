@@ -131,8 +131,8 @@ fi
 
 
 
-SERVER=`hostname -f || ifconfig eth0|grep "inet addr"|cut -d":" -f2|awk '{print $1}'`
-export SUPERVISOR_SERVER=$SERVER
+#SERVER=`hostname -f || ifconfig eth0|grep "inet addr"|cut -d":" -f2|awk '{print $1}'`
+export SUPERVISOR_SERVER=$HOSTNAME #$SERVER
 if [ $ISCONFIG == 1 ]; then
     export OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER=$SERVER
 fi

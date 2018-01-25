@@ -232,7 +232,33 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 			ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
 			cacheGroupKey(name,key);
 		}
-	}
+
+		//for each group get member map & comment, author, time, and type for latest key
+		for(auto& groupInfo:allGroupInfo_)
+		{
+			try
+			{
+				groupInfo.second.latestKeyMemberMap_ = loadConfigurationGroup(
+						groupInfo.first /*groupName*/,
+						groupInfo.second.getLatestKey(),
+						false /*doActivate*/,0 /*progressBar*/,0 /*accumulateErrors*/,
+						&groupInfo.second.latestKeyGroupComment_,
+						&groupInfo.second.latestKeyGroupAuthor_,
+						&groupInfo.second.latestKeyGroupCreationTime_,
+						true /*doNotLoadMember*/,
+						&groupInfo.second.latestKeyGroupTypeString_);
+			}
+			catch(...)
+			{
+				__COUT_WARN__ << "Error occurred loading latest group info into cache for '" <<
+						groupInfo.first << "'..." << __E__;
+				groupInfo.second.latestKeyGroupComment_ = "UNKNOWN";
+				groupInfo.second.latestKeyGroupAuthor_ = "UNKNOWN";
+				groupInfo.second.latestKeyGroupCreationTime_ = "0";
+				groupInfo.second.latestKeyGroupTypeString_ = "UNKNOWN";
+			}
+		} //end group info loop
+	} //end get group info
 	return allConfigurationInfo_;
 }
 
@@ -606,10 +632,10 @@ void ConfigurationManagerRW::cacheGroupKey(const std::string &groupName,
 }
 
 //==============================================================================
-//getAllGroupInfo
+//getGroupInfo
 //	the interface is slow when there are a lot of groups..
 //	so plan is to maintain local cache of recent group info
-const GroupInfo& ConfigurationManagerRW::getAllGroupInfo(const std::string &groupName)
+const GroupInfo& ConfigurationManagerRW::getGroupInfo(const std::string &groupName)
 {
 
 	//	//NOTE: seems like this filter is taking the long amount of time
@@ -648,7 +674,7 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 				//	std::set<std::string /*name*/> fullGroupNames =
 				//			theInterface_->getAllConfigurationGroupNames(groupName); //db filter by group name
 
-	const GroupInfo& groupInfo = getAllGroupInfo(groupName);
+	const GroupInfo& groupInfo = getGroupInfo(groupName);
 
 	//std::string name;
 	//ConfigurationGroupKey key;

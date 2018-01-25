@@ -77,6 +77,7 @@ namespace ots {
 
 		bool         getNext_(artdaq::FragmentPtrs & output) override;
 		void         start(void) override;
+		virtual void start_();
 		virtual void stop(void) override;
 		virtual void stopNoMutex(void) override;
 

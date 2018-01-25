@@ -420,6 +420,18 @@ throw (xgi::exception::Exception)
 	fsmWindowName = CgiDataUtilities::decodeURIComponent(fsmWindowName);
 	std::string currentState = theStateMachine_.getCurrentStateName();
 
+	__COUT__ << "Check for Handled by theIterator_" << std::endl;
+
+	//check if Iterator should handle
+	if((activeStateMachineWindowName_ == "" ||
+			activeStateMachineWindowName_ == "iterator") &&
+			theIterator_.handleCommandRequest(xmldoc,command,fsmWindowName))
+	{
+		__COUT__ << "Handled by theIterator_" << std::endl;
+		xmldoc.outputXmlDocument((std::ostringstream*) out, false);
+		return;
+	}
+
 	//Do not allow transition while in transition
 	if (theStateMachine_.isInTransition())
 	{
@@ -433,17 +445,6 @@ throw (xgi::exception::Exception)
 		return;
 	}
 
-	__COUT__ << "Check for Handled by theIterator_" << std::endl;
-
-	//check if Iterator should handle
-	if((activeStateMachineWindowName_ == "" ||
-			activeStateMachineWindowName_ == "iterator") &&
-			theIterator_.handleCommandRequest(xmldoc,command,fsmWindowName))
-	{
-		__COUT__ << "Handled by theIterator_" << std::endl;
-		xmldoc.outputXmlDocument((std::ostringstream*) out, false);
-		return;
-	}
 
 
 	/////////////////
@@ -610,6 +611,7 @@ std::string Supervisor::attemptStateMachineTransition(
 	if(out) xmldoc->outputXmlDocument((std::ostringstream*) out, false);
 	__COUT__ << "FSM state transition launched!" << std::endl;
 
+	stateMachineLastCommandInput_ = command;
 	return errorStr;
 }
 

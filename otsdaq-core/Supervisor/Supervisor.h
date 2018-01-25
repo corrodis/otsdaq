@@ -135,6 +135,7 @@ private:
 
     Iterator							theIterator_					;
     std::mutex							stateMachineAccessMutex_		; //for sharing state machine access with iterator thread
+    std::string							stateMachineLastCommandInput_	;
 
     enum {
     	VERBOSE_MUTEX = 0

@@ -799,6 +799,7 @@ void ConfigurationManager::loadMemberMap(
 //	if progressBar != 0, then do step handling, for finer granularity
 //
 // 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
+//	else NOTE: active views are changed! (when loading member map)
 //
 //	throws exception on failure.
 //   map<name       , ConfigurationVersion >
@@ -819,6 +820,18 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	if(groupAuthor) 			*groupAuthor 			= "";
 	if(groupCreateTime) 		*groupCreateTime 		= "";
 	if(groupTypeString)			*groupTypeString 		= "";
+
+	if(configGroupName == "defaultConfig")
+	{ //debug active versions
+		std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+		for(auto& activePair: allActivePairs)
+		{
+			__COUT__ << "Active table = " <<
+					activePair.first << "-v" <<
+					getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+		}
+	}
+
 
 	//	load all members of configuration group
 	//	if doActivate
@@ -850,6 +863,8 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	{
 		//__COUT__ << "Found group meta data. v" << metaTablePair->second << std::endl;
 
+		memberMap.erase(metaTablePair); //remove from member map that is returned
+
 		//clear table
 		while(groupMetadataTable_.getView().getNumberOfRows())
 			groupMetadataTable_.getViewP()->deleteRow(0);
@@ -860,11 +875,22 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 			groupMetadataTable_.print();
 			__SS__ << "groupMetadataTable_ has wrong number of rows! Must be 1." << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+
+			if(groupComment) *groupComment = "NO COMMENT FOUND";
+			if(groupAuthor) *groupAuthor = "NO AUTHOR FOUND";
+			if(groupCreateTime) *groupCreateTime = "0";
+
+			int groupType = -1;
+			if(groupTypeString) //do before exit case
+			{
+				groupType = getTypeOfGroup(memberMap);
+				*groupTypeString = convertGroupTypeIdToName(groupType);
+			}
+			return memberMap;
+			//throw std::runtime_error(ss.str());
 		}
 		//groupMetadataTable_.print();
 
-		memberMap.erase(metaTablePair);
 
 		//extract fields
 		if(groupComment) *groupComment 			= groupMetadataTable_.getView().getValueAsString(0,1);
@@ -882,6 +908,18 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 		groupType = getTypeOfGroup(memberMap);
 		*groupTypeString = convertGroupTypeIdToName(groupType);
 	}
+
+	if(configGroupName == "defaultConfig")
+		{ //debug active versions
+			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+			for(auto& activePair: allActivePairs)
+			{
+				__COUT__ << "Active table = " <<
+						activePair.first << "-v" <<
+						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+			}
+		}
+
 
 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
 
@@ -912,6 +950,16 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 //			//	- this group may have only been partially loaded before?
 //		}
 	}
+	if(configGroupName == "defaultConfig")
+		{ //debug active versions
+			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+			for(auto& activePair: allActivePairs)
+			{
+				__COUT__ << "Active table = " <<
+						activePair.first << "-v" <<
+						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+			}
+		}
 
 	if(progressBar) progressBar->step();
 

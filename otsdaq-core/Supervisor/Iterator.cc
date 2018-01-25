@@ -55,6 +55,7 @@ try
 
 
 	ConfigurationManagerRW theConfigurationManager(WebUsers::DEFAULT_ITERATOR_USERNAME); //this is a restricted username
+	//theConfigurationManager.init();
 	theConfigurationManager.getAllConfigurationInfo(true); // to prep all info
 
 	IteratorWorkLoopStruct theIteratorStruct(iterator,
@@ -211,27 +212,29 @@ try
 
 			theIteratorStruct.doHaltAction_ = false; //clear
 
-			//last ditch effort to make sure FSM is halted
-			iterator->haltStateMachine(
-					iterator->theSupervisor_,
-					theIteratorStruct.fsmName_);
+			iterator->haltIterator(iterator,&theIteratorStruct);
 
-			//lockout the messages array for the remainder of the scope
-			//this guarantees the reading thread can safely access the messages
-			if(iterator->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Waiting for iterator access" << __E__;
-			std::lock_guard<std::mutex> lock(iterator->accessMutex_);
-			if(iterator->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Have iterator access" << __E__;
-
-			iterator->activePlanIsRunning_ = false;
-			iterator->iteratorBusy_ = false;
-
-			__COUT__ << "Halted plan '" << theIteratorStruct.activePlan_ << "' at command index " <<
-					theIteratorStruct.commandIndex_ << ". " << __E__;
-			__MOUT__ << "Halted plan '" << theIteratorStruct.activePlan_ << "' at command index " <<
-					theIteratorStruct.commandIndex_ << ". " << __E__;
-
-			theIteratorStruct.activePlan_ = ""; //clear
-			theIteratorStruct.commandIndex_ = -1; //clear
+//			//last ditch effort to make sure FSM is halted
+//			iterator->haltIterator(
+//					iterator->theSupervisor_,
+//					theIteratorStruct.fsmName_);
+//
+//			//lockout the messages array for the remainder of the scope
+//			//this guarantees the reading thread can safely access the messages
+//			if(iterator->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Waiting for iterator access" << __E__;
+//			std::lock_guard<std::mutex> lock(iterator->accessMutex_);
+//			if(iterator->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Have iterator access" << __E__;
+//
+//			iterator->activePlanIsRunning_ = false;
+//			iterator->iteratorBusy_ = false;
+//
+//			__COUT__ << "Halted plan '" << theIteratorStruct.activePlan_ << "' at command index " <<
+//					theIteratorStruct.commandIndex_ << ". " << __E__;
+//			__MOUT__ << "Halted plan '" << theIteratorStruct.activePlan_ << "' at command index " <<
+//					theIteratorStruct.commandIndex_ << ". " << __E__;
+//
+//			theIteratorStruct.activePlan_ = ""; //clear
+//			theIteratorStruct.commandIndex_ = -1; //clear
 
 			continue; //resume workloop
 		}
@@ -332,25 +335,30 @@ try
 			    		__COUT_WARN__ << "Original group could not be activated." << __E__;
 			    	}
 
-			    	__COUT__ << "Completing halt..." << __E__;
 			    	//leave FSM halted
-			    	iterator->haltStateMachine(
-			    			iterator->theSupervisor_,
-							theIteratorStruct.fsmName_);
+			    	__COUT__ << "Completing halt..." << __E__;
 
-					//lockout the messages array for the remainder of the scope
-					//this guarantees the reading thread can safely access the messages
-					if(iterator->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Waiting for iterator access" << __E__;
-					std::lock_guard<std::mutex> lock(iterator->accessMutex_);
-					if(iterator->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Have iterator access" << __E__;
+			    	iterator->haltIterator(iterator,&theIteratorStruct);
 
-					//similar to halt
-					iterator->activePlanIsRunning_ = false;
-					iterator->iteratorBusy_ = false;
-
-					iterator->lastStartedPlanName_ = theIteratorStruct.activePlan_;
-					theIteratorStruct.activePlan_ = ""; //clear
-					theIteratorStruct.commandIndex_ = -1; //clear
+//
+//			    	//leave FSM halted
+//			    	iterator->haltIterator(
+//			    			iterator->theSupervisor_,
+//							theIteratorStruct.fsmName_);
+//
+//					//lockout the messages array for the remainder of the scope
+//					//this guarantees the reading thread can safely access the messages
+//					if(iterator->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Waiting for iterator access" << __E__;
+//					std::lock_guard<std::mutex> lock(iterator->accessMutex_);
+//					if(iterator->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Have iterator access" << __E__;
+//
+//					//similar to halt
+//					iterator->activePlanIsRunning_ = false;
+//					iterator->iteratorBusy_ = false;
+//
+//					iterator->lastStartedPlanName_ = theIteratorStruct.activePlan_;
+//					theIteratorStruct.activePlan_ = ""; //clear
+//					theIteratorStruct.commandIndex_ = -1; //clear
 				}
 			}
 			else if(theIteratorStruct.commandBusy_)
@@ -424,6 +432,17 @@ catch(...)
 void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
 try
 {
+
+	{
+		int i =0;
+		for(const auto& depthIteration:iteratorStruct->stepIndexStack_)
+		{
+			__COUT__ << i++ << ":" << depthIteration << __E__;
+
+		}
+	}
+
+
 	//should be mutually exclusive with Supervisor main thread state machine accesses
 	//lockout the messages array for the remainder of the scope
 	//this guarantees the reading thread can safely access the messages
@@ -676,17 +695,23 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct *iteratorStruct,
 
 //========================================================================================================================
 // return true if an action was attempted
-bool Iterator::haltStateMachine(Supervisor* theSupervisor, const std::string& fsmName)
+bool Iterator::haltIterator(Iterator *iterator,
+		 IteratorWorkLoopStruct *iteratorStruct)
+//(Supervisor* theSupervisor, const std::string& fsmName)
 {
+	Supervisor* theSupervisor = iterator->theSupervisor_;
+	const std::string& fsmName = iterator->lastFsmName_;
+
 	std::vector<std::string> fsmCommandParameters;
 	std::string errorStr = "";
 	std::string currentState = theSupervisor->theStateMachine_.getCurrentStateName();
 
+	bool haltAttempted = true;
 	if(currentState == "Initialized" ||
 			currentState == "Halted")
 	{
 		__COUT__ << "Do nothing. Already halted." << __E__;
-		return false;
+		haltAttempted = false;
 	}
 	else if(currentState == "Running")
 		errorStr = theSupervisor->attemptStateMachineTransition(
@@ -703,16 +728,73 @@ bool Iterator::haltStateMachine(Supervisor* theSupervisor, const std::string& fs
 				WebUsers::DEFAULT_ITERATOR_USERNAME,
 				fsmCommandParameters);
 
-	if(errorStr != "")
+	if(haltAttempted)
 	{
-		__SS__ << "Iterator failed to halt because of the following error: " << errorStr;
-		throw std::runtime_error(ss.str());
+		if(errorStr != "")
+
+		{
+			__SS__ << "Iterator failed to halt because of the following error: " << errorStr;
+			throw std::runtime_error(ss.str());
+		}
+
+		//else successfully launched
+		__COUT__ << "FSM in transition = " << theSupervisor->theStateMachine_.isInTransition() << __E__;
+		__COUT__ << "halting state machine launched." << __E__;
 	}
 
-	//else successfully launched
-	__COUT__ << "FSM in transition = " << theSupervisor->theStateMachine_.isInTransition() << __E__;
-	__COUT__ << "haltStateMachine launched." << __E__;
-	return true;
+
+
+	//finish up halting the iterator
+	__COUT__ << "Conducting Iterator halt." << __E__;
+
+
+	if(iteratorStruct)
+	{
+		__COUT__ << "Reverting track changes." << __E__;
+		ConfigurationInterface::setVersionTrackingEnabled(iteratorStruct->originalTrackChanges_);
+
+		__COUT__ << "Activating original group..." << __E__;
+		try
+		{
+			iteratorStruct->cfgMgr_->activateConfigurationGroup(
+					iteratorStruct->originalConfigGroup_,iteratorStruct->originalConfigKey_);
+		}
+		catch(...)
+		{
+			__COUT_WARN__ << "Original group could not be activated." << __E__;
+		}
+
+	}
+
+	//lockout the messages array for the remainder of the scope
+	//this guarantees the reading thread can safely access the messages
+	if(iterator->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Waiting for iterator access" << __E__;
+	std::lock_guard<std::mutex> lock(iterator->accessMutex_);
+	if(iterator->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Have iterator access" << __E__;
+
+
+
+	iterator->activePlanIsRunning_ = false;
+	iterator->iteratorBusy_ = false;
+
+	//clear
+	iterator->activePlanName_ = "";
+	iterator->activeCommandIndex_ = -1;
+
+	if(iteratorStruct)
+	{
+
+		__COUT__ << "Halted plan '" << iteratorStruct->activePlan_ << "' at command index " <<
+				iteratorStruct->commandIndex_ << ". " << __E__;
+		__MOUT__ << "Halted plan '" << iteratorStruct->activePlan_ << "' at command index " <<
+				iteratorStruct->commandIndex_ << ". " << __E__;
+
+		iterator->lastStartedPlanName_ = iteratorStruct->activePlan_;
+		iteratorStruct->activePlan_ = ""; //clear
+		iteratorStruct->commandIndex_ = -1; //clear
+	}
+
+	return haltAttempted;
 }
 
 //========================================================================================================================
@@ -1322,6 +1404,27 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct *iteratorStruct)
 	else //else successfully done (in Configured state!)
 	{
 		__COUT__ << "checkCommandConfigureAlias complete." << __E__;
+
+		//also activate the Iterator config manager to mimic active config
+		std::pair<std::string, ConfigurationGroupKey> newActiveGroup =
+				iteratorStruct->cfgMgr_->getConfigurationGroupFromAlias(iteratorStruct->fsmCommandParameters_[0]);
+		iteratorStruct->cfgMgr_->loadConfigurationGroup(newActiveGroup.first,newActiveGroup.second,true /*activate*/);
+
+
+		__COUT__ << "originalTrackChanges " <<
+				iteratorStruct->originalTrackChanges_ << __E__;
+		__COUT__ << "originalConfigGroup " <<
+				iteratorStruct->originalConfigGroup_ << __E__;
+		__COUT__ << "originalConfigKey " <<
+				iteratorStruct->originalConfigKey_ << __E__;
+
+		__COUT__ << "currentTrackChanges " <<
+				ConfigurationInterface::isVersionTrackingEnabled() << __E__;
+		__COUT__ << "originalConfigGroup " <<
+				iteratorStruct->cfgMgr_->getActiveGroupName() << __E__;
+		__COUT__ << "originalConfigKey " <<
+				iteratorStruct->cfgMgr_->getActiveGroupKey() << __E__;
+
 		return true;
 	}
 
@@ -1473,73 +1576,73 @@ void Iterator::haltIterationPlan(HttpXmlDocument& xmldoc)
 
 	//setup "halt" command
 
-	//lockout the messages array for the remainder of the scope
-	//this guarantees the reading thread can safely access the messages
-	if(theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Waiting for iterator access" << __E__;
-	std::lock_guard<std::mutex> lock(accessMutex_);
-	if(theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Have iterator access" << __E__;
 
-	if(activePlanIsRunning_ && !commandHalt_)
+	if(workloopRunning_)
 	{
-		if(workloopRunning_)
-		{
-			__COUT__ << "Passing halt command to iterator thread." << __E__;
-			commandHalt_ = true;
-		}
-		else //no thread, so reset 'Error' without command to thread
-		{
-			__COUT__ << "No thread, so conducting halt." << __E__;
-			activePlanIsRunning_ = false;
-			iteratorBusy_ = false;
+		//lockout the messages array for the remainder of the scope
+		//this guarantees the reading thread can safely access the messages
+		if(theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Waiting for iterator access" << __E__;
+		std::lock_guard<std::mutex> lock(accessMutex_);
+		if(theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Have iterator access" << __E__;
 
-			try
-			{
-				Iterator::haltStateMachine(theSupervisor_, lastFsmName_);
-			}
-			catch(const std::runtime_error& e)
-			{
-				xmldoc.addTextElementToData("error_message", e.what());
-			}
-		}
+		__COUT__ << "activePlanIsRunning_: " << activePlanIsRunning_ << __E__;
+		__COUT__ << "Passing halt command to iterator thread." << __E__;
+		commandHalt_ = true;
+
+		//clear
+		activePlanName_ = "";
+		activeCommandIndex_ = -1;
 	}
-	else
+	else //no thread, so halt (and reset Error') without command to thread
 	{
 		__COUT__ << "No thread, so conducting halt." << __E__;
+		Iterator::haltIterator(this);
+//
+//		activePlanIsRunning_ = false;
+//		iteratorBusy_ = false;
+//
+//		bool haltAttempted = false;
+//		try
+//		{
+//			haltAttempted = Iterator::haltIterator(theSupervisor_, lastFsmName_);
+//		}
+//		catch(const std::runtime_error& e)
+//		{
+//			haltAttempted = false;
+//			__COUT__ << "Halt error: " << e.what() << __E__;
+//		}
+//
+//		if(!haltAttempted) //then show error
+//		{
+//			__SS__ << "Invalid halt command attempted. Can only halt when there is an active iteration plan." << __E__;
+//			__MOUT_ERR__ << ss.str();
+//
+//			xmldoc.addTextElementToData("error_message", ss.str());
+//
+//			__COUT__ << "Invalid halt command attempted. " <<
+//					workloopRunning_ << " " <<
+//					activePlanIsRunning_ << " " <<
+//					commandHalt_ << " " <<
+//					activePlanName_ << __E__;
+//		}
+//		else
+//			__COUT__ << "Halt was attempted." << __E__;
 
-		bool haltAttempted = false;
-		try
-		{
-			haltAttempted = Iterator::haltStateMachine(theSupervisor_, lastFsmName_);
-		}
-		catch(const std::runtime_error& e)
-		{
-			haltAttempted = false;
-		}
-
-		if(!haltAttempted) //then show error
-		{
-			__SS__ << "Invalid halt command attempted. Can only halt when there is an active iteration plan." << __E__;
-			__MOUT__ << ss.str();
-
-			xmldoc.addTextElementToData("error_message", ss.str());
-
-			__COUT__ << "Invalid halt command attempted. " <<
-					workloopRunning_ << " " <<
-					activePlanIsRunning_ << " " <<
-					commandHalt_ << " " <<
-					activePlanName_ << __E__;
-		}
-		else
-			__COUT__ << "Halt was attempted." << __E__;
 	}
+
 }
 
 //========================================================================================================================
 //	return state machine and iterator status
 void Iterator::getIterationPlanStatus(HttpXmlDocument& xmldoc)
 {
-	xmldoc.addTextElementToData("current_state", theSupervisor_->theStateMachine_.getCurrentStateName());
-	xmldoc.addTextElementToData("in_transition", theSupervisor_->theStateMachine_.isInTransition() ? "1" : "0");
+	xmldoc.addTextElementToData("current_state",
+			theSupervisor_->theStateMachine_.isInTransition()?
+					theSupervisor_->theStateMachine_.getCurrentTransitionName(
+							theSupervisor_->stateMachineLastCommandInput_):
+					theSupervisor_->theStateMachine_.getCurrentStateName());
+
+	//xmldoc.addTextElementToData("in_transition", theSupervisor_->theStateMachine_.isInTransition() ? "1" : "0");
 	if(theSupervisor_->theStateMachine_.isInTransition())
 		xmldoc.addTextElementToData("transition_progress",
 				theSupervisor_->theProgressBar_.readPercentageString());
