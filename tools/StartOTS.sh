@@ -9,22 +9,26 @@ CHROME=0
 DONOTKILL=0
 
 function killprocs {
-    if [[ "x$1" == "x" ]]; then
-		PIDS=`ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'`
-		PIDS+=" "
-		PIDS+=`ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'`
-		PIDS+=" "
-		PIDS+=`ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'`
-		
-		#echo Killing PIDs: $PIDS
-		kill $PIDS >/dev/null 2>&1
-		kill -9 $PIDS >/dev/null 2>&1
-    else
-		PIDS=`ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'`
-		#echo Killing PIDs: $PIDS
-		kill $PIDS >/dev/null 2>&1
-		kill -9 $PIDS >/dev/null 2>&1
-    fi
+	killall -9 mpirun &>/dev/null #hide output
+	killall -9 xdaq.exe &>/dev/null #hide output
+	killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
+	
+#if [[ "x$1" == "x" ]]; then
+#		PIDS=`ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'`
+#		PIDS+=" "
+#		PIDS+=`ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'`
+#		PIDS+=" "
+#		PIDS+=`ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'`
+#		
+#		#echo Killing PIDs: $PIDS
+#		kill $PIDS >/dev/null 2>&1
+#		kill -9 $PIDS >/dev/null 2>&1
+#    else
+#		PIDS=`ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'`
+#		#echo Killing PIDs: $PIDS
+#		kill $PIDS >/dev/null 2>&1
+#		kill -9 $PIDS >/dev/null 2>&1
+#    fi
 }
 
 #check for wiz mode
@@ -55,9 +59,14 @@ fi
 #initializing StartOTS action file
 #attempt to mkdir for full path so that it exists to move the database to
 # assuming mkdir is non-destructive
+#Note: quit file added to universally quit StartOTS scripts originating from same USER_DATA
+# can not come from action file because individual StartOTS scripts need to respond to that one.
+# The gateway supervisor StartOTS script drives the quit file.
 
 OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${HOSTNAME}.cmd"
+OTSDAQ_STARTOTS_QUIT_FILE="${USER_DATA}/ServiceData/StartOTS_action_quit.cmd"
 echo "StartOTS_action file path = ${OTSDAQ_STARTOTS_ACTION_FILE}"
+echo "StartOTS_quit file path = ${OTSDAQ_STARTOTS_QUIT_FILE}"
 
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
 SAP_PATH=""
@@ -71,6 +80,7 @@ done
 
 #exit any old action loops
 echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
+
 #done initializing StartOTS action file
 #############################
 
@@ -728,10 +738,16 @@ fi
 #FIXME  -- temporary solution for keeping artdaq mpi alive through reconfiguring
 otsActionHandler() {
 		
-	
+	if [[ ($ISCONFIG == 1) || ("${HOSTNAME}" == "${mainHostname}") ]]; then
+		echo "${HOSTNAME} is gateway StartOTS.sh, so driving exit of other scripts."
+		echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
+		#time for other StartOTS to quit
+		sleep 5
+	fi
 	
 	#clear file initially
 	echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
+	echo "0" > $OTSDAQ_STARTOTS_QUIT_FILE
 	
 	FIRST_TIME=1
 	
