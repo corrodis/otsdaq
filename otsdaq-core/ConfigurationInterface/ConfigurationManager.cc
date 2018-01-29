@@ -577,6 +577,8 @@ const std::string& ConfigurationManager::getTypeNameOfGroup(
 //loadMemberMap
 //	loads tables given by name/version pairs in memberMap
 //	Note: does not activate them.
+//
+//	if filePath == "", then output to cout
 void ConfigurationManager::dumpActiveConfiguration(
 		const std::string &filePath, const std::string &dumpType) const
 {
@@ -594,7 +596,15 @@ void ConfigurationManager::dumpActiveConfiguration(
 	if(fs.is_open())
 		out = &fs;
 	else
+	{
+		if(filePath != "")
+		{
+			__SS__ << "Invalid File path. File path could not be opened!" << __E__;
+			__COUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
+		}
 		out = &(std::cout);
+	}
 
 
 	(*out) << "#################################" << std::endl;
@@ -659,6 +669,12 @@ void ConfigurationManager::dumpActiveConfiguration(
 			(*out) << "\t" << group.first << " := " <<
 					group.second.first << " (" <<
 					group.second.second << ")" << std::endl;
+
+			if(group.second.first == "")
+			{
+				(*out) << "\t" << "Empty group name. Assuming no active group." << __E__;
+				continue;
+			}
 
 			std::map<std::string /*name*/, ConfigurationVersion /*version*/> memberMap =
 					cfgMgr->theInterface_->getConfigurationGroupMembers(
