@@ -837,16 +837,16 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	if(groupCreateTime) 		*groupCreateTime 		= "";
 	if(groupTypeString)			*groupTypeString 		= "";
 
-	if(configGroupName == "defaultConfig")
-	{ //debug active versions
-		std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
-		for(auto& activePair: allActivePairs)
-		{
-			__COUT__ << "Active table = " <<
-					activePair.first << "-v" <<
-					getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
-		}
-	}
+//	if(configGroupName == "defaultConfig")
+//	{ //debug active versions
+//		std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+//		for(auto& activePair: allActivePairs)
+//		{
+//			__COUT__ << "Active table = " <<
+//					activePair.first << "-v" <<
+//					getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+//		}
+//	}
 
 
 	//	load all members of configuration group
@@ -925,16 +925,16 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 		*groupTypeString = convertGroupTypeIdToName(groupType);
 	}
 
-	if(configGroupName == "defaultConfig")
-		{ //debug active versions
-			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
-			for(auto& activePair: allActivePairs)
-			{
-				__COUT__ << "Active table = " <<
-						activePair.first << "-v" <<
-						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
-			}
-		}
+//	if(configGroupName == "defaultConfig")
+//		{ //debug active versions
+//			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+//			for(auto& activePair: allActivePairs)
+//			{
+//				__COUT__ << "Active table = " <<
+//						activePair.first << "-v" <<
+//						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+//			}
+//		}
 
 
 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
@@ -966,16 +966,16 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 //			//	- this group may have only been partially loaded before?
 //		}
 	}
-	if(configGroupName == "defaultConfig")
-		{ //debug active versions
-			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
-			for(auto& activePair: allActivePairs)
-			{
-				__COUT__ << "Active table = " <<
-						activePair.first << "-v" <<
-						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
-			}
-		}
+//	if(configGroupName == "defaultConfig")
+//		{ //debug active versions
+//			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+//			for(auto& activePair: allActivePairs)
+//			{
+//				__COUT__ << "Active table = " <<
+//						activePair.first << "-v" <<
+//						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+//			}
+//		}
 
 	if(progressBar) progressBar->step();
 
