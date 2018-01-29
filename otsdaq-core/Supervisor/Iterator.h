@@ -145,10 +145,11 @@ private:
     	std::map<std::string /*name*/, ConfigurationVersion /*version*/> memberMap;
     	try
     	{
-    		memberMap = cfgMgr->loadConfigurationGroup(
+    		 cfgMgr->loadConfigurationGroup(
     				groupName,
 					originalKey,
-					0,0,0,0,0,0, //defaults
+					0,&memberMap,
+					0,0,0,0,0, //defaults
 					true); //doNotLoadMember
     	}
     	catch(const std::runtime_error& e)

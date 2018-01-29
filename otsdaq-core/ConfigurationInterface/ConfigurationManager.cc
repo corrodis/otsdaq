@@ -819,10 +819,11 @@ void ConfigurationManager::loadMemberMap(
 //
 //	throws exception on failure.
 //   map<name       , ConfigurationVersion >
-std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurationGroup(
+void ConfigurationManager::loadConfigurationGroup(
 		const std::string     	&configGroupName,
 		ConfigurationGroupKey 	configGroupKey,
 		bool                  	doActivate,
+		std::map<std::string, ConfigurationVersion> *groupMembers,
 		ProgressBar			  	*progressBar,
 		std::string 			*accumulatedTreeErrors,
 		std::string 			*groupComment,
@@ -831,11 +832,13 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 		bool					doNotLoadMember,
 		std::string				*groupTypeString)
 {
+	//clear to defaults
 	if(accumulatedTreeErrors) 	*accumulatedTreeErrors	= "";
-	if(groupComment) 			*groupComment 			= "";
-	if(groupAuthor) 			*groupAuthor 			= "";
-	if(groupCreateTime) 		*groupCreateTime 		= "";
-	if(groupTypeString)			*groupTypeString 		= "";
+	if(groupComment) 			*groupComment 			= "NO COMMENT FOUND";
+	if(groupAuthor) 			*groupAuthor 			= "NO AUTHOR FOUND";
+	if(groupCreateTime) 		*groupCreateTime 		= "0";
+	if(groupTypeString)			*groupTypeString 		= "UNKNOWN";
+
 
 //	if(configGroupName == "defaultConfig")
 //	{ //debug active versions
@@ -881,6 +884,8 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 
 		memberMap.erase(metaTablePair); //remove from member map that is returned
 
+		if(groupMembers) *groupMembers = memberMap; //copy for return
+
 		//clear table
 		while(groupMetadataTable_.getView().getNumberOfRows())
 			groupMetadataTable_.getViewP()->deleteRow(0);
@@ -902,7 +907,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 				groupType = getTypeOfGroup(memberMap);
 				*groupTypeString = convertGroupTypeIdToName(groupType);
 			}
-			return memberMap;
+			return;// memberMap;
 			//throw std::runtime_error(ss.str());
 		}
 		//groupMetadataTable_.print();
@@ -913,6 +918,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 		if(groupAuthor) *groupAuthor 			= groupMetadataTable_.getView().getValueAsString(0,2);
 		if(groupCreateTime) *groupCreateTime 	= groupMetadataTable_.getView().getValueAsString(0,3);
 	}
+	else if(groupMembers) *groupMembers = memberMap; //copy for return
 
 	if(progressBar) progressBar->step();
 
@@ -937,7 +943,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 //		}
 
 
-	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
+	if(doNotLoadMember) return;// memberMap; //this is useful if just getting group metadata
 
 	if(doActivate)
 		__COUT__ << "------------------------------------- loadConfigurationGroup start" << std::endl;
@@ -995,7 +1001,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 		{
 			__COUT_ERR__ << "Errors detected while loading Configuration Group: " << configGroupName <<
 					"(" << configGroupKey << "). Aborting." << std::endl;
-			return memberMap; //return member name map to version
+			return;// memberMap; //return member name map to version
 		}
 	}
 
@@ -1088,7 +1094,7 @@ std::map<std::string, ConfigurationVersion> ConfigurationManager::loadConfigurat
 	if(doActivate)
 		__COUT__ << "------------------------------------- loadConfigurationGroup end" << std::endl;
 
-	return memberMap;
+	return;// memberMap;
 }
 
 

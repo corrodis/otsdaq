@@ -238,10 +238,12 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 		{
 			try
 			{
-				groupInfo.second.latestKeyMemberMap_ = loadConfigurationGroup(
+				loadConfigurationGroup(
 						groupInfo.first /*groupName*/,
 						groupInfo.second.getLatestKey(),
-						false /*doActivate*/,0 /*progressBar*/,0 /*accumulateErrors*/,
+						false /*doActivate*/,
+						&groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
+						0 /*progressBar*/,0 /*accumulateErrors*/,
 						&groupInfo.second.latestKeyGroupComment_,
 						&groupInfo.second.latestKeyGroupAuthor_,
 						&groupInfo.second.latestKeyGroupCreationTime_,
@@ -327,6 +329,7 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 {
 	loadConfigurationGroup(configGroupName,configGroupKey,
 			true, 	//loads and activates
+			0,		//no members needed
 			0,		//no progress bar
 			accumulatedTreeErrors); //accumulate warnings or not
 

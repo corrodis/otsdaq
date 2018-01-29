@@ -63,7 +63,7 @@ public:
 	void																  dumpActiveConfiguration		  (const std::string &filePath, const std::string &dumpType) const;
 
 	//   map<name       , ConfigurationVersion >
-	std::map<std::string, ConfigurationVersion >                          loadConfigurationGroup		  (const std::string &configGroupName, ConfigurationGroupKey configGroupKey, bool doActivate=false, ProgressBar* progressBar=0, std::string *accumulateWarnings=0, std::string *groupComment=0, std::string	*groupAuthor=0,	std::string *groupCreateTime=0, bool doNotLoadMember=false, std::string	*groupTypeString=0);
+	void                          										  loadConfigurationGroup		  (const std::string &configGroupName, ConfigurationGroupKey configGroupKey, bool doActivate=false, std::map<std::string, ConfigurationVersion> *groupMembers = 0, ProgressBar* progressBar=0, std::string *accumulateWarnings=0, std::string *groupComment=0, std::string	*groupAuthor=0,	std::string *groupCreateTime=0, bool doNotLoadMember=false, std::string	*groupTypeString=0);
 	void										                          loadMemberMap					  (const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
 	ConfigurationGroupKey							                      loadConfigurationBackbone       (void);
 	void											                      restoreActiveConfigurationGroups(bool throwErrors=false);

@@ -2569,7 +2569,7 @@ throw (xgi::exception::Exception)
 				{
 					theConfigurationManager_->loadConfigurationGroup(
 							aliasMapPair.second.first,aliasMapPair.second.second,
-							false,0,0,
+							false,0,0,0,
 							&groupComment, &groupAuthor, &groupCreationTime, false /*false to not load member map*/);
 
 					xmldoc.addTextElementToData("config_comment", groupComment);
