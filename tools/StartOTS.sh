@@ -417,6 +417,11 @@ launchOTSWiz() {
 	sleep 2
 	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	#echo $MAIN_URL
+			
+
+	printMainURL &
+	sleep 1 #so that the terminal comes back after the printouts in quiet mode
+
 }
 
 ####################################################################
@@ -604,6 +609,8 @@ launchOTS() {
 	
 	  if [ $QUIET == 1 ]; then
 		  echo -e "StartOTS [${LINENO}]  \t Quiet mode redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***"
+		  echo
+		  echo
 		  xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
 	  else
 		  xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
@@ -611,7 +618,7 @@ launchOTS() {
 	  
 	  i=$(( $i + 1 ))
 	done
-	
+		
 	if [[ (${#boardReaderPort[@]} != 0) || (${#builderPort[@]} != 0) || (${#aggregatorPort[@]} != 0) ]] && [[ "${HOSTNAME}" == "${mainHostname}" ]]; then
 	    cmdstart="mpirun -launcher ssh ${envString}"
 	    cmd=""
@@ -685,6 +692,10 @@ launchOTS() {
 	  echo -e "StartOTS [${LINENO}]  \t ********************************************************************************************************************************"
 	  echo -e "StartOTS [${LINENO}]  \t ********************************************************************************************************************************"
 	fi
+
+
+	printMainURL &
+	sleep 1 #so that the terminal comes back after the printouts in quiet mode
 }   
 
 export -f launchOTS
@@ -692,19 +703,25 @@ export -f launchOTS
 
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 printMainURL() {	
-#echo -e "StartOTS [${LINENO}]  \t printMainURL()"
+	
+	#echo -e "StartOTS [${LINENO}]  \t printMainURL()"
 	
 	#check if StartOTS.sh was aborted
-	OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
-	if [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
-		exit
+	#OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
+	#	if [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
+	#		exit
+	#	fi
+	
+	if [ $QUIET == 0 ]; then
+		sleep 3
+	else
+		sleep 2
 	fi
 	
 	echo
-	echo -e "StartOTS [${LINENO}]  \t Open the URL below in your Google Chrome or Mozilla Firefox web browser:"
-	if [ $QUIET == 0 ]; then
-		sleep 3
-	fi
+	echo
+	echo -e "StartOTS [${LINENO}]  \t Open the URL below in your Google Chrome or Mozilla Firefox web browser:"	
+	
 	
 	if [ $MAIN_URL == "unknown_url" ]; then
 		echo -e "StartOTS [${LINENO}]  \t INFO: No gateway supervisor found for node {${HOSTNAME}}."
@@ -714,15 +731,16 @@ printMainURL() {
 	for i in {1..5}
 	do
 		#check if StartOTS.sh was aborted
-		OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
-		if [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
-			exit
-		fi
+		#OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
+		#if [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
+		#exit
+		#fi
 		
-		echo
+		
 		echo -e "StartOTS [${LINENO}]  \t *********************************************************************"
 		echo -e "StartOTS [${LINENO}]  \t otsdaq URL = $MAIN_URL"
 		echo -e "StartOTS [${LINENO}]  \t *********************************************************************"
+		echo
 		
 		if [ $QUIET == 1 ]; then
 			exit
@@ -872,8 +890,10 @@ export -f otsActionHandler
 
 otsActionHandler &
 
-printMainURL &
-sleep 1 #so that the terminal comes back after the printouts in quiet mode
+#moved to launch functions
+#printMainURL &
+
+sleep 1 #so that the terminal comes back after the printouts are done ( in quiet mode )
 
 #launch chrome here if enabled
 if [ $CHROME == 1 ]; then
