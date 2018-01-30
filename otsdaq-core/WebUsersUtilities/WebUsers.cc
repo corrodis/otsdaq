@@ -49,8 +49,8 @@ using namespace ots;
 #define PREF_XML_USERLOCK_FIELD			"username_with_lock"		// user with lock (to lockout others)
 #define PREF_XML_USERNAME_FIELD			"pref_username"				// user with lock (to lockout others)
 
-#define PREF_XML_BGCOLOR_DEFAULT		"rgb(15,34,105)"		// -background color
-#define PREF_XML_DBCOLOR_DEFAULT		"rgb(60,64,75)"			// -dashboard color
+#define PREF_XML_BGCOLOR_DEFAULT		"rgb(0,76,151)"			// -background color
+#define PREF_XML_DBCOLOR_DEFAULT		"rgb(0,40,85)"			// -dashboard color
 #define PREF_XML_WINCOLOR_DEFAULT		"rgba(196,229,255,0.9)"	// -window color
 #define PREF_XML_LAYOUT_DEFAULT	 		"0;0;0;0"				// 3 default window layouts(and current)
 #define PREF_XML_SYSLAYOUT_DEFAULT	 	"0;0"					// 2 system default window layouts

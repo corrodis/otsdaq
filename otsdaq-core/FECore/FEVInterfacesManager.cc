@@ -77,6 +77,12 @@ void FEVInterfacesManager::createInterfaces(void)
 //used by MacroMaker
 int FEVInterfacesManager::universalRead(const std::string &interfaceID, char* address, char* returnValue)
 {
+	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
+	{
+		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
+		throw std::runtime_error(ss.str());
+	}
+
 	__COUT__ << "interfaceID: " << interfaceID << " and size: " << theFEInterfaces_.size() << std::endl;
 
 	if (theFEInterfaces_[interfaceID]->universalRead(address, returnValue) < 0) return -1;
@@ -87,17 +93,36 @@ int FEVInterfacesManager::universalRead(const std::string &interfaceID, char* ad
 //========================================================================================================================
 //used by MacroMaker
 unsigned int FEVInterfacesManager::getInterfaceUniversalAddressSize(const std::string &interfaceID)
-{ return theFEInterfaces_[interfaceID]->getUniversalAddressSize(); } //used by MacroMaker
+{
+	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
+	{
+		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
+		throw std::runtime_error(ss.str());
+	}
+	return theFEInterfaces_[interfaceID]->getUniversalAddressSize();
+} //used by MacroMaker
 
 //========================================================================================================================
 //used by MacroMaker
 unsigned int FEVInterfacesManager::getInterfaceUniversalDataSize(const std::string &interfaceID)
-{ return theFEInterfaces_[interfaceID]->getUniversalDataSize(); } //used by MacroMaker
+{
+	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
+	{
+		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
+		throw std::runtime_error(ss.str());
+	}
+	return theFEInterfaces_[interfaceID]->getUniversalDataSize();
+} //used by MacroMaker
 
 //========================================================================================================================
 //used by MacroMaker
 void FEVInterfacesManager::universalWrite(const std::string &interfaceID, char* address, char* writeValue)
 {
+	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
+	{
+		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
+		throw std::runtime_error(ss.str());
+	}
 
 	__COUT__ << "interfaceID: " << interfaceID << " and size: " << theFEInterfaces_.size() << std::endl;
 
