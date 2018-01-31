@@ -580,8 +580,10 @@ void ConfigurationView::getValue(std::string& value, unsigned int row, unsigned 
 //==============================================================================
 //validateValueForColumn
 //	string version
-//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
-std::string ConfigurationView::validateValueForColumn(const std::string& value, unsigned int col, bool convertEnvironmentVariables) const
+//	Note: necessary because types of std::basic_string<char>
+//	cause compiler problems if no string specific function
+std::string ConfigurationView::validateValueForColumn(const std::string& value,
+		unsigned int col, bool convertEnvironmentVariables) const
 {
 		//return validateValueForColumn<std::string>(value,col,convertEnvironmentVariables);
 		if(col >= columnsInfo_.size())
