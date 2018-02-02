@@ -220,12 +220,14 @@ if [ ! -d $USER_DATA ]; then
 fi
 
 echo
-echo -e "StartOTS.sh [${LINENO}]  \t User Data environment variable USER_DATA          = ${USER_DATA}"
+echo -e "StartOTS.sh [${LINENO}]  \t User Data environment variable USER_DATA \t                = ${USER_DATA}"
 
 ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`
 	
 echo
-echo -e "StartOTS.sh [${LINENO}]  \t Database environment variable ARTDAQ_DATABASE_URI = ${ARTDAQ_DATABASE_URI}"
+echo -e "StartOTS.sh [${LINENO}]  \t Database environment variable ARTDAQ_DATABASE_URI \t       = ${ARTDAQ_DATABASE_URI}"
+echo
+echo -e "StartOTS.sh [${LINENO}]  \t Primary Output Datapath environment variable OTSDAQ_DATA \t = ${OTSDAQ_DATA}"
 
 if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 	# Rebuild ARTDAQ_DATABASE indicies
