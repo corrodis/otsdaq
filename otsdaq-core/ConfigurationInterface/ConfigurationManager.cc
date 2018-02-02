@@ -889,7 +889,19 @@ void ConfigurationManager::loadConfigurationGroup(
 		//clear table
 		while(groupMetadataTable_.getView().getNumberOfRows())
 			groupMetadataTable_.getViewP()->deleteRow(0);
-		theInterface_->fill(&groupMetadataTable_,metaTablePair->second);
+		try
+		{
+			theInterface_->fill(&groupMetadataTable_,metaTablePair->second);
+		}
+		catch(const std::runtime_error& e)
+		{
+			__COUT_WARN__ << "Ignoring metadata error: " << e.what() << __E__;
+		}
+		catch(...)
+		{
+			__COUT_WARN__ << "Ignoring unnkown metadata error. " << __E__;
+		}
+
 		//check that there is only 1 row
 		if(groupMetadataTable_.getView().getNumberOfRows() != 1)
 		{
