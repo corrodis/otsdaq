@@ -77,6 +77,8 @@ OTSDAQ_STARTOTS_LOCAL_QUIT_FILE="${SCRIPT_DIR}/.StartOTS_action_quit.cmd"
 echo -e "StartOTS.sh [${LINENO}]  \t StartOTS_action path     = ${OTSDAQ_STARTOTS_ACTION_FILE}"
 echo -e "StartOTS.sh [${LINENO}]  \t StartOTS_quit path       = ${OTSDAQ_STARTOTS_QUIT_FILE}"
 echo -e "StartOTS.sh [${LINENO}]  \t StartOTS_local_quit path = ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE}"
+echo
+echo
 
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
 SAP_PATH=""
@@ -217,13 +219,14 @@ if [ ! -d $USER_DATA ]; then
 	exit   
 fi
 
-echo -e "StartOTS.sh [${LINENO}]  \t Environment variable USER_DATA is setup and points to folder" ${USER_DATA}
-
+echo
+echo -e "StartOTS.sh [${LINENO}]  \t User Data environment variable USER_DATA          = ${USER_DATA}"
 
 ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`
 	
 echo
-echo -e "StartOTS.sh [${LINENO}]  \t Checking database at ARTDAQ_DATABASE_URI=${ARTDAQ_DATABASE_URI}..."
+echo -e "StartOTS.sh [${LINENO}]  \t Database environment variable ARTDAQ_DATABASE_URI = ${ARTDAQ_DATABASE_URI}"
+
 if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 	# Rebuild ARTDAQ_DATABASE indicies
 	echo -e "StartOTS.sh [${LINENO}]  \t Rebuilding database indices..."
