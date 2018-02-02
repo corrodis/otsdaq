@@ -2488,7 +2488,7 @@ int ConfigurationView::addRow(const std::string &author,
 
 			//find max in rows
 
-			this->print();
+			//this->print();
 
 			for(unsigned int r=0;r<getNumberOfRows()-1;++r)
 			{
@@ -2501,7 +2501,7 @@ int ConfigurationView::addRow(const std::string &author,
 
 				for(index = tmpString.length()-1;index < tmpString.length(); --index)
 				{
-					__COUT__ << index << " tmpString[index] " << tmpString[index] << __E__;
+					//__COUT__ << index << " tmpString[index] " << tmpString[index] << __E__;
 					if(!(tmpString[index] >= '0' && tmpString[index] <= '9')) break; //if not numeric, break
 					foundAny = true;
 				}
@@ -2549,7 +2549,7 @@ int ConfigurationView::addRow(const std::string &author,
 
 			__COUT__ << "New unique data entry is '" << theDataView_[row][col] << "'" << __E__;
 
-			this->print();
+			//this->print();
 		}
 		else
 			theDataView_[row][col] = defaultRowValues[col];
