@@ -3,6 +3,13 @@ echo -e "StartOTS.sh [${LINENO}]  \t ===========================================
 echo -e "StartOTS.sh [${LINENO}]  \t Launching StartOTS.sh otsdaq script... on {${HOSTNAME}}."
 echo
 
+SCRIPT_DIR="$( 
+  cd "$(dirname "$(readlink "$0" || printf %s "$0")")"
+  pwd -P 
+)"
+		
+echo -e "StartOTS.sh [${LINENO}]  \t Script directory found as: $SCRIPT_DIR/$0"
+
 ISCONFIG=0
 QUIET=1
 CHROME=0
@@ -60,13 +67,16 @@ fi
 #attempt to mkdir for full path so that it exists to move the database to
 # assuming mkdir is non-destructive
 #Note: quit file added to universally quit StartOTS scripts originating from same USER_DATA
+#Note: local path quit file added to universally quit StartOTS scripts originating from same directory (regardless of USER_DATA)
 # can not come from action file because individual StartOTS scripts need to respond to that one.
 # The gateway supervisor StartOTS script drives the quit file.
 
 OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${HOSTNAME}.cmd"
 OTSDAQ_STARTOTS_QUIT_FILE="${USER_DATA}/ServiceData/StartOTS_action_quit.cmd"
-echo -e "StartOTS.sh [${LINENO}]  \t StartOTS_action file path = ${OTSDAQ_STARTOTS_ACTION_FILE}"
-echo -e "StartOTS.sh [${LINENO}]  \t StartOTS_quit file path = ${OTSDAQ_STARTOTS_QUIT_FILE}"
+OTSDAQ_STARTOTS_LOCAL_QUIT_FILE="${SCRIPT_DIR}/.StartOTS_action_quit.cmd"
+echo -e "StartOTS.sh [${LINENO}]  \t StartOTS_action path     = ${OTSDAQ_STARTOTS_ACTION_FILE}"
+echo -e "StartOTS.sh [${LINENO}]  \t StartOTS_quit path       = ${OTSDAQ_STARTOTS_QUIT_FILE}"
+echo -e "StartOTS.sh [${LINENO}]  \t StartOTS_local_quit path = ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE}"
 
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
 SAP_PATH=""
@@ -90,10 +100,13 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
     echo -e "StartOTS.sh [${LINENO}]  \t ******************************************************"
 
     killprocs
-	#killall -9 mpirun &>/dev/null #hide output
-	#killall -9 xdaq.exe &>/dev/null #hide output
-	#killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
-
+	
+	
+	#try to force kill other StartOTS scripts
+	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
+	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
+	killall -9 StartOTS.sh &>/dev/null #hide output
+	
 	exit
 fi
 
@@ -502,24 +515,32 @@ launchOTS() {
 	envString="-genv OTSDAQ_LOG_ROOT ${OTSDAQ_LOG_DIR} -genv ARTDAQ_OUTPUT_DIR ${ARTDAQ_OUTPUT_DIR}"
 		
 	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
+	
 	#echo
 	#echo -e "StartOTS.sh [${LINENO}]  \t XDAQ ARGS PASSED TO xdaq.exe:"
 	#echo ${XDAQ_ARGS}
 	#echo
 	#echo
+	
 	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`
+	
 	#echo -e "StartOTS.sh [${LINENO}]  \t $value"
 	#re="http://(${HOSTNAME}):([0-9]+)"
+	
 	re="http(s*)://(.+):([0-9]+)"
 	superRe="id=\"([0-9]+)\""		
+	
 	#echo -e "StartOTS.sh [${LINENO}]  \t MATCHING REGEX"
+	
 	haveXDAQContextPort=false
 	insideContext=false
 	ignore=false
 	isLocal=false
 	mainHostname=""
+			
 	while read line; do    
 		if [[ ($line == *"<!--"*) ]]; then
+		
 		ignore=true
 		fi
 		if [[ ($line == *"-->"*) ]]; then
@@ -528,7 +549,7 @@ launchOTS() {
 		if [[ ${ignore} == true ]]; then
 		continue
 		fi
-		
+				
 		if [[ ($line == *"xc:Context"*) && ($line == *"url"*) ]]; then
 			if [[ ($line =~ $re) ]]; then
 				#if https && hostname matches
@@ -771,15 +792,24 @@ otsActionHandler() {
 
 	#clear file initially
 	echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
-	echo "0" > $OTSDAQ_STARTOTS_QUIT_FILE
+	
 
 	if [[ ($ISCONFIG == 1) || ("${HOSTNAME}" == "${mainHostname}") ]]; then
 		echo -e "StartOTS.sh [${LINENO}]  \t This script, on ${HOSTNAME}, is the gateway StartOTS.sh script, so it will drive exit of other scripts."
+		
+
 		echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
-		#time for other StartOTS to quit
+		echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
+		
+		#time for other stale StartOTS to quit
 		sleep 5
 		echo "0" > $OTSDAQ_STARTOTS_QUIT_FILE
+		echo "0" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
+	else
+		sleep 10 #non masters sleep for a while, to give time to quit stale scripts
 	fi	
+	
+	
 	
 	FIRST_TIME=1
 	
@@ -794,6 +824,7 @@ otsActionHandler() {
 		
 		OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
 		OTSDAQ_STARTOTS_QUIT="$(cat ${OTSDAQ_STARTOTS_QUIT_FILE})"
+		OTSDAQ_STARTOTS_LOCAL_QUIT="$(cat ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE})"
 		
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 			echo -e "StartOTS.sh [${LINENO}]  \t  "
@@ -873,7 +904,14 @@ otsActionHandler() {
 				otsdaq_flatten_system_aliases 0 &
 			fi		
 						
-		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" ]]; then
+		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP" ]]; then
+
+
+			if [[ ($ISCONFIG == 1) || ("${HOSTNAME}" == "${mainHostname}") ]]; then
+				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
+				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
+			fi
+			
 		    exit
 		elif [ "$OTSDAQ_STARTOTS_ACTION" != "0" ]; then
 			echo -e "StartOTS.sh [${LINENO}]  \t Exiting StartOTS.sh.. Unrecognized command OTSDAQ_STARTOTS_ACTION=${OTSDAQ_STARTOTS_ACTION}"			
