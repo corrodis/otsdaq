@@ -63,12 +63,26 @@ void FEVInterfacesManager::createInterfaces(void)
 		__COUT__ << "Interface Name: "<< interface.first << std::endl;
 		__COUT__ << "XDAQContext Node: "<< theXDAQContextConfigTree_ << std::endl;
 		__COUT__ << "Path to configuration: "<< (theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration") << std::endl;
-		theFEInterfaces_[interface.first] = makeInterface(
-				interface.second.getNode("FEInterfacePluginName").getValue<std::string>(),
-				interface.first,
-				theXDAQContextConfigTree_,
-				(theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration")
-				);
+
+		try
+		{
+			theFEInterfaces_[interface.first] = makeInterface(
+					interface.second.getNode("FEInterfacePluginName").getValue<std::string>(),
+					interface.first,
+					theXDAQContextConfigTree_,
+					(theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration")
+					);
+		}
+		catch(const cet::exception& e)
+		{
+			__SS__ << "Failed to instantiate plugin named '" <<
+					interface.first << "' of type '" <<
+					interface.second.getNode("FEInterfacePluginName").getValue<std::string>()
+					<< "' due to the following error: \n" << e.what() << __E__;
+			__COUT_ERR__ << ss.str();
+			__MOUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
+		}
 	}
 	__COUT__ << "Done creating interfaces" << std::endl;
 }
