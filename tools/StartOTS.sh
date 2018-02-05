@@ -918,8 +918,8 @@ otsActionHandler() {
 			fi
 			
 		    exit
-		elif [ "$OTSDAQ_STARTOTS_ACTION" != "0" ]; then
-			echo -e "StartOTS.sh [${LINENO}]  \t Exiting StartOTS.sh.. Unrecognized command OTSDAQ_STARTOTS_ACTION=${OTSDAQ_STARTOTS_ACTION}"			
+		elif [[ "$OTSDAQ_STARTOTS_ACTION" != "0"  || "$OTSDAQ_STARTOTS_QUIT" != "0"  || "$OTSDAQ_STARTOTS_LOCAL_QUIT" != "0" ]]; then
+			echo -e "StartOTS.sh [${LINENO}]  \t Exiting StartOTS.sh.. Unrecognized command !=0 in ${OTSDAQ_STARTOTS_ACTION}-${OTSDAQ_STARTOTS_QUIT}-${OTSDAQ_STARTOTS_LOCAL_QUIT}"			
 			exit
 		fi
 		
