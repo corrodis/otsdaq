@@ -12,7 +12,7 @@
 #include "canvas/Utilities/Exception.h"
 
 #include "artdaq-ots/Overlays/UDPFragment.hh"
-#include "artdaq-core/Data/Fragments.hh"
+#include "artdaq-core/Data/Fragment.hh"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
 
 #include <algorithm>
