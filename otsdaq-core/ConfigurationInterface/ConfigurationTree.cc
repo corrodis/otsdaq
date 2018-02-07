@@ -258,7 +258,7 @@ std::string ConfigurationTree::getEscapedValue() const
 	if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
 		return configView_->getEscapedValueAsString(row_,col_);
 
-	__SS__ << "Can't get escaped value except from a value node!" <<
+	__SS__ << "Can not get escaped value except from a value node!" <<
 			" This node is type '" << getNodeType() << "." << std::endl;
 	__COUT_ERR__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
@@ -270,7 +270,7 @@ const std::string& ConfigurationTree::getConfigurationName(void) const
 {
 	if(!configuration_)
 	{
-		__SS__ << "Can't get configuration name of node with no configuration pointer!" << std::endl;
+		__SS__ << "Can not get configuration name of node with no configuration pointer!" << std::endl;
 		throw std::runtime_error(ss.str());
 	}
 	return configuration_->getConfigurationName();
@@ -287,7 +287,7 @@ const std::string& ConfigurationTree::getFieldConfigurationName(void) const
 	{
 		if(!linkParentConfig_)
 		{
-			__SS__ << "Can't get configuration name of link node field with no parent configuration pointer!" << std::endl;
+			__SS__ << "Can not get configuration name of link node field with no parent configuration pointer!" << std::endl;
 			throw std::runtime_error(ss.str());
 		}
 		return linkParentConfig_->getConfigurationName();
@@ -302,7 +302,7 @@ const std::string& ConfigurationTree::getDisconnectedTableName(void) const
 {
 	if(isLinkNode() && isDisconnected()) return disconnectedTargetName_;
 
-	__SS__ << "Can't get disconnected target name of node unless it is a disconnected link node!" << std::endl;
+	__SS__ << "Can not get disconnected target name of node unless it is a disconnected link node!" << std::endl;
 	throw std::runtime_error(ss.str());
 }
 
@@ -312,7 +312,7 @@ const std::string& ConfigurationTree::getDisconnectedLinkID(void) const
 {
 	if(isLinkNode() && isDisconnected()) return disconnectedLinkID_;
 
-	__SS__ << "Can't get disconnected target name of node unless it is a disconnected link node!" << std::endl;
+	__SS__ << "Can not get disconnected target name of node unless it is a disconnected link node!" << std::endl;
 	throw std::runtime_error(ss.str());
 }
 
@@ -322,7 +322,7 @@ const ConfigurationVersion& ConfigurationTree::getConfigurationVersion(void) con
 {
 	if(!configView_)
 	{
-		__SS__ << "Can't get configuration version of node with no config view pointer!" << std::endl;
+		__SS__ << "Can not get configuration version of node with no config view pointer!" << std::endl;
 		throw std::runtime_error(ss.str());
 	}
 	return configView_->getVersion();
@@ -334,7 +334,7 @@ const time_t& ConfigurationTree::getConfigurationCreationTime(void) const
 {
 	if(!configView_)
 	{
-		__SS__ << "Can't get configuration creation time of node with no config view pointer!" << std::endl;
+		__SS__ << "Can not get configuration creation time of node with no config view pointer!" << std::endl;
 		throw std::runtime_error(ss.str());
 	}
 	return configView_->getCreationTime();
@@ -347,17 +347,11 @@ const time_t& ConfigurationTree::getConfigurationCreationTime(void) const
 //	Used as choices for tree-view, for example.
 std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 {
-	if(!configView_)
-	{
-		__SS__ << "Can't get fixed choices of node with no config view pointer!" << std::endl;
-		throw std::runtime_error(ss.str());
-	}
-
 	if(getValueType() != ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
 			getValueType() != ViewColumnInfo::TYPE_BITMAP_DATA &&
 			!isLinkNode())
 	{
-		__SS__ << "Can't get fixed choices of node with value type of '" <<
+		__SS__ << "Can not get fixed choices of node with value type of '" <<
 				getValueType() << ".' Node must be a link or a value node with type '" <<
 				ViewColumnInfo::TYPE_BITMAP_DATA << "' or '" <<
 				ViewColumnInfo::TYPE_FIXED_CHOICE_DATA << ".'" << std::endl;
@@ -370,7 +364,7 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 	{
 		if(!linkParentConfig_)
 		{
-			__SS__ << "Can't get fixed choices of node with no parent config view pointer!" << std::endl;
+			__SS__ << "Can not get fixed choices of node with no parent config view pointer!" << std::endl;
 			throw std::runtime_error(ss.str());
 		}
 
@@ -393,6 +387,12 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 			retVec.push_back(choice);
 
 		return retVec;
+	}
+
+	if(!configView_)
+	{
+		__SS__ << "Can not get fixed choices of node with no config view pointer!" << std::endl;
+		throw std::runtime_error(ss.str());
 	}
 
 	//return vector of default + data choices
@@ -461,7 +461,7 @@ const std::string& ConfigurationTree::getUIDAsString(void) const
 		return configView_->getDataView()[row_][configView_->getColUID()];
 
 	{
-		__SS__ << "Can't get UID of node with type '" <<
+		__SS__ << "Can not get UID of node with type '" <<
 				getNodeType() << ".' Node type must be '" <<
 				ConfigurationTree::NODE_TYPE_VALUE << "' or '" <<
 				ConfigurationTree::NODE_TYPE_UID_LINK << ".'" << std::endl;
