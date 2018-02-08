@@ -1456,7 +1456,17 @@ throw (toolbox::fsm::exception::Exception)
 		{
 			//diagService_->reportError("FESupervisor supervisor "+stringF(it->first) + " could not be initialized!",DIAGFATAL);
 
-			__SS__ << "Can NOT " << command << " FESupervisor, instance = " << it.first << ".\n\n" <<
+			std::string appUID;
+			appUID = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getApplicationUID
+							(
+									it.second->getContextDescriptor()->getURL(),
+									it.second->getLocalId()
+							);
+
+
+			__SS__ << "Can NOT " << command << " FESupervisor '" <<
+					appUID << "'" <<
+					", instance = " << it.first << ".\n\n" <<
 					reply;
 			__COUT_ERR__ << ss.str() << std::endl;
 

@@ -15,8 +15,14 @@
 #include <vector>
 #include <array>
 
+#define __ARGS__				FEVInterface::frontEndMacroInArgs_t argsIn, FEVInterface::frontEndMacroOutArgs_t argsOut
+#define __GET_ARG_IN__(X,Y) 	FEVInterface::getFEMacroInputArgument <X>(argsIn ,Y)
+#define __GET_ARG_OUT__(Y) 		FEVInterface::getFEMacroOutputArgument   (argsOut,Y)
+#define __SET_ARG_OUT__(X,Y,Z) 	FEVInterface::setFEMacroOutputArgument<X>(argsOut,Y,Z)
+
 namespace ots
 {
+
 class FrontEndHardwareBase;
 class FrontEndFirmwareBase;
 class FEInterfaceConfigurationBase;
@@ -139,12 +145,11 @@ protected:
 	//FE Macro Function members and helper functions:
 
 	std::map<std::string, frontEndMacroStruct_t>	mapOfFEMacroFunctions_; //Map of FE Macro functions members
-	//std::array<std::string, 3> testarr_;
-	//void											registerFEMacroFunction(const std::string &feMacroName, frontEndMacroFunction_t feMacroFunction, unsigned int numOfInputArgs, unsigned int numOfOutputArgs, uint8_t requiredUserPermissions);
-	void											registerFEMacroFunction(const std::string &feMacroName, frontEndMacroFunction_t feMacroFunction, const std::vector<std::string> &namesOfInputArgs, const std::vector<std::string> &namesOfOutputArgs,uint8_t requiredUserPermissions);
+	void											registerFEMacroFunction(const std::string &feMacroName, frontEndMacroFunction_t feMacroFunction, const std::vector<std::string> &namesOfInputArgs, const std::vector<std::string> &namesOfOutputArgs, uint8_t requiredUserPermissions);
 
 	template<class T>
-	T getFEMacroInputArgument(frontEndMacroInArgs_t &argsIn, const std::string &argName) const
+	T 												getFEMacroInputArgument(
+			frontEndMacroInArgs_t &argsIn, const std::string &argName) const
 	{
 		//stolen from ConfigurationView
 		const std::string& data = getFEMacroInputArgument(argsIn, argName);
@@ -153,7 +158,8 @@ protected:
 
 		if(!isNumber(data))
 		{
-			__SS__ << (data + " is not a number!") << std::endl;
+			__SS__ << "Error extracting value for argument named '" <<
+					argName << ".' The value '" << data << "' is not a number!" << std::endl;
 			__COUT__ << "\n" << ss.str();
 			throw std::runtime_error(ss.str());
 		}
@@ -172,7 +178,17 @@ protected:
 		return retValue;
 	}
 	const std::string&								getFEMacroInputArgument(frontEndMacroInArgs_t &argsIn, const std::string &argName) const;
-	std::string&									getFEMacroOutputArgument(frontEndMacroOutArgs_t &argsOut, const std::string& argName);
+	std::string&									getFEMacroOutputArgument(frontEndMacroOutArgs_t &argsOut, const std::string& argName) const;
+	template<class T>
+	std::string& 									setFEMacroOutputArgument(
+			frontEndMacroOutArgs_t &argsOut,
+			const std::string &argName, const T& value) const
+	{
+		std::string& argOut = getFEMacroOutputArgument(argsOut,argName);
+		std::stringstream ss; ss << value;
+		argOut = ss.str();
+		return argOut;
+	}
 
 	bool 		        							isNumber(const std::string& s) const;
 };

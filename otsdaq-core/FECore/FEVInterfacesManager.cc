@@ -256,7 +256,7 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 		{
 			__COUT__ << "argName " << argName << std::endl;
 
-			returnStrings.push_back( "valueLore" );//std::string());
+			returnStrings.push_back( "DEFAULT" );//std::string());
 			argsOut.push_back(FEVInterface::frontEndMacroOutArg_t(
 					argName,
 					returnStrings[returnStrings.size()-1]));
@@ -308,12 +308,13 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 
 
 
-	__COUT__ << "Trying it " << std::endl;
+	__MOUT__ << "Launching FE Macro '" << feMacroName << "' ..." << std::endl;
+	__COUT__ << "Launching FE Macro '" << feMacroName << "' ..." << std::endl;
 
 	//have pointer to Macro structure, so run it
 	(FEVInterfaceIt->second.get()->*(FEMacroIt->second.macroFunction_))(argsIn,argsOut);
 
-	__COUT__ << "Made it " << std::endl;
+	__COUT__ << "FE Macro complete!" << std::endl;
 
 	__COUT__ << "# of output args = " << argsOut.size() << std::endl;
 	for(const auto &arg:argsOut)

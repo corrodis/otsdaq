@@ -289,7 +289,7 @@ const std::string& FEVInterface::getFEMacroInputArgument(frontEndMacroInArgs_t& 
 //getOutputArgumentString
 //	helper function for getting the value of an argument
 std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& argsOut,
-		const std::string& argName)
+		const std::string& argName) const
 {
 
 	for(std::pair<const std::string /* output arg name */ , std::string /* arg output value */ >&

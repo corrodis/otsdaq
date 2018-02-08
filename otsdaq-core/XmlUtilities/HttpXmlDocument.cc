@@ -218,7 +218,8 @@ void HttpXmlDocument::copyDataChildren(HttpXmlDocument &document)
 //==============================================================================
 //HttpXmlDocument::outputXmlDocument
 //	recurse through XML theDocument_ and std out and output to stream parameter if not null
-void HttpXmlDocument::outputXmlDocument (std::ostringstream *out, bool dispStdOut, bool allowWhiteSpace)
+void HttpXmlDocument::outputXmlDocument (std::ostringstream *out, bool dispStdOut,
+		bool allowWhiteSpace)
 {
 	recursiveOutputXmlDocument(theDocument_->getDocumentElement(),out,dispStdOut, "", allowWhiteSpace);
 }
