@@ -139,11 +139,42 @@ protected:
 	//FE Macro Function members and helper functions:
 
 	std::map<std::string, frontEndMacroStruct_t>	mapOfFEMacroFunctions_; //Map of FE Macro functions members
-	std::array<std::string, 3> testarr_;
+	//std::array<std::string, 3> testarr_;
 	//void											registerFEMacroFunction(const std::string &feMacroName, frontEndMacroFunction_t feMacroFunction, unsigned int numOfInputArgs, unsigned int numOfOutputArgs, uint8_t requiredUserPermissions);
 	void											registerFEMacroFunction(const std::string &feMacroName, frontEndMacroFunction_t feMacroFunction, const std::vector<std::string> &namesOfInputArgs, const std::vector<std::string> &namesOfOutputArgs,uint8_t requiredUserPermissions);
-	const std::string&								getFEMacroInputArgument(frontEndMacroInArgs_t &argsIn, const std::string &argName);
+
+	template<class T>
+	T getFEMacroInputArgument(frontEndMacroInArgs_t &argsIn, const std::string &argName) const
+	{
+		//stolen from ConfigurationView
+		const std::string& data = getFEMacroInputArgument(argsIn, argName);
+
+		T retValue;
+
+		if(!isNumber(data))
+		{
+			__SS__ << (data + " is not a number!") << std::endl;
+			__COUT__ << "\n" << ss.str();
+			throw std::runtime_error(ss.str());
+		}
+
+		if(typeid(double) == typeid(retValue))
+			retValue = strtod(data.c_str(),0);
+		else if(typeid(float) == typeid(retValue))
+			retValue = strtof(data.c_str(),0);
+		else if(data.size() > 2 && data[1] == 'x') //assume hex value
+			retValue = strtol(data.c_str(),0,16);
+		else if(data.size() > 1 && data[0] == 'b') //assume binary value
+			retValue = strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
+		else
+			retValue = strtol(data.c_str(),0,10);
+
+		return retValue;
+	}
+	const std::string&								getFEMacroInputArgument(frontEndMacroInArgs_t &argsIn, const std::string &argName) const;
 	std::string&									getFEMacroOutputArgument(frontEndMacroOutArgs_t &argsOut, const std::string& argName);
+
+	bool 		        							isNumber(const std::string& s) const;
 };
 
 }

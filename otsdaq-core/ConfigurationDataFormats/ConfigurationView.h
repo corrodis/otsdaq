@@ -331,7 +331,7 @@ private:
 
 	// Return "" if there is no conversion
 	std::string        	convertEnvVariables	(const std::string& data) const;
-	bool                isNumber           	(const std::string& s) const;
+	bool 		        isNumber           	(const std::string& s) const;
 
 	std::string							uniqueStorageIdentifier_; //starts empty "", used to implement re-writeable views ("temporary views") in artdaq db
 	std::string                 		tableName_   	;	//View name (extensionTableName in xml)
