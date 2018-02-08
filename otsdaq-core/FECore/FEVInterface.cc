@@ -303,7 +303,70 @@ std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& args
 	throw std::runtime_error(ss.str());
 }
 
+//========================================================================================================================
+//runSequenceOfCommands
+//	runs a sequence of write commands from a linked section of the configuration tree
+//		based on these fields:
+//			- WriteAddress,  WriteValue, StartingBitPosition, BitFieldSize
+void FEVInterface::runSequenceOfCommands(const std::string &treeLinkName)
+{
+	std::map<uint64_t,uint64_t> writeHistory;
+	uint64_t writeAddress, writeValue, bitMask;
+	uint8_t bitPosition;
 
+	std::string writeBuffer;
+	std::string readBuffer;
+	char msg[1000];
+	try
+	{
+		auto configSeqLink = theXDAQContextConfigTree_.getNode(theConfigurationPath_).getNode(
+				treeLinkName);
+
+		if(configSeqLink.isDisconnected())
+			__COUT__ << "Disconnected configure sequence" << std::endl;
+		else
+		{
+			__COUT__ << "Handling configure sequence." << std::endl;
+			auto childrenMap = configSeqLink.getChildrenMap();
+			for(const auto &child:childrenMap)
+			{
+				//WriteAddress and WriteValue fields
+
+				writeAddress = child.second.getNode("WriteAddress").getValue<uint64_t>();
+				writeValue = child.second.getNode("WriteValue").getValue<uint64_t>();
+				bitPosition = child.second.getNode("StartingBitPosition").getValue<uint8_t>();
+				bitMask = (1 << child.second.getNode("BitFieldSize").getValue<uint8_t>())-1;
+
+				writeValue &= bitMask;
+				writeValue <<= bitPosition;
+				bitMask = ~(bitMask<<bitPosition);
+
+				//place into write history
+				if(writeHistory.find(writeAddress) == writeHistory.end())
+					writeHistory[writeAddress] = 0;//init to 0
+
+				writeHistory[writeAddress] &= bitMask; //clear incoming bits
+				writeHistory[writeAddress] |= writeValue; //add incoming bits
+
+				sprintf(msg,"\t Writing %s: \t %ld(0x%lX) \t %ld(0x%lX)", child.first.c_str(),
+						writeAddress, writeAddress,
+						writeHistory[writeAddress], writeHistory[writeAddress]);
+
+				__COUT__ << msg << std::endl;
+
+				universalWrite((char *)&writeAddress,(char *)&(writeHistory[writeAddress]));
+			}
+		}
+	}
+	catch(const std::runtime_error &e)
+	{
+		__COUT__ << "Error accessing sequence, so giving up:\n" << e.what() << std::endl;
+	}
+	catch(...)
+	{
+		__COUT__ << "Unknown Error accessing sequence, so giving up." << std::endl;
+	}
+}
 
 
 
