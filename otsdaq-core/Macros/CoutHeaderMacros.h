@@ -12,6 +12,8 @@
 //take only file name
 #define __FILENAME__ 	(strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
+#define __E__			std::endl
+
 //#define __COUT_HDR__     __FILE__ << " : " << __PRETTY_FUNCTION__ << " [" << __LINE__ << "]\t"
 #define __COUT_HDR_FL__  __SHORTFILE__ << " [" << std::dec << __LINE__ << "]\t"
 #define __COUT_HDR_FP__  __SHORTFILE__ << " : " << __PRETTY_FUNCTION__ << "\t"
@@ -28,8 +30,8 @@
 #define __COUT_WARN__  	__COUT_TYPE__(LogWarning) 	<< __COUT_HDR__
 #define __COUT_INFO__  	__COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
 #define __COUT__  		__COUT_TYPE__(LogDebug)		<< __COUT_HDR__
+#define __COUTV__(X) 	__COUT__ << QUOTE(X) << " = " << X << __E__
 
-#define __E__			std::endl
 
 //////// ==============================================================
 //////// Use __MOUT__ for Message Facility use (easy to switch to cout for debugging):
@@ -50,10 +52,12 @@
 #define __MOUT_WARN__  	__MF_TYPE__(LogWarning) << __MF_HDR__
 #define __MOUT_INFO__  	__MF_TYPE__(LogInfo) 	<< __MF_HDR__
 #define __MOUT__  		__MF_TYPE__(LogDebug)	<< __MF_HDR__
+#define __MOUTV__(X)	__MOUT__ << QUOTE(X) << " = " << X
 
 
 
 #define __SS__			std::stringstream ss; ss << __MF_HDR__
+#define __SS_THROW__	__COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
 
 //////// ==============================================================
 
