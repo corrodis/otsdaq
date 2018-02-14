@@ -10,10 +10,11 @@ class Configurable
 {
 public:
   Configurable(const ConfigurationTree& theXDAQContextConfigTree, const std::string& theConfigurationPath)
-: theXDAQContextConfigTree_(theXDAQContextConfigTree)
-, theConfigurationPath_    (theConfigurationPath)
+: theXDAQContextConfigTree_		(theXDAQContextConfigTree)
+, theConfigurationPath_    		(theConfigurationPath)
+, theConfigurationRecordName_	(theXDAQContextConfigTree_.getNode(theConfigurationPath_).getValueAsString())
 {
-  	std::cout << __PRETTY_FUNCTION__ << std::endl;
+  	__COUT__ << __E__;
 }
   virtual ~Configurable(){;}
 
@@ -21,6 +22,7 @@ public:
 protected:
 	const ConfigurationTree theXDAQContextConfigTree_;
 	const std::string       theConfigurationPath_;
+	const std::string       theConfigurationRecordName_;
 
 };
 }

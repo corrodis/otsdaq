@@ -16,9 +16,9 @@ CHROME=0
 DONOTKILL=0
 
 function killprocs {
-	killall -9 mpirun &>/dev/null #hide output
-	killall -9 xdaq.exe &>/dev/null #hide output
-	killall -9 mf_rcv_n_fwd &>/dev/null #hide output #message viewer display without decoration
+	killall -9 mpirun &>/dev/null 2>&1 #hide output
+	killall -9 xdaq.exe &>/dev/null 2>&1 #hide output
+	killall -9 mf_rcv_n_fwd &>/dev/null 2>&1 #hide output #message viewer display without decoration
 	
 #if [[ "x$1" == "x" ]]; then
 #		PIDS=`ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'`
@@ -851,7 +851,7 @@ otsActionHandler() {
 			fi
 			
 			#killprocs mpirun
-			killall -9 mpirun
+			killall -9 mpirun &>/dev/null 2>&1 #hide output
 			sleep 1
 
 			export MPIEXEC_PORT_RANGE=8300:8349
@@ -875,9 +875,9 @@ otsActionHandler() {
 			echo -e "StartOTS.sh [${LINENO}]  \t Starting otsdaq Wiz mode for host {${HOSTNAME}}..."
 			echo
 			killprocs
-			#killall -9 xdaq.exe
-			#killall -9 mf_rcv_n_fwd #message viewer display without decoration
-			#killall -9 mpirun
+			#killall -9 xdaq.exe &>/dev/null 2>&1 #hide output
+			#killall -9 mf_rcv_n_fwd &>/dev/null 2>&1 #hide output #message viewer display without decoration
+			#killall -9 mpirun &>/dev/null 2>&1 #hide output
 			sleep 1
 			
 			launchOTSWiz
@@ -888,9 +888,9 @@ otsActionHandler() {
 			echo -e "StartOTS.sh [${LINENO}]  \t Starting otsdaq in normal mode for host {${HOSTNAME}}..."
 			echo
 			killprocs
-			#killall -9 xdaq.exe
+			#killall -9 xdaq.exe &>/dev/null 2>&1 #hide output
 			#killall -9 mf_rcv_n_fwd #message viewer display without decoration
-			#killall -9 mpirun
+			#killall -9 mpirun &>/dev/null 2>&1 #hide output
 			sleep 1
 			
 			launchOTS

@@ -58,7 +58,7 @@ public:
 //	  col_						(a.col_),
 //	  configView_				(a.configView_)
 //	{
-//		std::cout << __PRETTY_FUNCTION__ << std::endl;
+//		__COUT__ << std::endl;
 //		//return *this;
 //	}
 
@@ -67,17 +67,17 @@ public:
 
 	ConfigurationTree& operator=(const ConfigurationTree& a)
 	{
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
 		//Note: Members of the ConfigurationTree are declared constant.
 		//	(Refer to comments at top of class declaration for solutions)
 		//	So this operator cannot work.. SO I am going to crash just in case it is called by mistake
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
 		exit(0);
 
 		//copy to const members is not allowed.. but would look like this:
@@ -90,7 +90,7 @@ public:
 		//row_			= a.row_;
 		//col_			= a.col_;
 		configView_	    = a.configView_;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR COPY CONSTRUCTOR" << std::endl;
+		__COUT__ << "OPERATOR COPY CONSTRUCTOR" << std::endl;
 		return *this;
 	};
 

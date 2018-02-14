@@ -425,6 +425,7 @@ void FEVInterfacesManager::configure(void)
 		__COUT__ << "Configuring interface " << it.first << std::endl;
 		__COUT__ << "Configuring interface " << it.first << std::endl;
 		__COUT__ << "Configuring interface " << it.first << std::endl;
+
 		it.second->configure();
 
 		//configure slow controls and start slow controls workloop
