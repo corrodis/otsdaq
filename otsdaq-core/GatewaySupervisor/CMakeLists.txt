@@ -1,8 +1,8 @@
-cet_make(LIBRARY_NAME Supervisor
+cet_make(LIBRARY_NAME GatewaySupervisor
 		 LIBRARIES
 		 ${XDAQ_BASIC_LIB_LIST}
 		 ConfigurationInterface
-		 SupervisorDescriptorInfo
+		 SupervisorInfo
 		 SystemMessenger
          WorkLoopManager
          FiniteStateMachine

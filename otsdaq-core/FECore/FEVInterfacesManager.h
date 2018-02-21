@@ -61,13 +61,9 @@ protected:
 
 private:
 
-    //Each interface has a unique id (number)
-    std::map<std::string, std::unique_ptr<FEVInterface> > theFEInterfaces_;
-    //FEVInterface* theFERARTDAQInterface_;
 
+    std::map<std::string /*name*/, std::unique_ptr<FEVInterface> > theFEInterfaces_;
 
-    //MPI_Comm local_group_comm_;
-	//std::unique_ptr<artdaq::MPISentry> mpiSentry_;
 };
 
 }

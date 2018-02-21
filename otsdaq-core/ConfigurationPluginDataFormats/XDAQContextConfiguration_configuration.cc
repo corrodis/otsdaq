@@ -9,9 +9,22 @@
 using namespace ots;
 
 
-#define XDAQ_RUN_FILE			std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ std::string(getenv("XDAQ_CONFIGURATION_XML")) + ".xml"
+#define XDAQ_RUN_FILE			std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + std::string(getenv("XDAQ_CONFIGURATION_XML")) + ".xml"
+#define APP_PRIORITY_FILE		std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + "xdaqAppStateMachinePriority"
+
 //#define XDAQ_SCRIPT				std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartXDAQ_gen.sh"
 //#define ARTDAQ_MPI_SCRIPT		std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartMPI_gen.sh"
+
+const std::string 			XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS 		= "ots::Supervisor"; //still allowed for now, in StartOTS
+const std::string 			XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS 			= "ots::GatewaySupervisor";
+const std::string 			XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS			= "ots::WizardSupervisor";
+const std::set<std::string> XDAQContextConfiguration::FETypeClassNames_ 				= {"ots::FESupervisor", "ots::FEDataManagerSupervisor", "ots::ARTDAQFEDataManagerSupervisor"};
+const std::set<std::string> XDAQContextConfiguration::DMTypeClassNames_ 				= {"ots::DataManagerSupervisor", "ots::FEDataManagerSupervisor", "ots::ARTDAQFEDataManagerSupervisor"};
+const std::set<std::string> XDAQContextConfiguration::LogbookTypeClassNames_			= {"ots::LogbookrSupervisor"};
+const std::set<std::string> XDAQContextConfiguration::MacroMakerTypeClassNames_			= {"ots::MacroMakerSupervisor"};
+const std::set<std::string> XDAQContextConfiguration::ChatTypeClassNames_				= {"ots::ChatSupervisor"};
+const std::set<std::string> XDAQContextConfiguration::ConsoleTypeClassNames_			= {"ots::ConsoleSupervisor"};
+const std::set<std::string> XDAQContextConfiguration::ConfigurationGUITypeClassNames_	= {"ots::ConfigurationGUISupervisor"};
 
 
 //========================================================================================================================
@@ -51,17 +64,35 @@ void XDAQContextConfiguration::init(ConfigurationManager* configManager)
 {
 	extractContexts(configManager);
 
-	/////////////////////////
-	//generate xdaq run parameter file
-	std::fstream fs;
-	fs.open(XDAQ_RUN_FILE, std::fstream::out | std::fstream::trunc);
-	if (fs.fail())
 	{
-		__SS__ << "Failed to open XDAQ run file: " << XDAQ_RUN_FILE << std::endl;
-		throw std::runtime_error(ss.str());
+		/////////////////////////
+		//generate xdaq run parameter file
+		std::fstream fs;
+		fs.open(XDAQ_RUN_FILE, std::fstream::out | std::fstream::trunc);
+		if (fs.fail())
+		{
+			__SS__ << "Failed to open XDAQ run file: " << XDAQ_RUN_FILE << std::endl;
+			throw std::runtime_error(ss.str());
+		}
+		outputXDAQXML((std::ostream &)fs);
+		fs.close();
 	}
-	outputXDAQXML((std::ostream &)fs);
-	fs.close();
+
+//	std::array<std::string,3> stateMachineCommands = {"Configure","Start","Stop"};
+//	for(const auto& stateMachineCommand:stateMachineCommands)
+//	{
+//		/////////////////////////
+//		//generate xdaq app state machine priority file
+//		std::fstream fs;
+//		fs.open(APP_PRIORITY_FILE + stateMachineCommand + ".dat", std::fstream::out | std::fstream::trunc);
+//		if (fs.fail())
+//		{
+//			__SS__ << "Failed to open XDAQ Application Priority file: " << APP_PRIORITY_FILE << std::endl;
+//			throw std::runtime_error(ss.str());
+//		}
+//		outputAppPriority((std::ostream &)fs,stateMachineCommand);
+//		fs.close();
+//	}
 
 	//	/////////////////////////
 	//	//generate mpi script file
@@ -249,6 +280,10 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 	artdaqEventBuilders_.clear();
 	artdaqAggregators_.clear();
 
+	//Enforce that app IDs do not repeat!
+	//	Note: this is important because there are maps in MacroMaker and SupervisorDescriptorInfoBase that rely on localId() as key
+	std::set<unsigned int /*appId*/> appIdSet;
+
 	for (auto &child : children)
 	{
 		contexts_.push_back(XDAQContext());
@@ -293,6 +328,33 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 			appChild.second.getNode(colApplication_.colClass_).getValue(contexts_.back().applications_.back().class_);
 			appChild.second.getNode(colApplication_.colId_).getValue(contexts_.back().applications_.back().id_);
 
+			//assert NO app id repeats
+			if(appIdSet.find(contexts_.back().applications_.back().id_) != appIdSet.end())
+			{
+				__SS__ << "XDAQ Application IDs are not unique. Specifically at id=" <<
+						contexts_.back().applications_.back().id_ << " appName=" <<
+						contexts_.back().applications_.back().applicationUID_ << std::endl;
+				__COUT_ERR__ << "\n" << ss.str();
+				throw std::runtime_error(ss.str());
+			}
+
+			//assert Gateway is 200
+			if((contexts_.back().applications_.back().id_ == 200 &&
+					contexts_.back().applications_.back().class_ != XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS &&
+					contexts_.back().applications_.back().class_ != XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS) ||
+					(contexts_.back().applications_.back().id_ != 200 &&
+										(contexts_.back().applications_.back().class_ == XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS ||
+										contexts_.back().applications_.back().class_ == XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS)))
+			{
+				__SS__ << "XDAQ Application ID of 200 is reserved for the Gateway Supervisor " <<
+						XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS << ". Conflict specifically at id=" <<
+						contexts_.back().applications_.back().id_ << " appName=" <<
+						contexts_.back().applications_.back().applicationUID_ << std::endl;
+				__SS_THROW__;
+			}
+
+			appIdSet.insert(contexts_.back().applications_.back().id_);
+
 			//convert defaults to values
 			if (appChild.second.getNode(colApplication_.colInstance_).isDefaultValue())
 				contexts_.back().applications_.back().instance_ = 1;
@@ -310,6 +372,17 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 				appChild.second.getNode(colApplication_.colGroup_).getValue(contexts_.back().applications_.back().group_);
 
 			appChild.second.getNode(colApplication_.colModule_).getValue(contexts_.back().applications_.back().module_);
+
+			try
+			{
+				appChild.second.getNode(colApplication_.colConfigurePriority_).getValue(contexts_.back().applications_.back().stateMachineCommandPriority_["Configure"]);
+				appChild.second.getNode(colApplication_.colStartPriority_).getValue(contexts_.back().applications_.back().stateMachineCommandPriority_["Start"]);
+				appChild.second.getNode(colApplication_.colStopPriority_).getValue(contexts_.back().applications_.back().stateMachineCommandPriority_["Stop"]);
+			}
+			catch(...)
+			{
+				__COUT__ << "Ignoring missing state machine priorities..." << __E__;
+			}
 
 
 			auto appPropertyLink = appChild.second.getNode(colApplication_.colLinkToPropertyConfiguration_);
@@ -578,7 +651,29 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 		 //	//out << "\ndone\n";
 		 //}
 		 //
-		 //========================================================================================================================
+//
+////========================================================================================================================
+//void XDAQContextConfiguration::outputAppPriority(std::ostream &out, const std::string& stateMachineCommand)
+//{
+//	//output app ID and priority order [1:255] pairs.. new line separated
+//	//	0/undefined gets translated to 100
+//
+//	for (XDAQContext &context : contexts_)
+//		for (XDAQApplication &app : context.applications_)
+//		{
+//			out << app.id_ << "\n";
+//
+//			if(app.stateMachineCommandPriority_.find(stateMachineCommand) == app.stateMachineCommandPriority_.end())
+//				out << 100;
+//			else
+//				out << ((app.stateMachineCommandPriority_[stateMachineCommand])?
+//					app.stateMachineCommandPriority_[stateMachineCommand]:100);
+//
+//			out << "\n";
+//		}
+//}
+
+//========================================================================================================================
 void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 {
 	//each generated context will look something like this:

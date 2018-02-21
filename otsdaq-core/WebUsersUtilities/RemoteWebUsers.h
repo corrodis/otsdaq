@@ -13,7 +13,7 @@
 namespace ots
 {
 
-class SupervisorDescriptorInfo;
+class AllSupervisorInfo;
 class HttpXmlDocument;
 
 class RemoteWebUsers : public SOAPMessenger
@@ -35,27 +35,25 @@ public:
 	//for external supervisors to check with Supervisor for login
 	//if false, user code should just return.. out is handled on false; on true, out is untouched
 	bool			xmlLoginGateway(
-			cgicc::Cgicc 					&cgi,
-			std::ostringstream 				*out,
-			HttpXmlDocument 				*xmldoc,
-			const SupervisorDescriptorInfo 	&theSupervisorsDescriptorInfo,
-			uint8_t 						*userPermissions = 0,
+			cgicc::Cgicc& 					cgi,
+			std::ostringstream* 			out,
+			HttpXmlDocument* 				xmldoc,
+			const AllSupervisorInfo& 		allSupervisorInfo,
+			uint8_t* 						userPermissions = 0,
 			const bool						refresh = true,
 			const uint8_t					permissionsThreshold = 1,
 			const bool						checkLock = false,
 			const bool						lockRequired = false,
-			std::string 					*userWithLock = 0,
-			std::string 					*username = 0,
-			std::string 					*displayName = 0,
-			uint64_t 						*activeSessionIndex = 0);
+			std::string* 					userWithLock = 0,
+			std::string* 					username = 0,
+			std::string* 					displayName = 0,
+			uint64_t* 						activeSessionIndex = 0);
 
 
 	std::string															getActiveUserList					(const xdaq::ApplicationDescriptor* supervisorDescriptor);
 	void																sendSystemMessage					(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &toUser, const std::string& msg);
 	void																makeSystemLogbookEntry			   	(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &entryText);
 	std::pair<std::string /*group name*/, ConfigurationGroupKey>		getLastConfigGroup					(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &actionOfLastGroup, std::string &actionTimeString); //actionOfLastGroup = "Configured" or "Started", for example
-
-	bool																isWizardMode						(const SupervisorDescriptorInfo& theSupervisorsDescriptorInfo);
 
 private:
 	bool			cookieCodeIsActiveForRequest(

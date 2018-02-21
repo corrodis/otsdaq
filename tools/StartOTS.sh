@@ -374,7 +374,7 @@ launchOTSWiz() {
 	#setup wiz mode environment variables
 	export CONSOLE_SUPERVISOR_ID=260
 	export CONFIGURATION_GUI_SUPERVISOR_ID=280
-	export OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID=290	
+	export WIZARD_SUPERVISOR_ID=290	
 	MAIN_PORT=2015
 
 	if [ "x$OTS_WIZ_MODE_MAIN_PORT" != "x" ]; then
@@ -433,7 +433,7 @@ launchOTSWiz() {
 	#node serverbase.js > /tmp/${USER}_serverbase.log &
 	
 	sleep 2
-	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
+	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$WIZARD_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	#echo $MAIN_URL
 			
 
@@ -453,9 +453,13 @@ launchOTS() {
 	echo -e "StartOTS.sh [${LINENO}]  \t *****************************************************"
 	echo -e "StartOTS.sh [${LINENO}]  \t *************       Launching OTS!      *************"
 	echo -e "StartOTS.sh [${LINENO}]  \t *****************************************************"
-	echo -e "StartOTS.sh [${LINENO}]  \t XDAQ Configuration XML: ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
+	echo -e "StartOTS.sh [${LINENO}]  \t XDAQ Configuration XML: ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
 	echo
 	echo
+	
+	sed -i s/ots::Supervisor/ots::GatewaySupervisor/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
+	sed -i s/libSupervisor\.so/libGatewaySupervisor\.so/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
+	
 	####################################################################
 	########### start console & message facility handling ##############
 	####################################################################
@@ -609,7 +613,7 @@ launchOTS() {
 					haveXDAQContextPort=true
 				fi
 				
-				if [[ ($line == *"ots::Supervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
+				if [[ ($line == *"ots::GatewaySupervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
 					if [[ ($line =~ $superRe) ]]; then
 					    mainHostname=${host}
 						#echo ${BASH_REMATCH[1]}	#should be supervisor LID

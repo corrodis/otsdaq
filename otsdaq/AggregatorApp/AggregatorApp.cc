@@ -43,7 +43,7 @@ AggregatorApp::AggregatorApp(xdaq::ApplicationStub * s) throw (xdaq::exception::
 , supervisorContextUID_        ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
 , supervisorApplicationUID_    ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
 {
-  INIT_MF("AggregatorApp");
+	INIT_MF("AggregatorApp");
     xgi::bind (this, &AggregatorApp::Default,                "Default" );
     xgi::bind (this, &AggregatorApp::stateMachineXgiHandler, "StateMachineXgiHandler");
 
@@ -90,7 +90,8 @@ AggregatorApp::~AggregatorApp(void)
 void AggregatorApp::init(void)
 {
     std::cout << __COUT_HDR_FL__ << "ARTDAQAGGREGATOR SUPERVISOR INIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-	theSupervisorDescriptorInfo_.init(getApplicationContext());
+    allSupervisorInfo_.init(getApplicationContext());
+
     artdaq::configureMessageFacility("aggregator");
 
     // initialization

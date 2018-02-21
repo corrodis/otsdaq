@@ -1,7 +1,7 @@
-#include "otsdaq-core/Supervisor/Iterator.h"
+#include "otsdaq-core/GatewaySupervisor/Iterator.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
-#include "otsdaq-core/Supervisor/Supervisor.h"
+#include "otsdaq-core/GatewaySupervisor/GatewaySupervisor.h"
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h"
 
@@ -10,12 +10,12 @@
 #include <thread>       //for std::thread
 
 #undef 	__MF_SUBJECT__
-#define __MF_SUBJECT__ "SupervisorIterator"
+#define __MF_SUBJECT__ "Iterator"
 
 using namespace ots;
 
 //========================================================================================================================
-Iterator::Iterator(Supervisor* supervisor)
+Iterator::Iterator(GatewaySupervisor* supervisor)
 : workloopRunning_				(false)
 , activePlanIsRunning_			(false)
 , iteratorBusy_					(false)
@@ -443,7 +443,7 @@ try
 	}
 
 
-	//should be mutually exclusive with Supervisor main thread state machine accesses
+	//should be mutually exclusive with GatewaySupervisor main thread state machine accesses
 	//lockout the messages array for the remainder of the scope
 	//this guarantees the reading thread can safely access the messages
 	if(iteratorStruct->theIterator_->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Waiting for FSM access" << __E__;
@@ -697,9 +697,9 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct *iteratorStruct,
 // return true if an action was attempted
 bool Iterator::haltIterator(Iterator *iterator,
 		 IteratorWorkLoopStruct *iteratorStruct)
-//(Supervisor* theSupervisor, const std::string& fsmName)
+//(GatewaySupervisor* theSupervisor, const std::string& fsmName)
 {
-	Supervisor* theSupervisor = iterator->theSupervisor_;
+	GatewaySupervisor* theSupervisor = iterator->theSupervisor_;
 	const std::string& fsmName = iterator->lastFsmName_;
 
 	std::vector<std::string> fsmCommandParameters;
@@ -1105,8 +1105,8 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 {
 	sleep(1); //sleep to give FSM time to transition
 
-	//all RunControlStateMachine access commands should be mutually exclusive with Supervisor main thread state machine accesses
-	//should be mutually exclusive with Supervisor main thread state machine accesses
+	//all RunControlStateMachine access commands should be mutually exclusive with GatewaySupervisor main thread state machine accesses
+	//should be mutually exclusive with GatewaySupervisor main thread state machine accesses
 	//lockout the messages array for the remainder of the scope
 	//this guarantees the reading thread can safely access the messages
 	if(iteratorStruct->theIterator_->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Waiting for FSM access" << __E__;
@@ -1262,16 +1262,16 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 		if(waitOnRunningThreads)
 		{
 			//	get status of all running FE workloops
-			Supervisor* theSupervisor =
+			GatewaySupervisor* theSupervisor =
 					iteratorStruct->theIterator_->theSupervisor_;
 
 			bool allFrontEndsAreDone = true;
 			for (auto& it :
-					theSupervisor->theSupervisorDescriptorInfo_.getFEDescriptors())
+					theSupervisor->allSupervisorInfo_.getAllFETypeSupervisorInfo())
 			{
 				try
 				{
-					std::string status = theSupervisor->send(it.second,
+					std::string status = theSupervisor->send(it.second.getDescriptor(),
 							"WorkLoopStatusRequest");
 
 					__COUT__ << "FESupervisor instance " << it.first <<
@@ -1376,8 +1376,8 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct *iteratorStruct)
 {
 	sleep(1); //sleep to give FSM time to transition
 
-	//all RunControlStateMachine access commands should be mutually exclusive with Supervisor main thread state machine accesses
-	//should be mutually exclusive with Supervisor main thread state machine accesses
+	//all RunControlStateMachine access commands should be mutually exclusive with GatewaySupervisor main thread state machine accesses
+	//should be mutually exclusive with GatewaySupervisor main thread state machine accesses
 	//lockout the messages array for the remainder of the scope
 	//this guarantees the reading thread can safely access the messages
 	if(iteratorStruct->theIterator_->theSupervisor_->VERBOSE_MUTEX) __COUT__ << "Waiting for FSM access" << __E__;

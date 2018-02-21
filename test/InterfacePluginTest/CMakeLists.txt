@@ -12,7 +12,7 @@ cet_make_exec(InterfacePluginTestMain
 		#FEInterfaces
 		#ConfigurationDataFormats
         #WorkLoopManager
-        #SupervisorDescriptorInfo
+        #SupervisorInfo
         #CgiDataUtilities
         #SOAPUtilities
 	    #FiniteStateMachine

@@ -7,11 +7,11 @@
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
-#include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
-
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
+
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 
 
 using namespace ots;
@@ -97,19 +97,19 @@ RemoteWebUsers::RemoteWebUsers(xdaq::Application* application)
 //xmlLoginGateway
 //	if false, user code should just return.. out is handled on false; on true, out is untouched
 bool RemoteWebUsers::xmlLoginGateway(
-		cgicc::Cgicc 					&cgi,
-		std::ostringstream 				*out,
-		HttpXmlDocument 				*xmldoc,
-		const SupervisorDescriptorInfo 	&theSupervisorsDescriptorInfo,
-		uint8_t 						*userPermissions,
+		cgicc::Cgicc& 					cgi,
+		std::ostringstream* 			out,
+		HttpXmlDocument* 				xmldoc,
+		const AllSupervisorInfo& 		allSupervisorInfo,
+		uint8_t* 						userPermissions,
 		const bool						refresh,
 		const uint8_t 					permissionsThreshold,
 		const bool						checkLock,
 		const bool						lockRequired,
-		std::string 					*userWithLock,
-		std::string 					*userName,
-		std::string 					*displayName,
-		uint64_t 						*activeSessionIndex)
+		std::string* 					userWithLock,
+		std::string* 					userName,
+		std::string* 					displayName,
+		uint64_t* 						activeSessionIndex)
 {
 	//initialized optional acquisition parameters to failed results
 	if(userPermissions) 	*userPermissions    = 0;
@@ -142,8 +142,7 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 	/////////////////////////////////////////////////////
 	//have CookieCode, try it out
-	gatewaySupervisor = theSupervisorsDescriptorInfo.getSupervisorDescriptor();
-	if(!gatewaySupervisor) //assume using wizard mode
+	if(allSupervisorInfo.isWizardMode())
 	{
 		//if missing CookieCode... check if in Wizard mode and using sequence
 		std::string sequence = CgiDataUtilities::getOrPostData(cgi,"sequence"); //from GET or POST
@@ -157,7 +156,7 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 		//have sequence, try it out
 
-		gatewaySupervisor =	theSupervisorsDescriptorInfo.getWizardDescriptor();
+		gatewaySupervisor =	allSupervisorInfo.getWizardInfo().getDescriptor();
 		if(!gatewaySupervisor)
 		{
 			*out << RemoteWebUsers::REQ_NO_LOGIN_RESPONSE;
@@ -191,6 +190,9 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 		return true; //successful sequence login!
 	}
+
+
+	gatewaySupervisor = allSupervisorInfo.getGatewayInfo().getDescriptor();
 
 	//__COUT__ << std::endl;
 
@@ -270,14 +272,6 @@ bool RemoteWebUsers::xmlLoginGateway(
 	}
 
 	return true;
-}
-
-//========================================================================================================================
-//isWizardMode
-//	return true if in wizard configuration mode
-bool RemoteWebUsers::isWizardMode(const SupervisorDescriptorInfo& theSupervisorsDescriptorInfo)
-{
-	return theSupervisorsDescriptorInfo.getWizardDescriptor()?true:false;
 }
 
 //========================================================================================================================

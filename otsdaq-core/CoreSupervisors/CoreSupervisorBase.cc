@@ -60,7 +60,8 @@ throw (xdaq::exception::Exception)
 
 	try
 	{
-		supervisorContextUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getContextUID(getApplicationContext()->getContextDescriptor()->getURL());
+		supervisorContextUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getContextUID(
+				getApplicationContext()->getContextDescriptor()->getURL());
 	}
 	catch(...)
 	{
@@ -97,13 +98,15 @@ CoreSupervisorBase::~CoreSupervisorBase(void)
 {
 	destroy();
 }
+
 //========================================================================================================================
 void CoreSupervisorBase::init(void)
 {
 	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
-	__COUT__ << "init CONTEXT!" << std::endl;
+	__COUT__ << "init" << std::endl;
 
-	supervisorDescriptorInfo_.init(getApplicationContext());
+	allSupervisorInfo_.init(getApplicationContext());
+	__COUT__ << "Name = " << allSupervisorInfo_.getSupervisorInfo(this).getName();
 
 	__COUT__ << "Done!" << std::endl;
 	//RunControlStateMachine::reset();
@@ -263,7 +266,8 @@ throw (xoap::exception::Exception)
 		if(request == "GetInterfaces")
 		{
 			if(theFEInterfacesManager)
-				retParameters.addParameter("FEList",theFEInterfacesManager->getFEListString(
+				retParameters.addParameter("FEList",
+						theFEInterfacesManager->getFEListString(
 									std::to_string(getApplicationDescriptor()->getLocalId())));
 			else
 				retParameters.addParameter("FEList","");
