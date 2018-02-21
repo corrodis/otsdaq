@@ -100,23 +100,31 @@ ConfigurationManager::ConfigurationManager()
 	}
 
 	//dump names of core tables (so UpdateOTS.sh can copy core tables for user)
+	// only if table does not exist
 	{
-		FILE * fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"w");
+		FILE * fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"r");
+
 		if(fp)
-		{
-			for(const auto &name:contextMemberNames_)
-				fprintf(fp,"%s\n",name.c_str());
-			for(const auto &name:backboneMemberNames_)
-				fprintf(fp,"%s\n",name.c_str());
-			for(const auto &name:iterateMemberNames_)
-				fprintf(fp,"%s\n",name.c_str());
 			fclose(fp);
-		}
 		else
 		{
-			__SS__ << "Failed to open core table info file: " << CORE_TABLE_INFO_FILENAME << std::endl;
-			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"w");
+			if(fp)
+			{
+				for(const auto &name:contextMemberNames_)
+					fprintf(fp,"%s\n",name.c_str());
+				for(const auto &name:backboneMemberNames_)
+					fprintf(fp,"%s\n",name.c_str());
+				for(const auto &name:iterateMemberNames_)
+					fprintf(fp,"%s\n",name.c_str());
+				fclose(fp);
+			}
+			else
+			{
+				__SS__ << "Failed to open core table info file: " << CORE_TABLE_INFO_FILENAME << std::endl;
+				__COUT_ERR__ << "\n" << ss.str();
+				throw std::runtime_error(ss.str());
+			}
 		}
 	}
 
