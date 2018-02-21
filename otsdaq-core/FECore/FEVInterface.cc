@@ -268,28 +268,40 @@ void FEVInterface::registerFEMacroFunction(
 
 
 //========================================================================================================================
-//getInputArgumentString
+//getFEMacroInputArgument
 //	helper function for getting the value of an argument
 const std::string& FEVInterface::getFEMacroInputArgument(frontEndMacroInArgs_t& argsIn,
-		const std::string& argName) const
+		const std::string& argName)
 {
-
 	for(const std::pair<const std::string /* input arg name */ , const std::string /* arg input value */ >&
 			pair : argsIn)
 	{
 		if(pair.first == argName)
+		{
+
+			__COUT__ << "argName : " << pair.second << __E__;
 			return pair.second;
+		}
 	}
 	__SS__ << "Requested input argument not found with name '" << argName << "'" << std::endl;
 	__COUT_ERR__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
+//========================================================================================================================
+//getFEMacroInputArgumentValue
+//	helper function for getting the copy of the value of an argument
+template<>
+std::string	getFEMacroInputArgumentValue<std::string>(FEVInterface::frontEndMacroInArgs_t &argsIn,
+		const std::string &argName)
+{
+	return FEVInterface::getFEMacroInputArgument(argsIn,argName);
+}
 
 //========================================================================================================================
-//getOutputArgumentString
+//getFEMacroOutputArgument
 //	helper function for getting the value of an argument
 std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& argsOut,
-		const std::string& argName) const
+		const std::string& argName)
 {
 
 	for(std::pair<const std::string /* output arg name */ , std::string /* arg output value */ >&
@@ -371,7 +383,7 @@ void FEVInterface::runSequenceOfCommands(const std::string &treeLinkName)
 //==============================================================================
 //isNumber ~~
 //	returns true if hex ("0x.."), binary("b..."), or base10 number
-bool FEVInterface::isNumber(const std::string& s) const
+bool FEVInterface::isNumber(const std::string& s)
 {
 	//__COUT__ << "string " << s << std::endl;
 	if(s.find("0x") == 0) //indicates hex
