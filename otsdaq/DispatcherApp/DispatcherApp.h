@@ -3,9 +3,9 @@
 
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
-#include "otsdaq-core/Supervisor/SupervisorsInfo.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
-#include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
+
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 
 #include "artdaq/Application/DispatcherApp.hh"
 
@@ -67,17 +67,17 @@ public:
     void enteringError         (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
 
 private:
-    WorkLoopManager                          stateMachineWorkLoopManager_;
-    toolbox::BSem                            stateMachineSemaphore_;
+    WorkLoopManager                         stateMachineWorkLoopManager_;
+    toolbox::BSem                           stateMachineSemaphore_;
 
-    SupervisorDescriptorInfo                 theSupervisorDescriptorInfo_;
-    ConfigurationManager*                    theConfigurationManager_;
-	std::string                              XDAQContextConfigurationName_;
-	std::string                              supervisorConfigurationPath_;
-	std::string                              supervisorContextUID_;
-	std::string                              supervisorApplicationUID_;
+    AllSupervisorInfo 						allSupervisorInfo_;
+    ConfigurationManager*                   theConfigurationManager_;
+	std::string                             XDAQContextConfigurationName_;
+	std::string                             supervisorConfigurationPath_;
+	std::string                             supervisorContextUID_;
+	std::string                             supervisorApplicationUID_;
 
-    artdaq::DispatcherApp*                theDispatcherInterface_;
+    artdaq::DispatcherApp*                	theDispatcherInterface_;
 
 };
 
