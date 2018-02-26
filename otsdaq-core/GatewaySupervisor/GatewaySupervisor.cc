@@ -1200,6 +1200,34 @@ throw (toolbox::fsm::exception::Exception)
 }
 
 //========================================================================================================================
+void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference e)
+throw (toolbox::fsm::exception::Exception)
+{
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
+
+	makeSystemLogbookEntry("System shutting down.");
+
+	//kill all non-gateway contexts
+	launchStartOTSCommand("OTS_APP_SHUTDOWN");
+
+	//broadcastMessage(theStateMachine_.getCurrentMessage());
+}
+
+//========================================================================================================================
+void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference e)
+throw (toolbox::fsm::exception::Exception)
+{
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
+
+	makeSystemLogbookEntry("System starting up.");
+
+	//start all non-gateway contexts
+	launchStartOTSCommand("OTS_APP_STARTUP");
+
+	//broadcastMessage(theStateMachine_.getCurrentMessage());
+}
+
+//========================================================================================================================
 void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
@@ -1351,6 +1379,8 @@ throw (toolbox::fsm::exception::Exception)
 	bool proceed = true;
 	std::string reply;
 
+	__COUT__ << "=========> Broadcasting state machine command = " << command << __E__;
+
 	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	// Send a SOAP message to every Supervisor in order by priority
 	for(auto& it: allSupervisorInfo_.getOrderedSupervisorDescriptors(command))
@@ -1359,13 +1389,13 @@ throw (toolbox::fsm::exception::Exception)
 
 		RunControlStateMachine::theProgressBar_.step();
 
-		__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [" <<
+		__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
 				appInfo.getId() << "]: " << command << std::endl;
-		__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [" <<
+		__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
 				appInfo.getId() << "]: " << command << std::endl;
-		__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [" <<
+		__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
 				appInfo.getId() << "]: " << command << std::endl;
-		__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [" <<
+		__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
 				appInfo.getId() << "]: " << command << std::endl;
 
 		try
@@ -1378,21 +1408,31 @@ throw (toolbox::fsm::exception::Exception)
 			__SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
 					appInfo.getName() << "' [" <<
 					appInfo.getId() << "] in Context '" <<
-					appInfo.getContextName() << "'.\n\n" <<
+					appInfo.getContextName() << ".'\n\n" <<
 					"Xoap message failure. Did the target Supervisor crash? Try re-initializing or restarting otsdaq." << std::endl;
 			__COUT_ERR__ << ss.str();
 			__MOUT_ERR__ << ss.str();
-			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 
+			try
+			{
+				__COUT__ << "Try again.." << __E__;
+				reply = send(appInfo.getDescriptor(), message);
+			}
+			catch(const xdaq::exception::Exception &e) //due to xoap send failure
+			{
+				__COUT__ << "Failed.." << __E__;
+				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+			}
+			__COUT__ << "2nd passed.." << __E__;
 			proceed = false;
 		}
 
 		if (reply != command + "Done")
 		{
 			__SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
-					appInfo.getName() << "' [" <<
+					appInfo.getName() << "' [LID=" <<
 					appInfo.getId() << "] in Context '" <<
-					appInfo.getContextName() << "'.\n\n" <<
+					appInfo.getContextName() << ".'\n\n" <<
 					reply;
 			__COUT_ERR__ << ss.str() << std::endl;
 			__MOUT_ERR__ << ss.str() << std::endl;
@@ -1406,10 +1446,27 @@ throw (toolbox::fsm::exception::Exception)
 				parameters.addParameter("ErrorMessage");
 				SOAPMessenger::receive(errorMessage, parameters);
 
-				__SS__ << "errorMessage = " << parameters.getValue("ErrorMessage") << std::endl;
+				std::string error = parameters.getValue("ErrorMessage");
+				if(error == "")
+				{
+					std::stringstream err;
+					err << "Unknown error from Supervisor instance = '" <<
+						appInfo.getName() << "' [LID=" <<
+						appInfo.getId() << "] in Context '" <<
+						appInfo.getContextName() << ".'  If the problem persists or is repeatable, please notify admins.\n\n";
+					error = err.str();
+				}
+
+				__SS__ << "Received error from Supervisor instance = '" <<
+						appInfo.getName() << "' [LID=" <<
+						appInfo.getId() << "] in Context '" <<
+						appInfo.getContextName() << ".' Error Message = " << error << std::endl;
 
 				__COUT_ERR__ << ss.str() << std::endl;
 				__MOUT_ERR__ << ss.str() << std::endl;
+
+				if(command == "Error") continue; //do not throw exception and exit loop if informing all apps about error
+				//else throw exception and go into Error
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 
 				proceed = false;
@@ -1418,9 +1475,9 @@ throw (toolbox::fsm::exception::Exception)
 			{
 				//do not kill whole system if xdaq xoap failure
 				__SS__ << "Error! Gateway Supervisor failed to read error message from Supervisor instance = '" <<
-						appInfo.getName() << "' [" <<
+						appInfo.getName() << "' [LID=" <<
 						appInfo.getId() << "] in Context '" <<
-						appInfo.getContextName() << "'.\n\n" <<
+						appInfo.getContextName() << ".'\n\n" <<
 						"Xoap message failure. Did the target Supervisor crash? Try re-initializing or restarting otsdaq." << std::endl;
 				__COUT_ERR__ << ss.str();
 				__MOUT_ERR__ << ss.str();
@@ -1432,9 +1489,9 @@ throw (toolbox::fsm::exception::Exception)
 		else
 		{
 			__COUT__ << "Supervisor instance = '" <<
-					appInfo.getName() << "' [" <<
+					appInfo.getName() << "' [LID=" <<
 					appInfo.getId() << "] in Context '" <<
-					appInfo.getContextName() << " was " << command << "'d correctly!" << std::endl;
+					appInfo.getContextName() << "' was " << command << "'d correctly!" << std::endl;
 		}
 
 		if(!proceed)
@@ -2951,58 +3008,61 @@ throw (xgi::exception::Exception)
 			theWebUsers_.saveActiveSessions();
 
 			//now launch
-			__COUT_INFO__ << "Launching... " << std::endl;
 
+			if(Command == "gatewayLaunchOTS")
+				launchStartOTSCommand("LAUNCH_OTS");
+			else if(Command == "gatewayLaunchWiz")
+				launchStartOTSCommand("LAUNCH_WIZ");
 
-			__COUT__ << "Extracting target context hostnames... " << std::endl;
-			std::vector<std::string> hostnames;
-			try
-			{
-				theConfigurationManager_->init(); //completely reset to re-align with any changes
-
-				const XDAQContextConfiguration* contextConfiguration = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
-
-				auto contexts = contextConfiguration->getContexts();
-				unsigned int i,j;
-				for(const auto& context: contexts)
-				{
-					if(!context.status_) continue;
-
-					//find last slash
-					j=0; //default to whole string
-					for(i=0;i<context.address_.size();++i)
-						if(context.address_[i] == '/')
-							j = i+1;
-					hostnames.push_back(context.address_.substr(j));
-					__COUT__ << "hostname = " << hostnames.back() << std::endl;
-				}
-			}
-			catch(...)
-			{
-				__SS__ << "\nRelaunch of otsdaq interrupted! " <<
-						"The Configuration Manager could not be initialized." << std::endl;
-
-				__COUT_ERR__ << "\n" << ss.str();
-				return;
-			}
-
-			for(const auto& hostname: hostnames)
-			{
-				std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) +
-						"/StartOTS_action_" + hostname + ".cmd");
-				FILE* fp = fopen(fn.c_str(),"w");
-				if(fp)
-				{
-					if(Command == "gatewayLaunchOTS")
-						fprintf(fp,"LAUNCH_OTS");
-					else if(Command == "gatewayLaunchWiz")
-						fprintf(fp,"LAUNCH_WIZ");
-
-					fclose(fp);
-				}
-				else
-					__COUT_ERR__ << "Unable to open command file: " << fn << std::endl;
-			}
+//			__COUT__ << "Extracting target context hostnames... " << std::endl;
+//			std::vector<std::string> hostnames;
+//			try
+//			{
+//				theConfigurationManager_->init(); //completely reset to re-align with any changes
+//
+//				const XDAQContextConfiguration* contextConfiguration = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+//
+//				auto contexts = contextConfiguration->getContexts();
+//				unsigned int i,j;
+//				for(const auto& context: contexts)
+//				{
+//					if(!context.status_) continue;
+//
+//					//find last slash
+//					j=0; //default to whole string
+//					for(i=0;i<context.address_.size();++i)
+//						if(context.address_[i] == '/')
+//							j = i+1;
+//					hostnames.push_back(context.address_.substr(j));
+//					__COUT__ << "hostname = " << hostnames.back() << std::endl;
+//				}
+//			}
+//			catch(...)
+//			{
+//				__SS__ << "\nRelaunch of otsdaq interrupted! " <<
+//						"The Configuration Manager could not be initialized." << std::endl;
+//
+//				__COUT_ERR__ << "\n" << ss.str();
+//				return;
+//			}
+//
+//			for(const auto& hostname: hostnames)
+//			{
+//				std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) +
+//						"/StartOTS_action_" + hostname + ".cmd");
+//				FILE* fp = fopen(fn.c_str(),"w");
+//				if(fp)
+//				{
+//					if(Command == "gatewayLaunchOTS")
+//						fprintf(fp,"LAUNCH_OTS");
+//					else if(Command == "gatewayLaunchWiz")
+//						fprintf(fp,"LAUNCH_WIZ");
+//
+//					fclose(fp);
+//				}
+//				else
+//					__COUT_ERR__ << "Unable to open command file: " << fn << std::endl;
+//			}
 		}
 	}
 	else if(Command == "resetUserTooltips")
@@ -3018,6 +3078,62 @@ throw (xgi::exception::Exception)
 	xmldoc.outputXmlDocument((std::ostringstream*) out, false, true); //Note: allow white space need for error response
 
 	//__COUT__ << "done " << Command << std::endl;
+}
+
+//========================================================================================================================
+//xoap::supervisorGetUserInfo
+//	get user info to external supervisors
+void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
+{
+	__COUT__ << "launch StartOTS Command = " << command << __E__;
+	__COUT__ << "Extracting target context hostnames... " << std::endl;
+
+	std::vector<std::string> hostnames;
+	try
+	{
+		theConfigurationManager_->init(); //completely reset to re-align with any changes
+
+		const XDAQContextConfiguration* contextConfiguration = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+
+		auto contexts = contextConfiguration->getContexts();
+		unsigned int i,j;
+		for(const auto& context: contexts)
+		{
+			if(!context.status_) continue;
+
+			//find last slash
+			j=0; //default to whole string
+			for(i=0;i<context.address_.size();++i)
+				if(context.address_[i] == '/')
+					j = i+1;
+			hostnames.push_back(context.address_.substr(j));
+			__COUT__ << "hostname = " << hostnames.back() << std::endl;
+		}
+	}
+	catch(...)
+	{
+		__SS__ << "\nRelaunch of otsdaq interrupted! " <<
+				"The Configuration Manager could not be initialized." << std::endl;
+
+		__SS_THROW__;
+	}
+
+	for(const auto& hostname: hostnames)
+	{
+		std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) +
+				"/StartOTS_action_" + hostname + ".cmd");
+		FILE* fp = fopen(fn.c_str(),"w");
+		if(fp)
+		{
+			fprintf(fp,command.c_str());
+			fclose(fp);
+		}
+		else
+		{
+			__SS__ << "Unable to open command file: " << fn << std::endl;
+			__SS_THROW__;
+		}
+	}
 }
 
 //========================================================================================================================

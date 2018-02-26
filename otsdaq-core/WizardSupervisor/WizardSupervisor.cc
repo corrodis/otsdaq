@@ -368,7 +368,7 @@ throw (xgi::exception::Exception)
 		<meta name='theme-color' content='#ffffff'>" <<
 					//end show ots icon
 			"</head>" <<
-			"<frameset col='100%' row='100%'><frame src='/WebPath/html/OtsConfigurationWizard.html?urn=" <<
+			"<frameset col='100%' row='100%'><frame src='/WebPath/html/Wizard.html?urn=" <<
 	                this->getApplicationDescriptor()->getLocalId() << securityWarning <<"'></frameset></html>";
 
 }

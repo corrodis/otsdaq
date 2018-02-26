@@ -3,7 +3,7 @@
 
 #include "config/PackageInfo.h"
 
-#define MYPACKAGE_VERSION_MAJOR 			1
+#define MYPACKAGE_VERSION_MAJOR 			3
 #define MYPACKAGE_VERSION_MINOR 			0
 #define MYPACKAGE_VERSION_PATCH 			0
 #undef 	MYPACKAGE_PREVIOUS_VERSIONS

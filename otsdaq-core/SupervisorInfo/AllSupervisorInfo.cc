@@ -245,7 +245,7 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 {
 	__COUT__ << "getOrderedSupervisorDescriptors" << __E__;
 
-	std::map<uint8_t      /*priority*/, unsigned int /*appId*/> orderedByPriority;
+	std::map<uint8_t      /*priority*/, std::vector< unsigned int /*appId*/> > orderedByPriority;
 
 	try
 	{
@@ -261,11 +261,11 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 
 					auto it = app.stateMachineCommandPriority_.find(stateMachineCommand);
 					if(it == app.stateMachineCommandPriority_.end())
-						orderedByPriority[100] = app.id_;
+						orderedByPriority[100].push_back(app.id_);
 					else
-						orderedByPriority[it->second?it->second:100] = app.id_;
+						orderedByPriority[it->second?it->second:100].push_back(app.id_);
 
-					__COUT__ << "app.id_ " << app.id_ << __E__;
+					//__COUT__ << "app.id_ " << app.id_ << __E__;
 				}
 	}
 	catch(...)
@@ -276,18 +276,24 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 
 
 	__COUT__ << "Here is the order supervisors will be " << stateMachineCommand << "'d:" << __E__;
+
+
 	//return ordered set of supervisor infos
 	//	skip over Gateway Supervisor
 	std::vector<const SupervisorInfo*> retVec;
-	for (const auto& priorityApp : orderedByPriority)
+	for (const auto& priorityAppVector : orderedByPriority)
+		for (const auto& priorityApp : priorityAppVector.second)
 	{
-		auto it = allSupervisorInfo_.find(priorityApp.second);
+		auto it = allSupervisorInfo_.find(priorityApp);
 		if(it == allSupervisorInfo_.end())
 		{
-			__SS__ << "Error! Was AllSupervisorInfo properly initialized? The app.id_ " << priorityApp.second << " priority " <<
-							(unsigned int)priorityApp.first << " could not be found in AllSupervisorInfo." << __E__;
+			__SS__ << "Error! Was AllSupervisorInfo properly initialized? The app.id_ " << priorityApp << " priority " <<
+							(unsigned int)priorityAppVector.first << " could not be found in AllSupervisorInfo." << __E__;
 			__SS_THROW__;
 		}
+
+		//__COUT__ << it->second.getName() << " [" << it->second.getId() << "]: " << " priority? " <<
+		//				(unsigned int)priorityAppVector.first << __E__;
 
 		if(it->second.isGatewaySupervisor()) continue; //skip gateway supervisor
 		if(it->second.isTypeLogbookSupervisor()) continue; //skip logbook supervisor(s)
@@ -297,8 +303,8 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 		if(it->second.isTypeConsoleSupervisor()) continue; //skip console supervisor(s)
 
 		retVec.push_back(&(it->second));
-		__COUT__ << it->second.getName() << " [" << it->second.getId() << "]: " << " priority " <<
-				(unsigned int)priorityApp.first << __E__;
+		__COUT__ << it->second.getName() << " [LID=" << it->second.getId() << "]: " << " priority " <<
+				(unsigned int)priorityAppVector.first << __E__;
 	}
 	return retVec;
 
