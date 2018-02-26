@@ -5,7 +5,7 @@ include_directories(${MPI_INCLUDE_PATH})
 #    message(STATUS "${_variableName}=${${_variableName}}")
 #endforeach()
 
-cet_make(LIBRARY_NAME AggregatorApp
+cet_make(LIBRARY_NAME DataLoggerApp
 		 LIBRARIES
 		 ${FHICLCPP}
 		 ${CETLIB}
@@ -16,7 +16,7 @@ cet_make(LIBRARY_NAME AggregatorApp
 		 ${MF_UTILITIES}
 		 ${Boost_SYSTEM_LIBRARY}
 		 artdaq_Application
-		 artdaq_Application_MPI2
+		 artdaq-core_Utilities
 		 artdaq_DAQdata
 		 artdaq_BuildInfo
 		 MessageFacility

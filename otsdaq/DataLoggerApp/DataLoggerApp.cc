@@ -1,5 +1,4 @@
-#include "otsdaq/AggregatorApp/AggregatorApp.h"
-#include "otsdaq/AggregatorApp/AggregatorInterface.h"
+#include "otsdaq/DataLoggerApp/DataLoggerApp.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
@@ -17,8 +16,7 @@
 
 #include <memory>
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "artdaq/DAQdata/configureMessageFacility.hh"
-#include "artdaq/DAQrate/quiet_mpi.hh"
+#include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "cetlib/exception.h"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "fhiclcpp/make_ParameterSet.h"
@@ -29,13 +27,13 @@
 
 using namespace ots;
 
-XDAQ_INSTANTIATOR_IMPL(AggregatorApp)
+XDAQ_INSTANTIATOR_IMPL(DataLoggerApp)
 
 //========================================================================================================================
-AggregatorApp::AggregatorApp(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception)
+DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception)
 : xdaq::Application           (s)
 , SOAPMessenger               (this)
-, stateMachineWorkLoopManager_(toolbox::task::bind(this, &AggregatorApp::stateMachineThread, "StateMachine"))
+, stateMachineWorkLoopManager_(toolbox::task::bind(this, &DataLoggerApp::stateMachineThread, "StateMachine"))
 , stateMachineSemaphore_      (toolbox::BSem::FULL)
 , theConfigurationManager_    (new ConfigurationManager)//(Singleton<ConfigurationManager>::getInstance()) //I always load the full config but if I want to load a partial configuration (new ConfigurationManager)
 , XDAQContextConfigurationName_(theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getConfigurationName())
@@ -43,12 +41,12 @@ AggregatorApp::AggregatorApp(xdaq::ApplicationStub * s) throw (xdaq::exception::
 , supervisorContextUID_        ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
 , supervisorApplicationUID_    ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
 {
-  INIT_MF("AggregatorApp");
-    xgi::bind (this, &AggregatorApp::Default,                "Default" );
-    xgi::bind (this, &AggregatorApp::stateMachineXgiHandler, "StateMachineXgiHandler");
+  INIT_MF("DataLoggerApp");
+    xgi::bind (this, &DataLoggerApp::Default,                "Default" );
+    xgi::bind (this, &DataLoggerApp::stateMachineXgiHandler, "StateMachineXgiHandler");
 
-    xoap::bind(this, &AggregatorApp::stateMachineStateRequest, 			"StateMachineStateRequest", XDAQ_NS_URI );
-    xoap::bind(this, &AggregatorApp::stateMachineErrorMessageRequest,  	"StateMachineErrorMessageRequest",  XDAQ_NS_URI );
+    xoap::bind(this, &DataLoggerApp::stateMachineStateRequest, 			"StateMachineStateRequest", XDAQ_NS_URI );
+    xoap::bind(this, &DataLoggerApp::stateMachineErrorMessageRequest,  	"StateMachineErrorMessageRequest",  XDAQ_NS_URI );
 
 	try
 	{
@@ -82,37 +80,21 @@ AggregatorApp::AggregatorApp(xdaq::ApplicationStub * s) throw (xdaq::exception::
 }
 
 //========================================================================================================================
-AggregatorApp::~AggregatorApp(void)
+DataLoggerApp::~DataLoggerApp(void)
 {
     destroy();
 }
 //========================================================================================================================
-void AggregatorApp::init(void)
+void DataLoggerApp::init(void)
 {
-    std::cout << __COUT_HDR_FL__ << "ARTDAQAGGREGATOR SUPERVISOR INIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::cout << __COUT_HDR_FL__ << "ARTDAQDataLogger SUPERVISOR INIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 	theSupervisorDescriptorInfo_.init(getApplicationContext());
-    artdaq::configureMessageFacility("aggregator");
+    artdaq::configureMessageFacility("DataLogger");
 
     // initialization
 
-    int const wanted_threading_level { MPI_THREAD_MULTIPLE };
-    //int const wanted_threading_level { MPI_THREAD_FUNNELED };
-
-    MPI_Comm local_group_comm;
-
-    try
-    {
-        mpiSentry_.reset( new artdaq::MPISentry(0, 0, wanted_threading_level, artdaq::TaskType::AggregatorTask, local_group_comm) );
-    }
-    catch (cet::exception& errormsg)
-    {
-        mf::LogError("AggregatorMain") << errormsg ;
-        mf::LogError("AggregatorMain") << "MPISentry error encountered in AggregatorMain; exiting...";
-        throw errormsg;
-    }
-
-    std::cout << __COUT_HDR_FL__ << "ARTDAQAGGREGATOR SUPERVISOR INIT4!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-    std::string    name = "Aggregator";
+    std::cout << __COUT_HDR_FL__ << "ARTDAQDataLogger SUPERVISOR INIT4!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::string    name = "DataLogger";
     unsigned short port = 5300;
 //    artdaq::setMsgFacAppName(supervisorApplicationUID_, port);
     artdaq::setMsgFacAppName(name, port);
@@ -122,37 +104,34 @@ void AggregatorApp::init(void)
     << ", built " <<
     artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
 
-    // create the AggregatorInterface
-    theAggregatorInterface_ = new AggregatorInterface(mpiSentry_->rank(), name );
-    //theAggregatorInterface_ = new AggregatorInterface(mpiSentry_->rank(), local_group_comm, supervisorApplicationUID_ );
+    // create the DataLoggerInterface
+    theDataLoggerInterface_ = new artdaq::DataLoggerApp(this->getApplicationDescriptor()->getLocalId(), name );
 }
 
 //========================================================================================================================
-void AggregatorApp::destroy(void)
+void DataLoggerApp::destroy(void)
 {
-	delete theAggregatorInterface_;
-	//called by destructor
-	mpiSentry_.reset();
+	delete theDataLoggerInterface_;
 }
 
 //========================================================================================================================
-void AggregatorApp::Default(xgi::Input * in, xgi::Output * out ) throw (xgi::exception::Exception)
+void DataLoggerApp::Default(xgi::Input * in, xgi::Output * out ) throw (xgi::exception::Exception)
 {
     
-    *out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='/WebPath/html/AggregatorApp.html?urn=" <<
+    *out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='/WebPath/html/DataLoggerApp.html?urn=" <<
     		this->getApplicationDescriptor()->getLocalId() << "'></frameset></html>";
 }
 
 //========================================================================================================================
-void AggregatorApp::stateMachineXgiHandler(xgi::Input * in, xgi::Output * out ) throw (xgi::exception::Exception)
+void DataLoggerApp::stateMachineXgiHandler(xgi::Input * in, xgi::Output * out ) throw (xgi::exception::Exception)
 {}
 
 //========================================================================================================================
-void AggregatorApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception)
+void DataLoggerApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception)
 {}
 
 //========================================================================================================================
-xoap::MessageReference AggregatorApp::stateMachineXoapHandler(xoap::MessageReference message ) throw (xoap::exception::Exception)
+xoap::MessageReference DataLoggerApp::stateMachineXoapHandler(xoap::MessageReference message ) throw (xoap::exception::Exception)
 {
     std::cout << __COUT_HDR_FL__ << "Soap Handler!" << std::endl;
     stateMachineWorkLoopManager_.removeProcessedRequests();
@@ -162,7 +141,7 @@ xoap::MessageReference AggregatorApp::stateMachineXoapHandler(xoap::MessageRefer
 }
 
 //========================================================================================================================
-xoap::MessageReference AggregatorApp::stateMachineResultXoapHandler(xoap::MessageReference message ) throw (xoap::exception::Exception)
+xoap::MessageReference DataLoggerApp::stateMachineResultXoapHandler(xoap::MessageReference message ) throw (xoap::exception::Exception)
 {
     std::cout << __COUT_HDR_FL__ << "Soap Handler!" << std::endl;
     //stateMachineWorkLoopManager_.removeProcessedRequests();
@@ -172,7 +151,7 @@ xoap::MessageReference AggregatorApp::stateMachineResultXoapHandler(xoap::Messag
 }
 
 //========================================================================================================================
-bool AggregatorApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
+bool DataLoggerApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 {
     stateMachineSemaphore_.take();
     std::cout << __COUT_HDR_FL__ << "Re-sending message..." << SOAPUtilities::translate(stateMachineWorkLoopManager_.getMessage(workLoop)).getCommand() << std::endl;
@@ -185,14 +164,14 @@ bool AggregatorApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 }
 
 //========================================================================================================================
-xoap::MessageReference AggregatorApp::stateMachineStateRequest(xoap::MessageReference message) throw (xoap::exception::Exception)
+xoap::MessageReference DataLoggerApp::stateMachineStateRequest(xoap::MessageReference message) throw (xoap::exception::Exception)
 {
     std::cout << __COUT_HDR_FL__ << theStateMachine_.getCurrentStateName() << std::endl;
     return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getCurrentStateName());
 }
 
 //========================================================================================================================
-xoap::MessageReference AggregatorApp::stateMachineErrorMessageRequest(xoap::MessageReference message)
+xoap::MessageReference DataLoggerApp::stateMachineErrorMessageRequest(xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
 	__COUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
@@ -203,44 +182,44 @@ throw (xoap::exception::Exception)
 }
 
 //========================================================================================================================
-void AggregatorApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
 {
     
 }
 
 //========================================================================================================================
-void AggregatorApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
 {
     
 }
 
 //========================================================================================================================
-void AggregatorApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
 {
     
 }
 
 //========================================================================================================================
-void AggregatorApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
 {
     
 }
 
 //========================================================================================================================
-void AggregatorApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
 {
     
 }
 
 //========================================================================================================================
-void AggregatorApp::inError (toolbox::fsm::FiniteStateMachine & fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::inError (toolbox::fsm::FiniteStateMachine & fsm) throw (toolbox::fsm::exception::Exception)
 {
     std::cout << __COUT_HDR_FL__ << "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
     //rcmsStateNotifier_.stateChanged("Error", "");
 }
 
 //========================================================================================================================
-void AggregatorApp::enteringError (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::enteringError (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
     std::cout << __COUT_HDR_FL__ << "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
     toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
@@ -257,12 +236,12 @@ void AggregatorApp::enteringError (toolbox::Event::Reference e) throw (toolbox::
 
 
 #define ARTDAQ_FCL_PATH			std::string(getenv("USER_DATA")) + "/"+ "ARTDAQConfigurations/"
-#define ARTDAQ_FILE_PREAMBLE	"aggregator"
+#define ARTDAQ_FILE_PREAMBLE	"DataLogger"
 //========================================================================================================================
-void AggregatorApp::transitionConfiguring(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
 
-    std::cout << __COUT_HDR_FL__ << "ARTDAQAGGREGATOR SUPERVISOR CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::cout << __COUT_HDR_FL__ << "ARTDAQDataLogger SUPERVISOR CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     std::cout << __COUT_HDR_FL__  << SOAPUtilities::translate(theStateMachine_.getCurrentMessage()) << std::endl;
 
     std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup(
@@ -287,11 +266,11 @@ void AggregatorApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
     else if(dirP) { path = std::string(dirP) + "/"; }
 
     //Now that the configuration manager has all the necessary configurations I can create all objects dependent of the configuration
-    //std::string configString = "daq:{aggregator:{event_builder_count:2 event_queue_depth:20 event_queue_wait_time:5 expected_events_per_bunch:1 file_duration:0 file_event_count:0 file_size_MB:0 first_event_builder_rank:2 mpi_buffer_count:8 print_event_store_stats:true xmlrpc_client_list:\";http://localhost:5603/RPC2,3;http://localhost:5604/RPC2,3;http://localhost:5605/RPC2,4;http://localhost:5606/RPC2,4;http://localhost:5601/RPC2,5;http://localhost:5602/RPC2,5\"} max_fragment_size_words:2.097152e6} outputs:{normalOutput:{fileName:\"/data/otsdata/data/artdaqots_r%06r_sr%02s_%to.root\" module_type:\"RootOutput\"}} physics:{my_output_modules:[\"normalOutput\"] p2:[\"BuildInfo\"] producers:{BuildInfo:{instance_name:\"ArtdaqOts\" module_type:\"ArtdaqOtsBuildInfo\"}}} process_name:\"DAQAG\" services:{Timing:{summaryOnly:true} scheduler:{fileMode:\"NOMERGE\"} user:{NetMonTransportServiceInterface:{max_fragment_size_words:2.097152e6 service_provider:\"NetMonTransportService\"}}} source:{module_type:\"NetMonInput\"}";
+    //std::string configString = "daq:{DataLogger:{event_builder_count:2 event_queue_depth:20 event_queue_wait_time:5 expected_events_per_bunch:1 file_duration:0 file_event_count:0 file_size_MB:0 first_event_builder_rank:2 mpi_buffer_count:8 print_event_store_stats:true xmlrpc_client_list:\";http://localhost:5603/RPC2,3;http://localhost:5604/RPC2,3;http://localhost:5605/RPC2,4;http://localhost:5606/RPC2,4;http://localhost:5601/RPC2,5;http://localhost:5602/RPC2,5\"} max_fragment_size_words:2.097152e6} outputs:{normalOutput:{fileName:\"/data/otsdata/data/artdaqots_r%06r_sr%02s_%to.root\" module_type:\"RootOutput\"}} physics:{my_output_modules:[\"normalOutput\"] p2:[\"BuildInfo\"] producers:{BuildInfo:{instance_name:\"ArtdaqOts\" module_type:\"ArtdaqOtsBuildInfo\"}}} process_name:\"DAQAG\" services:{Timing:{summaryOnly:true} scheduler:{fileMode:\"NOMERGE\"} user:{NetMonTransportServiceInterface:{max_fragment_size_words:2.097152e6 service_provider:\"NetMonTransportService\"}}} source:{module_type:\"NetMonInput\"}";
     //ONLY 1 BOARD READER
-    //    std::string configString = "daq:{aggregator:{event_builder_count:1 event_queue_depth:20 event_queue_wait_time:5 expected_events_per_bunch:1 file_duration:0 file_event_count:0 file_size_MB:0 first_event_builder_rank:1 mpi_buffer_count:8 print_event_store_stats:true xmlrpc_client_list:\";http://localhost:5100/RPC2,3;http://localhost:5101/RPC2,3;http://localhost:5200/RPC2,4;http://localhost:5201/RPC2,4;http://localhost:5300/RPC2,5;http://localhost:5301/RPC2,5\"} max_fragment_size_words:2.097152e6} outputs:{normalOutput:{fileName:\""+path+"artdaqots_r%06r_sr%02s_%to.root\" module_type:\"RootOutput\"}} physics:{my_output_modules:[\"normalOutput\"] p2:[\"BuildInfo\"] a1:[\"wf\"] producers:{BuildInfo:{instance_name:\"ArtdaqOts\" module_type:\"ArtdaqOtsBuildInfo\"}} analyzers:{wf: {module_type:\"WFViewer\" fragment_ids:[0] fragment_type_labels:[ \"DataGen\" ] prescale:60 write_to_file:true fileName:\""+path+"otsdaqdemo_onmon.root\"}}} process_name:\"DAQAG\" services:{Timing:{summaryOnly:true} scheduler:{fileMode:\"NOMERGE\" errorOnFailureToPut: false} NetMonTransportServiceInterface:{max_fragment_size_words:2097152 service_provider:\"NetMonTransportService\"}} source:{module_type:\"NetMonInput\"}";
+    //    std::string configString = "daq:{DataLogger:{event_builder_count:1 event_queue_depth:20 event_queue_wait_time:5 expected_events_per_bunch:1 file_duration:0 file_event_count:0 file_size_MB:0 first_event_builder_rank:1 mpi_buffer_count:8 print_event_store_stats:true xmlrpc_client_list:\";http://localhost:5100/RPC2,3;http://localhost:5101/RPC2,3;http://localhost:5200/RPC2,4;http://localhost:5201/RPC2,4;http://localhost:5300/RPC2,5;http://localhost:5301/RPC2,5\"} max_fragment_size_words:2.097152e6} outputs:{normalOutput:{fileName:\""+path+"artdaqots_r%06r_sr%02s_%to.root\" module_type:\"RootOutput\"}} physics:{my_output_modules:[\"normalOutput\"] p2:[\"BuildInfo\"] a1:[\"wf\"] producers:{BuildInfo:{instance_name:\"ArtdaqOts\" module_type:\"ArtdaqOtsBuildInfo\"}} analyzers:{wf: {module_type:\"WFViewer\" fragment_ids:[0] fragment_type_labels:[ \"DataGen\" ] prescale:60 write_to_file:true fileName:\""+path+"otsdaqdemo_onmon.root\"}}} process_name:\"DAQAG\" services:{Timing:{summaryOnly:true} scheduler:{fileMode:\"NOMERGE\" errorOnFailureToPut: false} NetMonTransportServiceInterface:{max_fragment_size_words:2097152 service_provider:\"NetMonTransportService\"}} source:{module_type:\"NetMonInput\"}";
     //2 BOARD READERS
-    //std::string configString = "daq:{aggregator:{event_builder_count:1 event_queue_depth:20 event_queue_wait_time:5 expected_events_per_bunch:1 file_duration:0 file_event_count:0 file_size_MB:0 first_event_builder_rank:1 mpi_buffer_count:8 print_event_store_stats:true xmlrpc_client_list:\";http://localhost:5100/RPC2,3;http://localhost:5101/RPC2,3;http://localhost:5200/RPC2,4;http://localhost:5201/RPC2,4;http://localhost:5300/RPC2,5;http://localhost:5301/RPC2,5\"} max_fragment_size_words:2.097152e6} outputs:{normalOutput:{fileName:\""+path+"artdaqots_r%06r_sr%02s_%to.root\" module_type:\"RootOutput\"}} physics:{my_output_modules:[\"normalOutput\"] p2:[\"BuildInfo\"] a1:[\"wf\"] producers:{BuildInfo:{instance_name:\"ArtdaqOts\" module_type:\"ArtdaqOtsBuildInfo\"}} analyzers:{wf: {module_type:\"WFViewer\" fragment_ids:[0] fragment_type_labels:[ \"DataGen\" ] prescale:60 write_to_file:true fileName:\""+path+"otsdaqdemo_onmon.root\"}}} process_name:\"DAQAG\" services:{Timing:{summaryOnly:true} scheduler:{fileMode:\"NOMERGE\" errorOnFailureToPut: false} NetMonTransportServiceInterface:{max_fragment_size_words:2097152 service_provider:\"NetMonTransportService\"}} source:{module_type:\"NetMonInput\"}";
+    //std::string configString = "daq:{DataLogger:{event_builder_count:1 event_queue_depth:20 event_queue_wait_time:5 expected_events_per_bunch:1 file_duration:0 file_event_count:0 file_size_MB:0 first_event_builder_rank:1 mpi_buffer_count:8 print_event_store_stats:true xmlrpc_client_list:\";http://localhost:5100/RPC2,3;http://localhost:5101/RPC2,3;http://localhost:5200/RPC2,4;http://localhost:5201/RPC2,4;http://localhost:5300/RPC2,5;http://localhost:5301/RPC2,5\"} max_fragment_size_words:2.097152e6} outputs:{normalOutput:{fileName:\""+path+"artdaqots_r%06r_sr%02s_%to.root\" module_type:\"RootOutput\"}} physics:{my_output_modules:[\"normalOutput\"] p2:[\"BuildInfo\"] a1:[\"wf\"] producers:{BuildInfo:{instance_name:\"ArtdaqOts\" module_type:\"ArtdaqOtsBuildInfo\"}} analyzers:{wf: {module_type:\"WFViewer\" fragment_ids:[0] fragment_type_labels:[ \"DataGen\" ] prescale:60 write_to_file:true fileName:\""+path+"otsdaqdemo_onmon.root\"}}} process_name:\"DAQAG\" services:{Timing:{summaryOnly:true} scheduler:{fileMode:\"NOMERGE\" errorOnFailureToPut: false} NetMonTransportServiceInterface:{max_fragment_size_words:2097152 service_provider:\"NetMonTransportService\"}} source:{module_type:\"NetMonInput\"}";
 
     fhicl::ParameterSet pset;
     //fhicl::make_ParameterSet(configString, pset);
@@ -331,44 +310,45 @@ void AggregatorApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
 	//fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(), pset);
 
 
-    theAggregatorInterface_->configure(pset);
-    mf::LogInfo("AggregatorInterface") << "ARTDAQAGGREGATOR SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+    theDataLoggerInterface_->initialize(pset, 0, 0);
+    mf::LogInfo("DataLoggerInterface") << "ARTDAQDataLogger SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 
 }
 
 //========================================================================================================================
-void AggregatorApp::transitionHalting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionHalting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-    theAggregatorInterface_->halt();
+    theDataLoggerInterface_->shutdown(0);
 }
 
 //========================================================================================================================
-void AggregatorApp::transitionInitializing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionInitializing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
     
 }
 
 //========================================================================================================================
-void AggregatorApp::transitionPausing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionPausing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-    theAggregatorInterface_->pause();
+    theDataLoggerInterface_->pause(0, time(0));
 }
 
 //========================================================================================================================
-void AggregatorApp::transitionResuming(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionResuming(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-    theAggregatorInterface_->resume();
+    theDataLoggerInterface_->resume(0, time(0));
 }
 
 //========================================================================================================================
-void AggregatorApp::transitionStarting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionStarting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-    theAggregatorInterface_->start(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber"));
+	art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber")));
+    theDataLoggerInterface_->start(runId,0,time(0));
 }
 
 //========================================================================================================================
-void AggregatorApp::transitionStopping(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionStopping(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-    theAggregatorInterface_->stop();
-    theAggregatorInterface_->halt();
+    theDataLoggerInterface_->stop(0,time(0));
+    theDataLoggerInterface_->shutdown(0);
 }

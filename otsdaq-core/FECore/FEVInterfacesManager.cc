@@ -6,7 +6,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "artdaq/DAQdata/configureMessageFacility.hh"
+#include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "fhiclcpp/make_ParameterSet.h"
 

@@ -1,11 +1,13 @@
-#ifndef _ots_ARTDAQAggregatorSupervisor_h
-#define _ots_ARTDAQAggregatorSupervisor_h
+#ifndef _ots_ARTDAQDispatcherSupervisor_h
+#define _ots_ARTDAQDispatcherSupervisor_h
 
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq-core/Supervisor/SupervisorsInfo.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
 #include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
+
+#include "artdaq/Application/DispatcherApp.hh"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -18,25 +20,21 @@
 
 #include <memory>
 
-#include "artdaq/Application/MPI2/MPISentry.hh"
-
-
 namespace ots
 {
 
 class ConfigurationManager;
 class ConfigurationGroupKey;
-class AggregatorInterface;
 
-class AggregatorApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
+class DispatcherApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 
 public:
 
     XDAQ_INSTANTIATOR();
 
-    AggregatorApp            (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
-    virtual ~AggregatorApp   (void);
+    DispatcherApp            (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
+    virtual ~DispatcherApp   (void);
     void init                            (void);
     void destroy                         (void);
     void Default                         (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
@@ -79,8 +77,7 @@ private:
 	std::string                              supervisorContextUID_;
 	std::string                              supervisorApplicationUID_;
 
-    ots::AggregatorInterface*                theAggregatorInterface_;
-    std::unique_ptr<artdaq::MPISentry>       mpiSentry_;
+    artdaq::DispatcherApp*                theDispatcherInterface_;
 
 };
 
