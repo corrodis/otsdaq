@@ -3,15 +3,15 @@
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
 
-#include "xoap/Method.h"
-#include "xdaq/NamespaceURI.h"
-#include "xoap/MessageReference.h"
-#include "xoap/MessageFactory.h"
-#include "xoap/SOAPPart.h"
-#include "xoap/SOAPEnvelope.h"
-#include "xoap/SOAPBody.h"
-#include "xoap/domutils.h"
-#include "xoap/AttachmentPart.h"
+#include <xoap/Method.h>
+#include <xdaq/NamespaceURI.h>
+#include <xoap/MessageReference.h>
+#include <xoap/MessageFactory.h>
+#include <xoap/SOAPPart.h>
+#include <xoap/SOAPEnvelope.h>
+#include <xoap/SOAPBody.h>
+#include <xoap/domutils.h>
+#include <xoap/AttachmentPart.h>
 
 using namespace ots;
 

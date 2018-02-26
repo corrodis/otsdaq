@@ -1,13 +1,12 @@
-#ifndef _ots_EventBuilderApp_h_
-#define _ots_EventBuilderApp_h_
-
-#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
+#ifndef _ots_ARTDAQDataLoggerSupervisor_h
+#define _ots_ARTDAQDataLoggerSupervisor_h
 
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
 
-#include "artdaq/Application/EventBuilderApp.hh"
+#include "artdaq/Application/DataLoggerApp.hh"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -26,23 +25,23 @@ namespace ots
 class ConfigurationManager;
 class ConfigurationGroupKey;
 
-class EventBuilderApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
+class DataLoggerApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 
 public:
 
     XDAQ_INSTANTIATOR();
 
-    EventBuilderApp            								(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
-    virtual ~EventBuilderApp   								(void);
-    void init                            					(void);
-    void destroy                         					(void);
-    void Default                        					(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+    DataLoggerApp            (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
+    virtual ~DataLoggerApp   (void);
+    void init                            (void);
+    void destroy                         (void);
+    void Default                         (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
 
 
     //State Machine requests handlers
-    void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception);
-    void 			        stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception);
+    void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
+    void 			        stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
     xoap::MessageReference 	stateMachineXoapHandler      	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
     xoap::MessageReference 	stateMachineResultXoapHandler	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
     bool                    stateMachineThread           	(toolbox::task::WorkLoop* workLoop);
@@ -67,19 +66,17 @@ public:
     void enteringError         (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
 
 private:
+    WorkLoopManager                          stateMachineWorkLoopManager_;
+    toolbox::BSem                            stateMachineSemaphore_;
 
-    WorkLoopManager                            	stateMachineWorkLoopManager_;
-    toolbox::BSem                              	stateMachineSemaphore_;
+    AllSupervisorInfo			             allSupervisorInfo_;
+    ConfigurationManager*                    theConfigurationManager_;
+	std::string                              XDAQContextConfigurationName_;
+	std::string                              supervisorConfigurationPath_;
+	std::string                              supervisorContextUID_;
+	std::string                              supervisorApplicationUID_;
 
-    AllSupervisorInfo                   		allSupervisorInfo_;
-    ConfigurationManager*                      	theConfigurationManager_;
-	std::string                                	XDAQContextConfigurationName_;
-	std::string                                	supervisorConfigurationPath_;
-	std::string                                	supervisorContextUID_;
-	std::string                                	supervisorApplicationUID_;
-
-
-    std::map<int, artdaq::EventBuilderApp*> theARTDAQEventBuilderInterfaces_;
+    artdaq::DataLoggerApp*                theDataLoggerInterface_;
 
 };
 

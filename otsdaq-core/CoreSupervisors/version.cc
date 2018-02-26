@@ -1,6 +1,6 @@
-#include "config/version.h"
-#include "xcept/version.h"
-#include "xdaq/version.h"
+#include <config/version.h>
+#include <xcept/version.h>
+#include <xdaq/version.h>
 #include "otsdaq-core/CoreSupervisors/version.h"
 
 

@@ -5,7 +5,7 @@ include_directories(${MPI_INCLUDE_PATH})
 #    message(STATUS "${_variableName}=${${_variableName}}")
 #endforeach()
 
-cet_make(LIBRARY_NAME EventBuilderApp
+cet_make(LIBRARY_NAME DispatcherApp
 		 LIBRARIES
 		 ${FHICLCPP}
 		 ${CETLIB}
@@ -21,7 +21,7 @@ cet_make(LIBRARY_NAME EventBuilderApp
 		 artdaq_BuildInfo
 		 MessageFacility
 		 WorkLoopManager
-		 SupervisorInfo
+		 SupervisorDescriptorInfo
 		 FiniteStateMachine
 		 ConfigurationInterface
 		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration

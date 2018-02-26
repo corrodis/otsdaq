@@ -1,3 +1,4 @@
-add_subdirectory(AggregatorApp)
+add_subdirectory(DataLoggerApp)
+add_subdirectory(DispatcherApp)
 add_subdirectory(EventBuilderApp)
 

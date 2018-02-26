@@ -1,5 +1,4 @@
 #include "otsdaq/EventBuilderApp/EventBuilderApp.h"
-#include "otsdaq/EventBuilderApp/EventBuilderInterface.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
@@ -17,8 +16,7 @@
 
 #include <memory>
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "artdaq/DAQdata/configureMessageFacility.hh"
-#include "artdaq/DAQrate/quiet_mpi.hh"
+#include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "cetlib/exception.h"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "fhiclcpp/make_ParameterSet.h"
@@ -99,25 +97,7 @@ void EventBuilderApp::init(void)
 	artdaq::configureMessageFacility("eventbuilder");
 
 	// initialization
-
-	int const wanted_threading_level { MPI_THREAD_MULTIPLE };
-	//int const wanted_threading_level { MPI_THREAD_FUNNELED };
-
-	MPI_Comm local_group_comm;
-	try
-	{
-		std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR TRYING MPISENTRY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-		mpiSentry_.reset( new artdaq::MPISentry(0, 0, wanted_threading_level, artdaq::TaskType::EventBuilderTask, local_group_comm) );
-		std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR DONE MPISENTRY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-	}
-	catch (cet::exception& errormsg)
-	{
-		std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR INIT ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-		mf::LogError("EventBuilderMain") << errormsg ;
-		mf::LogError("EventBuilderMain") << "MPISentry error encountered in EventBuilderMain; exiting...";
-		throw errormsg;
-	}
-
+	
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR NO ERRORS MAKING MSG FACILITY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     std::string    name = "Builder";
 	unsigned short port = 5200;
@@ -131,17 +111,13 @@ void EventBuilderApp::init(void)
 			artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
 
 	// create the EventBuilderInterface
-	//theARTDAQEventBuilderInterfaces_[0] = new EventBuilderInterface(mpiSentry_->rank(), local_group_comm, name );
-	theARTDAQEventBuilderInterfaces_[0] = new EventBuilderInterface(mpiSentry_->rank(), name );
-	//theARTDAQEventBuilderInterfaces_[0] = new EventBuilderInterface(mpiSentry_->rank(), local_group_comm, supervisorApplicationUID_ );
+	theARTDAQEventBuilderInterfaces_[0] = new artdaq::EventBuilderApp(this->getApplicationDescriptor()->getLocalId(), name );
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR INIT DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 }
 
 //========================================================================================================================
 void EventBuilderApp::destroy(void)
 {
-	//called by destructor
-	mpiSentry_.reset();
 }
 
 //========================================================================================================================
@@ -355,8 +331,8 @@ throw (toolbox::fsm::exception::Exception)
 
 		//fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(), pset);
 
-		for(std::map<int,EventBuilderInterface*>::iterator it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-			it->second->configure(pset);
+		for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
+			it->second->initialize(pset,0,time(0));
 	}
 	catch(const cet::coded_exception<fhicl::error, &fhicl::detail::translate>& e)
 	{
@@ -382,7 +358,7 @@ throw (toolbox::fsm::exception::Exception)
 {
 
 	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->halt();
+		it->second->shutdown(0);
 }
 
 //========================================================================================================================
@@ -397,8 +373,8 @@ void EventBuilderApp::transitionPausing(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
 
-	for(std::map<int,EventBuilderInterface*>::iterator it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->pause();
+	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
+		it->second->pause(0, time(0));
 }
 
 //========================================================================================================================
@@ -406,8 +382,8 @@ void EventBuilderApp::transitionResuming(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
 
-	for(std::map<int,EventBuilderInterface*>::iterator it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->resume();
+	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
+		it->second->resume(0, time(0));
 }
 
 //========================================================================================================================
@@ -415,8 +391,9 @@ void EventBuilderApp::transitionStarting(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
 
-	for(std::map<int,EventBuilderInterface*>::iterator it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->start(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber"));
+	art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber")));
+	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
+		it->second->start(runId, 0, time(0));
 }
 
 //========================================================================================================================
@@ -424,9 +401,9 @@ void EventBuilderApp::transitionStopping(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
 
-	for(std::map<int,EventBuilderInterface*>::iterator it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->stop();
+	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
+		it->second->stop(45, time(0));
 
-	for(std::map<int,EventBuilderInterface*>::iterator it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->halt();
+	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
+		it->second->shutdown(45);
 }

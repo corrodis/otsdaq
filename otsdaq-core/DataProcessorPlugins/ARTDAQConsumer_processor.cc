@@ -148,10 +148,9 @@ void ARTDAQConsumer::configure(int rank)
     // instance, then create a new one.  Doing it in one step does not
     // produce the desired result since that creates a new instance and
     // then deletes the old one, and we need the opposite order.
-    artdaq::Commandable tmpCommandable;
     fragment_receiver_ptr_.reset(nullptr);
     std::cout << __COUT_HDR_FL__ << "\tNew core" << std::endl;
-    fragment_receiver_ptr_.reset(new artdaq::BoardReaderCore(tmpCommandable, rank, name_));
+    fragment_receiver_ptr_.reset(new artdaq::BoardReaderApp(rank, name_));
     //FIXME These are passed as parameters
     uint64_t timeout   = 45;
     //uint64_t timestamp = 184467440737095516;
@@ -198,14 +197,6 @@ void ARTDAQConsumer::pauseProcessingData(void)
         report_string_ = "Error pausing ";
         report_string_.append(name_ + ".");
     }
-
-    if (fragment_processing_future_.valid())
-    {
-        int number_of_fragments_sent = fragment_processing_future_.get();
-        mf::LogDebug(name_+"App::do_pause(uint64_t, uint64_t)")
-        << "Number of fragments sent = " << number_of_fragments_sent
-        << ".";
-    }
 }
 
 //========================================================================================================================
@@ -222,9 +213,6 @@ void ARTDAQConsumer::resumeProcessingData(void)
         report_string_ = "Error resuming ";
         report_string_.append(name_ + ".");
     }
-
-    fragment_processing_future_ = std::async(std::launch::async, &artdaq::BoardReaderCore::process_fragments, fragment_receiver_ptr_.get());
-
 }
 
 //========================================================================================================================
@@ -256,8 +244,6 @@ void ARTDAQConsumer::startProcessingData(std::string runNumber)
     }
 
     std::cout << __COUT_HDR_FL__ << "STARTING BOARD READER THREAD" << std::endl;
-    fragment_processing_future_ = std::async(std::launch::async, &artdaq::BoardReaderCore::process_fragments, fragment_receiver_ptr_.get());
-
 }
 
 //========================================================================================================================
@@ -275,15 +261,6 @@ void ARTDAQConsumer::stopProcessingData(void)
         report_string_.append(name_ + ".");
         //return false;
     }
-
-    if (fragment_processing_future_.valid())
-    {
-        int number_of_fragments_sent = fragment_processing_future_.get();
-        mf::LogDebug(name_ + "App::do_stop(uint64_t, uint64_t)")
-        << "Number of fragments sent = " << number_of_fragments_sent
-        << ".";
-    }
-
 }
 
 DEFINE_OTS_PROCESSOR(ARTDAQConsumer)
