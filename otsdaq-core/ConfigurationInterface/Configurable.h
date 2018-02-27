@@ -18,6 +18,7 @@ public:
 }
   virtual ~Configurable(){;}
 
+  ConfigurationTree			getSelfNode() { return theXDAQContextConfigTree_.getNode(theConfigurationPath_); }
 
 protected:
 	const ConfigurationTree theXDAQContextConfigTree_;
