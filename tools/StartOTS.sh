@@ -615,18 +615,19 @@ launchOTS() {
 			#echo -e "StartOTS.sh [${LINENO}]  \t <<<<<<<------------------------------------------"
 		fi
 		if [[ ($insideContext == true) ]]; then 
-			if [[ ($line == *"ots::ARTDAQDataManagerSupervisor"*) ]]; then
-			  boardReaderPort+=($port)
-			  boardReaderHost+=($host)
-			elif [[ ($line == *"ots::EventBuilderApp"*) ]]; then
-			  builderPort+=($port)
-			  builderHost+=($host)
-			elif [[ ($line == *"ots::AggregatorApp"*) ]]; then 
-			  aggregatorPort+=($port)
-			  aggregatorHost+=($host)
-			elif [[ ($line == *"class"*) ]] && [[ "${isLocal}" == "true" ]]; then #IT'S A XDAQ SUPERVISOR		
-	
-				
+#if [[ ($line == *"ots::ARTDAQDataManagerSupervisor"*) ]]; then
+#			  boardReaderPort+=($port)
+#			  boardReaderHost+=($host)
+#			elif [[ ($line == *"ots::EventBuilderApp"*) ]]; then
+#			  builderPort+=($port)
+#			  builderHost+=($host)
+#			elif [[ ($line == *"ots::AggregatorApp"*) ]]; then 
+#			  aggregatorPort+=($port)
+#			  aggregatorHost+=($host)
+#			elif [[ ($line == *"ots::AggregatorApp"*) ]]; then 
+#			  aggregatorPort+=($port)
+#			  aggregatorHost+=($host)
+			if [[ ($line == *"class"*) ]] && [[ "${isLocal}" == "true" ]]; then #IT'S A XDAQ SUPERVISOR		
 				
 				if [[ ($line == *"ots::GatewaySupervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
 					if [[ ($line =~ $superRe) ]]; then
