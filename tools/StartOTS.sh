@@ -15,28 +15,33 @@ QUIET=1
 CHROME=0
 DONOTKILL=0
 
-function killprocs {
+#############################
+#############################
+# function to kill all things ots
+function killprocs 
+{
 	killall -9 mpirun &>/dev/null 2>&1 #hide output
 	killall -9 xdaq.exe &>/dev/null 2>&1 #hide output
 	killall -9 mf_rcv_n_fwd &>/dev/null 2>&1 #hide output #message viewer display without decoration
 	
-#if [[ "x$1" == "x" ]]; then
-#		PIDS=`ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'`
-#		PIDS+=" "
-#		PIDS+=`ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'`
-#		PIDS+=" "
-#		PIDS+=`ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'`
-#		
-#		#echo Killing PIDs: $PIDS
-#		kill $PIDS >/dev/null 2>&1
-#		kill -9 $PIDS >/dev/null 2>&1
-#    else
-#		PIDS=`ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'`
-#		#echo Killing PIDs: $PIDS
-#		kill $PIDS >/dev/null 2>&1
-#		kill -9 $PIDS >/dev/null 2>&1
-#    fi
+	#if [[ "x$1" == "x" ]]; then
+	#		PIDS=`ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'`
+	#		PIDS+=" "
+	#		PIDS+=`ps --no-headers axk comm o pid,args|grep xdaq.exe|grep $USER_DATA|awk '{print $1}'`
+	#		PIDS+=" "
+	#		PIDS+=`ps --no-headers axk comm o pid,args|grep mf_rcv_n_fwd|grep $USER_DATA|awk '{print $1}'`
+	#		
+	#		#echo Killing PIDs: $PIDS
+	#		kill $PIDS >/dev/null 2>&1
+	#		kill -9 $PIDS >/dev/null 2>&1
+	#    else
+	#		PIDS=`ps --no-headers axk comm o pid,args|grep $1|grep $USER_DATA|awk '{print $1}'`
+	#		#echo Killing PIDs: $PIDS
+	#		kill $PIDS >/dev/null 2>&1
+	#		kill -9 $PIDS >/dev/null 2>&1
+	#    fi
 }
+#end killprocs
 
 #check for wiz mode
 if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then
@@ -374,7 +379,7 @@ launchOTSWiz() {
 	#setup wiz mode environment variables
 	export CONSOLE_SUPERVISOR_ID=260
 	export CONFIGURATION_GUI_SUPERVISOR_ID=280
-	export OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID=290	
+	export WIZARD_SUPERVISOR_ID=290	
 	MAIN_PORT=2015
 
 	if [ "x$OTS_WIZ_MODE_MAIN_PORT" != "x" ]; then
@@ -433,7 +438,7 @@ launchOTSWiz() {
 	#node serverbase.js > /tmp/${USER}_serverbase.log &
 	
 	sleep 2
-	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
+	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$WIZARD_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	#echo $MAIN_URL
 			
 
@@ -444,18 +449,34 @@ launchOTSWiz() {
 
 ####################################################################
 ####################################################################
-################## Normal Mode OTS Launch ###########################
+################## Normal Mode OTS Launch ##########################
 ####################################################################
 ####################################################################
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 launchOTS() {
 
-	echo -e "StartOTS.sh [${LINENO}]  \t *****************************************************"
-	echo -e "StartOTS.sh [${LINENO}]  \t *************       Launching OTS!      *************"
-	echo -e "StartOTS.sh [${LINENO}]  \t *****************************************************"
-	echo -e "StartOTS.sh [${LINENO}]  \t XDAQ Configuration XML: ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
+	ISGATEWAYLAUNCH=1
+	if [ "x$1" == "x" ]; then
+		ISGATEWAYLAUNCH=0
+	fi
+	
 	echo
 	echo
+	
+	echo -e "StartOTS.sh [${LINENO}]  \t *****************************************************"
+	#if [ $ISGATEWAYLAUNCH == 1 ]; then
+	#		echo -e "StartOTS.sh [${LINENO}]  \t **********       Launching OTS Gateway!    **********"
+	#	else
+		echo -e "StartOTS.sh [${LINENO}]  \t ***********       Launching OTS Apps!    ************"
+	#	fi
+	echo -e "StartOTS.sh [${LINENO}]  \t *****************************************************"
+	echo -e "StartOTS.sh [${LINENO}]  \t XDAQ Configuration XML: ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
+	echo
+	echo
+	
+	sed -i s/ots::Supervisor/ots::GatewaySupervisor/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
+	sed -i s/libSupervisor\.so/libGatewaySupervisor\.so/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
+	
 	####################################################################
 	########### start console & message facility handling ##############
 	####################################################################
@@ -481,11 +502,13 @@ launchOTS() {
 		#start quiet forwarder with receiving port and destination port parameter file
 	
 		if [ $QUIET == 1 ]; then
-			echo -e "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-mf-${HOSTNAME}.txt ***"
+			echo -e "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  (hidden file)"
 			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> .otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 		else
 			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
 		fi		 	
+		echo
+		echo
 	fi
 	
 	if [[ $USE_QT_VIEWER == "1" ]]; then
@@ -541,18 +564,18 @@ launchOTS() {
 	insideContext=false
 	ignore=false
 	isLocal=false
-	mainHostname=""
+	gatewayHostname=""
+	gatewayPort=0
 			
 	while read line; do    
-		if [[ ($line == *"<!--"*) ]]; then
-		
-		ignore=true
+		if [[ ($line == *"<!--"*) ]]; then		
+			ignore=true
 		fi
 		if [[ ($line == *"-->"*) ]]; then
-		ignore=false
+			ignore=false
 		fi
 		if [[ ${ignore} == true ]]; then
-		continue
+			continue
 		fi
 				
 		if [[ ($line == *"xc:Context"*) && ($line == *"url"*) ]]; then
@@ -603,19 +626,36 @@ launchOTS() {
 			  aggregatorHost+=($host)
 			elif [[ ($line == *"class"*) ]] && [[ "${isLocal}" == "true" ]]; then #IT'S A XDAQ SUPERVISOR		
 	
-				if [[ ($haveXDAQContextPort == false) ]]; then 
+				
+				
+				if [[ ($line == *"ots::GatewaySupervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
+					if [[ ($line =~ $superRe) ]]; then
+					    gatewayHostname=${host}
+						gatewayPort=${port}
+						
+						#echo ${BASH_REMATCH[1]}	#should be supervisor LID
+						MAIN_URL="http://${host}:${port}/urn:xdaq-application:lid=${BASH_REMATCH[1]}/"
+								
+						#if gateway launch, do it
+						if [[ $ISGATEWAYLAUNCH == 1 && ${host} == ${HOSTNAME} ]]; then	
+							if [ $QUIET == 1 ]; then
+								echo -e "StartOTS.sh [${LINENO}]  \t Launching the Gateway Application on host {${HOSTNAME}}..."
+								echo -e "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt *** (hidden file)"
+								echo
+								echo
+								xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
+							else
+								xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
+							fi
+							#return #FIXME .. could not launch others.. and only launch at MPI restart
+						fi
+					fi
+				elif [[ ($haveXDAQContextPort == false) && ($gatewayHostname != $host || $gatewayPort != $port) ]]; then 
 					xdaqPort+=($port)
 					xdaqHost+=($host)
 					haveXDAQContextPort=true
 				fi
 				
-				if [[ ($line == *"ots::Supervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
-					if [[ ($line =~ $superRe) ]]; then
-					    mainHostname=${host}
-						#echo ${BASH_REMATCH[1]}	#should be supervisor LID
-						MAIN_URL="http://${host}:${port}/urn:xdaq-application:lid=${BASH_REMATCH[1]}/"
-					fi
-				fi
 			  #IF THERE IS AT LEAST ONE NOT ARTDAQ APP THEN I CAN GET OUT OF THIS CONTEXT AND RUN XDAQ ONCE JUST FOR THIS
 			  #insideContext=false #RAR commented because need Super Supervisor connection LID for URL
 			  #echo $line          
@@ -623,7 +663,6 @@ launchOTS() {
 		fi   
 	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 	
-	echo
 	echo -e "StartOTS.sh [${LINENO}]  \t Launching all otsdaq Applications for host {${HOSTNAME}}..."
 	i=0	
 	for port in "${xdaqPort[@]}"
@@ -632,11 +671,13 @@ launchOTS() {
 	  #echo -e "StartOTS.sh [${LINENO}]  \t xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 	  #echo
 		  
+
+		if [[ ${xdaqHost[$i]} != ${HOSTNAME} ]]; then
+			continue
+		fi
 	
-	  if [ $QUIET == 1 ]; then
-		  echo -e "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***"
-		  echo
-		  echo
+		if [ $QUIET == 1 ]; then
+		  echo -e "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  (hidden file)"	
 		  xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
 	  else
 		  xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
@@ -645,7 +686,7 @@ launchOTS() {
 	  i=$(( $i + 1 ))
 	done
 		
-	if [[ (${#boardReaderPort[@]} != 0) || (${#builderPort[@]} != 0) || (${#aggregatorPort[@]} != 0) ]] && [[ "${HOSTNAME}" == "${mainHostname}" ]]; then
+	if [[ (${#boardReaderPort[@]} != 0) || (${#builderPort[@]} != 0) || (${#aggregatorPort[@]} != 0) ]] && [[ "${HOSTNAME}" == "${gatewayHostname}" ]]; then
 	    cmdstart="mpirun -launcher ssh ${envString}"
 	    cmd=""
 	    mpiHosts=""
@@ -705,16 +746,24 @@ launchOTS() {
 		#fi	  
 	fi
 	
+	echo
+	echo
+	echo
+	echo
+	
+	if [[ ${#contextHostname[@]} == 1 ]]; then 
+		echo -e "StartOTS.sh [${LINENO}]  \t This is the ONLY host configured to run xdaq applications: ${contextHostname[@]}" 	    
+	  else
+		echo -e "StartOTS.sh [${LINENO}]  \t These are the hosts configured to run xdaq applications: ${contextHostname[@]}"
+	fi
+	echo
+	  
 	if [[ (${#boardReaderPort[@]} == 0) && (${#builderPort[@]} == 0) && (${#aggregatorPort[@]} == 0) && (${#xdaqPort[@]} == 0) ]]; then
 	  echo -e "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
 	  echo -e "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
 	  echo -e "StartOTS.sh [${LINENO}]  \t WARNING: There are no configured processes for hostname ${HOSTNAME}." 
 	  echo -e "StartOTS.sh [${LINENO}]  \t Are you sure your configuration is written for ${HOSTNAME}?" 
-	  if [[ ${#contextHostname[@]} == 1 ]]; then 
-		echo -e "StartOTS.sh [${LINENO}]  \t This is the ONLY host configured to run xdaq applications: ${contextHostname[@]}" 	    
-	  else
-		echo -e "StartOTS.sh [${LINENO}]  \t These are the hosts configured to run xdaq applications: ${contextHostname[@]}"
-	  fi
+	 
 	  echo -e "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
 	  echo -e "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
 	fi
@@ -726,7 +775,8 @@ launchOTS() {
 
 export -f launchOTS
 
-
+#########################################################
+#########################################################
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 printMainURL() {	
 	
@@ -784,7 +834,7 @@ export -f printMainURL
 if [ $ISCONFIG == 1 ]; then
 	launchOTSWiz
 else
-	launchOTS 
+	launchOTS " Gateway" #only launch gateway once.. otherwise relaunch everything else
 fi
 
 
@@ -799,8 +849,8 @@ otsActionHandler() {
 	echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
 	
 
-	if [[ ($ISCONFIG == 1) || ("${HOSTNAME}" == "${mainHostname}") ]]; then
-		echo -e "StartOTS.sh [${LINENO}]  \t This script, on ${HOSTNAME}, is the gateway StartOTS.sh script, so it will drive exit of other scripts."
+	if [[ ($ISCONFIG == 1) || ("${HOSTNAME}" == "${gatewayHostname}") ]]; then
+		echo -e "StartOTS.sh [${LINENO}]  \t The script, on ${HOSTNAME}, is the gateway StartOTS.sh script, so it will drive exit of other scripts."
 		
 
 		echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
@@ -840,6 +890,19 @@ otsActionHandler() {
 			#grep -A 1 -B 1 "INFO: Stage build successful." otsdaq_startots_mrbreport.txt
 			echo -e "StartOTS.sh [${LINENO}]  \t  "
 			sleep 5
+		
+		elif [ "$OTSDAQ_STARTOTS_ACTION" == "OTS_APP_SHUTDOWN" ]; then
+			echo -e "StartOTS.sh [${LINENO}]  \t  "
+			echo -e "StartOTS.sh [${LINENO}]  \t Shutting down non-gateway supervisors (TODO). . ."
+			echo -e "StartOTS.sh [${LINENO}]  \t  "	
+			#TODO
+			
+		elif [ "$OTSDAQ_STARTOTS_ACTION" == "OTS_APP_STARTUP" ]; then
+			echo -e "StartOTS.sh [${LINENO}]  \t  "
+			echo -e "StartOTS.sh [${LINENO}]  \t Starting up non-gateway supervisors (TODO). . ."
+			echo -e "StartOTS.sh [${LINENO}]  \t  "	
+			#TODO
+			
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "RESET_MPI" ]; then
 		
 			#only print first time
@@ -912,7 +975,7 @@ otsActionHandler() {
 		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP" ]]; then
 
 
-			if [[ ($ISCONFIG == 1) || ("${HOSTNAME}" == "${mainHostname}") ]]; then
+			if [[ ($ISCONFIG == 1) || ("${HOSTNAME}" == "${gatewayHostname}") ]]; then
 				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
 				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 			fi

@@ -41,7 +41,8 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub * s) throw (xdaq::exception::
 , supervisorContextUID_        ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
 , supervisorApplicationUID_    ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
 {
-  INIT_MF("DataLoggerApp");
+
+	INIT_MF("DataLoggerApp");
     xgi::bind (this, &DataLoggerApp::Default,                "Default" );
     xgi::bind (this, &DataLoggerApp::stateMachineXgiHandler, "StateMachineXgiHandler");
 

@@ -12,15 +12,15 @@
 namespace ots
 {
 
-class Supervisor;
+class GatewaySupervisor;
 class ConfigurationManagerRW;
 
 class Iterator
 {
-	friend class Supervisor;
+	friend class GatewaySupervisor;
 	
 public:
-    Iterator (Supervisor* supervisor);
+    Iterator (GatewaySupervisor* supervisor);
     ~Iterator(void);
 
     void									playIterationPlan			(HttpXmlDocument& xmldoc, const std::string& planName);
@@ -92,7 +92,7 @@ private:
     static void								startCommandRun				(IteratorWorkLoopStruct *iteratorStruct);
     static bool								checkCommandRun				(IteratorWorkLoopStruct *iteratorStruct);
 
-    static bool								haltIterator				(Iterator *iterator, IteratorWorkLoopStruct *iteratorStruct = 0);//(Supervisor* theSupervisor, const std::string& fsmName);
+    static bool								haltIterator				(Iterator *iterator, IteratorWorkLoopStruct *iteratorStruct = 0);//(GatewaySupervisor* theSupervisor, const std::string& fsmName);
 
     std::mutex								accessMutex_;
     volatile bool							workloopRunning_;
@@ -106,7 +106,7 @@ private:
     std::string 							lastFsmName_;
     std::string 							errorMessage_;
 
-    Supervisor* 							theSupervisor_;
+    GatewaySupervisor* 							theSupervisor_;
 
     //========================================================================================================================
     //helpCommandModifyActive

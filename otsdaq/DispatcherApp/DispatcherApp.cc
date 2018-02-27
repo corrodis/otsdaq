@@ -88,7 +88,7 @@ DispatcherApp::~DispatcherApp(void)
 void DispatcherApp::init(void)
 {
 	std::cout << __COUT_HDR_FL__ << "ARTDAQDispatcher SUPERVISOR INIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-	theSupervisorDescriptorInfo_.init(getApplicationContext());
+	allSupervisorInfo_.init(getApplicationContext());
 	artdaq::configureMessageFacility("Dispatcher");
 
 	// initialization

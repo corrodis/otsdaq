@@ -6,7 +6,7 @@ cet_make(LIBRARY_NAME WebUsersUtilities
 		 XmlUtilities
 		 CgiDataUtilities
 		 ConfigurationDataFormats
-		 SupervisorDescriptorInfo
+		 SupervisorInfo
 )
 
 install_headers()

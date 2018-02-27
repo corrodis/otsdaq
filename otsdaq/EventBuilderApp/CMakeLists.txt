@@ -21,7 +21,7 @@ cet_make(LIBRARY_NAME EventBuilderApp
 		 artdaq_BuildInfo
 		 MessageFacility
 		 WorkLoopManager
-		 SupervisorDescriptorInfo
+		 SupervisorInfo
 		 FiniteStateMachine
 		 ConfigurationInterface
 		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration

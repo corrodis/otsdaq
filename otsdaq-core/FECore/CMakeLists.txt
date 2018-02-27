@@ -5,7 +5,7 @@ cet_make(LIBRARY_NAME FECore
 		 LIBRARIES
          ${XDAQ_BASIC_LIB_LIST}
 		 ConfigurationInterface
-		 SupervisorDescriptorInfo
+		 SupervisorInfo
 		 SystemMessenger
          WorkLoopManager
          FiniteStateMachine

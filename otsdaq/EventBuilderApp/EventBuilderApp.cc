@@ -92,7 +92,8 @@ EventBuilderApp::~EventBuilderApp(void)
 void EventBuilderApp::init(void)
 {
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR INIT START!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-	theSupervisorDescriptorInfo_.init(getApplicationContext());
+	allSupervisorInfo_.init(getApplicationContext());
+
 	artdaq::configureMessageFacility("eventbuilder");
 
 	// initialization

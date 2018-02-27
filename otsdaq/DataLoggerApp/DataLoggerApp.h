@@ -3,9 +3,8 @@
 
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
-#include "otsdaq-core/Supervisor/SupervisorsInfo.h"
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
-#include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
 
 #include "artdaq/Application/DataLoggerApp.hh"
 
@@ -70,7 +69,7 @@ private:
     WorkLoopManager                          stateMachineWorkLoopManager_;
     toolbox::BSem                            stateMachineSemaphore_;
 
-    SupervisorDescriptorInfo                 theSupervisorDescriptorInfo_;
+    AllSupervisorInfo			             allSupervisorInfo_;
     ConfigurationManager*                    theConfigurationManager_;
 	std::string                              XDAQContextConfigurationName_;
 	std::string                              supervisorConfigurationPath_;

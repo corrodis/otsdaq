@@ -1,14 +1,14 @@
-#ifndef _Supervisor_Supervisor_h
-#define _Supervisor_Supervisor_h
+#ifndef _ots_GatewaySupervisor_h
+#define _ots_GatewaySupervisor_h
 
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h"
 #include "otsdaq-core/SystemMessenger/SystemMessenger.h"
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
-#include "otsdaq-core/Supervisor/SupervisorsInfo.h"
-#include "otsdaq-core/Supervisor/Iterator.h"
-#include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
+#include "otsdaq-core/GatewaySupervisor/Iterator.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
 
 #pragma GCC diagnostic push
@@ -35,17 +35,17 @@ class ConfigurationManager;
 class ConfigurationGroupKey;
 class WorkLoopManager;
 
-class Supervisor: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
+class GatewaySupervisor: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
-	friend class OtsConfigurationWizardSupervisor;
+	friend class WizardSupervisor;
 	friend class Iterator;
 
 public:
 
     XDAQ_INSTANTIATOR();
 
-    Supervisor (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
-    virtual ~Supervisor(void);
+    GatewaySupervisor (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
+    virtual ~GatewaySupervisor(void);
 
     void 						init        				 	(void);
 
@@ -68,7 +68,7 @@ public:
     void 						infoRequestResultHandler	 	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
     bool                        infoRequestThread            	(toolbox::task::WorkLoop* workLoop);
 
-    //External Supervisor XOAP handlers
+    //External GatewaySupervisor XOAP handlers
     xoap::MessageReference 		supervisorCookieCheck 		 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
     xoap::MessageReference 		supervisorGetActiveUsers	 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
     xoap::MessageReference 		supervisorSystemMessage		 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
@@ -91,9 +91,9 @@ public:
     void transitionResuming    	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
     void transitionStarting    	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
     void transitionStopping    	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
+    void transitionShuttingDown (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
+    void transitionStartingUp   (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
     void enteringError         	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-
-    void getSupervisorsStatus  	(void) throw (toolbox::fsm::exception::Exception);
 
     void makeSystemLogbookEntry (std::string entryText);
 
@@ -105,21 +105,20 @@ private:
     static std::pair<std::string /*group name*/, ConfigurationGroupKey>	loadGroupNameAndKey					(const std::string &fileName, std::string &returnedTimeString);
     void																saveGroupNameAndKey					(const std::pair<std::string /*group name*/,	ConfigurationGroupKey> &theGroup, const std::string &fileName);
     static xoap::MessageReference 										lastConfigGroupRequestHandler		(const SOAPParameters &parameters);
+    void																launchStartOTSCommand				(const std::string& command);
 
-
-    static void															StateChangerWorkLoop				(Supervisor *supervisorPtr);
+    static void															StateChangerWorkLoop				(GatewaySupervisor *supervisorPtr);
     std::string															attemptStateMachineTransition		(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
     bool         														broadcastMessage					(xoap::MessageReference msg) throw (toolbox::fsm::exception::Exception);
 
     bool								supervisorGuiHasBeenLoaded_	; //use to indicate first access by user of ots since execution
 
-    //Variables
-    std::string                         outputDir_                  ;
-    SupervisorDescriptorInfo            theSupervisorDescriptorInfo_;
-    SupervisorsInfo                     theSupervisorsInfo_         ;
+    //Member Variables
+
+    AllSupervisorInfo                   allSupervisorInfo_         	;
     ConfigurationManager*               theConfigurationManager_    ;
     WebUsers 						    theWebUsers_                ;
-    SystemMessenger				        theSysMessenger_            ;
+    SystemMessenger				        theSystemMessenger_         ;
     
     WorkLoopManager                     stateMachineWorkLoopManager_;
     toolbox::BSem                      	stateMachineSemaphore_      ;

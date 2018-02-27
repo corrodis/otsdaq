@@ -9,7 +9,7 @@
     <xc:Module>${OTSDAQ_UTILITIES_LIB}/libConfigurationGUI.so</xc:Module>
 
     <xc:Application class="ots::OtsConfigurationWizardSupervisor" id="${OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID}" instance="1" network="local" group="daq"/>
-    <xc:Module>${OTSDAQ_UTILITIES_LIB}/libOtsConfigurationWizard.so</xc:Module>
+    <xc:Module>${OTSDAQ_LIB}/libWizardSupervisor.so</xc:Module>
 
     <xc:Application class="ots::ConsoleSupervisor" id="${CONSOLE_SUPERVISOR_ID}" instance="1" network="local" group="daq"/>
     <xc:Module>${OTSDAQ_UTILITIES_LIB}/libConsole.so</xc:Module>

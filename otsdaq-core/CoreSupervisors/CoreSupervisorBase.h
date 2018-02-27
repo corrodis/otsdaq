@@ -1,11 +1,12 @@
 #ifndef _ots_CoreSupervisorBase_h_
 #define _ots_CoreSupervisorBase_h_
 
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
-#include "otsdaq-core/Supervisor/SupervisorsInfo.h"
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
-#include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
@@ -85,7 +86,7 @@ protected:
 	std::string                    supervisorClass_;
 	std::string                    supervisorClassNoNamespace_;
 
-    SupervisorDescriptorInfo       supervisorDescriptorInfo_;
+    AllSupervisorInfo 				allSupervisorInfo_;
     std::vector<VStateMachine*>    theStateMachineImplementation_;
 
 };

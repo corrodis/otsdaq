@@ -21,7 +21,7 @@ cet_make(LIBRARY_NAME DataLoggerApp
 		 artdaq_BuildInfo
 		 MessageFacility
 		 WorkLoopManager
-		 SupervisorDescriptorInfo
+		 SupervisorInfo
 		 FiniteStateMachine
 		 ConfigurationInterface
 		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration

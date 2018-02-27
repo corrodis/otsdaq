@@ -162,7 +162,7 @@ std::string FEVInterfacesManager::getFEListString(const std::string &supervisorL
 
 	for(const auto& it : theFEInterfaces_)
 	{
-	  __COUT__ << "Just curious: it.first is " << it.first << std::endl;
+	  __COUT__ << "FE name = " << it.first << std::endl;
 
 	  retList += it.second->getInterfaceType() +
 			  ":" + supervisorLid + ":" +
