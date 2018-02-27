@@ -2,7 +2,6 @@
 #define _ots_ARTDAQDataManager_h_
 
 #include "otsdaq-core/DataManager/DataManager.h"
-#include "otsdaq-core/MPICore/MPIInitializer.h"
 
 namespace ots
 {
@@ -18,7 +17,7 @@ public:
     void stop(void);
 
 private:
-    MPIInitializer theMPIProcess_;
+    int rank_;
 };
 
 }

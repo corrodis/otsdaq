@@ -26,6 +26,7 @@ const std::set<std::string> XDAQContextConfiguration::ChatTypeClassNames_				= {
 const std::set<std::string> XDAQContextConfiguration::ConsoleTypeClassNames_			= {"ots::ConsoleSupervisor"};
 const std::set<std::string> XDAQContextConfiguration::ConfigurationGUITypeClassNames_	= {"ots::ConfigurationGUISupervisor"};
 
+const std::string			XDAQContextConfiguration::ARTDAQ_OFFSET_PORT				= "OffsetPort";
 
 //========================================================================================================================
 XDAQContextConfiguration::XDAQContextConfiguration(void)
@@ -60,7 +61,7 @@ XDAQContextConfiguration::~XDAQContextConfiguration(void)
 {}
 
 //========================================================================================================================
-void XDAQContextConfiguration::init(ConfigurationManager* configManager)
+void XDAQContextConfiguration::init(const ConfigurationManager* configManager)
 {
 	extractContexts(configManager);
 
@@ -136,54 +137,61 @@ unsigned int XDAQContextConfiguration::getARTDAQAppRank(const std::string &conte
 {
 	//	__COUT__ << "artdaqContexts_.size() = " <<
 	//			artdaqContexts_.size() << std::endl;
-
-	unsigned int rank = 0;
-
-	for (auto &i : artdaqBoardReaders_)
+	
+	if (artdaqBoardReaders_.size() == 0 && 
+			artdaqEventBuilders_.size() == 0 &&
+			artdaqAggregators_.size() == 0)
 	{
-		if (contexts_[i].contextUID_ == contextUID)
-			return rank;
-		++rank;
-	}
-	for (auto &i : artdaqEventBuilders_)
-	{
-		if (contexts_[i].contextUID_ == contextUID)
-			return rank;
-		++rank;
-	}
-	for (auto &i : artdaqAggregators_)
-	{
-		if (contexts_[i].contextUID_ == contextUID)
-			return rank;
-		++rank;
-	}
-
-	if (contextUID == "X")
-		return rank; //assume first undefined rank is desired
-
-	if (!rank)
-	{
-		__COUT__ << "Assuming since there are 0 active ARTDAQ context UID(s), we can ignore rank failure." << std::endl;
+		__COUT_WARN__ << "Assuming since there are 0 active ARTDAQ context UID(s), we can ignore rank failure." << std::endl;
 		return -1;
 	}
+
+	//define local "lambda" getRank function
+	auto localGetRank = [](const XDAQContext& context) -> unsigned int {
+		if(context.applications_.size() != 1)
+		{
+			__SS__ << "Invalid number of ARTDAQ applications in context '" << 
+					context.contextUID_ <<
+					".' Must be 1. Currently is " << context.applications_.size() << "." << __E__;
+			__SS_THROW__;
+		}
+
+		return context.applications_[0].id_;	
+	};
+		
+		
+	for (auto &i : artdaqBoardReaders_)
+		if (contexts_[i].contextUID_ == contextUID)
+			return localGetRank(contexts_[i]);
+	
+	for (auto &i : artdaqEventBuilders_)
+		if (contexts_[i].contextUID_ == contextUID)
+			return localGetRank(contexts_[i]);
+	
+	for (auto &i : artdaqAggregators_)
+		if (contexts_[i].contextUID_ == contextUID)
+			return localGetRank(contexts_[i]);
+
+	//if (contextUID == "X")
+	//	return -1; //assume disconnected link should not error?
+
+	
+	
 	__SS__ << "ARTDAQ rank could not be found for context UID '" <<
-		contextUID << "' - there were " << rank
-		<< " active ARTDAQ context UID(s) checked." << std::endl;
-	__COUT_ERR__ << "\n" << ss.str();
-	throw std::runtime_error(ss.str());
-	return -1; //should never happen!
+		contextUID << ".'" << std::endl;
+	__SS_THROW__; //should never happen!
 }
 
 //========================================================================================================================
 std::string XDAQContextConfiguration::getContextAddress(const std::string &contextUID, bool wantHttp) const
 {
 	if (contextUID == "X") return "";
-	for (auto& i : contexts_)
+	for (auto& context : contexts_)
 	{
-		if (i.contextUID_ == contextUID) 
+		if (context.contextUID_ == contextUID) 
 		{
-			if (wantHttp) return i.address_;
-			auto address = i.address_;
+			if (wantHttp) return context.address_;
+			auto address = context.address_;
 			if (address.find("http://") == 0) { address = address.replace(0,7, ""); }
 			if (address.find("https://") == 0) { address = address.replace(0,8, ""); }
 			return address;
@@ -191,15 +199,31 @@ std::string XDAQContextConfiguration::getContextAddress(const std::string &conte
 	}
 	return "";
 }
-unsigned int XDAQContextConfiguration::getARTDAQDataPort(const std::string &contextUID) const
+
+unsigned int XDAQContextConfiguration::getARTDAQDataPort(const ConfigurationManager *configManager,
+		const std::string &contextUID) const
 {
 	if (contextUID == "X") return 0;
-	for (auto& i : contexts_)
+	for (auto& context : contexts_)
 	{
-		if (i.contextUID_ == contextUID) return i.artdaqDataPort_;
+		if (context.contextUID_ == contextUID) 
+		{
+			if(context.applications_.size() != 1)
+			{
+				__SS__ << "Invalid number of ARTDAQ applications in context '" << 
+						contextUID <<
+						".' Must be 1. Currently is " << context.applications_.size() << "." << __E__;
+				__SS_THROW__;
+			}
+
+			return getApplicationNode(configManager,
+					context.contextUID_, context.applications_[0].applicationUID_).getNode(
+							XDAQContextConfiguration::ARTDAQ_OFFSET_PORT).getValue<unsigned int>();			
+		}
 	}
 	return 0;
 }
+
 
 //========================================================================================================================
 std::vector<const XDAQContextConfiguration::XDAQContext *> XDAQContextConfiguration::getBoardReaderContexts() const
@@ -228,7 +252,25 @@ std::vector<const XDAQContextConfiguration::XDAQContext *> XDAQContextConfigurat
 }
 
 //========================================================================================================================
-ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(ConfigurationManager *configManager,
+ConfigurationTree XDAQContextConfiguration::getContextNode(const ConfigurationManager *configManager,
+	const std::string &contextUID) const
+{
+	return configManager->__SELF_NODE__.getNode(
+			contextUID);
+}
+
+//========================================================================================================================
+ConfigurationTree XDAQContextConfiguration::getApplicationNode(const ConfigurationManager *configManager,
+	const std::string &contextUID, const std::string &appUID) const
+{
+	return configManager->__SELF_NODE__.getNode(
+		contextUID + "/" +
+		colContext_.colLinkToApplicationConfiguration_ + "/" +
+		appUID);
+}
+
+//========================================================================================================================
+ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(const ConfigurationManager *configManager,
 	const std::string &contextUID, const std::string &appUID) const
 {
 	return configManager->__SELF_NODE__.getNode(
@@ -236,34 +278,14 @@ ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(Configuratio
 		colContext_.colLinkToApplicationConfiguration_ + "/" +
 		appUID + "/" +
 		colApplication_.colLinkToSupervisorConfiguration_);
-
-
-	//			auto supervisorConfigLink =
-	//					appChild.second.getNode(colApplication_.colLinkToSupervisorConfiguration_);
-	//
-	//			contexts_.back().applications_.back().supervisorConfigUID_ =
-	//					supervisorConfigLink.getValue();
-	//			__COUT__ << "application supervisorConfigUID_ : " <<
-	//					supervisorConfigLink.getValueAsString() << std::endl;
-	//			if(!supervisorConfigLink.isDisconnected())
-	//			{
-	//				//add xdaq applications to this context
-	//				auto supervisorConfigChildren = supervisorConfigLink.getChildren();
-	//				for(auto supervisorConfigChild:supervisorConfigChildren)
-	//				{
-	//					__COUT__ << "Loop: " << appChild.first << "/" <<
-	//							supervisorConfigChild.first << std::endl;
-	//				}
-	//			}
-	//			__COUT__ << "application supervisorConfigUID_ : " <<
-	//					contexts_.back().applic
 }
+
 
 //========================================================================================================================
 //extractContexts
 //	Could be called by other tables if they need to access the context.
 //		This doesn't re-write config files, it just re-makes constructs in software.
-void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManager)
+void XDAQContextConfiguration::extractContexts(const ConfigurationManager* configManager)
 {
 	//__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	//__COUT__ << configManager->__SELF_NODE__ << std::endl;
@@ -274,7 +296,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 	auto children = configManager->__SELF_NODE__.getChildren();
 
 	contexts_.clear(); //reset
-	artdaqContexts_.clear();
+//	artdaqContexts_.clear();
 
 	artdaqBoardReaders_.clear();
 	artdaqEventBuilders_.clear();
@@ -300,7 +322,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 		child.second.getNode(colContext_.colId_).getValue(contexts_.back().id_);
 		child.second.getNode(colContext_.colAddress_).getValue(contexts_.back().address_);
 		child.second.getNode(colContext_.colPort_).getValue(contexts_.back().port_);
-		child.second.getNode(colContext_.colARTDAQDataPort_).getValue(contexts_.back().artdaqDataPort_);
+		//child.second.getNode(colContext_.colARTDAQDataPort_).getValue(contexts_.back().artdaqDataPort_);
 
 		//__COUT__ << contexts_.back().address_ << std::endl;
 		auto appLink = child.second.getNode(colContext_.colLinkToApplicationConfiguration_);
@@ -416,7 +438,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 		//check artdaq type
 		if (isARTDAQContext(contexts_.back().contextUID_))
 		{
-			artdaqContexts_.push_back(contexts_.size() - 1);
+			//artdaqContexts_.push_back(contexts_.size() - 1);
 
 			if (contexts_.back().applications_.size() != 1)
 			{
@@ -435,7 +457,9 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 				"ots::EventBuilderApp")
 				artdaqEventBuilders_.push_back(contexts_.size() - 1);
 			else if (contexts_.back().applications_[0].class_ == //if aggregator
-				"ots::AggregatorApp")
+				"ots::DataLoggerApp" || 
+				contexts_.back().applications_[0].class_ == //if aggregator
+						"ots::DispatcherApp")
 				artdaqAggregators_.push_back(contexts_.size() - 1);
 			else
 			{

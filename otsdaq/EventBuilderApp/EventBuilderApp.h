@@ -26,6 +26,9 @@ namespace ots
 class ConfigurationManager;
 class ConfigurationGroupKey;
 
+/**
+ * \brief
+ */
 class EventBuilderApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 

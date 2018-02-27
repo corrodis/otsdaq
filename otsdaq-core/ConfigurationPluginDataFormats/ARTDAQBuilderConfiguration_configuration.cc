@@ -62,8 +62,10 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 	//	output associated fcl config file
 	for (auto &builderContext : builderContexts)
 	{
-		ConfigurationTree builderConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+		ConfigurationTree builderAppNode = contextConfig->getApplicationNode(configManager,
 			builderContext->contextUID_, builderContext->applications_[0].applicationUID_);
+		ConfigurationTree builderConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+					builderContext->contextUID_, builderContext->applications_[0].applicationUID_);
 
 		__COUT__ << "Path for this aggregator config is " <<
 			builderContext->contextUID_ << "/" <<
@@ -74,7 +76,7 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 		outputFHICL(builderConfigNode,
 			contextConfig->getARTDAQAppRank(builderContext->contextUID_),
 			contextConfig->getContextAddress(builderContext->contextUID_),
-			contextConfig->getARTDAQDataPort(builderContext->contextUID_),
+			contextConfig->getARTDAQDataPort(configManager,builderContext->contextUID_),
 			contextConfig);
 	}
 }
@@ -292,7 +294,12 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 					auto destinationContextUID = destination.second.getNode("destinationARTDAQContextLink").getValueAsString();
 					unsigned int destinationRank = contextConfig->getARTDAQAppRank(destinationContextUID);
 					std::string host = contextConfig->getContextAddress(destinationContextUID);
-					unsigned int port = contextConfig->getARTDAQDataPort(destinationContextUID);
+					unsigned int port = contextConfig->getARTDAQDataPort(
+							builderNode.getConfigurationManager(),
+							destinationContextUID);
+					
+					
+					
 					OUT << destination.second.getNode("destinationKey").getValue() <<
 						": {" <<
 						" transferPluginType: " <<
@@ -374,7 +381,10 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 					auto sourceContextUID = source.second.getNode("sourceARTDAQContextLink").getValueAsString();
 					unsigned int sourceRank = contextConfig->getARTDAQAppRank(sourceContextUID);
 					std::string host = contextConfig->getContextAddress(sourceContextUID);
-					unsigned int port = contextConfig->getARTDAQDataPort(sourceContextUID);
+					unsigned int port = contextConfig->getARTDAQDataPort(
+							builderNode.getConfigurationManager(),
+							sourceContextUID);
+					
 
 					OUT << source.second.getNode("sourceKey").getValue() <<
 						": {" <<

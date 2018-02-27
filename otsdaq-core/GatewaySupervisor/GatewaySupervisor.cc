@@ -1406,9 +1406,11 @@ throw (toolbox::fsm::exception::Exception)
 		{
 			//do not kill whole system if xdaq xoap failure
 			__SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
-					appInfo.getName() << "' [" <<
+					appInfo.getName() << "' [LID=" <<
 					appInfo.getId() << "] in Context '" <<
-					appInfo.getContextName() << ".'\n\n" <<
+					appInfo.getContextName() << "' [URL=" <<
+					appInfo.getURL() <<
+					"].\n\n" <<
 					"Xoap message failure. Did the target Supervisor crash? Try re-initializing or restarting otsdaq." << std::endl;
 			__COUT_ERR__ << ss.str();
 			__MOUT_ERR__ << ss.str();
@@ -1432,7 +1434,9 @@ throw (toolbox::fsm::exception::Exception)
 			__SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
 					appInfo.getName() << "' [LID=" <<
 					appInfo.getId() << "] in Context '" <<
-					appInfo.getContextName() << ".'\n\n" <<
+					appInfo.getContextName() <<  "' [URL=" <<
+					appInfo.getURL() <<
+					"].\n\n" <<
 					reply;
 			__COUT_ERR__ << ss.str() << std::endl;
 			__MOUT_ERR__ << ss.str() << std::endl;
@@ -1453,14 +1457,18 @@ throw (toolbox::fsm::exception::Exception)
 					err << "Unknown error from Supervisor instance = '" <<
 						appInfo.getName() << "' [LID=" <<
 						appInfo.getId() << "] in Context '" <<
-						appInfo.getContextName() << ".'  If the problem persists or is repeatable, please notify admins.\n\n";
+						appInfo.getContextName() <<  "' [URL=" <<
+						appInfo.getURL() <<
+						"]. If the problem persists or is repeatable, please notify admins.\n\n";
 					error = err.str();
 				}
 
 				__SS__ << "Received error from Supervisor instance = '" <<
 						appInfo.getName() << "' [LID=" <<
 						appInfo.getId() << "] in Context '" <<
-						appInfo.getContextName() << ".' Error Message = " << error << std::endl;
+						appInfo.getContextName() << "' [URL=" <<
+						appInfo.getURL() <<
+						"].\n\n Error Message = " << error << std::endl;
 
 				__COUT_ERR__ << ss.str() << std::endl;
 				__MOUT_ERR__ << ss.str() << std::endl;
@@ -1477,7 +1485,9 @@ throw (toolbox::fsm::exception::Exception)
 				__SS__ << "Error! Gateway Supervisor failed to read error message from Supervisor instance = '" <<
 						appInfo.getName() << "' [LID=" <<
 						appInfo.getId() << "] in Context '" <<
-						appInfo.getContextName() << ".'\n\n" <<
+						appInfo.getContextName() <<  "' [URL=" <<
+						appInfo.getURL() <<
+						"].\n\n" <<
 						"Xoap message failure. Did the target Supervisor crash? Try re-initializing or restarting otsdaq." << std::endl;
 				__COUT_ERR__ << ss.str();
 				__MOUT_ERR__ << ss.str();
@@ -1491,7 +1501,9 @@ throw (toolbox::fsm::exception::Exception)
 			__COUT__ << "Supervisor instance = '" <<
 					appInfo.getName() << "' [LID=" <<
 					appInfo.getId() << "] in Context '" <<
-					appInfo.getContextName() << "' was " << command << "'d correctly!" << std::endl;
+					appInfo.getContextName() <<  "' [URL=" <<
+					appInfo.getURL() <<
+					"] was " << command << "'d correctly!" << std::endl;
 		}
 
 		if(!proceed)

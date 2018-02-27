@@ -51,8 +51,8 @@ namespace ots
 		virtual ~XDAQContextConfiguration							(void);
 
 		//Methods
-		void 								init					(ConfigurationManager *configManager);
-		void 								extractContexts			(ConfigurationManager *configManager);
+		void 								init					(const ConfigurationManager *configManager);
+		void 								extractContexts			(const ConfigurationManager *configManager);
 		void 								outputXDAQXML			(std::ostream &out);
 		//void 								outputAppPriority		(std::ostream &out, const std::string& stateMachineCommand);
 		//void 								outputXDAQScript		(std::ostream &out);
@@ -64,8 +64,9 @@ namespace ots
 
 		const std::vector<XDAQContext> & 	getContexts				() const { return contexts_; }
 
-
-		ConfigurationTree 					getSupervisorConfigNode	(ConfigurationManager *configManager, const std::string &contextUID, const std::string &appUID) const;
+		ConfigurationTree 					getContextNode			(const ConfigurationManager *configManager, const std::string &contextUID) const;
+		ConfigurationTree 					getApplicationNode		(const ConfigurationManager *configManager, const std::string &contextUID, const std::string &appUID) const;
+		ConfigurationTree 					getSupervisorConfigNode	(const ConfigurationManager *configManager, const std::string &contextUID, const std::string &appUID) const;
 
 		//artdaq specific get methods
 		std::vector<const XDAQContext *>	getBoardReaderContexts	() const;
@@ -73,14 +74,14 @@ namespace ots
 		std::vector<const XDAQContext *>	getAggregatorContexts	() const;
 		unsigned int						getARTDAQAppRank		(const std::string &contextUID = "X") const;
 		std::string                         getContextAddress		(const std::string &contextUID = "X", bool wantHttp = false) const;
-		unsigned int                        getARTDAQDataPort		(const std::string &contextUID = "X") const;
+		unsigned int                        getARTDAQDataPort		(const ConfigurationManager *configManager, const std::string &contextUID = "X") const;
 		static bool							isARTDAQContext			(const std::string &contextUID);
 
 	private:
 
 		std::vector<XDAQContext> contexts_;
-		std::vector<unsigned int> artdaqContexts_;
-
+//		std::vector<unsigned int> artdaqContexts_;
+//
 		std::vector<unsigned int> artdaqBoardReaders_;
 		std::vector<unsigned int> artdaqEventBuilders_;
 		std::vector<unsigned int> artdaqAggregators_;
@@ -97,7 +98,7 @@ namespace ots
 			std::string const colId_ 								= "Id";
 			std::string const colAddress_ 							= "Address";
 			std::string const colPort_ 								= "Port";
-			std::string const colARTDAQDataPort_					= "ARTDAQDataPort";
+			//std::string const colARTDAQDataPort_					= "ARTDAQDataPort";
 		} colContext_;
 
 		//XDAQ App Column names
@@ -125,15 +126,16 @@ namespace ots
 		//XDAQ App Property Column names
 		struct ColApplicationProperty
 		{
-			std::string const colPropertyGroupID_ = "PropertyGroupID";
-			std::string const colPropertyUID_ = "UID";
-			std::string const colStatus_ = ViewColumnInfo::COL_NAME_STATUS;
-			std::string const colPropertyName_ = "PropertyName";
-			std::string const colPropertyType_ = "PropertyType";
-			std::string const colPropertyValue_ = "PropertyValue";
+			std::string const colPropertyGroupID_ 					= "PropertyGroupID";
+			std::string const colPropertyUID_ 						= "UID";
+			std::string const colStatus_ 							= ViewColumnInfo::COL_NAME_STATUS;
+			std::string const colPropertyName_ 						= "PropertyName";
+			std::string const colPropertyType_ 						= "PropertyType";
+			std::string const colPropertyValue_ 					= "PropertyValue";
 
 		} colAppProperty_;
 
+		static const std::string 						ARTDAQ_OFFSET_PORT;
 
 	public:
 	    static const std::set<std::string>				FETypeClassNames_, DMTypeClassNames_, LogbookTypeClassNames_, MacroMakerTypeClassNames_, ChatTypeClassNames_, ConsoleTypeClassNames_, ConfigurationGUITypeClassNames_;

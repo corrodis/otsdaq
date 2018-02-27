@@ -2,6 +2,9 @@
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQConsumer.h"
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQProducer.h"
 
+
+#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 
 #include <iostream>
@@ -20,12 +23,38 @@ ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConf
 	__COUT__ << "Begin!" << std::endl;
 	__COUT__ << "Begin!" << std::endl;
 	__COUT__ << "Begin!" << std::endl;
-	mf::LogDebug("BoardReader") << "artdaq version " <<
+	
+
+
+	std::string name = "BoardReader";
+	
+	__CFG_MOUT__ << "artdaq version " <<
 	//    mf::LogDebug(supervisorApplicationUID_) << " artdaq version " <<
 				artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion()
 				<< ", built " <<
 				artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
-	theMPIProcess_.init("BoardReader", artdaq::TaskType::BoardReaderTask);
+	
+	INIT_MF((name + "App").c_str());
+	
+	//artdaq::configureMessageFacility("boardreader");
+	//artdaq::configureMessageFacility(name.c_str());
+
+	__COUT__ << "MF initialized" << std::endl;
+
+		
+	const XDAQContextConfiguration *contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);		
+	rank_ = contextConfig->getARTDAQAppRank(&configManager,
+			theXDAQContextConfigTree.getValueAsString());
+	
+	unsigned short port = 5100;
+
+	//artdaq::setMsgFacAppName(name, port);
+
+	// create the BoardReaderApp
+	//	  artdaq::BoardReaderApp br_app(local_group_comm, name);
+	__COUT__ << "END" << std::endl;
+
+
 	__COUT__ << "Initialized!" << std::endl;
 	__COUT__ << "Initialized!" << std::endl;
 	__COUT__ << "Initialized!" << std::endl;
@@ -49,7 +78,7 @@ void ARTDAQDataManager::configure(void)
 		for(auto& itc: it->second.consumers_)
 			if(dynamic_cast<ARTDAQConsumer*>(itc.get()))
 			{
-				dynamic_cast<ARTDAQConsumer*>(itc.get())->initLocalGroup(theMPIProcess_.getRank());
+				dynamic_cast<ARTDAQConsumer*>(itc.get())->initLocalGroup(rank_);
 				return;//There can only be 1 ARTDAQConsumer for each ARTDAQDataManager!!!!!!!
 			}
 
@@ -62,7 +91,7 @@ void ARTDAQDataManager::configure(void)
 		for(auto& itc: it->second.producers_)
 			if(dynamic_cast<ARTDAQProducer*>(itc.get()))
 			{
-				dynamic_cast<ARTDAQProducer*>(itc.get())->initLocalGroup(theMPIProcess_.getRank());
+				dynamic_cast<ARTDAQProducer*>(itc.get())->initLocalGroup(rank_);
 				return;//There can only be 1 ARTDAQProducer for each ARTDAQDataManager!!!!!!!
 			}
 

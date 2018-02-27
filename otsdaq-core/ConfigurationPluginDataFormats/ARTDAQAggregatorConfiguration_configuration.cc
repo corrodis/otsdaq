@@ -65,7 +65,7 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager* configManager)
 		outputFHICL(aggConfigNode,
 			contextConfig->getARTDAQAppRank(aggContext->contextUID_),
 			contextConfig->getContextAddress(aggContext->contextUID_),
-			contextConfig->getARTDAQDataPort(aggContext->contextUID_),
+			contextConfig->getARTDAQDataPort(configManager,aggContext->contextUID_),
 			contextConfig);
 	}
 }
@@ -351,10 +351,15 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 				auto sources = sourcesGroup.getChildren();
 				for (auto &source : sources)
 				{
-					auto sourceContextUID = source.second.getNode("sourceARTDAQContextLink").getValueAsString();
-					unsigned int sourceRank = contextConfig->getARTDAQAppRank(sourceContextUID);
-					std::string host = contextConfig->getContextAddress(sourceContextUID);
-					unsigned int port = contextConfig->getARTDAQDataPort(sourceContextUID);
+					std::string sourceContextUID =
+							source.second.getNode("sourceARTDAQContextLink").getValueAsString();
+					
+					std::string host = contextConfig->getContextAddress(
+							sourceContextNode.getValueAsString());					
+					unsigned int sourceRank = contextConfig->getARTDAQAppRank(sourceContextUID);					
+					unsigned int port = contextConfig->getARTDAQDataPort(
+							aggregatorNode.getConfigurationManager(),
+							sourceContextUID);
 
 					OUT << source.second.getNode("sourceKey").getValue() <<
 						": {" <<
