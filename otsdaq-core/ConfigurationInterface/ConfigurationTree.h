@@ -228,6 +228,7 @@ public:
 
 
 	//extracting information from node
+	const ConfigurationManager*				getConfigurationManager		(void) const { return configMgr_; }
 	const std::string&						getConfigurationName		(void) const;
 	const std::string&						getFieldConfigurationName	(void) const;
 	const ConfigurationVersion&				getConfigurationVersion		(void) const;
