@@ -89,7 +89,7 @@ DataLoggerApp::~DataLoggerApp(void)
 void DataLoggerApp::init(void)
 {
     std::cout << __COUT_HDR_FL__ << "ARTDAQDataLogger SUPERVISOR INIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-	theSupervisorDescriptorInfo_.init(getApplicationContext());
+	allSupervisorInfo_.init(getApplicationContext());
     artdaq::configureMessageFacility("DataLogger");
 
     // initialization

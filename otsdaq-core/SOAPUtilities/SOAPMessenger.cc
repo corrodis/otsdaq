@@ -8,7 +8,10 @@
 #include <xoap/Method.h>
 #include <xdaq/NamespaceURI.h>
 #include <xoap/MessageReference.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #include <xoap/MessageFactory.h>
+#pragma GCC diagnostic pop
 #include <xoap/SOAPPart.h>
 #include <xoap/SOAPEnvelope.h>
 #include <xoap/SOAPBody.h>
