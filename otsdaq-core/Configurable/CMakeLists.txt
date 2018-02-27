@@ -1,7 +1,7 @@
 cet_make(LIBRARY_NAME Configurable
 		 LIBRARIES
 		 ConfigurationInterface
-		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration         
+		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
 )
 
 

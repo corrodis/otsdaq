@@ -914,11 +914,16 @@ ConfigurationTree ConfigurationTree::getBackNode(std::string nodeName, unsigned 
 
 //==============================================================================
 ConfigurationTree ConfigurationTree::getForwardNode(std::string nodeName, unsigned int forwardSteps) const
-{
+{	
+	unsigned int s = 0;
+	
+	//skip all leading /'s
+	while(s < nodeName.length() && nodeName[s] == '/') ++s;
+	
 	for(unsigned int i=0; i<forwardSteps; i++)
-		nodeName = nodeName.substr(nodeName.find('/'));
-
-	return getNode(nodeName.substr(0,nodeName.find('/')));
+		s = nodeName.find('/',s) + 1;		
+	
+	return getNode(nodeName.substr(0,s));
 }
 //==============================================================================
 //isValueNode

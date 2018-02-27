@@ -2,11 +2,11 @@
 
 #include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
 
+
 using namespace ots;
 
 #undef 	__COUT_HDR__
 #define __COUT_HDR__ 	"Configurable"
-
 
 
 //==============================================================================
@@ -37,14 +37,15 @@ const ConfigurationManager* Configurable::getConfigurationManager() const
 //==============================================================================
 const std::string& Configurable::getContextUID() const
 {
-	return theXDAQContextConfigTree_.getValueAsString();
+	return theXDAQContextConfigTree_.getForwardNode(
+			theConfigurationPath_,1 /*steps to xdaq node*/).getValueAsString();
 }
 
 //==============================================================================
 const std::string& Configurable::getApplicationUID() const
-{
+{		
 	return theXDAQContextConfigTree_.getForwardNode(
-			theConfigurationPath_).getUIDAsString();
+			theConfigurationPath_,3 /*steps to app node*/).getValueAsString();
 }
 
 //==============================================================================

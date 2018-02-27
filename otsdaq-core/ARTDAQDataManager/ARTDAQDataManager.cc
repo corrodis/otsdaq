@@ -39,6 +39,8 @@ ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConf
 	__COUT__ << "MF initialized" << std::endl;
 
 	rank_ = Configurable::getApplicationLID();
+
+	__COUTV__(rank_);
 	
 	unsigned short port = 5100;
 
