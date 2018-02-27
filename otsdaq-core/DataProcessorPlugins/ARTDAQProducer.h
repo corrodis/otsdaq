@@ -2,7 +2,7 @@
 #define _ots_ARTDAQProducer_h_
 
 #include "otsdaq-core/DataManager/DataProducer.h"
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
+#include "otsdaq-core/Configurable/Configurable.h"
 #include "artdaq/Application/BoardReaderApp.hh"
 
 

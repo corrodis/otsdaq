@@ -24,7 +24,7 @@ cet_make(LIBRARY_NAME DispatcherApp
 		 SupervisorInfo
 		 FiniteStateMachine
 		 ConfigurationInterface
-		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
+#		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
 )
 
 install_headers()

@@ -4,7 +4,7 @@ include_directories(${CMAKE_BINARY_DIR}/artdaq)
 cet_make(LIBRARY_NAME FECore
 		 LIBRARIES
          ${XDAQ_BASIC_LIB_LIST}
-		 ConfigurationInterface
+		 Configurable
 		 SupervisorInfo
 		 SystemMessenger
          WorkLoopManager
@@ -29,10 +29,7 @@ cet_make(LIBRARY_NAME FECore
 		 MessageFacility
 		 ${MF_UTILITIES}
          ${XDAQ_BASIC_LIB_LIST}
-         ${ROOT_CORE}
-         
-         ##temp add by RAR until tree is used
-         #otsdaq-core_ConfigurationPluginDataFormats_FEConfiguration_configuration
+         ${ROOT_CORE}         
 )
 
 install_headers()

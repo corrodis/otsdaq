@@ -11,12 +11,11 @@ cet_make(LIBRARY_NAME CoreSupervisors
 		 ARTDAQDataManager
 		 DataManager
 		 FECore
-		 MPICore
          WorkLoopManager
          FiniteStateMachine
          CgiDataUtilities
          ${XDAQ_BASIC_LIB_LIST}
-		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
+		 
         )
 
 install_headers()

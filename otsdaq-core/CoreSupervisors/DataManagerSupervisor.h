@@ -2,7 +2,6 @@
 #define _ots_DataManagerSupervisor_h_
 
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
-#include "otsdaq-core/MPICore/MPIInitializer.h"
 
 namespace ots
 {

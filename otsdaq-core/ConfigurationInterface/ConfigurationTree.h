@@ -224,7 +224,8 @@ public:
 
 	//navigating between nodes
 	ConfigurationTree						getNode				        (const std::string& nodeName, bool doNotThrowOnBrokenUIDLinks=false) const;
-	ConfigurationTree				        getBackNode 		        (      std::string  nodeName, unsigned int backSteps=1) const;
+	ConfigurationTree				        getBackNode 		        (	   std::string  nodeName, unsigned int backSteps=1) const;
+	ConfigurationTree				        getForwardNode 		        (      std::string  nodeName, unsigned int forwardSteps=1) const;
 
 
 	//extracting information from node

@@ -62,7 +62,7 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager* configManager)
 			aggConfigNode.getValueAsString() <<
 			std::endl;
 
-		outputFHICL(aggConfigNode,
+		outputFHICL(configManager,aggConfigNode,
 			contextConfig->getARTDAQAppRank(aggContext->contextUID_),
 			contextConfig->getContextAddress(aggContext->contextUID_),
 			contextConfig->getARTDAQDataPort(configManager,aggContext->contextUID_),
@@ -90,7 +90,8 @@ std::string ARTDAQAggregatorConfiguration::getFHICLFilename(const ConfigurationT
 }
 
 //========================================================================================================================
-void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggregatorNode,
+void ARTDAQAggregatorConfiguration::outputFHICL(ConfigurationManager *configManager,
+	const ConfigurationTree &aggregatorNode,
 	unsigned int selfRank, std::string selfHost, unsigned int selfPort,
 	const XDAQContextConfiguration *contextConfig)
 {
@@ -351,15 +352,11 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 				auto sources = sourcesGroup.getChildren();
 				for (auto &source : sources)
 				{
-					std::string sourceContextUID =
-							source.second.getNode("sourceARTDAQContextLink").getValueAsString();
+					std::string sourceContextUID = source.second.getNode("sourceARTDAQContextLink").getValueAsString();
 					
-					std::string host = contextConfig->getContextAddress(
-							sourceContextNode.getValueAsString());					
+					std::string host = contextConfig->getContextAddress(sourceContextUID);
 					unsigned int sourceRank = contextConfig->getARTDAQAppRank(sourceContextUID);					
-					unsigned int port = contextConfig->getARTDAQDataPort(
-							aggregatorNode.getConfigurationManager(),
-							sourceContextUID);
+					unsigned int port = contextConfig->getARTDAQDataPort(configManager, sourceContextUID);
 
 					OUT << source.second.getNode("sourceKey").getValue() <<
 						": {" <<
@@ -458,9 +455,10 @@ void ARTDAQAggregatorConfiguration::outputFHICL(const ConfigurationTree &aggrega
 				for (auto &destination : destinations)
 				{
 					auto destinationContextUID = destination.second.getNode("destinationARTDAQContextLink").getValueAsString();
+
 					unsigned int destinationRank = contextConfig->getARTDAQAppRank(destinationContextUID);
 					std::string host = contextConfig->getContextAddress(destinationContextUID);
-					unsigned int port = contextConfig->getARTDAQDataPort(destinationContextUID);
+					unsigned int port = contextConfig->getARTDAQDataPort(configManager,destinationContextUID);
 
 					OUT << destination.second.getNode("destinationKey").getValue() <<
 						": {" <<

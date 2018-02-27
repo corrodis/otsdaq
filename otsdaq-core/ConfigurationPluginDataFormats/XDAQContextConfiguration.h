@@ -43,7 +43,6 @@ namespace ots
 			unsigned int id_;
 			std::string  address_;
 			unsigned int port_;
-			unsigned int artdaqDataPort_;
 			std::vector<XDAQApplication> applications_;
 		};
 
@@ -51,8 +50,8 @@ namespace ots
 		virtual ~XDAQContextConfiguration							(void);
 
 		//Methods
-		void 								init					(const ConfigurationManager *configManager);
-		void 								extractContexts			(const ConfigurationManager *configManager);
+		void 								init					(ConfigurationManager *configManager);
+		void 								extractContexts			(ConfigurationManager *configManager);
 		void 								outputXDAQXML			(std::ostream &out);
 		//void 								outputAppPriority		(std::ostream &out, const std::string& stateMachineCommand);
 		//void 								outputXDAQScript		(std::ostream &out);

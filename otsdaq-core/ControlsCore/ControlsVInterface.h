@@ -1,6 +1,6 @@
 #ifndef _ots_ControlsVInterface_h_
 #define _ots_ControlsVInterface_h_
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
+#include "otsdaq-core/Configurable/Configurable.h"
 
 
 #include <string>

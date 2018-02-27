@@ -5,7 +5,7 @@
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
 #include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
 #include "otsdaq-core/DataManager/CircularBuffer.h"
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
+#include "otsdaq-core/Configurable/Configurable.h"
 
 #include <map>
 #include <string>

@@ -3,7 +3,7 @@
 
 #include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
 #include "otsdaq-core/WorkLoopManager/WorkLoop.h"
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
+#include "otsdaq-core/Configurable/Configurable.h"
 #include "otsdaq-core/FECore/FESlowControlsWorkLoop.h"
 
 

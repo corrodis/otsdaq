@@ -50,7 +50,7 @@ public:
 	//getConfiguration
 	//	get configuration * with specific configuration type
 	template<class T>
-	const T* getConfiguration(std::string name)
+	const T* getConfiguration(std::string name) const
 	{return (T*) (getConfigurationByName(name));}
 	//==============================================================================
 

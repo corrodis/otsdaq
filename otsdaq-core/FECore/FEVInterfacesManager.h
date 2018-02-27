@@ -4,7 +4,7 @@
 //#include "artdaq/Application/MPI2/MPISentry.hh"
 //#include "artdaq/DAQrate/quiet_mpi.hh"
 #include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
+#include "otsdaq-core/Configurable/Configurable.h"
 
 #include <map>
 #include <string>

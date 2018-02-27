@@ -121,17 +121,11 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 		else {
 			if (child.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-//				outputFHICL(child.second,
-//					contextConfig->getARTDAQAppRank(thisContext->contextUID_),
-//					contextConfig->getContextAddress(thisContext->contextUID_),
-//					contextConfig->getARTDAQDataPort(thisContext->contextUID_),
-//					contextConfig);
-
-				outputFHICL(child.second,
-						thisContext->applications_[0].getNode("Id").getValue<unsigned int>(),
-						contextConfig->getContextAddress(thisContext->contextUID_),
-						thisContext->applications_[0].getNode("Id").getValue<unsigned int>()
-						contextConfig);
+				outputFHICL(configManager, child.second,
+					contextConfig->getARTDAQAppRank(thisContext->contextUID_),
+					contextConfig->getContextAddress(thisContext->contextUID_),
+					contextConfig->getARTDAQDataPort(configManager,thisContext->contextUID_),
+					contextConfig);
 			}
 		}
 	}
@@ -166,7 +160,8 @@ std::string ARTDAQBoardReaderConfiguration::getFHICLFilename(const Configuration
 }
 
 //========================================================================================================================
-void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardReaderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
+void ARTDAQBoardReaderConfiguration::outputFHICL(ConfigurationManager* configManager,
+		const ConfigurationTree &boardReaderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
 	const XDAQContextConfiguration *contextConfig)
 {
 	/*
@@ -387,11 +382,10 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 			for (auto &destination : destinations)
 			{
 				auto destinationContextUID = destination.second.getNode("destinationARTDAQContextLink").getValueAsString();
+
 				unsigned int destinationRank = contextConfig->getARTDAQAppRank(destinationContextUID);
 				std::string host = contextConfig->getContextAddress(destinationContextUID);
-				unsigned int port = contextConfig->getARTDAQDataPort(
-						boardReaderNode.getConfigurationManager(),
-						destinationContextUID);
+				unsigned int port = contextConfig->getARTDAQDataPort(configManager,destinationContextUID);
 				
 				OUT << destination.second.getNode("destinationKey").getValue() <<
 					": {" <<

@@ -61,7 +61,7 @@ XDAQContextConfiguration::~XDAQContextConfiguration(void)
 {}
 
 //========================================================================================================================
-void XDAQContextConfiguration::init(const ConfigurationManager* configManager)
+void XDAQContextConfiguration::init(ConfigurationManager* configManager)
 {
 	extractContexts(configManager);
 
@@ -78,44 +78,6 @@ void XDAQContextConfiguration::init(const ConfigurationManager* configManager)
 		outputXDAQXML((std::ostream &)fs);
 		fs.close();
 	}
-
-//	std::array<std::string,3> stateMachineCommands = {"Configure","Start","Stop"};
-//	for(const auto& stateMachineCommand:stateMachineCommands)
-//	{
-//		/////////////////////////
-//		//generate xdaq app state machine priority file
-//		std::fstream fs;
-//		fs.open(APP_PRIORITY_FILE + stateMachineCommand + ".dat", std::fstream::out | std::fstream::trunc);
-//		if (fs.fail())
-//		{
-//			__SS__ << "Failed to open XDAQ Application Priority file: " << APP_PRIORITY_FILE << std::endl;
-//			throw std::runtime_error(ss.str());
-//		}
-//		outputAppPriority((std::ostream &)fs,stateMachineCommand);
-//		fs.close();
-//	}
-
-	//	/////////////////////////
-	//	//generate mpi script file
-	//	fs.open(ARTDAQ_MPI_SCRIPT, std::fstream::out | std::fstream::trunc);
-	//	if(fs.fail())
-	//	{
-	//		__SS__ << "Failed to open ARTDAQ script file: " << ARTDAQ_MPI_SCRIPT << std::endl;
-	//		throw std::runtime_error(ss.str());
-	//	}
-	//	outputARTDAQScript((std::ostream &)fs);
-	//	fs.close();
-	//
-	//	/////////////////////////
-	//	//generate xdaq script file
-	//	fs.open(XDAQ_SCRIPT, std::fstream::out | std::fstream::trunc);
-	//	if(fs.fail())
-	//	{
-	//		__SS__ << "Failed to open XDAQ script file: " << XDAQ_SCRIPT << std::endl;
-	//		throw std::runtime_error(ss.str());
-	//	}
-	//	outputXDAQScript((std::ostream &)fs);
-	//	fs.close();
 }
 
 //========================================================================================================================
@@ -285,7 +247,7 @@ ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(const Config
 //extractContexts
 //	Could be called by other tables if they need to access the context.
 //		This doesn't re-write config files, it just re-makes constructs in software.
-void XDAQContextConfiguration::extractContexts(const ConfigurationManager* configManager)
+void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManager)
 {
 	//__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	//__COUT__ << configManager->__SELF_NODE__ << std::endl;

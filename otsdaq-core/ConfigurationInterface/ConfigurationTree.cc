@@ -913,6 +913,14 @@ ConfigurationTree ConfigurationTree::getBackNode(std::string nodeName, unsigned 
 }
 
 //==============================================================================
+ConfigurationTree ConfigurationTree::getForwardNode(std::string nodeName, unsigned int forwardSteps) const
+{
+	for(unsigned int i=0; i<forwardSteps; i++)
+		nodeName = nodeName.substr(nodeName.find('/'));
+
+	return getNode(nodeName.substr(0,nodeName.find('/')));
+}
+//==============================================================================
 //isValueNode
 //	if true, then this is a leaf node, i.e. there can be no children, only a value
 bool ConfigurationTree::isValueNode(void) const

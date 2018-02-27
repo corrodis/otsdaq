@@ -2,9 +2,6 @@
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQConsumer.h"
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQProducer.h"
 
-
-#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
-
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 
 #include <iostream>
@@ -41,10 +38,7 @@ ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConf
 
 	__COUT__ << "MF initialized" << std::endl;
 
-		
-	const XDAQContextConfiguration *contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);		
-	rank_ = contextConfig->getARTDAQAppRank(&configManager,
-			theXDAQContextConfigTree.getValueAsString());
+	rank_ = Configurable::getApplicationLID();
 	
 	unsigned short port = 5100;
 
