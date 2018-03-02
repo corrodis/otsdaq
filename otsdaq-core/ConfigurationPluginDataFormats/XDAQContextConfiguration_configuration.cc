@@ -178,7 +178,34 @@ unsigned int XDAQContextConfiguration::getARTDAQDataPort(const ConfigurationMana
 				__SS_THROW__;
 			}
 
-			return getApplicationNode(configManager,
+			if(context.applications_[0].class_ == "ots::ARTDAQDataManagerSupervisor")
+			{ 
+				auto processors = getSupervisorConfigNode(configManager,
+					context.contextUID_, context.applications_[0].applicationUID_).getNode(
+							"LinkToDataManagerConfiguration").getChildren()[0].second.getNode(
+									"LinkToDataBufferConfiguration").getChildren();
+
+				std::string processorType;
+				
+				//take first board reader processor (could be Consumer or Producer)
+				for(auto& processor : processors)
+				{
+					processorType = processor.second.getNode(
+							"ProcessorPluginName").getValue<std::string>();
+					__COUTV__(processorType);
+					
+					if(processorType == "ARTDAQConsumer" || 
+							processorType == "ARTDAQProducer")
+						return processor.second.getNode(
+								"LinkToProcessorConfiguration").getNode(
+										XDAQContextConfiguration::ARTDAQ_OFFSET_PORT).getValue<unsigned int>();
+				}
+								
+				__SS__ << "No ARTDAQ processor was found while looking for data port." << __E__;
+				__SS_THROW__;
+			}			
+			//else	
+			return getSupervisorConfigNode(configManager,
 					context.contextUID_, context.applications_[0].applicationUID_).getNode(
 							XDAQContextConfiguration::ARTDAQ_OFFSET_PORT).getValue<unsigned int>();			
 		}
@@ -428,8 +455,10 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 				__SS__ << "ARTDAQ Context must be have Application of an allowed class type:\n " <<
 					"\tots::ARTDAQDataManagerSupervisor\n" <<
 					"\tots::EventBuilderApp\n" <<
-					"\tots::AggregatorApp\n" << "\nClass found was " <<
-					contexts_.back().applications_[0].class_ << std::endl;
+				  "\tots::DataLoggerApp\n"  <<
+				  "\tots::DispatcherApp\n" <<
+				        "\nClass found was "  <<
+                                          contexts_.back().applications_[0].class_ << std::endl;
 				throw std::runtime_error(ss.str());
 			}
 

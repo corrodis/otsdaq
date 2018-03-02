@@ -237,7 +237,7 @@ void DispatcherApp::enteringError(toolbox::Event::Reference e) throw (toolbox::f
 
 
 #define ARTDAQ_FCL_PATH			std::string(getenv("USER_DATA")) + "/"+ "ARTDAQConfigurations/"
-#define ARTDAQ_FILE_PREAMBLE	"Dispatcher"
+#define ARTDAQ_FILE_PREAMBLE	"aggregator"
 //========================================================================================================================
 void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
@@ -311,7 +311,7 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
 	//fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(), pset);
 
 
-	theDispatcherInterface_->initialize(pset, 0, time(0));
+	theDispatcherInterface_->initialize(pset, 0, 0);
 	mf::LogInfo("DispatcherInterface") << "ARTDAQDispatcher SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 
 }
@@ -319,7 +319,7 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
 //========================================================================================================================
 void DispatcherApp::transitionHalting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-	theDispatcherInterface_->shutdown(45);
+  //theDispatcherInterface_->shutdown(45);
 }
 
 //========================================================================================================================
@@ -331,25 +331,25 @@ void DispatcherApp::transitionInitializing(toolbox::Event::Reference e) throw (t
 //========================================================================================================================
 void DispatcherApp::transitionPausing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-	theDispatcherInterface_->pause(0, time(0));
+	theDispatcherInterface_->pause(0, 0);
 }
 
 //========================================================================================================================
 void DispatcherApp::transitionResuming(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-	theDispatcherInterface_->resume(0, time(0));
+	theDispatcherInterface_->resume(0, 0);
 }
 
 //========================================================================================================================
 void DispatcherApp::transitionStarting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
 	art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber")));
-	theDispatcherInterface_->start(runId, 0, time(0));
+	theDispatcherInterface_->start(runId, 0, 0);
 }
 
 //========================================================================================================================
 void DispatcherApp::transitionStopping(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-	theDispatcherInterface_->stop(45, time(0));
+	theDispatcherInterface_->stop(45, 0);
 	theDispatcherInterface_->shutdown(45);
 }

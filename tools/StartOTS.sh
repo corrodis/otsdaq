@@ -24,6 +24,11 @@ function killprocs
 	killall -9 xdaq.exe &>/dev/null 2>&1 #hide output
 	killall -9 mf_rcv_n_fwd &>/dev/null 2>&1 #hide output #message viewer display without decoration
 	
+	killall -9 art &>/dev/null 2>&1
+
+	usershort=`echo $USER|cut -c 1-10`
+	for key in `ipcs|grep $usershort|grep ' 0 '|awk '{print $1}'`;do ipcrm -M $key;done
+
 	#if [[ "x$1" == "x" ]]; then
 	#		PIDS=`ps --no-headers axk comm o pid,args|grep mpirun|grep $USER_DATA|awk '{print $1}'`
 	#		PIDS+=" "

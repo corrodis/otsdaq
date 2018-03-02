@@ -332,7 +332,7 @@ throw (toolbox::fsm::exception::Exception)
 		//fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(), pset);
 
 		for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-			it->second->initialize(pset,0,time(0));
+			it->second->initialize(pset,0,0);
 	}
 	catch(const cet::coded_exception<fhicl::error, &fhicl::detail::translate>& e)
 	{
@@ -357,8 +357,8 @@ void EventBuilderApp::transitionHalting(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
 
-	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->shutdown(0);
+  //	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
+  //		it->second->shutdown(0);
 }
 
 //========================================================================================================================
@@ -374,7 +374,7 @@ throw (toolbox::fsm::exception::Exception)
 {
 
 	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->pause(0, time(0));
+		it->second->pause(0, 0);
 }
 
 //========================================================================================================================
@@ -383,7 +383,7 @@ throw (toolbox::fsm::exception::Exception)
 {
 
 	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->resume(0, time(0));
+		it->second->resume(0, 0);
 }
 
 //========================================================================================================================
@@ -393,7 +393,7 @@ throw (toolbox::fsm::exception::Exception)
 
 	art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber")));
 	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->start(runId, 0, time(0));
+		it->second->start(runId, 0, 0);
 }
 
 //========================================================================================================================
@@ -402,7 +402,7 @@ throw (toolbox::fsm::exception::Exception)
 {
 
 	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->stop(45, time(0));
+		it->second->stop(45, 0);
 
 	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
 		it->second->shutdown(45);

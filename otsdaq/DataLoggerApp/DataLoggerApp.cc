@@ -24,6 +24,7 @@
 #include <fstream>
 #include <iostream>
 #include <cassert>
+#include <boost/exception/all.hpp>
 
 using namespace ots;
 
@@ -237,7 +238,7 @@ void DataLoggerApp::enteringError (toolbox::Event::Reference e) throw (toolbox::
 
 
 #define ARTDAQ_FCL_PATH			std::string(getenv("USER_DATA")) + "/"+ "ARTDAQConfigurations/"
-#define ARTDAQ_FILE_PREAMBLE	"DataLogger"
+#define ARTDAQ_FILE_PREAMBLE	"aggregator"
 //========================================================================================================================
 void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
@@ -319,7 +320,7 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
 //========================================================================================================================
 void DataLoggerApp::transitionHalting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-    theDataLoggerInterface_->shutdown(0);
+  //    theDataLoggerInterface_->shutdown(0);
 }
 
 //========================================================================================================================
@@ -331,25 +332,33 @@ void DataLoggerApp::transitionInitializing(toolbox::Event::Reference e) throw (t
 //========================================================================================================================
 void DataLoggerApp::transitionPausing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-    theDataLoggerInterface_->pause(0, time(0));
+    theDataLoggerInterface_->pause(0, 0);
 }
 
 //========================================================================================================================
 void DataLoggerApp::transitionResuming(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-    theDataLoggerInterface_->resume(0, time(0));
+    theDataLoggerInterface_->resume(0, 0);
 }
 
 //========================================================================================================================
 void DataLoggerApp::transitionStarting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-	art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber")));
-    theDataLoggerInterface_->start(runId,0,time(0));
+  auto runnumber= SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber");
+  try {
+	art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(runnumber));
+    theDataLoggerInterface_->start(runId,0,0);
+  }
+  catch(const boost::exception& e)
+    {
+      std::cerr << "Error parsing string to art::RunNumber_t: " << runnumber << std::endl;
+      exit(1);
+    }
 }
 
 //========================================================================================================================
 void DataLoggerApp::transitionStopping(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
 {
-    theDataLoggerInterface_->stop(0,time(0));
+    theDataLoggerInterface_->stop(0,0);
     theDataLoggerInterface_->shutdown(0);
 }
