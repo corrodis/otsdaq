@@ -101,105 +101,105 @@ ConfigurationManager::ConfigurationManager()
 
 	//dump names of core tables (so UpdateOTS.sh can copy core tables for user)
 	// only if table does not exist
-	{
-		FILE * fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"r");
-
-		if(fp) //check for all core table names in file, and force their presence
-		{
-			std::vector<unsigned int> foundVector;
-			char line[100];
-			for(const auto &name:contextMemberNames_)
-			{
-				foundVector.push_back(false);
-				rewind(fp);
-				while(fgets(line,100,fp))
-					if(line == name)
-					{
-						foundVector.back() = true;
-						break;
-					}
-			}
-
-			for(const auto &name:backboneMemberNames_)
-			{
-				foundVector.push_back(false);
-				rewind(fp);
-				while(fgets(line,100,fp))
-					if(line == name)
-					{
-						foundVector.back() = true;
-						break;
-					}
-			}
-
-			for(const auto &name:iterateMemberNames_)
-			{
-				foundVector.push_back(false);
-				rewind(fp);
-				while(fgets(line,100,fp))
-					if(line == name)
-					{
-						foundVector.back() = true;
-						break;
-					}
-			}
-
-			fclose(fp);
-
-			//open file for appending the missing names
-			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"w");
-			if(fp)
-			{
-				unsigned int i = 0;
-				for(const auto &name:contextMemberNames_)
-				{
-					if(!foundVector[i])
-						fprintf(fp,"%s\n",name.c_str());
-
-					++i;
-				}
-				for(const auto &name:backboneMemberNames_)
-				{
-					if(!foundVector[i])
-						fprintf(fp,"%s\n",name.c_str());
-
-					++i;
-				}
-				for(const auto &name:iterateMemberNames_)
-				{
-					if(!foundVector[i])
-						fprintf(fp,"%s\n",name.c_str());
-
-					++i;
-				}
-				fclose(fp);
-			}
-			else
-			{
-				__SS__ << "Failed to open core table info file for appending: " << CORE_TABLE_INFO_FILENAME << std::endl;
-				__SS_THROW__;
-			}
-
-		}
-		else
-		{
-			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"w");
-			if(fp)
-			{
-				for(const auto &name:contextMemberNames_)
-					fprintf(fp,"%s\n",name.c_str());
-				for(const auto &name:backboneMemberNames_)
-					fprintf(fp,"%s\n",name.c_str());
-				for(const auto &name:iterateMemberNames_)
-					fprintf(fp,"%s\n",name.c_str());
-				fclose(fp);
-			}
-			else
-			{
-				__SS__ << "Failed to open core table info file: " << CORE_TABLE_INFO_FILENAME << std::endl;
-				__SS_THROW__;
-			}
-		}
+//	{
+//		FILE * fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"r");
+//
+//		if(fp) //check for all core table names in file, and force their presence
+//		{
+//			std::vector<unsigned int> foundVector;
+//			char line[100];
+//			for(const auto &name:contextMemberNames_)
+//			{
+//				foundVector.push_back(false);
+//				rewind(fp);
+//				while(fgets(line,100,fp))
+//					if(line == name)
+//					{
+//						foundVector.back() = true;
+//						break;
+//					}
+//			}
+//
+//			for(const auto &name:backboneMemberNames_)
+//			{
+//				foundVector.push_back(false);
+//				rewind(fp);
+//				while(fgets(line,100,fp))
+//					if(line == name)
+//					{
+//						foundVector.back() = true;
+//						break;
+//					}
+//			}
+//
+//			for(const auto &name:iterateMemberNames_)
+//			{
+//				foundVector.push_back(false);
+//				rewind(fp);
+//				while(fgets(line,100,fp))
+//					if(line == name)
+//					{
+//						foundVector.back() = true;
+//						break;
+//					}
+//			}
+//
+//			fclose(fp);
+//
+//			//open file for appending the missing names
+//			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"w");
+//			if(fp)
+//			{
+//				unsigned int i = 0;
+//				for(const auto &name:contextMemberNames_)
+//				{
+//					if(!foundVector[i])
+//						fprintf(fp,"%s\n",name.c_str());
+//
+//					++i;
+//				}
+//				for(const auto &name:backboneMemberNames_)
+//				{
+//					if(!foundVector[i])
+//						fprintf(fp,"%s\n",name.c_str());
+//
+//					++i;
+//				}
+//				for(const auto &name:iterateMemberNames_)
+//				{
+//					if(!foundVector[i])
+//						fprintf(fp,"%s\n",name.c_str());
+//
+//					++i;
+//				}
+//				fclose(fp);
+//			}
+//			else
+//			{
+//				__SS__ << "Failed to open core table info file for appending: " << CORE_TABLE_INFO_FILENAME << std::endl;
+//				__SS_THROW__;
+//			}
+//
+//		}
+//		else
+//		{
+//			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"w");
+//			if(fp)
+//			{
+//				for(const auto &name:contextMemberNames_)
+//					fprintf(fp,"%s\n",name.c_str());
+//				for(const auto &name:backboneMemberNames_)
+//					fprintf(fp,"%s\n",name.c_str());
+//				for(const auto &name:iterateMemberNames_)
+//					fprintf(fp,"%s\n",name.c_str());
+//				fclose(fp);
+//			}
+//			else
+//			{
+//				__SS__ << "Failed to open core table info file: " << CORE_TABLE_INFO_FILENAME << std::endl;
+//				__SS_THROW__;
+//			}
+//		}
 	}
 
 	init();
