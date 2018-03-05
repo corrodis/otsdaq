@@ -200,7 +200,7 @@ ConfigurationManager::ConfigurationManager()
 //				__SS_THROW__;
 //			}
 //		}
-	}
+//	}
 
 	init();
 }
