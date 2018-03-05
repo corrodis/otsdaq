@@ -147,7 +147,7 @@ ConfigurationManager::ConfigurationManager()
 			fclose(fp);
 
 			//open file for appending the missing names
-			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"a");
+			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"w");
 			if(fp)
 			{
 				unsigned int i = 0;
