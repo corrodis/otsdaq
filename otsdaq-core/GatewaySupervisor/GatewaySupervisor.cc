@@ -1223,7 +1223,8 @@ throw (toolbox::fsm::exception::Exception)
 
 	//start all non-gateway contexts
 	launchStartOTSCommand("OTS_APP_STARTUP");
-
+	sleep(5);
+	//transitionInitializing(e);
 	//broadcastMessage(theStateMachine_.getCurrentMessage());
 }
 
@@ -1232,6 +1233,9 @@ void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
 throw (toolbox::fsm::exception::Exception)
 {
 	__COUT__ << theStateMachine_.getCurrentStateName() << std::endl;
+
+	launchStartOTSCommand("OTS_APP_STARTUP");
+	sleep(5);
 
 	if(!broadcastMessage(theStateMachine_.getCurrentMessage()))
 	{

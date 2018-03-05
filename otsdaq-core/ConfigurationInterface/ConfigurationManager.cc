@@ -104,8 +104,83 @@ ConfigurationManager::ConfigurationManager()
 	{
 		FILE * fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"r");
 
-		if(fp)
+		if(fp) //check for all core table names in file, and force their presence
+		{
+			std::vector<unsigned int> foundVector;
+			char line[100];
+			for(const auto &name:contextMemberNames_)
+			{
+				foundVector.push_back(false);
+				rewind(fp);
+				while(fgets(line,100,fp))
+					if(line == name)
+					{
+						foundVector.back() = true;
+						break;
+					}
+			}
+
+			for(const auto &name:backboneMemberNames_)
+			{
+				foundVector.push_back(false);
+				rewind(fp);
+				while(fgets(line,100,fp))
+					if(line == name)
+					{
+						foundVector.back() = true;
+						break;
+					}
+			}
+
+			for(const auto &name:iterateMemberNames_)
+			{
+				foundVector.push_back(false);
+				rewind(fp);
+				while(fgets(line,100,fp))
+					if(line == name)
+					{
+						foundVector.back() = true;
+						break;
+					}
+			}
+
 			fclose(fp);
+
+			//open file for appending the missing names
+			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"a");
+			if(fp)
+			{
+				unsigned int i = 0;
+				for(const auto &name:contextMemberNames_)
+				{
+					if(!foundVector[i])
+						fprintf(fp,"%s\n",name.c_str());
+
+					++i;
+				}
+				for(const auto &name:backboneMemberNames_)
+				{
+					if(!foundVector[i])
+						fprintf(fp,"%s\n",name.c_str());
+
+					++i;
+				}
+				for(const auto &name:iterateMemberNames_)
+				{
+					if(!foundVector[i])
+						fprintf(fp,"%s\n",name.c_str());
+
+					++i;
+				}
+				fclose(fp);
+			}
+			else
+			{
+				__SS__ << "Failed to open core table info file for appending: " << CORE_TABLE_INFO_FILENAME << std::endl;
+				__SS_THROW__;
+			}
+
+		}
 		else
 		{
 			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"w");
@@ -122,8 +197,7 @@ ConfigurationManager::ConfigurationManager()
 			else
 			{
 				__SS__ << "Failed to open core table info file: " << CORE_TABLE_INFO_FILENAME << std::endl;
-				__COUT_ERR__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 	}

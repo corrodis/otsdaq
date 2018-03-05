@@ -12,18 +12,18 @@ UDPDataStreamerBase::UDPDataStreamerBase(std::string IPAddress, unsigned int por
 : TransmitterSocket (IPAddress, port)
 , streamToSocket_	(toIPAddress, toPort)
 {
-	std::cout << __COUT_HDR_FL__ << "IPAddress " << IPAddress << std::endl;
-	std::cout << __COUT_HDR_FL__ << "port " << port << std::endl;
-	std::cout << __COUT_HDR_FL__ << "toIPAddress " << toIPAddress << std::endl;
-	std::cout << __COUT_HDR_FL__ << "toPort " << toPort << std::endl;
-	std::cout << __COUT_HDR_FL__ << std::endl;
-	std::cout << __COUT_HDR_FL__ << std::endl;
-	std::cout << __COUT_HDR_FL__ << std::endl;
-	std::cout << __COUT_HDR_FL__ << std::endl;
-	std::cout << __COUT_HDR_FL__ << std::endl;
+	__COUT__ << "IPAddress " << IPAddress << std::endl;
+	__COUT__ << "port " << port << std::endl;
+	__COUT__ << "toIPAddress " << toIPAddress << std::endl;
+	__COUT__ << "toPort " << toPort << std::endl;
+	__COUT__ << std::endl;
+	__COUT__ << std::endl;
+	__COUT__ << std::endl;
+	__COUT__ << std::endl;
+	__COUT__ << std::endl;
 
 	Socket::initialize();
-	std::cout << __COUT_HDR_FL__ << "done!" << std::endl;
+	__COUT__ << "done!" << std::endl;
 }
 
 //========================================================================================================================
