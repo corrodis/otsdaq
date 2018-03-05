@@ -21,7 +21,7 @@ product		 version	optional
 artdaq              v3_00_03
 artdaq_database     v1_04_44
 xdaq                -
-artdaq_mfextensions v1_00_02   	-        optional
+artdaq_mfextensions v1_02_02   	-        optional
 smc_compiler        v6_6_0      -        only_for_build
 cetbuildtools       v7_01_00    -        only_for_build
 end_product_list
