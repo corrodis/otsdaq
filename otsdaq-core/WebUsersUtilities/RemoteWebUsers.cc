@@ -109,7 +109,9 @@ bool RemoteWebUsers::xmlLoginGateway(
 		std::string* 					userWithLock,
 		std::string* 					userName,
 		std::string* 					displayName,
-		uint64_t* 						activeSessionIndex)
+		uint64_t* 						activeSessionIndex,
+		const bool						allowNoUser
+		)
 {
 	//initialized optional acquisition parameters to failed results
 	if(userPermissions) 	*userPermissions    = 0;
@@ -217,13 +219,13 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 	//__COUT__ << "cookieCode=" << cookieCode << std::endl;
 
-	if(cookieCode.length() != COOKIE_CODE_LENGTH)
+	if(!allowNoUser && cookieCode.length() != COOKIE_CODE_LENGTH)
 	{
 		*out << RemoteWebUsers::REQ_NO_LOGIN_RESPONSE;
 		return false;	//invalid cookie and present sequence, but not correct sequence
 	}
 
-	if(tmpUserPermissions_ < permissionsThreshold)
+	if(!allowNoUser && tmpUserPermissions_ < permissionsThreshold)
 	{
 		*out << RemoteWebUsers::REQ_NO_PERMISSION_RESPONSE;
 		__COUT__ << "User has insufficient permissions: " << tmpUserPermissions_ << "<" <<
@@ -232,7 +234,12 @@ bool RemoteWebUsers::xmlLoginGateway(
 	}
 
 	if(xmldoc) //fill with cookie code tag
-		xmldoc->setHeader(cookieCode);
+	{	
+		if(!allowNoUser)
+			xmldoc->setHeader(cookieCode);
+		else
+			xmldoc->setHeader(RemoteWebUsers::REQ_ALLOW_NO_USER);			
+	}
 
 	if(!userName && !displayName && !activeSessionIndex && !checkLock && !lockRequired)
 		return true; //done, no need to get user info for cookie

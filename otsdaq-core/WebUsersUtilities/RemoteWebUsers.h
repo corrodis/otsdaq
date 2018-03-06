@@ -30,6 +30,7 @@ public:
 	static const std::string REQ_NO_PERMISSION_RESPONSE;
 	static const std::string REQ_USER_LOCKOUT_RESPONSE;
 	static const std::string REQ_LOCK_REQUIRED_RESPONSE;
+	static const std::string REQ_ALLOW_NO_USER;
 
 
 	//for external supervisors to check with Supervisor for login
@@ -47,7 +48,8 @@ public:
 			std::string* 					userWithLock = 0,
 			std::string* 					username = 0,
 			std::string* 					displayName = 0,
-			uint64_t* 						activeSessionIndex = 0);
+			uint64_t* 						activeSessionIndex = 0,
+			const bool						allowNoUser = false);
 
 
 	std::string															getActiveUserList					(const xdaq::ApplicationDescriptor* supervisorDescriptor);
@@ -88,6 +90,7 @@ const std::string RemoteWebUsers::REQ_NO_LOGIN_RESPONSE = "NoLogin";
 const std::string RemoteWebUsers::REQ_NO_PERMISSION_RESPONSE = "NoPermission";
 const std::string RemoteWebUsers::REQ_USER_LOCKOUT_RESPONSE = "UserLockout";
 const std::string RemoteWebUsers::REQ_LOCK_REQUIRED_RESPONSE = "LockRequired";
+const std::string RemoteWebUsers::REQ_ALLOW_NO_USER = "AllowNoUser";
 
 }
 
