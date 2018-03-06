@@ -106,6 +106,10 @@ function killprocs
 		killall -9 mf_rcv_n_fwd 	&>/dev/null 2>&1 #hide output #message viewer display without decoration		
 		killall -9 art 				&>/dev/null 2>&1 #hide output
 		
+		usershort=`echo $USER|cut -c 1-10`
+		for key in `ipcs|grep $usershort|grep ' 0 '|awk '{print $1}'`;do ipcrm -M $key;done
+
+		
 	else #then killing only non-gateway contexts
 		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Killing all non-gateway contexts..."
 		PIDS=""
