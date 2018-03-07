@@ -57,7 +57,7 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 //		throw std::runtime_error(ss.str());
 //	}
 
-	std::set<xdaq::ApplicationDescriptor*> appDescriptors;
+	std::set<XDAQ_CONST_CALL xdaq::ApplicationDescriptor*> appDescriptors;
 
 	//get allSupervisors_
 

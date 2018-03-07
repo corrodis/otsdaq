@@ -19,7 +19,7 @@ class SupervisorInfo
 
 public:
     SupervisorInfo (
-    		xdaq::ApplicationDescriptor* descriptor,
+		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* descriptor,
     		const std::string& name, const std::string& contextName) :
     			descriptor_			(descriptor),
 				contextDescriptor_	(descriptor?descriptor->getContextDescriptor():0),
@@ -59,7 +59,7 @@ public:
 
     //Getters -------------------
     XDAQ_CONST_CALL xdaq::ApplicationDescriptor*		getDescriptor		(void) const	{ return descriptor_;			}
-    const xdaq::ContextDescriptor*						getContextDescriptor(void) const	{ return contextDescriptor_;	}
+	const xdaq::ContextDescriptor*						getContextDescriptor(void) const	{ return contextDescriptor_;	}
     const std::string&									getName				(void) const  	{ return name_;   				}
     const std::string&									getContextName		(void) const  	{ return contextName_;   		}
     const unsigned int&									getId				(void) const  	{ return id_;   				}
@@ -75,8 +75,8 @@ public:
     void												clear				(void)						 { descriptor_ = 0; contextDescriptor_ = 0; name_ = ""; id_ = 0; contextName_ = ""; status_ = "Unknown"; }
 
 private:
-    xdaq::ApplicationDescriptor*						descriptor_;
-    xdaq::ContextDescriptor*							contextDescriptor_;
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor*						descriptor_;
+	XDAQ_CONST_CALL xdaq::ContextDescriptor*							contextDescriptor_;
     std::string 										name_;
     std::string 										contextName_;
     unsigned int										id_;
