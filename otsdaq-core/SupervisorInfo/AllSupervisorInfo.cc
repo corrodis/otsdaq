@@ -216,7 +216,7 @@ const SupervisorInfo& AllSupervisorInfo::getGatewayInfo(void) const
 	return *theSupervisorInfo_;
 }
 //========================================================================================================================
-const xdaq::ApplicationDescriptor* AllSupervisorInfo::getGatewayDescriptor(void) const
+XDAQ_CONST_CALL xdaq::ApplicationDescriptor* AllSupervisorInfo::getGatewayDescriptor(void) const
 {
 	return getGatewayInfo().getDescriptor();
 }
@@ -233,7 +233,7 @@ const SupervisorInfo& AllSupervisorInfo::getWizardInfo(void) const
 	return *theWizardInfo_;
 }
 //========================================================================================================================
-const xdaq::ApplicationDescriptor* AllSupervisorInfo::getWizardDescriptor(void) const
+XDAQ_CONST_CALL xdaq::ApplicationDescriptor* AllSupervisorInfo::getWizardDescriptor(void) const
 {
 	return getWizardInfo().getDescriptor();
 }

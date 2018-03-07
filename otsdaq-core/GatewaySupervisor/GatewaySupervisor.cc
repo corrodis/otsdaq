@@ -42,6 +42,7 @@ using namespace ots;
 #define FSM_LAST_GROUP_ALIAS_FILE_START			std::string("FSMLastGroupAlias-")
 #define FSM_USERS_PREFERENCES_FILETYPE			"pref"
 
+#define CORE_TABLE_INFO_FILENAME 				((getenv("SERVICE_DATA_PATH") == NULL)?(std::string(getenv("USER_DATA"))+"/ServiceData"):(std::string(getenv("SERVICE_DATA_PATH")))) + "/CoreTableInfoNames.dat"
 
 #undef 	__MF_SUBJECT__
 #define __MF_SUBJECT__ "GatewaySupervisor"
@@ -161,6 +162,137 @@ void GatewaySupervisor::init(void)
 	}
 	else
 		__COUT__ << "State changes over UDP are disabled." << __E__;
+
+
+
+	//=========================
+	//dump names of core tables (so UpdateOTS.sh can copy core tables for user)
+	// only if table does not exist
+	{
+		const std::set<std::string>& contextMemberNames = theConfigurationManager_->getContextMemberNames();
+		const std::set<std::string>& backboneMemberNames = theConfigurationManager_->getBackboneMemberNames();
+		const std::set<std::string>& iterateMemberNames = theConfigurationManager_->getIterateMemberNames();
+
+		FILE * fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"r");
+
+		__COUT__ << "Updating core tables table..." << __E__;
+
+		if(fp) //check for all core table names in file, and force their presence
+		{
+			std::vector<unsigned int> foundVector;
+			char line[100];
+			for(const auto &name:contextMemberNames)
+			{
+				foundVector.push_back(false);
+				rewind(fp);
+				while(fgets(line,100,fp))
+				{
+					if(strlen(line) < 1) continue;
+					line[strlen(line)-1] = '\0'; //remove endline
+					if(strcmp(line,name.c_str()) == 0) //is match?
+					{
+						foundVector.back() = true;
+						//__COUTV__(name);
+						break;
+					}
+				}
+			}
+
+			for(const auto &name:backboneMemberNames)
+			{
+				foundVector.push_back(false);
+				rewind(fp);
+				while(fgets(line,100,fp))
+				{
+					if(strlen(line) < 1) continue;
+					line[strlen(line)-1] = '\0'; //remove endline
+					if(strcmp(line,name.c_str()) == 0) //is match?
+					{
+						foundVector.back() = true;
+						//__COUTV__(name);
+						break;
+					}
+				}
+			}
+
+			for(const auto &name:iterateMemberNames)
+			{
+				foundVector.push_back(false);
+				rewind(fp);
+				while(fgets(line,100,fp))
+				{
+					if(strlen(line) < 1) continue;
+					line[strlen(line)-1] = '\0'; //remove endline
+					if(strcmp(line,name.c_str()) == 0) //is match?
+					{
+						foundVector.back() = true;
+						//__COUTV__(name);
+						break;
+					}
+				}
+			}
+
+			fclose(fp);
+
+			//for(const auto &found:foundVector)
+			//	__COUTV__(found);
+
+
+			//open file for appending the missing names
+			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"a");
+			if(fp)
+			{
+				unsigned int i = 0;
+				for(const auto &name:contextMemberNames)
+				{
+					if(!foundVector[i])
+						fprintf(fp,"%s\n",name.c_str());
+
+					++i;
+				}
+				for(const auto &name:backboneMemberNames)
+				{
+					if(!foundVector[i])
+						fprintf(fp,"%s\n",name.c_str());
+
+					++i;
+				}
+				for(const auto &name:iterateMemberNames)
+				{
+					if(!foundVector[i])
+						fprintf(fp,"%s\n",name.c_str());
+
+					++i;
+				}
+				fclose(fp);
+			}
+			else
+			{
+				__SS__ << "Failed to open core table info file for appending: " << CORE_TABLE_INFO_FILENAME << std::endl;
+				__SS_THROW__;
+			}
+
+		}
+		else
+		{
+			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(),"w");
+			if(fp)
+			{
+				for(const auto &name:contextMemberNames)
+					fprintf(fp,"%s\n",name.c_str());
+				for(const auto &name:backboneMemberNames)
+					fprintf(fp,"%s\n",name.c_str());
+				for(const auto &name:iterateMemberNames)
+					fprintf(fp,"%s\n",name.c_str());
+				fclose(fp);
+			}
+			else
+			{
+				__SS__ << "Failed to open core table info file: " << CORE_TABLE_INFO_FILENAME << std::endl;
+				__SS_THROW__;
+			}
+		}
+	}
 
 }
 

@@ -125,10 +125,10 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 	//const_cast away the const
 	//	so that this line is compatible with slf6 and slf7 versions of xdaq
-	//	where they changed to const xdaq::ApplicationDescriptor* in slf7
+	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 	//
 	// XDAQ_CONST_CALL is defined in "otsdaq-core/Macros/CoutHeaderMacros.h"
-	const xdaq::ApplicationDescriptor* gatewaySupervisor;
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor;
 
 	SOAPParameters               parameters;
 	xoap::MessageReference       retMsg;
@@ -285,7 +285,7 @@ bool RemoteWebUsers::xmlLoginGateway(
 //getActiveUserList
 //	if lastUpdateTime is not too recent as spec'd by ACTIVE_USERS_UPDATE_THRESHOLD
 //	if server responds with
-std::string RemoteWebUsers::getActiveUserList(const xdaq::ApplicationDescriptor* supervisorDescriptor)
+std::string RemoteWebUsers::getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor)
 {
 
 	if(1 || time(0) - ActiveUserLastUpdateTime_ > ACTIVE_USERS_UPDATE_THRESHOLD) //need to update
@@ -312,7 +312,7 @@ std::string RemoteWebUsers::getActiveUserList(const xdaq::ApplicationDescriptor*
 //	returns empty "" for actionTimeString on failure
 //	returns "Wed Dec 31 18:00:01 1969 CST" for actionTimeString (in CST) if action never has occurred
 std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::getLastConfigGroup(
-		const xdaq::ApplicationDescriptor* supervisorDescriptor,
+		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 		const std::string &actionOfLastGroup,
 		std::string &actionTimeString)
 {
@@ -349,7 +349,7 @@ std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::get
 //	get username and display name for user based on cookie code
 //	return true, if user info gotten successfully
 //	else false
-bool RemoteWebUsers::getUserInfoForCookie(const xdaq::ApplicationDescriptor* supervisorDescriptor,
+bool RemoteWebUsers::getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 		std::string &cookieCode, std::string *userName, std::string *displayName, uint64_t *activeSessionIndex)
 {
 	__COUT__ << std::endl;
@@ -376,7 +376,7 @@ bool RemoteWebUsers::getUserInfoForCookie(const xdaq::ApplicationDescriptor* sup
 //========================================================================================================================
 //cookieCodeIsActiveForRequest
 //	for external supervisors to check with Supervisor for login
-bool RemoteWebUsers::cookieCodeIsActiveForRequest(const xdaq::ApplicationDescriptor* supervisorDescriptor,
+bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 		std::string &cookieCode, uint8_t *userPermissions, std::string ip, bool refresh, std::string *userWithLock)
 {
 	//__COUT__ << "CookieCode: " << cookieCode << " " << cookieCode.length() << std::endl;
@@ -411,7 +411,7 @@ bool RemoteWebUsers::cookieCodeIsActiveForRequest(const xdaq::ApplicationDescrip
 //sendSystemMessage
 //	send system message to toUser through Supervisor
 //	toUser wild card * is to all users
-void RemoteWebUsers::sendSystemMessage(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg)
+void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ToUser" , toUser);
@@ -424,7 +424,7 @@ void RemoteWebUsers::sendSystemMessage(const xdaq::ApplicationDescriptor* superv
 //========================================================================================================================
 //makeSystemLogbookEntry
 //	make system logbook through Supervisor
-void RemoteWebUsers::makeSystemLogbookEntry(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText)
+void RemoteWebUsers::makeSystemLogbookEntry(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("EntryText", entryText);

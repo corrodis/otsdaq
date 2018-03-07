@@ -52,14 +52,14 @@ public:
 			const bool						allowNoUser = false);
 
 
-	std::string															getActiveUserList					(const xdaq::ApplicationDescriptor* supervisorDescriptor);
-	void																sendSystemMessage					(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &toUser, const std::string& msg);
-	void																makeSystemLogbookEntry			   	(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &entryText);
-	std::pair<std::string /*group name*/, ConfigurationGroupKey>		getLastConfigGroup					(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &actionOfLastGroup, std::string &actionTimeString); //actionOfLastGroup = "Configured" or "Started", for example
+	std::string															getActiveUserList					(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor);
+	void																sendSystemMessage					(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &toUser, const std::string& msg);
+	void																makeSystemLogbookEntry			   	(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &entryText);
+	std::pair<std::string /*group name*/, ConfigurationGroupKey>		getLastConfigGroup					(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string &actionOfLastGroup, std::string &actionTimeString); //actionOfLastGroup = "Configured" or "Started", for example
 
 private:
 	bool			cookieCodeIsActiveForRequest(
-			const xdaq::ApplicationDescriptor* supervisorDescriptor,
+			XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 			std::string&                 cookieCode,
 			uint8_t*                     userPermissions = 0,
 			std::string                  ip = "0",
@@ -67,7 +67,7 @@ private:
 			std::string*                 userWithLock = 0);
 
 	bool			getUserInfoForCookie(
-			const xdaq::ApplicationDescriptor* supervisorDescriptor,
+			XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 			std::string&                 cookieCode,
 			std::string*                 userName,
 			std::string*                 displayName = 0,

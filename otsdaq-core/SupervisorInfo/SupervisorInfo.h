@@ -47,32 +47,32 @@ public:
     {;}
 
     //BOOLs	-------------------
-    bool									isGatewaySupervisor						(void) const	{ return class_ == XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS; }
-    bool									isWizardSupervisor						(void) const	{ return class_ == XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS;  }
-    bool									isTypeFESupervisor						(void) const	{ return XDAQContextConfiguration::FETypeClassNames_.find(class_) 					!= XDAQContextConfiguration::FETypeClassNames_.end(); }
-    bool									isTypeDMSupervisor						(void) const	{ return XDAQContextConfiguration::DMTypeClassNames_.find(class_) 					!= XDAQContextConfiguration::DMTypeClassNames_.end(); }
-    bool									isTypeLogbookSupervisor					(void) const	{ return XDAQContextConfiguration::LogbookTypeClassNames_.find(class_) 				!= XDAQContextConfiguration::LogbookTypeClassNames_.end(); }
-    bool									isTypeMacroMakerSupervisor				(void) const	{ return XDAQContextConfiguration::MacroMakerTypeClassNames_.find(class_) 			!= XDAQContextConfiguration::MacroMakerTypeClassNames_.end(); }
-    bool									isTypeConfigurationGUISupervisor		(void) const	{ return XDAQContextConfiguration::ConfigurationGUITypeClassNames_.find(class_) 	!= XDAQContextConfiguration::ConfigurationGUITypeClassNames_.end(); }
-    bool									isTypeChatSupervisor					(void) const	{ return XDAQContextConfiguration::ChatTypeClassNames_.find(class_) 				!= XDAQContextConfiguration::ChatTypeClassNames_.end(); }
-    bool									isTypeConsoleSupervisor					(void) const	{ return XDAQContextConfiguration::ConsoleTypeClassNames_.find(class_) 				!= XDAQContextConfiguration::ConsoleTypeClassNames_.end(); }
+    bool												isGatewaySupervisor						(void) const	{ return class_ == XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS; }
+    bool												isWizardSupervisor						(void) const	{ return class_ == XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS;  }
+    bool												isTypeFESupervisor						(void) const	{ return XDAQContextConfiguration::FETypeClassNames_.find(class_) 					!= XDAQContextConfiguration::FETypeClassNames_.end(); }
+    bool												isTypeDMSupervisor						(void) const	{ return XDAQContextConfiguration::DMTypeClassNames_.find(class_) 					!= XDAQContextConfiguration::DMTypeClassNames_.end(); }
+    bool												isTypeLogbookSupervisor					(void) const	{ return XDAQContextConfiguration::LogbookTypeClassNames_.find(class_) 				!= XDAQContextConfiguration::LogbookTypeClassNames_.end(); }
+    bool												isTypeMacroMakerSupervisor				(void) const	{ return XDAQContextConfiguration::MacroMakerTypeClassNames_.find(class_) 			!= XDAQContextConfiguration::MacroMakerTypeClassNames_.end(); }
+    bool												isTypeConfigurationGUISupervisor		(void) const	{ return XDAQContextConfiguration::ConfigurationGUITypeClassNames_.find(class_) 	!= XDAQContextConfiguration::ConfigurationGUITypeClassNames_.end(); }
+    bool												isTypeChatSupervisor					(void) const	{ return XDAQContextConfiguration::ChatTypeClassNames_.find(class_) 				!= XDAQContextConfiguration::ChatTypeClassNames_.end(); }
+    bool												isTypeConsoleSupervisor					(void) const	{ return XDAQContextConfiguration::ConsoleTypeClassNames_.find(class_) 				!= XDAQContextConfiguration::ConsoleTypeClassNames_.end(); }
 
     //Getters -------------------
-    const xdaq::ApplicationDescriptor*		getDescriptor		(void) const	{ return descriptor_;			}
-    const xdaq::ContextDescriptor*			getContextDescriptor(void) const	{ return contextDescriptor_;	}
-    const std::string&						getName				(void) const  	{ return name_;   				}
-    const std::string&						getContextName		(void) const  	{ return contextName_;   		}
-    const unsigned int&						getId				(void) const  	{ return id_;   				}
-    const std::string&						getClass			(void) const  	{ return class_;   				}
-    const std::string&						getStatus			(void) const   	{ return status_;   			}
-    const std::string&						getURL				(void) const  	{ return contextURL_;   		}
-    const std::string&						getURN				(void) const  	{ return URN_;   				}
-    const std::string&						getFullURL			(void) const  	{ return URL_;   				}
-    const uint16_t&							getPort				(void) const  	{ return port_;   				}
+    XDAQ_CONST_CALL xdaq::ApplicationDescriptor*		getDescriptor		(void) const	{ return descriptor_;			}
+    const xdaq::ContextDescriptor*						getContextDescriptor(void) const	{ return contextDescriptor_;	}
+    const std::string&									getName				(void) const  	{ return name_;   				}
+    const std::string&									getContextName		(void) const  	{ return contextName_;   		}
+    const unsigned int&									getId				(void) const  	{ return id_;   				}
+    const std::string&									getClass			(void) const  	{ return class_;   				}
+    const std::string&									getStatus			(void) const   	{ return status_;   			}
+    const std::string&									getURL				(void) const  	{ return contextURL_;   		}
+    const std::string&									getURN				(void) const  	{ return URN_;   				}
+    const std::string&									getFullURL			(void) const  	{ return URL_;   				}
+    const uint16_t&										getPort				(void) const  	{ return port_;   				}
 
     //Setters -------------------
-    void 									setStatus			(const std::string& status)  { status_ = status; }
-    void									clear				(void)						 { descriptor_ = 0; contextDescriptor_ = 0; name_ = ""; id_ = 0; contextName_ = ""; status_ = "Unknown"; }
+    void 												setStatus			(const std::string& status)  { status_ = status; }
+    void												clear				(void)						 { descriptor_ = 0; contextDescriptor_ = 0; name_ = ""; id_ = 0; contextName_ = ""; status_ = "Unknown"; }
 
 private:
     xdaq::ApplicationDescriptor*						descriptor_;

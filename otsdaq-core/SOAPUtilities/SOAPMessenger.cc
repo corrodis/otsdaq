@@ -93,7 +93,7 @@ std::string SOAPMessenger::receive(const xoap::MessageReference& message, SOAPPa
 //    xdaq::ApplicationDescriptor* sourceptr;
 // void getURN()
 //
-std::string SOAPMessenger::send(const xdaq::ApplicationDescriptor* ind,
+std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
 		xoap::MessageReference message)
 throw (xdaq::exception::Exception)
 {
@@ -102,7 +102,7 @@ throw (xdaq::exception::Exception)
 //{
 //	//const_cast away the const
 //	//	so that this line is compatible with slf6 and slf7 versions of xdaq
-//	//	where they changed to const xdaq::ApplicationDescriptor* in slf7
+//	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 //	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d =
 //			const_cast<xdaq::ApplicationDescriptor*>(ind);
 //	try
@@ -135,7 +135,7 @@ throw (xdaq::exception::Exception)
 //}
 
 //========================================================================================================================
-std::string SOAPMessenger::send(const xdaq::ApplicationDescriptor* d, SOAPCommand soapCommand)
+std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, SOAPCommand soapCommand)
 throw (xdaq::exception::Exception)
 {
 	if(soapCommand.hasParameters())
@@ -145,7 +145,7 @@ throw (xdaq::exception::Exception)
 }
 
 //========================================================================================================================
-std::string SOAPMessenger::send(const xdaq::ApplicationDescriptor* d, std::string command)
+std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string command)
 throw (xdaq::exception::Exception)
 {
 	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(command);
@@ -153,7 +153,7 @@ throw (xdaq::exception::Exception)
 }
 
 //========================================================================================================================
-std::string SOAPMessenger::send(const xdaq::ApplicationDescriptor* ind, std::string cmd,
+std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind, std::string cmd,
 		SOAPParameters parameters)
 throw (xdaq::exception::Exception)
 {
@@ -163,7 +163,7 @@ throw (xdaq::exception::Exception)
 //{
 //	//const_cast away the const
 //	//	so that this line is compatible with slf6 and slf7 versions of xdaq
-//	//	where they changed to const xdaq::ApplicationDescriptor* in slf7
+//	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 //	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d =
 //			const_cast<xdaq::ApplicationDescriptor*>(ind);
 //
@@ -200,7 +200,7 @@ throw (xdaq::exception::Exception)
 //}
 
 //========================================================================================================================
-xoap::MessageReference SOAPMessenger::sendWithSOAPReply(const xdaq::ApplicationDescriptor* ind,
+xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
 		std::string cmd)
 throw (xdaq::exception::Exception)
 {
@@ -209,7 +209,7 @@ throw (xdaq::exception::Exception)
 //{
 //	//const_cast away the const
 //	//	so that this line is compatible with slf6 and slf7 versions of xdaq
-//	//	where they changed to const xdaq::ApplicationDescriptor* in slf7
+//	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 //	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d =
 //			const_cast<xdaq::ApplicationDescriptor*>(ind);
 //	try
@@ -241,13 +241,13 @@ throw (xdaq::exception::Exception)
 //}
 
 //========================================================================================================================
-xoap::MessageReference SOAPMessenger::sendWithSOAPReply(const xdaq::ApplicationDescriptor *ind,
+xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::ApplicationDescriptor *ind,
 		xoap::MessageReference message)
 throw (xdaq::exception::Exception)
 {
 	//const_cast away the const
 	//	so that this line is compatible with slf6 and slf7 versions of xdaq
-	//	where they changed to const xdaq::ApplicationDescriptor* in slf7
+	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d =
 			const_cast<xdaq::ApplicationDescriptor*>(ind);
 	try
@@ -278,7 +278,7 @@ throw (xdaq::exception::Exception)
 }
 
 //========================================================================================================================
-xoap::MessageReference SOAPMessenger::sendWithSOAPReply(const xdaq::ApplicationDescriptor* ind,
+xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
 		std::string cmd, SOAPParameters parameters)
 throw (xdaq::exception::Exception)
 {
@@ -287,7 +287,7 @@ throw (xdaq::exception::Exception)
 //{
 //	//const_cast away the const
 //	//	so that this line is compatible with slf6 and slf7 versions of xdaq
-//	//	where they changed to const xdaq::ApplicationDescriptor* in slf7
+//	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 //	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d =
 //			const_cast<xdaq::ApplicationDescriptor*>(ind);
 //	try
@@ -346,13 +346,13 @@ std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, 
 }
  */
 //========================================================================================================================
-std::string SOAPMessenger::sendStatus(const xdaq::ApplicationDescriptor* ind,
+std::string SOAPMessenger::sendStatus(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
 		std::string message)
 throw (xdaq::exception::Exception)
 {
 	//const_cast away the const
 	//	so that this line is compatible with slf6 and slf7 versions of xdaq
-	//	where they changed to const xdaq::ApplicationDescriptor* in slf7
+	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d =
 			const_cast<xdaq::ApplicationDescriptor*>(ind);
 
