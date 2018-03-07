@@ -123,7 +123,7 @@ protected:
     //Supervisor Property names
 	struct SupervisorProperties
 	{
-		std::string const fieldDoNotRequireLock					= "DoNotRequireLock";
+		std::string const fieldRequireLock						= "RequireLock";
 		std::string const fieldUserPermissionsThreshold			= "UserPermissionsThreshold";
 	} supervisorProperties_;
 };
