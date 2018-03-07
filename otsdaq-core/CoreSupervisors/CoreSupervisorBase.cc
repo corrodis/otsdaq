@@ -1,24 +1,9 @@
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
-#include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
-#include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
-#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
-#include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
+
 //#include "otsdaq-core/Singleton/Singleton.h"
-//#include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationTree.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
-#include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
-#include "otsdaq-core/FECore/FEVInterfacesManager.h"
+//#include "otsdaq-core/FECore/FEVInterfacesManager.h"
 
 
-#include <toolbox/fsm/FailedEvent.h>
-
-#include <xdaq/NamespaceURI.h>
-#include <xoap/Method.h>
 
 #include <iostream>
 
@@ -44,19 +29,22 @@ throw (xdaq::exception::Exception)
 , supervisorApplicationUID_     ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
 , supervisorClass_              (getApplicationDescriptor()->getClassName())
 , supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
+, theRemoteWebUsers_ 			(this)
+, LOCK_REQUIRED_	 			(false) 	//set default
+, USER_PERMISSIONS_THRESHOLD_	(1) 		//set default
 {
 	INIT_MF("CoreSupervisorBase");
 
 	__COUT__ << "Begin!" << std::endl;
 
-	xgi::bind (this, &CoreSupervisorBase::Default,                "Default" );
+	xgi::bind (this, &CoreSupervisorBase::DefaultWrapper,         "Default" );
+	xgi::bind (this, &CoreSupervisorBase::requestWrapper, 		  "Request");
 	xgi::bind (this, &CoreSupervisorBase::stateMachineXgiHandler, "StateMachineXgiHandler");
-	xgi::bind (this, &CoreSupervisorBase::request, 				  "Request");
 
 	xoap::bind(this, &CoreSupervisorBase::stateMachineStateRequest,    		"StateMachineStateRequest",    		XDAQ_NS_URI );
 	xoap::bind(this, &CoreSupervisorBase::stateMachineErrorMessageRequest,  "StateMachineErrorMessageRequest",  XDAQ_NS_URI );
-	xoap::bind(this, &CoreSupervisorBase::macroMakerSupervisorRequest, 		"MacroMakerSupervisorRequest", 		XDAQ_NS_URI );
-	xoap::bind(this, &CoreSupervisorBase::workLoopStatusRequest,    		"WorkLoopStatusRequest",    		XDAQ_NS_URI );
+	//xoap::bind(this, &CoreSupervisorBase::macroMakerSupervisorRequest, 		"MacroMakerSupervisorRequest", 		XDAQ_NS_URI );
+	xoap::bind(this, &CoreSupervisorBase::workLoopStatusRequestWrapper, 	"WorkLoopStatusRequest",    		XDAQ_NS_URI );
 
 	try
 	{
@@ -121,6 +109,14 @@ void CoreSupervisorBase::destroy(void)
 }
 
 //========================================================================================================================
+//wrapper for inheritance call
+void CoreSupervisorBase::DefaultWrapper(xgi::Input * in, xgi::Output * out )
+throw (xgi::exception::Exception)
+{
+	return Default(in,out);
+}
+
+//========================================================================================================================
 void CoreSupervisorBase::Default(xgi::Input * in, xgi::Output * out )
 throw (xgi::exception::Exception)
 {
@@ -128,30 +124,45 @@ throw (xgi::exception::Exception)
 
 	__COUT__<< "Supervisor class " << supervisorClass_ << std::endl;
 
-	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='/WebPath/html/" << supervisorClassNoNamespace_ << "Supervisor.html?urn=" <<
-			this->getApplicationDescriptor()->getLocalId() << //getenv((theSupervisorClassNoNamespace_ + "_SUPERVISOR_ID").c_str()) <<
+	std::stringstream pagess;
+	pagess << "/WebPath/html/" <<
+			supervisorClassNoNamespace_ << "Supervisor.html?urn=" <<
+			this->getApplicationDescriptor()->getLocalId();
+
+	__COUT__<< "Default page = " << pagess.str() << std::endl;
+
+	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='" <<
+			pagess.str() <<
 			"'></frameset></html>";
+}
+
+//========================================================================================================================
+//wrapper for inheritance call
+void CoreSupervisorBase::requestWrapper(xgi::Input * in, xgi::Output * out )
+throw (xgi::exception::Exception)
+{
+	return requestWrapper(in,out);
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::request(xgi::Input * in, xgi::Output * out )
 throw (xgi::exception::Exception)
 {
-
-
-	cgicc::Cgicc cgi(in);
-	std::string write = CgiDataUtilities::getOrPostData(cgi,"write");
-	std::string addr = CgiDataUtilities::getOrPostData(cgi,"addr");
-	std::string data = CgiDataUtilities::getOrPostData(cgi,"data");
-
-	__COUT__<< "write " << write << " addr: " << addr << " data: " << data << std::endl;
-
-	unsigned long long int addr64,data64;
-	sscanf(addr.c_str(),"%llu",&addr64);
-	sscanf(data.c_str(),"%llu",&data64);
-	__COUT__<< "write " << write << " addr: " << addr64 << " data: " << data64 << std::endl;
-
-	*out << "done";
+//
+//
+//	cgicc::Cgicc cgi(in);
+//	std::string write = CgiDataUtilities::getOrPostData(cgi,"write");
+//	std::string addr = CgiDataUtilities::getOrPostData(cgi,"addr");
+//	std::string data = CgiDataUtilities::getOrPostData(cgi,"data");
+//
+//	__COUT__<< "write " << write << " addr: " << addr << " data: " << data << std::endl;
+//
+//	unsigned long long int addr64,data64;
+//	sscanf(addr.c_str(),"%llu",&addr64);
+//	sscanf(data.c_str(),"%llu",&data64);
+//	__COUT__<< "write " << write << " addr: " << addr64 << " data: " << data64 << std::endl;
+//
+//	*out << "done";
 }
 
 //========================================================================================================================
@@ -187,6 +198,23 @@ throw (xoap::exception::Exception)
 }
 
 //========================================================================================================================
+//indirection to allow for overriding handler
+xoap::MessageReference CoreSupervisorBase::workLoopStatusRequestWrapper(xoap::MessageReference message)
+throw (xoap::exception::Exception)
+{
+	//this should have an override for monitoring work loops being done
+	return workLoopStatusRequest(message);
+} //end workLoopStatusRequest()
+
+//========================================================================================================================
+xoap::MessageReference CoreSupervisorBase::workLoopStatusRequest(xoap::MessageReference message)
+throw (xoap::exception::Exception)
+{
+	//this should have an override for monitoring work loops being done
+	return SOAPUtilities::makeSOAPMessageReference(CoreSupervisorBase::WORK_LOOP_DONE);
+} //end workLoopStatusRequest()
+
+//========================================================================================================================
 bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 {
 	stateMachineSemaphore_.take();
@@ -216,387 +244,6 @@ throw (xoap::exception::Exception)
 	SOAPParameters retParameters;
 	retParameters.addParameter("ErrorMessage",theStateMachine_.getErrorMessage());
 	return SOAPUtilities::makeSOAPMessageReference("stateMachineErrorMessageRequestReply",retParameters);
-}
-
-//========================================================================================================================
-// macroMakerSupervisorRequest
-//	 Handles all MacroMaker Requests:
-//		- GetInterfaces (returns interface type and id)
-//
-//	Note: this code assumes a CoreSupervisorBase has only one
-//		FEVInterfacesManager in its vector of state machines
-xoap::MessageReference CoreSupervisorBase::macroMakerSupervisorRequest(
-		xoap::MessageReference message)
-throw (xoap::exception::Exception)
-{
-	__COUT__<< "$$$$$$$$$$$$$$$$$" << std::endl;
-
-	//locate theFEInterfacesManager in state machines vector
-	FEVInterfacesManager* theFEInterfacesManager = extractFEInterfaceManager();
-
-	//receive request parameters
-	SOAPParameters parameters;
-	parameters.addParameter("Request");
-	parameters.addParameter("InterfaceID");
-
-	//params for universal commands
-	parameters.addParameter("Address");
-	parameters.addParameter("Data");
-
-	//params for running macros
-	parameters.addParameter("feMacroName");
-	parameters.addParameter("inputArgs");
-	parameters.addParameter("outputArgs");
-
-	SOAPMessenger::receive(message, parameters);
-	std::string request = parameters.getValue("Request");
-	std::string addressStr = parameters.getValue("Address");
-	std::string dataStr = parameters.getValue("Data");
-	std::string InterfaceID = parameters.getValue("InterfaceID");
-
-	__COUT__<< "request: " << request << std::endl;
-
-	__COUT__<<  "Address: " << addressStr << " Data: "
-			<< dataStr << " InterfaceID: " << InterfaceID << std::endl;
-
-	SOAPParameters retParameters;
-
-	try
-	{
-		if(request == "GetInterfaces")
-		{
-			if(theFEInterfacesManager)
-				retParameters.addParameter("FEList",
-						theFEInterfacesManager->getFEListString(
-									std::to_string(getApplicationDescriptor()->getLocalId())));
-			else
-				retParameters.addParameter("FEList","");
-
-			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response",
-					retParameters);
-		}
-		else if(request == "UniversalWrite")
-		{
-			if(!theFEInterfacesManager)
-			{
-				__COUT_INFO__ << "No FE Interface Manager! (So no write occurred)" << std::endl;
-				return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "DataWritten",retParameters);
-			}
-
-			// parameters interface index!
-			//unsigned int index = stoi(indexStr);	// As long as the supervisor has only one interface, this index will remain 0?
-
-
-
-			__COUT__<< "theFEInterfacesManager->getInterfaceUniversalAddressSize(index) " <<
-					theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID) << std::endl;
-			__COUT__<< "theFEInterfacesManager->getInterfaceUniversalDataSize(index) " <<
-					theFEInterfacesManager->getInterfaceUniversalDataSize(InterfaceID) << std::endl;
-
-			//Converting std::string to char*
-			//char address
-
-			char tmpHex[3]; //for use converting hex to binary
-			tmpHex[2] = '\0';
-
-
-			__COUT__<< "Translating address: ";
-
-			char address[theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID)];
-
-			if(addressStr.size()%2) //if odd, make even
-				addressStr = "0" + addressStr;
-			unsigned int i=0;
-			for(;i<addressStr.size() &&
-			i/2 < theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID) ; i+=2)
-			{
-				tmpHex[0] = addressStr[addressStr.size()-1-i-1];
-				tmpHex[1] = addressStr[addressStr.size()-1-i];
-				sscanf(tmpHex,"%hhX",(unsigned char*)&address[i/2]);
-				printf("%2.2X",(unsigned char)address[i/2]);
-			}
-			//finish and fill with 0s
-			for(;i/2 < theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID) ; i+=2)
-			{
-				address[i/2] = 0;
-				printf("%2.2X",(unsigned char)address[i/2]);
-			}
-
-			std::cout << std::endl;
-
-			__COUT__<< "Translating data: ";
-
-			char data[theFEInterfacesManager->getInterfaceUniversalDataSize(InterfaceID)];
-
-			if(dataStr.size()%2) //if odd, make even
-				dataStr = "0" + dataStr;
-
-			i=0;
-			for(;i<dataStr.size() &&
-			i/2 < theFEInterfacesManager->getInterfaceUniversalDataSize(InterfaceID) ; i+=2)
-			{
-				tmpHex[0] = dataStr[dataStr.size()-1-i-1];
-				tmpHex[1] = dataStr[dataStr.size()-1-i];
-				sscanf(tmpHex,"%hhX",(unsigned char*)&data[i/2]);
-				printf("%2.2X",(unsigned char)data[i/2]);
-			}
-			//finish and fill with 0s
-			for(;i/2 < theFEInterfacesManager->getInterfaceUniversalDataSize(InterfaceID) ; i+=2)
-			{
-				data[i/2] = 0;
-				printf("%2.2X",(unsigned char)data[i/2]);
-			}
-
-			std::cout << std::endl;
-
-			//char* address = new char[addressStr.size() + 1];
-			//std::copy(addressStr.begin(), addressStr.end(), address);
-			//    	address[addressStr.size()] = '\0';
-			//    	char* data = new char[dataStr.size() + 1];
-			//		std::copy(dataStr.begin(), dataStr.end(), data);
-			//		data[dataStr.size()] = '\0';
-
-			theFEInterfacesManager->universalWrite(InterfaceID,address,data);
-
-			//delete[] address;
-			//delete[] data;
-
-			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "DataWritten",retParameters);
-		}
-		else if(request == "UniversalRead")
-		{
-			if(!theFEInterfacesManager)
-			{
-				__COUT_INFO__ << "No FE Interface Manager! (So no read occurred)" << std::endl;
-				return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa",retParameters);
-			}
-
-			// parameters interface index!
-			// parameter address and data
-			//unsigned int index = stoi(indexStr);	// As long as the supervisor has only one interface, this index will remain 0?
-
-			__COUT__<< "theFEInterfacesManager->getInterfaceUniversalAddressSize(index) "
-					<< theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID) << std::endl;
-			__COUT__<< "theFEInterfacesManager->getInterfaceUniversalDataSize(index) "
-					<<theFEInterfacesManager->getInterfaceUniversalDataSize(InterfaceID) << std::endl;
-
-			char tmpHex[3]; //for use converting hex to binary
-			tmpHex[2] = '\0';
-
-
-			__COUT__<< "Translating address: ";
-
-			char address[theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID)];
-
-			if(addressStr.size()%2) //if odd, make even
-				addressStr = "0" + addressStr;
-
-			unsigned int i=0;
-			for(;i<addressStr.size() &&
-			i/2 < theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID) ; i+=2)
-			{
-				tmpHex[0] = addressStr[addressStr.size()-1-i-1];
-				tmpHex[1] = addressStr[addressStr.size()-1-i];
-				sscanf(tmpHex,"%hhX",(unsigned char*)&address[i/2]);
-				printf("%2.2X",(unsigned char)address[i/2]);
-			}
-			//finish and fill with 0s
-			for(;i/2 < theFEInterfacesManager->getInterfaceUniversalAddressSize(InterfaceID) ; i+=2)
-			{
-				address[i/2] = 0;
-				printf("%2.2X",(unsigned char)address[i/2]);
-			}
-
-			std::cout << std::endl;
-
-			unsigned int dataSz = theFEInterfacesManager->getInterfaceUniversalDataSize(InterfaceID);
-			char data[dataSz];
-
-
-			//    	std::string result = theFEInterfacesManager->universalRead(index,address,data);
-			//    	__COUT__<< result << std::endl << std::endl;
-
-			try
-			{
-				if(theFEInterfacesManager->universalRead(InterfaceID, address, data) < 0)
-				{
-					retParameters.addParameter("dataResult","Time Out Error");
-					return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa",retParameters);
-				}
-			}
-			catch(const std::runtime_error& e)
-			{
-				//do not allow read exception to crash everything when a macromaker command
-				__MOUT_ERR__ << "Exception caught during read: " << e.what() << std::endl;
-				__COUT_ERR__ << "Exception caught during read: " << e.what() << std::endl;
-				retParameters.addParameter("dataResult","Time Out Error");
-				return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa",retParameters);
-			}
-			catch(...)
-			{
-				//do not allow read exception to crash everything when a macromaker command
-				__MOUT_ERR__ << "Exception caught during read." << std::endl;
-				__COUT_ERR__ << "Exception caught during read." << std::endl;
-				retParameters.addParameter("dataResult","Time Out Error");
-				return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa",retParameters);
-			}
-
-			//if dataSz is less than 8 show what the unsigned number would be
-			if(dataSz <= 8)
-			{
-				std::string str8(data);
-				str8.resize(8);
-				__COUT__<< "decResult[" << dataSz << " bytes]: " <<
-						*((unsigned long long *)(&str8[0])) << std::endl;
-
-			}
-
-			char hexResult[dataSz*2+1];
-			//go through each byte and convert it to hex value (i.e. 2 0-F chars)
-			//go backwards through source data since should be provided in host order
-			//	(i.e. a cast to unsigned long long should acquire expected value)
-			for(unsigned int i=0;i<dataSz;++i)
-			{
-				sprintf(&hexResult[i*2],"%2.2X", (unsigned char)data[dataSz-1-i]);
-			}
-
-			__COUT__<< "hexResult[" << strlen(hexResult) << " nibbles]: " << std::string(hexResult) << std::endl;
-
-
-
-			retParameters.addParameter("dataResult",hexResult);
-			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa",retParameters);
-
-		}
-		else if(request == "GetInterfaceMacros")
-		{
-			if(theFEInterfacesManager)
-				retParameters.addParameter("FEMacros",theFEInterfacesManager->getFEMacrosString(
-						std::to_string(getApplicationDescriptor()->getLocalId())));
-			else
-				retParameters.addParameter("FEMacros","");
-
-			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response",
-					retParameters);
-		}
-		else if(request == "RunInterfaceMacro")
-		{
-			if(!theFEInterfacesManager)
-			{
-				retParameters.addParameter("success","0");
-				retParameters.addParameter("outputArgs","");
-				return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response",
-								retParameters);
-			}
-
-			std::string feMacroName = parameters.getValue("feMacroName");
-			std::string inputArgs = parameters.getValue("inputArgs");
-			std::string outputArgs = parameters.getValue("outputArgs");
-
-			//outputArgs must be filled with the proper argument names
-			//	and then the response output values will be returned in the string.
-			bool success = true;
-			try
-			{
-				theFEInterfacesManager->runFEMacro(InterfaceID,feMacroName,inputArgs,outputArgs);
-			}
-			catch(std::runtime_error &e)
-			{
-				__SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId()
-						<< " the FE Macro named '" << feMacroName << "' with tartget FE '"
-						<< InterfaceID << "' failed. Here is the error:\n\n" << e.what() << std::endl;
-				__COUT_ERR__ << "\n" << ss.str();
-				success = false;
-				outputArgs = ss.str();
-			}
-
-
-			retParameters.addParameter("success",success?"1":"0");
-			retParameters.addParameter("outputArgs",outputArgs);
-
-			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response",
-							retParameters);
-		}
-		else
-		{
-			__COUT_WARN__ << "Unrecognized request received! '" << request << "'" << std::endl;
-		}
-	}
-	catch(const std::runtime_error& e)
-	{
-		__SS__ << "Error occurred handling request: " << e.what() << __E__;
-		__COUT_ERR__ << ss.str();
-	}
-	catch(...)
-	{
-		__SS__ << "Error occurred handling request." << __E__;
-		__COUT_ERR__ << ss.str();
-	}
-
-
-
-	return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "FailRequest",retParameters);
-}
-
-//========================================================================================================================
-xoap::MessageReference CoreSupervisorBase::workLoopStatusRequest(xoap::MessageReference message)
-throw (xoap::exception::Exception)
-{
-	//locate theFEInterfacesManager in state machines vector
-	FEVInterfacesManager* theFEInterfacesManager = extractFEInterfaceManager();
-
-	if(!theFEInterfacesManager)
-	{
-		__SS__ << "Invalid request for front-end workloop status from Supervisor without a FEVInterfacesManager."
-				<< std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
-	}
-
-	return SOAPUtilities::makeSOAPMessageReference(
-			(theFEInterfacesManager->allFEWorkloopsAreDone()?
-					CoreSupervisorBase::WORK_LOOP_DONE:
-					CoreSupervisorBase::WORK_LOOP_WORKING));
-}
-
-//========================================================================================================================
-//extractFEInterfaceManager
-//
-//	locates theFEInterfacesManager in state machines vector and
-//		returns 0 if not found.
-//
-//	Note: this code assumes a CoreSupervisorBase has only one
-//		FEVInterfacesManager in its vector of state machines
-FEVInterfacesManager* CoreSupervisorBase::extractFEInterfaceManager()
-{
-	FEVInterfacesManager* theFEInterfacesManager = 0;
-
-	for(unsigned int i = 0; i<theStateMachineImplementation_.size();++i)
-	{
-		try
-		{
-			theFEInterfacesManager =
-					dynamic_cast<FEVInterfacesManager*>(theStateMachineImplementation_[i]);
-			if(!theFEInterfacesManager)
-			{
-				//dynamic_cast returns null pointer on failure
-				__SS__ << "Dynamic cast failure!" << std::endl;
-				__COUT_ERR__ << ss.str();
-				throw std::runtime_error(ss.str());
-			}
-			__COUT__ << "State Machine " << i << " WAS of type FEVInterfacesManager" << std::endl;
-
-			break;
-		}
-		catch(...)
-		{
-			__COUT__ << "State Machine " << i << " was NOT of type FEVInterfacesManager" << std::endl;
-		}
-	}
-
-	__COUT__ << "theFEInterfacesManager pointer = " << theFEInterfacesManager << std::endl;
-
-	return theFEInterfacesManager;
 }
 
 //========================================================================================================================

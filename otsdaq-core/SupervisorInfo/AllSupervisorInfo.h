@@ -43,9 +43,9 @@ public:
 
     const SupervisorInfo&							getSupervisorInfo				(xdaq::Application* app) const;
     const SupervisorInfo& 							getGatewayInfo	                (void) const;
-    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* 				getGatewayDescriptor            (void) const;
+    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* 	getGatewayDescriptor            (void) const;
     const SupervisorInfo& 							getWizardInfo	                (void) const;
-    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* 				getWizardDescriptor             (void) const;
+    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* 	getWizardDescriptor             (void) const;
 
     std::vector<const SupervisorInfo*>				getOrderedSupervisorDescriptors (const std::string& stateMachineCommand) const;
 

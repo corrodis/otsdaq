@@ -27,11 +27,11 @@ public:
     std::string   receive(const xoap::MessageReference& message, SOAPCommand&    soapCommand);
     std::string   receive(const xoap::MessageReference& message, SOAPParameters& parameters);
 
-    std::string   send      (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, xoap::MessageReference message)                   throw (xdaq::exception::Exception);
+    std::string   send      (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, xoap::MessageReference message)                 throw (xdaq::exception::Exception);
     std::string   send      (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, SOAPCommand soapCommand)                        throw (xdaq::exception::Exception);
-    std::string   send      (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string command)                              throw (xdaq::exception::Exception);
+    std::string   send      (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string command)                            throw (xdaq::exception::Exception);
     std::string   send      (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string command, SOAPParameters parameters) throw (xdaq::exception::Exception);
-    std::string   sendStatus(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string message)                              throw (xdaq::exception::Exception);
+    std::string   sendStatus(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string message)                            throw (xdaq::exception::Exception);
 
     xoap::MessageReference sendWithSOAPReply(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, xoap::MessageReference message)                   throw (xdaq::exception::Exception);
     xoap::MessageReference sendWithSOAPReply(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, SOAPCommand soapCommand)                        throw (xdaq::exception::Exception);

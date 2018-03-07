@@ -16,7 +16,7 @@
 				<COLUMN Type="Data" 	 Name="ConfigurePriority" 	 StorageName="CONFIGURE_PRIORITY" 		DataType="NUMBER" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="StartPriority" 	 StorageName="START_PRIORITY" 		DataType="NUMBER" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="StopPriority" 	 StorageName="STOP_PRIORITY" 		DataType="NUMBER" 		DataChoices=""/>
-				<COLUMN Type="ChildLink-PropertyGroup" 	 Name="LinkToPropertyConfiguration" 	 StorageName="LINK_TO_PROPERTY_CONFIGURATION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-PropertyGroup" 	 Name="LinkToPropertyConfiguration" 	 StorageName="LINK_TO_PROPERTY_CONFIGURATION" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,XDAQApplicationPropertyConfiguration"/>
 				<COLUMN Type="ChildLinkGroupID-PropertyGroup" 	 Name="LinkToPropertyGroupID" 	 StorageName="LINK_TO_PROPERTY_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>

@@ -1143,6 +1143,24 @@ ConfigurationGroupKey ConfigurationManager::getActiveGroupKey(const std::string&
 	throw std::runtime_error(ss.str());
 }
 
+//==============================================================================
+ConfigurationTree ConfigurationManager::getContextNode(
+		const std::string &contextUID, const std::string &applicationUID) const
+{
+	return getNode(
+			"/" + getConfigurationByName(XDAQ_CONTEXT_CONFIG_NAME)->getConfigurationName() +
+			"/" + contextUID);
+}
+
+//==============================================================================
+ConfigurationTree ConfigurationManager::getSupervisorNode(
+		const std::string &contextUID, const std::string &applicationUID) const
+{
+	return getNode(
+			"/" + getConfigurationByName(XDAQ_CONTEXT_CONFIG_NAME)->getConfigurationName() +
+			"/" + contextUID +
+			"/LinkToApplicationConfiguration/" + applicationUID);
+}
 
 //==============================================================================
 ConfigurationTree ConfigurationManager::getSupervisorConfigurationNode(

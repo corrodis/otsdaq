@@ -2,7 +2,7 @@
 #define _ots_SupervisorInfo_h_
 
 #include <string>
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutHeaderMacros.h" /* also for XDAQ_CONST_CALL */
 #include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
 
 #pragma GCC diagnostic push
@@ -10,6 +10,7 @@
 #include "xdaq/Application.h"  /* for  xdaq::ApplicationDescriptor */
 #include "xdaq/ContextDescriptor.h"  /* for  xdaq::ContextDescriptor */
 #pragma GCC diagnostic pop
+
 
 namespace ots
 {
@@ -19,7 +20,7 @@ class SupervisorInfo
 
 public:
     SupervisorInfo (
-		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* descriptor,
+    		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* descriptor,
     		const std::string& name, const std::string& contextName) :
     			descriptor_			(descriptor),
 				contextDescriptor_	(descriptor?descriptor->getContextDescriptor():0),
@@ -75,8 +76,8 @@ public:
     void												clear				(void)						 { descriptor_ = 0; contextDescriptor_ = 0; name_ = ""; id_ = 0; contextName_ = ""; status_ = "Unknown"; }
 
 private:
-	XDAQ_CONST_CALL xdaq::ApplicationDescriptor*						descriptor_;
-	XDAQ_CONST_CALL xdaq::ContextDescriptor*							contextDescriptor_;
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor*		descriptor_;
+	XDAQ_CONST_CALL xdaq::ContextDescriptor*			contextDescriptor_;
     std::string 										name_;
     std::string 										contextName_;
     unsigned int										id_;

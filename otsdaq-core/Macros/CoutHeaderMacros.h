@@ -79,7 +79,7 @@
 //========================================================================================================================
 //const_cast away the const
 //	so that otsdaq is compatible with slf6 and slf7 versions of xdaq
-//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
+//	where they changed to const xdaq::ApplicationDescriptor* in slf7
 #ifdef XDAQ_NOCONST
 #define XDAQ_CONST_CALL
 #else
