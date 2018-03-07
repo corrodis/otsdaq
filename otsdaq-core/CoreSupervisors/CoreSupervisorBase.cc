@@ -76,9 +76,47 @@ throw (xdaq::exception::Exception)
 
 	setStateMachineName(supervisorApplicationUID_);
 
-	__COUT__ << "Done!" << std::endl;
+	allSupervisorInfo_.init(getApplicationContext());
+	__COUT__ << "Name = " << allSupervisorInfo_.getSupervisorInfo(this).getName();
 
-	init();
+
+	__COUT__ << "Initializing..." << std::endl;
+	init(); //calls virtual init (where default supervisor properties should be set)
+
+	//try to get security settings
+	{
+		ConfigurationTree appNode = theConfigurationManager_->getSupervisorNode(
+				CoreSupervisorBase::supervisorContextUID_, CoreSupervisorBase::supervisorApplicationUID_);
+		try
+		{
+			__COUT__ << "Looking for supervisor security settings..." << __E__;
+			auto /*map<name,node>*/ children = appNode.getNode("LinkToPropertyConfiguration").getChildren();
+
+			for(auto& child:children)
+			{
+				if(child.second.getNode("Status").getValue<bool>() == false) continue; //skip OFF properties
+
+				auto propertyName = child.second.getNode("PropertyName");
+
+				if(propertyName.getValue() ==
+						supervisorProperties_.fieldRequireLock)
+				{
+					LOCK_REQUIRED_ = child.second.getNode("PropertyValue").getValue<bool>();
+					__COUTV__(LOCK_REQUIRED_);
+				}
+				else if(propertyName.getValue() ==
+						supervisorProperties_.fieldUserPermissionsThreshold)
+				{
+					USER_PERMISSIONS_THRESHOLD_ = child.second.getNode("PropertyValue").getValue<uint8_t>();
+					__COUTV__(USER_PERMISSIONS_THRESHOLD_);
+				}
+			}
+		}
+		catch(...)
+		{
+			__COUT__ << "No supervisor security settings found, going with defaults." << __E__;
+		}
+	}
 }
 
 //========================================================================================================================
@@ -88,53 +126,19 @@ CoreSupervisorBase::~CoreSupervisorBase(void)
 }
 
 //========================================================================================================================
+//When overriding, setup default property values here
+// called by CoreSupervisorBase constructor
 void CoreSupervisorBase::init(void)
 {
 	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
-	__COUT__ << "init" << std::endl;
 
-	allSupervisorInfo_.init(getApplicationContext());
-	__COUT__ << "Name = " << allSupervisorInfo_.getSupervisorInfo(this).getName();
-
-	ConfigurationTree appNode = theConfigurationManager_->getSupervisorNode(
-			CoreSupervisorBase::supervisorContextUID_, CoreSupervisorBase::supervisorApplicationUID_);
-	//try to get security settings
-	try
-	{
-		__COUT__ << "Looking for supervisor security settings..." << __E__;
-		auto /*map<name,node>*/ children = appNode.getNode("LinkToPropertyConfiguration").getChildren();
-
-		for(auto& child:children)
-		{
-			if(child.second.getNode("Status").getValue<bool>() == false) continue; //skip OFF properties
-
-			auto propertyName = child.second.getNode("PropertyName");
-
-			if(propertyName.getValue() ==
-					supervisorProperties_.fieldRequireLock)
-			{
-				LOCK_REQUIRED_ = child.second.getNode("PropertyValue").getValue<bool>();
-				__COUTV__(LOCK_REQUIRED_);
-			}
-			else if(propertyName.getValue() ==
-					supervisorProperties_.fieldUserPermissionsThreshold)
-			{
-				USER_PERMISSIONS_THRESHOLD_ = child.second.getNode("PropertyValue").getValue<uint8_t>();
-				__COUTV__(USER_PERMISSIONS_THRESHOLD_);
-			}
-		}
-	}
-	catch(...)
-	{
-		__COUT__ << "No supervisor security settings found, going with defaults." << __E__;
-	}
-
-	__COUT__ << "init complete!" << std::endl;
+	__COUT__ << "Initializing..." << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::destroy(void)
 {
+	__COUT__ << "Destroying..." << std::endl;
 	for(auto& it: theStateMachineImplementation_)
 		delete it;
 	theStateMachineImplementation_.clear();

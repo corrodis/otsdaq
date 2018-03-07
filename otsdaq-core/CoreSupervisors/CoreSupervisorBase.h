@@ -53,7 +53,7 @@ public:
     CoreSupervisorBase         (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
     virtual ~CoreSupervisorBase(void);
 
-    void 					init                  			(void);
+    virtual void			init                  			(void);
     void 					destroy               			(void);
 
 private:
