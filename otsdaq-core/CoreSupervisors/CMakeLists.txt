@@ -14,6 +14,12 @@ cet_make(LIBRARY_NAME CoreSupervisors
          WorkLoopManager
          FiniteStateMachine
          CgiDataUtilities
+         WebUsersUtilities
+         SupervisorInfo
+         SOAPUtilities
+         XmlUtilities
+         MessageFacility
+         CgiDataUtilities         
          ${XDAQ_BASIC_LIB_LIST}
 		 
         )

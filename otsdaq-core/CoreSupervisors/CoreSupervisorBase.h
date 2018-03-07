@@ -63,8 +63,8 @@ private:
 
 public:
     //common web request handlers
-    void 					Default               			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
-    void 					request               			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+    virtual void 			Default               			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+    virtual void			request               			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
 
     //State Machine request handlers
     void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception);

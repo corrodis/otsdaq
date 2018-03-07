@@ -459,7 +459,7 @@ launchOTSWiz() {
 			
 
 	printMainURL &
-	sleep 1 #so that the terminal comes back after the printouts in quiet mode
+	sleep 3 #so that the terminal comes back after the printouts in quiet mode
 
 } #end launchOTSWiz
 export -f launchOTSWiz

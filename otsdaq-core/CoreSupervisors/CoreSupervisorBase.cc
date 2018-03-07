@@ -152,8 +152,6 @@ throw (xgi::exception::Exception)
 void CoreSupervisorBase::Default(xgi::Input * in, xgi::Output * out )
 throw (xgi::exception::Exception)
 {
-
-
 	__COUT__<< "Supervisor class " << supervisorClass_ << std::endl;
 
 	std::stringstream pagess;
@@ -173,7 +171,7 @@ throw (xgi::exception::Exception)
 void CoreSupervisorBase::requestWrapper(xgi::Input * in, xgi::Output * out )
 throw (xgi::exception::Exception)
 {
-	return requestWrapper(in,out);
+	return request(in,out);
 }
 
 //========================================================================================================================
