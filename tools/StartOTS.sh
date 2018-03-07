@@ -27,26 +27,24 @@ CHROME=0
 FIREFOX=0
 
 #check for wiz mode
-if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************      WIZ MODE ENABLED!    *************"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
+if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then	
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *************      WIZ MODE ENABLED!    *************"	
     ISCONFIG=1
 fi
 
 
 if [[ "$1"  == "--verbose" || "$2"  == "--verbose" || "$1"  == "-v" || "$2"  == "-v"  ]]; then
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   VERBOSE MODE ENABLED!    ************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *************   VERBOSE MODE ENABLED!    ************"
 	QUIET=0
 fi
 
 if [[ "$1"  == "--chrome" || "$2"  == "--chrome" || "$1"  == "-c" || "$2"  == "-c"  ]]; then
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   GOOGLE-CHROME LAUNCH ENABLED!    ************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *************   GOOGLE-CHROME LAUNCH ENABLED!    ************"
 	CHROME=1
 fi
 
 if [[ "$1"  == "--firefox" || "$2"  == "--firefox" || "$1"  == "-f" || "$2"  == "-f"  ]]; then
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   FIREFOX LAUNCH ENABLED!    ************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *************   FIREFOX LAUNCH ENABLED!    ************"
 	FIREFOX=1
 fi
 
@@ -130,9 +128,9 @@ function killprocs
 export -f killprocs
 
 if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************    KILLING otsdaq!        **************"
-    echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ******************************************************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *************    KILLING otsdaq!        **************"
+    echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ******************************************************"
 
 	#try to force kill other StartOTS scripts
 	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
@@ -149,9 +147,9 @@ if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && "$1x" !=
 	echo 
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Unrecognized paramater $1"
 	echo
-    echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************    StartOTS.sh Usage      **************"
-    echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
+    echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ******************************************************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *************    StartOTS.sh Usage      **************"
+    echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ******************************************************"
 	echo
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t To start otsdaq in 'wiz mode' please use any of these options:"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	--configure  --config  --wizard  --wiz  -w"
@@ -333,9 +331,9 @@ launchOTSWiz() {
 	#kill all things otsdaq, before launching new things	
 	killprocs
 	
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************    Launching WIZ MODE!    *************"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *****************************************************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *************    Launching WIZ MODE!    *************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *****************************************************"
 
 	####################################################################
 	########### start console & message facility handling ##############
@@ -489,13 +487,13 @@ launchOTS() {
 	echo
 	echo	
 	
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *****************************************************"
 	if [ $ISGATEWAYLAUNCH == 1 ]; then
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t **********       Launching OTS Gateway!    **********"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t **********       Launching OTS Gateway!    **********"
 	else
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ***********       Launching OTS Apps!    ************"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ***********       Launching OTS Apps!    ************"
 	fi
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *****************************************************"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t XDAQ Configuration XML: ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
 	echo
 	echo
@@ -791,13 +789,13 @@ launchOTS() {
 	echo
 	  
 	if [[ (${#boardReaderPort[@]} == 0) && (${#builderPort[@]} == 0) && (${#aggregatorPort[@]} == 0) && (${#xdaqPort[@]} == 0) ]]; then
-	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
-	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
+	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ********************************************************************************************************************************"
+	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ********************************************************************************************************************************"
 	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t WARNING: There are no configured processes for hostname ${HOSTNAME}." 
 	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Are you sure your configuration is written for ${HOSTNAME}?" 
 	 
-	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
-	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
+	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ********************************************************************************************************************************"
+	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ********************************************************************************************************************************"
 	fi
 
 	sleep 1 #so that the terminal comes back after the printouts in quiet mode
@@ -843,9 +841,9 @@ printMainURL() {
 		#fi
 		
 		
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *********************************************************************"
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t otsdaq URL = $MAIN_URL"
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *********************************************************************"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *********************************************************************"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t otsdaq URL = $MAIN_URL"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *********************************************************************"
 		echo
 		
 		if [ $QUIET == 1 ]; then
