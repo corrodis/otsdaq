@@ -68,6 +68,7 @@ include(ProcessSmc)
 
 check_ups_version(xdaq "$ENV{XDAQ_VERSION}" v14_0_0 PRODUCT_OLDER_VAR slf6_xdaq)
 if(slf6_xdaq)
+  MESSAGE("Using SLF6, defining XDAQ_NOCONST")
   add_definitions(-DXDAQ_NOCONST)
 endif()
 
