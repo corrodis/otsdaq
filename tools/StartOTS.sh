@@ -51,7 +51,7 @@ if [[ "$1"  == "--firefox" || "$2"  == "--firefox" || "$1"  == "-f" || "$2"  == 
 fi
 
 if [[ "$1"  == "--backup" || "$2"  == "--backup" || "$1"  == "-b" || "$2"  == "-b"  ]]; then
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   LOG BACKUP ENABLED!              ************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   BACKUP LOGS ENABLED!              ************"
 	BACKUPLOGS=1
 fi
 echo
