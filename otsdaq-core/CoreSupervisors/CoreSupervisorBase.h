@@ -41,10 +41,6 @@
 namespace ots
 {
 
-//class ConfigurationManager;
-//class VStateMachine;
-//class FEVInterfacesManager;
-
 class CoreSupervisorBase: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 
@@ -53,7 +49,7 @@ public:
     CoreSupervisorBase         (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
     virtual ~CoreSupervisorBase(void);
 
-    virtual void			init                  			(void);
+    virtual void			setSupervisorPropertyDefaults	(void);
     void 					destroy               			(void);
 
 private:
@@ -119,12 +115,16 @@ protected:
 
     bool 							LOCK_REQUIRED_;
     uint8_t							USER_PERMISSIONS_THRESHOLD_;
+    std::string						USER_GROUPS_ALLOWED_;
+    std::string						USER_GROUPS_DISALLOWED_;
 
     //Supervisor Property names
 	struct SupervisorProperties
 	{
-		std::string const fieldRequireLock						= "RequireLock";
+		std::string const fieldRequireLock						= "RequireUserHasLock";
 		std::string const fieldUserPermissionsThreshold			= "UserPermissionsThreshold";
+		std::string const fieldUserGroupsAllowed				= "UserGroupsAllowed";
+		std::string const fieldUserGroupsDisallowed				= "UserGroupsDisallowed";
 	} supervisorProperties_;
 };
 

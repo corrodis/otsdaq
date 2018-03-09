@@ -81,7 +81,8 @@ throw (xdaq::exception::Exception)
 
 
 	__COUT__ << "Initializing..." << std::endl;
-	init(); //calls virtual init (where default supervisor properties should be set)
+
+	setSupervisorPropertyDefaults(); //calls virtual init (where default supervisor properties should be set)
 
 	//try to get security settings
 	{
@@ -127,12 +128,22 @@ CoreSupervisorBase::~CoreSupervisorBase(void)
 
 //========================================================================================================================
 //When overriding, setup default property values here
-// called by CoreSupervisorBase constructor
-void CoreSupervisorBase::init(void)
+// called by CoreSupervisorBase constructor before loading user defined property values
+void CoreSupervisorBase::setSupervisorPropertyDefaults(void)
 {
 	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
 
-	__COUT__ << "Initializing..." << std::endl;
+	__COUT__ << "Using base class property defaults..." << std::endl;
+
+	LOCK_REQUIRED_	 			= false; 	//set default
+	USER_PERMISSIONS_THRESHOLD_	= 1; 		//set default
+	USER_GROUPS_ALLOWED_		= ""; 		//set default
+	USER_GROUPS_DISALLOWED_		= ""; 		//set default
+
+	__COUTV__(LOCK_REQUIRED_);
+	__COUTV__(USER_PERMISSIONS_THRESHOLD_);
+	__COUTV__(USER_GROUPS_ALLOWED_);
+	__COUTV__(USER_GROUPS_DISALLOWED_);
 }
 
 //========================================================================================================================
