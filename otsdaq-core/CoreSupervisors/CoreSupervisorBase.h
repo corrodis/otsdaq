@@ -34,8 +34,10 @@
 #include <xoap/Method.h>
 
 #include <string>
-#include <memory>
 #include <vector>
+#include <map>
+#include <memory>
+
 
 
 namespace ots
@@ -61,6 +63,8 @@ public:
     //common web request handlers
     virtual void 			Default               			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
     virtual void			request               			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+
+    //bool					loginGateway					(xgi::Input* in, xgi::Output* out);
 
     //State Machine request handlers
     void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception);

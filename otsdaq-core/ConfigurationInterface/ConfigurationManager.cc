@@ -12,20 +12,24 @@ using namespace ots;
 #undef 	__MF_SUBJECT__
 #define __MF_SUBJECT__ "ConfigurationManager"
 
-const std::string ConfigurationManager::READONLY_USER = "READONLY_USER";
+const std::string ConfigurationManager::READONLY_USER 					= "READONLY_USER";
 
-const std::string ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME = "XDAQContextConfiguration";
+const std::string ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME 		= "XDAQContextConfiguration";
 
 //added env check for otsdaq_flatten_active_to_version to function
-const std::string ConfigurationManager::ACTIVE_GROUP_FILENAME = ((getenv("SERVICE_DATA_PATH") == NULL)?(std::string(getenv("USER_DATA"))+"/ServiceData"):(std::string(getenv("SERVICE_DATA_PATH")))) + "/ActiveConfigurationGroups.cfg";
-const std::string ConfigurationManager::ALIAS_VERSION_PREAMBLE = "ALIAS:";
-const std::string ConfigurationManager::SCRATCH_VERSION_ALIAS = "Scratch";
+const std::string ConfigurationManager::ACTIVE_GROUP_FILENAME 			= ((getenv("SERVICE_DATA_PATH") == NULL)?(std::string(getenv("USER_DATA"))+"/ServiceData"):(std::string(getenv("SERVICE_DATA_PATH")))) + "/ActiveConfigurationGroups.cfg";
+const std::string ConfigurationManager::ALIAS_VERSION_PREAMBLE 			= "ALIAS:";
+const std::string ConfigurationManager::SCRATCH_VERSION_ALIAS 			= "Scratch";
 
 const std::string ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT       = "Context";
 const std::string ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE      = "Backbone";
 const std::string ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE	    = "Iterate";
 const std::string ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION = "Configuration";
 
+const std::set<std::string> ConfigurationManager::contextMemberNames_	= {ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME,"XDAQApplicationConfiguration","XDAQApplicationPropertyConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","TheSupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"};
+const std::set<std::string> ConfigurationManager::backboneMemberNames_	= {"GroupAliasesConfiguration","VersionAliasesConfiguration"};
+const std::set<std::string> ConfigurationManager::iterateMemberNames_	= {"IterateConfiguration","IterationPlanConfiguration","IterationTargetConfiguration",
+	/*command specific tables*/"IterationCommandBeginLabelConfiguration","IterationCommandChooseFSMConfiguration","IterationCommandConfigureAliasConfiguration","IterationCommandConfigureGroupConfiguration","IterationCommandExecuteFEMacroConfiguration","IterationCommandExecuteMacroConfiguration","IterationCommandModifyGroupConfiguration","IterationCommandRepeatLabelConfiguration","IterationCommandRunConfiguration"};
 
 //==============================================================================
 ConfigurationManager::ConfigurationManager()
@@ -37,10 +41,6 @@ ConfigurationManager::ConfigurationManager()
 , theConfigurationGroup_	("")
 , theContextGroup_			("")
 , theBackboneGroup_			("")
-, contextMemberNames_		({XDAQ_CONTEXT_CONFIG_NAME,"XDAQApplicationConfiguration","XDAQApplicationPropertyConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","TheSupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"})
-, backboneMemberNames_		({"GroupAliasesConfiguration","VersionAliasesConfiguration"})
-, iterateMemberNames_		({"IterateConfiguration","IterationPlanConfiguration","IterationTargetConfiguration",
-	/*command specific tables*/"IterationCommandBeginLabelConfiguration","IterationCommandChooseFSMConfiguration","IterationCommandConfigureAliasConfiguration","IterationCommandConfigureGroupConfiguration","IterationCommandExecuteFEMacroConfiguration","IterationCommandExecuteMacroConfiguration","IterationCommandModifyGroupConfiguration","IterationCommandRepeatLabelConfiguration","IterationCommandRunConfiguration"})
 {
 	theInterface_ = ConfigurationInterface::getInstance(false);  //false to use artdaq DB
 	//NOTE: in ConfigurationManagerRW using false currently.. think about consistency! FIXME
@@ -1579,6 +1579,16 @@ std::string ConfigurationManager::encodeURIComponent(const std::string &sourceSt
 		}
 	return retStr;
 }
+
+//==============================================================================
+const std::set<std::string>& ConfigurationManager::getContextMemberNames()
+{	return ConfigurationManager::contextMemberNames_;	}
+//==============================================================================
+const std::set<std::string>& ConfigurationManager::getBackboneMemberNames()
+{	return ConfigurationManager::backboneMemberNames_;	}
+//==============================================================================
+const std::set<std::string>& ConfigurationManager::getIterateMemberNames()
+{	return ConfigurationManager::iterateMemberNames_;	}
 
 
 

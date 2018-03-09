@@ -175,7 +175,7 @@ throw (xgi::exception::Exception)
 
 	std::stringstream pagess;
 	pagess << "/WebPath/html/" <<
-			supervisorClassNoNamespace_ << "Supervisor.html?urn=" <<
+			supervisorClassNoNamespace_ << ".html?urn=" <<
 			this->getApplicationDescriptor()->getLocalId();
 
 	__COUT__<< "Default page = " << pagess.str() << std::endl;

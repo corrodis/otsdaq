@@ -21,6 +21,8 @@ class ConfigurationManager
 
 public:
 
+	//==============================================================================
+	//Static members
 	static const std::string READONLY_USER;
 	static const std::string ACTIVE_GROUP_FILENAME;
 	static const std::string ALIAS_VERSION_PREAMBLE;
@@ -31,6 +33,22 @@ public:
 	static const std::string ACTIVE_GROUP_NAME_BACKBONE;
 	static const std::string ACTIVE_GROUP_NAME_ITERATE;
 	static const std::string ACTIVE_GROUP_NAME_CONFIGURATION;
+
+	static const std::set<std::string>              contextMemberNames_;  //list of context members
+	static const std::set<std::string>	            backboneMemberNames_;  //list of backbone members
+	static const std::set<std::string>	            iterateMemberNames_;  //list of iterate members
+
+	static const std::set<std::string>&					                  getContextMemberNames		  	(void);
+	static const std::set<std::string>&					                  getBackboneMemberNames		(void);
+	static const std::set<std::string>&					                  getIterateMemberNames			(void);
+
+	static std::string													  encodeURIComponent			(const std::string &sourceStr);
+	static const std::string&											  convertGroupTypeIdToName		(int groupTypeId);
+	static int															  getTypeOfGroup				(const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
+	static const std::string&											  getTypeNameOfGroup   		    (const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
+
+	//==============================================================================
+	//Construct/Destruct
 
 	enum {
 		CONTEXT_TYPE,
@@ -46,34 +64,25 @@ public:
 	void destroy             		(void);
 	void destroyConfigurationGroup	(const std::string &theGroup = "", bool onlyDeactivate = false);
 
+
+
 	//==============================================================================
+	//Getters
+
+	void                          										  loadConfigurationGroup		(const std::string &configGroupName, ConfigurationGroupKey configGroupKey, bool doActivate=false, std::map<std::string, ConfigurationVersion> *groupMembers = 0, ProgressBar* progressBar=0, std::string *accumulateWarnings=0, std::string *groupComment=0, std::string	*groupAuthor=0,	std::string *groupCreateTime=0, bool doNotLoadMember=false, std::string	*groupTypeString=0);
+	void										                          loadMemberMap					(const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
+	ConfigurationGroupKey							                      loadConfigurationBackbone     (void);
+
+	//================
 	//getConfiguration
 	//	get configuration * with specific configuration type
 	template<class T>
 	const T* getConfiguration(std::string name) const
 	{return (T*) (getConfigurationByName(name));}
-	//==============================================================================
 
-
-
-	//FIXME.. don' use activateConfigurationGroupKey.. instead "Activate" a global config
-	//void activateConfigurationGroupKey  	(std::shared_ptr<const ConfigurationGroupKey> ConfigurationGroupKey, unsigned int supervisorInstance);
-
-
-	void																  dumpActiveConfiguration		  (const std::string &filePath, const std::string &dumpType) const;
-
-	//   map<name       , ConfigurationVersion >
-	void                          										  loadConfigurationGroup		  (const std::string &configGroupName, ConfigurationGroupKey configGroupKey, bool doActivate=false, std::map<std::string, ConfigurationVersion> *groupMembers = 0, ProgressBar* progressBar=0, std::string *accumulateWarnings=0, std::string *groupComment=0, std::string	*groupAuthor=0,	std::string *groupCreateTime=0, bool doNotLoadMember=false, std::string	*groupTypeString=0);
-	void										                          loadMemberMap					  (const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
-	ConfigurationGroupKey							                      loadConfigurationBackbone       (void);
-	void											                      restoreActiveConfigurationGroups(bool throwErrors=false);
-	int																	  getTypeOfGroup				  (const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
-	const std::string&													  getTypeNameOfGroup   		      (const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
-	const std::string&													  convertGroupTypeIdToName		  (int groupTypeId);
-
-	//==============================================================================
-	//Getters
 	const ConfigurationBase*                      					      getConfigurationByName        (const std::string &configurationName) const;
+
+	void																  dumpActiveConfiguration		(const std::string &filePath, const std::string &dumpType) const;
 
 	//   map<type,        pair     <groupName  , ConfigurationGroupKey>>
 	std::map<std::string, std::pair<std::string, ConfigurationGroupKey>>  getActiveConfigurationGroups  (void) const;
@@ -99,15 +108,11 @@ public:
 
 	std::map<std::string, ConfigurationVersion> 		  			      getActiveVersions		  		(void) const;
 
-	const std::set<std::string>&					                      getContextMemberNames		  	(void) const {return contextMemberNames_;}
-	const std::set<std::string>&					                      getBackboneMemberNames		(void) const {return backboneMemberNames_;}
-	const std::set<std::string>&					                      getIterateMemberNames			(void) const {return iterateMemberNames_;}
-
-	static std::string													  encodeURIComponent(const std::string &sourceStr);
-
 	//==============================================================================
 	//Setters/Modifiers
 	std::shared_ptr<ConfigurationGroupKey> 			makeTheConfigurationGroupKey(ConfigurationGroupKey key);
+	void											restoreActiveConfigurationGroups(bool throwErrors=false);
+
 
 private:
 	ConfigurationManager							(const std::string& userName); //private constructor called by ConfigurationManagerRW
@@ -119,11 +124,9 @@ private:
 
 	std::map<std::string, ConfigurationBase* >     	nameToConfigurationMap_;
 
-	const std::set<std::string>                   	contextMemberNames_;  //list of context members
-	const std::set<std::string>	                   	backboneMemberNames_;  //list of backbone members
-	const std::set<std::string>	                   	iterateMemberNames_;  //list of iterate members
 
 	ConfigurationBase								groupMetadataTable_; //special table - version saved each time a group is created
+
 
 };
 }
