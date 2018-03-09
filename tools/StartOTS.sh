@@ -41,7 +41,7 @@ if [[ "$1"  == "--verbose" || "$2"  == "--verbose" || "$1"  == "-v" || "$2"  == 
 fi
 
 if [[ "$1"  == "--chrome" || "$2"  == "--chrome" || "$1"  == "-c" || "$2"  == "-c"  ]]; then
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   GOOGLE-CHROME LAUNCH ENABLED!    ************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t **************   GOOGLE-CHROME LAUNCH ENABLED!    ************"
 	CHROME=1
 fi
 
@@ -134,6 +134,7 @@ function killprocs
 export -f killprocs
 
 if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
+
 	echo
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************    KILLING otsdaq!        **************"
@@ -154,9 +155,9 @@ if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPL
 	echo 
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Unrecognized parameter(s) $1 $2 [Note: only two parameters are considered, others are ignored].. showing usage:"
 	echo
-    echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************    StartOTS.sh Usage      **************"
-    echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
+    echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ******************************************************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *************    StartOTS.sh Usage      **************"
+    echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ******************************************************"
 	echo
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t To kill all otsdaq running processes, please use any of these options:"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	--killall  --kill  --kx  -k"
@@ -510,13 +511,13 @@ launchOTS() {
 	echo
 	echo	
 	
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *****************************************************"
 	if [ $ISGATEWAYLAUNCH == 1 ]; then
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t **********       Launching OTS Gateway!    **********"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t **********       Launching OTS Gateway!    **********"
 	else
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ***********       Launching OTS Apps!    ************"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ***********       Launching OTS Apps!    ************"
 	fi
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *****************************************************"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t XDAQ Configuration XML: ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
 	echo
 	echo
@@ -654,27 +655,16 @@ launchOTS() {
 					#echo ${BASH_REMATCH[1]}    
 				fi
 			fi
-			#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ------------------------------------------>>>>>>>>"
+			#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ------------------------------------------ out"
 	
 		fi
 		if [[ $line == *"/xc:Context"* ]]; then
 			insideContext=false
 			haveXDAQContextPort=false
-			#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t <<<<<<<------------------------------------------"
+			#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t in ------------------------------------------"
 		fi
 		if [[ ($insideContext == true) ]]; then 
-			#if [[ ($line == *"ots::ARTDAQDataManagerSupervisor"*) ]]; then
-			#			  boardReaderPort+=($port)
-			#			  boardReaderHost+=($host)
-			#			elif [[ ($line == *"ots::EventBuilderApp"*) ]]; then
-			#			  builderPort+=($port)
-			#			  builderHost+=($host)
-			#			elif [[ ($line == *"ots::AggregatorApp"*) ]]; then 
-			#			  aggregatorPort+=($port)
-			#			  aggregatorHost+=($host)
-			#			elif [[ ($line == *"ots::AggregatorApp"*) ]]; then 
-			#			  aggregatorPort+=($port)
-			#			  aggregatorHost+=($host)
+			
 			if [[ ($line == *"class"*) ]] && [[ "${isLocal}" == "true" ]]; then #IT'S A XDAQ SUPERVISOR		
 				
 				if [[ ($line == *"ots::GatewaySupervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
@@ -775,11 +765,12 @@ launchOTS() {
 	if [[ (${#xdaqPort[@]} == 0) ]]; then
 	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
 	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
+
 	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t WARNING: There are no configured processes for hostname ${HOSTNAME}." 
 	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Are you sure your configuration is written for ${HOSTNAME}?" 
 	 
-	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
-	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
+	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ********************************************************************************************************************************"
+	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ********************************************************************************************************************************"
 	fi
 
 }   #end launchOTS
@@ -824,9 +815,9 @@ printMainURL() {
 		#fi
 		
 		
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *********************************************************************"
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t otsdaq URL = $MAIN_URL"
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *********************************************************************"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *********************************************************************"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t otsdaq URL = $MAIN_URL"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *********************************************************************"
 		echo
 		
 		if [ $QUIET == 1 ]; then

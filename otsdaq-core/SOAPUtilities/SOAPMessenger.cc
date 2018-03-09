@@ -254,11 +254,11 @@ throw (xdaq::exception::Exception)
 	{
 		message->getMimeHeaders()->setHeader("Content-Location", d->getURN());
 
-		__COUT__ << d->getURN() << __E__;
-		__COUT__ << SOAPUtilities::translate(message) << __E__;
+		//__COUT__ << d->getURN() << __E__;
+		//__COUT__ << SOAPUtilities::translate(message) << __E__;
 		std::string mystring;
 		message->writeTo(mystring);
-		__COUT__<< mystring << std::endl;
+		//__COUT__<< mystring << std::endl;
 
 		xoap::MessageReference reply = theApplication_->getApplicationContext()->postSOAP(message,
 				*(theApplication_->getApplicationDescriptor()),

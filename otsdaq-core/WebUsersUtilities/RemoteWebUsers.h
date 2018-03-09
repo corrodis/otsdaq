@@ -86,11 +86,6 @@ private:
 	uint8_t 	tmpUserPermissions_;
 };
 
-const std::string RemoteWebUsers::REQ_NO_LOGIN_RESPONSE = "NoLogin";
-const std::string RemoteWebUsers::REQ_NO_PERMISSION_RESPONSE = "NoPermission";
-const std::string RemoteWebUsers::REQ_USER_LOCKOUT_RESPONSE = "UserLockout";
-const std::string RemoteWebUsers::REQ_LOCK_REQUIRED_RESPONSE = "LockRequired";
-const std::string RemoteWebUsers::REQ_ALLOW_NO_USER = "AllowNoUser";
 
 }
 

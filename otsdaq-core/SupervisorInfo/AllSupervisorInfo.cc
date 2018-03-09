@@ -307,38 +307,6 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 				(unsigned int)priorityAppVector.first << __E__;
 	}
 	return retVec;
-
-	//file name from "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
-//	FILE *fp = fopen((APP_PRIORITY_FILE + stateMachineCommand + ".dat").c_str(),"r");
-//	if (!fp)
-//	{
-//		__SS__ << "Failed to open XDAQ run file: " << APP_PRIORITY_FILE << std::endl;
-//		throw std::runtime_error(ss.str());
-//	}
-//
-//	//Note: unordered_map boasts faster accesses
-//	std::unordered_map<unsigned int /*appId*/,XDAQ_CONST_CALL xdaq::ApplicationDescriptor*> orderedById;
-//	std::map<uint8_t      /*priority*/, unsigned int /*appId*/> orderedByPriority;
-//
-//	char line[10000];
-//	unsigned int appId;
-//	uint8_t priority;
-//	while(fgets(line,10000,fp))
-//	{
-//		//get two lines at a time appId/Priority
-//		sscanf(line,"%u",&appId);
-//		fgets(line,10000,fp);
-//		sscanf(line,"%c",&priority);
-//		__COUT__ << "app " << appId << " - " << priority << __E__;
-//	}
-//	fclose(fp);
-
-//	std::vector<XDAQ_CONST_CALL xdaq::ApplicationDescriptor*> retVec;
-//
-//	for (XDAQContext &context : contexts_)
-
-
-//	return retVec;
 }
 
 
