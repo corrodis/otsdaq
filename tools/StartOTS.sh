@@ -25,18 +25,18 @@ ISCONFIG=0
 QUIET=1
 CHROME=0
 FIREFOX=0
+BACKUPLOGS=0
 
-#check for wiz mode
-if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" ]]; then
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************      WIZ MODE ENABLED!    *************"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
+#check for options
+echo
+echo
+if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" || "$2"  == "--config" || "$2"  == "--configure" || "$2"  == "--wizard" || "$2"  == "--wiz" || "$2"  == "-w" ]]; then	
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   WIZ MODE ENABLED!                *************"	
     ISCONFIG=1
 fi
 
-
 if [[ "$1"  == "--verbose" || "$2"  == "--verbose" || "$1"  == "-v" || "$2"  == "-v"  ]]; then
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   VERBOSE MODE ENABLED!    ************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   VERBOSE MODE ENABLED!            ************"
 	QUIET=0
 fi
 
@@ -46,9 +46,16 @@ if [[ "$1"  == "--chrome" || "$2"  == "--chrome" || "$1"  == "-c" || "$2"  == "-
 fi
 
 if [[ "$1"  == "--firefox" || "$2"  == "--firefox" || "$1"  == "-f" || "$2"  == "-f"  ]]; then
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   FIREFOX LAUNCH ENABLED!    ************"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   FIREFOX LAUNCH ENABLED!          ************"
 	FIREFOX=1
 fi
+
+if [[ "$1"  == "--backup" || "$2"  == "--backup" || "$1"  == "-b" || "$2"  == "-b"  ]]; then
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************   LOG BACKUP ENABLED!              ************"
+	BACKUPLOGS=1
+fi
+echo
+#end check for options
 
 
 #############################
@@ -62,12 +69,11 @@ fi
 
 OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${HOSTNAME}.cmd"
 OTSDAQ_STARTOTS_QUIT_FILE="${USER_DATA}/ServiceData/StartOTS_action_quit.cmd"
-OTSDAQ_STARTOTS_LOCAL_QUIT_FILE="${SCRIPT_DIR}/.StartOTS_action_quit.cmd"
+OTSDAQ_STARTOTS_LOCAL_QUIT_FILE=".StartOTS_action_quit.cmd"
 echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t StartOTS_action path     = ${OTSDAQ_STARTOTS_ACTION_FILE}"
 echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t StartOTS_quit path       = ${OTSDAQ_STARTOTS_QUIT_FILE}"
 echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t StartOTS_local_quit path = ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE}"
-echo
-echo
+
 
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
 SAP_PATH=""
@@ -95,8 +101,6 @@ function killprocs
 {	
 	if [[ "x$1" == "x" ]]; then #kill all ots processes
 	
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Killing all things ots..."
-		
 		killall xdaq.exe 			&>/dev/null 2>&1 #hide output
 		killall ots.exe 			&>/dev/null 2>&1 #hide output
 		killall mf_rcv_n_fwd 		&>/dev/null 2>&1 #hide output #message viewer display without decoration		
@@ -124,34 +128,39 @@ function killprocs
 		kill -9 $PIDS 				&>/dev/null 2>&1 #hide output
 	fi
 	
-	sleep 1
+	sleep 1 #give time for cleanup to occur
 	
 } #end killprocs
 export -f killprocs
 
 if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
+	echo
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************    KILLING otsdaq!        **************"
     echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
-
+	echo
+	
 	#try to force kill other StartOTS scripts
 	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
 	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
-
-    killprocs	
 	
+    killprocs	
 	killall -9 StartOTS.sh &>/dev/null 2>&1 #hide output
 	
 	exit
 fi
 
-if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && "$1x" != "x" ]]; then
+if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPLOGS == 0 && "$1x" != "x" ]]; then
 	echo 
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Unrecognized paramater $1"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Unrecognized parameter(s) $1 $2 [Note: only two parameters are considered, others are ignored].. showing usage:"
 	echo
     echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************    StartOTS.sh Usage      **************"
     echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ******************************************************"
+	echo
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t To kill all otsdaq running processes, please use any of these options:"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	--killall  --kill  --kx  -k"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	e.g.: StartOTS.sh --kx"
 	echo
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t To start otsdaq in 'wiz mode' please use any of these options:"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	--configure  --config  --wizard  --wiz  -w"
@@ -169,11 +178,11 @@ if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && "$1x" !=
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	--firefox  -f"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	e.g.: StartOTS.sh --wiz -f     or    StartOTS.sh --firefox"
 	echo
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t To kill all otsdaq running processes, please use any of these options:"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	--killall  --kill  --kx  -k"
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	e.g.: StartOTS.sh --kx"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t To backup and not overwrite previous quiet log files, add add one of these options:"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	--backup  -b"
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t 	e.g.: StartOTS.sh -b     or    StartOTS.sh --backup"
 	echo
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t aborting StartOTS.sh..."
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Exiting StartOTS.sh. Please see usage tips above."
 	exit
 fi
 
@@ -252,14 +261,16 @@ if [ ! -d $USER_DATA ]; then
 	exit   
 fi
 
+#print out important environment variables
 echo
-echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t User Data environment variable USER_DATA                 \t = ${USER_DATA}"
-
-ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`
-	
+echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t User Data environment variable        USER_DATA           = ${USER_DATA}"
+echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Database environment variable         ARTDAQ_DATABASE_URI = ${ARTDAQ_DATABASE_URI}"
+echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Primary Datapath environment variable OTSDAQ_DATA         = ${OTSDAQ_DATA}"
 echo
-echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Database environment variable ARTDAQ_DATABASE_URI        \t = ${ARTDAQ_DATABASE_URI}"
+#end print out important environment variables
 
+#check for antiquated artdaq databse
+ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`	
 if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 	# Rebuild ARTDAQ_DATABASE indicies
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Rebuilding database indices..."
@@ -268,12 +279,9 @@ if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 	mv ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}.bak.$$		
 	mv ${ARTDAQ_DATABASE_DIR}_new ${ARTDAQ_DATABASE_DIR}
 	echo "rebuilt" > ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild
-else
-	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild file exists, so not rebuilding indices."
+#else
+#	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild file exists, so not rebuilding indices."
 fi
-
-echo
-echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Primary Output Datapath environment variable OTSDAQ_DATA \t = ${OTSDAQ_DATA}"
 
 export CONFIGURATION_DATA_PATH=${USER_DATA}/ConfigurationDataExamples
 export CONFIGURATION_INFO_PATH=${USER_DATA}/ConfigurationInfo
@@ -333,10 +341,12 @@ launchOTSWiz() {
 	#kill all things otsdaq, before launching new things	
 	killprocs
 	
+	echo
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *************    Launching WIZ MODE!    *************"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t *****************************************************"
-
+	echo
+	
 	####################################################################
 	########### start console & message facility handling ##############
 	####################################################################
@@ -362,7 +372,14 @@ launchOTSWiz() {
 		#start quiet forwarder with receiving port and destination port parameter file
 	
 		if [ $QUIET == 1 ]; then
-			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-mf-${HOSTNAME}.txt ***"
+
+			if [ $BACKUPLOGS == 1 ]; then
+				DATESTRING=`date +'%s'`
+				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
+				mv .otsdaq_quiet_run-mf-${HOSTNAME}.txt .otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt
+			fi
+			
+			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  \t (hidden file)"
 			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> .otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 		else
 			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
@@ -381,7 +398,7 @@ launchOTSWiz() {
 		#start the QT Viewer (only if it is not already started)
 		if [ $( ps aux|egrep -c $USER.*msgviewer ) -eq 1 ]; then				
 			msgviewer -c ${USER_DATA}/MessageFacilityConfigurations/QTMessageViewerGen.fcl  &
-			sleep 2		
+			sleep 2	 #give time for msgviewer to be ready for messages	
 		fi		
 	fi
 	
@@ -433,8 +450,16 @@ launchOTSWiz() {
 			
 	if [ $QUIET == 1 ]; then
 		echo
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***"
+
+		if [ $BACKUPLOGS == 1 ]; then
+			DATESTRING=`date +'%s'`
+			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
+			mv .otsdaq_quiet_run-wiz-${HOSTNAME}.txt .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt
+		fi
+		
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  \t (hidden file)"
 		echo
+		
 		ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &> .otsdaq_quiet_run-wiz-${HOSTNAME}.txt &
 	else
 		ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &
@@ -453,14 +478,10 @@ launchOTSWiz() {
 	#uncomment to use artdaq db nodejs web gui
 	#node serverbase.js > /tmp/${USER}_serverbase.log &
 	
-	sleep 2
 	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$WIZARD_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
-	#echo $MAIN_URL
-			
-
+	
 	printMainURL &
-	sleep 1 #so that the terminal comes back after the printouts in quiet mode
-
+	
 } #end launchOTSWiz
 export -f launchOTSWiz
 		
@@ -529,7 +550,14 @@ launchOTS() {
 			#start quiet forwarder with receiving port and destination port parameter file
 		
 			if [[ $QUIET == 1 ]]; then
-				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  (hidden file)"
+
+				if [ $BACKUPLOGS == 1 ]; then
+					DATESTRING=`date +'%s'`
+					echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
+					mv .otsdaq_quiet_run-mf-${HOSTNAME}.txt .otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt
+				fi
+				
+				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  \t (hidden file)"
 				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> .otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 			else
 				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
@@ -550,7 +578,7 @@ launchOTS() {
 			#start the QT Viewer (only if it is not already started)
 			if [ $( ps aux|egrep -c $USER.*msgviewer ) -eq 1 ]; then				
 				msgviewer -c ${USER_DATA}/MessageFacilityConfigurations/QTMessageViewerGen.fcl  &
-				sleep 2		
+				sleep 2	 #give time for msgviewer to be ready for messages			
 			fi		
 		fi
 	fi
@@ -660,9 +688,16 @@ launchOTS() {
 						#if gateway launch, do it
 						if [[ $ISGATEWAYLAUNCH == 1 && ${host} == ${HOSTNAME} ]]; then	
 							if [ $QUIET == 1 ]; then
-								echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Launching the Gateway Application on host {${HOSTNAME}}..."
-								echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt *** (hidden file)"
-								ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
+								echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Launching the Gateway Application on host {${HOSTNAME}}..."								
+
+								if [ $BACKUPLOGS == 1 ]; then
+									DATESTRING=`date +'%s'`
+									echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.${DATESTRING}.txt ***\t (hidden file)"
+									mv .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.${DATESTRING}.txt
+								fi
+								
+								echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  \t (hidden file)"
+								ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt &
 							else
 								ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
 							fi
@@ -674,7 +709,6 @@ launchOTS() {
 							
 
 							printMainURL &
-							sleep 3 #so that the terminal comes back after the printouts in quiet mode
 															
 							return #FIXME .. could not launch others.. and only launch at MPI restart
 						fi
@@ -697,86 +731,34 @@ launchOTS() {
 	for port in "${xdaqPort[@]}"
 	do
 	  : 
-	  #echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
-	  #echo
+	  	#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+		#echo
 		  
 
 		if [[ ${xdaqHost[$i]} != ${HOSTNAME} ]]; then
 			continue
 		fi
 	
-		if [ $QUIET == 1 ]; then
-		  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  (hidden file)"	
-		  ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
-	  else
+		if [ $QUIET == 1 ]; then		  
+
+			if [ $BACKUPLOGS == 1 ]; then
+				DATESTRING=`date +'%s'`
+				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt ***\t (hidden file)"
+				mv .otsdaq_quiet_run-${HOSTNAME}-${port}.txt .otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt
+			fi
+		  
+			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  \t (hidden file)"
+			ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
+		else
 		  ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
-	  fi
-	  
-	  ContextPIDArray+=($!)
-	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Context-PID = ${ContextPIDArray[$i]}"
-	  
-	  i=$(( $i + 1 ))
+		fi
+		
+		ContextPIDArray+=($!)
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Context-PID = ${ContextPIDArray[$i]}"
+		
+		i=$(( $i + 1 ))
 	done
 		
-	if [[ (${#boardReaderPort[@]} != 0) || (${#builderPort[@]} != 0) || (${#aggregatorPort[@]} != 0) ]] && [[ "${HOSTNAME}" == "${gatewayHostname}" ]]; then
-	    cmdstart="mpirun -launcher ssh ${envString}"
-	    cmd=""
-	    mpiHosts=""
-	    i=0
-
-	    for port in "${boardReaderPort[@]}"
-	    do
-		: 
-		#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t  -np ots.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
-		cmd=$cmd" -np 1 ots.exe -h ${boardReaderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :"
-		if [[ "x$mpiHosts" == "x" ]]; then
-		    mpiHosts="${boardReaderHost[$i]}"
-		else
-		    mpiHosts=$mpiHosts",${boardReaderHost[$i]}"
-		fi
-		i=$(( $i + 1 ))
-	    done
-	    i=0	
-	    for port in "${builderPort[@]}"
-	    do
-		: 
-		#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t  -np ots.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} :\"
-		if [ $i -eq 0 ];then
-		    cmd=$cmd" -np 1 ots.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} "
-		else	
-		    cmd=$cmd": -np 1 ots.exe -h ${builderHost[$i]} -p ${port} -e ${XDAQ_ARGS} "
-		fi
-		if [[ "x$mpiHosts" == "x" ]]; then
-		    mpiHosts="${builderHost[$i]}"
-		else
-		    mpiHosts=$mpiHosts",${builderHost[$i]}"
-		fi
-		i=$(( $i + 1 ))
-	    done	
-	    i=0	
-	    for port in "${aggregatorPort[@]}"
-	    do
-		: 
-		#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t  -np ots.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS}\n"
-		cmd=$cmd": -np 1 ots.exe -h ${aggregatorHost[$i]} -p ${port} -e ${XDAQ_ARGS} "
-		if [[ "x$mpiHosts" == "x" ]]; then
-		    mpiHosts="${aggregatorHost[$i]}"
-		else
-		    mpiHosts=$mpiHosts",${aggregatorHost[$i]}"
-		fi
-		i=$(( $i + 1 ))
-	    done
-	    echo
-	    cmd=$cmdstart" -host "$mpiHosts$cmd
-	    echo Command used to start MPI: $cmd &
-	    MPI_RUN_CMD=$cmd
-		#if [ $QUIET == 1 ]; then
-		#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-mpi-${HOSTNAME}.txt ***"		  
-		#$cmd &> .otsdaq_quiet_run-mpi-${HOSTNAME}.txt &
-		#else
-		#$cmd &
-		#fi	  
-	fi
 	
 	echo
 	echo
@@ -790,7 +772,7 @@ launchOTS() {
 	fi
 	echo
 	  
-	if [[ (${#boardReaderPort[@]} == 0) && (${#builderPort[@]} == 0) && (${#aggregatorPort[@]} == 0) && (${#xdaqPort[@]} == 0) ]]; then
+	if [[ (${#xdaqPort[@]} == 0) ]]; then
 	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
 	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
 	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t WARNING: There are no configured processes for hostname ${HOSTNAME}." 
@@ -800,7 +782,6 @@ launchOTS() {
 	  echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ********************************************************************************************************************************"
 	fi
 
-	sleep 1 #so that the terminal comes back after the printouts in quiet mode
 }   #end launchOTS
 export -f launchOTS
 
@@ -819,9 +800,9 @@ printMainURL() {
 	#	fi
 	
 	if [ $QUIET == 0 ]; then
-		sleep 3
+		sleep 3 #give a little more time before injecting printouts in scrolling printouts
 	else
-		sleep 2
+		sleep 2 #give a little time for other StartOTS printouts to occur (so this one is last)  
 	fi
 	
 	echo
@@ -851,7 +832,7 @@ printMainURL() {
 		if [ $QUIET == 1 ]; then
 			exit
 		fi
-		sleep 1
+		sleep 1 #for delay between each printout
 	done
 }  #end printMainURL
 export -f printMainURL
@@ -933,6 +914,8 @@ otsActionHandler() {
 			killprocs
 			
 			launchOTSWiz
+			
+			sleep 3 #so that the terminal comes back after the printouts in quiet mode
 
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_OTS" ]; then
 				
@@ -943,6 +926,8 @@ otsActionHandler() {
 			
 			launchOTS
 
+			sleep 3 #so that the terminal comes back after the printouts in quiet mode
+
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "FLATTEN_TO_SYSTEM_ALIASES" ]; then
 
 			echo
@@ -950,8 +935,15 @@ otsActionHandler() {
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t otsdaq_flatten_system_aliases 0"
 			echo	
 			echo 
-			if [ $QUIET == 1 ]; then
-				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode  redirecting output to *** .otsdaq_quiet_run-flatten-${HOSTNAME}.txt ***"	
+			if [ $QUIET == 1 ]; then			
+
+				if [ $BACKUPLOGS == 1 ]; then
+					DATESTRING=`date +'%s'`
+					echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-flatten-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
+					mv .otsdaq_quiet_run-flatten-${HOSTNAME}.txt .otsdaq_quiet_run-flatten-${HOSTNAME}.${DATESTRING}.txt
+				fi
+				
+				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-flatten-${HOSTNAME}.txt ***  \t (hidden file)"	
 				otsdaq_flatten_system_aliases 0 &> .otsdaq_quiet_run-flatten-${HOSTNAME}.txt &
 			else
 				otsdaq_flatten_system_aliases 0 &
@@ -990,10 +982,7 @@ else
 	launchOTS Gateway #only launch gateway once.. otherwise would relaunch everything else
 fi
 
-
 otsActionHandler &
-
-sleep 1 #so that the terminal comes back after the printouts are done ( in quiet mode )
 
 #launch chrome here if enabled
 if [ $CHROME == 1 ]; then
@@ -1007,6 +996,7 @@ if [ $FIREFOX == 1 ]; then
 	firefox $MAIN_URL &
 fi
 
+sleep 3 #so that the terminal comes back after the printouts are done ( in quiet mode )
 
 
 
