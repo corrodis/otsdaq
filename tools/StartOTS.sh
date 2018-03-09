@@ -6,7 +6,6 @@ echo "  |"
 echo " _|_"
 echo " \ /"
 echo "  - "
-echo
 echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ========================================================"
 echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Launching StartOTS.sh otsdaq script... on {${HOSTNAME}}."
 echo
@@ -100,13 +99,13 @@ echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 function killprocs 
 {	
 	if [[ "x$1" == "x" ]]; then #kill all ots processes
-	
-		killall xdaq.exe 			&>/dev/null 2>&1 #hide output
+
 		killall ots.exe 			&>/dev/null 2>&1 #hide output
+		killall xdaq.exe 			&>/dev/null 2>&1 #hide output
 		killall mf_rcv_n_fwd 		&>/dev/null 2>&1 #hide output #message viewer display without decoration		
 		killall art 				&>/dev/null 2>&1 #hide output
-		killall -9 xdaq.exe			&>/dev/null 2>&1 #hide output
 		killall -9 ots.exe 			&>/dev/null 2>&1 #hide output
+		killall -9 xdaq.exe			&>/dev/null 2>&1 #hide output
 		killall -9 mf_rcv_n_fwd 	&>/dev/null 2>&1 #hide output #message viewer display without decoration		
 		killall -9 art 				&>/dev/null 2>&1 #hide output
 		
@@ -115,17 +114,19 @@ function killprocs
 
 		
 	else #then killing only non-gateway contexts
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Killing all non-gateway contexts..."
+		
 		PIDS=""
 		for contextPID in "${ContextPIDArray[@]}"
 		do
-			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Killing PID ${contextPID}"
+			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Killing Nongateway-PID ${contextPID}"
 			PIDS+=" ${contextPID}"
 		done
 		
 		#echo Killing PIDs: $PIDS
 		kill $PIDS 					&>/dev/null 2>&1 #hide output
 		kill -9 $PIDS 				&>/dev/null 2>&1 #hide output
+
+		unset ContextPIDArray #done with array of PIDs, so clear
 	fi
 	
 	sleep 1 #give time for cleanup to occur
@@ -457,7 +458,7 @@ launchOTSWiz() {
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
 			mv .otsdaq_quiet_run-wiz-${HOSTNAME}.txt .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt
 		fi
-		
+		ssss
 		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  \t (hidden file)"
 		echo
 		
@@ -496,13 +497,15 @@ export -f launchOTSWiz
 launchOTS() {
 	
 	ISGATEWAYLAUNCH=1
-	if [ "x$1" == "x" ]; then
+	if [ "x$1" != "x" ]; then #if parameter, then is nongateway launch
 		ISGATEWAYLAUNCH=0
 		killprocs nongateway
 		
 		unset ContextPIDArray 
+		unset xdaqPort
+		unset xdaqHost	
 		
-	else
+	else 					#else is full gateway and nongateway launch
 		GATEWAY_PID=-1
 		#kill all things otsdaq, before launching new things	
 		killprocs
@@ -513,9 +516,9 @@ launchOTS() {
 	
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *****************************************************"
 	if [ $ISGATEWAYLAUNCH == 1 ]; then
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t **********       Launching OTS Gateway!    **********"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ***********       Launching OTS!         ************"
 	else
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t ***********       Launching OTS Apps!    ************"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *******    Launching OTS Non-gateway Apps!    *******"
 	fi
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}] \t *****************************************************"
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t XDAQ Configuration XML: ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
@@ -700,7 +703,6 @@ launchOTS() {
 
 							printMainURL &
 															
-							return #FIXME .. could not launch others.. and only launch at MPI restart
 						fi
 					fi
 				elif [[ ($haveXDAQContextPort == false) && ($gatewayHostname != $host || $gatewayPort != $port) ]]; then 
@@ -732,23 +734,26 @@ launchOTS() {
 		if [ $QUIET == 1 ]; then		  
 
 			if [ $BACKUPLOGS == 1 ]; then
-				DATESTRING=`date +'%s'`
-				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt ***\t (hidden file)"
+				DATESTRING=`date +'%s'`				
+				
+				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt ***\t (hidden file)"				
 				mv .otsdaq_quiet_run-${HOSTNAME}-${port}.txt .otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt
 			fi
-		  
-			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  \t (hidden file)"
+		  			
+			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  \t (hidden file)"			
 			ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
 		else
 		  ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
 		fi
 		
 		ContextPIDArray+=($!)
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Context-PID = ${ContextPIDArray[$i]}"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Nongateway-PID = ${ContextPIDArray[$i]}"
 		
 		i=$(( $i + 1 ))
 	done
 		
+
+	FIRST_TIME=0 #used to supress printouts
 	
 	echo
 	echo
@@ -872,6 +877,8 @@ otsActionHandler() {
 		OTSDAQ_STARTOTS_LOCAL_QUIT="$(cat ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE})"
 		
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
+		
+			echo
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t  "
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Rebuilding..."
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t  "			
@@ -882,6 +889,8 @@ otsActionHandler() {
 			sleep 5
 		
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "OTS_APP_SHUTDOWN" ]; then
+		
+			echo
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t  "
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Shutting down non-gateway contexts..."
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t  "	
@@ -891,11 +900,13 @@ otsActionHandler() {
 			
 			
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "OTS_APP_STARTUP" ]; then
+		
+			echo
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t  "
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Starting up non-gateway contexts..."
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t  "	
 			
-			launchOTS #launch all non-gateway apps
+			launchOTS nongateway #launch all non-gateway apps			
 	
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_WIZ" ]; then
 			
@@ -907,6 +918,8 @@ otsActionHandler() {
 			launchOTSWiz
 			
 			sleep 3 #so that the terminal comes back after the printouts in quiet mode
+			
+			FIRST_TIME=1 #re-enable printouts for launch ots, in case of context changes
 
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_OTS" ]; then
 				
@@ -917,7 +930,7 @@ otsActionHandler() {
 			
 			launchOTS
 
-			sleep 3 #so that the terminal comes back after the printouts in quiet mode
+			sleep 3 #so that the terminal comes back after the printouts in quiet mode			
 
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "FLATTEN_TO_SYSTEM_ALIASES" ]; then
 
@@ -949,9 +962,12 @@ otsActionHandler() {
 			fi
 			
 		    exit
+			
 		elif [[ "$OTSDAQ_STARTOTS_ACTION" != "0"  || "$OTSDAQ_STARTOTS_QUIT" != "0"  || "$OTSDAQ_STARTOTS_LOCAL_QUIT" != "0" ]]; then
+		
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Exiting StartOTS.sh.. Unrecognized command !=0 in ${OTSDAQ_STARTOTS_ACTION}-${OTSDAQ_STARTOTS_QUIT}-${OTSDAQ_STARTOTS_LOCAL_QUIT}"			
 			exit
+			
 		fi
 		
 		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
@@ -970,7 +986,7 @@ export -f otsActionHandler
 if [ $ISCONFIG == 1 ]; then
 	launchOTSWiz
 else
-	launchOTS Gateway #only launch gateway once.. otherwise would relaunch everything else
+	launchOTS #only launch gateway once.. on shutdown and startup others can relaunch
 fi
 
 otsActionHandler &

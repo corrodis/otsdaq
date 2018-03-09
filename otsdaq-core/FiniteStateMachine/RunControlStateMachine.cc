@@ -25,7 +25,7 @@ RunControlStateMachine::RunControlStateMachine(std::string name)
 	theStateMachine_.addState('C', "Configured",  this, &RunControlStateMachine::stateConfigured);
 	theStateMachine_.addState('R', "Running",     this, &RunControlStateMachine::stateRunning);
 	theStateMachine_.addState('P', "Paused",      this, &RunControlStateMachine::statePaused);
-	theStateMachine_.addState('S', "Shutdown",    this, &RunControlStateMachine::stateShutdown);
+	theStateMachine_.addState('X', "Shutdown",    this, &RunControlStateMachine::stateShutdown);
 	//theStateMachine_.addState('v', "Recovering",  this, &RunControlStateMachine::stateRecovering);
 	//theStateMachine_.addState('T', "TTSTestMode", this, &RunControlStateMachine::stateTTSTestMode);
 
@@ -43,8 +43,8 @@ RunControlStateMachine::RunControlStateMachine(std::string name)
 	//end RAR added back in on 11/20/2016.. why was it removed..
 
 	theStateMachine_.addStateTransition('H', 'C', "Configure" , "Configuring"  , "ConfigurationAlias", this, &RunControlStateMachine::transitionConfiguring);
-	theStateMachine_.addStateTransition('H', 'S', "Shutdown"  , "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
-	theStateMachine_.addStateTransition('S', 'I', "Startup"   , "Starting Up"  , this, &RunControlStateMachine::transitionStartingUp);
+	theStateMachine_.addStateTransition('H', 'X', "Shutdown"  , "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
+	theStateMachine_.addStateTransition('X', 'I', "Startup"   , "Starting Up"  , this, &RunControlStateMachine::transitionStartingUp);
 
 	//Every state can transition to halted
 	theStateMachine_.addStateTransition('I', 'H', "Initialize", "Initializing" , this, &RunControlStateMachine::transitionInitializing);
@@ -105,6 +105,8 @@ throw (xoap::exception::Exception)
 	std::string command = SOAPUtilities::translate(message).getCommand();
 	//__COUT__ << "Command:-" << command << "-" << std::endl;
 	theProgressBar_.reset(command,stateMachineName_);
+	RunControlStateMachine::theProgressBar_.step();
+
 	std::string result = command + "Done";
 
 	//if error is received, immediately go to fail state
@@ -160,7 +162,9 @@ throw (xoap::exception::Exception)
 		__COUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
 	}
 
+	RunControlStateMachine::theProgressBar_.step();
 	theProgressBar_.complete();
+
 	__COUT__ << "Ending state for " << stateMachineName_ << " is " << theStateMachine_.getCurrentStateName() << std::endl;
 	__COUT__ << "result = " << result << std::endl;
 	return SOAPUtilities::makeSOAPMessageReference(result);

@@ -86,11 +86,15 @@ throw (xdaq::exception::Exception)
 
 	//try to get security settings
 	{
+
+		__COUT__ << "Looking for " <<
+				supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
+				" supervisor security settings..." << __E__;
+
 		ConfigurationTree appNode = theConfigurationManager_->getSupervisorNode(
-				CoreSupervisorBase::supervisorContextUID_, CoreSupervisorBase::supervisorApplicationUID_);
+				supervisorContextUID_, supervisorApplicationUID_);
 		try
 		{
-			__COUT__ << "Looking for supervisor security settings..." << __E__;
 			auto /*map<name,node>*/ children = appNode.getNode("LinkToPropertyConfiguration").getChildren();
 
 			for(auto& child:children)
