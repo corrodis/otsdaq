@@ -20,7 +20,7 @@ fcldir      -
 product		 version	optional
 artdaq              v3_00_03
 artdaq_database     v1_04_44
-xdaq                -
+xdaq                v14_4_0
 artdaq_mfextensions v1_02_02   	-        optional
 smc_compiler        v6_6_0      -        only_for_build
 cetbuildtools       v7_01_00    -        only_for_build
@@ -32,6 +32,10 @@ end_product_list
 # -nq- here means there is no qualifier
 # a "-" here means the dependent product is not required by the parent and will not be setup
 qualifier    	   artdaq	 	 artdaq_database	xdaq   	   artdaq_mfextensions 	notes
+e15:s64:prof       e15:eth:s64:prof    	 e15:s64:prof 		e15:prof   e15:s64:prof 	-std=c++14
+e15:s64:debug      e15:eth:s64:debug   	 e15:s64:debug		e15:debug  e15:s64:debug 	-std=c++14
+e14:s50:prof       e14:eth:s50:prof    	 e14:s50:prof 		e14:prof   e14:s50:prof 	-std=c++14
+e14:s50:debug      e14:eth:s50:debug   	 e14:s50:debug		e14:debug  e14:s50:debug 	-std=c++14
 e10:s46:prof       e10:eth:s46:prof    	 e10:s46:prof 		e10:prof   e10:s46:prof 	-std=c++14
 e10:s46:debug      e10:eth:s46:debug   	 e10:s46:debug		e10:debug  e10:s46:debug 	-std=c++14
 end_qualifier_list

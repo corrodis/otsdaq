@@ -5,7 +5,6 @@ simple_plugin(UDPReceiver "generator"
   artdaq-core_Utilities
   artdaq-core_Data
   canvas
-  MessageFacility
   pthread
   ${FHICLCPP}
   ${CETLIB}

@@ -19,7 +19,7 @@ simple_plugin(ARTDAQConsumer "processor"
 		canvas	 
 		${Boost_SYSTEM_LIBRARY}
 		${FHICLCPP}
-		MessageFacility
+#		MessageFacility
 		${MF_UTILITIES}
   )
   
@@ -35,7 +35,7 @@ simple_plugin(ARTDAQProducer "processor"
 		canvas	 
 		${Boost_SYSTEM_LIBRARY}
 		${FHICLCPP}
-		MessageFacility
+	#	MessageFacility
 		${MF_UTILITIES}
   )
 
@@ -71,7 +71,7 @@ simple_plugin(RawDataSaverConsumer "processor"
 simple_plugin(RawDataVisualizerConsumer "processor"	    
     DataManager
     WorkLoopManager
-	MessageFacility
+	#MessageFacility
     ConfigurationInterface
     ConfigurationDataFormats
 	${MF_MESSAGELOGGER}

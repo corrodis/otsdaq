@@ -13,6 +13,7 @@
 #include <sstream>      // std::stringstream, std::stringbuf
 #include <vector>
 #include <cassert>
+#include <set>
 #include <stdlib.h>
 #include <time.h>       /* time_t, time, ctime */
 

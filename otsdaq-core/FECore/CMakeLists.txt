@@ -26,7 +26,7 @@ cet_make(LIBRARY_NAME FECore
 		 ${ART_UTILITIES}
 		 ${CETLIB}
 		 ${FHICLCPP}
-		 MessageFacility
+	#	 MessageFacility
 		 ${MF_UTILITIES}
          ${XDAQ_BASIC_LIB_LIST}
          ${ROOT_CORE}         
