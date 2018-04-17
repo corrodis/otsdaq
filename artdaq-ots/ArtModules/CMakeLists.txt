@@ -23,6 +23,8 @@ simple_plugin(UDPDump "module"
 simple_plugin(JSONDispatcher "module"
   ${Boost_SYSTEM_LIBRARY}
   ${CETLIB_EXCEPT}
+  pthread
+  MF_MessageLogger
 )
 
 install_headers()

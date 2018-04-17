@@ -14,6 +14,7 @@
 #include <xdaq/NamespaceURI.h>
 #include <xoap/Method.h>
 
+#include "artdaq/DAQdata/Globals.hh"
 #include <memory>
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
@@ -105,7 +106,9 @@ void DispatcherApp::init(void)
 		artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
 
 	// create the DispatcherInterface
-	theDispatcherInterface_ = new artdaq::DispatcherApp(this->getApplicationDescriptor()->getLocalId(), name);
+	app_name = name;
+	my_rank = this->getApplicationDescriptor()->getLocalId();
+	theDispatcherInterface_ = new artdaq::DispatcherApp();
 	//theDispatcherInterface_ = new DispatcherInterface(mpiSentry_->rank(), local_group_comm, supervisorApplicationUID_ );
 }
 

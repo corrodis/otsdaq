@@ -11,29 +11,25 @@ simple_plugin(ARTDAQConsumer "processor"
   		${CETLIB}
   		DataManager
         artdaq_Application
-        artdaq_Application_MPI2
+		artdaq_DAQdata
         artdaq_BuildInfo
-		${ARTDAQ_APPLICATION}
-		${ARTDAQ_APPLICATION_MPI2}		 
-		${ARTDAQ_BUILDINFO}
-		canvas	 
+		canvas
 		${Boost_SYSTEM_LIBRARY}
+		${Boost_THREAD_LIBRARY}
 		${FHICLCPP}
 #		MessageFacility
 		${MF_UTILITIES}
   )
-  
+
 simple_plugin(ARTDAQProducer "processor"
   		${CETLIB}
   		DataManager
         artdaq_Application
-        artdaq_Application_MPI2
+		artdaq_DAQdata
         artdaq_BuildInfo
-		${ARTDAQ_APPLICATION}
-		${ARTDAQ_APPLICATION_MPI2}		 
-		${ARTDAQ_BUILDINFO}
-		canvas	 
+		canvas
 		${Boost_SYSTEM_LIBRARY}
+		${Boost_THREAD_LIBRARY}
 		${FHICLCPP}
 	#	MessageFacility
 		${MF_UTILITIES}
@@ -50,7 +46,7 @@ simple_plugin(UDPDataStreamerConsumer "processor"
 	NetworkUtilities
 	${CETLIB}
   )
-  
+
 simple_plugin(TCPDataListenerProducer "processor"
 	DataManager
 	NetworkUtilities
@@ -67,8 +63,8 @@ simple_plugin(RawDataSaverConsumer "processor"
 	DataManager
 	${CETLIB}
   )
-  
-simple_plugin(RawDataVisualizerConsumer "processor"	    
+
+simple_plugin(RawDataVisualizerConsumer "processor"
     DataManager
     WorkLoopManager
 	#MessageFacility
@@ -76,8 +72,8 @@ simple_plugin(RawDataVisualizerConsumer "processor"
     ConfigurationDataFormats
 	${MF_MESSAGELOGGER}
   )
-  
-  
+
+
 simple_plugin(OtsDataSaverConsumer "processor"
 	DataManager
 	${CETLIB}

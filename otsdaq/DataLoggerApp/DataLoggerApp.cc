@@ -14,6 +14,7 @@
 #include <xdaq/NamespaceURI.h>
 #include <xoap/Method.h>
 
+#include "artdaq/DAQdata/Globals.hh"
 #include <memory>
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
@@ -107,7 +108,9 @@ void DataLoggerApp::init(void)
     artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
 
     // create the DataLoggerInterface
-    theDataLoggerInterface_ = new artdaq::DataLoggerApp(this->getApplicationDescriptor()->getLocalId(), name );
+	app_name = name;
+	my_rank = this->getApplicationDescriptor()->getLocalId();
+    theDataLoggerInterface_ = new artdaq::DataLoggerApp();
 }
 
 //========================================================================================================================

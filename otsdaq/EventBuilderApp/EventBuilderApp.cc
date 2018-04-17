@@ -99,7 +99,7 @@ void EventBuilderApp::init(void)
 	// initialization
 	
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR NO ERRORS MAKING MSG FACILITY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-    std::string    name = "Builder";
+	std::string    name = "Builder";
 	unsigned short port = 5200;
 	//artdaq::setMsgFacAppName(supervisorApplicationUID_, port);
 	artdaq::setMsgFacAppName(name, port);
@@ -111,7 +111,9 @@ void EventBuilderApp::init(void)
 			artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
 
 	// create the EventBuilderInterface
-	theARTDAQEventBuilderInterfaces_[0] = new artdaq::EventBuilderApp(this->getApplicationDescriptor()->getLocalId(), name );
+	app_name = name;
+	my_rank = this->getApplicationDescriptor()->getLocalId();
+	theARTDAQEventBuilderInterfaces_[0] = new artdaq::EventBuilderApp( );
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR INIT DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 }
 
