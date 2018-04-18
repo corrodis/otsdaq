@@ -7,7 +7,7 @@
 #define DEFINE_OTS_INTERFACE(klass) \
   extern "C" \
   std::unique_ptr<ots::FEVInterface> \
-  make(const std::string& interfaceUID, const ConfigurationTree& configurationTree, const std::string& pathToInterfaceConfiguration) \
+  make(const std::string& interfaceUID, const ots::ConfigurationTree& configurationTree, const std::string& pathToInterfaceConfiguration) \
   {\
     return std::unique_ptr<ots::FEVInterface>(new klass(interfaceUID, configurationTree, pathToInterfaceConfiguration)); \
   }

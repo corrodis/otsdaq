@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 
 #define WEB_LOGIN_DB_PATH 			    std::string(getenv("SERVICE_DATA_PATH")) + "/LoginData/"
 #define WEB_LOGIN_CERTDATA_PATH         std::string(getenv("CERT_DATA_PATH"))
@@ -60,6 +61,7 @@ public:
     static const std::string DEFAULT_ADMIN_DISPLAY_NAME;
 	static const std::string DEFAULT_ADMIN_EMAIL;
     static const std::string DEFAULT_ITERATOR_USERNAME;
+    static const std::string DEFAULT_STATECHANGER_USERNAME;
 
     static const std::string REQ_NO_LOGIN_RESPONSE;
     static const std::string REQ_NO_PERMISSION_RESPONSE;

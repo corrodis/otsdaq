@@ -27,7 +27,7 @@ protected:
     int                socketNumber_;
     //unsigned int maxSocketSize_;
 
-private:
+protected:
     enum{FirstSocketPort=10000,LastSocketPort=15000};
     std::string  IPAddress_;
     unsigned int requestedPort_;

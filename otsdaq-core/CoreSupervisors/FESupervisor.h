@@ -6,6 +6,7 @@
 namespace ots
 {
 
+class FEVInterfacesManager;
 class FESupervisor: public CoreSupervisorBase
 {
 
@@ -16,6 +17,12 @@ public:
     FESupervisor                    (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
     virtual ~FESupervisor           (void);
 
+    xoap::MessageReference 			macroMakerSupervisorRequest  	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
+    virtual xoap::MessageReference 	workLoopStatusRequest		  	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
+
+
+protected:
+    FEVInterfacesManager*		   	extractFEInterfaceManager();
 };
 
 }

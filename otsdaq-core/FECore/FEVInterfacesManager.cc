@@ -6,7 +6,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "artdaq/DAQdata/configureMessageFacility.hh"
+#include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "fhiclcpp/make_ParameterSet.h"
 
@@ -63,12 +63,26 @@ void FEVInterfacesManager::createInterfaces(void)
 		__COUT__ << "Interface Name: "<< interface.first << std::endl;
 		__COUT__ << "XDAQContext Node: "<< theXDAQContextConfigTree_ << std::endl;
 		__COUT__ << "Path to configuration: "<< (theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration") << std::endl;
-		theFEInterfaces_[interface.first] = makeInterface(
-				interface.second.getNode("FEInterfacePluginName").getValue<std::string>(),
-				interface.first,
-				theXDAQContextConfigTree_,
-				(theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration")
-				);
+
+		try
+		{
+			theFEInterfaces_[interface.first] = makeInterface(
+					interface.second.getNode("FEInterfacePluginName").getValue<std::string>(),
+					interface.first,
+					theXDAQContextConfigTree_,
+					(theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration")
+					);
+		}
+		catch(const cet::exception& e)
+		{
+			__SS__ << "Failed to instantiate plugin named '" <<
+					interface.first << "' of type '" <<
+					interface.second.getNode("FEInterfacePluginName").getValue<std::string>()
+					<< "' due to the following error: \n" << e.what() << __E__;
+			__COUT_ERR__ << ss.str();
+			__MOUT_ERR__ << ss.str();
+			throw std::runtime_error(ss.str());
+		}
 	}
 	__COUT__ << "Done creating interfaces" << std::endl;
 }
@@ -77,6 +91,12 @@ void FEVInterfacesManager::createInterfaces(void)
 //used by MacroMaker
 int FEVInterfacesManager::universalRead(const std::string &interfaceID, char* address, char* returnValue)
 {
+	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
+	{
+		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
+		throw std::runtime_error(ss.str());
+	}
+
 	__COUT__ << "interfaceID: " << interfaceID << " and size: " << theFEInterfaces_.size() << std::endl;
 
 	if (theFEInterfaces_[interfaceID]->universalRead(address, returnValue) < 0) return -1;
@@ -87,17 +107,36 @@ int FEVInterfacesManager::universalRead(const std::string &interfaceID, char* ad
 //========================================================================================================================
 //used by MacroMaker
 unsigned int FEVInterfacesManager::getInterfaceUniversalAddressSize(const std::string &interfaceID)
-{ return theFEInterfaces_[interfaceID]->getUniversalAddressSize(); } //used by MacroMaker
+{
+	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
+	{
+		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
+		throw std::runtime_error(ss.str());
+	}
+	return theFEInterfaces_[interfaceID]->getUniversalAddressSize();
+} //used by MacroMaker
 
 //========================================================================================================================
 //used by MacroMaker
 unsigned int FEVInterfacesManager::getInterfaceUniversalDataSize(const std::string &interfaceID)
-{ return theFEInterfaces_[interfaceID]->getUniversalDataSize(); } //used by MacroMaker
+{
+	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
+	{
+		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
+		throw std::runtime_error(ss.str());
+	}
+	return theFEInterfaces_[interfaceID]->getUniversalDataSize();
+} //used by MacroMaker
 
 //========================================================================================================================
 //used by MacroMaker
 void FEVInterfacesManager::universalWrite(const std::string &interfaceID, char* address, char* writeValue)
 {
+	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
+	{
+		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
+		throw std::runtime_error(ss.str());
+	}
 
 	__COUT__ << "interfaceID: " << interfaceID << " and size: " << theFEInterfaces_.size() << std::endl;
 
@@ -123,7 +162,7 @@ std::string FEVInterfacesManager::getFEListString(const std::string &supervisorL
 
 	for(const auto& it : theFEInterfaces_)
 	{
-	  __COUT__ << "Just curious: it.first is " << it.first << std::endl;
+	  __COUT__ << "FE name = " << it.first << std::endl;
 
 	  retList += it.second->getInterfaceType() +
 			  ":" + supervisorLid + ":" +
@@ -217,7 +256,7 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 		{
 			__COUT__ << "argName " << argName << std::endl;
 
-			returnStrings.push_back( "valueLore" );//std::string());
+			returnStrings.push_back( "DEFAULT" );//std::string());
 			argsOut.push_back(FEVInterface::frontEndMacroOutArg_t(
 					argName,
 					returnStrings[returnStrings.size()-1]));
@@ -269,12 +308,13 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 
 
 
-	__COUT__ << "Trying it " << std::endl;
+	__MOUT__ << "Launching FE Macro '" << feMacroName << "' ..." << std::endl;
+	__COUT__ << "Launching FE Macro '" << feMacroName << "' ..." << std::endl;
 
 	//have pointer to Macro structure, so run it
 	(FEVInterfaceIt->second.get()->*(FEMacroIt->second.macroFunction_))(argsIn,argsOut);
 
-	__COUT__ << "Made it " << std::endl;
+	__COUT__ << "FE Macro complete!" << std::endl;
 
 	__COUT__ << "# of output args = " << argsOut.size() << std::endl;
 	for(const auto &arg:argsOut)
@@ -385,6 +425,7 @@ void FEVInterfacesManager::configure(void)
 		__COUT__ << "Configuring interface " << it.first << std::endl;
 		__COUT__ << "Configuring interface " << it.first << std::endl;
 		__COUT__ << "Configuring interface " << it.first << std::endl;
+
 		it.second->configure();
 
 		//configure slow controls and start slow controls workloop

@@ -49,8 +49,8 @@ using namespace ots;
 #define PREF_XML_USERLOCK_FIELD			"username_with_lock"		// user with lock (to lockout others)
 #define PREF_XML_USERNAME_FIELD			"pref_username"				// user with lock (to lockout others)
 
-#define PREF_XML_BGCOLOR_DEFAULT		"rgb(15,34,105)"		// -background color
-#define PREF_XML_DBCOLOR_DEFAULT		"rgb(60,64,75)"			// -dashboard color
+#define PREF_XML_BGCOLOR_DEFAULT		"rgb(0,76,151)"			// -background color
+#define PREF_XML_DBCOLOR_DEFAULT		"rgb(0,40,85)"			// -dashboard color
 #define PREF_XML_WINCOLOR_DEFAULT		"rgba(196,229,255,0.9)"	// -window color
 #define PREF_XML_LAYOUT_DEFAULT	 		"0;0;0;0"				// 3 default window layouts(and current)
 #define PREF_XML_SYSLAYOUT_DEFAULT	 	"0;0"					// 2 system default window layouts
@@ -62,6 +62,7 @@ const std::string WebUsers::DEFAULT_ADMIN_USERNAME = "admin";
 const std::string WebUsers::DEFAULT_ADMIN_DISPLAY_NAME = "Administrator";
 const std::string WebUsers::DEFAULT_ADMIN_EMAIL = "root@otsdaq.fnal.gov";
 const std::string WebUsers::DEFAULT_ITERATOR_USERNAME = "iterator";
+const std::string WebUsers::DEFAULT_STATECHANGER_USERNAME = "statechanger";
 
 const std::string WebUsers::REQ_NO_LOGIN_RESPONSE = "NoLogin";
 const std::string WebUsers::REQ_NO_PERMISSION_RESPONSE = "NoPermission";
@@ -456,7 +457,7 @@ bool WebUsers::loadDatabases()
 {
 	std::string fn;
 	FILE *fp;
-	unsigned int LINE_LEN = 1000;
+	const unsigned int LINE_LEN = 1000;
 	char line[LINE_LEN];
 	unsigned int i, si, c, len, f;
 	uint64_t tmpInt64;
@@ -849,7 +850,8 @@ bool WebUsers::createNewAccount(std::string Username, std::string DisplayName, s
 	//check if username already exists
 	uint64_t i;
 	if ((i = searchUsersDatabaseForUsername(Username)) != NOT_FOUND_IN_DATABASE ||
-			Username == WebUsers::DEFAULT_ITERATOR_USERNAME) //prevent reserved usernames from being created!
+			Username == WebUsers::DEFAULT_ITERATOR_USERNAME ||
+			Username == WebUsers::DEFAULT_STATECHANGER_USERNAME) //prevent reserved usernames from being created!
 	{
 		__COUT__ << "Username: " << Username << " already exists" << std::endl;
 		return false;
@@ -860,7 +862,7 @@ bool WebUsers::createNewAccount(std::string Username, std::string DisplayName, s
 	UsersDisplayNameVector.push_back(DisplayName);
 	UsersUserEmailVector.push_back(Email);
 	UsersSaltVector.push_back("");
-	UsersPermissionsVector.push_back(UsersPermissionsVector.size() ? 0 : -1); //max permissions if first user
+	UsersPermissionsVector.push_back(UsersPermissionsVector.size() ? 1 : -1); //max permissions if first user
 	UsersUserIdVector.push_back(usersNextUserId_++);
 	if (usersNextUserId_ == (uint64_t)-1) //error wrap around case
 	{
@@ -1870,12 +1872,12 @@ std::string WebUsers::dejumble(std::string u, std::string s)
 
 	if (s.length() != SESSION_ID_LENGTH) return ""; //session std::string must be even
 
-	int ss = s.length() / 2;
+	const int ss = s.length() / 2;
 	int p = hexByteStrToInt(&(s.c_str()[0])) % ss;
 	int n = hexByteStrToInt(&(s.c_str()[p * 2])) % ss;
 	int len = (hexByteStrToInt(&(u.c_str()[p * 2])) - p - n + ss * 3) % ss;
 
-	bool x[ss];
+	std::vector<bool> x(ss);
 	for (int i = 0; i < ss; ++i) x[i] = 0;
 	x[p] = 1;
 
@@ -2242,9 +2244,10 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string &pref
 	{
 		fseek(fp, 0, SEEK_END);
 		long size = ftell(fp);
-		char line[size + 1];
+		std::string line;
+		line.reserve(size + 1);
 		rewind(fp);
-		fgets(line, size + 1, fp);
+		fgets(&line[0], size + 1, fp);
 		fclose(fp);
 
 		__COUT__ << "Read value " << line << std::endl;

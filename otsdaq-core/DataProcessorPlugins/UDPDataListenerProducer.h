@@ -3,7 +3,7 @@
 
 #include "otsdaq-core/NetworkUtilities/ReceiverSocket.h"  // Make sure this is always first because <sys/types.h> (defined in Socket.h) must be first
 #include "otsdaq-core/DataManager/DataProducer.h"
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
+#include "otsdaq-core/Configurable/Configurable.h"
 
 #include <string>
 
@@ -32,6 +32,7 @@ protected:
 	unsigned long                         ipAddress_;
 	unsigned short                        port_;
 
+	unsigned char						lastSeqId_;
 	//bool getNextFragment(void);
 };
 

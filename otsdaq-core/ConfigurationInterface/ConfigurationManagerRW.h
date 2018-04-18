@@ -19,7 +19,16 @@ struct ConfigurationInfo {
 	{}
 
 	std::set<ConfigurationVersion>      		versions_;
-	ConfigurationBase* 					configurationPtr_;
+	ConfigurationBase* 							configurationPtr_;
+};
+
+struct GroupInfo {
+	std::set<ConfigurationGroupKey>      		keys_;
+	std::string latestKeyGroupAuthor_, latestKeyGroupComment_,
+	latestKeyGroupCreationTime_, latestKeyGroupTypeString_;
+	std::map<std::string /*name*/, ConfigurationVersion /*version*/> latestKeyMemberMap_;
+
+	ConfigurationGroupKey getLatestKey() { return *(keys_.rbegin()); }
 };
 
 
@@ -59,7 +68,7 @@ public:
 	//==============================================================================
 	//modifiers of generic ConfigurationBase
 
-	ConfigurationVersion								saveNewConfiguration					(const std::string &configurationName, ConfigurationVersion temporaryVersion = ConfigurationVersion(), bool makeTemporary = false);
+	ConfigurationVersion								saveNewConfiguration					(const std::string &configurationName, ConfigurationVersion temporaryVersion = ConfigurationVersion(), bool makeTemporary = false);//, bool saveToScratchVersion = false);
 	ConfigurationVersion								copyViewToCurrentColumns				(const std::string &configurationName, ConfigurationVersion sourceVersion);
 	void												eraseTemporaryVersion					(const std::string &configurationName, ConfigurationVersion targetVersion = ConfigurationVersion());
 	void												clearCachedVersions						(const std::string &configurationName);
@@ -77,16 +86,71 @@ public:
 
 	//==============================================================================
 	//modifiers of a configuration group based on alias, e.g. "Physics"
-	ConfigurationGroupKey								saveNewConfigurationGroup				(const std::string &groupName, std::map<std::string, ConfigurationVersion> &groupMembers, ConfigurationGroupKey previousVersion=ConfigurationGroupKey(), const std::string &groupComment = ViewColumnInfo::DATATYPE_COMMENT_DEFAULT);
+	ConfigurationGroupKey								saveNewConfigurationGroup				(const std::string &groupName, std::map<std::string, ConfigurationVersion> &groupMembers, const std::string &groupComment = ViewColumnInfo::DATATYPE_COMMENT_DEFAULT);
+
+
+
+	//==============================================================================
+	//public group cache handling
+	const GroupInfo&									getGroupInfo							(const std::string &groupName);
+	const std::map<std::string, GroupInfo>&				getAllGroupInfo							() {return allGroupInfo_;}
 
 	void testXDAQContext(); //for debugging
 
 private:
+
+	//==============================================================================
+	//group cache handling
+	void												cacheGroupKey							(const std::string &groupName, ConfigurationGroupKey key);
+
+
 	//==============================================================================
 	//private members
 	std::map<std::string, ConfigurationInfo> 	allConfigurationInfo_;
+	std::map<std::string, GroupInfo> 			allGroupInfo_;
 
 };
-}
+
+
+/////
+struct TableEditStruct {
+	//everything needed for editing a table
+	ConfigurationBase* config_;
+	ConfigurationView* cfgView_;
+	ConfigurationVersion temporaryVersion_, originalVersion_;
+	bool createdTemporaryVersion_; //indicates if temp version was created here
+	bool modified_; //indicates if temp version was modified
+	std::string configName_;
+	/////
+	TableEditStruct(){ __SS__ << "impossible!" << std::endl; throw std::runtime_error(ss.str());}
+	TableEditStruct(const std::string& configName, ConfigurationManagerRW* cfgMgr)
+	:createdTemporaryVersion_(false)
+	,modified_(false)
+	,configName_(configName)
+	{
+		__COUT__ << "Creating Table-Edit Struct for " << configName_ << std::endl;
+		config_ = cfgMgr->getConfigurationByName(configName_);
+
+		if(!(originalVersion_ =
+				config_->getView().getVersion()).isTemporaryVersion())
+		{
+			__COUT__ << "Start version " << originalVersion_ << std::endl;
+			//create temporary version for editing
+			temporaryVersion_ = config_->createTemporaryView(originalVersion_);
+			cfgMgr->saveNewConfiguration(
+					configName_,
+					temporaryVersion_, true); //proper bookkeeping for temporary version with the new version
+
+			__COUT__ << "Created temporary version " << temporaryVersion_ << std::endl;
+			createdTemporaryVersion_ = true;
+		}
+		else //else table is already temporary version
+			__COUT__ << "Using temporary version " << temporaryVersion_ << std::endl;
+
+		cfgView_ = config_->getViewP();
+	}
+}; //end TableEditStruct declaration
+
+} //end namespace
 
 #endif

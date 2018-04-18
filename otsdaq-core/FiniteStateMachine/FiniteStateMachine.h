@@ -16,7 +16,8 @@ public:
 
 	using toolbox::fsm::FiniteStateMachine::addStateTransition;
 	template <class OBJECT>
-	void addStateTransition(toolbox::fsm::State from, 
+	void addStateTransition(
+				toolbox::fsm::State from,
 				toolbox::fsm::State to, 
 				const std::string& input, 
 				const std::string& transitionName, 
@@ -29,7 +30,8 @@ public:
 	}
 
 	template <class OBJECT>
-	void addStateTransition(toolbox::fsm::State from,
+	void addStateTransition(
+				toolbox::fsm::State from,
 				toolbox::fsm::State to,
 				const std::string &input,
 				const std::string &transitionName,

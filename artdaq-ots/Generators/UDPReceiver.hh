@@ -32,92 +32,94 @@
 #include <thread>
 #include <chrono>
 
-namespace ots {    
+namespace ots {
 
-enum class CommandType : uint8_t {
-    Read = 0,
-    Write = 1,
-    Start_Burst = 2,
-    Stop_Burst = 3,
-      };
+	enum class CommandType : uint8_t {
+		Read = 0,
+		Write = 1,
+		Start_Burst = 2,
+		Stop_Burst = 3,
+	};
 
-enum class ReturnCode : uint8_t {
-    Read = 0,
-      First = 1,
-      Middle = 2,
-      Last = 3,
-      };
+	enum class ReturnCode : uint8_t {
+		Read = 0,
+		First = 1,
+		Middle = 2,
+		Last = 3,
+	};
 
-  enum class DataType : uint8_t {
-    Raw = 0,
-      JSON = 1,
-      String = 2,
-  };
+	enum class DataType : uint8_t {
+		Raw = 0,
+		JSON = 1,
+		String = 2,
+	};
 
-struct CommandPacket {
-  CommandType type;
-  uint8_t dataSize;
-  uint64_t address;
-  uint64_t data[182];
-};
+	struct CommandPacket {
+		CommandType type;
+		uint8_t dataSize;
+		uint64_t address;
+		uint64_t data[182];
+	};
 
-  typedef std::string packetBuffer_t;
-  typedef std::list<packetBuffer_t> packetBuffer_list_t;
+	typedef std::string packetBuffer_t;
+	typedef std::list<packetBuffer_t> packetBuffer_list_t;
 
-  class UDPReceiver : public artdaq::CommandableFragmentGenerator {
-  public:
-    explicit UDPReceiver(fhicl::ParameterSet const & ps);
-	virtual ~UDPReceiver();
+	class UDPReceiver : public artdaq::CommandableFragmentGenerator {
+	public:
+		explicit UDPReceiver(fhicl::ParameterSet const & ps);
+		virtual ~UDPReceiver();
 
-  protected:
+	protected:
 
-    // The "getNext_" function is used to implement user-specific
-    // functionality; it's a mandatory override of the pure virtual
-    // getNext_ function declared in CommandableFragmentGenerator
+		// The "getNext_" function is used to implement user-specific
+		// functionality; it's a mandatory override of the pure virtual
+		// getNext_ function declared in CommandableFragmentGenerator
 
-    bool         getNext_(artdaq::FragmentPtrs & output) override;
-    void         start          (void) override;
-    virtual void stop            (void) override;
-    virtual void stopNoMutex     (void) override;
+		bool         getNext_(artdaq::FragmentPtrs & output) override;
+		void         start(void) override;
+		virtual void start_();
+		virtual void stop(void) override;
+		virtual void stopNoMutex(void) override;
 
-    virtual void ProcessData_(artdaq::FragmentPtrs & output);
+		virtual void ProcessData_(artdaq::FragmentPtrs & output);
 
-    DataType getDataType(uint8_t byte) { return static_cast<DataType>((byte & 0xF0) >> 4); }
-    ReturnCode getReturnCode(uint8_t byte) { return static_cast<ReturnCode>(byte & 0xF); }
-    void send(CommandType flag);
+		DataType getDataType(uint8_t byte) { return static_cast<DataType>((byte & 0xF0) >> 4); }
+		ReturnCode getReturnCode(uint8_t byte) { return static_cast<ReturnCode>(byte & 0xF); }
+		void send(CommandType flag);
 
-    packetBuffer_list_t packetBuffers_;
+		packetBuffer_list_t packetBuffers_;
 
-    bool rawOutput_;
-    std::string rawPath_;
+		bool rawOutput_;
+		std::string rawPath_;
 
-    // FHiCL-configurable variables. Note that the C++ variable names
-    // are the FHiCL variable names with a "_" appended
+		// FHiCL-configurable variables. Note that the C++ variable names
+		// are the FHiCL variable names with a "_" appended
 
-    int dataport_;
-    std::string ip_;
+		int dataport_;
+		std::string ip_;
+		int rcvbuf_;
 
-    //The packet number of the next packet. Used to discover dropped packets
-    uint8_t expectedPacketNumber_;
+		//The packet number of the next packet. Used to discover dropped packets
+		uint8_t expectedPacketNumber_;
 
-    //Socket parameters
-    struct sockaddr_in si_data_;
-    int datasocket_;
-    bool sendCommands_;
+		//Socket parameters
+		struct sockaddr_in si_data_;
+		int datasocket_;
+		bool sendCommands_;
 
-  private:
+	private:
 
-    void receiveLoop_();
-    bool isTimerExpired_();
+		void receiveLoop_();
+		bool isTimerExpired_();
 
-	std::thread receiverThread_;
-	std::mutex receiveBufferLock_;
-    packetBuffer_list_t receiveBuffers_;
+		std::thread receiverThread_;
+		std::mutex receiveBufferLock_;
+		packetBuffer_list_t receiveBuffers_;
 
-	// Number of milliseconds per fragment
-	double fragmentWindow_;
-	std::chrono::high_resolution_clock::time_point lastFrag_;
-  };
+		// Number of milliseconds per fragment
+		double fragmentWindow_;
+		std::chrono::high_resolution_clock::time_point lastFrag_;
+	};
 }
 
 #endif /* artdaq_demo_Generators_ToySimulator_hh */

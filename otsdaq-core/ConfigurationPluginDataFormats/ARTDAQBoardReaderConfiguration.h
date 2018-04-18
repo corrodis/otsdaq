@@ -20,10 +20,11 @@ public:
 
 	//Methods
 	void init						(ConfigurationManager *configManager);
-	void outputFHICL				(const ConfigurationTree &readerNode, const XDAQContextConfiguration *contextConfig);
+	void outputFHICL				(ConfigurationManager *configManager, const ConfigurationTree &readerNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort, const XDAQContextConfiguration *contextConfig);
 	std::string getFHICLFilename	(const ConfigurationTree &readerNode);
 
 	//std::string	getBoardReaderApplication	(const ConfigurationTree &readerNode, const XDAQContextConfiguration *contextConfig, const ConfigurationTree &contextNode, std::string &applicationUID, std::string &bufferUID, std::string &consumerUID);
+
 };
 }
 #endif

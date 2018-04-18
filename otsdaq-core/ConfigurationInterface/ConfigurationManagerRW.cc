@@ -63,6 +63,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 
 	//else refresh!
 	allConfigurationInfo_.clear();
+	allGroupInfo_.clear();
 
 	ConfigurationBase* configuration;
 
@@ -218,6 +219,48 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 
 	__COUT__ << "======================================================== getAllConfigurationInfo end" << std::endl;
 
+
+	//get Group Info too!
+	{
+		std::set<std::string /*name*/>  configGroups = theInterface_->getAllConfigurationGroupNames();
+		__COUT__ << "Number of Groups: " << configGroups.size() << std::endl;
+
+		ConfigurationGroupKey key;
+		std::string name;
+		for(const auto& fullName:configGroups)
+		{
+			ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
+			cacheGroupKey(name,key);
+		}
+
+		//for each group get member map & comment, author, time, and type for latest key
+		for(auto& groupInfo:allGroupInfo_)
+		{
+			try
+			{
+				loadConfigurationGroup(
+						groupInfo.first /*groupName*/,
+						groupInfo.second.getLatestKey(),
+						false /*doActivate*/,
+						&groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
+						0 /*progressBar*/,0 /*accumulateErrors*/,
+						&groupInfo.second.latestKeyGroupComment_,
+						&groupInfo.second.latestKeyGroupAuthor_,
+						&groupInfo.second.latestKeyGroupCreationTime_,
+						true /*doNotLoadMember*/,
+						&groupInfo.second.latestKeyGroupTypeString_);
+			}
+			catch(...)
+			{
+				__COUT_WARN__ << "Error occurred loading latest group info into cache for '" <<
+						groupInfo.first << "'..." << __E__;
+				groupInfo.second.latestKeyGroupComment_ = "UNKNOWN";
+				groupInfo.second.latestKeyGroupAuthor_ = "UNKNOWN";
+				groupInfo.second.latestKeyGroupCreationTime_ = "0";
+				groupInfo.second.latestKeyGroupTypeString_ = "UNKNOWN";
+			}
+		} //end group info loop
+	} //end get group info
 	return allConfigurationInfo_;
 }
 
@@ -286,6 +329,7 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 {
 	loadConfigurationGroup(configGroupName,configGroupKey,
 			true, 	//loads and activates
+			0,		//no members needed
 			0,		//no progress bar
 			accumulatedTreeErrors); //accumulate warnings or not
 
@@ -299,6 +343,8 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 		catch(...){}
 	}
 
+	__COUT_INFO__ << "Updating persistent active groups to " <<
+			ConfigurationManager::ACTIVE_GROUP_FILENAME << " ..."  << std::endl;
 	__MOUT_INFO__ << "Updating persistent active groups to " <<
 			ConfigurationManager::ACTIVE_GROUP_FILENAME << " ..."  << std::endl;
 
@@ -312,6 +358,15 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 		throw std::runtime_error(ss.str());
 		return;
 	}
+
+	__COUT_INFO__ << "Active Context: " << theContextGroup_ << "(" <<
+			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__COUT_INFO__ << "Active Backbone: " << theBackboneGroup_ << "(" <<
+			(theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__COUT_INFO__ << "Active Iterate: " << theIterateGroup_ << "(" <<
+			(theIterateGroupKey_?theIterateGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__COUT_INFO__ << "Active Configuration: " << theConfigurationGroup_ << "(" <<
+			(theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1") << ")" << std::endl;
 
 	__MOUT_INFO__ << "Active Context: " << theContextGroup_ << "(" <<
 			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl;
@@ -420,8 +475,11 @@ ConfigurationBase* ConfigurationManagerRW::getVersionedConfigurationByName(const
 //==============================================================================
 //saveNewConfiguration
 //	saves version, makes the new version the active version, and returns new version
-ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(const std::string &configurationName,
-		ConfigurationVersion temporaryVersion, bool makeTemporary)
+ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(
+		const std::string &configurationName,
+		ConfigurationVersion temporaryVersion,
+		bool makeTemporary)//,
+		//bool saveToScratchVersion)
 {
 	ConfigurationVersion newVersion(temporaryVersion);
 
@@ -568,62 +626,115 @@ ConfigurationVersion ConfigurationManagerRW::copyViewToCurrentColumns(const std:
 	return newTemporaryVersion;
 }
 
+//==============================================================================
+//cacheGroupKey
+void ConfigurationManagerRW::cacheGroupKey(const std::string &groupName,
+		ConfigurationGroupKey key)
+{
+	allGroupInfo_[groupName].keys_.emplace(key);
+}
 
+//==============================================================================
+//getGroupInfo
+//	the interface is slow when there are a lot of groups..
+//	so plan is to maintain local cache of recent group info
+const GroupInfo& ConfigurationManagerRW::getGroupInfo(const std::string &groupName)
+{
+
+	//	//NOTE: seems like this filter is taking the long amount of time
+	//	std::set<std::string /*name*/> fullGroupNames =
+	//			theInterface_->getAllConfigurationGroupNames(groupName); //db filter by group name
+
+	//so instead caching ourselves...
+	auto it = allGroupInfo_.find(groupName);
+	if(it == allGroupInfo_.end())
+	{
+		__SS__ << "Group name '" << groupName << "' not found in group info! (creating empty info)" << __E__;
+		__COUT_WARN__ << ss.str();
+		//throw std::runtime_error(ss.str());
+		return allGroupInfo_[groupName];
+	}
+	return it->second;
+}
 
 //==============================================================================
 //findConfigurationGroup
 //	return group with same name and same members
 //	else return invalid key
 //
-// FIXME -- this is taking too long when there are a ton of groups.
-//	Change to going back only 20 or so.. (but the order also comes in alpha order from
+// Note: this is taking too long when there are a ton of groups.
+//	Change to going back only a limited number.. (but the order also comes in alpha order from
 //	theInterface_->getAllConfigurationGroupNames which is a problem for choosing the
-//	most recent to check.
+//	most recent to check. )
 ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::string &groupName,
 		const std::map<std::string, ConfigurationVersion> &groupMemberMap)
 {
-	std::set<std::string /*name*/> fullGroupNames =
-			theInterface_->getAllConfigurationGroupNames(groupName); //db filter by group name
+				//	//Taking too long..... taking out check for now
+				//	//if here, then no match found
+				//	return ConfigurationGroupKey(); //return invalid key
 
-	std::string name;
-	ConfigurationGroupKey key;
+				//	//NOTE: seems like this filter is taking the long amount of time
+				//	std::set<std::string /*name*/> fullGroupNames =
+				//			theInterface_->getAllConfigurationGroupNames(groupName); //db filter by group name
+
+	const GroupInfo& groupInfo = getGroupInfo(groupName);
+
+	//std::string name;
+	//ConfigurationGroupKey key;
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> compareToMemberMap;
 	bool isDifferent;
 
 	const unsigned int MAX_DEPTH_TO_CHECK = 20;
 	unsigned int keyMinToCheck = 0;
 
-	//determine min key to check
-	if(fullGroupNames.size() > MAX_DEPTH_TO_CHECK)
+	if(groupInfo.keys_.size())
+		keyMinToCheck = groupInfo.keys_.rbegin()->key();
+	if(keyMinToCheck > MAX_DEPTH_TO_CHECK)
 	{
-		//find keyMinToCheck to avoid looking at all groups
-		for(const std::string& fullName: fullGroupNames)
-		{
-			ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
-			if(key.key() > keyMinToCheck)
-				keyMinToCheck = key.key();
-		}
-
-		//just in case of craziness, check not crossing 0
-		if(keyMinToCheck >= MAX_DEPTH_TO_CHECK - 1)
-			keyMinToCheck -= MAX_DEPTH_TO_CHECK - 1;
-		else
-			keyMinToCheck = 0;
-
+		keyMinToCheck -= MAX_DEPTH_TO_CHECK;
 		__COUT__ << "Checking groups back to key... " << keyMinToCheck << std::endl;
 	}
 	else
+	{
+		keyMinToCheck = 0;
 		__COUT__ << "Checking all groups." << std::endl;
+	}
+
+
+	//determine min key to check
+//	if(groupInfo.keys_.size() > MAX_DEPTH_TO_CHECK)
+//	{
+//		//find keyMinToCheck to avoid looking at all groups
+//		for(const auto& key: groupInfo.keys_)
+//		{
+//			//ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
+//			if(key.key() > keyMinToCheck)
+//				keyMinToCheck = key.key();
+//		}
+//
+//		//just in case of craziness, check not crossing 0
+//		if(keyMinToCheck >= MAX_DEPTH_TO_CHECK - 1)
+//			keyMinToCheck -= MAX_DEPTH_TO_CHECK - 1;
+//		else
+//			keyMinToCheck = 0;
+//
+//		__COUT__ << "Checking groups back to key... " << keyMinToCheck << std::endl;
+//	}
+//	else
+//		__COUT__ << "Checking all groups." << std::endl;
 
 	//have min key to check, now loop through and check groups
-	for(const std::string& fullName: fullGroupNames)
+	std::string fullName;
+	for(const auto& key: groupInfo.keys_)
 	{
-		ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
+		//ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
 
 		if(key.key() < keyMinToCheck) continue; //skip keys that are too old
 
 		//__COUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
 		//if( name != groupName) continue; // superfluous check, but just to make sure the db filter worked
+
+		fullName = ConfigurationGroupKey::getFullGroupString(groupName,key);
 
 		__COUT__ << "checking group... " << fullName << std::endl;
 		compareToMemberMap = theInterface_->getConfigurationGroupMembers(fullName);
@@ -662,9 +773,10 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 //	else, bumps latest version found in db
 //
 //	Note: groupMembers map will get modified with group metadata table version
-ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const std::string &groupName,
+ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
+		const std::string &groupName,
 		std::map<std::string, ConfigurationVersion> &groupMembers,
-		ConfigurationGroupKey previousVersion, const std::string &groupComment)
+		const std::string &groupComment)
 {
 	//steps:
 	//	determine new group key
@@ -682,9 +794,10 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 
 	//determine new group key
 	ConfigurationGroupKey newKey;
-	if(!previousVersion.isInvalid())	//if previous provided, bump that
-		newKey = ConfigurationGroupKey::getNextKey(previousVersion);
-	else							//get latest key from db, and bump
+	//CHANGED do not allow bumping, it is too risky.. because database allows it.. and then it corrupts database
+	//if(!previousVersion.isInvalid())	//if previous provided, bump that
+	//	newKey = ConfigurationGroupKey::getNextKey(previousVersion);
+	//else							//get latest key from db, and bump
 	{
 		std::set<ConfigurationGroupKey> keys = theInterface_->getKeys(groupName);
 		if(keys.size()) //if keys exist, bump the last
@@ -771,6 +884,10 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(const st
 		__COUT_ERR__ << "Failed to create config group: " << groupName << ":" << newKey << std::endl;
 		throw;
 	}
+
+
+	//store cache of recent groups
+	cacheGroupKey(groupName,newKey);
 
 	// at this point succeeded!
 	return newKey;

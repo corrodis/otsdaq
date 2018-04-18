@@ -160,7 +160,12 @@ void XmlDocument::terminatePlatform(void)
 //	returns pointer to element that is added
 xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, std::string childText, xercesc::DOMElement* parent)
 {
-    if(parent == 0) return 0;
+    if(parent == 0)
+    {
+    	__SS__ << "Illegal Null Parent Pointer!" << __E__;
+    	throw std::runtime_error(ss.str());
+    	//return 0;
+    }
     xercesc::DOMElement* child;
     try
     {

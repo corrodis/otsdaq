@@ -38,6 +38,7 @@ struct identity { typedef T type; };
 class ConfigurationTree
 {
 	friend class ConfigurationGUISupervisor;
+	friend class Iterator;
 
 public:
 	//Note: due to const members, implicit copy constructor exists, but NOT assignment operator=
@@ -57,7 +58,7 @@ public:
 //	  col_						(a.col_),
 //	  configView_				(a.configView_)
 //	{
-//		std::cout << __PRETTY_FUNCTION__ << std::endl;
+//		__COUT__ << std::endl;
 //		//return *this;
 //	}
 
@@ -66,17 +67,17 @@ public:
 
 	ConfigurationTree& operator=(const ConfigurationTree& a)
 	{
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
 		//Note: Members of the ConfigurationTree are declared constant.
 		//	(Refer to comments at top of class declaration for solutions)
 		//	So this operator cannot work.. SO I am going to crash just in case it is called by mistake
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
 		exit(0);
 
 		//copy to const members is not allowed.. but would look like this:
@@ -89,7 +90,7 @@ public:
 		//row_			= a.row_;
 		//col_			= a.col_;
 		configView_	    = a.configView_;
-		std::cout << __PRETTY_FUNCTION__ << "OPERATOR COPY CONSTRUCTOR" << std::endl;
+		__COUT__ << "OPERATOR COPY CONSTRUCTOR" << std::endl;
 		return *this;
 	};
 
@@ -104,6 +105,7 @@ public:
 	static const std::string NODE_TYPE_UID_LINK;
 	static const std::string NODE_TYPE_VALUE;
 	static const std::string NODE_TYPE_UID;
+	static const std::string NODE_TYPE_ROOT;
 
 
 	//Methods
@@ -222,10 +224,12 @@ public:
 
 	//navigating between nodes
 	ConfigurationTree						getNode				        (const std::string& nodeName, bool doNotThrowOnBrokenUIDLinks=false) const;
-	ConfigurationTree				        getBackNode 		        (      std::string  nodeName, unsigned int backSteps=1) const;
+	ConfigurationTree				        getBackNode 		        (	   std::string  nodeName, unsigned int backSteps=1) const;
+	ConfigurationTree				        getForwardNode 		        (      std::string  nodeName, unsigned int forwardSteps=1) const;
 
 
 	//extracting information from node
+	const ConfigurationManager*				getConfigurationManager		(void) const { return configMgr_; }
 	const std::string&						getConfigurationName		(void) const;
 	const std::string&						getFieldConfigurationName	(void) const;
 	const ConfigurationVersion&				getConfigurationVersion		(void) const;
@@ -250,6 +254,7 @@ public:
 
 	//boolean info
 	bool									isDefaultValue				(void) const;
+	bool									isRootNode	        		(void) const;
 	bool									isConfigurationNode	        (void) const;
 	bool									isValueNode			        (void) const;
 	bool									isDisconnected		        (void) const;
@@ -312,7 +317,7 @@ private:
 	//	- value node is a pointer to a cell in a config table
 	//
 	//Assumption: uid column is present
-	const ConfigurationManager* configMgr_;
+	const ConfigurationManager* configMgr_; 	//root node
 	const ConfigurationBase* 	configuration_; //config node
 	const std::string			groupId_;		//group config node
 	const ConfigurationBase* 	linkParentConfig_; //link node parent config pointer (could be used to traverse backwards through tree)

@@ -11,14 +11,14 @@ using namespace ots;
 //========================================================================================================================
 TransmitterSocket::TransmitterSocket(void)
 {
-	__COUT__ << std::endl;
+	__COUT__ << "TransmitterSocket constructor " << __E__;
 }
 
 //========================================================================================================================
 TransmitterSocket::TransmitterSocket(const std::string &IPAddress, unsigned int port)
 	: Socket(IPAddress, port)
 {
-	__COUT__ << std::endl;
+	__COUT__ << "TransmitterSocket constructor " << IPAddress << ":" << port << __E__;
 }
 
 //========================================================================================================================
@@ -71,7 +71,8 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer,
 			usleep(10000);
 		else
 			delay = true;
-		sts = sendto(socketNumber_, buffer.c_str() + offset, thisSize, 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
+		sts = sendto(socketNumber_, buffer.c_str() + offset, thisSize, 0,
+				(struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
 		offset += sts;
 	}
 
@@ -102,7 +103,8 @@ int TransmitterSocket::send(Socket& toSocket, const std::vector<uint16_t>& buffe
 	while (offset < buffer.size() && sts > 0)
 	{
 		auto thisSize = 2 * (buffer.size() - offset) > MAX_SEND_SIZE ? MAX_SEND_SIZE : 2 * (buffer.size() - offset);
-		sts = sendto(socketNumber_, &buffer[0] + offset, thisSize, 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
+		sts = sendto(socketNumber_, &buffer[0] + offset, thisSize, 0,
+				(struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in));
 		offset += sts / 2;
 	}
 
@@ -125,7 +127,8 @@ int TransmitterSocket::send(Socket& toSocket, const std::vector<uint32_t>& buffe
 	//			" from-port: " << ntohs(socketAddress_.sin_port) <<
 	//			" to-port: " << ntohs(toSocket.getSocketAddress().sin_port) << std::endl;
 
-	if (sendto(socketNumber_, &buffer[0], buffer.size() * sizeof(uint32_t), 0, (struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in)) < (int)(buffer.size() * sizeof(uint32_t)))
+	if (sendto(socketNumber_, &buffer[0], buffer.size() * sizeof(uint32_t), 0,
+			(struct sockaddr *)&(toSocket.getSocketAddress()), sizeof(sockaddr_in)) < (int)(buffer.size() * sizeof(uint32_t)))
 	{
 		__COUT__ << "Error writing buffer for port " << ntohs(socketAddress_.sin_port) << std::endl;
 		return -1;

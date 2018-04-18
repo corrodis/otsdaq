@@ -2,8 +2,8 @@
 #define _ots_ARTDAQConsumer_h_
 
 #include "otsdaq-core/DataManager/DataConsumer.h"
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
-#include "artdaq/Application/BoardReaderCore.hh"
+#include "otsdaq-core/Configurable/Configurable.h"
+#include "artdaq/Application/BoardReaderApp.hh"
 
 
 #include <future>
@@ -38,8 +38,7 @@ public:
 private:
     bool workLoopThread(toolbox::task::WorkLoop* workLoop){return false;}
 
-    std::unique_ptr<artdaq::BoardReaderCore> fragment_receiver_ptr_;
-    std::future<size_t>                      fragment_processing_future_;
+    std::unique_ptr<artdaq::BoardReaderApp> fragment_receiver_ptr_;
     std::string                              name_;
 
     //FIXME These should go...

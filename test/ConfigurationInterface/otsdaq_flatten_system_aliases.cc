@@ -364,11 +364,10 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 		//load group and tables from original DB
 		try
 		{
-			memberMap =
-				cfgMgr->loadConfigurationGroup(
+			cfgMgr->loadConfigurationGroup(
 					groupPair.first.first,
 					groupPair.first.second,
-					true,0,&accumulateErrors);
+					true,&memberMap/*memberMap*/,0,&accumulateErrors);
 		}
 		catch(std::runtime_error& e)
 		{
@@ -636,11 +635,10 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			std::endl;
 
 	{
-		memberMap =
-				cfgMgr->loadConfigurationGroup(
+		 cfgMgr->loadConfigurationGroup(
 						activeBackboneGroupName,
 						activeGroupKeys[activeBackboneGroupName].second,
-						true,0,&accumulateErrors);
+						true,&memberMap,0,&accumulateErrors);
 
 		//modify GroupAliasesConfiguration and VersionAliasesConfiguration to point
 		//	at DEFAULT and flatVersion respectively

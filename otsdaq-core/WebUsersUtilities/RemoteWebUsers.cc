@@ -7,11 +7,11 @@
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
-#include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
-
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
+
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 
 
 using namespace ots;
@@ -85,6 +85,11 @@ using namespace ots;
 
 
 
+const std::string RemoteWebUsers::REQ_NO_LOGIN_RESPONSE 		= "NoLogin";
+const std::string RemoteWebUsers::REQ_NO_PERMISSION_RESPONSE 	= "NoPermission";
+const std::string RemoteWebUsers::REQ_USER_LOCKOUT_RESPONSE 	= "UserLockout";
+const std::string RemoteWebUsers::REQ_LOCK_REQUIRED_RESPONSE 	= "LockRequired";
+const std::string RemoteWebUsers::REQ_ALLOW_NO_USER 			= "AllowNoUser";
 
 RemoteWebUsers::RemoteWebUsers(xdaq::Application* application)
 : SOAPMessenger  (application)
@@ -97,19 +102,21 @@ RemoteWebUsers::RemoteWebUsers(xdaq::Application* application)
 //xmlLoginGateway
 //	if false, user code should just return.. out is handled on false; on true, out is untouched
 bool RemoteWebUsers::xmlLoginGateway(
-		cgicc::Cgicc 					&cgi,
-		std::ostringstream 				*out,
-		HttpXmlDocument 				*xmldoc,
-		const SupervisorDescriptorInfo 	&theSupervisorsDescriptorInfo,
-		uint8_t 						*userPermissions,
+		cgicc::Cgicc& 					cgi,
+		std::ostringstream* 			out,
+		HttpXmlDocument* 				xmldoc,
+		const AllSupervisorInfo& 		allSupervisorInfo,
+		uint8_t* 						userPermissions,
 		const bool						refresh,
 		const uint8_t 					permissionsThreshold,
 		const bool						checkLock,
 		const bool						lockRequired,
-		std::string 					*userWithLock,
-		std::string 					*userName,
-		std::string 					*displayName,
-		uint64_t 						*activeSessionIndex)
+		std::string* 					userWithLock,
+		std::string* 					userName,
+		std::string* 					displayName,
+		uint64_t* 						activeSessionIndex,
+		const bool						allowNoUser
+		)
 {
 	//initialized optional acquisition parameters to failed results
 	if(userPermissions) 	*userPermissions    = 0;
@@ -123,10 +130,10 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 	//const_cast away the const
 	//	so that this line is compatible with slf6 and slf7 versions of xdaq
-	//	where they changed to const xdaq::ApplicationDescriptor* in slf7
+	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 	//
 	// XDAQ_CONST_CALL is defined in "otsdaq-core/Macros/CoutHeaderMacros.h"
-	const xdaq::ApplicationDescriptor* gatewaySupervisor;
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor;
 
 	SOAPParameters               parameters;
 	xoap::MessageReference       retMsg;
@@ -142,8 +149,7 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 	/////////////////////////////////////////////////////
 	//have CookieCode, try it out
-	gatewaySupervisor = theSupervisorsDescriptorInfo.getSupervisorDescriptor();
-	if(!gatewaySupervisor) //assume using wizard mode
+	if(allSupervisorInfo.isWizardMode())
 	{
 		//if missing CookieCode... check if in Wizard mode and using sequence
 		std::string sequence = CgiDataUtilities::getOrPostData(cgi,"sequence"); //from GET or POST
@@ -157,7 +163,7 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 		//have sequence, try it out
 
-		gatewaySupervisor =	theSupervisorsDescriptorInfo.getWizardDescriptor();
+		gatewaySupervisor =	allSupervisorInfo.getWizardInfo().getDescriptor();
 		if(!gatewaySupervisor)
 		{
 			*out << RemoteWebUsers::REQ_NO_LOGIN_RESPONSE;
@@ -192,6 +198,9 @@ bool RemoteWebUsers::xmlLoginGateway(
 		return true; //successful sequence login!
 	}
 
+
+	gatewaySupervisor = allSupervisorInfo.getGatewayInfo().getDescriptor();
+
 	//__COUT__ << std::endl;
 
 	parameters.clear();
@@ -215,13 +224,13 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 	//__COUT__ << "cookieCode=" << cookieCode << std::endl;
 
-	if(cookieCode.length() != COOKIE_CODE_LENGTH)
+	if(!allowNoUser && cookieCode.length() != COOKIE_CODE_LENGTH)
 	{
 		*out << RemoteWebUsers::REQ_NO_LOGIN_RESPONSE;
 		return false;	//invalid cookie and present sequence, but not correct sequence
 	}
 
-	if(tmpUserPermissions_ < permissionsThreshold)
+	if(!allowNoUser && tmpUserPermissions_ < permissionsThreshold)
 	{
 		*out << RemoteWebUsers::REQ_NO_PERMISSION_RESPONSE;
 		__COUT__ << "User has insufficient permissions: " << tmpUserPermissions_ << "<" <<
@@ -230,7 +239,12 @@ bool RemoteWebUsers::xmlLoginGateway(
 	}
 
 	if(xmldoc) //fill with cookie code tag
-		xmldoc->setHeader(cookieCode);
+	{	
+		if(!allowNoUser)
+			xmldoc->setHeader(cookieCode);
+		else
+			xmldoc->setHeader(RemoteWebUsers::REQ_ALLOW_NO_USER);			
+	}
 
 	if(!userName && !displayName && !activeSessionIndex && !checkLock && !lockRequired)
 		return true; //done, no need to get user info for cookie
@@ -273,18 +287,10 @@ bool RemoteWebUsers::xmlLoginGateway(
 }
 
 //========================================================================================================================
-//isWizardMode
-//	return true if in wizard configuration mode
-bool RemoteWebUsers::isWizardMode(const SupervisorDescriptorInfo& theSupervisorsDescriptorInfo)
-{
-	return theSupervisorsDescriptorInfo.getWizardDescriptor()?true:false;
-}
-
-//========================================================================================================================
 //getActiveUserList
 //	if lastUpdateTime is not too recent as spec'd by ACTIVE_USERS_UPDATE_THRESHOLD
 //	if server responds with
-std::string RemoteWebUsers::getActiveUserList(const xdaq::ApplicationDescriptor* supervisorDescriptor)
+std::string RemoteWebUsers::getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor)
 {
 
 	if(1 || time(0) - ActiveUserLastUpdateTime_ > ACTIVE_USERS_UPDATE_THRESHOLD) //need to update
@@ -311,7 +317,7 @@ std::string RemoteWebUsers::getActiveUserList(const xdaq::ApplicationDescriptor*
 //	returns empty "" for actionTimeString on failure
 //	returns "Wed Dec 31 18:00:01 1969 CST" for actionTimeString (in CST) if action never has occurred
 std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::getLastConfigGroup(
-		const xdaq::ApplicationDescriptor* supervisorDescriptor,
+		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 		const std::string &actionOfLastGroup,
 		std::string &actionTimeString)
 {
@@ -348,7 +354,7 @@ std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::get
 //	get username and display name for user based on cookie code
 //	return true, if user info gotten successfully
 //	else false
-bool RemoteWebUsers::getUserInfoForCookie(const xdaq::ApplicationDescriptor* supervisorDescriptor,
+bool RemoteWebUsers::getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 		std::string &cookieCode, std::string *userName, std::string *displayName, uint64_t *activeSessionIndex)
 {
 	__COUT__ << std::endl;
@@ -375,7 +381,7 @@ bool RemoteWebUsers::getUserInfoForCookie(const xdaq::ApplicationDescriptor* sup
 //========================================================================================================================
 //cookieCodeIsActiveForRequest
 //	for external supervisors to check with Supervisor for login
-bool RemoteWebUsers::cookieCodeIsActiveForRequest(const xdaq::ApplicationDescriptor* supervisorDescriptor,
+bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 		std::string &cookieCode, uint8_t *userPermissions, std::string ip, bool refresh, std::string *userWithLock)
 {
 	//__COUT__ << "CookieCode: " << cookieCode << " " << cookieCode.length() << std::endl;
@@ -410,7 +416,7 @@ bool RemoteWebUsers::cookieCodeIsActiveForRequest(const xdaq::ApplicationDescrip
 //sendSystemMessage
 //	send system message to toUser through Supervisor
 //	toUser wild card * is to all users
-void RemoteWebUsers::sendSystemMessage(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg)
+void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ToUser" , toUser);
@@ -423,7 +429,7 @@ void RemoteWebUsers::sendSystemMessage(const xdaq::ApplicationDescriptor* superv
 //========================================================================================================================
 //makeSystemLogbookEntry
 //	make system logbook through Supervisor
-void RemoteWebUsers::makeSystemLogbookEntry(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText)
+void RemoteWebUsers::makeSystemLogbookEntry(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("EntryText", entryText);

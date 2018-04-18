@@ -25,6 +25,7 @@ public:
 	xercesc::DOMElement*	getRootDataElement			() { return dataElement_; }
 
 	xercesc::DOMElement* 	addTextElementToData		(const std::string &field, const std::string &value = "");
+	xercesc::DOMElement* 	addBinaryStringToData		(const std::string &field, const std::string &binary);
 
 	void  	             	copyDataChildren			(HttpXmlDocument &document);
 

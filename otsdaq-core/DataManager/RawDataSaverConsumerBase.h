@@ -2,7 +2,7 @@
 #define _ots_RawDataSaverConsumerBase_h_
 
 #include "otsdaq-core/DataManager/DataConsumer.h"
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
+#include "otsdaq-core/Configurable/Configurable.h"
 
 #include <string>
 #include <fstream>

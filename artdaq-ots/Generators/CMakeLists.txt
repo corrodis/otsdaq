@@ -5,11 +5,12 @@ simple_plugin(UDPReceiver "generator"
   artdaq-core_Utilities
   artdaq-core_Data
   canvas
-  MessageFacility
   pthread
   ${FHICLCPP}
   ${CETLIB}
   ${CETLIB_EXCEPT}
+  ${MF_MESSAGELOGGER}
+  ${Boost_SYSTEM_LIBRARY}
   )
 
 install_headers()

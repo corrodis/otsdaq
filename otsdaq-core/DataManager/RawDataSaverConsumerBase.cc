@@ -24,8 +24,8 @@ RawDataSaverConsumerBase::RawDataSaverConsumerBase(std::string supervisorApplica
 
 {
 
-	FILE *fp = fopen( "/home/otsdaq/tsave.txt","w");
-	if(fp)fclose(fp);
+	//FILE *fp = fopen( "/home/otsdaq/tsave.txt","w");
+	//if(fp)fclose(fp);
 }
 
 //========================================================================================================================

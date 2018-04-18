@@ -10,8 +10,8 @@ using namespace ots;
 
 
 //========================================================================================================================
-//addSysMsg
-void SystemMessenger::addSysMsg(std::string targetUser, std::string msg)
+//addSystemMessage
+void SystemMessenger::addSystemMessage(std::string targetUser, std::string msg)
 {
 	sysMsgCleanup();
 
@@ -32,12 +32,12 @@ void SystemMessenger::addSysMsg(std::string targetUser, std::string msg)
 }
 
 //========================================================================================================================
-//getSysMsg
+//getSystemMessage
 //	Deliver | separated system messages (time | msg | time | msg...etc),
 //		if there is any in vector set for user or for wildcard *
 //	Empty std::string "" returned if no message for targetUser
 //	Note: | is an illegal character and will cause GUI craziness
-std::string SystemMessenger::getSysMsg(std::string targetUser)
+std::string SystemMessenger::getSystemMessage(std::string targetUser)
 {
 	//std::cout << __COUT_HDR_FL__ << "Current System Messages: " << targetUser <<  std::endl << std::endl;
 	std::string retStr = "";

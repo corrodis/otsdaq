@@ -128,10 +128,17 @@ public:
 		const std::string Tables_ 					= "CSVTargetTables";
 		const std::string UIDs_ 					= "CSVTargetUIDs";
 	} targetParams_;
-	static struct TargetColumns
+	static struct CommandTargetColumns
+	{
+		const std::string TargetsLink_ 				= "LinkToTargets";
+		const std::string TargetsLinkGroupID_		= "LinkToTargetsGroupID";
+
+	} commandTargetCols_;
+	static struct TargetTableColumns
 	{
 		const std::string GroupID_ 					= "IterationTargetGroupID";
 		const std::string TargetLink_ 				= "LinkToTarget";
+		const std::string TargetLinkUID_ 			= "LinkToTargetUID";
 	} targetCols_;
 
 

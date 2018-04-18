@@ -13,6 +13,7 @@
 #include <sstream>      // std::stringstream, std::stringbuf
 #include <vector>
 #include <cassert>
+#include <set>
 #include <stdlib.h>
 #include <time.h>       /* time_t, time, ctime */
 
@@ -136,97 +137,163 @@ public:
 
 		T retValue;
 
-		if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_NUMBER) //handle numbers
+		try
 		{
-			std::string data = convertEnvironmentVariables?convertEnvVariables(value):
-					value;
-
-			if(!isNumber(data))
+			if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_NUMBER) //handle numbers
 			{
-				__SS__ << (data + " is not a number!") << std::endl;
-				__COUT__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
+				std::string data = convertEnvironmentVariables?convertEnvVariables(value):
+						value;
+
+				if(!isNumber(data))
+				{
+					__SS__ << (data + " is not a number!") << std::endl;
+					__COUT__ << "\n" << ss.str();
+					throw std::runtime_error(ss.str());
+				}
+
+				if(typeid(double) == typeid(retValue))
+					retValue = strtod(data.c_str(),0);
+				else if(typeid(float) == typeid(retValue))
+					retValue = strtof(data.c_str(),0);
+				else if(data.size() > 2 && data[1] == 'x') //assume hex value
+					retValue = strtol(data.c_str(),0,16);
+				else if(data.size() > 1 && data[0] == 'b') //assume binary value
+					retValue = strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
+				else
+					retValue = strtol(data.c_str(),0,10);
+
+				return retValue;
+			}
+			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
+					columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
+					(typeid(int) == typeid(retValue) ||
+							typeid(unsigned int) == typeid(retValue)))
+			{
+				//this case is for if fixed choice type but int is requested
+				//	then return index in fixed choice list
+				//	(always consider DEFAULT as index 0)
+				//throw error if no match
+
+				if(value == ViewColumnInfo::DATATYPE_STRING_DEFAULT)
+					retValue = 0;
+				else
+				{
+					std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
+
+					//				for(const auto& choice: choices)
+					//					__COUT__ << "choice " << choice << __E__;
+
+					//consider arbitrary bool
+					bool skipOne = (choices.size() &&
+							choices[0].find("arbitraryBool=") == 0);
+
+					for(retValue=1 + (skipOne?1:0);retValue-1<(T)choices.size();++retValue)
+						if(value == choices[retValue-1])
+							return retValue - (skipOne?1:0); //value has been set to selected choice index, so return
+
+					__SS__ << "\tInvalid value for column data type: " << columnsInfo_[col].getDataType()
+								<< " in configuration " << tableName_
+								<< " at column=" << columnsInfo_[col].getName()
+								<< " for getValue with type '" << ots_demangle(typeid(retValue).name())
+								<< ".'"
+								<< "Attempting to get index of '" << value
+								<< " in fixed choice array, but was not found in array. "
+								<< "Here are the valid choices:\n";
+					ss << "\t" << ViewColumnInfo::DATATYPE_STRING_DEFAULT << "\n";
+					for(const auto &choice:choices)
+						ss << "\t" << choice << "\n";
+					__COUT__ << "\n" << ss.str();
+					throw std::runtime_error(ss.str());
+				}
+
+				return retValue;
+			}
+			else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
+					typeid(bool) == typeid(retValue)) //handle bool
+			{
+				if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_ON_OFF)
+					retValue = (value == ViewColumnInfo::TYPE_VALUE_ON) ? true:false;
+				else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_TRUE_FALSE)
+					retValue = (value == ViewColumnInfo::TYPE_VALUE_TRUE) ? true:false;
+				else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_YES_NO)
+					retValue = (value == ViewColumnInfo::TYPE_VALUE_YES) ? true:false;
+				else if(value.length() && value[0] == '1') //for converting pure string types
+					retValue = true;
+				else if(value.length() && value[0] == '0') //for converting pure string types
+					retValue = false;
+				else
+				{
+					__SS__ << "Invalid boolean value encountered: " << value << __E__;
+					__SS_THROW__;
+				}
+
+				return retValue;
+			}
+			else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
+					typeid(std::string) != typeid(retValue))
+			{
+				std::string data = convertEnvironmentVariables?convertEnvVariables(value):
+						value;
+
+				if(isNumber(data))
+				{
+					//allow string conversion to integer for ease of use
+
+					if(typeid(double) == typeid(retValue))
+						retValue = strtod(data.c_str(),0);
+					else if(typeid(float) == typeid(retValue))
+						retValue = strtof(data.c_str(),0);
+					else if(typeid(unsigned int) == typeid(retValue) ||
+							typeid(int) == typeid(retValue) ||
+							typeid(unsigned long long) == typeid(retValue) ||
+							typeid(long long) == typeid(retValue) ||
+							typeid(unsigned long) == typeid(retValue) ||
+							typeid(long) == typeid(retValue) ||
+							typeid(unsigned short) == typeid(retValue) ||
+							typeid(short) == typeid(retValue) ||
+							typeid(uint8_t) == typeid(retValue))
+					{
+						if(data.size() > 2 && data[1] == 'x') //assume hex value
+							retValue = (T)strtol(data.c_str(),0,16);
+						else if(data.size() > 1 && data[0] == 'b') //assume binary value
+							retValue = (T)strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
+						else
+							retValue = (T)strtol(data.c_str(),0,10);
+					}
+					else
+					{
+						__SS__ << "Invalid type requested for a numeric string." << __E__;
+						__SS_THROW__;
+					}
+
+					return retValue;
+				}
+				else
+				{
+					__SS__ << "Invalid type requested for a non-numeric string (must request std::string)." << __E__;
+					__SS_THROW__;
+				}
 			}
 
-			if(typeid(double) == typeid(retValue))
-				retValue = strtod(data.c_str(),0);
-			else if(typeid(float) == typeid(retValue))
-				retValue = strtof(data.c_str(),0);
-			else if(data.size() > 2 && data[1] == 'x') //assume hex value
-				retValue = strtol(data.c_str(),0,16);
-			else if(data.size() > 1 && data[0] == 'b') //assume binary value
-				retValue = strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
-			else
-				retValue = strtol(data.c_str(),0,10);
+			//if here, then there was a problem
+			throw std::runtime_error("Error.");
 		}
-		else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
-				columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
-				(typeid(int) == typeid(retValue) ||
-						typeid(unsigned int) == typeid(retValue)))
+		catch(const std::runtime_error& e)
 		{
-			//this case is for if fixed choice type but int is requested
-			//	then return index in fixed choice list
-			//	(always consider DEFAULT as index 0)
-			//throw error if no match
-
-			if(value == ViewColumnInfo::DATATYPE_STRING_DEFAULT)
-				retValue = 0;
-			else
-			{
-				std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
-
-				//				for(const auto& choice: choices)
-				//					__COUT__ << "choice " << choice << __E__;
-
-				//consider arbitrary bool
-				bool skipOne = (choices.size() &&
-						choices[0].find("arbitraryBool=") == 0);
-
-				for(retValue=1 + (skipOne?1:0);retValue-1<(T)choices.size();++retValue)
-					if(value == choices[retValue-1])
-						return retValue - (skipOne?1:0); //value has been set to selected choice index, so return
-
-				__SS__ << "\tInvalid value for column data type: " << columnsInfo_[col].getDataType()
-						<< " in configuration " << tableName_
-						<< " at column=" << columnsInfo_[col].getName()
-						<< " for getValue with type '" << ots_demangle(typeid(retValue).name())
-						<< ".'"
-						<< "Attempting to get index of '" << value
-						<< " in fixed choice array, but was not found in array. "
-						<< "Here are the valid choices:\n";
-				ss << "\t" << ViewColumnInfo::DATATYPE_STRING_DEFAULT << "\n";
-				for(const auto &choice:choices)
-					ss << "\t" << choice << "\n";
-				__COUT__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
-			}
-		}
-		else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
-				typeid(bool) == typeid(retValue)) //handle bool
-		{
-			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_ON_OFF)
-				retValue = (value == ViewColumnInfo::TYPE_VALUE_ON) ? true:false;
-			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_TRUE_FALSE)
-				retValue = (value == ViewColumnInfo::TYPE_VALUE_TRUE) ? true:false;
-			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_YES_NO)
-				retValue = (value == ViewColumnInfo::TYPE_VALUE_YES) ? true:false;
-		}
-		else
-		{
-			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
-				__COUT_WARN__ << "For column type " << ViewColumnInfo::TYPE_FIXED_CHOICE_DATA
-					<< " the only valid numeric types are 'int' and 'unsigned int.'";
-
 			__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
-					<< " and column type: " << columnsInfo_[col].getType()
-					<< ", in configuration " << tableName_
-					<< " at column=" << columnsInfo_[col].getName()
-					<< " for getValue with type '" << ots_demangle(typeid(retValue).name())
-					<< "'" << std::endl;
+				<< " and column type: " << columnsInfo_[col].getType()
+				<< ", in configuration " << tableName_
+				<< " at column=" << columnsInfo_[col].getName()
+				<< " for getValue with type '" << ots_demangle(typeid(retValue).name())
+				<< "'" << std::endl;
+
+			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
+				ss << "For column type " << ViewColumnInfo::TYPE_FIXED_CHOICE_DATA
+				<< " the only valid numeric types are 'int' and 'unsigned int.'" << __E__;
+
+			ss << e.what() << __E__;
 			throw std::runtime_error(ss.str());
 		}
-
-		return retValue;
 	} // end validateValueForColumn()
 	//special version of getValue for string type
 	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
@@ -303,7 +370,7 @@ public:
 
 	//==============================================================================
 	void				resizeDataView		(unsigned int nRows, unsigned int nCols);
-	int					addRow        		(const std::string &author = "", std::string baseNameAutoUID = ""); //returns index of added row, always is last row
+	int					addRow        		(const std::string &author = "", bool incrementUniqueData = false, std::string baseNameAutoUID = ""); //returns index of added row, always is last row
 	void 				deleteRow     		(int r);
 
 	//Lore did not like this.. wants special access through separate Supervisor for "Database Management" int		addColumn(std::string name, std::string viewName, std::string viewType); //returns index of added column, always is last column unless
@@ -331,7 +398,7 @@ private:
 
 	// Return "" if there is no conversion
 	std::string        	convertEnvVariables	(const std::string& data) const;
-	bool                isNumber           	(const std::string& s) const;
+	bool 		        isNumber           	(const std::string& s) const;
 
 	std::string							uniqueStorageIdentifier_; //starts empty "", used to implement re-writeable views ("temporary views") in artdaq db
 	std::string                 		tableName_   	;	//View name (extensionTableName in xml)

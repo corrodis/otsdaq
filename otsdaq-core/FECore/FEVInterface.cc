@@ -268,25 +268,37 @@ void FEVInterface::registerFEMacroFunction(
 
 
 //========================================================================================================================
-//getInputArgumentString
+//getFEMacroInputArgument
 //	helper function for getting the value of an argument
 const std::string& FEVInterface::getFEMacroInputArgument(frontEndMacroInArgs_t& argsIn,
 		const std::string& argName)
 {
-
 	for(const std::pair<const std::string /* input arg name */ , const std::string /* arg input value */ >&
 			pair : argsIn)
 	{
 		if(pair.first == argName)
+		{
+
+			__COUT__ << "argName : " << pair.second << __E__;
 			return pair.second;
+		}
 	}
 	__SS__ << "Requested input argument not found with name '" << argName << "'" << std::endl;
 	__COUT_ERR__ << "\n" << ss.str();
 	throw std::runtime_error(ss.str());
 }
+//========================================================================================================================
+//getFEMacroInputArgumentValue
+//	helper function for getting the copy of the value of an argument
+template<>
+std::string	getFEMacroInputArgumentValue<std::string>(FEVInterface::frontEndMacroInArgs_t &argsIn,
+		const std::string &argName)
+{
+	return FEVInterface::getFEMacroInputArgument(argsIn,argName);
+}
 
 //========================================================================================================================
-//getOutputArgumentString
+//getFEMacroOutputArgument
 //	helper function for getting the value of an argument
 std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& argsOut,
 		const std::string& argName)
@@ -303,10 +315,122 @@ std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& args
 	throw std::runtime_error(ss.str());
 }
 
+//========================================================================================================================
+//runSequenceOfCommands
+//	runs a sequence of write commands from a linked section of the configuration tree
+//		based on these fields:
+//			- WriteAddress,  WriteValue, StartingBitPosition, BitFieldSize
+void FEVInterface::runSequenceOfCommands(const std::string &treeLinkName)
+{
+	std::map<uint64_t,uint64_t> writeHistory;
+	uint64_t writeAddress, writeValue, bitMask;
+	uint8_t bitPosition;
 
+	std::string writeBuffer;
+	std::string readBuffer;
+	char msg[1000];
+	try
+	{
+		auto configSeqLink = theXDAQContextConfigTree_.getNode(theConfigurationPath_).getNode(
+				treeLinkName);
 
+		if(configSeqLink.isDisconnected())
+			__COUT__ << "Disconnected configure sequence" << std::endl;
+		else
+		{
+			__COUT__ << "Handling configure sequence." << std::endl;
+			auto childrenMap = configSeqLink.getChildrenMap();
+			for(const auto &child:childrenMap)
+			{
+				//WriteAddress and WriteValue fields
 
+				writeAddress = child.second.getNode("WriteAddress").getValue<uint64_t>();
+				writeValue = child.second.getNode("WriteValue").getValue<uint64_t>();
+				bitPosition = child.second.getNode("StartingBitPosition").getValue<uint8_t>();
+				bitMask = (1 << child.second.getNode("BitFieldSize").getValue<uint8_t>())-1;
 
+				writeValue &= bitMask;
+				writeValue <<= bitPosition;
+				bitMask = ~(bitMask<<bitPosition);
+
+				//place into write history
+				if(writeHistory.find(writeAddress) == writeHistory.end())
+					writeHistory[writeAddress] = 0;//init to 0
+
+				writeHistory[writeAddress] &= bitMask; //clear incoming bits
+				writeHistory[writeAddress] |= writeValue; //add incoming bits
+
+				sprintf(msg,"\t Writing %s: \t %ld(0x%lX) \t %ld(0x%lX)", child.first.c_str(),
+						writeAddress, writeAddress,
+						writeHistory[writeAddress], writeHistory[writeAddress]);
+
+				__COUT__ << msg << std::endl;
+
+				universalWrite((char *)&writeAddress,(char *)&(writeHistory[writeAddress]));
+			}
+		}
+	}
+	catch(const std::runtime_error &e)
+	{
+		__COUT__ << "Error accessing sequence, so giving up:\n" << e.what() << std::endl;
+	}
+	catch(...)
+	{
+		__COUT__ << "Unknown Error accessing sequence, so giving up." << std::endl;
+	}
+}
+
+//==============================================================================
+//isNumber ~~
+//	returns true if hex ("0x.."), binary("b..."), or base10 number
+bool FEVInterface::isNumber(const std::string& s)
+{
+	//__COUT__ << "string " << s << std::endl;
+	if(s.find("0x") == 0) //indicates hex
+	{
+		//__COUT__ << "0x found" << std::endl;
+		for(unsigned int i=2;i<s.size();++i)
+		{
+			if(!((s[i] >= '0' && s[i] <= '9') ||
+					(s[i] >= 'A' && s[i] <= 'F') ||
+					(s[i] >= 'a' && s[i] <= 'f')
+			))
+			{
+				//__COUT__ << "prob " << s[i] << std::endl;
+				return false;
+			}
+		}
+		//return std::regex_match(s.substr(2), std::regex("^[0-90-9a-fA-F]+"));
+	}
+	else if(s[0] == 'b') //indicates binary
+	{
+		//__COUT__ << "b found" << std::endl;
+
+		for(unsigned int i=1;i<s.size();++i)
+		{
+			if(!((s[i] >= '0' && s[i] <= '1')
+			))
+			{
+				//__COUT__ << "prob " << s[i] << std::endl;
+				return false;
+			}
+		}
+	}
+	else
+	{
+		//__COUT__ << "base 10 " << std::endl;
+		for(unsigned int i=0;i<s.size();++i)
+			if(!((s[i] >= '0' && s[i] <= '9') ||
+					s[i] == '.' ||
+					s[i] == '+' ||
+					s[i] == '-'))
+				return false;
+		//Note: std::regex crashes in unresolvable ways (says Ryan.. also, stop using libraries)
+		//return std::regex_match(s, std::regex("^(\\-|\\+)?[0-9]*(\\.[0-9]+)?"));
+	}
+
+	return true;
+}
 
 
 

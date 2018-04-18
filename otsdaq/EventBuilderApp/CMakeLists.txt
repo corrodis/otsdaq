@@ -12,16 +12,15 @@ cet_make(LIBRARY_NAME EventBuilderApp
 		 ${CETLIB_EXCEPT}
 		 ${XDAQ_BASIC_LIB_LIST}
 		 canvas
-		 MessageFacility
+#		 MessageFacility
 		 ${MF_UTILITIES}
 		 ${Boost_SYSTEM_LIBRARY}
 		 artdaq_Application
-		 artdaq_Application_MPI2
+		 artdaq-core_Utilities
 		 artdaq_DAQdata
 		 artdaq_BuildInfo
-		 MessageFacility
 		 WorkLoopManager
-		 SupervisorDescriptorInfo
+		 SupervisorInfo
 		 FiniteStateMachine
 		 ConfigurationInterface
 		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
