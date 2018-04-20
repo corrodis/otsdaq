@@ -10,6 +10,7 @@
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/GatewaySupervisor/Iterator.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
+#include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -39,6 +40,7 @@ class GatewaySupervisor: public xdaq::Application, public SOAPMessenger, public 
 {
 	friend class WizardSupervisor;
 	friend class Iterator;
+	friend class ARTDAQCommandable;
 
 public:
 
@@ -83,7 +85,7 @@ public:
     void stateHalted     		(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
     void stateConfigured 		(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
     void inError         		(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    
+
     void transitionConfiguring 	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
     void transitionHalting     	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
     void transitionInitializing	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
@@ -119,7 +121,8 @@ private:
     ConfigurationManager*               theConfigurationManager_    ;
     WebUsers 						    theWebUsers_                ;
     SystemMessenger				        theSystemMessenger_         ;
-    
+	ARTDAQCommandable					theArtdaqCommandable_;
+
     WorkLoopManager                     stateMachineWorkLoopManager_;
     toolbox::BSem                      	stateMachineSemaphore_      ;
     WorkLoopManager                    	infoRequestWorkLoopManager_ ;

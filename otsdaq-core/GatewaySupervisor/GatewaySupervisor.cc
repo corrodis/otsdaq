@@ -10,6 +10,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
 #include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+#include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 
 
 #include "otsdaq-core/NetworkUtilities/TransceiverSocket.h" // for UDP state changer
@@ -58,6 +59,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s) throw (xdaq::exc
 ,RunControlStateMachine      	("GatewaySupervisor")
 ,theConfigurationManager_   	(new ConfigurationManager)
 //,theConfigurationGroupKey_    (nullptr)
+, theArtdaqCommandable_(this)
 ,stateMachineWorkLoopManager_	(toolbox::task::bind(this, &GatewaySupervisor::stateMachineThread,"StateMachine"))
 ,stateMachineSemaphore_      	(toolbox::BSem::FULL)
 ,infoRequestWorkLoopManager_ 	(toolbox::task::bind(this, &GatewaySupervisor::infoRequestThread, "InfoRequest"))
@@ -153,6 +155,15 @@ void GatewaySupervisor::init(void)
 	}
 	catch(...)
 	{;} //ignore errors
+
+	try
+	{
+		auto artdaqStateChangePort = configLinkNode.getNode("ARTDAQCommanderID").getValue<int>();
+		auto artdaqStateChangePluginType = configLinkNode.getNode("ARTDAQCommanderType").getValue<std::string>();
+		theArtdaqCommandable_.init(artdaqStateChangePort, artdaqStateChangePluginType);
+	}
+	catch(...)
+	{;}
 
 	if(enableStateChanges)
 	{
