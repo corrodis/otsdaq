@@ -16,7 +16,7 @@ namespace ots {
 
 		void init(int commanderId, std::string commanderType);
 	private:
-		std::unique_ptr<GatewaySupervisor> theSupervisor_;
+		GatewaySupervisor* theSupervisor_;
 		std::unique_ptr<artdaq::CommanderInterface> theCommander_;
 		boost::thread commanderThread_;
 
