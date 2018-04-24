@@ -6,7 +6,7 @@
 
 GETPACKAGEINFO(SimpleSoap)
 
-void SimpleSoap::checkPackageDependencies() throw (config::PackageInfo::VersionException)
+void SimpleSoap::checkPackageDependencies() 
 {
  CHECKDEPENDENCY(config);
  CHECKDEPENDENCY(xcept );        

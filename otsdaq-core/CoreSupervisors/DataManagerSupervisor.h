@@ -13,7 +13,7 @@ public:
 
     XDAQ_INSTANTIATOR();
 
-    DataManagerSupervisor              (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
+    DataManagerSupervisor              (xdaq::ApplicationStub * s) ;
     virtual ~DataManagerSupervisor     (void);
 
 private:

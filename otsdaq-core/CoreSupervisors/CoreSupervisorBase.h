@@ -48,52 +48,52 @@ class CoreSupervisorBase: public xdaq::Application, public SOAPMessenger, public
 
 public:
 
-    CoreSupervisorBase         (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
+    CoreSupervisorBase         (xdaq::ApplicationStub * s);
     virtual ~CoreSupervisorBase(void);
 
     virtual void			setSupervisorPropertyDefaults	(void);
     void 					destroy               			(void);
 
 private:
-    xoap::MessageReference 	workLoopStatusRequestWrapper  	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
-    void 					DefaultWrapper               	(xgi::Input* in, xgi::Output* out)  throw (xgi::exception::Exception);
-    void 					requestWrapper              	(xgi::Input* in, xgi::Output* out)  throw (xgi::exception::Exception);
+    xoap::MessageReference 	workLoopStatusRequestWrapper  	(xoap::MessageReference message )  	;
+    void 					DefaultWrapper               	(xgi::Input* in, xgi::Output* out)  ;
+    void 					requestWrapper              	(xgi::Input* in, xgi::Output* out)  ;
 
 public:
     //common web request handlers
-    virtual void 			Default               			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
-    virtual void			request               			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+    virtual void 			Default               			(xgi::Input* in, xgi::Output* out) ;
+    virtual void			request               			(xgi::Input* in, xgi::Output* out) ;
 
     //bool					loginGateway					(xgi::Input* in, xgi::Output* out);
 
     //State Machine request handlers
-    void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception);
-    void 			        stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception);
-    xoap::MessageReference 	stateMachineXoapHandler      	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
-    xoap::MessageReference 	stateMachineResultXoapHandler	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
+    void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out ) ;
+    void 			        stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out ) ;
+    xoap::MessageReference 	stateMachineXoapHandler      	(xoap::MessageReference message )  	;
+    xoap::MessageReference 	stateMachineResultXoapHandler	(xoap::MessageReference message )  	;
 
-    xoap::MessageReference 	stateMachineStateRequest     	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
-    xoap::MessageReference 	stateMachineErrorMessageRequest	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
+    xoap::MessageReference 	stateMachineStateRequest     	(xoap::MessageReference message )  	;
+    xoap::MessageReference 	stateMachineErrorMessageRequest	(xoap::MessageReference message )  	;
 
-    virtual xoap::MessageReference 	workLoopStatusRequest	(xoap::MessageReference message )  	throw (xoap::exception::Exception);
+    virtual xoap::MessageReference 	workLoopStatusRequest	(xoap::MessageReference message )  	;
 
     bool                    stateMachineThread           	(toolbox::task::WorkLoop* workLoop);
 
-    virtual void 			stateInitial    				(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    virtual void 			statePaused     				(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    virtual void 			stateRunning    				(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    virtual void 			stateHalted     				(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    virtual void 			stateConfigured 				(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    virtual void			inError         				(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
+    virtual void 			stateInitial    				(toolbox::fsm::FiniteStateMachine& fsm) ;
+    virtual void 			statePaused     				(toolbox::fsm::FiniteStateMachine& fsm) ;
+    virtual void 			stateRunning    				(toolbox::fsm::FiniteStateMachine& fsm) ;
+    virtual void 			stateHalted     				(toolbox::fsm::FiniteStateMachine& fsm) ;
+    virtual void 			stateConfigured 				(toolbox::fsm::FiniteStateMachine& fsm) ;
+    virtual void			inError         				(toolbox::fsm::FiniteStateMachine& fsm) ;
 
-    virtual void 			transitionConfiguring 			(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    virtual void 			transitionHalting     			(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    virtual void 			transitionInitializing			(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    virtual void 			transitionPausing     			(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    virtual void 			transitionResuming    			(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    virtual void 			transitionStarting    			(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    virtual void 			transitionStopping    			(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    virtual void 			enteringError         			(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
+    virtual void 			transitionConfiguring 			(toolbox::Event::Reference e) ;
+    virtual void 			transitionHalting     			(toolbox::Event::Reference e) ;
+    virtual void 			transitionInitializing			(toolbox::Event::Reference e) ;
+    virtual void 			transitionPausing     			(toolbox::Event::Reference e) ;
+    virtual void 			transitionResuming    			(toolbox::Event::Reference e) ;
+    virtual void 			transitionStarting    			(toolbox::Event::Reference e) ;
+    virtual void 			transitionStopping    			(toolbox::Event::Reference e) ;
+    virtual void 			enteringError         			(toolbox::Event::Reference e) ;
 
 
     static const std::string	   WORK_LOOP_DONE, WORK_LOOP_WORKING;

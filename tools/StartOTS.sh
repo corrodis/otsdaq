@@ -458,7 +458,7 @@ launchOTSWiz() {
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
 			mv .otsdaq_quiet_run-wiz-${HOSTNAME}.txt .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt
 		fi
-		ssss
+		echo
 		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  \t (hidden file)"
 		echo
 		

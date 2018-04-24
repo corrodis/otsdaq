@@ -28,7 +28,7 @@ toolbox::fsm::State FiniteStateMachine::getProvenanceState(void)
 }
 
 //========================================================================================================================
-toolbox::fsm::State FiniteStateMachine::getTransitionFinalState(const std::string& transition) throw (toolbox::fsm::exception::Exception)
+toolbox::fsm::State FiniteStateMachine::getTransitionFinalState(const std::string& transition) 
 {
 	if(stateTransitionTable_[currentState_].find(transition) != stateTransitionTable_[currentState_].end())
 		return stateTransitionTable_[currentState_][transition];
@@ -62,7 +62,7 @@ time_t FiniteStateMachine::getTimeInState (void)
 }
 
 //========================================================================================================================
-std::string FiniteStateMachine::getCurrentTransitionName(const std::string& transition) throw (toolbox::fsm::exception::Exception)
+std::string FiniteStateMachine::getCurrentTransitionName(const std::string& transition) 
 {
 	if(stateTransitionNameTable_[currentState_].find(transition) != stateTransitionNameTable_[currentState_].end())
 	{
@@ -77,7 +77,7 @@ std::string FiniteStateMachine::getCurrentTransitionName(const std::string& tran
 }
 
 //========================================================================================================================
-std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from, const std::string& transition) throw (toolbox::fsm::exception::Exception)
+std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from, const std::string& transition) 
 {
 	if(stateTransitionNameTable_[from].find(transition) != stateTransitionNameTable_[from].end())
 	{
@@ -92,7 +92,7 @@ std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from
 }
 
 //========================================================================================================================
-std::string FiniteStateMachine::getTransitionParameter(const toolbox::fsm::State from, const std::string& transition) throw (toolbox::fsm::exception::Exception)
+std::string FiniteStateMachine::getTransitionParameter(const toolbox::fsm::State from, const std::string& transition) 
 {
 	if(stateTransitionParameterTable_[from].find(transition) != stateTransitionParameterTable_[from].end())
 	{
@@ -102,20 +102,20 @@ std::string FiniteStateMachine::getTransitionParameter(const toolbox::fsm::State
 }
 
 //========================================================================================================================
-std::string FiniteStateMachine::getTransitionFinalStateName(const std::string& transition) throw (toolbox::fsm::exception::Exception)
+std::string FiniteStateMachine::getTransitionFinalStateName(const std::string& transition) 
 {
 	return getStateName(getTransitionFinalState(transition));
 }
 
 //========================================================================================================================
-bool FiniteStateMachine::execTransition(const std::string& transition) throw (toolbox::fsm::exception::Exception)
+bool FiniteStateMachine::execTransition(const std::string& transition) 
 {
 	const xoap::MessageReference message;//FIXME I would like to have everything in 1 line but like this is not a big deal
 	return execTransition(transition,message);
 }
 
 //========================================================================================================================
-bool FiniteStateMachine::execTransition(const std::string& transition, const xoap::MessageReference& message) throw (toolbox::fsm::exception::Exception)
+bool FiniteStateMachine::execTransition(const std::string& transition, const xoap::MessageReference& message) 
 {
 //	__COUT__ << "Transition?" << inTransition_ << std::endl;
 	if(inTransition_) return false;
