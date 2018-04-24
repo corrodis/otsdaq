@@ -3,7 +3,7 @@ cet_make(LIBRARY_NAME ConfigurationInterface
 		 PluginMakers
 		 ConfigurationDataFormats
 		 ProgressBar
-
+dl
          ${CETLIB}
          artdaq-database_ConfigurationDB
          artdaq-database_DataFormats_Json
