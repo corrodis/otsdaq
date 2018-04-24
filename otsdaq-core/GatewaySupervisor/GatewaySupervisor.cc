@@ -160,9 +160,13 @@ void GatewaySupervisor::init(void)
 
 	try
 	{
-		auto artdaqStateChangePort = configLinkNode.getNode("ARTDAQCommanderID").getValue<int>();
-		auto artdaqStateChangePluginType = configLinkNode.getNode("ARTDAQCommanderType").getValue<std::string>();
-		theArtdaqCommandable_.init(artdaqStateChangePort, artdaqStateChangePluginType);
+		auto artdaqStateChangeEnabled = configLinkNode.getNode("EnableARTDAQCommanderPlugin").getValue<bool>();
+		if (artdaqStateChangeEnabled)
+		{
+			auto artdaqStateChangePort = configLinkNode.getNode("ARTDAQCommanderID").getValue<int>();
+			auto artdaqStateChangePluginType = configLinkNode.getNode("ARTDAQCommanderType").getValue<std::string>();
+			theArtdaqCommandable_.init(artdaqStateChangePort, artdaqStateChangePluginType);
+		}
 	}
 	catch (...)
 	{
