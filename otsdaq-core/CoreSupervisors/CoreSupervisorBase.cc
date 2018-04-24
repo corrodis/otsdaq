@@ -90,10 +90,10 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 				supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
 				" supervisor security settings..." << __E__;
 
-		ConfigurationTree appNode = theConfigurationManager_->getSupervisorNode(
-				supervisorContextUID_, supervisorApplicationUID_);
 		try
 		{
+		ConfigurationTree appNode = theConfigurationManager_->getSupervisorNode(
+				supervisorContextUID_, supervisorApplicationUID_);
 			auto /*map<name,node>*/ children = appNode.getNode("LinkToPropertyConfiguration").getChildren();
 
 			for(auto& child:children)
