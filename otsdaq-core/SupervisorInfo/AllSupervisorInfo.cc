@@ -1,7 +1,7 @@
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"

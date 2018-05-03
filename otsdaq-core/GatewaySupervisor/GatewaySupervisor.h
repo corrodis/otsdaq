@@ -10,6 +10,7 @@
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/GatewaySupervisor/Iterator.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
+#include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
 #include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 
 #pragma GCC diagnostic push
@@ -36,7 +37,8 @@ class ConfigurationManager;
 class ConfigurationGroupKey;
 class WorkLoopManager;
 
-class GatewaySupervisor: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
+class GatewaySupervisor: public xdaq::Application, public SOAPMessenger,
+	public RunControlStateMachine, public CorePropertySupervisorBase
 {
 	friend class WizardSupervisor;
 	friend class Iterator;
@@ -59,10 +61,12 @@ public:
     void 						tooltipRequest              	(xgi::Input* in, xgi::Output* out )  	;
 
     //State Machine requests handlers
-    void 						stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out )  	;
-    void 						stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	;
+
+    void 						stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out )		;
+    //void 						stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	;
     xoap::MessageReference 		stateMachineXoapHandler      	(xoap::MessageReference msg )  	        ;
     xoap::MessageReference 		stateMachineResultXoapHandler	(xoap::MessageReference msg )  	        ;
+
     bool                        stateMachineThread           	(toolbox::task::WorkLoop* workLoop);
 
     //Status requests handlers
@@ -99,7 +103,10 @@ public:
 
     void makeSystemLogbookEntry (std::string entryText);
 
-   // void simpleFunction () { std::cout << __COUT_HDR_FL__ << "hi\n" << std::endl;}
+    //CorePropertySupervisorBase override functions
+    virtual void			setSupervisorPropertyDefaults	(void) override; //override to control supervisor specific defaults
+    virtual void			forceSupervisorPropertyValues	(void) override; //override to force supervisor property values (and ignore user settings)
+
 
 private:
     unsigned int 														getNextRunNumber					(const std::string &fsmName = "");
@@ -142,6 +149,9 @@ private:
     enum {
     	VERBOSE_MUTEX = 0
     };
+
+    //temporary member variable to avoid redeclaration in repetitive functions
+    char								tmpStringForConversions_[100];
 
     //Trash tests
     void wait(int milliseconds, std::string who="") const;

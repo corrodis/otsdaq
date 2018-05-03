@@ -1,5 +1,6 @@
 #include "otsdaq-core/ConfigurationDataFormats/ViewColumnInfo.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq-core/Macros/StringMacros.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationView.h"
 
 #include <iostream>
@@ -208,7 +209,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 		std::istringstream f(dataChoicesCSV);
 		std::string s;
 		while (getline(f, s, ',')) dataChoices_.push_back(
-				ConfigurationView::decodeURIComponent(s));
+				StringMacros::decodeURIComponent(s));
 		//for(const auto &dc: dataChoices_)
 		//	__COUT__ << dc << std::endl;
 	}

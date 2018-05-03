@@ -3,7 +3,7 @@
 
 #include <messagefacility/MessageLogger/MessageLogger.h>
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 namespace ots
 {

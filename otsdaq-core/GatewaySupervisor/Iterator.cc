@@ -1,6 +1,6 @@
 #include "otsdaq-core/GatewaySupervisor/Iterator.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/GatewaySupervisor/GatewaySupervisor.h"
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h"

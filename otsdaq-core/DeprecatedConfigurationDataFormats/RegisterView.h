@@ -8,7 +8,7 @@
 #ifndef _ots_RegisterView_h_
 #define _ots_RegisterView_h_
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/ConfigurationDataFormats/ViewRegisterInfo.h"
 #include "otsdaq-core/ConfigurationDataFormats/ViewRegisterSequencerInfo.h"
 

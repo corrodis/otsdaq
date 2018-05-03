@@ -1,5 +1,5 @@
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <string.h> 	//for strlen
 #include <stdexcept> 	//for runtime_error

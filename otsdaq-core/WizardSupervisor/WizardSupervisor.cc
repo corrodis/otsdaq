@@ -3,7 +3,7 @@
 #include "otsdaq-core/GatewaySupervisor/GatewaySupervisor.h"
 
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <xdaq/NamespaceURI.h>
 #include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
@@ -48,14 +48,15 @@ SOAPMessenger  (this)
 	mkdir((std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData").c_str(), 0755);
 
 	generateURL();
-	xgi::bind (this, &WizardSupervisor::Default,            	      "Default" 	);
-	xgi::bind (this, &WizardSupervisor::verification,        	      "Verify" 	  	);
-	xgi::bind (this, &WizardSupervisor::requestIcons,       	      "requestIcons"	);
-	xgi::bind (this, &WizardSupervisor::editSecurity,       	      "editSecurity"	);
-	xgi::bind (this, &WizardSupervisor::tooltipRequest,                   "TooltipRequest"	);
-	xgi::bind (this, &WizardSupervisor::toggleSecurityCodeGeneration,     "ToggleSecurityCodeGeneration"	);
-	xoap::bind(this, &WizardSupervisor::supervisorSequenceCheck,	      "SupervisorSequenceCheck",        	XDAQ_NS_URI);
-	xoap::bind(this, &WizardSupervisor::supervisorLastConfigGroupRequest, "SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
+	xgi::bind (this, &WizardSupervisor::Default,            	      		"Default" 	);
+	xgi::bind (this, &WizardSupervisor::verification,        	      		"Verify" 	  	);
+	xgi::bind (this, &WizardSupervisor::requestIcons,       	      		"requestIcons"	);
+	xgi::bind (this, &WizardSupervisor::editSecurity,       	      		"editSecurity"	);
+	xgi::bind (this, &WizardSupervisor::tooltipRequest,                   	"TooltipRequest"	);
+	xgi::bind (this, &WizardSupervisor::toggleSecurityCodeGeneration,     	"ToggleSecurityCodeGeneration"	);
+
+	xoap::bind(this, &WizardSupervisor::supervisorSequenceCheck,	      	"SupervisorSequenceCheck",        	XDAQ_NS_URI);
+	xoap::bind(this, &WizardSupervisor::supervisorLastConfigGroupRequest, 	"SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
 	init();
 
 }
@@ -267,9 +268,11 @@ throw (xoap::exception::Exception)
 	//receive request parameters
 	SOAPParameters parameters;
 	parameters.addParameter("sequence");
+	parameters.addParameter("IPAddress");
 	receive(message, parameters);
 
 	std::string submittedSequence = parameters.getValue("sequence");
+	std::string ipAddress = parameters.getValue("IPAddress");
 
 	//If submittedSequence matches securityCode_ then return full permissions (255)
 	//	else, return permissions 0

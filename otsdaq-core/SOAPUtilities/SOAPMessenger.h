@@ -8,7 +8,7 @@
 #include <xcept/tools.h>
 
 
-#include "otsdaq-core/Macros/CoutHeaderMacros.h" /* for XDAQ_CONST_CALL */
+#include "otsdaq-core/Macros/CoutMacros.h" /* for XDAQ_CONST_CALL */
 #include <string>
 
 namespace ots

@@ -7,7 +7,7 @@
 #include "artdaq-core/Utilities/SimpleLookupPolicy.hh"
 #include "artdaq-ots/Overlays/UDPFragmentWriter.hh"
 #include "artdaq-ots/Overlays/FragmentType.hh"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 
 #include <fstream>
