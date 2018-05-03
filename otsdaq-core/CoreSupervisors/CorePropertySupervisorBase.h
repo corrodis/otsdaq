@@ -48,7 +48,7 @@ class CorePropertySupervisorBase
 
 public:
 	CorePropertySupervisorBase										(void);
-    void init					         							(const std::string& supervisorContextUID, const std::string& supervisorApplicationUID, ConfigurationManager *theConfigurationManager);
+    //void init					         							(const std::string& supervisorContextUID, const std::string& supervisorApplicationUID, ConfigurationManager *theConfigurationManager);
     virtual ~CorePropertySupervisorBase								(void);
 
 
@@ -67,8 +67,8 @@ protected:
 
 	std::string                    	supervisorContextUID_;
 	std::string                    	supervisorApplicationUID_;
-	std::string                    	supervisorClass_;
-	std::string                    	supervisorClassNoNamespace_;
+//	std::string                    	supervisorClass_;
+//	std::string                    	supervisorClassNoNamespace_;
 
 
     //Supervisor Property names
@@ -142,6 +142,8 @@ private:
 	} propertyStruct_;
 
 public:
+	ConfigurationTree					getSupervisorTreeNode				(void);
+
 	void								loadUserSupervisorProperties		(void);
 	template<class T>
 	void 								setSupervisorProperty				(const std::string& propertyName, const T& propertyValue)
@@ -177,10 +179,6 @@ public:
 	std::string							getSupervisorProperty(const std::string& propertyName);
 	//void								setSupervisorPropertyUserPermissionsThreshold(uint8_t userPermissionThreshold);
 	WebUsers::permissionLevel_t			getSupervisorPropertyUserPermissionsThreshold(const std::string& requestType="*");
-
-private:
-
-	ConfigurationTree 					supervisorNode_;
 
 };
 

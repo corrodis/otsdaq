@@ -57,7 +57,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s)
 	:xdaq::Application(s)
 	, SOAPMessenger(this)
 	, RunControlStateMachine("GatewaySupervisor")
-	, theConfigurationManager_(new ConfigurationManager)
+	//, CorePropertySupervisorBase::theConfigurationManager_(new ConfigurationManager)
 	//,theConfigurationGroupKey_    (nullptr)
 	, theArtdaqCommandable_(this)
 	, stateMachineWorkLoopManager_(toolbox::task::bind(this, &GatewaySupervisor::stateMachineThread, "StateMachine"))
@@ -99,7 +99,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s)
 	//old:
 	//I always load all configuration even the one that is not related to the particular FEW/FER,
 	//so I can load it once and is good for all applications I am scared about threads so I comment it out!
-	//theConfigurationManager_ = Singleton<ConfigurationManager>::getInstance();
+	//CorePropertySupervisorBase::theConfigurationManager_ = Singleton<ConfigurationManager>::getInstance();
 
 	init();
 }
@@ -108,7 +108,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s)
 //	TODO: Lore needs to detect program quit through killall or ctrl+c so that Logbook entry is made when ots is halted
 GatewaySupervisor::~GatewaySupervisor(void)
 {
-	delete theConfigurationManager_;
+	delete CorePropertySupervisorBase::theConfigurationManager_;
 	makeSystemLogbookEntry("ots halted.");
 }
 
@@ -120,22 +120,21 @@ void GatewaySupervisor::init(void)
 
 	supervisorGuiHasBeenLoaded_ = false;
 
-	const XDAQContextConfiguration* contextConfiguration = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+	const XDAQContextConfiguration* contextConfiguration = CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
 
-	supervisorContextUID_ = contextConfiguration->getContextUID(
+	CorePropertySupervisorBase::supervisorContextUID_ = contextConfiguration->getContextUID(
 		getApplicationContext()->getContextDescriptor()->getURL()
 	);
 	__COUT__ << "Context UID:" << supervisorContextUID_ << std::endl;
 
-	supervisorApplicationUID_ = contextConfiguration->getApplicationUID(
+	CorePropertySupervisorBase::supervisorApplicationUID_ = contextConfiguration->getApplicationUID(
 		getApplicationContext()->getContextDescriptor()->getURL(),
 		getApplicationDescriptor()->getLocalId()
 	);
 
 	__COUT__ << "Application UID:" << supervisorApplicationUID_ << std::endl;
 
-	ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorConfigurationNode(
-		supervisorContextUID_, supervisorApplicationUID_);
+	ConfigurationTree configLinkNode = CorePropertySupervisorBase::getSupervisorTreeNode();
 
 	std::string supervisorUID;
 	if (!configLinkNode.isDisconnected())
@@ -147,7 +146,7 @@ void GatewaySupervisor::init(void)
 
 
 
-	CorePropertySupervisorBase::init(supervisorContextUID_,supervisorApplicationUID_,theConfigurationManager_);
+	//CorePropertySupervisorBase::init(supervisorContextUID_,supervisorApplicationUID_,CorePropertySupervisorBase::theConfigurationManager_);
 
 
 
@@ -193,9 +192,9 @@ void GatewaySupervisor::init(void)
 	//dump names of core tables (so UpdateOTS.sh can copy core tables for user)
 	// only if table does not exist
 	{
-		const std::set<std::string>& contextMemberNames = theConfigurationManager_->getContextMemberNames();
-		const std::set<std::string>& backboneMemberNames = theConfigurationManager_->getBackboneMemberNames();
-		const std::set<std::string>& iterateMemberNames = theConfigurationManager_->getIterateMemberNames();
+		const std::set<std::string>& contextMemberNames = CorePropertySupervisorBase::theConfigurationManager_->getContextMemberNames();
+		const std::set<std::string>& backboneMemberNames = CorePropertySupervisorBase::theConfigurationManager_->getBackboneMemberNames();
+		const std::set<std::string>& iterateMemberNames = CorePropertySupervisorBase::theConfigurationManager_->getIterateMemberNames();
 
 		FILE * fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "r");
 
@@ -327,7 +326,7 @@ void GatewaySupervisor::init(void)
 //	child thread
 void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor *theSupervisor)
 {
-	ConfigurationTree configLinkNode = theSupervisor->theConfigurationManager_->getSupervisorConfigurationNode(
+	ConfigurationTree configLinkNode = theSupervisor->CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
 		theSupervisor->supervisorContextUID_, theSupervisor->supervisorApplicationUID_);
 
 
@@ -1245,7 +1244,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	try
 	{
-		theConfigurationManager_->init(); //completely reset to re-align with any changes
+		CorePropertySupervisorBase::theConfigurationManager_->init(); //completely reset to re-align with any changes
 	}
 	catch (...)
 	{
@@ -1262,7 +1261,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	//Translate the system alias to a group name/key
 	try
 	{
-		theConfigurationGroup_ = theConfigurationManager_->getConfigurationGroupFromAlias(systemAlias);
+		theConfigurationGroup_ = CorePropertySupervisorBase::theConfigurationManager_->getConfigurationGroupFromAlias(systemAlias);
 	}
 	catch (...)
 	{
@@ -1299,7 +1298,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	//load and activate
 	try
 	{
-		theConfigurationManager_->loadConfigurationGroup(theConfigurationGroup_.first, theConfigurationGroup_.second, true);
+		CorePropertySupervisorBase::theConfigurationManager_->loadConfigurationGroup(theConfigurationGroup_.first, theConfigurationGroup_.second, true);
 
 		//When configured, set the translated System Alias to be persistently active
 		ConfigurationManagerRW tmpCfgMgr("TheSupervisor");
@@ -1319,7 +1318,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	//check if configuration dump is enabled on configure transition
 	{
-		ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorConfigurationNode(
+		ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
 			supervisorContextUID_, supervisorApplicationUID_);
 		if (!configLinkNode.isDisconnected())
 		{
@@ -1348,7 +1347,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 				if (dumpConfiguration)
 				{
 					//dump configuration
-					theConfigurationManager_->dumpActiveConfiguration(
+					CorePropertySupervisorBase::theConfigurationManager_->dumpActiveConfiguration(
 						dumpFilePath +
 						"/" +
 						dumpFileRadix +
@@ -1508,7 +1507,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 
 	//check if configuration dump is enabled on configure transition
 	{
-		ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorConfigurationNode(
+		ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
 			supervisorContextUID_, supervisorApplicationUID_);
 		if (!configLinkNode.isDisconnected())
 		{
@@ -1535,7 +1534,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 				if (dumpConfiguration)
 				{
 					//dump configuration
-					theConfigurationManager_->dumpActiveConfiguration(
+					CorePropertySupervisorBase::theConfigurationManager_->dumpActiveConfiguration(
 						dumpFilePath +
 						"/" +
 						dumpFileRadix +
@@ -2227,11 +2226,11 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 
 		std::map<std::string /*alias*/,
 			std::pair<std::string /*group name*/, ConfigurationGroupKey> > aliasMap =
-			theConfigurationManager_->getGroupAliasesConfiguration();
+			CorePropertySupervisorBase::theConfigurationManager_->getGroupAliasesConfiguration();
 
 
 		// get stateMachineAliasFilter if possible
-		ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorConfigurationNode(
+		ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
 			supervisorContextUID_, supervisorApplicationUID_);
 
 		if (!configLinkNode.isDisconnected())
@@ -2345,7 +2344,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 				std::string groupComment, groupAuthor, groupCreationTime;
 				try
 				{
-					theConfigurationManager_->loadConfigurationGroup(
+					CorePropertySupervisorBase::theConfigurationManager_->loadConfigurationGroup(
 						aliasMapPair.second.first, aliasMapPair.second.second,
 						false, 0, 0, 0,
 						&groupComment, &groupAuthor, &groupCreationTime, false /*false to not load member map*/);
@@ -2545,7 +2544,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	else if (requestType == "getStateMachineNames")
 	{
 		//get stateMachineAliasFilter if possible
-		ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorConfigurationNode(
+		ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
 			supervisorContextUID_, supervisorApplicationUID_);
 
 		try
@@ -2600,7 +2599,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 			std::string stateMachineRunAlias = "Run"; //default to "Run"
 
 			// get stateMachineAliasFilter if possible
-			ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorConfigurationNode(
+			ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
 				supervisorContextUID_, supervisorApplicationUID_);
 
 			if (!configLinkNode.isDisconnected())
@@ -2704,9 +2703,9 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 		//			std::vector<std::string> hostnames;
 		//			try
 		//			{
-		//				theConfigurationManager_->init(); //completely reset to re-align with any changes
+		//				CorePropertySupervisorBase::theConfigurationManager_->init(); //completely reset to re-align with any changes
 		//
-		//				const XDAQContextConfiguration* contextConfiguration = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+		//				const XDAQContextConfiguration* contextConfiguration = CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
 		//
 		//				auto contexts = contextConfiguration->getContexts();
 		//				unsigned int i,j;
@@ -2776,9 +2775,9 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
 	std::vector<std::string> hostnames;
 	try
 	{
-		theConfigurationManager_->init(); //completely reset to re-align with any changes
+		CorePropertySupervisorBase::theConfigurationManager_->init(); //completely reset to re-align with any changes
 
-		const XDAQContextConfiguration* contextConfiguration = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+		const XDAQContextConfiguration* contextConfiguration = CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
 
 		auto contexts = contextConfiguration->getContexts();
 		unsigned int i, j;

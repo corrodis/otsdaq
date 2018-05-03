@@ -21,11 +21,7 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 , SOAPMessenger                 (this)
 , stateMachineWorkLoopManager_  (toolbox::task::bind(this, &CoreSupervisorBase::stateMachineThread, "StateMachine"))
 , stateMachineSemaphore_        (toolbox::BSem::FULL)
-, theConfigurationManager_      (new ConfigurationManager)//(Singleton<ConfigurationManager>::getInstance()) //I always load the full config but if I want to load a partial configuration (new ConfigurationManager)
-, XDAQContextConfigurationName_ (theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getConfigurationName())
-, supervisorConfigurationPath_  ("INITIALIZED INSIDE THE CONTRUCTOR BECAUSE IT NEEDS supervisorContextUID_ and supervisorApplicationUID_")
-, supervisorContextUID_         ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
-, supervisorApplicationUID_     ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
+//, theConfigurationManager_      (new ConfigurationManager)//(Singleton<ConfigurationManager>::getInstance()) //I always load the full config but if I want to load a partial configuration (new ConfigurationManager)
 , supervisorClass_              (getApplicationDescriptor()->getClassName())
 , supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 , theRemoteWebUsers_ 			(this)
@@ -47,7 +43,7 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 
 	try
 	{
-		supervisorContextUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getContextUID(
+		CorePropertySupervisorBase::supervisorContextUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getContextUID(
 				getApplicationContext()->getContextDescriptor()->getURL());
 	}
 	catch(...)
@@ -60,7 +56,7 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 
 	try
 	{
-		supervisorApplicationUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getApplicationUID
+		CorePropertySupervisorBase::supervisorApplicationUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getApplicationUID
 				(
 						supervisorContextUID_,
 						getApplicationDescriptor()->getLocalId()
@@ -74,27 +70,18 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 		throw;
 	}
 
-	try
-	{
-		supervisorNode_ = theConfigurationManager_->getSupervisorNode(
-				supervisorContextUID_, supervisorApplicationUID_);
-	}
-	catch(...)
-	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration node through theConfigurationManager_." <<
-				" The supervisorContextUID_ = " << supervisorContextUID_ <<
-				". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
-		throw;
-	}
 
-	supervisorConfigurationPath_  = "/" + supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
 
-	setStateMachineName(supervisorApplicationUID_);
+	CorePropertySupervisorBase::supervisorConfigurationPath_  = "/" +
+			CorePropertySupervisorBase::supervisorContextUID_ + "/LinkToApplicationConfiguration/" +
+			CorePropertySupervisorBase::supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
+
+	setStateMachineName(CorePropertySupervisorBase::supervisorApplicationUID_);
 
 	allSupervisorInfo_.init(getApplicationContext());
 	__COUT__ << "Name = " << allSupervisorInfo_.getSupervisorInfo(this).getName();
 
-	CorePropertySupervisorBase::init(supervisorContextUID_,supervisorApplicationUID_,theConfigurationManager_);
+	//CorePropertySupervisorBase::init(supervisorContextUID_,supervisorApplicationUID_,theConfigurationManager_);
 //=======
 //
 //	__COUT__ << "Initializing..." << std::endl;
@@ -250,7 +237,7 @@ void CoreSupervisorBase::destroy(void)
 //	//re-acquire the configuration supervisor node, in case the config has changed
 //	try
 //	{
-//		supervisorNode_ = theConfigurationManager_->getSupervisorNode(
+//		supervisorNode = theConfigurationManager_->getSupervisorNode(
 //				supervisorContextUID_, supervisorApplicationUID_);
 //	}
 //	catch(...)
@@ -263,7 +250,7 @@ void CoreSupervisorBase::destroy(void)
 //
 //	try
 //	{
-//		auto /*map<name,node>*/ children = supervisorNode_.getNode("LinkToPropertyConfiguration").getChildren();
+//		auto /*map<name,node>*/ children = supervisorNode.getNode("LinkToPropertyConfiguration").getChildren();
 //
 //		for(auto& child:children)
 //		{

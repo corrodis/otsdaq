@@ -113,13 +113,13 @@ protected:
     WorkLoopManager                	stateMachineWorkLoopManager_;
     toolbox::BSem                  	stateMachineSemaphore_;
 
-    ConfigurationManager*          	theConfigurationManager_;
-
-	std::string                    	XDAQContextConfigurationName_;
-	std::string                    	supervisorConfigurationPath_;
-
-	std::string                    	supervisorContextUID_;
-	std::string                    	supervisorApplicationUID_;
+//    ConfigurationManager*          	theConfigurationManager_;
+//
+//	std::string                    	XDAQContextConfigurationName_;
+//	std::string                    	supervisorConfigurationPath_;
+//
+//	std::string                    	supervisorContextUID_;
+//	std::string                    	supervisorApplicationUID_;
 	std::string                    	supervisorClass_;
 	std::string                    	supervisorClassNoNamespace_;
 
@@ -233,9 +233,6 @@ public:
 //	//void								setSupervisorPropertyUserPermissionsThreshold(uint8_t userPermissionThreshold);
 //	WebUsers::permissionLevel_t			getSupervisorPropertyUserPermissionsThreshold(const std::string& requestType="*");
 
-private:
-
-	ConfigurationTree 					supervisorNode_;
 
 };
 

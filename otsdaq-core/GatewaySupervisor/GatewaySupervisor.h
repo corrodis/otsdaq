@@ -125,7 +125,7 @@ private:
     //Member Variables
 
     AllSupervisorInfo                   allSupervisorInfo_         	;
-    ConfigurationManager*               theConfigurationManager_    ;
+   // ConfigurationManager*               theConfigurationManager_    ;
     WebUsers 						    theWebUsers_                ;
     SystemMessenger				        theSystemMessenger_         ;
 	ARTDAQCommandable					theArtdaqCommandable_;
@@ -134,9 +134,9 @@ private:
     toolbox::BSem                      	stateMachineSemaphore_      ;
     WorkLoopManager                    	infoRequestWorkLoopManager_ ;
     toolbox::BSem                  		infoRequestSemaphore_       ;
-
-    std::string 						supervisorContextUID_		;
-    std::string 						supervisorApplicationUID_	;
+//
+//    std::string 						supervisorContextUID_		; //now comes from CorePropertySup
+//    std::string 						supervisorApplicationUID_	;
 
     std::string							activeStateMachineName_			; //when multiple state machines, this is the name of the state machine which executed the configure transition
     std::string							activeStateMachineWindowName_	;

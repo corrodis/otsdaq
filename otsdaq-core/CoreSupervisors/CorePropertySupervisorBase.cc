@@ -7,39 +7,34 @@ using namespace ots;
 
 const CorePropertySupervisorBase::SupervisorProperties 	CorePropertySupervisorBase::SUPERVISOR_PROPERTIES = CorePropertySupervisorBase::SupervisorProperties();
 
-//========================================================================================================================
-void CorePropertySupervisorBase::init(
-		const std::string& supervisorContextUID,
-		const std::string& supervisorApplicationUID,
-		ConfigurationManager *theConfigurationManager)
-{
-	__COUT__ << "Begin!" << std::endl;
-
-
-	__COUT__ << "Looking for " <<
-				supervisorContextUID << "/" << supervisorApplicationUID <<
-				" supervisor node..." << __E__;
-
-	try
-	{
-		supervisorNode_ = theConfigurationManager_->getSupervisorNode(
-				supervisorContextUID, supervisorApplicationUID);
-	}
-	catch(...)
-	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration node through theConfigurationManager_." <<
-				" The supervisorContextUID = " << supervisorContextUID <<
-				". The supervisorApplicationUID = " << supervisorApplicationUID << std::endl;
-		throw;
-	}
-
-	supervisorConfigurationPath_  = "/" + supervisorContextUID + "/LinkToApplicationConfiguration/" +
-			supervisorApplicationUID + "/LinkToSupervisorConfiguration";
-
-}
+////========================================================================================================================
+//void CorePropertySupervisorBase::init(
+//		const std::string& supervisorContextUID,
+//		const std::string& supervisorApplicationUID,
+//		ConfigurationManager *theConfigurationManager)
+//{
+//	__COUT__ << "Begin!" << std::endl;
+//
+//
+//	__COUT__ << "Looking for " <<
+//				supervisorContextUID << "/" << supervisorApplicationUID <<
+//				" supervisor node..." << __E__;
+//
+//	//test the supervisor UIDs at init
+//	auto supervisorNode = CorePropertySupervisorBase::getSupervisorTreeNode();
+//
+//	supervisorConfigurationPath_  = "/" + supervisorContextUID + "/LinkToApplicationConfiguration/" +
+//			supervisorApplicationUID + "/LinkToSupervisorConfiguration";
+//
+//}
 
 //========================================================================================================================
 CorePropertySupervisorBase::CorePropertySupervisorBase(void)
+: theConfigurationManager_      (new ConfigurationManager)
+, XDAQContextConfigurationName_ (theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getConfigurationName())
+, supervisorConfigurationPath_  ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR OF CLASS WHICH INHERITS, BECAUSE IT NEEDS supervisorContextUID_ and supervisorApplicationUID_")
+, supervisorContextUID_         ("INITIALIZED INSIDE THE CONTRUCTOR OF CLASS WHICH INHERITS, WHICH HAS ACCESS TO XDAQ APP MEMBER FUNCTIONS")
+, supervisorApplicationUID_     ("INITIALIZED INSIDE THE CONTRUCTOR OF CLASS WHICH INHERITS, WHICH HAS ACCESS TO XDAQ APP MEMBER FUNCTIONS")
 {
 	INIT_MF("CorePropertySupervisorBase");
 }
@@ -133,6 +128,24 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 }
 
 //========================================================================================================================
+//getSupervisorTreeNode ~
+//	try to get this Supervisors configuration tree node
+ConfigurationTree CorePropertySupervisorBase::getSupervisorTreeNode(void)
+try
+{
+	return theConfigurationManager_->getSupervisorNode(
+			supervisorContextUID_, supervisorApplicationUID_);
+}
+catch(...)
+{
+	__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration node through theConfigurationManager_ " <<
+			"(Did you remember to initialize using CorePropertySupervisorBase::init()?)." <<
+			" The supervisorContextUID_ = " << supervisorContextUID_ <<
+			". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
+	throw;
+}
+
+//========================================================================================================================
 //loadUserSupervisorProperties ~
 //	try to get user supervisor properties
 void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
@@ -142,22 +155,11 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 			" supervisor user properties..." << __E__;
 
 	//re-acquire the configuration supervisor node, in case the config has changed
-	try
-	{
-		supervisorNode_ = theConfigurationManager_->getSupervisorNode(
-				supervisorContextUID_, supervisorApplicationUID_);
-	}
-	catch(...)
-	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration node through theConfigurationManager_." <<
-				" The supervisorContextUID_ = " << supervisorContextUID_ <<
-				". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
-		throw;
-	}
+	auto supervisorNode = CorePropertySupervisorBase::getSupervisorTreeNode();
 
 	try
 	{
-		auto /*map<name,node>*/ children = supervisorNode_.getNode("LinkToPropertyConfiguration").getChildren();
+		auto /*map<name,node>*/ children = supervisorNode.getNode("LinkToPropertyConfiguration").getChildren();
 
 		for(auto& child:children)
 		{
