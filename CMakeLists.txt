@@ -70,12 +70,12 @@ check_ups_version(xdaq "$ENV{XDAQ_VERSION}" v14_0_0 PRODUCT_OLDER_VAR slf6_xdaq)
 if(slf6_xdaq)
   MESSAGE("Using SLF6, defining XDAQ_NOCONST")
   add_definitions(-DXDAQ_NOCONST)
-  message(STATUS "SLF6 XDAQ was identified.")
+  MESSAGE(STATUS "SLF6 XDAQ was identified.")
 else()
-  message(STATUS "SLF7 XDAQ was identified.")
+  MESSAGE(STATUS "SLF7 XDAQ was identified.")
 endif()
 
-find_package(MPI QUIET)
+##find_package(MPI QUIET)
 
 # macros for art_dictionary and simple_plugin
 include(ArtDictionary)

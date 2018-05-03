@@ -1,6 +1,6 @@
 #include "otsdaq-core/GatewaySupervisor/GatewaySupervisor.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
 #include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
@@ -77,20 +77,20 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s) throw (xdaq::exc
 
 	__COUT__ << "Security: " << securityType_ << std::endl;
 
-	xgi::bind(this, &GatewaySupervisor::Default,                  "Default");
-	xgi::bind(this, &GatewaySupervisor::loginRequest,             "LoginRequest");
-	xgi::bind(this, &GatewaySupervisor::request,                  "Request");
-	xgi::bind(this, &GatewaySupervisor::stateMachineXgiHandler,   "StateMachineXgiHandler");
-	xgi::bind(this, &GatewaySupervisor::infoRequestHandler,       "InfoRequestHandler");
-	xgi::bind(this, &GatewaySupervisor::infoRequestResultHandler, "InfoRequestResultHandler");
-	xgi::bind(this, &GatewaySupervisor::tooltipRequest,           "TooltipRequest");
+	xgi::bind (this, &GatewaySupervisor::Default,                  "Default");
+	xgi::bind (this, &GatewaySupervisor::loginRequest,             "LoginRequest");
+	xgi::bind (this, &GatewaySupervisor::request,                  "Request");
+	xgi::bind (this, &GatewaySupervisor::stateMachineXgiHandler,   "StateMachineXgiHandler");
+	xgi::bind (this, &GatewaySupervisor::infoRequestHandler,       "InfoRequestHandler");
+	xgi::bind (this, &GatewaySupervisor::infoRequestResultHandler, "InfoRequestResultHandler");
+	xgi::bind (this, &GatewaySupervisor::tooltipRequest,           "TooltipRequest");
 
-	xoap::bind(this, &GatewaySupervisor::supervisorCookieCheck,        	"SupervisorCookieCheck",        	XDAQ_NS_URI);
-	xoap::bind(this, &GatewaySupervisor::supervisorGetActiveUsers,     	"SupervisorGetActiveUsers",     	XDAQ_NS_URI);
-	xoap::bind(this, &GatewaySupervisor::supervisorSystemMessage,      	"SupervisorSystemMessage",      	XDAQ_NS_URI);
-	xoap::bind(this, &GatewaySupervisor::supervisorGetUserInfo,        	"SupervisorGetUserInfo",        	XDAQ_NS_URI);
-	xoap::bind(this, &GatewaySupervisor::supervisorSystemLogbookEntry, 	"SupervisorSystemLogbookEntry", 	XDAQ_NS_URI);
-	xoap::bind(this, &GatewaySupervisor::supervisorLastConfigGroupRequest, "SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
+	xoap::bind(this, &GatewaySupervisor::supervisorCookieCheck,        		"SupervisorCookieCheck",        	XDAQ_NS_URI);
+	xoap::bind(this, &GatewaySupervisor::supervisorGetActiveUsers,     		"SupervisorGetActiveUsers",     	XDAQ_NS_URI);
+	xoap::bind(this, &GatewaySupervisor::supervisorSystemMessage,      		"SupervisorSystemMessage",      	XDAQ_NS_URI);
+	//xoap::bind(this, &GatewaySupervisor::supervisorGetUserInfo,        		"SupervisorGetUserInfo",        	XDAQ_NS_URI);
+	xoap::bind(this, &GatewaySupervisor::supervisorSystemLogbookEntry, 		"SupervisorSystemLogbookEntry", 	XDAQ_NS_URI);
+	xoap::bind(this, &GatewaySupervisor::supervisorLastConfigGroupRequest, 	"SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
 
 
 	//old:
@@ -141,6 +141,10 @@ void GatewaySupervisor::init(void)
 		supervisorUID = ViewColumnInfo::DATATYPE_LINK_DEFAULT;
 
 	__COUT__ << "GatewaySupervisor UID:" << supervisorUID	<< std::endl;
+
+
+
+	CorePropertySupervisorBase::init(supervisorContextUID_,supervisorApplicationUID_,theConfigurationManager_);
 
 
 
@@ -293,6 +297,8 @@ void GatewaySupervisor::init(void)
 			}
 		}
 	}
+
+
 
 }
 
@@ -530,35 +536,55 @@ throw (xgi::exception::Exception)
 	std::lock_guard<std::mutex> lock(stateMachineAccessMutex_);
 	if(VERBOSE_MUTEX) __COUT__ << "Have FSM access" << std::endl;
 
-	cgicc::Cgicc cgi(in);
+	cgicc::Cgicc cgiIn(in);
 
-	uint8_t userPermissions;
-	uint64_t uid;
-	std::string userWithLock;
-	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
-	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions,
-			&uid, "0", 1, &userWithLock))
-	{
-		*out << cookieCode;
-		return;
-	}
 
-	std::string command = CgiDataUtilities::getData(cgi, "StateMachine");
+	std::string command = CgiDataUtilities::getData(cgiIn, "StateMachine");
+	std::string requestType = "StateMachine" + command; //prepend StateMachine to request type
 
-	//**** start LOCK GATEWAY CODE ***//
-	std::string username = "";
-	username = theWebUsers_.getUsersUsername(uid);
-	if (userWithLock != "" && userWithLock != username)
-	{
-		*out << WebUsers::REQ_USER_LOCKOUT_RESPONSE;
-		__COUT__ << "User " << username << " is locked out. " << userWithLock << " has lock." << std::endl;
-		return;
-	}
-	//**** end LOCK GATEWAY CODE ***//
 
-	HttpXmlDocument xmldoc(cookieCode);
-	std::string fsmName = CgiDataUtilities::getData(cgi, "fsmName");
-	std::string fsmWindowName = CgiDataUtilities::getData(cgi, "fsmWindowName");
+	HttpXmlDocument xmlOut;
+	WebUsers::RequestUserInfo userInfo(requestType,
+			CgiDataUtilities::postData(cgiIn, "CookieCode"));
+
+	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
+
+	if(!theWebUsers_.xmlRequestOnGateway(
+			cgiIn,
+			out,
+			&xmlOut,
+			userInfo
+			))
+		return; //access failed
+
+//	uint8_t userPermissions;
+//	uint64_t uid;
+//	std::string userWithLock;
+//	std::string cookieCode = CgiDataUtilities::postData(cgiIn, "CookieCode");
+//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions,
+//			&uid, "0", 1, &userWithLock))
+//	{
+//		*out << cookieCode;
+//		return;
+//	}
+//
+//	std::string command = CgiDataUtilities::getData(cgiIn, "StateMachine");
+//
+//	//**** start LOCK GATEWAY CODE ***//
+//	std::string username = "";
+//	username = theWebUsers_.getUsersUsername(uid);
+//	if (userWithLock != "" && userWithLock != username)
+//	{
+//		*out << WebUsers::REQ_USER_LOCKOUT_RESPONSE;
+//		__COUT__ << "User " << username << " is locked out. " << userWithLock << " has lock." << std::endl;
+//		return;
+//	}
+//	//**** end LOCK GATEWAY CODE ***//
+//
+//	HttpXmlDocument xmlOut(cookieCode);
+
+	std::string fsmName = CgiDataUtilities::getData(cgiIn, "fsmName");
+	std::string fsmWindowName = CgiDataUtilities::getData(cgiIn, "fsmWindowName");
 	fsmWindowName = CgiDataUtilities::decodeURIComponent(fsmWindowName);
 	std::string currentState = theStateMachine_.getCurrentStateName();
 
@@ -567,10 +593,10 @@ throw (xgi::exception::Exception)
 	//check if Iterator should handle
 	if((activeStateMachineWindowName_ == "" ||
 			activeStateMachineWindowName_ == "iterator") &&
-			theIterator_.handleCommandRequest(xmldoc,command,fsmWindowName))
+			theIterator_.handleCommandRequest(xmlOut,command,fsmWindowName))
 	{
 		__COUT__ << "Handled by theIterator_" << std::endl;
-		xmldoc.outputXmlDocument((std::ostringstream*) out, false);
+		xmlOut.outputXmlDocument((std::ostringstream*) out, false);
 		return;
 	}
 
@@ -580,10 +606,10 @@ throw (xgi::exception::Exception)
 		__SS__ << "Error - Can not accept request because the State Machine is already in transition!" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
 
-		xmldoc.addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
-		xmldoc.addTextElementToData("state_tranisition_attempted_err",
+		xmlOut.addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
+		xmlOut.addTextElementToData("state_tranisition_attempted_err",
 				ss.str()); //indicate to GUI transition NOT attempted
-		xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
+		xmlOut.outputXmlDocument((std::ostringstream*) out, false, true);
 		return;
 	}
 
@@ -617,10 +643,10 @@ throw (xgi::exception::Exception)
 					"State Machine '" << activeStateMachineWindowName_ << ".'" << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
 
-			xmldoc.addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
-			xmldoc.addTextElementToData("state_tranisition_attempted_err",
+			xmlOut.addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
+			xmlOut.addTextElementToData("state_tranisition_attempted_err",
 					ss.str()); //indicate to GUI transition NOT attempted
-			xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
+			xmlOut.outputXmlDocument((std::ostringstream*) out, false, true);
 			return;
 		}
 		else	//clear active state machine
@@ -637,9 +663,9 @@ throw (xgi::exception::Exception)
 
 	std::vector<std::string> parameters;
 	if(command == "Configure")
-		parameters.push_back(CgiDataUtilities::postData(cgi, "ConfigurationAlias"));
-	attemptStateMachineTransition(&xmldoc,out,command,fsmName,fsmWindowName,
-			username,parameters);
+		parameters.push_back(CgiDataUtilities::postData(cgiIn, "ConfigurationAlias"));
+	attemptStateMachineTransition(&xmlOut,out,command,fsmName,fsmWindowName,
+			userInfo.username_,parameters);
 }
 
 std::string GatewaySupervisor::attemptStateMachineTransition(
@@ -757,54 +783,55 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 	return errorStr;
 }
 
-//========================================================================================================================
-void GatewaySupervisor::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out)
-throw (xgi::exception::Exception)
-{
-	cgicc::Cgicc cgi(in);
-	__COUT__ << "Xgi Request!" << std::endl;
-
-	uint8_t userPermissions; // uint64_t uid;
-	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
-	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode,
-			&userPermissions))
-	{
-		*out << cookieCode;
-		return;
-	}
-
-	HttpXmlDocument xmldoc(cookieCode);
-
-	std::string command = CgiDataUtilities::getData(cgi, "StateMachine");
-
-	SOAPParameters parameters;
-	/*
-	 //FIXME I don't think that there should be this if statement and I guess it has been copied from the stateMachineXgiHandler method
-	 if (command == "Configure")
-
-{
-	 parameters.addParameter("RUN_KEY", CgiDataUtilities::postData(cgi, "ConfigurationAlias"));
-	 __COUT__ << "Configure --> Name: RUN_KEY Value: " << parameters.getValue("RUN_KEY") << std::endl;
-	 }
-	 else if (command == "Start")
-
-{
-	 unsigned int runNumber = getNextRunNumber();
-	 std::stringstream runNumberStream;
-	 runNumberStream << runNumber;
-	 parameters.addParameter("RUN_NUMBER", runNumberStream.str().c_str());
-	 setNextRunNumber(++runNumber);
-	 }
-	 */
-	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(
-			CgiDataUtilities::getData(cgi, "StateMachine"), parameters);
-	//Maybe we return an aknowledgment that the message has been received and processed
-	xoap::MessageReference reply = stateMachineResultXoapHandler(message);
-	//stateMachineWorkLoopManager_.removeProcessedRequests();
-	//stateMachineWorkLoopManager_.processRequest(message);
-	//xmldoc.outputXmlDocument((ostringstream*)out,false);
-	__COUT__ << "Done - Xgi Request!" << std::endl;
-}
+////========================================================================================================================
+////FIXME -- delete? is this ever used by anything? ever?
+//void GatewaySupervisor::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out)
+//throw (xgi::exception::Exception)
+//{
+//	cgicc::Cgicc cgiIn(in);
+//	__COUT__ << "Xgi Request!" << std::endl;
+//
+//	uint8_t userPermissions; // uint64_t uid;
+//	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
+//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode,
+//			&userPermissions))
+//	{
+//		*out << cookieCode;
+//		return;
+//	}
+//
+//	HttpXmlDocument xmldoc(cookieCode);
+//
+//	std::string command = CgiDataUtilities::getData(cgi, "StateMachine");
+//
+//	SOAPParameters parameters;
+//	/*
+//	 //FIXME I don't think that there should be this if statement and I guess it has been copied from the stateMachineXgiHandler method
+//	 if (command == "Configure")
+//
+//{
+//	 parameters.addParameter("RUN_KEY", CgiDataUtilities::postData(cgi, "ConfigurationAlias"));
+//	 __COUT__ << "Configure --> Name: RUN_KEY Value: " << parameters.getValue("RUN_KEY") << std::endl;
+//	 }
+//	 else if (command == "Start")
+//
+//{
+//	 unsigned int runNumber = getNextRunNumber();
+//	 std::stringstream runNumberStream;
+//	 runNumberStream << runNumber;
+//	 parameters.addParameter("RUN_NUMBER", runNumberStream.str().c_str());
+//	 setNextRunNumber(++runNumber);
+//	 }
+//	 */
+//	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(
+//			CgiDataUtilities::getData(cgi, "StateMachine"), parameters);
+//	//Maybe we return an aknowledgment that the message has been received and processed
+//	xoap::MessageReference reply = stateMachineResultXoapHandler(message);
+//	//stateMachineWorkLoopManager_.removeProcessedRequests();
+//	//stateMachineWorkLoopManager_.processRequest(message);
+//	//xmldoc.outputXmlDocument((ostringstream*)out,false);
+//	__COUT__ << "Done - Xgi Request!" << std::endl;
+//}
 
 //========================================================================================================================
 xoap::MessageReference GatewaySupervisor::stateMachineXoapHandler(xoap::MessageReference message)
@@ -861,31 +888,48 @@ void GatewaySupervisor::infoRequestHandler(xgi::Input* in, xgi::Output* out)
 throw (xgi::exception::Exception)
 {
 	__COUT__ << "Starting to Request!" << std::endl;
-	cgicc::Cgicc cgi(in);
 
-	//**** start LOGIN GATEWAY CODE ***//
-	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions, uint64_t uid
-	//Else, error message is returned in cookieCode
-	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
-	uint8_t userPermissions;// uint64_t uid;
-	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions))
-	{
-		*out << cookieCode;
-		return;
-	}
-	//**** end LOGIN GATEWAY CODE ***//
 
-	HttpXmlDocument xmldoc(cookieCode);
+	cgicc::Cgicc cgiIn(in);
+	std::string requestType = "infoRequestHandler"; //force request type to infoRequestHandler
+
+	HttpXmlDocument xmlOut;
+	WebUsers::RequestUserInfo userInfo(requestType,
+			CgiDataUtilities::postData(cgiIn, "CookieCode"));
+
+	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
+
+	if(!theWebUsers_.xmlRequestOnGateway(
+			cgiIn,
+			out,
+			&xmlOut,
+			userInfo
+	))
+		return; //access failed
+
+//	//**** start LOGIN GATEWAY CODE ***//
+//	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions, uint64_t uid
+//	//Else, error message is returned in cookieCode
+//	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
+//	uint8_t userPermissions;// uint64_t uid;
+//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions))
+//	{
+//		*out << cookieCode;
+//		return;
+//	}
+//	//**** end LOGIN GATEWAY CODE ***//
+//
+//	HttpXmlDocument xmldoc(cookieCode);
 
 	//If the thread is canceled when you are still in this method that activated it, then everything will freeze.
 	//The way the workloop manager now works is safe since it cancel the thread only when the infoRequestResultHandler is called
-	//and that methid can be called ONLY when I am already out of here!
+	//and that method can be called ONLY when I am already out of here!
 
-	HttpXmlDocument tmpDoc = infoRequestWorkLoopManager_.processRequest(cgi);
+	HttpXmlDocument tmpDoc = infoRequestWorkLoopManager_.processRequest(cgiIn);
 
-	xmldoc.copyDataChildren(tmpDoc);
+	xmlOut.copyDataChildren(tmpDoc);
 
-	xmldoc.outputXmlDocument((std::ostringstream*) out, false);
+	xmlOut.outputXmlDocument((std::ostringstream*) out, false);
 }
 
 //========================================================================================================================
@@ -895,24 +939,42 @@ throw (xgi::exception::Exception)
 	__COUT__ << "Starting ask!" << std::endl;
 	cgicc::Cgicc cgi(in);
 
-	//**** start LOGIN GATEWAY CODE ***//
-	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions, uint64_t uid
-	//Else, error message is returned in cookieCode
-	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
-	uint8_t userPermissions;// uint64_t uid;
-	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions))
-	{
-		*out << cookieCode;
-		return;
-	}
-	//**** end LOGIN GATEWAY CODE ***//
 
-	HttpXmlDocument xmldoc(cookieCode);
+	cgicc::Cgicc cgiIn(in);
+	std::string requestType = "infoRequestResultHandler"; //force request type to infoRequestResultHandler
 
-	infoRequestWorkLoopManager_.getRequestResult(cgi, xmldoc);
+	HttpXmlDocument xmlOut;
+	WebUsers::RequestUserInfo userInfo(requestType,
+			CgiDataUtilities::postData(cgiIn, "CookieCode"));
+
+	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
+
+	if(!theWebUsers_.xmlRequestOnGateway(
+			cgiIn,
+			out,
+			&xmlOut,
+			userInfo
+	))
+		return; //access failed
+
+//	//**** start LOGIN GATEWAY CODE ***//
+//	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions, uint64_t uid
+//	//Else, error message is returned in cookieCode
+//	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
+//	uint8_t userPermissions;// uint64_t uid;
+//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions))
+//	{
+//		*out << cookieCode;
+//		return;
+//	}
+//	//**** end LOGIN GATEWAY CODE ***//
+//
+//	HttpXmlDocument xmldoc(cookieCode);
+
+	infoRequestWorkLoopManager_.getRequestResult(cgiIn, xmlOut);
 
 	//return xml doc holding server response
-	xmldoc.outputXmlDocument((std::ostringstream*) out, false);
+	xmlOut.outputXmlDocument((std::ostringstream*) out, false);
 
 	__COUT__ << "Done asking!" << std::endl;
 }
@@ -1711,7 +1773,8 @@ throw (xgi::exception::Exception)
 		//	sessionId expires after set time if no login attempt (e.g. 5 minutes)
 		std::string uuid = CgiDataUtilities::postData(cgi, "uuid");
 
-		std::string sid = theWebUsers_.createNewLoginSession(uuid);
+		std::string sid = theWebUsers_.createNewLoginSession(uuid,
+				cgi.getEnvironment().getRemoteAddr() /* ip */);
 
 		__COUT__ << "uuid = " << uuid << std::endl;
 		__COUT__ << "SessionId = " << sid.substr(0, 10) << std::endl;
@@ -1783,7 +1846,7 @@ throw (xgi::exception::Exception)
 		__COUT__ << "nac =-" << newAccountCode << "-" << std::endl;
 
 		uint64_t uid = theWebUsers_.attemptActiveSession(uuid, jumbledUser,
-				jumbledPw, newAccountCode); //after call jumbledUser holds displayName on success
+				jumbledPw, newAccountCode, cgi.getEnvironment().getRemoteAddr()); //after call jumbledUser holds displayName on success
 
 
 		if (uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
@@ -1837,7 +1900,7 @@ throw (xgi::exception::Exception)
 		__COUT__ << "uuid = " << uuid << std::endl;
 
 		uint64_t uid = theWebUsers_.attemptActiveSessionWithCert(uuid, jumbledEmail,
-				cookieCode, username); //after call jumbledUser holds displayName on success
+				cookieCode, username, cgi.getEnvironment().getRemoteAddr()); //after call jumbledUser holds displayName on success
 
 
 		if (uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
@@ -1911,11 +1974,13 @@ throw (xgi::exception::Exception)
 	//Else, error message is returned in cookieCode
 	//Notes: cookie code not refreshed if RequestType = getSystemMessages
 	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
-	uint8_t userPermissions;
 	uint64_t uid;
 
-	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions,
-			&uid, "0", false))
+	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode,
+			0 /*userPermissions*/,
+			&uid,
+			"0" /*dummy ip*/,
+			false /*refresh*/))
 	{
 		*out << cookieCode;
 		return;
@@ -1953,6 +2018,33 @@ throw (xgi::exception::Exception)
 }
 
 //========================================================================================================================
+//setSupervisorPropertyDefaults
+//		override to set defaults for supervisor property values (before user settings override)
+void GatewaySupervisor::setSupervisorPropertyDefaults()
+{
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold, std::string() +
+			"*=1 | gatewayLaunchOTS=-1 | gatewayLaunchWiz=-1");
+}
+
+//========================================================================================================================
+//forceSupervisorPropertyValues
+//		override to force supervisor property values (and ignore user settings)
+void GatewaySupervisor::forceSupervisorPropertyValues()
+{
+	//note used by these handlers:
+	//	request()
+	//	stateMachineXgiHandler() -- prepend StateMachine to request type
+
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AutomatedRequestTypes,
+			"getSystemMessages | getCurrentState | gatewayLaunchOTS | gatewayLaunchWiz");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireUserLockRequestTypes,
+			"gatewayLaunchOTS | gatewayLaunchWiz");
+//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedUsernameRequestTypes,
+//			"StateMachine*"); //for all stateMachineXgiHandler requests
+
+}
+
+//========================================================================================================================
 void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 throw (xgi::exception::Exception)
 {
@@ -1961,32 +2053,49 @@ throw (xgi::exception::Exception)
 	std::lock_guard<std::mutex> lock(stateMachineAccessMutex_);
 	if(VERBOSE_MUTEX) __COUT__ << "Have FSM access" <<  std::endl;
 
-	cgicc::Cgicc cgi(in);
+	cgicc::Cgicc cgiIn(in);
 
-	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
+	std::string requestType = CgiDataUtilities::getData(cgiIn, "RequestType");
 
 
-	//**** start LOGIN GATEWAY CODE ***//
-	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions, uint64_t uid
-	//Else, error message is returned in cookieCode
-	//Notes: cookie code not refreshed if RequestType = getSystemMessages
-	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
-	uint8_t userPermissions;
-	uint64_t uid;
-	std::string userWithLock;
-	bool refreshCookie = Command != "getSystemMessages" &&
-			Command != "getCurrentState" &&
-			Command != "gatewayLaunchOTS" &&
-			Command != "gatewayLaunchWiz";
+	HttpXmlDocument xmlOut;
+	WebUsers::RequestUserInfo userInfo(requestType,
+			CgiDataUtilities::postData(cgiIn, "CookieCode"));
 
-	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions,
-			&uid, "0",
-			refreshCookie,
-			&userWithLock))
-	{
-		*out << cookieCode;
-		return;
-	}
+	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
+
+
+	if(!theWebUsers_.xmlRequestOnGateway(
+			cgiIn,
+			out,
+			&xmlOut,
+			userInfo
+			))
+		return; //access failed
+
+
+
+//	//**** start LOGIN GATEWAY CODE ***//
+//	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions, uint64_t userInfo.uid_
+//	//Else, error message is returned in cookieCode
+//	//Notes: cookie code not refreshed if RequestType = getSystemMessages
+//	std::string cookieCode = CgiDataUtilities::postData(cgiIn, "CookieCode");
+//	uint8_t userPermissions;
+//	uint64_t userInfo.uid_;
+//	std::string userWithLock;
+//	bool refreshCookie = requestType != "getSystemMessages" &&
+//			requestType != "getCurrentState" &&
+//			requestType != "gatewayLaunchOTS" &&
+//			requestType != "gatewayLaunchWiz";
+//
+//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions,
+//			&userInfo.uid_, "0",
+//			refreshCookie,
+//			&userWithLock))
+//	{
+//		*out << cookieCode;
+//		return;
+//	}
 
 	//**** end LOGIN GATEWAY CODE ***//
 
@@ -2012,23 +2121,23 @@ throw (xgi::exception::Exception)
 	//gatewayLaunchWiz
 
 
-	HttpXmlDocument xmldoc(cookieCode);
+	//HttpXmlDocument xmlOut(cookieCode);
 
-	if (Command == "getSettings")
+	if (requestType == "getSettings")
 	{
-		std::string accounts = CgiDataUtilities::getData(cgi, "accounts");
+		std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
 
 		__COUT__ << "Get Settings Request" << std::endl;
 		__COUT__ << "accounts = " << accounts << std::endl;
-		theWebUsers_.insertSettingsForUser(uid, &xmldoc, accounts == "1");
+		theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
 	}
-	else if (Command == "setSettings")
+	else if (requestType == "setSettings")
 	{
-		std::string bgcolor = 	CgiDataUtilities::postData(cgi, "bgcolor");
-		std::string dbcolor = 	CgiDataUtilities::postData(cgi, "dbcolor");
-		std::string wincolor = 	CgiDataUtilities::postData(cgi, "wincolor");
-		std::string layout = 	CgiDataUtilities::postData(cgi, "layout");
-		std::string syslayout = CgiDataUtilities::postData(cgi, "syslayout");
+		std::string bgcolor = 	CgiDataUtilities::postData(cgiIn, "bgcolor");
+		std::string dbcolor = 	CgiDataUtilities::postData(cgiIn, "dbcolor");
+		std::string wincolor = 	CgiDataUtilities::postData(cgiIn, "wincolor");
+		std::string layout = 	CgiDataUtilities::postData(cgiIn, "layout");
+		std::string syslayout = CgiDataUtilities::postData(cgiIn, "syslayout");
 
 		__COUT__ << "Set Settings Request" << std::endl;
 		__COUT__ << "bgcolor = " << bgcolor << std::endl;
@@ -2036,13 +2145,13 @@ throw (xgi::exception::Exception)
 		__COUT__ << "wincolor = " << wincolor << std::endl;
 		__COUT__ << "layout = " << layout << std::endl;
 		__COUT__ << "syslayout = " << syslayout << std::endl;
-		theWebUsers_.changeSettingsForUser(uid, bgcolor, dbcolor, wincolor,
+		theWebUsers_.changeSettingsForUser(userInfo.uid_, bgcolor, dbcolor, wincolor,
 				layout, syslayout);
-		theWebUsers_.insertSettingsForUser(uid, &xmldoc, true); //include user accounts
+		theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, true); //include user accounts
 	}
-	else if (Command == "accountSettings")
+	else if (requestType == "accountSettings")
 	{
-		std::string type = CgiDataUtilities::postData(cgi, "type"); //updateAccount, createAccount, deleteAccount
+		std::string type = CgiDataUtilities::postData(cgiIn, "type"); //updateAccount, createAccount, deleteAccount
 		int type_int = -1;
 
 		if (type == "updateAccount")
@@ -2052,13 +2161,13 @@ throw (xgi::exception::Exception)
 		else if (type == "deleteAccount")
 			type_int = 2;
 
-		std::string username = CgiDataUtilities::postData(cgi, "username");
-		std::string displayname = CgiDataUtilities::postData(cgi,
+		std::string username = CgiDataUtilities::postData(cgiIn, "username");
+		std::string displayname = CgiDataUtilities::postData(cgiIn,
 				"displayname");
-		std::string email = CgiDataUtilities::postData(cgi, "useremail");
-		std::string permissions = CgiDataUtilities::postData(cgi,
+		std::string email = CgiDataUtilities::postData(cgiIn, "useremail");
+		std::string permissions = CgiDataUtilities::postData(cgiIn,
 				"permissions");
-		std::string accounts = CgiDataUtilities::getData(cgi, "accounts");
+		std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
 
 		__COUT__ << "accountSettings Request" << std::endl;
 		__COUT__ << "type = " << type << " - " << type_int << std::endl;
@@ -2067,27 +2176,27 @@ throw (xgi::exception::Exception)
 		__COUT__ << "displayname = " << displayname << std::endl;
 		__COUT__ << "permissions = " << permissions << std::endl;
 
-		theWebUsers_.modifyAccountSettings(uid, type_int, username, displayname,email,
+		theWebUsers_.modifyAccountSettings(userInfo.uid_, type_int, username, displayname,email,
 				permissions);
 
 		__COUT__ << "accounts = " << accounts << std::endl;
 
-		theWebUsers_.insertSettingsForUser(uid, &xmldoc, accounts == "1");
+		theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
 	}
-	else if(Command == "stateMatchinePreferences")
+	else if(requestType == "stateMatchinePreferences")
 	{
-		std::string set = CgiDataUtilities::getData(cgi, "set");
+		std::string set = CgiDataUtilities::getData(cgiIn, "set");
 		const std::string DEFAULT_FSM_VIEW = "Default_FSM_View";
 		if(set == "1")
-			theWebUsers_.setGenericPreference(uid, DEFAULT_FSM_VIEW,
-					CgiDataUtilities::getData(cgi, DEFAULT_FSM_VIEW));
+			theWebUsers_.setGenericPreference(userInfo.uid_, DEFAULT_FSM_VIEW,
+					CgiDataUtilities::getData(cgiIn, DEFAULT_FSM_VIEW));
 		else
-			theWebUsers_.getGenericPreference(uid, DEFAULT_FSM_VIEW, &xmldoc);
+			theWebUsers_.getGenericPreference(userInfo.uid_, DEFAULT_FSM_VIEW, &xmlOut);
 	}
-	else if(Command == "getAliasList")
+	else if(requestType == "getAliasList")
 	{
-		std::string username = theWebUsers_.getUsersUsername(uid);
-		std::string fsmName = CgiDataUtilities::getData(cgi, "fsmName");
+		std::string username = theWebUsers_.getUsersUsername(userInfo.uid_);
+		std::string fsmName = CgiDataUtilities::getData(cgiIn, "fsmName");
 		__COUT__ << "fsmName = " << fsmName << std::endl;
 
 		std::string stateMachineAliasFilter = "*"; //default to all
@@ -2204,8 +2313,8 @@ throw (xgi::exception::Exception)
 
 				if(!filterMatch) continue;
 
-				xmldoc.addTextElementToData("config_alias", aliasMapPair.first);
-				xmldoc.addTextElementToData("config_key",
+				xmlOut.addTextElementToData("config_alias", aliasMapPair.first);
+				xmlOut.addTextElementToData("config_key",
 						ConfigurationGroupKey::getFullGroupString(aliasMapPair.second.first,
 								aliasMapPair.second.second).c_str());
 
@@ -2217,9 +2326,9 @@ throw (xgi::exception::Exception)
 							false,0,0,0,
 							&groupComment, &groupAuthor, &groupCreationTime, false /*false to not load member map*/);
 
-					xmldoc.addTextElementToData("config_comment", groupComment);
-					xmldoc.addTextElementToData("config_author", groupAuthor);
-					xmldoc.addTextElementToData("config_create_time", groupCreationTime);
+					xmlOut.addTextElementToData("config_comment", groupComment);
+					xmlOut.addTextElementToData("config_author", groupAuthor);
+					xmlOut.addTextElementToData("config_create_time", groupCreationTime);
 				}
 				catch(...)
 				{
@@ -2239,53 +2348,53 @@ throw (xgi::exception::Exception)
 			fscanf(fp,"%*s %s",tmpLastAlias);
 			__COUT__ << "tmpLastAlias: " << tmpLastAlias << std::endl;
 
-			xmldoc.addTextElementToData("UserLastConfigAlias",tmpLastAlias);
+			xmlOut.addTextElementToData("UserLastConfigAlias",tmpLastAlias);
 			fclose(fp);
 		}
 	}
-	else if (Command == "getFecList")
+	else if (requestType == "getFecList")
 	{
-		xmldoc.addTextElementToData("fec_list", "");
+		xmlOut.addTextElementToData("fec_list", "");
 
 		for (auto it: allSupervisorInfo_.getAllFETypeSupervisorInfo())
 		{
-			xmldoc.addTextElementToParent("fec_url",
+			xmlOut.addTextElementToParent("fec_url",
 					it.second.getURL(), "fec_list");
-			xmldoc.addTextElementToParent(
+			xmlOut.addTextElementToParent(
 					"fec_urn",
 					std::to_string(it.second.getId()),	"fec_list");
 		}
 	}
-	else if (Command == "getSystemMessages")
+	else if (requestType == "getSystemMessages")
 	{
-		xmldoc.addTextElementToData("systemMessages",
+		xmlOut.addTextElementToData("systemMessages",
 				theSystemMessenger_.getSystemMessage(
-						theWebUsers_.getUsersDisplayName(uid)));
+						theWebUsers_.getUsersDisplayName(userInfo.uid_)));
 
-		xmldoc.addTextElementToData("username_with_lock",
+		xmlOut.addTextElementToData("username_with_lock",
 				theWebUsers_.getUserWithLock()); //always give system lock update
 
 		//__COUT__ << "userWithLock " << theWebUsers_.getUserWithLock() << std::endl;
 	}
-	else if (Command == "setUserWithLock")
+	else if (requestType == "setUserWithLock")
 	{
-		std::string username = CgiDataUtilities::postData(cgi, "username");
-		std::string lock = CgiDataUtilities::postData(cgi, "lock");
-		std::string accounts = CgiDataUtilities::getData(cgi, "accounts");
+		std::string username = CgiDataUtilities::postData(cgiIn, "username");
+		std::string lock = CgiDataUtilities::postData(cgiIn, "lock");
+		std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
 
-		__COUT__ << Command <<  std::endl;
+		__COUT__ << requestType <<  std::endl;
 		__COUT__ << "username " << username <<  std::endl;
 		__COUT__ << "lock " << lock <<  std::endl;
 		__COUT__ << "accounts " << accounts <<  std::endl;
-		__COUT__ << "uid " << uid <<  std::endl;
+		__COUT__ << "userInfo.uid_ " << userInfo.uid_ <<  std::endl;
 
 		std::string tmpUserWithLock = theWebUsers_.getUserWithLock();
-		if(!theWebUsers_.setUserWithLock(uid, lock == "1", username))
-			xmldoc.addTextElementToData("server_alert",
+		if(!theWebUsers_.setUserWithLock(userInfo.uid_, lock == "1", username))
+			xmlOut.addTextElementToData("server_alert",
 					std::string("Set user lock action failed. You must have valid permissions and ") +
 					"locking user must be currently logged in.");
 
-		theWebUsers_.insertSettingsForUser(uid, &xmldoc, accounts == "1");
+		theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
 
 		if (tmpUserWithLock != theWebUsers_.getUserWithLock()) //if there was a change, broadcast system message
 			theSystemMessenger_.addSystemMessage("*", theWebUsers_.getUserWithLock()
@@ -2293,7 +2402,7 @@ throw (xgi::exception::Exception)
 							: theWebUsers_.getUserWithLock()
 							  + " has locked ots.");
 	}
-	else if (Command == "getStateMachine")
+	else if (requestType == "getStateMachine")
 	{
 		// __COUT__ << "Getting state machine" << std::endl;
 		std::vector<toolbox::fsm::State> states;
@@ -2307,9 +2416,9 @@ throw (xgi::exception::Exception)
 		for (unsigned int i = 0; i < states.size(); ++i)//get all states
 		{
 			stateStr[0] = states[i];
-			DOMElement* stateParent = xmldoc.addTextElementToData("state", stateStr);
+			DOMElement* stateParent = xmlOut.addTextElementToData("state", stateStr);
 
-			xmldoc.addTextElementToParent("state_name", theStateMachine_.getStateName(states[i]), stateParent);
+			xmlOut.addTextElementToParent("state_name", theStateMachine_.getStateName(states[i]), stateParent);
 
 			//__COUT__ << "state: " << states[i] << " - " << theStateMachine_.getStateName(states[i]) << std::endl;
 
@@ -2335,41 +2444,41 @@ throw (xgi::exception::Exception)
 				if(stateStr[0] == 'R')
 				{
 					//addRun = true;
-					xmldoc.addTextElementToParent("state_transition", stateStr, stateParent);
+					xmlOut.addTextElementToParent("state_transition", stateStr, stateParent);
 
 					//__COUT__ << states[i] << " => " << *ait << std::endl;
 
-					xmldoc.addTextElementToParent("state_transition_action", *ait, stateParent);
+					xmlOut.addTextElementToParent("state_transition_action", *ait, stateParent);
 
 					transName = theStateMachine_.getTransitionName(states[i], *ait);
 					//__COUT__ << states[i] << " => " << transName << std::endl;
 
-					xmldoc.addTextElementToParent("state_transition_name",
+					xmlOut.addTextElementToParent("state_transition_name",
 							transName, stateParent);
 					transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
 					//__COUT__ << states[i] << " => " << transParameter<< std::endl;
 
-					xmldoc.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
+					xmlOut.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
 					break;
 				}
 				else if(stateStr[0] == 'C')
 				{
 					//addCfg = true;
-					xmldoc.addTextElementToParent("state_transition", stateStr, stateParent);
+					xmlOut.addTextElementToParent("state_transition", stateStr, stateParent);
 
 					//__COUT__ << states[i] << " => " << *ait << std::endl;
 
-					xmldoc.addTextElementToParent("state_transition_action", *ait, stateParent);
+					xmlOut.addTextElementToParent("state_transition_action", *ait, stateParent);
 
 					transName = theStateMachine_.getTransitionName(states[i], *ait);
 					//__COUT__ << states[i] << " => " << transName << std::endl;
 
-					xmldoc.addTextElementToParent("state_transition_name",
+					xmlOut.addTextElementToParent("state_transition_name",
 							transName, stateParent);
 					transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
 					//__COUT__ << states[i] << " => " << transParameter<< std::endl;
 
-					xmldoc.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
+					xmlOut.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
 					break;
 				}
 			}
@@ -2390,26 +2499,26 @@ throw (xgi::exception::Exception)
 				else if(stateStr[0] == 'C')
 					continue;
 
-				xmldoc.addTextElementToParent("state_transition", stateStr, stateParent);
+				xmlOut.addTextElementToParent("state_transition", stateStr, stateParent);
 
 				//__COUT__ << states[i] << " => " << *ait << std::endl;
 
-				xmldoc.addTextElementToParent("state_transition_action", *ait, stateParent);
+				xmlOut.addTextElementToParent("state_transition_action", *ait, stateParent);
 
 				transName = theStateMachine_.getTransitionName(states[i], *ait);
 				//__COUT__ << states[i] << " => " << transName << std::endl;
 
-				xmldoc.addTextElementToParent("state_transition_name",
+				xmlOut.addTextElementToParent("state_transition_name",
 						transName, stateParent);
 				transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
 				//__COUT__ << states[i] << " => " << transParameter<< std::endl;
 
-				xmldoc.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
+				xmlOut.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
 			}
 		}
 
 	}
-	else if (Command == "getStateMachineNames")
+	else if (requestType == "getStateMachineNames")
 	{
 		//get stateMachineAliasFilter if possible
 		ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorConfigurationNode(
@@ -2420,32 +2529,32 @@ throw (xgi::exception::Exception)
 			auto fsmNodes = configLinkNode.getNode(
 					"LinkToStateMachineConfiguration").getChildren();
 			for(const auto& fsmNode:fsmNodes)
-				xmldoc.addTextElementToData("stateMachineName", fsmNode.first);
+				xmlOut.addTextElementToData("stateMachineName", fsmNode.first);
 		}
 		catch(...) //else empty set of state machines.. can always choose ""
 		{
 			__COUT__ << "Caught exception, assuming no valid FSM names." << std::endl;
-			xmldoc.addTextElementToData("stateMachineName", "");
+			xmlOut.addTextElementToData("stateMachineName", "");
 		}
 	}
-	else if (Command == "getIterationPlanStatus")
+	else if (requestType == "getIterationPlanStatus")
 	{
 		//__COUT__ << "checking it status" << std::endl;
-		theIterator_.handleCommandRequest(xmldoc,Command,"");
+		theIterator_.handleCommandRequest(xmlOut,requestType,"");
 	}
-	else if (Command == "getCurrentState")
+	else if (requestType == "getCurrentState")
 	{
-		xmldoc.addTextElementToData("current_state", theStateMachine_.getCurrentStateName());
-		xmldoc.addTextElementToData("in_transition", theStateMachine_.isInTransition() ? "1" : "0");
+		xmlOut.addTextElementToData("current_state", theStateMachine_.getCurrentStateName());
+		xmlOut.addTextElementToData("in_transition", theStateMachine_.isInTransition() ? "1" : "0");
 		if (theStateMachine_.isInTransition())
-			xmldoc.addTextElementToData("transition_progress", RunControlStateMachine::theProgressBar_.readPercentageString());
+			xmlOut.addTextElementToData("transition_progress", RunControlStateMachine::theProgressBar_.readPercentageString());
 		else
-			xmldoc.addTextElementToData("transition_progress", "100");
+			xmlOut.addTextElementToData("transition_progress", "100");
 
 
 		char tmp[20];
 		sprintf(tmp,"%lu",theStateMachine_.getTimeInState());
-		xmldoc.addTextElementToData("time_in_state", tmp);
+		xmlOut.addTextElementToData("time_in_state", tmp);
 
 
 
@@ -2454,7 +2563,7 @@ throw (xgi::exception::Exception)
 
 		//// ======================== get run alias based on fsm name ====
 
-		std::string fsmName = CgiDataUtilities::getData(cgi, "fsmName");
+		std::string fsmName = CgiDataUtilities::getData(cgiIn, "fsmName");
 		//		__COUT__ << "fsmName = " << fsmName << std::endl;
 		//		__COUT__ << "activeStateMachineName_ = " << activeStateMachineName_ << std::endl;
 		//		__COUT__ << "theStateMachine_.getProvenanceStateName() = " <<
@@ -2500,7 +2609,7 @@ throw (xgi::exception::Exception)
 
 			//__COUT__ << "stateMachineRunAlias  = " << stateMachineRunAlias	<< std::endl;
 
-			xmldoc.addTextElementToData("stateMachineRunAlias", stateMachineRunAlias);
+			xmlOut.addTextElementToData("stateMachineRunAlias", stateMachineRunAlias);
 
 
 			//// ======================== get run number based on fsm name ====
@@ -2511,14 +2620,14 @@ throw (xgi::exception::Exception)
 				sprintf(tmp,"Current %s Number: %u",stateMachineRunAlias.c_str(),getNextRunNumber(activeStateMachineName_)-1);
 			else
 				sprintf(tmp,"Next %s Number: %u",stateMachineRunAlias.c_str(),getNextRunNumber(fsmName));
-			xmldoc.addTextElementToData("run_number", tmp);
+			xmlOut.addTextElementToData("run_number", tmp);
 		}
 	}
-	else if(Command == "getErrorInStateMatchine")
+	else if(requestType == "getErrorInStateMatchine")
 	{
-		xmldoc.addTextElementToData("FSM_Error", theStateMachine_.getErrorMessage());
+		xmlOut.addTextElementToData("FSM_Error", theStateMachine_.getErrorMessage());
 	}
-	else if(Command == "getDesktopIcons")
+	else if(requestType == "getDesktopIcons")
 	{
 
 		std::string iconFileName = ICON_FILE_NAME;
@@ -2545,102 +2654,95 @@ throw (xgi::exception::Exception)
 			//Close file
 			iconFile.close();
 		}
-		xmldoc.addTextElementToData("iconList", iconList);
+		xmlOut.addTextElementToData("iconList", iconList);
 
 	}
-	else if(Command == "gatewayLaunchOTS" || Command == "gatewayLaunchWiz")
+	else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 	{
 		//NOTE: similar to ConfigurationGUI version but DOES keep active sessions
 
-		if(userPermissions != 255)
-		{
-			__COUT__ << "Insufficient Permissions" << std::endl;
-		}
-		else
-		{
-			__COUT_WARN__ << Command << " command received! " << std::endl;
-			__MOUT_WARN__ << Command << " command received! " << std::endl;
+		__COUT_WARN__ << requestType << " requestType received! " << std::endl;
+		__MOUT_WARN__ << requestType << " requestType received! " << std::endl;
 
 
-			//gateway launch is different, in that it saves user sessions
-			theWebUsers_.saveActiveSessions();
+		//gateway launch is different, in that it saves user sessions
+		theWebUsers_.saveActiveSessions();
 
-			//now launch
+		//now launch
 
-			if(Command == "gatewayLaunchOTS")
-				launchStartOTSCommand("LAUNCH_OTS");
-			else if(Command == "gatewayLaunchWiz")
-				launchStartOTSCommand("LAUNCH_WIZ");
+		if(requestType == "gatewayLaunchOTS")
+			launchStartOTSCommand("LAUNCH_OTS");
+		else if(requestType == "gatewayLaunchWiz")
+			launchStartOTSCommand("LAUNCH_WIZ");
 
-//			__COUT__ << "Extracting target context hostnames... " << std::endl;
-//			std::vector<std::string> hostnames;
-//			try
-//			{
-//				theConfigurationManager_->init(); //completely reset to re-align with any changes
-//
-//				const XDAQContextConfiguration* contextConfiguration = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
-//
-//				auto contexts = contextConfiguration->getContexts();
-//				unsigned int i,j;
-//				for(const auto& context: contexts)
-//				{
-//					if(!context.status_) continue;
-//
-//					//find last slash
-//					j=0; //default to whole string
-//					for(i=0;i<context.address_.size();++i)
-//						if(context.address_[i] == '/')
-//							j = i+1;
-//					hostnames.push_back(context.address_.substr(j));
-//					__COUT__ << "hostname = " << hostnames.back() << std::endl;
-//				}
-//			}
-//			catch(...)
-//			{
-//				__SS__ << "\nRelaunch of otsdaq interrupted! " <<
-//						"The Configuration Manager could not be initialized." << std::endl;
-//
-//				__COUT_ERR__ << "\n" << ss.str();
-//				return;
-//			}
-//
-//			for(const auto& hostname: hostnames)
-//			{
-//				std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) +
-//						"/StartOTS_action_" + hostname + ".cmd");
-//				FILE* fp = fopen(fn.c_str(),"w");
-//				if(fp)
-//				{
-//					if(Command == "gatewayLaunchOTS")
-//						fprintf(fp,"LAUNCH_OTS");
-//					else if(Command == "gatewayLaunchWiz")
-//						fprintf(fp,"LAUNCH_WIZ");
-//
-//					fclose(fp);
-//				}
-//				else
-//					__COUT_ERR__ << "Unable to open command file: " << fn << std::endl;
-//			}
-		}
+		//			__COUT__ << "Extracting target context hostnames... " << std::endl;
+		//			std::vector<std::string> hostnames;
+		//			try
+		//			{
+		//				theConfigurationManager_->init(); //completely reset to re-align with any changes
+		//
+		//				const XDAQContextConfiguration* contextConfiguration = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+		//
+		//				auto contexts = contextConfiguration->getContexts();
+		//				unsigned int i,j;
+		//				for(const auto& context: contexts)
+		//				{
+		//					if(!context.status_) continue;
+		//
+		//					//find last slash
+		//					j=0; //default to whole string
+		//					for(i=0;i<context.address_.size();++i)
+		//						if(context.address_[i] == '/')
+		//							j = i+1;
+		//					hostnames.push_back(context.address_.substr(j));
+		//					__COUT__ << "hostname = " << hostnames.back() << std::endl;
+		//				}
+		//			}
+		//			catch(...)
+		//			{
+		//				__SS__ << "\nRelaunch of otsdaq interrupted! " <<
+		//						"The Configuration Manager could not be initialized." << std::endl;
+		//
+		//				__COUT_ERR__ << "\n" << ss.str();
+		//				return;
+		//			}
+		//
+		//			for(const auto& hostname: hostnames)
+		//			{
+		//				std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) +
+		//						"/StartOTS_action_" + hostname + ".cmd");
+		//				FILE* fp = fopen(fn.c_str(),"w");
+		//				if(fp)
+		//				{
+		//					if(requestType == "gatewayLaunchOTS")
+		//						fprintf(fp,"LAUNCH_OTS");
+		//					else if(requestType == "gatewayLaunchWiz")
+		//						fprintf(fp,"LAUNCH_WIZ");
+		//
+		//					fclose(fp);
+		//				}
+		//				else
+		//					__COUT_ERR__ << "Unable to open requestType file: " << fn << std::endl;
+		//			}
+
 	}
-	else if(Command == "resetUserTooltips")
+	else if(requestType == "resetUserTooltips")
 	{
-		WebUsers::resetAllUserTooltips(theWebUsers_.getUsersUsername(uid));
+		WebUsers::resetAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_));
 	}
 	else
-		__COUT__ << "Command Request, " << Command << ", not recognized." << std::endl;
+		__COUT__ << "requestType Request, " << requestType << ", not recognized." << std::endl;
 
 	//__COUT__ << "Made it" << std::endl;
 
 	//return xml doc holding server response
-	xmldoc.outputXmlDocument((std::ostringstream*) out, false, true); //Note: allow white space need for error response
+	xmlOut.outputXmlDocument((std::ostringstream*) out, false, true); //Note: allow white space need for error response
 
-	//__COUT__ << "done " << Command << std::endl;
-}
+	//__COUT__ << "done " << requestType << std::endl;
+} // end request()
 
 //========================================================================================================================
-//xoap::supervisorGetUserInfo
-//	get user info to external supervisors
+//launchStartOTSCommand
 void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
 {
 	__COUT__ << "launch StartOTS Command = " << command << __E__;
@@ -2694,38 +2796,39 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
 	}
 }
 
-//========================================================================================================================
-//xoap::supervisorGetUserInfo
-//	get user info to external supervisors
-xoap::MessageReference GatewaySupervisor::supervisorGetUserInfo(
-		xoap::MessageReference message)
-throw (xoap::exception::Exception)
-{
-	SOAPParameters parameters;
-	parameters.addParameter("CookieCode");
-	receive(message, parameters);
-	std::string cookieCode = parameters.getValue("CookieCode");
-
-	std::string username, displayName;
-	uint64_t activeSessionIndex;
-
-	theWebUsers_.getUserInfoForCookie(cookieCode, &username, &displayName,
-			&activeSessionIndex);
-
-	//__COUT__ << "username " << username << std::endl;
-	//__COUT__ << "displayName " << displayName << std::endl;
-
-	//fill return parameters
-	SOAPParameters retParameters;
-	retParameters.addParameter("Username", username);
-	retParameters.addParameter("DisplayName", displayName);
-	char tmpStr[100];
-	sprintf(tmpStr, "%lu", activeSessionIndex);
-	retParameters.addParameter("ActiveSessionIndex", tmpStr);
-
-	return SOAPUtilities::makeSOAPMessageReference("UserInfoResponse",
-			retParameters);
-}
+//FIXME -- delete -- now all cookie checks return all info
+////========================================================================================================================
+////xoap::supervisorGetUserInfo
+////	get user info to external supervisors
+//xoap::MessageReference GatewaySupervisor::supervisorGetUserInfo(
+//		xoap::MessageReference message)
+//throw (xoap::exception::Exception)
+//{
+//	SOAPParameters parameters;
+//	parameters.addParameter("CookieCode");
+//	receive(message, parameters);
+//	std::string cookieCode = parameters.getValue("CookieCode");
+//
+//	std::string username, displayName;
+//	uint64_t activeSessionIndex;
+//
+//	theWebUsers_.getUserInfoForCookie(cookieCode, &username, &displayName,
+//			&activeSessionIndex);
+//
+//	//__COUT__ << "username " << username << std::endl;
+//	//__COUT__ << "displayName " << displayName << std::endl;
+//
+//	//fill return parameters
+//	SOAPParameters retParameters;
+//	retParameters.addParameter("Username", username);
+//	retParameters.addParameter("DisplayName", displayName);
+//	char tmpStr[100];
+//	sprintf(tmpStr, "%lu", activeSessionIndex);
+//	retParameters.addParameter("ActiveSessionIndex", tmpStr);
+//
+//	return SOAPUtilities::makeSOAPMessageReference("UserInfoResponse",
+//			retParameters);
+//}
 
 //========================================================================================================================
 //xoap::supervisorCookieCheck
@@ -2739,26 +2842,37 @@ throw (xoap::exception::Exception)
 	SOAPParameters parameters;
 	parameters.addParameter("CookieCode");
 	parameters.addParameter("RefreshOption");
+	parameters.addParameter("IPAddress");
 	receive(message, parameters);
 	std::string cookieCode = parameters.getValue("CookieCode");
 	std::string refreshOption = parameters.getValue("RefreshOption"); //give external supervisors option to refresh cookie or not, "1" to refresh
+	std::string ipAddress = parameters.getValue("IPAddress"); //give external supervisors option to refresh cookie or not, "1" to refresh
 
 	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions, uint64_t uid
 	//Else, error message is returned in cookieCode
-	uint8_t userPermissions = 0;
+	std::map<std::string /*groupName*/,WebUsers::permissionLevel_t> userGroupPermissionsMap;
 	std::string userWithLock = "";
-	theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions, 0,
-			"0", refreshOption == "1", &userWithLock);
+	uint64_t activeSessionIndex, uid;
+	theWebUsers_.cookieCodeIsActiveForRequest(
+			cookieCode,
+			&userGroupPermissionsMap,
+			&uid /*uid is not given to remote users*/,
+			ipAddress,
+			refreshOption == "1",
+			&userWithLock,
+			&activeSessionIndex);
 
 	//__COUT__ << "userWithLock " << userWithLock << std::endl;
 
 	//fill return parameters
 	SOAPParameters retParameters;
-	retParameters.addParameter("CookieCode", cookieCode);
-	char tmp[5];
-	sprintf(tmp, "%d", userPermissions);
-	retParameters.addParameter("Permissions", tmp);
-	retParameters.addParameter("UserWithLock", userWithLock);
+	retParameters.addParameter("CookieCode", 	cookieCode);
+	retParameters.addParameter("Permissions", 	StringMacros::mapToString(userGroupPermissionsMap).c_str());
+	retParameters.addParameter("UserWithLock", 	userWithLock);
+	retParameters.addParameter("Username", 		theWebUsers_.getUsersUsername(uid));
+	retParameters.addParameter("DisplayName", 	theWebUsers_.getUsersDisplayName(uid));
+	sprintf(tmpStringForConversions_, "%lu", 	activeSessionIndex);
+	retParameters.addParameter("ActiveSessionIndex", tmpStringForConversions_);
 
 	//__COUT__ << std::endl;
 

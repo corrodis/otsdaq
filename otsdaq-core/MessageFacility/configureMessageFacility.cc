@@ -1,5 +1,5 @@
 #include "otsdaq-core/MessageFacility/configureMessageFacility.hh"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/make_ParameterSet.h"
 #include <boost/filesystem.hpp>

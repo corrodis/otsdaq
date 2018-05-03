@@ -10,6 +10,7 @@
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/GatewaySupervisor/Iterator.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
+#include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -35,7 +36,8 @@ class ConfigurationManager;
 class ConfigurationGroupKey;
 class WorkLoopManager;
 
-class GatewaySupervisor: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
+class GatewaySupervisor: public xdaq::Application, public SOAPMessenger,
+	public RunControlStateMachine, public CorePropertySupervisorBase
 {
 	friend class WizardSupervisor;
 	friend class Iterator;
@@ -58,7 +60,7 @@ public:
 
     //State Machine requests handlers
     void 						stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
-    void 						stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
+    //void 						stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
     xoap::MessageReference 		stateMachineXoapHandler      	(xoap::MessageReference msg )  	        throw (xoap::exception::Exception);
     xoap::MessageReference 		stateMachineResultXoapHandler	(xoap::MessageReference msg )  	        throw (xoap::exception::Exception);
     bool                        stateMachineThread           	(toolbox::task::WorkLoop* workLoop);
@@ -97,7 +99,10 @@ public:
 
     void makeSystemLogbookEntry (std::string entryText);
 
-   // void simpleFunction () { std::cout << __COUT_HDR_FL__ << "hi\n" << std::endl;}
+    //CorePropertySupervisorBase override functions
+    virtual void			setSupervisorPropertyDefaults	(void) override; //override to control supervisor specific defaults
+    virtual void			forceSupervisorPropertyValues	(void) override; //override to force supervisor property values (and ignore user settings)
+
 
 private:
     unsigned int 														getNextRunNumber					(const std::string &fsmName = "");
@@ -139,6 +144,9 @@ private:
     enum {
     	VERBOSE_MUTEX = 0
     };
+
+    //temporary member variable to avoid redeclaration in repetitive functions
+    char								tmpStringForConversions_[100];
 
     //Trash tests
     void wait(int milliseconds, std::string who="") const;

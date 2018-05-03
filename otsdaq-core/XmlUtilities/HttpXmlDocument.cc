@@ -2,7 +2,7 @@
 #include "otsdaq-core/XmlUtilities/ConvertToXML.h"
 #include "otsdaq-core/XmlUtilities/ConvertFromXML.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 
 #include <stdexcept>
@@ -281,7 +281,8 @@ std::string HttpXmlDocument::getMatchingValue (const std::string &field, const u
 //==============================================================================
 //HttpXmlDocument::recursiveFindElement
 //  recursively searches and returns the value for field found occurance number of times
-std::string HttpXmlDocument::recursiveFindElementValue (xercesc::DOMElement *currEl, const std::string &field, const unsigned int occurance, unsigned int &count)
+std::string HttpXmlDocument::recursiveFindElementValue (xercesc::DOMElement *currEl, const std::string &field,
+		const unsigned int occurance, unsigned int &count)
 {
     if (XML_TO_CHAR(currEl->getNodeName()) == field && occurance == count++) //found, done!!
     {

@@ -527,53 +527,15 @@ void ConfigurationView::init(void)
 //getValue
 //	string version
 //	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
-void ConfigurationView::getValue(std::string& value, unsigned int row, unsigned int col, bool convertEnvironmentVariables) const
+void ConfigurationView::getValue(std::string& value, unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
-	//getValue<std::string>(value,row,col,convertEnvironmentVariables);
-
 	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 	{
 		__SS__ << "Invalid row col requested" << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
-	value = validateValueForColumn(theDataView_[row][col],col,convertEnvironmentVariables);
-
-//	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
-//	{
-//		__SS__ << "Invalid row col requested" << std::endl;
-//		__COUT_ERR__ << "\n" << ss.str();
-//		throw std::runtime_error(ss.str());
-//	}
-//
-//
-//	if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING)
-//	{
-//		value = theDataView_[row][col];
-//		if(convertEnvironmentVariables)
-//			value = convertEnvVariables(value);
-//	}
-//	else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_TIME)
-//	{
-//		value.resize(30); //known fixed size: Thu Aug 23 14:55:02 2001 CST
-//		time_t timestamp(strtol(theDataView_[row][col].c_str(),0,10));
-//		struct tm tmstruct;
-//		::localtime_r(&timestamp, &tmstruct);
-//		::strftime(&value[0], 30, "%c %Z", &tmstruct);
-//		value.resize(strlen(value.c_str()));
-//	}
-//	else
-//	{
-//		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
-//								<< " in configuration " << tableName_
-//								<< " at column=" << columnsInfo_[col].getName()
-//								<< " for getValue with type '" << ots_demangle(typeid(value).name())
-//								<< "'" << std::endl;
-//		throw std::runtime_error(ss.str());
-//	}
-
-
+	value = validateValueForColumn(theDataView_[row][col],col,doConvertEnvironmentVariables);
 }
 
 
@@ -583,44 +545,41 @@ void ConfigurationView::getValue(std::string& value, unsigned int row, unsigned 
 //	Note: necessary because types of std::basic_string<char>
 //	cause compiler problems if no string specific function
 std::string ConfigurationView::validateValueForColumn(const std::string& value,
-		unsigned int col, bool convertEnvironmentVariables) const
+		unsigned int col, bool doConvertEnvironmentVariables) const
 {
-		//return validateValueForColumn<std::string>(value,col,convertEnvironmentVariables);
-		if(col >= columnsInfo_.size())
-		{
-			__SS__ << "Invalid col requested" << std::endl;
-			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
-		}
-
-		std::string retValue;
-
-		if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING)
-			retValue = convertEnvironmentVariables?convertEnvVariables(value):value;
-		else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_TIME)
-		{
-			retValue.resize(30); //known fixed size: Thu Aug 23 14:55:02 2001 CST
-			time_t timestamp(
-					strtol((convertEnvironmentVariables?convertEnvVariables(value):value).c_str(),
-							0,10));
-			struct tm tmstruct;
-			::localtime_r(&timestamp, &tmstruct);
-			::strftime(&retValue[0], 30, "%c %Z", &tmstruct);
-			retValue.resize(strlen(retValue.c_str()));
-		}
-		else
-		{
-			__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
-				<< " in configuration " << tableName_
-				<< " at column=" << columnsInfo_[col].getName()
-				<< " for getValue with type '" << ots_demangle(typeid(retValue).name())
-				<< "'" << std::endl;
-			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
-		}
-
-		return retValue;
+	if(col >= columnsInfo_.size())
+	{
+		__SS__ << "Invalid col requested" << std::endl;
+		__SS_THROW__;
 	}
+
+	std::string retValue;
+
+	if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING)
+		retValue = doConvertEnvironmentVariables?StringMacros::convertEnvironmentVariables(value):value;
+	else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_TIME)
+	{
+		retValue.resize(30); //known fixed size: Thu Aug 23 14:55:02 2001 CST
+		time_t timestamp(
+				strtol((doConvertEnvironmentVariables?StringMacros::convertEnvironmentVariables(value):value).c_str(),
+						0,10));
+		struct tm tmstruct;
+		::localtime_r(&timestamp, &tmstruct);
+		::strftime(&retValue[0], 30, "%c %Z", &tmstruct);
+		retValue.resize(strlen(retValue.c_str()));
+	}
+	else
+	{
+		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
+						<< " in configuration " << tableName_
+						<< " at column=" << columnsInfo_[col].getName()
+						<< " for getValue with type '" << StringMacros::demangleTypeName(typeid(retValue).name())
+						<< "'" << std::endl;
+		__SS_THROW__;
+	}
+
+	return retValue;
+}
 
 
 //==============================================================================
@@ -628,7 +587,7 @@ std::string ConfigurationView::validateValueForColumn(const std::string& value,
 //	gets the value with the proper data type and converts to string
 //	as though getValue was called.
 std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int col,
-		bool convertEnvironmentVariables) const
+		bool doConvertEnvironmentVariables) const
 {
 	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 	{
@@ -662,7 +621,7 @@ std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int c
 	}
 
 	//__COUT__ << std::endl;
-	return convertEnvironmentVariables?convertEnvVariables(theDataView_[row][col]):
+	return doConvertEnvironmentVariables?StringMacros::convertEnvironmentVariables(theDataView_[row][col]):
 			theDataView_[row][col];
 }
 
@@ -674,9 +633,9 @@ std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int c
 //	then escapes all special characters with slash.
 //	Note: this should be useful for values placed in double quotes, i.e. JSON.
 std::string ConfigurationView::getEscapedValueAsString(unsigned int row, unsigned int col,
-		bool convertEnvironmentVariables) const
+		bool doConvertEnvironmentVariables) const
 {
-	std::string val = getValueAsString(row,col,convertEnvironmentVariables);
+	std::string val = getValueAsString(row,col,doConvertEnvironmentVariables);
 	std::string retVal = "";
 	retVal.reserve(val.size()); //reserve roughly right size
 	for(unsigned int i=0;i<val.size();++i)
@@ -700,31 +659,6 @@ std::string ConfigurationView::getEscapedValueAsString(unsigned int row, unsigne
 }
 
 //==============================================================================
-std::string ConfigurationView::convertEnvVariables(const std::string& data) const
-{
-	std::string converted = data;
-	if(data.find("${") != std::string::npos)
-	{
-		unsigned int begin = data.find("${");
-		unsigned int end   = data.find("}");
-		std::string envVariable = data.substr(begin+2, end-begin-2);
-		//std::cout << "Converted Value: " << envVariable << std::endl;
-		if(getenv(envVariable.c_str()) != nullptr)
-		{
-			return convertEnvVariables(converted.replace(begin,end-begin+1,getenv(envVariable.c_str())));
-		}
-		else
-		{
-			__SS__ << ("In configuration " + tableName_ + " the environmental variable: " + envVariable +
-					" is not set! Please make sure you set it before continuing!") << std::endl;
-			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
-		}
-	}
-	return converted;
-}
-
-//==============================================================================
 //setValue
 //	string version
 void ConfigurationView::setValue(const std::string &value, unsigned int row, unsigned int col)
@@ -743,7 +677,7 @@ void ConfigurationView::setValue(const std::string &value, unsigned int row, uns
 		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
 								<< " in configuration " << tableName_
 								<< " at column=" << columnsInfo_[col].getName()
-								<< " for setValue with type '" << ots_demangle(typeid(value).name())
+								<< " for setValue with type '" << StringMacros::demangleTypeName(typeid(value).name())
 								<< "'" << std::endl;
 		throw std::runtime_error(ss.str());
 	}
@@ -947,7 +881,7 @@ bool ConfigurationView::isEntryInGroup(const unsigned int &r,
 //	isEntryInGroupCol
 //		private function to prevent users from treating any column like a GroupID column
 //
-//	if *groupIDList != 0 return vector of groupIDs found
+//	if *groupIDList != 0 return set of groupIDs found
 //		useful for removing groupIDs.
 //
 //	Group entry can include | to place a record in multiple groups
@@ -1000,6 +934,7 @@ bool ConfigurationView::isEntryInGroupCol(const unsigned int &r,
 	return found;
 }
 
+
 //==============================================================================
 //getSetOfGroupIDs
 //	if row == -1, then considers all rows
@@ -1028,70 +963,73 @@ std::set<std::string> ConfigurationView::getSetOfGroupIDs(const std::string &chi
 			throw std::runtime_error(ss.str());
 		}
 
-		//go through the full groupString extracting groups
-		//add each found groupId to set
-		for(;j<theDataView_[r][c].size();++j)
-			if((theDataView_[r][c][j] == ' ' || //ignore leading white space or |
-					theDataView_[r][c][j] == '|')
-					&& i == j)
-				++i;
-			else if((theDataView_[r][c][j] == ' ' || //trailing white space or | indicates group
-					theDataView_[r][c][j] == '|')
-					&& i != j) // assume end of group name
-			{
-				//__COUT__ << "Group found: " <<
-				//		theDataView_[r][c].substr(i,j-i) << std::endl;
-
-
-				retSet.emplace(theDataView_[r][c].substr(i,j-i));
-
-				//setup i and j for next find
-				i = j+1;
-			}
-
-		if(i != j) //last group check (for case when no ' ' or '|')
-			retSet.emplace(theDataView_[r][c].substr(i,j-i));
+		StringMacros::getSetFromString(theDataView_[r][c],retSet);
+//		//go through the full groupString extracting groups
+//		//add each found groupId to set
+//		for(;j<theDataView_[r][c].size();++j)
+//			if((theDataView_[r][c][j] == ' ' || //ignore leading white space or |
+//					theDataView_[r][c][j] == '|')
+//					&& i == j)
+//				++i;
+//			else if((theDataView_[r][c][j] == ' ' || //trailing white space or | indicates group
+//					theDataView_[r][c][j] == '|')
+//					&& i != j) // assume end of group name
+//			{
+//				//__COUT__ << "Group found: " <<
+//				//		theDataView_[r][c].substr(i,j-i) << std::endl;
+//
+//
+//				retSet.emplace(theDataView_[r][c].substr(i,j-i));
+//
+//				//setup i and j for next find
+//				i = j+1;
+//			}
+//
+//		if(i != j) //last group check (for case when no ' ' or '|')
+//			retSet.emplace(theDataView_[r][c].substr(i,j-i));
 	}
 	else
 	{
 		//do all rows
 		for(r=0;r<getNumberOfRows();++r)
 		{
-			i=0;
-			j=0;
+			StringMacros::getSetFromString(theDataView_[r][c],retSet);
 
-			//__COUT__ << (int)r << ": " << theDataView_[r][c] << std::endl;
-
-			//go through the full groupString extracting groups
-			//add each found groupId to set
-			for(;j<theDataView_[r][c].size();++j)
-			{
-				//__COUT__ << "i:" << i << " j:" << j << std::endl;
-
-				if((theDataView_[r][c][j] == ' ' || //ignore leading white space or |
-						theDataView_[r][c][j] == '|')
-						&& i == j)
-					++i;
-				else if((theDataView_[r][c][j] == ' ' || //trailing white space or | indicates group
-						theDataView_[r][c][j] == '|')
-						&& i != j) // assume end of group name
-				{
-					//__COUT__ << "Group found: " <<
-					//		theDataView_[r][c].substr(i,j-i) << std::endl;
-
-					retSet.emplace(theDataView_[r][c].substr(i,j-i));
-
-					//setup i and j for next find
-					i = j+1;
-				}
-			}
-
-			if(i != j) //last group (for case when no ' ' or '|')
-			{
-				//__COUT__ << "Group found: " <<
-				//		theDataView_[r][c].substr(i,j-i) << std::endl;
-				retSet.emplace(theDataView_[r][c].substr(i,j-i));
-			}
+//			i=0;
+//			j=0;
+//
+//			//__COUT__ << (int)r << ": " << theDataView_[r][c] << std::endl;
+//
+//			//go through the full groupString extracting groups
+//			//add each found groupId to set
+//			for(;j<theDataView_[r][c].size();++j)
+//			{
+//				//__COUT__ << "i:" << i << " j:" << j << std::endl;
+//
+//				if((theDataView_[r][c][j] == ' ' || //ignore leading white space or |
+//						theDataView_[r][c][j] == '|')
+//						&& i == j)
+//					++i;
+//				else if((theDataView_[r][c][j] == ' ' || //trailing white space or | indicates group
+//						theDataView_[r][c][j] == '|')
+//						&& i != j) // assume end of group name
+//				{
+//					//__COUT__ << "Group found: " <<
+//					//		theDataView_[r][c].substr(i,j-i) << std::endl;
+//
+//					retSet.emplace(theDataView_[r][c].substr(i,j-i));
+//
+//					//setup i and j for next find
+//					i = j+1;
+//				}
+//			}
+//
+//			if(i != j) //last group (for case when no ' ' or '|')
+//			{
+//				//__COUT__ << "Group found: " <<
+//				//		theDataView_[r][c].substr(i,j-i) << std::endl;
+//				retSet.emplace(theDataView_[r][c].substr(i,j-i));
+//			}
 		}
 	}
 
@@ -1418,7 +1356,7 @@ void ConfigurationView::setComment(const std::string &comment)
 //==============================================================================
 void ConfigurationView::setURIEncodedComment(const std::string &uriComment)
 {
-	comment_ = decodeURIComponent(uriComment);
+	comment_ = StringMacros::decodeURIComponent(uriComment);
 }
 
 //==============================================================================
@@ -1484,7 +1422,7 @@ void ConfigurationView::print (std::ostream &out) const
 			{
 				int choiceIndex = -1;
 				std::vector<std::string> choices = columnsInfo_[c].getDataChoices();
-				val = convertEnvVariables(theDataView_[r][c]);
+				val = StringMacros::convertEnvironmentVariables(theDataView_[r][c]);
 
 				if(val == columnsInfo_[c].getDefaultValue())
 					choiceIndex = 0;
@@ -2171,7 +2109,7 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 //==============================================================================
 bool ConfigurationView::isURIEncodedCommentTheSame(const std::string &comment) const
 {
-	std::string compareStr = decodeURIComponent(comment);
+	std::string compareStr = StringMacros::decodeURIComponent(comment);
 	return comment_ == compareStr;
 }
 //
@@ -2349,7 +2287,7 @@ bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsig
 		throw std::runtime_error(ss.str());
 	}
 
-	std::string valueStr = decodeURIComponent(value);
+	std::string valueStr = StringMacros::decodeURIComponent(value);
 	std::string originalValueStr = getValueAsString(r,c,false); //do not convert env variables
 
 
@@ -2359,8 +2297,8 @@ bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsig
 	if(columnsInfo_[c].getDataType() == ViewColumnInfo::DATATYPE_NUMBER)
 	{
 		//check if valid number
-		std::string convertedString = convertEnvVariables(valueStr);
-		if(!isNumber(convertedString))
+		std::string convertedString = StringMacros::convertEnvironmentVariables(valueStr);
+		if(!StringMacros::isNumber(convertedString))
 		{
 			__SS__ << "\tIn configuration " << tableName_
 					<< " at column=" << columnsInfo_[c].getName()
@@ -2372,7 +2310,7 @@ bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsig
 	}
 	else if(columnsInfo_[c].getDataType() == ViewColumnInfo::DATATYPE_TIME)
 	{
-		//				valueStr = decodeURIComponent(data.substr(i,j-i));
+		//				valueStr = StringMacros::decodeURIComponent(data.substr(i,j-i));
 		//
 		//				getValue(tmpTimeStr,r,c);
 		//				if(valueStr != tmpTimeStr)//theDataView_[r][c])
@@ -2401,38 +2339,6 @@ bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsig
 	}
 
 	return rowWasModified;
-}
-
-//==============================================================================
-//decodeURIComponent
-//	converts all %## to the ascii character
-std::string ConfigurationView::decodeURIComponent(const std::string &data)
-{
-	std::string decodeURIString(data.size(),0); //init to same size
-	unsigned int j=0;
-	for(unsigned int i=0;i<data.size();++i,++j)
-	{
-		if(data[i] == '%')
-		{
-			//high order hex nibble digit
-			if(data[i+1] > '9') //then ABCDEF
-				decodeURIString[j] += (data[i+1]-55)*16;
-			else
-				decodeURIString[j] += (data[i+1]-48)*16;
-
-			//low order hex nibble digit
-			if(data[i+2] > '9')	//then ABCDEF
-				decodeURIString[j] += (data[i+2]-55);
-			else
-				decodeURIString[j] += (data[i+2]-48);
-
-			i+=2; //skip to next char
-		}
-		else
-			decodeURIString[j] = data[i];
-	}
-	decodeURIString.resize(j);
-	return decodeURIString;
 }
 
 //==============================================================================
@@ -2706,85 +2612,6 @@ const bool ConfigurationView::getChildLink(const unsigned int& c, bool& isGroup,
 	throw std::runtime_error(ss.str());
 }
 
-//==============================================================================
-//isNumber ~~
-//	returns true if hex ("0x.."), binary("b..."), or base10 number
-bool ConfigurationView::isNumber(const std::string& s) const
-{
-	//__COUT__ << "string " << s << std::endl;
-	if(s.find("0x") == 0) //indicates hex
-	{
-		//__COUT__ << "0x found" << std::endl;
-		for(unsigned int i=2;i<s.size();++i)
-		{
-			if(!((s[i] >= '0' && s[i] <= '9') ||
-					(s[i] >= 'A' && s[i] <= 'F') ||
-					(s[i] >= 'a' && s[i] <= 'f')
-			))
-			{
-				//__COUT__ << "prob " << s[i] << std::endl;
-				return false;
-			}
-		}
-		//return std::regex_match(s.substr(2), std::regex("^[0-90-9a-fA-F]+"));
-	}
-	else if(s[0] == 'b') //indicates binary
-	{
-		//__COUT__ << "b found" << std::endl;
-
-		for(unsigned int i=1;i<s.size();++i)
-		{
-			if(!((s[i] >= '0' && s[i] <= '1')
-			))
-			{
-				//__COUT__ << "prob " << s[i] << std::endl;
-				return false;
-			}
-		}
-	}
-	else
-	{
-		//__COUT__ << "base 10 " << std::endl;
-		for(unsigned int i=0;i<s.size();++i)
-			if(!((s[i] >= '0' && s[i] <= '9') ||
-					s[i] == '.' ||
-					s[i] == '+' ||
-					s[i] == '-'))
-				return false;
-		//Note: std::regex crashes in unresolvable ways (says Ryan.. also, stop using libraries)
-		//return std::regex_match(s, std::regex("^(\\-|\\+)?[0-9]*(\\.[0-9]+)?"));
-	}
-
-	return true;
-}
 
 
 
-
-#ifdef __GNUG__
-#include <cstdlib>
-#include <memory>
-#include <cxxabi.h>
-
-std::string ots_demangle(const char* name) {
-
-	int status = -4; // some arbitrary value to eliminate the compiler warning
-
-	// enable c++11 by passing the flag -std=c++11 to g++
-	std::unique_ptr<char, void(*)(void*)> res {
-		abi::__cxa_demangle(name, NULL, NULL, &status),
-				std::free
-	};
-
-	return (status==0) ? res.get() : name ;
-}
-
-#else
-
-// does nothing if not g++
-std::string ots_demangle(const char* name) {
-	return name;
-}
-
-
-#endif

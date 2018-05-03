@@ -3,7 +3,7 @@
 #include "otsdaq-core/DataManager/DataProducer.h"
 #include "otsdaq-core/DataManager/DataConsumer.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/PluginMakers/MakeDataProcessor.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 

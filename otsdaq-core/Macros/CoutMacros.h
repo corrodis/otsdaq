@@ -1,10 +1,10 @@
-#ifndef _ots_Utilities_Macro_h_
-#define _ots_Utilities_Macro_h_
+#ifndef _ots_Cout_Macros_h_
+#define _ots_Cout_Macros_h_
 
 
-#include <string.h> //for strstr
+#include <string.h> //for strstr (not the same as <string>)
 #include <iostream> //for cout
-#include <sstream> //for stringstream
+#include <sstream> //for stringstream, std::stringbuf
 
 //take filename only after srcs/ (this gives by repo name)
 #define __SHORTFILE__ 	(strstr(&__FILE__[0], "/srcs/") ? strstr(&__FILE__[0], "/srcs/") + 6 : __FILE__)
@@ -52,11 +52,22 @@
 #define __MOUT_WARN__  	__MF_TYPE__(LogWarning) << __MF_HDR__
 #define __MOUT_INFO__  	__MF_TYPE__(LogInfo) 	<< __MF_HDR__
 #define __MOUT__  		__MF_TYPE__(LogDebug)	<< __MF_HDR__
-#define __MOUTV__(X)	__MOUT__ << QUOTE(X) << " = " << X
+#define __MOUTV__(X)	__MOUT__ << QUOTE(X) << " = " << X << _E__
 
 
+//////// ==============================================================
+//////// Use __MCOUT__ for cout and Message Facility use in one line (that compiler expands to two)
+////////
+#define __MCOUT_ERR__(X)  	__MOUT_ERR__ << X; 	__COUT_ERR__ << X;
+#define __MCOUT_WARN__(X)  	__MOUT_WARN__ << X; __COUT_WARN__ << X;
+#define __MCOUT_INFO__(X)  	__MOUT_INFO__ << X; __COUT_INFO__ << X;
+#define __MCOUT__(X)  		__MOUT__ << X; 		__COUT__ << X;
+#define __MCOUTV__(X)		__MOUTV__(X); 		__COUTV__(X);
 
-#define __SS__			std::stringstream ss; ss << __MF_HDR__
+
+//////// ==============================================================
+
+#define __SS__			std::stringstream ss; ss << __COUT_HDR__
 #define __SS_THROW__	__COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
 
 //////// ==============================================================

@@ -2,7 +2,8 @@ cet_make(LIBRARY_NAME ConfigurationInterface
 		 LIBRARIES
 		 PluginMakers
 		 ConfigurationDataFormats
-		 ProgressBar
+		 ProgressBar		 
+		 Macros
 
          ${CETLIB}
          artdaq-database_ConfigurationDB

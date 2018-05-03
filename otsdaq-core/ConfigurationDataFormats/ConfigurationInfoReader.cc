@@ -2,6 +2,8 @@
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 #include "otsdaq-core/XmlUtilities/DOMTreeErrorReporter.h"
 #include "otsdaq-core/XmlUtilities/ConvertFromXML.h"
+#include "otsdaq-core/Macros/StringMacros.h"
+
 //#include "TimeFormatter.h"
 
 
@@ -353,7 +355,7 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 					viewDescriptionAttributeTag_));
 
 			configuration.setConfigurationDescription(
-					ConfigurationView::decodeURIComponent(configurationDescription));
+					StringMacros::decodeURIComponent(configurationDescription));
 			//__COUT__ << "configurationDescription = " << configurationDescription << std::endl;
 
 			//</VIEW>
