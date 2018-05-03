@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 
 #define WEB_LOGIN_DB_PATH 			    std::string(getenv("SERVICE_DATA_PATH")) + "/LoginData/"
 #define WEB_LOGIN_CERTDATA_PATH         std::string(getenv("CERT_DATA_PATH"))

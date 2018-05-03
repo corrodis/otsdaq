@@ -453,6 +453,7 @@ launchOTSWiz() {
 	export CONSOLE_SUPERVISOR_ID=260
 	export CONFIGURATION_GUI_SUPERVISOR_ID=280
 	export WIZARD_SUPERVISOR_ID=290	
+	export OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID=290	
 	MAIN_PORT=2015
 
 	if [ "x$OTS_WIZ_MODE_MAIN_PORT" != "x" ]; then
@@ -498,6 +499,7 @@ launchOTSWiz() {
 			mv .otsdaq_quiet_run-wiz-${HOSTNAME}.txt .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt
 		fi
 		
+		echo
 		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  \t (hidden file)"
 		echo
 		

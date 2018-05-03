@@ -9,7 +9,7 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(ARTDAQDataManagerSupervisor)
 
 //========================================================================================================================
-ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception)
+ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub * s) 
 //FIXME WE MUST ADD A MAP OF INSTANCES IN THE SINGLETON
 : CoreSupervisorBase(s)
 {

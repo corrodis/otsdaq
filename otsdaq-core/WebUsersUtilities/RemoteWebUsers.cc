@@ -27,7 +27,7 @@ using namespace ots;
 //
 //
 //			void exampleClass::exampleRequestHandler(xgi::Input * in, xgi::Output * out)
-//			throw (xgi::exception::Exception)
+//			
 //			{
 //				cgicc::Cgicc cgi(in);
 //

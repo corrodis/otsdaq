@@ -6,7 +6,7 @@
 
 GETPACKAGEINFO(CoreSupervisors)
 
-void CoreSupervisors::checkPackageDependencies() throw (config::PackageInfo::VersionException)
+void CoreSupervisors::checkPackageDependencies() 
 {
  CHECKDEPENDENCY(config);
  CHECKDEPENDENCY(xcept );        

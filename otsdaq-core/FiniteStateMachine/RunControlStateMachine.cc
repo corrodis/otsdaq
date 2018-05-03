@@ -94,7 +94,7 @@ void RunControlStateMachine::reset(void)
 //========================================================================================================================
 xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 		xoap::MessageReference message)
-throw (xoap::exception::Exception)
+
 {
 	__COUT__ << "Starting state for " << stateMachineName_ << " is " <<
 			theStateMachine_.getCurrentStateName() << std::endl;

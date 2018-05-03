@@ -136,15 +136,15 @@ void RegisterConfigurationInfoReader::read(RegisterBase& configuration)
 
     int iretStat = stat(configFile.c_str(), &fileStatus);
     if( iretStat == ENOENT )
-        throw ( std::runtime_error("Path file_name does not exist, or path is an empty std::string.") );
+         );
     else if( iretStat == ENOTDIR )
-        throw ( std::runtime_error("A component of the path is not a directory."));
+        );
     else if( iretStat == ELOOP )
-        throw ( std::runtime_error("Too many symbolic links encountered while traversing the path."));
+        );
     else if( iretStat == EACCES )
-        throw ( std::runtime_error("Permission denied."));
+        );
     else if( iretStat == ENAMETOOLONG )
-        throw ( std::runtime_error("File can not be read\n"));
+        );
 
     xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser;
     // Configure DOM parser.
@@ -171,7 +171,7 @@ void RegisterConfigurationInfoReader::read(RegisterBase& configuration)
         xercesc::DOMElement* configurationElement = getElement(registerNameTag_, elementRoot, 0);
         if( configuration.getConfigurationName() != XML_TO_CHAR(configurationElement->getAttribute(configurationNameAttributeTag_)) )
         {
-            
+
             std::cout << __COUT_HDR_FL__ << "In " << configFile << " the configuration name " << XML_TO_CHAR(configurationElement->getAttribute(configurationNameAttributeTag_))
             << " doesn't match the the class configuration name " << configuration.getConfigurationName() << "     ";
             assert(0);

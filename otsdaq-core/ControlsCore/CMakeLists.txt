@@ -4,6 +4,7 @@ cet_make(LIBRARY_NAME ControlsCore
 		 ${CETLIB}
         	 #$ENV{XERCES_C_LIB}/libxerces-c.so
                  ConfigurationInterface
+				 Configurable
 
 )
 

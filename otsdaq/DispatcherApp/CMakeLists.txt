@@ -12,14 +12,12 @@ cet_make(LIBRARY_NAME DispatcherApp
 		 ${CETLIB_EXCEPT}
 		 ${XDAQ_BASIC_LIB_LIST}
 		 canvas
-		 MessageFacility
 		 ${MF_UTILITIES}
 		 ${Boost_SYSTEM_LIBRARY}
 		 artdaq_Application
 		 artdaq-core_Utilities
 		 artdaq_DAQdata
 		 artdaq_BuildInfo
-		 MessageFacility
 		 WorkLoopManager
 		 SupervisorInfo
 		 FiniteStateMachine

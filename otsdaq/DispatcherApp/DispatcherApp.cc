@@ -14,6 +14,7 @@
 #include <xdaq/NamespaceURI.h>
 #include <xoap/Method.h>
 
+#include "artdaq/DAQdata/Globals.hh"
 #include <memory>
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
@@ -30,7 +31,7 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(DispatcherApp)
 
 //========================================================================================================================
-DispatcherApp::DispatcherApp(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception)
+DispatcherApp::DispatcherApp(xdaq::ApplicationStub * s) 
 	: xdaq::Application(s)
 	, SOAPMessenger(this)
 	, stateMachineWorkLoopManager_(toolbox::task::bind(this, &DispatcherApp::stateMachineThread, "StateMachine"))
@@ -105,7 +106,9 @@ void DispatcherApp::init(void)
 		artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
 
 	// create the DispatcherInterface
-	theDispatcherInterface_ = new artdaq::DispatcherApp(this->getApplicationDescriptor()->getLocalId(), name);
+	app_name = name;
+	my_rank = this->getApplicationDescriptor()->getLocalId();
+	theDispatcherInterface_ = new artdaq::DispatcherApp();
 	//theDispatcherInterface_ = new DispatcherInterface(mpiSentry_->rank(), local_group_comm, supervisorApplicationUID_ );
 }
 
@@ -116,7 +119,7 @@ void DispatcherApp::destroy(void)
 }
 
 //========================================================================================================================
-void DispatcherApp::Default(xgi::Input * in, xgi::Output * out) throw (xgi::exception::Exception)
+void DispatcherApp::Default(xgi::Input * in, xgi::Output * out) 
 {
 
 	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='/WebPath/html/DispatcherApp.html?urn=" <<
@@ -124,15 +127,15 @@ void DispatcherApp::Default(xgi::Input * in, xgi::Output * out) throw (xgi::exce
 }
 
 //========================================================================================================================
-void DispatcherApp::stateMachineXgiHandler(xgi::Input * in, xgi::Output * out) throw (xgi::exception::Exception)
+void DispatcherApp::stateMachineXgiHandler(xgi::Input * in, xgi::Output * out) 
 {}
 
 //========================================================================================================================
-void DispatcherApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception)
+void DispatcherApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out) 
 {}
 
 //========================================================================================================================
-xoap::MessageReference DispatcherApp::stateMachineXoapHandler(xoap::MessageReference message) throw (xoap::exception::Exception)
+xoap::MessageReference DispatcherApp::stateMachineXoapHandler(xoap::MessageReference message) 
 {
 	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << std::endl;
 	stateMachineWorkLoopManager_.removeProcessedRequests();
@@ -142,7 +145,7 @@ xoap::MessageReference DispatcherApp::stateMachineXoapHandler(xoap::MessageRefer
 }
 
 //========================================================================================================================
-xoap::MessageReference DispatcherApp::stateMachineResultXoapHandler(xoap::MessageReference message) throw (xoap::exception::Exception)
+xoap::MessageReference DispatcherApp::stateMachineResultXoapHandler(xoap::MessageReference message) 
 {
 	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << std::endl;
 	//stateMachineWorkLoopManager_.removeProcessedRequests();
@@ -165,7 +168,7 @@ bool DispatcherApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 }
 
 //========================================================================================================================
-xoap::MessageReference DispatcherApp::stateMachineStateRequest(xoap::MessageReference message) throw (xoap::exception::Exception)
+xoap::MessageReference DispatcherApp::stateMachineStateRequest(xoap::MessageReference message) 
 {
 	std::cout << __COUT_HDR_FL__ << theStateMachine_.getCurrentStateName() << std::endl;
 	return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getCurrentStateName());
@@ -173,7 +176,7 @@ xoap::MessageReference DispatcherApp::stateMachineStateRequest(xoap::MessageRefe
 
 //========================================================================================================================
 xoap::MessageReference DispatcherApp::stateMachineErrorMessageRequest(xoap::MessageReference message)
-throw (xoap::exception::Exception)
+
 {
 	__COUT__ << "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
 
@@ -183,44 +186,44 @@ throw (xoap::exception::Exception)
 }
 
 //========================================================================================================================
-void DispatcherApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) 
 {
 
 }
 
 //========================================================================================================================
-void DispatcherApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm) 
 {
 
 }
 
 //========================================================================================================================
-void DispatcherApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm) 
 {
 
 }
 
 //========================================================================================================================
-void DispatcherApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm) 
 {
 
 }
 
 //========================================================================================================================
-void DispatcherApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm) 
 {
 
 }
 
 //========================================================================================================================
-void DispatcherApp::inError(toolbox::fsm::FiniteStateMachine & fsm) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::inError(toolbox::fsm::FiniteStateMachine & fsm) 
 {
 	std::cout << __COUT_HDR_FL__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
 	//rcmsStateNotifier_.stateChanged("Error", "");
 }
 
 //========================================================================================================================
-void DispatcherApp::enteringError(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::enteringError(toolbox::Event::Reference e) 
 {
 	std::cout << __COUT_HDR_FL__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
@@ -239,7 +242,7 @@ void DispatcherApp::enteringError(toolbox::Event::Reference e) throw (toolbox::f
 #define ARTDAQ_FCL_PATH			std::string(getenv("USER_DATA")) + "/"+ "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE	"aggregator"
 //========================================================================================================================
-void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e) 
 {
 
 	std::cout << __COUT_HDR_FL__ << "ARTDAQDispatcher SUPERVISOR CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
@@ -317,38 +320,38 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
 }
 
 //========================================================================================================================
-void DispatcherApp::transitionHalting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::transitionHalting(toolbox::Event::Reference e) 
 {
   //theDispatcherInterface_->shutdown(45);
 }
 
 //========================================================================================================================
-void DispatcherApp::transitionInitializing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::transitionInitializing(toolbox::Event::Reference e) 
 {
 
 }
 
 //========================================================================================================================
-void DispatcherApp::transitionPausing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::transitionPausing(toolbox::Event::Reference e) 
 {
 	theDispatcherInterface_->pause(0, 0);
 }
 
 //========================================================================================================================
-void DispatcherApp::transitionResuming(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::transitionResuming(toolbox::Event::Reference e) 
 {
 	theDispatcherInterface_->resume(0, 0);
 }
 
 //========================================================================================================================
-void DispatcherApp::transitionStarting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::transitionStarting(toolbox::Event::Reference e) 
 {
 	art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber")));
 	theDispatcherInterface_->start(runId, 0, 0);
 }
 
 //========================================================================================================================
-void DispatcherApp::transitionStopping(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DispatcherApp::transitionStopping(toolbox::Event::Reference e) 
 {
 	theDispatcherInterface_->stop(45, 0);
 	theDispatcherInterface_->shutdown(45);

@@ -11,6 +11,7 @@
 #include "otsdaq-core/GatewaySupervisor/Iterator.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
 #include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
+#include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -41,61 +42,64 @@ class GatewaySupervisor: public xdaq::Application, public SOAPMessenger,
 {
 	friend class WizardSupervisor;
 	friend class Iterator;
+	friend class ARTDAQCommandable;
 
 public:
 
     XDAQ_INSTANTIATOR();
 
-    GatewaySupervisor (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
+    GatewaySupervisor (xdaq::ApplicationStub * s);
     virtual ~GatewaySupervisor(void);
 
     void 						init        				 	(void);
 
-    void 						Default     				 	(xgi::Input* in, xgi::Output* out ) 	throw (xgi::exception::Exception);
-//    void 						TmpTest     				 	(xgi::Input* in, xgi::Output* out ) 	throw (xgi::exception::Exception);
+    void 						Default     				 	(xgi::Input* in, xgi::Output* out ) 	;
+//    void 						TmpTest     				 	(xgi::Input* in, xgi::Output* out ) 	;
 
-    void 						loginRequest 				 	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
-    void 						request                      	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
-    void 						tooltipRequest              	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
+    void 						loginRequest 				 	(xgi::Input* in, xgi::Output* out )  	;
+    void 						request                      	(xgi::Input* in, xgi::Output* out )  	;
+    void 						tooltipRequest              	(xgi::Input* in, xgi::Output* out )  	;
 
     //State Machine requests handlers
-    void 						stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
-    //void 						stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
-    xoap::MessageReference 		stateMachineXoapHandler      	(xoap::MessageReference msg )  	        throw (xoap::exception::Exception);
-    xoap::MessageReference 		stateMachineResultXoapHandler	(xoap::MessageReference msg )  	        throw (xoap::exception::Exception);
+
+    void 						stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out )		;
+    //void 						stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	;
+    xoap::MessageReference 		stateMachineXoapHandler      	(xoap::MessageReference msg )  	        ;
+    xoap::MessageReference 		stateMachineResultXoapHandler	(xoap::MessageReference msg )  	        ;
+
     bool                        stateMachineThread           	(toolbox::task::WorkLoop* workLoop);
 
     //Status requests handlers
-    void 						infoRequestHandler   		 	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
-    void 						infoRequestResultHandler	 	(xgi::Input* in, xgi::Output* out )  	throw (xgi::exception::Exception);
+    void 						infoRequestHandler   		 	(xgi::Input* in, xgi::Output* out )  	;
+    void 						infoRequestResultHandler	 	(xgi::Input* in, xgi::Output* out )  	;
     bool                        infoRequestThread            	(toolbox::task::WorkLoop* workLoop);
 
     //External GatewaySupervisor XOAP handlers
-    xoap::MessageReference 		supervisorCookieCheck 		 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
-    xoap::MessageReference 		supervisorGetActiveUsers	 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
-    xoap::MessageReference 		supervisorSystemMessage		 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
-    xoap::MessageReference 		supervisorGetUserInfo 		 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
-    xoap::MessageReference 		supervisorSystemLogbookEntry 	(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
-    xoap::MessageReference 		supervisorLastConfigGroupRequest(xoap::MessageReference msg) 			throw (xoap::exception::Exception);
+    xoap::MessageReference 		supervisorCookieCheck 		 	(xoap::MessageReference msg) 			;
+    xoap::MessageReference 		supervisorGetActiveUsers	 	(xoap::MessageReference msg) 			;
+    xoap::MessageReference 		supervisorSystemMessage		 	(xoap::MessageReference msg) 			;
+    xoap::MessageReference 		supervisorGetUserInfo 		 	(xoap::MessageReference msg) 			;
+    xoap::MessageReference 		supervisorSystemLogbookEntry 	(xoap::MessageReference msg) 			;
+    xoap::MessageReference 		supervisorLastConfigGroupRequest(xoap::MessageReference msg) 			;
 
     //Finite State Machine States
-    void stateInitial    		(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    void statePaused     		(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    void stateRunning    		(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    void stateHalted     		(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    void stateConfigured 		(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    void inError         		(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception);
-    
-    void transitionConfiguring 	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    void transitionHalting     	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    void transitionInitializing	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    void transitionPausing     	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    void transitionResuming    	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    void transitionStarting    	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    void transitionStopping    	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    void transitionShuttingDown (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    void transitionStartingUp   (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
-    void enteringError         	(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception);
+    void stateInitial    		(toolbox::fsm::FiniteStateMachine& fsm) ;
+    void statePaused     		(toolbox::fsm::FiniteStateMachine& fsm) ;
+    void stateRunning    		(toolbox::fsm::FiniteStateMachine& fsm) ;
+    void stateHalted     		(toolbox::fsm::FiniteStateMachine& fsm) ;
+    void stateConfigured 		(toolbox::fsm::FiniteStateMachine& fsm) ;
+    void inError         		(toolbox::fsm::FiniteStateMachine& fsm) ;
+
+    void transitionConfiguring 	(toolbox::Event::Reference e) ;
+    void transitionHalting     	(toolbox::Event::Reference e) ;
+    void transitionInitializing	(toolbox::Event::Reference e) ;
+    void transitionPausing     	(toolbox::Event::Reference e) ;
+    void transitionResuming    	(toolbox::Event::Reference e) ;
+    void transitionStarting    	(toolbox::Event::Reference e) ;
+    void transitionStopping    	(toolbox::Event::Reference e) ;
+    void transitionShuttingDown (toolbox::Event::Reference e) ;
+    void transitionStartingUp   (toolbox::Event::Reference e) ;
+    void enteringError         	(toolbox::Event::Reference e) ;
 
     void makeSystemLogbookEntry (std::string entryText);
 
@@ -114,7 +118,7 @@ private:
 
     static void															StateChangerWorkLoop				(GatewaySupervisor *supervisorPtr);
     std::string															attemptStateMachineTransition		(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
-    bool         														broadcastMessage					(xoap::MessageReference msg) throw (toolbox::fsm::exception::Exception);
+    bool         														broadcastMessage					(xoap::MessageReference msg) ;
 
     bool								supervisorGuiHasBeenLoaded_	; //use to indicate first access by user of ots since execution
 
@@ -124,7 +128,8 @@ private:
     ConfigurationManager*               theConfigurationManager_    ;
     WebUsers 						    theWebUsers_                ;
     SystemMessenger				        theSystemMessenger_         ;
-    
+	ARTDAQCommandable					theArtdaqCommandable_;
+
     WorkLoopManager                     stateMachineWorkLoopManager_;
     toolbox::BSem                      	stateMachineSemaphore_      ;
     WorkLoopManager                    	infoRequestWorkLoopManager_ ;

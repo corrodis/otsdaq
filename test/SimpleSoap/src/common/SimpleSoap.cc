@@ -15,7 +15,7 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(SimpleSoap)
 
 //========================================================================================================================
-SimpleSoap::SimpleSoap   (xdaq::ApplicationStub * s   ) throw (xdaq::exception::Exception):
+SimpleSoap::SimpleSoap   (xdaq::ApplicationStub * s   ) :
         xdaq::Application(s),
         SOAPMessenger  (this)
 {
@@ -31,7 +31,7 @@ SimpleSoap::SimpleSoap   (xdaq::ApplicationStub * s   ) throw (xdaq::exception::
 
 //========================================================================================================================
 void SimpleSoap::Default(xgi::Input            * in,
-                                     xgi::Output           * out ) throw (xgi::exception::Exception)
+                                     xgi::Output           * out ) 
 {
     std::string url="/"+getApplicationDescriptor()->getURN();
     std::cout << __COUT_HDR_FL__ << url << std::endl;
@@ -50,7 +50,7 @@ void SimpleSoap::Default(xgi::Input            * in,
 }
 
 //========================================================================================================================
-void SimpleSoap::StateMachineXgiHandler(xgi::Input * in, xgi::Output * out ) throw (xgi::exception::Exception)
+void SimpleSoap::StateMachineXgiHandler(xgi::Input * in, xgi::Output * out ) 
 {
     
     cgicc::Cgicc cgi(in);
@@ -107,7 +107,7 @@ xoap::MessageReference SimpleSoap::Start (xoap::MessageReference msg)
 }
 
 //========================================================================================================================
-void SimpleSoap::stateInitial (toolbox::fsm::FiniteStateMachine & fsm) throw (toolbox::fsm::exception::Exception)
+void SimpleSoap::stateInitial (toolbox::fsm::FiniteStateMachine & fsm) 
 {
     std::cout << __COUT_HDR_FL__ << "--- SimpleWeb is in its Initial state ---" << std::endl;
     state_ = fsm_.getStateName (fsm_.getCurrentState());
@@ -117,7 +117,7 @@ void SimpleSoap::stateInitial (toolbox::fsm::FiniteStateMachine & fsm) throw (to
 }
 
 //========================================================================================================================
-void SimpleSoap::stateHalted (toolbox::fsm::FiniteStateMachine & fsm) throw (toolbox::fsm::exception::Exception)
+void SimpleSoap::stateHalted (toolbox::fsm::FiniteStateMachine & fsm) 
 {
     std::cout << __COUT_HDR_FL__ << "--- SimpleWeb is in its Halted state ---" << std::endl;
     state_ = fsm_.getStateName (fsm_.getCurrentState());

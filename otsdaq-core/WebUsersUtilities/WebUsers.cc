@@ -733,7 +733,7 @@ bool WebUsers::loadDatabases()
 {
 	std::string fn;
 	FILE *fp;
-	unsigned int LINE_LEN = 1000;
+	const unsigned int LINE_LEN = 1000;
 	char line[LINE_LEN];
 	unsigned int i, si, c, len, f;
 	uint64_t tmpInt64;
@@ -2343,12 +2343,12 @@ std::string WebUsers::dejumble(const std::string& u, const std::string& s)
 
 	if (s.length() != SESSION_ID_LENGTH) return ""; //session std::string must be even
 
-	int ss = s.length() / 2;
+	const int ss = s.length() / 2;
 	int p = hexByteStrToInt(&(s.c_str()[0])) % ss;
 	int n = hexByteStrToInt(&(s.c_str()[p * 2])) % ss;
 	int len = (hexByteStrToInt(&(u.c_str()[p * 2])) - p - n + ss * 3) % ss;
 
-	bool x[ss];
+	std::vector<bool> x(ss);
 	for (int i = 0; i < ss; ++i) x[i] = 0;
 	x[p] = 1;
 
@@ -2759,9 +2759,10 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 	{
 		fseek(fp, 0, SEEK_END);
 		long size = ftell(fp);
-		char line[size + 1];
+		std::string line;
+		line.reserve(size + 1);
 		rewind(fp);
-		fgets(line, size + 1, fp);
+		fgets(&line[0], size + 1, fp);
 		fclose(fp);
 
 		__COUT__ << "Read value " << line << __E__;

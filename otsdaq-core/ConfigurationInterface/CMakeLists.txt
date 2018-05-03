@@ -4,7 +4,8 @@ cet_make(LIBRARY_NAME ConfigurationInterface
 		 ConfigurationDataFormats
 		 ProgressBar		 
 		 Macros
-
+		 dl
+		 
          ${CETLIB}
          artdaq-database_ConfigurationDB
          artdaq-database_DataFormats_Json
@@ -13,6 +14,7 @@ cet_make(LIBRARY_NAME ConfigurationInterface
          artdaq-database_JsonDocument
          artdaq-database_BasicTypes
          artdaq-database_StorageProviders_FileSystemDB
+		 ${Boost_SYSTEM_LIBRARY}
 )
 
 

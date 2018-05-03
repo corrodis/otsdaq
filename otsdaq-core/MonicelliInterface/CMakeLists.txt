@@ -13,7 +13,7 @@ cet_make_library(LIBRARY_NAME MonicelliInterface
 		       ROC.cxx
 		LIBRARIES
 		       ${ROOT_BASIC_LIB_LIST}
-		       MessageFacility
+		        
                 )
 
 install_headers()
