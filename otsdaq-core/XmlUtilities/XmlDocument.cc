@@ -43,7 +43,7 @@ using namespace ots;
 XmlDocument::XmlDocument(std::string rootName) :
         rootTagName_(rootName)
 {
-	INIT_MF("XmlDocument");
+	//INIT_MF("XmlDocument");
     //__COUT__ << "in" << std::endl;
     initDocument();
     rootElement_ = theDocument_->getDocumentElement();
