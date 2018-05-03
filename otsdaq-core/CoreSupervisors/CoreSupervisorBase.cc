@@ -333,7 +333,6 @@ void CoreSupervisorBase::destroy(void)
 //========================================================================================================================
 //wrapper for inheritance call
 void CoreSupervisorBase::defaultPageWrapper(xgi::Input * in, xgi::Output * out )
-throw (xgi::exception::Exception)
 {
 	return defaultPage(in,out);
 }
@@ -581,7 +580,6 @@ void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& c
 //		access, responses, and error handling across all inheriting supervisors that use ::request.
 void CoreSupervisorBase::nonXmlRequest(const std::string& requestType, cgicc::Cgicc& cgiIn, std::ostream& out,
 		const WebUsers::RequestUserInfo& userInfo)
-throw (xgi::exception::Exception)
 {
 	__COUT__ << "This is the empty Core Supervisor non-xml request. Supervisors should override this function." << __E__;
 	out << "This is the empty Core Supervisor non-xml request. Supervisors should override this function." << __E__;

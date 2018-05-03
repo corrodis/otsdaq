@@ -4,7 +4,9 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include <typeinfo>
 #include "otsdaq-core/Macros/StringMacros.h"
+#if MESSAGEFACILITY_HEX_VERSION > 0x20100
 #include <boost/stacktrace.hpp>
+#endif
 
 using namespace ots;
 
@@ -884,7 +886,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 				"' in table '" << getConfigurationName() <<
 				"' looking for child '" << nodeName << "'\n\n" << std::endl;
 		ss << "--- Additional error detail: \n\n" << e.what() << std::endl;
+#if MESSAGEFACILITY_HEX_VERSION > 0x20100
 		ss << boost::stacktrace::stacktrace();
+#endif
 		throw std::runtime_error(ss.str());
 	}
 	catch(...)
@@ -892,7 +896,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 		__SS__ << "\n\nError occurred descending from node '" << getValue() <<
 				"' in table '" << getConfigurationName() <<
 				"' looking for child '" << nodeName << "'\n\n" << std::endl;
+#if MESSAGEFACILITY_HEX_VERSION > 0x20100
 		ss << boost::stacktrace::stacktrace();
+#endif
 		throw std::runtime_error(ss.str());
 	}
 
@@ -901,7 +907,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 			"' in table '" << getConfigurationName() <<
 			"' looking for child '" << nodeName << "'\n\n" <<
 			"Invalid depth! getNode() called from a value point in the Configuration Tree." << std::endl;
+#if MESSAGEFACILITY_HEX_VERSION > 0x20100
 	ss << boost::stacktrace::stacktrace();
+#endif
 	throw std::runtime_error(ss.str());	// this node is value node, cant go any deeper!
 }
 
