@@ -316,6 +316,7 @@ fi
 
 if [ ! -d $OTSDAQ_LOG_DIR ]; then
     mkdir -p $OTSDAQ_LOG_DIR
+	export OTSDAQ_LOG_ROOT=$OTSDAQ_LOG_DIR
 fi
 
 ##############################################################################
