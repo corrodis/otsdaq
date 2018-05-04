@@ -443,8 +443,8 @@ bool WebUsers::checkRequestAccess(
 	// - check user lock flags and status
 
 
-	__COUTV__(userInfo.permissionLevel_);
-	__COUTV__(userInfo.permissionsThreshold_);
+	__COUTV__((unsigned int)userInfo.permissionLevel_);
+	__COUTV__((unsigned int)userInfo.permissionsThreshold_);
 
 	//second, start check access -------
 	if(!isWizardMode && !userInfo.allowNoUser_ &&
@@ -461,8 +461,9 @@ bool WebUsers::checkRequestAccess(
 			userInfo.permissionLevel_ < userInfo.permissionsThreshold_))
 	{
 		*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-		__COUT__ << "User (@" << userInfo.ip_ << ") has insufficient permissions: " << userInfo.permissionLevel_ << "<" <<
-				userInfo.permissionsThreshold_ << std::endl;
+		__COUT__ << "User (@" << userInfo.ip_ << ") has insufficient permissions: " <<
+				(unsigned int)userInfo.permissionLevel_ << "<" <<
+				(unsigned int)userInfo.permissionsThreshold_ << std::endl;
 		return false;	//invalid cookie and present sequence, but not correct sequence
 	}
 	//end check access -------

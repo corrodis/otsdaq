@@ -182,8 +182,7 @@ bool RemoteWebUsers::xmlRequestToGateway(
 		parameters.addParameter("Permissions");
 		receive(retMsg, parameters);
 
-		//sscanf(parameters.getValue("Permissions").c_str(),"%hhu",&userInfo.permissionLevel_); //hhu := unsigned char
-
+		userInfo.setGroupPermissionLevels(parameters.getValue("Permissions"));
 
 		if(WebUsers::checkRequestAccess(cgi,out,xmldoc,userInfo,true /*isWizardMode*/))
 			return true;

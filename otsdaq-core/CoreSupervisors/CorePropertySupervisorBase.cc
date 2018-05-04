@@ -256,7 +256,8 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		catch(std::runtime_error& e)
 		{
 			 __COUT__ << "Error getting permissions threshold for userInfo.requestType_='" <<
-					 userInfo.requestType_ << "!' Defaulting to max threshold = " << (unsigned int)userInfo.permissionsThreshold_ << __E__;
+					 userInfo.requestType_ << "'... Defaulting to max threshold = " <<
+					 (unsigned int)userInfo.permissionsThreshold_ << __E__;
 		}
 
 		try
@@ -270,7 +271,7 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		{
 			userInfo.groupsAllowed_.clear();
 			 __COUT__ << "Error getting groups allowed userInfo.requestType_='" <<
-					 userInfo.requestType_ << "!' Defaulting to empty groups. " << e.what() << __E__;
+					 userInfo.requestType_ << "'... Defaulting to empty groups. " << e.what() << __E__;
 		}
 		try
 		{
@@ -283,7 +284,7 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		{
 			userInfo.groupsDisallowed_.clear();
 			 __COUT__ << "Error getting groups allowed userInfo.requestType_='" <<
-					 userInfo.requestType_ << "!' Defaulting to empty groups. " << e.what() << __E__;
+					 userInfo.requestType_ << "'... Defaulting to empty groups. " << e.what() << __E__;
 		}
 	} //**** end LOGIN GATEWAY CODE ***//
 
