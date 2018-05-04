@@ -24,6 +24,8 @@
 namespace ots
 {
 
+class HttpXmlDocument;
+
 
 class WizardSupervisor: public xdaq::Application, public SOAPMessenger
 {
@@ -47,8 +49,13 @@ public:
     void						requestIcons                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
 
     void 						editSecurity                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+    void 						UserSettings              			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
     void 						tooltipRequest                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
     void                        toggleSecurityCodeGeneration        (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+	std::string     			validateUploadFileType      		(const std::string fileType);
+    void            			cleanUpPreviews             		();
+    void            			savePostPreview             		(std::string &subject, std::string &text, const std::vector<cgicc::FormFile> &files, std::string creator, HttpXmlDocument *xmldoc = nullptr);
+    std::string 				exec								(const char* cmd);
 
     //External Supervisor XOAP handlers
     xoap::MessageReference 		supervisorSequenceCheck 			(xoap::MessageReference msg) throw (xoap::exception::Exception);
@@ -57,6 +64,15 @@ public:
 private:
     std::string					securityCode_;
     bool                        defaultSequence_;
+    std::vector<std::string>    allowedFileUploadTypes_, matchingFileUploadTypes_;
+
+    enum {
+        	ADMIN_PERMISSIONS_THRESHOLD = 255,
+        	EXPERIMENT_NAME_MIN_LENTH = 3,
+        	EXPERIMENT_NAME_MAX_LENTH = 25,
+        	USER_DATA_EXPIRATION_TIME = 60*20, //20 minutes
+        };
+
 };
 
 }

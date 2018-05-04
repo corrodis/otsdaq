@@ -18,6 +18,9 @@
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
 #include <sys/stat.h> 	  // mkdir
+#include <dirent.h> 	//for DIR
+#include <experimental/filesystem>
+
 
 
 using namespace ots;
@@ -26,6 +29,33 @@ using namespace ots;
 #define SECURITY_FILE_NAME 		std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
 #define SEQUENCE_FILE_NAME 		std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.dat"
 #define SEQUENCE_OUT_FILE_NAME 	        std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.out"
+#define USER_DATA_PATH  				std::string(getenv("SERVICE_DATA_PATH")) + std::string("/")
+//#define LOGBOOK_PREVIEWS_PATH 			"uploads/"
+
+#define XML_STATUS						"editUserData_status"
+
+#define XML_ADMIN_STATUS				"logbook_admin_status"
+#define XML_MOST_RECENT_DAY				"most_recent_day"
+#define XML_EXPERIMENTS_ROOT 			"experiments"
+#define XML_EXPERIMENT		 			"experiment"
+#define XML_ACTIVE_EXPERIMENT		 	"active_experiment"
+#define XML_EXPERIMENT_CREATE			"create_time"
+#define XML_EXPERIMENT_CREATOR 			"creator"
+
+#define XML_LOGBOOK_ENTRY               "logbook_entry"
+#define XML_LOGBOOK_ENTRY_SUBJECT       "logbook_entry_subject"
+#define XML_LOGBOOK_ENTRY_TEXT          "logbook_entry_text"
+#define XML_LOGBOOK_ENTRY_FILE          "logbook_entry_file"
+#define XML_LOGBOOK_ENTRY_TIME          "logbook_entry_time"
+#define XML_LOGBOOK_ENTRY_CREATOR       "logbook_entry_creator"
+#define XML_LOGBOOK_ENTRY_HIDDEN 	    "logbook_entry_hidden"
+#define XML_LOGBOOK_ENTRY_HIDER			"logbook_entry_hider"
+#define XML_LOGBOOK_ENTRY_HIDDEN_TIME   "logbook_entry_hidden_time"
+
+#define XML_PREVIEW_INDEX				"preview_index"
+#define LOGBOOK_PREVIEW_FILE        	"preview.xml"
+
+
 
 XDAQ_INSTANTIATOR_IMPL(WizardSupervisor)
 
@@ -52,6 +82,7 @@ SOAPMessenger  (this)
 	xgi::bind (this, &WizardSupervisor::verification,        	      "Verify" 	  	);
 	xgi::bind (this, &WizardSupervisor::requestIcons,       	      "requestIcons"	);
 	xgi::bind (this, &WizardSupervisor::editSecurity,       	      "editSecurity"	);
+	xgi::bind (this, &WizardSupervisor::UserSettings,       	      "UserSettings"	);
 	xgi::bind (this, &WizardSupervisor::tooltipRequest,                   "TooltipRequest"	);
 	xgi::bind (this, &WizardSupervisor::toggleSecurityCodeGeneration,     "ToggleSecurityCodeGeneration"	);
 	xoap::bind(this, &WizardSupervisor::supervisorSequenceCheck,	      "SupervisorSequenceCheck",        	XDAQ_NS_URI);
@@ -70,6 +101,17 @@ WizardSupervisor::~WizardSupervisor(void)
 void WizardSupervisor::init(void)
 {
 	getApplicationContext();
+
+	//init allowed file upload types
+	allowedFileUploadTypes_.push_back("image/png"); matchingFileUploadTypes_.push_back("png");
+	allowedFileUploadTypes_.push_back("image/jpeg"); matchingFileUploadTypes_.push_back("jpeg");
+	allowedFileUploadTypes_.push_back("image/gif"); matchingFileUploadTypes_.push_back("gif");
+	allowedFileUploadTypes_.push_back("image/bmp"); matchingFileUploadTypes_.push_back("bmp");
+	allowedFileUploadTypes_.push_back("application/pdf"); matchingFileUploadTypes_.push_back("pdf");
+	allowedFileUploadTypes_.push_back("application/zip"); matchingFileUploadTypes_.push_back("zip");
+	allowedFileUploadTypes_.push_back("text/plain"); matchingFileUploadTypes_.push_back("txt");
+
+
 }
 
 //========================================================================================================================
@@ -529,3 +571,302 @@ throw (xgi::exception::Exception)
 
 	*out << security;
 }
+//========================================================================================================================
+void WizardSupervisor::UserSettings(xgi::Input * in, xgi::Output * out )
+throw (xgi::exception::Exception)
+{
+
+	//if sequence doesn't match up -> return
+	cgicc::Cgicc cgi(in);
+	std::string submittedSequence = CgiDataUtilities::postData(cgi, "sequence");
+	std::string securityFileName = SECURITY_FILE_NAME;
+	std::string Command;
+	if((Command = CgiDataUtilities::postData(cgi,"RequestType")) == "")
+		Command = cgi("RequestType"); //get command from form, if PreviewEntry
+
+	__COUT__ << Command << std::endl;
+	__COUT__ << "We are vewing Users' Settings!" << std::endl;
+
+	//SECURITY CHECK START ****
+	if(securityCode_.compare(submittedSequence) != 0)
+	{
+		__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
+		__COUT__ << submittedSequence << std::endl;
+		//return;
+	}
+	else
+	{
+		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
+	}
+	//SECURITY CHECK END ****
+
+
+	HttpXmlDocument xmldoc;
+	uint64_t activeSessionIndex;
+	std::string user;
+	uint8_t userPermissions;
+
+	if(Command != "")
+	{
+		__COUT__ << "Action exists!" << std::endl;
+		__COUT__ <<  Command << std::endl;
+
+		if(Command == "Import")
+		{
+			//cleanup temporary folder
+			//NOTE: all input parameters for User Data will be attached to form
+			//	so use cgi(xxx) to get values.
+			//increment number for each temporary preview, previewPostTempIndex_
+			//save entry and uploads to previewPath / previewPostTempIndex_ /.
+
+			//cleanUpPreviews();
+//			std::string EntryText = cgi("EntryText");
+//			__COUT__ << "EntryText " << EntryText <<  std::endl << std::endl;
+//			std::string EntrySubject = cgi("EntrySubject");
+//			__COUT__ << "EntrySubject " << EntrySubject <<  std::endl << std::endl;
+
+			//get creator name
+			//std::string creator = user;
+			//CgiDataUtilities::postData(cgi, "file"); CgiDataUtilities::postData(cgi, "file");//
+			__COUT__ << cgi("Entry")    << std::endl;
+			__COUT__ << cgi("Filename") << std::endl;
+			__COUT__ << cgi("Imported_File") << std::endl;
+
+
+			const std::vector<cgicc::FormFile> files = cgi.getFiles();
+			__COUT__ << "FormFiles: " << sizeof(files) << std::endl;
+			__COUT__ << "Number of files: " << files.size() << std::endl;
+
+			for(unsigned int i = 0; i < files.size(); ++i)
+			{
+				std::string filename = USER_DATA_PATH + files[i].getFilename();
+				__COUT__ << filename << std::endl;
+				std::ofstream myFile;
+				myFile.open(filename.c_str());
+				files[0].writeToStream(myFile);
+			}
+
+
+			__COUT__ << files[0].getFilename() << std::endl;
+			__COUT__ << "********************Files Begin********************" << std::endl;
+			for (unsigned int i=0; i<files.size(); ++i)
+			{
+
+				__COUT__ << files[i].getDataType() << std::endl;
+
+			}
+			__COUT__ << "*********************Files End*********************" << std::endl;
+
+
+//			savePostPreview(EntrySubject, EntryText, cgi.getFiles(), creator, &xmldoc);
+			//else xmldoc.addTextElementToData(XML_STATUS,"Failed - could not get username info.");
+		}
+		else if(Command == "Export")
+		{
+			__COUT__ << "We are exporting Users' Settings!!!" << std::endl;
+			//system('pwd');
+
+			//Check for a TMP directory; if it doesn't exist, make it
+			std::string command = "cd " + USER_DATA_PATH;
+			std::string pathToTmp = USER_DATA_PATH + "/tmp/";
+			std::filesystem::path tmp = pathToTmp;
+
+			exec(command.c_str());
+			__COUT__ << exec("pwd") << std::endl;
+
+
+			if(std::filesystem::status_known(tmpDir) ? std::filesystem::exists(tmpDir) : std::filesystem::exists(tmpDir))
+				__COUT__ << pathToTmp << " exists!" << std::endl;
+			else
+				__COUT__ << pathToTmp << "does not exist! Creating it now. " << std::endl;
+
+			//Zip current files into TMP directory
+			command = std::string("tar -cvf user_settings.tar") +
+					std::string("ActiveConfigurationGroups.cfg ") +
+					std::string("ConsolePreferences ") +
+					std::string("CoreTableInfoNames.dat ") +
+					std::string("LoginData ") +
+					std::string("OtsWizardData ") +
+					std::string("ProgressBarData ");
+
+
+			//return zip
+			if(exec("pwd").find(USER_DATA_PATH) != std::string::npos)
+			{
+				__COUT__ << "Found USER_DATA directory " << std::endl;
+				system(command.c_str());
+				__COUT__ << system("ls") << std::endl;
+			}
+		}
+		else
+		{
+			__COUT__ << "Command request not recognized: " << Command << std::endl;
+			*out << "Error";
+			return;
+		}
+	}
+
+
+
+
+	*out << "test";
+	return;
+}
+//========================================================================================================================
+//	validateUploadFileType
+//      returns "" if file type is invalid, else returns file extension to use
+std::string WizardSupervisor::validateUploadFileType(const std::string fileType)
+{
+	for (unsigned int i=0; i<allowedFileUploadTypes_.size(); ++i)
+		if (allowedFileUploadTypes_[i] == fileType)
+			return matchingFileUploadTypes_[i];        //found and done
+
+	return ""; //not valid, return ""
+}
+//========================================================================================================================
+//	cleanUpPreviews
+//      cleanup logbook preview directory
+//      all names have time_t creation time + "_" + incremented index
+void WizardSupervisor::cleanUpPreviews()
+{
+	std::string userData = (std::string)USER_DATA_PATH;
+
+	DIR *dir = opendir(userData.c_str());
+	if(!dir)
+	{
+		__COUT__ << "Error - User Data directory missing: " << userData << std::endl;
+		return;
+	}
+
+	struct dirent *entry;
+	time_t dirCreateTime;
+	unsigned int i;
+
+	while((entry = readdir(dir))) //loop through all entries in directory and remove anything expired
+	{
+		if( strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0
+				&& strcmp(entry->d_name, ".svn") != 0 )
+		{
+			//replace _ with space so sscanf works
+			for(i=0;i<strlen(entry->d_name);++i)
+				if(entry->d_name[i] == '_')
+				{	entry->d_name[i] = ' '; break; 	}
+			sscanf(entry->d_name,"%li",&dirCreateTime);
+
+			if((time(0) - dirCreateTime) > USER_DATA_EXPIRATION_TIME)
+			{
+				__COUT__ << "Expired" << std::endl;
+
+				entry->d_name[i] = '_'; //put _ back
+
+				__COUT__ << "rm -rf " << USER_DATA_PATH + (std::string)entry->d_name <<  std::endl << std::endl;
+				system(((std::string)("rm -rf " + userData + (std::string)entry->d_name)).c_str());
+			}
+		}
+	}
+
+	closedir(dir);
+}
+
+//========================================================================================================================
+//	savePostPreview
+//      save post to preview directory named with time and incremented index
+void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, const std::vector<cgicc::FormFile> &files, std::string creator,
+		HttpXmlDocument *xmldoc)
+{
+	/*if(activeExperiment_ == "") //no active experiment!
+	{
+		if(xmldoc) xmldoc->addTextElementToData(XML_STATUS,"Failed - no active experiment currently!");
+		return;
+	}
+*/
+	char fileIndex[40];
+	sprintf(fileIndex,"%lu_%lu",time(0),clock()); //create unique time label for entry time(0)_clock()
+	std::string userDataPath = (std::string)USER_DATA_PATH + (std::string)fileIndex;
+
+	__COUT__ << "userDataPath " << userDataPath << std::endl;
+	if(-1 == mkdir(userDataPath.c_str(),0755))
+	{
+		if(xmldoc) xmldoc->addTextElementToData(XML_STATUS,"Failed - directory could not be generated.");
+		return;
+	}
+/*
+	//new directory created successfully, save text and files
+	//entry structure:
+	//  <XML_LOGBOOK_ENTRY>
+	//		<XML_LOGBOOK_ENTRY_TIME>
+	//		<XML_LOGBOOK_ENTRY_CREATOR>
+	//      <XML_LOGBOOK_ENTRY_SUBJECT>
+	//      <XML_LOGBOOK_ENTRY_TEXT>
+	//      <XML_LOGBOOK_ENTRY_FILE value=fileType0>
+	//      <XML_LOGBOOK_ENTRY_FILE value=fileType1> ...
+	//  </XML_LOGBOOK_ENTRY>
+
+	escapeLogbookEntry(text);
+	escapeLogbookEntry(subject);
+	__COUT__ << "~~subject " << subject << std::endl << "~~text " << text << std::endl << std::endl;
+
+	HttpXmlDocument previewXml;
+
+	previewXml.addTextElementToData(XML_LOGBOOK_ENTRY);
+	previewXml.addTextElementToParent(XML_LOGBOOK_ENTRY_TIME, fileIndex, XML_LOGBOOK_ENTRY);
+	if(xmldoc) xmldoc->addTextElementToData(XML_LOGBOOK_ENTRY_TIME,fileIndex); //return time
+	previewXml.addTextElementToParent(XML_LOGBOOK_ENTRY_CREATOR, creator, XML_LOGBOOK_ENTRY);
+	if(xmldoc) xmldoc->addTextElementToData(XML_LOGBOOK_ENTRY_CREATOR,creator); //return creator
+	previewXml.addTextElementToParent(XML_LOGBOOK_ENTRY_TEXT, text, XML_LOGBOOK_ENTRY);
+	if(xmldoc) xmldoc->addTextElementToData(XML_LOGBOOK_ENTRY_TEXT,text); //return text
+	previewXml.addTextElementToParent(XML_LOGBOOK_ENTRY_SUBJECT, subject, XML_LOGBOOK_ENTRY);
+	if(xmldoc) xmldoc->addTextElementToData(XML_LOGBOOK_ENTRY_SUBJECT,subject); //return subject
+
+	__COUT__ << "file size " << files.size() << std::endl;
+
+	std::string filename;
+	std::ofstream myfile;
+	for (unsigned int i=0; i<files.size(); ++i)
+	{
+
+		previewXml.addTextElementToParent(XML_LOGBOOK_ENTRY_FILE, files[i].getDataType(), XML_LOGBOOK_ENTRY);
+		if(xmldoc) xmldoc->addTextElementToData(XML_LOGBOOK_ENTRY_FILE,files[i].getDataType()); //return file type
+
+		if((filename = validateUploadFileType(files[i].getDataType())) == "") //invalid file type
+		{
+			if(xmldoc) xmldoc->addTextElementToData(XML_STATUS,"Failed - invalid file type, " +
+					files[i].getDataType() + ".");
+			return;
+		}*/
+
+		/*//file validated, so save upload to temp directory
+		sprintf(fileIndex,"%d",i);
+		filename = previewPath + "/" + (std::string)LOGBOOK_PREVIEW_UPLOAD_PREFACE +
+				(std::string)fileIndex + "." + filename;
+
+		__COUT__ << "file " << i << " - " << filename << std::endl;
+		myfile.open(filename.c_str());
+		if (myfile.is_open())
+		{
+			files[i].writeToStream(myfile);
+			myfile.close();
+		}
+	}*/
+/*
+	//save xml doc for preview entry
+	previewXml.saveXmlDocument(USER_DATA_PATH + "/" + (std::string)LOGBOOK_PREVIEW_FILE);
+
+	if(xmldoc) xmldoc->addTextElementToData(XML_STATUS,"1"); //1 indicates success!
+	if(xmldoc) xmldoc->addTextElementToData(XML_PREVIEW_INDEX,"1"); //1 indicates is a preview post*/
+}
+
+//========================================================================================================================
+std::string WizardSupervisor::exec(const char* cmd)
+{
+		std::array<char, 128> buffer;
+		std::string result;
+		std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+		if (!pipe) throw std::runtime_error("popen() failed!");
+		while (!feof(pipe.get())) {
+			if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+				result += buffer.data();
+		}
+		return result;
+}
+
