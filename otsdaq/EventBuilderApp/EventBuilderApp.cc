@@ -1,6 +1,6 @@
 #include "otsdaq/EventBuilderApp/EventBuilderApp.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
 #include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
@@ -31,7 +31,7 @@ XDAQ_INSTANTIATOR_IMPL(EventBuilderApp)
 
 //========================================================================================================================
 EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
-throw (xdaq::exception::Exception)
+
 : xdaq::Application            (stub)
 , SOAPMessenger                (this)
 , stateMachineWorkLoopManager_ (toolbox::task::bind(this, &EventBuilderApp::stateMachineThread, "StateMachine"))
@@ -99,7 +99,7 @@ void EventBuilderApp::init(void)
 	// initialization
 	
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR NO ERRORS MAKING MSG FACILITY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-    std::string    name = "Builder";
+	std::string    name = "Builder";
 	unsigned short port = 5200;
 	//artdaq::setMsgFacAppName(supervisorApplicationUID_, port);
 	artdaq::setMsgFacAppName(name, port);
@@ -111,7 +111,9 @@ void EventBuilderApp::init(void)
 			artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
 
 	// create the EventBuilderInterface
-	theARTDAQEventBuilderInterfaces_[0] = new artdaq::EventBuilderApp(this->getApplicationDescriptor()->getLocalId(), name );
+	app_name = name;
+	my_rank = this->getApplicationDescriptor()->getLocalId();
+	theARTDAQEventBuilderInterfaces_[0] = new artdaq::EventBuilderApp( );
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR INIT DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 }
 
@@ -122,7 +124,7 @@ void EventBuilderApp::destroy(void)
 
 //========================================================================================================================
 void EventBuilderApp::Default(xgi::Input * in, xgi::Output * out )
-throw (xgi::exception::Exception)
+
 {
 
 	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='/WebPath/html/EventBuilderApp.html?urn=" <<
@@ -131,17 +133,17 @@ throw (xgi::exception::Exception)
 
 //========================================================================================================================
 void EventBuilderApp::stateMachineXgiHandler(xgi::Input * in, xgi::Output * out )
-throw (xgi::exception::Exception)
+
 {}
 
 //========================================================================================================================
 void EventBuilderApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out )
-throw (xgi::exception::Exception)
+
 {}
 
 //========================================================================================================================
 xoap::MessageReference EventBuilderApp::stateMachineXoapHandler(xoap::MessageReference message )
-throw (xoap::exception::Exception)
+
 {
 	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << std::endl;
 	stateMachineWorkLoopManager_.removeProcessedRequests();
@@ -152,7 +154,7 @@ throw (xoap::exception::Exception)
 
 //========================================================================================================================
 xoap::MessageReference EventBuilderApp::stateMachineResultXoapHandler(xoap::MessageReference message )
-throw (xoap::exception::Exception)
+
 {
 	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << std::endl;
 	//stateMachineWorkLoopManager_.removeProcessedRequests();
@@ -176,7 +178,7 @@ bool EventBuilderApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 
 //========================================================================================================================
 xoap::MessageReference EventBuilderApp::stateMachineStateRequest(xoap::MessageReference message)
-throw (xoap::exception::Exception)
+
 {
 	std::cout << __COUT_HDR_FL__ << theStateMachine_.getCurrentStateName() << std::endl;
 	return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getCurrentStateName());
@@ -184,7 +186,7 @@ throw (xoap::exception::Exception)
 
 //========================================================================================================================
 xoap::MessageReference EventBuilderApp::stateMachineErrorMessageRequest(xoap::MessageReference message)
-throw (xoap::exception::Exception)
+
 {
 	__COUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
 
@@ -195,42 +197,42 @@ throw (xoap::exception::Exception)
 
 //========================================================================================================================
 void EventBuilderApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 }
 
 //========================================================================================================================
 void EventBuilderApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 }
 
 //========================================================================================================================
 void EventBuilderApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 }
 
 //========================================================================================================================
 void EventBuilderApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 }
 
 //========================================================================================================================
 void EventBuilderApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 }
 
 //========================================================================================================================
 void EventBuilderApp::inError (toolbox::fsm::FiniteStateMachine & fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
 	std::cout << __COUT_HDR_FL__ << "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
 	//rcmsStateNotifier_.stateChanged("Error", "");
@@ -238,7 +240,7 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 void EventBuilderApp::enteringError (toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
 	std::cout << __COUT_HDR_FL__ << "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
@@ -258,7 +260,7 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
@@ -354,7 +356,7 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 void EventBuilderApp::transitionHalting(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
   //	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
@@ -363,14 +365,14 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 void EventBuilderApp::transitionInitializing(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 }
 
 //========================================================================================================================
 void EventBuilderApp::transitionPausing(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
@@ -379,7 +381,7 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 void EventBuilderApp::transitionResuming(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
@@ -388,7 +390,7 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 void EventBuilderApp::transitionStarting(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 	art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber")));
@@ -398,7 +400,7 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 void EventBuilderApp::transitionStopping(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)

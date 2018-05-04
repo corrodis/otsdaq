@@ -3,7 +3,7 @@
 #include "otsdaq-core/XmlUtilities/ConvertToXML.h"
 #include "otsdaq-core/XmlUtilities/ConvertFromXML.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <xercesc/parsers/XercesDOMParser.hpp>
 #include <stdexcept>
@@ -43,7 +43,7 @@ using namespace ots;
 XmlDocument::XmlDocument(std::string rootName) :
         rootTagName_(rootName)
 {
-	INIT_MF("XmlDocument");
+	//INIT_MF("XmlDocument");
     //__COUT__ << "in" << std::endl;
     initDocument();
     rootElement_ = theDocument_->getDocumentElement();

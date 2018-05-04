@@ -7,7 +7,7 @@
 #include "artdaq-core/Utilities/SimpleLookupPolicy.hh"
 #include "artdaq-ots/Overlays/UDPFragmentWriter.hh"
 #include "artdaq-ots/Overlays/FragmentType.hh"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 
 #include <fstream>
@@ -46,8 +46,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const & ps)
 	}
 	/*if(fcntl(datasocket_, F_SETFL, O_NONBLOCK) == -1) {
 
-		throw art::Exception(art::errors::Configuration) <<
-		  "UDPReceiver: Cannot set socket to nonblocking!" << TLOG_ENDL;
+		throw art::Exception(art::errors::Configuration) << "UDPReceiver: Cannot set socket to nonblocking!" << TLOG_ENDL;
 	  }*/
 
 	if (rcvbuf_ > 0 && setsockopt(datasocket_, SOL_SOCKET, SO_RCVBUF, &rcvbuf_, sizeof(rcvbuf_)))

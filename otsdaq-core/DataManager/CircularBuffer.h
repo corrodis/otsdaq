@@ -5,7 +5,7 @@
 #include "otsdaq-core/DataManager/BufferImplementation.h"
 
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <iostream>
 #include <string>

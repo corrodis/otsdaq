@@ -16,12 +16,8 @@ cet_make(LIBRARY_NAME FECore
          DataManager
 		 ${CETLIB}
          artdaq_Application
-         artdaq_Application_MPI2
          artdaq_BuildInfo
-		 ${ARTDAQ_APPLICATION}
-		 ${ARTDAQ_APPLICATION_MPI2}		 
-		 ${ARTDAQ_BUILDINFO}
-		 ${ART_PERSISTENCY_PROVENANCE}		 
+		 ${ART_PERSISTENCY_PROVENANCE}
 		 ${Boost_SYSTEM_LIBRARY}
 		 ${ART_UTILITIES}
 		 ${CETLIB}
@@ -29,7 +25,7 @@ cet_make(LIBRARY_NAME FECore
 	#	 MessageFacility
 		 ${MF_UTILITIES}
          ${XDAQ_BASIC_LIB_LIST}
-         ${ROOT_CORE}         
+         ${ROOT_CORE}
 )
 
 install_headers()

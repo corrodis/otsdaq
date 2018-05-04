@@ -1,5 +1,5 @@
 #include "otsdaq-core/FECore/FEVInterface.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include "otsdaq-core/NetworkUtilities/UDPDataStreamerBase.h"
 

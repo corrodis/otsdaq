@@ -16,7 +16,7 @@
 #ifndef __CINT__
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #endif
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include "ANSIColors.h"
 

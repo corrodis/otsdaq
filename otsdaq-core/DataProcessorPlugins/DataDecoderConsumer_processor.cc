@@ -1,5 +1,5 @@
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/DataProcessorPlugins/DataDecoderConsumer.h"
 #include "otsdaq-core/ConfigurationPluginDataFormats/DataDecoderConsumerConfiguration.h"
 #include "otsdaq-core/Macros/ProcessorPluginMacros.h"

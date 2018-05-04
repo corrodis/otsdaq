@@ -1,10 +1,12 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationTree.h"
+
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
-
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-
 #include <typeinfo>
-
+#include "otsdaq-core/Macros/StringMacros.h"
+#if MESSAGEFACILITY_HEX_VERSION > 0x20100
+#include <boost/stacktrace.hpp>
+#endif
 
 using namespace ots;
 
@@ -884,6 +886,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 				"' in table '" << getConfigurationName() <<
 				"' looking for child '" << nodeName << "'\n\n" << std::endl;
 		ss << "--- Additional error detail: \n\n" << e.what() << std::endl;
+#if MESSAGEFACILITY_HEX_VERSION > 0x20100
+		ss << boost::stacktrace::stacktrace();
+#endif
 		throw std::runtime_error(ss.str());
 	}
 	catch(...)
@@ -891,6 +896,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 		__SS__ << "\n\nError occurred descending from node '" << getValue() <<
 				"' in table '" << getConfigurationName() <<
 				"' looking for child '" << nodeName << "'\n\n" << std::endl;
+#if MESSAGEFACILITY_HEX_VERSION > 0x20100
+		ss << boost::stacktrace::stacktrace();
+#endif
 		throw std::runtime_error(ss.str());
 	}
 
@@ -899,6 +907,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 			"' in table '" << getConfigurationName() <<
 			"' looking for child '" << nodeName << "'\n\n" <<
 			"Invalid depth! getNode() called from a value point in the Configuration Tree." << std::endl;
+#if MESSAGEFACILITY_HEX_VERSION > 0x20100
+	ss << boost::stacktrace::stacktrace();
+#endif
 	throw std::runtime_error(ss.str());	// this node is value node, cant go any deeper!
 }
 
@@ -1106,7 +1117,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 					//check field accept filter list
 					found = fieldAcceptList.size()?false:true; //accept if no filter list
 					for(const auto &fieldFilter : fieldAcceptList)
-						if(ConfigurationTree::wildCardMatch(
+						if(StringMacros::wildCardMatch(
 								fieldFilter,fieldNode.first))
 						{
 							found = true;
@@ -1147,7 +1158,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 
 						found = true; //accept if no filter list
 						for(const auto &fieldFilter : fieldRejectList)
-							if(ConfigurationTree::wildCardMatch(
+							if(StringMacros::wildCardMatch(
 									fieldFilter,fieldNode.first))
 							{
 								found = false; //reject if match
@@ -1348,7 +1359,7 @@ void ConfigurationTree::recursiveGetCommonFields(
 				//check field accept filter list
 				found = fieldAcceptList.size()?false:true; //accept if no filter list
 				for(const auto &fieldFilter : fieldAcceptList)
-					if(ConfigurationTree::wildCardMatch(
+					if(StringMacros::wildCardMatch(
 							fieldFilter,fieldNode.first))
 					{
 						found = true;
@@ -1390,7 +1401,7 @@ void ConfigurationTree::recursiveGetCommonFields(
 
 					found = true; //accept if no filter list
 					for(const auto &fieldFilter : fieldRejectList)
-						if(ConfigurationTree::wildCardMatch(
+						if(StringMacros::wildCardMatch(
 								fieldFilter,fieldNode.first))
 						{
 							found = false; //reject if match
@@ -1531,8 +1542,8 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 								this->getNode(filterPath).getValueAsString(true) <<
 								std::endl;
 
-						if(ConfigurationTree::wildCardMatch(
-								ConfigurationView::decodeURIComponent(fieldValue),
+						if(StringMacros::wildCardMatch(
+								StringMacros::decodeURIComponent(fieldValue),
 								this->getNode(filterPath).getValueAsString(true) ))
 						{
 							//found a match for the field/value pair
@@ -1541,7 +1552,7 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 						}
 
 //						if(this->getNode(filterPath).getValueAsString(true) ==
-//								ConfigurationView::decodeURIComponent(fieldValue))
+//								StringMacros::decodeURIComponent(fieldValue))
 //						{
 //							//found a match for the field/value pair
 //							skip = false;
@@ -1572,40 +1583,40 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 	//__COUT__ << "Done w/Children of node: " << getValueAsString() << std::endl;
 	return retMap;
 }
-
-//==============================================================================
-//wildCardMatch
-//	find needle in haystack
-//		allow needle to have leading and/or trailing wildcard '*'
-bool ConfigurationTree::wildCardMatch(const std::string& needle, const std::string& haystack)
-try
-{
-//	__COUT__ << "\t\t wildCardMatch: " << needle <<
-//			" =in= " << haystack << " ??? " <<
-//			std::endl;
-
-	if(needle.size() == 0)
-		return true; //if empty needle, always "found"
-
-	if(needle[0] == '*' && //leading wildcard
-					needle[needle.size()-1] == '*' ) //and trailing wildcard
-		return std::string::npos != haystack.find(needle.substr(1,needle.size()-2));
-
-	if(needle[0] == '*') //leading wildcard
-		return needle.substr(1) ==
-				haystack.substr(haystack.size() - (needle.size()-1));
-
-	if(needle[needle.size()-1] == '*') //trailing wildcard
-		return needle.substr(0,needle.size()-1) ==
-				haystack.substr(0,needle.size()-1);
-
-	//else //no wildcards
-	return needle == haystack;
-}
-catch(...)
-{
-	return false; //if out of range
-}
+//
+////==============================================================================
+////wildCardMatch
+////	find needle in haystack
+////		allow needle to have leading and/or trailing wildcard '*'
+//bool StringMacros::wildCardMatch(const std::string& needle, const std::string& haystack)
+//try
+//{
+////	__COUT__ << "\t\t wildCardMatch: " << needle <<
+////			" =in= " << haystack << " ??? " <<
+////			std::endl;
+//
+//	if(needle.size() == 0)
+//		return true; //if empty needle, always "found"
+//
+//	if(needle[0] == '*' && //leading wildcard
+//					needle[needle.size()-1] == '*' ) //and trailing wildcard
+//		return std::string::npos != haystack.find(needle.substr(1,needle.size()-2));
+//
+//	if(needle[0] == '*') //leading wildcard
+//		return needle.substr(1) ==
+//				haystack.substr(haystack.size() - (needle.size()-1));
+//
+//	if(needle[needle.size()-1] == '*') //trailing wildcard
+//		return needle.substr(0,needle.size()-1) ==
+//				haystack.substr(0,needle.size()-1);
+//
+//	//else //no wildcards
+//	return needle == haystack;
+//}
+//catch(...)
+//{
+//	return false; //if out of range
+//}
 
 
 //==============================================================================

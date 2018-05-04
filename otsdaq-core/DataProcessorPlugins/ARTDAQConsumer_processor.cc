@@ -1,6 +1,6 @@
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQConsumer.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "artdaq/Application/Commandable.hh"
 #include "otsdaq-core/Macros/ProcessorPluginMacros.h"
 #include "fhiclcpp/make_ParameterSet.h"
@@ -150,7 +150,9 @@ void ARTDAQConsumer::configure(int rank)
     // then deletes the old one, and we need the opposite order.
     fragment_receiver_ptr_.reset(nullptr);
     std::cout << __COUT_HDR_FL__ << "\tNew core" << std::endl;
-    fragment_receiver_ptr_.reset(new artdaq::BoardReaderApp(rank, name_));
+	my_rank = rank;
+	app_name = name_;
+    fragment_receiver_ptr_.reset(new artdaq::BoardReaderApp());
     //FIXME These are passed as parameters
     uint64_t timeout   = 45;
     //uint64_t timestamp = 184467440737095516;

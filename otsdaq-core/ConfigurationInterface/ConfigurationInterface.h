@@ -3,7 +3,7 @@
 
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationVersion.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 //#include "otsdaq-core/ConfigurationPluginDataFormats/Configurations.h"
 #include "otsdaq-core/PluginMakers/MakeInterfaceConfiguration.h"

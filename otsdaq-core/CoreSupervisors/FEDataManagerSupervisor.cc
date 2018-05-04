@@ -9,7 +9,7 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(FEDataManagerSupervisor)
 
 //========================================================================================================================
-FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception)
+FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s) 
 //FIXME WE MUST ADD A MAP OF INSTANCES IN THE SINGLETON
 : CoreSupervisorBase(s)
 {

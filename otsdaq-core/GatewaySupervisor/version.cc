@@ -8,7 +8,7 @@ GETPACKAGEINFO(GatewaySupervisor)
 
 
 //========================================================================================================================
-void GatewaySupervisor::checkPackageDependencies() throw (config::PackageInfo::VersionException)
+void GatewaySupervisor::checkPackageDependencies() 
 {
 	CHECKDEPENDENCY(config);
 	CHECKDEPENDENCY(xcept );

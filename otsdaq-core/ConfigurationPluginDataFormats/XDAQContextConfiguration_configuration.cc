@@ -764,7 +764,7 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 			for (XDAQApplicationProperty &appProperty : app.properties_)
 			{
 
-				if (appProperty.type_ == "ots-only Property") continue; //skip otsProperty values
+				if (appProperty.type_ == "ots::SupervisorProperty") continue; //skip ots Property values
 
 				if (!appProperty.status_)
 					out << "\t\t\t\t<!--\n";

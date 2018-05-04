@@ -2,7 +2,7 @@
 #define _ots_SupervisorInfo_h_
 
 #include <string>
-#include "otsdaq-core/Macros/CoutHeaderMacros.h" /* also for XDAQ_CONST_CALL */
+#include "otsdaq-core/Macros/CoutMacros.h" /* also for XDAQ_CONST_CALL */
 #include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
 
 #pragma GCC diagnostic push
