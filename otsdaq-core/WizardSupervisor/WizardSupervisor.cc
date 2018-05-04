@@ -276,19 +276,26 @@ throw (xoap::exception::Exception)
 
 	//If submittedSequence matches securityCode_ then return full permissions (255)
 	//	else, return permissions 0
-	uint8_t userPermissions = 0;
-	std::string userWithLock = "";
+	std::map<std::string /*groupName*/,WebUsers::permissionLevel_t> permissionMap;
 
 	if(securityCode_ == submittedSequence)
-		userPermissions = 255;
+		permissionMap.emplace(
+				std::pair<std::string /*groupName*/,WebUsers::permissionLevel_t>(
+						WebUsers::DEFAULT_USER_GROUP,
+						WebUsers::PERMISSION_LEVEL_ADMIN));
 	else
+	{
 		__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
+
+		permissionMap.emplace(
+				std::pair<std::string /*groupName*/,WebUsers::permissionLevel_t>(
+						WebUsers::DEFAULT_USER_GROUP,
+						WebUsers::PERMISSION_LEVEL_INACTIVE));
+	}
 
 	//fill return parameters
 	SOAPParameters retParameters;
-	char tmp[5];
-	sprintf(tmp, "%d", userPermissions);
-	retParameters.addParameter("Permissions", tmp);
+	retParameters.addParameter("Permissions", StringMacros::mapToString(permissionMap));
 
 
 	return SOAPUtilities::makeSOAPMessageReference("SequenceResponse",
