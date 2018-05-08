@@ -10,6 +10,7 @@
 #include "xdaq/Application.h"  /* for  xdaq::ApplicationDescriptor */
 #include "xdaq/ContextDescriptor.h"  /* for  xdaq::ContextDescriptor */
 #pragma GCC diagnostic pop
+#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 
 
 namespace ots

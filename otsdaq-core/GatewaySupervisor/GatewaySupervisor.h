@@ -17,6 +17,7 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
+#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 //#include <toolbox/fsm/FiniteStateMachine.h>
 #include <toolbox/task/WorkLoop.h>
 #include <xgi/Method.h>

@@ -5,6 +5,7 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
+#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <string>
