@@ -3,7 +3,7 @@
 #include "otsdaq-core/GatewaySupervisor/GatewaySupervisor.h"
 
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <xdaq/NamespaceURI.h>
 #include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
@@ -669,40 +669,43 @@ throw (xgi::exception::Exception)
 		}
 		else if(Command == "Export")
 		{
-			__COUT__ << "We are exporting Users' Settings!!!" << std::endl;
-			//system('pwd');
-
-			//Check for a TMP directory; if it doesn't exist, make it
-			std::string command = "cd " + USER_DATA_PATH;
-			std::string pathToTmp = USER_DATA_PATH + "/tmp/";
-			std::filesystem::path tmp = pathToTmp;
-
-			exec(command.c_str());
-			__COUT__ << exec("pwd") << std::endl;
-
-
-			if(std::filesystem::status_known(tmpDir) ? std::filesystem::exists(tmpDir) : std::filesystem::exists(tmpDir))
-				__COUT__ << pathToTmp << " exists!" << std::endl;
-			else
-				__COUT__ << pathToTmp << "does not exist! Creating it now. " << std::endl;
-
-			//Zip current files into TMP directory
-			command = std::string("tar -cvf user_settings.tar") +
-					std::string("ActiveConfigurationGroups.cfg ") +
-					std::string("ConsolePreferences ") +
-					std::string("CoreTableInfoNames.dat ") +
-					std::string("LoginData ") +
-					std::string("OtsWizardData ") +
-					std::string("ProgressBarData ");
-
-
-			//return zip
-			if(exec("pwd").find(USER_DATA_PATH) != std::string::npos)
-			{
-				__COUT__ << "Found USER_DATA directory " << std::endl;
-				system(command.c_str());
-				__COUT__ << system("ls") << std::endl;
-			}
+			__SS__ << "This doesn't compile Dan." << __E__;
+			__SS_THROW__;
+//
+//			__COUT__ << "We are exporting Users' Settings!!!" << std::endl;
+//			//system('pwd');
+//
+//			//Check for a TMP directory; if it doesn't exist, make it
+//			std::string command = "cd " + USER_DATA_PATH;
+//			std::string pathToTmp = USER_DATA_PATH + "/tmp/";
+//			std::filesystem::path tmp = pathToTmp;
+//
+//			exec(command.c_str());
+//			__COUT__ << exec("pwd") << std::endl;
+//
+//
+//			if(std::filesystem::status_known(tmpDir) ? std::filesystem::exists(tmpDir) : std::filesystem::exists(tmpDir))
+//				__COUT__ << pathToTmp << " exists!" << std::endl;
+//			else
+//				__COUT__ << pathToTmp << "does not exist! Creating it now. " << std::endl;
+//
+//			//Zip current files into TMP directory
+//			command = std::string("tar -cvf user_settings.tar") +
+//					std::string("ActiveConfigurationGroups.cfg ") +
+//					std::string("ConsolePreferences ") +
+//					std::string("CoreTableInfoNames.dat ") +
+//					std::string("LoginData ") +
+//					std::string("OtsWizardData ") +
+//					std::string("ProgressBarData ");
+//
+//
+//			//return zip
+//			if(exec("pwd").find(USER_DATA_PATH) != std::string::npos)
+//			{
+//				__COUT__ << "Found USER_DATA directory " << std::endl;
+//				system(command.c_str());
+//				__COUT__ << system("ls") << std::endl;
+//			}
 		}
 		else
 		{
