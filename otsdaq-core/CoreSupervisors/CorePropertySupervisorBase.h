@@ -12,6 +12,9 @@
 //#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
 //#include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
 
+
+
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationTree.h"
@@ -21,6 +24,13 @@
 //#include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
 
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h" //for WebUsers::RequestUserInfo
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#include <xdaq/Application.h>
+#pragma GCC diagnostic pop
+
+
 //
 //#pragma GCC diagnostic push
 //#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -47,7 +57,7 @@ class CorePropertySupervisorBase
 {
 
 public:
-	CorePropertySupervisorBase										(void);
+	CorePropertySupervisorBase										(xdaq::Application* application);
     //void init					         							(const std::string& supervisorContextUID, const std::string& supervisorApplicationUID, ConfigurationManager *theConfigurationManager);
     virtual ~CorePropertySupervisorBase								(void);
 
@@ -61,15 +71,18 @@ protected:
 
 
     ConfigurationManager*          	theConfigurationManager_;
+    ConfigurationTree				theContextTreeNode_;
 
-	std::string                    	XDAQContextConfigurationName_;
-	std::string                    	supervisorConfigurationPath_;
+	//std::string                    	XDAQContextConfigurationName_;
+
+	std::string                    	supervisorClass_;
+	std::string                    	supervisorClassNoNamespace_;
 
 	std::string                    	supervisorContextUID_;
 	std::string                    	supervisorApplicationUID_;
-//	std::string                    	supervisorClass_;
-//	std::string                    	supervisorClassNoNamespace_;
+	std::string                    	supervisorConfigurationPath_;
 
+    AllSupervisorInfo 				allSupervisorInfo_;
 
     //Supervisor Property names
     //	to access, use CorePropertySupervisorBase::getSupervisorProperty and CorePropertySupervisorBase::setSupervisorProperty
@@ -142,6 +155,7 @@ private:
 	} propertyStruct_;
 
 public:
+	void								resetPropertiesAreSetup				(void) { propertiesAreSetup_ = false; } //forces reload of properties from configuration
 	ConfigurationTree					getSupervisorTreeNode				(void);
 
 	void								loadUserSupervisorProperties		(void);

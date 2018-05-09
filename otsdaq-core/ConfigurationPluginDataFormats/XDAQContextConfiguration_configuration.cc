@@ -822,13 +822,20 @@ std::string XDAQContextConfiguration::getContextUID(const std::string &url) cons
 //========================================================================================================================
 std::string XDAQContextConfiguration::getApplicationUID(const std::string &url, unsigned int id) const
 {
+	__COUTV__(url); __COUTV__(id);
 	for (auto context : contexts_)
 	{
+
+		__COUT__ << "Checking " << (context.address_ + ":" + std::to_string(context.port_)) << __E__;
+		__COUTV__(context.status_);
+
 		if (!context.status_) continue;
 
+		__COUT__ << "Checking " << (context.address_ + ":" + std::to_string(context.port_)) << __E__;
 		if (url == context.address_ + ":" + std::to_string(context.port_))
 			for (auto application : context.applications_)
 			{
+				__COUTV__(application.status_);	__COUTV__(application.id_);
 				if (!application.status_) continue;
 
 				if (application.id_ == id)

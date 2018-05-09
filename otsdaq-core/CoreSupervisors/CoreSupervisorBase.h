@@ -1,7 +1,6 @@
 #ifndef _ots_CoreSupervisorBase_h_
 #define _ots_CoreSupervisorBase_h_
 
-#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
@@ -114,88 +113,79 @@ protected:
     WorkLoopManager                	stateMachineWorkLoopManager_;
     toolbox::BSem                  	stateMachineSemaphore_;
 
-//    ConfigurationManager*          	theConfigurationManager_;
-//
-//	std::string                    	XDAQContextConfigurationName_;
-//	std::string                    	supervisorConfigurationPath_;
-//
-//	std::string                    	supervisorContextUID_;
-//	std::string                    	supervisorApplicationUID_;
-	std::string                    	supervisorClass_;
-	std::string                    	supervisorClassNoNamespace_;
 
     AllSupervisorInfo 				allSupervisorInfo_;
     RemoteWebUsers             		theRemoteWebUsers_;
     std::vector<VStateMachine*>    	theStateMachineImplementation_;
-
-
-    //Supervisor Property names
-    //	to access, use CoreSupervisorBase::getSupervisorProperty and CorePropertySupervisorBase::setSupervisorProperty
-	static const struct SupervisorProperties
-	{
-		SupervisorProperties()
-		: allSetNames_({&CheckUserLockRequestTypes,&RequireUserLockRequestTypes,
-			&AutomatedRequestTypes,&AllowNoLoginRequestTypes,&NeedUsernameRequestTypes,
-			&NeedDisplayNameRequestTypes,&NeedGroupMembershipRequestTypes,&NeedSessionIndexRequestTypes,
-			&NoXmlWhiteSpaceRequestTypes,&NonXMLRequestTypes})
-		{}
-
-		const std::string UserPermissionsThreshold			= "UserPermissionsThreshold";
-		const std::string UserGroupsAllowed					= "UserGroupsAllowed";
-		const std::string UserGroupsDisallowed				= "UserGroupsDisallowed";
-
-		const std::string CheckUserLockRequestTypes			= "CheckUserLockRequestTypes";
-		const std::string RequireUserLockRequestTypes		= "RequireUserLockRequestTypes";
-		const std::string AutomatedRequestTypes				= "AutomatedRequestTypes";
-		const std::string AllowNoLoginRequestTypes			= "AllowNoLoginRequestTypes";
-
-		const std::string NeedUsernameRequestTypes			= "NeedUsernameRequestTypes";
-		const std::string NeedDisplayNameRequestTypes		= "NeedDisplayNameRequestTypes";
-		const std::string NeedGroupMembershipRequestTypes	= "NeedGroupMembershipRequestTypes";
-		const std::string NeedSessionIndexRequestTypes		= "NeedSessionIndexRequestTypes";
-
-		const std::string NoXmlWhiteSpaceRequestTypes		= "NoXmlWhiteSpaceRequestTypes";
-		const std::string NonXMLRequestTypes				= "NonXMLRequestTypes";
-
-		const std::set<const std::string*> allSetNames_;
-	} SUPERVISOR_PROPERTIES;
+//
+//
+//    //Supervisor Property names
+//    //	to access, use CoreSupervisorBase::getSupervisorProperty and CorePropertySupervisorBase::setSupervisorProperty
+//	static const struct SupervisorProperties
+//	{
+//		SupervisorProperties()
+//		: allSetNames_({&CheckUserLockRequestTypes,&RequireUserLockRequestTypes,
+//			&AutomatedRequestTypes,&AllowNoLoginRequestTypes,&NeedUsernameRequestTypes,
+//			&NeedDisplayNameRequestTypes,&NeedGroupMembershipRequestTypes,&NeedSessionIndexRequestTypes,
+//			&NoXmlWhiteSpaceRequestTypes,&NonXMLRequestTypes})
+//		{}
+//
+//		const std::string UserPermissionsThreshold			= "UserPermissionsThreshold";
+//		const std::string UserGroupsAllowed					= "UserGroupsAllowed";
+//		const std::string UserGroupsDisallowed				= "UserGroupsDisallowed";
+//
+//		const std::string CheckUserLockRequestTypes			= "CheckUserLockRequestTypes";
+//		const std::string RequireUserLockRequestTypes		= "RequireUserLockRequestTypes";
+//		const std::string AutomatedRequestTypes				= "AutomatedRequestTypes";
+//		const std::string AllowNoLoginRequestTypes			= "AllowNoLoginRequestTypes";
+//
+//		const std::string NeedUsernameRequestTypes			= "NeedUsernameRequestTypes";
+//		const std::string NeedDisplayNameRequestTypes		= "NeedDisplayNameRequestTypes";
+//		const std::string NeedGroupMembershipRequestTypes	= "NeedGroupMembershipRequestTypes";
+//		const std::string NeedSessionIndexRequestTypes		= "NeedSessionIndexRequestTypes";
+//
+//		const std::string NoXmlWhiteSpaceRequestTypes		= "NoXmlWhiteSpaceRequestTypes";
+//		const std::string NonXMLRequestTypes				= "NonXMLRequestTypes";
+//
+//		const std::set<const std::string*> allSetNames_;
+//	} SUPERVISOR_PROPERTIES;
 
 private:
 	//property private members
-	void					checkSupervisorPropertySetup		(void);
-	volatile bool									propertiesAreSetup_;
-
-	//for public access to property map,..
-	//	use CoreSupervisorBase::getSupervisorProperty and CorePropertySupervisorBase::setSupervisorProperty
-	std::map<std::string, std::string> 				propertyMap_;
-	struct CoreSupervisorPropertyStruct
-	{
-		CoreSupervisorPropertyStruct()
-		: allSets_ ({&CheckUserLockRequestTypes,&RequireUserLockRequestTypes,
-			&AutomatedRequestTypes,&AllowNoLoginRequestTypes,&NeedUsernameRequestTypes,
-			&NeedDisplayNameRequestTypes,&NeedGroupMembershipRequestTypes,&NeedSessionIndexRequestTypes,
-			&NoXmlWhiteSpaceRequestTypes,&NonXMLRequestTypes})
-		{}
-
-		std::map<std::string,uint8_t> 				UserPermissionsThreshold;
-		std::map<std::string,std::string> 			UserGroupsAllowed;
-		std::map<std::string,std::string>  			UserGroupsDisallowed;
-
-		std::set<std::string> 						CheckUserLockRequestTypes;
-		std::set<std::string> 						RequireUserLockRequestTypes;
-		std::set<std::string> 						AutomatedRequestTypes;
-		std::set<std::string> 						AllowNoLoginRequestTypes;
-
-		std::set<std::string> 						NeedUsernameRequestTypes;
-		std::set<std::string> 						NeedDisplayNameRequestTypes;
-		std::set<std::string> 						NeedGroupMembershipRequestTypes;
-		std::set<std::string> 						NeedSessionIndexRequestTypes;
-
-		std::set<std::string> 						NoXmlWhiteSpaceRequestTypes;
-		std::set<std::string> 						NonXMLRequestTypes;
-
-		std::set< std::set<std::string>* > 			allSets_;
-	} propertyStruct_;
+//	void					checkSupervisorPropertySetup		(void);
+//	volatile bool									propertiesAreSetup_;
+//
+//	//for public access to property map,..
+//	//	use CoreSupervisorBase::getSupervisorProperty and CorePropertySupervisorBase::setSupervisorProperty
+//	std::map<std::string, std::string> 				propertyMap_;
+//	struct CoreSupervisorPropertyStruct
+//	{
+//		CoreSupervisorPropertyStruct()
+//		: allSets_ ({&CheckUserLockRequestTypes,&RequireUserLockRequestTypes,
+//			&AutomatedRequestTypes,&AllowNoLoginRequestTypes,&NeedUsernameRequestTypes,
+//			&NeedDisplayNameRequestTypes,&NeedGroupMembershipRequestTypes,&NeedSessionIndexRequestTypes,
+//			&NoXmlWhiteSpaceRequestTypes,&NonXMLRequestTypes})
+//		{}
+//
+//		std::map<std::string,uint8_t> 				UserPermissionsThreshold;
+//		std::map<std::string,std::string> 			UserGroupsAllowed;
+//		std::map<std::string,std::string>  			UserGroupsDisallowed;
+//
+//		std::set<std::string> 						CheckUserLockRequestTypes;
+//		std::set<std::string> 						RequireUserLockRequestTypes;
+//		std::set<std::string> 						AutomatedRequestTypes;
+//		std::set<std::string> 						AllowNoLoginRequestTypes;
+//
+//		std::set<std::string> 						NeedUsernameRequestTypes;
+//		std::set<std::string> 						NeedDisplayNameRequestTypes;
+//		std::set<std::string> 						NeedGroupMembershipRequestTypes;
+//		std::set<std::string> 						NeedSessionIndexRequestTypes;
+//
+//		std::set<std::string> 						NoXmlWhiteSpaceRequestTypes;
+//		std::set<std::string> 						NonXMLRequestTypes;
+//
+//		std::set< std::set<std::string>* > 			allSets_;
+//	} propertyStruct_;
 
 public:
 //	void								loadUserSupervisorProperties		(void);

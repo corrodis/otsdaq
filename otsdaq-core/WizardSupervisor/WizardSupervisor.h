@@ -27,7 +27,14 @@ namespace ots
 
 class HttpXmlDocument;
 
-
+//WizardSupervisor
+//	This class is a xdaq application.
+//
+//	It is instantiated by the xdaq context when otsdaq is in "Wiz Mode."
+//
+//	It is different from the "Normal Mode" Gateway Supervisor in that it does not have a state machine
+//	and does not inherit properties from CorePropertySupervisorBase. The assumption is
+//	that only admins have access to wiz mode, and they have access to all features of it.
 class WizardSupervisor: public xdaq::Application, public SOAPMessenger
 {
 
@@ -66,6 +73,10 @@ private:
     std::string					securityCode_;
     bool                        defaultSequence_;
     std::vector<std::string>    allowedFileUploadTypes_, matchingFileUploadTypes_;
+
+
+    std::string					supervisorClass_;
+    std::string					supervisorClassNoNamespace_;
 
     enum {
         	ADMIN_PERMISSIONS_THRESHOLD = 255,

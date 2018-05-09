@@ -21,9 +21,9 @@ ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub *
 
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 			DataManagerSingleton::getInstance<ARTDAQDataManager>(
-					CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
-					CoreSupervisorBase::supervisorConfigurationPath_,
-					CoreSupervisorBase::supervisorApplicationUID_)
+					CorePropertySupervisorBase::theContextTreeNode_,//CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
+					CorePropertySupervisorBase::supervisorConfigurationPath_,
+					CorePropertySupervisorBase::supervisorApplicationUID_)
 	);
 
 	__COUT__ << "Initialized!" << std::endl;
@@ -37,6 +37,6 @@ ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub *
 //========================================================================================================================
 ARTDAQDataManagerSupervisor::~ARTDAQDataManagerSupervisor(void)
 {
-	DataManagerSingleton::deleteInstance(CoreSupervisorBase::supervisorApplicationUID_);
+	DataManagerSingleton::deleteInstance(CorePropertySupervisorBase::supervisorApplicationUID_);
 	theStateMachineImplementation_.pop_back();
 }

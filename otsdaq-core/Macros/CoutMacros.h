@@ -87,6 +87,26 @@
 #define __CFG_COUT__  		__CFG_COUT_TYPE__(LogDebug)		<< __COUT_HDR__
 #define __CFG_COUTV__(X) 	__CFG_COUT__ << QUOTE(X) << " = " << X << __E__
 
+
+//////// ==============================================================
+
+//for core supervisor objects (with supervisorClassNoNamespace_ defined), add class to subject
+#define __SUP_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << "-" << supervisorClassNoNamespace_ << ":"
+#define __SUP_MF_TYPE__(X)		mf::X (std::string(__MF_SUBJECT__) + supervisorClassNoNamespace_)
+
+#define __SUP_MOUT_ERR__  	__SUP_MF_TYPE__(LogError) 	<< __MF_HDR__
+#define __SUP_MOUT_WARN__  	__SUP_MF_TYPE__(LogWarning) << __MF_HDR__
+#define __SUP_MOUT_INFO__  	__SUP_MF_TYPE__(LogInfo) 	<< __MF_HDR__
+#define __SUP_MOUT__  		__SUP_MF_TYPE__(LogDebug)	<< __MF_HDR__
+#define __SUP_MOUTV__(X)	__SUP_MOUT__ << QUOTE(X) << " = " << X
+#define __SUP_COUT_ERR__  	__SUP_COUT_TYPE__(LogError) 	<< __COUT_HDR__
+#define __SUP_COUT_WARN__  	__SUP_COUT_TYPE__(LogWarning) 	<< __COUT_HDR__
+#define __SUP_COUT_INFO__  	__SUP_COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
+#define __SUP_COUT__  		__SUP_COUT_TYPE__(LogDebug)		<< __COUT_HDR__
+#define __SUP_COUTV__(X) 	__SUP_COUT__ << QUOTE(X) << " = " << X << __E__
+
+
+
 //========================================================================================================================
 //const_cast away the const
 //	so that otsdaq is compatible with slf6 and slf7 versions of xdaq

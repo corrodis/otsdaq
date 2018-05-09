@@ -29,14 +29,78 @@ const CorePropertySupervisorBase::SupervisorProperties 	CorePropertySupervisorBa
 //}
 
 //========================================================================================================================
-CorePropertySupervisorBase::CorePropertySupervisorBase(void)
+CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* application)
 : theConfigurationManager_      (new ConfigurationManager)
-, XDAQContextConfigurationName_ (theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getConfigurationName())
-, supervisorConfigurationPath_  ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR OF CLASS WHICH INHERITS, BECAUSE IT NEEDS supervisorContextUID_ and supervisorApplicationUID_")
-, supervisorContextUID_         ("INITIALIZED INSIDE THE CONTRUCTOR OF CLASS WHICH INHERITS, WHICH HAS ACCESS TO XDAQ APP MEMBER FUNCTIONS")
-, supervisorApplicationUID_     ("INITIALIZED INSIDE THE CONTRUCTOR OF CLASS WHICH INHERITS, WHICH HAS ACCESS TO XDAQ APP MEMBER FUNCTIONS")
+, theContextTreeNode_ 			(theConfigurationManager_->getNode(theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getConfigurationName()))
+, supervisorClass_              (application->getApplicationDescriptor()->getClassName())
+, supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
+, supervisorContextUID_         ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS")
+, supervisorApplicationUID_     ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS")
+, supervisorConfigurationPath_  ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS")
+, propertiesAreSetup_			(false)
 {
 	INIT_MF("CorePropertySupervisorBase");
+
+	__SUP_COUTV__(application->getApplicationContext()->getContextDescriptor()->getURL());
+	__SUP_COUTV__(application->getApplicationDescriptor()->getLocalId());
+	__SUP_COUTV__(supervisorClass_);
+	__SUP_COUTV__(supervisorClassNoNamespace_);
+
+	//get all supervisor info, and wiz mode or not
+	allSupervisorInfo_.init(application->getApplicationContext());
+
+	if(allSupervisorInfo_.isWizardMode())
+	{
+		__SUP_COUT__ << "Wiz mode detected. So skipping configuration location work." << __E__;
+
+		return;
+	}
+
+	__SUP_COUT__ << "Getting configuration specific info for supervisor '" <<
+			(allSupervisorInfo_.getSupervisorInfo(application).getName()) <<
+			"'" << __E__;
+
+	//get configuration specific info for the application supervisor
+
+	try
+	{
+		CorePropertySupervisorBase::supervisorContextUID_ =
+				theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getContextUID(
+						application->getApplicationContext()->getContextDescriptor()->getURL());
+	}
+	catch(...)
+	{
+		__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the theConfigurationManager_." <<
+				//" The XDAQContextConfigurationName = " << XDAQContextConfigurationName_ <<
+				". The getApplicationContext()->getContextDescriptor()->getURL() = " <<
+				application->getApplicationContext()->getContextDescriptor()->getURL() << std::endl;
+		throw;
+	}
+
+	try
+	{
+		CorePropertySupervisorBase::supervisorApplicationUID_ =
+				theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getApplicationUID
+				(
+						application->getApplicationContext()->getContextDescriptor()->getURL(),
+						application->getApplicationDescriptor()->getLocalId()
+				);
+	}
+	catch(...)
+	{
+		__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the theConfigurationManager_." <<
+				" The supervisorContextUID_ = " << supervisorContextUID_ <<
+				". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
+		throw;
+	}
+
+	CorePropertySupervisorBase::supervisorConfigurationPath_  = "/" +
+			CorePropertySupervisorBase::supervisorContextUID_ + "/LinkToApplicationConfiguration/" +
+			CorePropertySupervisorBase::supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
+
+	__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
+	__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
+	__SUP_COUTV__(CorePropertySupervisorBase::supervisorConfigurationPath_);
 }
 
 
@@ -53,7 +117,9 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 {
 	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
 
-	__COUT__ << "Setting up Core Supervisor Base property defaults..." << std::endl;
+	__COUT__ << "Setting up Core Supervisor Base property defaults for supervisor named '" <<
+			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
+			"'..." << __E__;
 
 	//set core Supervisor base class defaults
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,		"*=1");
@@ -72,6 +138,11 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NoXmlWhiteSpaceRequestTypes,	"");
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NonXMLRequestTypes,				"");
+
+
+	__COUT__ << "Done setting up Core Supervisor Base property defaults for supervisor named '" <<
+			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
+			"'" << __E__;
 }
 
 //========================================================================================================================
@@ -81,8 +152,17 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 
 
 	CorePropertySupervisorBase::setSupervisorPropertyDefaults(); 	//calls base class version defaults
+
+	__COUT__ << "Setting up supervisor specific property defaults for supervisor named '" <<
+			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
+			"'..." << __E__;
 	setSupervisorPropertyDefaults();						//calls override version defaults
+
 	CorePropertySupervisorBase::loadUserSupervisorProperties();		//loads user settings from configuration
+
+	__COUT__ << "Setting up supervisor specific forced properties for supervisor named '" <<
+			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
+			"'..." << __E__;
 	forceSupervisorPropertyValues();						//calls override forced values
 
 
@@ -133,6 +213,11 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 ConfigurationTree CorePropertySupervisorBase::getSupervisorTreeNode(void)
 try
 {
+	if(supervisorContextUID_ == "" || supervisorApplicationUID_ == "")
+	{
+		__SS__ << "Empty supervisorContextUID_ or supervisorApplicationUID_." << __E__;
+		__SS_THROW__;
+	}
 	return theConfigurationManager_->getSupervisorNode(
 			supervisorContextUID_, supervisorApplicationUID_);
 }
@@ -150,9 +235,9 @@ catch(...)
 //	try to get user supervisor properties
 void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 {
-	__COUT__ << "Looking for " <<
+	__COUT__ << "Loading user properties for supervisor '" <<
 			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
-			" supervisor user properties..." << __E__;
+			"'..." << __E__;
 
 	//re-acquire the configuration supervisor node, in case the config has changed
 	auto supervisorNode = CorePropertySupervisorBase::getSupervisorTreeNode();
@@ -174,6 +259,9 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 		__COUT__ << "No supervisor security settings found, going with defaults." << __E__;
 	}
 
+	__COUT__ << "Done loading user properties for supervisor '" <<
+			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
+			"'" << __E__;
 }
 
 //========================================================================================================================

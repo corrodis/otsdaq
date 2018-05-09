@@ -125,7 +125,7 @@ private:
 
     //Member Variables
 
-    AllSupervisorInfo                   allSupervisorInfo_         	;
+    //AllSupervisorInfo                   allSupervisorInfo_         	;
    // ConfigurationManager*               theConfigurationManager_    ;
     WebUsers 						    theWebUsers_                ;
     SystemMessenger				        theSystemMessenger_         ;

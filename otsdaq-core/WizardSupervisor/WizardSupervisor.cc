@@ -65,10 +65,14 @@ XDAQ_INSTANTIATOR_IMPL(WizardSupervisor)
 
 
 //========================================================================================================================
-WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception):
-xdaq::Application(s   ),
-SOAPMessenger  (this)
+WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception)
+: xdaq::Application				(s   )
+, SOAPMessenger  				(this)
+, supervisorClass_              (getApplicationDescriptor()->getClassName())
+, supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 {
+	__SUP_COUT__ << "Constructor started." << __E__;
+
 	INIT_MF("OtsConfigurationWizard");
 
 
@@ -88,6 +92,7 @@ SOAPMessenger  (this)
 	xoap::bind(this, &WizardSupervisor::supervisorLastConfigGroupRequest, "SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
 	init();
 
+	__SUP_COUT__ << "Constructor complete." << __E__;
 }
 
 //========================================================================================================================
@@ -99,7 +104,7 @@ WizardSupervisor::~WizardSupervisor(void)
 //========================================================================================================================
 void WizardSupervisor::init(void)
 {
-	getApplicationContext();
+	//getApplicationContext();
 
 	//init allowed file upload types
 	allowedFileUploadTypes_.push_back("image/png"); matchingFileUploadTypes_.push_back("png");
@@ -116,7 +121,9 @@ void WizardSupervisor::init(void)
 //========================================================================================================================
 void WizardSupervisor::generateURL()
 {
-        defaultSequence_ = true;
+
+	defaultSequence_ = true;
+
 	int length = 4;
 	FILE *fp = fopen((SEQUENCE_FILE_NAME).c_str(),"r");
 	if(fp)
