@@ -124,15 +124,14 @@ bool RemoteWebUsers::xmlRequestToGateway(
 	//	__COUT__ << cookieCode.length() << std::endl;
 	//	__COUT__ << "cookieCode=" << cookieCode << std::endl;
 	//	__COUT__ << std::endl;
-	__COUT__ << __E__;
+
 	/////////////////////////////////////////////////////
 	//have CookieCode, try it out
 	if(allSupervisorInfo.isWizardMode())
 	{
-		__COUT__ << __E__;
 		//if missing CookieCode... check if in Wizard mode and using sequence
 		std::string sequence = CgiDataUtilities::getOrPostData(cgi,"sequence"); //from GET or POST
-		__COUT__ << "sequence=" << sequence << std::endl;
+		//__COUT__ << "sequence=" << sequence << std::endl;
 		if(!sequence.length())
 		{
 			__COUT__ << "Invalid attempt (@" << userInfo.ip_ << ")." << std::endl;
@@ -184,7 +183,6 @@ bool RemoteWebUsers::xmlRequestToGateway(
 //		return true; //successful sequence login!
 	}
 
-	__COUT__ << __E__;
 	//else proceed with inquiry to Gateway Supervisor
 
 	gatewaySupervisor = allSupervisorInfo.getGatewayInfo().getDescriptor();
