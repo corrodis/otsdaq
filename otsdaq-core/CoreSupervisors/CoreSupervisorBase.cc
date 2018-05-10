@@ -20,6 +20,9 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 : xdaq::Application             (s)
 , SOAPMessenger                 (this)
 , CorePropertySupervisorBase	(this)
+, RunControlStateMachine		(CorePropertySupervisorBase::allSupervisorInfo_.isWizardMode()? //set state machine name
+		CorePropertySupervisorBase::supervisorClassNoNamespace_:
+		CorePropertySupervisorBase::supervisorClassNoNamespace_ + CorePropertySupervisorBase::supervisorApplicationUID_)
 , stateMachineWorkLoopManager_  (toolbox::task::bind(this, &CoreSupervisorBase::stateMachineThread, "StateMachine"))
 , stateMachineSemaphore_        (toolbox::BSem::FULL)
 //, theConfigurationManager_      (new ConfigurationManager)//(Singleton<ConfigurationManager>::getInstance()) //I always load the full config but if I want to load a partial configuration (new ConfigurationManager)
@@ -42,13 +45,6 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 	//xoap::bind(this, &CoreSupervisorBase::macroMakerSupervisorRequest, 		"MacroMakerSupervisorRequest", 		XDAQ_NS_URI ); //moved to only FESupervisor!
 	xoap::bind(this, &CoreSupervisorBase::workLoopStatusRequestWrapper, 	"WorkLoopStatusRequest",    		XDAQ_NS_URI );
 
-
-	setStateMachineName(supervisorClassNoNamespace_);
-
-	if(CorePropertySupervisorBase::allSupervisorInfo_.isWizardMode())
-		setStateMachineName(supervisorClassNoNamespace_);
-	else
-		setStateMachineName(supervisorClassNoNamespace_ + CorePropertySupervisorBase::supervisorApplicationUID_);
 	return;
 }
 
@@ -66,179 +62,6 @@ void CoreSupervisorBase::destroy(void)
 		delete it;
 	theStateMachineImplementation_.clear();
 }
-//
-////========================================================================================================================
-////When overriding, setup default property values here
-//// called by CoreSupervisorBase constructor before loading user defined property values
-//void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
-//{
-//	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
-//
-//	__SUP_COUT__ << "Setting up Core Supervisor Base property defaults..." << std::endl;
-//
-//	//set core Supervisor base class defaults
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,		"*=1");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsAllowed,				"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsDisallowed,			"");
-//
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.CheckUserLockRequestTypes,		"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireUserLockRequestTypes,	"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AutomatedRequestTypes,			"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AllowNoLoginRequestTypes,		"");
-//
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedUsernameRequestTypes,		"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedDisplayNameRequestTypes,	"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedGroupMembershipRequestTypes,"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedSessionIndexRequestTypes,	"");
-//
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NoXmlWhiteSpaceRequestTypes,	"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NonXMLRequestTypes,				"");
-//}
-//
-////========================================================================================================================
-//void CoreSupervisorBase::checkSupervisorPropertySetup()
-//{
-//	if(propertiesAreSetup_) return;
-//
-//
-//	CorePropertySupervisorBase::setSupervisorPropertyDefaults(); 	//calls base class version defaults
-//	setSupervisorPropertyDefaults();						//calls override version defaults
-//	CoreSupervisorBase::loadUserSupervisorProperties();		//loads user settings from configuration
-//	forceSupervisorPropertyValues();						//calls override forced values
-//
-//
-//	propertyStruct_.UserPermissionsThreshold.clear();
-//	StringMacros::getMapFromString(
-//			getSupervisorProperty(
-//					CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold),
-//					propertyStruct_.UserPermissionsThreshold);
-//
-//	propertyStruct_.UserGroupsAllowed.clear();
-//	StringMacros::getMapFromString(
-//			getSupervisorProperty(
-//					CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsAllowed),
-//					propertyStruct_.UserGroupsAllowed);
-//
-//	propertyStruct_.UserGroupsDisallowed.clear();
-//	StringMacros::getMapFromString(
-//			getSupervisorProperty(
-//					CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsDisallowed),
-//					propertyStruct_.UserGroupsDisallowed);
-//
-//	auto nameIt = SUPERVISOR_PROPERTIES.allSetNames_.begin();
-//	auto setIt = propertyStruct_.allSets_.begin();
-//	while(nameIt != SUPERVISOR_PROPERTIES.allSetNames_.end() &&
-//			setIt != propertyStruct_.allSets_.end())
-//	{
-//		(*setIt)->clear();
-//		StringMacros::getSetFromString(
-//				getSupervisorProperty(
-//						*(*nameIt)),
-//						*(*setIt));
-//
-//		++nameIt; ++setIt;
-//	}
-//
-//	//at this point supervisor property setup is complete
-//	//	only redo if Context configuration group changes
-//	propertiesAreSetup_ = true;
-//
-//	__SUP_COUT__ << "Final property settings:" << std::endl;
-//	for(auto& property: propertyMap_)
-//		__SUP_COUT__ << property.first << " = " << property.second << __E__;
-//}
-//
-////========================================================================================================================
-////loadUserSupervisorProperties ~
-////	try to get user supervisor properties
-//void CoreSupervisorBase::loadUserSupervisorProperties(void)
-//{
-//	__SUP_COUT__ << "Looking for " <<
-//			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
-//			" supervisor user properties..." << __E__;
-//
-//	//re-acquire the configuration supervisor node, in case the config has changed
-//	try
-//	{
-//		supervisorNode = theConfigurationManager_->getSupervisorNode(
-//				supervisorContextUID_, supervisorApplicationUID_);
-//	}
-//	catch(...)
-//	{
-//		__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration node through theConfigurationManager_." <<
-//				" The supervisorContextUID_ = " << supervisorContextUID_ <<
-//				". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
-//		throw;
-//	}
-//
-//	try
-//	{
-//		auto /*map<name,node>*/ children = supervisorNode.getNode("LinkToPropertyConfiguration").getChildren();
-//
-//		for(auto& child:children)
-//		{
-//			if(child.second.getNode("Status").getValue<bool>() == false) continue; //skip OFF properties
-//
-//			auto propertyName = child.second.getNode("PropertyName").getValue();
-//			setSupervisorProperty(propertyName, child.second.getNode("PropertyValue").getValue<std::string>());
-//		}
-//	}
-//	catch(...)
-//	{
-//		__SUP_COUT__ << "No supervisor security settings found, going with defaults." << __E__;
-//	}
-//
-//}
-//
-////========================================================================================================================
-//void CorePropertySupervisorBase::setSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
-//{
-//	propertyMap_[propertyName] = propertyValue;
-//	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
-//			"] = " << propertyMap_[propertyName] << __E__;
-//}
-//
-////========================================================================================================================
-//void CoreSupervisorBase::addSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
-//{
-//	propertyMap_[propertyName] = propertyValue + " | " + getSupervisorProperty(propertyName);
-//	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
-//			"] = " << propertyMap_[propertyName] << __E__;
-//}
-//
-//
-////========================================================================================================================
-////getSupervisorProperty
-////		string version of template function
-//std::string CoreSupervisorBase::getSupervisorProperty(const std::string& propertyName)
-//{
-//	//check if need to setup properties
-//	checkSupervisorPropertySetup ();
-//
-//	auto it = propertyMap_.find(propertyName);
-//	if(it == propertyMap_.end())
-//	{
-//		__SS__ << "Could not find property named " << propertyName << __E__;
-//		__SS_THROW__;
-//	}
-//	return StringMacros::validateValueForDefaultStringDataType(it->second);
-//}
-//
-////========================================================================================================================
-//uint8_t CoreSupervisorBase::getSupervisorPropertyUserPermissionsThreshold(const std::string& requestType)
-//{
-//	//check if need to setup properties
-//	checkSupervisorPropertySetup();
-//
-//	auto it = propertyStruct_.UserPermissionsThreshold.find(requestType);
-//	if(it == propertyStruct_.UserPermissionsThreshold.end())
-//	{
-//		__SS__ << "Could not find requestType named " << requestType << " in UserPermissionsThreshold map." << __E__;
-//		__SS_THROW__;
-//	}
-//	return it->second;
-//}
-
 
 //========================================================================================================================
 //wrapper for inheritance call
@@ -282,65 +105,12 @@ void CoreSupervisorBase::requestWrapper(xgi::Input * in, xgi::Output * out )
 			CgiDataUtilities::getOrPostData(cgiIn,"CookieCode"));
 
 	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
-//
-//	bool automatedCommand 	= StringMacros::inWildCardSet(requestType, propertyStruct_.AutomatedRequestTypes); //automatic commands should not refresh cookie code.. only user initiated commands should!
-//	bool NonXMLRequestType 	= StringMacros::inWildCardSet(requestType, propertyStruct_.NonXMLRequestTypes); //non-xml request types just return the request return string to client
-//
-//	//**** start LOGIN GATEWAY CODE ***//
-//	//check cookieCode, sequence, userWithLock, and permissions access all in one shot!
-//	{
-//		bool checkLock 			= StringMacros::inWildCardSet(requestType, propertyStruct_.CheckUserLockRequestTypes);
-//		bool requireLock 		= StringMacros::inWildCardSet(requestType, propertyStruct_.RequireUserLockRequestTypes);
-//		bool allowNoUser 		= StringMacros::inWildCardSet(requestType, propertyStruct_.AllowNoLoginRequestTypes);
-//		bool needUserName 		= StringMacros::inWildCardSet(requestType, propertyStruct_.NeedUsernameRequestTypes);
-//		bool needDisplayName 	= StringMacros::inWildCardSet(requestType, propertyStruct_.NeedDisplayNameRequestTypes);
-//		bool needGroupMembership= StringMacros::inWildCardSet(requestType, propertyStruct_.NeedGroupMembershipRequestTypes);
-//		bool needSessionIndex 	= StringMacros::inWildCardSet(requestType, propertyStruct_.NeedSessionIndexRequestTypes);
-//		uint8_t permissionsThreshold = -1; //default to max
-//		try
-//		{
-//			permissionsThreshold = CoreSupervisorBase::getSupervisorPropertyUserPermissionsThreshold(requestType);
-//		}
-//		catch(std::runtime_error& e)
-//		{
-//			 __SUP_COUT__ << "Error getting permissions threshold for requestType='" <<
-//					 requestType << "!' Defaulting to max threshold = " << (unsigned int)permissionsThreshold << __E__;
-//		}
-//
-//		std::set<std::string> groupsAllowed, groupsDisallowed;
-//		try
-//		{
-//			StringMacros::getSetFromString(
-//					StringMacros::getWildCardMatchFromMap(requestType,
-//							propertyStruct_.UserGroupsAllowed),
-//							groupsAllowed);
-//		}
-//		catch(std::runtime_error& e)
-//		{
-//			groupsAllowed.clear();
-//			 __SUP_COUT__ << "Error getting groups allowed requestType='" <<
-//					 requestType << "!' Defaulting to empty groups. " << e.what() << __E__;
-//		}
-//		try
-//		{
-//			StringMacros::getSetFromString(
-//					StringMacros::getWildCardMatchFromMap(requestType,
-//									propertyStruct_.UserGroupsDisallowed),
-//									groupsDisallowed);
-//		}
-//		catch(std::runtime_error& e)
-//		{
-//			groupsDisallowed.clear();
-//			 __SUP_COUT__ << "Error getting groups allowed requestType='" <<
-//					 requestType << "!' Defaulting to empty groups. " << e.what() << __E__;
-//		}
-
 
 	if(!theRemoteWebUsers_.xmlRequestToGateway(
 			cgiIn,
 			out,
 			&xmlOut,
-			allSupervisorInfo_,
+			CorePropertySupervisorBase::allSupervisorInfo_,
 			userInfo))
 		return; //access failed
 
@@ -375,77 +145,6 @@ void CoreSupervisorBase::requestWrapper(xgi::Input * in, xgi::Output * out )
 	//return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*) out, false /*print to cout*/,
 			!userInfo.NoXmlWhiteSpace_/*allow whitespace*/);
-
-//
-//		std::string groupMemebershipString;
-//		if(!theRemoteWebUsers_.xmlRequestToGateway(
-//				cgiIn
-//				,out
-//				,&xmlOut
-//				,allSupervisorInfo_
-//				,&userInfo.permissionLevel_					//acquire user's access level (optionally null pointer)
-//				,permissionsThreshold						//set access level requirement to pass gateway
-//				,allowNoUser 								//allow no user access
-//				,groupsAllowed
-//				,groupsDisallowed
-//				,!automatedCommand							//true/false refresh cookie code
-//				,checkLock									//true/false enable check that system is unlocked or this user has the lock
-//				,requireLock								//true/false requires this user has the lock to proceed
-//				,((checkLock || requireLock)?&userInfo.usernameWithLock_:0)	//acquire username with lock (optionally null pointer)
-//				,(needUserName?&userInfo.username_:0)			//acquire username of this user (optionally null pointer)
-//				,(needDisplayName?&userInfo.displayName_:0)						//acquire user's Display Name
-//				,((needGroupMembership || groupsAllowed.size() || groupsDisallowed.size())?
-//						&groupMemebershipString:0)	//acquire user's group memberships
-//				,(needSessionIndex?&userInfo.activeUserSessionIndex_:0)		//acquire user's session index associated with the cookieCode
-//		))
-//		{
-//			//failure
-//
-//			//print out return string on failure
-//			if(!automatedCommand)
-//				__SUP_COUT__ << "Failed request (requestType = " << requestType <<
-//					"): " << out->str() << __E__;
-//
-//			return;
-//		}
-//
-//		//re-factor membership string to set
-//		StringMacros::getSetFromString(
-//				groupMemebershipString,
-//				userInfo.groupMembership_);
-//	}
-
-	//done checking cookieCode, sequence, userWithLock, and permissions access all in one shot!
-	//**** end LOGIN GATEWAY CODE ***//
-//
-//	if(!automatedCommand)
-//		__SUP_COUT__ << "requestType: " << requestType << __E__;
-//
-//	if(NonXMLRequestType)
-//	{
-//		nonXmlRequest(requestType,cgiIn,*out,userInfo);
-//		return;
-//	}
-//	//else xml request type
-//
-//	request(requestType,cgiIn,xmlOut,userInfo);
-//
-//	//report any errors encountered
-//	{
-//		unsigned int occurance = 0;
-//		std::string err = xmlOut.getMatchingValue("Error",occurance++);
-//		while(err != "")
-//		{
-//			__SUP_COUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << std::endl;
-//			__MOUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << std::endl;
-//			err = xmlOut.getMatchingValue("Error",occurance++);
-//		}
-//	}
-//
-//	//return xml doc holding server response
-//	xmlOut.outputXmlDocument((std::ostringstream*) out, false /*print to cout*/,
-//			!(StringMacros::inWildCardSet(requestType,
-//					propertyStruct_.NoXmlWhiteSpaceRequestTypes))/*allow whitespace*/);
 }
 
 //========================================================================================================================

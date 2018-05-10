@@ -13,10 +13,10 @@ const CorePropertySupervisorBase::SupervisorProperties 	CorePropertySupervisorBa
 //		const std::string& supervisorApplicationUID,
 //		ConfigurationManager *theConfigurationManager)
 //{
-//	__COUT__ << "Begin!" << std::endl;
+//	__SUP_COUT__ << "Begin!" << std::endl;
 //
 //
-//	__COUT__ << "Looking for " <<
+//	__SUP_COUT__ << "Looking for " <<
 //				supervisorContextUID << "/" << supervisorApplicationUID <<
 //				" supervisor node..." << __E__;
 //
@@ -51,7 +51,8 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 
 	if(allSupervisorInfo_.isWizardMode())
 	{
-		__SUP_COUT__ << "Wiz mode detected. So skipping configuration location work." << __E__;
+		__SUP_COUT__ << "Wiz mode detected. So skipping configuration location work for supervisor of class '" <<
+				supervisorClass_ << "'" << __E__;
 
 		return;
 	}
@@ -117,9 +118,8 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 {
 	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
 
-	__COUT__ << "Setting up Core Supervisor Base property defaults for supervisor named '" <<
-			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
-			"'..." << __E__;
+	__SUP_COUT__ << "Setting up Core Supervisor Base property defaults for supervisor" <<
+			"..." << __E__;
 
 	//set core Supervisor base class defaults
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,		"*=1");
@@ -140,9 +140,8 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NonXMLRequestTypes,				"");
 
 
-	__COUT__ << "Done setting up Core Supervisor Base property defaults for supervisor named '" <<
-			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
-			"'" << __E__;
+	__SUP_COUT__ << "Done setting up Core Supervisor Base property defaults for supervisor" <<
+			"..." << __E__;
 }
 
 //========================================================================================================================
@@ -150,20 +149,33 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 {
 	if(propertiesAreSetup_) return;
 
+	//Immediately mark properties as setup, (prevent infinite loops due to
+	//	other launches from within this function, e.g. from getSupervisorProperty)
+	//	only redo if Context configuration group changes
+	propertiesAreSetup_ = true;
+
 
 	CorePropertySupervisorBase::setSupervisorPropertyDefaults(); 	//calls base class version defaults
 
-	__COUT__ << "Setting up supervisor specific property defaults for supervisor named '" <<
-			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
-			"'..." << __E__;
+	__SUP_COUT__ << "Setting up supervisor specific property DEFAULTS for supervisor" <<
+			"..." << __E__;
 	setSupervisorPropertyDefaults();						//calls override version defaults
+	__SUP_COUT__ << "Done setting up supervisor specific property DEFAULTS for supervisor" <<
+			"." << __E__;
 
-	CorePropertySupervisorBase::loadUserSupervisorProperties();		//loads user settings from configuration
+	if(allSupervisorInfo_.isWizardMode())
+		__SUP_COUT__ << "Wiz mode detected. Skipping setup of supervisor properties for supervisor of class '" <<
+						supervisorClass_ <<
+					"'" << __E__;
+	else
+		CorePropertySupervisorBase::loadUserSupervisorProperties();		//loads user settings from configuration
 
-	__COUT__ << "Setting up supervisor specific forced properties for supervisor named '" <<
-			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
-			"'..." << __E__;
+
+	__SUP_COUT__ << "Setting up supervisor specific FORCED properties for supervisor" <<
+			"..." << __E__;
 	forceSupervisorPropertyValues();						//calls override forced values
+	__SUP_COUT__ << "Done setting up supervisor specific FORCED properties for supervisor" <<
+			"." << __E__;
 
 
 	propertyStruct_.UserPermissionsThreshold.clear();
@@ -198,13 +210,10 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 		++nameIt; ++setIt;
 	}
 
-	//at this point supervisor property setup is complete
-	//	only redo if Context configuration group changes
-	propertiesAreSetup_ = true;
 
-	__COUT__ << "Final property settings:" << std::endl;
+	__SUP_COUT__ << "Final property settings:" << std::endl;
 	for(auto& property: propertyMap_)
-		__COUT__ << property.first << " = " << property.second << __E__;
+		__SUP_COUT__ << property.first << " = " << property.second << __E__;
 }
 
 //========================================================================================================================
@@ -216,14 +225,14 @@ try
 	if(supervisorContextUID_ == "" || supervisorApplicationUID_ == "")
 	{
 		__SS__ << "Empty supervisorContextUID_ or supervisorApplicationUID_." << __E__;
-		__SS_THROW__;
+		__SUP_SS_THROW__;
 	}
 	return theConfigurationManager_->getSupervisorNode(
 			supervisorContextUID_, supervisorApplicationUID_);
 }
 catch(...)
 {
-	__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration node through theConfigurationManager_ " <<
+	__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration node through theConfigurationManager_ " <<
 			"(Did you remember to initialize using CorePropertySupervisorBase::init()?)." <<
 			" The supervisorContextUID_ = " << supervisorContextUID_ <<
 			". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
@@ -235,7 +244,7 @@ catch(...)
 //	try to get user supervisor properties
 void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 {
-	__COUT__ << "Loading user properties for supervisor '" <<
+	__SUP_COUT__ << "Loading user properties for supervisor '" <<
 			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
 			"'..." << __E__;
 
@@ -256,10 +265,10 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 	}
 	catch(...)
 	{
-		__COUT__ << "No supervisor security settings found, going with defaults." << __E__;
+		__SUP_COUT__ << "No supervisor security settings found, going with defaults." << __E__;
 	}
 
-	__COUT__ << "Done loading user properties for supervisor '" <<
+	__SUP_COUT__ << "Done loading user properties for supervisor '" <<
 			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
 			"'" << __E__;
 }
@@ -268,7 +277,7 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 void CorePropertySupervisorBase::setSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
 {
 	propertyMap_[propertyName] = propertyValue;
-	__COUT__ << "Set propertyMap_[" << propertyName <<
+	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
 			"] = " << propertyMap_[propertyName] << __E__;
 }
 
@@ -276,7 +285,7 @@ void CorePropertySupervisorBase::setSupervisorProperty(const std::string& proper
 void CorePropertySupervisorBase::addSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
 {
 	propertyMap_[propertyName] = propertyValue + " | " + getSupervisorProperty(propertyName);
-	__COUT__ << "Set propertyMap_[" << propertyName <<
+	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
 			"] = " << propertyMap_[propertyName] << __E__;
 }
 
@@ -293,7 +302,7 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string&
 	if(it == propertyMap_.end())
 	{
 		__SS__ << "Could not find property named " << propertyName << __E__;
-		__SS_THROW__;
+		throw std::runtime_error(ss.str());//__SUP_SS_THROW__;
 	}
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
 }
@@ -308,7 +317,7 @@ uint8_t CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshol
 	if(it == propertyStruct_.UserPermissionsThreshold.end())
 	{
 		__SS__ << "Could not find requestType named " << requestType << " in UserPermissionsThreshold map." << __E__;
-		__SS_THROW__;
+		throw std::runtime_error(ss.str()); //__SUP_SS_THROW__;
 	}
 	return it->second;
 }
@@ -320,7 +329,7 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 {
 	checkSupervisorPropertySetup();
 
-	//__COUT__ << "userInfo.requestType_ " << userInfo.requestType_ << " files: " << cgiIn.getFiles().size() << std::endl;
+	//__SUP_COUT__ << "userInfo.requestType_ " << userInfo.requestType_ << " files: " << cgiIn.getFiles().size() << std::endl;
 
 	userInfo.automatedCommand_ 			= StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.AutomatedRequestTypes); //automatic commands should not refresh cookie code.. only user initiated commands should!
 	userInfo.NonXMLRequestType_			= StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.NonXMLRequestTypes); //non-xml request types just return the request return string to client
@@ -343,7 +352,7 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		}
 		catch(std::runtime_error& e)
 		{
-			 __COUT__ << "Error getting permissions threshold for userInfo.requestType_='" <<
+			 __SUP_COUT__ << "No explicit permissions threshold for request '" <<
 					 userInfo.requestType_ << "'... Defaulting to max threshold = " <<
 					 (unsigned int)userInfo.permissionsThreshold_ << __E__;
 		}
@@ -358,8 +367,8 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		catch(std::runtime_error& e)
 		{
 			userInfo.groupsAllowed_.clear();
-			 __COUT__ << "Error getting groups allowed userInfo.requestType_='" <<
-					 userInfo.requestType_ << "'... Defaulting to empty groups. " << e.what() << __E__;
+			 __SUP_COUT__ << "No explicit groups allowed for request '" <<
+					 userInfo.requestType_ << "'... Defaulting to empty groups allowed. " << __E__;
 		}
 		try
 		{
@@ -371,8 +380,8 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		catch(std::runtime_error& e)
 		{
 			userInfo.groupsDisallowed_.clear();
-			 __COUT__ << "Error getting groups allowed userInfo.requestType_='" <<
-					 userInfo.requestType_ << "'... Defaulting to empty groups. " << e.what() << __E__;
+			 __SUP_COUT__ << "No explicit groups disallowed for request '" <<
+					 userInfo.requestType_ << "'... Defaulting to empty groups disallowed. " << __E__;
 		}
 	} //**** end LOGIN GATEWAY CODE ***//
 
