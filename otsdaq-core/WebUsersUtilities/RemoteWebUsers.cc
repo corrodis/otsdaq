@@ -225,7 +225,9 @@ bool RemoteWebUsers::xmlRequestToGateway(
 
 	if(!WebUsers::checkRequestAccess(cgi,out,xmldoc,userInfo))
 		goto HANDLE_ACCESS_FAILURE; //return false, access failed
+	//else successful access request!
 
+	return true; //request granted
 //	if(!userInfo.checkLock_ && !userInfo.requireLock_)
 //		return true; //done, no need to get user info for this cookie code
 //

@@ -443,8 +443,12 @@ bool WebUsers::checkRequestAccess(
 	// - check user lock flags and status
 
 
-	__COUTV__((unsigned int)userInfo.permissionLevel_);
-	__COUTV__((unsigned int)userInfo.permissionsThreshold_);
+//	if(!userInfo.automatedCommand_)
+//	{
+//		__COUTV__(userInfo.requestType_);
+//		__COUTV__((unsigned int)userInfo.permissionLevel_);
+//		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
+//	}
 
 	//second, start check access -------
 	if(!isWizardMode && !userInfo.allowNoUser_ &&
@@ -470,8 +474,6 @@ bool WebUsers::checkRequestAccess(
 
 	if(isWizardMode)
 	{
-		__COUTV__(userInfo.username_);
-		__COUTV__(userInfo.usernameWithLock_);
 		userInfo.username_ = "admin";
 		userInfo.displayName_ = "Admin";
 		userInfo.usernameWithLock_ = "admin";
@@ -491,8 +493,11 @@ bool WebUsers::checkRequestAccess(
 	if(userInfo.allowNoUser_) return true; //ignore lock for allow-no-user case
 
 
-	__COUTV__(userInfo.username_);
-	__COUTV__(userInfo.usernameWithLock_);
+//	if(!userInfo.automatedCommand_)
+//	{
+//		__COUTV__(userInfo.username_);
+//		__COUTV__(userInfo.usernameWithLock_);
+//	}
 
 	if((userInfo.checkLock_ || userInfo.requireLock_) &&
 			userInfo.usernameWithLock_ != "" &&
@@ -623,7 +628,8 @@ void WebUsers::saveActiveSessions()
 	FILE *fp = fopen(fn.c_str(), "w");
 	if (!fp)
 	{
-		__COUT_ERR__ << "Error! Persistent active sessions could not be saved." << __E__;
+		__COUT_ERR__ << "Error! Persistent active sessions could not be saved to file: " <<
+				fn << __E__;
 		return;
 	}
 
@@ -662,7 +668,8 @@ void WebUsers::loadActiveSessions()
 	FILE *fp = fopen(fn.c_str(), "r");
 	if (!fp)
 	{
-		__COUT_ERR__ << "Error! Persistent active sessions could not be saved." << __E__;
+		__COUT_INFO__ << "Persistent active sessions were not found to be loaded at file: " <<
+				fn << __E__;
 		return;
 	}
 
@@ -733,6 +740,7 @@ void WebUsers::loadActiveSessions()
 bool WebUsers::loadDatabases()
 {
 	std::string fn;
+
 	FILE *fp;
 	const unsigned int LINE_LEN = 1000;
 	char line[LINE_LEN];
@@ -904,17 +912,34 @@ bool WebUsers::loadDatabases()
 								lastPermissionsMap);
 
 						__COUT__ << "User permission levels:" << __E__ <<
-								StringMacros::mapToString(lastPermissionsMap);
+								StringMacros::mapToString(lastPermissionsMap) << __E__;
 
 						//verify 'allUsers' is there
 						//	if not, add it as a diabled user (i.e. WebUsers::PERMISSION_LEVEL_INACTIVE)
 						if(lastPermissionsMap.find(WebUsers::DEFAULT_USER_GROUP) ==
 								lastPermissionsMap.end())
 						{
-							__MCOUT_INFO__( "User '" << "' is not a member of the default user group '" <<
-									WebUsers::DEFAULT_USER_GROUP << ".' Assuming user account is inactive (permission level := " <<
-									WebUsers::PERMISSION_LEVEL_INACTIVE << ")." << __E__);
-							lastPermissionsMap[WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE; //mark inactive
+							//try to accomplish backwards compatibility to
+							//	allow for the time before group permissions
+							sscanf(&line[si], "%lu", &tmpInt64);
+							tmpInt64 &= 0xFF;
+							if(tmpInt64) //if not 0
+							{
+								lastPermissionsMap.clear();
+								__COUT_INFO__ << "User '" <<
+									UsersUsernameVector.back() << "' is not a member of the default user group '" <<
+									WebUsers::DEFAULT_USER_GROUP << ".' For backward compatibility, permission level assumed for default group (permission level := " <<
+									tmpInt64 << ")." << __E__;
+								lastPermissionsMap[WebUsers::DEFAULT_USER_GROUP] = WebUsers::permissionLevel_t(tmpInt64);
+							}
+							else
+							{
+								__MCOUT_INFO__( "User '" <<
+										UsersUsernameVector.back() << "' is not a member of the default user group '" <<
+										WebUsers::DEFAULT_USER_GROUP << ".' Assuming user account is inactive (permission level := " <<
+										WebUsers::PERMISSION_LEVEL_INACTIVE << ")." << __E__);
+								lastPermissionsMap[WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE; //mark inactive
+							}
 						}
 					}
 					else if (f == 5)	//lastLoginAttemptTime

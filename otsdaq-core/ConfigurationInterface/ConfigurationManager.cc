@@ -911,7 +911,7 @@ void ConfigurationManager::loadConfigurationGroup(
 
 	if(progressBar) progressBar->step();
 
-	__COUT__ << "memberMap loaded size = " << memberMap.size() << std::endl;
+	//__COUT__ << "memberMap loaded size = " << memberMap.size() << std::endl;
 
 	int groupType = -1;
 	if(groupTypeString) //do before exit case
@@ -935,7 +935,7 @@ void ConfigurationManager::loadConfigurationGroup(
 	if(doNotLoadMember) return;// memberMap; //this is useful if just getting group metadata
 
 	if(doActivate)
-		__COUT__ << "------------------------------------- loadConfigurationGroup start" << std::endl;
+		__COUT__ << "------------------------------------- init start (for all configuration plug-ins)" << std::endl;
 
 
 	//if not already done, determine the type configuration group
@@ -1081,7 +1081,7 @@ void ConfigurationManager::loadConfigurationGroup(
 	if(progressBar) progressBar->step();
 
 	if(doActivate)
-		__COUT__ << "------------------------------------- loadConfigurationGroup end" << std::endl;
+		__COUT__ << "------------------------------------- init complete (for all configuration plug-ins)" << std::endl;
 
 	return;// memberMap;
 }

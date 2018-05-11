@@ -116,34 +116,31 @@ GatewaySupervisor::~GatewaySupervisor(void)
 //========================================================================================================================
 void GatewaySupervisor::init(void)
 {
-	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
-	allSupervisorInfo_.init(getApplicationContext());
-
 	supervisorGuiHasBeenLoaded_ = false;
 
-	const XDAQContextConfiguration* contextConfiguration = CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
-
-	CorePropertySupervisorBase::supervisorContextUID_ = contextConfiguration->getContextUID(
-		getApplicationContext()->getContextDescriptor()->getURL()
-	);
-	__SUP_COUT__ << "Context UID:" << supervisorContextUID_ << std::endl;
-
-	CorePropertySupervisorBase::supervisorApplicationUID_ = contextConfiguration->getApplicationUID(
-		getApplicationContext()->getContextDescriptor()->getURL(),
-		getApplicationDescriptor()->getLocalId()
-	);
-
-	__SUP_COUT__ << "Application UID:" << supervisorApplicationUID_ << std::endl;
-
-	ConfigurationTree configLinkNode = CorePropertySupervisorBase::getSupervisorTreeNode();
-
-	std::string supervisorUID;
-	if (!configLinkNode.isDisconnected())
-		supervisorUID = configLinkNode.getValue();
-	else
-		supervisorUID = ViewColumnInfo::DATATYPE_LINK_DEFAULT;
-
-	__SUP_COUT__ << "GatewaySupervisor UID:" << supervisorUID << std::endl;
+//	const XDAQContextConfiguration* contextConfiguration = CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+//
+//	CorePropertySupervisorBase::supervisorContextUID_ = contextConfiguration->getContextUID(
+//		getApplicationContext()->getContextDescriptor()->getURL()
+//	);
+//	__SUP_COUT__ << "Context UID:" << supervisorContextUID_ << std::endl;
+//
+//	CorePropertySupervisorBase::supervisorApplicationUID_ = contextConfiguration->getApplicationUID(
+//		getApplicationContext()->getContextDescriptor()->getURL(),
+//		getApplicationDescriptor()->getLocalId()
+//	);
+//
+//	__SUP_COUT__ << "Application UID:" << supervisorApplicationUID_ << std::endl;
+//
+//	ConfigurationTree configLinkNode = CorePropertySupervisorBase::getSupervisorTreeNode();
+//
+//	std::string supervisorUID;
+//	if (!configLinkNode.isDisconnected())
+//		supervisorUID = configLinkNode.getValue();
+//	else
+//		supervisorUID = ViewColumnInfo::DATATYPE_LINK_DEFAULT;
+//
+//	__SUP_COUT__ << "GatewaySupervisor UID:" << supervisorUID << std::endl;
 
 
 
@@ -156,7 +153,7 @@ void GatewaySupervisor::init(void)
 	try
 	{
 		enableStateChanges =
-			configLinkNode.getNode("EnableStateChangesOverUDP").getValue<bool>();
+				CorePropertySupervisorBase::theContextTreeNode_.getNode("EnableStateChangesOverUDP").getValue<bool>();
 	}
 	catch (...)
 	{
@@ -165,18 +162,18 @@ void GatewaySupervisor::init(void)
 
 	try
 	{
-		auto artdaqStateChangeEnabled = configLinkNode.getNode("EnableARTDAQCommanderPlugin").getValue<bool>();
+		auto artdaqStateChangeEnabled = CorePropertySupervisorBase::theContextTreeNode_.getNode("EnableARTDAQCommanderPlugin").getValue<bool>();
 		if (artdaqStateChangeEnabled)
 		{
-			auto artdaqStateChangePort = configLinkNode.getNode("ARTDAQCommanderID").getValue<int>();
-			auto artdaqStateChangePluginType = configLinkNode.getNode("ARTDAQCommanderType").getValue<std::string>();
+			auto artdaqStateChangePort = CorePropertySupervisorBase::theContextTreeNode_.getNode("ARTDAQCommanderID").getValue<int>();
+			auto artdaqStateChangePluginType = CorePropertySupervisorBase::theContextTreeNode_.getNode("ARTDAQCommanderType").getValue<std::string>();
 			theArtdaqCommandable_.init(artdaqStateChangePort, artdaqStateChangePluginType);
 		}
 	}
 	catch (...)
 	{
 		;
-	}
+	} //ignore errors
 
 	if (enableStateChanges)
 	{
@@ -292,7 +289,7 @@ void GatewaySupervisor::init(void)
 			}
 			else
 			{
-				__SS__ << "Failed to open core table info file for appending: " << CORE_TABLE_INFO_FILENAME << std::endl;
+				__SUP_SS__ << "Failed to open core table info file for appending: " << CORE_TABLE_INFO_FILENAME << std::endl;
 				__SS_THROW__;
 			}
 
@@ -312,7 +309,7 @@ void GatewaySupervisor::init(void)
 			}
 			else
 			{
-				__SS__ << "Failed to open core table info file: " << CORE_TABLE_INFO_FILENAME << std::endl;
+				__SUP_SS__ << "Failed to open core table info file: " << CORE_TABLE_INFO_FILENAME << std::endl;
 				__SS_THROW__;
 			}
 		}
@@ -622,7 +619,7 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 	//Do not allow transition while in transition
 	if (theStateMachine_.isInTransition())
 	{
-		__SS__ << "Error - Can not accept request because the State Machine is already in transition!" << std::endl;
+		__SUP_SS__ << "Error - Can not accept request because the State Machine is already in transition!" << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 
 		xmlOut.addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
@@ -650,7 +647,7 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 		{
 			//illegal for this FSM name to attempt transition
 
-			__SS__ << "Error - Can not accept request because the State Machine " <<
+			__SUP_SS__ << "Error - Can not accept request because the State Machine " <<
 				"with window name '" <<
 				activeStateMachineWindowName_ << "' (UID: " <<
 				activeStateMachineName_ << ") "
@@ -707,7 +704,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 	{
 		if (currentState != "Halted") //check if out of sync command
 		{
-			__SS__ << "Error - Can only transition to Configured if the current " <<
+			__SUP_SS__ << "Error - Can only transition to Configured if the current " <<
 				"state is Halted. Perhaps your state machine is out of sync." <<
 				std::endl;
 			__SUP_COUT_ERR__ << "\n" << ss.str();
@@ -725,7 +722,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 		//parameters.addParameter("RUN_KEY",CgiDataUtilities::postData(cgi,"ConfigurationAlias"));
 		if (!commandParameters.size())
 		{
-			__SS__ << "Error - Can only transition to Configured if a Configuration Alias parameter is provided." <<
+			__SUP_SS__ << "Error - Can only transition to Configured if a Configuration Alias parameter is provided." <<
 				std::endl;
 			__SUP_COUT_ERR__ << "\n" << ss.str();
 			errorStr = ss.str();
@@ -753,7 +750,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 		FILE *fp = fopen(fn.c_str(), "w");
 		if (!fp)
 		{
-			__SS__ << ("Could not open file: " + fn) << std::endl;
+			__SUP_SS__ << ("Could not open file: " + fn) << std::endl;
 			__SUP_COUT_ERR__ << ss.str();
 			throw std::runtime_error(ss.str());
 		}
@@ -767,7 +764,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 	{
 		if (currentState != "Configured") //check if out of sync command
 		{
-			__SS__ << "Error - Can only transition to Configured if the current " <<
+			__SUP_SS__ << "Error - Can only transition to Configured if the current " <<
 				"state is Halted. Perhaps your state machine is out of sync. " <<
 				"(Likely the server was restarted or another user changed the state)" <<
 				std::endl;
@@ -890,7 +887,7 @@ bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 
 	if (reply == "Fault")
 	{
-		__SS__ << "Failure to send Workloop transition command! Unrecognized transition name." << std::endl;
+		__SUP_SS__ << "Failure to send Workloop transition command! Unrecognized transition name." << std::endl;
 		__SUP_COUT_ERR__ << ss.str();
 		__MOUT_ERR__ << ss.str();
 	}
@@ -1209,7 +1206,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 
 	//extract error message and save for user interface access
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&> (*e);
-	__SS__ << "\nFailure performing transition from " << failedEvent.getFromState() << "-" <<
+	__SUP_SS__ << "\nFailure performing transition from " << failedEvent.getFromState() << "-" <<
 		theStateMachine_.getStateName(failedEvent.getFromState()) <<
 		" to " << failedEvent.getToState() << "-" <<
 		theStateMachine_.getStateName(failedEvent.getToState()) <<
@@ -1249,7 +1246,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	}
 	catch (...)
 	{
-		__SS__ << "\nTransition to Configuring interrupted! " <<
+		__SUP_SS__ << "\nTransition to Configuring interrupted! " <<
 			"The Configuration Manager could not be initialized." << std::endl;
 
 		__SUP_COUT_ERR__ << "\n" << ss.str();
@@ -1273,7 +1270,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	if (theConfigurationGroup_.second.isInvalid())
 	{
-		__SS__ << "\nTransition to Configuring interrupted! System Alias " <<
+		__SUP_SS__ << "\nTransition to Configuring interrupted! System Alias " <<
 			systemAlias << " could not be translated to a group name and key." << std::endl;
 
 		__SUP_COUT_ERR__ << "\n" << ss.str();
@@ -1307,7 +1304,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	}
 	catch (...)
 	{
-		__SS__ << "\nTransition to Configuring interrupted! System Alias " <<
+		__SUP_SS__ << "\nTransition to Configuring interrupted! System Alias " <<
 			systemAlias << " was translated to " << theConfigurationGroup_.first <<
 			" (" << theConfigurationGroup_.second << ") but could not be loaded and initialized." << std::endl;
 		ss << "\n\nTo debug this problem, try activating this group in the Configuration GUI " <<
@@ -1362,7 +1359,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 			}
 			catch (std::runtime_error &e)
 			{
-				__SS__ << "\nTransition to Configuring interrupted! There was an error identified " <<
+				__SUP_SS__ << "\nTransition to Configuring interrupted! There was an error identified " <<
 					"during the configuration dump attempt:\n\n " <<
 					e.what() << std::endl;
 				__SUP_COUT_ERR__ << "\n" << ss.str();
@@ -1371,7 +1368,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 			}
 			catch (...)
 			{
-				__SS__ << "\nTransition to Configuring interrupted! There was an error identified " <<
+				__SUP_SS__ << "\nTransition to Configuring interrupted! There was an error identified " <<
 					"during the configuration dump attempt.\n\n " <<
 					std::endl;
 				__SUP_COUT_ERR__ << "\n" << ss.str();
@@ -1551,7 +1548,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 			}
 			catch (std::runtime_error &e)
 			{
-				__SS__ << "\nTransition to Running interrupted! There was an error identified " <<
+				__SUP_SS__ << "\nTransition to Running interrupted! There was an error identified " <<
 					"during the configuration dump attempt:\n\n " <<
 					e.what() << std::endl;
 				__SUP_COUT_ERR__ << "\n" << ss.str();
@@ -1560,7 +1557,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 			}
 			catch (...)
 			{
-				__SS__ << "\nTransition to Running interrupted! There was an error identified " <<
+				__SUP_SS__ << "\nTransition to Running interrupted! There was an error identified " <<
 					"during the configuration dump attempt.\n\n " <<
 					std::endl;
 				__SUP_COUT_ERR__ << "\n" << ss.str();
@@ -1638,7 +1635,7 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 		catch (const xdaq::exception::Exception &e) //due to xoap send failure
 		{
 			//do not kill whole system if xdaq xoap failure
-			__SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
+			__SUP_SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
 				appInfo.getName() << "' [LID=" <<
 				appInfo.getId() << "] in Context '" <<
 				appInfo.getContextName() << "' [URL=" <<
@@ -1664,7 +1661,7 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 
 		if (reply != command + "Done")
 		{
-			__SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
+			__SUP_SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
 				appInfo.getName() << "' [LID=" <<
 				appInfo.getId() << "] in Context '" <<
 				appInfo.getContextName() << "' [URL=" <<
@@ -1696,7 +1693,7 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 					error = err.str();
 				}
 
-				__SS__ << "Received error from Supervisor instance = '" <<
+				__SUP_SS__ << "Received error from Supervisor instance = '" <<
 					appInfo.getName() << "' [LID=" <<
 					appInfo.getId() << "] in Context '" <<
 					appInfo.getContextName() << "' [URL=" <<
@@ -1715,7 +1712,7 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 			catch (const xdaq::exception::Exception &e) //due to xoap send failure
 			{
 				//do not kill whole system if xdaq xoap failure
-				__SS__ << "Error! Gateway Supervisor failed to read error message from Supervisor instance = '" <<
+				__SUP_SS__ << "Error! Gateway Supervisor failed to read error message from Supervisor instance = '" <<
 					appInfo.getName() << "' [LID=" <<
 					appInfo.getId() << "] in Context '" <<
 					appInfo.getContextName() << "' [URL=" <<
@@ -1799,8 +1796,8 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 		std::string sid = theWebUsers_.createNewLoginSession(uuid,
 				cgi.getEnvironment().getRemoteAddr() /* ip */);
 
-		__SUP_COUT__ << "uuid = " << uuid << std::endl;
-		__SUP_COUT__ << "SessionId = " << sid.substr(0, 10) << std::endl;
+//		__SUP_COUT__ << "uuid = " << uuid << std::endl;
+//		__SUP_COUT__ << "SessionId = " << sid.substr(0, 10) << std::endl;
 		*out << sid;
 	}
 	else if (Command == "checkCookie")
@@ -1822,9 +1819,9 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 		jumbledUser = CgiDataUtilities::postData(cgi, "ju");
 		cookieCode = CgiDataUtilities::postData(cgi, "cc");
 
-		__SUP_COUT__ << "uuid = " << uuid << std::endl;
-		__SUP_COUT__ << "Cookie Code = " << cookieCode.substr(0, 10) << std::endl;
-		__SUP_COUT__ << "jumbledUser = " << jumbledUser.substr(0, 10) << std::endl;
+//		__SUP_COUT__ << "uuid = " << uuid << std::endl;
+//		__SUP_COUT__ << "Cookie Code = " << cookieCode.substr(0, 10) << std::endl;
+//		__SUP_COUT__ << "jumbledUser = " << jumbledUser.substr(0, 10) << std::endl;
 
 		//If cookie code is good, then refresh and return with display name, else return 0 as CookieCode value
 		uid = theWebUsers_.isCookieCodeActiveForLogin(uuid, cookieCode,
@@ -1863,10 +1860,10 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 		std::string jumbledUser = CgiDataUtilities::postData(cgi, "ju");
 		std::string jumbledPw = CgiDataUtilities::postData(cgi, "jp");
 
-		__SUP_COUT__ << "jumbledUser = " << jumbledUser.substr(0, 10) << std::endl;
-		__SUP_COUT__ << "jumbledPw = " << jumbledPw.substr(0, 10) << std::endl;
-		__SUP_COUT__ << "uuid = " << uuid << std::endl;
-		__SUP_COUT__ << "nac =-" << newAccountCode << "-" << std::endl;
+//		__SUP_COUT__ << "jumbledUser = " << jumbledUser.substr(0, 10) << std::endl;
+//		__SUP_COUT__ << "jumbledPw = " << jumbledPw.substr(0, 10) << std::endl;
+//		__SUP_COUT__ << "uuid = " << uuid << std::endl;
+//		__SUP_COUT__ << "nac =-" << newAccountCode << "-" << std::endl;
 
 		uint64_t uid = theWebUsers_.attemptActiveSession(uuid, jumbledUser,
 				jumbledPw, newAccountCode, cgi.getEnvironment().getRemoteAddr()); //after call jumbledUser holds displayName on success
@@ -1880,7 +1877,7 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 				newAccountCode = "0";//clear cookie code if failure
 		}
 
-		__SUP_COUT__ << "new cookieCode = " << newAccountCode.substr(0, 10) << std::endl;
+		//__SUP_COUT__ << "new cookieCode = " << newAccountCode.substr(0, 10) << std::endl;
 
 		HttpXmlDocument xmldoc(newAccountCode, jumbledUser);
 
@@ -1918,9 +1915,9 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 		std::string username = "";
 		std::string cookieCode = "";
 
-		__SUP_COUT__ << "CERTIFICATE LOGIN REUEST RECEVIED!!!" << std::endl;
-		__SUP_COUT__ << "jumbledEmail = " << jumbledEmail << std::endl;
-		__SUP_COUT__ << "uuid = " << uuid << std::endl;
+//		__SUP_COUT__ << "CERTIFICATE LOGIN REUEST RECEVIED!!!" << std::endl;
+//		__SUP_COUT__ << "jumbledEmail = " << jumbledEmail << std::endl;
+//		__SUP_COUT__ << "uuid = " << uuid << std::endl;
 
 		uint64_t uid = theWebUsers_.attemptActiveSessionWithCert(uuid, jumbledEmail,
 				cookieCode, username, cgi.getEnvironment().getRemoteAddr()); //after call jumbledUser holds displayName on success
@@ -1934,7 +1931,7 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 				cookieCode = "0";//clear cookie code if failure
 		}
 
-		__SUP_COUT__ << "new cookieCode = " << cookieCode.substr(0, 10) << std::endl;
+		//__SUP_COUT__ << "new cookieCode = " << cookieCode.substr(0, 10) << std::endl;
 
 		HttpXmlDocument xmldoc(cookieCode, jumbledEmail);
 
@@ -1962,11 +1959,12 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 		std::string logoutOthers = CgiDataUtilities::postData(cgi,
 															  "LogoutOthers");
 
-		__SUP_COUT__ << "Cookie Code = " << cookieCode.substr(0, 10) << std::endl;
-		__SUP_COUT__ << "logoutOthers = " << logoutOthers << std::endl;
+//		__SUP_COUT__ << "Cookie Code = " << cookieCode.substr(0, 10) << std::endl;
+//		__SUP_COUT__ << "logoutOthers = " << logoutOthers << std::endl;
 
 		uint64_t uid; //get uid for possible system logbook message
-		if (theWebUsers_.cookieCodeLogout(cookieCode, logoutOthers == "1", &uid)
+		if (theWebUsers_.cookieCodeLogout(cookieCode, logoutOthers == "1",
+				&uid,  cgi.getEnvironment().getRemoteAddr())
 			!= theWebUsers_.NOT_FOUND_IN_DATABASE) //user logout
 		{
 			//if did some logging out, check if completely logged out
@@ -2725,7 +2723,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 		//			}
 		//			catch(...)
 		//			{
-		//				__SS__ << "\nRelaunch of otsdaq interrupted! " <<
+		//				__SUP_SS__ << "\nRelaunch of otsdaq interrupted! " <<
 		//						"The Configuration Manager could not be initialized." << std::endl;
 		//
 		//				__SUP_COUT_ERR__ << "\n" << ss.str();
@@ -2797,7 +2795,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
 	}
 	catch (...)
 	{
-		__SS__ << "\nRelaunch of otsdaq interrupted! " <<
+		__SUP_SS__ << "\nRelaunch of otsdaq interrupted! " <<
 			"The Configuration Manager could not be initialized." << std::endl;
 
 		__SS_THROW__;
@@ -2815,7 +2813,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
 		}
 		else
 		{
-			__SS__ << "Unable to open command file: " << fn << std::endl;
+			__SUP_SS__ << "Unable to open command file: " << fn << std::endl;
 			__SS_THROW__;
 		}
 	}
@@ -3050,7 +3048,7 @@ unsigned int GatewaySupervisor::getNextRunNumber(const std::string &fsmNameIn)
 		runNumberFile.open(runNumberFileName.c_str());
 		if (!runNumberFile.is_open())
 		{
-			__SS__ << "Error. Can't create file: " << runNumberFileName << std::endl;
+			__SUP_SS__ << "Error. Can't create file: " << runNumberFileName << std::endl;
 			__SUP_COUT_ERR__ << ss.str();
 			throw std::runtime_error(ss.str());
 		}
@@ -3078,7 +3076,7 @@ bool GatewaySupervisor::setNextRunNumber(unsigned int runNumber, const std::stri
 	std::ofstream runNumberFile(runNumberFileName.c_str());
 	if (!runNumberFile.is_open())
 	{
-		__SS__ << "Can't open file: " << runNumberFileName << std::endl;
+		__SUP_SS__ << "Can't open file: " << runNumberFileName << std::endl;
 		__SUP_COUT__ << ss.str();
 		throw std::runtime_error(ss.str());
 	}
@@ -3151,7 +3149,7 @@ void GatewaySupervisor::saveGroupNameAndKey(const std::pair<std::string /*group 
 	std::ofstream groupFile(fullPath.c_str());
 	if (!groupFile.is_open())
 	{
-		__SS__ << "Error. Can't open file: " << fullPath << std::endl;
+		__SUP_SS__ << "Error. Can't open file: " << fullPath << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}

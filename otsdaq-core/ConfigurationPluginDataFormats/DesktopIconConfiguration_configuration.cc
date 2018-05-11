@@ -68,8 +68,8 @@ DesktopIconConfiguration::~DesktopIconConfiguration(void)
 //==============================================================================
 void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 {
-	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__COUT__ << configManager->__SELF_NODE__ << std::endl;
+//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+//	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 
 	bool 			status;

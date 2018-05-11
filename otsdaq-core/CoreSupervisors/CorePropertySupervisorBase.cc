@@ -59,7 +59,7 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 
 	__SUP_COUT__ << "Getting configuration specific info for supervisor '" <<
 			(allSupervisorInfo_.getSupervisorInfo(application).getName()) <<
-			"'" << __E__;
+			"' of class " << supervisorClass_ << "." << __E__;
 
 	//get configuration specific info for the application supervisor
 
@@ -211,9 +211,9 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 	}
 
 
-	__SUP_COUT__ << "Final property settings:" << std::endl;
-	for(auto& property: propertyMap_)
-		__SUP_COUT__ << property.first << " = " << property.second << __E__;
+//	__SUP_COUT__ << "Final property settings:" << std::endl;
+//	for(auto& property: propertyMap_)
+//		__SUP_COUT__ << property.first << " = " << property.second << __E__;
 }
 
 //========================================================================================================================
@@ -224,7 +224,7 @@ try
 {
 	if(supervisorContextUID_ == "" || supervisorApplicationUID_ == "")
 	{
-		__SS__ << "Empty supervisorContextUID_ or supervisorApplicationUID_." << __E__;
+		__SUP_SS__ << "Empty supervisorContextUID_ or supervisorApplicationUID_." << __E__;
 		__SUP_SS_THROW__;
 	}
 	return theConfigurationManager_->getSupervisorNode(
@@ -277,16 +277,16 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 void CorePropertySupervisorBase::setSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
 {
 	propertyMap_[propertyName] = propertyValue;
-	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
-			"] = " << propertyMap_[propertyName] << __E__;
+//	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
+//			"] = " << propertyMap_[propertyName] << __E__;
 }
 
 //========================================================================================================================
 void CorePropertySupervisorBase::addSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
 {
 	propertyMap_[propertyName] = propertyValue + " | " + getSupervisorProperty(propertyName);
-	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
-			"] = " << propertyMap_[propertyName] << __E__;
+//	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
+//			"] = " << propertyMap_[propertyName] << __E__;
 }
 
 
@@ -301,7 +301,7 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string&
 	auto it = propertyMap_.find(propertyName);
 	if(it == propertyMap_.end())
 	{
-		__SS__ << "Could not find property named " << propertyName << __E__;
+		__SUP_SS__ << "Could not find property named " << propertyName << __E__;
 		throw std::runtime_error(ss.str());//__SUP_SS_THROW__;
 	}
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
@@ -316,7 +316,7 @@ uint8_t CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshol
 	auto it = propertyStruct_.UserPermissionsThreshold.find(requestType);
 	if(it == propertyStruct_.UserPermissionsThreshold.end())
 	{
-		__SS__ << "Could not find requestType named " << requestType << " in UserPermissionsThreshold map." << __E__;
+		__SUP_SS__ << "Could not find requestType named " << requestType << " in UserPermissionsThreshold map." << __E__;
 		throw std::runtime_error(ss.str()); //__SUP_SS_THROW__;
 	}
 	return it->second;
@@ -341,10 +341,13 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		userInfo.checkLock_				= StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.CheckUserLockRequestTypes);
 		userInfo.requireLock_ 			= StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.RequireUserLockRequestTypes);
 		userInfo.allowNoUser_ 			= StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.AllowNoLoginRequestTypes);
-//		userInfo.needUserName_ 			= StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.NeedUsernameRequestTypes);
-//		userInfo.needDisplayName_ 		= StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.NeedDisplayNameRequestTypes);
-//		userInfo.needGroupMembership_	= StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.NeedGroupMembershipRequestTypes);
-//		userInfo.needSessionIndex_ 		= StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.NeedSessionIndexRequestTypes);
+
+
+//		__COUTV__(userInfo.requestType_);
+//		__COUTV__(userInfo.checkLock_);
+//		__COUTV__(userInfo.requireLock_);
+//		__COUTV__(userInfo.allowNoUser_);
+
 		userInfo.permissionsThreshold_ 	= -1; //default to max
 		try
 		{
@@ -352,9 +355,10 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		}
 		catch(std::runtime_error& e)
 		{
-			 __SUP_COUT__ << "No explicit permissions threshold for request '" <<
-					 userInfo.requestType_ << "'... Defaulting to max threshold = " <<
-					 (unsigned int)userInfo.permissionsThreshold_ << __E__;
+//			if(!userInfo.automatedCommand_)
+//				 __SUP_COUT__ << "No explicit permissions threshold for request '" <<
+//						 userInfo.requestType_ << "'... Defaulting to max threshold = " <<
+//						 (unsigned int)userInfo.permissionsThreshold_ << __E__;
 		}
 
 		try
@@ -367,8 +371,10 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		catch(std::runtime_error& e)
 		{
 			userInfo.groupsAllowed_.clear();
-			 __SUP_COUT__ << "No explicit groups allowed for request '" <<
-					 userInfo.requestType_ << "'... Defaulting to empty groups allowed. " << __E__;
+
+//			if(!userInfo.automatedCommand_)
+//				__SUP_COUT__ << "No explicit groups allowed for request '" <<
+//					 userInfo.requestType_ << "'... Defaulting to empty groups allowed. " << __E__;
 		}
 		try
 		{
@@ -380,8 +386,10 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		catch(std::runtime_error& e)
 		{
 			userInfo.groupsDisallowed_.clear();
-			 __SUP_COUT__ << "No explicit groups disallowed for request '" <<
-					 userInfo.requestType_ << "'... Defaulting to empty groups disallowed. " << __E__;
+
+//			if(!userInfo.automatedCommand_)
+//				__SUP_COUT__ << "No explicit groups disallowed for request '" <<
+//					 userInfo.requestType_ << "'... Defaulting to empty groups disallowed. " << __E__;
 		}
 	} //**** end LOGIN GATEWAY CODE ***//
 

@@ -353,7 +353,7 @@ std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn, cons
 
 
 //==============================================================================
-//getMapFromString
+//demangleTypeName
 std::string StringMacros::demangleTypeName(const char* name)
 {
 	int status = -4; // some arbitrary value to eliminate the compiler warning

@@ -67,7 +67,7 @@
 
 //////// ==============================================================
 
-#define __SS__			std::stringstream ss; ss << __COUT_HDR__
+#define __SS__			std::stringstream ss; ss <<  ":" << __MF_SUBJECT__ << ":" << __COUT_HDR__
 #define __SS_THROW__	__COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
 
 //////// ==============================================================
@@ -87,6 +87,7 @@
 #define __CFG_COUT__  		__CFG_COUT_TYPE__(LogDebug)		<< __COUT_HDR__
 #define __CFG_COUTV__(X) 	__CFG_COUT__ << QUOTE(X) << " = " << X << __E__
 
+#define __CFG_SS__			std::stringstream ss; ss << ":" << __MF_SUBJECT__ << "-" << theConfigurationRecordName_ << ":" << __COUT_HDR__
 #define __CFG_SS_THROW__	__CFG_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
 
 
@@ -107,6 +108,7 @@
 #define __SUP_COUT__  		__SUP_COUT_TYPE__(LogDebug)		<< __COUT_HDR__
 #define __SUP_COUTV__(X) 	__SUP_COUT__ << QUOTE(X) << " = " << X << __E__
 
+#define __SUP_SS__			std::stringstream ss; ss << ":" << __MF_SUBJECT__ << "-" << supervisorClassNoNamespace_ << ":" << __COUT_HDR__
 #define __SUP_SS_THROW__	__SUP_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
 
 

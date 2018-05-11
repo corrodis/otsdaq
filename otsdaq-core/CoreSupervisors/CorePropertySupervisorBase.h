@@ -58,7 +58,6 @@ class CorePropertySupervisorBase
 
 public:
 	CorePropertySupervisorBase										(xdaq::Application* application);
-    //void init					         							(const std::string& supervisorContextUID, const std::string& supervisorApplicationUID, ConfigurationManager *theConfigurationManager);
     virtual ~CorePropertySupervisorBase								(void);
 
 
@@ -72,8 +71,6 @@ protected:
 
     ConfigurationManager*          	theConfigurationManager_;
     ConfigurationTree				theContextTreeNode_;
-
-	//std::string                    	XDAQContextConfigurationName_;
 
 	std::string                    	supervisorClass_;
 	std::string                    	supervisorClassNoNamespace_;
@@ -91,8 +88,6 @@ protected:
 		SupervisorProperties()
 		: allSetNames_({&CheckUserLockRequestTypes,&RequireUserLockRequestTypes,
 			&AutomatedRequestTypes,&AllowNoLoginRequestTypes,
-			//,&NeedUsernameRequestTypes,
-			//&NeedDisplayNameRequestTypes,&NeedGroupMembershipRequestTypes,&NeedSessionIndexRequestTypes,
 			&NoXmlWhiteSpaceRequestTypes,&NonXMLRequestTypes})
 		{}
 
@@ -104,11 +99,6 @@ protected:
 		const std::string RequireUserLockRequestTypes		= "RequireUserLockRequestTypes";
 		const std::string AutomatedRequestTypes				= "AutomatedRequestTypes";
 		const std::string AllowNoLoginRequestTypes			= "AllowNoLoginRequestTypes";
-
-//		const std::string NeedUsernameRequestTypes			= "NeedUsernameRequestTypes";
-//		const std::string NeedDisplayNameRequestTypes		= "NeedDisplayNameRequestTypes";
-//		const std::string NeedGroupMembershipRequestTypes	= "NeedGroupMembershipRequestTypes";
-//		const std::string NeedSessionIndexRequestTypes		= "NeedSessionIndexRequestTypes";
 
 		const std::string NoXmlWhiteSpaceRequestTypes		= "NoXmlWhiteSpaceRequestTypes";
 		const std::string NonXMLRequestTypes				= "NonXMLRequestTypes";
@@ -129,8 +119,6 @@ private:
 		CoreSupervisorPropertyStruct()
 		: allSets_ ({&CheckUserLockRequestTypes,&RequireUserLockRequestTypes,
 			&AutomatedRequestTypes,&AllowNoLoginRequestTypes,
-			//&NeedUsernameRequestTypes,
-			//&NeedDisplayNameRequestTypes,&NeedGroupMembershipRequestTypes,&NeedSessionIndexRequestTypes,
 			&NoXmlWhiteSpaceRequestTypes,&NonXMLRequestTypes})
 		{}
 
@@ -142,11 +130,6 @@ private:
 		std::set<std::string> 						RequireUserLockRequestTypes;
 		std::set<std::string> 						AutomatedRequestTypes;
 		std::set<std::string> 						AllowNoLoginRequestTypes;
-
-//		std::set<std::string> 						NeedUsernameRequestTypes;
-//		std::set<std::string> 						NeedDisplayNameRequestTypes;
-//		std::set<std::string> 						NeedGroupMembershipRequestTypes;
-//		std::set<std::string> 						NeedSessionIndexRequestTypes;
 
 		std::set<std::string> 						NoXmlWhiteSpaceRequestTypes;
 		std::set<std::string> 						NonXMLRequestTypes;

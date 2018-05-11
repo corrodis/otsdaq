@@ -1667,7 +1667,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(void) const
 		if(isLinkNode() && isDisconnected())
 			ss << " This node is a disconnected link to " <<
 				getDisconnectedTableName() << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		//__COUT_ERR__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
 

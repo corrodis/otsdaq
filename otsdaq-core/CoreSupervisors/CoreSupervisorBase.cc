@@ -22,7 +22,7 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 , CorePropertySupervisorBase	(this)
 , RunControlStateMachine		(CorePropertySupervisorBase::allSupervisorInfo_.isWizardMode()? //set state machine name
 		CorePropertySupervisorBase::supervisorClassNoNamespace_:
-		CorePropertySupervisorBase::supervisorClassNoNamespace_ + CorePropertySupervisorBase::supervisorApplicationUID_)
+		CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" + CorePropertySupervisorBase::supervisorApplicationUID_)
 , stateMachineWorkLoopManager_  (toolbox::task::bind(this, &CoreSupervisorBase::stateMachineThread, "StateMachine"))
 , stateMachineSemaphore_        (toolbox::BSem::FULL)
 //, theConfigurationManager_      (new ConfigurationManager)//(Singleton<ConfigurationManager>::getInstance()) //I always load the full config but if I want to load a partial configuration (new ConfigurationManager)
@@ -142,9 +142,11 @@ void CoreSupervisorBase::requestWrapper(xgi::Input * in, xgi::Output * out )
 		}
 	}
 
+
 	//return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*) out, false /*print to cout*/,
 			!userInfo.NoXmlWhiteSpace_/*allow whitespace*/);
+
 }
 
 //========================================================================================================================
@@ -174,7 +176,7 @@ void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& c
 //	}
 //	else
 //	{
-//		__SS__ << "requestType '" << requestType << "' request not recognized." << std::endl;
+//		__SUP_SS__ << "requestType '" << requestType << "' request not recognized." << std::endl;
 //		__SUP_COUT__ << "\n" << ss.str();
 //		xmlOut.addTextElementToData("Error", ss.str());
 //	}
@@ -365,7 +367,7 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error was caught while configuring: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while configuring: " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
@@ -404,7 +406,7 @@ void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
 			}
 			else //if not previously in Failed state, then fail
 			{
-				__SS__ << "Error was caught while halting: " << e.what() << std::endl;
+				__SUP_SS__ << "Error was caught while halting: " << e.what() << std::endl;
 				__SUP_COUT_ERR__ << "\n" << ss.str();
 				theStateMachine_.setErrorMessage(ss.str());
 				throw toolbox::fsm::exception::Exception(
@@ -449,7 +451,7 @@ void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error was caught while pausing: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
@@ -478,7 +480,7 @@ void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error was caught while resuming: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while resuming: " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
@@ -507,7 +509,7 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error was caught while starting: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while starting: " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
@@ -533,7 +535,7 @@ void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error was caught while pausing: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
