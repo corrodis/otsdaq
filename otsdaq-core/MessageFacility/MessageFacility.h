@@ -34,7 +34,7 @@ inline void INIT_MF(const char* name)
 	else
 		setenv("ARTDAQ_LOG_FHICL", logFhiclCode, 1);
 
-	artdaq::configureMessageFacility(name,true,true);
+	artdaq::configureMessageFacility(name,false,true);
 	artdaq::setMsgFacAppName(name,0);
 }
 
