@@ -465,7 +465,9 @@ bool WebUsers::checkRequestAccess(
 			userInfo.permissionLevel_ < userInfo.permissionsThreshold_))
 	{
 		*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-		__COUT__ << "User (@" << userInfo.ip_ << ") has insufficient permissions: " <<
+		__COUT__ << "User (@" << userInfo.ip_ << ") has insufficient permissions for requestType '" <<
+				userInfo.requestType_ <<
+				"' : " <<
 				(unsigned int)userInfo.permissionLevel_ << "<" <<
 				(unsigned int)userInfo.permissionsThreshold_ << std::endl;
 		return false;	//invalid cookie and present sequence, but not correct sequence
@@ -1263,6 +1265,7 @@ void WebUsers::intToHexStr(unsigned char i, char *h)
 uint64_t WebUsers::attemptActiveSession(const std::string& uuid, std::string& jumbledUser,
 		const std::string& jumbledPw, std::string& newAccountCode, const std::string& ip)
 {
+	//__COUTV__(ip);
 	if(!checkIpAccess(ip))
 	{
 		__COUT_ERR__ << "rejected ip: " << ip << __E__;
@@ -1349,17 +1352,23 @@ uint64_t WebUsers::attemptActiveSession(const std::string& uuid, std::string& ju
 		//__COUT__ << salt << " " << i << __E__;
 		if (searchHashesDatabaseForHash(sha512(user, pw, salt)) == NOT_FOUND_IN_DATABASE)
 		{
-			__COUT__ << "not found?" << __E__;
+			__COUT__ << "Failed login for " << user << " with permissions " <<
+					StringMacros::mapToString(UsersPermissionsVector[i]) <<	__E__;
+
 			++UsersLoginFailureCountVector[i];
 			if (UsersLoginFailureCountVector[i] >= USERS_MAX_LOGIN_FAILURES)
 				UsersPermissionsVector[i][WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE; //Lock account
 
-			__COUT_INFO__ << "\tUser/pw for user '" << user << "' was not correct (Failed Attempt #" <<
-					(int)(UsersLoginFailureCountVector[i]) << ")." << __E__;
+			__COUT_INFO__ << "User/pw for user '" << user << "' was not correct (Failed Attempt #" <<
+					(int)UsersLoginFailureCountVector[i] << " of " <<
+					(int)USERS_MAX_LOGIN_FAILURES << ")." << __E__;
 
+			__COUTV__(isInactiveForGroup(UsersPermissionsVector[i]));
 			if (isInactiveForGroup(UsersPermissionsVector[i]))
 				__MCOUT_INFO__("Account '" << user << "' has been marked inactive due to too many failed login attempts (Failed Attempt #" <<
-				")! Note only admins can reactivate accounts." << __E__);
+						(int)UsersLoginFailureCountVector[i] <<
+						")! Note only admins can reactivate accounts." << __E__);
+
 
 			saveDatabaseToFile(DB_USERS); //users db modified, so save
 			return NOT_FOUND_IN_DATABASE;
@@ -1405,7 +1414,7 @@ uint64_t WebUsers::attemptActiveSession(const std::string& uuid, std::string& ju
 	//SUCCESS!!
 	saveDatabaseToFile(DB_USERS); //users db modified, so save
 	jumbledUser = UsersDisplayNameVector[i]; //pass by reference displayName
-	newAccountCode = createNewActiveSession(UsersUserIdVector[i]); //return cookie code by reference
+	newAccountCode = createNewActiveSession(UsersUserIdVector[i],ip); //return cookie code by reference
 	return UsersUserIdVector[i]; //return user Id
 }
 
@@ -1534,7 +1543,7 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 	//SUCCESS!!
 	saveDatabaseToFile(DB_USERS); //users db modified, so save
 	email = UsersDisplayNameVector[i]; //pass by reference displayName
-	cookieCode = createNewActiveSession(UsersUserIdVector[i]); //return cookie code by reference
+	cookieCode = createNewActiveSession(UsersUserIdVector[i],ip); //return cookie code by reference
 	return UsersUserIdVector[i]; //return user Id
 }
 
@@ -1684,6 +1693,7 @@ void WebUsers::removeLoginSessionEntry(unsigned int i)
 //	In this ActiveSessionIndex should link a thread of cookieCodes
 std::string WebUsers::createNewActiveSession(uint64_t uid, const std::string& ip, uint64_t asIndex)
 {
+	//__COUTV__(ip);
 	ActiveSessionCookieCodeVector.push_back(genCookieCode());
 	ActiveSessionIpVector.push_back(ip);
 	ActiveSessionUserIdVector.push_back(uid);
@@ -2091,6 +2101,8 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string& cookieCode,
 		bool refresh, std::string *userWithLock,
 		uint64_t* activeUserSessionIndex)
 {
+	//__COUTV__(ip);
+
 	//check ip black list and increment counter if cookie code not found
 	if(!checkIpAccess(ip))
 	{
@@ -2140,7 +2152,9 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string& cookieCode,
 	//check ip
 	if (ip != "0" && ActiveSessionIpVector[i] != ip)
 	{
-		__COUT_ERR__ << "IP does not match active session" << __E__;
+		__COUTV__(ActiveSessionIpVector[i]);
+		//__COUTV__(ip);
+		__COUT_ERR__ << "IP does not match active session." << __E__;
 		cookieCode = REQ_NO_LOGIN_RESPONSE;
 		return false;
 	}
@@ -2263,7 +2277,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string> *loggedOutUsername
 std::string WebUsers::createNewLoginSession(const std::string& UUID, const std::string& ip)
 {
 	__COUTV__(UUID);
-	__COUTV__(ip);
+	//__COUTV__(ip);
 
 	uint64_t i = 0;
 	for (; i < LoginSessionUUIDVector.size(); ++i)
@@ -2415,7 +2429,7 @@ std::map<std::string /*groupName*/,WebUsers::permissionLevel_t> WebUsers::getPer
 }
 
 //========================================================================================================================
-uint8_t WebUsers::getPermissionLevelForGroup(
+WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(
 		std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap,
 		const std::string& groupName)
 {
@@ -2433,6 +2447,8 @@ bool WebUsers::isInactiveForGroup(
 		std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap,
 		const std::string& groupName)
 {
+	__COUTV__((int)getPermissionLevelForGroup(permissionMap,groupName));
+
 	return getPermissionLevelForGroup(permissionMap,groupName) ==
 			WebUsers::PERMISSION_LEVEL_INACTIVE;
 }

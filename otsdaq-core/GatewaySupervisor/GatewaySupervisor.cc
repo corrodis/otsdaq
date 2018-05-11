@@ -1867,11 +1867,14 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 
 		if (uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
 		{
-			__SUP_COUT__ << "cookieCode invalid" << std::endl;
+			__SUP_COUT__ << "Login invalid." << std::endl;
 			jumbledUser = ""; //clear display name if failure
 			if (newAccountCode != "1")//indicates uuid not found
 				newAccountCode = "0";//clear cookie code if failure
 		}
+		else	//Log login in logbook for active experiment
+			makeSystemLogbookEntry(
+				theWebUsers_.getUsersUsername(uid) + " logged in.");
 
 		//__SUP_COUT__ << "new cookieCode = " << newAccountCode.substr(0, 10) << std::endl;
 
@@ -1891,9 +1894,6 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 
 		xmldoc.outputXmlDocument((std::ostringstream*) out);
 
-		//Log login in logbook for active experiment
-		makeSystemLogbookEntry(
-			theWebUsers_.getUsersUsername(uid) + " logged in.");
 	}
 	else if (Command == "cert")
 	{
@@ -1926,6 +1926,9 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 			if (cookieCode != "1")//indicates uuid not found
 				cookieCode = "0";//clear cookie code if failure
 		}
+		else //Log login in logbook for active experiment
+			makeSystemLogbookEntry(
+				theWebUsers_.getUsersUsername(uid) + " logged in.");
 
 		//__SUP_COUT__ << "new cookieCode = " << cookieCode.substr(0, 10) << std::endl;
 
@@ -1944,10 +1947,6 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 		}
 
 		xmldoc.outputXmlDocument((std::ostringstream*) out);
-
-		//Log login in logbook for active experiment
-		makeSystemLogbookEntry(
-			theWebUsers_.getUsersUsername(uid) + " logged in.");
 	}
 	else if (Command == "logout")
 	{

@@ -259,7 +259,7 @@ public:
 
 private:
 
-	inline uint8_t 													        getPermissionLevelForGroup	    		(std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
+	inline WebUsers::permissionLevel_t								        getPermissionLevelForGroup	    		(std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 	inline bool														        isInactiveForGroup			    		(std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 	inline bool														        isAdminForGroup				    		(std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 

@@ -58,11 +58,11 @@
 //////// ==============================================================
 //////// Use __MCOUT__ for cout and Message Facility use in one line (that compiler expands to two)
 ////////
-#define __MCOUT_ERR__(X)  	__MOUT_ERR__ << X; 	__COUT_ERR__ << X;
-#define __MCOUT_WARN__(X)  	__MOUT_WARN__ << X; __COUT_WARN__ << X;
-#define __MCOUT_INFO__(X)  	__MOUT_INFO__ << X; __COUT_INFO__ << X;
-#define __MCOUT__(X)  		__MOUT__ << X; 		__COUT__ << X;
-#define __MCOUTV__(X)		__MOUTV__(X); 		__COUTV__(X);
+#define __MCOUT_ERR__(X)  	{__MOUT_ERR__ << X; 	__COUT_ERR__ << X;}
+#define __MCOUT_WARN__(X)  	{__MOUT_WARN__ << X; 	__COUT_WARN__ << X;}
+#define __MCOUT_INFO__(X)  	{__MOUT_INFO__ << X; 	__COUT_INFO__ << X;}
+#define __MCOUT__(X)  		{__MOUT__ << X; 		__COUT__ << X;}
+#define __MCOUTV__(X)		{__MOUTV__(X); 			__COUTV__(X);}
 
 
 //////// ==============================================================
@@ -87,6 +87,12 @@
 #define __CFG_COUT__  		__CFG_COUT_TYPE__(LogDebug)		<< __COUT_HDR__
 #define __CFG_COUTV__(X) 	__CFG_COUT__ << QUOTE(X) << " = " << X << __E__
 
+#define __CFG_MCOUT_ERR__(X)  	{__CFG_MOUT_ERR__ << X; 	__CFG_COUT_ERR__ << X;}
+#define __CFG_MCOUT_WARN__(X)  	{__CFG_MOUT_WARN__ << X; 	__CFG_COUT_WARN__ << X;}
+#define __CFG_MCOUT_INFO__(X)  	{__CFG_MOUT_INFO__ << X; 	__CFG_COUT_INFO__ << X;}
+#define __CFG_MCOUT__(X)  		{__CFG_MOUT__ << X; 		__CFG_COUT__ << X;}
+#define __CFG_MCOUTV__(X)		{__CFG_MOUTV__(X); 			__CFG_COUTV__(X);}
+
 #define __CFG_SS__			std::stringstream ss; ss << ":" << __MF_SUBJECT__ << "-" << theConfigurationRecordName_ << ":" << __COUT_HDR__
 #define __CFG_SS_THROW__	__CFG_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
 
@@ -107,6 +113,12 @@
 #define __SUP_COUT_INFO__  	__SUP_COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
 #define __SUP_COUT__  		__SUP_COUT_TYPE__(LogDebug)		<< __COUT_HDR__
 #define __SUP_COUTV__(X) 	__SUP_COUT__ << QUOTE(X) << " = " << X << __E__
+
+#define __SUP_MCOUT_ERR__(X)  	{__SUP_MOUT_ERR__ << X; 	__SUP_COUT_ERR__ << X;}
+#define __SUP_MCOUT_WARN__(X)  	{__SUP_MOUT_WARN__ << X; 	__SUP_COUT_WARN__ << X;}
+#define __SUP_MCOUT_INFO__(X)  	{__SUP_MOUT_INFO__ << X; 	__SUP_COUT_INFO__ << X;}
+#define __SUP_MCOUT__(X)  		{__SUP_MOUT__ << X; 		__SUP_COUT__ << X;}
+#define __SUP_MCOUTV__(X)		{__SUP_MOUTV__(X); 			__SUP_COUTV__(X);}
 
 #define __SUP_SS__			std::stringstream ss; ss << ":" << __MF_SUBJECT__ << "-" << supervisorClassNoNamespace_ << ":" << __COUT_HDR__
 #define __SUP_SS_THROW__	__SUP_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
