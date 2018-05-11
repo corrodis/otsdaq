@@ -11,6 +11,7 @@ cet_make(LIBRARY_NAME EventBuilderApp
 		 ${CETLIB}
 		 ${CETLIB_EXCEPT}
 		 ${XDAQ_BASIC_LIB_LIST}
+   ${ROOT_CORE}
 		 canvas
 #		 MessageFacility
 		 ${MF_UTILITIES}
