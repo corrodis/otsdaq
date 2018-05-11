@@ -911,8 +911,7 @@ bool WebUsers::loadDatabases()
 						StringMacros::getMapFromString<uint8_t>(&line[si],
 								lastPermissionsMap);
 
-						__COUT__ << "User permission levels:" << __E__ <<
-								StringMacros::mapToString(lastPermissionsMap) << __E__;
+						//__COUT__ << "User permission levels:" << StringMacros::mapToString(lastPermissionsMap) << __E__;
 
 						//verify 'allUsers' is there
 						//	if not, add it as a diabled user (i.e. WebUsers::PERMISSION_LEVEL_INACTIVE)
@@ -974,8 +973,9 @@ bool WebUsers::loadDatabases()
 			{
 				if (f != 7 && f != 9) //original database was size 8, so is ok to not match
 				{
-					__COUT__ << "FATAL ERROR - invalid database found with field number " << f << __E__;
+					__SS__ << "FATAL ERROR - invalid user database found with field number " << f << __E__;
 					fclose(fp);
+					__SS_THROW__;
 					return false;
 				}
 
@@ -1002,7 +1002,7 @@ bool WebUsers::loadDatabases()
 	{
 		__COUT__ << "User " << UsersUserIdVector[ii] << ": Name: " << UsersUsernameVector[ii] <<
 				"\t\tDisplay Name: " << UsersDisplayNameVector[ii] << "\t\tEmail: " <<
-				UsersUserEmailVector[ii] << "\t\tPermissions: " << __E__ <<
+				UsersUserEmailVector[ii] << "\t\tPermissions: " <<
 				StringMacros::mapToString(UsersPermissionsVector[ii]) << __E__;
 	}
 	return true;
@@ -1093,7 +1093,7 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 				}
 				else if (f == 4)	//permissions
 					saveToDatabase(fp, UsersDatabaseEntryFields[f],
-							StringMacros::mapToString(UsersPermissionsVector[i]), DB_SAVE_OPEN_AND_CLOSE, false);
+							StringMacros::mapToString(UsersPermissionsVector[i],","/*primary delimeter*/,":"/*secondary delimeter*/), DB_SAVE_OPEN_AND_CLOSE, false);
 				else if (f == 5)	//lastLoginAttemptTime
 				{
 					sprintf(fldStr, "%lu", UsersLastLoginAttemptVector[i]);
@@ -2401,8 +2401,9 @@ std::string WebUsers::dejumble(const std::string& u, const std::string& s)
 std::map<std::string /*groupName*/,WebUsers::permissionLevel_t> WebUsers::getPermissionsForUser(
 		uint64_t uid)
 {
+	__COUTV__(uid);
 	uint64_t userIndex = searchUsersDatabaseForUserId(uid);
-
+	__COUTV__(userIndex); __COUTV__(UsersPermissionsVector.size());
 	if (userIndex < UsersPermissionsVector.size())
 		return UsersPermissionsVector[userIndex];
 
@@ -2624,6 +2625,7 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument *xmldoc, bool
 {
 	std::map<std::string /*groupName*/,WebUsers::permissionLevel_t> permissionMap =
 			getPermissionsForUser(uid);
+	__COUTV__(StringMacros::mapToString(permissionMap));
 	if (isInactiveForGroup(permissionMap)) return; //not an active user
 
 	uint64_t	userIndex = searchUsersDatabaseForUserId(uid);

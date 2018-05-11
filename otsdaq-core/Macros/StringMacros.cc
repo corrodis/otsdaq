@@ -325,8 +325,13 @@ std::string StringMacros::mapToString(const std::map<std::string,uint8_t>& mapTo
 		const std::string& primaryDelimeter, const std::string& secondaryDelimeter)
 {
 	std::stringstream ss;
+	bool first = true;
 	for(auto& mapPair:mapToReturn)
-		ss << mapPair.first << secondaryDelimeter << (unsigned int)mapPair.second << primaryDelimeter;
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first << secondaryDelimeter << (unsigned int)mapPair.second;
+	}
 	return ss.str();
 }
 

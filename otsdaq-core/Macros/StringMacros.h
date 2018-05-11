@@ -154,15 +154,20 @@ static void					getMapFromString 						(const std::string& inputString, std::map
 }
 static void					getMapFromString 						(const std::string& inputString, std::map<std::string,std::string>& mapToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'});
 template<class T>
-static std::string			mapToString								(const std::map<std::string,T>& mapToReturn, const std::string& primaryDelimeter = "\n", const std::string& secondaryDelimeter = ": ")
+static std::string			mapToString								(const std::map<std::string,T>& mapToReturn, const std::string& primaryDelimeter = ",", const std::string& secondaryDelimeter = ": ")
 {
 	std::stringstream ss;
+	bool first = true;
 	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
 		ss << mapPair.first << secondaryDelimeter <<
-			mapPair.second << primaryDelimeter;
+			mapPair.second;
+	}
 	return ss.str();
 }
-static std::string			mapToString								(const std::map<std::string,uint8_t>& mapToReturn, const std::string& primaryDelimeter = "\n", const std::string& secondaryDelimeter = ": ");
+static std::string			mapToString								(const std::map<std::string,uint8_t>& mapToReturn, const std::string& primaryDelimeter = ",", const std::string& secondaryDelimeter = ": ");
 template<class T>
 static std::string			setToString								(const std::set<T>& setToReturn, const std::string& delimeter = ",")
 {
