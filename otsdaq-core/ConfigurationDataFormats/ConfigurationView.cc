@@ -25,6 +25,7 @@ ConfigurationView::ConfigurationView(const std::string &name)
 	lastAccessTime_				(0),
 	colUID_ 					(INVALID),
 	colStatus_					(INVALID),
+	colPriority_				(INVALID),
 	fillWithLooseColumnMatching_(false),
 	sourceColumnMismatchCount_	(0),
 	sourceColumnMissingCount_ 	(0)
@@ -108,6 +109,12 @@ void ConfigurationView::init(void)
 			getOrInitColStatus(); //setup Status column
 		}
 		catch(...){} //ignore no Status column
+		try
+		{
+			getOrInitColPriority(); //setup Priority column
+		}
+		catch(...){} //ignore no Priority column
+
 
 		//require one comment column
 		unsigned int colPos;
@@ -749,7 +756,7 @@ const unsigned int ConfigurationView::getOrInitColStatus(void)
 	colStatus_ = findCol(ViewColumnInfo::COL_NAME_STATUS);
 	if(colStatus_ == INVALID)
 	{
-		__SS__ << "\tMissing Status Column in table named '" << tableName_ << "'" << std::endl;
+		__SS__ << "\tMissing " << ViewColumnInfo::COL_NAME_STATUS << " Column in table named '" << tableName_ << "'" << std::endl;
 		ss << "Column Types: " << std::endl;
 		for(unsigned int col=0; col<columnsInfo_.size(); ++col)
 			ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << std::endl;
@@ -759,6 +766,30 @@ const unsigned int ConfigurationView::getOrInitColStatus(void)
 	}
 	return colStatus_;
 }
+
+//==============================================================================
+//getOrInitColPriority
+//	if column not found throw error
+const unsigned int ConfigurationView::getOrInitColPriority(void)
+{
+	if(colPriority_ != INVALID) return colPriority_;
+
+	//if doesn't exist throw error! each view must have a UID column
+	colPriority_ = findCol(ViewColumnInfo::COL_NAME_PRIORITY);
+	if(colPriority_ == INVALID)
+	{
+		__SS__ << "\tMissing " << ViewColumnInfo::COL_NAME_PRIORITY <<
+				" Column in table named '" << tableName_ << "'" << std::endl;
+		ss << "Column Types: " << std::endl;
+		for(unsigned int col=0; col<columnsInfo_.size(); ++col)
+			ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << std::endl;
+
+		//__COUT_ERR__ << "\n" << ss.str() << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+	return colPriority_;
+}
+
 //==============================================================================
 //getColStatus
 //	const version, so don't attempt to lookup
@@ -771,9 +802,28 @@ const unsigned int ConfigurationView::getColStatus(void) const
 	for(unsigned int col=0; col<columnsInfo_.size(); ++col)
 		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << std::endl;
 
-	__SS__ << ("Missing Status Column in config named " + tableName_ +
-			". (Possibly ConfigurationView was just not initialized?"  +
-			"This is the const call so can not alter class members)") << std::endl;
+	__SS__ << "Missing " << ViewColumnInfo::COL_NAME_STATUS << " Column in config named " << tableName_ <<
+			". (Possibly ConfigurationView was just not initialized?"  <<
+			"This is the const call so can not alter class members)" << std::endl;
+	__COUT_ERR__ << "\n" << ss.str() << std::endl;
+	throw std::runtime_error(ss.str());
+}
+
+//==============================================================================
+//getColPriority
+//	const version, so don't attempt to lookup
+//	if column not found throw error
+const unsigned int ConfigurationView::getColPriority(void) const
+{
+	if(colPriority_ != INVALID) return colPriority_;
+
+	__COUT__ << "Column Types: " << std::endl;
+	for(unsigned int col=0; col<columnsInfo_.size(); ++col)
+		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << std::endl;
+
+	__SS__ << "Missing " << ViewColumnInfo::COL_NAME_PRIORITY << " Column in config named " << tableName_ <<
+			". (Possibly ConfigurationView was just not initialized?"  <<
+			"This is the const call so can not alter class members)" << std::endl;
 	__COUT_ERR__ << "\n" << ss.str() << std::endl;
 	throw std::runtime_error(ss.str());
 }

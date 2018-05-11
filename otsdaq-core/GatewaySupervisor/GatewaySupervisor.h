@@ -65,6 +65,7 @@ public:
 
     void 						stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out )		;
     //void 						stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	;
+
     xoap::MessageReference 		stateMachineXoapHandler      	(xoap::MessageReference msg )  	        ;
     xoap::MessageReference 		stateMachineResultXoapHandler	(xoap::MessageReference msg )  	        ;
 

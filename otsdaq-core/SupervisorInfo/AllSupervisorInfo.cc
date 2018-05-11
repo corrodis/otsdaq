@@ -377,7 +377,7 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 {
 	__COUT__ << "getOrderedSupervisorDescriptors" << __E__;
 
-	std::map<uint8_t      /*priority*/, std::vector< unsigned int /*appId*/> > orderedByPriority;
+	std::map<uint64_t /*priority*/, std::vector< unsigned int /*appId*/> > orderedByPriority;
 
 	try
 	{
@@ -394,7 +394,7 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 					auto it = app.stateMachineCommandPriority_.find(stateMachineCommand);
 					if(it == app.stateMachineCommandPriority_.end())
 						orderedByPriority[100].push_back(app.id_);
-					else
+					else //take value, and do not allow DEFAUL value of 0 -> force to 100
 						orderedByPriority[it->second?it->second:100].push_back(app.id_);
 
 					//__COUT__ << "app.id_ " << app.id_ << __E__;

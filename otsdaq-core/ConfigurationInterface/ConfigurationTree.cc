@@ -1496,9 +1496,10 @@ void ConfigurationTree::recursiveGetCommonFields(
 //	returns them in order encountered in the table
 //	if filterMap criteria, then rejects any that do not meet all criteria
 std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChildren(
-		std::map<std::string /*relative-path*/, std::string /*value*/> filterMap) const
+		std::map<std::string /*relative-path*/, std::string /*value*/> filterMap,
+		bool byPriority) const
 {
-	std::vector<std::pair<std::string,ConfigurationTree> > retMap;
+	std::vector<std::pair<std::string,ConfigurationTree> > retVector;
 
 	//__COUT__ << "Children of node: " << getValueAsString() << std::endl;
 
@@ -1506,7 +1507,7 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 	bool skip;
 	std::string fieldValue;
 
-	std::vector<std::string> childrenNames = getChildrenNames();
+	std::vector<std::string> childrenNames = getChildrenNames(byPriority);
 	for(auto &childName : childrenNames)
 	{
 		//__COUT__ << "\tChild: " << childName << std::endl;
@@ -1576,12 +1577,12 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 			__COUT__ << "\tChild accepted: " << childName << std::endl;
 		}
 
-		retMap.push_back(std::pair<std::string,ConfigurationTree>(childName,
+		retVector.push_back(std::pair<std::string,ConfigurationTree>(childName,
 				this->getNode(childName, true)));
 	}
 
 	//__COUT__ << "Done w/Children of node: " << getValueAsString() << std::endl;
-	return retMap;
+	return retVector;
 }
 //
 ////==============================================================================
@@ -1655,9 +1656,9 @@ bool ConfigurationTree::isConfigurationNode(void) const
 //==============================================================================
 //getChildrenNames
 //	returns them in order encountered in the table
-std::vector<std::string> ConfigurationTree::getChildrenNames(void) const
+std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority) const
 {
-	std::vector<std::string> retSet;
+	std::vector<std::string /*child name*/> retVector;
 
 	if(!configView_)
 	{
@@ -1676,12 +1677,51 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(void) const
 		//this node is config node
 		//so return all uid node strings that match groupId
 
+		if(byPriority) //reshuffle by priority
+		{
+			try
+			{
+				std::map<uint64_t /*priority*/, std::vector< unsigned int /*child row*/> > orderedByPriority;
+				std::vector<std::string /*child name*/> retPrioritySet;
+
+				unsigned int col = configView_->getColPriority();
+				uint64_t tmpPriority;
+
+				for(unsigned int r = 0; r<configView_->getNumberOfRows(); ++r)
+					if(groupId_ == "" ||
+							configView_->isEntryInGroup(r,childLinkIndex_,groupId_))
+					{
+						configView_->getValue(tmpPriority,r,col);
+						//do not accept DEFAULT value of 0.. convert to 100
+						orderedByPriority[tmpPriority?tmpPriority:100].push_back(r);
+					}
+
+				//at this point have priority map
+				// now build return vector
+
+				for (const auto& priorityChildRowVector : orderedByPriority)
+					for (const auto& priorityChildRow : priorityChildRowVector.second)
+						retVector.push_back(configView_->getDataView()[priorityChildRow][configView_->getColUID()]);
+
+				__COUT__ << "Returning priority children list." << __E__;
+				return retVector;
+			}
+			catch(std::runtime_error& e)
+			{
+				__COUT_WARN__ << "Error identifying priority. Assuming all children have equal priority (Error: " <<
+						e.what() << __E__;
+				retVector.clear();
+			}
+		}
+		//else not by priority
+
 		for(unsigned int r = 0; r<configView_->getNumberOfRows(); ++r)
 			if(groupId_ == "" ||
 					configView_->isEntryInGroup(r,childLinkIndex_,groupId_))
-//					groupId_ == configView_->getDataView()[r][configView_->getColLinkGroupID(
-//							childLinkIndex_)])
-				retSet.push_back(configView_->getDataView()[r][configView_->getColUID()]);
+				//					groupId_ == configView_->getDataView()[r][configView_->getColLinkGroupID(
+				//							childLinkIndex_)])
+				retVector.push_back(configView_->getDataView()[r][configView_->getColUID()]);
+
 	}
 	else if(row_ == ConfigurationView::INVALID)
 	{
@@ -1700,7 +1740,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(void) const
 					configView_->getColumnInfo(c).isChildLinkUID())
 				continue;
 			else
-				retSet.push_back(configView_->getColumnInfo(c).getName());
+				retVector.push_back(configView_->getColumnInfo(c).getName());
 	}
 	else //this node is value node, so has no node to choose from
 	{
@@ -1711,7 +1751,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(void) const
 		throw std::runtime_error(ss.str());
 	}
 
-	return retSet;
+	return retVector;
 }
 
 

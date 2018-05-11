@@ -542,11 +542,8 @@ void GatewaySupervisor::Default(xgi::Input* in, xgi::Output* out)
 		securityType_ << "'></frameset></html>";
 }
 
-
-
 //========================================================================================================================
 void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
-
 {
 	//for simplicity assume all commands should be mutually exclusive with iterator thread state machine accesses (really should just be careful with RunControlStateMachine access)
 	if (VERBOSE_MUTEX) __SUP_COUT__ << "Waiting for FSM access" << std::endl;
@@ -557,7 +554,6 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 
 	std::string command = CgiDataUtilities::getData(cgiIn, "StateMachine");
 	std::string requestType = "StateMachine" + command; //prepend StateMachine to request type
-
 
 	HttpXmlDocument xmlOut;
 	WebUsers::RequestUserInfo userInfo(requestType,
