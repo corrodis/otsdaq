@@ -443,12 +443,12 @@ bool WebUsers::checkRequestAccess(
 	// - check user lock flags and status
 
 
-//	if(!userInfo.automatedCommand_)
-//	{
-//		__COUTV__(userInfo.requestType_);
-//		__COUTV__((unsigned int)userInfo.permissionLevel_);
-//		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
-//	}
+	if(!userInfo.automatedCommand_)
+	{
+		__COUTV__(userInfo.requestType_);
+		__COUTV__((unsigned int)userInfo.permissionLevel_);
+		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
+	}
 
 	//second, start check access -------
 	if(!isWizardMode && !userInfo.allowNoUser_ &&
@@ -2415,9 +2415,9 @@ std::string WebUsers::dejumble(const std::string& u, const std::string& s)
 std::map<std::string /*groupName*/,WebUsers::permissionLevel_t> WebUsers::getPermissionsForUser(
 		uint64_t uid)
 {
-	__COUTV__(uid);
+	//__COUTV__(uid);
 	uint64_t userIndex = searchUsersDatabaseForUserId(uid);
-	__COUTV__(userIndex); __COUTV__(UsersPermissionsVector.size());
+	//__COUTV__(userIndex); __COUTV__(UsersPermissionsVector.size());
 	if (userIndex < UsersPermissionsVector.size())
 		return UsersPermissionsVector[userIndex];
 
@@ -2447,8 +2447,6 @@ bool WebUsers::isInactiveForGroup(
 		std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap,
 		const std::string& groupName)
 {
-	__COUTV__((int)getPermissionLevelForGroup(permissionMap,groupName));
-
 	return getPermissionLevelForGroup(permissionMap,groupName) ==
 			WebUsers::PERMISSION_LEVEL_INACTIVE;
 }
@@ -2509,7 +2507,7 @@ std::string WebUsers::getTooltipFilename(
 				(c >= '0' && c <= '9'))
 			filename += c;
 	filename += ".tip";
-	__COUT__ << "filename " << filename << __E__;
+	//__COUT__ << "filename " << filename << __E__;
 	return filename;
 }
 
@@ -2585,7 +2583,7 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 	//	__COUT__ << "srcFile " << srcFile << __E__;
 	//	__COUT__ << "srcFunc " << srcFunc << __E__;
 	//	__COUT__ << "srcId " << srcId << __E__;
-	__COUT__ << "Checking tooltip for user: " << username << __E__;
+	//__COUT__ << "Checking tooltip for user: " << username << __E__;
 
 
 

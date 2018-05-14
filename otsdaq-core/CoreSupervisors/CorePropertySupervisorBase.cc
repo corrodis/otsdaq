@@ -7,27 +7,6 @@ using namespace ots;
 
 const CorePropertySupervisorBase::SupervisorProperties 	CorePropertySupervisorBase::SUPERVISOR_PROPERTIES = CorePropertySupervisorBase::SupervisorProperties();
 
-////========================================================================================================================
-//void CorePropertySupervisorBase::init(
-//		const std::string& supervisorContextUID,
-//		const std::string& supervisorApplicationUID,
-//		ConfigurationManager *theConfigurationManager)
-//{
-//	__SUP_COUT__ << "Begin!" << std::endl;
-//
-//
-//	__SUP_COUT__ << "Looking for " <<
-//				supervisorContextUID << "/" << supervisorApplicationUID <<
-//				" supervisor node..." << __E__;
-//
-//	//test the supervisor UIDs at init
-//	auto supervisorNode = CorePropertySupervisorBase::getSupervisorTreeNode();
-//
-//	supervisorConfigurationPath_  = "/" + supervisorContextUID + "/LinkToApplicationConfiguration/" +
-//			supervisorApplicationUID + "/LinkToSupervisorConfiguration";
-//
-//}
-
 //========================================================================================================================
 CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* application)
 : theConfigurationManager_      (new ConfigurationManager)
@@ -131,17 +110,12 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AutomatedRequestTypes,			"");
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AllowNoLoginRequestTypes,		"");
 
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedUsernameRequestTypes,		"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedDisplayNameRequestTypes,	"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedGroupMembershipRequestTypes,"");
-//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedSessionIndexRequestTypes,	"");
-
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NoXmlWhiteSpaceRequestTypes,	"");
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NonXMLRequestTypes,				"");
 
 
-	__SUP_COUT__ << "Done setting up Core Supervisor Base property defaults for supervisor" <<
-			"..." << __E__;
+//	__SUP_COUT__ << "Done setting up Core Supervisor Base property defaults for supervisor" <<
+//			"..." << __E__;
 }
 
 //========================================================================================================================
@@ -160,8 +134,8 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 	__SUP_COUT__ << "Setting up supervisor specific property DEFAULTS for supervisor" <<
 			"..." << __E__;
 	setSupervisorPropertyDefaults();						//calls override version defaults
-	__SUP_COUT__ << "Done setting up supervisor specific property DEFAULTS for supervisor" <<
-			"." << __E__;
+//	__SUP_COUT__ << "Done setting up supervisor specific property DEFAULTS for supervisor" <<
+//			"." << __E__;
 
 	if(allSupervisorInfo_.isWizardMode())
 		__SUP_COUT__ << "Wiz mode detected. Skipping setup of supervisor properties for supervisor of class '" <<
@@ -174,8 +148,8 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 	__SUP_COUT__ << "Setting up supervisor specific FORCED properties for supervisor" <<
 			"..." << __E__;
 	forceSupervisorPropertyValues();						//calls override forced values
-	__SUP_COUT__ << "Done setting up supervisor specific FORCED properties for supervisor" <<
-			"." << __E__;
+//	__SUP_COUT__ << "Done setting up supervisor specific FORCED properties for supervisor" <<
+//			"." << __E__;
 
 
 	propertyStruct_.UserPermissionsThreshold.clear();
@@ -211,9 +185,9 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 	}
 
 
-//	__SUP_COUT__ << "Final property settings:" << std::endl;
-//	for(auto& property: propertyMap_)
-//		__SUP_COUT__ << property.first << " = " << property.second << __E__;
+	__SUP_COUT__ << "Final property settings:" << std::endl;
+	for(auto& property: propertyMap_)
+		__SUP_COUT__ << "\t" << property.first << " = " << property.second << __E__;
 }
 
 //========================================================================================================================
@@ -308,18 +282,24 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string&
 }
 
 //========================================================================================================================
-uint8_t CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshold(const std::string& requestType)
+//getSupervisorPropertyUserPermissionsThreshold
+//	returns the threshold based on the requestType
+WebUsers::permissionLevel_t CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshold(
+		const std::string& requestType)
 {
 	//check if need to setup properties
 	checkSupervisorPropertySetup();
 
-	auto it = propertyStruct_.UserPermissionsThreshold.find(requestType);
-	if(it == propertyStruct_.UserPermissionsThreshold.end())
-	{
-		__SUP_SS__ << "Could not find requestType named " << requestType << " in UserPermissionsThreshold map." << __E__;
-		throw std::runtime_error(ss.str()); //__SUP_SS_THROW__;
-	}
-	return it->second;
+	return StringMacros::getWildCardMatchFromMap(requestType,
+			propertyStruct_.UserPermissionsThreshold);
+
+//	auto it = propertyStruct_.UserPermissionsThreshold.find(requestType);
+//	if(it == propertyStruct_.UserPermissionsThreshold.end())
+//	{
+//		__SUP_SS__ << "Could not find requestType named " << requestType << " in UserPermissionsThreshold map." << __E__;
+//		throw std::runtime_error(ss.str()); //__SUP_SS_THROW__;
+//	}
+//	return it->second;
 }
 
 //========================================================================================================================
@@ -343,23 +323,26 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		userInfo.allowNoUser_ 			= StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.AllowNoLoginRequestTypes);
 
 
-//		__COUTV__(userInfo.requestType_);
-//		__COUTV__(userInfo.checkLock_);
-//		__COUTV__(userInfo.requireLock_);
-//		__COUTV__(userInfo.allowNoUser_);
 
 		userInfo.permissionsThreshold_ 	= -1; //default to max
 		try
 		{
-			userInfo.permissionsThreshold_ = CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshold(userInfo.requestType_);
+			userInfo.permissionsThreshold_ = CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshold(
+					userInfo.requestType_);
 		}
 		catch(std::runtime_error& e)
 		{
-//			if(!userInfo.automatedCommand_)
-//				 __SUP_COUT__ << "No explicit permissions threshold for request '" <<
-//						 userInfo.requestType_ << "'... Defaulting to max threshold = " <<
-//						 (unsigned int)userInfo.permissionsThreshold_ << __E__;
+			if(!userInfo.automatedCommand_)
+				 __SUP_COUT__ << "No explicit permissions threshold for request '" <<
+						 userInfo.requestType_ << "'... Defaulting to max threshold = " <<
+						 (unsigned int)userInfo.permissionsThreshold_ << __E__;
 		}
+
+		//		__COUTV__(userInfo.requestType_);
+		//		__COUTV__(userInfo.checkLock_);
+		//		__COUTV__(userInfo.requireLock_);
+		//		__COUTV__(userInfo.allowNoUser_);
+		//		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
 
 		try
 		{

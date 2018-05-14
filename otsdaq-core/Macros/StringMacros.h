@@ -15,7 +15,32 @@ struct StringMacros
 
 static bool					wildCardMatch							(const std::string& needle, 		const std::string& 							haystack);
 static bool					inWildCardSet							(const std::string  needle, 		const std::set<std::string>& 				haystack);
-static const std::string&	getWildCardMatchFromMap					(const std::string  needle, 		const std::map<std::string,std::string>& 	haystack);
+
+
+//========================================================================================================================
+//getWildCardMatchFromMap ~
+//	returns value if needle is in haystack otherwise throws exception (considering wildcards)
+template<class T>
+static const T&				getWildCardMatchFromMap					(const std::string  needle, 		const std::map<std::string,T>& 				haystack)
+{
+	for(const auto& haystackPair : haystack)
+		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
+		if(StringMacros::wildCardMatch(haystackPair.first,needle)) return haystackPair.second;
+
+	__SS__ << "Needle '" << needle << "' not found in wildcard haystack:" << __E__;
+	bool first = true;
+	for(const auto& haystackPair : haystack)
+		if(first)
+		{
+			ss << ", " << haystackPair.first;
+			first = false;
+		}
+		else
+			ss << ", " << haystackPair.first;
+	throw std::runtime_error(ss.str());
+}
+
+//static const std::string&	getWildCardMatchFromMap					(const std::string  needle, 		const std::map<std::string,std::string>& 	haystack);
 
 static std::string		 	decodeURIComponent 						(const std::string& data);
 static std::string 			convertEnvironmentVariables				(const std::string& data);

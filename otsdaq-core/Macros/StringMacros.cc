@@ -49,28 +49,28 @@ bool StringMacros::inWildCardSet(const std::string needle, const std::set<std::s
 	return false;
 }
 
-//========================================================================================================================
-//inWildCardSet ~
-//	returns true if needle is in haystack (considering wildcards)
-const std::string& StringMacros::getWildCardMatchFromMap(const std::string needle,
-		const std::map<std::string, std::string>& haystack)
-{
-	for(const auto& haystackPair : haystack)
-		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
-		if(StringMacros::wildCardMatch(haystackPair.first,needle)) return haystackPair.second;
-
-	__SS__ << "Needle '" << needle << "' not found in wildcard haystack:" << __E__;
-	bool first = true;
-	for(const auto& haystackPair : haystack)
-		if(first)
-		{
-			ss << ", " << haystackPair.first;
-			first = false;
-		}
-		else
-			ss << ", " << haystackPair.first;
-	throw std::runtime_error(ss.str());
-}
+////========================================================================================================================
+////getWildCardMatchFromMap ~
+////	returns value if needle is in haystack otherwise throws exception (considering wildcards)
+//const std::string& StringMacros::getWildCardMatchFromMap(const std::string needle,
+//		const std::map<std::string, std::string>& haystack)
+//{
+//	for(const auto& haystackPair : haystack)
+//		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
+//		if(StringMacros::wildCardMatch(haystackPair.first,needle)) return haystackPair.second;
+//
+//	__SS__ << "Needle '" << needle << "' not found in wildcard haystack:" << __E__;
+//	bool first = true;
+//	for(const auto& haystackPair : haystack)
+//		if(first)
+//		{
+//			ss << ", " << haystackPair.first;
+//			first = false;
+//		}
+//		else
+//			ss << ", " << haystackPair.first;
+//	throw std::runtime_error(ss.str());
+//}
 
 //==============================================================================
 //decodeURIComponent

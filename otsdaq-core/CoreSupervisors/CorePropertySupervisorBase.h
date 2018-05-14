@@ -174,8 +174,7 @@ public:
 		return StringMacros::validateValueForDefaultStringDataType<T>(it->second);
 	}
 	std::string							getSupervisorProperty(const std::string& propertyName);
-	//void								setSupervisorPropertyUserPermissionsThreshold(uint8_t userPermissionThreshold);
-	WebUsers::permissionLevel_t			getSupervisorPropertyUserPermissionsThreshold(const std::string& requestType="*");
+	WebUsers::permissionLevel_t			getSupervisorPropertyUserPermissionsThreshold(const std::string& requestType);
 
 };
 
