@@ -3,7 +3,7 @@
 
 #include "otsdaq-core/NetworkUtilities/TCPDataStreamerBase.h"
 #include "otsdaq-core/DataManager/DataConsumer.h"
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
+#include "otsdaq-core/Configurable/Configurable.h"
 
 #include <string>
 

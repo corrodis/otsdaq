@@ -2,7 +2,7 @@
 #define _ots_Utilities_SystemMessenger_h
 
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <string>
 #include <vector>
@@ -17,8 +17,8 @@ public:
 
 	SystemMessenger() : sysMsgLock_(false) {}; //constructor
 	
-    void 						addSysMsg(std::string targetUser, std::string msg);
-    std::string 				getSysMsg(std::string targetUser);
+    void 						addSystemMessage(std::string targetUser, std::string msg);
+    std::string 				getSystemMessage(std::string targetUser);
 
 private:
 

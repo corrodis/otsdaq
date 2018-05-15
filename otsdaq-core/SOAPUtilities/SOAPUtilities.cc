@@ -1,17 +1,22 @@
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
 #include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
-#include "xoap/Method.h"
-#include "xdaq/NamespaceURI.h"
-#include "xoap/MessageReference.h"
-#include "xoap/MessageFactory.h"
-#include "xoap/SOAPPart.h"
-#include "xoap/SOAPEnvelope.h"
-#include "xoap/SOAPBody.h"
-#include "xoap/domutils.h"
-#include "xoap/AttachmentPart.h"
+#include <xoap/Method.h>
+#include <xdaq/NamespaceURI.h>
+#include <xoap/MessageReference.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#include <xoap/MessageFactory.h>
+#pragma GCC diagnostic pop
+
+#include <xoap/SOAPPart.h>
+#include <xoap/SOAPEnvelope.h>
+#include <xoap/SOAPBody.h>
+#include <xoap/domutils.h>
+#include <xoap/AttachmentPart.h>
 
 using namespace ots;
 

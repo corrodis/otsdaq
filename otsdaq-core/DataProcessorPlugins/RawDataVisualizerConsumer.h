@@ -2,7 +2,7 @@
 #define _ots_RawDataVisualizerConsumer_h_
 
 #include "otsdaq-core/DataManager/DataConsumer.h"
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
+#include "otsdaq-core/Configurable/Configurable.h"
 
 #include <string>
 

@@ -2,7 +2,7 @@
 #define _ots_BufferImplementation_h_
 
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/DataManager/CircularBufferBase.h"
 
 #include <iostream>

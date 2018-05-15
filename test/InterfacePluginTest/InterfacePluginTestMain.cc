@@ -13,8 +13,8 @@
 #include "otsdaq-core/PluginMakers/MakeInterfaceConfiguration.h"
 #include "otsdaq-core/PluginMakers/MakeInterface.h"
 
-//#include "../FEInterfaces/FEWOtsUDPFSSRInterface.h"
-//#include "../FEInterfaces/FEWOtsUDPHCALInterface.h"
+//#include "otsdaq-components/FEInterfaces/FEWOtsUDPFSSRInterface.h"
+//#include "otsdaq-components/FEInterfaces/FEWOtsUDPHCALInterface.h"
 
 using namespace ots;
 

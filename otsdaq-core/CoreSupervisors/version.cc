@@ -1,19 +1,19 @@
-#include "config/version.h"
-#include "xcept/version.h"
-#include "xdaq/version.h"
+#include <config/version.h>
+#include <xcept/version.h>
+#include <xdaq/version.h>
 #include "otsdaq-core/CoreSupervisors/version.h"
 
 
-GETPACKAGEINFO(FEWSupervisor)
+GETPACKAGEINFO(CoreSupervisors)
 
-void FEWSupervisor::checkPackageDependencies() throw (config::PackageInfo::VersionException)
+void CoreSupervisors::checkPackageDependencies() 
 {
  CHECKDEPENDENCY(config);
  CHECKDEPENDENCY(xcept );        
  CHECKDEPENDENCY(xdaq  ); 
 }
 
-std::set<std::string, std::less<std::string> > FEWSupervisor::getPackageDependencies()
+std::set<std::string, std::less<std::string> > CoreSupervisors::getPackageDependencies()
 {
  std::set<std::string, std::less<std::string> > dependencies;
 

@@ -2,7 +2,6 @@
 #define _ots_DataManagerSupervisor_h_
 
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
-#include "otsdaq-core/MPICore/MPIInitializer.h"
 
 namespace ots
 {
@@ -14,7 +13,7 @@ public:
 
     XDAQ_INSTANTIATOR();
 
-    DataManagerSupervisor              (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
+    DataManagerSupervisor              (xdaq::ApplicationStub * s) ;
     virtual ~DataManagerSupervisor     (void);
 
 private:

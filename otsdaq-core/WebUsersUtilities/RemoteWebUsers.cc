@@ -4,14 +4,13 @@
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
 #include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
-#include "otsdaq-core/SupervisorDescriptorInfo/SupervisorDescriptorInfo.h"
 
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
+
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 
 
 using namespace ots;
@@ -21,14 +20,14 @@ using namespace ots;
 
 //========================================================================================================================
 //User Notes:
-//	- use xmlLoginGateway to check security from outside the Supervisor and Wizard
+//	- use xmlRequestGateway to check security from outside the Supervisor and Wizard
 //
 //	Example usage:
 //
 //
 //
 //			void exampleClass::exampleRequestHandler(xgi::Input * in, xgi::Output * out)
-//			throw (xgi::exception::Exception)
+//			
 //			{
 //				cgicc::Cgicc cgi(in);
 //
@@ -46,7 +45,7 @@ using namespace ots;
 //					bool checkLock = true;
 //					bool lockRequired = true;
 //
-//					if(!theRemoteWebUsers_.xmlLoginGateway(
+//					if(!theRemoteWebUsers_.xmlRequestToGateway(
 //							cgi,out,&xmldoc,theSupervisorsConfiguration_
 //							,&userPermissions  			//acquire user's access level (optionally null pointer)//
 //							,!automaticCommand			//true/false refresh cookie code
@@ -94,47 +93,33 @@ RemoteWebUsers::RemoteWebUsers(xdaq::Application* application)
 }
 
 //========================================================================================================================
-//xmlLoginGateway
+//xmlRequestGateway
 //	if false, user code should just return.. out is handled on false; on true, out is untouched
-bool RemoteWebUsers::xmlLoginGateway(
-		cgicc::Cgicc 					&cgi,
-		std::ostringstream 				*out,
-		HttpXmlDocument 				*xmldoc,
-		const SupervisorDescriptorInfo 	&theSupervisorsDescriptorInfo,
-		uint8_t 						*userPermissions,
-		const bool						refresh,
-		const uint8_t 					permissionsThreshold,
-		const bool						checkLock,
-		const bool						lockRequired,
-		std::string 					*userWithLock,
-		std::string 					*userName,
-		std::string 					*displayName,
-		uint64_t 						*activeSessionIndex)
+bool RemoteWebUsers::xmlRequestToGateway(
+		cgicc::Cgicc& 					cgi,
+		std::ostringstream* 			out,
+		HttpXmlDocument* 				xmldoc,
+		const AllSupervisorInfo& 		allSupervisorInfo,
+		WebUsers::RequestUserInfo&		userInfo	)
 {
-	//initialized optional acquisition parameters to failed results
-	if(userPermissions) 	*userPermissions    = 0;
-	if(userWithLock)		*userWithLock       = "";
-	if(userName)			*userName           = "";
-	if(displayName)			*displayName        = "";
-	if(activeSessionIndex)	*activeSessionIndex = -1;
 
-	const std::string ip = cgi.getEnvironment().getRemoteAddr();
-
+	//initialize user info parameters to failed results
+	WebUsers::initializeRequestUserInfo(cgi,userInfo);
 
 	//const_cast away the const
 	//	so that this line is compatible with slf6 and slf7 versions of xdaq
-	//	where they changed to const xdaq::ApplicationDescriptor* in slf7
+	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 	//
-	// XDAQ_CONST_CALL is defined in "otsdaq-core/Macros/CoutHeaderMacros.h"
-	const xdaq::ApplicationDescriptor* gatewaySupervisor;
+	// XDAQ_CONST_CALL is defined in "otsdaq-core/Macros/CoutMacros.h"
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor;
 
 	SOAPParameters               parameters;
 	xoap::MessageReference       retMsg;
 
 	//**** start LOGIN GATEWAY CODE ***//
-	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions
+	//If TRUE, cookie code is good, and refreshed code is in cookieCode
 	//Else, error message is returned in cookieCode
-	std::string cookieCode = CgiDataUtilities::getOrPostData(cgi,"CookieCode"); //from GET or POST
+	//tmpCookieCode_ = CgiDataUtilities::getOrPostData(cgi,"CookieCode"); //from GET or POST
 
 	//	__COUT__ << cookieCode.length() << std::endl;
 	//	__COUT__ << "cookieCode=" << cookieCode << std::endl;
@@ -142,61 +127,79 @@ bool RemoteWebUsers::xmlLoginGateway(
 
 	/////////////////////////////////////////////////////
 	//have CookieCode, try it out
-	gatewaySupervisor = theSupervisorsDescriptorInfo.getSupervisorDescriptor();
-	if(!gatewaySupervisor) //assume using wizard mode
+	if(allSupervisorInfo.isWizardMode())
 	{
 		//if missing CookieCode... check if in Wizard mode and using sequence
 		std::string sequence = CgiDataUtilities::getOrPostData(cgi,"sequence"); //from GET or POST
 		//__COUT__ << "sequence=" << sequence << std::endl;
 		if(!sequence.length())
 		{
-			__COUT__ << "Invalid attempt." << std::endl;
-			*out << RemoteWebUsers::REQ_NO_LOGIN_RESPONSE;
-			return false;	//invalid cookie and also invalid sequence
+			__COUT__ << "Invalid attempt (@" << userInfo.ip_ << ")." << std::endl;
+			*out << WebUsers::REQ_NO_LOGIN_RESPONSE;
+			//invalid cookie and also invalid sequence
+			goto HANDLE_ACCESS_FAILURE; //return false, access failed
 		}
 
 		//have sequence, try it out
 
-		gatewaySupervisor =	theSupervisorsDescriptorInfo.getWizardDescriptor();
+		gatewaySupervisor =	allSupervisorInfo.getWizardInfo().getDescriptor();
 		if(!gatewaySupervisor)
 		{
-			*out << RemoteWebUsers::REQ_NO_LOGIN_RESPONSE;
-			return false;	//invalid cookie and present sequence, but no wizard supervisor
+			__COUT_ERR__ << "Missing wizard supervisor." << std::endl;
+			*out << WebUsers::REQ_NO_LOGIN_RESPONSE;
+			//sequence code present, but no wizard supervisor
+			goto HANDLE_ACCESS_FAILURE; //return false, access failed
 		}
 
 		parameters.addParameter("sequence",sequence);
+		parameters.addParameter("IPAddress",userInfo.ip_);
 		retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
 				"SupervisorSequenceCheck", parameters);
 		parameters.clear();
 		parameters.addParameter("Permissions");
 		receive(retMsg, parameters);
 
-		uint8_t tmpUserPermissions_;
-		sscanf(parameters.getValue("Permissions").c_str(),"%hhu",&tmpUserPermissions_); //unsigned char
+		userInfo.setGroupPermissionLevels(parameters.getValue("Permissions"));
 
-		if(userPermissions) 	*userPermissions = tmpUserPermissions_;
+		if(WebUsers::checkRequestAccess(cgi,out,xmldoc,userInfo,true /*isWizardMode*/))
+			return true;
+		else
+			goto HANDLE_ACCESS_FAILURE; //return false, access failed
 
-		if(tmpUserPermissions_ < permissionsThreshold)
-		{
-			*out << RemoteWebUsers::REQ_NO_LOGIN_RESPONSE;
-			__COUT__ << "User has insufficient permissions: " << tmpUserPermissions_ << "<" <<
-					permissionsThreshold << std::endl;
-			return false;	//invalid cookie and present sequence, but not correct sequence
-		}
+//		if(userInfo.permissionLevel_ < userInfo.permissionsThreshold_)
+//		{
+//			*out << WebUsers::REQ_NO_LOGIN_RESPONSE;
+//			__COUT__ << "User (@" << userInfo.ip_ << ") has insufficient permissions: " << userInfo.permissionLevel_ << "<" <<
+//					userInfo.permissionsThreshold_ << std::endl;
+//			return false;	//invalid cookie and present sequence, but not correct sequence
+//		}
+//
+//		userInfo.setUsername("admin");
+//		userInfo.setDisplayName("Admin");
+//		userInfo.setUsernameWithLock("admin");
+//		userInfo.setActiveUserSessionIndex(0);
+//		userInfo.setGroupMemebership("admin");
+//
+//		return true; //successful sequence login!
+	}
 
-		if(userWithLock)		*userWithLock = "admin";
-		if(userName)			*userName = "admin";
-		if(displayName)			*displayName = "Admin";
-		if(activeSessionIndex) 	*activeSessionIndex = 0;
+	//else proceed with inquiry to Gateway Supervisor
 
-		return true; //successful sequence login!
+	gatewaySupervisor = allSupervisorInfo.getGatewayInfo().getDescriptor();
+
+	if(!gatewaySupervisor)
+	{
+		__COUT_ERR__ << "Missing gateway supervisor." << std::endl;
+		*out << WebUsers::REQ_NO_LOGIN_RESPONSE;
+		goto HANDLE_ACCESS_FAILURE; //return false, access failed
 	}
 
 	//__COUT__ << std::endl;
 
 	parameters.clear();
-	parameters.addParameter("CookieCode",cookieCode);
-	parameters.addParameter("RefreshOption",refresh?"1":"0");
+	parameters.addParameter("CookieCode",userInfo.cookieCode_);
+	parameters.addParameter("RefreshOption",userInfo.automatedCommand_?"0":"1");
+	parameters.addParameter("IPAddress",userInfo.ip_);
 
 	retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
 			"SupervisorCookieCheck", parameters);
@@ -204,87 +207,214 @@ bool RemoteWebUsers::xmlLoginGateway(
 	parameters.clear();
 	parameters.addParameter("CookieCode");
 	parameters.addParameter("Permissions");
+	parameters.addParameter("UserGroups");
 	parameters.addParameter("UserWithLock");
-	receive(retMsg, parameters);
-	tmpUserWithLock_ = parameters.getValue("UserWithLock");
-	sscanf(parameters.getValue("Permissions").c_str(),"%hhu",&tmpUserPermissions_); //unsigned char
-	if(userWithLock)	*userWithLock = tmpUserWithLock_;
-	if(userPermissions) *userPermissions = tmpUserPermissions_;
-
-	cookieCode = parameters.getValue("CookieCode");
-
-	//__COUT__ << "cookieCode=" << cookieCode << std::endl;
-
-	if(cookieCode.length() != COOKIE_CODE_LENGTH)
-	{
-		*out << RemoteWebUsers::REQ_NO_LOGIN_RESPONSE;
-		return false;	//invalid cookie and present sequence, but not correct sequence
-	}
-
-	if(tmpUserPermissions_ < permissionsThreshold)
-	{
-		*out << RemoteWebUsers::REQ_NO_PERMISSION_RESPONSE;
-		__COUT__ << "User has insufficient permissions: " << tmpUserPermissions_ << "<" <<
-				permissionsThreshold << std::endl;
-		return false;
-	}
-
-	if(xmldoc) //fill with cookie code tag
-		xmldoc->setHeader(cookieCode);
-
-	if(!userName && !displayName && !activeSessionIndex && !checkLock && !lockRequired)
-		return true; //done, no need to get user info for cookie
-
-	//__COUT__ << "User with Lock: " << tmpUserWithLock_ << std::endl;
-
-
-	/////////////////////////////////////////////////////
-	//get user info
-	parameters.clear();
-	parameters.addParameter("CookieCode",cookieCode);
-	retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
-			"SupervisorGetUserInfo", parameters);
-
-	parameters.clear();
 	parameters.addParameter("Username");
 	parameters.addParameter("DisplayName");
 	parameters.addParameter("ActiveSessionIndex");
 	receive(retMsg, parameters);
-	std::string tmpUserName = parameters.getValue("Username");
-	if(userName)	*userName = tmpUserName;
-	if(displayName)	*displayName = parameters.getValue("DisplayName");
-	if(activeSessionIndex) *activeSessionIndex = strtoul(parameters.getValue("ActiveSessionIndex").c_str(),0,0);
 
-	if(checkLock && tmpUserWithLock_ != "" && tmpUserWithLock_ != tmpUserName)
-	{
-		*out << RemoteWebUsers::REQ_USER_LOCKOUT_RESPONSE;
-		__COUT__ << "User " << tmpUserName << " is locked out. " << tmpUserWithLock_ << " has lock." << std::endl;
-		return false;
-	}
+	//first extract a few things always from parameters
+	//	like permissionLevel for this request... must consider allowed groups!!
+	userInfo.setGroupPermissionLevels(parameters.getValue("Permissions"));
+	userInfo.cookieCode_ = parameters.getValue("CookieCode");
+	userInfo.username_ = parameters.getValue("Username");
+	userInfo.displayName_ = parameters.getValue("DisplayName");
+	userInfo.usernameWithLock_ = parameters.getValue("UserWithLock");
+	userInfo.activeUserSessionIndex_ = strtoul(parameters.getValue("ActiveSessionIndex").c_str(),0,0);
 
-	if(lockRequired && tmpUserWithLock_ != tmpUserName)
-	{
-		*out << RemoteWebUsers::REQ_LOCK_REQUIRED_RESPONSE;
-		__COUT__ << "User " << tmpUserName << " must have lock to proceed. (" << tmpUserWithLock_ << " has lock.)" << std::endl;
-		return false;
-	}
+	if(!WebUsers::checkRequestAccess(cgi,out,xmldoc,userInfo))
+		goto HANDLE_ACCESS_FAILURE; //return false, access failed
+	//else successful access request!
 
-	return true;
-}
+	return true; //request granted
+//	if(!userInfo.checkLock_ && !userInfo.requireLock_)
+//		return true; //done, no need to get user info for this cookie code
+//
 
-//========================================================================================================================
-//isWizardMode
-//	return true if in wizard configuration mode
-bool RemoteWebUsers::isWizardMode(const SupervisorDescriptorInfo& theSupervisorsDescriptorInfo)
-{
-	return theSupervisorsDescriptorInfo.getWizardDescriptor()?true:false;
+	/////////////////////////////////////////////////////
+	//get user info for cookie code and check lock (now that username is available)
+
+//	parameters.clear();
+//	parameters.addParameter("CookieCode",userInfo.cookieCode_);
+//	retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
+//			"SupervisorGetUserInfo", parameters);
+//
+//	parameters.clear();
+//	parameters.addParameter("Username");
+//	parameters.addParameter("DisplayName");
+//	parameters.addParameter("ActiveSessionIndex");
+//	receive(retMsg, parameters);
+
+//	if(WebUsers::finalizeRequestAccess(out,xmldoc,userInfo,
+//			parameters.getValue("Username"),
+//			parameters.getValue("DisplayName"),
+//			strtoul(parameters.getValue("ActiveSessionIndex").c_str(),0,0)))
+//		return true;
+//	else
+//		goto HANDLE_ACCESS_FAILURE; //return false, access failed
+
+HANDLE_ACCESS_FAILURE:
+
+	//print out return string on failure
+	if(!userInfo.automatedCommand_)
+		__COUT_ERR__ << "Failed request (requestType = " << userInfo.requestType_ <<
+		"): " << out->str() << __E__;
+	return false; //access failed
+
+//	tmpUserWithLock_ = parameters.getValue("UserWithLock");
+//	tmpUserGroups_ = parameters.getValue("UserGroups");
+//	sscanf(parameters.getValue("Permissions").c_str(),"%hhu",&userInfo.permissionLevel_); //unsigned char
+//	userInfo.setUsernameWithLock(parameters.getValue("UserWithLock"));
+//	userInfo.setGroupMemebership(parameters.getValue("UserGroups"));
+//	tmpCookieCode_ = parameters.getValue("CookieCode");
+
+
+
+	//else access granted
+
+	//__COUT__ << "cookieCode=" << cookieCode << std::endl;
+//
+//	if(!allowNoUser && cookieCode.length() != WebUsers::COOKIE_CODE_LENGTH)
+//	{
+//		__COUT__ << "User (@" << ip << ") has invalid cookie code: " << cookieCode << std::endl;
+//		*out << WebUsers::REQ_NO_LOGIN_RESPONSE;
+//		return false;	//invalid cookie and present sequence, but not correct sequence
+//	}
+//
+//	if(!allowNoUser && tmpUserPermissions_ < permissionsThreshold)
+//	{
+//		*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
+//		__COUT__ << "User (@" << ip << ") has insufficient permissions: " << tmpUserPermissions_ << "<" <<
+//				permissionsThreshold << std::endl;
+//		return false;
+//	}
+
+	//check group membership
+//	if(!allowNoUser)
+//	{
+//		//check groups allowed
+//		//	i.e. if user is a member of one of the groups allowed
+//		//			then grant access
+//
+//		std::set<std::string> userMembership;
+//		StringMacros::getSetFromString(
+//				tmpUserGroups_,
+//				userMembership);
+//
+//		bool accept = false;
+//		for(const auto& userGroup:userMembership)
+//			if(StringMacros::inWildCardSet(
+//					userGroup,
+//					groupsAllowed))
+//			{
+//				accept = true;
+//				break;
+//			}
+//
+//		if(!accept && userMembership.size())
+//		{
+//			*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
+//			std::stringstream ss;
+//			bool first = true;
+//			for(const auto& group:groupsAllowed)
+//				if(first && (first=false))
+//					ss << group;
+//				else
+//					ss << " | " << group;
+//
+//			__COUT__ << "User (@" << ip << ") has insufficient group permissions: " << tmpUserGroups_ << " != " <<
+//					ss.str() << std::endl;
+//			return false;
+//		}
+//
+//		//if no access groups specified, then check groups disallowed
+//		if(!userMembership.size())
+//		{
+//			for(const auto& userGroup:userMembership)
+//				if(StringMacros::inWildCardSet(
+//						userGroup,
+//						groupsDisallowed))
+//				{
+//					*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
+//					std::stringstream ss;
+//					bool first = true;
+//					for(const auto& group:groupsDisallowed)
+//						if(first && (first=false))
+//							ss << group;
+//						else
+//							ss << " | " << group;
+//
+//					__COUT__ << "User (@" << ip << ") is in in a disallowed group permissions: " << tmpUserGroups_ << " == " <<
+//							ss.str() << std::endl;
+//					return false;
+//				}
+//		}
+//	} //end group membership check
+//
+//	if(xmldoc) //fill with cookie code tag
+//	{
+//		if(!allowNoUser)
+//			xmldoc->setHeader(cookieCode);
+//		else
+//			xmldoc->setHeader(WebUsers::REQ_ALLOW_NO_USER);
+//	}
+//
+//
+//
+//	if(!userName && !displayName && !activeSessionIndex && !checkLock && !lockRequired)
+//		return true; //done, no need to get user info for cookie
+//
+//	//__COUT__ << "User with Lock: " << tmpUserWithLock_ << std::endl;
+//
+//
+//	/////////////////////////////////////////////////////
+//	//get user info
+//	parameters.clear();
+//	parameters.addParameter("CookieCode",cookieCode);
+//	retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
+//			"SupervisorGetUserInfo", parameters);
+//
+//	parameters.clear();
+//	parameters.addParameter("Username");
+//	parameters.addParameter("DisplayName");
+//	parameters.addParameter("ActiveSessionIndex");
+//	receive(retMsg, parameters);
+//
+//
+//
+//
+//	userInfo.setActiveUserSessionIndex(0);
+//
+//
+//	tmpUsername_ = parameters.getValue("Username");
+//	userInfo.setUsername(tmpUsername_);
+//	userInfo.setDisplayName(parameters.getValue("DisplayName"));
+//	userInfo.setActiveUserSessionIndex(
+//			strtoul(parameters.getValue("ActiveSessionIndex").c_str(),0,0));
+//
+//	if(userInfo.checkLock_ && tmpUserWithLock_ != "" && tmpUserWithLock_ != tmpUsername_)
+//	{
+//		*out << WebUsers::REQ_USER_LOCKOUT_RESPONSE;
+//		__COUT__ << "User " << tmpUsername_ << " is locked out. " << tmpUserWithLock_ << " has lock." << std::endl;
+//		return false;
+//	}
+//
+//	if(userInfo.lockRequired_ && tmpUserWithLock_ != tmpUsername_)
+//	{
+//		*out << WebUsers::REQ_LOCK_REQUIRED_RESPONSE;
+//		__COUT__ << "User " << tmpUsername_ << " must have lock to proceed. (" << tmpUserWithLock_ << " has lock.)" << std::endl;
+//		return false;
+//	}
+//
+//	return true;
 }
 
 //========================================================================================================================
 //getActiveUserList
 //	if lastUpdateTime is not too recent as spec'd by ACTIVE_USERS_UPDATE_THRESHOLD
 //	if server responds with
-std::string RemoteWebUsers::getActiveUserList(const xdaq::ApplicationDescriptor* supervisorDescriptor)
+std::string RemoteWebUsers::getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor)
 {
 
 	if(1 || time(0) - ActiveUserLastUpdateTime_ > ACTIVE_USERS_UPDATE_THRESHOLD) //need to update
@@ -311,7 +441,7 @@ std::string RemoteWebUsers::getActiveUserList(const xdaq::ApplicationDescriptor*
 //	returns empty "" for actionTimeString on failure
 //	returns "Wed Dec 31 18:00:01 1969 CST" for actionTimeString (in CST) if action never has occurred
 std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::getLastConfigGroup(
-		const xdaq::ApplicationDescriptor* supervisorDescriptor,
+		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 		const std::string &actionOfLastGroup,
 		std::string &actionTimeString)
 {
@@ -348,11 +478,11 @@ std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::get
 //	get username and display name for user based on cookie code
 //	return true, if user info gotten successfully
 //	else false
-bool RemoteWebUsers::getUserInfoForCookie(const xdaq::ApplicationDescriptor* supervisorDescriptor,
+bool RemoteWebUsers::getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 		std::string &cookieCode, std::string *userName, std::string *displayName, uint64_t *activeSessionIndex)
 {
 	__COUT__ << std::endl;
-	if(cookieCode.length() != COOKIE_CODE_LENGTH) return false; //return if invalid cookie code
+	if(cookieCode.length() != WebUsers::COOKIE_CODE_LENGTH) return false; //return if invalid cookie code
 
 	//	SOAPParametersV parameters(1);
 	//	parameters[0].setName("CookieCode"); parameters[0].setValue(cookieCode);
@@ -375,17 +505,17 @@ bool RemoteWebUsers::getUserInfoForCookie(const xdaq::ApplicationDescriptor* sup
 //========================================================================================================================
 //cookieCodeIsActiveForRequest
 //	for external supervisors to check with Supervisor for login
-bool RemoteWebUsers::cookieCodeIsActiveForRequest(const xdaq::ApplicationDescriptor* supervisorDescriptor,
-		std::string &cookieCode, uint8_t *userPermissions, std::string ip, bool refresh, std::string *userWithLock)
+bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
+		std::string &cookieCode, uint8_t *userPermissions, std::string ip, bool refreshCookie, std::string *userWithLock)
 {
 	//__COUT__ << "CookieCode: " << cookieCode << " " << cookieCode.length() << std::endl;
-	if(cookieCode.length() != COOKIE_CODE_LENGTH) return false; //return if invalid cookie code
+	if(cookieCode.length() != WebUsers::COOKIE_CODE_LENGTH) return false; //return if invalid cookie code
 
 	//
 
 	SOAPParameters parameters;
 	parameters.addParameter("CookieCode",cookieCode);
-	parameters.addParameter("RefreshOption",refresh?"1":"0");
+	parameters.addParameter("RefreshOption",refreshCookie?"1":"0");
 
 	//__COUT__ << "CookieCode: " << cookieCode << std::endl;
 	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorCookieCheck", parameters);
@@ -404,13 +534,13 @@ bool RemoteWebUsers::cookieCodeIsActiveForRequest(const xdaq::ApplicationDescrip
 
 	cookieCode = retParameters.getValue("CookieCode");
 
-	return cookieCode.length() == COOKIE_CODE_LENGTH; //proper cookieCode has length COOKIE_CODE_LENGTH
+	return cookieCode.length() == WebUsers::COOKIE_CODE_LENGTH; //proper cookieCode has length WebUsers::COOKIE_CODE_LENGTH
 }
 //========================================================================================================================
 //sendSystemMessage
 //	send system message to toUser through Supervisor
 //	toUser wild card * is to all users
-void RemoteWebUsers::sendSystemMessage(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg)
+void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ToUser" , toUser);
@@ -423,7 +553,7 @@ void RemoteWebUsers::sendSystemMessage(const xdaq::ApplicationDescriptor* superv
 //========================================================================================================================
 //makeSystemLogbookEntry
 //	make system logbook through Supervisor
-void RemoteWebUsers::makeSystemLogbookEntry(const xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText)
+void RemoteWebUsers::makeSystemLogbookEntry(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("EntryText", entryText);

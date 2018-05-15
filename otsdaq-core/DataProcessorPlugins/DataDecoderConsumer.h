@@ -3,7 +3,7 @@
 
 #include "otsdaq-core/DataManager/DataConsumer.h"
 #include "otsdaq-core/DataDecoders/DataDecoder.h"
-#include "otsdaq-core/ConfigurationInterface/Configurable.h"
+#include "otsdaq-core/Configurable/Configurable.h"
 
 namespace ots
 {

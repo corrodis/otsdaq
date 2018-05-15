@@ -1,5 +1,6 @@
 find_ups_product(fhiclcpp v3_20_01)
 find_ups_product(artdaq_database v1_01_00)
+find_ups_product(mongodb v3_4_0)
 
 include(CetTest)
 cet_enable_asserts()
@@ -9,6 +10,8 @@ link_libraries(
 #        FECore
         ${CETLIB}
         ${FHICLCPP}
+  ${BSONCXXLIB}
+  ${MONGOCXXLIB}
     	${artdaq-database_ConfigurationDB}
 		$ENV{XDAQ_LIB}/liblog4cplus.so
 		$ENV{XDAQ_LIB}/libasyncresolv
@@ -26,6 +29,7 @@ link_libraries(
 		$ENV{XDAQ_LIB}/libxdata.so
 		$ENV{XDAQ_LIB}/libb2innub.so
 		/usr/lib64/libuuid.so
+		${Boost_SYSTEM_LIBRARY}
 )
 
 cet_test(DatabaseConfiguration_t USE_BOOST_UNIT)

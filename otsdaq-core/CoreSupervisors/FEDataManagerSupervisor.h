@@ -2,7 +2,6 @@
 #define _ots_FEDataManagerSupervisor_h_
 
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
-#include "otsdaq-core/MPICore/MPIInitializer.h"
 
 namespace ots
 {
@@ -14,7 +13,7 @@ public:
 
     XDAQ_INSTANTIATOR();
 
-    FEDataManagerSupervisor              (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
+    FEDataManagerSupervisor              (xdaq::ApplicationStub * s) ;
     virtual ~FEDataManagerSupervisor     (void);
 
 private:

@@ -25,7 +25,6 @@ using namespace ots;
 //========================================================================================================================
 ARTDAQBuilderConfiguration::ARTDAQBuilderConfiguration(void)
 	: ConfigurationBase("ARTDAQBuilderConfiguration")
-	, configManager_(0)
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names used in C++ MUST match the Configuration INFO  //
@@ -40,20 +39,13 @@ ARTDAQBuilderConfiguration::~ARTDAQBuilderConfiguration(void)
 //========================================================================================================================
 void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 {
-	configManager_ = configManager;
 	//make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
 	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
-	const XDAQContextConfiguration *contextConfig = configManager_->__GET_CONFIG__(XDAQContextConfiguration);
-
-	//	auto childrenMap = configManager->__SELF_NODE__.getChildren();
-	//
-	//	for(auto &child:childrenMap)
-	//		if(child.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
-	//			outputFHICL(child.second, contextConfig);
+	const XDAQContextConfiguration *contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);
 
 	std::vector<const XDAQContextConfiguration::XDAQContext *> builderContexts =
 		contextConfig->getEventBuilderContexts();
@@ -62,8 +54,10 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 	//	output associated fcl config file
 	for (auto &builderContext : builderContexts)
 	{
-		ConfigurationTree builderConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+		ConfigurationTree builderAppNode = contextConfig->getApplicationNode(configManager,
 			builderContext->contextUID_, builderContext->applications_[0].applicationUID_);
+		ConfigurationTree builderConfigNode = contextConfig->getSupervisorConfigNode(configManager,
+					builderContext->contextUID_, builderContext->applications_[0].applicationUID_);
 
 		__COUT__ << "Path for this aggregator config is " <<
 			builderContext->contextUID_ << "/" <<
@@ -71,10 +65,10 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager* configManager)
 			builderConfigNode.getValueAsString() <<
 			std::endl;
 
-		outputFHICL(builderConfigNode,
+		outputFHICL(configManager, builderConfigNode,
 			contextConfig->getARTDAQAppRank(builderContext->contextUID_),
 			contextConfig->getContextAddress(builderContext->contextUID_),
-			contextConfig->getARTDAQDataPort(builderContext->contextUID_),
+			contextConfig->getARTDAQDataPort(configManager,builderContext->contextUID_),
 			contextConfig);
 	}
 }
@@ -99,7 +93,8 @@ std::string ARTDAQBuilderConfiguration::getFHICLFilename(const ConfigurationTree
 }
 
 //========================================================================================================================
-void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
+void ARTDAQBuilderConfiguration::outputFHICL(ConfigurationManager* configManager,
+		const ConfigurationTree &builderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
 	const XDAQContextConfiguration *contextConfig)
 {
 	/*
@@ -290,9 +285,13 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 				for (auto &destination : destinations)
 				{
 					auto destinationContextUID = destination.second.getNode("destinationARTDAQContextLink").getValueAsString();
+
 					unsigned int destinationRank = contextConfig->getARTDAQAppRank(destinationContextUID);
 					std::string host = contextConfig->getContextAddress(destinationContextUID);
-					unsigned int port = contextConfig->getARTDAQDataPort(destinationContextUID);
+					unsigned int port = contextConfig->getARTDAQDataPort(configManager,destinationContextUID);
+					
+					
+					
 					OUT << destination.second.getNode("destinationKey").getValue() <<
 						": {" <<
 						" transferPluginType: " <<
@@ -372,9 +371,11 @@ void ARTDAQBuilderConfiguration::outputFHICL(const ConfigurationTree &builderNod
 				for (auto &source : sources)
 				{
 					auto sourceContextUID = source.second.getNode("sourceARTDAQContextLink").getValueAsString();
+
 					unsigned int sourceRank = contextConfig->getARTDAQAppRank(sourceContextUID);
 					std::string host = contextConfig->getContextAddress(sourceContextUID);
-					unsigned int port = contextConfig->getARTDAQDataPort(sourceContextUID);
+					unsigned int port = contextConfig->getARTDAQDataPort(configManager,sourceContextUID);
+					
 
 					OUT << source.second.getNode("sourceKey").getValue() <<
 						": {" <<

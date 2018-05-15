@@ -1,7 +1,7 @@
 #ifndef _ots_SOAPUtilities_h
 #define _ots_SOAPUtilities_h
 
-#include "xoap/MessageReference.h"
+#include <xoap/MessageReference.h>
 
 #include <string>
 

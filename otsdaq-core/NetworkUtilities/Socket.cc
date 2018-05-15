@@ -1,6 +1,6 @@
 #include "otsdaq-core/NetworkUtilities/Socket.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <iostream>
 #include <cassert>
@@ -152,7 +152,8 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
 
     if(!socketInitialized)
     {
-    	__SS__ << "FATAL: Socket could not initialize socket. Perhaps it is already in use?" << std::endl;
+    	__SS__ << "FATAL: Socket could not initialize socket (IP=" << IPAddress_ <<
+    			", Port=" << ntohs(socketAddress_.sin_port) << "). Perhaps it is already in use?" << std::endl;
 		std::cout << ss.str();
 		throw std::runtime_error(ss.str());
     }

@@ -1,5 +1,5 @@
 #include "otsdaq-core/RootUtilities/DQMHistosBase.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <TDirectory.h>
 #include <TFile.h>

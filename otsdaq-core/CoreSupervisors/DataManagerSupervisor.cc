@@ -8,15 +8,15 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(DataManagerSupervisor)
 
 //========================================================================================================================
-DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception)
+DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub * s) 
 //FIXME WE MUST ADD A MAP OF INSTANCES IN THE SINGLETON
 : CoreSupervisorBase(s)
 {
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 			DataManagerSingleton::getInstance<DataManager>(
-					CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
-					CoreSupervisorBase::supervisorConfigurationPath_,
-					CoreSupervisorBase::supervisorApplicationUID_
+					CorePropertySupervisorBase::theContextTreeNode_,//CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
+					CorePropertySupervisorBase::supervisorConfigurationPath_,
+					CorePropertySupervisorBase::supervisorApplicationUID_
 			)
 	);
 }
@@ -24,6 +24,6 @@ DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub * s) throw (x
 //========================================================================================================================
 DataManagerSupervisor::~DataManagerSupervisor(void)
 {
-	DataManagerSingleton::deleteInstance(CoreSupervisorBase::supervisorApplicationUID_);
+	DataManagerSingleton::deleteInstance(CorePropertySupervisorBase::supervisorApplicationUID_);
 	theStateMachineImplementation_.pop_back();
 }

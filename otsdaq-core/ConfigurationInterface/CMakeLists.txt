@@ -2,7 +2,10 @@ cet_make(LIBRARY_NAME ConfigurationInterface
 		 LIBRARIES
 		 PluginMakers
 		 ConfigurationDataFormats
-		 ProgressBar
+		 ProgressBar		 
+		 Macros
+		 dl
+		 
          ${CETLIB}
          artdaq-database_ConfigurationDB
          artdaq-database_DataFormats_Json
@@ -11,6 +14,7 @@ cet_make(LIBRARY_NAME ConfigurationInterface
          artdaq-database_JsonDocument
          artdaq-database_BasicTypes
          artdaq-database_StorageProviders_FileSystemDB
+		 ${Boost_SYSTEM_LIBRARY}
 )
 
 
@@ -25,8 +29,9 @@ install_source()
 #		 otsdaq-core_ConfigurationPluginDataFormats_DetectorConfiguration_configuration
 #		 otsdaq-core_ConfigurationPluginDataFormats_FEConfiguration_configuration
 #		 otsdaq-core_ConfigurationPluginDataFormats_MaskConfiguration_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_ModuleToFEConfiguration_configuration
+#		 otsdaq-core_ConfigsurationPluginDataFormats_ModuleToFEConfiguration_configuration
 #		 otsdaq-core_ConfigurationPluginDataFormats_DetectorToFEConfiguration_configuration
 #		 otsdaq-core_ConfigurationPluginDataFormats_TemplateConfiguration_configuration
 #		 otsdaq-core_ConfigurationPluginDataFormats_VersionAliases_configuration
 #		 otsdaq-core_ConfigurationPluginDataFormats_XDAQApplicationConfiguration_configuration
+#		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration

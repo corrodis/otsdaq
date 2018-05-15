@@ -242,16 +242,18 @@ public:
 
 	//navigating between nodes
 	ConfigurationTree						getNode				        (const std::string& nodeName, bool doNotThrowOnBrokenUIDLinks=false) const;
-	ConfigurationTree				        getBackNode 		        (      std::string  nodeName, unsigned int backSteps=1) const;
+	ConfigurationTree				        getBackNode 		        (	   std::string  nodeName, unsigned int backSteps=1) const;
+	ConfigurationTree				        getForwardNode 		        (      std::string  nodeName, unsigned int forwardSteps=1) const;
 
 
 	//extracting information from node
+	const ConfigurationManager*				getConfigurationManager		(void) const { return configMgr_; }
 	const std::string&						getConfigurationName		(void) const;
 	const std::string&						getFieldConfigurationName	(void) const;
 	const ConfigurationVersion&				getConfigurationVersion		(void) const;
 	const time_t&							getConfigurationCreationTime(void) const;
-	std::vector<std::string>				getChildrenNames	        (void) const;
-	std::vector<std::pair<std::string,ConfigurationTree> >	getChildren	(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap = std::map<std::string /*relative-path*/, std::string /*value*/>()) const;
+	std::vector<std::string>				getChildrenNames	        (bool byPriority = false) const;
+	std::vector<std::pair<std::string,ConfigurationTree> >	getChildren	(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap = std::map<std::string /*relative-path*/, std::string /*value*/>(), bool byPriority = false) const;
 	std::map<std::string,ConfigurationTree> getChildrenMap	            (void) const;
 	std::string								getEscapedValue		        (void) const;
 	const std::string&						getValueAsString	        (bool returnLinkTableValue=false) const;
@@ -322,7 +324,7 @@ private:
 
 	static ConfigurationTree	recurse		  (const ConfigurationTree& t, const std::string& childPath, bool doNotThrowOnBrokenUIDLinks);
 	static void 				recursivePrint(const ConfigurationTree& t, unsigned int depth, std::ostream &out, std::string space);
-	static bool					wildCardMatch (const std::string& needle, const std::string& haystack);
+	//static bool					wildCardMatch (const std::string& needle, const std::string& haystack);
 
 	void						recursiveGetCommonFields(std::vector<ConfigurationTree::RecordField> &fieldCandidateList, std::vector<int> &fieldCount, const std::vector<std::string /*relative-path*/> &fieldAcceptList, const std::vector<std::string /*relative-path*/> &fieldRejectList, unsigned int depth, const std::string &relativePathBase, bool inFirstRecord) const;
 	ConfigurationTree			getValueAsTreeNode			(void) const;

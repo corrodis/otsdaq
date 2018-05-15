@@ -1,12 +1,12 @@
 #include "otsdaq-core/FECore/FEVInterfacesManager.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/FECore/FEVInterface.h"
 #include "otsdaq-core/PluginMakers/MakeInterface.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "artdaq/DAQdata/configureMessageFacility.hh"
+#include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "fhiclcpp/make_ParameterSet.h"
 
@@ -162,7 +162,7 @@ std::string FEVInterfacesManager::getFEListString(const std::string &supervisorL
 
 	for(const auto& it : theFEInterfaces_)
 	{
-	  __COUT__ << "Just curious: it.first is " << it.first << std::endl;
+	  __COUT__ << "FE name = " << it.first << std::endl;
 
 	  retList += it.second->getInterfaceType() +
 			  ":" + supervisorLid + ":" +

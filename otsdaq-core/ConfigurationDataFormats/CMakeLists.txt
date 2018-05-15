@@ -1,7 +1,7 @@
 cet_make(LIBRARY_NAME ConfigurationDataFormats
 		 LIBRARIES
 		 XmlUtilities
-		 #JSONParser
+		 Macros
 		 ${XDAQ_XERCESC}
 )
 

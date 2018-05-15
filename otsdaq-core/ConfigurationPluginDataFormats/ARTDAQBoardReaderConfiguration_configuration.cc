@@ -46,20 +46,7 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 	const XDAQContextConfiguration *contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);
-
-	//	//ConfigurationTree contextNode = configManager->getNode(contextConfig->getConfigurationName());
-	//
-	//	auto childrenMap = configManager->__SELF_NODE__.getChildren();
-	//
-	//	//std::string appUID, buffUID, consumerUID;
-	//	for(auto &child:childrenMap)
-	//		if(child.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
-	//		{
-	////			getBoardReaderParents(child.second, contextConfig,
-	////					contextNode, appUID, buffUID, consumerUID);
-	//			outputFHICL(child.second, contextConfig);
-	//		}
-
+	
 	std::vector<const XDAQContextConfiguration::XDAQContext *> readerContexts =
 		contextConfig->getBoardReaderContexts();
 
@@ -134,10 +121,10 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 		else {
 			if (child.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				outputFHICL(child.second,
+				outputFHICL(configManager, child.second,
 					contextConfig->getARTDAQAppRank(thisContext->contextUID_),
 					contextConfig->getContextAddress(thisContext->contextUID_),
-					contextConfig->getARTDAQDataPort(thisContext->contextUID_),
+					contextConfig->getARTDAQDataPort(configManager,thisContext->contextUID_),
 					contextConfig);
 			}
 		}
@@ -173,7 +160,8 @@ std::string ARTDAQBoardReaderConfiguration::getFHICLFilename(const Configuration
 }
 
 //========================================================================================================================
-void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardReaderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
+void ARTDAQBoardReaderConfiguration::outputFHICL(ConfigurationManager* configManager,
+		const ConfigurationTree &boardReaderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
 	const XDAQContextConfiguration *contextConfig)
 {
 	/*
@@ -394,9 +382,11 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(const ConfigurationTree &boardR
 			for (auto &destination : destinations)
 			{
 				auto destinationContextUID = destination.second.getNode("destinationARTDAQContextLink").getValueAsString();
+
 				unsigned int destinationRank = contextConfig->getARTDAQAppRank(destinationContextUID);
 				std::string host = contextConfig->getContextAddress(destinationContextUID);
-				unsigned int port = contextConfig->getARTDAQDataPort(destinationContextUID);
+				unsigned int port = contextConfig->getARTDAQDataPort(configManager,destinationContextUID);
+				
 				OUT << destination.second.getNode("destinationKey").getValue() <<
 					": {" <<
 					" transferPluginType: " <<

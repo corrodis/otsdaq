@@ -9,23 +9,22 @@ simple_plugin(ArtdaqOtsBuildInfo "module"
   artdaq_BuildInfo
   artdaq-core_BuildInfo
   artdaq-ots_BuildInfo
-  MessageFacility
   ${FHICLCPP}
   ${CETLIB}
   ${CETLIB_EXCEPT}
 )
 
 simple_plugin(UDPDump "module"
-  MessageFacility
   ${FHICLCPP}
   ${CETLIB}
   ${CETLIB_EXCEPT}
 )
 
 simple_plugin(JSONDispatcher "module"
-  MessageFacility
   ${Boost_SYSTEM_LIBRARY}
   ${CETLIB_EXCEPT}
+  pthread
+  MF_MessageLogger
 )
 
 install_headers()
