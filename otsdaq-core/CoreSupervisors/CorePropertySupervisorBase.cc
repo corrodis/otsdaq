@@ -164,8 +164,8 @@ bool CorePropertySupervisorBase::doPermissionsGrantAccess(
 	//return true if a permission level group name is found with a permission level
 	//	greater than or equal to the permission level at a matching group name entry in the thresholds map.
 
-	__COUTV__(StringMacros::mapToString(permissionLevelsMap));
-	__COUTV__(StringMacros::mapToString(permissionThresholdsMap));
+	//__COUTV__(StringMacros::mapToString(permissionLevelsMap));
+	//__COUTV__(StringMacros::mapToString(permissionThresholdsMap));
 
 	for(const auto& permissionLevelGroupPair: permissionLevelsMap)
 	{

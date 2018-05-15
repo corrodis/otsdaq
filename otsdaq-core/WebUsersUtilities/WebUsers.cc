@@ -429,7 +429,7 @@ bool WebUsers::checkRequestAccess(
 
 	if(!userInfo.automatedCommand_)
 	{
-		__COUT__ << "requestType ==========>>> " << userInfo.requestType_;
+		__COUT__ << "requestType ==========>>> " << userInfo.requestType_ << __E__;
 		__COUTV__((unsigned int)userInfo.permissionLevel_);
 		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
 	}
@@ -3077,8 +3077,8 @@ void WebUsers::deleteUserData()
 	//delete Visualizer folders
 	std::system(("rm -rf " + std::string(serviceDataPath) + "/VisualizerData/").c_str());
 
-	//delete active groups file
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/ActiveConfigurationGroups.cfg").c_str());
+	//DO NOT delete active groups file (this messes with people's configuration world, which is not expected when "resetting user info")
+	//std::system(("rm -rf " + std::string(serviceDataPath) + "/ActiveConfigurationGroups.cfg").c_str());
 
 	//delete Logbook folders
 	std::system(("rm -rf " + std::string(getenv("LOGBOOK_DATA_PATH")) + "/").c_str());
