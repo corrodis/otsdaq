@@ -40,11 +40,11 @@ public:
     static void						extractPermissionsMapFromString (const std::string& permissionsString, std::map<std::string,WebUsers::permissionLevel_t>& permissionsMap);
     static bool 					doPermissionsGrantAccess		(std::map<std::string,WebUsers::permissionLevel_t>& permissionLevelsMap, std::map<std::string,WebUsers::permissionLevel_t>& permissionThresholdsMap);
 
+    ConfigurationTree				getContextTreeNode 				(void) const { return theConfigurationManager_->getNode(theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getConfigurationName()); }
 protected:
 
 
     ConfigurationManager*          	theConfigurationManager_;
-    ConfigurationTree				theContextTreeNode_;
 
 	std::string                    	supervisorClass_;
 	std::string                    	supervisorClassNoNamespace_;
