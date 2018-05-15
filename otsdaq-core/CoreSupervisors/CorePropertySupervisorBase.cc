@@ -97,8 +97,8 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 {
 	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
 
-	__SUP_COUT__ << "Setting up Core Supervisor Base property defaults for supervisor" <<
-			"..." << __E__;
+	//__SUP_COUT__ << "Setting up Core Supervisor Base property defaults for supervisor" <<
+	//		"..." << __E__;
 
 	//set core Supervisor base class defaults
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,		"*=1");
@@ -200,8 +200,7 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 
 	CorePropertySupervisorBase::setSupervisorPropertyDefaults(); 	//calls base class version defaults
 
-	__SUP_COUT__ << "Setting up supervisor specific property DEFAULTS for supervisor" <<
-			"..." << __E__;
+	//__SUP_COUT__ << "Setting up supervisor specific property DEFAULTS for supervisor..." << __E__;
 	setSupervisorPropertyDefaults();						//calls override version defaults
 //	__SUP_COUT__ << "Done setting up supervisor specific property DEFAULTS for supervisor" <<
 //			"." << __E__;
@@ -214,8 +213,7 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 		CorePropertySupervisorBase::loadUserSupervisorProperties();		//loads user settings from configuration
 
 
-	__SUP_COUT__ << "Setting up supervisor specific FORCED properties for supervisor" <<
-			"..." << __E__;
+	//__SUP_COUT__ << "Setting up supervisor specific FORCED properties for supervisor..." << __E__;
 	forceSupervisorPropertyValues();						//calls override forced values
 //	__SUP_COUT__ << "Done setting up supervisor specific FORCED properties for supervisor" <<
 //			"." << __E__;
@@ -252,7 +250,7 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 	}
 
 
-	__SUP_COUT__ << "Final property settings:" << std::endl;
+	__SUP_COUT__ << "Final supervisor property settings:" << std::endl;
 	for(auto& property: propertyMap_)
 		__SUP_COUT__ << "\t" << property.first << " = " << property.second << __E__;
 }
@@ -285,9 +283,9 @@ catch(...)
 //	try to get user supervisor properties
 void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 {
-	__SUP_COUT__ << "Loading user properties for supervisor '" <<
-			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
-			"'..." << __E__;
+//	__SUP_COUT__ << "Loading user properties for supervisor '" <<
+//			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
+//			"'..." << __E__;
 
 	//re-acquire the configuration supervisor node, in case the config has changed
 	auto supervisorNode = CorePropertySupervisorBase::getSupervisorTreeNode();
@@ -306,12 +304,12 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 	}
 	catch(...)
 	{
-		__SUP_COUT__ << "No supervisor security settings found, going with defaults." << __E__;
+		__SUP_COUT__ << "No user supervisor property settings found in the configuration tree, going with the defaults." << __E__;
 	}
 
-	__SUP_COUT__ << "Done loading user properties for supervisor '" <<
-			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
-			"'" << __E__;
+	//	__SUP_COUT__ << "Done loading user properties for supervisor '" <<
+	//			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
+	//			"'" << __E__;
 }
 
 //========================================================================================================================

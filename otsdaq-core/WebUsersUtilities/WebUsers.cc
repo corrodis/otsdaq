@@ -429,7 +429,7 @@ bool WebUsers::checkRequestAccess(
 
 	if(!userInfo.automatedCommand_)
 	{
-		__COUTV__(userInfo.requestType_);
+		__COUT__ << "requestType ==========>>> " << userInfo.requestType_;
 		__COUTV__((unsigned int)userInfo.permissionLevel_);
 		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
 	}
