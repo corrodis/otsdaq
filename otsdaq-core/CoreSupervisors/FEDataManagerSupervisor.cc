@@ -16,14 +16,14 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s)
 	//WARNING THE ORDER IS IMPORTANT SINCE THE FIRST ELEMENTS WILLL BE CALLED FIRST!!!!!
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 			new FEVInterfacesManager(
-					CorePropertySupervisorBase::theContextTreeNode_,//CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
+					CorePropertySupervisorBase::getContextTreeNode(),
 					CorePropertySupervisorBase::supervisorConfigurationPath_
 			)
 	);
 
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 			DataManagerSingleton::getInstance<DataManager>(
-					CorePropertySupervisorBase::theContextTreeNode_,//CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
+					CorePropertySupervisorBase::getContextTreeNode(),
 					CorePropertySupervisorBase::supervisorConfigurationPath_,
 					CorePropertySupervisorBase::supervisorApplicationUID_
 			)

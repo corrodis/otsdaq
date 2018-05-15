@@ -154,7 +154,7 @@ void GatewaySupervisor::init(void)
 	try
 	{
 		enableStateChanges =
-				CorePropertySupervisorBase::theContextTreeNode_.getNode("EnableStateChangesOverUDP").getValue<bool>();
+				CorePropertySupervisorBase::getContextTreeNode().getNode("EnableStateChangesOverUDP").getValue<bool>();
 	}
 	catch (...)
 	{
@@ -163,11 +163,11 @@ void GatewaySupervisor::init(void)
 
 	try
 	{
-		auto artdaqStateChangeEnabled = CorePropertySupervisorBase::theContextTreeNode_.getNode("EnableARTDAQCommanderPlugin").getValue<bool>();
+		auto artdaqStateChangeEnabled = CorePropertySupervisorBase::getContextTreeNode().getNode("EnableARTDAQCommanderPlugin").getValue<bool>();
 		if (artdaqStateChangeEnabled)
 		{
-			auto artdaqStateChangePort = CorePropertySupervisorBase::theContextTreeNode_.getNode("ARTDAQCommanderID").getValue<int>();
-			auto artdaqStateChangePluginType = CorePropertySupervisorBase::theContextTreeNode_.getNode("ARTDAQCommanderType").getValue<std::string>();
+			auto artdaqStateChangePort = CorePropertySupervisorBase::getContextTreeNode().getNode("ARTDAQCommanderID").getValue<int>();
+			auto artdaqStateChangePluginType = CorePropertySupervisorBase::getContextTreeNode().getNode("ARTDAQCommanderType").getValue<std::string>();
 			theArtdaqCommandable_.init(artdaqStateChangePort, artdaqStateChangePluginType);
 		}
 	}

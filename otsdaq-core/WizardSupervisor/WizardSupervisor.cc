@@ -391,12 +391,12 @@ throw (xgi::exception::Exception)
 	else
 	{
 	  //defaultSequence_ = false;
-	  __COUT__ << "***Successfully authenticated security sequence. Default Sequence: "<<  defaultSequence_ <<
-				time(0) << std::endl;
+	  __COUT__ << "*** Successfully authenticated security sequence " <<
+				"@ " << time(0) << std::endl;
 
 		if (defaultSequence_)
 		{
-		  __COUT__ << " UNSECURE!!!" << std::endl;
+		  //__COUT__ << " UNSECURE!!!" << std::endl;
 		  securityWarning = "&secure=False";
 		}
 	}
@@ -562,8 +562,9 @@ throw (xgi::exception::Exception)
 
 	if(!securityFile)
 	{
-		__SS__ << "Error opening file: "<< securityFileName << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		//__SS__ << "Error opening file: "<< securityFileName << std::endl;
+		//__COUT_ERR__ << "\n" << ss.str();
+
 		//throw std::runtime_error(ss.str());
 		//return;
 		security = "DigestAccessAuthentication"; //default security when no file exists

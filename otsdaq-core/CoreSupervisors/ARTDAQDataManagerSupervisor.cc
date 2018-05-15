@@ -21,7 +21,7 @@ ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub *
 
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 			DataManagerSingleton::getInstance<ARTDAQDataManager>(
-					CorePropertySupervisorBase::theContextTreeNode_,//CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
+					CorePropertySupervisorBase::getContextTreeNode(),
 					CorePropertySupervisorBase::supervisorConfigurationPath_,
 					CorePropertySupervisorBase::supervisorApplicationUID_)
 	);

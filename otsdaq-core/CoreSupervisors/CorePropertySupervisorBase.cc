@@ -10,7 +10,6 @@ const CorePropertySupervisorBase::SupervisorProperties 	CorePropertySupervisorBa
 //========================================================================================================================
 CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* application)
 : theConfigurationManager_      (new ConfigurationManager)
-, theContextTreeNode_ 			(theConfigurationManager_->getNode(theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getConfigurationName()))
 , supervisorClass_              (application->getApplicationDescriptor()->getClassName())
 , supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 , supervisorContextUID_         ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS")
@@ -165,8 +164,8 @@ bool CorePropertySupervisorBase::doPermissionsGrantAccess(
 	//return true if a permission level group name is found with a permission level
 	//	greater than or equal to the permission level at a matching group name entry in the thresholds map.
 
-	__COUTV__(StringMacros::mapToString(permissionLevelsMap));
-	__COUTV__(StringMacros::mapToString(permissionThresholdsMap));
+	//__COUTV__(StringMacros::mapToString(permissionLevelsMap));
+	//__COUTV__(StringMacros::mapToString(permissionThresholdsMap));
 
 	for(const auto& permissionLevelGroupPair: permissionLevelsMap)
 	{
