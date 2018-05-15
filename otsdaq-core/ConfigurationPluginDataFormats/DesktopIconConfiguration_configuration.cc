@@ -1,6 +1,7 @@
 #include "otsdaq-core/ConfigurationPluginDataFormats/DesktopIconConfiguration.h"
 #include "otsdaq-core/Macros/ConfigurationPluginMacros.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/WebUsersUtilities/WebUsers.h"
 
 #include <iostream>
 #include <fstream>      // std::fstream
@@ -33,6 +34,9 @@ using namespace ots;
 DesktopIconConfiguration::DesktopIconConfiguration(void) :
 		ConfigurationBase("DesktopIconConfiguration")
 {
+	//Icon list no longer passes through file! so delete it from user's $USER_DATA
+	std::system(("rm -rf " + (std::string)DESKTOP_ICONS_FILE).c_str());
+
  	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names used in C++ MUST match the Configuration INFO  //
 	//////////////////////////////////////////////////////////////////////
@@ -72,71 +76,67 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 //	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 
-	bool 			status;
-	std::string 	val;
 	unsigned int	intVal;
-
-	bool 			first = true;
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
+	activeDesktopIcons_.clear();
 
-	//generate icons file
-	std::fstream fs;
-	fs.open(DESKTOP_ICONS_FILE, std::fstream::out | std::fstream::trunc);
-	if(fs.fail())
-	{
-		__SS__ << "Failed to open Desktop Icons run file: " << DESKTOP_ICONS_FILE << std::endl;
-		throw std::runtime_error(ss.str());
-	}
-
+	DesktopIconConfiguration::DesktopIcon* icon;
+	bool addedAppId;
+	bool numeric;
+	unsigned int i;
 	for(auto &child:childrenMap)
 	{
-		child.second.getNode(COL_STATUS	).getValue(status);
-		if(!status) continue;
+		if(!child.second.getNode(COL_STATUS	).getValue<bool>()) continue;
 
-		if(first) first = false;
-		else fs << ",";
+		activeDesktopIcons_.push_back(DesktopIconConfiguration::DesktopIcon());
+		icon = &(activeDesktopIcons_.back());
 
-		child.second.getNode(COL_CAPTION	).getValue(val);
-		fs << removeCommas(val, false, true);
-		//__COUT__ << "Icon caption: " << val << std::endl;
+		icon->caption_ 						= child.second.getNode(COL_CAPTION					).getValue<std::string>();
+		icon->alternateText_ 				= child.second.getNode(COL_ALTERNATE_TEXT			).getValue<std::string>();
+		icon->enforceOneWindowInstance_ 	= child.second.getNode(COL_FORCE_ONLY_ONE_INSTANCE	).getValue<bool>();
+		icon->permissionThresholdString_ 	= child.second.getNode(COL_REQUIRED_PERMISSION_LEVEL).getValue<std::string>();
+		icon->imageURL_					 	= child.second.getNode(COL_IMAGE_URL				).getValue<std::string>();
+		icon->windowContentURL_				= child.second.getNode(COL_WINDOW_CONTENT_URL		).getValue<std::string>();
+		icon->folderPath_					= child.second.getNode(COL_FOLDER_PATH				).getValue<std::string>();
 
-		fs << ",";
-		child.second.getNode(COL_ALTERNATE_TEXT	).getValue(val);
-		fs << removeCommas(val, false, true);
+		if(icon->folderPath_ == ViewColumnInfo::DATATYPE_STRING_DEFAULT) icon->folderPath_ = ""; //convert DEFAULT to empty string
 
-		fs << ",";
-		child.second.getNode(COL_FORCE_ONLY_ONE_INSTANCE	).getValue(status);
-		fs << (status?"1":"0");
+		numeric = true;
+		for(i=0;i<icon->permissionThresholdString_.size();++i)
+			if(!(icon->permissionThresholdString_[i] >= '0' &&
+					icon->permissionThresholdString_[i] <= '9'))
+			{
+				numeric = false;
+				break;
+			}
+		//for backwards compatibility, if permissions threshold is a single number
+		//	assume it is the threshold intended for the WebUsers::DEFAULT_USER_GROUP group
+		if(numeric)
+			icon->permissionThresholdString_ = WebUsers::DEFAULT_USER_GROUP + ":" + icon->permissionThresholdString_;
 
-		fs << ",";
-		child.second.getNode(COL_REQUIRED_PERMISSION_LEVEL	).getValue(val);
-		fs << removeCommas(val);
+		//remove all commas from member strings because desktop icons are served to client in comma-separated string
+		icon->caption_ 						= removeCommas(icon->caption_, 			false /*andHexReplace*/, true /*andHTMLReplace*/);
+		icon->alternateText_ 				= removeCommas(icon->alternateText_, 	false /*andHexReplace*/, true /*andHTMLReplace*/);
+		icon->imageURL_ 					= removeCommas(icon->imageURL_, 		true /*andHexReplace*/);
+		icon->windowContentURL_ 			= removeCommas(icon->windowContentURL_, true /*andHexReplace*/);
+		icon->folderPath_ 					= removeCommas(icon->folderPath_, 		false /*andHexReplace*/, true /*andHTMLReplace*/);
 
-		fs << ",";
-		child.second.getNode(COL_IMAGE_URL	).getValue(val);
-		fs << removeCommas(val,true);
-
-		fs << ",";
-		child.second.getNode(COL_WINDOW_CONTENT_URL	).getValue(val);
-		val = removeCommas(val,true);
-		fs << val;
-
-		bool addedAppId = false;
-		//add URN/LID if link is given
+		//add URN/LID to windowContentURL_, if link is given
+		addedAppId = false;
 		if(!child.second.getNode(COL_APP_LINK	).isDisconnected())
 		{
 			//if last character is not '='
 			//	then assume need to add "?urn="
-			if(val[val.size()-1] != '=')
-				fs << "?urn=";
+			if(icon->windowContentURL_[icon->windowContentURL_.size()-1] != '=')
+				icon->windowContentURL_ += "?urn=";
 
 			//__COUT__ << "Following Application link." << std::endl;
 			child.second.getNode(COL_APP_LINK	).getNode(COL_APP_ID		).getValue(intVal);
+			icon->windowContentURL_ += std::to_string(intVal);
 
 			//__COUT__ << "URN/LID=" << intVal << std::endl;
-			fs << intVal; //append number
 			addedAppId = true;
 		}
 
@@ -145,11 +145,11 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 		{
 			//if there is no '?' found
 			//	then assume need to add "?"
-			if(val.find('?') == std::string::npos)
-				fs << '?';
+			if(icon->windowContentURL_.find('?') == std::string::npos)
+				icon->windowContentURL_ += '?';
 			else if(addedAppId ||
-					val[val.size()-1] != '?') //if not first parameter, add &
-				fs << '&';
+					icon->windowContentURL_[icon->windowContentURL_.size()-1] != '?') //if not first parameter, add &
+				icon->windowContentURL_ += '&';
 
 			//now add each paramter separated by &
 			auto paramGroupMap = child.second.getNode(COL_PARAMETER_LINK	).getChildren();
@@ -157,24 +157,112 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 			for(const auto param:paramGroupMap)
 			{
 				if(notFirst)
-					fs << '&';
+					icon->windowContentURL_ += '&';
 				else
 					notFirst = true;
-				fs << ConfigurationManager::encodeURIComponent(
-						param.second.getNode(COL_PARAMETER_KEY).getValue<std::string>()) << "=" <<
-								ConfigurationManager::encodeURIComponent(
+				icon->windowContentURL_ += ConfigurationManager::encodeURIComponent(
+						param.second.getNode(COL_PARAMETER_KEY).getValue<std::string>()) +
+								"=" + ConfigurationManager::encodeURIComponent(
 										param.second.getNode(COL_PARAMETER_VALUE).getValue<std::string>());
 			}
 		}
+	} //end main icon extraction loop
 
-		fs << ",";
-		child.second.getNode(COL_FOLDER_PATH	).getValue(val);
-		if(val == ViewColumnInfo::DATATYPE_STRING_DEFAULT) val = "";
- 		fs << removeCommas(val,true);
-	}
-
-	//close icons file
-	fs.close();
+//
+//	//generate icons file
+//	std::fstream fs;
+//	fs.open(DESKTOP_ICONS_FILE, std::fstream::out | std::fstream::trunc);
+//	if(fs.fail())
+//	{
+//		__SS__ << "Failed to open Desktop Icons run file: " << DESKTOP_ICONS_FILE << std::endl;
+//		throw std::runtime_error(ss.str());
+//	}
+//
+//	for(auto &child:childrenMap)
+//	{
+//		child.second.getNode(COL_STATUS	).getValue(status);
+//		if(!status) continue;
+//
+//		if(first) first = false;
+//		else fs << ",";
+//
+//		child.second.getNode(COL_CAPTION	).getValue(val);
+//		fs << removeCommas(val, false, true);
+//		//__COUT__ << "Icon caption: " << val << std::endl;
+//
+//		fs << ",";
+//		child.second.getNode(COL_ALTERNATE_TEXT	).getValue(val);
+//		fs << removeCommas(val, false, true);
+//
+//		fs << ",";
+//		child.second.getNode(COL_FORCE_ONLY_ONE_INSTANCE	).getValue(status);
+//		fs << (status?"1":"0");
+//
+//		fs << ",";
+//		child.second.getNode(COL_REQUIRED_PERMISSION_LEVEL	).getValue(val);
+//		fs << removeCommas(val);
+//
+//		fs << ",";
+//		child.second.getNode(COL_IMAGE_URL	).getValue(val);
+//		fs << removeCommas(val,true);
+//
+//		fs << ",";
+//		child.second.getNode(COL_WINDOW_CONTENT_URL	).getValue(val);
+//		val = removeCommas(val,true);
+//		fs << val;
+//
+//		bool addedAppId = false;
+//		//add URN/LID if link is given
+//		if(!child.second.getNode(COL_APP_LINK	).isDisconnected())
+//		{
+//			//if last character is not '='
+//			//	then assume need to add "?urn="
+//			if(val[val.size()-1] != '=')
+//				fs << "?urn=";
+//
+//			//__COUT__ << "Following Application link." << std::endl;
+//			child.second.getNode(COL_APP_LINK	).getNode(COL_APP_ID		).getValue(intVal);
+//
+//			//__COUT__ << "URN/LID=" << intVal << std::endl;
+//			fs << intVal; //append number
+//			addedAppId = true;
+//		}
+//
+//		//add parameters if link is given
+//		if(!child.second.getNode(COL_PARAMETER_LINK	).isDisconnected())
+//		{
+//			//if there is no '?' found
+//			//	then assume need to add "?"
+//			if(val.find('?') == std::string::npos)
+//				fs << '?';
+//			else if(addedAppId ||
+//					val[val.size()-1] != '?') //if not first parameter, add &
+//				fs << '&';
+//
+//			//now add each paramter separated by &
+//			auto paramGroupMap = child.second.getNode(COL_PARAMETER_LINK	).getChildren();
+//			bool notFirst = false;
+//			for(const auto param:paramGroupMap)
+//			{
+//				if(notFirst)
+//					fs << '&';
+//				else
+//					notFirst = true;
+//				fs << ConfigurationManager::encodeURIComponent(
+//						param.second.getNode(COL_PARAMETER_KEY).getValue<std::string>()) << "=" <<
+//								ConfigurationManager::encodeURIComponent(
+//										param.second.getNode(COL_PARAMETER_VALUE).getValue<std::string>());
+//			}
+//		}
+//
+//		fs << ",";
+//		child.second.getNode(COL_FOLDER_PATH	).getValue(val);
+//		if(val == ViewColumnInfo::DATATYPE_STRING_DEFAULT) val = "";
+// 		fs << removeCommas(val,true);
+//	}
+//
+//	//close icons file
+//	fs.close();
 }
 
 std::string DesktopIconConfiguration::removeCommas(const std::string &str,

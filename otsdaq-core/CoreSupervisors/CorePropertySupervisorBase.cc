@@ -119,6 +119,75 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 }
 
 //========================================================================================================================
+//extractPermissionsMapFromString
+//	Static function that extract map function to standardize approach
+//		in case needed by supervisors for special permissions handling.
+//	For example, used to serve Desktop Icons.
+//
+//	permissionsString format is as follows:
+//		<groupName>:<permissionsThreshold> pairs separated by ',' '&' or '|'
+//		for example, to give access admins and pixel team but not calorimeter team:
+//			allUsers:255 | pixelTeam:1 | calorimeterTeam:0
+//
+//	Use with CorePropertySupervisorBase::doPermissionsGrantAccess to determine
+//		if access is allowed.
+void CorePropertySupervisorBase::extractPermissionsMapFromString(const std::string& permissionsString,
+		std::map<std::string,WebUsers::permissionLevel_t>& permissionsMap)
+{
+	permissionsMap.clear();
+	StringMacros::getMapFromString(
+			permissionsString,
+			permissionsMap);
+}
+
+//========================================================================================================================
+//doPermissionsGrantAccess
+//	Static function that checks permissionLevelsMap against permissionThresholdsMap and returns true if
+//	access requirements are met.
+//
+//	This is useful in standardizing approach for supervisors in case of
+//		of special permissions handling.
+//	For example, used to serve Desktop Icons.
+//
+//	permissionLevelsString format is as follows:
+//		<groupName>:<permissionsLevel> pairs separated by ',' '&' or '|'
+//		for example, to be a standard user and an admin on the pixel team and no access to calorimeter team:
+//			allUsers:1 | pixelTeam:255 | calorimeterTeam:0
+//
+//	permissionThresoldsString format is as follows:
+//		<groupName>:<permissionsThreshold> pairs separated by ',' '&' or '|'
+//		for example, to give access admins and pixel team but not calorimeter team:
+//			allUsers:255 | pixelTeam:1 | calorimeterTeam:0
+bool CorePropertySupervisorBase::doPermissionsGrantAccess(
+		std::map<std::string,WebUsers::permissionLevel_t>& permissionLevelsMap,
+		std::map<std::string,WebUsers::permissionLevel_t>& permissionThresholdsMap)
+{
+	//return true if a permission level group name is found with a permission level
+	//	greater than or equal to the permission level at a matching group name entry in the thresholds map.
+
+	__COUTV__(StringMacros::mapToString(permissionLevelsMap));
+	__COUTV__(StringMacros::mapToString(permissionThresholdsMap));
+
+	for(const auto& permissionLevelGroupPair: permissionLevelsMap)
+	{
+		//__COUTV__(permissionLevelGroupPair.first); __COUTV__(permissionLevelGroupPair.second);
+
+		for(const auto& permissionThresholdGroupPair: permissionThresholdsMap)
+		{
+			//__COUTV__(permissionThresholdGroupPair.first); __COUTV__(permissionThresholdGroupPair.second);
+			if(permissionLevelGroupPair.first == permissionThresholdGroupPair.first &&
+					permissionThresholdGroupPair.second && //not explicitly disallowed
+					permissionLevelGroupPair.second >= permissionThresholdGroupPair.second)
+				return true; //access granted!
+		}
+	}
+	//if here, no access group match found
+	//so denied
+	return false;
+} //end doPermissionsGrantAccess
+
+
+//========================================================================================================================
 void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 {
 	if(propertiesAreSetup_) return;
@@ -151,9 +220,7 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 //	__SUP_COUT__ << "Done setting up supervisor specific FORCED properties for supervisor" <<
 //			"." << __E__;
 
-
-	propertyStruct_.UserPermissionsThreshold.clear();
-	StringMacros::getMapFromString(
+	CorePropertySupervisorBase::extractPermissionsMapFromString(
 			getSupervisorProperty(
 					CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold),
 					propertyStruct_.UserPermissionsThreshold);

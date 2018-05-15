@@ -13,19 +13,52 @@ namespace ots
 struct StringMacros
 {
 
-static bool					wildCardMatch							(const std::string& needle, 		const std::string& 							haystack);
+static bool					wildCardMatch							(const std::string& needle, 		const std::string& 							haystack,	unsigned int* priorityIndex = 0);
 static bool					inWildCardSet							(const std::string  needle, 		const std::set<std::string>& 				haystack);
 
 
 //========================================================================================================================
 //getWildCardMatchFromMap ~
-//	returns value if needle is in haystack otherwise throws exception (considering wildcards)
+//	returns value if needle is in haystack otherwise throws exception
+//	(considering wildcards AND match priority as defined by StringMacros::wildCardMatch)
 template<class T>
 static const T&				getWildCardMatchFromMap					(const std::string  needle, 		const std::map<std::string,T>& 				haystack)
 {
+	unsigned int matchPriority, bestMatchPriority = 0; //lowest number matters most for matches
+
+	if(!haystack.size())
+	{
+		__SS__ << "Needle '" << needle << "' not found in EMPTY wildcard haystack:" << __E__;
+		throw std::runtime_error(ss.str());
+	}
+
+	//__COUT__ << StringMacros::mapToString(haystack) << __E__;
+
+	std::string bestMatchKey;
 	for(const auto& haystackPair : haystack)
 		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
-		if(StringMacros::wildCardMatch(haystackPair.first,needle)) return haystackPair.second;
+		//	check resulting priority to see if we are done with search (when priority=1, can be done)
+		if(StringMacros::wildCardMatch(haystackPair.first,needle,
+				&matchPriority))
+		{
+			if(matchPriority == 1) //found best possible match, so done
+				return haystackPair.second;
+
+			if(!bestMatchPriority || matchPriority < bestMatchPriority)
+			{
+				//found new best match
+				bestMatchPriority = matchPriority;
+				bestMatchKey = haystackPair.first;
+			}
+		}
+
+	if(bestMatchPriority) //found a match, although not exact, i.e. wildcard was used
+	{
+		//__COUTV__(bestMatchPriority);
+		//__COUTV__(bestMatchKey);
+		//__COUT__ << "value found: " << haystack.at(bestMatchKey) << __E__;
+		return haystack.at(bestMatchKey);
+	}
 
 	__SS__ << "Needle '" << needle << "' not found in wildcard haystack:" << __E__;
 	bool first = true;

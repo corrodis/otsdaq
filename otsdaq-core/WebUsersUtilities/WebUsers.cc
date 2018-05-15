@@ -382,22 +382,6 @@ bool WebUsers::xmlRequestOnGateway(
 
 	return true; //access success!
 
-//
-//	/////////////////////////////////////////////////////
-//	//get user info for cookie code and check lock (now that username is available)
-//
-//	//getUserInfoForCookie(userInfo.cookieCode_, &tmpUsername_, &tmpDisplayName_,
-//	//		&tmpActiveSessionIndex_);
-//
-//	if(WebUsers::finalizeRequestAccess(out,
-//			xmldoc,
-//			userInfo,
-//			 UsersUsernameVector[userInfo.uid_],//tmpUsername_,
-//			 UsersDisplayNameVector[userInfo.uid_],//tmpDisplayName_,
-//			 userInfo.activeUserSessionIndex_))//tmpActiveSessionIndex_))
-//		return true;
-//	else
-//		goto HANDLE_ACCESS_FAILURE; //return false, access failed
 
 HANDLE_ACCESS_FAILURE:
 	//print out return string on failure
@@ -522,100 +506,7 @@ bool WebUsers::checkRequestAccess(
 
 	return true; //access success!
 
-//	//third. check group membership
-//	if(!isWizardMode && !userInfo.allowNoUser_)
-//	{
-//		//check groups allowed
-//		//	i.e. if user is a member of one of the groups allowed
-//		//			then grant access
-//		bool accept = false;
-//		for(const auto& userGroup:userInfo.groupMembership_)
-//			if(StringMacros::inWildCardSet(
-//					userGroup,
-//					userInfo.groupsAllowed_))
-//			{
-//				accept = true;
-//				break;
-//			}
-//
-//		if(!accept && userInfo.groupMembership_.size())
-//		{
-//			*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-//
-//			__COUT_INFO__ << "User (@" << userInfo.ip_ << ") has insufficient group permissions: user is in these groups... " <<
-//					StringMacros::setToString(userInfo.groupMembership_) << " and the allowed groups are... " <<
-//					StringMacros::setToString(userInfo.groupsAllowed_) << std::endl;
-//			return false;
-//		}
-//
-//		//if no access groups specified, then check groups disallowed
-//		if(!userInfo.groupMembership_.size())
-//		{
-//			for(const auto& userGroup:userInfo.groupMembership_)
-//				if(StringMacros::inWildCardSet(
-//						userGroup,
-//						userInfo.groupsDisallowed_))
-//				{
-//					*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-//
-//					__COUT_INFO__ << "User (@" << userInfo.ip_ << ") is in a disallowed group: user is in these groups... " <<
-//							StringMacros::setToString(userInfo.groupMembership_) << " and the disallowed groups are... " <<
-//							StringMacros::setToString(userInfo.groupsDisallowed_) << std::endl;
-//					return false;
-//				}
-//		}
-//	} //end group membership check
-
-
-
-	//third, finalize other things
-
-
-
 } //end checkRequestAccess()
-
-//FIXME -- delete this because all user info comes in one cookie check request now
-////========================================================================================================================
-////finalizeRequestAccess
-////	finalize user access parameters based on user with lock and additional user info
-////	note: this is accomplished at supervisors through extra request to the gateway for additional user info
-////		thus, the soap parameters here are from a different response than those for checkRequestAccess.
-//bool WebUsers::finalizeRequestAccess(
-//		//cgicc::Cgicc& 					cgi,
-//		std::ostringstream* 			out,
-//		HttpXmlDocument* 				xmldoc,
-//		WebUsers::RequestUserInfo&		userInfo,
-//		const std::string&				usernameResponse,
-//		const std::string&				displayNameResponse,
-//		const uint64_t&					activeSessionIndexResponse)
-//		//SOAPParameters&		            parameters)
-//{
-//	userInfo.setUsername(usernameResponse);
-//	userInfo.setDisplayName(displayNameResponse);
-//	userInfo.setActiveUserSessionIndex(activeSessionIndexResponse);
-//
-//
-//	if((userInfo.checkLock_ || userInfo.requireLock_) &&
-//			userInfo.usernameWithLock_ != "" &&
-//			userInfo.usernameWithLock_ != userInfo.username_)
-//	{
-//		*out << WebUsers::REQ_USER_LOCKOUT_RESPONSE;
-//		__COUT__ << "User '" << userInfo.username_ << "' is locked out. '" <<
-//				userInfo.usernameWithLock_ << "' has lock." << std::endl;
-//		return false;
-//	}
-//
-//	if(userInfo.requireLock_ &&
-//			userInfo.usernameWithLock_ != userInfo.username_)
-//	{
-//		*out << WebUsers::REQ_LOCK_REQUIRED_RESPONSE;
-//		__COUT__ << "User '" << userInfo.username_ << "' must have lock to proceed. ('" <<
-//				userInfo.usernameWithLock_ << "' has lock.)" << std::endl;
-//		return false;
-//	}
-//
-//	return true;
-//} //end finalizeRequestAccess()
 
 //========================================================================================================================
 //saveActiveSessions

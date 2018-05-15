@@ -10,6 +10,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
 #include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/DesktopIconConfiguration.h"
 #include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 
 
@@ -2648,32 +2649,65 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	else if(requestType == "getDesktopIcons")
 	{
 
-		std::string iconFileName = ICON_FILE_NAME;
-		std::ifstream iconFile;
-		std::string iconList = "";
-		std::string line;
-		iconFile.open(iconFileName.c_str());
+		//get icons and create comma-separated string based on user permissions
+		//	note: each icon has own permission threshold, so each user can have
+		//		a unique desktop icon experience.
 
-		if (!iconFile)
+		const DesktopIconConfiguration* iconConfiguration =
+				CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(DesktopIconConfiguration);
+		std::vector<DesktopIconConfiguration::DesktopIcon> icons =
+				iconConfiguration->getAllDesktopIcons();
+
+		std::string iconString = ""; //comma-separated icon string, 7 fields:
+		//				0 - caption 		= text below icon
+		//				1 - altText 		= text icon if no image given
+		//				2 - uniqueWin 		= if true, only one window is allowed, else multiple instances of window
+		//				3 - permissions 	= security level needed to see icon
+		//				4 - picfn 			= icon image filename
+		//				5 - linkurl 		= url of the window to open
+		//				6 - folderPath 		= folder and subfolder location '/' separated
+		//for example:
+		//State Machine,FSM,1,200,icon-Physics.gif,/WebPath/html/StateMachine.html?fsm_name=OtherRuns0,,Chat,CHAT,1,1,icon-Chat.png,/urn:xdaq-application:lid=250,,Visualizer,VIS,0,10,icon-Visualizer.png,/WebPath/html/Visualization.html?urn=270,,Configure,CFG,0,10,icon-Configure.png,/urn:xdaq-application:lid=281,,Front-ends,CFG,0,15,icon-Configure.png,/WebPath/html/ConfigurationGUI_subset.html?urn=281&subsetBasePath=FEInterfaceConfiguration&groupingFieldList=Status%2CFEInterfacePluginName&recordAlias=Front%2Dends&editableFieldList=%21%2ACommentDescription%2C%21SlowControls%2A,Config Subsets
+
+
+		//__COUTV__((unsigned int)userInfo.permissionLevel_);
+
+		std::map<std::string,WebUsers::permissionLevel_t> userPermissionLevelsMap =
+				theWebUsers_.getPermissionsForUser(userInfo.uid_);
+		std::map<std::string,WebUsers::permissionLevel_t> iconPermissionThresholdsMap;
+
+
+		bool firstIcon = true;
+		for(const auto& icon: icons)
 		{
-			__SUP_COUT__ << "Error opening file: " << iconFileName << std::endl;
-			system("pause");
-			return;
-		}
-		if (iconFile.is_open())
-		{
-			__SUP_COUT__ << "Getting Desktop Icons - opened file: " << iconFileName << std::endl;
-			while (std::getline(iconFile, line))
-			{
-				iconList = line;
-			}
-			//__SUP_COUT__ << iconList << std::endl;
+			//__COUTV__(icon.caption_);
+			//__COUTV__(icon.permissionThresholdString_);
 
-			//Close file
-			iconFile.close();
-		}
-		xmlOut.addTextElementToData("iconList", iconList);
+			CorePropertySupervisorBase::extractPermissionsMapFromString(
+					icon.permissionThresholdString_,
+					iconPermissionThresholdsMap);
 
+			if(!CorePropertySupervisorBase::doPermissionsGrantAccess(
+					userPermissionLevelsMap,
+					iconPermissionThresholdsMap)) continue; //skip icon if no access
+
+			//__COUTV__(icon.caption_);
+
+			//have icon access, so add to CSV string
+			if(firstIcon) firstIcon = false;
+			else iconString += ",";
+
+			iconString += icon.caption_;
+			iconString += "," + icon.alternateText_;
+			iconString += "," + std::string(icon.enforceOneWindowInstance_?"1":"0");
+			iconString += "," + std::string("1"); //set permission to 1 so the desktop shows every icon that the server allows (i.e., trust server security, ignore client security)
+			iconString += "," + icon.imageURL_;
+			iconString += "," + icon.windowContentURL_;
+			iconString += "," + icon.folderPath_;
+		}
+		__COUTV__(iconString);
+
+		xmlOut.addTextElementToData("iconList", iconString);
 	}
 	else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 	{

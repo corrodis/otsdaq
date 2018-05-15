@@ -1,17 +1,5 @@
 #ifndef _ots_CorePropertySupervisorBase_h_
 #define _ots_CorePropertySupervisorBase_h_
-//
-//#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
-//#include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
-//#include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
-//#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
-//#include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
-
-//#include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
-//#include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
-//#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
-//#include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
-
 
 
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
@@ -21,7 +9,6 @@
 #include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
-//#include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
 
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h" //for WebUsers::RequestUserInfo
 
@@ -30,23 +17,6 @@
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
 
-
-//
-//#pragma GCC diagnostic push
-//#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-//#include <xdaq/Application.h>
-//#pragma GCC diagnostic pop
-//#include "xgi/Method.h"
-//
-//#include <toolbox/fsm/FailedEvent.h>
-//
-//#include <xdaq/NamespaceURI.h>
-//#include <xoap/Method.h>
-//
-//#include <string> /*string and to_string*/
-//#include <vector>
-//#include <map>
-//#include <memory>
 
 
 
@@ -65,6 +35,10 @@ public:
     virtual void					forceSupervisorPropertyValues	(void) {;} //override to force supervisor property values (and ignore user settings)
 
     void							getRequestUserInfo            	(WebUsers::RequestUserInfo& requestUserInfo);
+
+    //supervisors should use these two static functions to standardize permissions access:
+    static void						extractPermissionsMapFromString (const std::string& permissionsString, std::map<std::string,WebUsers::permissionLevel_t>& permissionsMap);
+    static bool 					doPermissionsGrantAccess		(std::map<std::string,WebUsers::permissionLevel_t>& permissionLevelsMap, std::map<std::string,WebUsers::permissionLevel_t>& permissionThresholdsMap);
 
 protected:
 
@@ -108,7 +82,7 @@ protected:
 
 private:
 	//property private members
-	void					checkSupervisorPropertySetup		(void);
+	void								checkSupervisorPropertySetup		(void);
 	volatile bool									propertiesAreSetup_;
 
 	//for public access to property map,..
@@ -122,7 +96,7 @@ private:
 			&NoXmlWhiteSpaceRequestTypes,&NonXMLRequestTypes})
 		{}
 
-		std::map<std::string,uint8_t> 				UserPermissionsThreshold;
+		std::map<std::string,WebUsers::permissionLevel_t> UserPermissionsThreshold;
 		std::map<std::string,std::string> 			UserGroupsAllowed;
 		std::map<std::string,std::string>  			UserGroupsDisallowed;
 
