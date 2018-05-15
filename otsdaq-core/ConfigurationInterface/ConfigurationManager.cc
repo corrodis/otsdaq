@@ -607,7 +607,7 @@ void ConfigurationManager::dumpActiveConfiguration(
 	{
 		if(filePath != "")
 		{
-			__SS__ << "Invalid File path. File path could not be opened!" << __E__;
+			__SS__ << "Invalid file path to dump active configuration. File " << filePath << " could not be opened!" << __E__;
 			__COUT_ERR__ << ss.str();
 			throw std::runtime_error(ss.str());
 		}

@@ -250,6 +250,128 @@ std::string ConfigurationTree::getValue() const
 	return value;
 }
 
+
+//==============================================================================
+//getValue (only ConfigurationTree::BitMap value)
+//special version of getValue for string type
+//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
+void ConfigurationTree::getValueAsBitMap(ConfigurationTree::BitMap& bitmap) const
+{
+	//__COUT__ << row_ << " " << col_ << " p: " << configView_<< std::endl;
+
+	if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
+	{
+		std::string bitmapString;
+		configView_->getValue(bitmapString,row_,col_);
+
+		__COUTV__(bitmapString);
+		if(bitmapString == ViewColumnInfo::DATATYPE_STRING_DEFAULT)
+		{
+			bitmap.isDefault_ = true;
+			return;
+		}
+		else
+			bitmap.isDefault_ = false;
+
+		//extract bit map
+		{
+			bitmap.bitmap_.clear();
+			int row = -1;
+			bool openRow = false;
+			unsigned int startInt = -1;
+			for(unsigned int i=0; i<bitmapString.length(); i++)
+			{
+				__COUTV__(bitmapString[i]);
+				__COUTV__(row);
+				__COUTV__(openRow);
+				__COUTV__(startInt);
+				__COUTV__(i);
+
+				if(!openRow) //need start of row
+				{
+					if(bitmapString[i] == '[')
+					{	//open a new row
+						openRow = true;
+						++row;
+						bitmap.bitmap_.push_back(std::vector<uint64_t>());
+					}
+					else if(bitmapString[i] == ']')
+					{
+						break; //ending bracket, done with string
+					}
+					else if(bitmapString[i] == ',') //end characters found not within row
+					{
+						__SS__ << "Too many ']' or ',' characters in bit map configuration" << std::endl;
+						__SS_THROW__;
+					}
+				}
+				else if(startInt == (unsigned int)-1) //need to find start of number
+				{
+					if(bitmapString[i] == ']') //found end of row, instead of start of number, assume row ended
+					{
+						openRow = false;
+					}
+					else if(bitmapString[i] >= '0' && bitmapString[i] <= '9') //found start of number
+					{
+						startInt = i;
+					}
+					else if(bitmapString[i] == ',') //comma found without number
+					{
+						__SS__ << "Too many ',' characters in bit map configuration" << std::endl;
+						__SS_THROW__;
+					}
+				}
+				else
+				{
+					//looking for end of number
+
+					if(bitmapString[i] == ']') //found end of row, assume row and number ended
+					{
+						openRow = false;
+						bitmap.bitmap_[row].push_back(strtoul(
+								bitmapString.substr(startInt,i-startInt).c_str(),0,0));
+						startInt = -1;
+					}
+					else if(bitmapString[i] == ',') //comma found, assume end of number
+					{
+						bitmap.bitmap_[row].push_back(strtoul(
+								bitmapString.substr(startInt,i-startInt).c_str(),0,0));
+						startInt = -1;
+					}
+				}
+			}
+
+			for(unsigned int r = 0; r<bitmap.bitmap_.size(); ++r)
+			{
+				for(unsigned int c = 0; c<bitmap.bitmap_[r].size(); ++c)
+				{
+					__COUT__ << r << "," << c << " = " << bitmap.bitmap_[r][c] << __E__;
+				}
+				__COUT__ << "================" << __E__;
+			}
+		}
+
+	}
+	else
+	{
+		__SS__ << "Requesting getValue must be on a value node." << std::endl;
+		__COUT_ERR__ << ss.str();
+		throw std::runtime_error(ss.str());
+	}
+
+}
+
+//==============================================================================
+//getValue
+//
+//	special version of getValue for ConfigurationTree::BitMap type
+ConfigurationTree::BitMap ConfigurationTree::getValueAsBitMap() const
+{
+	ConfigurationTree::BitMap value;
+	ConfigurationTree::getValueAsBitMap(value);
+	return value;
+}
+
 //==============================================================================
 //getEscapedValue
 //	Only works if a value node, other exception thrown
