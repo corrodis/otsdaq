@@ -13,8 +13,7 @@ using namespace ots;
 void FEVInterface::configureSlowControls(void)
 {
 	ConfigurationTree slowControlsGroupLink =
-			t
-			heXDAQContextConfigTree_.getBackNode(
+			theXDAQContextConfigTree_.getBackNode(
 					theConfigurationPath_).getNode("LinkToSlowControlChannelsConfiguration");
 
 	if(slowControlsGroupLink.isDisconnected())
