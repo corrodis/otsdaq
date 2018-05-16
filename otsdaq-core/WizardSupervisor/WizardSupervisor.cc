@@ -3,7 +3,7 @@
 #include "otsdaq-core/GatewaySupervisor/GatewaySupervisor.h"
 
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <xdaq/NamespaceURI.h>
 #include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
@@ -19,8 +19,7 @@
 #include <chrono>         // std::chrono::seconds
 #include <sys/stat.h> 	  // mkdir
 #include <dirent.h> 	//for DIR
-
-
+#include <sys/types.h>
 
 using namespace ots;
 
@@ -619,6 +618,8 @@ throw (xgi::exception::Exception)
 
 		if(Command == "Import")
 		{
+
+			__COUT__ << "WE ARE IMPORTING USER SETTINGS!" << std::endl;
 			//cleanup temporary folder
 			//NOTE: all input parameters for User Data will be attached to form
 			//	so use cgi(xxx) to get values.
@@ -642,10 +643,15 @@ throw (xgi::exception::Exception)
 			const std::vector<cgicc::FormFile> files = cgi.getFiles();
 			__COUT__ << "FormFiles: " << sizeof(files) << std::endl;
 			__COUT__ << "Number of files: " << files.size() << std::endl;
+			std::string filename = "";
+
+			std::string command = std::string("mkdir " + USER_DATA_PATH + "tmp/");
+			exec(command.c_str());
+
 
 			for(unsigned int i = 0; i < files.size(); ++i)
 			{
-				std::string filename = USER_DATA_PATH + files[i].getFilename();
+				filename = std::string(USER_DATA_PATH + "tmp/"+ files[i].getFilename());
 				__COUT__ << filename << std::endl;
 				std::ofstream myFile;
 				myFile.open(filename.c_str());
@@ -664,45 +670,146 @@ throw (xgi::exception::Exception)
 			__COUT__ << "*********************Files End*********************" << std::endl;
 
 
+			//Let's zip current folder into backup
+			//Check for a old_user_settings directory; if it doesn't exist, make it
+			command = "cd " + USER_DATA_PATH + "ServiceData/";
+			std::string pathname = USER_DATA_PATH + "/ServiceData/old_user_settings/";
+
+			struct stat info;
+			struct stat info2;
+
+			if( stat( pathname.c_str(), &info ) != 0 )
+			{
+				//Directory doesn't exist so let's check the parent and create it
+				printf( "cannot access %s\n", pathname.c_str() );
+				std::string parent = USER_DATA_PATH;
+				//FIXME Need to check if parent directory (USER_DATA_PATH) is setup
+				command = "mkdir " + USER_DATA_PATH + "old_user_settings/";
+				system(command.c_str());
+				__COUT__ << "old_user_settings directory did not exist!\n Created directory: " << USER_DATA_PATH << "old_user_settings/" << std::endl;
+				if( stat( pathname.c_str(), &info ) != 0 )
+					__COUT__ << "Failed directory creation!" << std::endl;
+				else
+					__COUT__ << "Directory successfully created!" << std::endl;
+
+			}
+			else if( info.st_mode & S_IFDIR )  // S_ISDIR() doesn't exist on my windows
+			{
+				printf( "%s is a directory\n", pathname.c_str() );
+			}
+			else
+			{
+				printf( "%s is no directory\n", pathname.c_str() );
+			}
+			//make tmp directory
+//			command = std::string("mkdir " + pathname + "backups");
+//			__COUT__ << command << std::endl;
+//			exec(command.c_str());
+
+			time_t seconds;
+			time(&seconds);
+			std::stringstream ss;
+			ss << seconds;
+			std::string ts = ss.str();
+			std::string tarName = std::string("user_settings_" + ts + ".tar");
+			__COUT__ << tarName << std::endl;
+			//zip files into .tar
+			command = std::string("tar -cvf " + pathname + "/" + tarName) +
+					std::string(" ActiveConfigurationGroups.cfg ") +
+					std::string("ConsolePreferences ") +
+					std::string("CoreTableInfoNames.dat ") +
+					std::string("LoginData ") +
+					std::string("OtsWizardData ") +
+					std::string("ProgressBarData ");
+			__COUT__ << command << std::endl;
+			exec(command.c_str());
+
+			//Move old configuration files to folder
+			command = std::string("rm -rf ") +
+								std::string("../ActiveConfigurationGroups.cfg ") +
+								std::string("../ConsolePreferences ") +
+								std::string("../CoreTableInfoNames.dat ") +
+								std::string("../LoginData ") +
+								std::string("../OtsWizardData ") +
+								std::string("../ProgressBarData ");
+			__COUT__ << command << std::endl;
+			exec(command.c_str());
+
+			//Expand uploaded tar
+			command = std::string("tar -C ../ -xvf " + filename);
+			__COUT__ << command << std::endl;
+			exec(command.c_str());
+
+			//Delete tmp dir
+			command = std::string("rm -rf ../tmp/");
+
+			//FIXME Would be good to have validation of file type
+			//FIXME Would be good to have a check to see if everything is working before we send back a success message
+			*out << "Upload Success";
+
+
+
 //			savePostPreview(EntrySubject, EntryText, cgi.getFiles(), creator, &xmldoc);
 			//else xmldoc.addTextElementToData(XML_STATUS,"Failed - could not get username info.");
 		}
-		else if(Command == "Export")
+		else if(Command == "Export2")
 		{
 			__COUT__ << "We are exporting Users' Settings!!!" << std::endl;
 			//system('pwd');
 
 			//Check for a TMP directory; if it doesn't exist, make it
 			std::string command = "cd " + USER_DATA_PATH;
-			std::string pathToTmp = USER_DATA_PATH + "/tmp/";
-			std::filesystem::path tmp = pathToTmp;
+			std::string pathname = USER_DATA_PATH + "tmp/";
 
+			struct stat info;
+			struct stat info2;
+
+			if( stat( pathname.c_str(), &info ) != 0 )
+			{
+				//Directory doesn't exist so let's check the parent and create it
+				printf( "cannot access %s\n", pathname.c_str() );
+				std::string parent = USER_DATA_PATH;
+				//FIXME Need to check if parent directory (USER_DATA_PATH) is setup
+				command = "mkdir " + USER_DATA_PATH + "tmp/";
+				system(command.c_str());
+				__COUT__ << "tmp directory did not exist!\n Created directory: " << USER_DATA_PATH << "tmp/" << std::endl;
+				if( stat( pathname.c_str(), &info ) != 0 )
+					__COUT__ << "Failed directory creation!" << std::endl;
+				else
+					__COUT__ << "Directory successfully created!" << std::endl;
+
+			}
+			else if( info.st_mode & S_IFDIR )  // S_ISDIR() doesn't exist on my windows
+			{
+				printf( "%s is a directory\n", pathname.c_str() );
+			}
+			else
+			{
+			    printf( "%s is no directory\n", pathname.c_str() );
+			}
 			exec(command.c_str());
 			__COUT__ << exec("pwd") << std::endl;
 
 
-			if(std::filesystem::status_known(tmpDir) ? std::filesystem::exists(tmpDir) : std::filesystem::exists(tmpDir))
-				__COUT__ << pathToTmp << " exists!" << std::endl;
-			else
-				__COUT__ << pathToTmp << "does not exist! Creating it now. " << std::endl;
 
 			//Zip current files into TMP directory
-			command = std::string("tar -cvf user_settings.tar") +
+			command = std::string("tar -cvf " + pathname + "user_settings.tar ") +
 					std::string("ActiveConfigurationGroups.cfg ") +
 					std::string("ConsolePreferences ") +
 					std::string("CoreTableInfoNames.dat ") +
 					std::string("LoginData ") +
 					std::string("OtsWizardData ") +
 					std::string("ProgressBarData ");
-
+			__COUT__ << command << std::endl;
+			exec(command.c_str());
 
 			//return zip
-			if(exec("pwd").find(USER_DATA_PATH) != std::string::npos)
-			{
-				__COUT__ << "Found USER_DATA directory " << std::endl;
-				system(command.c_str());
-				__COUT__ << system("ls") << std::endl;
-			}
+//			if(exec("pwd").find(USER_DATA_PATH) != std::string::npos)
+//			{
+//				__COUT__ << "Found USER_DATA directory " << std::endl;
+//				system(command.c_str());
+//				__COUT__ << system("ls") << std::endl;
+//			}
 		}
 		else
 		{
