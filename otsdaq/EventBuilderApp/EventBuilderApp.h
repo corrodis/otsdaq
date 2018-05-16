@@ -13,6 +13,7 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
+#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 #include <xgi/Method.h>
 
 #include <string>
@@ -29,6 +30,8 @@ class ConfigurationGroupKey;
 /**
  * \brief
  */
+//EventBuilderApp
+//	This class provides the otsdaq interface to a single artdaq Event Builder,
 class EventBuilderApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 

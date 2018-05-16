@@ -107,6 +107,22 @@ public:
 	static const std::string NODE_TYPE_UID;
 	static const std::string NODE_TYPE_ROOT;
 
+	struct BitMap
+	{
+		BitMap():isDefault_(true), zero_(0) {}
+
+		friend ConfigurationTree; //so ConfigurationTree can access private
+		const uint64_t& 	get				(unsigned int row, unsigned int col) const { return isDefault_?zero_:bitmap_[row][col]; }
+		unsigned int 		numberOfRows	() const { return bitmap_.size(); }
+		unsigned int 		numberOfColumns	(unsigned int row) const { return bitmap_[row].size(); }
+
+	private:
+		std::vector<std::vector<uint64_t>> 	bitmap_;
+		bool								isDefault_; //when default always return 0
+		uint64_t							zero_;
+	};
+
+
 
 	//Methods
 
@@ -176,6 +192,7 @@ public:
 	//special version of getValue for string type
 	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
 	void									getValue			        (std::string& value) const;
+	void									getValueAsBitMap	        (ConfigurationTree::BitMap& value) const;
 
 
 	//==============================================================================
@@ -191,6 +208,7 @@ public:
 	//special version of getValue for string type
 	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
 	std::string								getValue			        (void) const;
+	ConfigurationTree::BitMap				getValueAsBitMap	        (void) const;
 
 private:
 	template<typename T>
@@ -234,8 +252,8 @@ public:
 	const std::string&						getFieldConfigurationName	(void) const;
 	const ConfigurationVersion&				getConfigurationVersion		(void) const;
 	const time_t&							getConfigurationCreationTime(void) const;
-	std::vector<std::string>				getChildrenNames	        (void) const;
-	std::vector<std::pair<std::string,ConfigurationTree> >	getChildren	(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap = std::map<std::string /*relative-path*/, std::string /*value*/>()) const;
+	std::vector<std::string>				getChildrenNames	        (bool byPriority = false) const;
+	std::vector<std::pair<std::string,ConfigurationTree> >	getChildren	(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap = std::map<std::string /*relative-path*/, std::string /*value*/>(), bool byPriority = false) const;
 	std::map<std::string,ConfigurationTree> getChildrenMap	            (void) const;
 	std::string								getEscapedValue		        (void) const;
 	const std::string&						getValueAsString	        (bool returnLinkTableValue=false) const;

@@ -7,33 +7,75 @@ using namespace ots;
 //wildCardMatch
 //	find needle in haystack
 //		allow needle to have leading and/or trailing wildcard '*'
-bool StringMacros::wildCardMatch(const std::string& needle, const std::string& haystack)
+//		consider priority in matching, no mater the order in the haystack:
+//			- 0: no match!
+//			- 1: highest priority is exact match
+//			- 2: next highest is partial TRAILING-wildcard match
+//			- 3: next highest is partial LEADING-wildcard match
+//			- 4: lowest priority is partial full-wildcard match
+//		return priority found by reference
+bool StringMacros::wildCardMatch(const std::string& needle, const std::string& haystack,
+		unsigned int* priorityIndex)
 try
 {
 //	__COUT__ << "\t\t wildCardMatch: " << needle <<
 //			" =in= " << haystack << " ??? " <<
 //			std::endl;
 
+	//empty needle
 	if(needle.size() == 0)
+	{
+		if(priorityIndex) *priorityIndex = 1; //consider an exact match, to stop higher level loops
 		return true; //if empty needle, always "found"
+	}
 
-	if(needle[0] == '*' && //leading wildcard
-					needle[needle.size()-1] == '*' ) //and trailing wildcard
-		return std::string::npos != haystack.find(needle.substr(1,needle.size()-2));
+	//only wildcard
+	if(needle == "*")
+	{
+		if(priorityIndex) *priorityIndex = 5; //only wildcard, is lowest priority
+		return true; //if empty needle, always "found"
+	}
 
-	if(needle[0] == '*') //leading wildcard
-		return needle.substr(1) ==
-				haystack.substr(haystack.size() - (needle.size()-1));
+	//no wildcards
+	if(needle == haystack)
+	{
+		if(priorityIndex) *priorityIndex = 1; //an exact match
+		return true;
+	}
 
-	if(needle[needle.size()-1] == '*') //trailing wildcard
-		return needle.substr(0,needle.size()-1) ==
-				haystack.substr(0,needle.size()-1);
+	//trailing wildcard
+	if(needle[needle.size()-1] == '*' &&
+		needle.substr(0,needle.size()-1) ==
+				haystack.substr(0,needle.size()-1))
+	{
+		if(priorityIndex) *priorityIndex = 2; //trailing wildcard match
+		return true;
+	}
 
-	//else //no wildcards
-	return needle == haystack;
+	//leading wildcard
+	if(needle[0] == '*' && needle.substr(1) ==
+			haystack.substr(haystack.size() - (needle.size()-1)))
+	{
+		if(priorityIndex) *priorityIndex = 3; //leading wildcard match
+		return true;
+	}
+
+	//leading wildcard and trailing wildcard
+	if(needle[0] == '*' &&
+					needle[needle.size()-1] == '*' &&
+		std::string::npos != haystack.find(needle.substr(1,needle.size()-2)))
+	{
+		if(priorityIndex) *priorityIndex = 4; //leading and trailing wildcard match
+		return true;
+	}
+
+	//else no match
+	if(priorityIndex) *priorityIndex = 0; //no match
+	return false;
 }
 catch(...)
 {
+	if(priorityIndex) *priorityIndex = 0; //no match
 	return false; //if out of range
 }
 
@@ -49,28 +91,28 @@ bool StringMacros::inWildCardSet(const std::string needle, const std::set<std::s
 	return false;
 }
 
-//========================================================================================================================
-//inWildCardSet ~
-//	returns true if needle is in haystack (considering wildcards)
-const std::string& StringMacros::getWildCardMatchFromMap(const std::string needle,
-		const std::map<std::string, std::string>& haystack)
-{
-	for(const auto& haystackPair : haystack)
-		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
-		if(StringMacros::wildCardMatch(haystackPair.first,needle)) return haystackPair.second;
-
-	__SS__ << "Needle '" << needle << "' not found in wildcard haystack:" << __E__;
-	bool first = true;
-	for(const auto& haystackPair : haystack)
-		if(first)
-		{
-			ss << ", " << haystackPair.first;
-			first = false;
-		}
-		else
-			ss << ", " << haystackPair.first;
-	throw std::runtime_error(ss.str());
-}
+////========================================================================================================================
+////getWildCardMatchFromMap ~
+////	returns value if needle is in haystack otherwise throws exception (considering wildcards)
+//const std::string& StringMacros::getWildCardMatchFromMap(const std::string needle,
+//		const std::map<std::string, std::string>& haystack)
+//{
+//	for(const auto& haystackPair : haystack)
+//		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
+//		if(StringMacros::wildCardMatch(haystackPair.first,needle)) return haystackPair.second;
+//
+//	__SS__ << "Needle '" << needle << "' not found in wildcard haystack:" << __E__;
+//	bool first = true;
+//	for(const auto& haystackPair : haystack)
+//		if(first)
+//		{
+//			ss << ", " << haystackPair.first;
+//			first = false;
+//		}
+//		else
+//			ss << ", " << haystackPair.first;
+//	throw std::runtime_error(ss.str());
+//}
 
 //==============================================================================
 //decodeURIComponent
@@ -325,8 +367,13 @@ std::string StringMacros::mapToString(const std::map<std::string,uint8_t>& mapTo
 		const std::string& primaryDelimeter, const std::string& secondaryDelimeter)
 {
 	std::stringstream ss;
+	bool first = true;
 	for(auto& mapPair:mapToReturn)
-		ss << mapPair.first << secondaryDelimeter << (unsigned int)mapPair.second << primaryDelimeter;
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first << secondaryDelimeter << (unsigned int)mapPair.second;
+	}
 	return ss.str();
 }
 
@@ -353,7 +400,7 @@ std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn, cons
 
 
 //==============================================================================
-//getMapFromString
+//demangleTypeName
 std::string StringMacros::demangleTypeName(const char* name)
 {
 	int status = -4; // some arbitrary value to eliminate the compiler warning

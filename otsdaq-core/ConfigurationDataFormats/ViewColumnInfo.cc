@@ -50,6 +50,7 @@ const std::string ViewColumnInfo::DATATYPE_TIME_DEFAULT				= "0";
 const std::string ViewColumnInfo::DATATYPE_LINK_DEFAULT		        = "NO_LINK";
 
 const std::string ViewColumnInfo::COL_NAME_STATUS		        	= "Status";
+const std::string ViewColumnInfo::COL_NAME_PRIORITY		        	= "Priority";
 
 
 //==============================================================================

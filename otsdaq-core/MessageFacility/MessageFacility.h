@@ -3,7 +3,6 @@
 
 #include <messagefacility/MessageLogger/MessageLogger.h>
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
 
 
@@ -35,7 +34,11 @@ inline void INIT_MF(const char* name)
 	else
 		setenv("ARTDAQ_LOG_FHICL", logFhiclCode, 1);
 
-	artdaq::configureMessageFacility(name,true,true);
+	artdaq::configureMessageFacility(
+			name /*application name*/,
+			false /*cout display*/,
+			true /*enable debug messages*/);
+
 	artdaq::setMsgFacAppName(name,0);
 }
 

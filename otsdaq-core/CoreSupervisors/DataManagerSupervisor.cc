@@ -14,9 +14,9 @@ DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub * s)
 {
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 			DataManagerSingleton::getInstance<DataManager>(
-					CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
-					CoreSupervisorBase::supervisorConfigurationPath_,
-					CoreSupervisorBase::supervisorApplicationUID_
+					CorePropertySupervisorBase::getContextTreeNode(),
+					CorePropertySupervisorBase::supervisorConfigurationPath_,
+					CorePropertySupervisorBase::supervisorApplicationUID_
 			)
 	);
 }
@@ -24,6 +24,6 @@ DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub * s)
 //========================================================================================================================
 DataManagerSupervisor::~DataManagerSupervisor(void)
 {
-	DataManagerSingleton::deleteInstance(CoreSupervisorBase::supervisorApplicationUID_);
+	DataManagerSingleton::deleteInstance(CorePropertySupervisorBase::supervisorApplicationUID_);
 	theStateMachineImplementation_.pop_back();
 }

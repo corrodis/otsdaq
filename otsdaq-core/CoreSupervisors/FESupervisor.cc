@@ -19,8 +19,8 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub * s)
 
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 		new FEVInterfacesManager(
-			CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
-			CoreSupervisorBase::supervisorConfigurationPath_
+				CorePropertySupervisorBase::getContextTreeNode(),
+				CorePropertySupervisorBase::supervisorConfigurationPath_
 		)
 	);
 

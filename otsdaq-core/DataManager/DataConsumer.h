@@ -8,6 +8,9 @@
 namespace ots
 {
 
+//DataConsumer
+//	This class provides base class functionality for Data Consumer plugin classes to
+//	extracts and process streaming data from a Buffer.
 class DataConsumer : public DataProcessor, public virtual WorkLoop
 {
 public:

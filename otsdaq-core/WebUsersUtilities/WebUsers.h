@@ -26,6 +26,9 @@ namespace ots
 
 class HttpXmlDocument;
     
+//WebUsers
+//	This class provides the functionality for managing all otsdaq user account preferences
+//	and permissions.
 class WebUsers
 {
 public:
@@ -79,6 +82,8 @@ public:
     	{}
 
     	//------- setters --------//
+    	//===========================================
+    	//setGroupPermissionLevels
     	bool							setGroupPermissionLevels(const std::string& groupPermissionLevelsString)
     	{
     		permissionLevel_ = 0; //default to inactive, i.e. no access
@@ -89,17 +94,16 @@ public:
 					groupPermissionLevelMap_);
 			getGroupPermissionLevel(); //setup permissionLevel_
 			return true; //was fully setup
-    	}
+    	} //end setGroupPermissionLevels()
 
 
 
     	//------- getters --------//
-//    	const std::string&				getUsername() const					{ return username_; }
-//    	const std::string&				getDisplayName() const 				{ return displayName_; }
-//    	const std::string&				getUsernameWithLock() const 		{ return usernameWithLock_; }
-//    	const uint64_t&					getActiveUserSessionIndex() const 	{ return activeUserSessionIndex_; }
     	const std::map<std::string /*groupName*/,
 		WebUsers::permissionLevel_t>&	getGroupPermissionLevels() const	{ return groupPermissionLevelMap_; }
+    	//===========================================
+    	//getGroupPermissionLevel
+    	//	sets up permissionLevel based on already prepared RequestUserInfo members
     	const WebUsers::permissionLevel_t&	getGroupPermissionLevel()
     	{
     		permissionLevel_ = 0; //default to inactive, i.e. no access
@@ -187,10 +191,7 @@ public:
 			std::ostringstream* 			out,
 			HttpXmlDocument* 				xmldoc,
 			WebUsers::RequestUserInfo&		userInfo);
-private:
-	//std::string 	tmpUserWithLock_;
-	//std::string 	tmpUsername_, tmpDisplayName_;
-	//uint64_t 		tmpActiveSessionIndex_;
+
 public:
 
 	//used by gateway and other supervisors to verify requests consistently
@@ -203,15 +204,6 @@ public:
 			HttpXmlDocument* 				xmldoc,
 			WebUsers::RequestUserInfo&		userInfo,
 			bool							isWizardMode = false);
-//	static bool finalizeRequestAccess(
-//			//cgicc::Cgicc& 					cgi,
-//			std::ostringstream* 			out,
-//			HttpXmlDocument* 				xmldoc,
-//			WebUsers::RequestUserInfo&		userInfo,
-//			const std::string&				usernameResponse,
-//			const std::string&				displayNameResponse,
-//			const uint64_t&					activeSessionIndexResponse);
-//			//SOAPParameters&		            parameters);
 
 	bool 																	createNewAccount			    		(const std::string& username, const std::string& displayName, const std::string& email);
 	void																	cleanupExpiredEntries		   		 	(std::vector<std::string>* loggedOutUsernames = 0);
@@ -259,7 +251,7 @@ public:
 
 private:
 
-	inline uint8_t 													        getPermissionLevelForGroup	    		(std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
+	inline WebUsers::permissionLevel_t								        getPermissionLevelForGroup	    		(std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 	inline bool														        isInactiveForGroup			    		(std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 	inline bool														        isAdminForGroup				    		(std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 

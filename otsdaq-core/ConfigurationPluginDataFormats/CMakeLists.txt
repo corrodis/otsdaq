@@ -40,6 +40,7 @@ simple_plugin(XDAQContextConfiguration "configuration"
 simple_plugin(DesktopIconConfiguration "configuration"
   ConfigurationDataFormats
   ConfigurationInterface
+  WebUsersUtilities
   ${CETLIB}
   )
   

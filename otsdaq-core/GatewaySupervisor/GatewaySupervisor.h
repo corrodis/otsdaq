@@ -17,6 +17,7 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
+#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 //#include <toolbox/fsm/FiniteStateMachine.h>
 #include <toolbox/task/WorkLoop.h>
 #include <xgi/Method.h>
@@ -37,6 +38,10 @@ class ConfigurationManager;
 class ConfigurationGroupKey;
 class WorkLoopManager;
 
+//GatewaySupervisor
+//	This class is the gateway server for all otsdaq requests in "Normal Mode." It validates user access
+//	for every request. It synchronizes
+//	the state machines of all other supervisors.
 class GatewaySupervisor: public xdaq::Application, public SOAPMessenger,
 	public RunControlStateMachine, public CorePropertySupervisorBase
 {
@@ -64,6 +69,7 @@ public:
 
     void 						stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out )		;
     //void 						stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	;
+
     xoap::MessageReference 		stateMachineXoapHandler      	(xoap::MessageReference msg )  	        ;
     xoap::MessageReference 		stateMachineResultXoapHandler	(xoap::MessageReference msg )  	        ;
 
@@ -124,7 +130,7 @@ private:
 
     //Member Variables
 
-    AllSupervisorInfo                   allSupervisorInfo_         	;
+    //AllSupervisorInfo                   allSupervisorInfo_         	;
    // ConfigurationManager*               theConfigurationManager_    ;
     WebUsers 						    theWebUsers_                ;
     SystemMessenger				        theSystemMessenger_         ;

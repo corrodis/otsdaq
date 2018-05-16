@@ -101,33 +101,10 @@ bool RemoteWebUsers::xmlRequestToGateway(
 		HttpXmlDocument* 				xmldoc,
 		const AllSupervisorInfo& 		allSupervisorInfo,
 		WebUsers::RequestUserInfo&		userInfo	)
-//		uint8_t* 						userPermissions,
-//		const uint8_t 					permissionsThreshold,
-//		const bool						allowNoUser,
-//		const std::set<std::string>&	groupsAllowed,
-//		const std::set<std::string>& 	groupsDisallowed,
-//		const bool						refreshCookie,
-//		const bool						checkLock,
-//		const bool						lockRequired,
-//		std::string* 					userWithLock,
-//		std::string* 					userName,
-//		std::string* 					displayName,
-//		std::string* 					userGroups,
-//		uint64_t* 						activeSessionIndex
-//		)
 {
+
 	//initialize user info parameters to failed results
 	WebUsers::initializeRequestUserInfo(cgi,userInfo);
-//
-//	userInfo.permissionLevel_ = 0; //init to inactive
-//	if(userInfo.checkLock_ || userInfo.requireLock_)	userInfo.usernameWithLock_       = "";
-//	if(userInfo.userName)			*userName           = "";
-//	if(userInfo.displayName)			*displayName        = "";
-//	if(userInfo.userGroups)			*userGroups         = "";
-//	if(userInfo.activeSessionIndex)	*activeSessionIndex = -1;
-//
-//	const std::string& ip = cgi.getEnvironment().getRemoteAddr();
-
 
 	//const_cast away the const
 	//	so that this line is compatible with slf6 and slf7 versions of xdaq
@@ -248,7 +225,9 @@ bool RemoteWebUsers::xmlRequestToGateway(
 
 	if(!WebUsers::checkRequestAccess(cgi,out,xmldoc,userInfo))
 		goto HANDLE_ACCESS_FAILURE; //return false, access failed
+	//else successful access request!
 
+	return true; //request granted
 //	if(!userInfo.checkLock_ && !userInfo.requireLock_)
 //		return true; //done, no need to get user info for this cookie code
 //

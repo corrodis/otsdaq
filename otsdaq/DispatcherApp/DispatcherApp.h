@@ -13,6 +13,7 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
+#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 #include <xgi/Method.h>
 
 #include <string>
@@ -26,6 +27,8 @@ namespace ots
 class ConfigurationManager;
 class ConfigurationGroupKey;
 
+//DispatcherApp
+//	This class provides the otsdaq interface to a single artdaq Dispatcher.
 class DispatcherApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 

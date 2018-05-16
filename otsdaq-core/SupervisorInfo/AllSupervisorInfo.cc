@@ -51,101 +51,233 @@ void AllSupervisorInfo::destroy(void)
 //========================================================================================================================
 void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 {
+	__COUT__ << "Initializing info based on XDAQ context..." << __E__;
+
 	AllSupervisorInfo::destroy();
 	SupervisorDescriptorInfoBase::init(applicationContext);
 
+	auto allDescriptors = SupervisorDescriptorInfoBase::getAllDescriptors();
 	//ready.. loop through all descriptors, and organize
 
-	ConfigurationManager cfgMgr;
-	const XDAQContextConfiguration* contextConfig =
-			cfgMgr.__GET_CONFIG__(XDAQContextConfiguration);
+	//Steps:
+	//	1. first pass, identify Wiz mode or not
+	//	2. second pass, organize supervisors
 
-	auto allDescriptors = SupervisorDescriptorInfoBase::getAllDescriptors();
+	bool isWizardMode = false;
+
+	//first pass, identify Wiz mode or not
+	//	accept first encountered (wizard or gateway) as the mode
 	for(const auto& descriptor:allDescriptors)
 	{
-		auto /*<iterator,bool>*/ emplacePair = allSupervisorInfo_.emplace(std::pair<unsigned int, SupervisorInfo>(
-				descriptor.second->getLocalId(),//descriptor.first,
-				SupervisorInfo(
+		SupervisorInfo tempSupervisorInfo(
 						descriptor.second /* descriptor */,
-						contextConfig->getApplicationUID
-						(
-								descriptor.second->getContextDescriptor()->getURL(),
-								descriptor.second->getLocalId()
-						) /* name */,
-						contextConfig->getContextUID(
-								descriptor.second->getContextDescriptor()->getURL()) /* xdaq parent context */
-				)));
-		if(!emplacePair.second)
-		{
-			__SS__ << "Error! Duplicate Application IDs are not allowed. ID =" <<
-					descriptor.second->getLocalId() << __E__;
-			__SS_THROW__;
-		}
+						"" /* config app name */,"" /* config parent context name */ //skip configuration info
+						);
 
-		/////////////////////////////////////////////
-		// now organize new descriptor by class...
 
 		//check for gateway supervisor
-		// note: necessarily exclusive to other Supervisor types
-		if(emplacePair.first->second.isGatewaySupervisor())
+		if(tempSupervisorInfo.isGatewaySupervisor())
 		{
-			if(theSupervisorInfo_)
+			//found normal mode, done with first pass
+			isWizardMode = false;
+			break;
+		}
+		else if(tempSupervisorInfo.isWizardSupervisor())
+		{
+			//found wiz mode, done with first pass
+			isWizardMode = true;
+			break;
+		}
+	}
+
+
+
+	if(isWizardMode)
+	{
+		__COUT__ << "Initializing info for Wiz mode XDAQ context..." << __E__;
+
+		//do not involve the Configuration Manager
+		//	as it adds no valid information to the supervisors
+		//	present in wiz mode
+		for(const auto& descriptor:allDescriptors)
+		{
+			auto /*<iterator,bool>*/ emplacePair = allSupervisorInfo_.emplace(std::pair<unsigned int, SupervisorInfo>(
+					descriptor.second->getLocalId(),//descriptor.first,
+					SupervisorInfo(
+							descriptor.second /* descriptor */,
+							"" /* config app name */,"" /* config parent context name */ //skip configuration info
+					)));
+			if(!emplacePair.second)
 			{
-				__SS__ << "Error! Multiple Gateway Supervisors of class " << XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS <<
-						" found. There can only be one. ID =" <<
+				__SS__ << "Error! Duplicate Application IDs are not allowed. ID =" <<
 						descriptor.second->getLocalId() << __E__;
 				__SS_THROW__;
 			}
-			//copy and erase from map
-			theSupervisorInfo_ = &(emplacePair.first->second);
-			continue;
-		}
 
-		//check for wizard supervisor
-		// note: necessarily exclusive to other Supervisor types
-		if(emplacePair.first->second.isWizardSupervisor())
-		{
-			if(theWizardInfo_)
+			/////////////////////////////////////////////
+			// now organize new descriptor by class...
+
+			//check for gateway supervisor
+			// note: necessarily exclusive to other Supervisor types
+			if(emplacePair.first->second.isGatewaySupervisor())
 			{
-				__SS__ << "Error! Multiple Wizard Supervisors of class " << XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS <<
-						" found. There can only be one. ID =" <<
+				if(theSupervisorInfo_)
+				{
+					__SS__ << "Error! Multiple Gateway Supervisors of class " << XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS <<
+							" found. There can only be one. ID =" <<
+							descriptor.second->getLocalId() << __E__;
+					__SS_THROW__;
+				}
+				//copy and erase from map
+				theSupervisorInfo_ = &(emplacePair.first->second);
+				continue;
+			}
+
+			//check for wizard supervisor
+			// note: necessarily exclusive to other Supervisor types
+			if(emplacePair.first->second.isWizardSupervisor())
+			{
+				if(theWizardInfo_)
+				{
+					__SS__ << "Error! Multiple Wizard Supervisors of class " << XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS <<
+							" found. There can only be one. ID =" <<
+							descriptor.second->getLocalId() << __E__;
+					__SS_THROW__;
+				}
+				//copy and erase from map
+				theWizardInfo_ = &(emplacePair.first->second);
+				continue;
+			}
+
+
+			//check for FE type, then add to FE group
+			// note: not necessarily exclusive to other Supervisor types
+			if(emplacePair.first->second.isTypeFESupervisor())
+			{
+				allFETypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
+						emplacePair.first->second.getId(),
+						emplacePair.first->second));
+			}
+
+			//check for DM type, then add to DM group
+			// note: not necessarily exclusive to other Supervisor types
+			if(emplacePair.first->second.isTypeDMSupervisor())
+			{
+				allDMTypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
+						emplacePair.first->second.getId(),
+						emplacePair.first->second));
+			}
+
+			//check for Logbook type, then add to Logbook group
+			// note: not necessarily exclusive to other Supervisor types
+			if(emplacePair.first->second.isTypeLogbookSupervisor())
+			{
+				allLogbookTypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
+						emplacePair.first->second.getId(),
+						emplacePair.first->second));
+			}
+
+		} //end main extraction loop
+
+	}
+	else
+	{
+		__COUT__ << "Initializing info for Normal mode XDAQ context..." << __E__;
+
+
+		ConfigurationManager cfgMgr;
+		const XDAQContextConfiguration* contextConfig =
+				cfgMgr.__GET_CONFIG__(XDAQContextConfiguration);
+
+
+		//second pass, organize supervisors
+		auto allDescriptors = SupervisorDescriptorInfoBase::getAllDescriptors();
+		for(const auto& descriptor:allDescriptors)
+		{
+			auto /*<iterator,bool>*/ emplacePair = allSupervisorInfo_.emplace(std::pair<unsigned int, SupervisorInfo>(
+					descriptor.second->getLocalId(),//descriptor.first,
+					SupervisorInfo(
+							descriptor.second /* descriptor */,
+							contextConfig->getApplicationUID
+							(
+									descriptor.second->getContextDescriptor()->getURL(),
+									descriptor.second->getLocalId()
+							) /* name */,
+							contextConfig->getContextUID(
+									descriptor.second->getContextDescriptor()->getURL()) /* xdaq parent context */
+					)));
+			if(!emplacePair.second)
+			{
+				__SS__ << "Error! Duplicate Application IDs are not allowed. ID =" <<
 						descriptor.second->getLocalId() << __E__;
 				__SS_THROW__;
 			}
-			//copy and erase from map
-			theWizardInfo_ = &(emplacePair.first->second);
-			continue;
-		}
+
+			/////////////////////////////////////////////
+			// now organize new descriptor by class...
+
+			//check for gateway supervisor
+			// note: necessarily exclusive to other Supervisor types
+			if(emplacePair.first->second.isGatewaySupervisor())
+			{
+				if(theSupervisorInfo_)
+				{
+					__SS__ << "Error! Multiple Gateway Supervisors of class " << XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS <<
+							" found. There can only be one. ID =" <<
+							descriptor.second->getLocalId() << __E__;
+					__SS_THROW__;
+				}
+				//copy and erase from map
+				theSupervisorInfo_ = &(emplacePair.first->second);
+				continue;
+			}
+
+			//check for wizard supervisor
+			// note: necessarily exclusive to other Supervisor types
+			if(emplacePair.first->second.isWizardSupervisor())
+			{
+				if(theWizardInfo_)
+				{
+					__SS__ << "Error! Multiple Wizard Supervisors of class " << XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS <<
+							" found. There can only be one. ID =" <<
+							descriptor.second->getLocalId() << __E__;
+					__SS_THROW__;
+				}
+				//copy and erase from map
+				theWizardInfo_ = &(emplacePair.first->second);
+				continue;
+			}
 
 
-		//check for FE type, then add to FE group
-		// note: not necessarily exclusive to other Supervisor types
-		if(emplacePair.first->second.isTypeFESupervisor())
-		{
-			allFETypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
-					emplacePair.first->second.getId(),
-					emplacePair.first->second));
-		}
+			//check for FE type, then add to FE group
+			// note: not necessarily exclusive to other Supervisor types
+			if(emplacePair.first->second.isTypeFESupervisor())
+			{
+				allFETypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
+						emplacePair.first->second.getId(),
+						emplacePair.first->second));
+			}
 
-		//check for DM type, then add to DM group
-		// note: not necessarily exclusive to other Supervisor types
-		if(emplacePair.first->second.isTypeDMSupervisor())
-		{
-			allDMTypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
-					emplacePair.first->second.getId(),
-					emplacePair.first->second));
-		}
+			//check for DM type, then add to DM group
+			// note: not necessarily exclusive to other Supervisor types
+			if(emplacePair.first->second.isTypeDMSupervisor())
+			{
+				allDMTypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
+						emplacePair.first->second.getId(),
+						emplacePair.first->second));
+			}
 
-		//check for Logbook type, then add to Logbook group
-		// note: not necessarily exclusive to other Supervisor types
-		if(emplacePair.first->second.isTypeLogbookSupervisor())
-		{
-			allLogbookTypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
-					emplacePair.first->second.getId(),
-					emplacePair.first->second));
-		}
+			//check for Logbook type, then add to Logbook group
+			// note: not necessarily exclusive to other Supervisor types
+			if(emplacePair.first->second.isTypeLogbookSupervisor())
+			{
+				allLogbookTypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
+						emplacePair.first->second.getId(),
+						emplacePair.first->second));
+			}
 
-	} //end main extraction loop
+		} //end main extraction loop
+	}
 
 
 	if((!theWizardInfo_ && !theSupervisorInfo_) ||
@@ -161,7 +293,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 
 	SupervisorDescriptorInfoBase::destroy();
 
-	__COUT__ << "Init" << __E__;
+	__COUT__ << "Init complete" << __E__;
 
 	//for debugging
 	//getOrderedSupervisorDescriptors("Configure");
@@ -245,7 +377,7 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 {
 	__COUT__ << "getOrderedSupervisorDescriptors" << __E__;
 
-	std::map<uint8_t      /*priority*/, std::vector< unsigned int /*appId*/> > orderedByPriority;
+	std::map<uint64_t /*priority*/, std::vector< unsigned int /*appId*/> > orderedByPriority;
 
 	try
 	{
@@ -262,7 +394,7 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 					auto it = app.stateMachineCommandPriority_.find(stateMachineCommand);
 					if(it == app.stateMachineCommandPriority_.end())
 						orderedByPriority[100].push_back(app.id_);
-					else
+					else //take value, and do not allow DEFAUL value of 0 -> force to 100
 						orderedByPriority[it->second?it->second:100].push_back(app.id_);
 
 					//__COUT__ << "app.id_ " << app.id_ << __E__;

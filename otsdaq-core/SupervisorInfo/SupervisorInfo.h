@@ -10,6 +10,7 @@
 #include "xdaq/Application.h"  /* for  xdaq::ApplicationDescriptor */
 #include "xdaq/ContextDescriptor.h"  /* for  xdaq::ContextDescriptor */
 #pragma GCC diagnostic pop
+#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 
 
 namespace ots
@@ -19,13 +20,15 @@ class SupervisorInfo
 {
 
 public:
+	//when no configuration, e.g. Wizard Mode, then
+	// name and contextName are derived from the class name and LID
     SupervisorInfo (
     		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* descriptor,
     		const std::string& name, const std::string& contextName) :
     			descriptor_			(descriptor),
 				contextDescriptor_	(descriptor?descriptor->getContextDescriptor():0),
-				name_				(name),
-				contextName_		(contextName),
+				name_				(name), // this is the config app name
+				contextName_		(contextName), // this is the config parent context name
 				id_					(descriptor?descriptor->getLocalId():0),
 				class_				(descriptor?descriptor->getClassName():""),
 				contextURL_			(contextDescriptor_?contextDescriptor_->getURL():""),
@@ -34,6 +37,11 @@ public:
 				port_				(0),
 				status_				("Unknown")
     {
+    	//when no configuration, e.g. Wizard Mode, then
+    	// name and contextName are derived from the class name and LID
+    	if(name_ == "") name_ = id_;
+    	if(contextName_ == "") contextName_ = class_;
+
 		//    	__COUTV__(name_);
 		//    	__COUTV__(contextName_);
 		//    	__COUTV__(id_);
@@ -42,6 +50,8 @@ public:
 		//    	__COUTV__(URL_);
 		//    	__COUTV__(port_);
 		//    	__COUTV__(class_);
+
+
     }
 
     ~SupervisorInfo(void)

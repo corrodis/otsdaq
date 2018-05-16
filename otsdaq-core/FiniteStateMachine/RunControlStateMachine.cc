@@ -10,6 +10,10 @@
 
 #include <iostream>
 
+#undef 	__MF_SUBJECT__
+#define __MF_SUBJECT__ std::string("FSM-") + stateMachineName_
+
+
 using namespace ots;
 
 const std::string RunControlStateMachine::FAILED_STATE_NAME = "Failed";

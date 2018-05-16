@@ -9,7 +9,8 @@
 namespace ots
 {
 
-
+//DataProcessor
+//	This class provides common functionality for Data Producers and Consumers.
 class DataProcessor
 {
 public:

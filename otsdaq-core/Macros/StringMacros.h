@@ -13,9 +13,67 @@ namespace ots
 struct StringMacros
 {
 
-static bool					wildCardMatch							(const std::string& needle, 		const std::string& 							haystack);
+static bool					wildCardMatch							(const std::string& needle, 		const std::string& 							haystack,	unsigned int* priorityIndex = 0);
 static bool					inWildCardSet							(const std::string  needle, 		const std::set<std::string>& 				haystack);
-static const std::string&	getWildCardMatchFromMap					(const std::string  needle, 		const std::map<std::string,std::string>& 	haystack);
+
+
+//========================================================================================================================
+//getWildCardMatchFromMap ~
+//	returns value if needle is in haystack otherwise throws exception
+//	(considering wildcards AND match priority as defined by StringMacros::wildCardMatch)
+template<class T>
+static const T&				getWildCardMatchFromMap					(const std::string  needle, 		const std::map<std::string,T>& 				haystack)
+{
+	unsigned int matchPriority, bestMatchPriority = 0; //lowest number matters most for matches
+
+	if(!haystack.size())
+	{
+		__SS__ << "Needle '" << needle << "' not found in EMPTY wildcard haystack:" << __E__;
+		throw std::runtime_error(ss.str());
+	}
+
+	//__COUT__ << StringMacros::mapToString(haystack) << __E__;
+
+	std::string bestMatchKey;
+	for(const auto& haystackPair : haystack)
+		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
+		//	check resulting priority to see if we are done with search (when priority=1, can be done)
+		if(StringMacros::wildCardMatch(haystackPair.first,needle,
+				&matchPriority))
+		{
+			if(matchPriority == 1) //found best possible match, so done
+				return haystackPair.second;
+
+			if(!bestMatchPriority || matchPriority < bestMatchPriority)
+			{
+				//found new best match
+				bestMatchPriority = matchPriority;
+				bestMatchKey = haystackPair.first;
+			}
+		}
+
+	if(bestMatchPriority) //found a match, although not exact, i.e. wildcard was used
+	{
+		//__COUTV__(bestMatchPriority);
+		//__COUTV__(bestMatchKey);
+		//__COUT__ << "value found: " << haystack.at(bestMatchKey) << __E__;
+		return haystack.at(bestMatchKey);
+	}
+
+	__SS__ << "Needle '" << needle << "' not found in wildcard haystack:" << __E__;
+	bool first = true;
+	for(const auto& haystackPair : haystack)
+		if(first)
+		{
+			ss << ", " << haystackPair.first;
+			first = false;
+		}
+		else
+			ss << ", " << haystackPair.first;
+	throw std::runtime_error(ss.str());
+}
+
+//static const std::string&	getWildCardMatchFromMap					(const std::string  needle, 		const std::map<std::string,std::string>& 	haystack);
 
 static std::string		 	decodeURIComponent 						(const std::string& data);
 static std::string 			convertEnvironmentVariables				(const std::string& data);
@@ -154,15 +212,20 @@ static void					getMapFromString 						(const std::string& inputString, std::map
 }
 static void					getMapFromString 						(const std::string& inputString, std::map<std::string,std::string>& mapToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'});
 template<class T>
-static std::string			mapToString								(const std::map<std::string,T>& mapToReturn, const std::string& primaryDelimeter = "\n", const std::string& secondaryDelimeter = ": ")
+static std::string			mapToString								(const std::map<std::string,T>& mapToReturn, const std::string& primaryDelimeter = ",", const std::string& secondaryDelimeter = ": ")
 {
 	std::stringstream ss;
+	bool first = true;
 	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
 		ss << mapPair.first << secondaryDelimeter <<
-			mapPair.second << primaryDelimeter;
+			mapPair.second;
+	}
 	return ss.str();
 }
-static std::string			mapToString								(const std::map<std::string,uint8_t>& mapToReturn, const std::string& primaryDelimeter = "\n", const std::string& secondaryDelimeter = ": ");
+static std::string			mapToString								(const std::map<std::string,uint8_t>& mapToReturn, const std::string& primaryDelimeter = ",", const std::string& secondaryDelimeter = ": ");
 template<class T>
 static std::string			setToString								(const std::set<T>& setToReturn, const std::string& delimeter = ",")
 {

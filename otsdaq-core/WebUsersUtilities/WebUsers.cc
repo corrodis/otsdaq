@@ -382,22 +382,6 @@ bool WebUsers::xmlRequestOnGateway(
 
 	return true; //access success!
 
-//
-//	/////////////////////////////////////////////////////
-//	//get user info for cookie code and check lock (now that username is available)
-//
-//	//getUserInfoForCookie(userInfo.cookieCode_, &tmpUsername_, &tmpDisplayName_,
-//	//		&tmpActiveSessionIndex_);
-//
-//	if(WebUsers::finalizeRequestAccess(out,
-//			xmldoc,
-//			userInfo,
-//			 UsersUsernameVector[userInfo.uid_],//tmpUsername_,
-//			 UsersDisplayNameVector[userInfo.uid_],//tmpDisplayName_,
-//			 userInfo.activeUserSessionIndex_))//tmpActiveSessionIndex_))
-//		return true;
-//	else
-//		goto HANDLE_ACCESS_FAILURE; //return false, access failed
 
 HANDLE_ACCESS_FAILURE:
 	//print out return string on failure
@@ -443,8 +427,12 @@ bool WebUsers::checkRequestAccess(
 	// - check user lock flags and status
 
 
-	__COUTV__((unsigned int)userInfo.permissionLevel_);
-	__COUTV__((unsigned int)userInfo.permissionsThreshold_);
+	if(!userInfo.automatedCommand_)
+	{
+		__COUT__ << "requestType ==========>>> " << userInfo.requestType_ << __E__;
+		__COUTV__((unsigned int)userInfo.permissionLevel_);
+		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
+	}
 
 	//second, start check access -------
 	if(!isWizardMode && !userInfo.allowNoUser_ &&
@@ -461,7 +449,9 @@ bool WebUsers::checkRequestAccess(
 			userInfo.permissionLevel_ < userInfo.permissionsThreshold_))
 	{
 		*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-		__COUT__ << "User (@" << userInfo.ip_ << ") has insufficient permissions: " <<
+		__COUT__ << "User (@" << userInfo.ip_ << ") has insufficient permissions for requestType '" <<
+				userInfo.requestType_ <<
+				"' : " <<
 				(unsigned int)userInfo.permissionLevel_ << "<" <<
 				(unsigned int)userInfo.permissionsThreshold_ << std::endl;
 		return false;	//invalid cookie and present sequence, but not correct sequence
@@ -470,8 +460,6 @@ bool WebUsers::checkRequestAccess(
 
 	if(isWizardMode)
 	{
-		__COUTV__(userInfo.username_);
-		__COUTV__(userInfo.usernameWithLock_);
 		userInfo.username_ = "admin";
 		userInfo.displayName_ = "Admin";
 		userInfo.usernameWithLock_ = "admin";
@@ -491,8 +479,11 @@ bool WebUsers::checkRequestAccess(
 	if(userInfo.allowNoUser_) return true; //ignore lock for allow-no-user case
 
 
-	__COUTV__(userInfo.username_);
-	__COUTV__(userInfo.usernameWithLock_);
+//	if(!userInfo.automatedCommand_)
+//	{
+//		__COUTV__(userInfo.username_);
+//		__COUTV__(userInfo.usernameWithLock_);
+//	}
 
 	if((userInfo.checkLock_ || userInfo.requireLock_) &&
 			userInfo.usernameWithLock_ != "" &&
@@ -515,100 +506,7 @@ bool WebUsers::checkRequestAccess(
 
 	return true; //access success!
 
-//	//third. check group membership
-//	if(!isWizardMode && !userInfo.allowNoUser_)
-//	{
-//		//check groups allowed
-//		//	i.e. if user is a member of one of the groups allowed
-//		//			then grant access
-//		bool accept = false;
-//		for(const auto& userGroup:userInfo.groupMembership_)
-//			if(StringMacros::inWildCardSet(
-//					userGroup,
-//					userInfo.groupsAllowed_))
-//			{
-//				accept = true;
-//				break;
-//			}
-//
-//		if(!accept && userInfo.groupMembership_.size())
-//		{
-//			*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-//
-//			__COUT_INFO__ << "User (@" << userInfo.ip_ << ") has insufficient group permissions: user is in these groups... " <<
-//					StringMacros::setToString(userInfo.groupMembership_) << " and the allowed groups are... " <<
-//					StringMacros::setToString(userInfo.groupsAllowed_) << std::endl;
-//			return false;
-//		}
-//
-//		//if no access groups specified, then check groups disallowed
-//		if(!userInfo.groupMembership_.size())
-//		{
-//			for(const auto& userGroup:userInfo.groupMembership_)
-//				if(StringMacros::inWildCardSet(
-//						userGroup,
-//						userInfo.groupsDisallowed_))
-//				{
-//					*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-//
-//					__COUT_INFO__ << "User (@" << userInfo.ip_ << ") is in a disallowed group: user is in these groups... " <<
-//							StringMacros::setToString(userInfo.groupMembership_) << " and the disallowed groups are... " <<
-//							StringMacros::setToString(userInfo.groupsDisallowed_) << std::endl;
-//					return false;
-//				}
-//		}
-//	} //end group membership check
-
-
-
-	//third, finalize other things
-
-
-
 } //end checkRequestAccess()
-
-//FIXME -- delete this because all user info comes in one cookie check request now
-////========================================================================================================================
-////finalizeRequestAccess
-////	finalize user access parameters based on user with lock and additional user info
-////	note: this is accomplished at supervisors through extra request to the gateway for additional user info
-////		thus, the soap parameters here are from a different response than those for checkRequestAccess.
-//bool WebUsers::finalizeRequestAccess(
-//		//cgicc::Cgicc& 					cgi,
-//		std::ostringstream* 			out,
-//		HttpXmlDocument* 				xmldoc,
-//		WebUsers::RequestUserInfo&		userInfo,
-//		const std::string&				usernameResponse,
-//		const std::string&				displayNameResponse,
-//		const uint64_t&					activeSessionIndexResponse)
-//		//SOAPParameters&		            parameters)
-//{
-//	userInfo.setUsername(usernameResponse);
-//	userInfo.setDisplayName(displayNameResponse);
-//	userInfo.setActiveUserSessionIndex(activeSessionIndexResponse);
-//
-//
-//	if((userInfo.checkLock_ || userInfo.requireLock_) &&
-//			userInfo.usernameWithLock_ != "" &&
-//			userInfo.usernameWithLock_ != userInfo.username_)
-//	{
-//		*out << WebUsers::REQ_USER_LOCKOUT_RESPONSE;
-//		__COUT__ << "User '" << userInfo.username_ << "' is locked out. '" <<
-//				userInfo.usernameWithLock_ << "' has lock." << std::endl;
-//		return false;
-//	}
-//
-//	if(userInfo.requireLock_ &&
-//			userInfo.usernameWithLock_ != userInfo.username_)
-//	{
-//		*out << WebUsers::REQ_LOCK_REQUIRED_RESPONSE;
-//		__COUT__ << "User '" << userInfo.username_ << "' must have lock to proceed. ('" <<
-//				userInfo.usernameWithLock_ << "' has lock.)" << std::endl;
-//		return false;
-//	}
-//
-//	return true;
-//} //end finalizeRequestAccess()
 
 //========================================================================================================================
 //saveActiveSessions
@@ -623,7 +521,8 @@ void WebUsers::saveActiveSessions()
 	FILE *fp = fopen(fn.c_str(), "w");
 	if (!fp)
 	{
-		__COUT_ERR__ << "Error! Persistent active sessions could not be saved." << __E__;
+		__COUT_ERR__ << "Error! Persistent active sessions could not be saved to file: " <<
+				fn << __E__;
 		return;
 	}
 
@@ -662,7 +561,8 @@ void WebUsers::loadActiveSessions()
 	FILE *fp = fopen(fn.c_str(), "r");
 	if (!fp)
 	{
-		__COUT_ERR__ << "Error! Persistent active sessions could not be saved." << __E__;
+		__COUT_INFO__ << "Persistent active sessions were not found to be loaded at file: " <<
+				fn << __E__;
 		return;
 	}
 
@@ -733,6 +633,7 @@ void WebUsers::loadActiveSessions()
 bool WebUsers::loadDatabases()
 {
 	std::string fn;
+
 	FILE *fp;
 	const unsigned int LINE_LEN = 1000;
 	char line[LINE_LEN];
@@ -903,18 +804,34 @@ bool WebUsers::loadDatabases()
 						StringMacros::getMapFromString<uint8_t>(&line[si],
 								lastPermissionsMap);
 
-						__COUT__ << "User permission levels:" << __E__ <<
-								StringMacros::mapToString(lastPermissionsMap);
+						//__COUT__ << "User permission levels:" << StringMacros::mapToString(lastPermissionsMap) << __E__;
 
 						//verify 'allUsers' is there
 						//	if not, add it as a diabled user (i.e. WebUsers::PERMISSION_LEVEL_INACTIVE)
 						if(lastPermissionsMap.find(WebUsers::DEFAULT_USER_GROUP) ==
 								lastPermissionsMap.end())
 						{
-							__MCOUT_INFO__( "User '" << "' is not a member of the default user group '" <<
-									WebUsers::DEFAULT_USER_GROUP << ".' Assuming user account is inactive (permission level := " <<
-									WebUsers::PERMISSION_LEVEL_INACTIVE << ")." << __E__);
-							lastPermissionsMap[WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE; //mark inactive
+							//try to accomplish backwards compatibility to
+							//	allow for the time before group permissions
+							sscanf(&line[si], "%lu", &tmpInt64);
+							tmpInt64 &= 0xFF;
+							if(tmpInt64) //if not 0
+							{
+								lastPermissionsMap.clear();
+								__COUT_INFO__ << "User '" <<
+									UsersUsernameVector.back() << "' is not a member of the default user group '" <<
+									WebUsers::DEFAULT_USER_GROUP << ".' For backward compatibility, permission level assumed for default group (permission level := " <<
+									tmpInt64 << ")." << __E__;
+								lastPermissionsMap[WebUsers::DEFAULT_USER_GROUP] = WebUsers::permissionLevel_t(tmpInt64);
+							}
+							else
+							{
+								__MCOUT_INFO__( "User '" <<
+										UsersUsernameVector.back() << "' is not a member of the default user group '" <<
+										WebUsers::DEFAULT_USER_GROUP << ".' Assuming user account is inactive (permission level := " <<
+										WebUsers::PERMISSION_LEVEL_INACTIVE << ")." << __E__);
+								lastPermissionsMap[WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE; //mark inactive
+							}
 						}
 					}
 					else if (f == 5)	//lastLoginAttemptTime
@@ -949,8 +866,9 @@ bool WebUsers::loadDatabases()
 			{
 				if (f != 7 && f != 9) //original database was size 8, so is ok to not match
 				{
-					__COUT__ << "FATAL ERROR - invalid database found with field number " << f << __E__;
+					__SS__ << "FATAL ERROR - invalid user database found with field number " << f << __E__;
 					fclose(fp);
+					__SS_THROW__;
 					return false;
 				}
 
@@ -977,7 +895,7 @@ bool WebUsers::loadDatabases()
 	{
 		__COUT__ << "User " << UsersUserIdVector[ii] << ": Name: " << UsersUsernameVector[ii] <<
 				"\t\tDisplay Name: " << UsersDisplayNameVector[ii] << "\t\tEmail: " <<
-				UsersUserEmailVector[ii] << "\t\tPermissions: " << __E__ <<
+				UsersUserEmailVector[ii] << "\t\tPermissions: " <<
 				StringMacros::mapToString(UsersPermissionsVector[ii]) << __E__;
 	}
 	return true;
@@ -1068,7 +986,7 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 				}
 				else if (f == 4)	//permissions
 					saveToDatabase(fp, UsersDatabaseEntryFields[f],
-							StringMacros::mapToString(UsersPermissionsVector[i]), DB_SAVE_OPEN_AND_CLOSE, false);
+							StringMacros::mapToString(UsersPermissionsVector[i],","/*primary delimeter*/,":"/*secondary delimeter*/), DB_SAVE_OPEN_AND_CLOSE, false);
 				else if (f == 5)	//lastLoginAttemptTime
 				{
 					sprintf(fldStr, "%lu", UsersLastLoginAttemptVector[i]);
@@ -1238,6 +1156,7 @@ void WebUsers::intToHexStr(unsigned char i, char *h)
 uint64_t WebUsers::attemptActiveSession(const std::string& uuid, std::string& jumbledUser,
 		const std::string& jumbledPw, std::string& newAccountCode, const std::string& ip)
 {
+	//__COUTV__(ip);
 	if(!checkIpAccess(ip))
 	{
 		__COUT_ERR__ << "rejected ip: " << ip << __E__;
@@ -1324,17 +1243,23 @@ uint64_t WebUsers::attemptActiveSession(const std::string& uuid, std::string& ju
 		//__COUT__ << salt << " " << i << __E__;
 		if (searchHashesDatabaseForHash(sha512(user, pw, salt)) == NOT_FOUND_IN_DATABASE)
 		{
-			__COUT__ << "not found?" << __E__;
+			__COUT__ << "Failed login for " << user << " with permissions " <<
+					StringMacros::mapToString(UsersPermissionsVector[i]) <<	__E__;
+
 			++UsersLoginFailureCountVector[i];
 			if (UsersLoginFailureCountVector[i] >= USERS_MAX_LOGIN_FAILURES)
 				UsersPermissionsVector[i][WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE; //Lock account
 
-			__COUT_INFO__ << "\tUser/pw for user '" << user << "' was not correct (Failed Attempt #" <<
-					(int)(UsersLoginFailureCountVector[i]) << ")." << __E__;
+			__COUT_INFO__ << "User/pw for user '" << user << "' was not correct (Failed Attempt #" <<
+					(int)UsersLoginFailureCountVector[i] << " of " <<
+					(int)USERS_MAX_LOGIN_FAILURES << ")." << __E__;
 
+			__COUTV__(isInactiveForGroup(UsersPermissionsVector[i]));
 			if (isInactiveForGroup(UsersPermissionsVector[i]))
 				__MCOUT_INFO__("Account '" << user << "' has been marked inactive due to too many failed login attempts (Failed Attempt #" <<
-				")! Note only admins can reactivate accounts." << __E__);
+						(int)UsersLoginFailureCountVector[i] <<
+						")! Note only admins can reactivate accounts." << __E__);
+
 
 			saveDatabaseToFile(DB_USERS); //users db modified, so save
 			return NOT_FOUND_IN_DATABASE;
@@ -1380,7 +1305,7 @@ uint64_t WebUsers::attemptActiveSession(const std::string& uuid, std::string& ju
 	//SUCCESS!!
 	saveDatabaseToFile(DB_USERS); //users db modified, so save
 	jumbledUser = UsersDisplayNameVector[i]; //pass by reference displayName
-	newAccountCode = createNewActiveSession(UsersUserIdVector[i]); //return cookie code by reference
+	newAccountCode = createNewActiveSession(UsersUserIdVector[i],ip); //return cookie code by reference
 	return UsersUserIdVector[i]; //return user Id
 }
 
@@ -1509,7 +1434,7 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 	//SUCCESS!!
 	saveDatabaseToFile(DB_USERS); //users db modified, so save
 	email = UsersDisplayNameVector[i]; //pass by reference displayName
-	cookieCode = createNewActiveSession(UsersUserIdVector[i]); //return cookie code by reference
+	cookieCode = createNewActiveSession(UsersUserIdVector[i],ip); //return cookie code by reference
 	return UsersUserIdVector[i]; //return user Id
 }
 
@@ -1659,6 +1584,7 @@ void WebUsers::removeLoginSessionEntry(unsigned int i)
 //	In this ActiveSessionIndex should link a thread of cookieCodes
 std::string WebUsers::createNewActiveSession(uint64_t uid, const std::string& ip, uint64_t asIndex)
 {
+	//__COUTV__(ip);
 	ActiveSessionCookieCodeVector.push_back(genCookieCode());
 	ActiveSessionIpVector.push_back(ip);
 	ActiveSessionUserIdVector.push_back(uid);
@@ -2066,6 +1992,8 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string& cookieCode,
 		bool refresh, std::string *userWithLock,
 		uint64_t* activeUserSessionIndex)
 {
+	//__COUTV__(ip);
+
 	//check ip black list and increment counter if cookie code not found
 	if(!checkIpAccess(ip))
 	{
@@ -2115,7 +2043,9 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string& cookieCode,
 	//check ip
 	if (ip != "0" && ActiveSessionIpVector[i] != ip)
 	{
-		__COUT_ERR__ << "IP does not match active session" << __E__;
+		__COUTV__(ActiveSessionIpVector[i]);
+		//__COUTV__(ip);
+		__COUT_ERR__ << "IP does not match active session." << __E__;
 		cookieCode = REQ_NO_LOGIN_RESPONSE;
 		return false;
 	}
@@ -2238,7 +2168,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string> *loggedOutUsername
 std::string WebUsers::createNewLoginSession(const std::string& UUID, const std::string& ip)
 {
 	__COUTV__(UUID);
-	__COUTV__(ip);
+	//__COUTV__(ip);
 
 	uint64_t i = 0;
 	for (; i < LoginSessionUUIDVector.size(); ++i)
@@ -2376,8 +2306,9 @@ std::string WebUsers::dejumble(const std::string& u, const std::string& s)
 std::map<std::string /*groupName*/,WebUsers::permissionLevel_t> WebUsers::getPermissionsForUser(
 		uint64_t uid)
 {
+	//__COUTV__(uid);
 	uint64_t userIndex = searchUsersDatabaseForUserId(uid);
-
+	//__COUTV__(userIndex); __COUTV__(UsersPermissionsVector.size());
 	if (userIndex < UsersPermissionsVector.size())
 		return UsersPermissionsVector[userIndex];
 
@@ -2389,7 +2320,7 @@ std::map<std::string /*groupName*/,WebUsers::permissionLevel_t> WebUsers::getPer
 }
 
 //========================================================================================================================
-uint8_t WebUsers::getPermissionLevelForGroup(
+WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(
 		std::map<std::string /*groupName*/,WebUsers::permissionLevel_t>& permissionMap,
 		const std::string& groupName)
 {
@@ -2467,7 +2398,7 @@ std::string WebUsers::getTooltipFilename(
 				(c >= '0' && c <= '9'))
 			filename += c;
 	filename += ".tip";
-	__COUT__ << "filename " << filename << __E__;
+	//__COUT__ << "filename " << filename << __E__;
 	return filename;
 }
 
@@ -2543,7 +2474,7 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 	//	__COUT__ << "srcFile " << srcFile << __E__;
 	//	__COUT__ << "srcFunc " << srcFunc << __E__;
 	//	__COUT__ << "srcId " << srcId << __E__;
-	__COUT__ << "Checking tooltip for user: " << username << __E__;
+	//__COUT__ << "Checking tooltip for user: " << username << __E__;
 
 
 
@@ -2599,6 +2530,7 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument *xmldoc, bool
 {
 	std::map<std::string /*groupName*/,WebUsers::permissionLevel_t> permissionMap =
 			getPermissionsForUser(uid);
+	__COUTV__(StringMacros::mapToString(permissionMap));
 	if (isInactiveForGroup(permissionMap)) return; //not an active user
 
 	uint64_t	userIndex = searchUsersDatabaseForUserId(uid);
@@ -3145,8 +3077,8 @@ void WebUsers::deleteUserData()
 	//delete Visualizer folders
 	std::system(("rm -rf " + std::string(serviceDataPath) + "/VisualizerData/").c_str());
 
-	//delete active groups file
-	std::system(("rm -rf " + std::string(serviceDataPath) + "/ActiveConfigurationGroups.cfg").c_str());
+	//DO NOT delete active groups file (this messes with people's configuration world, which is not expected when "resetting user info")
+	//std::system(("rm -rf " + std::string(serviceDataPath) + "/ActiveConfigurationGroups.cfg").c_str());
 
 	//delete Logbook folders
 	std::system(("rm -rf " + std::string(getenv("LOGBOOK_DATA_PATH")) + "/").c_str());
