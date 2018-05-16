@@ -339,33 +339,33 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 			appChild.second.getNode(colApplication_.colClass_).getValue(contexts_.back().applications_.back().class_);
 			appChild.second.getNode(colApplication_.colId_).getValue(contexts_.back().applications_.back().id_);
 
-			//assert NO app id repeats
-			if(appIdSet.find(contexts_.back().applications_.back().id_) != appIdSet.end())
+			//assert Gateway is 200
+			if((contexts_.back().applications_.back().id_ == 200 &&
+					contexts_.back().applications_.back().class_ != XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS &&
+					contexts_.back().applications_.back().class_ != XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS) ||
+					(contexts_.back().applications_.back().id_ != 200 &&
+										(contexts_.back().applications_.back().class_ == XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS ||
+										contexts_.back().applications_.back().class_ == XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS)))
 			{
-				__SS__ << "XDAQ Application IDs are not unique. Specifically at id=" <<
+				__SS__ << "XDAQ Application ID of 200 is reserved for the Gateway Supervisor " <<
+						XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS << ". Conflict specifically at id=" <<
 						contexts_.back().applications_.back().id_ << " appName=" <<
 						contexts_.back().applications_.back().applicationUID_ << std::endl;
-				__COUT_ERR__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
+			//assert NO app id repeats if context/app enabled
 			if(contexts_.back().status_ && contexts_.back().applications_.back().status_)
 			{
-				//assert Gateway is 200
-				if((contexts_.back().applications_.back().id_ == 200 &&
-						contexts_.back().applications_.back().class_ != XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS &&
-						contexts_.back().applications_.back().class_ != XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS) ||
-						(contexts_.back().applications_.back().id_ != 200 &&
-											(contexts_.back().applications_.back().class_ == XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS ||
-											contexts_.back().applications_.back().class_ == XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS)))
+				//assert NO app id repeats
+				if(appIdSet.find(contexts_.back().applications_.back().id_) != appIdSet.end())
 				{
-					__SS__ << "XDAQ Application ID of 200 is reserved for the Gateway Supervisor " <<
-							XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS << ". Conflict specifically at id=" <<
+					__SS__ << "XDAQ Application IDs are not unique. Specifically at id=" <<
 							contexts_.back().applications_.back().id_ << " appName=" <<
 							contexts_.back().applications_.back().applicationUID_ << std::endl;
-					__SS_THROW__;
+					__COUT_ERR__ << "\n" << ss.str();
+					throw std::runtime_error(ss.str());
 				}
-
 				appIdSet.insert(contexts_.back().applications_.back().id_);
 			}
 
