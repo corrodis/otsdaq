@@ -23,6 +23,9 @@
 namespace ots
 {
 
+//CorePropertySupervisorBase
+//	This class provides supervisor property get and set functionality. It has member variables
+//		generally useful to the configuration of client supervisors.
 class CorePropertySupervisorBase
 {
 

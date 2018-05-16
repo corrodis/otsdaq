@@ -26,6 +26,9 @@ namespace ots
 
 class HttpXmlDocument;
     
+//WebUsers
+//	This class provides the functionality for managing all otsdaq user account preferences
+//	and permissions.
 class WebUsers
 {
 public:

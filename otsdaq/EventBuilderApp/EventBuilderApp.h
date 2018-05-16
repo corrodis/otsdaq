@@ -30,6 +30,8 @@ class ConfigurationGroupKey;
 /**
  * \brief
  */
+//EventBuilderApp
+//	This class provides the otsdaq interface to a single artdaq Event Builder,
 class EventBuilderApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 

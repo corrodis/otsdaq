@@ -14,6 +14,8 @@ namespace ots
 {
 class FEVInterface;
 
+//FEVInterfacesManager
+//	This class is a virtual class that handles a collection of front-end interface plugins.
 class FEVInterfacesManager : public VStateMachine, public Configurable
 {
 public:

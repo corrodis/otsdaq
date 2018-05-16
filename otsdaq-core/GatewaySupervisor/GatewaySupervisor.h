@@ -38,6 +38,10 @@ class ConfigurationManager;
 class ConfigurationGroupKey;
 class WorkLoopManager;
 
+//GatewaySupervisor
+//	This class is the gateway server for all otsdaq requests in "Normal Mode." It validates user access
+//	for every request. It synchronizes
+//	the state machines of all other supervisors.
 class GatewaySupervisor: public xdaq::Application, public SOAPMessenger,
 	public RunControlStateMachine, public CorePropertySupervisorBase
 {

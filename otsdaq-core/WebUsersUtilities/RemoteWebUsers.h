@@ -15,6 +15,9 @@ namespace ots
 class AllSupervisorInfo;
 class HttpXmlDocument;
 
+//RemoteWebUsers
+//	This class provides the functionality for client supervisors to check with the Gateway Supervisor
+//	to verify user access. It also provides the functionality for client supervisors to retreive user info.
 class RemoteWebUsers : public SOAPMessenger
 {
 public:

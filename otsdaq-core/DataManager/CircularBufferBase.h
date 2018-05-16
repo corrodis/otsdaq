@@ -8,6 +8,8 @@ namespace ots
 
 class DataProcessor;
 
+//CircularBufferBase
+//	This class is the base class for the otsdaq Buffer
 class CircularBufferBase
 {
 public:

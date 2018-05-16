@@ -1,8 +1,5 @@
 #include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
 
-
-//#include <iostream>
-
 using namespace ots;
 
 const CorePropertySupervisorBase::SupervisorProperties 	CorePropertySupervisorBase::SUPERVISOR_PROPERTIES = CorePropertySupervisorBase::SupervisorProperties();

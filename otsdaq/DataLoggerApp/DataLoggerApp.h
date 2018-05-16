@@ -26,6 +26,8 @@ namespace ots
 class ConfigurationManager;
 class ConfigurationGroupKey;
 
+//DataLoggerApp
+//	This class provides the otsdaq interface to a single artdaq Data Logger.
 class DataLoggerApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 

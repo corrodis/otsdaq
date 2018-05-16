@@ -11,6 +11,8 @@
 namespace ots
 {
 
+//CoreSupervisorBase
+//This class provides finite state machine functionality for otsdaq supervisors.
 class RunControlStateMachine : public virtual toolbox::lang::Class
 {
 

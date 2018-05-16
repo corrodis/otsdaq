@@ -19,6 +19,8 @@ class DataProducer;
 class DataConsumer;
 class CircularBufferBase;
 
+//DataManager
+//	This class is the base class that handles a collection of Buffers and associated Data Processor plugins.
 class DataManager: public VStateMachine, public Configurable
 {
 public:

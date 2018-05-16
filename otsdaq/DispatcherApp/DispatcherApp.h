@@ -27,6 +27,8 @@ namespace ots
 class ConfigurationManager;
 class ConfigurationGroupKey;
 
+//DispatcherApp
+//	This class provides the otsdaq interface to a single artdaq Dispatcher.
 class DispatcherApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
 {
 

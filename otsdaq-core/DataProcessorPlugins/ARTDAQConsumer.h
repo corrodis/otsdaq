@@ -13,6 +13,8 @@
 namespace ots
 {
 
+//ARTDAQConsumer
+//	This class is a Data Consumer Plugin that allows a single artdaq Event Builder to be instantiate as a Consumer to an otsdaq Buffer.
 class ARTDAQConsumer : public DataConsumer, public Configurable
 {
 
