@@ -2680,8 +2680,8 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 		bool firstIcon = true;
 		for(const auto& icon: icons)
 		{
-			//__COUTV__(icon.caption_);
-			//__COUTV__(icon.permissionThresholdString_);
+			__COUTV__(icon.caption_);
+			__COUTV__(icon.permissionThresholdString_);
 
 			CorePropertySupervisorBase::extractPermissionsMapFromString(
 					icon.permissionThresholdString_,

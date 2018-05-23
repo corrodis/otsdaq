@@ -73,20 +73,25 @@ static const T&				getWildCardMatchFromMap					(const std::string  needle, 		con
 	throw std::runtime_error(ss.str());
 }
 
-//static const std::string&	getWildCardMatchFromMap					(const std::string  needle, 		const std::map<std::string,std::string>& 	haystack);
-
 static std::string		 	decodeURIComponent 						(const std::string& data);
 static std::string 			convertEnvironmentVariables				(const std::string& data);
 static bool 	        	isNumber           						(const std::string& s);
+static bool 	        	extractAndCalculateNumber				(const std::string& s);
 
 
 //special validation ignoring any table info - just assuming type string
 template<class T>
 static T 					validateValueForDefaultStringDataType	(const std::string& value, bool doConvertEnvironmentVariables=true)
+try
 {
 	T retValue;
 	std::string data = doConvertEnvironmentVariables?convertEnvironmentVariables(value):
 			value;
+
+//	if(extractAndCalculateNumber(data))
+//	{
+//
+//	}
 
 	if(isNumber(data))
 	{
@@ -115,7 +120,10 @@ static T 					validateValueForDefaultStringDataType	(const std::string& value, b
 		}
 		else
 		{
-			__SS__ << "Invalid type requested for a numeric string." << __E__;
+			__SS__ << "Invalid type '" <<
+				StringMacros::demangleTypeName(typeid(retValue).name()) <<
+				"' requested for a numeric string. Data was '" <<
+				data << "'" << __E__;
 			__SS_THROW__;
 		}
 
@@ -123,9 +131,17 @@ static T 					validateValueForDefaultStringDataType	(const std::string& value, b
 	}
 	else
 	{
-		__SS__ << "Invalid type requested for a non-numeric string (must request std::string)." << __E__;
+		__SS__ << "Invalid type '" <<
+				StringMacros::demangleTypeName(typeid(retValue).name()) <<
+				"' requested for a non-numeric string (must request std::string). Data was '" <<
+				data << "'" << __E__;
 		__SS_THROW__;
 	}
+}
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Failed to validate value for default string data type. " << __E__ << e.what() << __E__;
+	__SS_THROW__;
 }
 static std::string 			validateValueForDefaultStringDataType	(const std::string& value, bool doConvertEnvironmentVariables=true);
 
@@ -133,6 +149,7 @@ static std::string 			validateValueForDefaultStringDataType	(const std::string& 
 static void					getSetFromString 						(const std::string& inputString, std::set<std::string>& setToReturn, const std::set<char>& delimiter = {',','|','&'}, const std::set<char>& whitespace = {' ','\t','\n','\r'});
 template<class T>
 static void					getMapFromString 						(const std::string& inputString, std::map<std::string,T>& mapToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'})
+try
 {
 	unsigned int i=0;
 	unsigned int j=0;
@@ -210,6 +227,13 @@ static void					getMapFromString 						(const std::string& inputString, std::map
 		}
 	}
 }
+catch(const std::runtime_error &e)
+{
+	__SS__ << "Error while extracting a map from the string '" <<
+			inputString << "'... is it a valid map?" << __E__ << e.what() << __E__;
+	__SS_THROW__;
+}
+
 static void					getMapFromString 						(const std::string& inputString, std::map<std::string,std::string>& mapToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'});
 template<class T>
 static std::string			mapToString								(const std::map<std::string,T>& mapToReturn, const std::string& primaryDelimeter = ",", const std::string& secondaryDelimeter = ": ")

@@ -91,29 +91,6 @@ bool StringMacros::inWildCardSet(const std::string needle, const std::set<std::s
 	return false;
 }
 
-////========================================================================================================================
-////getWildCardMatchFromMap ~
-////	returns value if needle is in haystack otherwise throws exception (considering wildcards)
-//const std::string& StringMacros::getWildCardMatchFromMap(const std::string needle,
-//		const std::map<std::string, std::string>& haystack)
-//{
-//	for(const auto& haystackPair : haystack)
-//		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
-//		if(StringMacros::wildCardMatch(haystackPair.first,needle)) return haystackPair.second;
-//
-//	__SS__ << "Needle '" << needle << "' not found in wildcard haystack:" << __E__;
-//	bool first = true;
-//	for(const auto& haystackPair : haystack)
-//		if(first)
-//		{
-//			ss << ", " << haystackPair.first;
-//			first = false;
-//		}
-//		else
-//			ss << ", " << haystackPair.first;
-//	throw std::runtime_error(ss.str());
-//}
-
 //==============================================================================
 //decodeURIComponent
 //	converts all %## to the ascii character
@@ -148,32 +125,65 @@ std::string StringMacros::decodeURIComponent(const std::string &data)
 
 //==============================================================================
 //convertEnvironmentVariables ~
-//	static function
+//	static recursive function
+//
+//	allows environment variables entered as $NAME or ${NAME}
 std::string StringMacros::convertEnvironmentVariables(const std::string& data)
 {
-	std::string converted = data;
-	if(data.find("${") != std::string::npos)
+	size_t begin = data.find("$");
+	if(begin != std::string::npos)
 	{
-		unsigned int begin = data.find("${");
-		unsigned int end   = data.find("}");
-		std::string envVariable = data.substr(begin+2, end-begin-2);
-		//std::cout << "Converted Value: " << envVariable << std::endl;
-		if(getenv(envVariable.c_str()) != nullptr)
+		size_t end;
+		std::string envVariable;
+		std::string converted = data; //make copy to modify
+
+		if(data[begin+1] == '{')//check if using ${NAME} syntax
 		{
-			return convertEnvironmentVariables(converted.replace(begin,end-begin+1,getenv(envVariable.c_str())));
+			end = data.find("}",begin+2);
+			envVariable = data.substr(begin+2, end-begin-2);
+			++end; //replace the closing } too!
+		}
+		else					//else using $NAME syntax
+		{
+			//end is first non environment variable character
+			for(end = begin+1; end < data.size(); ++end)
+				if(!((data[end] >= '0' && data[end] <= '9') ||
+								(data[end] >= 'A' && data[end] <= 'Z') ||
+								(data[end] >= 'a' && data[end] <= 'z') ||
+								data[end] == '-' || data[end] == '_' ||
+								data[end] == '.' || data[end] == ':'))
+					break; //found end
+			envVariable = data.substr(begin+1, end-begin-1);
+		}
+		//__COUTV__(data);
+		//__COUTV__(envVariable);
+		char *envResult = getenv(envVariable.c_str());
+
+		if(envResult)
+		{
+			//proceed recursively
+			return convertEnvironmentVariables(converted.replace(begin,end-begin,envResult));
 		}
 		else
 		{
-			//static function so can't use normal __SS__ (with table name in it)
-			std::stringstream ss;
-			ss << __COUT_HDR__ <<
-					("The environmental variable: " + envVariable +
-					" is not set! Please make sure you set it before continuing!") << std::endl;
-			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS__ <<
+					("The environmental variable '" + envVariable +
+					"' is not set! Please make sure you set it before continuing!") << std::endl;
+			__SS_THROW__;
 		}
 	}
-	return converted;
+	//else no environment variables found in string
+	return data;
+}
+
+//==============================================================================
+//extractAndCalculateNumber ~~
+//	returns true if one or many numbers separated by operations (+,-,/,*) is
+//		present in the string.
+//	Numbers can be hex ("0x.."), binary("b..."), or base10.
+bool StringMacros::extractAndCalculateNumber(const std::string& s)
+{
+	return true;
 }
 
 //==============================================================================
@@ -233,10 +243,16 @@ bool StringMacros::isNumber(const std::string& s)
 //
 std::string StringMacros::validateValueForDefaultStringDataType(const std::string& value,
 		bool doConvertEnvironmentVariables)
+try
 {
 	return doConvertEnvironmentVariables?
 			StringMacros::convertEnvironmentVariables(value):
 			value;
+}
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Failed to validate value for default string data type. " << __E__ << e.what() << __E__;
+	__SS_THROW__;
 }
 
 //==============================================================================
@@ -282,6 +298,7 @@ void StringMacros::getMapFromString(const std::string& inputString,
 		std::map<std::string,std::string>& mapToReturn,
 		const std::set<char>& pairPairDelimiter, const std::set<char>& nameValueDelimiter,
 		const std::set<char>& whitespace)
+try
 {
 	unsigned int i=0;
 	unsigned int j=0;
@@ -358,6 +375,12 @@ void StringMacros::getMapFromString(const std::string& inputString,
 					"') and keeping current value ('" << emplaceReturn.first->second << "'). " << __E__;
 		}
 	}
+}
+catch(const std::runtime_error &e)
+{
+	__SS__ << "Error while extracting a map from the string '" <<
+			inputString << "'... is it a valid map?" << __E__ << e.what() << __E__;
+	__SS_THROW__;
 }
 
 
