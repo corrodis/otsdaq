@@ -140,25 +140,13 @@ public:
 				std::string data = doConvertEnvironmentVariables?StringMacros::convertEnvironmentVariables(value):
 						value;
 
-				if(!StringMacros::isNumber(data))
-				{
-					__SS__ << (data + " is not a number!") << std::endl;
-					__COUT__ << "\n" << ss.str();
-					throw std::runtime_error(ss.str());
-				}
-
-				if(typeid(double) == typeid(retValue))
-					retValue = strtod(data.c_str(),0);
-				else if(typeid(float) == typeid(retValue))
-					retValue = strtof(data.c_str(),0);
-				else if(data.size() > 2 && data[1] == 'x') //assume hex value
-					retValue = strtol(data.c_str(),0,16);
-				else if(data.size() > 1 && data[0] == 'b') //assume binary value
-					retValue = strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
+				if(StringMacros::getNumber(data,retValue))
+					return retValue;
 				else
-					retValue = strtol(data.c_str(),0,10);
-
-				return retValue;
+				{
+					__SS__ << (data + " is not a number!") << __E__;
+					__SS_THROW__;
+				}
 			}
 			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
 					columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&

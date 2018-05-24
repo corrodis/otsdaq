@@ -380,57 +380,6 @@ void FEVInterface::runSequenceOfCommands(const std::string &treeLinkName)
 	}
 }
 
-//==============================================================================
-//isNumber ~~
-//	returns true if hex ("0x.."), binary("b..."), or base10 number
-bool FEVInterface::isNumber(const std::string& s)
-{
-	//__COUT__ << "string " << s << std::endl;
-	if(s.find("0x") == 0) //indicates hex
-	{
-		//__COUT__ << "0x found" << std::endl;
-		for(unsigned int i=2;i<s.size();++i)
-		{
-			if(!((s[i] >= '0' && s[i] <= '9') ||
-					(s[i] >= 'A' && s[i] <= 'F') ||
-					(s[i] >= 'a' && s[i] <= 'f')
-			))
-			{
-				//__COUT__ << "prob " << s[i] << std::endl;
-				return false;
-			}
-		}
-		//return std::regex_match(s.substr(2), std::regex("^[0-90-9a-fA-F]+"));
-	}
-	else if(s[0] == 'b') //indicates binary
-	{
-		//__COUT__ << "b found" << std::endl;
-
-		for(unsigned int i=1;i<s.size();++i)
-		{
-			if(!((s[i] >= '0' && s[i] <= '1')
-			))
-			{
-				//__COUT__ << "prob " << s[i] << std::endl;
-				return false;
-			}
-		}
-	}
-	else
-	{
-		//__COUT__ << "base 10 " << std::endl;
-		for(unsigned int i=0;i<s.size();++i)
-			if(!((s[i] >= '0' && s[i] <= '9') ||
-					s[i] == '.' ||
-					s[i] == '+' ||
-					s[i] == '-'))
-				return false;
-		//Note: std::regex crashes in unresolvable ways (says Ryan.. also, stop using libraries)
-		//return std::regex_match(s, std::regex("^(\\-|\\+)?[0-9]*(\\.[0-9]+)?"));
-	}
-
-	return true;
-}
 
 
 

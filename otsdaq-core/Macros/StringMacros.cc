@@ -173,70 +173,82 @@ std::string StringMacros::convertEnvironmentVariables(const std::string& data)
 		}
 	}
 	//else no environment variables found in string
+	//__COUT__ << "Result: " << data << __E__;
 	return data;
 }
 
 //==============================================================================
-//extractAndCalculateNumber ~~
+//isNumber ~~
 //	returns true if one or many numbers separated by operations (+,-,/,*) is
 //		present in the string.
 //	Numbers can be hex ("0x.."), binary("b..."), or base10.
-bool StringMacros::extractAndCalculateNumber(const std::string& s)
-{
-	return true;
-}
-
-//==============================================================================
-//isNumber ~~
-//	returns true if hex ("0x.."), binary("b..."), or base10 number
 bool StringMacros::isNumber(const std::string& s)
 {
-	//__COUT__ << "string " << s << std::endl;
-	if(s.find("0x") == 0) //indicates hex
+	//extract set of potential numbers and operators
+	std::vector<std::string> numbers;
+	std::vector<char> ops;
+
+	StringMacros::getVectorFromString(s,numbers,
+			/*delimiter*/ 	std::set<char>({'+','-','*','/'}),
+			/*whitespace*/ 	std::set<char>({' ','\t','\n','\r'}),
+			&ops);
+
+	//__COUTV__(StringMacros::vectorToString(numbers));
+	//__COUTV__(StringMacros::vectorToString(ops));
+
+	for(const auto& number:numbers)
 	{
-		//__COUT__ << "0x found" << std::endl;
-		for(unsigned int i=2;i<s.size();++i)
+		if(number.size() == 0) continue; //skip empty numbers
+
+		if(number.find("0x") == 0) //indicates hex
 		{
-			if(!((s[i] >= '0' && s[i] <= '9') ||
-					(s[i] >= 'A' && s[i] <= 'F') ||
-					(s[i] >= 'a' && s[i] <= 'f')
-			))
+			//__COUT__ << "0x found" << std::endl;
+			for(unsigned int i=2;i<number.size();++i)
 			{
-				//__COUT__ << "prob " << s[i] << std::endl;
-				return false;
+				if(!((number[i] >= '0' && number[i] <= '9') ||
+						(number[i] >= 'A' && number[i] <= 'F') ||
+						(number[i] >= 'a' && number[i] <= 'f')
+				))
+				{
+					//__COUT__ << "prob " << number[i] << std::endl;
+					return false;
+				}
+			}
+			//return std::regex_match(number.substr(2), std::regex("^[0-90-9a-fA-F]+"));
+		}
+		else if(number[0] == 'b') //indicates binary
+		{
+			//__COUT__ << "b found" << std::endl;
+
+			for(unsigned int i=1;i<number.size();++i)
+			{
+				if(!((number[i] >= '0' && number[i] <= '1')
+				))
+				{
+					//__COUT__ << "prob " << number[i] << std::endl;
+					return false;
+				}
 			}
 		}
-		//return std::regex_match(s.substr(2), std::regex("^[0-90-9a-fA-F]+"));
-	}
-	else if(s[0] == 'b') //indicates binary
-	{
-		//__COUT__ << "b found" << std::endl;
-
-		for(unsigned int i=1;i<s.size();++i)
+		else
 		{
-			if(!((s[i] >= '0' && s[i] <= '1')
-			))
-			{
-				//__COUT__ << "prob " << s[i] << std::endl;
-				return false;
-			}
+			//__COUT__ << "base 10 " << std::endl;
+			for(unsigned int i=0;i<number.size();++i)
+				if(!((number[i] >= '0' && number[i] <= '9') ||
+						number[i] == '.' ||
+						number[i] == '+' ||
+						number[i] == '-'))
+					return false;
+			//Note: std::regex crashes in unresolvable ways (says Ryan.. also, stop using libraries)
+			//return std::regex_match(s, std::regex("^(\\-|\\+)?[0-9]*(\\.[0-9]+)?"));
 		}
 	}
-	else
-	{
-		//__COUT__ << "base 10 " << std::endl;
-		for(unsigned int i=0;i<s.size();++i)
-			if(!((s[i] >= '0' && s[i] <= '9') ||
-					s[i] == '.' ||
-					s[i] == '+' ||
-					s[i] == '-'))
-				return false;
-		//Note: std::regex crashes in unresolvable ways (says Ryan.. also, stop using libraries)
-		//return std::regex_match(s, std::regex("^(\\-|\\+)?[0-9]*(\\.[0-9]+)?"));
-	}
 
+	//__COUT__ << "yes " << std::endl;
+
+	//all numbers are numbers
 	return true;
-}
+} //end isNumber()
 
 //==============================================================================
 // validateValueForDefaultStringDataType
@@ -288,7 +300,85 @@ void StringMacros::getSetFromString(const std::string& inputString,
 
 	if(i != j) //last element check (for case when no concluding ' ' or delimiter)
 		setToReturn.emplace(inputString.substr(i,j-i));
-}
+} //end getSetFromString()
+
+//==============================================================================
+//getVectorFromString
+//	extracts the list of elements from string that uses a delimiter
+//		ignoring whitespace
+//	optionally returns the list of delimiters encountered, which may be useful
+//		for extracting which operator was used
+//
+//	Note: lists are returned as vectors
+//	Note: the size() of delimiters will be one less than the size() of the returned values
+void StringMacros::getVectorFromString(const std::string& inputString,
+		std::vector<std::string>& listToReturn, const std::set<char>& delimiter,
+		const std::set<char>& whitespace, std::vector<char>* listOfDelimiters)
+{
+	unsigned int i=0;
+	unsigned int j=0;
+	std::set<char>::iterator delimeterSearchIt;
+	char lastDelimiter;
+	bool isDelimiter;
+
+	//__COUT__ << inputString << __E__;
+
+	//go through the full string extracting elements
+	//add each found element to set
+	for(;j<inputString.size();++j)
+	{
+		//__COUT__ << (char)inputString[j] << __E__;
+
+		delimeterSearchIt = delimiter.find(inputString[j]);
+		isDelimiter = delimeterSearchIt != delimiter.end();
+
+		//__COUT__ << (char)inputString[j] << " " << (char)lastDelimiter << __E__;
+
+		if((whitespace.find(inputString[j]) != whitespace.end() || //ignore leading white space or delimiter
+				isDelimiter)
+				&& i == j)
+			++i;
+		else if((whitespace.find(inputString[j]) != whitespace.end() || //trailing white space or delimiter indicates end
+				isDelimiter)
+				&& i != j) // assume end of element
+		{
+			//__COUT__ << "Set element found: " <<
+			//		inputString.substr(i,j-i) << std::endl;
+
+			if(listOfDelimiters && listToReturn.size())
+				listOfDelimiters->push_back(lastDelimiter);
+			listToReturn.push_back(inputString.substr(i,j-i));
+
+
+			//setup i and j for next find
+			i = j+1;
+		}
+
+		if(isDelimiter)
+			lastDelimiter = *delimeterSearchIt;
+	}
+
+	if(i != j) //last element check (for case when no concluding ' ' or delimiter)
+	{
+		if(listOfDelimiters && listToReturn.size())
+			listOfDelimiters->push_back(lastDelimiter);
+		listToReturn.push_back(inputString.substr(i,j-i));
+	}
+
+	//assert that there is one less delimiter than values
+	if(listOfDelimiters && listToReturn.size() - 1 != listOfDelimiters->size())
+	{
+		__SS__ << "There is a mismatch in delimiters to entries (should be one less delimiter): " <<
+				listOfDelimiters->size() <<
+				" vs " << listToReturn.size()  << __E__ <<
+				"Entries: " <<
+ 				StringMacros::vectorToString(listToReturn) << __E__ <<
+				"Delimiters: " <<
+ 				StringMacros::vectorToString(*listOfDelimiters) << __E__;
+		__SS_THROW__;
+	}
+
+} //end getVectorFromString()
 
 //==============================================================================
 //getMapFromString
@@ -403,6 +493,21 @@ std::string StringMacros::mapToString(const std::map<std::string,uint8_t>& mapTo
 //==============================================================================
 //setToString
 std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn, const std::string& delimeter)
+{
+	std::stringstream ss;
+	bool first = true;
+	for(auto& setValue:setToReturn)
+	{
+		if(first) first = false;
+		else ss << delimeter;
+		ss << (unsigned int)setValue;
+	}
+	return ss.str();
+}
+
+//==============================================================================
+//vectorToString
+std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn, const std::string& delimeter)
 {
 	std::stringstream ss;
 	bool first = true;

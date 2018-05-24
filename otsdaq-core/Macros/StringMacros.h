@@ -3,6 +3,7 @@
 
 #include "otsdaq-core/Macros/CoutMacros.h"
 
+#include <vector>
 #include <set>
 #include <map>
 #include <typeinfo>		// operator typeid
@@ -12,6 +13,28 @@ namespace ots
 
 struct StringMacros
 {
+
+	//Here is the list of static helper functions:
+	//
+	//		wildCardMatch
+	//		inWildCardSet
+	//		getWildCardMatchFromMap
+	//
+	//		decodeURIComponent
+	//		convertEnvironmentVariables
+	//		isNumber
+	//		extractAndCalculateNumber
+	//		validateValueForDefaultStringDataType
+	//
+	//		getSetFromString
+	//		getVectorFromString
+	//		getMapFromString
+	//
+	//		setToString
+	//		vectorToString
+	//		mapToString
+	//
+	//		demangleTypeName
 
 static bool					wildCardMatch							(const std::string& needle, 		const std::string& 							haystack,	unsigned int* priorityIndex = 0);
 static bool					inWildCardSet							(const std::string  needle, 		const std::set<std::string>& 				haystack);
@@ -76,31 +99,93 @@ static const T&				getWildCardMatchFromMap					(const std::string  needle, 		con
 static std::string		 	decodeURIComponent 						(const std::string& data);
 static std::string 			convertEnvironmentVariables				(const std::string& data);
 static bool 	        	isNumber           						(const std::string& s);
-static bool 	        	extractAndCalculateNumber				(const std::string& s);
 
-
-//special validation ignoring any table info - just assuming type string
 template<class T>
-static T 					validateValueForDefaultStringDataType	(const std::string& value, bool doConvertEnvironmentVariables=true)
-try
+static bool 	        	getNumber								(const std::string& s, T& retValue)
 {
-	T retValue;
-	std::string data = doConvertEnvironmentVariables?convertEnvironmentVariables(value):
-			value;
+	//extract set of potential numbers and operators
+	std::vector<std::string> numbers;
+	std::vector<char> ops;
 
-//	if(extractAndCalculateNumber(data))
-//	{
-//
-//	}
+	StringMacros::getVectorFromString(s,numbers,
+			/*delimiter*/ 	std::set<char>({'+','-','*','/'}),
+			/*whitespace*/ 	std::set<char>({' ','\t','\n','\r'}),
+			&ops);
 
-	if(isNumber(data))
+	retValue = 0; //initialize
+
+	T tmpValue;
+	unsigned int i = 0;
+	bool verified;
+	for(const auto& number:numbers)
 	{
-		//allow string conversion to integer for ease of use
+		if(number.size() == 0) continue; //skip empty numbers
 
+		//verify that this number looks like a number
+		//	for integer types, allow hex and binary
+		//	for all types allow base10
+
+		verified = false;
+
+		//check integer types
+		if(typeid(unsigned int) == typeid(retValue) ||
+				typeid(int) == typeid(retValue) ||
+				typeid(unsigned long long) == typeid(retValue) ||
+				typeid(long long) == typeid(retValue) ||
+				typeid(unsigned long) == typeid(retValue) ||
+				typeid(long) == typeid(retValue) ||
+				typeid(unsigned short) == typeid(retValue) ||
+				typeid(short) == typeid(retValue) ||
+				typeid(uint8_t) == typeid(retValue))
+		{
+			if(number.find("0x") == 0) //indicates hex
+			{
+				__COUT__ << "0x found" << std::endl;
+				for(unsigned int i=2;i<number.size();++i)
+				{
+					if(!((number[i] >= '0' && number[i] <= '9') ||
+							(number[i] >= 'A' && number[i] <= 'F') ||
+							(number[i] >= 'a' && number[i] <= 'f')
+					))
+					{
+						//__COUT__ << "prob " << number[i] << std::endl;
+						return false;
+					}
+				}
+				verified = true;
+			}
+			else if(number[0] == 'b') //indicates binary
+			{
+				//__COUT__ << "b found" << std::endl;
+
+				for(unsigned int i=1;i<number.size();++i)
+				{
+					if(!((number[i] >= '0' && number[i] <= '1')
+					))
+					{
+						//__COUT__ << "prob " << number[i] << std::endl;
+						return false;
+					}
+				}
+				verified = true;
+			}
+		}
+
+		//if not verified above, for all types, check base10
+		if(!verified)
+			for(unsigned int i=0;i<number.size();++i)
+				if(!((number[i] >= '0' && number[i] <= '9') ||
+						number[i] == '.' ||
+						number[i] == '+' ||
+						number[i] == '-'))
+					return false;
+
+		//at this point, this number is confirmed to be a number of some sort
+		// so convert to temporary number
 		if(typeid(double) == typeid(retValue))
-			retValue = strtod(data.c_str(),0);
+			tmpValue = strtod(number.c_str(),0);
 		else if(typeid(float) == typeid(retValue))
-			retValue = strtof(data.c_str(),0);
+			tmpValue = strtof(number.c_str(),0);
 		else if(typeid(unsigned int) == typeid(retValue) ||
 				typeid(int) == typeid(retValue) ||
 				typeid(unsigned long long) == typeid(retValue) ||
@@ -111,42 +196,102 @@ try
 				typeid(short) == typeid(retValue) ||
 				typeid(uint8_t) == typeid(retValue))
 		{
-			if(data.size() > 2 && data[1] == 'x') //assume hex value
-				retValue = (T)strtol(data.c_str(),0,16);
-			else if(data.size() > 1 && data[0] == 'b') //assume binary value
-				retValue = (T)strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
+			if(number.size() > 2 && number[1] == 'x') //assume hex value
+				tmpValue = (T)strtol(number.c_str(),0,16);
+			else if(number.size() > 1 && number[0] == 'b') //assume binary value
+				tmpValue = (T)strtol(number.substr(1).c_str(),0,2); //skip first 'b' character
 			else
-				retValue = (T)strtol(data.c_str(),0,10);
+				tmpValue = (T)strtol(number.c_str(),0,10);
 		}
 		else
 		{
 			__SS__ << "Invalid type '" <<
 				StringMacros::demangleTypeName(typeid(retValue).name()) <<
 				"' requested for a numeric string. Data was '" <<
-				data << "'" << __E__;
+				number << "'" << __E__;
 			__SS_THROW__;
 		}
 
-		return retValue;
-	}
-	else
+		//apply operation
+		if(i == 0) 	//first value, no operation, just take value
+			retValue = tmpValue;
+		else 		//there is some sort of op
+		{
+			if(0 && i==1) //display what we are dealing with
+			{
+				__COUTV__(StringMacros::vectorToString(numbers));
+				__COUTV__(StringMacros::vectorToString(ops));
+			}
+			//__COUT__ << "Intermediate value = " << retValue << __E__;
+
+			switch(ops[i-1])
+			{
+			case '+':
+				retValue += tmpValue;
+				break;
+			case '-':
+				retValue -= tmpValue;
+				break;
+			case '*':
+				retValue *= tmpValue;
+				break;
+			case '/':
+				retValue /= tmpValue;
+				break;
+			default:
+				__SS__ << "Unrecognized operation '" << ops[i-1] << "' found!" << __E__ <<
+					"Numbers: " <<
+					StringMacros::vectorToString(numbers) << __E__ <<
+					"Operations: " <<
+					StringMacros::vectorToString(ops) << __E__;
+				__SS_THROW__;
+			}
+			//__COUT__ << "Op " << ops[i-1] << " intermediate value = " << retValue << __E__;
+		}
+
+		++i; //increment index for next number/op
+	} //end number loop
+
+	return retValue;
+} //end static getNumber()
+
+
+//special validation ignoring any table info - just assuming type string
+template<class T>
+static T 					validateValueForDefaultStringDataType	(const std::string& value, bool doConvertEnvironmentVariables=true)
+{
+	T retValue;
+	try
 	{
-		__SS__ << "Invalid type '" <<
+		__COUTV__(value);
+		std::string data = doConvertEnvironmentVariables?convertEnvironmentVariables(value):
+				value;
+
+		//Note: allow string column types to convert to number (since user's would likely expect this to work)
+		if(StringMacros::getNumber(data,retValue))
+			return retValue;
+		else
+		{
+			__SS__ << "Invalid type '" <<
+					StringMacros::demangleTypeName(typeid(retValue).name()) <<
+					"' requested for a non-numeric string (must request std::string). Data was '" <<
+					data << "'" << __E__;
+			__SS_THROW__;
+		}
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "Failed to validate the string value for the data type  '" <<
 				StringMacros::demangleTypeName(typeid(retValue).name()) <<
-				"' requested for a non-numeric string (must request std::string). Data was '" <<
-				data << "'" << __E__;
+				"' requested. " << __E__ << e.what() << __E__;
 		__SS_THROW__;
 	}
-}
-catch(const std::runtime_error& e)
-{
-	__SS__ << "Failed to validate value for default string data type. " << __E__ << e.what() << __E__;
-	__SS_THROW__;
 }
 static std::string 			validateValueForDefaultStringDataType	(const std::string& value, bool doConvertEnvironmentVariables=true);
 
 
 static void					getSetFromString 						(const std::string& inputString, std::set<std::string>& setToReturn, const std::set<char>& delimiter = {',','|','&'}, const std::set<char>& whitespace = {' ','\t','\n','\r'});
+static void					getVectorFromString						(const std::string& inputString, std::vector<std::string>& listToReturn, const std::set<char>& delimiter = {',','|','&'}, const std::set<char>& whitespace = {' ','\t','\n','\r'}, std::vector<char>* listOfDelimiters = 0);
 template<class T>
 static void					getMapFromString 						(const std::string& inputString, std::map<std::string,T>& mapToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'})
 try
@@ -264,6 +409,20 @@ static std::string			setToString								(const std::set<T>& setToReturn, const s
 	return ss.str();
 }
 static std::string			setToString								(const std::set<uint8_t>& setToReturn, const std::string& delimeter = ",");
+template<class T>
+static std::string			vectorToString							(const std::vector<T>& setToReturn, const std::string& delimeter = ",")
+{
+	std::stringstream ss;
+	bool first = true;
+	for(auto& setValue:setToReturn)
+	{
+		if(first) first = false;
+		else ss << delimeter;
+		ss << setValue;
+	}
+	return ss.str();
+}
+static std::string			vectorToString							(const std::vector<uint8_t>& setToReturn, const std::string& delimeter = ",");
 
 static std::string 			demangleTypeName						(const char* name);
 
