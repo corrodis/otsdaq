@@ -671,7 +671,7 @@ launchOTS() {
 		if [[ ${ignore} == true ]]; then
 			continue
 		fi
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t $line"
+		#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t $line"
 				
 		if [[ ($line == *"xc:Context"*) && ($line == *"url"*) ]]; then
 			if [[ ($line =~ $re) ]]; then
@@ -692,7 +692,7 @@ launchOTS() {
 				host=${BASH_REMATCH[2]}
 				insideContext=true
 						
-				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t $host $port "
+				#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t $host $port "
 					#echo $port
 				if [[ (${BASH_REMATCH[2]} == ${HOSTNAME}) || (${BASH_REMATCH[2]} == ${HOSTNAME}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
 				    isLocal=true
