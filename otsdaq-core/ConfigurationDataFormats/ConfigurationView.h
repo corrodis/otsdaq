@@ -126,9 +126,8 @@ public:
 	{
 		if(col >= columnsInfo_.size())
 		{
-			__SS__ << "Invalid col requested" << std::endl;
-			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS__ << "Invalid col " << col << " requested." << std::endl;
+			__SS_THROW__;
 		}
 
 		T retValue;
@@ -220,7 +219,8 @@ public:
 			}
 
 			//if here, then there was a problem
-			throw std::runtime_error("Error.");
+			__SS__ <<  "Impossible Error." << __E__;
+			__SS_THROW__;
 		}
 		catch(const std::runtime_error& e)
 		{
@@ -236,7 +236,7 @@ public:
 				<< " the only valid numeric types are 'int' and 'unsigned int.'" << __E__;
 
 			ss << e.what() << __E__;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	} // end validateValueForColumn()
 	//special version of getValue for string type

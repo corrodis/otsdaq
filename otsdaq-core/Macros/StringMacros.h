@@ -140,7 +140,7 @@ static bool 	        	getNumber								(const std::string& s, T& retValue)
 		{
 			if(number.find("0x") == 0) //indicates hex
 			{
-				__COUT__ << "0x found" << std::endl;
+				//__COUT__ << "0x found" << std::endl;
 				for(unsigned int i=2;i<number.size();++i)
 				{
 					if(!((number[i] >= '0' && number[i] <= '9') ||
@@ -252,7 +252,7 @@ static bool 	        	getNumber								(const std::string& s, T& retValue)
 		++i; //increment index for next number/op
 	} //end number loop
 
-	return retValue;
+	return true; //number was valid and is passed by reference in retValue
 } //end static getNumber()
 
 
