@@ -1,0 +1,37 @@
+{
+"ouid" : [
+"4cac16301d8d4bcfa68937bf"
+],
+"version" : {
+"1" : [
+"4cac16301d8d4bcfa68937bf"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"4cac16301d8d4bcfa68937bf"
+],
+"defaultConfig_v1" : [
+"4cac16301d8d4bcfa68937bf"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"4cac16301d8d4bcfa68937bf"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+},
+"configurations.assigned" : {
+"notprovided" : [
+"2018-01-31T11:39:39.606-0600"
+],
+"defaultConfig_v1" : [
+"2018-01-31T11:39:39.986-0600"
+]
+}
+}

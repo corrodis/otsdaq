@@ -51,7 +51,7 @@ SCRIPT_DIR="$(
   pwd -P 
 )"
 		
-echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Script directory found as: $SCRIPT_DIR/$0"
+echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Script directory found as: $SCRIPT_DIR/StartOTS.sh"
 
 unalias ots.exe &>/dev/null 2>&1 #hide output
 alias ots.exe='xdaq.exe' &>/dev/null #hide output
@@ -567,8 +567,6 @@ launchOTS() {
 	echo
 	echo
 	
-	sed -i s/ots::Supervisor/ots::GatewaySupervisor/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
-	sed -i s/libSupervisor\.so/libGatewaySupervisor\.so/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 	
 	####################################################################
 	########### start console & message facility handling ##############
@@ -635,17 +633,21 @@ launchOTS() {
 	
 			
 	envString="-genv OTSDAQ_LOG_ROOT ${OTSDAQ_LOG_DIR} -genv ARTDAQ_OUTPUT_DIR ${ARTDAQ_OUTPUT_DIR}"
-		
+
+	#create argument to pass to xdaq executable
 	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
 	
 	#echo
 	#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t XDAQ ARGS PASSED TO ots.exe:"
 	#echo ${XDAQ_ARGS}
 	#echo
-	#echo
-	
-	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`
-	
+	#echo	
+
+	#for Supervisor backwards compatibility, convert to GatewaySupervisor stealthily
+	sed -i s/ots::Supervisor/ots::GatewaySupervisor/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
+	sed -i s/libSupervisor\.so/libGatewaySupervisor\.so/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
+
+	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`	
 	#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t $value"
 	#re="http://(${HOSTNAME}):([0-9]+)"
 	
@@ -680,11 +682,7 @@ launchOTS() {
 				#   create node config files with https:port forwarding to localhost:madeupport
 				#   run nodejs
 				#   run xdaq
-				#if [[ BASH_REMATCH[1] == "s" ]]; then
-				#
-				#cp ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
-				#
-						#fi
+			
 				#echo ${BASH_REMATCH[1]}
 				#echo ${BASH_REMATCH[2]}
 			
@@ -692,8 +690,8 @@ launchOTS() {
 				host=${BASH_REMATCH[2]}
 				insideContext=true
 						
-				#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t $host $port "
-					#echo $port
+				#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t $host $port "				
+						
 				if [[ (${BASH_REMATCH[2]} == ${HOSTNAME}) || (${BASH_REMATCH[2]} == ${HOSTNAME}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
 				    isLocal=true
 				else
@@ -763,7 +761,7 @@ launchOTS() {
 			fi
 		fi   
 	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
-	
+		
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Launching all otsdaq Applications for host {${HOSTNAME}}..."
 	i=0	
 	for port in "${xdaqPort[@]}"

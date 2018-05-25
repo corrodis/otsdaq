@@ -3005,7 +3005,7 @@ void WebUsers::loadSecuritySelection()
 			strcmp(line, SECURITY_TYPE_DIGEST_ACCESS.c_str()) == 0)
 		securityType_ = line;
 	else
-		securityType_ = SECURITY_TYPE_DIGEST_ACCESS; // default, if illegal
+		securityType_ = SECURITY_TYPE_NONE; // default to NO SECURITY
 
 	__COUT__ << "The current security type is " << securityType_ << __E__;
 
