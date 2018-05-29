@@ -11,6 +11,7 @@ cet_make(LIBRARY_NAME DispatcherApp
 		 ${CETLIB}
 		 ${CETLIB_EXCEPT}
 		 ${XDAQ_BASIC_LIB_LIST}
+   ${ROOT_CORE}
 		 canvas
 		 ${MF_UTILITIES}
 		 ${Boost_SYSTEM_LIBRARY}

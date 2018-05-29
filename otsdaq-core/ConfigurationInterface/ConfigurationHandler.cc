@@ -5,7 +5,7 @@
 #include "otsdaq-core/XmlUtilities/ConvertToXML.h"
 #include "otsdaq-core/XmlUtilities/ConvertFromXML.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <xercesc/parsers/XercesDOMParser.hpp>
 #include <xercesc/dom/DOMElement.hpp>

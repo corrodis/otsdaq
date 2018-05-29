@@ -1,6 +1,6 @@
 #include "otsdaq-core/BitManipulator/BitManipulator.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include <cstdlib>
 #include <sstream>
 #include <iostream>

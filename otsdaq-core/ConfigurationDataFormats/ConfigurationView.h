@@ -3,21 +3,16 @@
 
 #include "otsdaq-core/ConfigurationDataFormats/ViewColumnInfo.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq-core/Macros/StringMacros.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationVersion.h"
 
-
-#include <string>
-#include <typeinfo>		// operator typeid
 #include <iostream>
-#include <sstream>      // std::stringstream, std::stringbuf
 #include <vector>
 #include <cassert>
 #include <set>
 #include <stdlib.h>
 #include <time.h>       /* time_t, time, ctime */
-
-std::string ots_demangle(const char* name);
 
 namespace ots
 {
@@ -83,6 +78,7 @@ public:
 	unsigned int 					getNumberOfColumns			(void) const;
 	const unsigned int 			    getColUID					(void) const;
 	const unsigned int 			    getColStatus				(void) const;
+	const unsigned int 			    getColPriority				(void) const;
 
 	//Note: Group link handling should be done in this ConfigurationView class
 	//	only by using isEntryInGroup ...
@@ -103,7 +99,7 @@ public:
 	//	don't allow string to be returned.. (at least not easily)
 	//Since there is no environmental variable that can just be a number they will all be converted no matter what.
 	template<class T>
-	void getValue(T& value, unsigned int row, unsigned int col, bool convertEnvironmentVariables=true) const
+	void getValue(T& value, unsigned int row, unsigned int col, bool doConvertEnvironmentVariables=true) const
 	{
 		if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 		{
@@ -112,11 +108,11 @@ public:
 			throw std::runtime_error(ss.str());
 		}
 
-		value = validateValueForColumn<T>(theDataView_[row][col],col,convertEnvironmentVariables);
+		value = validateValueForColumn<T>(theDataView_[row][col],col,doConvertEnvironmentVariables);
 	}
 	//special version of getValue for string type
 	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
-	void 		getValue(std::string& value, unsigned int row, unsigned int col, bool convertEnvironmentVariables=true) const;
+	void 		getValue(std::string& value, unsigned int row, unsigned int col, bool doConvertEnvironmentVariables=true) const;
 
 	//==============================================================================
 	//validateValueForColumn
@@ -126,13 +122,12 @@ public:
 	//	on success returns what the value would be for get value
 	template<class T>
 	T validateValueForColumn(const std::string& value, unsigned int col,
-			bool convertEnvironmentVariables=true) const
+			bool doConvertEnvironmentVariables=true) const
 	{
 		if(col >= columnsInfo_.size())
 		{
-			__SS__ << "Invalid col requested" << std::endl;
-			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS__ << "Invalid col " << col << " requested." << std::endl;
+			__SS_THROW__;
 		}
 
 		T retValue;
@@ -141,28 +136,16 @@ public:
 		{
 			if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_NUMBER) //handle numbers
 			{
-				std::string data = convertEnvironmentVariables?convertEnvVariables(value):
+				std::string data = doConvertEnvironmentVariables?StringMacros::convertEnvironmentVariables(value):
 						value;
 
-				if(!isNumber(data))
-				{
-					__SS__ << (data + " is not a number!") << std::endl;
-					__COUT__ << "\n" << ss.str();
-					throw std::runtime_error(ss.str());
-				}
-
-				if(typeid(double) == typeid(retValue))
-					retValue = strtod(data.c_str(),0);
-				else if(typeid(float) == typeid(retValue))
-					retValue = strtof(data.c_str(),0);
-				else if(data.size() > 2 && data[1] == 'x') //assume hex value
-					retValue = strtol(data.c_str(),0,16);
-				else if(data.size() > 1 && data[0] == 'b') //assume binary value
-					retValue = strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
+				if(StringMacros::getNumber(data,retValue))
+					return retValue;
 				else
-					retValue = strtol(data.c_str(),0,10);
-
-				return retValue;
+				{
+					__SS__ << (data + " is not a number!") << __E__;
+					__SS_THROW__;
+				}
 			}
 			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
 					columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
@@ -194,7 +177,7 @@ public:
 					__SS__ << "\tInvalid value for column data type: " << columnsInfo_[col].getDataType()
 								<< " in configuration " << tableName_
 								<< " at column=" << columnsInfo_[col].getName()
-								<< " for getValue with type '" << ots_demangle(typeid(retValue).name())
+								<< " for getValue with type '" << StringMacros::demangleTypeName(typeid(retValue).name())
 								<< ".'"
 								<< "Attempting to get index of '" << value
 								<< " in fixed choice array, but was not found in array. "
@@ -232,51 +215,12 @@ public:
 			else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
 					typeid(std::string) != typeid(retValue))
 			{
-				std::string data = convertEnvironmentVariables?convertEnvVariables(value):
-						value;
-
-				if(isNumber(data))
-				{
-					//allow string conversion to integer for ease of use
-
-					if(typeid(double) == typeid(retValue))
-						retValue = strtod(data.c_str(),0);
-					else if(typeid(float) == typeid(retValue))
-						retValue = strtof(data.c_str(),0);
-					else if(typeid(unsigned int) == typeid(retValue) ||
-							typeid(int) == typeid(retValue) ||
-							typeid(unsigned long long) == typeid(retValue) ||
-							typeid(long long) == typeid(retValue) ||
-							typeid(unsigned long) == typeid(retValue) ||
-							typeid(long) == typeid(retValue) ||
-							typeid(unsigned short) == typeid(retValue) ||
-							typeid(short) == typeid(retValue) ||
-							typeid(uint8_t) == typeid(retValue))
-					{
-						if(data.size() > 2 && data[1] == 'x') //assume hex value
-							retValue = (T)strtol(data.c_str(),0,16);
-						else if(data.size() > 1 && data[0] == 'b') //assume binary value
-							retValue = (T)strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
-						else
-							retValue = (T)strtol(data.c_str(),0,10);
-					}
-					else
-					{
-						__SS__ << "Invalid type requested for a numeric string." << __E__;
-						__SS_THROW__;
-					}
-
-					return retValue;
-				}
-				else
-				{
-					__SS__ << "Invalid type requested for a non-numeric string (must request std::string)." << __E__;
-					__SS_THROW__;
-				}
+				return StringMacros::validateValueForDefaultStringDataType<T>(value,doConvertEnvironmentVariables);
 			}
 
 			//if here, then there was a problem
-			throw std::runtime_error("Error.");
+			__SS__ <<  "Impossible Error." << __E__;
+			__SS_THROW__;
 		}
 		catch(const std::runtime_error& e)
 		{
@@ -284,7 +228,7 @@ public:
 				<< " and column type: " << columnsInfo_[col].getType()
 				<< ", in configuration " << tableName_
 				<< " at column=" << columnsInfo_[col].getName()
-				<< " for getValue with type '" << ots_demangle(typeid(retValue).name())
+				<< " for getValue with type '" << StringMacros::demangleTypeName(typeid(retValue).name())
 				<< "'" << std::endl;
 
 			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
@@ -292,7 +236,7 @@ public:
 				<< " the only valid numeric types are 'int' and 'unsigned int.'" << __E__;
 
 			ss << e.what() << __E__;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	} // end validateValueForColumn()
 	//special version of getValue for string type
@@ -310,10 +254,10 @@ public:
 
 	//Setters
 
-	void setUniqueStorageIdentifier (const std::string &storageUID);
-	void setTableName    			(const std::string &name 	);
+	void setUniqueStorageIdentifier (const std::string &storageUID	);
+	void setTableName    			(const std::string &name 		);
 	void setComment 				(const std::string &comment		);
-	void setURIEncodedComment 		(const std::string &uriComment		);
+	void setURIEncodedComment 		(const std::string &uriComment	);
 	void setAuthor  				(const std::string &author 		);
 	void setCreationTime  			(time_t      t				);
 	void setLastAccessTime 			(time_t      t = time(0)  	);
@@ -357,57 +301,52 @@ public:
 			__SS__ << "\tUnrecognized view data type: " << columnsInfo_[col].getDataType()
 					<< " in configuration " << tableName_
 					<< " at column=" << columnsInfo_[col].getName()
-					<< " for setValue with type '" << ots_demangle(typeid(value).name())
+					<< " for setValue with type '" << StringMacros::demangleTypeName(typeid(value).name())
 					<< "'" << std::endl;
 			throw std::runtime_error(ss.str());
 		}
 	}
-	void 				setValue			(const std::string &value, unsigned int row, unsigned int col);
-	void 				setValue			(const char *value, unsigned int row, unsigned int col);
+	void 				setValue					(const std::string &value, unsigned int row, unsigned int col);
+	void 				setValue					(const char *value, unsigned int row, unsigned int col);
 
 	//Careful: The setValueAsString method is used to set the value without any consistency check with the data type
-	void 				setValueAsString	(const std::string &value, unsigned int row, unsigned int col);
+	void 				setValueAsString			(const std::string &value, unsigned int row, unsigned int col);
 
 	//==============================================================================
-	void				resizeDataView		(unsigned int nRows, unsigned int nCols);
-	int					addRow        		(const std::string &author = "", bool incrementUniqueData = false, std::string baseNameAutoUID = ""); //returns index of added row, always is last row
-	void 				deleteRow     		(int r);
+	void				resizeDataView				(unsigned int nRows, unsigned int nCols);
+	int					addRow        				(const std::string &author = "", bool incrementUniqueData = false, std::string baseNameAutoUID = ""); //returns index of added row, always is last row
+	void 				deleteRow     				(int r);
 
 	//Lore did not like this.. wants special access through separate Supervisor for "Database Management" int		addColumn(std::string name, std::string viewName, std::string viewType); //returns index of added column, always is last column unless
 
 
-	iterator       		begin				(void)       {return theDataView_.begin();}
-	iterator       		end  				(void)       {return theDataView_.end();}
-	const_iterator 		begin				(void) const {return theDataView_.begin();}
-	const_iterator 		end  				(void) const {return theDataView_.end();}
-	void           		reset				(void);
-	void           		print				(std::ostream &out = std::cout) const;
-	void           		printJSON			(std::ostream &out = std::cout) const;
-	int            		fillFromJSON		(const std::string &json);
-	int            		fillFromCSV			(const std::string &data, const int &dataOffset = 0, const std::string &author = "") throw(std::runtime_error);
-	bool				setURIEncodedValue	(const std::string &value, const unsigned int &row, const unsigned int &col, const std::string &author = "");
+	iterator       		begin						(void)       {return theDataView_.begin();}
+	iterator       		end  						(void)       {return theDataView_.end();}
+	const_iterator 		begin						(void) const {return theDataView_.begin();}
+	const_iterator 		end  						(void) const {return theDataView_.end();}
+	void           		reset						(void);
+	void           		print						(std::ostream &out = std::cout) const;
+	void           		printJSON					(std::ostream &out = std::cout) const;
+	int            		fillFromJSON				(const std::string &json);
+	int            		fillFromCSV					(const std::string &data, const int &dataOffset = 0, const std::string &author = "") throw(std::runtime_error);
+	bool				setURIEncodedValue			(const std::string &value, const unsigned int &row, const unsigned int &col, const std::string &author = "");
 
-	static std::string 	decodeURIComponent 	(const std::string& data);
 
 private:
-	const unsigned int 	getOrInitColUID		(void);
-	const unsigned int 	getOrInitColStatus	(void);
+	const unsigned int 	getOrInitColUID				(void);
+	const unsigned int 	getOrInitColStatus			(void);
+	const unsigned int 	getOrInitColPriority		(void);
 
-	//operator= is purposely undefined and private (DO NOT USE) - should use copy()
-	ConfigurationView& 	operator=		   	(const ConfigurationView src);
+	ConfigurationView& 	operator=		   			(const ConfigurationView src); //operator= is purposely undefined and private (DO NOT USE IT!) - should use ConfigurationView::copy()
 
-	// Return "" if there is no conversion
-	std::string        	convertEnvVariables	(const std::string& data) const;
-	bool 		        isNumber           	(const std::string& s) const;
-
-	std::string							uniqueStorageIdentifier_; //starts empty "", used to implement re-writeable views ("temporary views") in artdaq db
+	std::string							uniqueStorageIdentifier_; //starts empty "", used to implement re-writable views ("temporary views") in artdaq db
 	std::string                 		tableName_   	;	//View name (extensionTableName in xml)
 	ConfigurationVersion        		version_     	;	//Configuration version
 	std::string                 		comment_     	;	//Configuration version comment
 	std::string                			author_      	;
 	time_t		                		creationTime_	;	//used more like "construction"(constructor) time
 	time_t		                		lastAccessTime_ ;	//last time the ConfigurationInterface:get() retrieved this view
-	unsigned int						colUID_, colStatus_; //special column pointers
+	unsigned int						colUID_, colStatus_, colPriority_; //special column pointers
 	std::map<std::string, unsigned int>	colLinkGroupIDs_; //map from child link index to column
 
 	bool								fillWithLooseColumnMatching_;

@@ -12,116 +12,40 @@ using namespace ots;
 //XDAQ_INSTANTIATOR_IMPL(CoreSupervisorBase)
 
 
-const std::string		CoreSupervisorBase::WORK_LOOP_DONE 			= "Done";
-const std::string		CoreSupervisorBase::WORK_LOOP_WORKING 		= "Working";
+const std::string								CoreSupervisorBase::WORK_LOOP_DONE 			= "Done";
+const std::string								CoreSupervisorBase::WORK_LOOP_WORKING 		= "Working";
 
 //========================================================================================================================
 CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
-throw (xdaq::exception::Exception)
 : xdaq::Application             (s)
 , SOAPMessenger                 (this)
+, CorePropertySupervisorBase	(this)
+, RunControlStateMachine		(CorePropertySupervisorBase::allSupervisorInfo_.isWizardMode()? //set state machine name
+		CorePropertySupervisorBase::supervisorClassNoNamespace_:
+		CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" + CorePropertySupervisorBase::supervisorApplicationUID_)
 , stateMachineWorkLoopManager_  (toolbox::task::bind(this, &CoreSupervisorBase::stateMachineThread, "StateMachine"))
 , stateMachineSemaphore_        (toolbox::BSem::FULL)
-, theConfigurationManager_      (new ConfigurationManager)//(Singleton<ConfigurationManager>::getInstance()) //I always load the full config but if I want to load a partial configuration (new ConfigurationManager)
-, XDAQContextConfigurationName_ (theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getConfigurationName())
-, supervisorConfigurationPath_  ("INITIALIZED INSIDE THE CONTRUCTOR BECAUSE IT NEEDS supervisorContextUID_ and supervisorApplicationUID_")
-, supervisorContextUID_         ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
-, supervisorApplicationUID_     ("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
-, supervisorClass_              (getApplicationDescriptor()->getClassName())
-, supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
+//, theConfigurationManager_      (new ConfigurationManager)//(Singleton<ConfigurationManager>::getInstance()) //I always load the full config but if I want to load a partial configuration (new ConfigurationManager)
+//, supervisorClass_              (getApplicationDescriptor()->getClassName())
+//, supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 , theRemoteWebUsers_ 			(this)
-, LOCK_REQUIRED_	 			(false) 	//set default
-, USER_PERMISSIONS_THRESHOLD_	(1) 		//set default
+//, propertiesAreSetup_			(false)
 {
 	INIT_MF("CoreSupervisorBase");
 
-	__COUT__ << "Begin!" << std::endl;
+	__SUP_COUT__ << "Begin!" << std::endl;
 
-	xgi::bind (this, &CoreSupervisorBase::DefaultWrapper,         "Default" );
+	xgi::bind (this, &CoreSupervisorBase::defaultPageWrapper,     "Default" );
 	xgi::bind (this, &CoreSupervisorBase::requestWrapper, 		  "Request");
+
 	xgi::bind (this, &CoreSupervisorBase::stateMachineXgiHandler, "StateMachineXgiHandler");
 
 	xoap::bind(this, &CoreSupervisorBase::stateMachineStateRequest,    		"StateMachineStateRequest",    		XDAQ_NS_URI );
 	xoap::bind(this, &CoreSupervisorBase::stateMachineErrorMessageRequest,  "StateMachineErrorMessageRequest",  XDAQ_NS_URI );
-	//xoap::bind(this, &CoreSupervisorBase::macroMakerSupervisorRequest, 		"MacroMakerSupervisorRequest", 		XDAQ_NS_URI );
+	//xoap::bind(this, &CoreSupervisorBase::macroMakerSupervisorRequest, 		"MacroMakerSupervisorRequest", 		XDAQ_NS_URI ); //moved to only FESupervisor!
 	xoap::bind(this, &CoreSupervisorBase::workLoopStatusRequestWrapper, 	"WorkLoopStatusRequest",    		XDAQ_NS_URI );
 
-	try
-	{
-		supervisorContextUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getContextUID(
-				getApplicationContext()->getContextDescriptor()->getURL());
-	}
-	catch(...)
-	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Context Group." <<
-				" The XDAQContextConfigurationName = " << XDAQContextConfigurationName_ <<
-				". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
-		throw;
-	}
-	try
-	{
-		supervisorApplicationUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getApplicationUID
-				(
-						getApplicationContext()->getContextDescriptor()->getURL(),
-						getApplicationDescriptor()->getLocalId()
-				);
-	}
-	catch(...)
-	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Application Group."
-				<< " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
-		throw;
-	}
-	supervisorConfigurationPath_  = "/" + supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
-
-	setStateMachineName(supervisorApplicationUID_);
-
-	allSupervisorInfo_.init(getApplicationContext());
-	__COUT__ << "Name = " << allSupervisorInfo_.getSupervisorInfo(this).getName();
-
-
-	__COUT__ << "Initializing..." << std::endl;
-
-	setSupervisorPropertyDefaults(); //calls virtual init (where default supervisor properties should be set)
-
-	//try to get security settings
-	{
-
-		__COUT__ << "Looking for " <<
-				supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
-				" supervisor security settings..." << __E__;
-
-		ConfigurationTree appNode = theConfigurationManager_->getSupervisorNode(
-				supervisorContextUID_, supervisorApplicationUID_);
-		try
-		{
-			auto /*map<name,node>*/ children = appNode.getNode("LinkToPropertyConfiguration").getChildren();
-
-			for(auto& child:children)
-			{
-				if(child.second.getNode("Status").getValue<bool>() == false) continue; //skip OFF properties
-
-				auto propertyName = child.second.getNode("PropertyName");
-
-				if(propertyName.getValue() ==
-						supervisorProperties_.fieldRequireLock)
-				{
-					LOCK_REQUIRED_ = child.second.getNode("PropertyValue").getValue<bool>();
-					__COUTV__(LOCK_REQUIRED_);
-				}
-				else if(propertyName.getValue() ==
-						supervisorProperties_.fieldUserPermissionsThreshold)
-				{
-					USER_PERMISSIONS_THRESHOLD_ = child.second.getNode("PropertyValue").getValue<uint8_t>();
-					__COUTV__(USER_PERMISSIONS_THRESHOLD_);
-				}
-			}
-		}
-		catch(...)
-		{
-			__COUT__ << "No supervisor security settings found, going with defaults." << __E__;
-		}
-	}
+	return;
 }
 
 //========================================================================================================================
@@ -131,29 +55,9 @@ CoreSupervisorBase::~CoreSupervisorBase(void)
 }
 
 //========================================================================================================================
-//When overriding, setup default property values here
-// called by CoreSupervisorBase constructor before loading user defined property values
-void CoreSupervisorBase::setSupervisorPropertyDefaults(void)
-{
-	//This can be done in the constructor because when you start xdaq it loads the configuration that can't be changed while running!
-
-	__COUT__ << "Using base class property defaults..." << std::endl;
-
-	LOCK_REQUIRED_	 			= false; 	//set default
-	USER_PERMISSIONS_THRESHOLD_	= 1; 		//set default
-	USER_GROUPS_ALLOWED_		= ""; 		//set default
-	USER_GROUPS_DISALLOWED_		= ""; 		//set default
-
-	__COUTV__(LOCK_REQUIRED_);
-	__COUTV__(USER_PERMISSIONS_THRESHOLD_);
-	__COUTV__(USER_GROUPS_ALLOWED_);
-	__COUTV__(USER_GROUPS_DISALLOWED_);
-}
-
-//========================================================================================================================
 void CoreSupervisorBase::destroy(void)
 {
-	__COUT__ << "Destroying..." << std::endl;
+	__SUP_COUT__ << "Destroying..." << std::endl;
 	for(auto& it: theStateMachineImplementation_)
 		delete it;
 	theStateMachineImplementation_.clear();
@@ -161,24 +65,22 @@ void CoreSupervisorBase::destroy(void)
 
 //========================================================================================================================
 //wrapper for inheritance call
-void CoreSupervisorBase::DefaultWrapper(xgi::Input * in, xgi::Output * out )
-throw (xgi::exception::Exception)
+void CoreSupervisorBase::defaultPageWrapper(xgi::Input * in, xgi::Output * out )
 {
-	return Default(in,out);
+	return defaultPage(in,out);
 }
 
 //========================================================================================================================
-void CoreSupervisorBase::Default(xgi::Input * in, xgi::Output * out )
-throw (xgi::exception::Exception)
+void CoreSupervisorBase::defaultPage(xgi::Input * in, xgi::Output * out )
 {
-	__COUT__<< "Supervisor class " << supervisorClass_ << std::endl;
+	__SUP_COUT__<< "Supervisor class " << supervisorClass_ << std::endl;
 
 	std::stringstream pagess;
 	pagess << "/WebPath/html/" <<
 			supervisorClassNoNamespace_ << ".html?urn=" <<
 			this->getApplicationDescriptor()->getLocalId();
 
-	__COUT__<< "Default page = " << pagess.str() << std::endl;
+	__SUP_COUT__<< "Default page = " << pagess.str() << std::endl;
 
 	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='" <<
 			pagess.str() <<
@@ -186,70 +88,150 @@ throw (xgi::exception::Exception)
 }
 
 //========================================================================================================================
-//wrapper for inheritance call
+//requestWrapper ~
+//	wrapper for inheritance Supervisor request call
 void CoreSupervisorBase::requestWrapper(xgi::Input * in, xgi::Output * out )
-throw (xgi::exception::Exception)
+
 {
-	return request(in,out);
+	//checkSupervisorPropertySetup();
+
+	cgicc::Cgicc cgiIn(in);
+	std::string requestType = CgiDataUtilities::getData(cgiIn,"RequestType");
+
+	//__SUP_COUT__ << "requestType " << requestType << " files: " << cgiIn.getFiles().size() << std::endl;
+
+	HttpXmlDocument xmlOut;
+	WebUsers::RequestUserInfo userInfo(requestType,
+			CgiDataUtilities::getOrPostData(cgiIn,"CookieCode"));
+
+	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
+
+	if(!theRemoteWebUsers_.xmlRequestToGateway(
+			cgiIn,
+			out,
+			&xmlOut,
+			CorePropertySupervisorBase::allSupervisorInfo_,
+			userInfo))
+		return; //access failed
+
+
+	//done checking cookieCode, sequence, userWithLock, and permissions access all in one shot!
+	//**** end LOGIN GATEWAY CODE ***//
+
+	if(!userInfo.automatedCommand_)
+		__SUP_COUT__ << "requestType: " << requestType << __E__;
+
+	if(userInfo.NonXMLRequestType_)
+	{
+		nonXmlRequest(requestType,cgiIn,*out,userInfo);
+		return;
+	}
+	//else xml request type
+
+	request(requestType,cgiIn,xmlOut,userInfo);
+
+	//report any errors encountered
+	{
+		unsigned int occurance = 0;
+		std::string err = xmlOut.getMatchingValue("Error",occurance++);
+		while(err != "")
+		{
+			__SUP_COUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << std::endl;
+			__MOUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << std::endl;
+			err = xmlOut.getMatchingValue("Error",occurance++);
+		}
+	}
+
+
+	//return xml doc holding server response
+	xmlOut.outputXmlDocument((std::ostringstream*) out, false /*print to cout*/,
+			!userInfo.NoXmlWhiteSpace_/*allow whitespace*/);
+
 }
 
 //========================================================================================================================
-void CoreSupervisorBase::request(xgi::Input * in, xgi::Output * out )
-throw (xgi::exception::Exception)
+//request
+//		Supervisors should override this function. It will be called after user access has been verified
+//		according to the Supervisor Property settings. The CoreSupervisorBase class provides consistent
+//		access, responses, and error handling across all inheriting supervisors that use ::request.
+void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut,
+		const WebUsers::RequestUserInfo& userInfo)
 {
+	__SUP_COUT__ << "This is the empty Core Supervisor request. Supervisors should override this function." << __E__;
+
+// KEEP:
+//	here are some possibly interesting example lines of code for overriding supervisors
 //
 //
-//	cgicc::Cgicc cgi(in);
-//	std::string write = CgiDataUtilities::getOrPostData(cgi,"write");
-//	std::string addr = CgiDataUtilities::getOrPostData(cgi,"addr");
-//	std::string data = CgiDataUtilities::getOrPostData(cgi,"data");
+//  if(requestType == "savePlanCommandSequence")
+//	{
+//		std::string 	planName 		= CgiDataUtilities::getData(cgiIn,"planName"); //from GET
+//		std::string 	commands 		= CgiDataUtilities::postData(cgiIn,"commands"); //from POST
 //
-//	__COUT__<< "write " << write << " addr: " << addr << " data: " << data << std::endl;
+//		cgiIn.getFiles()
+//		__SUP_COUT__ << "planName: " << planName << __E__;
+//		__SUP_COUTV__(commands);
 //
-//	unsigned long long int addr64,data64;
-//	sscanf(addr.c_str(),"%llu",&addr64);
-//	sscanf(data.c_str(),"%llu",&data64);
-//	__COUT__<< "write " << write << " addr: " << addr64 << " data: " << data64 << std::endl;
 //
-//	*out << "done";
+//	}
+//	else
+//	{
+//		__SUP_SS__ << "requestType '" << requestType << "' request not recognized." << std::endl;
+//		__SUP_COUT__ << "\n" << ss.str();
+//		xmlOut.addTextElementToData("Error", ss.str());
+//	}
+//	xmlOut.addTextElementToData("Error",
+//			"request encountered an error!");
+}
+
+//========================================================================================================================
+//nonXmlRequest
+//		Supervisors should override this function. It will be called after user access has been verified
+//		according to the Supervisor Property settings. The CoreSupervisorBase class provides consistent
+//		access, responses, and error handling across all inheriting supervisors that use ::request.
+void CoreSupervisorBase::nonXmlRequest(const std::string& requestType, cgicc::Cgicc& cgiIn, std::ostream& out,
+		const WebUsers::RequestUserInfo& userInfo)
+{
+	__SUP_COUT__ << "This is the empty Core Supervisor non-xml request. Supervisors should override this function." << __E__;
+	out << "This is the empty Core Supervisor non-xml request. Supervisors should override this function." << __E__;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::stateMachineXgiHandler(xgi::Input * in, xgi::Output * out )
-throw (xgi::exception::Exception)
+
 {}
 
 //========================================================================================================================
 void CoreSupervisorBase::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out )
-throw (xgi::exception::Exception)
+
 {}
 
 //========================================================================================================================
 xoap::MessageReference CoreSupervisorBase::stateMachineXoapHandler(xoap::MessageReference message )
-throw (xoap::exception::Exception)
+
 {
-	__COUT__<< "Soap Handler!" << std::endl;
+	__SUP_COUT__<< "Soap Handler!" << std::endl;
 	stateMachineWorkLoopManager_.removeProcessedRequests();
 	stateMachineWorkLoopManager_.processRequest(message);
-	__COUT__<< "Done - Soap Handler!" << std::endl;
+	__SUP_COUT__<< "Done - Soap Handler!" << std::endl;
 	return message;
 }
 
 //========================================================================================================================
 xoap::MessageReference CoreSupervisorBase::stateMachineResultXoapHandler(xoap::MessageReference message )
-throw (xoap::exception::Exception)
+
 {
-	__COUT__<< "Soap Handler!" << std::endl;
+	__SUP_COUT__<< "Soap Handler!" << std::endl;
 	//stateMachineWorkLoopManager_.removeProcessedRequests();
 	//stateMachineWorkLoopManager_.processRequest(message);
-	__COUT__<< "Done - Soap Handler!" << std::endl;
+	__SUP_COUT__<< "Done - Soap Handler!" << std::endl;
 	return message;
 }
 
 //========================================================================================================================
 //indirection to allow for overriding handler
 xoap::MessageReference CoreSupervisorBase::workLoopStatusRequestWrapper(xoap::MessageReference message)
-throw (xoap::exception::Exception)
+
 {
 	//this should have an override for monitoring work loops being done
 	return workLoopStatusRequest(message);
@@ -257,7 +239,7 @@ throw (xoap::exception::Exception)
 
 //========================================================================================================================
 xoap::MessageReference CoreSupervisorBase::workLoopStatusRequest(xoap::MessageReference message)
-throw (xoap::exception::Exception)
+
 {
 	//this should have an override for monitoring work loops being done
 	return SOAPUtilities::makeSOAPMessageReference(CoreSupervisorBase::WORK_LOOP_DONE);
@@ -267,10 +249,10 @@ throw (xoap::exception::Exception)
 bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 {
 	stateMachineSemaphore_.take();
-	__COUT__<< "Re-sending message..." << SOAPUtilities::translate(stateMachineWorkLoopManager_.getMessage(workLoop)).getCommand() << std::endl;
+	__SUP_COUT__<< "Re-sending message..." << SOAPUtilities::translate(stateMachineWorkLoopManager_.getMessage(workLoop)).getCommand() << std::endl;
 	std::string reply = send(this->getApplicationDescriptor(),stateMachineWorkLoopManager_.getMessage(workLoop));
 	stateMachineWorkLoopManager_.report(workLoop, reply, 100, true);
-	__COUT__<< "Done with message" << std::endl;
+	__SUP_COUT__<< "Done with message" << std::endl;
 	stateMachineSemaphore_.give();
 	return false;//execute once and automatically remove the workloop so in WorkLoopManager the try workLoop->remove(job_) could be commented out
 	//return true;//go on and then you must do the workLoop->remove(job_) in WorkLoopManager
@@ -278,17 +260,17 @@ bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 
 //========================================================================================================================
 xoap::MessageReference CoreSupervisorBase::stateMachineStateRequest(xoap::MessageReference message)
-throw (xoap::exception::Exception)
+
 {
-	__COUT__<< "theStateMachine_.getCurrentStateName() = " << theStateMachine_.getCurrentStateName() << std::endl;
+	__SUP_COUT__<< "theStateMachine_.getCurrentStateName() = " << theStateMachine_.getCurrentStateName() << std::endl;
 	return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getCurrentStateName());
 }
 
 //========================================================================================================================
 xoap::MessageReference CoreSupervisorBase::stateMachineErrorMessageRequest(xoap::MessageReference message)
-throw (xoap::exception::Exception)
+
 {
-	__COUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
+	__SUP_COUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("ErrorMessage",theStateMachine_.getErrorMessage());
@@ -297,52 +279,52 @@ throw (xoap::exception::Exception)
 
 //========================================================================================================================
 void CoreSupervisorBase::stateInitial(toolbox::fsm::FiniteStateMachine& fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__ << "CoreSupervisorBase::stateInitial" << std::endl;
+	__SUP_COUT__ << "CoreSupervisorBase::stateInitial" << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__ << "CoreSupervisorBase::stateHalted" << std::endl;
+	__SUP_COUT__ << "CoreSupervisorBase::stateHalted" << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::stateRunning(toolbox::fsm::FiniteStateMachine& fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__ << "CoreSupervisorBase::stateRunning" << std::endl;
+	__SUP_COUT__ << "CoreSupervisorBase::stateRunning" << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__ << "CoreSupervisorBase::stateConfigured" << std::endl;
+	__SUP_COUT__ << "CoreSupervisorBase::stateConfigured" << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::statePaused(toolbox::fsm::FiniteStateMachine& fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__ << "CoreSupervisorBase::statePaused" << std::endl;
+	__SUP_COUT__ << "CoreSupervisorBase::statePaused" << std::endl;
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::inError (toolbox::fsm::FiniteStateMachine & fsm)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
+	__SUP_COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
 	//rcmsStateNotifier_.stateChanged("Error", "");
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::enteringError (toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()
+	__SUP_COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()
 			<< "\n\nError Message: " <<
 			theStateMachine_.getErrorMessage() << std::endl;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
@@ -352,16 +334,16 @@ throw (toolbox::fsm::exception::Exception)
 			<<  " to "
 			<< failedEvent.getToState()
 			<< " exception: " << failedEvent.getException().what();
-	__COUT_ERR__<< error.str() << std::endl;
+	__SUP_COUT_ERR__<< error.str() << std::endl;
 	//diagService_->reportError(errstr.str(),DIAGERROR);
 
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__ << "transitionConfiguring" << std::endl;
+	__SUP_COUT__ << "transitionConfiguring" << std::endl;
 
 	std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup(
 			SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
@@ -369,15 +351,14 @@ throw (toolbox::fsm::exception::Exception)
 			ConfigurationGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
 					getParameters().getValue("ConfigurationGroupKey")));
 
-	__COUT__ << "Configuration group name: " << theGroup.first << " key: " <<
+	__SUP_COUT__ << "Configuration group name: " << theGroup.first << " key: " <<
 			theGroup.second << std::endl;
 
 	theConfigurationManager_->loadConfigurationGroup(
 			theGroup.first,
 			theGroup.second, true);
 
-
-	//Now that the configuration manager has all the necessary configurations I can create all objects dependent of the configuration
+	//Now that the configuration manager has all the necessary configurations, create all objects that depend on the configuration
 
 	try
 	{
@@ -386,8 +367,8 @@ throw (toolbox::fsm::exception::Exception)
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error was caught while configuring: " << e.what() << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		__SUP_SS__ << "Error was caught while configuring: " << e.what() << std::endl;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
@@ -404,9 +385,9 @@ throw (toolbox::fsm::exception::Exception)
 //transitionHalting
 //	Ignore errors if coming from Failed state
 void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__ << "transitionHalting" << std::endl;
+	__SUP_COUT__ << "transitionHalting" << std::endl;
 
 	for(auto& it: theStateMachineImplementation_)
 	{
@@ -420,13 +401,13 @@ throw (toolbox::fsm::exception::Exception)
 			if(theStateMachine_.getProvenanceStateName() ==
 					RunControlStateMachine::FAILED_STATE_NAME)
 			{
-				__COUT_INFO__ << "Error was caught while halting (but ignoring because previous state was '" <<
+				__SUP_COUT_INFO__ << "Error was caught while halting (but ignoring because previous state was '" <<
 						RunControlStateMachine::FAILED_STATE_NAME << "'): " << e.what() << std::endl;
 			}
 			else //if not previously in Failed state, then fail
 			{
-				__SS__ << "Error was caught while halting: " << e.what() << std::endl;
-				__COUT_ERR__ << "\n" << ss.str();
+				__SUP_SS__ << "Error was caught while halting: " << e.what() << std::endl;
+				__SUP_COUT_ERR__ << "\n" << ss.str();
 				theStateMachine_.setErrorMessage(ss.str());
 				throw toolbox::fsm::exception::Exception(
 						"Transition Error" /*name*/,
@@ -441,20 +422,27 @@ throw (toolbox::fsm::exception::Exception)
 }
 
 //========================================================================================================================
+//Inheriting supervisor classes should not override this function, or should at least also call it in the override
+//	to maintain property functionality.
 void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
-{
-	__COUT__ << "transitionInitializing" << std::endl;
 
-	//    for(auto& it: theStateMachineImplementation_)
+{
+	__SUP_COUT__ << "transitionInitializing" << std::endl;
+
+	CorePropertySupervisorBase::resetPropertiesAreSetup(); //indicate need to re-load user properties
+
+
+	//Note: Do not initialize the state machine implementations... do any initializing in configure
+	//	This allows re-instantiation at each configure time.
+	//for(auto& it: theStateMachineImplementation_)
 	//it->initialize();
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__ << "transitionPausing" << std::endl;
+	__SUP_COUT__ << "transitionPausing" << std::endl;
 
 	try
 	{
@@ -463,8 +451,8 @@ throw (toolbox::fsm::exception::Exception)
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error was caught while pausing: " << e.what() << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
@@ -478,12 +466,12 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
 	//NOTE: I want to first start the data manager first if this is a FEDataManagerSupervisor
 
 
-	__COUT__ << "transitionResuming" << std::endl;
+	__SUP_COUT__ << "transitionResuming" << std::endl;
 
 	try
 	{
@@ -492,8 +480,8 @@ throw (toolbox::fsm::exception::Exception)
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error was caught while resuming: " << e.what() << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		__SUP_SS__ << "Error was caught while resuming: " << e.what() << std::endl;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
@@ -507,12 +495,12 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
 
 	//NOTE: I want to first start the data manager first if this is a FEDataManagerSupervisor
 
-	__COUT__ << "transitionStarting" << std::endl;
+	__SUP_COUT__ << "transitionStarting" << std::endl;
 
 	try
 	{
@@ -521,8 +509,8 @@ throw (toolbox::fsm::exception::Exception)
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error was caught while starting: " << e.what() << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		__SUP_SS__ << "Error was caught while starting: " << e.what() << std::endl;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
@@ -536,9 +524,9 @@ throw (toolbox::fsm::exception::Exception)
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
-throw (toolbox::fsm::exception::Exception)
+
 {
-	__COUT__ << "transitionStopping" << std::endl;
+	__SUP_COUT__ << "transitionStopping" << std::endl;
 
 	try
 	{
@@ -547,8 +535,8 @@ throw (toolbox::fsm::exception::Exception)
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error was caught while pausing: " << e.what() << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,

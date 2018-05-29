@@ -576,7 +576,7 @@ void ConfigurationManager::dumpActiveConfiguration(
 	{
 		if(filePath != "")
 		{
-			__SS__ << "Invalid File path. File path could not be opened!" << __E__;
+			__SS__ << "Invalid file path to dump active configuration. File " << filePath << " could not be opened!" << __E__;
 			__COUT_ERR__ << ss.str();
 			throw std::runtime_error(ss.str());
 		}
@@ -817,16 +817,16 @@ void ConfigurationManager::loadConfigurationGroup(
 	if(groupTypeString)			*groupTypeString 		= "UNKNOWN";
 
 
-//	if(configGroupName == "defaultConfig")
-//	{ //debug active versions
-//		std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
-//		for(auto& activePair: allActivePairs)
-//		{
-//			__COUT__ << "Active table = " <<
-//					activePair.first << "-v" <<
-//					getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
-//		}
-//	}
+	//	if(configGroupName == "defaultConfig")
+	//	{ //debug active versions
+	//		std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+	//		for(auto& activePair: allActivePairs)
+	//		{
+	//			__COUT__ << "Active table = " <<
+	//					activePair.first << "-v" <<
+	//					getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+	//		}
+	//	}
 
 
 	//	load all members of configuration group
@@ -841,8 +841,8 @@ void ConfigurationManager::loadConfigurationGroup(
 	//	if doActivate
 	//		set theConfigurationGroup_, theContextGroup_, or theBackboneGroup_ on success
 
-	__COUT_INFO__ << "Loading Configuration Group: " << configGroupName <<
-			"(" << configGroupKey << ")" << std::endl;
+	//	__COUT_INFO__ << "Loading Configuration Group: " << configGroupName <<
+	//			"(" << configGroupKey << ")" << std::endl;
 
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> memberMap =
 			theInterface_->getConfigurationGroupMembers(
@@ -911,7 +911,7 @@ void ConfigurationManager::loadConfigurationGroup(
 
 	if(progressBar) progressBar->step();
 
-	__COUT__ << "memberMap loaded size = " << memberMap.size() << std::endl;
+	//__COUT__ << "memberMap loaded size = " << memberMap.size() << std::endl;
 
 	int groupType = -1;
 	if(groupTypeString) //do before exit case
@@ -920,26 +920,28 @@ void ConfigurationManager::loadConfigurationGroup(
 		*groupTypeString = convertGroupTypeIdToName(groupType);
 	}
 
-//	if(configGroupName == "defaultConfig")
-//		{ //debug active versions
-//			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
-//			for(auto& activePair: allActivePairs)
-//			{
-//				__COUT__ << "Active table = " <<
-//						activePair.first << "-v" <<
-//						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
-//			}
-//		}
+	//	if(configGroupName == "defaultConfig")
+	//		{ //debug active versions
+	//			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+	//			for(auto& activePair: allActivePairs)
+	//			{
+	//				__COUT__ << "Active table = " <<
+	//						activePair.first << "-v" <<
+	//						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+	//			}
+	//		}
 
 
 	if(doNotLoadMember) return;// memberMap; //this is useful if just getting group metadata
 
-	if(doActivate)
-		__COUT__ << "------------------------------------- loadConfigurationGroup start" << std::endl;
-
 
 	//if not already done, determine the type configuration group
 	if(!groupTypeString) groupType = getTypeOfGroup(memberMap);
+
+	if(doActivate)
+		__COUT__ << "------------------------------------- init start    \t [for all plug-ins in " <<
+		convertGroupTypeIdToName(groupType) << " group '" <<
+		configGroupName << "(" << configGroupKey << ")" << "']" << std::endl;
 
 	if(doActivate)
 	{
@@ -952,25 +954,25 @@ void ConfigurationManager::loadConfigurationGroup(
 		//		deactivate all of that type (invalidate active view)
 		if(groupToDeactivate != "") //deactivate only if pre-existing group
 		{
-			__COUT__ << "groupToDeactivate '" << groupToDeactivate << "'" << std::endl;
+			//__COUT__ << "groupToDeactivate '" << groupToDeactivate << "'" << std::endl;
 			destroyConfigurationGroup(groupToDeactivate,true);
 		}
-//		else
-//		{
-//			//Getting here, is kind of strange:
-//			//	- this group may have only been partially loaded before?
-//		}
+		//		else
+		//		{
+		//			//Getting here, is kind of strange:
+		//			//	- this group may have only been partially loaded before?
+		//		}
 	}
-//	if(configGroupName == "defaultConfig")
-//		{ //debug active versions
-//			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
-//			for(auto& activePair: allActivePairs)
-//			{
-//				__COUT__ << "Active table = " <<
-//						activePair.first << "-v" <<
-//						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
-//			}
-//		}
+	//	if(configGroupName == "defaultConfig")
+	//		{ //debug active versions
+	//			std::map<std::string, ConfigurationVersion> allActivePairs = getActiveVersions();
+	//			for(auto& activePair: allActivePairs)
+	//			{
+	//				__COUT__ << "Active table = " <<
+	//						activePair.first << "-v" <<
+	//						getConfigurationByName(activePair.first)->getView().getVersion() << std::endl;
+	//			}
+	//		}
 
 	if(progressBar) progressBar->step();
 
@@ -983,7 +985,7 @@ void ConfigurationManager::loadConfigurationGroup(
 
 	if(accumulatedTreeErrors)
 	{
-		__COUT__ << "Checking chosen group for tree errors..." << std::endl;
+		//__COUT__ << "Checking chosen group for tree errors..." << std::endl;
 
 		getChildren(&memberMap, accumulatedTreeErrors);
 		if(*accumulatedTreeErrors != "")
@@ -1050,29 +1052,29 @@ void ConfigurationManager::loadConfigurationGroup(
 	{
 		if(groupType == CONTEXT_TYPE) //
 		{
-			__COUT_INFO__ << "Type=Context, Group loaded: " << configGroupName <<
-					"(" << configGroupKey << ")" << std::endl;
+			//			__COUT_INFO__ << "Type=Context, Group loaded: " << configGroupName <<
+			//					"(" << configGroupKey << ")" << std::endl;
 			theContextGroup_ = configGroupName;
 			theContextGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
 		}
 		else if(groupType == BACKBONE_TYPE)
 		{
-			__COUT_INFO__ << "Type=Backbone, Group loaded: " << configGroupName <<
-					"(" << configGroupKey << ")" << std::endl;
+			//			__COUT_INFO__ << "Type=Backbone, Group loaded: " << configGroupName <<
+			//					"(" << configGroupKey << ")" << std::endl;
 			theBackboneGroup_ = configGroupName;
 			theBackboneGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
 		}
 		else if(groupType == ITERATE_TYPE)
 		{
-			__COUT_INFO__ << "Type=Iterate, Group loaded: " << configGroupName <<
-					"(" << configGroupKey << ")" << std::endl;
+			//			__COUT_INFO__ << "Type=Iterate, Group loaded: " << configGroupName <<
+			//					"(" << configGroupKey << ")" << std::endl;
 			theIterateGroup_ = configGroupName;
 			theIterateGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
 		}
 		else //is theConfigurationGroup_
 		{
-			__COUT_INFO__ << "Type=Configuration, Group loaded: " << configGroupName <<
-					"(" << configGroupKey << ")" << std::endl;
+			//			__COUT_INFO__ << "Type=Configuration, Group loaded: " << configGroupName <<
+			//					"(" << configGroupKey << ")" << std::endl;
 			theConfigurationGroup_ = configGroupName;
 			theConfigurationGroupKey_ = std::shared_ptr<ConfigurationGroupKey>(new ConfigurationGroupKey(configGroupKey));
 		}
@@ -1081,7 +1083,9 @@ void ConfigurationManager::loadConfigurationGroup(
 	if(progressBar) progressBar->step();
 
 	if(doActivate)
-		__COUT__ << "------------------------------------- loadConfigurationGroup end" << std::endl;
+		__COUT__ << "------------------------------------- init complete \t [for all plug-ins in " <<
+		convertGroupTypeIdToName(groupType) << " group '" <<
+		configGroupName << "(" << configGroupKey << ")" << "']" << std::endl;
 
 	return;// memberMap;
 }

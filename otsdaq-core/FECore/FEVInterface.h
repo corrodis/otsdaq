@@ -28,6 +28,10 @@ class FrontEndFirmwareBase;
 class FEInterfaceConfigurationBase;
 //class SlowControlsChannelInfo;
 
+//FEVInterface
+//	This class is a virtual class defining the features of front-end interface plugin class.
+//	The features include configuration hooks, finite state machine handlers, Front-end Macros for web accessible C++ handlers, slow controls hooks, as well as universal write and read for
+//	Macro Maker compatibility.
 class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 {
 public:
@@ -148,7 +152,6 @@ protected:
 	void											registerFEMacroFunction(const std::string &feMacroName, frontEndMacroFunction_t feMacroFunction, const std::vector<std::string> &namesOfInputArgs, const std::vector<std::string> &namesOfOutputArgs, uint8_t requiredUserPermissions);
 
 public: //for external specialized template access
-	static bool 		        					isNumber(const std::string& s) ;
 	static const std::string&						getFEMacroInputArgument			(frontEndMacroInArgs_t &argsIn, const std::string &argName);
 protected:
 	static std::string&								getFEMacroOutputArgument 		(frontEndMacroOutArgs_t &argsOut, const std::string& argName);
@@ -180,25 +183,13 @@ T 												getFEMacroInputArgumentValue(
 
 	T retValue;
 
-	if(!FEVInterface::isNumber(data))
+	if(!StringMacros::getNumber(data,retValue))
 	{
 		__SS__ << "Error extracting value for argument named '" <<
 				argName << ".' The value '" << data << "' is not a number!" << std::endl;
 		__COUT__ << "\n" << ss.str();
 		throw std::runtime_error(ss.str());
 	}
-	__COUTV__(data);
-
-	if(typeid(double) == typeid(retValue))
-		retValue = strtod(data.c_str(),0);
-	else if(typeid(float) == typeid(retValue))
-		retValue = strtof(data.c_str(),0);
-	else if(data.size() > 2 && data[1] == 'x') //assume hex value
-		retValue = strtol(data.c_str(),0,16);
-	else if(data.size() > 1 && data[0] == 'b') //assume binary value
-		retValue = strtol(data.substr(1).c_str(),0,2); //skip first 'b' character
-	else
-		retValue = strtol(data.c_str(),0,10);
 
 	return retValue;
 }

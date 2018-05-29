@@ -4,6 +4,7 @@
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
 
 #include <xdaq/Application.h>
+#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 #include <xgi/Method.h>
 
 #include <xoap/SOAPEnvelope.h>
@@ -24,7 +25,16 @@
 namespace ots
 {
 
+class HttpXmlDocument;
 
+//WizardSupervisor
+//	This class is a xdaq application.
+//
+//	It is instantiated by the xdaq context when otsdaq is in "Wiz Mode."
+//
+//	It is different from the "Normal Mode" Gateway Supervisor in that it does not have a state machine
+//	and does not inherit properties from CorePropertySupervisorBase. The assumption is
+//	that only admins have access to wiz mode, and they have access to all features of it.
 class WizardSupervisor: public xdaq::Application, public SOAPMessenger
 {
 
@@ -47,8 +57,13 @@ public:
     void						requestIcons                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
 
     void 						editSecurity                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+    void 						UserSettings              			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
     void 						tooltipRequest                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
     void                        toggleSecurityCodeGeneration        (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+	std::string     			validateUploadFileType      		(const std::string fileType);
+    void            			cleanUpPreviews             		();
+    void            			savePostPreview             		(std::string &subject, std::string &text, const std::vector<cgicc::FormFile> &files, std::string creator, HttpXmlDocument *xmldoc = nullptr);
+    std::string 				exec								(const char* cmd);
 
     //External Supervisor XOAP handlers
     xoap::MessageReference 		supervisorSequenceCheck 			(xoap::MessageReference msg) throw (xoap::exception::Exception);
@@ -57,6 +72,19 @@ public:
 private:
     std::string					securityCode_;
     bool                        defaultSequence_;
+    std::vector<std::string>    allowedFileUploadTypes_, matchingFileUploadTypes_;
+
+
+    std::string					supervisorClass_;
+    std::string					supervisorClassNoNamespace_;
+
+    enum {
+        	ADMIN_PERMISSIONS_THRESHOLD = 255,
+        	EXPERIMENT_NAME_MIN_LENTH = 3,
+        	EXPERIMENT_NAME_MAX_LENTH = 25,
+        	USER_DATA_EXPIRATION_TIME = 60*20, //20 minutes
+        };
+
 };
 
 }

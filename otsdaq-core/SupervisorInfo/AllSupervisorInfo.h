@@ -14,6 +14,18 @@ namespace ots
 typedef std::map<unsigned int, const SupervisorInfo&> SupervisorInfoMap;
 
 ////// class define
+//AllSupervisorInfo
+//	xdaq Supervisors can use this class to gain access to
+//	info for all supervisors in the xdaq Context. Supervisors
+//	are organized by type/class. Note that if a supervisor is
+//	encountered in the xdaq context that is of unknown type, then
+//	it is ignored and not organized.
+//
+//	Supervisors should call init to setup data members of this class.
+//
+//	This class, when in normal mode, also interprets the active configuration
+//	to associate configuration UID/names to the supervisors in the xdaq context.
+//	In wizard mode, UID/name is taken from class name.
 class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 {
 

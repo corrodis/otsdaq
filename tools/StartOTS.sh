@@ -1,4 +1,38 @@
 #!/bin/sh
+
+#for some reason, this function does not exist in this script.. recreating
+function toffS () 
+{ 
+	${TRACE_BIN}/trace_cntl lvlclr 0 `bitN_to_mask "$@"` 0
+}
+
+function muteTrace() {
+	#source /data/ups/setup
+	#setup TRACE v3_13_04
+	#ups active
+	#which trace_cntl
+	#type toffS
+	
+	#for muting trace
+	export TRACE_NAME=OTSDAQ_TRACE
+	 
+	#type toffS
+	
+	toffS 0-63 -n CONF:OpBase_C
+	toffS 0-63 -n CONF:OpLdStr_C
+	toffS 0-63 -n CONF:CrtCfD_C
+	toffS 0-63 -n COFS:DpFle_C
+	toffS 0-63 -n PRVDR:FileDB_C
+	toffS 0-63 -n PRVDR:FileDBIX_C
+	toffS 0-63 -n JSNU:Document_C
+	toffS 0-63 -n JSNU:DocUtils_C
+	toffS 0-63 -n CONF:LdStrD_C
+	toffS 0-63 -n FileDB:RDWRT_C
+	
+}
+muteTrace
+
+
 echo
 echo "  |"
 echo "  |"
@@ -10,15 +44,19 @@ echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t =========================
 echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Launching StartOTS.sh otsdaq script... on {${HOSTNAME}}."
 echo
 
+
+
 SCRIPT_DIR="$( 
   cd "$(dirname "$(readlink "$0" || printf %s "$0")")"
   pwd -P 
 )"
 		
-echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Script directory found as: $SCRIPT_DIR/$0"
+echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Script directory found as: $SCRIPT_DIR/StartOTS.sh"
 
 unalias ots.exe &>/dev/null 2>&1 #hide output
 alias ots.exe='xdaq.exe' &>/dev/null #hide output
+
+
 
 ISCONFIG=0
 QUIET=1
@@ -317,6 +355,7 @@ fi
 if [ ! -d $OTSDAQ_LOG_DIR ]; then
     mkdir -p $OTSDAQ_LOG_DIR
 fi
+export OTSDAQ_LOG_ROOT=$OTSDAQ_LOG_DIR
 
 ##############################################################################
 export XDAQ_CONFIGURATION_XML=otsConfigurationNoRU_CMake #-> 
@@ -415,6 +454,7 @@ launchOTSWiz() {
 	export CONSOLE_SUPERVISOR_ID=260
 	export CONFIGURATION_GUI_SUPERVISOR_ID=280
 	export WIZARD_SUPERVISOR_ID=290	
+	export OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID=290	
 	MAIN_PORT=2015
 
 	if [ "x$OTS_WIZ_MODE_MAIN_PORT" != "x" ]; then
@@ -448,6 +488,7 @@ launchOTSWiz() {
 	#use safe Message Facility fcl in config mode
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacility.fcl #MessageFacilityWithCout.fcl
 	
+	echo
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Wiz mode xdaq config is ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml"
 			
 	if [ $QUIET == 1 ]; then
@@ -458,7 +499,8 @@ launchOTSWiz() {
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
 			mv .otsdaq_quiet_run-wiz-${HOSTNAME}.txt .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt
 		fi
-		ssss
+		
+		echo
 		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  \t (hidden file)"
 		echo
 		
@@ -525,8 +567,6 @@ launchOTS() {
 	echo
 	echo
 	
-	sed -i s/ots::Supervisor/ots::GatewaySupervisor/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
-	sed -i s/libSupervisor\.so/libGatewaySupervisor\.so/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 	
 	####################################################################
 	########### start console & message facility handling ##############
@@ -593,17 +633,21 @@ launchOTS() {
 	
 			
 	envString="-genv OTSDAQ_LOG_ROOT ${OTSDAQ_LOG_DIR} -genv ARTDAQ_OUTPUT_DIR ${ARTDAQ_OUTPUT_DIR}"
-		
+
+	#create argument to pass to xdaq executable
 	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
 	
 	#echo
 	#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t XDAQ ARGS PASSED TO ots.exe:"
 	#echo ${XDAQ_ARGS}
 	#echo
-	#echo
-	
-	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`
-	
+	#echo	
+
+	#for Supervisor backwards compatibility, convert to GatewaySupervisor stealthily
+	sed -i s/ots::Supervisor/ots::GatewaySupervisor/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
+	sed -i s/libSupervisor\.so/libGatewaySupervisor\.so/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
+
+	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`	
 	#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t $value"
 	#re="http://(${HOSTNAME}):([0-9]+)"
 	
@@ -629,6 +673,7 @@ launchOTS() {
 		if [[ ${ignore} == true ]]; then
 			continue
 		fi
+		#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t $line"
 				
 		if [[ ($line == *"xc:Context"*) && ($line == *"url"*) ]]; then
 			if [[ ($line =~ $re) ]]; then
@@ -637,17 +682,16 @@ launchOTS() {
 				#   create node config files with https:port forwarding to localhost:madeupport
 				#   run nodejs
 				#   run xdaq
-				#if [[ BASH_REMATCH[1] == "s" ]]; then
-				#
-				#cp ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
-				#
-						#fi
+			
 				#echo ${BASH_REMATCH[1]}
 				#echo ${BASH_REMATCH[2]}
-					port=${BASH_REMATCH[3]}
-					host=${BASH_REMATCH[2]}
-					insideContext=true
-					#echo $port
+			
+				port=${BASH_REMATCH[3]}
+				host=${BASH_REMATCH[2]}
+				insideContext=true
+						
+				#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t $host $port "				
+						
 				if [[ (${BASH_REMATCH[2]} == ${HOSTNAME}) || (${BASH_REMATCH[2]} == ${HOSTNAME}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
 				    isLocal=true
 				else
@@ -717,7 +761,7 @@ launchOTS() {
 			fi
 		fi   
 	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
-	
+		
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Launching all otsdaq Applications for host {${HOSTNAME}}..."
 	i=0	
 	for port in "${xdaqPort[@]}"
@@ -858,10 +902,10 @@ otsActionHandler() {
 	else
 		sleep 10 #non masters sleep for a while, to give time to quit stale scripts
 	fi	
-	
-	
-	
+		
 	FIRST_TIME=1
+	
+	
 	
 	#listen for file commands
 	while true; do
@@ -1004,7 +1048,6 @@ if [ $FIREFOX == 1 ]; then
 fi
 
 sleep 3 #so that the terminal comes back after the printouts are done ( in quiet mode )
-
 
 
 

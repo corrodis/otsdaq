@@ -1,6 +1,6 @@
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQConsumer.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "artdaq/Application/Commandable.hh"
 #include "otsdaq-core/Macros/ProcessorPluginMacros.h"
 #include "fhiclcpp/make_ParameterSet.h"

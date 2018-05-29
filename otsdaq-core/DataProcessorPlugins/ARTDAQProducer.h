@@ -13,6 +13,8 @@
 namespace ots
 {
 
+//ARTDAQProducer
+//	This class is a Data Producer Plugin that allows a single artdaq Event Builder to be instantiate as a Producer to an otsdaq Buffer.
 class ARTDAQProducer : public DataProducer, public Configurable
 {
 

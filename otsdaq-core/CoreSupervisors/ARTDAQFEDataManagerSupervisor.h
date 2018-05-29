@@ -13,7 +13,7 @@ public:
 
     XDAQ_INSTANTIATOR();
 
-    ARTDAQFEDataManagerSupervisor              (xdaq::ApplicationStub * s) throw (xdaq::exception::Exception);
+    ARTDAQFEDataManagerSupervisor              (xdaq::ApplicationStub * s) ;
     virtual ~ARTDAQFEDataManagerSupervisor     (void);
 
 private:

@@ -9,6 +9,9 @@
 namespace ots
 {
 
+//DataProducer
+//	This class provides base class functionality for Data Producer plugin classes to
+//	receive incoming streaming data and places it in a Buffer.
 class DataProducer : public DataProcessor, public virtual WorkLoop
 {
 public:

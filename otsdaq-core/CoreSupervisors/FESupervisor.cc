@@ -10,7 +10,7 @@ XDAQ_INSTANTIATOR_IMPL(FESupervisor)
 
 
 //========================================================================================================================
-FESupervisor::FESupervisor(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception)
+FESupervisor::FESupervisor(xdaq::ApplicationStub * s) 
 	: CoreSupervisorBase(s)
 
 {
@@ -19,8 +19,8 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub * s) throw (xdaq::exception::Ex
 
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 		new FEVInterfacesManager(
-			CoreSupervisorBase::theConfigurationManager_->getNode(CoreSupervisorBase::XDAQContextConfigurationName_),
-			CoreSupervisorBase::supervisorConfigurationPath_
+				CorePropertySupervisorBase::getContextTreeNode(),
+				CorePropertySupervisorBase::supervisorConfigurationPath_
 		)
 	);
 
@@ -42,7 +42,7 @@ FESupervisor::~FESupervisor(void)
 //		FEVInterfacesManager in its vector of state machines
 xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 	xoap::MessageReference message)
-	throw (xoap::exception::Exception)
+	
 {
 	__COUT__ << "$$$$$$$$$$$$$$$$$" << std::endl;
 
@@ -363,7 +363,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 
 //========================================================================================================================
 xoap::MessageReference FESupervisor::workLoopStatusRequest(xoap::MessageReference message)
-throw (xoap::exception::Exception)
+
 {
 	//locate theFEInterfacesManager in state machines vector
 	FEVInterfacesManager* theFEInterfacesManager = extractFEInterfaceManager();

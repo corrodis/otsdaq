@@ -18,12 +18,12 @@ public:
 	template <class OBJECT>
 	void addStateTransition(
 				toolbox::fsm::State from,
-				toolbox::fsm::State to, 
-				const std::string& input, 
-				const std::string& transitionName, 
-				OBJECT * obj, 
+				toolbox::fsm::State to,
+				const std::string& input,
+				const std::string& transitionName,
+				OBJECT * obj,
 				void (OBJECT::*func)(toolbox::Event::Reference) )
-		throw (toolbox::fsm::exception::Exception)
+
 	{
 		stateTransitionNameTable_[from][input] = transitionName;
 		toolbox::fsm::FiniteStateMachine::addStateTransition(from, to, input, obj, func);
@@ -38,32 +38,32 @@ public:
 				const std::string &transitionParameter,
 				OBJECT * obj,
 				void (OBJECT::*func)(toolbox::Event::Reference) )
-		throw (toolbox::fsm::exception::Exception)
+
 	{
 		stateTransitionParameterTable_[from][input] = transitionParameter;
 		addStateTransition(from, to, input, transitionName, obj, func);
 	}
 
 	toolbox::fsm::State getProvenanceState     (void);
-	toolbox::fsm::State getTransitionFinalState(const std::string &transition) throw (toolbox::fsm::exception::Exception);
+	toolbox::fsm::State getTransitionFinalState(const std::string &transition) ;
 
 	std::string getProvenanceStateName     (void);
 	std::string getCurrentStateName        (void);
     time_t 		getTimeInState (void);
-	std::string getCurrentTransitionName   (const std::string &transition) throw (toolbox::fsm::exception::Exception);
-	std::string getTransitionName   	   (const toolbox::fsm::State from, const std::string &transition) throw (toolbox::fsm::exception::Exception);
-	std::string getTransitionParameter 	   (const toolbox::fsm::State from, const std::string &transition) throw (toolbox::fsm::exception::Exception);
-	std::string getTransitionFinalStateName(const std::string &transition) throw (toolbox::fsm::exception::Exception);
+	std::string getCurrentTransitionName   (const std::string &transition) ;
+	std::string getTransitionName   	   (const toolbox::fsm::State from, const std::string &transition) ;
+	std::string getTransitionParameter 	   (const toolbox::fsm::State from, const std::string &transition) ;
+	std::string getTransitionFinalStateName(const std::string &transition) ;
 	const std::string &getErrorMessage() const;
 
 	const xoap::MessageReference& getCurrentMessage(void);
 
-	bool execTransition (const std::string &transition) throw (toolbox::fsm::exception::Exception);
-	bool execTransition (const std::string &transition, const xoap::MessageReference& message) throw (toolbox::fsm::exception::Exception);
+	bool execTransition (const std::string &transition) ;
+	bool execTransition (const std::string &transition, const xoap::MessageReference& message) ;
 	bool isInTransition (void);
     void setInitialState(toolbox::fsm::State state);
     void setErrorMessage(const std::string &errMessage);
-	
+
 protected:
 
     time_t 				stateEntranceTime_;

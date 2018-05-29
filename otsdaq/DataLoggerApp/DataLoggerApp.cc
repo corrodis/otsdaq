@@ -1,6 +1,6 @@
 #include "otsdaq/DataLoggerApp/DataLoggerApp.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
 #include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
@@ -32,7 +32,7 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(DataLoggerApp)
 
 //========================================================================================================================
-DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub * s) throw (xdaq::exception::Exception)
+DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub * s) 
 : xdaq::Application           (s)
 , SOAPMessenger               (this)
 , stateMachineWorkLoopManager_(toolbox::task::bind(this, &DataLoggerApp::stateMachineThread, "StateMachine"))
@@ -120,7 +120,7 @@ void DataLoggerApp::destroy(void)
 }
 
 //========================================================================================================================
-void DataLoggerApp::Default(xgi::Input * in, xgi::Output * out ) throw (xgi::exception::Exception)
+void DataLoggerApp::Default(xgi::Input * in, xgi::Output * out )
 {
     
     *out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='/WebPath/html/DataLoggerApp.html?urn=" <<
@@ -128,15 +128,15 @@ void DataLoggerApp::Default(xgi::Input * in, xgi::Output * out ) throw (xgi::exc
 }
 
 //========================================================================================================================
-void DataLoggerApp::stateMachineXgiHandler(xgi::Input * in, xgi::Output * out ) throw (xgi::exception::Exception)
+void DataLoggerApp::stateMachineXgiHandler(xgi::Input * in, xgi::Output * out )
 {}
 
 //========================================================================================================================
-void DataLoggerApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out ) throw (xgi::exception::Exception)
+void DataLoggerApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out ) 
 {}
 
 //========================================================================================================================
-xoap::MessageReference DataLoggerApp::stateMachineXoapHandler(xoap::MessageReference message ) throw (xoap::exception::Exception)
+xoap::MessageReference DataLoggerApp::stateMachineXoapHandler(xoap::MessageReference message )
 {
     std::cout << __COUT_HDR_FL__ << "Soap Handler!" << std::endl;
     stateMachineWorkLoopManager_.removeProcessedRequests();
@@ -146,7 +146,7 @@ xoap::MessageReference DataLoggerApp::stateMachineXoapHandler(xoap::MessageRefer
 }
 
 //========================================================================================================================
-xoap::MessageReference DataLoggerApp::stateMachineResultXoapHandler(xoap::MessageReference message ) throw (xoap::exception::Exception)
+xoap::MessageReference DataLoggerApp::stateMachineResultXoapHandler(xoap::MessageReference message )
 {
     std::cout << __COUT_HDR_FL__ << "Soap Handler!" << std::endl;
     //stateMachineWorkLoopManager_.removeProcessedRequests();
@@ -169,7 +169,7 @@ bool DataLoggerApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 }
 
 //========================================================================================================================
-xoap::MessageReference DataLoggerApp::stateMachineStateRequest(xoap::MessageReference message) throw (xoap::exception::Exception)
+xoap::MessageReference DataLoggerApp::stateMachineStateRequest(xoap::MessageReference message) 
 {
     std::cout << __COUT_HDR_FL__ << theStateMachine_.getCurrentStateName() << std::endl;
     return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getCurrentStateName());
@@ -177,7 +177,6 @@ xoap::MessageReference DataLoggerApp::stateMachineStateRequest(xoap::MessageRefe
 
 //========================================================================================================================
 xoap::MessageReference DataLoggerApp::stateMachineErrorMessageRequest(xoap::MessageReference message)
-throw (xoap::exception::Exception)
 {
 	__COUT__<< "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << std::endl;
 
@@ -187,44 +186,44 @@ throw (xoap::exception::Exception)
 }
 
 //========================================================================================================================
-void DataLoggerApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) 
 {
     
 }
 
 //========================================================================================================================
-void DataLoggerApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
 {
     
 }
 
 //========================================================================================================================
-void DataLoggerApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm)
 {
     
 }
 
 //========================================================================================================================
-void DataLoggerApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm)
 {
     
 }
 
 //========================================================================================================================
-void DataLoggerApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm)
 {
     
 }
 
 //========================================================================================================================
-void DataLoggerApp::inError (toolbox::fsm::FiniteStateMachine & fsm) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::inError (toolbox::fsm::FiniteStateMachine & fsm)
 {
     std::cout << __COUT_HDR_FL__ << "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
     //rcmsStateNotifier_.stateChanged("Error", "");
 }
 
 //========================================================================================================================
-void DataLoggerApp::enteringError (toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::enteringError (toolbox::Event::Reference e) 
 {
     std::cout << __COUT_HDR_FL__ << "Fsm current state: " << theStateMachine_.getCurrentStateName()<< std::endl;
     toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
@@ -243,7 +242,7 @@ void DataLoggerApp::enteringError (toolbox::Event::Reference e) throw (toolbox::
 #define ARTDAQ_FCL_PATH			std::string(getenv("USER_DATA")) + "/"+ "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE	"aggregator"
 //========================================================================================================================
-void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 {
 
     std::cout << __COUT_HDR_FL__ << "ARTDAQDataLogger SUPERVISOR CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
@@ -321,31 +320,31 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e) throw (to
 }
 
 //========================================================================================================================
-void DataLoggerApp::transitionHalting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionHalting(toolbox::Event::Reference e) 
 {
   //    theDataLoggerInterface_->shutdown(0);
 }
 
 //========================================================================================================================
-void DataLoggerApp::transitionInitializing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionInitializing(toolbox::Event::Reference e) 
 {
     
 }
 
 //========================================================================================================================
-void DataLoggerApp::transitionPausing(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionPausing(toolbox::Event::Reference e) 
 {
     theDataLoggerInterface_->pause(0, 0);
 }
 
 //========================================================================================================================
-void DataLoggerApp::transitionResuming(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionResuming(toolbox::Event::Reference e) 
 {
     theDataLoggerInterface_->resume(0, 0);
 }
 
 //========================================================================================================================
-void DataLoggerApp::transitionStarting(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionStarting(toolbox::Event::Reference e) 
 {
   auto runnumber= SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber");
   try {
@@ -360,7 +359,7 @@ void DataLoggerApp::transitionStarting(toolbox::Event::Reference e) throw (toolb
 }
 
 //========================================================================================================================
-void DataLoggerApp::transitionStopping(toolbox::Event::Reference e) throw (toolbox::fsm::exception::Exception)
+void DataLoggerApp::transitionStopping(toolbox::Event::Reference e) 
 {
     theDataLoggerInterface_->stop(0,0);
     theDataLoggerInterface_->shutdown(0);

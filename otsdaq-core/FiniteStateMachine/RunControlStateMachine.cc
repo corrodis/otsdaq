@@ -1,6 +1,6 @@
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
 #include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
 
@@ -9,6 +9,10 @@
 #include <xdaq/NamespaceURI.h>
 
 #include <iostream>
+
+#undef 	__MF_SUBJECT__
+#define __MF_SUBJECT__ std::string("FSM-") + stateMachineName_
+
 
 using namespace ots;
 
@@ -94,7 +98,7 @@ void RunControlStateMachine::reset(void)
 //========================================================================================================================
 xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 		xoap::MessageReference message)
-throw (xoap::exception::Exception)
+
 {
 	__COUT__ << "Starting state for " << stateMachineName_ << " is " <<
 			theStateMachine_.getCurrentStateName() << std::endl;

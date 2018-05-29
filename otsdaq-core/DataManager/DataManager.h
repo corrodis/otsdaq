@@ -2,7 +2,7 @@
 #define _ots_DataManager_h_
 
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
 #include "otsdaq-core/DataManager/CircularBuffer.h"
 #include "otsdaq-core/Configurable/Configurable.h"
@@ -19,6 +19,8 @@ class DataProducer;
 class DataConsumer;
 class CircularBufferBase;
 
+//DataManager
+//	This class is the base class that handles a collection of Buffers and associated Data Processor plugins.
 class DataManager: public VStateMachine, public Configurable
 {
 public:

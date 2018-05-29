@@ -11,8 +11,10 @@ cet_make(LIBRARY_NAME GatewaySupervisor
          CoreSupervisors
          NetworkUtilities
          #DetectorWriter
+		 artdaq_ExternalComms
 		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
 		 otsdaq-core_ConfigurationPluginDataFormats_IterateConfiguration_configuration
+		 otsdaq-core_ConfigurationPluginDataFormats_DesktopIconConfiguration_configuration
 )
 
 

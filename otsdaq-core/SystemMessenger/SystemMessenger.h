@@ -2,7 +2,7 @@
 #define _ots_Utilities_SystemMessenger_h
 
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <string>
 #include <vector>

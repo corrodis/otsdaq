@@ -1,5 +1,5 @@
 #include "otsdaq-core/NetworkUtilities/TCPDataStreamerBase.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <iostream>
 

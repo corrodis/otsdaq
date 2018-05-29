@@ -339,16 +339,6 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 			appChild.second.getNode(colApplication_.colClass_).getValue(contexts_.back().applications_.back().class_);
 			appChild.second.getNode(colApplication_.colId_).getValue(contexts_.back().applications_.back().id_);
 
-			//assert NO app id repeats
-			if(appIdSet.find(contexts_.back().applications_.back().id_) != appIdSet.end())
-			{
-				__SS__ << "XDAQ Application IDs are not unique. Specifically at id=" <<
-						contexts_.back().applications_.back().id_ << " appName=" <<
-						contexts_.back().applications_.back().applicationUID_ << std::endl;
-				__COUT_ERR__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
-			}
-
 			//assert Gateway is 200
 			if((contexts_.back().applications_.back().id_ == 200 &&
 					contexts_.back().applications_.back().class_ != XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS &&
@@ -364,7 +354,20 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 				__SS_THROW__;
 			}
 
-			appIdSet.insert(contexts_.back().applications_.back().id_);
+			//assert NO app id repeats if context/app enabled
+			if(contexts_.back().status_ && contexts_.back().applications_.back().status_)
+			{
+				//assert NO app id repeats
+				if(appIdSet.find(contexts_.back().applications_.back().id_) != appIdSet.end())
+				{
+					__SS__ << "XDAQ Application IDs are not unique. Specifically at id=" <<
+							contexts_.back().applications_.back().id_ << " appName=" <<
+							contexts_.back().applications_.back().applicationUID_ << std::endl;
+					__COUT_ERR__ << "\n" << ss.str();
+					throw std::runtime_error(ss.str());
+				}
+				appIdSet.insert(contexts_.back().applications_.back().id_);
+			}
 
 			//convert defaults to values
 			if (appChild.second.getNode(colApplication_.colInstance_).isDefaultValue())
@@ -764,7 +767,7 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 			for (XDAQApplicationProperty &appProperty : app.properties_)
 			{
 
-				if (appProperty.type_ == "ots-only Property") continue; //skip otsProperty values
+				if (appProperty.type_ == "ots::SupervisorProperty") continue; //skip ots Property values
 
 				if (!appProperty.status_)
 					out << "\t\t\t\t<!--\n";
@@ -822,13 +825,20 @@ std::string XDAQContextConfiguration::getContextUID(const std::string &url) cons
 //========================================================================================================================
 std::string XDAQContextConfiguration::getApplicationUID(const std::string &url, unsigned int id) const
 {
+	//__COUTV__(url); __COUTV__(id);
 	for (auto context : contexts_)
 	{
+
+		//__COUT__ << "Checking " << (context.address_ + ":" + std::to_string(context.port_)) << __E__;
+		//__COUTV__(context.status_);
+
 		if (!context.status_) continue;
 
+		//__COUT__ << "Checking " << (context.address_ + ":" + std::to_string(context.port_)) << __E__;
 		if (url == context.address_ + ":" + std::to_string(context.port_))
 			for (auto application : context.applications_)
 			{
+				//__COUTV__(application.status_);	__COUTV__(application.id_);
 				if (!application.status_) continue;
 
 				if (application.id_ == id)

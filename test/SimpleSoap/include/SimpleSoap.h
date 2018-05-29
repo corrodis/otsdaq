@@ -5,6 +5,7 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
+#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 #include "xgi/Method.h"
 
 #include <toolbox/fsm/FiniteStateMachine.h>
@@ -35,12 +36,12 @@ public:
 
     XDAQ_INSTANTIATOR();
 
-    SimpleSoap             (xdaq::ApplicationStub * s   )                             throw (xdaq::exception::Exception);
-    void                   Default                (xgi::Input            * in, xgi::Output           * out ) throw (xgi::exception::Exception );
-    void                   StateMachineXgiHandler (xgi::Input            * in, xgi::Output           * out ) throw (xgi::exception::Exception );
+    SimpleSoap             (xdaq::ApplicationStub * s   )                             ;
+    void                   Default                (xgi::Input            * in, xgi::Output           * out ) ;
+    void                   StateMachineXgiHandler (xgi::Input            * in, xgi::Output           * out ) ;
     xoap::MessageReference Start                  (xoap::MessageReference msg);
-    void                   stateInitial (toolbox::fsm::FiniteStateMachine & fsm) throw (toolbox::fsm::exception::Exception);
-    void                   stateHalted  (toolbox::fsm::FiniteStateMachine & fsm) throw (toolbox::fsm::exception::Exception);
+    void                   stateInitial (toolbox::fsm::FiniteStateMachine & fsm) ;
+    void                   stateHalted  (toolbox::fsm::FiniteStateMachine & fsm) ;
 private:
     toolbox::fsm::FiniteStateMachine fsm_;
     xdata::String state_; // used to reflect the current state to the outside world

@@ -2,7 +2,7 @@
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
 #include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 //#include "otsdaq-core/DataTypes/DataStructs.h"
 
 #include <xoap/Method.h>
@@ -95,7 +95,7 @@ std::string SOAPMessenger::receive(const xoap::MessageReference& message, SOAPPa
 //
 std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
 		xoap::MessageReference message)
-throw (xdaq::exception::Exception)
+
 {
 	return receive(sendWithSOAPReply(ind,message));
 }
@@ -136,7 +136,7 @@ throw (xdaq::exception::Exception)
 
 //========================================================================================================================
 std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, SOAPCommand soapCommand)
-throw (xdaq::exception::Exception)
+
 {
 	if(soapCommand.hasParameters())
 		return send(d, soapCommand.getCommand(), soapCommand.getParameters());
@@ -146,7 +146,7 @@ throw (xdaq::exception::Exception)
 
 //========================================================================================================================
 std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string command)
-throw (xdaq::exception::Exception)
+
 {
 	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(command);
 	return send(d, message);
@@ -155,7 +155,7 @@ throw (xdaq::exception::Exception)
 //========================================================================================================================
 std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind, std::string cmd,
 		SOAPParameters parameters)
-throw (xdaq::exception::Exception)
+
 {
 	return receive(sendWithSOAPReply(ind,cmd,parameters));
 }
@@ -202,7 +202,7 @@ throw (xdaq::exception::Exception)
 //========================================================================================================================
 xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
 		std::string cmd)
-throw (xdaq::exception::Exception)
+
 {
 	return sendWithSOAPReply(ind, SOAPUtilities::makeSOAPMessageReference(cmd));
 }
@@ -243,7 +243,7 @@ throw (xdaq::exception::Exception)
 //========================================================================================================================
 xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::ApplicationDescriptor *ind,
 		xoap::MessageReference message)
-throw (xdaq::exception::Exception)
+
 {
 	//const_cast away the const
 	//	so that this line is compatible with slf6 and slf7 versions of xdaq
@@ -280,7 +280,7 @@ throw (xdaq::exception::Exception)
 //========================================================================================================================
 xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
 		std::string cmd, SOAPParameters parameters)
-throw (xdaq::exception::Exception)
+
 {
 	return sendWithSOAPReply(ind, SOAPUtilities::makeSOAPMessageReference(cmd, parameters));
 }
@@ -311,7 +311,7 @@ throw (xdaq::exception::Exception)
 
 //========================================================================================================================
 /*
-std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string cmd, std::string filepath) throw (xdaq::exception::Exception)
+std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string cmd, std::string filepath) 
 {
 
     try
@@ -348,7 +348,7 @@ std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, 
 //========================================================================================================================
 std::string SOAPMessenger::sendStatus(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
 		std::string message)
-throw (xdaq::exception::Exception)
+
 {
 	//const_cast away the const
 	//	so that this line is compatible with slf6 and slf7 versions of xdaq

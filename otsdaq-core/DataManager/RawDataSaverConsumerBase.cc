@@ -1,6 +1,6 @@
 #include "otsdaq-core/DataManager/RawDataSaverConsumerBase.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-//#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+//#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <iostream>
 #include <cassert>
@@ -13,7 +13,9 @@ using namespace ots;
 
 
 //========================================================================================================================
-RawDataSaverConsumerBase::RawDataSaverConsumerBase(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
+RawDataSaverConsumerBase::RawDataSaverConsumerBase(std::string supervisorApplicationUID, std::string bufferUID, 
+												   std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, 
+												   const std::string& configurationPath)
 : WorkLoop            (processorUID)
 , DataConsumer        (supervisorApplicationUID, bufferUID, processorUID, HighConsumerPriority)
 , Configurable        (theXDAQContextConfigTree, configurationPath)
@@ -148,7 +150,8 @@ void RawDataSaverConsumerBase::save(const std::string& data)
 //========================================================================================================================
 bool RawDataSaverConsumerBase::workLoopThread(toolbox::task::WorkLoop* workLoop)
 {
-	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << DataProcessor::processorUID_ << " running, because workloop: " << WorkLoop::continueWorkLoop_ << std::endl;
+	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << DataProcessor::processorUID_ << " running, because workloop: " 
+	//<< WorkLoop::continueWorkLoop_ << std::endl;
 	fastRead();
 	return WorkLoop::continueWorkLoop_;
 }

@@ -1,6 +1,6 @@
 #include "otsdaq-core/NetworkUtilities/TransceiverSocket.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <iostream>
 

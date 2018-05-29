@@ -77,7 +77,7 @@ public:
   	static const std::string DATATYPE_TIME_DEFAULT		;
   	static const std::string DATATYPE_LINK_DEFAULT		;
 
-  	static const std::string COL_NAME_STATUS;
+  	static const std::string COL_NAME_STATUS, COL_NAME_PRIORITY;
 
 private:
   	ViewColumnInfo(); //private constructor, only used in assignment operator

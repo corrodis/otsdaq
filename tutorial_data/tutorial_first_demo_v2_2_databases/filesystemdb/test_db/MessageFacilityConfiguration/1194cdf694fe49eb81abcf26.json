@@ -1,0 +1,144 @@
+{
+"document" : {
+"data" : {
+"NAME" : "MESSAGE_FACILITY_CONFIGURATION",
+"COMMENT" : "default MF for web console",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1505250252,
+"COL_TYPES" : {
+"UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"ENABLE_UDP_FORWARDING" : "VARCHAR2",
+"FORWARD_TO_WEB_CONSOLE_GUI" : "VARCHAR2",
+"WEB_CONSOLE_FORWARDING_IP_ADDRESS" : "VARCHAR2",
+"WEB_CONSOLE_FORWARDING_PORT0" : "NUMBER",
+"WEB_CONSOLE_FORWARDING_PORT1" : "NUMBER",
+"FORWARD_TO_QT_VIEWER_GUI" : "VARCHAR2",
+"QT_VIEWER_FORWARDING_IP_ADDRESS" : "VARCHAR2",
+"QT_VIEWER_FORWARDING_PORT" : "NUMBER",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"UID" : "MF_Entry",
+"STATUS" : "On",
+"ENABLE_UDP_FORWARDING" : "True",
+"FORWARD_TO_WEB_CONSOLE_GUI" : "Yes",
+"WEB_CONSOLE_FORWARDING_IP_ADDRESS" : "127.0.0.1",
+"WEB_CONSOLE_FORWARDING_PORT0" : "30000",
+"WEB_CONSOLE_FORWARDING_PORT1" : "30001",
+"FORWARD_TO_QT_VIEWER_GUI" : "No",
+"QT_VIEWER_FORWARDING_IP_ADDRESS" : "127.0.0.1",
+"QT_VIEWER_FORWARDING_PORT" : "30000",
+"COMMENT_DESCRIPTION" : "",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "Tue Oct 25 14:40:33 2016 CDT"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2018-01-31T11:39:40.155-0600",
+"rawdata" : [
+
+]
+},
+"version" : "2",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2018-01-31T11:39:40.159-0600"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "2018-01-31T11:39:40.157-0600"
+},
+{
+"name" : "testContext_v2",
+"assigned" : "2018-01-31T11:39:40.507-0600"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "2018-01-31T11:39:40.157-0600",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2018-01-31T11:39:40.157-0600"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2018-01-31T11:39:40.157-0600",
+"value" : {
+"name" : "2",
+"assigned" : "2018-01-31T11:39:40.158-0600"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2018-01-31T11:39:40.158-0600",
+"value" : {
+"name" : "MessageFacilityConfiguration",
+"assigned" : "2018-01-31T11:39:40.158-0600"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2018-01-31T11:39:40.159-0600",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2018-01-31T11:39:40.159-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2018-01-31T11:39:40.507-0600",
+"value" : {
+"name" : "testContext_v2",
+"assigned" : "2018-01-31T11:39:40.507-0600"
+}
+}
+],
+"created" : "2018-01-31T11:39:40.155-0600"
+},
+"_id" : {
+"$oid" : "1194cdf694fe49eb81abcf26"
+},
+"collection" : "MessageFacilityConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}
