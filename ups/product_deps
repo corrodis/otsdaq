@@ -1,6 +1,6 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent otsdaq	v2_00_01
+parent otsdaq	v2_01_00
 defaultqual	e15:s64
 
 # These optional lines define the installed directories where
