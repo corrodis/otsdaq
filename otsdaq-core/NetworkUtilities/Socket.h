@@ -17,7 +17,7 @@ public:
     virtual void 				initialize(unsigned int socketReceiveBufferSize = defaultSocketReceiveSize_);
     const struct sockaddr_in& 	getSocketAddress(void);
     const std::string&			getIPAddress() { return IPAddress_; }
-    uint16_t 						getPort();
+    uint16_t 					getPort();
 
 protected:
 	enum{maxSocketSize_ = 65536, defaultSocketReceiveSize_ = 0x10000};

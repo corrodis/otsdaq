@@ -62,7 +62,7 @@ Socket::Socket(const std::string &IPAddress, unsigned int port)
 
     memset(&(socketAddress_.sin_zero), '\0', 8);// zero the rest of the struct
 
-    __COUT__ << "Constructed socket for port " << ntohs(socketAddress_.sin_port) <<
+    __COUT__ << "Constructed socket for port " << ntohs(socketAddress_.sin_port) << "=" << getPort() <<
     		" htons: " <<  socketAddress_.sin_port << std::endl;
 
 }
@@ -187,10 +187,14 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
 
 uint16_t Socket::getPort()
 {
-	struct sockaddr_in sin;
-	socklen_t len = sizeof(sin);
-	getsockname(socketNumber_, (struct sockaddr *)&sin, &len);
-	return ntohs(sin.sin_port);
+
+	return ntohs(socketAddress_.sin_port);
+
+//	//else extract from socket
+//	struct sockaddr_in sin;
+//	socklen_t len = sizeof(sin);
+//	getsockname(socketNumber_, (struct sockaddr *)&sin, &len);
+//	return ntohs(sin.sin_port);
 }
 
 //========================================================================================================================
