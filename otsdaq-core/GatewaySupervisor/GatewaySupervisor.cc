@@ -1656,7 +1656,7 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 			proceed = false;
 		}
 
-		if (reply != command + "Done")
+		if ((reply != command + "Done") && (reply != command + "Response") )
 		{
 			__SUP_SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
 				appInfo.getName() << "' [LID=" <<

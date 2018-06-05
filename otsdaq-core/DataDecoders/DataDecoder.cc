@@ -54,15 +54,9 @@ bool DataDecoder::isBCOLow(uint32_t data)
 }
 
 //========================================================================================================================
-bool DataDecoder::isTriggerLow(uint32_t data)
+bool DataDecoder::isTrigger(uint32_t data)
 {
-	return triggerDataDecoder_.isTriggerLow(data);
-}
-
-//========================================================================================================================
-bool DataDecoder::isTriggerHigh(uint32_t data)
-{
-	return triggerDataDecoder_.isTriggerHigh(data);
+	return triggerDataDecoder_.isTrigger(data);
 }
 
 //========================================================================================================================
@@ -96,9 +90,9 @@ uint64_t DataDecoder::mergeBCOHighAndLow(uint32_t dataBCOHigh, uint32_t dataBCOL
 }
 
 //========================================================================================================================
-uint64_t DataDecoder::mergeTriggerHighAndLow(uint32_t dataTriggerHigh, uint32_t dataTriggerLow)
+uint32_t DataDecoder::decodeTrigger(uint32_t data)
 {
-	return triggerDataDecoder_.mergeTriggerHighAndLow(triggerDataDecoder_.decodeTriggerHigh(dataTriggerHigh),triggerDataDecoder_.decodeTriggerLow(dataTriggerLow));
+	return triggerDataDecoder_.decodeTrigger(data);
 }
 
 //========================================================================================================================
