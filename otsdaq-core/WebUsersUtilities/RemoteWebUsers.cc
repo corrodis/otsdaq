@@ -102,7 +102,7 @@ bool RemoteWebUsers::xmlRequestToGateway(
 		const AllSupervisorInfo& 		allSupervisorInfo,
 		WebUsers::RequestUserInfo&		userInfo	)
 {
-
+	//__COUT__ << std::endl;
 	//initialize user info parameters to failed results
 	WebUsers::initializeRequestUserInfo(cgi,userInfo);
 
@@ -123,7 +123,7 @@ bool RemoteWebUsers::xmlRequestToGateway(
 
 	//	__COUT__ << cookieCode.length() << std::endl;
 	//	__COUT__ << "cookieCode=" << cookieCode << std::endl;
-	//	__COUT__ << std::endl;
+	//__COUT__ << std::endl;
 
 	/////////////////////////////////////////////////////
 	//have CookieCode, try it out
@@ -134,7 +134,7 @@ bool RemoteWebUsers::xmlRequestToGateway(
 		//__COUT__ << "sequence=" << sequence << std::endl;
 		if(!sequence.length())
 		{
-			__COUT__ << "Invalid attempt (@" << userInfo.ip_ << ")." << std::endl;
+			__COUT_ERR__ << "Invalid access attempt (@" << userInfo.ip_ << ")." << std::endl;
 			*out << WebUsers::REQ_NO_LOGIN_RESPONSE;
 			//invalid cookie and also invalid sequence
 			goto HANDLE_ACCESS_FAILURE; //return false, access failed
@@ -213,6 +213,8 @@ bool RemoteWebUsers::xmlRequestToGateway(
 	parameters.addParameter("DisplayName");
 	parameters.addParameter("ActiveSessionIndex");
 	receive(retMsg, parameters);
+
+	//__COUT__ << std::endl;
 
 	//first extract a few things always from parameters
 	//	like permissionLevel for this request... must consider allowed groups!!

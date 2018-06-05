@@ -399,7 +399,6 @@ void WebUsers::initializeRequestUserInfo(
 		cgicc::Cgicc& cgi,
 		WebUsers::RequestUserInfo&	userInfo)
 {
-	userInfo.permissionLevel_ = 0; //always init to inactive
 	userInfo.ip_ = cgi.getEnvironment().getRemoteAddr();
 
 	//note if related bools are false, members below may not be set
@@ -407,7 +406,7 @@ void WebUsers::initializeRequestUserInfo(
 	userInfo.displayName_ = "";
 	userInfo.usernameWithLock_ = "";
 	userInfo.activeUserSessionIndex_ = -1;
-	userInfo.setGroupPermissionLevels("");
+	userInfo.setGroupPermissionLevels(""); //always init to inactive
 }
 
 //========================================================================================================================
@@ -476,7 +475,14 @@ bool WebUsers::checkRequestAccess(
 			xmldoc->setHeader(userInfo.cookieCode_);
 	}
 
-	if(userInfo.allowNoUser_) return true; //ignore lock for allow-no-user case
+	if(userInfo.allowNoUser_)
+	{
+
+		if(userInfo.automatedCommand_)
+			__COUT__ << "Allowing anonymous access." << __E__;
+
+		return true; //ignore lock for allow-no-user case
+	}
 
 
 //	if(!userInfo.automatedCommand_)

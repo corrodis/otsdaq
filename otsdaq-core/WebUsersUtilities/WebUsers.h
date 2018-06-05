@@ -86,13 +86,15 @@ public:
     	//setGroupPermissionLevels
     	bool							setGroupPermissionLevels(const std::string& groupPermissionLevelsString)
     	{
+    		//__COUTV__(groupPermissionLevelsString);
     		permissionLevel_ = 0; //default to inactive, i.e. no access
-    		if(allowNoUser_) return false; //not set
 
 			StringMacros::getMapFromString( //re-factor membership string to set
 					groupPermissionLevelsString,
 					groupPermissionLevelMap_);
 			getGroupPermissionLevel(); //setup permissionLevel_
+
+    		//__COUTV__((unsigned int)permissionLevel_);
 			return true; //was fully setup
     	} //end setGroupPermissionLevels()
 
@@ -125,8 +127,6 @@ public:
     		//if no group match in groups allowed, then failed
     		if(!matchedAcceptGroup && groupsAllowed_.size())
     		{
-    			//	*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-
     			__COUT_INFO__ << "User (@" << ip_ << ") has insufficient group permissions: user is in these groups... " <<
     					StringMacros::mapToString(groupPermissionLevelMap_) << " and the allowed groups are... " <<
 						StringMacros::setToString(groupsAllowed_) << std::endl;
@@ -141,8 +141,6 @@ public:
     						userGroupPair.first,
 							groupsDisallowed_))
     				{
-    					//*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-
     					__COUT_INFO__ << "User (@" << ip_ << ") is in a disallowed group: user is in these groups... " <<
     							StringMacros::mapToString(groupPermissionLevelMap_) << " and the disallowed groups are... " <<
 								StringMacros::setToString(groupsDisallowed_) << std::endl;
