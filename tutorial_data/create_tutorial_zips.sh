@@ -5,7 +5,7 @@
 #	After this script, there is still the remaining work of updating the links in the html pages of the live tutorial being updated.
 #
 # usage: --tutorial <tutorial name> --version <version string> --repo <path to repo area> --data <path to user data> --database <path to database>
-#
+# 
 #   tutorial 
 #		e.g. ${TUTORIAL} or artdaq
 #   version 
@@ -21,6 +21,7 @@
 #  example run:
 #	./create_tutorial_zips.sh --tutorial first_demo --version v2_2 --repo /home/rrivera/ots/srcs/otsdaq/tutorial_data --data /home/rrivera/ots/NoGitData --database /home/rrivera/databases
 #
+# Note: for now blocking users other than rrivera.. (forcing use of defaults for paths)
 
 echo
 echo
