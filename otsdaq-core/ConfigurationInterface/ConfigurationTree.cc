@@ -1617,6 +1617,8 @@ void ConfigurationTree::recursiveGetCommonFields(
 //getChildren
 //	returns them in order encountered in the table
 //	if filterMap criteria, then rejects any that do not meet all criteria
+//
+//	value can be comma-separated for OR of multiple values
 std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChildren(
 		std::map<std::string /*relative-path*/, std::string /*value*/> filterMap,
 		bool byPriority) const
@@ -1643,15 +1645,21 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 			for(const auto &filterPair:filterMap)
 			{
 				std::string filterPath = childName + "/" + filterPair.first;
+				__COUTV__(filterPath);
 				try
 				{
 
 					//extract field value list
-					std::istringstream f(filterPair.second);
+					std::vector<std::string> fieldValues;
+					StringMacros::getVectorFromString(filterPair.second,
+							fieldValues,
+							std::set<char>({','})/*delimiters*/);
+
+					__COUTV__(fieldValues.size());
 
 					skip = true;
 					//for each field check if any match
-					while (getline(f, fieldValue, ','))
+					for(const auto& fieldValue:fieldValues)
 					{
 						//Note: that ConfigurationTree maps both fields associated with a link
 						//	to the same node instance.
@@ -1661,7 +1669,8 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 						//use TRUE in getValueAsString for proper behavior
 
 						__COUT__ << "\t\tCheck: " << filterPair.first <<
-								" == " << fieldValue << " ??? " <<
+								" == " << fieldValue << " => " <<
+								StringMacros::decodeURIComponent(fieldValue) << " ??? " <<
 								this->getNode(filterPath).getValueAsString(true) <<
 								std::endl;
 
@@ -1674,13 +1683,6 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 							break;
 						}
 
-//						if(this->getNode(filterPath).getValueAsString(true) ==
-//								StringMacros::decodeURIComponent(fieldValue))
-//						{
-//							//found a match for the field/value pair
-//							skip = false;
-//							break;
-//						}
 					}
 				}
 				catch(...)
@@ -1696,7 +1698,7 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 
 			if(skip) continue; //skip this record
 
-			__COUT__ << "\tChild accepted: " << childName << std::endl;
+			//__COUT__ << "\tChild accepted: " << childName << std::endl;
 		}
 
 		retVector.push_back(std::pair<std::string,ConfigurationTree>(childName,

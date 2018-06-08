@@ -176,7 +176,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 				for(auto &version:versions)
 					if(version.isTemporaryVersion())
 					{
-						__COUT__ << "copying tmp = " << version << std::endl;
+						//__COUT__ << "copying tmp = " << version << std::endl;
 
 						try //do NOT let ConfigurationView::init() throw here
 						{
@@ -206,7 +206,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 			for(auto &version:versions)
 				if(version.isTemporaryVersion())
 				{
-					__COUT__ << "surviving tmp = " << version << std::endl;
+					//__COUT__ << "surviving tmp = " << version << std::endl;
 					allConfigurationInfo_[entry->d_name].versions_.emplace(version);
 				}
 		}
