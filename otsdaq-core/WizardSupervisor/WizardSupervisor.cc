@@ -468,9 +468,9 @@ throw (xgi::exception::Exception)
 			//",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,myFolder" <<
 			//",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/myFolder/mySub.folder" <<
 			//",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,myFolder/" <<
-			",Front-end Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&subsetBasePath=FEInterfaceConfiguration&recordAlias=Front%2Dend,Config Wizards" <<
-			",Producer Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&subsetBasePath=FEInterfaceConfiguration&recordAlias=Producer,Config Wizards" <<
-			",Consumer Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&subsetBasePath=FEInterfaceConfiguration&recordAlias=Consumer,Config Wizards" <<
+			",Front-end Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Front%2Dend,Config Wizards" <<
+			",Processor Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Processor,Config Wizards" <<
+			//",Consumer Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&subsetBasePath=FEInterfaceConfiguration&recordAlias=Consumer,Config Wizards" <<
 			",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" <<
 			//",DB Utilities,DB,1,1,0,http://127.0.0.1:8080/db/client.html" <<
 			"";
