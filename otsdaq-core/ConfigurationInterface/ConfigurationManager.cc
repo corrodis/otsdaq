@@ -886,6 +886,12 @@ void ConfigurationManager::loadConfigurationGroup(
 			__SS__ << "Ignoring that groupMetadataTable_ has wrong number of rows! Must be 1. Going with anonymous defaults." << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
 
+			//fix metadata table
+			while(groupMetadataTable_.getViewP()->getNumberOfRows() > 1)
+				groupMetadataTable_.getViewP()->deleteRow(0);
+			if(groupMetadataTable_.getViewP()->getNumberOfRows() == 0)
+				groupMetadataTable_.getViewP()->addRow();
+
 			if(groupComment) *groupComment = "NO COMMENT FOUND";
 			if(groupAuthor) *groupAuthor = "NO AUTHOR FOUND";
 			if(groupCreateTime) *groupCreateTime = "0";

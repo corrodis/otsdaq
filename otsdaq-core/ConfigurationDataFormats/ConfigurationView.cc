@@ -8,7 +8,7 @@
 using namespace ots;
 
 #undef 	__MF_SUBJECT__
-#define __MF_SUBJECT__ "ConfigurationView"
+#define __MF_SUBJECT__ "ConfigurationView-" + tableName_
 #undef 	__COUT_HDR__
 #define __COUT_HDR__		tableName_ << ":v" << version_ << ":" << __COUT_HDR_FL__
 
