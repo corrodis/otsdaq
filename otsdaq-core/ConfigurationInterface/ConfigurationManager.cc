@@ -876,14 +876,14 @@ void ConfigurationManager::loadConfigurationGroup(
 		}
 		catch(...)
 		{
-			__COUT_WARN__ << "Ignoring unnkown metadata error. " << __E__;
+			__COUT_WARN__ << "Ignoring unknown metadata error. " << __E__;
 		}
 
 		//check that there is only 1 row
 		if(groupMetadataTable_.getView().getNumberOfRows() != 1)
 		{
 			groupMetadataTable_.print();
-			__SS__ << "groupMetadataTable_ has wrong number of rows! Must be 1." << std::endl;
+			__SS__ << "Ignoring that groupMetadataTable_ has wrong number of rows! Must be 1. Going with anonymous defaults." << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
 
 			if(groupComment) *groupComment = "NO COMMENT FOUND";
