@@ -268,12 +268,14 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 	{
 		__SS__ << "A fatal error occurred reading the info for all configuration groups. Error: " <<
 				e.what() << __E__;
+		__COUT_ERR__ << "\n" << ss.str();
 		if(accumulatedErrors) *accumulatedErrors += ss.str();
 		else throw;
 	}
 	catch(...)
 	{
 		__SS__ << "An unknown fatal error occurred reading the info for all configuration groups." << __E__;
+		__COUT_ERR__ << "\n" << ss.str();
 		if(accumulatedErrors) *accumulatedErrors += ss.str();
 		else throw;
 	}
