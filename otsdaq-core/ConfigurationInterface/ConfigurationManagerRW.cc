@@ -221,7 +221,10 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 
 
 	//get Group Info too!
+	try
 	{
+		//build allGroupInfo_ for the ConfigurationManagerRW
+
 		std::set<std::string /*name*/>  configGroups = theInterface_->getAllConfigurationGroupNames();
 		__COUT__ << "Number of Groups: " << configGroups.size() << std::endl;
 
@@ -261,8 +264,22 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 			}
 		} //end group info loop
 	} //end get group info
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "A fatal error occurred reading the info for all configuration groups. Error: " <<
+				e.what() << __E__;
+		if(accumulatedErrors) *accumulatedErrors += ss.str();
+		else throw;
+	}
+	catch(...)
+	{
+		__SS__ << "An unknown fatal error occurred reading the info for all configuration groups." << __E__;
+		if(accumulatedErrors) *accumulatedErrors += ss.str();
+		else throw;
+	}
+
 	return allConfigurationInfo_;
-}
+} //end getAllConfigurationInfo
 
 //==============================================================================
 //getActiveAliases()
