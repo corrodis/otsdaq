@@ -10,8 +10,8 @@ using namespace ots;
 
 #undef 	__MF_SUBJECT__
 #define __MF_SUBJECT__ "ConfigurationBase"
-#undef 	__MF_HDR__
-#define __MF_HDR__		__COUT_HDR_FL__ << getConfigurationName() << ": "
+#undef 	__COUT_HDR__
+#define __COUT_HDR__		__COUT_HDR_FL__ << getConfigurationName() << ": "
 
 
 //==============================================================================

@@ -226,13 +226,13 @@ throw(std::runtime_error) try
 }
 catch (std::exception const& e)
 {
-	__SS__ << "DBI Exception:" << e.what() << "\n";
+	__SS__ << "Filter string '" << filterString << "' yielded DBI Exception:" << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
 	throw std::runtime_error(ss.str());
 }
 catch (...)
 {
-	__SS__ << "DBI Unknown exception.\n";
+	__SS__ << "Filter string '" << filterString << "' yielded DBI Unknown exception.\n";
 	__COUT_ERR__ << ss.str();
 	throw std::runtime_error(ss.str());
 }
