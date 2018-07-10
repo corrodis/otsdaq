@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+		<CONFIGURATION Name="FENIMPlusInterfaceConfiguration">
+			<VIEW Name="FENIM_PLUS_INTERFACE_CONFIGURATION" Type="File,Database,DatabaseTest" Description="DelayAndWidth%20%5Beach%20bit%20is%203ns%5D%0AOutputTimeVetoDuration%20%5Bunits%20of%203ns%5D">
+				<COLUMN Type="UID" 	 Name="InterfaceID" 	 StorageName="INTERFACE_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="FirmwareVersion" 	 StorageName="FIRMWARE_VERSION" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="InterfaceIPAddress" 	 StorageName="INTERFACE_IP_ADDRESS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="InterfacePort" 	 StorageName="INTERFACE_PORT" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="HostIPAddress" 	 StorageName="HOST_IP_ADDRESS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="HostPort" 	 StorageName="HOST_PORT" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="StreamToIPAddress" 	 StorageName="STREAM_TO_IP_ADDRESS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="StreamToPort" 	 StorageName="STREAM_TO_PORT" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="FixedChoiceData" 	 Name="LogicInputChannelA" 	 StorageName="LOGIC_INPUT_CHANNEL_A" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NIM%20Input%20CH-A%20Raw%20(Invertible),NIM%20Input%20CH-A%20Modified,True,False"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="LogicInputChannelB" 	 StorageName="LOGIC_INPUT_CHANNEL_B" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NIM%20Input%20CH-B%20Raw%20(Invertible),NIM%20Input%20CH-B%20Modified,True,False"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="LogicInputChannelC" 	 StorageName="LOGIC_INPUT_CHANNEL_C" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NIM%20Input%20CH-C%20Raw%20(Invertible),NIM%20Input%20CH-C%20Modified,True,False"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="LogicInputChannelD" 	 StorageName="LOGIC_INPUT_CHANNEL_D" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NIM%20Input%20CH-D%20Raw%20(Invertible),NIM%20Input%20CH-D%20Modified,True,False"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="TriggerInputChannel0" 	 StorageName="TRIGGER_INPUT_CHANNEL0" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,Logic%20Output"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="TriggerInputChannel1" 	 StorageName="TRIGGER_INPUT_CHANNEL1" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,Logic%20Output,Trigger%20CH-0"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="TriggerInputChannel2" 	 StorageName="TRIGGER_INPUT_CHANNEL2" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,Logic%20Output,Trigger%20CH-0"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="OutputMuxSelectChannelA" 	 StorageName="OUTPUT_MUX_SELECT_CHANNEL_A" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,Trigger%20Output%20CH-0,NIM%20Input%20CH-A%20Raw%20(Invertible),NIM%20Input%20CH-B%20Raw%20(Invertible),NIM%20Input%20CH-C%20Raw%20(Invertible),NIM%20Input%20CH-D%20Raw%20(Invertible),NIM%20Input%20CH-A%20Modified,NIM%20Input%20CH-B%20Modified,NIM%20Input%20CH-C%20Modified,NIM%20Input%20CH-D%20Modified,Logic%20Output,Ground,Trigger%20Output%20CH-1,Trigger%20Output%20CH-2,Veto%20Out%20n1,Veto%20Out%20n2,Backpressure%20Out,Backpressure%20A,Backpressure%20B,Out%20Event%20Counter,In%20Event%20Counter%201,In%20Event%20Counter%202,Burst%20Out%20Write%20Enable,40MHz%20System%20Clock,Sync%20w%2F40MHz%20Logic%20Mask,Signal%20Generator%20Output,Output%20CH-B,Output%20CH-C,Output%20CH-D,External%20Clock%20after%20DCM%20%40%2026.5,System%20Clock%20after%20DCM%20%40%2053,External%20Clock%20after%20DCM%20%40%2053,Veto%20Out%20n0"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="OutputMuxSelectChannelB" 	 StorageName="OUTPUT_MUX_SELECT_CHANNEL_B" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,Trigger%20Output%20CH-0,Trigger%20Output%20CH-1,Trigger%20Output%20CH-2,40MHz%20System%20Clock,Signal%20Generator%20Output,External%20Clock%20after%20DCM%20%40%2053,Ground,Ground"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="OutputMuxSelectChannelC" 	 StorageName="OUTPUT_MUX_SELECT_CHANNEL_C" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,Trigger%20Output%20CH-0,Trigger%20Output%20CH-1,Trigger%20Output%20CH-2,40MHz%20System%20Clock,Signal%20Generator%20Output,External%20Clock%20after%20DCM%20%40%2053,Ground,Ground"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="OutputMuxSelectChannelD" 	 StorageName="OUTPUT_MUX_SELECT_CHANNEL_D" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,Trigger%20Output%20CH-0,Trigger%20Output%20CH-1,Trigger%20Output%20CH-2,40MHz%20System%20Clock,Signal%20Generator%20Output,External%20Clock%20after%20DCM%20%40%2053,Ground,Ground"/>
+				<COLUMN Type="Data" 	 Name="CoincidenceLogicWord" 	 StorageName="COINCIDENCE_LOGIC_WORD" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-optionalParameters" 	 Name="LinkToOptionalParameters" 	 StorageName="LINK_TO_OPTIONAL_PARAMETERS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLinkUID-optionalParameters" 	 Name="LinkToOptionalParametersUID" 	 StorageName="LINK_TO_OPTIONAL_PARAMETERS_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
+			</VIEW>
+		</CONFIGURATION>
+	</ROOT>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+		<CONFIGURATION Name="FENIMPlusInterfaceOptionalConfiguration">
+			<VIEW Name="FENIM_PLUS_INTERFACE_OPTIONAL_CONFIGURATION" Type="File,Database,DatabaseTest" Description="DelayAndWidth%20%5Beach%20bit%20is%203ns%5D%0AOutputTimeVetoDuration%20%5Bunits%20of%203ns%5D%0ASignalGeneratorHighPeriod%20%5Bunits%20of%203ns%5D%0ASignalGeneratorLow%20%5Bunits%20of%203ns%5D%0ASignalGeneratorPulseCount%20%5BNumber%20of%20pulses%20to%20output%2C%200%20for%20continuous%5D%0AOverrideORWithSelectionLogicRegister%20can%20be%20used%2C%20for%20example%2C%20to%20enable%20more%20than%20one%20combinatorial%20AND-gate%20for%20the%20selection%20logic%20-%20effectively%20an%20OR%20of%20ANDs.%0ATriggerCountAtRunStopFilename%20if%20DEFAULT%20does%20not%20save%20trigger%20counts%2C%20otherwise%20if%20valid%20file%20path%20will%20save%20trigger%20counts%20at%20end%20of%20run.">
+				<COLUMN Type="UID" 	 Name="InterfaceID" 	 StorageName="INTERFACE_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="EnableExpertWebappFeatures" 	 StorageName="ENABLE_EXPERT_WEBAPP_FEATURES" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="EnableClockResetDuringConfigure" 	 StorageName="ENABLE_CLOCK_RESET_DURING_CONFIGURE" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="UseExternalClock" 	 StorageName="USE_EXTERNAL_CLOCK" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="FixedChoiceData" 	 Name="ExternalClockSource" 	 StorageName="EXTERNAL_CLOCK_SOURCE" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NW-FMC-PTA%20Clock%20Source,NIM%20Input%20CH-A%20Raw,NIM%20Input%20CH-B%20Raw,NIM%20Input%20CH-C%20Raw,NIM%20Input%20CH-D%20Raw"/>
+				<COLUMN Type="Data" 	 Name="SecondsDelayBeforeStartingTriggers" 	 StorageName="SECONDS_DELAY_BEFORE_STARTING_TRIGGERS" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="EnableDACSetupDuringConfigure" 	 StorageName="ENABLE_DAC_SETUP_DURING_CONFIGURE" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DACValueChannelA" 	 StorageName="DAC_VALUE_CHANNEL_A" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DACValueChannelB" 	 StorageName="DAC_VALUE_CHANNEL_B" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DACValueChannelC" 	 StorageName="DAC_VALUE_CHANNEL_C" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DACValueChannelD" 	 StorageName="DAC_VALUE_CHANNEL_D" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayInputChannelA" 	 StorageName="DELAY_INPUT_CHANNEL_A" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="WidthInputChannelA" 	 StorageName="WIDTH_INPUT_CHANNEL_A" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="InvertPolarityInputChannelA" 	 StorageName="INVERT_POLARITY_INPUT_CHANNEL_A" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayInputChannelB" 	 StorageName="DELAY_INPUT_CHANNEL_B" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="WidthInputChannelB" 	 StorageName="WIDTH_INPUT_CHANNEL_B" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="InvertPolarityInputChannelB" 	 StorageName="INVERT_POLARITY_INPUT_CHANNEL_B" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayInputChannelC" 	 StorageName="DELAY_INPUT_CHANNEL_C" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="WidthInputChannelC" 	 StorageName="WIDTH_INPUT_CHANNEL_C" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="InvertPolarityInputChannelC" 	 StorageName="INVERT_POLARITY_INPUT_CHANNEL_C" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayInputChannelD" 	 StorageName="DELAY_INPUT_CHANNEL_D" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="WidthInputChannelD" 	 StorageName="WIDTH_INPUT_CHANNEL_D" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="InvertPolarityInputChannelD" 	 StorageName="INVERT_POLARITY_INPUT_CHANNEL_D" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableBackPressureNwFmcPta1" 	 StorageName="ENABLE_BACK_PRESSURE_NW_FMC_PTA1" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableBackPressureNwFmcPta2" 	 StorageName="ENABLE_BACK_PRESSURE_NW_FMC_PTA2" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="40MHzClockDelay" 	 StorageName="40M_HZ_CLOCK_DELAY" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="ClockMaskSetup" 	 StorageName="CLOCK_MASK_SETUP" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="DelayTriggerOutputChannel0" 	 StorageName="DELAY_TRIGGER_OUTPUT_CHANNEL0" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="WidthTriggerOutputChannel0" 	 StorageName="WIDTH_TRIGGER_OUTPUT_CHANNEL0" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="TimeVetoTriggerOutputChannel0" 	 StorageName="TIME_VETO_TRIGGER_OUTPUT_CHANNEL0" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="PrescaleTriggerOutputChannel0" 	 StorageName="PRESCALE_TRIGGER_OUTPUT_CHANNEL0" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="BackpressureTriggerOutputChannel0" 	 StorageName="BACKPRESSURE_TRIGGER_OUTPUT_CHANNEL0" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableClockMaskTriggerOutputChannel0" 	 StorageName="ENABLE_CLOCK_MASK_TRIGGER_OUTPUT_CHANNEL0" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="FixedChoiceData" 	 Name="VetoSourceTriggerOutputChannel0" 	 StorageName="VETO_SOURCE_TRIGGER_OUTPUT_CHANNEL0" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,No-Veto,NIM%20Input%20CH-A%20Raw%20(Invertible),NIM%20Input%20CH-B%20Raw%20(Invertible),NIM%20Input%20CH-C%20Raw%20(Invertible),NIM%20Input%20CH-D%20Raw%20(Invertible)"/>
+				<COLUMN Type="Data" 	 Name="DelayTriggerOutputChannel1" 	 StorageName="DELAY_TRIGGER_OUTPUT_CHANNEL1" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="WidthTriggerOutputChannel1" 	 StorageName="WIDTH_TRIGGER_OUTPUT_CHANNEL1" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="TimeVetoTriggerOutputChannel1" 	 StorageName="TIME_VETO_TRIGGER_OUTPUT_CHANNEL1" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="PrescaleTriggerOutputChannel1" 	 StorageName="PRESCALE_TRIGGER_OUTPUT_CHANNEL1" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="BackpressureTriggerOutputChannel1" 	 StorageName="BACKPRESSURE_TRIGGER_OUTPUT_CHANNEL1" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableClockMaskTriggerOutputChannel1" 	 StorageName="ENABLE_CLOCK_MASK_TRIGGER_OUTPUT_CHANNEL1" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="FixedChoiceData" 	 Name="VetoSourceTriggerOutputChannel1" 	 StorageName="VETO_SOURCE_TRIGGER_OUTPUT_CHANNEL1" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,No-Veto,NIM%20Input%20CH-A%20Raw%20(Invertible),NIM%20Input%20CH-B%20Raw%20(Invertible),NIM%20Input%20CH-C%20Raw%20(Invertible),NIM%20Input%20CH-D%20Raw%20(Invertible)"/>
+				<COLUMN Type="Data" 	 Name="DelayTriggerOutputChannel2" 	 StorageName="DELAY_TRIGGER_OUTPUT_CHANNEL2" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="WidthTriggerOutputChannel2" 	 StorageName="WIDTH_TRIGGER_OUTPUT_CHANNEL2" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="TimeVetoTriggerOutputChannel2" 	 StorageName="TIME_VETO_TRIGGER_OUTPUT_CHANNEL2" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="PrescaleTriggerOutputChannel2" 	 StorageName="PRESCALE_TRIGGER_OUTPUT_CHANNEL2" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="BackpressureTriggerOutputChannel2" 	 StorageName="BACKPRESSURE_TRIGGER_OUTPUT_CHANNEL2" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableClockMaskTriggerOutputChannel2" 	 StorageName="ENABLE_CLOCK_MASK_TRIGGER_OUTPUT_CHANNEL2" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="FixedChoiceData" 	 Name="VetoSourceTriggerOutputChannel2" 	 StorageName="VETO_SOURCE_TRIGGER_OUTPUT_CHANNEL2" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,No-Veto,NIM%20Input%20CH-A%20Raw%20(Invertible),NIM%20Input%20CH-B%20Raw%20(Invertible),NIM%20Input%20CH-C%20Raw%20(Invertible),NIM%20Input%20CH-D%20Raw%20(Invertible)"/>
+				<COLUMN Type="YesNo" 	 Name="InvertPolarityOutputChannelA" 	 StorageName="INVERT_POLARITY_OUTPUT_CHANNEL_A" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="InvertPolarityOutputChannelB" 	 StorageName="INVERT_POLARITY_OUTPUT_CHANNEL_B" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="InvertPolarityOutputChannelC" 	 StorageName="INVERT_POLARITY_OUTPUT_CHANNEL_C" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="InvertPolarityOutputChannelD" 	 StorageName="INVERT_POLARITY_OUTPUT_CHANNEL_D" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="SignalGeneratorPulseCount" 	 StorageName="SIGNAL_GENERATOR_PULSE_COUNT" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="SignalGeneratorHighPeriod" 	 StorageName="SIGNAL_GENERATOR_HIGH_PERIOD" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="SignalGeneratorLowPeriod" 	 StorageName="SIGNAL_GENERATOR_LOW_PERIOD" 		DataType="NUMBER" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="SignalGeneratorInvertPolarity" 	 StorageName="SIGNAL_GENERATOR_INVERT_POLARITY" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="SignalGeneratorEnable" 	 StorageName="SIGNAL_GENERATOR_ENABLE" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="EnableBurstData" 	 StorageName="ENABLE_BURST_DATA" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="FixedChoiceData" 	 Name="BurstDataMuxSelect" 	 StorageName="BURST_DATA_MUX_SELECT" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,Event%20Counters,4-Channel%20Scope,Delta-Time%20Samples,Output%20Counters"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="BurstDataLogicSampleDelay" 	 StorageName="BURST_DATA_LOGIC_SAMPLE_DELAY" 		DataType="NUMBER" 		DataChoices="arbitraryBool=0"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="BurstDataGateInputChannel" 	 StorageName="BURST_DATA_GATE_INPUT_CHANNEL" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,Input%20Channel-A,Input%20Channel-B,Input%20Channel-C,Input%20Channel-D"/>
+				<COLUMN Type="Data" 	 Name="TriggerCountAtRunStopFilename" 	 StorageName="TRIGGER_COUNT_AT_RUN_STOP_FILENAME" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="BitMap" 	 Name="TriggerMuxSelectionsBankA" 	 StorageName="TRIGGER_MUX_SELECTIONS_BANK_A" 		DataType="VARCHAR2" 		DataChoices="1,9,2,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,No,Yes,No,No"/>
+				<COLUMN Type="BitMap" 	 Name="TriggerMuxSelectionsBankB" 	 StorageName="TRIGGER_MUX_SELECTIONS_BANK_B" 		DataType="VARCHAR2" 		DataChoices="1,9,2,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,No,Yes,No,No"/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
+			</VIEW>
+		</CONFIGURATION>
+	</ROOT>
