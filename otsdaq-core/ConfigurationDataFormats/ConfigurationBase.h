@@ -65,11 +65,12 @@ public:
     void 					 			setConfigurationName				(const std::string &configurationName);
     void 					 			setConfigurationDescription			(const std::string &configurationDescription);
     bool 					 			setActiveView       				(ConfigurationVersion version);
-    ConfigurationVersion				copyView  							(const ConfigurationView &sourceView, ConfigurationVersion destinationVersion, const std::string &author) throw(std::runtime_error);
+    ConfigurationVersion				copyView  							(const ConfigurationView &sourceView, ConfigurationVersion destinationVersion, const std::string &author);
+    ConfigurationVersion				mergeViews 							(const ConfigurationView &sourceViewA, const ConfigurationView &sourceViewB, ConfigurationVersion destinationVersion, const std::string &author, const std::string &mergeApproach /*rename,replace,skip*/, std::map<std::string /*original uidB*/, std::string /*converted uidB*/>& uidConversionMap, bool doNotMakeDestinationVersion);
 
     ConfigurationVersion	 			createTemporaryView					(ConfigurationVersion sourceViewVersion = ConfigurationVersion(), ConfigurationVersion destTemporaryViewVersion = ConfigurationVersion::getNextTemporaryVersion()); //source of -1, from MockUp, else from valid view version
 
-    static std::string					convertToCaps						(std::string &str, bool isConfigName=false) throw(std::runtime_error);
+    static std::string					convertToCaps						(std::string &str, bool isConfigName=false);
 
     bool 								latestAndMockupColumnNumberMismatch	(void) const;
 

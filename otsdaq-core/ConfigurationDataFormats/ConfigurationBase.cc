@@ -511,6 +511,200 @@ bool ConfigurationBase::setActiveView(ConfigurationVersion version)
 
 
 //==============================================================================
+//mergeViews
+//	merges source view A and B and places in
+//	destination temporary version.
+//	if destination version is invalid, then next available temporary version is chosen
+//	one error, throw exception
+//
+//	Returns version of new temporary view that was created.
+ConfigurationVersion ConfigurationBase::mergeViews (
+		const ConfigurationView &sourceViewA, const ConfigurationView &sourceViewB,
+		ConfigurationVersion destinationVersion, const std::string &author,
+		const std::string &mergeApproach /*rename,replace,skip*/,
+		std::map<std::string /*original uidB*/, std::string /*converted uidB*/>& uidConversionMap,
+		bool justFileConversionMap /*only fill uid conversion map*/
+		)
+{
+	__COUT__ << "mergeViews starting..." << __E__;
+
+	//There 3 modes:
+	//	rename		-- All records from both groups are maintained, but conflicts from B are renamed.
+	//					Must maintain a map of UIDs that are remapped to new name for groupB,
+	//					because linkUID fields must be preserved.
+	//	replace		-- Any UID conflicts for a record are replaced by the record from group B.
+	//	skip		-- Any UID conflicts for a record are skipped so that group A record remains
+
+
+	//check that column sizes match
+	if(sourceViewA.getNumberOfColumns() !=
+			mockupConfigurationView_.getNumberOfColumns())
+	{
+		__SS__ << "Error! Number of Columns of source view A must match destination mock-up view." <<
+				"Dimension of source is [" <<	sourceViewA.getNumberOfColumns() <<
+				"] and of destination mockup is [" <<
+				mockupConfigurationView_.getNumberOfColumns() << "]." << std::endl;
+		__SS_THROW__;
+	}
+	//check that column sizes match
+	if(sourceViewB.getNumberOfColumns() !=
+			mockupConfigurationView_.getNumberOfColumns())
+	{
+		__SS__ << "Error! Number of Columns of source view B must match destination mock-up view." <<
+				"Dimension of source is [" <<	sourceViewB.getNumberOfColumns() <<
+				"] and of destination mockup is [" <<
+				mockupConfigurationView_.getNumberOfColumns() << "]." << std::endl;
+		__SS_THROW__;
+	}
+
+	unsigned int colUID = mockupConfigurationView_.getColUID(); //setup UID column
+
+	//check that UID column matches
+	if(colUID !=
+			sourceViewA.getColUID())
+	{
+		__SS__ << "Error! UID columns of source view A must match destination mock-up view." <<
+				"UID column of source is [" <<	sourceViewA.getColUID() <<
+				"] and of destination mockup is [" <<
+				colUID << "]." << std::endl;
+		__SS_THROW__;
+	}
+	colUID = sourceViewB.getColUID(); //setup UID column
+
+	//check that UID column matches
+	if(colUID !=
+			sourceViewB.getColUID())
+	{
+		__SS__ << "Error! UID columns of source view B must match destination mock-up view." <<
+				"UID column of source is [" <<	sourceViewB.getColUID() <<
+				"] and of destination mockup is [" <<
+				colUID << "]." << std::endl;
+		__SS_THROW__;
+	}
+
+	//fill conversion map based on merge approach
+
+	sourceViewA.print();
+	sourceViewB.print();
+
+	if(mergeApproach == "rename")
+	{
+		//	rename		-- All records from both groups are maintained, but conflicts from B are renamed.
+		//					Must maintain a map of UIDs that are remapped to new name for groupB,
+		//					because linkUID fields must be preserved.
+
+		//for each B record
+		//	if there is a conflict, rename
+
+		unsigned int uniqueId = 0;
+		std::string uniqueIdString;
+		char indexString[1000];
+		unsigned int ra;
+		bool found;
+
+		for(unsigned int rb = 0; rb < sourceViewB.getNumberOfRows(); ++rb)
+		{
+			found = false;
+			for(ra=0; ra<sourceViewA.getDataView().size(); ++ra)
+				if(sourceViewA.getDataView()[ra][colUID] == sourceViewB.getDataView()[rb][colUID])
+				{
+					found = true;
+					break;
+				}
+			if(!found) continue;
+
+			//found conflict
+			__COUT__ << "found conflict: " << sourceViewB.getDataView()[rb][colUID] << __E__;
+
+			//find unique id
+			if(mockupConfigurationView_.getColumnInfo(colUID).getDataType() ==
+					ViewColumnInfo::DATATYPE_NUMBER)
+			{
+				sprintf(indexString,"%u",uniqueId);
+				uniqueIdString = indexString;
+
+				found = false;
+				for(ra=0; ra<sourceViewA.getDataView().size(); ++ra)
+					if(sourceViewA.getDataView()[ra][colUID] == uniqueIdString)
+					{
+						found = true;
+						break;
+					}
+				while(found) // while conflict, change id
+				{
+					++uniqueId;
+					sprintf(indexString,"%u",uniqueId);
+					uniqueIdString = indexString;
+
+					found = false;
+					for(ra=0; ra<sourceViewA.getDataView().size(); ++ra)
+						if(sourceViewA.getDataView()[ra][colUID] == uniqueIdString)
+						{
+							found = true;
+							break;
+						}
+				}
+			}
+			else //string type id
+			{
+				sprintf(indexString,"%u",uniqueId);
+				uniqueIdString = "merge" + uniqueId + sourceViewB.getDataView()[rb][colUID];
+
+				found = false;
+				for(ra=0; ra<sourceViewA.getDataView().size(); ++ra)
+					if(sourceViewA.getDataView()[ra][colUID] == uniqueIdString)
+					{
+						found = true;
+						break;
+					}
+				while(found) // while conflict, change id
+				{
+					++uniqueId;
+					sprintf(indexString,"%u",uniqueId);
+					uniqueIdString = "merge" + uniqueId + sourceViewB.getDataView()[rb][colUID];
+
+					found = false;
+					for(ra=0; ra<sourceViewA.getDataView().size(); ++ra)
+						if(sourceViewA.getDataView()[ra][colUID] == uniqueIdString)
+						{
+							found = true;
+							break;
+						}
+				}
+			}
+
+			//have unique id string now
+			__COUTV__(uniqueIdString);
+
+			uidConversionMap[sourceViewB.getDataView()[rb][colUID]] = uniqueIdString;
+
+		}
+
+		//done creating conversion map
+		__COUTV__(StringMacros::mapToString(uidConversionMap));
+	}
+
+	if( 1 || justFileConversionMap)
+		return ConfigurationVersion(); //return invalid
+
+
+
+	//if destinationVersion is INVALID, creates next available temporary version
+	destinationVersion = createTemporaryView(ConfigurationVersion(),
+			destinationVersion);
+
+	__COUT__ << "Megring from (A) " << sourceViewA.getTableName() << "_v" <<
+			sourceViewA.getVersion() << " and (B) " << sourceViewB.getTableName() << "_v" <<
+			sourceViewB.getVersion() << "  to " << getConfigurationName() << "_v" <<
+			destinationVersion << " with approach '" << mergeApproach << ".'" << std::endl;
+
+
+
+
+	return destinationVersion;
+} //end mergeViews
+
+//==============================================================================
 //copyView
 //	copies source view (including version) and places in self
 //	as destination temporary version.
@@ -520,7 +714,6 @@ bool ConfigurationBase::setActiveView(ConfigurationVersion version)
 //	Returns version of new temporary view that was created.
 ConfigurationVersion ConfigurationBase::copyView (const ConfigurationView &sourceView,
 		ConfigurationVersion destinationVersion, const std::string &author)
-throw(std::runtime_error)
 {
 	//check that column sizes match
 	if(sourceView.getNumberOfColumns() !=
@@ -704,7 +897,6 @@ ConfigurationView* ConfigurationBase::getTemporaryView(ConfigurationVersion temp
 //	static utility for converting configuration and column names to the caps version
 //	throw std::runtime_error if not completely alpha-numeric input
 std::string ConfigurationBase::convertToCaps(std::string& str, bool isConfigName)
-throw(std::runtime_error)
 {
 	//append Configuration to be nice to user
 	unsigned int configPos = (unsigned int)std::string::npos;

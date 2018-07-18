@@ -871,8 +871,7 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 
 		__COUT__ << username_ << " " << time(0) << " " << groupComment << std::endl;
 
-		//to compensate for unusual errors upstream, make sure the meta table has one row
-		//fix metadata table
+		//to compensate for unusual errors upstream, make sure the metadata table has one row
 		while(groupMetadataTable_.getViewP()->getNumberOfRows() > 1)
 			groupMetadataTable_.getViewP()->deleteRow(0);
 		if(groupMetadataTable_.getViewP()->getNumberOfRows() == 0)

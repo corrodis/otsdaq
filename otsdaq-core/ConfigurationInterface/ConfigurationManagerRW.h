@@ -64,6 +64,7 @@ public:
 	ConfigurationBase*                          		getVersionedConfigurationByName			(const std::string &configurationName, ConfigurationVersion version, bool looseColumnMatching=false);
 	ConfigurationBase*                          		getConfigurationByName		  			(const std::string &configurationName);
 	ConfigurationGroupKey 								findConfigurationGroup					(const std::string &groupName, const std::map<std::string, ConfigurationVersion> &groupMembers);
+	ConfigurationBase*                          		getMetadataTable			  			(void) { return &groupMetadataTable_; /* created for use in otsdaq_flatten_system_aliases, e.g. */}
 
 	//==============================================================================
 	//modifiers of generic ConfigurationBase
