@@ -66,7 +66,7 @@ public:
     void 					 			setConfigurationDescription			(const std::string &configurationDescription);
     bool 					 			setActiveView       				(ConfigurationVersion version);
     ConfigurationVersion				copyView  							(const ConfigurationView &sourceView, ConfigurationVersion destinationVersion, const std::string &author);
-    ConfigurationVersion				mergeViews 							(const ConfigurationView &sourceViewA, const ConfigurationView &sourceViewB, ConfigurationVersion destinationVersion, const std::string &author, const std::string &mergeApproach /*rename,replace,skip*/, std::map<std::string /*original uidB*/, std::string /*converted uidB*/>& uidConversionMap, bool doNotMakeDestinationVersion);
+    ConfigurationVersion				mergeViews 							(const ConfigurationView &sourceViewA, const ConfigurationView &sourceViewB, ConfigurationVersion destinationVersion, const std::string &author, const std::string &mergeApproach /*rename,replace,skip*/, std::map< std::pair<std::string /*original table*/,std::string /*original uidB*/>, std::string /*converted uidB*/>& uidConversionMap, bool fillRecordConversionMap, bool applyRecordConversionMap);
 
     ConfigurationVersion	 			createTemporaryView					(ConfigurationVersion sourceViewVersion = ConfigurationVersion(), ConfigurationVersion destTemporaryViewVersion = ConfigurationVersion::getNextTemporaryVersion()); //source of -1, from MockUp, else from valid view version
 

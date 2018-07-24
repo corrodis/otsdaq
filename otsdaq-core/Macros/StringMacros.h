@@ -381,7 +381,7 @@ catch(const std::runtime_error &e)
 
 static void					getMapFromString 						(const std::string& inputString, std::map<std::string,std::string>& mapToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'});
 template<class T>
-static std::string			mapToString								(const std::map<std::string,T>& mapToReturn, const std::string& primaryDelimeter = ",", const std::string& secondaryDelimeter = ": ")
+static std::string			mapToString								(const std::map<std::string,T>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
 {
 	std::stringstream ss;
 	bool first = true;
@@ -394,9 +394,23 @@ static std::string			mapToString								(const std::map<std::string,T>& mapToRet
 	}
 	return ss.str();
 }
-static std::string			mapToString								(const std::map<std::string,uint8_t>& mapToReturn, const std::string& primaryDelimeter = ",", const std::string& secondaryDelimeter = ": ");
 template<class T>
-static std::string			setToString								(const std::set<T>& setToReturn, const std::string& delimeter = ",")
+static std::string			mapToString								(const std::map<std::pair<std::string,std::string>,T>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
+{
+	std::stringstream ss;
+	bool first = true;
+	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first.first << "/" << mapPair.first.second << secondaryDelimeter <<
+			mapPair.second;
+	}
+	return ss.str();
+}
+static std::string			mapToString								(const std::map<std::string,uint8_t>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ");
+template<class T>
+static std::string			setToString								(const std::set<T>& setToReturn, const std::string& delimeter = ", ")
 {
 	std::stringstream ss;
 	bool first = true;
@@ -408,9 +422,9 @@ static std::string			setToString								(const std::set<T>& setToReturn, const s
 	}
 	return ss.str();
 }
-static std::string			setToString								(const std::set<uint8_t>& setToReturn, const std::string& delimeter = ",");
+static std::string			setToString								(const std::set<uint8_t>& setToReturn, const std::string& delimeter = ", ");
 template<class T>
-static std::string			vectorToString							(const std::vector<T>& setToReturn, const std::string& delimeter = ",")
+static std::string			vectorToString							(const std::vector<T>& setToReturn, const std::string& delimeter = ", ")
 {
 	std::stringstream ss;
 	bool first = true;
@@ -422,7 +436,7 @@ static std::string			vectorToString							(const std::vector<T>& setToReturn, co
 	}
 	return ss.str();
 }
-static std::string			vectorToString							(const std::vector<uint8_t>& setToReturn, const std::string& delimeter = ",");
+static std::string			vectorToString							(const std::vector<uint8_t>& setToReturn, const std::string& delimeter = ", ");
 
 static std::string 			demangleTypeName						(const char* name);
 

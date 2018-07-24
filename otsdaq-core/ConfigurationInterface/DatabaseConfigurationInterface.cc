@@ -257,7 +257,6 @@ config_version_map_t DatabaseConfigurationInterface::getConfigurationGroupMember
 throw(std::runtime_error)
 try
 {
-	//std::cout << __COUT_HDR_FL__ << "configurationGroup:" << configurationGroup << "\n";
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.loadGlobalConfiguration(configurationGroup);
 
@@ -282,13 +281,16 @@ try
 }
 catch (std::exception const& e)
 {
-	__SS__ << "DBI Exception:" << e.what() << "\n";
+	__SS__ << "DBI Exception getting Configuration Group Members for '" <<
+			configurationGroup <<
+			"':\n\n" << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
 	throw std::runtime_error(ss.str());
 }
 catch (...)
 {
-	__SS__ << "DBI Unknown exception.\n";
+	__SS__ << "DBI Unknown exception getting Configuration Group Members for '" <<
+			configurationGroup << ".'\n";
 	__COUT_ERR__ << ss.str();
 	throw std::runtime_error(ss.str());
 }
