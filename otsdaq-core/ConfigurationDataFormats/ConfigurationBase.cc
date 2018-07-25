@@ -9,9 +9,7 @@ using namespace ots;
 
 
 #undef 	__MF_SUBJECT__
-#define __MF_SUBJECT__ "ConfigurationBase"
-#undef 	__COUT_HDR__
-#define __COUT_HDR__		__COUT_HDR_FL__ << getConfigurationName() << ": "
+#define __MF_SUBJECT__ 		"ConfigurationBase-" + getConfigurationName()
 
 
 //==============================================================================
@@ -523,9 +521,11 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 		ConfigurationVersion destinationVersion, const std::string &author,
 		const std::string &mergeApproach /*rename,replace,skip*/,
 		std::map< std::pair<std::string /*original table*/,std::string /*original uidB*/>,
-			std::string /*converted uidB*/>& uidConversionMap,
-		bool fillRecordConversionMap,
-		bool applyRecordConversionMap
+		std::string /*converted uidB*/>& uidConversionMap,
+		std::map< std::pair<std::string /*original table*/,std::pair<std::string /*group linkid*/,std::string /*original gidB*/> >,
+		std::string /*converted gidB*/>& groupidConversionMap,
+		bool fillRecordConversionMaps,
+		bool applyRecordConversionMaps
 		)
 {
 	__COUT__ << "mergeViews starting..." << __E__;
@@ -565,37 +565,13 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 		__SS_THROW__;
 	}
 
-	unsigned int colUID = mockupConfigurationView_.getColUID(); //setup UID column
-
-	//check that UID column matches
-	if(colUID !=
-			sourceViewA.getColUID())
-	{
-		__SS__ << "Error! UID columns of source view A must match destination mock-up view." <<
-				"UID column of source is [" <<	sourceViewA.getColUID() <<
-				"] and of destination mockup is [" <<
-				colUID << "]." << std::endl;
-		__SS_THROW__;
-	}
-	colUID = sourceViewB.getColUID(); //setup UID column
-
-	//check that UID column matches
-	if(colUID !=
-			sourceViewB.getColUID())
-	{
-		__SS__ << "Error! UID columns of source view B must match destination mock-up view." <<
-				"UID column of source is [" <<	sourceViewB.getColUID() <<
-				"] and of destination mockup is [" <<
-				colUID << "]." << std::endl;
-		__SS_THROW__;
-	}
 
 	//fill conversion map based on merge approach
 
 	sourceViewA.print();
 	sourceViewB.print();
 
-	if(fillRecordConversionMap && mergeApproach == "rename")
+	if(fillRecordConversionMaps && mergeApproach == "rename")
 	{
 		__COUT__ << "Filling record conversion map." << __E__;
 
@@ -613,131 +589,256 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 		unsigned int numericStartIndex;
 		bool found;
 
-		for(unsigned int rb = 0; rb < sourceViewB.getNumberOfRows(); ++rb)
+
+		for(unsigned int cb = 0; cb < sourceViewB.getNumberOfColumns(); ++cb)
 		{
-			found = false;
-			for(ra=0; ra<sourceViewA.getDataView().size(); ++ra)
-				if(sourceViewA.getValueAsString(ra,colUID) == sourceViewB.getValueAsString(rb,colUID))
-				{
-					found = true;
-					break;
-				}
-			if(!found) continue;
+			//skip columns that are not UID or GroupID columns
+			if(!(sourceViewA.getColumnInfo(cb).isUID() ||
+					sourceViewA.getColumnInfo(cb).isGroupID())) continue;
 
-			//found conflict
-			__COUT__ << "found conflict: " << sourceViewB.getTableName() << "/" <<
-					sourceViewB.getDataView()[rb][colUID] << __E__;
+			__COUT__ << "Have an ID column: " << cb << " " << sourceViewA.getColumnInfo(cb).getType() << __E__;
 
-
-
-			//extract starting uniqueId number
+			//at this point we have an ID column, verify B and mockup are the same
+			if(sourceViewA.getColumnInfo(cb).getType() !=
+					sourceViewB.getColumnInfo(cb).getType() ||
+					sourceViewA.getColumnInfo(cb).getType() !=
+							mockupConfigurationView_.getColumnInfo(cb).getType())
 			{
-				const std::string& str = sourceViewB.getDataView()[rb][colUID];
-				numericStartIndex = str.size();
-
-				//find first non-numeric character
-				while(numericStartIndex-1 < str.size() &&
-						str[numericStartIndex-1] >= '0' &&
-						str[numericStartIndex-1] <= '9')
-					--numericStartIndex;
-
-				if(numericStartIndex < str.size())
-				{
-					uniqueId = atoi(str.substr(numericStartIndex).c_str()) + 1;
-					uniqueIdBase = str.substr(0,numericStartIndex);
-				}
-				else
-				{
-					uniqueId = 0;
-					uniqueIdBase = str;
-				}
-
-				__COUTV__(uniqueIdBase);
-				__COUTV__(uniqueId);
+				__SS__ << "Error! " << sourceViewA.getColumnInfo(cb).getType() << " column " << cb <<
+						" of source view A must match source B and destination mock-up view." <<
+						" Column of source B is [" << sourceViewA.getColumnInfo(cb).getType() <<
+						"] and of destination mockup is [" <<
+						mockupConfigurationView_.getColumnInfo(cb).getType() << "]." << std::endl;
+				__SS_THROW__;
 			}
 
 
-			//find unique id
-			if(mockupConfigurationView_.getColumnInfo(colUID).getDataType() ==
-					ViewColumnInfo::DATATYPE_NUMBER)
+			//getColLinkGroupID(childLinkIndex)
+
+
+			std::vector< std::string /*converted uidB*/ > localConvertedIds; //used for conflict completeness check
+
+			if(sourceViewA.getColumnInfo(cb).isGroupID())
 			{
-				sprintf(indexString,"%u",uniqueId);
-				uniqueIdString = indexString;
+				std::set<std::string> aGroupids = sourceViewA.getSetOfGroupIDs(cb);
+				std::set<std::string> bGroupids = sourceViewB.getSetOfGroupIDs(cb);
 
-				found = false;
-				for(ra=0; ra<sourceViewA.getDataView().size(); ++ra)
-					if(sourceViewA.getValueAsString(ra,colUID) == uniqueIdString)
-					{
-						found = true;
-						break;
-					}
-				while(found) // while conflict, change id
+				for(const auto& bGroupid : bGroupids)
 				{
-					++uniqueId;
-					sprintf(indexString,"%u",uniqueId);
-					uniqueIdString = indexString;
+					if(aGroupids.find(bGroupid) == aGroupids.end())
+						continue;
 
-					found = false;
-					for(ra=0; ra<sourceViewA.getDataView().size(); ++ra)
-						if(sourceViewA.getValueAsString(ra,colUID) == uniqueIdString)
+					//if here, found conflict
+					__COUT__ << "found conflict: " << getConfigurationName() << "/" <<
+							bGroupid << __E__;
+
+
+
+					//extract starting uniqueId number
+					{
+						const std::string& str = bGroupid;
+						numericStartIndex = str.size();
+
+						//find first non-numeric character
+						while(numericStartIndex-1 < str.size() &&
+								str[numericStartIndex-1] >= '0' &&
+								str[numericStartIndex-1] <= '9')
+							--numericStartIndex;
+
+						if(numericStartIndex < str.size())
 						{
-							found = true;
-							break;
+							uniqueId = atoi(str.substr(numericStartIndex).c_str()) + 1;
+							uniqueIdBase = str.substr(0,numericStartIndex);
 						}
-				}
-			}
-			else //string type id
-			{
-				sprintf(indexString,"%u",uniqueId);
-				uniqueIdString = uniqueIdBase + indexString;
-				__COUTV__(uniqueIdString);
+						else
+						{
+							uniqueId = 0;
+							uniqueIdBase = str;
+						}
 
-				found = false;
-				for(ra=0; ra<sourceViewA.getDataView().size(); ++ra)
-					if(sourceViewA.getValueAsString(ra,colUID) == uniqueIdString)
+						__COUTV__(uniqueIdBase);
+						__COUTV__(uniqueId);
+					} //end //extract starting uniqueId number
+
+
+					//find unique id string
 					{
-						found = true;
-						break;
-					}
-				while(found) // while conflict, change id
-				{
-					++uniqueId;
-					sprintf(indexString,"%u",uniqueId);
-					uniqueIdString = uniqueIdBase + indexString;
+						sprintf(indexString,"%u",uniqueId);
+						uniqueIdString = uniqueIdBase + indexString;
+						__COUTV__(uniqueIdString);
+
+						found = false;
+						//check converted records and source A and B for conflicts
+						if(aGroupids.find(uniqueIdString) != aGroupids.end())
+							found = true;
+						if(!found && bGroupids.find(uniqueIdString) != bGroupids.end())
+							found = true;
+						if(!found && bGroupids.find(uniqueIdString) != bGroupids.end())
+							found = true;
+						for(ra=0;!found && ra<localConvertedIds.size(); ++ra)
+							if(localConvertedIds[ra] == uniqueIdString)
+								found = true;
+
+						while(found) // while conflict, change id
+						{
+							++uniqueId;
+							sprintf(indexString,"%u",uniqueId);
+							uniqueIdString = uniqueIdBase + indexString;
+							__COUTV__(uniqueIdString);
+
+							found = false;
+							//check converted records and source A and B for conflicts
+							if(aGroupids.find(uniqueIdString) != aGroupids.end())
+								found = true;
+							if(!found && bGroupids.find(uniqueIdString) != bGroupids.end())
+								found = true;
+							if(!found && bGroupids.find(uniqueIdString) != bGroupids.end())
+								found = true;
+							for(ra=0;!found && ra<localConvertedIds.size(); ++ra)
+								if(localConvertedIds[ra] == uniqueIdString)
+									found = true;
+						}
+					} //end find unique id string
+
+					//have unique id string now
 					__COUTV__(uniqueIdString);
 
+					groupidConversionMap[std::pair<std::string /*original table*/,
+										 std::pair<std::string /*group linkid*/,std::string /*original gidB*/> >(
+							getConfigurationName(),
+							std::pair<std::string /*group linkid*/,std::string /*original gidB*/>(
+									sourceViewB.getColumnInfo(cb).getChildLinkIndex(),
+									bGroupid)
+									)] = uniqueIdString;
+					localConvertedIds.push_back(uniqueIdString); //save to vector for future conflict checking within table
+
+				} //end row find unique id string loop for groupid
+
+				//done creating conversion map
+				__COUTV__(StringMacros::mapToString(groupidConversionMap));
+
+			} //end group id conversion map fill
+			else  //start uid conversion map fill
+			{
+				for(unsigned int rb = 0; rb < sourceViewB.getNumberOfRows(); ++rb)
+				{
 					found = false;
+
 					for(ra=0; ra<sourceViewA.getDataView().size(); ++ra)
-						if(sourceViewA.getValueAsString(ra,colUID) == uniqueIdString)
+						if(sourceViewA.getValueAsString(ra,cb) == sourceViewB.getValueAsString(rb,cb))
 						{
 							found = true;
 							break;
 						}
-				}
-			}
 
-			//have unique id string now
-			__COUTV__(uniqueIdString);
+					if(!found) continue;
 
-			uidConversionMap[std::pair<std::string /*original table*/,std::string /*original uidB*/>(
-					sourceViewB.getTableName(),
-					sourceViewB.getValueAsString(rb,colUID))] = uniqueIdString;
+					//found conflict
+					__COUT__ << "found conflict: " << getConfigurationName() << "/" <<
+							sourceViewB.getDataView()[rb][cb] << __E__;
 
-		}
 
-		//done creating conversion map
-		__COUTV__(StringMacros::mapToString(uidConversionMap));
+
+					//extract starting uniqueId number
+					{
+						const std::string& str = sourceViewB.getDataView()[rb][cb];
+						numericStartIndex = str.size();
+
+						//find first non-numeric character
+						while(numericStartIndex-1 < str.size() &&
+								str[numericStartIndex-1] >= '0' &&
+								str[numericStartIndex-1] <= '9')
+							--numericStartIndex;
+
+						if(numericStartIndex < str.size())
+						{
+							uniqueId = atoi(str.substr(numericStartIndex).c_str()) + 1;
+							uniqueIdBase = str.substr(0,numericStartIndex);
+						}
+						else
+						{
+							uniqueId = 0;
+							uniqueIdBase = str;
+						}
+
+						__COUTV__(uniqueIdBase);
+						__COUTV__(uniqueId);
+					} //end //extract starting uniqueId number
+
+
+					//find unique id string
+					{
+						sprintf(indexString,"%u",uniqueId);
+						uniqueIdString = uniqueIdBase + indexString;
+						__COUTV__(uniqueIdString);
+
+						found = false;
+						//check converted records and source A and B for conflicts
+						for(ra=0;!found && ra<sourceViewA.getDataView().size(); ++ra)
+							if(sourceViewA.getValueAsString(ra,cb) == uniqueIdString)
+								found = true;
+						for(ra=0;!found && ra<sourceViewB.getDataView().size(); ++ra)
+							if(ra == rb) continue; //skip record in question
+							else if(sourceViewB.getValueAsString(ra,cb) == uniqueIdString)
+								found = true;
+						for(ra=0;!found && ra<localConvertedIds.size(); ++ra)
+							if(localConvertedIds[ra] == uniqueIdString)
+								found = true;
+
+						while(found) // while conflict, change id
+						{
+							++uniqueId;
+							sprintf(indexString,"%u",uniqueId);
+							uniqueIdString = uniqueIdBase + indexString;
+							__COUTV__(uniqueIdString);
+
+							found = false;
+							//check converted records and source A and B for conflicts
+							for(ra=0;!found && ra<sourceViewA.getDataView().size(); ++ra)
+								if(sourceViewA.getValueAsString(ra,cb) == uniqueIdString)
+									found = true;
+							for(ra=0;!found && ra<sourceViewB.getDataView().size(); ++ra)
+								if(ra == rb) continue; //skip record in question
+								else if(sourceViewB.getValueAsString(ra,cb) == uniqueIdString)
+									found = true;
+							for(ra=0;!found && ra<localConvertedIds.size(); ++ra)
+								if(localConvertedIds[ra] == uniqueIdString)
+									found = true;
+						}
+					} //end find unique id string
+
+					//have unique id string now
+					__COUTV__(uniqueIdString);
+
+					uidConversionMap[std::pair<std::string /*original table*/,std::string /*original uidB*/>(
+							getConfigurationName(),
+							sourceViewB.getValueAsString(rb,cb))] = uniqueIdString;
+					localConvertedIds.push_back(uniqueIdString); //save to vector for future conflict checking within table
+
+				} //end row find unique id string loop
+
+				//done creating conversion map
+				__COUTV__(StringMacros::mapToString(uidConversionMap));
+			} ///end uid conversion map
+
+
+		} //end column find unique id string loop
+
 	} //end rename conversion map create
 	else
 		__COUT__ << "Not filling record conversion map." << __E__;
 
-	if(!applyRecordConversionMap)
+	if(!applyRecordConversionMaps)
 	{
 		__COUT__ << "Not applying record conversion map." << __E__;
 		return ConfigurationVersion(); //return invalid
 	}
 	else
+	{
 		__COUT__ << "Applying record conversion map." << __E__;
+		__COUTV__(StringMacros::mapToString(uidConversionMap));
+		__COUTV__(StringMacros::mapToString(groupidConversionMap));
+	}
 
 
 	//if destinationVersion is INVALID, creates next available temporary version
@@ -762,12 +863,17 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 		unsigned int cb;
 		bool found;
 		std::map<std::pair<std::string /*original table*/,std::string /*original uidB*/>,
-			std::string /*converted uidB*/>::iterator conversionIt;
+			std::string /*converted uidB*/>::iterator uidConversionIt;
+		std::map<std::pair<std::string /*original table*/,
+			std::pair<std::string /*group linkid*/,std::string /*original gidB*/> >,
+			std::string /*converted uidB*/>::iterator groupidConversionIt;
 
-		bool uidLinkIsGroup;
-		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> uidLinkPair;
+		bool linkIsGroup;
+		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
 		std::string strb;
 		size_t stri;
+
+		unsigned int colUID = mockupConfigurationView_.getColUID(); //setup UID column
 
 		//handle merger with conflicts consideration
 		for(unsigned int rb = 0; rb < sourceViewB.getNumberOfRows(); ++rb)
@@ -786,47 +892,85 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 
 				for(cb = 0; cb < sourceViewB.getNumberOfColumns(); ++cb)
 				{
-					if(sourceViewB.getColumnInfo(cb).isChildLink() ||
-							sourceViewB.getColumnInfo(cb).isChildLinkGroupID())
-						continue; //skip links
+					if(sourceViewB.getColumnInfo(cb).isChildLink())
+						continue; //skip link columns that have table name
 					else if(sourceViewB.getColumnInfo(cb).isChildLinkUID())
 					{
 						__COUT__ << "Checking UID link... col=" << cb << __E__;
-						sourceViewB.getChildLink(cb,uidLinkIsGroup,uidLinkPair);
+						sourceViewB.getChildLink(cb,linkIsGroup,linkPair);
 
 						//if table and uid are in conversion map, convert
-						if((conversionIt = uidConversionMap.find(
+						if((uidConversionIt = uidConversionMap.find(
 								std::pair<std::string /*original table*/,std::string /*original uidB*/>(
-										sourceViewB.getValueAsString(rb,uidLinkPair.first),
-										sourceViewB.getValueAsString(rb,uidLinkPair.second)))) !=
+										sourceViewB.getValueAsString(rb,linkPair.first),
+										sourceViewB.getValueAsString(rb,linkPair.second)))) !=
 												uidConversionMap.end())
 						{
 							__COUT__ << "Found entry to remap: " <<
-									sourceViewB.getDataView()[rb][uidLinkPair.second] << " ==> " <<
-									conversionIt->second << __E__;
-							destinationView->setValueAsString(conversionIt->second,destRow,uidLinkPair.second);
+									sourceViewB.getDataView()[rb][linkPair.second] << " ==> " <<
+									uidConversionIt->second << __E__;
+							destinationView->setValueAsString(uidConversionIt->second,destRow,linkPair.second);
+						}
+					}
+					else if(sourceViewB.getColumnInfo(cb).isChildLinkGroupID())
+					{
+						__COUT__ << "Checking GroupID link... col=" << cb << __E__;
+						sourceViewB.getChildLink(cb,linkIsGroup,linkPair);
+
+						//if table and uid are in conversion map, convert
+						if((groupidConversionIt = groupidConversionMap.find(
+								std::pair<std::string /*original table*/,
+								std::pair<std::string /*group linkid*/,std::string /*original gidB*/> >(
+										sourceViewB.getValueAsString(rb,linkPair.first),
+										std::pair<std::string /*group linkid*/,std::string /*original gidB*/>(
+												sourceViewB.getColumnInfo(cb).getChildLinkIndex(),
+												sourceViewB.getValueAsString(rb,linkPair.second))))) !=
+														groupidConversionMap.end())
+						{
+							__COUT__ << "Found entry to remap: " <<
+									sourceViewB.getDataView()[rb][linkPair.second] << " ==> " <<
+									groupidConversionIt->second << __E__;
+							destinationView->setValueAsString(groupidConversionIt->second,destRow,linkPair.second);
 						}
 					}
 					else if(sourceViewB.getColumnInfo(cb).isUID())
 					{
 						__COUT__ << "Checking UID... col=" << cb << __E__;
-						if((conversionIt = uidConversionMap.find(
+						if((uidConversionIt = uidConversionMap.find(
 								std::pair<std::string /*original table*/,std::string /*original uidB*/>(
-										sourceViewB.getTableName(),
+										getConfigurationName(),
 										sourceViewB.getValueAsString(rb,cb)))) !=
 												uidConversionMap.end())
 						{
 							__COUT__ << "Found entry to remap: " <<
 									sourceViewB.getDataView()[rb][cb] << " ==> " <<
-									conversionIt->second << __E__;
-							destinationView->setValueAsString(conversionIt->second,destRow,cb);
+									uidConversionIt->second << __E__;
+							destinationView->setValueAsString(uidConversionIt->second,destRow,cb);
+						}
+					}
+					else if(sourceViewB.getColumnInfo(cb).isGroupID())
+					{
+						__COUT__ << "Checking GroupID... col=" << cb << __E__;
+						if((groupidConversionIt = groupidConversionMap.find(
+								std::pair<std::string /*original table*/,
+								std::pair<std::string /*group linkid*/,std::string /*original gidB*/> >(
+										getConfigurationName(),
+										std::pair<std::string /*group linkid*/,std::string /*original gidB*/>(
+												sourceViewB.getColumnInfo(cb).getChildLinkIndex(),
+												sourceViewB.getValueAsString(rb,cb))))) !=
+														groupidConversionMap.end())
+						{
+							__COUT__ << "Found entry to remap: " <<
+									sourceViewB.getDataView()[rb][cb] << " ==> " <<
+									groupidConversionIt->second << __E__;
+							destinationView->setValueAsString(groupidConversionIt->second,destRow,cb);
 						}
 					}
 					else
 					{
 						//look for text link to a Table/UID in the map
 						strb = sourceViewB.getValueAsString(rb,cb);
-						if(strb.size() > sourceViewB.getTableName().size() + 2 &&
+						if(strb.size() > getConfigurationName().size() + 2 &&
 								strb[0] == '/')
 						{
 							//check for linked name
@@ -866,7 +1010,7 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 				continue;
 			} //end rename, no-conflict handling
 
-			//if here, then conflicts matter
+			//if here, then not doing rename, so conflicts matter
 
 			found = false;
 
@@ -908,33 +1052,6 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 				destinationView->copyRows(author,sourceViewB,rb,1 /*srcRowsToCopy*/);
 			}
 			//else if (mergeApproach == "skip") then do nothing with conflicting B record
-//			else if(mergeApproach == "rename")
-//			{
-//				//	rename		-- All records from both groups are maintained, but conflicts from B are renamed.
-//				//					Must maintain a map of UIDs that are remapped to new name for groupB,
-//				//					because linkUID fields must be preserved.
-//
-//				//add B record
-//				//copy row from B to new row
-//				destRow = destinationView->copyRows(author,sourceViewB,rb,1 /*srcRowsToCopy*/);
-//
-//				//check every column and remap conflicting names
-//
-//				for(cb = 0; cb < sourceViewB.getNumberOfColumns(); ++cb)
-//				{
-//					if((conversionIt = uidConversionMap.find(
-//							std::pair<std::string /*original table*/,std::string /*original uidB*/>(
-//									sourceViewB.getTableName(),
-//									sourceViewB.getValueAsString(rb,cb)))) !=
-//											uidConversionMap.end())
-//					{
-//						__COUT__ << "Found entry to remap: " <<
-//								sourceViewB.getDataView()[rb][cb] << " ==> " <<
-//								conversionIt->second << __E__;
-//						destinationView->setValueAsString(conversionIt->second,destRow,cb);
-//					}
-//				}
-//			}
 		}
 
 

@@ -30,7 +30,7 @@
 #define __COUT_ERR__  	 __COUT_TYPE__(LogError)   << __COUT_HDR__
 #define __COUT_WARN__    __COUT_TYPE__(LogWarning) << __COUT_HDR__
 #define __COUT_INFO__    __COUT_TYPE__(LogInfo)    << __COUT_HDR__
-#define __COUT__  	 __COUT_TYPE__(LogDebug)   << __COUT_HDR__
+#define __COUT__  	 	 __COUT_TYPE__(LogDebug)   << __COUT_HDR__
 #define __COUTV__(X) 	 __COUT__                  << QUOTE(X)     << " = "                << X              << __E__
 
 
@@ -48,11 +48,11 @@
 
 
 
-#define __MF_HDR__		__COUT_HDR_FL__
+#define __MF_HDR__		__COUT_HDR__
 #define __MOUT_ERR__  	__MF_TYPE__(LogError) 	<< __MF_HDR__
 #define __MOUT_WARN__  	__MF_TYPE__(LogWarning) << __MF_HDR__
 #define __MOUT_INFO__  	__MF_TYPE__(LogInfo) 	<< __MF_HDR__
-#define __MOUT__  	__MF_TYPE__(LogDebug)	<< __MF_HDR__
+#define __MOUT__  		__MF_TYPE__(LogDebug)	<< __MF_HDR__
 #define __MOUTV__(X)	__MOUT__ << QUOTE(X) << " = " << X << _E__
 
 

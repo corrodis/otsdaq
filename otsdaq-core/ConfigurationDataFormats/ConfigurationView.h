@@ -89,6 +89,7 @@ private:
 public:
 	//std::set<std::string /*GroupId*/>
 	std::set<std::string>			getSetOfGroupIDs			(const std::string& childLinkIndex, unsigned int row = -1) const;
+	std::set<std::string>			getSetOfGroupIDs			(const unsigned int& col, unsigned int row = -1) const;
 	bool			 			    isEntryInGroup				(const unsigned int& row, const std::string& childLinkIndex, const std::string& groupNeedle) const;
 	const bool	 					getChildLink				(const unsigned int& col, bool& isGroup, std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>& linkPair) const;
 	const unsigned int 			    getColLinkGroupID			(const std::string& childLinkIndex) const;

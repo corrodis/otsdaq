@@ -397,6 +397,8 @@ static std::string			mapToString								(const std::map<std::string,T>& mapToRet
 template<class T>
 static std::string			mapToString								(const std::map<std::pair<std::string,std::string>,T>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
 {
+	//this is a pretty specific map format (comes from the merge function in ConfigurationBase)
+
 	std::stringstream ss;
 	bool first = true;
 	for(auto& mapPair:mapToReturn)
@@ -404,6 +406,22 @@ static std::string			mapToString								(const std::map<std::pair<std::string,st
 		if(first) first = false;
 		else ss << primaryDelimeter;
 		ss << mapPair.first.first << "/" << mapPair.first.second << secondaryDelimeter <<
+			mapPair.second;
+	}
+	return ss.str();
+}
+template<class T>
+static std::string			mapToString								(const std::map<std::pair<std::string,std::pair<std::string,std::string>>,T>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
+{
+	//this is a pretty specific map format (comes from the merge function in ConfigurationBase)
+	std::stringstream ss;
+	bool first = true;
+	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first.first << "/" << mapPair.first.second.first << "," << mapPair.first.second.second <<
+				secondaryDelimeter <<
 			mapPair.second;
 	}
 	return ss.str();

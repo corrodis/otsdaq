@@ -8,9 +8,9 @@
 using namespace ots;
 
 #undef 	__MF_SUBJECT__
-#define __MF_SUBJECT__ "ConfigurationView-" + tableName_
+#define __MF_SUBJECT__		"ConfigurationView-" + tableName_
 #undef 	__COUT_HDR__
-#define __COUT_HDR__		tableName_ << ":v" << version_ << ":" << __COUT_HDR_FL__
+#define __COUT_HDR__		"v" << version_ << ":" << __COUT_HDR_FL__
 
 const unsigned int ConfigurationView::INVALID = -1;
 
@@ -71,9 +71,9 @@ unsigned int ConfigurationView::copyRows(const std::string& author,
 		unsigned int srcOffsetRow,	unsigned int srcRowsToCopy,
 		unsigned int destOffsetRow)
 {
-	__COUTV__(destOffsetRow);
-	__COUTV__(srcOffsetRow);
-	__COUTV__(srcRowsToCopy);
+	//__COUTV__(destOffsetRow);
+	//__COUTV__(srcOffsetRow);
+	//__COUTV__(srcRowsToCopy);
 
 	unsigned int retRow = (unsigned int)-1;
 
@@ -979,7 +979,6 @@ bool ConfigurationView::isEntryInGroup(const unsigned int &r,
 
 //==============================================================================
 //	isEntryInGroupCol
-//		private function to prevent users from treating any column like a GroupID column
 //
 //	if *groupIDList != 0 return set of groupIDs found
 //		useful for removing groupIDs.
@@ -1046,8 +1045,11 @@ bool ConfigurationView::isEntryInGroupCol(const unsigned int &r,
 std::set<std::string> ConfigurationView::getSetOfGroupIDs(const std::string &childLinkIndex,
 		unsigned int r) const
 {
-	unsigned int c = getColLinkGroupID(childLinkIndex);
-
+	return getSetOfGroupIDs(getColLinkGroupID(childLinkIndex), r);
+}
+std::set<std::string> ConfigurationView::getSetOfGroupIDs(const unsigned int& c,
+		unsigned int r) const
+{
 	//__COUT__ << "GroupID col=" << (int)c << std::endl;
 
 	std::set<std::string> retSet;
