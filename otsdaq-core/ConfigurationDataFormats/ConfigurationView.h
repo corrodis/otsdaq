@@ -30,7 +30,7 @@ public:
 	ConfigurationView							(const std::string &name="");
 	virtual ~ConfigurationView					(void);
 	ConfigurationView& 	copy					(const ConfigurationView &src, ConfigurationVersion destinationVersion, const std::string &author);
-	unsigned int	 	copyRows				(const std::string& author, const ConfigurationView &src, unsigned int srcOffsetRow = 0, unsigned int srcRowsToCopy = (unsigned int)-1, unsigned int destOffsetRow = (unsigned int)-1);
+	unsigned int	 	copyRows				(const std::string& author, const ConfigurationView &src, unsigned int srcOffsetRow = 0, unsigned int srcRowsToCopy = (unsigned int)-1, unsigned int destOffsetRow = (unsigned int)-1, bool generateUniqueDataColumns = false);
 
 
 	void 	init(void);

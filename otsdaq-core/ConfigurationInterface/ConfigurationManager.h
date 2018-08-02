@@ -28,6 +28,7 @@ public:
 	static const std::string ALIAS_VERSION_PREAMBLE;
 	static const std::string SCRATCH_VERSION_ALIAS;
 	static const std::string XDAQ_CONTEXT_CONFIG_NAME;
+	static const std::string XDAQ_APPLICATION_CONFIG_NAME;
 
 	static const std::string ACTIVE_GROUP_NAME_CONTEXT;
 	static const std::string ACTIVE_GROUP_NAME_BACKBONE;

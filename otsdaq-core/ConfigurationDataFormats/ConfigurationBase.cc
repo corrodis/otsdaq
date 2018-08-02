@@ -519,13 +519,14 @@ bool ConfigurationBase::setActiveView(ConfigurationVersion version)
 ConfigurationVersion ConfigurationBase::mergeViews (
 		const ConfigurationView &sourceViewA, const ConfigurationView &sourceViewB,
 		ConfigurationVersion destinationVersion, const std::string &author,
-		const std::string &mergeApproach /*rename,replace,skip*/,
+		const std::string &mergeApproach /*Rename,Replace,Skip*/,
 		std::map< std::pair<std::string /*original table*/,std::string /*original uidB*/>,
 		std::string /*converted uidB*/>& uidConversionMap,
 		std::map< std::pair<std::string /*original table*/,std::pair<std::string /*group linkid*/,std::string /*original gidB*/> >,
 		std::string /*converted gidB*/>& groupidConversionMap,
 		bool fillRecordConversionMaps,
-		bool applyRecordConversionMaps
+		bool applyRecordConversionMaps,
+		bool generateUniqueDataColumns
 		)
 {
 	__COUT__ << "mergeViews starting..." << __E__;
@@ -538,7 +539,7 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 	//	skip		-- Any UID conflicts for a record are skipped so that group A record remains
 
 	//check valid mode
-	if(!(mergeApproach == "rename" || mergeApproach == "replace" || mergeApproach == "skip"))
+	if(!(mergeApproach == "Rename" || mergeApproach == "Replace" || mergeApproach == "Skip"))
 	{
 		__SS__ << "Error! Invalid merge approach '" <<	mergeApproach << ".'" << __E__;
 		__SS_THROW__;
@@ -571,7 +572,7 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 	sourceViewA.print();
 	sourceViewB.print();
 
-	if(fillRecordConversionMaps && mergeApproach == "rename")
+	if(fillRecordConversionMaps && mergeApproach == "Rename")
 	{
 		__COUT__ << "Filling record conversion map." << __E__;
 
@@ -878,7 +879,7 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 		//handle merger with conflicts consideration
 		for(unsigned int rb = 0; rb < sourceViewB.getNumberOfRows(); ++rb)
 		{
-			if(mergeApproach == "rename")
+			if(mergeApproach == "Rename")
 			{
 				//	rename		-- All records from both groups are maintained, but conflicts from B are renamed.
 				//					Must maintain a map of UIDs that are remapped to new name for groupB,
@@ -886,7 +887,8 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 
 				//conflict does not matter (because record conversion map is already created, always take and append the B record
 				//copy row from B to new row
-				destRow = destinationView->copyRows(author,sourceViewB,rb,1 /*srcRowsToCopy*/);
+				destRow = destinationView->copyRows(author,sourceViewB,rb,1 /*srcRowsToCopy*/,
+						-1 /*destOffsetRow*/, generateUniqueDataColumns /*generateUniqueDataColumns*/);
 
 				//check every column and remap conflicting names
 

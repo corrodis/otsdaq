@@ -69,7 +69,7 @@ ConfigurationView& ConfigurationView::copy(const ConfigurationView &src,
 unsigned int ConfigurationView::copyRows(const std::string& author,
 		const ConfigurationView& src,
 		unsigned int srcOffsetRow,	unsigned int srcRowsToCopy,
-		unsigned int destOffsetRow)
+		unsigned int destOffsetRow, bool generateUniqueDataColumns)
 {
 	//__COUTV__(destOffsetRow);
 	//__COUTV__(srcOffsetRow);
@@ -95,7 +95,7 @@ unsigned int ConfigurationView::copyRows(const std::string& author,
 		if(r + srcOffsetRow >= srcRows)
 			break;  //end when no more source rows to copy (past bounds)
 
-		destOffsetRow = addRow(author,false /*incrementUniqueData*/,"" /*baseNameAutoUID*/,
+		destOffsetRow = addRow(author,generateUniqueDataColumns /*incrementUniqueData*/,"" /*baseNameAutoUID*/,
 				destOffsetRow) ; //add and get row created
 
 		if(retRow == (unsigned int)-1)
@@ -103,7 +103,11 @@ unsigned int ConfigurationView::copyRows(const std::string& author,
 
 		//copy data
 		for(unsigned int col=0;col<getNumberOfColumns();++col)
-			theDataView_[destOffsetRow][col] =
+			if(generateUniqueDataColumns &&
+					columnsInfo_[col].getType() == ViewColumnInfo::TYPE_UNIQUE_DATA)
+				continue; //if leaving unique data, then skip copy
+			else
+				theDataView_[destOffsetRow][col] =
 					src.theDataView_[r + srcOffsetRow][col];
 
 		//prepare for next row

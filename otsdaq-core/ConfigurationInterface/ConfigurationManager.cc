@@ -15,6 +15,7 @@ using namespace ots;
 const std::string ConfigurationManager::READONLY_USER 					= "READONLY_USER";
 
 const std::string ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME 		= "XDAQContextConfiguration";
+const std::string ConfigurationManager::XDAQ_APPLICATION_CONFIG_NAME 	= "XDAQApplicationConfiguration";
 
 //added env check for otsdaq_flatten_active_to_version to function
 const std::string ConfigurationManager::ACTIVE_GROUP_FILENAME 			= ((getenv("SERVICE_DATA_PATH") == NULL)?(std::string(getenv("USER_DATA"))+"/ServiceData"):(std::string(getenv("SERVICE_DATA_PATH")))) + "/ActiveConfigurationGroups.cfg";
@@ -26,7 +27,7 @@ const std::string ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE      = "Backb
 const std::string ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE	    = "Iterate";
 const std::string ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION = "Configuration";
 
-const std::set<std::string> ConfigurationManager::contextMemberNames_	= {ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME,"XDAQApplicationConfiguration","XDAQApplicationPropertyConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","TheSupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"};
+const std::set<std::string> ConfigurationManager::contextMemberNames_	= {ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME,ConfigurationManager::XDAQ_APPLICATION_CONFIG_NAME,"XDAQApplicationPropertyConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","TheSupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"};
 const std::set<std::string> ConfigurationManager::backboneMemberNames_	= {"GroupAliasesConfiguration","VersionAliasesConfiguration"};
 const std::set<std::string> ConfigurationManager::iterateMemberNames_	= {"IterateConfiguration","IterationPlanConfiguration","IterationTargetConfiguration",
 	/*command specific tables*/"IterationCommandBeginLabelConfiguration","IterationCommandChooseFSMConfiguration","IterationCommandConfigureAliasConfiguration","IterationCommandConfigureGroupConfiguration","IterationCommandExecuteFEMacroConfiguration","IterationCommandExecuteMacroConfiguration","IterationCommandModifyGroupConfiguration","IterationCommandRepeatLabelConfiguration","IterationCommandRunConfiguration"};
@@ -420,11 +421,15 @@ int ConfigurationManager::getTypeOfGroup(
 			{
 				__SS__ << "This group is an incomplete match to a Context group.\n";
 				__COUT_ERR__ << "\n" << ss.str();
-				ss << "\nTo be a Context group, the members must exactly match" <<
+				ss << "\nTo be a Context group, the members must exactly match " <<
 						"the following members:\n";
 				int i = 0;
-				for(auto &memberName:contextMemberNames_)
+				for(const auto &memberName:contextMemberNames_)
 					ss << ++i << ". " << memberName << "\n";
+				ss << "\nThe members are as follows::\n";
+				i = 0;
+				for(const auto &memberPairTmp:memberMap)
+					ss << ++i << ". " << memberPairTmp.first << "\n";
 				throw std::runtime_error(ss.str());
 			}
 		}
@@ -446,11 +451,15 @@ int ConfigurationManager::getTypeOfGroup(
 			{
 				__SS__ << "This group is an incomplete match to a Backbone group.\n";
 				__COUT_ERR__ << "\n" << ss.str();
-				ss << "\nTo be a Backbone group, the members must exactly match" <<
+				ss << "\nTo be a Backbone group, the members must exactly match " <<
 						"the following members:\n";
 				int i = 0;
 				for(auto &memberName:backboneMemberNames_)
 					ss << ++i << ". " << memberName << "\n";
+				ss << "\nThe members are as follows::\n";
+				i = 0;
+				for(const auto &memberPairTmp:memberMap)
+					ss << ++i << ". " << memberPairTmp.first << "\n";
 				//__COUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
@@ -473,11 +482,15 @@ int ConfigurationManager::getTypeOfGroup(
 			{
 				__SS__ << "This group is an incomplete match to a Iterate group.\n";
 				__COUT_ERR__ << "\n" << ss.str();
-				ss << "\nTo be a Iterate group, the members must exactly match" <<
+				ss << "\nTo be a Iterate group, the members must exactly match " <<
 						"the following members:\n";
 				int i = 0;
 				for(auto &memberName:iterateMemberNames_)
 					ss << ++i << ". " << memberName << "\n";
+				ss << "\nThe members are as follows::\n";
+				i = 0;
+				for(const auto &memberPairTmp:memberMap)
+					ss << ++i << ". " << memberPairTmp.first << "\n";
 				//__COUT_ERR__ << "\n" << ss.str();
 				throw std::runtime_error(ss.str());
 			}
