@@ -207,14 +207,14 @@ public:
 
 	}
 
-
+	//table handling
 	virtual std::set<std::string /*name*/> 					getAllConfigurationNames() 		const throw(std::runtime_error) { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
 	virtual std::set<ConfigurationVersion>					getVersions 			(const ConfigurationBase* configuration) const = 0;
 	const bool&												getMode					() const {return theMode_;}
 	ConfigurationVersion  			        				saveNewVersion			(ConfigurationBase* configuration, ConfigurationVersion temporaryVersion, ConfigurationVersion newVersion = ConfigurationVersion());
 
 
-
+	//group handling
 	virtual std::set<std::string /*name*/> 					getAllConfigurationGroupNames(const std::string &filterString = "") const throw(std::runtime_error) { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
 	virtual std::set<ConfigurationGroupKey> 				getKeys(const std::string &groupName) const { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
 	virtual std::map<std::string /*name*/, ConfigurationVersion /*version*/> getConfigurationGroupMembers(std::string const& /*globalConfiguration*/, bool includeMetaDataTable = false) const throw(std::runtime_error) { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
@@ -224,9 +224,11 @@ protected:
 	ConfigurationInterface(void);//Protected constructor
 
 	virtual void  											fill             		(      ConfigurationBase* configuration, ConfigurationVersion version) const = 0;
-	virtual ConfigurationVersion  							findLatestVersion		(const ConfigurationBase* configuration) const = 0; //return INVALID if no existing versions
 
-public: //was protected,.. unfortunately, must be public to allow otsdaq_database_migrate to compile
+
+public: //was protected,.. unfortunately, must be public to allow otsdaq_database_migrate and otsdaq_import_system_aliases to compile
+	virtual ConfigurationGroupKey  							findLatestGroupKey		(const std::string& groupName) const /* return INVALID if no existing versions */ { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findLatestGroupKey in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
+	virtual ConfigurationVersion  							findLatestVersion		(const ConfigurationBase* configuration) const = 0; //return INVALID if no existing versions
 	virtual void  											saveActiveVersion		(const ConfigurationBase* configuration, bool overwrite = false) const = 0;
 
 protected:

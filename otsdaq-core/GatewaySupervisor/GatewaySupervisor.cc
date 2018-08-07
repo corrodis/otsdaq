@@ -2221,7 +2221,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 
 		std::map<std::string /*alias*/,
 			std::pair<std::string /*group name*/, ConfigurationGroupKey> > aliasMap =
-			CorePropertySupervisorBase::theConfigurationManager_->getGroupAliasesConfiguration();
+			CorePropertySupervisorBase::theConfigurationManager_->getActiveGroupAliases();
 
 
 		// get stateMachineAliasFilter if possible

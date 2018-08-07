@@ -237,6 +237,19 @@ catch (...)
 	throw std::runtime_error(ss.str());
 }
 
+//==============================================================================
+// find the latest configuration group key by group name
+// 	if not found, return invalid
+ConfigurationGroupKey DatabaseConfigurationInterface::findLatestGroupKey(const std::string& groupName) const
+noexcept
+{
+	std::set<ConfigurationGroupKey> keys = DatabaseConfigurationInterface::getKeys(groupName);
+	if(keys.size()) //if keys exist, bump the last
+		return *(keys.crbegin());
+
+	//else, return invalid
+	return ConfigurationGroupKey();
+}
 
 //==============================================================================
 // find all configuration groups in database

@@ -226,7 +226,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 								ConfigurationGroupKey())
 		);
 
-	std::cout << __COUT_HDR_FL__<< "Identfied groups:" << std::endl;
+	std::cout << __COUT_HDR_FL__<< "Identified groups:" << std::endl;
 	for(auto& group:groupSet)
 		std::cout << __COUT_HDR_FL__<< group.first.first << " " << group.first.second << std::endl;
 	std::cout << __COUT_HDR_FL__<< std::endl;
@@ -490,10 +490,6 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 				//set it back for the table so that future groups can re-use cached version
 				cfgView->setVersion(memberPair.second); //IMPORTANT
 
-				memberPair.second = flatVersion; //change version in the member map
-
-				__COUT__<< "\t to...\t" <<
-						memberPair.first << ":v" << memberPair.second << std::endl;
 
 				//save new version to modifiedTables
 				modifiedTables.insert(std::pair<
@@ -504,6 +500,11 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 										memberPair.second),
 										ConfigurationVersion(flatVersion))
 				);
+
+				memberPair.second = flatVersion; //change version in the member map
+
+				__COUT__<< "\t to...\t" <<
+						memberPair.first << ":v" << memberPair.second << std::endl;
 			}
 
 			//Note: this code is copied actions in ConfigurationManagerRW::saveNewConfigurationGroup

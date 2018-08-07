@@ -144,14 +144,15 @@ void ConfigurationManager::init(std::string *accumulatedErrors)
 //	load the active groups from file
 //	Note: this should be used by the Supervisor to maintain
 //		the same configurationGroups surviving software system restarts
-void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
+void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors,
+		const std::string& pathToActiveGroupsFile)
 {
 	destroyConfigurationGroup("",true); //deactivate all
 
-	std::string fn = ACTIVE_GROUP_FILENAME;
+	std::string fn = pathToActiveGroupsFile == ""?ACTIVE_GROUP_FILENAME:pathToActiveGroupsFile;
 	FILE *fp = fopen(fn.c_str(),"r");
 
-	__COUT__ << "ACTIVE_GROUP_FILENAME = " << ACTIVE_GROUP_FILENAME << std::endl;
+	__COUT__ << "ACTIVE_GROUP_FILENAME = " << fn << std::endl;
 	__COUT__ << "ARTDAQ_DATABASE_URI = " << std::string(getenv("ARTDAQ_DATABASE_URI")) << std::endl;
 
 	if(!fp) return;
@@ -203,13 +204,15 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 					break;
 				}
 
+		if(skip) continue;
+
 		try
 		{
 			ConfigurationGroupKey::getFullGroupString(groupName,ConfigurationGroupKey(strVal));
 		}
 		catch(...)
 		{
-			__COUT__ << "illegal group accorging to ConfigurationGroupKey::getFullGroupString..." << std::endl;
+			__COUT__ << "illegal group according to ConfigurationGroupKey::getFullGroupString..." << std::endl;
 			skip = true;
 		}
 
@@ -244,7 +247,7 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors)
 		__COUT_INFO__ << "\n" << ss.str();
 		throw std::runtime_error(errorStr);
 	}
-}
+} // end restoreActiveConfigurationGroups()
 
 //==============================================================================
 //destroyConfigurationGroup
@@ -1512,7 +1515,7 @@ std::pair<std::string, ConfigurationGroupKey> ConfigurationManager::getConfigura
 
 //==============================================================================
 //   map<alias      ,      pair<group name,  ConfigurationGroupKey> >
-std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > ConfigurationManager::getGroupAliasesConfiguration(void)
+std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > ConfigurationManager::getActiveGroupAliases(void)
 {
 	restoreActiveConfigurationGroups(); //make sure the active configuration backbone is loaded!
 	//loadConfigurationBackbone();

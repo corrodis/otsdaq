@@ -286,11 +286,12 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 //==============================================================================
 //getActiveAliases()
 //	get active version aliases organized by table
-std::map<std::string,std::map<std::string,ConfigurationVersion> >
+std::map<std::string /*table name*/,std::map<std::string /*version alias*/,ConfigurationVersion /*aliased version*/> >
 ConfigurationManagerRW::getActiveVersionAliases(void) const
 {
 	__COUT__ << "getActiveVersionAliases()" << std::endl;
-	std::map<std::string,std::map<std::string,ConfigurationVersion> > retMap;
+	std::map<std::string /*table name*/,
+	std::map<std::string /*version alias*/,ConfigurationVersion /*aliased version*/> > retMap;
 
 	std::map<std::string, ConfigurationVersion> activeVersions = getActiveVersions();
 	std::string versionAliasesTableName = "VersionAliasesConfiguration";
@@ -812,18 +813,8 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 	}
 
 	//determine new group key
-	ConfigurationGroupKey newKey;
-	//CHANGED do not allow bumping, it is too risky.. because database allows it.. and then it corrupts database
-	//if(!previousVersion.isInvalid())	//if previous provided, bump that
-	//	newKey = ConfigurationGroupKey::getNextKey(previousVersion);
-	//else							//get latest key from db, and bump
-	{
-		std::set<ConfigurationGroupKey> keys = theInterface_->getKeys(groupName);
-		if(keys.size()) //if keys exist, bump the last
-			newKey = ConfigurationGroupKey::getNextKey(*(keys.crbegin()));
-		else			//else, take default
-			newKey = ConfigurationGroupKey::getDefaultKey();
-	}
+	ConfigurationGroupKey newKey = ConfigurationGroupKey::getNextKey(
+			theInterface_->findLatestGroupKey(groupName));
 
 	__COUT__ << "New Key for group: " << groupName << " found as " << newKey << std::endl;
 

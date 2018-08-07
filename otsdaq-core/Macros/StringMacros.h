@@ -426,6 +426,36 @@ static std::string			mapToString								(const std::map<std::pair<std::string,st
 	}
 	return ss.str();
 }
+template<class T>
+static std::string			mapToString								(const std::map<std::string,std::pair<std::string,T> >& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
+{
+	//this is a pretty specific map format (comes from the get aliases functions in ConfigurationManager)
+	std::stringstream ss;
+	bool first = true;
+	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first << "/" << mapPair.second.first << secondaryDelimeter << mapPair.second.second;
+	}
+	return ss.str();
+}
+template<class T>
+static std::string			mapToString								(const std::map<std::string,std::map<std::string,T> >& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
+{
+	//this is a pretty specific map format (comes from the get aliases functions in ConfigurationManager)
+	std::stringstream ss;
+	bool first = true;
+	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first;
+		for(auto& secondMapPair:mapPair.second)
+			ss << "/" << secondMapPair.first << secondaryDelimeter << secondMapPair.second;
+	}
+	return ss.str();
+}
 static std::string			mapToString								(const std::map<std::string,uint8_t>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ");
 template<class T>
 static std::string			setToString								(const std::set<T>& setToReturn, const std::string& delimeter = ", ")

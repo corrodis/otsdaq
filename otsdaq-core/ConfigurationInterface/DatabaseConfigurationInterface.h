@@ -39,6 +39,7 @@ class DatabaseConfigurationInterface : public ConfigurationInterface {
   // find all configuration groups in database
   std::set<std::string /*name+version*/> 	getAllConfigurationGroupNames(const std::string &filterString = "") const throw(std::runtime_error);
   std::set<ConfigurationGroupKey> 			getKeys(const std::string &groupName) const;
+  ConfigurationGroupKey  					findLatestGroupKey(const std::string& groupName) const noexcept;
 
   // return the contents of a configuration group
   config_version_map_t 			 			getConfigurationGroupMembers(std::string const& /*configurationGroup*/, bool includeMetaDataTable = false) const

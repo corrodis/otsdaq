@@ -52,7 +52,7 @@ public:
 	const std::string&									getUsername								(void) const { return username_; }
 	ConfigurationInterface* 							getConfigurationInterface				(void) const { return theInterface_; }
 
-	const std::map<std::string, ConfigurationInfo>& 	getAllConfigurationInfo					(bool refresh=false, std::string *accumulatedErrors=0, const std::string &errorFilterName="");
+	const std::map<std::string, ConfigurationInfo>& 	getAllConfigurationInfo					(bool refresh=false, std::string *accumulatedErrors=0, const std::string& errorFilterName="");
 	/* map < configName, map < aliasName, version > > */
 	std::map<std::string,std::map<std::string,ConfigurationVersion> > getActiveVersionAliases	(void) const;
 
@@ -61,39 +61,38 @@ public:
 	{
 		return (T*)getConfigurationByName(name);
 	}
-	ConfigurationBase*                          		getVersionedConfigurationByName			(const std::string &configurationName, ConfigurationVersion version, bool looseColumnMatching=false);
-	ConfigurationBase*                          		getConfigurationByName		  			(const std::string &configurationName);
-	ConfigurationGroupKey 								findConfigurationGroup					(const std::string &groupName, const std::map<std::string, ConfigurationVersion> &groupMembers);
+	ConfigurationBase*                          		getVersionedConfigurationByName			(const std::string& configurationName, ConfigurationVersion version, bool looseColumnMatching=false);
+	ConfigurationBase*                          		getConfigurationByName		  			(const std::string& configurationName);
+	ConfigurationGroupKey 								findConfigurationGroup					(const std::string& groupName, const std::map<std::string, ConfigurationVersion> &groupMembers);
 	ConfigurationBase*                          		getMetadataTable			  			(void) { return &groupMetadataTable_; /* created for use in otsdaq_flatten_system_aliases, e.g. */}
 
 	//==============================================================================
 	//modifiers of generic ConfigurationBase
 
-	ConfigurationVersion								saveNewConfiguration					(const std::string &configurationName, ConfigurationVersion temporaryVersion = ConfigurationVersion(), bool makeTemporary = false);//, bool saveToScratchVersion = false);
-	ConfigurationVersion								copyViewToCurrentColumns				(const std::string &configurationName, ConfigurationVersion sourceVersion);
-	void												eraseTemporaryVersion					(const std::string &configurationName, ConfigurationVersion targetVersion = ConfigurationVersion());
-	void												clearCachedVersions						(const std::string &configurationName);
+	ConfigurationVersion								saveNewConfiguration					(const std::string& configurationName, ConfigurationVersion temporaryVersion = ConfigurationVersion(), bool makeTemporary = false);//, bool saveToScratchVersion = false);
+	ConfigurationVersion								copyViewToCurrentColumns				(const std::string& configurationName, ConfigurationVersion sourceVersion);
+	void												eraseTemporaryVersion					(const std::string& configurationName, ConfigurationVersion targetVersion = ConfigurationVersion());
+	void												clearCachedVersions						(const std::string& configurationName);
 	void												clearAllCachedVersions					();
 
 	//==============================================================================
 	//modifiers of configuration groups
 
-	void 												activateConfigurationGroup				(const std::string &configGroupName, ConfigurationGroupKey configGroupKey, std::string *accumulatedTreeErrors=0);
+	void 												activateConfigurationGroup				(const std::string& configGroupName, ConfigurationGroupKey configGroupKey, std::string *accumulatedTreeErrors=0);
 
 	ConfigurationVersion								createTemporaryBackboneView				(ConfigurationVersion sourceViewVersion = ConfigurationVersion()); //-1, from MockUp, else from valid backbone view version
 	ConfigurationVersion								saveNewBackbone							(ConfigurationVersion temporaryVersion = ConfigurationVersion());
 
 
-
 	//==============================================================================
 	//modifiers of a configuration group based on alias, e.g. "Physics"
-	ConfigurationGroupKey								saveNewConfigurationGroup				(const std::string &groupName, std::map<std::string, ConfigurationVersion> &groupMembers, const std::string &groupComment = ViewColumnInfo::DATATYPE_COMMENT_DEFAULT);
+	ConfigurationGroupKey								saveNewConfigurationGroup				(const std::string& groupName, std::map<std::string, ConfigurationVersion> &groupMembers, const std::string& groupComment = ViewColumnInfo::DATATYPE_COMMENT_DEFAULT);
 
 
 
 	//==============================================================================
 	//public group cache handling
-	const GroupInfo&									getGroupInfo							(const std::string &groupName);
+	const GroupInfo&									getGroupInfo							(const std::string& groupName);
 	const std::map<std::string, GroupInfo>&				getAllGroupInfo							() {return allGroupInfo_;}
 
 	void testXDAQContext(); //for debugging
@@ -102,7 +101,7 @@ private:
 
 	//==============================================================================
 	//group cache handling
-	void												cacheGroupKey							(const std::string &groupName, ConfigurationGroupKey key);
+	void												cacheGroupKey							(const std::string& groupName, ConfigurationGroupKey key);
 
 
 	//==============================================================================

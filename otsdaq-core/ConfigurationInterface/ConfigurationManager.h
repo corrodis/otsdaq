@@ -103,7 +103,7 @@ public:
 
 
 	//   map<alias      ,      pair<group name,  ConfigurationGroupKey> >
-	std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > getGroupAliasesConfiguration  (void);
+	std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > getActiveGroupAliases  (void);
 	//   pair<group name , ConfigurationGroupKey>
 	std::pair<std::string, ConfigurationGroupKey>                         getConfigurationGroupFromAlias(std::string systemAlias, ProgressBar* progressBar=0);
 
@@ -112,7 +112,7 @@ public:
 	//==============================================================================
 	//Setters/Modifiers
 	std::shared_ptr<ConfigurationGroupKey> 			makeTheConfigurationGroupKey(ConfigurationGroupKey key);
-	void											restoreActiveConfigurationGroups(bool throwErrors=false);
+	void											restoreActiveConfigurationGroups(bool throwErrors=false, const std::string& pathToActiveGroupsFile = "");
 
 
 private:
