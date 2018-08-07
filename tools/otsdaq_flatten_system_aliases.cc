@@ -902,8 +902,8 @@ CLEAN_UP:
 
 	__COUT__<< "****************************" << std::endl;
 	__COUT__<< "There were " << groupSet.size() <<
-			" groups considered, and there were errors handling " << groupErrors.size() <<
-			" of those groups." << std::endl;
+			" groups considered, and there were " << groupErrors.size() <<
+			" errors found handling those groups." << std::endl;
 	__COUT__<< "The following errors were found handling the groups:" << std::endl;
 	for(auto& groupErr:groupErrors)
 		__COUT__<< "\t" << groupErr.first.first << " " << groupErr.first.second <<

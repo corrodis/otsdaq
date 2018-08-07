@@ -24,7 +24,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 	std::string prependBaseName = "Imported";
 	const std::string groupAliasesTableName = "GroupAliasesConfiguration";
-	const std::string tableAliasesTableName = "VersionAliasesConfiguration";
+	const std::string versionAliasesTableName = "VersionAliasesConfiguration";
 
 	std::cout << "\n\nusage: Two arguments:\n\n\t otsdaq_import_system_aliases <path_to_import_database_folder> <path_to_active_groups_file> <import_prepend_base_name (optional)> \n\n" <<
 			"\t\t Default values: \n\t\t\timport_prepend_base_name = \"" <<
@@ -33,6 +33,9 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			"\t\tfor example:\n\n" <<
 			"\t\t\totsdaq_import_system_aliases ~/databaseToImport/filesystemdb/test_db ~/UserDataToImport/ServiceData/ActiveConfigurationGroups.cfg" <<
 			__E__;
+
+	std::cout << "\n\n\tExample active groups file content:\n\n" <<
+			"testContext\n2\nTableEditWizBackbone\n\n3\ndefaultConfig\n1\n\n" << __E__;
 
 	std::cout << "\n\nNote: This assumes artdaq db file type interface. " <<
 			"The current database/ will be backed up to database_<linuxtime>/ " <<
@@ -143,9 +146,9 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	// 	-- insert new aliases for imported tables
 	//		- should be basename+alias connection to (hop through maps) new tableName & tableVersion
 	//	-- save new backbone tables and save new backbone group
-	//
 	//	-- backup the file ConfigurationManager::ACTIVE_GROUP_FILENAME with time
-	// 	-- change the ConfigurationManager::ACTIVE_GROUP_FILENAME to reflect new group names/keys
+	//	-- activate the new backbone group
+	//
 
 	//==============================================================================
 
@@ -293,10 +296,10 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 					std::endl;
 			__SS_THROW__;
 		}
-		if(activeVersions.find(tableAliasesTableName) == activeVersions.end())
+		if(activeVersions.find(versionAliasesTableName) == activeVersions.end())
 		{
-			__SS__ << "\nActive version of " << tableAliasesTableName << " missing! " <<
-					tableAliasesTableName << " is a required member of the Backbone configuration group." <<
+			__SS__ << "\nActive version of " << versionAliasesTableName << " missing! " <<
+					versionAliasesTableName << " is a required member of the Backbone configuration group." <<
 					"\n\nLikely you need to activate a valid Backbone group." <<
 					std::endl;
 			__SS_THROW__;
@@ -346,7 +349,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 		} //end group aliases loop
 
 		aliasNodePairs =
-				cfgMgr->getNode(tableAliasesTableName).getChildren();
+				cfgMgr->getNode(versionAliasesTableName).getChildren();
 		for(auto& aliasPair:aliasNodePairs)
 		{
 			if(ConfigurationVersion(aliasPair.second.getNode("Version").getValueAsString()).isInvalid()) continue;
@@ -726,6 +729,14 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 		//modify GroupAliasesConfiguration and VersionAliasesConfiguration to
 		//	include new groups and tables
 
+		std::string activeBackboneGroupName =
+				cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
+		cfgMgr->loadConfigurationGroup(
+				activeBackboneGroupName,
+				cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE),
+				true,&memberMap,0,&accumulateErrors);
+
+
 		std::map<std::string, ConfigurationVersion> activeMap = cfgMgr->getActiveVersions();
 
 		//modify GroupAliasesConfiguration
@@ -773,10 +784,10 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 		}
 
 		//modify VersionAliasesConfiguration
-		if(activeMap.find(versionAliasesName) != activeMap.end())
+		if(activeMap.find(versionAliasesTableName) != activeMap.end())
 		{
-			__COUT__ << "\n\nModifying " << versionAliasesName << std::endl;
-			config = cfgMgr->getConfigurationByName(versionAliasesName);
+			__COUT__ << "\n\nModifying " << versionAliasesTableName << std::endl;
+			config = cfgMgr->getConfigurationByName(versionAliasesTableName);
 			cfgView = config->getViewP();
 			unsigned int col0 = cfgView->findCol("VersionAlias");
 			unsigned int col1 = cfgView->findCol("ConfigurationName");
@@ -808,7 +819,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 						aliasPair.second.first,
 						row,col1);
 				cfgView->setValue(
-						groupIt->second.toString(),
+						tableIt->second.toString(),
 						row,col2);
 			} //end group alias edit
 
@@ -823,40 +834,58 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 		//change the version of the active view to flatVersion and save it
 		config = cfgMgr->getConfigurationByName(groupAliasesTableName);
 		cfgView = config->getViewP();
-		cfgView->setVersion(ConfigurationVersion(flatVersion));
+		newVersion = ConfigurationVersion::getNextVersion(theInterface_->findLatestVersion(config));
+		__COUTV__(newVersion);
+		cfgView->setVersion(newVersion);
 		theInterface_->saveActiveVersion(config);
 
-		memberMap[groupAliasesName] = flatVersion; //change version in the member map
+		memberMap[groupAliasesTableName] = newVersion; //change version in the member map
 
 		__COUT__ << "\t to...\t" <<
-				groupAliasesName << ":v" << memberMap[groupAliasesName] << std::endl;
+				groupAliasesTableName << ":v" << memberMap[groupAliasesTableName] << std::endl;
 
 
 
-		__COUT__ << versionAliasesName << ":v" <<
-				memberMap[versionAliasesName] << std::endl;
+		__COUT__ << versionAliasesTableName << ":v" <<
+				memberMap[versionAliasesTableName] << std::endl;
 		//change the version of the active view to flatVersion and save it
-		config = cfgMgr->getConfigurationByName(versionAliasesName);
+		config = cfgMgr->getConfigurationByName(versionAliasesTableName);
 		cfgView = config->getViewP();
-		cfgView->setVersion(ConfigurationVersion(flatVersion));
+		newVersion = ConfigurationVersion::getNextVersion(theInterface_->findLatestVersion(config));
+		__COUTV__(newVersion);
+		cfgView->setVersion(newVersion);
 		theInterface_->saveActiveVersion(config);
 
-		memberMap[versionAliasesName] = flatVersion; //change version in the member map
+		memberMap[versionAliasesTableName] = newVersion; //change version in the member map
 
 		__COUT__ << "\t to...\t" <<
-				versionAliasesName << ":v" << memberMap[versionAliasesName] << std::endl;
+				versionAliasesTableName << ":v" << memberMap[versionAliasesTableName] << std::endl;
+
+		__COUT__ << "Backbone member map completed" << __E__;
+		__COUTV__(StringMacros::mapToString(memberMap));
+
+		newKey = ConfigurationGroupKey::getNextKey(
+				theInterface_->findLatestGroupKey(
+						activeBackboneGroupName));
+
+		__COUTV__(newKey);
 
 		//memberMap should now consist of members with new flat version, so save
 		theInterface_->saveConfigurationGroup(memberMap,
 				ConfigurationGroupKey::getFullGroupString(
 						activeBackboneGroupName,
-						ConfigurationGroupKey(flatVersion)));
+						newKey));
 
-		activeGroupKeys[activeBackboneGroupName].second =
-								ConfigurationGroupKey(flatVersion);
 
-		__COUT__ << "New to-be-active backbone group " << activeBackboneGroupName <<
-				":v" << activeGroupKeys[activeBackboneGroupName].second << std::endl;
+		std::string renameFile = ConfigurationManager::ACTIVE_GROUP_FILENAME + "." + nowTime;
+		rename(ConfigurationManager::ACTIVE_GROUP_FILENAME.c_str(),
+				renameFile.c_str());
+
+		__COUT__<< "Backing up '" << ConfigurationManager::ACTIVE_GROUP_FILENAME << "' to ... '" <<
+				renameFile << "'" << std::endl;
+
+		cfgMgr->activateConfigurationGroup(activeBackboneGroupName, newKey); //and write to active group file
+
 	} //end try
 	catch(const std::runtime_error& e)
 	{
@@ -867,71 +896,6 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 
 
-	//backup the file ConfigurationManager::ACTIVE_GROUP_FILENAME with time
-	// 	and change the ConfigurationManager::ACTIVE_GROUP_FILENAME
-	//	to reflect new group names/keys
-
-	{
-		std::cout << "\n\n" << __COUT_HDR_FL__ << "Manipulating the Active Groups file..." << std::endl;
-
-		//check if original active file exists
-		FILE *fp = fopen(ConfigurationManager::ACTIVE_GROUP_FILENAME.c_str(),"r");
-		if(!fp)
-		{
-			__SS__ << "Original active groups file '" << ConfigurationManager::ACTIVE_GROUP_FILENAME
-					<< "' not found." << std::endl;
-			goto CLEAN_UP;
-		}
-
-		__COUT__ << "Backing up file: " << ConfigurationManager::ACTIVE_GROUP_FILENAME
-				<< std::endl;
-
-		fclose(fp);
-
-		std::string renameFile = ConfigurationManager::ACTIVE_GROUP_FILENAME + "." + nowTime;
-		rename(ConfigurationManager::ACTIVE_GROUP_FILENAME.c_str(),
-				renameFile.c_str());
-
-		__COUT__ << "Backup file name: " << renameFile
-				<< std::endl;
-
-		ConfigurationGroupKey         	*theConfigurationGroupKey_,	*theContextGroupKey_, 	*theBackboneGroupKey_,	*theIterateGroupKey_;
-		std::string						theConfigurationGroup_, 	theContextGroup_, 		theBackboneGroup_,		theIterateGroup_;
-
-		theConfigurationGroup_ = activeConfigGroupName;
-		theConfigurationGroupKey_ = &(activeGroupKeys[activeConfigGroupName].second);
-
-		theContextGroup_ = activeContextGroupName;
-		theContextGroupKey_ = &(activeGroupKeys[activeContextGroupName].second);
-
-		theBackboneGroup_ = activeBackboneGroupName;
-		theBackboneGroupKey_ = &(activeGroupKeys[activeBackboneGroupName].second);
-
-		theIterateGroup_ = activeIterateGroupName;
-		theIterateGroupKey_ = &(activeGroupKeys[activeIterateGroupName].second);
-
-
-		//the following is copied from ConfigurationManagerRW::activateConfigurationGroup
-		{
-			__COUT__ << "Updating persistent active groups to " <<
-					ConfigurationManager::ACTIVE_GROUP_FILENAME << " ..."  << std::endl;
-
-			std::string fn = ConfigurationManager::ACTIVE_GROUP_FILENAME;
-			FILE *fp = fopen(fn.c_str(),"w");
-			if(!fp) return;
-
-			fprintf(fp,"%s\n",theContextGroup_.c_str());
-			fprintf(fp,"%s\n",theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1");
-			fprintf(fp,"%s\n",theBackboneGroup_.c_str());
-			fprintf(fp,"%s\n",theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1");
-			fprintf(fp,"%s\n",theConfigurationGroup_.c_str());
-			fprintf(fp,"%s\n",theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1");
-			fprintf(fp,"%s\n",theIterateGroup_.c_str());
-			fprintf(fp,"%s\n",theIterateGroupKey_?theIterateGroupKey_->toString().c_str():"-1");
-			fclose(fp);
-		}
-	}
-
 	//print resulting all groups
 
 	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Groups:" << std::endl;
@@ -940,17 +904,6 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			group.first.second << " => " << group.second << std::endl;
 	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Groups end." << std::endl;
 
-
-	//print resulting active groups
-
-	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Active Groups:" << std::endl;
-	for(const auto &activeGroup: activeGroupKeys)
-		__COUT__ << "\t" << activeGroup.first << ": " <<
-			activeGroup.second.first << " => " << activeGroup.second.second << std::endl;
-
-	__COUT__ << activeBackboneGroupName << " is the " <<
-			ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE << "." << std::endl;
-	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Active Groups end." << std::endl;
 
 
 
@@ -962,8 +915,8 @@ CLEAN_UP:
 
 	__COUT__ << "****************************" << std::endl;
 	__COUT__ << "There were " << groupSet.size() <<
-			" groups considered, and there were errors handling " << groupErrors.size() <<
-			" of those groups." << std::endl;
+			" groups considered, and there were " << groupErrors.size() <<
+			" errors found handling those groups." << std::endl;
 	__COUT__ << "The following errors were found handling the groups:" << std::endl;
 	for(auto& groupErr:groupErrors)
 		__COUT__ << "\t" << groupErr.first.first << " " << groupErr.first.second <<
