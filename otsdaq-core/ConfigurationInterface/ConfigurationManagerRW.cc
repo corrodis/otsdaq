@@ -284,9 +284,10 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 } //end getAllConfigurationInfo
 
 //==============================================================================
-//getActiveAliases()
+//getActiveVersionAliases()
 //	get active version aliases organized by table
-std::map<std::string /*table name*/,std::map<std::string /*version alias*/,ConfigurationVersion /*aliased version*/> >
+std::map<std::string /*table name*/,std::map<
+std::string /*version alias*/,ConfigurationVersion /*aliased version*/> >
 ConfigurationManagerRW::getActiveVersionAliases(void) const
 {
 	__COUT__ << "getActiveVersionAliases()" << std::endl;
@@ -338,7 +339,7 @@ ConfigurationManagerRW::getActiveVersionAliases(void) const
 	}
 
 	return retMap;
-}
+} //end getActiveVersionAliases()
 
 //==============================================================================
 //setActiveGlobalConfiguration
@@ -956,6 +957,19 @@ ConfigurationVersion ConfigurationManagerRW::saveNewBackbone(ConfigurationVersio
 //==============================================================================
 void ConfigurationManagerRW::testXDAQContext()
 {
+
+	//test creating a group with member version aliases
+	{
+		std::map<std::string, ConfigurationVersion> groupMembers;
+		groupMembers["DesktopIcon"] = ConfigurationVersion(2);
+//
+//		theInterface_->saveConfigurationGroup(groupMembers,
+//				ConfigurationGroupKey::getFullGroupString(groupName,newKey));
+
+		return;
+	}
+
+
 //	//test creating config group with author, create time, and comment
 //	{
 //		__COUT__ << std::endl;

@@ -53,8 +53,8 @@ public:
 	ConfigurationInterface* 							getConfigurationInterface				(void) const { return theInterface_; }
 
 	const std::map<std::string, ConfigurationInfo>& 	getAllConfigurationInfo					(bool refresh=false, std::string *accumulatedErrors=0, const std::string& errorFilterName="");
-	/* map < configName, map < aliasName, version > > */
-	std::map<std::string,std::map<std::string,ConfigurationVersion> > getActiveVersionAliases	(void) const;
+	std::map<std::string /*tableName*/,std::map<std::string /*aliasName*/,ConfigurationVersion /*version*/> > 				getActiveVersionAliases	(void) const;
+
 
 	template<class T>
 	T* getConfigurationRW(std::string name)
