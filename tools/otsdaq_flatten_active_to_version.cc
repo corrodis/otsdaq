@@ -98,7 +98,14 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > activeGroupsMap =
 			cfgMgr->getActiveConfigurationGroups();
 
-	std::map<std::string, std::map<std::string, ConfigurationVersion> > activeGroupMembersMap;
+	std::map<std::string, std::map<std::string, ConfigurationVersion> > 			activeGroupMembersMap;
+	std::map<std::string, std::map<std::string /*name*/, std::string /*alias*/> > 	activeGroupAliasesMap;
+	std::map<std::string, std::string> 									activeGroupCommentMap;
+	std::map<std::string, std::string> 									activeGroupAuthorMap;
+	std::string groupCreateTime;
+	std::map<std::string, time_t> 										activeGroupCreateTimeMap;
+	ConfigurationBase*		groupMetadataTable = cfgMgr->getMetadataTable();
+
 	for(auto &activeGroupPair: activeGroupsMap)
 	{
 		if(activeGroupPair.second.second.isInvalid())
@@ -113,10 +120,52 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 				activeGroupPair.second.first << "(" << activeGroupPair.second.second << ")" <<
 				std::endl;
 
-		activeGroupMembersMap[activeGroupPair.second.first] =
-				cfgMgr->getConfigurationInterface()->getConfigurationGroupMembers(
-						ConfigurationGroupKey::getFullGroupString(
-								activeGroupPair.second.first,activeGroupPair.second.second));
+//		//old way before metadata
+//		activeGroupMembersMap[activeGroupPair.second.first] =
+//				cfgMgr->getConfigurationInterface()->getConfigurationGroupMembers(
+//						ConfigurationGroupKey::getFullGroupString(
+//								activeGroupPair.second.first,activeGroupPair.second.second));
+
+
+		//=========================
+		//load group, group metadata, and tables from original DB
+		try
+		{
+			cfgMgr->loadConfigurationGroup(
+					activeGroupPair.second.first,
+					activeGroupPair.second.second,
+					true /*doActivate*/,
+					&activeGroupMembersMap[activeGroupPair.second.first] /*memberMap*/,
+					0 /*progressBar*/,&accumulateErrors,
+					&activeGroupCommentMap[activeGroupPair.second.first],
+					&activeGroupAuthorMap[activeGroupPair.second.first],
+					&groupCreateTime,
+					false /*doNotLoadMember*/,
+					0 /*groupTypeString*/,
+					&activeGroupAliasesMap[activeGroupPair.second.first]
+			);
+			sscanf(groupCreateTime.c_str(),"%ld",&activeGroupCreateTimeMap[activeGroupPair.second.first]);
+		}
+		catch(std::runtime_error& e)
+		{
+
+			__COUT__<< "Error was caught loading members for " <<
+					groupPair.first.first <<
+					"(" << groupPair.first.second << ")" <<
+					std::endl;
+			__COUT__<< e.what() << std::endl;
+			errDetected = true;
+		}
+		catch(...)
+		{
+			__COUT__<< "Error was caught loading members for " <<
+					groupPair.first.first <<
+					"(" << groupPair.first.second << ")" <<
+					std::endl;
+			errDetected = true;
+		}
+
+		//=========================
 	}
 
 
@@ -315,6 +364,44 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 					groupMemberPair.first << ":v" << groupMemberPair.second << std::endl;
 		}
 
+
+		//Note: this code copies actions in ConfigurationManagerRW::saveNewConfigurationGroup
+
+		//add meta data
+		__COUTV__(StringMacros::mapToString(activeGroupAliasesMap[activeGroupMembersPair.first]));
+		__COUTV__(activeGroupCommentMap[activeGroupMembersPair.first]);
+		__COUTV__(activeGroupAuthorMap[activeGroupMembersPair.first]);
+		__COUTV__(activeGroupCreateTimeMap[activeGroupMembersPair.first]);
+
+		//to compensate for unusual errors upstream, make sure the metadata table has one row
+		while(groupMetadataTable->getViewP()->getNumberOfRows() > 1)
+			groupMetadataTable->getViewP()->deleteRow(0);
+		if(groupMetadataTable->getViewP()->getNumberOfRows() == 0)
+			groupMetadataTable->getViewP()->addRow();
+
+		//columns are uid,comment,author,time
+		//ConfigurationManager::METADATA_COL_ALIASES TODO
+		groupMetadataTable->getViewP()->setValue(
+				StringMacros::mapToString(
+						activeGroupAliasesMap[activeGroupMembersPair.first],
+						"," /*primary delimiter*/,":" /*secondary delimeter*/),
+						0,ConfigurationManager::METADATA_COL_ALIASES);
+		groupMetadataTable->getViewP()->setValue(
+				activeGroupCommentMap[activeGroupMembersPair.first]		,0,ConfigurationManager::METADATA_COL_COMMENT);
+		groupMetadataTable->getViewP()->setValue(
+				activeGroupAuthorMap[activeGroupMembersPair.first]		,0,ConfigurationManager::METADATA_COL_AUTHOR);
+		groupMetadataTable->getViewP()->setValue(
+				activeGroupCreateTimeMap[activeGroupMembersPair.first]	,0,ConfigurationManager::METADATA_COL_TIMESTAMP);
+
+		//set version of metadata table
+		groupMetadataTable->getViewP()->setVersion(ConfigurationVersion(flatVersion));
+		theInterface_->saveActiveVersion(groupMetadataTable);
+
+		//force groupMetadataTable_ to be a member for the group
+		activeGroupMembersPair.second[groupMetadataTable->getConfigurationName()] =
+				groupMetadataTable->getViewVersion();
+
+		//memberMap should now consist of members with new flat version, so save group
 		theInterface_->saveConfigurationGroup(activeGroupMembersPair.second,
 						ConfigurationGroupKey::getFullGroupString(
 								activeGroupMembersPair.first,

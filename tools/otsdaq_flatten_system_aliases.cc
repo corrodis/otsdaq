@@ -303,9 +303,10 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 
 	bool errDetected;
 	std::string accumulateErrors = "";
-	std::map<std::string, ConfigurationVersion> memberMap;
 	int count = 0;
 
+	std::map<std::string, ConfigurationVersion> 			memberMap;
+	std::map<std::string /*name*/, std::string /*alias*/> 	groupAliases;
 	std::string 			groupComment;
 	std::string 			groupAuthor;
 	std::string	 			groupCreateTime;
@@ -372,10 +373,14 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			cfgMgr->loadConfigurationGroup(
 					groupPair.first.first,
 					groupPair.first.second,
-					true,&memberMap/*memberMap*/,0,&accumulateErrors,
+					true /*doActivate*/,
+					&memberMap/*memberMap*/,0 /*progressBar*/,&accumulateErrors,
 					&groupComment,
 					&groupAuthor,
-					&groupCreateTime
+					&groupCreateTime,
+					false /*doNotLoadMember*/,
+					0 /*groupTypeString*/,
+					&groupAliases
 					);
 		}
 		catch(std::runtime_error& e)
@@ -507,9 +512,10 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 						memberPair.first << ":v" << memberPair.second << std::endl;
 			}
 
-			//Note: this code is copied actions in ConfigurationManagerRW::saveNewConfigurationGroup
+			//Note: this code copies actions in ConfigurationManagerRW::saveNewConfigurationGroup
 
 			//add meta data
+			__COUTV__(StringMacros::mapToString(groupAliases));
 			__COUTV__(groupComment);
 			__COUTV__(groupAuthor);
 			__COUTV__(groupCreateTime);
@@ -524,6 +530,10 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 
 			//columns are uid,comment,author,time
 			//ConfigurationManager::METADATA_COL_ALIASES TODO
+			groupMetadataTable->getViewP()->setValue(
+					StringMacros::mapToString(groupAliases,
+							"," /*primary delimiter*/,":" /*secondary delimeter*/),
+							0,ConfigurationManager::METADATA_COL_ALIASES);
 			groupMetadataTable->getViewP()->setValue(groupComment		,0,ConfigurationManager::METADATA_COL_COMMENT);
 			groupMetadataTable->getViewP()->setValue(groupAuthor		,0,ConfigurationManager::METADATA_COL_AUTHOR);
 			groupMetadataTable->getViewP()->setValue(groupCreateTime_t	,0,ConfigurationManager::METADATA_COL_TIMESTAMP);
@@ -536,7 +546,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			memberMap[groupMetadataTable->getConfigurationName()] =
 					groupMetadataTable->getViewVersion();
 
-			//memberMap should now consist of members with new flat version, so save
+			//memberMap should now consist of members with new flat version, so save group
 			theInterface_->saveConfigurationGroup(memberMap,
 					ConfigurationGroupKey::getFullGroupString(
 							groupPair.first.first,
