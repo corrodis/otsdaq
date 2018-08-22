@@ -202,12 +202,12 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	}
 
 	//add system alias groups to set
-	const std::string groupAliasesTableName = "GroupAliasesConfiguration";
+	const std::string groupAliasesTableName = ConfigurationManager::GROUP_ALIASES_CONFIG_NAME;
 	std::map<std::string, ConfigurationVersion> activeVersions = cfgMgr->getActiveVersions();
 	if(activeVersions.find(groupAliasesTableName) == activeVersions.end())
 	{
-		__SS__ << "\nActive version of GroupAliasesConfiguration missing! " <<
-				"GroupAliasesConfiguration is a required member of the Backbone configuration group." <<
+		__SS__ << "\nActive version of " << groupAliasesTableName << " missing! " <<
+				groupAliasesTableName << " is a required member of the Backbone configuration group." <<
 				"\n\nLikely you need to activate a valid Backbone group." <<
 				std::endl;
 		throw std::runtime_error(ss.str());
@@ -523,9 +523,10 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 				groupMetadataTable->getViewP()->addRow();
 
 			//columns are uid,comment,author,time
-			groupMetadataTable->getViewP()->setValue(groupComment		,0,1);
-			groupMetadataTable->getViewP()->setValue(groupAuthor		,0,2);
-			groupMetadataTable->getViewP()->setValue(groupCreateTime_t	,0,3);
+			//ConfigurationManager::METADATA_COL_ALIASES TODO
+			groupMetadataTable->getViewP()->setValue(groupComment		,0,ConfigurationManager::METADATA_COL_COMMENT);
+			groupMetadataTable->getViewP()->setValue(groupAuthor		,0,ConfigurationManager::METADATA_COL_AUTHOR);
+			groupMetadataTable->getViewP()->setValue(groupCreateTime_t	,0,ConfigurationManager::METADATA_COL_TIMESTAMP);
 
 			//set version of metadata table
 			groupMetadataTable->getViewP()->setVersion(ConfigurationVersion(flatVersion));
@@ -678,16 +679,16 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 						activeGroupKeys[activeBackboneGroupName].second,
 						true,&memberMap,0,&accumulateErrors);
 
-		//modify GroupAliasesConfiguration and VersionAliasesConfiguration to point
+		//modify Group Aliases Configuration and Version Aliases Configuration to point
 		//	at DEFAULT and flatVersion respectively
 
-		const std::string groupAliasesName = "GroupAliasesConfiguration";
-		const std::string versionAliasesName = "VersionAliasesConfiguration";
+		const std::string groupAliasesName = ConfigurationManager::GROUP_ALIASES_CONFIG_NAME;
+		const std::string versionAliasesName = ConfigurationManager::VERSION_ALIASES_CONFIG_NAME;
 
 
 		std::map<std::string, ConfigurationVersion> activeMap = cfgMgr->getActiveVersions();
 
-		//modify GroupAliasesConfiguration
+		//modify Group Aliases Configuration
 		if(activeMap.find(groupAliasesName) != activeMap.end())
 		{
 			__COUT__<< "\n\nModifying " << groupAliasesName << std::endl;
@@ -728,7 +729,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			//cfgView->print();
 		}
 
-		//modify VersionAliasesConfiguration
+		//modify Version Aliases Configuration
 		if(activeMap.find(versionAliasesName) != activeMap.end())
 		{
 			__COUT__<< "\n\nModifying " << versionAliasesName << std::endl;
@@ -763,7 +764,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 
 
 
-		//save new "GroupAliasesConfiguration" and "VersionAliasesConfiguration"
+		//save new Group Aliases Configuration and Version Aliases Configuration
 
 		__COUT__<< groupAliasesName << ":v" <<
 				memberMap[groupAliasesName] << std::endl;

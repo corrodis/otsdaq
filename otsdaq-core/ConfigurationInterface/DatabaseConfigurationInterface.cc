@@ -273,11 +273,17 @@ try
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.loadGlobalConfiguration(configurationGroup);
 
+	//	for(auto &item:result)
+	//		__COUT__ << "====================>" << item.configuration << ": " << item.version << __E__;
+
+
 	auto to_map = [](auto const& inputList, bool includeMetaDataTable) {
 		auto resultMap = config_version_map_t{};
 
 		std::for_each(inputList.begin(), inputList.end(),
-				[&resultMap](auto const& info) { resultMap[info.configuration] = std::stol(info.version, 0, 10); });
+				[&resultMap](auto const& info) {
+			resultMap[info.configuration] = std::stol(info.version, 0, 10);
+		});
 
 		if(!includeMetaDataTable)
 		{

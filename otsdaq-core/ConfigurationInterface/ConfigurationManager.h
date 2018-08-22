@@ -27,13 +27,22 @@ public:
 	static const std::string ACTIVE_GROUP_FILENAME;
 	static const std::string ALIAS_VERSION_PREAMBLE;
 	static const std::string SCRATCH_VERSION_ALIAS;
+
 	static const std::string XDAQ_CONTEXT_CONFIG_NAME;
 	static const std::string XDAQ_APPLICATION_CONFIG_NAME;
+	static const std::string GROUP_ALIASES_CONFIG_NAME;
+	static const std::string VERSION_ALIASES_CONFIG_NAME;
 
 	static const std::string ACTIVE_GROUP_NAME_CONTEXT;
 	static const std::string ACTIVE_GROUP_NAME_BACKBONE;
 	static const std::string ACTIVE_GROUP_NAME_ITERATE;
 	static const std::string ACTIVE_GROUP_NAME_CONFIGURATION;
+
+
+	static const uint8_t	 METADATA_COL_ALIASES;
+	static const uint8_t	 METADATA_COL_COMMENT;
+	static const uint8_t	 METADATA_COL_AUTHOR;
+	static const uint8_t	 METADATA_COL_TIMESTAMP;
 
 	static const std::set<std::string>              contextMemberNames_;  //list of context members
 	static const std::set<std::string>	            backboneMemberNames_;  //list of backbone members
@@ -70,7 +79,7 @@ public:
 	//==============================================================================
 	//Getters
 
-	void                          										  loadConfigurationGroup		(const std::string &configGroupName, ConfigurationGroupKey configGroupKey, bool doActivate=false, std::map<std::string, ConfigurationVersion> *groupMembers = 0, ProgressBar* progressBar=0, std::string *accumulateWarnings=0, std::string *groupComment=0, std::string	*groupAuthor=0,	std::string *groupCreateTime=0, bool doNotLoadMember=false, std::string	*groupTypeString=0);
+	void                          										  loadConfigurationGroup		(const std::string &configGroupName, ConfigurationGroupKey configGroupKey, bool doActivate=false, std::map<std::string, ConfigurationVersion> *groupMembers = 0, ProgressBar* progressBar=0, std::string *accumulateWarnings=0, std::string *groupComment=0, std::string	*groupAuthor=0,	std::string *groupCreateTime=0, bool doNotLoadMember=false, std::string	*groupTypeString=0, std::map<std::string /*name*/, std::string /*alias*/> *groupAliases = 0);
 	void										                          loadMemberMap					(const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
 	ConfigurationGroupKey							                      loadConfigurationBackbone     (void);
 
@@ -85,8 +94,12 @@ public:
 
 	void																  dumpActiveConfiguration		(const std::string &filePath, const std::string &dumpType) const;
 
-	//   map<type,        pair     <groupName  , ConfigurationGroupKey>>
-	std::map<std::string, std::pair<std::string, ConfigurationGroupKey>>  getActiveConfigurationGroups  (void) const;
+	std::map <std::string /*groupAlias*/,	std::pair<std::string /*groupName*/, ConfigurationGroupKey> > 		getActiveGroupAliases  			(void);
+	//Note: this ConfigurationManager::getVersionAliases is called internally and by ConfigurationManagerRW::getVersionAliases
+	std::map <std::string /*tableName*/,	std::map <std::string /*aliasName*/, ConfigurationVersion > > 		getVersionAliases				(void) const;
+
+	std::pair<std::string /*groupName*/, 	ConfigurationGroupKey>                         						getConfigurationGroupFromAlias	(std::string systemAlias, ProgressBar* progressBar=0);
+	std::map <std::string /*groupType*/, 	std::pair<std::string /*groupName*/, ConfigurationGroupKey> >  		getActiveConfigurationGroups  	(void) const;
 	const std::string&													  getActiveGroupName 			(const std::string& type = "") const;
 	ConfigurationGroupKey		 										  getActiveGroupKey 			(const std::string& type = "") const;
 
@@ -100,12 +113,6 @@ public:
 	//   map<name       , version
 	std::vector<std::pair<std::string,ConfigurationTree> >                getChildren				    (std::map<std::string, ConfigurationVersion> *memberMap = 0, std::string *accumulatedTreeErrors = 0) const;
 	std::string															  getFirstPathToNode			(const ConfigurationTree &node, const std::string &startPath = "/") const;
-
-
-	//   map<alias      ,      pair<group name,  ConfigurationGroupKey> >
-	std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > getActiveGroupAliases  (void);
-	//   pair<group name , ConfigurationGroupKey>
-	std::pair<std::string, ConfigurationGroupKey>                         getConfigurationGroupFromAlias(std::string systemAlias, ProgressBar* progressBar=0);
 
 	std::map<std::string, ConfigurationVersion> 		  			      getActiveVersions		  		(void) const;
 

@@ -210,11 +210,11 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	std::map<std::string, ConfigurationVersion> activeMap = cfgMgr->getActiveVersions();
 
 
-	//modify GroupAliasesConfiguration and VersionAliasesConfiguration to point
+	//modify Group Aliases Configuration and Version Aliases Configuration to point
 	//	at DEFAULT and flatVersion respectively
 
-	const std::string groupAliasesName = "GroupAliasesConfiguration";
-	const std::string versionAliasesName = "VersionAliasesConfiguration";
+	const std::string groupAliasesName = ConfigurationManager::GROUP_ALIASES_CONFIG_NAME;
+	const std::string versionAliasesName = ConfigurationManager::VERSION_ALIASES_CONFIG_NAME;
 
 
 	//don't do anything more if flatVersion is not persistent
@@ -227,7 +227,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	}
 
 
-	//modify GroupAliasesConfiguration
+	//modify Group Aliases Configuration
 	if(activeMap.find(groupAliasesName) != activeMap.end())
 	{
 		std::cout << __COUT_HDR_FL__ << "\n\nModifying " << groupAliasesName << std::endl;
@@ -258,7 +258,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 
 	}
 
-	//modify VersionAliasesConfiguration
+	//modify Version Aliases Configuration
 	if(activeMap.find(versionAliasesName) != activeMap.end())
 	{
 		std::cout << __COUT_HDR_FL__ << "\n\nModifying " << versionAliasesName << std::endl;

@@ -53,7 +53,7 @@ public:
 	ConfigurationInterface* 							getConfigurationInterface				(void) const { return theInterface_; }
 
 	const std::map<std::string, ConfigurationInfo>& 	getAllConfigurationInfo					(bool refresh=false, std::string *accumulatedErrors=0, const std::string& errorFilterName="");
-	std::map<std::string /*tableName*/,std::map<std::string /*aliasName*/,ConfigurationVersion /*version*/> > 				getActiveVersionAliases	(void) const;
+	std::map<std::string /*tableName*/,std::map<std::string /*aliasName*/,ConfigurationVersion /*version*/> > 				getVersionAliases	(void) const;
 
 
 	template<class T>
@@ -86,7 +86,7 @@ public:
 
 	//==============================================================================
 	//modifiers of a configuration group based on alias, e.g. "Physics"
-	ConfigurationGroupKey								saveNewConfigurationGroup				(const std::string& groupName, std::map<std::string, ConfigurationVersion> &groupMembers, const std::string& groupComment = ViewColumnInfo::DATATYPE_COMMENT_DEFAULT);
+	ConfigurationGroupKey								saveNewConfigurationGroup				(const std::string& groupName, std::map<std::string, ConfigurationVersion> &groupMembers, const std::string& groupComment = ViewColumnInfo::DATATYPE_COMMENT_DEFAULT, std::map<std::string /*table*/, std::string /*alias*/> *groupAliases = 0);
 
 
 

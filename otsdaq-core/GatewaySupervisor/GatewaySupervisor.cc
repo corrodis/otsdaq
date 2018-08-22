@@ -2342,7 +2342,8 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 					CorePropertySupervisorBase::theConfigurationManager_->loadConfigurationGroup(
 						aliasMapPair.second.first, aliasMapPair.second.second,
 						false, 0, 0, 0,
-						&groupComment, &groupAuthor, &groupCreationTime, false /*false to not load member map*/);
+						&groupComment, &groupAuthor, &groupCreationTime,
+						false /*false to not load member map*/);
 
 					xmlOut.addTextElementToData("config_comment", groupComment);
 					xmlOut.addTextElementToData("config_author", groupAuthor);

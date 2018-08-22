@@ -23,8 +23,8 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	__COUT__ << "Importing External System Aliases!" << std::endl;
 
 	std::string prependBaseName = "Imported";
-	const std::string groupAliasesTableName = "GroupAliasesConfiguration";
-	const std::string versionAliasesTableName = "VersionAliasesConfiguration";
+	const std::string groupAliasesTableName = ConfigurationManager::GROUP_ALIASES_CONFIG_NAME;
+	const std::string versionAliasesTableName = ConfigurationManager::VERSION_ALIASES_CONFIG_NAME;
 
 	std::cout << "\n\nusage: Two arguments:\n\n\t otsdaq_import_system_aliases <path_to_import_database_folder> <path_to_active_groups_file> <import_prepend_base_name (optional)> \n\n" <<
 			"\t\t Default values: \n\t\t\timport_prepend_base_name = \"" <<
@@ -211,7 +211,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	std::map<std::string /*table name*/,
 		std::map<std::string /*version alias*/,
 		ConfigurationVersion /*aliased version*/> >					 					existingTableAliases =
-			cfgMgr->getActiveVersionAliases();
+			cfgMgr->ConfigurationManager::getVersionAliases();
 	std::map<std::string /*alias*/,
 		std::pair<std::string /*group name*/, ConfigurationGroupKey> > 					existingGroupAliases =
 			cfgMgr->getActiveGroupAliases();
@@ -726,7 +726,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 	try
 	{
-		//modify GroupAliasesConfiguration and VersionAliasesConfiguration to
+		//modify Group Aliases Configuration and Version Aliases Configuration to
 		//	include new groups and tables
 
 		std::string activeBackboneGroupName =
@@ -739,7 +739,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 		std::map<std::string, ConfigurationVersion> activeMap = cfgMgr->getActiveVersions();
 
-		//modify GroupAliasesConfiguration
+		//modify Group Aliases Configuration
 		if(activeMap.find(groupAliasesTableName) != activeMap.end())
 		{
 			__COUT__ << "\n\nModifying " << groupAliasesTableName << std::endl;
@@ -783,7 +783,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			cfgView->print();
 		}
 
-		//modify VersionAliasesConfiguration
+		//modify Version Aliases Configuration
 		if(activeMap.find(versionAliasesTableName) != activeMap.end())
 		{
 			__COUT__ << "\n\nModifying " << versionAliasesTableName << std::endl;
@@ -829,7 +829,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 
 
-		//save new "GroupAliasesConfiguration" and "VersionAliasesConfiguration"
+		//save new Group Aliases Configuration and Version Aliases Configuration
 
 		//change the version of the active view to flatVersion and save it
 		config = cfgMgr->getConfigurationByName(groupAliasesTableName);

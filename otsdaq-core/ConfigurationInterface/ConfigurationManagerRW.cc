@@ -284,30 +284,20 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 } //end getAllConfigurationInfo
 
 //==============================================================================
-//getActiveVersionAliases()
-//	get active version aliases organized by table
+//getVersionAliases()
+//	get version aliases organized by table, for currently active backbone tables
+//	add scratch versions to the alias map returned by ConfigurationManager
 std::map<std::string /*table name*/,std::map<
 std::string /*version alias*/,ConfigurationVersion /*aliased version*/> >
-ConfigurationManagerRW::getActiveVersionAliases(void) const
+ConfigurationManagerRW::getVersionAliases(void) const
 {
-	__COUT__ << "getActiveVersionAliases()" << std::endl;
+	//__COUT__ << "getVersionAliases()" << std::endl;
 	std::map<std::string /*table name*/,
-	std::map<std::string /*version alias*/,ConfigurationVersion /*aliased version*/> > retMap;
-
-	std::map<std::string, ConfigurationVersion> activeVersions = getActiveVersions();
-	std::string versionAliasesTableName = "VersionAliasesConfiguration";
-	if(activeVersions.find(versionAliasesTableName) == activeVersions.end())
-	{
-		__SS__ << "Active version of VersionAliases  missing!" <<
-				"Make sure you have a valid active Backbone Group." << std::endl;
-		__COUT_WARN__ << "\n" << ss.str();
-		return retMap;
-	}
-
-	__COUT__ << "activeVersions[\"VersionAliasesConfiguration\"]=" <<
-			activeVersions[versionAliasesTableName] << std::endl;
+	std::map<std::string /*version alias*/,ConfigurationVersion /*aliased version*/> > retMap =
+			ConfigurationManager::getVersionAliases();
 
 	//always have scratch alias for each table that has a scratch version
+	//	overwrite map entry if necessary
 	if(!ConfigurationInterface::isVersionTrackingEnabled())
 		for(const auto &tableInfo:allConfigurationInfo_)
 			for(const auto &version:tableInfo.second.versions_)
@@ -315,31 +305,8 @@ ConfigurationManagerRW::getActiveVersionAliases(void) const
 					retMap[tableInfo.first][ConfigurationManager::SCRATCH_VERSION_ALIAS] =
 							ConfigurationVersion(ConfigurationVersion::SCRATCH);
 
-	std::vector<std::pair<std::string,ConfigurationTree> > aliasNodePairs =
-			getNode(versionAliasesTableName).getChildren();
-
-	//create map
-	//	add the first of each configName, versionAlias pair encountered
-	//	ignore any repeats (Note: this also prevents overwriting of Scratch alias)
-	std::string configName, versionAlias;
-	for(auto& aliasNodePair:aliasNodePairs)
-	{
-		configName = aliasNodePair.second.getNode(
-				"ConfigurationName").getValueAsString();
-		versionAlias = aliasNodePair.second.getNode(
-				"VersionAlias").getValueAsString();
-
-		if(retMap.find(configName) != retMap.end() &&
-				retMap[configName].find(versionAlias) != retMap[configName].end())
-			continue; //skip repeats (Note: this also prevents overwriting of Scratch alias)
-
-		//else add version to map
-		retMap[configName][versionAlias] = ConfigurationVersion(
-								aliasNodePair.second.getNode("Version").getValueAsString());
-	}
-
 	return retMap;
-} //end getActiveVersionAliases()
+} //end getVersionAliases()
 
 //==============================================================================
 //setActiveGlobalConfiguration
@@ -797,7 +764,8 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 		const std::string &groupName,
 		std::map<std::string, ConfigurationVersion> &groupMembers,
-		const std::string &groupComment)
+		const std::string &groupComment,
+		std::map<std::string /*table*/, std::string /*alias*/> *groupAliases)
 {
 	//steps:
 	//	determine new group key
@@ -809,8 +777,7 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 	if(groupMembers.size() == 0) //do not allow empty groups
 	{
 		__SS__ << "Empty group member list. Can not create a group without members!" << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//determine new group key
@@ -827,13 +794,14 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 		//check member name
 		if(allCfgInfo.find(memberPair.first) == allCfgInfo.end())
 		{
-			__COUT_ERR__ << "Group member \"" << memberPair.first << "\" not found in configuration!";
+			__COUT_ERR__ << "Group member \"" << memberPair.first << "\" not found in database!";
 
 			if(groupMetadataTable_.getConfigurationName() ==
 					memberPair.first)
 			{
-				__COUT_WARN__ << "Looks like this is the groupMetadataTable_. " <<
-						"Note that this table is added to the member map when groups are saved." <<
+				__COUT_WARN__ << "Looks like this is the groupMetadataTable_ '" <<
+						ConfigurationInterface::GROUP_METADATA_TABLE_NAME <<
+						".' Note that this table is added to the member map when groups are saved." <<
 						"It should not be part of member map when calling this function." << std::endl;
 				__COUT__ << "Attempting to recover." << std::endl;
 				groupMembers.erase(groupMembers.find(memberPair.first));
@@ -841,8 +809,7 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 			else
 			{
 				__SS__ << ("Group member not found!") << std::endl;
-				__COUT_ERR__ << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 		//check member version
@@ -850,18 +817,37 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 				allCfgInfo[memberPair.first].versions_.end())
 		{
 			__SS__ << "Group member  \"" << memberPair.first << "\" version \"" <<
-					memberPair.second << "\" not found in configuration!";
-			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+					memberPair.second << "\" not found in database!";
+			__SS_THROW__;
 		}
-	}
+	} //end verify members
+
+	//verify group aliases
+	if(groupAliases)
+	{
+		for(auto &aliasPair : *groupAliases )
+		{
+			//check for alias table in member names
+			if(groupMembers.find(aliasPair.first) == groupMembers.end())
+			{
+				__COUT_ERR__ << "Group member \"" << aliasPair.first << "\" not found in group member map!";
+
+				__SS__ << ("Alias table not found in member list!") << std::endl;
+				__SS_THROW__;
+			}
+		}
+	} //end verify group aliases
 
 	// verify groupNameWithKey and attempt to store
 	try
 	{
 		//save meta data for group; reuse groupMetadataTable_
-
-		__COUT__ << username_ << " " << time(0) << " " << groupComment << std::endl;
+		std::string groupAliasesString = "";
+		if(groupAliases)
+			groupAliasesString = StringMacros::mapToString(*groupAliases,
+					"," /*primary delimeter*/,":" /*secondary delimeter*/);
+		__COUT__ << "Metadata: " << username_ << " " << time(0) << " " << groupComment <<
+				" " << groupAliasesString << std::endl;
 
 		//to compensate for unusual errors upstream, make sure the metadata table has one row
 		while(groupMetadataTable_.getViewP()->getNumberOfRows() > 1)
@@ -870,9 +856,10 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 			groupMetadataTable_.getViewP()->addRow();
 
 		//columns are uid,comment,author,time
-		groupMetadataTable_.getViewP()->setValue(groupComment,0,1);
-		groupMetadataTable_.getViewP()->setValue(username_,0,2);
-		groupMetadataTable_.getViewP()->setValue(time(0),0,3);
+		groupMetadataTable_.getViewP()->setValue(groupAliasesString,0,ConfigurationManager::METADATA_COL_ALIASES);
+		groupMetadataTable_.getViewP()->setValue(groupComment,0,ConfigurationManager::METADATA_COL_COMMENT);
+		groupMetadataTable_.getViewP()->setValue(username_,0,ConfigurationManager::METADATA_COL_AUTHOR);
+		groupMetadataTable_.getViewP()->setValue(time(0),0,ConfigurationManager::METADATA_COL_TIMESTAMP);
 
 		//set version to first available persistent version
 		groupMetadataTable_.getViewP()->setVersion(
@@ -957,18 +944,6 @@ ConfigurationVersion ConfigurationManagerRW::saveNewBackbone(ConfigurationVersio
 //==============================================================================
 void ConfigurationManagerRW::testXDAQContext()
 {
-
-	//test creating a group with member version aliases
-	{
-		std::map<std::string, ConfigurationVersion> groupMembers;
-		groupMembers["DesktopIcon"] = ConfigurationVersion(2);
-//
-//		theInterface_->saveConfigurationGroup(groupMembers,
-//				ConfigurationGroupKey::getFullGroupString(groupName,newKey));
-
-		return;
-	}
-
 
 //	//test creating config group with author, create time, and comment
 //	{
