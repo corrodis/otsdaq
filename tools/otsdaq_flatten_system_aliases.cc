@@ -305,7 +305,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	std::string accumulateErrors = "";
 	int count = 0;
 
-	std::map<std::string, ConfigurationVersion> 			memberMap;
+	std::map<std::string /*name*/, ConfigurationVersion> 			memberMap;
 	std::map<std::string /*name*/, std::string /*alias*/> 	groupAliases;
 	std::string 			groupComment;
 	std::string 			groupAuthor;

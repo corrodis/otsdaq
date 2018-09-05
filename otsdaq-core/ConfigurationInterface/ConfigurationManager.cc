@@ -588,7 +588,7 @@ const std::string& ConfigurationManager::getTypeNameOfGroup(
 //
 //	if filePath == "", then output to cout
 void ConfigurationManager::dumpActiveConfiguration(
-		const std::string &filePath, const std::string &dumpType) const
+		const std::string &filePath, const std::string &dumpType)
 {
 	time_t rawtime =  time(0);
 	__COUT__ << "filePath = " << filePath << std::endl;
@@ -666,7 +666,7 @@ void ConfigurationManager::dumpActiveConfiguration(
 		}
 	};
 
-	auto localDumpActiveGroupMembers = [](const ConfigurationManager *cfgMgr, std::ostream *out) {
+	auto localDumpActiveGroupMembers = [](ConfigurationManager *cfgMgr, std::ostream *out) {
 		std::map<std::string, std::pair<std::string, ConfigurationGroupKey>>  activeGroups =
 				cfgMgr->getActiveConfigurationGroups();
 		(*out) << "\n\n************************" << std::endl;
@@ -684,19 +684,40 @@ void ConfigurationManager::dumpActiveConfiguration(
 				continue;
 			}
 
-			std::map<std::string /*name*/, ConfigurationVersion /*version*/> memberMap =
-					cfgMgr->theInterface_->getConfigurationGroupMembers(
-							ConfigurationGroupKey::getFullGroupString(
-									group.second.first,
-									group.second.second));
+			std::map<std::string /*name*/, ConfigurationVersion /*version*/> memberMap;
+			std::map<std::string /*name*/, std::string /*alias*/> 	groupAliases;
+			std::string 			groupComment;
+			std::string 			groupAuthor;
+			std::string	 			groupCreateTime;
+			time_t					groupCreateTime_t;
 
-			(*out) << "\tMember table count = " << memberMap.size() << std::endl;
+			cfgMgr->loadConfigurationGroup(
+					group.second.first,
+					group.second.second,
+					false /*doActivate*/,
+					&memberMap/*memberMap*/,0 /*progressBar*/,0 /*accumulateErrors*/,
+					&groupComment,
+					&groupAuthor,
+					&groupCreateTime,
+					true /*doNotLoadMember*/,
+					0 /*groupTypeString*/,
+					&groupAliases
+			);
+
+			(*out) << "\t\tGroup Comment: \t" << groupComment << __E__;
+			(*out) << "\t\tGroup Author: \t" << groupAuthor << __E__;
+
+			sscanf(groupCreateTime.c_str(),"%ld",&groupCreateTime_t);
+			(*out) << "\t\tGroup Create Time: \t" << ctime(&groupCreateTime_t) << __E__;
+			(*out) << "\t\tGroup Aliases: \t" << StringMacros::mapToString(groupAliases) << __E__;
+
+			(*out) << "\t\tMember table count = " << memberMap.size() << std::endl;
 			tableCount += memberMap.size();
 
 			unsigned int i = 0;
 			for(auto &member:memberMap)
 			{
-				(*out) << "\t\t" << ++i << ". " << member.first << "-v" <<
+				(*out) << "\t\t\t" << ++i << ". " << member.first << "-v" <<
 						member.second << std::endl;
 			}
 		}

@@ -647,29 +647,29 @@ const GroupInfo& ConfigurationManagerRW::getGroupInfo(const std::string &groupNa
 
 //==============================================================================
 //findConfigurationGroup
-//	return group with same name and same members
+//	return group with same name and same members and same aliases
 //	else return invalid key
+//
+// Note: if aliases, then member alias is matched (not member
 //
 // Note: this is taking too long when there are a ton of groups.
 //	Change to going back only a limited number.. (but the order also comes in alpha order from
 //	theInterface_->getAllConfigurationGroupNames which is a problem for choosing the
 //	most recent to check. )
 ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::string &groupName,
-		const std::map<std::string, ConfigurationVersion> &groupMemberMap)
+		const std::map<std::string, ConfigurationVersion> &groupMemberMap,
+		const std::map<std::string /*name*/, std::string /*alias*/> &groupAliases)
 {
-				//	//Taking too long..... taking out check for now
-				//	//if here, then no match found
-				//	return ConfigurationGroupKey(); //return invalid key
 
-				//	//NOTE: seems like this filter is taking the long amount of time
-				//	std::set<std::string /*name*/> fullGroupNames =
-				//			theInterface_->getAllConfigurationGroupNames(groupName); //db filter by group name
-
+	//	//NOTE: seems like this filter is taking the long amount of time
+	//	std::set<std::string /*name*/> fullGroupNames =
+	//			theInterface_->getAllConfigurationGroupNames(groupName); //db filter by group name
 	const GroupInfo& groupInfo = getGroupInfo(groupName);
 
 	//std::string name;
 	//ConfigurationGroupKey key;
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> compareToMemberMap;
+	std::map<std::string /*name*/, std::string /*alias*/> 			 compareToGroupAliases;
 	bool isDifferent;
 
 	const unsigned int MAX_DEPTH_TO_CHECK = 20;
@@ -689,50 +689,61 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 	}
 
 
-	//determine min key to check
-//	if(groupInfo.keys_.size() > MAX_DEPTH_TO_CHECK)
-//	{
-//		//find keyMinToCheck to avoid looking at all groups
-//		for(const auto& key: groupInfo.keys_)
-//		{
-//			//ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
-//			if(key.key() > keyMinToCheck)
-//				keyMinToCheck = key.key();
-//		}
-//
-//		//just in case of craziness, check not crossing 0
-//		if(keyMinToCheck >= MAX_DEPTH_TO_CHECK - 1)
-//			keyMinToCheck -= MAX_DEPTH_TO_CHECK - 1;
-//		else
-//			keyMinToCheck = 0;
-//
-//		__COUT__ << "Checking groups back to key... " << keyMinToCheck << std::endl;
-//	}
-//	else
-//		__COUT__ << "Checking all groups." << std::endl;
 
 	//have min key to check, now loop through and check groups
-	std::string fullName;
+	//std::string fullName;
 	for(const auto& key: groupInfo.keys_)
 	{
 		//ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
 
 		if(key.key() < keyMinToCheck) continue; //skip keys that are too old
 
-		//__COUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
-		//if( name != groupName) continue; // superfluous check, but just to make sure the db filter worked
+//		fullName = ConfigurationGroupKey::getFullGroupString(groupName,key);
+//
+//		__COUT__ << "checking group... " << fullName << std::endl;
+//
+//		compareToMemberMap = theInterface_->getConfigurationGroupMembers(fullName);
 
-		fullName = ConfigurationGroupKey::getFullGroupString(groupName,key);
 
-		__COUT__ << "checking group... " << fullName << std::endl;
-		compareToMemberMap = theInterface_->getConfigurationGroupMembers(fullName);
+		loadConfigurationGroup(
+				groupName,key,
+				false /*doActivate*/,
+				&compareToMemberMap/*memberMap*/,
+				0,0,0,0,0, /*null pointers*/
+				true /*doNotLoadMember*/,
+				0 /*groupTypeString*/,
+				&compareToGroupAliases
+		);
+
 
 		isDifferent = false;
 		for(auto &memberPair: groupMemberMap)
 		{
 			//__COUT__ << memberPair.first << " - " << memberPair.second << std::endl;
-			if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||	//name is missing
-					memberPair.second != compareToMemberMap[memberPair.first]) //or version mismatch
+
+			if(groupAliases.find(memberPair.first) != groupAliases.end())
+			{
+				//handle this table as alias, not version
+				if(compareToGroupAliases.find(memberPair.first) == compareToGroupAliases.end() || //alias is missing
+						groupAliases.at(memberPair.first) != compareToGroupAliases.at(memberPair.first))
+				{ //then different
+					//__COUT__ << "alias mismatch found!" << std::endl;
+					isDifferent = true;
+					break;
+				}
+				else
+					continue;
+			} //else check if compareTo group is using an alias for table
+			else if(compareToGroupAliases.find(memberPair.first) != compareToGroupAliases.end())
+			{
+				//then different
+				//__COUT__ << "alias mismatch found!" << std::endl;
+				isDifferent = true;
+				break;
+
+			} //else handle as table version comparison
+			else if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||	//name is missing
+					memberPair.second != compareToMemberMap.at(memberPair.first)) //or version mismatch
 			{	//then different
 				//__COUT__ << "mismatch found!" << std::endl;
 				isDifferent = true;
@@ -1030,7 +1041,7 @@ void ConfigurationManagerRW::testXDAQContext()
 //		for(auto &g:gcfgs)
 //		{
 //			__COUT__ << "Global config " << g << std::endl;
-//			auto gcMap = theInterface_->getConfigurationGroupMembers(g);
+//			auto gcMap = theInterface_->getConfigurationGroupMembers(g, true /*getMetaTable*/);
 //
 //			for(auto &cv:gcMap)
 //				__COUT__ << "\tMember config " << cv.first << ":" << cv.second << std::endl;

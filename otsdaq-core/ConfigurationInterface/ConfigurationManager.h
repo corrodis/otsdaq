@@ -92,7 +92,7 @@ public:
 
 	const ConfigurationBase*                      					      getConfigurationByName        (const std::string &configurationName) const;
 
-	void																  dumpActiveConfiguration		(const std::string &filePath, const std::string &dumpType) const;
+	void																  dumpActiveConfiguration		(const std::string &filePath, const std::string &dumpType);
 
 	std::map <std::string /*groupAlias*/,	std::pair<std::string /*groupName*/, ConfigurationGroupKey> > 		getActiveGroupAliases  			(void);
 	//Note: this ConfigurationManager::getVersionAliases is called internally and by ConfigurationManagerRW::getVersionAliases
@@ -110,8 +110,7 @@ public:
 
 
 
-	//   map<name       , version
-	std::vector<std::pair<std::string,ConfigurationTree> >                getChildren				    (std::map<std::string, ConfigurationVersion> *memberMap = 0, std::string *accumulatedTreeErrors = 0) const;
+	std::vector<std::pair<std::string /*childName*/,ConfigurationTree> >  getChildren				    (std::map<std::string, ConfigurationVersion> *memberMap = 0, std::string *accumulatedTreeErrors = 0) const;
 	std::string															  getFirstPathToNode			(const ConfigurationTree &node, const std::string &startPath = "/") const;
 
 	std::map<std::string, ConfigurationVersion> 		  			      getActiveVersions		  		(void) const;

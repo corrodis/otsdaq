@@ -217,7 +217,10 @@ public:
 	//group handling
 	virtual std::set<std::string /*name*/> 					getAllConfigurationGroupNames(const std::string &filterString = "") const throw(std::runtime_error) { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
 	virtual std::set<ConfigurationGroupKey> 				getKeys(const std::string &groupName) const { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
+
+	//Caution: getConfigurationGroupMembers must be carefully used.. the table versions are as initially defined for table versions aliases, i.e. not converted according to the metadata groupAliases!
 	virtual std::map<std::string /*name*/, ConfigurationVersion /*version*/> getConfigurationGroupMembers(std::string const& /*globalConfiguration*/, bool includeMetaDataTable = false) const throw(std::runtime_error) { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}
+
 	virtual void 											saveConfigurationGroup(std::map<std::string /*name*/, ConfigurationVersion /*version*/> const& /*configurationMap*/, std::string const& /*globalConfiguration*/) const throw(std::runtime_error) { __SS__; throw std::runtime_error(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");};
 
 protected:
