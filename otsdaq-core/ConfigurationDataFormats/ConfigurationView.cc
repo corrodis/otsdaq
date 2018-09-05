@@ -8,9 +8,9 @@
 using namespace ots;
 
 #undef 	__MF_SUBJECT__
-#define __MF_SUBJECT__ "ConfigurationView"
-#undef 	__MF_HDR__
-#define __MF_HDR__		tableName_ << ":v" << version_ << ":" << __COUT_HDR_FL__
+#define __MF_SUBJECT__		"ConfigurationView-" + tableName_
+#undef 	__COUT_HDR__
+#define __COUT_HDR__		"v" << version_ << ":" << __COUT_HDR_FL__
 
 const unsigned int ConfigurationView::INVALID = -1;
 
@@ -61,6 +61,60 @@ ConfigurationView& ConfigurationView::copy(const ConfigurationView &src,
 	sourceColumnNames_ 	= src.sourceColumnNames_;
 	init(); // verify consistency
 	return *this;
+}
+
+//==============================================================================
+//copyRows
+//	return row offset of first row copied in
+unsigned int ConfigurationView::copyRows(const std::string& author,
+		const ConfigurationView& src,
+		unsigned int srcOffsetRow,	unsigned int srcRowsToCopy,
+		unsigned int destOffsetRow, bool generateUniqueDataColumns)
+{
+	//__COUTV__(destOffsetRow);
+	//__COUTV__(srcOffsetRow);
+	//__COUTV__(srcRowsToCopy);
+
+	unsigned int retRow = (unsigned int)-1;
+
+	//check that column sizes match
+	if(src.getNumberOfColumns() !=
+			getNumberOfColumns())
+	{
+		__SS__ << "Error! Number of Columns of source view must match destination view." <<
+				"Dimension of source is [" <<	src.getNumberOfColumns() <<
+				"] and of destination is [" <<
+				getNumberOfColumns() << "]." << std::endl;
+		__SS_THROW__;
+	}
+
+	unsigned int srcRows = src.getNumberOfRows();
+
+	for(unsigned int r=0; r < srcRowsToCopy; ++r)
+	{
+		if(r + srcOffsetRow >= srcRows)
+			break;  //end when no more source rows to copy (past bounds)
+
+		destOffsetRow = addRow(author,generateUniqueDataColumns /*incrementUniqueData*/,"" /*baseNameAutoUID*/,
+				destOffsetRow) ; //add and get row created
+
+		if(retRow == (unsigned int)-1)
+			retRow = destOffsetRow; //save row of first copied entry
+
+		//copy data
+		for(unsigned int col=0;col<getNumberOfColumns();++col)
+			if(generateUniqueDataColumns &&
+					columnsInfo_[col].getType() == ViewColumnInfo::TYPE_UNIQUE_DATA)
+				continue; //if leaving unique data, then skip copy
+			else
+				theDataView_[destOffsetRow][col] =
+					src.theDataView_[r + srcOffsetRow][col];
+
+		//prepare for next row
+		++destOffsetRow;
+	}
+
+	return retRow;
 }
 
 //==============================================================================
@@ -929,7 +983,6 @@ bool ConfigurationView::isEntryInGroup(const unsigned int &r,
 
 //==============================================================================
 //	isEntryInGroupCol
-//		private function to prevent users from treating any column like a GroupID column
 //
 //	if *groupIDList != 0 return set of groupIDs found
 //		useful for removing groupIDs.
@@ -996,8 +1049,11 @@ bool ConfigurationView::isEntryInGroupCol(const unsigned int &r,
 std::set<std::string> ConfigurationView::getSetOfGroupIDs(const std::string &childLinkIndex,
 		unsigned int r) const
 {
-	unsigned int c = getColLinkGroupID(childLinkIndex);
-
+	return getSetOfGroupIDs(getColLinkGroupID(childLinkIndex), r);
+}
+std::set<std::string> ConfigurationView::getSetOfGroupIDs(const unsigned int& c,
+		unsigned int r) const
+{
 	//__COUT__ << "GroupID col=" << (int)c << std::endl;
 
 	std::set<std::string> retSet;
@@ -2405,12 +2461,24 @@ void ConfigurationView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //
 //	if baseNameAutoUID != "", creates a UID based on this base name
 //		and increments and appends an integer relative to the previous last row
-int ConfigurationView::addRow(const std::string &author,
+unsigned int ConfigurationView::addRow(const std::string &author,
 		bool incrementUniqueData,
-		std::string baseNameAutoUID)
+		std::string baseNameAutoUID,
+		unsigned int rowToAdd)
 {
-	int row = getNumberOfRows();
+	//default to last row
+	if(rowToAdd == (unsigned int)-1)
+		rowToAdd = getNumberOfRows();
+
 	theDataView_.resize(getNumberOfRows()+1,std::vector<std::string>(getNumberOfColumns()));
+
+	//shift data down the table if necessary
+	for(unsigned int r=getNumberOfRows()-2;r >= rowToAdd; --r)
+	{
+		if(r == (unsigned int)-1) break; //quit wrap around case
+		for(unsigned int col=0;col<getNumberOfColumns();++col)
+			theDataView_[r+1][col] = theDataView_[r][col];
+	}
 
 	std::vector<std::string> defaultRowValues =
 			getDefaultRowValues();
@@ -2432,7 +2500,8 @@ int ConfigurationView::addRow(const std::string &author,
 		//baseNameAutoUID indicates to attempt to make row unique
 		//	add index to max number
 		if(incrementUniqueData &&
-				(col == getColUID() || (row && columnsInfo_[col].getType() ==
+				(col == getColUID() ||
+						(getNumberOfRows() > 1 && columnsInfo_[col].getType() ==
 				ViewColumnInfo::TYPE_UNIQUE_DATA)))
 		{
 
@@ -2446,8 +2515,10 @@ int ConfigurationView::addRow(const std::string &author,
 
 			//this->print();
 
-			for(unsigned int r=0;r<getNumberOfRows()-1;++r)
+			for(unsigned int r=0;r<getNumberOfRows();++r)
 			{
+				if(r == rowToAdd) continue; //skip row to add
+
 				//find last non numeric character
 
 				foundAny = false;
@@ -2496,52 +2567,31 @@ int ConfigurationView::addRow(const std::string &author,
 			{
 				//handle UID case
 				if(baseNameAutoUID != "")
-					theDataView_[row][col] = baseNameAutoUID + indexString;
+					theDataView_[rowToAdd][col] = baseNameAutoUID + indexString;
 				else
-					theDataView_[row][col] = baseString + indexString;
+					theDataView_[rowToAdd][col] = baseString + indexString;
 			}
 			else
-				theDataView_[row][col] = baseString + indexString;
+				theDataView_[rowToAdd][col] = baseString + indexString;
 
-			__COUT__ << "New unique data entry is '" << theDataView_[row][col] << "'" << __E__;
+			__COUT__ << "New unique data entry is '" << theDataView_[rowToAdd][col] << "'" << __E__;
 
 			//this->print();
 		}
 		else
-			theDataView_[row][col] = defaultRowValues[col];
+			theDataView_[rowToAdd][col] = defaultRowValues[col];
 	}
 
 	if(author != "")
 	{
-		__COUT__ << "Row=" << row << " was created!" << std::endl;
+		__COUT__ << "Row=" << rowToAdd << " was created!" << std::endl;
 		int authorCol = findColByType(ViewColumnInfo::TYPE_AUTHOR);
 		int timestampCol = findColByType(ViewColumnInfo::TYPE_TIMESTAMP);
-		setValue(author,row,authorCol);
-		setValue(time(0),row,timestampCol);
+		setValue(author,rowToAdd,authorCol);
+		setValue(time(0),rowToAdd,timestampCol);
 	}
 
-//	if(baseNameAutoUID != "")
-//	{
-//		std::string indexSubstring = "0";
-//		//if there is a last row with baseName in it
-//		if(theDataView_.size() > 1 &&
-//				0 ==
-//				theDataView_[theDataView_.size()-2][getColUID()].find(baseNameAutoUID))
-//			//extract last index
-//			indexSubstring = theDataView_[theDataView_.size()-2][getColUID()].substr(
-//					baseNameAutoUID.size());
-//
-//		unsigned int index;
-//		sscanf(indexSubstring.c_str(),"%u",&index);
-//		++index; //increment
-//		char indexString[100];
-//		sprintf(indexString,"%u",index);
-//
-//		baseNameAutoUID += indexString;
-//		setValue(baseNameAutoUID,row,getColUID());
-//	}
-
-	return row;
+	return rowToAdd;
 }
 
 //==============================================================================

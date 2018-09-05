@@ -482,6 +482,7 @@ launchOTSWiz() {
 	fi
 	export PORT=${MAIN_PORT}	
 	
+		
 	#substitute environment variables into template wiz-mode xdaq config xml
 	envsubst <${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake.xml > ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml
 	
@@ -489,6 +490,7 @@ launchOTSWiz() {
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacility.fcl #MessageFacilityWithCout.fcl
 	
 	echo
+	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Starting wiz mode on port ${PORT}; to change, please setup environment variable OTS_WIZ_MODE_MAIN_PORT."
 	echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Wiz mode xdaq config is ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml"
 			
 	if [ $QUIET == 1 ]; then

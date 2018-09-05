@@ -176,7 +176,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 				for(auto &version:versions)
 					if(version.isTemporaryVersion())
 					{
-						__COUT__ << "copying tmp = " << version << std::endl;
+						//__COUT__ << "copying tmp = " << version << std::endl;
 
 						try //do NOT let ConfigurationView::init() throw here
 						{
@@ -206,7 +206,7 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 			for(auto &version:versions)
 				if(version.isTemporaryVersion())
 				{
-					__COUT__ << "surviving tmp = " << version << std::endl;
+					//__COUT__ << "surviving tmp = " << version << std::endl;
 					allConfigurationInfo_[entry->d_name].versions_.emplace(version);
 				}
 		}
@@ -221,7 +221,10 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 
 
 	//get Group Info too!
+	try
 	{
+		//build allGroupInfo_ for the ConfigurationManagerRW
+
 		std::set<std::string /*name*/>  configGroups = theInterface_->getAllConfigurationGroupNames();
 		__COUT__ << "Number of Groups: " << configGroups.size() << std::endl;
 
@@ -261,32 +264,40 @@ const std::map<std::string, ConfigurationInfo>& ConfigurationManagerRW::getAllCo
 			}
 		} //end group info loop
 	} //end get group info
-	return allConfigurationInfo_;
-}
-
-//==============================================================================
-//getActiveAliases()
-//	get active version aliases organized by table
-std::map<std::string,std::map<std::string,ConfigurationVersion> >
-ConfigurationManagerRW::getActiveVersionAliases(void) const
-{
-	__COUT__ << "getActiveVersionAliases()" << std::endl;
-	std::map<std::string,std::map<std::string,ConfigurationVersion> > retMap;
-
-	std::map<std::string, ConfigurationVersion> activeVersions = getActiveVersions();
-	std::string versionAliasesTableName = "VersionAliasesConfiguration";
-	if(activeVersions.find(versionAliasesTableName) == activeVersions.end())
+	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Active version of VersionAliases  missing!" <<
-				"Make sure you have a valid active Backbone Group." << std::endl;
-		__COUT_WARN__ << "\n" << ss.str();
-		return retMap;
+		__SS__ << "A fatal error occurred reading the info for all configuration groups. Error: " <<
+				e.what() << __E__;
+		__COUT_ERR__ << "\n" << ss.str();
+		if(accumulatedErrors) *accumulatedErrors += ss.str();
+		else throw;
+	}
+	catch(...)
+	{
+		__SS__ << "An unknown fatal error occurred reading the info for all configuration groups." << __E__;
+		__COUT_ERR__ << "\n" << ss.str();
+		if(accumulatedErrors) *accumulatedErrors += ss.str();
+		else throw;
 	}
 
-	__COUT__ << "activeVersions[\"VersionAliasesConfiguration\"]=" <<
-			activeVersions[versionAliasesTableName] << std::endl;
+	return allConfigurationInfo_;
+} //end getAllConfigurationInfo
+
+//==============================================================================
+//getVersionAliases()
+//	get version aliases organized by table, for currently active backbone tables
+//	add scratch versions to the alias map returned by ConfigurationManager
+std::map<std::string /*table name*/,std::map<
+std::string /*version alias*/,ConfigurationVersion /*aliased version*/> >
+ConfigurationManagerRW::getVersionAliases(void) const
+{
+	//__COUT__ << "getVersionAliases()" << std::endl;
+	std::map<std::string /*table name*/,
+	std::map<std::string /*version alias*/,ConfigurationVersion /*aliased version*/> > retMap =
+			ConfigurationManager::getVersionAliases();
 
 	//always have scratch alias for each table that has a scratch version
+	//	overwrite map entry if necessary
 	if(!ConfigurationInterface::isVersionTrackingEnabled())
 		for(const auto &tableInfo:allConfigurationInfo_)
 			for(const auto &version:tableInfo.second.versions_)
@@ -294,31 +305,8 @@ ConfigurationManagerRW::getActiveVersionAliases(void) const
 					retMap[tableInfo.first][ConfigurationManager::SCRATCH_VERSION_ALIAS] =
 							ConfigurationVersion(ConfigurationVersion::SCRATCH);
 
-	std::vector<std::pair<std::string,ConfigurationTree> > aliasNodePairs =
-			getNode(versionAliasesTableName).getChildren();
-
-	//create map
-	//	add the first of each configName, versionAlias pair encountered
-	//	ignore any repeats (Note: this also prevents overwriting of Scratch alias)
-	std::string configName, versionAlias;
-	for(auto& aliasNodePair:aliasNodePairs)
-	{
-		configName = aliasNodePair.second.getNode(
-				"ConfigurationName").getValueAsString();
-		versionAlias = aliasNodePair.second.getNode(
-				"VersionAlias").getValueAsString();
-
-		if(retMap.find(configName) != retMap.end() &&
-				retMap[configName].find(versionAlias) != retMap[configName].end())
-			continue; //skip repeats (Note: this also prevents overwriting of Scratch alias)
-
-		//else add version to map
-		retMap[configName][versionAlias] = ConfigurationVersion(
-								aliasNodePair.second.getNode("Version").getValueAsString());
-	}
-
 	return retMap;
-}
+} //end getVersionAliases()
 
 //==============================================================================
 //setActiveGlobalConfiguration
@@ -659,29 +647,29 @@ const GroupInfo& ConfigurationManagerRW::getGroupInfo(const std::string &groupNa
 
 //==============================================================================
 //findConfigurationGroup
-//	return group with same name and same members
+//	return group with same name and same members and same aliases
 //	else return invalid key
+//
+// Note: if aliases, then member alias is matched (not member
 //
 // Note: this is taking too long when there are a ton of groups.
 //	Change to going back only a limited number.. (but the order also comes in alpha order from
 //	theInterface_->getAllConfigurationGroupNames which is a problem for choosing the
 //	most recent to check. )
 ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::string &groupName,
-		const std::map<std::string, ConfigurationVersion> &groupMemberMap)
+		const std::map<std::string, ConfigurationVersion> &groupMemberMap,
+		const std::map<std::string /*name*/, std::string /*alias*/> &groupAliases)
 {
-				//	//Taking too long..... taking out check for now
-				//	//if here, then no match found
-				//	return ConfigurationGroupKey(); //return invalid key
 
-				//	//NOTE: seems like this filter is taking the long amount of time
-				//	std::set<std::string /*name*/> fullGroupNames =
-				//			theInterface_->getAllConfigurationGroupNames(groupName); //db filter by group name
-
+	//	//NOTE: seems like this filter is taking the long amount of time
+	//	std::set<std::string /*name*/> fullGroupNames =
+	//			theInterface_->getAllConfigurationGroupNames(groupName); //db filter by group name
 	const GroupInfo& groupInfo = getGroupInfo(groupName);
 
 	//std::string name;
 	//ConfigurationGroupKey key;
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> compareToMemberMap;
+	std::map<std::string /*name*/, std::string /*alias*/> 			 compareToGroupAliases;
 	bool isDifferent;
 
 	const unsigned int MAX_DEPTH_TO_CHECK = 20;
@@ -701,50 +689,61 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 	}
 
 
-	//determine min key to check
-//	if(groupInfo.keys_.size() > MAX_DEPTH_TO_CHECK)
-//	{
-//		//find keyMinToCheck to avoid looking at all groups
-//		for(const auto& key: groupInfo.keys_)
-//		{
-//			//ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
-//			if(key.key() > keyMinToCheck)
-//				keyMinToCheck = key.key();
-//		}
-//
-//		//just in case of craziness, check not crossing 0
-//		if(keyMinToCheck >= MAX_DEPTH_TO_CHECK - 1)
-//			keyMinToCheck -= MAX_DEPTH_TO_CHECK - 1;
-//		else
-//			keyMinToCheck = 0;
-//
-//		__COUT__ << "Checking groups back to key... " << keyMinToCheck << std::endl;
-//	}
-//	else
-//		__COUT__ << "Checking all groups." << std::endl;
 
 	//have min key to check, now loop through and check groups
-	std::string fullName;
+	//std::string fullName;
 	for(const auto& key: groupInfo.keys_)
 	{
 		//ConfigurationGroupKey::getGroupNameAndKey(fullName,name,key);
 
 		if(key.key() < keyMinToCheck) continue; //skip keys that are too old
 
-		//__COUT__ << fullName << " has name " << name << " ==? " << groupName << std::endl;
-		//if( name != groupName) continue; // superfluous check, but just to make sure the db filter worked
+//		fullName = ConfigurationGroupKey::getFullGroupString(groupName,key);
+//
+//		__COUT__ << "checking group... " << fullName << std::endl;
+//
+//		compareToMemberMap = theInterface_->getConfigurationGroupMembers(fullName);
 
-		fullName = ConfigurationGroupKey::getFullGroupString(groupName,key);
 
-		__COUT__ << "checking group... " << fullName << std::endl;
-		compareToMemberMap = theInterface_->getConfigurationGroupMembers(fullName);
+		loadConfigurationGroup(
+				groupName,key,
+				false /*doActivate*/,
+				&compareToMemberMap/*memberMap*/,
+				0,0,0,0,0, /*null pointers*/
+				true /*doNotLoadMember*/,
+				0 /*groupTypeString*/,
+				&compareToGroupAliases
+		);
+
 
 		isDifferent = false;
 		for(auto &memberPair: groupMemberMap)
 		{
 			//__COUT__ << memberPair.first << " - " << memberPair.second << std::endl;
-			if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||	//name is missing
-					memberPair.second != compareToMemberMap[memberPair.first]) //or version mismatch
+
+			if(groupAliases.find(memberPair.first) != groupAliases.end())
+			{
+				//handle this table as alias, not version
+				if(compareToGroupAliases.find(memberPair.first) == compareToGroupAliases.end() || //alias is missing
+						groupAliases.at(memberPair.first) != compareToGroupAliases.at(memberPair.first))
+				{ //then different
+					//__COUT__ << "alias mismatch found!" << std::endl;
+					isDifferent = true;
+					break;
+				}
+				else
+					continue;
+			} //else check if compareTo group is using an alias for table
+			else if(compareToGroupAliases.find(memberPair.first) != compareToGroupAliases.end())
+			{
+				//then different
+				//__COUT__ << "alias mismatch found!" << std::endl;
+				isDifferent = true;
+				break;
+
+			} //else handle as table version comparison
+			else if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||	//name is missing
+					memberPair.second != compareToMemberMap.at(memberPair.first)) //or version mismatch
 			{	//then different
 				//__COUT__ << "mismatch found!" << std::endl;
 				isDifferent = true;
@@ -776,7 +775,8 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 		const std::string &groupName,
 		std::map<std::string, ConfigurationVersion> &groupMembers,
-		const std::string &groupComment)
+		const std::string &groupComment,
+		std::map<std::string /*table*/, std::string /*alias*/> *groupAliases)
 {
 	//steps:
 	//	determine new group key
@@ -788,23 +788,12 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 	if(groupMembers.size() == 0) //do not allow empty groups
 	{
 		__SS__ << "Empty group member list. Can not create a group without members!" << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//determine new group key
-	ConfigurationGroupKey newKey;
-	//CHANGED do not allow bumping, it is too risky.. because database allows it.. and then it corrupts database
-	//if(!previousVersion.isInvalid())	//if previous provided, bump that
-	//	newKey = ConfigurationGroupKey::getNextKey(previousVersion);
-	//else							//get latest key from db, and bump
-	{
-		std::set<ConfigurationGroupKey> keys = theInterface_->getKeys(groupName);
-		if(keys.size()) //if keys exist, bump the last
-			newKey = ConfigurationGroupKey::getNextKey(*(keys.crbegin()));
-		else			//else, take default
-			newKey = ConfigurationGroupKey::getDefaultKey();
-	}
+	ConfigurationGroupKey newKey = ConfigurationGroupKey::getNextKey(
+			theInterface_->findLatestGroupKey(groupName));
 
 	__COUT__ << "New Key for group: " << groupName << " found as " << newKey << std::endl;
 
@@ -816,13 +805,14 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 		//check member name
 		if(allCfgInfo.find(memberPair.first) == allCfgInfo.end())
 		{
-			__COUT_ERR__ << "Group member \"" << memberPair.first << "\" not found in configuration!";
+			__COUT_ERR__ << "Group member \"" << memberPair.first << "\" not found in database!";
 
 			if(groupMetadataTable_.getConfigurationName() ==
 					memberPair.first)
 			{
-				__COUT_WARN__ << "Looks like this is the groupMetadataTable_. " <<
-						"Note that this table is added to the member map when groups are saved." <<
+				__COUT_WARN__ << "Looks like this is the groupMetadataTable_ '" <<
+						ConfigurationInterface::GROUP_METADATA_TABLE_NAME <<
+						".' Note that this table is added to the member map when groups are saved." <<
 						"It should not be part of member map when calling this function." << std::endl;
 				__COUT__ << "Attempting to recover." << std::endl;
 				groupMembers.erase(groupMembers.find(memberPair.first));
@@ -830,8 +820,7 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 			else
 			{
 				__SS__ << ("Group member not found!") << std::endl;
-				__COUT_ERR__ << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 		//check member version
@@ -839,22 +828,49 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 				allCfgInfo[memberPair.first].versions_.end())
 		{
 			__SS__ << "Group member  \"" << memberPair.first << "\" version \"" <<
-					memberPair.second << "\" not found in configuration!";
-			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+					memberPair.second << "\" not found in database!";
+			__SS_THROW__;
 		}
-	}
+	} //end verify members
+
+	//verify group aliases
+	if(groupAliases)
+	{
+		for(auto &aliasPair : *groupAliases )
+		{
+			//check for alias table in member names
+			if(groupMembers.find(aliasPair.first) == groupMembers.end())
+			{
+				__COUT_ERR__ << "Group member \"" << aliasPair.first << "\" not found in group member map!";
+
+				__SS__ << ("Alias table not found in member list!") << std::endl;
+				__SS_THROW__;
+			}
+		}
+	} //end verify group aliases
 
 	// verify groupNameWithKey and attempt to store
 	try
 	{
 		//save meta data for group; reuse groupMetadataTable_
+		std::string groupAliasesString = "";
+		if(groupAliases)
+			groupAliasesString = StringMacros::mapToString(*groupAliases,
+					"," /*primary delimeter*/,":" /*secondary delimeter*/);
+		__COUT__ << "Metadata: " << username_ << " " << time(0) << " " << groupComment <<
+				" " << groupAliasesString << std::endl;
 
-		__COUT__ << username_ << " " << time(0) << " " << groupComment << std::endl;
+		//to compensate for unusual errors upstream, make sure the metadata table has one row
+		while(groupMetadataTable_.getViewP()->getNumberOfRows() > 1)
+			groupMetadataTable_.getViewP()->deleteRow(0);
+		if(groupMetadataTable_.getViewP()->getNumberOfRows() == 0)
+			groupMetadataTable_.getViewP()->addRow();
+
 		//columns are uid,comment,author,time
-		groupMetadataTable_.getViewP()->setValue(groupComment,0,1);
-		groupMetadataTable_.getViewP()->setValue(username_,0,2);
-		groupMetadataTable_.getViewP()->setValue(time(0),0,3);
+		groupMetadataTable_.getViewP()->setValue(groupAliasesString,0,ConfigurationManager::METADATA_COL_ALIASES);
+		groupMetadataTable_.getViewP()->setValue(groupComment,0,ConfigurationManager::METADATA_COL_COMMENT);
+		groupMetadataTable_.getViewP()->setValue(username_,0,ConfigurationManager::METADATA_COL_AUTHOR);
+		groupMetadataTable_.getViewP()->setValue(time(0),0,ConfigurationManager::METADATA_COL_TIMESTAMP);
 
 		//set version to first available persistent version
 		groupMetadataTable_.getViewP()->setVersion(
@@ -939,6 +955,7 @@ ConfigurationVersion ConfigurationManagerRW::saveNewBackbone(ConfigurationVersio
 //==============================================================================
 void ConfigurationManagerRW::testXDAQContext()
 {
+
 //	//test creating config group with author, create time, and comment
 //	{
 //		__COUT__ << std::endl;
@@ -1024,7 +1041,7 @@ void ConfigurationManagerRW::testXDAQContext()
 //		for(auto &g:gcfgs)
 //		{
 //			__COUT__ << "Global config " << g << std::endl;
-//			auto gcMap = theInterface_->getConfigurationGroupMembers(g);
+//			auto gcMap = theInterface_->getConfigurationGroupMembers(g, true /*getMetaTable*/);
 //
 //			for(auto &cv:gcMap)
 //				__COUT__ << "\tMember config " << cv.first << ":" << cv.second << std::endl;

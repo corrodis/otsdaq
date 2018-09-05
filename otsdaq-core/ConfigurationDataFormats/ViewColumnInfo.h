@@ -53,6 +53,7 @@ public:
   	const bool							isChildLinkUID		(void) const;
   	const bool							isChildLinkGroupID	(void) const;
   	const bool							isGroupID			(void) const;
+  	const bool							isUID				(void) const;
 
   	std::string							getChildLinkIndex	(void) const;
 

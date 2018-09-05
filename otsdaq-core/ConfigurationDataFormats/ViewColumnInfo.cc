@@ -497,6 +497,13 @@ const bool ViewColumnInfo::isGroupID(void) const
 }
 
 //==============================================================================
+//isUID
+const bool ViewColumnInfo::isUID(void) const
+{
+	return (type_ == TYPE_UID);
+}
+
+//==============================================================================
 //getChildLinkIndex
 std::string	ViewColumnInfo::getChildLinkIndex	(void) const
 {

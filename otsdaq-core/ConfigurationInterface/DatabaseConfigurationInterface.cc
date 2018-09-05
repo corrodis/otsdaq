@@ -226,17 +226,30 @@ throw(std::runtime_error) try
 }
 catch (std::exception const& e)
 {
-	__SS__ << "DBI Exception:" << e.what() << "\n";
+	__SS__ << "Filter string '" << filterString << "' yielded DBI Exception:" << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
 	throw std::runtime_error(ss.str());
 }
 catch (...)
 {
-	__SS__ << "DBI Unknown exception.\n";
+	__SS__ << "Filter string '" << filterString << "' yielded DBI Unknown exception.\n";
 	__COUT_ERR__ << ss.str();
 	throw std::runtime_error(ss.str());
 }
 
+//==============================================================================
+// find the latest configuration group key by group name
+// 	if not found, return invalid
+ConfigurationGroupKey DatabaseConfigurationInterface::findLatestGroupKey(const std::string& groupName) const
+noexcept
+{
+	std::set<ConfigurationGroupKey> keys = DatabaseConfigurationInterface::getKeys(groupName);
+	if(keys.size()) //if keys exist, bump the last
+		return *(keys.crbegin());
+
+	//else, return invalid
+	return ConfigurationGroupKey();
+}
 
 //==============================================================================
 // find all configuration groups in database
@@ -257,15 +270,20 @@ config_version_map_t DatabaseConfigurationInterface::getConfigurationGroupMember
 throw(std::runtime_error)
 try
 {
-	//std::cout << __COUT_HDR_FL__ << "configurationGroup:" << configurationGroup << "\n";
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.loadGlobalConfiguration(configurationGroup);
+
+	//	for(auto &item:result)
+	//		__COUT__ << "====================>" << item.configuration << ": " << item.version << __E__;
+
 
 	auto to_map = [](auto const& inputList, bool includeMetaDataTable) {
 		auto resultMap = config_version_map_t{};
 
 		std::for_each(inputList.begin(), inputList.end(),
-				[&resultMap](auto const& info) { resultMap[info.configuration] = std::stol(info.version, 0, 10); });
+				[&resultMap](auto const& info) {
+			resultMap[info.configuration] = std::stol(info.version, 0, 10);
+		});
 
 		if(!includeMetaDataTable)
 		{
@@ -282,13 +300,16 @@ try
 }
 catch (std::exception const& e)
 {
-	__SS__ << "DBI Exception:" << e.what() << "\n";
+	__SS__ << "DBI Exception getting Configuration Group Members for '" <<
+			configurationGroup <<
+			"':\n\n" << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
 	throw std::runtime_error(ss.str());
 }
 catch (...)
 {
-	__SS__ << "DBI Unknown exception.\n";
+	__SS__ << "DBI Unknown exception getting Configuration Group Members for '" <<
+			configurationGroup << ".'\n";
 	__COUT_ERR__ << ss.str();
 	throw std::runtime_error(ss.str());
 }
@@ -304,8 +325,14 @@ try
 
 	auto to_list = [](auto const& inputMap) {
 		auto resultList = VersionInfoList_t{};
-		std::transform(inputMap.begin(), inputMap.end(), std::back_inserter(resultList), [](auto const& mapEntry) {
-			return VersionInfoList_t::value_type{mapEntry.first, mapEntry.second.toString(), default_entity};
+		std::transform(inputMap.begin(),
+				inputMap.end(),
+				std::back_inserter(resultList),
+				[](auto const& mapEntry) {
+			return VersionInfoList_t::value_type{
+				mapEntry.first,
+				mapEntry.second.toString(),
+				default_entity};
 		});
 
 		return resultList;

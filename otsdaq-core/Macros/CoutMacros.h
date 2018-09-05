@@ -15,22 +15,23 @@
 #define __E__			std::endl
 
 //#define __COUT_HDR__     __FILE__ << " : " << __PRETTY_FUNCTION__ << " [" << __LINE__ << "]\t"
-#define __COUT_HDR_FL__  __SHORTFILE__ << " [" << std::dec << __LINE__ << "]\t"
-#define __COUT_HDR_FP__  __SHORTFILE__ << " : " << __PRETTY_FUNCTION__ << "\t"
-#define __COUT_HDR_PL__  __PRETTY_FUNCTION__ << " [" << std::dec << __LINE__ << "]\t"
-#define __COUT_HDR_F__   __SHORTFILE__ << "\t"
-#define __COUT_HDR_L__   std::dec << __LINE__ << "\t"
-#define __COUT_HDR_P__   __PRETTY_FUNCTION__ << "\t"
+
+#define __COUT_HDR_FL__  __SHORTFILE__        	   << " ["         << std::dec << __LINE__ << "]\t"
+#define __COUT_HDR_FP__  __SHORTFILE__        	   << " : "        << __PRETTY_FUNCTION__  << "\t"
+#define __COUT_HDR_PL__  __PRETTY_FUNCTION__  	   << " ["         << std::dec << __LINE__ << "]\t"
+#define __COUT_HDR_F__   __SHORTFILE__        	   << "\t"
+#define __COUT_HDR_L__   std::dec             	   << __LINE__     			   << "\t"
+#define __COUT_HDR_P__   __PRETTY_FUNCTION__  	   << "\t"
 #define __COUT_HDR__     __COUT_HDR_FL__
 
 
-#define __COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":"
+#define __COUT_TYPE__(X) std::cout                 << QUOTE(X)     << ":"                  << __MF_SUBJECT__ << ":"
 
-#define __COUT_ERR__  	__COUT_TYPE__(LogError) 	<< __COUT_HDR__
-#define __COUT_WARN__  	__COUT_TYPE__(LogWarning) 	<< __COUT_HDR__
-#define __COUT_INFO__  	__COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
-#define __COUT__  		__COUT_TYPE__(LogDebug)		<< __COUT_HDR__
-#define __COUTV__(X) 	__COUT__ << QUOTE(X) << " = " << X << __E__
+#define __COUT_ERR__  	 __COUT_TYPE__(LogError)   << __COUT_HDR__
+#define __COUT_WARN__    __COUT_TYPE__(LogWarning) << __COUT_HDR__
+#define __COUT_INFO__    __COUT_TYPE__(LogInfo)    << __COUT_HDR__
+#define __COUT__  	 	 __COUT_TYPE__(LogDebug)   << __COUT_HDR__
+#define __COUTV__(X) 	 __COUT__                  << QUOTE(X)     << " = "                << X              << __E__
 
 
 //////// ==============================================================
@@ -47,7 +48,7 @@
 
 
 
-#define __MF_HDR__		__COUT_HDR_FL__
+#define __MF_HDR__		__COUT_HDR__
 #define __MOUT_ERR__  	__MF_TYPE__(LogError) 	<< __MF_HDR__
 #define __MOUT_WARN__  	__MF_TYPE__(LogWarning) << __MF_HDR__
 #define __MOUT_INFO__  	__MF_TYPE__(LogInfo) 	<< __MF_HDR__
@@ -76,10 +77,10 @@
 #define __CFG_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << "-" << theConfigurationRecordName_ << ":"
 #define __CFG_MF_TYPE__(X)		mf::X (std::string(__MF_SUBJECT__) + theConfigurationRecordName_)
 
-#define __CFG_MOUT_ERR__  	__CFG_MF_TYPE__(LogError) 	<< __MF_HDR__
-#define __CFG_MOUT_WARN__  	__CFG_MF_TYPE__(LogWarning) << __MF_HDR__
-#define __CFG_MOUT_INFO__  	__CFG_MF_TYPE__(LogInfo) 	<< __MF_HDR__
-#define __CFG_MOUT__  		__CFG_MF_TYPE__(LogDebug)	<< __MF_HDR__
+#define __CFG_MOUT_ERR__  	__CFG_MF_TYPE__(LogError) 	<< __COUT_HDR__
+#define __CFG_MOUT_WARN__  	__CFG_MF_TYPE__(LogWarning) << __COUT_HDR__
+#define __CFG_MOUT_INFO__  	__CFG_MF_TYPE__(LogInfo) 	<< __COUT_HDR__
+#define __CFG_MOUT__  		__CFG_MF_TYPE__(LogDebug)	<< __COUT_HDR__
 #define __CFG_MOUTV__(X)	__CFG_MOUT__ << QUOTE(X) << " = " << X
 #define __CFG_COUT_ERR__  	__CFG_COUT_TYPE__(LogError) 	<< __COUT_HDR__
 #define __CFG_COUT_WARN__  	__CFG_COUT_TYPE__(LogWarning) 	<< __COUT_HDR__
@@ -103,10 +104,10 @@
 #define __SUP_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << "-" << supervisorClassNoNamespace_ << ":"
 #define __SUP_MF_TYPE__(X)		mf::X (std::string(__MF_SUBJECT__) + supervisorClassNoNamespace_)
 
-#define __SUP_MOUT_ERR__  	__SUP_MF_TYPE__(LogError) 	<< __MF_HDR__
-#define __SUP_MOUT_WARN__  	__SUP_MF_TYPE__(LogWarning) << __MF_HDR__
-#define __SUP_MOUT_INFO__  	__SUP_MF_TYPE__(LogInfo) 	<< __MF_HDR__
-#define __SUP_MOUT__  		__SUP_MF_TYPE__(LogDebug)	<< __MF_HDR__
+#define __SUP_MOUT_ERR__  	__SUP_MF_TYPE__(LogError) 	<< __COUT_HDR__
+#define __SUP_MOUT_WARN__  	__SUP_MF_TYPE__(LogWarning) << __COUT_HDR__
+#define __SUP_MOUT_INFO__  	__SUP_MF_TYPE__(LogInfo) 	<< __COUT_HDR__
+#define __SUP_MOUT__  		__SUP_MF_TYPE__(LogDebug)	<< __COUT_HDR__
 #define __SUP_MOUTV__(X)	__SUP_MOUT__ << QUOTE(X) << " = " << X
 #define __SUP_COUT_ERR__  	__SUP_COUT_TYPE__(LogError) 	<< __COUT_HDR__
 #define __SUP_COUT_WARN__  	__SUP_COUT_TYPE__(LogWarning) 	<< __COUT_HDR__

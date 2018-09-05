@@ -30,6 +30,7 @@ public:
 	ConfigurationView							(const std::string &name="");
 	virtual ~ConfigurationView					(void);
 	ConfigurationView& 	copy					(const ConfigurationView &src, ConfigurationVersion destinationVersion, const std::string &author);
+	unsigned int	 	copyRows				(const std::string& author, const ConfigurationView &src, unsigned int srcOffsetRow = 0, unsigned int srcRowsToCopy = (unsigned int)-1, unsigned int destOffsetRow = (unsigned int)-1, bool generateUniqueDataColumns = false);
 
 
 	void 	init(void);
@@ -88,6 +89,7 @@ private:
 public:
 	//std::set<std::string /*GroupId*/>
 	std::set<std::string>			getSetOfGroupIDs			(const std::string& childLinkIndex, unsigned int row = -1) const;
+	std::set<std::string>			getSetOfGroupIDs			(const unsigned int& col, unsigned int row = -1) const;
 	bool			 			    isEntryInGroup				(const unsigned int& row, const std::string& childLinkIndex, const std::string& groupNeedle) const;
 	const bool	 					getChildLink				(const unsigned int& col, bool& isGroup, std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>& linkPair) const;
 	const unsigned int 			    getColLinkGroupID			(const std::string& childLinkIndex) const;
@@ -314,7 +316,7 @@ public:
 
 	//==============================================================================
 	void				resizeDataView				(unsigned int nRows, unsigned int nCols);
-	int					addRow        				(const std::string &author = "", bool incrementUniqueData = false, std::string baseNameAutoUID = ""); //returns index of added row, always is last row
+	unsigned int		addRow        				(const std::string &author = "", bool incrementUniqueData = false, std::string baseNameAutoUID = "", unsigned int rowToAdd = (unsigned int)-1); //returns index of added row, default is last row
 	void 				deleteRow     				(int r);
 
 	//Lore did not like this.. wants special access through separate Supervisor for "Database Management" int		addColumn(std::string name, std::string viewName, std::string viewType); //returns index of added column, always is last column unless

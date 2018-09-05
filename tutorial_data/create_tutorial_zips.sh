@@ -5,7 +5,7 @@
 #	After this script, there is still the remaining work of updating the links in the html pages of the live tutorial being updated.
 #
 # usage: --tutorial <tutorial name> --version <version string> --repo <path to repo area> --data <path to user data> --database <path to database>
-#
+# 
 #   tutorial 
 #		e.g. ${TUTORIAL} or artdaq
 #   version 
@@ -21,6 +21,7 @@
 #  example run:
 #	./create_tutorial_zips.sh --tutorial first_demo --version v2_2 --repo /home/rrivera/ots/srcs/otsdaq/tutorial_data --data /home/rrivera/ots/NoGitData --database /home/rrivera/databases
 #
+# Note: for now blocking users other than rrivera.. (forcing use of defaults for paths)
 
 echo
 echo
@@ -89,18 +90,24 @@ rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases; #replace databases
 cp -r ${UDATABASES} ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases;
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db.*; 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db_*;
+cd ${SRC}
+git add ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db
+cd -
 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data; #replace data
 cp -r ${UDATA} ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data; 
 rm ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/ActiveConfigurationGroups.cfg.*; 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ConfigurationInfo.*
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/OutputData/*   #*/ fix comment text coloring
+rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/Logs/*   #*/ fix comment text coloring
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/RunNumber/*  #*/ fix comment text coloring
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/MacroHistory/* #*/ fix comment text coloring
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/ProgressBarData 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/RunControlData
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/LoginData/UsersData/TooltipData
-
+cd ${SRC}
+git add ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data
+cd -
 
 
 #from home/tmp, make demo zips from repo

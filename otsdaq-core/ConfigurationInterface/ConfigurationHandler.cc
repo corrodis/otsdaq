@@ -215,7 +215,7 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 	if(stat(configFile.c_str(), &fileStatus) < 0)
 	{
 		__COUT__ << "Error reading path: " << configFile << std::endl;
-		std::stringstream ss; ss << __MF_HDR__;
+		std::stringstream ss; ss << __COUT_HDR__;
 		if( errno == ENOENT )
 			ss << ("Path file_name does not exist.");
 		else if( errno == ENOTDIR )

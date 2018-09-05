@@ -1656,7 +1656,7 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 			proceed = false;
 		}
 
-		if (reply != command + "Done")
+		if ((reply != command + "Done") && (reply != command + "Response") )
 		{
 			__SUP_SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
 				appInfo.getName() << "' [LID=" <<
@@ -2221,7 +2221,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 
 		std::map<std::string /*alias*/,
 			std::pair<std::string /*group name*/, ConfigurationGroupKey> > aliasMap =
-			CorePropertySupervisorBase::theConfigurationManager_->getGroupAliasesConfiguration();
+			CorePropertySupervisorBase::theConfigurationManager_->getActiveGroupAliases();
 
 
 		// get stateMachineAliasFilter if possible
@@ -2342,7 +2342,8 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 					CorePropertySupervisorBase::theConfigurationManager_->loadConfigurationGroup(
 						aliasMapPair.second.first, aliasMapPair.second.second,
 						false, 0, 0, 0,
-						&groupComment, &groupAuthor, &groupCreationTime, false /*false to not load member map*/);
+						&groupComment, &groupAuthor, &groupCreationTime,
+						false /*false to not load member map*/);
 
 					xmlOut.addTextElementToData("config_comment", groupComment);
 					xmlOut.addTextElementToData("config_author", groupAuthor);

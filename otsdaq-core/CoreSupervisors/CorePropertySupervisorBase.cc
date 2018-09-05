@@ -177,6 +177,8 @@ bool CorePropertySupervisorBase::doPermissionsGrantAccess(
 				return true; //access granted!
 		}
 	}
+	//__COUT__ << "Denied." << __E__;
+
 	//if here, no access group match found
 	//so denied
 	return false;
