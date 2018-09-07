@@ -350,7 +350,7 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor *theSupervisor)
 			"' and port " <<
 			myport << ". Perhaps it is already in use? Exiting State Changer receive loop." << std::endl;
 		__COUT__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 		return;
 	}
 
@@ -749,7 +749,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 		{
 			__SUP_SS__ << ("Could not open file: " + fn) << std::endl;
 			__SUP_COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		fprintf(fp, "FSM_last_configuration_alias %s", configurationAlias.c_str());
 		fclose(fp);
@@ -3080,7 +3080,7 @@ unsigned int GatewaySupervisor::getNextRunNumber(const std::string &fsmNameIn)
 		{
 			__SUP_SS__ << "Error. Can't create file: " << runNumberFileName << std::endl;
 			__SUP_COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 	std::string runNumberString;
@@ -3108,7 +3108,7 @@ bool GatewaySupervisor::setNextRunNumber(unsigned int runNumber, const std::stri
 	{
 		__SUP_SS__ << "Can't open file: " << runNumberFileName << std::endl;
 		__SUP_COUT__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	std::stringstream runNumberStream;
 	runNumberStream << runNumber;
@@ -3181,7 +3181,7 @@ void GatewaySupervisor::saveGroupNameAndKey(const std::pair<std::string /*group 
 	{
 		__SUP_SS__ << "Error. Can't open file: " << fullPath << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	std::stringstream outss;
 	outss << theGroup.first << "\n" << theGroup.second << "\n" << time(0);

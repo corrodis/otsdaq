@@ -87,7 +87,7 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 	{
 		__SS__ << "Error! Attempt to access disabled plan (Status=FALSE)." << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	std::vector<IterateConfiguration::Command> commands;

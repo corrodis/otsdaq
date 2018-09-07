@@ -72,7 +72,7 @@ TCPSocket::TCPSocket(void)
 	__SS__ << "ERROR: This method should never be called. This is the protected constructor. There is something wrong in your inheritance scheme!" << std::endl;
 	__COUT__ << "\n" << ss.str();
 
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //========================================================================================================================

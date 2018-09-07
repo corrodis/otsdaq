@@ -104,7 +104,7 @@ throw(std::runtime_error)
 			"' version '" << versionstring << "' - are you sure this version exists?\n" <<
 			"Here is the error:\n\n" << result.second << std::endl;
 	std::cout << __COUT_HDR_FL__ << "\n" << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //==============================================================================
@@ -131,7 +131,7 @@ throw(std::runtime_error)
 
 	__SS__ << "DBI Error:" << result.second << std::endl;
 	std::cout << __COUT_HDR_FL__ << "\n" << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //==============================================================================
@@ -203,13 +203,13 @@ catch (std::exception const& e)
 {
 	__SS__ << "DBI Exception:" << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 catch (...)
 {
 	__SS__ << "DBI Unknown exception.\n";
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //==============================================================================
@@ -228,13 +228,13 @@ catch (std::exception const& e)
 {
 	__SS__ << "Filter string '" << filterString << "' yielded DBI Exception:" << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 catch (...)
 {
 	__SS__ << "Filter string '" << filterString << "' yielded DBI Unknown exception.\n";
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //==============================================================================
@@ -304,14 +304,14 @@ catch (std::exception const& e)
 			configurationGroup <<
 			"':\n\n" << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 catch (...)
 {
 	__SS__ << "DBI Unknown exception getting Configuration Group Members for '" <<
 			configurationGroup << ".'\n";
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //==============================================================================
@@ -342,19 +342,19 @@ try
 
 	if (result.first) return;
 
-	throw std::runtime_error(result.second);
+	__THROW__(result.second);
 }
 catch (std::exception const& e)
 {
 	__SS__ << "DBI Exception:" << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 catch (...)
 {
 	__SS__ << "DBI Unknown exception.\n";
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 

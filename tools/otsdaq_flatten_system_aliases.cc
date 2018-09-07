@@ -210,7 +210,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 				groupAliasesTableName << " is a required member of the Backbone configuration group." <<
 				"\n\nLikely you need to activate a valid Backbone group." <<
 				std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 
@@ -241,7 +241,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	{
 		__SS__ << "filesystemdb:// was not found in $ARTDAQ_DATABASE_URI!" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	currentDir = currentDir.substr(std::string("filesystemdb://").length());
@@ -252,7 +252,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	{
 		__SS__ << ("Aborting move! Must at least give version argument to flatten to!") << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(pathToSwapIn != "")
@@ -341,7 +341,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			if(rename(currentDir.c_str(),pathToSwapIn.c_str()) < 0)
 			{
 				__SS__ << "Problem!" << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 		}
@@ -352,7 +352,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			if(rename(currentDir.c_str(),(moveToDir+"_tmp").c_str()) < 0)
 			{
 				__SS__ << "Problem!" << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 
@@ -362,7 +362,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 		if(rename(moveToDir.c_str(),currentDir.c_str()) < 0)
 		{
 			__SS__ << "Problem!" << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 
@@ -413,7 +413,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 		if(rename(currentDir.c_str(),moveToDir.c_str()) < 0)
 		{
 			__SS__ << "Problem!" << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		if(pathToSwapIn != "")
@@ -423,7 +423,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			if(rename(pathToSwapIn.c_str(),currentDir.c_str()) < 0)
 			{
 				__SS__ << "Problem!" << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 		else if(count) //if not first time, replace from temporarily holding area
@@ -433,7 +433,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			if(rename((moveToDir+"_tmp").c_str(),currentDir.c_str()) < 0)
 			{
 				__SS__ << "Problem!" << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 

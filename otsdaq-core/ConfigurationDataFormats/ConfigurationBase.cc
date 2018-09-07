@@ -123,7 +123,7 @@ void ConfigurationBase::setupMockupView(ConfigurationVersion version)
 			__SS__ << "\nsetupMockupView() IMPOSSIBLE ERROR: trimCache() is deleting the latest view version " <<
 					version	<< "!" << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 	else
@@ -131,7 +131,7 @@ void ConfigurationBase::setupMockupView(ConfigurationVersion version)
 		__SS__ << "\nsetupMockupView() ERROR: View to fill with mockup already exists: " << version
 				<< ". Cannot overwrite!" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 }
 
@@ -169,7 +169,7 @@ void ConfigurationBase::trimCache(unsigned int trimSize)
 		if(versionToDelete.isInvalid())
 		{
 			__SS__ << "Can NOT have a stored view with an invalid version!";
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		eraseView(versionToDelete);
@@ -210,7 +210,7 @@ void ConfigurationBase::trimTemporary(ConfigurationVersion targetVersion)
 		__SS__ << "Temporary trim target was a persistent version: " <<
 				targetVersion << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 }
 
@@ -233,7 +233,7 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 		__SS__ << "needleVersion does not exist: " <<
 				needleVersion << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	const ConfigurationView *needleView = &(needleIt->second);
@@ -321,14 +321,14 @@ void ConfigurationBase::changeVersionAndActivateView(ConfigurationVersion tempor
 	{
 		__SS__ << "ERROR: Temporary view version " << temporaryVersion << " doesn't exists!" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	if(version.isInvalid())
 	{
 		__SS__ << "ERROR: Attempting to create an invalid version " << version <<
 				"! Did you really run out of versions? (this should never happen)" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(configurationViews_.find(version) != configurationViews_.end())
@@ -417,7 +417,7 @@ unsigned int ConfigurationBase::getNumberOfStoredViews(void) const
 		else if(viewPair.first.isInvalid())
 		{
 			//__SS__ << "Can NOT have a stored view with an invalid version!";
-			//throw std::runtime_error(ss.str());
+			//__SS_THROW__;
 
 			//NOTE: if this starts happening a lot, could just auto-correct and remove the invalid version
 			// but it would be better to fix the cause.
@@ -435,7 +435,7 @@ const ConfigurationView& ConfigurationBase::getView(void) const
 	if(!activeConfigurationView_)
 	{
 		__SS__ << "activeConfigurationView_ pointer is null! (...likely the active view was not setup properly. Check your system setup.)";
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return *activeConfigurationView_;
 }
@@ -446,7 +446,7 @@ ConfigurationView* ConfigurationBase::getViewP(void)
 	if(!activeConfigurationView_)
 	{
 		__SS__ << "activeConfigurationView_ pointer is null! (...likely the active view was not setup properly. Check your system setup.)";
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return activeConfigurationView_;
 }
@@ -493,7 +493,7 @@ bool ConfigurationBase::setActiveView(ConfigurationVersion version)
 		__SS__ << "\nsetActiveView() ERROR: View with version " << version <<
 				" has never been stored before!" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 		return false;
 	}
 	activeConfigurationView_ = &configurationViews_[version];
@@ -501,7 +501,7 @@ bool ConfigurationBase::setActiveView(ConfigurationVersion version)
 	if(configurationViews_[version].getVersion() !=  version)
 	{
 		__SS__ << "Something has gone very wrong with the version handling!" << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	return true;
@@ -1094,7 +1094,7 @@ ConfigurationVersion ConfigurationBase::copyView (const ConfigurationView &sourc
 				"Dimension of source is [" <<	sourceView.getNumberOfColumns() <<
 				"] and of destination mockup is [" <<
 				mockupConfigurationView_.getNumberOfColumns() << "]." << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//check for destination version confict
@@ -1103,7 +1103,7 @@ ConfigurationVersion ConfigurationBase::copyView (const ConfigurationView &sourc
 	{
 		__SS__ << "Error! Asked to copy a view with a conflicting version: " <<
 				destinationVersion << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//if destinationVersion is INVALID, creates next available temporary version
@@ -1158,7 +1158,7 @@ ConfigurationVersion ConfigurationBase::createTemporaryView(ConfigurationVersion
 		__SS__ << "Invalid destination temporary version: " <<
 				destTemporaryViewVersion << ". Expected next temporary version < " << tmpVersion << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(sourceViewVersion == ConfigurationVersion::INVALID || 	//use mockup if sourceVersion is -1 or not found
@@ -1169,7 +1169,7 @@ ConfigurationVersion ConfigurationBase::createTemporaryView(ConfigurationVersion
 			__SS__ << "ERROR: sourceViewVersion " << sourceViewVersion << " not found. " <<
 					"Invalid source version. Version requested is not stored (yet?) or does not exist." << std::endl;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		__COUT__ << "Using Mock-up view" << std::endl;
 		configurationViews_[tmpVersion].copy(mockupConfigurationView_,
@@ -1215,7 +1215,7 @@ ConfigurationVersion ConfigurationBase::getNextTemporaryVersion() const
 		__SS__ << "Invalid destination temporary version: " <<
 				tmpVersion << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return tmpVersion;
 }
@@ -1241,7 +1241,7 @@ ConfigurationVersion ConfigurationBase::getNextVersion() const
 		__SS__ << "Invalid destination next version: " <<
 				tmpVersion << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return tmpVersion;
 }
@@ -1257,7 +1257,7 @@ ConfigurationView* ConfigurationBase::getTemporaryView(ConfigurationVersion temp
 	{
 		__SS__ << getConfigurationName() << ":: Error! Temporary version not found!" << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return &configurationViews_[temporaryVersion];
 }
@@ -1298,7 +1298,7 @@ std::string ConfigurationBase::convertToCaps(std::string& str, bool isConfigName
 		else if(str[c] >= '0' && str[c] <= '9')
 			capsStr += str[c]; //allow numbers
 		else //error! non-alpha
-			throw std::runtime_error(std::string("ConfigurationBase::convertToCaps::") +
+			__THROW__(std::string("ConfigurationBase::convertToCaps::") +
 					"Invalid character found in name (allowed: A-Z, a-z, 0-9):" +
 					str );
 

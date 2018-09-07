@@ -193,7 +193,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	{
 		__SS__ << "filesystemdb:// was not found in $ARTDAQ_DATABASE_URI!" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	currentDir = currentDir.substr(std::string("filesystemdb://").length());

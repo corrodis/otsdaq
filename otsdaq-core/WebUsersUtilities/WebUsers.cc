@@ -126,7 +126,7 @@ WebUsers::WebUsers()
 	{
 		__SS__ << "user: " << user << " is not found" << __E__;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 		exit(0); //THIS CAN NOT HAPPEN?! There must be an admin user
 	}
 	else if (UsersSaltVector[i] == "" && //admin password not setup, so print out NAC to help out

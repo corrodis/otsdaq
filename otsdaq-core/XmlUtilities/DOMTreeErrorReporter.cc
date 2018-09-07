@@ -23,21 +23,21 @@ DOMTreeErrorReporter::~DOMTreeErrorReporter()
 void DOMTreeErrorReporter::warning(const xercesc::SAXParseException& ex)
 {
 	__COUT__ << "Warning!" << std::endl;
-	throw std::runtime_error(reportParseException(ex));
+	__THROW__(reportParseException(ex));
 }
 
 //==============================================================================
 void DOMTreeErrorReporter::error(const xercesc::SAXParseException& ex)
 {
 	__COUT__ << "Error!" << std::endl;
-    throw std::runtime_error(reportParseException(ex));
+    __THROW__(reportParseException(ex));
 }
 
 //==============================================================================
 void DOMTreeErrorReporter::fatalError(const xercesc::SAXParseException& ex)
 {
 	__COUT__ << "Fatal Error!" << std::endl;
-    throw std::runtime_error(reportParseException(ex));
+    __THROW__(reportParseException(ex));
 }
 
 //==============================================================================

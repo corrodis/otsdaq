@@ -35,8 +35,8 @@ ConfigurationTree::ConfigurationTree()
   col_						(0),
   configView_				(0)
 {
-	//std::cout << __PRETTY_FUNCTION__ << std::endl;
-	//std::cout << __PRETTY_FUNCTION__ << "EMPTY CONSTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
+	//__COUT__ << std::endl;
+	//__COUT__ << "EMPTY CONSTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
 }
 //==============================================================================
 ConfigurationTree::ConfigurationTree(const ConfigurationManager* const &configMgr,
@@ -48,8 +48,8 @@ ConfigurationTree::ConfigurationTree(const ConfigurationManager* const &configMg
 		"" /*disconnectedLinkID_*/, "" /*childLinkIndex_*/,
 		ConfigurationView::INVALID /*row_*/, ConfigurationView::INVALID /*col_*/)
 {
-	//std::cout << __PRETTY_FUNCTION__ << std::endl;
-	//std::cout << __PRETTY_FUNCTION__ << "SHORT CONTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
+	//__COUT__ << std::endl;
+	//__COUT__ << "SHORT CONTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
 }
 
 //==============================================================================
@@ -82,8 +82,8 @@ ConfigurationTree::ConfigurationTree(
   col_						(col),
   configView_				(0)
 {
-	//std::cout << __PRETTY_FUNCTION__ << std::endl;
-	//std::cout << __PRETTY_FUNCTION__ << "FULL CONTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_ << std::endl;
+	//__COUT__ << std::endl;
+	//__COUT__ << "FULL CONTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_ << std::endl;
 	if(!configMgr_)// || !configuration_ || !configView_)
 	{
 		std::stringstream ss;
@@ -92,8 +92,7 @@ ConfigurationTree::ConfigurationTree(
 				"\n\tconfiguration_=" << configuration_ <<
 				"\n\tconfigView_=" << configView_ <<
 				std::endl;
-		__COUT__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(configuration_)
@@ -105,8 +104,7 @@ ConfigurationTree::ConfigurationTree(
 	{
 		__SS__ << "Missing UID column (must column of type  " << ViewColumnInfo::TYPE_UID <<
 				") in config view : " << configView_->getTableName() << std::endl;
-		__COUT__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 }
 
@@ -114,7 +112,7 @@ ConfigurationTree::ConfigurationTree(
 //destructor
 ConfigurationTree::~ConfigurationTree(void)
 {
-	//std::cout << __PRETTY_FUNCTION__ << std::endl;
+	//__COUT__ << std::endl;
 }
 
 //==============================================================================
@@ -219,16 +217,14 @@ void ConfigurationTree::getValue(std::string& value) const
 	else if(row_ == ConfigurationView::INVALID)
 	{
 		__SS__ << "Malformed ConfigurationTree" << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	else if(col_ == ConfigurationView::INVALID)						//this node is uid node
 		configView_->getValue(value,row_,configView_->getColUID());
 	else
 	{
 		__SS__ << "Impossible." << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 }
@@ -304,7 +300,7 @@ void ConfigurationTree::getValueAsBitMap(ConfigurationTree::BitMap& bitmap) cons
 					else if(bitmapString[i] == ',') //end characters found not within row
 					{
 						__SS__ << "Too many ']' or ',' characters in bit map configuration" << std::endl;
-						__SS_THROW__;
+						__SS_ONLY_THROW__;
 					}
 				}
 				else if(startInt == (unsigned int)-1) //need to find start of number
@@ -320,7 +316,7 @@ void ConfigurationTree::getValueAsBitMap(ConfigurationTree::BitMap& bitmap) cons
 					else if(bitmapString[i] == ',') //comma found without number
 					{
 						__SS__ << "Too many ',' characters in bit map configuration" << std::endl;
-						__SS_THROW__;
+						__SS_ONLY_THROW__;
 					}
 				}
 				else
@@ -357,8 +353,7 @@ void ConfigurationTree::getValueAsBitMap(ConfigurationTree::BitMap& bitmap) cons
 	else
 	{
 		__SS__ << "Requesting getValue must be on a value node." << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 }
@@ -384,8 +379,7 @@ std::string ConfigurationTree::getEscapedValue() const
 
 	__SS__ << "Can not get escaped value except from a value node!" <<
 			" This node is type '" << getNodeType() << "." << std::endl;
-	__COUT_ERR__ << "\n" << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //==============================================================================
@@ -395,7 +389,7 @@ const std::string& ConfigurationTree::getConfigurationName(void) const
 	if(!configuration_)
 	{
 		__SS__ << "Can not get configuration name of node with no configuration pointer!" << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 	return configuration_->getConfigurationName();
 }
@@ -412,7 +406,7 @@ const std::string& ConfigurationTree::getFieldConfigurationName(void) const
 		if(!linkParentConfig_)
 		{
 			__SS__ << "Can not get configuration name of link node field with no parent configuration pointer!" << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_ONLY_THROW__;
 		}
 		return linkParentConfig_->getConfigurationName();
 	}
@@ -427,7 +421,7 @@ const std::string& ConfigurationTree::getDisconnectedTableName(void) const
 	if(isLinkNode() && isDisconnected()) return disconnectedTargetName_;
 
 	__SS__ << "Can not get disconnected target name of node unless it is a disconnected link node!" << std::endl;
-	throw std::runtime_error(ss.str());
+	__SS_ONLY_THROW__;
 }
 
 //==============================================================================
@@ -437,7 +431,7 @@ const std::string& ConfigurationTree::getDisconnectedLinkID(void) const
 	if(isLinkNode() && isDisconnected()) return disconnectedLinkID_;
 
 	__SS__ << "Can not get disconnected target name of node unless it is a disconnected link node!" << std::endl;
-	throw std::runtime_error(ss.str());
+	__SS_ONLY_THROW__;
 }
 
 //==============================================================================
@@ -447,7 +441,7 @@ const ConfigurationVersion& ConfigurationTree::getConfigurationVersion(void) con
 	if(!configView_)
 	{
 		__SS__ << "Can not get configuration version of node with no config view pointer!" << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 	return configView_->getVersion();
 }
@@ -459,7 +453,7 @@ const time_t& ConfigurationTree::getConfigurationCreationTime(void) const
 	if(!configView_)
 	{
 		__SS__ << "Can not get configuration creation time of node with no config view pointer!" << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 	return configView_->getCreationTime();
 }
@@ -479,7 +473,7 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 				getValueType() << ".' Node must be a link or a value node with type '" <<
 				ViewColumnInfo::TYPE_BITMAP_DATA << "' or '" <<
 				ViewColumnInfo::TYPE_FIXED_CHOICE_DATA << ".'" << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 
 	std::vector<std::string> retVec;
@@ -489,7 +483,7 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 		if(!linkParentConfig_)
 		{
 			__SS__ << "Can not get fixed choices of node with no parent config view pointer!" << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_ONLY_THROW__;
 		}
 
 		//__COUT__ << getChildLinkIndex() << std::endl;
@@ -516,7 +510,7 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 	if(!configView_)
 	{
 		__SS__ << "Can not get fixed choices of node with no config view pointer!" << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 
 	//return vector of default + data choices
@@ -551,8 +545,7 @@ const std::string& ConfigurationTree::getValueAsString(bool returnLinkTableValue
 		else
 		{
 			__SS__ << "Impossible Link." << std::endl;
-			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 	else if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
@@ -562,16 +555,14 @@ const std::string& ConfigurationTree::getValueAsString(bool returnLinkTableValue
 	else if(row_ == ConfigurationView::INVALID)
 	{
 		__SS__ << "Malformed ConfigurationTree" << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	else if(col_ == ConfigurationView::INVALID)						//this node is uid node
 		return configView_->getDataView()[row_][configView_->getColUID()];
 	else
 	{
 		__SS__ << "Impossible." << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 }
 
@@ -589,7 +580,7 @@ const std::string& ConfigurationTree::getUIDAsString(void) const
 				getNodeType() << ".' Node type must be '" <<
 				ConfigurationTree::NODE_TYPE_VALUE << "' or '" <<
 				ConfigurationTree::NODE_TYPE_UID_LINK << ".'" << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 }
 
@@ -655,8 +646,7 @@ const ViewColumnInfo& ConfigurationTree::getColumnInfo(void) const
 	{
 		__SS__ << "Can only get column info from a value node! " <<
 				"The node type is " << getNodeType() << std::endl;
-		__COUT__ << "\n" << ss.str() << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 }
@@ -711,8 +701,7 @@ const std::string& ConfigurationTree::getChildLinkIndex(void) const
 	{
 		__SS__ << "Can only get link ID from a link! " <<
 				"The node type is " << getNodeType() << std::endl;
-		__COUT__ << "\n" << ss.str() << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return childLinkIndex_;
 }
@@ -729,8 +718,7 @@ const std::string& ConfigurationTree::getValueName(void) const
 	else
 	{
 		__SS__ << "Can only get value name of a value node!" << std::endl;
-		__COUT__ << "\n" << ss.str() << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 }
@@ -766,7 +754,7 @@ ConfigurationTree ConfigurationTree::recurse(const ConfigurationTree& tree,
 //		__SS__ << "Can only get getRecordFieldValueAsString from a uid node! " <<
 //				"The node type is " << getNodeType() << std::endl;
 //		__COUT__ << "\n" << ss.str() << std::endl;
-//		throw std::runtime_error(ss.str());
+//		__SS_THROW__;
 //	}
 //
 //	unsigned int c = configView_->findCol(fieldName);
@@ -792,8 +780,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 	{
 		__SS__ << "Invalid empty node name! Looking for child node from node '" <<
 				getValue() << "'..." << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	bool startingSlash = nodeString[0] == '/';
@@ -825,8 +812,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 			if(!configView_)
 			{
 				__SS__ << "Missing configView pointer! Likely attempting to access a child node through a disconnected link node." << std::endl;
-				__COUT_ERR__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 			//this node is config node, so return uid node considering groupid
@@ -851,8 +837,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 		else if(row_ == ConfigurationView::INVALID)
 		{
 			__SS__ << "Malformed ConfigurationTree" << std::endl;
-			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		else if(col_ == ConfigurationView::INVALID)
 		{
@@ -869,8 +854,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 			if(!configView_)
 			{
 				__SS__ << "Missing configView pointer! Likely attempting to access a child node through a disconnected link node." << std::endl;
-				__COUT_ERR__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 			unsigned int c = configView_->findCol(nodeName);
@@ -1011,7 +995,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 #if MESSAGEFACILITY_HEX_VERSION > 0x20100
 		ss << boost::stacktrace::stacktrace();
 #endif
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 	catch(...)
 	{
@@ -1021,7 +1005,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 #if MESSAGEFACILITY_HEX_VERSION > 0x20100
 		ss << boost::stacktrace::stacktrace();
 #endif
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 
 	//this node is value node, so has no node to choose from
@@ -1032,7 +1016,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string &nodeString,
 #if MESSAGEFACILITY_HEX_VERSION > 0x20100
 	ss << boost::stacktrace::stacktrace();
 #endif
-	throw std::runtime_error(ss.str());	// this node is value node, cant go any deeper!
+	__SS_ONLY_THROW__;	// this node is value node, cant go any deeper!
 }
 
 
@@ -1081,8 +1065,7 @@ bool ConfigurationTree::isDisconnected(void) const
 						"'\n\n" << std::endl;
 		ss << "This is not a Link node! It is node type '" <<
 				getNodeType() << ".' Only a Link node can be disconnected." << std::endl;
-		//__COUT__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 
 	return !configuration_ || !configView_;
@@ -1170,8 +1153,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 	{
 		__SS__ << "Can only get getCommonFields from a root or table node! " <<
 				"The node type is " << getNodeType() << std::endl;
-		__COUT__ << "\n" << ss.str() << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	std::vector<ConfigurationTree::RecordField> fieldCandidateList;
@@ -1245,33 +1227,6 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 							found = true;
 							break;
 						}
-//						if(fieldFilter[0] == '*') //leading wildcard
-//						{
-//							if(fieldNode.first ==
-//									fieldFilter.substr(1))
-//							{
-//								found = true;
-//								break;
-//							}
-//						}
-//						else if(fieldFilter.size() &&
-//								fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
-//						{
-//							if(fieldNode.first.substr(0,fieldFilter.size()-1) ==
-//									fieldFilter.substr(0,fieldFilter.size()-1))
-//							{
-//								found = true;
-//								break;
-//							}
-//						}
-//						else //no leading wildcard
-//						{
-//							if(fieldNode.first == fieldFilter)
-//							{
-//								found = true;
-//								break;
-//							}
-//						}
 
 
 					if(found)
@@ -1287,33 +1242,6 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 								break;
 							}
 
-//							if(fieldFilter[0] == '*') //leading wildcard
-//							{
-//								if(fieldNode.first ==
-//										fieldFilter.substr(1))
-//								{
-//									found = false; //reject if match
-//									break;
-//								}
-//							}
-//							else if(fieldFilter.size() &&
-//									fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
-//							{
-//								if(fieldNode.first.substr(0,fieldFilter.size()-1) ==
-//										fieldFilter.substr(0,fieldFilter.size()-1))
-//								{
-//									found = false; //reject if match
-//									break;
-//								}
-//							}
-//							else //no leading wildcard
-//							{
-//								if(fieldNode.first == fieldFilter)
-//								{
-//									found = false; //reject if match
-//									break;
-//								}
-//							}
 
 					}
 
@@ -1396,8 +1324,7 @@ std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForFiel
 	{
 		__SS__ << "Can only get getCommonFields from a table node! " <<
 				"The node type is " << getNodeType() << std::endl;
-		__COUT__ << "\n" << ss.str() << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	std::set<std::string /*unique-value*/> uniqueValues;
@@ -1487,35 +1414,6 @@ void ConfigurationTree::recursiveGetCommonFields(
 						found = true;
 						break;
 					}
-//					if(fieldFilter[0] == '*') //leading wildcard
-//					{
-//						if(fieldNode.first ==
-//								fieldFilter.substr(1))
-//						{
-//							found = true;
-//							break;
-//						}
-//					}
-//					else if(fieldFilter.size() &&
-//							fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
-//					{
-//						if((relativePathBase + fieldNode.first).substr(
-//								0,fieldFilter.size()-1) ==
-//								fieldFilter.substr(0,fieldFilter.size()-1))
-//						{
-//							found = true;
-//							break;
-//						}
-//					}
-//					else //no leading wildcard
-//					{
-//						if((relativePathBase + fieldNode.first) ==
-//							fieldFilter)
-//						{
-//							found = true;
-//							break;
-//						}
-//					}
 
 				if(found)
 				{
@@ -1529,35 +1427,6 @@ void ConfigurationTree::recursiveGetCommonFields(
 							found = false; //reject if match
 							break;
 						}
-//						if(fieldFilter[0] == '*') //leading wildcard
-//						{
-//							if(fieldNode.first ==
-//									fieldFilter.substr(1))
-//							{
-//								found = false; //reject if match
-//								break;
-//							}
-//						}
-//						else if(fieldFilter.size() &&
-//								fieldFilter[fieldFilter.size()-1] == '*') //trailing wildcard
-//						{
-//							if((relativePathBase + fieldNode.first).substr(
-//									0,fieldFilter.size()-1) ==
-//									fieldFilter.substr(0,fieldFilter.size()-1))
-//							{
-//								found = false; //reject if match
-//								break;
-//							}
-//						}
-//						else //no leading wildcard
-//						{
-//							if((relativePathBase + fieldNode.first) ==
-//									fieldFilter)
-//							{
-//								found = false; //reject if match
-//								break;
-//							}
-//						}
 				}
 
 				//if found, new field (since this is first record)
@@ -1689,8 +1558,7 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 				{
 					__SS__ << "Failed to access filter path '" <<
 							filterPath << "' - aborting." << std::endl;
-					__COUT_ERR__ << "\n" << ss.str();
-					throw std::runtime_error(ss.str());
+					__SS_THROW__;
 				}
 
 				if(skip) break; //no match for this field, so stop checking and skip this record
@@ -1708,41 +1576,6 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 	//__COUT__ << "Done w/Children of node: " << getValueAsString() << std::endl;
 	return retVector;
 }
-//
-////==============================================================================
-////wildCardMatch
-////	find needle in haystack
-////		allow needle to have leading and/or trailing wildcard '*'
-//bool StringMacros::wildCardMatch(const std::string& needle, const std::string& haystack)
-//try
-//{
-////	__COUT__ << "\t\t wildCardMatch: " << needle <<
-////			" =in= " << haystack << " ??? " <<
-////			std::endl;
-//
-//	if(needle.size() == 0)
-//		return true; //if empty needle, always "found"
-//
-//	if(needle[0] == '*' && //leading wildcard
-//					needle[needle.size()-1] == '*' ) //and trailing wildcard
-//		return std::string::npos != haystack.find(needle.substr(1,needle.size()-2));
-//
-//	if(needle[0] == '*') //leading wildcard
-//		return needle.substr(1) ==
-//				haystack.substr(haystack.size() - (needle.size()-1));
-//
-//	if(needle[needle.size()-1] == '*') //trailing wildcard
-//		return needle.substr(0,needle.size()-1) ==
-//				haystack.substr(0,needle.size()-1);
-//
-//	//else //no wildcards
-//	return needle == haystack;
-//}
-//catch(...)
-//{
-//	return false; //if out of range
-//}
-
 
 //==============================================================================
 //getChildren
@@ -1792,8 +1625,8 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority) co
 		if(isLinkNode() && isDisconnected())
 			ss << " This node is a disconnected link to " <<
 				getDisconnectedTableName() << std::endl;
-		//__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+
+		__SS_ONLY_THROW__;
 	}
 
 	if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)
@@ -1850,8 +1683,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority) co
 	else if(row_ == ConfigurationView::INVALID)
 	{
 		__SS__ << "Malformed ConfigurationTree" << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	else if(col_ == ConfigurationView::INVALID)
 	{
@@ -1871,8 +1703,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority) co
 		// this node is value node, cant go any deeper!
 		__SS__ << "\n\nError occurred looking for children of nodeName=" << getValueName() << "\n\n" <<
 			"Invalid depth! getChildrenValues() called from a value point in the Configuration Tree." << std::endl;
-		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	return retVector;
@@ -1891,8 +1722,7 @@ ConfigurationTree ConfigurationTree::getValueAsTreeNode(void) const
 	if(!configView_)
 	{
 		__SS__ << "Invalid node for get value." << std::endl;
-		__COUT__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	std::string valueString = configView_->getValueAsString(row_,col_,true /* convertEnvironmentVariables */);
@@ -1909,8 +1739,7 @@ ConfigurationTree ConfigurationTree::getValueAsTreeNode(void) const
 		catch(...)
 		{
 			__SS__ << "Invalid tree path." << std::endl;
-			//__COUT__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_ONLY_THROW__;
 		}
 	}
 
@@ -1918,7 +1747,7 @@ ConfigurationTree ConfigurationTree::getValueAsTreeNode(void) const
 	{
 		__SS__ << "Invalid value string '" << valueString <<
 				"' - must start with a '/' character." << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 }
 

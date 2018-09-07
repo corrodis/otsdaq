@@ -168,25 +168,25 @@ public:
 		{
 			__SS__ << "Requesting getValue on config node level. Must be a value node." << std::endl;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		else if(row_ == ConfigurationView::INVALID)
 		{
 			__SS__ << "Malformed ConfigurationTree" << std::endl;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		else if(col_ == ConfigurationView::INVALID)						//this node is uid node
 		{
 			__SS__ << "Requesting getValue on uid node level. Must be a value node." << std::endl;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		else
 		{
 			__SS__ << "Impossible" << std::endl;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 	//special version of getValue for string type
@@ -218,7 +218,7 @@ private:
 		{
 			__SS__ << "Null configView" << std::endl;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		std::cout << "210:::::" << "handleValidateValueForColumn<T>" << std::endl;
 		return configView->validateValueForColumn<T>(
@@ -231,7 +231,7 @@ private:
 		{
 			__SS__ << "Null configView" << std::endl;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		std::cout << "210:::::" << "handleValidateValueForColumn<string>" << std::endl;
 		return configView->validateValueForColumn(

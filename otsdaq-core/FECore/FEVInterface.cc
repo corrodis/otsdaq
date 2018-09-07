@@ -201,7 +201,7 @@ bool FEVInterface::slowControlsRunning(void)
 			{
 				__SS__ << "This should never happen hopefully!" << std::endl;
 				__COUT_ERR__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 			//send early if threshold reached
@@ -252,7 +252,7 @@ void FEVInterface::registerFEMacroFunction(
 	{
 		__SS__ << "feMacroName '" << feMacroName << "' already exists! Not allowed." << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	mapOfFEMacroFunctions_.insert(
@@ -285,7 +285,7 @@ const std::string& FEVInterface::getFEMacroInputArgument(frontEndMacroInArgs_t& 
 	}
 	__SS__ << "Requested input argument not found with name '" << argName << "'" << std::endl;
 	__COUT_ERR__ << "\n" << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 //========================================================================================================================
 //getFEMacroInputArgumentValue
@@ -312,7 +312,7 @@ std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& args
 	}
 	__SS__ << "Requested output argument not found with name '" << argName << "'" << std::endl;
 	__COUT_ERR__ << "\n" << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //========================================================================================================================

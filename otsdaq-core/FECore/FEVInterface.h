@@ -188,7 +188,7 @@ T 												getFEMacroInputArgumentValue(
 		__SS__ << "Error extracting value for argument named '" <<
 				argName << ".' The value '" << data << "' is not a number!" << std::endl;
 		__COUT__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	return retValue;

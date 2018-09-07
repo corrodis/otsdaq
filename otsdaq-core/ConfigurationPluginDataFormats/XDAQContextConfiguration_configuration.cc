@@ -73,7 +73,7 @@ void XDAQContextConfiguration::init(ConfigurationManager* configManager)
 		if (fs.fail())
 		{
 			__SS__ << "Failed to open XDAQ run file: " << XDAQ_RUN_FILE << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		outputXDAQXML((std::ostream &)fs);
 		fs.close();
@@ -318,7 +318,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 		if (appLink.isDisconnected())
 		{
 			__SS__ << "Application link is disconnected!" << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		//add xdaq applications to this context
@@ -364,7 +364,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 							contexts_.back().applications_.back().id_ << " appName=" <<
 							contexts_.back().applications_.back().applicationUID_ << std::endl;
 					__COUT_ERR__ << "\n" << ss.str();
-					throw std::runtime_error(ss.str());
+					__SS_THROW__;
 				}
 				appIdSet.insert(contexts_.back().applications_.back().id_);
 			}
@@ -437,7 +437,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 				__SS__ << "ARTDAQ Context '" << contexts_.back().contextUID_ <<
 					"' must have one Application! " <<
 					contexts_.back().applications_.size() << " were found. " << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 			if (!contexts_.back().status_) continue; //skip if disabled
@@ -462,7 +462,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 				  "\tots::DispatcherApp\n" <<
 				        "\nClass found was "  <<
                                           contexts_.back().applications_[0].class_ << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 		}
@@ -757,7 +757,7 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 			{
 				__SS__ << "Illegal XDAQApplication class name value of '" << app.class_
 					<< "' - please check the entry for app ID = " << app.id_ << __E__;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 			out << "\t\t\t<properties xmlns=\"urn:xdaq-application:" <<
 				app.class_.substr(foundColon) <<

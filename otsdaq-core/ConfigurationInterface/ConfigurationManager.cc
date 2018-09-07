@@ -260,7 +260,7 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors,
 	if(throwErrors && errorStr != "")
 	{
 		__COUT_INFO__ << "\n" << ss.str();
-		throw std::runtime_error(errorStr);
+		__THROW__(errorStr);
 	}
 } // end restoreActiveConfigurationGroups()
 
@@ -281,7 +281,7 @@ void ConfigurationManager::destroyConfigurationGroup(const std::string& theGroup
 	{
 		__SS__ << "Invalid configuration group to destroy: " << theGroup << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	std::string dbgHeader = onlyDeactivate?"Deactivating":"Destroying";
@@ -448,7 +448,7 @@ int ConfigurationManager::getTypeOfGroup(
 				i = 0;
 				for(const auto &memberPairTmp:memberMap)
 					ss << ++i << ". " << memberPairTmp.first << "\n";
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 
@@ -479,7 +479,7 @@ int ConfigurationManager::getTypeOfGroup(
 				for(const auto &memberPairTmp:memberMap)
 					ss << ++i << ". " << memberPairTmp.first << "\n";
 				//__COUT_ERR__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 
@@ -510,7 +510,7 @@ int ConfigurationManager::getTypeOfGroup(
 				for(const auto &memberPairTmp:memberMap)
 					ss << ++i << ". " << memberPairTmp.first << "\n";
 				//__COUT_ERR__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 	}
@@ -530,7 +530,7 @@ int ConfigurationManager::getTypeOfGroup(
 		for(auto &memberName:contextMemberNames_)
 			ss << ++i << ". " << memberName << "\n";
 		//__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(isBackbone && matchCount != backboneMemberNames_.size())
@@ -548,7 +548,7 @@ int ConfigurationManager::getTypeOfGroup(
 		for(auto &memberName:backboneMemberNames_)
 			ss << ++i << ". " << memberName << "\n";
 		//__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(isIterate && matchCount != iterateMemberNames_.size())
@@ -566,7 +566,7 @@ int ConfigurationManager::getTypeOfGroup(
 		for(auto &memberName:iterateMemberNames_)
 			ss << ++i << ". " << memberName << "\n";
 		//__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	return isContext?CONTEXT_TYPE:(isBackbone?BACKBONE_TYPE:(isIterate?ITERATE_TYPE:CONFIGURATION_TYPE));
@@ -609,7 +609,7 @@ void ConfigurationManager::dumpActiveConfiguration(
 		{
 			__SS__ << "Invalid file path to dump active configuration. File " << filePath << " could not be opened!" << __E__;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		out = &(std::cout);
 	}
@@ -778,7 +778,7 @@ void ConfigurationManager::dumpActiveConfiguration(
 
 				"\n\nPlease change the State Machine configuration to a valid dump type." <<
 				std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(fs.is_open())
@@ -827,7 +827,7 @@ void ConfigurationManager::loadMemberMap(
 		{
 			__SS__ << nameToConfigurationMap_[memberPair.first]->getConfigurationName() <<
 					": View version not activated properly!";
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 }
@@ -1121,7 +1121,7 @@ void ConfigurationManager::loadConfigurationGroup(
 						" are not allowed! Please only use unique, persistent versions when version tracking is enabled."
 						<< std::endl;
 				__COUT_ERR__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 
@@ -1136,14 +1136,14 @@ void ConfigurationManager::loadConfigurationGroup(
 				__SS__ << "Error detected calling " <<
 						nameToConfigurationMap_[memberPair.first]->getConfigurationName() <<
 						".init()!\n\n " << e.what() << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 			catch(...)
 			{
 				__SS__ << "Error detected calling " <<
 						nameToConfigurationMap_[memberPair.first]->getConfigurationName() <<
 						".init()!\n\n " << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 		}
@@ -1233,7 +1233,7 @@ const std::string& ConfigurationManager::getActiveGroupName(const std::string& t
 
 	__SS__ << "Invalid type requested '" << type << "'" << std::endl;
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //==============================================================================
@@ -1250,7 +1250,7 @@ ConfigurationGroupKey ConfigurationManager::getActiveGroupKey(const std::string&
 
 	__SS__ << "Invalid type requested '" << type << "'" << std::endl;
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //==============================================================================
@@ -1294,7 +1294,7 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString,
 	{
 		__SS__ << ("Invalid empty node name") << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//ignore multiple starting slashes
@@ -1311,7 +1311,7 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString,
 
 		//		__SS__ << "Invalid node name: " << nodeName << std::endl;
 		//		__COUT_ERR__ << ss.str();
-		//		throw std::runtime_error(ss.str());
+		//		__SS_THROW__;
 	}
 
 	std::string childPath = nodeString.substr(nodeName.length() + startingIndex);
@@ -1413,13 +1413,13 @@ std::vector<std::pair<std::string,ConfigurationTree> >	ConfigurationManager::get
 			{
 				__SS__ << "Get Children with member map requires a child '" <<
 						memberPair.first << "' that is not present!" << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 			if(!(*mapIt).second->isActive())
 			{
 				__SS__ << "Get Children with member map requires a child '" <<
 						memberPair.first << "' that is not active!" << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 			ConfigurationTree newNode(this, (*mapIt).second);
@@ -1503,10 +1503,11 @@ const ConfigurationBase* ConfigurationManager::getConfigurationByName(const std:
 				"\n\t StartOTS.sh --wiz" <<
 				"\n\n\n\n"
 				<< std::endl;
-		//prints out too often
+
+		//prints out too often, so only throw
 		//if(configurationName != ViewColumnInfo::DATATYPE_LINK_DEFAULT)
 		//	__COUT_WARN__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 	return it->second;
 }

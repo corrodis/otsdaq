@@ -83,7 +83,7 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 			__COUT_ERR__ << "This board reader will likely not get instantiated properly! Proceeding anyway with fcl generation." << std::endl;
 
 			//proceed anyway, because it was really annoying to not be able to activate the configuration group when the context is being developed also.
-			//throw std::runtime_error(ss.str());
+			//__SS_THROW__;
 		}
 
 		//artdaq Reader is not at Supervisor level like other apps
@@ -270,7 +270,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(ConfigurationManager* configMan
 	if (out.fail())
 	{
 		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//no primary link to configuration tree for reader node!
@@ -405,7 +405,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(ConfigurationManager* configMan
 			__SS__ << "Are the DAQ destinations valid? Error occurred looking for Board Reader DAQ sources for UID '" <<
 				boardReaderNode.getValue() << "': " << e.what() << std::endl;
 			__COUT_ERR__ << ss.str() << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 	POPTAB;

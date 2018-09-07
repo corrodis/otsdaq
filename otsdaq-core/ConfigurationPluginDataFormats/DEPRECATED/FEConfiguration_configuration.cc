@@ -88,7 +88,7 @@ void FEConfiguration::init(ConfigurationManager *configManager)
 //				return ConfigurationBase::getView().getDataView()[typeNameToRow_.find(itSupervisors.first)->second.find(frontEndID)->second][FrontEndType];
 //	std::cout << __COUT_HDR_FL__ << "Didn't find any interface with ID: " << frontEndID << std::endl;
 //	assert(0);
-//	throw std::runtime_error("FEID not found!");
+//	__THROW__("FEID not found!");
 //	return "";
 //}
 //

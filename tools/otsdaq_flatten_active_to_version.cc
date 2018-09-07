@@ -177,7 +177,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	{
 		__SS__ << "filesystemdb:// was not found in $ARTDAQ_DATABASE_URI!" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	currentDir = currentDir.substr(std::string("filesystemdb://").length());
@@ -192,7 +192,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	{
 		__SS__ << ("Aborting move! Must at least give version argument to flatten to!") << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	rename(currentDir.c_str(),moveToDir.c_str());

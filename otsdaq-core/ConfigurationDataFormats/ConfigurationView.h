@@ -107,7 +107,7 @@ public:
 		{
 			__SS__ << "Invalid row col requested" << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		value = validateValueForColumn<T>(theDataView_[row][col],col,doConvertEnvironmentVariables);
@@ -188,7 +188,7 @@ public:
 					for(const auto &choice:choices)
 						ss << "\t" << choice << "\n";
 					__COUT__ << "\n" << ss.str();
-					throw std::runtime_error(ss.str());
+					__SS_THROW__;
 				}
 
 				return retValue;
@@ -281,7 +281,7 @@ public:
 		if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 		{
 			__SS__ << "Invalid row (" << row << ") col (" << col << ") requested!" << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_NUMBER)
@@ -305,7 +305,7 @@ public:
 					<< " at column=" << columnsInfo_[col].getName()
 					<< " for setValue with type '" << StringMacros::demangleTypeName(typeid(value).name())
 					<< "'" << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 	void 				setValue					(const std::string &value, unsigned int row, unsigned int col);

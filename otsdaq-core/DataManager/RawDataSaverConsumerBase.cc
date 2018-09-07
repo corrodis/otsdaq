@@ -65,7 +65,7 @@ void RawDataSaverConsumerBase::openFile(std::string runNumber)
 	{
 		__SS__ << "Can't open file " << fileName.str() << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	writeHeader(); //write start of file header

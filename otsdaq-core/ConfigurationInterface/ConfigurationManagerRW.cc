@@ -343,7 +343,7 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 		__SS__ << "Fatal Error! Unable to open the file " <<
 				ConfigurationManager::ACTIVE_GROUP_FILENAME << " for editing! Is there a permissions problem?" << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 		return;
 	}
 
@@ -408,7 +408,7 @@ ConfigurationVersion ConfigurationManagerRW::createTemporaryBackboneView(Configu
 			__SS__ << "Failure! Temporary view requested was " <<
 					tmpVersion << ". Mismatched temporary view created: " << retTmpVersion << std::endl;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 
@@ -428,7 +428,7 @@ ConfigurationBase* ConfigurationManagerRW::getConfigurationByName(const std::str
 			ss << "There was a space character found in the configuration name needle at position " <<
 				f << " in the string (was this intended?). " << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return nameToConfigurationMap_[configurationName];
 }
@@ -449,7 +449,7 @@ ConfigurationBase* ConfigurationManagerRW::getVersionedConfigurationByName(const
 				"'\n\n\n\nYou need to load the configuration before it can be used." <<
 				"It probably is missing from the member list of the Configuration Group that was loaded?\n\n\n\n\n"
 				<< std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	ConfigurationBase* configuration = it->second;
 	theInterface_->get(configuration, configurationName, 0 , 0,
@@ -511,7 +511,7 @@ ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(
 		__SS__ << "Something went wrong saving the new version v" << newVersion <<
 				". What happened?! (duplicates? database error?)" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//update allConfigurationInfo_ with the new version
@@ -639,7 +639,7 @@ const GroupInfo& ConfigurationManagerRW::getGroupInfo(const std::string &groupNa
 	{
 		__SS__ << "Group name '" << groupName << "' not found in group info! (creating empty info)" << __E__;
 		__COUT_WARN__ << ss.str();
-		//throw std::runtime_error(ss.str());
+		//__SS_THROW__;
 		return allGroupInfo_[groupName];
 	}
 	return it->second;
@@ -945,7 +945,7 @@ ConfigurationVersion ConfigurationManagerRW::saveNewBackbone(ConfigurationVersio
 			__SS__ << "Failure! New view requested was " <<
 					newVersion << ". Mismatched new view created: " << retNewVersion << std::endl;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 

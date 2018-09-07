@@ -33,6 +33,7 @@
 #define __COUT__  	 	 __COUT_TYPE__(LogDebug)   << __COUT_HDR__
 #define __COUTV__(X) 	 __COUT__                  << QUOTE(X)     << " = "                << X              << __E__
 
+#define __THROW__(X)	 throw std::runtime_error(X)
 
 //////// ==============================================================
 //////// Use __MOUT__ for Message Facility use (easy to switch to cout for debugging):
@@ -68,8 +69,9 @@
 
 //////// ==============================================================
 
-#define __SS__			std::stringstream ss; ss <<  ":" << __MF_SUBJECT__ << ":" << __COUT_HDR__
-#define __SS_THROW__	__COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
+#define __SS__				std::stringstream ss; ss <<  ":" << __MF_SUBJECT__ << ":" << __COUT_HDR__
+#define __SS_THROW__		__COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
+#define __SS_ONLY_THROW__	throw std::runtime_error(ss.str())
 
 //////// ==============================================================
 

@@ -94,7 +94,7 @@ void ARTDAQDataManager::configure(void)
 	__COUT__ << "No ARTDAQ Producers found either... so error!" << std::endl;
 
 	__COUT_ERR__ << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 

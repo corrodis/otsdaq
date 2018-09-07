@@ -842,7 +842,7 @@ printMainURL() {
 	#	fi
 	
 	if [ $QUIET == 0 ]; then
-		sleep 3 #give a little more time before injecting printouts in scrolling printouts
+		sleep 4 #give a little more time before injecting printouts in scrolling printouts
 	else
 		sleep 2 #give a little time for other StartOTS printouts to occur (so this one is last)  
 	fi
@@ -874,7 +874,7 @@ printMainURL() {
 		if [ $QUIET == 1 ]; then
 			exit
 		fi
-		sleep 1 #for delay between each printout
+		sleep 2 #for delay between each printout
 	done
 }  #end printMainURL
 export -f printMainURL

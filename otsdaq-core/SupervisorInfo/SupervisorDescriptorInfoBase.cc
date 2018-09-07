@@ -54,7 +54,7 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 //	{
 //		__SS__ << "Must have THE ots::Supervisor (or THE ots::OtsConfigurationWizardSupervisor) as part of the context configuration!" << __E__;
 //		__COUT_ERR__ << "\n" << ss.str();
-//		throw std::runtime_error(ss.str());
+//		__SS_THROW__;
 //	}
 
 	std::set<XDAQ_CONST_CALL xdaq::ApplicationDescriptor*> appDescriptors;

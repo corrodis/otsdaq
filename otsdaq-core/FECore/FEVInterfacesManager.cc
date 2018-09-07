@@ -81,7 +81,7 @@ void FEVInterfacesManager::createInterfaces(void)
 					<< "' due to the following error: \n" << e.what() << __E__;
 			__COUT_ERR__ << ss.str();
 			__MOUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 	__COUT__ << "Done creating interfaces" << std::endl;
@@ -94,7 +94,7 @@ int FEVInterfacesManager::universalRead(const std::string &interfaceID, char* ad
 	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
 	{
 		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	__COUT__ << "interfaceID: " << interfaceID << " and size: " << theFEInterfaces_.size() << std::endl;
@@ -111,7 +111,7 @@ unsigned int FEVInterfacesManager::getInterfaceUniversalAddressSize(const std::s
 	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
 	{
 		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return theFEInterfaces_[interfaceID]->getUniversalAddressSize();
 } //used by MacroMaker
@@ -123,7 +123,7 @@ unsigned int FEVInterfacesManager::getInterfaceUniversalDataSize(const std::stri
 	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
 	{
 		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return theFEInterfaces_[interfaceID]->getUniversalDataSize();
 } //used by MacroMaker
@@ -135,7 +135,7 @@ void FEVInterfacesManager::universalWrite(const std::string &interfaceID, char* 
 	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
 	{
 		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	__COUT__ << "interfaceID: " << interfaceID << " and size: " << theFEInterfaces_.size() << std::endl;
@@ -191,7 +191,7 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 	{
 		__SS__ << "interfaceID '" << interfaceID << "' was not found!" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//have pointer to virtual FEInterface, find Macro structure
@@ -201,7 +201,7 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 		__SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
 				interfaceID << "' was not found!" << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//build input arguments
@@ -228,7 +228,7 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 						" were given. " << FEMacroIt->second.namesOfInputArguments_.size() <<
 						" expected." << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	for(unsigned int i=0;i<argsIn.size();++i)
 		if(argsIn[i].first != FEMacroIt->second.namesOfInputArguments_[i])
@@ -240,7 +240,7 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 							FEMacroIt->second.namesOfInputArguments_[i] <<
 							" expected." << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 
@@ -275,7 +275,7 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 						" were given. " << FEMacroIt->second.namesOfOutputArguments_.size() <<
 						" expected." << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	for(unsigned int i=0;i<argsOut.size();++i)
 		if(argsOut[i].first != FEMacroIt->second.namesOfOutputArguments_[i])
@@ -287,7 +287,7 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 							FEMacroIt->second.namesOfOutputArguments_[i] <<
 							" expected." << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 
@@ -332,7 +332,7 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 						"manipulated the output arguments vector. It is illegal "
 						"to add or remove output vector name/value pairs." << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 
@@ -439,7 +439,7 @@ void FEVInterfacesManager::configure(void)
 		__COUT__ << "Done configuring interface " << it.first << std::endl;
 		__COUT__ << "Done configuring interface " << it.first << std::endl;
 		__COUT__ << "Done configuring interface " << it.first << std::endl;
-		//throw std::runtime_error(ss.str());
+		//__SS_THROW__;
 		//	it.second->configureDetector(theConfigurationManager_->getDACStream(it.first));
 
 //		}

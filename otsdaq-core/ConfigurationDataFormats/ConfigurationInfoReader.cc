@@ -231,31 +231,31 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 	{
 		__SS__ << ("Path file_name does not exist, or path is an empty std::string.") << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	else if( iretStat == ENOTDIR )
 	{
 		__SS__ << ("A component of the path is not a directory.") << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	else if( iretStat == ELOOP )
 	{
 		__SS__ << ("Too many symbolic links encountered while traversing the path.") << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	else if( iretStat == EACCES )
 	{
 		__SS__ << ("Permission denied.") << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	else if( iretStat == ENAMETOOLONG )
 	{
 		__SS__ << ("File can not be read. Name too long.") << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser;

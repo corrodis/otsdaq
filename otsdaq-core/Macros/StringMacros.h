@@ -52,7 +52,7 @@ static const T&				getWildCardMatchFromMap					(const std::string  needle, 		con
 	if(!haystack.size())
 	{
 		__SS__ << "Needle '" << needle << "' not found in EMPTY wildcard haystack:" << __E__;
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 
 	//__COUT__ << StringMacros::mapToString(haystack) << __E__;
@@ -93,7 +93,7 @@ static const T&				getWildCardMatchFromMap					(const std::string  needle, 		con
 		}
 		else
 			ss << ", " << haystackPair.first;
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 static std::string		 	decodeURIComponent 						(const std::string& data);
