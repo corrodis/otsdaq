@@ -140,6 +140,11 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 	{
 		toolbox::Event::Reference e(new toolbox::Event(transition, this));
 		theMessage_ = message;//Even if it is bad, there can only be 1 transition at a time so this parameter should not change during all transition
+
+		//Note: anything called by fireEvent must throw
+		//toolbox::fsm::exception::Exception from
+		//#include <toolbox/fsm/exception/Exception.h>
+		// to avoid crash
 		this->fireEvent(e);
 	}
 	catch (toolbox::fsm::exception::Exception& e)
@@ -147,11 +152,13 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		inTransition_ = false;
 		transitionSuccessful = false;
 		std::ostringstream error;
-		error << "Transition " << transition << " cannot be executed from current state " << getStateName (getCurrentState());
+		error << "Transition " << transition << " cannot be executed from current state " <<
+				getStateName (getCurrentState());
 		__COUT_ERR__ << error.str() << std::endl;
 		//diagService_->reportError(err.str(),DIAGERROR);
 		XCEPT_RAISE (toolbox::fsm::exception::Exception, error.str());//This make everything crash so you know for sure there is something wrong
 	}
+
 //	__COUT__ << "Transition?" << inTransition_ << std::endl;
 	inTransition_ = false;
 //	__COUT__ << "Done with fsm transition" << std::endl;
