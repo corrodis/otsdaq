@@ -35,7 +35,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			__E__;
 
 	std::cout << "\n\n\tExample active groups file content:\n\n" <<
-			"testContext\n2\nTableEditWizBackbone\n\n3\ndefaultConfig\n1\n\n" << __E__;
+			"testContext\n2\nTableEditWizBackbone\n3\ndefaultConfig\n1\n\n" << __E__;
 
 	std::cout << "\n\nNote: This assumes artdaq db file type interface. " <<
 			"The current database/ will be backed up to database_<linuxtime>/ " <<

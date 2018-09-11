@@ -44,7 +44,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 
 	if(argc < 2)
 	{
-		std::cout << "Must provide at least one parameter.";
+		std::cout << "Error! Must provide at least one parameter.\n\n" << std::endl;
 		return;
 	}
 
