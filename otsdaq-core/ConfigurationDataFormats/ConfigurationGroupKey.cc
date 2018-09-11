@@ -154,14 +154,14 @@ std::string	 ConfigurationGroupKey::getFullGroupString(const std::string &groupN
 
 		__SS__ << ("ConfigurationGroupKey::getFullGroupString() Illegal Group Name! The Group Name was not provided.\n");
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	else if(groupName.size() == 1)
 	{
 		__SS__ << ("ConfigurationGroupKey::getFullGroupString() Illegal Group Name! The Group Name is too short: \"" +
 				groupName + "\"") << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	else
 	{
@@ -175,7 +175,7 @@ std::string	 ConfigurationGroupKey::getFullGroupString(const std::string &groupN
 				__SS__ << ("ConfigurationGroupKey::getFullGroupString() Illegal Group Name! Group Name must be alpha-numeric: \"" +
 						groupName + "\"") << std::endl;
 				__COUT_ERR__ << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 	}

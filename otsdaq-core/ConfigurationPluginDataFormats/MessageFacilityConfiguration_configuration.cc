@@ -83,7 +83,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 	if(fs.fail())
 	{
 		__SS__ << "Failed to open Message Facility configuration file: " << MF_CFG_FILE << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//loop through all children just to be same as other configurations
@@ -104,7 +104,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 			fs.close();
 			__SS__ << "Illegal Message Facility configuration: " <<
 					"Can only enable Web Console or QT Viewer, not both." << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		std::fstream bfs;
@@ -115,7 +115,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 			fs.close();
 			__SS__ << "Failed to open boolean Use of Web Console configuration file: " <<
 					USE_WEB_BOOL_FILE << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		bfs << (useWeb?1:0);
 		bfs.close();
@@ -127,7 +127,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 			fs.close();
 			__SS__ << "Failed to open boolean Use of QT Viewer configuration file: " <<
 					USE_QT_BOOL_FILE << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		bfs << (useQT?1:0);
 		bfs.close();
@@ -158,7 +158,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 					fs.close();
 					__SS__ << "Failed to open Web Console's 'Quiet Forwarder' configuration file: " <<
 							QUIET_CFG_FILE << std::endl;
-					throw std::runtime_error(ss.str());
+					__SS_THROW__;
 				}
 				qtfs << "RECEIVE_PORT \t " << fwdPort << "\n";
 				child.second.getNode(COL_WEB_PORT1	).getValue(fwdPort);
@@ -190,7 +190,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 					fs.close();
 					__SS__ << "Failed to open QT Message Viewer configuration file: " <<
 							QT_CFG_FILE << std::endl;
-					throw std::runtime_error(ss.str());
+					__SS_THROW__;
 				}
 				qtfs << "receivers: \n{\n";
 				qtfs << "\t" << "syslog: \n{\n";

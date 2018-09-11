@@ -456,7 +456,7 @@ try
 	{
 		__SS__ << "Out of range commandIndex = " << iteratorStruct->commandIndex_ <<
 				" in size = " << iteratorStruct->commands_.size() << __E__;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//increment iteration count for command
@@ -518,7 +518,7 @@ try
 	{
 		__SS__ << "Attempt to start unrecognized command type = " << type << __E__;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 }
 catch(...)
@@ -600,7 +600,7 @@ try
 	{
 		__SS__ << "Attempt to check unrecognized command type = " << type << __E__;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 }
 catch(...)
@@ -734,7 +734,7 @@ bool Iterator::haltIterator(Iterator *iterator,
 
 		{
 			__SS__ << "Iterator failed to halt because of the following error: " << errorStr;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		//else successfully launched
@@ -885,7 +885,7 @@ void Iterator::startCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 	if(errorStr != "")
 	{
 		__SS__ << "Iterator failed to run because of the following error: " << errorStr;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//else successfully launched
@@ -990,7 +990,7 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 				(iteratorStruct->fsmCommandParameters_.size()?
 						iteratorStruct->fsmCommandParameters_[0]:"UNKNOWN") <<
 				"' because of the following error: " << errorStr;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//else successfully launched
@@ -1156,7 +1156,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 		if(errorStr != "")
 		{
 			__SS__ << "Iterator failed to pause because of the following error: " << errorStr;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		return false;
 	}
@@ -1194,7 +1194,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 		if(errorStr != "")
 		{
 			__SS__ << "Iterator failed to halt because of the following error: " << errorStr;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		return false;
 	}
@@ -1216,7 +1216,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 		if(errorStr != "")
 		{
 			__SS__ << "Iterator failed to run because of the following error: " << errorStr;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		return false;
 	}
@@ -1293,7 +1293,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 					if(errorStr != "")
 					{
 						__SS__ << "Iterator failed to run because of the following error: " << errorStr;
-						throw std::runtime_error(ss.str());
+						__SS_THROW__;
 					}
 				}
 			}
@@ -1313,7 +1313,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 				if(errorStr != "")
 				{
 					__SS__ << "Iterator failed to stop run because of the following error: " << errorStr;
-					throw std::runtime_error(ss.str());
+					__SS_THROW__;
 				}
 
 				//write indication of run done into duration
@@ -1352,7 +1352,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 			if(errorStr != "")
 			{
 				__SS__ << "Iterator failed to stop run because of the following error: " << errorStr;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 			//write indication of run done into duration
@@ -1365,7 +1365,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 	if(errorStr != "")
 	{
 		__SS__ << "Iterator failed to run because of the following error: " << errorStr;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return false;
 }
@@ -1434,7 +1434,7 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct *iteratorStruct)
 				(iteratorStruct->fsmCommandParameters_.size()?
 						iteratorStruct->fsmCommandParameters_[0]:"UNKNOWN") <<
 				"' because of the following error: " << errorStr;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return false;
 }

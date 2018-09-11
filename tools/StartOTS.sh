@@ -336,6 +336,9 @@ if [ "x$OTSDAQ_DATA" == "x" ];then
 	export OTSDAQ_DATA=/tmp
 fi
 
+#make director if it does not exist
+mkdir -p ${OTSDAQ_DATA} || echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Error: OTSDAQ_DATA path (${OTSDAQ_DATA}) does not exist and mkdir failed!"
+
 if [ "x$ROOT_BROWSER_PATH" == "x" ];then
 	export ROOT_BROWSER_PATH=${OTSDAQ_DEMO_DIR}
 fi
@@ -416,12 +419,12 @@ launchOTSWiz() {
 
 			if [ $BACKUPLOGS == 1 ]; then
 				DATESTRING=`date +'%s'`
-				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
-				mv .otsdaq_quiet_run-mf-${HOSTNAME}.txt .otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt
+				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt ***"
+				mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt
 			fi
 			
-			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  \t (hidden file)"
-			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> .otsdaq_quiet_run-mf-${HOSTNAME}.txt &
+			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  "
+			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 		else
 			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
 		fi		 	
@@ -498,15 +501,15 @@ launchOTSWiz() {
 
 		if [ $BACKUPLOGS == 1 ]; then
 			DATESTRING=`date +'%s'`
-			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
-			mv .otsdaq_quiet_run-wiz-${HOSTNAME}.txt .otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt
+			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt ***"
+			mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.${DATESTRING}.txt
 		fi
 		
 		echo
-		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  \t (hidden file)"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  "
 		echo
 		
-		ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &> .otsdaq_quiet_run-wiz-${HOSTNAME}.txt &
+		ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt &
 	else
 		ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &
 	fi
@@ -599,12 +602,12 @@ launchOTS() {
 
 				if [ $BACKUPLOGS == 1 ]; then
 					DATESTRING=`date +'%s'`
-					echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
-					mv .otsdaq_quiet_run-mf-${HOSTNAME}.txt .otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt
+					echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt ***"
+					mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt
 				fi
 				
-				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  \t (hidden file)"
-				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> .otsdaq_quiet_run-mf-${HOSTNAME}.txt &
+				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  "
+				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 			else
 				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
 			fi		 	
@@ -731,11 +734,11 @@ launchOTS() {
 
 								if [ $BACKUPLOGS == 1 ]; then
 									DATESTRING=`date +'%s'`
-									echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.${DATESTRING}.txt ***\t (hidden file)"
-									mv .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.${DATESTRING}.txt
+									echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.${DATESTRING}.txt ***"
+									mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.${DATESTRING}.txt
 								fi
 								
-								echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt ***  \t (hidden file)"
+								echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt ***  "
 								ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt &
 							else
 								ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
@@ -782,12 +785,12 @@ launchOTS() {
 			if [ $BACKUPLOGS == 1 ]; then
 				DATESTRING=`date +'%s'`				
 				
-				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt ***\t (hidden file)"				
-				mv .otsdaq_quiet_run-${HOSTNAME}-${port}.txt .otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt
+				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt ***"				
+				mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt
 			fi
 		  			
-			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  \t (hidden file)"			
-			ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> .otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
+			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  "			
+			ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
 		else
 		  ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
 		fi
@@ -842,7 +845,7 @@ printMainURL() {
 	#	fi
 	
 	if [ $QUIET == 0 ]; then
-		sleep 3 #give a little more time before injecting printouts in scrolling printouts
+		sleep 4 #give a little more time before injecting printouts in scrolling printouts
 	else
 		sleep 2 #give a little time for other StartOTS printouts to occur (so this one is last)  
 	fi
@@ -874,7 +877,7 @@ printMainURL() {
 		if [ $QUIET == 1 ]; then
 			exit
 		fi
-		sleep 1 #for delay between each printout
+		sleep 2 #for delay between each printout
 	done
 }  #end printMainURL
 export -f printMainURL
@@ -989,12 +992,12 @@ otsActionHandler() {
 
 				if [ $BACKUPLOGS == 1 ]; then
 					DATESTRING=`date +'%s'`
-					echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** .otsdaq_quiet_run-flatten-${HOSTNAME}.${DATESTRING}.txt ***\t (hidden file)"
-					mv .otsdaq_quiet_run-flatten-${HOSTNAME}.txt .otsdaq_quiet_run-flatten-${HOSTNAME}.${DATESTRING}.txt
+					echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t      Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${HOSTNAME}.${DATESTRING}.txt ***"
+					mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${HOSTNAME}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${HOSTNAME}.${DATESTRING}.txt
 				fi
 				
-				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** .otsdaq_quiet_run-flatten-${HOSTNAME}.txt ***  \t (hidden file)"	
-				otsdaq_flatten_system_aliases 0 &> .otsdaq_quiet_run-flatten-${HOSTNAME}.txt &
+				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${HOSTNAME}.txt ***  "	
+				otsdaq_flatten_system_aliases 0 &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${HOSTNAME}.txt &
 			else
 				otsdaq_flatten_system_aliases 0 &
 			fi		

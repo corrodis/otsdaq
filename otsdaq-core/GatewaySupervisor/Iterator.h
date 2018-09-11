@@ -156,7 +156,7 @@ private:
     	{
     		__SS__ << "Failed to load the active configuration group. Is there a valid one activated? " <<
     				e.what() << __E__;
-    		throw std::runtime_error(ss.str());
+    		__SS_THROW__;
     	}
 
     	for(const auto& member: memberMap)
@@ -175,7 +175,7 @@ private:
     		{
     			__SS__ << "Invalid target node. The target path '" << pathToField <<
     					"' must be a value node." << __E__;
-    			throw std::runtime_error(ss.str());
+    			__SS_THROW__;
     		}
 
     		__COUT__ << "value node table: " << node.getConfigurationName() << __E__;
@@ -330,7 +330,7 @@ private:
     	__SS__ << "Modify command failed! " << e.what() << __E__;
 
 
-    	throw std::runtime_error(ss.str());
+    	__SS_THROW__;
     }
 };
 

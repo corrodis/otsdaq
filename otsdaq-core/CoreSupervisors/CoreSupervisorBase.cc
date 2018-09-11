@@ -324,9 +324,9 @@ void CoreSupervisorBase::inError (toolbox::fsm::FiniteStateMachine & fsm)
 void CoreSupervisorBase::enteringError (toolbox::Event::Reference e)
 
 {
-	__SUP_COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()
-			<< "\n\nError Message: " <<
-			theStateMachine_.getErrorMessage() << std::endl;
+//	__SUP_COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()
+//			<< "\n\nError Message: " <<
+//			theStateMachine_.getErrorMessage() << std::endl;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
 	std::ostringstream error;
 	error << "Failure performing transition from "
@@ -362,8 +362,10 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 
 	try
 	{
+		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
 		for(auto& it: theStateMachineImplementation_)
 			it->configure();
+		__SUP_COUT__ << "Done configuration all state machine implementations..." << __E__;
 	}
 	catch(const std::runtime_error& e)
 	{
@@ -377,6 +379,31 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 				__LINE__ /*line*/,
 				__FUNCTION__ /*function*/
 				);
+	}
+	catch(...)//const toolbox::fsm::exception::Exception& e)
+	{
+//		__SUP_SS__ << "Error was caught while configuring: " << e.what() << std::endl;
+//		__SUP_COUT_ERR__ << "\n" << ss.str();
+//		theStateMachine_.setErrorMessage(ss.str());
+//		throw toolbox::fsm::exception::Exception(
+//				"Transition Error" /*name*/,
+//				ss.str() /* message*/,
+//				"CoreSupervisorBase::transitionConfiguring" /*module*/,
+//				__LINE__ /*line*/,
+//				__FUNCTION__ /*function*/
+//		);
+
+		__SUP_SS__ << "Unknown error was caught while configuring. Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transitionConfiguring" /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+
 	}
 
 }

@@ -94,7 +94,7 @@ ConfigurationVersion Configurations::getConditionVersion(const ConfigurationGrou
 	std::cout << __COUT_HDR_FL__ << "****************************************************************************************************************************" << std::endl;
 	std::cout << __COUT_HDR_FL__ << "\tCan't find KOC " << koc << " with ConfigurationGroupKey " << ConfigurationGroupKey << " in the Configurations view" << std::endl;
 	std::cout << __COUT_HDR_FL__ << "****************************************************************************************************************************" << std::endl;
-	throw std::runtime_error("Could not find koc for ConfigurationGroupKey");
+	__THROW__("Could not find koc for ConfigurationGroupKey");
 	return ConfigurationVersion(); //return INVALID
 }
 
@@ -166,7 +166,7 @@ void Configurations::getListOfKocsForView(ConfigurationView* cfgView, std::set<s
 		std::cout << __COUT_HDR_FL__ << "****************************************************************************************************************************" << std::endl;
 		std::cout << __COUT_HDR_FL__ << "\tCan't find list of Kocs for null cfgView pointer" << std::endl;
 		std::cout << __COUT_HDR_FL__ << "****************************************************************************************************************************" << std::endl;
-		throw std::runtime_error("Null cfgView configuration view pointer");
+		__THROW__("Null cfgView configuration view pointer");
 	}
 
 	std::string       	tmpKOC;

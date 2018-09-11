@@ -122,7 +122,7 @@ FESlowControlsChannel::FESlowControlsChannel(
 				"B), double (" << sizeof(double) <<
 				"B)." << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(sizeOfDataTypeBits_ > 64)
@@ -132,7 +132,7 @@ FESlowControlsChannel::FESlowControlsChannel(
 				". Size in bits must be less than or equal to 64-bits." <<
 				std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(universalDataSize*8 < sizeOfDataTypeBits_)
@@ -143,7 +143,7 @@ FESlowControlsChannel::FESlowControlsChannel(
 				"-bits. Data Type size must be less than or equal to Universal Data Size." <<
 				std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 
@@ -221,7 +221,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString, s
 					"dataType_=" << dataType_ <<
 					" buffer.size()=" << buffer.size() << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		{ //print

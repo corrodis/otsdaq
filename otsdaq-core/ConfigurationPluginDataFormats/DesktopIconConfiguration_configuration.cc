@@ -175,7 +175,7 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 //	if(fs.fail())
 //	{
 //		__SS__ << "Failed to open Desktop Icons run file: " << DESKTOP_ICONS_FILE << std::endl;
-//		throw std::runtime_error(ss.str());
+//		__SS_THROW__;
 //	}
 //
 //	for(auto &child:childrenMap)

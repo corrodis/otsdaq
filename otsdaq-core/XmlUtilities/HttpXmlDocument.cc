@@ -116,7 +116,7 @@ void HttpXmlDocument::setHeader(std::string cookieCode, std::string displayName)
 		std::stringstream ss;
 		ss << __COUT_HDR_FL__ <<
 				"Can NOT set header to doc with a header! Only allowed for docs without header element.";
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 

@@ -215,7 +215,7 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 	if(stat(configFile.c_str(), &fileStatus) < 0)
 	{
 		__COUT__ << "Error reading path: " << configFile << std::endl;
-		std::stringstream ss; ss << __MF_HDR__;
+		std::stringstream ss; ss << __COUT_HDR__;
 		if( errno == ENOENT )
 			ss << ("Path file_name does not exist.");
 		else if( errno == ENOTDIR )
@@ -230,7 +230,7 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 			ss << ("File can not be read.");
 		ss << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser;
@@ -344,7 +344,7 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 		if(!dataNodeList->getLength())//I must have at least 1 data!
 		{
 			__SS__ << "Must be non-empty data set!";
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		//__COUT__ << configuration.getView().getColumnsInfo().size() << std::endl;

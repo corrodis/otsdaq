@@ -69,7 +69,7 @@ ARTDAQConsumer::ARTDAQConsumer (std::string supervisorApplicationUID, std::strin
 	{
 		__SS__ << "Could not find 'fragment_receiver: {' in Board Reader fcl string!" << std::endl;
 		__COUT__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//get the parent IDs from configurationPath

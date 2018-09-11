@@ -373,7 +373,7 @@ xoap::MessageReference FESupervisor::workLoopStatusRequest(xoap::MessageReferenc
 		__SS__ << "Invalid request for front-end workloop status from Supervisor without a FEVInterfacesManager."
 			<< std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	return SOAPUtilities::makeSOAPMessageReference(
@@ -405,7 +405,7 @@ FEVInterfacesManager* FESupervisor::extractFEInterfaceManager()
 				//dynamic_cast returns null pointer on failure
 				__SS__ << "Dynamic cast failure!" << std::endl;
 				__COUT_ERR__ << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 			__COUT__ << "State Machine " << i << " WAS of type FEVInterfacesManager" << std::endl;
 

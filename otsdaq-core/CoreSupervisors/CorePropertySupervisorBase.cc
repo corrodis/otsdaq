@@ -339,7 +339,7 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string&
 	if(it == propertyMap_.end())
 	{
 		__SUP_SS__ << "Could not find property named " << propertyName << __E__;
-		throw std::runtime_error(ss.str());//__SUP_SS_THROW__;
+		__SS_THROW__;//__SUP_SS_THROW__;
 	}
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
 }
@@ -360,7 +360,7 @@ WebUsers::permissionLevel_t CorePropertySupervisorBase::getSupervisorPropertyUse
 //	if(it == propertyStruct_.UserPermissionsThreshold.end())
 //	{
 //		__SUP_SS__ << "Could not find requestType named " << requestType << " in UserPermissionsThreshold map." << __E__;
-//		throw std::runtime_error(ss.str()); //__SUP_SS_THROW__;
+//		__SS_THROW__; //__SUP_SS_THROW__;
 //	}
 //	return it->second;
 }

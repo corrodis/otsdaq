@@ -48,7 +48,7 @@ public:
 			 __SS__ << "An instance of the class MUST already exists so I am crashing!" << std::endl;
 			 __COUT__ << "\n" << ss.str();
 			assert(0);
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		else
 			__COUT__ << "An instance of " << instanceUID << " already exists so your input parameters are ignored!" << std::endl;

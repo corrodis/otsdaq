@@ -470,6 +470,7 @@ throw (xgi::exception::Exception)
 			//",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,myFolder/" <<
 			",Front-end Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Front%2Dend,Config Wizards" <<
 			",Processor Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Processor,Config Wizards" <<
+			",Block Diagram,CFG,0,1,icon-Configure.png,/WebPath/html/ConfigurationSubsetBlockDiagram.html?urn=280,Config Wizards" <<
 			//",Consumer Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&subsetBasePath=FEInterfaceConfiguration&recordAlias=Consumer,Config Wizards" <<
 			",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" <<
 			//",DB Utilities,DB,1,1,0,http://127.0.0.1:8080/db/client.html" <<
@@ -565,7 +566,7 @@ throw (xgi::exception::Exception)
 		//__SS__ << "Error opening file: "<< securityFileName << std::endl;
 		//__COUT_ERR__ << "\n" << ss.str();
 
-		//throw std::runtime_error(ss.str());
+		//__SS_THROW__;
 		//return;
 		security = "DigestAccessAuthentication"; //default security when no file exists
 	}
@@ -879,7 +880,7 @@ std::string WizardSupervisor::exec(const char* cmd)
 		std::array<char, 128> buffer;
 		std::string result;
 		std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
-		if (!pipe) throw std::runtime_error("popen() failed!");
+		if (!pipe) __THROW__("popen() failed!");
 		while (!feof(pipe.get())) {
 			if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
 				result += buffer.data();

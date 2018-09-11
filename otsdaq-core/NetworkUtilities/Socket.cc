@@ -41,7 +41,7 @@ Socket::Socket(const std::string &IPAddress, unsigned int port)
 				(1<<16)-1 << "." << std::endl;
 		//assert(0); //RAR changed to exception on 8/17/2016
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 
@@ -57,7 +57,7 @@ Socket::Socket(const std::string &IPAddress, unsigned int port)
     			IPAddress << ":" << port << std::endl;
         //assert(0); //RAR changed to exception on 8/17/2016
     	__COUT_ERR__ << "\n" << ss.str();
-        throw std::runtime_error(ss.str());
+        __SS_THROW__;
     }
 
     memset(&(socketAddress_.sin_zero), '\0', 8);// zero the rest of the struct
@@ -74,7 +74,7 @@ Socket::Socket(void)
 	__SS__ << "ERROR: This method should never be called. This is the protected constructor. There is something wrong in your inheritance scheme!" << std::endl;
 	__COUT_ERR__ << "\n" << ss.str();
 
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //========================================================================================================================
@@ -155,7 +155,7 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
     	__SS__ << "FATAL: Socket could not initialize socket (IP=" << IPAddress_ <<
     			", Port=" << ntohs(socketAddress_.sin_port) << "). Perhaps it is already in use?" << std::endl;
 		std::cout << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
     }
 
 
@@ -179,7 +179,7 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
 			__SS__ << "Failed to set socket receive size to " <<
 					socketReceiveBufferSize << ". Attempting to revert to default." << std::endl;
 			std::cout << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 	}

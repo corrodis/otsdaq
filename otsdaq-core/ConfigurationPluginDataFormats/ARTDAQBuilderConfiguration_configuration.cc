@@ -229,7 +229,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(ConfigurationManager* configManager
 	if (out.fail())
 	{
 		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 
@@ -310,7 +310,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(ConfigurationManager* configManager
 				__SS__ << "Are the Net Monitor Transport Service destinations valid? Error occurred looking for Event Builder transport service destinations for UID '" <<
 					builderNode.getValue() << "': " << e.what() << std::endl;
 				__COUT_ERR__ << ss.str() << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 		POPTAB;
@@ -395,7 +395,7 @@ void ARTDAQBuilderConfiguration::outputFHICL(ConfigurationManager* configManager
 				__SS__ << "Are the DAQ sources valid? Error occurred looking for Event Builder DAQ sources for UID '" <<
 					builderNode.getValue() << "': " << e.what() << std::endl;
 				__COUT_ERR__ << ss.str() << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 		POPTAB;

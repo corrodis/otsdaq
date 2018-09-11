@@ -90,18 +90,24 @@ rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases; #replace databases
 cp -r ${UDATABASES} ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases;
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db.*; 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db_*;
+cd ${SRC}
+git add ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db
+cd -
 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data; #replace data
 cp -r ${UDATA} ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data; 
 rm ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/ActiveConfigurationGroups.cfg.*; 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ConfigurationInfo.*
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/OutputData/*   #*/ fix comment text coloring
+rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/Logs/*   #*/ fix comment text coloring
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/RunNumber/*  #*/ fix comment text coloring
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/MacroHistory/* #*/ fix comment text coloring
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/ProgressBarData 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/RunControlData
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/LoginData/UsersData/TooltipData
-
+cd ${SRC}
+git add ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data
+cd -
 
 
 #from home/tmp, make demo zips from repo

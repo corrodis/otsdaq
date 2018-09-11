@@ -52,7 +52,7 @@ static const T&				getWildCardMatchFromMap					(const std::string  needle, 		con
 	if(!haystack.size())
 	{
 		__SS__ << "Needle '" << needle << "' not found in EMPTY wildcard haystack:" << __E__;
-		throw std::runtime_error(ss.str());
+		__SS_ONLY_THROW__;
 	}
 
 	//__COUT__ << StringMacros::mapToString(haystack) << __E__;
@@ -93,12 +93,13 @@ static const T&				getWildCardMatchFromMap					(const std::string  needle, 		con
 		}
 		else
 			ss << ", " << haystackPair.first;
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 static std::string		 	decodeURIComponent 						(const std::string& data);
 static std::string 			convertEnvironmentVariables				(const std::string& data);
-static bool 	        	isNumber           						(const std::string& s);
+static bool 	        	isNumber           						(const std::string& stringToCheck);
+static std::string			binaryToHexString						(const char *binaryBuffer, unsigned int numberOfBytes, const std::string& resultPreamble = "", const std::string& resultDelimiter = "");
 
 template<class T>
 static bool 	        	getNumber								(const std::string& s, T& retValue)
@@ -381,7 +382,7 @@ catch(const std::runtime_error &e)
 
 static void					getMapFromString 						(const std::string& inputString, std::map<std::string,std::string>& mapToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'});
 template<class T>
-static std::string			mapToString								(const std::map<std::string,T>& mapToReturn, const std::string& primaryDelimeter = ",", const std::string& secondaryDelimeter = ": ")
+static std::string			mapToString								(const std::map<std::string,T>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
 {
 	std::stringstream ss;
 	bool first = true;
@@ -394,9 +395,71 @@ static std::string			mapToString								(const std::map<std::string,T>& mapToRet
 	}
 	return ss.str();
 }
-static std::string			mapToString								(const std::map<std::string,uint8_t>& mapToReturn, const std::string& primaryDelimeter = ",", const std::string& secondaryDelimeter = ": ");
 template<class T>
-static std::string			setToString								(const std::set<T>& setToReturn, const std::string& delimeter = ",")
+static std::string			mapToString								(const std::map<std::pair<std::string,std::string>,T>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
+{
+	//this is a pretty specific map format (comes from the merge function in ConfigurationBase)
+
+	std::stringstream ss;
+	bool first = true;
+	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first.first << "/" << mapPair.first.second << secondaryDelimeter <<
+			mapPair.second;
+	}
+	return ss.str();
+}
+template<class T>
+static std::string			mapToString								(const std::map<std::pair<std::string,std::pair<std::string,std::string>>,T>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
+{
+	//this is a pretty specific map format (comes from the merge function in ConfigurationBase)
+	std::stringstream ss;
+	bool first = true;
+	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first.first << "/" << mapPair.first.second.first << "," << mapPair.first.second.second <<
+				secondaryDelimeter <<
+			mapPair.second;
+	}
+	return ss.str();
+}
+template<class T>
+static std::string			mapToString								(const std::map<std::string,std::pair<std::string,T> >& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
+{
+	//this is a pretty specific map format (comes from the get aliases functions in ConfigurationManager)
+	std::stringstream ss;
+	bool first = true;
+	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first << "/" << mapPair.second.first << secondaryDelimeter << mapPair.second.second;
+	}
+	return ss.str();
+}
+template<class T>
+static std::string			mapToString								(const std::map<std::string,std::map<std::string,T> >& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
+{
+	//this is a pretty specific map format (comes from the get aliases functions in ConfigurationManager)
+	std::stringstream ss;
+	bool first = true;
+	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first;
+		for(auto& secondMapPair:mapPair.second)
+			ss << "/" << secondMapPair.first << secondaryDelimeter << secondMapPair.second;
+	}
+	return ss.str();
+}
+static std::string			mapToString								(const std::map<std::string,uint8_t>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ");
+template<class T>
+static std::string			setToString								(const std::set<T>& setToReturn, const std::string& delimeter = ", ")
 {
 	std::stringstream ss;
 	bool first = true;
@@ -408,9 +471,9 @@ static std::string			setToString								(const std::set<T>& setToReturn, const s
 	}
 	return ss.str();
 }
-static std::string			setToString								(const std::set<uint8_t>& setToReturn, const std::string& delimeter = ",");
+static std::string			setToString								(const std::set<uint8_t>& setToReturn, const std::string& delimeter = ", ");
 template<class T>
-static std::string			vectorToString							(const std::vector<T>& setToReturn, const std::string& delimeter = ",")
+static std::string			vectorToString							(const std::vector<T>& setToReturn, const std::string& delimeter = ", ")
 {
 	std::stringstream ss;
 	bool first = true;
@@ -422,7 +485,7 @@ static std::string			vectorToString							(const std::vector<T>& setToReturn, co
 	}
 	return ss.str();
 }
-static std::string			vectorToString							(const std::vector<uint8_t>& setToReturn, const std::string& delimeter = ",");
+static std::string			vectorToString							(const std::vector<uint8_t>& setToReturn, const std::string& delimeter = ", ");
 
 static std::string 			demangleTypeName						(const char* name);
 

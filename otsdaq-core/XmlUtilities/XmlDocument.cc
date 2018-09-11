@@ -163,7 +163,7 @@ xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, 
     if(parent == 0)
     {
     	__SS__ << "Illegal Null Parent Pointer!" << __E__;
-    	throw std::runtime_error(ss.str());
+    	__SS_THROW__;
     	//return 0;
     }
     xercesc::DOMElement* child;
