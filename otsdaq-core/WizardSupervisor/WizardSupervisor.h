@@ -54,6 +54,7 @@ public:
 
     void 						Default                    			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
     void 						verification               		 	(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+    void						request		                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
     void						requestIcons                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
 
     void 						editSecurity                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
@@ -70,6 +71,7 @@ public:
     xoap::MessageReference 		supervisorLastConfigGroupRequest	(xoap::MessageReference msg) throw (xoap::exception::Exception);
 
 private:
+
     std::string					securityCode_;
     bool                        defaultSequence_;
     std::vector<std::string>    allowedFileUploadTypes_, matchingFileUploadTypes_;

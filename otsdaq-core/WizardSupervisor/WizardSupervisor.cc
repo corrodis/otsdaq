@@ -81,15 +81,16 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub * s) throw (xdaq::excep
 	mkdir((std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData").c_str(), 0755);
 
 	generateURL();
-	xgi::bind (this, &WizardSupervisor::Default,            	      "Default" 	);
-	xgi::bind (this, &WizardSupervisor::verification,        	      "Verify" 	  	);
-	xgi::bind (this, &WizardSupervisor::requestIcons,       	      "requestIcons"	);
-	xgi::bind (this, &WizardSupervisor::editSecurity,       	      "editSecurity"	);
-	xgi::bind (this, &WizardSupervisor::UserSettings,       	      "UserSettings"	);
-	xgi::bind (this, &WizardSupervisor::tooltipRequest,                   "TooltipRequest"	);
-	xgi::bind (this, &WizardSupervisor::toggleSecurityCodeGeneration,     "ToggleSecurityCodeGeneration"	);
-	xoap::bind(this, &WizardSupervisor::supervisorSequenceCheck,	      "SupervisorSequenceCheck",        	XDAQ_NS_URI);
-	xoap::bind(this, &WizardSupervisor::supervisorLastConfigGroupRequest, "SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
+	xgi::bind (this, &WizardSupervisor::Default,            	      		"Default" 			);
+	xgi::bind (this, &WizardSupervisor::verification,        	      		"Verify" 	  		);
+	xgi::bind (this, &WizardSupervisor::request,       	      				"Request"			);
+	xgi::bind (this, &WizardSupervisor::requestIcons,       	      		"requestIcons"		);
+	xgi::bind (this, &WizardSupervisor::editSecurity,       	      		"editSecurity"		);
+	xgi::bind (this, &WizardSupervisor::UserSettings,       	      		"UserSettings"		);
+	xgi::bind (this, &WizardSupervisor::tooltipRequest,                   	"TooltipRequest"	);
+	xgi::bind (this, &WizardSupervisor::toggleSecurityCodeGeneration,     	"ToggleSecurityCodeGeneration"	);
+	xoap::bind(this, &WizardSupervisor::supervisorSequenceCheck,	      	"SupervisorSequenceCheck",        	XDAQ_NS_URI);
+	xoap::bind(this, &WizardSupervisor::supervisorLastConfigGroupRequest, 	"SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
 	init();
 
 	__SUP_COUT__ << "Constructor complete." << __E__;
@@ -128,7 +129,7 @@ void WizardSupervisor::generateURL()
 	FILE *fp = fopen((SEQUENCE_FILE_NAME).c_str(),"r");
 	if(fp)
 	{
-		__COUT_INFO__ <<  "Sequence length file found: " << SEQUENCE_FILE_NAME << std::endl;
+		__SUP_COUT_INFO__ <<  "Sequence length file found: " << SEQUENCE_FILE_NAME << std::endl;
 		char line[100];
 		fgets(line,100,fp);
 		sscanf(line,"%d",&length);
@@ -141,11 +142,11 @@ void WizardSupervisor::generateURL()
 	}
 	else
 	{
-		__COUT_INFO__ <<  "(Reverting to default wiz security) Sequence length file NOT found: " << SEQUENCE_FILE_NAME << std::endl;
+		__SUP_COUT_INFO__ <<  "(Reverting to default wiz security) Sequence length file NOT found: " << SEQUENCE_FILE_NAME << std::endl;
 		srand(0);	//use same seed for convenience if file not found
 	}
 
-	__COUT__ << "Sequence length = " << length << std::endl;
+	__SUP_COUT__ << "Sequence length = " << length << std::endl;
 
 	securityCode_ = "";
 
@@ -159,7 +160,7 @@ void WizardSupervisor::generateURL()
 		securityCode_ += alphanum[rand() % (sizeof(alphanum) - 1)];
 	}
 
-	std::cout << __COUT_HDR_FL__ <<
+	__SUP_COUT__ <<
 			getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":" << getenv("PORT") <<
 			"/urn:xdaq-application:lid="
 			<< this->getApplicationDescriptor()->getLocalId() << "/Verify?code=" << securityCode_ << std::endl;
@@ -175,7 +176,7 @@ void WizardSupervisor::generateURL()
 		fclose(fp);
 	}
 	else
-		__COUT_ERR__ <<  "Sequence output file NOT found: " << SEQUENCE_OUT_FILE_NAME << std::endl;
+		__SUP_COUT_ERR__ <<  "Sequence output file NOT found: " << SEQUENCE_OUT_FILE_NAME << std::endl;
 
 
 	return;
@@ -190,7 +191,7 @@ void WizardSupervisor::printURL(WizardSupervisor *ptr,
 	for (; i < 5; ++i)
 	{
 		std::this_thread::sleep_for (std::chrono::seconds(2));
-		std::cout << __COUT_HDR_FL__ <<
+		__COUT__ <<
 				getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":" << getenv("PORT") <<
 				"/urn:xdaq-application:lid="
 				<< ptr->getApplicationDescriptor()->getLocalId() << "/Verify?code=" << securityCode << std::endl;
@@ -212,19 +213,19 @@ throw (xgi::exception::Exception)
 	cgicc::Cgicc cgi(in);
 
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
-	__COUT__ << "Command = " << Command <<  std::endl;
+	__SUP_COUT__ << "Command = " << Command <<  std::endl;
 
 	std::string submittedSequence = CgiDataUtilities::postData(cgi, "sequence");
 
 	//SECURITY CHECK START ****
 	if(securityCode_.compare(submittedSequence) != 0)
 	{
-		__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
+		__SUP_COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
 		return;
 	}
 	else
 	{
-		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
+		__SUP_COUT__ << "***Successfully authenticated security sequence." << std::endl;
 	}
 	//SECURITY CHECK END ****
 
@@ -252,7 +253,7 @@ throw (xgi::exception::Exception)
 
 	}
 	else
-		__COUT__ << "Command Request, " << Command << ", not recognized." << std::endl;
+		__SUP_COUT__ << "Command Request, " << Command << ", not recognized." << std::endl;
 
 	xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
 }
@@ -264,19 +265,19 @@ throw (xgi::exception::Exception)
 	cgicc::Cgicc cgi(in);
 
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
-	__COUT__ << "Got to Command = " << Command <<  std::endl;
+	__SUP_COUT__ << "Got to Command = " << Command <<  std::endl;
 
 	std::string submittedSequence = CgiDataUtilities::postData(cgi, "sequence");
 
 	//SECURITY CHECK START ****
 	if(securityCode_.compare(submittedSequence) != 0)
 	{
-		__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
+		__SUP_COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
 		return;
 	}
 	else
 	{
-		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
+		__SUP_COUT__ << "***Successfully authenticated security sequence." << std::endl;
 	}
 	//SECURITY CHECK END ****
 	
@@ -284,7 +285,7 @@ throw (xgi::exception::Exception)
 
 	if(Command == "TurnGenerationOn")
 	{
-                __COUT__ << "Turning automatic URL Generation on with a sequence depth of 16!" << std::endl;	  
+                __SUP_COUT__ << "Turning automatic URL Generation on with a sequence depth of 16!" << std::endl;
 		std::ofstream outfile ((SEQUENCE_FILE_NAME).c_str());
 		outfile << "16" << std::endl;
 		outfile.close();
@@ -301,7 +302,7 @@ throw (xgi::exception::Exception)
 		xmldoc.addTextElementToData("Status", "Generation_Success"); 
 	}
 	else
-		__COUT__ << "Command Request, " << Command << ", not recognized." << std::endl;
+		__SUP_COUT__ << "Command Request, " << Command << ", not recognized." << std::endl;
 
 		xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
 }
@@ -330,7 +331,7 @@ throw (xoap::exception::Exception)
 						WebUsers::PERMISSION_LEVEL_ADMIN));
 	else
 	{
-		__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
+		__SUP_COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
 
 		permissionMap.emplace(
 				std::pair<std::string /*groupName*/,WebUsers::permissionLevel_t>(
@@ -367,7 +368,7 @@ throw (xoap::exception::Exception)
 void WizardSupervisor::Default(xgi::Input * in, xgi::Output * out )
 throw (xgi::exception::Exception)
 {
-	__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
+	__SUP_COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
 	*out << "Unauthorized Request.";
 }
 
@@ -377,26 +378,26 @@ throw (xgi::exception::Exception)
 {
 	cgicc::Cgicc cgi(in);
 	std::string submittedSequence = CgiDataUtilities::getData(cgi, "code");
-	__COUT__ << "submittedSequence=" << submittedSequence <<
+	__SUP_COUT__ << "submittedSequence=" << submittedSequence <<
 			" " << time(0) << std::endl;
 
 	std::string securityWarning = "";
 
 	if(securityCode_.compare(submittedSequence) != 0)
 	{
-		__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
+		__SUP_COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
 		*out << "Invalid code.";
 		return;
 	}
 	else
 	{
 	  //defaultSequence_ = false;
-	  __COUT__ << "*** Successfully authenticated security sequence " <<
+	  __SUP_COUT__ << "*** Successfully authenticated security sequence " <<
 				"@ " << time(0) << std::endl;
 
 		if (defaultSequence_)
 		{
-		  //__COUT__ << " UNSECURE!!!" << std::endl;
+		  //__SUP_COUT__ << " UNSECURE!!!" << std::endl;
 		  securityWarning = "&secure=False";
 		}
 	}
@@ -429,6 +430,48 @@ throw (xgi::exception::Exception)
 }
 
 //========================================================================================================================
+void WizardSupervisor::request(xgi::Input * in, xgi::Output * out )
+throw (xgi::exception::Exception)
+{
+	cgicc::Cgicc cgiIn(in);
+
+	std::string submittedSequence = CgiDataUtilities::postData(cgiIn, "sequence");
+
+	//SECURITY CHECK START ****
+	if(securityCode_.compare(submittedSequence) != 0)
+	{
+		__SUP_COUT__ << "Unauthorized Request made, security sequence doesn't match! " <<
+				time(0) << std::endl;
+		return;
+	}
+	else
+	{
+		__SUP_COUT__ << "***Successfully authenticated security sequence. " <<
+				time(0) << std::endl;
+	}
+	//SECURITY CHECK END ****
+
+	std::string requestType = CgiDataUtilities::getData(cgiIn, "RequestType");
+	__SUP_COUTV__(requestType);
+
+
+	HttpXmlDocument xmlOut;
+
+
+	if (requestType == "codeEditor")
+	{
+		__SUP_COUT__ << "Code Editor" << __E__;
+	}
+	else
+		__SUP_COUT__ << "requestType Request, " << requestType << ", not recognized." << __E__;
+
+	//return xml doc holding server response
+	xmlOut.outputXmlDocument((std::ostringstream*) out, false, true); //Note: allow white space need for error response
+
+
+} //end request()
+
+//========================================================================================================================
 void WizardSupervisor::requestIcons(xgi::Input * in, xgi::Output * out )
 throw (xgi::exception::Exception)
 {
@@ -439,13 +482,13 @@ throw (xgi::exception::Exception)
 	//SECURITY CHECK START ****
 	if(securityCode_.compare(submittedSequence) != 0)
 	{
-		__COUT__ << "Unauthorized Request made, security sequence doesn't match! " <<
+		__SUP_COUT__ << "Unauthorized Request made, security sequence doesn't match! " <<
 				time(0) << std::endl;
 		return;
 	}
 	else
 	{
-		__COUT__ << "***Successfully authenticated security sequence. " <<
+		__SUP_COUT__ << "***Successfully authenticated security sequence. " <<
 				time(0) << std::endl;
 	}
 	//SECURITY CHECK END ****
@@ -493,12 +536,12 @@ throw (xgi::exception::Exception)
 	//SECURITY CHECK START ****
 	if(securityCode_.compare(submittedSequence) != 0)
 	{
-		__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
+		__SUP_COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
 		return;
 	}
 	else
 	{
-		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
+		__SUP_COUT__ << "***Successfully authenticated security sequence." << std::endl;
 	}
 	//SECURITY CHECK END ****
 
@@ -506,13 +549,13 @@ throw (xgi::exception::Exception)
 
 	if(submittedSecurity != "")
 	{
-		__COUT__ << "Selection exists!" << std::endl;
-		__COUT__ <<  submittedSecurity << std::endl;
+		__SUP_COUT__ << "Selection exists!" << std::endl;
+		__SUP_COUT__ <<  submittedSecurity << std::endl;
 
 		if(submittedSecurity == "ResetAllUserData")
 		{
 			WebUsers::deleteUserData();
-			__COUT__ << "Turning URL Generation back to default!" << std::endl;
+			__SUP_COUT__ << "Turning URL Generation back to default!" << std::endl;
 			//std::remove((SEQUENCE_FILE_NAME).c_str());
 			//std::remove((SEQUENCE_OUT_FILE_NAME).c_str());
 			std::ofstream newFile ((SEQUENCE_FILE_NAME).c_str());
@@ -539,13 +582,13 @@ throw (xgi::exception::Exception)
 			if(writeSecurityFile.is_open())
 				writeSecurityFile << submittedSecurity;
 			else
-				__COUT__ << "Error writing file!" << std::endl;
+				__SUP_COUT__ << "Error writing file!" << std::endl;
 
 			writeSecurityFile.close();
 		}
 		else
 		{
-			__COUT_ERR__ << "Invalid submittedSecurity string: " <<
+			__SUP_COUT_ERR__ << "Invalid submittedSecurity string: " <<
 					submittedSecurity << std::endl;
 			*out << "Error";
 			return;
@@ -564,7 +607,7 @@ throw (xgi::exception::Exception)
 	if(!securityFile)
 	{
 		//__SS__ << "Error opening file: "<< securityFileName << std::endl;
-		//__COUT_ERR__ << "\n" << ss.str();
+		//__SUP_COUT_ERR__ << "\n" << ss.str();
 
 		//__SS_THROW__;
 		//return;
@@ -572,13 +615,13 @@ throw (xgi::exception::Exception)
 	}
 	if(securityFile.is_open())
 	{
-		//__COUT__ << "Opened File: " << securityFileName << std::endl;
+		//__SUP_COUT__ << "Opened File: " << securityFileName << std::endl;
 		while(std::getline(securityFile, line))
 		{
 			security += line;
 			lineNumber++;
 		}
-		//__COUT__ << std::to_string(lineNumber) << ":" << iconList << std::endl;
+		//__SUP_COUT__ << std::to_string(lineNumber) << ":" << iconList << std::endl;
 
 		//Close file
 		securityFile.close();
@@ -599,19 +642,19 @@ throw (xgi::exception::Exception)
 	if((Command = CgiDataUtilities::postData(cgi,"RequestType")) == "")
 		Command = cgi("RequestType"); //get command from form, if PreviewEntry
 
-	__COUT__ << Command << std::endl;
-	__COUT__ << "We are vewing Users' Settings!" << std::endl;
+	__SUP_COUT__ << Command << std::endl;
+	__SUP_COUT__ << "We are vewing Users' Settings!" << std::endl;
 
 	//SECURITY CHECK START ****
 	if(securityCode_.compare(submittedSequence) != 0)
 	{
-		__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
-		__COUT__ << submittedSequence << std::endl;
+		__SUP_COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
+		__SUP_COUT__ << submittedSequence << std::endl;
 		//return;
 	}
 	else
 	{
-		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
+		__SUP_COUT__ << "***Successfully authenticated security sequence." << std::endl;
 	}
 	//SECURITY CHECK END ****
 
@@ -623,8 +666,8 @@ throw (xgi::exception::Exception)
 
 	if(Command != "")
 	{
-		__COUT__ << "Action exists!" << std::endl;
-		__COUT__ <<  Command << std::endl;
+		__SUP_COUT__ << "Action exists!" << std::endl;
+		__SUP_COUT__ <<  Command << std::endl;
 
 		if(Command == "Import")
 		{
@@ -636,41 +679,41 @@ throw (xgi::exception::Exception)
 
 			//cleanUpPreviews();
 //			std::string EntryText = cgi("EntryText");
-//			__COUT__ << "EntryText " << EntryText <<  std::endl << std::endl;
+//			__SUP_COUT__ << "EntryText " << EntryText <<  std::endl << std::endl;
 //			std::string EntrySubject = cgi("EntrySubject");
-//			__COUT__ << "EntrySubject " << EntrySubject <<  std::endl << std::endl;
+//			__SUP_COUT__ << "EntrySubject " << EntrySubject <<  std::endl << std::endl;
 
 			//get creator name
 			//std::string creator = user;
 			//CgiDataUtilities::postData(cgi, "file"); CgiDataUtilities::postData(cgi, "file");//
-			__COUT__ << cgi("Entry")    << std::endl;
-			__COUT__ << cgi("Filename") << std::endl;
-			__COUT__ << cgi("Imported_File") << std::endl;
+			__SUP_COUT__ << cgi("Entry")    << std::endl;
+			__SUP_COUT__ << cgi("Filename") << std::endl;
+			__SUP_COUT__ << cgi("Imported_File") << std::endl;
 
 
 			const std::vector<cgicc::FormFile> files = cgi.getFiles();
-			__COUT__ << "FormFiles: " << sizeof(files) << std::endl;
-			__COUT__ << "Number of files: " << files.size() << std::endl;
+			__SUP_COUT__ << "FormFiles: " << sizeof(files) << std::endl;
+			__SUP_COUT__ << "Number of files: " << files.size() << std::endl;
 
 			for(unsigned int i = 0; i < files.size(); ++i)
 			{
 				std::string filename = USER_DATA_PATH + files[i].getFilename();
-				__COUT__ << filename << std::endl;
+				__SUP_COUT__ << filename << std::endl;
 				std::ofstream myFile;
 				myFile.open(filename.c_str());
 				files[0].writeToStream(myFile);
 			}
 
 
-			__COUT__ << files[0].getFilename() << std::endl;
-			__COUT__ << "********************Files Begin********************" << std::endl;
+			__SUP_COUT__ << files[0].getFilename() << std::endl;
+			__SUP_COUT__ << "********************Files Begin********************" << std::endl;
 			for (unsigned int i=0; i<files.size(); ++i)
 			{
 
-				__COUT__ << files[i].getDataType() << std::endl;
+				__SUP_COUT__ << files[i].getDataType() << std::endl;
 
 			}
-			__COUT__ << "*********************Files End*********************" << std::endl;
+			__SUP_COUT__ << "*********************Files End*********************" << std::endl;
 
 
 //			savePostPreview(EntrySubject, EntryText, cgi.getFiles(), creator, &xmldoc);
@@ -681,7 +724,7 @@ throw (xgi::exception::Exception)
 			__SS__ << "This doesn't compile Dan." << __E__;
 			__SS_THROW__;
 //
-//			__COUT__ << "We are exporting Users' Settings!!!" << std::endl;
+//			__SUP_COUT__ << "We are exporting Users' Settings!!!" << std::endl;
 //			//system('pwd');
 //
 //			//Check for a TMP directory; if it doesn't exist, make it
@@ -690,13 +733,13 @@ throw (xgi::exception::Exception)
 //			std::filesystem::path tmp = pathToTmp;
 //
 //			exec(command.c_str());
-//			__COUT__ << exec("pwd") << std::endl;
+//			__SUP_COUT__ << exec("pwd") << std::endl;
 //
 //
 //			if(std::filesystem::status_known(tmpDir) ? std::filesystem::exists(tmpDir) : std::filesystem::exists(tmpDir))
-//				__COUT__ << pathToTmp << " exists!" << std::endl;
+//				__SUP_COUT__ << pathToTmp << " exists!" << std::endl;
 //			else
-//				__COUT__ << pathToTmp << "does not exist! Creating it now. " << std::endl;
+//				__SUP_COUT__ << pathToTmp << "does not exist! Creating it now. " << std::endl;
 //
 //			//Zip current files into TMP directory
 //			command = std::string("tar -cvf user_settings.tar") +
@@ -711,14 +754,14 @@ throw (xgi::exception::Exception)
 //			//return zip
 //			if(exec("pwd").find(USER_DATA_PATH) != std::string::npos)
 //			{
-//				__COUT__ << "Found USER_DATA directory " << std::endl;
+//				__SUP_COUT__ << "Found USER_DATA directory " << std::endl;
 //				system(command.c_str());
-//				__COUT__ << system("ls") << std::endl;
+//				__SUP_COUT__ << system("ls") << std::endl;
 //			}
 		}
 		else
 		{
-			__COUT__ << "Command request not recognized: " << Command << std::endl;
+			__SUP_COUT__ << "Command request not recognized: " << Command << std::endl;
 			*out << "Error";
 			return;
 		}
@@ -752,7 +795,7 @@ void WizardSupervisor::cleanUpPreviews()
 	DIR *dir = opendir(userData.c_str());
 	if(!dir)
 	{
-		__COUT__ << "Error - User Data directory missing: " << userData << std::endl;
+		__SUP_COUT__ << "Error - User Data directory missing: " << userData << std::endl;
 		return;
 	}
 
@@ -773,11 +816,11 @@ void WizardSupervisor::cleanUpPreviews()
 
 			if((time(0) - dirCreateTime) > USER_DATA_EXPIRATION_TIME)
 			{
-				__COUT__ << "Expired" << std::endl;
+				__SUP_COUT__ << "Expired" << std::endl;
 
 				entry->d_name[i] = '_'; //put _ back
 
-				__COUT__ << "rm -rf " << USER_DATA_PATH + (std::string)entry->d_name <<  std::endl << std::endl;
+				__SUP_COUT__ << "rm -rf " << USER_DATA_PATH + (std::string)entry->d_name <<  std::endl << std::endl;
 				system(((std::string)("rm -rf " + userData + (std::string)entry->d_name)).c_str());
 			}
 		}
@@ -802,7 +845,7 @@ void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, 
 	sprintf(fileIndex,"%lu_%lu",time(0),clock()); //create unique time label for entry time(0)_clock()
 	std::string userDataPath = (std::string)USER_DATA_PATH + (std::string)fileIndex;
 
-	__COUT__ << "userDataPath " << userDataPath << std::endl;
+	__SUP_COUT__ << "userDataPath " << userDataPath << std::endl;
 	if(-1 == mkdir(userDataPath.c_str(),0755))
 	{
 		if(xmldoc) xmldoc->addTextElementToData(XML_STATUS,"Failed - directory could not be generated.");
@@ -822,7 +865,7 @@ void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, 
 
 	escapeLogbookEntry(text);
 	escapeLogbookEntry(subject);
-	__COUT__ << "~~subject " << subject << std::endl << "~~text " << text << std::endl << std::endl;
+	__SUP_COUT__ << "~~subject " << subject << std::endl << "~~text " << text << std::endl << std::endl;
 
 	HttpXmlDocument previewXml;
 
@@ -836,7 +879,7 @@ void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, 
 	previewXml.addTextElementToParent(XML_LOGBOOK_ENTRY_SUBJECT, subject, XML_LOGBOOK_ENTRY);
 	if(xmldoc) xmldoc->addTextElementToData(XML_LOGBOOK_ENTRY_SUBJECT,subject); //return subject
 
-	__COUT__ << "file size " << files.size() << std::endl;
+	__SUP_COUT__ << "file size " << files.size() << std::endl;
 
 	std::string filename;
 	std::ofstream myfile;
@@ -858,7 +901,7 @@ void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, 
 		filename = previewPath + "/" + (std::string)LOGBOOK_PREVIEW_UPLOAD_PREFACE +
 				(std::string)fileIndex + "." + filename;
 
-		__COUT__ << "file " << i << " - " << filename << std::endl;
+		__SUP_COUT__ << "file " << i << " - " << filename << std::endl;
 		myfile.open(filename.c_str());
 		if (myfile.is_open())
 		{
@@ -877,14 +920,14 @@ void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, 
 //========================================================================================================================
 std::string WizardSupervisor::exec(const char* cmd)
 {
-		std::array<char, 128> buffer;
-		std::string result;
-		std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
-		if (!pipe) __THROW__("popen() failed!");
-		while (!feof(pipe.get())) {
-			if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
-				result += buffer.data();
-		}
-		return result;
+	std::array<char, 128> buffer;
+	std::string result;
+	std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+	if (!pipe) __THROW__("popen() failed!");
+	while (!feof(pipe.get())) {
+		if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+			result += buffer.data();
+	}
+	return result;
 }
 

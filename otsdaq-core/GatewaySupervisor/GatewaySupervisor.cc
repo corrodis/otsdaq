@@ -2190,6 +2190,8 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	//gatewayLaunchOTS
 	//gatewayLaunchWiz
 
+	//codeEditor
+
 
 	//HttpXmlDocument xmlOut(cookieCode);
 
@@ -2835,6 +2837,11 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	else if(requestType == "resetUserTooltips")
 	{
 		WebUsers::resetAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_));
+	}
+	else if (requestType == "codeEditor")
+	{
+
+		__SUP_COUT__ << "Code Editor" << __E__;
 	}
 	else
 		__SUP_COUT__ << "requestType Request, " << requestType << ", not recognized." << __E__;
