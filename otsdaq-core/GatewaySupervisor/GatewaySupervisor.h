@@ -73,12 +73,12 @@ public:
     xoap::MessageReference 		stateMachineXoapHandler      	(xoap::MessageReference msg )  	        ;
     xoap::MessageReference 		stateMachineResultXoapHandler	(xoap::MessageReference msg )  	        ;
 
-    bool                        stateMachineThread           	(toolbox::task::WorkLoop* workLoop);
+    bool                        stateMachineThread           	(toolbox::task::WorkLoop* workLoop)		;
 
     //Status requests handlers
     void 						infoRequestHandler   		 	(xgi::Input* in, xgi::Output* out )  	;
     void 						infoRequestResultHandler	 	(xgi::Input* in, xgi::Output* out )  	;
-    bool                        infoRequestThread            	(toolbox::task::WorkLoop* workLoop);
+    bool                        infoRequestThread            	(toolbox::task::WorkLoop* workLoop)		;
 
     //External GatewaySupervisor XOAP handlers
     xoap::MessageReference 		supervisorCookieCheck 		 	(xoap::MessageReference msg) 			;
@@ -124,7 +124,10 @@ private:
 
     static void															StateChangerWorkLoop				(GatewaySupervisor *supervisorPtr);
     std::string															attemptStateMachineTransition		(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
-    bool         														broadcastMessage					(xoap::MessageReference msg) ;
+    bool         														broadcastMessage					(xoap::MessageReference msg);
+
+
+    std::map<std::string /*plugin type*/,std::string /*plugin .h*/> 	getPlugins							(void);
 
     bool								supervisorGuiHasBeenLoaded_	; //use to indicate first access by user of ots since execution
 

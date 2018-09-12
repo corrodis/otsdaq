@@ -33,6 +33,7 @@
 #include <thread>         	// std::this_thread::sleep_for
 #include <chrono>         	// std::chrono::seconds
 #include <sys/stat.h> 		// for mkdir
+#include <dirent.h> /*DIR and dirent*/
 
 using namespace ots;
 
@@ -97,13 +98,9 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s)
 	xoap::bind(this, &GatewaySupervisor::supervisorLastConfigGroupRequest, 	"SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
 
 
-
-	//old:
-	//I always load all configuration even the one that is not related to the particular FEW/FER,
-	//so I can load it once and is good for all applications I am scared about threads so I comment it out!
-	//CorePropertySupervisorBase::theConfigurationManager_ = Singleton<ConfigurationManager>::getInstance();
-
 	init();
+	getPlugins();
+	//exit(1);
 }
 
 //========================================================================================================================
@@ -113,6 +110,71 @@ GatewaySupervisor::~GatewaySupervisor(void)
 	delete CorePropertySupervisorBase::theConfigurationManager_;
 	makeSystemLogbookEntry("ots halted.");
 }
+
+//========================================================================================================================
+std::map<std::string /*plugin type*/,std::string /*plugin .h*/>
+GatewaySupervisor::getPlugins(void)
+{
+	std::map<std::string /*plugin type*/,std::string /*plugin .h*/> retMap;
+	std::string path = std::string(getenv("MRB_SOURCE"));
+
+	__SUP_COUTV__(path);
+
+	std::string pluginFolders[] = {"FEInterfaces","DataProcessorPlugins","ControlsInterfacePlugins",
+		"FEInterfacePlugins"};
+
+	DIR *pDIR;
+	struct dirent *entry;
+	bool isDir;
+	if( !(pDIR=opendir(path.c_str())) )
+	{
+		__SUP_SS__ << "Plugin base path '" << path << "' could not be opened!" << __E__;
+		__SUP_SS_THROW__;
+	}
+
+	//else directory good, get all repos
+	while((entry = readdir(pDIR)))
+	{
+		__SUP_COUT__ << int(entry->d_type) << " " << entry->d_name << "\n" << std::endl;
+		if( entry->d_name[0] != '.' && (entry->d_type == 0 || //0 == UNKNOWN (which can happen - seen in SL7 VM)
+				entry->d_type == 4 || entry->d_type == 8))
+		{
+			//__SUP_COUT__ << int(entry->d_type) << " " << entry->d_name << "\n" << std::endl;
+
+			isDir = false;
+
+			if(entry->d_type == 0)
+			{
+				//unknown type .. determine if directory
+				DIR *pTmpDIR = opendir((path + "/" + entry->d_name).c_str());
+				if(pTmpDIR)
+				{
+					isDir = true;
+					closedir(pTmpDIR);
+				}
+				//else //assume file
+			}
+
+			if((entry->d_type == 8 || (!isDir && entry->d_type == 0)) //file type
+					//&& std::string(entry->d_name).find(".root") == std::string::npos
+					)
+				continue; //skip if not a directory or file we care about
+			else if(entry->d_type == 4)
+				isDir = true; //flag directory types
+
+			if(isDir)
+			{
+				__SUP_COUT__ << int(entry->d_type) << " " << entry->d_name << "\n" << std::endl;
+			}
+		}
+	}
+
+	closedir(pDIR);
+
+
+	__SUP_COUTV__(StringMacros::mapToString(retMap));
+	return retMap;
+} //end getPlugins()
 
 //========================================================================================================================
 void GatewaySupervisor::init(void)

@@ -336,7 +336,7 @@ if [ "x$OTSDAQ_DATA" == "x" ];then
 	export OTSDAQ_DATA=/tmp
 fi
 
-#make director if it does not exist
+#make directory if it does not exist
 mkdir -p ${OTSDAQ_DATA} || echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Error: OTSDAQ_DATA path (${OTSDAQ_DATA}) does not exist and mkdir failed!"
 
 if [ "x$ROOT_BROWSER_PATH" == "x" ];then
