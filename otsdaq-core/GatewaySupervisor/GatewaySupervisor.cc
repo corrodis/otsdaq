@@ -772,7 +772,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 			if (xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
 			if (xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted_err",
 													 ss.str()); //indicate to GUI transition NOT attempted
-			if (out) xmldoc->outputXmlDocument((std::ostringstream*) out, false, true);
+			if (out) xmldoc->outputXmlDocument((std::ostringstream*) out, false /*dispStdOut*/, true /*allowWhiteSpace*/);
 
 			return errorStr;
 		}
@@ -789,7 +789,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 			if (xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
 			if (xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted_err",
 													 ss.str()); //indicate to GUI transition NOT attempted
-			if (out) xmldoc->outputXmlDocument((std::ostringstream*) out, false, true);
+			if (out) xmldoc->outputXmlDocument((std::ostringstream*) out, false /*dispStdOut*/, true /*allowWhiteSpace*/);
 
 			return errorStr;
 		}
@@ -833,7 +833,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 			if (xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted", "0"); //indicate to GUI transition NOT attempted
 			if (xmldoc) xmldoc->addTextElementToData("state_tranisition_attempted_err",
 													 ss.str()); //indicate to GUI transition NOT attempted
-			if (out) xmldoc->outputXmlDocument((std::ostringstream*) out, false, true);
+			if (out) xmldoc->outputXmlDocument((std::ostringstream*) out, false /*dispStdOut*/, true /*allowWhiteSpace*/);
 
 			return errorStr;
 		}
@@ -2849,7 +2849,8 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	//__SUP_COUT__ << "Made it" << __E__;
 
 	//return xml doc holding server response
-	xmlOut.outputXmlDocument((std::ostringstream*) out, false, true); //Note: allow white space need for error response
+	xmlOut.outputXmlDocument((std::ostringstream*) out, false /*dispStdOut*/,
+			true /*allowWhiteSpace*/); //Note: allow white space need for error response
 
 	//__SUP_COUT__ << "done " << requestType << __E__;
 } // end request()

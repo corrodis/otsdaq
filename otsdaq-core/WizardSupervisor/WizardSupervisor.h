@@ -21,6 +21,7 @@
 #include <map>
 
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
+#include "otsdaq-core/CodeEditor/CodeEditor.h"
 
 namespace ots
 {
@@ -86,6 +87,8 @@ private:
         	EXPERIMENT_NAME_MAX_LENTH = 25,
         	USER_DATA_EXPIRATION_TIME = 60*20, //20 minutes
         };
+
+    CodeEditor 					codeEditor_;
 
 };
 
