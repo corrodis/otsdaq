@@ -38,8 +38,7 @@ private:
 	void getDirectoryContent			(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
 	void getFileContent					(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
 	void saveFileContent				(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
-	void cleanBuild						(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
-	void incrementalBuild				(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
+	void build							(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
 
 };
 

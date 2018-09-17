@@ -3,6 +3,7 @@ cet_make(LIBRARY_NAME CodeEditor
 		 ${XDAQ_BASIC_LIB_LIST}
          CgiDataUtilities
 		 XmlUtilities
+		 Macros
 )
 
 
