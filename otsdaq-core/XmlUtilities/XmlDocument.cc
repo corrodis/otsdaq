@@ -629,7 +629,7 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
         	if(i-1 == ws) continue; //dont do anything for first white space
 
         	//for second white space add 2, and 1 from then
-        	if(i-2 == ws)
+        	if(0 && i-2 == ws)
         	{
         		inString.insert(i,"&#160;"); //insert html space
         		i+=6; //skip to point at space again
@@ -637,14 +637,18 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
         	inString.insert(i,"&#160"); //insert html space
         	inString.replace(i+5,1,1,';');        // replace special character with ;
         	i+=5; //skip to next char to check
-        	ws = i;
+        	//ws = i;
         }
 
     if(doit) std::cout << __COUT_HDR_FL__<<  inString.size() << " " << ws << std::endl;
 
-    inString.substr(0,ws+1);
+    //inString.substr(0,ws+1);
 
     if(doit) std::cout << __COUT_HDR_FL__<<  inString.size() << " " << inString << std::endl;
+
+    if(allowWhiteSpace) //keep all white space
+    	return inString;
+    //else trim trailing white space
 
     if(ws == (unsigned int)-1) return ""; //empty std::string since all white space
     return inString.substr(0,ws+1); //trim right white space
