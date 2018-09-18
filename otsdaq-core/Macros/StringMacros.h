@@ -112,10 +112,14 @@ static bool 	        	getNumber								(const std::string& s, T& retValue)
 			/*whitespace*/ 	std::set<char>({' ','\t','\n','\r'}),
 			&ops);
 
+	//__COUTV__(StringMacros::vectorToString(numbers));
+	//__COUTV__(StringMacros::vectorToString(ops));
+
 	retValue = 0; //initialize
 
 	T tmpValue;
 	unsigned int i = 0;
+	unsigned int opsi = 0;
 	bool verified;
 	for(const auto& number:numbers)
 	{
@@ -214,7 +218,16 @@ static bool 	        	getNumber								(const std::string& s, T& retValue)
 
 		//apply operation
 		if(i == 0) 	//first value, no operation, just take value
+		{
 			retValue = tmpValue;
+
+			if(ops.size() == numbers.size()) //then there is a leading operation, so apply
+			{
+				if(ops[opsi] == '-') //only meaningful op is negative sign
+					retValue *= -1;
+				opsi++; //jump to first internal op
+			}
+		}
 		else 		//there is some sort of op
 		{
 			if(0 && i==1) //display what we are dealing with
@@ -224,7 +237,7 @@ static bool 	        	getNumber								(const std::string& s, T& retValue)
 			}
 			//__COUT__ << "Intermediate value = " << retValue << __E__;
 
-			switch(ops[i-1])
+			switch(ops[opsi])
 			{
 			case '+':
 				retValue += tmpValue;
@@ -239,17 +252,18 @@ static bool 	        	getNumber								(const std::string& s, T& retValue)
 				retValue /= tmpValue;
 				break;
 			default:
-				__SS__ << "Unrecognized operation '" << ops[i-1] << "' found!" << __E__ <<
+				__SS__ << "Unrecognized operation '" << ops[opsi] << "' found!" << __E__ <<
 					"Numbers: " <<
 					StringMacros::vectorToString(numbers) << __E__ <<
 					"Operations: " <<
 					StringMacros::vectorToString(ops) << __E__;
 				__SS_THROW__;
 			}
-			//__COUT__ << "Op " << ops[i-1] << " intermediate value = " << retValue << __E__;
+			//__COUT__ << "Op " << ops[opsi] << " intermediate value = " << retValue << __E__;
 		}
 
 		++i; //increment index for next number/op
+		++opsi;
 	} //end number loop
 
 	return true; //number was valid and is passed by reference in retValue
