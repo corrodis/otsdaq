@@ -8,14 +8,7 @@ cet_make(LIBRARY_NAME WizardSupervisor
 		 GatewaySupervisor
 		 CgiDataUtilities
 		 WebUsersUtilities
-		 
-		 #SOAPUtilities
-		 #XmlUtilities
-		 
-         #$ENV{XERCES_C_LIB}/libxerces-c.so
-         #MessageFacility
-	 #${MF_MESSAGELOGGER}
-	 #${MF_UTILITIES}
+		 CodeEditor
 )
 
 install_headers()

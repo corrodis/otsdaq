@@ -388,7 +388,17 @@ const std::string& ConfigurationTree::getConfigurationName(void) const
 {
 	if(!configuration_)
 	{
-		__SS__ << "Can not get configuration name of node with no configuration pointer!" << std::endl;
+		__SS__ << "Can not get configuration name of node with no configuration pointer! " <<
+				"Is there a broken link? " <<
+				__E__;
+		if(linkParentConfig_)
+		{
+			ss << "Error occurred traversing from " << linkParentConfig_->getConfigurationName() <<
+					" row " << linkBackRow_ <<
+					" col '" << linkParentConfig_->getView().getColumnInfo(
+							linkBackCol_).getName() << ".'" << __E__;
+		}
+
 		__SS_ONLY_THROW__;
 	}
 	return configuration_->getConfigurationName();

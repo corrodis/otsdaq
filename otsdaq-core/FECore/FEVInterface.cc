@@ -19,11 +19,11 @@ void FEVInterface::configureSlowControls(void)
 	if(slowControlsGroupLink.isDisconnected())
 	{
 		__COUT__ << "slowControlsGroupLink is disconnected, so done configuring slow controls." <<
-				std::endl;
+				__E__;
 		return;
 	}
 	__COUT__ << "slowControlsGroupLink is valid! Configuring slow controls..." <<
-			std::endl;
+			__E__;
 
 	mapOfSlowControlsChannels_.clear();
 	std::vector<std::pair<std::string,ConfigurationTree> > groupLinkChildren =
@@ -36,7 +36,7 @@ void FEVInterface::configureSlowControls(void)
 		__COUT__ << "Channel:" << getInterfaceUID() <<
 				"/" <<  groupLinkChild.first << "\t Type:" <<
 				groupLinkChild.second.getNode("ChannelDataType") <<
-				std::endl;
+				__E__;
 
 		mapOfSlowControlsChannels_.insert(
 				std::pair<std::string,FESlowControlsChannel>(
@@ -72,7 +72,7 @@ void FEVInterface::configureSlowControls(void)
 //========================================================================================================================
 bool FEVInterface::slowControlsRunning(void)
 {
-	__COUT__ << "slowControlsRunning" << std::endl;
+	__COUT__ << "slowControlsRunning" << __E__;
 	std::string readVal;
 	readVal.resize(universalDataSize_); //size to data in advance
 
@@ -94,12 +94,12 @@ bool FEVInterface::slowControlsRunning(void)
 	if(slowControlsInterfaceLink.isDisconnected())
 	{
 		__COUT__ << "slowControlsInterfaceLink is disconnected, so no socket made." <<
-				std::endl;
+				__E__;
 	}
 	else
 	{
 		__COUT__ << "slowControlsInterfaceLink is valid! Create tx socket..." <<
-				std::endl;
+				__E__;
 		txSocket.reset(new UDPDataStreamerBase(
 				FEInterfaceNode.getNode("SlowControlsTxSocketIPAddress").getValue	<std::string>(),
 				FEInterfaceNode.getNode("SlowControlsTxSocketPort").getValue		<int>(),
@@ -120,7 +120,7 @@ bool FEVInterface::slowControlsRunning(void)
 				FEInterfaceNode.getNode("SlowControlsSaveBinaryFile").getValue<bool>();
 
 		__COUT_INFO__ << "Slow Controls Aggregate Saving turned On BinaryFormat=" <<
-				aggregateFileIsBinaryFormat << std::endl;
+				aggregateFileIsBinaryFormat << __E__;
 
 		std::string saveFullFileName =
 				FEInterfaceNode.getNode("SlowControlsLocalFilePath").getValue<std::string>() +
@@ -138,15 +138,15 @@ bool FEVInterface::slowControlsRunning(void)
 		if(!fp)
 		{
 			__COUT_ERR__ << "Failed to open slow controls channel file: " <<
-					saveFullFileName << std::endl;
+					saveFullFileName << __E__;
 			//continue on, just nothing will be saved
 		}
 		else
 			__COUT_INFO__ << "Slow controls aggregate file opened: " <<
-			saveFullFileName << std::endl;
+			saveFullFileName << __E__;
 	}
 	else
-		__COUT_INFO__ << "Slow Controls Aggregate Saving turned off." << std::endl;
+		__COUT_INFO__ << "Slow Controls Aggregate Saving turned off." << __E__;
 
 
 	time_t	timeCounter = 0;
@@ -157,12 +157,12 @@ bool FEVInterface::slowControlsRunning(void)
 		++timeCounter;
 
 		if(txBuffer.size())
-			__COUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
+			__COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 		txBuffer.resize(0); //clear buffer a la txBuffer = "";
 
-		//__COUT__ << "timeCounter=" << timeCounter << std::endl;
-		//__COUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
+		//__COUT__ << "timeCounter=" << timeCounter << __E__;
+		//__COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 		for(auto &slowControlsChannelPair : mapOfSlowControlsChannels_)
 		{
@@ -176,8 +176,8 @@ bool FEVInterface::slowControlsRunning(void)
 
 
 			__COUT__ << "Channel:" << getInterfaceUID() <<
-					"/" << slowControlsChannelPair.first << std::endl;
-			__COUT__ << "Monitoring..." << std::endl;
+					"/" << slowControlsChannelPair.first << __E__;
+			__COUT__ << "Monitoring..." << __E__;
 
 			universalRead(channel->getUniversalAddress(),
 					&readVal[0]);
@@ -187,19 +187,19 @@ bool FEVInterface::slowControlsRunning(void)
 			//				for(int i=(int)universalAddressSize_-1;i>=0;--i)
 			//					ss << std::hex << (int)((readVal[i]>>4)&0xF) <<
 			//					(int)((readVal[i])&0xF) << " " << std::dec;
-			//				ss << std::endl;
+			//				ss << __E__;
 			//				__COUT__ << "Sampled.\n" << ss.str();
 			//			}
 
 			//have sample
 			channel->handleSample(readVal,txBuffer, fp, aggregateFileIsBinaryFormat);
 			if(txBuffer.size())
-				__COUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
+				__COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 			//make sure buffer hasn't exploded somehow
 			if(txBuffer.size() > txBufferSz)
 			{
-				__SS__ << "This should never happen hopefully!" << std::endl;
+				__SS__ << "This should never happen hopefully!" << __E__;
 				__COUT_ERR__ << "\n" << ss.str();
 				__SS_THROW__;
 			}
@@ -208,7 +208,7 @@ bool FEVInterface::slowControlsRunning(void)
 			if(txSocket &&
 					txBuffer.size() > txBufferFullThreshold)
 			{
-				__COUT__ << "Sending now! txBufferFullThreshold=" << txBufferFullThreshold << std::endl;
+				__COUT__ << "Sending now! txBufferFullThreshold=" << txBufferFullThreshold << __E__;
 				txSocket->send(txBuffer);
 				txBuffer.resize(0); //clear buffer a la txBuffer = "";
 			}
@@ -217,13 +217,13 @@ bool FEVInterface::slowControlsRunning(void)
 		}
 
 		if(txBuffer.size())
-			__COUT__ << "txBuffer sz=" << txBuffer.size() << std::endl;
+			__COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 		//send anything left
 		if(txSocket &&
 				txBuffer.size())
 		{
-			__COUT__ << "Sending now!" << std::endl;
+			__COUT__ << "Sending now!" << __E__;
 			txSocket->send(txBuffer);
 		}
 
@@ -250,7 +250,7 @@ void FEVInterface::registerFEMacroFunction(
 	if(mapOfFEMacroFunctions_.find(feMacroName) !=
 			mapOfFEMacroFunctions_.end())
 	{
-		__SS__ << "feMacroName '" << feMacroName << "' already exists! Not allowed." << std::endl;
+		__SS__ << "feMacroName '" << feMacroName << "' already exists! Not allowed." << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
@@ -283,7 +283,7 @@ const std::string& FEVInterface::getFEMacroInputArgument(frontEndMacroInArgs_t& 
 			return pair.second;
 		}
 	}
-	__SS__ << "Requested input argument not found with name '" << argName << "'" << std::endl;
+	__SS__ << "Requested input argument not found with name '" << argName << "'" << __E__;
 	__COUT_ERR__ << "\n" << ss.str();
 	__SS_THROW__;
 }
@@ -310,7 +310,7 @@ std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& args
 		if(pair.first == argName)
 			return pair.second;
 	}
-	__SS__ << "Requested output argument not found with name '" << argName << "'" << std::endl;
+	__SS__ << "Requested output argument not found with name '" << argName << "'" << __E__;
 	__COUT_ERR__ << "\n" << ss.str();
 	__SS_THROW__;
 }
@@ -329,54 +329,66 @@ void FEVInterface::runSequenceOfCommands(const std::string &treeLinkName)
 	std::string writeBuffer;
 	std::string readBuffer;
 	char msg[1000];
+	bool ignoreError = true;
+
+	//ignore errors getting sequence of commands through tree (since it is optional)
 	try
 	{
-		auto configSeqLink = theXDAQContextConfigTree_.getNode(theConfigurationPath_).getNode(
+		ConfigurationTree configSeqLink = theXDAQContextConfigTree_.getNode(theConfigurationPath_).getNode(
 				treeLinkName);
 
-		if(configSeqLink.isDisconnected())
-			__COUT__ << "Disconnected configure sequence" << std::endl;
-		else
+
+		//but throw errors if problems executing the sequence of commands
+		try
 		{
-			__COUT__ << "Handling configure sequence." << std::endl;
-			auto childrenMap = configSeqLink.getChildrenMap();
-			for(const auto &child:childrenMap)
+			if(configSeqLink.isDisconnected())
+				__COUT__ << "Disconnected configure sequence" << __E__;
+			else
 			{
-				//WriteAddress and WriteValue fields
+				__COUT__ << "Handling configure sequence." << __E__;
+				auto childrenMap = configSeqLink.getChildrenMap();
+				for(const auto &child:childrenMap)
+				{
+					//WriteAddress and WriteValue fields
 
-				writeAddress = child.second.getNode("WriteAddress").getValue<uint64_t>();
-				writeValue = child.second.getNode("WriteValue").getValue<uint64_t>();
-				bitPosition = child.second.getNode("StartingBitPosition").getValue<uint8_t>();
-				bitMask = (1 << child.second.getNode("BitFieldSize").getValue<uint8_t>())-1;
+					writeAddress = child.second.getNode("WriteAddress").getValue<uint64_t>();
+					writeValue = child.second.getNode("WriteValue").getValue<uint64_t>();
+					bitPosition = child.second.getNode("StartingBitPosition").getValue<uint8_t>();
+					bitMask = (1 << child.second.getNode("BitFieldSize").getValue<uint8_t>())-1;
 
-				writeValue &= bitMask;
-				writeValue <<= bitPosition;
-				bitMask = ~(bitMask<<bitPosition);
+					writeValue &= bitMask;
+					writeValue <<= bitPosition;
+					bitMask = ~(bitMask<<bitPosition);
 
-				//place into write history
-				if(writeHistory.find(writeAddress) == writeHistory.end())
-					writeHistory[writeAddress] = 0;//init to 0
+					//place into write history
+					if(writeHistory.find(writeAddress) == writeHistory.end())
+						writeHistory[writeAddress] = 0;//init to 0
 
-				writeHistory[writeAddress] &= bitMask; //clear incoming bits
-				writeHistory[writeAddress] |= writeValue; //add incoming bits
+					writeHistory[writeAddress] &= bitMask; //clear incoming bits
+					writeHistory[writeAddress] |= writeValue; //add incoming bits
 
-				sprintf(msg,"\t Writing %s: \t %ld(0x%lX) \t %ld(0x%lX)", child.first.c_str(),
-						writeAddress, writeAddress,
-						writeHistory[writeAddress], writeHistory[writeAddress]);
+					sprintf(msg,"\t Writing %s: \t %ld(0x%lX) \t %ld(0x%lX)", child.first.c_str(),
+							writeAddress, writeAddress,
+							writeHistory[writeAddress], writeHistory[writeAddress]);
 
-				__COUT__ << msg << std::endl;
+					__COUT__ << msg << __E__;
 
-				universalWrite((char *)&writeAddress,(char *)&(writeHistory[writeAddress]));
+					universalWrite((char *)&writeAddress,(char *)&(writeHistory[writeAddress]));
+				}
 			}
 		}
-	}
-	catch(const std::runtime_error &e)
-	{
-		__COUT__ << "Error accessing sequence, so giving up:\n" << e.what() << std::endl;
+		catch(...)
+		{
+			ignoreError = false;
+			throw;
+		}
 	}
 	catch(...)
 	{
-		__COUT__ << "Unknown Error accessing sequence, so giving up." << std::endl;
+		if(!ignoreError) throw;
+		//else ignoring error
+		__COUT__ << "Unable to access sequence of commands through configuration tree. " <<
+				"Assuming no sequence. " << __E__;
 	}
 }
 

@@ -98,7 +98,8 @@ static const T&				getWildCardMatchFromMap					(const std::string  needle, 		con
 
 static std::string		 	decodeURIComponent 						(const std::string& data);
 static std::string 			convertEnvironmentVariables				(const std::string& data);
-static bool 	        	isNumber           						(const std::string& s);
+static bool 	        	isNumber           						(const std::string& stringToCheck);
+static std::string			binaryToHexString						(const char *binaryBuffer, unsigned int numberOfBytes, const std::string& resultPreamble = "", const std::string& resultDelimiter = "");
 
 template<class T>
 static bool 	        	getNumber								(const std::string& s, T& retValue)

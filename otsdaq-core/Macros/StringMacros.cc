@@ -250,6 +250,27 @@ bool StringMacros::isNumber(const std::string& s)
 	return true;
 } //end isNumber()
 
+
+//========================================================================================================================
+// binaryToHexString
+//	convert a data buffer of <len> bytes to a hex string 2*len characters long
+//	Note: no preamble (i.e. "0x" is applied by default)
+std::string StringMacros::binaryToHexString(const char *binaryBuffer, unsigned int numberOfBytes,
+		const std::string& resultPreamble, const std::string& resultDelimiter)
+{
+	std::string dest;
+	dest.reserve(numberOfBytes*2);
+	char hexstr[3];
+
+	for(unsigned int i=0;i<numberOfBytes;++i)
+	{
+		sprintf(hexstr,"%02X",(unsigned char)binaryBuffer[i]);
+		if(i) dest += resultDelimiter;
+		dest += hexstr;
+	}
+	return resultPreamble + dest;
+} //end binaryToHexString
+
 //==============================================================================
 // validateValueForDefaultStringDataType
 //

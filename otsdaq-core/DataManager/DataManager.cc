@@ -47,7 +47,7 @@ void DataManager::configure(void)
 
 	for (const auto& buffer : theXDAQContextConfigTree_.getNode(theConfigurationPath_ + "/LinkToDataManagerConfiguration").getChildren())
 	{
-		__COUT__ << "Data Buffer Name: " << buffer.first << std::endl;
+		__CFG_COUT__ << "Data Buffer Name: " << buffer.first << std::endl;
 		if (buffer.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 		{
 			std::vector<unsigned int> producersVectorLocation;
@@ -56,7 +56,7 @@ void DataManager::configure(void)
 			unsigned int location = 0;
 			for (const auto& bufferConfiguration : bufferConfigurationList)
 			{
-				__COUT__ << "Processor id: " << bufferConfiguration.first << std::endl;
+				__CFG_COUT__ << "Processor id: " << bufferConfiguration.first << std::endl;
 				if (bufferConfiguration.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 				{
 					if (bufferConfiguration.second.getNode("ProcessorType").getValue<std::string>() == "Producer")
@@ -69,12 +69,13 @@ void DataManager::configure(void)
 					}
 					else
 					{
-						__SS__ << "Node ProcessorType in "
+						__CFG_SS__ << "Node ProcessorType in "
 							<< bufferConfiguration.first
 							<< " of type "
 							<< bufferConfiguration.second.getNode("ProcessorType").getValue<std::string>()
 							<< " is invalid. The only accepted types are Producer and Consumer" << std::endl;
-						__SS_THROW__;
+						__CFG_MOUT_ERR__ << ss.str();
+						__CFG_SS_THROW__;
 					}
 				}
 				++location;
@@ -83,27 +84,27 @@ void DataManager::configure(void)
 
 			if (producersVectorLocation.size() == 0)// || consumersVectorLocation.size() == 0)
 			{
-				__SS__ << "Node Data Buffer "
+				__CFG_SS__ << "Node Data Buffer "
 					<< buffer.first
 					<< " has " << producersVectorLocation.size() << " Producers"
 					<< " and " << consumersVectorLocation.size() << " Consumers"
 					<< " there must be at least 1 Producer " << //	of both configured
 					"for the buffer!" << std::endl;
-				__SS_THROW__;
-
+				__CFG_MOUT_ERR__ << ss.str();
+				__CFG_SS_THROW__;
 			}
 
 			configureBuffer<std::string, std::map<std::string, std::string>>(buffer.first);
 			for (auto& producerLocation : producersVectorLocation)
 			{
-				//				__COUT__ << theConfigurationPath_ << std::endl;
-				//				__COUT__ << buffer.first << std::endl;
-				__COUT__ << "Creating producer... " <<
+				//				__CFG_COUT__ << theConfigurationPath_ << std::endl;
+				//				__CFG_COUT__ << buffer.first << std::endl;
+				__CFG_COUT__ << "Creating producer... " <<
 						bufferConfigurationList[producerLocation].first << std::endl;
-				//				__COUT__ << bufferConfigurationMap[producer].getNode("ProcessorPluginName").getValue<std::string>() << std::endl;
-				//				__COUT__ << bufferConfigurationMap[producer].getNode("LinkToProcessorConfiguration") << std::endl;
-				//				__COUT__ << "THIS DATA MANAGER POINTER: " << this << std::endl;
-				//				__COUT__ << "PASSED" << std::endl;
+				//				__CFG_COUT__ << bufferConfigurationMap[producer].getNode("ProcessorPluginName").getValue<std::string>() << std::endl;
+				//				__CFG_COUT__ << bufferConfigurationMap[producer].getNode("LinkToProcessorConfiguration") << std::endl;
+				//				__CFG_COUT__ << "THIS DATA MANAGER POINTER: " << this << std::endl;
+				//				__CFG_COUT__ << "PASSED" << std::endl;
 
 				try
 				{
@@ -125,28 +126,27 @@ void DataManager::configure(void)
 				}
 				catch(const cet::exception& e)
 				{
-					__SS__ << "Failed to instantiate plugin named '" <<
+					__CFG_SS__ << "Failed to instantiate plugin named '" <<
 							bufferConfigurationList[producerLocation].first << "' of type '" <<
 							bufferConfigurationList[producerLocation].second.getNode(
 															"ProcessorPluginName").getValue<std::string>()
 							<< "' due to the following error: \n" << e.what() << __E__;
-					__COUT_ERR__ << ss.str();
-					__MOUT_ERR__ << ss.str();
-					__SS_THROW__;
+					__CFG_MOUT_ERR__ << ss.str();
+					__CFG_SS_THROW__;
 				}
-				__COUT__ << bufferConfigurationList[producerLocation].first << " has been created!" << std::endl;
+				__CFG_COUT__ << bufferConfigurationList[producerLocation].first << " has been created!" << std::endl;
 			}
 			for (auto& consumerLocation : consumersVectorLocation)
 			{
-				//				__COUT__ << theConfigurationPath_ << std::endl;
-				//				__COUT__ << buffer.first << std::endl;
-				__COUT__ << "Creating consumer... " <<
+				//				__CFG_COUT__ << theConfigurationPath_ << std::endl;
+				//				__CFG_COUT__ << buffer.first << std::endl;
+				__CFG_COUT__ << "Creating consumer... " <<
 						bufferConfigurationList[consumerLocation].first << std::endl;
-				//				__COUT__ << bufferConfigurationMap[consumer].getNode("ProcessorPluginName").getValue<std::string>() << std::endl;
-				//				__COUT__ << bufferConfigurationMap[consumer].getNode("LinkToProcessorConfiguration") << std::endl;
-				//				__COUT__ << theXDAQContextConfigTree_.getBackNode(theConfigurationPath_) << std::endl;
-				//				__COUT__ << "THIS DATA MANAGER POINTER: " << this << std::endl;
-				//				__COUT__ << "PASSED" << std::endl;
+				//				__CFG_COUT__ << bufferConfigurationMap[consumer].getNode("ProcessorPluginName").getValue<std::string>() << std::endl;
+				//				__CFG_COUT__ << bufferConfigurationMap[consumer].getNode("LinkToProcessorConfiguration") << std::endl;
+				//				__CFG_COUT__ << theXDAQContextConfigTree_.getBackNode(theConfigurationPath_) << std::endl;
+				//				__CFG_COUT__ << "THIS DATA MANAGER POINTER: " << this << std::endl;
+				//				__CFG_COUT__ << "PASSED" << std::endl;
 				try
 				{
 					buffers_[buffer.first].consumers_.push_back(std::shared_ptr<DataConsumer>(dynamic_cast<DataConsumer*>(
@@ -167,20 +167,18 @@ void DataManager::configure(void)
 				}
 				catch(const cet::exception& e)
 				{
-					__SS__ << "Failed to instantiate plugin named '" <<
+					__CFG_SS__ << "Failed to instantiate plugin named '" <<
 							bufferConfigurationList[consumerLocation].first << "' of type '" <<
 							bufferConfigurationList[consumerLocation].second.getNode(
 															"ProcessorPluginName").getValue<std::string>()
 							<< "' due to the following error: \n" << e.what() << __E__;
-					__COUT_ERR__ << ss.str();
-					__MOUT_ERR__ << ss.str();
-					__SS_THROW__;
+					__CFG_MOUT_ERR__ << ss.str();
+					__CFG_SS_THROW__;
 				}
-				__COUT__ << bufferConfigurationList[consumerLocation].first << " has been created!" << std::endl;
+				__CFG_COUT__ << bufferConfigurationList[consumerLocation].first << " has been created!" << std::endl;
 			}
 		}
 	}
-
 }
 
 //========================================================================================================================
@@ -193,7 +191,7 @@ void DataManager::halt(void)
 //========================================================================================================================
 void DataManager::pause(void)
 {
-	__COUT__ << "Pausing..." << std::endl;
+	__CFG_COUT__ << "Pausing..." << std::endl;
 	DataManager::pauseAllBuffers();
 }
 
@@ -285,9 +283,8 @@ void DataManager::registerConsumer(std::string bufferUID, DataConsumer* consumer
 	{
 		if (buffers_.find(bufferUID) == buffers_.end())
 		{
-			__SS__ << ("Can't find buffer UID: " + bufferUID + ". Make sure that your configuration is correct!") << std::endl;
-			__COUT_ERR__ << ss.str();
-			__SS_THROW__;
+			__CFG_SS__ << ("Can't find buffer UID: " + bufferUID + ". Make sure that your configuration is correct!") << std::endl;
+			__CFG_SS_THROW__;
 		}
 		buffers_[bufferUID].buffer_->registerConsumer(consumer);
 	}
@@ -382,7 +379,7 @@ void DataManager::resumeBuffer(std::string bufferUID)
 //========================================================================================================================
 void DataManager::pauseBuffer(std::string bufferUID)
 {
-	__COUT__ << "Pausing..." << std::endl;
+	__CFG_COUT__ << "Pausing..." << std::endl;
 
 	for (auto& it : buffers_[bufferUID].producers_)
 		it->pauseProcessingData();

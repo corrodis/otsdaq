@@ -26,14 +26,8 @@ UDPDataStreamerConsumer::UDPDataStreamerConsumer(std::string supervisorApplicati
 //, DataConsumer   ("ARTDAQDataManager", 1, "ARTDAQBuffer", "ARTDAQDataStreamer0", HighConsumerPriority)
 //, streamToSocket_("192.168.133.1", 50100)
 {
-	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << std::endl;
-	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << std::endl;
-	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << std::endl;
-	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << std::endl;
-	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << std::endl;
-	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << std::endl;
-	//Socket::initialize(); //dont call this! UDPDataStreamer() calls it
-	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "done!" << std::endl;
+	//Socket::initialize(); //dont call this! UDPDataStreamerBase() calls it
+	__COUT__ << "done!" << std::endl;
 }
 
 //========================================================================================================================
@@ -51,14 +45,14 @@ bool UDPDataStreamerConsumer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 //========================================================================================================================
 void UDPDataStreamerConsumer::fastRead(void)
 {
-	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " running!" << std::endl;
+	//__COUT__ << processorUID_ << " running!" << std::endl;
 	if(DataConsumer::read(dataP_, headerP_) < 0)
 	{
 		usleep(100);
 		return;
 	}
 	//unsigned int reconverted = (((*headerP_)["IPAddress"][0]&0xff)<<24) + (((*headerP_)["IPAddress"][1]&0xff)<<16) + (((*headerP_)["IPAddress"][2]&0xff)<<8) + ((*headerP_)["IPAddress"][3]&0xff);
-	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " -> Got some data. From: "  << std::hex << reconverted << std::dec << std::endl;
+	//__COUT__ << processorUID_ << " -> Got some data. From: "  << std::hex << reconverted << std::dec << std::endl;
 
 	//std::cout << __COUT_HDR_FL__ << dataP_->length() << std::endl;
 	TransmitterSocket::send(streamToSocket_, *dataP_);
@@ -68,7 +62,7 @@ void UDPDataStreamerConsumer::fastRead(void)
 //========================================================================================================================
 void UDPDataStreamerConsumer::slowRead(void)
 {
-	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " running!" << std::endl;
+	//__COUT__ << processorUID_ << " running!" << std::endl;
 	//This is making a copy!!!
 	if(DataConsumer::read(data_, header_) < 0)
 	{
@@ -76,7 +70,7 @@ void UDPDataStreamerConsumer::slowRead(void)
 		return;
 	}
 	//unsigned int reconverted = ((header_["IPAddress"][0]&0xff)<<24) + ((header_["IPAddress"][1]&0xff)<<16) + ((header_["IPAddress"][2]&0xff)<<8) + (header_["IPAddress"][3]&0xff);
-	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " -> Got some data. From: "  << std::hex << reconverted << std::dec << std::endl;
+	//__COUT__ << processorUID_ << " -> Got some data. From: "  << std::hex << reconverted << std::dec << std::endl;
 
 	TransmitterSocket::send(streamToSocket_, data_);
 }
