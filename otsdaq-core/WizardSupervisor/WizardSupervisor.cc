@@ -461,13 +461,17 @@ throw (xgi::exception::Exception)
 	if (requestType == "codeEditor")
 	{
 		__SUP_COUT__ << "Code Editor" << __E__;
+		codeEditor_.xmlRequest(
+				CgiDataUtilities::getData(cgiIn, "option"),
+				cgiIn,
+				&xmlOut);
 	}
 	else
 		__SUP_COUT__ << "requestType Request, " << requestType << ", not recognized." << __E__;
 
 	//return xml doc holding server response
-	xmlOut.outputXmlDocument((std::ostringstream*) out, false, true); //Note: allow white space need for error response
-
+	xmlOut.outputXmlDocument((std::ostringstream*) out, true /*dispStdOut*/,
+			true /*allowWhiteSpace*/); //Note: allow white space need for error response
 
 } //end request()
 

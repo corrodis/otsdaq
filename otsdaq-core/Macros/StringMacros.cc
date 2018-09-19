@@ -328,10 +328,12 @@ void StringMacros::getSetFromString(const std::string& inputString,
 //	extracts the list of elements from string that uses a delimiter
 //		ignoring whitespace
 //	optionally returns the list of delimiters encountered, which may be useful
-//		for extracting which operator was used
+//		for extracting which operator was used.
+//
 //
 //	Note: lists are returned as vectors
 //	Note: the size() of delimiters will be one less than the size() of the returned values
+//		unless there is a leading delimiter, in which case vectors will have the same size.
 void StringMacros::getVectorFromString(const std::string& inputString,
 		std::vector<std::string>& listToReturn, const std::set<char>& delimiter,
 		const std::set<char>& whitespace, std::vector<char>* listOfDelimiters)
@@ -341,6 +343,7 @@ void StringMacros::getVectorFromString(const std::string& inputString,
 	std::set<char>::iterator delimeterSearchIt;
 	char lastDelimiter;
 	bool isDelimiter;
+	bool foundLeadingDelimiter = false;
 
 	//__COUT__ << inputString << __E__;
 
@@ -358,7 +361,11 @@ void StringMacros::getVectorFromString(const std::string& inputString,
 		if((whitespace.find(inputString[j]) != whitespace.end() || //ignore leading white space or delimiter
 				isDelimiter)
 				&& i == j)
+		{
 			++i;
+			if(isDelimiter)
+				foundLeadingDelimiter = true;
+		}
 		else if((whitespace.find(inputString[j]) != whitespace.end() || //trailing white space or delimiter indicates end
 				isDelimiter)
 				&& i != j) // assume end of element
@@ -366,8 +373,12 @@ void StringMacros::getVectorFromString(const std::string& inputString,
 			//__COUT__ << "Set element found: " <<
 			//		inputString.substr(i,j-i) << std::endl;
 
-			if(listOfDelimiters && listToReturn.size())
+			if(listOfDelimiters &&
+					(listToReturn.size() || foundLeadingDelimiter)) //accept leading delimiter (especially for case of leading negative in math parsing)
+			{
+				//__COUTV__(lastDelimiter);
 				listOfDelimiters->push_back(lastDelimiter);
+			}
 			listToReturn.push_back(inputString.substr(i,j-i));
 
 
@@ -377,19 +388,25 @@ void StringMacros::getVectorFromString(const std::string& inputString,
 
 		if(isDelimiter)
 			lastDelimiter = *delimeterSearchIt;
+		//__COUTV__(lastDelimiter);
 	}
 
 	if(i != j) //last element check (for case when no concluding ' ' or delimiter)
 	{
-		if(listOfDelimiters && listToReturn.size())
+		if(listOfDelimiters &&
+				(listToReturn.size() || foundLeadingDelimiter)) //accept leading delimiter (especially for case of leading negative in math parsing)
+		{
+			//__COUTV__(lastDelimiter);
 			listOfDelimiters->push_back(lastDelimiter);
+		}
 		listToReturn.push_back(inputString.substr(i,j-i));
 	}
 
 	//assert that there is one less delimiter than values
-	if(listOfDelimiters && listToReturn.size() - 1 != listOfDelimiters->size())
+	if(listOfDelimiters && listToReturn.size() - 1 != listOfDelimiters->size() &&
+			listToReturn.size() != listOfDelimiters->size())
 	{
-		__SS__ << "There is a mismatch in delimiters to entries (should be one less delimiter): " <<
+		__SS__ << "There is a mismatch in delimiters to entries (should be equal or one less delimiter): " <<
 				listOfDelimiters->size() <<
 				" vs " << listToReturn.size()  << __E__ <<
 				"Entries: " <<
