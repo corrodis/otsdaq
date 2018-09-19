@@ -85,6 +85,8 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 		__SS__ << "Failed to open Message Facility configuration file: " << MF_CFG_FILE << std::endl;
 		__SS_THROW__;
 	}
+	else
+		__COUT__ << "Opened.. " << MF_CFG_FILE << __E__;
 
 	//loop through all children just to be same as other configurations
 	//	exit loop after first active one
@@ -138,7 +140,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 			//handle using web gui
 			if(useWeb)
 			{
-				//__COUT__ << "Forwarding to Web GUI with UDP forward MesageFacility configuration." << std::endl;
+				__COUT__ << "Forwarding to Web GUI with UDP forward MesageFacility configuration." << std::endl;
 
 				child.second.getNode(COL_WEB_PORT0	).getValue(fwdPort);
 				child.second.getNode(COL_WEB_IP		).getValue(fwdIP);
@@ -170,7 +172,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 			//handle using qt viewer
 			if(useQT)
 			{
-				//__COUT__ << "Forwarding to Web GUI with UDP forward MesageFacility configuration." << std::endl;
+				__COUT__ << "Forwarding to Web GUI with UDP forward MesageFacility configuration." << std::endl;
 
 				child.second.getNode(COL_QT_PORT	).getValue(fwdPort);
 				child.second.getNode(COL_QT_IP		).getValue(fwdIP);

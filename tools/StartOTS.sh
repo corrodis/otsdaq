@@ -413,8 +413,9 @@ launchOTSWiz() {
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
 		#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t CONSOLE: Using web console viewer"
 		
-		#start quiet forwarder with receiving port and destination port parameter file
-	
+		#start quiet forwarder with wiz receiving port and destination port parameter file
+		cp ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderWiz.cfg ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
+		
 		if [ $QUIET == 1 ]; then
 
 			if [ $BACKUPLOGS == 1 ]; then
@@ -424,14 +425,14 @@ launchOTSWiz() {
 			fi
 			
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  "
-			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
+			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 		else
-			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
+			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
 		fi		 	
 	fi
 	
 	if [[ $USE_QT_VIEWER == "1" ]]; then
-		#echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t CONSOLE: Using QT console viewer"
+		echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t CONSOLE: Using QT console viewer"
 		if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
 			echo
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
@@ -597,7 +598,8 @@ launchOTS() {
 			echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t Launching message facility web console assistant..."
 			
 			#start quiet forwarder with receiving port and destination port parameter file
-		
+			cp ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
+			
 			if [[ $QUIET == 1 ]]; then
 
 				if [ $BACKUPLOGS == 1 ]; then
@@ -607,9 +609,9 @@ launchOTS() {
 				fi
 				
 				echo -e `date +"%h%y %T"` "StartOTS.sh [${LINENO}]  \t ===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  "
-				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
+				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 			else
-				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg  &
+				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
 			fi		 	
 			echo
 			echo
