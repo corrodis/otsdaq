@@ -29,7 +29,9 @@ function muteTrace() {
 	toffS 0-63 -n CONF:LdStrD_C
 	toffS 0-63 -n FileDB:RDWRT_C
 	
+	${TRACE_BIN}/trace_cntl lvlset 0 0x1f 0	
 }
+export TRACE_FILE=/tmp/trace_buffer_${USER}
 muteTrace
 
 

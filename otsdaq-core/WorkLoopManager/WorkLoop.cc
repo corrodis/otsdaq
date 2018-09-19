@@ -23,10 +23,10 @@ WorkLoop::WorkLoop(std::string name)
 //========================================================================================================================
 WorkLoop::~WorkLoop(void)
 {
-  mf::LogDebug("WorkLoop") << "Destroying WorkLoop: " << cWorkLoopName_ << std::endl;
+  TLOG(TLVL_DEBUG, "WorkLoop") << "Destroying WorkLoop: " << cWorkLoopName_ << std::endl;
 	if(stopWorkLoop())
 		toolbox::task::getWorkLoopFactory()->removeWorkLoop(cWorkLoopName_, cWorkLoopType_);
-	mf::LogDebug("WorkLoop") << "Destroyed WorkLoop: " << cWorkLoopName_ << std::endl;
+	TLOG(TLVL_DEBUG, "WorkLoop") << "Destroyed WorkLoop: " << cWorkLoopName_ << std::endl;
 }
 
 //========================================================================================================================

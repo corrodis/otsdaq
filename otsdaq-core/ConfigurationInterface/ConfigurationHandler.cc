@@ -73,7 +73,7 @@ void ConfigurationHandler::initPlatform(void)
 	}
 	catch( xercesc::XMLException& e )
 	{
-		mf::LogError(__FILE__) << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
+	        __MOUT_ERR__ << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
 		// throw exception here to return ERROR_XERCES_INIT
 	}
 
@@ -123,7 +123,7 @@ void ConfigurationHandler::terminatePlatform(void)
 	}
 	catch( ... )
 	{
-		mf::LogError(__FILE__) << "Unknown exception encountered in TagNames destructor" << std::endl;
+		__MOUT_ERR__ << "Unknown exception encountered in TagNames destructor" << std::endl;
 	}
 
 	try
@@ -132,7 +132,7 @@ void ConfigurationHandler::terminatePlatform(void)
 	}
 	catch( xercesc::XMLException& e )
 	{
-		mf::LogError(__FILE__) << "XML ttolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
+		__MOUT_ERR__ << "XML ttolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
 	}
 }
 
@@ -378,7 +378,7 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 							<< colNumber+1 << (colNumber==0?"st":(colNumber==1?"nd":(colNumber==2?"rd":"th")))
 							<< " element found in the file at " << XML_TO_CHAR(dataTag_) << " tag number " << row
 							<< " is " << XML_TO_CHAR(columnElement->getTagName());
-					mf::LogError(__FILE__) << error.str();
+					__MOUT_ERR__ << error.str();
 					throw(std::runtime_error( error.str() ));
 				}
 

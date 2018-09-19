@@ -104,8 +104,7 @@ void EventBuilderApp::init(void)
 	//artdaq::setMsgFacAppName(supervisorApplicationUID_, port);
 	artdaq::setMsgFacAppName(name, port);
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR MSG FACILITY DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-	mf::LogDebug(name + "Supervisor") << "artdaq version " <<
-//    mf::LogDebug(supervisorApplicationUID_) << " artdaq version " <<
+	TLOG(TLVL_DEBUG, name + "Supervisor") << "artdaq version " <<
 			artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion()
 			<< ", built " <<
 			artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();

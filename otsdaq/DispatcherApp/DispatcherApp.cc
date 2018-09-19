@@ -100,7 +100,7 @@ void DispatcherApp::init(void)
 	//    artdaq::setMsgFacAppName(supervisorApplicationUID_, port);
 	artdaq::setMsgFacAppName(name, port);
 	//    mf::LogDebug(supervisorApplicationUID_) << "artdaq version " <<
-	mf::LogDebug(name + "Supervisor") << "artdaq version " <<
+	TLOG(TLVL_DEBUG, name + "Supervisor") << "artdaq version " <<
 		artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion()
 		<< ", built " <<
 		artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
@@ -315,7 +315,7 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 
 
 	theDispatcherInterface_->initialize(pset, 0, 0);
-	mf::LogInfo("DispatcherInterface") << "ARTDAQDispatcher SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+	TLOG(TLVL_INFO, "DispatcherInterface") << "ARTDAQDispatcher SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 
 }
 

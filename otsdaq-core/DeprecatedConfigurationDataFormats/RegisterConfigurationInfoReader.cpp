@@ -60,7 +60,7 @@ RegisterConfigurationInfoReader::~RegisterConfigurationInfoReader() {
 	    }
 	    catch( ... )
 	    {
-	      mf::LogError(__FILE__) << "Unknown exception encountered in TagNames destructor" << "     ";
+	      __MOUT_ERROR__ << "Unknown exception encountered in TagNames destructor" << "     ";
 	    }
 	    terminatePlatform();	// TODO Auto-generated destructor stub
 }
@@ -74,7 +74,7 @@ void RegisterConfigurationInfoReader::initPlatform(void)
     }
     catch( xercesc::XMLException& e )
     {
-        mf::LogError(__FILE__) << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << "     ";
+        __MOUT_ERROR__ << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << "     ";
         // throw exception here to return ERROR_XERCES_INIT
     }
 }
@@ -88,7 +88,7 @@ void RegisterConfigurationInfoReader::terminatePlatform(void)
     }
     catch( xercesc::XMLException& e )
     {
-        mf::LogError(__FILE__) << "XML toolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << "     ";
+        __MOUT_ERROR__ << "XML toolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << "     ";
     }
 }
 

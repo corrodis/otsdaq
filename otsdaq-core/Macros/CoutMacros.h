@@ -52,9 +52,9 @@
 
 #define __MF_HDR__		__COUT_HDR__
 #define __MOUT_ERR__  	__MF_TYPE__(TLVL_ERROR) 	<< __MF_HDR__
-#define __MOUT_WARN__  	__MF_TYPE__(TLVL_WARNING) << __MF_HDR__
-#define __MOUT_INFO__  	__MF_TYPE__(TLVL_INFO) 	<< __MF_HDR__
-#define __MOUT__  		__MF_TYPE__(TLVL_DEBUG)	<< __MF_HDR__
+#define __MOUT_WARN__  	__MF_TYPE__(TLVL_WARNING) 	<< __MF_HDR__
+#define __MOUT_INFO__  	__MF_TYPE__(TLVL_INFO) 		<< __MF_HDR__
+#define __MOUT__  		__MF_TYPE__(TLVL_DEBUG)		<< __MF_HDR__
 #define __MOUTV__(X)	__MOUT__ << QUOTE(X) << " = " << X << _E__
 
 

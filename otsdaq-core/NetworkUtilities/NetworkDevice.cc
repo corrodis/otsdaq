@@ -97,7 +97,7 @@ int NetworkDevice::initSocket(std::string socketPort)
         // bind it to the port we passed in to getaddrinfo():
         if(bind(socketOut, res->ai_addr, res->ai_addrlen) == -1)
         {
-	  mf::LogError("NetworkDevice") << __LINE__ << "]\tFailed bind for port: " <<  port.str();
+	  TLOG(TLVL_ERROR, "NetworkDevice") << __LINE__ << "]\tFailed bind for port: " <<  port.str();
             socketOut = -1;
             exit(0);
         }

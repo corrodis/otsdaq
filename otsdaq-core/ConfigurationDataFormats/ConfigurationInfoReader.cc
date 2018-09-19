@@ -73,7 +73,7 @@ ConfigurationInfoReader::~ConfigurationInfoReader(void)
 	}
 	catch( ... )
 	{
-		mf::LogError(__FILE__) << "Unknown exception encountered in TagNames destructor" << std::endl;
+		__MOUT_ERR__ << "Unknown exception encountered in TagNames destructor" << std::endl;
 	}
 	terminatePlatform();
 }
@@ -87,7 +87,7 @@ void ConfigurationInfoReader::initPlatform(void)
 	}
 	catch( xercesc::XMLException& e )
 	{
-		mf::LogError(__FILE__) << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
+		__MOUT_ERR__ << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
 		// throw exception here to return ERROR_XERCES_INIT
 	}
 }
@@ -101,7 +101,7 @@ void ConfigurationInfoReader::terminatePlatform(void)
 	}
 	catch( xercesc::XMLException& e )
 	{
-		mf::LogError(__FILE__) << "XML tolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
+		__MOUT_ERR__ << "XML tolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << std::endl;
 	}
 }
 

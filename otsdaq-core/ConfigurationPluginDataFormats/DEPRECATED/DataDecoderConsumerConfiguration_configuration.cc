@@ -54,7 +54,7 @@ void DataDecoderConsumerConfiguration::check(std::string processorUID) const
 {
 	if(processorIDToRowMap_.find(processorUID) == processorIDToRowMap_.end())
 	{
-		mf::LogError(__FILE__) << "Couldn't find processor " << processorUID << " in the UDPDataStreamerConsumerConfiguration!" << std::endl;
+		__MOUT_ERROR__ << "Couldn't find processor " << processorUID << " in the UDPDataStreamerConsumerConfiguration!" << std::endl;
 		assert(0);
 	}
 }
