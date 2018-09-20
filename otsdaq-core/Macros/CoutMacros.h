@@ -5,7 +5,9 @@
 #include <string.h> //for strstr (not the same as <string>)
 #include <iostream> //for cout
 #include <sstream> //for stringstream, std::stringbuf
+#if MESSAGEFACILITY_HEX_VERSION > 0x20106
 #include "tracemf.h"
+#endif
 
 //take filename only after srcs/ (this gives by repo name)
 #define __SHORTFILE__ 	(strstr(&__FILE__[0], "/srcs/") ? strstr(&__FILE__[0], "/srcs/") + 6 : __FILE__)
@@ -46,15 +48,24 @@
 #define Q(X) #X
 #define QUOTE(X) Q(X)
 //#define __MF_TYPE__(X)	FIXME ?? how to do this ...(getenv("OTSDAQ_USING_MF")=="1"? mf::X (__MF_SUBJECT__) : std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":")
-#define __MF_TYPE__(X)	TLOG(X, __MF_SUBJECT__)
-
 
 
 #define __MF_HDR__		__COUT_HDR__
+#if MESSAGEFACILITY_HEX_VERSION > 0x20106
+#define __MF_TYPE__(X)	TLOG(X, __MF_SUBJECT__) //for latest artdaq
 #define __MOUT_ERR__  	__MF_TYPE__(TLVL_ERROR) 	<< __MF_HDR__
 #define __MOUT_WARN__  	__MF_TYPE__(TLVL_WARNING) 	<< __MF_HDR__
 #define __MOUT_INFO__  	__MF_TYPE__(TLVL_INFO) 		<< __MF_HDR__
 #define __MOUT__  		__MF_TYPE__(TLVL_DEBUG)		<< __MF_HDR__
+#else
+#define __MF_TYPE__(X)	mf::X (__MF_SUBJECT__)
+#define __MOUT_ERR__  	__MF_TYPE__(LogError) 	<< __MF_HDR__
+#define __MOUT_WARN__  	__MF_TYPE__(LogWarning) 	<< __MF_HDR__
+#define __MOUT_INFO__  	__MF_TYPE__(LogInfo) 		<< __MF_HDR__
+#define __MOUT__  		__MF_TYPE__(LogDebug)		<< __MF_HDR__
+
+#endif
+
 #define __MOUTV__(X)	__MOUT__ << QUOTE(X) << " = " << X << _E__
 
 
