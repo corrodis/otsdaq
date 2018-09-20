@@ -236,6 +236,9 @@ static bool 	        	getNumber								(const std::string& s, T& retValue)
 				__COUTV__(StringMacros::vectorToString(numbers));
 				__COUTV__(StringMacros::vectorToString(ops));
 			}
+			//__COUTV__(opsi);
+			//__COUTV__(ops[opsi]);
+			//__COUTV__(tmpValue);
 			//__COUT__ << "Intermediate value = " << retValue << __E__;
 
 			switch(ops[opsi])
@@ -261,10 +264,11 @@ static bool 	        	getNumber								(const std::string& s, T& retValue)
 				__SS_THROW__;
 			}
 			//__COUT__ << "Op " << ops[opsi] << " intermediate value = " << retValue << __E__;
+			++opsi;
 		}
 
 		++i; //increment index for next number/op
-		++opsi;
+
 	} //end number loop
 
 	return true; //number was valid and is passed by reference in retValue
