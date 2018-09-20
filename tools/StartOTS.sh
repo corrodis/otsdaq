@@ -2,9 +2,6 @@
 
 function defineColors ()
 {
-  # Reset
-  Rev='\033[0m'       # Text Reset
-
   # Regular Colors
   Black='\033[0;30m'        # Black
   Red='\033[0;31m'          # Red
@@ -75,15 +72,15 @@ function defineColors ()
   On_ICyan='\033[0;106m'    # Cyan
   On_IWhite='\033[0;107m'   # White
 
-  Bold=`tput bold`        # Select bold mode
-  DIM=`tput dim`          # Select dim (half-bright) mode
-  Blink=`tput blink`          # Select dim (half-bright) mode
-  EUNDERLINE=`tput smul`  # Enable underline mode
-  DUNDERLINE=`tput rmul`  # Disable underline mode
-  REV=`tput rev`          # Turn on reverse video mode
-  Reset=`tput sgr0`       # Reset all
-  EBold=`tput smso`       # Enter standout (bold) mode
-  DBold=`tput rmso`       # Exit standout mode
+  Bold=`tput bold`          # Select bold mode                  
+  DIM=`tput dim`            # Select dim (half-bright) mode     
+  Blink=`tput blink`        # Select dim (half-bright) mode 
+  EUNDERLINE=`tput smul`    # Enable underline mode             
+  DUNDERLINE=`tput rmul`    # Disable underline mode            
+  REV=`tput rev`            # Turn on reverse video mode        
+  Reset=`tput sgr0`         # Reset all                         
+  EBold=`tput smso`         # Enter standout (bold) mode        
+  DBold=`tput rmso`         # Exit standout mode                
 }
 
 #for some reason, this function does not exist in this script.. recreating
@@ -92,7 +89,8 @@ function toffS ()
 	${TRACE_BIN}/trace_cntl lvlclr 0 `bitN_to_mask "$@"` 0
 }
 
-function muteTrace() {
+function muteTrace() 
+{
 	#source /data/ups/setup
 	#setup TRACE v3_13_04
 	#ups active
@@ -176,7 +174,6 @@ if [[ "$1"  == "--backup" || "$2"  == "--backup" || "$1"  == "-b" || "$2"  == "-
 fi
 #end check for options
 
-
 #############################
 #initializing StartOTS action file
 #attempt to mkdir for full path so that it exists to move the database to
@@ -195,7 +192,6 @@ echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tStartOTS_action path     
 echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tStartOTS_quit path       = ${OTSDAQ_STARTOTS_QUIT_FILE}      "
 echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tStartOTS_local_quit path = ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE}"
 
-
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
 SAP_PATH=""
 for SAP_EL in ${SAP_ARR[@]}
@@ -212,8 +208,6 @@ echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 
 #done initializing StartOTS action file
 #############################
-
-
 
 #############################
 #############################
@@ -240,13 +234,13 @@ function killprocs
 		PIDS=""
 		for contextPID in "${ContextPIDArray[@]}"
 		do
-			echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tKilling Nongateway-PID ${contextPID}"
+			echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Red}{$Rev}Killing Nongateway-PID${Reset} ${contextPID}"
 			PIDS+=" ${contextPID}"
 		done
 		
 		#echo Killing PIDs: $PIDS
-		kill $PIDS 					&>/dev/null 2>&1 #hide output
-		kill -9 $PIDS 				&>/dev/null 2>&1 #hide output
+		kill    $PIDS &>/dev/null 2>&1 #hide output
+		kill -9 $PIDS &>/dev/null 2>&1 #hide output
 
 		unset ContextPIDArray #done with array of PIDs, so clear
 	fi
@@ -259,24 +253,27 @@ export -f killprocs
 if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
 
 	echo
-	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t******************************************************"
-	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t*************    KILLING otsdaq!        **************"
-        echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t******************************************************"
+	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}******************************************************${Reset}"
+	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}*************        otsdaq!        **************${Reset}"
+        echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}******************************************************${Reset}"
 	echo
 	
 	#try to force kill other StartOTS scripts
 	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
 	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 	
-    killprocs	
+        echo "${IBRed}"
+        killprocs	
 	killall -9 StartOTS.sh &>/dev/null 2>&1 #hide output
+        echo "${Reset}"
 	
 	exit
 fi
 
 if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPLOGS == 0 && "$1x" != "x" ]]; then
 	echo 
-	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tUnrecognized parameter(s) $1 $2 [Note: only two parameters are considered, others are ignored].. showing usage:"
+	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Unrecognized parameter(s)${Reset} ${BIBlue}$1 $2${Reset} [Note: only two parameters are considered, others are ignored]. "
+	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${BIGreen}Usage${Reset}:"
 	echo
         echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t******************************************************"
 	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t*************    StartOTS.sh Usage      **************"
@@ -307,10 +304,9 @@ if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPL
 	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\te.g.: StartOTS.sh -b     or    StartOTS.sh --backup"
 	echo
 	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tExiting StartOTS.sh. Please see usage tips above."
+	echo
 	exit
 fi
-
-
 
 #SERVER=`hostname -f || ifconfig eth0|grep "inet addr"|cut -d":" -f2|awk '{print $1}'`
 export SUPERVISOR_SERVER=$HOSTNAME #$SERVER
@@ -362,25 +358,26 @@ ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath &>/dev/null  #hide output
 
 if [ "x$USER_DATA" == "x" ]; then
 	echo
-	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tError."
-	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tEnvironment variable USER_DATA not setup!"
+	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Fatal Error${Reset}."
+	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tEnvironment variable ${Cyan}${Bold}USER_DATAr${Reset} has not been setup!"
 	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tTo setup, use 'export USER_DATA=<path to user data>'"
-	echo 
 	echo
 	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
+	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Aborting launch${Reset}"
 	echo
 	exit    
 fi
 
 if [ ! -d $USER_DATA ]; then
 	echo
-	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tError."
+	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Fatal Error${Reset}."
 	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tUSER_DATA=$USER_DATA"
-	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tEnvironment variable USER_DATA does not point to a valid directory!"
+	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tEnvironment variable ${Cyan}${Bold}USER_DATA${Reset} does not point to a valid directory!"
 	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tTo setup, use 'export USER_DATA=<path to user data>'"
 	echo 
 	echo
 	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
+	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Aborting launch${Reset}"
 	echo
 	exit   
 fi
@@ -506,7 +503,7 @@ launchOTSWiz() {
 				mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.${DATESTRING}.txt
 			fi
 			
-			echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  "
+			echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  "
 			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 		else
 			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
@@ -589,7 +586,7 @@ launchOTSWiz() {
 		fi
 		
 		echo
-		echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  "
+		echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  "
 		echo
 		
 		ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt &
@@ -864,11 +861,11 @@ launchOTS() {
 			if [ $BACKUPLOGS == 1 ]; then
 				DATESTRING=`date +'%s'`				
 				
-				echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t     Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt ***"				
+				echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tBacking up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt ***"				
 				mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.${DATESTRING}.txt
 			fi
 		  			
-			echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  "			
+			echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  "			
 			ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
 		else
 		  ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
@@ -925,7 +922,6 @@ printMainURL() {
 	
 	echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tOpen the URL below in your Google Chrome or Mozilla Firefox web browser:"	
 	
-	
 	if [ $MAIN_URL == "unknown_url" ]; then
 		echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\tINFO: No gateway supervisor found for node {${HOSTNAME}}."
 		exit
@@ -937,8 +933,7 @@ printMainURL() {
 		#OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
 		#if [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
 		#exit
-		#fi
-		
+		#fi		
 		
 		echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${BICyan}${EUNDERLINE}${MAIN_URL}${Reset}"
 		echo
@@ -951,7 +946,6 @@ printMainURL() {
 }  #end printMainURL
 export -f printMainURL
 	
-
 #########################################################
 #########################################################
 otsActionHandler() {
@@ -1066,7 +1060,7 @@ otsActionHandler() {
 					mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${HOSTNAME}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${HOSTNAME}.${DATESTRING}.txt
 				fi
 				
-				echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t===> Quiet mode redirecting output to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${HOSTNAME}.txt ***  "	
+				echo -e `date +"%h%y %T"` "[${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${HOSTNAME}.txt ***  "	
 				otsdaq_flatten_system_aliases 0 &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${HOSTNAME}.txt &
 			else
 				otsdaq_flatten_system_aliases 0 &
