@@ -127,7 +127,7 @@ private:
     bool         														broadcastMessage					(xoap::MessageReference msg);
 
 
-    std::map<std::string /*plugin type*/,std::string /*plugin .h*/> 	getPlugins							(void);
+
 
     bool								supervisorGuiHasBeenLoaded_	; //use to indicate first access by user of ots since execution
 

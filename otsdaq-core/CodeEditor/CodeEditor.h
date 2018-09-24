@@ -40,6 +40,12 @@ private:
 	void saveFileContent				(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
 	void build							(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
 
+	std::string safePathString			(const std::string& path);
+	std::string safeExtensionString		(const std::string& extension);
+
+	std::map<std::string /*special type*/,std::set<std::string> /*special file paths*/>
+	getSpecialsMap						(void);
+
 };
 
 }

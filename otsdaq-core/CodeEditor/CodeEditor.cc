@@ -82,6 +82,40 @@ catch(...)
 	xmlOut->addTextElementToData("Error",ss.str());
 } //end xmlRequest()
 
+//========================================================================================================================
+//safePathString
+std::string CodeEditor::safePathString(const std::string& path)
+{
+	__COUTV__(path);
+	//remove all non ascii and non /, -, _,, space
+	std::string fullpath = "";
+	for(unsigned int i=0;i<path.length();++i)
+		if((path[i] >= 'a' && path[i] <= 'z') ||
+				(path[i] >= 'A' && path[i] <= 'Z') ||
+				path[i] >= '_' ||
+				path[i] >= '-' ||
+				path[i] >= ' ' ||
+				path[i] >= '/')
+			fullpath += path[i];
+	__COUTV__(fullpath);
+	return fullpath;
+} //end safePathString()
+
+//========================================================================================================================
+//safeExtensionString
+std::string CodeEditor::safeExtensionString(const std::string& extension)
+{
+	__COUTV__(extension);
+
+	std::string retExt = "";
+	//remove all non ascii
+	for(unsigned int i=0;i<extension.length();++i)
+		if((extension[i] >= 'a' && extension[i] <= 'z') ||
+				(extension[i] >= 'A' && extension[i] <= 'Z'))
+			retExt += extension[i];
+	__COUTV__(retExt);
+	return retExt;
+} //end safeExtensionString()
 
 //========================================================================================================================
 //getDirectoryContent
@@ -90,12 +124,51 @@ void CodeEditor::getDirectoryContent(
 		HttpXmlDocument* 				xmlOut)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
+	path = safePathString(CgiDataUtilities::decodeURIComponent(path));
 	__COUTV__(path);
 
 	xmlOut->addTextElementToData("path",path);
 
-	std::string pluginFolders[] = {"FEInterfaces","DataProcessorPlugins","ControlsInterfacePlugins",
-			"FEInterfacePlugins"};
+
+	const unsigned int numOfTypes = 3;
+	std::string specialTypeNames[] = {
+			"Front-End Plugins",
+			"Data Processor Plugins",
+			"Controls Interface Plugins"};
+	std::string specialTypes[] = {
+			"FEInterface",
+			"DataProcessor",
+			"ControlsInterface"};
+
+	std::string pathMatchPrepend = "/"; //some requests come in with leading "/" and "//"
+	if(path.length() > 1 && path[1] == '/')
+		pathMatchPrepend += '/';
+
+	for(unsigned int i=0;i<numOfTypes;++i)
+		if(path == pathMatchPrepend + specialTypeNames[i])
+		{
+			__COUT__ << "Getting all " << specialTypeNames[i] <<
+					"..." << __E__;
+
+			std::map<std::string /*special type*/,
+				std::set<std::string> /*special file paths*/> retMap = getSpecialsMap();
+			if(retMap.find(specialTypes[i]) != retMap.end())
+			{
+				for(const auto& specialTypeFile : retMap[specialTypes[i]])
+				{
+					xmlOut->addTextElementToData("specialFile",specialTypeFile);
+				}
+			}
+			else
+			{
+				__SS__ << "No files for type '" << specialTypeNames[i] <<
+						"' were found." << __E__;
+				__SS_THROW__;
+			}
+			return;
+		}
+
+
 
 	DIR *pDIR;
 	struct dirent *entry;
@@ -108,6 +181,15 @@ void CodeEditor::getDirectoryContent(
 		__SS__ << "Path '" << path << "' could not be opened!" << __E__;
 		__SS_THROW__;
 	}
+
+	if(path == "/")
+	{
+		//add special directory for types
+
+		for(unsigned int i=0;i<numOfTypes;++i)
+			xmlOut->addTextElementToData("special",specialTypeNames[i]);
+	}
+
 
 	//else directory good, get all folders, .h, .cc, .txt files
 	while((entry = readdir(pDIR)))
@@ -150,9 +232,14 @@ void CodeEditor::getDirectoryContent(
 			{
 				//__COUT__ << "File: " << type << " " << name << "\n" << std::endl;
 				if(
-						name.find(".h") == name.length()-2 ||
-						name.find(".cc") == name.length()-3 ||
-						name.find(".txt") == name.length()-4
+						name.find(".h") == name.length()-2 		||
+						name.find(".cc") == name.length()-3 	||
+						name.find(".js") == name.length()-3 	||
+						name.find(".sh") == name.length()-3 	||
+						name.find(".py") == name.length()-3 	||
+						name.find(".txt") == name.length()-4 	||
+						name.find(".css") == name.length()-4 	||
+						name.find(".html") == name.length()-5
 				)
 				{
 					__COUT__ << "EditFile: " << type << " " << name << __E__;
@@ -160,7 +247,7 @@ void CodeEditor::getDirectoryContent(
 				}
 			}
 		}
-	}
+	} //end directory traversal
 
 	closedir(pDIR);
 
@@ -174,30 +261,15 @@ void CodeEditor::getFileContent(
 		HttpXmlDocument* 				xmlOut)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
+	path = safePathString(CgiDataUtilities::decodeURIComponent(path));
 	xmlOut->addTextElementToData("path",path);
 
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
+	extension = safeExtensionString(extension);
 	xmlOut->addTextElementToData("ext",extension);
 
-	__COUTV__(path);
-	__COUTV__(extension);
 
-	//remove all non ascii and non /
-	std::string fullpath = SOURCE_BASE_PATH;
-	for(unsigned int i=0;i<path.length();++i)
-		if((path[i] >= 'a' && path[i] <= 'z') ||
-				(path[i] >= 'A' && path[i] <= 'Z') ||
-				path[i] >= '_' ||
-				path[i] >= '-' ||
-				path[i] >= '/')
-			fullpath += path[i];
-
-	fullpath += ".";
-
-	for(unsigned int i=0;i<extension.length();++i)
-		if((extension[i] >= 'a' && extension[i] <= 'z') ||
-				(extension[i] >= 'A' && extension[i] <= 'Z'))
-			fullpath += extension[i];
+	std::string fullpath = SOURCE_BASE_PATH + path + "." + extension;
 	__COUTV__(fullpath);
 
 
@@ -226,40 +298,20 @@ void CodeEditor::saveFileContent(
 		HttpXmlDocument* 				xmlOut)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
+	path = safePathString(CgiDataUtilities::decodeURIComponent(path));
 	xmlOut->addTextElementToData("path",path);
 
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
+	extension = safeExtensionString(extension);
 	xmlOut->addTextElementToData("ext",extension);
 
-	__COUTV__(path);
-	__COUTV__(extension);
 
 	std::string contents = CgiDataUtilities::postData(cgiIn, "content");
 	__COUTV__(contents);
 	contents = StringMacros::decodeURIComponent(contents);
 
-
-
-	//remove all non ascii and non /
-	std::string fullpath = SOURCE_BASE_PATH;
-	for(unsigned int i=0;i<path.length();++i)
-		if((path[i] >= 'a' && path[i] <= 'z') ||
-				(path[i] >= 'A' && path[i] <= 'Z') ||
-				path[i] >= '_' ||
-				path[i] >= '-' ||
-				path[i] >= '/')
-			fullpath += path[i];
-
-	fullpath += ".";
-
-	for(unsigned int i=0;i<extension.length();++i)
-		if((extension[i] >= 'a' && extension[i] <= 'z') ||
-				(extension[i] >= 'A' && extension[i] <= 'Z'))
-			fullpath += extension[i];
+	std::string fullpath = SOURCE_BASE_PATH + path + "." + extension;
 	__COUTV__(fullpath);
-
-
-
 
 	FILE *fp = fopen(fullpath.c_str(), "wb");
 	if (!fp)
@@ -389,7 +441,139 @@ void CodeEditor::build(
 
 
 
-} //end build
+} //end build()
+
+
+//========================================================================================================================
+std::map<std::string /*special type*/,std::set<std::string> /*special file paths*/>
+CodeEditor::getSpecialsMap(void)
+{
+	std::map<std::string /*special type*/,
+		std::set<std::string> /*special file paths*/> retMap;
+	std::string path = std::string(getenv("MRB_SOURCE"));
+
+	__COUTV__(path);
+
+	const unsigned int numOfSpecials = 4;
+	std::string specialFolders[] = {"FEInterfaces","DataProcessorPlugins","ControlsInterfacePlugins",
+		"FEInterfacePlugins"};
+	std::string specialMapTypes[] = {"FEInterface","DataProcessor","ControlsInterface",
+		"FEInterface"};
+
+	//Note: can not do lambda recursive function if using auto to declare the function,
+	//	and must capture reference to the function. Also, must capture specialFolders
+	//	reference for use internally (const values already are captured).
+	std::function<void(const std::string&, const std::string&, const unsigned int, const int)>
+	localRecurse = [&specialFolders, &specialMapTypes,
+					&retMap,
+					&localRecurse]
+					(
+							const std::string& path,
+							const std::string& offsetPath,
+							const unsigned int depth,
+							const int specialIndex) {
+
+		//__COUTV__(path);
+		//__COUTV__(depth);
+
+		DIR *pDIR;
+		struct dirent *entry;
+		bool isDir;
+		if( !(pDIR=opendir(path.c_str())) )
+		{
+			__SS__ << "Plugin base path '" << path << "' could not be opened!" << __E__;
+			__SS_THROW__;
+		}
+
+		//else directory good, get all folders and look for special folders
+		std::string name;
+		int type;
+		int childSpecialIndex;
+		while((entry = readdir(pDIR)))
+		{
+			name = std::string(entry->d_name);
+			type = int(entry->d_type);
+
+			//__COUT__ << type << " " << name << "\n" << std::endl;
+
+			if( name[0] != '.' && (type== 0 || //0 == UNKNOWN (which can happen - seen in SL7 VM)
+					type == 4 || type == 8))
+			{
+				isDir = false;
+
+				if(type == 0)
+				{
+					//unknown type .. determine if directory
+					DIR *pTmpDIR = opendir((path + "/" + name).c_str());
+					if(pTmpDIR)
+					{
+						isDir = true;
+						closedir(pTmpDIR);
+					}
+					//else //assume file
+				}
+
+				if(type == 4)
+					isDir = true; //flag directory types
+
+				//handle directories
+
+
+				if(isDir)
+				{
+					//__COUT__ << "Directory: " << type << " " << name << __E__;
+
+					childSpecialIndex = -1;
+					for(unsigned int i=0;i<numOfSpecials;++i)
+						if(name == specialFolders[i])
+						{
+							__COUT__ << "Found special folder '" << specialFolders[i] <<
+									"' at path " <<	path << __E__;
+
+							childSpecialIndex = i;
+							break;
+						}
+
+					//recurse deeper!
+					if(depth < 4) //limit search depth
+						localRecurse(path + "/" + name,
+								offsetPath + "/" + name, depth + 1, childSpecialIndex);
+				}
+				else if(specialIndex >= 0)
+				{
+					//get special files!!
+
+					if(
+							name.find(".h") == name.length()-2 		||
+							name.find(".cc") == name.length()-3 	||
+							name.find(".txt") == name.length()-4
+					)
+					{
+						__COUT__ << "Found special '" << specialFolders[specialIndex] <<
+								"' file '" << name << "' at path " <<
+								path << " " << specialIndex << __E__;
+
+						retMap[specialMapTypes[specialIndex]].emplace(
+								offsetPath + "/" + name);
+					}
+				}
+			}
+		} //end directory traversal
+
+		closedir(pDIR);
+
+	}; //end localRecurse() definition
+
+	//start recursive traversal to find special folders
+	localRecurse(path,"" /*offsetPath*/, 0 /*depth*/, -1 /*specialIndex*/);
+
+	__COUTV__(StringMacros::mapToString(retMap));
+	return retMap;
+} //end getSpecialsMap()
+
+
+
+
 
 
 

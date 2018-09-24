@@ -470,7 +470,7 @@ throw (xgi::exception::Exception)
 		__SUP_COUT__ << "requestType Request, " << requestType << ", not recognized." << __E__;
 
 	//return xml doc holding server response
-	xmlOut.outputXmlDocument((std::ostringstream*) out, true /*dispStdOut*/,
+	xmlOut.outputXmlDocument((std::ostringstream*) out, false /*dispStdOut*/,
 			true /*allowWhiteSpace*/); //Note: allow white space need for error response
 
 } //end request()

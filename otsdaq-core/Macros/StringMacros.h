@@ -475,6 +475,38 @@ static std::string			mapToString								(const std::map<std::string,std::map<std
 	}
 	return ss.str();
 }
+template<class T>
+static std::string			mapToString								(const std::map<std::string,std::set<T> >& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
+{
+	//this is a somewhat specific map format (one usage is in CodeEditor)
+	std::stringstream ss;
+	bool first = true;
+	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first;
+		ss << ":";
+		ss << StringMacros::setToString(mapPair.second,secondaryDelimeter);
+	}
+	return ss.str();
+}
+template<class T>
+static std::string			mapToString								(const std::map<std::string,std::vector<T> >& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
+{
+	//this is a somewhat specific map format (one usage is similar CodeEditor)
+	std::stringstream ss;
+	bool first = true;
+	for(auto& mapPair:mapToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << mapPair.first;
+		ss << ":";
+		ss << StringMacros::vectorToString(mapPair.second,secondaryDelimeter);
+	}
+	return ss.str();
+}
 static std::string			mapToString								(const std::map<std::string,uint8_t>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ");
 template<class T>
 static std::string			setToString								(const std::set<T>& setToReturn, const std::string& delimeter = ", ")
