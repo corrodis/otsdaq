@@ -2775,6 +2775,11 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	{
 
 		__SUP_COUT__ << "Code Editor" << __E__;
+
+		codeEditor_.xmlRequest(
+				CgiDataUtilities::getData(cgiIn, "option"),
+				cgiIn,
+				&xmlOut);
 	}
 	else
 		__SUP_COUT__ << "requestType Request, " << requestType << ", not recognized." << __E__;
