@@ -13,6 +13,8 @@
 #include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
 #include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 
+#include "otsdaq-core/CodeEditor/CodeEditor.h"
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
@@ -158,6 +160,8 @@ private:
     enum {
     	VERBOSE_MUTEX = 0
     };
+
+    CodeEditor 							codeEditor_;
 
     //temporary member variable to avoid redeclaration in repetitive functions
     char								tmpStringForConversions_[100];

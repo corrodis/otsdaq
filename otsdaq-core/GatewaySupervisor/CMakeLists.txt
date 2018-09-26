@@ -11,6 +11,7 @@ cet_make(LIBRARY_NAME GatewaySupervisor
          CodeEditor         
          CoreSupervisors
          NetworkUtilities
+         CodeEditor
          
 		 artdaq_ExternalComms
 		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
