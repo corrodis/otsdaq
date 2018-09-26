@@ -136,11 +136,7 @@ void GatewaySupervisor::init(void)
 //	else
 //		supervisorUID = ViewColumnInfo::DATATYPE_LINK_DEFAULT;
 //
-//	__SUP_COUT__ << "GatewaySupervisor UID:" << supervisorUID << __E__;
-
-
-
-	//CorePropertySupervisorBase::init(supervisorContextUID_,supervisorApplicationUID_,CorePropertySupervisorBase::theConfigurationManager_);
+	//__SUP_COUT__ << "GatewaySupervisor UID:" << supervisorUID << __E__;
 
 
 
@@ -149,7 +145,7 @@ void GatewaySupervisor::init(void)
 	try
 	{
 		enableStateChanges =
-				CorePropertySupervisorBase::getContextTreeNode().getNode("EnableStateChangesOverUDP").getValue<bool>();
+				CorePropertySupervisorBase::getSupervisorConfigurationNode().getNode("EnableStateChangesOverUDP").getValue<bool>();
 	}
 	catch (...)
 	{
@@ -158,11 +154,11 @@ void GatewaySupervisor::init(void)
 
 	try
 	{
-		auto artdaqStateChangeEnabled = CorePropertySupervisorBase::getContextTreeNode().getNode("EnableARTDAQCommanderPlugin").getValue<bool>();
+		auto artdaqStateChangeEnabled = CorePropertySupervisorBase::getSupervisorConfigurationNode().getNode("EnableARTDAQCommanderPlugin").getValue<bool>();
 		if (artdaqStateChangeEnabled)
 		{
-			auto artdaqStateChangePort = CorePropertySupervisorBase::getContextTreeNode().getNode("ARTDAQCommanderID").getValue<int>();
-			auto artdaqStateChangePluginType = CorePropertySupervisorBase::getContextTreeNode().getNode("ARTDAQCommanderType").getValue<std::string>();
+			auto artdaqStateChangePort = CorePropertySupervisorBase::getSupervisorConfigurationNode().getNode("ARTDAQCommanderID").getValue<int>();
+			auto artdaqStateChangePluginType = CorePropertySupervisorBase::getSupervisorConfigurationNode().getNode("ARTDAQCommanderType").getValue<std::string>();
 			theArtdaqCommandable_.init(artdaqStateChangePort, artdaqStateChangePluginType);
 		}
 	}
@@ -320,19 +316,17 @@ void GatewaySupervisor::init(void)
 //	child thread
 void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor *theSupervisor)
 {
-	ConfigurationTree configLinkNode = theSupervisor->CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
-		theSupervisor->supervisorContextUID_, theSupervisor->supervisorApplicationUID_);
+	ConfigurationTree configLinkNode = theSupervisor->CorePropertySupervisorBase::getSupervisorConfigurationNode();
 
+	std::string ipAddressForStateChangesOverUDP = configLinkNode.getNode("IPAddressForStateChangesOverUDP").getValue<std::string>();
+	int         portForStateChangesOverUDP      = configLinkNode.getNode("PortForStateChangesOverUDP"     ).getValue<int>();
+	bool        acknowledgementEnabled          = configLinkNode.getNode("EnableAckForStateChangesOverUDP").getValue<bool>();
 
-	std::string myip = configLinkNode.getNode("IPAddressForStateChangesOverUDP").getValue<std::string>();
-	int myport = configLinkNode.getNode("PortForStateChangesOverUDP").getValue<int>();
-	bool ackEnabled = configLinkNode.getNode("EnableAckForStateChangesOverUDP").getValue<bool>();
+	//__COUT__ << "IPAddressForStateChangesOverUDP = " << ipAddressForStateChangesOverUDP << __E__;
+	//__COUT__ << "PortForStateChangesOverUDP      = " << portForStateChangesOverUDP << __E__;
+	//__COUT__ << "acknowledgmentEnabled           = " << acknowledgmentEnabled << __E__;
 
-	__COUT__ << "ip = " << myip << __E__;
-	__COUT__ << "port = " << myport << __E__;
-	__COUT__ << "ackEnabled = " << ackEnabled << __E__;
-
-	TransceiverSocket sock(myip, myport); //Take Port from Configuration
+	TransceiverSocket sock(ipAddressForStateChangesOverUDP, portForStateChangesOverUDP); //Take Port from Configuration
 	try
 	{
 		sock.initialize();
@@ -341,18 +335,21 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor *theSupervisor)
 	{
 
 		//generate special message to indicate failed socket
-		__SS__ << "FATAL Console error. Could not initialize socket at ip '" << myip <<
+		__SS__ << "FATAL Console error. Could not initialize socket at ip '" << ipAddressForStateChangesOverUDP <<
 			"' and port " <<
-			myport << ". Perhaps it is already in use? Exiting State Changer receive loop." << __E__;
+			portForStateChangesOverUDP << ". Perhaps it is already in use? Exiting State Changer receive loop." << __E__;
 		__COUT__ << ss.str();
 		__SS_THROW__;
 		return;
 	}
 
-	unsigned int i, firsti;
-	std::string buffer;
-	std::string errorStr;
-	std::string command, fsmName;
+	std::size_t  commaPosition;
+	unsigned int commaCounter = 0;
+	std::size_t  begin = 0;
+	std::string  buffer;
+	std::string  errorStr;
+	std::string  fsmName;
+	std::string  command;
 	std::vector<std::string> parameters;
 	while (1)
 	{
@@ -367,34 +364,29 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor *theSupervisor)
 						 false /*verbose*/) != -1)
 		{
 			__COUT__ << "UDP State Changer received size = " << buffer.size() << __E__;
-
-			command = "", fsmName = "";
-			parameters.clear();
-
-			//extract comma separated values: command,fsmname,parameter(s)
-			for (firsti = 0, i = 0; i < buffer.size(); ++i)
+			size_t nCommas = std::count(buffer.begin(), buffer.end(), ',');
+			if(nCommas == 0)
 			{
-				if (buffer[i] == ',')
-				{
-					if (command == "")
-					{
-						command = buffer.substr(firsti, i - firsti);
-						__COUT__ << "command = " << command << __E__;
-					}
-					else if (fsmName == "")
-					{
-						fsmName = buffer.substr(firsti, i - firsti);
-						__COUT__ << "fsmName = " << fsmName << __E__;
-					}
-					else //parameter
-					{
-						parameters.push_back(buffer.substr(firsti, i - firsti));
+				__SS__ << "Unrecognized State Machine command :-" << buffer << "-. Format is FiniteStateMachineName,Command,Parameter(s). Where Parameter(s) is/are optional." << __E__;
+				__COUT_INFO__ << ss.str();
+				__MOUT_INFO__ << ss.str();
+			}
+			begin        = 0;
+			commaCounter = 0;
+			parameters.clear();
+			while((commaPosition = buffer.find(',', begin)) != std::string::npos || commaCounter == nCommas)
+			{
+				if(commaCounter == nCommas) commaPosition = buffer.size();
+				if(commaCounter == 0)
+					fsmName = buffer.substr(begin, commaPosition-begin);
+				else if(commaCounter == 1)
+					command = buffer.substr(begin, commaPosition-begin);
+				else
+					parameters.push_back(buffer.substr(begin, commaPosition-begin));
+				__COUT__ << "Word: " << buffer.substr(begin, commaPosition-begin) << __E__;
 
-						__COUT__ << "parameter[" << parameters.size() - 1 <<
-							"] = " << command << __E__;
-					}
-					firsti = i + 1;
-				}
+				begin = commaPosition + 1;
+				++commaCounter;
 			}
 
 			//set scope of mutext
@@ -419,14 +411,14 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor *theSupervisor)
 				__SS__ << "UDP State Changer failed to execute command because of the following error: " << errorStr;
 				__COUT_ERR__ << ss.str();
 				__MOUT_ERR__ << ss.str();
-				if (ackEnabled) sock.acknowledge(errorStr, true /*verbose*/);
+				if (acknowledgementEnabled) sock.acknowledge(errorStr, true /*verbose*/);
 			}
 			else
 			{
 				__SS__ << "Successfully executed state change command '" << command << ".'" << __E__;
 				__COUT_INFO__ << ss.str();
 				__MOUT_INFO__ << ss.str();
-				if (ackEnabled) sock.acknowledge("Done", true /*verbose*/);
+				if (acknowledgementEnabled) sock.acknowledge("Done", true /*verbose*/);
 			}
 		}
 		else
@@ -676,6 +668,7 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 			userInfo.username_,parameters);
 }
 
+//========================================================================================================================
 std::string GatewaySupervisor::attemptStateMachineTransition(
 	HttpXmlDocument* xmldoc, std::ostringstream* out,
 	const std::string& command,
@@ -690,6 +683,8 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 	__SUP_COUT__ << "fsmName = " << fsmName << __E__;
 	__SUP_COUT__ << "fsmWindowName = " << fsmWindowName << __E__;
 	__SUP_COUT__ << "activeStateMachineName_ = " << activeStateMachineName_ << __E__;
+	__SUP_COUT__ << "command = " << command << __E__;
+	__SUP_COUT__ << "commandParameters.size = " << commandParameters.size() << __E__;
 
 	SOAPParameters parameters;
 	if (command == "Configure")
@@ -712,7 +707,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 
 		//NOTE Original name of the configuration key
 		//parameters.addParameter("RUN_KEY",CgiDataUtilities::postData(cgi,"ConfigurationAlias"));
-		if (!commandParameters.size())
+		if (commandParameters.size() == 0)
 		{
 			__SUP_SS__ << "Error - Can only transition to Configured if a Configuration Alias parameter is provided." <<
 				__E__;
@@ -770,10 +765,17 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 
 			return errorStr;
 		}
-
-		unsigned int runNumber = getNextRunNumber();
+		unsigned int runNumber;
+		if(commandParameters.size() == 0)
+		{
+			runNumber = getNextRunNumber();
+			setNextRunNumber(runNumber+1);
+		}
+		else
+		{
+			runNumber = std::atoi(commandParameters[0].c_str());
+		}
 		parameters.addParameter("RunNumber", runNumber);
-		setNextRunNumber(++runNumber);
 	}
 
 	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(

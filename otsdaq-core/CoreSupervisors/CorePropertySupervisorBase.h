@@ -44,6 +44,8 @@ public:
     static bool 					doPermissionsGrantAccess		(std::map<std::string,WebUsers::permissionLevel_t>& permissionLevelsMap, std::map<std::string,WebUsers::permissionLevel_t>& permissionThresholdsMap);
 
     ConfigurationTree				getContextTreeNode 				(void) const { return theConfigurationManager_->getNode(theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getConfigurationName()); }
+	ConfigurationTree				getSupervisorConfigurationNode 	(void) const { return getContextTreeNode().getNode(supervisorConfigurationPath_); }
+
 protected:
 
 
