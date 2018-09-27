@@ -5,11 +5,13 @@
 
 #include <dirent.h> //DIR and dirent
 #include <thread>   //for std::thread
+#include <sys/stat.h> 	//for mkdir
 
 using namespace ots;
 
 
-#define SOURCE_BASE_PATH 			    std::string(getenv("MRB_SOURCE")) + "/"
+#define SOURCE_BASE_PATH 			  		std::string(getenv("MRB_SOURCE")) + "/"
+#define CODE_EDITOR_DATA_PATH 			    std::string(getenv("SERVICE_DATA_PATH")) + "/" + "CodeEditorData"
 
 
 
@@ -21,6 +23,17 @@ using namespace ots;
 //CodeEditor
 CodeEditor::CodeEditor()
 {
+	std::string path = CODE_EDITOR_DATA_PATH;
+	DIR *dir = opendir(path.c_str());
+	if(dir)
+		closedir(dir);
+	else if(-1 == mkdir(path.c_str(),0755))
+	{
+		//lets create the service folder (for first time)
+		__SS__ << "Service directory creation failed: " <<
+				path << std::endl;
+		__SS_THROW__;
+	}
 
 } //end CodeEditor()
 
@@ -329,16 +342,50 @@ void CodeEditor::saveFileContent(
 	std::string fullpath = SOURCE_BASE_PATH + path + "." + extension;
 	__COUTV__(fullpath);
 
-	FILE *fp = fopen(fullpath.c_str(), "wb");
+	FILE *fp;
+
+	//get old file size
+	fp = fopen(fullpath.c_str(), "rb");
 	if (!fp)
 	{
-		__SS__ << "Could not open file for saving at " << path << __E__;
+		__SS__ << "Could not open file for saving at " << fullpath << __E__;
+		__SS_THROW__;
+	}
+	std::fseek(fp, 0, SEEK_END);
+	long long int oldSize = std::ftell(fp);
+	fclose(fp);
+
+	fp = fopen(fullpath.c_str(), "wb");
+	if (!fp)
+	{
+		__SS__ << "Could not open file for saving at " << fullpath << __E__;
 		__SS_THROW__;
 	}
 
 
 	std::fwrite(&contents[0], 1, contents.size(), fp);
 	std::fclose(fp);
+
+	//log changes
+	{
+		path = CODE_EDITOR_DATA_PATH+"/codeEditorChangeLog.txt";
+		fp = fopen(path.c_str(),"a");
+		if (!fp)
+		{
+			__SS__ << "Could not open change log for change tracking at " <<
+					path << __E__;
+			__SS_THROW__;
+		}
+		fprintf(fp,"time=%lld old-size=%lld new-size=%lld path=%s\n",
+				(long long)time(0),
+				oldSize,
+				(long long)contents.size(),
+				fullpath.c_str());
+
+		fclose(fp);
+		__COUT__ << "Changes logged to: " << path << __E__;
+	}
+
 
 } //end saveFileContent
 

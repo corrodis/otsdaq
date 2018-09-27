@@ -3070,6 +3070,9 @@ void WebUsers::deleteUserData()
 	//delete console folders
 	std::system(("rm -rf " + std::string(serviceDataPath) + "/ConsolePreferences/").c_str());
 
+	//delete code editor folders
+	std::system(("rm -rf " + std::string(serviceDataPath) + "/CodeEditorData/").c_str());
+
 	//delete wizard folders
 	std::system(("rm -rf " + std::string(serviceDataPath) + "/OtsWizardData/").c_str());
 
