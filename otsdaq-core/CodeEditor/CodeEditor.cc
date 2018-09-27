@@ -98,6 +98,11 @@ std::string CodeEditor::safePathString(const std::string& path)
 				path[i] >= '/')
 			fullpath += path[i];
 	__COUTV__(fullpath);
+	if(!fullpath.length())
+	{
+		__SS__ << "Invalid path '" << fullpath << "' found!" << __E__;
+		__SS_THROW__;
+	}
 	return fullpath;
 } //end safePathString()
 
@@ -114,6 +119,15 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 				(extension[i] >= 'A' && extension[i] <= 'Z'))
 			retExt += extension[i];
 	__COUTV__(retExt);
+	if(
+			retExt != "h" && retExt != "cc" && retExt != "txt" && //should match get directory content restrictions
+			retExt != "sh" && retExt != "css" && retExt != "html" &&
+			retExt != "js" && retExt != "py" && retExt != "fcl"
+					&& retExt != "xml")
+	{
+		__SS__ << "Invalid extension '" << retExt << "' found!" << __E__;
+		__SS_THROW__;
+	}
 	return retExt;
 } //end safeExtensionString()
 
@@ -224,7 +238,7 @@ void CodeEditor::getDirectoryContent(
 
 			if(isDir)
 			{
-				__COUT__ << "Directory: " << type << " " << name << __E__;
+				//__COUT__ << "Directory: " << type << " " << name << __E__;
 
 				xmlOut->addTextElementToData("directory",name);
 			}
@@ -237,12 +251,14 @@ void CodeEditor::getDirectoryContent(
 						name.find(".js") == name.length()-3 	||
 						name.find(".sh") == name.length()-3 	||
 						name.find(".py") == name.length()-3 	||
+						name.find(".fcl") == name.length()-4 	||
 						name.find(".txt") == name.length()-4 	||
 						name.find(".css") == name.length()-4 	||
+						name.find(".xml") == name.length()-4 	||
 						name.find(".html") == name.length()-5
 				)
 				{
-					__COUT__ << "EditFile: " << type << " " << name << __E__;
+					//__COUT__ << "EditFile: " << type << " " << name << __E__;
 					xmlOut->addTextElementToData("file",name);
 				}
 			}
@@ -527,8 +543,8 @@ CodeEditor::getSpecialsMap(void)
 					for(unsigned int i=0;i<numOfSpecials;++i)
 						if(name == specialFolders[i])
 						{
-							__COUT__ << "Found special folder '" << specialFolders[i] <<
-									"' at path " <<	path << __E__;
+							//__COUT__ << "Found special folder '" << specialFolders[i] <<
+							//		"' at path " <<	path << __E__;
 
 							childSpecialIndex = i;
 							break;
@@ -549,9 +565,9 @@ CodeEditor::getSpecialsMap(void)
 							name.find(".txt") == name.length()-4
 					)
 					{
-						__COUT__ << "Found special '" << specialFolders[specialIndex] <<
-								"' file '" << name << "' at path " <<
-								path << " " << specialIndex << __E__;
+						//__COUT__ << "Found special '" << specialFolders[specialIndex] <<
+						//		"' file '" << name << "' at path " <<
+						//		path << " " << specialIndex << __E__;
 
 						retMap[specialMapTypes[specialIndex]].emplace(
 								offsetPath + "/" + name);
