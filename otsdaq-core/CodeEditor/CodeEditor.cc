@@ -490,13 +490,13 @@ void CodeEditor::build(
 
 					//each time there is a new line print out
 					i = result.find('\n');
-					__COUTV__(result.substr(0,i));
+					//__COUTV__(result.substr(0,i));
 					__MOUT__ << result.substr(0,i);
 					result = result.substr(i+1); //discard before new line
 				}
 			}
 
-			__COUTV__(result);
+			//__COUTV__(result);
 			__MOUT__ << result.substr(0,i);
 		}
 	},clean).detach();

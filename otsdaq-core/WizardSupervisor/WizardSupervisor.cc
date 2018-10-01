@@ -507,10 +507,14 @@ throw (xgi::exception::Exception)
 	//5 - linkurl = url of the window to open
 	//6 - folderPath = folder and subfolder location
 
-	*out << "Security Settings,SEC,1,1,icon-SecuritySettings.png,/WebPath/html/SecuritySettings.html,/" <<
-			",Edit User Data,USER,1,1,icon-EditUserData.png,/WebPath/html/EditUserData.html,/" <<
-			",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/" <<
+	*out <<
+			"Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/" <<
 			",Table Editor,TBL,0,1,icon-IconEditor.png,/urn:xdaq-application:lid=280/?configWindowName=tableEditor,/" <<
+			",Security Settings,SEC,1,1,icon-SecuritySettings.png,/WebPath/html/SecuritySettings.html,/User Settings" <<
+			",Edit User Data,USER,1,1,icon-EditUserData.png,/WebPath/html/EditUserData.html,/User Settings" <<
+
+			",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" <<
+
 			//",Iterate,IT,0,1,icon-Iterate.png,/urn:xdaq-application:lid=280/?configWindowName=iterate,/" <<
 			//",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,myFolder" <<
 			//",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/myFolder/mySub.folder" <<
@@ -519,8 +523,9 @@ throw (xgi::exception::Exception)
 			",Processor Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Processor,Config Wizards" <<
 			",Block Diagram,CFG,0,1,icon-Configure.png,/WebPath/html/ConfigurationSubsetBlockDiagram.html?urn=280,Config Wizards" <<
 			//",Consumer Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&subsetBasePath=FEInterfaceConfiguration&recordAlias=Consumer,Config Wizards" <<
-			",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" <<
+
 			//",DB Utilities,DB,1,1,0,http://127.0.0.1:8080/db/client.html" <<
+			",Code Editor,CODE,0,1,icon-CodeEditor.png,/WebPath/html/CodeEditor.html,/" <<
 			"";
 	return;
 }
