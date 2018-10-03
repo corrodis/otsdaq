@@ -18,6 +18,9 @@ using namespace ots;
 #undef 	__MF_SUBJECT__
 #define __MF_SUBJECT__ "CodeEditor"
 
+std::string CodeEditor::SPECIAL_TYPE_FEInterface = "FEInterface";
+std::string CodeEditor::SPECIAL_TYPE_DataProcessor = "DataProcessor";
+std::string CodeEditor::SPECIAL_TYPE_ControlsInterface = "ControlsInterface";
 
 //========================================================================================================================
 //CodeEditor
@@ -178,7 +181,8 @@ void CodeEditor::getDirectoryContent(
 					"..." << __E__;
 
 			std::map<std::string /*special type*/,
-				std::set<std::string> /*special file paths*/> retMap = getSpecialsMap();
+				std::set<std::string> /*special file paths*/> retMap =
+						CodeEditor::getSpecialsMap();
 			if(retMap.find(specialTypes[i]) != retMap.end())
 			{
 				for(const auto& specialTypeFile : retMap[specialTypes[i]])
@@ -297,10 +301,20 @@ void CodeEditor::getFileContent(
 	extension = safeExtensionString(extension);
 	xmlOut->addTextElementToData("ext",extension);
 
+	std::string contents;
+	CodeEditor::readFile(path + "." + extension,contents);
 
-	std::string fullpath = SOURCE_BASE_PATH + path + "." + extension;
+	xmlOut->addTextElementToData("content",contents);
+
+} //end getFileContent
+
+//========================================================================================================================
+//readFile
+void CodeEditor::readFile(
+		const std::string& path, std::string& contents)
+{
+	std::string fullpath = SOURCE_BASE_PATH + path;
 	__COUTV__(fullpath);
-
 
 	std::FILE *fp = std::fopen(fullpath.c_str(), "rb");
 	if (!fp)
@@ -309,37 +323,20 @@ void CodeEditor::getFileContent(
 		__SS_THROW__;
 	}
 
-	std::string contents;
 	std::fseek(fp, 0, SEEK_END);
 	contents.resize(std::ftell(fp));
 	std::rewind(fp);
 	std::fread(&contents[0], 1, contents.size(), fp);
 	std::fclose(fp);
-
-	xmlOut->addTextElementToData("content",contents);
-
-} //end getFileContent
+} //end readFile
 
 //========================================================================================================================
-//saveFileContent
-void CodeEditor::saveFileContent(
-		cgicc::Cgicc& 					cgiIn,
-		HttpXmlDocument* 				xmlOut)
+//writeFile
+void CodeEditor::writeFile(
+		const std::string& path, const std::string& contents,
+		const unsigned long long& insertPos, const std::string& insertString)
 {
-	std::string path = CgiDataUtilities::getData(cgiIn, "path");
-	path = safePathString(CgiDataUtilities::decodeURIComponent(path));
-	xmlOut->addTextElementToData("path",path);
-
-	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
-	extension = safeExtensionString(extension);
-	xmlOut->addTextElementToData("ext",extension);
-
-
-	std::string contents = CgiDataUtilities::postData(cgiIn, "content");
-	__COUTV__(contents);
-	contents = StringMacros::decodeURIComponent(contents);
-
-	std::string fullpath = SOURCE_BASE_PATH + path + "." + extension;
+	std::string fullpath = SOURCE_BASE_PATH + path;
 	__COUTV__(fullpath);
 
 	FILE *fp;
@@ -363,17 +360,24 @@ void CodeEditor::saveFileContent(
 	}
 
 
-	std::fwrite(&contents[0], 1, contents.size(), fp);
+	if(insertPos == (unsigned long long)-1)
+		std::fwrite(&contents[0], 1, contents.size(), fp);
+	else //do insert
+	{
+		std::fwrite(&contents[0], 1, insertPos, fp);
+		std::fwrite(&insertString[0], 1, insertString.size(), fp);
+		std::fwrite(&contents[insertPos], 1, contents.size()-insertPos, fp);
+	}
 	std::fclose(fp);
 
 	//log changes
 	{
-		path = CODE_EDITOR_DATA_PATH+"/codeEditorChangeLog.txt";
-		fp = fopen(path.c_str(),"a");
+		std::string logpath = CODE_EDITOR_DATA_PATH+"/codeEditorChangeLog.txt";
+		fp = fopen(logpath.c_str(),"a");
 		if (!fp)
 		{
 			__SS__ << "Could not open change log for change tracking at " <<
-					path << __E__;
+					logpath << __E__;
 			__SS_THROW__;
 		}
 		fprintf(fp,"time=%lld old-size=%lld new-size=%lld path=%s\n",
@@ -383,9 +387,31 @@ void CodeEditor::saveFileContent(
 				fullpath.c_str());
 
 		fclose(fp);
-		__COUT__ << "Changes logged to: " << path << __E__;
-	}
+		__COUT__ << "Changes logged to: " << logpath << __E__;
+	} //end log changes
 
+} //end writeFile
+
+//========================================================================================================================
+//saveFileContent
+void CodeEditor::saveFileContent(
+		cgicc::Cgicc& 					cgiIn,
+		HttpXmlDocument* 				xmlOut)
+{
+	std::string path = CgiDataUtilities::getData(cgiIn, "path");
+	path = safePathString(CgiDataUtilities::decodeURIComponent(path));
+	xmlOut->addTextElementToData("path",path);
+
+	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
+	extension = safeExtensionString(extension);
+	xmlOut->addTextElementToData("ext",extension);
+
+
+	std::string contents = CgiDataUtilities::postData(cgiIn, "content");
+	//__COUTV__(contents);
+	contents = StringMacros::decodeURIComponent(contents);
+
+	CodeEditor::writeFile(path + "." + extension,contents);
 
 } //end saveFileContent
 
@@ -518,10 +544,16 @@ CodeEditor::getSpecialsMap(void)
 	__COUTV__(path);
 
 	const unsigned int numOfSpecials = 4;
-	std::string specialFolders[] = {"FEInterfaces","DataProcessorPlugins","ControlsInterfacePlugins",
-		"FEInterfacePlugins"};
-	std::string specialMapTypes[] = {"FEInterface","DataProcessor","ControlsInterface",
-		"FEInterface"};
+	std::string specialFolders[] = {
+			"FEInterfaces",
+			"DataProcessorPlugins",
+			"ControlsInterfacePlugins",
+			"FEInterfacePlugins"};
+	std::string specialMapTypes[] = {
+			CodeEditor::SPECIAL_TYPE_FEInterface,
+			CodeEditor::SPECIAL_TYPE_DataProcessor,
+			CodeEditor::SPECIAL_TYPE_ControlsInterface,
+			CodeEditor::SPECIAL_TYPE_FEInterface};
 
 	//Note: can not do lambda recursive function if using auto to declare the function,
 	//	and must capture reference to the function. Also, must capture specialFolders

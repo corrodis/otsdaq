@@ -43,8 +43,15 @@ private:
 	std::string safePathString			(const std::string& path);
 	std::string safeExtensionString		(const std::string& extension);
 
-	std::map<std::string /*special type*/,std::set<std::string> /*special file paths*/>
+public:
+
+	static std::string SPECIAL_TYPE_FEInterface, SPECIAL_TYPE_DataProcessor, SPECIAL_TYPE_ControlsInterface;
+
+	static std::map<std::string /*special type*/,std::set<std::string> /*special file paths*/>
 	getSpecialsMap						(void);
+
+	static void readFile				(const std::string& path, std::string& contents);
+	static void writeFile				(const std::string& path, const std::string& contents, const unsigned long long& insertPos = -1, const std::string& insertString = "");
 
 };
 
