@@ -16,7 +16,7 @@
 #include <array>
 
 #define __ARGS__				FEVInterface::frontEndMacroInArgs_t argsIn, FEVInterface::frontEndMacroOutArgs_t argsOut
-#define __GET_ARG_IN__(X,Y) 	getFEMacroInputArgumentValue<Y> 	(argsIn ,X)
+#define __GET_ARG_IN__(X,Y) 	getFEMacroInputArgumentValue<Y> 				(argsIn ,X)
 #define __GET_ARG_OUT__(X) 		FEVInterface::getFEMacroOutputArgument   		(argsOut,X)
 #define __SET_ARG_OUT__(X,Y) 	FEVInterface::setFEMacroOutputArgumentValue   	(argsOut,X,Y)
 
