@@ -1500,7 +1500,7 @@ void ConfigurationTree::recursiveGetCommonFields(
 //	value can be comma-separated for OR of multiple values
 std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChildren(
 		std::map<std::string /*relative-path*/, std::string /*value*/> filterMap,
-		bool byPriority) const
+		bool byPriority, bool onlyStatusTrue) const
 {
 	std::vector<std::pair<std::string,ConfigurationTree> > retVector;
 
@@ -1510,7 +1510,7 @@ std::vector<std::pair<std::string,ConfigurationTree> > ConfigurationTree::getChi
 	bool skip;
 	std::string fieldValue;
 
-	std::vector<std::string> childrenNames = getChildrenNames(byPriority);
+	std::vector<std::string> childrenNames = getChildrenNames(byPriority,onlyStatusTrue);
 	for(auto &childName : childrenNames)
 	{
 		//__COUT__ << "\tChild: " << childName << std::endl;
@@ -1623,7 +1623,8 @@ bool ConfigurationTree::isConfigurationNode(void) const
 //==============================================================================
 //getChildrenNames
 //	returns them in order encountered in the table
-std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority) const
+std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority,
+		bool onlyStatusTrue) const
 {
 	std::vector<std::string /*child name*/> retVector;
 
@@ -1644,6 +1645,9 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority) co
 		//this node is config node
 		//so return all uid node strings that match groupId
 
+
+		bool tmpStatus;
+
 		if(byPriority) //reshuffle by priority
 		{
 			try
@@ -1652,12 +1656,20 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority) co
 				std::vector<std::string /*child name*/> retPrioritySet;
 
 				unsigned int col = configView_->getColPriority();
+
 				uint64_t tmpPriority;
 
 				for(unsigned int r = 0; r<configView_->getNumberOfRows(); ++r)
 					if(groupId_ == "" ||
 							configView_->isEntryInGroup(r,childLinkIndex_,groupId_))
 					{
+						//check status if needed
+						if(onlyStatusTrue)
+						{
+							configView_->getValue(tmpStatus,r,configView_->getColStatus());
+							if(!tmpStatus) continue; //skip those with status false
+						}
+
 						configView_->getValue(tmpPriority,r,col);
 						//do not accept DEFAULT value of 0.. convert to 100
 						orderedByPriority[tmpPriority?tmpPriority:100].push_back(r);
@@ -1685,9 +1697,16 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority) co
 		for(unsigned int r = 0; r<configView_->getNumberOfRows(); ++r)
 			if(groupId_ == "" ||
 					configView_->isEntryInGroup(r,childLinkIndex_,groupId_))
-				//					groupId_ == configView_->getDataView()[r][configView_->getColLinkGroupID(
-				//							childLinkIndex_)])
+			{
+				//check status if needed
+				if(onlyStatusTrue)
+				{
+					configView_->getValue(tmpStatus,r,configView_->getColStatus());
+					if(!tmpStatus) continue; //skip those with status false
+				}
+
 				retVector.push_back(configView_->getDataView()[r][configView_->getColUID()]);
+			}
 
 	}
 	else if(row_ == ConfigurationView::INVALID)
@@ -1699,6 +1718,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority) co
 	{
 		//this node is uid node
 		//so return all link and value nodes
+
 
 		for(unsigned int c = 0; c<configView_->getNumberOfColumns(); ++c)
 			if(c == configView_->getColUID() ||  //skip UID and linkID columns (only show link column, to avoid duplicates)

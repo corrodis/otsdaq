@@ -57,7 +57,7 @@ void FEVInterfacesManager::createInterfaces(void)
 	theFENamesByPriority_ =
 			Configurable::getSelfNode().getNode(
 					"LinkToFEInterfaceConfiguration").getChildrenNames(
-							true /*byPriority*/);
+							true /*byPriority*/, true /*onlyStatusTrue*/);
 	__COUTV__(StringMacros::vectorToString(theFENamesByPriority_));
 
 	for(const auto& interface: feChildren)

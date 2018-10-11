@@ -122,7 +122,7 @@ public:
 		const std::vector<std::string> 	namesOfInputArguments_, namesOfOutputArguments_;
 		const uint8_t					requiredUserPermissions_;
 	};
-	const std::map<std::string, frontEndMacroStruct_t>&	getMapOfFEMacroFunctions() {return mapOfFEMacroFunctions_;}
+	const std::map<std::string, frontEndMacroStruct_t>&	getMapOfFEMacroFunctions(void) {return mapOfFEMacroFunctions_;}
 	//end FE Macros
 	/////////
 
