@@ -346,6 +346,7 @@ void StringMacros::getVectorFromString(const std::string& inputString,
 	bool foundLeadingDelimiter = false;
 
 	//__COUT__ << inputString << __E__;
+	//__COUTV__(inputString.length());
 
 	//go through the full string extracting elements
 	//add each found element to set

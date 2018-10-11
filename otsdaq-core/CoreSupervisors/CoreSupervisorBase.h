@@ -7,7 +7,6 @@
 
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
-#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
 #include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
 
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
@@ -114,6 +113,12 @@ protected:
     WorkLoopManager                	stateMachineWorkLoopManager_;
     toolbox::BSem                  	stateMachineSemaphore_;
     std::vector<VStateMachine*>    	theStateMachineImplementation_;
+
+    std::vector<bool>				stateMachinesIterationsDone_;
+    void							preStateMachineExecution(unsigned int i);
+    void							postStateMachineExecution(unsigned int i);
+    void							preStateMachineExecutionLoop(void);
+    void							postStateMachineExecutionLoop(void);
 
 
     RemoteWebUsers             		theRemoteWebUsers_;

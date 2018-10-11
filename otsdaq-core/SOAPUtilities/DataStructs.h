@@ -1,6 +1,8 @@
 #ifndef _ots_DataStructs_h
 #define _ots_DataStructs_h
 
+#include "otsdaq-core/Macros/CoutMacros.h"
+
 #include <set>
 #include <map>
 
@@ -48,7 +50,16 @@ public:
             names.insert(it->first);
         return names;
     }
-    const V&          getValue        (const N name) const {return theParameters_.find(name)->second;}
+    const V&          getValue        (const N name) const
+    {
+    	auto it = theParameters_.find(name);
+    	if(it == theParameters_.end())
+    	{
+    		__SS__ << "Parameter '" << name << "' not found!" << __E__;
+    		__SS_ONLY_THROW__;
+    	}
+		return it->second;
+    }
     Parameter<N,V>    getParameter    (const N name){return Parameter<N,V>(name,getValue(name));}
 
     //Setters

@@ -242,7 +242,8 @@ bool FEVInterface::slowControlsRunning(void)
 //	web interfaces. The menu consisting of all enabled FEs macros is assembled
 //	by the FE Supervisor (and its FE Interface Manager).
 void FEVInterface::registerFEMacroFunction(
-		const std::string &feMacroName, frontEndMacroFunction_t feMacroFunction,
+		const std::string &feMacroName,
+		frontEndMacroFunction_t feMacroFunction,
 		const std::vector<std::string> &namesOfInputArgs,
 		const std::vector<std::string> &namesOfOutputArgs,
 		uint8_t requiredUserPermissions)

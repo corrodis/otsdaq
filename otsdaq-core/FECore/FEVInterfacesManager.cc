@@ -48,7 +48,19 @@ void FEVInterfacesManager::createInterfaces(void)
 	destroy();
 
 	__COUT__ << "Path: "<< theConfigurationPath_+"/LinkToFEInterfaceConfiguration" << std::endl;
-	for(const auto& interface: theXDAQContextConfigTree_.getNode(theConfigurationPath_+"/LinkToFEInterfaceConfiguration").getChildren())
+
+	std::vector<std::pair<std::string,ConfigurationTree> > feChildren =
+			Configurable::getSelfNode().getNode(
+					"LinkToFEInterfaceConfiguration").getChildren();
+
+	//acquire names by priority
+	theFENamesByPriority_ =
+			Configurable::getSelfNode().getNode(
+					"LinkToFEInterfaceConfiguration").getChildrenNames(
+							true /*byPriority*/);
+	__COUTV__(StringMacros::vectorToString(theFENamesByPriority_));
+
+	for(const auto& interface: feChildren)
 	{
 		try
 		{
@@ -413,20 +425,114 @@ bool FEVInterfacesManager::allFEWorkloopsAreDone(void)
 	return allFEWorkloopsAreDone;
 }
 
+
+//========================================================================================================================
+void FEVInterfacesManager::preStateMachineExecutionLoop(void)
+{
+	VStateMachine::clearStillWorking();
+	if(VStateMachine::getIterationIndex() == 0)
+	{
+		//reset map for iterations done on first iteration
+
+		stateMachinesIterationsDone_.clear();
+		for(const auto& FEPair : theFEInterfaces_)
+			stateMachinesIterationsDone_[FEPair.first] = false; //init to not done
+	}
+	else
+		__COUTV__(VStateMachine::getIterationIndex());
+}
+
+//========================================================================================================================
+void FEVInterfacesManager::preStateMachineExecution(unsigned int i)
+{
+	if(i >= theFENamesByPriority_.size())
+	{
+		__SS__ << "FE Interface " << i << " not found!" << __E__;
+		__SS_THROW__;
+	}
+
+	const std::string& name = theFENamesByPriority_[i];
+
+	auto it = theFEInterfaces_.find(name);
+	if(it == theFEInterfaces_.end())
+	{
+		__SS__ << "FE Interface '" << name << "' not found!" << __E__;
+		__SS_THROW__;
+	}
+
+	it->second->VStateMachine::setIterationIndex(VStateMachine::getIterationIndex());
+	it->second->VStateMachine::clearStillWorking();
+
+	__COUTV__(it->second->VStateMachine::getIterationIndex());
+}
+
+//========================================================================================================================
+void FEVInterfacesManager::postStateMachineExecution(unsigned int i)
+{
+	if(i >= theFENamesByPriority_.size())
+	{
+		__SS__ << "FE Interface " << i << " not found!" << __E__;
+		__SS_THROW__;
+	}
+
+	const std::string& name = theFENamesByPriority_[i];
+
+	auto it = theFEInterfaces_.find(name);
+	if(it == theFEInterfaces_.end())
+	{
+		__SS__ << "FE Interface '" << name << "' not found!" << __E__;
+		__SS_THROW__;
+	}
+
+	bool& stateMachineDone = stateMachinesIterationsDone_[name];
+	stateMachineDone =
+			!it->second->VStateMachine::getStillWorking();
+
+	if(!stateMachineDone)
+	{
+		__COUT__ << "FE Interface '" << name << "' is still working..." << __E__;
+		VStateMachine::indicateStillWorking(); //mark not done at FEVInterfacesManager level
+	}
+}
+
+//========================================================================================================================
+void FEVInterfacesManager::postStateMachineExecutionLoop(void)
+{
+	if(!VStateMachine::getStillWorking())
+		__COUT__ << "Done configuration all state machine implementations..." << __E__;
+	else
+		__COUT__ << "Some FE Interfaces state machine implementations are still working..." << __E__;
+}
+
 //========================================================================================================================
 void FEVInterfacesManager::configure(void)
 {
-	createInterfaces();
-	for(const auto& it : theFEInterfaces_)
+	//create interfaces (the first iteration)
+	if(VStateMachine::getIterationIndex() == 0)
+		createInterfaces(); //by priority
+
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
+		const std::string& name = theFENamesByPriority_[i];
+
+		auto it = theFEInterfaces_.find(name);
+		if(it == theFEInterfaces_.end())
+		{
+			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
+			__SS_THROW__;
+		}
+
 //		if(supervisorType_ == "FER")
 //			it.second->initLocalGroup((int)local_group_comm_);
 
-		__COUT__ << "Configuring interface " << it.first << std::endl;
-		__COUT__ << "Configuring interface " << it.first << std::endl;
-		__COUT__ << "Configuring interface " << it.first << std::endl;
+		__COUT__ << "Configuring interface " << name << std::endl;
+		__COUT__ << "Configuring interface " << name << std::endl;
+		__COUT__ << "Configuring interface " << name << std::endl;
 
-		it.second->configure();
+		preStateMachineExecution(i);
+		it->second->configure();
+		postStateMachineExecution(i);
 
 		//configure slow controls and start slow controls workloop
 		//	slow controls workloop stays alive through start/stop.. and dies on halt
@@ -436,17 +542,18 @@ void FEVInterfacesManager::configure(void)
 //		if((supervisorType_ == "FEW") || (supervisorType_ == "FEWR") )
 //		{
 
-		__COUT__ << "Done configuring interface " << it.first << std::endl;
-		__COUT__ << "Done configuring interface " << it.first << std::endl;
-		__COUT__ << "Done configuring interface " << it.first << std::endl;
+		__COUT__ << "Done configuring interface " << name << std::endl;
+		__COUT__ << "Done configuring interface " << name << std::endl;
+		__COUT__ << "Done configuring interface " << name << std::endl;
 		//__SS_THROW__;
 		//	it.second->configureDetector(theConfigurationManager_->getDACStream(it.first));
 
 //		}
 	}
+	postStateMachineExecutionLoop();
 
 
-	__COUT__ << "Done Configure" << std::endl;
+	__COUT__ << "Done configuring all interfaces." << std::endl;
 }
 
 //========================================================================================================================

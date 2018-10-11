@@ -30,6 +30,18 @@ public:
     virtual void inError   (void){;}
 
 
+    void		 setIterationIndex		(unsigned int i) { iterationIndex_ = i; }
+    unsigned int getIterationIndex		(void) { return iterationIndex_; }
+    void 		 indicateStillWorking	(void) { stillWorking_ = true; }
+    void 		 clearStillWorking		(void) { stillWorking_ = false; }
+    bool		 getStillWorking		(void) { return stillWorking_; }
+
+
+private:
+    unsigned int iterationIndex_;
+    bool		 stillWorking_;
+
+
 };
 
 }

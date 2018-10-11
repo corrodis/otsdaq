@@ -557,31 +557,6 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 			))
 		return; //access failed
 
-//	uint8_t userPermissions;
-//	uint64_t uid;
-//	std::string userWithLock;
-//	std::string cookieCode = CgiDataUtilities::postData(cgiIn, "CookieCode");
-//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions,
-//			&uid, "0", 1, &userWithLock))
-//	{
-//		*out << cookieCode;
-//		return;
-//	}
-//
-//	std::string command = CgiDataUtilities::getData(cgiIn, "StateMachine");
-//
-//	//**** start LOCK GATEWAY CODE ***//
-//	std::string username = "";
-//	username = theWebUsers_.getUsersUsername(uid);
-//	if (userWithLock != "" && userWithLock != username)
-//	{
-//		*out << WebUsers::REQ_USER_LOCKOUT_RESPONSE;
-//		__SUP_COUT__ << "User " << username << " is locked out. " << userWithLock << " has lock." << __E__;
-//		return;
-//	}
-//	//**** end LOCK GATEWAY CODE ***//
-//
-//	HttpXmlDocument xmlOut(cookieCode);
 
 	std::string fsmName = CgiDataUtilities::getData(cgiIn, "fsmName");
 	std::string fsmWindowName = CgiDataUtilities::getData(cgiIn, "fsmWindowName");
@@ -1591,142 +1566,201 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 										   theStateMachine_.getCurrentStateName());
 
 	std::string command = SOAPUtilities::translate(message).getCommand();
+
 	bool proceed = true;
 	std::string reply;
+
+
+	bool iterationsDone = false;
+	std::vector<const SupervisorInfo*> orderedSupervisors =
+			allSupervisorInfo_.getOrderedSupervisorDescriptors(command);
+	std::vector<bool> supervisorIterationsDone(orderedSupervisors.size(),
+			false /*initial value*/);
+	unsigned int iteration = 0;
+
+	//send command to all supervisors (for multiple iterations) until all are done
+
+	xoap::MessageReference originalMessage = message;
+
+
 
 	__SUP_COUT__ << "=========> Broadcasting state machine command = " << command << __E__;
 
 	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
 	// Send a SOAP message to every Supervisor in order by priority
-	for (auto& it : allSupervisorInfo_.getOrderedSupervisorDescriptors(command))
+	do //while !iterationsDone
 	{
-		const SupervisorInfo& appInfo = *it;
-
-		RunControlStateMachine::theProgressBar_.step();
-
-		__SUP_COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
-			appInfo.getId() << "]: " << command << __E__;
-		__SUP_COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
-			appInfo.getId() << "]: " << command << __E__;
-		__SUP_COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
-			appInfo.getId() << "]: " << command << __E__;
-		__SUP_COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
-			appInfo.getId() << "]: " << command << __E__;
-
-		try
+		iterationsDone = true;
+		if(iteration)
 		{
-			reply = send(appInfo.getDescriptor(), message);
+			//add the iteration index as a parameter to message
+			message = originalMessage;
+			SOAPParameters parameters;
+			parameters.addParameter("iterationIndex", iteration);
+			SOAPUtilities::addParameters(message, parameters);
 		}
-		catch (const xdaq::exception::Exception &e) //due to xoap send failure
+
+		for (unsigned int i=0;i<supervisorIterationsDone.size();++i)
 		{
-			//do not kill whole system if xdaq xoap failure
-			__SUP_SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
-				appInfo.getName() << "' [LID=" <<
-				appInfo.getId() << "] in Context '" <<
-				appInfo.getContextName() << "' [URL=" <<
-				appInfo.getURL() <<
-				"].\n\n" <<
-				"Xoap message failure. Did the target Supervisor crash? Try re-initializing or restarting otsdaq." << __E__;
-			__SUP_COUT_ERR__ << ss.str();
-			__MOUT_ERR__ << ss.str();
+			if(supervisorIterationsDone[i]) continue; //skip if supervisor is already done
+			const SupervisorInfo& appInfo = *(orderedSupervisors[i]);
+
+			RunControlStateMachine::theProgressBar_.step();
+
+			if(iteration == 0)
+			{
+
+				for(unsigned int j=0;j<4;++j)
+					__SUP_COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
+					appInfo.getId() << "]: " << command << __E__;
+			}
+			else //else this not the first time through the supervisors
+			{
+				for(unsigned int j=0;j<4;++j)
+					__SUP_COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
+					appInfo.getId() << "]: " << command <<
+					" (iteration: " << iteration << ")" << __E__;
+			}
 
 			try
 			{
-				__SUP_COUT__ << "Try again.." << __E__;
 				reply = send(appInfo.getDescriptor(), message);
 			}
 			catch (const xdaq::exception::Exception &e) //due to xoap send failure
 			{
-				__SUP_COUT__ << "Failed.." << __E__;
-				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
-			}
-			__SUP_COUT__ << "2nd passed.." << __E__;
-			proceed = false;
-		}
-
-		if ((reply != command + "Done") && (reply != command + "Response") )
-		{
-			__SUP_SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
-				appInfo.getName() << "' [LID=" <<
-				appInfo.getId() << "] in Context '" <<
-				appInfo.getContextName() << "' [URL=" <<
-				appInfo.getURL() <<
-				"].\n\n" <<
-				reply;
-			__SUP_COUT_ERR__ << ss.str() << __E__;
-			__MOUT_ERR__ << ss.str() << __E__;
-
-			__SUP_COUT__ << "Getting error message..." << __E__;
-			try
-			{
-				xoap::MessageReference errorMessage = sendWithSOAPReply(appInfo.getDescriptor(),
-																		SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
-				SOAPParameters parameters;
-				parameters.addParameter("ErrorMessage");
-				SOAPMessenger::receive(errorMessage, parameters);
-
-				std::string error = parameters.getValue("ErrorMessage");
-				if (error == "")
-				{
-					std::stringstream err;
-					err << "Unknown error from Supervisor instance = '" <<
+				//do not kill whole system if xdaq xoap failure
+				__SUP_SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
 						appInfo.getName() << "' [LID=" <<
 						appInfo.getId() << "] in Context '" <<
 						appInfo.getContextName() << "' [URL=" <<
 						appInfo.getURL() <<
-						"]. If the problem persists or is repeatable, please notify admins.\n\n";
-					error = err.str();
+						"].\n\n" <<
+						"Xoap message failure. Did the target Supervisor crash? Try re-initializing or restarting otsdaq." << __E__;
+				__SUP_COUT_ERR__ << ss.str();
+				__MOUT_ERR__ << ss.str();
+
+				try
+				{
+					__SUP_COUT__ << "Try again.." << __E__;
+					reply = send(appInfo.getDescriptor(), message);
 				}
+				catch (const xdaq::exception::Exception &e) //due to xoap send failure
+				{
+					__SUP_COUT__ << "Second try failed.." << __E__;
+					XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+					proceed = false;
+				}
+				__SUP_COUT__ << "2nd try passed.." << __E__;
+			}
 
-				__SUP_SS__ << "Received error from Supervisor instance = '" <<
-					appInfo.getName() << "' [LID=" <<
-					appInfo.getId() << "] in Context '" <<
-					appInfo.getContextName() << "' [URL=" <<
-					appInfo.getURL() <<
-					"].\n\n Error Message = " << error << __E__;
-
+			if ((reply != command + "Done") && (reply != command + "Response")
+					&& (reply != command + "Working") )
+			{
+				__SUP_SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
+						appInfo.getName() << "' [LID=" <<
+						appInfo.getId() << "] in Context '" <<
+						appInfo.getContextName() << "' [URL=" <<
+						appInfo.getURL() <<
+						"].\n\n" <<
+						reply;
 				__SUP_COUT_ERR__ << ss.str() << __E__;
 				__MOUT_ERR__ << ss.str() << __E__;
 
-				if (command == "Error") continue; //do not throw exception and exit loop if informing all apps about error
-				//else throw exception and go into Error
-				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+				__SUP_COUT__ << "Getting error message..." << __E__;
+				try
+				{
+					xoap::MessageReference errorMessage = sendWithSOAPReply(appInfo.getDescriptor(),
+							SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
+					SOAPParameters parameters;
+					parameters.addParameter("ErrorMessage");
+					SOAPMessenger::receive(errorMessage, parameters);
 
-				proceed = false;
-			}
-			catch (const xdaq::exception::Exception &e) //due to xoap send failure
+					std::string error = parameters.getValue("ErrorMessage");
+					if (error == "")
+					{
+						std::stringstream err;
+						err << "Unknown error from Supervisor instance = '" <<
+								appInfo.getName() << "' [LID=" <<
+								appInfo.getId() << "] in Context '" <<
+								appInfo.getContextName() << "' [URL=" <<
+								appInfo.getURL() <<
+								"]. If the problem persists or is repeatable, please notify admins.\n\n";
+						error = err.str();
+					}
+
+					__SUP_SS__ << "Received error from Supervisor instance = '" <<
+							appInfo.getName() << "' [LID=" <<
+							appInfo.getId() << "] in Context '" <<
+							appInfo.getContextName() << "' [URL=" <<
+							appInfo.getURL() <<
+							"].\n\n Error Message = " << error << __E__;
+
+					__SUP_COUT_ERR__ << ss.str() << __E__;
+					__MOUT_ERR__ << ss.str() << __E__;
+
+					if (command == "Error") continue; //do not throw exception and exit loop if informing all apps about error
+					//else throw exception and go into Error
+					XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+
+					proceed = false;
+				}
+				catch (const xdaq::exception::Exception &e) //due to xoap send failure
+				{
+					//do not kill whole system if xdaq xoap failure
+					__SUP_SS__ << "Error! Gateway Supervisor failed to read error message from Supervisor instance = '" <<
+							appInfo.getName() << "' [LID=" <<
+							appInfo.getId() << "] in Context '" <<
+							appInfo.getContextName() << "' [URL=" <<
+							appInfo.getURL() <<
+							"].\n\n" <<
+							"Xoap message failure. Did the target Supervisor crash? Try re-initializing or restarting otsdaq." << __E__;
+					__SUP_COUT_ERR__ << ss.str();
+					__MOUT_ERR__ << ss.str();
+					XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+
+					proceed = false;
+				}
+			} //end error response handling
+			else if(reply == command + "Working")
 			{
-				//do not kill whole system if xdaq xoap failure
-				__SUP_SS__ << "Error! Gateway Supervisor failed to read error message from Supervisor instance = '" <<
-					appInfo.getName() << "' [LID=" <<
-					appInfo.getId() << "] in Context '" <<
-					appInfo.getContextName() << "' [URL=" <<
-					appInfo.getURL() <<
-					"].\n\n" <<
-					"Xoap message failure. Did the target Supervisor crash? Try re-initializing or restarting otsdaq." << __E__;
-				__SUP_COUT_ERR__ << ss.str();
-				__MOUT_ERR__ << ss.str();
-				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+				iterationsDone = false;
+				__SUP_COUT__ << "Supervisor instance = '" <<
+						appInfo.getName() << "' [LID=" <<
+						appInfo.getId() << "] in Context '" <<
+						appInfo.getContextName() << "' [URL=" <<
+						appInfo.getURL() <<
+						"] is still " << command <<
+						"'ing... (iteration: " << iteration << ")" << __E__;
 
-				proceed = false;
+			} //end still working response handling
+			else //else success response
+			{
+				supervisorIterationsDone[i] = true;
+				__SUP_COUT__ << "Supervisor instance = '" <<
+						appInfo.getName() << "' [LID=" <<
+						appInfo.getId() << "] in Context '" <<
+						appInfo.getContextName() << "' [URL=" <<
+						appInfo.getURL() <<
+						"] was " << command << "'d correctly!" << __E__;
 			}
-		}
-		else
-		{
-			__SUP_COUT__ << "Supervisor instance = '" <<
-				appInfo.getName() << "' [LID=" <<
-				appInfo.getId() << "] in Context '" <<
-				appInfo.getContextName() << "' [URL=" <<
-				appInfo.getURL() <<
-				"] was " << command << "'d correctly!" << __E__;
-		}
+
+			if (!proceed)
+			{
+				__SUP_COUT__ << "Breaking out of secondary loop." << __E__;
+				break;
+			}
+		} //end main supervisor broadcast loop
 
 		if (!proceed)
 		{
-			__SUP_COUT__ << "Breaking out of loop." << __E__;
+			__SUP_COUT__ << "Breaking out of primary loop." << __E__;
 			break;
 		}
-	}
+
+		++iteration;
+		if(iteration) __SUP_COUTV__(iteration);
+
+	} while(!iterationsDone);
 
 	RunControlStateMachine::theProgressBar_.step();
 
@@ -2078,31 +2112,6 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 			))
 		return; //access failed
 
-
-
-//	//**** start LOGIN GATEWAY CODE ***//
-//	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers optionally for uint8_t userPermissions, uint64_t userInfo.uid_
-//	//Else, error message is returned in cookieCode
-//	//Notes: cookie code not refreshed if RequestType = getSystemMessages
-//	std::string cookieCode = CgiDataUtilities::postData(cgiIn, "CookieCode");
-//	uint8_t userPermissions;
-//	uint64_t userInfo.uid_;
-//	std::string userWithLock;
-//	bool refreshCookie = requestType != "getSystemMessages" &&
-//			requestType != "getCurrentState" &&
-//			requestType != "gatewayLaunchOTS" &&
-//			requestType != "gatewayLaunchWiz";
-//
-//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions,
-//			&userInfo.uid_, "0",
-//			refreshCookie,
-//			&userWithLock))
-//	{
-//		*out << cookieCode;
-//		return;
-//	}
-
-	//**** end LOGIN GATEWAY CODE ***//
 
 	//RequestType Commands:
 	//getSettings
@@ -2717,57 +2726,6 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 			launchStartOTSCommand("LAUNCH_OTS");
 		else if(requestType == "gatewayLaunchWiz")
 			launchStartOTSCommand("LAUNCH_WIZ");
-
-		//			__SUP_COUT__ << "Extracting target context hostnames... " << __E__;
-		//			std::vector<std::string> hostnames;
-		//			try
-		//			{
-		//				CorePropertySupervisorBase::theConfigurationManager_->init(); //completely reset to re-align with any changes
-		//
-		//				const XDAQContextConfiguration* contextConfiguration = CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
-		//
-		//				auto contexts = contextConfiguration->getContexts();
-		//				unsigned int i,j;
-		//				for(const auto& context: contexts)
-		//				{
-		//					if(!context.status_) continue;
-		//
-		//					//find last slash
-		//					j=0; //default to whole string
-		//					for(i=0;i<context.address_.size();++i)
-		//						if(context.address_[i] == '/')
-		//							j = i+1;
-		//					hostnames.push_back(context.address_.substr(j));
-		//					__SUP_COUT__ << "hostname = " << hostnames.back() << __E__;
-		//				}
-		//			}
-		//			catch(...)
-		//			{
-		//				__SUP_SS__ << "\nRelaunch of otsdaq interrupted! " <<
-		//						"The Configuration Manager could not be initialized." << __E__;
-		//
-		//				__SUP_COUT_ERR__ << "\n" << ss.str();
-		//				return;
-		//			}
-		//
-		//			for(const auto& hostname: hostnames)
-		//			{
-		//				std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) +
-		//						"/StartOTS_action_" + hostname + ".cmd");
-		//				FILE* fp = fopen(fn.c_str(),"w");
-		//				if(fp)
-		//				{
-		//					if(requestType == "gatewayLaunchOTS")
-		//						fprintf(fp,"LAUNCH_OTS");
-		//					else if(requestType == "gatewayLaunchWiz")
-		//						fprintf(fp,"LAUNCH_WIZ");
-		//
-		//					fclose(fp);
-		//				}
-		//				else
-		//					__SUP_COUT_ERR__ << "Unable to open requestType file: " << fn << __E__;
-		//			}
-
 	}
 	else if(requestType == "resetUserTooltips")
 	{

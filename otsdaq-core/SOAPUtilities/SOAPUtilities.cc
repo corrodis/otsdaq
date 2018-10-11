@@ -1,5 +1,5 @@
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
-#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
+
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
 
@@ -52,7 +52,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 //========================================================================================================================
 xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string command, SOAPParameters parameters)
 {
-    //std::cout << __COUT_HDR_FL__ << "Command: " << command << " par size: " << parameters.size() << std::endl;
+    //__COUT__ << "Command: " << command << " par size: " << parameters.size() << std::endl;
     if(parameters.size() == 0)
         return makeSOAPMessageReference(command);
     xoap::MessageReference message       = xoap::createMessage();
@@ -73,7 +73,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 //========================================================================================================================
 xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string command, std::string fileName)
 {
-    std::cout << __COUT_HDR_FL__ << "SOAP XML file path : " << fileName << std::endl;
+    __COUT__ << "SOAP XML file path : " << fileName << std::endl;
     xoap::MessageReference message  = xoap::createMessage();
     xoap::SOAPPart         soap     = message->getSOAPPart();
     xoap::SOAPEnvelope     envelope = soap.getEnvelope();
@@ -92,7 +92,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 //========================================================================================================================
 void SOAPUtilities::addParameters(xoap::MessageReference& message, SOAPParameters parameters)
 {
-    std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "adding parameters!!!!!!" << std::endl;
+    __COUT__ << "adding parameters!!!!!!" << std::endl;
     if(parameters.size() == 0) return;
     xoap::SOAPEnvelope     envelope      = message->getSOAPPart().getEnvelope();
     xoap::SOAPBody         body          = envelope.getBody();

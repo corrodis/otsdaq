@@ -339,33 +339,110 @@ void CoreSupervisorBase::enteringError (toolbox::Event::Reference e)
 
 }
 
+
+//========================================================================================================================
+void CoreSupervisorBase::preStateMachineExecutionLoop(void)
+{
+	RunControlStateMachine::clearStillWorking();
+	if(RunControlStateMachine::getIterationIndex() == 0)
+	{
+		//reset vector for iterations done on first iteration
+
+		stateMachinesIterationsDone_.resize(theStateMachineImplementation_.size());
+		for(unsigned int i=0;i<stateMachinesIterationsDone_.size();++i)
+			stateMachinesIterationsDone_[i] = false;
+	}
+	else
+		__SUP_COUTV__(RunControlStateMachine::getIterationIndex());
+}
+
+//========================================================================================================================
+void CoreSupervisorBase::preStateMachineExecution(unsigned int i)
+{
+	if(i >= theStateMachineImplementation_.size())
+	{
+		__SS__ << "State Machine " << i << " not found!" << __E__;
+		__SS_THROW__;
+	}
+
+	theStateMachineImplementation_[i]->VStateMachine::setIterationIndex(
+			RunControlStateMachine::getIterationIndex());
+	theStateMachineImplementation_[i]->VStateMachine::clearStillWorking();
+
+	__COUTV__(theStateMachineImplementation_[i]->VStateMachine::getIterationIndex());
+}
+
+//========================================================================================================================
+void CoreSupervisorBase::postStateMachineExecution(unsigned int i)
+{
+	if(i >= theStateMachineImplementation_.size())
+	{
+		__SS__ << "State Machine " << i << " not found!" << __E__;
+		__SS_THROW__;
+	}
+
+	stateMachinesIterationsDone_[i] =
+			!theStateMachineImplementation_[i]->VStateMachine::getStillWorking();
+
+	if(!stateMachinesIterationsDone_[i])
+	{
+		__SUP_COUT__ << "State machine " << i << " is still working..." << __E__;
+		RunControlStateMachine::indicateStillWorking(); //mark not done at CoreSupervisorBase level
+	}
+}
+
+//========================================================================================================================
+void CoreSupervisorBase::postStateMachineExecutionLoop(void)
+{
+	if(!RunControlStateMachine::stillWorking_)
+		__SUP_COUT__ << "Done configuration all state machine implementations..." << __E__;
+	else
+		__SUP_COUT__ << "Some state machine implementations are still working..." << __E__;
+}
+
 //========================================================================================================================
 void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 
 {
 	__SUP_COUT__ << "transitionConfiguring" << std::endl;
 
-	std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup(
-			SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
-			getParameters().getValue("ConfigurationGroupName"),
-			ConfigurationGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
-					getParameters().getValue("ConfigurationGroupKey")));
+	//activate the configuration tree (the first iteration)
+	if(RunControlStateMachine::getIterationIndex() == 0)
+	{
+		std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup(
+				SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
+				getParameters().getValue("ConfigurationGroupName"),
+				ConfigurationGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
+						getParameters().getValue("ConfigurationGroupKey")));
 
-	__SUP_COUT__ << "Configuration group name: " << theGroup.first << " key: " <<
-			theGroup.second << std::endl;
+		__SUP_COUT__ << "Configuration group name: " << theGroup.first << " key: " <<
+				theGroup.second << std::endl;
 
-	theConfigurationManager_->loadConfigurationGroup(
-			theGroup.first,
-			theGroup.second, true);
+		theConfigurationManager_->loadConfigurationGroup(
+				theGroup.first,
+				theGroup.second, true);
+	}
 
-	//Now that the configuration manager has all the necessary configurations, create all objects that depend on the configuration
+	//Now that the configuration manager has all the necessary configurations,
+	//	create all objects that depend on the configuration (the first iteration)
 
 	try
 	{
+
+
 		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
-		for(auto& it: theStateMachineImplementation_)
-			it->configure();
-		__SUP_COUT__ << "Done configuration all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
+		{
+			if(stateMachinesIterationsDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->configure(); //e.g. for FESupervisor, this is configure of FEVInterfacesManager
+			postStateMachineExecution(i);
+		}
+		postStateMachineExecutionLoop();
+
+
 	}
 	catch(const std::runtime_error& e)
 	{
@@ -380,19 +457,8 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 				__FUNCTION__ /*function*/
 				);
 	}
-	catch(...)//const toolbox::fsm::exception::Exception& e)
+	catch(...)
 	{
-//		__SUP_SS__ << "Error was caught while configuring: " << e.what() << std::endl;
-//		__SUP_COUT_ERR__ << "\n" << ss.str();
-//		theStateMachine_.setErrorMessage(ss.str());
-//		throw toolbox::fsm::exception::Exception(
-//				"Transition Error" /*name*/,
-//				ss.str() /* message*/,
-//				"CoreSupervisorBase::transitionConfiguring" /*module*/,
-//				__LINE__ /*line*/,
-//				__FUNCTION__ /*function*/
-//		);
-
 		__SUP_SS__ << "Unknown error was caught while configuring. Please checked the logs." << __E__;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
@@ -403,10 +469,8 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 				__LINE__ /*line*/,
 				__FUNCTION__ /*function*/
 		);
-
 	}
-
-}
+} //end transitionConfiguring()
 
 //========================================================================================================================
 //transitionHalting

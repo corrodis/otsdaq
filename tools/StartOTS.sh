@@ -191,9 +191,9 @@ fi
 # can not come from action file because individual StartOTS scripts need to respond to that one.
 # The gateway supervisor StartOTS script drives the quit file.
 
-OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${HOSTNAME}.cmd"
-OTSDAQ_STARTOTS_QUIT_FILE="${USER_DATA}/ServiceData/StartOTS_action_quit.cmd"
-OTSDAQ_STARTOTS_LOCAL_QUIT_FILE=".StartOTS_action_quit.cmd"
+OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${HOSTNAME}.cmd" #the targeted hostname action script gives commands to StartOTS scripts running on that host
+OTSDAQ_STARTOTS_QUIT_FILE="${USER_DATA}/ServiceData/StartOTS_action_quit.cmd" #the global quit gives exit commonds to the non-gateway StartOTS scripts
+OTSDAQ_STARTOTS_LOCAL_QUIT_FILE=".StartOTS_action_quit.cmd" #the local quit is used to remove other StartOTS calls from the same directory (it catches the case when switching USER_DATA paths)
 
 echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tScript path              = ${SCRIPT_DIR}/StartOTS.sh         "
 echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tStartOTS_action path     = ${OTSDAQ_STARTOTS_ACTION_FILE}    "
@@ -958,7 +958,7 @@ export -f printMainURL
 #########################################################
 otsActionHandler() {
 
-        echo		
+    echo		
 	echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Starting action handler...${Reset}"
 
 	#clear file initially
@@ -980,7 +980,7 @@ otsActionHandler() {
 		sleep 10 #non masters sleep for a while, to give time to quit stale scripts
 	fi	
 		
-	FIRST_TIME=1
+	FIRST_TIME=1 #to enable url printouts
 	
 	
 	
@@ -1086,12 +1086,12 @@ otsActionHandler() {
 			
 		elif [[ "$OTSDAQ_STARTOTS_ACTION" != "0"  || "$OTSDAQ_STARTOTS_QUIT" != "0"  || "$OTSDAQ_STARTOTS_LOCAL_QUIT" != "0" ]]; then
 		
-			echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExiting StartOTS.sh.. Unrecognized command !=0 in ${OTSDAQ_STARTOTS_ACTION}-${OTSDAQ_STARTOTS_QUIT}-${OTSDAQ_STARTOTS_LOCAL_QUIT}"			
+			echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExiting StartOTS.sh.. Unrecognized command !=0 in Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"			
 			exit
 			
 		fi
 		
-		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
+		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE #clear the command in the file; it has been responded to
 		sleep 1
 	done
 

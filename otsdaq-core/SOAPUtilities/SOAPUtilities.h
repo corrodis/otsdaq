@@ -3,12 +3,12 @@
 
 #include <xoap/MessageReference.h>
 
+#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
+
 #include <string>
 
 namespace ots
 {
-class SOAPCommand;
-class SOAPParameters;
 
 class SOAPUtilities
 {

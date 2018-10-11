@@ -64,7 +64,14 @@ protected:
 private:
 
 
-    std::map<std::string /*name*/, std::unique_ptr<FEVInterface> > theFEInterfaces_;
+    std::map<std::string /*name*/, std::unique_ptr<FEVInterface> > 	theFEInterfaces_;
+    std::vector<std::string /*name*/> 								theFENamesByPriority_;
+
+    std::map<std::string /*name*/, bool /*isDone*/ > 				stateMachinesIterationsDone_;
+    void							preStateMachineExecution		(unsigned int i);
+    void							postStateMachineExecution		(unsigned int i);
+    void							preStateMachineExecutionLoop	(void);
+    void							postStateMachineExecutionLoop	(void);
 
 };
 
