@@ -84,7 +84,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 				retParameters.addParameter("FEList",
 					theFEInterfacesManager->getFEListString(
 						std::to_string(getApplicationDescriptor()->getLocalId())));
-			else
+			else //if no FE interfaces, return empty string
 				retParameters.addParameter("FEList", "");
 
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response",
@@ -292,8 +292,10 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 		else if (request == "GetInterfaceMacros")
 		{
 			if (theFEInterfacesManager)
-				retParameters.addParameter("FEMacros", theFEInterfacesManager->getFEMacrosString(
-					std::to_string(getApplicationDescriptor()->getLocalId())));
+				retParameters.addParameter("FEMacros",
+						theFEInterfacesManager->getFEMacrosString(
+								supervisorApplicationUID_,
+								std::to_string(getApplicationDescriptor()->getLocalId())));
 			else
 				retParameters.addParameter("FEMacros", "");
 

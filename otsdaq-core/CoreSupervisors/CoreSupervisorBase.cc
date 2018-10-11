@@ -1,9 +1,5 @@
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 
-//#include "otsdaq-core/Singleton/Singleton.h"
-//#include "otsdaq-core/FECore/FEVInterfacesManager.h"
-
-
 
 #include <iostream>
 
@@ -25,11 +21,7 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 		CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" + CorePropertySupervisorBase::supervisorApplicationUID_)
 , stateMachineWorkLoopManager_  (toolbox::task::bind(this, &CoreSupervisorBase::stateMachineThread, "StateMachine"))
 , stateMachineSemaphore_        (toolbox::BSem::FULL)
-//, theConfigurationManager_      (new ConfigurationManager)//(Singleton<ConfigurationManager>::getInstance()) //I always load the full config but if I want to load a partial configuration (new ConfigurationManager)
-//, supervisorClass_              (getApplicationDescriptor()->getClassName())
-//, supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 , theRemoteWebUsers_ 			(this)
-//, propertiesAreSetup_			(false)
 {
 	INIT_MF("CoreSupervisorBase");
 
@@ -42,7 +34,6 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 
 	xoap::bind(this, &CoreSupervisorBase::stateMachineStateRequest,    		"StateMachineStateRequest",    		XDAQ_NS_URI );
 	xoap::bind(this, &CoreSupervisorBase::stateMachineErrorMessageRequest,  "StateMachineErrorMessageRequest",  XDAQ_NS_URI );
-	//xoap::bind(this, &CoreSupervisorBase::macroMakerSupervisorRequest, 		"MacroMakerSupervisorRequest", 		XDAQ_NS_URI ); //moved to only FESupervisor!
 	xoap::bind(this, &CoreSupervisorBase::workLoopStatusRequestWrapper, 	"WorkLoopStatusRequest",    		XDAQ_NS_URI );
 
 	return;

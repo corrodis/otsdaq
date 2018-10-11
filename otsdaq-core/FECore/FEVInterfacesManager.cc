@@ -165,10 +165,11 @@ void FEVInterfacesManager::universalWrite(const std::string &interfaceID, char* 
 
 //========================================================================================================================
 //getFEListString
-//	returns string with each new line indicating the macros for a FE
+//	returns string with each new line for each FE
 //	each line:
 //		<interface type>:<parent supervisor lid>:<interface UID>
-std::string FEVInterfacesManager::getFEListString(const std::string &supervisorLid)
+std::string FEVInterfacesManager::getFEListString(
+		const std::string &supervisorLid)
 {
 	std::string retList = "";
 
@@ -177,8 +178,8 @@ std::string FEVInterfacesManager::getFEListString(const std::string &supervisorL
 	  __COUT__ << "FE name = " << it.first << std::endl;
 
 	  retList += it.second->getInterfaceType() +
-			  ":" + supervisorLid + ":" +
-			  it.second->getInterfaceUID() + "\n";
+			  ":" + supervisorLid +
+			  ":" + it.second->getInterfaceUID() + "\n";
 	}
 	return retList;
 }
@@ -365,10 +366,12 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 //getFEMacrosString
 //	returns string with each new line indicating the macros for a FE
 //	each line:
-//		<interface type>:<parent supervisor lid>:<interface UID>
+//		<parent supervisor name>:<parent supervisor lid>:<interface type>:<interface UID>
 //		:<macro name>:<macro permissions req>:<macro num of inputs>:...<input names : separated>...
 //		:<macro num of outputs>:...<output names : separated>...
-std::string FEVInterfacesManager::getFEMacrosString(const std::string &supervisorLid)
+std::string FEVInterfacesManager::getFEMacrosString(
+		const std::string &supervisorName,
+		const std::string &supervisorLid)
 {
 	std::string retList = "";
 
@@ -376,9 +379,10 @@ std::string FEVInterfacesManager::getFEMacrosString(const std::string &superviso
 	{
 		  __COUT__ << "FE interface UID = " << it.first << std::endl;
 
-	  retList += it.second->getInterfaceType() +
-			  ":" + supervisorLid + ":" +
-			  it.second->getInterfaceUID();
+	  retList += supervisorName +
+			  ":" + supervisorLid +
+			  ":" + it.second->getInterfaceType() +
+			  ":" + it.second->getInterfaceUID();
 
 	  for(const auto& macroPair : it.second->getMapOfFEMacroFunctions())
 	  {

@@ -74,8 +74,6 @@ private:
 
 public:
 
-    //bool					loginGateway					(xgi::Input* in, xgi::Output* out);
-
     //State Machine request handlers
     void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out ) ;
     void 			        stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out ) ;

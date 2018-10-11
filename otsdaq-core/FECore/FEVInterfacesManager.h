@@ -42,7 +42,7 @@ public:
     int					universalRead	 					(const std::string &interfaceID, char* address, char* returnValue); //used by MacroMaker
     void 			    universalWrite	  					(const std::string &interfaceID, char* address, char* writeValue); //used by MacroMaker
     std::string  	    getFEListString						(const std::string &supervisorLid);	//used by MacroMaker
-    std::string  	    getFEMacrosString					(const std::string &supervisorLid);	//used by MacroMaker
+    std::string  	    getFEMacrosString					(const std::string &supervisorName, const std::string &supervisorLid);	//used by MacroMaker
     void		  	    runFEMacro							(const std::string &interfaceID, const std::string &feMacroName, const std::string &inputArgs, std::string &outputArgs);	//used by MacroMaker
     unsigned int		getInterfaceUniversalAddressSize	(const std::string &interfaceID); 	//used by MacroMaker
     unsigned int		getInterfaceUniversalDataSize		(const std::string &interfaceID);	//used by MacroMaker
