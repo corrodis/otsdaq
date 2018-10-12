@@ -30,16 +30,21 @@ public:
     virtual void inError   (void){;}
 
 
-    void		 setIterationIndex		(unsigned int i) { iterationIndex_ = i; }
-    unsigned int getIterationIndex		(void) { return iterationIndex_; }
-    void 		 indicateStillWorking	(void) { stillWorking_ = true; }
-    void 		 clearStillWorking		(void) { stillWorking_ = false; }
-    bool		 getStillWorking		(void) { return stillWorking_; }
+    void		 						setIterationIndex			(unsigned int i) { iterationIndex_ = i; }
+    void		 						setSubIterationIndex		(unsigned int i) { subIterationIndex_ = i; }
+    unsigned int 						getIterationIndex			(void) { return iterationIndex_; }
+    unsigned int 						getSubIterationIndex		(void) { return subIterationIndex_; }
+    void 		 						indicateIterationWork		(void) { iterationWorkFlag_ = true; }
+    void 		 						clearIterationWork			(void) { iterationWorkFlag_ = false; }
+    bool		 						getIterationWork			(void) { return iterationWorkFlag_; }
+    void 								indicateSubIterationWork	(void) { subIterationWorkFlag_ = true; }
+    void 								clearSubIterationWork		(void) { subIterationWorkFlag_ = false; }
+    bool								getSubIterationWork			(void) { return subIterationWorkFlag_; }
 
 
 private:
-    unsigned int iterationIndex_;
-    bool		 stillWorking_;
+    unsigned int iterationIndex_, subIterationIndex_;
+    bool		 iterationWorkFlag_, subIterationWorkFlag_;
 
 
 };

@@ -260,7 +260,8 @@ xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::Ap
 		message->writeTo(mystring);
 		//__COUT__<< mystring << std::endl;
 
-		xoap::MessageReference reply = theApplication_->getApplicationContext()->postSOAP(message,
+		xoap::MessageReference reply = theApplication_->getApplicationContext()->postSOAP(
+				message,
 				*(theApplication_->getApplicationDescriptor()),
 				*d);
 		return reply;

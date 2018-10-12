@@ -115,9 +115,13 @@ public:
 
 
     unsigned int						getIterationIndex			(void) { return iterationIndex_;}
-    void 								indicateStillWorking		(void) { stillWorking_ = true; }
-    void 								clearStillWorking			(void) { stillWorking_ = false; }
-    bool								getStillWorking				(void) { return stillWorking_; }
+    unsigned int						getSubIterationIndex		(void) { return subIterationIndex_;}
+    void 								indicateIterationWork		(void) { iterationWorkFlag_ = true; }
+    void 								clearIterationWork			(void) { iterationWorkFlag_ = false; }
+    bool								getIterationWork				(void) { return iterationWorkFlag_; }
+    void 								indicateSubIterationWork		(void) { subIterationWorkFlag_ = true; }
+    void 								clearSubIterationWork			(void) { subIterationWorkFlag_ = false; }
+    bool								getSubIterationWork			(void) { return subIterationWorkFlag_; }
 
 
 protected:
@@ -126,11 +130,13 @@ protected:
     std::string        		stateMachineName_;
 
 
-	unsigned int			iterationIndex_;
-	bool					stillWorking_;
+	unsigned int			iterationIndex_, subIterationIndex_;
+	bool					iterationWorkFlag_, subIterationWorkFlag_;
 
 	toolbox::fsm::State		lastIterationState_;
 	std::string				lastIterationCommand_;
+	std::string				lastIterationResult_;
+	unsigned int			lastIterationIndex_, lastSubIterationIndex_;
 
 	std::map<toolbox::fsm::State, std::map<std::string,
 			void (RunControlStateMachine::*)(toolbox::Event::Reference), std::less<std::string> > >	stateTransitionFunctionTable_;

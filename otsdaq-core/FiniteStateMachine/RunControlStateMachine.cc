@@ -131,7 +131,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 		xoap::MessageReference message)
 
 {
-	__COUT__ << SOAPUtilities::translate(message) << std::endl;
+	__COUT__ << "Received... " << SOAPUtilities::translate(message) << std::endl;
 
 	theStateMachine_.setErrorMessage(""); //clear error message
 
@@ -148,9 +148,49 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 		__COUT__ << "Defaulting iteration index to 0." << __E__;
 		iterationIndex_ = 0;
 	}
+	//get subIteration index
+	try
+	{
+		 StringMacros::getNumber(SOAPUtilities::translate(message).getParameters().getValue(
+					"subIterationIndex"), subIterationIndex_);
+	}
+	catch(...) //ignore errors and set subIteration index to 0
+	{
+		__COUT__ << "Defaulting subIterationIndex_ index to 0." << __E__;
+		subIterationIndex_ = 0;
+	}
+
+	//get retransmission indicator
+	try
+	{
+		if(SOAPUtilities::translate(message).getParameters().getValue(
+				"retransmission") == "1")
+		{
+			//handle retransmission
+
+			//attempt to stop an error if last command was same
+			if(lastIterationCommand_ == command &&
+					lastIterationIndex_ == iterationIndex_ &&
+					lastSubIterationIndex_ == subIterationIndex_)
+			{
+				__COUT__ << "Assuming a timeout occurred at Gateway waiting for a response. " <<
+						"Attempting to avoid error, by giving last result for command '" <<
+						command << "': " <<
+						lastIterationResult_ << __E__;
+				return SOAPUtilities::makeSOAPMessageReference(lastIterationResult_);
+			}
+			else
+				__COUT__ << "Looks like Gateway command '" << command <<
+					"' was lost - attempting to handle retransmission." << __E__;
+		}
+	}
+	catch(...) //ignore errors for retransmission indicator (assume it is not a retransmission)
+	{;}
+	lastIterationIndex_ = iterationIndex_;
+	lastSubIterationIndex_ =  subIterationIndex_;
 
 	std::string currentState;
-	if(iterationIndex_ == 0)
+	if(iterationIndex_ == 0 && subIterationIndex_ == 0)
 	{
 		//this is the first iteration attempt for this transition
 		theProgressBar_.reset(command,stateMachineName_);
@@ -162,13 +202,16 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	{
 		currentState = theStateMachine_.getStateName(lastIterationState_);
 
-		__COUT__ << "Iteration index " << iterationIndex_ << " for " << stateMachineName_ << " from " <<
+		__COUT__ << "Iteration index " << iterationIndex_ << "." <<
+				subIterationIndex_ << " for " <<
+				stateMachineName_ << " from " <<
 				currentState << " attempting to " << command << std::endl;
 	}
 
 	RunControlStateMachine::theProgressBar_.step();
 
 	std::string result = command + "Done";
+	lastIterationResult_ = result;
 
 	//if error is received, immediately go to fail state
 	//	likely error was sent by central FSM or external xoap
@@ -209,10 +252,12 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	//handle normal transitions here
 	try
 	{
-		stillWorking_ = false;
-		if(iterationIndex_)
+		iterationWorkFlag_ = false;
+		subIterationWorkFlag_ = false;
+		if(iterationIndex_ || subIterationIndex_)
 		{
-			__COUT__ << command << " iteration " <<  iterationIndex_ << __E__;
+			__COUT__ << command << " iteration " <<  iterationIndex_ <<
+					"." << subIterationIndex_ << __E__;
 			toolbox::Event::Reference event(new toolbox::Event(command, this));
 
 
@@ -253,10 +298,15 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 
 		}
 
-		if(stillWorking_)
+		if(subIterationWorkFlag_) //'Stalling' has priority over 'Working'
 		{
-			__COUTV__(stillWorking_);
-			result = command + "Working"; //indicate still working back to Gateway
+			__COUTV__(subIterationWorkFlag_);
+			result = command + "SubIterate"; //indicate still stalling back to Gateway
+		}
+		else if(iterationWorkFlag_)
+		{
+			__COUTV__(iterationWorkFlag_);
+			result = command + "Iterate"; //indicate still iterating back to Gateway
 		}
 	}
 	catch(toolbox::fsm::exception::Exception& e)
@@ -294,11 +344,12 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 
 	RunControlStateMachine::theProgressBar_.step();
 
-	if(!stillWorking_)
+	if(!iterationWorkFlag_)
 		theProgressBar_.complete();
 
 	__COUT__ << "Ending state for " << stateMachineName_ << " is " << currentState << std::endl;
 	__COUT__ << "result = " << result << std::endl;
+	lastIterationResult_ = result;
 	return SOAPUtilities::makeSOAPMessageReference(result);
 }
 

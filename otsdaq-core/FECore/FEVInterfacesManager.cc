@@ -427,24 +427,33 @@ bool FEVInterfacesManager::allFEWorkloopsAreDone(void)
 	}
 
 	return allFEWorkloopsAreDone;
-}
+} //end allFEWorkloopsAreDone()
 
 
 //========================================================================================================================
 void FEVInterfacesManager::preStateMachineExecutionLoop(void)
 {
-	VStateMachine::clearStillWorking();
-	if(VStateMachine::getIterationIndex() == 0)
+	VStateMachine::clearIterationWork();
+	VStateMachine::clearSubIterationWork();
+
+	stateMachinesIterationWorkCount_ = 0;
+
+	if(VStateMachine::getIterationIndex() == 0 &&
+			VStateMachine::getSubIterationIndex() == 0)
 	{
 		//reset map for iterations done on first iteration
 
-		stateMachinesIterationsDone_.clear();
+		subIterationWorkStateMachineIndex_ = -1; //clear sub iteration work index
+
+		stateMachinesIterationDone_.clear();
 		for(const auto& FEPair : theFEInterfaces_)
-			stateMachinesIterationsDone_[FEPair.first] = false; //init to not done
+			stateMachinesIterationDone_[FEPair.first] = false; //init to not done
 	}
 	else
-		__COUTV__(VStateMachine::getIterationIndex());
-}
+		__COUT__ << "Iteration " << VStateMachine::getIterationIndex() <<
+			"." << VStateMachine::getSubIterationIndex() <<
+			"(" << subIterationWorkStateMachineIndex_ << ")" << __E__;
+} //end preStateMachineExecutionLoop()
 
 //========================================================================================================================
 void FEVInterfacesManager::preStateMachineExecution(unsigned int i)
@@ -464,18 +473,25 @@ void FEVInterfacesManager::preStateMachineExecution(unsigned int i)
 		__SS_THROW__;
 	}
 
-	it->second->VStateMachine::setIterationIndex(VStateMachine::getIterationIndex());
-	it->second->VStateMachine::clearStillWorking();
+	it->second->VStateMachine::setIterationIndex(
+			VStateMachine::getIterationIndex());
+	it->second->VStateMachine::setSubIterationIndex(
+			VStateMachine::getSubIterationIndex());
 
-	__COUTV__(it->second->VStateMachine::getIterationIndex());
-}
+	it->second->VStateMachine::clearIterationWork();
+	it->second->VStateMachine::clearSubIterationWork();
+
+	__COUT__ << "theStateMachineImplementation Iteration " <<
+			it->second->VStateMachine::getIterationIndex() <<
+		"." << it->second->VStateMachine::getSubIterationIndex() << __E__;
+} //end preStateMachineExecution()
 
 //========================================================================================================================
 void FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 {
 	if(i >= theFENamesByPriority_.size())
 	{
-		__SS__ << "FE Interface " << i << " not found!" << __E__;
+		__SS__ << "FE Interface index " << i << " not found!" << __E__;
 		__SS_THROW__;
 	}
 
@@ -488,36 +504,58 @@ void FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 		__SS_THROW__;
 	}
 
-	bool& stateMachineDone = stateMachinesIterationsDone_[name];
-	stateMachineDone =
-			!it->second->VStateMachine::getStillWorking();
-
-	if(!stateMachineDone)
+	//'Stalling' has priority
+	if(it->second->VStateMachine::getSubIterationWork())
 	{
-		__COUT__ << "FE Interface '" << name << "' is still working..." << __E__;
-		VStateMachine::indicateStillWorking(); //mark not done at FEVInterfacesManager level
+		subIterationWorkStateMachineIndex_ = i;
+		VStateMachine::indicateSubIterationWork();
+
+		__COUT__ << "FE Interface '" << name << "' is stalling..." << __E__;
 	}
-}
+	else
+	{
+		bool& stateMachineDone = stateMachinesIterationDone_[name];
+			stateMachineDone =
+					!it->second->VStateMachine::getIterationWork();
+
+
+		if(!stateMachineDone)
+		{
+			__COUT__ << "FE Interface '" << name << "' is still working..." << __E__;
+					VStateMachine::indicateIterationWork(); //mark not done at FEVInterfacesManager level
+			++stateMachinesIterationWorkCount_; //increment still working count
+		}
+	}
+} //end postStateMachineExecution()
 
 //========================================================================================================================
 void FEVInterfacesManager::postStateMachineExecutionLoop(void)
 {
-	if(!VStateMachine::getStillWorking())
-		__COUT__ << "Done configuration all state machine implementations..." << __E__;
+	if(VStateMachine::getSubIterationWork())
+		__COUT__ << "FE Interface state machine implementation " << subIterationWorkStateMachineIndex_ <<
+			" is stalling..." << __E__;
+	else if(VStateMachine::getIterationWork())
+		__COUT__ << stateMachinesIterationWorkCount_ <<
+			" FE Interface state machine implementation(s) still working..." << __E__;
 	else
-		__COUT__ << "Some FE Interfaces state machine implementations are still working..." << __E__;
-}
+		__COUT__ << "Done configuration all state machine implementations..." << __E__;
+} //end postStateMachineExecutionLoop()
 
 //========================================================================================================================
 void FEVInterfacesManager::configure(void)
 {
 	//create interfaces (the first iteration)
-	if(VStateMachine::getIterationIndex() == 0)
+	if(VStateMachine::getIterationIndex() == 0 &&
+			VStateMachine::getSubIterationIndex() == 0)
 		createInterfaces(); //by priority
 
 	preStateMachineExecutionLoop();
 	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
+		//if one state machine is stalling, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
 		const std::string& name = theFENamesByPriority_[i];
 
 		auto it = theFEInterfaces_.find(name);
@@ -526,6 +564,8 @@ void FEVInterfacesManager::configure(void)
 			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
 			__SS_THROW__;
 		}
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
 
 //		if(supervisorType_ == "FER")
 //			it.second->initLocalGroup((int)local_group_comm_);

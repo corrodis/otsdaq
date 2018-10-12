@@ -112,7 +112,10 @@ protected:
     toolbox::BSem                  	stateMachineSemaphore_;
     std::vector<VStateMachine*>    	theStateMachineImplementation_;
 
-    std::vector<bool>				stateMachinesIterationsDone_;
+    //for managing transition iterations
+    std::vector<bool>				stateMachinesIterationDone_;
+    unsigned int					stateMachinesIterationWorkCount_;
+    unsigned int					subIterationWorkStateMachineIndex_;
     void							preStateMachineExecution(unsigned int i);
     void							postStateMachineExecution(unsigned int i);
     void							preStateMachineExecutionLoop(void);

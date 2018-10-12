@@ -334,17 +334,26 @@ void CoreSupervisorBase::enteringError (toolbox::Event::Reference e)
 //========================================================================================================================
 void CoreSupervisorBase::preStateMachineExecutionLoop(void)
 {
-	RunControlStateMachine::clearStillWorking();
-	if(RunControlStateMachine::getIterationIndex() == 0)
+	RunControlStateMachine::clearIterationWork();
+	RunControlStateMachine::clearSubIterationWork();
+
+	stateMachinesIterationWorkCount_ = 0;
+
+	if(RunControlStateMachine::getIterationIndex() == 0 &&
+			RunControlStateMachine::getSubIterationIndex() == 0)
 	{
 		//reset vector for iterations done on first iteration
 
-		stateMachinesIterationsDone_.resize(theStateMachineImplementation_.size());
-		for(unsigned int i=0;i<stateMachinesIterationsDone_.size();++i)
-			stateMachinesIterationsDone_[i] = false;
+		subIterationWorkStateMachineIndex_ = -1; //clear sub iteration work index
+
+		stateMachinesIterationDone_.resize(theStateMachineImplementation_.size());
+		for(unsigned int i=0;i<stateMachinesIterationDone_.size();++i)
+			stateMachinesIterationDone_[i] = false;
 	}
 	else
-		__SUP_COUTV__(RunControlStateMachine::getIterationIndex());
+		__SUP_COUT__ << "Iteration " << RunControlStateMachine::getIterationIndex() <<
+			"." << RunControlStateMachine::getSubIterationIndex() <<
+			"(" << subIterationWorkStateMachineIndex_ << ")" << __E__;
 }
 
 //========================================================================================================================
@@ -352,15 +361,21 @@ void CoreSupervisorBase::preStateMachineExecution(unsigned int i)
 {
 	if(i >= theStateMachineImplementation_.size())
 	{
-		__SS__ << "State Machine " << i << " not found!" << __E__;
-		__SS_THROW__;
+		__SUP_SS__ << "State Machine " << i << " not found!" << __E__;
+		__SUP_SS_THROW__;
 	}
 
 	theStateMachineImplementation_[i]->VStateMachine::setIterationIndex(
 			RunControlStateMachine::getIterationIndex());
-	theStateMachineImplementation_[i]->VStateMachine::clearStillWorking();
+	theStateMachineImplementation_[i]->VStateMachine::setSubIterationIndex(
+			RunControlStateMachine::getSubIterationIndex());
 
-	__COUTV__(theStateMachineImplementation_[i]->VStateMachine::getIterationIndex());
+	theStateMachineImplementation_[i]->VStateMachine::clearIterationWork();
+	theStateMachineImplementation_[i]->VStateMachine::clearSubIterationWork();
+
+	__SUP_COUT__ << "theStateMachineImplementation Iteration " <<
+			theStateMachineImplementation_[i]->VStateMachine::getIterationIndex() <<
+		"." << theStateMachineImplementation_[i]->VStateMachine::getSubIterationIndex() << __E__;
 }
 
 //========================================================================================================================
@@ -368,27 +383,43 @@ void CoreSupervisorBase::postStateMachineExecution(unsigned int i)
 {
 	if(i >= theStateMachineImplementation_.size())
 	{
-		__SS__ << "State Machine " << i << " not found!" << __E__;
-		__SS_THROW__;
+		__SUP_SS__ << "State Machine " << i << " not found!" << __E__;
+		__SUP_SS_THROW__;
 	}
 
-	stateMachinesIterationsDone_[i] =
-			!theStateMachineImplementation_[i]->VStateMachine::getStillWorking();
-
-	if(!stateMachinesIterationsDone_[i])
+	//'Stalling' has priority
+	if(theStateMachineImplementation_[i]->VStateMachine::getSubIterationWork())
 	{
-		__SUP_COUT__ << "State machine " << i << " is still working..." << __E__;
-		RunControlStateMachine::indicateStillWorking(); //mark not done at CoreSupervisorBase level
+		subIterationWorkStateMachineIndex_ = i;
+		RunControlStateMachine::indicateSubIterationWork();
+
+		__SUP_COUT__ << "State machine " << i << " is stalling..." << __E__;
+	}
+	else
+	{
+		stateMachinesIterationDone_[i] =
+			!theStateMachineImplementation_[i]->VStateMachine::getIterationWork();
+
+		if(!stateMachinesIterationDone_[i])
+		{
+			__SUP_COUT__ << "State machine " << i << " is still working..." << __E__;
+			RunControlStateMachine::indicateIterationWork(); //mark not done at CoreSupervisorBase level
+			++stateMachinesIterationWorkCount_; //increment still working count
+		}
 	}
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::postStateMachineExecutionLoop(void)
 {
-	if(!RunControlStateMachine::stillWorking_)
-		__SUP_COUT__ << "Done configuration all state machine implementations..." << __E__;
+	if(RunControlStateMachine::subIterationWorkFlag_)
+		__SUP_COUT__ << "State machine implementation " << subIterationWorkStateMachineIndex_ <<
+			" is stalling..." << __E__;
+	else if(RunControlStateMachine::iterationWorkFlag_)
+		__SUP_COUT__ << stateMachinesIterationWorkCount_ <<
+			" state machine implementation(s) still working..." << __E__;
 	else
-		__SUP_COUT__ << "Some state machine implementations are still working..." << __E__;
+		__SUP_COUT__ << "Done configuration all state machine implementations..." << __E__;
 }
 
 //========================================================================================================================
@@ -398,7 +429,8 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 	__SUP_COUT__ << "transitionConfiguring" << std::endl;
 
 	//activate the configuration tree (the first iteration)
-	if(RunControlStateMachine::getIterationIndex() == 0)
+	if(RunControlStateMachine::getIterationIndex() == 0 &&
+			RunControlStateMachine::getSubIterationIndex() == 0)
 	{
 		std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup(
 				SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
@@ -425,7 +457,11 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 		preStateMachineExecutionLoop();
 		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
 		{
-			if(stateMachinesIterationsDone_[i]) continue; //skip state machines already done
+			//if one state machine is stalling, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
 
 			preStateMachineExecution(i);
 			theStateMachineImplementation_[i]->configure(); //e.g. for FESupervisor, this is configure of FEVInterfacesManager

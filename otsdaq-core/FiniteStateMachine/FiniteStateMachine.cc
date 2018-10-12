@@ -124,7 +124,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition)
 //	Returns true if transition is successfully executed
 //		else false if this exec did not complete a transition.
 //
-//	Note: For iteration handling, there is iterationIndex_ and stillWorking_.
+//	Note: For iteration handling, there is iterationIndex_ and iterationWorkFlag_.
 //		These are different (higher level) than the members of VStateMachine.
 bool FiniteStateMachine::execTransition(const std::string& transition,
 		const xoap::MessageReference& message)
