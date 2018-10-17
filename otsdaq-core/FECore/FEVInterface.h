@@ -7,8 +7,12 @@
 #include "otsdaq-core/FECore/FESlowControlsWorkLoop.h"
 
 
-//#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+
+#include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h" //to send errors to Gateway, e.g.
+
+
 #include "otsdaq-core/FECore/FESlowControlsChannel.h"
+#include "otsdaq-core/SOAPUtilities/SOAPMessenger.h" 	//for xdaq::ApplicationDescriptor communication
 
 #include <string>
 #include <iostream>
@@ -36,17 +40,11 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 {
 public:
 
-	FEVInterface (const std::string& interfaceUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
-: WorkLoop                    	(interfaceUID)
-, Configurable                	(theXDAQContextConfigTree, configurationPath)
-, interfaceUID_	              	(interfaceUID)
-, interfaceType_				(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>())
-, daqHardwareType_            	("NOT SET")
-, firmwareType_               	("NOT SET")
-, slowControlsWorkLoop_			(interfaceUID + "-SlowControls", this)
-{}
+	FEVInterface (const std::string& interfaceUID,
+			const ConfigurationTree& theXDAQContextConfigTree,
+			const std::string& configurationPath);
 
-	virtual 				~FEVInterface  					(void) {;}
+	virtual 				~FEVInterface  					(void) {__CFG_COUT__ << "Destructed." << __E__;}
 
 			/////////===========================
 			//start OLD - but keeping around for a while, in case we realize we need it
@@ -127,10 +125,9 @@ public:
 	/////////
 
 protected:
-	bool 					workLoopThread(toolbox::task::WorkLoop* workLoop){continueWorkLoop_ = running(); /* in case users return false, without using continueWorkLoop_*/ return continueWorkLoop_;}
+	bool 					workLoopThread(toolbox::task::WorkLoop* workLoop);
 	std::string             interfaceUID_;
 	std::string             interfaceType_;
-
 
 	std::string  			daqHardwareType_;
 	std::string  			firmwareType_;

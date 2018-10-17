@@ -10,7 +10,7 @@ namespace ots
 class FiniteStateMachine : public toolbox::fsm::FiniteStateMachine
 {
 public:
-	FiniteStateMachine (void);
+	FiniteStateMachine (const std::string& stateMachineName);
 	~FiniteStateMachine(void);
 
 	using toolbox::fsm::FiniteStateMachine::addStateTransition;
@@ -55,6 +55,8 @@ public:
 	std::string 						getTransitionParameter 		(const toolbox::fsm::State from, const std::string &transition);
 	std::string 						getTransitionFinalStateName	(const std::string &transition);
 	const std::string&					getErrorMessage				(void) const;
+	const std::string&					getStateMachineName			(void) const {return stateMachineName_;}
+	void 								setStateMachineName			(const std::string& name){stateMachineName_ = name;}
 
 	const xoap::MessageReference& 		getCurrentMessage			(void);
 
@@ -82,6 +84,7 @@ protected:
 
 	xoap::MessageReference 	theMessage_;
 	std::string				theErrorMessage_;
+	std::string				stateMachineName_;
 
 private:
 };

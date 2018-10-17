@@ -14,7 +14,7 @@
 #include <iostream>
 
 #undef 	__MF_SUBJECT__
-#define __MF_SUBJECT__ std::string("FSM-") + stateMachineName_
+#define __MF_SUBJECT__ std::string("FSM-") + theStateMachine_.getStateMachineName()
 
 
 using namespace ots;
@@ -22,8 +22,9 @@ using namespace ots;
 const std::string RunControlStateMachine::FAILED_STATE_NAME = "Failed";
 
 //========================================================================================================================
-RunControlStateMachine::RunControlStateMachine(std::string name)
-: stateMachineName_(name)
+RunControlStateMachine::RunControlStateMachine(const std::string& name)
+: theStateMachine_			(name)
+, asyncFailureReceived_		(false)
 {
 	INIT_MF("RunControlStateMachine");
 
@@ -80,6 +81,7 @@ RunControlStateMachine::RunControlStateMachine(std::string name)
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Startup"   , XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Fail"      , XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Error"     , XDAQ_NS_URI);
+	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "AsyncError", XDAQ_NS_URI);
 
 
 	reset();
@@ -87,15 +89,17 @@ RunControlStateMachine::RunControlStateMachine(std::string name)
 
 //========================================================================================================================
 RunControlStateMachine::~RunControlStateMachine(void)
-{
-}
+{}
 
 //========================================================================================================================
 void RunControlStateMachine::reset(void)
 {
-	__COUT__ << "Resetting RunControlStateMachine with name '" << stateMachineName_ << "'..." << __E__;
+	__COUT__ << "Resetting RunControlStateMachine with name '" <<
+			theStateMachine_.getStateMachineName() << "'..." << __E__;
 	theStateMachine_.setInitialState('I');
 	theStateMachine_.reset();
+
+	asyncFailureReceived_ = false;
 }
 
 ////========================================================================================================================
@@ -193,9 +197,11 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	if(iterationIndex_ == 0 && subIterationIndex_ == 0)
 	{
 		//this is the first iteration attempt for this transition
-		theProgressBar_.reset(command,stateMachineName_);
+		theProgressBar_.reset(command,
+				theStateMachine_.getStateMachineName());
 		currentState = theStateMachine_.getCurrentStateName();
-		__COUT__ << "Starting state for " << stateMachineName_ << " is " <<
+		__COUT__ << "Starting state for " <<
+				theStateMachine_.getStateMachineName() << " is " <<
 				currentState << " and attempting to " << command << std::endl;
 	}
 	else
@@ -204,7 +210,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 
 		__COUT__ << "Iteration index " << iterationIndex_ << "." <<
 				subIterationIndex_ << " for " <<
-				stateMachineName_ << " from " <<
+				theStateMachine_.getStateMachineName() << " from " <<
 				currentState << " attempting to " << command << std::endl;
 	}
 
@@ -233,6 +239,23 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 			__COUT_ERR__ << "Halting failed in reaction to " << command <<
 					"... ignoring." << __E__;
 		}
+		return SOAPUtilities::makeSOAPMessageReference(result);
+	}
+	else if(command == "AsyncError")
+	{
+		std::string errorMessage = SOAPUtilities::translate(
+				message).getParameters().getValue("ErrorMessage");
+
+		__SS__ << command << " was received! Error'ing immediately: " <<
+				errorMessage << std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+
+		asyncFailureReceived_ = true; //mark flag, to be used to abort next transition
+		//determine any valid transition from where we are
+		theStateMachine_.execTransition("fail");
+		//XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());
+
 		return SOAPUtilities::makeSOAPMessageReference(result);
 	}
 
@@ -338,7 +361,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	{
 		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " +
 				theStateMachine_.getErrorMessage();
-		__COUT_ERR__ << "Unexpected Failure state for " << stateMachineName_ << " is " << currentState << std::endl;
+		__COUT_ERR__ << "Unexpected Failure state for " << theStateMachine_.getStateMachineName()  << " is " << currentState << std::endl;
 		__COUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
 	}
 
@@ -347,7 +370,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	if(!iterationWorkFlag_)
 		theProgressBar_.complete();
 
-	__COUT__ << "Ending state for " << stateMachineName_ << " is " << currentState << std::endl;
+	__COUT__ << "Ending state for " << theStateMachine_.getStateMachineName()  <<
+			" is " << currentState << std::endl;
 	__COUT__ << "result = " << result << std::endl;
 	lastIterationResult_ = result;
 	return SOAPUtilities::makeSOAPMessageReference(result);

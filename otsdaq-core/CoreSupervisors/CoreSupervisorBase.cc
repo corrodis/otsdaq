@@ -464,6 +464,7 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
 
 			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->parentSupervisor_ = this; //for backwards compatibility, kept out of configure parameters
 			theStateMachineImplementation_[i]->configure(); //e.g. for FESupervisor, this is configure of FEVInterfacesManager
 			postStateMachineExecution(i);
 		}
@@ -623,7 +624,8 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
 	try
 	{
 		for(auto& it: theStateMachineImplementation_)
-			it->start(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber"));
+			it->start(SOAPUtilities::translate(
+					theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber"));
 	}
 	catch(const std::runtime_error& e)
 	{

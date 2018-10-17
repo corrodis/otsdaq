@@ -8,14 +8,13 @@
 #include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 #include <xcept/tools.h>
 
+#include "otsdaq-core/SOAPUtilities/SOAPUtilities.h" /* for SOAPCommand & SOAPParameters */
 
 #include "otsdaq-core/Macros/CoutMacros.h" /* for XDAQ_CONST_CALL */
 #include <string>
 
 namespace ots
 {
-class SOAPCommand;
-class SOAPParameters;
 
 class SOAPMessenger : public virtual toolbox::lang::Class
 {

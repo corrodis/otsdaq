@@ -18,12 +18,12 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 
 public:
 
-    RunControlStateMachine(std::string name="Undefined Name");
+    RunControlStateMachine(const std::string& name="Undefined Name");
     virtual ~RunControlStateMachine(void);
 
-    void reset(void);
-    void setStateMachineName(std::string name){stateMachineName_ = name;}
-
+    void 								reset						(void);
+    void 								setStateMachineName			(const std::string& name){ theStateMachine_.setStateMachineName(name);}
+    const std::string&					getErrorMessage				(void) const { return theStateMachine_.getErrorMessage(); }
 
     template <class OBJECT>
     void addStateTransition(
@@ -118,17 +118,18 @@ public:
     unsigned int						getSubIterationIndex		(void) { return subIterationIndex_;}
     void 								indicateIterationWork		(void) { iterationWorkFlag_ = true; }
     void 								clearIterationWork			(void) { iterationWorkFlag_ = false; }
-    bool								getIterationWork				(void) { return iterationWorkFlag_; }
-    void 								indicateSubIterationWork		(void) { subIterationWorkFlag_ = true; }
-    void 								clearSubIterationWork			(void) { subIterationWorkFlag_ = false; }
+    bool								getIterationWork			(void) { return iterationWorkFlag_; }
+    void 								indicateSubIterationWork	(void) { subIterationWorkFlag_ = true; }
+    void 								clearSubIterationWork		(void) { subIterationWorkFlag_ = false; }
     bool								getSubIterationWork			(void) { return subIterationWorkFlag_; }
 
 
 protected:
 	FiniteStateMachine 		theStateMachine_;
     ProgressBar		   		theProgressBar_;
-    std::string        		stateMachineName_;
+    //std::string        		stateMachineName_;
 
+    volatile bool			asyncFailureReceived_;
 
 	unsigned int			iterationIndex_, subIterationIndex_;
 	bool					iterationWorkFlag_, subIterationWorkFlag_;

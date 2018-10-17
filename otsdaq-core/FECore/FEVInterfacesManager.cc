@@ -84,6 +84,9 @@ void FEVInterfacesManager::createInterfaces(void)
 					theXDAQContextConfigTree_,
 					(theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration")
 					);
+
+			//setup parent supervisor of FEVinterface (for backwards compatibility, left out of constructor)
+			theFEInterfaces_[interface.first]->parentSupervisor_ = parentSupervisor_;
 		}
 		catch(const cet::exception& e)
 		{
@@ -413,7 +416,8 @@ bool FEVInterfacesManager::allFEWorkloopsAreDone(void)
 
 	for(const auto& FEInterface: theFEInterfaces_)
 	{
-		isActive = FEInterface.second->isActive();
+		isActive = FEInterface.second->WorkLoop::isActive();
+
 		__COUT__ << FEInterface.second->getInterfaceUID() << " of type " <<
 				FEInterface.second->getInterfaceType() << ": \t" <<
 				"workLoop_->isActive() " <<

@@ -111,6 +111,8 @@ public:
 
     void makeSystemLogbookEntry (std::string entryText);
 
+    void checkForAsyncError		(void);
+
     //CorePropertySupervisorBase override functions
     virtual void			setSupervisorPropertyDefaults	(void) override; //override to control supervisor specific defaults
     virtual void			forceSupervisorPropertyValues	(void) override; //override to force supervisor property values (and ignore user settings)

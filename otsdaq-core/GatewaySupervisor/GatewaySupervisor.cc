@@ -96,6 +96,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s)
 	xoap::bind(this, &GatewaySupervisor::supervisorSystemLogbookEntry, 		"SupervisorSystemLogbookEntry", 	XDAQ_NS_URI);
 	xoap::bind(this, &GatewaySupervisor::supervisorLastConfigGroupRequest, 	"SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
 
+	//xoap::bind(this, &GatewaySupervisor::supervisorHandleAsyncError, 		"FERunningError", XDAQ_NS_URI);
 
 	init();
 	//exit(1);
@@ -766,7 +767,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(
 
 	stateMachineLastCommandInput_ = command;
 	return errorStr;
-}
+} //end attemptStateMachineTransition()
 
 ////========================================================================================================================
 ////FIXME -- delete? is this ever used by anything? ever?
@@ -1154,30 +1155,59 @@ void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine & fsm)
 void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine & fsm)
 
 {
-	__SUP_COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+	__SUP_COUT__ << "Fsm current state: " << "Failed"
+			//theStateMachine_.getCurrentStateName() //There may be a race condition here
+			//	when async errors occur (e.g. immediately in running)
+			<< __E__;
 	//rcmsStateNotifier_.stateChanged("Error", "");
 }
 
 //========================================================================================================================
 void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
-
 {
 	__SUP_COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	//extract error message and save for user interface access
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&> (*e);
-	__SUP_SS__ << "\nFailure performing transition from " << failedEvent.getFromState() << "-" <<
-		theStateMachine_.getStateName(failedEvent.getFromState()) <<
-		" to " << failedEvent.getToState() << "-" <<
-		theStateMachine_.getStateName(failedEvent.getToState()) <<
-		".\n\nException:\n" << failedEvent.getException().what() << __E__;
-	__SUP_COUT_ERR__ << "\n" << ss.str();
 
+
+	__SUP_SS__;
+
+	//handle async error message differently
+	if(RunControlStateMachine::asyncFailureReceived_)
+	{
+		ss << "\nAn asynchronous failure was encountered." <<
+				".\n\nException:\n" << failedEvent.getException().what() << __E__;
+		RunControlStateMachine::asyncFailureReceived_ = false; //clear async error
+	}
+	else
+	{
+		ss << "\nFailure performing transition from " << failedEvent.getFromState() << "-" <<
+			theStateMachine_.getStateName(failedEvent.getFromState()) <<
+			" to " << failedEvent.getToState() << "-" <<
+			theStateMachine_.getStateName(failedEvent.getToState()) <<
+			".\n\nException:\n" << failedEvent.getException().what() << __E__;
+	}
+
+	__SUP_COUT_ERR__ << "\n" << ss.str();
 	theStateMachine_.setErrorMessage(ss.str());
 
 	//move everything else to Error!
 	broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Error"));
 }
+
+//========================================================================================================================
+void GatewaySupervisor::checkForAsyncError()
+{
+	if(RunControlStateMachine::asyncFailureReceived_)
+	{
+		__SUP_COUTV__(RunControlStateMachine::asyncFailureReceived_);
+
+		XCEPT_RAISE(toolbox::fsm::exception::Exception,
+				RunControlStateMachine::getErrorMessage());
+		return;
+	}
+} //end checkForAsyncError()
 
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// FSM State Transition Functions //////////////////////////
@@ -1186,8 +1216,9 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 
 //========================================================================================================================
 void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
-
 {
+	checkForAsyncError();
+
 	RunControlStateMachine::theProgressBar_.step();
 
 	__SUP_COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
@@ -1360,8 +1391,9 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 //========================================================================================================================
 void GatewaySupervisor::transitionHalting(toolbox::Event::Reference e)
-
 {
+	checkForAsyncError();
+
 	__SUP_COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	makeSystemLogbookEntry("Run halting.");
@@ -1433,6 +1465,8 @@ void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
 void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
 
 {
+	checkForAsyncError();
+
 	__SUP_COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	makeSystemLogbookEntry("Run pausing.");
@@ -1444,6 +1478,8 @@ void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
 void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
 
 {
+	checkForAsyncError();
+
 	__SUP_COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	makeSystemLogbookEntry("Run resuming.");
@@ -1455,6 +1491,8 @@ void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
 void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 
 {
+	checkForAsyncError();
+
 	__SUP_COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	SOAPParameters parameters("RunNumber");
@@ -1540,6 +1578,8 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 void GatewaySupervisor::transitionStopping(toolbox::Event::Reference e)
 
 {
+	checkForAsyncError();
+
 	__SUP_COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	makeSystemLogbookEntry("Run stopping.");

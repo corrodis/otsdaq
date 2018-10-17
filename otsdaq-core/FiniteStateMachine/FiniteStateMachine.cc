@@ -9,12 +9,17 @@
 
 using namespace ots;
 
+
+#undef 	__MF_SUBJECT__
+#define __MF_SUBJECT__ 		std::string("FSM-") + getStateMachineName()
+
 //========================================================================================================================
-FiniteStateMachine::FiniteStateMachine(void)
+FiniteStateMachine::FiniteStateMachine(const std::string& stateMachineName)
 : stateEntranceTime_(0)
 , inTransition_   	(false)
 , provenanceState_	('X')
 , theErrorMessage_ 	("")
+, stateMachineName_	(stateMachineName)
 {
 	__COUT__ << "Constructing FiniteStateMachine" << std::endl;
 }
@@ -129,8 +134,67 @@ bool FiniteStateMachine::execTransition(const std::string& transition)
 bool FiniteStateMachine::execTransition(const std::string& transition,
 		const xoap::MessageReference& message)
 {
-//	__COUT__ << "Transition?" << inTransition_ << std::endl;
-	if(inTransition_) return false;
+	__COUTV__(transition);
+
+
+
+	if(transition == "fail")
+	{
+		__COUT_INFO__ << "Failing now!!" << __E__;
+
+		while(inTransition_)
+		{
+
+			__COUT__ << "Currently in a transition executed from current state " <<
+					getProvenanceStateName() <<
+					". Attempting to wait for the transition to complete." <<
+					__E__;
+			sleep(1);
+		}
+		sleep(1);
+
+		//find any valid transition and take it..
+		//	all transition functions must check for a failure
+		//	flag, and throw an exception to go to Fail state
+
+
+		std::map<std::string, toolbox::fsm::State> transitions = getTransitions(getCurrentState());
+		for(const auto& transitionPair : transitions)
+		{
+			__COUT__ << "Taking transition to indirect failure: " <<
+					transitionPair.first << __E__;
+			toolbox::Event::Reference event(new toolbox::Event(transitionPair.first, this));
+
+			try
+			{
+				this->fireEvent(event);
+			}
+			catch(toolbox::fsm::exception::Exception& e)
+			{
+				std::ostringstream error;
+				error << "Transition " << transition << " was not executed from current state " <<
+						getStateName (getCurrentState()) << ". There was an error: " << e.what();
+				__COUT_ERR__ << error.str() << std::endl;
+			}
+			inTransition_ = false;
+			stateEntranceTime_ = time(0);
+			return true;
+		}
+//		//XCEPT_RAISE (toolbox::fsm::exception::Exception, transition);
+//		theMessage_ = message;
+//		toolbox::Event::Reference event(new toolbox::Event(, this));
+//
+	}
+
+
+
+	if(inTransition_)
+	{
+		__COUT_WARN__ << "In transition, and received another transition: " <<
+				transition << ". Ignoring..." << __E__;
+
+		return false;
+	}
 	inTransition_ = true;
 	bool transitionSuccessful = true;
 	provenanceState_ = getCurrentState();
