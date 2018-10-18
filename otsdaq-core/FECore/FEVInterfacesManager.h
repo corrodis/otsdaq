@@ -73,7 +73,7 @@ private:
     unsigned int					stateMachinesIterationWorkCount_;
     unsigned int					subIterationWorkStateMachineIndex_;
     void							preStateMachineExecution(unsigned int i);
-    void							postStateMachineExecution(unsigned int i);
+    bool							postStateMachineExecution(unsigned int i);
     void							preStateMachineExecutionLoop(void);
     void							postStateMachineExecutionLoop(void);
 

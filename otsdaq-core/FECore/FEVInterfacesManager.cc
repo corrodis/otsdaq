@@ -491,7 +491,9 @@ void FEVInterfacesManager::preStateMachineExecution(unsigned int i)
 } //end preStateMachineExecution()
 
 //========================================================================================================================
-void FEVInterfacesManager::postStateMachineExecution(unsigned int i)
+//postStateMachineExecution
+//	return false to indicate state machine is NOT done with transition
+bool FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 {
 	if(i >= theFENamesByPriority_.size())
 	{
@@ -515,6 +517,7 @@ void FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 		VStateMachine::indicateSubIterationWork();
 
 		__COUT__ << "FE Interface '" << name << "' is stalling..." << __E__;
+		return false; //to indicate state machine is NOT done with transition
 	}
 	else
 	{
@@ -528,8 +531,10 @@ void FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 			__COUT__ << "FE Interface '" << name << "' is still working..." << __E__;
 					VStateMachine::indicateIterationWork(); //mark not done at FEVInterfacesManager level
 			++stateMachinesIterationWorkCount_; //increment still working count
+			return false; //to indicate state machine is NOT done with transition
 		}
 	}
+	return true; //to indicate state machine is done with transition
 } //end postStateMachineExecution()
 
 //========================================================================================================================
@@ -553,6 +558,7 @@ void FEVInterfacesManager::configure(void)
 			VStateMachine::getSubIterationIndex() == 0)
 		createInterfaces(); //by priority
 
+	const std::string transitionName = "Configuring";
 	preStateMachineExecutionLoop();
 	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
@@ -574,9 +580,9 @@ void FEVInterfacesManager::configure(void)
 //		if(supervisorType_ == "FER")
 //			it.second->initLocalGroup((int)local_group_comm_);
 
-		__COUT__ << "Configuring interface " << name << std::endl;
-		__COUT__ << "Configuring interface " << name << std::endl;
-		__COUT__ << "Configuring interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
 
 		preStateMachineExecution(i);
 		it->second->configure();
@@ -590,9 +596,9 @@ void FEVInterfacesManager::configure(void)
 //		if((supervisorType_ == "FEW") || (supervisorType_ == "FEWR") )
 //		{
 
-		__COUT__ << "Done configuring interface " << name << std::endl;
-		__COUT__ << "Done configuring interface " << name << std::endl;
-		__COUT__ << "Done configuring interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
 		//__SS_THROW__;
 		//	it.second->configureDetector(theConfigurationManager_->getDACStream(it.first));
 
@@ -601,18 +607,54 @@ void FEVInterfacesManager::configure(void)
 	postStateMachineExecutionLoop();
 
 
-	__COUT__ << "Done configuring all interfaces." << std::endl;
+	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
 }
 
 //========================================================================================================================
 void FEVInterfacesManager::halt(void)
 {
-	for(const auto& it : theFEInterfaces_)
+	const std::string transitionName = "Halting";
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		it.second->halt();
-		it.second->stopWorkLoop();
-		//it.second->stopSlowControlsWorkLooop();
+		//if one state machine is stalling, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		auto it = theFEInterfaces_.find(name);
+		if(it == theFEInterfaces_.end())
+		{
+			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
+			__SS_THROW__;
+		}
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+
+		preStateMachineExecution(i);
+		it->second->stopWorkLoop();
+		it->second->halt();
+		postStateMachineExecution(i);
+
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
 	}
+	postStateMachineExecutionLoop();
+
+
+	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
+//	for(const auto& it : theFEInterfaces_)
+//	{
+//		it.second->halt();
+//		it.second->stopWorkLoop();
+//		//it.second->stopSlowControlsWorkLooop();
+//	}
 
 	destroy(); //destroy all FE interfaces on halt, must be configured for FE interfaces to exist
 }
@@ -620,38 +662,184 @@ void FEVInterfacesManager::halt(void)
 //========================================================================================================================
 void FEVInterfacesManager::pause(void)
 {
-	for(const auto& it : theFEInterfaces_)
+	const std::string transitionName = "Pausing";
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		it.second->pause();
-		it.second->stopWorkLoop();
+		//if one state machine is stalling, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		auto it = theFEInterfaces_.find(name);
+		if(it == theFEInterfaces_.end())
+		{
+			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
+			__SS_THROW__;
+		}
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+
+		preStateMachineExecution(i);
+		it->second->stopWorkLoop();
+		it->second->pause();
+		postStateMachineExecution(i);
+
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
 	}
+	postStateMachineExecutionLoop();
+
+
+	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
+
+//	for(const auto& it : theFEInterfaces_)
+//	{
+//		it.second->pause();
+//		it.second->stopWorkLoop();
+//	}
 }
 
 //========================================================================================================================
 void FEVInterfacesManager::resume(void)
 {
-	for(const auto& it : theFEInterfaces_)
+	const std::string transitionName = "Resuming";
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		it.second->resume();
-		it.second->startWorkLoop();
+		//if one state machine is stalling, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		auto it = theFEInterfaces_.find(name);
+		if(it == theFEInterfaces_.end())
+		{
+			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
+			__SS_THROW__;
+		}
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+
+		preStateMachineExecution(i);
+		it->second->resume();
+		//only start workloop once transition is done
+		if(postStateMachineExecution(i))
+			it->second->startWorkLoop();
+
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
 	}
+	postStateMachineExecutionLoop();
+
+	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
+//
+//	for(const auto& it : theFEInterfaces_)
+//	{
+//		it.second->resume();
+//		it.second->startWorkLoop();
+//	}
 }
 
 //========================================================================================================================
 void FEVInterfacesManager::start(std::string runNumber)
 {
-	for(const auto& it : theFEInterfaces_)
+	const std::string transitionName = "Starting";
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		it.second->start(runNumber);
-		it.second->startWorkLoop();
+		//if one state machine is stalling, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		auto it = theFEInterfaces_.find(name);
+		if(it == theFEInterfaces_.end())
+		{
+			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
+			__SS_THROW__;
+		}
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+
+		preStateMachineExecution(i);
+		it->second->start(runNumber);
+		//only start workloop once transition is done
+		if(postStateMachineExecution(i))
+			it->second->startWorkLoop();
+
+
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
 	}
+	postStateMachineExecutionLoop();
+
+	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
+//	for(const auto& it : theFEInterfaces_)
+//	{
+//		it.second->start(runNumber);
+//		it.second->startWorkLoop();
+//	}
 }
 //========================================================================================================================
 void FEVInterfacesManager::stop(void)
 {
-	for(const auto& it : theFEInterfaces_)
+	const std::string transitionName = "Starting";
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		it.second->stopWorkLoop();
-		it.second->stop();
+		//if one state machine is stalling, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		auto it = theFEInterfaces_.find(name);
+		if(it == theFEInterfaces_.end())
+		{
+			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
+			__SS_THROW__;
+		}
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+		__COUT__ << transitionName << " interface " << name << std::endl;
+
+		preStateMachineExecution(i);
+		it->second->stopWorkLoop();
+		it->second->stop();
+		postStateMachineExecution(i);
+
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
+		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
 	}
+	postStateMachineExecutionLoop();
+
+	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
+//	for(const auto& it : theFEInterfaces_)
+//	{
+//		it.second->stopWorkLoop();
+//		it.second->stop();
+//	}
 }

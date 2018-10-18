@@ -506,45 +506,118 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
 
 {
-	__SUP_COUT__ << "transitionHalting" << std::endl;
-
-	for(auto& it: theStateMachineImplementation_)
+	const std::string transitionName = "Halting";
+	try
 	{
-		try
+		__SUP_COUT__ << transitionName << " all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
 		{
-			it->halt();
+			//if one state machine is stalling, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->halt(); //e.g. for FESupervisor, this is transition of FEVInterfacesManager
+			postStateMachineExecution(i);
 		}
-		catch(const std::runtime_error& e)
+		postStateMachineExecutionLoop();
+
+	}
+	catch(const std::runtime_error& e)
+	{
+		//if halting from Failed state, then ignore errors
+		if(theStateMachine_.getProvenanceStateName() ==
+				RunControlStateMachine::FAILED_STATE_NAME)
 		{
-			//if halting from Failed state, then ignore errors
-			if(theStateMachine_.getProvenanceStateName() ==
-					RunControlStateMachine::FAILED_STATE_NAME)
-			{
-				__SUP_COUT_INFO__ << "Error was caught while halting (but ignoring because previous state was '" <<
-						RunControlStateMachine::FAILED_STATE_NAME << "'): " << e.what() << std::endl;
-			}
-			else //if not previously in Failed state, then fail
-			{
-				__SUP_SS__ << "Error was caught while halting: " << e.what() << std::endl;
-				__SUP_COUT_ERR__ << "\n" << ss.str();
-				theStateMachine_.setErrorMessage(ss.str());
-				throw toolbox::fsm::exception::Exception(
-						"Transition Error" /*name*/,
-						ss.str() /* message*/,
-						"CoreSupervisorBase::transitionHalting" /*module*/,
-						__LINE__ /*line*/,
-						__FUNCTION__ /*function*/
-						);
-			}
+			__SUP_COUT_INFO__ << "Error was caught while halting (but ignoring because previous state was '" <<
+					RunControlStateMachine::FAILED_STATE_NAME << "'): " << e.what() << std::endl;
+		}
+		else //if not previously in Failed state, then fail
+		{
+			__SUP_SS__ << "Error was caught while " << transitionName <<
+					": " << e.what() << std::endl;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			theStateMachine_.setErrorMessage(ss.str());
+			throw toolbox::fsm::exception::Exception(
+					"Transition Error" /*name*/,
+					ss.str() /* message*/,
+					"CoreSupervisorBase::transition" + transitionName /*module*/,
+					__LINE__ /*line*/,
+					__FUNCTION__ /*function*/
+			);
+		}
+
+
+	}
+	catch(...)
+	{
+		//if halting from Failed state, then ignore errors
+		if(theStateMachine_.getProvenanceStateName() ==
+				RunControlStateMachine::FAILED_STATE_NAME)
+		{
+			__SUP_COUT_INFO__ << "Unknown error was caught while halting (but ignoring because previous state was '" <<
+					RunControlStateMachine::FAILED_STATE_NAME << "')." << std::endl;
+		}
+		else //if not previously in Failed state, then fail
+		{
+
+			__SUP_SS__ << "Unknown error was caught while " <<
+					transitionName << ". Please checked the logs." << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			theStateMachine_.setErrorMessage(ss.str());
+			throw toolbox::fsm::exception::Exception(
+					"Transition Error" /*name*/,
+					ss.str() /* message*/,
+					"CoreSupervisorBase::transition" + transitionName /*module*/,
+					__LINE__ /*line*/,
+					__FUNCTION__ /*function*/
+			);
 		}
 	}
+
+
+
+//
+//
+//	for(auto& it: theStateMachineImplementation_)
+//	{
+//		try
+//		{
+//			it->halt();
+//		}
+//		catch(const std::runtime_error& e)
+//		{
+//			//if halting from Failed state, then ignore errors
+//			if(theStateMachine_.getProvenanceStateName() ==
+//					RunControlStateMachine::FAILED_STATE_NAME)
+//			{
+//				__SUP_COUT_INFO__ << "Error was caught while halting (but ignoring because previous state was '" <<
+//						RunControlStateMachine::FAILED_STATE_NAME << "'): " << e.what() << std::endl;
+//			}
+//			else //if not previously in Failed state, then fail
+//			{
+//				__SUP_SS__ << "Error was caught while halting: " << e.what() << std::endl;
+//				__SUP_COUT_ERR__ << "\n" << ss.str();
+//				theStateMachine_.setErrorMessage(ss.str());
+//				throw toolbox::fsm::exception::Exception(
+//						"Transition Error" /*name*/,
+//						ss.str() /* message*/,
+//						"CoreSupervisorBase::transitionHalting" /*module*/,
+//						__LINE__ /*line*/,
+//						__FUNCTION__ /*function*/
+//						);
+//			}
+//		}
+//	}
 }
 
 //========================================================================================================================
 //Inheriting supervisor classes should not override this function, or should at least also call it in the override
 //	to maintain property functionality.
 void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference e)
-
 {
 	__SUP_COUT__ << "transitionInitializing" << std::endl;
 
@@ -559,111 +632,297 @@ void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference e)
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
-
 {
-	__SUP_COUT__ << "transitionPausing" << std::endl;
-
+	const std::string transitionName = "Pausing";
 	try
 	{
-		for(auto& it: theStateMachineImplementation_)
-			it->pause();
+		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
+		{
+			//if one state machine is stalling, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->pause(); //e.g. for FESupervisor, this is transition of FEVInterfacesManager
+			postStateMachineExecution(i);
+		}
+		postStateMachineExecutionLoop();
+
+
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while " << transitionName <<
+				": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
-				"CoreSupervisorBase::transitionPausing" /*module*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
 				__LINE__ /*line*/,
 				__FUNCTION__ /*function*/
 		);
 	}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while " <<
+				transitionName << ". Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+//	try
+//	{
+//		for(auto& it: theStateMachineImplementation_)
+//			it->pause();
+//	}
+//	catch(const std::runtime_error& e)
+//	{
+//		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
+//		__SUP_COUT_ERR__ << "\n" << ss.str();
+//		theStateMachine_.setErrorMessage(ss.str());
+//		throw toolbox::fsm::exception::Exception(
+//				"Transition Error" /*name*/,
+//				ss.str() /* message*/,
+//				"CoreSupervisorBase::transitionPausing" /*module*/,
+//				__LINE__ /*line*/,
+//				__FUNCTION__ /*function*/
+//		);
+//	}
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
 
 {
-	//NOTE: I want to first start the data manager first if this is a FEDataManagerSupervisor
-
-
-	__SUP_COUT__ << "transitionResuming" << std::endl;
-
+	const std::string transitionName = "Resuming";
 	try
 	{
-		for(auto& it: theStateMachineImplementation_)
-			it->resume();
+		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
+		{
+			//if one state machine is stalling, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->resume(); //e.g. for FESupervisor, this is transition of FEVInterfacesManager
+			postStateMachineExecution(i);
+		}
+		postStateMachineExecutionLoop();
+
+
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SUP_SS__ << "Error was caught while resuming: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while " << transitionName <<
+				": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
-				"CoreSupervisorBase::transitionResuming" /*module*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
 				__LINE__ /*line*/,
 				__FUNCTION__ /*function*/
 		);
 	}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while " <<
+				transitionName << ". Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+
+	//	try
+	//	{
+	//		for(auto& it: theStateMachineImplementation_)
+	//			it->resume();
+	//	}
+	//	catch(const std::runtime_error& e)
+	//	{
+	//		__SUP_SS__ << "Error was caught while resuming: " << e.what() << std::endl;
+	//		__SUP_COUT_ERR__ << "\n" << ss.str();
+	//		theStateMachine_.setErrorMessage(ss.str());
+	//		throw toolbox::fsm::exception::Exception(
+	//				"Transition Error" /*name*/,
+	//				ss.str() /* message*/,
+	//				"CoreSupervisorBase::transitionResuming" /*module*/,
+	//				__LINE__ /*line*/,
+	//				__FUNCTION__ /*function*/
+	//		);
+	//	}
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
-
 {
-
-	//NOTE: I want to first start the data manager first if this is a FEDataManagerSupervisor
-
-	__SUP_COUT__ << "transitionStarting" << std::endl;
-
+	const std::string transitionName = "Starting";
+	const std::string runNumber = SOAPUtilities::translate(
+								theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber");
 	try
 	{
-		for(auto& it: theStateMachineImplementation_)
-			it->start(SOAPUtilities::translate(
-					theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber"));
+		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
+		{
+			//if one state machine is stalling, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->start(runNumber); //e.g. for FESupervisor, this is transition of FEVInterfacesManager
+			postStateMachineExecution(i);
+		}
+		postStateMachineExecutionLoop();
+
+
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SUP_SS__ << "Error was caught while starting: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while " << transitionName <<
+				": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
-				"CoreSupervisorBase::transitionStarting" /*module*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
 				__LINE__ /*line*/,
 				__FUNCTION__ /*function*/
 		);
 	}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while " <<
+				transitionName << ". Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+
+	//	try
+	//	{
+	//		for(auto& it: theStateMachineImplementation_)
+	//			it->start(SOAPUtilities::translate(
+	//					theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber"));
+	//	}
+	//	catch(const std::runtime_error& e)
+	//	{
+	//		__SUP_SS__ << "Error was caught while starting: " << e.what() << std::endl;
+	//		__SUP_COUT_ERR__ << "\n" << ss.str();
+	//		theStateMachine_.setErrorMessage(ss.str());
+	//		throw toolbox::fsm::exception::Exception(
+	//				"Transition Error" /*name*/,
+	//				ss.str() /* message*/,
+	//				"CoreSupervisorBase::transitionStarting" /*module*/,
+	//				__LINE__ /*line*/,
+	//				__FUNCTION__ /*function*/
+	//		);
+	//	}
 }
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
 
 {
-	__SUP_COUT__ << "transitionStopping" << std::endl;
-
+	const std::string transitionName = "Stopping";
 	try
 	{
-		for(auto& it: theStateMachineImplementation_)
-			it->stop();
+		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
+		{
+			//if one state machine is stalling, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->stop(); //e.g. for FESupervisor, this is transition of FEVInterfacesManager
+			postStateMachineExecution(i);
+		}
+		postStateMachineExecutionLoop();
+
+
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while " << transitionName <<
+				": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
-				"CoreSupervisorBase::transitionStopping" /*module*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
 				__LINE__ /*line*/,
 				__FUNCTION__ /*function*/
 		);
 	}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while " <<
+				transitionName << ". Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+//
+//
+//	try
+//	{
+//		for(auto& it: theStateMachineImplementation_)
+//			it->stop();
+//	}
+//	catch(const std::runtime_error& e)
+//	{
+//		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
+//		__SUP_COUT_ERR__ << "\n" << ss.str();
+//		theStateMachine_.setErrorMessage(ss.str());
+//		throw toolbox::fsm::exception::Exception(
+//				"Transition Error" /*name*/,
+//				ss.str() /* message*/,
+//				"CoreSupervisorBase::transitionStopping" /*module*/,
+//				__LINE__ /*line*/,
+//				__FUNCTION__ /*function*/
+//		);
+//	}
 }

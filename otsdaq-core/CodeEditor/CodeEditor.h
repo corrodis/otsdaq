@@ -45,7 +45,7 @@ private:
 
 public:
 
-	static std::string SPECIAL_TYPE_FEInterface, SPECIAL_TYPE_DataProcessor, SPECIAL_TYPE_ControlsInterface;
+	static std::string SPECIAL_TYPE_FEInterface, SPECIAL_TYPE_DataProcessor, SPECIAL_TYPE_ControlsInterface, SPECIAL_TYPE_Tools;
 
 	static std::map<std::string /*special type*/,std::set<std::string> /*special file paths*/>
 	getSpecialsMap						(void);

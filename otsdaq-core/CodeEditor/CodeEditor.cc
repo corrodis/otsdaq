@@ -21,6 +21,7 @@ using namespace ots;
 std::string CodeEditor::SPECIAL_TYPE_FEInterface = "FEInterface";
 std::string CodeEditor::SPECIAL_TYPE_DataProcessor = "DataProcessor";
 std::string CodeEditor::SPECIAL_TYPE_ControlsInterface = "ControlsInterface";
+std::string CodeEditor::SPECIAL_TYPE_Tools = "Tools";
 
 //========================================================================================================================
 //CodeEditor
@@ -160,15 +161,17 @@ void CodeEditor::getDirectoryContent(
 	xmlOut->addTextElementToData("path",path);
 
 
-	const unsigned int numOfTypes = 3;
+	const unsigned int numOfTypes = 4;
 	std::string specialTypeNames[] = {
 			"Front-End Plugins",
 			"Data Processor Plugins",
-			"Controls Interface Plugins"};
+			"Controls Interface Plugins",
+			"Tools and Scripts"};
 	std::string specialTypes[] = {
-			"FEInterface",
-			"DataProcessor",
-			"ControlsInterface"};
+			SPECIAL_TYPE_FEInterface,
+			SPECIAL_TYPE_DataProcessor,
+			SPECIAL_TYPE_ControlsInterface,
+			SPECIAL_TYPE_Tools};
 
 	std::string pathMatchPrepend = "/"; //some requests come in with leading "/" and "//"
 	if(path.length() > 1 && path[1] == '/')
@@ -543,17 +546,19 @@ CodeEditor::getSpecialsMap(void)
 
 	__COUTV__(path);
 
-	const unsigned int numOfSpecials = 4;
+	const unsigned int numOfSpecials = 5;
 	std::string specialFolders[] = {
 			"FEInterfaces",
 			"DataProcessorPlugins",
 			"ControlsInterfacePlugins",
-			"FEInterfacePlugins"};
+			"FEInterfacePlugins",
+			"tools"};
 	std::string specialMapTypes[] = {
 			CodeEditor::SPECIAL_TYPE_FEInterface,
 			CodeEditor::SPECIAL_TYPE_DataProcessor,
 			CodeEditor::SPECIAL_TYPE_ControlsInterface,
-			CodeEditor::SPECIAL_TYPE_FEInterface};
+			CodeEditor::SPECIAL_TYPE_FEInterface,
+			CodeEditor::SPECIAL_TYPE_Tools};
 
 	//Note: can not do lambda recursive function if using auto to declare the function,
 	//	and must capture reference to the function. Also, must capture specialFolders
@@ -641,7 +646,9 @@ CodeEditor::getSpecialsMap(void)
 					if(
 							name.find(".h") == name.length()-2 		||
 							name.find(".cc") == name.length()-3 	||
-							name.find(".txt") == name.length()-4
+							name.find(".txt") == name.length()-4	||
+							name.find(".sh") == name.length()-3		||
+							name.find(".py") == name.length()-3
 					)
 					{
 						//__COUT__ << "Found special '" << specialFolders[specialIndex] <<
