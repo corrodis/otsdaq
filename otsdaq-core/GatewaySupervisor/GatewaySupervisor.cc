@@ -68,6 +68,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s)
 	, infoRequestSemaphore_			(toolbox::BSem::FULL)
 	, activeStateMachineName_		("")
 	, theIterator_					(this)
+	, broadcastCommandMessageIndex_ (0)
 	, counterTest_					(0)
 {
 	INIT_MF("GatewaySupervisor");
@@ -1631,7 +1632,6 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 					SOAPUtilities::translate(message));
 
 
-
 	__SUP_COUT__ << "=========> Broadcasting state machine command = " << command << __E__;
 
 	//:::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -1701,6 +1701,14 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 					}
 				}
 
+
+				{
+					//add the message index
+					SOAPParameters parameters;
+					parameters.addParameter("commandId", broadcastCommandMessageIndex_++);
+					SOAPUtilities::addParameters(message, parameters);
+				}
+
 				__SUP_COUT__ << "Sending... " <<
 						SOAPUtilities::translate(message) << std::endl;
 
@@ -1725,10 +1733,23 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 					{
 						__SUP_COUT__ << "Try again.." << __E__;
 
-						//add a second try parameter flag
-						SOAPParameters parameters;
-						parameters.addParameter("retransmission", "1");
-						SOAPUtilities::addParameters(message, parameters);
+						{
+							//add a second try parameter flag
+							SOAPParameters parameters;
+							parameters.addParameter("retransmission", "1");
+							SOAPUtilities::addParameters(message, parameters);
+						}
+
+
+						{
+							//add the message index
+							SOAPParameters parameters;
+							parameters.addParameter("commandId", broadcastCommandMessageIndex_++);
+							SOAPUtilities::addParameters(message, parameters);
+						}
+
+						__SUP_COUT__ << "Re-Sending... " <<
+								SOAPUtilities::translate(message) << std::endl;
 
 						reply = send(appInfo.getDescriptor(), message);
 					}

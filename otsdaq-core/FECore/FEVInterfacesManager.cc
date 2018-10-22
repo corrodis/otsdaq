@@ -40,6 +40,7 @@ void FEVInterfacesManager::destroy(void)
 		it.second.reset();
 
 	theFEInterfaces_.clear();
+	theFENamesByPriority_.clear();
 }
 
 //========================================================================================================================

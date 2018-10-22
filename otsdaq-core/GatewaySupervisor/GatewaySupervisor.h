@@ -164,6 +164,7 @@ private:
     };
 
     CodeEditor 							codeEditor_;
+    unsigned int						broadcastCommandMessageIndex_;
 
     //temporary member variable to avoid redeclaration in repetitive functions
     char								tmpStringForConversions_[100];
