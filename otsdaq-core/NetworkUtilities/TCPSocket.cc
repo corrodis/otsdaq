@@ -35,6 +35,7 @@ TCPSocket::TCPSocket(const std::string &senderHost, unsigned int senderPort, int
 	, chunkSize_(65000)
 {}
 
+//========================================================================================================================
 TCPSocket::TCPSocket(unsigned int listenPort, int sendBufferSize)
 	: port_(listenPort)
 	, TCPSocketNumber_(-1)
@@ -85,6 +86,7 @@ TCPSocket::~TCPSocket(void)
 		close(SendSocket_);
 }
 
+//========================================================================================================================
 void TCPSocket::connect()
 {
 	if (isSender_)
@@ -121,6 +123,7 @@ void TCPSocket::connect()
 }
 
 
+//========================================================================================================================
 int TCPSocket::send(const uint8_t* data, size_t size)
 {
 	std::unique_lock<std::mutex> lk(socketMutex_);

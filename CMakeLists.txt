@@ -30,11 +30,16 @@ include(CetCMakeEnv)
 cet_cmake_env()
 include(FindUpsXdaq)
 
-cet_set_compiler_flags(DIAGS VIGILANT
+cet_set_compiler_flags(
+ DIAGS 
+ VIGILANT
  WERROR
  NO_UNDEFINED
  EXTRA_FLAGS -pedantic -Wno-unused-parameter -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-ignored-qualifiers -Wno-unused-variable
  )
+ 
+cet_remove_compiler_flags(-std=c++98)
+ 
 
 #string(TOUPPER ${CMAKE_BUILD_TYPE} BTYPE_UC )
 #if( ${BTYPE_UC} MATCHES "DEBUG" )
