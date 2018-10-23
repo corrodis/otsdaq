@@ -528,7 +528,7 @@ void GatewaySupervisor::Default(xgi::Input* in, xgi::Output* out)
 		"</head>" <<
 		"<frameset col='100%' row='100%'>" <<
 		"<frame src='/WebPath/html/Desktop.html?urn=" <<
-		this->getApplicationDescriptor()->getLocalId() << "=securityType=" <<
+		this->getApplicationDescriptor()->getLocalId() << "&securityType=" <<
 		securityType_ << "'></frameset></html>";
 }
 
