@@ -372,7 +372,7 @@ XDAQ_CONST_CALL xdaq::ApplicationDescriptor* AllSupervisorInfo::getWizardDescrip
 
 
 //========================================================================================================================
-std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescriptors(
+std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSupervisorDescriptors(
 		const std::string& stateMachineCommand) const
 {
 	__COUT__ << "getOrderedSupervisorDescriptors" << __E__;
@@ -393,9 +393,9 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 
 					auto it = app.stateMachineCommandPriority_.find(stateMachineCommand);
 					if(it == app.stateMachineCommandPriority_.end())
-						orderedByPriority[100].push_back(app.id_);
-					else //take value, and do not allow DEFAUL value of 0 -> force to 100
-						orderedByPriority[it->second?it->second:100].push_back(app.id_);
+						orderedByPriority[XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY].push_back(app.id_); //if no priority, then default to XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY
+					else //take value, and do not allow DEFAULT value of 0 -> force to XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY
+						orderedByPriority[it->second?it->second:XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY].push_back(app.id_);
 
 					//__COUT__ << "app.id_ " << app.id_ << __E__;
 				}
@@ -411,33 +411,52 @@ std::vector<const SupervisorInfo*> AllSupervisorInfo::getOrderedSupervisorDescri
 
 
 	//return ordered set of supervisor infos
-	//	skip over Gateway Supervisor
-	std::vector<const SupervisorInfo*> retVec;
+	//	skip over Gateway Supervisor,
+	//	and other supervisors that do not need state transitions.
+	std::vector<std::vector<const SupervisorInfo*>> retVec;
+	bool createContainer;
 	for (const auto& priorityAppVector : orderedByPriority)
-		for (const auto& priorityApp : priorityAppVector.second)
 	{
-		auto it = allSupervisorInfo_.find(priorityApp);
-		if(it == allSupervisorInfo_.end())
+		createContainer = true;
+
+		for (const auto& priorityApp : priorityAppVector.second)
 		{
-			__SS__ << "Error! Was AllSupervisorInfo properly initialized? The app.id_ " << priorityApp << " priority " <<
-							(unsigned int)priorityAppVector.first << " could not be found in AllSupervisorInfo." << __E__;
-			__SS_THROW__;
+			auto it = allSupervisorInfo_.find(priorityApp);
+			if(it == allSupervisorInfo_.end())
+			{
+				__SS__ << "Error! Was AllSupervisorInfo properly initialized? The app.id_ " << priorityApp << " priority " <<
+								(unsigned int)priorityAppVector.first << " could not be found in AllSupervisorInfo." << __E__;
+				__SS_THROW__;
+			}
+
+			//__COUT__ << it->second.getName() << " [" << it->second.getId() << "]: " << " priority? " <<
+			//				(unsigned int)priorityAppVector.first << __E__;
+
+			if(it->second.isGatewaySupervisor()) continue; //skip gateway supervisor
+			if(it->second.isTypeLogbookSupervisor()) continue; //skip logbook supervisor(s)
+			if(it->second.isTypeMacroMakerSupervisor()) continue; //skip macromaker supervisor(s)
+			if(it->second.isTypeConfigurationGUISupervisor()) continue; //skip configurationGUI supervisor(s)
+			if(it->second.isTypeChatSupervisor()) continue; //skip chat supervisor(s)
+			if(it->second.isTypeConsoleSupervisor()) continue; //skip console supervisor(s)
+
+			if(createContainer) //create container first time
+			{
+				retVec.push_back(std::vector<const SupervisorInfo*>());
+
+				//if default priority, create a new vector container for each entry
+				//	so they have in sequence by default
+				if(priorityAppVector.first !=
+						XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY)
+					createContainer = false;
+			}
+			retVec[retVec.size()-1].push_back(&(it->second));
+
+			__COUT__ << it->second.getName() << " [LID=" << it->second.getId() << "]: " <<
+					" priority " <<
+					(unsigned int)priorityAppVector.first << " count " <<
+					retVec[retVec.size()-1].size() << __E__;
 		}
-
-		//__COUT__ << it->second.getName() << " [" << it->second.getId() << "]: " << " priority? " <<
-		//				(unsigned int)priorityAppVector.first << __E__;
-
-		if(it->second.isGatewaySupervisor()) continue; //skip gateway supervisor
-		if(it->second.isTypeLogbookSupervisor()) continue; //skip logbook supervisor(s)
-		if(it->second.isTypeMacroMakerSupervisor()) continue; //skip macromaker supervisor(s)
-		if(it->second.isTypeConfigurationGUISupervisor()) continue; //skip configurationGUI supervisor(s)
-		if(it->second.isTypeChatSupervisor()) continue; //skip chat supervisor(s)
-		if(it->second.isTypeConsoleSupervisor()) continue; //skip console supervisor(s)
-
-		retVec.push_back(&(it->second));
-		__COUT__ << it->second.getName() << " [LID=" << it->second.getId() << "]: " << " priority " <<
-				(unsigned int)priorityAppVector.first << __E__;
-	}
+	} //end equal priority loop
 	return retVec;
 }
 

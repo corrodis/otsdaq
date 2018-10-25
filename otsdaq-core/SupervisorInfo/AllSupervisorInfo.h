@@ -59,7 +59,7 @@ public:
     const SupervisorInfo& 							getWizardInfo	                (void) const;
     XDAQ_CONST_CALL xdaq::ApplicationDescriptor* 	getWizardDescriptor             (void) const;
 
-    std::vector<const SupervisorInfo*>				getOrderedSupervisorDescriptors (const std::string& stateMachineCommand) const;
+    std::vector<std::vector<const SupervisorInfo*>>	getOrderedSupervisorDescriptors (const std::string& stateMachineCommand) const;
 
 private:
 

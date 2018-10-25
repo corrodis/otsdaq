@@ -21,20 +21,6 @@ template<typename T>
 struct identity { typedef T type; };
 
 
-//
-//template <class T> 	T handleValidateValueForColumn    (ConfigurationView* configView, std::string value, unsigned int col)
-//{
-//	std::cout << "22:::::" << "handleValidateValueForColumn<T>" << std::endl;
-//	return configView->validateValueForColumn<T>(
-//			value,col);
-//}
-//template <>            	std::string handleValidateValueForColumn<std::string>(ConfigurationView* configView, std::string value, unsigned int col)
-//{
-//	std::cout << "22:::::" << "handleValidateValueForColumn<std::string>" << std::endl;
-//	return configView->validateValueForColumn(
-//			value,col);
-//}
-
 class ConfigurationTree
 {
 	friend class ConfigurationGUISupervisor;
@@ -71,13 +57,12 @@ public:
 		//Note: Members of the ConfigurationTree are declared constant.
 		//	(Refer to comments at top of class declaration for solutions)
 		//	So this operator cannot work.. SO I am going to crash just in case it is called by mistake
-		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
-		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - SO YOUR CODE IS WRONG! Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - ConfigurationTree is a const class. SO YOUR CODE IS WRONG! You should probably instantiate and initialize another ConfigurationTree, rather than assigning to an existing ConfigurationTree. Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - ConfigurationTree is a const class. SO YOUR CODE IS WRONG! You should probably instantiate and initialize another ConfigurationTree, rather than assigning to an existing ConfigurationTree. Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - ConfigurationTree is a const class. SO YOUR CODE IS WRONG! You should probably instantiate and initialize another ConfigurationTree, rather than assigning to an existing ConfigurationTree. Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - ConfigurationTree is a const class. SO YOUR CODE IS WRONG! You should probably instantiate and initialize another ConfigurationTree, rather than assigning to an existing ConfigurationTree. Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - ConfigurationTree is a const class. SO YOUR CODE IS WRONG! You should probably instantiate and initialize another ConfigurationTree, rather than assigning to an existing ConfigurationTree. Crashing now." << std::endl;
+		__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - ConfigurationTree is a const class. SO YOUR CODE IS WRONG! You should probably instantiate and initialize another ConfigurationTree, rather than assigning to an existing ConfigurationTree. Crashing now." << std::endl;
 		exit(0);
 
 		//copy to const members is not allowed.. but would look like this:

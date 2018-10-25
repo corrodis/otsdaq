@@ -20,6 +20,8 @@ namespace ots
 
 		struct XDAQApplication
 		{
+			static const uint8_t DEFAULT_PRIORITY;
+
 			std::string  applicationGroupID_;
 			std::string  applicationUID_;
 			bool		 status_;

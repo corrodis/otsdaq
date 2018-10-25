@@ -28,6 +28,8 @@ const std::set<std::string> XDAQContextConfiguration::ConfigurationGUITypeClassN
 
 const std::string			XDAQContextConfiguration::ARTDAQ_OFFSET_PORT				= "OffsetPort";
 
+const uint8_t 				XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY = 100;
+
 //========================================================================================================================
 XDAQContextConfiguration::XDAQContextConfiguration(void)
 	: ConfigurationBase("XDAQContextConfiguration")
@@ -389,9 +391,12 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 
 			try
 			{
-				appChild.second.getNode(colApplication_.colConfigurePriority_).getValue(contexts_.back().applications_.back().stateMachineCommandPriority_["Configure"]);
-				appChild.second.getNode(colApplication_.colStartPriority_).getValue(contexts_.back().applications_.back().stateMachineCommandPriority_["Start"]);
-				appChild.second.getNode(colApplication_.colStopPriority_).getValue(contexts_.back().applications_.back().stateMachineCommandPriority_["Stop"]);
+				appChild.second.getNode(colApplication_.colConfigurePriority_).getValue(
+						contexts_.back().applications_.back().stateMachineCommandPriority_["Configure"]);
+				appChild.second.getNode(colApplication_.colStartPriority_).getValue(
+						contexts_.back().applications_.back().stateMachineCommandPriority_["Start"]);
+				appChild.second.getNode(colApplication_.colStopPriority_).getValue(
+						contexts_.back().applications_.back().stateMachineCommandPriority_["Stop"]);
 			}
 			catch(...)
 			{
