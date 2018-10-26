@@ -1493,6 +1493,118 @@ void ConfigurationTree::recursiveGetCommonFields(
 }
 
 //==============================================================================
+//getChildrenByPriority
+//	returns them in order encountered in the table
+//	if filterMap criteria, then rejects any that do not meet all criteria
+//
+//	value can be comma-separated for OR of multiple values
+std::vector<std::vector<std::pair<std::string,ConfigurationTree> > > ConfigurationTree::getChildrenByPriority(
+		std::map<std::string /*relative-path*/, std::string /*value*/> filterMap,
+		bool onlyStatusTrue) const
+{
+	std::vector<std::vector<std::pair<std::string,ConfigurationTree> > > retVector;
+
+	//__COUT__ << "Children of node: " << getValueAsString() << std::endl;
+
+	bool filtering = filterMap.size();
+	bool skip;
+	std::string fieldValue;
+
+	bool createContainer;
+
+	std::vector<std::vector<std::string> > childrenNamesByPriority =
+			getChildrenNamesByPriority(onlyStatusTrue);
+
+	for(auto &childNamesAtPriority : childrenNamesByPriority)
+	{
+		createContainer = true;
+
+		for(auto &childName : childNamesAtPriority)
+		{
+			//__COUT__ << "\tChild: " << childName << std::endl;
+
+			if(filtering)
+			{
+				//if all criteria are not met, then skip
+				skip = false;
+
+				//for each filter, check value
+				for(const auto &filterPair:filterMap)
+				{
+					std::string filterPath = childName + "/" + filterPair.first;
+					__COUTV__(filterPath);
+					try
+					{
+
+						//extract field value list
+						std::vector<std::string> fieldValues;
+						StringMacros::getVectorFromString(filterPair.second,
+								fieldValues,
+								std::set<char>({','})/*delimiters*/);
+
+						__COUTV__(fieldValues.size());
+
+						skip = true;
+						//for each field check if any match
+						for(const auto& fieldValue:fieldValues)
+						{
+							//Note: that ConfigurationTree maps both fields associated with a link
+							//	to the same node instance.
+							//The behavior is likely not expected as response for this function..
+							//	so for links return actual value for field name specified
+							//	i.e. if Table of link is requested give that; if linkID is requested give that.
+							//use TRUE in getValueAsString for proper behavior
+
+							__COUT__ << "\t\tCheck: " << filterPair.first <<
+									" == " << fieldValue << " => " <<
+									StringMacros::decodeURIComponent(fieldValue) << " ??? " <<
+									this->getNode(filterPath).getValueAsString(true) <<
+									std::endl;
+
+							if(StringMacros::wildCardMatch(
+									StringMacros::decodeURIComponent(fieldValue),
+									this->getNode(filterPath).getValueAsString(true) ))
+							{
+								//found a match for the field/value pair
+								skip = false;
+								break;
+							}
+
+						}
+					}
+					catch(...)
+					{
+						__SS__ << "Failed to access filter path '" <<
+								filterPath << "' - aborting." << std::endl;
+						__SS_THROW__;
+					}
+
+					if(skip) break; //no match for this field, so stop checking and skip this record
+				}
+
+				if(skip) continue; //skip this record
+
+				//__COUT__ << "\tChild accepted: " << childName << std::endl;
+			}
+
+			if(createContainer)
+			{
+				retVector.push_back(
+						std::vector<std::pair<std::string,ConfigurationTree> >());
+				createContainer = false;
+			}
+
+			retVector[retVector.size()-1].push_back(
+					std::pair<std::string,ConfigurationTree>(childName,
+					this->getNode(childName, true)));
+		} //end children within priority loop
+	} //end children by priority loop
+
+	//__COUT__ << "Done w/Children of node: " << getValueAsString() << std::endl;
+	return retVector;
+} //end getChildrenByPriority()
+
+//==============================================================================
 //getChildren
 //	returns them in order encountered in the table
 //	if filterMap criteria, then rejects any that do not meet all criteria
@@ -1618,6 +1730,137 @@ bool ConfigurationTree::isConfigurationNode(void) const
 {
 	return (configuration_ &&
 			row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID);
+}
+
+
+//==============================================================================
+//getChildrenNamesByPriority
+//	returns them in priority order encountered in the table
+std::vector<std::vector<std::string>> ConfigurationTree::getChildrenNamesByPriority(
+		bool onlyStatusTrue) const
+{
+	std::vector<std::vector<std::string /*child name*/>> retVector;
+
+	if(!configView_)
+	{
+		__SS__ << "Can not get children names of '" <<
+				getValueAsString() <<
+				"' with null configuration view pointer!" << std::endl;
+		if(isLinkNode() && isDisconnected())
+			ss << " This node is a disconnected link to " <<
+				getDisconnectedTableName() << std::endl;
+
+		__SS_ONLY_THROW__;
+	}
+
+	if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)
+	{
+		//this node is config node
+		//so return all uid node strings that match groupId
+
+
+		bool tmpStatus;
+
+		if(1) //reshuffle by priority
+		{
+			try
+			{
+				std::map<uint64_t /*priority*/,
+					std::vector< unsigned int /*child row*/> > orderedByPriority;
+				std::vector<std::string /*child name*/> retPrioritySet;
+
+				unsigned int col = configView_->getColPriority();
+
+				uint64_t tmpPriority;
+
+				for(unsigned int r = 0; r<configView_->getNumberOfRows(); ++r)
+					if(groupId_ == "" ||
+							configView_->isEntryInGroup(r,childLinkIndex_,groupId_))
+					{
+						//check status if needed
+						if(onlyStatusTrue)
+						{
+							configView_->getValue(tmpStatus,r,configView_->getColStatus());
+							if(!tmpStatus) continue; //skip those with status false
+						}
+
+						configView_->getValue(tmpPriority,r,col);
+						//do not accept DEFAULT value of 0.. convert to 100
+						orderedByPriority[tmpPriority?tmpPriority:100].push_back(r);
+					}
+
+				//at this point have priority map
+				// now build return vector
+
+				for (const auto& priorityChildRowVector : orderedByPriority)
+				{
+					retVector.push_back(std::vector<std::string /*child name*/>());
+					for (const auto& priorityChildRow : priorityChildRowVector.second)
+						retVector[retVector.size()-1].push_back(
+								configView_->getDataView()[priorityChildRow][configView_->getColUID()]);
+				}
+
+				__COUT__ << "Returning priority children list." << __E__;
+				return retVector;
+			}
+			catch(std::runtime_error& e)
+			{
+				__COUT_WARN__ << "Error identifying priority. Assuming all children have equal priority (Error: " <<
+						e.what() << __E__;
+				retVector.clear();
+			}
+		}
+		//else not by priority
+
+		for(unsigned int r = 0; r<configView_->getNumberOfRows(); ++r)
+			if(groupId_ == "" ||
+					configView_->isEntryInGroup(r,childLinkIndex_,groupId_))
+			{
+				//check status if needed
+				if(onlyStatusTrue)
+				{
+					configView_->getValue(tmpStatus,r,configView_->getColStatus());
+					if(!tmpStatus) continue; //skip those with status false
+				}
+
+				retVector.push_back(std::vector<std::string /*child name*/>());
+				retVector[retVector.size()-1].push_back(
+						configView_->getDataView()[r][configView_->getColUID()]);
+			}
+
+	}
+	else if(row_ == ConfigurationView::INVALID)
+	{
+		__SS__ << "Malformed ConfigurationTree" << std::endl;
+		__SS_THROW__;
+	}
+	else if(col_ == ConfigurationView::INVALID)
+	{
+		//this node is uid node
+		//so return all link and value nodes
+
+
+		for(unsigned int c = 0; c<configView_->getNumberOfColumns(); ++c)
+			if(c == configView_->getColUID() ||  //skip UID and linkID columns (only show link column, to avoid duplicates)
+					configView_->getColumnInfo(c).isChildLinkGroupID() ||
+					configView_->getColumnInfo(c).isChildLinkUID())
+				continue;
+			else
+			{
+				retVector.push_back(std::vector<std::string /*child name*/>());
+				retVector[retVector.size()-1].push_back(
+						configView_->getColumnInfo(c).getName());
+			}
+	}
+	else //this node is value node, so has no node to choose from
+	{
+		// this node is value node, cant go any deeper!
+		__SS__ << "\n\nError occurred looking for children of nodeName=" << getValueName() << "\n\n" <<
+			"Invalid depth! getChildrenValues() called from a value point in the Configuration Tree." << std::endl;
+		__SS_THROW__;
+	}
+
+	return retVector;
 }
 
 //==============================================================================

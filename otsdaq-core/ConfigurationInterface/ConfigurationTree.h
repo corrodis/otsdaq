@@ -237,8 +237,10 @@ public:
 	const std::string&						getFieldConfigurationName	(void) const;
 	const ConfigurationVersion&				getConfigurationVersion		(void) const;
 	const time_t&							getConfigurationCreationTime(void) const;
+	std::vector<std::vector<std::string> > 	getChildrenNamesByPriority  (bool onlyStatusTrue = false) const;
 	std::vector<std::string>				getChildrenNames	        (bool byPriority = false, bool onlyStatusTrue = false) const;
-	std::vector<std::pair<std::string,ConfigurationTree> >	getChildren	(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap = std::map<std::string /*relative-path*/, std::string /*value*/>(), bool byPriority = false, bool onlyStatusTrue = false) const;
+	std::vector<std::vector<std::pair<std::string,ConfigurationTree> > >	getChildrenByPriority	(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap = std::map<std::string /*relative-path*/, std::string /*value*/>(), bool onlyStatusTrue = false) const;
+	std::vector<std::pair<std::string,ConfigurationTree> >					getChildren				(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap = std::map<std::string /*relative-path*/, std::string /*value*/>(), bool byPriority = false, bool onlyStatusTrue = false) const;
 	std::map<std::string,ConfigurationTree> getChildrenMap	            (void) const;
 	std::string								getEscapedValue		        (void) const;
 	const std::string&						getValueAsString	        (bool returnLinkTableValue=false) const;
