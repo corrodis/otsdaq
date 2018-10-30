@@ -1084,7 +1084,7 @@ otsActionHandler() {
 			
 		    exit
 			
-		elif [[ "$OTSDAQ_STARTOTS_ACTION" != "0"  || "$OTSDAQ_STARTOTS_QUIT" != "0" ]]; then
+		elif ! [[ "$OTSDAQ_STARTOTS_ACTION" ~= "(0|)"  || "$OTSDAQ_STARTOTS_QUIT" ~= "(0|)" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" ~= "(0|)" ]]; then
 		
 			echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExiting StartOTS.sh.. Unrecognized command !=0 in Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"			
 			exit
