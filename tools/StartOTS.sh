@@ -427,7 +427,7 @@ fi
 mkdir -p ${OTSDAQ_DATA} || echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tError: OTSDAQ_DATA path (${OTSDAQ_DATA}) does not exist and mkdir failed!"
 
 if [ "x$ROOT_BROWSER_PATH" == "x" ];then
-	export ROOT_BROWSER_PATH=${OTSDAQ_DEMO_DIR}
+	export ROOT_BROWSER_PATH=${OTSDAQ_DATA}
 fi
 
 if [ "x$OTSDAQ_LOG_DIR" == "x" ];then
