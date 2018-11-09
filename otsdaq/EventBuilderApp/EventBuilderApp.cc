@@ -356,11 +356,16 @@ void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
 void EventBuilderApp::transitionHalting(toolbox::Event::Reference e)
 
 {
-
-	for (auto it = theARTDAQEventBuilderInterfaces_.begin(); it != theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->stop(45, 0);
-	for (auto it = theARTDAQEventBuilderInterfaces_.begin(); it != theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->shutdown(45);
+	try {
+		for (auto it = theARTDAQEventBuilderInterfaces_.begin(); it != theARTDAQEventBuilderInterfaces_.end(); it++)
+			it->second->stop(45, 0);
+		for (auto it = theARTDAQEventBuilderInterfaces_.begin(); it != theARTDAQEventBuilderInterfaces_.end(); it++)
+			it->second->shutdown(45);
+	}
+	catch (...)
+	{
+		__MOUT_ERR__ << "ERROR OCCURRED DURING SHUTDOWN! STATE=" << theARTDAQEventBuilderInterfaces_[0]->status();
+	}
 }
 
 //========================================================================================================================
