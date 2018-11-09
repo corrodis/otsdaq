@@ -256,6 +256,10 @@ void ARTDAQConsumer::stopProcessingData(void)
     uint64_t timeout   = 45;
     uint64_t timestamp = 184467440737095516;
     report_string_ = "";
+
+	auto sts = fragment_receiver_ptr_->status();
+	if (sts == "Ready") return; // Already stopped/never started
+
     external_request_status_ = fragment_receiver_ptr_->stop(timeout, timestamp);
     if (! external_request_status_)
     {
