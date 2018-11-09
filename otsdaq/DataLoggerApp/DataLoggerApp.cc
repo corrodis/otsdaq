@@ -321,9 +321,22 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 //========================================================================================================================
 void DataLoggerApp::transitionHalting(toolbox::Event::Reference e) 
 {
-    theDataLoggerInterface_->stop(0,0);
-      theDataLoggerInterface_->shutdown(0);
-      init();
+	  try {
+		  theDataLoggerInterface_->stop(45, 0);
+	  }
+	  catch (...) {
+		  // It is okay for this to fail, esp. if already stopped...
+	  }
+
+	  try {
+		  theDataLoggerInterface_->shutdown(45);
+	  }
+	  catch (...)
+	  {
+		  __MOUT_ERR__ << "ERROR OCCURRED DURING SHUTDOWN! STATE=" << theDataLoggerInterface_->status();
+	  }
+
+	  init();
 }
 
 //========================================================================================================================

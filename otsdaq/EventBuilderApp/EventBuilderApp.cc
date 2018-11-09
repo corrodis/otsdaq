@@ -357,14 +357,20 @@ void EventBuilderApp::transitionHalting(toolbox::Event::Reference e)
 {
 	try {
 		theARTDAQEventBuilderInterface_->stop(45, 0);
-		theARTDAQEventBuilderInterface_->shutdown(45);
+	}
+	catch (...) {
+	 // It is okay for this to fail, esp. if already stopped...
+	}
 
-		init();
+	try {
+		theARTDAQEventBuilderInterface_->shutdown(45);
 	}
 	catch (...)
 	{
 		__MOUT_ERR__ << "ERROR OCCURRED DURING SHUTDOWN! STATE=" << theARTDAQEventBuilderInterface_->status();
 	}
+
+	init();
 }
 
 //========================================================================================================================

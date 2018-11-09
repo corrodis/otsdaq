@@ -321,8 +321,21 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 //========================================================================================================================
 void DispatcherApp::transitionHalting(toolbox::Event::Reference e) 
 {
-	theDispatcherInterface_->stop(45, 0);
-  theDispatcherInterface_->shutdown(45);
+  try {
+	  theDispatcherInterface_->stop(45, 0);
+  }
+  catch (...) {
+	  // It is okay for this to fail, esp. if already stopped...
+  }
+
+  try {
+	  theDispatcherInterface_->shutdown(45);
+  }
+  catch (...)
+  {
+	  __MOUT_ERR__ << "ERROR OCCURRED DURING SHUTDOWN! STATE=" << theDispatcherInterface_->status();
+  }
+
   init();
 }
 
