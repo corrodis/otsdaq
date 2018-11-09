@@ -80,7 +80,7 @@ private:
 	std::string                             supervisorContextUID_;
 	std::string                             supervisorApplicationUID_;
 
-    artdaq::DispatcherApp*                	theDispatcherInterface_;
+	std::unique_ptr<artdaq::DispatcherApp>                	theDispatcherInterface_;
 
 };
 

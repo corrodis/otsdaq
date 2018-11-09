@@ -157,6 +157,7 @@ void CodeEditor::getDirectoryContent(
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
 	path = safePathString(CgiDataUtilities::decodeURIComponent(path));
 	__COUTV__(path);
+	__COUTV__(SOURCE_BASE_PATH);
 
 	xmlOut->addTextElementToData("path",path);
 
@@ -241,7 +242,7 @@ void CodeEditor::getDirectoryContent(
 			if(type == 0)
 			{
 				//unknown type .. determine if directory
-				DIR *pTmpDIR = opendir((path + "/" + name).c_str());
+				DIR *pTmpDIR = opendir((SOURCE_BASE_PATH + path + "/" + name).c_str());
 				if(pTmpDIR)
 				{
 					isDir = true;

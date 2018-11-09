@@ -85,7 +85,7 @@ private:
 	std::string                                	supervisorApplicationUID_;
 
 
-    std::map<int, artdaq::EventBuilderApp*> theARTDAQEventBuilderInterfaces_;
+	std::map<int, std::unique_ptr<artdaq::EventBuilderApp>> theARTDAQEventBuilderInterfaces_;
 
 };
 

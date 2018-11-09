@@ -1,4 +1,4 @@
-#include "otsdaq/EventBuilderApp/EventBuilderApp.h"
+ #include "otsdaq/EventBuilderApp/EventBuilderApp.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
@@ -111,7 +111,7 @@ void EventBuilderApp::init(void)
 	// create the EventBuilderInterface
 	app_name = name;
 	my_rank = this->getApplicationDescriptor()->getLocalId();
-	theARTDAQEventBuilderInterfaces_[0] = new artdaq::EventBuilderApp( );
+	theARTDAQEventBuilderInterfaces_[0].reset( new artdaq::EventBuilderApp( ));
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR INIT DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 }
 
@@ -361,6 +361,7 @@ void EventBuilderApp::transitionHalting(toolbox::Event::Reference e)
 		it->second->stop(45, 0);
 	for (auto it = theARTDAQEventBuilderInterfaces_.begin(); it != theARTDAQEventBuilderInterfaces_.end(); it++)
 		it->second->shutdown(45);
+	init();
 }
 
 //========================================================================================================================

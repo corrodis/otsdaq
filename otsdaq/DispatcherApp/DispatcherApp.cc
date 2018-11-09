@@ -107,14 +107,14 @@ void DispatcherApp::init(void)
 	// create the DispatcherInterface
 	app_name = name;
 	my_rank = this->getApplicationDescriptor()->getLocalId();
-	theDispatcherInterface_ = new artdaq::DispatcherApp();
+	theDispatcherInterface_.reset( new artdaq::DispatcherApp());
 	//theDispatcherInterface_ = new DispatcherInterface(mpiSentry_->rank(), local_group_comm, supervisorApplicationUID_ );
 }
 
 //========================================================================================================================
 void DispatcherApp::destroy(void)
 {
-	delete theDispatcherInterface_;
+  theDispatcherInterface_.reset(nullptr);
 }
 
 //========================================================================================================================
@@ -322,7 +322,8 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 void DispatcherApp::transitionHalting(toolbox::Event::Reference e) 
 {
 	theDispatcherInterface_->stop(45, 0);
-	theDispatcherInterface_->shutdown(45);
+  theDispatcherInterface_->shutdown(45);
+  init();
 }
 
 //========================================================================================================================

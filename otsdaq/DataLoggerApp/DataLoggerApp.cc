@@ -109,13 +109,13 @@ void DataLoggerApp::init(void)
     // create the DataLoggerInterface
 	app_name = name;
 	my_rank = this->getApplicationDescriptor()->getLocalId();
-    theDataLoggerInterface_ = new artdaq::DataLoggerApp();
+	theDataLoggerInterface_.reset( new artdaq::DataLoggerApp());
 }
 
 //========================================================================================================================
 void DataLoggerApp::destroy(void)
 {
-	delete theDataLoggerInterface_;
+  theDataLoggerInterface_.reset(nullptr);
 }
 
 //========================================================================================================================
@@ -321,8 +321,9 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 //========================================================================================================================
 void DataLoggerApp::transitionHalting(toolbox::Event::Reference e) 
 {
-	theDataLoggerInterface_->stop(0, 0);
-	theDataLoggerInterface_->shutdown(0);
+    theDataLoggerInterface_->stop(0,0);
+      theDataLoggerInterface_->shutdown(0);
+      init();
 }
 
 //========================================================================================================================
