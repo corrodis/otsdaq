@@ -79,7 +79,6 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub * s)
 	supervisorConfigurationPath_  = "/" + supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
 
 	setStateMachineName(supervisorApplicationUID_);
-    init();
 }
 
 //========================================================================================================================
@@ -322,13 +321,15 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 //========================================================================================================================
 void DataLoggerApp::transitionHalting(toolbox::Event::Reference e) 
 {
-  //    theDataLoggerInterface_->shutdown(0);
+	theDataLoggerInterface_->stop(0, 0);
+	theDataLoggerInterface_->shutdown(0);
 }
 
 //========================================================================================================================
 void DataLoggerApp::transitionInitializing(toolbox::Event::Reference e) 
 {
-    
+
+	init();
 }
 
 //========================================================================================================================
@@ -362,5 +363,4 @@ void DataLoggerApp::transitionStarting(toolbox::Event::Reference e)
 void DataLoggerApp::transitionStopping(toolbox::Event::Reference e) 
 {
     theDataLoggerInterface_->stop(0,0);
-    theDataLoggerInterface_->shutdown(0);
 }

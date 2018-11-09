@@ -77,7 +77,6 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub * s)
 	supervisorConfigurationPath_ = "/" + supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
 
 	setStateMachineName(supervisorApplicationUID_);
-	init();
 }
 
 //========================================================================================================================
@@ -322,13 +321,15 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 //========================================================================================================================
 void DispatcherApp::transitionHalting(toolbox::Event::Reference e) 
 {
-  //theDispatcherInterface_->shutdown(45);
+	theDispatcherInterface_->stop(45, 0);
+	theDispatcherInterface_->shutdown(45);
 }
 
 //========================================================================================================================
 void DispatcherApp::transitionInitializing(toolbox::Event::Reference e) 
 {
 
+	init();
 }
 
 //========================================================================================================================
@@ -354,5 +355,4 @@ void DispatcherApp::transitionStarting(toolbox::Event::Reference e)
 void DispatcherApp::transitionStopping(toolbox::Event::Reference e) 
 {
 	theDispatcherInterface_->stop(45, 0);
-	theDispatcherInterface_->shutdown(45);
 }

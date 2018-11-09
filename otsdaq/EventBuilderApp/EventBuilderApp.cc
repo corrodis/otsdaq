@@ -80,7 +80,6 @@ EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
 	supervisorConfigurationPath_  = "/" + supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
 
 	setStateMachineName(supervisorApplicationUID_);
-	init();
 }
 
 //========================================================================================================================
@@ -358,15 +357,17 @@ void EventBuilderApp::transitionHalting(toolbox::Event::Reference e)
 
 {
 
-  //	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-  //		it->second->shutdown(0);
+	for (auto it = theARTDAQEventBuilderInterfaces_.begin(); it != theARTDAQEventBuilderInterfaces_.end(); it++)
+		it->second->stop(45, 0);
+	for (auto it = theARTDAQEventBuilderInterfaces_.begin(); it != theARTDAQEventBuilderInterfaces_.end(); it++)
+		it->second->shutdown(45);
 }
 
 //========================================================================================================================
 void EventBuilderApp::transitionInitializing(toolbox::Event::Reference e)
 
 {
-
+	init();
 }
 
 //========================================================================================================================
@@ -404,7 +405,4 @@ void EventBuilderApp::transitionStopping(toolbox::Event::Reference e)
 
 	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
 		it->second->stop(45, 0);
-
-	for(auto it=theARTDAQEventBuilderInterfaces_.begin(); it!=theARTDAQEventBuilderInterfaces_.end(); it++)
-		it->second->shutdown(45);
 }
