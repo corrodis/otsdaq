@@ -1615,8 +1615,19 @@ bool GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 	bool iterationsDone = false;
 	bool subIterationsDone;
 
-	std::vector<std::vector<const SupervisorInfo*>> orderedSupervisors =
-			allSupervisorInfo_.getOrderedSupervisorDescriptors(command);
+	std::vector<std::vector<const SupervisorInfo*>> orderedSupervisors;
+
+	try
+	{
+		orderedSupervisors = allSupervisorInfo_.getOrderedSupervisorDescriptors(command);
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "Error getting supervisor priority. Was there a change in the context?" <<
+				" Remember, if the context was changed, it is safest to relaunch StartOTS.sh. " <<
+				e.what() << __E__;
+		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+	}
 
 	std::vector<std::vector<bool>> supervisorIterationsDone;
 	//initialize to false (not done)
