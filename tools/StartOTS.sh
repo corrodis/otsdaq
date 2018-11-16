@@ -226,11 +226,13 @@ function killprocs
 
 		killall ots.exe 	&>/dev/null 2>&1 #hide output
 		killall xdaq.exe 	&>/dev/null 2>&1 #hide output
-		killall mf_rcv_n_fwd 	&>/dev/null 2>&1 #hide output #message viewer display without decoration		
+		killall otsConsoleFwd 	&>/dev/null 2>&1 #hide output #message viewer display without decoration
+		killall mf_rcv_n_fwd 			&>/dev/null 2>&1 #hide output #message viewer display without decoration #deprecated name		
 		killall art 		&>/dev/null 2>&1 #hide output
 		killall -9 ots.exe 	&>/dev/null 2>&1 #hide output
 		killall -9 xdaq.exe	&>/dev/null 2>&1 #hide output
-		killall -9 mf_rcv_n_fwd &>/dev/null 2>&1 #hide output #message viewer display without decoration		
+		killall -9 otsConsoleFwd &>/dev/null 2>&1 #hide output #message viewer display without decoration
+		killall -9 mf_rcv_n_fwd 		 &>/dev/null 2>&1 #hide output #message viewer display without decoration #deprecated name
 		killall -9 art 		&>/dev/null 2>&1 #hide output
 		
 		usershort=`echo $USER|cut -c 1-10`
@@ -512,9 +514,9 @@ launchOTSWiz() {
 			fi
 			
 			echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt ***  "
-			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
+			otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 		else
-			mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
+			otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
 		fi		 	
 	fi
 	
@@ -692,9 +694,9 @@ launchOTS() {
 				fi
 				
 				echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${Yellow}${Bold}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt${Reset}"
-				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
+				otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
 			else
-				mf_rcv_n_fwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
+				otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
 			fi		 	
 			echo
 		fi

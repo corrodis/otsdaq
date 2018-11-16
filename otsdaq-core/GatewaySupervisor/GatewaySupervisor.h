@@ -128,17 +128,83 @@ private:
 
     static void															StateChangerWorkLoop				(GatewaySupervisor *supervisorPtr);
     std::string															attemptStateMachineTransition		(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
-    bool         														broadcastMessage					(xoap::MessageReference msg);
+    void         														broadcastMessage					(xoap::MessageReference msg);
 
+    struct BroadcastThreadStruct
+    {
+    	BroadcastThreadStruct()
+    	: threadIndex_		(-1)
+    	, exitThread_		(false)
+    	, working_			(true)
+    	, workToDo_			(false)
+    	{}
 
+    	//each thread accesses these members
+    	std::mutex						threadMutex;
+    	unsigned int 					threadIndex_;
+    	volatile bool					exitThread_, working_;
+		bool 							workToDo_;
+
+		struct BroadcastMessageStruct
+		{
+			BroadcastMessageStruct(
+					const SupervisorInfo& 			appInfo,
+					xoap::MessageReference 			message,
+					const std::string& 				command,
+					const unsigned int&				iteration,
+					uint8_t&						iterationsDone)
+			: appInfo_			(appInfo)
+			, message_			(message)
+			, command_			(command)
+			, iteration_		(iteration)
+			, iterationsDone_	(iterationsDone)
+			{}
+
+			const SupervisorInfo& 			appInfo_;
+			xoap::MessageReference 			message_;
+			const std::string& 				command_;
+			const unsigned int&				iteration_;
+			uint8_t&						iterationsDone_;
+
+			std::string 					reply_;
+		};
+
+		//always just 1 (for now)
+		std::vector<BroadcastThreadStruct::BroadcastMessageStruct> messages_;
+
+		void setMessage(
+				const SupervisorInfo& 			appInfo,
+				xoap::MessageReference 			message,
+				const std::string& 				command,
+				const unsigned int&				iteration,
+				uint8_t&						iterationsDone)
+		{
+			messages_.clear();
+			messages_.push_back(BroadcastThreadStruct::BroadcastMessageStruct(
+					appInfo,
+					message,
+					command,
+					iteration,
+					iterationsDone
+					));
+			workToDo_ = true;
+		} //end setMessage()
+
+		const SupervisorInfo& 	getAppInfo()			{ return messages_[0].appInfo_;			}
+		xoap::MessageReference 	getMessage()			{ return messages_[0].message_;			}
+		const std::string&		getCommand()			{ return messages_[0].command_;			}
+		const unsigned int&		getIteration()			{ return messages_[0].iteration_;		}
+		std::string& 			getReply()				{ return messages_[0].reply_;			}
+		uint8_t&	 			getIterationsDone()		{ return messages_[0].iterationsDone_;	}
+    }; //end BroadcastThreadStruct declaration
+    static void															broadcastMessageThread				(GatewaySupervisor *supervisorPtr, GatewaySupervisor::BroadcastThreadStruct* threadStruct);
+    bool 																handleBroadcastMessageTarget		(const SupervisorInfo& appInfo, xoap::MessageReference message, const std::string& command, const unsigned int& iteration, std::string& reply);
 
 
     bool								supervisorGuiHasBeenLoaded_	; //use to indicate first access by user of ots since execution
 
     //Member Variables
 
-    //AllSupervisorInfo                   allSupervisorInfo_         	;
-   // ConfigurationManager*               theConfigurationManager_    ;
     WebUsers 						    theWebUsers_                ;
     SystemMessenger				        theSystemMessenger_         ;
 	ARTDAQCommandable					theArtdaqCommandable_;
@@ -147,9 +213,6 @@ private:
     toolbox::BSem                      	stateMachineSemaphore_      ;
     WorkLoopManager                    	infoRequestWorkLoopManager_ ;
     toolbox::BSem                  		infoRequestSemaphore_       ;
-//
-//    std::string 						supervisorContextUID_		; //now comes from CorePropertySup
-//    std::string 						supervisorApplicationUID_	;
 
     std::string							activeStateMachineName_			; //when multiple state machines, this is the name of the state machine which executed the configure transition
     std::string							activeStateMachineWindowName_	;
@@ -164,7 +227,10 @@ private:
     };
 
     CodeEditor 							codeEditor_;
+
+    std::mutex							broadcastCommandMessageIndexMutex_, broadcastIterationsDoneMutex_;
     unsigned int						broadcastCommandMessageIndex_;
+    bool								broadcastIterationsDone_;
 
     //temporary member variable to avoid redeclaration in repetitive functions
     char								tmpStringForConversions_[100];

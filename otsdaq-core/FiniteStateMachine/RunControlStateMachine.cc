@@ -135,7 +135,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 		xoap::MessageReference message)
 
 {
-	__COUT__ << "Received... " << SOAPUtilities::translate(message) << std::endl;
+	__COUT__ << "Received... \t" << SOAPUtilities::translate(message) << std::endl;
 
 	theStateMachine_.setErrorMessage(""); //clear error message
 

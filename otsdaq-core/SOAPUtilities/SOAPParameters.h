@@ -13,11 +13,11 @@ class SOAPParameters : public Parameters<std::string,std::string>
 {
 public:
     SOAPParameters(void);
-    SOAPParameters(std::string name, std::string value="");
+    SOAPParameters(const std::string& name, const std::string& value="");
     SOAPParameters(SOAPParameter parameter);
     ~SOAPParameters(void);
-    void addParameter(const std::string name, const std::string value="");
-    void addParameter(const std::string name, const int value);
+    void addParameter(const std::string& name, const std::string& value="");
+    void addParameter(const std::string& name, const int value);
 
 };
 }

@@ -5,6 +5,7 @@
 #include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <string>
+#include <mutex>
 
 namespace ots
 {
@@ -15,17 +16,18 @@ namespace ots
 // The are 4 public member function that should matter to the user:
 //
 //		resetProgressBar(int id) ~~
-//			Resets progress bar to 0% complete, id does not have to be unique in your code, read NOTE 2
+//			Resets progress bar to 0% complete, id does not have to be unique in your code, read NOTE 2.
 //
 //		step() ~~
 //			Marks that incremental progress has been made. user should place step()
 //			freely throughout the code each time a jump in the progress bar is desired.
+//			Thread safe.
 //
 //		complete() ~~
-//			Indicate the progress bar is to be 100% at this point
+//			Indicate the progress bar is to be 100% at this point.
 //
 //		read() ~~
-//			Returns the % complete
+//			Returns the % complete. Thread safe.
 //
 //	USE: User places resetProgressBar(id) at the start of sequence of events, as many step()'s as desired
 //		within the sequence, and complete() at the end of the sequence of events.
@@ -86,18 +88,19 @@ public:
 	//********************************************************************//
 
 	//remaining member functions are called normal
-	void step();
+	void step(); //thread safe
 	void complete();
-	int  read(); //if stepsToComplete==0, then define any progress as 50%
-	std::string  readPercentageString(); //if stepsToComplete==0, then define any progress as 50%
+	int  read(); //if stepsToComplete==0, then define any progress as 50%, thread safe
+	std::string  readPercentageString(); //if stepsToComplete==0, then define any progress as 50%, thread safe
 
 private:
-	const std::string cProgressBarFilePath_;
-	const std::string cProgressBarFileExtension_;
-	std::string       totalStepsFileName_;
-	int               stepCount_;
-	int               stepsToComplete_;
-	bool              started_;
+	const std::string 	cProgressBarFilePath_;
+	const std::string 	cProgressBarFileExtension_;
+	std::string       	totalStepsFileName_;
+	int               	stepCount_;
+	int               	stepsToComplete_;
+	bool              	started_;
+	std::mutex			theMutex_;
 };
 
 	
