@@ -34,6 +34,8 @@ end_product_list
 qualifier    	   artdaq	 	 artdaq_database	xdaq   	   artdaq_mfextensions 	notes
 e15:s65:prof       e15:s65:prof    	 e15:s65:prof 		e15:prof   e15:s65:prof 	-std=c++14
 e15:s65:debug      e15:s65:debug   	 e15:s65:debug		e15:debug  e15:s65:debug 	-std=c++14
+e15:s64:prof       e15:s64:prof    	 e15:s64:prof 		e15:prof   e15:s64:prof 	-std=c++14
+e15:s64:debug      e15:s64:debug   	 e15:s64:debug		e15:debug  e15:s64:debug 	-std=c++14
 e14:s50:prof       e14:s50:prof    	 e14:s50:prof 		e14:prof   e14:s50:prof 	-std=c++14
 e14:s50:debug      e14:s50:debug   	 e14:s50:debug		e14:debug  e14:s50:debug 	-std=c++14
 end_qualifier_list
