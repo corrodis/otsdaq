@@ -3228,7 +3228,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
 			__SS_THROW__;
 		}
 	}
-}
+} //end launchStartOTSCommand
 
 //FIXME -- delete -- now all cookie checks return all info
 ////========================================================================================================================
