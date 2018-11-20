@@ -1083,7 +1083,7 @@ otsActionHandler() {
 						
 		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP" ]]; then
 
-			echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExiting StartOTS.sh..
+			echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExiting StartOTS.sh.."
 			if [[ ($ISCONFIG == 1) || ("${HOSTNAME}" == "${gatewayHostname}") ]]; then
 				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
 				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
