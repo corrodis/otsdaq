@@ -231,19 +231,28 @@ bool FiniteStateMachine::execTransition(const std::string& transition,
 		inTransition_ = false;
 		transitionSuccessful = false;
 		std::ostringstream error;
-		error << "Transition " << transition << " was not executed from current state " <<
+		__SS__ << "Transition " << transition << " was not executed from current state " <<
 				getStateName (getCurrentState()) << ". There was an error: " << e.what();
-		__COUT_ERR__ << error.str() << std::endl;
+		__COUT_ERR__ << ss.str() << std::endl;
 		//diagService_->reportError(err.str(),DIAGERROR);
 
 		//send state machine to error
-		XCEPT_RAISE (toolbox::fsm::exception::Exception, error.str());
+		XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());
+	}
+	catch (...)
+	{
+		inTransition_ = false;
+		transitionSuccessful = false;
+		__SS__ << "Transition " << transition << " was not executed from current state " <<
+				getStateName (getCurrentState()) << ". There was an unknown error.";
+		__COUT_ERR__ << ss.str() << std::endl;
+		//diagService_->reportError(err.str(),DIAGERROR);
+
+		//send state machine to error
+		XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());
 	}
 
-//	__COUT__ << "Transition?" << inTransition_ << std::endl;
 	inTransition_ = false;
-//	__COUT__ << "Done with fsm transition" << std::endl;
-//	__COUT__ << "Transition?" << inTransition_ << std::endl;
 	stateEntranceTime_ = time(0);
 	return transitionSuccessful;
 }

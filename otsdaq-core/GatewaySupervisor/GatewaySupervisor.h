@@ -130,29 +130,60 @@ private:
     std::string															attemptStateMachineTransition		(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
     void         														broadcastMessage					(xoap::MessageReference msg);
 
+
+	struct BroadcastMessageIterationsDoneStruct
+	{
+		//Creating std::vector<std::vector<bool>>
+		//	because of problems with the standard library
+		//	not allowing passing by reference of bool types.
+		//Broadcast thread implementation requires passing by reference.
+		~BroadcastMessageIterationsDoneStruct()
+		{
+			for(auto &arr : iterationsDone_)
+				delete[] arr;
+			iterationsDone_.clear();
+			arraySizes_.clear();
+		} //end destructor
+
+		void push(const unsigned int& size)
+		{
+			iterationsDone_.push_back(new bool[size]);
+			arraySizes_.push_back(size);
+
+			//initialize to false
+			for(unsigned int i=0;i<size;++i)
+				iterationsDone_[iterationsDone_.size()-1][i] = false;
+		} //end push()
+
+		bool* 			operator[]	(unsigned int i) 			{return iterationsDone_[i];}
+		const bool* 	operator[]	(unsigned int i) const 		{return iterationsDone_[i];}
+		unsigned int 	size		(unsigned int i=-1) 		{if(i==(unsigned int)-1) return iterationsDone_.size(); return arraySizes_[i];}
+	private:
+
+		std::vector<bool*> 			iterationsDone_;
+		std::vector<unsigned int>	arraySizes_;
+	}; //end BroadcastMessageIterationsDoneStruct definition
+
     struct BroadcastThreadStruct
     {
+		//===================
     	BroadcastThreadStruct()
     	: threadIndex_		(-1)
     	, exitThread_		(false)
     	, working_			(true)
     	, workToDo_			(false)
-    	{}
-
-    	//each thread accesses these members
-    	std::mutex						threadMutex;
-    	unsigned int 					threadIndex_;
-    	volatile bool					exitThread_, working_;
-		bool 							workToDo_;
+    	, error_			(false)
+    	{} //end BroadcastThreadStruct constructor()
 
 		struct BroadcastMessageStruct
 		{
+	    	//===================
 			BroadcastMessageStruct(
 					const SupervisorInfo& 			appInfo,
 					xoap::MessageReference 			message,
 					const std::string& 				command,
 					const unsigned int&				iteration,
-					uint8_t&						iterationsDone)
+					bool&							iterationsDone)
 			: appInfo_			(appInfo)
 			, message_			(message)
 			, command_			(command)
@@ -164,20 +195,18 @@ private:
 			xoap::MessageReference 			message_;
 			const std::string& 				command_;
 			const unsigned int&				iteration_;
-			uint8_t&						iterationsDone_;
+			bool&							iterationsDone_;
 
 			std::string 					reply_;
-		};
+		}; //end BroadcastMessageStruct definition
 
-		//always just 1 (for now)
-		std::vector<BroadcastThreadStruct::BroadcastMessageStruct> messages_;
-
+		//===================
 		void setMessage(
 				const SupervisorInfo& 			appInfo,
 				xoap::MessageReference 			message,
 				const std::string& 				command,
 				const unsigned int&				iteration,
-				uint8_t&						iterationsDone)
+				bool&							iterationsDone)
 		{
 			messages_.clear();
 			messages_.push_back(BroadcastThreadStruct::BroadcastMessageStruct(
@@ -186,7 +215,7 @@ private:
 					command,
 					iteration,
 					iterationsDone
-					));
+			));
 			workToDo_ = true;
 		} //end setMessage()
 
@@ -195,10 +224,19 @@ private:
 		const std::string&		getCommand()			{ return messages_[0].command_;			}
 		const unsigned int&		getIteration()			{ return messages_[0].iteration_;		}
 		std::string& 			getReply()				{ return messages_[0].reply_;			}
-		uint8_t&	 			getIterationsDone()		{ return messages_[0].iterationsDone_;	}
+		bool&	 				getIterationsDone()		{ return messages_[0].iterationsDone_;	}
+
+    	//each thread accesses these members
+    	std::mutex						threadMutex;
+    	unsigned int 					threadIndex_;
+    	volatile bool					exitThread_, working_, workToDo_, error_;
+		//always just 1 message (for now)
+		std::vector<BroadcastThreadStruct::BroadcastMessageStruct> messages_;
+
+
     }; //end BroadcastThreadStruct declaration
     static void															broadcastMessageThread				(GatewaySupervisor *supervisorPtr, GatewaySupervisor::BroadcastThreadStruct* threadStruct);
-    bool 																handleBroadcastMessageTarget		(const SupervisorInfo& appInfo, xoap::MessageReference message, const std::string& command, const unsigned int& iteration, std::string& reply);
+    bool 																handleBroadcastMessageTarget		(const SupervisorInfo& appInfo, xoap::MessageReference message, const std::string& command, const unsigned int& iteration, std::string& reply, unsigned int threadIndex = 0);
 
 
     bool								supervisorGuiHasBeenLoaded_	; //use to indicate first access by user of ots since execution

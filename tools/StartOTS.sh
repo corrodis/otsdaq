@@ -586,6 +586,7 @@ launchOTSWiz() {
 	echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tStarting wiz mode on port ${PORT}; to change, please setup environment variable OTS_WIZ_MODE_MAIN_PORT."
 	echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tWiz mode xdaq config is ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml"
 			
+	sleep 1 #attempt to avoid false starts by xdaq
 	if [ $QUIET == 1 ]; then
 		echo
 
@@ -814,7 +815,9 @@ launchOTS() {
 						MAIN_URL="http://${host}:${port}/urn:xdaq-application:lid=${BASH_REMATCH[1]}/"
 								
 						#if gateway launch, do it
-						if [[ $ISGATEWAYLAUNCH == 1 && ${host} == ${HOSTNAME} ]]; then	
+						if [[ $ISGATEWAYLAUNCH == 1 && ${host} == ${HOSTNAME} ]]; then
+						
+							sleep 1 #attempt to avoid false starts by xdaq
 							if [ $QUIET == 1 ]; then
 								echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching the Gateway Application on host {${HOSTNAME}}...${Reset}"								
 
@@ -853,6 +856,7 @@ launchOTS() {
 		fi   
 	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 		
+	
 	echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching all otsdaq Applications for host {${HOSTNAME}}...${Reset}"
 	i=0	
 	for port in "${xdaqPort[@]}"
@@ -866,6 +870,7 @@ launchOTS() {
 			continue
 		fi
 	
+		sleep 1 #attempt to avoid false starts by xdaq
 		if [ $QUIET == 1 ]; then		  
 
 			if [ $BACKUPLOGS == 1 ]; then
@@ -1078,7 +1083,7 @@ otsActionHandler() {
 						
 		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP" ]]; then
 
-
+			echo -e `date +"%h%y %T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExiting StartOTS.sh..
 			if [[ ($ISCONFIG == 1) || ("${HOSTNAME}" == "${gatewayHostname}") ]]; then
 				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
 				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
@@ -1106,13 +1111,15 @@ export -f otsActionHandler
 #functions have been declared
 #now launch things
 
+otsActionHandler &
+
+sleep 2 #attempt to avoid false starts by xdaq 
 if [ $ISCONFIG == 1 ]; then
 	launchOTSWiz
 else
 	launchOTS #only launch gateway once.. on shutdown and startup others can relaunch
 fi
 
-otsActionHandler &
 
 #launch chrome here if enabled
 if [ $CHROME == 1 ]; then

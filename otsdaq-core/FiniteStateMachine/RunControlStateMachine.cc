@@ -321,15 +321,15 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 
 		}
 
-		if(subIterationWorkFlag_) //'Stalling' has priority over 'Working'
+		if(subIterationWorkFlag_) //sub-iteration has priority over 'Working'
 		{
 			__COUTV__(subIterationWorkFlag_);
-			result = command + "SubIterate"; //indicate still stalling back to Gateway
+			result = command + "SubIterate"; //indicate another sub-iteration back to Gateway
 		}
 		else if(iterationWorkFlag_)
 		{
 			__COUTV__(iterationWorkFlag_);
-			result = command + "Iterate"; //indicate still iterating back to Gateway
+			result = command + "Iterate"; //indicate another iteration back to Gateway
 		}
 	}
 	catch(toolbox::fsm::exception::Exception& e)

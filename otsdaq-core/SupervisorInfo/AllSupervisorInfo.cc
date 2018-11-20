@@ -444,10 +444,12 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 				retVec.push_back(std::vector<const SupervisorInfo*>());
 
 				//if default priority, create a new vector container for each entry
-				//	so they have in sequence by default
-				if(priorityAppVector.first !=
-						XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY)
-					createContainer = false;
+				//	so they happen in sequence by default
+				//if(priorityAppVector.first !=
+				//		XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY)
+					//createContainer = false;
+
+				createContainer = false;
 			}
 			retVec[retVec.size()-1].push_back(&(it->second));
 

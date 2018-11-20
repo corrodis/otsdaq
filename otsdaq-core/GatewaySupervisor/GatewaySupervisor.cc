@@ -1387,9 +1387,9 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	//save last configured group name/key
 	saveGroupNameAndKey(theConfigurationGroup_, FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
 
-	__COUT__ << "Done" << __E__;
+	__COUT__ << "Done configuring." << __E__;
 	RunControlStateMachine::theProgressBar_.complete();
-}
+} //end transitionConfiguring()
 
 //========================================================================================================================
 void GatewaySupervisor::transitionHalting(toolbox::Event::Reference e)
@@ -1401,7 +1401,7 @@ void GatewaySupervisor::transitionHalting(toolbox::Event::Reference e)
 	makeSystemLogbookEntry("Run halting.");
 
 	broadcastMessage(theStateMachine_.getCurrentMessage());
-}
+} //end transitionHalting()
 
 //========================================================================================================================
 void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference e)
@@ -1601,7 +1601,8 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 		xoap::MessageReference 					message,
 		const std::string& 						command,
 		const unsigned int&						iteration,
-		std::string& 							reply)
+		std::string& 							reply,
+		unsigned int							threadIndex)
 {
 	unsigned int subIteration = 0; //reset for next subIteration loop
 	bool subIterationsDone = false;
@@ -1621,7 +1622,8 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 		}
 
 		if(iteration || subIteration)
-			__COUT__ << "Adding iteration parameters " << iteration <<
+			__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+			"Adding iteration parameters " << iteration <<
 					"." << subIteration << __E__;
 
 		RunControlStateMachine::theProgressBar_.step();
@@ -1630,7 +1632,8 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 		{
 
 			for(unsigned int j=0;j<4;++j)
-				__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
+				__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+				"Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
 				appInfo.getId() << "]: " << command << __E__;
 		}
 		else //else this not the first time through the supervisors
@@ -1638,14 +1641,16 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 			if(subIteration == 0)
 			{
 				for(unsigned int j=0;j<4;++j)
-					__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
+					__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+					"Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
 					appInfo.getId() << "]: " << command <<
 					" (iteration: " << iteration << ")" << __E__;
 			}
 			else
 			{
 				for(unsigned int j=0;j<4;++j)
-					__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
+					__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+					"Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
 					appInfo.getId() << "]: " << command <<
 					" (iteration: " << iteration <<
 					", sub-iteration: " << subIteration << ")" << __E__;
@@ -1663,7 +1668,8 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 			SOAPUtilities::addParameters(message, parameters);
 		}
 
-		__COUT__ << "Sending... \t" <<
+		__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+				"Sending... \t" <<
 				SOAPUtilities::translate(message) << std::endl;
 
 		try //attempt transmit of transition command
@@ -1685,7 +1691,8 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 
 			try
 			{
-				__COUT__ << "Try again.." << __E__;
+				__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+						"Try again.." << __E__;
 
 				{
 					//add a second try parameter flag
@@ -1705,20 +1712,24 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 					SOAPUtilities::addParameters(message, parameters);
 				}
 
-				__COUT__ << "Re-Sending... " <<
+				__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+						"Re-Sending... " <<
 						SOAPUtilities::translate(message) << std::endl;
 
 				reply = send(appInfo.getDescriptor(), message);
 			}
 			catch (const xdaq::exception::Exception &e) //due to xoap send failure
 			{
-				__COUT__ << "Second try failed.." << __E__;
+				__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+						"Second try failed.." << __E__;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			}
-			__COUT__ << "2nd try passed.." << __E__;
+			__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+					"2nd try passed.." << __E__;
 		} //end send catch
 
-		__COUT__ << "Reply received = " << reply << __E__;
+		__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+				"Reply received = " << reply << __E__;
 
 		if ((reply != command + "Done") && (reply != command + "Response")
 				&& (reply != command + "Iterate") && (reply != command + "SubIterate") )
@@ -1733,7 +1744,8 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 			__COUT_ERR__ << ss.str() << __E__;
 			__MOUT_ERR__ << ss.str() << __E__;
 
-			__COUT__ << "Getting error message..." << __E__;
+			__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+					"Getting error message..." << __E__;
 			try
 			{
 				xoap::MessageReference errorMessage = sendWithSOAPReply(appInfo.getDescriptor(),
@@ -1792,13 +1804,14 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 			// 	front-ends with higher priority see the incremented iteration index.
 
 			iterationsDone = false;
-			__COUT__ << "Supervisor instance = '" <<
+			__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+					"Supervisor instance = '" <<
 					appInfo.getName() << "' [LID=" <<
 					appInfo.getId() << "] in Context '" <<
 					appInfo.getContextName() << "' [URL=" <<
 					appInfo.getURL() <<
-					"] is still " << command <<
-					"'ing... (iteration: " << iteration << ")" << __E__;
+					"] flagged for another iteration to " << command <<
+					"... (iteration: " << iteration << ")" << __E__;
 
 		} //end still working response handling
 		else if(reply == command + "SubIterate")
@@ -1808,19 +1821,21 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 			//	without any other front-ends taking actions or seeing the sub-iteration index.
 
 			subIterationsDone = false;
-			__COUT__ << "Supervisor instance = '" <<
+			__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+					"Supervisor instance = '" <<
 					appInfo.getName() << "' [LID=" <<
 					appInfo.getId() << "] in Context '" <<
 					appInfo.getContextName() << "' [URL=" <<
 					appInfo.getURL() <<
-					"] is stalling at " << command <<
-					"'ing... (iteration: " << iteration <<
+					"] flagged for another sub-iteration to " << command <<
+					"... (iteration: " << iteration <<
 					", sub-iteration: " << subIteration << ")" << __E__;
 
 		}
 		else //else success response
 		{
-			__COUT__ << "Supervisor instance = '" <<
+			__COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+					"Supervisor instance = '" <<
 					appInfo.getName() << "' [LID=" <<
 					appInfo.getId() << "] in Context '" <<
 					appInfo.getContextName() << "' [URL=" <<
@@ -1830,13 +1845,12 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 
 
 
-		if(subIteration) __COUT__ << "Completed sub-iteration: " <<
+		if(subIteration) __COUT__ << "Broadcast thread " << threadIndex << "\t" <<
+				"Completed sub-iteration: " <<
 				subIteration << __E__;
 		++subIteration;
 
 	} //end subIteration handling loop
-
-	__COUTV__(iterationsDone);
 
 	return iterationsDone;
 
@@ -1850,7 +1864,8 @@ void GatewaySupervisor::broadcastMessageThread(
 		GatewaySupervisor *supervisorPtr,
 		GatewaySupervisor::BroadcastThreadStruct* threadStruct)
 {
-	__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << " starting..." << __E__;
+	__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t" <<
+			"starting..." << __E__;
 
 	while(!threadStruct->exitThread_)
 	{
@@ -1861,32 +1876,55 @@ void GatewaySupervisor::broadcastMessageThread(
 		std::lock_guard<std::mutex> lock(threadStruct->threadMutex);
 		if(threadStruct->workToDo_)
 		{
-			__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ <<
-					" starting work..." << __E__;
+			__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t" <<
+					"starting work..." <<  __E__;
 
-			threadStruct->getIterationsDone() =
-					supervisorPtr->handleBroadcastMessageTarget(
-							threadStruct->getAppInfo(),
-							threadStruct->getMessage(),
-							threadStruct->getCommand(),
-							threadStruct->getIteration(),
-							threadStruct->getReply());
+			try
+			{
+				if(supervisorPtr->handleBroadcastMessageTarget(
+								threadStruct->getAppInfo(),
+								threadStruct->getMessage(),
+								threadStruct->getCommand(),
+								threadStruct->getIteration(),
+								threadStruct->getReply(),
+								threadStruct->threadIndex_
+								))
+					threadStruct->getIterationsDone() = true;
+			}
+			catch(toolbox::fsm::exception::Exception e)
+			{
+				__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t" <<
+						"going into error: " << e.what() << __E__;
+
+				threadStruct->getReply() = e.what();
+				threadStruct->error_ = true;
+				threadStruct->workToDo_ = false;
+				threadStruct->working_ = false; //indicate exiting
+				return;
+			}
+
 
 			if(!threadStruct->getIterationsDone())
 			{
+				__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t" <<
+						"flagged for another iteration." <<  __E__;
+
 				//set global iterationsDone
 				std::lock_guard<std::mutex> lock(supervisorPtr->broadcastIterationsDoneMutex_);
 				supervisorPtr->broadcastIterationsDone_ = false;
 			}
 
-			__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ <<
-					" done with work." << __E__;
+
+			__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t" <<
+					"done with work." << __E__;
+
 			threadStruct->workToDo_ = false;
 		} //end work
 
 	} //end primary while loop
 
-	__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << " exited." << __E__;
+	__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t" <<
+			"exited." << __E__;
 	threadStruct->working_ = false; //indicate exiting
 } //end broadcastMessageThread()
 
@@ -1906,10 +1944,8 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 	std::string command = SOAPUtilities::translate(message).getCommand();
 
 	std::string reply;
-
-
 	broadcastIterationsDone_ = false;
-	bool subIterationsDone;
+	bool assignedJob;
 
 	std::vector<std::vector<const SupervisorInfo*>> orderedSupervisors;
 
@@ -1925,12 +1961,16 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 	}
 
-	std::vector<std::vector<uint8_t/*bool*/>> supervisorIterationsDone; //Note: can not use bool because std::vector does not allow access by reference of type bool
+	RunControlStateMachine::theProgressBar_.step();
+
+	//std::vector<std::vector<uint8_t/*bool*/>> supervisorIterationsDone; //Note: can not use bool because std::vector does not allow access by reference of type bool
+	GatewaySupervisor::BroadcastMessageIterationsDoneStruct supervisorIterationsDone;
+
 	//initialize to false (not done)
 	for(const auto& vectorAtPriority : orderedSupervisors)
-		supervisorIterationsDone.push_back(
-				std::vector<uint8_t>(vectorAtPriority.size(),
-						false /*initial value*/));
+		supervisorIterationsDone.push(vectorAtPriority.size()); //push_back(
+				//std::vector<uint8_t>(vectorAtPriority.size(),
+						//false /*initial value*/));
 
 	unsigned int iteration = 0;
 	unsigned int subIteration;
@@ -1967,16 +2007,13 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 
 	__COUTV__(numberOfThreads);
 
-	std::vector<GatewaySupervisor::BroadcastThreadStruct> broadcastThreadStructs(numberOfThreads);
+	std::vector<GatewaySupervisor::BroadcastThreadStruct> broadcastThreadStructs(
+			numberOfThreads);
 
 	//only launch threads if more than 1
 	//	if 1, just use main thread
 	for(unsigned int i=0;i<numberOfThreads;++i)
 	{
-		//broadcastThreadStructs.push_back(
-		//		GatewaySupervisor::BroadcastThreadStruct(i));
-		//broadcastThreadMutexes.push_back(std::mutex());
-
 		broadcastThreadStructs[i].threadIndex_ = i;
 
 		std::thread([](GatewaySupervisor* supervisorPtr,
@@ -1988,6 +2025,8 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 				this, &broadcastThreadStructs[i]).detach();
 	} //end broadcast thread creation loop
 
+	RunControlStateMachine::theProgressBar_.step();
+
 	try
 	{
 
@@ -1997,9 +2036,12 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 		{
 			broadcastIterationsDone_ = true;
 
+			if(iteration)
+				__COUT__ << "Starting iteration: " << iteration << __E__;
+
 			for (unsigned int i=0;i<supervisorIterationsDone.size();++i)
 			{
-				for (unsigned int j=0;j<supervisorIterationsDone[i].size();++j)
+				for (unsigned int j=0;j<supervisorIterationsDone.size(i);++j)
 				{
 					if(supervisorIterationsDone[i][j]) continue; //skip if supervisor is already done
 
@@ -2016,31 +2058,45 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 						//add the iteration index as a parameter to message
 						SOAPParameters parameters;
 						parameters.addParameter("iterationIndex", iteration);
+						SOAPUtilities::addParameters(message, parameters);
 					}
 
 
 					if(numberOfThreads)
 					{
 						//schedule message to first open thread
-
-						for(unsigned int i=0;i<numberOfThreads;++i)
+						assignedJob = false;
+						do
 						{
-							std::lock_guard<std::mutex> lock(
-									broadcastThreadStructs[i].threadMutex);
-							if(!broadcastThreadStructs[i].workToDo_)
-							{ //found our thread!
-								broadcastThreadStructs[i].setMessage(
-										appInfo,
-										message,
-										command,
-										iteration,
-										supervisorIterationsDone[i][j]
-										);
-								break;
+							for(unsigned int k=0;k<numberOfThreads;++k)
+							{
+								if(!broadcastThreadStructs[k].workToDo_)
+								{
+									//found our thread!
+									assignedJob = true;
+									__COUT__ << "Giving work to thread " << k << __E__;
+
+									std::lock_guard<std::mutex> lock(
+											broadcastThreadStructs[k].threadMutex);
+									broadcastThreadStructs[k].setMessage(
+											appInfo,
+											message,
+											command,
+											iteration,
+											supervisorIterationsDone[i][j]
+											);
+
+									break;
+								}
+							} //end thread assigning search
+
+							if(!assignedJob)
+							{
+								__COUT__ << "No free broadcast threads, " <<
+										"waiting for an available thread..." << __E__;
+								usleep(100*1000 /*100 ms*/);
 							}
-
-						}
-
+						} while(!assignedJob);
 					}
 					else //no thread
 					{
@@ -2052,263 +2108,13 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 							broadcastIterationsDone_ = false;
 					}
 
-//
-//
-//					subIteration = 0; //reset for next subIteration loop
-//					subIterationsDone = false;
-
-
-//
-//					while(!subIterationsDone)
-//					{
-//						subIterationsDone = true;
-//						RunControlStateMachine::theProgressBar_.step();
-//
-//						//add iteration and subIteration indices to message
-//						if(iteration || subIteration)
-//						{
-//							//add the iteration index as a parameter to message
-//							SOAPParameters parameters;
-//							parameters.addParameter("iterationIndex", iteration);
-//
-//							if(subIteration)
-//								parameters.addParameter("subIterationIndex", subIteration);
-//
-//							__COUT__ << "Adding iteration parameters " << iteration <<
-//									"." << subIteration << __E__;
-//							SOAPUtilities::addParameters(message, parameters);
-//						}
-//
-//						RunControlStateMachine::theProgressBar_.step();
-//
-//						if(iteration == 0 && subIteration == 0)
-//						{
-//
-//							for(unsigned int j=0;j<4;++j)
-//								__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
-//								appInfo.getId() << "]: " << command << __E__;
-//						}
-//						else //else this not the first time through the supervisors
-//						{
-//							if(subIteration == 0)
-//							{
-//								for(unsigned int j=0;j<4;++j)
-//									__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
-//									appInfo.getId() << "]: " << command <<
-//									" (iteration: " << iteration << ")" << __E__;
-//							}
-//							else
-//							{
-//								for(unsigned int j=0;j<4;++j)
-//									__COUT__ << "Sending message to Supervisor " << appInfo.getName() << " [LID=" <<
-//									appInfo.getId() << "]: " << command <<
-//									" (iteration: " << iteration <<
-//									", sub-iteration: " << subIteration << ")" << __E__;
-//							}
-//						}
-
-
-//						{
-//										//add the message index
-//										SOAPParameters parameters;
-//										{ //mutex scope
-//											std::lock_guard<std::mutex> lock(broadcastCommandMessageIndexMutex_);
-//											parameters.addParameter("commandId", broadcastCommandMessageIndex_++);
-//										} //end mutex scope
-//										SOAPUtilities::addParameters(message, parameters);
-//									}
-//						__COUT__ << "Sending... " <<
-//								SOAPUtilities::translate(message) << std::endl;
-//
-//						try //attempt transmit of transition command
-//						{
-//							reply = send(appInfo.getDescriptor(), message);
-//						}
-//						catch (const xdaq::exception::Exception &e) //due to xoap send failure
-//						{
-//							//do not kill whole system if xdaq xoap failure
-//							__SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
-//									appInfo.getName() << "' [LID=" <<
-//									appInfo.getId() << "] in Context '" <<
-//									appInfo.getContextName() << "' [URL=" <<
-//									appInfo.getURL() <<
-//									"].\n\n" <<
-//									"Xoap message failure. Did the target Supervisor crash? Try re-initializing or restarting otsdaq." << __E__;
-//							__COUT_ERR__ << ss.str();
-//							__MOUT_ERR__ << ss.str();
-//
-//							try
-//							{
-//								__COUT__ << "Try again.." << __E__;
-//
-//								{
-//									//add a second try parameter flag
-//									SOAPParameters parameters;
-//									parameters.addParameter("retransmission", "1");
-//									SOAPUtilities::addParameters(message, parameters);
-//								}
-//
-//
-//								{
-//									//add the message index
-//									SOAPParameters parameters;
-//									parameters.addParameter("commandId", broadcastCommandMessageIndex_++);
-//									SOAPUtilities::addParameters(message, parameters);
-//								}
-//
-//								__COUT__ << "Re-Sending... " <<
-//										SOAPUtilities::translate(message) << std::endl;
-//
-//								reply = send(appInfo.getDescriptor(), message);
-//							}
-//							catch (const xdaq::exception::Exception &e) //due to xoap send failure
-//							{
-//								__COUT__ << "Second try failed.." << __E__;
-//								XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
-//								proceed = false;
-//							}
-//							__COUT__ << "2nd try passed.." << __E__;
-//						}
-//
-//						if ((reply != command + "Done") && (reply != command + "Response")
-//								&& (reply != command + "Iterate") && (reply != command + "SubIterate") )
-//						{
-//							__SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" <<
-//									appInfo.getName() << "' [LID=" <<
-//									appInfo.getId() << "] in Context '" <<
-//									appInfo.getContextName() << "' [URL=" <<
-//									appInfo.getURL() <<
-//									"].\n\n" <<
-//									reply;
-//							__COUT_ERR__ << ss.str() << __E__;
-//							__MOUT_ERR__ << ss.str() << __E__;
-//
-//							__COUT__ << "Getting error message..." << __E__;
-//							try
-//							{
-//								xoap::MessageReference errorMessage = sendWithSOAPReply(appInfo.getDescriptor(),
-//										SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
-//								SOAPParameters parameters;
-//								parameters.addParameter("ErrorMessage");
-//								SOAPMessenger::receive(errorMessage, parameters);
-//
-//								std::string error = parameters.getValue("ErrorMessage");
-//								if (error == "")
-//								{
-//									std::stringstream err;
-//									err << "Unknown error from Supervisor instance = '" <<
-//											appInfo.getName() << "' [LID=" <<
-//											appInfo.getId() << "] in Context '" <<
-//											appInfo.getContextName() << "' [URL=" <<
-//											appInfo.getURL() <<
-//											"]. If the problem persists or is repeatable, please notify admins.\n\n";
-//									error = err.str();
-//								}
-//
-//								__SS__ << "Received error from Supervisor instance = '" <<
-//										appInfo.getName() << "' [LID=" <<
-//										appInfo.getId() << "] in Context '" <<
-//										appInfo.getContextName() << "' [URL=" <<
-//										appInfo.getURL() <<
-//										"].\n\n Error Message = " << error << __E__;
-//
-//								__COUT_ERR__ << ss.str() << __E__;
-//								__MOUT_ERR__ << ss.str() << __E__;
-//
-//								if (command == "Error") continue; //do not throw exception and exit loop if informing all apps about error
-//								//else throw exception and go into Error
-//								XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
-//
-//								proceed = false;
-//							}
-//							catch (const xdaq::exception::Exception &e) //due to xoap send failure
-//							{
-//								//do not kill whole system if xdaq xoap failure
-//								__SS__ << "Error! Gateway Supervisor failed to read error message from Supervisor instance = '" <<
-//										appInfo.getName() << "' [LID=" <<
-//										appInfo.getId() << "] in Context '" <<
-//										appInfo.getContextName() << "' [URL=" <<
-//										appInfo.getURL() <<
-//										"].\n\n" <<
-//										"Xoap message failure. Did the target Supervisor crash? Try re-initializing or restarting otsdaq." << __E__;
-//								__COUT_ERR__ << ss.str();
-//								__MOUT_ERR__ << ss.str();
-//								XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
-//
-//								proceed = false;
-//							}
-//						} //end error response handling
-						//else if(reply == command + "Iterate")
-						//if(reply == command + "Iterate")
-//						{
-//							//when 'Working' this front-end is expecting
-//							//	to get the same command again with an incremented iteration index
-//							//	after all other front-ends see the same iteration index, and all
-//							// 	front-ends with higher priority see the incremented iteration index.
-//
-//							iterationsDone = false;
-//							__COUT__ << "Supervisor instance = '" <<
-//									appInfo.getName() << "' [LID=" <<
-//									appInfo.getId() << "] in Context '" <<
-//									appInfo.getContextName() << "' [URL=" <<
-//									appInfo.getURL() <<
-//									"] is still " << command <<
-//									"'ing... (iteration: " << iteration << ")" << __E__;
-//
-//						} //end still working response handling
-//						else if(reply == command + "SubIterate")
-//						{
-//							//when 'Working' this front-end is expecting
-//							//	to get the same command again with an incremented sub-iteration index
-//							//	without any other front-ends taking actions or seeing the sub-iteration index.
-//
-//							subIterationsDone = false;
-//							__COUT__ << "Supervisor instance = '" <<
-//									appInfo.getName() << "' [LID=" <<
-//									appInfo.getId() << "] in Context '" <<
-//									appInfo.getContextName() << "' [URL=" <<
-//									appInfo.getURL() <<
-//									"] is stalling at " << command <<
-//									"'ing... (iteration: " << iteration <<
-//									", sub-iteration: " << subIteration << ")" << __E__;
-//
-//						}
-//						else //else success response
-//						{
-//							supervisorIterationsDone[i][j] = true;
-//							__COUT__ << "Supervisor instance = '" <<
-//									appInfo.getName() << "' [LID=" <<
-//									appInfo.getId() << "] in Context '" <<
-//									appInfo.getContextName() << "' [URL=" <<
-//									appInfo.getURL() <<
-//									"] was " << command << "'d correctly!" << __E__;
-//						}
-//
-////						if (!proceed)
-////						{
-////							__COUT__ << "Breaking out of secondary loop." << __E__;
-////							break;
-////						}
-//
-//						if(subIteration) __COUT__ << "Completed sub-iteration: " <<
-//								subIteration << __E__;
-//						++subIteration;
-//
-//					} //end subIteration broadcast loop
-
-//					if (!proceed)
-//					{
-//						__COUT__ << "Breaking out of secondary loop." << __E__;
-//						break;
-//					}
-
 				} //end supervisors at same priority broadcast loop
 
 				//before proceeding to next priority,
 				//	make sure all threads have completed
 				if(numberOfThreads)
 				{
-					__COUT__ << "Waiting for threads to finish..." << __E__;
+					__COUT__ << "Done with priority level. Waiting for threads to finish..." << __E__;
 					bool done;
 					do
 					{
@@ -2322,8 +2128,15 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 								usleep(100 * 1000 /*100ms*/);
 								break;
 							}
+							else if(broadcastThreadStructs[i].error_)
+							{
+								__COUT__ << "Found thread in error! Throwing state machine error: " <<
+										broadcastThreadStructs[i].getReply() << __E__;
+								XCEPT_RAISE(toolbox::fsm::exception::Exception,
+										broadcastThreadStructs[i].getReply());
+							}
 					} while(!done);
-					__COUT__ << "All threads done with iteration." << __E__;
+					__COUT__ << "All threads done with priority level work." << __E__;
 				} //end thread complete verification
 
 
@@ -2361,18 +2174,19 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 
 	if(numberOfThreads)
 	{
-		__COUT__ << "Wrapping up, exiting broadcast threads..." << __E__;
+		__COUT__ << "All transitions completed. Wrapping up, exiting broadcast threads..." << __E__;
 
 		//attempt to exit threads
 		//	The threads should already be done with all work.
 		//	If broadcastMessage scope ends, then the
 		//	thread struct will be destructed, and the thread will
-		//	crash on next access attempt (thought we probably do not care).
+		//	crash on next access attempt (when the thread crashes, the whole context crashes).
 		for(unsigned int i=0;i<numberOfThreads;++i)
 			broadcastThreadStructs[i].exitThread_ = true;
 		usleep(100 * 1000 /*100ms*/); //sleep for exit time
 	}
 
+	__COUT__ << "Broadcast complete." << __E__;
 } // end broadcastMessage()
 
 //========================================================================================================================

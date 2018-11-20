@@ -92,7 +92,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 //========================================================================================================================
 void SOAPUtilities::addParameters(xoap::MessageReference& message, SOAPParameters parameters)
 {
-    __COUT__ << "adding parameters!!!!!!" << std::endl;
+    //__COUT__ << "adding parameters!!!!!!" << std::endl;
     if(parameters.size() == 0) return;
     xoap::SOAPEnvelope     envelope      = message->getSOAPPart().getEnvelope();
     xoap::SOAPBody         body          = envelope.getBody();

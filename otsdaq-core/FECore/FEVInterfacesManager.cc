@@ -511,13 +511,13 @@ bool FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 		__SS_THROW__;
 	}
 
-	//'Stalling' has priority
+	//sub-iteration has priority
 	if(it->second->VStateMachine::getSubIterationWork())
 	{
 		subIterationWorkStateMachineIndex_ = i;
 		VStateMachine::indicateSubIterationWork();
 
-		__COUT__ << "FE Interface '" << name << "' is stalling..." << __E__;
+		__COUT__ << "FE Interface '" << name << "' is flagged for another sub-iteration..." << __E__;
 		return false; //to indicate state machine is NOT done with transition
 	}
 	else
@@ -529,7 +529,7 @@ bool FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 
 		if(!stateMachineDone)
 		{
-			__COUT__ << "FE Interface '" << name << "' is still working..." << __E__;
+			__COUT__ << "FE Interface '" << name << "' is flagged for another iteration..." << __E__;
 					VStateMachine::indicateIterationWork(); //mark not done at FEVInterfacesManager level
 			++stateMachinesIterationWorkCount_; //increment still working count
 			return false; //to indicate state machine is NOT done with transition
@@ -543,10 +543,10 @@ void FEVInterfacesManager::postStateMachineExecutionLoop(void)
 {
 	if(VStateMachine::getSubIterationWork())
 		__COUT__ << "FE Interface state machine implementation " << subIterationWorkStateMachineIndex_ <<
-			" is stalling..." << __E__;
+			" is flagged for another sub-iteration..." << __E__;
 	else if(VStateMachine::getIterationWork())
 		__COUT__ << stateMachinesIterationWorkCount_ <<
-			" FE Interface state machine implementation(s) still working..." << __E__;
+			" FE Interface state machine implementation(s) flagged for another iteration..." << __E__;
 	else
 		__COUT__ << "Done configuration all state machine implementations..." << __E__;
 } //end postStateMachineExecutionLoop()
@@ -563,9 +563,9 @@ void FEVInterfacesManager::configure(void)
 	preStateMachineExecutionLoop();
 	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		//if one state machine is stalling, then target that one
+		//if one state machine is doing a sub-iteration, then target that one
 		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 		const std::string& name = theFENamesByPriority_[i];
 
@@ -618,9 +618,9 @@ void FEVInterfacesManager::halt(void)
 	preStateMachineExecutionLoop();
 	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		//if one state machine is stalling, then target that one
+		//if one state machine is doing a sub-iteration, then target that one
 		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 		const std::string& name = theFENamesByPriority_[i];
 
@@ -667,9 +667,9 @@ void FEVInterfacesManager::pause(void)
 	preStateMachineExecutionLoop();
 	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		//if one state machine is stalling, then target that one
+		//if one state machine is doing a sub-iteration, then target that one
 		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 		const std::string& name = theFENamesByPriority_[i];
 
@@ -714,9 +714,9 @@ void FEVInterfacesManager::resume(void)
 	preStateMachineExecutionLoop();
 	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		//if one state machine is stalling, then target that one
+		//if one state machine is doing a sub-iteration, then target that one
 		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 		const std::string& name = theFENamesByPriority_[i];
 
@@ -761,9 +761,9 @@ void FEVInterfacesManager::start(std::string runNumber)
 	preStateMachineExecutionLoop();
 	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		//if one state machine is stalling, then target that one
+		//if one state machine is doing a sub-iteration, then target that one
 		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 		const std::string& name = theFENamesByPriority_[i];
 
@@ -807,9 +807,9 @@ void FEVInterfacesManager::stop(void)
 	preStateMachineExecutionLoop();
 	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		//if one state machine is stalling, then target that one
+		//if one state machine is doing a sub-iteration, then target that one
 		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 		const std::string& name = theFENamesByPriority_[i];
 

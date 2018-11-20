@@ -387,13 +387,13 @@ void CoreSupervisorBase::postStateMachineExecution(unsigned int i)
 		__SUP_SS_THROW__;
 	}
 
-	//'Stalling' has priority
+	//sub-iteration has priority
 	if(theStateMachineImplementation_[i]->VStateMachine::getSubIterationWork())
 	{
 		subIterationWorkStateMachineIndex_ = i;
 		RunControlStateMachine::indicateSubIterationWork();
 
-		__SUP_COUT__ << "State machine " << i << " is stalling..." << __E__;
+		__SUP_COUT__ << "State machine " << i << " is flagged for another sub-iteration..." << __E__;
 	}
 	else
 	{
@@ -402,7 +402,7 @@ void CoreSupervisorBase::postStateMachineExecution(unsigned int i)
 
 		if(!stateMachinesIterationDone_[i])
 		{
-			__SUP_COUT__ << "State machine " << i << " is still working..." << __E__;
+			__SUP_COUT__ << "State machine " << i << " is flagged for another iteration..." << __E__;
 			RunControlStateMachine::indicateIterationWork(); //mark not done at CoreSupervisorBase level
 			++stateMachinesIterationWorkCount_; //increment still working count
 		}
@@ -414,10 +414,10 @@ void CoreSupervisorBase::postStateMachineExecutionLoop(void)
 {
 	if(RunControlStateMachine::subIterationWorkFlag_)
 		__SUP_COUT__ << "State machine implementation " << subIterationWorkStateMachineIndex_ <<
-			" is stalling..." << __E__;
+			" is flagged for another sub-iteration..." << __E__;
 	else if(RunControlStateMachine::iterationWorkFlag_)
 		__SUP_COUT__ << stateMachinesIterationWorkCount_ <<
-			" state machine implementation(s) still working..." << __E__;
+			" state machine implementation(s) flagged for another iteration..." << __E__;
 	else
 		__SUP_COUT__ << "Done configuration all state machine implementations..." << __E__;
 }
@@ -457,9 +457,9 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 		preStateMachineExecutionLoop();
 		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
 		{
-			//if one state machine is stalling, then target that one
+			//if one state machine is doing a sub-iteration, then target that one
 			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
 
@@ -513,9 +513,9 @@ void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
 		preStateMachineExecutionLoop();
 		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
 		{
-			//if one state machine is stalling, then target that one
+			//if one state machine is doing a sub-iteration, then target that one
 			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
 
@@ -640,9 +640,9 @@ void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
 		preStateMachineExecutionLoop();
 		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
 		{
-			//if one state machine is stalling, then target that one
+			//if one state machine is doing a sub-iteration, then target that one
 			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
 
@@ -713,9 +713,9 @@ void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
 		preStateMachineExecutionLoop();
 		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
 		{
-			//if one state machine is stalling, then target that one
+			//if one state machine is doing a sub-iteration, then target that one
 			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
 
@@ -788,9 +788,9 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
 		preStateMachineExecutionLoop();
 		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
 		{
-			//if one state machine is stalling, then target that one
+			//if one state machine is doing a sub-iteration, then target that one
 			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
 
@@ -863,9 +863,9 @@ void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
 		preStateMachineExecutionLoop();
 		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
 		{
-			//if one state machine is stalling, then target that one
+			//if one state machine is doing a sub-iteration, then target that one
 			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-					i != subIterationWorkStateMachineIndex_) continue; //skip those not stalling
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
 
 			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
 
