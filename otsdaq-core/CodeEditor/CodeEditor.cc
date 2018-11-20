@@ -6,6 +6,7 @@
 #include <dirent.h> //DIR and dirent
 #include <thread>   //for std::thread
 #include <sys/stat.h> 	//for mkdir
+#include <cctype>  //for std::toupper
 
 using namespace ots;
 
@@ -225,6 +226,29 @@ void CodeEditor::getDirectoryContent(
 			xmlOut->addTextElementToData("special",specialTypeNames[i]);
 	}
 
+	//add to set for alpha ordering
+	//	with insensitive compare
+	struct InsensitiveCompare {
+	    bool operator() (const std::string& as, const std::string& bs) const
+	    {
+	    	//return true, if as < bs
+	    	const char* a = as.c_str();
+	    	const char* b = bs.c_str();
+	    	int d;
+
+	    	//compare each character, until difference, or end of string
+	    	while (
+	    			(d=(std::toupper(*a) - std::toupper(*b))) == 0 &&
+					*a)
+	    		++a, ++b;
+
+	    	//__COUT__ << as << " vs " << bs << " = " << d << " " << (d<0) << __E__;
+
+	    	return d<0;
+	    }
+	};
+	std::set<std::string,InsensitiveCompare> orderedDirectories;
+	std::set<std::string,InsensitiveCompare> orderedFiles;
 
 	//else directory good, get all folders, .h, .cc, .txt files
 	while((entry = readdir(pDIR)))
@@ -261,7 +285,8 @@ void CodeEditor::getDirectoryContent(
 			{
 				//__COUT__ << "Directory: " << type << " " << name << __E__;
 
-				xmlOut->addTextElementToData("directory",name);
+				orderedDirectories.emplace(name);
+				//xmlOut->addTextElementToData("directory",name);
 			}
 			else //type 8 or 0 is file
 			{
@@ -280,7 +305,9 @@ void CodeEditor::getDirectoryContent(
 				)
 				{
 					//__COUT__ << "EditFile: " << type << " " << name << __E__;
-					xmlOut->addTextElementToData("file",name);
+
+					orderedFiles.emplace(name);
+					//xmlOut->addTextElementToData("file",name);
 				}
 			}
 		}
@@ -288,6 +315,13 @@ void CodeEditor::getDirectoryContent(
 
 	closedir(pDIR);
 
+	__COUT__ << "Found " << orderedDirectories.size() 	<< " directories." << __E__;
+	__COUT__ << "Found " << orderedFiles.size() 		<< " files." << __E__;
+
+	for(const auto& name:orderedDirectories)
+		xmlOut->addTextElementToData("directory",name);
+	for(const auto& name:orderedFiles)
+		xmlOut->addTextElementToData("file",name);
 
 } //end getDirectoryContent
 
