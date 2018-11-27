@@ -59,6 +59,18 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	auto allDescriptors = SupervisorDescriptorInfoBase::getAllDescriptors();
 	//ready.. loop through all descriptors, and organize
 
+//	for(const auto& descriptor:allDescriptors)
+//	{
+//		SupervisorInfo tempSupervisorInfo(
+//						descriptor.second /* descriptor */,
+//						"" /* config app name */,"" /* config parent context name */ //skip configuration info
+//						);
+//						
+//		__COUT__ << "id " << descriptor.second->getLocalId() << " url " << descriptor.second->getContextDescriptor()->getURL() << __E__;
+//						
+//	}
+//	__COUTV__(XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS);
+
 	//Steps:
 	//	1. first pass, identify Wiz mode or not
 	//	2. second pass, organize supervisors
@@ -73,6 +85,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 						descriptor.second /* descriptor */,
 						"" /* config app name */,"" /* config parent context name */ //skip configuration info
 						);
+						
 
 
 		//check for gateway supervisor
@@ -282,12 +295,12 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 
 	if((!theWizardInfo_ && !theSupervisorInfo_) ||
 			(theWizardInfo_ && theSupervisorInfo_))
-	{
-		__SS__ << "Error! Must have one " << XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS <<
-				" OR one " << XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS <<
-				" as part of the context configuration! " <<
-				"Neither were found." << __E__;
-		__SS_THROW__;
+	 {
+	 	__SS__ << "Error! Must have one " << XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS <<
+	 			" OR one " << XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS <<
+	 			" as part of the context configuration! " <<
+	 			"Neither were found." << __E__;
+	 	__SS_THROW__;
 	}
 
 

@@ -341,6 +341,8 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 			appChild.second.getNode(colApplication_.colClass_).getValue(contexts_.back().applications_.back().class_);
 			appChild.second.getNode(colApplication_.colId_).getValue(contexts_.back().applications_.back().id_);
 
+			
+				
 			//assert Gateway is 200
 			if((contexts_.back().applications_.back().id_ == 200 &&
 					contexts_.back().applications_.back().class_ != XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS &&
@@ -389,6 +391,16 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 
 			appChild.second.getNode(colApplication_.colModule_).getValue(contexts_.back().applications_.back().module_);
 
+			//force deprecated Supervisor to GatewaySupervisor class
+			if(contexts_.back().applications_.back().class_ == XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS)
+			{		
+				contexts_.back().applications_.back().module_ = 
+					contexts_.back().applications_.back().module_.substr(0,
+					contexts_.back().applications_.back().module_.size() - std::string("Supervisor.so").size()) + 
+					"GatewaySupervisor.so";
+				contexts_.back().applications_.back().class_ = XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS;
+			}
+			
 			try
 			{
 				appChild.second.getNode(colApplication_.colConfigurePriority_).getValue(
