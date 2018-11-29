@@ -14,6 +14,7 @@ const std::string ViewColumnInfo::TYPE_UID 							= "UID";
 
 const std::string ViewColumnInfo::TYPE_DATA 						= "Data";
 const std::string ViewColumnInfo::TYPE_UNIQUE_DATA					= "UniqueData";
+const std::string ViewColumnInfo::TYPE_UNIQUE_GROUP_DATA			= "UniqueGroupData";
 const std::string ViewColumnInfo::TYPE_MULTILINE_DATA				= "MultilineData";
 const std::string ViewColumnInfo::TYPE_FIXED_CHOICE_DATA			= "FixedChoiceData";
 const std::string ViewColumnInfo::TYPE_BITMAP_DATA					= "BitMap";
@@ -67,7 +68,10 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 , bitMapInfoP_(0)
 {
 	//verify type
-	if((type_ != TYPE_DATA) && (type_ != TYPE_UNIQUE_DATA) && (type_ != TYPE_UID) &&
+	if(
+			(type_ != TYPE_UID) &&
+			(type_ != TYPE_DATA) &&
+			(type_ != TYPE_UNIQUE_DATA) && (type_ != TYPE_UNIQUE_GROUP_DATA) &&
 			(type_ != TYPE_MULTILINE_DATA) && (type_ != TYPE_FIXED_CHOICE_DATA) &&
 			(type_ != TYPE_BITMAP_DATA) &&
 			(type_ != TYPE_ON_OFF) && (type_ != TYPE_TRUE_FALSE) && (type_ != TYPE_YES_NO) &&
@@ -81,6 +85,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 				", while the only accepted types are: " <<
 				TYPE_DATA << " " <<
 				TYPE_UNIQUE_DATA << " " <<
+				TYPE_UNIQUE_GROUP_DATA << " " <<
 				TYPE_MULTILINE_DATA << " " <<
 				TYPE_FIXED_CHOICE_DATA << " " <<
 				TYPE_UID  << " " <<
@@ -372,6 +377,7 @@ std::vector<std::string> ViewColumnInfo::getAllTypesForGUI(void)
 	std::vector<std::string> all;
 	all.push_back(TYPE_DATA);
 	all.push_back(TYPE_UNIQUE_DATA);
+	all.push_back(TYPE_UNIQUE_GROUP_DATA);
 	all.push_back(TYPE_FIXED_CHOICE_DATA);
 	all.push_back(TYPE_MULTILINE_DATA);
 	all.push_back(TYPE_BITMAP_DATA);

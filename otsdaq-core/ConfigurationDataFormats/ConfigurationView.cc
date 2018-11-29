@@ -301,7 +301,7 @@ void ConfigurationView::init(void)
 		{
 			__SS__ << "Entries in UID are not unique!" <<
 					"There are " << getNumberOfRows() <<
-					" rows and the unique UID count is " << uidSet.size() << std::endl;
+					" records and the unique UID count is " << uidSet.size() << std::endl;
 			__SS_THROW__;
 		}
 
@@ -328,10 +328,69 @@ void ConfigurationView::init(void)
 				__SS__ << "Entries in  Unique Data column " <<
 							columnsInfo_[colPos].getName() << " are not unique!" <<
 						"There are " << getNumberOfRows() <<
-						" rows and the unique data count is " << uDataSet.size() << std::endl;
+						" records and the unique data count is " << uDataSet.size() << std::endl;
 				__SS_THROW__;
 			}
 		}
+
+		//check that any TYPE_UNIQUE_GROUP_DATA columns are really unique fpr groups (no repeats)
+		colPos = (unsigned int)-1;
+		while((colPos = findColByType(ViewColumnInfo::TYPE_UNIQUE_GROUP_DATA,colPos+1)) != INVALID)
+		{
+			//colPos is a unique group data column
+			//now, for each groupId column
+			//	check that data is unique for all groups
+			for(unsigned int groupIdColPos=0;groupIdColPos<columnsInfo_.size();++groupIdColPos)
+				if(columnsInfo_[groupIdColPos].isGroupID())
+				{
+
+					std::map<std::string /*group name*/,
+						std::pair<unsigned int /*memberCount*/,
+							std::set<std::string /*unique data*/> > > uGroupDataSets;
+
+					for(unsigned int row = 0; row < getNumberOfRows(); ++row)
+					{
+						auto groupIds = getSetOfGroupIDs(groupIdColPos,row);
+
+						for(const auto& groupId: groupIds)
+						{
+							uGroupDataSets[groupId].first++; //add to member count
+
+							if(uGroupDataSets[groupId].second.find(theDataView_[row][colPos]) !=
+									uGroupDataSets[groupId].second.end())
+							{
+								__SS__ << "Entries in Unique Group Data column " <<
+										columnsInfo_[colPos].getName() <<
+										" are not unique for group ID '" <<
+										groupId <<
+										".' Specifically at row=" <<
+										std::to_string(row) << " value=" <<
+										theDataView_[row][colPos] <<
+										__E__;
+								__SS_THROW__;
+							}
+							uGroupDataSets[groupId].second.insert(
+									theDataView_[row][colPos]);
+						}
+
+
+					}
+
+					for(const auto& groupPair: uGroupDataSets)
+						if(uGroupDataSets[groupPair.first].second.size() !=
+								uGroupDataSets[groupPair.first].first)
+						{
+							__SS__ << "Entries in  Unique Data column " <<
+									columnsInfo_[colPos].getName() <<
+									" are not unique for group '" <<
+									groupPair.first << "!'" <<
+									"There are " << uGroupDataSets[groupPair.first].first <<
+									" records and the unique data count is " <<
+									uGroupDataSets[groupPair.first].second.size() << __E__;
+							__SS_THROW__;
+						}
+				}
+		} //end TYPE_UNIQUE_GROUP_DATA check
 
 		auto rowDefaults = getDefaultRowValues();
 
