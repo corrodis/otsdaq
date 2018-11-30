@@ -1,7 +1,7 @@
 
 cet_make(LIBRARY_NAME XmlUtilities
 		   LIBRARIES
-           $ENV{XERCES_C_LIB}/libxerces-c.so
+           ${XDAQ_XERCES-C}
 		   MF_MessageLogger
 		   artdaq-core_Utilities
 )
