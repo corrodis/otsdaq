@@ -2212,6 +2212,7 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 								sourceColumnNames_.emplace(currKey);
 
 							//__SS_THROW__;
+							__COUT_WARN__ << "Ignoring error, and not populating missing column." << __E__;
 						}
 
 					}

@@ -213,7 +213,9 @@ void ConfigurationManager::restoreActiveConfigurationGroups(bool throwErrors,
 					(strVal[j] >= '0' && strVal[j] <= '9')))
 				{
 					strVal[j] = '\0';
-					__COUT_INFO__ << "Illegal character found, so skipping entry in active table file!" << std::endl;
+
+					if(groupName.size() > 3) //notify if seems like a real group name
+						__COUT_INFO__ << "Skipping active group with illegal character in name." << std::endl;
 
 					skip = true;
 					break;
@@ -975,12 +977,11 @@ void ConfigurationManager::loadConfigurationGroup(
 
 		//modify members based on aliases
 		{
-			__COUTV__(StringMacros::mapToString(aliasMap));
-
 			std::map<std::string /*table*/, std::map<
 				std::string /*alias*/,ConfigurationVersion> > versionAliases;
 			if(aliasMap.size()) //load version aliases
 			{
+				__COUTV__(StringMacros::mapToString(aliasMap));
 				versionAliases = ConfigurationManager::getVersionAliases();
 				__COUTV__(StringMacros::mapToString(versionAliases));
 			}

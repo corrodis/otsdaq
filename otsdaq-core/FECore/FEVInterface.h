@@ -61,7 +61,7 @@ public:
 	const std::string&		getInterfaceUID     			(void) const {return interfaceUID_;}
 	const std::string&		getDaqHardwareType  			(void) const {return daqHardwareType_;}
 	const std::string&		getFirmwareType     			(void) const {return firmwareType_;}
-	const std::string&		getInterfaceType    			(void) const {return interfaceType_;}
+	virtual std::string		getInterfaceType    			(void) const {return theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>();}//interfaceType_;}
 
 	virtual int				universalRead	        		(char* address, char* returnValue) = 0;
 	virtual void 			universalWrite	        		(char* address, char* writeValue)  = 0;
@@ -127,7 +127,7 @@ public:
 protected:
 	bool 					workLoopThread(toolbox::task::WorkLoop* workLoop);
 	std::string             interfaceUID_;
-	std::string             interfaceType_;
+	//std::string             interfaceType_;
 
 	std::string  			daqHardwareType_;
 	std::string  			firmwareType_;

@@ -20,7 +20,7 @@ FEVInterface::FEVInterface (const std::string& interfaceUID,
 : WorkLoop                    	(interfaceUID)
 , Configurable                	(theXDAQContextConfigTree, configurationPath)
 , interfaceUID_	              	(interfaceUID)
-, interfaceType_				(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>())
+//, interfaceType_				(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>())
 , daqHardwareType_            	("NOT SET")
 , firmwareType_               	("NOT SET")
 , slowControlsWorkLoop_			(interfaceUID + "-SlowControls", this)

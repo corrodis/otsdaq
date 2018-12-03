@@ -65,6 +65,7 @@ XDAQContextConfiguration::~XDAQContextConfiguration(void)
 //========================================================================================================================
 void XDAQContextConfiguration::init(ConfigurationManager* configManager)
 {
+	//__COUT__ << "init" << __E__;
 	extractContexts(configManager);
 
 	{
@@ -392,13 +393,25 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 			appChild.second.getNode(colApplication_.colModule_).getValue(contexts_.back().applications_.back().module_);
 
 			//force deprecated Supervisor to GatewaySupervisor class
-			if(contexts_.back().applications_.back().class_ == XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS)
-			{		
+			if(contexts_.back().applications_.back().class_ ==
+					XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS)
+			{
+				contexts_.back().applications_.back().class_ = XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS;
+				__COUT__ << "Fixing deprecated Supervisor class from " <<
+						XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS <<
+						" to " << (contexts_.back().applications_.back().class_);
+			}
+			if(contexts_.back().applications_.back().module_.find("libSupervisor.so") !=
+					std::string::npos)
+			{
+				__COUT__ << "Fixing deprecated Supervisor class from " <<
+						contexts_.back().applications_.back().module_ <<
+						" to ";
 				contexts_.back().applications_.back().module_ = 
 					contexts_.back().applications_.back().module_.substr(0,
 					contexts_.back().applications_.back().module_.size() - std::string("Supervisor.so").size()) + 
 					"GatewaySupervisor.so";
-				contexts_.back().applications_.back().class_ = XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS;
+				std::cout << contexts_.back().applications_.back().module_ << __E__;
 			}
 			
 			try
