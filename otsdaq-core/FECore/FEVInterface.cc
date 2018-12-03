@@ -12,6 +12,8 @@
 using namespace ots;
 
 
+#undef 	__MF_SUBJECT__
+#define __MF_SUBJECT__ "FE-FEVInterface"
 
 //========================================================================================================================
 FEVInterface::FEVInterface (const std::string& interfaceUID,
@@ -360,14 +362,17 @@ const std::string& FEVInterface::getFEMacroInputArgument(frontEndMacroInArgs_t& 
 		if(pair.first == argName)
 		{
 
-			__COUT__ << "argName : " << pair.second << __E__;
+			std::cout << __COUT_HDR__ << "argName : " << pair.second << __E__;
 			return pair.second;
 		}
 	}
-	__SS__ << "Requested input argument not found with name '" << argName << "'" << __E__;
-	__COUT_ERR__ << "\n" << ss.str();
-	__SS_THROW__;
+	std::stringstream ss;
+	ss << __COUT_HDR__ << "Requested input argument not found with name '" <<
+			argName << "'" << __E__;
+	std::cout << ss.str();
+	throw std::runtime_error(ss.str());
 }
+
 //========================================================================================================================
 //getFEMacroInputArgumentValue
 //	helper function for getting the copy of the value of an argument
@@ -393,9 +398,11 @@ std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& args
 		if(pair.first == argName)
 			return pair.second;
 	}
-	__SS__ << "Requested output argument not found with name '" << argName << "'" << __E__;
-	__COUT_ERR__ << "\n" << ss.str();
-	__SS_THROW__;
+	std::stringstream ss;
+	ss << __COUT_HDR__ << "Requested output argument not found with name '" <<
+			argName << "'" << __E__;
+	std::cout << "\n" << ss.str();
+	throw std::runtime_error(ss.str());
 }
 
 //========================================================================================================================

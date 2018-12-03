@@ -5,17 +5,13 @@
 
 using namespace ots;
 
-#undef 	__COUT_HDR__
-#define __COUT_HDR__ 	"Configurable"
-
-
 //==============================================================================
 Configurable::Configurable(const ConfigurationTree& theXDAQContextConfigTree, const std::string& theConfigurationPath)
 : theXDAQContextConfigTree_		(theXDAQContextConfigTree)
 , theConfigurationPath_    		(theConfigurationPath)
 , theConfigurationRecordName_	(theXDAQContextConfigTree_.getNode(theConfigurationPath_).getValueAsString())
 {
-	__CFG_COUT__ << __E__;
+	__CFG_COUT__ << " Configurable class constructed. " << __E__;
 }
 
 //==============================================================================
