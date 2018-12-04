@@ -1146,7 +1146,7 @@ fi
 
 sleep 3 #so that the terminal comes back after the printouts are done ( in quiet mode )
 
-
+echo "${Reset}"
 
 
 
