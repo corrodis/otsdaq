@@ -1414,7 +1414,8 @@ void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference e)
 	RunControlStateMachine::theProgressBar_.step();
 
 	//kill all non-gateway contexts
-	launchStartOTSCommand("OTS_APP_SHUTDOWN");
+	GatewaySupervisor::launchStartOTSCommand("OTS_APP_SHUTDOWN",
+			CorePropertySupervisorBase::theConfigurationManager_);
 	RunControlStateMachine::theProgressBar_.step();
 
 	//important to give time for StartOTS script to recognize command (before user does Startup again)
@@ -1436,7 +1437,8 @@ void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference e)
 	RunControlStateMachine::theProgressBar_.step();
 
 	//start all non-gateway contexts
-	launchStartOTSCommand("OTS_APP_STARTUP");
+	GatewaySupervisor::launchStartOTSCommand("OTS_APP_STARTUP",
+			CorePropertySupervisorBase::theConfigurationManager_);
 	RunControlStateMachine::theProgressBar_.step();
 
 	//important to give time for StartOTS script to recognize command and for apps to instantiate things (before user does Initialize)
@@ -2559,465 +2561,97 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	//codeEditor
 
 
-	//HttpXmlDocument xmlOut(cookieCode);
-
-	if (requestType == "getSettings")
+	try
 	{
-		std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
 
-		__COUT__ << "Get Settings Request" << __E__;
-		__COUT__ << "accounts = " << accounts << __E__;
-		theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
-	}
-	else if (requestType == "setSettings")
-	{
-		std::string bgcolor = 	CgiDataUtilities::postData(cgiIn, "bgcolor");
-		std::string dbcolor = 	CgiDataUtilities::postData(cgiIn, "dbcolor");
-		std::string wincolor = 	CgiDataUtilities::postData(cgiIn, "wincolor");
-		std::string layout = 	CgiDataUtilities::postData(cgiIn, "layout");
-		std::string syslayout = CgiDataUtilities::postData(cgiIn, "syslayout");
 
-		__COUT__ << "Set Settings Request" << __E__;
-		__COUT__ << "bgcolor = " << bgcolor << __E__;
-		__COUT__ << "dbcolor = " << dbcolor << __E__;
-		__COUT__ << "wincolor = " << wincolor << __E__;
-		__COUT__ << "layout = " << layout << __E__;
-		__COUT__ << "syslayout = " << syslayout << __E__;
+		if (requestType == "getSettings")
+		{
+			std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
 
-		theWebUsers_.changeSettingsForUser(userInfo.uid_, bgcolor, dbcolor, wincolor,
-				layout, syslayout);
-		theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, true); //include user accounts
-	}
-	else if (requestType == "accountSettings")
-	{
-		std::string type = CgiDataUtilities::postData(cgiIn, "type"); //updateAccount, createAccount, deleteAccount
-		int type_int = -1;
+			__COUT__ << "Get Settings Request" << __E__;
+			__COUT__ << "accounts = " << accounts << __E__;
+			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
+		}
+		else if (requestType == "setSettings")
+		{
+			std::string bgcolor = 	CgiDataUtilities::postData(cgiIn, "bgcolor");
+			std::string dbcolor = 	CgiDataUtilities::postData(cgiIn, "dbcolor");
+			std::string wincolor = 	CgiDataUtilities::postData(cgiIn, "wincolor");
+			std::string layout = 	CgiDataUtilities::postData(cgiIn, "layout");
+			std::string syslayout = CgiDataUtilities::postData(cgiIn, "syslayout");
 
-		if (type == "updateAccount")
-			type_int = 0;
-		else if (type == "createAccount")
-			type_int = 1;
-		else if (type == "deleteAccount")
-			type_int = 2;
+			__COUT__ << "Set Settings Request" << __E__;
+			__COUT__ << "bgcolor = " << bgcolor << __E__;
+			__COUT__ << "dbcolor = " << dbcolor << __E__;
+			__COUT__ << "wincolor = " << wincolor << __E__;
+			__COUT__ << "layout = " << layout << __E__;
+			__COUT__ << "syslayout = " << syslayout << __E__;
 
-		std::string username = CgiDataUtilities::postData(cgiIn, "username");
-		std::string displayname = CgiDataUtilities::postData(cgiIn,
-				"displayname");
-		std::string email = CgiDataUtilities::postData(cgiIn, "useremail");
-		std::string permissions = CgiDataUtilities::postData(cgiIn,
-				"permissions");
-		std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
+			theWebUsers_.changeSettingsForUser(userInfo.uid_, bgcolor, dbcolor, wincolor,
+					layout, syslayout);
+			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, true); //include user accounts
+		}
+		else if (requestType == "accountSettings")
+		{
+			std::string type = CgiDataUtilities::postData(cgiIn, "type"); //updateAccount, createAccount, deleteAccount
+			int type_int = -1;
 
-		__COUT__ << "accountSettings Request" << __E__;
-		__COUT__ << "type = " << type << " - " << type_int << __E__;
-		__COUT__ << "username = " << username << __E__;
-		__COUT__ << "useremail = " << email << __E__;
-		__COUT__ << "displayname = " << displayname << __E__;
-		__COUT__ << "permissions = " << permissions << __E__;
+			if (type == "updateAccount")
+				type_int = 0;
+			else if (type == "createAccount")
+				type_int = 1;
+			else if (type == "deleteAccount")
+				type_int = 2;
 
-		theWebUsers_.modifyAccountSettings(userInfo.uid_, type_int, username, displayname,email,
-				permissions);
+			std::string username = CgiDataUtilities::postData(cgiIn, "username");
+			std::string displayname = CgiDataUtilities::postData(cgiIn,
+					"displayname");
+			std::string email = CgiDataUtilities::postData(cgiIn, "useremail");
+			std::string permissions = CgiDataUtilities::postData(cgiIn,
+					"permissions");
+			std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
 
-		__COUT__ << "accounts = " << accounts << __E__;
+			__COUT__ << "accountSettings Request" << __E__;
+			__COUT__ << "type = " << type << " - " << type_int << __E__;
+			__COUT__ << "username = " << username << __E__;
+			__COUT__ << "useremail = " << email << __E__;
+			__COUT__ << "displayname = " << displayname << __E__;
+			__COUT__ << "permissions = " << permissions << __E__;
 
-		theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
-	}
-	else if(requestType == "stateMatchinePreferences")
-	{
-		std::string set = CgiDataUtilities::getData(cgiIn, "set");
-		const std::string DEFAULT_FSM_VIEW = "Default_FSM_View";
-		if(set == "1")
-			theWebUsers_.setGenericPreference(userInfo.uid_, DEFAULT_FSM_VIEW,
-					CgiDataUtilities::getData(cgiIn, DEFAULT_FSM_VIEW));
-		else
-			theWebUsers_.getGenericPreference(userInfo.uid_, DEFAULT_FSM_VIEW, &xmlOut);
-	}
-	else if(requestType == "getAliasList")
-	{
-		std::string username = theWebUsers_.getUsersUsername(userInfo.uid_);
-		std::string fsmName = CgiDataUtilities::getData(cgiIn, "fsmName");
-		__COUT__ << "fsmName = " << fsmName << __E__;
+			theWebUsers_.modifyAccountSettings(userInfo.uid_, type_int, username, displayname,email,
+					permissions);
 
-		std::string stateMachineAliasFilter = "*"; //default to all
+			__COUT__ << "accounts = " << accounts << __E__;
 
-		std::map<std::string /*alias*/,
+			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
+		}
+		else if(requestType == "stateMatchinePreferences")
+		{
+			std::string set = CgiDataUtilities::getData(cgiIn, "set");
+			const std::string DEFAULT_FSM_VIEW = "Default_FSM_View";
+			if(set == "1")
+				theWebUsers_.setGenericPreference(userInfo.uid_, DEFAULT_FSM_VIEW,
+						CgiDataUtilities::getData(cgiIn, DEFAULT_FSM_VIEW));
+			else
+				theWebUsers_.getGenericPreference(userInfo.uid_, DEFAULT_FSM_VIEW, &xmlOut);
+		}
+		else if(requestType == "getAliasList")
+		{
+			std::string username = theWebUsers_.getUsersUsername(userInfo.uid_);
+			std::string fsmName = CgiDataUtilities::getData(cgiIn, "fsmName");
+			__COUT__ << "fsmName = " << fsmName << __E__;
+
+			std::string stateMachineAliasFilter = "*"; //default to all
+
+			std::map<std::string /*alias*/,
 			std::pair<std::string /*group name*/, ConfigurationGroupKey> > aliasMap =
-			CorePropertySupervisorBase::theConfigurationManager_->getActiveGroupAliases();
+					CorePropertySupervisorBase::theConfigurationManager_->getActiveGroupAliases();
 
-
-		// get stateMachineAliasFilter if possible
-		ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
-			supervisorContextUID_, supervisorApplicationUID_);
-
-		if (!configLinkNode.isDisconnected())
-		{
-			try //for backwards compatibility
-			{
-				ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration");
-				if (!fsmLinkNode.isDisconnected())
-					stateMachineAliasFilter =
-					fsmLinkNode.getNode(fsmName + "/SystemAliasFilter").getValue<std::string>();
-				else
-					__COUT_INFO__ << "FSM Link disconnected." << __E__;
-			}
-			catch (std::runtime_error &e) { __COUT_INFO__ << e.what() << __E__; }
-			catch (...) { __COUT_ERR__ << "Unknown error. Should never happen." << __E__; }
-		}
-		else
-			__COUT_INFO__ << "FSM Link disconnected." << __E__;
-
-		__COUT__ << "stateMachineAliasFilter  = " << stateMachineAliasFilter << __E__;
-
-
-		//filter list of aliases based on stateMachineAliasFilter
-		//  ! as first character means choose those that do NOT match filter
-		//	* can be used as wild card.
-		{
-			bool invertFilter = stateMachineAliasFilter.size() && stateMachineAliasFilter[0] == '!';
-			std::vector<std::string> filterArr;
-
-			size_t  i = 0;
-			if (invertFilter) ++i;
-			size_t  f;
-			std::string tmp;
-			while ((f = stateMachineAliasFilter.find('*', i)) != std::string::npos)
-			{
-				tmp = stateMachineAliasFilter.substr(i, f - i);
-				i = f + 1;
-				filterArr.push_back(tmp);
-				//__COUT__ << filterArr[filterArr.size()-1] << " " << i <<
-				//		" of " << stateMachineAliasFilter.size() << __E__;
-
-			}
-			if (i <= stateMachineAliasFilter.size())
-			{
-				tmp = stateMachineAliasFilter.substr(i);
-				filterArr.push_back(tmp);
-				//__COUT__ << filterArr[filterArr.size()-1] << " last." << __E__;
-			}
-
-
-			bool filterMatch;
-
-
-			for (auto& aliasMapPair : aliasMap)
-			{
-				//__COUT__ << "aliasMapPair.first: " << aliasMapPair.first << __E__;
-
-				filterMatch = true;
-
-				if (filterArr.size() == 1)
-				{
-					if (filterArr[0] != "" &&
-						filterArr[0] != "*" &&
-						aliasMapPair.first != filterArr[0])
-						filterMatch = false;
-				}
-				else
-				{
-					i = -1;
-					for (f = 0; f < filterArr.size(); ++f)
-					{
-						if (!filterArr[f].size()) continue; //skip empty filters
-
-						if (f == 0) //must start with this filter
-						{
-							if ((i = aliasMapPair.first.find(filterArr[f])) != 0)
-							{
-								filterMatch = false;
-								break;
-							}
-						}
-						else if (f == filterArr.size() - 1) //must end with this filter
-						{
-							if (aliasMapPair.first.rfind(filterArr[f]) !=
-								aliasMapPair.first.size() - filterArr[f].size())
-							{
-								filterMatch = false;
-								break;
-							}
-						}
-						else if ((i = aliasMapPair.first.find(filterArr[f])) ==
-								 std::string::npos)
-						{
-							filterMatch = false;
-							break;
-						}
-					}
-				}
-
-				if (invertFilter) filterMatch = !filterMatch;
-
-				//__COUT__ << "filterMatch=" << filterMatch  << __E__;
-
-				if (!filterMatch) continue;
-
-				xmlOut.addTextElementToData("config_alias", aliasMapPair.first);
-				xmlOut.addTextElementToData("config_key",
-						ConfigurationGroupKey::getFullGroupString(aliasMapPair.second.first,
-								aliasMapPair.second.second).c_str());
-
-				std::string groupComment, groupAuthor, groupCreationTime;
-				try
-				{
-					CorePropertySupervisorBase::theConfigurationManager_->loadConfigurationGroup(
-						aliasMapPair.second.first, aliasMapPair.second.second,
-						false, 0, 0, 0,
-						&groupComment, &groupAuthor, &groupCreationTime,
-						false /*false to not load member map*/);
-
-					xmlOut.addTextElementToData("config_comment", groupComment);
-					xmlOut.addTextElementToData("config_author", groupAuthor);
-					xmlOut.addTextElementToData("config_create_time", groupCreationTime);
-				}
-				catch (...)
-				{
-					__COUT_WARN__ << "Failed to load group metadata." << __E__;
-				}
-			}
-		}
-
-		//return last group alias
-		std::string fn = FSM_LAST_GROUP_ALIAS_PATH + FSM_LAST_GROUP_ALIAS_FILE_START +
-			username + "." + FSM_USERS_PREFERENCES_FILETYPE;
-		__COUT__ << "Load preferences: " << fn << __E__;
-		FILE *fp = fopen(fn.c_str(), "r");
-		if (fp)
-		{
-			char tmpLastAlias[500];
-			fscanf(fp, "%*s %s", tmpLastAlias);
-			__COUT__ << "tmpLastAlias: " << tmpLastAlias << __E__;
-
-			xmlOut.addTextElementToData("UserLastConfigAlias",tmpLastAlias);
-			fclose(fp);
-		}
-	}
-	else if (requestType == "getFecList")
-	{
-		xmlOut.addTextElementToData("fec_list", "");
-
-		for (auto it : allSupervisorInfo_.getAllFETypeSupervisorInfo())
-		{
-			xmlOut.addTextElementToParent("fec_url",
-					it.second.getURL(), "fec_list");
-			xmlOut.addTextElementToParent(
-					"fec_urn",
-					std::to_string(it.second.getId()),	"fec_list");
-		}
-	}
-	else if (requestType == "getSystemMessages")
-	{
-		xmlOut.addTextElementToData("systemMessages",
-				theSystemMessenger_.getSystemMessage(
-						theWebUsers_.getUsersDisplayName(userInfo.uid_)));
-
-		xmlOut.addTextElementToData("username_with_lock",
-				theWebUsers_.getUserWithLock()); //always give system lock update
-
-							//__COUT__ << "userWithLock " << theWebUsers_.getUserWithLock() << __E__;
-	}
-	else if (requestType == "setUserWithLock")
-	{
-		std::string username = CgiDataUtilities::postData(cgiIn, "username");
-		std::string lock = CgiDataUtilities::postData(cgiIn, "lock");
-		std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
-
-		__COUT__ << requestType <<  __E__;
-		__COUT__ << "username " << username <<  __E__;
-		__COUT__ << "lock " << lock <<  __E__;
-		__COUT__ << "accounts " << accounts <<  __E__;
-		__COUT__ << "userInfo.uid_ " << userInfo.uid_ <<  __E__;
-
-		std::string tmpUserWithLock = theWebUsers_.getUserWithLock();
-		if(!theWebUsers_.setUserWithLock(userInfo.uid_, lock == "1", username))
-			xmlOut.addTextElementToData("server_alert",
-					std::string("Set user lock action failed. You must have valid permissions and ") +
-					"locking user must be currently logged in.");
-
-		theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
-
-		if (tmpUserWithLock != theWebUsers_.getUserWithLock()) //if there was a change, broadcast system message
-			theSystemMessenger_.addSystemMessage("*", theWebUsers_.getUserWithLock()
-												 == "" ? tmpUserWithLock + " has unlocked ots."
-												 : theWebUsers_.getUserWithLock()
-												 + " has locked ots.");
-	}
-	else if (requestType == "getStateMachine")
-	{
-		// __COUT__ << "Getting state machine" << __E__;
-		std::vector<toolbox::fsm::State> states;
-		states = theStateMachine_.getStates();
-		char stateStr[2];
-		stateStr[1] = '\0';
-		std::string transName;
-		std::string transParameter;
-
-		//bool addRun, addCfg;
-		for (unsigned int i = 0; i < states.size(); ++i)//get all states
-		{
-			stateStr[0] = states[i];
-			DOMElement* stateParent = xmlOut.addTextElementToData("state", stateStr);
-
-			xmlOut.addTextElementToParent("state_name", theStateMachine_.getStateName(states[i]), stateParent);
-
-			//__COUT__ << "state: " << states[i] << " - " << theStateMachine_.getStateName(states[i]) << __E__;
-
-			//get all transition final states, transitionNames and actionNames from state
-			std::map<std::string, toolbox::fsm::State, std::less<std::string> >
-				trans = theStateMachine_.getTransitions(states[i]);
-			std::set<std::string> actionNames = theStateMachine_.getInputs(states[i]);
-
-			std::map<std::string, toolbox::fsm::State, std::less<std::string> >::iterator it =
-				trans.begin();
-			std::set<std::string>::iterator ait = actionNames.begin();
-
-			//			addRun = false;
-			//			addCfg = false;
-
-			//handle hacky way to keep "forward" moving states on right of FSM display
-			//must be first!
-
-			for (; it != trans.end() && ait != actionNames.end(); ++it, ++ait)
-			{
-				stateStr[0] = it->second;
-
-				if (stateStr[0] == 'R')
-				{
-					//addRun = true;
-					xmlOut.addTextElementToParent("state_transition", stateStr, stateParent);
-
-					//__COUT__ << states[i] << " => " << *ait << __E__;
-
-					xmlOut.addTextElementToParent("state_transition_action", *ait, stateParent);
-
-					transName = theStateMachine_.getTransitionName(states[i], *ait);
-					//__COUT__ << states[i] << " => " << transName << __E__;
-
-					xmlOut.addTextElementToParent("state_transition_name",
-							transName, stateParent);
-					transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
-					//__COUT__ << states[i] << " => " << transParameter<< __E__;
-
-					xmlOut.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
-					break;
-				}
-				else if (stateStr[0] == 'C')
-				{
-					//addCfg = true;
-					xmlOut.addTextElementToParent("state_transition", stateStr, stateParent);
-
-					//__COUT__ << states[i] << " => " << *ait << __E__;
-
-					xmlOut.addTextElementToParent("state_transition_action", *ait, stateParent);
-
-					transName = theStateMachine_.getTransitionName(states[i], *ait);
-					//__COUT__ << states[i] << " => " << transName << __E__;
-
-					xmlOut.addTextElementToParent("state_transition_name",
-							transName, stateParent);
-					transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
-					//__COUT__ << states[i] << " => " << transParameter<< __E__;
-
-					xmlOut.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
-					break;
-				}
-			}
-
-			//reset for 2nd pass
-			it = trans.begin();
-			ait = actionNames.begin();
-
-			//other states
-			for (; it != trans.end() && ait != actionNames.end(); ++it, ++ait)
-			{
-				//__COUT__ << states[i] << " => " << it->second << __E__;
-
-				stateStr[0] = it->second;
-
-				if (stateStr[0] == 'R')
-					continue;
-				else if (stateStr[0] == 'C')
-					continue;
-
-				xmlOut.addTextElementToParent("state_transition", stateStr, stateParent);
-
-				//__COUT__ << states[i] << " => " << *ait << __E__;
-
-				xmlOut.addTextElementToParent("state_transition_action", *ait, stateParent);
-
-				transName = theStateMachine_.getTransitionName(states[i], *ait);
-				//__COUT__ << states[i] << " => " << transName << __E__;
-
-				xmlOut.addTextElementToParent("state_transition_name",
-						transName, stateParent);
-				transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
-				//__COUT__ << states[i] << " => " << transParameter<< __E__;
-
-				xmlOut.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
-			}
-		}
-
-	}
-	else if (requestType == "getStateMachineNames")
-	{
-		//get stateMachineAliasFilter if possible
-		ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
-			supervisorContextUID_, supervisorApplicationUID_);
-
-		try
-		{
-			auto fsmNodes = configLinkNode.getNode(
-					"LinkToStateMachineConfiguration").getChildren();
-			for(const auto& fsmNode:fsmNodes)
-				xmlOut.addTextElementToData("stateMachineName", fsmNode.first);
-		}
-		catch (...) //else empty set of state machines.. can always choose ""
-		{
-			__COUT__ << "Caught exception, assuming no valid FSM names." << __E__;
-			xmlOut.addTextElementToData("stateMachineName", "");
-		}
-	}
-	else if (requestType == "getIterationPlanStatus")
-	{
-		//__COUT__ << "checking it status" << __E__;
-		theIterator_.handleCommandRequest(xmlOut,requestType,"");
-	}
-	else if (requestType == "getCurrentState")
-	{
-		xmlOut.addTextElementToData("current_state", theStateMachine_.getCurrentStateName());
-		xmlOut.addTextElementToData("in_transition", theStateMachine_.isInTransition() ? "1" : "0");
-		if (theStateMachine_.isInTransition())
-			xmlOut.addTextElementToData("transition_progress", RunControlStateMachine::theProgressBar_.readPercentageString());
-		else
-			xmlOut.addTextElementToData("transition_progress", "100");
-
-
-		char tmp[20];
-		sprintf(tmp,"%lu",theStateMachine_.getTimeInState());
-		xmlOut.addTextElementToData("time_in_state", tmp);
-
-
-
-		//__COUT__ << "current state: " << theStateMachine_.getCurrentStateName() << __E__;
-
-
-		//// ======================== get run alias based on fsm name ====
-
-		std::string fsmName = CgiDataUtilities::getData(cgiIn, "fsmName");
-		//		__COUT__ << "fsmName = " << fsmName << __E__;
-		//		__COUT__ << "activeStateMachineName_ = " << activeStateMachineName_ << __E__;
-		//		__COUT__ << "theStateMachine_.getProvenanceStateName() = " <<
-		//				theStateMachine_.getProvenanceStateName() << __E__;
-		//		__COUT__ << "theStateMachine_.getCurrentStateName() = " <<
-		//				theStateMachine_.getCurrentStateName() << __E__;
-
-		if (!theStateMachine_.isInTransition())
-		{
-			std::string stateMachineRunAlias = "Run"; //default to "Run"
 
 			// get stateMachineAliasFilter if possible
 			ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
-				supervisorContextUID_, supervisorApplicationUID_);
+					supervisorContextUID_, supervisorApplicationUID_);
 
 			if (!configLinkNode.isDisconnected())
 			{
@@ -3025,159 +2659,548 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 				{
 					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration");
 					if (!fsmLinkNode.isDisconnected())
-						stateMachineRunAlias =
-						fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").getValue<std::string>();
-					//else
-					//	__COUT_INFO__ << "FSM Link disconnected." << __E__;
+						stateMachineAliasFilter =
+								fsmLinkNode.getNode(fsmName + "/SystemAliasFilter").getValue<std::string>();
+					else
+						__COUT_INFO__ << "FSM Link disconnected." << __E__;
 				}
-				catch (std::runtime_error &e)
+				catch (std::runtime_error &e) { __COUT_INFO__ << e.what() << __E__; }
+				catch (...) { __COUT_ERR__ << "Unknown error. Should never happen." << __E__; }
+			}
+			else
+				__COUT_INFO__ << "FSM Link disconnected." << __E__;
+
+			__COUT__ << "stateMachineAliasFilter  = " << stateMachineAliasFilter << __E__;
+
+
+			//filter list of aliases based on stateMachineAliasFilter
+			//  ! as first character means choose those that do NOT match filter
+			//	* can be used as wild card.
+			{
+				bool invertFilter = stateMachineAliasFilter.size() && stateMachineAliasFilter[0] == '!';
+				std::vector<std::string> filterArr;
+
+				size_t  i = 0;
+				if (invertFilter) ++i;
+				size_t  f;
+				std::string tmp;
+				while ((f = stateMachineAliasFilter.find('*', i)) != std::string::npos)
 				{
-					//__COUT_INFO__ << e.what() << __E__;
-					//__COUT_INFO__ << "No state machine Run alias. Ignoring and assuming alias of '" <<
-					//		stateMachineRunAlias << ".'" << __E__;
+					tmp = stateMachineAliasFilter.substr(i, f - i);
+					i = f + 1;
+					filterArr.push_back(tmp);
+					//__COUT__ << filterArr[filterArr.size()-1] << " " << i <<
+					//		" of " << stateMachineAliasFilter.size() << __E__;
 
 				}
-				catch (...)
+				if (i <= stateMachineAliasFilter.size())
 				{
-					__COUT_ERR__ << "Unknown error. Should never happen." << __E__;
+					tmp = stateMachineAliasFilter.substr(i);
+					filterArr.push_back(tmp);
+					//__COUT__ << filterArr[filterArr.size()-1] << " last." << __E__;
+				}
 
-					__COUT_INFO__ << "No state machine Run alias. Ignoring and assuming alias of '" <<
-						stateMachineRunAlias << ".'" << __E__;
+
+				bool filterMatch;
+
+
+				for (auto& aliasMapPair : aliasMap)
+				{
+					//__COUT__ << "aliasMapPair.first: " << aliasMapPair.first << __E__;
+
+					filterMatch = true;
+
+					if (filterArr.size() == 1)
+					{
+						if (filterArr[0] != "" &&
+								filterArr[0] != "*" &&
+								aliasMapPair.first != filterArr[0])
+							filterMatch = false;
+					}
+					else
+					{
+						i = -1;
+						for (f = 0; f < filterArr.size(); ++f)
+						{
+							if (!filterArr[f].size()) continue; //skip empty filters
+
+							if (f == 0) //must start with this filter
+							{
+								if ((i = aliasMapPair.first.find(filterArr[f])) != 0)
+								{
+									filterMatch = false;
+									break;
+								}
+							}
+							else if (f == filterArr.size() - 1) //must end with this filter
+							{
+								if (aliasMapPair.first.rfind(filterArr[f]) !=
+										aliasMapPair.first.size() - filterArr[f].size())
+								{
+									filterMatch = false;
+									break;
+								}
+							}
+							else if ((i = aliasMapPair.first.find(filterArr[f])) ==
+									std::string::npos)
+							{
+								filterMatch = false;
+								break;
+							}
+						}
+					}
+
+					if (invertFilter) filterMatch = !filterMatch;
+
+					//__COUT__ << "filterMatch=" << filterMatch  << __E__;
+
+					if (!filterMatch) continue;
+
+					xmlOut.addTextElementToData("config_alias", aliasMapPair.first);
+					xmlOut.addTextElementToData("config_key",
+							ConfigurationGroupKey::getFullGroupString(aliasMapPair.second.first,
+									aliasMapPair.second.second).c_str());
+
+					std::string groupComment, groupAuthor, groupCreationTime;
+					try
+					{
+						CorePropertySupervisorBase::theConfigurationManager_->loadConfigurationGroup(
+								aliasMapPair.second.first, aliasMapPair.second.second,
+								false, 0, 0, 0,
+								&groupComment, &groupAuthor, &groupCreationTime,
+								false /*false to not load member map*/);
+
+						xmlOut.addTextElementToData("config_comment", groupComment);
+						xmlOut.addTextElementToData("config_author", groupAuthor);
+						xmlOut.addTextElementToData("config_create_time", groupCreationTime);
+					}
+					catch (...)
+					{
+						__COUT_WARN__ << "Failed to load group metadata." << __E__;
+					}
 				}
 			}
-			//else
-			//	__COUT_INFO__ << "FSM Link disconnected." << __E__;
 
-			//__COUT__ << "stateMachineRunAlias  = " << stateMachineRunAlias	<< __E__;
+			//return last group alias
+			std::string fn = FSM_LAST_GROUP_ALIAS_PATH + FSM_LAST_GROUP_ALIAS_FILE_START +
+					username + "." + FSM_USERS_PREFERENCES_FILETYPE;
+			__COUT__ << "Load preferences: " << fn << __E__;
+			FILE *fp = fopen(fn.c_str(), "r");
+			if (fp)
+			{
+				char tmpLastAlias[500];
+				fscanf(fp, "%*s %s", tmpLastAlias);
+				__COUT__ << "tmpLastAlias: " << tmpLastAlias << __E__;
 
-			xmlOut.addTextElementToData("stateMachineRunAlias", stateMachineRunAlias);
-
-
-			//// ======================== get run number based on fsm name ====
-
-
-			if (theStateMachine_.getCurrentStateName() == "Running" ||
-				theStateMachine_.getCurrentStateName() == "Paused")
-				sprintf(tmp, "Current %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
-			else
-				sprintf(tmp,"Next %s Number: %u",stateMachineRunAlias.c_str(),getNextRunNumber(fsmName));
-			xmlOut.addTextElementToData("run_number", tmp);
+				xmlOut.addTextElementToData("UserLastConfigAlias",tmpLastAlias);
+				fclose(fp);
+			}
 		}
-	}
-	else if(requestType == "getErrorInStateMatchine")
-	{
-		xmlOut.addTextElementToData("FSM_Error", theStateMachine_.getErrorMessage());
-	}
-	else if(requestType == "getDesktopIcons")
-	{
-
-		//get icons and create comma-separated string based on user permissions
-		//	note: each icon has own permission threshold, so each user can have
-		//		a unique desktop icon experience.
-
-		const DesktopIconConfiguration* iconConfiguration =
-				CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(DesktopIconConfiguration);
-		std::vector<DesktopIconConfiguration::DesktopIcon> icons =
-				iconConfiguration->getAllDesktopIcons();
-
-		std::string iconString = ""; //comma-separated icon string, 7 fields:
-		//				0 - caption 		= text below icon
-		//				1 - altText 		= text icon if no image given
-		//				2 - uniqueWin 		= if true, only one window is allowed, else multiple instances of window
-		//				3 - permissions 	= security level needed to see icon
-		//				4 - picfn 			= icon image filename
-		//				5 - linkurl 		= url of the window to open
-		//				6 - folderPath 		= folder and subfolder location '/' separated
-		//for example:
-		//State Machine,FSM,1,200,icon-Physics.gif,/WebPath/html/StateMachine.html?fsm_name=OtherRuns0,,Chat,CHAT,1,1,icon-Chat.png,/urn:xdaq-application:lid=250,,Visualizer,VIS,0,10,icon-Visualizer.png,/WebPath/html/Visualization.html?urn=270,,Configure,CFG,0,10,icon-Configure.png,/urn:xdaq-application:lid=281,,Front-ends,CFG,0,15,icon-Configure.png,/WebPath/html/ConfigurationGUI_subset.html?urn=281&subsetBasePath=FEInterfaceConfiguration&groupingFieldList=Status%2CFEInterfacePluginName&recordAlias=Front%2Dends&editableFieldList=%21%2ACommentDescription%2C%21SlowControls%2A,Config Subsets
-
-
-		//__COUTV__((unsigned int)userInfo.permissionLevel_);
-
-		std::map<std::string,WebUsers::permissionLevel_t> userPermissionLevelsMap =
-				theWebUsers_.getPermissionsForUser(userInfo.uid_);
-		std::map<std::string,WebUsers::permissionLevel_t> iconPermissionThresholdsMap;
-
-
-		bool firstIcon = true;
-		for(const auto& icon: icons)
+		else if (requestType == "getFecList")
 		{
-			__COUTV__(icon.caption_);
-			__COUTV__(icon.permissionThresholdString_);
+			xmlOut.addTextElementToData("fec_list", "");
 
-			CorePropertySupervisorBase::extractPermissionsMapFromString(
-					icon.permissionThresholdString_,
-					iconPermissionThresholdsMap);
-
-			if(!CorePropertySupervisorBase::doPermissionsGrantAccess(
-					userPermissionLevelsMap,
-					iconPermissionThresholdsMap)) continue; //skip icon if no access
-
-			//__COUTV__(icon.caption_);
-
-			//have icon access, so add to CSV string
-			if(firstIcon) firstIcon = false;
-			else iconString += ",";
-
-			iconString += icon.caption_;
-			iconString += "," + icon.alternateText_;
-			iconString += "," + std::string(icon.enforceOneWindowInstance_?"1":"0");
-			iconString += "," + std::string("1"); //set permission to 1 so the desktop shows every icon that the server allows (i.e., trust server security, ignore client security)
-			iconString += "," + icon.imageURL_;
-			iconString += "," + icon.windowContentURL_;
-			iconString += "," + icon.folderPath_;
+			for (auto it : allSupervisorInfo_.getAllFETypeSupervisorInfo())
+			{
+				xmlOut.addTextElementToParent("fec_url",
+						it.second.getURL(), "fec_list");
+				xmlOut.addTextElementToParent(
+						"fec_urn",
+						std::to_string(it.second.getId()),	"fec_list");
+			}
 		}
-		__COUTV__(iconString);
+		else if (requestType == "getSystemMessages")
+		{
+			xmlOut.addTextElementToData("systemMessages",
+					theSystemMessenger_.getSystemMessage(
+							theWebUsers_.getUsersDisplayName(userInfo.uid_)));
 
-		xmlOut.addTextElementToData("iconList", iconString);
+			xmlOut.addTextElementToData("username_with_lock",
+					theWebUsers_.getUserWithLock()); //always give system lock update
+
+			//__COUT__ << "userWithLock " << theWebUsers_.getUserWithLock() << __E__;
+		}
+		else if (requestType == "setUserWithLock")
+		{
+			std::string username = CgiDataUtilities::postData(cgiIn, "username");
+			std::string lock = CgiDataUtilities::postData(cgiIn, "lock");
+			std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
+
+			__COUT__ << requestType <<  __E__;
+			__COUT__ << "username " << username <<  __E__;
+			__COUT__ << "lock " << lock <<  __E__;
+			__COUT__ << "accounts " << accounts <<  __E__;
+			__COUT__ << "userInfo.uid_ " << userInfo.uid_ <<  __E__;
+
+			std::string tmpUserWithLock = theWebUsers_.getUserWithLock();
+			if(!theWebUsers_.setUserWithLock(userInfo.uid_, lock == "1", username))
+				xmlOut.addTextElementToData("server_alert",
+						std::string("Set user lock action failed. You must have valid permissions and ") +
+						"locking user must be currently logged in.");
+
+			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
+
+			if (tmpUserWithLock != theWebUsers_.getUserWithLock()) //if there was a change, broadcast system message
+				theSystemMessenger_.addSystemMessage("*", theWebUsers_.getUserWithLock()
+						== "" ? tmpUserWithLock + " has unlocked ots."
+								: theWebUsers_.getUserWithLock()
+								  + " has locked ots.");
+		}
+		else if (requestType == "getStateMachine")
+		{
+			// __COUT__ << "Getting state machine" << __E__;
+			std::vector<toolbox::fsm::State> states;
+			states = theStateMachine_.getStates();
+			char stateStr[2];
+			stateStr[1] = '\0';
+			std::string transName;
+			std::string transParameter;
+
+			//bool addRun, addCfg;
+			for (unsigned int i = 0; i < states.size(); ++i)//get all states
+			{
+				stateStr[0] = states[i];
+				DOMElement* stateParent = xmlOut.addTextElementToData("state", stateStr);
+
+				xmlOut.addTextElementToParent("state_name", theStateMachine_.getStateName(states[i]), stateParent);
+
+				//__COUT__ << "state: " << states[i] << " - " << theStateMachine_.getStateName(states[i]) << __E__;
+
+				//get all transition final states, transitionNames and actionNames from state
+				std::map<std::string, toolbox::fsm::State, std::less<std::string> >
+				trans = theStateMachine_.getTransitions(states[i]);
+				std::set<std::string> actionNames = theStateMachine_.getInputs(states[i]);
+
+				std::map<std::string, toolbox::fsm::State, std::less<std::string> >::iterator it =
+						trans.begin();
+				std::set<std::string>::iterator ait = actionNames.begin();
+
+				//			addRun = false;
+				//			addCfg = false;
+
+				//handle hacky way to keep "forward" moving states on right of FSM display
+				//must be first!
+
+				for (; it != trans.end() && ait != actionNames.end(); ++it, ++ait)
+				{
+					stateStr[0] = it->second;
+
+					if (stateStr[0] == 'R')
+					{
+						//addRun = true;
+						xmlOut.addTextElementToParent("state_transition", stateStr, stateParent);
+
+						//__COUT__ << states[i] << " => " << *ait << __E__;
+
+						xmlOut.addTextElementToParent("state_transition_action", *ait, stateParent);
+
+						transName = theStateMachine_.getTransitionName(states[i], *ait);
+						//__COUT__ << states[i] << " => " << transName << __E__;
+
+						xmlOut.addTextElementToParent("state_transition_name",
+								transName, stateParent);
+						transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
+						//__COUT__ << states[i] << " => " << transParameter<< __E__;
+
+						xmlOut.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
+						break;
+					}
+					else if (stateStr[0] == 'C')
+					{
+						//addCfg = true;
+						xmlOut.addTextElementToParent("state_transition", stateStr, stateParent);
+
+						//__COUT__ << states[i] << " => " << *ait << __E__;
+
+						xmlOut.addTextElementToParent("state_transition_action", *ait, stateParent);
+
+						transName = theStateMachine_.getTransitionName(states[i], *ait);
+						//__COUT__ << states[i] << " => " << transName << __E__;
+
+						xmlOut.addTextElementToParent("state_transition_name",
+								transName, stateParent);
+						transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
+						//__COUT__ << states[i] << " => " << transParameter<< __E__;
+
+						xmlOut.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
+						break;
+					}
+				}
+
+				//reset for 2nd pass
+				it = trans.begin();
+				ait = actionNames.begin();
+
+				//other states
+				for (; it != trans.end() && ait != actionNames.end(); ++it, ++ait)
+				{
+					//__COUT__ << states[i] << " => " << it->second << __E__;
+
+					stateStr[0] = it->second;
+
+					if (stateStr[0] == 'R')
+						continue;
+					else if (stateStr[0] == 'C')
+						continue;
+
+					xmlOut.addTextElementToParent("state_transition", stateStr, stateParent);
+
+					//__COUT__ << states[i] << " => " << *ait << __E__;
+
+					xmlOut.addTextElementToParent("state_transition_action", *ait, stateParent);
+
+					transName = theStateMachine_.getTransitionName(states[i], *ait);
+					//__COUT__ << states[i] << " => " << transName << __E__;
+
+					xmlOut.addTextElementToParent("state_transition_name",
+							transName, stateParent);
+					transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
+					//__COUT__ << states[i] << " => " << transParameter<< __E__;
+
+					xmlOut.addTextElementToParent("state_transition_parameter", transParameter, stateParent);
+				}
+			}
+
+		}
+		else if (requestType == "getStateMachineNames")
+		{
+			//get stateMachineAliasFilter if possible
+			ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
+					supervisorContextUID_, supervisorApplicationUID_);
+
+			try
+			{
+				auto fsmNodes = configLinkNode.getNode(
+						"LinkToStateMachineConfiguration").getChildren();
+				for(const auto& fsmNode:fsmNodes)
+					xmlOut.addTextElementToData("stateMachineName", fsmNode.first);
+			}
+			catch (...) //else empty set of state machines.. can always choose ""
+			{
+				__COUT__ << "Caught exception, assuming no valid FSM names." << __E__;
+				xmlOut.addTextElementToData("stateMachineName", "");
+			}
+		}
+		else if (requestType == "getIterationPlanStatus")
+		{
+			//__COUT__ << "checking it status" << __E__;
+			theIterator_.handleCommandRequest(xmlOut,requestType,"");
+		}
+		else if (requestType == "getCurrentState")
+		{
+			xmlOut.addTextElementToData("current_state", theStateMachine_.getCurrentStateName());
+			xmlOut.addTextElementToData("in_transition", theStateMachine_.isInTransition() ? "1" : "0");
+			if (theStateMachine_.isInTransition())
+				xmlOut.addTextElementToData("transition_progress", RunControlStateMachine::theProgressBar_.readPercentageString());
+			else
+				xmlOut.addTextElementToData("transition_progress", "100");
+
+
+			char tmp[20];
+			sprintf(tmp,"%lu",theStateMachine_.getTimeInState());
+			xmlOut.addTextElementToData("time_in_state", tmp);
+
+
+
+			//__COUT__ << "current state: " << theStateMachine_.getCurrentStateName() << __E__;
+
+
+			//// ======================== get run alias based on fsm name ====
+
+			std::string fsmName = CgiDataUtilities::getData(cgiIn, "fsmName");
+			//		__COUT__ << "fsmName = " << fsmName << __E__;
+			//		__COUT__ << "activeStateMachineName_ = " << activeStateMachineName_ << __E__;
+			//		__COUT__ << "theStateMachine_.getProvenanceStateName() = " <<
+			//				theStateMachine_.getProvenanceStateName() << __E__;
+			//		__COUT__ << "theStateMachine_.getCurrentStateName() = " <<
+			//				theStateMachine_.getCurrentStateName() << __E__;
+
+			if (!theStateMachine_.isInTransition())
+			{
+				std::string stateMachineRunAlias = "Run"; //default to "Run"
+
+				// get stateMachineAliasFilter if possible
+				ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorConfigurationNode(
+						supervisorContextUID_, supervisorApplicationUID_);
+
+				if (!configLinkNode.isDisconnected())
+				{
+					try //for backwards compatibility
+					{
+						ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration");
+						if (!fsmLinkNode.isDisconnected())
+							stateMachineRunAlias =
+									fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").getValue<std::string>();
+						//else
+						//	__COUT_INFO__ << "FSM Link disconnected." << __E__;
+					}
+					catch (std::runtime_error &e)
+					{
+						//__COUT_INFO__ << e.what() << __E__;
+						//__COUT_INFO__ << "No state machine Run alias. Ignoring and assuming alias of '" <<
+						//		stateMachineRunAlias << ".'" << __E__;
+
+					}
+					catch (...)
+					{
+						__COUT_ERR__ << "Unknown error. Should never happen." << __E__;
+
+						__COUT_INFO__ << "No state machine Run alias. Ignoring and assuming alias of '" <<
+								stateMachineRunAlias << ".'" << __E__;
+					}
+				}
+				//else
+				//	__COUT_INFO__ << "FSM Link disconnected." << __E__;
+
+				//__COUT__ << "stateMachineRunAlias  = " << stateMachineRunAlias	<< __E__;
+
+				xmlOut.addTextElementToData("stateMachineRunAlias", stateMachineRunAlias);
+
+
+				//// ======================== get run number based on fsm name ====
+
+
+				if (theStateMachine_.getCurrentStateName() == "Running" ||
+						theStateMachine_.getCurrentStateName() == "Paused")
+					sprintf(tmp, "Current %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
+				else
+					sprintf(tmp,"Next %s Number: %u",stateMachineRunAlias.c_str(),getNextRunNumber(fsmName));
+				xmlOut.addTextElementToData("run_number", tmp);
+			}
+		}
+		else if(requestType == "getErrorInStateMatchine")
+		{
+			xmlOut.addTextElementToData("FSM_Error", theStateMachine_.getErrorMessage());
+		}
+		else if(requestType == "getDesktopIcons")
+		{
+
+			//get icons and create comma-separated string based on user permissions
+			//	note: each icon has own permission threshold, so each user can have
+			//		a unique desktop icon experience.
+
+			const DesktopIconConfiguration* iconConfiguration =
+					CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(DesktopIconConfiguration);
+			std::vector<DesktopIconConfiguration::DesktopIcon> icons =
+					iconConfiguration->getAllDesktopIcons();
+
+			std::string iconString = ""; //comma-separated icon string, 7 fields:
+			//				0 - caption 		= text below icon
+			//				1 - altText 		= text icon if no image given
+			//				2 - uniqueWin 		= if true, only one window is allowed, else multiple instances of window
+			//				3 - permissions 	= security level needed to see icon
+			//				4 - picfn 			= icon image filename
+			//				5 - linkurl 		= url of the window to open
+			//				6 - folderPath 		= folder and subfolder location '/' separated
+			//for example:
+			//State Machine,FSM,1,200,icon-Physics.gif,/WebPath/html/StateMachine.html?fsm_name=OtherRuns0,,Chat,CHAT,1,1,icon-Chat.png,/urn:xdaq-application:lid=250,,Visualizer,VIS,0,10,icon-Visualizer.png,/WebPath/html/Visualization.html?urn=270,,Configure,CFG,0,10,icon-Configure.png,/urn:xdaq-application:lid=281,,Front-ends,CFG,0,15,icon-Configure.png,/WebPath/html/ConfigurationGUI_subset.html?urn=281&subsetBasePath=FEInterfaceConfiguration&groupingFieldList=Status%2CFEInterfacePluginName&recordAlias=Front%2Dends&editableFieldList=%21%2ACommentDescription%2C%21SlowControls%2A,Config Subsets
+
+
+			//__COUTV__((unsigned int)userInfo.permissionLevel_);
+
+			std::map<std::string,WebUsers::permissionLevel_t> userPermissionLevelsMap =
+					theWebUsers_.getPermissionsForUser(userInfo.uid_);
+			std::map<std::string,WebUsers::permissionLevel_t> iconPermissionThresholdsMap;
+
+
+			bool firstIcon = true;
+			for(const auto& icon: icons)
+			{
+				__COUTV__(icon.caption_);
+				__COUTV__(icon.permissionThresholdString_);
+
+				CorePropertySupervisorBase::extractPermissionsMapFromString(
+						icon.permissionThresholdString_,
+						iconPermissionThresholdsMap);
+
+				if(!CorePropertySupervisorBase::doPermissionsGrantAccess(
+						userPermissionLevelsMap,
+						iconPermissionThresholdsMap)) continue; //skip icon if no access
+
+				//__COUTV__(icon.caption_);
+
+				//have icon access, so add to CSV string
+				if(firstIcon) firstIcon = false;
+				else iconString += ",";
+
+				iconString += icon.caption_;
+				iconString += "," + icon.alternateText_;
+				iconString += "," + std::string(icon.enforceOneWindowInstance_?"1":"0");
+				iconString += "," + std::string("1"); //set permission to 1 so the desktop shows every icon that the server allows (i.e., trust server security, ignore client security)
+				iconString += "," + icon.imageURL_;
+				iconString += "," + icon.windowContentURL_;
+				iconString += "," + icon.folderPath_;
+			}
+			__COUTV__(iconString);
+
+			xmlOut.addTextElementToData("iconList", iconString);
+		}
+		else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
+		{
+			//NOTE: similar to ConfigurationGUI version but DOES keep active sessions
+
+			__COUT_WARN__ << requestType << " requestType received! " << __E__;
+			__MOUT_WARN__ << requestType << " requestType received! " << __E__;
+
+
+			//gateway launch is different, in that it saves user sessions
+			theWebUsers_.saveActiveSessions();
+
+			//now launch
+
+			if(requestType == "gatewayLaunchOTS")
+				GatewaySupervisor::launchStartOTSCommand("LAUNCH_OTS",
+						CorePropertySupervisorBase::theConfigurationManager_);
+			else if(requestType == "gatewayLaunchWiz")
+				GatewaySupervisor::launchStartOTSCommand("LAUNCH_WIZ",
+						CorePropertySupervisorBase::theConfigurationManager_);
+		}
+		else if(requestType == "resetUserTooltips")
+		{
+			WebUsers::resetAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_));
+		}
+		else if (requestType == "codeEditor")
+		{
+
+			__COUT__ << "Code Editor" << __E__;
+
+			codeEditor_.xmlRequest(
+					CgiDataUtilities::getData(cgiIn, "option"),
+					cgiIn,
+					&xmlOut);
+		}
+		else
+		{
+			__SS__ << "requestType Request, " << requestType << ", not recognized." << __E__;
+			__SS_THROW__;
+		}
 	}
-	else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
+	catch(const std::runtime_error& e)
 	{
-		//NOTE: similar to ConfigurationGUI version but DOES keep active sessions
-
-		__COUT_WARN__ << requestType << " requestType received! " << __E__;
-		__MOUT_WARN__ << requestType << " requestType received! " << __E__;
-
-
-		//gateway launch is different, in that it saves user sessions
-		theWebUsers_.saveActiveSessions();
-
-		//now launch
-
-		if(requestType == "gatewayLaunchOTS")
-			launchStartOTSCommand("LAUNCH_OTS");
-		else if(requestType == "gatewayLaunchWiz")
-			launchStartOTSCommand("LAUNCH_WIZ");
+		__SS__ << "An error was encountered handling requestType '" << requestType << "':" <<
+				e.what() << __E__;
+		__COUT__ << "\n" << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
 	}
-	else if(requestType == "resetUserTooltips")
+	catch(...)
 	{
-		WebUsers::resetAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_));
+		__SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' " <<
+				"Please check the printouts to debug." << __E__;
+		__COUT__ << "\n" << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
 	}
-	else if (requestType == "codeEditor")
-	{
-
-		__COUT__ << "Code Editor" << __E__;
-
-		codeEditor_.xmlRequest(
-				CgiDataUtilities::getData(cgiIn, "option"),
-				cgiIn,
-				&xmlOut);
-	}
-	else
-		__COUT__ << "requestType Request, " << requestType << ", not recognized." << __E__;
-
-	//__COUT__ << "Made it" << __E__;
 
 	//return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*) out, false /*dispStdOut*/,
 			true /*allowWhiteSpace*/); //Note: allow white space need for error response
-
-	//__COUT__ << "done " << requestType << __E__;
 } // end request()
 
 //========================================================================================================================
 //launchStartOTSCommand
-void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
+//	static function (so WizardSupervisor can use it)
+//	throws exception if command fails to start
+void GatewaySupervisor::launchStartOTSCommand(const std::string& command,
+		ConfigurationManager* cfgMgr)
 {
 	__COUT__ << "launch StartOTS Command = " << command << __E__;
 	__COUT__ << "Extracting target context hostnames... " << __E__;
@@ -3185,9 +3208,11 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
 	std::vector<std::string> hostnames;
 	try
 	{
-		CorePropertySupervisorBase::theConfigurationManager_->init(); //completely reset to re-align with any changes
+		cfgMgr->init(); //completely reset to re-align with any changes
 
-		const XDAQContextConfiguration* contextConfiguration = CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+		const XDAQContextConfiguration* contextConfiguration =
+				cfgMgr->__GET_CONFIG__(
+						XDAQContextConfiguration);
 
 		auto contexts = contextConfiguration->getContexts();
 		unsigned int i, j;
@@ -3201,7 +3226,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
 				if (context.address_[i] == '/')
 					j = i + 1;
 			hostnames.push_back(context.address_.substr(j));
-			__COUT__ << "hostname = " << hostnames.back() << __E__;
+			__COUT__ << "StartOTS.sh hostname = " << hostnames.back() << __E__;
 		}
 	}
 	catch (...)
@@ -3225,6 +3250,35 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command)
 		else
 		{
 			__SS__ << "Unable to open command file: " << fn << __E__;
+			__SS_THROW__;
+		}
+	}
+
+	sleep(2 /*seconds*/); //then verify that the commands were read
+	//note: StartOTS.sh has a sleep of 1 second
+
+	for (const auto& hostname : hostnames)
+	{
+		std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) +
+				"/StartOTS_action_" + hostname + ".cmd");
+		FILE* fp = fopen(fn.c_str(), "r");
+		if (fp)
+		{
+			char line[100];
+			fgets(line,100,fp);
+			fclose(fp);
+
+			if(strcmp(line,command.c_str()) == 0)
+			{
+				__SS__ << "The command looks to have been ignored by " <<
+						hostname << ". Is StartOTS.sh still running on that node?" << __E__;
+				__SS_THROW__;
+			}
+			__COUTV__(line);
+		}
+		else
+		{
+			__SS__ << "Unable to open command file for verification: " << fn << __E__;
 			__SS_THROW__;
 		}
 	}

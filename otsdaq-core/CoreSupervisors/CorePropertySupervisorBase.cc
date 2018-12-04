@@ -83,6 +83,7 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 //========================================================================================================================
 CorePropertySupervisorBase::~CorePropertySupervisorBase(void)
 {
+	if(theConfigurationManager_) delete theConfigurationManager_;
 }
 
 

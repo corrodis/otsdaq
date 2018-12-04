@@ -124,7 +124,7 @@ private:
     static std::pair<std::string /*group name*/, ConfigurationGroupKey>	loadGroupNameAndKey					(const std::string &fileName, std::string &returnedTimeString);
     void																saveGroupNameAndKey					(const std::pair<std::string /*group name*/,	ConfigurationGroupKey> &theGroup, const std::string &fileName);
     static xoap::MessageReference 										lastConfigGroupRequestHandler		(const SOAPParameters &parameters);
-    void																launchStartOTSCommand				(const std::string& command);
+    static void															launchStartOTSCommand				(const std::string& command, ConfigurationManager* cfgMgr);
 
     static void															StateChangerWorkLoop				(GatewaySupervisor *supervisorPtr);
     std::string															attemptStateMachineTransition		(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);

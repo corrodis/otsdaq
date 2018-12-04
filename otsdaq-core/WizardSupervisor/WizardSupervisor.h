@@ -33,9 +33,10 @@ class HttpXmlDocument;
 //
 //	It is instantiated by the xdaq context when otsdaq is in "Wiz Mode."
 //
-//	It is different from the "Normal Mode" Gateway Supervisor in that it does not have a state machine
-//	and does not inherit properties from CorePropertySupervisorBase. The assumption is
-//	that only admins have access to wiz mode, and they have access to all features of it.
+//	It is different from the "Normal Mode" Gateway Supervisor in that
+//	it does not have a state machine and does not inherit properties
+//	from CorePropertySupervisorBase. The assumption is that only admins
+//	have access to wiz mode, and they have access to all features of it.
 class WizardSupervisor: public xdaq::Application, public SOAPMessenger
 {
 

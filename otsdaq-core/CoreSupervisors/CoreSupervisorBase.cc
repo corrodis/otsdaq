@@ -153,6 +153,8 @@ void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& c
 // KEEP:
 //	here are some possibly interesting example lines of code for overriding supervisors
 //
+//try
+//{
 //
 //  if(requestType == "savePlanCommandSequence")
 //	{
@@ -168,11 +170,27 @@ void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& c
 //	else
 //	{
 //		__SUP_SS__ << "requestType '" << requestType << "' request not recognized." << std::endl;
-//		__SUP_COUT__ << "\n" << ss.str();
-//		xmlOut.addTextElementToData("Error", ss.str());
+//		__SUP_SS_THROW__;
 //	}
 //	xmlOut.addTextElementToData("Error",
 //			"request encountered an error!");
+//}
+//	catch(const std::runtime_error& e)
+//	{
+//		__SUP_SS__ << "An error was encountered handling requestType '" << requestType << "':" <<
+//				e.what() << __E__;
+//		__SUP_COUT__ << "\n" << ss.str();
+//		xmlOut.addTextElementToData("Error", ss.str());
+//	}
+//	catch(...)
+//	{
+//		__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' " <<
+//				"Please check the printouts to debug." << __E__;
+//		__SUP_COUT__ << "\n" << ss.str();
+//		xmlOut.addTextElementToData("Error", ss.str());
+//	}
+// END KEEP.
+
 }
 
 //========================================================================================================================
