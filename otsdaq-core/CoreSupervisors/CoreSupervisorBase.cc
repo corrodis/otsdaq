@@ -114,12 +114,47 @@ void CoreSupervisorBase::requestWrapper(xgi::Input * in, xgi::Output * out )
 
 	if(userInfo.NonXMLRequestType_)
 	{
-		nonXmlRequest(requestType,cgiIn,*out,userInfo);
+		try
+		{
+			nonXmlRequest(requestType,cgiIn,*out,userInfo);
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SUP_SS__ << "An error was encountered handling requestType '" << requestType << "':" <<
+					e.what() << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			__SUP_MOUT_ERR__ << "\n" << ss.str();
+		}
+		catch(...)
+		{
+			__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' " <<
+					"Please check the printouts to debug." << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			__SUP_MOUT_ERR__ << "\n" << ss.str();
+		}
 		return;
 	}
 	//else xml request type
 
-	request(requestType,cgiIn,xmlOut,userInfo);
+	try
+	{
+		//call derived class' request()
+		request(requestType,cgiIn,xmlOut,userInfo);
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SUP_SS__ << "An error was encountered handling requestType '" << requestType << "':" <<
+				e.what() << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
+	}
+	catch(...)
+	{
+		__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' " <<
+				"Please check the printouts to debug." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
+	}
 
 	//report any errors encountered
 	{
@@ -128,7 +163,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input * in, xgi::Output * out )
 		while(err != "")
 		{
 			__SUP_COUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << std::endl;
-			__MOUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << std::endl;
+			__SUP_MOUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << std::endl;
 			err = xmlOut.getMatchingValue("Error",occurance++);
 		}
 	}
@@ -179,14 +214,14 @@ void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& c
 //	{
 //		__SUP_SS__ << "An error was encountered handling requestType '" << requestType << "':" <<
 //				e.what() << __E__;
-//		__SUP_COUT__ << "\n" << ss.str();
+//		__SUP_COUT_ERR__ << "\n" << ss.str();
 //		xmlOut.addTextElementToData("Error", ss.str());
 //	}
 //	catch(...)
 //	{
 //		__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' " <<
 //				"Please check the printouts to debug." << __E__;
-//		__SUP_COUT__ << "\n" << ss.str();
+//		__SUP_COUT_ERR__ << "\n" << ss.str();
 //		xmlOut.addTextElementToData("Error", ss.str());
 //	}
 // END KEEP.

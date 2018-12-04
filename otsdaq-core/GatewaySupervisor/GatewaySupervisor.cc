@@ -3284,40 +3284,6 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command,
 	}
 } //end launchStartOTSCommand
 
-//FIXME -- delete -- now all cookie checks return all info
-////========================================================================================================================
-////xoap::supervisorGetUserInfo
-////	get user info to external supervisors
-//xoap::MessageReference GatewaySupervisor::supervisorGetUserInfo(
-//		xoap::MessageReference message)
-//throw (xoap::exception::Exception)
-//{
-//	SOAPParameters parameters;
-//	parameters.addParameter("CookieCode");
-//	receive(message, parameters);
-//	std::string cookieCode = parameters.getValue("CookieCode");
-//
-//	std::string username, displayName;
-//	uint64_t activeSessionIndex;
-//
-//	theWebUsers_.getUserInfoForCookie(cookieCode, &username, &displayName,
-//			&activeSessionIndex);
-//
-//	//__COUT__ << "username " << username << __E__;
-//	//__COUT__ << "displayName " << displayName << __E__;
-//
-//	//fill return parameters
-//	SOAPParameters retParameters;
-//	retParameters.addParameter("Username", username);
-//	retParameters.addParameter("DisplayName", displayName);
-//	char tmpStr[100];
-//	sprintf(tmpStr, "%lu", activeSessionIndex);
-//	retParameters.addParameter("ActiveSessionIndex", tmpStr);
-//
-//	return SOAPUtilities::makeSOAPMessageReference("UserInfoResponse",
-//			retParameters);
-//}
-
 //========================================================================================================================
 //xoap::supervisorCookieCheck
 //	verify cookie

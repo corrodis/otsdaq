@@ -349,11 +349,13 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 	{
 		__SS__ << "Error occurred handling request: " << e.what() << __E__;
 		__COUT_ERR__ << ss.str();
+		retParameters.addParameter("Error", ss.str());
 	}
 	catch (...)
 	{
 		__SS__ << "Error occurred handling request." << __E__;
 		__COUT_ERR__ << ss.str();
+		retParameters.addParameter("Error", ss.str());
 	}
 
 
