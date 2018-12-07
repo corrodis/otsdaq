@@ -2209,8 +2209,8 @@ void GatewaySupervisor::wait(int milliseconds, std::string who) const
 //  NOTE: there are two ways for a user to be logged out: timeout or manual logout
 //      System logbook messages are generated for login and logout
 void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
-
 {
+	__COUT__ << "Start" << __E__;
 	cgicc::Cgicc cgi(in);
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
 	__COUT__ << "*** Login RequestType = " << Command << __E__;
@@ -2418,15 +2418,17 @@ void GatewaySupervisor::loginRequest(xgi::Input * in, xgi::Output * out)
 	}
 	else
 	{
-		__COUT__ << __LINE__ << "\tInvalid Command" << __E__;
+		__COUT__ << "Invalid Command" << __E__;
 		*out << "0";
 	}
-}
+
+	__COUT__ << "Done" << __E__;
+} //end loginRequest()
 
 //========================================================================================================================
 void GatewaySupervisor::tooltipRequest(xgi::Input * in, xgi::Output * out)
-
 {
+	__COUT__ << "Start" << __E__;
 	cgicc::Cgicc cgi(in);
 
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
@@ -2478,7 +2480,9 @@ void GatewaySupervisor::tooltipRequest(xgi::Input * in, xgi::Output * out)
 		__COUT__ << "Command Request, " << Command << ", not recognized." << __E__;
 
 	xmldoc.outputXmlDocument((std::ostringstream*) out, false, true);
-}
+
+	__COUT__ << "Done" << __E__;
+} //end tooltipRequest
 
 //========================================================================================================================
 //setSupervisorPropertyDefaults
@@ -2509,8 +2513,9 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 
 //========================================================================================================================
 void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
-
 {
+	__COUT__ << "Start" << __E__;
+
 	//for simplicity assume all commands should be mutually exclusive with iterator thread state machine accesses (really should just be careful with RunControlStateMachine access)
 	if (VERBOSE_MUTEX) __COUT__ << "Waiting for FSM access" << __E__;
 	std::lock_guard<std::mutex> lock(stateMachineAccessMutex_);
@@ -3193,6 +3198,8 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	//return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*) out, false /*dispStdOut*/,
 			true /*allowWhiteSpace*/); //Note: allow white space need for error response
+
+	__COUT__ << "Done" << __E__;
 } // end request()
 
 //========================================================================================================================
