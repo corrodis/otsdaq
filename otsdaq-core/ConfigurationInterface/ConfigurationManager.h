@@ -37,6 +37,7 @@ public:
 	static const std::string ACTIVE_GROUP_NAME_BACKBONE;
 	static const std::string ACTIVE_GROUP_NAME_ITERATE;
 	static const std::string ACTIVE_GROUP_NAME_CONFIGURATION;
+	static const std::string ACTIVE_GROUP_NAME_UNKNOWN;
 
 
 	static const uint8_t	 METADATA_COL_ALIASES;
@@ -100,6 +101,7 @@ public:
 
 	std::pair<std::string /*groupName*/, 	ConfigurationGroupKey>                         						getConfigurationGroupFromAlias	(std::string systemAlias, ProgressBar* progressBar=0);
 	std::map <std::string /*groupType*/, 	std::pair<std::string /*groupName*/, ConfigurationGroupKey> >  		getActiveConfigurationGroups  	(void) const;
+	const std::map <std::string /*groupType*/, 	std::pair<std::string /*groupName*/, ConfigurationGroupKey> >&  getFailedConfigurationGroups  	(void) const { return lastFailedGroupLoad_; }
 	const std::string&													  getActiveGroupName 			(const std::string& type = "") const;
 	ConfigurationGroupKey		 										  getActiveGroupKey 			(const std::string& type = "") const;
 
@@ -128,6 +130,8 @@ private:
 	ConfigurationInterface*                       	theInterface_;
 	std::shared_ptr<ConfigurationGroupKey>          theConfigurationGroupKey_,	theContextGroupKey_, 	theBackboneGroupKey_,	theIterateGroupKey_;
 	std::string										theConfigurationGroup_, 	theContextGroup_, 		theBackboneGroup_,		theIterateGroup_;
+
+	std::map<std::string, std::pair<std::string, ConfigurationGroupKey>> lastFailedGroupLoad_;
 
 	std::map<std::string, ConfigurationBase* >     	nameToConfigurationMap_;
 

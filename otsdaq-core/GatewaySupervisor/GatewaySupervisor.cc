@@ -2514,7 +2514,7 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 //========================================================================================================================
 void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 {
-	__COUT__ << "Start" << __E__;
+	//__COUT__ << "Start" << __E__;
 
 	//for simplicity assume all commands should be mutually exclusive with iterator thread state machine accesses (really should just be careful with RunControlStateMachine access)
 	if (VERBOSE_MUTEX) __COUT__ << "Waiting for FSM access" << __E__;
@@ -3199,7 +3199,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	xmlOut.outputXmlDocument((std::ostringstream*) out, false /*dispStdOut*/,
 			true /*allowWhiteSpace*/); //Note: allow white space need for error response
 
-	__COUT__ << "Done" << __E__;
+	//__COUT__ << "Done" << __E__;
 } // end request()
 
 //========================================================================================================================
