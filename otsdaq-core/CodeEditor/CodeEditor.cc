@@ -138,7 +138,9 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 			retExt += extension[i];
 	__COUTV__(retExt);
 	if(
-			retExt != "h" && retExt != "cc" && retExt != "txt" && //should match get directory content restrictions
+			retExt != "h" && retExt != "hh" &&
+			retExt != "c" && retExt != "cc" && retExt != "cpp" &&
+			retExt != "txt" && //should match get directory content restrictions
 			retExt != "sh" && retExt != "css" && retExt != "html" &&
 			retExt != "js" && retExt != "py" && retExt != "fcl"
 					&& retExt != "xml")
@@ -293,7 +295,10 @@ void CodeEditor::getDirectoryContent(
 				//__COUT__ << "File: " << type << " " << name << "\n" << std::endl;
 				if(
 						name.find(".h") == name.length()-2 		||
+						name.find(".hh") == name.length()-3		||
+						name.find(".c") == name.length()-2	 	||
 						name.find(".cc") == name.length()-3 	||
+						name.find(".cpp") == name.length()-4 	||
 						name.find(".js") == name.length()-3 	||
 						name.find(".sh") == name.length()-3 	||
 						name.find(".py") == name.length()-3 	||
