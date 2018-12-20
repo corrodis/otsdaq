@@ -50,6 +50,7 @@ public:
 
 protected:
 
+    static void 					indicateOtsAlive				(const CorePropertySupervisorBase* properties = 0);
 
     ConfigurationManager*          	theConfigurationManager_;
 

@@ -77,15 +77,49 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorConfigurationPath_);
-}
+
+	__SUP_COUTV__(getenv("HOSTNAME"));
+
+	CorePropertySupervisorBase::indicateOtsAlive(this);
+
+} // end constructor
 
 
 //========================================================================================================================
 CorePropertySupervisorBase::~CorePropertySupervisorBase(void)
 {
 	if(theConfigurationManager_) delete theConfigurationManager_;
-}
+} //end destructor
 
+
+//========================================================================================================================
+void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBase* properties)
+{
+	char portStr[100] = "0";
+	if(properties)
+	{
+		unsigned int port = properties->getContextTreeNode().getNode(
+				properties->supervisorContextUID_).getNode(
+						"Port").getValue<unsigned int>();
+		sprintf(portStr,"%u",port);
+	}
+
+	//indicate ots is alive (for StartOTS.sh to verify launch was successful)
+	std::string filename = std::string(getenv("OTSDAQ_LOG_DIR")) +
+			"/otsdaq_is_alive-" +
+			std::string(getenv("HOSTNAME")) +
+			"-" +
+			portStr +
+			".dat";
+	FILE *fp = fopen(filename.c_str(),"w");
+	if(!fp)
+	{
+		__SS__ << "Failed to open the ots-is-alive file: " << filename << __E__;
+		__SS_THROW__;
+	}
+	fprintf(fp,"%ld",time(0));
+	fclose(fp);
+}
 
 //========================================================================================================================
 //When overriding, setup default property values here

@@ -127,7 +127,7 @@ HOSTNAME_ARR=($(echo "${HOSTNAME}" | tr '.' " "))
 #    echo "$i=>${HOSTNAME_ARR[i]}"
 #done
 #echo ${HOSTNAME_ARR[0]}
-
+	
 echo
 echo
 echo "  |"
@@ -152,7 +152,6 @@ SCRIPT_DIR="$(
 		
 unalias ots.exe &>/dev/null 2>&1 #hide output
 alias ots.exe='xdaq.exe' &>/dev/null #hide output
-
 
 
 ISCONFIG=0
@@ -271,17 +270,17 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	echo
 	echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}******************************************************${Reset}"
 	echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}*************        otsdaq!        **************${Reset}"
-        echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}******************************************************${Reset}"
+    echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}******************************************************${Reset}"
 	echo
 	
 	#try to force kill other StartOTS scripts
 	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
 	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 	
-        echo "${IBRed}"
-        killprocs	
+    echo "${IBRed}"
+    killprocs	
 	killall -9 StartOTS.sh &>/dev/null 2>&1 #hide output
-        echo "${Reset}"
+    echo "${Reset}"
 	
 	exit
 fi
@@ -291,9 +290,9 @@ if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPL
 	echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Unrecognized parameter(s)${Reset} ${BIBlue}$1 $2${Reset} [Note: only two parameters are considered, others are ignored]. "
 	echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${BIGreen}Usage${Reset}:"
 	echo
-        echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t******************************************************"
+    echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t******************************************************"
 	echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t*************    StartOTS.sh Usage      **************"
-        echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t******************************************************"
+    echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t******************************************************"
 	echo
 	echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tTo kill all otsdaq running processes, please use any of these options:"
 	echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t--killall  --kill  --kx  -k"
@@ -455,6 +454,11 @@ if [ ! -d $OTSDAQ_LOG_DIR ]; then
 fi
 export OTSDAQ_LOG_ROOT=$OTSDAQ_LOG_DIR
 
+
+#cleanup alive files
+rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive* &>/dev/null 2>&1 #hide output #remove alive file
+
+
 ##############################################################################
 export XDAQ_CONFIGURATION_XML=otsConfigurationNoRU_CMake #-> 
 ##############################################################################
@@ -591,8 +595,10 @@ launchOTSWiz() {
 	echo
 	echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tStarting wiz mode on port ${PORT}; to change, please setup environment variable OTS_WIZ_MODE_MAIN_PORT."
 	echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tWiz mode xdaq config is ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml"
-			
-	sleep 1 #attempt to avoid false starts by xdaq
+
+	#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
+	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-0.dat >/dev/null 2>&1 #hide output #remove alive file
+		
 	if [ $QUIET == 1 ]; then
 		echo
 
@@ -604,13 +610,31 @@ launchOTSWiz() {
 		
 		echo
 		echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  "
-		echo
+		echo		
 		
 		ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt &
 	else
 		ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &
 	fi
+	LAST_OTS_PID=$!
 
+	#test for relaunch
+	sleep 1
+	OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-0.dat)"
+	#echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t OTS_IS_ALIVE=${OTS_IS_ALIVE}"
+
+	if [ "x$OTS_IS_ALIVE" == "x" ]; then
+		echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t Relaunching xdaq..."
+		kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
+		
+		if [ $QUIET == 1 ]; then
+			ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt &
+		else
+			ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &
+		fi
+		LAST_OTS_PID=$!
+	fi
+	
 	################
 	# start node db server
 	
@@ -655,7 +679,7 @@ launchOTS() {
 		killprocs
 	fi
 	
-        echo 
+    echo 
 	echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Purple}${REV}*****************************************************${Reset}"
 	if [ $ISGATEWAYLAUNCH == 1 ]; then
 		echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Purple}${REV}***********       Launching OTS!         ************${Reset}"
@@ -740,6 +764,8 @@ launchOTS() {
 	#echo ${XDAQ_ARGS}
 	#echo
 	#echo	
+			
+
 
 	#for Supervisor backwards compatibility, convert to GatewaySupervisor stealthily
 	#sed -i s/ots::Supervisor/ots::GatewaySupervisor/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
@@ -821,9 +847,11 @@ launchOTS() {
 						MAIN_URL="http://${host}:${port}/urn:xdaq-application:lid=${BASH_REMATCH[1]}/"
 								
 						#if gateway launch, do it
-						if [[ $ISGATEWAYLAUNCH == 1 && ${host} == ${HOSTNAME} ]]; then
-						
-							sleep 1 #attempt to avoid false starts by xdaq
+						if [[ $ISGATEWAYLAUNCH == 1 && ${host} == ${HOSTNAME} ]]; then						
+
+							#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
+							rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat >/dev/null 2>&1 #hide output #remove alive file
+
 							if [ $QUIET == 1 ]; then
 								echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching the Gateway Application on host {${HOSTNAME}}...${Reset}"								
 
@@ -833,14 +861,33 @@ launchOTS() {
 									mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.${DATESTRING}.txt
 								fi
 								
+
 								echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${Yellow}${Bold}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt${Reset}"
-								ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt &								
-								
+								ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt &
 							else
 								ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
 							fi
 							
-							GATEWAY_PID=$!
+							LAST_OTS_PID=$!
+
+							#test for relaunch
+							sleep 1
+							OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
+							#echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t OTS_IS_ALIVE=${OTS_IS_ALIVE}"
+
+							if [ "x$OTS_IS_ALIVE" == "x" ]; then
+								echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t Relaunching xdaq..."
+								kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
+								
+								if [ $QUIET == 1 ]; then
+									ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt &
+								else
+									ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
+								fi
+								LAST_OTS_PID=$!
+							fi
+							
+							GATEWAY_PID=$LAST_OTS_PID													
 							echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tGateway-PID = ${Blue}${Bold}${GATEWAY_PID}${Rev}${Reset}"
 							echo
 							
@@ -875,8 +922,10 @@ launchOTS() {
 		if [[ ${xdaqHost[$i]} != ${HOSTNAME} ]]; then
 			continue
 		fi
-	
-		sleep 1 #attempt to avoid false starts by xdaq
+
+		#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
+		rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat >/dev/null 2>&1 #hide output #remove alive file
+							
 		if [ $QUIET == 1 ]; then		  
 
 			if [ $BACKUPLOGS == 1 ]; then
@@ -889,10 +938,29 @@ launchOTS() {
 			echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***  "			
 			ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
 		else
-		  ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
+			ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
 		fi
 		
-		ContextPIDArray+=($!)
+		LAST_OTS_PID=$!
+		
+		#test for relaunch
+		sleep 1
+		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
+		#echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t OTS_IS_ALIVE=${OTS_IS_ALIVE}"
+
+		if [ "x$OTS_IS_ALIVE" == "x" ]; then
+			echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t Relaunching xdaq..."
+			kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
+			
+			if [ $QUIET == 1 ]; then
+				ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
+			else
+				ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
+			fi
+			LAST_OTS_PID=$!
+		fi
+				
+		ContextPIDArray+=($LAST_OTS_PID)
 		echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tNongateway-PID = ${ContextPIDArray[$i]}"
 		
 		i=$(( $i + 1 ))

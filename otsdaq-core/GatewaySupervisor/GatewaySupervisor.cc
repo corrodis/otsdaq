@@ -37,7 +37,6 @@
 using namespace ots;
 
 
-#define ICON_FILE_NAME 							std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
 #define RUN_NUMBER_PATH		 					std::string(getenv("SERVICE_DATA_PATH")) + "/RunNumber/"
 #define RUN_NUMBER_FILE_NAME 					"NextRunNumber.txt"
 #define FSM_LAST_GROUP_ALIAS_PATH				std::string(getenv("SERVICE_DATA_PATH")) + "/RunControlData/"
@@ -75,6 +74,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s)
 	__COUT__ << __E__;
 
 	//attempt to make directory structure (just in case)
+	mkdir((std::string(getenv("SERVICE_DATA_PATH"))).c_str(), 0755);
 	mkdir((FSM_LAST_GROUP_ALIAS_PATH).c_str(), 0755);
 	mkdir((RUN_NUMBER_PATH).c_str(), 0755);
 
@@ -100,8 +100,10 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s)
 	//xoap::bind(this, &GatewaySupervisor::supervisorHandleAsyncError, 		"FERunningError", XDAQ_NS_URI);
 
 	init();
-	//exit(1);
-}
+
+	//exit(1); //keep for syntax to exit ots
+
+} //end constructor
 
 //========================================================================================================================
 //	TODO: Lore needs to detect program quit through killall or ctrl+c so that Logbook entry is made when ots is halted
@@ -109,6 +111,12 @@ GatewaySupervisor::~GatewaySupervisor(void)
 {
 	delete CorePropertySupervisorBase::theConfigurationManager_;
 	makeSystemLogbookEntry("ots halted.");
+} //end destructor
+
+//========================================================================================================================
+void GatewaySupervisor::indicateOtsAlive(const CorePropertySupervisorBase* properties)
+{
+	CorePropertySupervisorBase::indicateOtsAlive(properties);
 }
 
 //========================================================================================================================
