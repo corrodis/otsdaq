@@ -78,8 +78,7 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorConfigurationPath_);
 
-	__SUP_COUTV__(getenv("HOSTNAME"));
-
+	
 	CorePropertySupervisorBase::indicateOtsAlive(this);
 
 } // end constructor
@@ -96,29 +95,46 @@ CorePropertySupervisorBase::~CorePropertySupervisorBase(void)
 void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBase* properties)
 {
 	char portStr[100] = "0";
+	std::string hostname = "wiz";
+	
+	//Note: the environment variable getenv("HOSTNAME") fails in multinode ots systems started through ssh
+	
 	if(properties)
 	{
 		unsigned int port = properties->getContextTreeNode().getNode(
 				properties->supervisorContextUID_).getNode(
 						"Port").getValue<unsigned int>();
 		sprintf(portStr,"%u",port);
+		
+		hostname = properties->getContextTreeNode().getNode(
+				properties->supervisorContextUID_).getNode(
+						"Address").getValue<std::string>();
+	
+		size_t i = hostname.find("//");
+		if(i != std::string::npos)
+			hostname = hostname.substr(i+2);
+				
+		__COUTV__(hostname); 
 	}
 
+	
 	//indicate ots is alive (for StartOTS.sh to verify launch was successful)
 	std::string filename = std::string(getenv("OTSDAQ_LOG_DIR")) +
 			"/otsdaq_is_alive-" +
-			std::string(getenv("HOSTNAME")) +
+			hostname +
 			"-" +
 			portStr +
-			".dat";
+			".dat";			
 	FILE *fp = fopen(filename.c_str(),"w");
 	if(!fp)
 	{
 		__SS__ << "Failed to open the ots-is-alive file: " << filename << __E__;
 		__SS_THROW__;
 	}
-	fprintf(fp,"%ld",time(0));
+	fprintf(fp,"%s %s %ld\n",hostname.c_str(),portStr,time(0));
 	fclose(fp);
+	
+	__COUT__ << "Marked alive: " << filename << __E__;
 }
 
 //========================================================================================================================
