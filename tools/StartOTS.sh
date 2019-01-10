@@ -251,7 +251,7 @@ function killprocs
 		PIDS=""
 		for contextPID in "${ContextPIDArray[@]}"
 		do
-			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}{$Rev}Killing Nongateway-PID${Reset} ${contextPID}"
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Rev}Killing Nongateway-PID${Reset} ${contextPID}"
 			PIDS+=" ${contextPID}"
 		done
 		

@@ -24,7 +24,10 @@ FEVInterface::FEVInterface (const std::string& interfaceUID,
 //, daqHardwareType_            	("NOT SET")
 //, firmwareType_               	("NOT SET")
 , slowControlsWorkLoop_			(interfaceUID + "-SlowControls", this)
-{ __FE_COUT__ << "Constructed." << __E__;}
+{
+	//NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the base class versions of function (e.g. getInterfaceType) are called because the derived class has not been instantiate yet!
+	__COUT__ << "'" << interfaceUID << "' Constructed." << __E__;
+}
 
 //========================================================================================================================
 void FEVInterface::configureSlowControls(void)
