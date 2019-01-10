@@ -314,10 +314,10 @@ throw (xgi::exception::Exception)
 xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	//receive request parameters
+	//SOAPUtilities::receive request parameters
 	SOAPParameters parameters;
 	parameters.addParameter("sequence");
-	receive(message, parameters);
+	SOAPUtilities::receive(message, parameters);
 
 	std::string submittedSequence = parameters.getValue("sequence");
 
@@ -360,7 +360,7 @@ throw (xoap::exception::Exception)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ActionOfLastGroup");
-	receive(message, parameters);
+	SOAPUtilities::receive(message, parameters);
 
 	return GatewaySupervisor::lastConfigGroupRequestHandler(parameters);
 }

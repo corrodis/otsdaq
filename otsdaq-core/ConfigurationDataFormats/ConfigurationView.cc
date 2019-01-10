@@ -906,8 +906,8 @@ const unsigned int ConfigurationView::getColPriority(void) const
 		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << std::endl;
 
 	__SS__ << "Missing " << ViewColumnInfo::COL_NAME_PRIORITY << " Column in config named " << tableName_ <<
-			". (Possibly ConfigurationView was just not initialized?"  <<
-			"This is the const call so can not alter class members)" << std::endl;
+			". (The Priority column is identified when ConfigurationView is initialized)"
+			<< std::endl; // this is the const call, so can not identify the column and set colPriority_ here
 	__SS_THROW__;
 }
 

@@ -88,8 +88,8 @@
 //////// ==============================================================
 
 //for configurable objects, add name to subject
-#define __CFG_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << "-" << theConfigurationRecordName_ << ":"
-#define __CFG_MF_TYPE__(X)		mf::X (std::string(__MF_SUBJECT__) + theConfigurationRecordName_)
+#define __CFG_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":" << theConfigurationRecordName_ << ":"
+#define __CFG_MF_TYPE__(X)		mf::X (std::string(__MF_SUBJECT__) + "-" + theConfigurationRecordName_)
 
 #define __CFG_MOUT_ERR__  	__CFG_MF_TYPE__(LogError) 	<< __COUT_HDR__
 #define __CFG_MOUT_WARN__  	__CFG_MF_TYPE__(LogWarning) << __COUT_HDR__
@@ -108,15 +108,41 @@
 #define __CFG_MCOUT__(X)  		{__CFG_MOUT__ << X; 		__CFG_COUT__ << X;}
 #define __CFG_MCOUTV__(X)		{__CFG_MOUTV__(X); 			__CFG_COUTV__(X);}
 
-#define __CFG_SS__			std::stringstream ss; ss << ":" << __MF_SUBJECT__ << "-" << theConfigurationRecordName_ << ":" << __COUT_HDR__
+#define __CFG_SS__			std::stringstream ss; ss << ":" << __MF_SUBJECT__ << ":" << theConfigurationRecordName_ << ":" << __COUT_HDR__
 #define __CFG_SS_THROW__	__CFG_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
+
+//////// ==============================================================
+
+//for front-end interface objects, add name to subject
+#define __FE_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":FE:" << FEVInterface::getInterfaceType() << ":" << FEVInterface::getInterfaceUID() << ":" << theConfigurationRecordName_ << ":"
+#define __FE_MF_TYPE__(X)		mf::X (std::string("FE-") + FEVInterface::getInterfaceType() + "-" + FEVInterface::getInterfaceUID() + "-" + theConfigurationRecordName_)
+
+#define __FE_MOUT_ERR__  	__FE_MF_TYPE__(LogError) 	<< __COUT_HDR__
+#define __FE_MOUT_WARN__  	__FE_MF_TYPE__(LogWarning) 	<< __COUT_HDR__
+#define __FE_MOUT_INFO__  	__FE_MF_TYPE__(LogInfo) 	<< __COUT_HDR__
+#define __FE_MOUT__  		__FE_MF_TYPE__(LogDebug)	<< __COUT_HDR__
+#define __FE_MOUTV__(X)		__FE_MOUT__ << QUOTE(X) << " = " << X
+#define __FE_COUT_ERR__  	__FE_COUT_TYPE__(LogError) 		<< __COUT_HDR__
+#define __FE_COUT_WARN__  	__FE_COUT_TYPE__(LogWarning) 	<< __COUT_HDR__
+#define __FE_COUT_INFO__  	__FE_COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
+#define __FE_COUT__  		__FE_COUT_TYPE__(LogDebug)		<< __COUT_HDR__
+#define __FE_COUTV__(X) 	__FE_COUT__ << QUOTE(X) << " = " << X << __E__
+
+#define __FE_MCOUT_ERR__(X)  	{__FE_MOUT_ERR__ << X; 		__FE_COUT_ERR__ << X;}
+#define __FE_MCOUT_WARN__(X)  	{__FE_MOUT_WARN__ << X; 	__FE_COUT_WARN__ << X;}
+#define __FE_MCOUT_INFO__(X)  	{__FE_MOUT_INFO__ << X; 	__FE_COUT_INFO__ << X;}
+#define __FE_MCOUT__(X)  		{__FE_MOUT__ << X; 			__FE_COUT__ << X;}
+#define __FE_MCOUTV__(X)		{__FE_MOUTV__(X); 			__FE_COUTV__(X);}
+
+#define __FE_SS__			std::stringstream ss; ss << ":FE:" << FEVInterface::getInterfaceType() << ":" << FEVInterface::getInterfaceUID() << ":" << theConfigurationRecordName_ << ":" << __COUT_HDR__
+#define __FE_SS_THROW__	__FE_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
 
 
 //////// ==============================================================
 
 //for core supervisor objects (with supervisorClassNoNamespace_ defined), add class to subject
-#define __SUP_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << "-" << supervisorClassNoNamespace_ << ":"
-#define __SUP_MF_TYPE__(X)		mf::X (std::string(__MF_SUBJECT__) + supervisorClassNoNamespace_)
+#define __SUP_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << supervisorClassNoNamespace_ << ":" << CorePropertySupervisorBase::supervisorApplicationUID_ << ":"
+#define __SUP_MF_TYPE__(X)		mf::X (supervisorClassNoNamespace_ + "-" + CorePropertySupervisorBase::supervisorApplicationUID_)
 
 #define __SUP_MOUT_ERR__  	__SUP_MF_TYPE__(LogError) 	<< __COUT_HDR__
 #define __SUP_MOUT_WARN__  	__SUP_MF_TYPE__(LogWarning) << __COUT_HDR__
@@ -135,7 +161,7 @@
 #define __SUP_MCOUT__(X)  		{__SUP_MOUT__ << X; 		__SUP_COUT__ << X;}
 #define __SUP_MCOUTV__(X)		{__SUP_MOUTV__(X); 			__SUP_COUTV__(X);}
 
-#define __SUP_SS__			std::stringstream ss; ss << ":" << __MF_SUBJECT__ << "-" << supervisorClassNoNamespace_ << ":" << __COUT_HDR__
+#define __SUP_SS__			std::stringstream ss; ss << ":" << supervisorClassNoNamespace_ << ":" << CorePropertySupervisorBase::supervisorApplicationUID_ << ":" << __COUT_HDR__
 #define __SUP_SS_THROW__	__SUP_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
 
 

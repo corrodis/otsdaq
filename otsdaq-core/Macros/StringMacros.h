@@ -13,6 +13,10 @@ namespace ots
 
 struct StringMacros
 {
+private: //private constructor because all static members, should never instantiate this class
+	StringMacros(void);
+    ~StringMacros(void);
+public:
 
 	//Here is the list of static helper functions:
 	//
@@ -23,7 +27,8 @@ struct StringMacros
 	//		decodeURIComponent
 	//		convertEnvironmentVariables
 	//		isNumber
-	//		extractAndCalculateNumber
+    //		binaryToHexString
+    //		getNumber
 	//		validateValueForDefaultStringDataType
 	//
 	//		getSetFromString
@@ -37,7 +42,7 @@ struct StringMacros
 	//		demangleTypeName
 
 static bool					wildCardMatch							(const std::string& needle, 		const std::string& 							haystack,	unsigned int* priorityIndex = 0);
-static bool					inWildCardSet							(const std::string  needle, 		const std::set<std::string>& 				haystack);
+static bool					inWildCardSet							(const std::string& needle, 		const std::set<std::string>& 				haystack);
 
 
 //========================================================================================================================
@@ -45,7 +50,7 @@ static bool					inWildCardSet							(const std::string  needle, 		const std::set
 //	returns value if needle is in haystack otherwise throws exception
 //	(considering wildcards AND match priority as defined by StringMacros::wildCardMatch)
 template<class T>
-static const T&				getWildCardMatchFromMap					(const std::string  needle, 		const std::map<std::string,T>& 				haystack)
+static T&				getWildCardMatchFromMap					(const std::string& needle, std::map<std::string,T>& haystack, std::string* foundKey = 0)
 {
 	unsigned int matchPriority, bestMatchPriority = 0; //lowest number matters most for matches
 
@@ -58,14 +63,17 @@ static const T&				getWildCardMatchFromMap					(const std::string  needle, 		con
 	//__COUT__ << StringMacros::mapToString(haystack) << __E__;
 
 	std::string bestMatchKey;
-	for(const auto& haystackPair : haystack)
+	for(auto& haystackPair : haystack)
 		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
 		//	check resulting priority to see if we are done with search (when priority=1, can be done)
-		if(StringMacros::wildCardMatch(haystackPair.first,needle,
+		if(StringMacros::wildCardMatch(haystackPair.first, needle,
 				&matchPriority))
 		{
 			if(matchPriority == 1) //found best possible match, so done
+			{
+				if(foundKey) *foundKey = haystackPair.first;
 				return haystackPair.second;
+			}
 
 			if(!bestMatchPriority || matchPriority < bestMatchPriority)
 			{
@@ -80,6 +88,7 @@ static const T&				getWildCardMatchFromMap					(const std::string  needle, 		con
 		//__COUTV__(bestMatchPriority);
 		//__COUTV__(bestMatchKey);
 		//__COUT__ << "value found: " << haystack.at(bestMatchKey) << __E__;
+		if(foundKey) *foundKey = bestMatchKey;
 		return haystack.at(bestMatchKey);
 	}
 
@@ -119,6 +128,7 @@ static bool 	        	getNumber								(const std::string& s, T& retValue)
 	retValue = 0; //initialize
 
 	T tmpValue;
+
 	unsigned int i = 0;
 	unsigned int opsi = 0;
 	bool verified;
@@ -310,9 +320,9 @@ static std::string 			validateValueForDefaultStringDataType	(const std::string& 
 
 
 static void					getSetFromString 						(const std::string& inputString, std::set<std::string>& setToReturn, const std::set<char>& delimiter = {',','|','&'}, const std::set<char>& whitespace = {' ','\t','\n','\r'});
-static void					getVectorFromString						(const std::string& inputString, std::vector<std::string>& listToReturn, const std::set<char>& delimiter = {',','|','&'}, const std::set<char>& whitespace = {' ','\t','\n','\r'}, std::vector<char>* listOfDelimiters = 0);
-template<class T>
-static void					getMapFromString 						(const std::string& inputString, std::map<std::string,T>& mapToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'})
+
+template<class T /*value type*/, class S = std::string /*name string or const string*/>
+static void					getMapFromString 						(const std::string& inputString, std::map<S,T>& mapToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'})
 try
 {
 	unsigned int i=0;
@@ -357,7 +367,8 @@ try
 				//__COUT__ << "Map value found: " <<
 				//		inputString.substr(i,j-i) << std::endl;
 
-				auto /*pair<it,success>*/ emplaceReturn = mapToReturn.emplace(std::pair<std::string,T>(
+				auto /*pair<it,success>*/ emplaceReturn =
+						mapToReturn.emplace(std::pair<S,T>(
 						name,
 						validateValueForDefaultStringDataType<T>(
 								inputString.substr(i,j-i)) //value
@@ -378,7 +389,8 @@ try
 
 	if(i != j) //last value (for case when no concluding ' ' or delimiter)
 	{
-		auto /*pair<it,success>*/ emplaceReturn = mapToReturn.emplace(std::pair<std::string,T>(
+		auto /*pair<it,success>*/ emplaceReturn = mapToReturn.emplace(
+				std::pair<S,T>(
 				name,
 				validateValueForDefaultStringDataType<T>(
 						inputString.substr(i,j-i)) //value
@@ -396,9 +408,57 @@ catch(const std::runtime_error &e)
 	__SS__ << "Error while extracting a map from the string '" <<
 			inputString << "'... is it a valid map?" << __E__ << e.what() << __E__;
 	__SS_THROW__;
-}
-
+} //end getMapFromString
 static void					getMapFromString 						(const std::string& inputString, std::map<std::string,std::string>& mapToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'});
+//
+//template<class T /*value type*/, class S /*name string or const string*/>
+//static void					getVectorFromString						(const std::string& inputString, std::vector<std::pair<S,T> >& vectorToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'})
+//try
+//{
+//	std::map<T,S> mapToReturn;
+//	getMapFromString<T,S>(
+//			inputString,
+//			mapToReturn,
+//			pairPairDelimiter,
+//			nameValueDelimiter,
+//			whitespace);
+//
+//	vectorToReturn.clear();
+//	for(auto& mapPair: mapToReturn)
+//		vectorToReturn.push_back(mapPair);
+//}
+//catch(const std::runtime_error &e)
+//{
+//	__SS__ << "Error while extracting a vector of pairs from the string '" <<
+//			inputString << "'... is it a valid vector of pairs?" << __E__ << e.what() << __E__;
+//	__SS_THROW__;
+//} //end getVectorFromString <pair>
+//template<class S /*name string or const string*/>
+//static void					getVectorFromString						(const std::string& inputString, std::vector<std::pair<S,std::string> >& vectorToReturn, const std::set<char>& pairPairDelimiter = {',','|','&'}, const std::set<char>& nameValueDelimiter = {'=',':'}, const std::set<char>& whitespace = {' ','\t','\n','\r'})
+//try
+//{
+//	std::map<std::string,S> mapToReturn;
+//	getMapFromString(
+//			inputString,
+//			mapToReturn,
+//			pairPairDelimiter,
+//			nameValueDelimiter,
+//			whitespace);
+//
+//	vectorToReturn.clear();
+//	for(auto& mapPair: mapToReturn)
+//		vectorToReturn.push_back(mapPair);
+//}
+//catch(const std::runtime_error &e)
+//{
+//	__SS__ << "Error while extracting a vector of pairs from the string '" <<
+//			inputString << "'... is it a valid vector of pairs?" << __E__ << e.what() << __E__;
+//	__SS_THROW__;
+//} //end getVectorFromString <pair>
+static void					getVectorFromString						(const std::string& inputString, std::vector<std::string>& listToReturn, const std::set<char>& delimiter = {',','|','&'}, const std::set<char>& whitespace = {' ','\t','\n','\r'}, std::vector<char>* listOfDelimiters = 0);
+
+
+
 template<class T>
 static std::string			mapToString								(const std::map<std::string,T>& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
 {
@@ -494,7 +554,7 @@ static std::string			mapToString								(const std::map<std::string,std::set<T> 
 template<class T>
 static std::string			mapToString								(const std::map<std::string,std::vector<T> >& mapToReturn, const std::string& primaryDelimeter = ", ", const std::string& secondaryDelimeter = ": ")
 {
-	//this is a somewhat specific map format (one usage is similar CodeEditor)
+	//this is a somewhat specific map format (one usage is similar to that in CodeEditor)
 	std::stringstream ss;
 	bool first = true;
 	for(auto& mapPair:mapToReturn)
@@ -536,6 +596,21 @@ static std::string			vectorToString							(const std::vector<T>& setToReturn, co
 	return ss.str();
 }
 static std::string			vectorToString							(const std::vector<uint8_t>& setToReturn, const std::string& delimeter = ", ");
+template<class S, class T>
+static std::string			vectorToString							(const std::vector<std::pair<S,T> >& setToReturn, const std::string& primaryDelimeter = "; ", const std::string& secondaryDelimeter = ":")
+{
+	//this is a somewhat specific vector format (one usage is in FE Macro arguments)
+	std::stringstream ss;
+	bool first = true;
+	for(auto& setPair:setToReturn)
+	{
+		if(first) first = false;
+		else ss << primaryDelimeter;
+		ss << setPair.first << secondaryDelimeter << setPair.second;
+	}
+	return ss.str();
+}
+
 
 static std::string 			demangleTypeName						(const char* name);
 
