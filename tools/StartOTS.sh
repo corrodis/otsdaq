@@ -627,7 +627,7 @@ launchOTSWiz() {
 	if [ "x$OTS_IS_ALIVE" == "x" ]; then
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tRelaunching xdaq..."
 		kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
-		sleep 1
+		sleep 2
 		
 		if [ $QUIET == 1 ]; then
 			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  "
@@ -885,14 +885,14 @@ launchOTS() {
 							LAST_OTS_PID=$!
 
 							#test for relaunch
-							sleep 2
+							sleep 4
 							OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
 							#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
 
 							if [ "x$OTS_IS_ALIVE" == "x" ]; then
 								echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tRelaunching xdaq..."
 								kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
-								sleep 1
+								sleep 2
 								
 								if [ $QUIET == 1 ]; then
 									echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt"
