@@ -282,7 +282,9 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
     echo "${IBRed}"
     killprocs	
 	killall -9 StartOTS.sh &>/dev/null 2>&1 #hide output
-    echo ""
+    
+	echo -e "${Reset}"
+	echo -e "${Reset}"
 	
 	exit
 fi
