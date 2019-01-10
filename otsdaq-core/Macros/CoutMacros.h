@@ -114,8 +114,8 @@
 //////// ==============================================================
 
 //for front-end interface objects, add name to subject
-#define __FE_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":FE:" << FEVInterface::getInterfaceType() << ":" << FEVInterface::getInterfaceUID() << ":" << theConfigurationRecordName_ << ":"
-#define __FE_MF_TYPE__(X)		mf::X (std::string("FE-") + FEVInterface::getInterfaceType() + "-" + FEVInterface::getInterfaceUID() + "-" + theConfigurationRecordName_)
+#define __FE_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":FE:" << getInterfaceType() << ":" << getInterfaceUID() << ":" << theConfigurationRecordName_ << ":"
+#define __FE_MF_TYPE__(X)		mf::X (std::string("FE-") + getInterfaceType() + "-" + getInterfaceUID() + "-" + theConfigurationRecordName_)
 
 #define __FE_MOUT_ERR__  	__FE_MF_TYPE__(LogError) 	<< __COUT_HDR__
 #define __FE_MOUT_WARN__  	__FE_MF_TYPE__(LogWarning) 	<< __COUT_HDR__
@@ -134,7 +134,7 @@
 #define __FE_MCOUT__(X)  		{__FE_MOUT__ << X; 			__FE_COUT__ << X;}
 #define __FE_MCOUTV__(X)		{__FE_MOUTV__(X); 			__FE_COUTV__(X);}
 
-#define __FE_SS__			std::stringstream ss; ss << ":FE:" << FEVInterface::getInterfaceType() << ":" << FEVInterface::getInterfaceUID() << ":" << theConfigurationRecordName_ << ":" << __COUT_HDR__
+#define __FE_SS__			std::stringstream ss; ss << ":FE:" << getInterfaceType() << ":" << getInterfaceUID() << ":" << theConfigurationRecordName_ << ":" << __COUT_HDR__
 #define __FE_SS_THROW__	__FE_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
 
 
