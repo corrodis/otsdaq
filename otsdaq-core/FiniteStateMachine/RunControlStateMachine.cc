@@ -25,6 +25,7 @@ const std::string RunControlStateMachine::FAILED_STATE_NAME = "Failed";
 RunControlStateMachine::RunControlStateMachine(const std::string& name)
 : theStateMachine_			(name)
 , asyncFailureReceived_		(false)
+, asyncSoftFailureReceived_ (false)
 {
 	INIT_MF("RunControlStateMachine");
 
@@ -81,8 +82,9 @@ RunControlStateMachine::RunControlStateMachine(const std::string& name)
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Startup"   , XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Fail"      , XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Error"     , XDAQ_NS_URI);
-	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "AsyncError", XDAQ_NS_URI);
 
+	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "AsyncError"	, XDAQ_NS_URI);
+	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "AsyncSoftError", XDAQ_NS_URI);
 
 	reset();
 }
@@ -99,7 +101,10 @@ void RunControlStateMachine::reset(void)
 	theStateMachine_.setInitialState('I');
 	theStateMachine_.reset();
 
+	theStateMachine_.setErrorMessage("",false /*append*/); //clear error message
+
 	asyncFailureReceived_ = false;
+	asyncSoftFailureReceived_ = false;
 }
 
 ////========================================================================================================================
@@ -137,7 +142,6 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 {
 	__COUT__ << "Received... \t" << SOAPUtilities::translate(message) << std::endl;
 
-	theStateMachine_.setErrorMessage(""); //clear error message
 
 	std::string command = SOAPUtilities::translate(message).getCommand();
 
@@ -258,6 +262,24 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 
 		return SOAPUtilities::makeSOAPMessageReference(result);
 	}
+	else if(command == "AsyncSoftError")
+	{
+		std::string errorMessage = SOAPUtilities::translate(
+				message).getParameters().getValue("ErrorMessage");
+
+		__SS__ << command << " was received! Pause'ing immediately: " <<
+				errorMessage << std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+
+		if(!asyncSoftFailureReceived_) //launch pause only first time
+		{
+			asyncSoftFailureReceived_ = true; //mark flag, to be used to avoid double pausing and identify pause was due to soft error
+			theStateMachine_.execTransition("Pause");
+		}
+
+		return SOAPUtilities::makeSOAPMessageReference(result);
+	}
 
 
 	//if already Halted, respond to Initialize with "done"
@@ -266,6 +288,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 			currentState == "Halted")
 	{
 		__COUT__ << "Already Initialized.. ignoring Initialize command." << std::endl;
+
+		theStateMachine_.setErrorMessage("",false/*append*/); //clear error message
 		return SOAPUtilities::makeSOAPMessageReference(result);
 	}
 
@@ -275,6 +299,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	//handle normal transitions here
 	try
 	{
+		theStateMachine_.setErrorMessage("", false/*append*/); //clear error message
+
 		iterationWorkFlag_ = false;
 		subIterationWorkFlag_ = false;
 		if(iterationIndex_ || subIterationIndex_)

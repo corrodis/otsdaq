@@ -1502,7 +1502,6 @@ void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
 
 //========================================================================================================================
 void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
-
 {
 	checkForAsyncError();
 
@@ -1510,13 +1509,26 @@ void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
 
 	makeSystemLogbookEntry("Run pausing.");
 
-	broadcastMessage(theStateMachine_.getCurrentMessage());
+	//the current message is not for Pause if its due to async failure
+	if(RunControlStateMachine::asyncSoftFailureReceived_)
+	{
+		__COUT_ERR__ << "Broadcasting pause for async SOFT error!" << __E__;
+		broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Pause"));
+	}
+	else
+		broadcastMessage(theStateMachine_.getCurrentMessage());
 }
 
 //========================================================================================================================
 void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
-
 {
+	if(RunControlStateMachine::asyncSoftFailureReceived_)
+	{
+		//clear async soft error
+		__COUT_INFO__ << "Clearing async SOFT error!" << __E__;
+		RunControlStateMachine::asyncSoftFailureReceived_ = false;
+	}
+
 	checkForAsyncError();
 
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
@@ -1524,12 +1536,18 @@ void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
 	makeSystemLogbookEntry("Run resuming.");
 
 	broadcastMessage(theStateMachine_.getCurrentMessage());
-}
+} //end transitionResuming()
 
 //========================================================================================================================
 void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
-
 {
+	if(RunControlStateMachine::asyncSoftFailureReceived_)
+	{
+		//clear async soft error
+		__COUT_INFO__ << "Clearing async SOFT error!" << __E__;
+		RunControlStateMachine::asyncSoftFailureReceived_ = false;
+	}
+
 	checkForAsyncError();
 
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
@@ -3108,7 +3126,17 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 
 				if (theStateMachine_.getCurrentStateName() == "Running" ||
 						theStateMachine_.getCurrentStateName() == "Paused")
+				{
 					sprintf(tmp, "Current %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
+
+					if(RunControlStateMachine::asyncSoftFailureReceived_)
+					{
+						//__COUTV__(RunControlStateMachine::asyncSoftFailureReceived_);
+						//__COUTV__(RunControlStateMachine::getErrorMessage());
+						xmlOut.addTextElementToData("soft_error",
+								RunControlStateMachine::getErrorMessage());
+					}
+				}
 				else
 					sprintf(tmp,"Next %s Number: %u",stateMachineRunAlias.c_str(),getNextRunNumber(fsmName));
 				xmlOut.addTextElementToData("run_number", tmp);

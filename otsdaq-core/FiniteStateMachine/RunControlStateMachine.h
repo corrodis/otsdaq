@@ -128,7 +128,7 @@ protected:
 	FiniteStateMachine 		theStateMachine_;
     ProgressBar		   		theProgressBar_;
 
-    volatile bool			asyncFailureReceived_;
+    volatile bool			asyncFailureReceived_, asyncSoftFailureReceived_;
 
 	unsigned int			iterationIndex_, subIterationIndex_;
 	bool					iterationWorkFlag_, subIterationWorkFlag_;

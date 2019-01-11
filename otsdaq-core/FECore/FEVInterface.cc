@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <thread>       //for std::thread
 
 using namespace ots;
 
@@ -251,7 +252,67 @@ bool FEVInterface::slowControlsRunning(void)
 	}
 	if(fp) fclose(fp);
 	return false;
+} //end slowControlsRunning()
+
+//========================================================================================================================
+//SendAsyncErrorToGateway
+//	Static -- thread
+//	Send async error or soft error to gateway
+//	Do this as thread so that workloop can end
+void FEVInterface::sendAsyncErrorToGateway(FEVInterface* fe, const std::string& errorMessage, bool isSoftError)
+try
+{
+	if(isSoftError)
+		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" <<
+		fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":" <<
+			"Sending FE Async SOFT Running Error... \n" << errorMessage << __E__;
+	else
+		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" <<
+		fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":" <<
+			"Sending FE Async Running Error... \n" << errorMessage << __E__;
+
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor =
+			fe->VStateMachine::parentSupervisor_->allSupervisorInfo_.getGatewayInfo().getDescriptor();
+
+	SOAPParameters parameters;
+	parameters.addParameter("ErrorMessage",errorMessage);
+
+	xoap::MessageReference replyMessage =
+			fe->VStateMachine::parentSupervisor_->
+			SOAPMessenger::sendWithSOAPReply(
+					gatewaySupervisor,
+					isSoftError?"AsyncSoftError":"AsyncError",
+							parameters);
+
+	std::stringstream replyMessageSStream;
+	replyMessageSStream << SOAPUtilities::translate(replyMessage);
+	__COUT__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":" <<
+			"Received... " << replyMessageSStream.str() << std::endl;
+
+	if(replyMessageSStream.str().find("Fault") != std::string::npos)
+	{
+		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" <<
+				fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":" <<
+				"Failure to indicate fault to Gateway..." << __E__;
+		throw;
+	}
 }
+catch(const xdaq::exception::Exception& e)
+{
+	if(isSoftError)
+		__COUT__ << "SOAP message failure indicating front-end asynchronous running SOFT error back to Gateway: " <<
+		e.what() << __E__;
+	else
+		__COUT__ << "SOAP message failure indicating front-end asynchronous running error back to Gateway: " <<
+		e.what() << __E__;
+}
+catch(...)
+{
+	if(isSoftError)
+		__COUT__ << "Unknown error encounter indicating front-end asynchronous running SOFT error back to Gateway." << __E__;
+	else
+		__COUT__ << "Unknown error encounter indicating front-end asynchronous running error back to Gateway." << __E__;
+} //end SendAsyncErrorToGateway()
 
 //========================================================================================================================
 //workLoopThread
@@ -267,9 +328,16 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 		//catch all, then rethrow with local variables needed
 		__FE_SS__;
 
+		bool isSoftError = false;
+
 		try
 		{
 			throw;
+		}
+		catch(const __OTS_SOFT_EXCEPTION__& e)
+		{
+			ss << "SOFT Error was caught while configuring: " << e.what() << std::endl;
+			isSoftError = true;
 		}
 		catch(const std::runtime_error& e)
 		{
@@ -282,37 +350,26 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 			ss << "Caught an unknown error during running." << __E__;
 		}
 
+		//At this point, an asynchronous error has occurred
+		//	during front-end running...
+		//Send async error to Gateway
+
 		__FE_COUT_ERR__ << ss.str();
 
-		//send error out to Gateway
-		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor =
-				VStateMachine::parentSupervisor_->allSupervisorInfo_.getGatewayInfo().getDescriptor();
-
-		__FE_COUT__ << "Sending FERunningError... " << __E__;
-
-		SOAPParameters               parameters;
-		parameters.addParameter("ErrorMessage",ss.str());
-
-		xoap::MessageReference       retMsg =
-				VStateMachine::parentSupervisor_->
-				SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
-				"AsyncError",parameters);
-
-		std::stringstream retMsgSs;
-		retMsgSs << SOAPUtilities::translate(retMsg);
-		__FE_COUT__ << "Received... " << retMsgSs.str() << std::endl;
-
-		if(retMsgSs.str().find("Fault") != std::string::npos)
-		{
-			__FE_COUT_ERR__ << "Failure to indicate fault to system... so crashing..." << __E__;
-			throw;
-		}
+		std::thread([](FEVInterface* fe, const std::string errorMessage, bool isSoftError)
+				{
+			FEVInterface::sendAsyncErrorToGateway(fe,errorMessage,isSoftError);
+				},
+			//pass the values
+			this,
+			ss.str(),
+			isSoftError).detach();
 
 		return false;
 	}
 
 	return continueWorkLoop_;
-}
+} //end workLoopThread()
 
 //========================================================================================================================
 //registerFEMacroFunction

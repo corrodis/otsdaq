@@ -177,7 +177,19 @@
 #endif
 //========================================================================================================================
 
-
-
+//========================================================================================================================
+//declare special ots soft exception
+//	a SOFT exception thrown during runnning workloop by a state machine plugin will pause the
+//	global state machine and allow for manual intervention to resume a run.
+namespace ots
+{
+struct __OTS_SOFT_EXCEPTION__ : public std::exception
+{
+	__OTS_SOFT_EXCEPTION__(const std::string& what)
+				:what_(what) {}
+	virtual char const* what() const throw() {return what_.c_str();}
+	std::string what_;
+};
+}
 
 #endif

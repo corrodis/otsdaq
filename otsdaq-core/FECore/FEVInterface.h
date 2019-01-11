@@ -53,21 +53,7 @@ public:
 
 	FEVInterfacesManager*	parentInterfaceManager_;
 
-			/////////===========================
-			//start OLD - but keeping around for a while, in case we realize we need it
-			//
-			//virtual void 			initLocalGroup					(int local_group_comm_) {std::cout << __PRETTY_FUNCTION__ << std::endl;}
-			//void 					setConfigurationManager(ConfigurationManager* configurationManager){theConfigurationManager_ = configurationManager;}
-			//virtual void 			configureDetector(const DACStream& theDACStream) = 0;
-			//virtual void resetDetector() = 0;
-			//virtual void configureFEW     (void) = 0;
-			//
-			//end OLD
-			/////////
-
 	const std::string&		getInterfaceUID     			(void) const {return interfaceUID_;}
-	//const std::string&		getDaqHardwareType  			(void) const {return daqHardwareType_;}
-	//const std::string&		getFirmwareType     			(void) const {return firmwareType_;}
 	virtual std::string		getInterfaceType    			(void) const {return theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>();}//interfaceType_;}
 
 	virtual void			universalRead	        		(char* address, char* returnValue) = 0; //throw std::runtime_error exception on error/timeout
@@ -75,11 +61,9 @@ public:
 	const unsigned int&		getUniversalAddressSize			(void) {return universalAddressSize_;}
 	const unsigned int&		getUniversalDataSize   			(void) {return universalDataSize_;}
 
-	//FrontEndHardwareBase* 	getHardwareP					(void) const {return theFrontEndHardware_;}
-	//FrontEndFirmwareBase*	getFirmwareP					(void) const {return theFrontEndFirmware_;}
-
 	void 					runSequenceOfCommands			(const std::string& treeLinkName);
 
+	static void 			sendAsyncErrorToGateway			(FEVInterface* fe, const std::string& errMsg, bool isSoftError);
 
 
 	/////////===========================
@@ -239,13 +223,6 @@ public:
 protected:
 	bool 					workLoopThread(toolbox::task::WorkLoop* workLoop);
 	std::string             interfaceUID_;
-	//std::string             interfaceType_;
-
-//	std::string  			daqHardwareType_;
-//	std::string  			firmwareType_;
-
-//	FrontEndHardwareBase* 	theFrontEndHardware_ = nullptr;
-//	FrontEndFirmwareBase* 	theFrontEndFirmware_ = nullptr;
 
 	unsigned int 			universalAddressSize_ = 0;
 	unsigned int 			universalDataSize_ = 0;
@@ -287,7 +264,8 @@ protected:
 		args.push_back(frontEndMacroArg_t(argName, ss.str()));
 		return args.back().second;
 	}
-};
+
+}; //end FEVInterface class
 
 
 template<class T>
