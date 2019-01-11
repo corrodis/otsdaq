@@ -1261,7 +1261,9 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	//Translate the system alias to a group name/key
 	try
 	{
-		theConfigurationGroup_ = CorePropertySupervisorBase::theConfigurationManager_->getConfigurationGroupFromAlias(systemAlias);
+		theConfigurationGroup_ =
+				CorePropertySupervisorBase::theConfigurationManager_->
+				getConfigurationGroupFromAlias(systemAlias);
 	}
 	catch (...)
 	{
@@ -2081,6 +2083,8 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 			{
 				for (unsigned int j=0;j<supervisorIterationsDone.size(i);++j)
 				{
+					checkForAsyncError();
+
 					if(supervisorIterationsDone[i][j]) continue; //skip if supervisor is already done
 
 					const SupervisorInfo& appInfo = *(orderedSupervisors[i][j]);
@@ -2590,6 +2594,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	//stateMatchinePreferences
 	//getStateMachineNames
 	//getCurrentState
+	//cancelStateMachineTransition
 	//getIterationPlanStatus
 	//getErrorInStateMatchine
 	//getDesktopIcons
@@ -3108,6 +3113,13 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 					sprintf(tmp,"Next %s Number: %u",stateMachineRunAlias.c_str(),getNextRunNumber(fsmName));
 				xmlOut.addTextElementToData("run_number", tmp);
 			}
+		}
+		else if(requestType == "cancelStateMachineTransition")
+		{
+			__SS__ << "State transition was cancelled by user!" << __E__;
+			__MCOUT__(ss.str());
+			RunControlStateMachine::theStateMachine_.setErrorMessage(ss.str());
+			RunControlStateMachine::asyncFailureReceived_ = true;
 		}
 		else if(requestType == "getErrorInStateMatchine")
 		{
