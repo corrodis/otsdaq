@@ -83,7 +83,7 @@ catch(...)
 //========================================================================================================================
 //inWildCardSet ~
 //	returns true if needle is in haystack (considering wildcards)
-bool StringMacros::inWildCardSet(const std::string needle, const std::set<std::string>& haystack)
+bool StringMacros::inWildCardSet(const std::string& needle, const std::set<std::string>& haystack)
 {
 	for(const auto& haystackString : haystack)
 		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
@@ -543,7 +543,6 @@ std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn, cons
 	}
 	return ss.str();
 }
-
 //==============================================================================
 //vectorToString
 std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn, const std::string& delimeter)

@@ -264,9 +264,12 @@ bool FiniteStateMachine::isInTransition(void)
 }
 
 //========================================================================================================================
-void FiniteStateMachine::setErrorMessage(const std::string &errMessage)
+void FiniteStateMachine::setErrorMessage(const std::string &errMessage, bool append)
 {
-	theErrorMessage_ = errMessage;
+	if(append)
+		theErrorMessage_ += errMessage;
+	else
+		theErrorMessage_ = errMessage;
 }
 
 //========================================================================================================================

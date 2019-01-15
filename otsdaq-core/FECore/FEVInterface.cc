@@ -5,15 +5,14 @@
 
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 
+#include "otsdaq-core/FECore/FEVInterfacesManager.h"
+
 
 #include <iostream>
 #include <sstream>
+#include <thread>       //for std::thread
 
 using namespace ots;
-
-
-#undef 	__MF_SUBJECT__
-#define __MF_SUBJECT__ "FE-FEVInterface"
 
 //========================================================================================================================
 FEVInterface::FEVInterface (const std::string& interfaceUID,
@@ -23,10 +22,13 @@ FEVInterface::FEVInterface (const std::string& interfaceUID,
 , Configurable                	(theXDAQContextConfigTree, configurationPath)
 , interfaceUID_	              	(interfaceUID)
 //, interfaceType_				(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>())
-, daqHardwareType_            	("NOT SET")
-, firmwareType_               	("NOT SET")
+//, daqHardwareType_            	("NOT SET")
+//, firmwareType_               	("NOT SET")
 , slowControlsWorkLoop_			(interfaceUID + "-SlowControls", this)
-{ __CFG_COUT__ << "Constructed." << __E__;}
+{
+	//NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the base class versions of function (e.g. getInterfaceType) are called because the derived class has not been instantiate yet!
+	__COUT__ << "'" << interfaceUID << "' Constructed." << __E__;
+}
 
 //========================================================================================================================
 void FEVInterface::configureSlowControls(void)
@@ -37,11 +39,11 @@ void FEVInterface::configureSlowControls(void)
 
 	if(slowControlsGroupLink.isDisconnected())
 	{
-		__CFG_COUT__ << "slowControlsGroupLink is disconnected, so done configuring slow controls." <<
+		__FE_COUT__ << "slowControlsGroupLink is disconnected, so done configuring slow controls." <<
 				__E__;
 		return;
 	}
-	__CFG_COUT__ << "slowControlsGroupLink is valid! Configuring slow controls..." <<
+	__FE_COUT__ << "slowControlsGroupLink is valid! Configuring slow controls..." <<
 			__E__;
 
 	mapOfSlowControlsChannels_.clear();
@@ -52,7 +54,7 @@ void FEVInterface::configureSlowControls(void)
 		//skip channels that are off
 		if(!(groupLinkChild.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())) continue;
 
-		__CFG_COUT__ << "Channel:" << getInterfaceUID() <<
+		__FE_COUT__ << "Channel:" << getInterfaceUID() <<
 				"/" <<  groupLinkChild.first << "\t Type:" <<
 				groupLinkChild.second.getNode("ChannelDataType") <<
 				__E__;
@@ -91,7 +93,7 @@ void FEVInterface::configureSlowControls(void)
 //========================================================================================================================
 bool FEVInterface::slowControlsRunning(void)
 {
-	__CFG_COUT__ << "slowControlsRunning" << __E__;
+	__FE_COUT__ << "slowControlsRunning" << __E__;
 	std::string readVal;
 	readVal.resize(universalDataSize_); //size to data in advance
 
@@ -112,12 +114,12 @@ bool FEVInterface::slowControlsRunning(void)
 
 	if(slowControlsInterfaceLink.isDisconnected())
 	{
-		__CFG_COUT__ << "slowControlsInterfaceLink is disconnected, so no socket made." <<
+		__FE_COUT__ << "slowControlsInterfaceLink is disconnected, so no socket made." <<
 				__E__;
 	}
 	else
 	{
-		__CFG_COUT__ << "slowControlsInterfaceLink is valid! Create tx socket..." <<
+		__FE_COUT__ << "slowControlsInterfaceLink is valid! Create tx socket..." <<
 				__E__;
 		txSocket.reset(new UDPDataStreamerBase(
 				FEInterfaceNode.getNode("SlowControlsTxSocketIPAddress").getValue	<std::string>(),
@@ -138,7 +140,7 @@ bool FEVInterface::slowControlsRunning(void)
 		aggregateFileIsBinaryFormat =
 				FEInterfaceNode.getNode("SlowControlsSaveBinaryFile").getValue<bool>();
 
-		__CFG_COUT_INFO__ << "Slow Controls Aggregate Saving turned On BinaryFormat=" <<
+		__FE_COUT_INFO__ << "Slow Controls Aggregate Saving turned On BinaryFormat=" <<
 				aggregateFileIsBinaryFormat << __E__;
 
 		std::string saveFullFileName =
@@ -156,16 +158,16 @@ bool FEVInterface::slowControlsRunning(void)
 						"ab":"a");
 		if(!fp)
 		{
-			__CFG_COUT_ERR__ << "Failed to open slow controls channel file: " <<
+			__FE_COUT_ERR__ << "Failed to open slow controls channel file: " <<
 					saveFullFileName << __E__;
 			//continue on, just nothing will be saved
 		}
 		else
-			__CFG_COUT_INFO__ << "Slow controls aggregate file opened: " <<
+			__FE_COUT_INFO__ << "Slow controls aggregate file opened: " <<
 			saveFullFileName << __E__;
 	}
 	else
-		__CFG_COUT_INFO__ << "Slow Controls Aggregate Saving turned off." << __E__;
+		__FE_COUT_INFO__ << "Slow Controls Aggregate Saving turned off." << __E__;
 
 
 	time_t	timeCounter = 0;
@@ -176,12 +178,12 @@ bool FEVInterface::slowControlsRunning(void)
 		++timeCounter;
 
 		if(txBuffer.size())
-			__CFG_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
+			__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 		txBuffer.resize(0); //clear buffer a la txBuffer = "";
 
-		//__CFG_COUT__ << "timeCounter=" << timeCounter << __E__;
-		//__CFG_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
+		//__FE_COUT__ << "timeCounter=" << timeCounter << __E__;
+		//__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 		for(auto &slowControlsChannelPair : mapOfSlowControlsChannels_)
 		{
@@ -194,40 +196,40 @@ bool FEVInterface::slowControlsRunning(void)
 			if(timeCounter % channel->delayBetweenSamples_) continue;
 
 
-			__CFG_COUT__ << "Channel:" << getInterfaceUID() <<
+			__FE_COUT__ << "Channel:" << getInterfaceUID() <<
 					"/" << slowControlsChannelPair.first << __E__;
-			__CFG_COUT__ << "Monitoring..." << __E__;
+			__FE_COUT__ << "Monitoring..." << __E__;
 
 			universalRead(channel->getUniversalAddress(),
 					&readVal[0]);
 
 			//			{ //print
-			//				__CFG_SS__ << "0x ";
+			//				__FE_SS__ << "0x ";
 			//				for(int i=(int)universalAddressSize_-1;i>=0;--i)
 			//					ss << std::hex << (int)((readVal[i]>>4)&0xF) <<
 			//					(int)((readVal[i])&0xF) << " " << std::dec;
 			//				ss << __E__;
-			//				__CFG_COUT__ << "Sampled.\n" << ss.str();
+			//				__FE_COUT__ << "Sampled.\n" << ss.str();
 			//			}
 
 			//have sample
 			channel->handleSample(readVal,txBuffer, fp, aggregateFileIsBinaryFormat);
 			if(txBuffer.size())
-				__CFG_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
+				__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 			//make sure buffer hasn't exploded somehow
 			if(txBuffer.size() > txBufferSz)
 			{
-				__CFG_SS__ << "This should never happen hopefully!" << __E__;
-				__CFG_COUT_ERR__ << "\n" << ss.str();
-				__CFG_SS_THROW__;
+				__FE_SS__ << "This should never happen hopefully!" << __E__;
+				__FE_COUT_ERR__ << "\n" << ss.str();
+				__FE_SS_THROW__;
 			}
 
 			//send early if threshold reached
 			if(txSocket &&
 					txBuffer.size() > txBufferFullThreshold)
 			{
-				__CFG_COUT__ << "Sending now! txBufferFullThreshold=" << txBufferFullThreshold << __E__;
+				__FE_COUT__ << "Sending now! txBufferFullThreshold=" << txBufferFullThreshold << __E__;
 				txSocket->send(txBuffer);
 				txBuffer.resize(0); //clear buffer a la txBuffer = "";
 			}
@@ -236,13 +238,13 @@ bool FEVInterface::slowControlsRunning(void)
 		}
 
 		if(txBuffer.size())
-			__CFG_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
+			__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 		//send anything left
 		if(txSocket &&
 				txBuffer.size())
 		{
-			__CFG_COUT__ << "Sending now!" << __E__;
+			__FE_COUT__ << "Sending now!" << __E__;
 			txSocket->send(txBuffer);
 		}
 
@@ -250,7 +252,67 @@ bool FEVInterface::slowControlsRunning(void)
 	}
 	if(fp) fclose(fp);
 	return false;
+} //end slowControlsRunning()
+
+//========================================================================================================================
+//SendAsyncErrorToGateway
+//	Static -- thread
+//	Send async error or soft error to gateway
+//	Do this as thread so that workloop can end
+void FEVInterface::sendAsyncErrorToGateway(FEVInterface* fe, const std::string& errorMessage, bool isSoftError)
+try
+{
+	if(isSoftError)
+		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" <<
+		fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":" <<
+			"Sending FE Async SOFT Running Error... \n" << errorMessage << __E__;
+	else
+		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" <<
+		fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":" <<
+			"Sending FE Async Running Error... \n" << errorMessage << __E__;
+
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor =
+			fe->VStateMachine::parentSupervisor_->allSupervisorInfo_.getGatewayInfo().getDescriptor();
+
+	SOAPParameters parameters;
+	parameters.addParameter("ErrorMessage",errorMessage);
+
+	xoap::MessageReference replyMessage =
+			fe->VStateMachine::parentSupervisor_->
+			SOAPMessenger::sendWithSOAPReply(
+					gatewaySupervisor,
+					isSoftError?"AsyncSoftError":"AsyncError",
+							parameters);
+
+	std::stringstream replyMessageSStream;
+	replyMessageSStream << SOAPUtilities::translate(replyMessage);
+	__COUT__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":" <<
+			"Received... " << replyMessageSStream.str() << std::endl;
+
+	if(replyMessageSStream.str().find("Fault") != std::string::npos)
+	{
+		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" <<
+				fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":" <<
+				"Failure to indicate fault to Gateway..." << __E__;
+		throw;
+	}
 }
+catch(const xdaq::exception::Exception& e)
+{
+	if(isSoftError)
+		__COUT__ << "SOAP message failure indicating front-end asynchronous running SOFT error back to Gateway: " <<
+		e.what() << __E__;
+	else
+		__COUT__ << "SOAP message failure indicating front-end asynchronous running error back to Gateway: " <<
+		e.what() << __E__;
+}
+catch(...)
+{
+	if(isSoftError)
+		__COUT__ << "Unknown error encounter indicating front-end asynchronous running SOFT error back to Gateway." << __E__;
+	else
+		__COUT__ << "Unknown error encounter indicating front-end asynchronous running error back to Gateway." << __E__;
+} //end SendAsyncErrorToGateway()
 
 //========================================================================================================================
 //workLoopThread
@@ -264,11 +326,18 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 	catch(...) //
 	{
 		//catch all, then rethrow with local variables needed
-		__CFG_SS__;
+		__FE_SS__;
+
+		bool isSoftError = false;
 
 		try
 		{
 			throw;
+		}
+		catch(const __OTS_SOFT_EXCEPTION__& e)
+		{
+			ss << "SOFT Error was caught while configuring: " << e.what() << std::endl;
+			isSoftError = true;
 		}
 		catch(const std::runtime_error& e)
 		{
@@ -281,37 +350,26 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 			ss << "Caught an unknown error during running." << __E__;
 		}
 
-		__CFG_COUT_ERR__ << ss.str();
+		//At this point, an asynchronous error has occurred
+		//	during front-end running...
+		//Send async error to Gateway
 
-		//send error out to Gateway
-		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor =
-				VStateMachine::parentSupervisor_->allSupervisorInfo_.getGatewayInfo().getDescriptor();
+		__FE_COUT_ERR__ << ss.str();
 
-		__CFG_COUT__ << "Sending FERunningError... " << __E__;
-
-		SOAPParameters               parameters;
-		parameters.addParameter("ErrorMessage",ss.str());
-
-		xoap::MessageReference       retMsg =
-				VStateMachine::parentSupervisor_->
-				SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
-				"AsyncError",parameters);
-
-		std::stringstream retMsgSs;
-		retMsgSs << SOAPUtilities::translate(retMsg);
-		__CFG_COUT__ << "Received... " << retMsgSs.str() << std::endl;
-
-		if(retMsgSs.str().find("Fault") != std::string::npos)
-		{
-			__CFG_COUT_ERR__ << "Failure to indicate fault to system... so crashing..." << __E__;
-			throw;
-		}
+		std::thread([](FEVInterface* fe, const std::string errorMessage, bool isSoftError)
+				{
+			FEVInterface::sendAsyncErrorToGateway(fe,errorMessage,isSoftError);
+				},
+			//pass the values
+			this,
+			ss.str(),
+			isSoftError).detach();
 
 		return false;
 	}
 
 	return continueWorkLoop_;
-}
+} //end workLoopThread()
 
 //========================================================================================================================
 //registerFEMacroFunction
@@ -322,65 +380,79 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 //	web interfaces. The menu consisting of all enabled FEs macros is assembled
 //	by the FE Supervisor (and its FE Interface Manager).
 void FEVInterface::registerFEMacroFunction(
-		const std::string &feMacroName,
+		const std::string& feMacroName,
 		frontEndMacroFunction_t feMacroFunction,
 		const std::vector<std::string> &namesOfInputArgs,
 		const std::vector<std::string> &namesOfOutputArgs,
-		uint8_t requiredUserPermissions)
+		uint8_t requiredUserPermissions,
+		const std::string& allowedCallingFEs)
 {
 	if(mapOfFEMacroFunctions_.find(feMacroName) !=
 			mapOfFEMacroFunctions_.end())
 	{
-		__CFG_SS__ << "feMacroName '" << feMacroName << "' already exists! Not allowed." << __E__;
-		__CFG_COUT_ERR__ << "\n" << ss.str();
-		__CFG_SS_THROW__;
+		__FE_SS__ << "feMacroName '" << feMacroName << "' already exists! Not allowed." << __E__;
+		__FE_COUT_ERR__ << "\n" << ss.str();
+		__FE_SS_THROW__;
 	}
 
 	mapOfFEMacroFunctions_.insert(
 			std::pair<std::string, frontEndMacroStruct_t> (
 					feMacroName,
 					frontEndMacroStruct_t(
+							feMacroName,
 							feMacroFunction,
 							namesOfInputArgs,
 							namesOfOutputArgs,
-							requiredUserPermissions
+							requiredUserPermissions,
+							allowedCallingFEs
 					)));
 }
 
 
 //========================================================================================================================
-//getFEMacroInputArgument
+//getFEMacroConstArgument
 //	helper function for getting the value of an argument
 //
 //	Note: static function
-const std::string& FEVInterface::getFEMacroInputArgument(frontEndMacroInArgs_t& argsIn,
+const std::string& FEVInterface::getFEMacroConstArgument(frontEndMacroConstArgs_t& args,
 		const std::string& argName)
 {
-	for(const std::pair<const std::string /* input arg name */ , const std::string /* arg input value */ >&
-			pair : argsIn)
+	for(const std::pair<const std::string /* input arg name */ ,
+			const std::string /* arg input value */ >&
+			pair : args)
 	{
 		if(pair.first == argName)
 		{
 
-			std::cout << __COUT_HDR__ << "argName : " << pair.second << __E__;
+			__COUT__ << "argName : " << pair.second << __E__;
 			return pair.second;
 		}
 	}
-	std::stringstream ss;
-	ss << __COUT_HDR__ << "Requested input argument not found with name '" <<
+	__SS__ << "Requested input argument not found with name '" <<
 			argName << "'" << __E__;
-	std::cout << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //========================================================================================================================
-//getFEMacroInputArgumentValue
+//getFEMacroConstArgumentValue
 //	helper function for getting the copy of the value of an argument
 template<>
-std::string	getFEMacroInputArgumentValue<std::string>(FEVInterface::frontEndMacroInArgs_t &argsIn,
+std::string	getFEMacroConstArgumentValue<std::string>(
+		FEVInterface::frontEndMacroConstArgs_t &args,
 		const std::string &argName)
 {
-	return FEVInterface::getFEMacroInputArgument(argsIn,argName);
+	return FEVInterface::getFEMacroConstArgument(args,argName);
+}
+
+//========================================================================================================================
+//getFEMacroArgumentValue
+//	helper function for getting the copy of the value of an argument
+template<>
+std::string	getFEMacroArgumentValue<std::string>(
+		FEVInterface::frontEndMacroArgs_t &args,
+		const std::string &argName)
+{
+	return FEVInterface::getFEMacroArgument(args,argName);
 }
 
 //========================================================================================================================
@@ -388,21 +460,20 @@ std::string	getFEMacroInputArgumentValue<std::string>(FEVInterface::frontEndMacr
 //	helper function for getting the value of an argument
 //
 //	Note: static function
-std::string& FEVInterface::getFEMacroOutputArgument(frontEndMacroOutArgs_t& argsOut,
+std::string& FEVInterface::getFEMacroArgument(
+		frontEndMacroArgs_t& args,
 		const std::string& argName)
 {
 
 	for(std::pair<const std::string /* output arg name */ , std::string /* arg output value */ >&
-			pair : argsOut)
+			pair : args)
 	{
 		if(pair.first == argName)
 			return pair.second;
 	}
-	std::stringstream ss;
-	ss << __COUT_HDR__ << "Requested output argument not found with name '" <<
+	__SS__ << "Requested argument not found with name '" <<
 			argName << "'" << __E__;
-	std::cout << "\n" << ss.str();
-	throw std::runtime_error(ss.str());
+	__SS_THROW__;
 }
 
 //========================================================================================================================
@@ -432,10 +503,10 @@ void FEVInterface::runSequenceOfCommands(const std::string &treeLinkName)
 		try
 		{
 			if(configSeqLink.isDisconnected())
-				__CFG_COUT__ << "Disconnected configure sequence" << __E__;
+				__FE_COUT__ << "Disconnected configure sequence" << __E__;
 			else
 			{
-				__CFG_COUT__ << "Handling configure sequence." << __E__;
+				__FE_COUT__ << "Handling configure sequence." << __E__;
 				auto childrenMap = configSeqLink.getChildrenMap();
 				for(const auto &child:childrenMap)
 				{
@@ -461,7 +532,7 @@ void FEVInterface::runSequenceOfCommands(const std::string &treeLinkName)
 							writeAddress, writeAddress,
 							writeHistory[writeAddress], writeHistory[writeAddress]);
 
-					__CFG_COUT__ << msg << __E__;
+					__FE_COUT__ << msg << __E__;
 
 					universalWrite((char *)&writeAddress,(char *)&(writeHistory[writeAddress]));
 				}
@@ -477,11 +548,180 @@ void FEVInterface::runSequenceOfCommands(const std::string &treeLinkName)
 	{
 		if(!ignoreError) throw;
 		//else ignoring error
-		__CFG_COUT__ << "Unable to access sequence of commands through configuration tree. " <<
+		__FE_COUT__ << "Unable to access sequence of commands through configuration tree. " <<
 				"Assuming no sequence. " << __E__;
 	}
 }
 
+
+//========================================================================================================================
+//runFrontEndMacro
+//	run a front-end macro in the target interface plug-in and gets the output arguments back
+void FEVInterface::runFrontEndMacro(const std::string& targetInterfaceID,
+		const std::string& feMacroName,
+		const std::vector<frontEndMacroArg_t>& inputArgs,
+		std::vector<frontEndMacroArg_t>& outputArgs) const
+{
+
+	__FE_COUTV__(targetInterfaceID);
+	__FE_COUTV__(VStateMachine::parentSupervisor_);
+
+
+	std::string inputArgsStr =
+			StringMacros::vectorToString(inputArgs,";" /*primaryDelimeter*/,","/*secondaryDelimeter*/);
+
+	__FE_COUTV__(inputArgsStr);
+
+	xoap::MessageReference message =
+		SOAPUtilities::makeSOAPMessageReference("FECommunication");
+
+	SOAPParameters parameters;
+	parameters.addParameter("type", "feMacro");
+	parameters.addParameter("sourceInterfaceID", FEVInterface::interfaceUID_);
+	parameters.addParameter("targetInterfaceID", targetInterfaceID);
+	parameters.addParameter("feMacroName", feMacroName);
+	parameters.addParameter("inputArgs", inputArgsStr);
+	SOAPUtilities::addParameters(message, parameters);
+
+	__FE_COUT__ << "Sending FE communication: " <<
+			SOAPUtilities::translate(message) << __E__;
+
+	xoap::MessageReference replyMessage = VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply(
+		VStateMachine::parentSupervisor_->allSupervisorInfo_.getAllMacroMakerTypeSupervisorInfo().
+		begin()->second.getDescriptor(), message);
+
+	__FE_COUT__ << "Response received: " <<
+			SOAPUtilities::translate(replyMessage) << __E__;
+
+	SOAPParameters rxParameters;
+	rxParameters.addParameter("Error");
+	SOAPUtilities::receive(replyMessage,rxParameters);
+
+	std::string error = rxParameters.getValue("Error");
+
+	if(error != "")
+	{
+		//error occurred!
+		__FE_SS__ << "Error transmitting request to target interface '" <<
+				targetInterfaceID << "' from '" << FEVInterface::interfaceUID_ << ".' " <<
+				error << __E__;
+		__FE_SS_THROW__;
+	}
+
+	//extract output args
+	SOAPParameters argsOutParameter;
+	argsOutParameter.addParameter("outputArgs");
+	SOAPUtilities::receive(replyMessage,argsOutParameter);
+
+	std::string outputArgsStr = argsOutParameter.getValue("outputArgs");
+	std::set<char> pairDelimiter({';'}), nameValueDelimiter({','});
+
+	std::map<std::string,std::string> mapToReturn;
+	StringMacros::getMapFromString(
+			outputArgsStr,
+			mapToReturn,
+			pairDelimiter,
+			nameValueDelimiter);
+
+	outputArgs.clear();
+	for(auto& mapPair: mapToReturn)
+		outputArgs.push_back(mapPair);
+
+} //end runFrontEndMacro()
+
+//========================================================================================================================
+//receiveFromFrontEnd
+//	specialized template function for T=std::string
+//
+//	Note: sourceInterfaceID can be a wildcard string as defined in StringMacros
+void FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID, std::string& retValue, unsigned int timeoutInSeconds) const
+{
+	__FE_COUTV__(sourceInterfaceID);
+	__FE_COUTV__(parentSupervisor_);
+
+	std::string data = "0";
+	bool found = false;
+	while(1)
+	{
+		//mutex scope
+		{
+			std::lock_guard<std::mutex> lock(
+					parentInterfaceManager_->frontEndCommunicationReceiveMutex_);
+
+			auto receiveBuffersForTargetIt =
+					parentInterfaceManager_->frontEndCommunicationReceiveBuffer_.find(
+							FEVInterface::interfaceUID_);
+			if(receiveBuffersForTargetIt !=
+					parentInterfaceManager_->frontEndCommunicationReceiveBuffer_.end())
+			{
+				__FE_COUT__ << "Number of source buffers found for front-end '" <<
+						FEVInterface::interfaceUID_ << "': " <<
+						receiveBuffersForTargetIt->second.size() << __E__;
+
+				for(auto& buffPair:receiveBuffersForTargetIt->second)
+					__FE_COUTV__(buffPair.first);
+
+				//match sourceInterfaceID to map of buffers
+				std::string sourceBufferId = "";
+				std::queue<std::string /*value*/>& sourceBuffer =
+									StringMacros::getWildCardMatchFromMap(sourceInterfaceID,
+						receiveBuffersForTargetIt->second,
+						&sourceBufferId);
+
+				__FE_COUT__ << "Found source buffer '" << sourceBufferId <<
+						"' with size " << sourceBuffer.size() << __E__;
+
+				if(sourceBuffer.size())
+				{
+					__FE_COUT__ << "Found a value in queue of size " <<
+							sourceBuffer.size() << __E__;
+
+					//remove from receive buffer
+					retValue = sourceBuffer.front();
+					sourceBuffer.pop();
+					return;
+				}
+				else
+					__FE_COUT__ << "Source buffer empty for '" <<
+						sourceInterfaceID << "'" << __E__;
+			}
+
+			//else, not found...
+
+			//if out of time, throw error
+			if(!timeoutInSeconds)
+			{
+				__FE_SS__ << "Timeout (" << timeoutInSeconds <<
+						" s) waiting for front-end communication from " <<
+						sourceInterfaceID << "." << __E__;
+				__FE_SS_THROW__;
+			}
+			//else, there is still hope
+
+		} //end mutex scope
+
+		//else try again in a sec
+		__FE_COUT__ << "Waiting for front-end communication from " <<
+				sourceInterfaceID << " for " <<
+				timeoutInSeconds << " more seconds..." << __E__;
+
+		--timeoutInSeconds;
+		sleep(1); //wait a sec
+	} //end timeout loop
+
+	//should never get here
+} //end receiveFromFrontEnd()
+
+//========================================================================================================================
+//receiveFromFrontEnd
+//	specialized template function for T=std::string
+//	Note: if called without template <T> syntax, necessary because types of std::basic_string<char> cause compiler problems if no string specific function
+std::string FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID, unsigned int timeoutInSeconds) const
+{
+	std::string retValue;
+	FEVInterface::receiveFromFrontEnd(sourceInterfaceID,retValue,timeoutInSeconds);
+	return retValue;
+} //end receiveFromFrontEnd()
 
 
 

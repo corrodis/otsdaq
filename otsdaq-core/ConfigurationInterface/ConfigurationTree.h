@@ -115,6 +115,7 @@ public:
 	//==============================================================================
 	//getValue (not std::string value)
 	//	throw exception unless it value node
+	// NOTE: can not overload functions based on return type, so T& passed as value
 	template<class T>
 	void getValue(T& value) const
 	{
@@ -183,6 +184,7 @@ public:
 	//==============================================================================
 	//getValue (not std::string value)
 	//	throw exception unless it value node
+	// NOTE: can not overload functions based on return type, so calls function with T& passed as value
 	template<class T>
 	T getValue(void) const
 	{
@@ -205,10 +207,10 @@ private:
 			__COUT_ERR__ << ss.str();
 			__SS_THROW__;
 		}
-		std::cout << "210:::::" << "handleValidateValueForColumn<T>" << std::endl;
+		__COUT__ << "handleValidateValueForColumn<T>" << std::endl;
 		return configView->validateValueForColumn<T>(
 				value,col);
-	}
+	} // end T handleValidateValueForColumn()
 
 	std::string handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<std::string>) const
 	{
@@ -218,10 +220,10 @@ private:
 			__COUT_ERR__ << ss.str();
 			__SS_THROW__;
 		}
-		std::cout << "210:::::" << "handleValidateValueForColumn<string>" << std::endl;
+		__COUT__ << "handleValidateValueForColumn<string>" << std::endl;
 		return configView->validateValueForColumn(
 				value,col);
-	}
+	} //end std::string handleValidateValueForColumn()
 
 public:
 

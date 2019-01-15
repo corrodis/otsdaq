@@ -229,6 +229,7 @@ void ConfigurationTree::getValue(std::string& value) const
 
 }
 
+
 //==============================================================================
 //getValue
 //	Only std::string value will work.
@@ -240,7 +241,7 @@ void ConfigurationTree::getValue(std::string& value) const
 //		column name of the link when disconnected.
 //
 ////special version of getValue for string type
-//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
+//	Note: if called without template, necessary because types of std::basic_string<char> cause compiler problems if no string specific function
 std::string ConfigurationTree::getValue() const
 {
 	std::string value;
@@ -1930,7 +1931,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority,
 			}
 			catch(std::runtime_error& e)
 			{
-				__COUT_WARN__ << "Error identifying priority. Assuming all children have equal priority (Error: " <<
+				__COUT_WARN__ << "Priority configuration not found. Assuming all children have equal priority (Error: " <<
 						e.what() << __E__;
 				retVector.clear();
 			}
