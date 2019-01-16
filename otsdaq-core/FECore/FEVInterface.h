@@ -20,6 +20,8 @@
 #include <vector>
 #include <array>
 
+#include "otsdaq-core/Macros/CoutMacros.h"
+
 #define __ARGS__				FEVInterface::frontEndMacroConstArgs_t argsIn, FEVInterface::frontEndMacroArgs_t argsOut
 
 #define __GET_ARG_IN__(X,Y) 	getFEMacroConstArgumentValue<Y> 			(argsIn ,X)
@@ -41,6 +43,9 @@ class FEVInterfacesManager;
 //	This class is a virtual class defining the features of front-end interface plugin class.
 //	The features include configuration hooks, finite state machine handlers, Front-end Macros for web accessible C++ handlers, slow controls hooks, as well as universal write and read for
 //	Macro Maker compatibility.
+//
+//	It inherits workloop as 'public virtual' for the case that other classes like DataProducer
+//	 will also be inherited by child class and only one workloop is desired.
 class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 {
 public:

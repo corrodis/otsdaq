@@ -3,13 +3,12 @@
 
 #include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
 #include "otsdaq-core/Configurable/Configurable.h"
-#include "otsdaq-core/FECore/FEVInterface.h"
-
 #include <map>
 #include <string>
 #include <memory>
 #include <queue>
 #include <mutex>
+#include "otsdaq-core/FECore/FEVInterface.h"
 
 namespace ots
 {

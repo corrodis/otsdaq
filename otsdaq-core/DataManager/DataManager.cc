@@ -271,7 +271,7 @@ bool DataManager::deleteBuffer(std::string bufferUID)
 }
 
 //========================================================================================================================
-void DataManager::registerProducer(std::string bufferUID, DataProducer* producer)
+void DataManager::registerProducer(std::string bufferUID, DataProducerBase* producer)
 {
 	buffers_[bufferUID].buffer_->registerProducer(producer, producer->getBufferSize());
 }

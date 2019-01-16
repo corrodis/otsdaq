@@ -15,7 +15,7 @@
 namespace ots
 {
 class DataProcessor;
-class DataProducer;
+class DataProducerBase;
 class DataConsumer;
 class CircularBufferBase;
 
@@ -43,7 +43,7 @@ public:
     	buffers_[bufferUID].buffer_ = new CircularBuffer<D,H>();
     	buffers_[bufferUID].status_ = Initialized;
     }
-    void registerProducer(std::string bufferUID, DataProducer* producer);//The data manager becomes the owner of the producer object!
+    void registerProducer(std::string bufferUID, DataProducerBase* producer);//The data manager becomes the owner of the producer object!
     void registerConsumer(std::string bufferUID, DataConsumer* consumer, bool registerToBuffer=true);//The data manager becomes the owner of the consumer object!
 
 protected:
@@ -75,9 +75,8 @@ protected:
     struct Buffer
     {
     	CircularBufferBase*        buffer_;
-    	std::vector<std::shared_ptr<DataProducer>> producers_;
-    	//std::vector<DataProducer*> producers_;
-    	std::vector<std::shared_ptr<DataConsumer>> consumers_;
+    	std::vector<std::shared_ptr<DataProducerBase> > producers_;
+    	std::vector<std::shared_ptr<DataConsumer> > 	consumers_;
     	BufferStatus               status_;
     };
     std::map<std::string, Buffer> buffers_;

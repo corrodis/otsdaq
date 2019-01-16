@@ -1,5 +1,5 @@
 #include "otsdaq-core/FECore/FEVInterface.h"
-#include "otsdaq-core/Macros/CoutMacros.h"
+
 
 #include "otsdaq-core/NetworkUtilities/UDPDataStreamerBase.h"
 
@@ -315,7 +315,7 @@ catch(...)
 } //end SendAsyncErrorToGateway()
 
 //========================================================================================================================
-//workLoopThread
+//override WorkLoop::workLoopThread
 //	return false to stop the workloop from calling the thread again
 bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 {

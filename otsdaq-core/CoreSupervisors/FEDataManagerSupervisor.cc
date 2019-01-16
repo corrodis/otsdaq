@@ -18,6 +18,8 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s)
 	//the FE Interfaces Manager is added first, and then the Data Manager
 	//	So on FSM transitions, front-ends will transition first.
 
+	//FEVInterfacesManager gets added in FESupervisor constructor
+	__SUP_COUTV__(CoreSupervisorBase::theStateMachineImplementation_.size());
 //
 //	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 //			new FEVInterfacesManager(
