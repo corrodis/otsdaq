@@ -54,7 +54,7 @@ public:
 			const ConfigurationTree& theXDAQContextConfigTree,
 			const std::string& configurationPath);
 
-	virtual 				~FEVInterface  					(void) {__FE_COUT__ << "Destructed." << __E__;}
+	virtual 				~FEVInterface  					(void);
 
 	FEVInterfacesManager*	parentInterfaceManager_;
 

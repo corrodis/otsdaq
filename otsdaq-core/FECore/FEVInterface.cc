@@ -31,6 +31,13 @@ FEVInterface::FEVInterface (const std::string& interfaceUID,
 }
 
 //========================================================================================================================
+FEVInterface::~FEVInterface(void)
+{
+	//NOTE:: be careful not to call __FE_COUT__ decoration because it uses the tree and it may already be destructed partially
+	__COUT__ << FEVInterface::interfaceUID_ << " Destructor" << __E__;
+}
+
+//========================================================================================================================
 void FEVInterface::configureSlowControls(void)
 {
 	ConfigurationTree slowControlsGroupLink =
