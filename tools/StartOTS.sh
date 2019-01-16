@@ -622,7 +622,7 @@ launchOTSWiz() {
 	LAST_OTS_PID=$!
 
 	#test for relaunch
-	sleep 2
+	sleep 4
 	OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
 	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
 
@@ -975,7 +975,7 @@ launchOTS() {
 	####################################################################
 	###########  test for relaunch of non-Gateway contexts	############
 	####################################################################	
-	sleep 2
+	sleep 4 #give time before relaunch test
 	i=0
 	j=0
 	for port in "${xdaqPort[@]}"
