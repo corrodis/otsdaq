@@ -96,7 +96,7 @@ void UDPDataListenerProducer::fastWrite(void)
 		return;
 	}
 
-	if(ReceiverSocket::receive(*dataP_, ipAddress_, port_) != -1)
+	if(ReceiverSocket::receive(*dataP_, ipAddress_, port_,1,0, true) != -1)
 	{
 		(*headerP_)["IPAddress"] = NetworkConverters::networkToStringIP  (ipAddress_);
 		(*headerP_)["Port"]      = NetworkConverters::networkToStringPort(port_);
