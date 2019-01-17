@@ -32,11 +32,14 @@ using namespace ots;
 //========================================================================================================================
 DataManager::DataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath)
 	: Configurable(theXDAQContextConfigTree, supervisorConfigurationPath)
-{}
+{
+	__CFG_COUT__ << "Constructed" << __E__;
+}
 
 //========================================================================================================================
 DataManager::~DataManager(void)
 {
+	__CFG_COUT__ << "Destructor" << __E__;
 	eraseAllBuffers();
 }
 
@@ -45,7 +48,9 @@ void DataManager::configure(void)
 {
 	eraseAllBuffers(); //Deletes all pointers created and given to the DataManager!
 
-	for (const auto& buffer : theXDAQContextConfigTree_.getNode(theConfigurationPath_ + "/LinkToDataManagerConfiguration").getChildren())
+	for (const auto& buffer :
+			theXDAQContextConfigTree_.getNode(theConfigurationPath_ +
+					"/LinkToDataManagerConfiguration").getChildren())
 	{
 		__CFG_COUT__ << "Data Buffer Name: " << buffer.first << std::endl;
 		if (buffer.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())

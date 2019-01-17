@@ -13,6 +13,10 @@ DataProcessor::DataProcessor(std::string supervisorApplicationUID, std::string b
 , processorUID_            (processorUID)
 , theCircularBuffer_       (nullptr)
 {
+	__COUT__ << "DataProcessor constructed." << __E__;
+	__COUTV__(supervisorApplicationUID_);
+	__COUTV__(bufferUID_);
+	__COUTV__(processorUID_);
 }
 
 //========================================================================================================================

@@ -30,12 +30,12 @@ public:
 	{
 		if ( theInstances_.find(instanceUID) ==  theInstances_.end())
 		{
-			__COUT__ << "Creating supervisor application: " << instanceUID << " POINTER: " << theInstances_[instanceUID] << std::endl;
+			__COUT__ << "Creating supervisor application UID: " << instanceUID << " POINTER: " << theInstances_[instanceUID] << std::endl;
 			theInstances_[instanceUID] = static_cast<DataManager*>(new C(configurationTree, supervisorConfigurationPath));
-			__COUT__ << "Creating supervisor application: " << instanceUID << " POINTER: " << theInstances_[instanceUID] << std::endl;
+			__COUT__ << "Creating supervisor application UID: " << instanceUID << " POINTER: " << theInstances_[instanceUID] << std::endl;
 		}
 		else
-			__COUT__ << "An instance of " << instanceUID << " already exists so your input parameters are ignored!" << std::endl;
+			__COUT__ << "An instance of application UID " << instanceUID << " already exists so your input parameters are ignored!" << std::endl;
 
 		return static_cast<C*>(theInstances_[instanceUID]);
 	}
@@ -44,13 +44,13 @@ public:
 	{
 		if ( theInstances_.find(instanceUID) ==  theInstances_.end())
 		{
-			__COUT__ << "Can't find supervisor application " << instanceUID << std::endl;
+			__COUT__ << "Can't find supervisor application UID " << instanceUID << std::endl;
 
 			__SS__ << "An instance of the class MUST already exists so I am crashing!" << std::endl;
 			__SS_THROW__;
 		}
 		else
-			__COUT__ << "An instance of " << instanceUID << " already exists so your input parameters are ignored!" << std::endl;
+			__COUT__ << "An instance of application UID " << instanceUID << " already exists so your input parameters are ignored!" << std::endl;
 
 		return theInstances_[instanceUID];
 	}

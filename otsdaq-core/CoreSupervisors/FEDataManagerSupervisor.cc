@@ -20,6 +20,7 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s)
 
 	//FEVInterfacesManager gets added in FESupervisor constructor
 	__SUP_COUTV__(CoreSupervisorBase::theStateMachineImplementation_.size());
+
 //
 //	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 //			new FEVInterfacesManager(
@@ -27,7 +28,7 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s)
 //					CorePropertySupervisorBase::supervisorConfigurationPath_
 //			)
 //	);
-
+	__SUP_COUT__ << "Adding Data Manager now...!" << __E__;
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 			DataManagerSingleton::getInstance<DataManager>(
 					CorePropertySupervisorBase::getContextTreeNode(),
