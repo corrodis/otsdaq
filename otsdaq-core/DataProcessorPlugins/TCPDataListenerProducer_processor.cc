@@ -30,7 +30,7 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string supervisorApplicati
 	(
 		theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>(),
 		theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>(),
-		theXDAQContextConfigTree.getNode(configurationPath).getNode("SocketReceiveBufferSize").getValue<unsigned int>()
+		0x10000/*theXDAQContextConfigTree.getNode(configurationPath).getNode("SocketReceiveBufferSize").getValue<unsigned int>()*/
 	)
 	, dataP_(nullptr)
 	, headerP_(nullptr)
