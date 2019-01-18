@@ -22,7 +22,7 @@ namespace ots
 		TCPSocket(unsigned int listenPort, int sendBufferSize = 0x10000);
 		virtual ~TCPSocket(void);
 
-		void connect();
+		void connect(double tmo_s = 10.0);
 
 		int send(const uint8_t* data, size_t size);
 		int send(const std::string& buffer);
@@ -32,7 +32,7 @@ namespace ots
 		int receive(uint8_t* buffer, unsigned int timeoutSeconds, unsigned int timeoutUSeconds);
 		int receive(std::string& buffer, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0);
 		int receive(std::vector<uint32_t>& buffer, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0);
-		
+
 	protected:
 
 		TCPSocket(void);
