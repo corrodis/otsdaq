@@ -166,7 +166,7 @@ void RawDataSaverConsumerBase::fastRead(void)
 	}
 	__CFG_COUTV__(dataP_->length());
 	std::string& buffer = *dataP_;
-	__CFG_COUT__ << "Writing to buffer length " << buffer.length() << " bytes!" << __E__;
+	__CFG_COUT__ << "Reading from buffer length " << buffer.length() << " bytes!" << __E__;
 
 	__CFG_COUT__ << "Buffer Data: " << BinaryStringMacros::binaryTo8ByteHexString(buffer) << __E__;
 

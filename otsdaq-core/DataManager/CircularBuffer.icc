@@ -30,23 +30,30 @@ void CircularBuffer<D,H>::reset(void)
 
 //========================================================================================================================
 template<class D, class H>
-bool CircularBuffer<D,H>::isEmpty(void)
+bool CircularBuffer<D,H>::isEmpty(void) const
 {
 	for(auto& it: theBuffer_)
 		if(!it.second.isEmpty())
 			return false;
 	return true;
-}
+} //end isEmpty()
 
 //========================================================================================================================
 template<class D, class H>
-unsigned int CircularBuffer<D,H>::getNumberOfBuffers(void)
+unsigned int CircularBuffer<D,H>::getTotalNumberOfSubBuffers(void) const
 {
 	unsigned int numberOfBuffers = 0;
 	for(auto& it: theBuffer_)
-		numberOfBuffers += it.second.bufferSize();
+		numberOfBuffers += it.second.bufferSize(); //add sub-buffer count
 	return numberOfBuffers;	
-}
+} //end getTotalNumberOfSubBuffers()
+
+//========================================================================================================================
+template<class D, class H>
+unsigned int CircularBuffer<D,H>::getProducerBufferSize(const std::string& producerID) const
+{
+	return theBuffer_.at(producerID).bufferSize();
+} //end getProducerBufferSize()
 
 //========================================================================================================================
 template<class D, class H>
@@ -69,7 +76,7 @@ void CircularBuffer<D,H>::registerProducer(const std::string& producerID, unsign
 							);
 
 	__COUT__ << "Registering " << consumers_.size() <<
-			" consumers to new buffer implementation." << __E__;
+			" existing consumers to new buffer implementation." << __E__;
 	
 	//register all existing consumers
 	for(const auto& consumer: consumers_)

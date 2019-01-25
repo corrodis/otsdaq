@@ -20,12 +20,13 @@ DataProcessor::DataProcessor(std::string supervisorApplicationUID, std::string b
 	__COUTV__(bufferUID_);
 	__COUTV__(processorUID_);
 
+	__COUT__ << "Constructed." << __E__;
 }
 
 //========================================================================================================================
 DataProcessor::~DataProcessor(void)
 {
-	__COUT__ << "Destructor." << __E__;
+	__COUT__ << "Destructed." << __E__;
 }
 
 //========================================================================================================================

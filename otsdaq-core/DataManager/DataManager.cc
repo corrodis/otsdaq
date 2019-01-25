@@ -34,14 +34,15 @@ DataManager::DataManager(const ConfigurationTree& theXDAQContextConfigTree, cons
 : Configurable						(theXDAQContextConfigTree, supervisorConfigurationPath)
 , parentSupervisorHasFrontends_		(false)
 {
-	__CFG_COUT__ << "Constructed" << __E__;
+	__CFG_COUT__ << "Constructed." << __E__;
 } //end constructor
 
 //========================================================================================================================
 DataManager::~DataManager(void)
 {
-	__CFG_COUT__ << "Destructor" << __E__;
-	eraseAllBuffers();
+	__CFG_COUT__ << "Destructor." << __E__;
+	DataManager::destroyBuffers();
+	__CFG_COUT__ << "Destructed." << __E__;
 } //end destructor
 
 //========================================================================================================================
@@ -58,7 +59,10 @@ void DataManager::dumpStatus(std::ostream* out) const
 		*out << "\t\t" << "Producers:" << __E__;
 		for(auto& producer : bufferPair.second.producers_)
 		{
-			*out << "\t\t\t" << producer->getProcessorID() << __E__;
+			*out << "\t\t\t" << producer->getProcessorID() <<
+					" [" <<
+					bufferPair.second.buffer_->getProducerBufferSize(
+							 producer->getProcessorID()) << "]" << __E__;
 		}
 		*out << "\t\t" << "Consumers:" << __E__;
 		for(auto& consumer : bufferPair.second.consumers_)
@@ -84,10 +88,9 @@ void DataManager::configure(void)
 	__CFG_COUT__ << transitionName << " DataManager" << __E__;
 	__CFG_COUT__ << "Path: "<< theConfigurationPath_+"/"+COL_NAME_bufferGroupLink << __E__;
 
-	eraseAllBuffers(); //Deletes all pointers created and given to the DataManager!
+	destroyBuffers();
 
-
-
+	//get all buffer definitions from configuration tree
 	for (const auto& buffer :
 			theXDAQContextConfigTree_.getNode(theConfigurationPath_ +
 					"/" + COL_NAME_bufferGroupLink).getChildren()) //"/LinkToDataManagerConfiguration").getChildren())
@@ -327,7 +330,7 @@ void DataManager::halt(void)
 
 	__CFG_COUT__ << transitionName << " DataManager stopped. Now destruct buffers..." << __E__;
 
-	DataManager::eraseAllBuffers(); //Stop all Buffers and deletes all pointers created and given to the DataManager!
+	DataManager::destroyBuffers(); //Stop all Buffers, deletes all pointers, and delete Buffer struct
 } //end halt()
 
 //========================================================================================================================
@@ -369,25 +372,67 @@ void DataManager::stop()
 
 	__CFG_COUT__ << transitionName << " DataManager " << __E__;
 
-
 	DataManager::stopAllBuffers();
 } //end stop()
 
 //========================================================================================================================
-void DataManager::eraseAllBuffers(void)
+//destroyBuffers
+//	Stop all Buffers, deletes all pointers, and delete Buffer struct
+void DataManager::destroyBuffers(void)
 {
-	for (auto& it : buffers_)
-		deleteBuffer(it.first);
+	DataManager::stopAllBuffers();
+
+	for (auto& bufferPair : buffers_)
+	{
+		//delete all producers/consumers
+		// then delete CircularBuffer
+		for(auto& producer : bufferPair.second.producers_)
+			delete producer;
+		bufferPair.second.producers_.clear();
+
+		for(auto& consumer : bufferPair.second.consumers_)
+			delete consumer;
+		bufferPair.second.consumers_.clear();
+
+		delete bufferPair.second.buffer_;
+	} //end delete buffer loop
 
 	buffers_.clear();
-} //end eraseAllBuffers()
+} //end destroyBuffers()
 
-//========================================================================================================================
-void DataManager::eraseBuffer(const std::string& bufferUID)
-{
-	if (deleteBuffer(bufferUID))
-		buffers_.erase(bufferUID);
-} //end eraseBuffer()
+////========================================================================================================================
+//void DataManager::eraseBuffer(const std::string& bufferUID)
+//{
+//	if (deleteBuffer(bufferUID))
+//		buffers_.erase(bufferUID);
+//} //end eraseBuffer()
+//
+////========================================================================================================================
+//
+//bool DataManager::deleteBuffer(const std::string& bufferUID)
+//{
+//	auto it = buffers_.find(bufferUID);
+//	if (it != buffers_.end())
+//	{
+//		auto aBuffer = it->second;
+//		if (aBuffer.status_ == Running)
+//			stopBuffer(bufferUID);
+//
+////		for (auto& itc : aBuffer.consumers_)
+////		{
+////			aBuffer.buffer_->unregisterConsumer(itc.get());
+////			//			delete itc;
+////		}
+//		aBuffer.consumers_.clear();
+//		//		for(auto& itp: aBuffer.producers_)
+//		//			delete itp;
+//		aBuffer.producers_.clear();
+//
+//		delete aBuffer.buffer_;
+//		return true;
+//	}
+//	return false;
+//} //end deleteBuffer()
 //
 ////========================================================================================================================
 ////unregisterConsumer
@@ -540,31 +585,6 @@ void DataManager::unregisterFEProducer(const std::string& bufferID, const std::s
 
 } //end unregisterFEProducer()
 
-//========================================================================================================================
-bool DataManager::deleteBuffer(const std::string& bufferUID)
-{
-	auto it = buffers_.find(bufferUID);
-	if (it != buffers_.end())
-	{
-		auto aBuffer = it->second;
-		if (aBuffer.status_ == Running)
-			stopBuffer(bufferUID);
-
-//		for (auto& itc : aBuffer.consumers_)
-//		{
-//			aBuffer.buffer_->unregisterConsumer(itc.get());
-//			//			delete itc;
-//		}
-		aBuffer.consumers_.clear();
-		//		for(auto& itp: aBuffer.producers_)
-		//			delete itp;
-		aBuffer.producers_.clear();
-
-		delete aBuffer.buffer_;
-		return true;
-	}
-	return false;
-} //end deleteBuffer()
 
 //========================================================================================================================
 //registerProducer
@@ -685,7 +705,8 @@ void DataManager::stopBuffer(const std::string& bufferUID)
 	unsigned int timeOut = 0;
 	const unsigned int ratio = 100;
 	const unsigned int sleepTime = 1000 * ratio;
-	unsigned int totalSleepTime = sleepTime / ratio * buffers_[bufferUID].buffer_->getNumberOfBuffers();//1 milliseconds for each buffer!!!!
+	unsigned int totalSleepTime = sleepTime / ratio *
+			buffers_[bufferUID].buffer_->getTotalNumberOfSubBuffers();//1 milliseconds for each buffer!!!!
 	if (totalSleepTime < 5000000)
 		totalSleepTime = 5000000;//At least 5 seconds
 	while (!buffers_[bufferUID].buffer_->isEmpty())
@@ -694,7 +715,8 @@ void DataManager::stopBuffer(const std::string& bufferUID)
 		timeOut += sleepTime;
 		if (timeOut > totalSleepTime)
 		{
-			std::cout << "Couldn't flush all buffers! Timing out after " << totalSleepTime / 1000000. << " seconds!" << std::endl;
+			std::cout << "Couldn't flush all buffers! Timing out after " <<
+					totalSleepTime / 1000000. << " seconds!" << std::endl;
 			buffers_[bufferUID].buffer_->isEmpty();
 			break;
 		}
@@ -732,9 +754,12 @@ void DataManager::pauseBuffer(const std::string& bufferUID)
 	{
 		usleep(sleepTime);
 		timeOut += sleepTime;
-		if (timeOut > sleepTime*buffers_[bufferUID].buffer_->getNumberOfBuffers())//1 milliseconds for each buffer!!!!
+		if (timeOut > sleepTime *
+				buffers_[bufferUID].buffer_->getTotalNumberOfSubBuffers())//1 milliseconds for each buffer!!!!
 		{
-			std::cout << "Couldn't flush all buffers! Timing out after " << buffers_[bufferUID].buffer_->getNumberOfBuffers()*sleepTime / 1000000. << " seconds!" << std::endl;
+			std::cout << "Couldn't flush all buffers! Timing out after " <<
+					buffers_[bufferUID].buffer_->getTotalNumberOfSubBuffers()*
+					sleepTime / 1000000. << " seconds!" << std::endl;
 			break;
 		}
 	}

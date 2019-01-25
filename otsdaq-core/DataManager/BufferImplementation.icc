@@ -36,8 +36,9 @@ BufferImplementation<D,H>::BufferImplementation(const BufferImplementation<D,H>&
 , subBuffers_        	(numberOfSubBuffers_,D())
 , bufferFree_        	(true)
 {	
-	__GEN_COUT__ << "AM I CALLING THIS???" << __E__;
+	__GEN_COUT__ << "Copy Constructor." << __E__;
 	//whos is constructing this?.. show stack
+	if(0)
 	{ 
 		//__GEN_SS__; ots::stackTrace(ss); std::cout << ss.str() << __E__;
 
@@ -136,7 +137,8 @@ BufferImplementation<D,H>::BufferImplementation(const BufferImplementation<D,H>&
 //	headers_            = toCopy.headers_;
 //	subBuffers_         = toCopy.subBuffers_;
 
-}
+	__GEN_COUT__ << "Copy Constructed." << __E__;
+} //end copy constructor
 
 //========================================================================================================================
 template<class D, class H>
@@ -162,12 +164,13 @@ BufferImplementation<D,H>& BufferImplementation<D,H>::operator=(const BufferImpl
 	headers_            = toCopy.headers_;
 	subBuffers_         = toCopy.subBuffers_;
 	return *this;
-}
+} //end assignmemt operator
 
 //========================================================================================================================
 template<class D, class H>
 BufferImplementation<D,H>::~BufferImplementation(void)
 {
+	__GEN_COUT__ << "Destructor." << __E__;
 	for(auto& it : consumers_)
 		if(it.second.subBuffersStatus_ != nullptr)
 		{
@@ -176,7 +179,9 @@ BufferImplementation<D,H>::~BufferImplementation(void)
 		}
 	delete[] subBuffersStatus_;
 	subBuffersStatus_ = nullptr;
-}
+	
+	__GEN_COUT__ << "Destructed." << __E__;
+} //end destructor
 
 //========================================================================================================================
 template<class D, class H>
@@ -523,7 +528,8 @@ std::atomic_bool& BufferImplementation<D,H>::isFree(unsigned int subBuffer) cons
 
 //========================================================================================================================
 template<class D, class H>
-std::atomic_bool& BufferImplementation<D,H>::isFree(unsigned int subBuffer, const std::string& consumer) const
+std::atomic_bool& BufferImplementation<D,H>::isFree(unsigned int subBuffer, 
+		const std::string& consumer) const
 {
 	return consumers_.at(consumer).subBuffersStatus_[subBuffer];
 }
@@ -537,7 +543,7 @@ unsigned int BufferImplementation<D,H>::getReadPointer(const std::string& consum
 
 //========================================================================================================================
 template<class D, class H>
-bool BufferImplementation<D,H>::isEmpty(void)
+bool BufferImplementation<D,H>::isEmpty(void) const
 {
 	for(unsigned int i=0; i<numberOfSubBuffers_; i++)
 		if(!isFree(i))
@@ -551,7 +557,7 @@ bool BufferImplementation<D,H>::isEmpty(void)
 
 //========================================================================================================================
 template<class D, class H>
-unsigned int BufferImplementation<D,H>::numberOfWrittenBuffers(void)
+unsigned int BufferImplementation<D,H>::numberOfWrittenBuffers(void) const
 {
 	unsigned int numberOfWrittenBuffers = 0;
 	for(unsigned int i=0; i<numberOfSubBuffers_; i++)

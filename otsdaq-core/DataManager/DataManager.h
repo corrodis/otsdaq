@@ -55,8 +55,8 @@ public:
     void dumpStatus	 	 		(std::ostream* out = (std::ostream*)&(std::cout)) const;
 
 protected:
-    void eraseAllBuffers 		(void);//!!!!!Delete all Buffers and all the pointers of the producers and consumers
-    void eraseBuffer     		(const std::string& bufferUID);//!!!!!Delete all the pointers of the producers and consumers
+    void destroyBuffers 		(void);//!!!!!Delete all Buffers and all the pointers of the producers and consumers
+    //void destroyBuffer     		(const std::string& bufferUID);//!!!!!Delete all the pointers of the producers and consumers
 
     void startAllBuffers 		(const std::string& runNumber);
     void stopAllBuffers  		(void);
@@ -78,7 +78,6 @@ protected:
 
     enum BufferStatus {Initialized, Running};
 
-    bool deleteBuffer      		(const std::string& bufferUID);
     struct Buffer
     {
     	CircularBufferBase*        buffer_;

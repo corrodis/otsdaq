@@ -21,10 +21,11 @@ public:
 	CircularBuffer         			(const std::string& dataBufferId);
 	virtual ~CircularBuffer			(void);
 
-	void         reset             (void);//This DOES NOT reset the consumer list
-	void         resetConsumerList (void);
-    bool         isEmpty           (void);
-    unsigned int getNumberOfBuffers(void);
+	void         reset             			(void);//This DOES NOT reset the consumer list
+	void         resetConsumerList 			(void);
+    bool         isEmpty           			(void) const;
+    unsigned int getTotalNumberOfSubBuffers	(void) const;
+    unsigned int getProducerBufferSize		(const std::string& producerID) const;
 
 	inline int read (D& buffer, const std::string& consumerID)
 	{

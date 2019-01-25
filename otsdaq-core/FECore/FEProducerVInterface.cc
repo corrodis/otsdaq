@@ -4,6 +4,9 @@
 
 using namespace ots;
 
+#undef  __MF_SUBJECT__
+#define __MF_SUBJECT__ (std::string("FEProducer-") + DataProcessor::processorUID_)
+
 //========================================================================================================================
 FEProducerVInterface::FEProducerVInterface (const std::string& interfaceUID,
 		const ConfigurationTree& theXDAQContextConfigTree,

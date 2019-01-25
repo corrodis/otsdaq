@@ -28,8 +28,9 @@ public:
     //void unregisterProducer(DataProcessor*  producer);
     //void unregisterConsumer(DataProcessor*  consumer);
 
-    virtual bool         isEmpty           	(void) = 0;
-    virtual unsigned int getNumberOfBuffers	(void) = 0;
+    virtual bool         isEmpty           			(void) const = 0;
+    virtual unsigned int getTotalNumberOfSubBuffers	(void) const = 0;
+    virtual unsigned int getProducerBufferSize		(const std::string& producerID) const = 0;
 
 protected:
     virtual void registerProducer  			(const std::string& producerID, unsigned int numberOfSubBuffers=100) = 0;

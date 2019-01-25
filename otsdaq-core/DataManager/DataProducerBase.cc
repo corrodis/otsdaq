@@ -26,8 +26,6 @@ DataProducerBase::DataProducerBase(const std::string& supervisorApplicationUID,
 //========================================================================================================================
 DataProducerBase::~DataProducerBase(void)
 {
-	__COUT__ << "Destructor." << __E__;
-	//unregisterFromBuffer();
 	__COUT__ << "Destructed." << __E__;
 } //end destructor()
 

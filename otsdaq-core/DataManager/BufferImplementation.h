@@ -45,9 +45,9 @@ public:
 	int  read                          	(D*& buffer, H*& header, const std::string& consumer);
 	int  setReadSubBuffer              	(const std::string& consumer);//Must be used in conjunction with attachToEmptySubBuffer because it attach to the nextWritePointer buffer
 
-	bool         isEmpty               	(void);
-	unsigned int bufferSize            	(void){return numberOfSubBuffers_;}
-	unsigned int numberOfWrittenBuffers	(void);
+	bool         isEmpty               	(void) const;
+	unsigned int bufferSize            	(void) const {return numberOfSubBuffers_;}
+	unsigned int numberOfWrittenBuffers	(void) const;
 
 	const std::map<std::string, ConsumerStruct>& getConsumers(void) const {return consumers_;};
 
