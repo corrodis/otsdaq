@@ -97,7 +97,7 @@ void UDPDataListenerProducer::fastWrite(void)
 		return;
 	}
 
-	if(1) // test data buffers
+	if(0) // test data buffers
 	{
 		sleep(1);
 		unsigned long long value = 0xA54321; //this is 8-bytes
