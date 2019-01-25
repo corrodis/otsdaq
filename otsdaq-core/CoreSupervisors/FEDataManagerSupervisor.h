@@ -28,8 +28,6 @@ protected:
     DataManager*			theDataManager_;
 private:
     DataManager*		   	extractDataManager(); //likely, just used in constructor
-
-    std::map<std::string /*feId*/, std::shared_ptr<DataProducerBase> >  feProducers_; //keep map of feProducers (especially for destructor)
 };
 
 }

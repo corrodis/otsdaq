@@ -75,6 +75,7 @@ void FEDataManagerSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		__SUP_SS__ << "State machine size is not 2! It is " <<
 				theStateMachineImplementation_.size() <<
 				". What happened??" << __E__;
+		__SUP_SS_THROW__;
 	}
 
 	VStateMachine* p = theStateMachineImplementation_[0];
@@ -89,96 +90,10 @@ void FEDataManagerSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		std::cout << ss.str() << __E__;
 	}
 
-	//at this point the buffers have been made with producers and consumers
-	//	then the FEs were made.
-	//BUT, the FEs were not attached to buffers as producers
-	//so... steps:
-	//	go through each FE that has a LinkToDataBufferTable
-	//		and add it as a producer for the specified buffer
-
-	__SUP_COUT__ << "FE and Data Managers plugins have been created and configured as their respective types!" <<
-			" Now linking FE-producers to their buffers..." << __E__;
-
-	const std::string COL_NAME_feGroupLink 	= "LinkToFEInterfaceTable";
-	const std::string COL_NAME_feTypeLink 	= "LinkToFETypeConfiguration";
-	const std::string COL_NAME_dataBufferId = "LinkToDataBufferTable";
-
-	__SUP_COUT__ << "Path: "<< supervisorConfigurationPath_ + "/" +
-			COL_NAME_feGroupLink << __E__;
-
-	const std::map<std::string /*name*/, std::unique_ptr<FEVInterface> >& feMap =
-			theFEInterfacesManager_->getFEInterfaces();
-
-	std::string pathToBufferId;
-	std::string bufferId;
-	for(const auto& fePair : feMap)
-	{
-		__SUP_COUTV__(fePair.first);
-
-		pathToBufferId = supervisorConfigurationPath_ + "/" +
-				COL_NAME_feGroupLink + "/" +
-				fePair.first + "/" +
-				COL_NAME_feTypeLink + "/" +
-				COL_NAME_dataBufferId;
-
-		try
-		{
-			ConfigurationTree buffIdNode =
-					CorePropertySupervisorBase::getContextTreeNode().getNode(
-							pathToBufferId);
-
-			bufferId = buffIdNode.getValue();
-		}
-		catch(const std::runtime_error& e)
-		{
-			__SUP_COUT__ << "FE '" << fePair.first <<
-					"' does not have link to buffer id '" <<
-					COL_NAME_dataBufferId <<
-					"' so assuming it is not a Producer within this FEDataManager!" << __E__;
-			continue;
-		}
-
-		__SUP_COUTV__(bufferId);
-
-		//try to cast FE as a Producer as ultimate test
-
-		DataProducerBase* dp;
-		try
-		{
-			dp = dynamic_cast<DataProducerBase*>(
-					dynamic_cast<FEProducerVInterface*>(
-							(theFEInterfacesManager_->getFEInterfaceP(fePair.first))));
-//					dynamic_cast<DataProducerBase*>(
-//					theFEInterfacesManager_->getFEInterfaceP(fePair.first));
-			if(!dp)
-			{
-				__SUP_SS__ << "Null pointer after cast to Data Producer!" << __E__;
-				__SUP_SS_THROW__;
-			}
-		}
-		catch(const std::bad_cast& e)
-		{
-			__SUP_SS__ << "Failed to instantiate producer/frontend plugin named '" <<
-					fePair.first << "' for buffer '" << bufferId <<
-					"' due to the following error: \n" << e.what() << __E__;
-			__SUP_MOUT_ERR__ << ss.str();
-			__SUP_SS_THROW__;
-		}
-		catch(...)
-		{
-			__SUP_SS__ << "Failed to instantiate producer/frontend plugin named '" <<
-					fePair.first << "' for buffer '" << bufferId <<
-					"' due to an unknown error." << __E__;
-			__SUP_MOUT_ERR__ << ss.str();
-			__SUP_SS_THROW__;
-		}
-
-		//at this point have valid DataProducerBase*
-
-		//track shared pointers in FEDataManager for special handling (e.g. destructor handling)
-		feProducers_[fePair.first] = std::shared_ptr<DataProducerBase>(dp);
-
-	} //end FEs
+	//At this point the buffers have been made with producers and consumers
+	//	then the FEs (including FEProducers) were made.
+	//	Producers (including FEProducers) and Consumers attach to their DataManager
+	//	Buffer during their construction.
 
 	//revert state machine order back
 	theStateMachineImplementation_[1] = theStateMachineImplementation_[0];
