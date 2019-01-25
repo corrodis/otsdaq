@@ -71,10 +71,10 @@ void ARTDAQDataManager::configure(void)
 
 	__COUT__ << "ARTDAQDataManager DataManager configured now pass the MPI stuff" << std::endl;
 	for(auto it=DataManager::buffers_.begin(); it!=DataManager::buffers_.end(); it++)
-		for(auto& itc: it->second.consumers_)
-			if(dynamic_cast<ARTDAQConsumer*>(itc.get()))
+		for(auto& consumer: it->second.consumers_)
+			if(dynamic_cast<ARTDAQConsumer*>(consumer))
 			{
-				dynamic_cast<ARTDAQConsumer*>(itc.get())->initLocalGroup(rank_);
+				dynamic_cast<ARTDAQConsumer*>(consumer)->initLocalGroup(rank_);
 				return;//There can only be 1 ARTDAQConsumer for each ARTDAQDataManager!!!!!!!
 			}
 
@@ -84,10 +84,10 @@ void ARTDAQDataManager::configure(void)
 	__COUT__ << "Looking for an ARTDAQ Producer..." << std::endl;
 
 	for(auto it=DataManager::buffers_.begin(); it!=DataManager::buffers_.end(); it++)
-		for(auto& itc: it->second.producers_)
-			if(dynamic_cast<ARTDAQProducer*>(itc.get()))
+		for(auto& producer: it->second.producers_)
+			if(dynamic_cast<ARTDAQProducer*>(producer))
 			{
-				dynamic_cast<ARTDAQProducer*>(itc.get())->initLocalGroup(rank_);
+				dynamic_cast<ARTDAQProducer*>(producer)->initLocalGroup(rank_);
 				return;//There can only be 1 ARTDAQProducer for each ARTDAQDataManager!!!!!!!
 			}
 

@@ -477,7 +477,6 @@ void CoreSupervisorBase::postStateMachineExecutionLoop(void)
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
-
 {
 	__SUP_COUT__ << "transitionConfiguring" << std::endl;
 
@@ -557,7 +556,6 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 //transitionHalting
 //	Ignore errors if coming from Failed state
 void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
-
 {
 	const std::string transitionName = "Halting";
 	try
@@ -630,7 +628,7 @@ void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
 			);
 		}
 	}
-}
+} //end transitionHalting()
 
 //========================================================================================================================
 //Inheriting supervisor classes should not override this function, or should at least also call it in the override
@@ -647,7 +645,7 @@ void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference e)
 	//	This allows re-instantiation at each configure time.
 	//for(auto& it: theStateMachineImplementation_)
 	//it->initialize();
-}
+} //end transitionInitializing()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
@@ -701,11 +699,10 @@ void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
 				__FUNCTION__ /*function*/
 		);
 	}
-}
+} //end transitionPausing()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
-
 {
 	const std::string transitionName = "Resuming";
 	try
@@ -756,7 +753,7 @@ void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
 				__FUNCTION__ /*function*/
 		);
 	}
-}
+} // end transitionResuming()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
@@ -812,7 +809,7 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
 				__FUNCTION__ /*function*/
 		);
 	}
-}
+} //end transitionStarting()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
@@ -866,4 +863,4 @@ void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
 				__FUNCTION__ /*function*/
 		);
 	}
-}
+} //end transitionStopping()

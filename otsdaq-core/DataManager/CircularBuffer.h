@@ -18,8 +18,8 @@ template <class D, class H>
 class CircularBuffer : public CircularBufferBase
 {
 public:
-	CircularBuffer         (void);
-	virtual ~CircularBuffer(void);
+	CircularBuffer         			(const std::string& dataBufferId);
+	virtual ~CircularBuffer			(void);
 
 	void         reset             (void);//This DOES NOT reset the consumer list
 	void         resetConsumerList (void);
@@ -36,14 +36,14 @@ public:
 	{
 		setNextProducerBuffer(consumerID);
 		unsigned int readCounter = theBuffer_.size()-1;
-		++megaCounter_;
-		if(megaCounter_%10000000 == 0)
-			std::cout << __COUT_HDR_FL__ << __COUT_HDR_FL__
-			<< "Consumer: " << consumerID
-			<< " Reading producer: " << lastReadBuffer_[consumerID]->first
-			<< " Buffer empty? " << lastReadBuffer_[consumerID]->second.isEmpty()
-			<< " written buffers: " << lastReadBuffer_[consumerID]->second.numberOfWrittenBuffers()
-			<< std::endl;
+//		++megaCounter_;
+//		if(megaCounter_%10000000 == 0)
+//			std::cout << __COUT_HDR_FL__ << __COUT_HDR_FL__
+//			<< "Consumer: " << consumerID
+//			<< " Reading producer: " << lastReadBuffer_[consumerID]->first
+//			<< " Buffer empty? " << lastReadBuffer_[consumerID]->second.isEmpty()
+//			<< " written buffers: " << lastReadBuffer_[consumerID]->second.numberOfWrittenBuffers()
+//			<< std::endl;
   	    int readReturnVal;
 		while((readReturnVal = lastReadBuffer_[consumerID]->second.read(buffer, header, consumerID)) < 0 && readCounter > 0)
 		{
@@ -57,14 +57,14 @@ public:
 	{
 		setNextProducerBuffer(consumerID);
 		unsigned int readCounter = theBuffer_.size()-1;
-		++megaCounter_;
-		if(megaCounter_%10000000 == 0)
-			std::cout << __COUT_HDR_FL__ << __COUT_HDR_FL__
-			<< "Consumer: " << consumerID
-			<< " Reading producer: " << lastReadBuffer_[consumerID]->first
-			<< " Buffer empty? " << lastReadBuffer_[consumerID]->second.isEmpty()
-			<< " written buffers: " << lastReadBuffer_[consumerID]->second.numberOfWrittenBuffers()
-			<< std::endl;
+//		++megaCounter_;
+//		if(megaCounter_%10000000 == 0)
+//			std::cout << __COUT_HDR_FL__ << __COUT_HDR_FL__
+//			<< "Consumer: " << consumerID
+//			<< " Reading producer: " << lastReadBuffer_[consumerID]->first
+//			<< " Buffer empty? " << lastReadBuffer_[consumerID]->second.isEmpty()
+//			<< " written buffers: " << lastReadBuffer_[consumerID]->second.numberOfWrittenBuffers()
+//			<< std::endl;
   	    int readReturnVal;
 		while((readReturnVal = lastReadBuffer_[consumerID]->second.read(buffer, header, consumerID)) < 0 && readCounter > 0)
 		{
@@ -74,20 +74,24 @@ public:
 		return readReturnVal;
 	}
 
-	BufferImplementation<D,H>& getLastReadBuffer(std::string consumerID){return lastReadBuffer_[consumerID]->second;}
-	BufferImplementation<D,H>& getBuffer        (std::string producerID){return theBuffer_[producerID];}
+	BufferImplementation<D,H>& getLastReadBuffer(const std::string& consumerID){return lastReadBuffer_[consumerID]->second;}
+	BufferImplementation<D,H>& getBuffer        (const std::string& producerID){ __COUTV__(producerID); __COUTV__(int(theBuffer_.find(producerID) == theBuffer_.end())); return theBuffer_[producerID];}
+
+	//void unregisterConsumer   (const std::string& consumerID);
+	//void unregisterProducer   (const std::string& producerID);
 
 private:
-	std::map<std::string, BufferImplementation<D,H>> theBuffer_;
+	std::map<std::string /*producer id*/, BufferImplementation<D,H> /*one producer, many consumers*/> theBuffer_;
 
-	void registerProducer     (std::string producerID, unsigned int numberOfSubBuffers=100);
-	void registerConsumer     (std::string consumerID, CircularBufferBase::ConsumerPriority priority);
-	void unregisterConsumer   (std::string consumerID);
+	void registerProducer     (const std::string& producerID, unsigned int numberOfSubBuffers=100);
+	void registerConsumer     (const std::string& consumerID, CircularBufferBase::ConsumerPriority priority);
+
 	void setNextProducerBuffer(const std::string& consumer);
-	//The first element is a CONSUMER, then it is the producer buffer map!!!!! 
-	std::map<std::string, typename std::map<std::string, BufferImplementation<D,H>>::iterator> lastReadBuffer_;
 
-	unsigned long long megaCounter_;
+	std::map<std::string /*consumer id*/, /*iterator within producer map*/ typename std::map<std::string, BufferImplementation<D,H>>::iterator> lastReadBuffer_;
+
+    std::map<std::string, CircularBufferBase::ConsumerPriority> 	consumers_;
+
 };
 #include "otsdaq-core/DataManager/CircularBuffer.icc"
 

@@ -1311,7 +1311,7 @@ export -f otsActionHandler
 if [ $ISCONFIG == 1 ]; then
 	launchOTSWiz
 else
-	launchOTS #only launch gateway once.. on shutdown and startup others can relaunch
+	launchOTS  #only launch gateway once.. on shutdown and startup others can relaunch
 fi
 
 

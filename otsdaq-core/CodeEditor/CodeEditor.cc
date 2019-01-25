@@ -27,7 +27,7 @@ std::string CodeEditor::SPECIAL_TYPE_Tools = "Tools";
 //========================================================================================================================
 //CodeEditor
 CodeEditor::CodeEditor()
-: ALLOWED_FILE_EXTENSIONS_({"h","hh","hpp","hxx",		"c","cc","cpp","cxx",		"txt","sh","css","html","htm","js","py",		"fcl","xml"})
+: ALLOWED_FILE_EXTENSIONS_({"h","hh","hpp","hxx",		"c","cc","cpp","cxx","icc",		"txt","sh","css","html","htm","js","py",		"fcl","xml"})
 {
 	std::string path = CODE_EDITOR_DATA_PATH;
 	DIR *dir = opendir(path.c_str());

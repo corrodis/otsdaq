@@ -1556,7 +1556,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 	SOAPUtilities::receive(theStateMachine_.getCurrentMessage(), parameters);
 
 	std::string runNumber = parameters.getValue("RunNumber");
-	__COUT__ << runNumber << __E__;
+	__COUTV__(runNumber);
 
 	//check if configuration dump is enabled on configure transition
 	{

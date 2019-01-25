@@ -1,5 +1,5 @@
-#ifndef _ots_String_Macros_h_
-#define _ots_String_Macros_h_
+#ifndef _ots_StringMacros_h_
+#define _ots_StringMacros_h_
 
 #include "otsdaq-core/Macros/CoutMacros.h"
 
@@ -27,7 +27,6 @@ public:
 	//		decodeURIComponent
 	//		convertEnvironmentVariables
 	//		isNumber
-    //		binaryToHexString
     //		getNumber
 	//		validateValueForDefaultStringDataType
 	//
@@ -108,7 +107,6 @@ static T&				getWildCardMatchFromMap					(const std::string& needle, std::map<st
 static std::string		 	decodeURIComponent 						(const std::string& data);
 static std::string 			convertEnvironmentVariables				(const std::string& data);
 static bool 	        	isNumber           						(const std::string& stringToCheck);
-static std::string			binaryToHexString						(const char *binaryBuffer, unsigned int numberOfBytes, const std::string& resultPreamble = "", const std::string& resultDelimiter = "");
 
 template<class T>
 static bool 	        	getNumber								(const std::string& s, T& retValue)
@@ -614,6 +612,7 @@ static std::string			vectorToString							(const std::vector<std::pair<S,T> >& s
 
 static std::string 			demangleTypeName						(const char* name);
 
-}; //end class
+
+}; //end StringMarcos static class
 } //end namespace
 #endif

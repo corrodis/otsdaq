@@ -49,6 +49,8 @@ public:
     bool				allFEWorkloopsAreDone				(void); //used by Iterator, e.g.
     const FEVInterface&	getFEInterface						(const std::string& interfaceID) const;
 
+    const std::map<std::string /*name*/, std::unique_ptr<FEVInterface> >& getFEInterfaces (void) const {return theFEInterfaces_;}
+    FEVInterface*		getFEInterfaceP						(const std::string& interfaceID);
 
     //FE communication helpers
 	std::mutex									frontEndCommunicationReceiveMutex_;
@@ -58,7 +60,7 @@ public:
 
 private:
 
-	FEVInterface*		getFEInterfaceP		(const std::string& interfaceID);
+
     std::map<std::string /*name*/, std::unique_ptr<FEVInterface> > 	theFEInterfaces_;
     std::vector<std::string /*name*/> 								theFENamesByPriority_;
 

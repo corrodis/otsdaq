@@ -62,6 +62,5 @@ private:
 
 };
 
-//std::map<std::string, DataManager*> DataManagerSingleton::theInstances_;
 }
 #endif

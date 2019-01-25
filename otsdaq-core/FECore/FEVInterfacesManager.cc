@@ -45,24 +45,30 @@ void FEVInterfacesManager::destroy(void)
 //========================================================================================================================
 void FEVInterfacesManager::createInterfaces(void)
 {
+
+	const std::string COL_NAME_feGroupLink 	= "LinkToFEInterfaceTable";
+	const std::string COL_NAME_feTypeLink 	= "LinkToFETypeConfiguration";
+	const std::string COL_NAME_fePlugin 	= "FEInterfacePluginName";
+
+	__CFG_COUT__ << "Path: "<< theConfigurationPath_+"/"+COL_NAME_feGroupLink << __E__;
+
 	destroy();
 
-	__CFG_COUT__ << "Path: "<< theConfigurationPath_+"/LinkToFEInterfaceConfiguration" << __E__;
-
-	{ //could access application node
+	{ //could access application node like so, ever needed?
 		ConfigurationTree appNode =
 				theXDAQContextConfigTree_.getBackNode(theConfigurationPath_,1);
 		__CFG_COUTV__(appNode.getValueAsString());
 	}
 
+	ConfigurationTree feGroupLinkNode = Configurable::getSelfNode().getNode(
+			COL_NAME_feGroupLink);
+
 	std::vector<std::pair<std::string,ConfigurationTree> > feChildren =
-			Configurable::getSelfNode().getNode(
-					"LinkToFEInterfaceConfiguration").getChildren();
+			feGroupLinkNode.getChildren();
 
 	//acquire names by priority
 	theFENamesByPriority_ =
-			Configurable::getSelfNode().getNode(
-					"LinkToFEInterfaceConfiguration").getChildrenNames(
+			feGroupLinkNode.getChildrenNames(
 							true /*byPriority*/, true /*onlyStatusTrue*/);
 	__CFG_COUTV__(StringMacros::vectorToString(theFENamesByPriority_));
 
@@ -77,18 +83,23 @@ void FEVInterfacesManager::createInterfaces(void)
 			__CFG_COUT_INFO__ << "Ignoring FE Status since Status column is missing!" << __E__;
 		}
 
-		__CFG_COUT__ << "Interface Plugin Name: "<< interface.second.getNode("FEInterfacePluginName").getValue<std::string>() << __E__;
+		__CFG_COUT__ << "Interface Plugin Name: "<< interface.second.getNode(
+				COL_NAME_fePlugin).getValue<std::string>() << __E__;
 		__CFG_COUT__ << "Interface Name: "<< interface.first << __E__;
 		__CFG_COUT__ << "XDAQContext Node: "<< theXDAQContextConfigTree_ << __E__;
-		__CFG_COUT__ << "Path to configuration: "<< (theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration") << __E__;
+		__CFG_COUT__ << "Path to configuration: "<< (theConfigurationPath_ + "/" +
+				COL_NAME_feGroupLink + "/" + interface.first + "/" +
+				COL_NAME_feTypeLink) << __E__;
 
 		try
 		{
 			theFEInterfaces_[interface.first] = makeInterface(
-					interface.second.getNode("FEInterfacePluginName").getValue<std::string>(),
+					interface.second.getNode(COL_NAME_fePlugin).getValue<std::string>(),
 					interface.first,
 					theXDAQContextConfigTree_,
-					(theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration")
+					(theConfigurationPath_ + "/" +
+							COL_NAME_feGroupLink + "/" + interface.first + "/" +
+							COL_NAME_feTypeLink)
 					);
 
 			//setup parent supervisor and interface manager
@@ -101,10 +112,29 @@ void FEVInterfacesManager::createInterfaces(void)
 		{
 			__CFG_SS__ << "Failed to instantiate plugin named '" <<
 					interface.first << "' of type '" <<
-					interface.second.getNode("FEInterfacePluginName").getValue<std::string>()
+					interface.second.getNode(COL_NAME_fePlugin).getValue<std::string>()
 					<< "' due to the following error: \n" << e.what() << __E__;
 			__MOUT_ERR__ << ss.str();
 			__CFG_SS_THROW__;
+		}
+		catch(const std::runtime_error& e)
+		{
+			__CFG_SS__ << "Failed to instantiate plugin named '" <<
+					interface.first << "' of type '" <<
+					interface.second.getNode(COL_NAME_fePlugin).getValue<std::string>()
+					<< "' due to the following error: \n" << e.what() << __E__;
+			__MOUT_ERR__ << ss.str();
+			__CFG_SS_THROW__;
+		}
+		catch(...)
+		{
+			__CFG_SS__ << "Failed to instantiate plugin named '" <<
+					interface.first << "' of type '" <<
+					interface.second.getNode(COL_NAME_fePlugin).getValue<std::string>()
+					<< "' due to an unknown error." << __E__;
+			__MOUT_ERR__ << ss.str();
+			throw; //if we do not throw, it is hard to tell what is happening..
+			//__CFG_SS_THROW__;
 		}
 	}
 	__CFG_COUT__ << "Done creating interfaces" << __E__;
@@ -197,10 +227,9 @@ void FEVInterfacesManager::halt(void)
 	}
 	postStateMachineExecutionLoop();
 
+	destroy(); //destroy all FE interfaces on halt, must be configured for FE interfaces to exist
 
 	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
-
-	destroy(); //destroy all FE interfaces on halt, must be configured for FE interfaces to exist
 } //end halt()
 
 //========================================================================================================================
@@ -875,7 +904,7 @@ void FEVInterfacesManager::postStateMachineExecutionLoop(void)
 		__CFG_COUT__ << stateMachinesIterationWorkCount_ <<
 			" FE Interface state machine implementation(s) flagged for another iteration..." << __E__;
 	else
-		__CFG_COUT__ << "Done configuration all state machine implementations..." << __E__;
+		__CFG_COUT__ << "Done transitioning all state machine implementations..." << __E__;
 } //end postStateMachineExecutionLoop()
 
 

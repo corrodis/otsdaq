@@ -18,13 +18,15 @@ public:
     virtual ~DataProcessor(void);
 
     virtual void registerToBuffer    (void) = 0;
+    //virtual void unregisterFromBuffer(void) = 0;
+
     virtual void startProcessingData (std::string runNumber) = 0;
     virtual void stopProcessingData  (void) = 0;
     virtual void pauseProcessingData (void){stopProcessingData();}
     virtual void resumeProcessingData(void){startProcessingData("");}
 
     //Getters
-    std::string getProcessorID(void);
+    const std::string& getProcessorID(void) const {return processorUID_;}
 
     void setCircularBuffer(CircularBufferBase* circularBuffer);
 

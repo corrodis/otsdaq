@@ -8,16 +8,22 @@
 #include <memory>
 using namespace ots;
 
+#undef  __MF_SUBJECT__
+#define __MF_SUBJECT__ "producer-" << bufferUID_ << "-" << processorUID_
+
 //========================================================================================================================
-DataProducer::DataProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, unsigned int bufferSize)
+DataProducer::DataProducer(std::string supervisorApplicationUID, std::string bufferUID,
+		std::string processorUID, unsigned int bufferSize)
 : WorkLoop      (processorUID)
-, DataProducerBase (supervisorApplicationUID, bufferUID, processorUID)
+, DataProducerBase (supervisorApplicationUID, bufferUID, processorUID, bufferSize)
 {
+	__COUT__ << "Constructed." << __E__;
 }
 
 //========================================================================================================================
 DataProducer::~DataProducer(void)
 {
+	__COUT__ << "Destructed." << __E__;
 }
 
 //========================================================================================================================

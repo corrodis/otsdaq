@@ -5,19 +5,14 @@
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
 
+#include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
+
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
 #include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
 
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationTree.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
 
-#include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
 #include "otsdaq-core/WebUsersUtilities/RemoteWebUsers.h"
 
 #pragma GCC diagnostic push

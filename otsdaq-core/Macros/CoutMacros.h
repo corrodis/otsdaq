@@ -137,6 +137,32 @@
 #define __FE_SS__			std::stringstream ss; ss << ":FE:" << getInterfaceType() << ":" << getInterfaceUID() << ":" << theConfigurationRecordName_ << ":" << __COUT_HDR__
 #define __FE_SS_THROW__	__FE_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
 
+//////// ==============================================================
+
+//for generic decoration override, just have mfSubject declared
+#define __GEN_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << mfSubject_ << ":"
+#define __GEN_MF_TYPE__(X)		mf::X (mfSubject_)
+
+#define __GEN_MOUT_ERR__  	__GEN_MF_TYPE__(LogError) 	<< __COUT_HDR__
+#define __GEN_MOUT_WARN__  	__GEN_MF_TYPE__(LogWarning) << __COUT_HDR__
+#define __GEN_MOUT_INFO__  	__GEN_MF_TYPE__(LogInfo) 	<< __COUT_HDR__
+#define __GEN_MOUT__  		__GEN_MF_TYPE__(LogDebug)	<< __COUT_HDR__
+#define __GEN_MOUTV__(X)	__GEN_MOUT__ << QUOTE(X) << " = " << X
+#define __GEN_COUT_ERR__  	__GEN_COUT_TYPE__(LogError) 	<< __COUT_HDR__
+#define __GEN_COUT_WARN__  	__GEN_COUT_TYPE__(LogWarning) 	<< __COUT_HDR__
+#define __GEN_COUT_INFO__  	__GEN_COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
+#define __GEN_COUT__  		__GEN_COUT_TYPE__(LogDebug)		<< __COUT_HDR__
+#define __GEN_COUTV__(X) 	__GEN_COUT__ << QUOTE(X) << " = " << X << __E__
+
+#define __GEN_MCOUT_ERR__(X)  	{__GEN_MOUT_ERR__ << X; 	__GEN_COUT_ERR__ << X;}
+#define __GEN_MCOUT_WARN__(X)  	{__GEN_MOUT_WARN__ << X; 	__GEN_COUT_WARN__ << X;}
+#define __GEN_MCOUT_INFO__(X)  	{__GEN_MOUT_INFO__ << X; 	__GEN_COUT_INFO__ << X;}
+#define __GEN_MCOUT__(X)  		{__GEN_MOUT__ << X; 		__GEN_COUT__ << X;}
+#define __GEN_MCOUTV__(X)		{__GEN_MOUTV__(X); 			__GEN_COUTV__(X);}
+
+#define __GEN_SS__			std::stringstream ss; ss << ":" << mfSubject_ << ":" << __COUT_HDR__
+#define __GEN_SS_THROW__	__GEN_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
+
 
 //////// ==============================================================
 
@@ -190,6 +216,10 @@ struct __OTS_SOFT_EXCEPTION__ : public std::exception
 	virtual char const* what() const throw() {return what_.c_str();}
 	std::string what_;
 };
+
 }
+
+
+
 
 #endif
