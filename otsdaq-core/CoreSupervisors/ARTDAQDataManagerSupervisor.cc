@@ -10,14 +10,9 @@ XDAQ_INSTANTIATOR_IMPL(ARTDAQDataManagerSupervisor)
 
 //========================================================================================================================
 ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub * s) 
-//FIXME WE MUST ADD A MAP OF INSTANCES IN THE SINGLETON
 : CoreSupervisorBase(s)
 {
-	__COUT__ << "Begin!" << std::endl;
-	__COUT__ << "Begin!" << std::endl;
-	__COUT__ << "Begin!" << std::endl;
-	__COUT__ << "Begin!" << std::endl;
-	__COUT__ << "Begin!" << std::endl;
+	__SUP_COUT__ << "Constructor." << std::endl;
 
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 			DataManagerSingleton::getInstance<ARTDAQDataManager>(
@@ -26,17 +21,15 @@ ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub *
 					CorePropertySupervisorBase::supervisorApplicationUID_)
 	);
 
-	__COUT__ << "Initialized!" << std::endl;
-	__COUT__ << "Initialized!" << std::endl;
-	__COUT__ << "Initialized!" << std::endl;
-	__COUT__ << "Initialized!" << std::endl;
-	__COUT__ << "Initialized!" << std::endl;
+	__SUP_COUT__ << "Constructed." << __E__;
 
 }
 
 //========================================================================================================================
 ARTDAQDataManagerSupervisor::~ARTDAQDataManagerSupervisor(void)
 {
+	__SUP_COUT__ << "Destroying..." << std::endl;
 	DataManagerSingleton::deleteInstance(CorePropertySupervisorBase::supervisorApplicationUID_);
 	theStateMachineImplementation_.pop_back();
+	__SUP_COUT__ << "Destructed." << __E__;
 }

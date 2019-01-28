@@ -8,7 +8,8 @@ const CorePropertySupervisorBase::SupervisorProperties 	CorePropertySupervisorBa
 CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* application)
 : theConfigurationManager_      (new ConfigurationManager)
 , supervisorClass_              (application->getApplicationDescriptor()->getClassName())
-, supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
+, supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1,
+		supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 , supervisorContextUID_         ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS")
 , supervisorApplicationUID_     ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS")
 , supervisorConfigurationPath_  ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS")
@@ -28,7 +29,10 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	{
 		__SUP_COUT__ << "Wiz mode detected. So skipping configuration location work for supervisor of class '" <<
 				supervisorClass_ << "'" << __E__;
-
+		supervisorContextUID_ 			= "NO CONTEXT ID IN WIZ MODE";
+		supervisorApplicationUID_ 		= std::to_string(
+				application->getApplicationDescriptor()->getLocalId());
+		supervisorConfigurationPath_ 	= "NO APP PATH IN WIZ MODE";
 		return;
 	}
 

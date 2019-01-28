@@ -3,7 +3,7 @@
 
 #include "otsdaq-core/CoreSupervisors/FESupervisor.h"
 
-#include "otsdaq-core/DataManager/DataProducerBase.h"
+//#include "otsdaq-core/DataManager/DataProducerBase.h"
 
 namespace ots
 {
@@ -16,7 +16,7 @@ public:
 
     XDAQ_INSTANTIATOR();
 
-    FEDataManagerSupervisor              (xdaq::ApplicationStub * s) ;
+    FEDataManagerSupervisor              (xdaq::ApplicationStub * s, bool artdaqDataManager = false) ;
     virtual ~FEDataManagerSupervisor     (void);
 
 

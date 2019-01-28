@@ -18,7 +18,8 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 , CorePropertySupervisorBase	(this)
 , RunControlStateMachine		(CorePropertySupervisorBase::allSupervisorInfo_.isWizardMode()? //set state machine name
 		CorePropertySupervisorBase::supervisorClassNoNamespace_:
-		CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" + CorePropertySupervisorBase::supervisorApplicationUID_)
+		CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" +
+		CorePropertySupervisorBase::supervisorApplicationUID_)
 , stateMachineWorkLoopManager_  (toolbox::task::bind(this, &CoreSupervisorBase::stateMachineThread, "StateMachine"))
 , stateMachineSemaphore_        (toolbox::BSem::FULL)
 , theRemoteWebUsers_ 			(this)

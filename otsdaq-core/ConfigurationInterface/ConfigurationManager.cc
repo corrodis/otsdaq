@@ -35,7 +35,7 @@ const uint8_t	  ConfigurationManager::METADATA_COL_COMMENT			= 2;
 const uint8_t	  ConfigurationManager::METADATA_COL_AUTHOR				= 3;
 const uint8_t	  ConfigurationManager::METADATA_COL_TIMESTAMP			= 4;
 
-const std::set<std::string> ConfigurationManager::contextMemberNames_	= {ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME,ConfigurationManager::XDAQ_APPLICATION_CONFIG_NAME,"XDAQApplicationPropertyConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","TheSupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"};
+const std::set<std::string> ConfigurationManager::contextMemberNames_	= {ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME,ConfigurationManager::XDAQ_APPLICATION_CONFIG_NAME,"XDAQApplicationPropertyConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","GatewaySupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"};
 const std::set<std::string> ConfigurationManager::backboneMemberNames_	= {ConfigurationManager::GROUP_ALIASES_CONFIG_NAME,ConfigurationManager::VERSION_ALIASES_CONFIG_NAME};
 const std::set<std::string> ConfigurationManager::iterateMemberNames_	= {"IterateConfiguration","IterationPlanConfiguration","IterationTargetConfiguration",
 	/*command specific tables*/"IterationCommandBeginLabelConfiguration","IterationCommandChooseFSMConfiguration","IterationCommandConfigureAliasConfiguration","IterationCommandConfigureGroupConfiguration","IterationCommandExecuteFEMacroConfiguration","IterationCommandExecuteMacroConfiguration","IterationCommandModifyGroupConfiguration","IterationCommandRepeatLabelConfiguration","IterationCommandRunConfiguration"};
@@ -1207,9 +1207,27 @@ try
 				 std::pair<std::string, ConfigurationGroupKey>(
 						 configGroupName,
 						 ConfigurationGroupKey(configGroupKey));
+
+		try
+		{
+			throw;
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Error occurred while loading configuration group: " <<
+					e.what() << __E__;
+			if(accumulatedTreeErrors)
+				*accumulatedTreeErrors = ss.str();
+		}
+		catch(...)
+		{
+			__SS__ << "An unknown error occurred while loading configuration group." << __E__;
+			if(accumulatedTreeErrors)
+				*accumulatedTreeErrors = ss.str();
+		}
 	}
 
-	return;// memberMap;
+	return;
 }
 catch(...)
 {
@@ -1218,7 +1236,25 @@ catch(...)
 			 std::pair<std::string, ConfigurationGroupKey>(
 					 configGroupName,
 					 ConfigurationGroupKey(configGroupKey));
-}
+
+	try
+	{
+		throw;
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "Error occurred while loading configuration group: " <<
+				e.what() << __E__;
+		if(accumulatedTreeErrors)
+			*accumulatedTreeErrors = ss.str();
+	}
+	catch(...)
+	{
+		__SS__ << "An unknown error occurred while loading configuration group." << __E__;
+		if(accumulatedTreeErrors)
+			*accumulatedTreeErrors = ss.str();
+	}
+} //end loadConfigurationGroup()
 
 
 //==============================================================================

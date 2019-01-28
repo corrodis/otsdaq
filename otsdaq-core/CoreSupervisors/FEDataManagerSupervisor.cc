@@ -1,19 +1,22 @@
 #include "otsdaq-core/CoreSupervisors/FEDataManagerSupervisor.h"
-#include "otsdaq-core/FECore/FEVInterfacesManager.h"
+//#include "otsdaq-core/FECore/FEVInterfacesManager.h"
 #include "otsdaq-core/DataManager/DataManager.h"
 #include "otsdaq-core/DataManager/DataManagerSingleton.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/ARTDAQDataManager/ARTDAQDataManager.h"
 
-#include "otsdaq-core/FECore/FEProducerVInterface.h"
+//#include "otsdaq-core/FECore/FEProducerVInterface.h"
 
 using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(FEDataManagerSupervisor)
 
 //========================================================================================================================
-FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s) 
+FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s,
+		bool artdaqDataManager)
 : FESupervisor(s)
 {
+	__SUP_COUT__ << "Constructor." << std::endl;
 
 	//WARNING THE ORDER IS IMPORTANT SINCE THE FIRST STATE MACHINE ELEMENT
 	//	WILL BE CALLED FIRST DURING TRANSITION!!!!!
@@ -31,20 +34,34 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s)
 //					CorePropertySupervisorBase::supervisorConfigurationPath_
 //			)
 //	);
-	__SUP_COUT__ << "Adding Data Manager now...!" << __E__;
-	CoreSupervisorBase::theStateMachineImplementation_.push_back(
-			DataManagerSingleton::getInstance<DataManager>(
-					CorePropertySupervisorBase::getContextTreeNode(),
-					CorePropertySupervisorBase::supervisorConfigurationPath_,
-					CorePropertySupervisorBase::supervisorApplicationUID_
-			)
-	);
+
+
+	if(artdaqDataManager)
+	{
+		__SUP_COUT__ << "Adding ARTDAQ Data Manager now...!" << __E__;
+		CoreSupervisorBase::theStateMachineImplementation_.push_back(
+					DataManagerSingleton::getInstance<ARTDAQDataManager>(
+							CorePropertySupervisorBase::getContextTreeNode(),
+							CorePropertySupervisorBase::supervisorConfigurationPath_,
+							CorePropertySupervisorBase::supervisorApplicationUID_
+					)
+			);
+	}
+	else
+	{
+		__SUP_COUT__ << "Adding Data Manager now...!" << __E__;
+		CoreSupervisorBase::theStateMachineImplementation_.push_back(
+				DataManagerSingleton::getInstance<DataManager>(
+						CorePropertySupervisorBase::getContextTreeNode(),
+						CorePropertySupervisorBase::supervisorConfigurationPath_,
+						CorePropertySupervisorBase::supervisorApplicationUID_
+				)
+		);
+	}
 
 	extractDataManager();
 
-	//theDataManager_->parentSupervisorHasFrontends_ = true; //flag that parent supervisor has front-ends
-
-
+	__SUP_COUT__ << "Constructed." << __E__;
 } //end constructor()
 
 //========================================================================================================================
@@ -57,6 +74,8 @@ FEDataManagerSupervisor::~FEDataManagerSupervisor(void)
 
 	DataManagerSingleton::deleteInstance(CoreSupervisorBase::supervisorApplicationUID_);
 	theStateMachineImplementation_.pop_back();
+
+	__SUP_COUT__ << "Destructed." << __E__;
 } //end destructor()
 
 //========================================================================================================================
