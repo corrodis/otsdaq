@@ -162,6 +162,7 @@ QUIET=1
 CHROME=0
 FIREFOX=0
 BACKUPLOGS=0
+RELAUNCHCHECK=0
 
 #check for options
 if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" || "$2"  == "--config" || "$2"  == "--configure" || "$2"  == "--wizard" || "$2"  == "--wiz" || "$2"  == "-w" ]]; then	
@@ -187,6 +188,11 @@ fi
 if [[ "$1"  == "--backup" || "$2"  == "--backup" || "$1"  == "-b" || "$2"  == "-b"  ]]; then
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t************* ${RED}BACKUP LOGS ENABLED!${Reset}          ************"
 	BACKUPLOGS=1
+fi
+
+if [[ "$1"  == "--relaunch" || "$2"  == "--relaunch" || "$1"  == "-r" || "$2"  == "-r"  ]]; then
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t************* ${RED}RELUANCH CHECK ENABLED!${Reset}          ************"
+	RELAUNCHCHECK=1
 fi
 #end check for options
 
@@ -622,31 +628,33 @@ launchOTSWiz() {
 	fi
 	LAST_OTS_PID=$!
 
-	#test for relaunch
-	sleep 4
-	OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
-	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
-
-	if [ "x$OTS_IS_ALIVE" == "x" ]; then
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tRelaunching ots wiz context..."
-		kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
-		sleep 2
-		
-		if [ $QUIET == 1 ]; then
-			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  "
-			echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt
-			ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt &
-		else
-			ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &
-		fi
-		LAST_OTS_PID=$!
-		
+	if [ $RELAUNCHCHECK == 1 ]; then
 		#test for relaunch
 		sleep 4
 		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
-
+		#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
+	
 		if [ "x$OTS_IS_ALIVE" == "x" ]; then
-			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots wiz context launch..."
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tRelaunching ots wiz context..."
+			kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
+			sleep 2
+			
+			if [ $QUIET == 1 ]; then
+				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt ***  "
+				echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt
+				ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${HOSTNAME}.txt &
+			else
+				ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml &
+			fi
+			LAST_OTS_PID=$!
+			
+			#test for relaunch
+			sleep 4
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
+	
+			if [ "x$OTS_IS_ALIVE" == "x" ]; then
+				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots wiz context launch..."
+			fi
 		fi
 	fi
 	
@@ -895,31 +903,33 @@ launchOTS() {
 							
 							LAST_OTS_PID=$!
 
-							#test for relaunch
-							sleep 4
-							OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
-							#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
-
-							if [ "x$OTS_IS_ALIVE" == "x" ]; then
-								echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tRelaunching ots gateway context..."
-								kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
-								sleep 2
-								
-								if [ $QUIET == 1 ]; then
-									echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt${Reset}"
-									echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt
-									ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt &
-								else
-									ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
-								fi
-								LAST_OTS_PID=$!
-								
-								#verify relaunch
+							if [ $RELAUNCHCHECK == 1 ]; then
+								#test for relaunch
 								sleep 4
 								OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
-								
+								#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
+	
 								if [ "x$OTS_IS_ALIVE" == "x" ]; then
-									echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots gateway context launch..."
+									echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tRelaunching ots gateway context..."
+									kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
+									sleep 2
+									
+									if [ $QUIET == 1 ]; then
+										echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt${Reset}"
+										echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt
+										ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${HOSTNAME}-${port}.txt &
+									else
+										ots.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
+									fi
+									LAST_OTS_PID=$!
+									
+									#verify relaunch
+									sleep 4
+									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
+									
+									if [ "x$OTS_IS_ALIVE" == "x" ]; then
+										echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots gateway context launch..."
+									fi
 								fi
 							fi
 							
@@ -989,83 +999,84 @@ launchOTS() {
 	done
 	
 
-	####################################################################
-	###########  test for relaunch of non-Gateway contexts	############
-	####################################################################	
-	sleep 4 #give time before relaunch test
-	i=0
-	j=0
-	for port in "${xdaqPort[@]}"
-	do
-	  : 
-		#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
-		echo
-			  
-		if [[ ${xdaqHost[$i]} != ${HOSTNAME} ]]; then
-			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tskipping context no on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
-			i=$(( $i + 1 ))
-			continue
-		fi
-		
-		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
-		#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
-
-		if [ "x$OTS_IS_ALIVE" == "x" ]; then
-			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tRelaunching ots non-gateway context..."
-			kill -9 ${TempContextPIDArray[$j]} 	>/dev/null 2>&1 #hide output
-			sleep 2
-			
-			if [ $QUIET == 1 ]; then
-				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***${Reset}"
-				echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt
-				ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
-			else
-				ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
+	if [ $RELAUNCHCHECK == 1 ]; then
+		####################################################################
+		###########  test for relaunch of non-Gateway contexts	############
+		####################################################################	
+		sleep 4 #give time before relaunch test
+		i=0
+		j=0
+		for port in "${xdaqPort[@]}"
+		do
+		  : 
+			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+			echo
+				  
+			if [[ ${xdaqHost[$i]} != ${HOSTNAME} ]]; then
+				#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tskipping context no on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+				i=$(( $i + 1 ))
+				continue
 			fi
-			LAST_OTS_PID=$!
-			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tNongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${Reset}"
-					
-			ContextPIDArray+=($LAST_OTS_PID)
-		else
-			ContextPIDArray+=(${TempContextPIDArray[$j]})
-		fi
-		
-		i=$(( $i + 1 ))
-		j=$(( $j + 1 ))
-	done #end test for relaunch loop
-	####################################################################
+			
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
+			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
 	
-	
-	####################################################################
-	###########  verify relaunch of non-Gateway contexts	############
-	####################################################################	
-	sleep 4 #give time before verify
-	i=0
-	j=0
-	for port in "${xdaqPort[@]}"
-	do
-	  : 
-		#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
-		echo
-			  
-		if [[ ${xdaqHost[$i]} != ${HOSTNAME} ]]; then
-			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tskipping context no on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+			if [ "x$OTS_IS_ALIVE" == "x" ]; then
+				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tRelaunching ots non-gateway context..."
+				kill -9 ${TempContextPIDArray[$j]} 	>/dev/null 2>&1 #hide output
+				sleep 2
+				
+				if [ $QUIET == 1 ]; then
+					echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt ***${Reset}"
+					echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt
+					ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${HOSTNAME}-${port}.txt &
+				else
+					ots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
+				fi
+				LAST_OTS_PID=$!
+				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tNongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${Reset}"
+						
+				ContextPIDArray+=($LAST_OTS_PID)
+			else
+				ContextPIDArray+=(${TempContextPIDArray[$j]})
+			fi
+			
 			i=$(( $i + 1 ))
-			continue
-		fi
+			j=$(( $j + 1 ))
+		done #end test for relaunch loop
+		####################################################################
 		
-		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
-		#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
-
-		if [ "x$OTS_IS_ALIVE" == "x" ]; then
-			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t{Red}${Bold}Could not verify launch of non-gateway context!${Reset}"			
-		fi
 		
-		i=$(( $i + 1 ))
-		j=$(( $j + 1 ))
-	done #end verify launch loop
-	####################################################################
+		####################################################################
+		###########  verify relaunch of non-Gateway contexts	############
+		####################################################################	
+		sleep 4 #give time before verify
+		i=0
+		j=0
+		for port in "${xdaqPort[@]}"
+		do
+		  : 
+			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+			echo
+				  
+			if [[ ${xdaqHost[$i]} != ${HOSTNAME} ]]; then
+				#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tskipping context no on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+				i=$(( $i + 1 ))
+				continue
+			fi
+			
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
+			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
 	
+			if [ "x$OTS_IS_ALIVE" == "x" ]; then
+				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t{Red}${Bold}Could not verify launch of non-gateway context!${Reset}"			
+			fi
+			
+			i=$(( $i + 1 ))
+			j=$(( $j + 1 ))
+		done #end verify launch loop
+		####################################################################
+	fi
 	
 	
 	

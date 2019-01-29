@@ -484,9 +484,10 @@ void ConfigurationView::init(void)
 								columnsInfo_[col].getName() << " is not a valid Fixed Choice option. " <<
 								"Possible values are as follows: ";
 
+						//ss << StringMacros::vectorToString(columnsInfo_[col].getDataChoices()) << __E__;
 						for(unsigned int i = skipOne?1:0; i < columnsInfo_[col].getDataChoices().size(); ++i)
 						{
-							if(i == 1 + (skipOne?1:0)) ss << ", ";
+							if(i > (skipOne?1:0)) ss << ", ";
 							ss << columnsInfo_[col].getDataChoices()[i];
 						}
 						ss << "." << std::endl;

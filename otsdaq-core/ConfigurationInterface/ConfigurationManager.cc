@@ -1216,12 +1216,14 @@ try
 		{
 			__SS__ << "Error occurred while loading configuration group: " <<
 					e.what() << __E__;
+			__COUT_WARN__ << ss.str();
 			if(accumulatedTreeErrors)
 				*accumulatedTreeErrors = ss.str();
 		}
 		catch(...)
 		{
 			__SS__ << "An unknown error occurred while loading configuration group." << __E__;
+			__COUT_WARN__ << ss.str();
 			if(accumulatedTreeErrors)
 				*accumulatedTreeErrors = ss.str();
 		}
@@ -1245,12 +1247,14 @@ catch(...)
 	{
 		__SS__ << "Error occurred while loading configuration group: " <<
 				e.what() << __E__;
+		__COUT_WARN__ << ss.str();
 		if(accumulatedTreeErrors)
 			*accumulatedTreeErrors = ss.str();
 	}
 	catch(...)
 	{
 		__SS__ << "An unknown error occurred while loading configuration group." << __E__;
+		__COUT_WARN__ << ss.str();
 		if(accumulatedTreeErrors)
 			*accumulatedTreeErrors = ss.str();
 	}
