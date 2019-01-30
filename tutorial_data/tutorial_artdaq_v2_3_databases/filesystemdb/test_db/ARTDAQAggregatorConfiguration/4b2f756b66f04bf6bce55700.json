@@ -1,0 +1,178 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_AGGREGATOR_CONFIGURATION",
+"COMMENT" : "Empty table.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1504872434,
+"COL_TYPES" : {
+"SUPERVISOR_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"CONFIGURATION_STRING" : "VARCHAR2",
+"SERVICES_LINK" : "VARCHAR2",
+"SERVICES_LINK_UID" : "VARCHAR2",
+"DAQ_LINK" : "VARCHAR2",
+"DAQ_LINK_UID" : "VARCHAR2",
+"OUTPUTS_LINK" : "VARCHAR2",
+"OUTPUTS_LINK_UID" : "VARCHAR2",
+"PHYSICS_LINK" : "VARCHAR2",
+"PHYSICS_LINK_UID" : "VARCHAR2",
+"SOURCE_LINK" : "VARCHAR2",
+"SOURCE_LINK_UID" : "VARCHAR2",
+"ARTDAQ_GLOBAL_CONFIGURATION_FOR_PROCESS_NAME_LINK" : "VARCHAR2",
+"ARTDAQ_GLOBAL_CONFIGURATION_FOR_PROCESS_NAME_LINK_UID" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"SUPERVISOR_UID" : "aggregator0",
+"STATUS" : "On",
+"CONFIGURATION_STRING" : "DEFAULT",
+"SERVICES_LINK" : "ARTDAQAggregatorServicesConfiguration",
+"SERVICES_LINK_UID" : "aggregator0services0",
+"DAQ_LINK" : "ARTDAQAggregatorDaqConfiguration",
+"DAQ_LINK_UID" : "aggregator0daq0",
+"OUTPUTS_LINK" : "ARTDAQOutputConfiguration",
+"OUTPUTS_LINK_UID" : "aggregator0outputs",
+"PHYSICS_LINK" : "ARTDAQPhysicsConfiguration",
+"PHYSICS_LINK_UID" : "aggregator0physics0",
+"SOURCE_LINK" : "ARTDAQAggregatorSourceConfiguration",
+"SOURCE_LINK_UID" : "aggregator0source0",
+"ARTDAQ_GLOBAL_CONFIGURATION_FOR_PROCESS_NAME_LINK" : "ARTDAQGlobalConfiguration",
+"ARTDAQ_GLOBAL_CONFIGURATION_FOR_PROCESS_NAME_LINK_UID" : "artdaq0",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2017-09-18T14:41:26.000-0500",
+"rawdata" : [
+
+]
+},
+"version" : "1",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+},
+{
+"name" : "artdaqConfig_v1",
+"assigned" : "2017-09-18T14:41:27.000-0500"
+},
+{
+"name" : "artdaqConfig_v2",
+"assigned" : "2019-01-29T21:41:41.090-0600"
+},
+{
+"name" : "artdaqConfig_v3",
+"assigned" : "2019-01-29T22:19:29.718-0600"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "2017-09-18T14:41:26.000-0500",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2017-09-18T14:41:26.000-0500",
+"value" : {
+"name" : "1",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2017-09-18T14:41:26.000-0500",
+"value" : {
+"name" : "ARTDAQAggregatorConfiguration",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2017-09-18T14:41:26.000-0500",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2017-09-18T14:41:27.000-0500",
+"value" : {
+"name" : "artdaqConfig_v1",
+"assigned" : "2017-09-18T14:41:27.000-0500"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-01-29T21:41:41.090-0600",
+"value" : {
+"name" : "artdaqConfig_v2",
+"assigned" : "2019-01-29T21:41:41.090-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-01-29T22:19:29.718-0600",
+"value" : {
+"name" : "artdaqConfig_v3",
+"assigned" : "2019-01-29T22:19:29.718-0600"
+}
+}
+],
+"created" : "2017-09-18T14:41:26.000-0500"
+},
+"_id" : {
+"$oid" : "4b2f756b66f04bf6bce55700"
+},
+"collection" : "ARTDAQAggregatorConfiguration",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

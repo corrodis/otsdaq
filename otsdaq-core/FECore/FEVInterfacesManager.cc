@@ -548,7 +548,8 @@ void FEVInterfacesManager::runFEMacroByFE(const std::string &callingInterfaceID,
 //		- throws exception on failure
 //		- outputArgs: colon-separate name/value pairs, and then comma-separated
 void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
-		const std::string &feMacroName, const std::string &inputArgs, std::string &outputArgs)
+		const std::string &feMacroName, const std::string &inputArgs,
+		std::string &outputArgs)
 {
 
 	//check for interfaceID
@@ -615,7 +616,7 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 			__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" <<
 					interfaceID << "' was attempted with a mismatch in" <<
 							" a name of an input argument. " <<
-							argsIn[i].first << " were given. " <<
+							argsIn[i].first << " was given. " <<
 							feMacro.namesOfInputArguments_[i] <<
 							" expected." << __E__;
 			__CFG_COUT_ERR__ << "\n" << ss.str();

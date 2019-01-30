@@ -185,7 +185,9 @@ public:
 		}
 
     } //end sendToFrontEnd()
-    void 						runFrontEndMacro					(const std::string& targetInterfaceID, const std::string& feMacroName, const std::vector<frontEndMacroArg_t>& inputArgs, std::vector<frontEndMacroArg_t>& outputArgs) const;
+    void 						runFrontEndMacro					(const std::string& targetInterfaceID, const std::string& feMacroName, const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs, std::vector<FEVInterface::frontEndMacroArg_t>& outputArgs) const;
+    void 						runSelfFrontEndMacro				(const std::string& feMacroName, const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs, std::vector<FEVInterface::frontEndMacroArg_t>& outputArgs);
+
 
     /////////
     //receiveFromFrontEnd

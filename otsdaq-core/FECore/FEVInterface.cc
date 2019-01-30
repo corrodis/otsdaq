@@ -563,16 +563,98 @@ void FEVInterface::runSequenceOfCommands(const std::string &treeLinkName)
 
 //========================================================================================================================
 //runFrontEndMacro
+//	Helper funtion to run this FEInterface's own front-end macro
+// and gets the output arguments back.
+//
+//	Very similar to FEVInterfacesManager::runFEMacro()
+//
+//	Note: that argsOut are populated for caller, can just pass empty vector.
+void FEVInterface::runSelfFrontEndMacro(
+		const std::string& feMacroName,
+		//not equivalent to __ARGS__
+		//	left non-const value so caller can modify inputArgs as they are being created
+		const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
+		std::vector<FEVInterface::frontEndMacroArg_t>& argsOut)
+{
+	//have pointer to virtual FEInterface, find Macro structure
+	auto FEMacroIt = this->getMapOfFEMacroFunctions().find(feMacroName);
+	if(FEMacroIt == this->getMapOfFEMacroFunctions().end())
+	{
+		__CFG_SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
+				getInterfaceUID() << "' was not found!" << __E__;
+		__CFG_COUT_ERR__ << "\n" << ss.str();
+		__CFG_SS_THROW__;
+	}
+	const FEVInterface::frontEndMacroStruct_t& feMacro = FEMacroIt->second;
+
+	std::vector<FEVInterface::frontEndMacroConstArg_t> argsIn;
+	{
+		for(unsigned int i=0;i<inputArgs.size();++i)
+			if(inputArgs[i].first != feMacro.namesOfInputArguments_[i])
+			{
+				__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" <<
+						getInterfaceUID() << "' was attempted with a mismatch in" <<
+						" a name of an input argument. " <<
+						inputArgs[i].first << " was given. " <<
+						feMacro.namesOfInputArguments_[i] <<
+						" expected." << __E__;
+				__CFG_COUT_ERR__ << "\n" << ss.str();
+				__CFG_SS_THROW__;
+			}
+			else
+				argsIn.push_back(std::pair<std::string,std::string>(
+					inputArgs[i].first,inputArgs[i].second));
+	}
+
+	//check namesOfInputArguments_
+	if(feMacro.namesOfInputArguments_.size() != argsIn.size())
+	{
+		__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" <<
+				getInterfaceUID() << "' was attempted with a mismatch in" <<
+				" number of input arguments. " << argsIn.size() <<
+				" were given. " << feMacro.namesOfInputArguments_.size() <<
+				" expected." << __E__;
+		__CFG_COUT_ERR__ << "\n" << ss.str();
+		__CFG_SS_THROW__;
+	}
+
+
+
+	__CFG_COUT__ << "# of input args = " << argsIn.size() << __E__;
+	for(auto &argIn:argsIn)
+		__CFG_COUT__ << argIn.first << ": " << argIn.second << __E__;
+
+	__CFG_COUT__ << "Launching FE Macro '" <<
+			feMacro.feMacroName_ << "' ..." << __E__;
+
+	argsOut.clear();
+	for(unsigned int i=0;i<feMacro.namesOfOutputArguments_.size();++i)
+		argsOut.push_back(FEVInterface::frontEndMacroArg_t(
+				feMacro.namesOfOutputArguments_[i],
+				"DEFAULT"));
+
+	//run it!
+	(this->*(feMacro.macroFunction_))(argsIn,argsOut);
+
+	__CFG_COUT__ << "FE Macro complete!" << __E__;
+
+	__CFG_COUT__ << "# of output args = " << argsOut.size() << __E__;
+	for(const auto &arg:argsOut)
+		__CFG_COUT__ << arg.first << ": " << arg.second << __E__;
+
+} //end runSelfFrontEndMacro()
+
+//========================================================================================================================
+//runFrontEndMacro
 //	run a front-end macro in the target interface plug-in and gets the output arguments back
 void FEVInterface::runFrontEndMacro(const std::string& targetInterfaceID,
 		const std::string& feMacroName,
-		const std::vector<frontEndMacroArg_t>& inputArgs,
-		std::vector<frontEndMacroArg_t>& outputArgs) const
+		const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
+		std::vector<FEVInterface::frontEndMacroArg_t>& outputArgs) const
 {
 
 	__FE_COUTV__(targetInterfaceID);
 	__FE_COUTV__(VStateMachine::parentSupervisor_);
-
 
 	std::string inputArgsStr =
 			StringMacros::vectorToString(inputArgs,";" /*primaryDelimeter*/,","/*secondaryDelimeter*/);
