@@ -347,23 +347,14 @@ void ConfigurationManagerRW::activateConfigurationGroup(const std::string &confi
 		return;
 	}
 
-	__COUT_INFO__ << "Active Context: " << theContextGroup_ << "(" <<
-			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-	__COUT_INFO__ << "Active Backbone: " << theBackboneGroup_ << "(" <<
-			(theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-	__COUT_INFO__ << "Active Iterate: " << theIterateGroup_ << "(" <<
-			(theIterateGroupKey_?theIterateGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-	__COUT_INFO__ << "Active Configuration: " << theConfigurationGroup_ << "(" <<
-			(theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-
-	__MOUT_INFO__ << "Active Context: " << theContextGroup_ << "(" <<
-			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-	__MOUT_INFO__ << "Active Backbone: " << theBackboneGroup_ << "(" <<
-			(theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-	__MOUT_INFO__ << "Active Iterate: " << theIterateGroup_ << "(" <<
-			(theIterateGroupKey_?theIterateGroupKey_->toString().c_str():"-1") << ")" << std::endl;
-	__MOUT_INFO__ << "Active Configuration: " << theConfigurationGroup_ << "(" <<
-			(theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1") << ")" << std::endl;
+	__MCOUT_INFO__("Active Context: " << theContextGroup_ << "(" <<
+			(theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1") << ")" << std::endl);
+	__MCOUT_INFO__("Active Backbone: " << theBackboneGroup_ << "(" <<
+			(theBackboneGroupKey_?theBackboneGroupKey_->toString().c_str():"-1") << ")" << std::endl);
+	__MCOUT_INFO__("Active Iterate: " << theIterateGroup_ << "(" <<
+			(theIterateGroupKey_?theIterateGroupKey_->toString().c_str():"-1") << ")" << std::endl);
+	__MCOUT_INFO__("Active Configuration: " << theConfigurationGroup_ << "(" <<
+			(theConfigurationGroupKey_?theConfigurationGroupKey_->toString().c_str():"-1") << ")" << std::endl);
 
 	fprintf(fp,"%s\n",theContextGroup_.c_str());
 	fprintf(fp,"%s\n",theContextGroupKey_?theContextGroupKey_->toString().c_str():"-1");

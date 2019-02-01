@@ -53,6 +53,7 @@ public:
 	static void readFile				(const std::string& path, std::string& contents);
 	static void writeFile				(const std::string& path, const std::string& contents, const unsigned long long& insertPos = -1, const std::string& insertString = "");
 
+	const std::set<std::string>			ALLOWED_FILE_EXTENSIONS_;
 };
 
 }

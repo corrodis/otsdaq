@@ -18,7 +18,8 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 , CorePropertySupervisorBase	(this)
 , RunControlStateMachine		(CorePropertySupervisorBase::allSupervisorInfo_.isWizardMode()? //set state machine name
 		CorePropertySupervisorBase::supervisorClassNoNamespace_:
-		CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" + CorePropertySupervisorBase::supervisorApplicationUID_)
+		CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" +
+		CorePropertySupervisorBase::supervisorApplicationUID_)
 , stateMachineWorkLoopManager_  (toolbox::task::bind(this, &CoreSupervisorBase::stateMachineThread, "StateMachine"))
 , stateMachineSemaphore_        (toolbox::BSem::FULL)
 , theRemoteWebUsers_ 			(this)
@@ -477,7 +478,6 @@ void CoreSupervisorBase::postStateMachineExecutionLoop(void)
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
-
 {
 	__SUP_COUT__ << "transitionConfiguring" << std::endl;
 
@@ -557,7 +557,6 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 //transitionHalting
 //	Ignore errors if coming from Failed state
 void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
-
 {
 	const std::string transitionName = "Halting";
 	try
@@ -630,42 +629,7 @@ void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
 			);
 		}
 	}
-
-
-
-//
-//
-//	for(auto& it: theStateMachineImplementation_)
-//	{
-//		try
-//		{
-//			it->halt();
-//		}
-//		catch(const std::runtime_error& e)
-//		{
-//			//if halting from Failed state, then ignore errors
-//			if(theStateMachine_.getProvenanceStateName() ==
-//					RunControlStateMachine::FAILED_STATE_NAME)
-//			{
-//				__SUP_COUT_INFO__ << "Error was caught while halting (but ignoring because previous state was '" <<
-//						RunControlStateMachine::FAILED_STATE_NAME << "'): " << e.what() << std::endl;
-//			}
-//			else //if not previously in Failed state, then fail
-//			{
-//				__SUP_SS__ << "Error was caught while halting: " << e.what() << std::endl;
-//				__SUP_COUT_ERR__ << "\n" << ss.str();
-//				theStateMachine_.setErrorMessage(ss.str());
-//				throw toolbox::fsm::exception::Exception(
-//						"Transition Error" /*name*/,
-//						ss.str() /* message*/,
-//						"CoreSupervisorBase::transitionHalting" /*module*/,
-//						__LINE__ /*line*/,
-//						__FUNCTION__ /*function*/
-//						);
-//			}
-//		}
-//	}
-}
+} //end transitionHalting()
 
 //========================================================================================================================
 //Inheriting supervisor classes should not override this function, or should at least also call it in the override
@@ -677,11 +641,12 @@ void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference e)
 	CorePropertySupervisorBase::resetPropertiesAreSetup(); //indicate need to re-load user properties
 
 
-	//Note: Do not initialize the state machine implementations... do any initializing in configure
+	//Note: Do not initialize the state machine implementations...
+	//	do any initializing in configure
 	//	This allows re-instantiation at each configure time.
 	//for(auto& it: theStateMachineImplementation_)
 	//it->initialize();
-}
+} //end transitionInitializing()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
@@ -735,29 +700,10 @@ void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
 				__FUNCTION__ /*function*/
 		);
 	}
-//	try
-//	{
-//		for(auto& it: theStateMachineImplementation_)
-//			it->pause();
-//	}
-//	catch(const std::runtime_error& e)
-//	{
-//		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
-//		__SUP_COUT_ERR__ << "\n" << ss.str();
-//		theStateMachine_.setErrorMessage(ss.str());
-//		throw toolbox::fsm::exception::Exception(
-//				"Transition Error" /*name*/,
-//				ss.str() /* message*/,
-//				"CoreSupervisorBase::transitionPausing" /*module*/,
-//				__LINE__ /*line*/,
-//				__FUNCTION__ /*function*/
-//		);
-//	}
-}
+} //end transitionPausing()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
-
 {
 	const std::string transitionName = "Resuming";
 	try
@@ -808,26 +754,7 @@ void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
 				__FUNCTION__ /*function*/
 		);
 	}
-
-	//	try
-	//	{
-	//		for(auto& it: theStateMachineImplementation_)
-	//			it->resume();
-	//	}
-	//	catch(const std::runtime_error& e)
-	//	{
-	//		__SUP_SS__ << "Error was caught while resuming: " << e.what() << std::endl;
-	//		__SUP_COUT_ERR__ << "\n" << ss.str();
-	//		theStateMachine_.setErrorMessage(ss.str());
-	//		throw toolbox::fsm::exception::Exception(
-	//				"Transition Error" /*name*/,
-	//				ss.str() /* message*/,
-	//				"CoreSupervisorBase::transitionResuming" /*module*/,
-	//				__LINE__ /*line*/,
-	//				__FUNCTION__ /*function*/
-	//		);
-	//	}
-}
+} // end transitionResuming()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
@@ -883,31 +810,10 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
 				__FUNCTION__ /*function*/
 		);
 	}
-
-	//	try
-	//	{
-	//		for(auto& it: theStateMachineImplementation_)
-	//			it->start(SOAPUtilities::translate(
-	//					theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber"));
-	//	}
-	//	catch(const std::runtime_error& e)
-	//	{
-	//		__SUP_SS__ << "Error was caught while starting: " << e.what() << std::endl;
-	//		__SUP_COUT_ERR__ << "\n" << ss.str();
-	//		theStateMachine_.setErrorMessage(ss.str());
-	//		throw toolbox::fsm::exception::Exception(
-	//				"Transition Error" /*name*/,
-	//				ss.str() /* message*/,
-	//				"CoreSupervisorBase::transitionStarting" /*module*/,
-	//				__LINE__ /*line*/,
-	//				__FUNCTION__ /*function*/
-	//		);
-	//	}
-}
+} //end transitionStarting()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
-
 {
 	const std::string transitionName = "Stopping";
 	try
@@ -958,24 +864,4 @@ void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
 				__FUNCTION__ /*function*/
 		);
 	}
-//
-//
-//	try
-//	{
-//		for(auto& it: theStateMachineImplementation_)
-//			it->stop();
-//	}
-//	catch(const std::runtime_error& e)
-//	{
-//		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
-//		__SUP_COUT_ERR__ << "\n" << ss.str();
-//		theStateMachine_.setErrorMessage(ss.str());
-//		throw toolbox::fsm::exception::Exception(
-//				"Transition Error" /*name*/,
-//				ss.str() /* message*/,
-//				"CoreSupervisorBase::transitionStopping" /*module*/,
-//				__LINE__ /*line*/,
-//				__FUNCTION__ /*function*/
-//		);
-//	}
-}
+} //end transitionStopping()

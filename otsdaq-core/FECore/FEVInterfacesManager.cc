@@ -1,7 +1,6 @@
 #include "otsdaq-core/FECore/FEVInterfacesManager.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
-#include "otsdaq-core/FECore/FEVInterface.h"
 #include "otsdaq-core/PluginMakers/MakeInterface.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
@@ -46,20 +45,32 @@ void FEVInterfacesManager::destroy(void)
 //========================================================================================================================
 void FEVInterfacesManager::createInterfaces(void)
 {
+
+	const std::string COL_NAME_feGroupLink 	= "LinkToFEInterfaceTable";
+	const std::string COL_NAME_feTypeLink 	= "LinkToFETypeConfiguration";
+	const std::string COL_NAME_fePlugin 	= "FEInterfacePluginName";
+
+	__CFG_COUT__ << "Path: "<< theConfigurationPath_+"/"+COL_NAME_feGroupLink << __E__;
+
 	destroy();
 
-	__COUT__ << "Path: "<< theConfigurationPath_+"/LinkToFEInterfaceConfiguration" << std::endl;
+	{ //could access application node like so, ever needed?
+		ConfigurationTree appNode =
+				theXDAQContextConfigTree_.getBackNode(theConfigurationPath_,1);
+		__CFG_COUTV__(appNode.getValueAsString());
+	}
+
+	ConfigurationTree feGroupLinkNode = Configurable::getSelfNode().getNode(
+			COL_NAME_feGroupLink);
 
 	std::vector<std::pair<std::string,ConfigurationTree> > feChildren =
-			Configurable::getSelfNode().getNode(
-					"LinkToFEInterfaceConfiguration").getChildren();
+			feGroupLinkNode.getChildren();
 
 	//acquire names by priority
 	theFENamesByPriority_ =
-			Configurable::getSelfNode().getNode(
-					"LinkToFEInterfaceConfiguration").getChildrenNames(
+			feGroupLinkNode.getChildrenNames(
 							true /*byPriority*/, true /*onlyStatusTrue*/);
-	__COUTV__(StringMacros::vectorToString(theFENamesByPriority_));
+	__CFG_COUTV__(StringMacros::vectorToString(theFENamesByPriority_));
 
 	for(const auto& interface: feChildren)
 	{
@@ -69,103 +80,375 @@ void FEVInterfacesManager::createInterfaces(void)
 		}
 		catch(...) //if Status column not there ignore (for backwards compatibility)
 		{
-			__COUT_INFO__ << "Ignoring FE Status since Status column is missing!" << std::endl;
+			__CFG_COUT_INFO__ << "Ignoring FE Status since Status column is missing!" << __E__;
 		}
 
-		__COUT__ << "Interface Plugin Name: "<< interface.second.getNode("FEInterfacePluginName").getValue<std::string>() << std::endl;
-		__COUT__ << "Interface Name: "<< interface.first << std::endl;
-		__COUT__ << "XDAQContext Node: "<< theXDAQContextConfigTree_ << std::endl;
-		__COUT__ << "Path to configuration: "<< (theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration") << std::endl;
+		__CFG_COUT__ << "Interface Plugin Name: "<< interface.second.getNode(
+				COL_NAME_fePlugin).getValue<std::string>() << __E__;
+		__CFG_COUT__ << "Interface Name: "<< interface.first << __E__;
+		__CFG_COUT__ << "XDAQContext Node: "<< theXDAQContextConfigTree_ << __E__;
+		__CFG_COUT__ << "Path to configuration: "<< (theConfigurationPath_ + "/" +
+				COL_NAME_feGroupLink + "/" + interface.first + "/" +
+				COL_NAME_feTypeLink) << __E__;
 
 		try
 		{
 			theFEInterfaces_[interface.first] = makeInterface(
-					interface.second.getNode("FEInterfacePluginName").getValue<std::string>(),
+					interface.second.getNode(COL_NAME_fePlugin).getValue<std::string>(),
 					interface.first,
 					theXDAQContextConfigTree_,
-					(theConfigurationPath_ + "/LinkToFEInterfaceConfiguration/" + interface.first + "/LinkToFETypeConfiguration")
+					(theConfigurationPath_ + "/" +
+							COL_NAME_feGroupLink + "/" + interface.first + "/" +
+							COL_NAME_feTypeLink)
 					);
 
-			//setup parent supervisor of FEVinterface (for backwards compatibility, left out of constructor)
-			theFEInterfaces_[interface.first]->parentSupervisor_ = parentSupervisor_;
+			//setup parent supervisor and interface manager
+			//	of FEVinterface (for backwards compatibility, left out of constructor)
+			theFEInterfaces_[interface.first]->VStateMachine::parentSupervisor_ =
+					VStateMachine::parentSupervisor_;
+			theFEInterfaces_[interface.first]->parentInterfaceManager_ = this;
 		}
 		catch(const cet::exception& e)
 		{
-			__SS__ << "Failed to instantiate plugin named '" <<
+			__CFG_SS__ << "Failed to instantiate plugin named '" <<
 					interface.first << "' of type '" <<
-					interface.second.getNode("FEInterfacePluginName").getValue<std::string>()
+					interface.second.getNode(COL_NAME_fePlugin).getValue<std::string>()
 					<< "' due to the following error: \n" << e.what() << __E__;
-			__COUT_ERR__ << ss.str();
 			__MOUT_ERR__ << ss.str();
-			__SS_THROW__;
+			__CFG_SS_THROW__;
+		}
+		catch(const std::runtime_error& e)
+		{
+			__CFG_SS__ << "Failed to instantiate plugin named '" <<
+					interface.first << "' of type '" <<
+					interface.second.getNode(COL_NAME_fePlugin).getValue<std::string>()
+					<< "' due to the following error: \n" << e.what() << __E__;
+			__MOUT_ERR__ << ss.str();
+			__CFG_SS_THROW__;
+		}
+		catch(...)
+		{
+			__CFG_SS__ << "Failed to instantiate plugin named '" <<
+					interface.first << "' of type '" <<
+					interface.second.getNode(COL_NAME_fePlugin).getValue<std::string>()
+					<< "' due to an unknown error." << __E__;
+			__MOUT_ERR__ << ss.str();
+			throw; //if we do not throw, it is hard to tell what is happening..
+			//__CFG_SS_THROW__;
 		}
 	}
-	__COUT__ << "Done creating interfaces" << std::endl;
-}
+	__CFG_COUT__ << "Done creating interfaces" << __E__;
+} //end createInterfaces()
 
 //========================================================================================================================
-//used by MacroMaker
-int FEVInterfacesManager::universalRead(const std::string &interfaceID, char* address, char* returnValue)
+void FEVInterfacesManager::configure(void)
 {
-	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
+	const std::string transitionName = "Configuring";
+
+	__CFG_COUT__ << transitionName << " FEVInterfacesManager " << __E__;
+
+	//create interfaces (the first iteration)
+	if(VStateMachine::getIterationIndex() == 0 &&
+			VStateMachine::getSubIterationIndex() == 0)
+		createInterfaces(); //by priority
+
+	FEVInterface* fe;
+
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
 	{
-		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
-		__SS_THROW__;
+		//if one state machine is doing a sub-iteration, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		//test for front-end existence
+		fe = getFEInterfaceP(name);
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+
+		preStateMachineExecution(i);
+		fe->configure();
+		postStateMachineExecution(i);
+
+		//configure slow controls and start slow controls workloop
+		//	slow controls workloop stays alive through start/stop.. and dies on halt
+		//fe->configureSlowControls();
+		////fe->startSlowControlsWorkLooop();
+
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+
 	}
+	postStateMachineExecutionLoop();
 
-	__COUT__ << "interfaceID: " << interfaceID << " and size: " << theFEInterfaces_.size() << std::endl;
+	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
+} //end configure()
 
-	if (theFEInterfaces_[interfaceID]->universalRead(address, returnValue) < 0) return -1;
-	return 0;
-}
+//========================================================================================================================
+void FEVInterfacesManager::halt(void)
+{
+	const std::string transitionName = "Halting";
+	FEVInterface* fe;
+
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
+	{
+		//if one state machine is doing a sub-iteration, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		fe = getFEInterfaceP(name);
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+
+		preStateMachineExecution(i);
+		fe->stopWorkLoop();
+		fe->stopSlowControlsWorkLooop();
+		fe->halt();
+		postStateMachineExecution(i);
+
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+	}
+	postStateMachineExecutionLoop();
+
+	destroy(); //destroy all FE interfaces on halt, must be configured for FE interfaces to exist
+
+	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
+} //end halt()
+
+//========================================================================================================================
+void FEVInterfacesManager::pause(void)
+{
+	const std::string transitionName = "Pausing";
+	FEVInterface* fe;
+
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
+	{
+		//if one state machine is doing a sub-iteration, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		fe = getFEInterfaceP(name);
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+
+		preStateMachineExecution(i);
+		fe->stopWorkLoop();
+		fe->pause();
+		postStateMachineExecution(i);
+
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+	}
+	postStateMachineExecutionLoop();
+
+	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
+} //end pause()
+
+//========================================================================================================================
+void FEVInterfacesManager::resume(void)
+{
+	const std::string transitionName = "Resuming";
+	FEVInterface* fe;
+
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
+	{
+		//if one state machine is doing a sub-iteration, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		FEVInterface* fe = getFEInterfaceP(name);
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+
+		preStateMachineExecution(i);
+		fe->resume();
+		//only start workloop once transition is done
+		if(postStateMachineExecution(i))
+			fe->startWorkLoop();
+
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+	}
+	postStateMachineExecutionLoop();
+
+	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
+
+} //end resume()
+
+//========================================================================================================================
+void FEVInterfacesManager::start(std::string runNumber)
+{
+	const std::string transitionName = "Starting";
+	FEVInterface* fe;
+
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
+	{
+		//if one state machine is doing a sub-iteration, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		fe = getFEInterfaceP(name);
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+
+		preStateMachineExecution(i);
+		fe->start(runNumber);
+		//only start workloop once transition is done
+		if(postStateMachineExecution(i))
+			fe->startWorkLoop();
+
+
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+	}
+	postStateMachineExecutionLoop();
+
+	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
+
+} //end start()
+
+//========================================================================================================================
+void FEVInterfacesManager::stop(void)
+{
+	const std::string transitionName = "Starting";
+	FEVInterface* fe;
+
+	preStateMachineExecutionLoop();
+	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
+	{
+		//if one state machine is doing a sub-iteration, then target that one
+		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+		const std::string& name = theFENamesByPriority_[i];
+
+		fe = getFEInterfaceP(name);
+
+		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
+
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << transitionName << " interface " << name << __E__;
+
+		preStateMachineExecution(i);
+		fe->stopWorkLoop();
+		fe->stop();
+		postStateMachineExecution(i);
+
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+	}
+	postStateMachineExecutionLoop();
+
+	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
+
+} //end stop()
 
 
 //========================================================================================================================
-//used by MacroMaker
+//getFEInterfaceP
+FEVInterface* FEVInterfacesManager::getFEInterfaceP(const std::string& interfaceID)
+{
+	try
+	{
+		return theFEInterfaces_.at(interfaceID).get();
+	}
+	catch(...)
+	{
+		__CFG_SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
+		__CFG_SS_THROW__;
+	}
+} //end getFEInterfaceP()
+
+//========================================================================================================================
+//getFEInterface
+const FEVInterface&	FEVInterfacesManager::getFEInterface(const std::string& interfaceID) const
+{
+	try
+	{
+		return *(theFEInterfaces_.at(interfaceID));
+	}
+	catch(...)
+	{
+		__CFG_SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
+		__CFG_SS_THROW__;
+	}
+} //end getFEInterface()
+
+//========================================================================================================================
+//universalRead
+//	used by MacroMaker
+//	throw std::runtime_error on error/timeout
+void FEVInterfacesManager::universalRead(const std::string &interfaceID, char* address, char* returnValue)
+{
+	getFEInterfaceP(interfaceID)->universalRead(address, returnValue);
+} //end universalRead()
+
+//========================================================================================================================
+//getInterfaceUniversalAddressSize
+//	used by MacroMaker
 unsigned int FEVInterfacesManager::getInterfaceUniversalAddressSize(const std::string &interfaceID)
 {
-	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
-	{
-		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
-		__SS_THROW__;
-	}
-	return theFEInterfaces_[interfaceID]->getUniversalAddressSize();
-} //used by MacroMaker
+	return getFEInterfaceP(interfaceID)->getUniversalAddressSize();
+} //end getInterfaceUniversalAddressSize()
 
 //========================================================================================================================
-//used by MacroMaker
+//getInterfaceUniversalDataSize
+//	used by MacroMaker
 unsigned int FEVInterfacesManager::getInterfaceUniversalDataSize(const std::string &interfaceID)
 {
-	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
-	{
-		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
-		__SS_THROW__;
-	}
-	return theFEInterfaces_[interfaceID]->getUniversalDataSize();
-} //used by MacroMaker
+	return getFEInterfaceP(interfaceID)->getUniversalDataSize();
+} //end getInterfaceUniversalDataSize()
 
 //========================================================================================================================
-//used by MacroMaker
+//universalWrite
+//	used by MacroMaker
 void FEVInterfacesManager::universalWrite(const std::string &interfaceID, char* address, char* writeValue)
 {
-	if(theFEInterfaces_.find(interfaceID) == theFEInterfaces_.end())
-	{
-		__SS__ << "Interface ID '" << interfaceID << "' not found in configured interfaces." << __E__;
-		__SS_THROW__;
-	}
-
-	__COUT__ << "interfaceID: " << interfaceID << " and size: " << theFEInterfaces_.size() << std::endl;
-
-	theFEInterfaces_[interfaceID]->universalWrite(address, writeValue);
-
-//	if(interfaceIndex >= theFEInterfaces_.size())
-//	{
-//		__COUT__ << "ERROR!!!! Invalid interface index" << std::endl;
-//		return; //invalid interface index
-//	}
-
-
-}
+	getFEInterfaceP(interfaceID)->universalWrite(address, writeValue);
+} //end universalWrite()
 
 //========================================================================================================================
 //getFEListString
@@ -179,14 +462,79 @@ std::string FEVInterfacesManager::getFEListString(
 
 	for(const auto& it : theFEInterfaces_)
 	{
-	  __COUT__ << "FE name = " << it.first << std::endl;
+	  __CFG_COUT__ << "FE name = " << it.first << __E__;
 
 	  retList += it.second->getInterfaceType() +
 			  ":" + supervisorLid +
 			  ":" + it.second->getInterfaceUID() + "\n";
 	}
 	return retList;
-}
+} //end getFEListString()
+
+//========================================================================================================================
+//runFEMacroByFE
+//	Runs the FE Macro in the specified FE interface. Called by another FE.
+//
+//	inputs:
+//		- inputArgs: colon-separated name/value pairs, and then comma-separated
+//		- outputArgs: comma-separated (Note: resolved for FE, allowing FE to not know output arguments)
+//
+//	outputs:
+//		- throws exception on failure
+//		- outputArgs: colon-separate name/value pairs, and then comma-separated
+void FEVInterfacesManager::runFEMacroByFE(const std::string &callingInterfaceID, const std::string &interfaceID,
+		const std::string &feMacroName, const std::string &inputArgs,
+		std::string &outputArgs)
+{
+	__CFG_COUTV__(callingInterfaceID);
+
+	//check for interfaceID
+	FEVInterface* fe = getFEInterfaceP(interfaceID);
+
+	//have pointer to virtual FEInterface, find Macro structure
+	auto FEMacroIt = fe->getMapOfFEMacroFunctions().find(feMacroName);
+	if(FEMacroIt == fe->getMapOfFEMacroFunctions().end())
+	{
+		__CFG_SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
+				interfaceID << "' was not found!" << __E__;
+		__CFG_COUT_ERR__ << "\n" << ss.str();
+		__CFG_SS_THROW__;
+	}
+
+	auto& feMacro = FEMacroIt->second;
+
+	std::set<std::string> allowedFEsSet;
+	StringMacros::getSetFromString(
+						feMacro.allowedCallingFrontEnds_,
+						allowedFEsSet);
+
+	//check if calling interface is allowed to call macro
+	if(!StringMacros::inWildCardSet(callingInterfaceID,allowedFEsSet))
+	{
+		__CFG_SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
+				interfaceID << "' does not allow access to calling interfaceID '" <<
+				callingInterfaceID << "!' Did the interface add the calling interfaceID " <<
+				"to the access list when registering the front-end macro." << __E__;
+		__CFG_COUT_ERR__ << "\n" << ss.str();
+		__CFG_SS_THROW__;
+	}
+
+	//if here, then access allowed
+	//build output args list
+
+	outputArgs = "";
+
+
+	for(unsigned int i=0;i<feMacro.namesOfOutputArguments_.size();++i)
+		outputArgs += (i?",":"") + feMacro.namesOfOutputArguments_[i];
+
+	__CFG_COUTV__(outputArgs);
+
+	runFEMacro(interfaceID,feMacro,inputArgs,outputArgs);
+
+	__CFG_COUTV__(outputArgs);
+
+} //end runFEMacroByFE()
 
 //========================================================================================================================
 //runFEMacro
@@ -200,30 +548,45 @@ std::string FEVInterfacesManager::getFEListString(
 //		- throws exception on failure
 //		- outputArgs: colon-separate name/value pairs, and then comma-separated
 void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
-		const std::string &feMacroName, const std::string &inputArgs, std::string &outputArgs)
+		const std::string &feMacroName, const std::string &inputArgs,
+		std::string &outputArgs)
 {
+
 	//check for interfaceID
-	auto FEVInterfaceIt = theFEInterfaces_.find(interfaceID);
-	if(FEVInterfaceIt == theFEInterfaces_.end())
-	{
-		__SS__ << "interfaceID '" << interfaceID << "' was not found!" << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
-	}
+	FEVInterface* fe = getFEInterfaceP(interfaceID);
 
 	//have pointer to virtual FEInterface, find Macro structure
-	auto FEMacroIt = FEVInterfaceIt->second->getMapOfFEMacroFunctions().find(feMacroName);
-	if(FEMacroIt == FEVInterfaceIt->second->getMapOfFEMacroFunctions().end())
+	auto FEMacroIt = fe->getMapOfFEMacroFunctions().find(feMacroName);
+	if(FEMacroIt == fe->getMapOfFEMacroFunctions().end())
 	{
-		__SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
-				interfaceID << "' was not found!" << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
+		__CFG_SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
+				interfaceID << "' was not found!" << __E__;
+		__CFG_COUT_ERR__ << "\n" << ss.str();
+		__CFG_SS_THROW__;
 	}
 
+	runFEMacro(interfaceID,FEMacroIt->second,inputArgs,outputArgs);
+
+} //end runFEMacro()
+
+//========================================================================================================================
+//runFEMacro
+//	Runs the FE Macro in the specified FE interface.
+//
+//	inputs:
+//		- inputArgs: semicolon-separated name/value pairs, and then comma-separated
+//		- outputArgs: comma-separated
+//
+//	outputs:
+//		- throws exception on failure
+//		- outputArgs: colon-separate name/value pairs, and then comma-separated
+void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
+		const FEVInterface::frontEndMacroStruct_t& feMacro, const std::string &inputArgs,
+		std::string &outputArgs)
+{
 	//build input arguments
-	//	parse args, colon-separated pairs, and then comma-separated
-	std::vector<FEVInterface::frontEndMacroInArg_t> argsIn;
+	//	parse args, semicolon-separated pairs, and then comma-separated
+	std::vector<FEVInterface::frontEndMacroConstArg_t> argsIn;
 	{
 		std::istringstream inputStream(inputArgs);
 		std::string splitVal, argName, argValue;
@@ -237,74 +600,74 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 	}
 
 	//check namesOfInputArguments_
-	if(FEMacroIt->second.namesOfInputArguments_.size() != argsIn.size())
+	if(feMacro.namesOfInputArguments_.size() != argsIn.size())
 	{
-		__SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
+		__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" <<
 				interfaceID << "' was attempted with a mismatch in" <<
 						" number of input arguments. " << argsIn.size() <<
-						" were given. " << FEMacroIt->second.namesOfInputArguments_.size() <<
-						" expected." << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
+						" were given. " << feMacro.namesOfInputArguments_.size() <<
+						" expected." << __E__;
+		__CFG_COUT_ERR__ << "\n" << ss.str();
+		__CFG_SS_THROW__;
 	}
 	for(unsigned int i=0;i<argsIn.size();++i)
-		if(argsIn[i].first != FEMacroIt->second.namesOfInputArguments_[i])
+		if(argsIn[i].first != feMacro.namesOfInputArguments_[i])
 		{
-			__SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
+			__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" <<
 					interfaceID << "' was attempted with a mismatch in" <<
 							" a name of an input argument. " <<
-							argsIn[i].first << " were given. " <<
-							FEMacroIt->second.namesOfInputArguments_[i] <<
-							" expected." << std::endl;
-			__COUT_ERR__ << "\n" << ss.str();
-			__SS_THROW__;
+							argsIn[i].first << " was given. " <<
+							feMacro.namesOfInputArguments_[i] <<
+							" expected." << __E__;
+			__CFG_COUT_ERR__ << "\n" << ss.str();
+			__CFG_SS_THROW__;
 		}
 
 
 
 	//build output arguments
 	std::vector<std::string> returnStrings;
-	std::vector<FEVInterface::frontEndMacroOutArg_t> argsOut;
+	std::vector<FEVInterface::frontEndMacroArg_t> argsOut;
 
 	{
 		std::istringstream inputStream(outputArgs);
 		std::string argName;
 		while (getline(inputStream, argName, ','))
 		{
-			__COUT__ << "argName " << argName << std::endl;
+			__CFG_COUT__ << "argName " << argName << __E__;
 
 			returnStrings.push_back( "DEFAULT" );//std::string());
-			argsOut.push_back(FEVInterface::frontEndMacroOutArg_t(
+			argsOut.push_back(FEVInterface::frontEndMacroArg_t(
 					argName,
 					returnStrings[returnStrings.size()-1]));
 			//
-			//			__COUT__ << argsOut[argsOut.size()-1].first << std::endl;
-			__COUT__ << (uint64_t) &(returnStrings[returnStrings.size()-1]) << std::endl;
+			//			__CFG_COUT__ << argsOut[argsOut.size()-1].first << __E__;
+			__CFG_COUT__ << (uint64_t) &(returnStrings[returnStrings.size()-1]) << __E__;
 		}
 	}
 
 	//check namesOfOutputArguments_
-	if(FEMacroIt->second.namesOfOutputArguments_.size() != argsOut.size())
+	if(feMacro.namesOfOutputArguments_.size() != argsOut.size())
 	{
-		__SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
+		__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" <<
 				interfaceID << "' was attempted with a mismatch in" <<
 						" number of output arguments. " << argsOut.size() <<
-						" were given. " << FEMacroIt->second.namesOfOutputArguments_.size() <<
-						" expected." << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
+						" were given. " << feMacro.namesOfOutputArguments_.size() <<
+						" expected." << __E__;
+		__CFG_COUT_ERR__ << "\n" << ss.str();
+		__CFG_SS_THROW__;
 	}
 	for(unsigned int i=0;i<argsOut.size();++i)
-		if(argsOut[i].first != FEMacroIt->second.namesOfOutputArguments_[i])
+		if(argsOut[i].first != feMacro.namesOfOutputArguments_[i])
 		{
-			__SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
+			__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" <<
 					interfaceID << "' was attempted with a mismatch in" <<
 							" a name of an output argument. " <<
 							argsOut[i].first << " were given. " <<
-							FEMacroIt->second.namesOfOutputArguments_[i] <<
-							" expected." << std::endl;
-			__COUT_ERR__ << "\n" << ss.str();
-			__SS_THROW__;
+							feMacro.namesOfOutputArguments_[i] <<
+							" expected." << __E__;
+			__CFG_COUT_ERR__ << "\n" << ss.str();
+			__CFG_SS_THROW__;
 		}
 
 
@@ -312,44 +675,42 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 
 
 
-	__COUT__ << "# of input args = " << argsIn.size() << std::endl;
+	__CFG_COUT__ << "# of input args = " << argsIn.size() << __E__;
 	for(auto &argIn:argsIn)
-		__COUT__ << argIn.first << ": " << argIn.second << std::endl;
+		__CFG_COUT__ << argIn.first << ": " << argIn.second << __E__;
 
-	//	__COUT__ << "# of output args = " << argsOut.size() << std::endl;
+	//	__CFG_COUT__ << "# of output args = " << argsOut.size() << __E__;
 	//	for(unsigned int i=0;i<argsOut.size();++i)
-	//		__COUT__ << i << ": " << argsOut[i].first << std::endl;
+	//		__CFG_COUT__ << i << ": " << argsOut[i].first << __E__;
 	//	for(unsigned int i=0;i<returnStrings.size();++i)
-	//		__COUT__ << i << ": " << returnStrings[i] << std::endl;
+	//		__CFG_COUT__ << i << ": " << returnStrings[i] << __E__;
 
 
 
 
-	__MOUT__ << "Launching FE Macro '" << feMacroName << "' ..." << std::endl;
-	__COUT__ << "Launching FE Macro '" << feMacroName << "' ..." << std::endl;
+	__MOUT__ << "Launching FE Macro '" << feMacro.feMacroName_ << "' ..." << __E__;
+	__CFG_COUT__ << "Launching FE Macro '" << feMacro.feMacroName_ << "' ..." << __E__;
 
 	//have pointer to Macro structure, so run it
-	(FEVInterfaceIt->second.get()->*(FEMacroIt->second.macroFunction_))(argsIn,argsOut);
+	//(FEVInterfaceIt->second.get()->*(feMacro.macroFunction_))(argsIn,argsOut);
+	(getFEInterfaceP(interfaceID)->*(feMacro.macroFunction_))(argsIn,argsOut);
 
-	__COUT__ << "FE Macro complete!" << std::endl;
+	__CFG_COUT__ << "FE Macro complete!" << __E__;
 
-	__COUT__ << "# of output args = " << argsOut.size() << std::endl;
+	__CFG_COUT__ << "# of output args = " << argsOut.size() << __E__;
 	for(const auto &arg:argsOut)
-		__COUT__ << arg.first << ": " << arg.second << std::endl;
-
-
-
+		__CFG_COUT__ << arg.first << ": " << arg.second << __E__;
 
 
 	//check namesOfOutputArguments_ size
-	if(FEMacroIt->second.namesOfOutputArguments_.size() != argsOut.size())
+	if(feMacro.namesOfOutputArguments_.size() != argsOut.size())
 	{
-		__SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" <<
+		__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" <<
 				interfaceID << "' was attempted but the FE macro "
 						"manipulated the output arguments vector. It is illegal "
-						"to add or remove output vector name/value pairs." << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
+						"to add or remove output vector name/value pairs." << __E__;
+		__CFG_COUT_ERR__ << "\n" << ss.str();
+		__CFG_SS_THROW__;
 	}
 
 
@@ -362,9 +723,9 @@ void FEVInterfacesManager::runFEMacro(const std::string &interfaceID,
 		outputArgs += argsOut[i].first + "," + argsOut[i].second;
 	}
 
-	__COUT__ << "outputArgs = " << outputArgs << std::endl;
+	__CFG_COUT__ << "outputArgs = " << outputArgs << __E__;
 
-}
+} //end runFEMacro()
 
 //========================================================================================================================
 //getFEMacrosString
@@ -381,7 +742,7 @@ std::string FEVInterfacesManager::getFEMacrosString(
 
 	for(const auto& it : theFEInterfaces_)
 	{
-		  __COUT__ << "FE interface UID = " << it.first << std::endl;
+		  __CFG_COUT__ << "FE interface UID = " << it.first << __E__;
 
 	  retList += supervisorName +
 			  ":" + supervisorLid +
@@ -390,7 +751,7 @@ std::string FEVInterfacesManager::getFEMacrosString(
 
 	  for(const auto& macroPair : it.second->getMapOfFEMacroFunctions())
 	  {
-		  __COUT__ << "FE Macro name = " << macroPair.first << std::endl;
+		  __CFG_COUT__ << "FE Macro name = " << macroPair.first << __E__;
 		  retList +=
 				  ":" + macroPair.first +
 				  ":" + std::to_string(macroPair.second.requiredUserPermissions_) +
@@ -419,10 +780,10 @@ bool FEVInterfacesManager::allFEWorkloopsAreDone(void)
 	{
 		isActive = FEInterface.second->WorkLoop::isActive();
 
-		__COUT__ << FEInterface.second->getInterfaceUID() << " of type " <<
+		__CFG_COUT__ << FEInterface.second->getInterfaceUID() << " of type " <<
 				FEInterface.second->getInterfaceType() << ": \t" <<
 				"workLoop_->isActive() " <<
-			(isActive?"yes":"no") << std::endl;
+			(isActive?"yes":"no") << __E__;
 
 		if(isActive) //then not done
 		{
@@ -443,6 +804,9 @@ void FEVInterfacesManager::preStateMachineExecutionLoop(void)
 
 	stateMachinesIterationWorkCount_ = 0;
 
+	__CFG_COUT__ << "Number of front ends to transition: " <<
+			theFENamesByPriority_.size() << __E__;
+
 	if(VStateMachine::getIterationIndex() == 0 &&
 			VStateMachine::getSubIterationIndex() == 0)
 	{
@@ -455,7 +819,7 @@ void FEVInterfacesManager::preStateMachineExecutionLoop(void)
 			stateMachinesIterationDone_[FEPair.first] = false; //init to not done
 	}
 	else
-		__COUT__ << "Iteration " << VStateMachine::getIterationIndex() <<
+		__CFG_COUT__ << "Iteration " << VStateMachine::getIterationIndex() <<
 			"." << VStateMachine::getSubIterationIndex() <<
 			"(" << subIterationWorkStateMachineIndex_ << ")" << __E__;
 } //end preStateMachineExecutionLoop()
@@ -465,31 +829,27 @@ void FEVInterfacesManager::preStateMachineExecution(unsigned int i)
 {
 	if(i >= theFENamesByPriority_.size())
 	{
-		__SS__ << "FE Interface " << i << " not found!" << __E__;
-		__SS_THROW__;
+		__CFG_SS__ << "FE Interface " << i << " not found!" << __E__;
+		__CFG_SS_THROW__;
 	}
 
 	const std::string& name = theFENamesByPriority_[i];
 
-	auto it = theFEInterfaces_.find(name);
-	if(it == theFEInterfaces_.end())
-	{
-		__SS__ << "FE Interface '" << name << "' not found!" << __E__;
-		__SS_THROW__;
-	}
+	FEVInterface* fe = getFEInterfaceP(name);
 
-	it->second->VStateMachine::setIterationIndex(
+	fe->VStateMachine::setIterationIndex(
 			VStateMachine::getIterationIndex());
-	it->second->VStateMachine::setSubIterationIndex(
+	fe->VStateMachine::setSubIterationIndex(
 			VStateMachine::getSubIterationIndex());
 
-	it->second->VStateMachine::clearIterationWork();
-	it->second->VStateMachine::clearSubIterationWork();
+	fe->VStateMachine::clearIterationWork();
+	fe->VStateMachine::clearSubIterationWork();
 
-	__COUT__ << "theStateMachineImplementation Iteration " <<
-			it->second->VStateMachine::getIterationIndex() <<
-		"." << it->second->VStateMachine::getSubIterationIndex() << __E__;
+	__CFG_COUT__ << "theStateMachineImplementation Iteration " <<
+			fe->VStateMachine::getIterationIndex() <<
+		"." << fe->VStateMachine::getSubIterationIndex() << __E__;
 } //end preStateMachineExecution()
+
 
 //========================================================================================================================
 //postStateMachineExecution
@@ -498,38 +858,35 @@ bool FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 {
 	if(i >= theFENamesByPriority_.size())
 	{
-		__SS__ << "FE Interface index " << i << " not found!" << __E__;
-		__SS_THROW__;
+		__CFG_SS__ << "FE Interface index " << i << " not found!" << __E__;
+		__CFG_SS_THROW__;
 	}
 
 	const std::string& name = theFENamesByPriority_[i];
 
-	auto it = theFEInterfaces_.find(name);
-	if(it == theFEInterfaces_.end())
-	{
-		__SS__ << "FE Interface '" << name << "' not found!" << __E__;
-		__SS_THROW__;
-	}
+	FEVInterface* fe = getFEInterfaceP(name);
 
 	//sub-iteration has priority
-	if(it->second->VStateMachine::getSubIterationWork())
+	if(fe->VStateMachine::getSubIterationWork())
 	{
 		subIterationWorkStateMachineIndex_ = i;
 		VStateMachine::indicateSubIterationWork();
 
-		__COUT__ << "FE Interface '" << name << "' is flagged for another sub-iteration..." << __E__;
+		__CFG_COUT__ << "FE Interface '" << name << "' is flagged for another sub-iteration..." << __E__;
 		return false; //to indicate state machine is NOT done with transition
 	}
 	else
 	{
+		subIterationWorkStateMachineIndex_ = -1; //clear sub iteration work index
+
 		bool& stateMachineDone = stateMachinesIterationDone_[name];
 			stateMachineDone =
-					!it->second->VStateMachine::getIterationWork();
+					!fe->VStateMachine::getIterationWork();
 
 
 		if(!stateMachineDone)
 		{
-			__COUT__ << "FE Interface '" << name << "' is flagged for another iteration..." << __E__;
+			__CFG_COUT__ << "FE Interface '" << name << "' is flagged for another iteration..." << __E__;
 					VStateMachine::indicateIterationWork(); //mark not done at FEVInterfacesManager level
 			++stateMachinesIterationWorkCount_; //increment still working count
 			return false; //to indicate state machine is NOT done with transition
@@ -542,305 +899,14 @@ bool FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 void FEVInterfacesManager::postStateMachineExecutionLoop(void)
 {
 	if(VStateMachine::getSubIterationWork())
-		__COUT__ << "FE Interface state machine implementation " << subIterationWorkStateMachineIndex_ <<
+		__CFG_COUT__ << "FE Interface state machine implementation " << subIterationWorkStateMachineIndex_ <<
 			" is flagged for another sub-iteration..." << __E__;
 	else if(VStateMachine::getIterationWork())
-		__COUT__ << stateMachinesIterationWorkCount_ <<
+		__CFG_COUT__ << stateMachinesIterationWorkCount_ <<
 			" FE Interface state machine implementation(s) flagged for another iteration..." << __E__;
 	else
-		__COUT__ << "Done configuration all state machine implementations..." << __E__;
+		__CFG_COUT__ << "Done transitioning all state machine implementations..." << __E__;
 } //end postStateMachineExecutionLoop()
 
-//========================================================================================================================
-void FEVInterfacesManager::configure(void)
-{
-	//create interfaces (the first iteration)
-	if(VStateMachine::getIterationIndex() == 0 &&
-			VStateMachine::getSubIterationIndex() == 0)
-		createInterfaces(); //by priority
-
-	const std::string transitionName = "Configuring";
-	preStateMachineExecutionLoop();
-	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
-	{
-		//if one state machine is doing a sub-iteration, then target that one
-		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
-
-		const std::string& name = theFENamesByPriority_[i];
-
-		auto it = theFEInterfaces_.find(name);
-		if(it == theFEInterfaces_.end())
-		{
-			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
-			__SS_THROW__;
-		}
-
-		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
-
-//		if(supervisorType_ == "FER")
-//			it.second->initLocalGroup((int)local_group_comm_);
-
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-
-		preStateMachineExecution(i);
-		it->second->configure();
-		postStateMachineExecution(i);
-
-		//configure slow controls and start slow controls workloop
-		//	slow controls workloop stays alive through start/stop.. and dies on halt
-		//LOREit.second->configureSlowControls();
-		//WAS ALREADY COMMENTED OUTit.second->startSlowControlsWorkLooop();
-
-//		if((supervisorType_ == "FEW") || (supervisorType_ == "FEWR") )
-//		{
-
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		//__SS_THROW__;
-		//	it.second->configureDetector(theConfigurationManager_->getDACStream(it.first));
-
-//		}
-	}
-	postStateMachineExecutionLoop();
 
 
-	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
-}
-
-//========================================================================================================================
-void FEVInterfacesManager::halt(void)
-{
-	const std::string transitionName = "Halting";
-	preStateMachineExecutionLoop();
-	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
-	{
-		//if one state machine is doing a sub-iteration, then target that one
-		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
-
-		const std::string& name = theFENamesByPriority_[i];
-
-		auto it = theFEInterfaces_.find(name);
-		if(it == theFEInterfaces_.end())
-		{
-			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
-			__SS_THROW__;
-		}
-
-		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
-
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-
-		preStateMachineExecution(i);
-		it->second->stopWorkLoop();
-		it->second->halt();
-		postStateMachineExecution(i);
-
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-	}
-	postStateMachineExecutionLoop();
-
-
-	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
-//	for(const auto& it : theFEInterfaces_)
-//	{
-//		it.second->halt();
-//		it.second->stopWorkLoop();
-//		//it.second->stopSlowControlsWorkLooop();
-//	}
-
-	destroy(); //destroy all FE interfaces on halt, must be configured for FE interfaces to exist
-}
-
-//========================================================================================================================
-void FEVInterfacesManager::pause(void)
-{
-	const std::string transitionName = "Pausing";
-	preStateMachineExecutionLoop();
-	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
-	{
-		//if one state machine is doing a sub-iteration, then target that one
-		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
-
-		const std::string& name = theFENamesByPriority_[i];
-
-		auto it = theFEInterfaces_.find(name);
-		if(it == theFEInterfaces_.end())
-		{
-			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
-			__SS_THROW__;
-		}
-
-		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
-
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-
-		preStateMachineExecution(i);
-		it->second->stopWorkLoop();
-		it->second->pause();
-		postStateMachineExecution(i);
-
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-	}
-	postStateMachineExecutionLoop();
-
-
-	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
-
-//	for(const auto& it : theFEInterfaces_)
-//	{
-//		it.second->pause();
-//		it.second->stopWorkLoop();
-//	}
-}
-
-//========================================================================================================================
-void FEVInterfacesManager::resume(void)
-{
-	const std::string transitionName = "Resuming";
-	preStateMachineExecutionLoop();
-	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
-	{
-		//if one state machine is doing a sub-iteration, then target that one
-		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
-
-		const std::string& name = theFENamesByPriority_[i];
-
-		auto it = theFEInterfaces_.find(name);
-		if(it == theFEInterfaces_.end())
-		{
-			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
-			__SS_THROW__;
-		}
-
-		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
-
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-
-		preStateMachineExecution(i);
-		it->second->resume();
-		//only start workloop once transition is done
-		if(postStateMachineExecution(i))
-			it->second->startWorkLoop();
-
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-	}
-	postStateMachineExecutionLoop();
-
-	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
-//
-//	for(const auto& it : theFEInterfaces_)
-//	{
-//		it.second->resume();
-//		it.second->startWorkLoop();
-//	}
-}
-
-//========================================================================================================================
-void FEVInterfacesManager::start(std::string runNumber)
-{
-	const std::string transitionName = "Starting";
-	preStateMachineExecutionLoop();
-	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
-	{
-		//if one state machine is doing a sub-iteration, then target that one
-		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
-
-		const std::string& name = theFENamesByPriority_[i];
-
-		auto it = theFEInterfaces_.find(name);
-		if(it == theFEInterfaces_.end())
-		{
-			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
-			__SS_THROW__;
-		}
-
-		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
-
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-
-		preStateMachineExecution(i);
-		it->second->start(runNumber);
-		//only start workloop once transition is done
-		if(postStateMachineExecution(i))
-			it->second->startWorkLoop();
-
-
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-	}
-	postStateMachineExecutionLoop();
-
-	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
-//	for(const auto& it : theFEInterfaces_)
-//	{
-//		it.second->start(runNumber);
-//		it.second->startWorkLoop();
-//	}
-}
-//========================================================================================================================
-void FEVInterfacesManager::stop(void)
-{
-	const std::string transitionName = "Starting";
-	preStateMachineExecutionLoop();
-	for(unsigned int i=0;i<theFENamesByPriority_.size();++i)
-	{
-		//if one state machine is doing a sub-iteration, then target that one
-		if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
-				i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
-
-		const std::string& name = theFENamesByPriority_[i];
-
-		auto it = theFEInterfaces_.find(name);
-		if(it == theFEInterfaces_.end())
-		{
-			__SS__ << "FE Interface '" << name << "' not found!" << __E__;
-			__SS_THROW__;
-		}
-
-		if(stateMachinesIterationDone_[name]) continue; //skip state machines already done
-
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-		__COUT__ << transitionName << " interface " << name << std::endl;
-
-		preStateMachineExecution(i);
-		it->second->stopWorkLoop();
-		it->second->stop();
-		postStateMachineExecution(i);
-
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-		__COUT__ << "Done " << transitionName << " interface " << name << std::endl;
-	}
-	postStateMachineExecutionLoop();
-
-	__COUT__ << "Done " << transitionName << " all interfaces." << std::endl;
-//	for(const auto& it : theFEInterfaces_)
-//	{
-//		it.second->stopWorkLoop();
-//		it.second->stop();
-//	}
-}

@@ -83,7 +83,7 @@ catch(...)
 //========================================================================================================================
 //inWildCardSet ~
 //	returns true if needle is in haystack (considering wildcards)
-bool StringMacros::inWildCardSet(const std::string needle, const std::set<std::string>& haystack)
+bool StringMacros::inWildCardSet(const std::string& needle, const std::set<std::string>& haystack)
 {
 	for(const auto& haystackString : haystack)
 		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
@@ -249,27 +249,6 @@ bool StringMacros::isNumber(const std::string& s)
 	//all numbers are numbers
 	return true;
 } //end isNumber()
-
-
-//========================================================================================================================
-// binaryToHexString
-//	convert a data buffer of <len> bytes to a hex string 2*len characters long
-//	Note: no preamble (i.e. "0x" is applied by default)
-std::string StringMacros::binaryToHexString(const char *binaryBuffer, unsigned int numberOfBytes,
-		const std::string& resultPreamble, const std::string& resultDelimiter)
-{
-	std::string dest;
-	dest.reserve(numberOfBytes*2);
-	char hexstr[3];
-
-	for(unsigned int i=0;i<numberOfBytes;++i)
-	{
-		sprintf(hexstr,"%02X",(unsigned char)binaryBuffer[i]);
-		if(i) dest += resultDelimiter;
-		dest += hexstr;
-	}
-	return resultPreamble + dest;
-} //end binaryToHexString
 
 //==============================================================================
 // validateValueForDefaultStringDataType
@@ -543,7 +522,6 @@ std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn, cons
 	}
 	return ss.str();
 }
-
 //==============================================================================
 //vectorToString
 std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn, const std::string& delimeter)
@@ -565,7 +543,6 @@ std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn
 #include <memory>
 #include <cxxabi.h>
 
-
 //==============================================================================
 //demangleTypeName
 std::string StringMacros::demangleTypeName(const char* name)
@@ -579,7 +556,8 @@ std::string StringMacros::demangleTypeName(const char* name)
 	};
 
 	return (status==0) ? res.get() : name ;
-}
+} //end demangleTypeName()
+
 
 #else //does nothing if not g++
 //==============================================================================
@@ -589,10 +567,7 @@ std::string StringMacros::demangleTypeName(const char* name)
 {
 	return name;
 }
-
-
 #endif
-
 
 
 

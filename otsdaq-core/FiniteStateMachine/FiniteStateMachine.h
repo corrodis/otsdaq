@@ -54,7 +54,7 @@ public:
 	std::string 						getTransitionName 			(const toolbox::fsm::State from, const std::string &transition);
 	std::string 						getTransitionParameter 		(const toolbox::fsm::State from, const std::string &transition);
 	std::string 						getTransitionFinalStateName	(const std::string &transition);
-	const std::string&					getErrorMessage				(void) const;
+	const std::string&					getErrorMessage				() const;
 	const std::string&					getStateMachineName			(void) const {return stateMachineName_;}
 	void 								setStateMachineName			(const std::string& name){stateMachineName_ = name;}
 
@@ -64,7 +64,7 @@ public:
 	bool 								execTransition 				(const std::string &transition, const xoap::MessageReference& message);
 	bool 								isInTransition 				(void);
 	void 								setInitialState				(toolbox::fsm::State state);
-	void 								setErrorMessage				(const std::string &errMessage);
+	void 								setErrorMessage				(const std::string &errMessage, bool append = true);
 
 protected:
 

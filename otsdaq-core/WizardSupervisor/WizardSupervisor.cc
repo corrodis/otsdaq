@@ -24,9 +24,8 @@
 
 using namespace ots;
 
-
-#define SECURITY_FILE_NAME 		std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
-#define SEQUENCE_FILE_NAME 		std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.dat"
+#define SECURITY_FILE_NAME 				std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
+#define SEQUENCE_FILE_NAME 				std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.dat"
 #define SEQUENCE_OUT_FILE_NAME 	        std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.out"
 #define USER_DATA_PATH  				std::string(getenv("SERVICE_DATA_PATH")) + std::string("/")
 //#define LOGBOOK_PREVIEWS_PATH 			"uploads/"
@@ -79,6 +78,8 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub * s) throw (xdaq::excep
 	//attempt to make directory structure (just in case)
 	mkdir((std::string(getenv("SERVICE_DATA_PATH"))).c_str(), 0755);
 	mkdir((std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData").c_str(), 0755);
+
+	GatewaySupervisor::indicateOtsAlive();
 
 	generateURL();
 	xgi::bind (this, &WizardSupervisor::Default,            	      		"Default" 			);
@@ -313,10 +314,10 @@ throw (xgi::exception::Exception)
 xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	//receive request parameters
+	//SOAPUtilities::receive request parameters
 	SOAPParameters parameters;
 	parameters.addParameter("sequence");
-	receive(message, parameters);
+	SOAPUtilities::receive(message, parameters);
 
 	std::string submittedSequence = parameters.getValue("sequence");
 
@@ -359,7 +360,7 @@ throw (xoap::exception::Exception)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ActionOfLastGroup");
-	receive(message, parameters);
+	SOAPUtilities::receive(message, parameters);
 
 	return GatewaySupervisor::lastConfigGroupRequestHandler(parameters);
 }

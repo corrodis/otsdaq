@@ -1,12 +1,12 @@
 #ifndef _ots_ARTDAQFEDataManagerSupervisor_h_
 #define _ots_ARTDAQFEDataManagerSupervisor_h_
 
-#include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
+#include "otsdaq-core/CoreSupervisors/FEDataManagerSupervisor.h"
 
 namespace ots
 {
 
-class ARTDAQFEDataManagerSupervisor: public CoreSupervisorBase
+class ARTDAQFEDataManagerSupervisor: public FEDataManagerSupervisor
 {
 
 public:

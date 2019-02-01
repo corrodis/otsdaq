@@ -127,3 +127,53 @@ SOAPCommand SOAPUtilities::translate(const xoap::MessageReference& message)
     }
     return soapCommand;
 }
+
+
+//========================================================================================================================
+std::string SOAPUtilities::receive(const xoap::MessageReference& message, SOAPCommand& soapCommand)
+{
+	return receive(message, soapCommand.getParametersRef());
+}
+
+//========================================================================================================================
+std::string SOAPUtilities::receive(const xoap::MessageReference& message)
+{
+	//NOTE it is assumed that there is only 1 command for each message (that's why we use begin)
+	return (message->getSOAPPart().getEnvelope().getBody().getChildElements()).begin()->getElementName().getLocalName();
+}
+
+//========================================================================================================================
+std::string SOAPUtilities::receive(const xoap::MessageReference& message, SOAPParameters& parameters)
+{
+	xoap::SOAPEnvelope        envelope    	= message->getSOAPPart().getEnvelope();
+	std::vector<xoap::SOAPElement> bodyList = envelope.getBody().getChildElements();
+	xoap::SOAPElement         command     	= bodyList[0];
+	std::string               commandName 	= command.getElementName().getLocalName();
+	xoap::SOAPName            name        	= envelope.createName("Key");
+
+	for (SOAPParameters::iterator it=parameters.begin(); it!=parameters.end(); it++)
+	{
+		name = envelope.createName(it->first);
+
+		try
+		{
+			it->second = command.getAttributeValue(name);
+			//if( parameters.getParameter(it->first).isEmpty() )
+			//{
+			//    __COUT__ << "Complaint from " << (theApplication_->getApplicationDescriptor()->getClassName()) << std::endl;
+			//    __COUT__ << " : Parameter "<< it->first
+			//    << " does not exist in the list of incoming parameters!" << std::endl;
+			//    __COUT__ << "It could also be because you passed an empty std::string" << std::endl;
+			//    //assert(0);
+			//};
+		}
+		catch (xoap::exception::Exception& e)
+		{
+			__COUT__ << "Parameter " << it->first << " does not exist in the list of incoming parameters!" << std::endl;
+			XCEPT_RETHROW(xoap::exception::Exception,"Looking for parameter that does not exist!",e);
+		}
+
+	}
+
+	return commandName;
+}

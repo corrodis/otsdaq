@@ -1,6 +1,7 @@
 #include "otsdaq-core/NetworkUtilities/TCPSocket.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
+#include "artdaq-core/Utilities/TimeUtils.hh"
 
 #include <iostream>
 #include <cassert>
@@ -44,26 +45,7 @@ TCPSocket::TCPSocket(unsigned int listenPort, int sendBufferSize)
 	, bufferSize_(sendBufferSize)
 	, chunkSize_(65000)
 {
-	TCPSocketNumber_ = TCP_listen_fd(listenPort, 0);
-	if (bufferSize_ > 0)
-	{
-		int len;
-		socklen_t lenlen = sizeof(len);
-		len = 0;
-		auto sts = getsockopt(TCPSocketNumber_, SOL_SOCKET, SO_SNDBUF, &len, &lenlen);
-		TRACE(3, "TCPConnect SNDBUF initial: %d sts/errno=%d/%d lenlen=%d", len, sts, errno, lenlen);
-		len = bufferSize_;
-		sts = setsockopt(TCPSocketNumber_, SOL_SOCKET, SO_SNDBUF, &len, lenlen);
-		if (sts == -1)
-			TRACE(0, "Error with setsockopt SNDBUF %d", errno);
-		len = 0;
-		sts = getsockopt(TCPSocketNumber_, SOL_SOCKET, SO_SNDBUF, &len, &lenlen);
-		if (len < (bufferSize_ * 2))
-			TRACE(1, "SNDBUF %d not expected (%d) sts/errno=%d/%d"
-				  , len, bufferSize_, sts, errno);
-		else
-			TRACE(3, "SNDBUF %d sts/errno=%d/%d", len, sts, errno);
-	}
+	TCPSocketNumber_ = TCP_listen_fd(listenPort, bufferSize_);
 }
 
 //========================================================================================================================
@@ -87,37 +69,50 @@ TCPSocket::~TCPSocket(void)
 }
 
 //========================================================================================================================
-void TCPSocket::connect()
+void TCPSocket::connect(double tmo_s)
 {
+	auto start = std::chrono::steady_clock::now();
 	if (isSender_)
 	{
-		sockaddr_in addr;
-		socklen_t arglen = sizeof(addr);
-		SendSocket_ = accept(TCPSocketNumber_, (struct sockaddr *)&addr, &arglen);
+		while (SendSocket_ == -1 && artdaq::TimeUtils::GetElapsedTime(start) < tmo_s) {
 
-		if (SendSocket_ == -1)
-		{
-			perror("accept");
-			exit(EXIT_FAILURE);
-		}
+			sockaddr_in addr;
+			socklen_t arglen = sizeof(addr);
+			SendSocket_ = accept(TCPSocketNumber_, (struct sockaddr *)&addr, &arglen);
 
-		MagicPacket m;
-		auto sts = read(SendSocket_, &m, sizeof(MagicPacket));
-		if (!checkMagicPacket(m) || sts != sizeof(MagicPacket))
-		{
-			perror("magic");
-			exit(EXIT_FAILURE);
+			if (SendSocket_ == -1)
+			{
+				perror("accept");
+				continue;
+			}
+
+			MagicPacket m;
+			auto sts = read(SendSocket_, &m, sizeof(MagicPacket));
+			if (!checkMagicPacket(m) || sts != sizeof(MagicPacket))
+			{
+				perror("magic");
+				close(SendSocket_);
+				SendSocket_ = -1;
+			}
 		}
 	}
 	else
 	{
-		TCPSocketNumber_ = TCPConnect(host_.c_str(), port_, 0, O_NONBLOCK);
-		auto m = makeMagicPacket(port_);
-		auto sts = ::send(TCPSocketNumber_, &m, sizeof(MagicPacket), 0);
-		if (sts != sizeof(MagicPacket))
-		{
-			perror("connect");
-			exit(EXIT_FAILURE);
+		while (TCPSocketNumber_ == -1 && artdaq::TimeUtils::GetElapsedTime(start) < tmo_s) {
+			TCPSocketNumber_ = TCPConnect(host_.c_str(), port_, 0, O_NONBLOCK);
+			if (TCPSocketNumber_ == -1) {
+				usleep(10000);
+				continue;
+			}
+
+			auto m = makeMagicPacket(port_);
+			auto sts = ::send(TCPSocketNumber_, &m, sizeof(MagicPacket), 0);
+			if (sts != sizeof(MagicPacket))
+			{
+				perror("connect");
+				close(TCPSocketNumber_);
+				TCPSocketNumber_ = -1;
+			}
 		}
 	}
 }
@@ -130,6 +125,8 @@ int TCPSocket::send(const uint8_t* data, size_t size)
 	if (SendSocket_ == -1)
 	{
 		connect();
+
+		if (SendSocket_ == -1) return -1;
 	}
 
 	size_t offset = 0;
@@ -187,6 +184,7 @@ int TCPSocket::receive(uint8_t* buffer, unsigned int timeoutSeconds, unsigned in
 	if (TCPSocketNumber_ == -1)
 	{
 		connect();
+		if (TCPSocketNumber_ == -1) return -1;
 	}
 
 	//set timeout period for select()

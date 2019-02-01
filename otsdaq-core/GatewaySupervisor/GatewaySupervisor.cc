@@ -37,7 +37,6 @@
 using namespace ots;
 
 
-#define ICON_FILE_NAME 							std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
 #define RUN_NUMBER_PATH		 					std::string(getenv("SERVICE_DATA_PATH")) + "/RunNumber/"
 #define RUN_NUMBER_FILE_NAME 					"NextRunNumber.txt"
 #define FSM_LAST_GROUP_ALIAS_PATH				std::string(getenv("SERVICE_DATA_PATH")) + "/RunControlData/"
@@ -75,6 +74,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s)
 	__COUT__ << __E__;
 
 	//attempt to make directory structure (just in case)
+	mkdir((std::string(getenv("SERVICE_DATA_PATH"))).c_str(), 0755);
 	mkdir((FSM_LAST_GROUP_ALIAS_PATH).c_str(), 0755);
 	mkdir((RUN_NUMBER_PATH).c_str(), 0755);
 
@@ -100,8 +100,10 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub * s)
 	//xoap::bind(this, &GatewaySupervisor::supervisorHandleAsyncError, 		"FERunningError", XDAQ_NS_URI);
 
 	init();
-	//exit(1);
-}
+
+	//exit(1); //keep for syntax to exit ots
+
+} //end constructor
 
 //========================================================================================================================
 //	TODO: Lore needs to detect program quit through killall or ctrl+c so that Logbook entry is made when ots is halted
@@ -109,6 +111,12 @@ GatewaySupervisor::~GatewaySupervisor(void)
 {
 	delete CorePropertySupervisorBase::theConfigurationManager_;
 	makeSystemLogbookEntry("ots halted.");
+} //end destructor
+
+//========================================================================================================================
+void GatewaySupervisor::indicateOtsAlive(const CorePropertySupervisorBase* properties)
+{
+	CorePropertySupervisorBase::indicateOtsAlive(properties);
 }
 
 //========================================================================================================================
@@ -339,7 +347,7 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor *theSupervisor)
 		//generate special message to indicate failed socket
 		__SS__ << "FATAL Console error. Could not initialize socket at ip '" << ipAddressForStateChangesOverUDP <<
 			"' and port " <<
-			portForStateChangesOverUDP << ". Perhaps it is already in use? Exiting State Changer receive loop." << __E__;
+			portForStateChangesOverUDP << ". Perhaps it is already in use? Exiting State Changer SOAPUtilities::receive loop." << __E__;
 		__COUT__ << ss.str();
 		__SS_THROW__;
 		return;
@@ -356,7 +364,7 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor *theSupervisor)
 	while (1)
 	{
 		//workloop procedure
-		//	if receive a UDP command
+		//	if SOAPUtilities::receive a UDP command
 		//		execute command
 		//	else
 		//		sleep
@@ -365,7 +373,8 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor *theSupervisor)
 		if (sock.receive(buffer, 0 /*timeoutSeconds*/, 1/*timeoutUSeconds*/,
 						 false /*verbose*/) != -1)
 		{
-			__COUT__ << "UDP State Changer received size = " << buffer.size() << __E__;
+			__COUT__ << "UDP State Changer packet received of size = " << buffer.size() << __E__;
+
 			size_t nCommas = std::count(buffer.begin(), buffer.end(), ',');
 			if(nCommas == 0)
 			{
@@ -489,7 +498,7 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 		SOAPParameters retParameters("Status");
 		//SOAPParametersV retParameters(1);
 		//retParameters[0].setName("Status");
-		receive(retMsg, retParameters);
+		SOAPUtilities::receive(retMsg, retParameters);
 
 		__COUT__ << "Returned Status: " << retParameters.getValue("Status") << __E__;//retParameters[0].getValue() << __E__ << __E__;
 	}
@@ -1252,7 +1261,9 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	//Translate the system alias to a group name/key
 	try
 	{
-		theConfigurationGroup_ = CorePropertySupervisorBase::theConfigurationManager_->getConfigurationGroupFromAlias(systemAlias);
+		theConfigurationGroup_ =
+				CorePropertySupervisorBase::theConfigurationManager_->
+				getConfigurationGroupFromAlias(systemAlias);
 	}
 	catch (...)
 	{
@@ -1289,7 +1300,8 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	//load and activate
 	try
 	{
-		CorePropertySupervisorBase::theConfigurationManager_->loadConfigurationGroup(theConfigurationGroup_.first, theConfigurationGroup_.second, true);
+		CorePropertySupervisorBase::theConfigurationManager_->loadConfigurationGroup(
+				theConfigurationGroup_.first, theConfigurationGroup_.second, true);
 
 		//When configured, set the translated System Alias to be persistently active
 		ConfigurationManagerRW tmpCfgMgr("TheSupervisor");
@@ -1376,6 +1388,29 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	parameters.addParameter("ConfigurationGroupName", theConfigurationGroup_.first);
 	parameters.addParameter("ConfigurationGroupKey", theConfigurationGroup_.second.toString());
 
+	//update Macro Maker front end list
+	{
+		__COUT__ << "Initializing Macro Maker." << __E__;
+		xoap::MessageReference message =
+				SOAPUtilities::makeSOAPMessageReference("FECommunication");
+
+		SOAPParameters parameters;
+		parameters.addParameter("type", "initFElist");
+		parameters.addParameter("groupName", theConfigurationGroup_.first);
+		parameters.addParameter("groupKey", theConfigurationGroup_.second.toString());
+		SOAPUtilities::addParameters(message, parameters);
+
+		__COUT__ << "Sending FE communication: " <<
+				SOAPUtilities::translate(message) << __E__;
+
+		std::string reply = SOAPMessenger::send(
+				CorePropertySupervisorBase::allSupervisorInfo_.getAllMacroMakerTypeSupervisorInfo().
+				begin()->second.getDescriptor(), message);
+
+		__COUT__ << "Macro Maker init reply: " << reply << __E__;
+	}
+
+
 	//xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand(), parameters);
 	xoap::MessageReference message = theStateMachine_.getCurrentMessage();
 	SOAPUtilities::addParameters(message, parameters);
@@ -1386,6 +1421,9 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	//save last configured group name/key
 	saveGroupNameAndKey(theConfigurationGroup_, FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
+
+
+
 
 	__COUT__ << "Done configuring." << __E__;
 	RunControlStateMachine::theProgressBar_.complete();
@@ -1464,7 +1502,6 @@ void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
 
 //========================================================================================================================
 void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
-
 {
 	checkForAsyncError();
 
@@ -1472,13 +1509,26 @@ void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
 
 	makeSystemLogbookEntry("Run pausing.");
 
-	broadcastMessage(theStateMachine_.getCurrentMessage());
+	//the current message is not for Pause if its due to async failure
+	if(RunControlStateMachine::asyncSoftFailureReceived_)
+	{
+		__COUT_ERR__ << "Broadcasting pause for async SOFT error!" << __E__;
+		broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Pause"));
+	}
+	else
+		broadcastMessage(theStateMachine_.getCurrentMessage());
 }
 
 //========================================================================================================================
 void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
-
 {
+	if(RunControlStateMachine::asyncSoftFailureReceived_)
+	{
+		//clear async soft error
+		__COUT_INFO__ << "Clearing async SOFT error!" << __E__;
+		RunControlStateMachine::asyncSoftFailureReceived_ = false;
+	}
+
 	checkForAsyncError();
 
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
@@ -1486,21 +1536,27 @@ void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
 	makeSystemLogbookEntry("Run resuming.");
 
 	broadcastMessage(theStateMachine_.getCurrentMessage());
-}
+} //end transitionResuming()
 
 //========================================================================================================================
 void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
-
 {
+	if(RunControlStateMachine::asyncSoftFailureReceived_)
+	{
+		//clear async soft error
+		__COUT_INFO__ << "Clearing async SOFT error!" << __E__;
+		RunControlStateMachine::asyncSoftFailureReceived_ = false;
+	}
+
 	checkForAsyncError();
 
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	SOAPParameters parameters("RunNumber");
-	receive(theStateMachine_.getCurrentMessage(), parameters);
+	SOAPUtilities::receive(theStateMachine_.getCurrentMessage(), parameters);
 
 	std::string runNumber = parameters.getValue("RunNumber");
-	__COUT__ << runNumber << __E__;
+	__COUTV__(runNumber);
 
 	//check if configuration dump is enabled on configure transition
 	{
@@ -1754,7 +1810,7 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(
 						SOAPUtilities::makeSOAPMessageReference("StateMachineErrorMessageRequest"));
 				SOAPParameters parameters;
 				parameters.addParameter("ErrorMessage");
-				SOAPMessenger::receive(errorMessage, parameters);
+				SOAPUtilities::receive(errorMessage, parameters);
 
 				std::string error = parameters.getValue("ErrorMessage");
 				if (error == "")
@@ -2045,6 +2101,8 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 			{
 				for (unsigned int j=0;j<supervisorIterationsDone.size(i);++j)
 				{
+					checkForAsyncError();
+
 					if(supervisorIterationsDone[i][j]) continue; //skip if supervisor is already done
 
 					const SupervisorInfo& appInfo = *(orderedSupervisors[i][j]);
@@ -2554,6 +2612,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 	//stateMatchinePreferences
 	//getStateMachineNames
 	//getCurrentState
+	//cancelStateMachineTransition
 	//getIterationPlanStatus
 	//getErrorInStateMatchine
 	//getDesktopIcons
@@ -3067,11 +3126,28 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 
 				if (theStateMachine_.getCurrentStateName() == "Running" ||
 						theStateMachine_.getCurrentStateName() == "Paused")
+				{
 					sprintf(tmp, "Current %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
+
+					if(RunControlStateMachine::asyncSoftFailureReceived_)
+					{
+						//__COUTV__(RunControlStateMachine::asyncSoftFailureReceived_);
+						//__COUTV__(RunControlStateMachine::getErrorMessage());
+						xmlOut.addTextElementToData("soft_error",
+								RunControlStateMachine::getErrorMessage());
+					}
+				}
 				else
 					sprintf(tmp,"Next %s Number: %u",stateMachineRunAlias.c_str(),getNextRunNumber(fsmName));
 				xmlOut.addTextElementToData("run_number", tmp);
 			}
+		}
+		else if(requestType == "cancelStateMachineTransition")
+		{
+			__SS__ << "State transition was cancelled by user!" << __E__;
+			__MCOUT__(ss.str());
+			RunControlStateMachine::theStateMachine_.setErrorMessage(ss.str());
+			RunControlStateMachine::asyncFailureReceived_ = true;
 		}
 		else if(requestType == "getErrorInStateMatchine")
 		{
@@ -3299,12 +3375,12 @@ xoap::MessageReference GatewaySupervisor::supervisorCookieCheck(xoap::MessageRef
 {
 	//__COUT__ << __E__;
 
-	//receive request parameters
+	//SOAPUtilities::receive request parameters
 	SOAPParameters parameters;
 	parameters.addParameter("CookieCode");
 	parameters.addParameter("RefreshOption");
 	parameters.addParameter("IPAddress");
-	receive(message, parameters);
+	SOAPUtilities::receive(message, parameters);
 	std::string cookieCode = parameters.getValue("CookieCode");
 	std::string refreshOption = parameters.getValue("RefreshOption"); //give external supervisors option to refresh cookie or not, "1" to refresh
 	std::string ipAddress = parameters.getValue("IPAddress"); //give external supervisors option to refresh cookie or not, "1" to refresh
@@ -3358,7 +3434,7 @@ xoap::MessageReference GatewaySupervisor::supervisorGetActiveUsers(
 
 //========================================================================================================================
 //xoap::supervisorSystemMessage
-//	receive a new system Message from a supervisor
+//	SOAPUtilities::receive a new system Message from a supervisor
 //	ToUser wild card * is to all users
 xoap::MessageReference GatewaySupervisor::supervisorSystemMessage(
 	xoap::MessageReference message)
@@ -3367,7 +3443,7 @@ xoap::MessageReference GatewaySupervisor::supervisorSystemMessage(
 	SOAPParameters parameters;
 	parameters.addParameter("ToUser");
 	parameters.addParameter("Message");
-	receive(message, parameters);
+	SOAPUtilities::receive(message, parameters);
 
 	__COUT__ << "toUser: " << parameters.getValue("ToUser").substr(
 		0, 10) << ", message: " << parameters.getValue("Message").substr(0,
@@ -3380,7 +3456,7 @@ xoap::MessageReference GatewaySupervisor::supervisorSystemMessage(
 
 //===================================================================================================================
 //xoap::supervisorSystemLogbookEntry
-//	receive a new system Message from a supervisor
+//	SOAPUtilities::receive a new system Message from a supervisor
 //	ToUser wild card * is to all users
 xoap::MessageReference GatewaySupervisor::supervisorSystemLogbookEntry(
 	xoap::MessageReference message)
@@ -3388,7 +3464,7 @@ xoap::MessageReference GatewaySupervisor::supervisorSystemLogbookEntry(
 {
 	SOAPParameters parameters;
 	parameters.addParameter("EntryText");
-	receive(message, parameters);
+	SOAPUtilities::receive(message, parameters);
 
 	__COUT__ << "EntryText: " << parameters.getValue("EntryText").substr(
 		0, 10) << __E__;
@@ -3409,7 +3485,7 @@ xoap::MessageReference GatewaySupervisor::supervisorLastConfigGroupRequest(
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ActionOfLastGroup");
-	receive(message, parameters);
+	SOAPUtilities::receive(message, parameters);
 
 	return GatewaySupervisor::lastConfigGroupRequestHandler(parameters);
 }

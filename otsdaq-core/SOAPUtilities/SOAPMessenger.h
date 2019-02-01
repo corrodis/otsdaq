@@ -23,10 +23,6 @@ public:
     SOAPMessenger(xdaq::Application* application);
     SOAPMessenger(const SOAPMessenger& aSOAPMessenger);
 
-    std::string   receive(const xoap::MessageReference& message);
-    std::string   receive(const xoap::MessageReference& message, SOAPCommand&    soapCommand);
-    std::string   receive(const xoap::MessageReference& message, SOAPParameters& parameters);
-
     std::string   send      (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, xoap::MessageReference message)                 ;
     std::string   send      (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, SOAPCommand soapCommand)                        ;
     std::string   send      (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string command)                            ;

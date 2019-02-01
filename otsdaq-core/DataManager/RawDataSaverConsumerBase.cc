@@ -1,6 +1,6 @@
 #include "otsdaq-core/DataManager/RawDataSaverConsumerBase.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-//#include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq-core/Macros/BinaryStringMacros.h"
 
 #include <iostream>
 #include <cassert>
@@ -63,13 +63,12 @@ void RawDataSaverConsumerBase::openFile(std::string runNumber)
 	if(maxFileSize_ > 0)
 		fileName << "_" << currentSubRunNumber_;
 	fileName << "_Raw.dat";
-	std::cout << __COUT_HDR_FL__ << "Saving file: " << fileName.str() << std::endl;
+	__CFG_COUT__ << "Saving file: " << fileName.str() << std::endl;
 	outFile_.open(fileName.str().c_str(), std::ios::out | std::ios::binary);
 	if(!outFile_.is_open())
 	{
-		__SS__ << "Can't open file " << fileName.str() << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
+		__CFG_SS__ << "Can't open file " << fileName.str() << std::endl;
+		__CFG_SS_THROW__;
 	}
 
 	writeHeader(); //write start of file header
@@ -154,7 +153,7 @@ void RawDataSaverConsumerBase::save(const std::string& data)
 //========================================================================================================================
 bool RawDataSaverConsumerBase::workLoopThread(toolbox::task::WorkLoop* workLoop)
 {
-	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << DataProcessor::processorUID_ << " running, because workloop: " 
+	//__CFG_COUT__ << DataProcessor::processorUID_ << " running, because workloop: "
 	//<< WorkLoop::continueWorkLoop_ << std::endl;
 	fastRead();
 	return WorkLoop::continueWorkLoop_;
@@ -163,22 +162,26 @@ bool RawDataSaverConsumerBase::workLoopThread(toolbox::task::WorkLoop* workLoop)
 //========================================================================================================================
 void RawDataSaverConsumerBase::fastRead(void)
 {
-	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " running!" << std::endl;
+	//__CFG_COUT__ << processorUID_ << " running!" << std::endl;
 	if(DataConsumer::read(dataP_, headerP_) < 0)
 	{
 		usleep(100);
 		return;
 	}
-	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " Buffer: " << buffer << std::endl;
-	//std::cout << __COUT_HDR_FL__ << dataP_->length() << std::endl;
+	__CFG_COUTV__(dataP_->length());
+	std::string& buffer = *dataP_;
+
+	//__CFG_COUT__ << "Reading from buffer length " << buffer.length() << " bytes!" << __E__;
+	//__CFG_COUT__ << "Buffer Data: " << BinaryStringMacros::binaryTo8ByteHexString(buffer) << __E__;
+
 	save(*dataP_);
-	DataConsumer::setReadSubBuffer<std::string, std::map<std::string, std::string>>();
+	DataConsumer::setReadSubBuffer<std::string, std::map<std::string, std::string> >();
 }
 
 //========================================================================================================================
 void RawDataSaverConsumerBase::slowRead(void)
 {
-	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " running!" << std::endl;
+	//__CFG_COUT__ << processorUID_ << " running!" << std::endl;
 	//This is making a copy!!!
 	if(DataConsumer::read(data_, header_) < 0)
 	{

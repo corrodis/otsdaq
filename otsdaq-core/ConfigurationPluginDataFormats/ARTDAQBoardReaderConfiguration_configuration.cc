@@ -69,12 +69,13 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 
 			__COUT__ << "Checking that this reader supervisor node is DataManager-like." << std::endl;
 
-			readerConfigNode.getNode("LinkToDataManagerConfiguration").getChildren();
+			readerConfigNode.getNode("LinkToDataBufferTable").getChildren();
 
 		}
 		catch (const std::runtime_error& e)
 		{
-			__SS__ << "artdaq Board Readers must be instantiated as a Consumer within a DataManager configuration. Error found while checking for LinkToDataManagerConfiguration: " <<
+			__SS__ << "artdaq Board Readers must be instantiated as a Consumer within a DataManager configuration. " <<
+					"Error found while checking for LinkToDataBufferTable: " <<
 				e.what() << std::endl;
 			__COUT_ERR__ << ss.str();
 			__COUT__ << "Path for this reader config is " <<
@@ -102,9 +103,9 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 		for (auto& readerContext : readerContexts) {
 			ConfigurationTree readerConfigNode = contextConfig->getSupervisorConfigNode(configManager,
 				readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
-			auto dataManagerConfMap = readerConfigNode.getNode("LinkToDataManagerConfiguration").getChildren();
+			auto dataManagerConfMap = readerConfigNode.getNode("LinkToDataBufferTable").getChildren();
 			for (auto dmc : dataManagerConfMap) {
-				auto dataBufferConfMap = dmc.second.getNode("LinkToDataBufferConfiguration").getChildren();
+				auto dataBufferConfMap = dmc.second.getNode("LinkToDataProcessorTable").getChildren();
 				for (auto dbc : dataBufferConfMap) {
 					auto processorConfUID = dbc.second.getNode("LinkToProcessorUID").getUIDAsString();
 					if (processorConfUID == child.second.getValue()) {

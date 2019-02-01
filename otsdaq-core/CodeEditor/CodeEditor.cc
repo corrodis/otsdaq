@@ -27,6 +27,7 @@ std::string CodeEditor::SPECIAL_TYPE_Tools = "Tools";
 //========================================================================================================================
 //CodeEditor
 CodeEditor::CodeEditor()
+: ALLOWED_FILE_EXTENSIONS_({"h","hh","hpp","hxx",		"c","cc","cpp","cxx","icc",		"txt","sh","css","html","htm","js","py",		"fcl","xml"})
 {
 	std::string path = CODE_EDITOR_DATA_PATH;
 	DIR *dir = opendir(path.c_str());
@@ -62,7 +63,7 @@ try
 	//	saveFileContent
 	//	cleanBuild
 	//	incrementalBuild
-	//
+	//	getAllowedExtensions
 	//
 
 	if(option == "getDirectoryContent")
@@ -80,6 +81,11 @@ try
 	else if(option == "build")
 	{
 		build(cgiIn,xmlOut);
+	}
+	else if(option == "getAllowedExtensions")
+	{
+		xmlOut->addTextElementToData("AllowedExtensions",
+				StringMacros::setToString(ALLOWED_FILE_EXTENSIONS_,","));
 	}
 	else
 	{
@@ -126,6 +132,7 @@ std::string CodeEditor::safePathString(const std::string& path)
 
 //========================================================================================================================
 //safeExtensionString
+//	remove all non ascii and make lower case
 std::string CodeEditor::safeExtensionString(const std::string& extension)
 {
 	__COUTV__(extension);
@@ -133,17 +140,15 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 	std::string retExt = "";
 	//remove all non ascii
 	for(unsigned int i=0;i<extension.length();++i)
-		if((extension[i] >= 'a' && extension[i] <= 'z') ||
-				(extension[i] >= 'A' && extension[i] <= 'Z'))
+		if((extension[i] >= 'a' && extension[i] <= 'z'))
 			retExt += extension[i];
+		else if((extension[i] >= 'A' && extension[i] <= 'Z'))
+			retExt += extension[i] + 32; //make lowercase
+
 	__COUTV__(retExt);
-	if(
-			retExt != "h" && retExt != "hh" &&
-			retExt != "c" && retExt != "cc" && retExt != "cpp" &&
-			retExt != "txt" && //should match get directory content restrictions
-			retExt != "sh" && retExt != "css" && retExt != "html" &&
-			retExt != "js" && retExt != "py" && retExt != "fcl"
-					&& retExt != "xml")
+
+	if(ALLOWED_FILE_EXTENSIONS_.find(retExt) == //should match get directory content restrictions
+			ALLOWED_FILE_EXTENSIONS_.end())
 	{
 		__SS__ << "Invalid extension '" << retExt << "' found!" << __E__;
 		__SS_THROW__;
@@ -252,6 +257,8 @@ void CodeEditor::getDirectoryContent(
 	std::set<std::string,InsensitiveCompare> orderedDirectories;
 	std::set<std::string,InsensitiveCompare> orderedFiles;
 
+	std::string extension;
+
 	//else directory good, get all folders, .h, .cc, .txt files
 	while((entry = readdir(pDIR)))
 	{
@@ -293,26 +300,17 @@ void CodeEditor::getDirectoryContent(
 			else //type 8 or 0 is file
 			{
 				//__COUT__ << "File: " << type << " " << name << "\n" << std::endl;
-				if(
-						name.find(".h") == name.length()-2 		||
-						name.find(".hh") == name.length()-3		||
-						name.find(".c") == name.length()-2	 	||
-						name.find(".cc") == name.length()-3 	||
-						name.find(".cpp") == name.length()-4 	||
-						name.find(".js") == name.length()-3 	||
-						name.find(".sh") == name.length()-3 	||
-						name.find(".py") == name.length()-3 	||
-						name.find(".fcl") == name.length()-4 	||
-						name.find(".txt") == name.length()-4 	||
-						name.find(".css") == name.length()-4 	||
-						name.find(".xml") == name.length()-4 	||
-						name.find(".html") == name.length()-5
-				)
+
+				try
 				{
+					safeExtensionString(name.substr(name.rfind('.')));
 					//__COUT__ << "EditFile: " << type << " " << name << __E__;
 
 					orderedFiles.emplace(name);
-					//xmlOut->addTextElementToData("file",name);
+				}
+				catch(...)
+				{
+					__COUT__ << "Invalid file extension, skipping '" << name << "' ..." << __E__;
 				}
 			}
 		}

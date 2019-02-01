@@ -185,8 +185,8 @@ unsigned int XDAQContextConfiguration::getARTDAQDataPort(const ConfigurationMana
 			{ 
 				auto processors = getSupervisorConfigNode(configManager,
 					context.contextUID_, context.applications_[0].applicationUID_).getNode(
-							"LinkToDataManagerConfiguration").getChildren()[0].second.getNode(
-									"LinkToDataBufferConfiguration").getChildren();
+							"LinkToDataBufferTable").getChildren()[0].second.getNode(
+									"LinkToDataProcessorTable").getChildren();
 
 				std::string processorType;
 				
