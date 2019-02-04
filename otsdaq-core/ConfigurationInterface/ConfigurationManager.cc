@@ -38,7 +38,7 @@ const uint8_t	  ConfigurationManager::METADATA_COL_TIMESTAMP			= 4;
 const std::set<std::string> ConfigurationManager::contextMemberNames_	= {ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME,ConfigurationManager::XDAQ_APPLICATION_CONFIG_NAME,"XDAQApplicationPropertyConfiguration","DesktopIconConfiguration","MessageFacilityConfiguration","GatewaySupervisorConfiguration","StateMachineConfiguration","DesktopWindowParameterConfiguration"};
 const std::set<std::string> ConfigurationManager::backboneMemberNames_	= {ConfigurationManager::GROUP_ALIASES_CONFIG_NAME,ConfigurationManager::VERSION_ALIASES_CONFIG_NAME};
 const std::set<std::string> ConfigurationManager::iterateMemberNames_	= {"IterateConfiguration","IterationPlanConfiguration","IterationTargetConfiguration",
-	/*command specific tables*/"IterationCommandBeginLabelConfiguration","IterationCommandChooseFSMConfiguration","IterationCommandConfigureAliasConfiguration","IterationCommandConfigureGroupConfiguration","IterationCommandExecuteFEMacroConfiguration","IterationCommandExecuteMacroConfiguration","IterationCommandModifyGroupConfiguration","IterationCommandRepeatLabelConfiguration","IterationCommandRunConfiguration"};
+	/*command specific tables*/"IterationCommandBeginLabelConfiguration","IterationCommandChooseFSMConfiguration","IterationCommandConfigureAliasConfiguration","IterationCommandConfigureGroupConfiguration","IterationCommandExecuteFEMacroConfiguration","IterationCommandExecuteMacroConfiguration","IterationCommandMacroParameterConfiguration","IterationCommandModifyGroupConfiguration","IterationCommandRepeatLabelConfiguration","IterationCommandRunConfiguration"};
 
 //==============================================================================
 ConfigurationManager::ConfigurationManager()

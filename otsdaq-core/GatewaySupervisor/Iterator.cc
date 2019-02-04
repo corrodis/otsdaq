@@ -426,7 +426,7 @@ catch(...)
 
 	iterator->workloopRunning_ = false; //if we ever exit
 	iterator->errorMessage_ = ss.str();
-}
+} //end IteratorWorkLoop()
 
 //========================================================================================================================
 void Iterator::startCommand(IteratorWorkLoopStruct *iteratorStruct)
@@ -434,7 +434,7 @@ try
 {
 
 	{
-		int i =0;
+		int i = 0;
 		for(const auto& depthIteration:iteratorStruct->stepIndexStack_)
 		{
 			__COUT__ << i++ << ":" << depthIteration << __E__;
@@ -494,13 +494,11 @@ try
 	}
 	else if(type == IterateConfiguration::COMMAND_EXECUTE_FE_MACRO)
 	{
-		//TODO
-		return;
+		return startCommandMacro(iteratorStruct, true /*isFEMacro*/);
 	}
 	else if(type == IterateConfiguration::COMMAND_EXECUTE_MACRO)
 	{
-		//TODO
-		return;
+		return startCommandMacro(iteratorStruct, false /*isFEMacro*/);
 	}
 	else if(type == IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP)
 	{
@@ -516,7 +514,7 @@ try
 	}
 	else
 	{
-		__SS__ << "Attempt to start unrecognized command type = " << type << __E__;
+		__SS__ << "Failed attempt to start unrecognized command type = " << type << __E__;
 		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
@@ -537,8 +535,7 @@ catch(...)
 		__COUT_WARN__ << "Original group could not be activated." << __E__;
 	}
 	throw;
-}
-
+} //end startCommand()
 
 //========================================================================================================================
 //checkCommand
@@ -574,13 +571,11 @@ try
 	}
 	else if(type == IterateConfiguration::COMMAND_EXECUTE_FE_MACRO)
 	{
-		//do nothing
-		return true;
+		return checkCommandMacro(iteratorStruct, true /*isFEMacro*/);
 	}
 	else if(type == IterateConfiguration::COMMAND_EXECUTE_MACRO)
 	{
-		//do nothing
-		return true;
+		return checkCommandMacro(iteratorStruct, false /*isFEMacro*/);
 	}
 	else if(type == IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP)
 	{
@@ -620,7 +615,7 @@ catch(...)
 	}
 
 	throw;
-}
+} //end checkCommand()
 
 //========================================================================================================================
 void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct *iteratorStruct,
@@ -691,7 +686,7 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct *iteratorStruct,
 		--iteratorStruct->fsmNextRunNumber_; //current run number is one back
 
 	__COUT__ << "fsmNextRunNumber_  = " << iteratorStruct->fsmNextRunNumber_ << __E__;
-}
+} //end startCommandChooseFSM()
 
 //========================================================================================================================
 // return true if an action was attempted
@@ -795,7 +790,7 @@ bool Iterator::haltIterator(Iterator *iterator,
 	}
 
 	return haltAttempted;
-}
+} //end haltIterator()
 
 //========================================================================================================================
 void Iterator::startCommandBeginLabel(IteratorWorkLoopStruct *iteratorStruct)
@@ -808,8 +803,7 @@ void Iterator::startCommandBeginLabel(IteratorWorkLoopStruct *iteratorStruct)
 
 	//add new step index to stack
 	iteratorStruct->stepIndexStack_.push_back(0);
-}
-
+} //end startCommandBeginLabel()
 
 //========================================================================================================================
 void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct)
@@ -857,7 +851,7 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct)
 
 	iteratorStruct->commandIndex_ = i;
 	__COUT__ << "Jumping back to commandIndex " << iteratorStruct->commandIndex_ << __E__;
-}
+} //end startCommandRepeatLabel()
 
 //========================================================================================================================
 void Iterator::startCommandRun(IteratorWorkLoopStruct *iteratorStruct)
@@ -891,7 +885,7 @@ void Iterator::startCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 	//else successfully launched
 	__COUT__ << "FSM in transition = " << iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition() << __E__;
 	__COUT__ << "startCommandRun success." << __E__;
-}
+} //end startCommandRun()
 
 //========================================================================================================================
 void Iterator::startCommandConfigureActive(IteratorWorkLoopStruct *iteratorStruct)
@@ -913,7 +907,7 @@ void Iterator::startCommandConfigureActive(IteratorWorkLoopStruct *iteratorStruc
 	std::stringstream systemAlias;
 	systemAlias << "GROUP:" << group << ":" << key;
 	startCommandConfigureAlias(iteratorStruct,systemAlias.str());
-}
+} //end startCommandConfigureActive()
 
 //========================================================================================================================
 void Iterator::startCommandConfigureGroup(IteratorWorkLoopStruct *iteratorStruct)
@@ -941,7 +935,7 @@ void Iterator::startCommandConfigureGroup(IteratorWorkLoopStruct *iteratorStruct
 	std::stringstream systemAlias;
 	systemAlias << "GROUP:" << group << ":" << key;
 	startCommandConfigureAlias(iteratorStruct,systemAlias.str());
-}
+} //end startCommandConfigureGroup()
 
 //========================================================================================================================
 void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct,
@@ -953,7 +947,8 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 	iteratorStruct->fsmCommandParameters_.push_back(systemAlias);
 
 	std::string errorStr = "";
-	std::string currentState = iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
+	std::string currentState =
+			iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
 
 	//execute first transition (may need two in conjunction with checkCommandConfigure())
 
@@ -996,7 +991,193 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct
 	//else successfully launched
 	__COUT__ << "FSM in transition = " << iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition() << __E__;
 	__COUT__ << "startCommandConfigureAlias success." << __E__;
-}
+} //end startCommandConfigureAlias()
+
+//========================================================================================================================
+void Iterator::startCommandMacro(IteratorWorkLoopStruct *iteratorStruct, bool isFrontEndMacro)
+{
+	//Steps:
+	//	4 parameters  CommandExecuteFEMacroParams:
+	//		//targets
+	//		const std::string FEMacroName_ 				= "FEMacroName";
+	//		//macro parameters (table/groupID)
+
+	const std::string& macroName =
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandExecuteMacroParams_.MacroName_];
+
+	__COUTV__(macroName);
+
+
+
+	//send request to MacroMaker a la FEVInterface::runFrontEndMacro
+	//	but need to pass iteration information, so that the call is launch by just one send
+	//	to each front end.
+	//	Front-ends must immediately respond that is started
+	//		FEVInterfacesManager.. must start a thread for running the macro iterations
+	//	Then check for complete.
+	//	So two messages for every launch for each front-end
+	//	BUT BUT BUT -- then the iteration plan is all messed up!
+	//		WE COULD -- detect if the frontEndMacro is the only thing in the loop, and handle it
+	//			differently, with the atomic call.. otherwise to keep loop functionality
+	//			do single calls
+
+	//inputArgs: dimensional semi-colon-separated,
+	//			colon-separated name/value/stepsize sets, and then comma-separated
+	//	normal input args are , separated, ;
+	std::string inputArgsStr = ""; //";" /*primaryDelimeter*/,","/*secondaryDelimeter*/
+
+	inputArgsStr = "myOtherArg,4";
+
+	for(auto& paramPair:iteratorStruct->commands_[iteratorStruct->commandIndex_].params_)
+	{
+		//if(paramPair.first.substr(0,
+		//		IterateConfiguration::MacroParameterPrepend_.length) == )
+		__COUT__ << "param " << paramPair.first << ":" << paramPair.second << __E__;
+		//inputArgsStr +=
+	}
+
+	iteratorStruct->targetsDone_.clear(); //reset
+
+	__COUTV__(iteratorStruct->commands_[iteratorStruct->commandIndex_].targets_.size());
+	for(const auto& target:
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].targets_)
+	{
+		__COUT__ << "target " << target.table_ << ":" << target.UID_ << __E__;
+
+		iteratorStruct->targetsDone_.push_back(false); //init to not done
+
+		xoap::MessageReference message =
+				SOAPUtilities::makeSOAPMessageReference("FECommunication");
+
+		SOAPParameters parameters;
+		std::string type = isFrontEndMacro?
+				"feMacroMultiDimensionalStart":"macroMultiDimensionalStart";
+		parameters.addParameter("type", type);
+		parameters.addParameter("requester", WebUsers::DEFAULT_ITERATOR_USERNAME);
+		parameters.addParameter("targetInterfaceID", target.UID_);
+		parameters.addParameter(isFrontEndMacro?
+				"feMacroName":"macroName", macroName);
+		parameters.addParameter("inputArgs", inputArgsStr);
+		SOAPUtilities::addParameters(message, parameters);
+
+		__COUT__ << "Sending FE communication: " <<
+				SOAPUtilities::translate(message) << __E__;
+
+		xoap::MessageReference replyMessage = iteratorStruct->theIterator_->theSupervisor_->SOAPMessenger::sendWithSOAPReply(
+				iteratorStruct->theIterator_->theSupervisor_->allSupervisorInfo_.getAllMacroMakerTypeSupervisorInfo().
+				begin()->second.getDescriptor(), message);
+
+		__COUT__ << "Response received: " <<
+				SOAPUtilities::translate(replyMessage) << __E__;
+
+		SOAPParameters rxParameters;
+		rxParameters.addParameter("Error");
+		std::string response = SOAPUtilities::receive(replyMessage,rxParameters);
+
+		std::string error = rxParameters.getValue("Error");
+
+		if(response != type + "Done" ||
+				error != "")
+		{
+			//error occurred!
+			__SS__ << "Error transmitting request to target interface '" <<
+					target.UID_ << "' from '" << WebUsers::DEFAULT_ITERATOR_USERNAME <<
+					".' Response '" << response << "' with error: " <<
+					error << __E__;
+			__SS_THROW__;
+		}
+	} //end target loop
+
+} //end startCommandMacro()
+
+//========================================================================================================================
+bool Iterator::checkCommandMacro(IteratorWorkLoopStruct *iteratorStruct, bool isFrontEndMacro)
+{
+	sleep(1);
+
+	//Steps:
+	//	4 parameters  CommandExecuteFEMacroParams:
+	//		//targets
+	//		const std::string FEMacroName_ 				= "FEMacroName";
+	//		//macro parameters (table/groupID)
+
+	const std::string& macroName =
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandExecuteMacroParams_.MacroName_];
+
+	__COUTV__(macroName);
+
+
+
+	//send request to MacroMaker to check completion of macro
+	// as targets are identified complete, remove targets_ from vector
+
+	for(unsigned int i=0;i <
+		iteratorStruct->commands_[iteratorStruct->commandIndex_].targets_.size();++i)
+	{
+		ots::IterateConfiguration::CommandTarget& target =
+				iteratorStruct->commands_[iteratorStruct->commandIndex_].targets_[i];
+
+		__COUT__ << "target " << target.table_ << ":" << target.UID_ << __E__;
+
+
+		xoap::MessageReference message =
+				SOAPUtilities::makeSOAPMessageReference("FECommunication");
+
+		SOAPParameters parameters;
+		std::string type = isFrontEndMacro?
+				"feMacroMultiDimensionalCheck":"macroMultiDimensionalCheck";
+		parameters.addParameter("type", type);
+		parameters.addParameter("requester", WebUsers::DEFAULT_ITERATOR_USERNAME);
+		parameters.addParameter("targetInterfaceID", target.UID_);
+		parameters.addParameter(isFrontEndMacro?
+				"feMacroName":"macroName", macroName);
+		SOAPUtilities::addParameters(message, parameters);
+
+		__COUT__ << "Sending FE communication: " <<
+				SOAPUtilities::translate(message) << __E__;
+
+		xoap::MessageReference replyMessage = iteratorStruct->theIterator_->theSupervisor_->SOAPMessenger::sendWithSOAPReply(
+				iteratorStruct->theIterator_->theSupervisor_->allSupervisorInfo_.getAllMacroMakerTypeSupervisorInfo().
+				begin()->second.getDescriptor(), message);
+
+		__COUT__ << "Response received: " <<
+				SOAPUtilities::translate(replyMessage) << __E__;
+
+		SOAPParameters rxParameters;
+		rxParameters.addParameter("Error");
+		rxParameters.addParameter("Done");
+		std::string response = SOAPUtilities::receive(replyMessage,rxParameters);
+
+		std::string error = rxParameters.getValue("Error");
+		bool done = rxParameters.getValue("Done") == "1";
+
+		if(response != type + "Done" ||
+				error != "")
+		{
+			//error occurred!
+			__SS__ << "Error transmitting request to target interface '" <<
+					target.UID_ << "' from '" << WebUsers::DEFAULT_ITERATOR_USERNAME <<
+					".' Response '" << response << "' with error: " <<
+					error << __E__;
+			__SS_THROW__;
+		}
+
+		if(!done) //still more to do so give up checking
+			return false;
+
+		//mark target done
+		iteratorStruct->targetsDone_[i] = true;
+
+	//		iteratorStruct->commands_[iteratorStruct->commandIndex_].targets_.erase(
+	//				targetIt--); //go back after delete
+
+	} //end target loop
+
+	//if here all targets are done
+	return true;
+} //end checkCommandMacro()
 
 //========================================================================================================================
 void Iterator::startCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct)
@@ -1089,8 +1270,7 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct)
 				doTrackGroupChanges);
 	}
 
-}
-
+} //end startCommandModifyActive()
 
 //========================================================================================================================
 //checkCommandRun
@@ -1119,7 +1299,8 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct *iteratorStruct)
 	iteratorStruct->fsmCommandParameters_.clear();
 
 	std::string errorStr = "";
-	std::string currentState = iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
+	std::string currentState =
+			iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
 
 
 	/////////////////////

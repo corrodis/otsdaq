@@ -55,7 +55,7 @@ try
 
 	std::string type = typeParameter.getValue("type");
 
-	rxParameters.addParameter("sourceInterfaceID");
+	rxParameters.addParameter("requester");
 	rxParameters.addParameter("targetInterfaceID");
 
 	if(type == "feSend")
@@ -65,11 +65,11 @@ try
 		rxParameters.addParameter("value");
 		SOAPUtilities::receive(message, rxParameters);
 
-		std::string sourceInterfaceID = rxParameters.getValue("sourceInterfaceID");
+		std::string requester = rxParameters.getValue("requester");
 		std::string targetInterfaceID = rxParameters.getValue("targetInterfaceID");
 		std::string value = rxParameters.getValue("value");
 
-		__SUP_COUTV__(sourceInterfaceID);
+		__SUP_COUTV__(requester);
 		__SUP_COUTV__(targetInterfaceID);
 		__SUP_COUTV__(value);
 
@@ -82,17 +82,17 @@ try
 					theFEInterfacesManager_->frontEndCommunicationReceiveMutex_);
 
 			theFEInterfacesManager_->frontEndCommunicationReceiveBuffer_
-			[targetInterfaceID][sourceInterfaceID].emplace(value);
+			[targetInterfaceID][requester].emplace(value);
 
 			__SUP_COUT__ << "Number of target interface ID '" << targetInterfaceID <<
 					"' buffers: " << theFEInterfacesManager_->frontEndCommunicationReceiveBuffer_
 					[targetInterfaceID].size() << __E__;
-			__SUP_COUT__ << "Number of source interface ID '" << sourceInterfaceID <<
+			__SUP_COUT__ << "Number of source interface ID '" << requester <<
 					"' values received: " << theFEInterfacesManager_->frontEndCommunicationReceiveBuffer_
-					[targetInterfaceID][sourceInterfaceID].size() << __E__;
+					[targetInterfaceID][requester].size() << __E__;
 		}
 		return SOAPUtilities::makeSOAPMessageReference("Received");
-	}
+	} //end type feSend
 	else if(type == "feMacro")
 	{
 		__SUP_COUTV__(type);
@@ -102,12 +102,12 @@ try
 
 		SOAPUtilities::receive(message, rxParameters);
 
-		std::string sourceInterfaceID = rxParameters.getValue("sourceInterfaceID");
+		std::string requester = rxParameters.getValue("requester");
 		std::string targetInterfaceID = rxParameters.getValue("targetInterfaceID");
 		std::string feMacroName = rxParameters.getValue("feMacroName");
 		std::string inputArgs = rxParameters.getValue("inputArgs");
 
-		__SUP_COUTV__(sourceInterfaceID);
+		__SUP_COUTV__(requester);
 		__SUP_COUTV__(targetInterfaceID);
 		__SUP_COUTV__(feMacroName);
 		__SUP_COUTV__(inputArgs);
@@ -116,7 +116,7 @@ try
 		try
 		{
 			theFEInterfacesManager_->runFEMacroByFE(
-					sourceInterfaceID,
+					requester,
 					targetInterfaceID, feMacroName,
 					inputArgs, outputArgs);
 		}
@@ -140,7 +140,7 @@ try
 		xoap::MessageReference replyMessage =
 			SOAPUtilities::makeSOAPMessageReference("feMacrosResponse");
 		SOAPParameters txParameters;
-		txParameters.addParameter("sourceInterfaceID", sourceInterfaceID);
+		txParameters.addParameter("requester", requester);
 		txParameters.addParameter("targetInterfaceID", targetInterfaceID);
 		txParameters.addParameter("feMacroName", feMacroName);
 		txParameters.addParameter("outputArgs", outputArgs);
@@ -151,7 +151,117 @@ try
 				SOAPUtilities::translate(replyMessage) << __E__;
 
 		return replyMessage;
-	}
+	} //end type feMacro
+	else if(type == "feMacroMultiDimensionalStart") //from iterator
+	{
+		__SUP_COUTV__(type);
+
+		rxParameters.addParameter("feMacroName");
+		rxParameters.addParameter("inputArgs");
+
+		SOAPUtilities::receive(message, rxParameters);
+
+		std::string requester = rxParameters.getValue("requester");
+		std::string targetInterfaceID = rxParameters.getValue("targetInterfaceID");
+		std::string feMacroName = rxParameters.getValue("feMacroName");
+		std::string inputArgs = rxParameters.getValue("inputArgs");
+
+		__SUP_COUTV__(requester);
+		__SUP_COUTV__(targetInterfaceID);
+		__SUP_COUTV__(feMacroName);
+		__SUP_COUTV__(inputArgs);
+
+
+		try
+		{
+			theFEInterfacesManager_->startFEMacroMultiDimensional(
+					requester,
+					targetInterfaceID, feMacroName,
+					inputArgs);
+		}
+		catch(std::runtime_error &e)
+		{
+			__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
+					" the FE Macro named '" << feMacroName << "' with target FE '" <<
+					targetInterfaceID << "' failed to start multi-dimensional launch. " <<
+					"Here is the error:\n\n" << e.what() << std::endl;
+			__SUP_SS_THROW__;
+		}
+		catch(...)
+		{
+			__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
+					" the FE Macro named '" << feMacroName << "' with target FE '" <<
+					targetInterfaceID << "' failed to start multi-dimensional launch " <<
+					"due to an unknown error." << __E__;
+			__SUP_SS_THROW__;
+		}
+
+		xoap::MessageReference replyMessage =
+			SOAPUtilities::makeSOAPMessageReference(type + "Done");
+		SOAPParameters txParameters;
+		//txParameters.addParameter("started", "1");
+		SOAPUtilities::addParameters(replyMessage, txParameters);
+
+
+		__SUP_COUT__ << "Sending FE macro result: " <<
+				SOAPUtilities::translate(replyMessage) << __E__;
+
+		return replyMessage;
+	} //end type feMacroMultiDimensionalStart
+	else if(type == "feMacroMultiDimensionalCheck")
+	{
+		__SUP_COUTV__(type);
+
+		rxParameters.addParameter("feMacroName");
+		rxParameters.addParameter("targetInterfaceID");
+
+		SOAPUtilities::receive(message, rxParameters);
+
+		std::string targetInterfaceID = rxParameters.getValue("targetInterfaceID");
+		std::string feMacroName = rxParameters.getValue("feMacroName");
+
+		__SUP_COUTV__(targetInterfaceID);
+		__SUP_COUTV__(feMacroName);
+
+
+		std::string outputArgs;
+		bool done = false;
+		try
+		{
+			done = theFEInterfacesManager_->checkFEMacroMultiDimensional(
+					targetInterfaceID, feMacroName);
+		}
+		catch(std::runtime_error &e)
+		{
+			__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
+					" the FE Macro named '" << feMacroName << "' with target FE '" <<
+					targetInterfaceID << "' failed to check multi-dimensional launch. " <<
+					"Here is the error:\n\n" << e.what() << std::endl;
+			__SUP_SS_THROW__;
+		}
+		catch(...)
+		{
+			__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
+					" the FE Macro named '" << feMacroName << "' with target FE '" <<
+					targetInterfaceID << "' failed to check multi-dimensional launch " <<
+					"due to an unknown error." << __E__;
+			__SUP_SS_THROW__;
+		}
+
+		__SUP_COUTV__(outputArgs);
+
+		xoap::MessageReference replyMessage =
+			SOAPUtilities::makeSOAPMessageReference(type + "Done");
+		SOAPParameters txParameters;
+		txParameters.addParameter("Done", done?"1":"0");
+		SOAPUtilities::addParameters(replyMessage, txParameters);
+
+
+		__SUP_COUT__ << "Sending FE macro result: " <<
+				SOAPUtilities::translate(replyMessage) << __E__;
+
+		return replyMessage;
+	} //end type feMacroMultiDimensionalCheck
 	else
 	{
 		__SUP_SS__ << "Unrecognized FE Communication type: " << type << __E__;

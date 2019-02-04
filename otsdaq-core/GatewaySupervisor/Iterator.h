@@ -68,6 +68,7 @@ private:
     	bool										runIsDone_;
 
     	std::vector<std::string> 					fsmCommandParameters_;
+    	std::vector<bool>							targetsDone_;
 
 
 	}; //end declaration of iterator workloop members
@@ -85,6 +86,8 @@ private:
 
     static void								startCommandModifyActive	(IteratorWorkLoopStruct *iteratorStruct);
 
+    static void								startCommandMacro			(IteratorWorkLoopStruct *iteratorStruct, bool isFEMacro);
+    static bool								checkCommandMacro			(IteratorWorkLoopStruct *iteratorStruct, bool isFEMacro);
 
     static void								startCommandBeginLabel		(IteratorWorkLoopStruct *iteratorStruct);
     static void								startCommandRepeatLabel		(IteratorWorkLoopStruct *iteratorStruct);
@@ -106,7 +109,7 @@ private:
     std::string 							lastFsmName_;
     std::string 							errorMessage_;
 
-    GatewaySupervisor* 							theSupervisor_;
+    GatewaySupervisor* 						theSupervisor_;
 
     //========================================================================================================================
     //helpCommandModifyActive
