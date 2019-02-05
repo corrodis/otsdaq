@@ -592,6 +592,10 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string &reque
 
 			longDimensionParameters.push_back(longParamMap_t());
 			longDimensionParameters.push_back(longParamMap_t());
+
+			doubleDimensionParameters.push_back(doubleParamMap_t());
+			doubleDimensionParameters.push_back(doubleParamMap_t());
+
 			longDimensionParameters.back().emplace(
 					std::make_pair("myOtherArg",
 						std::make_pair( 3 /*current value*/,
@@ -612,6 +616,8 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string &reque
 			localRecurse = [&dimensionIterations,
 							&dimensionIterationCnt,
 							&iterationCount,
+							&longDimensionParameters,
+							&doubleDimensionParameters,
 							&fe,
 							&feMacro,
 							&argsIn,
@@ -630,6 +636,58 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string &reque
 					__GEN_COUT__ << "Iteration count: " << iterationCount++ << __E__;
 					__GEN_COUT__ << "Launching FE Macro '" << feMacro.feMacroName_ << "' ..." << __E__;
 
+					//set argsIn to current value
+
+					//scan all dimension parameter objects
+					//	note: Although conflicts should not be allowed
+					//		at this point, lower dimensions will have priority over higher dimension
+					//		with same name argument.. and longs will have priority over doubles
+
+
+					bool foundAsLong;
+					for(unsigned int i=0;i<argsIn.size();++i)
+					{
+						foundAsLong = false;
+						for(unsigned int j=0;j<dimensionIterations.size();++j)
+						{
+							auto longIt = longDimensionParameters[j].find(argsIn[i].first);
+							if(longIt == longDimensionParameters[j].end())
+								continue;
+
+							//else found long!
+							__GEN_COUT__ << "Assigning argIn '" <<
+									argsIn[i].first << "' to current long value '" <<
+									longIt->second.first << "' from dimension " <<
+									j << " parameter." << __E__;
+							argsIn[i].second = std::to_string(
+									longIt->second.first);
+							foundAsLong = true;
+							break;
+						} //end long loop
+						if(foundAsLong) continue; //skip double check
+
+						for(unsigned int j=0;j<dimensionIterations.size();++j)
+						{
+							auto doubleIt = doubleDimensionParameters[j].find(argsIn[i].first);
+							if(doubleIt == doubleDimensionParameters[j].end())
+								continue;
+
+							//else found long!
+							__GEN_COUT__ << "Assigning argIn '" <<
+									argsIn[i].first << "' to current double value '" <<
+									doubleIt->second.first << "' from dimension " <<
+									j << " parameter." << __E__;
+							argsIn[i].second = std::to_string(
+									doubleIt->second.first);
+							foundAsLong = true;
+							break;
+						} //end double loop
+
+						__GEN_SS__ << "ArgIn impossibly not found!" << __E__;
+						__GEN_SS_THROW__;
+					} //done building argsIn
+
+
 
 					//have pointer to Macro structure, so run it
 					(fe->*(feMacro.macroFunction_))(argsIn,argsOut);
@@ -645,6 +703,8 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string &reque
 
 					//if enabled to save to file do it.
 					__GEN_COUT__ << "\n" << outSs.str();
+
+
 
 					return;
 				}
@@ -663,6 +723,29 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string &reque
 				//if enabled to save to file do it.
 				__GEN_COUT__ << "\n" << outSs.str();
 
+
+				//update current value to initial value for this dimension's parameters
+				{
+					for(auto& longPair: longDimensionParameters[dimension])
+					{
+						longPair.second.first = //reset to initial value
+								longPair.second.second.first;
+						__GEN_COUT__ << "arg '" <<
+								longPair.first << "' current value: " <<
+								longPair.second.first << __E__;
+					}//end long loop
+
+					for(auto& doublePair: doubleDimensionParameters[dimension])
+					{
+						doublePair.second.first = //reset to initial value
+								doublePair.second.second.first;
+						__GEN_COUT__ << "arg '" <<
+								doublePair.first << "' current value: " <<
+								doublePair.second.first << __E__;
+					}//end double loop
+				} //end update current value to initial value for all dimensional parameters
+
+
 				for(dimensionIterationCnt[dimension]=0; //reset each time through dimension loop
 						dimensionIterationCnt[dimension]<
 						dimensionIterations[dimension];
@@ -674,6 +757,29 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string &reque
 						dimensionIterationCnt[dimension] << __E__;
 
 					localRecurse(dimension+1);
+
+					//update current value to next value for this dimension's parameters
+					{
+						for(auto& longPair: longDimensionParameters[dimension])
+						{
+							longPair.second.first += //add step value
+									longPair.second.second.second;
+							__GEN_COUT__ << "arg '" <<
+									longPair.first << "' current value: " <<
+									longPair.second.first << __E__;
+						}//end long loop
+
+						for(auto& doublePair: doubleDimensionParameters[dimension])
+						{
+							doublePair.second.first += //add step value
+									doublePair.second.second.second;
+
+							__GEN_COUT__ << "arg '" <<
+									doublePair.first << "' current value: " <<
+									doublePair.second.first << __E__;
+						}//end double loop
+					} //end update current value to next value for all dimensional parameters
+
 				}
 				__GEN_COUT__ << "Completed dimension[" << dimension <<
 						"] number of iterations := " <<

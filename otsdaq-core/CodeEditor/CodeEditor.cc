@@ -110,7 +110,7 @@ catch(...)
 //safePathString
 std::string CodeEditor::safePathString(const std::string& path)
 {
-	__COUTV__(path);
+	//__COUTV__(path);
 	//remove all non ascii and non /, -, _,, space
 	std::string fullpath = "";
 	for(unsigned int i=0;i<path.length();++i)
@@ -121,7 +121,7 @@ std::string CodeEditor::safePathString(const std::string& path)
 				path[i] >= ' ' ||
 				path[i] >= '/')
 			fullpath += path[i];
-	__COUTV__(fullpath);
+	//__COUTV__(fullpath);
 	if(!fullpath.length())
 	{
 		__SS__ << "Invalid path '" << fullpath << "' found!" << __E__;
@@ -135,7 +135,7 @@ std::string CodeEditor::safePathString(const std::string& path)
 //	remove all non ascii and make lower case
 std::string CodeEditor::safeExtensionString(const std::string& extension)
 {
-	__COUTV__(extension);
+	//__COUTV__(extension);
 
 	std::string retExt = "";
 	//remove all non ascii
@@ -145,13 +145,13 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 		else if((extension[i] >= 'A' && extension[i] <= 'Z'))
 			retExt += extension[i] + 32; //make lowercase
 
-	__COUTV__(retExt);
+	//__COUTV__(retExt);
 
 	if(ALLOWED_FILE_EXTENSIONS_.find(retExt) == //should match get directory content restrictions
 			ALLOWED_FILE_EXTENSIONS_.end())
 	{
 		__SS__ << "Invalid extension '" << retExt << "' found!" << __E__;
-		__SS_THROW__;
+		__SS_ONLY_THROW__;
 	}
 	return retExt;
 } //end safeExtensionString()
