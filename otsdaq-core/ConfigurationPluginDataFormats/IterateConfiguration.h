@@ -153,7 +153,7 @@ public:
 
 	static struct IterateTableColumns
 	{
-		const std::string PlanLink_ 				= "LinkToIterationPlanConfiguration";
+		const std::string PlanLink_ 				= "LinkToIterationPlanTable";
 	} iterateTableCols_;
 
 	static struct PlanTableColumns

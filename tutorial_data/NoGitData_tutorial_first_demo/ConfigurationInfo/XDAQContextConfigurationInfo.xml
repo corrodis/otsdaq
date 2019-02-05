@@ -3,7 +3,7 @@
 		<CONFIGURATION Name="XDAQContextConfiguration">
 			<VIEW Name="XDAQ_CONTEXT_CONFIGURATION" Type="File,Database,DatabaseTest">
 				<COLUMN Type="UID" 	 Name="ContextUID" 	 StorageName="CONTEXT_UID" 		DataType="VARCHAR2"/>
-				<COLUMN Type="ChildLink-0" 	 Name="LinkToApplicationConfiguration" 	 StorageName="LINK_TO_APPLICATION_CONFIGURATION" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLink-0" 	 Name="LinkToApplicationTable" 	 StorageName="LINK_TO_APPLICATION_TABLE" 		DataType="VARCHAR2"/>
 				<COLUMN Type="ChildLinkGroupID-0" 	 Name="ApplicationGroupID" 	 StorageName="APPLICATION_GROUP_ID" 		DataType="VARCHAR2"/>
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2"/>
 				<COLUMN Type="Data" 	 Name="Id" 	 StorageName="ID" 		DataType="NUMBER"/>

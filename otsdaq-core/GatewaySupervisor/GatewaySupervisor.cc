@@ -1332,7 +1332,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 				std::string dumpFilePath, dumpFileRadix, dumpFormat;
 				try //for backwards compatibility
 				{
-					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration").
+					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable").
 						getNode(activeStateMachineName_);
 					dumpConfiguration = fsmLinkNode.getNode("EnableConfigurationDumpOnConfigureTransition").
 						getValue<bool>();
@@ -1570,7 +1570,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 				std::string dumpFilePath, dumpFileRadix, dumpFormat;
 				try //for backwards compatibility
 				{
-					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration").
+					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable").
 						getNode(activeStateMachineName_);
 					dumpConfiguration = fsmLinkNode.getNode("EnableConfigurationDumpOnRunTransition").
 						getValue<bool>();
@@ -2721,7 +2721,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 			{
 				try //for backwards compatibility
 				{
-					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration");
+					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable");
 					if (!fsmLinkNode.isDisconnected())
 						stateMachineAliasFilter =
 								fsmLinkNode.getNode(fsmName + "/SystemAliasFilter").getValue<std::string>();
@@ -3035,7 +3035,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 			try
 			{
 				auto fsmNodes = configLinkNode.getNode(
-						"LinkToStateMachineConfiguration").getChildren();
+						"LinkToStateMachineTable").getChildren();
 				for(const auto& fsmNode:fsmNodes)
 					xmlOut.addTextElementToData("stateMachineName", fsmNode.first);
 			}
@@ -3091,7 +3091,7 @@ void GatewaySupervisor::request(xgi::Input * in, xgi::Output * out)
 				{
 					try //for backwards compatibility
 					{
-						ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration");
+						ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable");
 						if (!fsmLinkNode.isDisconnected())
 							stateMachineRunAlias =
 									fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").getValue<std::string>();

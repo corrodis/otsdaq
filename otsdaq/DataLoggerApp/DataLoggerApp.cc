@@ -76,7 +76,7 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub * s)
 				<< " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
 	}
-	supervisorConfigurationPath_  = "/" + supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
+	supervisorConfigurationPath_  = "/" + supervisorContextUID_ + "/LinkToApplicationTable/" + supervisorApplicationUID_ + "/LinkToSupervisorTable";
 
 	setStateMachineName(supervisorApplicationUID_);
 }

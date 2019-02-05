@@ -47,10 +47,10 @@ void FEVInterfacesManager::createInterfaces(void)
 {
 
 	const std::string COL_NAME_feGroupLink 	= "LinkToFEInterfaceTable";
-	const std::string COL_NAME_feTypeLink 	= "LinkToFETypeConfiguration";
+	const std::string COL_NAME_feTypeLink 	= "LinkToFETypeTable";
 	const std::string COL_NAME_fePlugin 	= "FEInterfacePluginName";
 
-	__CFG_COUT__ << "Path: "<< theConfigurationPath_+"/"+COL_NAME_feGroupLink << __E__;
+	__CFG_COUT__ << "Path: " << theConfigurationPath_ + "/" + COL_NAME_feGroupLink << __E__;
 
 	destroy();
 

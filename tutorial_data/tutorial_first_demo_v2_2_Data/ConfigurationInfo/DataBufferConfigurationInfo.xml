@@ -6,7 +6,7 @@
 				<COLUMN Type="UID" 	 Name="ProcessorUID" 	 StorageName="PROCESSOR_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="FixedChoiceData" 	 Name="ProcessorType" 	 StorageName="PROCESSOR_TYPE" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,Producer,Consumer"/>
 				<COLUMN Type="FixedChoiceData" 	 Name="ProcessorPluginName" 	 StorageName="PROCESSOR_PLUGIN_NAME" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,UDPDataListenerProducer,UDPDataListenerProducer,RawDataSaverConsumer,UDPDataStreamerConsumer,DemoDQMHistosConsumer"/>
-				<COLUMN Type="ChildLink-0" 	 Name="LinkToProcessorConfiguration" 	 StorageName="LINK_TO_PROCESSOR_CONFIGURATION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-0" 	 Name="LinkToProcessorTable" 	 StorageName="LINK_TO_PROCESSOR_TABLE" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLinkUID-0" 	 Name="LinkToProcessorUID" 	 StorageName="LINK_TO_PROCESSOR_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>

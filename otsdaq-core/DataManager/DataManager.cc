@@ -82,7 +82,7 @@ void DataManager::configure(void)
 	const std::string COL_NAME_processorGroupLink 	= "LinkToDataProcessorTable";
 	const std::string COL_NAME_processorType 		= "ProcessorType";
 	const std::string COL_NAME_processorPlugin 		= "ProcessorPluginName";
-	const std::string COL_NAME_processorLink 		= "LinkToProcessorConfiguration";
+	const std::string COL_NAME_processorLink 		= "LinkToProcessorTable";
 	const std::string COL_NAME_appUID 				= "ApplicationUID";
 
 	__CFG_COUT__ << transitionName << " DataManager" << __E__;
@@ -93,7 +93,7 @@ void DataManager::configure(void)
 	//get all buffer definitions from configuration tree
 	for (const auto& buffer :
 			theXDAQContextConfigTree_.getNode(theConfigurationPath_ +
-					"/" + COL_NAME_bufferGroupLink).getChildren()) //"/LinkToDataManagerConfiguration").getChildren())
+					"/" + COL_NAME_bufferGroupLink).getChildren()) //"/LinkToDataManagerTable").getChildren())
 	{
 		__CFG_COUT__ << "Data Buffer Name: " << buffer.first << std::endl;
 		if (buffer.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
@@ -101,7 +101,7 @@ void DataManager::configure(void)
 			std::vector<unsigned int> producersVectorLocation;
 			std::vector<unsigned int> consumersVectorLocation;
 			auto bufferConfigurationList = buffer.second.getNode(
-					COL_NAME_processorGroupLink).getChildren();//"LinkToDataBufferConfiguration").getChildren();
+					COL_NAME_processorGroupLink).getChildren();//"LinkToDataBufferTable").getChildren();
 			unsigned int location = 0;
 			for (const auto& bufferConfiguration : bufferConfigurationList)
 			{
@@ -164,7 +164,7 @@ void DataManager::configure(void)
 				__CFG_COUT__ << "Creating producer... " <<
 						bufferConfigurationList[producerLocation].first << std::endl;
 				//				__CFG_COUT__ << bufferConfigurationMap[producer].getNode(COL_NAME_processorPlugin).getValue<std::string>() << std::endl;
-				//				__CFG_COUT__ << bufferConfigurationMap[producer].getNode("LinkToProcessorConfiguration") << std::endl;
+				//				__CFG_COUT__ << bufferConfigurationMap[producer].getNode("LinkToProcessorTable") << std::endl;
 				//				__CFG_COUT__ << "THIS DATA MANAGER POINTER: " << this << std::endl;
 				//				__CFG_COUT__ << "PASSED" << std::endl;
 
@@ -245,7 +245,7 @@ void DataManager::configure(void)
 				__CFG_COUT__ << "Creating consumer... " <<
 						bufferConfigurationList[consumerLocation].first << std::endl;
 				//				__CFG_COUT__ << bufferConfigurationMap[consumer].getNode(COL_NAME_processorPlugin).getValue<std::string>() << std::endl;
-				//				__CFG_COUT__ << bufferConfigurationMap[consumer].getNode("LinkToProcessorConfiguration") << std::endl;
+				//				__CFG_COUT__ << bufferConfigurationMap[consumer].getNode("LinkToProcessorTable") << std::endl;
 				//				__CFG_COUT__ << theXDAQContextConfigTree_.getBackNode(theConfigurationPath_) << std::endl;
 				//				__CFG_COUT__ << "THIS DATA MANAGER POINTER: " << this << std::endl;
 				//				__CFG_COUT__ << "PASSED" << std::endl;

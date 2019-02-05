@@ -652,7 +652,7 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct *iteratorStruct,
 	{
 		try //for backwards compatibility
 		{
-			ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineConfiguration");
+			ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable");
 			if(!fsmLinkNode.isDisconnected())
 				iteratorStruct->fsmRunAlias_  =
 						fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").getValue<std::string>();

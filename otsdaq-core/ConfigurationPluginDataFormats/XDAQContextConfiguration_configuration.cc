@@ -43,7 +43,7 @@ XDAQContextConfiguration::XDAQContextConfiguration(void)
 	//	   <CONFIGURATION Name="XDAQContextConfiguration">
 	//	     <VIEW Name="XDAQ_CONTEXT_CONFIGURATION" Type="File,Database,DatabaseTest">
 	//           <COLUMN Type="UID" 	           Name="ContextUID" 	                 StorageName="CONTEXT_UID" 		                 DataType="VARCHAR2"/>
-	//           <COLUMN Type="ChildLink-0" 	   Name="LinkToApplicationConfiguration" StorageName="LINK_TO_APPLICATION_CONFIGURATION" DataType="VARCHAR2"/>
+	//           <COLUMN Type="ChildLink-0" 	   Name="LinkToApplicationTable" StorageName="LINK_TO_APPLICATION_CONFIGURATION" DataType="VARCHAR2"/>
 	//           <COLUMN Type="ChildLinkGroupID-0" Name="ApplicationGroupID" 	         StorageName="APPLICATION_GROUP_ID"              DataType="VARCHAR2"/>
 	//           <COLUMN Type="OnOff" 	           Name="Status" 	                     StorageName="STATUS" 	   	                     DataType="VARCHAR2"/>
 	//           <COLUMN Type="Data" 	           Name="Id" 	                         StorageName="ID" 		                         DataType="VARCHAR2"/>
@@ -200,7 +200,7 @@ unsigned int XDAQContextConfiguration::getARTDAQDataPort(const ConfigurationMana
 					if(processorType == "ARTDAQConsumer" || 
 							processorType == "ARTDAQProducer")
 						return processor.second.getNode(
-								"LinkToProcessorConfiguration").getNode(
+								"LinkToProcessorTable").getNode(
 										XDAQContextConfiguration::ARTDAQ_OFFSET_PORT).getValue<unsigned int>();
 				}
 								
@@ -257,7 +257,7 @@ ConfigurationTree XDAQContextConfiguration::getApplicationNode(const Configurati
 {
 	return configManager->__SELF_NODE__.getNode(
 		contextUID + "/" +
-		colContext_.colLinkToApplicationConfiguration_ + "/" +
+		colContext_.colLinkToApplicationTable_ + "/" +
 		appUID);
 }
 
@@ -267,9 +267,9 @@ ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(const Config
 {
 	return configManager->__SELF_NODE__.getNode(
 		contextUID + "/" +
-		colContext_.colLinkToApplicationConfiguration_ + "/" +
+		colContext_.colLinkToApplicationTable_ + "/" +
 		appUID + "/" +
-		colApplication_.colLinkToSupervisorConfiguration_);
+		colApplication_.colLinkToSupervisorTable_);
 }
 
 
@@ -317,7 +317,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 		//child.second.getNode(colContext_.colARTDAQDataPort_).getValue(contexts_.back().artdaqDataPort_);
 
 		//__COUT__ << contexts_.back().address_ << std::endl;
-		auto appLink = child.second.getNode(colContext_.colLinkToApplicationConfiguration_);
+		auto appLink = child.second.getNode(colContext_.colLinkToApplicationTable_);
 		if (appLink.isDisconnected())
 		{
 			__SS__ << "Application link is disconnected!" << std::endl;
@@ -429,7 +429,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 			}
 
 
-			auto appPropertyLink = appChild.second.getNode(colApplication_.colLinkToPropertyConfiguration_);
+			auto appPropertyLink = appChild.second.getNode(colApplication_.colLinkToPropertyTable_);
 			if (!appPropertyLink.isDisconnected())
 			{
 				//add xdaq application properties to this context

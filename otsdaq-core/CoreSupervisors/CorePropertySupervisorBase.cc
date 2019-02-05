@@ -75,8 +75,8 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	}
 
 	CorePropertySupervisorBase::supervisorConfigurationPath_  = "/" +
-			CorePropertySupervisorBase::supervisorContextUID_ + "/LinkToApplicationConfiguration/" +
-			CorePropertySupervisorBase::supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
+			CorePropertySupervisorBase::supervisorContextUID_ + "/LinkToApplicationTable/" +
+			CorePropertySupervisorBase::supervisorApplicationUID_ + "/LinkToSupervisorTable";
 
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
@@ -345,7 +345,7 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 
 	try
 	{
-		auto /*map<name,node>*/ children = supervisorNode.getNode("LinkToPropertyConfiguration").getChildren();
+		auto /*map<name,node>*/ children = supervisorNode.getNode("LinkToPropertyTable").getChildren();
 
 		for(auto& child:children)
 		{

@@ -10,7 +10,7 @@
 				<COLUMN Type="Data" 	 Name="RequiredPermissionLevel" 	 StorageName="REQUIRED_PERMISSION_LEVEL" 		DataType="VARCHAR2"/>
 				<COLUMN Type="Data" 	 Name="ImageURL" 	 StorageName="IMAGE_URL" 		DataType="VARCHAR2"/>
 				<COLUMN Type="Data" 	 Name="WindowContentURL" 	 StorageName="WINDOW_CONTENT_URL" 		DataType="VARCHAR2"/>
-				<COLUMN Type="ChildLink-0" 	 Name="LinkToApplicationConfiguration" 	 StorageName="LINK_TO_APPLICATION_CONFIGURATION" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLink-0" 	 Name="LinkToApplicationTable" 	 StorageName="LINK_TO_APPLICATION_TABLE" 		DataType="VARCHAR2"/>
 				<COLUMN Type="ChildLinkUID-0" 	 Name="ApplicationUID" 	 StorageName="APPLICATION_UID" 		DataType="VARCHAR2"/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2"/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2"/>
