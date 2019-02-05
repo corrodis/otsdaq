@@ -57,7 +57,7 @@ public:
 	{
 		std::map<std::string,std::string> m;
 		m[COMMAND_BEGIN_LABEL] 				=  "IterationCommandBeginLabelConfiguration";
-		m[COMMAND_CHOOSE_FSM] 		=  "IterationCommandChooseFSMConfiguration";
+		m[COMMAND_CHOOSE_FSM] 				=  "IterationCommandChooseFSMConfiguration";
 		m[COMMAND_CONFIGURE_ACTIVE_GROUP] 	=  ""; //no parameters
 		m[COMMAND_CONFIGURE_ALIAS] 			=  "IterationCommandConfigureAliasConfiguration";
 		m[COMMAND_CONFIGURE_GROUP] 			=  "IterationCommandConfigureGroupConfiguration";
@@ -90,16 +90,13 @@ public:
 		const std::string GroupName_ 				= "GroupName";
 		const std::string GroupKey_ 				= "GroupKey";
 	} commandConfigureGroupParams_;
-	static struct CommandExecuteFEMacroParams
-	{
-		//targets
-		const std::string FEMacroName_ 				= "FEMacroName";
-		//macro parameters
-	} commandExecuteFEMacroParams_;
-	static struct CommandExecuteMacroParams
+	static struct CommandExecuteMacroParams //treat FE and Macro the same
 	{
 		//targets
 		const std::string MacroName_ 				= "MacroName";
+		const std::string MacroParameterLink_		= "LinkToMacroParameters";
+		const std::string MacroParameterPrepend_	= "MacroParameter-";
+
 		//macro parameters
 	} commandExecuteMacroParams_;
 	static struct CommandModifyActiveParams
@@ -141,6 +138,13 @@ public:
 		const std::string TargetLinkUID_ 			= "LinkToTargetUID";
 	} targetCols_;
 
+
+	//for macro parameters
+	static struct MacroParamTableColumns
+	{
+		const std::string Name_ 					= "ParameterName";
+		const std::string Value_ 					= "ParameterValue";
+	} macroParamCols_;
 
 	//Table hierarchy is as follows:
 	//	Iterate

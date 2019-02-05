@@ -2561,7 +2561,7 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 	//	stateMachineXgiHandler() -- prepend StateMachine to request type
 
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AutomatedRequestTypes,
-			"getSystemMessages | getCurrentState | gatewayLaunchOTS | gatewayLaunchWiz");
+			"getSystemMessages | getCurrentState | getIterationPlanStatus");
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireUserLockRequestTypes,
 			"gatewayLaunchOTS | gatewayLaunchWiz | codeEditor");
 //	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedUsernameRequestTypes,

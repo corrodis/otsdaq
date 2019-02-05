@@ -44,6 +44,9 @@ public:
     void		  	    runFEMacro							(const std::string& interfaceID, const FEVInterface::frontEndMacroStruct_t& feMacro, const std::string& inputArgs, std::string& outputArgs);	//used by MacroMaker and FE calling indirectly
     void		  	    runFEMacro							(const std::string& interfaceID, const std::string& feMacroName, const std::string& inputArgs, std::string& outputArgs);	//used by MacroMaker
     void		  	    runFEMacroByFE						(const std::string& callingInterfaceID, const std::string& interfaceID, const std::string& feMacroName, const std::string& inputArgs, std::string& outputArgs);	//used by FE calling (i.e. FESupervisor)
+    void		  	    startFEMacroMultiDimensional		(const std::string& requester, const std::string& interfaceID, const std::string& feMacroName, const std::string& inputArgs);	//used by iterator calling (i.e. FESupervisor)
+    bool		  	    checkFEMacroMultiDimensional		(const std::string& interfaceID, const std::string& feMacroName);	//used by iterator calling (i.e. FESupervisor)
+
     unsigned int		getInterfaceUniversalAddressSize	(const std::string& interfaceID); 	//used by MacroMaker
     unsigned int		getInterfaceUniversalDataSize		(const std::string& interfaceID);	//used by MacroMaker
     bool				allFEWorkloopsAreDone				(void); //used by Iterator, e.g.
@@ -55,8 +58,13 @@ public:
     //FE communication helpers
 	std::mutex									frontEndCommunicationReceiveMutex_;
 	std::map<std::string /*targetInterfaceID*/,  //map of target to buffers organized by source
-		std::map<std::string /*sourceInterfaceID*/,
+		std::map<std::string /*requester*/,
 			std::queue<std::string /*value*/> > >  	frontEndCommunicationReceiveBuffer_;
+
+	//multi-dimensional FE Macro helpers
+	std::mutex									frontEndMacroMultiDimensionalDoneMutex_;
+	std::map<std::string /*targetInterfaceID*/, //set of active multi-dimensional FE Macro launches
+		std::string /*status := Active, Done, Error: <message> */> frontEndMacroMultiDimensionalStatusMap_;
 
 private:
 

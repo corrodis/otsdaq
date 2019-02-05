@@ -424,9 +424,7 @@ void FEVInterface::registerFEMacroFunction(
 const std::string& FEVInterface::getFEMacroConstArgument(frontEndMacroConstArgs_t& args,
 		const std::string& argName)
 {
-	for(const std::pair<const std::string /* input arg name */ ,
-			const std::string /* arg input value */ >&
-			pair : args)
+	for(const frontEndMacroArg_t& pair : args)
 	{
 		if(pair.first == argName)
 		{
@@ -573,7 +571,7 @@ void FEVInterface::runSelfFrontEndMacro(
 		const std::string& feMacroName,
 		//not equivalent to __ARGS__
 		//	left non-const value so caller can modify inputArgs as they are being created
-		const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
+		const std::vector<FEVInterface::frontEndMacroArg_t>& argsIn,
 		std::vector<FEVInterface::frontEndMacroArg_t>& argsOut)
 {
 	//have pointer to virtual FEInterface, find Macro structure
@@ -587,24 +585,20 @@ void FEVInterface::runSelfFrontEndMacro(
 	}
 	const FEVInterface::frontEndMacroStruct_t& feMacro = FEMacroIt->second;
 
-	std::vector<FEVInterface::frontEndMacroConstArg_t> argsIn;
-	{
-		for(unsigned int i=0;i<inputArgs.size();++i)
-			if(inputArgs[i].first != feMacro.namesOfInputArguments_[i])
-			{
-				__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" <<
-						getInterfaceUID() << "' was attempted with a mismatch in" <<
-						" a name of an input argument. " <<
-						inputArgs[i].first << " was given. " <<
-						feMacro.namesOfInputArguments_[i] <<
-						" expected." << __E__;
-				__CFG_COUT_ERR__ << "\n" << ss.str();
-				__CFG_SS_THROW__;
-			}
-			else
-				argsIn.push_back(std::pair<std::string,std::string>(
-					inputArgs[i].first,inputArgs[i].second));
-	}
+	//check for input arg name match
+	for(unsigned int i=0;i<argsIn.size();++i)
+		if(argsIn[i].first != feMacro.namesOfInputArguments_[i])
+		{
+			__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" <<
+					getInterfaceUID() << "' was attempted with a mismatch in" <<
+					" a name of an input argument. " <<
+					argsIn[i].first << " was given. " <<
+					feMacro.namesOfInputArguments_[i] <<
+					" expected." << __E__;
+			__CFG_COUT_ERR__ << "\n" << ss.str();
+			__CFG_SS_THROW__;
+		}
+
 
 	//check namesOfInputArguments_
 	if(feMacro.namesOfInputArguments_.size() != argsIn.size())
@@ -621,7 +615,7 @@ void FEVInterface::runSelfFrontEndMacro(
 
 
 	__CFG_COUT__ << "# of input args = " << argsIn.size() << __E__;
-	for(auto &argIn:argsIn)
+	for(auto& argIn:argsIn)
 		__CFG_COUT__ << argIn.first << ": " << argIn.second << __E__;
 
 	__CFG_COUT__ << "Launching FE Macro '" <<
@@ -639,7 +633,7 @@ void FEVInterface::runSelfFrontEndMacro(
 	__CFG_COUT__ << "FE Macro complete!" << __E__;
 
 	__CFG_COUT__ << "# of output args = " << argsOut.size() << __E__;
-	for(const auto &arg:argsOut)
+	for(const auto& arg:argsOut)
 		__CFG_COUT__ << arg.first << ": " << arg.second << __E__;
 
 } //end runSelfFrontEndMacro()
@@ -666,7 +660,7 @@ void FEVInterface::runFrontEndMacro(const std::string& targetInterfaceID,
 
 	SOAPParameters parameters;
 	parameters.addParameter("type", "feMacro");
-	parameters.addParameter("sourceInterfaceID", FEVInterface::interfaceUID_);
+	parameters.addParameter("requester", FEVInterface::interfaceUID_);
 	parameters.addParameter("targetInterfaceID", targetInterfaceID);
 	parameters.addParameter("feMacroName", feMacroName);
 	parameters.addParameter("inputArgs", inputArgsStr);
@@ -722,10 +716,10 @@ void FEVInterface::runFrontEndMacro(const std::string& targetInterfaceID,
 //receiveFromFrontEnd
 //	specialized template function for T=std::string
 //
-//	Note: sourceInterfaceID can be a wildcard string as defined in StringMacros
-void FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID, std::string& retValue, unsigned int timeoutInSeconds) const
+//	Note: requester can be a wildcard string as defined in StringMacros
+void FEVInterface::receiveFromFrontEnd(const std::string& requester, std::string& retValue, unsigned int timeoutInSeconds) const
 {
-	__FE_COUTV__(sourceInterfaceID);
+	__FE_COUTV__(requester);
 	__FE_COUTV__(parentSupervisor_);
 
 	std::string data = "0";
@@ -750,10 +744,10 @@ void FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID, std
 				for(auto& buffPair:receiveBuffersForTargetIt->second)
 					__FE_COUTV__(buffPair.first);
 
-				//match sourceInterfaceID to map of buffers
+				//match requester to map of buffers
 				std::string sourceBufferId = "";
 				std::queue<std::string /*value*/>& sourceBuffer =
-									StringMacros::getWildCardMatchFromMap(sourceInterfaceID,
+									StringMacros::getWildCardMatchFromMap(requester,
 						receiveBuffersForTargetIt->second,
 						&sourceBufferId);
 
@@ -772,7 +766,7 @@ void FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID, std
 				}
 				else
 					__FE_COUT__ << "Source buffer empty for '" <<
-						sourceInterfaceID << "'" << __E__;
+						requester << "'" << __E__;
 			}
 
 			//else, not found...
@@ -782,7 +776,7 @@ void FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID, std
 			{
 				__FE_SS__ << "Timeout (" << timeoutInSeconds <<
 						" s) waiting for front-end communication from " <<
-						sourceInterfaceID << "." << __E__;
+						requester << "." << __E__;
 				__FE_SS_THROW__;
 			}
 			//else, there is still hope
@@ -791,7 +785,7 @@ void FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID, std
 
 		//else try again in a sec
 		__FE_COUT__ << "Waiting for front-end communication from " <<
-				sourceInterfaceID << " for " <<
+				requester << " for " <<
 				timeoutInSeconds << " more seconds..." << __E__;
 
 		--timeoutInSeconds;
@@ -805,10 +799,10 @@ void FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID, std
 //receiveFromFrontEnd
 //	specialized template function for T=std::string
 //	Note: if called without template <T> syntax, necessary because types of std::basic_string<char> cause compiler problems if no string specific function
-std::string FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID, unsigned int timeoutInSeconds) const
+std::string FEVInterface::receiveFromFrontEnd(const std::string& requester, unsigned int timeoutInSeconds) const
 {
 	std::string retValue;
-	FEVInterface::receiveFromFrontEnd(sourceInterfaceID,retValue,timeoutInSeconds);
+	FEVInterface::receiveFromFrontEnd(requester,retValue,timeoutInSeconds);
 	return retValue;
 } //end receiveFromFrontEnd()
 

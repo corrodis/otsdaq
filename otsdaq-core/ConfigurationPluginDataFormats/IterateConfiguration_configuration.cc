@@ -33,7 +33,6 @@ IterateConfiguration::CommandBeginLabelParams 		IterateConfiguration::commandBeg
 IterateConfiguration::CommandConfigureActiveParams 	IterateConfiguration::commandConfigureActiveParams_;
 IterateConfiguration::CommandConfigureAliasParams 	IterateConfiguration::commandConfigureAliasParams_;
 IterateConfiguration::CommandConfigureGroupParams 	IterateConfiguration::commandConfigureGroupParams_;
-IterateConfiguration::CommandExecuteFEMacroParams 	IterateConfiguration::commandExecuteFEMacroParams_;
 IterateConfiguration::CommandExecuteMacroParams 	IterateConfiguration::commandExecuteMacroParams_;
 IterateConfiguration::CommandModifyActiveParams 	IterateConfiguration::commandModifyActiveParams_;
 IterateConfiguration::CommandRepeatLabelParams 		IterateConfiguration::commandRepeatLabelParams_;
@@ -43,6 +42,8 @@ IterateConfiguration::CommandChooseFSMParams 		IterateConfiguration::commandChoo
 IterateConfiguration::TargetParams 					IterateConfiguration::targetParams_;
 IterateConfiguration::TargetTableColumns			IterateConfiguration::targetCols_;
 IterateConfiguration::CommandTargetColumns	 		IterateConfiguration::commandTargetCols_;
+
+IterateConfiguration::MacroParamTableColumns	 	IterateConfiguration::macroParamCols_;
 
 
 
@@ -122,6 +123,8 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 
 		for(unsigned int i=0; i<commandSpecificFields.size()-3; ++i) //ignore last three columns
 		{
+			//NOTE -- that links turn into one field with value LinkID/GroupID unless specially handled
+
 			__COUT__ << "\t\tParameter \t" << commandSpecificFields[i].first << " = \t" <<
 					commandSpecificFields[i].second << std::endl;
 
@@ -151,6 +154,34 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 					commands.back().addTarget();
 					commands.back().targets_.back().table_ = targetNode.getConfigurationName();
 					commands.back().targets_.back().UID_ = targetNode.getValueAsString();
+				}
+			}
+			else if(commandSpecificFields[i].first ==
+					IterateConfiguration::commandExecuteMacroParams_.MacroParameterLink_)
+			{
+				//get Macro parameters, place them in params_
+				__COUT__ << "Extracting macro parameters..." << __E__;
+				auto macroParams = commandSpecificFields[i].second.getChildren();
+
+				std::string name, value;
+				for(auto& macroParam:macroParams)
+				{
+					__COUT__ << "\t\t\tParam \t" << macroParam.first << __E__;
+					name = IterateConfiguration::commandExecuteMacroParams_.MacroParameterPrepend_ +
+							macroParam.second.getNode(
+							IterateConfiguration::macroParamCols_.Name_
+							).getValue<std::string>();
+					value = macroParam.second.getNode(
+							IterateConfiguration::macroParamCols_.Value_
+							).getValue<std::string>();
+
+					//assume no conflict with fixed parameters in map
+					//	because of prepend IterateConfiguration::commandExecuteMacroParams_.MacroParameterPrepend_ +
+					commands.back().params_.emplace(std::pair<
+							std::string /*param name*/,
+							std::string /*param value*/>(
+									name,
+									value));
 				}
 			}
 			else
