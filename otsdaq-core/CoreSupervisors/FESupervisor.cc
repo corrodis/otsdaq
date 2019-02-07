@@ -157,6 +157,9 @@ try
 		__SUP_COUTV__(type);
 
 		rxParameters.addParameter("feMacroName");
+		rxParameters.addParameter("enableSavingOutput");
+		rxParameters.addParameter("outputFilePath");
+		rxParameters.addParameter("outputFileRadix");
 		rxParameters.addParameter("inputArgs");
 
 		SOAPUtilities::receive(message, rxParameters);
@@ -164,11 +167,17 @@ try
 		std::string requester = rxParameters.getValue("requester");
 		std::string targetInterfaceID = rxParameters.getValue("targetInterfaceID");
 		std::string feMacroName = rxParameters.getValue("feMacroName");
+		bool enableSavingOutput = rxParameters.getValue("enableSavingOutput") == "1";
+		std::string outputFilePath = rxParameters.getValue("outputFilePath");
+		std::string outputFileRadix = rxParameters.getValue("outputFileRadix");
 		std::string inputArgs = rxParameters.getValue("inputArgs");
 
 		__SUP_COUTV__(requester);
 		__SUP_COUTV__(targetInterfaceID);
 		__SUP_COUTV__(feMacroName);
+		__SUP_COUTV__(enableSavingOutput);
+		__SUP_COUTV__(outputFilePath);
+		__SUP_COUTV__(outputFileRadix);
 		__SUP_COUTV__(inputArgs);
 
 
@@ -177,6 +186,7 @@ try
 			theFEInterfacesManager_->startFEMacroMultiDimensional(
 					requester,
 					targetInterfaceID, feMacroName,
+					enableSavingOutput,outputFilePath,outputFileRadix,
 					inputArgs);
 		}
 		catch(std::runtime_error &e)
@@ -276,7 +286,8 @@ catch(const std::runtime_error& e)
 
 	SOAPParameters parameters;
 	parameters.addParameter("Error", ss.str());
-	return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "FailFECommunicationRequest",
+	return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ +
+			"FailFECommunicationRequest",
 			parameters);
 }
 catch(...)
@@ -286,8 +297,9 @@ catch(...)
 
 	SOAPParameters parameters;
 	parameters.addParameter("Error", ss.str());
-	return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "FailFECommunicationRequest",
-				parameters);
+	return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ +
+			"FailFECommunicationRequest",
+			parameters);
 } //end frontEndCommunicationRequest()
 
 //========================================================================================================================

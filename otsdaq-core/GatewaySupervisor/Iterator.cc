@@ -1005,37 +1005,33 @@ void Iterator::startCommandMacro(IteratorWorkLoopStruct *iteratorStruct, bool is
 	const std::string& macroName =
 			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
 			[IterateConfiguration::commandExecuteMacroParams_.MacroName_];
+	const std::string& enableSavingOutput =
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandExecuteMacroParams_.EnableSavingOutput_];
+	const std::string& outputFilePath =
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandExecuteMacroParams_.OutputFilePath_];
+	const std::string& outputFileRadix =
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandExecuteMacroParams_.OutputFileRadix_];
+	const std::string& inputArgs =
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
+			[IterateConfiguration::commandExecuteMacroParams_.MacroArgumentString_];
 
 	__COUTV__(macroName);
+	__COUTV__(enableSavingOutput);
+	__COUTV__(outputFilePath);
+	__COUTV__(outputFileRadix);
+	__COUTV__(inputArgs);
 
 
 
 	//send request to MacroMaker a la FEVInterface::runFrontEndMacro
-	//	but need to pass iteration information, so that the call is launch by just one send
+	//	but need to pass iteration information, so that the call is launched by just one send
 	//	to each front end.
 	//	Front-ends must immediately respond that is started
 	//		FEVInterfacesManager.. must start a thread for running the macro iterations
 	//	Then check for complete.
-	//	So two messages for every launch for each front-end
-	//	BUT BUT BUT -- then the iteration plan is all messed up!
-	//		WE COULD -- detect if the frontEndMacro is the only thing in the loop, and handle it
-	//			differently, with the atomic call.. otherwise to keep loop functionality
-	//			do single calls
-
-	//inputArgs: dimensional semi-colon-separated,
-	//			colon-separated name/value/stepsize sets, and then comma-separated
-	//	normal input args are , separated, ;
-	std::string inputArgsStr = ""; //";" /*primaryDelimeter*/,","/*secondaryDelimeter*/
-
-	inputArgsStr = "myOtherArg,4";
-
-	for(auto& paramPair:iteratorStruct->commands_[iteratorStruct->commandIndex_].params_)
-	{
-		//if(paramPair.first.substr(0,
-		//		IterateConfiguration::MacroParameterPrepend_.length) == )
-		__COUT__ << "param " << paramPair.first << ":" << paramPair.second << __E__;
-		//inputArgsStr +=
-	}
 
 	iteratorStruct->targetsDone_.clear(); //reset
 
@@ -1045,7 +1041,8 @@ void Iterator::startCommandMacro(IteratorWorkLoopStruct *iteratorStruct, bool is
 	{
 		__COUT__ << "target " << target.table_ << ":" << target.UID_ << __E__;
 
-		iteratorStruct->targetsDone_.push_back(false); //init to not done
+		//for each target, init to not done
+		iteratorStruct->targetsDone_.push_back(false);
 
 		xoap::MessageReference message =
 				SOAPUtilities::makeSOAPMessageReference("FECommunication");
@@ -1058,7 +1055,10 @@ void Iterator::startCommandMacro(IteratorWorkLoopStruct *iteratorStruct, bool is
 		parameters.addParameter("targetInterfaceID", target.UID_);
 		parameters.addParameter(isFrontEndMacro?
 				"feMacroName":"macroName", macroName);
-		parameters.addParameter("inputArgs", inputArgsStr);
+		parameters.addParameter("enableSavingOutput", enableSavingOutput);
+		parameters.addParameter("outputFilePath", outputFilePath);
+		parameters.addParameter("outputFileRadix", outputFileRadix);
+		parameters.addParameter("inputArgs", inputArgs);
 		SOAPUtilities::addParameters(message, parameters);
 
 		__COUT__ << "Sending FE communication: " <<
@@ -1242,23 +1242,31 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct)
 	}
 	else //handle as long
 	{
+
+
 		long int startValue;
-
-		if(startValueStr.size() > 2 && startValueStr[1] == 'x') //assume hex value
-			startValue = strtol(startValueStr.c_str(),0,16);
-		else if(startValueStr.size() > 1 && startValueStr[0] == 'b') //assume binary value
-			startValue = strtol(startValueStr.substr(1).c_str(),0,2); //skip first 'b' character
-		else
-			startValue = strtol(startValueStr.c_str(),0,10);
-
 		long int stepSize;
 
-		if(stepSizeStr.size() > 2 && stepSizeStr[1] == 'x') //assume hex value
-			stepSize = strtol(stepSizeStr.c_str(),0,16);
-		else if(stepSizeStr.size() > 1 && stepSizeStr[0] == 'b') //assume binary value
-			stepSize = strtol(stepSizeStr.substr(1).c_str(),0,2); //skip first 'b' character
-		else
-			stepSize = strtol(stepSizeStr.c_str(),0,10);
+		StringMacros::getNumber(startValueStr,startValue);
+		StringMacros::getNumber(startValueStr,stepSize);
+
+//		long int startValue;
+//
+//		if(startValueStr.size() > 2 && startValueStr[1] == 'x') //assume hex value
+//			startValue = strtol(startValueStr.c_str(),0,16);
+//		else if(startValueStr.size() > 1 && startValueStr[0] == 'b') //assume binary value
+//			startValue = strtol(startValueStr.substr(1).c_str(),0,2); //skip first 'b' character
+//		else
+//			startValue = strtol(startValueStr.c_str(),0,10);
+//
+//		long int stepSize;
+//
+//		if(stepSizeStr.size() > 2 && stepSizeStr[1] == 'x') //assume hex value
+//			stepSize = strtol(stepSizeStr.c_str(),0,16);
+//		else if(stepSizeStr.size() > 1 && stepSizeStr[0] == 'b') //assume binary value
+//			stepSize = strtol(stepSizeStr.substr(1).c_str(),0,2); //skip first 'b' character
+//		else
+//			stepSize = strtol(stepSizeStr.c_str(),0,10);
 
 		__COUT__ << "startValue " << startValue << std::endl;
 		__COUT__ << "stepSize " << stepSize << std::endl;

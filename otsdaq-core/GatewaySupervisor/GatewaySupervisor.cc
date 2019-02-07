@@ -3536,7 +3536,7 @@ xoap::MessageReference GatewaySupervisor::lastConfigGroupRequestHandler(
 //	Else get next run number for the active FSM name, activeStateMachineName_
 //
 // 	Note: the FSM name is sanitized of special characters and used in the filename.
-unsigned int GatewaySupervisor::getNextRunNumber(const std::string &fsmNameIn)
+unsigned int GatewaySupervisor::getNextRunNumber(const std::string& fsmNameIn)
 {
 	std::string runNumberFileName = RUN_NUMBER_PATH + "/";
 	std::string fsmName = fsmNameIn == "" ? activeStateMachineName_ : fsmNameIn;
@@ -3574,7 +3574,7 @@ unsigned int GatewaySupervisor::getNextRunNumber(const std::string &fsmNameIn)
 }
 
 //========================================================================================================================
-bool GatewaySupervisor::setNextRunNumber(unsigned int runNumber, const std::string &fsmNameIn)
+bool GatewaySupervisor::setNextRunNumber(unsigned int runNumber, const std::string& fsmNameIn)
 {
 	std::string runNumberFileName = RUN_NUMBER_PATH + "/";
 	std::string fsmName = fsmNameIn == "" ? activeStateMachineName_ : fsmNameIn;
@@ -3608,8 +3608,9 @@ bool GatewaySupervisor::setNextRunNumber(unsigned int runNumber, const std::stri
 //
 //	Note: this is static so the OtsConfigurationWizardSupervisor can call it
 std::pair<std::string /*group name*/,
-	ConfigurationGroupKey> GatewaySupervisor::loadGroupNameAndKey(const std::string &fileName,
-																  std::string &returnedTimeString)
+	ConfigurationGroupKey> GatewaySupervisor::loadGroupNameAndKey(
+			const std::string& fileName,
+			std::string& returnedTimeString)
 {
 	std::string fullPath = FSM_LAST_GROUP_ALIAS_PATH + "/" + fileName;
 
@@ -3640,10 +3641,10 @@ std::pair<std::string /*group name*/,
 	fgets(line, 500, groupFile); //time
 	time_t timestamp;
 	sscanf(line, "%ld", &timestamp); //type long int
-	struct tm tmstruct;
-	::localtime_r(&timestamp, &tmstruct);
-	::strftime(line, 30, "%c %Z", &tmstruct);
-	returnedTimeString = line;
+//	struct tm tmstruct;
+//	::localtime_r(&timestamp, &tmstruct);
+//	::strftime(line, 30, "%c %Z", &tmstruct);
+	returnedTimeString = StringMacros::getTimestampString(timestamp);//line;
 	fclose(groupFile);
 
 
@@ -3651,12 +3652,13 @@ std::pair<std::string /*group name*/,
 		" theGroup.second= " << theGroup.second << __E__;
 
 	return theGroup;
-}
+} //end loadGroupNameAndKey()
 
 //========================================================================================================================
-void GatewaySupervisor::saveGroupNameAndKey(const std::pair<std::string /*group name*/,
-	ConfigurationGroupKey> &theGroup,
-											const std::string &fileName)
+void GatewaySupervisor::saveGroupNameAndKey(
+		const std::pair<std::string /*group name*/,
+			ConfigurationGroupKey> &theGroup,
+		const std::string& fileName)
 {
 	std::string fullPath = FSM_LAST_GROUP_ALIAS_PATH + "/" + fileName;
 
@@ -3671,7 +3673,7 @@ void GatewaySupervisor::saveGroupNameAndKey(const std::pair<std::string /*group 
 	outss << theGroup.first << "\n" << theGroup.second << "\n" << time(0);
 	groupFile << outss.str().c_str();
 	groupFile.close();
-}
+} //end saveGroupNameAndKey()
 
 
 

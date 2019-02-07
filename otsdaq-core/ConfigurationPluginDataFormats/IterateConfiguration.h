@@ -94,8 +94,13 @@ public:
 	{
 		//targets
 		const std::string MacroName_ 				= "MacroName";
-		const std::string MacroParameterLink_		= "LinkToMacroParameters";
-		const std::string MacroParameterPrepend_	= "MacroParameter-";
+		const std::string MacroParameterLink_		= "LinkToMacroDimensionalLoopTable";
+		const std::string EnableSavingOutput_		= "EnableSavingOutputsToFile";
+		const std::string OutputFilePath_ 			= "OutputFilePath";
+		const std::string OutputFileRadix_ 			= "OutputFileRadix";
+
+
+		const std::string MacroArgumentString_		= "MacroArgumentString";
 
 		//macro parameters
 	} commandExecuteMacroParams_;
@@ -139,11 +144,19 @@ public:
 	} targetCols_;
 
 
-	//for macro parameters
+	//for macro dimensional loop parameters
+	static struct MacroDimLoopTableColumns
+	{
+		const std::string Priority_					= "DimensionalLoopPriority";
+		const std::string NumberOfIterations_		= "NumberOfIterations";
+		const std::string ParamLink_ 				= "LinkToDimensionalLoopParameterTable";
+	} macroDimLoopCols_;
 	static struct MacroParamTableColumns
 	{
 		const std::string Name_ 					= "ParameterName";
-		const std::string Value_ 					= "ParameterValue";
+		const std::string Value_ 					= "ParameterInitialValue";
+		const std::string Step_ 					= "ParameterStepSize";
+
 	} macroParamCols_;
 
 	//Table hierarchy is as follows:

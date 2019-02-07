@@ -28,8 +28,8 @@ class ConfigurationTree
 
 public:
 	//Note: due to const members, implicit copy constructor exists, but NOT assignment operator=
-	//	... so ConfigurationTree t = mytree.GetNode(nodeString); //ok
-	//	... or ConfigurationTree t(mytree.GetNode(nodeString)); //ok
+	//	... so ConfigurationTree t = mytree.GetNode(nodeString); //OK
+	//	... or ConfigurationTree t(mytree.GetNode(nodeString)); //OK
 	//	... but mytree = mytree.GetNode(nodeString); //does NOT work
 	ConfigurationTree							();
 //	ConfigurationTree(const ConfigurationTree& a)
@@ -117,64 +117,7 @@ public:
 	//	throw exception unless it value node
 	// NOTE: can not overload functions based on return type, so T& passed as value
 	template<class T>
-	void getValue(T& value) const
-	{
-		if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
-		{
-			//attempt to interpret the value as a tree node path itself
-			try
-			{
-				ConfigurationTree valueAsTreeNode = getValueAsTreeNode();
-				//valueAsTreeNode.getValue<T>(value);
-				__COUT__ << "Success following path to tree node!" << std::endl;
-				//value has been interpreted as a tree node value
-				//now verify result under the rules of this column
-//				if(typeid(std::string) == typeid(value) ||
-//						typeid(std::basic_string<char>) == typeid(value))
-//					value =	configView_->validateValueForColumn(
-//						valueAsTreeNode.getValueAsString(),col_);
-//				else
-				//	value = (T)configView_->validateValueForColumn<T>(
-				//		valueAsTreeNode.getValueAsString(),col_);
-				value = handleValidateValueForColumn(configView_,
-						valueAsTreeNode.getValueAsString(),col_,identity<T>());
-
-				__COUT__ << "Successful value!" << std::endl;
-				return;
-			}
-			catch(...) //tree node path interpretation failed
-			{
-				//__COUT__ << "Invalid path, just returning normal value." << std::endl;
-			}
-
-			//else normal return
-			configView_->getValue(value,row_,col_);
-		}
-		else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
-		{
-			__SS__ << "Requesting getValue on config node level. Must be a value node." << std::endl;
-			__COUT_ERR__ << ss.str();
-			__SS_THROW__;
-		}
-		else if(row_ == ConfigurationView::INVALID)
-		{
-			__SS__ << "Malformed ConfigurationTree" << std::endl;
-			__COUT_ERR__ << ss.str();
-			__SS_THROW__;
-		}
-		else if(col_ == ConfigurationView::INVALID)						//this node is uid node
-		{
-			__SS__ << "Requesting getValue on uid node level. Must be a value node." << std::endl;
-			__COUT_ERR__ << ss.str();
-			__SS_THROW__;
-		}
-		else
-		{
-			__SS__ << "Impossible" << std::endl;
-			__COUT_ERR__ << ss.str();
-			__SS_THROW__;
-		}
-	}
+	void getValue(T& value) const;	//defined in included .icc source
 	//special version of getValue for string type
 	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
 	void									getValue			        (std::string& value) const;
@@ -186,12 +129,7 @@ public:
 	//	throw exception unless it value node
 	// NOTE: can not overload functions based on return type, so calls function with T& passed as value
 	template<class T>
-	T getValue(void) const
-	{
-		T value;
-		ConfigurationTree::getValue<T>(value);
-		return value;
-	}
+	T getValue(void) const; //defined in included .icc source
 	//special version of getValue for string type
 	//	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
 	std::string								getValue			        (void) const;
@@ -199,31 +137,9 @@ public:
 
 private:
 	template<typename T>
-	T handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<T>) const
-	{
-		if(!configView)
-		{
-			__SS__ << "Null configView" << std::endl;
-			__COUT_ERR__ << ss.str();
-			__SS_THROW__;
-		}
-		__COUT__ << "handleValidateValueForColumn<T>" << std::endl;
-		return configView->validateValueForColumn<T>(
-				value,col);
-	} // end T handleValidateValueForColumn()
+	T handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<T>) const; //defined in included .icc source
+	std::string handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<std::string>) const;
 
-	std::string handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<std::string>) const
-	{
-		if(!configView)
-		{
-			__SS__ << "Null configView" << std::endl;
-			__COUT_ERR__ << ss.str();
-			__SS_THROW__;
-		}
-		__COUT__ << "handleValidateValueForColumn<string>" << std::endl;
-		return configView->validateValueForColumn(
-				value,col);
-	} //end std::string handleValidateValueForColumn()
 
 public:
 
@@ -264,6 +180,8 @@ public:
 	bool									isRootNode	        		(void) const;
 	bool									isConfigurationNode	        (void) const;
 	bool									isValueNode			        (void) const;
+	bool									isValueBoolType		        (void) const;
+	bool									isValueNumberDataType       (void) const;
 	bool									isDisconnected		        (void) const;
 	bool									isLinkNode			        (void) const;
 	bool									isGroupLinkNode		        (void) const;
@@ -340,6 +258,9 @@ private:
 	const ConfigurationView*	configView_;
 
 };
+
+#include "otsdaq-core/ConfigurationInterface/ConfigurationTree.icc" //define template functions
+
 }
 
 #endif

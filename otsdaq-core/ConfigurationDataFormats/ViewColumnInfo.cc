@@ -419,6 +419,22 @@ std::map<std::pair<std::string,std::string>,std::string> ViewColumnInfo::getAllD
 }
 
 //==============================================================================
+//isBoolType
+const bool ViewColumnInfo::isBoolType(void) const
+{
+	return (type_ == TYPE_ON_OFF ||
+			type_ == TYPE_TRUE_FALSE ||
+			type_ == TYPE_YES_NO);
+} //end isBoolType()
+
+//==============================================================================
+//isNumberDataType
+const bool ViewColumnInfo::isNumberDataType(void) const
+{
+	return (dataType_ == DATATYPE_NUMBER);
+} //end isBoolType()
+
+//==============================================================================
 const std::string& ViewColumnInfo::getName(void) const
 {
 	return name_;

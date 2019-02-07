@@ -7,7 +7,7 @@ using namespace ots;
 //wildCardMatch
 //	find needle in haystack
 //		allow needle to have leading and/or trailing wildcard '*'
-//		consider priority in matching, no mater the order in the haystack:
+//		consider priority in matching, no matter the order in the haystack:
 //			- 0: no match!
 //			- 1: highest priority is exact match
 //			- 2: next highest is partial TRAILING-wildcard match
@@ -249,6 +249,32 @@ bool StringMacros::isNumber(const std::string& s)
 	//all numbers are numbers
 	return true;
 } //end isNumber()
+
+//==============================================================================
+//getTimestampString ~~
+//	returns ots style timestamp string
+//	of known fixed size: Thu Aug 23 14:55:02 2001 CST
+std::string StringMacros::getTimestampString(const std::string& linuxTimeInSeconds)
+{
+	time_t timestamp(strtol(linuxTimeInSeconds.c_str(),0,10));
+	return getTimestampString(timestamp);
+} //end getTimestampString()
+
+//==============================================================================
+//getTimestampString ~~
+//	returns ots style timestamp string
+//	of known fixed size: Thu Aug 23 14:55:02 2001 CST
+std::string StringMacros::getTimestampString(const time_t& linuxTimeInSeconds)
+{
+	std::string retValue(30,'\0'); //known fixed size: Thu Aug 23 14:55:02 2001 CST
+
+	struct tm tmstruct;
+	::localtime_r(&linuxTimeInSeconds, &tmstruct);
+	::strftime(&retValue[0], 30, "%c %Z", &tmstruct);
+	retValue.resize(strlen(retValue.c_str()));
+
+	return retValue;
+} //end getTimestampString()
 
 //==============================================================================
 // validateValueForDefaultStringDataType

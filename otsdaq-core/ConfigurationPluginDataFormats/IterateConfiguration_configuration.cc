@@ -43,7 +43,9 @@ IterateConfiguration::TargetParams 					IterateConfiguration::targetParams_;
 IterateConfiguration::TargetTableColumns			IterateConfiguration::targetCols_;
 IterateConfiguration::CommandTargetColumns	 		IterateConfiguration::commandTargetCols_;
 
+IterateConfiguration::MacroDimLoopTableColumns	 	IterateConfiguration::macroDimLoopCols_;
 IterateConfiguration::MacroParamTableColumns	 	IterateConfiguration::macroParamCols_;
+
 
 
 
@@ -133,6 +135,9 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 			{
 				__COUT__ << "Extracting targets..." << __E__;
 				auto targets = commandSpecificFields[i].second.getChildren();
+
+				__COUTV__(targets.size());
+
 				for(auto& target:targets)
 				{
 					__COUT__ << "\t\t\tTarget \t" << target.first << __E__;
@@ -150,10 +155,10 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 							"Table:" <<
 							targetNode.getConfigurationName() <<
 							" UID:" <<
-							targetNode.getValueAsString() << std::endl;
+							targetNode.getUIDAsString() << std::endl;
 					commands.back().addTarget();
 					commands.back().targets_.back().table_ = targetNode.getConfigurationName();
-					commands.back().targets_.back().UID_ = targetNode.getValueAsString();
+					commands.back().targets_.back().UID_ = targetNode.getUIDAsString();
 				}
 			}
 			else if(commandSpecificFields[i].first ==
@@ -161,35 +166,132 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 			{
 				//get Macro parameters, place them in params_
 				__COUT__ << "Extracting macro parameters..." << __E__;
-				auto macroParams = commandSpecificFields[i].second.getChildren();
 
-				std::string name, value;
-				for(auto& macroParam:macroParams)
+				//need to extract input arguments
+				//	by dimension (by priority)
+				//
+				//	two vector by dimension <map of params>
+				//		one vector for long and for double
+				//
+				//	map of params :=
+				//		name => {
+				//			<long/double current value>
+				//			<long/double init value>
+				//			<long/double step size>
+				//		}
+
+				auto dimensionalLoops = commandSpecificFields[i].second.getChildren(
+						std::map<std::string /*relative-path*/, std::string /*value*/>() /*no filter*/,
+						true /*by Priority*/);
+
+				__COUTV__(dimensionalLoops.size());
+
+
+
+				//	inputs:
+				//		- inputArgs: dimensional semi-colon-separated,
+				//			comma separated: dimension iterations and arguments (colon-separated name/value/stepsize sets)
+				std::string argStr = "";
+				//inputArgsStr = "3;3,myOtherArg:5:2"; //example
+
+				//std::string name, value;
+				unsigned long numberOfIterations;
+				bool firstDimension = true;
+
+				for(auto& dimensionalLoop:dimensionalLoops)
 				{
-					__COUT__ << "\t\t\tParam \t" << macroParam.first << __E__;
-					name = IterateConfiguration::commandExecuteMacroParams_.MacroParameterPrepend_ +
-							macroParam.second.getNode(
-							IterateConfiguration::macroParamCols_.Name_
-							).getValue<std::string>();
-					value = macroParam.second.getNode(
-							IterateConfiguration::macroParamCols_.Value_
-							).getValue<std::string>();
+					__COUT__ << "\t\t\tDimensionalLoop \t" << dimensionalLoop.first << __E__;
 
-					//assume no conflict with fixed parameters in map
-					//	because of prepend IterateConfiguration::commandExecuteMacroParams_.MacroParameterPrepend_ +
+					numberOfIterations = dimensionalLoop.second.getNode(
+							IterateConfiguration::macroDimLoopCols_.NumberOfIterations_
+					).getValue<unsigned long>();
+
+					__COUTV__(numberOfIterations);
+
+					if(numberOfIterations == 0)
+					{
+						__SS__ << "Illegal number of iterations value of '" <<
+								numberOfIterations << ".' Must be a positive integer!" << __E__;
+						__SS_THROW__;
+					}
+
+					//at this point add dimension parameter with value numberOfIterations
+
+					if(!firstDimension)
+						argStr += ";";
+					firstDimension = false;
+					argStr += std::to_string(numberOfIterations);
+
+					auto paramLinkNode = dimensionalLoop.second.getNode(
+							IterateConfiguration::macroDimLoopCols_.ParamLink_);
+
+					if(paramLinkNode.isDisconnected())
+					{
+						__COUT__ << "Disconnected parameter link, so no parameters for this dimension." << __E__;
+						continue;
+					}
+
+					auto macroParams = paramLinkNode.getChildren();
+
+					__COUTV__(macroParams.size());
+
+					for(auto& macroParam:macroParams)
+					{
+						__COUT__ << "\t\t\tParam \t" << macroParam.first << __E__;
+
+						//add parameter name:value:step
+
+						argStr += ",";
+						argStr += macroParam.second.getNode(
+								IterateConfiguration::macroParamCols_.Name_).getValue<std::string>();
+						argStr += ":";
+						argStr += macroParam.second.getNode(
+								IterateConfiguration::macroParamCols_.Value_).getValue<std::string>();
+						argStr += ":";
+						argStr += macroParam.second.getNode(
+								IterateConfiguration::macroParamCols_.Step_).getValue<std::string>();
+
+					} //end parameter loop
+				} //end dimension loop
+
+				//Macro argument string is done
+				__COUTV__(argStr);
+
+				//assume no conflict with fixed parameters in map
+				//	because of prepend IterateConfiguration::commandExecuteMacroParams_.MacroParameterPrepend_ +
+				commands.back().params_.emplace(std::pair<
+						std::string /*param name*/,
+						std::string /*param value*/>(
+								IterateConfiguration::commandExecuteMacroParams_.MacroArgumentString_,
+								argStr));
+			}
+			else //all other non-special fields
+			{
+				if(//bool type, convert to 1 or 0
+						commandSpecificFields[i].second.isValueBoolType())
 					commands.back().params_.emplace(std::pair<
 							std::string /*param name*/,
 							std::string /*param value*/>(
-									name,
-									value));
-				}
+									commandSpecificFields[i].first,
+									commandSpecificFields[i].second.getValue<bool>()?
+											"1":"0"
+							));
+				else if(//number data type, get raw value string (note: does not do math or variable substitution)
+						commandSpecificFields[i].second.isValueNumberDataType())
+					commands.back().params_.emplace(std::pair<
+							std::string /*param name*/,
+							std::string /*param value*/>(
+									commandSpecificFields[i].first,
+									commandSpecificFields[i].second.getValueAsString()
+							));
+				else
+					commands.back().params_.emplace(std::pair<
+							std::string /*param name*/,
+							std::string /*param value*/>(
+									commandSpecificFields[i].first,
+									commandSpecificFields[i].second.getValue<std::string>()
+							));
 			}
-			else
-				commands.back().params_.emplace(std::pair<
-					std::string /*param name*/,
-					std::string /*param value*/>(
-							commandSpecificFields[i].first,
-							commandSpecificFields[i].second.getValueAsString()));
 		}
 	}
 

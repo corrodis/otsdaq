@@ -164,6 +164,19 @@ void ConfigurationTree::recursivePrint(const ConfigurationTree &t, unsigned int 
 	}
 }
 
+//==============================================================================
+std::string ConfigurationTree::handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<std::string>) const
+{
+	if(!configView)
+	{
+		__SS__ << "Null configView" << std::endl;
+		__COUT_ERR__ << ss.str();
+		__SS_THROW__;
+	}
+	__COUT__ << "handleValidateValueForColumn<string>" << std::endl;
+	return configView->validateValueForColumn(
+			value,col);
+} //end std::string handleValidateValueForColumn()
 
 //==============================================================================
 //getValue (only std::string value)
@@ -1053,6 +1066,7 @@ ConfigurationTree ConfigurationTree::getForwardNode(std::string nodeName, unsign
 	
 	return getNode(nodeName.substr(0,s));
 }
+
 //==============================================================================
 //isValueNode
 //	if true, then this is a leaf node, i.e. there can be no children, only a value
@@ -1060,6 +1074,24 @@ bool ConfigurationTree::isValueNode(void) const
 {
 	return (row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID);
 }
+
+//==============================================================================
+//isValueBoolType
+//	if true, then this is a leaf node with BOOL type
+bool ConfigurationTree::isValueBoolType(void) const
+{
+	return isValueNode() &&
+			configView_->getColumnInfo(col_).isBoolType();
+} //end isValueBoolType()
+
+//==============================================================================
+//isValueNumberDataType
+//	if true, then this is a leaf node with NUMBER data type
+bool ConfigurationTree::isValueNumberDataType(void) const
+{
+	return isValueNode() &&
+			configView_->getColumnInfo(col_).isNumberDataType();
+} //end isValueBoolType()
 
 //==============================================================================
 //isDisconnected
