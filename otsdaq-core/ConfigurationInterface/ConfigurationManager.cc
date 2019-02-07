@@ -1333,7 +1333,7 @@ ConfigurationTree ConfigurationManager::getSupervisorNode(
 	return getNode(
 			"/" + getConfigurationByName(XDAQ_CONTEXT_CONFIG_NAME)->getConfigurationName() +
 			"/" + contextUID +
-			"/LinkToApplicationConfiguration/" + applicationUID);
+			"/LinkToApplicationTable/" + applicationUID);
 }
 
 //==============================================================================
@@ -1343,8 +1343,8 @@ ConfigurationTree ConfigurationManager::getSupervisorConfigurationNode(
 	return getNode(
 			"/" + getConfigurationByName(XDAQ_CONTEXT_CONFIG_NAME)->getConfigurationName() +
 			"/" + contextUID +
-			"/LinkToApplicationConfiguration/" + applicationUID +
-			"/LinkToSupervisorConfiguration");
+			"/LinkToApplicationTable/" + applicationUID +
+			"/LinkToSupervisorTable");
 }
 
 //==============================================================================

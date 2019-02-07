@@ -42,7 +42,7 @@ void FEVInterface::configureSlowControls(void)
 {
 	ConfigurationTree slowControlsGroupLink =
 			theXDAQContextConfigTree_.getBackNode(
-					theConfigurationPath_).getNode("LinkToSlowControlChannelsConfiguration");
+					theConfigurationPath_).getNode("LinkToSlowControlChannelsTable");
 
 	if(slowControlsGroupLink.isDisconnected())
 	{
@@ -115,7 +115,7 @@ bool FEVInterface::slowControlsRunning(void)
 			theConfigurationPath_);
 
 	ConfigurationTree slowControlsInterfaceLink =
-			FEInterfaceNode.getNode("LinkToSlowControlsMonitorConfiguration");
+			FEInterfaceNode.getNode("LinkToSlowControlsMonitorTable");
 
 	std::unique_ptr<UDPDataStreamerBase> txSocket;
 

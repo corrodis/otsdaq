@@ -6,11 +6,11 @@
 				<COLUMN Type="UID" 	 Name="FEInterfaceUID" 	 StorageName="FE_INTERFACE_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="FixedChoiceData" 	 Name="FEInterfacePluginName" 	 StorageName="FE_INTERFACE_PLUGIN_NAME" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,FEOtsUDPTemplateInterface"/>
-				<COLUMN Type="ChildLink-0" 	 Name="LinkToFETypeConfiguration" 	 StorageName="LINK_TO_FE_TYPE_CONFIGURATION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-0" 	 Name="LinkToFETypeTable" 	 StorageName="LINK_TO_FE_TYPE_TABLE" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLinkUID-0" 	 Name="LinkToFETypeUID" 	 StorageName="LINK_TO_FE_TYPE_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="ChildLink-SlowControlChannels" 	 Name="LinkToSlowControlChannelsConfiguration" 	 StorageName="LINK_TO_SLOW_CONTROL_CHANNELS_CONFIGURATION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-SlowControlChannels" 	 Name="LinkToSlowControlChannelsTable" 	 StorageName="LINK_TO_SLOW_CONTROL_CHANNELS_TABLE" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLinkGroupID-SlowControlChannels" 	 Name="LinkToSlowControlChannelsGroupID" 	 StorageName="LINK_TO_SLOW_CONTROL_CHANNELS_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="ChildLink-SlowControlsMonitor" 	 Name="LinkToSlowControlsMonitorConfiguration" 	 StorageName="LINK_TO_SLOW_CONTROLS_MONITOR_CONFIGURATION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-SlowControlsMonitor" 	 Name="LinkToSlowControlsMonitorTable" 	 StorageName="LINK_TO_SLOW_CONTROLS_MONITOR_TABLE" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLinkUID-SlowControlsMonitor" 	 Name="LinkToSlowControlsMonitorUID" 	 StorageName="LINK_TO_SLOW_CONTROLS_MONITOR_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="SlowControlsTxSocketIPAddress" 	 StorageName="SLOW_CONTROLS_TX_SOCKET_IP_ADDRESS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="SlowControlsTxSocketPort" 	 StorageName="SLOW_CONTROLS_TX_SOCKET_PORT" 		DataType="NUMBER" 		DataChoices=""/>

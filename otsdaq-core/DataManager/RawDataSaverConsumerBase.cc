@@ -37,7 +37,11 @@ RawDataSaverConsumerBase::~RawDataSaverConsumerBase(void)
 //========================================================================================================================
 void RawDataSaverConsumerBase::startProcessingData(std::string runNumber)
 {
-	openFile(runNumber);
+	if(runNumber != "")//If there is no number it means it was paused
+	{
+		currentSubRunNumber_ = 0;
+		openFile(runNumber);
+	}
 	DataConsumer::startProcessingData(runNumber);
 }
 
@@ -133,7 +137,7 @@ void RawDataSaverConsumerBase::save(const std::string& data)
 	if(maxFileSize_ > 0)
 	{
 		long length = outFile_.tellp();
-		if(length >= maxFileSize_)
+		if(length >= maxFileSize_/1000)
 		{
 			closeFile();
 			++currentSubRunNumber_;

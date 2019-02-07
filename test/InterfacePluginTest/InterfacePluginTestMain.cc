@@ -24,7 +24,7 @@ int main()
 	std::string supervisorContextUID_           = "MainContext";
 	std::string supervisorApplicationUID_       = "FeSupervisor0";
 	std::string ConfigurationAlias_             = "Physics";
-	std::string theSupervisorConfigurationPath_ = supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
+	std::string theSupervisorConfigurationPath_ = supervisorContextUID_ + "/LinkToApplicationTable/" + supervisorApplicationUID_ + "/LinkToSupervisorTable";
 	//const int ConfigurationGroupKeyValue_ = 0;
 	//std::shared_ptr<ConfigurationGroupKey> theConfigurationGroupKey_(new ConfigurationGroupKey(ConfigurationGroupKeyValue_));
 

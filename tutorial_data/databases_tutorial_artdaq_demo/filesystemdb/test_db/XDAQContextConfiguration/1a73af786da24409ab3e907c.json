@@ -7,7 +7,7 @@
 "CREATION_TIME" : 1503852834,
 "COL_TYPES" : {
 "CONTEXT_UID" : "VARCHAR2",
-"LINK_TO_APPLICATION_CONFIGURATION" : "VARCHAR2",
+"LINK_TO_APPLICATION_TABLE" : "VARCHAR2",
 "APPLICATION_GROUP_ID" : "VARCHAR2",
 "STATUS" : "VARCHAR2",
 "ID" : "NUMBER",
@@ -20,7 +20,7 @@
 "DATA_SET" : [
 {
 "CONTEXT_UID" : "mainContext",
-"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"LINK_TO_APPLICATION_TABLE" : "XDAQApplicationConfiguration",
 "APPLICATION_GROUP_ID" : "testContextApps",
 "STATUS" : "On",
 "ID" : "0",
@@ -32,7 +32,7 @@
 },
 {
 "CONTEXT_UID" : "ARTDAQBoardReader0",
-"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"LINK_TO_APPLICATION_TABLE" : "XDAQApplicationConfiguration",
 "APPLICATION_GROUP_ID" : "BoardReader0Apps",
 "STATUS" : "On",
 "ID" : "0",
@@ -44,7 +44,7 @@
 },
 {
 "CONTEXT_UID" : "ARTDAQEventBuilder0",
-"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"LINK_TO_APPLICATION_TABLE" : "XDAQApplicationConfiguration",
 "APPLICATION_GROUP_ID" : "EventBuilder0Apps",
 "STATUS" : "On",
 "ID" : "0",
@@ -56,7 +56,7 @@
 },
 {
 "CONTEXT_UID" : "ARTDAQAggregator0",
-"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"LINK_TO_APPLICATION_TABLE" : "XDAQApplicationConfiguration",
 "APPLICATION_GROUP_ID" : "Aggregator0Apps",
 "STATUS" : "On",
 "ID" : "0",
