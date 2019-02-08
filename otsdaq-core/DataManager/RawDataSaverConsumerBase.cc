@@ -137,7 +137,7 @@ void RawDataSaverConsumerBase::save(const std::string& data)
 	if(maxFileSize_ > 0)
 	{
 		long length = outFile_.tellp();
-		if(length >= maxFileSize_/1000)
+		if(length >= maxFileSize_)
 		{
 			closeFile();
 			++currentSubRunNumber_;
