@@ -854,14 +854,14 @@ void ConfigurationManager::loadMemberMap(
 void ConfigurationManager::loadConfigurationGroup(
 		const std::string     	&configGroupName,
 		ConfigurationGroupKey 	configGroupKey,
-		bool                  	doActivate,
+		bool                  	doActivate /*=false*/,
 		std::map<std::string, ConfigurationVersion> *groupMembers,
 		ProgressBar			  	*progressBar,
 		std::string 			*accumulatedTreeErrors,
 		std::string 			*groupComment,
 		std::string 			*groupAuthor,
 		std::string	 			*groupCreateTime,
-		bool					doNotLoadMember,
+		bool					doNotLoadMember /*=false*/,
 		std::string				*groupTypeString,
 		std::map<std::string /*name*/, std::string /*alias*/> *groupAliases)
 try

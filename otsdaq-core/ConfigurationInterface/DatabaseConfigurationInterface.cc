@@ -82,17 +82,20 @@ DatabaseConfigurationInterface::DatabaseConfigurationInterface()
 //==============================================================================
 // read configuration from database
 // version = -1 means latest version
-void DatabaseConfigurationInterface::fill(ConfigurationBase* configuration, ConfigurationVersion version) const
+void DatabaseConfigurationInterface::fill(ConfigurationBase* configuration,
+		ConfigurationVersion version) const
 throw(std::runtime_error)
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
 	auto versionstring = version.toString();
 
+	//__COUTV__(versionstring);
 	//configuration->getViewP()->setUniqueStorageIdentifier(storageUID);
 
 	auto result =
-			ifc.template loadVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity);
+			ifc.template loadVersion<decltype(configuration), JsonData>(
+					configuration, versionstring, default_entity);
 
 	if (result.first)
 	{
@@ -102,8 +105,7 @@ throw(std::runtime_error)
 	}
 	__SS__ << "\n\nDBI Error while filling '" << configuration->getConfigurationName() <<
 			"' version '" << versionstring << "' - are you sure this version exists?\n" <<
-			"Here is the error:\n\n" << result.second << std::endl;
-	std::cout << __COUT_HDR_FL__ << "\n" << ss.str();
+			"Here is the error:\n\n" << result.second << __E__;
 	__SS_THROW__;
 }
 
@@ -118,7 +120,7 @@ throw(std::runtime_error)
 	//configuration->getView().getUniqueStorageIdentifier()
 
 	auto versionstring = configuration->getView().getVersion().toString();
-	//std::cout << __COUT_HDR_FL__ << "versionstring: " << versionstring << "\n";
+	//__COUT__ << "versionstring: " << versionstring << "\n";
 
 	//auto result =
 		//	ifc.template storeVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity);
@@ -129,8 +131,8 @@ throw(std::runtime_error)
 	if (result.first)
 		return;
 
-	__SS__ << "DBI Error:" << result.second << std::endl;
-	std::cout << __COUT_HDR_FL__ << "\n" << ss.str();
+	__SS__ << "DBI Error:" << result.second << __E__;
+	__COUT__ << "\n" << ss.str();
 	__SS_THROW__;
 }
 
@@ -141,11 +143,11 @@ noexcept
 {
 	auto versions = getVersions(configuration);
 
-	std::cout << __COUT_HDR_FL__ << "Config Name: " << configuration->getConfigurationName() << std::endl;
-	std::cout << __COUT_HDR_FL__ << "All Versions: " ;
+	__COUT__ << "Config Name: " << configuration->getConfigurationName() << __E__;
+	__COUT__ << "All Versions: " ;
 	for(auto &v : versions)
 		std::cout << v << " ";
-	std::cout << std::endl;
+	std::cout << __E__;
 
 	if (!versions.size()) return ConfigurationVersion(); //return INVALID
 
@@ -176,13 +178,13 @@ try
 
 	//auto vs = to_set(result);
 	//for(auto &v:vs)
-	//	std::cout << __COUT_HDR_FL__ << "\tversion " << v << std::endl;
+	//	__COUT__ << "\tversion " << v << __E__;
 
 	return resultSet;//to_set(result);
 }
 catch (std::exception const& e)
 {
-	std::cout << __COUT_HDR_FL__ << "DBI Exception:" << e.what() << "\n";
+	__COUT__ << "DBI Exception:" << e.what() << "\n";
 	return {};
 }
 
@@ -202,13 +204,11 @@ try
 catch (std::exception const& e)
 {
 	__SS__ << "DBI Exception:" << e.what() << "\n";
-	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 catch (...)
 {
 	__SS__ << "DBI Unknown exception.\n";
-	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 

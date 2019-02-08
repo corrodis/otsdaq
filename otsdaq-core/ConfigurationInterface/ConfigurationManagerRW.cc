@@ -585,14 +585,16 @@ void ConfigurationManagerRW::clearAllCachedVersions()
 
 //==============================================================================
 //copyViewToCurrentColumns
-ConfigurationVersion ConfigurationManagerRW::copyViewToCurrentColumns(const std::string &configurationName,
+ConfigurationVersion ConfigurationManagerRW::copyViewToCurrentColumns(
+		const std::string &configurationName,
 		ConfigurationVersion sourceVersion)
 {
 	getConfigurationByName(configurationName)->reset();
 
 	//make sure source version is loaded
 	//need to load with loose column rules!
-	ConfigurationBase *config = getVersionedConfigurationByName(configurationName,
+	ConfigurationBase *config = getVersionedConfigurationByName(
+			configurationName,
 			ConfigurationVersion(sourceVersion), true);
 
 	//copy from source version to a new temporary version

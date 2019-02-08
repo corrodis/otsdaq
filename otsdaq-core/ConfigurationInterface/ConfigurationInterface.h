@@ -205,7 +205,7 @@ public:
 		}
 
 
-	}
+	} //end get()
 
 	//table handling
 	virtual std::set<std::string /*name*/> 					getAllConfigurationNames() 		const throw(std::runtime_error) { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");}

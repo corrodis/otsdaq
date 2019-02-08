@@ -1746,7 +1746,7 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 		CV_JSON_FILL_DATA_SET
 	};
 
-	//__COUT__ << json << __E__;
+	//__COUTV__(json);
 
 	sourceColumnMismatchCount_ = 0;
 	sourceColumnMissingCount_ = 0;
@@ -2312,11 +2312,15 @@ bool ConfigurationView::isURIEncodedCommentTheSame(const std::string &comment) c
 //	if author != "", assign author for any row that has been modified, and assign now as timestamp
 //
 //	Returns -1 if data was same and pre-existing content
+//	Returns 1 if data was same, but columns are different
 //	otherwise 0
+//
 int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffset,
 		const std::string &author)
 throw(std::runtime_error)
 {
+	int retVal = 0;
+
 	int r = dataOffset;
 	int c = 0;
 
@@ -2393,10 +2397,35 @@ throw(std::runtime_error)
 
 	if(!countRowsModified)
 	{
-		__SS__ << "No rows were modified! No reason to fill a view with same content." << __E__;
-		__COUT__ << "\n" << ss.str();
-		return -1;
-	}
+		//check that source columns match storage name
+		// otherwise allow same data...
+
+		bool match = getColumnStorageNames().size() ==
+				getSourceColumnNames().size();
+		if(match)
+		{
+			for(auto& destColName:getColumnStorageNames())
+				if(getSourceColumnNames().find(destColName) ==
+						getSourceColumnNames().end())
+				{
+					__COUT__ << "Found column name mismach for '" <<
+							destColName <<
+							"'... So allowing same data!" << __E__;
+
+					match = false;
+					break;
+				}
+		}
+		//if still a match, do not allow!
+		if(match)
+		{
+			__SS__ << "No rows were modified! No reason to fill a view with same content." << __E__;
+			__COUT__ << "\n" << ss.str();
+			return -1;
+		}
+		//else mark with retVal
+		retVal = 1;
+	} //end same check
 
 	//print(); //for debugging
 
@@ -2412,7 +2441,7 @@ throw(std::runtime_error)
 	//	print(ss);
 	//	__COUT__ << "\n" << ss.str() << __E__;
 
-	return 0;
+	return retVal;
 }
 
 //==============================================================================

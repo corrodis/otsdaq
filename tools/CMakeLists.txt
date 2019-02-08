@@ -50,3 +50,4 @@ link_libraries(
 #cet_make_exec(otsdaq_flatten_active_to_version)
 cet_make_exec(otsdaq_flatten_system_aliases)
 cet_make_exec(otsdaq_import_system_aliases)
+cet_make_exec(otsdaq_fix_new_table_fields_tool)
