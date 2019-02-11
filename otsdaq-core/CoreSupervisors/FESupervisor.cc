@@ -152,11 +152,19 @@ try
 
 		return replyMessage;
 	} //end type feMacro
-	else if(type == "feMacroMultiDimensionalStart") //from iterator
+	else if(type == "feMacroMultiDimensionalStart" || //from iterator
+			type == "macroMultiDimensionalStart") //from iterator
 	{
 		__SUP_COUTV__(type);
 
-		rxParameters.addParameter("feMacroName");
+		if(type[0] == 'm')
+		{
+			rxParameters.addParameter("macroString");
+			rxParameters.addParameter("macroName");
+		}
+		else
+			rxParameters.addParameter("feMacroName");
+
 		rxParameters.addParameter("enableSavingOutput");
 		rxParameters.addParameter("outputFilePath");
 		rxParameters.addParameter("outputFileRadix");
@@ -166,7 +174,15 @@ try
 
 		std::string requester = rxParameters.getValue("requester");
 		std::string targetInterfaceID = rxParameters.getValue("targetInterfaceID");
-		std::string feMacroName = rxParameters.getValue("feMacroName");
+		std::string macroName, macroString;
+		if(type[0] == 'm')
+		{
+			macroName = rxParameters.getValue("macroName");
+			macroString = rxParameters.getValue("macroString");
+			__SUP_COUTV__(macroString);
+		}
+		else
+			macroName = rxParameters.getValue("feMacroName");
 		bool enableSavingOutput = rxParameters.getValue("enableSavingOutput") == "1";
 		std::string outputFilePath = rxParameters.getValue("outputFilePath");
 		std::string outputFileRadix = rxParameters.getValue("outputFileRadix");
@@ -174,37 +190,68 @@ try
 
 		__SUP_COUTV__(requester);
 		__SUP_COUTV__(targetInterfaceID);
-		__SUP_COUTV__(feMacroName);
+		__SUP_COUTV__(macroName);
 		__SUP_COUTV__(enableSavingOutput);
 		__SUP_COUTV__(outputFilePath);
 		__SUP_COUTV__(outputFileRadix);
 		__SUP_COUTV__(inputArgs);
 
 
-		try
+		if(type[0] == 'm') //start Macro
 		{
-			theFEInterfacesManager_->startFEMacroMultiDimensional(
-					requester,
-					targetInterfaceID, feMacroName,
-					enableSavingOutput,outputFilePath,outputFileRadix,
-					inputArgs);
+			try
+			{
+				theFEInterfacesManager_->startMacroMultiDimensional(
+						requester,
+						targetInterfaceID, macroName, macroString,
+						enableSavingOutput,outputFilePath,outputFileRadix,
+						inputArgs);
+			}
+			catch(std::runtime_error &e)
+			{
+				__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
+						" the Macro named '" << macroName << "' with target FE '" <<
+						targetInterfaceID << "' failed to start multi-dimensional launch. " <<
+						"Here is the error:\n\n" << e.what() << std::endl;
+				__SUP_SS_THROW__;
+			}
+			catch(...)
+			{
+				__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
+						" the Macro named '" << macroName << "' with target FE '" <<
+						targetInterfaceID << "' failed to start multi-dimensional launch " <<
+						"due to an unknown error." << __E__;
+				__SUP_SS_THROW__;
+			}
 		}
-		catch(std::runtime_error &e)
+		else //start FE Macro
 		{
-			__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
-					" the FE Macro named '" << feMacroName << "' with target FE '" <<
-					targetInterfaceID << "' failed to start multi-dimensional launch. " <<
-					"Here is the error:\n\n" << e.what() << std::endl;
-			__SUP_SS_THROW__;
+			try
+			{
+				theFEInterfacesManager_->startFEMacroMultiDimensional(
+						requester,
+						targetInterfaceID, macroName,
+						enableSavingOutput,outputFilePath,outputFileRadix,
+						inputArgs);
+			}
+			catch(std::runtime_error &e)
+			{
+				__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
+						" the FE Macro named '" << macroName << "' with target FE '" <<
+						targetInterfaceID << "' failed to start multi-dimensional launch. " <<
+						"Here is the error:\n\n" << e.what() << std::endl;
+				__SUP_SS_THROW__;
+			}
+			catch(...)
+			{
+				__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
+						" the FE Macro named '" << macroName << "' with target FE '" <<
+						targetInterfaceID << "' failed to start multi-dimensional launch " <<
+						"due to an unknown error." << __E__;
+				__SUP_SS_THROW__;
+			}
 		}
-		catch(...)
-		{
-			__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
-					" the FE Macro named '" << feMacroName << "' with target FE '" <<
-					targetInterfaceID << "' failed to start multi-dimensional launch " <<
-					"due to an unknown error." << __E__;
-			__SUP_SS_THROW__;
-		}
+
 
 		xoap::MessageReference replyMessage =
 			SOAPUtilities::makeSOAPMessageReference(type + "Done");
@@ -217,34 +264,39 @@ try
 				SOAPUtilities::translate(replyMessage) << __E__;
 
 		return replyMessage;
-	} //end type feMacroMultiDimensionalStart
-	else if(type == "feMacroMultiDimensionalCheck")
+	} //end type (fe)MacroMultiDimensionalStart
+	else if(type == "feMacroMultiDimensionalCheck" || //from iterator
+			type == "macroMultiDimensionalCheck")
 	{
 		__SUP_COUTV__(type);
-
-		rxParameters.addParameter("feMacroName");
+		if(type[0] == 'm')
+			rxParameters.addParameter("macroName");
+		else
+			rxParameters.addParameter("feMacroName");
 		rxParameters.addParameter("targetInterfaceID");
 
 		SOAPUtilities::receive(message, rxParameters);
 
 		std::string targetInterfaceID = rxParameters.getValue("targetInterfaceID");
-		std::string feMacroName = rxParameters.getValue("feMacroName");
+		std::string macroName;
+		if(type[0] == 'm')
+			macroName = rxParameters.getValue("macroName");
+		else
+			macroName = rxParameters.getValue("feMacroName");
 
 		__SUP_COUTV__(targetInterfaceID);
-		__SUP_COUTV__(feMacroName);
+		__SUP_COUTV__(macroName);
 
-
-		std::string outputArgs;
 		bool done = false;
 		try
 		{
 			done = theFEInterfacesManager_->checkFEMacroMultiDimensional(
-					targetInterfaceID, feMacroName);
+					targetInterfaceID, macroName);
 		}
 		catch(std::runtime_error &e)
 		{
 			__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
-					" the FE Macro named '" << feMacroName << "' with target FE '" <<
+					" the FE Macro named '" << macroName << "' with target FE '" <<
 					targetInterfaceID << "' failed to check multi-dimensional launch. " <<
 					"Here is the error:\n\n" << e.what() << std::endl;
 			__SUP_SS_THROW__;
@@ -252,13 +304,11 @@ try
 		catch(...)
 		{
 			__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() <<
-					" the FE Macro named '" << feMacroName << "' with target FE '" <<
+					" the FE Macro named '" << macroName << "' with target FE '" <<
 					targetInterfaceID << "' failed to check multi-dimensional launch " <<
 					"due to an unknown error." << __E__;
 			__SUP_SS_THROW__;
 		}
-
-		__SUP_COUTV__(outputArgs);
 
 		xoap::MessageReference replyMessage =
 			SOAPUtilities::makeSOAPMessageReference(type + "Done");
@@ -271,7 +321,7 @@ try
 				SOAPUtilities::translate(replyMessage) << __E__;
 
 		return replyMessage;
-	} //end type feMacroMultiDimensionalCheck
+	} //end type (fe)MacroMultiDimensionalCheck
 	else
 	{
 		__SUP_SS__ << "Unrecognized FE Communication type: " << type << __E__;

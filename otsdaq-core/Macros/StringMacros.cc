@@ -345,42 +345,45 @@ void StringMacros::getVectorFromString(const std::string& inputString,
 {
 	unsigned int i=0;
 	unsigned int j=0;
+	unsigned int c=0;
 	std::set<char>::iterator delimeterSearchIt;
 	char lastDelimiter;
 	bool isDelimiter;
-	bool foundLeadingDelimiter = false;
+	//bool foundLeadingDelimiter = false;
 
 	//__COUT__ << inputString << __E__;
 	//__COUTV__(inputString.length());
 
 	//go through the full string extracting elements
 	//add each found element to set
-	for(;j<inputString.size();++j)
+	for(;c<inputString.size();++c)
 	{
-		//__COUT__ << (char)inputString[j] << __E__;
+		//__COUT__ << (char)inputString[c] << __E__;
 
-		delimeterSearchIt = delimiter.find(inputString[j]);
+		delimeterSearchIt = delimiter.find(inputString[c]);
 		isDelimiter = delimeterSearchIt != delimiter.end();
 
-		//__COUT__ << (char)inputString[j] << " " << (char)lastDelimiter << __E__;
+		//__COUT__ << (char)inputString[c] << " " << isDelimiter << __E__;//char)lastDelimiter << __E__;
 
-		if((whitespace.find(inputString[j]) != whitespace.end() || //ignore leading white space or delimiter
-				isDelimiter)
+		if(whitespace.find(inputString[c]) != whitespace.end()//ignore leading white space
 				&& i == j)
 		{
-			++i;
-			if(isDelimiter)
-				foundLeadingDelimiter = true;
+			++i; ++j;
+			//if(isDelimiter)
+			//	foundLeadingDelimiter = true;
 		}
-		else if((whitespace.find(inputString[j]) != whitespace.end() || //trailing white space or delimiter indicates end
-				isDelimiter)
-				&& i != j) // assume end of element
+		else if(whitespace.find(inputString[c]) != whitespace.end()
+				&& i != j) //trailing white space, assume possible end of element
+		{
+			//do not change j or i
+		}
+		else if(isDelimiter) // delimiter is end of element
 		{
 			//__COUT__ << "Set element found: " <<
 			//		inputString.substr(i,j-i) << std::endl;
 
 			if(listOfDelimiters &&
-					(listToReturn.size() || foundLeadingDelimiter)) //accept leading delimiter (especially for case of leading negative in math parsing)
+					listToReturn.size())// || foundLeadingDelimiter)) //accept leading delimiter (especially for case of leading negative in math parsing)
 			{
 				//__COUTV__(lastDelimiter);
 				listOfDelimiters->push_back(lastDelimiter);
@@ -389,18 +392,23 @@ void StringMacros::getVectorFromString(const std::string& inputString,
 
 
 			//setup i and j for next find
-			i = j+1;
+			i = c+1; j = c+1;
 		}
+		else  //part of element, so move j, not i
+			j = c+1;
 
 		if(isDelimiter)
 			lastDelimiter = *delimeterSearchIt;
 		//__COUTV__(lastDelimiter);
 	}
 
-	if(i != j) //last element check (for case when no concluding ' ' or delimiter)
+	if(1)//i != j) //last element check (for case when no concluding ' ' or delimiter)
 	{
+		//__COUT__ << "Last element found: " <<
+		//		inputString.substr(i,j-i) << std::endl;
+
 		if(listOfDelimiters &&
-				(listToReturn.size() || foundLeadingDelimiter)) //accept leading delimiter (especially for case of leading negative in math parsing)
+				listToReturn.size())// || foundLeadingDelimiter)) //accept leading delimiter (especially for case of leading negative in math parsing)
 		{
 			//__COUTV__(lastDelimiter);
 			listOfDelimiters->push_back(lastDelimiter);

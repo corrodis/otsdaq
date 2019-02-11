@@ -134,6 +134,28 @@ public:
 
 
 
+	/////////===========================
+	//start Macros
+	struct macroStruct_t
+	{
+		macroStruct_t(const std::string& macroString);
+
+		enum
+		{
+			OP_TYPE_READ,
+			OP_TYPE_WRITE,
+			OP_TYPE_DELAY,
+		};
+		std::string 							macroName_;
+		std::vector<unsigned int /*op type*/> 	operations_;
+		const std::vector<std::string> 			namesOfInputArguments_, namesOfOutputArguments_;
+		bool 									lsbf_; //least significant byte first
+	};
+	void 						runMacro							(FEVInterface::macroStruct_t& macro, FEVInterface::frontEndMacroConstArgs_t argsIn, FEVInterface::frontEndMacroArgs_t argsOut);
+	//end FE Macros
+	/////////
+
+
 
 
 	/////////===========================

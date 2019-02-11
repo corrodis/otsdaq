@@ -46,6 +46,9 @@ public:
     void		  	    runFEMacroByFE						(const std::string& callingInterfaceID, const std::string& interfaceID, const std::string& feMacroName, const std::string& inputArgs, std::string& outputArgs);	//used by FE calling (i.e. FESupervisor)
     void		  	    startFEMacroMultiDimensional		(const std::string& requester, const std::string& interfaceID, const std::string& feMacroName, const bool enableSavingOutput, const std::string& outputFilePath, const std::string& outputFileRadix, const std::string& inputArgs);	//used by iterator calling (i.e. FESupervisor)
     bool		  	    checkFEMacroMultiDimensional		(const std::string& interfaceID, const std::string& feMacroName);	//used by iterator calling (i.e. FESupervisor)
+    void		  	    startMacroMultiDimensional			(const std::string& requester, const std::string& interfaceID, const std::string& macroName, const std::string& macroString, const bool enableSavingOutput, const std::string& outputFilePath, const std::string& outputFileRadix, const std::string& inputArgs);	//used by iterator calling (i.e. FESupervisor)
+    bool		  	    checkMacroMultiDimensional			(const std::string& interfaceID, const std::string& macroName);	//used by iterator calling (i.e. FESupervisor)
+
 
     unsigned int		getInterfaceUniversalAddressSize	(const std::string& interfaceID); 	//used by MacroMaker
     unsigned int		getInterfaceUniversalDataSize		(const std::string& interfaceID);	//used by MacroMaker
@@ -56,15 +59,15 @@ public:
     FEVInterface*		getFEInterfaceP						(const std::string& interfaceID);
 
     //FE communication helpers
-	std::mutex									frontEndCommunicationReceiveMutex_;
+	std::mutex														frontEndCommunicationReceiveMutex_;
 	std::map<std::string /*targetInterfaceID*/,  //map of target to buffers organized by source
 		std::map<std::string /*requester*/,
-			std::queue<std::string /*value*/> > >  	frontEndCommunicationReceiveBuffer_;
+			std::queue<std::string /*value*/> > >  					frontEndCommunicationReceiveBuffer_;
 
 	//multi-dimensional FE Macro helpers
-	std::mutex									frontEndMacroMultiDimensionalDoneMutex_;
-	std::map<std::string /*targetInterfaceID*/, //set of active multi-dimensional FE Macro launches
-		std::string /*status := Active, Done, Error: <message> */> frontEndMacroMultiDimensionalStatusMap_;
+	std::mutex														macroMultiDimensionalDoneMutex_;
+	std::map<std::string /*targetInterfaceID*/, //set of active multi-dimensional Macro launches
+		std::string /*status := Active, Done, Error: <message> */> 	macroMultiDimensionalStatusMap_;
 
 private:
 
@@ -75,12 +78,12 @@ private:
 
     //for managing transition iterations
     std::map<std::string /*name*/, bool /*isDone*/ > 				stateMachinesIterationDone_;
-    unsigned int					stateMachinesIterationWorkCount_;
-    unsigned int					subIterationWorkStateMachineIndex_;
-    void							preStateMachineExecution(unsigned int i);
-    bool							postStateMachineExecution(unsigned int i);
-    void							preStateMachineExecutionLoop(void);
-    void							postStateMachineExecutionLoop(void);
+    unsigned int													stateMachinesIterationWorkCount_;
+    unsigned int													subIterationWorkStateMachineIndex_;
+    void				preStateMachineExecution			(unsigned int i);
+    bool				postStateMachineExecution			(unsigned int i);
+    void				preStateMachineExecutionLoop		(void);
+    void				postStateMachineExecutionLoop		(void);
 
 
 };

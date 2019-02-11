@@ -472,13 +472,15 @@ std::string FEVInterfacesManager::getFEListString(
 	return retList;
 } //end getFEListString()
 
+
 //========================================================================================================================
-//startFEMacroMultiDimensional
+//startMacroMultiDimensional
 //	Launches a thread that manages the multi-dimensional loop
-//		running the FE Macro in the specified FE interface.
+//		running the Macro on the specified FE interface.
 //	Called by iterator (for now).
 //
-//	Note: no output arguments are returned.
+//	Note: no output arguments are returned, but outputs are
+//		optionally saved to file.
 //
 //
 //	inputs:
@@ -487,7 +489,569 @@ std::string FEVInterfacesManager::getFEListString(
 //
 //	outputs:
 //		- throws exception on failure
-void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string& requester,
+void FEVInterfacesManager::startMacroMultiDimensional(
+		const std::string& 	requester,
+		const std::string& 	interfaceID,
+		const std::string& 	macroName,
+		const std::string& 	macroString,
+		const bool 		   	enableSavingOutput,
+		const std::string& 	outputFilePath,
+		const std::string& 	outputFileRadix,
+		const std::string& 	inputArgs)
+{
+	if(requester != "iterator")
+	{
+		__CFG_SS__ << "Invalid requester '" << requester <<
+				"'" << __E__;
+		__CFG_SS_THROW__;
+	}
+
+	__CFG_COUT__ << "Starting multi-dimensional Macro '" <<
+			macroName << "' for interface '" <<
+			interfaceID << ".'" << __E__;
+
+	__CFG_COUTV__(macroString);
+
+	__CFG_COUTV__(inputArgs);
+
+	//mark active(only one Macro per interface active at any time, for now)
+	{ //lock mutex scope
+		std::lock_guard<std::mutex> lock(
+				macroMultiDimensionalDoneMutex_);
+		//mark active
+		if(macroMultiDimensionalStatusMap_.find(interfaceID) !=
+				macroMultiDimensionalStatusMap_.end())
+		{
+			__SS__ << "Failed to start multi-dimensional Macro '" <<
+					macroName << "' for interface '" <<
+					interfaceID <<
+					"' - this interface already has an active Macro launch!" << __E__;
+			__SS_THROW__;
+		}
+		macroMultiDimensionalStatusMap_.emplace(
+				std::make_pair(interfaceID,"Active"));
+	}
+
+	//start thread
+	std::thread([](FEVInterfacesManager *feMgr,
+			const std::string 	interfaceID,
+			const std::string 	macroName,
+			const std::string 	macroString,
+			const bool			enableSavingOutput,
+			const std::string 	outputFilePath,
+			const std::string 	outputFileRadix,
+			const std::string 	inputArgsStr)
+			{
+
+		//create local message facility subject
+		std::string mfSubject_ = "threadMultiD-" + macroName;
+		__GEN_COUT__ << "Thread started." << __E__;
+
+		std::string statusResult = "Done";
+
+		try
+		{
+			//-------------------------------
+			//check for interfaceID
+			FEVInterface* fe = feMgr->getFEInterfaceP(interfaceID);
+
+			//-------------------------------
+			//extract macro object
+			FEVInterface::macroStruct_t macro(macroString);
+
+			//-------------------------------
+			//create output file pointer
+			FILE* outputFilePointer = 0;
+			if(enableSavingOutput)
+			{
+				std::string filename = outputFilePath + "/" +
+						outputFileRadix + macroName + "_" +
+						std::to_string(time(0)) + ".txt";
+				__GEN_COUT__ << "Opening file... " <<
+						filename << __E__;
+
+				outputFilePointer = fopen(filename.c_str(),"w");
+				if(!outputFilePointer)
+				{
+					__GEN_SS__ << "Failed to open output file: " <<
+							filename << __E__;
+					__GEN_SS_THROW__;
+				}
+			} //at this point output file pointer is valid or null
+
+
+			//-------------------------------
+			//setup Macro arguments
+			__GEN_COUTV__(inputArgsStr);
+
+			//	inputs:
+			//		- inputArgs: dimensional semi-colon-separated,
+			//			comma separated: dimension iterations and arguments (colon-separated name/value/stepsize sets)
+
+			//need to extract input arguments
+			//	by dimension (by priority)
+			//
+			//	two vector by dimension <map of params>
+			//		one vector for long and for double
+			//
+			//	map of params :=
+			//		name => {
+			//			<long/double current value>
+			//			<long/double init value>
+			//			<long/double step size>
+			//		}
+
+
+
+			std::vector<unsigned long /*dimension iterations*/>
+			dimensionIterations, dimensionIterationCnt;
+
+			using longParamMap_t = std::map<std::string /*name*/,
+					std::pair<long /*current value*/,
+					std::pair<long /*initial value*/,
+					long /*step value*/>>>;
+
+
+			std::vector<longParamMap_t> longDimensionParameters;
+			//Note: double parameters not allowed for Macro (allowed in FE Macros)
+
+			std::vector<FEVInterface::frontEndMacroArg_t> argsIn;
+			std::vector<FEVInterface::frontEndMacroArg_t> argsOut;
+
+			for(unsigned int i=0;i<macro.namesOfInputArguments_.size();++i)
+				argsIn.push_back(std::make_pair( //do not care about input arg value
+						macro.namesOfInputArguments_[i],""));
+			for(unsigned int i=0;i<macro.namesOfOutputArguments_.size();++i)
+				argsOut.push_back(std::make_pair( //do not care about output arg value
+						macro.namesOfOutputArguments_[i],""));
+
+			if(0) //example
+			{
+				//inputArgsStr = "2,fisrD:3:2,fD2:4:1;4,myOtherArg:5:2,sD:10f:1.3";
+
+				argsIn.push_back(std::make_pair("myOtherArg","3"));
+
+				dimensionIterations.push_back(2);
+				dimensionIterations.push_back(4);
+
+				longDimensionParameters.push_back(longParamMap_t());
+				longDimensionParameters.push_back(longParamMap_t());
+
+				//				doubleDimensionParameters.push_back(doubleParamMap_t());
+				//				doubleDimensionParameters.push_back(doubleParamMap_t());
+
+
+				longDimensionParameters.back().emplace(
+						std::make_pair("myOtherArg",
+								std::make_pair( 3 /*current value*/,
+										std::make_pair( 3 /*initial value*/,
+												4 /*step value*/))));
+			} //end example
+
+			std::vector<std::string> dimensionArgs;
+			StringMacros::getVectorFromString(
+					inputArgsStr,
+					dimensionArgs,
+					{';'} /*delimeter set*/);
+
+			__GEN_COUTV__(dimensionArgs.size());
+			//__GEN_COUTV__(StringMacros::vectorToString(dimensionArgs));
+
+			if(dimensionArgs.size() == 0)
+			{
+				//just call Macro once!
+				//	create dimension with 1 iteration
+				//		and no arguments
+				dimensionIterations.push_back(1);
+				longDimensionParameters.push_back(longParamMap_t());
+			}
+			else
+				for(unsigned int d=0;d<dimensionArgs.size();++d)
+				{
+					//for each dimension
+					//	get argument and classify as long or double
+
+					std::vector<std::string> args;
+					StringMacros::getVectorFromString(
+							dimensionArgs[d],
+							args,
+							{','} /*delimeter set*/);
+
+					//__GEN_COUTV__(args.size());
+					//__GEN_COUTV__(StringMacros::vectorToString(args));
+
+					//require first value for number of iterations
+					if(args.size() == 0)
+					{
+						__GEN_SS__ << "Invalid dimensional arguments! " <<
+								"Need number of iterations at dimension " <<
+								d << __E__;
+						__GEN_SS_THROW__;
+					}
+
+					unsigned long numOfIterations;
+					StringMacros::getNumber(args[0],numOfIterations);
+					__GEN_COUT__ << "Dimension " << d <<
+							" numOfIterations=" << numOfIterations << __E__;
+
+					//create dimension!
+					{
+						dimensionIterations.push_back(numOfIterations);
+						longDimensionParameters.push_back(longParamMap_t());
+					}
+
+					//skip iteration value, start at index 1
+					for(unsigned int a=1;a<args.size();++a)
+					{
+						std::vector<std::string> argPieces;
+						StringMacros::getVectorFromString(
+								args[a],
+								argPieces,
+								{':'} /*delimeter set*/);
+
+						__GEN_COUTV__(StringMacros::vectorToString(argPieces));
+
+						//check pieces and determine if arg is long or double
+						//3 pieces := name, init value, step value
+						if(argPieces.size() != 3)
+						{
+							__GEN_SS__ << "Invalid argument pieces! Should be size 3, but is " <<
+									argPieces.size() << __E__;
+							ss << StringMacros::vectorToString(argPieces);
+							__GEN_SS_THROW__;
+						}
+
+						//check piece 1 and 2 for double hint
+						//	a la Iterator::startCommandModifyActive()
+						if((argPieces[1].size() &&
+								(argPieces[1][argPieces[1].size()-1] == 'f' ||
+										argPieces[1].find('.') != std::string::npos)) ||
+								(argPieces[2].size() &&
+										(argPieces[2][argPieces[2].size()-1] == 'f' ||
+												argPieces[2].find('.') != std::string::npos)))
+						{
+							//handle as double
+
+							double startValue = strtod(argPieces[1].c_str(),0);
+							double stepSize = strtod(argPieces[2].c_str(),0);
+
+							__GEN_COUTV__(startValue);
+							__GEN_COUTV__(stepSize);
+
+
+							__GEN_SS__ << "Error! Only integer aruments allowed for Macros. " <<
+									"Double style arugment found: "  <<
+									argPieces[0] << "' := " <<
+									startValue << ", " << stepSize << __E__;
+							__GEN_SS_THROW__;
+							//							doubleDimensionParameters.back().emplace(
+							//									std::make_pair(argPieces[0],
+							//											std::make_pair( startValue /*current value*/,
+							//													std::make_pair( startValue /*initial value*/,
+							//															stepSize /*step value*/))));
+						}
+						else
+						{
+							//handle as long
+							//__GEN_COUT__ << "Long found" << __E__;
+
+							long int startValue;
+							long int stepSize;
+
+							StringMacros::getNumber(argPieces[1],startValue);
+							StringMacros::getNumber(argPieces[2],stepSize);
+
+							__GEN_COUTV__(startValue);
+							__GEN_COUTV__(stepSize);
+
+							__GEN_COUT__ << "Creating long argument '" <<
+									argPieces[0] << "' := " <<
+									startValue << ", " << stepSize << __E__;
+
+							longDimensionParameters.back().emplace(
+									std::make_pair(argPieces[0],
+											std::make_pair( startValue /*current value*/,
+													std::make_pair( startValue /*initial value*/,
+															stepSize /*step value*/))));
+
+						}
+
+					} //end dimensional argument loop
+
+				} //end dimensions loop
+
+
+			if(dimensionIterations.size() != longDimensionParameters.size())
+			{
+				__GEN_SS__ << "Impossible vector size mismatch! " <<
+						dimensionIterations.size() << " - " <<
+						longDimensionParameters.size() << __E__;
+				__GEN_SS_THROW__;
+			}
+
+			//output header
+			{
+				std::stringstream outSS;
+				{
+					outSS << "\n==========================\n" << __E__;
+					outSS << "Macro '" << macro.macroName_ << "' multi-dimensional scan..." << __E__;
+					outSS << "\t" << StringMacros::getTimestampString() << __E__;
+					outSS << "\t" << dimensionIterations.size() << " dimensions defined." << __E__;
+					for(unsigned int i=0;i<dimensionIterations.size(); ++i)
+					{
+						outSS << "\t\t" << "dimension[" << i << "] has " <<
+								dimensionIterations[i] << " iterations and " <<
+								(longDimensionParameters[i].size()) <<
+								" arguments." << __E__;
+
+						for(auto& param:longDimensionParameters[i])
+							outSS << "\t\t\t" << "'" << param.first << "' of type long with " <<
+							"initial value and step value [decimal] = " << "\t" <<
+							param.second.second.first << " & " <<
+							param.second.second.second << __E__;
+
+					}
+
+					outSS << "\n==========================\n" << __E__;
+				} //end outputs stringstream results
+
+
+				//if enabled to save to file, do it.
+				__GEN_COUT__ << "\n" << outSS.str();
+				if(outputFilePointer)
+					fprintf(outputFilePointer,outSS.str().c_str());
+			} //end output header
+
+
+			unsigned int iterationCount = 0;
+
+			//Use lambda recursive function to do arbitrary dimensions
+			//
+			//Note: can not do lambda recursive function if using auto to declare the function,
+			//	and must capture reference to the function. Also, must capture specialFolders
+			//	reference for use internally (const values already are captured).
+			std::function<void(
+					const unsigned int /*dimension*/
+			)>
+			localRecurse = [&dimensionIterations,
+							&dimensionIterationCnt,
+							&iterationCount,
+							&longDimensionParameters,
+							&fe,
+							&macro,
+							&outputFilePointer,
+							&argsIn,
+							&argsOut,
+							&localRecurse]
+							(
+									const unsigned int dimension
+							) {
+
+				//create local message facility subject
+				std::string mfSubject_ = "multiD-" + std::to_string(dimension) + "-" +
+						macro.macroName_;
+				__GEN_COUTV__(dimension);
+
+				if(dimension >= dimensionIterations.size())
+				{
+					__GEN_COUT__ << "Iteration count: " << iterationCount++ << __E__;
+					__GEN_COUT__ << "Launching Macro '" << macro.macroName_ << "' ..." << __E__;
+
+					//set argsIn to current value
+
+					//scan all dimension parameter objects
+					//	note: Although conflicts should not be allowed
+					//		at this point, lower dimensions will have priority over higher dimension
+					//		with same name argument.. and longs will have priority over doubles
+
+
+					bool foundAsLong;
+					for(unsigned int i=0;i<argsIn.size();++i)
+					{
+						foundAsLong = false;
+						for(unsigned int j=0;j<dimensionIterations.size();++j)
+						{
+							auto longIt = longDimensionParameters[j].find(argsIn[i].first);
+							if(longIt == longDimensionParameters[j].end())
+								continue;
+
+							//else found long!
+							__GEN_COUT__ << "Assigning argIn '" <<
+									argsIn[i].first << "' to current long value '" <<
+									longIt->second.first << "' from dimension " <<
+									j << " parameter." << __E__;
+							argsIn[i].second = std::to_string(
+									longIt->second.first);
+							foundAsLong = true;
+							break;
+						} //end long loop
+						if(foundAsLong) continue; //skip double check
+
+
+						__GEN_SS__ << "ArgIn '" << argsIn[i].first << "' was not assigned a value " <<
+								"by any dimensional loop parameter sets. This is illegal. Macro '" <<
+								macro.macroName_ << "' requires '" << argsIn[i].first <<
+								"' as an input argument. Either remove the input argument from this Macro, " <<
+								"or define a value as a dimensional loop parameter." << __E__;
+						__GEN_SS_THROW__;
+					} //done building argsIn
+
+
+					//have FE and Macro structure, so run it
+					fe->runMacro(macro,argsIn,argsOut);
+
+					__GEN_SS__ << "RUN" << __E__;
+					__GEN_SS_THROW__;
+
+					__GEN_COUT__ << "Macro complete!" << __E__;
+
+					//output results
+					{
+						std::stringstream outSS;
+						{
+							outSS << "\n---------------\n" << __E__;
+							outSS << "Macro '" << macro.macroName_ << "' execution..." << __E__;
+							outSS << "\t" << "iteration " << iterationCount << __E__;
+							for(unsigned int i=0;i<dimensionIterationCnt.size(); ++i)
+								outSS << "\t" << "dimension[" << i << "] index := " <<
+								dimensionIterationCnt[i] << __E__;
+
+							outSS << "\n" << "\t" << "Input arguments (count: " <<
+									argsIn.size() << "):" << __E__;
+							for(auto& argIn: argsIn)
+								outSS << "\t\t" << argIn.first << " = " << argIn.second << __E__;
+
+							outSS << "\n" << "\t" << "Output arguments (count: " <<
+									argsOut.size() << "):" << __E__;
+							for(auto& argOut: argsOut)
+								outSS << "\t\t" << argOut.first << " = " << argOut.second << __E__;
+						} //end outputs stringstream results
+
+
+						//if enabled to save to file, do it.
+						__GEN_COUT__ << "\n" << outSS.str();
+						if(outputFilePointer)
+							fprintf(outputFilePointer,outSS.str().c_str());
+					} //end output results
+
+
+					return;
+				}
+
+				//init dimension index
+				if(dimension >= dimensionIterationCnt.size())
+					dimensionIterationCnt.push_back(0);
+
+				//if enabled to save to file, do it.
+				__GEN_COUT__ << "\n" << "======================================" << __E__ <<
+						"dimension[" << dimension << "] number of iterations := " <<
+						dimensionIterations[dimension] << __E__;
+
+				//update current value to initial value for this dimension's parameters
+				{
+					for(auto& longPair: longDimensionParameters[dimension])
+					{
+						longPair.second.first = //reset to initial value
+								longPair.second.second.first;
+						__GEN_COUT__ << "arg '" <<
+								longPair.first << "' current value: " <<
+								longPair.second.first << __E__;
+					}//end long loop
+
+				} //end update current value to initial value for all dimensional parameters
+
+
+				for(dimensionIterationCnt[dimension]=0; //reset each time through dimension loop
+						dimensionIterationCnt[dimension]<
+						dimensionIterations[dimension];
+						++dimensionIterationCnt[dimension])
+				{
+					__GEN_COUT__ << "dimension[" << dimension << "] index := " <<
+							dimensionIterationCnt[dimension] << __E__;
+
+					localRecurse(dimension+1);
+
+					//update current value to next value for this dimension's parameters
+					{
+						for(auto& longPair: longDimensionParameters[dimension])
+						{
+							longPair.second.first += //add step value
+									longPair.second.second.second;
+							__GEN_COUT__ << "arg '" <<
+									longPair.first << "' current value: " <<
+									longPair.second.first << __E__;
+						}//end long loop
+
+					} //end update current value to next value for all dimensional parameters
+
+				}
+				__GEN_COUT__ << "Completed dimension[" << dimension <<
+						"] number of iterations := " <<
+						dimensionIterationCnt[dimension] << " of " <<
+						dimensionIterations[dimension] << __E__;
+			}; //end local lambda recursive function
+
+			//launch multi-dimensional recursion
+			localRecurse(0);
+
+			//close output file
+			if(outputFilePointer)
+				fclose(outputFilePointer);
+
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Error executing multi-dimensional Macro: " <<
+					e.what() << __E__;
+			statusResult = ss.str();
+		}
+		catch(...)
+		{
+			__SS__ << "Unknown error executing multi-dimensional Macro. " <<
+					__E__;
+			statusResult = ss.str();
+		}
+
+		__COUTV__(statusResult);
+
+		{ //lock mutex scope
+			std::lock_guard<std::mutex> lock(
+					feMgr->macroMultiDimensionalDoneMutex_);
+			//change status at completion
+			feMgr->macroMultiDimensionalStatusMap_[interfaceID] =
+					statusResult;
+		}
+
+			}, //end thread()
+			this,interfaceID,macroName,macroString,
+			enableSavingOutput,outputFilePath,outputFileRadix,
+			inputArgs
+	).detach();
+
+	__CFG_COUT__ << "Started multi-dimensional Macro '" <<
+			macroName << "' for interface '" <<
+			interfaceID << ".'" << __E__;
+
+} //end startMacroMultiDimensional()
+
+//========================================================================================================================
+//startFEMacroMultiDimensional
+//	Launches a thread that manages the multi-dimensional loop
+//		running the FE Macro in the specified FE interface.
+//	Called by iterator (for now).
+//
+//	Note: no output arguments are returned, but outputs are
+//		optionally saved to file.
+//
+//
+//	inputs:
+//		- inputArgs: dimensional semi-colon-separated,
+//			comma separated: dimension iterations and arguments (colon-separated name/value/stepsize sets)
+//
+//	outputs:
+//		- throws exception on failure
+void FEVInterfacesManager::startFEMacroMultiDimensional(
+		const std::string& 	requester,
 		const std::string& 	interfaceID,
 		const std::string& 	feMacroName,
 		const bool 		   	enableSavingOutput,
@@ -511,10 +1075,10 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string& reque
 	//mark active(only one FE Macro per interface active at any time, for now)
 	{ //lock mutex scope
 		std::lock_guard<std::mutex> lock(
-				frontEndMacroMultiDimensionalDoneMutex_);
+				macroMultiDimensionalDoneMutex_);
 		//mark active
-		if(frontEndMacroMultiDimensionalStatusMap_.find(interfaceID) !=
-				frontEndMacroMultiDimensionalStatusMap_.end())
+		if(macroMultiDimensionalStatusMap_.find(interfaceID) !=
+				macroMultiDimensionalStatusMap_.end())
 		{
 			__SS__ << "Failed to start multi-dimensional FE Macro '" <<
 					feMacroName << "' for interface '" <<
@@ -522,7 +1086,7 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string& reque
 					"' - this interface already has an active FE Macro launch!" << __E__;
 			__SS_THROW__;
 		}
-		frontEndMacroMultiDimensionalStatusMap_.emplace(
+		macroMultiDimensionalStatusMap_.emplace(
 				std::make_pair(interfaceID,"Active"));
 	}
 
@@ -814,7 +1378,7 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string& reque
 
 						for(auto& param:longDimensionParameters[i])
 							outSS << "\t\t\t" << "'" << param.first << "' of type long with " <<
-								"initial value and step value = " << "\t" <<
+								"initial value and step value [decimal] = " << "\t" <<
 								param.second.second.first << " & " <<
 								param.second.second.second << __E__;
 
@@ -1061,9 +1625,9 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string& reque
 
 		{ //lock mutex scope
 			std::lock_guard<std::mutex> lock(
-					feMgr->frontEndMacroMultiDimensionalDoneMutex_);
+					feMgr->macroMultiDimensionalDoneMutex_);
 			//change status at completion
-			feMgr->frontEndMacroMultiDimensionalStatusMap_[interfaceID] =
+			feMgr->macroMultiDimensionalStatusMap_[interfaceID] =
 					statusResult;
 		}
 
@@ -1093,11 +1657,11 @@ bool FEVInterfacesManager::checkFEMacroMultiDimensional(
 	//check active(only one FE Macro per interface active at any time, for now)
 	//lock mutex scope
 	std::lock_guard<std::mutex> lock(
-			frontEndMacroMultiDimensionalDoneMutex_);
+			macroMultiDimensionalDoneMutex_);
 	//check status
-	auto statusIt = frontEndMacroMultiDimensionalStatusMap_.find(interfaceID);
+	auto statusIt = macroMultiDimensionalStatusMap_.find(interfaceID);
 	if(statusIt ==
-			frontEndMacroMultiDimensionalStatusMap_.end())
+			macroMultiDimensionalStatusMap_.end())
 	{
 		__CFG_SS__ << "Status missing for multi-dimensional launch of FE Macro '" <<
 				feMacroName << "' for interface '" <<
@@ -1111,7 +1675,7 @@ bool FEVInterfacesManager::checkFEMacroMultiDimensional(
 				interfaceID << ".'" << __E__;
 
 		//erase from map
-		frontEndMacroMultiDimensionalStatusMap_.erase(statusIt);
+		macroMultiDimensionalStatusMap_.erase(statusIt);
 		return true;
 	}
 	else if(statusIt->second == "Active")

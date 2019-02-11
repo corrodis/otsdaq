@@ -673,13 +673,33 @@ void FixNewTableFields(int argc, char* argv[])
 		if(activeMap.find(groupAliasesName) != activeMap.end())
 		{
 			__COUT__<< "\n\nModifying " << groupAliasesName << __E__;
+
+			//now save new group
+			__COUT__ << "Before member map: " <<
+					StringMacros::mapToString(memberMap) << __E__;
+
+			//save new Group Aliases table and Version Aliases table
+			//first save new group aliases table
+			__COUT__<< groupAliasesName << ":v" <<
+					memberMap[groupAliasesName] << __E__;
+
+
+			//first copy to new column names
+			ConfigurationVersion temporaryVersion =
+					cfgMgr->copyViewToCurrentColumns(
+							groupAliasesName /*table name*/,
+							memberMap[groupAliasesName]/*source version*/
+					);
+
+
 			config = cfgMgr->getConfigurationByName(groupAliasesName);
+			config->setActiveView(temporaryVersion);
 			cfgView = config->getViewP();
 
 			unsigned int col1 = cfgView->findCol("GroupName");
 			unsigned int col2 = cfgView->findCol("GroupKey");
 
-			//cfgView->print();
+			cfgView->print();
 
 			//change all key entries found to the new key and delete rows for groups not found
 			bool found;
@@ -707,14 +727,51 @@ void FixNewTableFields(int argc, char* argv[])
 				if(!found) //delete row
 					cfgView->deleteRow(row--);
 			}
-			//cfgView->print();
+
+			cfgView->print();
+
+			//then save temporary to persistent version
+			ConfigurationVersion persistentVersion =
+					cfgMgr->saveNewConfiguration(
+							groupAliasesName /*table name*/,
+							temporaryVersion);
+
+	//		//change the version of the active view to flatVersion and save it
+	//		config = cfgMgr->getConfigurationByName(groupAliasesName);
+	//		cfgView = config->getViewP();
+	//		cfgView->setVersion(ConfigurationVersion(flatVersion));
+	//		theInterface_->saveActiveVersion(config);
+
+			memberMap[groupAliasesName] = persistentVersion; //change version in the member map
+
+			__COUT__<< "\t to...\t" <<
+					groupAliasesName << ":v" << memberMap[groupAliasesName] << __E__;
+
+
 		} //done modifying group aliases
+
+
 
 		//modify Version Aliases Configuration
 		if(activeMap.find(versionAliasesName) != activeMap.end())
 		{
 			__COUT__<< "\n\nModifying " << versionAliasesName << __E__;
+
+			//first save new version aliases table
+			__COUT__<< versionAliasesName << ":v" <<
+					memberMap[versionAliasesName] << __E__;
+
+
+			//first copy to new column names
+			ConfigurationVersion temporaryVersion =
+					cfgMgr->copyViewToCurrentColumns(
+							versionAliasesName /*table name*/,
+							memberMap[versionAliasesName]/*source version*/
+					);
+
+
 			config = cfgMgr->getConfigurationByName(versionAliasesName);
+			config->setActiveView(temporaryVersion);
 			cfgView = config->getViewP();
 			unsigned int col1 = cfgView->findCol("ConfigurationName");
 			unsigned int col2 = cfgView->findCol("Version");
@@ -741,71 +798,26 @@ void FixNewTableFields(int argc, char* argv[])
 				if(!found) //delete row
 					cfgView->deleteRow(row--);
 			}
+
+			//then save temporary to persistent version
+			ConfigurationVersion persistentVersion =
+					cfgMgr->saveNewConfiguration(
+							versionAliasesName /*table name*/,
+							temporaryVersion);
+
+	//		//change the version of the active view to flatVersion and save it
+	//		config = cfgMgr->getConfigurationByName(versionAliasesName);
+	//		cfgView = config->getViewP();
+	//		cfgView->setVersion(ConfigurationVersion(flatVersion));
+	//		theInterface_->saveActiveVersion(config);
+
+			memberMap[versionAliasesName] = persistentVersion; //change version in the member map
+
+			__COUT__<< "\t to...\t" <<
+					versionAliasesName << ":v" << memberMap[versionAliasesName] << __E__;
+
 		} //done modifying version aliases
 
-		//now save new group
-		__COUT__ << "Before member map: " <<
-				StringMacros::mapToString(memberMap) << __E__;
-
-		//save new Group Aliases table and Version Aliases table
-		//first save new group aliases table
-		__COUT__<< groupAliasesName << ":v" <<
-				memberMap[groupAliasesName] << __E__;
-
-
-		//first copy to new column names
-		ConfigurationVersion temporaryVersion =
-				cfgMgr->copyViewToCurrentColumns(
-						groupAliasesName /*table name*/,
-						memberMap[groupAliasesName]/*source version*/
-				);
-
-		//then save temporary to persistent version
-		ConfigurationVersion persistentVersion =
-				cfgMgr->saveNewConfiguration(
-						groupAliasesName /*table name*/,
-						temporaryVersion);
-
-//		//change the version of the active view to flatVersion and save it
-//		config = cfgMgr->getConfigurationByName(groupAliasesName);
-//		cfgView = config->getViewP();
-//		cfgView->setVersion(ConfigurationVersion(flatVersion));
-//		theInterface_->saveActiveVersion(config);
-
-		memberMap[groupAliasesName] = persistentVersion; //change version in the member map
-
-		__COUT__<< "\t to...\t" <<
-				groupAliasesName << ":v" << memberMap[groupAliasesName] << __E__;
-
-
-		//first save new version aliases table
-		__COUT__<< versionAliasesName << ":v" <<
-				memberMap[versionAliasesName] << __E__;
-
-
-		//first copy to new column names
-		temporaryVersion =
-				cfgMgr->copyViewToCurrentColumns(
-						versionAliasesName /*table name*/,
-						memberMap[versionAliasesName]/*source version*/
-				);
-
-		//then save temporary to persistent version
-		persistentVersion =
-				cfgMgr->saveNewConfiguration(
-						versionAliasesName /*table name*/,
-						temporaryVersion);
-
-//		//change the version of the active view to flatVersion and save it
-//		config = cfgMgr->getConfigurationByName(versionAliasesName);
-//		cfgView = config->getViewP();
-//		cfgView->setVersion(ConfigurationVersion(flatVersion));
-//		theInterface_->saveActiveVersion(config);
-
-		memberMap[versionAliasesName] = persistentVersion; //change version in the member map
-
-		__COUT__<< "\t to...\t" <<
-				versionAliasesName << ":v" << memberMap[versionAliasesName] << __E__;
 
 		//now save new group
 		__COUT__ << "After member map: " <<

@@ -808,7 +808,97 @@ std::string FEVInterface::receiveFromFrontEnd(const std::string& requester, unsi
 
 
 
+//========================================================================================================================
+//macroStruct_t constructor
+FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
+{
+	__COUTV__(macroString);
 
+	//example macro string:
+	//	{"name":"testPublic","sequence":"0:w:1001:writeVal,1:r:1001:","time":"Sat Feb 0
+	//	9 2019 10:42:03 GMT-0600 (Central Standard Time)","notes":"","LSBF":"false"}@
+
+	std::vector<std::string> extractVec;
+	StringMacros::getVectorFromString(macroString,extractVec,{'"'});
+
+	__COUTV__(StringMacros::vectorToString(extractVec," ||| "));
+
+	enum
+	{
+		MACRONAME_NAME_INDEX = 1,
+		MACRONAME_VALUE_INDEX = 3,
+		SEQUENCE_NAME_INDEX = 5,
+		SEQUENCE_VALUE_INDEX = 7,
+		LSBF_NAME_INDEX = 17,
+		LSFBF_VALUE_INDEX = 19,
+	};
+
+	//verify fields in sequence (for sanity)
+	if(MACRONAME_NAME_INDEX >= extractVec.size() || extractVec[MACRONAME_NAME_INDEX] != "name")
+	{
+		__SS__ << "Invalid sequence, 'name' expected in position " << MACRONAME_NAME_INDEX << __E__;
+		__SS_THROW__;
+	}
+	if(SEQUENCE_NAME_INDEX >= extractVec.size() || extractVec[SEQUENCE_NAME_INDEX] != "sequence")
+	{
+		__SS__ << "Invalid sequence, 'sequence' expected in position " << SEQUENCE_NAME_INDEX << __E__;
+		__SS_THROW__;
+	}
+	if(LSBF_NAME_INDEX >= extractVec.size() || extractVec[LSBF_NAME_INDEX] != "LSBF")
+	{
+		__SS__ << "Invalid sequence, 'LSBF' expected in position " << LSBF_NAME_INDEX << __E__;
+		__SS_THROW__;
+	}
+	macroName_ = extractVec[MACRONAME_VALUE_INDEX];
+	__COUTV__(macroName_);
+	lsbf_ = extractVec[LSFBF_VALUE_INDEX] == "false"?false:true;
+	__COUTV__(lsbf_);
+	std::string& sequence = extractVec[SEQUENCE_VALUE_INDEX];
+	__COUTV__(sequence);
+
+	std::vector<std::string> sequenceCommands;
+	StringMacros::getVectorFromString(sequence,sequenceCommands,{','});
+
+	__COUTV__(StringMacros::vectorToString(sequenceCommands," ### "));
+
+	for(auto& command: sequenceCommands)
+	{
+		__COUTV__(command);
+
+		//Note: the only way to distinguish between variable and data
+		//	is hex characters or not (lower and upper case allowed for hex)
+
+		std::vector<std::string> commandPieces;
+		StringMacros::getVectorFromString(command,commandPieces,{':'});
+
+		__COUTV__(StringMacros::vectorToString(commandPieces," ### "));
+
+		__COUTV__(commandPieces.size());
+
+		//d is delay (2)
+		//w is write (3)
+		//r is read  (2/3 with arg)
+
+
+
+
+	} //end sequence commands extraction loop
+
+} //end macroStruct_t constructor
+
+//========================================================================================================================
+//runMacro
+void FEVInterface::runMacro(
+		FEVInterface::macroStruct_t& 				macro,
+		FEVInterface::frontEndMacroConstArgs_t 		argsIn,
+		FEVInterface::frontEndMacroArgs_t 			argsOut)
+{
+	//Similar to FEVInterface::runSequenceOfCommands()
+
+	__SS__ << "Running" << __E__;
+	__SS_THROW__;
+
+} //end runMacro
 
 
 
