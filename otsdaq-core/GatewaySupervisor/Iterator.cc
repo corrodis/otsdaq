@@ -1633,6 +1633,7 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct *iteratorStruct)
 bool Iterator::handleCommandRequest(HttpXmlDocument& xmldoc,
 		const std::string& command, const std::string& parameter)
 {
+	__COUTV__(command);
 	if(command == "iteratePlay")
 	{
 		playIterationPlan(xmldoc,parameter);
