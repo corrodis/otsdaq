@@ -290,7 +290,7 @@ try
 		bool done = false;
 		try
 		{
-			done = theFEInterfacesManager_->checkFEMacroMultiDimensional(
+			done = theFEInterfacesManager_->checkMacroMultiDimensional(
 					targetInterfaceID, macroName);
 		}
 		catch(std::runtime_error &e)

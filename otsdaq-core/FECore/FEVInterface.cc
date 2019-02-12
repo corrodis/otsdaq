@@ -1,10 +1,6 @@
 #include "otsdaq-core/FECore/FEVInterface.h"
-
-
 #include "otsdaq-core/NetworkUtilities/UDPDataStreamerBase.h"
-
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
-
 #include "otsdaq-core/FECore/FEVInterfacesManager.h"
 
 
@@ -875,28 +871,323 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 
 		__COUTV__(commandPieces.size());
 
-		//d is delay (2)
-		//w is write (3)
-		//r is read  (2/3 with arg)
+		//command format
+		//	index | type | address/sleep[ms] | data
+		//d is delay (1+2)
+		//w is write (1+3)
+		//r is read  (1+2/3 with arg)
 
+		//extract input arguments, as the variables in address/data fields
+		//extract output arguments, as the variables in read data fields
 
+		if(commandPieces.size() < 3 ||
+				commandPieces.size() > 4 ||
+				commandPieces[1].size() != 1)
+		{
+			__SS__ << "Invalid command type specified in command string: " <<
+					command << __E__;
+			__SS_THROW__;
+		}
+
+		//==========================
+		//Use lambda to identify variable name in field
+		std::function<bool(
+				const std::string& /*field value*/
+		)>
+		localIsVariable  = [/*capture variable*/]
+							(
+									const std::string& fieldValue
+							) {
+			//create local message facility subject
+			std::string mfSubject_ = "isVar";
+			__GEN_COUTV__(fieldValue);
+
+			//return false if all hex characters found
+			for(const auto& c:fieldValue)
+				if(!((c >= '0' && c <= '9') ||
+						(c >= 'a' && c <= 'f') ||
+						(c >= 'A' && c <= 'F')))
+				return true; // is variable name!
+			return false; //else is a valid hex string, so not variable name
+
+		}; //end local lambda localIsVariable()
+
+		if(commandPieces[1][0] == 'r' && commandPieces.size() == 4) //read type
+		{
+			__COUT__ << "Read type found." << __E__;
+			//2: address or optional variable name
+			//3: optional variable name
+
+			operations_.push_back(std::make_pair(
+					macroStruct_t::OP_TYPE_READ,readOps_.size()));
+
+			readOps_.push_back(macroStruct_t::readOp_t());
+			readOps_.back().addressIsVar_ = localIsVariable(commandPieces[2]);
+			readOps_.back().dataIsVar_ = localIsVariable(commandPieces[3]);
+
+			if(!readOps_.back().addressIsVar_)
+			{
+				if(lsbf_) //flip byte order
+				{
+					std::string lsbfData = "";
+
+					//always add leading 0 to guarantee do not miss data
+					commandPieces[2] = "0" + commandPieces[2];
+					for(unsigned int i=0;i<commandPieces[2].size()/2; ++i)
+					{
+						__COUTV__(commandPieces[2].size()-2*(i+1));
+						//add one byte at a time, backwards
+						lsbfData += commandPieces[2][
+							commandPieces[2].size()-2*(i+1)];
+						lsbfData += commandPieces[2][
+							commandPieces[2].size()-2*(i+1)+1];
+						__COUTV__(lsbfData);
+					}
+					__COUTV__(lsbfData);
+					StringMacros::getNumber("0x" + lsbfData,
+						readOps_.back().address_);
+				}
+				else
+					StringMacros::getNumber("0x" + commandPieces[2],
+						readOps_.back().address_);
+			}
+			else
+			{
+				readOps_.back().addressVarName_ = commandPieces[2];
+				__COUTV__(readOps_.back().addressVarName_);
+
+				namesOfInputArguments_.emplace(readOps_.back().addressVarName_);
+			}
+
+			if(readOps_.back().dataIsVar_)
+			{
+				readOps_.back().dataVarName_ = commandPieces[3];
+				__COUTV__(readOps_.back().dataVarName_);
+
+				namesOfOutputArguments_.emplace(readOps_.back().dataVarName_);
+			}
+
+		}
+		else if(commandPieces[1][0] == 'w' && commandPieces.size() == 4) //write type
+		{
+			__COUT__ << "Write type found." << __E__;
+			//2: address or optional variable name
+			//3: data or optional variable name
+
+			operations_.push_back(std::make_pair(
+					macroStruct_t::OP_TYPE_WRITE,writeOps_.size()));
+
+			writeOps_.push_back(macroStruct_t::writeOp_t());
+			writeOps_.back().addressIsVar_ = localIsVariable(commandPieces[2]);
+			writeOps_.back().dataIsVar_ = localIsVariable(commandPieces[3]);
+
+			if(!writeOps_.back().addressIsVar_)
+			{
+				if(lsbf_) //flip byte order
+				{
+					std::string lsbfData = "";
+
+					//always add leading 0 to guarantee do not miss data
+					commandPieces[2] = "0" + commandPieces[2];
+					for(unsigned int i=0;i<commandPieces[2].size()/2; ++i)
+					{
+						__COUTV__(commandPieces[2].size()-2*(i+1));
+						//add one byte at a time, backwards
+						lsbfData += commandPieces[2][
+							commandPieces[2].size()-2*(i+1)];
+						lsbfData += commandPieces[2][
+							commandPieces[2].size()-2*(i+1)+1];
+						__COUTV__(lsbfData);
+					}
+					__COUTV__(lsbfData);
+					StringMacros::getNumber("0x" + lsbfData,
+							writeOps_.back().address_);
+				}
+				else
+					StringMacros::getNumber("0x" + commandPieces[2],
+						writeOps_.back().address_);
+			}
+			else
+			{
+				writeOps_.back().addressVarName_ = commandPieces[2];
+				__COUTV__(writeOps_.back().addressVarName_);
+
+				namesOfInputArguments_.emplace(writeOps_.back().addressVarName_);
+			}
+
+			if(!writeOps_.back().dataIsVar_)
+			{
+				if(lsbf_) //flip byte order
+				{
+					std::string lsbfData = "";
+
+					//always add leading 0 to guarantee do not miss data
+					commandPieces[2] = "0" + commandPieces[3];
+					for(unsigned int i=0;i<commandPieces[3].size()/2; ++i)
+					{
+						__COUTV__(commandPieces[3].size()-2*(i+1));
+						//add one byte at a time, backwards
+						lsbfData += commandPieces[3][
+							commandPieces[3].size()-2*(i+1)];
+						lsbfData += commandPieces[3][
+							commandPieces[3].size()-2*(i+1)+1];
+						__COUTV__(lsbfData);
+					}
+					__COUTV__(lsbfData);
+					StringMacros::getNumber("0x" + lsbfData,
+							writeOps_.back().data_);
+				}
+				else
+					StringMacros::getNumber("0x" + commandPieces[3],
+						writeOps_.back().data_);
+			}
+			else
+			{
+				writeOps_.back().dataVarName_ = commandPieces[3];
+				__COUTV__(writeOps_.back().dataVarName_);
+
+				namesOfInputArguments_.emplace(writeOps_.back().dataVarName_);
+			}
+		}
+		else if(commandPieces[1][0] == 'd' && commandPieces.size() == 3) //delay type
+		{
+			__COUT__ << "Delay type found." << __E__;
+			//2: delay[ms] or optional variable name
+
+			operations_.push_back(std::make_pair(
+					macroStruct_t::OP_TYPE_DELAY,delayOps_.size()));
+
+			delayOps_.push_back(macroStruct_t::delayOp_t());
+			delayOps_.back().delayIsVar_ = localIsVariable(commandPieces[2]);
+
+			if(!delayOps_.back().delayIsVar_)
+				StringMacros::getNumber("0x" + commandPieces[2],
+						delayOps_.back().delay_);
+			else
+			{
+				delayOps_.back().delayVarName_ = commandPieces[2];
+				__COUTV__(delayOps_.back().delayVarName_);
+
+				namesOfInputArguments_.emplace(delayOps_.back().delayVarName_);
+			}
+
+		}
+		else //invalid type
+		{
+			__SS__ << "Invalid command type '" <<
+					commandPieces[1][0] << "' specified with " <<
+					commandPieces.size() << " components." <<
+					 __E__;
+			__SS_THROW__;
+		}
 
 
 	} //end sequence commands extraction loop
+
+	__COUT__ <<  operations_.size() << " operations extracted: \n\t" <<
+			readOps_.size()  << " reads \n\t" <<
+			writeOps_.size() << " writes \n\t" <<
+			delayOps_.size() << " delays" <<  __E__;
+
+	__COUT__ << "Input arguments: " << __E__;
+	for(const auto& inputArg: namesOfInputArguments_)
+		__COUT__ << "\t" << inputArg << __E__;
+
+	__COUT__ << "Output arguments: " << __E__;
+	for(const auto& outputArg: namesOfOutputArguments_)
+		__COUT__ << "\t" << outputArg << __E__;
 
 } //end macroStruct_t constructor
 
 //========================================================================================================================
 //runMacro
 void FEVInterface::runMacro(
-		FEVInterface::macroStruct_t& 				macro,
-		FEVInterface::frontEndMacroConstArgs_t 		argsIn,
-		FEVInterface::frontEndMacroArgs_t 			argsOut)
+		FEVInterface::macroStruct_t& 						macro,
+		std::map<std::string /*name*/,uint64_t /*value*/>& 	variableMap)
 {
 	//Similar to FEVInterface::runSequenceOfCommands()
 
-	__SS__ << "Running" << __E__;
-	__SS_THROW__;
+	__FE_COUT__ << "Running Macro '" << macro.macroName_ <<
+			"' of " << macro.operations_.size() << " operations." << __E__;
+
+	for(auto& op: macro.operations_)
+	{
+		if(op.first == macroStruct_t::OP_TYPE_READ)
+		{
+			__FE_COUT__ << "Doing read op..." << __E__;
+			macroStruct_t::readOp_t& readOp = macro.readOps_[op.second];
+			if(readOp.addressIsVar_)
+			{
+				__FE_COUTV__(readOp.addressVarName_);
+				readOp.address_ = variableMap.at(readOp.addressVarName_);
+			}
+
+			uint64_t dataValue;
+
+			__FE_COUT__ << std::hex << "Read address: \t 0x" <<
+					readOp.address_ << __E__ << std::dec;
+
+			universalRead((char *)&readOp.address_,(char *)&dataValue);
+
+			__FE_COUT__ << std::hex << "Read data: \t 0x" <<
+					dataValue<< __E__ << std::dec;
+
+			if(readOp.dataIsVar_)
+			{
+				__FE_COUTV__(readOp.dataVarName_);
+				variableMap.at(readOp.dataVarName_) = dataValue;
+			}
+
+		} //end read op
+		else if(op.first == macroStruct_t::OP_TYPE_WRITE)
+		{
+			__FE_COUT__ << "Doing write op..." << __E__;
+			macroStruct_t::writeOp_t& writeOp = macro.writeOps_[op.second];
+			if(writeOp.addressIsVar_)
+			{
+				__FE_COUTV__(writeOp.addressVarName_);
+				writeOp.address_ = variableMap.at(writeOp.addressVarName_);
+			}
+			if(writeOp.dataIsVar_)
+			{
+				__FE_COUTV__(writeOp.dataVarName_);
+				writeOp.data_ = variableMap.at(writeOp.dataVarName_);
+			}
+
+			__FE_COUT__ << std::hex << "Write address: \t 0x" <<
+					writeOp.address_ << __E__ << std::dec;
+			__FE_COUT__ << std::hex << "Write data: \t 0x" <<
+					writeOp.data_ << __E__ << std::dec;
+
+			universalWrite((char *)&writeOp.address_,(char *)&writeOp.data_);
+
+		} //end write op
+		else if(op.first == macroStruct_t::OP_TYPE_DELAY)
+		{
+			__FE_COUT__ << "Doing delay op..." << __E__;
+
+			macroStruct_t::delayOp_t& delayOp = macro.delayOps_[op.second];
+			if(delayOp.delayIsVar_)
+			{
+				__FE_COUTV__(delayOp.delayVarName_);
+				delayOp.delay_ = variableMap.at(delayOp.delayVarName_);
+			}
+
+			__FE_COUT__ << std::dec << "Delay ms: \t " <<
+					delayOp.delay_ << __E__;
+
+			usleep(delayOp.delay_/*ms*/ * 1000);
+
+		} //end delay op
+		else //invalid type
+		{
+			__FE_SS__ << "Invalid command type '" <<
+					op.first << "!'" <<
+					__E__;
+			__FE_SS_THROW__;
+		}
+
+	} //end operations loop
 
 } //end runMacro
 

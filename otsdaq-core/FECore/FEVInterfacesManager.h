@@ -45,7 +45,6 @@ public:
     void		  	    runFEMacro							(const std::string& interfaceID, const std::string& feMacroName, const std::string& inputArgs, std::string& outputArgs);	//used by MacroMaker
     void		  	    runFEMacroByFE						(const std::string& callingInterfaceID, const std::string& interfaceID, const std::string& feMacroName, const std::string& inputArgs, std::string& outputArgs);	//used by FE calling (i.e. FESupervisor)
     void		  	    startFEMacroMultiDimensional		(const std::string& requester, const std::string& interfaceID, const std::string& feMacroName, const bool enableSavingOutput, const std::string& outputFilePath, const std::string& outputFileRadix, const std::string& inputArgs);	//used by iterator calling (i.e. FESupervisor)
-    bool		  	    checkFEMacroMultiDimensional		(const std::string& interfaceID, const std::string& feMacroName);	//used by iterator calling (i.e. FESupervisor)
     void		  	    startMacroMultiDimensional			(const std::string& requester, const std::string& interfaceID, const std::string& macroName, const std::string& macroString, const bool enableSavingOutput, const std::string& outputFilePath, const std::string& outputFileRadix, const std::string& inputArgs);	//used by iterator calling (i.e. FESupervisor)
     bool		  	    checkMacroMultiDimensional			(const std::string& interfaceID, const std::string& macroName);	//used by iterator calling (i.e. FESupervisor)
 

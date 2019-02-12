@@ -615,31 +615,31 @@ void FEVInterfacesManager::startMacroMultiDimensional(
 			std::vector<longParamMap_t> longDimensionParameters;
 			//Note: double parameters not allowed for Macro (allowed in FE Macros)
 
-			std::vector<FEVInterface::frontEndMacroArg_t> argsIn;
-			std::vector<FEVInterface::frontEndMacroArg_t> argsOut;
+			//instead of strict inputs and outputs, make a map
+			//	and populate with all input and output names
+			std::map<std::string /*name*/,uint64_t /*value*/> variableMap;
 
-			for(unsigned int i=0;i<macro.namesOfInputArguments_.size();++i)
-				argsIn.push_back(std::make_pair( //do not care about input arg value
-						macro.namesOfInputArguments_[i],""));
-			for(unsigned int i=0;i<macro.namesOfOutputArguments_.size();++i)
-				argsOut.push_back(std::make_pair( //do not care about output arg value
-						macro.namesOfOutputArguments_[i],""));
+			//std::vector<FEVInterface::frontEndMacroArg_t> argsIn;
+			//std::vector<FEVInterface::frontEndMacroArg_t> argsOut;
+
+			for(const auto& inputArgName:macro.namesOfInputArguments_)
+				variableMap.emplace( //do not care about input arg value
+						std::pair<std::string /*name*/,uint64_t /*value*/>(
+								inputArgName,0));
+			for(const auto& outputArgName:macro.namesOfOutputArguments_)
+				variableMap.emplace( //do not care about output arg value
+						std::pair<std::string /*name*/,uint64_t /*value*/>(
+								outputArgName,0));
 
 			if(0) //example
 			{
 				//inputArgsStr = "2,fisrD:3:2,fD2:4:1;4,myOtherArg:5:2,sD:10f:1.3";
-
-				argsIn.push_back(std::make_pair("myOtherArg","3"));
 
 				dimensionIterations.push_back(2);
 				dimensionIterations.push_back(4);
 
 				longDimensionParameters.push_back(longParamMap_t());
 				longDimensionParameters.push_back(longParamMap_t());
-
-				//				doubleDimensionParameters.push_back(doubleParamMap_t());
-				//				doubleDimensionParameters.push_back(doubleParamMap_t());
-
 
 				longDimensionParameters.back().emplace(
 						std::make_pair("myOtherArg",
@@ -812,6 +812,13 @@ void FEVInterfacesManager::startMacroMultiDimensional(
 
 					}
 
+					outSS << "\nInput argument names:" << __E__;
+					for(const auto& inputArgName:macro.namesOfInputArguments_)
+						outSS << "\t" << inputArgName << __E__;
+					outSS << "\nOutput argument names:" << __E__;
+					for(const auto& outputArgName:macro.namesOfOutputArguments_)
+						outSS << "\t" << outputArgName << __E__;
+
 					outSS << "\n==========================\n" << __E__;
 				} //end outputs stringstream results
 
@@ -839,9 +846,8 @@ void FEVInterfacesManager::startMacroMultiDimensional(
 							&longDimensionParameters,
 							&fe,
 							&macro,
+							&variableMap,
 							&outputFilePointer,
-							&argsIn,
-							&argsOut,
 							&localRecurse]
 							(
 									const unsigned int dimension
@@ -858,54 +864,31 @@ void FEVInterfacesManager::startMacroMultiDimensional(
 					__GEN_COUT__ << "Launching Macro '" << macro.macroName_ << "' ..." << __E__;
 
 					//set argsIn to current value
-
-					//scan all dimension parameter objects
-					//	note: Although conflicts should not be allowed
-					//		at this point, lower dimensions will have priority over higher dimension
-					//		with same name argument.. and longs will have priority over doubles
-
-
-					bool foundAsLong;
-					for(unsigned int i=0;i<argsIn.size();++i)
 					{
-						foundAsLong = false;
+						//scan all dimension parameter objects
+						//	note: Although conflicts should not be allowed
+						//		at this point, lower dimensions will have priority over higher dimension
+						//		with same name argument.. and longs will have priority over doubles
+
+
 						for(unsigned int j=0;j<dimensionIterations.size();++j)
 						{
-							auto longIt = longDimensionParameters[j].find(argsIn[i].first);
-							if(longIt == longDimensionParameters[j].end())
-								continue;
+							for(auto& longParam:longDimensionParameters[j])
+							{
 
-							//else found long!
-							__GEN_COUT__ << "Assigning argIn '" <<
-									argsIn[i].first << "' to current long value '" <<
-									longIt->second.first << "' from dimension " <<
-									j << " parameter." << __E__;
-							argsIn[i].second = std::to_string(
-									longIt->second.first);
-							foundAsLong = true;
-							break;
+								__GEN_COUT__ << "Assigning argIn '" <<
+										longParam.first << "' to current long value '" <<
+										longParam.second.first << "' from dimension " <<
+										j << " parameter." << __E__;
+								variableMap.at(longParam.first) =
+										longParam.second.first;
+							}
 						} //end long loop
-						if(foundAsLong) continue; //skip double check
 
-
-						__GEN_SS__ << "ArgIn '" << argsIn[i].first << "' was not assigned a value " <<
-								"by any dimensional loop parameter sets. This is illegal. Macro '" <<
-								macro.macroName_ << "' requires '" << argsIn[i].first <<
-								"' as an input argument. Either remove the input argument from this Macro, " <<
-								"or define a value as a dimensional loop parameter." << __E__;
-						__GEN_SS_THROW__;
 					} //done building argsIn
 
 
-					//have FE and Macro structure, so run it
-					fe->runMacro(macro,argsIn,argsOut);
-
-					__GEN_SS__ << "RUN" << __E__;
-					__GEN_SS_THROW__;
-
-					__GEN_COUT__ << "Macro complete!" << __E__;
-
-					//output results
+					//output inputs
 					{
 						std::stringstream outSS;
 						{
@@ -916,15 +899,36 @@ void FEVInterfacesManager::startMacroMultiDimensional(
 								outSS << "\t" << "dimension[" << i << "] index := " <<
 								dimensionIterationCnt[i] << __E__;
 
-							outSS << "\n" << "\t" << "Input arguments (count: " <<
-									argsIn.size() << "):" << __E__;
-							for(auto& argIn: argsIn)
-								outSS << "\t\t" << argIn.first << " = " << argIn.second << __E__;
 
+							outSS << "\n" << "\t" << "Input arguments (count: " <<
+									macro.namesOfInputArguments_.size() << "):" << __E__;
+							for(auto& argIn: macro.namesOfInputArguments_)
+								outSS << "\t\t" << argIn << " = " <<
+								variableMap.at(argIn) << __E__;
+
+						} //end outputs stringstream results
+
+
+						//if enabled to save to file, do it.
+						__GEN_COUT__ << "\n" << outSS.str();
+						if(outputFilePointer)
+							fprintf(outputFilePointer,outSS.str().c_str());
+					} //end output inputs
+
+					//have FE and Macro structure, so run it
+					fe->runMacro(macro,variableMap);
+
+					__GEN_COUT__ << "Macro complete!" << __E__;
+
+					//output results
+					{
+						std::stringstream outSS;
+						{
 							outSS << "\n" << "\t" << "Output arguments (count: " <<
-									argsOut.size() << "):" << __E__;
-							for(auto& argOut: argsOut)
-								outSS << "\t\t" << argOut.first << " = " << argOut.second << __E__;
+									macro.namesOfOutputArguments_.size() << "):" << __E__;
+							for(auto& argOut: macro.namesOfOutputArguments_)
+								outSS << "\t\t" << argOut << " = " <<
+									variableMap.at(argOut) << __E__;
 						} //end outputs stringstream results
 
 
@@ -1389,6 +1393,13 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(
 								param.second.second.second << __E__;
 					}
 
+					outSS << "\nHere are the identified input arguments:" << __E__;
+					for(unsigned int i=0;i<feMacro.namesOfInputArguments_.size();++i)
+						outSS << "\t" << feMacro.namesOfInputArguments_[i] << __E__;
+					outSS << "\nHere are the identified input arguments:" << __E__;
+					for(unsigned int i=0;i<feMacro.namesOfOutputArguments_.size();++i)
+						outSS << "\t" << feMacro.namesOfOutputArguments_[i] << __E__;
+
 					outSS << "\n==========================\n" << __E__;
 				} //end outputs stringstream results
 
@@ -1646,13 +1657,13 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(
 //========================================================================================================================
 //checkFEMacroMultiDimensional
 //	Checks for the completion of the thread that manages the multi-dimensional loop
-//		running the FE Macro in the specified FE interface.
+//		running the FE Macro or MacroMaker Macro in the specified FE interface.
 //	Called by iterator (for now).
 //
 //	Returns true if multi-dimensional launch is done
-bool FEVInterfacesManager::checkFEMacroMultiDimensional(
+bool FEVInterfacesManager::checkMacroMultiDimensional(
 		const std::string& interfaceID,
-		const std::string& feMacroName)
+		const std::string& macroName)
 {
 	//check active(only one FE Macro per interface active at any time, for now)
 	//lock mutex scope
@@ -1663,15 +1674,15 @@ bool FEVInterfacesManager::checkFEMacroMultiDimensional(
 	if(statusIt ==
 			macroMultiDimensionalStatusMap_.end())
 	{
-		__CFG_SS__ << "Status missing for multi-dimensional launch of FE Macro '" <<
-				feMacroName << "' for interface '" <<
+		__CFG_SS__ << "Status missing for multi-dimensional launch of Macro '" <<
+				macroName << "' for interface '" <<
 				interfaceID << ".'" << __E__;
 		__CFG_SS_THROW__;
 	}
 	else if(statusIt->second == "Done")
 	{
-		__CFG_COUT__ << "Completed multi-dimensional launch of FE Macro '" <<
-				feMacroName << "' for interface '" <<
+		__CFG_COUT__ << "Completed multi-dimensional launch of Macro '" <<
+				macroName << "' for interface '" <<
 				interfaceID << ".'" << __E__;
 
 		//erase from map
@@ -1680,19 +1691,19 @@ bool FEVInterfacesManager::checkFEMacroMultiDimensional(
 	}
 	else if(statusIt->second == "Active")
 	{
-		__CFG_COUT__ << "Still running multi-dimensional launch of FE Macro '" <<
-			feMacroName << "' for interface '" <<
+		__CFG_COUT__ << "Still running multi-dimensional launch of Macro '" <<
+			macroName << "' for interface '" <<
 			interfaceID << ".'" << __E__;
 		return false;
 	}
 	//else //assume error
 
-	__CFG_SS__ << "Error occured during multi-dimensional launch of FE Macro '" <<
-			feMacroName << "' for interface '" <<
+	__CFG_SS__ << "Error occured during multi-dimensional launch of Macro '" <<
+			macroName << "' for interface '" <<
 			interfaceID << "':" << statusIt->second <<__E__;
 	__CFG_SS_THROW__;
 
-} //end checkFEMacroMultiDimensional()
+} //end checkMacroMultiDimensional()
 
 //========================================================================================================================
 //runFEMacroByFE

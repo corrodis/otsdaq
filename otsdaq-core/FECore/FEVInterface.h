@@ -146,12 +146,45 @@ public:
 			OP_TYPE_WRITE,
 			OP_TYPE_DELAY,
 		};
+
+		struct readOp_t
+		{
+			uint64_t	 	address_;
+			bool			addressIsVar_;
+			std::string		addressVarName_;
+			bool			dataIsVar_;
+			std::string		dataVarName_;
+		}; //end macroStruct_t::writeOp_t declaration
+
+		struct writeOp_t
+		{
+			uint64_t	 	address_;
+			bool			addressIsVar_;
+			std::string		addressVarName_;
+			uint64_t	 	data_;
+			bool			dataIsVar_;
+			std::string		dataVarName_;
+		}; //end macroStruct_t::writeOp_t declaration
+
+		struct delayOp_t
+		{
+			uint64_t	 	delay_; //milliseconds
+			bool			delayIsVar_;
+			std::string		delayVarName_;
+		}; //end macroStruct_t::writeOp_t declaration
+
+
 		std::string 							macroName_;
-		std::vector<unsigned int /*op type*/> 	operations_;
-		const std::vector<std::string> 			namesOfInputArguments_, namesOfOutputArguments_;
+		std::vector<std::pair<
+			unsigned int /*op type*/,
+			unsigned int /*index in specific type vector*/> > 	operations_;
+		std::vector<macroStruct_t::readOp_t> 	readOps_;
+		std::vector<macroStruct_t::writeOp_t> 	writeOps_;
+		std::vector<macroStruct_t::delayOp_t> 	delayOps_;
+		std::set<std::string> 					namesOfInputArguments_, namesOfOutputArguments_;
 		bool 									lsbf_; //least significant byte first
-	};
-	void 						runMacro							(FEVInterface::macroStruct_t& macro, FEVInterface::frontEndMacroConstArgs_t argsIn, FEVInterface::frontEndMacroArgs_t argsOut);
+	}; //end macroStruct_t declaration
+	void 						runMacro							(FEVInterface::macroStruct_t& macro, std::map<std::string /*name*/,uint64_t /*value*/>& variableMap);
 	//end FE Macros
 	/////////
 
@@ -300,25 +333,6 @@ protected:
 template<class T>
 T 												getFEMacroConstArgumentValue(
 		FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName);
-//{
-//	//stolen from ConfigurationView
-//	//	only handles number types (strings are handled in non-template function override
-//
-//	const std::string& data = FEVInterface::getFEMacroConstArgument(args, argName);
-//
-//
-//	T retValue;
-//
-//	if(!StringMacros::getNumber(data,retValue))
-//	{
-//		__SS__ << "Error extracting value for input argument named '" <<
-//				argName << ".' The value '" << data << "' is not a number!" << std::endl;
-//		__COUT__ << "\n" << ss.str();
-//		__SS_THROW__;
-//	}
-//
-//	return retValue;
-//}
 //specialized template version of getFEMacroConstArgumentValue for string
 template<>
 std::string										getFEMacroConstArgumentValue<std::string>	(FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName);
@@ -326,25 +340,6 @@ std::string										getFEMacroConstArgumentValue<std::string>	(FEVInterface::fr
 template<class T>
 T 												getFEMacroArgumentValue(
 		FEVInterface::frontEndMacroArgs_t args, const std::string& argName);
-//{
-//	//stolen from ConfigurationView
-//	//	only handles number types (strings are handled in non-template function override
-//
-//	const std::string& data = FEVInterface::getFEMacroArgument(args, argName);
-//
-//
-//	T retValue;
-//
-//	if(!StringMacros::getNumber(data,retValue))
-//	{
-//		__SS__ << "Error extracting value for output argument named '" <<
-//				argName << ".' The value '" << data << "' is not a number!" << std::endl;
-//		__COUT__ << "\n" << ss.str();
-//		__SS_THROW__;
-//	}
-//
-//	return retValue;
-//}
 
 //specialized template version of getFEMacroArgumentValue for string
 template<>
