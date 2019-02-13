@@ -1,9 +1,9 @@
 #ifndef _ots_BufferImplementation_h_
 #define _ots_BufferImplementation_h_
 
+#include "otsdaq-core/DataManager/CircularBufferBase.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/DataManager/CircularBufferBase.h"
 
 #include <atomic>
 #include <iostream>
