@@ -18,6 +18,7 @@ simple_plugin(UDPDump "module"
   ${FHICLCPP}
   ${CETLIB}
   ${CETLIB_EXCEPT}
+  MF_MessageLogger
 )
 
 simple_plugin(JSONDispatcher "module"

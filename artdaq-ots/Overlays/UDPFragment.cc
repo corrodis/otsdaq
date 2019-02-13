@@ -1,6 +1,5 @@
 #include "artdaq-ots/Overlays/UDPFragment.hh"
 
-#include "cetlib/exception.h"
 
 std::ostream & ots::operator << (std::ostream & os, UDPFragment const & f) {
   os << "UDPFragment_event_size: "
