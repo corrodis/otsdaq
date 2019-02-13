@@ -2,7 +2,6 @@
 
 #include "canvas/Utilities/Exception.h"
 #include "artdaq/Application/GeneratorMacros.hh"
-#include "cetlib/exception.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "artdaq-core/Utilities/SimpleLookupPolicy.hh"
 #include "artdaq-ots/Overlays/UDPFragmentWriter.hh"

@@ -17,7 +17,7 @@
 #include <memory>
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "fhiclcpp/make_ParameterSet.h"
 

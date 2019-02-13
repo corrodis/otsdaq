@@ -3,6 +3,7 @@ cet_make(LIBRARY_NAME PluginMakers
         ${XDAQ_XERCES-C} 
 	${CETLIB}
          ${CETLIB_EXCEPT}
+	 MF_MessageLogger
          pthread 
 )
 
