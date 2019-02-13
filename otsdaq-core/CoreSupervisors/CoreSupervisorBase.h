@@ -5,20 +5,14 @@
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
 
+#include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
+
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
-#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
 #include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
 
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationTree.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
 
-#include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
 #include "otsdaq-core/WebUsersUtilities/RemoteWebUsers.h"
 
 #pragma GCC diagnostic push
@@ -75,8 +69,6 @@ private:
 
 public:
 
-    //bool					loginGateway					(xgi::Input* in, xgi::Output* out);
-
     //State Machine request handlers
     void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out ) ;
     void 			        stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out ) ;
@@ -114,6 +106,15 @@ protected:
     WorkLoopManager                	stateMachineWorkLoopManager_;
     toolbox::BSem                  	stateMachineSemaphore_;
     std::vector<VStateMachine*>    	theStateMachineImplementation_;
+
+    //for managing transition iterations
+    std::vector<bool>				stateMachinesIterationDone_;
+    unsigned int					stateMachinesIterationWorkCount_;
+    unsigned int					subIterationWorkStateMachineIndex_;
+    void							preStateMachineExecution(unsigned int i);
+    void							postStateMachineExecution(unsigned int i);
+    void							preStateMachineExecutionLoop(void);
+    void							postStateMachineExecutionLoop(void);
 
 
     RemoteWebUsers             		theRemoteWebUsers_;

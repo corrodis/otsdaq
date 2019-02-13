@@ -28,12 +28,12 @@ link_libraries(
 		$ENV{XDAQ_LIB}/libxoap.so
 		$ENV{XDAQ_LIB}/libxdata.so
 		$ENV{XDAQ_LIB}/libb2innub.so
-		/usr/lib64/libuuid.so
+		uuid
 		${Boost_SYSTEM_LIBRARY}
 )
 
-cet_test(DatabaseConfiguration_t USE_BOOST_UNIT)
-cet_test(DatabaseInterfaceTest_t USE_BOOST_UNIT)
+#cet_test(DatabaseConfiguration_t USE_BOOST_UNIT)
+#cet_test(DatabaseInterfaceTest_t USE_BOOST_UNIT)
 
 #cet_make_exec(otsdaq_database_migrate)
 

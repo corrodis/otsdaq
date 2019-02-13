@@ -66,12 +66,12 @@ ots::JSONDispatcher::JSONDispatcher(fhicl::ParameterSet const & pset)
 	boost::system::error_code ec;
 	socket_.set_option(boost::asio::socket_base::reuse_address(true),ec);
 	if(ec) {
-		mf::LogError("JSONDispatcher") << "An error occurred setting reuse_address: " << ec.message() << std::endl;
+	  TLOG(TLVL_ERROR, "JSONDispatcher") << "An error occurred setting reuse_address: " << ec.message() << std::endl;
 	}
 	//std::cout << __COUT_HDR_FL__ << "JSONDispatcher setting broadcast option" << std::endl;
 	socket_.set_option(boost::asio::socket_base::broadcast(true),ec);
 	if(ec) {
-		mf::LogError("JSONDispatcher") << "An error occurred setting broadcast: " << ec.message() << std::endl;
+	  TLOG(TLVL_ERROR, "JSONDispatcher") << "An error occurred setting broadcast: " << ec.message() << std::endl;
 	}
 
 	//std::cout << __COUT_HDR_FL__ << "JSONDispatcher gettting UDP endpoint" << std::endl;
@@ -93,7 +93,7 @@ void ots::JSONDispatcher::analyze(art::Event const & evt)
 {
 	//std::cout << __COUT_HDR_FL__ << "JSONDispatcher getting event number to check prescale" << std::endl;
 	art::EventNumber_t eventNumber = evt.event();
-	mf::LogInfo("JSONDispatcher") << "Received event with sequence ID " << eventNumber;
+	TLOG(TLVL_INFO, "JSONDispatcher") << "Received event with sequence ID " << eventNumber;
 	if((int)eventNumber % prescale_ == 0) {
 		//std::cout << __COUT_HDR_FL__ << "JSONDispatcher dispatching event" << std::endl;
 		std::ostringstream outputJSON;

@@ -21,6 +21,7 @@
 #include <map>
 
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
+#include "otsdaq-core/CodeEditor/CodeEditor.h"
 
 namespace ots
 {
@@ -32,9 +33,10 @@ class HttpXmlDocument;
 //
 //	It is instantiated by the xdaq context when otsdaq is in "Wiz Mode."
 //
-//	It is different from the "Normal Mode" Gateway Supervisor in that it does not have a state machine
-//	and does not inherit properties from CorePropertySupervisorBase. The assumption is
-//	that only admins have access to wiz mode, and they have access to all features of it.
+//	It is different from the "Normal Mode" Gateway Supervisor in that
+//	it does not have a state machine and does not inherit properties
+//	from CorePropertySupervisorBase. The assumption is that only admins
+//	have access to wiz mode, and they have access to all features of it.
 class WizardSupervisor: public xdaq::Application, public SOAPMessenger
 {
 
@@ -54,6 +56,7 @@ public:
 
     void 						Default                    			(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
     void 						verification               		 	(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+    void						request		                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
     void						requestIcons                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
 
     void 						editSecurity                		(xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
@@ -70,6 +73,7 @@ public:
     xoap::MessageReference 		supervisorLastConfigGroupRequest	(xoap::MessageReference msg) throw (xoap::exception::Exception);
 
 private:
+
     std::string					securityCode_;
     bool                        defaultSequence_;
     std::vector<std::string>    allowedFileUploadTypes_, matchingFileUploadTypes_;
@@ -84,6 +88,8 @@ private:
         	EXPERIMENT_NAME_MAX_LENTH = 25,
         	USER_DATA_EXPIRATION_TIME = 60*20, //20 minutes
         };
+
+    CodeEditor 					codeEditor_;
 
 };
 

@@ -8,7 +8,7 @@
 "COL_TYPES" : {
 "APPLICATION_GROUP_ID" : "VARCHAR2",
 "APPLICATION_UID" : "VARCHAR2",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "VARCHAR2",
+"LINK_TO_SUPERVISOR_TABLE" : "VARCHAR2",
 "SUPERVISOR_UID" : "VARCHAR2",
 "STATUS" : "VARCHAR2",
 "CLASS" : "VARCHAR2",
@@ -25,7 +25,7 @@
 {
 "APPLICATION_GROUP_ID" : "testContextApps",
 "APPLICATION_UID" : "Supervisor",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "TheSupervisorConfiguration",
+"LINK_TO_SUPERVISOR_TABLE" : "TheSupervisorConfiguration",
 "SUPERVISOR_UID" : "Supervisor0",
 "STATUS" : "On",
 "CLASS" : "ots::Supervisor",
@@ -41,7 +41,7 @@
 {
 "APPLICATION_GROUP_ID" : "testContextApps",
 "APPLICATION_UID" : "FESupervisor",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "FESupervisorConfiguration",
+"LINK_TO_SUPERVISOR_TABLE" : "FESupervisorConfiguration",
 "SUPERVISOR_UID" : "FESupervisor0",
 "STATUS" : "On",
 "CLASS" : "ots::FESupervisor",
@@ -57,7 +57,7 @@
 {
 "APPLICATION_GROUP_ID" : "testContextApps",
 "APPLICATION_UID" : "ChatSupervisor",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"LINK_TO_SUPERVISOR_TABLE" : "NO_LINK",
 "SUPERVISOR_UID" : "ChatSupervisor0",
 "STATUS" : "On",
 "CLASS" : "ots::ChatSupervisor",
@@ -73,7 +73,7 @@
 {
 "APPLICATION_GROUP_ID" : "testContextApps",
 "APPLICATION_UID" : "ConsoleSupervisor",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"LINK_TO_SUPERVISOR_TABLE" : "NO_LINK",
 "SUPERVISOR_UID" : "ConsoleSupervisor0",
 "STATUS" : "On",
 "CLASS" : "ots::ConsoleSupervisor",
@@ -89,7 +89,7 @@
 {
 "APPLICATION_GROUP_ID" : "testContextApps",
 "APPLICATION_UID" : "DataManagerSupervisor",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"LINK_TO_SUPERVISOR_TABLE" : "DataManagerSupervisorConfiguration",
 "SUPERVISOR_UID" : "DataManagerSupervisor0",
 "STATUS" : "Off",
 "CLASS" : "ots::DataManagerSupervisor",
@@ -105,7 +105,7 @@
 {
 "APPLICATION_GROUP_ID" : "testContextApps",
 "APPLICATION_UID" : "LogbookSupervisor",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"LINK_TO_SUPERVISOR_TABLE" : "NO_LINK",
 "SUPERVISOR_UID" : "LogbookSupervisor0",
 "STATUS" : "On",
 "CLASS" : "ots::LogbookSupervisor",
@@ -121,7 +121,7 @@
 {
 "APPLICATION_GROUP_ID" : "testContextApps",
 "APPLICATION_UID" : "VisualSupervisor",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"LINK_TO_SUPERVISOR_TABLE" : "DataManagerSupervisorConfiguration",
 "SUPERVISOR_UID" : "VisualSupervisor0",
 "STATUS" : "Off",
 "CLASS" : "ots::VisualSupervisor",
@@ -137,7 +137,7 @@
 {
 "APPLICATION_GROUP_ID" : "testContextApps",
 "APPLICATION_UID" : "ConfigurationGUISupervisor",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"LINK_TO_SUPERVISOR_TABLE" : "NO_LINK",
 "SUPERVISOR_UID" : "ConfigurationGUISupervisor0",
 "STATUS" : "On",
 "CLASS" : "ots::ConfigurationGUISupervisor",
@@ -153,7 +153,7 @@
 {
 "APPLICATION_GROUP_ID" : "testContextApps",
 "APPLICATION_UID" : "MacroMakerSupervisor",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "NO_LINK",
+"LINK_TO_SUPERVISOR_TABLE" : "NO_LINK",
 "SUPERVISOR_UID" : "MacroMakerSupervisor0",
 "STATUS" : "On",
 "CLASS" : "ots::MacroMakerSupervisor",
@@ -169,7 +169,7 @@
 {
 "APPLICATION_GROUP_ID" : "ARTDataManager0",
 "APPLICATION_UID" : "ARTDataManager0",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"LINK_TO_SUPERVISOR_TABLE" : "DataManagerSupervisorConfiguration",
 "SUPERVISOR_UID" : "ARTDataManagerSupervisor0",
 "STATUS" : "Off",
 "CLASS" : "ots::ARTDAQDataManagerSupervisor",
@@ -185,7 +185,7 @@
 {
 "APPLICATION_GROUP_ID" : "ARTDataManager1",
 "APPLICATION_UID" : "ARTDataManager1",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "DataManagerSupervisorConfiguration",
+"LINK_TO_SUPERVISOR_TABLE" : "DataManagerSupervisorConfiguration",
 "SUPERVISOR_UID" : "ARTDataManagerSupervisor1",
 "STATUS" : "Off",
 "CLASS" : "ots::ARTDAQDataManagerSupervisor",
@@ -201,7 +201,7 @@
 {
 "APPLICATION_GROUP_ID" : "ARTEventBuilder0",
 "APPLICATION_UID" : "ARTEventBuilder0",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "ARTDAQBuilderConfiguration",
+"LINK_TO_SUPERVISOR_TABLE" : "ARTDAQBuilderConfiguration",
 "SUPERVISOR_UID" : "ARTEventBuilderSupervisor0",
 "STATUS" : "Off",
 "CLASS" : "ots::EventBuilderApp",
@@ -217,7 +217,7 @@
 {
 "APPLICATION_GROUP_ID" : "ARTAggregator",
 "APPLICATION_UID" : "ARTAggregator",
-"LINK_TO_SUPERVISOR_CONFIGURATION" : "ARTDAQAggregatorConfiguration",
+"LINK_TO_SUPERVISOR_TABLE" : "ARTDAQAggregatorConfiguration",
 "SUPERVISOR_UID" : "ARTAggregatorSupervisor",
 "STATUS" : "Off",
 "CLASS" : "ots::AggregatorApp",

@@ -13,6 +13,7 @@ class FEVInterfacesManager;
 //	provides an interface to Macro Maker for writes and reads to the front-end interfaces.
 class FESupervisor: public CoreSupervisorBase
 {
+	//friend FEVInterface;
 
 public:
 
@@ -21,12 +22,15 @@ public:
     FESupervisor                    (xdaq::ApplicationStub * s) ;
     virtual ~FESupervisor           (void);
 
-    xoap::MessageReference 			macroMakerSupervisorRequest  	(xoap::MessageReference message )  	;
-    virtual xoap::MessageReference 	workLoopStatusRequest		  	(xoap::MessageReference message )  	;
+    xoap::MessageReference 			frontEndCommunicationRequest   	(xoap::MessageReference message);
+    xoap::MessageReference 			macroMakerSupervisorRequest  	(xoap::MessageReference message );
+    virtual xoap::MessageReference 	workLoopStatusRequest		  	(xoap::MessageReference message );
 
 
 protected:
-    FEVInterfacesManager*		   	extractFEInterfaceManager();
+    FEVInterfacesManager*			theFEInterfacesManager_;
+private:
+    FEVInterfacesManager*		   	extractFEInterfacesManager(); //likely, just used in constructor
 };
 
 }

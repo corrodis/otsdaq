@@ -69,12 +69,13 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 
 			__COUT__ << "Checking that this reader supervisor node is DataManager-like." << std::endl;
 
-			readerConfigNode.getNode("LinkToDataManagerConfiguration").getChildren();
+			readerConfigNode.getNode("LinkToDataBufferTable").getChildren();
 
 		}
 		catch (const std::runtime_error& e)
 		{
-			__SS__ << "artdaq Board Readers must be instantiated as a Consumer within a DataManager configuration. Error found while checking for LinkToDataManagerConfiguration: " <<
+			__SS__ << "artdaq Board Readers must be instantiated as a Consumer within a DataManager configuration. " <<
+					"Error found while checking for LinkToDataBufferTable: " <<
 				e.what() << std::endl;
 			__COUT_ERR__ << ss.str();
 			__COUT__ << "Path for this reader config is " <<
@@ -83,7 +84,7 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 			__COUT_ERR__ << "This board reader will likely not get instantiated properly! Proceeding anyway with fcl generation." << std::endl;
 
 			//proceed anyway, because it was really annoying to not be able to activate the configuration group when the context is being developed also.
-			//throw std::runtime_error(ss.str());
+			//__SS_THROW__;
 		}
 
 		//artdaq Reader is not at Supervisor level like other apps
@@ -102,9 +103,9 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager* configManager)
 		for (auto& readerContext : readerContexts) {
 			ConfigurationTree readerConfigNode = contextConfig->getSupervisorConfigNode(configManager,
 				readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
-			auto dataManagerConfMap = readerConfigNode.getNode("LinkToDataManagerConfiguration").getChildren();
+			auto dataManagerConfMap = readerConfigNode.getNode("LinkToDataBufferTable").getChildren();
 			for (auto dmc : dataManagerConfMap) {
-				auto dataBufferConfMap = dmc.second.getNode("LinkToDataBufferConfiguration").getChildren();
+				auto dataBufferConfMap = dmc.second.getNode("LinkToDataProcessorTable").getChildren();
 				for (auto dbc : dataBufferConfMap) {
 					auto processorConfUID = dbc.second.getNode("LinkToProcessorUID").getUIDAsString();
 					if (processorConfUID == child.second.getValue()) {
@@ -270,7 +271,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(ConfigurationManager* configMan
 	if (out.fail())
 	{
 		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	//no primary link to configuration tree for reader node!
@@ -405,7 +406,7 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(ConfigurationManager* configMan
 			__SS__ << "Are the DAQ destinations valid? Error occurred looking for Board Reader DAQ sources for UID '" <<
 				boardReaderNode.getValue() << "': " << e.what() << std::endl;
 			__COUT_ERR__ << ss.str() << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 	POPTAB;

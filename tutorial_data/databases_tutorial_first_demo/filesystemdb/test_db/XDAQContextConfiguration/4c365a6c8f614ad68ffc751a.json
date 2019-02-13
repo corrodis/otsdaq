@@ -7,7 +7,7 @@
 "CREATION_TIME" : 1480711961,
 "COL_TYPES" : {
 "CONTEXT_UID" : "VARCHAR2",
-"LINK_TO_APPLICATION_CONFIGURATION" : "VARCHAR2",
+"LINK_TO_APPLICATION_TABLE" : "VARCHAR2",
 "APPLICATION_GROUP_ID" : "VARCHAR2",
 "STATUS" : "VARCHAR2",
 "ID" : "NUMBER",
@@ -20,7 +20,7 @@
 "DATA_SET" : [
 {
 "CONTEXT_UID" : "mainContext",
-"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"LINK_TO_APPLICATION_TABLE" : "XDAQApplicationConfiguration",
 "APPLICATION_GROUP_ID" : "testContextApps",
 "STATUS" : "On",
 "ID" : "0",
@@ -32,7 +32,7 @@
 },
 {
 "CONTEXT_UID" : "ARTEventBuilder0",
-"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"LINK_TO_APPLICATION_TABLE" : "XDAQApplicationConfiguration",
 "APPLICATION_GROUP_ID" : "ARTEventBuilder0",
 "STATUS" : "Off",
 "ID" : "0",
@@ -44,7 +44,7 @@
 },
 {
 "CONTEXT_UID" : "ARTAggregator",
-"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"LINK_TO_APPLICATION_TABLE" : "XDAQApplicationConfiguration",
 "APPLICATION_GROUP_ID" : "ARTAggregator",
 "STATUS" : "Off",
 "ID" : "0",
@@ -56,7 +56,7 @@
 },
 {
 "CONTEXT_UID" : "ARTDataManager0",
-"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"LINK_TO_APPLICATION_TABLE" : "XDAQApplicationConfiguration",
 "APPLICATION_GROUP_ID" : "ARTDataManager0",
 "STATUS" : "Off",
 "ID" : "0",
@@ -68,7 +68,7 @@
 },
 {
 "CONTEXT_UID" : "ARTDataManager1",
-"LINK_TO_APPLICATION_CONFIGURATION" : "XDAQApplicationConfiguration",
+"LINK_TO_APPLICATION_TABLE" : "XDAQApplicationConfiguration",
 "APPLICATION_GROUP_ID" : "ARTDataManager1",
 "STATUS" : "Off",
 "ID" : "0",

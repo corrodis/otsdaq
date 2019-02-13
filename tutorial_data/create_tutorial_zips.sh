@@ -7,10 +7,10 @@
 # usage: --tutorial <tutorial name> --version <version string> --repo <path to repo area> --data <path to user data> --database <path to database>
 # 
 #   tutorial 
-#		e.g. ${TUTORIAL} or artdaq
+#		e.g. first_demo or artdaq
 #   version 
 #		usually looks like v2_2 to represent v2.2 release, for example 
-#		(underscores might more universal for web downloads than periods)
+#		(underscores might be more universal for web downloads than periods)
 # 	repo 
 #		is the path to the repository folder where tutorial data should be saved for posterity
 #	data 
@@ -34,8 +34,8 @@ echo
 
 
 SRC='/home/rrivera/ots/srcs/otsdaq/tutorial_data'
-UDATA='/home/rrivera/ots/NoGitData'
-UDATABASES='/home/rrivera/databases'
+UDATA='/home/rrivera/ots/srcs/otsdaq_demo/NoGitData'
+UDATABASES='/home/rrivera/ots/srcs/otsdaq_demo/NoGitDatabases'
 		
 
 if [[ "$1"  == "--tutorial" && "x$2" != "x" ]]; then

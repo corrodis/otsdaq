@@ -126,7 +126,7 @@ WebUsers::WebUsers()
 	{
 		__SS__ << "user: " << user << " is not found" << __E__;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 		exit(0); //THIS CAN NOT HAPPEN?! There must be an admin user
 	}
 	else if (UsersSaltVector[i] == "" && //admin password not setup, so print out NAC to help out
@@ -2427,7 +2427,7 @@ std::string ots::WebUsers::getUserEmailFromFingerprint(const std::string& finger
 		if (fp.second == fingerprint) return fp.first;
 	}
 	return "";
-}
+} //end getUserEmailFromFingerprint()
 
 //========================================================================================================================
 //WebUsers::tooltipSetNeverShowForUsername
@@ -2438,24 +2438,32 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
 		const std::string& srcId, bool doNeverShow, bool temporarySilence)
 {
 
-	__COUT__ << "Setting tooltip never show for user: " << username <<
-			" to " << doNeverShow << " (temporarySilence=" <<
+	__COUT__ << "Setting tooltip never show for user '" << username <<
+			"' to " << doNeverShow << " (temporarySilence=" <<
 			temporarySilence << ")" << __E__;
-
 
 	std::string filename = getTooltipFilename(username, srcFile, srcFunc, srcId);
 	FILE *fp = fopen(filename.c_str(), "w");
 	if (fp)
 	{	//file exists, so do NOT show tooltip
 		if (temporarySilence)
-			fprintf(fp, "%ld", time(0) + 60 * 60); //mute for an hour
+			fprintf(fp, "%ld", time(0) + 1 /*hours*/ * 60 * 60); //mute for an hour
+		else if(username == WebUsers::DEFAULT_ADMIN_USERNAME)
+		{
+			//admin could be shared account, so max out at 48 hours
+			fprintf(fp, "%ld", time(0) + 48 /*hours*/ * 60 * 60);
+
+			__COUT__ << "User '" << username <<
+					"' can only silence tooltips for up to 48 hours. Silencing now." <<
+					__E__;
+		}
 		else
 			fputc(doNeverShow ? '1' : '0', fp);
 		fclose(fp);
 	}
 	else //default to show tool tip
 		__COUT_ERR__ << "Big problme with tooltips! File not accessible: " << filename << __E__;
-}
+} //end tooltipSetNeverShowForUsername()
 
 //========================================================================================================================
 //WebUsers::tooltipCheckForUsername
@@ -3069,6 +3077,9 @@ void WebUsers::deleteUserData()
 
 	//delete console folders
 	std::system(("rm -rf " + std::string(serviceDataPath) + "/ConsolePreferences/").c_str());
+
+	//delete code editor folders
+	std::system(("rm -rf " + std::string(serviceDataPath) + "/CodeEditorData/").c_str());
 
 	//delete wizard folders
 	std::system(("rm -rf " + std::string(serviceDataPath) + "/OtsWizardData/").c_str());

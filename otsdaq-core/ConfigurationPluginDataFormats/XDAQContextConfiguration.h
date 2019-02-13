@@ -20,6 +20,8 @@ namespace ots
 
 		struct XDAQApplication
 		{
+			static const uint8_t DEFAULT_PRIORITY;
+
 			std::string  applicationGroupID_;
 			std::string  applicationUID_;
 			bool		 status_;
@@ -91,7 +93,7 @@ namespace ots
 		struct ColContext
 		{
 			std::string const colContextUID_ 						= "ContextUID";
-			std::string const colLinkToApplicationConfiguration_ 	= "LinkToApplicationConfiguration";
+			std::string const colLinkToApplicationTable_ 	= "LinkToApplicationTable";
 			std::string const colLinkToApplicationGroupID_ 			= "LinkToApplicationGroupID";
 			std::string const colStatus_ 							= ViewColumnInfo::COL_NAME_STATUS;
 			std::string const colId_ 								= "Id";
@@ -105,7 +107,7 @@ namespace ots
 		{
 			std::string const colApplicationGroupID_ 				= "ApplicationGroupID";
 			std::string const colApplicationUID_ 					= "ApplicationUID";
-			std::string const colLinkToSupervisorConfiguration_ 	= "LinkToSupervisorConfiguration";
+			std::string const colLinkToSupervisorTable_ 	= "LinkToSupervisorTable";
 			std::string const colLinkToSupervisorUID_ 				= "LinkToSupervisorUID";
 			std::string const colStatus_ 							= ViewColumnInfo::COL_NAME_STATUS;
 			std::string const colClass_ 							= "Class";
@@ -117,7 +119,7 @@ namespace ots
 			std::string const colConfigurePriority_ 				= "ConfigurePriority";
 			std::string const colStartPriority_ 					= "StartPriority";
 			std::string const colStopPriority_ 						= "StopPriority";
-			std::string const colLinkToPropertyConfiguration_ 		= "LinkToPropertyConfiguration";
+			std::string const colLinkToPropertyTable_ 		= "LinkToPropertyTable";
 			std::string const colLinkToPropertyGroupID_ 			= "LinkToPropertyGroupID";
 
 		} colApplication_;

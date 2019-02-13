@@ -18,11 +18,48 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 
 public:
 
-    RunControlStateMachine(std::string name="Undefined Name");
+    RunControlStateMachine(const std::string& name="Undefined Name");
     virtual ~RunControlStateMachine(void);
 
-    void reset(void);
-    void setStateMachineName(std::string name){stateMachineName_ = name;}
+    void 								reset						(void);
+    void 								setStateMachineName			(const std::string& name){ theStateMachine_.setStateMachineName(name);}
+    const std::string&					getErrorMessage				(void) const { return theStateMachine_.getErrorMessage(); }
+
+    template <class OBJECT>
+    void addStateTransition(
+    		toolbox::fsm::State from,
+			toolbox::fsm::State to,
+			const std::string& input,
+			const std::string& transitionName,
+			OBJECT* obj,
+			void (OBJECT::* func)(toolbox::Event::Reference) )
+
+    {
+    	stateTransitionFunctionTable_[from][input] = func;
+    	theStateMachine_.addStateTransition(from, to, input, transitionName, obj, func);
+    }
+
+    template <class OBJECT>
+    void addStateTransition(
+    		toolbox::fsm::State from,
+			toolbox::fsm::State to,
+			const std::string& input,
+			const std::string& transitionName,
+			const std::string& transitionParameter,
+			OBJECT* obj,
+			void (OBJECT::* func)(toolbox::Event::Reference) )
+
+    {
+    	stateTransitionFunctionTable_[from][input] = func;
+    	theStateMachine_.addStateTransition(from, to, input, transitionName, transitionParameter, obj, func);
+    }
+
+    //using	stateMachineFunction_t = void (ots::RunControlStateMachine::* )(toolbox::Event::Reference);
+    //stateMachineFunction_t getTransitionFunction	(const toolbox::fsm::State from, const std::string &transition);
+
+
+
+
 
     //Finite State Machine States
     //1. Control Configuration and Function Manager are loaded.
@@ -72,14 +109,37 @@ public:
     virtual void enteringError         (toolbox::Event::Reference e) {;}
 
     //Run Control Messages
-    xoap::MessageReference runControlMessageHandler(xoap::MessageReference message) ;
+    xoap::MessageReference 				runControlMessageHandler(xoap::MessageReference message) ;
 
     static const std::string FAILED_STATE_NAME;
 
+
+    unsigned int						getIterationIndex			(void) { return iterationIndex_;}
+    unsigned int						getSubIterationIndex		(void) { return subIterationIndex_;}
+    void 								indicateIterationWork		(void) { iterationWorkFlag_ = true; }
+    void 								clearIterationWork			(void) { iterationWorkFlag_ = false; }
+    bool								getIterationWork			(void) { return iterationWorkFlag_; }
+    void 								indicateSubIterationWork	(void) { subIterationWorkFlag_ = true; }
+    void 								clearSubIterationWork		(void) { subIterationWorkFlag_ = false; }
+    bool								getSubIterationWork			(void) { return subIterationWorkFlag_; }
+
+
 protected:
-	FiniteStateMachine theStateMachine_;
-    ProgressBar		   theProgressBar_;
-    std::string        stateMachineName_;
+	FiniteStateMachine 		theStateMachine_;
+    ProgressBar		   		theProgressBar_;
+
+    volatile bool			asyncFailureReceived_, asyncSoftFailureReceived_;
+
+	unsigned int			iterationIndex_, subIterationIndex_;
+	bool					iterationWorkFlag_, subIterationWorkFlag_;
+
+	toolbox::fsm::State		lastIterationState_;
+	std::string				lastIterationCommand_;
+	std::string				lastIterationResult_;
+	unsigned int			lastIterationIndex_, lastSubIterationIndex_;
+
+	std::map<toolbox::fsm::State, std::map<std::string,
+			void (RunControlStateMachine::*)(toolbox::Event::Reference), std::less<std::string> > >	stateTransitionFunctionTable_;
 
 };
 

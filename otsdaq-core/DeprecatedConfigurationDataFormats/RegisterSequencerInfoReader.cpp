@@ -37,7 +37,7 @@ RegisterSequencerInfoReader::RegisterSequencerInfoReader() {
 	    }
 	    catch( ... )
 	    {
-	      mf::LogError(__FILE__) << "Unknown exception encountered in TagNames destructor" << "     ";
+	      TLOG(TLVL_ERROR, __FILE__) << "Unknown exception encountered in TagNames destructor" << "     ";
 	    }
 
 }
@@ -55,7 +55,7 @@ void RegisterSequencerInfoReader::initPlatform(void)
     }
     catch( xercesc::XMLException& e )
     {
-      mf::LogError(__FILE__) << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << "     ";
+      TLOG(TLVL_ERROR, __FILE__) << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << "     ";
         // throw exception here to return ERROR_XERCES_INIT
     }
 }
@@ -69,7 +69,7 @@ void RegisterSequencerInfoReader::terminatePlatform(void)
     }
     catch( xercesc::XMLException& e )
     {
-      mf::LogError(__FILE__) << "XML toolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << "     ";
+      TLOG(TLVL_ERROR, __FILE__) << "XML toolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << "     ";
     }
 }
 

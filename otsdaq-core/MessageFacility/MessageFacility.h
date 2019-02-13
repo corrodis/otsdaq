@@ -34,6 +34,7 @@ inline void INIT_MF(const char* name)
 	else
 		setenv("ARTDAQ_LOG_FHICL", logFhiclCode, 1);
 
+	__COUT__ << "Configuring message facility with " << logFhiclCode << __E__;
 	artdaq::configureMessageFacility(
 			name /*application name*/,
 			false /*cout display*/,

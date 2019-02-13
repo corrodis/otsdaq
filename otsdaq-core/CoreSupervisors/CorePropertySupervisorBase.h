@@ -44,19 +44,23 @@ public:
     static bool 					doPermissionsGrantAccess		(std::map<std::string,WebUsers::permissionLevel_t>& permissionLevelsMap, std::map<std::string,WebUsers::permissionLevel_t>& permissionThresholdsMap);
 
     ConfigurationTree				getContextTreeNode 				(void) const { return theConfigurationManager_->getNode(theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)->getConfigurationName()); }
+	ConfigurationTree				getSupervisorConfigurationNode 	(void) const { return getContextTreeNode().getNode(supervisorConfigurationPath_); }
+
+    AllSupervisorInfo 				allSupervisorInfo_;
+
 protected:
 
+    static void 					indicateOtsAlive				(const CorePropertySupervisorBase* properties = 0);
 
     ConfigurationManager*          	theConfigurationManager_;
 
-	std::string                    	supervisorClass_;
-	std::string                    	supervisorClassNoNamespace_;
+	const std::string              	supervisorClass_;
+	const std::string              	supervisorClassNoNamespace_;
 
 	std::string                    	supervisorContextUID_;
 	std::string                    	supervisorApplicationUID_;
 	std::string                    	supervisorConfigurationPath_;
 
-    AllSupervisorInfo 				allSupervisorInfo_;
 
     //Supervisor Property names
     //	to access, use CorePropertySupervisorBase::getSupervisorProperty and CorePropertySupervisorBase::setSupervisorProperty

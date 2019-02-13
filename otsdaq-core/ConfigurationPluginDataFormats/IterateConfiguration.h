@@ -57,7 +57,7 @@ public:
 	{
 		std::map<std::string,std::string> m;
 		m[COMMAND_BEGIN_LABEL] 				=  "IterationCommandBeginLabelConfiguration";
-		m[COMMAND_CHOOSE_FSM] 		=  "IterationCommandChooseFSMConfiguration";
+		m[COMMAND_CHOOSE_FSM] 				=  "IterationCommandChooseFSMConfiguration";
 		m[COMMAND_CONFIGURE_ACTIVE_GROUP] 	=  ""; //no parameters
 		m[COMMAND_CONFIGURE_ALIAS] 			=  "IterationCommandConfigureAliasConfiguration";
 		m[COMMAND_CONFIGURE_GROUP] 			=  "IterationCommandConfigureGroupConfiguration";
@@ -90,16 +90,18 @@ public:
 		const std::string GroupName_ 				= "GroupName";
 		const std::string GroupKey_ 				= "GroupKey";
 	} commandConfigureGroupParams_;
-	static struct CommandExecuteFEMacroParams
-	{
-		//targets
-		const std::string FEMacroName_ 				= "FEMacroName";
-		//macro parameters
-	} commandExecuteFEMacroParams_;
-	static struct CommandExecuteMacroParams
+	static struct CommandExecuteMacroParams //treat FE and Macro the same
 	{
 		//targets
 		const std::string MacroName_ 				= "MacroName";
+		const std::string MacroParameterLink_		= "LinkToMacroDimensionalLoopTable";
+		const std::string EnableSavingOutput_		= "EnableSavingOutputsToFile";
+		const std::string OutputFilePath_ 			= "OutputFilePath";
+		const std::string OutputFileRadix_ 			= "OutputFileRadix";
+
+
+		const std::string MacroArgumentString_		= "MacroArgumentString";
+
 		//macro parameters
 	} commandExecuteMacroParams_;
 	static struct CommandModifyActiveParams
@@ -142,6 +144,21 @@ public:
 	} targetCols_;
 
 
+	//for macro dimensional loop parameters
+	static struct MacroDimLoopTableColumns
+	{
+		const std::string Priority_					= "DimensionalLoopPriority";
+		const std::string NumberOfIterations_		= "NumberOfIterations";
+		const std::string ParamLink_ 				= "LinkToDimensionalLoopParameterTable";
+	} macroDimLoopCols_;
+	static struct MacroParamTableColumns
+	{
+		const std::string Name_ 					= "ParameterName";
+		const std::string Value_ 					= "ParameterInitialValue";
+		const std::string Step_ 					= "ParameterStepSize";
+
+	} macroParamCols_;
+
 	//Table hierarchy is as follows:
 	//	Iterate
 	//		|- Plan
@@ -153,7 +170,7 @@ public:
 
 	static struct IterateTableColumns
 	{
-		const std::string PlanLink_ 				= "LinkToIterationPlanConfiguration";
+		const std::string PlanLink_ 				= "LinkToIterationPlanTable";
 	} iterateTableCols_;
 
 	static struct PlanTableColumns

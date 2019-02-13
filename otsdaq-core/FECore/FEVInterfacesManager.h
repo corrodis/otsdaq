@@ -1,19 +1,17 @@
 #ifndef _ots_FEVInterfacesManager_h_
 #define _ots_FEVInterfacesManager_h_
 
-//#include "artdaq/Application/MPI2/MPISentry.hh"
-//#include "artdaq/DAQrate/quiet_mpi.hh"
 #include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
 #include "otsdaq-core/Configurable/Configurable.h"
-
 #include <map>
 #include <string>
 #include <memory>
+#include <queue>
+#include <mutex>
+#include "otsdaq-core/FECore/FEVInterface.h"
 
 namespace ots
 {
-class FEVInterface;
-
 //FEVInterfacesManager
 //	This class is a virtual class that handles a collection of front-end interface plugins.
 class FEVInterfacesManager : public VStateMachine, public Configurable
@@ -39,32 +37,53 @@ public:
 
 
 
-    int					universalRead	 					(const std::string &interfaceID, char* address, char* returnValue); //used by MacroMaker
-    void 			    universalWrite	  					(const std::string &interfaceID, char* address, char* writeValue); //used by MacroMaker
-    std::string  	    getFEListString						(const std::string &supervisorLid);	//used by MacroMaker
-    std::string  	    getFEMacrosString					(const std::string &supervisorLid);	//used by MacroMaker
-    void		  	    runFEMacro							(const std::string &interfaceID, const std::string &feMacroName, const std::string &inputArgs, std::string &outputArgs);	//used by MacroMaker
-    unsigned int		getInterfaceUniversalAddressSize	(const std::string &interfaceID); 	//used by MacroMaker
-    unsigned int		getInterfaceUniversalDataSize		(const std::string &interfaceID);	//used by MacroMaker
+    void				universalRead	 					(const std::string& interfaceID, char* address, char* returnValue); //used by MacroMaker
+    void 			    universalWrite	  					(const std::string& interfaceID, char* address, char* writeValue); //used by MacroMaker
+    std::string  	    getFEListString						(const std::string& supervisorLid);	//used by MacroMaker
+    std::string  	    getFEMacrosString					(const std::string& supervisorName, const std::string& supervisorLid);	//used by MacroMaker
+    void		  	    runFEMacro							(const std::string& interfaceID, const FEVInterface::frontEndMacroStruct_t& feMacro, const std::string& inputArgs, std::string& outputArgs);	//used by MacroMaker and FE calling indirectly
+    void		  	    runFEMacro							(const std::string& interfaceID, const std::string& feMacroName, const std::string& inputArgs, std::string& outputArgs);	//used by MacroMaker
+    void		  	    runFEMacroByFE						(const std::string& callingInterfaceID, const std::string& interfaceID, const std::string& feMacroName, const std::string& inputArgs, std::string& outputArgs);	//used by FE calling (i.e. FESupervisor)
+    void		  	    startFEMacroMultiDimensional		(const std::string& requester, const std::string& interfaceID, const std::string& feMacroName, const bool enableSavingOutput, const std::string& outputFilePath, const std::string& outputFileRadix, const std::string& inputArgs);	//used by iterator calling (i.e. FESupervisor)
+    void		  	    startMacroMultiDimensional			(const std::string& requester, const std::string& interfaceID, const std::string& macroName, const std::string& macroString, const bool enableSavingOutput, const std::string& outputFilePath, const std::string& outputFileRadix, const std::string& inputArgs);	//used by iterator calling (i.e. FESupervisor)
+    bool		  	    checkMacroMultiDimensional			(const std::string& interfaceID, const std::string& macroName);	//used by iterator calling (i.e. FESupervisor)
+
+
+    unsigned int		getInterfaceUniversalAddressSize	(const std::string& interfaceID); 	//used by MacroMaker
+    unsigned int		getInterfaceUniversalDataSize		(const std::string& interfaceID);	//used by MacroMaker
     bool				allFEWorkloopsAreDone				(void); //used by Iterator, e.g.
+    const FEVInterface&	getFEInterface						(const std::string& interfaceID) const;
 
-    //void progDAC           (std::string dacName, std::string rocName="*");
-    //void write             (long long address, const std::vector<long long>& data);
-    //void read              (long long address,       std::vector<long long>& data);
-//    void initHardware      (void);
+    const std::map<std::string /*name*/, std::unique_ptr<FEVInterface> >& getFEInterfaces (void) const {return theFEInterfaces_;}
+    FEVInterface*		getFEInterfaceP						(const std::string& interfaceID);
 
+    //FE communication helpers
+	std::mutex														frontEndCommunicationReceiveMutex_;
+	std::map<std::string /*targetInterfaceID*/,  //map of target to buffers organized by source
+		std::map<std::string /*requester*/,
+			std::queue<std::string /*value*/> > >  					frontEndCommunicationReceiveBuffer_;
 
-
-protected:
-//    virtual std::unique_ptr<FEVInterface> interpretInterface (
-//    		const unsigned int interfaceId,
-//    		const std::string typeName, const std::string firmwareName,
-//    		const FEInterfaceConfigurationBase* frontEndHardwareConfiguration);
+	//multi-dimensional FE Macro helpers
+	std::mutex														macroMultiDimensionalDoneMutex_;
+	std::map<std::string /*targetInterfaceID*/, //set of active multi-dimensional Macro launches
+		std::string /*status := Active, Done, Error: <message> */> 	macroMultiDimensionalStatusMap_;
 
 private:
 
 
-    std::map<std::string /*name*/, std::unique_ptr<FEVInterface> > theFEInterfaces_;
+    std::map<std::string /*name*/, std::unique_ptr<FEVInterface> > 	theFEInterfaces_;
+    std::vector<std::string /*name*/> 								theFENamesByPriority_;
+
+
+    //for managing transition iterations
+    std::map<std::string /*name*/, bool /*isDone*/ > 				stateMachinesIterationDone_;
+    unsigned int													stateMachinesIterationWorkCount_;
+    unsigned int													subIterationWorkStateMachineIndex_;
+    void				preStateMachineExecution			(unsigned int i);
+    bool				postStateMachineExecution			(unsigned int i);
+    void				preStateMachineExecutionLoop		(void);
+    void				postStateMachineExecutionLoop		(void);
+
 
 };
 

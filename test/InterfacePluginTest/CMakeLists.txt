@@ -31,7 +31,7 @@ cet_make_exec(InterfacePluginTestMain
 		$ENV{XDAQ_LIB}/libmimetic.so
 		$ENV{XDAQ_LIB}/libasyncresolv
 		$ENV{XDAQ_LIB}/libb2innub.so
-		/usr/lib64/libuuid.so
+		uuid
 
 #$ENV{XDAQ_LIB}/libb2ineventing.so
 #$ENV{XDAQ_LIB}/libb2inutils.so

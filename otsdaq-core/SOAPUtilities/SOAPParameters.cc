@@ -10,7 +10,7 @@ SOAPParameters::SOAPParameters(void)
 {;}
 
 //========================================================================================================================
-SOAPParameters::SOAPParameters(std::string name, std::string value) :
+SOAPParameters::SOAPParameters(const std::string& name, const std::string& value) :
   Parameters<std::string,std::string>(name,value)
 {;}
 
@@ -24,13 +24,13 @@ SOAPParameters::~SOAPParameters(void)
 {;}
 
 //========================================================================================================================
-void SOAPParameters::addParameter(const std::string name, const std::string value)
+void SOAPParameters::addParameter(const std::string& name, const std::string& value)
 {
   theParameters_[name] = value;
 }
 
 //========================================================================================================================
-void SOAPParameters::addParameter(const std::string name, const int value)
+void SOAPParameters::addParameter(const std::string& name, const int value)
 {
   std::stringstream sValue;
   sValue << value;

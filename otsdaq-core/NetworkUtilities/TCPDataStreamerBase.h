@@ -15,6 +15,7 @@ public:
 
 	int send(const std::string& buffer) { return TCPSocket::send(buffer); }
 	int send(const std::vector<uint32_t>& buffer) { return TCPSocket::send(buffer); }
+	int send(const std::vector<uint16_t>& buffer) { return TCPSocket::send(buffer); }
 };
 
 }

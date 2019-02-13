@@ -35,9 +35,9 @@ NetworkDevice::NetworkDevice(std::string IPAddress, unsigned int IPPort) : commu
 
     if(inet_aton(IPAddress.c_str(), &deviceAddress_.sin_addr) == 0)
     {
-        std::cout << __COUT_HDR_FL__ << __LINE__ << "FATAL: Invalid IP address " <<  IPAddress << std::endl;
+        __COUT__ << "FATAL: Invalid IP address " <<  IPAddress << std::endl;
         //FIXME substitute with try catch solution !!
-        assert(0);
+        __SS__ << "Error!" << __E__; __SS_THROW__;
     }
 
     memset(&(deviceAddress_.sin_zero), '\0', 8);// zero the rest of the struct
@@ -48,7 +48,7 @@ NetworkDevice::~NetworkDevice(void)
 {
   for(std::map<int,int>::iterator it=openSockets_.begin(); it!=openSockets_.end(); it++)
     {
-        std::cout << __COUT_HDR_FL__ << "Closing socket for port " << it->second << std::endl;
+        __COUT__ << "Closing socket for port " << it->second << std::endl;
         close(it->first);
     }
     openSockets_.clear();
@@ -83,11 +83,11 @@ int NetworkDevice::initSocket(std::string socketPort)
     {
         port.str("");
         port << p;
-        std::cout << __COUT_HDR_FL__ << __LINE__ << "]\tBinding port: " << port.str() << std::endl;
+        __COUT__ << "Binding port: " << port.str() << std::endl;
 
         if((status = getaddrinfo(NULL, port.str().c_str(), &hints, &res)) != 0)
         {
-            std::cout << __COUT_HDR_FL__ << __LINE__ << "]\tGetaddrinfo error status: " << status << std::endl;
+            __COUT__ << "Getaddrinfo error status: " << status << std::endl;
             continue;
         }
 
@@ -97,7 +97,7 @@ int NetworkDevice::initSocket(std::string socketPort)
         // bind it to the port we passed in to getaddrinfo():
         if(bind(socketOut, res->ai_addr, res->ai_addrlen) == -1)
         {
-	  mf::LogError("NetworkDevice") << __LINE__ << "]\tFailed bind for port: " <<  port.str();
+        	__COUT_ERR__ << "Failed bind for port: " <<  port.str();
             socketOut = -1;
             exit(0);
         }
@@ -107,7 +107,7 @@ int NetworkDevice::initSocket(std::string socketPort)
             setsockopt(socketOut,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int));
             socketInitialized = true;
             openSockets_[socketOut] = p;
-            std::cout << __COUT_HDR_FL__ << __LINE__ << "]\tSocket Number: " << socketOut << " for port: " << p << " initialized." << std::endl;
+            __COUT__ << "Socket Number: " << socketOut << " for port: " << p << " initialized." << std::endl;
         }
 
         freeaddrinfo(res); // free the linked-list
@@ -130,7 +130,7 @@ int NetworkDevice::send(int socketDescriptor, const std::string& buffer)
 {
     if(sendto(socketDescriptor,buffer.c_str(),buffer.size(),0,(struct sockaddr *)&(deviceAddress_), sizeof(deviceAddress_)) < (int)(buffer.size()))
     {
-        std::cout << __COUT_HDR_FL__ << "Error writing buffer" << std::endl;
+        __COUT__ << "Error writing buffer" << std::endl;
         return -1;
     }
     return 0;
@@ -156,7 +156,7 @@ int NetworkDevice::receive(int socketDescriptor, std::string& buffer)
         char   readBuffer[maxSocketSize];
         if ((nOfBytes=recvfrom(socketDescriptor, readBuffer, maxSocketSize, 0, (struct sockaddr *)&tmpAddress, &addressLength)) == -1)
         {
-            std::cout << __COUT_HDR_FL__ << __LINE__ << "Error reading buffer" << std::endl;
+            __COUT__ << "Error reading buffer" << std::endl;
             return -1;
         }
         buffer.resize(nOfBytes);
@@ -165,7 +165,7 @@ int NetworkDevice::receive(int socketDescriptor, std::string& buffer)
     }
     else
     {
-        std::cout << __COUT_HDR_FL__ << __LINE__ << "]\tNetwork device unresponsive. Read request timed out." << std::endl;
+        __COUT__ << "Network device unresponsive. Read request timed out." << std::endl;
         return -1;
     }
 
@@ -175,7 +175,7 @@ int NetworkDevice::receive(int socketDescriptor, std::string& buffer)
 //========================================================================================================================
 int NetworkDevice::listen(int socketDescriptor, std::string& buffer)
 {
-    std::cout << __COUT_HDR_FL__ << "LISTENING!!!!!" << std::endl;
+    __COUT__ << "LISTENING!!!!!" << std::endl;
     struct timeval tv;
     tv.tv_sec = 5;
     tv.tv_usec = 0; //set timeout period for select()
@@ -193,7 +193,7 @@ int NetworkDevice::listen(int socketDescriptor, std::string& buffer)
         char   readBuffer[maxSocketSize];
         if ((nOfBytes=recvfrom(socketDescriptor, readBuffer, maxSocketSize, 0, (struct sockaddr *)&tmpAddress, &addressLength)) == -1)
         {
-            std::cout << __COUT_HDR_FL__ << __LINE__ << "Error reading buffer" << std::endl;
+            __COUT__ << "Error reading buffer" << std::endl;
             return -1;
         }
         buffer.resize(nOfBytes);
@@ -202,7 +202,7 @@ int NetworkDevice::listen(int socketDescriptor, std::string& buffer)
     }
     else
     {
-        std::cout << __COUT_HDR_FL__ << __LINE__ << "Timed out" << std::endl;
+        __COUT__ << "Timed out" << std::endl;
         return -1;
     }
 
@@ -215,14 +215,14 @@ int NetworkDevice::ping(int socketDescriptor)
     std::string pingMsg(1,0);
     if(send(socketDescriptor, pingMsg) == -1)
     {
-        std::cout << __COUT_HDR_FL__ << __LINE__ << "]\tCan't send ping Message!" << std::endl;
+        __COUT__ << "Can't send ping Message!" << std::endl;
         return -1;
     }
 
     std::string bufferS;
     if(receive(socketDescriptor,bufferS) == -1)
     {
-        std::cout << __COUT_HDR_FL__ << __LINE__ <<"]\tFailed to ping device"<< std::endl;
+        __COUT__ << "Failed to ping device"<< std::endl;
         return -1;
     }
     /*
@@ -239,13 +239,13 @@ int NetworkDevice::ping(int socketDescriptor)
         std::string bufferS;
             if(receive(socketDescriptor,bufferS) == -1)
             {
-               std::cout << __COUT_HDR_FL__ << __LINE__ <<"]\tFailed to ping device"<< std::endl;
+               __COUT__ << "Failed to ping device"<< std::endl;
                return -1;
             }
         }
         else
         {
-            std::cout << __COUT_HDR_FL__ << __LINE__ << "]\tNetwork device unresponsive. Ping request timed out." << std::endl;
+            __COUT__ << "Network device unresponsive. Ping request timed out." << std::endl;
             return -1;
         }
     */
@@ -255,7 +255,7 @@ int NetworkDevice::ping(int socketDescriptor)
 //========================================================================================================================
 std::string NetworkDevice::getFullIPAddress(std::string partialIpAddress)
 {
-    std::cout << __COUT_HDR_FL__ << "partial IP: " << partialIpAddress << std::endl;
+    __COUT__ << "partial IP: " << partialIpAddress << std::endl;
     if(getInterface(partialIpAddress))
     {
         char *p, addr[32];
@@ -267,11 +267,11 @@ std::string NetworkDevice::getFullIPAddress(std::string partialIpAddress)
     }
     else
     {
-        std::cout << __COUT_HDR_FL__ << "FIXME substitute with try catch solution !!\n\nFailed to locate network interface matching partial IP address" << std::endl;
+        __COUT__ << "FIXME substitute with try catch solution !!\n\nFailed to locate network interface matching partial IP address" << std::endl;
         //FIXME substitute with try catch solution !!
-        assert(0);
+        __SS__ << "Error!" << __E__; __SS_THROW__;
 
-        //std::cout << __COUT_HDR_FL__ << "Failed to locate network interface matching partial IP address" << std::endl;
+        //__COUT__ << "Failed to locate network interface matching partial IP address" << std::endl;
         return "";
     }
 }
@@ -279,16 +279,16 @@ std::string NetworkDevice::getFullIPAddress(std::string partialIpAddress)
 //========================================================================================================================
 std::string NetworkDevice::getInterfaceName(std::string ipAddress)
 {
-    std::cout << __COUT_HDR_FL__ << "IP: " << ipAddress << std::endl;
+    __COUT__ << "IP: " << ipAddress << std::endl;
     if(getInterface(ipAddress))
         return communicationInterface_->ifa_name;
     else
     {
         //FIXME substitute with try catch solution !!
-        std::cout << __COUT_HDR_FL__ << "FIXME substitute with try catch solution !!\n\nFailed to get interface name!" << std::endl;
-        assert(0);
+        __COUT__ << "FIXME substitute with try catch solution !!\n\nFailed to get interface name!" << std::endl;
+        __SS__ << "Error!" << __E__; __SS_THROW__;
 
-        std::cout << __COUT_HDR_FL__ << "Failed to get interface name for IP address" << std::endl;
+        __COUT__ << "Failed to get interface name for IP address" << std::endl;
         return "";
     }
 }
@@ -300,7 +300,7 @@ int NetworkDevice::getInterface(std::string ipAddress)
     char host[NI_MAXHOST];
 
 
-    std::cout << __COUT_HDR_FL__ << "IP2: " << ipAddress << std::endl;
+    __COUT__ << "IP2: " << ipAddress << std::endl;
     if(communicationInterface_ != 0)
     {
         s = getnameinfo(communicationInterface_->ifa_addr,
@@ -312,10 +312,10 @@ int NetworkDevice::getInterface(std::string ipAddress)
 
         if (s != 0)
         {
-            std::cout << __COUT_HDR_FL__ << "getnameinfo() failed: " << gai_strerror(s) << std::endl;
+            __COUT__ << "getnameinfo() failed: " << gai_strerror(s) << std::endl;
             //FIXME substitute with try catch solution !!
-            std::cout << __COUT_HDR_FL__ << "FIXME substitute with try catch solution !!\n\nFailed to get name info!" << std::endl;
-            assert(0);
+            __COUT__ << "FIXME substitute with try catch solution !!\n\nFailed to get name info!" << std::endl;
+            __SS__ << "Error!" << __E__; __SS_THROW__;
         }
 
         if (std::string(host).find(ipAddress) != std::string::npos)
@@ -335,8 +335,8 @@ int NetworkDevice::getInterface(std::string ipAddress)
     {
         perror("getifaddrs");
         //FIXME substitute with try catch solution !!
-        std::cout << __COUT_HDR_FL__ << "FIXME substitute with try catch solution !!\n\nFailed to get ifaddress!" << std::endl;
-        assert(0);
+        __COUT__ << "FIXME substitute with try catch solution !!\n\nFailed to get ifaddress!" << std::endl;
+        __SS__ << "Error!" << __E__; __SS_THROW__;
     }
 
     /* Walk through linked list, maintaining head pointer so we
@@ -364,10 +364,10 @@ int NetworkDevice::getInterface(std::string ipAddress)
 
             if (s != 0)
             {
-                std::cout << __COUT_HDR_FL__ << "getnameinfo() failed: " << gai_strerror(s) << std::endl;
+                __COUT__ << "getnameinfo() failed: " << gai_strerror(s) << std::endl;
                 //FIXME substitute with try catch solution !!
-                std::cout << __COUT_HDR_FL__ << "FIXME substitute with try catch solution !!\n\nFailed to get getnameinfo!" << std::endl;
-                assert(0);
+                __COUT__ << "FIXME substitute with try catch solution !!\n\nFailed to get getnameinfo!" << std::endl;
+                __SS__ << "Error!" << __E__; __SS_THROW__;
             }
 
             if (std::string(host).find(ipAddress) != std::string::npos)

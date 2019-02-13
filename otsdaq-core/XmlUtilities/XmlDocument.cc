@@ -73,7 +73,7 @@ XmlDocument& XmlDocument::operator=(const XmlDocument& doc)
 //==============================================================================
 XmlDocument::~XmlDocument(void)
 {
-    //std::cout << __COUT_HDR_FL__<< "Xml Destructor" << std::endl;
+    //__COUT__ << "Xml Destructor" << std::endl;
     terminatePlatform();
 }
 
@@ -120,7 +120,7 @@ void XmlDocument::initPlatform(void)
     try
     {
         xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
-        //std::cout << __COUT_HDR_FL__<< "Initialized new theDocument_" << std::endl;
+        //__COUT__ << "Initialized new theDocument_" << std::endl;
     }
     catch( xercesc::XMLException& e )
     {
@@ -134,9 +134,9 @@ void XmlDocument::terminatePlatform(void)
 {
     try
     {
-        //std::cout << __COUT_HDR_FL__<< "Releasing the document" << std::endl;
+        //__COUT__ << "Releasing the document" << std::endl;
         theDocument_->release();
-        //std::cout << __COUT_HDR_FL__<< "document released" << std::endl;
+        //__COUT__ << "document released" << std::endl;
     }
     catch (...)
     {
@@ -163,7 +163,7 @@ xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, 
     if(parent == 0)
     {
     	__SS__ << "Illegal Null Parent Pointer!" << __E__;
-    	throw std::runtime_error(ss.str());
+    	__SS_THROW__;
     	//return 0;
     }
     xercesc::DOMElement* child;
@@ -248,9 +248,9 @@ unsigned int XmlDocument::addElementToParent(std::string field, std::string valu
 	if(verbose)
 	{
 		//display parent info
-		//std::cout << __COUT_HDR_FL__<< "Parent Name: "  << XML_TO_CHAR(parentEl->getNodeName()) << " Field: " << field << " Value: " << value << std::endl;
+		//__COUT__ << "Parent Name: "  << XML_TO_CHAR(parentEl->getNodeName()) << " Field: " << field << " Value: " << value << std::endl;
 	    if( parentEl->getFirstChild() != NULL && parentEl->getFirstChild()->getNodeType() == DOMNode::TEXT_NODE)
-	   	 	std::cout << __COUT_HDR_FL__<< "Parent's First Child Node Value: " << XML_TO_CHAR(parentEl->getFirstChild()->getNodeValue()) << std::endl;
+	   	 	__COUT__ << "Parent's First Child Node Value: " << XML_TO_CHAR(parentEl->getFirstChild()->getNodeValue()) << std::endl;
 	}
 	
     //add field/value element
@@ -303,7 +303,7 @@ unsigned int XmlDocument::addDataElement ( std::string field, std::string value,
 	
 	if(parentIndexArray) //if there passed an array find parent relative to data element
 	{		
-		//std::cout << __COUT_HDR_FL__<< "Using Parent Index Array" << std::endl;
+		//__COUT__ << "Using Parent Index Array" << std::endl;
 		
 		DOMNodeList *nodeList;
 						
@@ -407,7 +407,7 @@ void XmlDocument::outputXmlDocument (std::ostringstream *out, bool dispStdOut)
 void XmlDocument::recursiveOutputXmlDocument (xercesc::DOMElement *currEl, std::ostringstream *out, bool dispStdOut, std::string tabStr)
 {
     //open field tag
-    if(dispStdOut) std::cout << __COUT_HDR_FL__<< tabStr << "<"  << XML_TO_CHAR(currEl->getNodeName()) ;
+    if(dispStdOut) __COUT__ << tabStr << "<"  << XML_TO_CHAR(currEl->getNodeName()) ;
     if(out) *out << tabStr << "<"  << XML_TO_CHAR(currEl->getNodeName());
 
     //insert value if text node child
@@ -437,7 +437,7 @@ void XmlDocument::recursiveOutputXmlDocument (xercesc::DOMElement *currEl, std::
     //close tag if children
     if(nodeList->getLength() > 1 || (nodeList->getLength() == 1 && currEl->getFirstChild()->getNodeType() != xercesc::DOMNode::TEXT_NODE))
     {
-        if(dispStdOut) std::cout << __COUT_HDR_FL__<< tabStr << "</"  << XML_TO_CHAR(currEl->getNodeName()) << ">" << std::endl;
+        if(dispStdOut) __COUT__ << tabStr << "</"  << XML_TO_CHAR(currEl->getNodeName()) << ">" << std::endl;
         if(out) *out << tabStr << "</"  << XML_TO_CHAR(currEl->getNodeName()) << ">" << std::endl;
     }
 }
@@ -530,7 +530,7 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
     for(unsigned int i=0; i<inString.length(); i++)
         if(inString[i] != ' ')
         {
-			if(doit) std::cout << __COUT_HDR_FL__<< inString[i] << ":" <<
+			if(doit) __COUT__ << inString[i] << ":" <<
 					(int)inString[i] << ":" << inString << std::endl;
 
         	//remove new lines and unprintable characters
@@ -586,11 +586,11 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
 					inString.erase(i,1);        //erase character
 					--i; //step back so next char to check is correct
             	}
-            	if(doit) std::cout << __COUT_HDR_FL__<<  inString << std::endl;
+            	if(doit) __COUT__ <<  inString << std::endl;
             	continue;
             }
 
-        	if(doit) std::cout << __COUT_HDR_FL__<<  inString << std::endl;
+        	if(doit) __COUT__ <<  inString << std::endl;
 
             //replace special characters
             if(inString[i] == '\"' || inString[i] == '\'')
@@ -598,7 +598,7 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
                 inString.insert(i,(inString[i] == '\'')?"&apos":"&quot"); //insert HTML name before quotes
                 inString.replace(i+5,1,1,';');        // replace special character with ;
                 i+=5; //skip to next char to check
-                //std::cout << __COUT_HDR_FL__<<  inString << std::endl;
+                //__COUT__ <<  inString << std::endl;
             }
             else if(inString[i] == '&')
             {
@@ -620,7 +620,7 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
             	i+=5; //skip to next char to check
             }
 
-        	if(doit) std::cout << __COUT_HDR_FL__<<  inString << std::endl;
+        	if(doit) __COUT__ <<  inString << std::endl;
 
             ws = i; //last non white space char
         }
@@ -629,7 +629,7 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
         	if(i-1 == ws) continue; //dont do anything for first white space
 
         	//for second white space add 2, and 1 from then
-        	if(i-2 == ws)
+        	if(0 && i-2 == ws)
         	{
         		inString.insert(i,"&#160;"); //insert html space
         		i+=6; //skip to point at space again
@@ -637,14 +637,18 @@ std::string	XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
         	inString.insert(i,"&#160"); //insert html space
         	inString.replace(i+5,1,1,';');        // replace special character with ;
         	i+=5; //skip to next char to check
-        	ws = i;
+        	//ws = i;
         }
 
-    if(doit) std::cout << __COUT_HDR_FL__<<  inString.size() << " " << ws << std::endl;
+    if(doit) __COUT__ <<  inString.size() << " " << ws << std::endl;
 
-    inString.substr(0,ws+1);
+    //inString.substr(0,ws+1);
 
-    if(doit) std::cout << __COUT_HDR_FL__<<  inString.size() << " " << inString << std::endl;
+    if(doit) __COUT__ <<  inString.size() << " " << inString << std::endl;
+
+    if(allowWhiteSpace) //keep all white space
+    	return inString;
+    //else trim trailing white space
 
     if(ws == (unsigned int)-1) return ""; //empty std::string since all white space
     return inString.substr(0,ws+1); //trim right white space
@@ -672,16 +676,16 @@ void XmlDocument::recursiveRemoveChild(xercesc::DOMElement *childEl, xercesc::DO
 //	Warning: filePath must be accessible or program will crash!
 void XmlDocument::saveXmlDocument (std::string filePath)
 {
-    std::cout << __COUT_HDR_FL__<< "Saving theDocument_ to file: " << filePath << std::endl;
+    __COUT__ << "Saving theDocument_ to file: " << filePath << std::endl;
     //Return the first registered theImplementation_ that has the desired features. In this case, we are after a DOM theImplementation_ that has the LS feature... or Load/Save.
     //DOMImplementation *theImplementation_ = DOMImplementationRegistry::getDOMImplementation(L"LS");
     xercesc::DOMImplementation *saveImplementation = xercesc::DOMImplementationRegistry::getDOMImplementation(CONVERT_TO_XML("LS"));
 
-    std::cout << __COUT_HDR_FL__<< "XERCES Version: " << _XERCES_VERSION << std::endl;
+    //__COUT__ << "XERCES Version: " << _XERCES_VERSION << std::endl;
 
 #if _XERCES_VERSION >= 30000
 
-    //std::cout << __COUT_HDR_FL__<< "making file" << filePath << std::endl;
+    //__COUT__ << "making file" << filePath << std::endl;
     // Create a DOMLSSerializer which is used to serialize a DOM tree into an XML theDocument_.
     xercesc::DOMLSSerializer *serializer = ((xercesc::DOMImplementationLS*)saveImplementation)->createLSSerializer();
 
@@ -704,7 +708,7 @@ void XmlDocument::saveXmlDocument (std::string filePath)
     }
     catch(...)
     {
-        std::cout << __COUT_HDR_FL__<< "Inaccessible file path: " << filePath << std::endl;
+        __COUT__ << "Inaccessible file path: " << filePath << std::endl;
         serializer->release();
         //xercesc::XMLString::release(&tempFilePath);
 
@@ -743,7 +747,7 @@ void XmlDocument::saveXmlDocument (std::string filePath)
     }
     catch(...)
     {
-        std::cout << __COUT_HDR_FL__<< "Inaccessible file path: " << filePath << std::endl;
+        __COUT__ << "Inaccessible file path: " << filePath << std::endl;
         serializer->release();
         xercesc::XMLString::release(&tempFilePath);
         return;
@@ -758,14 +762,14 @@ void XmlDocument::saveXmlDocument (std::string filePath)
 #endif
 
     // Cleanup.
-    //std::cout << __COUT_HDR_FL__<< "delete format target" << std::endl;
+    //__COUT__ << "delete format target" << std::endl;
 
 
 #if _XERCES_VERSION >= 30000
 
-    //std::cout << __COUT_HDR_FL__<< "delete output0" << std::endl;
+    //__COUT__ << "delete output0" << std::endl;
     output->release();
-    //std::cout << __COUT_HDR_FL__<< "delete output1" << std::endl;
+    //__COUT__ << "delete output1" << std::endl;
 
 #endif
 }
@@ -774,13 +778,13 @@ void XmlDocument::saveXmlDocument (std::string filePath)
 //==============================================================================
 bool XmlDocument::loadXmlDocument (std::string filePath)
 {
-    std::cout << __COUT_HDR_FL__<< "Loading theDocument_ from file: " << filePath << std::endl;
+    __COUT__ << "Loading theDocument_ from file: " << filePath << std::endl;
 
     struct stat fileStatus;
 
     if(stat(filePath.c_str(), &fileStatus) != 0)
     {
-        std::cout << __COUT_HDR_FL__<< "File not accessible." << std::endl;
+        __COUT__ << "File not accessible." << std::endl;
         return false;
     }
 
@@ -810,7 +814,7 @@ bool XmlDocument::loadXmlDocument (std::string filePath)
     }
     catch( xercesc::XMLException& e )
     {
-        std::cout << __COUT_HDR_FL__<< "Error parsing file." << std::endl;
+        __COUT__ << "Error parsing file." << std::endl;
         return false;
     }
     delete parser;

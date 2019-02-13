@@ -54,11 +54,13 @@ public:
   	const bool							isChildLinkGroupID	(void) const;
   	const bool							isGroupID			(void) const;
   	const bool							isUID				(void) const;
+  	const bool							isBoolType			(void) const;
+  	const bool							isNumberDataType	(void) const;
 
   	std::string							getChildLinkIndex	(void) const;
 
   	static const std::string TYPE_UID;
-  	static const std::string TYPE_DATA, TYPE_UNIQUE_DATA, TYPE_MULTILINE_DATA, TYPE_FIXED_CHOICE_DATA, TYPE_BITMAP_DATA;
+  	static const std::string TYPE_DATA, TYPE_UNIQUE_DATA, TYPE_UNIQUE_GROUP_DATA, TYPE_MULTILINE_DATA, TYPE_FIXED_CHOICE_DATA, TYPE_BITMAP_DATA;
 	static const std::string TYPE_ON_OFF, TYPE_TRUE_FALSE, TYPE_YES_NO;
   	static const std::string TYPE_COMMENT, TYPE_AUTHOR, TYPE_TIMESTAMP;
   	static const std::string TYPE_START_CHILD_LINK, TYPE_START_CHILD_LINK_UID, TYPE_START_CHILD_LINK_GROUP_ID, TYPE_START_GROUP_ID;

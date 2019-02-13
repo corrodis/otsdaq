@@ -76,10 +76,9 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub * s)
 				<< " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
 	}
-	supervisorConfigurationPath_  = "/" + supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
+	supervisorConfigurationPath_  = "/" + supervisorContextUID_ + "/LinkToApplicationTable/" + supervisorApplicationUID_ + "/LinkToSupervisorTable";
 
 	setStateMachineName(supervisorApplicationUID_);
-    init();
 }
 
 //========================================================================================================================
@@ -102,7 +101,7 @@ void DataLoggerApp::init(void)
 //    artdaq::setMsgFacAppName(supervisorApplicationUID_, port);
     artdaq::setMsgFacAppName(name, port);
 //    mf::LogDebug(supervisorApplicationUID_) << "artdaq version " <<
-    mf::LogDebug(name + "Supervisor") << "artdaq version " <<
+    TLOG(TLVL_DEBUG, name + "Supervisor") << "artdaq version " <<
     artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion()
     << ", built " <<
     artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
@@ -110,13 +109,13 @@ void DataLoggerApp::init(void)
     // create the DataLoggerInterface
 	app_name = name;
 	my_rank = this->getApplicationDescriptor()->getLocalId();
-    theDataLoggerInterface_ = new artdaq::DataLoggerApp();
+	theDataLoggerInterface_.reset( new artdaq::DataLoggerApp());
 }
 
 //========================================================================================================================
 void DataLoggerApp::destroy(void)
 {
-	delete theDataLoggerInterface_;
+  theDataLoggerInterface_.reset(nullptr);
 }
 
 //========================================================================================================================
@@ -315,20 +314,36 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 
 
     theDataLoggerInterface_->initialize(pset, 0, 0);
-    mf::LogInfo("DataLoggerInterface") << "ARTDAQDataLogger SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+    TLOG(TLVL_INFO, "DataLoggerInterface") << "ARTDAQDataLogger SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 
 }
 
 //========================================================================================================================
 void DataLoggerApp::transitionHalting(toolbox::Event::Reference e) 
 {
-  //    theDataLoggerInterface_->shutdown(0);
+	  try {
+		  theDataLoggerInterface_->stop(45, 0);
+	  }
+	  catch (...) {
+		  // It is okay for this to fail, esp. if already stopped...
+	  }
+
+	  try {
+		  theDataLoggerInterface_->shutdown(45);
+	  }
+	  catch (...)
+	  {
+		  __MOUT_ERR__ << "ERROR OCCURRED DURING SHUTDOWN! STATE=" << theDataLoggerInterface_->status();
+	  }
+
+	  init();
 }
 
 //========================================================================================================================
 void DataLoggerApp::transitionInitializing(toolbox::Event::Reference e) 
 {
-    
+
+	init();
 }
 
 //========================================================================================================================
@@ -362,5 +377,4 @@ void DataLoggerApp::transitionStarting(toolbox::Event::Reference e)
 void DataLoggerApp::transitionStopping(toolbox::Event::Reference e) 
 {
     theDataLoggerInterface_->stop(0,0);
-    theDataLoggerInterface_->shutdown(0);
 }

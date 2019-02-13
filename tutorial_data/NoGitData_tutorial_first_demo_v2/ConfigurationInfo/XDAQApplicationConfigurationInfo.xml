@@ -4,7 +4,7 @@
 			<VIEW Name="XDAQ_APPLICATION_CONFIGURATION" Type="File,Database,DatabaseTest">
 				<COLUMN Type="GroupID-0" 	 Name="ApplicationGroupID" 	 StorageName="APPLICATION_GROUP_ID" 		DataType="VARCHAR2"/>
 				<COLUMN Type="UID" 	 Name="ApplicationUID" 	 StorageName="APPLICATION_UID" 		DataType="VARCHAR2"/>
-				<COLUMN Type="ChildLink-0" 	 Name="LinkToSupervisorConfiguration" 	 StorageName="LINK_TO_SUPERVISOR_CONFIGURATION" 		DataType="VARCHAR2"/>
+				<COLUMN Type="ChildLink-0" 	 Name="LinkToSupervisorTable" 	 StorageName="LINK_TO_SUPERVISOR_TABLE" 		DataType="VARCHAR2"/>
 				<COLUMN Type="ChildLinkUID-0" 	 Name="LinkToSupervisorUID" 	 StorageName="LINK_TO_SUPERVISOR_UID" 		DataType="VARCHAR2"/>
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2"/>
 				<COLUMN Type="Data" 	 Name="Class" 	 StorageName="CLASS" 		DataType="VARCHAR2"/>

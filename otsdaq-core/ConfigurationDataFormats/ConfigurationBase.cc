@@ -30,13 +30,13 @@ ConfigurationBase::ConfigurationBase(std::string configurationName,
 		std::string returnedExceptions = configurationInfoReader.read(this);
 
 		if(returnedExceptions != "")
-			__COUT_ERR__ << returnedExceptions << std::endl;
+			__COUT_ERR__ << returnedExceptions << __E__;
 
 		if(accumulatedExceptions) *accumulatedExceptions += std::string("\n") + returnedExceptions;
 	}
 	catch(...) //if accumulating exceptions, continue to and return, else throw
 	{
-		__SS__ << "Failure in configurationInfoReader.read(this)" << std::endl;
+		__SS__ << "Failure in configurationInfoReader.read(this)" << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		if(accumulatedExceptions) *accumulatedExceptions += std::string("\n") +
 				ss.str();
@@ -81,13 +81,13 @@ std::string ConfigurationBase::getTypeId()
 //==============================================================================
 void ConfigurationBase::init(ConfigurationManager *configurationManager)
 {
-	//__COUT__ << "Default ConfigurationBase::init() called." << std::endl;
+	//__COUT__ << "Default ConfigurationBase::init() called." << __E__;
 }
 
 //==============================================================================
 void ConfigurationBase::reset(bool keepTemporaryVersions)
 {
-	//std::cout << __COUT_HDR_FL__ << "resetting" << std::endl;
+	//std::cout << __COUT_HDR_FL__ << "resetting" << __E__;
 	deactivate();
 	if(keepTemporaryVersions)
 		trimCache(0);
@@ -98,10 +98,10 @@ void ConfigurationBase::reset(bool keepTemporaryVersions)
 //==============================================================================
 void ConfigurationBase::print(std::ostream &out) const
 {
-	//std::cout << __COUT_HDR_FL__ << "activeVersion_ " << activeVersion_ << " (INVALID_VERSION:=" << INVALID_VERSION << ")" << std::endl;
+	//std::cout << __COUT_HDR_FL__ << "activeVersion_ " << activeVersion_ << " (INVALID_VERSION:=" << INVALID_VERSION << ")" << __E__;
 	if(!activeConfigurationView_)
 	{
-		__COUT_ERR__ << "ERROR: No active view set" << std::endl;
+		__COUT_ERR__ << "ERROR: No active view set" << __E__;
 		return;
 	}
 	activeConfigurationView_->print(out);
@@ -121,17 +121,17 @@ void ConfigurationBase::setupMockupView(ConfigurationVersion version)
 		if(!isStored(version)) //the trim cache is misbehaving!
 		{
 			__SS__ << "\nsetupMockupView() IMPOSSIBLE ERROR: trimCache() is deleting the latest view version " <<
-					version	<< "!" << std::endl;
+					version	<< "!" << __E__;
 			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 	else
 	{
 		__SS__ << "\nsetupMockupView() ERROR: View to fill with mockup already exists: " << version
-				<< ". Cannot overwrite!" << std::endl;
+				<< ". Cannot overwrite!" << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 }
 
@@ -169,7 +169,7 @@ void ConfigurationBase::trimCache(unsigned int trimSize)
 		if(versionToDelete.isInvalid())
 		{
 			__SS__ << "Can NOT have a stored view with an invalid version!";
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		eraseView(versionToDelete);
@@ -189,7 +189,7 @@ void ConfigurationBase::trimTemporary(ConfigurationVersion targetVersion)
 		{
 			if(it->first.isTemporaryVersion())
 			{
-				__COUT__ << "Trimming temporary version: " << it->first << std::endl;
+				__COUT__ << "Trimming temporary version: " << it->first << __E__;
 				if(activeConfigurationView_ &&
 					getViewVersion() == it->first) //if activeVersion is being erased!
 					deactivate(); 		//deactivate active view, instead of guessing at next active view
@@ -201,16 +201,16 @@ void ConfigurationBase::trimTemporary(ConfigurationVersion targetVersion)
 	}
 	else if(targetVersion.isTemporaryVersion()) //erase target
 	{
-		__COUT__ << "Trimming temporary version: " << targetVersion << std::endl;
+		__COUT__ << "Trimming temporary version: " << targetVersion << __E__;
 		eraseView(targetVersion);
 	}
 	else
 	{
 		//else this is a persistent version!
 		__SS__ << "Temporary trim target was a persistent version: " <<
-				targetVersion << std::endl;
+				targetVersion << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 }
 
@@ -231,9 +231,9 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 	{
 		//else this is a persistent version!
 		__SS__ << "needleVersion does not exist: " <<
-				needleVersion << std::endl;
+				needleVersion << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	const ConfigurationView *needleView = &(needleIt->second);
@@ -263,25 +263,48 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 			continue; //col mismatch
 
 
+
 		++potentialMatchCount;
-		__COUT__ << "Checking version... " << viewPairReverseIterator->first << std::endl;
+		__COUT__ << "Checking version... " << viewPairReverseIterator->first << __E__;
 
 		//viewPairReverseIterator->second.print();
 
-		match = true;
+		//match = true;
 
-		auto viewColInfoIt = viewPairReverseIterator->second.getColumnsInfo().begin();
-		for(unsigned int col=0; match && //note column size must already match
-			viewPairReverseIterator->second.getColumnsInfo().size() > 3 &&
-			col<viewPairReverseIterator->second.getColumnsInfo().size()-3;++col,viewColInfoIt++)
-			if(viewColInfoIt->getName() !=
-					needleView->getColumnsInfo()[col].getName())
-			{
-				match = false;
-//				__COUT__ << "Column name mismatch " << col << ":" <<
-//						viewColInfoIt->getName() << " vs " <<
-//						needleView->getColumnsInfo()[col].getName() << std::endl;
-			}
+		//if column source names do not match then skip
+		//	source names are potentially different from getColumnsInfo()/getColumnStorageNames
+
+		match = viewPairReverseIterator->second.getSourceColumnNames().size() ==
+				needleView->getSourceColumnNames().size();
+		if(match)
+		{
+			for(auto& haystackColName:viewPairReverseIterator->second.getSourceColumnNames())
+				if(needleView->getSourceColumnNames().find(
+						haystackColName) ==
+								needleView->getSourceColumnNames().end())
+				{
+					__COUT__ << "Found column name mismach for '" <<
+							haystackColName <<
+							"'... So allowing same data!" << __E__;
+
+					match = false;
+					break;
+				}
+		}
+
+		//checking columnsInfo seems to be wrong approach, use getSourceColumnNames (above)
+//		auto viewColInfoIt = viewPairReverseIterator->second.getColumnsInfo().begin();
+//		for(unsigned int col=0; match && //note column size must already match
+//			viewPairReverseIterator->second.getColumnsInfo().size() > 3 &&
+//			col<viewPairReverseIterator->second.getColumnsInfo().size()-3;++col,viewColInfoIt++)
+//			if(viewColInfoIt->getName() !=
+//					needleView->getColumnsInfo()[col].getName())
+//			{
+//				match = false;
+////				__COUT__ << "Column name mismatch " << col << ":" <<
+////						viewColInfoIt->getName() << " vs " <<
+////						needleView->getColumnsInfo()[col].getName() << __E__;
+//			}
 
 		for(unsigned int row=0;match && row<rows;++row)
 		{
@@ -297,19 +320,19 @@ ConfigurationVersion ConfigurationBase::checkForDuplicate(ConfigurationVersion n
 //							" vs " <<
 //							needleView->getDataView()[row][col] << "[" <<
 //							needleView->getDataView()[row][col].size() << "]" <<
-//							std::endl;
+//							__E__;
 
 					break;
 				}
 		}
 		if(match)
 		{
-			__COUT_INFO__ << "Duplicate version found: " << viewPairReverseIterator->first << std::endl;
+			__COUT_INFO__ << "Duplicate version found: " << viewPairReverseIterator->first << __E__;
 			return viewPairReverseIterator->first;
 		}
 	}
 
-	__COUT__ << "No duplicates found in " << potentialMatchCount << " potential matches." << std::endl;
+	__COUT__ << "No duplicates found in " << potentialMatchCount << " potential matches." << __E__;
 	return ConfigurationVersion(); //return invalid if no matches
 }
 
@@ -319,20 +342,20 @@ void ConfigurationBase::changeVersionAndActivateView(ConfigurationVersion tempor
 {
 	if(configurationViews_.find(temporaryVersion) == configurationViews_.end())
 	{
-		__SS__ << "ERROR: Temporary view version " << temporaryVersion << " doesn't exists!" << std::endl;
+		__SS__ << "ERROR: Temporary view version " << temporaryVersion << " doesn't exists!" << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	if(version.isInvalid())
 	{
 		__SS__ << "ERROR: Attempting to create an invalid version " << version <<
-				"! Did you really run out of versions? (this should never happen)" << std::endl;
+				"! Did you really run out of versions? (this should never happen)" << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(configurationViews_.find(version) != configurationViews_.end())
-		__COUT_WARN__ << "WARNING: View version " << version << " already exists! Overwriting." << std::endl;
+		__COUT_WARN__ << "WARNING: View version " << version << " already exists! Overwriting." << __E__;
 
 	configurationViews_[version].copy(configurationViews_[temporaryVersion],
 			version,
@@ -417,13 +440,13 @@ unsigned int ConfigurationBase::getNumberOfStoredViews(void) const
 		else if(viewPair.first.isInvalid())
 		{
 			//__SS__ << "Can NOT have a stored view with an invalid version!";
-			//throw std::runtime_error(ss.str());
+			//__SS_THROW__;
 
 			//NOTE: if this starts happening a lot, could just auto-correct and remove the invalid version
 			// but it would be better to fix the cause.
 
 			//FIXME... for now just auto correcting
-			__COUT__ << "There is an invalid version now!.. where did it come from?" << std::endl;
+			__COUT__ << "There is an invalid version now!.. where did it come from?" << __E__;
 		}
 		else ++sz;
 	return sz;
@@ -435,7 +458,7 @@ const ConfigurationView& ConfigurationBase::getView(void) const
 	if(!activeConfigurationView_)
 	{
 		__SS__ << "activeConfigurationView_ pointer is null! (...likely the active view was not setup properly. Check your system setup.)";
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return *activeConfigurationView_;
 }
@@ -446,7 +469,7 @@ ConfigurationView* ConfigurationBase::getViewP(void)
 	if(!activeConfigurationView_)
 	{
 		__SS__ << "activeConfigurationView_ pointer is null! (...likely the active view was not setup properly. Check your system setup.)";
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return activeConfigurationView_;
 }
@@ -491,17 +514,17 @@ bool ConfigurationBase::setActiveView(ConfigurationVersion version)
 	{ 	//we don't call else load for the user, because the configuration manager would lose track.. (I think?)
 		//so load new versions for the first time through the configuration manager only. (I think??)
 		__SS__ << "\nsetActiveView() ERROR: View with version " << version <<
-				" has never been stored before!" << std::endl;
+				" has never been stored before!" << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 		return false;
 	}
 	activeConfigurationView_ = &configurationViews_[version];
 
 	if(configurationViews_[version].getVersion() !=  version)
 	{
-		__SS__ << "Something has gone very wrong with the version handling!" << std::endl;
-		throw std::runtime_error(ss.str());
+		__SS__ << "Something has gone very wrong with the version handling!" << __E__;
+		__SS_THROW__;
 	}
 
 	return true;
@@ -552,7 +575,7 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 		__SS__ << "Error! Number of Columns of source view A must match destination mock-up view." <<
 				"Dimension of source is [" <<	sourceViewA.getNumberOfColumns() <<
 				"] and of destination mockup is [" <<
-				mockupConfigurationView_.getNumberOfColumns() << "]." << std::endl;
+				mockupConfigurationView_.getNumberOfColumns() << "]." << __E__;
 		__SS_THROW__;
 	}
 	//check that column sizes match
@@ -562,7 +585,7 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 		__SS__ << "Error! Number of Columns of source view B must match destination mock-up view." <<
 				"Dimension of source is [" <<	sourceViewB.getNumberOfColumns() <<
 				"] and of destination mockup is [" <<
-				mockupConfigurationView_.getNumberOfColumns() << "]." << std::endl;
+				mockupConfigurationView_.getNumberOfColumns() << "]." << __E__;
 		__SS_THROW__;
 	}
 
@@ -609,7 +632,7 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 						" of source view A must match source B and destination mock-up view." <<
 						" Column of source B is [" << sourceViewA.getColumnInfo(cb).getType() <<
 						"] and of destination mockup is [" <<
-						mockupConfigurationView_.getColumnInfo(cb).getType() << "]." << std::endl;
+						mockupConfigurationView_.getColumnInfo(cb).getType() << "]." << __E__;
 				__SS_THROW__;
 			}
 
@@ -849,7 +872,7 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 	__COUT__ << "Merging from (A) " << sourceViewA.getTableName() << "_v" <<
 			sourceViewA.getVersion() << " and (B) " << sourceViewB.getTableName() << "_v" <<
 			sourceViewB.getVersion() << "  to " << getConfigurationName() << "_v" <<
-			destinationVersion << " with approach '" << mergeApproach << ".'" << std::endl;
+			destinationVersion << " with approach '" << mergeApproach << ".'" << __E__;
 
 	//if the merge fails then delete the destinationVersion view
 	try
@@ -1065,9 +1088,9 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 		__COUT_ERR__ << "Failed to merge " << sourceViewA.getTableName() << "_v" <<
 				sourceViewA.getVersion() << " and " << sourceViewB.getTableName() << "_v" <<
 				sourceViewB.getVersion() << " into " << getConfigurationName() << "_v" <<
-				destinationVersion << std::endl;
+				destinationVersion << __E__;
 		__COUT_WARN__ << "Deleting the failed destination version " <<
-				destinationVersion << std::endl;
+				destinationVersion << __E__;
 		eraseView(destinationVersion);
 		throw; //and rethrow
 	}
@@ -1083,8 +1106,10 @@ ConfigurationVersion ConfigurationBase::mergeViews (
 //	if conflict, throw exception
 //
 //	Returns version of new temporary view that was created.
-ConfigurationVersion ConfigurationBase::copyView (const ConfigurationView &sourceView,
-		ConfigurationVersion destinationVersion, const std::string &author)
+ConfigurationVersion ConfigurationBase::copyView (
+		const ConfigurationView &sourceView,
+		ConfigurationVersion destinationVersion,
+		const std::string &author)
 {
 	//check that column sizes match
 	if(sourceView.getNumberOfColumns() !=
@@ -1093,8 +1118,8 @@ ConfigurationVersion ConfigurationBase::copyView (const ConfigurationView &sourc
 		__SS__ << "Error! Number of Columns of source view must match destination mock-up view." <<
 				"Dimension of source is [" <<	sourceView.getNumberOfColumns() <<
 				"] and of destination mockup is [" <<
-				mockupConfigurationView_.getNumberOfColumns() << "]." << std::endl;
-		throw std::runtime_error(ss.str());
+				mockupConfigurationView_.getNumberOfColumns() << "]." << __E__;
+		__SS_THROW__;
 	}
 
 	//check for destination version confict
@@ -1102,8 +1127,8 @@ ConfigurationVersion ConfigurationBase::copyView (const ConfigurationView &sourc
 			configurationViews_.find(destinationVersion) != configurationViews_.end())
 	{
 		__SS__ << "Error! Asked to copy a view with a conflicting version: " <<
-				destinationVersion << std::endl;
-		throw std::runtime_error(ss.str());
+				destinationVersion << __E__;
+		__SS_THROW__;
 	}
 
 	//if destinationVersion is INVALID, creates next available temporary version
@@ -1112,7 +1137,7 @@ ConfigurationVersion ConfigurationBase::copyView (const ConfigurationView &sourc
 
 	__COUT__ << "Copying from " << sourceView.getTableName() << "_v" <<
 			sourceView.getVersion() << " to " << getConfigurationName() << "_v" <<
-			destinationVersion << std::endl;
+			destinationVersion << __E__;
 
 	try
 	{
@@ -1122,15 +1147,15 @@ ConfigurationVersion ConfigurationBase::copyView (const ConfigurationView &sourc
 	{
 		__COUT_ERR__ << "Failed to copy from " << sourceView.getTableName() << "_v" <<
 				sourceView.getVersion() << " to " << getConfigurationName() << "_v" <<
-				destinationVersion << std::endl;
+				destinationVersion << __E__;
 		__COUT_WARN__ << "Deleting the failed destination version " <<
-				destinationVersion << std::endl;
+				destinationVersion << __E__;
 		eraseView(destinationVersion);
 		throw; //and rethrow
 	}
 
 	return destinationVersion;
-}
+} //end copyView()
 
 
 //==============================================================================
@@ -1139,15 +1164,16 @@ ConfigurationVersion ConfigurationBase::copyView (const ConfigurationView &sourc
 //	destTemporaryViewVersion is starting point for search for available temporary versions.
 //	if destTemporaryViewVersion is invalid, starts search at ConfigurationVersion::getNextTemporaryVersion().
 // 	returns new temporary version number (which is always negative)
-ConfigurationVersion ConfigurationBase::createTemporaryView(ConfigurationVersion sourceViewVersion,
+ConfigurationVersion ConfigurationBase::createTemporaryView(
+		ConfigurationVersion sourceViewVersion,
 		ConfigurationVersion destTemporaryViewVersion)
 {
 	__COUT__ << "Configuration: " <<
-			getConfigurationName()<< std::endl;
+			getConfigurationName()<< __E__;
 
 	__COUT__ << "Num of Views: " <<
 			configurationViews_.size() << " (Temporary Views: " <<
-			(configurationViews_.size() - getNumberOfStoredViews()) << ")" << std::endl;
+			(configurationViews_.size() - getNumberOfStoredViews()) << ")" << __E__;
 
 	ConfigurationVersion tmpVersion = destTemporaryViewVersion;
 	if(tmpVersion.isInvalid()) tmpVersion = ConfigurationVersion::getNextTemporaryVersion();
@@ -1156,9 +1182,9 @@ ConfigurationVersion ConfigurationBase::createTemporaryView(ConfigurationVersion
 	if(isStored(tmpVersion) || tmpVersion.isInvalid())
 	{
 		__SS__ << "Invalid destination temporary version: " <<
-				destTemporaryViewVersion << ". Expected next temporary version < " << tmpVersion << std::endl;
+				destTemporaryViewVersion << ". Expected next temporary version < " << tmpVersion << __E__;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 	if(sourceViewVersion == ConfigurationVersion::INVALID || 	//use mockup if sourceVersion is -1 or not found
@@ -1167,11 +1193,11 @@ ConfigurationVersion ConfigurationBase::createTemporaryView(ConfigurationVersion
 		if(sourceViewVersion != -1)
 		{
 			__SS__ << "ERROR: sourceViewVersion " << sourceViewVersion << " not found. " <<
-					"Invalid source version. Version requested is not stored (yet?) or does not exist." << std::endl;
+					"Invalid source version. Version requested is not stored (yet?) or does not exist." << __E__;
 			__COUT_ERR__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
-		__COUT__ << "Using Mock-up view" << std::endl;
+		__COUT__ << "Using Mock-up view" << __E__;
 		configurationViews_[tmpVersion].copy(mockupConfigurationView_,
 				tmpVersion,
 				mockupConfigurationView_.getAuthor());
@@ -1187,12 +1213,12 @@ ConfigurationVersion ConfigurationBase::createTemporaryView(ConfigurationVersion
 		catch(...)
 		{
 			__COUT_WARN__ << "createTemporaryView() Source view failed init(). " <<
-					"This is being ignored (hopefully the new copy is being fixed)." << std::endl;
+					"This is being ignored (hopefully the new copy is being fixed)." << __E__;
 		}
 	}
 
 	return tmpVersion;
-}
+} //end createTemporaryView()
 
 //==============================================================================
 //getNextAvailableTemporaryView
@@ -1213,9 +1239,9 @@ ConfigurationVersion ConfigurationBase::getNextTemporaryVersion() const
 	if(isStored(tmpVersion) || tmpVersion.isInvalid() || !tmpVersion.isTemporaryVersion())
 	{
 		__SS__ << "Invalid destination temporary version: " <<
-				tmpVersion << std::endl;
+				tmpVersion << __E__;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return tmpVersion;
 }
@@ -1239,9 +1265,9 @@ ConfigurationVersion ConfigurationBase::getNextVersion() const
 	if(isStored(tmpVersion) || tmpVersion.isInvalid() || tmpVersion.isTemporaryVersion())
 	{
 		__SS__ << "Invalid destination next version: " <<
-				tmpVersion << std::endl;
+				tmpVersion << __E__;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return tmpVersion;
 }
@@ -1255,9 +1281,9 @@ ConfigurationView* ConfigurationBase::getTemporaryView(ConfigurationVersion temp
 	if(!temporaryVersion.isTemporaryVersion() ||
 			!isStored(temporaryVersion))
 	{
-		__SS__ << getConfigurationName() << ":: Error! Temporary version not found!" << std::endl;
+		__SS__ << getConfigurationName() << ":: Error! Temporary version not found!" << __E__;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 	return &configurationViews_[temporaryVersion];
 }
@@ -1274,9 +1300,6 @@ std::string ConfigurationBase::convertToCaps(std::string& str, bool isConfigName
 	if(isConfigName && (configPos = str.find("Configuration")) !=
 			str.size() - strlen("Configuration"))
 		str += "Configuration";
-
-	//std::cout << str << std::endl;
-	//std::cout << configPos << " " << (str.size() - strlen("Configuration")) << std::endl;
 
 	//create all caps name and validate
 	//	only allow alpha names with Configuration at end
@@ -1298,7 +1321,7 @@ std::string ConfigurationBase::convertToCaps(std::string& str, bool isConfigName
 		else if(str[c] >= '0' && str[c] <= '9')
 			capsStr += str[c]; //allow numbers
 		else //error! non-alpha
-			throw std::runtime_error(std::string("ConfigurationBase::convertToCaps::") +
+			__THROW__(std::string("ConfigurationBase::convertToCaps::") +
 					"Invalid character found in name (allowed: A-Z, a-z, 0-9):" +
 					str );
 

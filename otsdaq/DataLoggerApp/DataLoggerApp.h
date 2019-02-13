@@ -79,7 +79,7 @@ private:
 	std::string                              supervisorContextUID_;
 	std::string                              supervisorApplicationUID_;
 
-    artdaq::DataLoggerApp*                	 theDataLoggerInterface_;
+	std::unique_ptr<artdaq::DataLoggerApp>                	 theDataLoggerInterface_;
 
 };
 

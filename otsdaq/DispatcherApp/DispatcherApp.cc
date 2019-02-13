@@ -74,10 +74,9 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub * s)
 			<< " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
 	}
-	supervisorConfigurationPath_ = "/" + supervisorContextUID_ + "/LinkToApplicationConfiguration/" + supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
+	supervisorConfigurationPath_ = "/" + supervisorContextUID_ + "/LinkToApplicationTable/" + supervisorApplicationUID_ + "/LinkToSupervisorTable";
 
 	setStateMachineName(supervisorApplicationUID_);
-	init();
 }
 
 //========================================================================================================================
@@ -100,7 +99,7 @@ void DispatcherApp::init(void)
 	//    artdaq::setMsgFacAppName(supervisorApplicationUID_, port);
 	artdaq::setMsgFacAppName(name, port);
 	//    mf::LogDebug(supervisorApplicationUID_) << "artdaq version " <<
-	mf::LogDebug(name + "Supervisor") << "artdaq version " <<
+	TLOG(TLVL_DEBUG, name + "Supervisor") << "artdaq version " <<
 		artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion()
 		<< ", built " <<
 		artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
@@ -108,14 +107,14 @@ void DispatcherApp::init(void)
 	// create the DispatcherInterface
 	app_name = name;
 	my_rank = this->getApplicationDescriptor()->getLocalId();
-	theDispatcherInterface_ = new artdaq::DispatcherApp();
+	theDispatcherInterface_.reset( new artdaq::DispatcherApp());
 	//theDispatcherInterface_ = new DispatcherInterface(mpiSentry_->rank(), local_group_comm, supervisorApplicationUID_ );
 }
 
 //========================================================================================================================
 void DispatcherApp::destroy(void)
 {
-	delete theDispatcherInterface_;
+  theDispatcherInterface_.reset(nullptr);
 }
 
 //========================================================================================================================
@@ -315,20 +314,36 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 
 
 	theDispatcherInterface_->initialize(pset, 0, 0);
-	mf::LogInfo("DispatcherInterface") << "ARTDAQDispatcher SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+	TLOG(TLVL_INFO, "DispatcherInterface") << "ARTDAQDispatcher SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 
 }
 
 //========================================================================================================================
 void DispatcherApp::transitionHalting(toolbox::Event::Reference e) 
 {
-  //theDispatcherInterface_->shutdown(45);
+  try {
+	  theDispatcherInterface_->stop(45, 0);
+  }
+  catch (...) {
+	  // It is okay for this to fail, esp. if already stopped...
+  }
+
+  try {
+	  theDispatcherInterface_->shutdown(45);
+  }
+  catch (...)
+  {
+	  __MOUT_ERR__ << "ERROR OCCURRED DURING SHUTDOWN! STATE=" << theDispatcherInterface_->status();
+  }
+
+  init();
 }
 
 //========================================================================================================================
 void DispatcherApp::transitionInitializing(toolbox::Event::Reference e) 
 {
 
+	init();
 }
 
 //========================================================================================================================
@@ -354,5 +369,4 @@ void DispatcherApp::transitionStarting(toolbox::Event::Reference e)
 void DispatcherApp::transitionStopping(toolbox::Event::Reference e) 
 {
 	theDispatcherInterface_->stop(45, 0);
-	theDispatcherInterface_->shutdown(45);
 }

@@ -157,7 +157,7 @@ bool RemoteWebUsers::xmlRequestToGateway(
 				"SupervisorSequenceCheck", parameters);
 		parameters.clear();
 		parameters.addParameter("Permissions");
-		receive(retMsg, parameters);
+		SOAPUtilities::receive(retMsg, parameters);
 
 		userInfo.setGroupPermissionLevels(parameters.getValue("Permissions"));
 
@@ -212,7 +212,7 @@ bool RemoteWebUsers::xmlRequestToGateway(
 	parameters.addParameter("Username");
 	parameters.addParameter("DisplayName");
 	parameters.addParameter("ActiveSessionIndex");
-	receive(retMsg, parameters);
+	SOAPUtilities::receive(retMsg, parameters);
 
 	//__COUT__ << std::endl;
 
@@ -246,7 +246,7 @@ bool RemoteWebUsers::xmlRequestToGateway(
 //	parameters.addParameter("Username");
 //	parameters.addParameter("DisplayName");
 //	parameters.addParameter("ActiveSessionIndex");
-//	receive(retMsg, parameters);
+//	SOAPUtilities::receive(retMsg, parameters);
 
 //	if(WebUsers::finalizeRequestAccess(out,xmldoc,userInfo,
 //			parameters.getValue("Username"),
@@ -381,7 +381,7 @@ HANDLE_ACCESS_FAILURE:
 //	parameters.addParameter("Username");
 //	parameters.addParameter("DisplayName");
 //	parameters.addParameter("ActiveSessionIndex");
-//	receive(retMsg, parameters);
+//	SOAPUtilities::receive(retMsg, parameters);
 //
 //
 //
@@ -428,7 +428,7 @@ std::string RemoteWebUsers::getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationD
 
 
 		SOAPParameters retParameters("UserList");
-		receive(retMsg, retParameters);
+		SOAPUtilities::receive(retMsg, retParameters);
 
 		ActiveUserLastUpdateTime_ = time(0);
 		return (ActiveUserList_ = retParameters.getValue("UserList"));
@@ -458,7 +458,7 @@ std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::get
 	retParameters.addParameter("GroupKey");
 	retParameters.addParameter("GroupAction");
 	retParameters.addParameter("GroupActionTime");
-	receive(retMsg, retParameters);
+	SOAPUtilities::receive(retMsg, retParameters);
 
 	std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup;
 	if(retParameters.getValue("GroupAction") != actionOfLastGroup) //if action doesn't match.. weird
@@ -494,7 +494,7 @@ bool RemoteWebUsers::getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescr
 	retParameters.addParameter("Username");
 	retParameters.addParameter("DisplayName");
 	retParameters.addParameter("ActiveSessionIndex");
-	receive(retMsg, retParameters);
+	SOAPUtilities::receive(retMsg, retParameters);
 	if(userName)	*userName = retParameters.getValue("Username");
 	if(displayName)	*displayName = retParameters.getValue("DisplayName");
 	if(activeSessionIndex) *activeSessionIndex = strtoul(retParameters.getValue("ActiveSessionIndex").c_str(),0,0);
@@ -527,7 +527,7 @@ bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::Applicat
 	retParameters.addParameter("CookieCode");
 	retParameters.addParameter("Permissions");
 	retParameters.addParameter("UserWithLock");
-	receive(retMsg, retParameters);
+	SOAPUtilities::receive(retMsg, retParameters);
 
 
 

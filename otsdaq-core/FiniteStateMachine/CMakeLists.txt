@@ -4,6 +4,7 @@ cet_make(LIBRARY_NAME FiniteStateMachine
 		SOAPUtilities
 		ProgressBar
 		artdaq-core_Utilities
+		Macros
                 )
 
 install_headers()

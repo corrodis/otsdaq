@@ -74,6 +74,7 @@ void ProgressBar::reset(std::string file, std::string lineNumber, int id)
 //========================================================================================================================
 void ProgressBar::step()
 {
+	std::lock_guard<std::mutex> lock(theMutex_); //lock out for remainder of scope
 	++stepCount_;
 	//std::cout << __COUT_HDR_FL__  << totalStepsFileName_ << " " << readPercentageString() << "% complete" << std::endl;
 }
@@ -106,6 +107,7 @@ int ProgressBar::read()
 	if(!started_)
 		return 100;  //if no progress started, always return 100% complete
 
+	std::lock_guard<std::mutex> lock(theMutex_); //lock out for remainder of scope
 	if(stepsToComplete_)
 		return stepCount_*100.0/stepsToComplete_;
 

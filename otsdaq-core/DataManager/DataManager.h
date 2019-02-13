@@ -15,7 +15,7 @@
 namespace ots
 {
 class DataProcessor;
-class DataProducer;
+class DataProducerBase;
 class DataConsumer;
 class CircularBufferBase;
 
@@ -24,63 +24,74 @@ class CircularBufferBase;
 class DataManager: public VStateMachine, public Configurable
 {
 public:
-             DataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath);
-    virtual ~DataManager(void);
+             DataManager		(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath);
+    virtual ~DataManager		(void);
 
     //State Machine Methods
-    virtual void configure(void);
-    virtual void halt     (void);
-    virtual void pause    (void);
-    virtual void resume   (void);
-    virtual void start    (std::string runNumber);
-    virtual void stop     (void);
+    virtual void configure		(void);
+    virtual void halt     		(void);
+    virtual void pause    		(void);
+    virtual void resume   		(void);
+    virtual void start    		(std::string runNumber);
+    virtual void stop     		(void);
 
 
 
     template<class D, class H>
-    void configureBuffer(std::string bufferUID)
+    void configureBuffer(const std::string& bufferUID)
     {
-    	buffers_[bufferUID].buffer_ = new CircularBuffer<D,H>();
+    	buffers_[bufferUID].buffer_ = new CircularBuffer<D,H>(bufferUID);
     	buffers_[bufferUID].status_ = Initialized;
     }
-    void registerProducer(std::string bufferUID, DataProducer* producer);//The data manager becomes the owner of the producer object!
-    void registerConsumer(std::string bufferUID, DataConsumer* consumer, bool registerToBuffer=true);//The data manager becomes the owner of the consumer object!
+
+    void registerProducer		(const std::string& bufferUID, DataProducerBase* producer);//The data manager becomes the owner of the producer object!
+    void registerConsumer		(const std::string& bufferUID, DataConsumer* consumer);//The data manager becomes the owner of the consumer object!
+
+    void unregisterFEProducer	(const std::string& bufferID, const std::string& feProducerID);
+
+    //void unregisterConsumer		(const std::string& bufferID, const std::string& consumerID);
+    //void unregisterProducer		(const std::string& bufferID, const std::string& producerID);
+
+    void dumpStatus	 	 		(std::ostream* out = (std::ostream*)&(std::cout)) const;
 
 protected:
-    void eraseAllBuffers (void);//!!!!!Delete all Buffers and all the pointers of the producers and consumers
-    void eraseBuffer     (std::string bufferUID);//!!!!!Delete all the pointers of the producers and consumers
+    void destroyBuffers 		(void);//!!!!!Delete all Buffers and all the pointers of the producers and consumers
+    //void destroyBuffer     		(const std::string& bufferUID);//!!!!!Delete all the pointers of the producers and consumers
 
-    void startAllBuffers (std::string runNumber);
-    void stopAllBuffers  (void);
-    void resumeAllBuffers(void);
-    void pauseAllBuffers (void);
+    void startAllBuffers 		(const std::string& runNumber);
+    void stopAllBuffers  		(void);
+    void resumeAllBuffers		(void);
+    void pauseAllBuffers 		(void);
 
-    void startBuffer     (std::string bufferUID, std::string runNumber);
-    void stopBuffer      (std::string bufferUID);
-    void resumeBuffer    (std::string bufferUID);
-    void pauseBuffer     (std::string bufferUID);
+    void startBuffer     		(const std::string& bufferUID, std::string runNumber);
+    void stopBuffer      		(const std::string& bufferUID);
+    void resumeBuffer    		(const std::string& bufferUID);
+    void pauseBuffer     		(const std::string& bufferUID);
 
-//    void startProducer   (std::string bufferUID, std::string producerID);
-//    void stopProducer    (std::string bufferUID, std::string producerID);
-//    void startConsumer   (std::string bufferUID, std::string consumerID);
-//    void stopConsumer    (std::string bufferUID, std::string consumerID);
+//    void startProducer   (const std::string& bufferUID, std::string producerID);
+//    void stopProducer    (const std::string& bufferUID, std::string producerID);
+//    void startConsumer   (const std::string& bufferUID, std::string consumerID);
+//    void stopConsumer    (const std::string& bufferUID, std::string consumerID);
 
 //#include "otsdaq-core/DataTypes/DataStructs.h"
-//    void setConsumerParameters(std::string name);
+//    void setConsumerParameters(const std::string& name);
 
     enum BufferStatus {Initialized, Running};
 
-    bool unregisterConsumer(std::string consumerID);
-    bool deleteBuffer      (std::string bufferUID);
     struct Buffer
     {
     	CircularBufferBase*        buffer_;
-    	std::vector<std::shared_ptr<DataProducer>> producers_;
-    	//std::vector<DataProducer*> producers_;
-    	std::vector<std::shared_ptr<DataConsumer>> consumers_;
+    	std::vector<DataProducerBase*> producers_;
+    	std::vector<DataConsumer*> 	consumers_;
     	BufferStatus               status_;
     };
-    std::map<std::string, Buffer> buffers_;
+    std::map<std::string /*dataBufferId*/,
+		Buffer /*CircularBuffer:=Map of Producer to Buffer Implementations*/> buffers_;
+
+public:
+    bool parentSupervisorHasFrontends_; //if parent supervisor has front-ends, then allow no producers... that will be checked later by parent supervisor
+
+    const std::map<std::string /*dataBufferId*/, Buffer>& getBuffers(void) const { return buffers_; }
 };
 
 }

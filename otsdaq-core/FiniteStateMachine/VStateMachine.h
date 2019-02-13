@@ -6,6 +6,8 @@
 namespace ots
 {
 
+class CoreSupervisorBase;
+
 class VStateMachine
 {
 public:
@@ -28,6 +30,25 @@ public:
     virtual void configured(void){;}
     virtual void initial   (void){;}
     virtual void inError   (void){;}
+
+
+    void		 						setIterationIndex			(unsigned int i) { iterationIndex_ = i; }
+    void		 						setSubIterationIndex		(unsigned int i) { subIterationIndex_ = i; }
+    unsigned int 						getIterationIndex			(void) { return iterationIndex_; }
+    unsigned int 						getSubIterationIndex		(void) { return subIterationIndex_; }
+    void 		 						indicateIterationWork		(void) { iterationWorkFlag_ = true; }
+    void 		 						clearIterationWork			(void) { iterationWorkFlag_ = false; }
+    bool		 						getIterationWork			(void) { return iterationWorkFlag_; }
+    void 								indicateSubIterationWork	(void) { subIterationWorkFlag_ = true; }
+    void 								clearSubIterationWork		(void) { subIterationWorkFlag_ = false; }
+    bool								getSubIterationWork			(void) { return subIterationWorkFlag_; }
+
+
+    CoreSupervisorBase* parentSupervisor_; //e.g. to communicate error fault and start transition to error for entire system
+
+private:
+    unsigned int iterationIndex_, subIterationIndex_;
+    bool		 iterationWorkFlag_, subIterationWorkFlag_;
 
 
 };

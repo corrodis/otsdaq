@@ -1,9 +1,5 @@
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 
-//#include "otsdaq-core/Singleton/Singleton.h"
-//#include "otsdaq-core/FECore/FEVInterfacesManager.h"
-
-
 
 #include <iostream>
 
@@ -22,14 +18,11 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 , CorePropertySupervisorBase	(this)
 , RunControlStateMachine		(CorePropertySupervisorBase::allSupervisorInfo_.isWizardMode()? //set state machine name
 		CorePropertySupervisorBase::supervisorClassNoNamespace_:
-		CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" + CorePropertySupervisorBase::supervisorApplicationUID_)
+		CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" +
+		CorePropertySupervisorBase::supervisorApplicationUID_)
 , stateMachineWorkLoopManager_  (toolbox::task::bind(this, &CoreSupervisorBase::stateMachineThread, "StateMachine"))
 , stateMachineSemaphore_        (toolbox::BSem::FULL)
-//, theConfigurationManager_      (new ConfigurationManager)//(Singleton<ConfigurationManager>::getInstance()) //I always load the full config but if I want to load a partial configuration (new ConfigurationManager)
-//, supervisorClass_              (getApplicationDescriptor()->getClassName())
-//, supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 , theRemoteWebUsers_ 			(this)
-//, propertiesAreSetup_			(false)
 {
 	INIT_MF("CoreSupervisorBase");
 
@@ -42,7 +35,6 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub * s)
 
 	xoap::bind(this, &CoreSupervisorBase::stateMachineStateRequest,    		"StateMachineStateRequest",    		XDAQ_NS_URI );
 	xoap::bind(this, &CoreSupervisorBase::stateMachineErrorMessageRequest,  "StateMachineErrorMessageRequest",  XDAQ_NS_URI );
-	//xoap::bind(this, &CoreSupervisorBase::macroMakerSupervisorRequest, 		"MacroMakerSupervisorRequest", 		XDAQ_NS_URI ); //moved to only FESupervisor!
 	xoap::bind(this, &CoreSupervisorBase::workLoopStatusRequestWrapper, 	"WorkLoopStatusRequest",    		XDAQ_NS_URI );
 
 	return;
@@ -123,12 +115,47 @@ void CoreSupervisorBase::requestWrapper(xgi::Input * in, xgi::Output * out )
 
 	if(userInfo.NonXMLRequestType_)
 	{
-		nonXmlRequest(requestType,cgiIn,*out,userInfo);
+		try
+		{
+			nonXmlRequest(requestType,cgiIn,*out,userInfo);
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SUP_SS__ << "An error was encountered handling requestType '" << requestType << "':" <<
+					e.what() << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			__SUP_MOUT_ERR__ << "\n" << ss.str();
+		}
+		catch(...)
+		{
+			__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' " <<
+					"Please check the printouts to debug." << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			__SUP_MOUT_ERR__ << "\n" << ss.str();
+		}
 		return;
 	}
 	//else xml request type
 
-	request(requestType,cgiIn,xmlOut,userInfo);
+	try
+	{
+		//call derived class' request()
+		request(requestType,cgiIn,xmlOut,userInfo);
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SUP_SS__ << "An error was encountered handling requestType '" << requestType << "':" <<
+				e.what() << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
+	}
+	catch(...)
+	{
+		__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' " <<
+				"Please check the printouts to debug." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
+	}
 
 	//report any errors encountered
 	{
@@ -137,7 +164,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input * in, xgi::Output * out )
 		while(err != "")
 		{
 			__SUP_COUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << std::endl;
-			__MOUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << std::endl;
+			__SUP_MOUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << std::endl;
 			err = xmlOut.getMatchingValue("Error",occurance++);
 		}
 	}
@@ -162,6 +189,8 @@ void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& c
 // KEEP:
 //	here are some possibly interesting example lines of code for overriding supervisors
 //
+//try
+//{
 //
 //  if(requestType == "savePlanCommandSequence")
 //	{
@@ -177,11 +206,27 @@ void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& c
 //	else
 //	{
 //		__SUP_SS__ << "requestType '" << requestType << "' request not recognized." << std::endl;
-//		__SUP_COUT__ << "\n" << ss.str();
-//		xmlOut.addTextElementToData("Error", ss.str());
+//		__SUP_SS_THROW__;
 //	}
 //	xmlOut.addTextElementToData("Error",
 //			"request encountered an error!");
+//}
+//	catch(const std::runtime_error& e)
+//	{
+//		__SUP_SS__ << "An error was encountered handling requestType '" << requestType << "':" <<
+//				e.what() << __E__;
+//		__SUP_COUT_ERR__ << "\n" << ss.str();
+//		xmlOut.addTextElementToData("Error", ss.str());
+//	}
+//	catch(...)
+//	{
+//		__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' " <<
+//				"Please check the printouts to debug." << __E__;
+//		__SUP_COUT_ERR__ << "\n" << ss.str();
+//		xmlOut.addTextElementToData("Error", ss.str());
+//	}
+// END KEEP.
+
 }
 
 //========================================================================================================================
@@ -324,9 +369,9 @@ void CoreSupervisorBase::inError (toolbox::fsm::FiniteStateMachine & fsm)
 void CoreSupervisorBase::enteringError (toolbox::Event::Reference e)
 
 {
-	__SUP_COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()
-			<< "\n\nError Message: " <<
-			theStateMachine_.getErrorMessage() << std::endl;
+//	__SUP_COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()
+//			<< "\n\nError Message: " <<
+//			theStateMachine_.getErrorMessage() << std::endl;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
 	std::ostringstream error;
 	error << "Failure performing transition from "
@@ -339,31 +384,146 @@ void CoreSupervisorBase::enteringError (toolbox::Event::Reference e)
 
 }
 
+
+//========================================================================================================================
+void CoreSupervisorBase::preStateMachineExecutionLoop(void)
+{
+	RunControlStateMachine::clearIterationWork();
+	RunControlStateMachine::clearSubIterationWork();
+
+	stateMachinesIterationWorkCount_ = 0;
+
+	if(RunControlStateMachine::getIterationIndex() == 0 &&
+			RunControlStateMachine::getSubIterationIndex() == 0)
+	{
+		//reset vector for iterations done on first iteration
+
+		subIterationWorkStateMachineIndex_ = -1; //clear sub iteration work index
+
+		stateMachinesIterationDone_.resize(theStateMachineImplementation_.size());
+		for(unsigned int i=0;i<stateMachinesIterationDone_.size();++i)
+			stateMachinesIterationDone_[i] = false;
+	}
+	else
+		__SUP_COUT__ << "Iteration " << RunControlStateMachine::getIterationIndex() <<
+			"." << RunControlStateMachine::getSubIterationIndex() <<
+			"(" << subIterationWorkStateMachineIndex_ << ")" << __E__;
+}
+
+//========================================================================================================================
+void CoreSupervisorBase::preStateMachineExecution(unsigned int i)
+{
+	if(i >= theStateMachineImplementation_.size())
+	{
+		__SUP_SS__ << "State Machine " << i << " not found!" << __E__;
+		__SUP_SS_THROW__;
+	}
+
+	theStateMachineImplementation_[i]->VStateMachine::setIterationIndex(
+			RunControlStateMachine::getIterationIndex());
+	theStateMachineImplementation_[i]->VStateMachine::setSubIterationIndex(
+			RunControlStateMachine::getSubIterationIndex());
+
+	theStateMachineImplementation_[i]->VStateMachine::clearIterationWork();
+	theStateMachineImplementation_[i]->VStateMachine::clearSubIterationWork();
+
+	__SUP_COUT__ << "theStateMachineImplementation Iteration " <<
+			theStateMachineImplementation_[i]->VStateMachine::getIterationIndex() <<
+		"." << theStateMachineImplementation_[i]->VStateMachine::getSubIterationIndex() << __E__;
+}
+
+//========================================================================================================================
+void CoreSupervisorBase::postStateMachineExecution(unsigned int i)
+{
+	if(i >= theStateMachineImplementation_.size())
+	{
+		__SUP_SS__ << "State Machine " << i << " not found!" << __E__;
+		__SUP_SS_THROW__;
+	}
+
+	//sub-iteration has priority
+	if(theStateMachineImplementation_[i]->VStateMachine::getSubIterationWork())
+	{
+		subIterationWorkStateMachineIndex_ = i;
+		RunControlStateMachine::indicateSubIterationWork();
+
+		__SUP_COUT__ << "State machine " << i << " is flagged for another sub-iteration..." << __E__;
+	}
+	else
+	{
+		stateMachinesIterationDone_[i] =
+			!theStateMachineImplementation_[i]->VStateMachine::getIterationWork();
+
+		if(!stateMachinesIterationDone_[i])
+		{
+			__SUP_COUT__ << "State machine " << i << " is flagged for another iteration..." << __E__;
+			RunControlStateMachine::indicateIterationWork(); //mark not done at CoreSupervisorBase level
+			++stateMachinesIterationWorkCount_; //increment still working count
+		}
+	}
+}
+
+//========================================================================================================================
+void CoreSupervisorBase::postStateMachineExecutionLoop(void)
+{
+	if(RunControlStateMachine::subIterationWorkFlag_)
+		__SUP_COUT__ << "State machine implementation " << subIterationWorkStateMachineIndex_ <<
+			" is flagged for another sub-iteration..." << __E__;
+	else if(RunControlStateMachine::iterationWorkFlag_)
+		__SUP_COUT__ << stateMachinesIterationWorkCount_ <<
+			" state machine implementation(s) flagged for another iteration..." << __E__;
+	else
+		__SUP_COUT__ << "Done configuration all state machine implementations..." << __E__;
+}
+
 //========================================================================================================================
 void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
-
 {
 	__SUP_COUT__ << "transitionConfiguring" << std::endl;
 
-	std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup(
-			SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
-			getParameters().getValue("ConfigurationGroupName"),
-			ConfigurationGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
-					getParameters().getValue("ConfigurationGroupKey")));
+	//activate the configuration tree (the first iteration)
+	if(RunControlStateMachine::getIterationIndex() == 0 &&
+			RunControlStateMachine::getSubIterationIndex() == 0)
+	{
+		std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup(
+				SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
+				getParameters().getValue("ConfigurationGroupName"),
+				ConfigurationGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).
+						getParameters().getValue("ConfigurationGroupKey")));
 
-	__SUP_COUT__ << "Configuration group name: " << theGroup.first << " key: " <<
-			theGroup.second << std::endl;
+		__SUP_COUT__ << "Configuration group name: " << theGroup.first << " key: " <<
+				theGroup.second << std::endl;
 
-	theConfigurationManager_->loadConfigurationGroup(
-			theGroup.first,
-			theGroup.second, true);
+		theConfigurationManager_->loadConfigurationGroup(
+				theGroup.first,
+				theGroup.second, true);
+	}
 
-	//Now that the configuration manager has all the necessary configurations, create all objects that depend on the configuration
+	//Now that the configuration manager has all the necessary configurations,
+	//	create all objects that depend on the configuration (the first iteration)
 
 	try
 	{
-		for(auto& it: theStateMachineImplementation_)
-			it->configure();
+
+
+		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
+		{
+			//if one state machine is doing a sub-iteration, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->parentSupervisor_ = this; //for backwards compatibility, kept out of configure parameters
+			theStateMachineImplementation_[i]->configure(); //e.g. for FESupervisor, this is configure of FEVInterfacesManager
+			postStateMachineExecution(i);
+		}
+		postStateMachineExecutionLoop();
+
+
 	}
 	catch(const std::runtime_error& e)
 	{
@@ -378,172 +538,330 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 				__FUNCTION__ /*function*/
 				);
 	}
-
-}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while configuring. Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transitionConfiguring" /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+} //end transitionConfiguring()
 
 //========================================================================================================================
 //transitionHalting
 //	Ignore errors if coming from Failed state
 void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
-
 {
-	__SUP_COUT__ << "transitionHalting" << std::endl;
-
-	for(auto& it: theStateMachineImplementation_)
+	const std::string transitionName = "Halting";
+	try
 	{
-		try
+		__SUP_COUT__ << transitionName << " all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
 		{
-			it->halt();
+			//if one state machine is doing a sub-iteration, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->halt(); //e.g. for FESupervisor, this is transition of FEVInterfacesManager
+			postStateMachineExecution(i);
 		}
-		catch(const std::runtime_error& e)
+		postStateMachineExecutionLoop();
+
+	}
+	catch(const std::runtime_error& e)
+	{
+		//if halting from Failed state, then ignore errors
+		if(theStateMachine_.getProvenanceStateName() ==
+				RunControlStateMachine::FAILED_STATE_NAME)
 		{
-			//if halting from Failed state, then ignore errors
-			if(theStateMachine_.getProvenanceStateName() ==
-					RunControlStateMachine::FAILED_STATE_NAME)
-			{
-				__SUP_COUT_INFO__ << "Error was caught while halting (but ignoring because previous state was '" <<
-						RunControlStateMachine::FAILED_STATE_NAME << "'): " << e.what() << std::endl;
-			}
-			else //if not previously in Failed state, then fail
-			{
-				__SUP_SS__ << "Error was caught while halting: " << e.what() << std::endl;
-				__SUP_COUT_ERR__ << "\n" << ss.str();
-				theStateMachine_.setErrorMessage(ss.str());
-				throw toolbox::fsm::exception::Exception(
-						"Transition Error" /*name*/,
-						ss.str() /* message*/,
-						"CoreSupervisorBase::transitionHalting" /*module*/,
-						__LINE__ /*line*/,
-						__FUNCTION__ /*function*/
-						);
-			}
+			__SUP_COUT_INFO__ << "Error was caught while halting (but ignoring because previous state was '" <<
+					RunControlStateMachine::FAILED_STATE_NAME << "'): " << e.what() << std::endl;
+		}
+		else //if not previously in Failed state, then fail
+		{
+			__SUP_SS__ << "Error was caught while " << transitionName <<
+					": " << e.what() << std::endl;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			theStateMachine_.setErrorMessage(ss.str());
+			throw toolbox::fsm::exception::Exception(
+					"Transition Error" /*name*/,
+					ss.str() /* message*/,
+					"CoreSupervisorBase::transition" + transitionName /*module*/,
+					__LINE__ /*line*/,
+					__FUNCTION__ /*function*/
+			);
+		}
+
+
+	}
+	catch(...)
+	{
+		//if halting from Failed state, then ignore errors
+		if(theStateMachine_.getProvenanceStateName() ==
+				RunControlStateMachine::FAILED_STATE_NAME)
+		{
+			__SUP_COUT_INFO__ << "Unknown error was caught while halting (but ignoring because previous state was '" <<
+					RunControlStateMachine::FAILED_STATE_NAME << "')." << std::endl;
+		}
+		else //if not previously in Failed state, then fail
+		{
+
+			__SUP_SS__ << "Unknown error was caught while " <<
+					transitionName << ". Please checked the logs." << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			theStateMachine_.setErrorMessage(ss.str());
+			throw toolbox::fsm::exception::Exception(
+					"Transition Error" /*name*/,
+					ss.str() /* message*/,
+					"CoreSupervisorBase::transition" + transitionName /*module*/,
+					__LINE__ /*line*/,
+					__FUNCTION__ /*function*/
+			);
 		}
 	}
-}
+} //end transitionHalting()
 
 //========================================================================================================================
 //Inheriting supervisor classes should not override this function, or should at least also call it in the override
 //	to maintain property functionality.
 void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference e)
-
 {
 	__SUP_COUT__ << "transitionInitializing" << std::endl;
 
 	CorePropertySupervisorBase::resetPropertiesAreSetup(); //indicate need to re-load user properties
 
 
-	//Note: Do not initialize the state machine implementations... do any initializing in configure
+	//Note: Do not initialize the state machine implementations...
+	//	do any initializing in configure
 	//	This allows re-instantiation at each configure time.
 	//for(auto& it: theStateMachineImplementation_)
 	//it->initialize();
-}
+} //end transitionInitializing()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
-
 {
-	__SUP_COUT__ << "transitionPausing" << std::endl;
-
+	const std::string transitionName = "Pausing";
 	try
 	{
-		for(auto& it: theStateMachineImplementation_)
-			it->pause();
+		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
+		{
+			//if one state machine is doing a sub-iteration, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->pause(); //e.g. for FESupervisor, this is transition of FEVInterfacesManager
+			postStateMachineExecution(i);
+		}
+		postStateMachineExecutionLoop();
+
+
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while " << transitionName <<
+				": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
-				"CoreSupervisorBase::transitionPausing" /*module*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
 				__LINE__ /*line*/,
 				__FUNCTION__ /*function*/
 		);
 	}
-}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while " <<
+				transitionName << ". Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+} //end transitionPausing()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
-
 {
-	//NOTE: I want to first start the data manager first if this is a FEDataManagerSupervisor
-
-
-	__SUP_COUT__ << "transitionResuming" << std::endl;
-
+	const std::string transitionName = "Resuming";
 	try
 	{
-		for(auto& it: theStateMachineImplementation_)
-			it->resume();
+		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
+		{
+			//if one state machine is doing a sub-iteration, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->resume(); //e.g. for FESupervisor, this is transition of FEVInterfacesManager
+			postStateMachineExecution(i);
+		}
+		postStateMachineExecutionLoop();
+
+
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SUP_SS__ << "Error was caught while resuming: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while " << transitionName <<
+				": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
-				"CoreSupervisorBase::transitionResuming" /*module*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
 				__LINE__ /*line*/,
 				__FUNCTION__ /*function*/
 		);
 	}
-}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while " <<
+				transitionName << ". Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+} // end transitionResuming()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
-
 {
-
-	//NOTE: I want to first start the data manager first if this is a FEDataManagerSupervisor
-
-	__SUP_COUT__ << "transitionStarting" << std::endl;
-
+	const std::string transitionName = "Starting";
+	const std::string runNumber = SOAPUtilities::translate(
+								theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber");
 	try
 	{
-		for(auto& it: theStateMachineImplementation_)
-			it->start(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber"));
+		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
+		{
+			//if one state machine is doing a sub-iteration, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->start(runNumber); //e.g. for FESupervisor, this is transition of FEVInterfacesManager
+			postStateMachineExecution(i);
+		}
+		postStateMachineExecutionLoop();
+
+
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SUP_SS__ << "Error was caught while starting: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while " << transitionName <<
+				": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
-				"CoreSupervisorBase::transitionStarting" /*module*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
 				__LINE__ /*line*/,
 				__FUNCTION__ /*function*/
 		);
 	}
-}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while " <<
+				transitionName << ". Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+} //end transitionStarting()
 
 //========================================================================================================================
 void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
-
 {
-	__SUP_COUT__ << "transitionStopping" << std::endl;
-
+	const std::string transitionName = "Stopping";
 	try
 	{
-		for(auto& it: theStateMachineImplementation_)
-			it->stop();
+		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+		preStateMachineExecutionLoop();
+		for(unsigned int i=0;i<theStateMachineImplementation_.size();++i)
+		{
+			//if one state machine is doing a sub-iteration, then target that one
+			if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+					i != subIterationWorkStateMachineIndex_) continue; //skip those not in the sub-iteration
+
+			if(stateMachinesIterationDone_[i]) continue; //skip state machines already done
+
+			preStateMachineExecution(i);
+			theStateMachineImplementation_[i]->stop(); //e.g. for FESupervisor, this is transition of FEVInterfacesManager
+			postStateMachineExecution(i);
+		}
+		postStateMachineExecutionLoop();
+
+
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SUP_SS__ << "Error was caught while pausing: " << e.what() << std::endl;
+		__SUP_SS__ << "Error was caught while " << transitionName <<
+				": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 				"Transition Error" /*name*/,
 				ss.str() /* message*/,
-				"CoreSupervisorBase::transitionStopping" /*module*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
 				__LINE__ /*line*/,
 				__FUNCTION__ /*function*/
 		);
 	}
-}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while " <<
+				transitionName << ". Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"CoreSupervisorBase::transition" + transitionName /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+} //end transitionStopping()

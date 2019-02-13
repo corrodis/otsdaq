@@ -73,7 +73,7 @@ void FESlowControlsConfiguration::init(ConfigurationManager *configManager)
 						" The bit size given was " << sz <<
 						" and it must be between 1 and 64." << std::endl;
 				__COUT_ERR__ << "\n" << ss.str();
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 		}
 		else if(childType != "char" &&
@@ -101,7 +101,7 @@ void FESlowControlsConfiguration::init(ConfigurationManager *configManager)
 					"B), double (" << sizeof(double) <<
 					"B)." << std::endl;
 			__COUT_ERR__ << "\n" << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 }

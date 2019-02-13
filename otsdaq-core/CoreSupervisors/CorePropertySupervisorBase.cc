@@ -8,7 +8,8 @@ const CorePropertySupervisorBase::SupervisorProperties 	CorePropertySupervisorBa
 CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* application)
 : theConfigurationManager_      (new ConfigurationManager)
 , supervisorClass_              (application->getApplicationDescriptor()->getClassName())
-, supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
+, supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1,
+		supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 , supervisorContextUID_         ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS")
 , supervisorApplicationUID_     ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS")
 , supervisorConfigurationPath_  ("MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS")
@@ -28,7 +29,10 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	{
 		__SUP_COUT__ << "Wiz mode detected. So skipping configuration location work for supervisor of class '" <<
 				supervisorClass_ << "'" << __E__;
-
+		supervisorContextUID_ 			= "NO CONTEXT ID IN WIZ MODE";
+		supervisorApplicationUID_ 		= std::to_string(
+				application->getApplicationDescriptor()->getLocalId());
+		supervisorConfigurationPath_ 	= "NO APP PATH IN WIZ MODE";
 		return;
 	}
 
@@ -71,20 +75,71 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	}
 
 	CorePropertySupervisorBase::supervisorConfigurationPath_  = "/" +
-			CorePropertySupervisorBase::supervisorContextUID_ + "/LinkToApplicationConfiguration/" +
-			CorePropertySupervisorBase::supervisorApplicationUID_ + "/LinkToSupervisorConfiguration";
+			CorePropertySupervisorBase::supervisorContextUID_ + "/LinkToApplicationTable/" +
+			CorePropertySupervisorBase::supervisorApplicationUID_ + "/LinkToSupervisorTable";
 
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorConfigurationPath_);
-}
+
+	
+	CorePropertySupervisorBase::indicateOtsAlive(this);
+
+} // end constructor
 
 
 //========================================================================================================================
 CorePropertySupervisorBase::~CorePropertySupervisorBase(void)
 {
-}
+	if(theConfigurationManager_) delete theConfigurationManager_;
+} //end destructor
 
+
+//========================================================================================================================
+void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBase* properties)
+{
+	char portStr[100] = "0";
+	std::string hostname = "wiz";
+	
+	//Note: the environment variable getenv("HOSTNAME") fails in multinode ots systems started through ssh
+	
+	if(properties)
+	{
+		unsigned int port = properties->getContextTreeNode().getNode(
+				properties->supervisorContextUID_).getNode(
+						"Port").getValue<unsigned int>();
+		sprintf(portStr,"%u",port);
+		
+		hostname = properties->getContextTreeNode().getNode(
+				properties->supervisorContextUID_).getNode(
+						"Address").getValue<std::string>();
+	
+		size_t i = hostname.find("//");
+		if(i != std::string::npos)
+			hostname = hostname.substr(i+2);
+				
+		__COUTV__(hostname); 
+	}
+
+	
+	//indicate ots is alive (for StartOTS.sh to verify launch was successful)
+	std::string filename = std::string(getenv("OTSDAQ_LOG_DIR")) +
+			"/otsdaq_is_alive-" +
+			hostname +
+			"-" +
+			portStr +
+			".dat";			
+	FILE *fp = fopen(filename.c_str(),"w");
+	if(!fp)
+	{
+		__SS__ << "Failed to open the ots-is-alive file: " << filename << __E__;
+		__SS_THROW__;
+	}
+	fprintf(fp,"%s %s %ld\n",hostname.c_str(),portStr,time(0));
+	fclose(fp);
+	
+	__COUT__ << "Marked alive: " << filename << __E__;
+}
 
 //========================================================================================================================
 //When overriding, setup default property values here
@@ -290,7 +345,7 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 
 	try
 	{
-		auto /*map<name,node>*/ children = supervisorNode.getNode("LinkToPropertyConfiguration").getChildren();
+		auto /*map<name,node>*/ children = supervisorNode.getNode("LinkToPropertyTable").getChildren();
 
 		for(auto& child:children)
 		{
@@ -339,7 +394,7 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string&
 	if(it == propertyMap_.end())
 	{
 		__SUP_SS__ << "Could not find property named " << propertyName << __E__;
-		throw std::runtime_error(ss.str());//__SUP_SS_THROW__;
+		__SS_THROW__;//__SUP_SS_THROW__;
 	}
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
 }
@@ -360,7 +415,7 @@ WebUsers::permissionLevel_t CorePropertySupervisorBase::getSupervisorPropertyUse
 //	if(it == propertyStruct_.UserPermissionsThreshold.end())
 //	{
 //		__SUP_SS__ << "Could not find requestType named " << requestType << " in UserPermissionsThreshold map." << __E__;
-//		throw std::runtime_error(ss.str()); //__SUP_SS_THROW__;
+//		__SS_THROW__; //__SUP_SS_THROW__;
 //	}
 //	return it->second;
 }

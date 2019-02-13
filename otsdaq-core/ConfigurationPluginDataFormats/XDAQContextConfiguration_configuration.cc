@@ -28,6 +28,8 @@ const std::set<std::string> XDAQContextConfiguration::ConfigurationGUITypeClassN
 
 const std::string			XDAQContextConfiguration::ARTDAQ_OFFSET_PORT				= "OffsetPort";
 
+const uint8_t 				XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY = 100;
+
 //========================================================================================================================
 XDAQContextConfiguration::XDAQContextConfiguration(void)
 	: ConfigurationBase("XDAQContextConfiguration")
@@ -41,7 +43,7 @@ XDAQContextConfiguration::XDAQContextConfiguration(void)
 	//	   <CONFIGURATION Name="XDAQContextConfiguration">
 	//	     <VIEW Name="XDAQ_CONTEXT_CONFIGURATION" Type="File,Database,DatabaseTest">
 	//           <COLUMN Type="UID" 	           Name="ContextUID" 	                 StorageName="CONTEXT_UID" 		                 DataType="VARCHAR2"/>
-	//           <COLUMN Type="ChildLink-0" 	   Name="LinkToApplicationConfiguration" StorageName="LINK_TO_APPLICATION_CONFIGURATION" DataType="VARCHAR2"/>
+	//           <COLUMN Type="ChildLink-0" 	   Name="LinkToApplicationTable" StorageName="LINK_TO_APPLICATION_CONFIGURATION" DataType="VARCHAR2"/>
 	//           <COLUMN Type="ChildLinkGroupID-0" Name="ApplicationGroupID" 	         StorageName="APPLICATION_GROUP_ID"              DataType="VARCHAR2"/>
 	//           <COLUMN Type="OnOff" 	           Name="Status" 	                     StorageName="STATUS" 	   	                     DataType="VARCHAR2"/>
 	//           <COLUMN Type="Data" 	           Name="Id" 	                         StorageName="ID" 		                         DataType="VARCHAR2"/>
@@ -63,6 +65,7 @@ XDAQContextConfiguration::~XDAQContextConfiguration(void)
 //========================================================================================================================
 void XDAQContextConfiguration::init(ConfigurationManager* configManager)
 {
+	//__COUT__ << "init" << __E__;
 	extractContexts(configManager);
 
 	{
@@ -73,7 +76,7 @@ void XDAQContextConfiguration::init(ConfigurationManager* configManager)
 		if (fs.fail())
 		{
 			__SS__ << "Failed to open XDAQ run file: " << XDAQ_RUN_FILE << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 		outputXDAQXML((std::ostream &)fs);
 		fs.close();
@@ -182,8 +185,8 @@ unsigned int XDAQContextConfiguration::getARTDAQDataPort(const ConfigurationMana
 			{ 
 				auto processors = getSupervisorConfigNode(configManager,
 					context.contextUID_, context.applications_[0].applicationUID_).getNode(
-							"LinkToDataManagerConfiguration").getChildren()[0].second.getNode(
-									"LinkToDataBufferConfiguration").getChildren();
+							"LinkToDataBufferTable").getChildren()[0].second.getNode(
+									"LinkToDataProcessorTable").getChildren();
 
 				std::string processorType;
 				
@@ -197,7 +200,7 @@ unsigned int XDAQContextConfiguration::getARTDAQDataPort(const ConfigurationMana
 					if(processorType == "ARTDAQConsumer" || 
 							processorType == "ARTDAQProducer")
 						return processor.second.getNode(
-								"LinkToProcessorConfiguration").getNode(
+								"LinkToProcessorTable").getNode(
 										XDAQContextConfiguration::ARTDAQ_OFFSET_PORT).getValue<unsigned int>();
 				}
 								
@@ -254,7 +257,7 @@ ConfigurationTree XDAQContextConfiguration::getApplicationNode(const Configurati
 {
 	return configManager->__SELF_NODE__.getNode(
 		contextUID + "/" +
-		colContext_.colLinkToApplicationConfiguration_ + "/" +
+		colContext_.colLinkToApplicationTable_ + "/" +
 		appUID);
 }
 
@@ -264,9 +267,9 @@ ConfigurationTree XDAQContextConfiguration::getSupervisorConfigNode(const Config
 {
 	return configManager->__SELF_NODE__.getNode(
 		contextUID + "/" +
-		colContext_.colLinkToApplicationConfiguration_ + "/" +
+		colContext_.colLinkToApplicationTable_ + "/" +
 		appUID + "/" +
-		colApplication_.colLinkToSupervisorConfiguration_);
+		colApplication_.colLinkToSupervisorTable_);
 }
 
 
@@ -314,11 +317,11 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 		//child.second.getNode(colContext_.colARTDAQDataPort_).getValue(contexts_.back().artdaqDataPort_);
 
 		//__COUT__ << contexts_.back().address_ << std::endl;
-		auto appLink = child.second.getNode(colContext_.colLinkToApplicationConfiguration_);
+		auto appLink = child.second.getNode(colContext_.colLinkToApplicationTable_);
 		if (appLink.isDisconnected())
 		{
 			__SS__ << "Application link is disconnected!" << std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		//add xdaq applications to this context
@@ -339,6 +342,8 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 			appChild.second.getNode(colApplication_.colClass_).getValue(contexts_.back().applications_.back().class_);
 			appChild.second.getNode(colApplication_.colId_).getValue(contexts_.back().applications_.back().id_);
 
+			
+				
 			//assert Gateway is 200
 			if((contexts_.back().applications_.back().id_ == 200 &&
 					contexts_.back().applications_.back().class_ != XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS &&
@@ -364,7 +369,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 							contexts_.back().applications_.back().id_ << " appName=" <<
 							contexts_.back().applications_.back().applicationUID_ << std::endl;
 					__COUT_ERR__ << "\n" << ss.str();
-					throw std::runtime_error(ss.str());
+					__SS_THROW__;
 				}
 				appIdSet.insert(contexts_.back().applications_.back().id_);
 			}
@@ -387,11 +392,36 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 
 			appChild.second.getNode(colApplication_.colModule_).getValue(contexts_.back().applications_.back().module_);
 
+			//force deprecated Supervisor to GatewaySupervisor class
+			if(contexts_.back().applications_.back().class_ ==
+					XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS)
+			{
+				contexts_.back().applications_.back().class_ = XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS;
+				__COUT__ << "Fixing deprecated Supervisor class from " <<
+						XDAQContextConfiguration::DEPRECATED_SUPERVISOR_CLASS <<
+						" to " << (contexts_.back().applications_.back().class_);
+			}
+			if(contexts_.back().applications_.back().module_.find("libSupervisor.so") !=
+					std::string::npos)
+			{
+				__COUT__ << "Fixing deprecated Supervisor class from " <<
+						contexts_.back().applications_.back().module_ <<
+						" to ";
+				contexts_.back().applications_.back().module_ = 
+					contexts_.back().applications_.back().module_.substr(0,
+					contexts_.back().applications_.back().module_.size() - std::string("Supervisor.so").size()) + 
+					"GatewaySupervisor.so";
+				std::cout << contexts_.back().applications_.back().module_ << __E__;
+			}
+			
 			try
 			{
-				appChild.second.getNode(colApplication_.colConfigurePriority_).getValue(contexts_.back().applications_.back().stateMachineCommandPriority_["Configure"]);
-				appChild.second.getNode(colApplication_.colStartPriority_).getValue(contexts_.back().applications_.back().stateMachineCommandPriority_["Start"]);
-				appChild.second.getNode(colApplication_.colStopPriority_).getValue(contexts_.back().applications_.back().stateMachineCommandPriority_["Stop"]);
+				appChild.second.getNode(colApplication_.colConfigurePriority_).getValue(
+						contexts_.back().applications_.back().stateMachineCommandPriority_["Configure"]);
+				appChild.second.getNode(colApplication_.colStartPriority_).getValue(
+						contexts_.back().applications_.back().stateMachineCommandPriority_["Start"]);
+				appChild.second.getNode(colApplication_.colStopPriority_).getValue(
+						contexts_.back().applications_.back().stateMachineCommandPriority_["Stop"]);
 			}
 			catch(...)
 			{
@@ -399,7 +429,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 			}
 
 
-			auto appPropertyLink = appChild.second.getNode(colApplication_.colLinkToPropertyConfiguration_);
+			auto appPropertyLink = appChild.second.getNode(colApplication_.colLinkToPropertyTable_);
 			if (!appPropertyLink.isDisconnected())
 			{
 				//add xdaq application properties to this context
@@ -437,7 +467,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 				__SS__ << "ARTDAQ Context '" << contexts_.back().contextUID_ <<
 					"' must have one Application! " <<
 					contexts_.back().applications_.size() << " were found. " << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 			if (!contexts_.back().status_) continue; //skip if disabled
@@ -462,7 +492,7 @@ void XDAQContextConfiguration::extractContexts(ConfigurationManager* configManag
 				  "\tots::DispatcherApp\n" <<
 				        "\nClass found was "  <<
                                           contexts_.back().applications_[0].class_ << std::endl;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 
 		}
@@ -757,7 +787,7 @@ void XDAQContextConfiguration::outputXDAQXML(std::ostream &out)
 			{
 				__SS__ << "Illegal XDAQApplication class name value of '" << app.class_
 					<< "' - please check the entry for app ID = " << app.id_ << __E__;
-				throw std::runtime_error(ss.str());
+				__SS_THROW__;
 			}
 			out << "\t\t\t<properties xmlns=\"urn:xdaq-application:" <<
 				app.class_.substr(foundColon) <<

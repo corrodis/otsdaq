@@ -19,10 +19,12 @@ public:
 		LowConsumerPriority, //If the buffers are full because a low priority consumer didn't emptied them then overwrite
 		HighConsumerPriority //Can't overwrite but need to wait for sometime before writing a buffer
 	};
-	DataConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, ConsumerPriority priority);
-	virtual ~DataConsumer(void);
+	DataConsumer								(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, ConsumerPriority priority);
+	virtual ~DataConsumer						(void);
 
-	void         registerToBuffer   (void);
+	virtual void         registerToBuffer   	(void);
+	//virtual void         unregisterFromBuffer  	(void);
+
     virtual void startProcessingData(std::string runNumber);
     virtual void stopProcessingData (void);
 

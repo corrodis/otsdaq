@@ -1,5 +1,5 @@
 #include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
-#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
+
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
 
@@ -52,7 +52,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 //========================================================================================================================
 xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string command, SOAPParameters parameters)
 {
-    //std::cout << __COUT_HDR_FL__ << "Command: " << command << " par size: " << parameters.size() << std::endl;
+    //__COUT__ << "Command: " << command << " par size: " << parameters.size() << std::endl;
     if(parameters.size() == 0)
         return makeSOAPMessageReference(command);
     xoap::MessageReference message       = xoap::createMessage();
@@ -73,7 +73,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 //========================================================================================================================
 xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string command, std::string fileName)
 {
-    std::cout << __COUT_HDR_FL__ << "SOAP XML file path : " << fileName << std::endl;
+    __COUT__ << "SOAP XML file path : " << fileName << std::endl;
     xoap::MessageReference message  = xoap::createMessage();
     xoap::SOAPPart         soap     = message->getSOAPPart();
     xoap::SOAPEnvelope     envelope = soap.getEnvelope();
@@ -92,7 +92,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 //========================================================================================================================
 void SOAPUtilities::addParameters(xoap::MessageReference& message, SOAPParameters parameters)
 {
-    std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "adding parameters!!!!!!" << std::endl;
+    //__COUT__ << "adding parameters!!!!!!" << std::endl;
     if(parameters.size() == 0) return;
     xoap::SOAPEnvelope     envelope      = message->getSOAPPart().getEnvelope();
     xoap::SOAPBody         body          = envelope.getBody();
@@ -126,4 +126,54 @@ SOAPCommand SOAPUtilities::translate(const xoap::MessageReference& message)
             soapCommand.setParameter(xoap::XMLCh2String(parameters->item(i)->getNodeName()), xoap::XMLCh2String(parameters->item(i)->getNodeValue()));
     }
     return soapCommand;
+}
+
+
+//========================================================================================================================
+std::string SOAPUtilities::receive(const xoap::MessageReference& message, SOAPCommand& soapCommand)
+{
+	return receive(message, soapCommand.getParametersRef());
+}
+
+//========================================================================================================================
+std::string SOAPUtilities::receive(const xoap::MessageReference& message)
+{
+	//NOTE it is assumed that there is only 1 command for each message (that's why we use begin)
+	return (message->getSOAPPart().getEnvelope().getBody().getChildElements()).begin()->getElementName().getLocalName();
+}
+
+//========================================================================================================================
+std::string SOAPUtilities::receive(const xoap::MessageReference& message, SOAPParameters& parameters)
+{
+	xoap::SOAPEnvelope        envelope    	= message->getSOAPPart().getEnvelope();
+	std::vector<xoap::SOAPElement> bodyList = envelope.getBody().getChildElements();
+	xoap::SOAPElement         command     	= bodyList[0];
+	std::string               commandName 	= command.getElementName().getLocalName();
+	xoap::SOAPName            name        	= envelope.createName("Key");
+
+	for (SOAPParameters::iterator it=parameters.begin(); it!=parameters.end(); it++)
+	{
+		name = envelope.createName(it->first);
+
+		try
+		{
+			it->second = command.getAttributeValue(name);
+			//if( parameters.getParameter(it->first).isEmpty() )
+			//{
+			//    __COUT__ << "Complaint from " << (theApplication_->getApplicationDescriptor()->getClassName()) << std::endl;
+			//    __COUT__ << " : Parameter "<< it->first
+			//    << " does not exist in the list of incoming parameters!" << std::endl;
+			//    __COUT__ << "It could also be because you passed an empty std::string" << std::endl;
+			//    //assert(0);
+			//};
+		}
+		catch (xoap::exception::Exception& e)
+		{
+			__COUT__ << "Parameter " << it->first << " does not exist in the list of incoming parameters!" << std::endl;
+			XCEPT_RETHROW(xoap::exception::Exception,"Looking for parameter that does not exist!",e);
+		}
+
+	}
+
+	return commandName;
 }

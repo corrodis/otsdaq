@@ -122,7 +122,7 @@ struct TableEditStruct {
 	bool modified_; //indicates if temp version was modified
 	std::string configName_;
 	/////
-	TableEditStruct(){ __SS__ << "impossible!" << std::endl; throw std::runtime_error(ss.str());}
+	TableEditStruct(){ __SS__ << "impossible!" << std::endl; __SS_THROW__;}
 	TableEditStruct(const std::string& configName, ConfigurationManagerRW* cfgMgr)
 	:createdTemporaryVersion_(false)
 	,modified_(false)

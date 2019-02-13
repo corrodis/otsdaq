@@ -8,9 +8,11 @@ cet_make(LIBRARY_NAME GatewaySupervisor
          FiniteStateMachine
          CgiDataUtilities
          WebUsersUtilities
+         CodeEditor         
          CoreSupervisors
          NetworkUtilities
-         #DetectorWriter
+         CodeEditor
+         
 		 artdaq_ExternalComms
 		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
 		 otsdaq-core_ConfigurationPluginDataFormats_IterateConfiguration_configuration

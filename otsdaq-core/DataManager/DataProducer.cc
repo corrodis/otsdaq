@@ -8,26 +8,22 @@
 #include <memory>
 using namespace ots;
 
+#undef  __MF_SUBJECT__
+#define __MF_SUBJECT__ "producer-" << bufferUID_ << "-" << processorUID_
+
 //========================================================================================================================
-DataProducer::DataProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, unsigned int bufferSize)
+DataProducer::DataProducer(std::string supervisorApplicationUID, std::string bufferUID,
+		std::string processorUID, unsigned int bufferSize)
 : WorkLoop      (processorUID)
-, DataProcessor (supervisorApplicationUID, bufferUID, processorUID)
-, bufferSize_   (bufferSize)
+, DataProducerBase (supervisorApplicationUID, bufferUID, processorUID, bufferSize)
 {
-	registerToBuffer();
+	__COUT__ << "Constructed." << __E__;
 }
 
 //========================================================================================================================
 DataProducer::~DataProducer(void)
 {
-}
-
-//========================================================================================================================
-void DataProducer::registerToBuffer(void)
-{
-	__COUT__ << "\tProducerID: " << processorUID_ << " is registering to DataManager pointer: " << DataManagerSingleton::getInstance(supervisorApplicationUID_) << std::endl;
-	(DataManagerSingleton::getInstance(supervisorApplicationUID_))->registerProducer(bufferUID_,this);
-	__COUT__ << "\tProducerID: " << processorUID_ << "...registered" << std::endl;
+	__COUT__ << "Destructed." << __E__;
 }
 
 //========================================================================================================================
@@ -43,5 +39,3 @@ void DataProducer::stopProcessingData(void)
 	__COUT__ << "stopWorkLoop..." << std::endl;
 	WorkLoop::stopWorkLoop();
 }
-
-

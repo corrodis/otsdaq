@@ -42,17 +42,17 @@ public:
     	if(name_ == "") name_ = id_;
     	if(contextName_ == "") contextName_ = class_;
 
-		//    	__COUTV__(name_);
-		//    	__COUTV__(contextName_);
-		//    	__COUTV__(id_);
-		//    	__COUTV__(contextURL_);
-		//    	__COUTV__(URN_);
-		//    	__COUTV__(URL_);
-		//    	__COUTV__(port_);
-		//    	__COUTV__(class_);
+		//  __COUTV__(name_);
+		//  __COUTV__(contextName_);
+		//  __COUTV__(id_);
+		//  __COUTV__(contextURL_);
+		//  __COUTV__(URN_);
+		//  __COUTV__(URL_);
+		//  __COUTV__(port_);
+		//  __COUTV__(class_);
 
 
-    }
+  }
 
     ~SupervisorInfo(void)
     {;}

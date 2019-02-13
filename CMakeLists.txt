@@ -30,11 +30,16 @@ include(CetCMakeEnv)
 cet_cmake_env()
 include(FindUpsXdaq)
 
-cet_set_compiler_flags(DIAGS VIGILANT
+cet_set_compiler_flags(
+ DIAGS 
+ VIGILANT
  WERROR
  NO_UNDEFINED
  EXTRA_FLAGS -pedantic -Wno-unused-parameter -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-ignored-qualifiers -Wno-unused-variable
  )
+ 
+cet_remove_compiler_flags(-std=c++98)
+ 
 
 #string(TOUPPER ${CMAKE_BUILD_TYPE} BTYPE_UC )
 #if( ${BTYPE_UC} MATCHES "DEBUG" )
@@ -53,7 +58,6 @@ find_ups_product( art v1_06_00 )
 find_ups_product( fhiclcpp v2_16_00 )
 find_ups_product( messagefacility v1_10_00 )
 find_ups_product( cetlib v1_03_00 )
-find_ups_product( xerces_c v3_1_2 )
 find_ups_product( artdaq_database v1_03_07 )
 find_ups_xdaq( v11_2_7 )
 find_ups_root( v5_34_00 )

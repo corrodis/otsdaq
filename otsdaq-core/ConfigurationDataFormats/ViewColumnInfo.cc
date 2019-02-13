@@ -14,6 +14,7 @@ const std::string ViewColumnInfo::TYPE_UID 							= "UID";
 
 const std::string ViewColumnInfo::TYPE_DATA 						= "Data";
 const std::string ViewColumnInfo::TYPE_UNIQUE_DATA					= "UniqueData";
+const std::string ViewColumnInfo::TYPE_UNIQUE_GROUP_DATA			= "UniqueGroupData";
 const std::string ViewColumnInfo::TYPE_MULTILINE_DATA				= "MultilineData";
 const std::string ViewColumnInfo::TYPE_FIXED_CHOICE_DATA			= "FixedChoiceData";
 const std::string ViewColumnInfo::TYPE_BITMAP_DATA					= "BitMap";
@@ -67,7 +68,10 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 , bitMapInfoP_(0)
 {
 	//verify type
-	if((type_ != TYPE_DATA) && (type_ != TYPE_UNIQUE_DATA) && (type_ != TYPE_UID) &&
+	if(
+			(type_ != TYPE_UID) &&
+			(type_ != TYPE_DATA) &&
+			(type_ != TYPE_UNIQUE_DATA) && (type_ != TYPE_UNIQUE_GROUP_DATA) &&
 			(type_ != TYPE_MULTILINE_DATA) && (type_ != TYPE_FIXED_CHOICE_DATA) &&
 			(type_ != TYPE_BITMAP_DATA) &&
 			(type_ != TYPE_ON_OFF) && (type_ != TYPE_TRUE_FALSE) && (type_ != TYPE_YES_NO) &&
@@ -81,6 +85,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 				", while the only accepted types are: " <<
 				TYPE_DATA << " " <<
 				TYPE_UNIQUE_DATA << " " <<
+				TYPE_UNIQUE_GROUP_DATA << " " <<
 				TYPE_MULTILINE_DATA << " " <<
 				TYPE_FIXED_CHOICE_DATA << " " <<
 				TYPE_UID  << " " <<
@@ -92,7 +97,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 				TYPE_START_CHILD_LINK_GROUP_ID << "-* " <<
 				TYPE_START_GROUP_ID  << "-* " << std::endl;
 		if(capturedExceptionString) *capturedExceptionString = ss.str();
-		else throw std::runtime_error(ss.str());
+		else __SS_THROW__;
 	}
 	else if(capturedExceptionString) *capturedExceptionString = ""; //indicates no error found
 
@@ -110,7 +115,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 					"'. Data types must contain only letters, numbers," <<
 					"dashes, underscores, and periods." << std::endl;
 			if(capturedExceptionString) *capturedExceptionString += ss.str();
-			else throw std::runtime_error(ss.str());
+			else __SS_THROW__;
 		}
 
 
@@ -125,7 +130,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 				DATATYPE_STRING  << " " <<
 				DATATYPE_TIME  << std::endl;
 		if(capturedExceptionString) *capturedExceptionString += ss.str();
-		else throw std::runtime_error(ss.str());
+		else __SS_THROW__;
 	}
 
 
@@ -134,7 +139,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 		__SS__ << "The data type for column " << name_ << " is '" << dataType_ <<
 				"'. Data types must contain at least 1 character." << std::endl;
 		if(capturedExceptionString) *capturedExceptionString += ss.str();
-		else throw std::runtime_error(ss.str());
+		else __SS_THROW__;
 	}
 
 	//enforce that data type only
@@ -151,7 +156,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 								"'. Data types must contain only letters, numbers," <<
 								"dashes, and underscores." << std::endl;
 			if(capturedExceptionString) *capturedExceptionString += ss.str();
-			else throw std::runtime_error(ss.str());
+			else __SS_THROW__;
 		}
 
 	if(name_.size() == 0)
@@ -159,7 +164,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 		__SS__ << "There is a column named " << name_ <<
 				"'. Column names must contain at least 1 character." << std::endl;
 		if(capturedExceptionString) *capturedExceptionString += ss.str();
-		else throw std::runtime_error(ss.str());
+		else __SS_THROW__;
 	}
 
 	//enforce that col name only
@@ -176,7 +181,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 								"'. Column names must contain only letters, numbers," <<
 								"dashes, and underscores." << std::endl;
 			if(capturedExceptionString) *capturedExceptionString += ss.str();
-			else throw std::runtime_error(ss.str());
+			else __SS_THROW__;
 		}
 
 
@@ -185,7 +190,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 		__SS__ << "The storage name for column " << name_ << " is '" << storageName_ <<
 				"'. Storage names must contain at least 1 character." << std::endl;
 		if(capturedExceptionString) *capturedExceptionString += ss.str();
-		else throw std::runtime_error(ss.str());
+		else __SS_THROW__;
 	}
 
 	//enforce that col storage name only
@@ -201,7 +206,7 @@ ViewColumnInfo::ViewColumnInfo(const std::string &type, const std::string &name,
 								"'. Storage names must contain only capital letters, numbers," <<
 								"dashes, and underscores." << std::endl;
 			if(capturedExceptionString) *capturedExceptionString += ss.str();
-			else throw std::runtime_error(ss.str());
+			else __SS_THROW__;
 		}
 
 	//build data choices vector from URI encoded data
@@ -267,7 +272,7 @@ void ViewColumnInfo::extractBitMapInfo()
 					" should be size 16, but is size " << dataChoices_.size() <<
 					". Bit-Map parameters should be rows, cols, cellBitSize, and min, mid, max color." <<
 					std::endl;
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 
 		sscanf(dataChoices_[0].c_str(),"%u",&(bitMapInfoP_->numOfRows_));
@@ -362,7 +367,7 @@ const std::string& ViewColumnInfo::getDefaultValue(void) const
 	{
 		__SS__ << "\tUnrecognized View data type: " << getDataType() << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 }
 
@@ -372,6 +377,7 @@ std::vector<std::string> ViewColumnInfo::getAllTypesForGUI(void)
 	std::vector<std::string> all;
 	all.push_back(TYPE_DATA);
 	all.push_back(TYPE_UNIQUE_DATA);
+	all.push_back(TYPE_UNIQUE_GROUP_DATA);
 	all.push_back(TYPE_FIXED_CHOICE_DATA);
 	all.push_back(TYPE_MULTILINE_DATA);
 	all.push_back(TYPE_BITMAP_DATA);
@@ -413,6 +419,22 @@ std::map<std::pair<std::string,std::string>,std::string> ViewColumnInfo::getAllD
 }
 
 //==============================================================================
+//isBoolType
+const bool ViewColumnInfo::isBoolType(void) const
+{
+	return (type_ == TYPE_ON_OFF ||
+			type_ == TYPE_TRUE_FALSE ||
+			type_ == TYPE_YES_NO);
+} //end isBoolType()
+
+//==============================================================================
+//isNumberDataType
+const bool ViewColumnInfo::isNumberDataType(void) const
+{
+	return (dataType_ == DATATYPE_NUMBER);
+} //end isBoolType()
+
+//==============================================================================
 const std::string& ViewColumnInfo::getName(void) const
 {
 	return name_;
@@ -447,7 +469,7 @@ const ViewColumnInfo::BitMapInfo& ViewColumnInfo::getBitMapInfo(void) const
 	{
 		__SS__ << "getBitMapInfo request for non-BitMap column of type: " << getType() << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 
 }
@@ -520,7 +542,7 @@ std::string	ViewColumnInfo::getChildLinkIndex	(void) const
 	{
 		__SS__ << ("Requesting a Link Index from a column that is not a child link member!") << std::endl;
 		__COUT_ERR__ << ss.str();
-		throw std::runtime_error(ss.str());
+		__SS_THROW__;
 	}
 }
 

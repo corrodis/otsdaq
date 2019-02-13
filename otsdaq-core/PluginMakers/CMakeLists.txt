@@ -1,8 +1,9 @@
 cet_make(LIBRARY_NAME PluginMakers
 		 LIBRARIES
-         $ENV{XERCES_C_LIB}/libxerces-c.so
-         ${CETLIB}
+        ${XDAQ_XERCES-C} 
+	${CETLIB}
          ${CETLIB_EXCEPT}
+         pthread 
 )
 
 install_headers()

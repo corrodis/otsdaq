@@ -9,7 +9,6 @@ XDAQ_INSTANTIATOR_IMPL(DataManagerSupervisor)
 
 //========================================================================================================================
 DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub * s) 
-//FIXME WE MUST ADD A MAP OF INSTANCES IN THE SINGLETON
 : CoreSupervisorBase(s)
 {
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
@@ -24,6 +23,8 @@ DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub * s)
 //========================================================================================================================
 DataManagerSupervisor::~DataManagerSupervisor(void)
 {
+	__SUP_COUT__ << "Destroying..." << std::endl;
+
 	DataManagerSingleton::deleteInstance(CorePropertySupervisorBase::supervisorApplicationUID_);
 	theStateMachineImplementation_.pop_back();
 }

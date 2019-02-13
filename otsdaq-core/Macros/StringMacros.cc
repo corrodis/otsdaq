@@ -7,7 +7,7 @@ using namespace ots;
 //wildCardMatch
 //	find needle in haystack
 //		allow needle to have leading and/or trailing wildcard '*'
-//		consider priority in matching, no mater the order in the haystack:
+//		consider priority in matching, no matter the order in the haystack:
 //			- 0: no match!
 //			- 1: highest priority is exact match
 //			- 2: next highest is partial TRAILING-wildcard match
@@ -83,7 +83,7 @@ catch(...)
 //========================================================================================================================
 //inWildCardSet ~
 //	returns true if needle is in haystack (considering wildcards)
-bool StringMacros::inWildCardSet(const std::string needle, const std::set<std::string>& haystack)
+bool StringMacros::inWildCardSet(const std::string& needle, const std::set<std::string>& haystack)
 {
 	for(const auto& haystackString : haystack)
 		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
@@ -251,6 +251,32 @@ bool StringMacros::isNumber(const std::string& s)
 } //end isNumber()
 
 //==============================================================================
+//getTimestampString ~~
+//	returns ots style timestamp string
+//	of known fixed size: Thu Aug 23 14:55:02 2001 CST
+std::string StringMacros::getTimestampString(const std::string& linuxTimeInSeconds)
+{
+	time_t timestamp(strtol(linuxTimeInSeconds.c_str(),0,10));
+	return getTimestampString(timestamp);
+} //end getTimestampString()
+
+//==============================================================================
+//getTimestampString ~~
+//	returns ots style timestamp string
+//	of known fixed size: Thu Aug 23 14:55:02 2001 CST
+std::string StringMacros::getTimestampString(const time_t& linuxTimeInSeconds)
+{
+	std::string retValue(30,'\0'); //known fixed size: Thu Aug 23 14:55:02 2001 CST
+
+	struct tm tmstruct;
+	::localtime_r(&linuxTimeInSeconds, &tmstruct);
+	::strftime(&retValue[0], 30, "%c %Z", &tmstruct);
+	retValue.resize(strlen(retValue.c_str()));
+
+	return retValue;
+} //end getTimestampString()
+
+//==============================================================================
 // validateValueForDefaultStringDataType
 //
 std::string StringMacros::validateValueForDefaultStringDataType(const std::string& value,
@@ -307,68 +333,94 @@ void StringMacros::getSetFromString(const std::string& inputString,
 //	extracts the list of elements from string that uses a delimiter
 //		ignoring whitespace
 //	optionally returns the list of delimiters encountered, which may be useful
-//		for extracting which operator was used
+//		for extracting which operator was used.
+//
 //
 //	Note: lists are returned as vectors
 //	Note: the size() of delimiters will be one less than the size() of the returned values
+//		unless there is a leading delimiter, in which case vectors will have the same size.
 void StringMacros::getVectorFromString(const std::string& inputString,
 		std::vector<std::string>& listToReturn, const std::set<char>& delimiter,
 		const std::set<char>& whitespace, std::vector<char>* listOfDelimiters)
 {
 	unsigned int i=0;
 	unsigned int j=0;
+	unsigned int c=0;
 	std::set<char>::iterator delimeterSearchIt;
 	char lastDelimiter;
 	bool isDelimiter;
+	//bool foundLeadingDelimiter = false;
 
 	//__COUT__ << inputString << __E__;
+	//__COUTV__(inputString.length());
 
 	//go through the full string extracting elements
 	//add each found element to set
-	for(;j<inputString.size();++j)
+	for(;c<inputString.size();++c)
 	{
-		//__COUT__ << (char)inputString[j] << __E__;
+		//__COUT__ << (char)inputString[c] << __E__;
 
-		delimeterSearchIt = delimiter.find(inputString[j]);
+		delimeterSearchIt = delimiter.find(inputString[c]);
 		isDelimiter = delimeterSearchIt != delimiter.end();
 
-		//__COUT__ << (char)inputString[j] << " " << (char)lastDelimiter << __E__;
+		//__COUT__ << (char)inputString[c] << " " << isDelimiter << __E__;//char)lastDelimiter << __E__;
 
-		if((whitespace.find(inputString[j]) != whitespace.end() || //ignore leading white space or delimiter
-				isDelimiter)
+		if(whitespace.find(inputString[c]) != whitespace.end()//ignore leading white space
 				&& i == j)
-			++i;
-		else if((whitespace.find(inputString[j]) != whitespace.end() || //trailing white space or delimiter indicates end
-				isDelimiter)
-				&& i != j) // assume end of element
+		{
+			++i; ++j;
+			//if(isDelimiter)
+			//	foundLeadingDelimiter = true;
+		}
+		else if(whitespace.find(inputString[c]) != whitespace.end()
+				&& i != j) //trailing white space, assume possible end of element
+		{
+			//do not change j or i
+		}
+		else if(isDelimiter) // delimiter is end of element
 		{
 			//__COUT__ << "Set element found: " <<
 			//		inputString.substr(i,j-i) << std::endl;
 
-			if(listOfDelimiters && listToReturn.size())
+			if(listOfDelimiters &&
+					listToReturn.size())// || foundLeadingDelimiter)) //accept leading delimiter (especially for case of leading negative in math parsing)
+			{
+				//__COUTV__(lastDelimiter);
 				listOfDelimiters->push_back(lastDelimiter);
+			}
 			listToReturn.push_back(inputString.substr(i,j-i));
 
 
 			//setup i and j for next find
-			i = j+1;
+			i = c+1; j = c+1;
 		}
+		else  //part of element, so move j, not i
+			j = c+1;
 
 		if(isDelimiter)
 			lastDelimiter = *delimeterSearchIt;
+		//__COUTV__(lastDelimiter);
 	}
 
-	if(i != j) //last element check (for case when no concluding ' ' or delimiter)
+	if(1)//i != j) //last element check (for case when no concluding ' ' or delimiter)
 	{
-		if(listOfDelimiters && listToReturn.size())
+		//__COUT__ << "Last element found: " <<
+		//		inputString.substr(i,j-i) << std::endl;
+
+		if(listOfDelimiters &&
+				listToReturn.size())// || foundLeadingDelimiter)) //accept leading delimiter (especially for case of leading negative in math parsing)
+		{
+			//__COUTV__(lastDelimiter);
 			listOfDelimiters->push_back(lastDelimiter);
+		}
 		listToReturn.push_back(inputString.substr(i,j-i));
 	}
 
 	//assert that there is one less delimiter than values
-	if(listOfDelimiters && listToReturn.size() - 1 != listOfDelimiters->size())
+	if(listOfDelimiters && listToReturn.size() - 1 != listOfDelimiters->size() &&
+			listToReturn.size() != listOfDelimiters->size())
 	{
-		__SS__ << "There is a mismatch in delimiters to entries (should be one less delimiter): " <<
+		__SS__ << "There is a mismatch in delimiters to entries (should be equal or one less delimiter): " <<
 				listOfDelimiters->size() <<
 				" vs " << listToReturn.size()  << __E__ <<
 				"Entries: " <<
@@ -504,7 +556,6 @@ std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn, cons
 	}
 	return ss.str();
 }
-
 //==============================================================================
 //vectorToString
 std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn, const std::string& delimeter)
@@ -526,7 +577,6 @@ std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn
 #include <memory>
 #include <cxxabi.h>
 
-
 //==============================================================================
 //demangleTypeName
 std::string StringMacros::demangleTypeName(const char* name)
@@ -540,7 +590,8 @@ std::string StringMacros::demangleTypeName(const char* name)
 	};
 
 	return (status==0) ? res.get() : name ;
-}
+} //end demangleTypeName()
+
 
 #else //does nothing if not g++
 //==============================================================================
@@ -550,10 +601,7 @@ std::string StringMacros::demangleTypeName(const char* name)
 {
 	return name;
 }
-
-
 #endif
-
 
 
 

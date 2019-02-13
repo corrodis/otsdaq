@@ -117,7 +117,7 @@ ConfigurationVersion ConfigurationInterface::saveNewVersion(ConfigurationBase* c
 		{
 			__SS__ << ("New version already exists!") << std::endl;
 			std::cout << __COUT_HDR_FL__ << ss.str();
-			throw std::runtime_error(ss.str());
+			__SS_THROW__;
 		}
 	}
 

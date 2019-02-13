@@ -24,9 +24,8 @@
 
 using namespace ots;
 
-
-#define SECURITY_FILE_NAME 		std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
-#define SEQUENCE_FILE_NAME 		std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.dat"
+#define SECURITY_FILE_NAME 				std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
+#define SEQUENCE_FILE_NAME 				std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.dat"
 #define SEQUENCE_OUT_FILE_NAME 	        std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.out"
 #define USER_DATA_PATH  				std::string(getenv("SERVICE_DATA_PATH")) + std::string("/")
 //#define LOGBOOK_PREVIEWS_PATH 			"uploads/"
@@ -71,7 +70,7 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub * s) throw (xdaq::excep
 , supervisorClass_              (getApplicationDescriptor()->getClassName())
 , supervisorClassNoNamespace_   (supervisorClass_.substr(supervisorClass_.find_last_of(":")+1, supervisorClass_.length()-supervisorClass_.find_last_of(":")))
 {
-	__SUP_COUT__ << "Constructor started." << __E__;
+	__COUT__ << "Constructor started." << __E__;
 
 	INIT_MF("OtsConfigurationWizard");
 
@@ -80,19 +79,22 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub * s) throw (xdaq::excep
 	mkdir((std::string(getenv("SERVICE_DATA_PATH"))).c_str(), 0755);
 	mkdir((std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData").c_str(), 0755);
 
+	GatewaySupervisor::indicateOtsAlive();
+
 	generateURL();
-	xgi::bind (this, &WizardSupervisor::Default,            	      "Default" 	);
-	xgi::bind (this, &WizardSupervisor::verification,        	      "Verify" 	  	);
-	xgi::bind (this, &WizardSupervisor::requestIcons,       	      "requestIcons"	);
-	xgi::bind (this, &WizardSupervisor::editSecurity,       	      "editSecurity"	);
-	xgi::bind (this, &WizardSupervisor::UserSettings,       	      "UserSettings"	);
-	xgi::bind (this, &WizardSupervisor::tooltipRequest,                   "TooltipRequest"	);
-	xgi::bind (this, &WizardSupervisor::toggleSecurityCodeGeneration,     "ToggleSecurityCodeGeneration"	);
-	xoap::bind(this, &WizardSupervisor::supervisorSequenceCheck,	      "SupervisorSequenceCheck",        	XDAQ_NS_URI);
-	xoap::bind(this, &WizardSupervisor::supervisorLastConfigGroupRequest, "SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
+	xgi::bind (this, &WizardSupervisor::Default,            	      		"Default" 			);
+	xgi::bind (this, &WizardSupervisor::verification,        	      		"Verify" 	  		);
+	xgi::bind (this, &WizardSupervisor::request,       	      				"Request"			);
+	xgi::bind (this, &WizardSupervisor::requestIcons,       	      		"requestIcons"		);
+	xgi::bind (this, &WizardSupervisor::editSecurity,       	      		"editSecurity"		);
+	xgi::bind (this, &WizardSupervisor::UserSettings,       	      		"UserSettings"		);
+	xgi::bind (this, &WizardSupervisor::tooltipRequest,                   	"TooltipRequest"	);
+	xgi::bind (this, &WizardSupervisor::toggleSecurityCodeGeneration,     	"ToggleSecurityCodeGeneration"	);
+	xoap::bind(this, &WizardSupervisor::supervisorSequenceCheck,	      	"SupervisorSequenceCheck",        	XDAQ_NS_URI);
+	xoap::bind(this, &WizardSupervisor::supervisorLastConfigGroupRequest, 	"SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
 	init();
 
-	__SUP_COUT__ << "Constructor complete." << __E__;
+	__COUT__ << "Constructor complete." << __E__;
 }
 
 //========================================================================================================================
@@ -159,7 +161,7 @@ void WizardSupervisor::generateURL()
 		securityCode_ += alphanum[rand() % (sizeof(alphanum) - 1)];
 	}
 
-	std::cout << __COUT_HDR_FL__ <<
+	__COUT__ <<
 			getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":" << getenv("PORT") <<
 			"/urn:xdaq-application:lid="
 			<< this->getApplicationDescriptor()->getLocalId() << "/Verify?code=" << securityCode_ << std::endl;
@@ -190,7 +192,7 @@ void WizardSupervisor::printURL(WizardSupervisor *ptr,
 	for (; i < 5; ++i)
 	{
 		std::this_thread::sleep_for (std::chrono::seconds(2));
-		std::cout << __COUT_HDR_FL__ <<
+		__COUT__ <<
 				getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":" << getenv("PORT") <<
 				"/urn:xdaq-application:lid="
 				<< ptr->getApplicationDescriptor()->getLocalId() << "/Verify?code=" << securityCode << std::endl;
@@ -284,7 +286,7 @@ throw (xgi::exception::Exception)
 
 	if(Command == "TurnGenerationOn")
 	{
-                __COUT__ << "Turning automatic URL Generation on with a sequence depth of 16!" << std::endl;	  
+                __COUT__ << "Turning automatic URL Generation on with a sequence depth of 16!" << std::endl;
 		std::ofstream outfile ((SEQUENCE_FILE_NAME).c_str());
 		outfile << "16" << std::endl;
 		outfile.close();
@@ -312,10 +314,10 @@ throw (xgi::exception::Exception)
 xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(xoap::MessageReference message)
 throw (xoap::exception::Exception)
 {
-	//receive request parameters
+	//SOAPUtilities::receive request parameters
 	SOAPParameters parameters;
 	parameters.addParameter("sequence");
-	receive(message, parameters);
+	SOAPUtilities::receive(message, parameters);
 
 	std::string submittedSequence = parameters.getValue("sequence");
 
@@ -358,7 +360,7 @@ throw (xoap::exception::Exception)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ActionOfLastGroup");
-	receive(message, parameters);
+	SOAPUtilities::receive(message, parameters);
 
 	return GatewaySupervisor::lastConfigGroupRequestHandler(parameters);
 }
@@ -429,6 +431,87 @@ throw (xgi::exception::Exception)
 }
 
 //========================================================================================================================
+void WizardSupervisor::request(xgi::Input * in, xgi::Output * out )
+throw (xgi::exception::Exception)
+{
+	cgicc::Cgicc cgiIn(in);
+
+	std::string submittedSequence = CgiDataUtilities::postData(cgiIn, "sequence");
+
+	//SECURITY CHECK START ****
+	if(securityCode_.compare(submittedSequence) != 0)
+	{
+		__COUT__ << "Unauthorized Request made, security sequence doesn't match! " <<
+				time(0) << std::endl;
+		return;
+	}
+	else
+	{
+		__COUT__ << "***Successfully authenticated security sequence. " <<
+				time(0) << std::endl;
+	}
+	//SECURITY CHECK END ****
+
+	std::string requestType = CgiDataUtilities::getData(cgiIn, "RequestType");
+	__COUTV__(requestType);
+
+
+	HttpXmlDocument xmlOut;
+
+	try
+	{
+		if (requestType == "codeEditor")
+		{
+			__COUT__ << "Code Editor" << __E__;
+			codeEditor_.xmlRequest(
+					CgiDataUtilities::getData(cgiIn, "option"),
+					cgiIn,
+					&xmlOut);
+		}
+		else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
+		{
+			//NOTE: similar to ConfigurationGUI version but DOES keep active sessions
+
+			__COUT_WARN__ << requestType << " requestType received! " << __E__;
+			__MOUT_WARN__ << requestType << " requestType received! " << __E__;
+
+			//now launch
+			ConfigurationManager cfgMgr;
+			if(requestType == "gatewayLaunchOTS")
+				GatewaySupervisor::launchStartOTSCommand("LAUNCH_OTS",
+						&cfgMgr);
+			else if(requestType == "gatewayLaunchWiz")
+				GatewaySupervisor::launchStartOTSCommand("LAUNCH_WIZ",
+						&cfgMgr);
+		}
+		else
+		{
+			__SS__ << "requestType Request, " << requestType << ", not recognized." << __E__;
+			__SS_THROW__;
+		}
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "An error was encountered handling requestType '" << requestType << "':" <<
+				e.what() << __E__;
+		__COUT__ << "\n" << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
+	}
+	catch(...)
+	{
+		__SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' " <<
+				"Please check the printouts to debug." << __E__;
+		__COUT__ << "\n" << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
+	}
+
+	//return xml doc holding server response
+	xmlOut.outputXmlDocument((std::ostringstream*) out, false /*dispStdOut*/,
+			true /*allowWhiteSpace*/); //Note: allow white space need for error response
+
+} //end request()
+
+//========================================================================================================================
 void WizardSupervisor::requestIcons(xgi::Input * in, xgi::Output * out )
 throw (xgi::exception::Exception)
 {
@@ -460,10 +543,14 @@ throw (xgi::exception::Exception)
 	//5 - linkurl = url of the window to open
 	//6 - folderPath = folder and subfolder location
 
-	*out << "Security Settings,SEC,1,1,icon-SecuritySettings.png,/WebPath/html/SecuritySettings.html,/" <<
-			",Edit User Data,USER,1,1,icon-EditUserData.png,/WebPath/html/EditUserData.html,/" <<
-			",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/" <<
+	*out <<
+			"Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/" <<
 			",Table Editor,TBL,0,1,icon-IconEditor.png,/urn:xdaq-application:lid=280/?configWindowName=tableEditor,/" <<
+			",Security Settings,SEC,1,1,icon-SecuritySettings.png,/WebPath/html/SecuritySettings.html,/User Settings" <<
+			",Edit User Data,USER,1,1,icon-EditUserData.png,/WebPath/html/EditUserData.html,/User Settings" <<
+
+			",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" <<
+
 			//",Iterate,IT,0,1,icon-Iterate.png,/urn:xdaq-application:lid=280/?configWindowName=iterate,/" <<
 			//",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,myFolder" <<
 			//",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/myFolder/mySub.folder" <<
@@ -472,8 +559,9 @@ throw (xgi::exception::Exception)
 			",Processor Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Processor,Config Wizards" <<
 			",Block Diagram,CFG,0,1,icon-Configure.png,/WebPath/html/ConfigurationSubsetBlockDiagram.html?urn=280,Config Wizards" <<
 			//",Consumer Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&subsetBasePath=FEInterfaceConfiguration&recordAlias=Consumer,Config Wizards" <<
-			",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" <<
+
 			//",DB Utilities,DB,1,1,0,http://127.0.0.1:8080/db/client.html" <<
+			",Code Editor,CODE,0,1,icon-CodeEditor.png,/WebPath/html/CodeEditor.html,/" <<
 			"";
 	return;
 }
@@ -566,7 +654,7 @@ throw (xgi::exception::Exception)
 		//__SS__ << "Error opening file: "<< securityFileName << std::endl;
 		//__COUT_ERR__ << "\n" << ss.str();
 
-		//throw std::runtime_error(ss.str());
+		//__SS_THROW__;
 		//return;
 		security = "DigestAccessAuthentication"; //default security when no file exists
 	}
@@ -877,14 +965,14 @@ void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, 
 //========================================================================================================================
 std::string WizardSupervisor::exec(const char* cmd)
 {
-		std::array<char, 128> buffer;
-		std::string result;
-		std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
-		if (!pipe) throw std::runtime_error("popen() failed!");
-		while (!feof(pipe.get())) {
-			if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
-				result += buffer.data();
-		}
-		return result;
+	std::array<char, 128> buffer;
+	std::string result;
+	std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+	if (!pipe) __THROW__("popen() failed!");
+	while (!feof(pipe.get())) {
+		if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+			result += buffer.data();
+	}
+	return result;
 }
 
