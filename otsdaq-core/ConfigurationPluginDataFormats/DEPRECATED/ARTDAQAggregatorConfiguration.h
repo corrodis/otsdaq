@@ -1,35 +1,26 @@
 #ifndef _ots_ARTDAQAggregatorConfiguration_h_
 #define _ots_ARTDAQAggregatorConfiguration_h_
 
-#include "otsdaq-core/ConfigurationDataFormats/FEInterfaceConfigurationBase.h"
 #include <string>
+#include "otsdaq-core/ConfigurationDataFormats/FEInterfaceConfigurationBase.h"
 
-namespace ots
-{
+namespace ots {
 
-class ARTDAQAggregatorConfiguration : public ConfigurationBase
-{
+class ARTDAQAggregatorConfiguration : public ConfigurationBase {
+ public:
+  ARTDAQAggregatorConfiguration(void);
+  virtual ~ARTDAQAggregatorConfiguration(void);
 
-public:
+  // Methods
+  void init(ConfigurationManager *configManager);
 
-	ARTDAQAggregatorConfiguration(void);
-	virtual ~ARTDAQAggregatorConfiguration(void);
+  // Getters
+  std::string getAggregatorID(unsigned int supervisorInstance) const;
+  bool getStatus(unsigned int supervisorInstance) const;
+  const std::string getConfigurationString(unsigned int supervisorInstance) const;
 
-	//Methods
-	void init(ConfigurationManager *configManager);
-
-	//Getters
-	std::string       getAggregatorID       (unsigned int supervisorInstance) const;
-	bool              getStatus             (unsigned int supervisorInstance) const;
-	const std::string getConfigurationString(unsigned int supervisorInstance) const;
-
-private:
-	enum{SupervisorInstance,
-		AggregatorID,
-		Status,
-		ConfigurationString
-	};
-
+ private:
+  enum { SupervisorInstance, AggregatorID, Status, ConfigurationString };
 };
-}
+}  // namespace ots
 #endif

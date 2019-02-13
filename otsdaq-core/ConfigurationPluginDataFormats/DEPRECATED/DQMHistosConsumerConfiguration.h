@@ -5,39 +5,27 @@
 
 #include <string>
 
+namespace ots {
 
-namespace ots
-{
+class DQMHistosConsumerConfiguration : public ConfigurationBase {
+ public:
+  DQMHistosConsumerConfiguration(void);
+  virtual ~DQMHistosConsumerConfiguration(void);
 
-class DQMHistosConsumerConfiguration : public ConfigurationBase
-{
+  // Methods
+  void init(ConfigurationManager *configManager);
 
-public:
+  // Getter
+  std::vector<std::string> getProcessorIDList(void) const;
+  std::string getFilePath(std::string processorUID) const;
+  std::string getRadixFileName(std::string processorUID) const;
+  bool getSaveFile(std::string processorUID) const;
 
-	DQMHistosConsumerConfiguration(void);
-	virtual ~DQMHistosConsumerConfiguration(void);
+ private:
+  void check(std::string processorUID) const;
+  enum { ProcessorID, FilePath, RadixFileName, SaveFile };
 
-	//Methods
-	void init(ConfigurationManager *configManager);
-
-	//Getter
-	std::vector<std::string>  getProcessorIDList(void) const;
-	std::string               getFilePath       (std::string processorUID) const;
-	std::string               getRadixFileName  (std::string processorUID) const;
-	bool                      getSaveFile       (std::string processorUID) const;
-
-private:
-
-	void check(std::string processorUID) const;
-	enum{
-		ProcessorID,
-		FilePath,
-		RadixFileName,
-		SaveFile
-	};
-
-	std::map<std::string, unsigned int> processorIDToRowMap_;
-
+  std::map<std::string, unsigned int> processorIDToRowMap_;
 };
-}
+}  // namespace ots
 #endif

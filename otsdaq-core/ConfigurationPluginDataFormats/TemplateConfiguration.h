@@ -3,31 +3,23 @@
 
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 
+namespace ots {
 
-namespace ots
-{
+class TemplateConfiguration : public ConfigurationBase {
+ public:
+  TemplateConfiguration(void);
+  virtual ~TemplateConfiguration(void);
 
-class TemplateConfiguration : public ConfigurationBase
-{
+  // Methods
+  void init(ConfigurationManager *configManager);
 
-public:
+  // Getters
 
-	TemplateConfiguration(void);
-	virtual ~TemplateConfiguration(void);
-
-	//Methods
-	void init(ConfigurationManager *configManager);
-
-	//Getters
-
-private:
-
-	//Column names
-	struct ColTemplate
-	{
-		std::string const colColumnName_ = "ColumnName";
-	} colNames_;
-
+ private:
+  // Column names
+  struct ColTemplate {
+    std::string const colColumnName_ = "ColumnName";
+  } colNames_;
 };
-}
+}  // namespace ots
 #endif

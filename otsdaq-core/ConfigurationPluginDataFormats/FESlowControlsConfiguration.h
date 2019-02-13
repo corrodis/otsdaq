@@ -6,28 +6,23 @@
 
 #include <string>
 
-namespace ots
-{
+namespace ots {
 
-class FESlowControlsConfiguration : public ConfigurationBase
-{
+class FESlowControlsConfiguration : public ConfigurationBase {
+ public:
+  FESlowControlsConfiguration(void);
+  virtual ~FESlowControlsConfiguration(void);
 
-public:
+  // Methods
+  void init(ConfigurationManager *configManager);
 
-	FESlowControlsConfiguration(void);
-	virtual ~FESlowControlsConfiguration(void);
+  // Getters
 
-	//Methods
-	void init(ConfigurationManager *configManager);
-
-	//Getters
-
-private:
-	//Column names
-	struct ColSlowControls
-	{
-		std::string const colDataType_                     = "ChannelDataType";
-	} colNames_;
+ private:
+  // Column names
+  struct ColSlowControls {
+    std::string const colDataType_ = "ChannelDataType";
+  } colNames_;
 };
-}
+}  // namespace ots
 #endif

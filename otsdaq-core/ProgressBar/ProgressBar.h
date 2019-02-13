@@ -1,17 +1,16 @@
 #ifndef _ots_Utilities_ProgressBar_h_
 #define _ots_Utilities_ProgressBar_h_
 
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq-core/MessageFacility/MessageFacility.h"
 
-#include <string>
 #include <mutex>
+#include <string>
 
-namespace ots
-{
+namespace ots {
 
-//ProgressBar
-//class by Ryan Rivera ( rrivera @ fnal.gov ), July 2013
+// ProgressBar
+// class by Ryan Rivera ( rrivera @ fnal.gov ), July 2013
 //
 // The are 4 public member function that should matter to the user:
 //
@@ -48,8 +47,10 @@ namespace ots
 //				ProgressBar myProgressBar;
 //				void setupProgress(int i)
 //				{
-//					myProgressBar.resetProgressBar(i);		//this reset is shared by sequence one and
-//															//two so must identify with integer
+//					myProgressBar.resetProgressBar(i);		//this reset is shared by sequence one
+//and
+//															//two so must identify with
+//integer
 //
 //					if(i==0) sequenceOne();
 //					else if(i==1) sequenceTwo();
@@ -71,40 +72,37 @@ namespace ots
 //				}
 //
 
-class ProgressBar
-{
-public:
-	ProgressBar();
+class ProgressBar {
+ public:
+  ProgressBar();
 
-	//********************************************************************//
-	//NOTE!!! don't call reset. Call resetProgressBar(id) as though
-	// the function was this:
-	//void resetProgressBar(int id)
-	//
-	// then the pre-compiler directive:
-	#define resetProgressBar(x) reset(__FILE__,S_(__LINE__),x)
-	//will call this reset:
-	void reset(std::string file, std::string lineNumber, int id=0);
-	//********************************************************************//
+//********************************************************************//
+// NOTE!!! don't call reset. Call resetProgressBar(id) as though
+// the function was this:
+// void resetProgressBar(int id)
+//
+// then the pre-compiler directive:
+#define resetProgressBar(x) reset(__FILE__, S_(__LINE__), x)
+  // will call this reset:
+  void reset(std::string file, std::string lineNumber, int id = 0);
+  //********************************************************************//
 
-	//remaining member functions are called normal
-	void step(); //thread safe
-	void complete();
-	int  read(); //if stepsToComplete==0, then define any progress as 50%, thread safe
-	std::string  readPercentageString(); //if stepsToComplete==0, then define any progress as 50%, thread safe
+  // remaining member functions are called normal
+  void step();  // thread safe
+  void complete();
+  int read();                          // if stepsToComplete==0, then define any progress as 50%, thread safe
+  std::string readPercentageString();  // if stepsToComplete==0, then define any progress as 50%, thread safe
 
-private:
-	const std::string 	cProgressBarFilePath_;
-	const std::string 	cProgressBarFileExtension_;
-	std::string       	totalStepsFileName_;
-	int               	stepCount_;
-	int               	stepsToComplete_;
-	bool              	started_;
-	std::mutex			theMutex_;
+ private:
+  const std::string cProgressBarFilePath_;
+  const std::string cProgressBarFileExtension_;
+  std::string totalStepsFileName_;
+  int stepCount_;
+  int stepsToComplete_;
+  bool started_;
+  std::mutex theMutex_;
 };
 
-	
-}
-
+}  // namespace ots
 
 #endif

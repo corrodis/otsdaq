@@ -6,33 +6,24 @@
 #include <map>
 #include <string>
 
-namespace ots
-{
+namespace ots {
 
-class MaskConfiguration : public ConfigurationBase
-{
+class MaskConfiguration : public ConfigurationBase {
+ public:
+  MaskConfiguration(void);
+  virtual ~MaskConfiguration(void);
 
-public:
+  // Methods
+  virtual void init(ConfigurationManager* configManager);
 
-	MaskConfiguration(void);
-	virtual ~MaskConfiguration(void);
+  // Getters
+  const std::string& getROCMask(std::string rocName) const;
 
-	//Methods
-	virtual void init(ConfigurationManager *configManager);
+ protected:
+  std::map<std::string, unsigned int> nameToRow_;
 
-	//Getters
-	const std::string& getROCMask(std::string rocName) const;
-
-
-protected:
-	std::map<std::string, unsigned int> nameToRow_;
-
-private:
-	enum{
-		DetectorID,
-		KillMask
-	};
-
+ private:
+  enum { DetectorID, KillMask };
 };
-}
+}  // namespace ots
 #endif

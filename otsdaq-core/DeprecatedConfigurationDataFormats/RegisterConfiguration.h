@@ -12,23 +12,17 @@
 
 namespace ots {
 
-class RegisterConfiguration: public ots::ConfigurationBase
-{
-public:
-    RegisterConfiguration (std::string staticConfigurationName);
-    virtual 		  ~RegisterConfiguration ();
+class RegisterConfiguration : public ots::ConfigurationBase {
+ public:
+  RegisterConfiguration(std::string staticConfigurationName);
+  virtual ~RegisterConfiguration();
 
-    void 		  init (void);
-protected:
+  void init(void);
 
-    enum{ComponentName,
-         RegisterName,
-         RegisterBaseAddress,
-         RegisterSize,
-         RegisterAccess
-        };
+ protected:
+  enum { ComponentName, RegisterName, RegisterBaseAddress, RegisterSize, RegisterAccess };
 };
 
-}
+}  // namespace ots
 
 #endif /* REGISTERCONFIGURATION_H_ */

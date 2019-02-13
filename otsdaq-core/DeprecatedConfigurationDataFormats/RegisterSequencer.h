@@ -13,29 +13,19 @@
 
 namespace ots {
 
-class RegisterSequencer: public ots::ConfigurationBase
-{
-public:
-    RegisterSequencer (std::string staticConfigurationName);
-    virtual 		  ~RegisterSequencer ();
+class RegisterSequencer : public ots::ConfigurationBase {
+ public:
+  RegisterSequencer(std::string staticConfigurationName);
+  virtual ~RegisterSequencer();
 
-    void 		  init (void);
+  void init(void);
 
-    //getter
+  // getter
 
-protected:
-
-    enum{ComponentName,
-         RegisterName,
-		 RegisterValue,
-		 SequencerNumber,
-		 State
-        };
-
-
-
+ protected:
+  enum { ComponentName, RegisterName, RegisterValue, SequencerNumber, State };
 };
 
-}
+}  // namespace ots
 
 #endif /* REGISTERCONFIGURATION_H_ */

@@ -3,37 +3,25 @@
 
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 
-#include <string>
 #include <list>
+#include <string>
 
-namespace ots
-{
+namespace ots {
 
-class ModuleToFEConfiguration : public ConfigurationBase
-{
+class ModuleToFEConfiguration : public ConfigurationBase {
+ public:
+  ModuleToFEConfiguration(void);
+  virtual ~ModuleToFEConfiguration(void);
 
-public:
+  // Methods
+  void init(ConfigurationManager *configManager);
 
-	ModuleToFEConfiguration(void);
-	virtual ~ModuleToFEConfiguration(void);
+  // Getters
+  std::list<std::string> getFEWModulesList(unsigned int FEWNumber) const;
+  std::list<std::string> getFERModulesList(unsigned int FERNumber) const;
 
-	//Methods
-	void init(ConfigurationManager *configManager);
-
-	//Getters
-	std::list<std::string>  getFEWModulesList(unsigned int FEWNumber) const;
-	std::list<std::string>  getFERModulesList(unsigned int FERNumber) const;
-
-private:
-	enum{
-		ModuleName,
-		ModuleType,
-		FEWName,
-		FEWType,
-		FERName,
-		FERType
-	};
-
+ private:
+  enum { ModuleName, ModuleType, FEWName, FEWType, FERName, FERType };
 };
-}
+}  // namespace ots
 #endif

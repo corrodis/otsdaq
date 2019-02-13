@@ -5,36 +5,26 @@
 
 #include <string>
 
+namespace ots {
 
-namespace ots
-{
+class RawDataSaverConsumerConfiguration : public ConfigurationBase {
+ public:
+  RawDataSaverConsumerConfiguration(void);
+  virtual ~RawDataSaverConsumerConfiguration(void);
 
-class RawDataSaverConsumerConfiguration : public ConfigurationBase
-{
+  // Methods
+  void init(ConfigurationManager *configManager);
 
-public:
+  // Getter
+  std::vector<std::string> getProcessorIDList(void) const;
+  std::string getFilePath(std::string processorUID) const;
+  std::string getRadixFileName(std::string processorUID) const;
 
-	RawDataSaverConsumerConfiguration(void);
-	virtual ~RawDataSaverConsumerConfiguration(void);
+ private:
+  void check(std::string processorUID) const;
+  enum { ProcessorID, FilePath, RadixFileName };
 
-	//Methods
-	void init(ConfigurationManager *configManager);
-
-	//Getter
-	std::vector<std::string>  getProcessorIDList(void) const;
-	std::string               getFilePath       (std::string processorUID) const;
-	std::string               getRadixFileName  (std::string processorUID) const;
-private:
-
-	void check(std::string processorUID) const;
-	enum{
-		ProcessorID,
-		FilePath,
-		RadixFileName
-	};
-
-	std::map<std::string, unsigned int> processorIDToRowMap_;
-
+  std::map<std::string, unsigned int> processorIDToRowMap_;
 };
-}
+}  // namespace ots
 #endif

@@ -3,23 +3,22 @@
 
 #include "otsdaq-core/DataManager/RawDataSaverConsumerBase.h"
 
-namespace ots
-{
+namespace ots {
 
-class OtsDataSaverConsumer : public RawDataSaverConsumerBase
-{
-public:
-	OtsDataSaverConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
-	virtual ~OtsDataSaverConsumer(void);
+class OtsDataSaverConsumer : public RawDataSaverConsumerBase {
+ public:
+  OtsDataSaverConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID,
+                       const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
+  virtual ~OtsDataSaverConsumer(void);
 
-	virtual void writePacketHeader  (const std::string& data);
+  virtual void writePacketHeader(const std::string& data);
 
-protected:
-	void writeHeader   (void) override;
+ protected:
+  void writeHeader(void) override;
 
-	unsigned char	lastSeqId_;
+  unsigned char lastSeqId_;
 };
 
-}
+}  // namespace ots
 
 #endif
