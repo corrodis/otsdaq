@@ -18,38 +18,40 @@ namespace configuration {
 
 using ots::ConfigurationBase;
 
-template <>
-template <>
-bool MakeSerializable<ConfigurationBase const*>::writeDocumentImpl<JsonData>(JsonData& data) const {
-  std::stringstream ss;
+template<>
+template<>
+bool MakeSerializable<ConfigurationBase const*>::writeDocumentImpl<JsonData>(JsonData& data) const
+{
+	std::stringstream ss;
 
-  _conf->getView().printJSON(ss);
-  //std::cout << "!!!!!\n" << ss.str() << std::endl; //for debugging
-  data.json_buffer = ss.str();
+	_conf->getView().printJSON(ss);
+	//std::cout << "!!!!!\n" << ss.str() << std::endl; //for debugging
+	data.json_buffer = ss.str();
 
-  return true;
+	return true;
 }
 
-template <>
-std::string MakeSerializable<ConfigurationBase const*>::configurationNameImpl() const {
-
-  return _conf->getConfigurationName();
+template<>
+std::string MakeSerializable<ConfigurationBase const*>::configurationNameImpl() const
+{
+	return _conf->getConfigurationName();
 }
 
-template <>
-template <>
-bool MakeSerializable<ConfigurationBase*>::readDocumentImpl<JsonData>(JsonData const& data) {
-  int retVal = _conf->getViewP()->fillFromJSON(data.json_buffer);
+template<>
+template<>
+bool MakeSerializable<ConfigurationBase*>::readDocumentImpl<JsonData>(JsonData const& data)
+{
+	int retVal = _conf->getViewP()->fillFromJSON(data.json_buffer);
 
-  return (retVal >= 0);
+	return (retVal >= 0);
 }
 
-template <>
-std::string MakeSerializable<ConfigurationBase*>::configurationNameImpl() const {
-  return _conf->getConfigurationName();
+template<>
+std::string MakeSerializable<ConfigurationBase*>::configurationNameImpl() const
+{
+	return _conf->getConfigurationName();
 }
 
 }  // namespace configuration
 }  // namespace database
 }  // namespace artdaq
-

@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 DetectorConfiguration::DetectorConfiguration(void)
-: ConfigurationBase("DetectorConfiguration")
+    : ConfigurationBase("DetectorConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -23,29 +23,29 @@ DetectorConfiguration::DetectorConfiguration(void)
 	//    </VIEW>
 	//  </CONFIGURATION>
 	//</ROOT>
-
 }
 
 //==============================================================================
 DetectorConfiguration::~DetectorConfiguration(void)
-{}
+{
+}
 
 //==============================================================================
-void DetectorConfiguration::init(ConfigurationManager *configManager)
+void DetectorConfiguration::init(ConfigurationManager* configManager)
 {
-	nameToRow_     .clear();
-	detectorIDs_   .clear();
-	detectorTypes_ .clear();
-	std::string tmpDetectorID;
-	std::map<std::string,bool> detectorTypes;
-	for(unsigned int row=0; row<ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	nameToRow_.clear();
+	detectorIDs_.clear();
+	detectorTypes_.clear();
+	std::string		    tmpDetectorID;
+	std::map<std::string, bool> detectorTypes;
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
 		ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorID, row, DetectorID);
-		nameToRow_[tmpDetectorID] = row;
+		nameToRow_[tmpDetectorID]						     = row;
 		detectorTypes[ConfigurationBase::getView().getDataView()[row][DetectorType]] = true;
 		detectorIDs_.push_back(tmpDetectorID);
 	}
-	for(auto& it: detectorTypes)
+	for (auto& it : detectorTypes)
 		detectorTypes_.push_back(it.first);
 }
 

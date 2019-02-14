@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 DataBufferConfiguration::DataBufferConfiguration(void)
-: ConfigurationBase("DataBufferConfiguration")
+    : ConfigurationBase("DataBufferConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -23,15 +23,15 @@ DataBufferConfiguration::DataBufferConfiguration(void)
 	//      </VIEW>
 	//    </CONFIGURATION>
 	//  </ROOT>
-
 }
 
 //==============================================================================
 DataBufferConfiguration::~DataBufferConfiguration(void)
-{}
+{
+}
 
 //==============================================================================
-void DataBufferConfiguration::init(ConfigurationManager *configManager)
+void DataBufferConfiguration::init(ConfigurationManager* configManager)
 {
 	processorInfos_.clear();
 
@@ -39,23 +39,23 @@ void DataBufferConfiguration::init(ConfigurationManager *configManager)
 	std::string dataBufferID;
 	std::string processorUID;
 	std::string processorType;
-	Info        processorInfo;
-	for(unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	Info	processorInfo;
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(dataBufferID,          row, DataBufferID);
-		ConfigurationBase::activeConfigurationView_->getValue(processorUID,           row, ProcessorID);
-		ConfigurationBase::activeConfigurationView_->getValue(processorType,         row, ProcessorType);
-		ConfigurationBase::activeConfigurationView_->getValue(processorInfo.class_,  row, ProcessorClass);
+		ConfigurationBase::activeConfigurationView_->getValue(dataBufferID, row, DataBufferID);
+		ConfigurationBase::activeConfigurationView_->getValue(processorUID, row, ProcessorID);
+		ConfigurationBase::activeConfigurationView_->getValue(processorType, row, ProcessorType);
+		ConfigurationBase::activeConfigurationView_->getValue(processorInfo.class_, row, ProcessorClass);
 		ConfigurationBase::activeConfigurationView_->getValue(processorInfo.status_, row, ProcessorStatus);
 
-		if(processorType == "Producer")
+		if (processorType == "Producer")
 		{
-			processorInfos_[dataBufferID].producers_ [processorUID] = processorInfo;
+			processorInfos_[dataBufferID].producers_[processorUID]  = processorInfo;
 			processorInfos_[dataBufferID].processors_[processorUID] = processorInfo;
 		}
-		else if(processorType == "Consumer")
+		else if (processorType == "Consumer")
 		{
-			processorInfos_[dataBufferID].consumers_ [processorUID] = processorInfo;
+			processorInfos_[dataBufferID].consumers_[processorUID]  = processorInfo;
 			processorInfos_[dataBufferID].processors_[processorUID] = processorInfo;
 		}
 		else
@@ -70,17 +70,16 @@ void DataBufferConfiguration::init(ConfigurationManager *configManager)
 std::vector<std::string> DataBufferConfiguration::getProcessorIDList(std::string dataBufferID) const
 {
 	std::vector<std::string> list;
-	for(auto const& it: processorInfos_.find(dataBufferID)->second.processors_)
+	for (auto const& it : processorInfos_.find(dataBufferID)->second.processors_)
 		list.push_back(it.first);
 	return list;
-
 }
 
 //==============================================================================
 std::vector<std::string> DataBufferConfiguration::getProducerIDList(std::string dataBufferID) const
 {
 	std::vector<std::string> list;
-	for(auto const& it: processorInfos_.find(dataBufferID)->second.producers_)
+	for (auto const& it : processorInfos_.find(dataBufferID)->second.producers_)
 		list.push_back(it.first);
 	return list;
 }
@@ -101,7 +100,7 @@ std::string DataBufferConfiguration::getProducerClass(std::string dataBufferID, 
 std::vector<std::string> DataBufferConfiguration::getConsumerIDList(std::string dataBufferID) const
 {
 	std::vector<std::string> list;
-	for(auto& it: processorInfos_.find(dataBufferID)->second.consumers_)
+	for (auto& it : processorInfos_.find(dataBufferID)->second.consumers_)
 		list.push_back(it.first);
 	return list;
 }
@@ -110,7 +109,6 @@ std::vector<std::string> DataBufferConfiguration::getConsumerIDList(std::string 
 bool DataBufferConfiguration::getConsumerStatus(std::string dataBufferID, std::string consumerID) const
 {
 	return processorInfos_.find(dataBufferID)->second.consumers_.find(consumerID)->second.status_;
-
 }
 
 //==============================================================================

@@ -5,31 +5,27 @@
 
 //#include "otsdaq-core/DataManager/DataProducerBase.h"
 
-namespace ots
-{
+namespace ots {
 class DataManager;
 
-class FEDataManagerSupervisor: public FESupervisor
-{
+class FEDataManagerSupervisor : public FESupervisor {
+       public:
+	XDAQ_INSTANTIATOR();
 
-public:
+	FEDataManagerSupervisor(xdaq::ApplicationStub* s, bool artdaqDataManager = false);
+	virtual ~FEDataManagerSupervisor(void);
 
-    XDAQ_INSTANTIATOR();
+	virtual void transitionConfiguring(toolbox::Event::Reference e) override;
+	virtual void transitionStarting(toolbox::Event::Reference e) override;
+	virtual void transitionResuming(toolbox::Event::Reference e) override;
 
-    FEDataManagerSupervisor              (xdaq::ApplicationStub * s, bool artdaqDataManager = false) ;
-    virtual ~FEDataManagerSupervisor     (void);
+       protected:
+	DataManager* theDataManager_;
 
-
-    virtual void 			transitionConfiguring 			(toolbox::Event::Reference e) override;
-    virtual void 			transitionStarting 				(toolbox::Event::Reference e) override;
-    virtual void 			transitionResuming 				(toolbox::Event::Reference e) override;
-
-protected:
-    DataManager*			theDataManager_;
-private:
-    DataManager*		   	extractDataManager(); //likely, just used in constructor
+       private:
+	DataManager* extractDataManager();  //likely, just used in constructor
 };
 
-}
+}  // namespace ots
 
 #endif

@@ -1,47 +1,44 @@
 #include "otsdaq-core/DataProcessorPlugins/TCPDataListenerProducer.h"
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
-#include "otsdaq-core/NetworkUtilities/NetworkConverters.h"
 #include "otsdaq-core/Macros/ProcessorPluginMacros.h"
+#include "otsdaq-core/MessageFacility/MessageFacility.h"
+#include "otsdaq-core/NetworkUtilities/NetworkConverters.h"
 
-#include <iostream>
-#include <cassert>
 #include <string.h>
 #include <unistd.h>
+#include <cassert>
+#include <iostream>
 
 using namespace ots;
 
-
 //========================================================================================================================
 TCPDataListenerProducer::TCPDataListenerProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID,
-												 const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
-	: WorkLoop(processorUID)
-	//, Socket       ("192.168.133.100", 40000)
-	, DataProducer
-	(
-		supervisorApplicationUID,
-		bufferUID,
-		processorUID,
-		theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>()
-	)
-	//, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
-	, Configurable(theXDAQContextConfigTree, configurationPath)
-	, TCPSocket
-	(
-		theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>(),
-		theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>(),
-		0x10000/*theXDAQContextConfigTree.getNode(configurationPath).getNode("SocketReceiveBufferSize").getValue<unsigned int>()*/
-	)
-	, dataP_(nullptr)
-	, headerP_(nullptr)
-	, ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>())
-	, port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>())
+						 const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
+    : WorkLoop(processorUID)
+    //, Socket       ("192.168.133.100", 40000)
+    , DataProducer(
+	  supervisorApplicationUID,
+	  bufferUID,
+	  processorUID,
+	  theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
+    //, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
+    , Configurable(theXDAQContextConfigTree, configurationPath)
+    , TCPSocket(
+	  theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>(),
+	  theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>(),
+	  0x10000 /*theXDAQContextConfigTree.getNode(configurationPath).getNode("SocketReceiveBufferSize").getValue<unsigned int>()*/
+	  )
+    , dataP_(nullptr)
+    , headerP_(nullptr)
+    , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>())
+    , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>())
 {
 }
 
 //========================================================================================================================
 TCPDataListenerProducer::~TCPDataListenerProducer(void)
-{}
+{
+}
 
 //========================================================================================================================
 bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
@@ -60,7 +57,7 @@ void TCPDataListenerProducer::slowWrite(void)
 	if (TCPSocket::receive(data_) != -1)
 	{
 		header_["IPAddress"] = ipAddress_;
-		header_["Port"] = std::to_string(port_);
+		header_["Port"]      = std::to_string(port_);
 
 		while (DataProducer::write(data_, header_) < 0)
 		{
@@ -86,7 +83,7 @@ void TCPDataListenerProducer::fastWrite(void)
 	if (TCPSocket::receive(*dataP_) != -1)
 	{
 		(*headerP_)["IPAddress"] = ipAddress_;
-		(*headerP_)["Port"] = std::to_string(port_);
+		(*headerP_)["Port"]      = std::to_string(port_);
 
 		//if (port_ == 40005)
 		//{

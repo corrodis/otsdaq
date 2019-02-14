@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 ARTDAQConsumerConfiguration::ARTDAQConsumerConfiguration(void)
-: ConfigurationBase("ARTDAQConsumerConfiguration")
+    : ConfigurationBase("ARTDAQConsumerConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -22,12 +22,12 @@ ARTDAQConsumerConfiguration::ARTDAQConsumerConfiguration(void)
 	//    </VIEW>
 	//  </CONFIGURATION>
 	//</ROOT>
-
 }
 
 //==============================================================================
 ARTDAQConsumerConfiguration::~ARTDAQConsumerConfiguration(void)
-{}
+{
+}
 
 //==============================================================================
 void ARTDAQConsumerConfiguration::init(ConfigurationManager *configManager)
@@ -38,7 +38,7 @@ void ARTDAQConsumerConfiguration::init(ConfigurationManager *configManager)
 const std::string ARTDAQConsumerConfiguration::getConfigurationString(std::string processorUID) const
 {
 	std::string tmpConfiguration;
-	ConfigurationBase::activeConfigurationView_->getValue(tmpConfiguration, ConfigurationBase::activeConfigurationView_->findRow(ProcessorID,processorUID), ConfigurationString);
+	ConfigurationBase::activeConfigurationView_->getValue(tmpConfiguration, ConfigurationBase::activeConfigurationView_->findRow(ProcessorID, processorUID), ConfigurationString);
 	return tmpConfiguration;
 }
 

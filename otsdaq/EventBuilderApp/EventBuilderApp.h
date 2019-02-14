@@ -3,9 +3,9 @@
 
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 
-#include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
+#include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 
 #include "artdaq/Application/EventBuilderApp.hh"
 
@@ -13,16 +13,15 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
-#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 #include <xgi/Method.h>
+#include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 
-#include <string>
 #include <map>
+#include <string>
 
 #include <memory>
 
-namespace ots
-{
+namespace ots {
 
 class ConfigurationManager;
 class ConfigurationGroupKey;
@@ -32,63 +31,56 @@ class ConfigurationGroupKey;
  */
 //EventBuilderApp
 //	This class provides the otsdaq interface to a single artdaq Event Builder,
-class EventBuilderApp: public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
-{
+class EventBuilderApp : public xdaq::Application, public SOAPMessenger, public RunControlStateMachine {
+       public:
+	XDAQ_INSTANTIATOR();
 
-public:
+	EventBuilderApp(xdaq::ApplicationStub* s);
+	virtual ~EventBuilderApp(void);
+	void init(void);
+	void destroy(void);
+	void Default(xgi::Input* in, xgi::Output* out);
 
-    XDAQ_INSTANTIATOR();
+	//State Machine requests handlers
+	void		       stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
+	void		       stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out);
+	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference message);
+	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference message);
+	bool		       stateMachineThread(toolbox::task::WorkLoop* workLoop);
 
-    EventBuilderApp            								(xdaq::ApplicationStub * s) ;
-    virtual ~EventBuilderApp   								(void);
-    void init                            					(void);
-    void destroy                         					(void);
-    void Default                        					(xgi::Input* in, xgi::Output* out) ;
+	xoap::MessageReference stateMachineStateRequest(xoap::MessageReference message);
+	xoap::MessageReference stateMachineErrorMessageRequest(xoap::MessageReference message);
 
+	void stateInitial(toolbox::fsm::FiniteStateMachine& fsm);
+	void statePaused(toolbox::fsm::FiniteStateMachine& fsm);
+	void stateRunning(toolbox::fsm::FiniteStateMachine& fsm);
+	void stateHalted(toolbox::fsm::FiniteStateMachine& fsm);
+	void stateConfigured(toolbox::fsm::FiniteStateMachine& fsm);
+	void inError(toolbox::fsm::FiniteStateMachine& fsm);
 
-    //State Machine requests handlers
-    void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out ) ;
-    void 			        stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out ) ;
-    xoap::MessageReference 	stateMachineXoapHandler      	(xoap::MessageReference message )  	;
-    xoap::MessageReference 	stateMachineResultXoapHandler	(xoap::MessageReference message )  	;
-    bool                    stateMachineThread           	(toolbox::task::WorkLoop* workLoop);
+	void transitionConfiguring(toolbox::Event::Reference e);
+	void transitionHalting(toolbox::Event::Reference e);
+	void transitionInitializing(toolbox::Event::Reference e);
+	void transitionPausing(toolbox::Event::Reference e);
+	void transitionResuming(toolbox::Event::Reference e);
+	void transitionStarting(toolbox::Event::Reference e);
+	void transitionStopping(toolbox::Event::Reference e);
+	void enteringError(toolbox::Event::Reference e);
 
-    xoap::MessageReference 	stateMachineStateRequest     	(xoap::MessageReference message )  	;
-    xoap::MessageReference 	stateMachineErrorMessageRequest	(xoap::MessageReference message )  	;
+       private:
+	WorkLoopManager stateMachineWorkLoopManager_;
+	toolbox::BSem   stateMachineSemaphore_;
 
-    void stateInitial    (toolbox::fsm::FiniteStateMachine& fsm) ;
-    void statePaused     (toolbox::fsm::FiniteStateMachine& fsm) ;
-    void stateRunning    (toolbox::fsm::FiniteStateMachine& fsm) ;
-    void stateHalted     (toolbox::fsm::FiniteStateMachine& fsm) ;
-    void stateConfigured (toolbox::fsm::FiniteStateMachine& fsm) ;
-    void inError         (toolbox::fsm::FiniteStateMachine& fsm) ;
-
-    void transitionConfiguring (toolbox::Event::Reference e) ;
-    void transitionHalting     (toolbox::Event::Reference e) ;
-    void transitionInitializing(toolbox::Event::Reference e) ;
-    void transitionPausing     (toolbox::Event::Reference e) ;
-    void transitionResuming    (toolbox::Event::Reference e) ;
-    void transitionStarting    (toolbox::Event::Reference e) ;
-    void transitionStopping    (toolbox::Event::Reference e) ;
-    void enteringError         (toolbox::Event::Reference e) ;
-
-private:
-
-    WorkLoopManager                            	stateMachineWorkLoopManager_;
-    toolbox::BSem                              	stateMachineSemaphore_;
-
-    AllSupervisorInfo                   		allSupervisorInfo_;
-    ConfigurationManager*                      	theConfigurationManager_;
-	std::string                                	XDAQContextConfigurationName_;
-	std::string                                	supervisorConfigurationPath_;
-	std::string                                	supervisorContextUID_;
-	std::string                                	supervisorApplicationUID_;
-
+	AllSupervisorInfo     allSupervisorInfo_;
+	ConfigurationManager* theConfigurationManager_;
+	std::string	   XDAQContextConfigurationName_;
+	std::string	   supervisorConfigurationPath_;
+	std::string	   supervisorContextUID_;
+	std::string	   supervisorApplicationUID_;
 
 	std::unique_ptr<artdaq::EventBuilderApp> theARTDAQEventBuilderInterface_;
-
 };
 
-}
+}  // namespace ots
 
 #endif

@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 DQMHistosConsumerConfiguration::DQMHistosConsumerConfiguration(void)
-: ConfigurationBase("DQMHistosConsumerConfiguration")
+    : ConfigurationBase("DQMHistosConsumerConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -23,19 +23,18 @@ DQMHistosConsumerConfiguration::DQMHistosConsumerConfiguration(void)
 	//	    </VIEW>
 	//	  </CONFIGURATION>
 	//	</ROOT>
-
-
 }
 
 //==============================================================================
 DQMHistosConsumerConfiguration::~DQMHistosConsumerConfiguration(void)
-{}
+{
+}
 
 //==============================================================================
-void DQMHistosConsumerConfiguration::init(ConfigurationManager *configManager)
+void DQMHistosConsumerConfiguration::init(ConfigurationManager* configManager)
 {
-	std::string  processorUID;
-	for(unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	std::string processorUID;
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
 		ConfigurationBase::activeConfigurationView_->getValue(processorUID, row, ProcessorID);
 		processorIDToRowMap_[processorUID] = row;
@@ -46,7 +45,7 @@ void DQMHistosConsumerConfiguration::init(ConfigurationManager *configManager)
 std::vector<std::string> DQMHistosConsumerConfiguration::getProcessorIDList(void) const
 {
 	std::vector<std::string> list;
-	for(auto& it: processorIDToRowMap_)
+	for (auto& it : processorIDToRowMap_)
 		list.push_back(it.first);
 	return list;
 }
@@ -61,7 +60,7 @@ std::string DQMHistosConsumerConfiguration::getFilePath(std::string processorUID
 }
 
 //==============================================================================
-std::string DQMHistosConsumerConfiguration::getRadixFileName (std::string processorUID) const
+std::string DQMHistosConsumerConfiguration::getRadixFileName(std::string processorUID) const
 {
 	check(processorUID);
 	std::string val;
@@ -70,7 +69,7 @@ std::string DQMHistosConsumerConfiguration::getRadixFileName (std::string proces
 }
 
 //==============================================================================
-bool DQMHistosConsumerConfiguration::getSaveFile (std::string processorUID) const
+bool DQMHistosConsumerConfiguration::getSaveFile(std::string processorUID) const
 {
 	check(processorUID);
 	bool val;
@@ -81,7 +80,7 @@ bool DQMHistosConsumerConfiguration::getSaveFile (std::string processorUID) cons
 //==============================================================================
 void DQMHistosConsumerConfiguration::check(std::string processorUID) const
 {
-	if(processorIDToRowMap_.find(processorUID) == processorIDToRowMap_.end())
+	if (processorIDToRowMap_.find(processorUID) == processorIDToRowMap_.end())
 	{
 		std::cout << __COUT_HDR_FL__ << "Couldn't find processor " << processorUID << " in the UDPDataStreamerConsumerConfiguration!" << std::endl;
 		assert(0);

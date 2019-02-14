@@ -1,14 +1,14 @@
 #include "otsdaq-core/NetworkUtilities/TCPSocket.h"
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutMacros.h"
 #include "artdaq-core/Utilities/TimeUtils.hh"
+#include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq-core/MessageFacility/MessageFacility.h"
 
-#include <iostream>
 #include <cassert>
+#include <iostream>
 #include <sstream>
 
-#include <unistd.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 //#include <sys/TCPSocket.h>
 #include <netdb.h>
 //#include <ifaddrs.h>
@@ -26,24 +26,25 @@
 using namespace ots;
 
 //========================================================================================================================
-TCPSocket::TCPSocket(const std::string &senderHost, unsigned int senderPort, int receiveBufferSize)
-	: host_(senderHost)
-	, port_(senderPort)
-	, TCPSocketNumber_(-1)
-	, SendSocket_(-1)
-	, isSender_(false)
-	, bufferSize_(receiveBufferSize)
-	, chunkSize_(65000)
-{}
+TCPSocket::TCPSocket(const std::string& senderHost, unsigned int senderPort, int receiveBufferSize)
+    : host_(senderHost)
+    , port_(senderPort)
+    , TCPSocketNumber_(-1)
+    , SendSocket_(-1)
+    , isSender_(false)
+    , bufferSize_(receiveBufferSize)
+    , chunkSize_(65000)
+{
+}
 
 //========================================================================================================================
 TCPSocket::TCPSocket(unsigned int listenPort, int sendBufferSize)
-	: port_(listenPort)
-	, TCPSocketNumber_(-1)
-	, SendSocket_(-1)
-	, isSender_(true)
-	, bufferSize_(sendBufferSize)
-	, chunkSize_(65000)
+    : port_(listenPort)
+    , TCPSocketNumber_(-1)
+    , SendSocket_(-1)
+    , isSender_(true)
+    , bufferSize_(sendBufferSize)
+    , chunkSize_(65000)
 {
 	TCPSocketNumber_ = TCP_listen_fd(listenPort, bufferSize_);
 }
@@ -53,7 +54,8 @@ TCPSocket::TCPSocket(unsigned int listenPort, int sendBufferSize)
 TCPSocket::TCPSocket(void)
 {
 	__SS__ << "ERROR: This method should never be called. This is the protected constructor. There is something wrong in your inheritance scheme!" << std::endl;
-	__COUT__ << "\n" << ss.str();
+	__COUT__ << "\n"
+		 << ss.str();
 
 	__SS_THROW__;
 }
@@ -75,10 +77,9 @@ void TCPSocket::connect(double tmo_s)
 	if (isSender_)
 	{
 		while (SendSocket_ == -1 && artdaq::TimeUtils::GetElapsedTime(start) < tmo_s) {
-
 			sockaddr_in addr;
-			socklen_t arglen = sizeof(addr);
-			SendSocket_ = accept(TCPSocketNumber_, (struct sockaddr *)&addr, &arglen);
+			socklen_t   arglen = sizeof(addr);
+			SendSocket_	= accept(TCPSocketNumber_, (struct sockaddr*)&addr, &arglen);
 
 			if (SendSocket_ == -1)
 			{
@@ -87,7 +88,7 @@ void TCPSocket::connect(double tmo_s)
 			}
 
 			MagicPacket m;
-			auto sts = read(SendSocket_, &m, sizeof(MagicPacket));
+			auto	sts = read(SendSocket_, &m, sizeof(MagicPacket));
 			if (!checkMagicPacket(m) || sts != sizeof(MagicPacket))
 			{
 				perror("magic");
@@ -105,7 +106,7 @@ void TCPSocket::connect(double tmo_s)
 				continue;
 			}
 
-			auto m = makeMagicPacket(port_);
+			auto m   = makeMagicPacket(port_);
 			auto sts = ::send(TCPSocketNumber_, &m, sizeof(MagicPacket), 0);
 			if (sts != sizeof(MagicPacket))
 			{
@@ -116,7 +117,6 @@ void TCPSocket::connect(double tmo_s)
 		}
 	}
 }
-
 
 //========================================================================================================================
 int TCPSocket::send(const uint8_t* data, size_t size)
@@ -130,7 +130,7 @@ int TCPSocket::send(const uint8_t* data, size_t size)
 	}
 
 	size_t offset = 0;
-	int sts = 1;
+	int    sts    = 1;
 
 	while (offset < size && sts > 0)
 	{
@@ -189,7 +189,7 @@ int TCPSocket::receive(uint8_t* buffer, unsigned int timeoutSeconds, unsigned in
 
 	//set timeout period for select()
 	struct timeval timeout;
-	timeout.tv_sec = timeoutSeconds;
+	timeout.tv_sec  = timeoutSeconds;
 	timeout.tv_usec = timeoutUSeconds;
 
 	fd_set fdSet;
@@ -244,4 +244,3 @@ int TCPSocket::receive(std::vector<uint32_t>& buffer, unsigned int timeoutSecond
 	}
 	return -1;
 }
-

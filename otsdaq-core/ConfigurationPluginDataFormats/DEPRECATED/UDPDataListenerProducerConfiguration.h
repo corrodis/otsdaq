@@ -5,15 +5,10 @@
 
 #include <string>
 
+namespace ots {
 
-namespace ots
-{
-
-class UDPDataListenerProducerConfiguration : public ConfigurationBase
-{
-
-public:
-
+class UDPDataListenerProducerConfiguration : public ConfigurationBase {
+       public:
 	UDPDataListenerProducerConfiguration(void);
 	virtual ~UDPDataListenerProducerConfiguration(void);
 
@@ -21,15 +16,14 @@ public:
 	void init(ConfigurationManager *configManager);
 
 	//Getter
-	std::vector<std::string>  getProcessorIDList(void) const;
-	unsigned int              getBufferSize     (std::string processorUID) const;
-	std::string               getIPAddress      (std::string processorUID) const;
-	unsigned int              getPort           (std::string processorUID) const;
+	std::vector<std::string> getProcessorIDList(void) const;
+	unsigned int		 getBufferSize(std::string processorUID) const;
+	std::string		 getIPAddress(std::string processorUID) const;
+	unsigned int		 getPort(std::string processorUID) const;
 
-private:
-
+       private:
 	void check(std::string processorUID) const;
-	enum{
+	enum {
 		ProcessorID,
 		BufferSize,
 		IPAddress,
@@ -37,7 +31,6 @@ private:
 	};
 
 	std::map<std::string, unsigned int> processorIDToRowMap_;
-
 };
-}
+}  // namespace ots
 #endif

@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 DetectorToFEConfiguration::DetectorToFEConfiguration(void)
-: ConfigurationBase("DetectorToFEConfiguration")
+    : ConfigurationBase("DetectorToFEConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -31,22 +31,23 @@ DetectorToFEConfiguration::DetectorToFEConfiguration(void)
 
 //==============================================================================
 DetectorToFEConfiguration::~DetectorToFEConfiguration(void)
-{}
+{
+}
 
 //==============================================================================
-void DetectorToFEConfiguration::init(ConfigurationManager *configManager)
+void DetectorToFEConfiguration::init(ConfigurationManager* configManager)
 {
 	std::string tmpDetectorName;
-	for(unsigned int row=0; row<ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorName                          , row, DetectorID);
+		ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorName, row, DetectorID);
 		nameToInfoMap_[tmpDetectorName] = DetectorInfo();
-		DetectorInfo& aDetectorInfo = nameToInfoMap_[tmpDetectorName];
-		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEWriterID_             , row, FEWriterID);
-		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEWriterChannel_        , row, FEWriterChannel);
+		DetectorInfo& aDetectorInfo     = nameToInfoMap_[tmpDetectorName];
+		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEWriterID_, row, FEWriterID);
+		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEWriterChannel_, row, FEWriterChannel);
 		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEWriterDetectorAddress_, row, FEWriterDetectorAddress);
-		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEReaderID_             , row, FEReaderID);
-		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEReaderChannel_        , row, FEReaderChannel);
+		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEReaderID_, row, FEReaderID);
+		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEReaderChannel_, row, FEReaderChannel);
 		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEReaderDetectorAddress_, row, FEReaderDetectorAddress);
 	}
 }
@@ -54,13 +55,13 @@ void DetectorToFEConfiguration::init(ConfigurationManager *configManager)
 //==============================================================================
 std::vector<std::string> DetectorToFEConfiguration::getFEWriterDetectorList(std::string interfaceID) const
 {
-	std::string tmpDetectorID;
-	std::string tmpFEWriterID;
+	std::string		 tmpDetectorID;
+	std::string		 tmpFEWriterID;
 	std::vector<std::string> list;
-	for(unsigned int row=0; row<ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
 		ConfigurationBase::activeConfigurationView_->getValue(tmpFEWriterID, row, FEWriterID);
-		if(tmpFEWriterID == interfaceID)
+		if (tmpFEWriterID == interfaceID)
 		{
 			ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorID, row, DetectorID);
 			list.push_back(tmpDetectorID);
@@ -72,13 +73,13 @@ std::vector<std::string> DetectorToFEConfiguration::getFEWriterDetectorList(std:
 //==============================================================================
 std::vector<std::string> DetectorToFEConfiguration::getFEReaderDetectorList(std::string interfaceID) const
 {
-	std::string tmpDetectorID;
-	std::string tmpFEReaderID;
+	std::string		 tmpDetectorID;
+	std::string		 tmpFEReaderID;
 	std::vector<std::string> list;
-	for(unsigned int row=0; row<ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpFEReaderID,row,FEReaderID);
-		if(tmpFEReaderID == interfaceID)
+		ConfigurationBase::activeConfigurationView_->getValue(tmpFEReaderID, row, FEReaderID);
+		if (tmpFEReaderID == interfaceID)
 		{
 			ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorID, row, DetectorID);
 			list.push_back(tmpDetectorID);

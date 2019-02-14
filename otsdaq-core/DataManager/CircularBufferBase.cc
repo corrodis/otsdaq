@@ -1,14 +1,13 @@
 #include "otsdaq-core/DataManager/CircularBufferBase.h"
-#include "otsdaq-core/DataManager/DataProducer.h"
 #include "otsdaq-core/DataManager/DataConsumer.h"
+#include "otsdaq-core/DataManager/DataProducer.h"
 
 using namespace ots;
 
-
 //========================================================================================================================
 CircularBufferBase::CircularBufferBase(const std::string& bufferID)
-: dataBufferId_		(bufferID)
-, mfSubject_		("CircularBuffer-" + dataBufferId_)
+    : dataBufferId_(bufferID)
+    , mfSubject_("CircularBuffer-" + dataBufferId_)
 {
 }
 

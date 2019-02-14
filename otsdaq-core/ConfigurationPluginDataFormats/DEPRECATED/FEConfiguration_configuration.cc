@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 FEConfiguration::FEConfiguration(void)
-: ConfigurationBase("FEConfiguration")
+    : ConfigurationBase("FEConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -24,12 +24,12 @@ FEConfiguration::FEConfiguration(void)
 	//    </VIEW>
 	//  </CONFIGURATION>
 	//</ROOT>
-
 }
 
 //==============================================================================
 FEConfiguration::~FEConfiguration(void)
-{}
+{
+}
 
 //==============================================================================
 void FEConfiguration::init(ConfigurationManager *configManager)
@@ -37,11 +37,11 @@ void FEConfiguration::init(ConfigurationManager *configManager)
 	std::string  tmpType;
 	unsigned int tmpInstance;
 	std::string  tmpID;
-	for(unsigned int row=0; row<ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpType,     row, SupervisorType);
+		ConfigurationBase::activeConfigurationView_->getValue(tmpType, row, SupervisorType);
 		ConfigurationBase::activeConfigurationView_->getValue(tmpInstance, row, SupervisorInstance);
-		ConfigurationBase::activeConfigurationView_->getValue(tmpID,       row, FrontEndId);
+		ConfigurationBase::activeConfigurationView_->getValue(tmpID, row, FrontEndId);
 		std::cout << __COUT_HDR_FL__ << "Type: " << tmpType << " Name: " << tmpInstance << " row: " << row << std::endl;
 		typeNameToRow_[composeUniqueName(tmpType, tmpInstance)][tmpID] = row;
 	}

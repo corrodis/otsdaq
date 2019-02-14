@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 RawDataSaverConsumerConfiguration::RawDataSaverConsumerConfiguration(void)
-: ConfigurationBase("RawDataSaverConsumerConfiguration")
+    : ConfigurationBase("RawDataSaverConsumerConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -22,19 +22,18 @@ RawDataSaverConsumerConfiguration::RawDataSaverConsumerConfiguration(void)
 	//	    </VIEW>
 	//	  </CONFIGURATION>
 	//	</ROOT>
-
-
 }
 
 //==============================================================================
 RawDataSaverConsumerConfiguration::~RawDataSaverConsumerConfiguration(void)
-{}
+{
+}
 
 //==============================================================================
-void RawDataSaverConsumerConfiguration::init(ConfigurationManager *configManager)
+void RawDataSaverConsumerConfiguration::init(ConfigurationManager* configManager)
 {
-	std::string  processorUID;
-	for(unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	std::string processorUID;
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
 		ConfigurationBase::activeConfigurationView_->getValue(processorUID, row, ProcessorID);
 		processorIDToRowMap_[processorUID] = row;
@@ -45,7 +44,7 @@ void RawDataSaverConsumerConfiguration::init(ConfigurationManager *configManager
 std::vector<std::string> RawDataSaverConsumerConfiguration::getProcessorIDList(void) const
 {
 	std::vector<std::string> list;
-	for(auto& it: processorIDToRowMap_)
+	for (auto& it : processorIDToRowMap_)
 		list.push_back(it.first);
 	return list;
 }
@@ -60,7 +59,7 @@ std::string RawDataSaverConsumerConfiguration::getFilePath(std::string processor
 }
 
 //==============================================================================
-std::string RawDataSaverConsumerConfiguration::getRadixFileName (std::string processorUID) const
+std::string RawDataSaverConsumerConfiguration::getRadixFileName(std::string processorUID) const
 {
 	check(processorUID);
 	std::string val;
@@ -71,7 +70,7 @@ std::string RawDataSaverConsumerConfiguration::getRadixFileName (std::string pro
 //==============================================================================
 void RawDataSaverConsumerConfiguration::check(std::string processorUID) const
 {
-	if(processorIDToRowMap_.find(processorUID) == processorIDToRowMap_.end())
+	if (processorIDToRowMap_.find(processorUID) == processorIDToRowMap_.end())
 	{
 		std::cout << __COUT_HDR_FL__ << "Couldn't find processor " << processorUID << " in the UDPDataStreamerConsumerConfiguration!" << std::endl;
 		assert(0);

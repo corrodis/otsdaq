@@ -9,8 +9,8 @@ using namespace ots;
 //the Socket Constructor that is commented out here in your class
 //========================================================================================================================
 UDPDataStreamerBase::UDPDataStreamerBase(std::string IPAddress, unsigned int port, std::string toIPAddress, unsigned int toPort)
-: TransmitterSocket (IPAddress, port)
-, streamToSocket_	(toIPAddress, toPort)
+    : TransmitterSocket(IPAddress, port)
+    , streamToSocket_(toIPAddress, toPort)
 {
 	__COUT__ << "IPAddress " << IPAddress << std::endl;
 	__COUT__ << "port " << port << std::endl;
@@ -30,4 +30,3 @@ UDPDataStreamerBase::UDPDataStreamerBase(std::string IPAddress, unsigned int por
 UDPDataStreamerBase::~UDPDataStreamerBase(void)
 {
 }
-

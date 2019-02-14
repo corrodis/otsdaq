@@ -1,9 +1,9 @@
 #include "otsdaq-core/CoreSupervisors/FEDataManagerSupervisor.h"
 //#include "otsdaq-core/FECore/FEVInterfacesManager.h"
+#include "otsdaq-core/ARTDAQDataManager/ARTDAQDataManager.h"
+#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/DataManager/DataManager.h"
 #include "otsdaq-core/DataManager/DataManagerSingleton.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/ARTDAQDataManager/ARTDAQDataManager.h"
 
 //#include "otsdaq-core/FECore/FEProducerVInterface.h"
 
@@ -12,9 +12,9 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(FEDataManagerSupervisor)
 
 //========================================================================================================================
-FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s,
-		bool artdaqDataManager)
-: FESupervisor(s)
+FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub* s,
+						 bool			artdaqDataManager)
+    : FESupervisor(s)
 {
 	__SUP_COUT__ << "Constructor." << std::endl;
 
@@ -27,42 +27,37 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub * s,
 	//FEVInterfacesManager gets added in FESupervisor constructor
 	__SUP_COUTV__(CoreSupervisorBase::theStateMachineImplementation_.size());
 
-//
-//	CoreSupervisorBase::theStateMachineImplementation_.push_back(
-//			new FEVInterfacesManager(
-//					CorePropertySupervisorBase::getContextTreeNode(),
-//					CorePropertySupervisorBase::supervisorConfigurationPath_
-//			)
-//	);
+	//
+	//	CoreSupervisorBase::theStateMachineImplementation_.push_back(
+	//			new FEVInterfacesManager(
+	//					CorePropertySupervisorBase::getContextTreeNode(),
+	//					CorePropertySupervisorBase::supervisorConfigurationPath_
+	//			)
+	//	);
 
-
-	if(artdaqDataManager)
+	if (artdaqDataManager)
 	{
 		__SUP_COUT__ << "Adding ARTDAQ Data Manager now...!" << __E__;
 		CoreSupervisorBase::theStateMachineImplementation_.push_back(
-					DataManagerSingleton::getInstance<ARTDAQDataManager>(
-							CorePropertySupervisorBase::getContextTreeNode(),
-							CorePropertySupervisorBase::supervisorConfigurationPath_,
-							CorePropertySupervisorBase::supervisorApplicationUID_
-					)
-			);
+		    DataManagerSingleton::getInstance<ARTDAQDataManager>(
+			CorePropertySupervisorBase::getContextTreeNode(),
+			CorePropertySupervisorBase::supervisorConfigurationPath_,
+			CorePropertySupervisorBase::supervisorApplicationUID_));
 	}
 	else
 	{
 		__SUP_COUT__ << "Adding Data Manager now...!" << __E__;
 		CoreSupervisorBase::theStateMachineImplementation_.push_back(
-				DataManagerSingleton::getInstance<DataManager>(
-						CorePropertySupervisorBase::getContextTreeNode(),
-						CorePropertySupervisorBase::supervisorConfigurationPath_,
-						CorePropertySupervisorBase::supervisorApplicationUID_
-				)
-		);
+		    DataManagerSingleton::getInstance<DataManager>(
+			CorePropertySupervisorBase::getContextTreeNode(),
+			CorePropertySupervisorBase::supervisorConfigurationPath_,
+			CorePropertySupervisorBase::supervisorApplicationUID_));
 	}
 
 	extractDataManager();
 
 	__SUP_COUT__ << "Constructed." << __E__;
-} //end constructor()
+}  //end constructor()
 
 //========================================================================================================================
 FEDataManagerSupervisor::~FEDataManagerSupervisor(void)
@@ -76,7 +71,7 @@ FEDataManagerSupervisor::~FEDataManagerSupervisor(void)
 	theStateMachineImplementation_.pop_back();
 
 	__SUP_COUT__ << "Destructed." << __E__;
-} //end destructor()
+}  //end destructor()
 
 //========================================================================================================================
 //transitionConfiguring
@@ -89,21 +84,19 @@ void FEDataManagerSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	//Data Manager needs to be configured (instantiate buffers)
 	//	before FEVinterfaceManager configures (creates interfaces)
 
-	if(theStateMachineImplementation_.size() != 2)
+	if (theStateMachineImplementation_.size() != 2)
 	{
-		__SUP_SS__ << "State machine size is not 2! It is " <<
-				theStateMachineImplementation_.size() <<
-				". What happened??" << __E__;
+		__SUP_SS__ << "State machine size is not 2! It is " << theStateMachineImplementation_.size() << ". What happened??" << __E__;
 		__SUP_SS_THROW__;
 	}
 
-	VStateMachine* p = theStateMachineImplementation_[0];
+	VStateMachine* p		  = theStateMachineImplementation_[0];
 	theStateMachineImplementation_[0] = theStateMachineImplementation_[1];
 	theStateMachineImplementation_[1] = p;
 
 	CoreSupervisorBase::transitionConfiguring(e);
 
-	{	//print buffer status
+	{  //print buffer status
 		__SUP_SS__;
 		//theDataManager_->dumpStatus((std::ostream*)&ss);
 		std::cout << ss.str() << __E__;
@@ -118,7 +111,7 @@ void FEDataManagerSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	theStateMachineImplementation_[1] = theStateMachineImplementation_[0];
 	theStateMachineImplementation_[0] = p;
 
-} //end transitionConfiguring()
+}  //end transitionConfiguring()
 
 //========================================================================================================================
 //transitionStarting
@@ -132,14 +125,12 @@ void FEDataManagerSupervisor::transitionStarting(toolbox::Event::Reference e)
 	//Data Manager needs to be started (start buffers)
 	//	before FEVinterfaceManager starts (interfaces write)
 
-	if(theStateMachineImplementation_.size() != 2)
+	if (theStateMachineImplementation_.size() != 2)
 	{
-		__SUP_SS__ << "State machine size is not 2! It is " <<
-				theStateMachineImplementation_.size() <<
-				". What happened??" << __E__;
+		__SUP_SS__ << "State machine size is not 2! It is " << theStateMachineImplementation_.size() << ". What happened??" << __E__;
 	}
 
-	VStateMachine* p = theStateMachineImplementation_[0];
+	VStateMachine* p		  = theStateMachineImplementation_[0];
 	theStateMachineImplementation_[0] = theStateMachineImplementation_[1];
 	theStateMachineImplementation_[1] = p;
 
@@ -149,7 +140,7 @@ void FEDataManagerSupervisor::transitionStarting(toolbox::Event::Reference e)
 	theStateMachineImplementation_[1] = theStateMachineImplementation_[0];
 	theStateMachineImplementation_[0] = p;
 
-} //end transitionStarting()
+}  //end transitionStarting()
 
 //========================================================================================================================
 //transitionResuming
@@ -163,14 +154,12 @@ void FEDataManagerSupervisor::transitionResuming(toolbox::Event::Reference e)
 	//Data Manager needs to be resumed (resume buffers)
 	//	before FEVinterfaceManager resumes (interfaces write)
 
-	if(theStateMachineImplementation_.size() != 2)
+	if (theStateMachineImplementation_.size() != 2)
 	{
-		__SUP_SS__ << "State machine size is not 2! It is " <<
-				theStateMachineImplementation_.size() <<
-				". What happened??" << __E__;
+		__SUP_SS__ << "State machine size is not 2! It is " << theStateMachineImplementation_.size() << ". What happened??" << __E__;
 	}
 
-	VStateMachine* p = theStateMachineImplementation_[0];
+	VStateMachine* p		  = theStateMachineImplementation_[0];
 	theStateMachineImplementation_[0] = theStateMachineImplementation_[1];
 	theStateMachineImplementation_[1] = p;
 
@@ -180,8 +169,7 @@ void FEDataManagerSupervisor::transitionResuming(toolbox::Event::Reference e)
 	theStateMachineImplementation_[1] = theStateMachineImplementation_[0];
 	theStateMachineImplementation_[0] = p;
 
-} //end transitionResuming()
-
+}  //end transitionResuming()
 
 //========================================================================================================================
 //extractDataManager
@@ -200,7 +188,7 @@ DataManager* FEDataManagerSupervisor::extractDataManager()
 		try
 		{
 			theDataManager_ =
-				dynamic_cast<DataManager*>(theStateMachineImplementation_[i]);
+			    dynamic_cast<DataManager*>(theStateMachineImplementation_[i]);
 			if (!theDataManager_)
 			{
 				//dynamic_cast returns null pointer on failure
@@ -221,4 +209,4 @@ DataManager* FEDataManagerSupervisor::extractDataManager()
 	__SUP_COUT__ << "theDataManager pointer = " << theDataManager_ << std::endl;
 
 	return theDataManager_;
-} // end extractDataManager()
+}  // end extractDataManager()

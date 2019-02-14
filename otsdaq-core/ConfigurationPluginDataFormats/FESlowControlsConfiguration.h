@@ -6,14 +6,10 @@
 
 #include <string>
 
-namespace ots
-{
+namespace ots {
 
-class FESlowControlsConfiguration : public ConfigurationBase
-{
-
-public:
-
+class FESlowControlsConfiguration : public ConfigurationBase {
+       public:
 	FESlowControlsConfiguration(void);
 	virtual ~FESlowControlsConfiguration(void);
 
@@ -22,12 +18,12 @@ public:
 
 	//Getters
 
-private:
+       private:
 	//Column names
 	struct ColSlowControls
 	{
-		std::string const colDataType_                     = "ChannelDataType";
+		std::string const colDataType_ = "ChannelDataType";
 	} colNames_;
 };
-}
+}  // namespace ots
 #endif

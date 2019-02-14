@@ -7,48 +7,46 @@
 
 #ifndef _ots_RegisterView_h_
 #define _ots_RegisterView_h_
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/ConfigurationDataFormats/ViewRegisterInfo.h"
 #include "otsdaq-core/ConfigurationDataFormats/ViewRegisterSequencerInfo.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq-core/MessageFacility/MessageFacility.h"
 
+#include <stdlib.h>
+#include <cassert>
+#include <iostream>
+#include <sstream>  // std::stringstream, std::stringbuf
 #include <string>
 #include <typeinfo>
-#include <iostream>
-#include <sstream>      // std::stringstream, std::stringbuf
 #include <vector>
-#include <cassert>
-#include <stdlib.h>
 namespace ots {
 
 class RegisterView {
-public:
+       public:
+	typedef std::vector<std::vector<std::string> > DataView;
+	typedef DataView::iterator		       iterator;
+	typedef DataView::const_iterator	       const_iterator;
 
-    typedef std::vector<std::vector<std::string> > DataView;
-    typedef DataView::iterator                     iterator;
-    typedef DataView::const_iterator               const_iterator;
-
-    RegisterView(std::string name = "");
+	RegisterView(std::string name = "");
 	virtual ~RegisterView();
 
-
-    unsigned int findRow(unsigned int col, const std::string  value) const;
-    unsigned int findRow(unsigned int col, const unsigned int value) const;
+	unsigned int findRow(unsigned int col, const std::string value) const;
+	unsigned int findRow(unsigned int col, const unsigned int value) const;
 
 	//Getters
-    std::string 		    getName           				() const;
-    int         						 			getVersion        				() const;
-    std::string 						 			getComment        				() const;
-    std::string  						 			getAuthor         				() const;
-    time_t 		 						 			getCreationTime   				() const;
-    unsigned int 						 			getNumberOfRows   				() const;
-    unsigned int    getNumberOfColumns () const;
-    const std::vector<ViewRegisterInfo>& 			getRegistersInfo 				() const;
-          std::vector<ViewRegisterInfo>* 			getRegistersInfoPointer			();
-    const std::vector<ViewRegisterSequencerInfo>& 	getRegistersSequencerInfo		() const;
-	      std::vector<ViewRegisterSequencerInfo>* 	getRegistersSequencerInfoPointer();
+	std::string				      getName() const;
+	int					      getVersion() const;
+	std::string				      getComment() const;
+	std::string				      getAuthor() const;
+	time_t					      getCreationTime() const;
+	unsigned int				      getNumberOfRows() const;
+	unsigned int				      getNumberOfColumns() const;
+	const std::vector<ViewRegisterInfo>&	  getRegistersInfo() const;
+	std::vector<ViewRegisterInfo>*		      getRegistersInfoPointer();
+	const std::vector<ViewRegisterSequencerInfo>& getRegistersSequencerInfo() const;
+	std::vector<ViewRegisterSequencerInfo>*       getRegistersSequencerInfoPointer();
 
-	      /*template<class T>
+	/*template<class T>
 	  void getValue(T& value, unsigned int row, unsigned int col) const
 	  {
 		assert(col < columnsInfo_.size() && row < getNumberOfRows());
@@ -79,17 +77,15 @@ public:
 		}
 	  }*/
 
+	//Setters
+	void setName(std::string name);
+	void setVersion(int version);
+	void setVersion(char* version);
+	void setComment(std::string name);
+	void setAuthor(std::string name);
+	void setCreationTime(time_t t);
 
-
-    //Setters
-    void 								 setName    				(std::string name   );
-    void								 setVersion 				(int         version);
-    void								 setVersion 				(char*       version);
-    void								 setComment 				(std::string name   );
-    void								 setAuthor  				(std::string name   );
-    void								 setCreationTime  			(time_t      t		);
-
-    /*    template<class T>
+	/*    template<class T>
 	void setValue(T value, unsigned int row, unsigned int col)
 	{
     	assert(col < columnsInfo_.size() && row < getNumberOfRows());
@@ -120,21 +116,20 @@ public:
 		}
 	}*/
 
-    int		addRow(); //returns index of added row, always is last row unless
-    bool 	deleteRow(int r); //returns true on success
+	int  addRow();		//returns index of added row, always is last row unless
+	bool deleteRow(int r);  //returns true on success
 
-private:
-	std::string                            name_       			 	;//View name (extensionTableName in xml)
-	int                                    version_    			 	;//Configuration version
-	std::string                            comment_   			  	;//Configuration version comment
-	std::string                            author_      			;
-	time_t		                           creationTime_			;
-  	std::vector<ViewRegisterInfo>          registersInfo_ 			;
-  	std::vector<ViewRegisterSequencerInfo> registersSequencerInfo_	;
-  	DataView                               theDataView_ 			;
-
+       private:
+	std::string			       name_;     //View name (extensionTableName in xml)
+	int				       version_;  //Configuration version
+	std::string			       comment_;  //Configuration version comment
+	std::string			       author_;
+	time_t				       creationTime_;
+	std::vector<ViewRegisterInfo>	  registersInfo_;
+	std::vector<ViewRegisterSequencerInfo> registersSequencerInfo_;
+	DataView			       theDataView_;
 };
 
-}
+}  // namespace ots
 
 #endif /* REGISTERVIEW_H_ */

@@ -6,36 +6,32 @@
 #include <string>
 #include <vector>
 
-namespace ots
-{
+namespace ots {
 
-class DetectorToFEConfiguration : public ConfigurationBase
-{
-
-public:
-
+class DetectorToFEConfiguration : public ConfigurationBase {
+       public:
 	DetectorToFEConfiguration(void);
 	virtual ~DetectorToFEConfiguration(void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init(ConfigurationManager* configManager);
 
 	//Getters
-	std::vector<std::string>  getFEWriterDetectorList   (std::string interfaceID) const;
-	std::vector<std::string>  getFEReaderDetectorList   (std::string interfaceID) const;
+	std::vector<std::string> getFEWriterDetectorList(std::string interfaceID) const;
+	std::vector<std::string> getFEReaderDetectorList(std::string interfaceID) const;
 	//std::vector<std::string>  getFEWCards     (unsigned int supervisorInstance) const;
-	unsigned int              getFEWriterChannel        (const std::string& detectorID) const;
-	unsigned int              getFEWriterDetectorAddress(const std::string& detectorID) const;
-	unsigned int              getFEReaderChannel        (const std::string& detectorID) const;
+	unsigned int getFEWriterChannel(const std::string& detectorID) const;
+	unsigned int getFEWriterDetectorAddress(const std::string& detectorID) const;
+	unsigned int getFEReaderChannel(const std::string& detectorID) const;
 
-private:
-	enum{DetectorID,
-		FEWriterID,
-		FEWriterChannel,
-		FEWriterDetectorAddress,
-		FEReaderID,
-		FEReaderChannel,
-		FEReaderDetectorAddress};
+       private:
+	enum { DetectorID,
+	       FEWriterID,
+	       FEWriterChannel,
+	       FEWriterDetectorAddress,
+	       FEReaderID,
+	       FEReaderChannel,
+	       FEReaderDetectorAddress };
 	struct DetectorInfo
 	{
 		std::string  theFEWriterID_;
@@ -47,5 +43,5 @@ private:
 	};
 	std::map<std::string, DetectorInfo> nameToInfoMap_;
 };
-}
+}  // namespace ots
 #endif

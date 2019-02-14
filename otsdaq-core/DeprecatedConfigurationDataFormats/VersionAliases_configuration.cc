@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 VersionAliases::VersionAliases(void)
-: ConfigurationBase("VersionAliases")
+    : ConfigurationBase("VersionAliases")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -23,7 +23,6 @@ VersionAliases::VersionAliases(void)
 	//    </VIEW>
 	//  </CONFIGURATION>
 	//</ROOT>
-
 }
 
 //==============================================================================

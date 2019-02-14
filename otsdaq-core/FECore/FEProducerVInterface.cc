@@ -1,54 +1,53 @@
 #include "otsdaq-core/FECore/FEProducerVInterface.h"
-#include "otsdaq-core/DataManager/DataManagerSingleton.h"
 #include "otsdaq-core/DataManager/DataManager.h"
+#include "otsdaq-core/DataManager/DataManagerSingleton.h"
 
 using namespace ots;
 
-#undef  __MF_SUBJECT__
+#undef __MF_SUBJECT__
 #define __MF_SUBJECT__ (std::string("FEProducer-") + DataProcessor::processorUID_)
 
 //========================================================================================================================
-FEProducerVInterface::FEProducerVInterface (const std::string& interfaceUID,
-		const ConfigurationTree& theXDAQContextConfigTree,
-		const std::string& interfaceConfigurationPath)
-:
-  FEVInterface			(interfaceUID, theXDAQContextConfigTree, interfaceConfigurationPath)
-, DataProducerBase 		(
-		theXDAQContextConfigTree.getBackNode(
-				interfaceConfigurationPath,4).getValueAsString(),
-				theXDAQContextConfigTree.getNode(
-						interfaceConfigurationPath + "/" +
-						"LinkToDataBufferTable",4).getValueAsString(),
-						interfaceUID /*processorID*/,
-						100/*bufferSize*/)
+FEProducerVInterface::FEProducerVInterface(const std::string&       interfaceUID,
+					   const ConfigurationTree& theXDAQContextConfigTree,
+					   const std::string&       interfaceConfigurationPath)
+    : FEVInterface(interfaceUID, theXDAQContextConfigTree, interfaceConfigurationPath)
+    , DataProducerBase(
+	  theXDAQContextConfigTree.getBackNode(
+				      interfaceConfigurationPath, 4)
+	      .getValueAsString(),
+	  theXDAQContextConfigTree.getNode(
+				      interfaceConfigurationPath + "/" +
+					  "LinkToDataBufferTable",
+				      4)
+	      .getValueAsString(),
+	  interfaceUID /*processorID*/,
+	  100 /*bufferSize*/)
 {
 	//NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the base class versions of function (e.g. getInterfaceType) are called because the derived class has not been instantiate yet!
 	__COUT__ << "'" << interfaceUID << "' Constructed." << __E__;
 
 	__COUTV__(interfaceConfigurationPath);
 	ConfigurationTree appNode =
-			theXDAQContextConfigTree.getBackNode(interfaceConfigurationPath,2);
+	    theXDAQContextConfigTree.getBackNode(interfaceConfigurationPath, 2);
 
 	__COUTV__(appNode.getValueAsString());
 
-} //end constructor()
+}  //end constructor()
 
-FEProducerVInterface::~FEProducerVInterface (void)
+FEProducerVInterface::~FEProducerVInterface(void)
 {
 	__FE_COUT__ << "Destructor." << __E__;
 	//Take out of DataManager vector!
 
-	__COUT__ << "FEProducer '" << DataProcessor::processorUID_ <<
-			"' is unregistering from DataManager Supervisor Buffer '" <<
-			DataProcessor::supervisorApplicationUID_ << ":" <<
-			DataProcessor::bufferUID_ << ".'" << std::endl;
+	__COUT__ << "FEProducer '" << DataProcessor::processorUID_ << "' is unregistering from DataManager Supervisor Buffer '" << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
 
 	DataManager* dataManager =
-		(DataManagerSingleton::getInstance(
-				supervisorApplicationUID_));
+	    (DataManagerSingleton::getInstance(
+		supervisorApplicationUID_));
 
 	dataManager->unregisterFEProducer(
-						bufferUID_,DataProcessor::processorUID_);
+	    bufferUID_, DataProcessor::processorUID_);
 
 	{
 		__SS__;
@@ -56,8 +55,7 @@ FEProducerVInterface::~FEProducerVInterface (void)
 		std::cout << ss.str() << __E__;
 	}
 
-	__COUT__ << "FEProducer '" << DataProcessor::processorUID_ <<
-			"' unregistered." << __E__;
+	__COUT__ << "FEProducer '" << DataProcessor::processorUID_ << "' unregistered." << __E__;
 
 	__FE_COUT__ << "Destructed." << __E__;
 }
@@ -86,31 +84,31 @@ void FEProducerVInterface::copyToNextBuffer(const std::string& dataToWrite)
 {
 	__FE_COUT__ << "Write Data: " << BinaryStringMacros::binaryTo8ByteHexString(dataToWrite) << __E__;
 
-	DataProducerBase::write<std::string,std::map<std::string,std::string> >(dataToWrite);
-//
-//	FEProducerVInterface::getNextBuffer();
-//
-//	__FE_COUT__ << "Have next buffer " << FEProducerVInterface::dataP_ << __E__;
-//	__FE_COUT__ << "Have next buffer size " << FEProducerVInterface::dataP_->size() << __E__;
-//
-//
-//	FEProducerVInterface::dataP_->resize(dataToWrite.size());
-//
-//	__FE_COUT__ << "Have next buffer size " << FEProducerVInterface::dataP_->size() << __E__;
-//
-//	//*FEProducerVInterface::dataP_ = dataToWrite; //copy
-//	memcpy((void *)&(*FEProducerVInterface::dataP_)[0] /*dest*/,
-//			(void *)&dataToWrite[0] /*src*/, 8 /*numOfBytes*/);
-//
-//	__FE_COUT__ << "Data copied " << FEProducerVInterface::dataP_->size() << __E__;
-//
-//	__FE_COUT__ << "Copied Data: " <<
-//			BinaryStringMacros::binaryTo8ByteHexString(*FEProducerVInterface::dataP_) << __E__;
-//
-//
-//	FEProducerVInterface::writeCurrentBuffer();
+	DataProducerBase::write<std::string, std::map<std::string, std::string> >(dataToWrite);
+	//
+	//	FEProducerVInterface::getNextBuffer();
+	//
+	//	__FE_COUT__ << "Have next buffer " << FEProducerVInterface::dataP_ << __E__;
+	//	__FE_COUT__ << "Have next buffer size " << FEProducerVInterface::dataP_->size() << __E__;
+	//
+	//
+	//	FEProducerVInterface::dataP_->resize(dataToWrite.size());
+	//
+	//	__FE_COUT__ << "Have next buffer size " << FEProducerVInterface::dataP_->size() << __E__;
+	//
+	//	//*FEProducerVInterface::dataP_ = dataToWrite; //copy
+	//	memcpy((void *)&(*FEProducerVInterface::dataP_)[0] /*dest*/,
+	//			(void *)&dataToWrite[0] /*src*/, 8 /*numOfBytes*/);
+	//
+	//	__FE_COUT__ << "Data copied " << FEProducerVInterface::dataP_->size() << __E__;
+	//
+	//	__FE_COUT__ << "Copied Data: " <<
+	//			BinaryStringMacros::binaryTo8ByteHexString(*FEProducerVInterface::dataP_) << __E__;
+	//
+	//
+	//	FEProducerVInterface::writeCurrentBuffer();
 
-} //end copyToNextBuffer()
+}  //end copyToNextBuffer()
 
 //========================================================================================================================
 //getNextBuffer
@@ -125,16 +123,16 @@ void FEProducerVInterface::copyToNextBuffer(const std::string& dataToWrite)
 //
 std::string* FEProducerVInterface::getNextBuffer(void)
 {
-	if(DataProducerBase::attachToEmptySubBuffer(
-			FEProducerVInterface::dataP_,
-			FEProducerVInterface::headerP_) < 0)
+	if (DataProducerBase::attachToEmptySubBuffer(
+		FEProducerVInterface::dataP_,
+		FEProducerVInterface::headerP_) < 0)
 	{
 		__SS__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
 		__SS_THROW__;
 	}
 
 	return FEProducerVInterface::dataP_;
-} //end getNextBuffer()
+}  //end getNextBuffer()
 
 //========================================================================================================================
 //writeCurrentBuffer
@@ -144,13 +142,8 @@ void FEProducerVInterface::writeCurrentBuffer(void)
 {
 	__FE_COUT__ << "Writing data of size " << FEProducerVInterface::dataP_->size() << __E__;
 
-	DataProducerBase::setWrittenSubBuffer<std::string,std::map<std::string,std::string> >();
+	DataProducerBase::setWrittenSubBuffer<std::string, std::map<std::string, std::string> >();
 
 	__FE_COUT__ << "Data written." << __E__;
 
-} //end writeCurrentBuffer()
-
-
-
-
-
+}  //end writeCurrentBuffer()

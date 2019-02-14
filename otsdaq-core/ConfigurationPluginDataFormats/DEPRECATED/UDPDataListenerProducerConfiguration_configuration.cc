@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 UDPDataListenerProducerConfiguration::UDPDataListenerProducerConfiguration(void)
-: ConfigurationBase("UDPDataListenerProducerConfiguration")
+    : ConfigurationBase("UDPDataListenerProducerConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -23,19 +23,18 @@ UDPDataListenerProducerConfiguration::UDPDataListenerProducerConfiguration(void)
 	//	    </VIEW>
 	//	  </CONFIGURATION>
 	//	</ROOT>
-
-
 }
 
 //==============================================================================
 UDPDataListenerProducerConfiguration::~UDPDataListenerProducerConfiguration(void)
-{}
+{
+}
 
 //==============================================================================
 void UDPDataListenerProducerConfiguration::init(ConfigurationManager *configManager)
 {
-	std::string  processorUID;
-	for(unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	std::string processorUID;
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
 		ConfigurationBase::activeConfigurationView_->getValue(processorUID, row, ProcessorID);
 		processorIDToRowMap_[processorUID] = row;
@@ -72,7 +71,7 @@ unsigned int UDPDataListenerProducerConfiguration::getPort(std::string processor
 //==============================================================================
 void UDPDataListenerProducerConfiguration::check(std::string processorUID) const
 {
-	if(processorIDToRowMap_.find(processorUID) == processorIDToRowMap_.end())
+	if (processorIDToRowMap_.find(processorUID) == processorIDToRowMap_.end())
 	{
 		std::cout << __COUT_HDR_FL__ << "Couldn't find processor " << processorUID << " in the UDPDataStreamerConsumerConfiguration!" << std::endl;
 		assert(0);

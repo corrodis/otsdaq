@@ -7,8 +7,6 @@
 
 using namespace ots;
 
-
-
 //========================================================================================================================
 SupervisorDescriptorInfoBase::SupervisorDescriptorInfoBase(void)
 {
@@ -22,7 +20,8 @@ SupervisorDescriptorInfoBase::SupervisorDescriptorInfoBase(xdaq::ApplicationCont
 
 //========================================================================================================================
 SupervisorDescriptorInfoBase::~SupervisorDescriptorInfoBase()
-{}
+{
+}
 
 //========================================================================================================================
 void SupervisorDescriptorInfoBase::destroy()
@@ -33,7 +32,7 @@ void SupervisorDescriptorInfoBase::destroy()
 //========================================================================================================================
 void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationContext)
 {
-	if(applicationContext->getDefaultZone()->getApplicationGroup("daq") == 0)
+	if (applicationContext->getDefaultZone()->getApplicationGroup("daq") == 0)
 	{
 		__SS__ << "Could not find xdaq application group \"daq\" (Must not be present in the xdaq context configuration)" << __E__;
 		__SS_THROW__;
@@ -41,21 +40,21 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 
 	__COUT__ << "Init" << __E__;
 
-//	//There is only one and only Supervisor! (Or Config Wizard!!)
-//	theSupervisor_ = *(applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::Supervisor").begin());
-//	if(0)//theSupervisor_ == 0)
-//		__COUT__ << "Note: Could not find xdaq application descriptor \"ots::Supervisor\" (Must not be present in the xdaq context configuration)" << __E__;
-//
-//	theWizard_ = *(applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::OtsConfigurationWizardSupervisor").begin());
-//	if(0)//theWizard_ == 0)
-//		__COUT__ << "Note: Could not find xdaq application descriptor \"ots::OtsConfigurationWizardSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
-//
-//	if(theWizard_ == 0 && theSupervisor_ == 0)
-//	{
-//		__SS__ << "Must have THE ots::Supervisor (or THE ots::OtsConfigurationWizardSupervisor) as part of the context configuration!" << __E__;
-//		__COUT_ERR__ << "\n" << ss.str();
-//		__SS_THROW__;
-//	}
+	//	//There is only one and only Supervisor! (Or Config Wizard!!)
+	//	theSupervisor_ = *(applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::Supervisor").begin());
+	//	if(0)//theSupervisor_ == 0)
+	//		__COUT__ << "Note: Could not find xdaq application descriptor \"ots::Supervisor\" (Must not be present in the xdaq context configuration)" << __E__;
+	//
+	//	theWizard_ = *(applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::OtsConfigurationWizardSupervisor").begin());
+	//	if(0)//theWizard_ == 0)
+	//		__COUT__ << "Note: Could not find xdaq application descriptor \"ots::OtsConfigurationWizardSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
+	//
+	//	if(theWizard_ == 0 && theSupervisor_ == 0)
+	//	{
+	//		__SS__ << "Must have THE ots::Supervisor (or THE ots::OtsConfigurationWizardSupervisor) as part of the context configuration!" << __E__;
+	//		__COUT_ERR__ << "\n" << ss.str();
+	//		__SS_THROW__;
+	//	}
 
 	std::set<XDAQ_CONST_CALL xdaq::ApplicationDescriptor*> appDescriptors;
 
@@ -64,43 +63,41 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 	//allFETypeSupervisors_.clear();
 	allSupervisors_.clear();
 	appDescriptors = applicationContext->getDefaultZone()->getApplicationGroup(
-			"daq")->getApplicationDescriptors();
-	for(auto& it: appDescriptors)
+								 "daq")
+			     ->getApplicationDescriptors();
+	for (auto& it : appDescriptors)
 	{
-		auto /*<it,bool*/ retPair = allSupervisors_.emplace(std::pair
-				<xdata::UnsignedIntegerT, XDAQ_CONST_CALL xdaq::ApplicationDescriptor*>(
-				it->getLocalId(),
-				it));
-		if(!retPair.second)
+		auto /*<it,bool*/ retPair = allSupervisors_.emplace(std::pair<xdata::UnsignedIntegerT, XDAQ_CONST_CALL xdaq::ApplicationDescriptor*>(
+		    it->getLocalId(),
+		    it));
+		if (!retPair.second)
 		{
-			__SS__ << "Error! Duplicate Application IDs are not allowed. ID =" <<
-					it->getLocalId() << __E__;
+			__SS__ << "Error! Duplicate Application IDs are not allowed. ID =" << it->getLocalId() << __E__;
 			__SS_THROW__;
 		}
 	}
 
-//
-//	theLogbookSupervisor_ = *(applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::LogbookSupervisor").begin());
-//	if(theWizard_ == 0 && theLogbookSupervisor_ == 0)
-//		__COUT__ << "Note: Could not find xdaq application descriptor \"ots::LogbookSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
+	//
+	//	theLogbookSupervisor_ = *(applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::LogbookSupervisor").begin());
+	//	if(theWizard_ == 0 && theLogbookSupervisor_ == 0)
+	//		__COUT__ << "Note: Could not find xdaq application descriptor \"ots::LogbookSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
 
-//	theDataManagerSupervisors_.clear();
-//	appDescriptors = applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::DataManagerSupervisor");
-//	for(auto& it: appDescriptors)
-//		theDataManagerSupervisors_[it->getLocalId()] = it;
-//	if(theWizard_ == 0 && theDataManagerSupervisors_.size() == 0)
-//		__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::DataManagerSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
+	//	theDataManagerSupervisors_.clear();
+	//	appDescriptors = applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::DataManagerSupervisor");
+	//	for(auto& it: appDescriptors)
+	//		theDataManagerSupervisors_[it->getLocalId()] = it;
+	//	if(theWizard_ == 0 && theDataManagerSupervisors_.size() == 0)
+	//		__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::DataManagerSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
 
+	//	//theFESupervisors_.clear();
+	//	appDescriptors = applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::FESupervisor");
+	//	for(auto& it: appDescriptors)
+	//	{
+	//		//theFESupervisors_[it->getLocalId()] = it;
+	//		allFETypeSupervisors_[it->getLocalId()] = it;
+	//	}
 
-//	//theFESupervisors_.clear();
-//	appDescriptors = applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::FESupervisor");
-//	for(auto& it: appDescriptors)
-//	{
-//		//theFESupervisors_[it->getLocalId()] = it;
-//		allFETypeSupervisors_[it->getLocalId()] = it;
-//	}
-
-//	if(theWizard_ == 0 && theFESupervisors_.size() == 0)
+	//	if(theWizard_ == 0 && theFESupervisors_.size() == 0)
 	//	__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::FESupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
 
 	//RAR: no need for this theDTCSupervisors_.. state machine should use 'all supervisors'
@@ -116,15 +113,14 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 	//    }
 
 	//theFEDataManagerSupervisors_.clear();
-//	appDescriptors = applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::FEDataManagerSupervisor");
-//	for(auto& it: appDescriptors)
-//	{
-//		//theFEDataManagerSupervisors_[it->getLocalId()] = it;
-//		allFETypeSupervisors_[it->getLocalId()] = it;
-//	}
-//	if(theWizard_ == 0 && theFEDataManagerSupervisors_.size() == 0)
+	//	appDescriptors = applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::FEDataManagerSupervisor");
+	//	for(auto& it: appDescriptors)
+	//	{
+	//		//theFEDataManagerSupervisors_[it->getLocalId()] = it;
+	//		allFETypeSupervisors_[it->getLocalId()] = it;
+	//	}
+	//	if(theWizard_ == 0 && theFEDataManagerSupervisors_.size() == 0)
 	//	__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::FEDataManagerSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
-
 
 	//    theARTDAQFESupervisors_.clear();
 	//    for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::ARTDAQFESupervisor"))
@@ -134,43 +130,42 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 	//        __COUT__ << "Note: Could not find xdaq application descriptor \"ots::ARTDAQFESupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
 	//        //assert(0);
 	//    }
-//
-//	theARTDAQFEDataManagerSupervisors_.clear();
-//			for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::ARTDAQFEDataManagerSupervisor"))
-//			{
-//				//theARTDAQFEDataManagerSupervisors_[it->getLocalId()] = it;
-//				allFETypeSupervisors_[it->getLocalId()] = it;
-//			}
-//	if(0)//theARTDAQFEDataManagerSupervisors_.size() == 0)
+	//
+	//	theARTDAQFEDataManagerSupervisors_.clear();
+	//			for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::ARTDAQFEDataManagerSupervisor"))
+	//			{
+	//				//theARTDAQFEDataManagerSupervisors_[it->getLocalId()] = it;
+	//				allFETypeSupervisors_[it->getLocalId()] = it;
+	//			}
+	//	if(0)//theARTDAQFEDataManagerSupervisors_.size() == 0)
 	//	__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::ARTDAQFEDataManagerSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
-//
-//	theARTDAQDataManagerSupervisors_.clear();
-//	for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::ARTDAQDataManagerSupervisor"))
-//		theARTDAQDataManagerSupervisors_[it->getLocalId()] = it;
-//	if(0)//theARTDAQDataManagerSupervisors_.size() == 0)
-//		__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::ARTDAQDataManagerSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
-//
-//
-//	theARTDAQBuilderSupervisors_.clear();
-//	for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::EventBuilderApp"))
-//		theARTDAQBuilderSupervisors_[it->getLocalId()] = it;
-//	if(0)//theARTDAQBuilderSupervisors_.size() == 0)
-//		__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::EventBuilderApp\" (Must not be present in the xdaq context configuration)" << __E__;
-//
-//
-//	theARTDAQAggregatorSupervisors_.clear();
-//	for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::AggregatorApp"))
-//		theARTDAQAggregatorSupervisors_[it->getLocalId()] = it;
-//	if(0)//theARTDAQAggregatorSupervisors_.size() == 0)
-//		__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::AggregatorApp\" (Must not be present in the xdaq context configuration)" << __E__;
-//
-//
-//	theVisualSupervisors_.clear();
-//	for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::VisualSupervisor"))
-//		theVisualSupervisors_[it->getLocalId()] = it;
-//	if(0)//theVisualSupervisors_.size() == 0)
-//		__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::VisualSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
-
+	//
+	//	theARTDAQDataManagerSupervisors_.clear();
+	//	for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::ARTDAQDataManagerSupervisor"))
+	//		theARTDAQDataManagerSupervisors_[it->getLocalId()] = it;
+	//	if(0)//theARTDAQDataManagerSupervisors_.size() == 0)
+	//		__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::ARTDAQDataManagerSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
+	//
+	//
+	//	theARTDAQBuilderSupervisors_.clear();
+	//	for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::EventBuilderApp"))
+	//		theARTDAQBuilderSupervisors_[it->getLocalId()] = it;
+	//	if(0)//theARTDAQBuilderSupervisors_.size() == 0)
+	//		__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::EventBuilderApp\" (Must not be present in the xdaq context configuration)" << __E__;
+	//
+	//
+	//	theARTDAQAggregatorSupervisors_.clear();
+	//	for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::AggregatorApp"))
+	//		theARTDAQAggregatorSupervisors_[it->getLocalId()] = it;
+	//	if(0)//theARTDAQAggregatorSupervisors_.size() == 0)
+	//		__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::AggregatorApp\" (Must not be present in the xdaq context configuration)" << __E__;
+	//
+	//
+	//	theVisualSupervisors_.clear();
+	//	for(auto& it: applicationContext->getDefaultZone()->getApplicationGroup("daq")->getApplicationDescriptors("ots::VisualSupervisor"))
+	//		theVisualSupervisors_[it->getLocalId()] = it;
+	//	if(0)//theVisualSupervisors_.size() == 0)
+	//		__COUT__ << "Note: Could not find any xdaq application descriptor \"ots::VisualSupervisor\" (Must not be present in the xdaq context configuration)" << __E__;
 }
 
 //
@@ -231,7 +226,6 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 //{
 //	return theVisualSupervisors_;
 //}
-
 
 //========================================================================================================================
 const SupervisorDescriptors& SupervisorDescriptorInfoBase::getAllDescriptors(void) const

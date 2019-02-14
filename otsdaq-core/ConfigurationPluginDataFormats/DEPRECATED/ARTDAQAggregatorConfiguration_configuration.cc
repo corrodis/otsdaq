@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 ARTDAQAggregatorConfiguration::ARTDAQAggregatorConfiguration(void)
-: ConfigurationBase("ARTDAQAggregatorConfiguration")
+    : ConfigurationBase("ARTDAQAggregatorConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -24,12 +24,12 @@ ARTDAQAggregatorConfiguration::ARTDAQAggregatorConfiguration(void)
 	//    </VIEW>
 	//  </CONFIGURATION>
 	//</ROOT>
-
 }
 
 //==============================================================================
 ARTDAQAggregatorConfiguration::~ARTDAQAggregatorConfiguration(void)
-{}
+{
+}
 
 //==============================================================================
 void ARTDAQAggregatorConfiguration::init(ConfigurationManager *configManager)
@@ -40,15 +40,15 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager *configManager)
 std::string ARTDAQAggregatorConfiguration::getAggregatorID(unsigned int supervisorInstance) const
 {
 	std::string tmpID;
-	ConfigurationBase::activeConfigurationView_->getValue(tmpID, ConfigurationBase::activeConfigurationView_->findRow(SupervisorInstance,supervisorInstance), AggregatorID);
+	ConfigurationBase::activeConfigurationView_->getValue(tmpID, ConfigurationBase::activeConfigurationView_->findRow(SupervisorInstance, supervisorInstance), AggregatorID);
 	return tmpID;
 }
 
 //==============================================================================
-bool  ARTDAQAggregatorConfiguration::getStatus(unsigned int supervisorInstance) const
+bool ARTDAQAggregatorConfiguration::getStatus(unsigned int supervisorInstance) const
 {
 	bool tmpStatus;
-	ConfigurationBase::activeConfigurationView_->getValue(tmpStatus, ConfigurationBase::activeConfigurationView_->findRow(SupervisorInstance,supervisorInstance), Status);
+	ConfigurationBase::activeConfigurationView_->getValue(tmpStatus, ConfigurationBase::activeConfigurationView_->findRow(SupervisorInstance, supervisorInstance), Status);
 	return tmpStatus;
 }
 
@@ -56,7 +56,7 @@ bool  ARTDAQAggregatorConfiguration::getStatus(unsigned int supervisorInstance) 
 const std::string ARTDAQAggregatorConfiguration::getConfigurationString(unsigned int supervisorInstance) const
 {
 	std::string tmpConfiguration;
-	ConfigurationBase::activeConfigurationView_->getValue(tmpConfiguration, ConfigurationBase::activeConfigurationView_->findRow(SupervisorInstance,supervisorInstance), ConfigurationString);
+	ConfigurationBase::activeConfigurationView_->getValue(tmpConfiguration, ConfigurationBase::activeConfigurationView_->findRow(SupervisorInstance, supervisorInstance), ConfigurationString);
 	return tmpConfiguration;
 }
 

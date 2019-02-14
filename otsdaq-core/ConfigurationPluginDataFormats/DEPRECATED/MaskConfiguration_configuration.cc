@@ -7,7 +7,7 @@ using namespace ots;
 
 //==============================================================================
 MaskConfiguration::MaskConfiguration(void)
-: ConfigurationBase("MaskConfiguration")
+    : ConfigurationBase("MaskConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -30,12 +30,12 @@ MaskConfiguration::~MaskConfiguration(void)
 }
 
 //==============================================================================
-void MaskConfiguration::init(ConfigurationManager *configManager)
+void MaskConfiguration::init(ConfigurationManager* configManager)
 {
 	std::string tmpDetectorID;
-	for(unsigned int row=0; row<ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorID,row,DetectorID);
+		ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorID, row, DetectorID);
 		nameToRow_[tmpDetectorID] = row;
 	}
 }
@@ -44,7 +44,7 @@ void MaskConfiguration::init(ConfigurationManager *configManager)
 const std::string& MaskConfiguration::getROCMask(std::string rocName) const
 {
 	//FIXME This check should be removed when you are sure you don't have inconsistencies between configurations
-	if(nameToRow_.find(rocName) == nameToRow_.end())
+	if (nameToRow_.find(rocName) == nameToRow_.end())
 	{
 		std::cout << __COUT_HDR_FL__ << "ROC named " << rocName << " doesn't exist in the mask configuration." << std::endl;
 		assert(0);

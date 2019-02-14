@@ -10,11 +10,10 @@
 
 using namespace ots;
 
-
 //========================================================================================================================
 DQMHistosBase::DQMHistosBase(void)
-: theFile_      (0)
-, myDirectory_  (0)
+    : theFile_(0)
+    , myDirectory_(0)
 {
 	gStyle->SetPalette(1);
 }
@@ -26,11 +25,11 @@ DQMHistosBase::~DQMHistosBase(void)
 }
 
 //========================================================================================================================
-void DQMHistosBase::openFile (std::string fileName)
+void DQMHistosBase::openFile(std::string fileName)
 {
 	closeFile();
 	myDirectory_ = 0;
-	theFile_ = TFile::Open(fileName.c_str(), "RECREATE");
+	theFile_     = TFile::Open(fileName.c_str(), "RECREATE");
 	theFile_->cd();
 }
 
