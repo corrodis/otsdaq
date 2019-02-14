@@ -8,31 +8,27 @@
 
 namespace ots
 {
-
 class MaskConfiguration : public ConfigurationBase
 {
-
-public:
-
-	MaskConfiguration(void);
-	virtual ~MaskConfiguration(void);
+  public:
+	MaskConfiguration (void);
+	virtual ~MaskConfiguration (void);
 
 	//Methods
-	virtual void init(ConfigurationManager *configManager);
+	virtual void init (ConfigurationManager* configManager);
 
 	//Getters
-	const std::string& getROCMask(std::string rocName) const;
+	const std::string& getROCMask (std::string rocName) const;
 
-
-protected:
+  protected:
 	std::map<std::string, unsigned int> nameToRow_;
 
-private:
-	enum{
+  private:
+	enum
+	{
 		DetectorID,
 		KillMask
 	};
-
 };
-}
+}  // namespace ots
 #endif

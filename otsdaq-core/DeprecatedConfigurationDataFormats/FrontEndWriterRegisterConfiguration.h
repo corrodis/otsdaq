@@ -5,18 +5,11 @@
 
 namespace ots
 {
-
 class FEWRegisterConfiguration : public ots::RegisterConfiguration
 {
-
-public:
-
-	FEWRegisterConfiguration(void);
-    virtual ~FEWRegisterConfiguration(void);
-
-    
-
-
+  public:
+	FEWRegisterConfiguration (void);
+	virtual ~FEWRegisterConfiguration (void);
 };
-}
+}  // namespace ots
 #endif

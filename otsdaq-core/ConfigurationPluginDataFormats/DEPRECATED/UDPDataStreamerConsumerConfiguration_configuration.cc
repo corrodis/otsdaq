@@ -6,8 +6,8 @@
 using namespace ots;
 
 //==============================================================================
-UDPDataStreamerConsumerConfiguration::UDPDataStreamerConsumerConfiguration(void)
-: ConfigurationBase("UDPDataStreamerConsumerConfiguration")
+UDPDataStreamerConsumerConfiguration::UDPDataStreamerConsumerConfiguration (void)
+    : ConfigurationBase ("UDPDataStreamerConsumerConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -24,69 +24,68 @@ UDPDataStreamerConsumerConfiguration::UDPDataStreamerConsumerConfiguration(void)
 	//	    </VIEW>
 	//	  </CONFIGURATION>
 	//	</ROOT>
-
-
 }
 
 //==============================================================================
-UDPDataStreamerConsumerConfiguration::~UDPDataStreamerConsumerConfiguration(void)
-{}
+UDPDataStreamerConsumerConfiguration::~UDPDataStreamerConsumerConfiguration (void)
+{
+}
 
 //==============================================================================
-void UDPDataStreamerConsumerConfiguration::init(ConfigurationManager *configManager)
+void UDPDataStreamerConsumerConfiguration::init (ConfigurationManager *configManager)
 {
-	std::string  processorUID;
-	for(unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	std::string processorUID;
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(processorUID, row, ProcessorID);
+		ConfigurationBase::activeConfigurationView_->getValue (processorUID, row, ProcessorID);
 		processorIDToRowMap_[processorUID] = row;
 	}
 }
 
 //==============================================================================
-std::string UDPDataStreamerConsumerConfiguration::getIPAddress(std::string processorUID) const
+std::string UDPDataStreamerConsumerConfiguration::getIPAddress (std::string processorUID) const
 {
-	check(processorUID);
+	check (processorUID);
 	std::string val;
-	ConfigurationBase::activeConfigurationView_->getValue(val, processorIDToRowMap_.find(processorUID)->second, IPAddress);
+	ConfigurationBase::activeConfigurationView_->getValue (val, processorIDToRowMap_.find (processorUID)->second, IPAddress);
 	return val;
 }
 
 //==============================================================================
-unsigned int UDPDataStreamerConsumerConfiguration::getPort(std::string processorUID) const
+unsigned int UDPDataStreamerConsumerConfiguration::getPort (std::string processorUID) const
 {
-	check(processorUID);
+	check (processorUID);
 	unsigned int val;
-	ConfigurationBase::activeConfigurationView_->getValue(val, processorIDToRowMap_.find(processorUID)->second, Port);
+	ConfigurationBase::activeConfigurationView_->getValue (val, processorIDToRowMap_.find (processorUID)->second, Port);
 	return val;
 }
 
 //==============================================================================
-std::string UDPDataStreamerConsumerConfiguration::getStreamToIPAddress(std::string processorUID) const
+std::string UDPDataStreamerConsumerConfiguration::getStreamToIPAddress (std::string processorUID) const
 {
-	check(processorUID);
+	check (processorUID);
 	std::string val;
-	ConfigurationBase::activeConfigurationView_->getValue(val, processorIDToRowMap_.find(processorUID)->second, StreamToIPAddress);
+	ConfigurationBase::activeConfigurationView_->getValue (val, processorIDToRowMap_.find (processorUID)->second, StreamToIPAddress);
 	return val;
 }
 
 //==============================================================================
-unsigned int UDPDataStreamerConsumerConfiguration::getStreamToPort(std::string processorUID) const
+unsigned int UDPDataStreamerConsumerConfiguration::getStreamToPort (std::string processorUID) const
 {
-	check(processorUID);
+	check (processorUID);
 	unsigned int val;
-	ConfigurationBase::activeConfigurationView_->getValue(val, processorIDToRowMap_.find(processorUID)->second, StreamToPort);
+	ConfigurationBase::activeConfigurationView_->getValue (val, processorIDToRowMap_.find (processorUID)->second, StreamToPort);
 	return val;
 }
 
 //==============================================================================
-void UDPDataStreamerConsumerConfiguration::check(std::string processorUID) const
+void UDPDataStreamerConsumerConfiguration::check (std::string processorUID) const
 {
-	if(processorIDToRowMap_.find(processorUID) == processorIDToRowMap_.end())
+	if (processorIDToRowMap_.find (processorUID) == processorIDToRowMap_.end ())
 	{
 		std::cout << __COUT_HDR_FL__ << "Couldn't find processor " << processorUID << " in the UDPDataStreamerConsumerConfiguration!" << std::endl;
-		assert(0);
+		assert (0);
 	}
 }
 
-DEFINE_OTS_CONFIGURATION(UDPDataStreamerConsumerConfiguration)
+DEFINE_OTS_CONFIGURATION (UDPDataStreamerConsumerConfiguration)

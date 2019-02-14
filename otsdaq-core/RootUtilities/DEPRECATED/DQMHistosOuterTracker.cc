@@ -1,37 +1,37 @@
 #include "otsdaq-core/RootUtilities/DQMHistosOuterTracker.h"
+#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/DataDecoders/FSSRData.h"
 #include "otsdaq-core/DataDecoders/VIPICData.h"
 #include "otsdaq-core/NetworkUtilities/NetworkConverters.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
-#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/FEConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorToFEConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/DataManagerConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/DataBufferConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/UDPDataStreamerConsumerConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/UDPDataListenerProducerConfiguration.h"
 #include "otsdaq-core/ConfigurationDataFormats/FEInterfaceConfigurationBase.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/DataBufferConfiguration.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/DataManagerConfiguration.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorConfiguration.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorToFEConfiguration.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/FEConfiguration.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/UDPDataListenerProducerConfiguration.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/UDPDataStreamerConsumerConfiguration.h"
 //#include "otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceConfiguration.h"
 //#include "otsdaq-demo/UserConfigurationDataFormats/FEWRPurdueFSSRInterfaceConfiguration.h"
 
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
 
-#include <TH1.h>
-#include <TH2.h>
-#include <TH1F.h>
-#include <TH2F.h>
-#include <TProfile.h>
 #include <TCanvas.h>
-#include <TFrame.h>
-#include <TRandom.h>
-#include <TThread.h>
-#include <TROOT.h>
 #include <TDirectory.h>
 #include <TFile.h>
+#include <TFrame.h>
+#include <TH1.h>
+#include <TH1F.h>
+#include <TH2.h>
+#include <TH2F.h>
+#include <TProfile.h>
+#include <TROOT.h>
+#include <TRandom.h>
 #include <TStyle.h>
+#include <TThread.h>
 
 #include <stdint.h>
 //#include <arpa/inet.h>
@@ -41,122 +41,119 @@
 
 using namespace ots;
 
-
 //========================================================================================================================
-DQMHistosOuterTracker::DQMHistosOuterTracker(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID)
-: theFile_                 (0)
-, theDataDecoder_          (supervisorApplicationUID, bufferUID, processorUID)
-, supervisorApplicationUID_(supervisorApplicationUID)
-, bufferUID_               (bufferUID)
-, processorUID_            (processorUID)
+DQMHistosOuterTracker::DQMHistosOuterTracker (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID)
+    : theFile_ (0)
+    , theDataDecoder_ (supervisorApplicationUID, bufferUID, processorUID)
+    , supervisorApplicationUID_ (supervisorApplicationUID)
+    , bufferUID_ (bufferUID)
+    , processorUID_ (processorUID)
 {
-	gStyle->SetPalette(1);
+	gStyle->SetPalette (1);
 }
 
 //========================================================================================================================
-DQMHistosOuterTracker::~DQMHistosOuterTracker(void)
+DQMHistosOuterTracker::~DQMHistosOuterTracker (void)
 {
-	closeFile();
+	closeFile ();
 }
 
 //========================================================================================================================
 void DQMHistosOuterTracker::openFile (std::string fileName)
 {
-	closeFile();
+	closeFile ();
 	currentDirectory_ = 0;
-	theFile_ = TFile::Open(fileName.c_str(), "RECREATE");
-	theFile_->cd();
-
+	theFile_          = TFile::Open (fileName.c_str (), "RECREATE");
+	theFile_->cd ();
 }
 
 //========================================================================================================================
-void DQMHistosOuterTracker::book()
+void DQMHistosOuterTracker::book ()
 {
 	std::cout << __COUT_HDR_FL__ << "Booking start!" << std::endl;
 
-	currentDirectory_ = theFile_->mkdir("General", "General");
-	currentDirectory_->cd();
-	numberOfTriggers_ = new TH1I("NumberOfTriggers", "Number of triggers", 1, -0.5, 0.5);
-	currentDirectory_ = theFile_->mkdir("Planes", "Planes");
-	currentDirectory_->cd();
+	currentDirectory_ = theFile_->mkdir ("General", "General");
+	currentDirectory_->cd ();
+	numberOfTriggers_ = new TH1I ("NumberOfTriggers", "Number of triggers", 1, -0.5, 0.5);
+	currentDirectory_ = theFile_->mkdir ("Planes", "Planes");
+	currentDirectory_->cd ();
 	std::stringstream name;
 	std::stringstream title;
 	//FIXME
-	const FEConfiguration*                       feConfiguration                    = theConfigurationManager_->__GET_CONFIG__(FEConfiguration);
-	const DetectorToFEConfiguration*             detectorToFEConfiguration          = theConfigurationManager_->__GET_CONFIG__(DetectorToFEConfiguration);
-	const DataManagerConfiguration*              dataManagerConfiguration           = theConfigurationManager_->__GET_CONFIG__(DataManagerConfiguration);
-	const DataBufferConfiguration*               dataBufferConfiguration            = theConfigurationManager_->__GET_CONFIG__(DataBufferConfiguration);
-	const UDPDataStreamerConsumerConfiguration*  dataStreamerConsumerConfiguration  = theConfigurationManager_->__GET_CONFIG__(UDPDataStreamerConsumerConfiguration);
-	const DetectorConfiguration*                 detectorConfiguration              = theConfigurationManager_->__GET_CONFIG__(DetectorConfiguration);
+	const FEConfiguration*                      feConfiguration                   = theConfigurationManager_->__GET_CONFIG__ (FEConfiguration);
+	const DetectorToFEConfiguration*            detectorToFEConfiguration         = theConfigurationManager_->__GET_CONFIG__ (DetectorToFEConfiguration);
+	const DataManagerConfiguration*             dataManagerConfiguration          = theConfigurationManager_->__GET_CONFIG__ (DataManagerConfiguration);
+	const DataBufferConfiguration*              dataBufferConfiguration           = theConfigurationManager_->__GET_CONFIG__ (DataBufferConfiguration);
+	const UDPDataStreamerConsumerConfiguration* dataStreamerConsumerConfiguration = theConfigurationManager_->__GET_CONFIG__ (UDPDataStreamerConsumerConfiguration);
+	const DetectorConfiguration*                detectorConfiguration             = theConfigurationManager_->__GET_CONFIG__ (DetectorConfiguration);
 
 	//    const std::string   supervisorType_;
 	//    const unsigned int  supervisorInstance_;
 	//    const unsigned int  bufferUID_;
 	//    const std::string   processorUID_;
 
-
-	std::stringstream processName;
-	std::vector<std::string> bufferList    = dataManagerConfiguration->getListOfDataBuffers();
-	std::vector<std::string> interfaceList = feConfiguration->getListOfFEIDs();
-	for(const auto& itInterfaces: interfaceList)
+	std::stringstream        processName;
+	std::vector<std::string> bufferList    = dataManagerConfiguration->getListOfDataBuffers ();
+	std::vector<std::string> interfaceList = feConfiguration->getListOfFEIDs ();
+	for (const auto& itInterfaces : interfaceList)
 	{
 		std::string streamToIP;
 		std::string streamToPort;
 
 		//RAR -- on June 28
 		//	Eric changed this to Base.. but this functionality does not belong in ConfiguraitonBase
-				//	If LORE wants this functionality then move to otsdaq_demo repository since it depends on
-				//		interfaces in demo (Or think about how to extract this dependency?.. should there be an
-				//		intermediate class that interfaces have to inherit from to have DQM functionality?)
-		if(feConfiguration->getFEInterfaceType(itInterfaces).find("FSSRInterface") != std::string::npos)
+		//	If LORE wants this functionality then move to otsdaq_demo repository since it depends on
+		//		interfaces in demo (Or think about how to extract this dependency?.. should there be an
+		//		intermediate class that interfaces have to inherit from to have DQM functionality?)
+		if (feConfiguration->getFEInterfaceType (itInterfaces).find ("FSSRInterface") != std::string::npos)
 		{
-			const ConfigurationBase* interfaceConfiguration = theConfigurationManager_->getConfigurationByName(feConfiguration->getFEInterfaceType(itInterfaces)+"Configuration");
-			auto feinterfaceConfiguration = dynamic_cast<const FEInterfaceConfigurationBase*>(interfaceConfiguration);
-			if(feinterfaceConfiguration) {
-				streamToIP   = feinterfaceConfiguration->getStreamingIPAddress(itInterfaces);
-				streamToPort = feinterfaceConfiguration->getStreamingPort(itInterfaces);
+			const ConfigurationBase* interfaceConfiguration   = theConfigurationManager_->getConfigurationByName (feConfiguration->getFEInterfaceType (itInterfaces) + "Configuration");
+			auto                     feinterfaceConfiguration = dynamic_cast<const FEInterfaceConfigurationBase*> (interfaceConfiguration);
+			if (feinterfaceConfiguration) {
+				streamToIP   = feinterfaceConfiguration->getStreamingIPAddress (itInterfaces);
+				streamToPort = feinterfaceConfiguration->getStreamingPort (itInterfaces);
 			}
 		}
 
-		for(const auto& itBuffers: bufferList)
+		for (const auto& itBuffers : bufferList)
 		{
-			std::vector<std::string> producerList  = dataBufferConfiguration->getProducerIDList(itBuffers);
-			std::vector<std::string> consumerList  = dataBufferConfiguration->getConsumerIDList(itBuffers);
-			for(const auto& itProducers: producerList)
+			std::vector<std::string> producerList = dataBufferConfiguration->getProducerIDList (itBuffers);
+			std::vector<std::string> consumerList = dataBufferConfiguration->getConsumerIDList (itBuffers);
+			for (const auto& itProducers : producerList)
 			{
-				if(dataBufferConfiguration->getProducerClass(itBuffers,itProducers) == "UDPDataListenerProducer")
+				if (dataBufferConfiguration->getProducerClass (itBuffers, itProducers) == "UDPDataListenerProducer")
 				{
-					const UDPDataListenerProducerConfiguration* listerConfiguration = static_cast<const UDPDataListenerProducerConfiguration*>(theConfigurationManager_->getConfigurationByName("UDPDataListenerProducerConfiguration"));
-					if(listerConfiguration->getIPAddress(itProducers) == streamToIP && listerConfiguration->getPort(itProducers) == streamToPort)
+					const UDPDataListenerProducerConfiguration* listerConfiguration = static_cast<const UDPDataListenerProducerConfiguration*> (theConfigurationManager_->getConfigurationByName ("UDPDataListenerProducerConfiguration"));
+					if (listerConfiguration->getIPAddress (itProducers) == streamToIP && listerConfiguration->getPort (itProducers) == streamToPort)
 					{
-						for(const auto& itConsumers: consumerList)
+						for (const auto& itConsumers : consumerList)
 						{
 							std::cout << __COUT_HDR_FL__ << "CONSUMER LIST: " << itConsumers << std::endl;
-							if(dataBufferConfiguration->getConsumerClass(itBuffers,itConsumers) == "UDPDataStreamerConsumer")
+							if (dataBufferConfiguration->getConsumerClass (itBuffers, itConsumers) == "UDPDataStreamerConsumer")
 							{
 								//FIXME This is very bad since I am getting the PC IP Hardcoded!!!!!!!
-								std::string ipAddress = NetworkConverters::nameToStringIP(dataStreamerConsumerConfiguration->getIPAddress(itConsumers));
+								std::string ipAddress = NetworkConverters::nameToStringIP (dataStreamerConsumerConfiguration->getIPAddress (itConsumers));
 								//FIXME the streamer should have it's own configured port and not fedport +1
-								std::string port = NetworkConverters::unsignedToStringPort(dataStreamerConsumerConfiguration->getPort(itConsumers));
-								planeOccupancies_[ipAddress][port] = std::map<unsigned int, TH1*>();
-								std::cout << __COUT_HDR_FL__ << "IP: " << NetworkConverters::stringToNameIP(ipAddress) << " Port:----" << NetworkConverters::stringToUnsignedPort(port) << "----" << std::endl;
-								const std::vector<std::string> rocList = detectorToFEConfiguration->getFEReaderDetectorList(itInterfaces);
-								std::cout << __COUT_HDR_FL__ << "List of rocs for FER: " << itInterfaces  << " has size: " << rocList.size() << std::endl;
-								for(const auto& itROC: rocList)
+								std::string port                   = NetworkConverters::unsignedToStringPort (dataStreamerConsumerConfiguration->getPort (itConsumers));
+								planeOccupancies_[ipAddress][port] = std::map<unsigned int, TH1*> ();
+								std::cout << __COUT_HDR_FL__ << "IP: " << NetworkConverters::stringToNameIP (ipAddress) << " Port:----" << NetworkConverters::stringToUnsignedPort (port) << "----" << std::endl;
+								const std::vector<std::string> rocList = detectorToFEConfiguration->getFEReaderDetectorList (itInterfaces);
+								std::cout << __COUT_HDR_FL__ << "List of rocs for FER: " << itInterfaces << " has size: " << rocList.size () << std::endl;
+								for (const auto& itROC : rocList)
 								{
-									std::string ROCType = detectorConfiguration->getDetectorType(itROC);
+									std::string ROCType = detectorConfiguration->getDetectorType (itROC);
 									//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "ROC type: " << ROCType << std::endl;
-									if(ROCType == "FSSR")
+									if (ROCType == "FSSR")
 									{
-										unsigned int fedChannel = detectorToFEConfiguration->getFEReaderChannel(itROC);
-										if(planeOccupancies_[ipAddress][port].find(fedChannel) == planeOccupancies_[ipAddress][port].end())
+										unsigned int fedChannel = detectorToFEConfiguration->getFEReaderChannel (itROC);
+										if (planeOccupancies_[ipAddress][port].find (fedChannel) == planeOccupancies_[ipAddress][port].end ())
 										{
-											name.str("");
-											title.str("");
-											name << "Plane_FE" << itInterfaces << "_Channel"<< fedChannel << "_Occupancy";
-											title << "Plane FE" << itInterfaces << " Channel"<< fedChannel << " Occupancy";
-											std::cout << __COUT_HDR_FL__ << "Adding:" << name.str() << std::endl;
-											planeOccupancies_[ipAddress][port][fedChannel] = new TH1F(name.str().c_str(), title.str().c_str(), 640, -0.5, 639.5);
+											name.str ("");
+											title.str ("");
+											name << "Plane_FE" << itInterfaces << "_Channel" << fedChannel << "_Occupancy";
+											title << "Plane FE" << itInterfaces << " Channel" << fedChannel << " Occupancy";
+											std::cout << __COUT_HDR_FL__ << "Adding:" << name.str () << std::endl;
+											planeOccupancies_[ipAddress][port][fedChannel] = new TH1F (name.str ().c_str (), title.str ().c_str (), 640, -0.5, 639.5);
 										}
 									}
 								}
@@ -259,9 +256,8 @@ void DQMHistosOuterTracker::book()
 }
 
 //========================================================================================================================
-void DQMHistosOuterTracker::fill(std::string& buffer, std::map<std::string, std::string> header)
+void DQMHistosOuterTracker::fill (std::string& buffer, std::map<std::string, std::string> header)
 {
-
 	//std::cout << __COUT_HDR_FL__ << buffer.length() << std::endl;
 	//int triggerNumber = 0;
 	//int triggerHigh = 0;
@@ -272,52 +268,49 @@ void DQMHistosOuterTracker::fill(std::string& buffer, std::map<std::string, std:
 
 	//std::cout << __COUT_HDR_FL__ << "Got data from IP: " << NetworkConverters::stringToNameIP(ipAddress) << " port: " << NetworkConverters::stringToUnsignedPort(port) << std::endl;
 
-	if (NetworkConverters::stringToUnsignedPort(port) == 48003)
-		theDataDecoder_.convertBuffer(buffer, convertedBuffer_, false);
+	if (NetworkConverters::stringToUnsignedPort (port) == 48003)
+		theDataDecoder_.convertBuffer (buffer, convertedBuffer_, false);
 	else
-		theDataDecoder_.convertBuffer(buffer, convertedBuffer_, true);
+		theDataDecoder_.convertBuffer (buffer, convertedBuffer_, true);
 	//std::cout << __COUT_HDR_FL__ << "New buffer" << std::endl;
 	unsigned int bufferCounter = 0;
-	uint32_t oldData = 0;
-	while (!convertedBuffer_.empty())
+	uint32_t     oldData       = 0;
+	while (!convertedBuffer_.empty ())
 	{
 		//if (!theDataDecoder_.isBCOHigh(convertedBuffer_.front())
 		//    && !theDataDecoder_.isBCOLow(convertedBuffer_.front())
 		//    && !theDataDecoder_.isTrigger(convertedBuffer_.front()))
 
-		if (NetworkConverters::stringToUnsignedPort(port) == 48003 && bufferCounter%2 == 1)
+		if (NetworkConverters::stringToUnsignedPort (port) == 48003 && bufferCounter % 2 == 1)
 		{
-			convertedBuffer_.pop();
+			convertedBuffer_.pop ();
 			bufferCounter++;
 			continue;
 		}
 		//if (NetworkConverters::stringToUnsignedPort(port) == 48003 && bufferCounter%2 == 0)
 		//	std::cout << __COUT_HDR_FL__ << "Data: " << std::hex << convertedBuffer_.front() << std::dec << std::endl;
-		if (theDataDecoder_.isFSSRData(convertedBuffer_.front()))
+		if (theDataDecoder_.isFSSRData (convertedBuffer_.front ()))
 		{
-
 			//			if(oldData != 0 && oldData==convertedBuffer_.front())
 			//				std::cout << __COUT_HDR_FL__ << "There is a copy FSSR: " << std::hex << convertedBuffer_.front() << " counter: " << bufferCounter << std::dec << std::endl;
-			oldData = convertedBuffer_.front();
+			oldData                    = convertedBuffer_.front ();
 			FSSRData* detectorDataFSSR = 0;
-			theDataDecoder_.decodeData(convertedBuffer_.front(), (DetectorDataBase**)&detectorDataFSSR);
+			theDataDecoder_.decodeData (convertedBuffer_.front (), (DetectorDataBase**)&detectorDataFSSR);
 			//if(detectorData->getChannelNumber() >= 4)
 			//{
 			//    std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "Wrong channel: " << detectorData->getChannelNumber() << std::endl;
 			//    return;
 			//}
 			//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "Receiving data from: " << hex << ipAddress << " port: " << port << std::endl;
-			if(        planeOccupancies_.find(ipAddress) != planeOccupancies_.end()
-					&& planeOccupancies_[ipAddress].find(port) != planeOccupancies_[ipAddress].end()
-					&& planeOccupancies_[ipAddress][port].find(detectorDataFSSR->getChannelNumber()) != planeOccupancies_[ipAddress][port].end())
-				planeOccupancies_[ipAddress][port][detectorDataFSSR->getChannelNumber()]->Fill(detectorDataFSSR->getSensorStrip());
+			if (planeOccupancies_.find (ipAddress) != planeOccupancies_.end () && planeOccupancies_[ipAddress].find (port) != planeOccupancies_[ipAddress].end () && planeOccupancies_[ipAddress][port].find (detectorDataFSSR->getChannelNumber ()) != planeOccupancies_[ipAddress][port].end ())
+				planeOccupancies_[ipAddress][port][detectorDataFSSR->getChannelNumber ()]->Fill (detectorDataFSSR->getSensorStrip ());
 			else
 				std::cout << __COUT_HDR_FL__
-				<< "ERROR: I haven't book histos for streamer " << NetworkConverters::stringToNameIP(ipAddress)
-			<< " port number: " << NetworkConverters::stringToUnsignedPort(port)
-			<< " channel: " << detectorDataFSSR->getChannelNumber()
-			<< " data: " << std::hex << convertedBuffer_.front() << std::dec
-			<< std::endl;
+				          << "ERROR: I haven't book histos for streamer " << NetworkConverters::stringToNameIP (ipAddress)
+				          << " port number: " << NetworkConverters::stringToUnsignedPort (port)
+				          << " channel: " << detectorDataFSSR->getChannelNumber ()
+				          << " data: " << std::hex << convertedBuffer_.front () << std::dec
+				          << std::endl;
 			//    }
 			//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " filling histograms!" << std::endl;
 			//  Float_t px, py, pz;
@@ -385,7 +378,7 @@ void DQMHistosOuterTracker::fill(std::string& buffer, std::map<std::string, std:
           //  std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "---------------------------- ERROR: different trigger number " << triggerNumber << " entries: " << numberOfTriggers_->GetEntries() << std::endl;
           }
 		 */
-		convertedBuffer_.pop();
+		convertedBuffer_.pop ();
 		bufferCounter++;
 	}
 	/*
@@ -404,28 +397,28 @@ void DQMHistosOuterTracker::fill(std::string& buffer, std::map<std::string, std:
 }
 
 //========================================================================================================================
-void DQMHistosOuterTracker::save(void)
+void DQMHistosOuterTracker::save (void)
 {
 	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "Saving file!" << std::endl;
 	if (theFile_ != 0)
-		theFile_->Write();
+		theFile_->Write ();
 }
 
 //========================================================================================================================
-void DQMHistosOuterTracker::load(std::string fileName)
+void DQMHistosOuterTracker::load (std::string fileName)
 {
-	closeFile();
-	theFile_ = TFile::Open(fileName.c_str());//WebPath/js/visualizers_lib/tmpRootData/Suca.root");
-	if (!theFile_->IsOpen())
+	closeFile ();
+	theFile_ = TFile::Open (fileName.c_str ());  //WebPath/js/visualizers_lib/tmpRootData/Suca.root");
+	if (!theFile_->IsOpen ())
 		return;
-	theFile_->cd();
-	numberOfTriggers_ = (TH1I*)theFile_->Get("General/NumberOfTriggers");
+	theFile_->cd ();
+	numberOfTriggers_ = (TH1I*)theFile_->Get ("General/NumberOfTriggers");
 
-	std::string directory = "Planes";
+	std::string       directory = "Planes";
 	std::stringstream name;
-	for(unsigned int p=0; p<4; p++)
+	for (unsigned int p = 0; p < 4; p++)
 	{
-		name.str("");
+		name.str ("");
 		name << directory << "/Plane_" << p << "_Occupancy";
 		//FIXME Must organize better all histograms!!!!!
 		//planeOccupancies_.push_back((TH1I*)theFile_->Get(name.str().c_str()));
@@ -434,23 +427,23 @@ void DQMHistosOuterTracker::load(std::string fileName)
 	//histo1D_ = (TH1F*) theFile_->Get("MainDirectory/Histo1D");
 	//histo2D_ = (TH2F*) theFile_->Get("MainDirectory/Histo2D");
 	//profile_ = (TProfile*) theFile_->Get("MainDirectory/Profile");
-	closeFile();
+	closeFile ();
 }
 
 //========================================================================================================================
-void DQMHistosOuterTracker::closeFile(void)
+void DQMHistosOuterTracker::closeFile (void)
 {
 	if (theFile_ != 0)
 	{
-		theFile_->Close();
+		theFile_->Close ();
 		theFile_ = 0;
 	}
 }
 
 //========================================================================================================================
-TObject* DQMHistosOuterTracker::get(std::string name)
+TObject* DQMHistosOuterTracker::get (std::string name)
 {
 	if (theFile_ != 0)
-		return theFile_->Get(name.c_str());
+		return theFile_->Get (name.c_str ());
 	return 0;
 }

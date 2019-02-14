@@ -9,15 +9,13 @@
 
 namespace ots
 {
-
 class RawDataSaverConsumer : public RawDataSaverConsumerBase
 {
-public:
-	RawDataSaverConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
-	virtual ~RawDataSaverConsumer(void);
-
+  public:
+	RawDataSaverConsumer (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
+	virtual ~RawDataSaverConsumer (void);
 };
 
-}
+}  // namespace ots
 
 #endif

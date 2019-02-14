@@ -1,15 +1,14 @@
 #ifndef _ots_Utilities_ProgressBar_h_
 #define _ots_Utilities_ProgressBar_h_
 
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq-core/MessageFacility/MessageFacility.h"
 
-#include <string>
 #include <mutex>
+#include <string>
 
 namespace ots
 {
-
 //ProgressBar
 //class by Ryan Rivera ( rrivera @ fnal.gov ), July 2013
 //
@@ -73,38 +72,36 @@ namespace ots
 
 class ProgressBar
 {
-public:
-	ProgressBar();
+  public:
+	ProgressBar ();
 
-	//********************************************************************//
-	//NOTE!!! don't call reset. Call resetProgressBar(id) as though
-	// the function was this:
-	//void resetProgressBar(int id)
-	//
-	// then the pre-compiler directive:
-	#define resetProgressBar(x) reset(__FILE__,S_(__LINE__),x)
+//********************************************************************//
+//NOTE!!! don't call reset. Call resetProgressBar(id) as though
+// the function was this:
+//void resetProgressBar(int id)
+//
+// then the pre-compiler directive:
+#define resetProgressBar(x) reset (__FILE__, S_ (__LINE__), x)
 	//will call this reset:
-	void reset(std::string file, std::string lineNumber, int id=0);
+	void reset (std::string file, std::string lineNumber, int id = 0);
 	//********************************************************************//
 
 	//remaining member functions are called normal
-	void step(); //thread safe
-	void complete();
-	int  read(); //if stepsToComplete==0, then define any progress as 50%, thread safe
-	std::string  readPercentageString(); //if stepsToComplete==0, then define any progress as 50%, thread safe
+	void        step ();  //thread safe
+	void        complete ();
+	int         read ();                  //if stepsToComplete==0, then define any progress as 50%, thread safe
+	std::string readPercentageString ();  //if stepsToComplete==0, then define any progress as 50%, thread safe
 
-private:
-	const std::string 	cProgressBarFilePath_;
-	const std::string 	cProgressBarFileExtension_;
-	std::string       	totalStepsFileName_;
-	int               	stepCount_;
-	int               	stepsToComplete_;
-	bool              	started_;
-	std::mutex			theMutex_;
+  private:
+	const std::string cProgressBarFilePath_;
+	const std::string cProgressBarFileExtension_;
+	std::string       totalStepsFileName_;
+	int               stepCount_;
+	int               stepsToComplete_;
+	bool              started_;
+	std::mutex        theMutex_;
 };
 
-	
-}
-
+}  // namespace ots
 
 #endif

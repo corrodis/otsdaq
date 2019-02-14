@@ -1,43 +1,41 @@
 
 //==============================================================================
 template<class T>
-unsigned int ConfigurationView::findRow(unsigned int col, const T& value,
-		unsigned int offsetRow/*=0*/) const
+unsigned int ConfigurationView::findRow (unsigned int col, const T& value, unsigned int offsetRow /*=0*/) const
 {
-	std::istringstream s(value);
-	return findRow(col,s.str(),offsetRow);
-} //end findRow<T>()
+	std::istringstream s (value);
+	return findRow (col, s.str (), offsetRow);
+}  //end findRow<T>()
 
 //==============================================================================
 template<class T>
-unsigned int ConfigurationView::findRowInGroup(
-		unsigned int col, const T& value,
-		const std::string &groupId, 
-		const std::string &childLinkIndex, 
-		unsigned int offsetRow /*=0*/) const
+unsigned int ConfigurationView::findRowInGroup (
+    unsigned int col, const T& value, const std::string& groupId, const std::string& childLinkIndex, unsigned int offsetRow /*=0*/) const
 {
-	std::istringstream s(value);
-	return findRowInGroup(col,s.str(),groupId,childLinkIndex,offsetRow);
-} //end findRowInGroup<T>()
+	std::istringstream s (value);
+	return findRowInGroup (col, s.str (), groupId, childLinkIndex, offsetRow);
+}  //end findRowInGroup<T>()
 
 //==============================================================================
 //Philosophy: force type validation by passing value to fill by reference..
 //	don't allow string to be returned.. (at least not easily)
 //Since there is no environmental variable that can just be a number they will all be converted no matter what.
 template<class T>
-void ConfigurationView::getValue(T& value, 
-		unsigned int row, unsigned int col,
-		bool doConvertEnvironmentVariables /*=true*/) const
+void ConfigurationView::getValue (T&           value,
+                                  unsigned int row,
+                                  unsigned int col,
+                                  bool         doConvertEnvironmentVariables /*=true*/) const
 {
-	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
+	if (!(col < columnsInfo_.size () && row < getNumberOfRows ()))
 	{
 		__SS__ << "Invalid row col requested" << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		__COUT_ERR__ << "\n"
+		             << ss.str ();
 		__SS_THROW__;
 	}
 
-	value = validateValueForColumn<T>(theDataView_[row][col],col,doConvertEnvironmentVariables);
-} //end getValue<T>()
+	value = validateValueForColumn<T> (theDataView_[row][col], col, doConvertEnvironmentVariables);
+}  //end getValue<T>()
 
 //==============================================================================
 //validateValueForColumn
@@ -46,12 +44,12 @@ void ConfigurationView::getValue(T& value,
 //
 //	on success returns what the value would be for get value
 template<class T>
-T ConfigurationView::validateValueForColumn(
-		const std::string& value, 
-		unsigned int col,
-		bool doConvertEnvironmentVariables /*=true*/) const
+T ConfigurationView::validateValueForColumn (
+    const std::string& value,
+    unsigned int       col,
+    bool               doConvertEnvironmentVariables /*=true*/) const
 {
-	if(col >= columnsInfo_.size())
+	if (col >= columnsInfo_.size ())
 	{
 		__SS__ << "Invalid col " << col << " requested." << std::endl;
 		__SS_THROW__;
@@ -61,12 +59,11 @@ T ConfigurationView::validateValueForColumn(
 
 	try
 	{
-		if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_NUMBER) //handle numbers
+		if (columnsInfo_[col].getDataType () == ViewColumnInfo::DATATYPE_NUMBER)  //handle numbers
 		{
-			std::string data = doConvertEnvironmentVariables?StringMacros::convertEnvironmentVariables(value):
-					value;
+			std::string data = doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables (value) : value;
 
-			if(StringMacros::getNumber(data,retValue))
+			if (StringMacros::getNumber (data, retValue))
 				return retValue;
 			else
 			{
@@ -74,62 +71,63 @@ T ConfigurationView::validateValueForColumn(
 				__SS_THROW__;
 			}
 		}
-		else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
-				columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
-				(typeid(int) == typeid(retValue) ||
-						typeid(unsigned int) == typeid(retValue)))
+		else if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
+		         columnsInfo_[col].getDataType () == ViewColumnInfo::DATATYPE_STRING &&
+		         (typeid (int) == typeid (retValue) ||
+		          typeid (unsigned int) == typeid (retValue)))
 		{
 			//this case is for if fixed choice type but int is requested
 			//	then return index in fixed choice list
 			//	(always consider DEFAULT as index 0)
 			//throw error if no match
 
-			if(value == ViewColumnInfo::DATATYPE_STRING_DEFAULT)
+			if (value == ViewColumnInfo::DATATYPE_STRING_DEFAULT)
 				retValue = 0;
 			else
 			{
-				std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
+				std::vector<std::string> choices = columnsInfo_[col].getDataChoices ();
 
 				//				for(const auto& choice: choices)
 				//					__COUT__ << "choice " << choice << __E__;
 
 				//consider arbitrary bool
-				bool skipOne = (choices.size() &&
-						choices[0].find("arbitraryBool=") == 0);
+				bool skipOne = (choices.size () &&
+				                choices[0].find ("arbitraryBool=") == 0);
 
-				for(retValue=1 + (skipOne?1:0);retValue-1<(T)choices.size();++retValue)
-					if(value == choices[retValue-1])
-						return retValue - (skipOne?1:0); //value has been set to selected choice index, so return
+				for (retValue = 1 + (skipOne ? 1 : 0); retValue - 1 < (T)choices.size (); ++retValue)
+					if (value == choices[retValue - 1])
+						return retValue - (skipOne ? 1 : 0);  //value has been set to selected choice index, so return
 
-				__SS__ << "\tInvalid value for column data type: " << columnsInfo_[col].getDataType()
-										<< " in configuration " << tableName_
-										<< " at column=" << columnsInfo_[col].getName()
-										<< " for getValue with type '" << StringMacros::demangleTypeName(typeid(retValue).name())
-				<< ".'"
-				<< "Attempting to get index of '" << value
-				<< " in fixed choice array, but was not found in array. "
-				<< "Here are the valid choices:\n";
+				__SS__ << "\tInvalid value for column data type: " << columnsInfo_[col].getDataType ()
+				       << " in configuration " << tableName_
+				       << " at column=" << columnsInfo_[col].getName ()
+				       << " for getValue with type '" << StringMacros::demangleTypeName (typeid (retValue).name ())
+				       << ".'"
+				       << "Attempting to get index of '" << value
+				       << " in fixed choice array, but was not found in array. "
+				       << "Here are the valid choices:\n";
 				ss << "\t" << ViewColumnInfo::DATATYPE_STRING_DEFAULT << "\n";
-				for(const auto &choice:choices)
+				for (const auto& choice : choices)
 					ss << "\t" << choice << "\n";
-				__COUT__ << "\n" << ss.str();
+				__COUT__ << "\n"
+				         << ss.str ();
 				__SS_THROW__;
 			}
 
 			return retValue;
 		}
-		else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
-				typeid(bool) == typeid(retValue)) //handle bool
+		else if (columnsInfo_[col].getDataType () == ViewColumnInfo::DATATYPE_STRING &&
+		         typeid (bool) == typeid (retValue))  //handle bool
 		{
-			if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_ON_OFF)
-				retValue = (value == ViewColumnInfo::TYPE_VALUE_ON) ? true:false;
-			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_TRUE_FALSE)
-				retValue = (value == ViewColumnInfo::TYPE_VALUE_TRUE) ? true:false;
-			else if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_YES_NO)
-				retValue = (value == ViewColumnInfo::TYPE_VALUE_YES) ? true:false;
-			else if(value.length() && value[0] == '1') //for converting pure string types
+			if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_ON_OFF)
+				retValue = (value == ViewColumnInfo::TYPE_VALUE_ON) ? true : false;
+			else if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_TRUE_FALSE)
+				retValue = (value == ViewColumnInfo::TYPE_VALUE_TRUE) ? true : false;
+			else if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_YES_NO)
+				retValue = (value == ViewColumnInfo::TYPE_VALUE_YES) ? true : false;
+			else if (value.length () && value[0] == '1')  //for converting pure string types
 				retValue = true;
-			else if(value.length() && value[0] == '0') //for converting pure string types
+			else if (value.length () && value[0] == '0')  //for converting pure string types
 				retValue = false;
 			else
 			{
@@ -139,76 +137,75 @@ T ConfigurationView::validateValueForColumn(
 
 			return retValue;
 		}
-		else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING &&
-				typeid(std::string) != typeid(retValue))
+		else if (columnsInfo_[col].getDataType () == ViewColumnInfo::DATATYPE_STRING &&
+		         typeid (std::string) != typeid (retValue))
 		{
-			return StringMacros::validateValueForDefaultStringDataType<T>(value,doConvertEnvironmentVariables);
+			return StringMacros::validateValueForDefaultStringDataType<T> (value, doConvertEnvironmentVariables);
 		}
 
 		//if here, then there was a problem
-		__SS__ <<  "Impossible Error." << __E__;
+		__SS__ << "Impossible Error." << __E__;
 		__SS_THROW__;
 	}
-	catch(const std::runtime_error& e)
+	catch (const std::runtime_error& e)
 	{
-		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
-						<< " and column type: " << columnsInfo_[col].getType()
-						<< ", in configuration " << tableName_
-						<< " at column=" << columnsInfo_[col].getName()
-						<< " for getValue with type '" << StringMacros::demangleTypeName(typeid(retValue).name())
-		<< "'" << std::endl;
+		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType ()
+		       << " and column type: " << columnsInfo_[col].getType ()
+		       << ", in configuration " << tableName_
+		       << " at column=" << columnsInfo_[col].getName ()
+		       << " for getValue with type '" << StringMacros::demangleTypeName (typeid (retValue).name ())
+		       << "'" << std::endl;
 
-		if(columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
+		if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
 			ss << "For column type " << ViewColumnInfo::TYPE_FIXED_CHOICE_DATA
-			<< " the only valid numeric types are 'int' and 'unsigned int.'" << __E__;
+			   << " the only valid numeric types are 'int' and 'unsigned int.'" << __E__;
 
-		ss << e.what() << __E__;
+		ss << e.what () << __E__;
 		__SS_THROW__;
 	}
-} // end validateValueForColumn<T>()
+}  // end validateValueForColumn<T>()
 
 //==============================================================================
 template<class T>
-void ConfigurationView::setVersion(const T& version)
+void ConfigurationView::setVersion (const T& version)
 {
-	version_ = ConfigurationVersion(version);
-} //end setVersion<>()
-
+	version_ = ConfigurationVersion (version);
+}  //end setVersion<>()
 
 //==============================================================================
 //These two methods check for basic type consistency
 template<class T>
-void ConfigurationView::setValue(const T& value,
-		unsigned int row, unsigned int col)
+void ConfigurationView::setValue (const T&     value,
+                                  unsigned int row,
+                                  unsigned int col)
 {
-	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
+	if (!(col < columnsInfo_.size () && row < getNumberOfRows ()))
 	{
 		__SS__ << "Invalid row (" << row << ") col (" << col << ") requested!" << std::endl;
 		__SS_THROW__;
 	}
 
-	if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_NUMBER)
+	if (columnsInfo_[col].getDataType () == ViewColumnInfo::DATATYPE_NUMBER)
 	{
 		std::stringstream ss;
 		ss << value;
-		theDataView_[row][col] = ss.str();
+		theDataView_[row][col] = ss.str ();
 	}
-	else if(columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_TIME &&
-			typeid(time_t) == typeid(value))
+	else if (columnsInfo_[col].getDataType () == ViewColumnInfo::DATATYPE_TIME &&
+	         typeid (time_t) == typeid (value))
 	{
 		//save DATATYPE_TIME as unix timestamp, but get as nice string
 		std::stringstream ss;
 		ss << value;
-		theDataView_[row][col] = ss.str();
+		theDataView_[row][col] = ss.str ();
 	}
 	else
 	{
-		__SS__ << "\tUnrecognized view data type: " << columnsInfo_[col].getDataType()
-							<< " in configuration " << tableName_
-							<< " at column=" << columnsInfo_[col].getName()
-							<< " for setValue with type '" << StringMacros::demangleTypeName(typeid(value).name())
-		<< "'" << std::endl;
+		__SS__ << "\tUnrecognized view data type: " << columnsInfo_[col].getDataType ()
+		       << " in configuration " << tableName_
+		       << " at column=" << columnsInfo_[col].getName ()
+		       << " for setValue with type '" << StringMacros::demangleTypeName (typeid (value).name ())
+		       << "'" << std::endl;
 		__SS_THROW__;
 	}
-} //end setValue<T>()
-
+}  //end setValue<T>()

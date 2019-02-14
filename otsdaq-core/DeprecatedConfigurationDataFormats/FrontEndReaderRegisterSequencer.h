@@ -5,18 +5,11 @@
 
 namespace ots
 {
-
 class FERRegisterSequencer : public RegisterConfiguration
 {
-
-public:
-
-	FERRegisterSequencer(void);
-    virtual ~FERRegisterSequencer(void);
-
-    
-
-
+  public:
+	FERRegisterSequencer (void);
+	virtual ~FERRegisterSequencer (void);
 };
-}
+}  // namespace ots
 #endif

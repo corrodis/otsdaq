@@ -6,8 +6,8 @@
 using namespace ots;
 
 //==============================================================================
-Configurations::Configurations(void)
-: ConfigurationBase("Configurations")
+Configurations::Configurations (void)
+    : ConfigurationBase ("Configurations")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -23,15 +23,15 @@ Configurations::Configurations(void)
 	//    </VIEW>
 	//  </CONFIGURATION>
 	//</ROOT>
-
 }
 
 //==============================================================================
-Configurations::~Configurations(void)
-{}
+Configurations::~Configurations (void)
+{
+}
 
 //==============================================================================
-void Configurations::init(ConfigurationManager *configManager)
+void Configurations::init (ConfigurationManager *configManager)
 {
 	/*
         std::string       keyName;
@@ -47,18 +47,18 @@ void Configurations::init(ConfigurationManager *configManager)
 }
 
 //==============================================================================
-bool Configurations::findKOC(ConfigurationGroupKey ConfigurationGroupKey, std::string koc) const
+bool Configurations::findKOC (ConfigurationGroupKey ConfigurationGroupKey, std::string koc) const
 {
-	unsigned int tmpConfigurationGroupKey;	//this is type to extract from table
-	std::string       tmpKOC;
-	for(unsigned int row=0; row<ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	unsigned int tmpConfigurationGroupKey;  //this is type to extract from table
+	std::string  tmpKOC;
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpConfigurationGroupKey,row,ConfigurationGroupKeyAlias);
-		if(ConfigurationGroupKey == tmpConfigurationGroupKey)
+		ConfigurationBase::activeConfigurationView_->getValue (tmpConfigurationGroupKey, row, ConfigurationGroupKeyAlias);
+		if (ConfigurationGroupKey == tmpConfigurationGroupKey)
 		{
-			ConfigurationBase::activeConfigurationView_->getValue(tmpKOC,row,KOC);
+			ConfigurationBase::activeConfigurationView_->getValue (tmpKOC, row, KOC);
 			//std::cout << __COUT_HDR_FL__ << "Looking for KOC: " << tmpKOC << " for " << koc << std::endl;
-			if(tmpKOC == koc)
+			if (tmpKOC == koc)
 				return true;
 		}
 	}
@@ -69,87 +69,83 @@ bool Configurations::findKOC(ConfigurationGroupKey ConfigurationGroupKey, std::s
 //==============================================================================
 // getConditionVersion
 //FIXME -- new ConfiguratoinGroup and ConfigurationGroupKey should be used!
-ConfigurationVersion Configurations::getConditionVersion(const ConfigurationGroupKey &ConfigurationGroupKey,
-		std::string koc) const
+ConfigurationVersion Configurations::getConditionVersion (const ConfigurationGroupKey &ConfigurationGroupKey,
+                                                          std::string                  koc) const
 {
-	unsigned int 			tmpConfigurationGroupKey;//this is type to extract from table
-	std::string       		tmpKOC;
-	unsigned int		 	conditionVersion; 	//this is type to extract from table
+	unsigned int tmpConfigurationGroupKey;  //this is type to extract from table
+	std::string  tmpKOC;
+	unsigned int conditionVersion;  //this is type to extract from table
 
-	for(unsigned int row=0; row<ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpConfigurationGroupKey,row,ConfigurationGroupKeyAlias);
-		if(ConfigurationGroupKey == tmpConfigurationGroupKey)
+		ConfigurationBase::activeConfigurationView_->getValue (tmpConfigurationGroupKey, row, ConfigurationGroupKeyAlias);
+		if (ConfigurationGroupKey == tmpConfigurationGroupKey)
 		{
-			ConfigurationBase::activeConfigurationView_->getValue(tmpKOC,row,KOC);
-			if(tmpKOC == koc)
+			ConfigurationBase::activeConfigurationView_->getValue (tmpKOC, row, KOC);
+			if (tmpKOC == koc)
 			{
-				ConfigurationBase::activeConfigurationView_->getValue(conditionVersion,row,ConditionVersion);
+				ConfigurationBase::activeConfigurationView_->getValue (conditionVersion, row, ConditionVersion);
 				//std::cout << __COUT_HDR_FL__ << "\tConditionVersion " << ConditionVersion << std::endl;
-				return ConfigurationVersion(conditionVersion);
+				return ConfigurationVersion (conditionVersion);
 			}
-
 		}
 	}
 	std::cout << __COUT_HDR_FL__ << "****************************************************************************************************************************" << std::endl;
 	std::cout << __COUT_HDR_FL__ << "\tCan't find KOC " << koc << " with ConfigurationGroupKey " << ConfigurationGroupKey << " in the Configurations view" << std::endl;
 	std::cout << __COUT_HDR_FL__ << "****************************************************************************************************************************" << std::endl;
-	__THROW__("Could not find koc for ConfigurationGroupKey");
-	return ConfigurationVersion(); //return INVALID
+	__THROW__ ("Could not find koc for ConfigurationGroupKey");
+	return ConfigurationVersion ();  //return INVALID
 }
 
-//==============================================================================  
+//==============================================================================
 // setConditionVersion
-// returns 1 if no change occurred (because new version was same as existing)                                          
-// returns 0 on change success  
-int Configurations::setConditionVersionForView (ConfigurationView* cfgView,
-		ConfigurationGroupKey ConfigurationGroupKey, std::string koc, ConfigurationVersion newKOCVersion)
+// returns 1 if no change occurred (because new version was same as existing)
+// returns 0 on change success
+int Configurations::setConditionVersionForView (ConfigurationView *   cfgView,
+                                                ConfigurationGroupKey ConfigurationGroupKey,
+                                                std::string           koc,
+                                                ConfigurationVersion  newKOCVersion)
 {
 	//find first match of KOCAlias and ConfigurationGroupKey
 	unsigned int row = 0;
-	unsigned int tmpConfigurationGroupKey;	//this is type to extract from table
+	unsigned int tmpConfigurationGroupKey;  //this is type to extract from table
 	std::string  tmpKOC;
-	unsigned int tmpOldKOCVersion;		//this is type to extract from table
-	for(row=0; row<cfgView->getNumberOfRows(); row++)
+	unsigned int tmpOldKOCVersion;  //this is type to extract from table
+	for (row = 0; row < cfgView->getNumberOfRows (); row++)
 	{
-		cfgView->getValue(tmpConfigurationGroupKey,row,Configurations::ConfigurationGroupKeyAlias);
-		if(ConfigurationGroupKey == tmpConfigurationGroupKey)
+		cfgView->getValue (tmpConfigurationGroupKey, row, Configurations::ConfigurationGroupKeyAlias);
+		if (ConfigurationGroupKey == tmpConfigurationGroupKey)
 		{
-			cfgView->getValue(tmpKOC,row,Configurations::KOC);
-			if(tmpKOC == koc)
+			cfgView->getValue (tmpKOC, row, Configurations::KOC);
+			if (tmpKOC == koc)
 			{
-				cfgView->getValue(tmpOldKOCVersion,row,Configurations::ConditionVersion);
-				std::cout << __COUT_HDR_FL__ << "Found ConfigKey(" <<
-						ConfigurationGroupKey << ") and KOCAlias(" <<
-						koc << ") pair." <<
-						" Current version is: " << tmpOldKOCVersion  <<
-						" New version is: " << newKOCVersion << std::endl;
-				if(newKOCVersion == tmpOldKOCVersion)
-					return 1; //no change necessary
-				break; //found row! exit search loop
+				cfgView->getValue (tmpOldKOCVersion, row, Configurations::ConditionVersion);
+				std::cout << __COUT_HDR_FL__ << "Found ConfigKey(" << ConfigurationGroupKey << ") and KOCAlias(" << koc << ") pair."
+				          << " Current version is: " << tmpOldKOCVersion << " New version is: " << newKOCVersion << std::endl;
+				if (newKOCVersion == tmpOldKOCVersion)
+					return 1;  //no change necessary
+				break;         //found row! exit search loop
 			}
-
 		}
 	}
 
 	//at this point have row to change
 
 	std::cout << __COUT_HDR_FL__ << "Row found is:" << row << std::endl;
-	cfgView->setValue(newKOCVersion, row, Configurations::ConditionVersion);
+	cfgView->setValue (newKOCVersion, row, Configurations::ConditionVersion);
 	std::cout << __COUT_HDR_FL__ << "Version changed to:" << newKOCVersion << std::endl;
 	return 0;
 }
-
 
 //==============================================================================
 //getListOfKocs
 //	return list of Kind of Conditions that match ConfigurationGroupKey for the active configuration view.
 //	for all KOCs regardless of ConfigurationGroupKey, set ConfigurationGroupKey = -1
 //
-std::set<std::string> Configurations::getListOfKocs(ConfigurationGroupKey ConfigurationGroupKey) const
+std::set<std::string> Configurations::getListOfKocs (ConfigurationGroupKey ConfigurationGroupKey) const
 {
 	std::set<std::string> kocs;
-	getListOfKocsForView(ConfigurationBase::activeConfigurationView_,kocs,ConfigurationGroupKey);
+	getListOfKocsForView (ConfigurationBase::activeConfigurationView_, kocs, ConfigurationGroupKey);
 	return kocs;
 }
 
@@ -158,33 +154,29 @@ std::set<std::string> Configurations::getListOfKocs(ConfigurationGroupKey Config
 //	return list of Kind of Conditions that match ConfigurationGroupKey for the active configuration view.
 //	for all KOCs regardless of ConfigurationGroupKey, set ConfigurationGroupKey = -1
 //
-void Configurations::getListOfKocsForView(ConfigurationView* cfgView, std::set<std::string> &kocs,
-		ConfigurationGroupKey ConfigurationGroupKey) const
+void Configurations::getListOfKocsForView (ConfigurationView *cfgView, std::set<std::string> &kocs, ConfigurationGroupKey ConfigurationGroupKey) const
 {
-	if(!cfgView)
+	if (!cfgView)
 	{
 		std::cout << __COUT_HDR_FL__ << "****************************************************************************************************************************" << std::endl;
 		std::cout << __COUT_HDR_FL__ << "\tCan't find list of Kocs for null cfgView pointer" << std::endl;
 		std::cout << __COUT_HDR_FL__ << "****************************************************************************************************************************" << std::endl;
-		__THROW__("Null cfgView configuration view pointer");
+		__THROW__ ("Null cfgView configuration view pointer");
 	}
 
-	std::string       	tmpKOC;
-	unsigned int		tmpConfigurationGroupKey;	//this is type to extract from table
+	std::string  tmpKOC;
+	unsigned int tmpConfigurationGroupKey;  //this is type to extract from table
 
-	for(unsigned int row=0; row<cfgView->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < cfgView->getNumberOfRows (); row++)
 	{
-		cfgView->getValue(tmpConfigurationGroupKey,row,ConfigurationGroupKeyAlias);
-		if(ConfigurationGroupKey == ConfigurationGroupKey::INVALID ||
-				ConfigurationGroupKey == tmpConfigurationGroupKey)
+		cfgView->getValue (tmpConfigurationGroupKey, row, ConfigurationGroupKeyAlias);
+		if (ConfigurationGroupKey == ConfigurationGroupKey::INVALID ||
+		    ConfigurationGroupKey == tmpConfigurationGroupKey)
 		{
-			cfgView->getValue(tmpKOC,row,KOC);
-			kocs.insert(tmpKOC);
+			cfgView->getValue (tmpKOC, row, KOC);
+			kocs.insert (tmpKOC);
 		}
 	}
 }
 
-
-
-
-DEFINE_OTS_CONFIGURATION(Configurations)
+DEFINE_OTS_CONFIGURATION (Configurations)

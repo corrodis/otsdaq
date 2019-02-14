@@ -7,16 +7,18 @@
 
 namespace ots
 {
-
-class SOAPParameter : public Parameter<std::string,std::string>
+class SOAPParameter : public Parameter<std::string, std::string>
 {
-public:
-    SOAPParameter (std::string name="", std::string value="") :
-    Parameter<std::string,std::string>(name, value){;}
-    ~SOAPParameter(void){;}
+  public:
+	SOAPParameter (std::string name = "", std::string value = "")
+	    : Parameter<std::string, std::string> (name, value) { ; }
+	~SOAPParameter (void) { ; }
 
-    bool isEmpty(void){if(name_ == "" && value_ == "") return true; return false;}
-
+	bool isEmpty (void)
+	{
+		if (name_ == "" && value_ == "") return true;
+		return false;
+	}
 };
-}
+}  // namespace ots
 #endif

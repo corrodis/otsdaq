@@ -5,18 +5,11 @@
 
 namespace ots
 {
-
 class DetectorRegisterSequencer : public ots::RegisterConfiguration
 {
-
-public:
-
-	DetectorRegisterSequencer(void);
-    virtual ~DetectorRegisterSequencer(void);
-
-    
-
-
+  public:
+	DetectorRegisterSequencer (void);
+	virtual ~DetectorRegisterSequencer (void);
 };
-}
+}  // namespace ots
 #endif

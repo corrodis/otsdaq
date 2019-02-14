@@ -7,28 +7,25 @@
 
 namespace ots
 {
-
 class VersionAliases : public ConfigurationBase
 {
-
-public:
-
-	VersionAliases(void);
-	~VersionAliases(void);
+  public:
+	VersionAliases (void);
+	~VersionAliases (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 
 	//Getters
-	unsigned int getAliasedKey(std::string alias) const;
+	unsigned int getAliasedKey (std::string alias) const;
 
-private:
-	enum{
+  private:
+	enum
+	{
 		VersionAlias,
 		Version,
 		KOC
 	};
-
 };
-}
+}  // namespace ots
 #endif

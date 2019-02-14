@@ -4,14 +4,14 @@
 //	throw exception unless it value node
 // NOTE: can not overload functions based on return type, so T& passed as value
 template<class T>
-void ConfigurationTree::getValue(T& value) const
+void ConfigurationTree::getValue (T& value) const
 {
-	if(row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)	//this node is a value node
+	if (row_ != ConfigurationView::INVALID && col_ != ConfigurationView::INVALID)  //this node is a value node
 	{
 		//attempt to interpret the value as a tree node path itself
 		try
 		{
-			ConfigurationTree valueAsTreeNode = getValueAsTreeNode();
+			ConfigurationTree valueAsTreeNode = getValueAsTreeNode ();
 			//valueAsTreeNode.getValue<T>(value);
 			__COUT__ << "Success following path to tree node!" << std::endl;
 			//value has been interpreted as a tree node value
@@ -23,71 +23,71 @@ void ConfigurationTree::getValue(T& value) const
 			//				else
 			//	value = (T)configView_->validateValueForColumn<T>(
 			//		valueAsTreeNode.getValueAsString(),col_);
-			value = handleValidateValueForColumn(configView_,
-					valueAsTreeNode.getValueAsString(),col_,identity<T>());
+			value = handleValidateValueForColumn (configView_,
+			                                      valueAsTreeNode.getValueAsString (),
+			                                      col_,
+			                                      identity<T> ());
 
 			__COUT__ << "Successful value!" << std::endl;
 			return;
 		}
-		catch(...) //tree node path interpretation failed
+		catch (...)  //tree node path interpretation failed
 		{
 			//__COUT__ << "Invalid path, just returning normal value." << std::endl;
 		}
 
 		//else normal return
-		configView_->getValue(value,row_,col_);
+		configView_->getValue (value, row_, col_);
 	}
-	else if(row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)	//this node is config node maybe with groupId
+	else if (row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)  //this node is config node maybe with groupId
 	{
 		__SS__ << "Requesting getValue on config node level. Must be a value node." << std::endl;
-		__COUT_ERR__ << ss.str();
+		__COUT_ERR__ << ss.str ();
 		__SS_THROW__;
 	}
-	else if(row_ == ConfigurationView::INVALID)
+	else if (row_ == ConfigurationView::INVALID)
 	{
 		__SS__ << "Malformed ConfigurationTree" << std::endl;
-		__COUT_ERR__ << ss.str();
+		__COUT_ERR__ << ss.str ();
 		__SS_THROW__;
 	}
-	else if(col_ == ConfigurationView::INVALID)						//this node is uid node
+	else if (col_ == ConfigurationView::INVALID)  //this node is uid node
 	{
 		__SS__ << "Requesting getValue on uid node level. Must be a value node." << std::endl;
-		__COUT_ERR__ << ss.str();
+		__COUT_ERR__ << ss.str ();
 		__SS_THROW__;
 	}
 	else
 	{
 		__SS__ << "Impossible" << std::endl;
-		__COUT_ERR__ << ss.str();
+		__COUT_ERR__ << ss.str ();
 		__SS_THROW__;
 	}
-} //end getValue<T>()
+}  //end getValue<T>()
 
 //==============================================================================
 //getValue (not std::string value)
 //	throw exception unless it value node
 // NOTE: can not overload functions based on return type, so calls function with T& passed as value
 template<class T>
-T ConfigurationTree::getValue(void) const
+T ConfigurationTree::getValue (void) const
 {
 	T value;
-	ConfigurationTree::getValue<T>(value);
+	ConfigurationTree::getValue<T> (value);
 	return value;
-} //end T getValue()
+}  //end T getValue()
 
 //==============================================================================
 template<typename T>
-T ConfigurationTree::handleValidateValueForColumn(const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<T>) const
+T ConfigurationTree::handleValidateValueForColumn (const ConfigurationView* configView, std::string value, unsigned int col, ots::identity<T>) const
 {
-	if(!configView)
+	if (!configView)
 	{
 		__SS__ << "Null configView" << std::endl;
-		__COUT_ERR__ << ss.str();
+		__COUT_ERR__ << ss.str ();
 		__SS_THROW__;
 	}
 	__COUT__ << "handleValidateValueForColumn<T>" << std::endl;
-	return configView->validateValueForColumn<T>(
-			value,col);
-} // end T handleValidateValueForColumn()
-
-
+	return configView->validateValueForColumn<T> (
+	    value, col);
+}  // end T handleValidateValueForColumn()

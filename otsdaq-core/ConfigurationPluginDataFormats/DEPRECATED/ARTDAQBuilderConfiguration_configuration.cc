@@ -6,8 +6,8 @@
 using namespace ots;
 
 //==============================================================================
-ARTDAQBuilderConfiguration::ARTDAQBuilderConfiguration(void)
-: ConfigurationBase("ARTDAQBuilderConfiguration")
+ARTDAQBuilderConfiguration::ARTDAQBuilderConfiguration (void)
+    : ConfigurationBase ("ARTDAQBuilderConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -24,40 +24,40 @@ ARTDAQBuilderConfiguration::ARTDAQBuilderConfiguration(void)
 	//    </VIEW>
 	//  </CONFIGURATION>
 	//</ROOT>
-
 }
 
 //==============================================================================
-ARTDAQBuilderConfiguration::~ARTDAQBuilderConfiguration(void)
-{}
-
-//==============================================================================
-void ARTDAQBuilderConfiguration::init(ConfigurationManager *configManager)
+ARTDAQBuilderConfiguration::~ARTDAQBuilderConfiguration (void)
 {
 }
 
 //==============================================================================
-std::string ARTDAQBuilderConfiguration::getAggregatorID(unsigned int supervisorInstance) const
+void ARTDAQBuilderConfiguration::init (ConfigurationManager *configManager)
+{
+}
+
+//==============================================================================
+std::string ARTDAQBuilderConfiguration::getAggregatorID (unsigned int supervisorInstance) const
 {
 	std::string tmpID;
-	ConfigurationBase::activeConfigurationView_->getValue(tmpID, ConfigurationBase::activeConfigurationView_->findRow(SupervisorInstance,supervisorInstance), BuilderID);
+	ConfigurationBase::activeConfigurationView_->getValue (tmpID, ConfigurationBase::activeConfigurationView_->findRow (SupervisorInstance, supervisorInstance), BuilderID);
 	return tmpID;
 }
 
 //==============================================================================
-bool  ARTDAQBuilderConfiguration::getStatus(unsigned int supervisorInstance) const
+bool ARTDAQBuilderConfiguration::getStatus (unsigned int supervisorInstance) const
 {
 	bool tmpStatus;
-	ConfigurationBase::activeConfigurationView_->getValue(tmpStatus, ConfigurationBase::activeConfigurationView_->findRow(SupervisorInstance,supervisorInstance), Status);
+	ConfigurationBase::activeConfigurationView_->getValue (tmpStatus, ConfigurationBase::activeConfigurationView_->findRow (SupervisorInstance, supervisorInstance), Status);
 	return tmpStatus;
 }
 
 //==============================================================================
-const std::string ARTDAQBuilderConfiguration::getConfigurationString(unsigned int supervisorInstance) const
+const std::string ARTDAQBuilderConfiguration::getConfigurationString (unsigned int supervisorInstance) const
 {
 	std::string tmpConfiguration;
-	ConfigurationBase::activeConfigurationView_->getValue(tmpConfiguration, ConfigurationBase::activeConfigurationView_->findRow(SupervisorInstance,supervisorInstance), ConfigurationString);
+	ConfigurationBase::activeConfigurationView_->getValue (tmpConfiguration, ConfigurationBase::activeConfigurationView_->findRow (SupervisorInstance, supervisorInstance), ConfigurationString);
 	return tmpConfiguration;
 }
 
-DEFINE_OTS_CONFIGURATION(ARTDAQBuilderConfiguration)
+DEFINE_OTS_CONFIGURATION (ARTDAQBuilderConfiguration)

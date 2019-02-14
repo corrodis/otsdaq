@@ -6,110 +6,112 @@
  */
 
 #include "otsdaq-core/ConfigurationDataFormats/RegisterSequencerInfoReader.h"
-#include "otsdaq-core/XmlUtilities/ConvertFromXML.h"
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/Macros/CoutHeaderMacros.h"
+#include "otsdaq-core/MessageFacility/MessageFacility.h"
+#include "otsdaq-core/XmlUtilities/ConvertFromXML.h"
 
-#include <xercesc/dom/DOMElement.hpp>
-#include <xercesc/dom/DOMNodeList.hpp>
 #include <iostream>
 #include <stdexcept>
+#include <xercesc/dom/DOMElement.hpp>
+#include <xercesc/dom/DOMNodeList.hpp>
 
 using namespace ots;
 
-RegisterSequencerInfoReader::RegisterSequencerInfoReader() {
+RegisterSequencerInfoReader::RegisterSequencerInfoReader ()
+{
 	try
-	    {
-	        xercesc::XMLString::release( &rootTag_               );
-	        xercesc::XMLString::release( &headerTag_             );
-	        xercesc::XMLString::release( &typeTag_ 				);
-	        xercesc::XMLString::release( &extensionTableNameTag_ );
-	        xercesc::XMLString::release( &nameTag_          		);
-	        xercesc::XMLString::release( &dataSetTag_          	);
-	        xercesc::XMLString::release( &versionTag_            );
-	        xercesc::XMLString::release( &commentDescriptionTag_ );
-	        xercesc::XMLString::release( &createdByUserTag_ 		);
-	        xercesc::XMLString::release( &componentNameTag_		);
-	        xercesc::XMLString::release( &registerNameTag_    	);
-	        xercesc::XMLString::release( &registerValueTag_    	);
-	        xercesc::XMLString::release( &sequenceNumberTag_		);
-	        xercesc::XMLString::release( &stateTag_    			);
-	    }
-	    catch( ... )
-	    {
-	      TLOG(TLVL_ERROR, __FILE__) << "Unknown exception encountered in TagNames destructor" << "     ";
-	    }
-
+	{
+		xercesc::XMLString::release (&rootTag_);
+		xercesc::XMLString::release (&headerTag_);
+		xercesc::XMLString::release (&typeTag_);
+		xercesc::XMLString::release (&extensionTableNameTag_);
+		xercesc::XMLString::release (&nameTag_);
+		xercesc::XMLString::release (&dataSetTag_);
+		xercesc::XMLString::release (&versionTag_);
+		xercesc::XMLString::release (&commentDescriptionTag_);
+		xercesc::XMLString::release (&createdByUserTag_);
+		xercesc::XMLString::release (&componentNameTag_);
+		xercesc::XMLString::release (&registerNameTag_);
+		xercesc::XMLString::release (&registerValueTag_);
+		xercesc::XMLString::release (&sequenceNumberTag_);
+		xercesc::XMLString::release (&stateTag_);
+	}
+	catch (...)
+	{
+		TLOG (TLVL_ERROR, __FILE__) << "Unknown exception encountered in TagNames destructor"
+		                            << "     ";
+	}
 }
 
-RegisterSequencerInfoReader::~RegisterSequencerInfoReader() {
+RegisterSequencerInfoReader::~RegisterSequencerInfoReader ()
+{
 	// TODO Auto-generated destructor stub
 }
 
 //==============================================================================
-void RegisterSequencerInfoReader::initPlatform(void)
+void RegisterSequencerInfoReader::initPlatform (void)
 {
-    try
-    {
-      xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
-    }
-    catch( xercesc::XMLException& e )
-    {
-      TLOG(TLVL_ERROR, __FILE__) << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << "     ";
-        // throw exception here to return ERROR_XERCES_INIT
-    }
+	try
+	{
+		xercesc::XMLPlatformUtils::Initialize ();  // Initialize Xerces infrastructure
+	}
+	catch (xercesc::XMLException& e)
+	{
+		TLOG (TLVL_ERROR, __FILE__) << "XML toolkit initialization error: " << XML_TO_CHAR (e.getMessage ()) << "     ";
+		// throw exception here to return ERROR_XERCES_INIT
+	}
 }
 
 //==============================================================================
-void RegisterSequencerInfoReader::terminatePlatform(void)
+void RegisterSequencerInfoReader::terminatePlatform (void)
 {
-    try
-    {
-        xercesc::XMLPlatformUtils::Terminate();  // Terminate after release of memory
-    }
-    catch( xercesc::XMLException& e )
-    {
-      TLOG(TLVL_ERROR, __FILE__) << "XML toolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << "     ";
-    }
+	try
+	{
+		xercesc::XMLPlatformUtils::Terminate ();  // Terminate after release of memory
+	}
+	catch (xercesc::XMLException& e)
+	{
+		TLOG (TLVL_ERROR, __FILE__) << "XML toolkit teardown error: " << XML_TO_CHAR (e.getMessage ()) << "     ";
+	}
 }
 
 //==============================================================================
-xercesc::DOMNode* RegisterSequencerInfoReader::getNode(XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber)
+xercesc::DOMNode* RegisterSequencerInfoReader::getNode (XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber)
 {
-    return getNode(tagName, dynamic_cast< xercesc::DOMElement* >(parent), itemNumber);
+	return getNode (tagName, dynamic_cast<xercesc::DOMElement*> (parent), itemNumber);
 }
 
 //==============================================================================
-xercesc::DOMNode* RegisterSequencerInfoReader::getNode(XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber)
+xercesc::DOMNode* RegisterSequencerInfoReader::getNode (XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber)
 {
-    xercesc::DOMNodeList* nodeList = parent->getElementsByTagName(tagName);
-    if( !nodeList )
-    {
-        throw(std::runtime_error( std::string("Can't find ") + XML_TO_CHAR(tagName) + " tag!"));
-        std::cout << __COUT_HDR_FL__ << (std::string("Can't find ") + XML_TO_CHAR(tagName) + " tag!") << std::endl;
-    }
-//    std::cout << __COUT_HDR_FL__<< "Name: "  << XML_TO_CHAR(nodeList->item(itemNumber)->getNodeName()) << std::endl;
-//    if( nodeList->item(itemNumber)->getFirstChild() != 0 )
-//        std::cout << __COUT_HDR_FL__<< "Value: " << XML_TO_CHAR(nodeList->item(itemNumber)->getFirstChild()->getNodeValue()) << std::endl;
-    return nodeList->item(itemNumber);
+	xercesc::DOMNodeList* nodeList = parent->getElementsByTagName (tagName);
+	if (!nodeList)
+	{
+		throw (std::runtime_error (std::string ("Can't find ") + XML_TO_CHAR (tagName) + " tag!"));
+		std::cout << __COUT_HDR_FL__ << (std::string ("Can't find ") + XML_TO_CHAR (tagName) + " tag!") << std::endl;
+	}
+	//    std::cout << __COUT_HDR_FL__<< "Name: "  << XML_TO_CHAR(nodeList->item(itemNumber)->getNodeName()) << std::endl;
+	//    if( nodeList->item(itemNumber)->getFirstChild() != 0 )
+	//        std::cout << __COUT_HDR_FL__<< "Value: " << XML_TO_CHAR(nodeList->item(itemNumber)->getFirstChild()->getNodeValue()) << std::endl;
+	return nodeList->item (itemNumber);
 }
 
 //==============================================================================
-xercesc::DOMElement* RegisterSequencerInfoReader::getElement(XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber)
+xercesc::DOMElement* RegisterSequencerInfoReader::getElement (XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber)
 {
-    return dynamic_cast< xercesc::DOMElement* >(getNode(tagName,parent,itemNumber));
+	return dynamic_cast<xercesc::DOMElement*> (getNode (tagName, parent, itemNumber));
 }
 
 //==============================================================================
-xercesc::DOMElement* RegisterSequencerInfoReader::getElement(XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber)
+xercesc::DOMElement* RegisterSequencerInfoReader::getElement (XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber)
 {
-    return dynamic_cast< xercesc::DOMElement* >(getNode(tagName,parent,itemNumber));
+	return dynamic_cast<xercesc::DOMElement*> (getNode (tagName, parent, itemNumber));
 }
 
 //==============================================================================
-void RegisterSequencerInfoReader::read(RegisterBase& configuration)
+void RegisterSequencerInfoReader::read (RegisterBase& configuration)
 {
-  /*
+	/*
     std::string configurationDataDir = std::string(getenv("CONFIGURATION_DATA_PATH")) + "/" + configuration.getTypeName() + "RegisterSequencer/";
     		//"/ConfigurationInfo/";
     std::string configFile = configurationDataDir + "/0/" + configuration.getTypeName() + "RegisterSequencer" + ".xml";
@@ -202,7 +204,7 @@ void RegisterSequencerInfoReader::read(RegisterBase& configuration)
 }
 
 //==============================================================================
-void RegisterSequencerInfoReader::read(RegisterBase* configuration)
+void RegisterSequencerInfoReader::read (RegisterBase* configuration)
 {
-    read(*configuration);
+	read (*configuration);
 }

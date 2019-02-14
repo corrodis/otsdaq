@@ -5,18 +5,11 @@
 
 namespace ots
 {
-
 class FERRegisterConfiguration : public ots::RegisterConfiguration
 {
-
-public:
-
-	FERRegisterConfiguration(void);
-    virtual ~FERRegisterConfiguration(void);
-
-    
-
-
+  public:
+	FERRegisterConfiguration (void);
+	virtual ~FERRegisterConfiguration (void);
 };
-}
+}  // namespace ots
 #endif

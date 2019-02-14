@@ -3,38 +3,35 @@
 
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace ots
 {
-
 class DataBufferConfiguration : public ConfigurationBase
 {
-
-public:
-
-	DataBufferConfiguration(void);
-	virtual ~DataBufferConfiguration(void);
+  public:
+	DataBufferConfiguration (void);
+	virtual ~DataBufferConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 
 	//Getter
-	std::vector<std::string> getProcessorIDList  (std::string dataBufferID)                         const;
+	std::vector<std::string> getProcessorIDList (std::string dataBufferID) const;
 
-	std::vector<std::string> getProducerIDList   (std::string dataBufferID)                         const;
-	bool                     getProducerStatus   (std::string dataBufferID, std::string producerID) const;
-	std::string              getProducerClass    (std::string dataBufferID, std::string producerID) const;
+	std::vector<std::string> getProducerIDList (std::string dataBufferID) const;
+	bool                     getProducerStatus (std::string dataBufferID, std::string producerID) const;
+	std::string              getProducerClass (std::string dataBufferID, std::string producerID) const;
 
-	std::vector<std::string> getConsumerIDList   (std::string dataBufferID)                         const;
-	bool                     getConsumerStatus   (std::string dataBufferID, std::string consumerID) const;
-	std::string              getConsumerClass    (std::string dataBufferID, std::string consumerID) const;
+	std::vector<std::string> getConsumerIDList (std::string dataBufferID) const;
+	bool                     getConsumerStatus (std::string dataBufferID, std::string consumerID) const;
+	std::string              getConsumerClass (std::string dataBufferID, std::string consumerID) const;
 
-private:
-
-	enum{
+  private:
+	enum
+	{
 		UniqueID,
 		DataBufferID,
 		ProcessorID,
@@ -57,7 +54,6 @@ private:
 	};
 	//DataBufferID,
 	std::map<std::string, BufferProcessors> processorInfos_;
-
 };
-}
+}  // namespace ots
 #endif

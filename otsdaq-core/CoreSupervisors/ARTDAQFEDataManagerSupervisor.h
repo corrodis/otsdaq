@@ -5,20 +5,17 @@
 
 namespace ots
 {
-
-class ARTDAQFEDataManagerSupervisor: public FEDataManagerSupervisor
+class ARTDAQFEDataManagerSupervisor : public FEDataManagerSupervisor
 {
+  public:
+	XDAQ_INSTANTIATOR ();
 
-public:
+	ARTDAQFEDataManagerSupervisor (xdaq::ApplicationStub* s);
+	virtual ~ARTDAQFEDataManagerSupervisor (void);
 
-    XDAQ_INSTANTIATOR();
-
-    ARTDAQFEDataManagerSupervisor              (xdaq::ApplicationStub * s) ;
-    virtual ~ARTDAQFEDataManagerSupervisor     (void);
-
-private:
+  private:
 };
 
-}
+}  // namespace ots
 
 #endif
