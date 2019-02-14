@@ -270,10 +270,9 @@ config_version_map_t DatabaseConfigurationInterface::getConfigurationGroupMember
 	auto to_map = [](auto const& inputList, bool includeMetaDataTable) {
 		auto resultMap = config_version_map_t{};
 
-		std::for_each(inputList.begin(), inputList.end(),
-		              [&resultMap](auto const& info) {
-			              resultMap[info.configuration] = std::stol(info.version, 0, 10);
-		              });
+		std::for_each(inputList.begin(), inputList.end(), [&resultMap](auto const& info) {
+			resultMap[info.configuration] = std::stol(info.version, 0, 10);
+		});
 
 		if (!includeMetaDataTable)
 		{

@@ -203,8 +203,7 @@ void HttpXmlDocument::copyDataChildren(HttpXmlDocument &document)
 //==============================================================================
 //HttpXmlDocument::outputXmlDocument
 //	recurse through XML theDocument_ and std out and output to stream parameter if not null
-void HttpXmlDocument::outputXmlDocument(std::ostringstream *out, bool dispStdOut,
-                                        bool allowWhiteSpace)
+void HttpXmlDocument::outputXmlDocument(std::ostringstream *out, bool dispStdOut, bool allowWhiteSpace)
 {
 	recursiveOutputXmlDocument(theDocument_->getDocumentElement(), out, dispStdOut, "", allowWhiteSpace);
 }
@@ -212,8 +211,7 @@ void HttpXmlDocument::outputXmlDocument(std::ostringstream *out, bool dispStdOut
 //==============================================================================
 //HttpXmlDocument::recursiveOutputXmlDocument
 //	recursively printout XML theDocument_ to std out and output stream if not null
-void HttpXmlDocument::recursiveOutputXmlDocument(xercesc::DOMElement *currEl, std::ostringstream *out,
-                                                 bool dispStdOut, std::string tabStr, bool allowWhiteSpace)
+void HttpXmlDocument::recursiveOutputXmlDocument(xercesc::DOMElement *currEl, std::ostringstream *out, bool dispStdOut, std::string tabStr, bool allowWhiteSpace)
 {
 	//open field tag
 	if (dispStdOut) std::cout << __COUT_HDR_FL__ << tabStr << "<" << XML_TO_CHAR(currEl->getNodeName());
@@ -269,8 +267,7 @@ std::string HttpXmlDocument::getMatchingValue(const std::string &field, const un
 //==============================================================================
 //HttpXmlDocument::recursiveFindElement
 //  recursively searches and returns the value for field found occurance number of times
-std::string HttpXmlDocument::recursiveFindElementValue(xercesc::DOMElement *currEl, const std::string &field,
-                                                       const unsigned int occurance, unsigned int &count)
+std::string HttpXmlDocument::recursiveFindElementValue(xercesc::DOMElement *currEl, const std::string &field, const unsigned int occurance, unsigned int &count)
 {
 	if (XML_TO_CHAR(currEl->getNodeName()) == field && occurance == count++)  //found, done!!
 	{
@@ -288,7 +285,7 @@ std::string HttpXmlDocument::recursiveFindElementValue(xercesc::DOMElement *curr
 		{
 			retStr = recursiveFindElementValue((xercesc::DOMElement *)(nodeList->item(i)), field, occurance, count);
 			if (retStr != "") return retStr;  //found among children already, done
-			                                  //else continue search within children recursively
+				                              //else continue search within children recursively
 		}
 	return "";  //nothing found
 }
@@ -332,8 +329,7 @@ xercesc::DOMElement *HttpXmlDocument::getMatchingElement(const std::string &fiel
 //  returns the element for field found occurance number of times within the subtree
 //		specified by parentEl
 //  returns null if field was not found
-xercesc::DOMElement *HttpXmlDocument::getMatchingElementInSubtree(xercesc::DOMElement *parentEl, const std::string &field,
-                                                                  const unsigned int occurance)
+xercesc::DOMElement *HttpXmlDocument::getMatchingElementInSubtree(xercesc::DOMElement *parentEl, const std::string &field, const unsigned int occurance)
 {
 	unsigned int count = 0;
 	return recursiveFindElement(parentEl, field, occurance, count);
@@ -342,8 +338,7 @@ xercesc::DOMElement *HttpXmlDocument::getMatchingElementInSubtree(xercesc::DOMEl
 //==============================================================================
 //HttpXmlDocument::recursiveFindElement
 //  recursively searches and returns the element for field found occurance number of times
-xercesc::DOMElement *HttpXmlDocument::recursiveFindElement(xercesc::DOMElement *currEl, const std::string &field,
-                                                           const unsigned int occurance, unsigned int &count)
+xercesc::DOMElement *HttpXmlDocument::recursiveFindElement(xercesc::DOMElement *currEl, const std::string &field, const unsigned int occurance, unsigned int &count)
 {
 	if (XML_TO_CHAR(currEl->getNodeName()) == field && occurance == count++)  //found, done!!
 	{

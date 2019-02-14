@@ -138,7 +138,8 @@ struct TableEditStruct
 			temporaryVersion_ = config_->createTemporaryView(originalVersion_);
 			cfgMgr->saveNewConfiguration(
 			    configName_,
-			    temporaryVersion_, true);  //proper bookkeeping for temporary version with the new version
+			    temporaryVersion_,
+			    true);  //proper bookkeeping for temporary version with the new version
 
 			__COUT__ << "Created temporary version " << temporaryVersion_ << std::endl;
 			createdTemporaryVersion_ = true;

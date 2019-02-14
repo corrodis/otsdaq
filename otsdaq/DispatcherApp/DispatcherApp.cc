@@ -240,7 +240,8 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 
 	theConfigurationManager_->loadConfigurationGroup(
 	    theGroup.first,
-	    theGroup.second, true);
+	    theGroup.second,
+	    true);
 
 	std::string path   = "";
 	char*       dirMRB = getenv("MRB_BUILDDIR");

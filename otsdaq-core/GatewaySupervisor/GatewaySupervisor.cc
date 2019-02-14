@@ -351,8 +351,7 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 		//	else
 		//		sleep
 
-		if (sock.receive(buffer, 0 /*timeoutSeconds*/, 1 /*timeoutUSeconds*/,
-		                 false /*verbose*/) != -1)
+		if (sock.receive(buffer, 0 /*timeoutSeconds*/, 1 /*timeoutUSeconds*/, false /*verbose*/) != -1)
 		{
 			__COUT__ << "UDP State Changer packet received of size = " << buffer.size() << __E__;
 
@@ -392,11 +391,7 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 				if (theSupervisor->VERBOSE_MUTEX) __COUT__ << "Have FSM access" << __E__;
 
 				errorStr = theSupervisor->attemptStateMachineTransition(
-				    0, 0,
-				    command, fsmName,
-				    WebUsers::DEFAULT_STATECHANGER_USERNAME /*fsmWindowName*/,
-				    WebUsers::DEFAULT_STATECHANGER_USERNAME,
-				    parameters);
+				    0, 0, command, fsmName, WebUsers::DEFAULT_STATECHANGER_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_STATECHANGER_USERNAME, parameters);
 			}
 
 			if (errorStr != "")
@@ -473,7 +468,8 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 	{
 		xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(
 		    logbookInfo.second.getDescriptor(),
-		    "MakeSystemLogbookEntry", parameters);
+		    "MakeSystemLogbookEntry",
+		    parameters);
 
 		SOAPParameters retParameters("Status");
 		//SOAPParametersV retParameters(1);
@@ -619,17 +615,12 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 	std::vector<std::string> parameters;
 	if (command == "Configure")
 		parameters.push_back(CgiDataUtilities::postData(cgiIn, "ConfigurationAlias"));
-	attemptStateMachineTransition(&xmlOut, out, command, fsmName, fsmWindowName,
-	                              userInfo.username_, parameters);
+	attemptStateMachineTransition(&xmlOut, out, command, fsmName, fsmWindowName, userInfo.username_, parameters);
 }
 
 //========================================================================================================================
 std::string GatewaySupervisor::attemptStateMachineTransition(
-    HttpXmlDocument* xmldoc, std::ostringstream* out,
-    const std::string& command,
-    const std::string& fsmName, const std::string& fsmWindowName,
-    const std::string&              username,
-    const std::vector<std::string>& commandParameters)
+    HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& commandParameters)
 {
 	std::string errorStr = "";
 
@@ -947,7 +938,9 @@ bool GatewaySupervisor::infoRequestThread(toolbox::task::WorkLoop* workLoop)
 	}
 
 	infoRequestWorkLoopManager_.report(workLoop,
-	                                   "RESULT: This is the best result ever", 50, false);
+	                                   "RESULT: This is the best result ever",
+	                                   50,
+	                                   false);
 	std::string workLoopName = workLoop->getName();
 	__COUT__ << workLoopName << " test: " << counterTest_
 	         << " vector size: " << vectorTest_.size() << __E__;
@@ -972,7 +965,9 @@ bool GatewaySupervisor::infoRequestThread(toolbox::task::WorkLoop* workLoop)
 	//    __COUT__ << " Lock released again" << __E__;
 	//infoRequestWorkLoopManager_->report(workLoop,"RESULT: This is the best result ever");
 	infoRequestWorkLoopManager_.report(workLoop,
-	                                   theStateMachine_.getCurrentStateName(), 100, true);
+	                                   theStateMachine_.getCurrentStateName(),
+	                                   100,
+	                                   true);
 	//    __COUT__ << " Done with WorkLoop: " << workLoopName << __E__;
 	return false;  //execute once and automatically remove the workloop so in WorkLoopManager the try workLoop->remove(job_) could be commented out
 	               //return true;//go on and then you must do the workLoop->remove(job_) in WorkLoopManager
@@ -1951,7 +1946,8 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 			GatewaySupervisor::broadcastMessageThread(
 			    supervisorPtr, threadStruct);
 		},
-		            this, &broadcastThreadStructs[i])
+		            this,
+		            &broadcastThreadStructs[i])
 		    .detach();
 	}  //end broadcast thread creation loop
 
@@ -2231,8 +2227,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		//		__COUT__ << "uuid = " << uuid << __E__;
 		//		__COUT__ << "nac =-" << newAccountCode << "-" << __E__;
 
-		uint64_t uid = theWebUsers_.attemptActiveSession(uuid, jumbledUser,
-		                                                 jumbledPw, newAccountCode, cgi.getEnvironment().getRemoteAddr());  //after call jumbledUser holds displayName on success
+		uint64_t uid = theWebUsers_.attemptActiveSession(uuid, jumbledUser, jumbledPw, newAccountCode, cgi.getEnvironment().getRemoteAddr());  //after call jumbledUser holds displayName on success
 
 		if (uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
 		{
@@ -2283,8 +2278,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		//		__COUT__ << "jumbledEmail = " << jumbledEmail << __E__;
 		//		__COUT__ << "uuid = " << uuid << __E__;
 
-		uint64_t uid = theWebUsers_.attemptActiveSessionWithCert(uuid, jumbledEmail,
-		                                                         cookieCode, username, cgi.getEnvironment().getRemoteAddr());  //after call jumbledUser holds displayName on success
+		uint64_t uid = theWebUsers_.attemptActiveSessionWithCert(uuid, jumbledEmail, cookieCode, username, cgi.getEnvironment().getRemoteAddr());  //after call jumbledUser holds displayName on success
 
 		if (uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
 		{
@@ -2324,9 +2318,8 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		//		__COUT__ << "Cookie Code = " << cookieCode.substr(0, 10) << __E__;
 		//		__COUT__ << "logoutOthers = " << logoutOthers << __E__;
 
-		uint64_t uid;  //get uid for possible system logbook message
-		if (theWebUsers_.cookieCodeLogout(cookieCode, logoutOthers == "1",
-		                                  &uid, cgi.getEnvironment().getRemoteAddr()) != theWebUsers_.NOT_FOUND_IN_DATABASE)  //user logout
+		uint64_t uid;                                                                                                                                          //get uid for possible system logbook message
+		if (theWebUsers_.cookieCodeLogout(cookieCode, logoutOthers == "1", &uid, cgi.getEnvironment().getRemoteAddr()) != theWebUsers_.NOT_FOUND_IN_DATABASE)  //user logout
 		{
 			//if did some logging out, check if completely logged out
 			//if so, system logbook message should be made.
@@ -2407,8 +2400,7 @@ void GatewaySupervisor::tooltipRequest(xgi::Input* in, xgi::Output* out)
 //		override to set defaults for supervisor property values (before user settings override)
 void GatewaySupervisor::setSupervisorPropertyDefaults()
 {
-	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold, std::string() +
-	                                                                                                                                  "*=1 | gatewayLaunchOTS=-1 | gatewayLaunchWiz=-1 | codeEditor=-1");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold, std::string() + "*=1 | gatewayLaunchOTS=-1 | gatewayLaunchWiz=-1 | codeEditor=-1");
 }
 
 //========================================================================================================================
@@ -2504,8 +2496,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			__COUT__ << "layout = " << layout << __E__;
 			__COUT__ << "syslayout = " << syslayout << __E__;
 
-			theWebUsers_.changeSettingsForUser(userInfo.uid_, bgcolor, dbcolor, wincolor,
-			                                   layout, syslayout);
+			theWebUsers_.changeSettingsForUser(userInfo.uid_, bgcolor, dbcolor, wincolor, layout, syslayout);
 			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, true);  //include user accounts
 		}
 		else if (requestType == "accountSettings")
@@ -2535,8 +2526,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			__COUT__ << "displayname = " << displayname << __E__;
 			__COUT__ << "permissions = " << permissions << __E__;
 
-			theWebUsers_.modifyAccountSettings(userInfo.uid_, type_int, username, displayname, email,
-			                                   permissions);
+			theWebUsers_.modifyAccountSettings(userInfo.uid_, type_int, username, displayname, email, permissions);
 
 			__COUT__ << "accounts = " << accounts << __E__;
 
@@ -2547,8 +2537,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			std::string       set              = CgiDataUtilities::getData(cgiIn, "set");
 			const std::string DEFAULT_FSM_VIEW = "Default_FSM_View";
 			if (set == "1")
-				theWebUsers_.setGenericPreference(userInfo.uid_, DEFAULT_FSM_VIEW,
-				                                  CgiDataUtilities::getData(cgiIn, DEFAULT_FSM_VIEW));
+				theWebUsers_.setGenericPreference(userInfo.uid_, DEFAULT_FSM_VIEW, CgiDataUtilities::getData(cgiIn, DEFAULT_FSM_VIEW));
 			else
 				theWebUsers_.getGenericPreference(userInfo.uid_, DEFAULT_FSM_VIEW, &xmlOut);
 		}
@@ -2684,10 +2673,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 					try
 					{
 						CorePropertySupervisorBase::theConfigurationManager_->loadConfigurationGroup(
-						    aliasMapPair.second.first, aliasMapPair.second.second,
-						    false, 0, 0, 0,
-						    &groupComment, &groupAuthor, &groupCreationTime,
-						    false /*false to not load member map*/);
+						    aliasMapPair.second.first, aliasMapPair.second.second, false, 0, 0, 0, &groupComment, &groupAuthor, &groupCreationTime, false /*false to not load member map*/);
 
 						xmlOut.addTextElementToData("config_comment", groupComment);
 						xmlOut.addTextElementToData("config_author", groupAuthor);
@@ -2722,10 +2708,12 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			for (auto it : allSupervisorInfo_.getAllFETypeSupervisorInfo())
 			{
 				xmlOut.addTextElementToParent("fec_url",
-				                              it.second.getURL(), "fec_list");
+				                              it.second.getURL(),
+				                              "fec_list");
 				xmlOut.addTextElementToParent(
 				    "fec_urn",
-				    std::to_string(it.second.getId()), "fec_list");
+				    std::to_string(it.second.getId()),
+				    "fec_list");
 			}
 		}
 		else if (requestType == "getSystemMessages")
@@ -2760,8 +2748,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
 
 			if (tmpUserWithLock != theWebUsers_.getUserWithLock())  //if there was a change, broadcast system message
-				theSystemMessenger_.addSystemMessage("*", theWebUsers_.getUserWithLock() == "" ? tmpUserWithLock + " has unlocked ots."
-				                                                                               : theWebUsers_.getUserWithLock() + " has locked ots.");
+				theSystemMessenger_.addSystemMessage("*", theWebUsers_.getUserWithLock() == "" ? tmpUserWithLock + " has unlocked ots." : theWebUsers_.getUserWithLock() + " has locked ots.");
 		}
 		else if (requestType == "getStateMachine")
 		{
@@ -2815,7 +2802,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 						//__COUT__ << states[i] << " => " << transName << __E__;
 
 						xmlOut.addTextElementToParent("state_transition_name",
-						                              transName, stateParent);
+						                              transName,
+						                              stateParent);
 						transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
 						//__COUT__ << states[i] << " => " << transParameter<< __E__;
 
@@ -2835,7 +2823,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 						//__COUT__ << states[i] << " => " << transName << __E__;
 
 						xmlOut.addTextElementToParent("state_transition_name",
-						                              transName, stateParent);
+						                              transName,
+						                              stateParent);
 						transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
 						//__COUT__ << states[i] << " => " << transParameter<< __E__;
 
@@ -2870,7 +2859,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 					//__COUT__ << states[i] << " => " << transName << __E__;
 
 					xmlOut.addTextElementToParent("state_transition_name",
-					                              transName, stateParent);
+					                              transName,
+					                              stateParent);
 					transParameter = theStateMachine_.getTransitionParameter(states[i], *ait);
 					//__COUT__ << states[i] << " => " << transParameter<< __E__;
 
@@ -3115,8 +3105,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	}
 
 	//return xml doc holding server response
-	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*dispStdOut*/,
-	                         true /*allowWhiteSpace*/);  //Note: allow white space need for error response
+	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*dispStdOut*/, true /*allowWhiteSpace*/);  //Note: allow white space need for error response
 
 	//__COUT__ << "Done" << __E__;
 }  // end request()

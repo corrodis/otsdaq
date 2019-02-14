@@ -28,8 +28,7 @@ struct BinaryStringMacros
 
 	template<class T>
 	static void insertValueInBinaryString(
-	    std::string& binaryBuffer, T value,
-	    unsigned int byteIndex = 0, unsigned int bitIndex = 0)
+	    std::string& binaryBuffer, T value, unsigned int byteIndex = 0, unsigned int bitIndex = 0)
 	{
 		__COUTV__(sizeof(value));
 
@@ -71,8 +70,7 @@ struct BinaryStringMacros
 	}  //end insertValueInBinaryString
 	//specialized for string value
 	static void insertValueInBinaryString(
-	    std::string& binaryBuffer, const std::string& value,
-	    unsigned int byteIndex = 0, unsigned int bitIndex = 0)
+	    std::string& binaryBuffer, const std::string& value, unsigned int byteIndex = 0, unsigned int bitIndex = 0)
 	{
 	}
 

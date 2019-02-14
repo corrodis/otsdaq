@@ -150,7 +150,8 @@ bool RemoteWebUsers::xmlRequestToGateway(
 		parameters.addParameter("sequence", sequence);
 		parameters.addParameter("IPAddress", userInfo.ip_);
 		retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
-		                                          "SupervisorSequenceCheck", parameters);
+		                                          "SupervisorSequenceCheck",
+		                                          parameters);
 		parameters.clear();
 		parameters.addParameter("Permissions");
 		SOAPUtilities::receive(retMsg, parameters);
@@ -198,7 +199,8 @@ bool RemoteWebUsers::xmlRequestToGateway(
 	parameters.addParameter("IPAddress", userInfo.ip_);
 
 	retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
-	                                          "SupervisorCookieCheck", parameters);
+	                                          "SupervisorCookieCheck",
+	                                          parameters);
 
 	parameters.clear();
 	parameters.addParameter("CookieCode");
@@ -439,8 +441,7 @@ std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::get
 {
 	actionTimeString              = "";
 	xoap::MessageReference retMsg = ots::SOAPMessenger::sendWithSOAPReply(
-	    supervisorDescriptor, "SupervisorLastConfigGroupRequest",
-	    SOAPParameters("ActionOfLastGroup", actionOfLastGroup));
+	    supervisorDescriptor, "SupervisorLastConfigGroupRequest", SOAPParameters("ActionOfLastGroup", actionOfLastGroup));
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("GroupName");
@@ -469,7 +470,10 @@ std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::get
 //	return true, if user info gotten successfully
 //	else false
 bool RemoteWebUsers::getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-                                          std::string& cookieCode, std::string* userName, std::string* displayName, uint64_t* activeSessionIndex)
+                                          std::string&                                 cookieCode,
+                                          std::string*                                 userName,
+                                          std::string*                                 displayName,
+                                          uint64_t*                                    activeSessionIndex)
 {
 	__COUT__ << std::endl;
 	if (cookieCode.length() != WebUsers::COOKIE_CODE_LENGTH) return false;  //return if invalid cookie code
@@ -496,7 +500,11 @@ bool RemoteWebUsers::getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescr
 //cookieCodeIsActiveForRequest
 //	for external supervisors to check with Supervisor for login
 bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-                                                  std::string& cookieCode, uint8_t* userPermissions, std::string ip, bool refreshCookie, std::string* userWithLock)
+                                                  std::string&                                 cookieCode,
+                                                  uint8_t*                                     userPermissions,
+                                                  std::string                                  ip,
+                                                  bool                                         refreshCookie,
+                                                  std::string*                                 userWithLock)
 {
 	//__COUT__ << "CookieCode: " << cookieCode << " " << cookieCode.length() << std::endl;
 	if (cookieCode.length() != WebUsers::COOKIE_CODE_LENGTH) return false;  //return if invalid cookie code

@@ -102,7 +102,9 @@ ConfigurationVersion Configurations::getConditionVersion(const ConfigurationGrou
 // returns 1 if no change occurred (because new version was same as existing)
 // returns 0 on change success
 int Configurations::setConditionVersionForView(ConfigurationView *   cfgView,
-                                               ConfigurationGroupKey ConfigurationGroupKey, std::string koc, ConfigurationVersion newKOCVersion)
+                                               ConfigurationGroupKey ConfigurationGroupKey,
+                                               std::string           koc,
+                                               ConfigurationVersion  newKOCVersion)
 {
 	//find first match of KOCAlias and ConfigurationGroupKey
 	unsigned int row = 0;
@@ -152,8 +154,7 @@ std::set<std::string> Configurations::getListOfKocs(ConfigurationGroupKey Config
 //	return list of Kind of Conditions that match ConfigurationGroupKey for the active configuration view.
 //	for all KOCs regardless of ConfigurationGroupKey, set ConfigurationGroupKey = -1
 //
-void Configurations::getListOfKocsForView(ConfigurationView *cfgView, std::set<std::string> &kocs,
-                                          ConfigurationGroupKey ConfigurationGroupKey) const
+void Configurations::getListOfKocsForView(ConfigurationView *cfgView, std::set<std::string> &kocs, ConfigurationGroupKey ConfigurationGroupKey) const
 {
 	if (!cfgView)
 	{

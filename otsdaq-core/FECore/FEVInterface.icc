@@ -50,7 +50,8 @@ void FEVInterface::sendToFrontEnd(const std::string& targetInterfaceID,
 // NOTE: can not overload functions based on return type, so T& passed as value
 template<class T>
 void FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID,
-                                       T& retValue, unsigned int timeoutInSeconds) const
+                                       T&                 retValue,
+                                       unsigned int       timeoutInSeconds) const
 {
 	__FE_COUTV__(sourceInterfaceID);
 	__FE_COUTV__(VStateMachine::parentSupervisor_);
@@ -81,7 +82,8 @@ T FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID,
 template<class T>
 std::string& FEVInterface::setFEMacroArgumentValue(
     frontEndMacroArgs_t args,
-    const std::string& argName, const T& value) const
+    const std::string&  argName,
+    const T&            value) const
 {
 	//modify existing pair
 	std::string&      arg = getFEMacroArgument(args, argName);
@@ -95,7 +97,8 @@ std::string& FEVInterface::setFEMacroArgumentValue(
 template<class T>
 std::string& FEVInterface::emplaceFEMacroArgumentValue(
     frontEndMacroArgs_t args,
-    const std::string& argName, const T& value) const
+    const std::string&  argName,
+    const T&            value) const
 {
 	//insert new pair
 	std::stringstream ss;

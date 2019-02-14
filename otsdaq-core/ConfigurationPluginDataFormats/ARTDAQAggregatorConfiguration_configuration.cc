@@ -52,15 +52,12 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager *configManager)
 	for (auto &aggContext : aggContexts)
 	{
 		ConfigurationTree aggConfigNode = contextConfig->getSupervisorConfigNode(configManager,
-		                                                                         aggContext->contextUID_, aggContext->applications_[0].applicationUID_);
+		                                                                         aggContext->contextUID_,
+		                                                                         aggContext->applications_[0].applicationUID_);
 
 		__COUT__ << "Path for this aggregator config is " << aggContext->contextUID_ << "/" << aggContext->applications_[0].applicationUID_ << "/" << aggConfigNode.getValueAsString() << std::endl;
 
-		outputFHICL(configManager, aggConfigNode,
-		            contextConfig->getARTDAQAppRank(aggContext->contextUID_),
-		            contextConfig->getContextAddress(aggContext->contextUID_),
-		            contextConfig->getARTDAQDataPort(configManager, aggContext->contextUID_),
-		            contextConfig);
+		outputFHICL(configManager, aggConfigNode, contextConfig->getARTDAQAppRank(aggContext->contextUID_), contextConfig->getContextAddress(aggContext->contextUID_), contextConfig->getARTDAQDataPort(configManager, aggContext->contextUID_), contextConfig);
 	}
 }
 
@@ -84,9 +81,11 @@ std::string ARTDAQAggregatorConfiguration::getFHICLFilename(const ConfigurationT
 }
 
 //========================================================================================================================
-void ARTDAQAggregatorConfiguration::outputFHICL(ConfigurationManager *   configManager,
-                                                const ConfigurationTree &aggregatorNode,
-                                                unsigned int selfRank, std::string selfHost, unsigned int selfPort,
+void ARTDAQAggregatorConfiguration::outputFHICL(ConfigurationManager *          configManager,
+                                                const ConfigurationTree &       aggregatorNode,
+                                                unsigned int                    selfRank,
+                                                std::string                     selfHost,
+                                                unsigned int                    selfPort,
                                                 const XDAQContextConfiguration *contextConfig)
 {
 	/*

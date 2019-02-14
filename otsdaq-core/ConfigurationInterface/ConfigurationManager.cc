@@ -36,7 +36,17 @@ const uint8_t ConfigurationManager::METADATA_COL_TIMESTAMP = 4;
 const std::set<std::string> ConfigurationManager::contextMemberNames_  = {ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME, ConfigurationManager::XDAQ_APPLICATION_CONFIG_NAME, "XDAQApplicationPropertyConfiguration", "DesktopIconConfiguration", "MessageFacilityConfiguration", "GatewaySupervisorConfiguration", "StateMachineConfiguration", "DesktopWindowParameterConfiguration"};
 const std::set<std::string> ConfigurationManager::backboneMemberNames_ = {ConfigurationManager::GROUP_ALIASES_CONFIG_NAME, ConfigurationManager::VERSION_ALIASES_CONFIG_NAME};
 const std::set<std::string> ConfigurationManager::iterateMemberNames_  = {"IterateConfiguration", "IterationPlanConfiguration", "IterationTargetConfiguration",
-                                                                         /*command specific tables*/ "IterationCommandBeginLabelConfiguration", "IterationCommandChooseFSMConfiguration", "IterationCommandConfigureAliasConfiguration", "IterationCommandConfigureGroupConfiguration", "IterationCommandExecuteFEMacroConfiguration", "IterationCommandExecuteMacroConfiguration", "IterationCommandMacroDimensionalLoopConfiguration", "IterationCommandMacroDimensionalLoopParameterConfiguration", "IterationCommandModifyGroupConfiguration", "IterationCommandRepeatLabelConfiguration", "IterationCommandRunConfiguration"};
+                                                                         /*command specific tables*/ "IterationCommandBeginLabelConfiguration",
+                                                                         "IterationCommandChooseFSMConfiguration",
+                                                                         "IterationCommandConfigureAliasConfiguration",
+                                                                         "IterationCommandConfigureGroupConfiguration",
+                                                                         "IterationCommandExecuteFEMacroConfiguration",
+                                                                         "IterationCommandExecuteMacroConfiguration",
+                                                                         "IterationCommandMacroDimensionalLoopConfiguration",
+                                                                         "IterationCommandMacroDimensionalLoopParameterConfiguration",
+                                                                         "IterationCommandModifyGroupConfiguration",
+                                                                         "IterationCommandRepeatLabelConfiguration",
+                                                                         "IterationCommandRunConfiguration"};
 
 //==============================================================================
 ConfigurationManager::ConfigurationManager()
@@ -74,31 +84,36 @@ ConfigurationManager::ConfigurationManager()
 		    "UnusedUID",
 		    "UNUSED_UID",
 		    ViewColumnInfo::DATATYPE_NUMBER,
-		    "", 0));
+		    "",
+		    0));
 		colInfo->push_back(ViewColumnInfo(
 		    ViewColumnInfo::TYPE_DATA,
 		    "GroupAliases",
 		    "GROUP_ALIASES",
 		    ViewColumnInfo::DATATYPE_STRING,
-		    "", 0));
+		    "",
+		    0));
 		colInfo->push_back(ViewColumnInfo(
 		    ViewColumnInfo::TYPE_COMMENT,  //just to make init() happy
 		    "CommentDescription",
 		    "COMMENT_DESCRIPTION",
 		    ViewColumnInfo::DATATYPE_STRING,
-		    "", 0));
+		    "",
+		    0));
 		colInfo->push_back(ViewColumnInfo(
 		    ViewColumnInfo::TYPE_AUTHOR,  //just to make init() happy
 		    "GroupAuthor",
 		    "AUTHOR",
 		    ViewColumnInfo::DATATYPE_STRING,
-		    "", 0));
+		    "",
+		    0));
 		colInfo->push_back(ViewColumnInfo(
 		    ViewColumnInfo::TYPE_TIMESTAMP,
 		    "GroupCreationTime",
 		    "GROUP_CREATION_TIME",
 		    ViewColumnInfo::DATATYPE_TIME,
-		    "", 0));
+		    "",
+		    0));
 		auto tmpVersion = groupMetadataTable_.createTemporaryView();
 		groupMetadataTable_.setActiveView(tmpVersion);
 		//only need this one and only row for all time
@@ -677,7 +692,9 @@ void ConfigurationManager::dumpActiveConfiguration(
 			    group.second.first,
 			    group.second.second,
 			    false /*doActivate*/,
-			    &memberMap /*memberMap*/, 0 /*progressBar*/, 0 /*accumulateErrors*/,
+			    &memberMap /*memberMap*/,
+			    0 /*progressBar*/,
+			    0 /*accumulateErrors*/,
 			    &groupComment,
 			    &groupAuthor,
 			    &groupCreateTime,
@@ -951,8 +968,7 @@ void ConfigurationManager::loadConfigurationGroup(
 
 		//modify members based on aliases
 		{
-			std::map<std::string /*table*/, std::map<
-			                                    std::string /*alias*/, ConfigurationVersion>>
+			std::map<std::string /*table*/, std::map<std::string /*alias*/, ConfigurationVersion>>
 			    versionAliases;
 			if (aliasMap.size())  //load version aliases
 			{
@@ -1629,8 +1645,7 @@ ConfigurationManager::getActiveGroupAliases(void)
 //==============================================================================
 //getVersionAliases()
 //	get version aliases organized by table, for currently active backbone tables
-std::map<std::string /*table name*/, std::map<
-                                         std::string /*version alias*/, ConfigurationVersion /*aliased version*/>>
+std::map<std::string /*table name*/, std::map<std::string /*version alias*/, ConfigurationVersion /*aliased version*/>>
 ConfigurationManager::getVersionAliases(void) const
 {
 	//__COUT__ << "getVersionAliases()" << std::endl;

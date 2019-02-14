@@ -12,7 +12,9 @@ using namespace ots;
 
 //========================================================================================================================
 DataProducerBase::DataProducerBase(const std::string& supervisorApplicationUID,
-                                   const std::string& bufferUID, const std::string& processorUID, unsigned int bufferSize)
+                                   const std::string& bufferUID,
+                                   const std::string& processorUID,
+                                   unsigned int       bufferSize)
     : DataProcessor(supervisorApplicationUID, bufferUID, processorUID)
     , bufferSize_(bufferSize)
 {

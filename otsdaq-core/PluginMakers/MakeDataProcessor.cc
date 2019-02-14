@@ -10,6 +10,11 @@ ots::DataProcessor* ots::makeDataProcessor(
 	static cet::BasicPluginFactory basicPluginInterfaceFactory("processor", "make");
 
 	return basicPluginInterfaceFactory.makePlugin<
-	    ots::DataProcessor*, std::string const&, std::string const&, std::string const&, ots::ConfigurationTree const&, std::string const&>(
+	    ots::DataProcessor*,
+	    std::string const&,
+	    std::string const&,
+	    std::string const&,
+	    ots::ConfigurationTree const&,
+	    std::string const&>(
 	    processorPluginName, supervisorApplicationUID, bufferUID, processorUID, configurationTree, pathToInterfaceConfiguration);
 }

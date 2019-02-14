@@ -1,8 +1,7 @@
 
 //==============================================================================
 template<class T>
-unsigned int ConfigurationView::findRow(unsigned int col, const T& value,
-                                        unsigned int offsetRow /*=0*/) const
+unsigned int ConfigurationView::findRow(unsigned int col, const T& value, unsigned int offsetRow /*=0*/) const
 {
 	std::istringstream s(value);
 	return findRow(col, s.str(), offsetRow);
@@ -11,10 +10,7 @@ unsigned int ConfigurationView::findRow(unsigned int col, const T& value,
 //==============================================================================
 template<class T>
 unsigned int ConfigurationView::findRowInGroup(
-    unsigned int col, const T& value,
-    const std::string& groupId,
-    const std::string& childLinkIndex,
-    unsigned int       offsetRow /*=0*/) const
+    unsigned int col, const T& value, const std::string& groupId, const std::string& childLinkIndex, unsigned int offsetRow /*=0*/) const
 {
 	std::istringstream s(value);
 	return findRowInGroup(col, s.str(), groupId, childLinkIndex, offsetRow);
@@ -26,8 +22,9 @@ unsigned int ConfigurationView::findRowInGroup(
 //Since there is no environmental variable that can just be a number they will all be converted no matter what.
 template<class T>
 void ConfigurationView::getValue(T&           value,
-                                 unsigned int row, unsigned int col,
-                                 bool doConvertEnvironmentVariables /*=true*/) const
+                                 unsigned int row,
+                                 unsigned int col,
+                                 bool         doConvertEnvironmentVariables /*=true*/) const
 {
 	if (!(col < columnsInfo_.size() && row < getNumberOfRows()))
 	{
@@ -179,7 +176,8 @@ void ConfigurationView::setVersion(const T& version)
 //These two methods check for basic type consistency
 template<class T>
 void ConfigurationView::setValue(const T&     value,
-                                 unsigned int row, unsigned int col)
+                                 unsigned int row,
+                                 unsigned int col)
 {
 	if (!(col < columnsInfo_.size() && row < getNumberOfRows()))
 	{

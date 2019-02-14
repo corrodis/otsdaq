@@ -308,7 +308,11 @@ int NetworkDevice::getInterface(std::string ipAddress)
 		                (communicationInterface_->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) :
 
 		                                                                          sizeof(struct sockaddr_in6),
-		                host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+		                host,
+		                NI_MAXHOST,
+		                NULL,
+		                0,
+		                NI_NUMERICHOST);
 
 		if (s != 0)
 		{
@@ -362,7 +366,11 @@ int NetworkDevice::getInterface(std::string ipAddress)
 			                (family == AF_INET) ? sizeof(struct sockaddr_in) :
 
 			                                    sizeof(struct sockaddr_in6),
-			                host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+			                host,
+			                NI_MAXHOST,
+			                NULL,
+			                0,
+			                NI_NUMERICHOST);
 
 			if (s != 0)
 			{

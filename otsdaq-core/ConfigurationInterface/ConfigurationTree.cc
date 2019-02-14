@@ -27,12 +27,7 @@ ConfigurationTree::ConfigurationTree()
 //==============================================================================
 ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMgr,
                                      const ConfigurationBase* const&    config)
-    : ConfigurationTree(configMgr, config, "" /*groupId_*/, 0 /*linkParentConfig_*/,
-                        "" /*linkColName_*/, "" /*linkColValue_*/,
-                        ConfigurationView::INVALID /*linkBackRow_*/, ConfigurationView::INVALID /*linkBackCol_*/,
-                        "" /*disconnectedTargetName_*/,
-                        "" /*disconnectedLinkID_*/, "" /*childLinkIndex_*/,
-                        ConfigurationView::INVALID /*row_*/, ConfigurationView::INVALID /*col_*/)
+    : ConfigurationTree(configMgr, config, "" /*groupId_*/, 0 /*linkParentConfig_*/, "" /*linkColName_*/, "" /*linkColValue_*/, ConfigurationView::INVALID /*linkBackRow_*/, ConfigurationView::INVALID /*linkBackCol_*/, "" /*disconnectedTargetName_*/, "" /*disconnectedLinkID_*/, "" /*childLinkIndex_*/, ConfigurationView::INVALID /*row_*/, ConfigurationView::INVALID /*col_*/)
 {
 	//__COUT__ << std::endl;
 	//__COUT__ << "SHORT CONTRUCTOR ConfigManager: " << configMgr_ << " configuration: " << configuration_  << std::endl;
@@ -698,7 +693,8 @@ const std::string& ConfigurationTree::getValueName(void) const
 //recurse
 //	Used by ConfigurationTree to handle / syntax of getNode
 ConfigurationTree ConfigurationTree::recurse(const ConfigurationTree& tree,
-                                             const std::string& childPath, bool doNotThrowOnBrokenUIDLinks)
+                                             const std::string&       childPath,
+                                             bool                     doNotThrowOnBrokenUIDLinks)
 {
 	//__COUT__ << tree.row_ << " " << tree.col_ << std::endl;
 	//__COUT__ << "childPath=" << childPath << " " << childPath.length() << std::endl;
@@ -772,7 +768,8 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 			//so return config node
 			return recurse(
 			    configMgr_->getNode(nodeName),
-			    childPath, doNotThrowOnBrokenUIDLinks);
+			    childPath,
+			    doNotThrowOnBrokenUIDLinks);
 		}
 		else if (row_ == ConfigurationView::INVALID && col_ == ConfigurationView::INVALID)
 		{
@@ -792,15 +789,19 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 			                   0 /*linkParentConfig_*/,
 			                   "",  //link node name, not a link
 			                   "",  //link node value, not a link
-			                   ConfigurationView::INVALID /*linkBackRow_*/, ConfigurationView::INVALID /*linkBackCol_*/,
+			                   ConfigurationView::INVALID /*linkBackRow_*/,
+			                   ConfigurationView::INVALID /*linkBackCol_*/,
 			                   "",  //ignored disconnected target name, not a link
 			                   "",  //ignored disconnected link id, not a link
 			                   "",
 			                   //if this node is group config node, consider that when getting rows
 			                   (groupId_ == "") ? configView_->findRow(configView_->getColUID(), nodeName)
 			                                    : configView_->findRowInGroup(configView_->getColUID(),
-			                                                                  nodeName, groupId_, childLinkIndex_)),
-			               childPath, doNotThrowOnBrokenUIDLinks);
+			                                                                  nodeName,
+			                                                                  groupId_,
+			                                                                  childLinkIndex_)),
+			               childPath,
+			               doNotThrowOnBrokenUIDLinks);
 		}
 		else if (row_ == ConfigurationView::INVALID)
 		{
@@ -863,7 +864,8 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 					    configuration_,  //linkParentConfig_
 					    nodeName,
 					    configView_->getDataView()[row_][c],  //this the link node field associated value (matches targeted column)
-					    row_ /*linkBackRow_*/, c /*linkBackCol_*/,
+					    row_ /*linkBackRow_*/,
+					    c /*linkBackCol_*/,
 					    configView_->getDataView()[row_][linkPair.first],   //give disconnected target name
 					    configView_->getDataView()[row_][linkPair.second],  //give disconnected link ID
 					    configView_->getColumnInfo(c).getChildLinkIndex());
@@ -877,13 +879,15 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 				        configuration_,                       //linkParentConfig_
 				        nodeName,                             //this is a link node
 				        configView_->getDataView()[row_][c],  //this the link node field associated value (matches targeted column)
-				        row_ /*linkBackRow_*/, c /*linkBackCol_*/,
+				        row_ /*linkBackRow_*/,
+				        c /*linkBackCol_*/,
 				        "",  //ignore since is connected
 				        "",  //ignore since is connected
 				        configView_->getColumnInfo(c).getChildLinkIndex(),
 				        childConfig->getView().findRow(childConfig->getView().getColUID(),
 				                                       configView_->getDataView()[row_][linkPair.second])),
-				    childPath, doNotThrowOnBrokenUIDLinks);
+				    childPath,
+				    doNotThrowOnBrokenUIDLinks);
 			}
 			else if (isLink)
 			{
@@ -911,7 +915,8 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 					                         configuration_,                                     //linkParentConfig_
 					                         nodeName,
 					                         configView_->getDataView()[row_][c],  //this the link node field associated value (matches targeted column)
-					                         row_ /*linkBackRow_*/, c /*linkBackCol_*/,
+					                         row_ /*linkBackRow_*/,
+					                         c /*linkBackCol_*/,
 					                         configView_->getDataView()[row_][linkPair.first],   //give disconnected target name
 					                         configView_->getDataView()[row_][linkPair.second],  //give disconnected target name
 					                         configView_->getColumnInfo(c).getChildLinkIndex());
@@ -925,11 +930,13 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 				        configuration_,                                     //linkParentConfig_
 				        nodeName,                                           //this is a link node
 				        configView_->getDataView()[row_][c],                //this the link node field associated value (matches targeted column)
-				        row_ /*linkBackRow_*/, c /*linkBackCol_*/,
+				        row_ /*linkBackRow_*/,
+				        c /*linkBackCol_*/,
 				        "",  //ignore since is connected
 				        "",  //ignore since is connected
 				        configView_->getColumnInfo(c).getChildLinkIndex()),
-				    childPath, doNotThrowOnBrokenUIDLinks);
+				    childPath,
+				    doNotThrowOnBrokenUIDLinks);
 			}
 			else
 			{
@@ -937,12 +944,18 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 				//return value node
 				return ConfigurationTree(
 				    configMgr_,
-				    configuration_, "",
+				    configuration_,
+				    "",
 				    0 /*linkParentConfig_*/,
-				    "", "",
-				    ConfigurationView::INVALID /*linkBackRow_*/, ConfigurationView::INVALID /*linkBackCol_*/,
-				    "", "" /*disconnectedLinkID*/, "",
-				    row_, c);
+				    "",
+				    "",
+				    ConfigurationView::INVALID /*linkBackRow_*/,
+				    ConfigurationView::INVALID /*linkBackCol_*/,
+				    "",
+				    "" /*disconnectedLinkID*/,
+				    "",
+				    row_,
+				    c);
 			}
 		}
 	}
@@ -1557,7 +1570,8 @@ std::vector<std::vector<std::pair<std::string, ConfigurationTree>>> Configuratio
 //	value can be comma-separated for OR of multiple values
 std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationTree::getChildren(
     std::map<std::string /*relative-path*/, std::string /*value*/> filterMap,
-    bool byPriority, bool onlyStatusTrue) const
+    bool                                                           byPriority,
+    bool                                                           onlyStatusTrue) const
 {
 	std::vector<std::pair<std::string, ConfigurationTree>> retVector;
 

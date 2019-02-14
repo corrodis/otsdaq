@@ -27,7 +27,7 @@ class TransmitterSocket : public virtual Socket
 
   private:
 	std::mutex sendMutex_;  //to make transmitter socket thread safe
-	    //	i.e. multiple threads can share a socket and call send()
+	                        //	i.e. multiple threads can share a socket and call send()
 };
 
 }  // namespace ots

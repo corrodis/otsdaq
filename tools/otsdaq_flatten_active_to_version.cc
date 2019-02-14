@@ -129,7 +129,8 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 			    activeGroupPair.second.second,
 			    true /*doActivate*/,
 			    &activeGroupMembersMap[activeGroupPair.second.first] /*memberMap*/,
-			    0 /*progressBar*/, &accumulateErrors,
+			    0 /*progressBar*/,
+			    &accumulateErrors,
 			    &activeGroupCommentMap[activeGroupPair.second.first],
 			    &activeGroupAuthorMap[activeGroupPair.second.first],
 			    &groupCreateTime,
@@ -195,8 +196,7 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 		timeinfo = localtime(&rawtime);
 		strftime(buffer, 200, "%b %d, %Y %I:%M%p %Z", timeinfo);
 
-		fprintf(fp, "This database was moved from...\n\t %s \nto...\n\t %s \nat this time \n\t %lu \t %s\n\n\n",
-		        currentDir.c_str(), moveToDir.c_str(), time(0), buffer);
+		fprintf(fp, "This database was moved from...\n\t %s \nto...\n\t %s \nat this time \n\t %lu \t %s\n\n\n", currentDir.c_str(), moveToDir.c_str(), time(0), buffer);
 
 		fclose(fp);
 	}
@@ -228,8 +228,7 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 			timeinfo = localtime(&rawtime);
 			strftime(buffer, 200, "%b %d, %Y %I:%M:%S%p %Z", timeinfo);
 
-			fprintf(fp, "This database was moved from...\t %s \t to...\t %s at this time \t %lu \t %s\n\n",
-			        pathToSwapIn.c_str(), currentDir.c_str(), time(0), buffer);
+			fprintf(fp, "This database was moved from...\t %s \t to...\t %s at this time \t %lu \t %s\n\n", pathToSwapIn.c_str(), currentDir.c_str(), time(0), buffer);
 			fclose(fp);
 		}
 	}
@@ -279,7 +278,8 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 					std::cout << __COUT_HDR_FL__ << "Changing row " << row << " for " << cfgView->getDataView()[row][col1] << " key=" << cfgView->getDataView()[row][col2] << " to DEFAULT=" << ConfigurationGroupKey(ConfigurationGroupKey::getDefaultKey()) << std::endl;
 					cfgView->setValue(
 					    ConfigurationGroupKey(ConfigurationGroupKey::getDefaultKey()).toString(),
-					    row, col2);
+					    row,
+					    col2);
 					break;
 				}
 	}
@@ -355,8 +355,10 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 		groupMetadataTable->getViewP()->setValue(
 		    StringMacros::mapToString(
 		        activeGroupAliasesMap[activeGroupMembersPair.first],
-		        "," /*primary delimiter*/, ":" /*secondary delimeter*/),
-		    0, ConfigurationManager::METADATA_COL_ALIASES);
+		        "," /*primary delimiter*/,
+		        ":" /*secondary delimeter*/),
+		    0,
+		    ConfigurationManager::METADATA_COL_ALIASES);
 		groupMetadataTable->getViewP()->setValue(
 		    activeGroupCommentMap[activeGroupMembersPair.first], 0, ConfigurationManager::METADATA_COL_COMMENT);
 		groupMetadataTable->getViewP()->setValue(

@@ -78,7 +78,8 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	{
 		SupervisorInfo tempSupervisorInfo(
 		    descriptor.second /* descriptor */,
-		    "" /* config app name */, "" /* config parent context name */  //skip configuration info
+		    "" /* config app name */,
+		    "" /* config parent context name */  //skip configuration info
 		);
 
 		//check for gateway supervisor

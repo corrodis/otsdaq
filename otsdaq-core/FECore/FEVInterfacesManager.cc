@@ -964,7 +964,14 @@ void FEVInterfacesManager::startMacroMultiDimensional(
 		}
 
 	},  //end thread()
-	            this, interfaceID, macroName, macroString, enableSavingOutput, outputFilePath, outputFileRadix, inputArgs)
+	            this,
+	            interfaceID,
+	            macroName,
+	            macroString,
+	            enableSavingOutput,
+	            outputFilePath,
+	            outputFileRadix,
+	            inputArgs)
 	    .detach();
 
 	__CFG_COUT__ << "Started multi-dimensional Macro '" << macroName << "' for interface '" << interfaceID << ".'" << __E__;
@@ -1109,10 +1116,12 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(
 
 			for (unsigned int i = 0; i < feMacro.namesOfInputArguments_.size(); ++i)
 				argsIn.push_back(std::make_pair(  //do not care about input arg value
-				    feMacro.namesOfInputArguments_[i], ""));
+				    feMacro.namesOfInputArguments_[i],
+				    ""));
 			for (unsigned int i = 0; i < feMacro.namesOfOutputArguments_.size(); ++i)
 				argsOut.push_back(std::make_pair(  //do not care about output arg value
-				    feMacro.namesOfOutputArguments_[i], ""));
+				    feMacro.namesOfOutputArguments_[i],
+				    ""));
 
 			if (0)  //example
 			{
@@ -1517,7 +1526,13 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(
 		}
 
 	},  //end thread()
-	            this, interfaceID, feMacroName, enableSavingOutput, outputFilePath, outputFileRadix, inputArgs)
+	            this,
+	            interfaceID,
+	            feMacroName,
+	            enableSavingOutput,
+	            outputFilePath,
+	            outputFileRadix,
+	            inputArgs)
 	    .detach();
 
 	__CFG_COUT__ << "Started multi-dimensional FE Macro '" << feMacroName << "' for interface '" << interfaceID << ".'" << __E__;
@@ -1578,9 +1593,7 @@ bool FEVInterfacesManager::checkMacroMultiDimensional(
 //	outputs:
 //		- throws exception on failure
 //		- outputArgs: colon-separate name/value pairs, and then comma-separated
-void FEVInterfacesManager::runFEMacroByFE(const std::string& callingInterfaceID, const std::string& interfaceID,
-                                          const std::string& feMacroName, const std::string& inputArgs,
-                                          std::string& outputArgs)
+void FEVInterfacesManager::runFEMacroByFE(const std::string& callingInterfaceID, const std::string& interfaceID, const std::string& feMacroName, const std::string& inputArgs, std::string& outputArgs)
 {
 	__CFG_COUTV__(callingInterfaceID);
 
@@ -1642,8 +1655,9 @@ void FEVInterfacesManager::runFEMacroByFE(const std::string& callingInterfaceID,
 //		- throws exception on failure
 //		- outputArgs: colon-separate name/value pairs, and then comma-separated
 void FEVInterfacesManager::runFEMacro(const std::string& interfaceID,
-                                      const std::string& feMacroName, const std::string& inputArgs,
-                                      std::string& outputArgs)
+                                      const std::string& feMacroName,
+                                      const std::string& inputArgs,
+                                      std::string&       outputArgs)
 {
 	//check for interfaceID
 	FEVInterface* fe = getFEInterfaceP(interfaceID);
@@ -1674,8 +1688,9 @@ void FEVInterfacesManager::runFEMacro(const std::string& interfaceID,
 //		- throws exception on failure
 //		- outputArgs: colon-separate name/value pairs, and then comma-separated
 void FEVInterfacesManager::runFEMacro(const std::string&                         interfaceID,
-                                      const FEVInterface::frontEndMacroStruct_t& feMacro, const std::string& inputArgs,
-                                      std::string& outputArgs)
+                                      const FEVInterface::frontEndMacroStruct_t& feMacro,
+                                      const std::string&                         inputArgs,
+                                      std::string&                               outputArgs)
 {
 	//build input arguments
 	//	parse args, semicolon-separated pairs, and then comma-separated

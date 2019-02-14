@@ -190,8 +190,9 @@ std::string ConfigurationGroupKey::getFullGroupString(const std::string&        
 }
 
 //==============================================================================
-void ConfigurationGroupKey::getGroupNameAndKey(const std::string& fullGroupString,
-                                               std::string& groupName, ConfigurationGroupKey& key)
+void ConfigurationGroupKey::getGroupNameAndKey(const std::string&     fullGroupString,
+                                               std::string&           groupName,
+                                               ConfigurationGroupKey& key)
 {
 	auto i    = fullGroupString.rfind("_v");
 	groupName = fullGroupString.substr(0, i);

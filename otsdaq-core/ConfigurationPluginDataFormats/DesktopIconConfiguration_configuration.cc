@@ -262,7 +262,8 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 }
 
 std::string DesktopIconConfiguration::removeCommas(const std::string &str,
-                                                   bool andHexReplace, bool andHTMLReplace)
+                                                   bool               andHexReplace,
+                                                   bool               andHTMLReplace)
 {
 	std::string retStr = "";
 	retStr.reserve(str.length());

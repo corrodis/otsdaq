@@ -538,16 +538,7 @@ bool ConfigurationBase::setActiveView(ConfigurationVersion version)
 //
 //	Returns version of new temporary view that was created.
 ConfigurationVersion ConfigurationBase::mergeViews(
-    const ConfigurationView& sourceViewA, const ConfigurationView& sourceViewB,
-    ConfigurationVersion destinationVersion, const std::string& author,
-    const std::string&                        mergeApproach /*Rename,Replace,Skip*/,
-    std::map<std::pair<std::string /*original table*/, std::string /*original uidB*/>,
-             std::string /*converted uidB*/>& uidConversionMap,
-    std::map<std::pair<std::string /*original table*/, std::pair<std::string /*group linkid*/, std::string /*original gidB*/> >,
-             std::string /*converted gidB*/>& groupidConversionMap,
-    bool                                      fillRecordConversionMaps,
-    bool                                      applyRecordConversionMaps,
-    bool                                      generateUniqueDataColumns)
+    const ConfigurationView& sourceViewA, const ConfigurationView& sourceViewB, ConfigurationVersion destinationVersion, const std::string& author, const std::string& mergeApproach /*Rename,Replace,Skip*/, std::map<std::pair<std::string /*original table*/, std::string /*original uidB*/>, std::string /*converted uidB*/>& uidConversionMap, std::map<std::pair<std::string /*original table*/, std::pair<std::string /*group linkid*/, std::string /*original gidB*/> >, std::string /*converted gidB*/>& groupidConversionMap, bool fillRecordConversionMaps, bool applyRecordConversionMaps, bool generateUniqueDataColumns)
 {
 	__COUT__ << "mergeViews starting..." << __E__;
 
@@ -883,8 +874,7 @@ ConfigurationVersion ConfigurationBase::mergeViews(
 
 				//conflict does not matter (because record conversion map is already created, always take and append the B record
 				//copy row from B to new row
-				destRow = destinationView->copyRows(author, sourceViewB, rb, 1 /*srcRowsToCopy*/,
-				                                    -1 /*destOffsetRow*/, generateUniqueDataColumns /*generateUniqueDataColumns*/);
+				destRow = destinationView->copyRows(author, sourceViewB, rb, 1 /*srcRowsToCopy*/, -1 /*destOffsetRow*/, generateUniqueDataColumns /*generateUniqueDataColumns*/);
 
 				//check every column and remap conflicting names
 
@@ -980,7 +970,8 @@ ConfigurationVersion ConfigurationBase::mergeViews(
 									        (mapPairToPair.first.first + "/" + mapPairToPair.first.second) +
 									        strb.substr(stri +
 									                    (mapPairToPair.first.first + "/" + mapPairToPair.first.second).size()),
-									    destRow, cb);
+									    destRow,
+									    cb);
 
 									__COUT__ << "Found entry to remap: " << sourceViewB.getDataView()[rb][cb] << " ==> " << destinationView->getDataView()[destRow][cb] << __E__;
 									break;

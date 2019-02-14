@@ -480,8 +480,7 @@ void WizardSupervisor::request(xgi::Input *in, xgi::Output *out) throw(xgi::exce
 	}
 
 	//return xml doc holding server response
-	xmlOut.outputXmlDocument((std::ostringstream *)out, false /*dispStdOut*/,
-	                         true /*allowWhiteSpace*/);  //Note: allow white space need for error response
+	xmlOut.outputXmlDocument((std::ostringstream *)out, false /*dispStdOut*/, true /*allowWhiteSpace*/);  //Note: allow white space need for error response
 
 }  //end request()
 
@@ -831,8 +830,7 @@ void WizardSupervisor::cleanUpPreviews()
 //========================================================================================================================
 //	savePostPreview
 //      save post to preview directory named with time and incremented index
-void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, const std::vector<cgicc::FormFile> &files, std::string creator,
-                                       HttpXmlDocument *xmldoc)
+void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, const std::vector<cgicc::FormFile> &files, std::string creator, HttpXmlDocument *xmldoc)
 {
 	/*if(activeExperiment_ == "") //no active experiment!
 	{

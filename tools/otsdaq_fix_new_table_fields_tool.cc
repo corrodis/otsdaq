@@ -125,8 +125,7 @@ void FixNewTableFields(int argc, char *argv[])
 	std::map<std::pair<std::string, ConfigurationVersion>,
 	         ConfigurationVersion>
 	    modifiedTables;
-	std::map<std::string, std::pair<ConfigurationGroupKey,
-	                                ConfigurationGroupKey>>
+	std::map<std::string, std::pair<ConfigurationGroupKey, ConfigurationGroupKey>>
 	    activeGroupKeys;
 	std::map<std::pair<std::string, ConfigurationGroupKey>,
 	         std::string>
@@ -535,8 +534,7 @@ void FixNewTableFields(int argc, char *argv[])
 			timeinfo = localtime(&rawtime);
 			strftime(buffer, 200, "%b %d, %Y %I:%M%p %Z", timeinfo);
 
-			fprintf(fp, "This database %s \n\t is a backup of %s \n\t BEFORE forcing to new table fields \n\t and was created at this time \n\t %lu \t %s\n\n\n",
-			        currentDir.c_str(), moveToDir.c_str(), time(0), buffer);
+			fprintf(fp, "This database %s \n\t is a backup of %s \n\t BEFORE forcing to new table fields \n\t and was created at this time \n\t %lu \t %s\n\n\n", currentDir.c_str(), moveToDir.c_str(), time(0), buffer);
 
 			fclose(fp);
 		}
@@ -558,8 +556,7 @@ void FixNewTableFields(int argc, char *argv[])
 			timeinfo = localtime(&rawtime);
 			strftime(buffer, 200, "%b %d, %Y %I:%M:%S%p %Z", timeinfo);
 
-			fprintf(fp, "This database %s \n\t was forced to new table fields \n\t at this time \n\t %lu \t %s\n\n\n",
-			        currentDir.c_str(), time(0), buffer);
+			fprintf(fp, "This database %s \n\t was forced to new table fields \n\t at this time \n\t %lu \t %s\n\n\n", currentDir.c_str(), time(0), buffer);
 
 			fclose(fp);
 		}
@@ -659,7 +656,8 @@ void FixNewTableFields(int argc, char *argv[])
 						__COUT__ << "Changing row " << row << " for " << cfgView->getDataView()[row][col1] << " key=" << cfgView->getDataView()[row][col2] << " to NEW key=" << group.second << __E__;
 						cfgView->setValue(
 						    group.second.toString(),
-						    row, col2);
+						    row,
+						    col2);
 						found = true;
 						break;
 					}

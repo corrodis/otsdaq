@@ -38,8 +38,7 @@ ReceiverSocket::~ReceiverSocket(void)
 }
 
 //========================================================================================================================
-int ReceiverSocket::receive(std::string& buffer, unsigned int timeoutSeconds,
-                            unsigned int timeoutUSeconds, bool verbose)
+int ReceiverSocket::receive(std::string& buffer, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
 {
 	return receive(buffer, dummyIPAddress_, dummyPort_, timeoutSeconds, timeoutUSeconds, verbose);
 }
@@ -48,9 +47,7 @@ int ReceiverSocket::receive(std::string& buffer, unsigned int timeoutSeconds,
 //receive ~~
 //	returns 0 on success, -1 on failure
 //	NOTE: must call Socket::initialize before receiving!
-int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress,
-                            unsigned short& fromPort, unsigned int timeoutSeconds, unsigned int timeoutUSeconds,
-                            bool verbose)
+int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
 {
 	//lockout other receivers for the remainder of the scope
 	std::lock_guard<std::mutex> lock(receiveMutex_);
@@ -66,8 +63,7 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress,
 	if (FD_ISSET(socketNumber_, &fileDescriptor_))
 	{
 		buffer.resize(maxSocketSize_);  //NOTE: this is inexpensive according to Lorenzo/documentation in C++11 (only increases size once and doesn't decrease size)
-		if ((numberOfBytes_ = recvfrom(socketNumber_, &buffer[0], maxSocketSize_, 0,
-		                               (struct sockaddr*)&fromAddress_, &addressLength_)) == -1)
+		if ((numberOfBytes_ = recvfrom(socketNumber_, &buffer[0], maxSocketSize_, 0, (struct sockaddr*)&fromAddress_, &addressLength_)) == -1)
 		{
 			__COUT__ << "At socket with IPAddress: " << getIPAddress() << " port: " << getPort() << std::endl;
 			__SS__ << "Error reading buffer from\tIP:\t";

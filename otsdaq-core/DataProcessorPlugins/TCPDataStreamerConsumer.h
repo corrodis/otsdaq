@@ -14,8 +14,7 @@ class ConfigurationTree;
 class TCPDataStreamerConsumer : public TCPDataStreamerBase, public DataConsumer, public Configurable
 {
   public:
-	TCPDataStreamerConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID,
-	                        const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
+	TCPDataStreamerConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
 	virtual ~TCPDataStreamerConsumer(void);
 
   protected:

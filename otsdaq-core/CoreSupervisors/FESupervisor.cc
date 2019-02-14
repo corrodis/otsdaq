@@ -10,12 +10,9 @@ XDAQ_INSTANTIATOR_IMPL(FESupervisor)
 FESupervisor::FESupervisor(xdaq::ApplicationStub* s)
     : CoreSupervisorBase(s)
 {
-	xoap::bind(this, &FESupervisor::macroMakerSupervisorRequest,
-	           "MacroMakerSupervisorRequest", XDAQ_NS_URI);
-	xoap::bind(this, &FESupervisor::workLoopStatusRequest,
-	           "WorkLoopStatusRequest", XDAQ_NS_URI);
-	xoap::bind(this, &FESupervisor::frontEndCommunicationRequest,
-	           "FECommunication", XDAQ_NS_URI);
+	xoap::bind(this, &FESupervisor::macroMakerSupervisorRequest, "MacroMakerSupervisorRequest", XDAQ_NS_URI);
+	xoap::bind(this, &FESupervisor::workLoopStatusRequest, "WorkLoopStatusRequest", XDAQ_NS_URI);
+	xoap::bind(this, &FESupervisor::frontEndCommunicationRequest, "FECommunication", XDAQ_NS_URI);
 
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 	    new FEVInterfacesManager(
@@ -108,8 +105,10 @@ xoap::MessageReference FESupervisor::frontEndCommunicationRequest(xoap::MessageR
 		{
 			theFEInterfacesManager_->runFEMacroByFE(
 			    requester,
-			    targetInterfaceID, feMacroName,
-			    inputArgs, outputArgs);
+			    targetInterfaceID,
+			    feMacroName,
+			    inputArgs,
+			    outputArgs);
 		}
 		catch (std::runtime_error& e)
 		{
@@ -188,8 +187,12 @@ xoap::MessageReference FESupervisor::frontEndCommunicationRequest(xoap::MessageR
 			{
 				theFEInterfacesManager_->startMacroMultiDimensional(
 				    requester,
-				    targetInterfaceID, macroName, macroString,
-				    enableSavingOutput, outputFilePath, outputFileRadix,
+				    targetInterfaceID,
+				    macroName,
+				    macroString,
+				    enableSavingOutput,
+				    outputFilePath,
+				    outputFileRadix,
 				    inputArgs);
 			}
 			catch (std::runtime_error& e)
@@ -212,8 +215,11 @@ xoap::MessageReference FESupervisor::frontEndCommunicationRequest(xoap::MessageR
 			{
 				theFEInterfacesManager_->startFEMacroMultiDimensional(
 				    requester,
-				    targetInterfaceID, macroName,
-				    enableSavingOutput, outputFilePath, outputFileRadix,
+				    targetInterfaceID,
+				    macroName,
+				    enableSavingOutput,
+				    outputFilePath,
+				    outputFileRadix,
 				    inputArgs);
 			}
 			catch (std::runtime_error& e)

@@ -463,7 +463,9 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			    groupPair.first.first,
 			    groupPair.first.second,
 			    true /*doActivate*/,
-			    &memberMap /*memberMap*/, 0 /*progressBar*/, &accumulateErrors,
+			    &memberMap /*memberMap*/,
+			    0 /*progressBar*/,
+			    &accumulateErrors,
 			    &groupComment,
 			    &groupAuthor,
 			    &groupCreateTime,
@@ -595,8 +597,10 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			//ConfigurationManager::METADATA_COL_ALIASES TODO
 			groupMetadataTable->getViewP()->setValue(
 			    StringMacros::mapToString(groupAliases,
-			                              "," /*primary delimiter*/, ":" /*secondary delimeter*/),
-			    0, ConfigurationManager::METADATA_COL_ALIASES);
+			                              "," /*primary delimiter*/,
+			                              ":" /*secondary delimeter*/),
+			    0,
+			    ConfigurationManager::METADATA_COL_ALIASES);
 			groupMetadataTable->getViewP()->setValue(groupComment, 0, ConfigurationManager::METADATA_COL_COMMENT);
 			groupMetadataTable->getViewP()->setValue(groupAuthor, 0, ConfigurationManager::METADATA_COL_AUTHOR);
 			groupMetadataTable->getViewP()->setValue(groupCreateTime_t, 0, ConfigurationManager::METADATA_COL_TIMESTAMP);
@@ -702,9 +706,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			timeinfo = localtime(&rawtime);
 			strftime(buffer, 200, "%b %d, %Y %I:%M:%S%p %Z", timeinfo);
 
-			fprintf(fp, "This database...\t %s \t received an import from...\t %s \t at this time \t %lu \t %s\n\n",
-			        currentDir.c_str(),
-			        pathToImportDatabase.c_str(), time(0), buffer);
+			fprintf(fp, "This database...\t %s \t received an import from...\t %s \t at this time \t %lu \t %s\n\n", currentDir.c_str(), pathToImportDatabase.c_str(), time(0), buffer);
 			fclose(fp);
 		}
 	}
@@ -732,7 +734,10 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 		cfgMgr->loadConfigurationGroup(
 		    activeBackboneGroupName,
 		    cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE),
-		    true, &memberMap, 0, &accumulateErrors);
+		    true,
+		    &memberMap,
+		    0,
+		    &accumulateErrors);
 
 		std::map<std::string, ConfigurationVersion> activeMap = cfgMgr->getActiveVersions();
 
@@ -766,13 +771,16 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 				row = cfgView->addRow("import_aliases", true /*incrementUniqueData*/);
 				cfgView->setValue(
 				    aliasPair.first,
-				    row, col0);
+				    row,
+				    col0);
 				cfgView->setValue(
 				    aliasPair.second.first,
-				    row, col1);
+				    row,
+				    col1);
 				cfgView->setValue(
 				    groupIt->second.toString(),
-				    row, col2);
+				    row,
+				    col2);
 			}  //end group alias edit
 
 			cfgView->print();
@@ -808,13 +816,16 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 				row = cfgView->addRow("import_aliases", true /*incrementUniqueData*/);
 				cfgView->setValue(
 				    aliasPair.first,
-				    row, col0);
+				    row,
+				    col0);
 				cfgView->setValue(
 				    aliasPair.second.first,
-				    row, col1);
+				    row,
+				    col1);
 				cfgView->setValue(
 				    tableIt->second.toString(),
-				    row, col2);
+				    row,
+				    col2);
 			}  //end group alias edit
 
 			cfgView->print();

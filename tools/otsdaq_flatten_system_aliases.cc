@@ -133,8 +133,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	std::map<std::pair<std::string, ConfigurationVersion>,
 	         ConfigurationVersion>
 	    modifiedTables;
-	std::map<std::string, std::pair<ConfigurationGroupKey,
-	                                ConfigurationGroupKey>>
+	std::map<std::string, std::pair<ConfigurationGroupKey, ConfigurationGroupKey>>
 	    activeGroupKeys;
 	std::map<std::pair<std::string, ConfigurationGroupKey>,
 	         std::string>
@@ -356,7 +355,9 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 			    groupPair.first.first,
 			    groupPair.first.second,
 			    true /*doActivate*/,
-			    &memberMap /*memberMap*/, 0 /*progressBar*/, &accumulateErrors,
+			    &memberMap /*memberMap*/,
+			    0 /*progressBar*/,
+			    &accumulateErrors,
 			    &groupComment,
 			    &groupAuthor,
 			    &groupCreateTime,
@@ -494,8 +495,10 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 			//ConfigurationManager::METADATA_COL_ALIASES TODO
 			groupMetadataTable->getViewP()->setValue(
 			    StringMacros::mapToString(groupAliases,
-			                              "," /*primary delimiter*/, ":" /*secondary delimeter*/),
-			    0, ConfigurationManager::METADATA_COL_ALIASES);
+			                              "," /*primary delimiter*/,
+			                              ":" /*secondary delimeter*/),
+			    0,
+			    ConfigurationManager::METADATA_COL_ALIASES);
 			groupMetadataTable->getViewP()->setValue(groupComment, 0, ConfigurationManager::METADATA_COL_COMMENT);
 			groupMetadataTable->getViewP()->setValue(groupAuthor, 0, ConfigurationManager::METADATA_COL_AUTHOR);
 			groupMetadataTable->getViewP()->setValue(groupCreateTime_t, 0, ConfigurationManager::METADATA_COL_TIMESTAMP);
@@ -570,8 +573,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 			timeinfo = localtime(&rawtime);
 			strftime(buffer, 200, "%b %d, %Y %I:%M%p %Z", timeinfo);
 
-			fprintf(fp, "This database was moved from...\n\t %s \nto...\n\t %s \nat this time \n\t %lu \t %s\n\n\n",
-			        currentDir.c_str(), moveToDir.c_str(), time(0), buffer);
+			fprintf(fp, "This database was moved from...\n\t %s \nto...\n\t %s \nat this time \n\t %lu \t %s\n\n\n", currentDir.c_str(), moveToDir.c_str(), time(0), buffer);
 
 			fclose(fp);
 		}
@@ -593,8 +595,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 			timeinfo = localtime(&rawtime);
 			strftime(buffer, 200, "%b %d, %Y %I:%M:%S%p %Z", timeinfo);
 
-			fprintf(fp, "This database was moved from...\t %s \t to...\t %s at this time \t %lu \t %s\n\n",
-			        pathToSwapIn.c_str(), currentDir.c_str(), time(0), buffer);
+			fprintf(fp, "This database was moved from...\t %s \t to...\t %s at this time \t %lu \t %s\n\n", pathToSwapIn.c_str(), currentDir.c_str(), time(0), buffer);
 			fclose(fp);
 		}
 	}
@@ -636,7 +637,10 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 		cfgMgr->loadConfigurationGroup(
 		    activeBackboneGroupName,
 		    activeGroupKeys[activeBackboneGroupName].second,
-		    true, &memberMap, 0, &accumulateErrors);
+		    true,
+		    &memberMap,
+		    0,
+		    &accumulateErrors);
 
 		//modify Group Aliases Configuration and Version Aliases Configuration to point
 		//	at DEFAULT and flatVersion respectively
@@ -673,7 +677,8 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 						__COUT__ << "Changing row " << row << " for " << cfgView->getDataView()[row][col1] << " key=" << cfgView->getDataView()[row][col2] << " to NEW key=" << group.second << std::endl;
 						cfgView->setValue(
 						    group.second.toString(),
-						    row, col2);
+						    row,
+						    col2);
 						found = true;
 						break;
 					}

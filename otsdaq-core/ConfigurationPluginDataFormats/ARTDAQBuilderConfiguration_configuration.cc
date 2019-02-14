@@ -53,17 +53,15 @@ void ARTDAQBuilderConfiguration::init(ConfigurationManager *configManager)
 	for (auto &builderContext : builderContexts)
 	{
 		ConfigurationTree builderAppNode    = contextConfig->getApplicationNode(configManager,
-                                                                             builderContext->contextUID_, builderContext->applications_[0].applicationUID_);
+                                                                             builderContext->contextUID_,
+                                                                             builderContext->applications_[0].applicationUID_);
 		ConfigurationTree builderConfigNode = contextConfig->getSupervisorConfigNode(configManager,
-		                                                                             builderContext->contextUID_, builderContext->applications_[0].applicationUID_);
+		                                                                             builderContext->contextUID_,
+		                                                                             builderContext->applications_[0].applicationUID_);
 
 		__COUT__ << "Path for this aggregator config is " << builderContext->contextUID_ << "/" << builderContext->applications_[0].applicationUID_ << "/" << builderConfigNode.getValueAsString() << std::endl;
 
-		outputFHICL(configManager, builderConfigNode,
-		            contextConfig->getARTDAQAppRank(builderContext->contextUID_),
-		            contextConfig->getContextAddress(builderContext->contextUID_),
-		            contextConfig->getARTDAQDataPort(configManager, builderContext->contextUID_),
-		            contextConfig);
+		outputFHICL(configManager, builderConfigNode, contextConfig->getARTDAQAppRank(builderContext->contextUID_), contextConfig->getContextAddress(builderContext->contextUID_), contextConfig->getARTDAQDataPort(configManager, builderContext->contextUID_), contextConfig);
 	}
 }
 
@@ -87,8 +85,11 @@ std::string ARTDAQBuilderConfiguration::getFHICLFilename(const ConfigurationTree
 }
 
 //========================================================================================================================
-void ARTDAQBuilderConfiguration::outputFHICL(ConfigurationManager *   configManager,
-                                             const ConfigurationTree &builderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
+void ARTDAQBuilderConfiguration::outputFHICL(ConfigurationManager *          configManager,
+                                             const ConfigurationTree &       builderNode,
+                                             unsigned int                    selfRank,
+                                             std::string                     selfHost,
+                                             unsigned int                    selfPort,
                                              const XDAQContextConfiguration *contextConfig)
 {
 	/*

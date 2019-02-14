@@ -152,17 +152,13 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
 	}
 
 	__COUT__ << "Setting socket receive buffer size = " << socketReceiveBufferSize << " 0x" << std::hex << socketReceiveBufferSize << std::dec << __E__;
-	if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF,
-	               (char*)&socketReceiveBufferSize,
-	               sizeof(socketReceiveBufferSize)) < 0) {
+	if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF, (char*)&socketReceiveBufferSize, sizeof(socketReceiveBufferSize)) < 0) {
 		__COUT_ERR__ << "Failed to set socket receive size to " << socketReceiveBufferSize << ". Attempting to revert to default." << std::endl;
 
 		socketReceiveBufferSize = defaultSocketReceiveSize_;
 
 		__COUT__ << "Setting socket receive buffer size = " << socketReceiveBufferSize << " 0x" << std::hex << socketReceiveBufferSize << std::dec << __E__;
-		if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF,
-		               (char*)&socketReceiveBufferSize,
-		               sizeof(socketReceiveBufferSize)) < 0)
+		if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF, (char*)&socketReceiveBufferSize, sizeof(socketReceiveBufferSize)) < 0)
 		{
 			__SS__ << "Failed to set socket receive size to " << socketReceiveBufferSize << ". Attempting to revert to default." << std::endl;
 			std::cout << ss.str();

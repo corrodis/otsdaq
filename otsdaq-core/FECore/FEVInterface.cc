@@ -335,7 +335,9 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 			FEVInterface::sendAsyncErrorToGateway(fe, errorMessage, isSoftError);
 		},
 		            //pass the values
-		            this, ss.str(), isSoftError)
+		            this,
+		            ss.str(),
+		            isSoftError)
 		    .detach();
 
 		return false;
@@ -492,9 +494,7 @@ void FEVInterface::runSequenceOfCommands(const std::string& treeLinkName)
 					writeHistory[writeAddress] &= bitMask;     //clear incoming bits
 					writeHistory[writeAddress] |= writeValue;  //add incoming bits
 
-					sprintf(msg, "\t Writing %s: \t %ld(0x%lX) \t %ld(0x%lX)", child.first.c_str(),
-					        writeAddress, writeAddress,
-					        writeHistory[writeAddress], writeHistory[writeAddress]);
+					sprintf(msg, "\t Writing %s: \t %ld(0x%lX) \t %ld(0x%lX)", child.first.c_str(), writeAddress, writeAddress, writeHistory[writeAddress], writeHistory[writeAddress]);
 
 					__FE_COUT__ << msg << __E__;
 

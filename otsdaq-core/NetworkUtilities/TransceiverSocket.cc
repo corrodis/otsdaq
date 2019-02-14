@@ -48,7 +48,8 @@ int TransceiverSocket::acknowledge(const std::string& buffer,
                             buffer.c_str() + offset,
                             thisSize,
                             0,
-                            (struct sockaddr*)&(ReceiverSocket::fromAddress_), sizeof(sockaddr_in));
+                            (struct sockaddr*)&(ReceiverSocket::fromAddress_),
+                            sizeof(sockaddr_in));
 
 	if (sendToSize <= 0)
 	{

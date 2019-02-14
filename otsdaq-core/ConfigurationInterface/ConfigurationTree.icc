@@ -24,7 +24,9 @@ void ConfigurationTree::getValue(T& value) const
 			//	value = (T)configView_->validateValueForColumn<T>(
 			//		valueAsTreeNode.getValueAsString(),col_);
 			value = handleValidateValueForColumn(configView_,
-			                                     valueAsTreeNode.getValueAsString(), col_, identity<T>());
+			                                     valueAsTreeNode.getValueAsString(),
+			                                     col_,
+			                                     identity<T>());
 
 			__COUT__ << "Successful value!" << std::endl;
 			return;

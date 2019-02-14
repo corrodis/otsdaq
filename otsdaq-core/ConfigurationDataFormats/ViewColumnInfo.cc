@@ -57,9 +57,7 @@ const std::string ViewColumnInfo::COL_NAME_PRIORITY = "Priority";
 //ViewColumnInfo
 // if(capturedExceptionString) *capturedExceptionString = ""; //indicates no error found
 // if(!capturedExceptionString) then exception is thrown on error
-ViewColumnInfo::ViewColumnInfo(const std::string& type, const std::string& name,
-                               const std::string& storageName, const std::string& dataType,
-                               const std::string& dataChoicesCSV, std::string* capturedExceptionString)
+ViewColumnInfo::ViewColumnInfo(const std::string& type, const std::string& name, const std::string& storageName, const std::string& dataType, const std::string& dataChoicesCSV, std::string* capturedExceptionString)
     : type_(type)
     , name_(name)
     , storageName_(storageName)

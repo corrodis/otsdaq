@@ -196,9 +196,7 @@ class ConfigurationTree
 	//extracting information from a list of records
 	struct RecordField
 	{
-		RecordField(const std::string& table, const std::string& uid,
-		            const std::string& columnName, const std::string& relativePath,
-		            const ViewColumnInfo* columnInfo)
+		RecordField(const std::string& table, const std::string& uid, const std::string& columnName, const std::string& relativePath, const ViewColumnInfo* columnInfo)
 		    : tableName_(table)
 		    , columnName_(columnName)
 		    , relativePath_(relativePath)

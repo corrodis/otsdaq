@@ -669,18 +669,10 @@ bool Iterator::haltIterator(Iterator*               iterator,
 	}
 	else if (currentState == "Running")
 		errorStr = theSupervisor->attemptStateMachineTransition(
-		    0, 0,
-		    "Abort", fsmName,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME,
-		    fsmCommandParameters);
+		    0, 0, "Abort", fsmName, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, fsmCommandParameters);
 	else
 		errorStr = theSupervisor->attemptStateMachineTransition(
-		    0, 0,
-		    "Halt", fsmName,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME,
-		    fsmCommandParameters);
+		    0, 0, "Halt", fsmName, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, fsmCommandParameters);
 
 	if (haltAttempted)
 	{
@@ -761,7 +753,8 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct* iteratorStruct)
 	sscanf(iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
 	           [IterateConfiguration::commandRepeatLabelParams_.NumberOfRepetitions_]
 	               .c_str(),
-	       "%d", &numOfRepetitions);
+	       "%d",
+	       &numOfRepetitions);
 	__COUT__ << "numOfRepetitions remaining = " << numOfRepetitions << __E__;
 
 	char repStr[200];
@@ -813,11 +806,7 @@ void Iterator::startCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 
 	if (currentState == "Configured")
 		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-		    0, 0,
-		    "Start", iteratorStruct->fsmName_,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME,
-		    iteratorStruct->fsmCommandParameters_);
+		    0, 0, "Start", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 	else
 		errorStr = "Can only Run from the Configured state. The current state is " +
 		           currentState;
@@ -901,25 +890,13 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct* iteratorStruct
 
 	if (currentState == "Initial")
 		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-		    0, 0,
-		    "Initialize", iteratorStruct->fsmName_,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME,
-		    iteratorStruct->fsmCommandParameters_);
+		    0, 0, "Initialize", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 	else if (currentState == "Halted")
 		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-		    0, 0,
-		    "Configure", iteratorStruct->fsmName_,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME,
-		    iteratorStruct->fsmCommandParameters_);
+		    0, 0, "Configure", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 	else if (currentState == "Configured")
 		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-		    0, 0,
-		    "Halt", iteratorStruct->fsmName_,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME,
-		    iteratorStruct->fsmCommandParameters_);
+		    0, 0, "Halt", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 	else
 		errorStr = "Can only Configure from the Initial or Halted state. The current state is " +
 		           currentState;
@@ -1244,11 +1221,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 		}
 		else if (currentState == "Running")  //launch transition to pause
 			errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-			    0, 0,
-			    "Pause", iteratorStruct->fsmName_,
-			    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-			    WebUsers::DEFAULT_ITERATOR_USERNAME,
-			    iteratorStruct->fsmCommandParameters_);
+			    0, 0, "Pause", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 		else if (currentState == "Configured")
 		{
 			//no need to pause state machine, no run going on
@@ -1281,18 +1254,10 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 		else if (currentState == "Running" ||  //launch transition to halt
 		         currentState == "Paused")
 			errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-			    0, 0,
-			    "Abort", iteratorStruct->fsmName_,
-			    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-			    WebUsers::DEFAULT_ITERATOR_USERNAME,
-			    iteratorStruct->fsmCommandParameters_);
+			    0, 0, "Abort", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 		else if (currentState == "Configured")  //launch transition to halt
 			errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-			    0, 0,
-			    "Halt", iteratorStruct->fsmName_,
-			    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-			    WebUsers::DEFAULT_ITERATOR_USERNAME,
-			    iteratorStruct->fsmCommandParameters_);
+			    0, 0, "Halt", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 		else
 			errorStr = "Expected to be in Halted. Unexpectedly, the current state is " +
 			           currentState + ". Last State Machine error message was as follows: " +
@@ -1314,11 +1279,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 
 		if (currentState == "Paused")  //launch transition to running
 			errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-			    0, 0,
-			    "Resume", iteratorStruct->fsmName_,
-			    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-			    WebUsers::DEFAULT_ITERATOR_USERNAME,
-			    iteratorStruct->fsmCommandParameters_);
+			    0, 0, "Resume", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 
 		if (errorStr != "")
 		{
@@ -1356,7 +1317,8 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 		sscanf(iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
 		           [IterateConfiguration::commandRunParams_.DurationInSeconds_]
 		               .c_str(),
-		       "%ld", &remainingDurationInSeconds);
+		       "%ld",
+		       &remainingDurationInSeconds);
 
 		__COUT__ << "waitOnRunningThreads " << waitOnRunningThreads << __E__;
 		__COUT__ << "remainingDurationInSeconds " << remainingDurationInSeconds << __E__;
@@ -1406,11 +1368,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 				__COUT__ << "FE workloops all complete! Stopping run..." << __E__;
 
 				errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-				    0, 0,
-				    "Stop", iteratorStruct->fsmName_,
-				    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-				    WebUsers::DEFAULT_ITERATOR_USERNAME,
-				    iteratorStruct->fsmCommandParameters_);
+				    0, 0, "Stop", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 
 				if (errorStr != "")
 				{
@@ -1444,11 +1402,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 			__COUT__ << "Time duration reached! Stopping run..." << __E__;
 
 			errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-			    0, 0,
-			    "Stop", iteratorStruct->fsmName_,
-			    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-			    WebUsers::DEFAULT_ITERATOR_USERNAME,
-			    iteratorStruct->fsmCommandParameters_);
+			    0, 0, "Stop", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 
 			if (errorStr != "")
 			{
@@ -1493,11 +1447,7 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct* iteratorStruct)
 
 	if (currentState == "Halted")
 		errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(
-		    0, 0,
-		    "Configure", iteratorStruct->fsmName_,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-		    WebUsers::DEFAULT_ITERATOR_USERNAME,
-		    iteratorStruct->fsmCommandParameters_);
+		    0, 0, "Configure", iteratorStruct->fsmName_, WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/, WebUsers::DEFAULT_ITERATOR_USERNAME, iteratorStruct->fsmCommandParameters_);
 	else if (currentState != "Configured")
 		errorStr = "Expected to be in Configure. Unexpectedly, the current state is " +
 		           currentState + "." + ". Last State Machine error message was as follows: " +
@@ -1532,7 +1482,8 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct* iteratorStruct)
 
 //========================================================================================================================
 bool Iterator::handleCommandRequest(HttpXmlDocument&   xmldoc,
-                                    const std::string& command, const std::string& parameter)
+                                    const std::string& command,
+                                    const std::string& parameter)
 {
 	__COUTV__(command);
 	if (command == "iteratePlay")

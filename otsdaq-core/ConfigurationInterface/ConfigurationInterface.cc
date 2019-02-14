@@ -74,7 +74,8 @@ void ConfigurationInterface::setVersionTrackingEnabled(bool setValue)
 //	If newVersion is non 0, attempt to save as given newVersion number, else throw exception.
 //	return ConfigurationVersion::INVALID on failure
 ConfigurationVersion ConfigurationInterface::saveNewVersion(ConfigurationBase*   configuration,
-                                                            ConfigurationVersion temporaryVersion, ConfigurationVersion newVersion)
+                                                            ConfigurationVersion temporaryVersion,
+                                                            ConfigurationVersion newVersion)
 {
 	if (!temporaryVersion.isTemporaryVersion() ||
 	    !configuration->isStored(temporaryVersion))

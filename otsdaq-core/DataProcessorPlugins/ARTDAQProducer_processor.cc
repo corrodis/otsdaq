@@ -20,8 +20,7 @@ using namespace ots;
 //========================================================================================================================
 ARTDAQProducer::ARTDAQProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
     : WorkLoop(processorUID)
-    , DataProducer(supervisorApplicationUID, bufferUID,
-                   processorUID)
+    , DataProducer(supervisorApplicationUID, bufferUID, processorUID)
     //theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
     , Configurable(theXDAQContextConfigTree, configurationPath)
 {

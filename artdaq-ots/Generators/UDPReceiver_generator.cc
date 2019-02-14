@@ -95,8 +95,7 @@ void ots::UDPReceiver::receiveLoop_()
 				//FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
 				uint8_t   peekBuffer[4];
 				socklen_t dataSz = sizeof(si_data_);
-				recvfrom(datasocket_, peekBuffer, sizeof(peekBuffer), MSG_PEEK,
-				         (struct sockaddr *)&si_data_, &dataSz);
+				recvfrom(datasocket_, peekBuffer, sizeof(peekBuffer), MSG_PEEK, (struct sockaddr *)&si_data_, &dataSz);
 
 				TLOG_TRACE("UDPReceiver") << "Received UDP Datagram with sequence number " << std::hex << "0x" << static_cast<int>(peekBuffer[1]) << "!" << std::dec << TLOG_ENDL;
 				TLOG_TRACE("UDPReceiver") << "peekBuffer[1] == expectedPacketNumber_: " << std::hex << static_cast<int>(peekBuffer[1]) << " =?= " << (int)expectedPacketNumber_ << TLOG_ENDL;
@@ -187,8 +186,10 @@ void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs &output)
 	std::size_t initial_payload_size = 0;
 
 	output.emplace_back(artdaq::Fragment::FragmentBytes(initial_payload_size,
-	                                                    ev_counter(), fragment_id(),
-	                                                    ots::detail::FragmentType::UDP, metadata));
+	                                                    ev_counter(),
+	                                                    fragment_id(),
+	                                                    ots::detail::FragmentType::UDP,
+	                                                    metadata));
 	// We now have a fragment to contain this event:
 	ots::UDPFragmentWriter thisFrag(*output.back());
 

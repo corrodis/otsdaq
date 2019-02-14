@@ -360,8 +360,7 @@ void CodeEditor::readFile(
 //========================================================================================================================
 //writeFile
 void CodeEditor::writeFile(
-    const std::string& path, const std::string& contents,
-    const unsigned long long& insertPos, const std::string& insertString)
+    const std::string& path, const std::string& contents, const unsigned long long& insertPos, const std::string& insertString)
 {
 	std::string fullpath = SOURCE_BASE_PATH + path;
 	__COUTV__(fullpath);
@@ -405,11 +404,7 @@ void CodeEditor::writeFile(
 			__SS__ << "Could not open change log for change tracking at " << logpath << __E__;
 			__SS_THROW__;
 		}
-		fprintf(fp, "time=%lld old-size=%lld new-size=%lld path=%s\n",
-		        (long long)time(0),
-		        oldSize,
-		        (long long)contents.size(),
-		        fullpath.c_str());
+		fprintf(fp, "time=%lld old-size=%lld new-size=%lld path=%s\n", (long long)time(0), oldSize, (long long)contents.size(), fullpath.c_str());
 
 		fclose(fp);
 		__COUT__ << "Changes logged to: " << logpath << __E__;
@@ -583,9 +578,7 @@ CodeEditor::getSpecialsMap(void)
 	//	and must capture reference to the function. Also, must capture specialFolders
 	//	reference for use internally (const values already are captured).
 	std::function<void(const std::string&, const std::string&, const unsigned int, const int)>
-	    localRecurse = [&specialFolders, &specialMapTypes,
-	                    &retMap,
-	                    &localRecurse](
+	    localRecurse = [&specialFolders, &specialMapTypes, &retMap, &localRecurse](
 	                       const std::string& path,
 	                       const std::string& offsetPath,
 	                       const unsigned int depth,
@@ -654,7 +647,9 @@ CodeEditor::getSpecialsMap(void)
 					    //recurse deeper!
 					    if (depth < 4)  //limit search depth
 						    localRecurse(path + "/" + name,
-						                 offsetPath + "/" + name, depth + 1, childSpecialIndex);
+						                 offsetPath + "/" + name,
+						                 depth + 1,
+						                 childSpecialIndex);
 				    }
 				    else if (specialIndex >= 0)
 				    {

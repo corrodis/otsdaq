@@ -58,8 +58,10 @@ ConfigurationView &ConfigurationView::copy(const ConfigurationView &src,
 //	return row offset of first row copied in
 unsigned int ConfigurationView::copyRows(const std::string &      author,
                                          const ConfigurationView &src,
-                                         unsigned int srcOffsetRow, unsigned int srcRowsToCopy,
-                                         unsigned int destOffsetRow, bool generateUniqueDataColumns)
+                                         unsigned int             srcOffsetRow,
+                                         unsigned int             srcRowsToCopy,
+                                         unsigned int             destOffsetRow,
+                                         bool                     generateUniqueDataColumns)
 {
 	//__COUTV__(destOffsetRow);
 	//__COUTV__(srcOffsetRow);
@@ -588,7 +590,8 @@ void ConfigurationView::getValue(std::string &value, unsigned int row, unsigned 
 //	Note: necessary because types of std::basic_string<char>
 //	cause compiler problems if no string specific function
 std::string ConfigurationView::validateValueForColumn(const std::string &value,
-                                                      unsigned int col, bool doConvertEnvironmentVariables) const
+                                                      unsigned int       col,
+                                                      bool               doConvertEnvironmentVariables) const
 {
 	if (col >= columnsInfo_.size())
 	{
@@ -629,8 +632,7 @@ std::string ConfigurationView::validateValueForColumn(const std::string &value,
 //getValueAsString
 //	gets the value with the proper data type and converts to string
 //	as though getValue was called.
-std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int col,
-                                                bool doConvertEnvironmentVariables) const
+std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
 	if (!(col < columnsInfo_.size() && row < getNumberOfRows()))
 	{
@@ -672,8 +674,7 @@ std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int c
 //	as though getValue was called.
 //	then escapes all special characters with slash.
 //	Note: this should be useful for values placed in double quotes, i.e. JSON.
-std::string ConfigurationView::getEscapedValueAsString(unsigned int row, unsigned int col,
-                                                       bool doConvertEnvironmentVariables) const
+std::string ConfigurationView::getEscapedValueAsString(unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
 	std::string val    = getValueAsString(row, col, doConvertEnvironmentVariables);
 	std::string retVal = "";
@@ -878,11 +879,13 @@ void ConfigurationView::addRowToGroup(const unsigned int &row,
 	    getDataView()[row][col] == getDefaultRowValues()[col])  //colDefault)
 		setValue(
 		    groupID,
-		    row, col);
+		    row,
+		    col);
 	else
 		setValue(
 		    groupID + " | " + getDataView()[row][col],
-		    row, col);
+		    row,
+		    col);
 
 	//__COUT__ << getDataView()[row][col] << __E__;
 }
@@ -960,8 +963,9 @@ bool ConfigurationView::isEntryInGroup(const unsigned int &r,
 //	Group entry can include | to place a record in multiple groups
 //
 // Note: should mirror what happens in ConfigurationView::getSetOfGroupIDs
-bool ConfigurationView::isEntryInGroupCol(const unsigned int &r,
-                                          const unsigned int &c, const std::string &groupNeedle,
+bool ConfigurationView::isEntryInGroupCol(const unsigned int &   r,
+                                          const unsigned int &   c,
+                                          const std::string &    groupNeedle,
                                           std::set<std::string> *groupIDList) const
 {
 	unsigned int i     = 0;
@@ -1154,8 +1158,7 @@ unsigned int ConfigurationView::findRow(unsigned int col, const std::string &val
 }
 
 //==============================================================================
-unsigned int ConfigurationView::findRowInGroup(unsigned int col, const std::string &value,
-                                               const std::string &groupId, const std::string &childLinkIndex, unsigned int offsetRow) const
+unsigned int ConfigurationView::findRowInGroup(unsigned int col, const std::string &value, const std::string &groupId, const std::string &childLinkIndex, unsigned int offsetRow) const
 {
 	unsigned int groupIdCol = getColLinkGroupID(childLinkIndex);
 	for (unsigned int row = offsetRow; row < theDataView_.size(); ++row)
@@ -2071,7 +2074,8 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 								keyIsMatch   = true;
 								keyIsComment = true;
 								for (keyIsMatchIndex = 0, keyIsMatchStorageIndex = 0, keyIsMatchCommentIndex = 0;
-								     keyIsMatchIndex < currKey.size(); ++keyIsMatchIndex)
+								     keyIsMatchIndex < currKey.size();
+								     ++keyIsMatchIndex)
 								{
 									if (columnsInfo_[col].getStorageName()[keyIsMatchStorageIndex] == '_')
 										++keyIsMatchStorageIndex;  //skip to next storage character
@@ -2237,8 +2241,7 @@ bool ConfigurationView::isURIEncodedCommentTheSame(const std::string &comment) c
 //	Returns 1 if data was same, but columns are different
 //	otherwise 0
 //
-int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffset,
-                                   const std::string &author) throw(std::runtime_error)
+int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffset, const std::string &author) throw(std::runtime_error)
 {
 	int retVal = 0;
 
@@ -2370,8 +2373,7 @@ int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffse
 //
 //	if author == "", do nothing special for author and timestamp column
 //	if author != "", assign author for any row that has been modified, and assign now as timestamp
-bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsigned int &r,
-                                           const unsigned int &c, const std::string &author)
+bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsigned int &r, const unsigned int &c, const std::string &author)
 {
 	if (!(c < columnsInfo_.size() && r < getNumberOfRows()))
 	{
@@ -2414,7 +2416,8 @@ bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsig
 		//				}
 
 		setValue(time_t(strtol(valueStr.c_str(), 0, 10)),
-		         r, c);
+		         r,
+		         c);
 	}
 	else
 		theDataView_[r][c] = valueStr;
@@ -2609,8 +2612,7 @@ void ConfigurationView::deleteRow(int r)
 //  a group link is defined by two columns: TYPE_START_CHILD_LINK, TYPE_START_CHILD_LINK_GROUP_ID
 //
 //	returns true if column is member of a group or unique link.
-const bool ConfigurationView::getChildLink(const unsigned int &c, bool &isGroup,
-                                           std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> &linkPair) const
+const bool ConfigurationView::getChildLink(const unsigned int &c, bool &isGroup, std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> &linkPair) const
 {
 	if (!(c < columnsInfo_.size()))
 	{

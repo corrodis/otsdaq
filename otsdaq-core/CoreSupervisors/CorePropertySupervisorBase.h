@@ -58,9 +58,7 @@ class CorePropertySupervisorBase
 	static const struct SupervisorProperties
 	{
 		SupervisorProperties()
-		    : allSetNames_({&CheckUserLockRequestTypes, &RequireUserLockRequestTypes,
-		                    &AutomatedRequestTypes, &AllowNoLoginRequestTypes,
-		                    &NoXmlWhiteSpaceRequestTypes, &NonXMLRequestTypes})
+		    : allSetNames_({&CheckUserLockRequestTypes, &RequireUserLockRequestTypes, &AutomatedRequestTypes, &AllowNoLoginRequestTypes, &NoXmlWhiteSpaceRequestTypes, &NonXMLRequestTypes})
 		{
 		}
 
@@ -90,9 +88,7 @@ class CorePropertySupervisorBase
 	struct CoreSupervisorPropertyStruct
 	{
 		CoreSupervisorPropertyStruct()
-		    : allSets_({&CheckUserLockRequestTypes, &RequireUserLockRequestTypes,
-		                &AutomatedRequestTypes, &AllowNoLoginRequestTypes,
-		                &NoXmlWhiteSpaceRequestTypes, &NonXMLRequestTypes})
+		    : allSets_({&CheckUserLockRequestTypes, &RequireUserLockRequestTypes, &AutomatedRequestTypes, &AllowNoLoginRequestTypes, &NoXmlWhiteSpaceRequestTypes, &NonXMLRequestTypes})
 		{
 		}
 

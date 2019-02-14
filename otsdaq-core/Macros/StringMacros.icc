@@ -25,8 +25,7 @@ T& StringMacros::getWildCardMatchFromMap(
 	for (auto& haystackPair : haystack)
 		//use wildcard match, flip needle parameter.. because we want haystack to have the wildcards
 		//	check resulting priority to see if we are done with search (when priority=1, can be done)
-		if (StringMacros::wildCardMatch(haystackPair.first, needle,
-		                                &matchPriority))
+		if (StringMacros::wildCardMatch(haystackPair.first, needle, &matchPriority))
 		{
 			if (matchPriority == 1)  //found best possible match, so done
 			{

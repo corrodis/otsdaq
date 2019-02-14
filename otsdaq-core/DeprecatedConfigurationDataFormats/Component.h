@@ -21,14 +21,8 @@ class Component
 	virtual ~Component();
 	void addRegister(std::string name);
 	void addRegister(std::string name, std::string baseAddress, int size, std::string access, int globalSequencePosition, int globalValue);
-	void addRegister(std::string name, std::string baseAddress, int size, std::string access, int initializeSequencePosition, int initializeValue,
-	                 int configureSequencePosition, int configureValue);
-	void addRegister(std::string name, std::string baseAddress, int size, std::string access, int initializeSequencePosition, int initializeValue,
-	                 int configureSequencePosition, int configureValue,
-	                 int startSequencePosition, int startValue,
-	                 int haltSequencePosition, int haltValue,
-	                 int pauseSequencePosition, int pauseValue,
-	                 int resumeSequencePosition, int resumeValue);
+	void addRegister(std::string name, std::string baseAddress, int size, std::string access, int initializeSequencePosition, int initializeValue, int configureSequencePosition, int configureValue);
+	void addRegister(std::string name, std::string baseAddress, int size, std::string access, int initializeSequencePosition, int initializeValue, int configureSequencePosition, int configureValue, int startSequencePosition, int startValue, int haltSequencePosition, int haltValue, int pauseSequencePosition, int pauseValue, int resumeSequencePosition, int resumeValue);
 	void setState(std::string state, std::pair<int, int> sequenceValuePair);
 	//Getters
 	std::list<Register>  getRegisters(void);

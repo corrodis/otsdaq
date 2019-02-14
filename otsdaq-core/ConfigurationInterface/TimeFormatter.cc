@@ -48,7 +48,8 @@ std::string TimeFormatter::getTime(void)
 	thisTime = localtime(&aclock);
 
 	sprintf(theDate,
-	        "%d-%02d-%02d %02d:%02d:%02d", thisTime->tm_year + 1900,
+	        "%d-%02d-%02d %02d:%02d:%02d",
+	        thisTime->tm_year + 1900,
 	        thisTime->tm_mon + 1,
 	        thisTime->tm_mday,
 	        thisTime->tm_hour,

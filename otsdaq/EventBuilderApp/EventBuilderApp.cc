@@ -258,7 +258,8 @@ void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
 
 	theConfigurationManager_->loadConfigurationGroup(
 	    theGroup.first,
-	    theGroup.second, true);
+	    theGroup.second,
+	    true);
 
 	//theConfigurationManager_->setupEventBuilderAppConfiguration(theConfigurationGroupKey_,supervisorInstance_);
 

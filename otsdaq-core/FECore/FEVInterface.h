@@ -304,7 +304,8 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	template<class T>
 	std::string& setFEMacroArgumentValue(
 	    frontEndMacroArgs_t args,
-	    const std::string& argName, const T& value) const;
+	    const std::string&  argName,
+	    const T&            value) const;
 	//	{
 	//		//modify existing pair
 	//		std::string& arg = getFEMacroArgument(args,argName);
@@ -315,7 +316,8 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	template<class T>
 	std::string& emplaceFEMacroArgumentValue(
 	    frontEndMacroArgs_t args,
-	    const std::string& argName, const T& value) const;
+	    const std::string&  argName,
+	    const T&            value) const;
 	//	{
 	//		//insert new pair
 	//		std::stringstream ss; ss << value;

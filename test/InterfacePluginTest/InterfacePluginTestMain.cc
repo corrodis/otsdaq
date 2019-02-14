@@ -38,7 +38,8 @@ int main()
 
 	theConfigurationManager_->loadConfigurationGroup(
 	    theGroup.first,
-	    theGroup.second, true);
+	    theGroup.second,
+	    true);
 
 	theFEVInterfacesManager_.configure();
 	////////////////////////////////////////////////////////////////

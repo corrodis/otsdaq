@@ -37,9 +37,14 @@ void Iterator::helpCommandModifyActive(
 		cfgMgr->loadConfigurationGroup(
 		    groupName,
 		    originalKey,
-		    0, &memberMap,
-		    0, 0, 0, 0, 0,  //defaults
-		    true);          //doNotLoadMember
+		    0,
+		    &memberMap,
+		    0,
+		    0,
+		    0,
+		    0,
+		    0,      //defaults
+		    true);  //doNotLoadMember
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -154,8 +159,7 @@ void Iterator::helpCommandModifyActive(
 				__COUT__ << "\t\t**************************** Save v" << temporaryModifiedVersion << " as new table version" << std::endl;
 
 				newAssignedVersion =
-				    cfgMgr->saveNewConfiguration(configName, temporaryModifiedVersion,
-				                                 false /*makeTemporary*/);
+				    cfgMgr->saveNewConfiguration(configName, temporaryModifiedVersion, false /*makeTemporary*/);
 			}
 
 			__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << std::endl;

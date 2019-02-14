@@ -291,8 +291,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string &inString, s
 //========================================================================================================================
 //handleSample
 //	adds to txBuffer if sample should be sent to monitor server
-void FESlowControlsChannel::handleSample(const std::string &universalReadValue, std::string &txBuffer,
-                                         FILE *fpAggregate, bool aggregateIsBinaryFormat)
+void FESlowControlsChannel::handleSample(const std::string &universalReadValue, std::string &txBuffer, FILE *fpAggregate, bool aggregateIsBinaryFormat)
 {
 	__COUT__ << "txBuffer size=" << txBuffer.size() << std::endl;
 

@@ -128,8 +128,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 	std::string         lastIterationResult_;
 	unsigned int        lastIterationIndex_, lastSubIterationIndex_;
 
-	std::map<toolbox::fsm::State, std::map<std::string,
-	                                       void (RunControlStateMachine::*)(toolbox::Event::Reference), std::less<std::string> > >
+	std::map<toolbox::fsm::State, std::map<std::string, void (RunControlStateMachine::*)(toolbox::Event::Reference), std::less<std::string> > >
 	    stateTransitionFunctionTable_;
 };
 

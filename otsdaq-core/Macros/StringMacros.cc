@@ -13,8 +13,7 @@ using namespace ots;
 //			- 3: next highest is partial LEADING-wildcard match
 //			- 4: lowest priority is partial full-wildcard match
 //		return priority found by reference
-bool StringMacros::wildCardMatch(const std::string& needle, const std::string& haystack,
-                                 unsigned int* priorityIndex) try
+bool StringMacros::wildCardMatch(const std::string& needle, const std::string& haystack, unsigned int* priorityIndex) try
 {
 	//	__COUT__ << "\t\t wildCardMatch: " << needle <<
 	//			" =in= " << haystack << " ??? " <<
@@ -290,8 +289,9 @@ catch (const std::runtime_error& e)
 //	extracts the set of elements from string that uses a delimiter
 //		ignoring whitespace
 void StringMacros::getSetFromString(const std::string&     inputString,
-                                    std::set<std::string>& setToReturn, const std::set<char>& delimiter,
-                                    const std::set<char>& whitespace)
+                                    std::set<std::string>& setToReturn,
+                                    const std::set<char>&  delimiter,
+                                    const std::set<char>&  whitespace)
 {
 	unsigned int i = 0;
 	unsigned int j = 0;
@@ -332,8 +332,10 @@ void StringMacros::getSetFromString(const std::string&     inputString,
 //	Note: the size() of delimiters will be one less than the size() of the returned values
 //		unless there is a leading delimiter, in which case vectors will have the same size.
 void StringMacros::getVectorFromString(const std::string&        inputString,
-                                       std::vector<std::string>& listToReturn, const std::set<char>& delimiter,
-                                       const std::set<char>& whitespace, std::vector<char>* listOfDelimiters)
+                                       std::vector<std::string>& listToReturn,
+                                       const std::set<char>&     delimiter,
+                                       const std::set<char>&     whitespace,
+                                       std::vector<char>*        listOfDelimiters)
 {
 	unsigned int             i = 0;
 	unsigned int             j = 0;
@@ -424,8 +426,9 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 //		ignoring whitespace
 void StringMacros::getMapFromString(const std::string&                  inputString,
                                     std::map<std::string, std::string>& mapToReturn,
-                                    const std::set<char>& pairPairDelimiter, const std::set<char>& nameValueDelimiter,
-                                    const std::set<char>& whitespace) try
+                                    const std::set<char>&               pairPairDelimiter,
+                                    const std::set<char>&               nameValueDelimiter,
+                                    const std::set<char>&               whitespace) try
 {
 	unsigned int i = 0;
 	unsigned int j = 0;
@@ -510,7 +513,8 @@ catch (const std::runtime_error& e)
 //==============================================================================
 //mapToString
 std::string StringMacros::mapToString(const std::map<std::string, uint8_t>& mapToReturn,
-                                      const std::string& primaryDelimeter, const std::string& secondaryDelimeter)
+                                      const std::string&                    primaryDelimeter,
+                                      const std::string&                    secondaryDelimeter)
 {
 	std::stringstream ss;
 	bool              first = true;

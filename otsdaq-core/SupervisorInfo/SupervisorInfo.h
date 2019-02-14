@@ -21,7 +21,8 @@ class SupervisorInfo
 	// name and contextName are derived from the class name and LID
 	SupervisorInfo(
 	    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* descriptor,
-	    const std::string& name, const std::string& contextName)
+	    const std::string&                           name,
+	    const std::string&                           contextName)
 	    : descriptor_(descriptor), contextDescriptor_(descriptor ? descriptor->getContextDescriptor() : 0), name_(name),  // this is the config app name
 	    contextName_(contextName)
 	    ,  // this is the config parent context name

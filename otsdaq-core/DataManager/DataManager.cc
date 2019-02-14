@@ -180,7 +180,10 @@ void DataManager::configure(void)
 					            .getNode(
 					                COL_NAME_appUID)
 					            .getValue<std::string>(),
-					        buffer.first, bufferConfigurationList[producerLocation].first, theXDAQContextConfigTree_, theConfigurationPath_ + "/" + COL_NAME_bufferGroupLink + "/" + buffer.first + "/" + COL_NAME_processorGroupLink + "/" + bufferConfigurationList[producerLocation].first + "/" + COL_NAME_processorLink));  //));
+					        buffer.first,
+					        bufferConfigurationList[producerLocation].first,
+					        theXDAQContextConfigTree_,
+					        theConfigurationPath_ + "/" + COL_NAME_bufferGroupLink + "/" + buffer.first + "/" + COL_NAME_processorGroupLink + "/" + bufferConfigurationList[producerLocation].first + "/" + COL_NAME_processorLink));  //));
 
 					{
 						__CFG_SS__;
@@ -241,7 +244,11 @@ void DataManager::configure(void)
 					        bufferConfigurationList[consumerLocation].second.getNode(
 					                                                            COL_NAME_processorPlugin)
 					            .getValue<std::string>(),
-					        theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode(COL_NAME_appUID).getValue<std::string>(), buffer.first, bufferConfigurationList[consumerLocation].first, theXDAQContextConfigTree_, theConfigurationPath_ + "/" + COL_NAME_bufferGroupLink + "/" + buffer.first + "/" + COL_NAME_processorGroupLink + "/" + bufferConfigurationList[consumerLocation].first + "/" + COL_NAME_processorLink));  //));
+					        theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode(COL_NAME_appUID).getValue<std::string>(),
+					        buffer.first,
+					        bufferConfigurationList[consumerLocation].first,
+					        theXDAQContextConfigTree_,
+					        theConfigurationPath_ + "/" + COL_NAME_bufferGroupLink + "/" + buffer.first + "/" + COL_NAME_processorGroupLink + "/" + bufferConfigurationList[consumerLocation].first + "/" + COL_NAME_processorLink));  //));
 
 					{
 						__CFG_SS__;
@@ -532,7 +539,8 @@ void DataManager::unregisterFEProducer(const std::string& bufferID, const std::s
 	//remove from producer vector
 	//just destroy consumer, and it unregisters itself
 	for (auto feProducerIt = bufferIt->second.producers_.begin();
-	     feProducerIt != bufferIt->second.producers_.end(); feProducerIt++)
+	     feProducerIt != bufferIt->second.producers_.end();
+	     feProducerIt++)
 	{
 		if ((*feProducerIt)->getProcessorID() == feProducerID)
 		{

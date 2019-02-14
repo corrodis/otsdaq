@@ -167,8 +167,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 	}
 
 	//return xml doc holding server response
-	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*print to cout*/,
-	                         !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
+	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*print to cout*/, !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
 }
 
 //========================================================================================================================
@@ -176,8 +175,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 //		Supervisors should override this function. It will be called after user access has been verified
 //		according to the Supervisor Property settings. The CoreSupervisorBase class provides consistent
 //		access, responses, and error handling across all inheriting supervisors that use ::request.
-void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut,
-                                 const WebUsers::RequestUserInfo& userInfo)
+void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut, const WebUsers::RequestUserInfo& userInfo)
 {
 	__SUP_COUT__ << "This is the empty Core Supervisor request. Supervisors should override this function." << __E__;
 
@@ -228,8 +226,7 @@ void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& c
 //		Supervisors should override this function. It will be called after user access has been verified
 //		according to the Supervisor Property settings. The CoreSupervisorBase class provides consistent
 //		access, responses, and error handling across all inheriting supervisors that use ::request.
-void CoreSupervisorBase::nonXmlRequest(const std::string& requestType, cgicc::Cgicc& cgiIn, std::ostream& out,
-                                       const WebUsers::RequestUserInfo& userInfo)
+void CoreSupervisorBase::nonXmlRequest(const std::string& requestType, cgicc::Cgicc& cgiIn, std::ostream& out, const WebUsers::RequestUserInfo& userInfo)
 {
 	__SUP_COUT__ << "This is the empty Core Supervisor non-xml request. Supervisors should override this function." << __E__;
 	out << "This is the empty Core Supervisor non-xml request. Supervisors should override this function." << __E__;
@@ -481,7 +478,8 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 
 		theConfigurationManager_->loadConfigurationGroup(
 		    theGroup.first,
-		    theGroup.second, true);
+		    theGroup.second,
+		    true);
 	}
 
 	//Now that the configuration manager has all the necessary configurations,

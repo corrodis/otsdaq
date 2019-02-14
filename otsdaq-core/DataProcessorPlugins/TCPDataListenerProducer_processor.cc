@@ -12,8 +12,7 @@
 using namespace ots;
 
 //========================================================================================================================
-TCPDataListenerProducer::TCPDataListenerProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID,
-                                                 const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
+TCPDataListenerProducer::TCPDataListenerProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
     : WorkLoop(processorUID)
     //, Socket       ("192.168.133.100", 40000)
     , DataProducer(

@@ -14,8 +14,7 @@ class ConfigurationTree;
 class TCPDataListenerProducer : public DataProducer, public Configurable, public TCPSocket
 {
   public:
-	TCPDataListenerProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID,
-	                        const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
+	TCPDataListenerProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
 	virtual ~TCPDataListenerProducer(void);
 
   protected:
