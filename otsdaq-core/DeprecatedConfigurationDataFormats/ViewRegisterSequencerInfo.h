@@ -9,10 +9,11 @@
 #define VIEWREGISTERSEQUENCERINFO_H_
 #include <string>
 
-namespace ots {
-
-class ViewRegisterSequencerInfo {
-       public:
+namespace ots
+{
+class ViewRegisterSequencerInfo
+{
+  public:
 	ViewRegisterSequencerInfo(std::string componentName, std::string registerName, int registerValue, int sequenceNumber, std::string state);
 	//							  std::pair<int, int> initializeState, 		std::pair<int, int> configurationState,
 	//							  std::pair<int, int> startState, 			std::pair<int, int> haltState,
@@ -23,9 +24,9 @@ class ViewRegisterSequencerInfo {
 	void setState(std::string state, std::pair<int, int> valueSequencePair);
 
 	//Getters
-	const std::string&	 getComponentName(void) const;
-	const std::string&	 getRegisterName(void) const;
-	const std::string&	 getState(void) const;
+	const std::string&         getComponentName(void) const;
+	const std::string&         getRegisterName(void) const;
+	const std::string&         getState(void) const;
 	const std::pair<int, int>& getValueSequencePair(void) const;
 	const std::pair<int, int>& getInitialize(void) const;
 	const std::pair<int, int>& getConfiguration(void) const;
@@ -33,12 +34,12 @@ class ViewRegisterSequencerInfo {
 	const std::pair<int, int>& getHalt(void) const;
 	const std::pair<int, int>& getPause(void) const;
 	const std::pair<int, int>& getResume(void) const;
-	const int		   getNumberOfColumns(void) const;
+	const int                  getNumberOfColumns(void) const;
 
-       protected:
-	std::string	 componentName_;
-	std::string	 registerName_;
-	std::string	 state_;
+  protected:
+	std::string         componentName_;
+	std::string         registerName_;
+	std::string         state_;
 	std::pair<int, int> valueSequencePair_;
 	std::pair<int, int> initializeState_;
 	std::pair<int, int> configurationState_;

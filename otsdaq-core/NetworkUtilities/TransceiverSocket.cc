@@ -27,7 +27,7 @@ TransceiverSocket::~TransceiverSocket(void)
 //========================================================================================================================
 //returns 0 on success
 int TransceiverSocket::acknowledge(const std::string& buffer,
-				   bool		      verbose)
+                                   bool               verbose)
 {
 	//lockout other senders for the remainder of the scope
 	std::lock_guard<std::mutex> lock(sendMutex_);
@@ -45,10 +45,10 @@ int TransceiverSocket::acknowledge(const std::string& buffer,
 	size_t offset     = 0;
 	size_t thisSize   = buffer.size();
 	int    sendToSize = sendto(socketNumber_,
-				   buffer.c_str() + offset,
-				   thisSize,
-				   0,
-				   (struct sockaddr*)&(ReceiverSocket::fromAddress_), sizeof(sockaddr_in));
+                            buffer.c_str() + offset,
+                            thisSize,
+                            0,
+                            (struct sockaddr*)&(ReceiverSocket::fromAddress_), sizeof(sockaddr_in));
 
 	if (sendToSize <= 0)
 	{

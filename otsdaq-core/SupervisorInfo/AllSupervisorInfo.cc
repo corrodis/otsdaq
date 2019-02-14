@@ -112,15 +112,15 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 		auto /*<iterator,bool>*/ emplacePair = allSupervisorInfo_.emplace(std::pair<unsigned int, SupervisorInfo>(
 		    descriptor.second->getLocalId(),  //descriptor.first,
 		    SupervisorInfo(
-			descriptor.second /* descriptor */,
-			contextConfig ? contextConfig->getApplicationUID(
-					    descriptor.second->getContextDescriptor()->getURL(),
-					    descriptor.second->getLocalId())
-				      : "" /* config app name */,
-			contextConfig ? contextConfig->getContextUID(
-					    descriptor.second->getContextDescriptor()->getURL())
-				      : "" /* config parent context name */
-			)));
+		        descriptor.second /* descriptor */,
+		        contextConfig ? contextConfig->getApplicationUID(
+		                            descriptor.second->getContextDescriptor()->getURL(),
+		                            descriptor.second->getLocalId())
+		                      : "" /* config app name */,
+		        contextConfig ? contextConfig->getContextUID(
+		                            descriptor.second->getContextDescriptor()->getURL())
+		                      : "" /* config parent context name */
+		        )));
 		if (!emplacePair.second)
 		{
 			__SS__ << "Error! Duplicate Application IDs are not allowed. ID =" << descriptor.second->getLocalId() << __E__;
@@ -335,19 +335,19 @@ const SupervisorInfo& AllSupervisorInfo::getSupervisorInfo(xdaq::Application* ap
 
 //========================================================================================================================
 void AllSupervisorInfo::setSupervisorStatus(xdaq::Application* app,
-					    const std::string& status)
+                                            const std::string& status)
 {
 	setSupervisorStatus(app->getApplicationDescriptor()->getLocalId(), status);
 }
 //========================================================================================================================
 void AllSupervisorInfo::setSupervisorStatus(const SupervisorInfo& appInfo,
-					    const std::string&    status)
+                                            const std::string&    status)
 {
 	setSupervisorStatus(appInfo.getId(), status);
 }
 //========================================================================================================================
 void AllSupervisorInfo::setSupervisorStatus(const unsigned int& id,
-					    const std::string&  status)
+                                            const std::string&  status)
 {
 	auto it = allSupervisorInfo_.find(id);
 	if (it == allSupervisorInfo_.end())
@@ -400,7 +400,7 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 
 	try
 	{
-		ConfigurationManager					  cfgMgr;
+		ConfigurationManager                                      cfgMgr;
 		const std::vector<XDAQContextConfiguration::XDAQContext>& contexts =
 		    cfgMgr.__GET_CONFIG__(XDAQContextConfiguration)->getContexts();
 
@@ -413,7 +413,7 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 					auto it = app.stateMachineCommandPriority_.find(stateMachineCommand);
 					if (it == app.stateMachineCommandPriority_.end())
 						orderedByPriority[XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY].push_back(app.id_);  //if no priority, then default to XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY
-					else													    //take value, and do not allow DEFAULT value of 0 -> force to XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY
+					else                                                                                                    //take value, and do not allow DEFAULT value of 0 -> force to XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY
 						orderedByPriority[it->second ? it->second : XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY].push_back(app.id_);
 
 					//__COUT__ << "app.id_ " << app.id_ << __E__;
@@ -431,7 +431,7 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 	//	skip over Gateway Supervisor,
 	//	and other supervisors that do not need state transitions.
 	std::vector<std::vector<const SupervisorInfo*>> retVec;
-	bool						createContainer;
+	bool                                            createContainer;
 	for (const auto& priorityAppVector : orderedByPriority)
 	{
 		createContainer = true;
@@ -448,12 +448,12 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 			//__COUT__ << it->second.getName() << " [" << it->second.getId() << "]: " << " priority? " <<
 			//				(unsigned int)priorityAppVector.first << __E__;
 
-			if (it->second.isGatewaySupervisor()) continue;		      //skip gateway supervisor
-			if (it->second.isTypeLogbookSupervisor()) continue;	   //skip logbook supervisor(s)
-			if (it->second.isTypeMacroMakerSupervisor()) continue;	//skip macromaker supervisor(s)
+			if (it->second.isGatewaySupervisor()) continue;               //skip gateway supervisor
+			if (it->second.isTypeLogbookSupervisor()) continue;           //skip logbook supervisor(s)
+			if (it->second.isTypeMacroMakerSupervisor()) continue;        //skip macromaker supervisor(s)
 			if (it->second.isTypeConfigurationGUISupervisor()) continue;  //skip configurationGUI supervisor(s)
-			if (it->second.isTypeChatSupervisor()) continue;	      //skip chat supervisor(s)
-			if (it->second.isTypeConsoleSupervisor()) continue;	   //skip console supervisor(s)
+			if (it->second.isTypeChatSupervisor()) continue;              //skip chat supervisor(s)
+			if (it->second.isTypeConsoleSupervisor()) continue;           //skip console supervisor(s)
 
 			if (createContainer)  //create container first time
 			{
@@ -470,7 +470,7 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 			retVec[retVec.size() - 1].push_back(&(it->second));
 
 			__COUT__ << it->second.getName() << " [LID=" << it->second.getId() << "]: "
-				 << " priority " << (unsigned int)priorityAppVector.first << " count " << retVec[retVec.size() - 1].size() << __E__;
+			         << " priority " << (unsigned int)priorityAppVector.first << " count " << retVec[retVec.size() - 1].size() << __E__;
 		}
 	}  //end equal priority loop
 	return retVec;

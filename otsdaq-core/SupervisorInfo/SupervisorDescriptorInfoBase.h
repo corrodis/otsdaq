@@ -11,13 +11,15 @@
 #include <map>
 #include <string>
 
-namespace ots {
+namespace ots
+{
 // key is the crate number
 typedef std::map<xdata::UnsignedIntegerT, XDAQ_CONST_CALL xdaq::ApplicationDescriptor*> SupervisorDescriptors;
 
-class SupervisorDescriptorInfoBase {
+class SupervisorDescriptorInfoBase
+{
 	friend class SupervisorInfo;  //"Friend" class needs access to private members
-       public:
+  public:
 	SupervisorDescriptorInfoBase(void);
 	SupervisorDescriptorInfoBase(xdaq::ApplicationContext* applicationContext);
 	virtual ~SupervisorDescriptorInfoBase(void);
@@ -25,7 +27,7 @@ class SupervisorDescriptorInfoBase {
 	//XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getSupervisorDescriptor 	    (void) const;
 	//XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getWizardDescriptor 	        (void) const;
 
-       protected:
+  protected:
 	virtual void init(xdaq::ApplicationContext* applicationContext);
 	virtual void destroy();
 
@@ -61,7 +63,7 @@ class SupervisorDescriptorInfoBase {
 	//    std::string getARTDAQBuilderURL    (xdata::UnsignedIntegerT instance) const;
 	//    std::string getARTDAQAggregatorURL (xdata::UnsignedIntegerT instance) const;
 
-       protected:
+  protected:
 	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* theSupervisor_;
 	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* theWizard_;
 	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* theLogbookSupervisor_;

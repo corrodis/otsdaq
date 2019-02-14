@@ -4,10 +4,11 @@
 #include <string>
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 
-namespace ots {
-
-class ARTDAQConsumerConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class ARTDAQConsumerConfiguration : public ConfigurationBase
+{
+  public:
 	ARTDAQConsumerConfiguration(void);
 	virtual ~ARTDAQConsumerConfiguration(void);
 
@@ -17,9 +18,11 @@ class ARTDAQConsumerConfiguration : public ConfigurationBase {
 	//Getters
 	const std::string getConfigurationString(std::string processorUID) const;
 
-       private:
-	enum { ProcessorID,
-	       ConfigurationString
+  private:
+	enum
+	{
+		ProcessorID,
+		ConfigurationString
 	};
 };
 }  // namespace ots

@@ -27,7 +27,7 @@ void SystemMessenger::addSystemMessage(std::string targetUser, std::string msg)
 	sysMsgSetLock(false);  //unset lock
 
 	std::cout << __COUT_HDR_FL__ << "Current System Messages: " << sysMsgTargetUser_.size() << std::endl
-		  << std::endl;
+	          << std::endl;
 }
 
 //========================================================================================================================
@@ -40,8 +40,8 @@ std::string SystemMessenger::getSystemMessage(std::string targetUser)
 {
 	//std::cout << __COUT_HDR_FL__ << "Current System Messages: " << targetUser <<  std::endl << std::endl;
 	std::string retStr = "";
-	int	 cnt    = 0;
-	char	tmp[100];
+	int         cnt    = 0;
+	char        tmp[100];
 	for (uint64_t i = 0; i < sysMsgTargetUser_.size(); ++i)
 		if (sysMsgTargetUser_[i] == targetUser || sysMsgTargetUser_[i] == "*")
 		{
@@ -87,7 +87,7 @@ void SystemMessenger::sysMsgCleanup()
 			sysMsgTime_.erase(sysMsgTime_.begin() + i);
 			sysMsgDelivered_.erase(sysMsgDelivered_.begin() + i);
 			sysMsgSetLock(false);  //unset lock
-			--i;		       //rewind
+			--i;                   //rewind
 		}
 	//std::cout << __COUT_HDR_FL__ << "Remaining System Messages: " << sysMsgTargetUser_.size() <<  std::endl << std::endl;
 }

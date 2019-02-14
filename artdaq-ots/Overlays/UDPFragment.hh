@@ -9,15 +9,17 @@
 
 // Implementation of "UDPFragment", an artdaq::Fragment overlay class
 
-namespace ots {
+namespace ots
+{
 class UDPFragment;
 
 // Let the "<<" operator dump the UDPFragment's data to stdout
 std::ostream &operator<<(std::ostream &, UDPFragment const &);
 }  // namespace ots
 
-class ots::UDPFragment {
-       public:
+class ots::UDPFragment
+{
+  public:
 	// The "Metadata" struct is used to store info primarily related to
 	// the upstream hardware environment from where the fragment came
 
@@ -99,7 +101,7 @@ class ots::UDPFragment {
 		return dataBegin() + udp_data_words();
 	}
 
-       protected:
+  protected:
 	// Functions to translate between byte size and the size of
 	// this fragment overlay's concept of a unit of data (i.e.,
 	// Header::data_t).
@@ -118,7 +120,7 @@ class ots::UDPFragment {
 		return reinterpret_cast<UDPFragment::Header const *>(artdaq_Fragment_.dataBeginBytes());
 	}
 
-       private:
+  private:
 	artdaq::Fragment const &artdaq_Fragment_;
 };
 

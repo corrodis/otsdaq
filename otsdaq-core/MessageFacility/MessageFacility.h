@@ -5,8 +5,8 @@
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "otsdaq-core/Macros/CoutMacros.h"
 
-namespace ots {
-
+namespace ots
+{
 inline void INIT_MF(const char* name)
 {
 	char* logRootString = getenv("OTSDAQ_LOG_ROOT");
@@ -15,7 +15,7 @@ inline void INIT_MF(const char* name)
 		__COUT_ERR__ << "\n**********************************************************" << std::endl;
 		__COUT_ERR__ << "WARNING: OTSDAQ_LOG_ROOT environment variable was not set!" << std::endl;
 		__COUT_ERR__ << "**********************************************************\n"
-			     << std::endl;
+		             << std::endl;
 		;
 		//exit(0);
 	}
@@ -28,7 +28,7 @@ inline void INIT_MF(const char* name)
 		__COUT_ERR__ << "\n***********************************************************" << std::endl;
 		__COUT_ERR__ << "WARNING: OTSDAQ_LOG_FHICL environment variable was not set!" << std::endl;
 		__COUT_ERR__ << "***********************************************************\n"
-			     << std::endl;
+		             << std::endl;
 		//exit(0);
 	}
 	else

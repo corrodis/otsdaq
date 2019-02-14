@@ -3,10 +3,11 @@
 
 #include "otsdaq-core/ConfigurationDataFormats/RegisterConfiguration.h"
 
-namespace ots {
-
-class FERRegisterConfiguration : public ots::RegisterConfiguration {
-       public:
+namespace ots
+{
+class FERRegisterConfiguration : public ots::RegisterConfiguration
+{
+  public:
 	FERRegisterConfiguration(void);
 	virtual ~FERRegisterConfiguration(void);
 };

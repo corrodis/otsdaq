@@ -7,10 +7,11 @@
 #include <string>
 #include <vector>
 
-namespace ots {
-
-class FEConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class FEConfiguration : public ConfigurationBase
+{
+  public:
 	FEConfiguration(void);
 	virtual ~FEConfiguration(void);
 
@@ -36,14 +37,15 @@ class FEConfiguration : public ConfigurationBase {
 	//	std::vector<unsigned int> getListOfFERs        (unsigned int supervisorInstance) const;
 	//	const std::string&        getFERInterfaceName  (unsigned int id)                 const;
 
-       private:
-	enum {
+  private:
+	enum
+	{
 		SupervisorType,
 		SupervisorInstance,
 		FrontEndId,
 		FrontEndType
 	};
-	std::string						   composeUniqueName(std::string supervisorName, unsigned int supervisorInstance) const { return supervisorName + std::to_string(supervisorInstance); }
+	std::string                                                composeUniqueName(std::string supervisorName, unsigned int supervisorInstance) const { return supervisorName + std::to_string(supervisorInstance); }
 	std::map<std::string, std::map<std::string, unsigned int>> typeNameToRow_;
 };
 }  // namespace ots

@@ -6,12 +6,14 @@
 #include <string>
 #include "otsdaq-core/DataManager/DataManager.h"
 
-namespace ots {
+namespace ots
+{
 class ConfigurationTree;
 
 //====================================================================================
-class DataManagerSingleton {
-       public:
+class DataManagerSingleton
+{
+  public:
 	//There is no way I can realize that the singletonized class has been deleted!
 	static void deleteInstance(std::string instanceUID)
 	{
@@ -53,7 +55,7 @@ class DataManagerSingleton {
 		return theInstances_[instanceUID];
 	}
 
-       private:
+  private:
 	DataManagerSingleton(void) { ; }
 	~DataManagerSingleton(void) { ; }
 	static std::map<std::string, DataManager*> theInstances_;

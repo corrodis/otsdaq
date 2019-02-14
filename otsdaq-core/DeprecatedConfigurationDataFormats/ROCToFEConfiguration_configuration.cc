@@ -43,7 +43,7 @@ void ROCToFEConfiguration::init(ConfigurationManager* configManager)
 	{
 		ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorID, row, DetectorID);
 		nameToInfoMap_[tmpDetectorID] = ROCInfo();
-		ROCInfo& aROCInfo	     = nameToInfoMap_[tmpDetectorID];
+		ROCInfo& aROCInfo             = nameToInfoMap_[tmpDetectorID];
 		ConfigurationBase::activeConfigurationView_->getValue(aROCInfo.theFEWName_, row, FEWName);
 		ConfigurationBase::activeConfigurationView_->getValue(aROCInfo.theFEWChannel_, row, FEWChannel);
 		ConfigurationBase::activeConfigurationView_->getValue(aROCInfo.theFEWROCAddress_, row, FEWROCAddress);
@@ -56,8 +56,8 @@ void ROCToFEConfiguration::init(ConfigurationManager* configManager)
 //==============================================================================
 std::vector<std::string> ROCToFEConfiguration::getFEWROCsList(std::string fECNumber) const
 {
-	std::string		 tmpDetectorID;
-	std::string		 tmpFEWName;
+	std::string              tmpDetectorID;
+	std::string              tmpFEWName;
 	std::vector<std::string> list;
 	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
@@ -74,8 +74,8 @@ std::vector<std::string> ROCToFEConfiguration::getFEWROCsList(std::string fECNum
 //==============================================================================
 std::vector<std::string> ROCToFEConfiguration::getFERROCsList(std::string fEDNumber) const
 {
-	std::string		 tmpDetectorID;
-	std::string		 tmpFERName;
+	std::string              tmpDetectorID;
+	std::string              tmpFERName;
 	std::vector<std::string> list;
 	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{

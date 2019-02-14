@@ -4,10 +4,11 @@
 #include <string>
 #include "otsdaq-core/ConfigurationDataFormats/FEInterfaceConfigurationBase.h"
 
-namespace ots {
-
-class ARTDAQAggregatorConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class ARTDAQAggregatorConfiguration : public ConfigurationBase
+{
+  public:
 	ARTDAQAggregatorConfiguration(void);
 	virtual ~ARTDAQAggregatorConfiguration(void);
 
@@ -16,14 +17,16 @@ class ARTDAQAggregatorConfiguration : public ConfigurationBase {
 
 	//Getters
 	std::string       getAggregatorID(unsigned int supervisorInstance) const;
-	bool		  getStatus(unsigned int supervisorInstance) const;
+	bool              getStatus(unsigned int supervisorInstance) const;
 	const std::string getConfigurationString(unsigned int supervisorInstance) const;
 
-       private:
-	enum { SupervisorInstance,
-	       AggregatorID,
-	       Status,
-	       ConfigurationString
+  private:
+	enum
+	{
+		SupervisorInstance,
+		AggregatorID,
+		Status,
+		ConfigurationString
 	};
 };
 }  // namespace ots

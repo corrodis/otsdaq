@@ -21,7 +21,7 @@ TimeFormatter::TimeFormatter(std::string source)
 		return;
 	origin_ = source;
 	std::cout << __COUT_HDR_FL__ << "[TimeFormatter::TimeFormatter()]\t\t    Time counter started for " << origin_ << std::endl
-		  << std::endl;
+	          << std::endl;
 	startTime_ = getImSecTime();
 }
 
@@ -34,13 +34,13 @@ void TimeFormatter::stopTimer(void)
 	double start = startTime_.tv_sec + startTime_.tv_usec / 1000000.;
 	double stop  = endTime_.tv_sec + endTime_.tv_usec / 1000000.;
 	std::cout << __COUT_HDR_FL__ << "[TimeFormatter::stopTimer()]\t\t\t    Elapsed time: " << stop - start << " seconds for " << origin_ << std::endl
-		  << std::endl;
+	          << std::endl;
 }
 
 //==============================================================================
 std::string TimeFormatter::getTime(void)
 {
-	char	theDate[20];
+	char        theDate[20];
 	struct tm * thisTime;
 	time_t      aclock;
 	std::string date;
@@ -48,12 +48,12 @@ std::string TimeFormatter::getTime(void)
 	thisTime = localtime(&aclock);
 
 	sprintf(theDate,
-		"%d-%02d-%02d %02d:%02d:%02d", thisTime->tm_year + 1900,
-		thisTime->tm_mon + 1,
-		thisTime->tm_mday,
-		thisTime->tm_hour,
-		thisTime->tm_min,
-		thisTime->tm_sec);
+	        "%d-%02d-%02d %02d:%02d:%02d", thisTime->tm_year + 1900,
+	        thisTime->tm_mon + 1,
+	        thisTime->tm_mday,
+	        thisTime->tm_hour,
+	        thisTime->tm_min,
+	        thisTime->tm_sec);
 	date = theDate;
 	//std::cout << __COUT_HDR_FL__ << "[TimeFormatter::getTime()]\t\t\t\t    Time: " << date << std::endl  << std::endl;
 	return date;
@@ -72,14 +72,14 @@ struct tm *TimeFormatter::getITime(void)
 //==============================================================================
 std::string getmSecTime(void)
 {
-	char	   theDate[20];
+	char           theDate[20];
 	struct timeval msecTime;
 	gettimeofday(&msecTime, (struct timezone *)0);
 
 	sprintf(theDate,
-		"%d-%d",
-		(unsigned int)msecTime.tv_sec,
-		(unsigned int)msecTime.tv_usec);
+	        "%d-%d",
+	        (unsigned int)msecTime.tv_sec,
+	        (unsigned int)msecTime.tv_usec);
 	return std::string(theDate);
 }
 

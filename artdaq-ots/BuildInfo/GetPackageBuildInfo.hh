@@ -5,8 +5,8 @@
 
 #include <string>
 
-namespace ots {
-
+namespace ots
+{
 struct GetPackageBuildInfo
 {
 	static artdaq::PackageBuildInfo getPackageBuildInfo();

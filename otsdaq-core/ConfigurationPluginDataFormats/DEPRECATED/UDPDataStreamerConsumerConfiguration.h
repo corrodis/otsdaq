@@ -5,10 +5,11 @@
 
 #include <string>
 
-namespace ots {
-
-class UDPDataStreamerConsumerConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class UDPDataStreamerConsumerConfiguration : public ConfigurationBase
+{
+  public:
 	UDPDataStreamerConsumerConfiguration(void);
 	virtual ~UDPDataStreamerConsumerConfiguration(void);
 
@@ -17,14 +18,15 @@ class UDPDataStreamerConsumerConfiguration : public ConfigurationBase {
 
 	//Getter
 	std::vector<std::string> getProcessorIDList(void) const;
-	std::string		 getIPAddress(std::string processorUID) const;
-	unsigned int		 getPort(std::string processorUID) const;
-	std::string		 getStreamToIPAddress(std::string processorUID) const;
-	unsigned int		 getStreamToPort(std::string processorUID) const;
+	std::string              getIPAddress(std::string processorUID) const;
+	unsigned int             getPort(std::string processorUID) const;
+	std::string              getStreamToIPAddress(std::string processorUID) const;
+	unsigned int             getStreamToPort(std::string processorUID) const;
 
-       private:
+  private:
 	void check(std::string processorUID) const;
-	enum {
+	enum
+	{
 		ProcessorID,
 		IPAddress,
 		Port,

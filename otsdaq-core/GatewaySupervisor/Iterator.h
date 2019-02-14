@@ -8,15 +8,16 @@
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
 
-namespace ots {
-
+namespace ots
+{
 class GatewaySupervisor;
 class ConfigurationManagerRW;
 
-class Iterator {
+class Iterator
+{
 	friend class GatewaySupervisor;
 
-       public:
+  public:
 	Iterator(GatewaySupervisor *supervisor);
 	~Iterator(void);
 
@@ -27,7 +28,7 @@ class Iterator {
 
 	bool handleCommandRequest(HttpXmlDocument &xmldoc, const std::string &command, const std::string &parameter);
 
-       private:
+  private:
 	//begin declaration of iterator workloop members
 	struct IteratorWorkLoopStruct
 	{
@@ -44,28 +45,28 @@ class Iterator {
 		{
 		}
 
-		Iterator *		theIterator_;
+		Iterator *              theIterator_;
 		ConfigurationManagerRW *cfgMgr_;
-		bool			originalTrackChanges_;
-		std::string		originalConfigGroup_;
+		bool                    originalTrackChanges_;
+		std::string             originalConfigGroup_;
 		ConfigurationGroupKey   originalConfigKey_;
 
 		bool running_, commandBusy_;
 		bool doPauseAction_, doHaltAction_, doResumeAction_;
 
-		std::string				   activePlan_;
+		std::string                                activePlan_;
 		std::vector<IterateConfiguration::Command> commands_;
-		std::vector<unsigned int>		   commandIterations_;
-		unsigned int				   commandIndex_;
-		std::vector<unsigned int>		   stepIndexStack_;
+		std::vector<unsigned int>                  commandIterations_;
+		unsigned int                               commandIndex_;
+		std::vector<unsigned int>                  stepIndexStack_;
 
 		//associated with FSM
 		std::string  fsmName_, fsmRunAlias_;
 		unsigned int fsmNextRunNumber_;
-		bool	 runIsDone_;
+		bool         runIsDone_;
 
 		std::vector<std::string> fsmCommandParameters_;
-		std::vector<bool>	targetsDone_;
+		std::vector<bool>        targetsDone_;
 
 	};  //end declaration of iterator workloop members
 
@@ -93,17 +94,17 @@ class Iterator {
 
 	static bool haltIterator(Iterator *iterator, IteratorWorkLoopStruct *iteratorStruct = 0);  //(GatewaySupervisor* theSupervisor, const std::string& fsmName);
 
-	std::mutex		  accessMutex_;
-	volatile bool		  workloopRunning_;
-	volatile bool		  activePlanIsRunning_;
-	volatile bool		  iteratorBusy_;
-	volatile bool		  commandPlay_, commandPause_, commandHalt_;  //commands are set by supervisor thread, and cleared by iterator thread
-	std::string		  activePlanName_, lastStartedPlanName_, lastFinishedPlanName_;
+	std::mutex                accessMutex_;
+	volatile bool             workloopRunning_;
+	volatile bool             activePlanIsRunning_;
+	volatile bool             iteratorBusy_;
+	volatile bool             commandPlay_, commandPause_, commandHalt_;  //commands are set by supervisor thread, and cleared by iterator thread
+	std::string               activePlanName_, lastStartedPlanName_, lastFinishedPlanName_;
 	volatile unsigned int     activeCommandIndex_, activeCommandIteration_;
 	std::vector<unsigned int> depthIterationStack_;
-	volatile time_t		  activeCommandStartTime_;
-	std::string		  lastFsmName_;
-	std::string		  errorMessage_;
+	volatile time_t           activeCommandStartTime_;
+	std::string               lastFsmName_;
+	std::string               errorMessage_;
 
 	GatewaySupervisor *theSupervisor_;
 

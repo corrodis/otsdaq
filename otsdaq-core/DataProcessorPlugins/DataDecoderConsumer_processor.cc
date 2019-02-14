@@ -28,7 +28,7 @@ DataDecoderConsumer::~DataDecoderConsumer(void)
 bool DataDecoderConsumer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 {
 	//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " running!" << std::endl;
-	std::string			   buffer;
+	std::string                        buffer;
 	std::map<std::string, std::string> header;
 	//unsigned long block;
 	if (DataConsumer::read(buffer, header) < 0)

@@ -80,9 +80,9 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 	activeDesktopIcons_.clear();
 
 	DesktopIconConfiguration::DesktopIcon *icon;
-	bool				       addedAppId;
-	bool				       numeric;
-	unsigned int			       i;
+	bool                                   addedAppId;
+	bool                                   numeric;
+	unsigned int                           i;
 	for (auto &child : childrenMap)
 	{
 		if (!child.second.getNode(COL_STATUS).getValue<bool>()) continue;
@@ -90,13 +90,13 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 		activeDesktopIcons_.push_back(DesktopIconConfiguration::DesktopIcon());
 		icon = &(activeDesktopIcons_.back());
 
-		icon->caption_			 = child.second.getNode(COL_CAPTION).getValue<std::string>();
-		icon->alternateText_		 = child.second.getNode(COL_ALTERNATE_TEXT).getValue<std::string>();
+		icon->caption_                   = child.second.getNode(COL_CAPTION).getValue<std::string>();
+		icon->alternateText_             = child.second.getNode(COL_ALTERNATE_TEXT).getValue<std::string>();
 		icon->enforceOneWindowInstance_  = child.second.getNode(COL_FORCE_ONLY_ONE_INSTANCE).getValue<bool>();
 		icon->permissionThresholdString_ = child.second.getNode(COL_REQUIRED_PERMISSION_LEVEL).getValue<std::string>();
-		icon->imageURL_			 = child.second.getNode(COL_IMAGE_URL).getValue<std::string>();
-		icon->windowContentURL_		 = child.second.getNode(COL_WINDOW_CONTENT_URL).getValue<std::string>();
-		icon->folderPath_		 = child.second.getNode(COL_FOLDER_PATH).getValue<std::string>();
+		icon->imageURL_                  = child.second.getNode(COL_IMAGE_URL).getValue<std::string>();
+		icon->windowContentURL_          = child.second.getNode(COL_WINDOW_CONTENT_URL).getValue<std::string>();
+		icon->folderPath_                = child.second.getNode(COL_FOLDER_PATH).getValue<std::string>();
 
 		if (icon->folderPath_ == ViewColumnInfo::DATATYPE_STRING_DEFAULT) icon->folderPath_ = "";  //convert DEFAULT to empty string
 
@@ -114,9 +114,9 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 			icon->permissionThresholdString_ = WebUsers::DEFAULT_USER_GROUP + ":" + icon->permissionThresholdString_;
 
 		//remove all commas from member strings because desktop icons are served to client in comma-separated string
-		icon->caption_		= removeCommas(icon->caption_, false /*andHexReplace*/, true /*andHTMLReplace*/);
+		icon->caption_          = removeCommas(icon->caption_, false /*andHexReplace*/, true /*andHTMLReplace*/);
 		icon->alternateText_    = removeCommas(icon->alternateText_, false /*andHexReplace*/, true /*andHTMLReplace*/);
-		icon->imageURL_		= removeCommas(icon->imageURL_, true /*andHexReplace*/);
+		icon->imageURL_         = removeCommas(icon->imageURL_, true /*andHexReplace*/);
 		icon->windowContentURL_ = removeCommas(icon->windowContentURL_, true /*andHexReplace*/);
 		icon->folderPath_       = removeCommas(icon->folderPath_, false /*andHexReplace*/, true /*andHTMLReplace*/);
 
@@ -145,7 +145,7 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 			if (icon->windowContentURL_.find('?') == std::string::npos)
 				icon->windowContentURL_ += '?';
 			else if (addedAppId ||
-				 icon->windowContentURL_[icon->windowContentURL_.size() - 1] != '?')  //if not first parameter, add &
+			         icon->windowContentURL_[icon->windowContentURL_.size() - 1] != '?')  //if not first parameter, add &
 				icon->windowContentURL_ += '&';
 
 			//now add each paramter separated by &
@@ -158,8 +158,8 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 				else
 					notFirst = true;
 				icon->windowContentURL_ += ConfigurationManager::encodeURIComponent(
-							       param.second.getNode(COL_PARAMETER_KEY).getValue<std::string>()) +
-							   "=" + ConfigurationManager::encodeURIComponent(param.second.getNode(COL_PARAMETER_VALUE).getValue<std::string>());
+				                               param.second.getNode(COL_PARAMETER_KEY).getValue<std::string>()) +
+				                           "=" + ConfigurationManager::encodeURIComponent(param.second.getNode(COL_PARAMETER_VALUE).getValue<std::string>());
 			}
 		}
 	}  //end main icon extraction loop
@@ -262,7 +262,7 @@ void DesktopIconConfiguration::init(ConfigurationManager *configManager)
 }
 
 std::string DesktopIconConfiguration::removeCommas(const std::string &str,
-						   bool andHexReplace, bool andHTMLReplace)
+                                                   bool andHexReplace, bool andHTMLReplace)
 {
 	std::string retStr = "";
 	retStr.reserve(str.length());

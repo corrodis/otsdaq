@@ -18,7 +18,7 @@ using namespace ots;
 std::string CodeEditor::SPECIAL_TYPE_FEInterface       = "FEInterface";
 std::string CodeEditor::SPECIAL_TYPE_DataProcessor     = "DataProcessor";
 std::string CodeEditor::SPECIAL_TYPE_ControlsInterface = "ControlsInterface";
-std::string CodeEditor::SPECIAL_TYPE_Tools	     = "Tools";
+std::string CodeEditor::SPECIAL_TYPE_Tools             = "Tools";
 
 //========================================================================================================================
 //CodeEditor
@@ -26,7 +26,7 @@ CodeEditor::CodeEditor()
     : ALLOWED_FILE_EXTENSIONS_({"h", "hh", "hpp", "hxx", "c", "cc", "cpp", "cxx", "icc", "txt", "sh", "css", "html", "htm", "js", "py", "fcl", "xml"})
 {
 	std::string path = CODE_EDITOR_DATA_PATH;
-	DIR*	dir  = opendir(path.c_str());
+	DIR*        dir  = opendir(path.c_str());
 	if (dir)
 		closedir(dir);
 	else if (-1 == mkdir(path.c_str(), 0755))
@@ -77,7 +77,7 @@ void CodeEditor::xmlRequest(
 	else if (option == "getAllowedExtensions")
 	{
 		xmlOut->addTextElementToData("AllowedExtensions",
-					     StringMacros::setToString(ALLOWED_FILE_EXTENSIONS_, ","));
+		                             StringMacros::setToString(ALLOWED_FILE_EXTENSIONS_, ","));
 	}
 	else
 	{
@@ -153,18 +153,18 @@ void CodeEditor::getDirectoryContent(
     HttpXmlDocument* xmlOut)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
-	path		 = safePathString(CgiDataUtilities::decodeURIComponent(path));
+	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
 	__COUTV__(path);
 	__COUTV__(SOURCE_BASE_PATH);
 
 	xmlOut->addTextElementToData("path", path);
 
-	const unsigned int numOfTypes	 = 4;
-	std::string	specialTypeNames[] = {
-		   "Front-End Plugins",
-		   "Data Processor Plugins",
-		   "Controls Interface Plugins",
-		   "Tools and Scripts"};
+	const unsigned int numOfTypes         = 4;
+	std::string        specialTypeNames[] = {
+        "Front-End Plugins",
+        "Data Processor Plugins",
+        "Controls Interface Plugins",
+        "Tools and Scripts"};
 	std::string specialTypes[] = {
 	    SPECIAL_TYPE_FEInterface,
 	    SPECIAL_TYPE_DataProcessor,
@@ -181,9 +181,9 @@ void CodeEditor::getDirectoryContent(
 			__COUT__ << "Getting all " << specialTypeNames[i] << "..." << __E__;
 
 			std::map<std::string /*special type*/,
-				 std::set<std::string> /*special file paths*/>
+			         std::set<std::string> /*special file paths*/>
 			    retMap =
-				CodeEditor::getSpecialsMap();
+			        CodeEditor::getSpecialsMap();
 			if (retMap.find(specialTypes[i]) != retMap.end())
 			{
 				for (const auto& specialTypeFile : retMap[specialTypes[i]])
@@ -199,11 +199,11 @@ void CodeEditor::getDirectoryContent(
 			return;
 		}
 
-	DIR*	   pDIR;
+	DIR*           pDIR;
 	struct dirent* entry;
-	bool	   isDir;
+	bool           isDir;
 	std::string    name;
-	int	    type;
+	int            type;
 
 	if (!(pDIR = opendir((SOURCE_BASE_PATH + path).c_str())))
 	{
@@ -228,7 +228,7 @@ void CodeEditor::getDirectoryContent(
 			//return true, if as < bs
 			const char* a = as.c_str();
 			const char* b = bs.c_str();
-			int	 d;
+			int         d;
 
 			//compare each character, until difference, or end of string
 			while (
@@ -255,7 +255,7 @@ void CodeEditor::getDirectoryContent(
 		//__COUT__ << type << " " << name << "\n" << std::endl;
 
 		if (name[0] != '.' && (type == 0 ||  //0 == UNKNOWN (which can happen - seen in SL7 VM)
-				       type == 4 || type == 8))
+		                       type == 4 || type == 8))
 		{
 			isDir = false;
 
@@ -321,11 +321,11 @@ void CodeEditor::getFileContent(
     HttpXmlDocument* xmlOut)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
-	path		 = safePathString(CgiDataUtilities::decodeURIComponent(path));
+	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
 	xmlOut->addTextElementToData("path", path);
 
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
-	extension	     = safeExtensionString(extension);
+	extension             = safeExtensionString(extension);
 	xmlOut->addTextElementToData("ext", extension);
 
 	std::string contents;
@@ -399,17 +399,17 @@ void CodeEditor::writeFile(
 	//log changes
 	{
 		std::string logpath = CODE_EDITOR_DATA_PATH + "/codeEditorChangeLog.txt";
-		fp		    = fopen(logpath.c_str(), "a");
+		fp                  = fopen(logpath.c_str(), "a");
 		if (!fp)
 		{
 			__SS__ << "Could not open change log for change tracking at " << logpath << __E__;
 			__SS_THROW__;
 		}
 		fprintf(fp, "time=%lld old-size=%lld new-size=%lld path=%s\n",
-			(long long)time(0),
-			oldSize,
-			(long long)contents.size(),
-			fullpath.c_str());
+		        (long long)time(0),
+		        oldSize,
+		        (long long)contents.size(),
+		        fullpath.c_str());
 
 		fclose(fp);
 		__COUT__ << "Changes logged to: " << logpath << __E__;
@@ -424,11 +424,11 @@ void CodeEditor::saveFileContent(
     HttpXmlDocument* xmlOut)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
-	path		 = safePathString(CgiDataUtilities::decodeURIComponent(path));
+	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
 	xmlOut->addTextElementToData("path", path);
 
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
-	extension	     = safeExtensionString(extension);
+	extension             = safeExtensionString(extension);
 	xmlOut->addTextElementToData("ext", extension);
 
 	std::string contents = CgiDataUtilities::postData(cgiIn, "content");
@@ -461,7 +461,7 @@ void CodeEditor::build(
 				cmd = "mrb z 2>&1";
 
 				std::array<char, 128> buffer;
-				std::string	   result;
+				std::string           result;
 				std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
 				if (!pipe) __THROW__("popen() failed!");
 
@@ -492,7 +492,7 @@ void CodeEditor::build(
 				cmd = "source mrbSetEnv 2>&1";
 
 				std::array<char, 128> buffer;
-				std::string	   result;
+				std::string           result;
 				std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
 				if (!pipe) __THROW__("popen() failed!");
 
@@ -524,7 +524,7 @@ void CodeEditor::build(
 			cmd = "mrb b 2>&1";
 
 			std::array<char, 128> buffer;
-			std::string	   result;
+			std::string           result;
 			std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
 			if (!pipe) __THROW__("popen() failed!");
 
@@ -549,7 +549,7 @@ void CodeEditor::build(
 			__MOUT__ << result.substr(0, i);
 		}
 	},
-		    clean)
+	            clean)
 	    .detach();
 
 }  //end build()
@@ -559,19 +559,19 @@ std::map<std::string /*special type*/, std::set<std::string> /*special file path
 CodeEditor::getSpecialsMap(void)
 {
 	std::map<std::string /*special type*/,
-		 std::set<std::string> /*special file paths*/>
+	         std::set<std::string> /*special file paths*/>
 	    retMap;
 	std::string path = std::string(getenv("MRB_SOURCE"));
 
 	__COUTV__(path);
 
 	const unsigned int numOfSpecials    = 5;
-	std::string	specialFolders[] = {
-		   "FEInterfaces",
-		   "DataProcessorPlugins",
-		   "ControlsInterfacePlugins",
-		   "FEInterfacePlugins",
-		   "tools"};
+	std::string        specialFolders[] = {
+        "FEInterfaces",
+        "DataProcessorPlugins",
+        "ControlsInterfacePlugins",
+        "FEInterfacePlugins",
+        "tools"};
 	std::string specialMapTypes[] = {
 	    CodeEditor::SPECIAL_TYPE_FEInterface,
 	    CodeEditor::SPECIAL_TYPE_DataProcessor,
@@ -584,19 +584,19 @@ CodeEditor::getSpecialsMap(void)
 	//	reference for use internally (const values already are captured).
 	std::function<void(const std::string&, const std::string&, const unsigned int, const int)>
 	    localRecurse = [&specialFolders, &specialMapTypes,
-			    &retMap,
-			    &localRecurse](
-			       const std::string& path,
-			       const std::string& offsetPath,
-			       const unsigned int depth,
-			       const int	  specialIndex) {
+	                    &retMap,
+	                    &localRecurse](
+	                       const std::string& path,
+	                       const std::string& offsetPath,
+	                       const unsigned int depth,
+	                       const int          specialIndex) {
 
 		    //__COUTV__(path);
 		    //__COUTV__(depth);
 
-		    DIR*	   pDIR;
+		    DIR*           pDIR;
 		    struct dirent* entry;
-		    bool	   isDir;
+		    bool           isDir;
 		    if (!(pDIR = opendir(path.c_str())))
 		    {
 			    __SS__ << "Plugin base path '" << path << "' could not be opened!" << __E__;
@@ -605,8 +605,8 @@ CodeEditor::getSpecialsMap(void)
 
 		    //else directory good, get all folders and look for special folders
 		    std::string name;
-		    int		type;
-		    int		childSpecialIndex;
+		    int         type;
+		    int         childSpecialIndex;
 		    while ((entry = readdir(pDIR)))
 		    {
 			    name = std::string(entry->d_name);
@@ -615,7 +615,7 @@ CodeEditor::getSpecialsMap(void)
 			    //__COUT__ << type << " " << name << "\n" << std::endl;
 
 			    if (name[0] != '.' && (type == 0 ||  //0 == UNKNOWN (which can happen - seen in SL7 VM)
-						   type == 4 || type == 8))
+			                           type == 4 || type == 8))
 			    {
 				    isDir = false;
 
@@ -654,25 +654,25 @@ CodeEditor::getSpecialsMap(void)
 					    //recurse deeper!
 					    if (depth < 4)  //limit search depth
 						    localRecurse(path + "/" + name,
-								 offsetPath + "/" + name, depth + 1, childSpecialIndex);
+						                 offsetPath + "/" + name, depth + 1, childSpecialIndex);
 				    }
 				    else if (specialIndex >= 0)
 				    {
 					    //get special files!!
 
 					    if (
-						name.find(".h") == name.length() - 2 ||
-						name.find(".cc") == name.length() - 3 ||
-						name.find(".txt") == name.length() - 4 ||
-						name.find(".sh") == name.length() - 3 ||
-						name.find(".py") == name.length() - 3)
+					        name.find(".h") == name.length() - 2 ||
+					        name.find(".cc") == name.length() - 3 ||
+					        name.find(".txt") == name.length() - 4 ||
+					        name.find(".sh") == name.length() - 3 ||
+					        name.find(".py") == name.length() - 3)
 					    {
 						    //__COUT__ << "Found special '" << specialFolders[specialIndex] <<
 						    //		"' file '" << name << "' at path " <<
 						    //		path << " " << specialIndex << __E__;
 
 						    retMap[specialMapTypes[specialIndex]].emplace(
-							offsetPath + "/" + name);
+						        offsetPath + "/" + name);
 					    }
 				    }
 			    }

@@ -87,7 +87,7 @@ void SOAPCommand::translate(const xoap::MessageReference& message)
 {
 	//A SOAP message can ONLY have 1 command so we get the .begin() of the vector of commands
 	xoap::SOAPElement messageCommand = *(message->getSOAPPart().getEnvelope().getBody().getChildElements().begin());
-	command_			 = messageCommand.getElementName().getLocalName();
+	command_                         = messageCommand.getElementName().getLocalName();
 	DOMNamedNodeMap* parameters      = messageCommand.getDOM()->getAttributes();
 	for (unsigned int i = 0; i < parameters->getLength(); i++)
 	{
@@ -132,7 +132,8 @@ bool SOAPCommand::findParameter(std::string parameterName) const
 }
 
 //========================================================================================================================
-namespace ots {
+namespace ots
+{
 std::ostream& operator<<(std::ostream& os, const SOAPCommand& c)
 {
 	os << "Command: " << c.getCommand();

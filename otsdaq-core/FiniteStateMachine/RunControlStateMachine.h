@@ -7,17 +7,18 @@
 #include <string>
 #include "toolbox/lang/Class.h"
 
-namespace ots {
-
+namespace ots
+{
 //CoreSupervisorBase
 //This class provides finite state machine functionality for otsdaq supervisors.
-class RunControlStateMachine : public virtual toolbox::lang::Class {
-       public:
+class RunControlStateMachine : public virtual toolbox::lang::Class
+{
+  public:
 	RunControlStateMachine(const std::string& name = "Undefined Name");
 	virtual ~RunControlStateMachine(void);
 
-	void		   reset(void);
-	void		   setStateMachineName(const std::string& name) { theStateMachine_.setStateMachineName(name); }
+	void               reset(void);
+	void               setStateMachineName(const std::string& name) { theStateMachine_.setStateMachineName(name); }
 	const std::string& getErrorMessage(void) const { return theStateMachine_.getErrorMessage(); }
 
 	template<class OBJECT>
@@ -26,7 +27,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class {
 	    toolbox::fsm::State to,
 	    const std::string&  input,
 	    const std::string&  transitionName,
-	    OBJECT*		obj,
+	    OBJECT*             obj,
 	    void (OBJECT::*func)(toolbox::Event::Reference))
 
 	{
@@ -41,7 +42,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class {
 	    const std::string&  input,
 	    const std::string&  transitionName,
 	    const std::string&  transitionParameter,
-	    OBJECT*		obj,
+	    OBJECT*             obj,
 	    void (OBJECT::*func)(toolbox::Event::Reference))
 
 	{
@@ -106,29 +107,29 @@ class RunControlStateMachine : public virtual toolbox::lang::Class {
 
 	unsigned int getIterationIndex(void) { return iterationIndex_; }
 	unsigned int getSubIterationIndex(void) { return subIterationIndex_; }
-	void	 indicateIterationWork(void) { iterationWorkFlag_ = true; }
-	void	 clearIterationWork(void) { iterationWorkFlag_ = false; }
-	bool	 getIterationWork(void) { return iterationWorkFlag_; }
-	void	 indicateSubIterationWork(void) { subIterationWorkFlag_ = true; }
-	void	 clearSubIterationWork(void) { subIterationWorkFlag_ = false; }
-	bool	 getSubIterationWork(void) { return subIterationWorkFlag_; }
+	void         indicateIterationWork(void) { iterationWorkFlag_ = true; }
+	void         clearIterationWork(void) { iterationWorkFlag_ = false; }
+	bool         getIterationWork(void) { return iterationWorkFlag_; }
+	void         indicateSubIterationWork(void) { subIterationWorkFlag_ = true; }
+	void         clearSubIterationWork(void) { subIterationWorkFlag_ = false; }
+	bool         getSubIterationWork(void) { return subIterationWorkFlag_; }
 
-       protected:
+  protected:
 	FiniteStateMachine theStateMachine_;
-	ProgressBar	theProgressBar_;
+	ProgressBar        theProgressBar_;
 
 	volatile bool asyncFailureReceived_, asyncSoftFailureReceived_;
 
 	unsigned int iterationIndex_, subIterationIndex_;
-	bool	 iterationWorkFlag_, subIterationWorkFlag_;
+	bool         iterationWorkFlag_, subIterationWorkFlag_;
 
 	toolbox::fsm::State lastIterationState_;
-	std::string	 lastIterationCommand_;
-	std::string	 lastIterationResult_;
-	unsigned int	lastIterationIndex_, lastSubIterationIndex_;
+	std::string         lastIterationCommand_;
+	std::string         lastIterationResult_;
+	unsigned int        lastIterationIndex_, lastSubIterationIndex_;
 
 	std::map<toolbox::fsm::State, std::map<std::string,
-					       void (RunControlStateMachine::*)(toolbox::Event::Reference), std::less<std::string> > >
+	                                       void (RunControlStateMachine::*)(toolbox::Event::Reference), std::less<std::string> > >
 	    stateTransitionFunctionTable_;
 };
 

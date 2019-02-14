@@ -24,21 +24,21 @@ RegisterConfigurationInfoReader::RegisterConfigurationInfoReader()
 {
 	// TODO Auto-generated constructor stub
 	initPlatform();
-	rootTag_	       = xercesc::XMLString::transcode("ROOT");
-	headerTag_	     = xercesc::XMLString::transcode("HEADER");
-	typeTag_	       = xercesc::XMLString::transcode("TYPE");
+	rootTag_               = xercesc::XMLString::transcode("ROOT");
+	headerTag_             = xercesc::XMLString::transcode("HEADER");
+	typeTag_               = xercesc::XMLString::transcode("TYPE");
 	extensionTableNameTag_ = xercesc::XMLString::transcode("EXTENSION_TABLE_NAME");
-	nameTag_	       = xercesc::XMLString::transcode("NAME");
-	dataSetTag_	    = xercesc::XMLString::transcode("DATA_SET");
-	versionTag_	    = xercesc::XMLString::transcode("VERSION");
+	nameTag_               = xercesc::XMLString::transcode("NAME");
+	dataSetTag_            = xercesc::XMLString::transcode("DATA_SET");
+	versionTag_            = xercesc::XMLString::transcode("VERSION");
 	commentDescriptionTag_ = xercesc::XMLString::transcode("COMMENT_DESCRIPTION");
 	createdByUserTag_      = xercesc::XMLString::transcode("CREATED_BY_USER");
-	dataTag_	       = xercesc::XMLString::transcode("DATA");
-	typeNameTag_	   = xercesc::XMLString::transcode("TYPE_NAME");
+	dataTag_               = xercesc::XMLString::transcode("DATA");
+	typeNameTag_           = xercesc::XMLString::transcode("TYPE_NAME");
 	registerNameTag_       = xercesc::XMLString::transcode("REGISTER_NAME");
-	baseAddressTag_	= xercesc::XMLString::transcode("BASE_ADDRESS");
-	sizeTag_	       = xercesc::XMLString::transcode("REGISTER_SIZE");
-	accessTag_	     = xercesc::XMLString::transcode("ACCESS");
+	baseAddressTag_        = xercesc::XMLString::transcode("BASE_ADDRESS");
+	sizeTag_               = xercesc::XMLString::transcode("REGISTER_SIZE");
+	accessTag_             = xercesc::XMLString::transcode("ACCESS");
 }
 
 RegisterConfigurationInfoReader::~RegisterConfigurationInfoReader()
@@ -63,7 +63,7 @@ RegisterConfigurationInfoReader::~RegisterConfigurationInfoReader()
 	catch (...)
 	{
 		__MOUT_ERROR__ << "Unknown exception encountered in TagNames destructor"
-			       << "     ";
+		               << "     ";
 	}
 	terminatePlatform();  // TODO Auto-generated destructor stub
 }

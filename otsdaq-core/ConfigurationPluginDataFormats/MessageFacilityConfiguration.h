@@ -4,17 +4,18 @@
 #include <string>
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 
-namespace ots {
-
-class MessageFacilityConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class MessageFacilityConfiguration : public ConfigurationBase
+{
+  public:
 	MessageFacilityConfiguration(void);
 	virtual ~MessageFacilityConfiguration(void);
 
 	//Methods
 	void init(ConfigurationManager *configManager);
 
-       private:
+  private:
 };
 }  // namespace ots
 #endif

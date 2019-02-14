@@ -47,9 +47,9 @@ void ProgressBar::reset(std::string file, std::string lineNumber, int id)
 
 	for (unsigned int c = 0; c < strlen(fn); ++c)
 		if (!(
-			(fn[c] >= '0' && fn[c] <= '9') ||
-			(fn[c] >= 'a' && fn[c] <= 'z') ||
-			(fn[c] >= 'A' && fn[c] <= 'Z')))
+		        (fn[c] >= '0' && fn[c] <= '9') ||
+		        (fn[c] >= 'a' && fn[c] <= 'z') ||
+		        (fn[c] >= 'A' && fn[c] <= 'Z')))
 			fn[c] = '_';
 	totalStepsFileName_ = cProgressBarFilePath_ + fn + cProgressBarFileExtension_;
 	//	std::cout << __COUT_HDR_FL__ << totalStepsFileName_ << std::endl;
@@ -80,7 +80,7 @@ void ProgressBar::complete()
 {
 	step();  //consider complete as a step
 	stepsToComplete_ = stepCount_;
-	started_	 = false;
+	started_         = false;
 
 	//done, save steps to file
 

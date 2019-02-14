@@ -43,7 +43,7 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager *configManager)
 	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
-	const XDAQContextConfiguration *			   contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);
+	const XDAQContextConfiguration *                           contextConfig = configManager->__GET_CONFIG__(XDAQContextConfiguration);
 	std::vector<const XDAQContextConfiguration::XDAQContext *> aggContexts =
 	    contextConfig->getAggregatorContexts();
 
@@ -52,15 +52,15 @@ void ARTDAQAggregatorConfiguration::init(ConfigurationManager *configManager)
 	for (auto &aggContext : aggContexts)
 	{
 		ConfigurationTree aggConfigNode = contextConfig->getSupervisorConfigNode(configManager,
-											 aggContext->contextUID_, aggContext->applications_[0].applicationUID_);
+		                                                                         aggContext->contextUID_, aggContext->applications_[0].applicationUID_);
 
 		__COUT__ << "Path for this aggregator config is " << aggContext->contextUID_ << "/" << aggContext->applications_[0].applicationUID_ << "/" << aggConfigNode.getValueAsString() << std::endl;
 
 		outputFHICL(configManager, aggConfigNode,
-			    contextConfig->getARTDAQAppRank(aggContext->contextUID_),
-			    contextConfig->getContextAddress(aggContext->contextUID_),
-			    contextConfig->getARTDAQDataPort(configManager, aggContext->contextUID_),
-			    contextConfig);
+		            contextConfig->getARTDAQAppRank(aggContext->contextUID_),
+		            contextConfig->getContextAddress(aggContext->contextUID_),
+		            contextConfig->getARTDAQDataPort(configManager, aggContext->contextUID_),
+		            contextConfig);
 	}
 }
 
@@ -85,9 +85,9 @@ std::string ARTDAQAggregatorConfiguration::getFHICLFilename(const ConfigurationT
 
 //========================================================================================================================
 void ARTDAQAggregatorConfiguration::outputFHICL(ConfigurationManager *   configManager,
-						const ConfigurationTree &aggregatorNode,
-						unsigned int selfRank, std::string selfHost, unsigned int selfPort,
-						const XDAQContextConfiguration *contextConfig)
+                                                const ConfigurationTree &aggregatorNode,
+                                                unsigned int selfRank, std::string selfHost, unsigned int selfPort,
+                                                const XDAQContextConfiguration *contextConfig)
 {
 	/*
 		the file will look something like this:
@@ -423,8 +423,8 @@ void ARTDAQAggregatorConfiguration::outputFHICL(ConfigurationManager *   configM
 					auto destinationContextUID = destination.second.getNode("destinationARTDAQContextLink").getValueAsString();
 
 					unsigned int destinationRank = contextConfig->getARTDAQAppRank(destinationContextUID);
-					std::string  host	    = contextConfig->getContextAddress(destinationContextUID);
-					unsigned int port	    = contextConfig->getARTDAQDataPort(configManager, destinationContextUID);
+					std::string  host            = contextConfig->getContextAddress(destinationContextUID);
+					unsigned int port            = contextConfig->getARTDAQDataPort(configManager, destinationContextUID);
 
 					OUT << destination.second.getNode("destinationKey").getValue() << ": {"
 					    << " transferPluginType: " << destination.second.getNode("transferPluginType").getValue() << " source_rank: " << selfRank << " destination_rank: " << destinationRank << " max_fragment_size_words: " << destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() << " host_map: [{rank: " << destinationRank << " host: \"" << host << "\" portOffset: " << std::to_string(port) << "}, "

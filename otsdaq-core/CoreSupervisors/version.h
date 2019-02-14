@@ -15,15 +15,16 @@
 #define MYPACKAGE_FULL_VERSION_LIST MYPACKAGE_PREVIOUS_VERSIONS "," PACKAGE_VERSION_STRING(MYPACKAGE_VERSION_MAJOR, MYPACKAGE_VERSION_MINOR, MYPACKAGE_VERSION_PATCH)
 #endif
 
-namespace CoreSupervisors {
-const std::string			       package     = "CoreSupervisors";
-const std::string			       versions    = MYPACKAGE_FULL_VERSION_LIST;
-const std::string			       summary     = "Core otsdaq supervisor base class";
-const std::string			       description = "Used for basic supervisor functionality including configuration and state transitions.";
-const std::string			       authors     = "Ryan Rivera, Lorenzo Uplegger";
-const std::string			       link	= "http://xdaq.web.cern.ch";
-config::PackageInfo			       getPackageInfo();
-void					       checkPackageDependencies();
+namespace CoreSupervisors
+{
+const std::string                              package     = "CoreSupervisors";
+const std::string                              versions    = MYPACKAGE_FULL_VERSION_LIST;
+const std::string                              summary     = "Core otsdaq supervisor base class";
+const std::string                              description = "Used for basic supervisor functionality including configuration and state transitions.";
+const std::string                              authors     = "Ryan Rivera, Lorenzo Uplegger";
+const std::string                              link        = "http://xdaq.web.cern.ch";
+config::PackageInfo                            getPackageInfo();
+void                                           checkPackageDependencies();
 std::set<std::string, std::less<std::string> > getPackageDependencies();
 }  // namespace CoreSupervisors
 

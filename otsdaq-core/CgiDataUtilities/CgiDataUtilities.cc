@@ -26,13 +26,13 @@ std::string CgiDataUtilities::postData(cgicc::Cgicc& cgi, const std::string& nee
 	std::string postData = "&" + cgi.getEnvironment().getPostData();
 	//__COUT__ << "PostData: " + postData << std::endl;
 	size_t start_pos = postData.find("&" + needle + "=");  //add & and = to make sure found field and not part of a value
-	if (start_pos == std::string::npos) return "";	 //needle not found
+	if (start_pos == std::string::npos) return "";         //needle not found
 
 	size_t end_pos = postData.find('=', start_pos);  //verify = sign
 	if (end_pos == std::string::npos) return "";     //= not found
 
-	start_pos += needle.length() + 2;		      //get past & and field
-	end_pos = postData.find('&', start_pos);	      //skip needle and = sign
+	start_pos += needle.length() + 2;                     //get past & and field
+	end_pos = postData.find('&', start_pos);              //skip needle and = sign
 	if (end_pos == std::string::npos) postData.length();  //not found, so take data to end
 
 	//__COUT__ << "start_pos=" << start_pos
@@ -50,13 +50,13 @@ std::string CgiDataUtilities::getData(cgicc::Cgicc& cgi, const std::string& need
 	//__COUT__ << "getData: " + getData << std::endl;
 
 	size_t start_pos = getData.find("&" + needle + "=");  //add & and = to make sure found field and not part of a value
-	if (start_pos == std::string::npos) return "";	//needle not found
+	if (start_pos == std::string::npos) return "";        //needle not found
 
 	size_t end_pos = getData.find('=', start_pos);  //verify = sign
 	if (end_pos == std::string::npos) return "";    //= not found
 
-	start_pos += needle.length() + 2;			 //get past & and field
-	end_pos = getData.find('&', start_pos);			 //skip needle and = sign
+	start_pos += needle.length() + 2;                        //get past & and field
+	end_pos = getData.find('&', start_pos);                  //skip needle and = sign
 	if (end_pos != std::string::npos) end_pos -= start_pos;  //found, so determine sz of field
 
 	//__COUT__ << "start_pos=" << start_pos << " '" << getData[start_pos] <<

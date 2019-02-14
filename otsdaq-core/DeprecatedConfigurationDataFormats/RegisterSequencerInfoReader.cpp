@@ -39,7 +39,7 @@ RegisterSequencerInfoReader::RegisterSequencerInfoReader()
 	catch (...)
 	{
 		TLOG(TLVL_ERROR, __FILE__) << "Unknown exception encountered in TagNames destructor"
-					   << "     ";
+		                           << "     ";
 	}
 }
 

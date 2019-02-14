@@ -6,17 +6,18 @@
 #include <map>
 #include <set>
 
-namespace ots {
-
+namespace ots
+{
 template<typename N, typename V>
-class Parameter {
-       public:
+class Parameter
+{
+  public:
 	Parameter(N name, V value)
 	    : name_(name), value_(value) { ; }
 	virtual ~Parameter(void) { ; }
 	//Getters
-	const N&	      getName(void) const { return name_; }
-	const V&	      getValue(void) const { return value_; }
+	const N&              getName(void) const { return name_; }
+	const V&              getValue(void) const { return value_; }
 	const std::pair<N, V> getParameterPair(void) { return std::pair<N, V>(name_, value_); }
 
 	//Setters
@@ -33,15 +34,16 @@ class Parameter {
 		value_ = parameter.second;
 	}
 
-       protected:
+  protected:
 	N name_;
 	V value_;
 };
 
 template<typename N, typename V>
-class Parameters {
-       public:
-	typedef std::map<N, V>			      ParameterMap;
+class Parameters
+{
+  public:
+	typedef std::map<N, V>                        ParameterMap;
 	typedef typename ParameterMap::iterator       iterator;
 	typedef typename ParameterMap::const_iterator const_iterator;
 
@@ -84,9 +86,9 @@ class Parameters {
 
 	//Methods
 	unsigned int size(void) const { return theParameters_.size(); }
-	void	 clear(void) { theParameters_.clear(); }
+	void         clear(void) { theParameters_.clear(); }
 
-       protected:
+  protected:
 	ParameterMap theParameters_;
 };
 

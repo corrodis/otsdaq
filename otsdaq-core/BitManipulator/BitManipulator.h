@@ -4,10 +4,11 @@
 #include <stdint.h>
 #include <string>
 
-namespace ots {
-
-class BitManipulator {
-       public:
+namespace ots
+{
+class BitManipulator
+{
+  public:
 	BitManipulator(void);
 	~BitManipulator(void);
 	static uint64_t insertBits(uint64_t& data, uint64_t value, unsigned int startBit, unsigned int numberOfBits);

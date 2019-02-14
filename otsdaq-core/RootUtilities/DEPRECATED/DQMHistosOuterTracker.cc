@@ -63,7 +63,7 @@ void DQMHistosOuterTracker::openFile(std::string fileName)
 {
 	closeFile();
 	currentDirectory_ = 0;
-	theFile_	  = TFile::Open(fileName.c_str(), "RECREATE");
+	theFile_          = TFile::Open(fileName.c_str(), "RECREATE");
 	theFile_->cd();
 }
 
@@ -80,19 +80,19 @@ void DQMHistosOuterTracker::book()
 	std::stringstream name;
 	std::stringstream title;
 	//FIXME
-	const FEConfiguration*			    feConfiguration		      = theConfigurationManager_->__GET_CONFIG__(FEConfiguration);
-	const DetectorToFEConfiguration*	    detectorToFEConfiguration	 = theConfigurationManager_->__GET_CONFIG__(DetectorToFEConfiguration);
-	const DataManagerConfiguration*		    dataManagerConfiguration	  = theConfigurationManager_->__GET_CONFIG__(DataManagerConfiguration);
-	const DataBufferConfiguration*		    dataBufferConfiguration	   = theConfigurationManager_->__GET_CONFIG__(DataBufferConfiguration);
+	const FEConfiguration*                      feConfiguration                   = theConfigurationManager_->__GET_CONFIG__(FEConfiguration);
+	const DetectorToFEConfiguration*            detectorToFEConfiguration         = theConfigurationManager_->__GET_CONFIG__(DetectorToFEConfiguration);
+	const DataManagerConfiguration*             dataManagerConfiguration          = theConfigurationManager_->__GET_CONFIG__(DataManagerConfiguration);
+	const DataBufferConfiguration*              dataBufferConfiguration           = theConfigurationManager_->__GET_CONFIG__(DataBufferConfiguration);
 	const UDPDataStreamerConsumerConfiguration* dataStreamerConsumerConfiguration = theConfigurationManager_->__GET_CONFIG__(UDPDataStreamerConsumerConfiguration);
-	const DetectorConfiguration*		    detectorConfiguration	     = theConfigurationManager_->__GET_CONFIG__(DetectorConfiguration);
+	const DetectorConfiguration*                detectorConfiguration             = theConfigurationManager_->__GET_CONFIG__(DetectorConfiguration);
 
 	//    const std::string   supervisorType_;
 	//    const unsigned int  supervisorInstance_;
 	//    const unsigned int  bufferUID_;
 	//    const std::string   processorUID_;
 
-	std::stringstream	processName;
+	std::stringstream        processName;
 	std::vector<std::string> bufferList    = dataManagerConfiguration->getListOfDataBuffers();
 	std::vector<std::string> interfaceList = feConfiguration->getListOfFEIDs();
 	for (const auto& itInterfaces : interfaceList)
@@ -108,7 +108,7 @@ void DQMHistosOuterTracker::book()
 		if (feConfiguration->getFEInterfaceType(itInterfaces).find("FSSRInterface") != std::string::npos)
 		{
 			const ConfigurationBase* interfaceConfiguration   = theConfigurationManager_->getConfigurationByName(feConfiguration->getFEInterfaceType(itInterfaces) + "Configuration");
-			auto			 feinterfaceConfiguration = dynamic_cast<const FEInterfaceConfigurationBase*>(interfaceConfiguration);
+			auto                     feinterfaceConfiguration = dynamic_cast<const FEInterfaceConfigurationBase*>(interfaceConfiguration);
 			if (feinterfaceConfiguration) {
 				streamToIP   = feinterfaceConfiguration->getStreamingIPAddress(itInterfaces);
 				streamToPort = feinterfaceConfiguration->getStreamingPort(itInterfaces);
@@ -134,7 +134,7 @@ void DQMHistosOuterTracker::book()
 								//FIXME This is very bad since I am getting the PC IP Hardcoded!!!!!!!
 								std::string ipAddress = NetworkConverters::nameToStringIP(dataStreamerConsumerConfiguration->getIPAddress(itConsumers));
 								//FIXME the streamer should have it's own configured port and not fedport +1
-								std::string port		   = NetworkConverters::unsignedToStringPort(dataStreamerConsumerConfiguration->getPort(itConsumers));
+								std::string port                   = NetworkConverters::unsignedToStringPort(dataStreamerConsumerConfiguration->getPort(itConsumers));
 								planeOccupancies_[ipAddress][port] = std::map<unsigned int, TH1*>();
 								std::cout << __COUT_HDR_FL__ << "IP: " << NetworkConverters::stringToNameIP(ipAddress) << " Port:----" << NetworkConverters::stringToUnsignedPort(port) << "----" << std::endl;
 								const std::vector<std::string> rocList = detectorToFEConfiguration->getFEReaderDetectorList(itInterfaces);
@@ -293,7 +293,7 @@ void DQMHistosOuterTracker::fill(std::string& buffer, std::map<std::string, std:
 		{
 			//			if(oldData != 0 && oldData==convertedBuffer_.front())
 			//				std::cout << __COUT_HDR_FL__ << "There is a copy FSSR: " << std::hex << convertedBuffer_.front() << " counter: " << bufferCounter << std::dec << std::endl;
-			oldData			   = convertedBuffer_.front();
+			oldData                    = convertedBuffer_.front();
 			FSSRData* detectorDataFSSR = 0;
 			theDataDecoder_.decodeData(convertedBuffer_.front(), (DetectorDataBase**)&detectorDataFSSR);
 			//if(detectorData->getChannelNumber() >= 4)
@@ -306,11 +306,11 @@ void DQMHistosOuterTracker::fill(std::string& buffer, std::map<std::string, std:
 				planeOccupancies_[ipAddress][port][detectorDataFSSR->getChannelNumber()]->Fill(detectorDataFSSR->getSensorStrip());
 			else
 				std::cout << __COUT_HDR_FL__
-					  << "ERROR: I haven't book histos for streamer " << NetworkConverters::stringToNameIP(ipAddress)
-					  << " port number: " << NetworkConverters::stringToUnsignedPort(port)
-					  << " channel: " << detectorDataFSSR->getChannelNumber()
-					  << " data: " << std::hex << convertedBuffer_.front() << std::dec
-					  << std::endl;
+				          << "ERROR: I haven't book histos for streamer " << NetworkConverters::stringToNameIP(ipAddress)
+				          << " port number: " << NetworkConverters::stringToUnsignedPort(port)
+				          << " channel: " << detectorDataFSSR->getChannelNumber()
+				          << " data: " << std::hex << convertedBuffer_.front() << std::dec
+				          << std::endl;
 			//    }
 			//std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " filling histograms!" << std::endl;
 			//  Float_t px, py, pz;

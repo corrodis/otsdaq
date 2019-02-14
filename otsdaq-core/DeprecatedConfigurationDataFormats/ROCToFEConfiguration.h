@@ -6,10 +6,11 @@
 #include <string>
 #include <vector>
 
-namespace ots {
-
-class ROCToFEConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class ROCToFEConfiguration : public ConfigurationBase
+{
+  public:
 	ROCToFEConfiguration(void);
 	virtual ~ROCToFEConfiguration(void);
 
@@ -20,18 +21,21 @@ class ROCToFEConfiguration : public ConfigurationBase {
 	std::vector<std::string> getFEWROCsList(std::string fECNumber) const;
 	std::vector<std::string> getFERROCsList(std::string fEDNumber) const;
 	std::vector<std::string> getFEWCards(unsigned int supervisorInstance) const;
-	unsigned int		 getFEWChannel(const std::string& rOCName) const;
-	unsigned int		 getFEWROCAddress(const std::string& rOCName) const;
-	unsigned int		 getFERChannel(const std::string& rOCName) const;
+	unsigned int             getFEWChannel(const std::string& rOCName) const;
+	unsigned int             getFEWROCAddress(const std::string& rOCName) const;
+	unsigned int             getFERChannel(const std::string& rOCName) const;
 
-       private:
-	enum { DetectorID,
-	       FEWName,
-	       FEWChannel,
-	       FEWROCAddress,
-	       FERName,
-	       FERChannel,
-	       FERROCAddress };
+  private:
+	enum
+	{
+		DetectorID,
+		FEWName,
+		FEWChannel,
+		FEWROCAddress,
+		FERName,
+		FERChannel,
+		FERROCAddress
+	};
 	struct ROCInfo
 	{
 		std::string  theFEWName_;

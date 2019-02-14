@@ -3,14 +3,15 @@
 
 #include <ostream>
 
-namespace ots {
-
+namespace ots
+{
 //ConfigurationVersion is the type used for version associated with a configuration table
 //(whereas ConfigurationGroupKey is the type used for versions association with global configurations)
 //
 // Designed so that version type could be changed easily, e.g. to string
-class ConfigurationVersion {
-       public:
+class ConfigurationVersion
+{
+  public:
 	static const unsigned int INVALID;
 	static const unsigned int DEFAULT;
 	static const unsigned int SCRATCH;
@@ -21,22 +22,22 @@ class ConfigurationVersion {
 	virtual ~ConfigurationVersion(void);
 
 	unsigned int version(void) const;
-	bool	 isTemporaryVersion(void) const;
-	bool	 isScratchVersion(void) const;
-	bool	 isMockupVersion(void) const;
-	bool	 isInvalid(void) const;
+	bool         isTemporaryVersion(void) const;
+	bool         isScratchVersion(void) const;
+	bool         isMockupVersion(void) const;
+	bool         isInvalid(void) const;
 	std::string  toString(void) const;
 
 	//Operators
 	ConfigurationVersion& operator=(const unsigned int version);
-	bool		      operator==(unsigned int version) const;
-	bool		      operator==(const ConfigurationVersion& version) const;
-	bool		      operator!=(unsigned int version) const;
-	bool		      operator!=(const ConfigurationVersion& version) const;
-	bool		      operator<(const ConfigurationVersion& version) const;
-	bool		      operator>(const ConfigurationVersion& version) const;
-	bool		      operator<=(const ConfigurationVersion& version) const { return !operator>(version); }
-	bool		      operator>=(const ConfigurationVersion& version) const { return !operator<(version); }
+	bool                  operator==(unsigned int version) const;
+	bool                  operator==(const ConfigurationVersion& version) const;
+	bool                  operator!=(unsigned int version) const;
+	bool                  operator!=(const ConfigurationVersion& version) const;
+	bool                  operator<(const ConfigurationVersion& version) const;
+	bool                  operator>(const ConfigurationVersion& version) const;
+	bool                  operator<=(const ConfigurationVersion& version) const { return !operator>(version); }
+	bool                  operator>=(const ConfigurationVersion& version) const { return !operator<(version); }
 
 	friend std::ostream& operator<<(std::ostream& out, const ConfigurationVersion& version)
 	{
@@ -54,8 +55,11 @@ class ConfigurationVersion {
 	static ConfigurationVersion getNextVersion(const ConfigurationVersion& version = ConfigurationVersion());
 	static ConfigurationVersion getNextTemporaryVersion(const ConfigurationVersion& version = ConfigurationVersion());
 
-       private:
-	enum { NUM_OF_TEMP_VERSIONS = 10000 };
+  private:
+	enum
+	{
+		NUM_OF_TEMP_VERSIONS = 10000
+	};
 
 	unsigned int version_;
 	std::string  versionString_;

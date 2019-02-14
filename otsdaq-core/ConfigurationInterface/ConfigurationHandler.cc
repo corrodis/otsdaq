@@ -35,24 +35,24 @@ using namespace ots;
 #define __COUT_HDR__ "ConfigHandler"
 
 //The tag values must be given after the XML platform is initialized so they are defined in initPlatform
-XMLCh* ConfigurationHandler::rootTag_		    = 0;
-XMLCh* ConfigurationHandler::headerTag_		    = 0;
-XMLCh* ConfigurationHandler::typeTag_		    = 0;
+XMLCh* ConfigurationHandler::rootTag_               = 0;
+XMLCh* ConfigurationHandler::headerTag_             = 0;
+XMLCh* ConfigurationHandler::typeTag_               = 0;
 XMLCh* ConfigurationHandler::extensionTableNameTag_ = 0;
-XMLCh* ConfigurationHandler::nameTag_		    = 0;
-XMLCh* ConfigurationHandler::runTag_		    = 0;
-XMLCh* ConfigurationHandler::runTypeTag_	    = 0;
-XMLCh* ConfigurationHandler::runNumberTag_	  = 0;
+XMLCh* ConfigurationHandler::nameTag_               = 0;
+XMLCh* ConfigurationHandler::runTag_                = 0;
+XMLCh* ConfigurationHandler::runTypeTag_            = 0;
+XMLCh* ConfigurationHandler::runNumberTag_          = 0;
 XMLCh* ConfigurationHandler::runBeginTimestampTag_  = 0;
-XMLCh* ConfigurationHandler::locationTag_	   = 0;
-XMLCh* ConfigurationHandler::datasetTag_	    = 0;
-XMLCh* ConfigurationHandler::versionTag_	    = 0;
+XMLCh* ConfigurationHandler::locationTag_           = 0;
+XMLCh* ConfigurationHandler::datasetTag_            = 0;
+XMLCh* ConfigurationHandler::versionTag_            = 0;
 XMLCh* ConfigurationHandler::commentDescriptionTag_ = 0;
 XMLCh* ConfigurationHandler::createdByUserTag_      = 0;
-XMLCh* ConfigurationHandler::partTag_		    = 0;
-XMLCh* ConfigurationHandler::nameLabelTag_	  = 0;
-XMLCh* ConfigurationHandler::kindOfPartTag_	 = 0;
-XMLCh* ConfigurationHandler::dataTag_		    = 0;
+XMLCh* ConfigurationHandler::partTag_               = 0;
+XMLCh* ConfigurationHandler::nameLabelTag_          = 0;
+XMLCh* ConfigurationHandler::kindOfPartTag_         = 0;
+XMLCh* ConfigurationHandler::dataTag_               = 0;
 
 //==============================================================================
 ConfigurationHandler::ConfigurationHandler(void)
@@ -77,24 +77,24 @@ void ConfigurationHandler::initPlatform(void)
 		// throw exception here to return ERROR_XERCES_INIT
 	}
 
-	rootTag_	       = xercesc::XMLString::transcode("ROOT");
-	headerTag_	     = xercesc::XMLString::transcode("HEADER");
-	typeTag_	       = xercesc::XMLString::transcode("TYPE");
+	rootTag_               = xercesc::XMLString::transcode("ROOT");
+	headerTag_             = xercesc::XMLString::transcode("HEADER");
+	typeTag_               = xercesc::XMLString::transcode("TYPE");
 	extensionTableNameTag_ = xercesc::XMLString::transcode("EXTENSION_TABLE_NAME");
-	nameTag_	       = xercesc::XMLString::transcode("NAME");
-	runTag_		       = xercesc::XMLString::transcode("RUN");
-	runTypeTag_	    = xercesc::XMLString::transcode("RUN_TYPE");
-	runNumberTag_	  = xercesc::XMLString::transcode("RUN_NUMBER");
+	nameTag_               = xercesc::XMLString::transcode("NAME");
+	runTag_                = xercesc::XMLString::transcode("RUN");
+	runTypeTag_            = xercesc::XMLString::transcode("RUN_TYPE");
+	runNumberTag_          = xercesc::XMLString::transcode("RUN_NUMBER");
 	runBeginTimestampTag_  = xercesc::XMLString::transcode("RUN_BEGIN_TIMESTAMP");
-	locationTag_	   = xercesc::XMLString::transcode("LOCATION");
-	datasetTag_	    = xercesc::XMLString::transcode("DATA_SET");
-	versionTag_	    = xercesc::XMLString::transcode("VERSION");
+	locationTag_           = xercesc::XMLString::transcode("LOCATION");
+	datasetTag_            = xercesc::XMLString::transcode("DATA_SET");
+	versionTag_            = xercesc::XMLString::transcode("VERSION");
 	commentDescriptionTag_ = xercesc::XMLString::transcode("COMMENT_DESCRIPTION");
 	createdByUserTag_      = xercesc::XMLString::transcode("CREATED_BY_USER");
-	partTag_	       = xercesc::XMLString::transcode("PART");
-	nameLabelTag_	  = xercesc::XMLString::transcode("NAME_LABEL");
-	kindOfPartTag_	 = xercesc::XMLString::transcode("KIND_OF_PART");
-	dataTag_	       = xercesc::XMLString::transcode("DATA");
+	partTag_               = xercesc::XMLString::transcode("PART");
+	nameLabelTag_          = xercesc::XMLString::transcode("NAME_LABEL");
+	kindOfPartTag_         = xercesc::XMLString::transcode("KIND_OF_PART");
+	dataTag_               = xercesc::XMLString::transcode("DATA");
 }
 
 //==============================================================================
@@ -148,7 +148,7 @@ bool ConfigurationHandler::validateNode(XMLCh* tagName, xercesc::DOMNode* node, 
 	if (XML_TO_STRING(node->getFirstChild()->getNodeValue()) != expectedValue)
 	{
 		__COUT__ << "The tag " << XML_TO_CHAR(tagName) << " with value " << XML_TO_CHAR(node->getFirstChild()->getNodeValue())
-			 << " doesn't match the expected value " << expectedValue << std::endl;
+		         << " doesn't match the expected value " << expectedValue << std::endl;
 		return false;
 	}
 
@@ -315,7 +315,7 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 			__COUT__ << version << "-" << XML_TO_CHAR(versionNode->getFirstChild()->getNodeValue()) << std::endl;
 			if (strcmp(tmpVersionStr, XML_TO_CHAR(versionNode->getFirstChild()->getNodeValue())) != 0)
 				throw(std::runtime_error(std::string("Mis-matched version tag: ") + XML_TO_CHAR(versionNode->getFirstChild()->getNodeValue()) +
-							 " vs " + tmpVersionStr));
+				                         " vs " + tmpVersionStr));
 		}
 		//version is valid
 		configuration.getViewP()->setVersion(XML_TO_CHAR(versionNode->getFirstChild()->getNodeValue()));
@@ -352,7 +352,7 @@ void ConfigurationHandler::readXML(ConfigurationBase& configuration, Configurati
 		{
 			//DOMElement* dataElement = dynamic_cast< xercesc::DOMElement* >( dataNodeList->item(row) );
 			xercesc::DOMNodeList* columnNodeList = dataNodeList->item(row)->getChildNodes();
-			unsigned int	  colNumber      = 0;
+			unsigned int          colNumber      = 0;
 
 			//__COUT__ << "Row: " << row << " w " <<  columnNodeList->getLength() << std::endl;
 			for (XMLSize_t col = 0; col < columnNodeList->getLength(); col++)
@@ -419,9 +419,9 @@ std::string ConfigurationHandler::writeXML(const ConfigurationBase& configuratio
 		{
 			//<ROOT>
 			xercesc::DOMDocument* document = implementation->createDocument(
-			    0,	 // root element namespace URI.
+			    0,         // root element namespace URI.
 			    rootTag_,  // root element name
-			    0);	// document type object (DTD).
+			    0);        // document type object (DTD).
 
 			xercesc::DOMElement* rootElement = document->getDocumentElement();
 			rootElement->setAttribute(CONVERT_TO_XML("xmlns:xsi"), CONVERT_TO_XML("http://www.w3.org/2001/XMLSchema-instance"));
@@ -641,8 +641,8 @@ std::string ConfigurationHandler::getXMLFileName(const ConfigurationBase& config
 {
 	std::stringstream fileName;
 	fileName << getXMLDir(&configuration)
-		 << version << '/'
-		 << configuration.getConfigurationName() << "_v" << version << ".xml";
+	         << version << '/'
+	         << configuration.getConfigurationName() << "_v" << version << ".xml";
 	return fileName.str();
 }
 

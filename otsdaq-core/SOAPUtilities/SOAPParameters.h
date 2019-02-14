@@ -6,10 +6,11 @@
 
 #include <string>
 
-namespace ots {
-
-class SOAPParameters : public Parameters<std::string, std::string> {
-       public:
+namespace ots
+{
+class SOAPParameters : public Parameters<std::string, std::string>
+{
+  public:
 	SOAPParameters(void);
 	SOAPParameters(const std::string& name, const std::string& value = "");
 	SOAPParameters(SOAPParameter parameter);

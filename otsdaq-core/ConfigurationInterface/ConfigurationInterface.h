@@ -11,20 +11,21 @@
 #include <sstream>
 #include "otsdaq-core/PluginMakers/MakeInterfaceConfiguration.h"
 
-namespace ots {
-
+namespace ots
+{
 class ConfigurationHandlerBase;
 
-class ConfigurationInterface {
+class ConfigurationInterface
+{
 	friend class ConfigurationManagerRW;  //because need access to latestVersion() call for group metadata
 	friend class ConfigurationManager;    //because need access to fill() call for group metadata
 
-       public:
+  public:
 	virtual ~ConfigurationInterface() { ; }
 
 	static ConfigurationInterface* getInstance(bool mode);
-	static bool		       isVersionTrackingEnabled();
-	static void		       setVersionTrackingEnabled(bool setValue);
+	static bool                    isVersionTrackingEnabled();
+	static void                    setVersionTrackingEnabled(bool setValue);
 
 	static const std::string GROUP_METADATA_TABLE_NAME;
 	//==============================================================================
@@ -33,14 +34,14 @@ class ConfigurationInterface {
 	//
 	//	Loose column matching can be used to ignore column names when filling.
 	//
-	void get(ConfigurationBase*&			      configuration,
-		 const std::string			      configurationName,
-		 std::shared_ptr<const ConfigurationGroupKey> groupKey		  = 0,
-		 const std::string*			      groupName		  = 0,
-		 bool					      dontFill		  = false,
-		 ConfigurationVersion			      version		  = ConfigurationVersion(),
-		 bool					      resetConfiguration  = true,
-		 bool					      looseColumnMatching = false)
+	void get(ConfigurationBase*&                          configuration,
+	         const std::string                            configurationName,
+	         std::shared_ptr<const ConfigurationGroupKey> groupKey            = 0,
+	         const std::string*                           groupName           = 0,
+	         bool                                         dontFill            = false,
+	         ConfigurationVersion                         version             = ConfigurationVersion(),
+	         bool                                         resetConfiguration  = true,
+	         bool                                         looseColumnMatching = false)
 	{
 		if (configuration == 0)
 		{
@@ -103,7 +104,7 @@ class ConfigurationInterface {
 		}
 
 		if (resetConfiguration)  //reset to empty configuration views and no active view
-		{			 //EXCEPT, keep temporary views! (call ConfigurationBase::reset to really reset all)
+		{                        //EXCEPT, keep temporary views! (call ConfigurationBase::reset to really reset all)
 			configuration->deactivate();
 			std::set<ConfigurationVersion> versions =
 			    configuration->getStoredVersions();
@@ -157,7 +158,7 @@ class ConfigurationInterface {
 			}
 
 			//match key by ignoring '_'
-			bool	 nameIsMatch = true;
+			bool         nameIsMatch = true;
 			unsigned int nameIsMatchIndex, nameIsMatchStorageIndex;
 			for (nameIsMatchIndex = 0, nameIsMatchStorageIndex = 0;
 			     nameIsMatchIndex < configuration->getViewP()->getTableName().size();
@@ -171,7 +172,7 @@ class ConfigurationInterface {
 				//match to storage name
 				if (nameIsMatchStorageIndex >= configuration->getMockupViewP()->getTableName().size() ||
 				    configuration->getViewP()->getTableName()[nameIsMatchIndex] !=
-					configuration->getMockupViewP()->getTableName()[nameIsMatchStorageIndex])
+				        configuration->getMockupViewP()->getTableName()[nameIsMatchStorageIndex])
 				{
 					//size mismatch or character mismatch
 					nameIsMatch = false;
@@ -208,8 +209,8 @@ class ConfigurationInterface {
 		__THROW__(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");
 	}
 	virtual std::set<ConfigurationVersion> getVersions(const ConfigurationBase* configuration) const = 0;
-	const bool&			       getMode() const { return theMode_; }
-	ConfigurationVersion		       saveNewVersion(ConfigurationBase* configuration, ConfigurationVersion temporaryVersion, ConfigurationVersion newVersion = ConfigurationVersion());
+	const bool&                            getMode() const { return theMode_; }
+	ConfigurationVersion                   saveNewVersion(ConfigurationBase* configuration, ConfigurationVersion temporaryVersion, ConfigurationVersion newVersion = ConfigurationVersion());
 
 	//group handling
 	virtual std::set<std::string /*name*/> getAllConfigurationGroupNames(const std::string& filterString = "") const throw(std::runtime_error)
@@ -236,27 +237,27 @@ class ConfigurationInterface {
 		__THROW__(ss.str() + "ConfigurationInterface::... Must only call findAllGlobalConfigurations in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");
 	};
 
-       protected:
+  protected:
 	ConfigurationInterface(void);  //Protected constructor
 
 	virtual void fill(ConfigurationBase* configuration, ConfigurationVersion version) const = 0;
 
-       public:										     //was protected,.. unfortunately, must be public to allow otsdaq_database_migrate and otsdaq_import_system_aliases to compile
+  public:                                                                                //was protected,.. unfortunately, must be public to allow otsdaq_database_migrate and otsdaq_import_system_aliases to compile
 	virtual ConfigurationGroupKey findLatestGroupKey(const std::string& groupName) const /* return INVALID if no existing versions */
 	{
 		__SS__;
 		__THROW__(ss.str() + "ConfigurationInterface::... Must only call findLatestGroupKey in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface).");
 	}
-	virtual ConfigurationVersion findLatestVersion(const ConfigurationBase* configuration) const			     = 0;  //return INVALID if no existing versions
-	virtual void		     saveActiveVersion(const ConfigurationBase* configuration, bool overwrite = false) const = 0;
+	virtual ConfigurationVersion findLatestVersion(const ConfigurationBase* configuration) const                         = 0;  //return INVALID if no existing versions
+	virtual void                 saveActiveVersion(const ConfigurationBase* configuration, bool overwrite = false) const = 0;
 
-       protected:
+  protected:
 	ConfigurationHandlerBase* theConfigurationHandler_;
 
-       private:
+  private:
 	static ConfigurationInterface* theInstance_;
-	static bool		       theMode_;		    //1 is FILE, 0 is artdaq-DB
-	static bool		       theVersionTrackingEnabled_;  //tracking versions 1 is enabled, 0 is disabled
+	static bool                    theMode_;                    //1 is FILE, 0 is artdaq-DB
+	static bool                    theVersionTrackingEnabled_;  //tracking versions 1 is enabled, 0 is disabled
 };
 
 }  // namespace ots

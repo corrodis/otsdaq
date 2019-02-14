@@ -4,10 +4,11 @@
 #include <string>
 #include <xercesc/util/XMLChar.hpp>
 
-namespace ots {
-
-class ConvertFromXML {
-       public:
+namespace ots
+{
+class ConvertFromXML
+{
+  public:
 	ConvertFromXML(const XMLCh* const toTranscode);
 	~ConvertFromXML();
 
@@ -15,7 +16,7 @@ class ConvertFromXML {
 	char*       toChar(void) const;
 	std::string toString(void) const;
 
-       private:
+  private:
 	char* xmlTranscoded_;
 };
 

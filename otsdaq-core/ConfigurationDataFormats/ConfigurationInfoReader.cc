@@ -34,16 +34,16 @@ ConfigurationInfoReader::ConfigurationInfoReader(bool allowIllegalColumns)
     : allowIllegalColumns_(allowIllegalColumns)
 {
 	initPlatform();
-	rootTag_		       = xercesc::XMLString::transcode("ROOT");
-	configurationTag_	      = xercesc::XMLString::transcode("CONFIGURATION");
+	rootTag_                       = xercesc::XMLString::transcode("ROOT");
+	configurationTag_              = xercesc::XMLString::transcode("CONFIGURATION");
 	configurationNameAttributeTag_ = xercesc::XMLString::transcode("Name");
-	viewTag_		       = xercesc::XMLString::transcode("VIEW");
-	viewNameAttributeTag_	  = xercesc::XMLString::transcode("Name");
-	viewTypeAttributeTag_	  = xercesc::XMLString::transcode("Type");
+	viewTag_                       = xercesc::XMLString::transcode("VIEW");
+	viewNameAttributeTag_          = xercesc::XMLString::transcode("Name");
+	viewTypeAttributeTag_          = xercesc::XMLString::transcode("Type");
 	viewDescriptionAttributeTag_   = xercesc::XMLString::transcode("Description");
-	columnTag_		       = xercesc::XMLString::transcode("COLUMN");
-	columnTypeAttributeTag_	= xercesc::XMLString::transcode("Type");
-	columnNameAttributeTag_	= xercesc::XMLString::transcode("Name");
+	columnTag_                     = xercesc::XMLString::transcode("COLUMN");
+	columnTypeAttributeTag_        = xercesc::XMLString::transcode("Type");
+	columnNameAttributeTag_        = xercesc::XMLString::transcode("Name");
 	columnStorageNameAttributeTag_ = xercesc::XMLString::transcode("StorageName");
 	columnDataTypeAttributeTag_    = xercesc::XMLString::transcode("DataType");
 	columnDataChoicesAttributeTag_ = xercesc::XMLString::transcode("DataChoices");
@@ -117,7 +117,7 @@ const bool& ConfigurationInfoReader::getAllowColumnErrors(void)
 bool ConfigurationInfoReader::checkViewType(std::string type)
 {
 	std::vector<std::string> types;
-	int			 currentIndex = 0;
+	int                      currentIndex = 0;
 	while (type.find(',', currentIndex) != std::string::npos)
 	{
 		types.push_back(type.substr(currentIndex, type.find(',', currentIndex) - currentIndex));
@@ -138,8 +138,8 @@ bool ConfigurationInfoReader::checkViewType(std::string type)
 	if (systemType != allowedNames[0] && systemType != allowedNames[1] && systemType != allowedNames[2])
 	{
 		__COUT__ << "The type defined in CONFIGURATION_TYPE ("
-			 << systemType << ") doesn't match with any of the allowed types: File,Database or DatabaseTest"
-			 << std::endl;
+		         << systemType << ") doesn't match with any of the allowed types: File,Database or DatabaseTest"
+		         << std::endl;
 
 		throw(std::runtime_error("Illegal configuration type"));
 	}
@@ -148,9 +148,9 @@ bool ConfigurationInfoReader::checkViewType(std::string type)
 		if (types[i] != allowedNames[0] && types[i] != allowedNames[1] && types[i] != allowedNames[2])
 		{
 			__COUT__ << "The type defined in the info file ("
-				 << types[i] << ") doesn't match with any of the allowed types: "
-				 << allowedNames[0] << ", " << allowedNames[1] << " or " << allowedNames[2]
-				 << std::endl;
+			         << types[i] << ") doesn't match with any of the allowed types: "
+			         << allowedNames[0] << ", " << allowedNames[1] << " or " << allowedNames[2]
+			         << std::endl;
 			throw(std::runtime_error("Illegal Type!"));
 		}
 	}
@@ -214,7 +214,7 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 	//setenv("CONFIGURATION_INFO_PATH",(std::string(getenv("USER_DATA")) + "/ConfigurationInfo").c_str(),1);
 
 	std::string configurationDataDir = std::string(getenv("CONFIGURATION_INFO_PATH")) + "/";
-	std::string configFile		 = configurationDataDir + configuration.getConfigurationName() + "Info.xml";
+	std::string configFile           = configurationDataDir + configuration.getConfigurationName() + "Info.xml";
 	//__COUT__ << configFile << std::endl;
 	struct stat fileStatus;
 
@@ -285,12 +285,12 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 			delete parser;
 			delete errorHandler;
 			__COUT_ERR__ << "\n"
-				     << ss.str();
+			             << ss.str();
 			throw(std::runtime_error(ss.str()));
 		}
 		//<VIEW>
 		xercesc::DOMNodeList* viewNodeList     = configurationElement->getElementsByTagName(viewTag_);
-		bool		      storageTypeFound = false;
+		bool                  storageTypeFound = false;
 
 		if (viewNodeList->getLength() != 1)
 		{
@@ -300,7 +300,7 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 			delete parser;
 			delete errorHandler;
 			__COUT_ERR__ << "\n"
-				     << ss.str();
+			             << ss.str();
 			throw(std::runtime_error(ss.str()));
 		}
 
@@ -309,7 +309,7 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 			if (!viewNodeList->item(view)->getNodeType() || viewNodeList->item(view)->getNodeType() != xercesc::DOMNode::ELEMENT_NODE)  //true is not 0 && is element
 				continue;
 			xercesc::DOMElement* viewElement = dynamic_cast<xercesc::DOMElement*>(viewNodeList->item(view));
-			std::string	  viewType    = XML_TO_CHAR(viewElement->getAttribute(viewTypeAttributeTag_));
+			std::string          viewType    = XML_TO_CHAR(viewElement->getAttribute(viewTypeAttributeTag_));
 			if (!checkViewType(viewType))
 				continue;
 			storageTypeFound = true;
@@ -325,12 +325,12 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 				std::string capturedException;
 				configuration.getMockupViewP()->getColumnsInfoP()->push_back(
 				    ViewColumnInfo(
-					XML_TO_CHAR(columnElement->getAttribute(columnTypeAttributeTag_)),
-					XML_TO_CHAR(columnElement->getAttribute(columnNameAttributeTag_)),
-					XML_TO_CHAR(columnElement->getAttribute(columnStorageNameAttributeTag_)),
-					XML_TO_CHAR(columnElement->getAttribute(columnDataTypeAttributeTag_)),
-					XML_TO_CHAR(columnElement->getAttribute(columnDataChoicesAttributeTag_)),
-					allowIllegalColumns_ ? &capturedException : 0));  //capture exception string if allowing illegal columns
+				        XML_TO_CHAR(columnElement->getAttribute(columnTypeAttributeTag_)),
+				        XML_TO_CHAR(columnElement->getAttribute(columnNameAttributeTag_)),
+				        XML_TO_CHAR(columnElement->getAttribute(columnStorageNameAttributeTag_)),
+				        XML_TO_CHAR(columnElement->getAttribute(columnDataTypeAttributeTag_)),
+				        XML_TO_CHAR(columnElement->getAttribute(columnDataChoicesAttributeTag_)),
+				        allowIllegalColumns_ ? &capturedException : 0));  //capture exception string if allowing illegal columns
 
 				//if error detected (this implies allowing illegal columns)
 				//	accumulate and return accumulated errors at end
@@ -354,7 +354,7 @@ std::string ConfigurationInfoReader::read(ConfigurationBase& configuration)
 		if (!storageTypeFound)
 		{
 			__COUT__ << "The type defined in CONFIGURATION_TYPE ("
-				 << getenv("CONFIGURATION_TYPE") << ") doesn't match with any of the types defined in " << configFile << std::endl;
+			         << getenv("CONFIGURATION_TYPE") << ") doesn't match with any of the types defined in " << configFile << std::endl;
 
 			delete parser;
 			delete errorHandler;

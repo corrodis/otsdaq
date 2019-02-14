@@ -5,10 +5,11 @@
 
 #include <string>
 
-namespace ots {
-
-class RawDataSaverConsumerConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class RawDataSaverConsumerConfiguration : public ConfigurationBase
+{
+  public:
 	RawDataSaverConsumerConfiguration(void);
 	virtual ~RawDataSaverConsumerConfiguration(void);
 
@@ -17,12 +18,13 @@ class RawDataSaverConsumerConfiguration : public ConfigurationBase {
 
 	//Getter
 	std::vector<std::string> getProcessorIDList(void) const;
-	std::string		 getFilePath(std::string processorUID) const;
-	std::string		 getRadixFileName(std::string processorUID) const;
+	std::string              getFilePath(std::string processorUID) const;
+	std::string              getRadixFileName(std::string processorUID) const;
 
-       private:
+  private:
 	void check(std::string processorUID) const;
-	enum {
+	enum
+	{
 		ProcessorID,
 		FilePath,
 		RadixFileName

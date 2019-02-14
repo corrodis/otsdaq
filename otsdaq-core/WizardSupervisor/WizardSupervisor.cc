@@ -157,7 +157,7 @@ void WizardSupervisor::generateURL()
 	}
 
 	__COUT__ << getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":" << getenv("PORT") << "/urn:xdaq-application:lid="
-		 << this->getApplicationDescriptor()->getLocalId() << "/Verify?code=" << securityCode_ << std::endl;
+	         << this->getApplicationDescriptor()->getLocalId() << "/Verify?code=" << securityCode_ << std::endl;
 
 	//Note: print out handled by StartOTS.sh now
 	//std::thread([&](WizardSupervisor *ptr, std::string securityCode)
@@ -176,7 +176,7 @@ void WizardSupervisor::generateURL()
 }
 
 void WizardSupervisor::printURL(WizardSupervisor *ptr,
-				std::string       securityCode)
+                                std::string       securityCode)
 {
 	INIT_MF("ConfigurationWizard");
 	// child process
@@ -185,7 +185,7 @@ void WizardSupervisor::printURL(WizardSupervisor *ptr,
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 		__COUT__ << getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":" << getenv("PORT") << "/urn:xdaq-application:lid="
-			 << ptr->getApplicationDescriptor()->getLocalId() << "/Verify?code=" << securityCode << std::endl;
+		         << ptr->getApplicationDescriptor()->getLocalId() << "/Verify?code=" << securityCode << std::endl;
 	}
 }
 
@@ -311,16 +311,16 @@ xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(xoap::MessageRe
 	if (securityCode_ == submittedSequence)
 		permissionMap.emplace(
 		    std::pair<std::string /*groupName*/, WebUsers::permissionLevel_t>(
-			WebUsers::DEFAULT_USER_GROUP,
-			WebUsers::PERMISSION_LEVEL_ADMIN));
+		        WebUsers::DEFAULT_USER_GROUP,
+		        WebUsers::PERMISSION_LEVEL_ADMIN));
 	else
 	{
 		__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
 
 		permissionMap.emplace(
 		    std::pair<std::string /*groupName*/, WebUsers::permissionLevel_t>(
-			WebUsers::DEFAULT_USER_GROUP,
-			WebUsers::PERMISSION_LEVEL_INACTIVE));
+		        WebUsers::DEFAULT_USER_GROUP,
+		        WebUsers::PERMISSION_LEVEL_INACTIVE));
 	}
 
 	//fill return parameters
@@ -328,7 +328,7 @@ xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(xoap::MessageRe
 	retParameters.addParameter("Permissions", StringMacros::mapToString(permissionMap));
 
 	return SOAPUtilities::makeSOAPMessageReference("SequenceResponse",
-						       retParameters);
+	                                               retParameters);
 }
 
 //===================================================================================================================
@@ -372,7 +372,7 @@ void WizardSupervisor::verification(xgi::Input *in, xgi::Output *out) throw(xgi:
 	{
 		//defaultSequence_ = false;
 		__COUT__ << "*** Successfully authenticated security sequence "
-			 << "@ " << time(0) << std::endl;
+		         << "@ " << time(0) << std::endl;
 
 		if (defaultSequence_)
 		{
@@ -452,10 +452,10 @@ void WizardSupervisor::request(xgi::Input *in, xgi::Output *out) throw(xgi::exce
 			ConfigurationManager cfgMgr;
 			if (requestType == "gatewayLaunchOTS")
 				GatewaySupervisor::launchStartOTSCommand("LAUNCH_OTS",
-									 &cfgMgr);
+				                                         &cfgMgr);
 			else if (requestType == "gatewayLaunchWiz")
 				GatewaySupervisor::launchStartOTSCommand("LAUNCH_WIZ",
-									 &cfgMgr);
+				                                         &cfgMgr);
 		}
 		else
 		{
@@ -467,7 +467,7 @@ void WizardSupervisor::request(xgi::Input *in, xgi::Output *out) throw(xgi::exce
 	{
 		__SS__ << "An error was encountered handling requestType '" << requestType << "':" << e.what() << __E__;
 		__COUT__ << "\n"
-			 << ss.str();
+		         << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}
 	catch (...)
@@ -475,13 +475,13 @@ void WizardSupervisor::request(xgi::Input *in, xgi::Output *out) throw(xgi::exce
 		__SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' "
 		       << "Please check the printouts to debug." << __E__;
 		__COUT__ << "\n"
-			 << ss.str();
+		         << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}
 
 	//return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream *)out, false /*dispStdOut*/,
-				 true /*allowWhiteSpace*/);  //Note: allow white space need for error response
+	                         true /*allowWhiteSpace*/);  //Note: allow white space need for error response
 
 }  //end request()
 
@@ -583,7 +583,7 @@ void WizardSupervisor::editSecurity(xgi::Input *in, xgi::Output *out) throw(xgi:
 			return;
 		}
 		else if (submittedSecurity == "DigestAccessAuthentication" ||
-			 submittedSecurity == "NoSecurity")
+		         submittedSecurity == "NoSecurity")
 		{
 			std::ofstream writeSecurityFile;
 
@@ -607,7 +607,7 @@ void WizardSupervisor::editSecurity(xgi::Input *in, xgi::Output *out) throw(xgi:
 	std::ifstream securityFile;
 	std::string   line;
 	std::string   security   = "";
-	int	   lineNumber = 0;
+	int           lineNumber = 0;
 
 	securityFile.open(securityFileName.c_str());
 
@@ -664,9 +664,9 @@ void WizardSupervisor::UserSettings(xgi::Input *in, xgi::Output *out) throw(xgi:
 	//SECURITY CHECK END ****
 
 	HttpXmlDocument xmldoc;
-	uint64_t	activeSessionIndex;
+	uint64_t        activeSessionIndex;
 	std::string     user;
-	uint8_t		userPermissions;
+	uint8_t         userPermissions;
 
 	if (Command != "")
 	{
@@ -796,7 +796,7 @@ void WizardSupervisor::cleanUpPreviews()
 	}
 
 	struct dirent *entry;
-	time_t	 dirCreateTime;
+	time_t         dirCreateTime;
 	unsigned int   i;
 
 	while ((entry = readdir(dir)))  //loop through all entries in directory and remove anything expired
@@ -819,7 +819,7 @@ void WizardSupervisor::cleanUpPreviews()
 				entry->d_name[i] = '_';  //put _ back
 
 				__COUT__ << "rm -rf " << USER_DATA_PATH + (std::string)entry->d_name << std::endl
-					 << std::endl;
+				         << std::endl;
 				system(((std::string)("rm -rf " + userData + (std::string)entry->d_name)).c_str());
 			}
 		}
@@ -832,7 +832,7 @@ void WizardSupervisor::cleanUpPreviews()
 //	savePostPreview
 //      save post to preview directory named with time and incremented index
 void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, const std::vector<cgicc::FormFile> &files, std::string creator,
-				       HttpXmlDocument *xmldoc)
+                                       HttpXmlDocument *xmldoc)
 {
 	/*if(activeExperiment_ == "") //no active experiment!
 	{
@@ -920,7 +920,7 @@ void WizardSupervisor::savePostPreview(std::string &subject, std::string &text, 
 std::string WizardSupervisor::exec(const char *cmd)
 {
 	std::array<char, 128> buffer;
-	std::string	   result;
+	std::string           result;
 	std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
 	if (!pipe) __THROW__("popen() failed!");
 	while (!feof(pipe.get())) {

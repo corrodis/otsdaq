@@ -9,10 +9,11 @@
 #define _ots_Register_h_
 #include <string>
 
-namespace ots {
-
-class Register {
-       public:
+namespace ots
+{
+class Register
+{
+  public:
 	Register(std::string name);
 	virtual ~Register();
 
@@ -27,10 +28,10 @@ class Register {
 	void setResume(std::pair<int, int> resume);
 
 	//Getters
-	std::string	 getName(void);
-	std::string	 getBaseAddress(void);
-	int		    getSize(void);
-	std::string	 getAccess(void);
+	std::string         getName(void);
+	std::string         getBaseAddress(void);
+	int                 getSize(void);
+	std::string         getAccess(void);
 	std::pair<int, int> getInitialize(void);
 	std::pair<int, int> getConfigure(void);
 	std::pair<int, int> getStart(void);
@@ -38,10 +39,10 @@ class Register {
 	std::pair<int, int> getPause(void);
 	std::pair<int, int> getResume(void);
 
-       protected:
+  protected:
 	std::string registerName_;
 	std::string registerBaseAddress_;
-	int	 registerSize_;
+	int         registerSize_;
 	std::string registerAccess_;
 
 	//pair  sequenced position : value

@@ -29,7 +29,7 @@ SimpleSoap::SimpleSoap(xdaq::ApplicationStub* s)
 
 //========================================================================================================================
 void SimpleSoap::Default(xgi::Input*  in,
-			 xgi::Output* out)
+                         xgi::Output* out)
 {
 	std::string url = "/" + getApplicationDescriptor()->getURN();
 	std::cout << __COUT_HDR_FL__ << url << std::endl;
@@ -63,10 +63,10 @@ void SimpleSoap::StateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 
 		if (receive(reply) == "StartDone")
 			std::cout << __COUT_HDR_FL__ << "Everything started correctly!" << std::endl
-				  << std::endl;
+			          << std::endl;
 		else
 			std::cout << __COUT_HDR_FL__ << "All underlying Supervisors could not be started by browser button!" << std::endl
-				  << std::endl;
+			          << std::endl;
 	}
 	else if (Command == "Start")
 	{
@@ -81,16 +81,16 @@ void SimpleSoap::StateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 
 				if (sReply == "StartDone")
 					std::cout << __COUT_HDR_FL__ << "Everything started correctly!" << std::endl
-						  << std::endl;
+					          << std::endl;
 				else
 					std::cout << __COUT_HDR_FL__ << "All underlying Supervisors could not be started by browser button!" << std::endl
-						  << std::endl;
+					          << std::endl;
 			}
 			catch (xdaq::exception::Exception& e)
 			{
 				std::cout << __COUT_HDR_FL__
-					  //<< std::stringF((*i_set_SimpleSoap)->getInstance())
-					  << " Couldn't start sending a msg" << std::endl;
+				          //<< std::stringF((*i_set_SimpleSoap)->getInstance())
+				          << " Couldn't start sending a msg" << std::endl;
 			}
 		}
 	}

@@ -3,18 +3,19 @@
 
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 
-namespace ots {
-
+namespace ots
+{
 //ARTDAQDataManagerSupervisor
 //	This class handles a single artdaq Board Reader instance.
-class ARTDAQDataManagerSupervisor : public CoreSupervisorBase {
-       public:
+class ARTDAQDataManagerSupervisor : public CoreSupervisorBase
+{
+  public:
 	XDAQ_INSTANTIATOR();
 
 	ARTDAQDataManagerSupervisor(xdaq::ApplicationStub* s);
 	virtual ~ARTDAQDataManagerSupervisor(void);
 
-       private:
+  private:
 };
 
 }  // namespace ots

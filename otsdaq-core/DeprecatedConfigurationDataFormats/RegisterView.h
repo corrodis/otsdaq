@@ -19,13 +19,14 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
-namespace ots {
-
-class RegisterView {
-       public:
+namespace ots
+{
+class RegisterView
+{
+  public:
 	typedef std::vector<std::vector<std::string> > DataView;
-	typedef DataView::iterator		       iterator;
-	typedef DataView::const_iterator	       const_iterator;
+	typedef DataView::iterator                     iterator;
+	typedef DataView::const_iterator               const_iterator;
 
 	RegisterView(std::string name = "");
 	virtual ~RegisterView();
@@ -34,15 +35,15 @@ class RegisterView {
 	unsigned int findRow(unsigned int col, const unsigned int value) const;
 
 	//Getters
-	std::string				      getName() const;
-	int					      getVersion() const;
-	std::string				      getComment() const;
-	std::string				      getAuthor() const;
-	time_t					      getCreationTime() const;
-	unsigned int				      getNumberOfRows() const;
-	unsigned int				      getNumberOfColumns() const;
-	const std::vector<ViewRegisterInfo>&	  getRegistersInfo() const;
-	std::vector<ViewRegisterInfo>*		      getRegistersInfoPointer();
+	std::string                                   getName() const;
+	int                                           getVersion() const;
+	std::string                                   getComment() const;
+	std::string                                   getAuthor() const;
+	time_t                                        getCreationTime() const;
+	unsigned int                                  getNumberOfRows() const;
+	unsigned int                                  getNumberOfColumns() const;
+	const std::vector<ViewRegisterInfo>&          getRegistersInfo() const;
+	std::vector<ViewRegisterInfo>*                getRegistersInfoPointer();
 	const std::vector<ViewRegisterSequencerInfo>& getRegistersSequencerInfo() const;
 	std::vector<ViewRegisterSequencerInfo>*       getRegistersSequencerInfoPointer();
 
@@ -116,18 +117,18 @@ class RegisterView {
 		}
 	}*/
 
-	int  addRow();		//returns index of added row, always is last row unless
+	int  addRow();          //returns index of added row, always is last row unless
 	bool deleteRow(int r);  //returns true on success
 
-       private:
-	std::string			       name_;     //View name (extensionTableName in xml)
-	int				       version_;  //Configuration version
-	std::string			       comment_;  //Configuration version comment
-	std::string			       author_;
-	time_t				       creationTime_;
-	std::vector<ViewRegisterInfo>	  registersInfo_;
+  private:
+	std::string                            name_;     //View name (extensionTableName in xml)
+	int                                    version_;  //Configuration version
+	std::string                            comment_;  //Configuration version comment
+	std::string                            author_;
+	time_t                                 creationTime_;
+	std::vector<ViewRegisterInfo>          registersInfo_;
 	std::vector<ViewRegisterSequencerInfo> registersSequencerInfo_;
-	DataView			       theDataView_;
+	DataView                               theDataView_;
 };
 
 }  // namespace ots

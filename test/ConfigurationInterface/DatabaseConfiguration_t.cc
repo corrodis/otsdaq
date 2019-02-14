@@ -66,14 +66,14 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 
 	for (unsigned int i = 0; i < configTables.size(); ++i)
 	{
-		theInterface_		= ConfigurationInterface::getInstance(true);
+		theInterface_           = ConfigurationInterface::getInstance(true);
 		ConfigurationBase* base = 0;
 		std::cout << __COUT_HDR_FL__ << std::endl;
 		std::cout << __COUT_HDR_FL__ << std::endl;
 		std::cout << __COUT_HDR_FL__ << (i + 1) << " of " << configTables.size() << ": " << configTables[i] << std::endl;
 
 		theInterface_->get(base, configTables[i], 0, 0, false,
-				   ConfigurationVersion(ConfigurationVersion::DEFAULT));  //load version 0 for all
+		                   ConfigurationVersion(ConfigurationVersion::DEFAULT));  //load version 0 for all
 
 		std::cout << __COUT_HDR_FL__ << "loaded " << configTables[i] << std::endl;
 
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 
 	for (unsigned int i = 0; i < configTables.size(); ++i)
 	{
-		theInterface_		= ConfigurationInterface::getInstance(false);
+		theInterface_           = ConfigurationInterface::getInstance(false);
 		ConfigurationBase* base = 0;
 		std::cout << __COUT_HDR_FL__ << std::endl;
 		std::cout << __COUT_HDR_FL__ << std::endl;
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 		theInterface_->saveNewVersion(base, tmpView);
 
 		delete base;  //cleanup config instance
-			      //break;
+		              //break;
 	}
 
 	std::cout << __COUT_HDR_FL__ << "end of debugging Configuration!" << std::endl;

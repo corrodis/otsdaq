@@ -55,7 +55,7 @@ TCPSocket::TCPSocket(void)
 {
 	__SS__ << "ERROR: This method should never be called. This is the protected constructor. There is something wrong in your inheritance scheme!" << std::endl;
 	__COUT__ << "\n"
-		 << ss.str();
+	         << ss.str();
 
 	__SS_THROW__;
 }
@@ -79,7 +79,7 @@ void TCPSocket::connect(double tmo_s)
 		while (SendSocket_ == -1 && artdaq::TimeUtils::GetElapsedTime(start) < tmo_s) {
 			sockaddr_in addr;
 			socklen_t   arglen = sizeof(addr);
-			SendSocket_	= accept(TCPSocketNumber_, (struct sockaddr*)&addr, &arglen);
+			SendSocket_        = accept(TCPSocketNumber_, (struct sockaddr*)&addr, &arglen);
 
 			if (SendSocket_ == -1)
 			{
@@ -88,7 +88,7 @@ void TCPSocket::connect(double tmo_s)
 			}
 
 			MagicPacket m;
-			auto	sts = read(SendSocket_, &m, sizeof(MagicPacket));
+			auto        sts = read(SendSocket_, &m, sizeof(MagicPacket));
 			if (!checkMagicPacket(m) || sts != sizeof(MagicPacket))
 			{
 				perror("magic");

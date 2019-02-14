@@ -53,7 +53,7 @@ void FESlowControlsConfiguration::init(ConfigurationManager *configManager)
 	//		  											  << std::endl;
 
 	std::string childType;
-	auto	childrenMap = configManager->__SELF_NODE__.getChildren();
+	auto        childrenMap = configManager->__SELF_NODE__.getChildren();
 	for (auto &childPair : childrenMap)
 	{
 		//check each row in table
@@ -70,25 +70,25 @@ void FESlowControlsConfiguration::init(ConfigurationManager *configManager)
 				__SS__ << "Data type '" << childType << "' for UID=" << childPair.first << " is invalid. "
 				       << " The bit size given was " << sz << " and it must be between 1 and 64." << std::endl;
 				__COUT_ERR__ << "\n"
-					     << ss.str();
+				             << ss.str();
 				__SS_THROW__;
 			}
 		}
 		else if (childType != "char" &&
-			 childType != "short" &&
-			 childType != "int" &&
-			 childType != "unsigned int" &&
-			 childType != "long long " &&
-			 childType != "unsigned long long" &&
-			 childType != "float" &&
-			 childType != "double")
+		         childType != "short" &&
+		         childType != "int" &&
+		         childType != "unsigned int" &&
+		         childType != "long long " &&
+		         childType != "unsigned long long" &&
+		         childType != "float" &&
+		         childType != "double")
 		{
 			__SS__ << "Data type '" << childType << "' for UID=" << childPair.first << " is invalid. "
 			       << "Valid data types (w/size in bytes) are as follows: "
 			       << "#b (# bits)"
 			       << ", char (" << sizeof(char) << "B), unsigned char (" << sizeof(unsigned char) << "B), short (" << sizeof(short) << "B), unsigned short (" << sizeof(unsigned short) << "B), int (" << sizeof(int) << "B), unsigned int (" << sizeof(unsigned int) << "B), long long (" << sizeof(long long) << "B), unsigned long long (" << sizeof(unsigned long long) << "B), float (" << sizeof(float) << "B), double (" << sizeof(double) << "B)." << std::endl;
 			__COUT_ERR__ << "\n"
-				     << ss.str();
+			             << ss.str();
 			__SS_THROW__;
 		}
 	}

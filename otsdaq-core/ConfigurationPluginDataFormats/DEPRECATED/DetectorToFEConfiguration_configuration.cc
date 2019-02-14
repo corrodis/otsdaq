@@ -55,8 +55,8 @@ void DetectorToFEConfiguration::init(ConfigurationManager* configManager)
 //==============================================================================
 std::vector<std::string> DetectorToFEConfiguration::getFEWriterDetectorList(std::string interfaceID) const
 {
-	std::string		 tmpDetectorID;
-	std::string		 tmpFEWriterID;
+	std::string              tmpDetectorID;
+	std::string              tmpFEWriterID;
 	std::vector<std::string> list;
 	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
@@ -73,8 +73,8 @@ std::vector<std::string> DetectorToFEConfiguration::getFEWriterDetectorList(std:
 //==============================================================================
 std::vector<std::string> DetectorToFEConfiguration::getFEReaderDetectorList(std::string interfaceID) const
 {
-	std::string		 tmpDetectorID;
-	std::string		 tmpFEReaderID;
+	std::string              tmpDetectorID;
+	std::string              tmpFEReaderID;
 	std::vector<std::string> list;
 	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{

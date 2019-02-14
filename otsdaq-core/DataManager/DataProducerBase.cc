@@ -12,7 +12,7 @@ using namespace ots;
 
 //========================================================================================================================
 DataProducerBase::DataProducerBase(const std::string& supervisorApplicationUID,
-				   const std::string& bufferUID, const std::string& processorUID, unsigned int bufferSize)
+                                   const std::string& bufferUID, const std::string& processorUID, unsigned int bufferSize)
     : DataProcessor(supervisorApplicationUID, bufferUID, processorUID)
     , bufferSize_(bufferSize)
 {
@@ -35,7 +35,7 @@ void DataProducerBase::registerToBuffer(void)
 
 	DataManager* dataManager =
 	    (DataManagerSingleton::getInstance(
-		supervisorApplicationUID_));
+	        supervisorApplicationUID_));
 
 	dataManager->registerProducer(
 	    bufferUID_, this);

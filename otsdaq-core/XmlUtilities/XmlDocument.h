@@ -6,10 +6,11 @@
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/parsers/XercesDOMParser.hpp>
 
-namespace ots {
-
-class XmlDocument {
-       public:
+namespace ots
+{
+class XmlDocument
+{
+  public:
 	XmlDocument(std::string rootName = "ROOT");
 	XmlDocument(const XmlDocument& doc);
 	XmlDocument& operator=(const XmlDocument& doc);
@@ -25,7 +26,7 @@ class XmlDocument {
 
 	void outputXmlDocument(std::ostringstream* out, bool dispStdOut = false);
 
-       protected:
+  protected:
 	void copyDocument(const xercesc::DOMDocument* toCopy, xercesc::DOMDocument* copy);
 	void recursiveElementCopy(const xercesc::DOMElement* toCopy, xercesc::DOMElement* copy);
 	void initDocument(void);
@@ -41,7 +42,7 @@ class XmlDocument {
 
 	xercesc::DOMImplementation* theImplementation_;
 	xercesc::DOMDocument*       theDocument_;
-	xercesc::DOMElement*	rootElement_;
+	xercesc::DOMElement*        rootElement_;
 
 	const std::string rootTagName_;
 };

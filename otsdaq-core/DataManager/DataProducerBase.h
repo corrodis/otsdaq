@@ -7,13 +7,14 @@
 
 #include <string>
 
-namespace ots {
-
+namespace ots
+{
 //DataProducerBase
 //	This class provides base class functionality for Data Producer plugin classes to
 //	receive incoming streaming data and places it in a Buffer.
-class DataProducerBase : public DataProcessor {
-       public:
+class DataProducerBase : public DataProcessor
+{
+  public:
 	DataProducerBase(const std::string& supervisorApplicationUID, const std::string& bufferUID, const std::string& processorUID, unsigned int bufferSize = 100);
 	virtual ~DataProducerBase(void);
 
@@ -47,7 +48,7 @@ class DataProducerBase : public DataProcessor {
 
 	unsigned int getBufferSize(void) const { return bufferSize_; }
 
-       private:
+  private:
 	const unsigned int bufferSize_;
 };
 

@@ -4,10 +4,11 @@
 #include <xgi/Method.h>  //for cgicc::Cgicc
 #include <string>
 
-namespace ots {
-
-class CgiDataUtilities {
-       public:
+namespace ots
+{
+class CgiDataUtilities
+{
+  public:
 	CgiDataUtilities(){};
 	~CgiDataUtilities(){};
 

@@ -8,15 +8,15 @@
 #include <typeinfo>  // operator typeid
 #include <vector>
 
-namespace ots {
-
+namespace ots
+{
 struct BinaryStringMacros
 {
-       private:  //private constructor because all static members, should never instantiate this class
+  private:  //private constructor because all static members, should never instantiate this class
 	BinaryStringMacros(void);
 	~BinaryStringMacros(void);
 
-       public:
+  public:
 	//Here is the list of static helper functions:
 	//
 	//		binaryToHexString

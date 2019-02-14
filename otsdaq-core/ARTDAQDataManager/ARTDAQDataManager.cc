@@ -11,7 +11,7 @@ using namespace ots;
 
 //========================================================================================================================
 ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConfigTree,
-				     const std::string&       supervisorConfigurationPath)
+                                     const std::string&       supervisorConfigurationPath)
     : DataManager(theXDAQContextConfigTree, supervisorConfigurationPath)
 {
 	INIT_MF("BoardReaderDataManager");
@@ -20,9 +20,9 @@ ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConf
 	std::string name = "BoardReader";
 
 	__CFG_MCOUT__("artdaq version " <<
-		      //    mf::LogDebug(supervisorApplicationUID_) << " artdaq version " <<
-		      artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion()
-					<< ", built " << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp());
+	              //    mf::LogDebug(supervisorApplicationUID_) << " artdaq version " <<
+	              artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion()
+	                                << ", built " << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp());
 
 	INIT_MF((name + "App").c_str());
 

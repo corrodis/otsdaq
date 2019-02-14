@@ -56,7 +56,7 @@ std::set<ConfigurationVersion> FileConfigurationInterface::getVersions(const Con
 	//const std::string        ppDir = "..";
 	//int                 dirVersion;
 	std::string::const_iterator    it;
-	std::string		       dirName;
+	std::string                    dirName;
 	std::set<ConfigurationVersion> dirNumbers;
 
 	while ((dirp = readdir(dp)) != 0)
@@ -73,7 +73,7 @@ std::set<ConfigurationVersion> FileConfigurationInterface::getVersions(const Con
 			if (dirName.empty() || it != dirName.end())
 			{
 				std::cout << __COUT_HDR_FL__ << "WARNING: there is a non numeric directory in " << configDir << " called " << dirName
-					  << " please remove it from there since only numeric directories are considered." << std::endl;
+				          << " please remove it from there since only numeric directories are considered." << std::endl;
 				continue;
 			}
 

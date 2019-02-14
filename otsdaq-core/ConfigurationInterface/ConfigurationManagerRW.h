@@ -10,8 +10,8 @@
 
 //#include <memory>
 
-namespace ots {
-
+namespace ots
+{
 struct ConfigurationInfo
 {
 	ConfigurationInfo()
@@ -21,13 +21,13 @@ struct ConfigurationInfo
 	}
 
 	std::set<ConfigurationVersion> versions_;
-	ConfigurationBase*	     configurationPtr_;
+	ConfigurationBase*             configurationPtr_;
 };
 
 struct GroupInfo
 {
 	std::set<ConfigurationGroupKey> keys_;
-	std::string			latestKeyGroupAuthor_, latestKeyGroupComment_,
+	std::string                     latestKeyGroupAuthor_, latestKeyGroupComment_,
 	    latestKeyGroupCreationTime_, latestKeyGroupTypeString_;
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> latestKeyMemberMap_;
 
@@ -43,8 +43,9 @@ struct GroupInfo
 //	This is the ConfigurationManger with write access
 //	This class inherits all public function from ConfigurationManager
 // and is a "Friend" class of ConfigurationManager so has access to private members.
-class ConfigurationManagerRW : public ConfigurationManager {
-       public:
+class ConfigurationManagerRW : public ConfigurationManager
+{
+  public:
 	ConfigurationManagerRW(std::string username);
 
 	//==============================================================================
@@ -52,7 +53,7 @@ class ConfigurationManagerRW : public ConfigurationManager {
 	const std::string&      getUsername(void) const { return username_; }
 	ConfigurationInterface* getConfigurationInterface(void) const { return theInterface_; }
 
-	const std::map<std::string, ConfigurationInfo>&								    getAllConfigurationInfo(bool refresh = false, std::string* accumulatedErrors = 0, const std::string& errorFilterName = "");
+	const std::map<std::string, ConfigurationInfo>&                                                             getAllConfigurationInfo(bool refresh = false, std::string* accumulatedErrors = 0, const std::string& errorFilterName = "");
 	std::map<std::string /*tableName*/, std::map<std::string /*aliasName*/, ConfigurationVersion /*version*/> > getVersionAliases(void) const;
 
 	template<class T>
@@ -70,9 +71,9 @@ class ConfigurationManagerRW : public ConfigurationManager {
 
 	ConfigurationVersion saveNewConfiguration(const std::string& configurationName, ConfigurationVersion temporaryVersion = ConfigurationVersion(), bool makeTemporary = false);  //, bool saveToScratchVersion = false);
 	ConfigurationVersion copyViewToCurrentColumns(const std::string& configurationName, ConfigurationVersion sourceVersion);
-	void		     eraseTemporaryVersion(const std::string& configurationName, ConfigurationVersion targetVersion = ConfigurationVersion());
-	void		     clearCachedVersions(const std::string& configurationName);
-	void		     clearAllCachedVersions();
+	void                 eraseTemporaryVersion(const std::string& configurationName, ConfigurationVersion targetVersion = ConfigurationVersion());
+	void                 clearCachedVersions(const std::string& configurationName);
+	void                 clearAllCachedVersions();
 
 	//==============================================================================
 	//modifiers of configuration groups
@@ -88,12 +89,12 @@ class ConfigurationManagerRW : public ConfigurationManager {
 
 	//==============================================================================
 	//public group cache handling
-	const GroupInfo&			getGroupInfo(const std::string& groupName);
+	const GroupInfo&                        getGroupInfo(const std::string& groupName);
 	const std::map<std::string, GroupInfo>& getAllGroupInfo() { return allGroupInfo_; }
 
 	void testXDAQContext();  //for debugging
 
-       private:
+  private:
 	//==============================================================================
 	//group cache handling
 	void cacheGroupKey(const std::string& groupName, ConfigurationGroupKey key);
@@ -101,7 +102,7 @@ class ConfigurationManagerRW : public ConfigurationManager {
 	//==============================================================================
 	//private members
 	std::map<std::string, ConfigurationInfo> allConfigurationInfo_;
-	std::map<std::string, GroupInfo>	 allGroupInfo_;
+	std::map<std::string, GroupInfo>         allGroupInfo_;
 };
 
 /////
@@ -111,9 +112,9 @@ struct TableEditStruct
 	ConfigurationBase*   config_;
 	ConfigurationView*   cfgView_;
 	ConfigurationVersion temporaryVersion_, originalVersion_;
-	bool		     createdTemporaryVersion_;  //indicates if temp version was created here
-	bool		     modified_;			//indicates if temp version was modified
-	std::string	  configName_;
+	bool                 createdTemporaryVersion_;  //indicates if temp version was created here
+	bool                 modified_;                 //indicates if temp version was modified
+	std::string          configName_;
 	/////
 	TableEditStruct()
 	{
@@ -129,8 +130,8 @@ struct TableEditStruct
 		config_ = cfgMgr->getConfigurationByName(configName_);
 
 		if (!(originalVersion_ =
-			  config_->getView().getVersion())
-			 .isTemporaryVersion())
+		          config_->getView().getVersion())
+		         .isTemporaryVersion())
 		{
 			__COUT__ << "Start version " << originalVersion_ << std::endl;
 			//create temporary version for editing

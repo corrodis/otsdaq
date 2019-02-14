@@ -4,10 +4,11 @@
 #include <stdint.h>
 #include <string>
 
-namespace ots {
-
-class NetworkConverters {
-       public:
+namespace ots
+{
+class NetworkConverters
+{
+  public:
 	NetworkConverters(void);
 	~NetworkConverters(void);
 

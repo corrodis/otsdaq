@@ -5,13 +5,15 @@
 #include "otsdaq-core/DataDecoders/DataDecoder.h"
 #include "otsdaq-core/DataManager/DataConsumer.h"
 
-namespace ots {
-class DataDecoderConsumer : public DataDecoder, public DataConsumer, public Configurable {
-       public:
+namespace ots
+{
+class DataDecoderConsumer : public DataDecoder, public DataConsumer, public Configurable
+{
+  public:
 	DataDecoderConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
 	virtual ~DataDecoderConsumer(void);
 
-       protected:
+  protected:
 	bool workLoopThread(toolbox::task::WorkLoop* workLoop);
 };
 

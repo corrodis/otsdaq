@@ -3,16 +3,17 @@
 
 #include "otsdaq-core/CoreSupervisors/FEDataManagerSupervisor.h"
 
-namespace ots {
-
-class ARTDAQFEDataManagerSupervisor : public FEDataManagerSupervisor {
-       public:
+namespace ots
+{
+class ARTDAQFEDataManagerSupervisor : public FEDataManagerSupervisor
+{
+  public:
 	XDAQ_INSTANTIATOR();
 
 	ARTDAQFEDataManagerSupervisor(xdaq::ApplicationStub* s);
 	virtual ~ARTDAQFEDataManagerSupervisor(void);
 
-       private:
+  private:
 };
 
 }  // namespace ots

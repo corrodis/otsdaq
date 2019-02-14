@@ -13,9 +13,9 @@ DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub* s)
 {
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
 	    DataManagerSingleton::getInstance<DataManager>(
-		CorePropertySupervisorBase::getContextTreeNode(),
-		CorePropertySupervisorBase::supervisorConfigurationPath_,
-		CorePropertySupervisorBase::supervisorApplicationUID_));
+	        CorePropertySupervisorBase::getContextTreeNode(),
+	        CorePropertySupervisorBase::supervisorConfigurationPath_,
+	        CorePropertySupervisorBase::supervisorApplicationUID_));
 }
 
 //========================================================================================================================

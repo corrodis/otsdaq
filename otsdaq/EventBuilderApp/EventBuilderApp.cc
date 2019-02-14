@@ -59,7 +59,7 @@ EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
 	catch (...)
 	{
 		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Context Group."
-			     << " The XDAQContextConfigurationName = " << XDAQContextConfigurationName_ << ". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
+		             << " The XDAQContextConfigurationName = " << XDAQContextConfigurationName_ << ". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
 	}
 	try
@@ -69,7 +69,7 @@ EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
 	catch (...)
 	{
 		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Application Group."
-			     << " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
+		             << " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
 	}
 	supervisorConfigurationPath_ = "/" + supervisorContextUID_ + "/LinkToApplicationTable/" + supervisorApplicationUID_ + "/LinkToSupervisorTable";
@@ -99,7 +99,7 @@ void EventBuilderApp::init(void)
 	artdaq::setMsgFacAppName(name, port);
 	std::cout << __COUT_HDR_FL__ << "ARTDAQBUILDER SUPERVISOR MSG FACILITY DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 	TLOG(TLVL_DEBUG, name + "Supervisor") << "artdaq version " << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion()
-					      << ", built " << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
+	                                      << ", built " << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
 
 	// create the EventBuilderInterface
 	app_name = name;
@@ -164,7 +164,7 @@ bool EventBuilderApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 	std::cout << __COUT_HDR_FL__ << "Done with message" << std::endl;
 	stateMachineSemaphore_.give();
 	return false;  //execute once and automatically remove the workloop so in WorkLoopManager the try workLoop->remove(job_) could be commented out
-		       //return true;//go on and then you must do the workLoop->remove(job_) in WorkLoopManager
+	               //return true;//go on and then you must do the workLoop->remove(job_) in WorkLoopManager
 }
 
 //========================================================================================================================
@@ -230,7 +230,7 @@ void EventBuilderApp::enteringError(toolbox::Event::Reference e)
 {
 	std::cout << __COUT_HDR_FL__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
-	std::ostringstream	 error;
+	std::ostringstream         error;
 	error << "Failure performing transition from "
 	      << failedEvent.getFromState()
 	      << " to "
@@ -318,7 +318,7 @@ void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
 	{
 		__SS__ << "Error was caught while configuring: " << e.what() << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,

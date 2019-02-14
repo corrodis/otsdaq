@@ -93,8 +93,8 @@ bool ConfigurationVersion::operator>(const ConfigurationVersion& version) const
 bool ConfigurationVersion::isInvalid() const
 {
 	return (version_ == ConfigurationVersion::INVALID ||
-		(version_ > ConfigurationVersion::SCRATCH &&
-		 version_ < INVALID - NUM_OF_TEMP_VERSIONS));  //unused reserved block
+	        (version_ > ConfigurationVersion::SCRATCH &&
+	         version_ < INVALID - NUM_OF_TEMP_VERSIONS));  //unused reserved block
 }
 
 //==============================================================================

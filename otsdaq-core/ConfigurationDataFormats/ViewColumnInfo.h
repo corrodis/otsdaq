@@ -6,21 +6,22 @@
 #include <string>
 #include <vector>
 
-namespace ots {
-
-class ViewColumnInfo {
-       public:
+namespace ots
+{
+class ViewColumnInfo
+{
+  public:
 	ViewColumnInfo(const std::string& type, const std::string& name, const std::string& storageName, const std::string& dataType, const std::string& dataChoicesCSV, std::string* capturedExceptionString);
-	ViewColumnInfo(const ViewColumnInfo& c);	     //copy constructor because of bitmap pointer
+	ViewColumnInfo(const ViewColumnInfo& c);             //copy constructor because of bitmap pointer
 	ViewColumnInfo& operator=(const ViewColumnInfo& c);  //assignment operator because of bitmap pointer
 
 	virtual ~ViewColumnInfo(void);
 
-	const std::string&		getType(void) const;
-	const std::string&		getName(void) const;
-	const std::string&		getStorageName(void) const;
-	const std::string&		getDataType(void) const;
-	const std::string&		getDefaultValue(void) const;
+	const std::string&              getType(void) const;
+	const std::string&              getName(void) const;
+	const std::string&              getStorageName(void) const;
+	const std::string&              getDataType(void) const;
+	const std::string&              getDefaultValue(void) const;
 	const std::vector<std::string>& getDataChoices(void) const;
 
 	struct BitMapInfo  //uses dataChoices CSV fields if type is TYPE_BITMAP_DATA
@@ -36,13 +37,13 @@ class ViewColumnInfo {
 		std::string  aspectRatio_;
 		std::string  minColor_, midColor_, maxColor_;
 		std::string  absMinColor_, absMaxColor_;
-		bool	 rowsAscending_, colsAscending_, snakeRows_, snakeCols_;
+		bool         rowsAscending_, colsAscending_, snakeRows_, snakeCols_;
 	};
 	const BitMapInfo& getBitMapInfo(void) const;  //uses dataChoices CSV fields if type is TYPE_BITMAP_DATA
 
-	static std::vector<std::string>					  getAllTypesForGUI(void);
+	static std::vector<std::string>                                   getAllTypesForGUI(void);
 	static std::map<std::pair<std::string, std::string>, std::string> getAllDefaultsForGUI(void);
-	static std::vector<std::string>					  getAllDataTypesForGUI(void);
+	static std::vector<std::string>                                   getAllDataTypesForGUI(void);
 
 	const bool isChildLink(void) const;
 	const bool isChildLinkUID(void) const;
@@ -77,17 +78,17 @@ class ViewColumnInfo {
 
 	static const std::string COL_NAME_STATUS, COL_NAME_PRIORITY;
 
-       private:
+  private:
 	ViewColumnInfo();  //private constructor, only used in assignment operator
 	void extractBitMapInfo();
 
-       protected:
-	std::string		 type_;
-	std::string		 name_;
-	std::string		 storageName_;
-	std::string		 dataType_;
+  protected:
+	std::string              type_;
+	std::string              name_;
+	std::string              storageName_;
+	std::string              dataType_;
 	std::vector<std::string> dataChoices_;
-	BitMapInfo*		 bitMapInfoP_;
+	BitMapInfo*              bitMapInfoP_;
 };
 
 }  // namespace ots

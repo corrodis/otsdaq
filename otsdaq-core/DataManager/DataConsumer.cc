@@ -42,7 +42,7 @@ void DataConsumer::registerToBuffer(void)
 
 	DataManager* dataManager =
 	    (DataManagerSingleton::getInstance(
-		supervisorApplicationUID_));
+	        supervisorApplicationUID_));
 
 	dataManager->registerConsumer(
 	    bufferUID_, this);

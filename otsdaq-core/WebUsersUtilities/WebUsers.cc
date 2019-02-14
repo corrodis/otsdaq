@@ -38,38 +38,38 @@ using namespace ots;
 #define USERS_DB_NEXT_UID_STRING "nextUserId"
 
 //defines for user preferences
-#define PREF_XML_BGCOLOR_FIELD "pref_bgcolor"		       // -background color
-#define PREF_XML_DBCOLOR_FIELD "pref_dbcolor"		       // -dashboard color
-#define PREF_XML_WINCOLOR_FIELD "pref_wincolor"		       // -window color
-#define PREF_XML_LAYOUT_FIELD "pref_layout"		       // -3 defaults window layouts(and current)
-#define PREF_XML_SYSLAYOUT_FIELD "pref_syslayout"	      // -2 defaults window layouts
+#define PREF_XML_BGCOLOR_FIELD "pref_bgcolor"                  // -background color
+#define PREF_XML_DBCOLOR_FIELD "pref_dbcolor"                  // -dashboard color
+#define PREF_XML_WINCOLOR_FIELD "pref_wincolor"                // -window color
+#define PREF_XML_LAYOUT_FIELD "pref_layout"                    // -3 defaults window layouts(and current)
+#define PREF_XML_SYSLAYOUT_FIELD "pref_syslayout"              // -2 defaults window layouts
 #define PREF_XML_PERMISSIONS_FIELD "desktop_user_permissions"  // 0-255 permissions value (255 is admin super user)
-#define PREF_XML_USERLOCK_FIELD "username_with_lock"	   // user with lock (to lockout others)
-#define PREF_XML_USERNAME_FIELD "pref_username"		       // user with lock (to lockout others)
+#define PREF_XML_USERLOCK_FIELD "username_with_lock"           // user with lock (to lockout others)
+#define PREF_XML_USERNAME_FIELD "pref_username"                // user with lock (to lockout others)
 
-#define PREF_XML_BGCOLOR_DEFAULT "rgb(0,76,151)"	   // -background color
-#define PREF_XML_DBCOLOR_DEFAULT "rgb(0,40,85)"		   // -dashboard color
+#define PREF_XML_BGCOLOR_DEFAULT "rgb(0,76,151)"           // -background color
+#define PREF_XML_DBCOLOR_DEFAULT "rgb(0,40,85)"            // -dashboard color
 #define PREF_XML_WINCOLOR_DEFAULT "rgba(196,229,255,0.9)"  // -window color
-#define PREF_XML_LAYOUT_DEFAULT "0;0;0;0"		   // 3 default window layouts(and current)
-#define PREF_XML_SYSLAYOUT_DEFAULT "0;0"		   // 2 system default window layouts
+#define PREF_XML_LAYOUT_DEFAULT "0;0;0;0"                  // 3 default window layouts(and current)
+#define PREF_XML_SYSLAYOUT_DEFAULT "0;0"                   // 2 system default window layouts
 
 #define PREF_XML_ACCOUNTS_FIELD "users_accounts"    // user accounts field for super users
 #define PREF_XML_LOGIN_HISTORY_FIELD "login_entry"  // login history field for user login history data
 
-const std::string WebUsers::DEFAULT_ADMIN_USERNAME	= "admin";
+const std::string WebUsers::DEFAULT_ADMIN_USERNAME        = "admin";
 const std::string WebUsers::DEFAULT_ADMIN_DISPLAY_NAME    = "Administrator";
-const std::string WebUsers::DEFAULT_ADMIN_EMAIL		  = "root@otsdaq.fnal.gov";
+const std::string WebUsers::DEFAULT_ADMIN_EMAIL           = "root@otsdaq.fnal.gov";
 const std::string WebUsers::DEFAULT_ITERATOR_USERNAME     = "iterator";
 const std::string WebUsers::DEFAULT_STATECHANGER_USERNAME = "statechanger";
-const std::string WebUsers::DEFAULT_USER_GROUP		  = "allUsers";
+const std::string WebUsers::DEFAULT_USER_GROUP            = "allUsers";
 
 const std::string WebUsers::REQ_NO_LOGIN_RESPONSE      = "NoLogin";
 const std::string WebUsers::REQ_NO_PERMISSION_RESPONSE = "NoPermission";
 const std::string WebUsers::REQ_USER_LOCKOUT_RESPONSE  = "UserLockout";
 const std::string WebUsers::REQ_LOCK_REQUIRED_RESPONSE = "LockRequired";
-const std::string WebUsers::REQ_ALLOW_NO_USER	  = "AllowNoUser";
+const std::string WebUsers::REQ_ALLOW_NO_USER          = "AllowNoUser";
 
-const std::string WebUsers::SECURITY_TYPE_NONE		= "NoSecurity";
+const std::string WebUsers::SECURITY_TYPE_NONE          = "NoSecurity";
 const std::string WebUsers::SECURITY_TYPE_DIGEST_ACCESS = "DigestAccessAuthentication";
 
 #undef __MF_SUBJECT__
@@ -122,7 +122,7 @@ WebUsers::WebUsers()
 		exit(0);  //THIS CAN NOT HAPPEN?! There must be an admin user
 	}
 	else if (UsersSaltVector[i] == "" &&  //admin password not setup, so print out NAC to help out
-		 securityType_ == SECURITY_TYPE_DIGEST_ACCESS)
+	         securityType_ == SECURITY_TYPE_DIGEST_ACCESS)
 	{
 		char charTimeStr[10];
 		sprintf(charTimeStr, "%d", int(UsersAccountCreatedTimeVector[i] & 0xffff));
@@ -132,7 +132,7 @@ WebUsers::WebUsers()
 		//start thread for notifying the user about the admin new account code
 		// notify for 10 seconds (e.g.)
 		std::thread([](const std::string& nac, const std::string& user) { WebUsers::NACDisplayThread(nac, user); },
-			    tmpTimeStr, user)
+		            tmpTimeStr, user)
 		    .detach();
 	}
 
@@ -335,9 +335,9 @@ WebUsers::WebUsers()
 //		of the web users instance.
 //	if false, gateway request code should just return.. out is handled on false; on true, out is untouched
 bool WebUsers::xmlRequestOnGateway(
-    cgicc::Cgicc&	      cgi,
-    std::ostringstream*	out,
-    HttpXmlDocument*	   xmldoc,
+    cgicc::Cgicc&              cgi,
+    std::ostringstream*        out,
+    HttpXmlDocument*           xmldoc,
     WebUsers::RequestUserInfo& userInfo)
 {
 	//initialize user info parameters to failed results
@@ -346,13 +346,13 @@ bool WebUsers::xmlRequestOnGateway(
 	//tmpUserWithLock_ = "";
 
 	if (!cookieCodeIsActiveForRequest(
-		userInfo.cookieCode_,
-		&userInfo.groupPermissionLevelMap_,
-		&userInfo.uid_,
-		userInfo.ip_,
-		!userInfo.automatedCommand_ /*refresh cookie*/,
-		&userInfo.usernameWithLock_,
-		&userInfo.activeUserSessionIndex_))
+	        userInfo.cookieCode_,
+	        &userInfo.groupPermissionLevelMap_,
+	        &userInfo.uid_,
+	        userInfo.ip_,
+	        !userInfo.automatedCommand_ /*refresh cookie*/,
+	        &userInfo.usernameWithLock_,
+	        &userInfo.activeUserSessionIndex_))
 	{
 		*out << userInfo.cookieCode_;
 		goto HANDLE_ACCESS_FAILURE;  //return false, access failed
@@ -380,14 +380,14 @@ HANDLE_ACCESS_FAILURE:
 //initializeRequestUserInfo
 //	initialize user info parameters to failed results
 void WebUsers::initializeRequestUserInfo(
-    cgicc::Cgicc&	      cgi,
+    cgicc::Cgicc&              cgi,
     WebUsers::RequestUserInfo& userInfo)
 {
 	userInfo.ip_ = cgi.getEnvironment().getRemoteAddr();
 
 	//note if related bools are false, members below may not be set
-	userInfo.username_		 = "";
-	userInfo.displayName_		 = "";
+	userInfo.username_               = "";
+	userInfo.displayName_            = "";
 	userInfo.usernameWithLock_       = "";
 	userInfo.activeUserSessionIndex_ = -1;
 	userInfo.setGroupPermissionLevels("");  //always init to inactive
@@ -399,11 +399,11 @@ void WebUsers::initializeRequestUserInfo(
 //	Note: assumes userInfo.groupPermissionLevelMap_ and userInfo.permissionLevel_ are properly setup
 //		by either calling userInfo.setGroupPermissionLevels() or userInfo.getGroupPermissionLevel()
 bool WebUsers::checkRequestAccess(
-    cgicc::Cgicc&	      cgi,
-    std::ostringstream*	out,
-    HttpXmlDocument*	   xmldoc,
+    cgicc::Cgicc&              cgi,
+    std::ostringstream*        out,
+    HttpXmlDocument*           xmldoc,
     WebUsers::RequestUserInfo& userInfo,
-    bool		       isWizardMode)
+    bool                       isWizardMode)
 {
 	//steps:
 	// - check access based on cookieCode and permission level
@@ -437,8 +437,8 @@ bool WebUsers::checkRequestAccess(
 
 	if (isWizardMode)
 	{
-		userInfo.username_		 = "admin";
-		userInfo.displayName_		 = "Admin";
+		userInfo.username_               = "admin";
+		userInfo.displayName_            = "Admin";
 		userInfo.usernameWithLock_       = "admin";
 		userInfo.activeUserSessionIndex_ = 0;
 		return true;  //done, wizard mode access granted
@@ -606,11 +606,11 @@ bool WebUsers::loadDatabases()
 {
 	std::string fn;
 
-	FILE*		   fp;
+	FILE*              fp;
 	const unsigned int LINE_LEN = 1000;
-	char		   line[LINE_LEN];
+	char               line[LINE_LEN];
 	unsigned int       i, si, c, len, f;
-	uint64_t	   tmpInt64;
+	uint64_t           tmpInt64;
 
 	//hashes
 	//	File Organization:
@@ -648,7 +648,7 @@ bool WebUsers::loadDatabases()
 			for (i = 0; i < len; ++i)
 				if (line[i] == '>')
 				{
-					++c;				 //count >'s
+					++c;                             //count >'s
 					if (c != 2 && c != 4) continue;  //only proceed for field data
 
 					si = ++i;  //save start index
@@ -720,7 +720,7 @@ bool WebUsers::loadDatabases()
 				i += 2;
 				si = i;
 				while (i < LINE_LEN && line[i] != '\0' && line[i] != '<') ++i;  //find '<'
-				line[i] = '\0';							//close std::string
+				line[i] = '\0';                                                 //close std::string
 				sscanf(&line[si], "%lu", &usersNextUserId_);
 				break;  //done with next uid
 			}
@@ -746,7 +746,7 @@ bool WebUsers::loadDatabases()
 			for (i = 0; i < len; ++i)
 				if (line[i] == '>')
 				{
-					++c;				     //count >'s
+					++c;                                 //count >'s
 					if (c == 0 || c % 2 == 1) continue;  //only proceed for field data (even
 
 					si = ++i;  //save start index
@@ -774,7 +774,7 @@ bool WebUsers::loadDatabases()
 						UsersPermissionsVector.push_back(std::map<std::string, uint8_t>());
 						std::map<std::string, uint8_t>& lastPermissionsMap = UsersPermissionsVector.back();
 						StringMacros::getMapFromString<uint8_t>(&line[si],
-											lastPermissionsMap);
+						                                        lastPermissionsMap);
 
 						//__COUT__ << "User permission levels:" << StringMacros::mapToString(lastPermissionsMap) << __E__;
 
@@ -890,7 +890,7 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 	__COUT__ << "Save Database: " << (int)db << __E__;
 
 	std::string fn = (std::string)WEB_LOGIN_DB_PATH +
-			 ((db == DB_USERS) ? (std::string)USERS_DB_FILE : (std::string)HASHES_DB_FILE);
+	                 ((db == DB_USERS) ? (std::string)USERS_DB_FILE : (std::string)HASHES_DB_FILE);
 
 	__COUT__ << "Save Database Filename: " << fn << __E__;
 
@@ -900,9 +900,9 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 		char dayAppend[20];
 		sprintf(dayAppend, ".%lu.bkup", time(0) / (3600 * 24));
 		std::string bkup_fn = (std::string)WEB_LOGIN_DB_PATH +
-				      (std::string)WEB_LOGIN_BKUP_DB_PATH +
-				      ((db == DB_USERS) ? (std::string)USERS_DB_FILE : (std::string)HASHES_DB_FILE) +
-				      (std::string)dayAppend;
+		                      (std::string)WEB_LOGIN_BKUP_DB_PATH +
+		                      ((db == DB_USERS) ? (std::string)USERS_DB_FILE : (std::string)HASHES_DB_FILE) +
+		                      (std::string)dayAppend;
 
 		__COUT__ << "Backup file: " << bkup_fn << __E__;
 
@@ -946,7 +946,7 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 				}
 				else if (f == 4)  //permissions
 					saveToDatabase(fp, UsersDatabaseEntryFields[f],
-						       StringMacros::mapToString(UsersPermissionsVector[i], "," /*primary delimeter*/, ":" /*secondary delimeter*/), DB_SAVE_OPEN_AND_CLOSE, false);
+					               StringMacros::mapToString(UsersPermissionsVector[i], "," /*primary delimeter*/, ":" /*secondary delimeter*/), DB_SAVE_OPEN_AND_CLOSE, false);
 				else if (f == 5)  //lastLoginAttemptTime
 				{
 					sprintf(fldStr, "%lu", UsersLastLoginAttemptVector[i]);
@@ -1015,7 +1015,7 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 //			and salt starts as "" until password is set
 //		Special case if first user name!! max permissions given (super user made)
 bool WebUsers::createNewAccount(const std::string& username, const std::string& displayName,
-				const std::string& email)
+                                const std::string& email)
 {
 	__COUT__ << "Creating account: " << username << __E__;
 	//check if username already exists
@@ -1034,7 +1034,7 @@ bool WebUsers::createNewAccount(const std::string& username, const std::string& 
 	UsersUserEmailVector.push_back(email);
 	UsersSaltVector.push_back("");
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> initPermissions = {{WebUsers::DEFAULT_USER_GROUP,
-											     (UsersPermissionsVector.size() ? WebUsers::PERMISSION_LEVEL_NOVICE : WebUsers::PERMISSION_LEVEL_ADMIN)}};
+	                                                                                     (UsersPermissionsVector.size() ? WebUsers::PERMISSION_LEVEL_NOVICE : WebUsers::PERMISSION_LEVEL_ADMIN)}};
 	UsersPermissionsVector.push_back(initPermissions);  //max permissions if first user
 
 	UsersUserIdVector.push_back(usersNextUserId_++);
@@ -1086,7 +1086,7 @@ bool WebUsers::deleteAccount(const std::string& username, const std::string& dis
 unsigned int WebUsers::hexByteStrToInt(const char* h)
 {
 	unsigned int rv;
-	char	 hs[3] = {h[0], h[1], '\0'};
+	char         hs[3] = {h[0], h[1], '\0'};
 	sscanf(hs, "%X", &rv);
 	return rv;
 }
@@ -1107,7 +1107,7 @@ void WebUsers::intToHexStr(unsigned char i, char* h)
 //	returns User Id, cookieCode in newAccountCode, and displayName in jumbledUser on success
 //	else returns -1 and cookieCode "0"
 uint64_t WebUsers::attemptActiveSession(const std::string& uuid, std::string& jumbledUser,
-					const std::string& jumbledPw, std::string& newAccountCode, const std::string& ip)
+                                        const std::string& jumbledPw, std::string& newAccountCode, const std::string& ip)
 {
 	//__COUTV__(ip);
 	if (!checkIpAccess(ip))
@@ -1236,12 +1236,12 @@ uint64_t WebUsers::attemptActiveSession(const std::string& uuid, std::string& ju
 		char entryStr[500];
 		if (h)
 			sprintf(entryStr, "Time=%lu Username=%s Permissions=%s UID=%lu",
-				time(0), UsersUsernameVector[i].c_str(),
-				StringMacros::mapToString(UsersPermissionsVector[i]).c_str(), UsersUserIdVector[i]);
+			        time(0), UsersUsernameVector[i].c_str(),
+			        StringMacros::mapToString(UsersPermissionsVector[i]).c_str(), UsersUserIdVector[i]);
 		else
 			sprintf(entryStr, "Time=%lu displayName=%s Permissions=%s UID=%lu",
-				time(0), UsersDisplayNameVector[i].c_str(),
-				StringMacros::mapToString(UsersPermissionsVector[i]).c_str(), UsersUserIdVector[i]);
+			        time(0), UsersDisplayNameVector[i].c_str(),
+			        StringMacros::mapToString(UsersPermissionsVector[i]).c_str(), UsersUserIdVector[i]);
 		histXml.addTextElementToData(PREF_XML_LOGIN_HISTORY_FIELD, entryStr);
 
 		//save file
@@ -1249,10 +1249,10 @@ uint64_t WebUsers::attemptActiveSession(const std::string& uuid, std::string& ju
 	}
 
 	//SUCCESS!!
-	saveDatabaseToFile(DB_USERS);					    //users db modified, so save
-	jumbledUser    = UsersDisplayNameVector[i];			    //pass by reference displayName
+	saveDatabaseToFile(DB_USERS);                                       //users db modified, so save
+	jumbledUser    = UsersDisplayNameVector[i];                         //pass by reference displayName
 	newAccountCode = createNewActiveSession(UsersUserIdVector[i], ip);  //return cookie code by reference
-	return UsersUserIdVector[i];					    //return user Id
+	return UsersUserIdVector[i];                                        //return user Id
 }
 
 //========================================================================================================================
@@ -1262,7 +1262,7 @@ uint64_t WebUsers::attemptActiveSession(const std::string& uuid, std::string& ju
 //	returns User Id, cookieCode, and displayName in jumbledEmail on success
 //	else returns -1 and cookieCode "0"
 uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::string& email,
-						std::string& cookieCode, std::string& user, const std::string& ip)
+                                                std::string& cookieCode, std::string& user, const std::string& ip)
 {
 	if (!checkIpAccess(ip))
 	{
@@ -1275,7 +1275,7 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 	if (!CareAboutCookieCodes_)  //NO SECURITY
 	{
 		uint64_t uid = getAdminUserID();
-		email	= getUsersDisplayName(uid);
+		email        = getUsersDisplayName(uid);
 		cookieCode   = genCookieCode();  //return "dummy" cookie code by reference
 		return uid;
 	}
@@ -1363,12 +1363,12 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 		char entryStr[500];
 		if (h)
 			sprintf(entryStr, "Time=%lu Username=%s Permissions=%s UID=%lu",
-				time(0), UsersUsernameVector[i].c_str(),
-				StringMacros::mapToString(UsersPermissionsVector[i]).c_str(), UsersUserIdVector[i]);
+			        time(0), UsersUsernameVector[i].c_str(),
+			        StringMacros::mapToString(UsersPermissionsVector[i]).c_str(), UsersUserIdVector[i]);
 		else
 			sprintf(entryStr, "Time=%lu displayName=%s Permissions=%s UID=%lu",
-				time(0), UsersDisplayNameVector[i].c_str(),
-				StringMacros::mapToString(UsersPermissionsVector[i]).c_str(), UsersUserIdVector[i]);
+			        time(0), UsersDisplayNameVector[i].c_str(),
+			        StringMacros::mapToString(UsersPermissionsVector[i]).c_str(), UsersUserIdVector[i]);
 		histXml.addTextElementToData(PREF_XML_LOGIN_HISTORY_FIELD, entryStr);
 
 		//save file
@@ -1376,10 +1376,10 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 	}
 
 	//SUCCESS!!
-	saveDatabaseToFile(DB_USERS);					//users db modified, so save
-	email      = UsersDisplayNameVector[i];				//pass by reference displayName
+	saveDatabaseToFile(DB_USERS);                                   //users db modified, so save
+	email      = UsersDisplayNameVector[i];                         //pass by reference displayName
 	cookieCode = createNewActiveSession(UsersUserIdVector[i], ip);  //return cookie code by reference
-	return UsersUserIdVector[i];					//return user Id
+	return UsersUserIdVector[i];                                    //return user Id
 }
 
 //========================================================================================================================
@@ -1499,7 +1499,7 @@ bool WebUsers::addToHashesDatabase(const std::string& hash)
 //WebUsers::genCookieCode ---
 std::string WebUsers::genCookieCode()
 {
-	char	hexStr[3];
+	char        hexStr[3];
 	std::string cc = "";
 	for (uint32_t i = 0; i < COOKIE_CODE_LENGTH / 2; ++i)
 	{
@@ -1596,7 +1596,7 @@ std::string WebUsers::refreshCookieCode(unsigned int i, bool enableRefresh)
 			{
 				//but previous is maintained and start time is changed to accommodate overlap time.
 				ActiveSessionStartTimeVector[j] = time(0) - ACTIVE_SESSION_EXPIRATION_TIME +
-								  ACTIVE_SESSION_COOKIE_OVERLAP_TIME;  //give time window for stale cookie commands before expiring
+				                                  ACTIVE_SESSION_COOKIE_OVERLAP_TIME;  //give time window for stale cookie commands before expiring
 
 				//create new active cookieCode with same ActiveSessionIndex, will now be found as most recent
 				return createNewActiveSession(ActiveSessionUserIdVector[i], ActiveSessionIpVector[i], ActiveSessionIndex[i]);
@@ -1614,7 +1614,7 @@ std::string WebUsers::refreshCookieCode(unsigned int i, bool enableRefresh)
 //	displayName is returned in username std::string
 //	else returns -1
 uint64_t WebUsers::isCookieCodeActiveForLogin(const std::string& uuid, std::string& cookieCode,
-					      std::string& username)
+                                              std::string& username)
 {
 	if (!CareAboutCookieCodes_)
 		return getAdminUserID();  //always successful
@@ -1659,7 +1659,7 @@ uint64_t WebUsers::isCookieCodeActiveForLogin(const std::string& uuid, std::stri
 
 	username   = UsersDisplayNameVector[j];  //return display name by reference
 	cookieCode = refreshCookieCode(i);       //refresh cookie by reference
-	return UsersUserIdVector[j];		 //return user ID
+	return UsersUserIdVector[j];             //return user ID
 }
 
 //========================================================================================================================
@@ -1667,7 +1667,7 @@ uint64_t WebUsers::isCookieCodeActiveForLogin(const std::string& uuid, std::stri
 //	Returns count of unique ActiveSessionIndex entries for user's uid
 uint64_t WebUsers::getActiveSessionCountForUser(uint64_t uid)
 {
-	bool		      unique;
+	bool                  unique;
 	std::vector<uint64_t> uniqueAsi;  //maintain unique as indices for reference
 
 	uint64_t i, j;
@@ -1820,7 +1820,7 @@ std::string WebUsers::getUsersUsername(uint64_t uid)
 //  on failure, returns -1
 // 	on success returns number of active sessions that were removed
 uint64_t WebUsers::cookieCodeLogout(const std::string& cookieCode, bool logoutOtherUserSessions,
-				    uint64_t* userId, const std::string& ip)
+                                    uint64_t* userId, const std::string& ip)
 {
 	uint64_t i;
 
@@ -1863,7 +1863,7 @@ uint64_t WebUsers::cookieCodeLogout(const std::string& cookieCode, bool logoutOt
 		     ActiveSessionIndex[i] == asi))
 		{
 			__COUT__ << "Logging out of active session " << ActiveSessionUserIdVector[i]
-				 << "-" << ActiveSessionIndex[i] << __E__;
+			         << "-" << ActiveSessionIndex[i] << __E__;
 			removeActiveSessionEntry(i);
 			++logoutCount;
 		}
@@ -1879,8 +1879,8 @@ uint64_t WebUsers::cookieCodeLogout(const std::string& cookieCode, bool logoutOt
 //========================================================================================================================
 //WebUsers::getUserInfoForCookie ---
 bool WebUsers::getUserInfoForCookie(std::string& cookieCode,
-				    std::string* userName, std::string* displayName,
-				    uint64_t* activeSessionIndex)
+                                    std::string* userName, std::string* displayName,
+                                    uint64_t* activeSessionIndex)
 {
 	if (userName) *userName = "";
 	if (displayName) *displayName = "";
@@ -1927,11 +1927,11 @@ bool WebUsers::getUserInfoForCookie(std::string& cookieCode,
 //
 //  If do NOT care about cookie code, then returns uid 0 (admin)
 //		and grants full permissions
-bool WebUsers::cookieCodeIsActiveForRequest(std::string&						      cookieCode,
-					    std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>* userPermissions,
-					    uint64_t* uid, const std::string& ip,
-					    bool refresh, std::string* userWithLock,
-					    uint64_t* activeUserSessionIndex)
+bool WebUsers::cookieCodeIsActiveForRequest(std::string&                                                      cookieCode,
+                                            std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>* userPermissions,
+                                            uint64_t* uid, const std::string& ip,
+                                            bool refresh, std::string* userWithLock,
+                                            uint64_t* activeUserSessionIndex)
 {
 	//__COUTV__(ip);
 
@@ -1953,8 +1953,8 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string&						      cookieCode,
 	if (!CareAboutCookieCodes_)  //No Security, so grant admin
 	{
 		if (userPermissions) *userPermissions =
-					 std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>({{WebUsers::DEFAULT_USER_GROUP,
-													    WebUsers::PERMISSION_LEVEL_ADMIN}});
+			                     std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>({{WebUsers::DEFAULT_USER_GROUP,
+			                                                                                        WebUsers::PERMISSION_LEVEL_ADMIN}});
 		if (uid) *uid = getAdminUserID();
 		if (userWithLock) *userWithLock = usersUsernameWithLock_;
 		if (activeUserSessionIndex) *activeUserSessionIndex = -1;
@@ -2119,7 +2119,7 @@ std::string WebUsers::createNewLoginSession(const std::string& UUID, const std::
 	LoginSessionUUIDVector.push_back(UUID);
 
 	//generate sessionId
-	char	hexStr[3];
+	char        hexStr[3];
 	std::string sid = "";
 	for (i = 0; i < SESSION_ID_LENGTH / 2; ++i)
 	{
@@ -2249,7 +2249,7 @@ std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> WebUsers::getPe
 //========================================================================================================================
 WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(
     std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
-    const std::string&						      groupName)
+    const std::string&                                                groupName)
 {
 	auto it = permissionMap.find(groupName);
 	if (it == permissionMap.end())
@@ -2263,7 +2263,7 @@ WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(
 //========================================================================================================================
 bool WebUsers::isInactiveForGroup(
     std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
-    const std::string&						      groupName)
+    const std::string&                                                groupName)
 {
 	return getPermissionLevelForGroup(permissionMap, groupName) ==
 	       WebUsers::PERMISSION_LEVEL_INACTIVE;
@@ -2272,7 +2272,7 @@ bool WebUsers::isInactiveForGroup(
 //========================================================================================================================
 bool WebUsers::isAdminForGroup(
     std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
-    const std::string&						      groupName)
+    const std::string&                                                groupName)
 {
 	return getPermissionLevelForGroup(permissionMap, groupName) ==
 	       WebUsers::PERMISSION_LEVEL_ADMIN;
@@ -2354,9 +2354,9 @@ std::string ots::WebUsers::getUserEmailFromFingerprint(const std::string& finger
 //WebUsers::tooltipSetNeverShowForUsername
 //	temporarySilence has priority over the neverShow setting
 void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
-					      HttpXmlDocument*   xmldoc,
-					      const std::string& srcFile, const std::string& srcFunc,
-					      const std::string& srcId, bool doNeverShow, bool temporarySilence)
+                                              HttpXmlDocument*   xmldoc,
+                                              const std::string& srcFile, const std::string& srcFunc,
+                                              const std::string& srcId, bool doNeverShow, bool temporarySilence)
 {
 	__COUT__ << "Setting tooltip never show for user '" << username << "' to " << doNeverShow << " (temporarySilence=" << temporarySilence << ")" << __E__;
 
@@ -2389,9 +2389,9 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
 //		if other then treat as temporary mute..
 //			i.e. if time(0) > val show
 void WebUsers::tooltipCheckForUsername(const std::string& username,
-				       HttpXmlDocument*   xmldoc,
-				       const std::string& srcFile, const std::string& srcFunc,
-				       const std::string& srcId)
+                                       HttpXmlDocument*   xmldoc,
+                                       const std::string& srcFile, const std::string& srcFunc,
+                                       const std::string& srcId)
 {
 	if (srcId == "ALWAYS")
 	{
@@ -2431,8 +2431,8 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 void WebUsers::resetAllUserTooltips(const std::string& userNeedle)
 {
 	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + TOOLTIP_DB_PATH +
-		     "/" + userNeedle)
-			.c_str());
+	             "/" + userNeedle)
+	                .c_str());
 	__COUT__ << "Successfully reset Tooltips for user " << userNeedle << __E__;
 }
 
@@ -2549,7 +2549,7 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument* xmldoc, bool
 //WebUsers::setGenericPreference
 //	each generic preference has its own directory, and each user has their own file
 void WebUsers::setGenericPreference(uint64_t uid, const std::string& preferenceName,
-				    const std::string& preferenceValue)
+                                    const std::string& preferenceValue)
 {
 	uint64_t userIndex = searchUsersDatabaseForUserId(uid);
 	//__COUT__ << "setGenericPreference for user: " << UsersUsernameVector[userIndex] << __E__;
@@ -2564,13 +2564,13 @@ void WebUsers::setGenericPreference(uint64_t uid, const std::string& preferenceN
 			safePreferenceName += c;
 
 	std::string dir = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_PREFERENCES_PATH +
-			  "generic_" + safePreferenceName + "/";
+	                  "generic_" + safePreferenceName + "/";
 
 	//attempt to make directory (just in case)
 	mkdir(dir.c_str(), 0755);
 
 	std::string fn = UsersUsernameVector[userIndex] + "_" + safePreferenceName +
-			 "." + (std::string)USERS_PREFERENCES_FILETYPE;
+	                 "." + (std::string)USERS_PREFERENCES_FILETYPE;
 
 	__COUT__ << "Preferences file: " << (dir + fn) << __E__;
 
@@ -2589,7 +2589,7 @@ void WebUsers::setGenericPreference(uint64_t uid, const std::string& preferenceN
 //	each generic preference has its own directory, and each user has their own file
 //	default preference is empty string.
 std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& preferenceName,
-					   HttpXmlDocument* xmldoc) const
+                                           HttpXmlDocument* xmldoc) const
 {
 	uint64_t userIndex = searchUsersDatabaseForUserId(uid);
 	//__COUT__ << "getGenericPreference for user: " << UsersUsernameVector[userIndex] << __E__;
@@ -2604,10 +2604,10 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 			safePreferenceName += c;
 
 	std::string dir = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_PREFERENCES_PATH +
-			  "generic_" + safePreferenceName + "/";
+	                  "generic_" + safePreferenceName + "/";
 
 	std::string fn = UsersUsernameVector[userIndex] + "_" + safePreferenceName +
-			 "." + (std::string)USERS_PREFERENCES_FILETYPE;
+	                 "." + (std::string)USERS_PREFERENCES_FILETYPE;
 
 	__COUT__ << "Preferences file: " << (dir + fn) << __E__;
 
@@ -2616,7 +2616,7 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 	if (fp)
 	{
 		fseek(fp, 0, SEEK_END);
-		long	size = ftell(fp);
+		long        size = ftell(fp);
 		std::string line;
 		line.reserve(size + 1);
 		rewind(fp);
@@ -2638,7 +2638,7 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 //========================================================================================================================
 //WebUsers::changeSettingsForUser
 void WebUsers::changeSettingsForUser(uint64_t uid, const std::string& bgcolor, const std::string& dbcolor,
-				     const std::string& wincolor, const std::string& layout, const std::string& syslayout)
+                                     const std::string& wincolor, const std::string& layout, const std::string& syslayout)
 {
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> permissionMap =
 	    getPermissionsForUser(uid);
@@ -2678,7 +2678,7 @@ void WebUsers::changeSettingsForUser(uint64_t uid, const std::string& bgcolor, c
 // if lock is false, attempt to unlock user specified
 //	return true on success
 bool WebUsers::setUserWithLock(uint64_t actingUid, bool lock,
-			       const std::string& username)
+                               const std::string& username)
 {
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> permissionMap =
 	    getPermissionsForUser(actingUid);
@@ -2721,7 +2721,7 @@ bool WebUsers::setUserWithLock(uint64_t actingUid, bool lock,
 	//save username with lock
 	{
 		std::string securityFileName = USER_WITH_LOCK_FILE;
-		FILE*       fp		     = fopen(securityFileName.c_str(), "w");
+		FILE*       fp               = fopen(securityFileName.c_str(), "w");
 		if (!fp)
 		{
 			__COUT_INFO__ << "USER_WITH_LOCK_FILE " << USER_WITH_LOCK_FILE << " not found. Ignoring." << __E__;
@@ -2738,8 +2738,8 @@ bool WebUsers::setUserWithLock(uint64_t actingUid, bool lock,
 //========================================================================================================================
 //WebUsers::modifyAccountSettings
 void WebUsers::modifyAccountSettings(uint64_t actingUid, uint8_t cmd_type,
-				     const std::string& username, const std::string& displayname,
-				     const std::string& email, const std::string& permissions)
+                                     const std::string& username, const std::string& displayname,
+                                     const std::string& email, const std::string& permissions)
 {
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> permissionMap =
 	    getPermissionsForUser(actingUid);
@@ -2785,10 +2785,10 @@ void WebUsers::modifyAccountSettings(uint64_t actingUid, uint8_t cmd_type,
 		//If account is currently inactive and re-activating, then reset fail count and password.
 		//	Note: this is the account unlock mechanism.
 		if (isInactiveForGroup(UsersPermissionsVector[modi]) &&  //curently inactive
-		    !isInactiveForGroup(newPermissionsMap))		 //and re-activating
+		    !isInactiveForGroup(newPermissionsMap))              //and re-activating
 		{
 			UsersLoginFailureCountVector[modi] = 0;
-			UsersSaltVector[modi]		   = "";
+			UsersSaltVector[modi]              = "";
 		}
 		UsersPermissionsVector[modi] = newPermissionsMap;
 
@@ -2825,7 +2825,7 @@ std::string WebUsers::getActiveUsersString()
 {
 	std::string ret = "";
 	uint64_t    u;
-	bool	repeat;
+	bool        repeat;
 	for (uint64_t i = 0; i < ActiveSessionUserIdVector.size(); ++i)
 	{
 		repeat = false;
@@ -2838,7 +2838,7 @@ std::string WebUsers::getActiveUsersString()
 			}  //found repeat!
 
 		if (!repeat && (u = searchUsersDatabaseForUserId(ActiveSessionUserIdVector[i])) !=
-				   NOT_FOUND_IN_DATABASE)  //if found, add displayName
+		                   NOT_FOUND_IN_DATABASE)  //if found, add displayName
 			ret += UsersDisplayNameVector[u] + ",";
 	}
 	if (ret.length() > 1) ret.erase(ret.length() - 1);  //get rid of last comma
@@ -2861,7 +2861,7 @@ void WebUsers::loadUserWithLock()
 	char username[300] = "";  //assume username is less than 300 chars
 
 	std::string securityFileName = USER_WITH_LOCK_FILE;
-	FILE*       fp		     = fopen(securityFileName.c_str(), "r");
+	FILE*       fp               = fopen(securityFileName.c_str(), "r");
 	if (!fp)
 	{
 		__COUT_INFO__ << "USER_WITH_LOCK_FILE " << USER_WITH_LOCK_FILE << " not found. Defaulting to admin lock." << __E__;
@@ -2908,8 +2908,8 @@ std::string WebUsers::getSecurity()
 void WebUsers::loadSecuritySelection()
 {
 	std::string securityFileName = SECURITY_FILE_NAME;
-	FILE*       fp		     = fopen(securityFileName.c_str(), "r");
-	char	line[100]	= "";
+	FILE*       fp               = fopen(securityFileName.c_str(), "r");
+	char        line[100]        = "";
 	if (fp) fgets(line, 100, fp);
 	unsigned int i = 0;
 
@@ -2951,7 +2951,7 @@ void WebUsers::NACDisplayThread(const std::string& nac, const std::string& user)
 		__COUT__ << "\n******************************************************************** " << __E__;
 		__COUT__ << "\n******************************************************************** " << __E__;
 		__COUT__ << "\n\nNew account code = " << nac << " for user: " << user << "\n"
-			 << __E__;
+		         << __E__;
 		__COUT__ << "\n******************************************************************** " << __E__;
 		__COUT__ << "\n******************************************************************** " << __E__;
 	}

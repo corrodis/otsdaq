@@ -6,10 +6,11 @@
 #include <list>
 #include <string>
 
-namespace ots {
-
-class ModuleToFEConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class ModuleToFEConfiguration : public ConfigurationBase
+{
+  public:
 	ModuleToFEConfiguration(void);
 	virtual ~ModuleToFEConfiguration(void);
 
@@ -20,8 +21,9 @@ class ModuleToFEConfiguration : public ConfigurationBase {
 	std::list<std::string> getFEWModulesList(unsigned int FEWNumber) const;
 	std::list<std::string> getFERModulesList(unsigned int FERNumber) const;
 
-       private:
-	enum {
+  private:
+	enum
+	{
 		ModuleName,
 		ModuleType,
 		FEWName,

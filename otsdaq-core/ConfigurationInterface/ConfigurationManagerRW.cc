@@ -40,7 +40,7 @@ ConfigurationManagerRW::ConfigurationManagerRW(std::string username)
 
 	//FIXME only necessarily temporarily while Lore is still using fileSystem xml
 	theInterface_ = ConfigurationInterface::getInstance(false);  //false to use artdaq DB
-								     // FIXME -- can delete this change of interface once RW and regular use same interface instance
+	                                                             // FIXME -- can delete this change of interface once RW and regular use same interface instance
 }
 
 //==============================================================================
@@ -69,10 +69,10 @@ const std::map<std::string, ConfigurationInfo> &ConfigurationManagerRW::getAllCo
 	//and then which versions
 	__COUT__ << "======================================================== getAllConfigurationInfo start" << std::endl;
 	__COUT__ << "Refreshing all! Extracting list of Configuration tables..." << std::endl;
-	DIR *		    pDIR;
+	DIR *               pDIR;
 	struct dirent *     entry;
-	std::string	 path	       = CONFIGURATION_INFO_PATH;
-	char		    fileExt[]	  = CONFIGURATION_INFO_EXT;
+	std::string         path               = CONFIGURATION_INFO_PATH;
+	char                fileExt[]          = CONFIGURATION_INFO_EXT;
 	const unsigned char MIN_CONFIG_NAME_SZ = 3;
 	if ((pDIR = opendir(path.c_str())) != 0)
 	{
@@ -84,8 +84,8 @@ const std::map<std::string, ConfigurationInfo> &ConfigurationManagerRW::getAllCo
 
 			//find file names with correct file extenstion
 			if (strcmp(
-				&(entry->d_name[strlen(entry->d_name) - strlen(fileExt)]),
-				fileExt) != 0)
+			        &(entry->d_name[strlen(entry->d_name) - strlen(fileExt)]),
+			        fileExt) != 0)
 				continue;  //skip different extentions
 
 			entry->d_name[strlen(entry->d_name) - strlen(fileExt)] = '\0';  //remove file extension to get config name
@@ -98,9 +98,9 @@ const std::map<std::string, ConfigurationInfo> &ConfigurationManagerRW::getAllCo
 			try  //only add valid configuration instances to maps
 			{
 				theInterface_->get(configuration,
-						   entry->d_name,
-						   0, 0,
-						   true);  //dont fill
+				                   entry->d_name,
+				                   0, 0,
+				                   true);  //dont fill
 			}
 			catch (cet::exception)
 			{
@@ -127,7 +127,7 @@ const std::map<std::string, ConfigurationInfo> &ConfigurationManagerRW::getAllCo
 					    errorFilterName == entry->d_name)
 					{
 						*accumulatedErrors += std::string("\nIn table '") + entry->d_name +
-								      "'..." + e.what();  //global accumulate
+						                      "'..." + e.what();  //global accumulate
 
 						__SS__ << "Attempting to allow illegal columns!" << std::endl;
 						*accumulatedErrors += ss.str();
@@ -152,7 +152,7 @@ const std::map<std::string, ConfigurationInfo> &ConfigurationManagerRW::getAllCo
 					if (errorFilterName == "" ||
 					    errorFilterName == entry->d_name)
 						*accumulatedErrors += std::string("\nIn table '") + entry->d_name +
-								      "'..." + returnedAccumulatedErrors;  //global accumulate
+						                      "'..." + returnedAccumulatedErrors;  //global accumulate
 				}
 				else
 					continue;
@@ -190,7 +190,7 @@ const std::map<std::string, ConfigurationInfo> &ConfigurationManagerRW::getAllCo
 			nameToConfigurationMap_[entry->d_name] = configuration;
 
 			allConfigurationInfo_[entry->d_name].configurationPtr_ = configuration;
-			allConfigurationInfo_[entry->d_name].versions_	 = theInterface_->getVersions(configuration);
+			allConfigurationInfo_[entry->d_name].versions_         = theInterface_->getVersions(configuration);
 
 			//also add any existing temporary versions to all config info
 			//	because the interface wont find those versions
@@ -221,7 +221,7 @@ const std::map<std::string, ConfigurationInfo> &ConfigurationManagerRW::getAllCo
 		__COUT__ << "Number of Groups: " << configGroups.size() << std::endl;
 
 		ConfigurationGroupKey key;
-		std::string	   name;
+		std::string           name;
 		for (const auto &fullName : configGroups)
 		{
 			ConfigurationGroupKey::getGroupNameAndKey(fullName, name, key);
@@ -254,12 +254,12 @@ const std::map<std::string, ConfigurationInfo> &ConfigurationManagerRW::getAllCo
 				groupInfo.second.latestKeyGroupTypeString_   = "UNKNOWN";
 			}
 		}  //end group info loop
-	}	  //end get group info
+	}      //end get group info
 	catch (const std::runtime_error &e)
 	{
 		__SS__ << "A fatal error occurred reading the info for all configuration groups. Error: " << e.what() << __E__;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		if (accumulatedErrors)
 			*accumulatedErrors += ss.str();
 		else
@@ -269,7 +269,7 @@ const std::map<std::string, ConfigurationInfo> &ConfigurationManagerRW::getAllCo
 	{
 		__SS__ << "An unknown fatal error occurred reading the info for all configuration groups." << __E__;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		if (accumulatedErrors)
 			*accumulatedErrors += ss.str();
 		else
@@ -284,14 +284,14 @@ const std::map<std::string, ConfigurationInfo> &ConfigurationManagerRW::getAllCo
 //	get version aliases organized by table, for currently active backbone tables
 //	add scratch versions to the alias map returned by ConfigurationManager
 std::map<std::string /*table name*/, std::map<
-					 std::string /*version alias*/, ConfigurationVersion /*aliased version*/> >
+                                         std::string /*version alias*/, ConfigurationVersion /*aliased version*/> >
 ConfigurationManagerRW::getVersionAliases(void) const
 {
 	//__COUT__ << "getVersionAliases()" << std::endl;
 	std::map<std::string /*table name*/,
-		 std::map<std::string /*version alias*/, ConfigurationVersion /*aliased version*/> >
+	         std::map<std::string /*version alias*/, ConfigurationVersion /*aliased version*/> >
 	    retMap =
-		ConfigurationManager::getVersionAliases();
+	        ConfigurationManager::getVersionAliases();
 
 	//always have scratch alias for each table that has a scratch version
 	//	overwrite map entry if necessary
@@ -310,13 +310,13 @@ ConfigurationManagerRW::getVersionAliases(void) const
 //	load config group and activate
 //	deactivates previous config group of same type if necessary
 void ConfigurationManagerRW::activateConfigurationGroup(const std::string &   configGroupName,
-							ConfigurationGroupKey configGroupKey, std::string *accumulatedTreeErrors)
+                                                        ConfigurationGroupKey configGroupKey, std::string *accumulatedTreeErrors)
 {
 	loadConfigurationGroup(configGroupName, configGroupKey,
-			       true,			//loads and activates
-			       0,			//no members needed
-			       0,			//no progress bar
-			       accumulatedTreeErrors);  //accumulate warnings or not
+	                       true,                    //loads and activates
+	                       0,                       //no members needed
+	                       0,                       //no progress bar
+	                       accumulatedTreeErrors);  //accumulate warnings or not
 
 	if (accumulatedTreeErrors &&
 	    *accumulatedTreeErrors != "")
@@ -371,7 +371,7 @@ ConfigurationVersion ConfigurationManagerRW::createTemporaryBackboneView(Configu
 	//find common available temporary version among backbone members
 	ConfigurationVersion tmpVersion = ConfigurationVersion::getNextTemporaryVersion();  //get the default temporary version
 	ConfigurationVersion retTmpVersion;
-	auto		     backboneMemberNames = ConfigurationManager::getBackboneMemberNames();
+	auto                 backboneMemberNames = ConfigurationManager::getBackboneMemberNames();
 	for (auto &name : backboneMemberNames)
 	{
 		retTmpVersion = ConfigurationManager::getConfigurationByName(name)->getNextTemporaryVersion();
@@ -406,7 +406,7 @@ ConfigurationBase *ConfigurationManagerRW::getConfigurationByName(const std::str
 		if ((f = configurationName.find(' ')) != std::string::npos)
 			ss << "There was a space character found in the configuration name needle at position " << f << " in the string (was this intended?). " << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 	return nameToConfigurationMap_[configurationName];
@@ -418,7 +418,7 @@ ConfigurationBase *ConfigurationManagerRW::getConfigurationByName(const std::str
 // 	This configuration instance must already exist and be owned by ConfigurationManager.
 //	return null pointer on failure, on success return configuration pointer.
 ConfigurationBase *ConfigurationManagerRW::getVersionedConfigurationByName(const std::string &  configurationName,
-									   ConfigurationVersion version, bool looseColumnMatching)
+                                                                           ConfigurationVersion version, bool looseColumnMatching)
 {
 	auto it = nameToConfigurationMap_.find(configurationName);
 	if (it == nameToConfigurationMap_.end())
@@ -430,10 +430,10 @@ ConfigurationBase *ConfigurationManagerRW::getVersionedConfigurationByName(const
 	}
 	ConfigurationBase *configuration = it->second;
 	theInterface_->get(configuration, configurationName, 0, 0,
-			   false,  //fill w/version
-			   version,
-			   false,  //do not reset
-			   looseColumnMatching);
+	                   false,  //fill w/version
+	                   version,
+	                   false,  //do not reset
+	                   looseColumnMatching);
 	return configuration;
 }
 
@@ -443,8 +443,8 @@ ConfigurationBase *ConfigurationManagerRW::getVersionedConfigurationByName(const
 ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(
     const std::string &  configurationName,
     ConfigurationVersion temporaryVersion,
-    bool		 makeTemporary)  //,
-			 //bool saveToScratchVersion)
+    bool                 makeTemporary)  //,
+    //bool saveToScratchVersion)
 {
 	ConfigurationVersion newVersion(temporaryVersion);
 
@@ -461,7 +461,7 @@ ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(
 	//if there is a problem, try to recover
 	while (!makeTemporary && !newVersion.isScratchVersion() &&
 	       allConfigurationInfo_[configurationName].versions_.find(newVersion) !=
-		   allConfigurationInfo_[configurationName].versions_.end())
+	           allConfigurationInfo_[configurationName].versions_.end())
 	{
 		__COUT_ERR__ << "What happenened!?? ERROR::: new persistent version v" << newVersion << " already exists!? How is it possible? Retrace your steps and tell an admin." << std::endl;
 
@@ -485,7 +485,7 @@ ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(
 	{
 		__SS__ << "Something went wrong saving the new version v" << newVersion << ". What happened?! (duplicates? database error?)" << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 
@@ -503,7 +503,7 @@ ConfigurationVersion ConfigurationManagerRW::saveNewConfiguration(
 //
 //	maintains allConfigurationInfo_ also while erasing
 void ConfigurationManagerRW::eraseTemporaryVersion(const std::string &  configurationName,
-						   ConfigurationVersion targetVersion)
+                                                   ConfigurationVersion targetVersion)
 {
 	ConfigurationBase *config = getConfigurationByName(configurationName);
 
@@ -584,7 +584,7 @@ ConfigurationVersion ConfigurationManagerRW::copyViewToCurrentColumns(
 
 	//copy from source version to a new temporary version
 	ConfigurationVersion newTemporaryVersion = config->copyView(config->getView(),
-								    ConfigurationVersion(), username_);
+	                                                            ConfigurationVersion(), username_);
 
 	//update allConfigurationInfo_ with the new version
 	allConfigurationInfo_[configurationName].versions_.insert(newTemporaryVersion);
@@ -595,7 +595,7 @@ ConfigurationVersion ConfigurationManagerRW::copyViewToCurrentColumns(
 //==============================================================================
 //cacheGroupKey
 void ConfigurationManagerRW::cacheGroupKey(const std::string &   groupName,
-					   ConfigurationGroupKey key)
+                                           ConfigurationGroupKey key)
 {
 	allGroupInfo_[groupName].keys_.emplace(key);
 }
@@ -633,9 +633,9 @@ const GroupInfo &ConfigurationManagerRW::getGroupInfo(const std::string &groupNa
 //	Change to going back only a limited number.. (but the order also comes in alpha order from
 //	theInterface_->getAllConfigurationGroupNames which is a problem for choosing the
 //	most recent to check. )
-ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::string &					  groupName,
-								     const std::map<std::string, ConfigurationVersion> &	  groupMemberMap,
-								     const std::map<std::string /*name*/, std::string /*alias*/> &groupAliases)
+ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::string &                                          groupName,
+                                                                     const std::map<std::string, ConfigurationVersion> &          groupMemberMap,
+                                                                     const std::map<std::string /*name*/, std::string /*alias*/> &groupAliases)
 {
 	//	//NOTE: seems like this filter is taking the long amount of time
 	//	std::set<std::string /*name*/> fullGroupNames =
@@ -645,8 +645,8 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 	//std::string name;
 	//ConfigurationGroupKey key;
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> compareToMemberMap;
-	std::map<std::string /*name*/, std::string /*alias*/>		 compareToGroupAliases;
-	bool								 isDifferent;
+	std::map<std::string /*name*/, std::string /*alias*/>            compareToGroupAliases;
+	bool                                                             isDifferent;
 
 	const unsigned int MAX_DEPTH_TO_CHECK = 20;
 	unsigned int       keyMinToCheck      = 0;
@@ -712,10 +712,10 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 				isDifferent = true;
 				break;
 
-			}										   //else handle as table version comparison
+			}                                                                                  //else handle as table version comparison
 			else if (compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||  //name is missing
-				 memberPair.second != compareToMemberMap.at(memberPair.first))		   //or version mismatch
-			{										   //then different
+			         memberPair.second != compareToMemberMap.at(memberPair.first))             //or version mismatch
+			{                                                                                  //then different
 				//__COUT__ << "mismatch found!" << std::endl;
 				isDifferent = true;
 				break;
@@ -743,9 +743,9 @@ ConfigurationGroupKey ConfigurationManagerRW::findConfigurationGroup(const std::
 //
 //	Note: groupMembers map will get modified with group metadata table version
 ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
-    const std::string &					    groupName,
-    std::map<std::string, ConfigurationVersion> &	   groupMembers,
-    const std::string &					    groupComment,
+    const std::string &                                     groupName,
+    std::map<std::string, ConfigurationVersion> &           groupMembers,
+    const std::string &                                     groupComment,
     std::map<std::string /*table*/, std::string /*alias*/> *groupAliases)
 {
 	//steps:
@@ -780,7 +780,7 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 			    memberPair.first)
 			{
 				__COUT_WARN__ << "Looks like this is the groupMetadataTable_ '" << ConfigurationInterface::GROUP_METADATA_TABLE_NAME << ".' Note that this table is added to the member map when groups are saved."
-					      << "It should not be part of member map when calling this function." << std::endl;
+				              << "It should not be part of member map when calling this function." << std::endl;
 				__COUT__ << "Attempting to recover." << std::endl;
 				groupMembers.erase(groupMembers.find(memberPair.first));
 			}
@@ -822,7 +822,7 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 		std::string groupAliasesString = "";
 		if (groupAliases)
 			groupAliasesString = StringMacros::mapToString(*groupAliases,
-								       "," /*primary delimeter*/, ":" /*secondary delimeter*/);
+			                                               "," /*primary delimeter*/, ":" /*secondary delimeter*/);
 		__COUT__ << "Metadata: " << username_ << " " << time(0) << " " << groupComment << " " << groupAliasesString << std::endl;
 
 		//to compensate for unusual errors upstream, make sure the metadata table has one row
@@ -850,14 +850,14 @@ ConfigurationGroupKey ConfigurationManagerRW::saveNewConfigurationGroup(
 		    groupMetadataTable_.getViewVersion();
 
 		theInterface_->saveConfigurationGroup(groupMembers,
-						      ConfigurationGroupKey::getFullGroupString(groupName, newKey));
+		                                      ConfigurationGroupKey::getFullGroupString(groupName, newKey));
 		__COUT__ << "Created config group: " << groupName << ":" << newKey << std::endl;
 	}
 	catch (std::runtime_error &e)
 	{
 		__COUT_ERR__ << "Failed to create config group: " << groupName << ":" << newKey << std::endl;
 		__COUT_ERR__ << "\n\n"
-			     << e.what() << std::endl;
+		             << e.what() << std::endl;
 		throw;
 	}
 	catch (...)
@@ -884,7 +884,7 @@ ConfigurationVersion ConfigurationManagerRW::saveNewBackbone(ConfigurationVersio
 	//find common available temporary version among backbone members
 	ConfigurationVersion newVersion(ConfigurationVersion::DEFAULT);
 	ConfigurationVersion retNewVersion;
-	auto		     backboneMemberNames = ConfigurationManager::getBackboneMemberNames();
+	auto                 backboneMemberNames = ConfigurationManager::getBackboneMemberNames();
 	for (auto &name : backboneMemberNames)
 	{
 		retNewVersion = ConfigurationManager::getConfigurationByName(name)->getNextVersion();

@@ -5,10 +5,11 @@
 #include <xercesc/sax/ErrorHandler.hpp>
 #include <xercesc/sax/SAXParseException.hpp>
 
-namespace ots {
-
-class DOMTreeErrorReporter : public xercesc::ErrorHandler {
-       public:
+namespace ots
+{
+class DOMTreeErrorReporter : public xercesc::ErrorHandler
+{
+  public:
 	DOMTreeErrorReporter();
 	~DOMTreeErrorReporter();
 
@@ -17,7 +18,7 @@ class DOMTreeErrorReporter : public xercesc::ErrorHandler {
 	void fatalError(const xercesc::SAXParseException& exception);
 	void resetErrors(void);
 
-       private:
+  private:
 	std::string reportParseException(const xercesc::SAXParseException& exception);
 };
 

@@ -13,10 +13,11 @@
 #include <string>
 #include "otsdaq-core/Macros/CoutMacros.h" /* for XDAQ_CONST_CALL */
 
-namespace ots {
-
-class SOAPMessenger : public virtual toolbox::lang::Class {
-       public:
+namespace ots
+{
+class SOAPMessenger : public virtual toolbox::lang::Class
+{
+  public:
 	SOAPMessenger(xdaq::Application* application);
 	SOAPMessenger(const SOAPMessenger& aSOAPMessenger);
 
@@ -31,7 +32,7 @@ class SOAPMessenger : public virtual toolbox::lang::Class {
 	xoap::MessageReference sendWithSOAPReply(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string command);
 	xoap::MessageReference sendWithSOAPReply(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string command, SOAPParameters parameters);
 
-       protected:
+  protected:
 	xdaq::Application* theApplication_;
 };
 }  // namespace ots

@@ -32,15 +32,16 @@
 #include <string> /*string and to_string*/
 #include <vector>
 
-namespace ots {
-
+namespace ots
+{
 //CoreSupervisorBase
 //	This class should be the base class for all client otsdaq, XDAQ-based, supervisors.
 //	That is, all supervisors that need web requests through the ots desktop
 //		with access verified by the Gateway Supervisor,
 //		or that need a state machines driven by the Gateway Supervisor.
-class CoreSupervisorBase : public xdaq::Application, public SOAPMessenger, public CorePropertySupervisorBase, public RunControlStateMachine {
-       public:
+class CoreSupervisorBase : public xdaq::Application, public SOAPMessenger, public CorePropertySupervisorBase, public RunControlStateMachine
+{
+  public:
 	CoreSupervisorBase(xdaq::ApplicationStub* s);
 	virtual ~CoreSupervisorBase(void);
 
@@ -55,15 +56,15 @@ class CoreSupervisorBase : public xdaq::Application, public SOAPMessenger, publi
 	virtual void request(const std::string& requestType, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut, const WebUsers::RequestUserInfo& userInfo);
 	virtual void nonXmlRequest(const std::string& requestType, cgicc::Cgicc& cgiIn, std::ostream& out, const WebUsers::RequestUserInfo& userInfo);
 
-       private:
+  private:
 	xoap::MessageReference workLoopStatusRequestWrapper(xoap::MessageReference message);
-	void		       defaultPageWrapper(xgi::Input* in, xgi::Output* out);
-	void		       requestWrapper(xgi::Input* in, xgi::Output* out);
+	void                   defaultPageWrapper(xgi::Input* in, xgi::Output* out);
+	void                   requestWrapper(xgi::Input* in, xgi::Output* out);
 
-       public:
+  public:
 	//State Machine request handlers
-	void		       stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
-	void		       stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out);
+	void                   stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
+	void                   stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out);
 	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference message);
 	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference message);
 
@@ -92,19 +93,19 @@ class CoreSupervisorBase : public xdaq::Application, public SOAPMessenger, publi
 
 	static const std::string WORK_LOOP_DONE, WORK_LOOP_WORKING;
 
-       protected:
-	WorkLoopManager		    stateMachineWorkLoopManager_;
-	toolbox::BSem		    stateMachineSemaphore_;
+  protected:
+	WorkLoopManager             stateMachineWorkLoopManager_;
+	toolbox::BSem               stateMachineSemaphore_;
 	std::vector<VStateMachine*> theStateMachineImplementation_;
 
 	//for managing transition iterations
 	std::vector<bool> stateMachinesIterationDone_;
 	unsigned int      stateMachinesIterationWorkCount_;
 	unsigned int      subIterationWorkStateMachineIndex_;
-	void		  preStateMachineExecution(unsigned int i);
-	void		  postStateMachineExecution(unsigned int i);
-	void		  preStateMachineExecutionLoop(void);
-	void		  postStateMachineExecutionLoop(void);
+	void              preStateMachineExecution(unsigned int i);
+	void              postStateMachineExecution(unsigned int i);
+	void              preStateMachineExecutionLoop(void);
+	void              postStateMachineExecutionLoop(void);
 
 	RemoteWebUsers theRemoteWebUsers_;
 };

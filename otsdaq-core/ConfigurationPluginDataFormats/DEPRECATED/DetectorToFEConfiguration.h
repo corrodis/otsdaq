@@ -6,10 +6,11 @@
 #include <string>
 #include <vector>
 
-namespace ots {
-
-class DetectorToFEConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class DetectorToFEConfiguration : public ConfigurationBase
+{
+  public:
 	DetectorToFEConfiguration(void);
 	virtual ~DetectorToFEConfiguration(void);
 
@@ -24,14 +25,17 @@ class DetectorToFEConfiguration : public ConfigurationBase {
 	unsigned int getFEWriterDetectorAddress(const std::string& detectorID) const;
 	unsigned int getFEReaderChannel(const std::string& detectorID) const;
 
-       private:
-	enum { DetectorID,
-	       FEWriterID,
-	       FEWriterChannel,
-	       FEWriterDetectorAddress,
-	       FEReaderID,
-	       FEReaderChannel,
-	       FEReaderDetectorAddress };
+  private:
+	enum
+	{
+		DetectorID,
+		FEWriterID,
+		FEWriterChannel,
+		FEWriterDetectorAddress,
+		FEReaderID,
+		FEReaderChannel,
+		FEReaderDetectorAddress
+	};
 	struct DetectorInfo
 	{
 		std::string  theFEWriterID_;

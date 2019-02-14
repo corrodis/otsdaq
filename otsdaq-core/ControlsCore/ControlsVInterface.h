@@ -4,10 +4,11 @@
 
 #include <array>
 #include <string>
-namespace ots {
-
-class ControlsVInterface : public Configurable {
-       public:
+namespace ots
+{
+class ControlsVInterface : public Configurable
+{
+  public:
 	ControlsVInterface(const std::string& interfaceUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
 	    : Configurable(theXDAQContextConfigTree, configurationPath)
 	//, interfaceUID_                 (interfaceUID)
@@ -20,14 +21,14 @@ class ControlsVInterface : public Configurable {
 
 	virtual void initialize() = 0;
 
-	virtual void			   subscribe(std::string Name)       = 0;
-	virtual void			   subscribeJSON(std::string List)   = 0;
-	virtual void			   unsubscribe(std::string Name)     = 0;
-	virtual std::string		   getList(std::string format)       = 0;
+	virtual void                       subscribe(std::string Name)       = 0;
+	virtual void                       subscribeJSON(std::string List)   = 0;
+	virtual void                       unsubscribe(std::string Name)     = 0;
+	virtual std::string                getList(std::string format)       = 0;
 	virtual std::array<std::string, 4> getCurrentValue(std::string Name) = 0;
 	virtual std::array<std::string, 9> getSettings(std::string Name)     = 0;
 
-       protected:
+  protected:
 	std::string interfaceUID_;
 	std::string interfaceType_;
 };

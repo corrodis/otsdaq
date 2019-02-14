@@ -6,12 +6,13 @@
 #include "otsdaq-core/DataManager/CircularBufferBase.h"
 #include "otsdaq-core/WorkLoopManager/WorkLoop.h"
 
-namespace ots {
-
+namespace ots
+{
 //DataProcessor
 //	This class provides common functionality for Data Producers and Consumers.
-class DataProcessor {
-       public:
+class DataProcessor
+{
+  public:
 	DataProcessor(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID);
 	virtual ~DataProcessor(void);
 
@@ -19,7 +20,7 @@ class DataProcessor {
 	//virtual void unregisterFromBuffer(void) = 0;
 
 	virtual void startProcessingData(std::string runNumber) = 0;
-	virtual void stopProcessingData(void)			= 0;
+	virtual void stopProcessingData(void)                   = 0;
 	virtual void pauseProcessingData(void) { stopProcessingData(); }
 	virtual void resumeProcessingData(void) { startProcessingData(""); }
 
@@ -28,7 +29,7 @@ class DataProcessor {
 
 	void setCircularBuffer(CircularBufferBase* circularBuffer);
 
-       protected:
+  protected:
 	const std::string   supervisorApplicationUID_;
 	const std::string   bufferUID_;
 	const std::string   processorUID_;

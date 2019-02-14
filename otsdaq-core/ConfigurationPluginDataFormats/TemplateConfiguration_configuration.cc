@@ -31,7 +31,7 @@ void TemplateConfiguration::init(ConfigurationManager *configManager)
 	//	__COUT__ << configManager->getNode(this->getConfigurationName()).getValueAsString()
 	//		  											  << std::endl;
 
-	std::string						value;
+	std::string                                             value;
 	std::vector<std::pair<std::string, ConfigurationTree> > children =
 	    configManager->__SELF_NODE__.getChildren();
 	for (auto &childPair : children)

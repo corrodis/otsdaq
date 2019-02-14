@@ -6,10 +6,11 @@
 
 #include <string>
 
-namespace ots {
-
-class FESlowControlsConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class FESlowControlsConfiguration : public ConfigurationBase
+{
+  public:
 	FESlowControlsConfiguration(void);
 	virtual ~FESlowControlsConfiguration(void);
 
@@ -18,7 +19,7 @@ class FESlowControlsConfiguration : public ConfigurationBase {
 
 	//Getters
 
-       private:
+  private:
 	//Column names
 	struct ColSlowControls
 	{

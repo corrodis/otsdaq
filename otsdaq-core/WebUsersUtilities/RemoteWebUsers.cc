@@ -85,16 +85,16 @@ RemoteWebUsers::RemoteWebUsers(xdaq::Application* application)
     : SOAPMessenger(application)
 {
 	ActiveUserLastUpdateTime_ = 0;   //init to never
-	ActiveUserList_		  = "";  //init to empty
+	ActiveUserList_           = "";  //init to empty
 }
 
 //========================================================================================================================
 //xmlRequestGateway
 //	if false, user code should just return.. out is handled on false; on true, out is untouched
 bool RemoteWebUsers::xmlRequestToGateway(
-    cgicc::Cgicc&	      cgi,
-    std::ostringstream*	out,
-    HttpXmlDocument*	   xmldoc,
+    cgicc::Cgicc&              cgi,
+    std::ostringstream*        out,
+    HttpXmlDocument*           xmldoc,
     const AllSupervisorInfo&   allSupervisorInfo,
     WebUsers::RequestUserInfo& userInfo)
 {
@@ -109,7 +109,7 @@ bool RemoteWebUsers::xmlRequestToGateway(
 	// XDAQ_CONST_CALL is defined in "otsdaq-core/Macros/CoutMacros.h"
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor;
 
-	SOAPParameters	 parameters;
+	SOAPParameters         parameters;
 	xoap::MessageReference retMsg;
 
 	//**** start LOGIN GATEWAY CODE ***//
@@ -150,7 +150,7 @@ bool RemoteWebUsers::xmlRequestToGateway(
 		parameters.addParameter("sequence", sequence);
 		parameters.addParameter("IPAddress", userInfo.ip_);
 		retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
-							  "SupervisorSequenceCheck", parameters);
+		                                          "SupervisorSequenceCheck", parameters);
 		parameters.clear();
 		parameters.addParameter("Permissions");
 		SOAPUtilities::receive(retMsg, parameters);
@@ -198,7 +198,7 @@ bool RemoteWebUsers::xmlRequestToGateway(
 	parameters.addParameter("IPAddress", userInfo.ip_);
 
 	retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
-						  "SupervisorCookieCheck", parameters);
+	                                          "SupervisorCookieCheck", parameters);
 
 	parameters.clear();
 	parameters.addParameter("CookieCode");
@@ -215,9 +215,9 @@ bool RemoteWebUsers::xmlRequestToGateway(
 	//first extract a few things always from parameters
 	//	like permissionLevel for this request... must consider allowed groups!!
 	userInfo.setGroupPermissionLevels(parameters.getValue("Permissions"));
-	userInfo.cookieCode_		 = parameters.getValue("CookieCode");
-	userInfo.username_		 = parameters.getValue("Username");
-	userInfo.displayName_		 = parameters.getValue("DisplayName");
+	userInfo.cookieCode_             = parameters.getValue("CookieCode");
+	userInfo.username_               = parameters.getValue("Username");
+	userInfo.displayName_            = parameters.getValue("DisplayName");
 	userInfo.usernameWithLock_       = parameters.getValue("UserWithLock");
 	userInfo.activeUserSessionIndex_ = strtoul(parameters.getValue("ActiveSessionIndex").c_str(), 0, 0);
 
@@ -226,9 +226,9 @@ bool RemoteWebUsers::xmlRequestToGateway(
 	//else successful access request!
 
 	return true;  //request granted
-		      //	if(!userInfo.checkLock_ && !userInfo.requireLock_)
-		      //		return true; //done, no need to get user info for this cookie code
-		      //
+	              //	if(!userInfo.checkLock_ && !userInfo.requireLock_)
+	              //		return true; //done, no need to get user info for this cookie code
+	              //
 
 	/////////////////////////////////////////////////////
 	//get user info for cookie code and check lock (now that username is available)
@@ -434,10 +434,10 @@ std::string RemoteWebUsers::getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationD
 //	returns "Wed Dec 31 18:00:01 1969 CST" for actionTimeString (in CST) if action never has occurred
 std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::getLastConfigGroup(
     XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-    const std::string&				 actionOfLastGroup,
-    std::string&				 actionTimeString)
+    const std::string&                           actionOfLastGroup,
+    std::string&                                 actionTimeString)
 {
-	actionTimeString	      = "";
+	actionTimeString              = "";
 	xoap::MessageReference retMsg = ots::SOAPMessenger::sendWithSOAPReply(
 	    supervisorDescriptor, "SupervisorLastConfigGroupRequest",
 	    SOAPParameters("ActionOfLastGroup", actionOfLastGroup));
@@ -469,7 +469,7 @@ std::pair<std::string /*group name*/, ConfigurationGroupKey> RemoteWebUsers::get
 //	return true, if user info gotten successfully
 //	else false
 bool RemoteWebUsers::getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-					  std::string& cookieCode, std::string* userName, std::string* displayName, uint64_t* activeSessionIndex)
+                                          std::string& cookieCode, std::string* userName, std::string* displayName, uint64_t* activeSessionIndex)
 {
 	__COUT__ << std::endl;
 	if (cookieCode.length() != WebUsers::COOKIE_CODE_LENGTH) return false;  //return if invalid cookie code
@@ -496,7 +496,7 @@ bool RemoteWebUsers::getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescr
 //cookieCodeIsActiveForRequest
 //	for external supervisors to check with Supervisor for login
 bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-						  std::string& cookieCode, uint8_t* userPermissions, std::string ip, bool refreshCookie, std::string* userWithLock)
+                                                  std::string& cookieCode, uint8_t* userPermissions, std::string ip, bool refreshCookie, std::string* userWithLock)
 {
 	//__COUT__ << "CookieCode: " << cookieCode << " " << cookieCode.length() << std::endl;
 	if (cookieCode.length() != WebUsers::COOKIE_CODE_LENGTH) return false;  //return if invalid cookie code

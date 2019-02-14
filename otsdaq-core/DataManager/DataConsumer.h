@@ -5,14 +5,16 @@
 #include <string>
 #include "otsdaq-core/DataManager/DataProcessor.h"
 
-namespace ots {
-
+namespace ots
+{
 //DataConsumer
 //	This class provides base class functionality for Data Consumer plugin classes to
 //	extracts and process streaming data from a Buffer.
-class DataConsumer : public DataProcessor, public virtual WorkLoop {
-       public:
-	enum ConsumerPriority {
+class DataConsumer : public DataProcessor, public virtual WorkLoop
+{
+  public:
+	enum ConsumerPriority
+	{
 		LowConsumerPriority,  //If the buffers are full because a low priority consumer didn't emptied them then overwrite
 		HighConsumerPriority  //Can't overwrite but need to wait for sometime before writing a buffer
 	};
@@ -53,7 +55,7 @@ class DataConsumer : public DataProcessor, public virtual WorkLoop {
 
 	ConsumerPriority getPriority(void);
 
-       private:
+  private:
 	ConsumerPriority priority_;
 };
 

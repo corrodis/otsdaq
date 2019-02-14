@@ -34,7 +34,7 @@ const ConfigurationManager* Configurable::getConfigurationManager() const
 const std::string& Configurable::getContextUID() const
 {
 	return theXDAQContextConfigTree_.getForwardNode(
-					    theConfigurationPath_, 1 /*steps to xdaq node*/)
+	                                    theConfigurationPath_, 1 /*steps to xdaq node*/)
 	    .getValueAsString();
 }
 
@@ -42,7 +42,7 @@ const std::string& Configurable::getContextUID() const
 const std::string& Configurable::getApplicationUID() const
 {
 	return theXDAQContextConfigTree_.getForwardNode(
-					    theConfigurationPath_, 3 /*steps to app node*/)
+	                                    theConfigurationPath_, 3 /*steps to app node*/)
 	    .getValueAsString();
 }
 
@@ -53,11 +53,11 @@ unsigned int Configurable::getApplicationLID() const
 	    getConfigurationManager()->__GET_CONFIG__(XDAQContextConfiguration);
 
 	return contextConfig->getApplicationNode(
-				getConfigurationManager(),
-				getContextUID(),
-				getApplicationUID())
+	                        getConfigurationManager(),
+	                        getContextUID(),
+	                        getApplicationUID())
 	    .getNode(
-		contextConfig->colApplication_.colId_)
+	        contextConfig->colApplication_.colId_)
 	    .getValue<unsigned int>();
 }
 
@@ -68,10 +68,10 @@ std::string Configurable::getContextAddress() const
 	    getConfigurationManager()->__GET_CONFIG__(XDAQContextConfiguration);
 
 	return contextConfig->getContextNode(
-				getConfigurationManager(),
-				getContextUID())
+	                        getConfigurationManager(),
+	                        getContextUID())
 	    .getNode(
-		contextConfig->colContext_.colAddress_)
+	        contextConfig->colContext_.colAddress_)
 	    .getValue<std::string>();
 }
 
@@ -82,9 +82,9 @@ unsigned int Configurable::getContextPort() const
 	    getConfigurationManager()->__GET_CONFIG__(XDAQContextConfiguration);
 
 	return contextConfig->getContextNode(
-				getConfigurationManager(),
-				getContextUID())
+	                        getConfigurationManager(),
+	                        getContextUID())
 	    .getNode(
-		contextConfig->colContext_.colPort_)
+	        contextConfig->colContext_.colPort_)
 	    .getValue<unsigned int>();
 }

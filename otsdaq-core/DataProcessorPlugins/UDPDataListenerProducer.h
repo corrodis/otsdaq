@@ -7,24 +7,25 @@
 
 #include <string>
 
-namespace ots {
-
+namespace ots
+{
 class ConfigurationTree;
 
-class UDPDataListenerProducer : public DataProducer, public Configurable, public ReceiverSocket {
-       public:
+class UDPDataListenerProducer : public DataProducer, public Configurable, public ReceiverSocket
+{
+  public:
 	UDPDataListenerProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
 	virtual ~UDPDataListenerProducer(void);
 
-       protected:
+  protected:
 	bool workLoopThread(toolbox::task::WorkLoop* workLoop);
 	void slowWrite(void);
 	void fastWrite(void);
 	//For slow write
-	std::string			   data_;
+	std::string                        data_;
 	std::map<std::string, std::string> header_;
 	//For fast write
-	std::string*			    dataP_;
+	std::string*                        dataP_;
 	std::map<std::string, std::string>* headerP_;
 
 	unsigned long  ipAddress_;

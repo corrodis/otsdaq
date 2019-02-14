@@ -15,9 +15,9 @@ using namespace ots;
 #define DEBUG_CONFIGURATION true
 
 //==============================================================================
-ConfigurationInterface* ConfigurationInterface::theInstance_		   = 0;
-bool			ConfigurationInterface::theMode_		   = true;
-bool			ConfigurationInterface::theVersionTrackingEnabled_ = true;
+ConfigurationInterface* ConfigurationInterface::theInstance_               = 0;
+bool                    ConfigurationInterface::theMode_                   = true;
+bool                    ConfigurationInterface::theVersionTrackingEnabled_ = true;
 
 const std::string ConfigurationInterface::GROUP_METADATA_TABLE_NAME = "ConfigurationGroupMetadata";
 
@@ -74,7 +74,7 @@ void ConfigurationInterface::setVersionTrackingEnabled(bool setValue)
 //	If newVersion is non 0, attempt to save as given newVersion number, else throw exception.
 //	return ConfigurationVersion::INVALID on failure
 ConfigurationVersion ConfigurationInterface::saveNewVersion(ConfigurationBase*   configuration,
-							    ConfigurationVersion temporaryVersion, ConfigurationVersion newVersion)
+                                                            ConfigurationVersion temporaryVersion, ConfigurationVersion newVersion)
 {
 	if (!temporaryVersion.isTemporaryVersion() ||
 	    !configuration->isStored(temporaryVersion))
@@ -131,8 +131,8 @@ ConfigurationVersion ConfigurationInterface::saveNewVersion(ConfigurationBase*  
 	//	only allow overwrite if version tracking is disabled AND the rewriteable version
 	//		already exists.
 	saveActiveVersion(configuration,
-			  !ConfigurationInterface::isVersionTrackingEnabled() &&
-			      rewriteableExists);
+	                  !ConfigurationInterface::isVersionTrackingEnabled() &&
+	                      rewriteableExists);
 
 	return newVersion;
 }

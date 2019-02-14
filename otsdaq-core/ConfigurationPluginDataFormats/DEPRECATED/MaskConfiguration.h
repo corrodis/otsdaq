@@ -6,10 +6,11 @@
 #include <map>
 #include <string>
 
-namespace ots {
-
-class MaskConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class MaskConfiguration : public ConfigurationBase
+{
+  public:
 	MaskConfiguration(void);
 	virtual ~MaskConfiguration(void);
 
@@ -19,11 +20,12 @@ class MaskConfiguration : public ConfigurationBase {
 	//Getters
 	const std::string& getROCMask(std::string rocName) const;
 
-       protected:
+  protected:
 	std::map<std::string, unsigned int> nameToRow_;
 
-       private:
-	enum {
+  private:
+	enum
+	{
 		DetectorID,
 		KillMask
 	};

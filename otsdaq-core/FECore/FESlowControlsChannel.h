@@ -4,10 +4,11 @@
 #include <iostream>
 #include <string>
 
-namespace ots {
-
-class FESlowControlsChannel {
-       public:
+namespace ots
+{
+class FESlowControlsChannel
+{
+  public:
 	FESlowControlsChannel(
 	    const std::string& interfaceUID,
 	    const std::string& channelName,
@@ -16,17 +17,17 @@ class FESlowControlsChannel {
 	    unsigned int       universalAddressSize,
 	    const std::string& universalAddress,
 	    unsigned int       universalDataBitOffset,
-	    bool	       readAccess,
-	    bool	       writeAccess,
-	    bool	       monitoringEnabled,
-	    bool	       recordChangesOnly,
-	    time_t	     delayBetweenSamples,
-	    bool	       saveEnabled,
+	    bool               readAccess,
+	    bool               writeAccess,
+	    bool               monitoringEnabled,
+	    bool               recordChangesOnly,
+	    time_t             delayBetweenSamples,
+	    bool               saveEnabled,
 	    const std::string& savePath,
 	    const std::string& saveFileRadix,
-	    bool	       saveBinaryFormat,
-	    bool	       alarmsEnabled,
-	    bool	       latchAlarms,
+	    bool               saveBinaryFormat,
+	    bool               alarmsEnabled,
+	    bool               latchAlarms,
 	    const std::string& lolo,
 	    const std::string& lo,
 	    const std::string& hi,
@@ -40,41 +41,41 @@ class FESlowControlsChannel {
 
 	static std::string underscoreString(const std::string& str);
 
-       private:
+  private:
 	void extractSample(const std::string& universalReadValue);
 	char checkAlarms(std::string& txBuffer);
 	void convertStringToBuffer(const std::string& inString, std::string& buffer, bool useDataType = false);
 
-       public:
+  public:
 	const std::string interfaceUID_;
 	const std::string channelName_;
 	const std::string fullChannelName_;
 	const std::string dataType_;
 
-       private:
+  private:
 	std::string   universalAddress_;    //get size from parent FE interface
 	unsigned int  sizeOfDataTypeBits_;  //defines the size of all data string buffers, must be less than or equal to universalDataSize
 	unsigned int  sizeOfDataTypeBytes_;
 	unsigned int  universalDataBitOffset_;
 	unsigned char txPacketSequenceNumber_;
 
-       public:
+  public:
 	const bool   readAccess_, writeAccess_, monitoringEnabled_;
 	const bool   recordChangesOnly_;
 	const time_t delayBetweenSamples_;
 
-	const bool	saveEnabled_;
+	const bool        saveEnabled_;
 	const std::string savePath_;
 	const std::string saveFileRadix_;
-	const bool	saveBinaryFormat_;
+	const bool        saveBinaryFormat_;
 
 	const bool alarmsEnabled_, latchAlarms_;
 
-       private:
+  private:
 	std::string sample_, lastSample_;
 	std::string lolo_, lo_, hi_, hihi_;
 	time_t      lastSampleTime_;
-	bool	loloAlarmed_, loAlarmed_, hiAlarmed_, hihiAlarmed_;
+	bool        loloAlarmed_, loAlarmed_, hiAlarmed_, hihiAlarmed_;
 
 	std::string saveFullFileName_;
 };

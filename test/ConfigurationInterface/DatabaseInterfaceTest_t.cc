@@ -25,7 +25,8 @@
 //#include "artdaq-database/DataFormats/common/helper_functions.h"
 //#include "artdaq-database/DataFormats/common/shared_literals.h"
 
-namespace ots {
+namespace ots
+{
 struct ConfigurationViewEx : public ConfigurationView
 {
 	void printJSON(std::stringstream& ss) const { ss << _json; }
@@ -41,7 +42,7 @@ struct TestConfiguration001 final : public ConfigurationBase
 {
 	TestConfiguration001()
 	    : ConfigurationBase("TestConfiguration001") { init(0); }
-	void		    init(ConfigurationManager* configManager) { activeConfigurationView_ = &view; }
+	void                init(ConfigurationManager* configManager) { activeConfigurationView_ = &view; }
 	ConfigurationViewEx view;
 };
 
@@ -49,7 +50,7 @@ struct TestConfiguration002 final : public ConfigurationBase
 {
 	TestConfiguration002()
 	    : ConfigurationBase("TestConfiguration002") { init(0); }
-	void		    init(ConfigurationManager* configManager) { activeConfigurationView_ = &view; }
+	void                init(ConfigurationManager* configManager) { activeConfigurationView_ = &view; }
 	ConfigurationViewEx view;
 };
 }  // namespace ots
@@ -111,7 +112,7 @@ BOOST_AUTO_TEST_CASE(configure_tests)
 BOOST_AUTO_TEST_CASE(store_configuration)
 {
 	std::shared_ptr<ConfigurationBase> cfg1 = std::make_shared<TestConfiguration001>();
-	auto				   ifc  = DatabaseConfigurationInterface();
+	auto                               ifc  = DatabaseConfigurationInterface();
 
 	cfg1->getViewP()->setVersion(fixture.version());
 
@@ -127,7 +128,7 @@ BOOST_AUTO_TEST_CASE(store_configuration)
 BOOST_AUTO_TEST_CASE(load_configuration)
 {
 	std::shared_ptr<ConfigurationBase> cfg1 = std::make_shared<TestConfiguration001>();
-	auto				   ifc  = DatabaseConfigurationInterface();
+	auto                               ifc  = DatabaseConfigurationInterface();
 
 	ifc.fill(cfg1.get(), ConfigurationVersion(fixture.version()));
 
@@ -148,7 +149,7 @@ BOOST_AUTO_TEST_CASE(store_global_configuration)
 
 	ifc.saveActiveVersion(cfg2.get());
 
-	auto map			  = DatabaseConfigurationInterface::config_version_map_t{};
+	auto map                          = DatabaseConfigurationInterface::config_version_map_t{};
 	map[cfg1->getConfigurationName()] = cfg1->getView().getVersion();
 	map[cfg2->getConfigurationName()] = cfg2->getView().getVersion();
 

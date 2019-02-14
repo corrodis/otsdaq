@@ -35,7 +35,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const &ps)
 
 	struct sockaddr_in si_me_data;
 	si_me_data.sin_family      = AF_INET;
-	si_me_data.sin_port	= htons(dataport_);
+	si_me_data.sin_port        = htons(dataport_);
 	si_me_data.sin_addr.s_addr = htonl(INADDR_ANY);
 	if (bind(datasocket_, (struct sockaddr *)&si_me_data, sizeof(si_me_data)) == -1)
 	{
@@ -96,14 +96,14 @@ void ots::UDPReceiver::receiveLoop_()
 				uint8_t   peekBuffer[4];
 				socklen_t dataSz = sizeof(si_data_);
 				recvfrom(datasocket_, peekBuffer, sizeof(peekBuffer), MSG_PEEK,
-					 (struct sockaddr *)&si_data_, &dataSz);
+				         (struct sockaddr *)&si_data_, &dataSz);
 
 				TLOG_TRACE("UDPReceiver") << "Received UDP Datagram with sequence number " << std::hex << "0x" << static_cast<int>(peekBuffer[1]) << "!" << std::dec << TLOG_ENDL;
 				TLOG_TRACE("UDPReceiver") << "peekBuffer[1] == expectedPacketNumber_: " << std::hex << static_cast<int>(peekBuffer[1]) << " =?= " << (int)expectedPacketNumber_ << TLOG_ENDL;
 				TLOG_TRACE("UDPReceiver") << "peekBuffer: 0: " << std::hex << static_cast<int>(peekBuffer[0])
-							  << ", 1: " << std::hex << static_cast<int>(peekBuffer[1])
-							  << ", 2: " << std::hex << static_cast<int>(peekBuffer[2])
-							  << ", 3: " << std::hex << static_cast<int>(peekBuffer[3]) << TLOG_ENDL;
+				                          << ", 1: " << std::hex << static_cast<int>(peekBuffer[1])
+				                          << ", 2: " << std::hex << static_cast<int>(peekBuffer[2])
+				                          << ", 3: " << std::hex << static_cast<int>(peekBuffer[3]) << TLOG_ENDL;
 
 				uint8_t seqNum = peekBuffer[1];
 				//ReturnCode dataCode = getReturnCode(peekBuffer[0]);
@@ -187,14 +187,14 @@ void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs &output)
 	std::size_t initial_payload_size = 0;
 
 	output.emplace_back(artdaq::Fragment::FragmentBytes(initial_payload_size,
-							    ev_counter(), fragment_id(),
-							    ots::detail::FragmentType::UDP, metadata));
+	                                                    ev_counter(), fragment_id(),
+	                                                    ots::detail::FragmentType::UDP, metadata));
 	// We now have a fragment to contain this event:
 	ots::UDPFragmentWriter thisFrag(*output.back());
 
 	TLOG_TRACE("UDPReceiver") << "Received data, now placing data with UDP sequence number "
-				  << std::hex << static_cast<int>((packetBuffers_.front()).at(1))
-				  << " into UDPFragment" << TLOG_ENDL;
+	                          << std::hex << static_cast<int>((packetBuffers_.front()).at(1))
+	                          << " into UDPFragment" << TLOG_ENDL;
 	thisFrag.resize(64050 * packetBuffers_.size() + 1);
 	std::ofstream rawOutput;
 	if (rawOutput_) {
@@ -220,7 +220,7 @@ void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs &output)
 
 	if (dataType == DataType::JSON || dataType == DataType::String) {
 		*(thisFrag.dataBegin() + pos) = 0;
-		char zero		      = 0;
+		char zero                     = 0;
 		if (rawOutput_) rawOutput.write(&zero, sizeof(char));
 	}
 	if (rawOutput_) rawOutput.close();

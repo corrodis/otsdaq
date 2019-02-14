@@ -24,18 +24,20 @@
 #include <iostream>
 #include <vector>
 
-namespace ots {
+namespace ots
+{
 class UDPDump;
 }
 
-class ots::UDPDump : public art::EDAnalyzer {
-       public:
+class ots::UDPDump : public art::EDAnalyzer
+{
+  public:
 	explicit UDPDump(fhicl::ParameterSet const& pset);
 	virtual ~UDPDump();
 
 	virtual void analyze(art::Event const& evt);
 
-       private:
+  private:
 	std::string  raw_data_label_;
 	std::string  frag_type_;
 	unsigned int num_bytes_to_show_;
@@ -67,8 +69,8 @@ void ots::UDPDump::analyze(art::Event const& evt)
 		std::cout << __COUT_HDR_FL__ << "######################################################################" << std::endl;
 
 		std::cout << __COUT_HDR_FL__ << std::dec << "Run " << evt.run() << ", subrun " << evt.subRun()
-			  << ", event " << eventNumber << " has " << raw->size()
-			  << " fragment(s) of type " << frag_type_ << std::endl;
+		          << ", event " << eventNumber << " has " << raw->size()
+		          << " fragment(s) of type " << frag_type_ << std::endl;
 
 		for (size_t idx = 0; idx < raw->size(); ++idx) {
 			const auto& frag((*raw)[idx]);
@@ -76,22 +78,22 @@ void ots::UDPDump::analyze(art::Event const& evt)
 			ots::UDPFragment bb(frag);
 
 			std::cout << __COUT_HDR_FL__ << "UDP fragment " << frag.fragmentID() << " has total byte count = "
-				  << bb.udp_data_words() << std::endl;
+			          << bb.udp_data_words() << std::endl;
 
 			if (frag.hasMetadata()) {
 				std::cout << __COUT_HDR_FL__ << "Fragment metadata: " << std::endl;
 				ots::UDPFragment::Metadata const* md =
 				    frag.metadata<ots::UDPFragment::Metadata>();
 
-				char		   buf[sizeof(in_addr)];
+				char               buf[sizeof(in_addr)];
 				struct sockaddr_in addr;
 				addr.sin_addr.s_addr = md->address;
 				inet_ntop(AF_INET, &(addr.sin_addr), buf, INET_ADDRSTRLEN);
 
 				std::cout << __COUT_HDR_FL__ << "Board port number = "
-					  << ((int)md->port) << ", address = "
-					  << std::string(buf)
-					  << std::endl;
+				          << ((int)md->port) << ", address = "
+				          << std::string(buf)
+				          << std::endl;
 			}
 
 			int type = bb.hdr_data_type();
@@ -116,8 +118,8 @@ void ots::UDPDump::analyze(art::Event const& evt)
 	else
 	{
 		std::cout << __COUT_HDR_FL__ << std::dec << "Run " << evt.run() << ", subrun " << evt.subRun()
-			  << ", event " << eventNumber << " has zero"
-			  << " UDP fragments." << std::endl;
+		          << ", event " << eventNumber << " has zero"
+		          << " UDP fragments." << std::endl;
 	}
 }
 

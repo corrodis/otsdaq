@@ -13,21 +13,21 @@ using namespace ots;
 
 //========================================================================================================================
 TCPDataListenerProducer::TCPDataListenerProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID,
-						 const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
+                                                 const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
     : WorkLoop(processorUID)
     //, Socket       ("192.168.133.100", 40000)
     , DataProducer(
-	  supervisorApplicationUID,
-	  bufferUID,
-	  processorUID,
-	  theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
+          supervisorApplicationUID,
+          bufferUID,
+          processorUID,
+          theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
     //, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
     , Configurable(theXDAQContextConfigTree, configurationPath)
     , TCPSocket(
-	  theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>(),
-	  theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>(),
-	  0x10000 /*theXDAQContextConfigTree.getNode(configurationPath).getNode("SocketReceiveBufferSize").getValue<unsigned int>()*/
-	  )
+          theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>(),
+          theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>(),
+          0x10000 /*theXDAQContextConfigTree.getNode(configurationPath).getNode("SocketReceiveBufferSize").getValue<unsigned int>()*/
+          )
     , dataP_(nullptr)
     , headerP_(nullptr)
     , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>())

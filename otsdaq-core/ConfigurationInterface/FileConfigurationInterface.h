@@ -5,11 +5,13 @@
 
 #include <set>
 
-namespace ots {
+namespace ots
+{
 class ConfigurationBase;
 
-class FileConfigurationInterface : public ConfigurationInterface {
-       public:
+class FileConfigurationInterface : public ConfigurationInterface
+{
+  public:
 	FileConfigurationInterface() { ; }
 	virtual ~FileConfigurationInterface() { ; }
 
@@ -25,7 +27,7 @@ class FileConfigurationInterface : public ConfigurationInterface {
 	// find all configuration versions by configuration type
 	std::set<ConfigurationVersion> getVersions(const ConfigurationBase* /*configuration*/) const;
 
-       private:
+  private:
 };
 }  // namespace ots
 

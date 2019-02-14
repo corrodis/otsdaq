@@ -12,10 +12,12 @@
 using artdaq::database::basictypes::FhiclData;
 using artdaq::database::basictypes::JsonData;
 
-namespace artdaq {
-namespace database {
-namespace configuration {
-
+namespace artdaq
+{
+namespace database
+{
+namespace configuration
+{
 using ots::ConfigurationBase;
 
 template<>

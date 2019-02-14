@@ -9,20 +9,20 @@ using namespace ots;
 
 //========================================================================================================================
 FEProducerVInterface::FEProducerVInterface(const std::string&       interfaceUID,
-					   const ConfigurationTree& theXDAQContextConfigTree,
-					   const std::string&       interfaceConfigurationPath)
+                                           const ConfigurationTree& theXDAQContextConfigTree,
+                                           const std::string&       interfaceConfigurationPath)
     : FEVInterface(interfaceUID, theXDAQContextConfigTree, interfaceConfigurationPath)
     , DataProducerBase(
-	  theXDAQContextConfigTree.getBackNode(
-				      interfaceConfigurationPath, 4)
-	      .getValueAsString(),
-	  theXDAQContextConfigTree.getNode(
-				      interfaceConfigurationPath + "/" +
-					  "LinkToDataBufferTable",
-				      4)
-	      .getValueAsString(),
-	  interfaceUID /*processorID*/,
-	  100 /*bufferSize*/)
+          theXDAQContextConfigTree.getBackNode(
+                                      interfaceConfigurationPath, 4)
+              .getValueAsString(),
+          theXDAQContextConfigTree.getNode(
+                                      interfaceConfigurationPath + "/" +
+                                          "LinkToDataBufferTable",
+                                      4)
+              .getValueAsString(),
+          interfaceUID /*processorID*/,
+          100 /*bufferSize*/)
 {
 	//NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the base class versions of function (e.g. getInterfaceType) are called because the derived class has not been instantiate yet!
 	__COUT__ << "'" << interfaceUID << "' Constructed." << __E__;
@@ -44,7 +44,7 @@ FEProducerVInterface::~FEProducerVInterface(void)
 
 	DataManager* dataManager =
 	    (DataManagerSingleton::getInstance(
-		supervisorApplicationUID_));
+	        supervisorApplicationUID_));
 
 	dataManager->unregisterFEProducer(
 	    bufferUID_, DataProcessor::processorUID_);
@@ -124,8 +124,8 @@ void FEProducerVInterface::copyToNextBuffer(const std::string& dataToWrite)
 std::string* FEProducerVInterface::getNextBuffer(void)
 {
 	if (DataProducerBase::attachToEmptySubBuffer(
-		FEProducerVInterface::dataP_,
-		FEProducerVInterface::headerP_) < 0)
+	        FEProducerVInterface::dataP_,
+	        FEProducerVInterface::headerP_) < 0)
 	{
 		__SS__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
 		__SS_THROW__;

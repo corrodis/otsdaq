@@ -4,13 +4,14 @@
 #include "otsdaq-core/DataManager/DataProducerBase.h"
 #include "otsdaq-core/WorkLoopManager/WorkLoop.h"
 
-namespace ots {
-
+namespace ots
+{
 //DataProducer
 //	This class provides base class functionality for Data Producer plugin classes to
 //	receive incoming streaming data and places it in a Buffer.
-class DataProducer : public DataProducerBase, public virtual WorkLoop {
-       public:
+class DataProducer : public DataProducerBase, public virtual WorkLoop
+{
+  public:
 	DataProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, unsigned int bufferSize = 100);
 	virtual ~DataProducer(void);
 

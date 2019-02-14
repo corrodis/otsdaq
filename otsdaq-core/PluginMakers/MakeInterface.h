@@ -6,8 +6,8 @@
 #include <memory>
 #include <string>
 
-namespace ots {
-
+namespace ots
+{
 class FEVInterface;
 class ConfigurationTree;
 

@@ -63,8 +63,8 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 	//allFETypeSupervisors_.clear();
 	allSupervisors_.clear();
 	appDescriptors = applicationContext->getDefaultZone()->getApplicationGroup(
-								 "daq")
-			     ->getApplicationDescriptors();
+	                                                         "daq")
+	                     ->getApplicationDescriptors();
 	for (auto& it : appDescriptors)
 	{
 		auto /*<it,bool*/ retPair = allSupervisors_.emplace(std::pair<xdata::UnsignedIntegerT, XDAQ_CONST_CALL xdaq::ApplicationDescriptor*>(

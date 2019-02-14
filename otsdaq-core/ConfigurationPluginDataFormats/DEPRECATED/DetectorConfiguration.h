@@ -7,10 +7,11 @@
 #include <string>
 #include <vector>
 
-namespace ots {
-
-class DetectorConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class DetectorConfiguration : public ConfigurationBase
+{
+  public:
 	DetectorConfiguration(void);
 	virtual ~DetectorConfiguration(void);
 
@@ -20,19 +21,22 @@ class DetectorConfiguration : public ConfigurationBase {
 	//Getters
 	const std::vector<std::string>& getDetectorIDs(void) const;
 	const std::vector<std::string>& getDetectorTypes(void) const;  //TODO add a class or configuration.info where there is a list of supported DetectorTypes
-	const std::string&		getDetectorType(const std::string& detectorID) const;
-	const std::string&		getDetectorStatus(const std::string& detectorID) const;
+	const std::string&              getDetectorType(const std::string& detectorID) const;
+	const std::string&              getDetectorStatus(const std::string& detectorID) const;
 
 	const std::map<std::string, unsigned int>& getNameToRowMap() const { return nameToRow_; }
 
-       private:
-	enum { DetectorID,
-	       DetectorType,
-	       DetectorStatus };
+  private:
+	enum
+	{
+		DetectorID,
+		DetectorType,
+		DetectorStatus
+	};
 
 	std::map<std::string, unsigned int> nameToRow_;
-	std::vector<std::string>	    detectorIDs_;
-	std::vector<std::string>	    detectorTypes_;
+	std::vector<std::string>            detectorIDs_;
+	std::vector<std::string>            detectorTypes_;
 };
 }  // namespace ots
 #endif

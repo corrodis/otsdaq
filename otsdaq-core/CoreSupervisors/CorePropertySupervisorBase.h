@@ -16,13 +16,14 @@
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
 
-namespace ots {
-
+namespace ots
+{
 //CorePropertySupervisorBase
 //	This class provides supervisor property get and set functionality. It has member variables
 //		generally useful to the configuration of client supervisors.
-class CorePropertySupervisorBase {
-       public:
+class CorePropertySupervisorBase
+{
+  public:
 	CorePropertySupervisorBase(xdaq::Application* application);
 	virtual ~CorePropertySupervisorBase(void);
 
@@ -40,7 +41,7 @@ class CorePropertySupervisorBase {
 
 	AllSupervisorInfo allSupervisorInfo_;
 
-       protected:
+  protected:
 	static void indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
 
 	ConfigurationManager* theConfigurationManager_;
@@ -58,13 +59,13 @@ class CorePropertySupervisorBase {
 	{
 		SupervisorProperties()
 		    : allSetNames_({&CheckUserLockRequestTypes, &RequireUserLockRequestTypes,
-				    &AutomatedRequestTypes, &AllowNoLoginRequestTypes,
-				    &NoXmlWhiteSpaceRequestTypes, &NonXMLRequestTypes})
+		                    &AutomatedRequestTypes, &AllowNoLoginRequestTypes,
+		                    &NoXmlWhiteSpaceRequestTypes, &NonXMLRequestTypes})
 		{
 		}
 
 		const std::string UserPermissionsThreshold = "UserPermissionsThreshold";
-		const std::string UserGroupsAllowed	= "UserGroupsAllowed";
+		const std::string UserGroupsAllowed        = "UserGroupsAllowed";
 		const std::string UserGroupsDisallowed     = "UserGroupsDisallowed";
 
 		const std::string CheckUserLockRequestTypes   = "CheckUserLockRequestTypes";
@@ -73,14 +74,14 @@ class CorePropertySupervisorBase {
 		const std::string AllowNoLoginRequestTypes    = "AllowNoLoginRequestTypes";
 
 		const std::string NoXmlWhiteSpaceRequestTypes = "NoXmlWhiteSpaceRequestTypes";
-		const std::string NonXMLRequestTypes	  = "NonXMLRequestTypes";
+		const std::string NonXMLRequestTypes          = "NonXMLRequestTypes";
 
 		const std::set<const std::string*> allSetNames_;
 	} SUPERVISOR_PROPERTIES;
 
-       private:
+  private:
 	//property private members
-	void	  checkSupervisorPropertySetup(void);
+	void          checkSupervisorPropertySetup(void);
 	volatile bool propertiesAreSetup_;
 
 	//for public access to property map,..
@@ -90,14 +91,14 @@ class CorePropertySupervisorBase {
 	{
 		CoreSupervisorPropertyStruct()
 		    : allSets_({&CheckUserLockRequestTypes, &RequireUserLockRequestTypes,
-				&AutomatedRequestTypes, &AllowNoLoginRequestTypes,
-				&NoXmlWhiteSpaceRequestTypes, &NonXMLRequestTypes})
+		                &AutomatedRequestTypes, &AllowNoLoginRequestTypes,
+		                &NoXmlWhiteSpaceRequestTypes, &NonXMLRequestTypes})
 		{
 		}
 
 		std::map<std::string, WebUsers::permissionLevel_t> UserPermissionsThreshold;
-		std::map<std::string, std::string>		   UserGroupsAllowed;
-		std::map<std::string, std::string>		   UserGroupsDisallowed;
+		std::map<std::string, std::string>                 UserGroupsAllowed;
+		std::map<std::string, std::string>                 UserGroupsDisallowed;
 
 		std::set<std::string> CheckUserLockRequestTypes;
 		std::set<std::string> RequireUserLockRequestTypes;
@@ -110,8 +111,8 @@ class CorePropertySupervisorBase {
 		std::set<std::set<std::string>*> allSets_;
 	} propertyStruct_;
 
-       public:
-	void		  resetPropertiesAreSetup(void) { propertiesAreSetup_ = false; }  //forces reload of properties from configuration
+  public:
+	void              resetPropertiesAreSetup(void) { propertiesAreSetup_ = false; }  //forces reload of properties from configuration
 	ConfigurationTree getSupervisorTreeNode(void);
 
 	void loadUserSupervisorProperties(void);
@@ -146,7 +147,7 @@ class CorePropertySupervisorBase {
 		}
 		return StringMacros::validateValueForDefaultStringDataType<T>(it->second);
 	}
-	std::string		    getSupervisorProperty(const std::string& propertyName);
+	std::string                 getSupervisorProperty(const std::string& propertyName);
 	WebUsers::permissionLevel_t getSupervisorPropertyUserPermissionsThreshold(const std::string& requestType);
 };
 

@@ -24,18 +24,18 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	__COUT__ << "\nFlattening Active System Aliases!" << std::endl;
 
 	std::cout << "\n\nusage: Two arguments:\n\t <baseFlatVersion> <pathToSwapIn (optional)> \n\n"
-		  << "\t Default values: baseFlatVersion = 0, pathToSwapIn = \"\" \n\n"
-		  << std::endl;
+	          << "\t Default values: baseFlatVersion = 0, pathToSwapIn = \"\" \n\n"
+	          << std::endl;
 
 	std::cout << "\n\nNote: you can optionally just swap databases (and not modify their contents at all)"
-		  << " by providing an invalid baseFlatVersion of -1.\n\n"
-		  << std::endl;
+	          << " by providing an invalid baseFlatVersion of -1.\n\n"
+	          << std::endl;
 
 	std::cout << "\n\nNote: This assumes artdaq db file type interface. "
-		  << "The current database/ will be moved to database_<linuxtime>/ "
-		  << "and if a pathToSwapIn is specified it will be copied to database/ "
-		  << "before saving the currently active groups.\n\n"
-		  << std::endl;
+	          << "The current database/ will be moved to database_<linuxtime>/ "
+	          << "and if a pathToSwapIn is specified it will be copied to database/ "
+	          << "before saving the currently active groups.\n\n"
+	          << std::endl;
 
 	std::cout << "argc = " << argc << std::endl;
 	for (int i = 0; i < argc; i++)
@@ -44,7 +44,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	if (argc < 2)
 	{
 		std::cout << "Error! Must provide at least one parameter.\n\n"
-			  << std::endl;
+		          << std::endl;
 		return;
 	}
 
@@ -56,7 +56,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 		return;
 	}
 
-	int	 flatVersion  = 0;
+	int         flatVersion  = 0;
 	std::string pathToSwapIn = "";
 	if (argc >= 2)
 		sscanf(argv[1], "%d", &flatVersion);
@@ -98,7 +98,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 
 	//ConfigurationManager instance immediately loads active groups
 	std::cout << "\n\n\n"
-		  << __COUT_HDR_FL__ << "Loading active Aliases..." << std::endl;
+	          << __COUT_HDR_FL__ << "Loading active Aliases..." << std::endl;
 	ConfigurationManagerRW  cfgMgrInst("flatten_admin");
 	ConfigurationManagerRW *cfgMgr = &cfgMgrInst;
 
@@ -127,17 +127,17 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 
 	/* map<<groupName, origKey>, newKey> */
 	std::map<std::pair<std::string, ConfigurationGroupKey>,
-		 ConfigurationGroupKey>
+	         ConfigurationGroupKey>
 	    groupSet;
 	/* <tableName, <origVersion, newVersion> >*/
 	std::map<std::pair<std::string, ConfigurationVersion>,
-		 ConfigurationVersion>
+	         ConfigurationVersion>
 	    modifiedTables;
 	std::map<std::string, std::pair<ConfigurationGroupKey,
-					ConfigurationGroupKey>>
+	                                ConfigurationGroupKey>>
 	    activeGroupKeys;
 	std::map<std::pair<std::string, ConfigurationGroupKey>,
-		 std::string>
+	         std::string>
 	    groupErrors;
 
 	std::string activeBackboneGroupName = "";
@@ -162,19 +162,19 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	for (const auto &activeGroup : activeGroupsMap)
 	{
 		groupSet.insert(std::pair<
-				std::pair<std::string, ConfigurationGroupKey>,
-				ConfigurationGroupKey>(
+		                std::pair<std::string, ConfigurationGroupKey>,
+		                ConfigurationGroupKey>(
 		    std::pair<std::string, ConfigurationGroupKey>(
-			activeGroup.second.first,
-			activeGroup.second.second),
+		        activeGroup.second.first,
+		        activeGroup.second.second),
 		    ConfigurationGroupKey()));
 		activeGroupKeys.insert(std::pair<
-				       std::string,
-				       std::pair<ConfigurationGroupKey, ConfigurationGroupKey>>(
+		                       std::string,
+		                       std::pair<ConfigurationGroupKey, ConfigurationGroupKey>>(
 		    activeGroup.second.first,
 		    std::pair<ConfigurationGroupKey, ConfigurationGroupKey>(
-			activeGroup.second.second,
-			ConfigurationGroupKey())));
+		        activeGroup.second.second,
+		        ConfigurationGroupKey())));
 
 		if (activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE)
 		{
@@ -199,8 +199,8 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	}
 
 	//add system alias groups to set
-	const std::string			    groupAliasesTableName = ConfigurationManager::GROUP_ALIASES_CONFIG_NAME;
-	std::map<std::string, ConfigurationVersion> activeVersions	= cfgMgr->getActiveVersions();
+	const std::string                           groupAliasesTableName = ConfigurationManager::GROUP_ALIASES_CONFIG_NAME;
+	std::map<std::string, ConfigurationVersion> activeVersions        = cfgMgr->getActiveVersions();
 	if (activeVersions.find(groupAliasesTableName) == activeVersions.end())
 	{
 		__SS__ << "\nActive version of " << groupAliasesTableName << " missing! " << groupAliasesTableName << " is a required member of the Backbone configuration group."
@@ -212,11 +212,11 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	    cfgMgr->getNode(groupAliasesTableName).getChildren();
 	for (auto &groupPair : aliasNodePairs)
 		groupSet.insert(std::pair<
-				std::pair<std::string, ConfigurationGroupKey>,
-				ConfigurationGroupKey>(
+		                std::pair<std::string, ConfigurationGroupKey>,
+		                ConfigurationGroupKey>(
 		    std::pair<std::string, ConfigurationGroupKey>(
-			groupPair.second.getNode("GroupName").getValueAsString(),
-			ConfigurationGroupKey(groupPair.second.getNode("GroupKey").getValueAsString())),
+		        groupPair.second.getNode("GroupName").getValueAsString(),
+		        ConfigurationGroupKey(groupPair.second.getNode("GroupKey").getValueAsString())),
 		    ConfigurationGroupKey()));
 
 	std::cout << __COUT_HDR_FL__ << "Identified groups:" << std::endl;
@@ -234,7 +234,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	{
 		__SS__ << "filesystemdb:// was not found in $ARTDAQ_DATABASE_URI!" << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 
@@ -246,7 +246,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	{
 		__SS__ << ("Aborting move! Must at least give version argument to flatten to!") << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 
@@ -276,7 +276,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 		//also swap in active groups file
 		//check if original active file exists
 		std::string activeGroupsFile = ConfigurationManager::ACTIVE_GROUP_FILENAME + "." + thenTime;
-		FILE *      fp		     = fopen(activeGroupsFile.c_str(), "r");
+		FILE *      fp               = fopen(activeGroupsFile.c_str(), "r");
 		if (fp)
 		{
 			__COUT__ << "Swapping active groups file: \t" << activeGroupsFile << std::endl;
@@ -290,17 +290,17 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	ConfigurationView *     cfgView;
 	ConfigurationBase *     config;
 
-	bool	errDetected;
+	bool        errDetected;
 	std::string accumulateErrors = "";
-	int	 count	    = 0;
+	int         count            = 0;
 
 	std::map<std::string /*name*/, ConfigurationVersion>  memberMap;
 	std::map<std::string /*name*/, std::string /*alias*/> groupAliases;
-	std::string					      groupComment;
-	std::string					      groupAuthor;
-	std::string					      groupCreateTime;
-	time_t						      groupCreateTime_t;
-	ConfigurationBase *				      groupMetadataTable = cfgMgr->getMetadataTable();
+	std::string                                           groupComment;
+	std::string                                           groupAuthor;
+	std::string                                           groupCreateTime;
+	time_t                                                groupCreateTime_t;
+	ConfigurationBase *                                   groupMetadataTable = cfgMgr->getMetadataTable();
 
 	//don't do anything more if flatVersion is not persistent
 	if (ConfigurationVersion(flatVersion).isInvalid() ||
@@ -419,11 +419,11 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 			//	and record error
 
 			groupErrors.insert(std::pair<
-					   std::pair<std::string, ConfigurationGroupKey>,
-					   std::string>(
+			                   std::pair<std::string, ConfigurationGroupKey>,
+			                   std::string>(
 			    std::pair<std::string, ConfigurationGroupKey>(
-				groupPair.first.first,
-				groupPair.first.second),
+			        groupPair.first.first,
+			        groupPair.first.second),
 			    "Error caught loading the group."));
 			continue;
 		}
@@ -440,8 +440,8 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 				//check if table has already been modified by a previous group
 				//	(i.e. two groups using the same version of a table)
 				if (modifiedTables.find(std::pair<std::string, ConfigurationVersion>(
-					memberPair.first,
-					memberPair.second)) != modifiedTables.end())
+				        memberPair.first,
+				        memberPair.second)) != modifiedTables.end())
 				{
 					__COUT__ << "Table was already modified!" << std::endl;
 					memberPair.second = modifiedTables[std::pair<std::string, ConfigurationVersion>(
@@ -462,11 +462,11 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 
 				//save new version to modifiedTables
 				modifiedTables.insert(std::pair<
-						      std::pair<std::string, ConfigurationVersion>,
-						      ConfigurationVersion>(
+				                      std::pair<std::string, ConfigurationVersion>,
+				                      ConfigurationVersion>(
 				    std::pair<std::string, ConfigurationVersion>(
-					memberPair.first,
-					memberPair.second),
+				        memberPair.first,
+				        memberPair.second),
 				    ConfigurationVersion(flatVersion)));
 
 				memberPair.second = flatVersion;  //change version in the member map
@@ -494,7 +494,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 			//ConfigurationManager::METADATA_COL_ALIASES TODO
 			groupMetadataTable->getViewP()->setValue(
 			    StringMacros::mapToString(groupAliases,
-						      "," /*primary delimiter*/, ":" /*secondary delimeter*/),
+			                              "," /*primary delimiter*/, ":" /*secondary delimeter*/),
 			    0, ConfigurationManager::METADATA_COL_ALIASES);
 			groupMetadataTable->getViewP()->setValue(groupComment, 0, ConfigurationManager::METADATA_COL_COMMENT);
 			groupMetadataTable->getViewP()->setValue(groupAuthor, 0, ConfigurationManager::METADATA_COL_AUTHOR);
@@ -510,9 +510,9 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 
 			//memberMap should now consist of members with new flat version, so save group
 			theInterface_->saveConfigurationGroup(memberMap,
-							      ConfigurationGroupKey::getFullGroupString(
-								  groupPair.first.first,
-								  ConfigurationGroupKey(flatVersion)));
+			                                      ConfigurationGroupKey::getFullGroupString(
+			                                          groupPair.first.first,
+			                                          ConfigurationGroupKey(flatVersion)));
 
 			//and modify groupSet and activeGroupKeys keys
 			groupPair.second = ConfigurationGroupKey(flatVersion);
@@ -529,11 +529,11 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 			__COUT__ << e.what() << std::endl;
 
 			groupErrors.insert(std::pair<
-					   std::pair<std::string, ConfigurationGroupKey>,
-					   std::string>(
+			                   std::pair<std::string, ConfigurationGroupKey>,
+			                   std::string>(
 			    std::pair<std::string, ConfigurationGroupKey>(
-				groupPair.first.first,
-				groupPair.first.second),
+			        groupPair.first.first,
+			        groupPair.first.second),
 			    "Error caught saving the group."));
 		}
 		catch (...)
@@ -541,11 +541,11 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 			__COUT__ << "Error was caught saving group " << groupPair.first.first << " (" << groupPair.first.second << ") " << std::endl;
 
 			groupErrors.insert(std::pair<
-					   std::pair<std::string, ConfigurationGroupKey>,
-					   std::string>(
+			                   std::pair<std::string, ConfigurationGroupKey>,
+			                   std::string>(
 			    std::pair<std::string, ConfigurationGroupKey>(
-				groupPair.first.first,
-				groupPair.first.second),
+			        groupPair.first.first,
+			        groupPair.first.second),
 			    "Error caught saving the group."));
 		}
 		//=========================
@@ -571,7 +571,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 			strftime(buffer, 200, "%b %d, %Y %I:%M%p %Z", timeinfo);
 
 			fprintf(fp, "This database was moved from...\n\t %s \nto...\n\t %s \nat this time \n\t %lu \t %s\n\n\n",
-				currentDir.c_str(), moveToDir.c_str(), time(0), buffer);
+			        currentDir.c_str(), moveToDir.c_str(), time(0), buffer);
 
 			fclose(fp);
 		}
@@ -594,7 +594,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 			strftime(buffer, 200, "%b %d, %Y %I:%M:%S%p %Z", timeinfo);
 
 			fprintf(fp, "This database was moved from...\t %s \t to...\t %s at this time \t %lu \t %s\n\n",
-				pathToSwapIn.c_str(), currentDir.c_str(), time(0), buffer);
+			        pathToSwapIn.c_str(), currentDir.c_str(), time(0), buffer);
 			fclose(fp);
 		}
 	}
@@ -630,7 +630,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	}
 
 	std::cout << "\n\n"
-		  << __COUT_HDR_FL__ << "Modifying the active Backbone table to reflect new table versions and group keys." << std::endl;
+	          << __COUT_HDR_FL__ << "Modifying the active Backbone table to reflect new table versions and group keys." << std::endl;
 
 	{
 		cfgMgr->loadConfigurationGroup(
@@ -667,7 +667,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 					if (group.second.isInvalid())
 						continue;
 					else if (cfgView->getDataView()[row][col1] == group.first.first &&
-						 cfgView->getDataView()[row][col2] == group.first.second.toString())
+					         cfgView->getDataView()[row][col2] == group.first.second.toString())
 					{
 						//found a matching group/key pair
 						__COUT__ << "Changing row " << row << " for " << cfgView->getDataView()[row][col1] << " key=" << cfgView->getDataView()[row][col2] << " to NEW key=" << group.second << std::endl;
@@ -688,8 +688,8 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 		if (activeMap.find(versionAliasesName) != activeMap.end())
 		{
 			__COUT__ << "\n\nModifying " << versionAliasesName << std::endl;
-			config		  = cfgMgr->getConfigurationByName(versionAliasesName);
-			cfgView		  = config->getViewP();
+			config            = cfgMgr->getConfigurationByName(versionAliasesName);
+			cfgView           = config->getViewP();
 			unsigned int col1 = cfgView->findCol("ConfigurationName");
 			unsigned int col2 = cfgView->findCol("Version");
 
@@ -740,9 +740,9 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 
 		//memberMap should now consist of members with new flat version, so save
 		theInterface_->saveConfigurationGroup(memberMap,
-						      ConfigurationGroupKey::getFullGroupString(
-							  activeBackboneGroupName,
-							  ConfigurationGroupKey(flatVersion)));
+		                                      ConfigurationGroupKey::getFullGroupString(
+		                                          activeBackboneGroupName,
+		                                          ConfigurationGroupKey(flatVersion)));
 
 		activeGroupKeys[activeBackboneGroupName].second =
 		    ConfigurationGroupKey(flatVersion);
@@ -756,7 +756,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 
 	{
 		std::cout << "\n\n"
-			  << __COUT_HDR_FL__ << "Manipulating the Active Groups file..." << std::endl;
+		          << __COUT_HDR_FL__ << "Manipulating the Active Groups file..." << std::endl;
 
 		//check if original active file exists
 		FILE *fp = fopen(ConfigurationManager::ACTIVE_GROUP_FILENAME.c_str(), "r");
@@ -768,7 +768,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 		}
 
 		__COUT__ << "Backing up file: " << ConfigurationManager::ACTIVE_GROUP_FILENAME
-			 << std::endl;
+		         << std::endl;
 
 		fclose(fp);
 
@@ -777,10 +777,10 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 		       renameFile.c_str());
 
 		__COUT__ << "Backup file name: " << renameFile
-			 << std::endl;
+		         << std::endl;
 
 		ConfigurationGroupKey *theConfigurationGroupKey_, *theContextGroupKey_, *theBackboneGroupKey_, *theIterateGroupKey_;
-		std::string	    theConfigurationGroup_, theContextGroup_, theBackboneGroup_, theIterateGroup_;
+		std::string            theConfigurationGroup_, theContextGroup_, theBackboneGroup_, theIterateGroup_;
 
 		theConfigurationGroup_    = activeConfigGroupName;
 		theConfigurationGroupKey_ = &(activeGroupKeys[activeConfigGroupName].second);
@@ -817,28 +817,28 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char *argv[])
 	//print resulting all groups
 
 	std::cout << "\n\n"
-		  << __COUT_HDR_FL__ << "Resulting Groups:" << std::endl;
+	          << __COUT_HDR_FL__ << "Resulting Groups:" << std::endl;
 	for (const auto &group : groupSet)
 		__COUT__ << "\t" << group.first.first << ": " << group.first.second << " => " << group.second << std::endl;
 	std::cout << "\n\n"
-		  << __COUT_HDR_FL__ << "Resulting Groups end." << std::endl;
+	          << __COUT_HDR_FL__ << "Resulting Groups end." << std::endl;
 
 	//print resulting active groups
 
 	std::cout << "\n\n"
-		  << __COUT_HDR_FL__ << "Resulting Active Groups:" << std::endl;
+	          << __COUT_HDR_FL__ << "Resulting Active Groups:" << std::endl;
 	for (const auto &activeGroup : activeGroupKeys)
 		__COUT__ << "\t" << activeGroup.first << ": " << activeGroup.second.first << " => " << activeGroup.second.second << std::endl;
 
 	__COUT__ << activeBackboneGroupName << " is the " << ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE << "." << std::endl;
 	std::cout << "\n\n"
-		  << __COUT_HDR_FL__ << "Resulting Active Groups end." << std::endl;
+	          << __COUT_HDR_FL__ << "Resulting Active Groups end." << std::endl;
 
 CLEAN_UP:
 	//==============================================================================
 	std::cout << "\n\n"
-		  << __COUT_HDR_FL__ << "End of Flattening Active Configuration Groups!\n\n\n"
-		  << std::endl;
+	          << __COUT_HDR_FL__ << "End of Flattening Active Configuration Groups!\n\n\n"
+	          << std::endl;
 
 	__COUT__ << "****************************" << std::endl;
 	__COUT__ << "There were " << groupSet.size() << " groups considered, and there were " << groupErrors.size() << " errors found handling those groups." << std::endl;
@@ -846,11 +846,11 @@ CLEAN_UP:
 	for (auto &groupErr : groupErrors)
 		__COUT__ << "\t" << groupErr.first.first << " " << groupErr.first.second << ": \t" << groupErr.second << std::endl;
 	__COUT__ << "End of errors.\n\n"
-		 << std::endl;
+	         << std::endl;
 
 	__COUT__ << "Run the following to return to your previous database structure:" << std::endl;
 	__COUT__ << "\t otsdaq_flatten_system_aliases -1 " << moveToDir << "\n\n"
-		 << std::endl;
+	         << std::endl;
 
 	return;
 }

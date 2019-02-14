@@ -12,10 +12,11 @@
 #pragma GCC diagnostic pop
 #include "otsdaq-core/Macros/XDAQApplicationMacros.h"
 
-namespace ots {
-
-class SupervisorInfo {
-       public:
+namespace ots
+{
+class SupervisorInfo
+{
+  public:
 	//when no configuration, e.g. Wizard Mode, then
 	// name and contextName are derived from the class name and LID
 	SupervisorInfo(
@@ -65,41 +66,41 @@ class SupervisorInfo {
 
 	//Getters -------------------
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDescriptor(void) const { return descriptor_; }
-	const xdaq::ContextDescriptor*		     getContextDescriptor(void) const { return contextDescriptor_; }
-	const std::string&			     getName(void) const { return name_; }
-	const std::string&			     getContextName(void) const { return contextName_; }
-	const unsigned int&			     getId(void) const { return id_; }
-	const std::string&			     getClass(void) const { return class_; }
-	const std::string&			     getStatus(void) const { return status_; }
-	const std::string&			     getURL(void) const { return contextURL_; }
-	const std::string&			     getURN(void) const { return URN_; }
-	const std::string&			     getFullURL(void) const { return URL_; }
-	const uint16_t&				     getPort(void) const { return port_; }
+	const xdaq::ContextDescriptor*               getContextDescriptor(void) const { return contextDescriptor_; }
+	const std::string&                           getName(void) const { return name_; }
+	const std::string&                           getContextName(void) const { return contextName_; }
+	const unsigned int&                          getId(void) const { return id_; }
+	const std::string&                           getClass(void) const { return class_; }
+	const std::string&                           getStatus(void) const { return status_; }
+	const std::string&                           getURL(void) const { return contextURL_; }
+	const std::string&                           getURN(void) const { return URN_; }
+	const std::string&                           getFullURL(void) const { return URL_; }
+	const uint16_t&                              getPort(void) const { return port_; }
 
 	//Setters -------------------
 	void setStatus(const std::string& status) { status_ = status; }
 	void clear(void)
 	{
-		descriptor_	= 0;
+		descriptor_        = 0;
 		contextDescriptor_ = 0;
-		name_		   = "";
-		id_		   = 0;
+		name_              = "";
+		id_                = 0;
 		contextName_       = "";
-		status_		   = "Unknown";
+		status_            = "Unknown";
 	}
 
-       private:
+  private:
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* descriptor_;
 	XDAQ_CONST_CALL xdaq::ContextDescriptor* contextDescriptor_;
-	std::string				 name_;
-	std::string				 contextName_;
-	unsigned int				 id_;
-	std::string				 class_;
-	std::string				 contextURL_;
-	std::string				 URN_;
-	std::string				 URL_;
-	uint16_t				 port_;
-	std::string				 status_;
+	std::string                              name_;
+	std::string                              contextName_;
+	unsigned int                             id_;
+	std::string                              class_;
+	std::string                              contextURL_;
+	std::string                              URN_;
+	std::string                              URL_;
+	uint16_t                                 port_;
+	std::string                              status_;
 };
 
 }  // namespace ots

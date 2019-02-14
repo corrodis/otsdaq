@@ -9,12 +9,13 @@
 #include <memory>
 #include <string>
 
-namespace ots {
-
+namespace ots
+{
 //ARTDAQConsumer
 //	This class is a Data Consumer Plugin that allows a single artdaq Event Builder to be instantiate as a Consumer to an otsdaq Buffer.
-class ARTDAQConsumer : public DataConsumer, public Configurable {
-       public:
+class ARTDAQConsumer : public DataConsumer, public Configurable
+{
+  public:
 	ARTDAQConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
 	virtual ~ARTDAQConsumer(void);
 
@@ -33,15 +34,15 @@ class ARTDAQConsumer : public DataConsumer, public Configurable {
 	//artdaq::BoardReaderCore* getFragmentReceiverPtr(){return fragment_receiver_ptr_.get();}
 	//void ProcessData_(artdaq::FragmentPtrs & frags) override;
 
-       private:
+  private:
 	bool workLoopThread(toolbox::task::WorkLoop* workLoop) { return false; }
 
 	std::unique_ptr<artdaq::BoardReaderApp> fragment_receiver_ptr_;
-	std::string				name_;
+	std::string                             name_;
 
 	//FIXME These should go...
-	std::string	 report_string_;
-	bool		    external_request_status_;
+	std::string         report_string_;
+	bool                external_request_status_;
 	fhicl::ParameterSet fhiclConfiguration_;
 };
 

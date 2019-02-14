@@ -21,7 +21,7 @@ using namespace ots;
 ARTDAQProducer::ARTDAQProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
     : WorkLoop(processorUID)
     , DataProducer(supervisorApplicationUID, bufferUID,
-		   processorUID)
+                   processorUID)
     //theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
     , Configurable(theXDAQContextConfigTree, configurationPath)
 {
@@ -64,12 +64,12 @@ ARTDAQProducer::ARTDAQProducer(std::string supervisorApplicationUID, std::string
 	//	BufferUID:"ART_S0_DM0_DataBuffer0"
 	//	ProcessorUID:"ART_S0_DM0_DB0_ARTConsumer0"
 	size_t fcli = fileFclString.find("fragment_receiver: {") +
-		      +strlen("fragment_receiver: {");
+	              +strlen("fragment_receiver: {");
 	if (fcli == std::string::npos)
 	{
 		__SS__ << "Could not find 'fragment_receiver: {' in Board Reader fcl string!" << std::endl;
 		__COUT__ << "\n"
-			 << ss.str();
+		         << ss.str();
 		__SS_THROW__;
 	}
 
@@ -79,7 +79,7 @@ ARTDAQProducer::ARTDAQProducer(std::string supervisorApplicationUID, std::string
 	std::string  consumerID, bufferID, appID;
 	unsigned int backSteps;  //at 2, 4, and 7 are the important parent IDs
 	size_t       backi = -1, backj;
-	backSteps	  = 7;
+	backSteps          = 7;
 	for (unsigned int i = 0; i < backSteps; i++)
 	{
 		//__COUT__ << "backsteps: " << i+1 << std::endl;
@@ -100,10 +100,10 @@ ARTDAQProducer::ARTDAQProducer(std::string supervisorApplicationUID, std::string
 
 	//insert parent IDs into fcl string
 	fileFclString = fileFclString.substr(0, fcli) + "\n\t\t" +
-			"SupervisorApplicationUID: \"" + appID + "\"\n\t\t" +
-			"BufferUID: \"" + bufferID + "\"\n\t\t" +
-			"ProcessorUID: \"" + consumerID + "\"\n" +
-			fileFclString.substr(fcli);
+	                "SupervisorApplicationUID: \"" + appID + "\"\n\t\t" +
+	                "BufferUID: \"" + bufferID + "\"\n\t\t" +
+	                "ProcessorUID: \"" + consumerID + "\"\n" +
+	                fileFclString.substr(fcli);
 
 	__COUT__ << fileFclString << std::endl;
 
@@ -141,7 +141,7 @@ void ARTDAQProducer::configure(int rank)
 {
 	std::cout << __COUT_HDR_FL__ << "\tConfigure" << std::endl;
 
-	report_string_		 = "";
+	report_string_           = "";
 	external_request_status_ = true;
 
 	// in the following block, we first destroy the existing BoardReader
@@ -176,7 +176,7 @@ void ARTDAQProducer::halt(void)
 	//FIXME These are passed as parameters
 	uint64_t timeout = 45;
 	//uint64_t timestamp = 184467440737095516;
-	report_string_		 = "";
+	report_string_           = "";
 	external_request_status_ = fragment_receiver_ptr_->shutdown(timeout);
 	if (!external_request_status_)
 	{
@@ -190,9 +190,9 @@ void ARTDAQProducer::pauseProcessingData(void)
 {
 	std::cout << __COUT_HDR_FL__ << "\tPause" << std::endl;
 	//FIXME These are passed as parameters
-	uint64_t timeout	 = 45;
+	uint64_t timeout         = 45;
 	uint64_t timestamp       = 184467440737095516;
-	report_string_		 = "";
+	report_string_           = "";
 	external_request_status_ = fragment_receiver_ptr_->pause(timeout, timestamp);
 	if (!external_request_status_)
 	{
@@ -206,9 +206,9 @@ void ARTDAQProducer::resumeProcessingData(void)
 {
 	std::cout << __COUT_HDR_FL__ << "\tResume" << std::endl;
 	//FIXME These are passed as parameters
-	uint64_t timeout	 = 45;
+	uint64_t timeout         = 45;
 	uint64_t timestamp       = 184467440737095516;
-	report_string_		 = "";
+	report_string_           = "";
 	external_request_status_ = fragment_receiver_ptr_->resume(timeout, timestamp);
 	if (!external_request_status_)
 	{

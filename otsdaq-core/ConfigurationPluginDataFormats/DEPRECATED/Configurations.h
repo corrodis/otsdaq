@@ -8,10 +8,11 @@
 #include <set>
 #include <string>
 
-namespace ots {
-
-class Configurations : public ConfigurationBase {
-       public:
+namespace ots
+{
+class Configurations : public ConfigurationBase
+{
+  public:
 	Configurations(void);
 	virtual ~Configurations(void);
 
@@ -22,16 +23,19 @@ class Configurations : public ConfigurationBase {
 	//Getters
 	ConfigurationVersion getConditionVersion(const ConfigurationGroupKey &ConfigurationGroupKey, std::string koc) const;
 
-	std::set<std::string> getListOfKocs(ConfigurationGroupKey ConfigurationGroupKey = ConfigurationGroupKey()) const;								      //INVALID to get all Kocs
-	void		      getListOfKocsForView(ConfigurationView *cfgView, std::set<std::string> &kocList, ConfigurationGroupKey ConfigurationGroupKey = ConfigurationGroupKey()) const;  //INVALID to get all Kocs
+	std::set<std::string> getListOfKocs(ConfigurationGroupKey ConfigurationGroupKey = ConfigurationGroupKey()) const;                                                                     //INVALID to get all Kocs
+	void                  getListOfKocsForView(ConfigurationView *cfgView, std::set<std::string> &kocList, ConfigurationGroupKey ConfigurationGroupKey = ConfigurationGroupKey()) const;  //INVALID to get all Kocs
 
 	//Setters
 	int setConditionVersionForView(ConfigurationView *cfgView, ConfigurationGroupKey ConfigurationGroupKey, std::string koc, ConfigurationVersion newKOCVersion);
 
-       private:
-	enum { ConfigurationGroupKeyAlias,
-	       KOC,
-	       ConditionVersion };
+  private:
+	enum
+	{
+		ConfigurationGroupKeyAlias,
+		KOC,
+		ConditionVersion
+	};
 };
 }  // namespace ots
 #endif

@@ -63,11 +63,11 @@ HttpXmlDocument WorkLoopManager::processRequest(std::string workLoopName, const 
 	}
 	time(&(workLoops_[requestNumber].requestStartTime));
 	workLoops_[requestNumber].requestLastTimeChecked = workLoops_[requestNumber].requestStartTime;
-	workLoops_[requestNumber].request		 = getWorkLoopRequest(workLoopName);
-	workLoops_[requestNumber].result		 = "EMPTY";
-	workLoops_[requestNumber].progress		 = 0;
-	workLoops_[requestNumber].done			 = false;
-	workLoops_[requestNumber].workLoopName		 = workLoopName;
+	workLoops_[requestNumber].request                = getWorkLoopRequest(workLoopName);
+	workLoops_[requestNumber].result                 = "EMPTY";
+	workLoops_[requestNumber].progress               = 0;
+	workLoops_[requestNumber].done                   = false;
+	workLoops_[requestNumber].workLoopName           = workLoopName;
 	if (message != 0)
 		workLoops_[requestNumber].message = *message;
 	try
@@ -160,7 +160,7 @@ bool WorkLoopManager::getRequestResult(cgicc::Cgicc& cgi, HttpXmlDocument& xmlDo
 	RequestNumber     requestNumber       = strtoull(requestNumberString.c_str(), 0, 10);
 
 	__COUT__ << "Request: " << requestName_ << " RequestNumber=" << requestNumberString
-		 << " assigned # " << requestNumber << std::endl;
+	         << " assigned # " << requestNumber << std::endl;
 
 	if (workLoops_.find(requestNumber) == workLoops_.end())
 	{
@@ -291,9 +291,9 @@ std::string WorkLoopManager::composeWorkLoopName(RequestNumber requestNumber, cg
 	std::stringstream name;
 	name << requestNumber << "-" << cgi.getElement(requestName_)->getValue();
 	__COUT__ << "Request: " << requestName_
-		 << " Value=" << cgi.getElement(requestName_)->getValue()
-		 << " WLName: " << name.str()
-		 << std::endl;
+	         << " Value=" << cgi.getElement(requestName_)->getValue()
+	         << " WLName: " << name.str()
+	         << std::endl;
 	return name.str();
 }
 
@@ -304,9 +304,9 @@ std::string WorkLoopManager::composeWorkLoopName(RequestNumber requestNumber, co
 	std::stringstream name;
 	name << requestNumber << "-" << soapCommand.getCommand();
 	__COUT__ << "Request: " << requestName_
-		 << " Value=" << soapCommand.getCommand()
-		 << " WLName: " << name.str()
-		 << std::endl;
+	         << " Value=" << soapCommand.getCommand()
+	         << " WLName: " << name.str()
+	         << std::endl;
 	if (soapCommand.hasParameters())
 	{
 		name << '<';

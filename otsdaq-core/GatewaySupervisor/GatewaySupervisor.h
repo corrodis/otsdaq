@@ -31,8 +31,8 @@
 #define FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE std::string("FSMLastConfiguredGroupAlias.hist")
 #define FSM_LAST_STARTED_GROUP_ALIAS_FILE std::string("FSMLastStartedGroupAlias.hist")
 
-namespace ots {
-
+namespace ots
+{
 class ConfigurationManager;
 class ConfigurationGroupKey;
 class WorkLoopManager;
@@ -41,12 +41,13 @@ class WorkLoopManager;
 //	This class is the gateway server for all otsdaq requests in "Normal Mode." It validates user access
 //	for every request. It synchronizes
 //	the state machines of all other supervisors.
-class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public RunControlStateMachine, public CorePropertySupervisorBase {
+class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public RunControlStateMachine, public CorePropertySupervisorBase
+{
 	friend class WizardSupervisor;
 	friend class Iterator;
 	friend class ARTDAQCommandable;
 
-       public:
+  public:
 	XDAQ_INSTANTIATOR();
 
 	GatewaySupervisor(xdaq::ApplicationStub* s);
@@ -111,18 +112,18 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 	virtual void setSupervisorPropertyDefaults(void) override;  //override to control supervisor specific defaults
 	virtual void forceSupervisorPropertyValues(void) override;  //override to force supervisor property values (and ignore user settings)
 
-       private:
-	unsigned int							    getNextRunNumber(const std::string& fsmName = "");
-	bool								    setNextRunNumber(unsigned int runNumber, const std::string& fsmName = "");
+  private:
+	unsigned int                                                        getNextRunNumber(const std::string& fsmName = "");
+	bool                                                                setNextRunNumber(unsigned int runNumber, const std::string& fsmName = "");
 	static std::pair<std::string /*group name*/, ConfigurationGroupKey> loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString);
-	void								    saveGroupNameAndKey(const std::pair<std::string /*group name*/, ConfigurationGroupKey>& theGroup, const std::string& fileName);
-	static xoap::MessageReference					    lastConfigGroupRequestHandler(const SOAPParameters& parameters);
-	static void							    launchStartOTSCommand(const std::string& command, ConfigurationManager* cfgMgr);
-	static void							    indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
+	void                                                                saveGroupNameAndKey(const std::pair<std::string /*group name*/, ConfigurationGroupKey>& theGroup, const std::string& fileName);
+	static xoap::MessageReference                                       lastConfigGroupRequestHandler(const SOAPParameters& parameters);
+	static void                                                         launchStartOTSCommand(const std::string& command, ConfigurationManager* cfgMgr);
+	static void                                                         indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
 
 	static void StateChangerWorkLoop(GatewaySupervisor* supervisorPtr);
 	std::string attemptStateMachineTransition(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
-	void	broadcastMessage(xoap::MessageReference msg);
+	void        broadcastMessage(xoap::MessageReference msg);
 
 	struct BroadcastMessageIterationsDoneStruct
 	{
@@ -148,7 +149,7 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 				iterationsDone_[iterationsDone_.size() - 1][i] = false;
 		}  //end push()
 
-		bool*	operator[](unsigned int i) { return iterationsDone_[i]; }
+		bool*        operator[](unsigned int i) { return iterationsDone_[i]; }
 		const bool*  operator[](unsigned int i) const { return iterationsDone_[i]; }
 		unsigned int size(unsigned int i = -1)
 		{
@@ -156,8 +157,8 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 			return arraySizes_[i];
 		}
 
-	       private:
-		std::vector<bool*>	iterationsDone_;
+	  private:
+		std::vector<bool*>        iterationsDone_;
 		std::vector<unsigned int> arraySizes_;
 	};  //end BroadcastMessageIterationsDoneStruct definition
 
@@ -181,7 +182,7 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 			    xoap::MessageReference message,
 			    const std::string&     command,
 			    const unsigned int&    iteration,
-			    bool&		   iterationsDone)
+			    bool&                  iterationsDone)
 			    : appInfo_(appInfo)
 			    , message_(message)
 			    , command_(command)
@@ -194,7 +195,7 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 			xoap::MessageReference message_;
 			const std::string&     command_;
 			const unsigned int&    iteration_;
-			bool&		       iterationsDone_;
+			bool&                  iterationsDone_;
 
 			std::string reply_;
 		};  //end BroadcastMessageStruct definition
@@ -205,7 +206,7 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 		    xoap::MessageReference message,
 		    const std::string&     command,
 		    const unsigned int&    iteration,
-		    bool&		   iterationsDone)
+		    bool&                  iterationsDone)
 		{
 			messages_.clear();
 			messages_.push_back(BroadcastThreadStruct::BroadcastMessageStruct(
@@ -221,8 +222,8 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 		xoap::MessageReference getMessage() { return messages_[0].message_; }
 		const std::string&     getCommand() { return messages_[0].command_; }
 		const unsigned int&    getIteration() { return messages_[0].iteration_; }
-		std::string&	   getReply() { return messages_[0].reply_; }
-		bool&		       getIterationsDone() { return messages_[0].iterationsDone_; }
+		std::string&           getReply() { return messages_[0].reply_; }
+		bool&                  getIterationsDone() { return messages_[0].iterationsDone_; }
 
 		//each thread accesses these members
 		std::mutex    threadMutex;
@@ -233,13 +234,13 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 
 	};  //end BroadcastThreadStruct declaration
 	static void broadcastMessageThread(GatewaySupervisor* supervisorPtr, GatewaySupervisor::BroadcastThreadStruct* threadStruct);
-	bool	handleBroadcastMessageTarget(const SupervisorInfo& appInfo, xoap::MessageReference message, const std::string& command, const unsigned int& iteration, std::string& reply, unsigned int threadIndex = 0);
+	bool        handleBroadcastMessageTarget(const SupervisorInfo& appInfo, xoap::MessageReference message, const std::string& command, const unsigned int& iteration, std::string& reply, unsigned int threadIndex = 0);
 
 	bool supervisorGuiHasBeenLoaded_;  //use to indicate first access by user of ots since execution
 
 	//Member Variables
 
-	WebUsers	  theWebUsers_;
+	WebUsers          theWebUsers_;
 	SystemMessenger   theSystemMessenger_;
 	ARTDAQCommandable theArtdaqCommandable_;
 
@@ -248,15 +249,16 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 	WorkLoopManager infoRequestWorkLoopManager_;
 	toolbox::BSem   infoRequestSemaphore_;
 
-	std::string						     activeStateMachineName_;  //when multiple state machines, this is the name of the state machine which executed the configure transition
-	std::string						     activeStateMachineWindowName_;
+	std::string                                                  activeStateMachineName_;  //when multiple state machines, this is the name of the state machine which executed the configure transition
+	std::string                                                  activeStateMachineWindowName_;
 	std::pair<std::string /*group name*/, ConfigurationGroupKey> theConfigurationGroup_;  //used to track the active configuration group at states after the configure state
 
 	Iterator    theIterator_;
 	std::mutex  stateMachineAccessMutex_;  //for sharing state machine access with iterator thread
 	std::string stateMachineLastCommandInput_;
 
-	enum {
+	enum
+	{
 		VERBOSE_MUTEX = 0
 	};
 
@@ -264,16 +266,16 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 
 	std::mutex   broadcastCommandMessageIndexMutex_, broadcastIterationsDoneMutex_;
 	unsigned int broadcastCommandMessageIndex_;
-	bool	 broadcastIterationsDone_;
+	bool         broadcastIterationsDone_;
 
 	//temporary member variable to avoid redeclaration in repetitive functions
 	char tmpStringForConversions_[100];
 
 	//Trash tests
-	void		   wait(int milliseconds, std::string who = "") const;
+	void               wait(int milliseconds, std::string who = "") const;
 	unsigned long long counterTest_;
 	std::vector<int>   vectorTest_;
-	std::string	securityType_;
+	std::string        securityType_;
 };
 
 }  // namespace ots

@@ -70,7 +70,7 @@ bool Configurations::findKOC(ConfigurationGroupKey ConfigurationGroupKey, std::s
 // getConditionVersion
 //FIXME -- new ConfiguratoinGroup and ConfigurationGroupKey should be used!
 ConfigurationVersion Configurations::getConditionVersion(const ConfigurationGroupKey &ConfigurationGroupKey,
-							 std::string		      koc) const
+                                                         std::string                  koc) const
 {
 	unsigned int tmpConfigurationGroupKey;  //this is type to extract from table
 	std::string  tmpKOC;
@@ -102,7 +102,7 @@ ConfigurationVersion Configurations::getConditionVersion(const ConfigurationGrou
 // returns 1 if no change occurred (because new version was same as existing)
 // returns 0 on change success
 int Configurations::setConditionVersionForView(ConfigurationView *   cfgView,
-					       ConfigurationGroupKey ConfigurationGroupKey, std::string koc, ConfigurationVersion newKOCVersion)
+                                               ConfigurationGroupKey ConfigurationGroupKey, std::string koc, ConfigurationVersion newKOCVersion)
 {
 	//find first match of KOCAlias and ConfigurationGroupKey
 	unsigned int row = 0;
@@ -119,10 +119,10 @@ int Configurations::setConditionVersionForView(ConfigurationView *   cfgView,
 			{
 				cfgView->getValue(tmpOldKOCVersion, row, Configurations::ConditionVersion);
 				std::cout << __COUT_HDR_FL__ << "Found ConfigKey(" << ConfigurationGroupKey << ") and KOCAlias(" << koc << ") pair."
-					  << " Current version is: " << tmpOldKOCVersion << " New version is: " << newKOCVersion << std::endl;
+				          << " Current version is: " << tmpOldKOCVersion << " New version is: " << newKOCVersion << std::endl;
 				if (newKOCVersion == tmpOldKOCVersion)
 					return 1;  //no change necessary
-				break;		   //found row! exit search loop
+				break;         //found row! exit search loop
 			}
 		}
 	}
@@ -153,7 +153,7 @@ std::set<std::string> Configurations::getListOfKocs(ConfigurationGroupKey Config
 //	for all KOCs regardless of ConfigurationGroupKey, set ConfigurationGroupKey = -1
 //
 void Configurations::getListOfKocsForView(ConfigurationView *cfgView, std::set<std::string> &kocs,
-					  ConfigurationGroupKey ConfigurationGroupKey) const
+                                          ConfigurationGroupKey ConfigurationGroupKey) const
 {
 	if (!cfgView)
 	{

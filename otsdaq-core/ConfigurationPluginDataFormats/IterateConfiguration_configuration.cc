@@ -9,16 +9,16 @@ using namespace ots;
 
 //instantiate static members
 
-const std::string IterateConfiguration::COMMAND_BEGIN_LABEL	    = "BEGIN_LABEL";
-const std::string IterateConfiguration::COMMAND_CHOOSE_FSM	     = "CHOOSE_FSM";
+const std::string IterateConfiguration::COMMAND_BEGIN_LABEL            = "BEGIN_LABEL";
+const std::string IterateConfiguration::COMMAND_CHOOSE_FSM             = "CHOOSE_FSM";
 const std::string IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP = "CONFIGURE_ACTIVE_GROUP";
-const std::string IterateConfiguration::COMMAND_CONFIGURE_ALIAS	= "CONFIGURE_ALIAS";
-const std::string IterateConfiguration::COMMAND_CONFIGURE_GROUP	= "CONFIGURE_GROUP";
+const std::string IterateConfiguration::COMMAND_CONFIGURE_ALIAS        = "CONFIGURE_ALIAS";
+const std::string IterateConfiguration::COMMAND_CONFIGURE_GROUP        = "CONFIGURE_GROUP";
 const std::string IterateConfiguration::COMMAND_EXECUTE_FE_MACRO       = "EXECUTE_FE_MACRO";
-const std::string IterateConfiguration::COMMAND_EXECUTE_MACRO	  = "EXECUTE_MACRO";
+const std::string IterateConfiguration::COMMAND_EXECUTE_MACRO          = "EXECUTE_MACRO";
 const std::string IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP    = "MODIFY_ACTIVE_GROUP";
-const std::string IterateConfiguration::COMMAND_REPEAT_LABEL	   = "REPEAT_LABEL";
-const std::string IterateConfiguration::COMMAND_RUN		       = "RUN";
+const std::string IterateConfiguration::COMMAND_REPEAT_LABEL           = "REPEAT_LABEL";
+const std::string IterateConfiguration::COMMAND_RUN                    = "RUN";
 
 const std::string IterateConfiguration::ITERATE_TABLE = "IterateConfiguration";
 const std::string IterateConfiguration::PLAN_TABLE    = "IterationPlanConfiguration";
@@ -36,10 +36,10 @@ IterateConfiguration::CommandConfigureGroupParams  IterateConfiguration::command
 IterateConfiguration::CommandExecuteMacroParams    IterateConfiguration::commandExecuteMacroParams_;
 IterateConfiguration::CommandModifyActiveParams    IterateConfiguration::commandModifyActiveParams_;
 IterateConfiguration::CommandRepeatLabelParams     IterateConfiguration::commandRepeatLabelParams_;
-IterateConfiguration::CommandRunParams		   IterateConfiguration::commandRunParams_;
+IterateConfiguration::CommandRunParams             IterateConfiguration::commandRunParams_;
 IterateConfiguration::CommandChooseFSMParams       IterateConfiguration::commandChooseFSMParams_;
 
-IterateConfiguration::TargetParams	 IterateConfiguration::targetParams_;
+IterateConfiguration::TargetParams         IterateConfiguration::targetParams_;
 IterateConfiguration::TargetTableColumns   IterateConfiguration::targetCols_;
 IterateConfiguration::CommandTargetColumns IterateConfiguration::commandTargetCols_;
 
@@ -65,7 +65,7 @@ void IterateConfiguration::init(ConfigurationManager* configManager)
 	//	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
 	std::string value;
-	auto	childrenMap = configManager->__SELF_NODE__.getChildren();
+	auto        childrenMap = configManager->__SELF_NODE__.getChildren();
 	for (auto& childPair : childrenMap)
 	{
 		//do something for each row in table
@@ -93,8 +93,8 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 	std::vector<IterateConfiguration::Command> commands;
 
 	auto commandChildren = planNode.getNode(
-					   IterateConfiguration::iterateTableCols_.PlanLink_)
-				   .getChildren();
+	                                   IterateConfiguration::iterateTableCols_.PlanLink_)
+	                           .getChildren();
 
 	for (auto& commandChild : commandChildren)
 	{
@@ -105,23 +105,23 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 		__COUT__ << "\t\tType \t" << commandChild.second.getNode(IterateConfiguration::planTableCols_.CommandType_) << std::endl;
 
 		if (!commandChild.second.getNode(
-					    IterateConfiguration::planTableCols_.Status_)
-			 .getValue<bool>())
+		                            IterateConfiguration::planTableCols_.Status_)
+		         .getValue<bool>())
 			continue;  //skip disabled commands
 
 		commands.push_back(IterateConfiguration::Command());
 		commands.back().type_ = commandChild.second.getNode(
-							       IterateConfiguration::planTableCols_.CommandType_)
-					    .getValue<std::string>();
+		                                               IterateConfiguration::planTableCols_.CommandType_)
+		                            .getValue<std::string>();
 
 		if (commandChild.second.getNode(
-					   IterateConfiguration::planTableCols_.CommandLink_)
-			.isDisconnected())
+		                           IterateConfiguration::planTableCols_.CommandLink_)
+		        .isDisconnected())
 			continue;  //skip if no command parameters
 
 		auto commandSpecificFields = commandChild.second.getNode(
-								    IterateConfiguration::planTableCols_.CommandLink_)
-						 .getChildren();
+		                                                    IterateConfiguration::planTableCols_.CommandLink_)
+		                                 .getChildren();
 
 		for (unsigned int i = 0; i < commandSpecificFields.size() - 3; ++i)  //ignore last three columns
 		{
@@ -143,7 +143,7 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 
 					ConfigurationTree targetNode =
 					    target.second.getNode(
-						IterateConfiguration::targetCols_.TargetLink_);
+					        IterateConfiguration::targetCols_.TargetLink_);
 					if (targetNode.isDisconnected())
 					{
 						__COUT_ERR__ << "Disconnected target!?" << __E__;
@@ -151,14 +151,14 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 					}
 
 					__COUT__ << "\t\t = \t"
-						 << "Table:" << targetNode.getConfigurationName() << " UID:" << targetNode.getUIDAsString() << std::endl;
+					         << "Table:" << targetNode.getConfigurationName() << " UID:" << targetNode.getUIDAsString() << std::endl;
 					commands.back().addTarget();
 					commands.back().targets_.back().table_ = targetNode.getConfigurationName();
 					commands.back().targets_.back().UID_   = targetNode.getUIDAsString();
 				}
 			}
 			else if (commandSpecificFields[i].first ==
-				 IterateConfiguration::commandExecuteMacroParams_.MacroParameterLink_)
+			         IterateConfiguration::commandExecuteMacroParams_.MacroParameterLink_)
 			{
 				//get Macro parameters, place them in params_
 				__COUT__ << "Extracting macro parameters..." << __E__;
@@ -190,15 +190,15 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 
 				//std::string name, value;
 				unsigned long numberOfIterations;
-				bool	  firstDimension = true;
+				bool          firstDimension = true;
 
 				for (auto& dimensionalLoop : dimensionalLoops)
 				{
 					__COUT__ << "\t\t\tDimensionalLoop \t" << dimensionalLoop.first << __E__;
 
 					numberOfIterations = dimensionalLoop.second.getNode(
-										       IterateConfiguration::macroDimLoopCols_.NumberOfIterations_)
-								 .getValue<unsigned long>();
+					                                               IterateConfiguration::macroDimLoopCols_.NumberOfIterations_)
+					                         .getValue<unsigned long>();
 
 					__COUTV__(numberOfIterations);
 
@@ -236,19 +236,19 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 
 						argStr += ",";
 						argStr += macroParam.second.getNode(
-									       IterateConfiguration::macroParamCols_.Name_)
-							      .getValue<std::string>();
+						                               IterateConfiguration::macroParamCols_.Name_)
+						              .getValue<std::string>();
 						argStr += ":";
 						argStr += macroParam.second.getNode(
-									       IterateConfiguration::macroParamCols_.Value_)
-							      .getValue<std::string>();
+						                               IterateConfiguration::macroParamCols_.Value_)
+						              .getValue<std::string>();
 						argStr += ":";
 						argStr += macroParam.second.getNode(
-									       IterateConfiguration::macroParamCols_.Step_)
-							      .getValue<std::string>();
+						                               IterateConfiguration::macroParamCols_.Step_)
+						              .getValue<std::string>();
 
 					}  //end parameter loop
-				}	  //end dimension loop
+				}      //end dimension loop
 
 				//Macro argument string is done
 				__COUTV__(argStr);
@@ -256,8 +256,8 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 				//assume no conflict with fixed parameters in map
 				//	because of prepend IterateConfiguration::commandExecuteMacroParams_.MacroParameterPrepend_ +
 				commands.back().params_.emplace(std::pair<
-								std::string /*param name*/,
-								std::string /*param value*/>(
+				                                std::string /*param name*/,
+				                                std::string /*param value*/>(
 				    IterateConfiguration::commandExecuteMacroParams_.MacroArgumentString_,
 				    argStr));
 			}
@@ -266,21 +266,21 @@ std::vector<IterateConfiguration::Command> IterateConfiguration::getPlanCommands
 				if (  //bool type, convert to 1 or 0
 				    commandSpecificFields[i].second.isValueBoolType())
 					commands.back().params_.emplace(std::pair<
-									std::string /*param name*/,
-									std::string /*param value*/>(
+					                                std::string /*param name*/,
+					                                std::string /*param value*/>(
 					    commandSpecificFields[i].first,
 					    commandSpecificFields[i].second.getValue<bool>() ? "1" : "0"));
 				else if (  //number data type, get raw value string (note: does not do math or variable substitution)
 				    commandSpecificFields[i].second.isValueNumberDataType())
 					commands.back().params_.emplace(std::pair<
-									std::string /*param name*/,
-									std::string /*param value*/>(
+					                                std::string /*param name*/,
+					                                std::string /*param value*/>(
 					    commandSpecificFields[i].first,
 					    commandSpecificFields[i].second.getValueAsString()));
 				else
 					commands.back().params_.emplace(std::pair<
-									std::string /*param name*/,
-									std::string /*param value*/>(
+					                                std::string /*param name*/,
+					                                std::string /*param value*/>(
 					    commandSpecificFields[i].first,
 					    commandSpecificFields[i].second.getValue<std::string>()));
 			}

@@ -5,22 +5,24 @@
 #include "artdaq/ExternalComms/CommanderInterface.hh"
 #include "boost/thread.hpp"
 
-namespace ots {
+namespace ots
+{
 class GatewaySupervisor;
 
-class ARTDAQCommandable : public artdaq::Commandable {
-       public:
+class ARTDAQCommandable : public artdaq::Commandable
+{
+  public:
 	explicit ARTDAQCommandable(GatewaySupervisor* super);
 	virtual ~ARTDAQCommandable();
 
 	void init(int commanderId, std::string commanderType);
 
-       private:
-	GatewaySupervisor*			    theSupervisor_;
+  private:
+	GatewaySupervisor*                          theSupervisor_;
 	std::unique_ptr<artdaq::CommanderInterface> theCommander_;
-	boost::thread				    commanderThread_;
+	boost::thread                               commanderThread_;
 
-       public:
+  public:
 	// Commandable Overrides
 	// these methods provide the operations that are used by the state machine
 	/**

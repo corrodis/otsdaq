@@ -11,10 +11,11 @@
 #include "ConfigurationBase.h"
 #include "ROCDACs.h"
 
-namespace ots {
-
-class RegisterSequencer : public ots::ConfigurationBase {
-       public:
+namespace ots
+{
+class RegisterSequencer : public ots::ConfigurationBase
+{
+  public:
 	RegisterSequencer(std::string staticConfigurationName);
 	virtual ~RegisterSequencer();
 
@@ -22,12 +23,14 @@ class RegisterSequencer : public ots::ConfigurationBase {
 
 	//getter
 
-       protected:
-	enum { ComponentName,
-	       RegisterName,
-	       RegisterValue,
-	       SequencerNumber,
-	       State
+  protected:
+	enum
+	{
+		ComponentName,
+		RegisterName,
+		RegisterValue,
+		SequencerNumber,
+		State
 	};
 };
 

@@ -5,8 +5,8 @@
 
 #include <string>
 
-namespace ots {
-
+namespace ots
+{
 class DataProcessor;
 class ConfigurationTree;
 

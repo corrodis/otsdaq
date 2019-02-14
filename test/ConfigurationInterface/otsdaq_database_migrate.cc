@@ -31,7 +31,7 @@ void readxml_writedb_configurations()
 
 	if (getenv("USER_DATA") == NULL) std::cout << __COUT_HDR_FL__ << "Missing env variable: USER_DATA. It must be set!" << std::endl;
 
-	std::vector<std::string> configTables;		//list of tables to migrate
+	std::vector<std::string> configTables;          //list of tables to migrate
 	std::vector<std::string> failedConfigVersions;  //list of tables/versions that failed to migrate
 
 	//normally CONFIGURATION_TYPE is set by StartOTS.sh
@@ -67,7 +67,7 @@ void readxml_writedb_configurations()
 	}
 
 	unsigned int configurationsCount = 0, skippedConfigurations = 0,
-		     skippedVersions = 0, versionsCount = 0;
+	             skippedVersions = 0, versionsCount = 0;
 
 	ConfigurationInterface *theInterface_ = ConfigurationInterface::getInstance(true);
 
@@ -85,7 +85,7 @@ void readxml_writedb_configurations()
 		catch (cet::exception e)
 		{
 			std::cout << __COUT_HDR_FL__ << std::endl
-				  << e.what() << std::endl;
+			          << e.what() << std::endl;
 			std::cout << __COUT_HDR_FL__ << "Caught exception, so skip. (likely not a defined configuration class) " << std::endl;
 
 			++skippedConfigurations;
@@ -108,7 +108,7 @@ void readxml_writedb_configurations()
 			catch (std::runtime_error e)
 			{
 				std::cout << __COUT_HDR_FL__ << std::endl
-					  << e.what() << std::endl;
+				          << e.what() << std::endl;
 				std::cout << __COUT_HDR_FL__ << "Caught exception for version, so skip. (likely invalid column names) " << std::endl;
 
 				++skippedVersions;
@@ -154,13 +154,13 @@ void readxml_writedb_configurations()
 			//		**** switch back db style interface?!!?!? ****   //
 			//
 			theInterface_ = ConfigurationInterface::getInstance(true);  //true for File interface, false for artdaq database
-										    //
-										    //
+			                                                            //
+			                                                            //
 
 			//break;  //uncomment to just do the one version (for debugging)
 		}
 		delete base;  //cleanup config instance
-			      //break;  //uncomment to just do the one config table (for debugging)
+		              //break;  //uncomment to just do the one config table (for debugging)
 	}
 
 	std::cout << __COUT_HDR_FL__ << "End of migrating Configuration!" << std::endl;

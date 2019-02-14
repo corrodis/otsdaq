@@ -3,20 +3,21 @@
 
 #include "otsdaq-core/DataManager/DataManager.h"
 
-namespace ots {
-
+namespace ots
+{
 class ConfigurationManager;
 
 //ARTDAQDataManager
 //	This class provides the otsdaq interface to a single artdaq Board Reader.
-class ARTDAQDataManager : public DataManager {
-       public:
+class ARTDAQDataManager : public DataManager
+{
+  public:
 	ARTDAQDataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath);
 	virtual ~ARTDAQDataManager(void);
 	void configure(void);
 	void stop(void);
 
-       private:
+  private:
 	int rank_;
 };
 

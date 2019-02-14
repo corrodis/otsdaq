@@ -37,7 +37,7 @@ Socket::Socket(const std::string& IPAddress, unsigned int port)
 		__SS__ << "FATAL: Invalid Port " << port << ". Max port number is " << (1 << 16) - 1 << "." << std::endl;
 		//assert(0); //RAR changed to exception on 8/17/2016
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 
@@ -52,7 +52,7 @@ Socket::Socket(const std::string& IPAddress, unsigned int port)
 		__SS__ << "FATAL: Invalid IP:Port combination. Please verify... " << IPAddress << ":" << port << std::endl;
 		//assert(0); //RAR changed to exception on 8/17/2016
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 
@@ -67,7 +67,7 @@ Socket::Socket(void)
 {
 	__SS__ << "ERROR: This method should never be called. This is the protected constructor. There is something wrong in your inheritance scheme!" << std::endl;
 	__COUT_ERR__ << "\n"
-		     << ss.str();
+	             << ss.str();
 
 	__SS_THROW__;
 }
@@ -86,7 +86,7 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
 	__COUT__ << "Initializing port " << ntohs(socketAddress_.sin_port) << " htons: " << socketAddress_.sin_port << std::endl;
 	struct addrinfo  hints;
 	struct addrinfo* res;
-	int		 status = 0;
+	int              status = 0;
 
 	// first, load up address structs with getaddrinfo():
 	memset(&hints, 0, sizeof hints);
@@ -95,8 +95,8 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
 	hints.ai_flags    = AI_PASSIVE;  // fill in my IP for me
 
 	bool socketInitialized = false;
-	int  fromPort	  = FirstSocketPort;
-	int  toPort	    = LastSocketPort;
+	int  fromPort          = FirstSocketPort;
+	int  toPort            = LastSocketPort;
 
 	if (ntohs(socketAddress_.sin_port) != 0)
 		fromPort = toPort = ntohs(socketAddress_.sin_port);
@@ -153,16 +153,16 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
 
 	__COUT__ << "Setting socket receive buffer size = " << socketReceiveBufferSize << " 0x" << std::hex << socketReceiveBufferSize << std::dec << __E__;
 	if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF,
-		       (char*)&socketReceiveBufferSize,
-		       sizeof(socketReceiveBufferSize)) < 0) {
+	               (char*)&socketReceiveBufferSize,
+	               sizeof(socketReceiveBufferSize)) < 0) {
 		__COUT_ERR__ << "Failed to set socket receive size to " << socketReceiveBufferSize << ". Attempting to revert to default." << std::endl;
 
 		socketReceiveBufferSize = defaultSocketReceiveSize_;
 
 		__COUT__ << "Setting socket receive buffer size = " << socketReceiveBufferSize << " 0x" << std::hex << socketReceiveBufferSize << std::dec << __E__;
 		if (setsockopt(socketNumber_, SOL_SOCKET, SO_RCVBUF,
-			       (char*)&socketReceiveBufferSize,
-			       sizeof(socketReceiveBufferSize)) < 0)
+		               (char*)&socketReceiveBufferSize,
+		               sizeof(socketReceiveBufferSize)) < 0)
 		{
 			__SS__ << "Failed to set socket receive size to " << socketReceiveBufferSize << ". Attempting to revert to default." << std::endl;
 			std::cout << ss.str();

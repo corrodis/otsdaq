@@ -18,12 +18,13 @@ class TProfile;
 class TDirectory;
 class TObject;
 
-namespace ots {
-
+namespace ots
+{
 class ConfigurationManager;
 
-class DQMHistosOuterTracker {
-       public:
+class DQMHistosOuterTracker
+{
+  public:
 	DQMHistosOuterTracker(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID);
 	virtual ~DQMHistosOuterTracker(void);
 	void     setConfigurationManager(ConfigurationManager* configurationManager) { theConfigurationManager_ = configurationManager; }
@@ -41,12 +42,12 @@ class DQMHistosOuterTracker {
 	//TH2F*     getHisto2D(void){return histo2D_;}
 	//TProfile* getProfile(void){return profile_;}
 
-       protected:
+  protected:
 	void   openFile(std::string fileName);
 	void   closeFile(void);
 	TFile* theFile_;
 
-	DataDecoder	  theDataDecoder_;
+	DataDecoder          theDataDecoder_;
 	std::queue<uint32_t> convertedBuffer_;
 
 	//TCanvas*      canvas_; // main canvas
@@ -56,12 +57,12 @@ class DQMHistosOuterTracker {
 	//       IPAddress          port                channel
 	std::map<std::string, std::map<std::string, std::map<unsigned int, TH1*>>> planeOccupancies_;
 	//std::vector<TH1I*> planeOccupancies_;
-	TH1I*		      numberOfTriggers_;
+	TH1I*                 numberOfTriggers_;
 	const std::string     supervisorContextUID_;
 	const std::string     supervisorApplicationUID_;
 	const std::string     bufferUID_;
 	const std::string     processorUID_;
-	TDirectory*	   currentDirectory_;
+	TDirectory*           currentDirectory_;
 	ConfigurationManager* theConfigurationManager_;
 };
 }  // namespace ots

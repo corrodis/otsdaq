@@ -145,8 +145,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	try
 	{
 		StringMacros::getNumber(SOAPUtilities::translate(message).getParameters().getValue(
-					    "iterationIndex"),
-					iterationIndex_);
+		                            "iterationIndex"),
+		                        iterationIndex_);
 	}
 	catch (...)  //ignore errors and set iteration index to 0
 	{
@@ -157,8 +157,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	try
 	{
 		StringMacros::getNumber(SOAPUtilities::translate(message).getParameters().getValue(
-					    "subIterationIndex"),
-					subIterationIndex_);
+		                            "subIterationIndex"),
+		                        subIterationIndex_);
 	}
 	catch (...)  //ignore errors and set subIteration index to 0
 	{
@@ -170,7 +170,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	try
 	{
 		if (SOAPUtilities::translate(message).getParameters().getValue(
-			"retransmission") == "1")
+		        "retransmission") == "1")
 		{
 			//handle retransmission
 
@@ -180,7 +180,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 			    lastSubIterationIndex_ == subIterationIndex_)
 			{
 				__COUT__ << "Assuming a timeout occurred at Gateway waiting for a response. "
-					 << "Attempting to avoid error, by giving last result for command '" << command << "': " << lastIterationResult_ << __E__;
+				         << "Attempting to avoid error, by giving last result for command '" << command << "': " << lastIterationResult_ << __E__;
 				return SOAPUtilities::makeSOAPMessageReference(lastIterationResult_);
 			}
 			else
@@ -199,7 +199,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	{
 		//this is the first iteration attempt for this transition
 		theProgressBar_.reset(command,
-				      theStateMachine_.getStateMachineName());
+		                      theStateMachine_.getStateMachineName());
 		currentState = theStateMachine_.getCurrentStateName();
 		__COUT__ << "Starting state for " << theStateMachine_.getStateMachineName() << " is " << currentState << " and attempting to " << command << std::endl;
 	}
@@ -221,14 +221,14 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	{
 		__SS__ << command << " was received! Halting immediately." << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 
 		try
 		{
 			if (currentState == "Configured")
 				theStateMachine_.execTransition("Halt", message);
 			else if (currentState == "Running" ||
-				 currentState == "Paused")
+			         currentState == "Paused")
 				theStateMachine_.execTransition("Abort", message);
 		}
 		catch (...)
@@ -240,13 +240,13 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	else if (command == "AsyncError")
 	{
 		std::string errorMessage = SOAPUtilities::translate(
-					       message)
-					       .getParameters()
-					       .getValue("ErrorMessage");
+		                               message)
+		                               .getParameters()
+		                               .getValue("ErrorMessage");
 
 		__SS__ << command << " was received! Error'ing immediately: " << errorMessage << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 
 		asyncFailureReceived_ = true;  //mark flag, to be used to abort next transition
@@ -259,13 +259,13 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	else if (command == "AsyncSoftError")
 	{
 		std::string errorMessage = SOAPUtilities::translate(
-					       message)
-					       .getParameters()
-					       .getValue("ErrorMessage");
+		                               message)
+		                               .getParameters()
+		                               .getValue("ErrorMessage");
 
 		__SS__ << command << " was received! Pause'ing immediately: " << errorMessage << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 
 		if (!asyncSoftFailureReceived_)  //launch pause only first time
@@ -351,7 +351,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 		theStateMachine_.setErrorMessage(ss.str());
 
 		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " +
-			 theStateMachine_.getErrorMessage();
+		         theStateMachine_.getErrorMessage();
 	}
 	catch (...)
 	{
@@ -360,7 +360,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 		theStateMachine_.setErrorMessage(ss.str());
 
 		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " +
-			 theStateMachine_.getErrorMessage();
+		         theStateMachine_.getErrorMessage();
 	}
 
 	RunControlStateMachine::theProgressBar_.step();
@@ -370,7 +370,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 	if (currentState == RunControlStateMachine::FAILED_STATE_NAME)
 	{
 		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " +
-			 theStateMachine_.getErrorMessage();
+		         theStateMachine_.getErrorMessage();
 		__COUT_ERR__ << "Unexpected Failure state for " << theStateMachine_.getStateMachineName() << " is " << currentState << std::endl;
 		__COUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
 	}

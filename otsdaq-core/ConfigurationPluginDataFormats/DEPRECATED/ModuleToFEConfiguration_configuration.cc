@@ -50,8 +50,8 @@ std::string       enumValue1;
 //==============================================================================
 std::list<std::string> ModuleToFEConfiguration::getFEWModulesList(unsigned int FEWNumber) const
 {
-	std::string	    moduleName;
-	unsigned int	   tmpFEW;
+	std::string            moduleName;
+	unsigned int           tmpFEW;
 	std::list<std::string> list;
 	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
@@ -68,8 +68,8 @@ std::list<std::string> ModuleToFEConfiguration::getFEWModulesList(unsigned int F
 //==============================================================================
 std::list<std::string> ModuleToFEConfiguration::getFERModulesList(unsigned int FERNumber) const
 {
-	std::string	    moduleName;
-	unsigned int	   tmpFER;
+	std::string            moduleName;
+	unsigned int           tmpFER;
 	std::list<std::string> list;
 	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{

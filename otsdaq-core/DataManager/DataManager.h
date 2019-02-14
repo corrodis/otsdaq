@@ -12,7 +12,8 @@
 #include <string>
 #include <vector>
 
-namespace ots {
+namespace ots
+{
 class DataProcessor;
 class DataProducerBase;
 class DataConsumer;
@@ -20,8 +21,9 @@ class CircularBufferBase;
 
 //DataManager
 //	This class is the base class that handles a collection of Buffers and associated Data Processor plugins.
-class DataManager : public VStateMachine, public Configurable {
-       public:
+class DataManager : public VStateMachine, public Configurable
+{
+  public:
 	DataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath);
 	virtual ~DataManager(void);
 
@@ -50,7 +52,7 @@ class DataManager : public VStateMachine, public Configurable {
 
 	void dumpStatus(std::ostream* out = (std::ostream*)&(std::cout)) const;
 
-       protected:
+  protected:
 	void destroyBuffers(void);  //!!!!!Delete all Buffers and all the pointers of the producers and consumers
 	//void destroyBuffer     		(const std::string& bufferUID);//!!!!!Delete all the pointers of the producers and consumers
 
@@ -72,21 +74,24 @@ class DataManager : public VStateMachine, public Configurable {
 	//#include "otsdaq-core/DataTypes/DataStructs.h"
 	//    void setConsumerParameters(const std::string& name);
 
-	enum BufferStatus { Initialized,
-			    Running };
+	enum BufferStatus
+	{
+		Initialized,
+		Running
+	};
 
 	struct Buffer
 	{
-		CircularBufferBase*	    buffer_;
+		CircularBufferBase*            buffer_;
 		std::vector<DataProducerBase*> producers_;
 		std::vector<DataConsumer*>     consumers_;
-		BufferStatus		       status_;
+		BufferStatus                   status_;
 	};
 	std::map<std::string /*dataBufferId*/,
-		 Buffer /*CircularBuffer:=Map of Producer to Buffer Implementations*/>
+	         Buffer /*CircularBuffer:=Map of Producer to Buffer Implementations*/>
 	    buffers_;
 
-       public:
+  public:
 	bool parentSupervisorHasFrontends_;  //if parent supervisor has front-ends, then allow no producers... that will be checked later by parent supervisor
 
 	const std::map<std::string /*dataBufferId*/, Buffer>& getBuffers(void) const { return buffers_; }

@@ -3,7 +3,8 @@
 
 #include <cetlib/BasicPluginFactory.h>
 
-namespace ots {
+namespace ots
+{
 ConfigurationBase* makeInterfaceConfiguration(std::string const& configurationPluginName)
 {
 	static cet::BasicPluginFactory basicPluginInterfaceFactory("configuration", "make");

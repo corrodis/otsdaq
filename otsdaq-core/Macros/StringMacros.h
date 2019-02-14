@@ -8,15 +8,15 @@
 #include <typeinfo>  // operator typeid
 #include <vector>
 
-namespace ots {
-
+namespace ots
+{
 struct StringMacros
 {
-       private:  //private constructor because all static members, should never instantiate this class
+  private:  //private constructor because all static members, should never instantiate this class
 	StringMacros(void);
 	~StringMacros(void);
 
-       public:
+  public:
 	//Here is the list of static helper functions:
 	//
 	//		wildCardMatch
@@ -51,16 +51,16 @@ struct StringMacros
 
 	static std::string decodeURIComponent(const std::string& data);
 	static std::string convertEnvironmentVariables(const std::string& data);
-	static bool	isNumber(const std::string& stringToCheck);
+	static bool        isNumber(const std::string& stringToCheck);
 
 	template<class T>
-	static bool	getNumber(const std::string& s, T& retValue);  //defined in included .icc source
+	static bool        getNumber(const std::string& s, T& retValue);  //defined in included .icc source
 	static std::string getTimestampString(const std::string& linuxTimeInSeconds);
 	static std::string getTimestampString(const time_t& linuxTimeInSeconds = time(0));
 
 	//special validation ignoring any table info - just assuming type string
 	template<class T>
-	static T	   validateValueForDefaultStringDataType(const std::string& value, bool doConvertEnvironmentVariables = true);  //defined in included .icc source
+	static T           validateValueForDefaultStringDataType(const std::string& value, bool doConvertEnvironmentVariables = true);  //defined in included .icc source
 	static std::string validateValueForDefaultStringDataType(const std::string& value, bool doConvertEnvironmentVariables = true);
 
 	static void getSetFromString(const std::string& inputString, std::set<std::string>& setToReturn, const std::set<char>& delimiter = {',', '|', '&'}, const std::set<char>& whitespace = {' ', '\t', '\n', '\r'});

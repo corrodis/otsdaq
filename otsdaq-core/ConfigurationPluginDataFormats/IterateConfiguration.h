@@ -3,10 +3,11 @@
 
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 
-namespace ots {
-
-class IterateConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class IterateConfiguration : public ConfigurationBase
+{
+  public:
 	IterateConfiguration(void);
 	virtual ~IterateConfiguration(void);
 
@@ -23,8 +24,8 @@ class IterateConfiguration : public ConfigurationBase {
 
 	struct Command
 	{
-		void			   addTarget() { targets_.push_back(CommandTarget()); }
-		std::string		   type_;
+		void                       addTarget() { targets_.push_back(CommandTarget()); }
+		std::string                type_;
 		std::vector<CommandTarget> targets_;
 		std::map<
 		    std::string /*param name*/,
@@ -53,16 +54,16 @@ class IterateConfiguration : public ConfigurationBase {
 	static std::map<std::string, std::string>       createCommandToTableMap()
 	{
 		std::map<std::string, std::string> m;
-		m[COMMAND_BEGIN_LABEL]		  = "IterationCommandBeginLabelConfiguration";
-		m[COMMAND_CHOOSE_FSM]		  = "IterationCommandChooseFSMConfiguration";
+		m[COMMAND_BEGIN_LABEL]            = "IterationCommandBeginLabelConfiguration";
+		m[COMMAND_CHOOSE_FSM]             = "IterationCommandChooseFSMConfiguration";
 		m[COMMAND_CONFIGURE_ACTIVE_GROUP] = "";  //no parameters
-		m[COMMAND_CONFIGURE_ALIAS]	= "IterationCommandConfigureAliasConfiguration";
-		m[COMMAND_CONFIGURE_GROUP]	= "IterationCommandConfigureGroupConfiguration";
+		m[COMMAND_CONFIGURE_ALIAS]        = "IterationCommandConfigureAliasConfiguration";
+		m[COMMAND_CONFIGURE_GROUP]        = "IterationCommandConfigureGroupConfiguration";
 		m[COMMAND_EXECUTE_FE_MACRO]       = "IterationCommandExecuteFEMacroConfiguration";
-		m[COMMAND_EXECUTE_MACRO]	  = "IterationCommandExecuteMacroConfiguration";
+		m[COMMAND_EXECUTE_MACRO]          = "IterationCommandExecuteMacroConfiguration";
 		m[COMMAND_MODIFY_ACTIVE_GROUP]    = "IterationCommandModifyGroupConfiguration";
-		m[COMMAND_REPEAT_LABEL]		  = "IterationCommandRepeatLabelConfiguration";
-		m[COMMAND_RUN]			  = "IterationCommandRunConfiguration";
+		m[COMMAND_REPEAT_LABEL]           = "IterationCommandRepeatLabelConfiguration";
+		m[COMMAND_RUN]                    = "IterationCommandRunConfiguration";
 		return m;
 	}
 
@@ -90,7 +91,7 @@ class IterateConfiguration : public ConfigurationBase {
 	static struct CommandExecuteMacroParams  //treat FE and Macro the same
 	{
 		//targets
-		const std::string MacroName_	  = "MacroName";
+		const std::string MacroName_          = "MacroName";
 		const std::string MacroParameterLink_ = "LinkToMacroDimensionalLoopTable";
 		const std::string EnableSavingOutput_ = "EnableSavingOutputsToFile";
 		const std::string OutputFilePath_     = "OutputFilePath";
@@ -105,12 +106,12 @@ class IterateConfiguration : public ConfigurationBase {
 		//targets
 		const std::string DoTrackGroupChanges_    = "DoTrackGroupChanges";
 		const std::string RelativePathToField_    = "RelativePathToField";
-		const std::string FieldStartValue_	= "FieldStartValue";
+		const std::string FieldStartValue_        = "FieldStartValue";
 		const std::string FieldIterationStepSize_ = "FieldIterationStepSize";
 	} commandModifyActiveParams_;
 	static struct CommandRepeatLabelParams
 	{
-		const std::string Label_	       = "Label";
+		const std::string Label_               = "Label";
 		const std::string NumberOfRepetitions_ = "NumberOfRepetitions";
 	} commandRepeatLabelParams_;
 	static struct CommandRunParams
@@ -127,7 +128,7 @@ class IterateConfiguration : public ConfigurationBase {
 	} targetParams_;
 	static struct CommandTargetColumns
 	{
-		const std::string TargetsLink_	= "LinkToTargets";
+		const std::string TargetsLink_        = "LinkToTargets";
 		const std::string TargetsLinkGroupID_ = "LinkToTargetsGroupID";
 
 	} commandTargetCols_;
@@ -141,9 +142,9 @@ class IterateConfiguration : public ConfigurationBase {
 	//for macro dimensional loop parameters
 	static struct MacroDimLoopTableColumns
 	{
-		const std::string Priority_	   = "DimensionalLoopPriority";
+		const std::string Priority_           = "DimensionalLoopPriority";
 		const std::string NumberOfIterations_ = "NumberOfIterations";
-		const std::string ParamLink_	  = "LinkToDimensionalLoopParameterTable";
+		const std::string ParamLink_          = "LinkToDimensionalLoopParameterTable";
 	} macroDimLoopCols_;
 	static struct MacroParamTableColumns
 	{

@@ -12,16 +12,18 @@
 #include <map>
 #include <string>
 
-namespace ots {
+namespace ots
+{
 template<class D, class H>
-class CircularBuffer : public CircularBufferBase {
-       public:
+class CircularBuffer : public CircularBufferBase
+{
+  public:
 	CircularBuffer(const std::string& dataBufferId);
 	virtual ~CircularBuffer(void);
 
-	void	 reset(void);  //This DOES NOT reset the consumer list
-	void	 resetConsumerList(void);
-	bool	 isEmpty(void) const;
+	void         reset(void);  //This DOES NOT reset the consumer list
+	void         resetConsumerList(void);
+	bool         isEmpty(void) const;
 	unsigned int getTotalNumberOfSubBuffers(void) const;
 	unsigned int getProducerBufferSize(const std::string& producerID) const;
 
@@ -84,7 +86,7 @@ class CircularBuffer : public CircularBufferBase {
 	//void unregisterConsumer   (const std::string& consumerID);
 	//void unregisterProducer   (const std::string& producerID);
 
-       private:
+  private:
 	std::map<std::string /*producer id*/, BufferImplementation<D, H> /*one producer, many consumers*/> theBuffer_;
 
 	void registerProducer(const std::string& producerID, unsigned int numberOfSubBuffers = 100);

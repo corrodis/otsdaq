@@ -19,12 +19,14 @@
 
 #include <iostream>
 
-namespace ots {
+namespace ots
+{
 class UDPFragmentWriter;
 }
 
-class ots::UDPFragmentWriter : public ots::UDPFragment {
-       public:
+class ots::UDPFragmentWriter : public ots::UDPFragment
+{
+  public:
 	UDPFragmentWriter(artdaq::Fragment &f);
 
 	// These functions form overload sets with const functions from
@@ -49,7 +51,7 @@ class ots::UDPFragmentWriter : public ots::UDPFragment {
 
 	void resize(size_t nBytes);
 
-       private:
+  private:
 	size_t calc_event_size_words_(size_t nBytes);
 
 	static size_t bytes_to_words_(size_t nBytes);

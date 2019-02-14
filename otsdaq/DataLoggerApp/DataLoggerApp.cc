@@ -57,7 +57,7 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* s)
 	catch (...)
 	{
 		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Context Group."
-			     << " The XDAQContextConfigurationName = " << XDAQContextConfigurationName_ << ". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
+		             << " The XDAQContextConfigurationName = " << XDAQContextConfigurationName_ << ". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
 	}
 	try
@@ -67,7 +67,7 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* s)
 	catch (...)
 	{
 		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the Configuration Application Group."
-			     << " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
+		             << " The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
 		throw;
 	}
 	supervisorConfigurationPath_ = "/" + supervisorContextUID_ + "/LinkToApplicationTable/" + supervisorApplicationUID_ + "/LinkToSupervisorTable";
@@ -96,7 +96,7 @@ void DataLoggerApp::init(void)
 	artdaq::setMsgFacAppName(name, port);
 	//    mf::LogDebug(supervisorApplicationUID_) << "artdaq version " <<
 	TLOG(TLVL_DEBUG, name + "Supervisor") << "artdaq version " << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion()
-					      << ", built " << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
+	                                      << ", built " << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp();
 
 	// create the DataLoggerInterface
 	app_name = name;
@@ -156,7 +156,7 @@ bool DataLoggerApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 	std::cout << __COUT_HDR_FL__ << "Done with message" << std::endl;
 	stateMachineSemaphore_.give();
 	return false;  //execute once and automatically remove the workloop so in WorkLoopManager the try workLoop->remove(job_) could be commented out
-		       //return true;//go on and then you must do the workLoop->remove(job_) in WorkLoopManager
+	               //return true;//go on and then you must do the workLoop->remove(job_) in WorkLoopManager
 }
 
 //========================================================================================================================
@@ -213,7 +213,7 @@ void DataLoggerApp::enteringError(toolbox::Event::Reference e)
 {
 	std::cout << __COUT_HDR_FL__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << std::endl;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
-	std::ostringstream	 error;
+	std::ostringstream         error;
 	error << "Failure performing transition from "
 	      << failedEvent.getFromState()
 	      << " to "

@@ -10,21 +10,24 @@
 
 #include "ConfigurationBase.h"
 
-namespace ots {
-
-class RegisterConfiguration : public ots::ConfigurationBase {
-       public:
+namespace ots
+{
+class RegisterConfiguration : public ots::ConfigurationBase
+{
+  public:
 	RegisterConfiguration(std::string staticConfigurationName);
 	virtual ~RegisterConfiguration();
 
 	void init(void);
 
-       protected:
-	enum { ComponentName,
-	       RegisterName,
-	       RegisterBaseAddress,
-	       RegisterSize,
-	       RegisterAccess
+  protected:
+	enum
+	{
+		ComponentName,
+		RegisterName,
+		RegisterBaseAddress,
+		RegisterSize,
+		RegisterAccess
 	};
 };
 

@@ -12,14 +12,15 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ots {
-
+namespace ots
+{
 class HttpXmlDocument;
 
 //CodeEditor
 //	This class provides the functionality for editing, saving, and building code
-class CodeEditor {
-       public:
+class CodeEditor
+{
+  public:
 	CodeEditor();
 
 	//request are handled here
@@ -28,7 +29,7 @@ class CodeEditor {
 	    cgicc::Cgicc&      cgiIn,
 	    HttpXmlDocument*   xmlOut);
 
-       private:
+  private:
 	void getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
 	void getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
 	void saveFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
@@ -37,7 +38,7 @@ class CodeEditor {
 	std::string safePathString(const std::string& path);
 	std::string safeExtensionString(const std::string& extension);
 
-       public:
+  public:
 	static std::string SPECIAL_TYPE_FEInterface, SPECIAL_TYPE_DataProcessor, SPECIAL_TYPE_ControlsInterface, SPECIAL_TYPE_Tools;
 
 	static std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/>

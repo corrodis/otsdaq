@@ -5,10 +5,11 @@
 
 #include <string>
 
-namespace ots {
-
-class SOAPParameter : public Parameter<std::string, std::string> {
-       public:
+namespace ots
+{
+class SOAPParameter : public Parameter<std::string, std::string>
+{
+  public:
 	SOAPParameter(std::string name = "", std::string value = "")
 	    : Parameter<std::string, std::string>(name, value) { ; }
 	~SOAPParameter(void) { ; }

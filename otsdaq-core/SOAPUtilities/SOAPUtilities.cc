@@ -44,8 +44,8 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 {
 	xoap::MessageReference message  = xoap::createMessage();
 	xoap::SOAPEnvelope     envelope = message->getSOAPPart().getEnvelope();
-	xoap::SOAPName	 name     = envelope.createName(command, "xdaq", XDAQ_NS_URI);
-	xoap::SOAPBody	 body     = envelope.getBody();
+	xoap::SOAPName         name     = envelope.createName(command, "xdaq", XDAQ_NS_URI);
+	xoap::SOAPBody         body     = envelope.getBody();
 	body.addBodyElement(name);
 	return message;
 }
@@ -58,10 +58,10 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 		return makeSOAPMessageReference(command);
 	xoap::MessageReference message       = xoap::createMessage();
 	xoap::SOAPEnvelope     envelope      = message->getSOAPPart().getEnvelope();
-	xoap::SOAPName	 name	  = envelope.createName(command, "xdaq", XDAQ_NS_URI);
-	xoap::SOAPBody	 body	  = envelope.getBody();
+	xoap::SOAPName         name          = envelope.createName(command, "xdaq", XDAQ_NS_URI);
+	xoap::SOAPBody         body          = envelope.getBody();
 	xoap::SOAPElement      bodyCommand   = body.addBodyElement(name);
-	xoap::SOAPName	 parameterName = envelope.createName("Null");
+	xoap::SOAPName         parameterName = envelope.createName("Null");
 	for (SOAPParameters::iterator it = parameters.begin(); it != parameters.end(); it++)
 	{
 		parameterName = envelope.createName(it->first);
@@ -76,7 +76,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 {
 	__COUT__ << "SOAP XML file path : " << fileName << std::endl;
 	xoap::MessageReference message  = xoap::createMessage();
-	xoap::SOAPPart	 soap     = message->getSOAPPart();
+	xoap::SOAPPart         soap     = message->getSOAPPart();
 	xoap::SOAPEnvelope     envelope = soap.getEnvelope();
 	xoap::AttachmentPart*  attachment;
 	attachment = message->createAttachmentPart();
@@ -116,7 +116,7 @@ void SOAPUtilities::addParameters(xoap::MessageReference& message, SOAPParameter
 //========================================================================================================================
 SOAPCommand SOAPUtilities::translate(const xoap::MessageReference& message)
 {
-	SOAPCommand			      soapCommand;
+	SOAPCommand                           soapCommand;
 	const std::vector<xoap::SOAPElement>& bodyList = message->getSOAPPart().getEnvelope().getBody().getChildElements();
 	for (std::vector<xoap::SOAPElement>::const_iterator it = bodyList.begin(); it != bodyList.end(); it++)
 	{
@@ -145,11 +145,11 @@ std::string SOAPUtilities::receive(const xoap::MessageReference& message)
 //========================================================================================================================
 std::string SOAPUtilities::receive(const xoap::MessageReference& message, SOAPParameters& parameters)
 {
-	xoap::SOAPEnvelope	     envelope    = message->getSOAPPart().getEnvelope();
+	xoap::SOAPEnvelope             envelope    = message->getSOAPPart().getEnvelope();
 	std::vector<xoap::SOAPElement> bodyList    = envelope.getBody().getChildElements();
-	xoap::SOAPElement	      command     = bodyList[0];
-	std::string		       commandName = command.getElementName().getLocalName();
-	xoap::SOAPName		       name	= envelope.createName("Key");
+	xoap::SOAPElement              command     = bodyList[0];
+	std::string                    commandName = command.getElementName().getLocalName();
+	xoap::SOAPName                 name        = envelope.createName("Key");
 
 	for (SOAPParameters::iterator it = parameters.begin(); it != parameters.end(); it++)
 	{

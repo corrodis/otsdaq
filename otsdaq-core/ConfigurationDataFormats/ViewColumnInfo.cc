@@ -12,7 +12,7 @@ using namespace ots;
 //NOTE: Do NOT put '-' in static const TYPEs because it will mess up javascript handling in the web gui
 const std::string ViewColumnInfo::TYPE_UID = "UID";
 
-const std::string ViewColumnInfo::TYPE_DATA		 = "Data";
+const std::string ViewColumnInfo::TYPE_DATA              = "Data";
 const std::string ViewColumnInfo::TYPE_UNIQUE_DATA       = "UniqueData";
 const std::string ViewColumnInfo::TYPE_UNIQUE_GROUP_DATA = "UniqueGroupData";
 const std::string ViewColumnInfo::TYPE_MULTILINE_DATA    = "MultilineData";
@@ -23,13 +23,13 @@ const std::string ViewColumnInfo::TYPE_ON_OFF     = "OnOff";
 const std::string ViewColumnInfo::TYPE_TRUE_FALSE = "TrueFalse";
 const std::string ViewColumnInfo::TYPE_YES_NO     = "YesNo";
 
-const std::string ViewColumnInfo::TYPE_START_CHILD_LINK		 = "ChildLink";
+const std::string ViewColumnInfo::TYPE_START_CHILD_LINK          = "ChildLink";
 const std::string ViewColumnInfo::TYPE_START_CHILD_LINK_UID      = "ChildLinkUID";
 const std::string ViewColumnInfo::TYPE_START_CHILD_LINK_GROUP_ID = "ChildLinkGroupID";
-const std::string ViewColumnInfo::TYPE_START_GROUP_ID		 = "GroupID";
-const std::string ViewColumnInfo::TYPE_COMMENT			 = "Comment";
-const std::string ViewColumnInfo::TYPE_AUTHOR			 = "Author";
-const std::string ViewColumnInfo::TYPE_TIMESTAMP		 = "Timestamp";
+const std::string ViewColumnInfo::TYPE_START_GROUP_ID            = "GroupID";
+const std::string ViewColumnInfo::TYPE_COMMENT                   = "Comment";
+const std::string ViewColumnInfo::TYPE_AUTHOR                    = "Author";
+const std::string ViewColumnInfo::TYPE_TIMESTAMP                 = "Timestamp";
 //NOTE: Do NOT put '-' in static const TYPEs because it will mess up javascript handling in the web gui
 
 const std::string ViewColumnInfo::DATATYPE_NUMBER = "NUMBER";
@@ -58,8 +58,8 @@ const std::string ViewColumnInfo::COL_NAME_PRIORITY = "Priority";
 // if(capturedExceptionString) *capturedExceptionString = ""; //indicates no error found
 // if(!capturedExceptionString) then exception is thrown on error
 ViewColumnInfo::ViewColumnInfo(const std::string& type, const std::string& name,
-			       const std::string& storageName, const std::string& dataType,
-			       const std::string& dataChoicesCSV, std::string* capturedExceptionString)
+                               const std::string& storageName, const std::string& dataType,
+                               const std::string& dataChoicesCSV, std::string* capturedExceptionString)
     : type_(type)
     , name_(name)
     , storageName_(storageName)
@@ -93,10 +93,10 @@ ViewColumnInfo::ViewColumnInfo(const std::string& type, const std::string& name,
 	//allows letters, numbers, dash, underscore
 	for (unsigned int i = 0; i < type_.size(); ++i)
 		if (!(
-			(type_[i] >= 'A' && type_[i] <= 'Z') ||
-			(type_[i] >= 'a' && type_[i] <= 'z') ||
-			(type_[i] >= '0' && type_[i] <= '9') ||
-			(type_[i] == '-' || type_[i] <= '_' || type_[i] <= '.')))
+		        (type_[i] >= 'A' && type_[i] <= 'Z') ||
+		        (type_[i] >= 'a' && type_[i] <= 'z') ||
+		        (type_[i] >= '0' && type_[i] <= '9') ||
+		        (type_[i] == '-' || type_[i] <= '_' || type_[i] <= '.')))
 		{
 			__SS__ << "The data type for column " << name_ << " is '" << type_ << "'. Data types must contain only letters, numbers,"
 			       << "dashes, underscores, and periods." << std::endl;
@@ -131,10 +131,10 @@ ViewColumnInfo::ViewColumnInfo(const std::string& type, const std::string& name,
 	//allows letters, numbers, dash, underscore
 	for (unsigned int i = 0; i < dataType_.size(); ++i)
 		if (!(
-			(dataType_[i] >= 'A' && dataType_[i] <= 'Z') ||
-			(dataType_[i] >= 'a' && dataType_[i] <= 'z') ||
-			(dataType_[i] >= '0' && dataType_[i] <= '9') ||
-			(dataType_[i] == '-' || dataType_[i] <= '_')))
+		        (dataType_[i] >= 'A' && dataType_[i] <= 'Z') ||
+		        (dataType_[i] >= 'a' && dataType_[i] <= 'z') ||
+		        (dataType_[i] >= '0' && dataType_[i] <= '9') ||
+		        (dataType_[i] == '-' || dataType_[i] <= '_')))
 		{
 			__SS__ << "The data type for column " << name_ << " is '" << dataType_ << "'. Data types must contain only letters, numbers,"
 			       << "dashes, and underscores." << std::endl;
@@ -157,10 +157,10 @@ ViewColumnInfo::ViewColumnInfo(const std::string& type, const std::string& name,
 	//allows letters, numbers, dash, underscore
 	for (unsigned int i = 0; i < name_.size(); ++i)
 		if (!(
-			(name_[i] >= 'A' && name_[i] <= 'Z') ||
-			(name_[i] >= 'a' && name_[i] <= 'z') ||
-			(name_[i] >= '0' && name_[i] <= '9') ||
-			(name_[i] == '-' || name_[i] <= '_')))
+		        (name_[i] >= 'A' && name_[i] <= 'Z') ||
+		        (name_[i] >= 'a' && name_[i] <= 'z') ||
+		        (name_[i] >= '0' && name_[i] <= '9') ||
+		        (name_[i] == '-' || name_[i] <= '_')))
 		{
 			__SS__ << "There is a column named " << name_ << "'. Column names must contain only letters, numbers,"
 			       << "dashes, and underscores." << std::endl;
@@ -183,9 +183,9 @@ ViewColumnInfo::ViewColumnInfo(const std::string& type, const std::string& name,
 	//allows capital letters, numbers, dash, underscore
 	for (unsigned int i = 0; i < storageName_.size(); ++i)
 		if (!(
-			(storageName_[i] >= 'A' && storageName_[i] <= 'Z') ||
-			(storageName_[i] >= '0' && storageName_[i] <= '9') ||
-			(storageName_[i] == '-' || storageName_[i] <= '_')))
+		        (storageName_[i] >= 'A' && storageName_[i] <= 'Z') ||
+		        (storageName_[i] >= '0' && storageName_[i] <= '9') ||
+		        (storageName_[i] == '-' || storageName_[i] <= '_')))
 		{
 			__SS__ << "The storage name for column " << name_ << " is '" << storageName_ << "'. Storage names must contain only capital letters, numbers,"
 			       << "dashes, and underscores." << std::endl;
@@ -199,9 +199,9 @@ ViewColumnInfo::ViewColumnInfo(const std::string& type, const std::string& name,
 	//__COUT__ << "dataChoicesCSV " << dataChoicesCSV << std::endl;
 	{
 		std::istringstream f(dataChoicesCSV);
-		std::string	s;
+		std::string        s;
 		while (getline(f, s, ',')) dataChoices_.push_back(
-		    StringMacros::decodeURIComponent(s));
+			StringMacros::decodeURIComponent(s));
 		//for(const auto &dc: dataChoices_)
 		//	__COUT__ << dc << std::endl;
 	}
@@ -302,8 +302,8 @@ ViewColumnInfo::ViewColumnInfo(const ViewColumnInfo& c)  //copy constructor beca
 ViewColumnInfo& ViewColumnInfo::operator=(const ViewColumnInfo& c)  //assignment operator because of bitmap pointer
 {
 	ViewColumnInfo* retColInfo = new ViewColumnInfo();
-	retColInfo->type_	  = c.type_;
-	retColInfo->name_	  = c.name_;
+	retColInfo->type_          = c.type_;
+	retColInfo->name_          = c.name_;
 	retColInfo->storageName_   = c.storageName_;
 	retColInfo->dataType_      = c.dataType_;
 	retColInfo->dataChoices_   = c.dataChoices_;
@@ -351,7 +351,7 @@ const std::string& ViewColumnInfo::getDefaultValue(void) const
 	{
 		__SS__ << "\tUnrecognized View data type: " << getDataType() << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 }
@@ -399,7 +399,7 @@ std::map<std::pair<std::string, std::string>, std::string> ViewColumnInfo::getAl
 	all[std::pair<std::string, std::string>(DATATYPE_STRING, TYPE_YES_NO)]     = DATATYPE_BOOL_DEFAULT;
 
 	all[std::pair<std::string, std::string>(DATATYPE_STRING, TYPE_START_CHILD_LINK)] = DATATYPE_LINK_DEFAULT;
-	all[std::pair<std::string, std::string>(DATATYPE_STRING, "*")]			 = DATATYPE_STRING_DEFAULT;
+	all[std::pair<std::string, std::string>(DATATYPE_STRING, "*")]                   = DATATYPE_STRING_DEFAULT;
 	return all;
 }
 
@@ -408,8 +408,8 @@ std::map<std::pair<std::string, std::string>, std::string> ViewColumnInfo::getAl
 const bool ViewColumnInfo::isBoolType(void) const
 {
 	return (type_ == TYPE_ON_OFF ||
-		type_ == TYPE_TRUE_FALSE ||
-		type_ == TYPE_YES_NO);
+	        type_ == TYPE_TRUE_FALSE ||
+	        type_ == TYPE_YES_NO);
 }  //end isBoolType()
 
 //==============================================================================
@@ -454,7 +454,7 @@ const ViewColumnInfo::BitMapInfo& ViewColumnInfo::getBitMapInfo(void) const
 	{
 		__SS__ << "getBitMapInfo request for non-BitMap column of type: " << getType() << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 }
@@ -466,8 +466,8 @@ const ViewColumnInfo::BitMapInfo& ViewColumnInfo::getBitMapInfo(void) const
 const bool ViewColumnInfo::isChildLink(void) const
 {
 	return (type_.find(TYPE_START_CHILD_LINK) == 0 &&
-		type_.length() > TYPE_START_CHILD_LINK.length() &&
-		type_[TYPE_START_CHILD_LINK.length()] == '-');
+	        type_.length() > TYPE_START_CHILD_LINK.length() &&
+	        type_[TYPE_START_CHILD_LINK.length()] == '-');
 }
 
 //==============================================================================
@@ -477,8 +477,8 @@ const bool ViewColumnInfo::isChildLink(void) const
 const bool ViewColumnInfo::isChildLinkUID(void) const
 {
 	return (type_.find(TYPE_START_CHILD_LINK_UID) == 0 &&
-		type_.length() > TYPE_START_CHILD_LINK_UID.length() &&
-		type_[TYPE_START_CHILD_LINK_UID.length()] == '-');
+	        type_.length() > TYPE_START_CHILD_LINK_UID.length() &&
+	        type_[TYPE_START_CHILD_LINK_UID.length()] == '-');
 }
 
 //==============================================================================
@@ -488,8 +488,8 @@ const bool ViewColumnInfo::isChildLinkUID(void) const
 const bool ViewColumnInfo::isChildLinkGroupID(void) const
 {
 	return (type_.find(TYPE_START_CHILD_LINK_GROUP_ID) == 0 &&
-		type_.length() > TYPE_START_CHILD_LINK_GROUP_ID.length() &&
-		type_[TYPE_START_CHILD_LINK_GROUP_ID.length()] == '-');
+	        type_.length() > TYPE_START_CHILD_LINK_GROUP_ID.length() &&
+	        type_[TYPE_START_CHILD_LINK_GROUP_ID.length()] == '-');
 }
 
 //==============================================================================
@@ -499,8 +499,8 @@ const bool ViewColumnInfo::isChildLinkGroupID(void) const
 const bool ViewColumnInfo::isGroupID(void) const
 {
 	return (type_.find(TYPE_START_GROUP_ID) == 0 &&
-		type_.length() > TYPE_START_GROUP_ID.length() &&
-		type_[TYPE_START_GROUP_ID.length()] == '-');
+	        type_.length() > TYPE_START_GROUP_ID.length() &&
+	        type_[TYPE_START_GROUP_ID.length()] == '-');
 }
 
 //==============================================================================

@@ -5,10 +5,11 @@
 
 #include <string>
 
-namespace ots {
-
-class DataDecoderConsumerConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class DataDecoderConsumerConfiguration : public ConfigurationBase
+{
+  public:
 	DataDecoderConsumerConfiguration(void);
 	virtual ~DataDecoderConsumerConfiguration(void);
 
@@ -18,9 +19,10 @@ class DataDecoderConsumerConfiguration : public ConfigurationBase {
 	//Getter
 	std::vector<std::string> getProcessorIDList(void) const;
 
-       private:
+  private:
 	void check(std::string processorUID) const;
-	enum {
+	enum
+	{
 		ProcessorID
 	};
 

@@ -32,7 +32,7 @@ uint64_t BitManipulator::insertBits(uint64_t& data, uint64_t value, unsigned int
 //========================================================================================================================
 uint64_t BitManipulator::insertBits(std::string& data, uint64_t value, unsigned int startBit, unsigned int numberOfBits)
 {
-	uint8_t		   toWrite     = 0;
+	uint8_t            toWrite     = 0;
 	const unsigned int bitsInAByte = 8;
 
 	uint8_t overWritten    = 0;
@@ -56,7 +56,7 @@ uint64_t BitManipulator::insertBits(std::string& data, uint64_t value, unsigned 
 		else
 			finalBitInByte = (startBit + numberOfBits - 1) % 8;
 
-		tmp	    = finalBitInByte;
+		tmp            = finalBitInByte;
 		finalBitInByte = 7 - startBitInByte;
 		startBitInByte = 7 - tmp;
 
@@ -131,7 +131,7 @@ uint32_t BitManipulator::insertBits(uint32_t& data, uint32_t value, unsigned int
 //========================================================================================================================
 uint32_t BitManipulator::insertBits(std::string& data, uint32_t value, unsigned int startBit, unsigned int numberOfBits)
 {
-	uint8_t		   toWrite     = 0;
+	uint8_t            toWrite     = 0;
 	const unsigned int bitsInAByte = 8;
 
 	uint8_t overWritten    = 0;
@@ -155,7 +155,7 @@ uint32_t BitManipulator::insertBits(std::string& data, uint32_t value, unsigned 
 		else
 			finalBitInByte = (startBit + numberOfBits - 1) % 8;
 
-		tmp	    = finalBitInByte;
+		tmp            = finalBitInByte;
 		finalBitInByte = 7 - startBitInByte;
 		startBitInByte = 7 - tmp;
 

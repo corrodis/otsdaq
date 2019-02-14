@@ -28,23 +28,24 @@ using boost::asio::ip::udp;
 #include <iostream>
 #include <vector>
 
-namespace ots {
-
-class JSONDispatcher : public art::EDAnalyzer {
-       public:
+namespace ots
+{
+class JSONDispatcher : public art::EDAnalyzer
+{
+  public:
 	explicit JSONDispatcher(fhicl::ParameterSet const& pset);
 	virtual ~JSONDispatcher();
 
 	virtual void analyze(art::Event const& evt) override;
 	virtual void beginRun(art::Run const& run) override;
 
-       private:
-	int			prescale_;
-	std::string		raw_data_label_;
-	std::string		frag_type_;
+  private:
+	int                     prescale_;
+	std::string             raw_data_label_;
+	std::string             frag_type_;
 	boost::asio::io_service io_service_;
-	udp::socket		socket_;
-	udp::endpoint		remote_endpoint_;
+	udp::socket             socket_;
+	udp::endpoint           remote_endpoint_;
 };
 
 }  // namespace ots
@@ -119,7 +120,7 @@ void ots::JSONDispatcher::analyze(art::Event const& evt)
 				const auto& frag((*raw)[idx]);
 
 				ots::UDPFragment bb(frag);
-				int		 type = 0;
+				int              type = 0;
 
 				if (frag.hasMetadata())
 				{
@@ -127,7 +128,7 @@ void ots::JSONDispatcher::analyze(art::Event const& evt)
 					//std::cout << __COUT_HDR_FL__ << "Fragment metadata: " << std::endl;
 					auto md = frag.metadata<ots::UDPFragment::Metadata>();
 					outputJSON << "\"port\":" << std::to_string(md->port) << ",";
-					char		   buf[sizeof(in_addr)];
+					char               buf[sizeof(in_addr)];
 					struct sockaddr_in addr;
 					addr.sin_addr.s_addr = md->address;
 					inet_ntop(AF_INET, &(addr.sin_addr), buf, INET_ADDRSTRLEN);

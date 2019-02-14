@@ -13,8 +13,8 @@ using namespace ots;
 
 //========================================================================================================================
 RawDataSaverConsumerBase::RawDataSaverConsumerBase(std::string supervisorApplicationUID, std::string bufferUID,
-						   std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree,
-						   const std::string& configurationPath)
+                                                   std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree,
+                                                   const std::string& configurationPath)
     : WorkLoop(processorUID)
     , DataConsumer(supervisorApplicationUID, bufferUID, processorUID, HighConsumerPriority)
     , Configurable(theXDAQContextConfigTree, configurationPath)

@@ -5,10 +5,11 @@
 
 #include <string>
 
-namespace ots {
-
-class VersionAliases : public ConfigurationBase {
-       public:
+namespace ots
+{
+class VersionAliases : public ConfigurationBase
+{
+  public:
 	VersionAliases(void);
 	~VersionAliases(void);
 
@@ -18,8 +19,9 @@ class VersionAliases : public ConfigurationBase {
 	//Getters
 	unsigned int getAliasedKey(std::string alias) const;
 
-       private:
-	enum {
+  private:
+	enum
+	{
 		VersionAlias,
 		Version,
 		KOC

@@ -25,7 +25,7 @@ using artdaq::database::basictypes::JsonData;
 using ots::DatabaseConfigurationInterface;
 using config_version_map_t = ots::DatabaseConfigurationInterface::config_version_map_t;
 
-namespace db		= artdaq::database::configuration;
+namespace db            = artdaq::database::configuration;
 using VersionInfoList_t = db::ConfigurationInterface::VersionInfoList_t;
 
 constexpr auto default_dbprovider = "filesystem";
@@ -78,7 +78,7 @@ DatabaseConfigurationInterface::DatabaseConfigurationInterface()
 // read configuration from database
 // version = -1 means latest version
 void DatabaseConfigurationInterface::fill(ConfigurationBase*   configuration,
-					  ConfigurationVersion version) const
+                                          ConfigurationVersion version) const
     throw(std::runtime_error)
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
@@ -90,7 +90,7 @@ void DatabaseConfigurationInterface::fill(ConfigurationBase*   configuration,
 
 	auto result =
 	    ifc.template loadVersion<decltype(configuration), JsonData>(
-		configuration, versionstring, default_entity);
+	        configuration, versionstring, default_entity);
 
 	if (result.first)
 	{
@@ -107,8 +107,8 @@ void DatabaseConfigurationInterface::fill(ConfigurationBase*   configuration,
 //==============================================================================
 // write configuration to database
 void DatabaseConfigurationInterface::saveActiveVersion(const ConfigurationBase*
-							   configuration,
-						       bool overwrite) const
+                                                           configuration,
+                                                       bool overwrite) const
     throw(std::runtime_error)
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
@@ -127,7 +127,7 @@ void DatabaseConfigurationInterface::saveActiveVersion(const ConfigurationBase*
 
 	__SS__ << "DBI Error:" << result.second << __E__;
 	__COUT__ << "\n"
-		 << ss.str();
+	         << ss.str();
 	__SS_THROW__;
 }
 
@@ -271,9 +271,9 @@ config_version_map_t DatabaseConfigurationInterface::getConfigurationGroupMember
 		auto resultMap = config_version_map_t{};
 
 		std::for_each(inputList.begin(), inputList.end(),
-			      [&resultMap](auto const& info) {
-				      resultMap[info.configuration] = std::stol(info.version, 0, 10);
-			      });
+		              [&resultMap](auto const& info) {
+			              resultMap[info.configuration] = std::stol(info.version, 0, 10);
+		              });
 
 		if (!includeMetaDataTable)
 		{
@@ -305,7 +305,7 @@ catch (...)
 //==============================================================================
 // create a new configuration group from the contents map
 void DatabaseConfigurationInterface::saveConfigurationGroup(config_version_map_t const& configurationMap,
-							    std::string const&		configurationGroup) const
+                                                            std::string const&          configurationGroup) const
     throw(std::runtime_error) try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
@@ -313,14 +313,14 @@ void DatabaseConfigurationInterface::saveConfigurationGroup(config_version_map_t
 	auto to_list = [](auto const& inputMap) {
 		auto resultList = VersionInfoList_t{};
 		std::transform(inputMap.begin(),
-			       inputMap.end(),
-			       std::back_inserter(resultList),
-			       [](auto const& mapEntry) {
-				       return VersionInfoList_t::value_type{
-					   mapEntry.first,
-					   mapEntry.second.toString(),
-					   default_entity};
-			       });
+		               inputMap.end(),
+		               std::back_inserter(resultList),
+		               [](auto const& mapEntry) {
+			               return VersionInfoList_t::value_type{
+			                   mapEntry.first,
+			                   mapEntry.second.toString(),
+			                   default_entity};
+		               });
 
 		return resultList;
 	};

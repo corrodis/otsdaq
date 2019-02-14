@@ -12,7 +12,7 @@ using namespace ots;
 
 //========================================================================================================================
 DataProducer::DataProducer(std::string supervisorApplicationUID, std::string bufferUID,
-			   std::string processorUID, unsigned int bufferSize)
+                           std::string processorUID, unsigned int bufferSize)
     : WorkLoop(processorUID)
     , DataProducerBase(supervisorApplicationUID, bufferUID, processorUID, bufferSize)
 {

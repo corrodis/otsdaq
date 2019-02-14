@@ -15,14 +15,14 @@ using namespace ots;
 UDPDataListenerProducer::UDPDataListenerProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
     : WorkLoop(processorUID)
     , Socket(
-	  theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>(),
-	  theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>())
+          theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>(),
+          theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>())
     //, Socket       ("192.168.133.100", 40000)
     , DataProducer(
-	  supervisorApplicationUID,
-	  bufferUID,
-	  processorUID,
-	  theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
+          supervisorApplicationUID,
+          bufferUID,
+          processorUID,
+          theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
     //, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
     , Configurable(theXDAQContextConfigTree, configurationPath)
     , dataP_(nullptr)
@@ -86,7 +86,7 @@ void UDPDataListenerProducer::fastWrite(void)
 	//__CFG_COUT__ << " running!" << std::endl;
 
 	if (DataProducer::attachToEmptySubBuffer(
-		dataP_, headerP_) < 0)
+	        dataP_, headerP_) < 0)
 	{
 		__CFG_COUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
 		usleep(10000);

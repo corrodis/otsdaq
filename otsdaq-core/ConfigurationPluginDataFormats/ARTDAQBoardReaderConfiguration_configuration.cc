@@ -56,7 +56,7 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager *configManager)
 		try
 		{
 			ConfigurationTree readerConfigNode = contextConfig->getSupervisorConfigNode(configManager,
-												    readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
+			                                                                            readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
 
 			__COUT__ << "Path for this reader config is " << readerContext->contextUID_ << "/" << readerContext->applications_[0].applicationUID_ << "/" << readerConfigNode.getValueAsString() << std::endl;
 
@@ -84,15 +84,15 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager *configManager)
 
 	//handle fcl file generation, wherever the level of this configuration
 
-	auto	childrenMap = configManager->__SELF_NODE__.getChildren();
+	auto        childrenMap = configManager->__SELF_NODE__.getChildren();
 	std::string appUID, buffUID, consumerUID;
 	for (auto &child : childrenMap)
 	{
 		const XDAQContextConfiguration::XDAQContext *thisContext = nullptr;
 		for (auto &readerContext : readerContexts) {
 			ConfigurationTree readerConfigNode   = contextConfig->getSupervisorConfigNode(configManager,
-												      readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
-			auto		  dataManagerConfMap = readerConfigNode.getNode("LinkToDataBufferTable").getChildren();
+                                                                                        readerContext->contextUID_, readerContext->applications_[0].applicationUID_);
+			auto              dataManagerConfMap = readerConfigNode.getNode("LinkToDataBufferTable").getChildren();
 			for (auto dmc : dataManagerConfMap) {
 				auto dataBufferConfMap = dmc.second.getNode("LinkToDataProcessorTable").getChildren();
 				for (auto dbc : dataBufferConfMap) {
@@ -113,10 +113,10 @@ void ARTDAQBoardReaderConfiguration::init(ConfigurationManager *configManager)
 			if (child.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
 				outputFHICL(configManager, child.second,
-					    contextConfig->getARTDAQAppRank(thisContext->contextUID_),
-					    contextConfig->getContextAddress(thisContext->contextUID_),
-					    contextConfig->getARTDAQDataPort(configManager, thisContext->contextUID_),
-					    contextConfig);
+				            contextConfig->getARTDAQAppRank(thisContext->contextUID_),
+				            contextConfig->getContextAddress(thisContext->contextUID_),
+				            contextConfig->getARTDAQDataPort(configManager, thisContext->contextUID_),
+				            contextConfig);
 			}
 		}
 	}
@@ -152,8 +152,8 @@ std::string ARTDAQBoardReaderConfiguration::getFHICLFilename(const Configuration
 
 //========================================================================================================================
 void ARTDAQBoardReaderConfiguration::outputFHICL(ConfigurationManager *   configManager,
-						 const ConfigurationTree &boardReaderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
-						 const XDAQContextConfiguration *contextConfig)
+                                                 const ConfigurationTree &boardReaderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort,
+                                                 const XDAQContextConfiguration *contextConfig)
 {
 	/*
 		the file will look something like this:
@@ -364,8 +364,8 @@ void ARTDAQBoardReaderConfiguration::outputFHICL(ConfigurationManager *   config
 				auto destinationContextUID = destination.second.getNode("destinationARTDAQContextLink").getValueAsString();
 
 				unsigned int destinationRank = contextConfig->getARTDAQAppRank(destinationContextUID);
-				std::string  host	    = contextConfig->getContextAddress(destinationContextUID);
-				unsigned int port	    = contextConfig->getARTDAQDataPort(configManager, destinationContextUID);
+				std::string  host            = contextConfig->getContextAddress(destinationContextUID);
+				unsigned int port            = contextConfig->getARTDAQDataPort(configManager, destinationContextUID);
 
 				OUT << destination.second.getNode("destinationKey").getValue() << ": {"
 				    << " transferPluginType: " << destination.second.getNode("transferPluginType").getValue() << " destination_rank: " << destinationRank << " max_fragment_size_words: " << destination.second.getNode("ARTDAQGlobalConfigurationLink/maxFragmentSizeWords").getValue<unsigned int>() << " host_map: [{rank: " << destinationRank << " host: \"" << host << "\" portOffset: " << std::to_string(port) << "}, "

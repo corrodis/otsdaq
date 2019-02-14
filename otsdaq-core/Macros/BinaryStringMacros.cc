@@ -8,9 +8,9 @@ using namespace ots;
 //	Note: no preamble is applied by default (but "0x" could be nice)
 //
 //	Note: this is used with defaults by VisualSupervisor
-std::string BinaryStringMacros::binaryToHexString(const char*	binaryBuffer,
-						  unsigned int       numberOfBytes,
-						  const std::string& resultPreamble, const std::string& resultDelimiter)
+std::string BinaryStringMacros::binaryToHexString(const char*        binaryBuffer,
+                                                  unsigned int       numberOfBytes,
+                                                  const std::string& resultPreamble, const std::string& resultDelimiter)
 {
 	std::string dest;
 	dest.reserve(numberOfBytes * 2);
@@ -31,12 +31,12 @@ std::string BinaryStringMacros::binaryToHexString(const char*	binaryBuffer,
 //		8 bytes at a time with the least significant byte last.
 //	Note: no preamble is applied by default (but "0x" could be nice)
 std::string BinaryStringMacros::binaryTo8ByteHexString(const std::string& binaryBuffer,
-						       const std::string& resultPreamble, const std::string& resultDelimiter)
+                                                       const std::string& resultPreamble, const std::string& resultDelimiter)
 {
 	std::string dest;
 	dest.reserve(binaryBuffer.size() * 2 +
-		     resultDelimiter.size() * (binaryBuffer.size() / 8) +
-		     resultPreamble.size());
+	             resultDelimiter.size() * (binaryBuffer.size() / 8) +
+	             resultPreamble.size());
 	char hexstr[3];
 
 	dest += resultPreamble;

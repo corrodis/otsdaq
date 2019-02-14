@@ -5,10 +5,11 @@
 
 #include <string>
 
-namespace ots {
-
-class DQMHistosConsumerConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class DQMHistosConsumerConfiguration : public ConfigurationBase
+{
+  public:
 	DQMHistosConsumerConfiguration(void);
 	virtual ~DQMHistosConsumerConfiguration(void);
 
@@ -17,13 +18,14 @@ class DQMHistosConsumerConfiguration : public ConfigurationBase {
 
 	//Getter
 	std::vector<std::string> getProcessorIDList(void) const;
-	std::string		 getFilePath(std::string processorUID) const;
-	std::string		 getRadixFileName(std::string processorUID) const;
-	bool			 getSaveFile(std::string processorUID) const;
+	std::string              getFilePath(std::string processorUID) const;
+	std::string              getRadixFileName(std::string processorUID) const;
+	bool                     getSaveFile(std::string processorUID) const;
 
-       private:
+  private:
 	void check(std::string processorUID) const;
-	enum {
+	enum
+	{
 		ProcessorID,
 		FilePath,
 		RadixFileName,

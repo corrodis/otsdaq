@@ -12,10 +12,11 @@
 
 #define OTS_MAGIC 0x5F4F54534441515F /* _OTSDAQ_ */
 
-namespace ots {
-
-class TCPSocket {
-       public:
+namespace ots
+{
+class TCPSocket
+{
+  public:
 	TCPSocket(const std::string& senderHost, unsigned int senderPort, int receiveBufferSize = 0x10000);
 	TCPSocket(unsigned int listenPort, int sendBufferSize = 0x10000);
 	virtual ~TCPSocket(void);
@@ -31,7 +32,7 @@ class TCPSocket {
 	int receive(std::string& buffer, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0);
 	int receive(std::vector<uint32_t>& buffer, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0);
 
-       protected:
+  protected:
 	TCPSocket(void);
 
 	std::string  host_;
@@ -45,7 +46,7 @@ class TCPSocket {
 
 	mutable std::mutex socketMutex_;
 
-       private:
+  private:
 	struct MagicPacket
 	{
 		uint64_t     ots_magic;

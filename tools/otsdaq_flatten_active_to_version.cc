@@ -24,18 +24,18 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 	std::cout << __COUT_HDR_FL__ << "\nFlattening Active Configuration Groups!" << std::endl;
 
 	std::cout << "\n\nusage: Two arguments:\n\t pathToSwapIn <flatVersion> <pathToSwapIn (optional)> \n\n"
-		  << "\t Default values: flatVersion = 0, pathToSwapIn = \"\" \n\n"
-		  << std::endl;
+	          << "\t Default values: flatVersion = 0, pathToSwapIn = \"\" \n\n"
+	          << std::endl;
 
 	std::cout << "\n\nNote: you can optionally just swap databases (and not modify their contents at all)"
-		  << " by providing an invalid flatVersion of -1.\n\n"
-		  << std::endl;
+	          << " by providing an invalid flatVersion of -1.\n\n"
+	          << std::endl;
 
 	std::cout << "\n\nNote: This assumes artdaq db file type interface. "
-		  << "The current database/ will be moved to database_<linuxtime>/ "
-		  << "and if a pathToSwapIn is specified it will be copied to database/ "
-		  << "before saving the currently active groups.\n\n"
-		  << std::endl;
+	          << "The current database/ will be moved to database_<linuxtime>/ "
+	          << "and if a pathToSwapIn is specified it will be copied to database/ "
+	          << "before saving the currently active groups.\n\n"
+	          << std::endl;
 
 	std::cout << "argc = " << argc << std::endl;
 	for (int i = 0; i < argc; i++)
@@ -55,7 +55,7 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 		return;
 	}
 
-	int	 flatVersion  = 0;
+	int         flatVersion  = 0;
 	std::string pathToSwapIn = "";
 	if (argc >= 2)
 		sscanf(argv[1], "%d", &flatVersion);
@@ -96,13 +96,13 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 	std::map<std::string, std::pair<std::string, ConfigurationGroupKey> > activeGroupsMap =
 	    cfgMgr->getActiveConfigurationGroups();
 
-	std::map<std::string, std::map<std::string, ConfigurationVersion> >	   activeGroupMembersMap;
+	std::map<std::string, std::map<std::string, ConfigurationVersion> >           activeGroupMembersMap;
 	std::map<std::string, std::map<std::string /*name*/, std::string /*alias*/> > activeGroupAliasesMap;
-	std::map<std::string, std::string>					      activeGroupCommentMap;
-	std::map<std::string, std::string>					      activeGroupAuthorMap;
-	std::string								      groupCreateTime;
-	std::map<std::string, time_t>						      activeGroupCreateTimeMap;
-	ConfigurationBase *							      groupMetadataTable = cfgMgr->getMetadataTable();
+	std::map<std::string, std::string>                                            activeGroupCommentMap;
+	std::map<std::string, std::string>                                            activeGroupAuthorMap;
+	std::string                                                                   groupCreateTime;
+	std::map<std::string, time_t>                                                 activeGroupCreateTimeMap;
+	ConfigurationBase *                                                           groupMetadataTable = cfgMgr->getMetadataTable();
 
 	for (auto &activeGroupPair : activeGroupsMap)
 	{
@@ -161,7 +161,7 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 	{
 		__SS__ << "filesystemdb:// was not found in $ARTDAQ_DATABASE_URI!" << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 
@@ -177,7 +177,7 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 	{
 		__SS__ << ("Aborting move! Must at least give version argument to flatten to!") << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 
@@ -196,7 +196,7 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 		strftime(buffer, 200, "%b %d, %Y %I:%M%p %Z", timeinfo);
 
 		fprintf(fp, "This database was moved from...\n\t %s \nto...\n\t %s \nat this time \n\t %lu \t %s\n\n\n",
-			currentDir.c_str(), moveToDir.c_str(), time(0), buffer);
+		        currentDir.c_str(), moveToDir.c_str(), time(0), buffer);
 
 		fclose(fp);
 	}
@@ -229,7 +229,7 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 			strftime(buffer, 200, "%b %d, %Y %I:%M:%S%p %Z", timeinfo);
 
 			fprintf(fp, "This database was moved from...\t %s \t to...\t %s at this time \t %lu \t %s\n\n",
-				pathToSwapIn.c_str(), currentDir.c_str(), time(0), buffer);
+			        pathToSwapIn.c_str(), currentDir.c_str(), time(0), buffer);
 			fclose(fp);
 		}
 	}
@@ -273,7 +273,7 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 				if (activeGroupPair.second.second.isInvalid())
 					continue;
 				else if (cfgView->getDataView()[row][col1] == activeGroupPair.second.first &&
-					 cfgView->getDataView()[row][col2] == activeGroupPair.second.second.toString())
+				         cfgView->getDataView()[row][col2] == activeGroupPair.second.second.toString())
 				{
 					//found a matching group/key pair
 					std::cout << __COUT_HDR_FL__ << "Changing row " << row << " for " << cfgView->getDataView()[row][col1] << " key=" << cfgView->getDataView()[row][col2] << " to DEFAULT=" << ConfigurationGroupKey(ConfigurationGroupKey::getDefaultKey()) << std::endl;
@@ -288,8 +288,8 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 	if (activeMap.find(versionAliasesName) != activeMap.end())
 	{
 		std::cout << __COUT_HDR_FL__ << "\n\nModifying " << versionAliasesName << std::endl;
-		config		  = cfgMgr->getConfigurationByName(versionAliasesName);
-		cfgView		  = config->getViewP();
+		config            = cfgMgr->getConfigurationByName(versionAliasesName);
+		cfgView           = config->getViewP();
 		unsigned int col1 = cfgView->findCol("ConfigurationName");
 		unsigned int col2 = cfgView->findCol("Version");
 
@@ -354,8 +354,8 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 		//ConfigurationManager::METADATA_COL_ALIASES TODO
 		groupMetadataTable->getViewP()->setValue(
 		    StringMacros::mapToString(
-			activeGroupAliasesMap[activeGroupMembersPair.first],
-			"," /*primary delimiter*/, ":" /*secondary delimeter*/),
+		        activeGroupAliasesMap[activeGroupMembersPair.first],
+		        "," /*primary delimiter*/, ":" /*secondary delimeter*/),
 		    0, ConfigurationManager::METADATA_COL_ALIASES);
 		groupMetadataTable->getViewP()->setValue(
 		    activeGroupCommentMap[activeGroupMembersPair.first], 0, ConfigurationManager::METADATA_COL_COMMENT);
@@ -374,19 +374,19 @@ void FlattenActiveConfigurationGroups(int argc, char *argv[])
 
 		//memberMap should now consist of members with new flat version, so save group
 		theInterface_->saveConfigurationGroup(activeGroupMembersPair.second,
-						      ConfigurationGroupKey::getFullGroupString(
-							  activeGroupMembersPair.first,
-							  ConfigurationGroupKey(ConfigurationGroupKey::getDefaultKey())));
+		                                      ConfigurationGroupKey::getFullGroupString(
+		                                          activeGroupMembersPair.first,
+		                                          ConfigurationGroupKey(ConfigurationGroupKey::getDefaultKey())));
 	}
 
 CLEAN_UP:
 	//==============================================================================
 	std::cout << __COUT_HDR_FL__ << "\n\nEnd of Flattening Active Configuration Groups!\n\n\n"
-		  << std::endl;
+	          << std::endl;
 
 	std::cout << __COUT_HDR_FL__ << "Run the following to return to your previous database structure:" << std::endl;
 	std::cout << __COUT_HDR_FL__ << "\t otsdaq_flatten_active_to_version -1 " << moveToDir << "\n\n"
-		  << std::endl;
+	          << std::endl;
 
 	return;
 }

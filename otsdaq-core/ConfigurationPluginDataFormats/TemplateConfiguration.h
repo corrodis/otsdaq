@@ -3,10 +3,11 @@
 
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 
-namespace ots {
-
-class TemplateConfiguration : public ConfigurationBase {
-       public:
+namespace ots
+{
+class TemplateConfiguration : public ConfigurationBase
+{
+  public:
 	TemplateConfiguration(void);
 	virtual ~TemplateConfiguration(void);
 
@@ -15,7 +16,7 @@ class TemplateConfiguration : public ConfigurationBase {
 
 	//Getters
 
-       private:
+  private:
 	//Column names
 	struct ColTemplate
 	{

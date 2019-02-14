@@ -15,9 +15,9 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub* s)
     , SOAPMessenger(this)
     , CorePropertySupervisorBase(this)
     , RunControlStateMachine(CorePropertySupervisorBase::allSupervisorInfo_.isWizardMode() ?  //set state machine name
-				 CorePropertySupervisorBase::supervisorClassNoNamespace_
-											   : CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" +
-												 CorePropertySupervisorBase::supervisorApplicationUID_)
+                                 CorePropertySupervisorBase::supervisorClassNoNamespace_
+                                                                                           : CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" +
+                                                                                                 CorePropertySupervisorBase::supervisorApplicationUID_)
     , stateMachineWorkLoopManager_(toolbox::task::bind(this, &CoreSupervisorBase::stateMachineThread, "StateMachine"))
     , stateMachineSemaphore_(toolbox::BSem::FULL)
     , theRemoteWebUsers_(this)
@@ -86,18 +86,18 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 
 	//__SUP_COUT__ << "requestType " << requestType << " files: " << cgiIn.getFiles().size() << std::endl;
 
-	HttpXmlDocument		  xmlOut;
+	HttpXmlDocument           xmlOut;
 	WebUsers::RequestUserInfo userInfo(requestType,
-					   CgiDataUtilities::getOrPostData(cgiIn, "CookieCode"));
+	                                   CgiDataUtilities::getOrPostData(cgiIn, "CookieCode"));
 
 	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
 
 	if (!theRemoteWebUsers_.xmlRequestToGateway(
-		cgiIn,
-		out,
-		&xmlOut,
-		CorePropertySupervisorBase::allSupervisorInfo_,
-		userInfo))
+	        cgiIn,
+	        out,
+	        &xmlOut,
+	        CorePropertySupervisorBase::allSupervisorInfo_,
+	        userInfo))
 		return;  //access failed
 
 	//done checking cookieCode, sequence, userWithLock, and permissions access all in one shot!
@@ -116,18 +116,18 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 		{
 			__SUP_SS__ << "An error was encountered handling requestType '" << requestType << "':" << e.what() << __E__;
 			__SUP_COUT_ERR__ << "\n"
-					 << ss.str();
+			                 << ss.str();
 			__SUP_MOUT_ERR__ << "\n"
-					 << ss.str();
+			                 << ss.str();
 		}
 		catch (...)
 		{
 			__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' "
-				   << "Please check the printouts to debug." << __E__;
+			           << "Please check the printouts to debug." << __E__;
 			__SUP_COUT_ERR__ << "\n"
-					 << ss.str();
+			                 << ss.str();
 			__SUP_MOUT_ERR__ << "\n"
-					 << ss.str();
+			                 << ss.str();
 		}
 		return;
 	}
@@ -142,15 +142,15 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 	{
 		__SUP_SS__ << "An error was encountered handling requestType '" << requestType << "':" << e.what() << __E__;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}
 	catch (...)
 	{
 		__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' "
-			   << "Please check the printouts to debug." << __E__;
+		           << "Please check the printouts to debug." << __E__;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}
 
@@ -168,7 +168,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 
 	//return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*print to cout*/,
-				 !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
+	                         !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
 }
 
 //========================================================================================================================
@@ -177,7 +177,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 //		according to the Supervisor Property settings. The CoreSupervisorBase class provides consistent
 //		access, responses, and error handling across all inheriting supervisors that use ::request.
 void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut,
-				 const WebUsers::RequestUserInfo& userInfo)
+                                 const WebUsers::RequestUserInfo& userInfo)
 {
 	__SUP_COUT__ << "This is the empty Core Supervisor request. Supervisors should override this function." << __E__;
 
@@ -229,7 +229,7 @@ void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& c
 //		according to the Supervisor Property settings. The CoreSupervisorBase class provides consistent
 //		access, responses, and error handling across all inheriting supervisors that use ::request.
 void CoreSupervisorBase::nonXmlRequest(const std::string& requestType, cgicc::Cgicc& cgiIn, std::ostream& out,
-				       const WebUsers::RequestUserInfo& userInfo)
+                                       const WebUsers::RequestUserInfo& userInfo)
 {
 	__SUP_COUT__ << "This is the empty Core Supervisor non-xml request. Supervisors should override this function." << __E__;
 	out << "This is the empty Core Supervisor non-xml request. Supervisors should override this function." << __E__;
@@ -296,7 +296,7 @@ bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 	__SUP_COUT__ << "Done with message" << std::endl;
 	stateMachineSemaphore_.give();
 	return false;  //execute once and automatically remove the workloop so in WorkLoopManager the try workLoop->remove(job_) could be commented out
-		       //return true;//go on and then you must do the workLoop->remove(job_) in WorkLoopManager
+	               //return true;//go on and then you must do the workLoop->remove(job_) in WorkLoopManager
 }
 
 //========================================================================================================================
@@ -369,7 +369,7 @@ void CoreSupervisorBase::enteringError(toolbox::Event::Reference e)
 	//			<< "\n\nError Message: " <<
 	//			theStateMachine_.getErrorMessage() << std::endl;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
-	std::ostringstream	 error;
+	std::ostringstream         error;
 	error << "Failure performing transition from "
 	      << failedEvent.getFromState()
 	      << " to "
@@ -448,7 +448,7 @@ void CoreSupervisorBase::postStateMachineExecution(unsigned int i)
 		{
 			__SUP_COUT__ << "State machine " << i << " is flagged for another iteration..." << __E__;
 			RunControlStateMachine::indicateIterationWork();  //mark not done at CoreSupervisorBase level
-			++stateMachinesIterationWorkCount_;		  //increment still working count
+			++stateMachinesIterationWorkCount_;               //increment still working count
 		}
 	}
 }
@@ -501,7 +501,7 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 
 			preStateMachineExecution(i);
 			theStateMachineImplementation_[i]->parentSupervisor_ = this;  //for backwards compatibility, kept out of configure parameters
-			theStateMachineImplementation_[i]->configure();		      //e.g. for FESupervisor, this is configure of FEVInterfacesManager
+			theStateMachineImplementation_[i]->configure();               //e.g. for FESupervisor, this is configure of FEVInterfacesManager
 			postStateMachineExecution(i);
 		}
 		postStateMachineExecutionLoop();
@@ -510,7 +510,7 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 	{
 		__SUP_SS__ << "Error was caught while configuring: " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,
@@ -524,7 +524,7 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 	{
 		__SUP_SS__ << "Unknown error was caught while configuring. Please checked the logs." << __E__;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,
@@ -572,7 +572,7 @@ void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
 		{
 			__SUP_SS__ << "Error was caught while " << transitionName << ": " << e.what() << std::endl;
 			__SUP_COUT_ERR__ << "\n"
-					 << ss.str();
+			                 << ss.str();
 			theStateMachine_.setErrorMessage(ss.str());
 			throw toolbox::fsm::exception::Exception(
 			    "Transition Error" /*name*/,
@@ -595,7 +595,7 @@ void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
 		{
 			__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
 			__SUP_COUT_ERR__ << "\n"
-					 << ss.str();
+			                 << ss.str();
 			theStateMachine_.setErrorMessage(ss.str());
 			throw toolbox::fsm::exception::Exception(
 			    "Transition Error" /*name*/,
@@ -650,7 +650,7 @@ void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
 	{
 		__SUP_SS__ << "Error was caught while " << transitionName << ": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,
@@ -664,7 +664,7 @@ void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
 	{
 		__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,
@@ -702,7 +702,7 @@ void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
 	{
 		__SUP_SS__ << "Error was caught while " << transitionName << ": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,
@@ -716,7 +716,7 @@ void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
 	{
 		__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,
@@ -733,9 +733,9 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
 {
 	const std::string transitionName = "Starting";
 	const std::string runNumber      = SOAPUtilities::translate(
-					       theStateMachine_.getCurrentMessage())
-					  .getParameters()
-					  .getValue("RunNumber");
+                                      theStateMachine_.getCurrentMessage())
+	                                  .getParameters()
+	                                  .getValue("RunNumber");
 	try
 	{
 		__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
@@ -758,7 +758,7 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
 	{
 		__SUP_SS__ << "Error was caught while " << transitionName << ": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,
@@ -772,7 +772,7 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
 	{
 		__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,
@@ -810,7 +810,7 @@ void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
 	{
 		__SUP_SS__ << "Error was caught while " << transitionName << ": " << e.what() << std::endl;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,
@@ -824,7 +824,7 @@ void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
 	{
 		__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
 		__SUP_COUT_ERR__ << "\n"
-				 << ss.str();
+		                 << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception(
 		    "Transition Error" /*name*/,

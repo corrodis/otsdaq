@@ -65,8 +65,8 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	//	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
-	bool	status, enableFwd, useWeb, useQT;
-	int	 fwdPort;
+	bool        status, enableFwd, useWeb, useQT;
+	int         fwdPort;
 	std::string fwdIP;
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();

@@ -29,7 +29,7 @@ NetworkDevice::NetworkDevice(std::string IPAddress, unsigned int IPPort)
     : communicationInterface_(NULL)
 {
 	//network stuff
-	deviceAddress_.sin_family = AF_INET;	// use IPv4 host byte order
+	deviceAddress_.sin_family = AF_INET;        // use IPv4 host byte order
 	deviceAddress_.sin_port   = htons(IPPort);  // short, network byte order
 
 	if (inet_aton(IPAddress.c_str(), &deviceAddress_.sin_addr) == 0)
@@ -60,8 +60,8 @@ int NetworkDevice::initSocket(std::string socketPort)
 	struct addrinfo hints;
 
 	struct addrinfo* res;
-	int		 status    = 0;
-	int		 socketOut = -1;
+	int              status    = 0;
+	int              socketOut = -1;
 
 	// first, load up address structs with getaddrinfo():
 	memset(&hints, 0, sizeof hints);
@@ -70,8 +70,8 @@ int NetworkDevice::initSocket(std::string socketPort)
 	hints.ai_flags    = AI_PASSIVE;  // fill in my IP for me
 
 	bool socketInitialized = false;
-	int  fromPort	  = FirstSocketPort;
-	int  toPort	    = LastSocketPort;
+	int  fromPort          = FirstSocketPort;
+	int  toPort            = LastSocketPort;
 
 	if (socketPort != "")
 		fromPort = toPort = strtol(socketPort.c_str(), 0, 10);
@@ -140,7 +140,7 @@ int NetworkDevice::receive(int socketDescriptor, std::string& buffer)
 {
 	struct timeval tv;
 	tv.tv_sec  = 2;
-	tv.tv_usec = 0;		//set timeout period for select()
+	tv.tv_usec = 0;         //set timeout period for select()
 	fd_set fileDescriptor;  //setup set for select()
 	FD_ZERO(&fileDescriptor);
 	FD_SET(socketDescriptor, &fileDescriptor);
@@ -148,11 +148,11 @@ int NetworkDevice::receive(int socketDescriptor, std::string& buffer)
 
 	if (FD_ISSET(socketDescriptor, &fileDescriptor))
 	{
-		std::string	bufferS;
+		std::string        bufferS;
 		struct sockaddr_in tmpAddress;
-		socklen_t	  addressLength = sizeof(tmpAddress);
-		int		   nOfBytes;
-		char		   readBuffer[maxSocketSize];
+		socklen_t          addressLength = sizeof(tmpAddress);
+		int                nOfBytes;
+		char               readBuffer[maxSocketSize];
 		if ((nOfBytes = recvfrom(socketDescriptor, readBuffer, maxSocketSize, 0, (struct sockaddr*)&tmpAddress, &addressLength)) == -1)
 		{
 			__COUT__ << "Error reading buffer" << std::endl;
@@ -177,7 +177,7 @@ int NetworkDevice::listen(int socketDescriptor, std::string& buffer)
 	__COUT__ << "LISTENING!!!!!" << std::endl;
 	struct timeval tv;
 	tv.tv_sec  = 5;
-	tv.tv_usec = 0;		//set timeout period for select()
+	tv.tv_usec = 0;         //set timeout period for select()
 	fd_set fileDescriptor;  //setup set for select()
 	FD_ZERO(&fileDescriptor);
 	FD_SET(socketDescriptor, &fileDescriptor);
@@ -185,11 +185,11 @@ int NetworkDevice::listen(int socketDescriptor, std::string& buffer)
 
 	if (FD_ISSET(socketDescriptor, &fileDescriptor))
 	{
-		std::string	bufferS;
+		std::string        bufferS;
 		struct sockaddr_in tmpAddress;
-		socklen_t	  addressLength = sizeof(tmpAddress);
-		int		   nOfBytes;
-		char		   readBuffer[maxSocketSize];
+		socklen_t          addressLength = sizeof(tmpAddress);
+		int                nOfBytes;
+		char               readBuffer[maxSocketSize];
 		if ((nOfBytes = recvfrom(socketDescriptor, readBuffer, maxSocketSize, 0, (struct sockaddr*)&tmpAddress, &addressLength)) == -1)
 		{
 			__COUT__ << "Error reading buffer" << std::endl;
@@ -305,10 +305,10 @@ int NetworkDevice::getInterface(std::string ipAddress)
 	{
 		s = getnameinfo(communicationInterface_->ifa_addr,
 
-				(communicationInterface_->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) :
+		                (communicationInterface_->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) :
 
-											  sizeof(struct sockaddr_in6),
-				host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+		                                                                          sizeof(struct sockaddr_in6),
+		                host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
 
 		if (s != 0)
 		{
@@ -359,10 +359,10 @@ int NetworkDevice::getInterface(std::string ipAddress)
 		{
 			s = getnameinfo(ifa->ifa_addr,
 
-					(family == AF_INET) ? sizeof(struct sockaddr_in) :
+			                (family == AF_INET) ? sizeof(struct sockaddr_in) :
 
-							    sizeof(struct sockaddr_in6),
-					host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+			                                    sizeof(struct sockaddr_in6),
+			                host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
 
 			if (s != 0)
 			{
@@ -376,7 +376,7 @@ int NetworkDevice::getInterface(std::string ipAddress)
 			if (std::string(host).find(ipAddress) != std::string::npos)
 			{
 				communicationInterface_ = new struct ifaddrs(*ifa);
-				found			= true;
+				found                   = true;
 			}
 		}
 	}
@@ -393,7 +393,7 @@ std::string NetworkDevice::getMacAddress(std::string interfaceName)
 #if defined(SIOCGIFHWADDR)
 
 	struct ifreq ifr;
-	int	  sock;
+	int          sock;
 
 	sock = socket(PF_INET, SOCK_STREAM, 0);
 

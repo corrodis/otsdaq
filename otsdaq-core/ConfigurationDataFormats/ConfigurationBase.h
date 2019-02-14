@@ -7,15 +7,16 @@
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationVersion.h"
 #include "otsdaq-core/ConfigurationDataFormats/ConfigurationView.h"
 
-namespace ots {
-
+namespace ots
+{
 class ConfigurationManager;
 
 //e.g. configManager->__SELF_NODE__;  //to get node referring to this configuration
 #define __SELF_NODE__ getNode(getConfigurationName())
 
-class ConfigurationBase {
-       public:
+class ConfigurationBase
+{
+  public:
 	const unsigned int MAX_VIEWS_IN_CACHE;  //Each inheriting configuration class could have varying amounts of cache
 
 	ConfigurationBase();
@@ -35,22 +36,22 @@ class ConfigurationBase {
 
 	std::string getTypeId(void);
 
-	void		     setupMockupView(ConfigurationVersion version);
-	void		     changeVersionAndActivateView(ConfigurationVersion temporaryVersion, ConfigurationVersion version);
-	bool		     isStored(const ConfigurationVersion &version) const;
-	bool		     eraseView(ConfigurationVersion version);
-	void		     trimCache(unsigned int trimSize = -1);
-	void		     trimTemporary(ConfigurationVersion targetVersion = ConfigurationVersion());
+	void                 setupMockupView(ConfigurationVersion version);
+	void                 changeVersionAndActivateView(ConfigurationVersion temporaryVersion, ConfigurationVersion version);
+	bool                 isStored(const ConfigurationVersion &version) const;
+	bool                 eraseView(ConfigurationVersion version);
+	void                 trimCache(unsigned int trimSize = -1);
+	void                 trimTemporary(ConfigurationVersion targetVersion = ConfigurationVersion());
 	ConfigurationVersion checkForDuplicate(ConfigurationVersion needleVersion, ConfigurationVersion ignoreVersion = ConfigurationVersion()) const;
 
 	//Getters
-	const std::string &	    getConfigurationName(void) const;
-	const std::string &	    getConfigurationDescription(void) const;
+	const std::string &            getConfigurationName(void) const;
+	const std::string &            getConfigurationDescription(void) const;
 	std::set<ConfigurationVersion> getStoredVersions(void) const;
 
 	const ConfigurationView &   getView(void) const;
-	ConfigurationView *	 getViewP(void);
-	ConfigurationView *	 getMockupViewP(void);
+	ConfigurationView *         getViewP(void);
+	ConfigurationView *         getMockupViewP(void);
 	const ConfigurationVersion &getViewVersion(void) const;  //always the active one
 
 	ConfigurationView *  getTemporaryView(ConfigurationVersion temporaryVersion);
@@ -58,9 +59,9 @@ class ConfigurationBase {
 	ConfigurationVersion getNextVersion() const;
 
 	//Setters
-	void		     setConfigurationName(const std::string &configurationName);
-	void		     setConfigurationDescription(const std::string &configurationDescription);
-	bool		     setActiveView(ConfigurationVersion version);
+	void                 setConfigurationName(const std::string &configurationName);
+	void                 setConfigurationDescription(const std::string &configurationDescription);
+	bool                 setActiveView(ConfigurationVersion version);
 	ConfigurationVersion copyView(const ConfigurationView &sourceView, ConfigurationVersion destinationVersion, const std::string &author);
 	ConfigurationVersion mergeViews(const ConfigurationView &sourceViewA, const ConfigurationView &sourceViewB, ConfigurationVersion destinationVersion, const std::string &author, const std::string &mergeApproach /*Rename,Replace,Skip*/, std::map<std::pair<std::string /*original table*/, std::string /*original uidB*/>, std::string /*converted uidB*/> &uidConversionMap, std::map<std::pair<std::string /*original table*/, std::pair<std::string /*group linkid*/, std::string /*original gidB*/> >, std::string /*converted gidB*/> &groupidConversionMap, bool fillRecordConversionMaps, bool applyRecordConversionMaps, bool generateUniqueDataColumns = false);
 
@@ -72,7 +73,7 @@ class ConfigurationBase {
 
 	unsigned int getNumberOfStoredViews(void) const;
 
-       protected:
+  protected:
 	std::string configurationName_;
 	std::string configurationDescription_;
 

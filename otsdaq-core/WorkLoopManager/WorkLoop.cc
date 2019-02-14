@@ -68,7 +68,7 @@ void WorkLoop::startWorkLoop(void)
 	catch (xcept::Exception& e)
 	{
 		__COUT__ << "ERROR: Can't activate WorkLoop job for " << workLoopName_
-			 << " Very likely because the name " << workLoopName_ << " is not unique!" << __E__;
+		         << " Very likely because the name " << workLoopName_ << " is not unique!" << __E__;
 		stopWorkLoop();
 	}
 }  //end startWorkLoop()

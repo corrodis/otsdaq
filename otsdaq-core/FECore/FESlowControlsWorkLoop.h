@@ -6,12 +6,13 @@
 #include <iostream>
 #include <string>
 
-namespace ots {
-
+namespace ots
+{
 class FEVInterface;
 
-class FESlowControlsWorkLoop : public WorkLoop {
-       public:
+class FESlowControlsWorkLoop : public WorkLoop
+{
+  public:
 	FESlowControlsWorkLoop(const std::string &name, FEVInterface *interface)
 	    : WorkLoop(name)
 	    , interface_(interface)
@@ -23,7 +24,7 @@ class FESlowControlsWorkLoop : public WorkLoop {
 
 	bool getContinueWorkLoop() { return continueWorkLoop_; }
 
-       private:
+  private:
 	FEVInterface *interface_;
 };
 

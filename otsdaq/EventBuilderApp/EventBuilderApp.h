@@ -21,8 +21,8 @@
 
 #include <memory>
 
-namespace ots {
-
+namespace ots
+{
 class ConfigurationManager;
 class ConfigurationGroupKey;
 
@@ -31,8 +31,9 @@ class ConfigurationGroupKey;
  */
 //EventBuilderApp
 //	This class provides the otsdaq interface to a single artdaq Event Builder,
-class EventBuilderApp : public xdaq::Application, public SOAPMessenger, public RunControlStateMachine {
-       public:
+class EventBuilderApp : public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
+{
+  public:
 	XDAQ_INSTANTIATOR();
 
 	EventBuilderApp(xdaq::ApplicationStub* s);
@@ -42,11 +43,11 @@ class EventBuilderApp : public xdaq::Application, public SOAPMessenger, public R
 	void Default(xgi::Input* in, xgi::Output* out);
 
 	//State Machine requests handlers
-	void		       stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
-	void		       stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out);
+	void                   stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
+	void                   stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out);
 	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference message);
 	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference message);
-	bool		       stateMachineThread(toolbox::task::WorkLoop* workLoop);
+	bool                   stateMachineThread(toolbox::task::WorkLoop* workLoop);
 
 	xoap::MessageReference stateMachineStateRequest(xoap::MessageReference message);
 	xoap::MessageReference stateMachineErrorMessageRequest(xoap::MessageReference message);
@@ -67,16 +68,16 @@ class EventBuilderApp : public xdaq::Application, public SOAPMessenger, public R
 	void transitionStopping(toolbox::Event::Reference e);
 	void enteringError(toolbox::Event::Reference e);
 
-       private:
+  private:
 	WorkLoopManager stateMachineWorkLoopManager_;
 	toolbox::BSem   stateMachineSemaphore_;
 
 	AllSupervisorInfo     allSupervisorInfo_;
 	ConfigurationManager* theConfigurationManager_;
-	std::string	   XDAQContextConfigurationName_;
-	std::string	   supervisorConfigurationPath_;
-	std::string	   supervisorContextUID_;
-	std::string	   supervisorApplicationUID_;
+	std::string           XDAQContextConfigurationName_;
+	std::string           supervisorConfigurationPath_;
+	std::string           supervisorContextUID_;
+	std::string           supervisorApplicationUID_;
 
 	std::unique_ptr<artdaq::EventBuilderApp> theARTDAQEventBuilderInterface_;
 };

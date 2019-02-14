@@ -84,7 +84,7 @@ std::string FiniteStateMachine::getCurrentTransitionName(const std::string& tran
 
 //========================================================================================================================
 std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from,
-						  const std::string&	transition)
+                                                  const std::string&        transition)
 {
 	if (stateTransitionNameTable_[from].find(transition) != stateTransitionNameTable_[from].end())
 	{
@@ -100,7 +100,7 @@ std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from
 
 //========================================================================================================================
 std::string FiniteStateMachine::getTransitionParameter(const toolbox::fsm::State from,
-						       const std::string&	transition)
+                                                       const std::string&        transition)
 {
 	if (stateTransitionParameterTable_[from].find(transition) != stateTransitionParameterTable_[from].end())
 	{
@@ -130,8 +130,8 @@ bool FiniteStateMachine::execTransition(const std::string& transition)
 //
 //	Note: For iteration handling, there is iterationIndex_ and iterationWorkFlag_.
 //		These are different (higher level) than the members of VStateMachine.
-bool FiniteStateMachine::execTransition(const std::string&	    transition,
-					const xoap::MessageReference& message)
+bool FiniteStateMachine::execTransition(const std::string&            transition,
+                                        const xoap::MessageReference& message)
 {
 	__COUTV__(transition);
 
@@ -182,9 +182,9 @@ bool FiniteStateMachine::execTransition(const std::string&	    transition,
 
 		return false;
 	}
-	inTransition_		  = true;
+	inTransition_             = true;
 	bool transitionSuccessful = true;
-	provenanceState_	  = getCurrentState();
+	provenanceState_          = getCurrentState();
 
 	std::map<std::string, toolbox::fsm::State> transitions = getTransitions(getCurrentState());
 	if (transitions.find(transition) == transitions.end())
@@ -206,13 +206,13 @@ bool FiniteStateMachine::execTransition(const std::string&	    transition,
 	{
 		toolbox::Event::Reference event(new toolbox::Event(transition, this));
 		theMessage_ = message;  //Even if it is bad, there can only be 1 transition at a time
-					//so this parameter should not change during all transition
+		                        //so this parameter should not change during all transition
 
 		this->fireEvent(event);
 	}
 	catch (toolbox::fsm::exception::Exception& e)
 	{
-		inTransition_	= false;
+		inTransition_        = false;
 		transitionSuccessful = false;
 		std::ostringstream error;
 		__SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState()) << ". There was an error: " << e.what();
@@ -224,7 +224,7 @@ bool FiniteStateMachine::execTransition(const std::string&	    transition,
 	}
 	catch (...)
 	{
-		inTransition_	= false;
+		inTransition_        = false;
 		transitionSuccessful = false;
 		__SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState()) << ". There was an unknown error.";
 		__COUT_ERR__ << ss.str() << std::endl;

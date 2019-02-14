@@ -9,10 +9,11 @@
 #include <ostream>
 #include <string>
 
-namespace ots {
-
-class SOAPCommand {
-       public:
+namespace ots
+{
+class SOAPCommand
+{
+  public:
 	SOAPCommand(void);
 	SOAPCommand(const xoap::MessageReference& message);
 	SOAPCommand(std::string command);
@@ -25,8 +26,8 @@ class SOAPCommand {
 	const std::string&    getCommand(void) const;
 	const SOAPParameters& getParameters(void) const;
 	SOAPParameters&       getParametersRef(void);
-	std::string	   getParameterValue(std::string parameterName) const;
-	unsigned int	  getParametersSize(void) const;
+	std::string           getParameterValue(std::string parameterName) const;
+	unsigned int          getParametersSize(void) const;
 
 	//Setters
 	void translate(const xoap::MessageReference& message);
@@ -35,11 +36,11 @@ class SOAPCommand {
 	void setParameter(const std::string parameterName, const std::string parameterValue);
 	void setParameter(const SOAPParameter parameter);
 
-	bool		     hasParameters(void) const;
-	bool		     findParameter(std::string parameterName) const;
+	bool                 hasParameters(void) const;
+	bool                 findParameter(std::string parameterName) const;
 	friend std::ostream& operator<<(std::ostream& os, const SOAPCommand& command);
 
-       private:
+  private:
 	std::string    command_;
 	SOAPParameters parameters_;
 };

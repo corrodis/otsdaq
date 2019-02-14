@@ -4,10 +4,11 @@
 #include <string>
 #include "otsdaq-core/NetworkUtilities/TCPSocket.h"  // Make sure this is always first because <sys/types.h> (defined in Socket.h) must be first
 
-namespace ots {
-
-class TCPDataStreamerBase : public TCPSocket {
-       public:
+namespace ots
+{
+class TCPDataStreamerBase : public TCPSocket
+{
+  public:
 	TCPDataStreamerBase(unsigned int port);
 	virtual ~TCPDataStreamerBase(void);
 

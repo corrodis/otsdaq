@@ -15,12 +15,13 @@
 #include <map>
 #include <string>
 
-namespace ots {
-
+namespace ots
+{
 class RegisterView;
 
-class RegisterBase : public ots::ConfigurationBase {
-       public:
+class RegisterBase : public ots::ConfigurationBase
+{
+  public:
 	RegisterBase(std::string configurationName, std::string typeName);
 	virtual ~RegisterBase();
 	void init(void);

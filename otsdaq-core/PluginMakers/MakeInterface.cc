@@ -4,10 +4,10 @@
 #include <cetlib/BasicPluginFactory.h>
 
 std::unique_ptr<ots::FEVInterface> ots::makeInterface(
-    const std::string&		  interfacePluginName,
-    const std::string&		  interfaceUID,
+    const std::string&            interfacePluginName,
+    const std::string&            interfaceUID,
     const ots::ConfigurationTree& configuration,
-    const std::string&		  pathToInterfaceConfiguration)
+    const std::string&            pathToInterfaceConfiguration)
 
 {
 	static cet::BasicPluginFactory basicPluginInterfaceFactory("interface", "make");

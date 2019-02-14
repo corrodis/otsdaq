@@ -21,15 +21,16 @@
 
 #include <memory>
 
-namespace ots {
-
+namespace ots
+{
 class ConfigurationManager;
 class ConfigurationGroupKey;
 
 //DispatcherApp
 //	This class provides the otsdaq interface to a single artdaq Dispatcher.
-class DispatcherApp : public xdaq::Application, public SOAPMessenger, public RunControlStateMachine {
-       public:
+class DispatcherApp : public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
+{
+  public:
 	XDAQ_INSTANTIATOR();
 
 	DispatcherApp(xdaq::ApplicationStub* s);
@@ -39,11 +40,11 @@ class DispatcherApp : public xdaq::Application, public SOAPMessenger, public Run
 	void Default(xgi::Input* in, xgi::Output* out);
 
 	//State Machine requests handlers
-	void		       stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
-	void		       stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out);
+	void                   stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
+	void                   stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out);
 	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference message);
 	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference message);
-	bool		       stateMachineThread(toolbox::task::WorkLoop* workLoop);
+	bool                   stateMachineThread(toolbox::task::WorkLoop* workLoop);
 
 	xoap::MessageReference stateMachineStateRequest(xoap::MessageReference message);
 	xoap::MessageReference stateMachineErrorMessageRequest(xoap::MessageReference message);
@@ -64,16 +65,16 @@ class DispatcherApp : public xdaq::Application, public SOAPMessenger, public Run
 	void transitionStopping(toolbox::Event::Reference e);
 	void enteringError(toolbox::Event::Reference e);
 
-       private:
+  private:
 	WorkLoopManager stateMachineWorkLoopManager_;
 	toolbox::BSem   stateMachineSemaphore_;
 
 	AllSupervisorInfo     allSupervisorInfo_;
 	ConfigurationManager* theConfigurationManager_;
-	std::string	   XDAQContextConfigurationName_;
-	std::string	   supervisorConfigurationPath_;
-	std::string	   supervisorContextUID_;
-	std::string	   supervisorApplicationUID_;
+	std::string           XDAQContextConfigurationName_;
+	std::string           supervisorConfigurationPath_;
+	std::string           supervisorContextUID_;
+	std::string           supervisorApplicationUID_;
 
 	std::unique_ptr<artdaq::DispatcherApp> theDispatcherInterface_;
 };

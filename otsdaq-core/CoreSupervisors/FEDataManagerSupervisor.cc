@@ -13,7 +13,7 @@ XDAQ_INSTANTIATOR_IMPL(FEDataManagerSupervisor)
 
 //========================================================================================================================
 FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub* s,
-						 bool			artdaqDataManager)
+                                                 bool                   artdaqDataManager)
     : FESupervisor(s)
 {
 	__SUP_COUT__ << "Constructor." << std::endl;
@@ -40,18 +40,18 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub* s,
 		__SUP_COUT__ << "Adding ARTDAQ Data Manager now...!" << __E__;
 		CoreSupervisorBase::theStateMachineImplementation_.push_back(
 		    DataManagerSingleton::getInstance<ARTDAQDataManager>(
-			CorePropertySupervisorBase::getContextTreeNode(),
-			CorePropertySupervisorBase::supervisorConfigurationPath_,
-			CorePropertySupervisorBase::supervisorApplicationUID_));
+		        CorePropertySupervisorBase::getContextTreeNode(),
+		        CorePropertySupervisorBase::supervisorConfigurationPath_,
+		        CorePropertySupervisorBase::supervisorApplicationUID_));
 	}
 	else
 	{
 		__SUP_COUT__ << "Adding Data Manager now...!" << __E__;
 		CoreSupervisorBase::theStateMachineImplementation_.push_back(
 		    DataManagerSingleton::getInstance<DataManager>(
-			CorePropertySupervisorBase::getContextTreeNode(),
-			CorePropertySupervisorBase::supervisorConfigurationPath_,
-			CorePropertySupervisorBase::supervisorApplicationUID_));
+		        CorePropertySupervisorBase::getContextTreeNode(),
+		        CorePropertySupervisorBase::supervisorConfigurationPath_,
+		        CorePropertySupervisorBase::supervisorApplicationUID_));
 	}
 
 	extractDataManager();
@@ -90,7 +90,7 @@ void FEDataManagerSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		__SUP_SS_THROW__;
 	}
 
-	VStateMachine* p		  = theStateMachineImplementation_[0];
+	VStateMachine* p                  = theStateMachineImplementation_[0];
 	theStateMachineImplementation_[0] = theStateMachineImplementation_[1];
 	theStateMachineImplementation_[1] = p;
 
@@ -130,7 +130,7 @@ void FEDataManagerSupervisor::transitionStarting(toolbox::Event::Reference e)
 		__SUP_SS__ << "State machine size is not 2! It is " << theStateMachineImplementation_.size() << ". What happened??" << __E__;
 	}
 
-	VStateMachine* p		  = theStateMachineImplementation_[0];
+	VStateMachine* p                  = theStateMachineImplementation_[0];
 	theStateMachineImplementation_[0] = theStateMachineImplementation_[1];
 	theStateMachineImplementation_[1] = p;
 
@@ -159,7 +159,7 @@ void FEDataManagerSupervisor::transitionResuming(toolbox::Event::Reference e)
 		__SUP_SS__ << "State machine size is not 2! It is " << theStateMachineImplementation_.size() << ". What happened??" << __E__;
 	}
 
-	VStateMachine* p		  = theStateMachineImplementation_[0];
+	VStateMachine* p                  = theStateMachineImplementation_[0];
 	theStateMachineImplementation_[0] = theStateMachineImplementation_[1];
 	theStateMachineImplementation_[1] = p;
 

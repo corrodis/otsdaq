@@ -51,7 +51,7 @@ void Register::setState(std::string state, std::pair<int, int> valueSequencePair
 void Register::fillRegisterInfo(std::string registerBaseAddress, int registerSize, std::string registerAccess)
 {
 	registerBaseAddress_ = registerBaseAddress;
-	registerSize_	= registerSize;
+	registerSize_        = registerSize;
 	registerAccess_      = registerAccess;
 
 	return;

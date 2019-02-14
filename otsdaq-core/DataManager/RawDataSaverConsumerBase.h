@@ -7,14 +7,15 @@
 #include <fstream>
 #include <string>
 
-namespace ots {
-
-class RawDataSaverConsumerBase : public DataConsumer, public Configurable {
-       public:
+namespace ots
+{
+class RawDataSaverConsumerBase : public DataConsumer, public Configurable
+{
+  public:
 	RawDataSaverConsumerBase(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
 	virtual ~RawDataSaverConsumerBase(void);
 
-       protected:
+  protected:
 	virtual void openFile(std::string runNumber);
 	virtual void closeFile(void);
 	virtual void save(const std::string& data);
@@ -30,15 +31,15 @@ class RawDataSaverConsumerBase : public DataConsumer, public Configurable {
 
 	std::ofstream outFile_;
 	//For fast read
-	std::string*			    dataP_;
+	std::string*                        dataP_;
 	std::map<std::string, std::string>* headerP_;
 	//For slow read
-	std::string			   data_;
+	std::string                        data_;
 	std::map<std::string, std::string> header_;
 
 	std::string  filePath_;
 	std::string  fileRadix_;
-	long	 maxFileSize_;
+	long         maxFileSize_;
 	std::string  currentRunNumber_;
 	unsigned int currentSubRunNumber_;
 };

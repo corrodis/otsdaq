@@ -39,7 +39,7 @@ void DataBufferConfiguration::init(ConfigurationManager* configManager)
 	std::string dataBufferID;
 	std::string processorUID;
 	std::string processorType;
-	Info	processorInfo;
+	Info        processorInfo;
 	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
 	{
 		ConfigurationBase::activeConfigurationView_->getValue(dataBufferID, row, DataBufferID);

@@ -23,8 +23,8 @@
 #include "otsdaq-core/CodeEditor/CodeEditor.h"
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 
-namespace ots {
-
+namespace ots
+{
 class HttpXmlDocument;
 
 //WizardSupervisor
@@ -36,8 +36,9 @@ class HttpXmlDocument;
 //	it does not have a state machine and does not inherit properties
 //	from CorePropertySupervisorBase. The assumption is that only admins
 //	have access to wiz mode, and they have access to all features of it.
-class WizardSupervisor : public xdaq::Application, public SOAPMessenger {
-       public:
+class WizardSupervisor : public xdaq::Application, public SOAPMessenger
+{
+  public:
 	XDAQ_INSTANTIATOR();
 
 	WizardSupervisor(xdaq::ApplicationStub*) throw(xdaq::exception::Exception);
@@ -46,7 +47,7 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger {
 	void init(void);
 	void destroy(void);
 
-	void	generateURL(void);
+	void        generateURL(void);
 	static void printURL(WizardSupervisor* ptr, std::string securityCode);
 
 	void Default(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
@@ -54,28 +55,29 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger {
 	void request(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
 	void requestIcons(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
 
-	void	editSecurity(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
-	void	UserSettings(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
-	void	tooltipRequest(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
-	void	toggleSecurityCodeGeneration(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void        editSecurity(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void        UserSettings(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void        tooltipRequest(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void        toggleSecurityCodeGeneration(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
 	std::string validateUploadFileType(const std::string fileType);
-	void	cleanUpPreviews();
-	void	savePostPreview(std::string& subject, std::string& text, const std::vector<cgicc::FormFile>& files, std::string creator, HttpXmlDocument* xmldoc = nullptr);
+	void        cleanUpPreviews();
+	void        savePostPreview(std::string& subject, std::string& text, const std::vector<cgicc::FormFile>& files, std::string creator, HttpXmlDocument* xmldoc = nullptr);
 	std::string exec(const char* cmd);
 
 	//External Supervisor XOAP handlers
 	xoap::MessageReference supervisorSequenceCheck(xoap::MessageReference msg) throw(xoap::exception::Exception);
 	xoap::MessageReference supervisorLastConfigGroupRequest(xoap::MessageReference msg) throw(xoap::exception::Exception);
 
-       private:
-	std::string		 securityCode_;
-	bool			 defaultSequence_;
+  private:
+	std::string              securityCode_;
+	bool                     defaultSequence_;
 	std::vector<std::string> allowedFileUploadTypes_, matchingFileUploadTypes_;
 
 	std::string supervisorClass_;
 	std::string supervisorClassNoNamespace_;
 
-	enum {
+	enum
+	{
 		ADMIN_PERMISSIONS_THRESHOLD = 255,
 		EXPERIMENT_NAME_MIN_LENTH   = 3,
 		EXPERIMENT_NAME_MAX_LENTH   = 25,

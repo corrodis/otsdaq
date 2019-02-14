@@ -7,14 +7,15 @@
 
 #include <string>
 
-namespace ots {
-
-class SOAPUtilities {
-       private:  //private constructor because all static members, should never instantiate this class
+namespace ots
+{
+class SOAPUtilities
+{
+  private:  //private constructor because all static members, should never instantiate this class
 	SOAPUtilities(void);
 	~SOAPUtilities(void);
 
-       public:
+  public:
 	static xoap::MessageReference makeSOAPMessageReference(SOAPCommand soapCommand);
 	static xoap::MessageReference makeSOAPMessageReference(std::string command);
 	static xoap::MessageReference makeSOAPMessageReference(std::string command, SOAPParameters parameters);

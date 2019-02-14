@@ -4,7 +4,8 @@
 
 #include <string>
 
-namespace ots {
+namespace ots
+{
 class ControlsVInterface;
 class ConfigurationTree;
 

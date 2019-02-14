@@ -63,6 +63,6 @@ std::string DOMTreeErrorReporter::reportParseException(const xercesc::SAXParseEx
 	       //<< " (check against xsd file)" //RAR commented, has no meaning to me or users..
 	       << "\n\n";
 	__COUT__ << "\n"
-		 << ss.str() << std::endl;
+	         << ss.str() << std::endl;
 	return ss.str();
 }

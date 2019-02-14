@@ -90,8 +90,8 @@ void XmlDocument::initDocument(void)
 		{
 			theDocument_ = theImplementation_->createDocument(
 			    CONVERT_TO_XML("http://www.w3.org/2001/XMLSchema-instance"),  // root element namespace URI.
-			    CONVERT_TO_XML(rootTagName_),				  // root element name
-			    0);								  // theDocument_ type object (DTD).
+			    CONVERT_TO_XML(rootTagName_),                                 // root element name
+			    0);                                                           // theDocument_ type object (DTD).
 		}
 		catch (const xercesc::OutOfMemoryException&)
 		{
@@ -120,7 +120,7 @@ void XmlDocument::initPlatform(void)
 	try
 	{
 		xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
-							  //__COUT__ << "Initialized new theDocument_" << std::endl;
+		                                          //__COUT__ << "Initialized new theDocument_" << std::endl;
 	}
 	catch (xercesc::XMLException& e)
 	{
@@ -173,7 +173,7 @@ xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, 
 	catch (xercesc::DOMException& e)
 	{
 		__COUT__ << "Can't use the name: " << childName << " to create the child element because the exception says: "
-			 << XML_TO_CHAR(e.getMessage()) << ". Very likely you have a name that starts with a number and that's not allowed!" << std::endl;
+		         << XML_TO_CHAR(e.getMessage()) << ". Very likely you have a name that starts with a number and that's not allowed!" << std::endl;
 	}
 	parent->appendChild(child);
 
@@ -221,7 +221,7 @@ void XmlDocument::recursiveElementCopy(const xercesc::DOMElement* toCopy, xerces
 	xercesc::DOMDocument* copyDocument = copy->getOwnerDocument();
 	for (unsigned int i = 0; i < nodeListToCopy->getLength(); i++)
 	{
-		iNode			   = nodeListToCopy->item(i);
+		iNode                      = nodeListToCopy->item(i);
 		xercesc::DOMElement* child = copyDocument->createElement(iNode->getNodeName());
 		copy->appendChild(child);
 		if (iNode->getFirstChild() != 0 && iNode->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)  //if has a text node first, insert as value attribute
@@ -420,16 +420,16 @@ void XmlDocument::recursiveOutputXmlDocument(xercesc::DOMElement* currEl, std::o
 
 	//close opening field tag
 	if (dispStdOut) std::cout << ((nodeList->getLength() == 0 ||
-				       (nodeList->getLength() == 1 && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE))
-					  ? "/"
-					  : "")
-				  << ">"
-				  << " len:" << nodeList->getLength() << std::endl;
+		                           (nodeList->getLength() == 1 && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE))
+		                              ? "/"
+		                              : "")
+		                      << ">"
+		                      << " len:" << nodeList->getLength() << std::endl;
 	if (out) *out << ((nodeList->getLength() == 0 ||
-			   (nodeList->getLength() == 1 && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE))
-			      ? "/"
-			      : "")
-		      << ">" << std::endl;
+		               (nodeList->getLength() == 1 && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE))
+		                  ? "/"
+		                  : "")
+		          << ">" << std::endl;
 
 	//insert children
 	std::string newTabStr = tabStr + "\t";
@@ -528,7 +528,7 @@ std::string XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
 	bool doit = false;
 
 	unsigned int ws = -1;
-	char	 htmlTmp[6];
+	char         htmlTmp[6];
 
 	for (unsigned int i = 0; i < inString.length(); i++)
 		if (inString[i] != ' ')
@@ -536,11 +536,11 @@ std::string XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
 			if (doit) __COUT__ << inString[i] << ":" << (int)inString[i] << ":" << inString << std::endl;
 
 			//remove new lines and unprintable characters
-			if (inString[i] == '\r' || inString[i] == '\n' ||	  //remove new line chars
-			    inString[i] == '\t' ||				   //remove tabs
-			    inString[i] < 32 ||					   //remove un-printable characters (they mess up xml interpretation)
+			if (inString[i] == '\r' || inString[i] == '\n' ||          //remove new line chars
+			    inString[i] == '\t' ||                                 //remove tabs
+			    inString[i] < 32 ||                                    //remove un-printable characters (they mess up xml interpretation)
 			    (inString[i] > char(126) && inString[i] < char(161)))  //this is aggravated by the bug in MFextensions (though Eric says he fixed on 8/24/2016)
-										   //Note: greater than 255 should be impossible if by byte (but there are html chracters in 300s and 8000s)
+			                                                           //Note: greater than 255 should be impossible if by byte (but there are html chracters in 300s and 8000s)
 			{
 				if (  //maintain new lines and tabs
 				    inString[i] == '\n')
@@ -548,9 +548,9 @@ std::string XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
 					if (allowWhiteSpace)
 					{
 						sprintf(htmlTmp, "&#%3.3d", inString[i]);
-						inString.insert(i, htmlTmp);	 //insert html str sequence
+						inString.insert(i, htmlTmp);         //insert html str sequence
 						inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
-						i += 6;				     //skip to next char to check
+						i += 6;                              //skip to next char to check
 						--i;
 					}
 					else  //translate to ' '
@@ -565,17 +565,17 @@ std::string XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
 						{
 							//tab = 8 spaces
 							sprintf(htmlTmp, "&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160");
-							inString.insert(i, htmlTmp);	  //insert html str sequence
+							inString.insert(i, htmlTmp);          //insert html str sequence
 							inString.replace(i + 47, 1, 1, ';');  // replace special character with ;
-							i += 48;			      //skip to next char to check
+							i += 48;                              //skip to next char to check
 							--i;
 						}
 						else  //tab =  0x09
 						{
 							sprintf(htmlTmp, "&#009");
-							inString.insert(i, htmlTmp);	 //insert html str sequence
+							inString.insert(i, htmlTmp);         //insert html str sequence
 							inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
-							i += 6;				     //skip to next char to check
+							i += 6;                              //skip to next char to check
 							--i;
 						}
 					}
@@ -585,7 +585,7 @@ std::string XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
 				else
 				{
 					inString.erase(i, 1);  //erase character
-					--i;		       //step back so next char to check is correct
+					--i;                   //step back so next char to check is correct
 				}
 				if (doit) __COUT__ << inString << std::endl;
 				continue;
@@ -597,28 +597,28 @@ std::string XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
 			if (inString[i] == '\"' || inString[i] == '\'')
 			{
 				inString.insert(i, (inString[i] == '\'') ? "&apos" : "&quot");  //insert HTML name before quotes
-				inString.replace(i + 5, 1, 1, ';');				// replace special character with ;
-				i += 5;								//skip to next char to check
-												//__COUT__ <<  inString << std::endl;
+				inString.replace(i + 5, 1, 1, ';');                             // replace special character with ;
+				i += 5;                                                         //skip to next char to check
+				                                                                //__COUT__ <<  inString << std::endl;
 			}
 			else if (inString[i] == '&')
 			{
-				inString.insert(i, "&amp");	  //insert HTML name before special character
+				inString.insert(i, "&amp");          //insert HTML name before special character
 				inString.replace(i + 4, 1, 1, ';');  // replace special character with ;
-				i += 4;				     //skip to next char to check
+				i += 4;                              //skip to next char to check
 			}
 			else if (inString[i] == '<' || inString[i] == '>')
 			{
 				inString.insert(i, (inString[i] == '<') ? "&lt" : "&gt");  //insert HTML name before special character
-				inString.replace(i + 3, 1, 1, ';');			   // replace special character with ;
-				i += 3;							   //skip to next char to check
+				inString.replace(i + 3, 1, 1, ';');                        // replace special character with ;
+				i += 3;                                                    //skip to next char to check
 			}
 			else if (inString[i] >= char(161) && inString[i] <= char(255))  //printable special characters
 			{
 				sprintf(htmlTmp, "&#%3.3d", inString[i]);
-				inString.insert(i, htmlTmp);	 //insert html number sequence
+				inString.insert(i, htmlTmp);         //insert html number sequence
 				inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
-				i += 5;				     //skip to next char to check
+				i += 5;                              //skip to next char to check
 			}
 
 			if (doit) __COUT__ << inString << std::endl;
@@ -633,12 +633,12 @@ std::string XmlDocument::escapeString(std::string inString, bool allowWhiteSpace
 			if (0 && i - 2 == ws)
 			{
 				inString.insert(i, "&#160;");  //insert html space
-				i += 6;			       //skip to point at space again
+				i += 6;                        //skip to point at space again
 			}
-			inString.insert(i, "&#160");	 //insert html space
+			inString.insert(i, "&#160");         //insert html space
 			inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
-			i += 5;				     //skip to next char to check
-							     //ws = i;
+			i += 5;                              //skip to next char to check
+			                                     //ws = i;
 		}
 
 	if (doit) __COUT__ << inString.size() << " " << ws << std::endl;
@@ -739,7 +739,7 @@ void XmlDocument::saveXmlDocument(std::string filePath)
     */
 	//XMLFormatTarget* pTarget = new StdOutFormatTarget();
 	// Convert the path into Xerces compatible XMLCh*.
-	XMLCh*			  tempFilePath = xercesc::XMLString::transcode(filePath.c_str());
+	XMLCh*                    tempFilePath = xercesc::XMLString::transcode(filePath.c_str());
 	xercesc::XMLFormatTarget* formatTarget;
 	try
 	{

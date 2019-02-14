@@ -21,24 +21,24 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	__COUT__ << "=================================================\n";
 	__COUT__ << "Importing External System Aliases!" << std::endl;
 
-	std::string       prependBaseName	 = "Imported";
+	std::string       prependBaseName         = "Imported";
 	const std::string groupAliasesTableName   = ConfigurationManager::GROUP_ALIASES_CONFIG_NAME;
 	const std::string versionAliasesTableName = ConfigurationManager::VERSION_ALIASES_CONFIG_NAME;
 
 	std::cout << "\n\nusage: Two arguments:\n\n\t otsdaq_import_system_aliases <path_to_import_database_folder> <path_to_active_groups_file> <import_prepend_base_name (optional)> \n\n"
-		  << "\t\t Default values: \n\t\t\timport_prepend_base_name = \"" << prependBaseName << "\" "
-		  << "\n\n"
-		  << "\t\tfor example:\n\n"
-		  << "\t\t\totsdaq_import_system_aliases ~/databaseToImport/filesystemdb/test_db ~/UserDataToImport/ServiceData/ActiveConfigurationGroups.cfg" << __E__;
+	          << "\t\t Default values: \n\t\t\timport_prepend_base_name = \"" << prependBaseName << "\" "
+	          << "\n\n"
+	          << "\t\tfor example:\n\n"
+	          << "\t\t\totsdaq_import_system_aliases ~/databaseToImport/filesystemdb/test_db ~/UserDataToImport/ServiceData/ActiveConfigurationGroups.cfg" << __E__;
 
 	std::cout << "\n\n\tExample active groups file content:\n\n"
-		  << "testContext\n2\nTableEditWizBackbone\n3\ndefaultConfig\n1\n\n"
-		  << __E__;
+	          << "testContext\n2\nTableEditWizBackbone\n3\ndefaultConfig\n1\n\n"
+	          << __E__;
 
 	std::cout << "\n\nNote: This assumes artdaq db file type interface. "
-		  << "The current database/ will be backed up to database_<linuxtime>/ "
-		  << "before importing the active groups.\n\n"
-		  << __E__;
+	          << "The current database/ will be backed up to database_<linuxtime>/ "
+	          << "before importing the active groups.\n\n"
+	          << __E__;
 
 	__COUTV__(argc);
 	for (int i = 0; i < argc; i++)
@@ -47,7 +47,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	if (argc < 3)
 	{
 		__COUT__ << "Must provide at least two parameters (the database and active groups files for the import).\n\n\n"
-			 << __E__;
+		         << __E__;
 		return;
 	}
 
@@ -155,23 +155,23 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	//	ConfigurationVersion /*next persisten version*/> 								tableNextVersionMap;
 
 	std::map<std::string /*importGroupAlias*/,
-		 /*original*/ std::pair<std::string /*groupName*/, ConfigurationGroupKey>>
+	         /*original*/ std::pair<std::string /*groupName*/, ConfigurationGroupKey>>
 	    originalGroupAliasMap;
 
 	std::map</*original*/ std::pair<std::string /*groupName*/, ConfigurationGroupKey>,
-		 /*new*/ ConfigurationGroupKey>
+	         /*new*/ ConfigurationGroupKey>
 	    groupSet;
 
 	std::map<std::string /*importTableAlias*/,
-		 /*original*/ std::pair<std::string /*tableName*/, ConfigurationVersion>>
+	         /*original*/ std::pair<std::string /*tableName*/, ConfigurationVersion>>
 	    originalTableAliasMap;
 
 	std::map</*original*/ std::pair<std::string /*tableName*/, ConfigurationVersion>,
-		 /*new*/ ConfigurationVersion>
+	         /*new*/ ConfigurationVersion>
 	    newTableVersionMap;
 
 	std::map</*original*/ std::pair<std::string, ConfigurationGroupKey>,
-		 std::string /*error string*/>
+	         std::string /*error string*/>
 	    groupErrors;
 
 	//get prepared with initial source db
@@ -179,8 +179,8 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	//ConfigurationManager instance immediately loads active groups
 	__COUT__ << "Getting started..." << std::endl;
 	ConfigurationManagerRW  cfgMgrInst("import_aliases");
-	ConfigurationManagerRW* cfgMgr		  = &cfgMgrInst;
-	bool			importedDbInPlace = false;
+	ConfigurationManagerRW* cfgMgr            = &cfgMgrInst;
+	bool                    importedDbInPlace = false;
 
 	__COUT__ << "Configuration manager initialized." << __E__;
 
@@ -191,7 +191,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	{
 		__SS__ << "filesystemdb:// was not found in $ARTDAQ_DATABASE_URI!" << std::endl;
 		__COUT_ERR__ << "\n"
-			     << ss.str();
+		             << ss.str();
 		__SS_THROW__;
 	}
 
@@ -208,14 +208,14 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 	//	-- get set of existing aliases
 	std::map<std::string /*table name*/,
-		 std::map<std::string /*version alias*/,
-			  ConfigurationVersion /*aliased version*/>>
+	         std::map<std::string /*version alias*/,
+	                  ConfigurationVersion /*aliased version*/>>
 	    existingTableAliases =
-		cfgMgr->ConfigurationManager::getVersionAliases();
+	        cfgMgr->ConfigurationManager::getVersionAliases();
 	std::map<std::string /*alias*/,
-		 std::pair<std::string /*group name*/, ConfigurationGroupKey>>
+	         std::pair<std::string /*group name*/, ConfigurationGroupKey>>
 	    existingGroupAliases =
-		cfgMgr->getActiveGroupAliases();
+	        cfgMgr->getActiveGroupAliases();
 
 	//	//NOT NEEDED -- just ask db on fly for next version //	- fill map of table name to next persistent table version
 	//	{
@@ -274,11 +274,11 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			__COUTV__(activeGroup.second.second);
 
 			groupSet.insert(std::pair<
-					std::pair<std::string, ConfigurationGroupKey>,
-					ConfigurationGroupKey>(
+			                std::pair<std::string, ConfigurationGroupKey>,
+			                ConfigurationGroupKey>(
 			    std::pair<std::string, ConfigurationGroupKey>(
-				activeGroup.second.first,
-				activeGroup.second.second),
+			        activeGroup.second.first,
+			        activeGroup.second.second),
 			    ConfigurationGroupKey()));
 		}
 
@@ -324,17 +324,17 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			}
 
 			groupSet.insert(std::pair<
-					std::pair<std::string, ConfigurationGroupKey>,
-					ConfigurationGroupKey>(
+			                std::pair<std::string, ConfigurationGroupKey>,
+			                ConfigurationGroupKey>(
 			    std::pair<std::string, ConfigurationGroupKey>(
-				aliasPair.second.getNode("GroupName").getValueAsString(),
-				ConfigurationGroupKey(aliasPair.second.getNode("GroupKey").getValueAsString())),
+			        aliasPair.second.getNode("GroupName").getValueAsString(),
+			        ConfigurationGroupKey(aliasPair.second.getNode("GroupKey").getValueAsString())),
 			    ConfigurationGroupKey()));
 
 			originalGroupAliasMap[aliasName] =
 			    std::pair<std::string, ConfigurationGroupKey>(
-				aliasPair.second.getNode("GroupName").getValueAsString(),
-				ConfigurationGroupKey(aliasPair.second.getNode("GroupKey").getValueAsString()));
+			        aliasPair.second.getNode("GroupName").getValueAsString(),
+			        ConfigurationGroupKey(aliasPair.second.getNode("GroupKey").getValueAsString()));
 		}  //end group aliases loop
 
 		aliasNodePairs =
@@ -363,10 +363,10 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 			originalTableAliasMap[aliasName] =
 			    std::pair<std::string, ConfigurationVersion>(
-				aliasPair.second.getNode("ConfigurationName").getValueAsString(),
-				ConfigurationVersion(aliasPair.second.getNode("Version").getValueAsString()));
+			        aliasPair.second.getNode("ConfigurationName").getValueAsString(),
+			        ConfigurationVersion(aliasPair.second.getNode("Version").getValueAsString()));
 		}  //end table aliases loop
-	}	  //end extract group set
+	}      //end extract group set
 	catch (const std::runtime_error& e)
 	{
 		__COUT_ERR__ << "There was a fatal error: " << e.what() << __E__;
@@ -375,7 +375,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 		__COUT__ << std::endl;
 		__COUT__ << "Run the following to return to your previous database structure:" << std::endl;
 		__COUT__ << "\t otsdaq_flatten_system_aliases -1 " << backupDir << "\n\n"
-			 << std::endl;
+		         << std::endl;
 		__COUT__ << std::endl;
 		__COUT__ << std::endl;
 		return;
@@ -407,17 +407,17 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	ConfigurationVersion    newVersion;
 	ConfigurationGroupKey   newKey;
 
-	bool	errDetected;
+	bool        errDetected;
 	std::string accumulateErrors = "";
-	int	 count	    = 0;
+	int         count            = 0;
 
-	std::map<std::string, ConfigurationVersion>	   memberMap;
+	std::map<std::string, ConfigurationVersion>           memberMap;
 	std::map<std::string /*name*/, std::string /*alias*/> groupAliases;
-	std::string					      groupComment;
-	std::string					      groupAuthor;
-	std::string					      groupCreateTime;
-	time_t						      groupCreateTime_t;
-	ConfigurationBase*				      groupMetadataTable = cfgMgr->getMetadataTable();
+	std::string                                           groupComment;
+	std::string                                           groupAuthor;
+	std::string                                           groupCreateTime;
+	time_t                                                groupCreateTime_t;
+	ConfigurationBase*                                    groupMetadataTable = cfgMgr->getMetadataTable();
 
 	__COUT__ << "Proceeding with handling of identified groups..." << __E__;
 
@@ -496,11 +496,11 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			//	and record error
 
 			groupErrors.insert(std::pair<
-					   std::pair<std::string, ConfigurationGroupKey>,
-					   std::string>(
+			                   std::pair<std::string, ConfigurationGroupKey>,
+			                   std::string>(
 			    std::pair<std::string, ConfigurationGroupKey>(
-				groupPair.first.first,
-				groupPair.first.second),
+			        groupPair.first.first,
+			        groupPair.first.second),
 			    "Error caught loading the group."));
 			continue;
 		}
@@ -534,8 +534,8 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 				//check if table has already been modified by a previous group
 				//	(i.e. two groups using the same version of a table)
 				if (newTableVersionMap.find(std::pair<std::string, ConfigurationVersion>(
-					memberPair.first,
-					memberPair.second)) != newTableVersionMap.end())
+				        memberPair.first,
+				        memberPair.second)) != newTableVersionMap.end())
 				{
 					__COUT__ << "Table was already modified!" << std::endl;
 					memberPair.second = newTableVersionMap[std::pair<std::string, ConfigurationVersion>(
@@ -560,11 +560,11 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 				//save new version to modifiedTables
 				newTableVersionMap.insert(std::pair<
-							  std::pair<std::string, ConfigurationVersion>,
-							  ConfigurationVersion>(
+				                          std::pair<std::string, ConfigurationVersion>,
+				                          ConfigurationVersion>(
 				    std::pair<std::string, ConfigurationVersion>(
-					memberPair.first,
-					memberPair.second),
+				        memberPair.first,
+				        memberPair.second),
 				    newVersion));
 
 				memberPair.second = newVersion;  //change version in the member map
@@ -595,7 +595,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			//ConfigurationManager::METADATA_COL_ALIASES TODO
 			groupMetadataTable->getViewP()->setValue(
 			    StringMacros::mapToString(groupAliases,
-						      "," /*primary delimiter*/, ":" /*secondary delimeter*/),
+			                              "," /*primary delimiter*/, ":" /*secondary delimeter*/),
 			    0, ConfigurationManager::METADATA_COL_ALIASES);
 			groupMetadataTable->getViewP()->setValue(groupComment, 0, ConfigurationManager::METADATA_COL_COMMENT);
 			groupMetadataTable->getViewP()->setValue(groupAuthor, 0, ConfigurationManager::METADATA_COL_AUTHOR);
@@ -620,9 +620,9 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 			//memberMap should now consist of members with new flat version, so save
 			theInterface_->saveConfigurationGroup(memberMap,
-							      ConfigurationGroupKey::getFullGroupString(
-								  groupPair.first.first,
-								  newKey));
+			                                      ConfigurationGroupKey::getFullGroupString(
+			                                          groupPair.first.first,
+			                                          newKey));
 
 			//and modify groupSet and activeGroupKeys keys
 			groupPair.second = newKey;
@@ -633,11 +633,11 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			__COUT__ << e.what() << std::endl;
 
 			groupErrors.insert(std::pair<
-					   std::pair<std::string, ConfigurationGroupKey>,
-					   std::string>(
+			                   std::pair<std::string, ConfigurationGroupKey>,
+			                   std::string>(
 			    std::pair<std::string, ConfigurationGroupKey>(
-				groupPair.first.first,
-				groupPair.first.second),
+			        groupPair.first.first,
+			        groupPair.first.second),
 			    "Error caught saving the group."));
 		}
 		catch (...)
@@ -645,11 +645,11 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			__COUT__ << "Error was caught saving group " << groupPair.first.first << " (" << groupPair.first.second << ") " << std::endl;
 
 			groupErrors.insert(std::pair<
-					   std::pair<std::string, ConfigurationGroupKey>,
-					   std::string>(
+			                   std::pair<std::string, ConfigurationGroupKey>,
+			                   std::string>(
 			    std::pair<std::string, ConfigurationGroupKey>(
-				groupPair.first.first,
-				groupPair.first.second),
+			        groupPair.first.first,
+			        groupPair.first.second),
 			    "Error caught saving the group."));
 		}
 		//=========================
@@ -703,8 +703,8 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			strftime(buffer, 200, "%b %d, %Y %I:%M:%S%p %Z", timeinfo);
 
 			fprintf(fp, "This database...\t %s \t received an import from...\t %s \t at this time \t %lu \t %s\n\n",
-				currentDir.c_str(),
-				pathToImportDatabase.c_str(), time(0), buffer);
+			        currentDir.c_str(),
+			        pathToImportDatabase.c_str(), time(0), buffer);
 			fclose(fp);
 		}
 	}
@@ -782,8 +782,8 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 		if (activeMap.find(versionAliasesTableName) != activeMap.end())
 		{
 			__COUT__ << "\n\nModifying " << versionAliasesTableName << std::endl;
-			config		  = cfgMgr->getConfigurationByName(versionAliasesTableName);
-			cfgView		  = config->getViewP();
+			config            = cfgMgr->getConfigurationByName(versionAliasesTableName);
+			cfgView           = config->getViewP();
 			unsigned int col0 = cfgView->findCol("VersionAlias");
 			unsigned int col1 = cfgView->findCol("ConfigurationName");
 			unsigned int col2 = cfgView->findCol("Version");
@@ -852,15 +852,15 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 		newKey = ConfigurationGroupKey::getNextKey(
 		    theInterface_->findLatestGroupKey(
-			activeBackboneGroupName));
+		        activeBackboneGroupName));
 
 		__COUTV__(newKey);
 
 		//memberMap should now consist of members with new flat version, so save
 		theInterface_->saveConfigurationGroup(memberMap,
-						      ConfigurationGroupKey::getFullGroupString(
-							  activeBackboneGroupName,
-							  newKey));
+		                                      ConfigurationGroupKey::getFullGroupString(
+		                                          activeBackboneGroupName,
+		                                          newKey));
 
 		std::string renameFile = ConfigurationManager::ACTIVE_GROUP_FILENAME + "." + nowTime;
 		rename(ConfigurationManager::ACTIVE_GROUP_FILENAME.c_str(),
@@ -881,16 +881,16 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	//print resulting all groups
 
 	std::cout << "\n\n"
-		  << __COUT_HDR_FL__ << "Resulting Groups:" << std::endl;
+	          << __COUT_HDR_FL__ << "Resulting Groups:" << std::endl;
 	for (const auto& group : groupSet)
 		__COUT__ << "\t" << group.first.first << ": " << group.first.second << " => " << group.second << std::endl;
 	std::cout << "\n\n"
-		  << __COUT_HDR_FL__ << "Resulting Groups end." << std::endl;
+	          << __COUT_HDR_FL__ << "Resulting Groups end." << std::endl;
 
 CLEAN_UP:
 	//==============================================================================
 	__COUT__ << "End of Importing Active Configuration Groups!\n\n\n"
-		 << std::endl;
+	         << std::endl;
 
 	__COUT__ << "****************************" << std::endl;
 	__COUT__ << "There were " << groupSet.size() << " groups considered, and there were " << groupErrors.size() << " errors found handling those groups." << std::endl;
@@ -898,11 +898,11 @@ CLEAN_UP:
 	for (auto& groupErr : groupErrors)
 		__COUT__ << "\t" << groupErr.first.first << " " << groupErr.first.second << ": \t" << groupErr.second << std::endl;
 	__COUT__ << "End of errors.\n\n"
-		 << std::endl;
+	         << std::endl;
 
 	__COUT__ << "Run the following to return to your previous database structure:" << std::endl;
 	__COUT__ << "\t otsdaq_flatten_system_aliases -1 " << backupDir << "\n\n"
-		 << std::endl;
+	         << std::endl;
 
 	return;
 }
