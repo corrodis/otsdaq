@@ -6,43 +6,47 @@
 
 #include <xoap/MessageReference.h>
 
-#include <ostream>
 #include <string>
+#include <ostream>
 
-namespace ots {
+namespace ots
+{
 
-class SOAPCommand {
- public:
-  SOAPCommand(void);
-  SOAPCommand(const xoap::MessageReference& message);
-  SOAPCommand(std::string command);
-  SOAPCommand(std::string command, SOAPParameters parameters);
-  SOAPCommand(std::string command, SOAPParameter parameter);
-  ~SOAPCommand(void);
+class SOAPCommand
+{
+public:
 
-  // Getters
-  // FIXMEconst xoap::MessageReference translate         (void) const;
-  const std::string& getCommand(void) const;
-  const SOAPParameters& getParameters(void) const;
-  SOAPParameters& getParametersRef(void);
-  std::string getParameterValue(std::string parameterName) const;
-  unsigned int getParametersSize(void) const;
+	SOAPCommand (void);
+	SOAPCommand (const xoap::MessageReference& message);
+	SOAPCommand (std::string command);
+	SOAPCommand (std::string command, SOAPParameters parameters);
+	SOAPCommand (std::string command, SOAPParameter  parameter);
+	~SOAPCommand(void);
 
-  // Setters
-  void translate(const xoap::MessageReference& message);
-  void setCommand(const std::string command);
-  void setParameters(const SOAPParameters& parameters);
-  void setParameter(const std::string parameterName, const std::string parameterValue);
-  void setParameter(const SOAPParameter parameter);
+	//Getters
+	//FIXMEconst xoap::MessageReference translate         (void) const;
+	const std::string&     getCommand        (void) const;
+	const SOAPParameters&  getParameters     (void) const;
+	SOAPParameters&        getParametersRef  (void);
+	std::string            getParameterValue (std::string parameterName) const;
+	unsigned int           getParametersSize (void) const;
 
-  bool hasParameters(void) const;
-  bool findParameter(std::string parameterName) const;
-  friend std::ostream& operator<<(std::ostream& os, const SOAPCommand& command);
+	//Setters
+	void translate        (const xoap::MessageReference& message);
+	void setCommand       (const std::string command);
+	void setParameters    (const SOAPParameters& parameters);
+	void setParameter     (const std::string parameterName, const std::string parameterValue);
+	void setParameter     (const SOAPParameter parameter);
 
- private:
-  std::string command_;
-  SOAPParameters parameters_;
+	bool hasParameters    (void) const;
+	bool findParameter    (std::string parameterName) const;
+	friend std::ostream& operator<<(std::ostream& os, const SOAPCommand& command);
+
+private:
+	std::string       command_;
+	SOAPParameters  parameters_;
 };
 
-}  // namespace ots
+
+}
 #endif

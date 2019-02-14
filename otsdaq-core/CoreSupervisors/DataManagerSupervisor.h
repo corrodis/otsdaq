@@ -3,22 +3,26 @@
 
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 
-namespace ots {
+namespace ots
+{
 
-// DataManagerSupervisor
+//DataManagerSupervisor
 //	This class handles a collection of Data Processor plugins. It provides
 //	a mechanism for Data Processor Producers to store data in Buffers, and for
 //	Data Processor Consumers to retrive data from the Buffers.
-class DataManagerSupervisor : public CoreSupervisorBase {
- public:
-  XDAQ_INSTANTIATOR();
+class DataManagerSupervisor: public CoreSupervisorBase
+{
 
-  DataManagerSupervisor(xdaq::ApplicationStub* s);
-  virtual ~DataManagerSupervisor(void);
+public:
 
- private:
+    XDAQ_INSTANTIATOR();
+
+    DataManagerSupervisor              (xdaq::ApplicationStub * s) ;
+    virtual ~DataManagerSupervisor     (void);
+
+private:
 };
 
-}  // namespace ots
+}
 
 #endif

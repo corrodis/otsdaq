@@ -5,28 +5,31 @@
 
 #include <set>
 
-namespace ots {
+namespace ots
+{
 class ConfigurationBase;
 
-class FileConfigurationInterface : public ConfigurationInterface {
- public:
-  FileConfigurationInterface() { ; }
-  virtual ~FileConfigurationInterface() { ; }
+class FileConfigurationInterface : public ConfigurationInterface
+{
+public:
+  FileConfigurationInterface(){;}
+  virtual ~FileConfigurationInterface(){;}
 
   // read configuration from database
-  void fill(ConfigurationBase* /*configuration*/, ConfigurationVersion /*version*/) const;
+   void 									fill(ConfigurationBase* /*configuration*/, ConfigurationVersion /*version*/) const;
 
-  // write configuration to database
-  void saveActiveVersion(const ConfigurationBase* /*configuration*/, bool overwrite = false) const;
+   // write configuration to database
+   void 									saveActiveVersion(const ConfigurationBase* /*configuration*/, bool overwrite = false) const;
 
-  // find the latest configuration version by configuration type
-  ConfigurationVersion findLatestVersion(const ConfigurationBase* /*configuration*/) const;
+   // find the latest configuration version by configuration type
+   ConfigurationVersion						findLatestVersion(const ConfigurationBase* /*configuration*/) const;
 
-  // find all configuration versions by configuration type
-  std::set<ConfigurationVersion> getVersions(const ConfigurationBase* /*configuration*/) const;
+   // find all configuration versions by configuration type
+   std::set<ConfigurationVersion> 			getVersions(const ConfigurationBase* /*configuration*/) const;
 
- private:
+private:
+
 };
-}  // namespace ots
+}
 
 #endif

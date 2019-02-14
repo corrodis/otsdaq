@@ -4,11 +4,12 @@
 
 #include <string>
 
-namespace ots {
+namespace ots
+{
 class ConfigurationBase;
 
 ConfigurationBase* makeInterfaceConfiguration(std::string const& configurationPluginName);
 
-}  // namespace ots
+}
 
 #endif /* _ots_MakeInterfaceConfiguration_h_ */

@@ -3,10 +3,12 @@
 
 #include <cetlib/BasicPluginFactory.h>
 
-namespace ots {
-ConfigurationBase* makeInterfaceConfiguration(std::string const& configurationPluginName) {
-  static cet::BasicPluginFactory basicPluginInterfaceFactory("configuration", "make");
+namespace ots
+{
+ConfigurationBase* makeInterfaceConfiguration(std::string const& configurationPluginName)
+{
+	static cet::BasicPluginFactory basicPluginInterfaceFactory("configuration", "make");
 
-  return basicPluginInterfaceFactory.makePlugin<ConfigurationBase*>(configurationPluginName);
+	return basicPluginInterfaceFactory.makePlugin<ConfigurationBase*> (configurationPluginName);
 }
-}  // namespace ots
+}

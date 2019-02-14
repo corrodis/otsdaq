@@ -7,10 +7,11 @@
 
 namespace ots {
 
-struct GetPackageBuildInfo {
-  static artdaq::PackageBuildInfo getPackageBuildInfo();
-};
+  struct GetPackageBuildInfo {
 
-}  // namespace ots
+    static artdaq::PackageBuildInfo getPackageBuildInfo();
+  };
+
+}
 
 #endif /* artdaq_ots_BuildInfo_GetPackageBuildInfo_hh */

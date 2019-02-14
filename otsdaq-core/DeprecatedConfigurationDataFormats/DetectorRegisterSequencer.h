@@ -3,12 +3,20 @@
 
 #include "otsdaq-core/ConfigurationDataFormats/RegisterConfiguration.h"
 
-namespace ots {
+namespace ots
+{
 
-class DetectorRegisterSequencer : public ots::RegisterConfiguration {
- public:
-  DetectorRegisterSequencer(void);
-  virtual ~DetectorRegisterSequencer(void);
+class DetectorRegisterSequencer : public ots::RegisterConfiguration
+{
+
+public:
+
+	DetectorRegisterSequencer(void);
+    virtual ~DetectorRegisterSequencer(void);
+
+    
+
+
 };
-}  // namespace ots
+}
 #endif

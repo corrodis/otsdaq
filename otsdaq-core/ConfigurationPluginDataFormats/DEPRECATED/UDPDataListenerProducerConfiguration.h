@@ -5,27 +5,39 @@
 
 #include <string>
 
-namespace ots {
 
-class UDPDataListenerProducerConfiguration : public ConfigurationBase {
- public:
-  UDPDataListenerProducerConfiguration(void);
-  virtual ~UDPDataListenerProducerConfiguration(void);
+namespace ots
+{
 
-  // Methods
-  void init(ConfigurationManager *configManager);
+class UDPDataListenerProducerConfiguration : public ConfigurationBase
+{
 
-  // Getter
-  std::vector<std::string> getProcessorIDList(void) const;
-  unsigned int getBufferSize(std::string processorUID) const;
-  std::string getIPAddress(std::string processorUID) const;
-  unsigned int getPort(std::string processorUID) const;
+public:
 
- private:
-  void check(std::string processorUID) const;
-  enum { ProcessorID, BufferSize, IPAddress, Port };
+	UDPDataListenerProducerConfiguration(void);
+	virtual ~UDPDataListenerProducerConfiguration(void);
 
-  std::map<std::string, unsigned int> processorIDToRowMap_;
+	//Methods
+	void init(ConfigurationManager *configManager);
+
+	//Getter
+	std::vector<std::string>  getProcessorIDList(void) const;
+	unsigned int              getBufferSize     (std::string processorUID) const;
+	std::string               getIPAddress      (std::string processorUID) const;
+	unsigned int              getPort           (std::string processorUID) const;
+
+private:
+
+	void check(std::string processorUID) const;
+	enum{
+		ProcessorID,
+		BufferSize,
+		IPAddress,
+		Port
+	};
+
+	std::map<std::string, unsigned int> processorIDToRowMap_;
+
 };
-}  // namespace ots
+}
 #endif

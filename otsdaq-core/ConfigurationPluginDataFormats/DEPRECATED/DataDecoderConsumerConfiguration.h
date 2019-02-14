@@ -5,24 +5,33 @@
 
 #include <string>
 
-namespace ots {
 
-class DataDecoderConsumerConfiguration : public ConfigurationBase {
- public:
-  DataDecoderConsumerConfiguration(void);
-  virtual ~DataDecoderConsumerConfiguration(void);
+namespace ots
+{
 
-  // Methods
-  void init(ConfigurationManager *configManager);
+class DataDecoderConsumerConfiguration : public ConfigurationBase
+{
 
-  // Getter
-  std::vector<std::string> getProcessorIDList(void) const;
+public:
 
- private:
-  void check(std::string processorUID) const;
-  enum { ProcessorID };
+	DataDecoderConsumerConfiguration(void);
+	virtual ~DataDecoderConsumerConfiguration(void);
 
-  std::map<std::string, unsigned int> processorIDToRowMap_;
+	//Methods
+	void init(ConfigurationManager *configManager);
+
+	//Getter
+	std::vector<std::string>  getProcessorIDList(void) const;
+
+private:
+
+	void check(std::string processorUID) const;
+	enum{
+		ProcessorID
+	};
+
+	std::map<std::string, unsigned int> processorIDToRowMap_;
+
 };
-}  // namespace ots
+}
 #endif

@@ -1,171 +1,183 @@
-#define BOOST_TEST_MODULE (databaseconfiguration test)
+#define BOOST_TEST_MODULE ( databaseconfiguration test)
 
 #include "boost/test/auto_unit_test.hpp"
 
-#include <dirent.h>
-#include <cassert>
+#include <string>
 #include <iostream>
 #include <memory>
-#include <string>
+#include <cassert>
+#include <dirent.h>
 //#include <otsdaq_demo/otsdaq-demo/FEInterfaces/FEWROtsUDPFSSRInterface.h>
 //#include <otsdaq_demo/otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceConfiguration.h>
-#include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"
 //#include "otsdaq-core/ConfigurationPluginDataFormats/Configurations.h"
 //#include "otsdaq-core/ConfigurationPluginDataFormats/ConfigurationAliases.h"
 //#include "otsdaq-core/ConfigurationPluginDataFormats/FEConfiguration.h"
-#include "artdaq-database/JsonDocument/JSONDocument.h"
-#include "artdaq-database/StorageProviders/FileSystemDB/provider_filedb_index.h"
-#include "otsdaq-core/PluginMakers/MakeInterface.h"
 #include "otsdaq-core/PluginMakers/MakeInterfaceConfiguration.h"
+#include "otsdaq-core/PluginMakers/MakeInterface.h"
+#include "artdaq-database/StorageProviders/FileSystemDB/provider_filedb_index.h"
+#include "artdaq-database/JsonDocument/JSONDocument.h"
 
 using namespace ots;
 
-BOOST_AUTO_TEST_SUITE(databaseconfiguration_test)
+BOOST_AUTO_TEST_SUITE( databaseconfiguration_test )
 
-BOOST_AUTO_TEST_CASE(readxml_writedb_configurations) {
-  // artdaq::database::filesystem::index::debug::enable();
-  // artdaq::database::jsonutils::debug::enableJSONDocument();
+BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
+{
 
-  std::vector<std::string> configTables;
+	//artdaq::database::filesystem::index::debug::enable();
+	//artdaq::database::jsonutils::debug::enableJSONDocument();
 
-  // normally CONFIGURATION_TYPE is set by StartOTS.sh
-  setenv("CONFIGURATION_DATA_PATH", (std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(), 1);
-  std::string configDir = std::string(getenv("CONFIGURATION_DATA_PATH")) + '/';
+	std::vector<std::string> configTables;
 
-  // CONFIGURATION_TYPE needed by otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]
-  // Can be File, Database, DatabaseTest
-  setenv("CONFIGURATION_TYPE", "File", 1);
+	//normally CONFIGURATION_TYPE is set by StartOTS.sh
+	setenv("CONFIGURATION_DATA_PATH",(std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(),1);
+	std::string configDir = std::string(getenv("CONFIGURATION_DATA_PATH")) + '/';
 
-  // add configurations to vector list from directory
-  {
-    std::cout << __COUT_HDR_FL__ << "ConfigurationDir: " << configDir << std::endl;
-    DIR* dp;
+	//CONFIGURATION_TYPE needed by otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]
+	//Can be File, Database, DatabaseTest
+	setenv("CONFIGURATION_TYPE","File",1);
 
-    struct dirent* dirp;
+	//add configurations to vector list from directory
+	{
+		std::cout << __COUT_HDR_FL__ << "ConfigurationDir: " << configDir << std::endl;
+		DIR *dp;
 
-    if ((dp = opendir(configDir.c_str())) == 0) {
-      std::cout << __COUT_HDR_FL__ << "ERROR:(" << errno << ").  Can't open directory: " << configDir << std::endl;
-      exit(0);
-    }
+		struct dirent *dirp;
 
-    const unsigned char isDir = 0x4;
-    while ((dirp = readdir(dp)) != 0)
-      if (dirp->d_type == isDir && dirp->d_name[0] != '.') {
-        std::cout << __COUT_HDR_FL__ << dirp->d_name << std::endl;
-        configTables.push_back(dirp->d_name);
-      }
+		if((dp = opendir(configDir.c_str())) == 0)
+		{
+			std::cout << __COUT_HDR_FL__<< "ERROR:(" << errno << ").  Can't open directory: " << configDir << std::endl;
+			exit(0);
+		}
 
-    closedir(dp);
-  }
+		const unsigned char isDir = 0x4;
+		while ((dirp = readdir(dp)) != 0)
+			if(dirp->d_type == isDir && dirp->d_name[0] != '.' )
+			{
+				std::cout << __COUT_HDR_FL__<< dirp->d_name << std::endl;
+				configTables.push_back(dirp->d_name);
+			}
 
-  ConfigurationInterface* theInterface_ = ConfigurationInterface::getInstance(true);
+	    closedir(dp);
+	}
 
-  for (unsigned int i = 0; i < configTables.size(); ++i) {
-    theInterface_ = ConfigurationInterface::getInstance(true);
-    ConfigurationBase* base = 0;
-    std::cout << __COUT_HDR_FL__ << std::endl;
-    std::cout << __COUT_HDR_FL__ << std::endl;
-    std::cout << __COUT_HDR_FL__ << (i + 1) << " of " << configTables.size() << ": " << configTables[i] << std::endl;
+	ConfigurationInterface* theInterface_ = ConfigurationInterface::getInstance(true);
 
-    theInterface_->get(base, configTables[i], 0, 0, false,
-                       ConfigurationVersion(ConfigurationVersion::DEFAULT));  // load version 0 for all
+	for(unsigned int i = 0; i < configTables.size(); ++i)
+	{
+		theInterface_ = ConfigurationInterface::getInstance(true);
+		ConfigurationBase* base = 0;
+		std::cout << __COUT_HDR_FL__ << std::endl;
+		std::cout << __COUT_HDR_FL__ << std::endl;
+		std::cout << __COUT_HDR_FL__ << (i+1) << " of " << configTables.size() << ": " << configTables[i] << std::endl;
 
-    std::cout << __COUT_HDR_FL__ << "loaded " << configTables[i] << std::endl;
+		theInterface_->get(base,configTables[i], 0, 0, false,
+				ConfigurationVersion(ConfigurationVersion::DEFAULT)); //load version 0 for all
 
-    // if(configTables[i]  != "ARTDAQAggregatorConfiguration") continue;
+		std::cout << __COUT_HDR_FL__ << "loaded " << configTables[i]<< std::endl;
 
-    // save the active version
-    std::cout << __COUT_HDR_FL__ << "Current version: " << base->getViewVersion() << std::endl;
 
-    //
-    //		**** switch to db style interface?!!?!? ****   //
-    //
-    theInterface_ = ConfigurationInterface::getInstance(false);
-    //
-    //
 
-    // theInterface_->saveActiveVersion(base); //saves current version
+		//if(configTables[i]  != "ARTDAQAggregatorConfiguration") continue;
 
-    ConfigurationVersion tmpView = base->createTemporaryView(ConfigurationVersion(ConfigurationVersion::DEFAULT));
-    theInterface_->saveNewVersion(base, tmpView);
+		//save the active version
+		std::cout << __COUT_HDR_FL__ << "Current version: " << base->getViewVersion() << std::endl;
 
-    delete base;  // cleanup config instance
+		//
+		//		**** switch to db style interface?!!?!? ****   //
+		//
+		theInterface_ = ConfigurationInterface::getInstance(false);
+		//
+		//
 
-    // break;
-  }
+		//theInterface_->saveActiveVersion(base); //saves current version
 
-  std::cout << __COUT_HDR_FL__ << "end of debugging Configuration!" << std::endl;
-  return;
+		ConfigurationVersion tmpView = base->createTemporaryView(ConfigurationVersion(ConfigurationVersion::DEFAULT));
+		theInterface_->saveNewVersion(base,tmpView);
+
+		delete base; //cleanup config instance
+
+		//break;
+	}
+
+	std::cout << __COUT_HDR_FL__ << "end of debugging Configuration!" << std::endl;
+	return;
 }
 
-BOOST_AUTO_TEST_CASE(readdb_writexml_configurations) {
-  // return;
-  std::vector<std::string> configTables;
+BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
+{
+	//return;
+	std::vector<std::string> configTables;
 
-  // normally CONFIGURATION_TYPE is set by StartOTS.sh
-  setenv("CONFIGURATION_DATA_PATH", (std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(), 1);
-  std::string configDir = std::string(getenv("CONFIGURATION_DATA_PATH")) + '/';
+	//normally CONFIGURATION_TYPE is set by StartOTS.sh
+	setenv("CONFIGURATION_DATA_PATH",(std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(),1);
+	std::string configDir = std::string(getenv("CONFIGURATION_DATA_PATH")) + '/';
 
-  // CONFIGURATION_TYPE needed by otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]
-  // Can be File, Database, DatabaseTest
-  setenv("CONFIGURATION_TYPE", "File", 1);
+	//CONFIGURATION_TYPE needed by otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]
+	//Can be File, Database, DatabaseTest
+	setenv("CONFIGURATION_TYPE","File",1);
 
-  // add configurations to vector list from directory
-  {
-    std::cout << __COUT_HDR_FL__ << "ConfigurationDir: " << configDir << std::endl;
-    DIR* dp;
+	//add configurations to vector list from directory
+	{
+		std::cout << __COUT_HDR_FL__ << "ConfigurationDir: " << configDir << std::endl;
+		DIR *dp;
 
-    struct dirent* dirp;
+		struct dirent *dirp;
 
-    if ((dp = opendir(configDir.c_str())) == 0) {
-      std::cout << __COUT_HDR_FL__ << "ERROR:(" << errno << ").  Can't open directory: " << configDir << std::endl;
-      exit(0);
-    }
+		if((dp = opendir(configDir.c_str())) == 0)
+		{
+			std::cout << __COUT_HDR_FL__<< "ERROR:(" << errno << ").  Can't open directory: " << configDir << std::endl;
+			exit(0);
+		}
 
-    const unsigned char isDir = 0x4;
-    while ((dirp = readdir(dp)) != 0)
-      if (dirp->d_type == isDir && dirp->d_name[0] != '.') {
-        std::cout << __COUT_HDR_FL__ << dirp->d_name << std::endl;
-        configTables.push_back(dirp->d_name);
-      }
+		const unsigned char isDir = 0x4;
+		while ((dirp = readdir(dp)) != 0)
+			if(dirp->d_type == isDir && dirp->d_name[0] != '.' )
+			{
+				std::cout << __COUT_HDR_FL__<< dirp->d_name << std::endl;
+				configTables.push_back(dirp->d_name);
+			}
 
-    closedir(dp);
-  }
+	    closedir(dp);
+	}
 
-  ConfigurationInterface* theInterface_ = ConfigurationInterface::getInstance(false);
+	ConfigurationInterface* theInterface_ = ConfigurationInterface::getInstance(false);
 
-  for (unsigned int i = 0; i < configTables.size(); ++i) {
-    theInterface_ = ConfigurationInterface::getInstance(false);
-    ConfigurationBase* base = 0;
-    std::cout << __COUT_HDR_FL__ << std::endl;
-    std::cout << __COUT_HDR_FL__ << std::endl;
-    std::cout << __COUT_HDR_FL__ << (i + 1) << " of " << configTables.size() << ": " << configTables[i] << std::endl;
+	for(unsigned int i = 0; i < configTables.size(); ++i)
+	{
+		theInterface_ = ConfigurationInterface::getInstance(false);
+		ConfigurationBase* base = 0;
+		std::cout << __COUT_HDR_FL__ << std::endl;
+		std::cout << __COUT_HDR_FL__ << std::endl;
+		std::cout << __COUT_HDR_FL__ << (i+1) << " of " << configTables.size() << ": " << configTables[i] << std::endl;
 
-    theInterface_->get(base, configTables[i], 0, 0, false,
-                       ConfigurationVersion(ConfigurationVersion::DEFAULT));  // load version 0 for all
+		theInterface_->get(base,configTables[i], 0, 0, false, ConfigurationVersion(ConfigurationVersion::DEFAULT)); //load version 0 for all
 
-    std::cout << __COUT_HDR_FL__ << "loaded " << configTables[i] << std::endl;
+		std::cout << __COUT_HDR_FL__ << "loaded " << configTables[i]<< std::endl;
 
-    // save the active version
-    std::cout << __COUT_HDR_FL__ << "Current version: " << base->getViewVersion() << std::endl;
 
-    //
-    //		**** switch to db style interface?!!?!? ****   //
-    //
-    // theInterface_ = ConfigurationInterface::getInstance(true);
-    //
-    //
+		//save the active version
+		std::cout << __COUT_HDR_FL__ << "Current version: " << base->getViewVersion() << std::endl;
 
-    ConfigurationVersion tmpView = base->createTemporaryView(ConfigurationVersion(ConfigurationVersion::DEFAULT));
-    theInterface_->saveNewVersion(base, tmpView);
+		//
+		//		**** switch to db style interface?!!?!? ****   //
+		//
+		//theInterface_ = ConfigurationInterface::getInstance(true);
+		//
+		//
 
-    delete base;  // cleanup config instance
-    // break;
-  }
+		ConfigurationVersion tmpView = base->createTemporaryView(ConfigurationVersion(ConfigurationVersion::DEFAULT));
+		theInterface_->saveNewVersion(base,tmpView);
 
-  std::cout << __COUT_HDR_FL__ << "end of debugging Configuration!" << std::endl;
-  return;
+		delete base; //cleanup config instance
+		//break;
+	}
+
+	std::cout << __COUT_HDR_FL__ << "end of debugging Configuration!" << std::endl;
+	return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+

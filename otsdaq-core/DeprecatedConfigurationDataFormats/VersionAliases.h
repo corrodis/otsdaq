@@ -5,21 +5,30 @@
 
 #include <string>
 
-namespace ots {
+namespace ots
+{
 
-class VersionAliases : public ConfigurationBase {
- public:
-  VersionAliases(void);
-  ~VersionAliases(void);
+class VersionAliases : public ConfigurationBase
+{
 
-  // Methods
-  void init(ConfigurationManager *configManager);
+public:
 
-  // Getters
-  unsigned int getAliasedKey(std::string alias) const;
+	VersionAliases(void);
+	~VersionAliases(void);
 
- private:
-  enum { VersionAlias, Version, KOC };
+	//Methods
+	void init(ConfigurationManager *configManager);
+
+	//Getters
+	unsigned int getAliasedKey(std::string alias) const;
+
+private:
+	enum{
+		VersionAlias,
+		Version,
+		KOC
+	};
+
 };
-}  // namespace ots
+}
 #endif

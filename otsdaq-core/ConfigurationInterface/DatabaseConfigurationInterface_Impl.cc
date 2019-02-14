@@ -24,7 +24,7 @@ bool MakeSerializable<ConfigurationBase const*>::writeDocumentImpl<JsonData>(Jso
   std::stringstream ss;
 
   _conf->getView().printJSON(ss);
-  // std::cout << "!!!!!\n" << ss.str() << std::endl; //for debugging
+  //std::cout << "!!!!!\n" << ss.str() << std::endl; //for debugging
   data.json_buffer = ss.str();
 
   return true;
@@ -32,6 +32,7 @@ bool MakeSerializable<ConfigurationBase const*>::writeDocumentImpl<JsonData>(Jso
 
 template <>
 std::string MakeSerializable<ConfigurationBase const*>::configurationNameImpl() const {
+
   return _conf->getConfigurationName();
 }
 
@@ -51,3 +52,4 @@ std::string MakeSerializable<ConfigurationBase*>::configurationNameImpl() const 
 }  // namespace configuration
 }  // namespace database
 }  // namespace artdaq
+

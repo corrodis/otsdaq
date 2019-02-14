@@ -9,89 +9,115 @@
 
 using namespace ots;
 
-Register::Register(std::string name)
-    : registerName_(name)
+Register::Register(std::string name):
+	registerName_			(name)
 
 {}
 
-Register::~Register() {}
-//==============================================================================
-void Register::setState(std::string state, std::pair<int, int> valueSequencePair) {
-  if (state == "INITIALIZE") {
-    initialize_ = valueSequencePair;
-  } else if (state == "CONFIGURATION") {
-    configuration_ = valueSequencePair;
-  } else if (state == "START") {
-    start_ = valueSequencePair;
-  } else if (state == "HALT") {
-    halt_ = valueSequencePair;
-  } else if (state == "PAUSE") {
-    pause_ = valueSequencePair;
-  } else if (state == "RESUME") {
-    resume_ = valueSequencePair;
-  }
-
-  return;
+Register::~Register() {
 }
 //==============================================================================
-void Register::fillRegisterInfo(std::string registerBaseAddress, int registerSize, std::string registerAccess) {
-  registerBaseAddress_ = registerBaseAddress;
-  registerSize_ = registerSize;
-  registerAccess_ = registerAccess;
+void Register::setState(std::string state, std::pair<int, int > valueSequencePair)
+{
+	if(state == "INITIALIZE"){
+		initialize_ = valueSequencePair;
+	}else if(state == "CONFIGURATION"){
+		configuration_ = valueSequencePair;
+	}else if(state == "START"){
+		start_ = valueSequencePair;
+	}else if(state == "HALT"){
+		halt_ = valueSequencePair;
+	}else if(state == "PAUSE"){
+		pause_ = valueSequencePair;
+	}else if(state == "RESUME"){
+		resume_ = valueSequencePair;
+	}
 
-  return;
+	return;
 }
 //==============================================================================
-void Register::setInitialize(std::pair<int, int> initialize) {
-  initialize_ = initialize;
+void Register::fillRegisterInfo(std::string registerBaseAddress, int registerSize, std::string registerAccess){
 
-  return;
+	registerBaseAddress_	=	registerBaseAddress;
+	registerSize_			=	registerSize;
+	registerAccess_			=	registerAccess;
+
+	return;
+
 }
 //==============================================================================
-void Register::setConfigure(std::pair<int, int> configure) {
-  configuration_ = configure;
+void Register::setInitialize(std::pair< int, int> initialize){
+	initialize_ = initialize;
 
-  return;
+	return;
 }
 //==============================================================================
-void Register::setStart(std::pair<int, int> start) {
-  start_ = start;
+void Register::setConfigure(std::pair< int, int> configure){
+	configuration_ = configure;
 
-  return;
+	return;
 }
 //==============================================================================
-void Register::setHalt(std::pair<int, int> halt) {
-  halt_ = halt;
+void Register::setStart(std::pair< int, int> start){
+	start_ = start;
 
-  return;
+	return;
 }
 //==============================================================================
-void Register::setPause(std::pair<int, int> pause) {
-  pause_ = pause;
+void Register::setHalt(std::pair< int, int> halt){
+	halt_ = halt;
 
-  return;
+	return;
 }
 //==============================================================================
-void Register::setResume(std::pair<int, int> resume) { resume_ = resume; }
+void Register::setPause(std::pair< int, int> pause){
+	pause_ = pause;
 
-// Getters
+	return;
+}
 //==============================================================================
-std::string Register::getName(void) { return registerName_; }
+void Register::setResume(std::pair< int, int> resume){
+	resume_ = resume;
+}
+
+//Getters
 //==============================================================================
-std::string Register::getBaseAddress(void) { return registerBaseAddress_; }
+std::string Register::getName(void){
+	return registerName_;
+}
 //==============================================================================
-int Register::getSize(void) { return registerSize_; }
+std::string Register::getBaseAddress(void){
+	return registerBaseAddress_;
+}
 //==============================================================================
-std::string Register::getAccess(void) { return registerAccess_; }
+int Register::getSize(void){
+	return registerSize_;
+}
 //==============================================================================
-std::pair<int, int> Register::getInitialize(void) { return initialize_; }
+std::string Register::getAccess(void){
+	return registerAccess_;
+}
 //==============================================================================
-std::pair<int, int> Register::getConfigure(void) { return configuration_; }
+std::pair< int, int> Register::getInitialize(void){
+	return initialize_;
+}
 //==============================================================================
-std::pair<int, int> Register::getStart(void) { return start_; }
+std::pair< int, int> Register::getConfigure(void){
+	return configuration_;
+}
 //==============================================================================
-std::pair<int, int> Register::getHalt(void) { return halt_; }
+std::pair< int, int> Register::getStart(void){
+	return start_;
+}
 //==============================================================================
-std::pair<int, int> Register::getPause(void) { return pause_; }
+std::pair< int, int> Register::getHalt(void){
+	return halt_;
+}
 //==============================================================================
-std::pair<int, int> Register::getResume(void) { return resume_; }
+std::pair< int, int> Register::getPause(void){
+	return pause_;
+}
+//==============================================================================
+std::pair< int, int> Register::getResume(void){
+	return resume_;
+}

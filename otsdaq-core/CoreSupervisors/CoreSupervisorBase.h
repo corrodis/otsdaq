@@ -1,15 +1,15 @@
 #ifndef _ots_CoreSupervisorBase_h_
 #define _ots_CoreSupervisorBase_h_
 
+#include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
-#include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 
 #include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
 
-#include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
-#include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
+#include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
+#include "otsdaq-core/CgiDataUtilities/CgiDataUtilities.h"
 
 #include "otsdaq-core/FiniteStateMachine/VStateMachine.h"
 
@@ -27,95 +27,99 @@
 #include <xdaq/NamespaceURI.h>
 #include <xoap/Method.h>
 
-#include <map>
-#include <memory>
 #include <string> /*string and to_string*/
 #include <vector>
+#include <map>
+#include <memory>
 
-namespace ots {
 
-// CoreSupervisorBase
+
+namespace ots
+{
+
+//CoreSupervisorBase
 //	This class should be the base class for all client otsdaq, XDAQ-based, supervisors.
 //	That is, all supervisors that need web requests through the ots desktop
 //		with access verified by the Gateway Supervisor,
 //		or that need a state machines driven by the Gateway Supervisor.
-class CoreSupervisorBase : public xdaq::Application,
-                           public SOAPMessenger,
-                           public CorePropertySupervisorBase,
-                           public RunControlStateMachine {
- public:
-  CoreSupervisorBase(xdaq::ApplicationStub* s);
-  virtual ~CoreSupervisorBase(void);
+class CoreSupervisorBase: public xdaq::Application, public SOAPMessenger,
+	public CorePropertySupervisorBase, public RunControlStateMachine
+{
 
-  void destroy(void);
+public:
 
-  // Here are the common web request handlers:
-  //	defaultPage returns the public html page
-  //	request checks the login before proceeding to virtual request
-  //		- All Supervisors should implement request for their actions (and they will get the security wrapper for
-  //free)
-  //		- The security setting defaults can be setup or forced by overriding setSupervisorPropertyDefaults and
-  //forceSupervisorProperties
-  virtual void defaultPage(xgi::Input* in, xgi::Output* out);
-  virtual void request(const std::string& requestType, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut,
-                       const WebUsers::RequestUserInfo& userInfo);
-  virtual void nonXmlRequest(const std::string& requestType, cgicc::Cgicc& cgiIn, std::ostream& out,
-                             const WebUsers::RequestUserInfo& userInfo);
+    CoreSupervisorBase         								(xdaq::ApplicationStub * s);
+    virtual ~CoreSupervisorBase								(void);
 
- private:
-  xoap::MessageReference workLoopStatusRequestWrapper(xoap::MessageReference message);
-  void defaultPageWrapper(xgi::Input* in, xgi::Output* out);
-  void requestWrapper(xgi::Input* in, xgi::Output* out);
+    void 					destroy               			(void);
 
- public:
-  // State Machine request handlers
-  void stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
-  void stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out);
-  xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference message);
-  xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference message);
+    //Here are the common web request handlers:
+    //	defaultPage returns the public html page
+    //	request checks the login before proceeding to virtual request
+    //		- All Supervisors should implement request for their actions (and they will get the security wrapper for free)
+    //		- The security setting defaults can be setup or forced by overriding setSupervisorPropertyDefaults and forceSupervisorProperties
+    virtual void 			defaultPage      				(xgi::Input* in, xgi::Output* out) 	;
+    virtual void			request         	 			(const std::string& requestType, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut, 	const WebUsers::RequestUserInfo& userInfo) ;
+    virtual void			nonXmlRequest          			(const std::string& requestType, cgicc::Cgicc& cgiIn, std::ostream& out, 		const WebUsers::RequestUserInfo& userInfo) ;
 
-  xoap::MessageReference stateMachineStateRequest(xoap::MessageReference message);
-  xoap::MessageReference stateMachineErrorMessageRequest(xoap::MessageReference message);
+private:
+    xoap::MessageReference 	workLoopStatusRequestWrapper  	(xoap::MessageReference message )  	;
+    void 					defaultPageWrapper              (xgi::Input* in, xgi::Output* out)  ;
+    void 					requestWrapper              	(xgi::Input* in, xgi::Output* out)  ;
 
-  virtual xoap::MessageReference workLoopStatusRequest(xoap::MessageReference message);
+public:
 
-  bool stateMachineThread(toolbox::task::WorkLoop* workLoop);
+    //State Machine request handlers
+    void 			        stateMachineXgiHandler       	(xgi::Input* in, xgi::Output* out ) ;
+    void 			        stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out ) ;
+    xoap::MessageReference 	stateMachineXoapHandler      	(xoap::MessageReference message )  	;
+    xoap::MessageReference 	stateMachineResultXoapHandler	(xoap::MessageReference message )  	;
 
-  virtual void stateInitial(toolbox::fsm::FiniteStateMachine& fsm);
-  virtual void statePaused(toolbox::fsm::FiniteStateMachine& fsm);
-  virtual void stateRunning(toolbox::fsm::FiniteStateMachine& fsm);
-  virtual void stateHalted(toolbox::fsm::FiniteStateMachine& fsm);
-  virtual void stateConfigured(toolbox::fsm::FiniteStateMachine& fsm);
-  virtual void inError(toolbox::fsm::FiniteStateMachine& fsm);
+    xoap::MessageReference 	stateMachineStateRequest     	(xoap::MessageReference message )  	;
+    xoap::MessageReference 	stateMachineErrorMessageRequest	(xoap::MessageReference message )  	;
 
-  virtual void transitionConfiguring(toolbox::Event::Reference e);
-  virtual void transitionHalting(toolbox::Event::Reference e);
-  virtual void transitionInitializing(toolbox::Event::Reference e);
-  virtual void transitionPausing(toolbox::Event::Reference e);
-  virtual void transitionResuming(toolbox::Event::Reference e);
-  virtual void transitionStarting(toolbox::Event::Reference e);
-  virtual void transitionStopping(toolbox::Event::Reference e);
-  virtual void enteringError(toolbox::Event::Reference e);
+    virtual xoap::MessageReference 	workLoopStatusRequest	(xoap::MessageReference message )  	;
 
-  static const std::string WORK_LOOP_DONE, WORK_LOOP_WORKING;
+    bool                    stateMachineThread           	(toolbox::task::WorkLoop* workLoop);
 
- protected:
-  WorkLoopManager stateMachineWorkLoopManager_;
-  toolbox::BSem stateMachineSemaphore_;
-  std::vector<VStateMachine*> theStateMachineImplementation_;
+    virtual void 			stateInitial    				(toolbox::fsm::FiniteStateMachine& fsm) ;
+    virtual void 			statePaused     				(toolbox::fsm::FiniteStateMachine& fsm) ;
+    virtual void 			stateRunning    				(toolbox::fsm::FiniteStateMachine& fsm) ;
+    virtual void 			stateHalted     				(toolbox::fsm::FiniteStateMachine& fsm) ;
+    virtual void 			stateConfigured 				(toolbox::fsm::FiniteStateMachine& fsm) ;
+    virtual void			inError         				(toolbox::fsm::FiniteStateMachine& fsm) ;
 
-  // for managing transition iterations
-  std::vector<bool> stateMachinesIterationDone_;
-  unsigned int stateMachinesIterationWorkCount_;
-  unsigned int subIterationWorkStateMachineIndex_;
-  void preStateMachineExecution(unsigned int i);
-  void postStateMachineExecution(unsigned int i);
-  void preStateMachineExecutionLoop(void);
-  void postStateMachineExecutionLoop(void);
+    virtual void 			transitionConfiguring 			(toolbox::Event::Reference e) ;
+    virtual void 			transitionHalting     			(toolbox::Event::Reference e) ;
+    virtual void 			transitionInitializing			(toolbox::Event::Reference e) ;
+    virtual void 			transitionPausing     			(toolbox::Event::Reference e) ;
+    virtual void 			transitionResuming    			(toolbox::Event::Reference e) ;
+    virtual void 			transitionStarting    			(toolbox::Event::Reference e) ;
+    virtual void 			transitionStopping    			(toolbox::Event::Reference e) ;
+    virtual void 			enteringError         			(toolbox::Event::Reference e) ;
 
-  RemoteWebUsers theRemoteWebUsers_;
+
+    static const std::string	   WORK_LOOP_DONE, WORK_LOOP_WORKING;
+
+protected:
+
+    WorkLoopManager                	stateMachineWorkLoopManager_;
+    toolbox::BSem                  	stateMachineSemaphore_;
+    std::vector<VStateMachine*>    	theStateMachineImplementation_;
+
+    //for managing transition iterations
+    std::vector<bool>				stateMachinesIterationDone_;
+    unsigned int					stateMachinesIterationWorkCount_;
+    unsigned int					subIterationWorkStateMachineIndex_;
+    void							preStateMachineExecution(unsigned int i);
+    void							postStateMachineExecution(unsigned int i);
+    void							preStateMachineExecutionLoop(void);
+    void							postStateMachineExecutionLoop(void);
+
+
+    RemoteWebUsers             		theRemoteWebUsers_;
 };
 
-}  // namespace ots
+}
 
 #endif
