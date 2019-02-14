@@ -56,12 +56,10 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 
 	FEVInterfacesManager* parentInterfaceManager_;
 
-	const std::string& getInterfaceUID (
-	    void) const { return interfaceUID_; }
+	const std::string& getInterfaceUID (void) const { return interfaceUID_; }
 	virtual std::string getInterfaceType (void) const { return theXDAQContextConfigTree_.getBackNode (theConfigurationPath_).getNode ("FEInterfacePluginName").getValue<std::string> (); }  //interfaceType_;}
 
-	virtual void universalRead (
-	    char* address,
+	virtual void universalRead (char* address,
 	    char* returnValue) = 0;  //throw std::runtime_error exception on error/timeout
 	virtual void universalWrite (
 	    char* address,
