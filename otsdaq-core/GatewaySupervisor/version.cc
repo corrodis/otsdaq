@@ -3,24 +3,24 @@
 #include <xdaq/version.h>
 #include "otsdaq-core/GatewaySupervisor/version.h"
 
-GETPACKAGEINFO(GatewaySupervisor)
+GETPACKAGEINFO (GatewaySupervisor)
 
 //========================================================================================================================
-void GatewaySupervisor::checkPackageDependencies()
+void GatewaySupervisor::checkPackageDependencies ()
 {
-	CHECKDEPENDENCY(config);
-	CHECKDEPENDENCY(xcept);
-	CHECKDEPENDENCY(xdaq);
+	CHECKDEPENDENCY (config);
+	CHECKDEPENDENCY (xcept);
+	CHECKDEPENDENCY (xdaq);
 }
 
 //========================================================================================================================
-std::set<std::string, std::less<std::string> > GatewaySupervisor::getPackageDependencies()
+std::set<std::string, std::less<std::string> > GatewaySupervisor::getPackageDependencies ()
 {
 	std::set<std::string, std::less<std::string> > dependencies;
 
-	ADDDEPENDENCY(dependencies, config);
-	ADDDEPENDENCY(dependencies, xcept);
-	ADDDEPENDENCY(dependencies, xdaq);
+	ADDDEPENDENCY (dependencies, config);
+	ADDDEPENDENCY (dependencies, xcept);
+	ADDDEPENDENCY (dependencies, xdaq);
 
 	return dependencies;
 }

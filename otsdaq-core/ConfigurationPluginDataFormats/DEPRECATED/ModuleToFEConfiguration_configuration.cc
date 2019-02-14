@@ -6,8 +6,8 @@
 using namespace ots;
 
 //==============================================================================
-ModuleToFEConfiguration::ModuleToFEConfiguration(void)
-    : ConfigurationBase("ModuleToFEConfiguration")
+ModuleToFEConfiguration::ModuleToFEConfiguration (void)
+    : ConfigurationBase ("ModuleToFEConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -29,12 +29,12 @@ ModuleToFEConfiguration::ModuleToFEConfiguration(void)
 }
 
 //==============================================================================
-ModuleToFEConfiguration::~ModuleToFEConfiguration(void)
+ModuleToFEConfiguration::~ModuleToFEConfiguration (void)
 {
 }
 
 //==============================================================================
-void ModuleToFEConfiguration::init(ConfigurationManager *configManager)
+void ModuleToFEConfiguration::init (ConfigurationManager *configManager)
 {
 	/*
 std::string       enumValue1;
@@ -48,39 +48,39 @@ std::string       enumValue1;
 }
 
 //==============================================================================
-std::list<std::string> ModuleToFEConfiguration::getFEWModulesList(unsigned int FEWNumber) const
+std::list<std::string> ModuleToFEConfiguration::getFEWModulesList (unsigned int FEWNumber) const
 {
 	std::string            moduleName;
 	unsigned int           tmpFEW;
 	std::list<std::string> list;
-	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpFEW, row, FEWName);
+		ConfigurationBase::activeConfigurationView_->getValue (tmpFEW, row, FEWName);
 		if (tmpFEW == FEWNumber)
 		{
-			ConfigurationBase::activeConfigurationView_->getValue(moduleName, row, ModuleName);
-			list.push_back(moduleName);
+			ConfigurationBase::activeConfigurationView_->getValue (moduleName, row, ModuleName);
+			list.push_back (moduleName);
 		}
 	}
 	return list;
 }
 
 //==============================================================================
-std::list<std::string> ModuleToFEConfiguration::getFERModulesList(unsigned int FERNumber) const
+std::list<std::string> ModuleToFEConfiguration::getFERModulesList (unsigned int FERNumber) const
 {
 	std::string            moduleName;
 	unsigned int           tmpFER;
 	std::list<std::string> list;
-	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpFER, row, FERName);
+		ConfigurationBase::activeConfigurationView_->getValue (tmpFER, row, FERName);
 		if (tmpFER == FERNumber)
 		{
-			ConfigurationBase::activeConfigurationView_->getValue(moduleName, row, ModuleName);
-			list.push_back(moduleName);
+			ConfigurationBase::activeConfigurationView_->getValue (moduleName, row, ModuleName);
+			list.push_back (moduleName);
 		}
 	}
 	return list;
 }
 
-DEFINE_OTS_CONFIGURATION(ModuleToFEConfiguration)
+DEFINE_OTS_CONFIGURATION (ModuleToFEConfiguration)

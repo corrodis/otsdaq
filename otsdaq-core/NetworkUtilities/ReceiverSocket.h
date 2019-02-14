@@ -15,16 +15,16 @@ class ReceiverSocket : public virtual Socket
 	friend class TransceiverSocket;
 
   public:
-	ReceiverSocket(std::string IPAddress, unsigned int port = 0);
-	virtual ~ReceiverSocket(void);
+	ReceiverSocket (std::string IPAddress, unsigned int port = 0);
+	virtual ~ReceiverSocket (void);
 
-	int receive(std::string& buffer, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0, bool verbose = false);
-	int receive(std::vector<uint32_t>& buffer, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0, bool verbose = false);
-	int receive(std::string& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0, bool verbose = false);
-	int receive(std::vector<uint32_t>& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0, bool verbose = false);
+	int receive (std::string& buffer, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0, bool verbose = false);
+	int receive (std::vector<uint32_t>& buffer, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0, bool verbose = false);
+	int receive (std::string& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0, bool verbose = false);
+	int receive (std::vector<uint32_t>& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds = 1, unsigned int timeoutUSeconds = 0, bool verbose = false);
 
   protected:
-	ReceiverSocket(void);
+	ReceiverSocket (void);
 
   private:
 	fd_set             fileDescriptor_;

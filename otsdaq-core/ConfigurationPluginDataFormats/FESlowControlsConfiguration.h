@@ -11,11 +11,11 @@ namespace ots
 class FESlowControlsConfiguration : public ConfigurationBase
 {
   public:
-	FESlowControlsConfiguration(void);
-	virtual ~FESlowControlsConfiguration(void);
+	FESlowControlsConfiguration (void);
+	virtual ~FESlowControlsConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 
 	//Getters
 

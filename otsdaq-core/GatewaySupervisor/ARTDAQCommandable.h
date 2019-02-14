@@ -12,10 +12,10 @@ class GatewaySupervisor;
 class ARTDAQCommandable : public artdaq::Commandable
 {
   public:
-	explicit ARTDAQCommandable(GatewaySupervisor* super);
-	virtual ~ARTDAQCommandable();
+	explicit ARTDAQCommandable (GatewaySupervisor* super);
+	virtual ~ARTDAQCommandable ();
 
-	void init(int commanderId, std::string commanderType);
+	void init (int commanderId, std::string commanderType);
 
   private:
 	GatewaySupervisor*                          theSupervisor_;
@@ -29,41 +29,41 @@ class ARTDAQCommandable : public artdaq::Commandable
 		* \brief Perform the initialize transition.
 		* \return Whether the transition succeeded
 		*/
-	bool do_initialize(fhicl::ParameterSet const&, uint64_t, uint64_t) override;
+	bool do_initialize (fhicl::ParameterSet const&, uint64_t, uint64_t) override;
 
 	/**
 		* \brief Perform the start transition.
 		* \return Whether the transition succeeded
 		*/
-	bool do_start(art::RunID, uint64_t, uint64_t) override;
+	bool do_start (art::RunID, uint64_t, uint64_t) override;
 
 	/**
 		* \brief Perform the stop transition.
 		* \return Whether the transition succeeded
 		*/
-	bool do_stop(uint64_t, uint64_t) override;
+	bool do_stop (uint64_t, uint64_t) override;
 
 	/**
 		* \brief Perform the pause transition.
 		* \return Whether the transition succeeded
 		*/
-	bool do_pause(uint64_t, uint64_t) override;
+	bool do_pause (uint64_t, uint64_t) override;
 
 	/**
 		* \brief Perform the resume transition.
 		* \return Whether the transition succeeded
 		*/
-	bool do_resume(uint64_t, uint64_t) override;
+	bool do_resume (uint64_t, uint64_t) override;
 
 	/**
 		* \brief Perform the shutdown transition.
 		* \return Whether the transition succeeded
 		*/
-	bool do_shutdown(uint64_t) override;
+	bool do_shutdown (uint64_t) override;
 
 	/**
 		* \brief Run a module-defined command with the given parameter string		*/
-	bool do_meta_command(std::string const&, std::string const&) override;
+	bool do_meta_command (std::string const&, std::string const&) override;
 };
 }  // namespace ots
 

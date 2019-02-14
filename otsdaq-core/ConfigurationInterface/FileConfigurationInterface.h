@@ -12,20 +12,20 @@ class ConfigurationBase;
 class FileConfigurationInterface : public ConfigurationInterface
 {
   public:
-	FileConfigurationInterface() { ; }
-	virtual ~FileConfigurationInterface() { ; }
+	FileConfigurationInterface () { ; }
+	virtual ~FileConfigurationInterface () { ; }
 
 	// read configuration from database
-	void fill(ConfigurationBase* /*configuration*/, ConfigurationVersion /*version*/) const;
+	void fill (ConfigurationBase* /*configuration*/, ConfigurationVersion /*version*/) const;
 
 	// write configuration to database
-	void saveActiveVersion(const ConfigurationBase* /*configuration*/, bool overwrite = false) const;
+	void saveActiveVersion (const ConfigurationBase* /*configuration*/, bool overwrite = false) const;
 
 	// find the latest configuration version by configuration type
-	ConfigurationVersion findLatestVersion(const ConfigurationBase* /*configuration*/) const;
+	ConfigurationVersion findLatestVersion (const ConfigurationBase* /*configuration*/) const;
 
 	// find all configuration versions by configuration type
-	std::set<ConfigurationVersion> getVersions(const ConfigurationBase* /*configuration*/) const;
+	std::set<ConfigurationVersion> getVersions (const ConfigurationBase* /*configuration*/) const;
 
   private:
 };

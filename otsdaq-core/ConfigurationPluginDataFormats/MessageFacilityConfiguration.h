@@ -9,11 +9,11 @@ namespace ots
 class MessageFacilityConfiguration : public ConfigurationBase
 {
   public:
-	MessageFacilityConfiguration(void);
-	virtual ~MessageFacilityConfiguration(void);
+	MessageFacilityConfiguration (void);
+	virtual ~MessageFacilityConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 
   private:
 };

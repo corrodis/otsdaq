@@ -14,7 +14,7 @@ namespace ots
 class UDPFragment;
 
 // Let the "<<" operator dump the UDPFragment's data to stdout
-std::ostream &operator<<(std::ostream &, UDPFragment const &);
+std::ostream &operator<< (std::ostream &, UDPFragment const &);
 }  // namespace ots
 
 class ots::UDPFragment
@@ -39,7 +39,7 @@ class ots::UDPFragment
 		static size_t const size_words = 1ull;  // Units of Metadata::data_t
 	};
 
-	static_assert(sizeof(Metadata) == Metadata::size_words * sizeof(Metadata::data_t), "UDPFragment::Metadata size changed");
+	static_assert (sizeof (Metadata) == Metadata::size_words * sizeof (Metadata::data_t), "UDPFragment::Metadata size changed");
 
 	// The "Header" struct contains "metadata" specific to the fragment
 	// which is not hardware-related
@@ -69,36 +69,36 @@ class ots::UDPFragment
 		static size_t const size_words = 1ul;  // Units of Header::data_t
 	};
 
-	static_assert(sizeof(Header) == Header::size_words * sizeof(Header::data_t), "UDPFragment::Header size changed");
+	static_assert (sizeof (Header) == Header::size_words * sizeof (Header::data_t), "UDPFragment::Header size changed");
 
 	// The constructor simply sets its const private member "artdaq_Fragment_"
 	// to refer to the artdaq::Fragment object
 
-	UDPFragment(artdaq::Fragment const &f)
-	    : artdaq_Fragment_(f) {}
+	UDPFragment (artdaq::Fragment const &f)
+	    : artdaq_Fragment_ (f) {}
 
 	// const getter functions for the data in the header
 
-	Header::event_size_t    hdr_event_size() const { return header_()->event_size; }
-	Header::data_type_t     hdr_data_type() const { return header_()->type; }
-	static constexpr size_t hdr_size_words() { return Header::size_words; }
+	Header::event_size_t    hdr_event_size () const { return header_ ()->event_size; }
+	Header::data_type_t     hdr_data_type () const { return header_ ()->type; }
+	static constexpr size_t hdr_size_words () { return Header::size_words; }
 
 	// UDP Data Word Count
-	size_t udp_data_words() const
+	size_t udp_data_words () const
 	{
-		return (hdr_event_size() - hdr_size_words()) * bytes_per_word_();
+		return (hdr_event_size () - hdr_size_words ()) * bytes_per_word_ ();
 	}
 
 	// Start of the UDP data, returned as a pointer
-	uint8_t const *dataBegin() const
+	uint8_t const *dataBegin () const
 	{
-		return reinterpret_cast<uint8_t const *>(header_() + 1);
+		return reinterpret_cast<uint8_t const *> (header_ () + 1);
 	}
 
 	// End of the UDP data, returned as a pointer
-	uint8_t const *dataEnd() const
+	uint8_t const *dataEnd () const
 	{
-		return dataBegin() + udp_data_words();
+		return dataBegin () + udp_data_words ();
 	}
 
   protected:
@@ -106,18 +106,18 @@ class ots::UDPFragment
 	// this fragment overlay's concept of a unit of data (i.e.,
 	// Header::data_t).
 
-	static constexpr size_t bytes_per_word_()
+	static constexpr size_t bytes_per_word_ ()
 	{
-		return sizeof(Header::data_t) / sizeof(uint8_t);
+		return sizeof (Header::data_t) / sizeof (uint8_t);
 	}
 
 	// header_() simply takes the address of the start of this overlay's
 	// data (i.e., where the UDPFragment::Header object begins) and
 	// casts it as a pointer to UDPFragment::Header
 
-	Header const *header_() const
+	Header const *header_ () const
 	{
-		return reinterpret_cast<UDPFragment::Header const *>(artdaq_Fragment_.dataBeginBytes());
+		return reinterpret_cast<UDPFragment::Header const *> (artdaq_Fragment_.dataBeginBytes ());
 	}
 
   private:

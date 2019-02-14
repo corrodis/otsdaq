@@ -8,17 +8,17 @@
 using namespace ots;
 
 //========================================================================================================================
-BitManipulator::BitManipulator()
+BitManipulator::BitManipulator ()
 {
 }
 
 //========================================================================================================================
-BitManipulator::~BitManipulator()
+BitManipulator::~BitManipulator ()
 {
 }
 
 //========================================================================================================================
-uint64_t BitManipulator::insertBits(uint64_t& data, uint64_t value, unsigned int startBit, unsigned int numberOfBits)
+uint64_t BitManipulator::insertBits (uint64_t& data, uint64_t value, unsigned int startBit, unsigned int numberOfBits)
 {
 	//    std::cout << __COUT_HDR_FL__ << "Before: " << std::hex << data << "-<-" << value << std::dec << std::endl;
 	for (unsigned int i = 0; i < numberOfBits; i++)
@@ -30,7 +30,7 @@ uint64_t BitManipulator::insertBits(uint64_t& data, uint64_t value, unsigned int
 }
 
 //========================================================================================================================
-uint64_t BitManipulator::insertBits(std::string& data, uint64_t value, unsigned int startBit, unsigned int numberOfBits)
+uint64_t BitManipulator::insertBits (std::string& data, uint64_t value, unsigned int startBit, unsigned int numberOfBits)
 {
 	uint8_t            toWrite     = 0;
 	const unsigned int bitsInAByte = 8;
@@ -62,7 +62,7 @@ uint64_t BitManipulator::insertBits(std::string& data, uint64_t value, unsigned 
 
 		//std::cout << __COUT_HDR_FL__ << "in byte : " << startByte + j << ", start bit: " << startBitInByte << ", finish in bit " << finalBitInByte << "\n" << std::endl;
 
-		overWritten = data.substr(startByte + j, 1).data()[0];
+		overWritten = data.substr (startByte + j, 1).data ()[0];
 		//std::cout << __COUT_HDR_FL__ << "value overwritten: " << hex << (uint64_t)overWritten << "\n" << std::endl;
 		//    	toWrite = (uint8_t)value; //FIXME you can declare value as uint8_t from the beginning 30-0600000000000000
 		toWrite = (uint8_t)0;
@@ -103,7 +103,7 @@ uint64_t BitManipulator::insertBits(std::string& data, uint64_t value, unsigned 
 }
 
 //========================================================================================================================
-uint64_t BitManipulator::reverseBits(uint64_t data, unsigned int startBit, unsigned int numberOfBits)
+uint64_t BitManipulator::reverseBits (uint64_t data, unsigned int startBit, unsigned int numberOfBits)
 {
 	uint64_t reversedData = 0;
 	for (unsigned int r = startBit; r < numberOfBits; r++)
@@ -112,7 +112,7 @@ uint64_t BitManipulator::reverseBits(uint64_t data, unsigned int startBit, unsig
 }
 
 //========================================================================================================================
-uint32_t BitManipulator::insertBits(uint32_t& data, uint32_t value, unsigned int startBit, unsigned int numberOfBits)
+uint32_t BitManipulator::insertBits (uint32_t& data, uint32_t value, unsigned int startBit, unsigned int numberOfBits)
 {
 	//    std::cout << __COUT_HDR_FL__ << "Before: " << hex << data << "-<-" << value << std::endl;
 	value = value << startBit;
@@ -129,7 +129,7 @@ uint32_t BitManipulator::insertBits(uint32_t& data, uint32_t value, unsigned int
 }
 
 //========================================================================================================================
-uint32_t BitManipulator::insertBits(std::string& data, uint32_t value, unsigned int startBit, unsigned int numberOfBits)
+uint32_t BitManipulator::insertBits (std::string& data, uint32_t value, unsigned int startBit, unsigned int numberOfBits)
 {
 	uint8_t            toWrite     = 0;
 	const unsigned int bitsInAByte = 8;
@@ -161,7 +161,7 @@ uint32_t BitManipulator::insertBits(std::string& data, uint32_t value, unsigned 
 
 		//std::cout << __COUT_HDR_FL__ << "in byte : " << startByte + j << ", start bit: " << startBitInByte << ", finish in bit " << finalBitInByte << "\n" << std::endl;
 
-		overWritten = data.substr(startByte + j, 1).data()[0];
+		overWritten = data.substr (startByte + j, 1).data ()[0];
 		//std::cout << __COUT_HDR_FL__ << "value overwritten: " << hex << (uint64_t)overWritten << "\n" << std::endl;
 		//    	toWrite = (uint8_t)value; //FIXME you can declare value as uint8_t from the beginning 30-0600000000000000
 		toWrite = (uint8_t)0;
@@ -202,7 +202,7 @@ uint32_t BitManipulator::insertBits(std::string& data, uint32_t value, unsigned 
 }
 
 //========================================================================================================================
-uint32_t BitManipulator::reverseBits(uint32_t data, unsigned int startBit, unsigned int numberOfBits)
+uint32_t BitManipulator::reverseBits (uint32_t data, unsigned int startBit, unsigned int numberOfBits)
 {
 	uint32_t reversedData = 0;
 	for (unsigned int r = startBit; r < startBit + numberOfBits; r++)
@@ -211,7 +211,7 @@ uint32_t BitManipulator::reverseBits(uint32_t data, unsigned int startBit, unsig
 }
 
 //========================================================================================================================
-uint32_t BitManipulator::readBits(uint32_t data, unsigned int startBit, unsigned int numberOfBits)
+uint32_t BitManipulator::readBits (uint32_t data, unsigned int startBit, unsigned int numberOfBits)
 {
 	uint32_t returnData = 0;
 	for (unsigned int r = startBit; r < startBit + numberOfBits; r++)

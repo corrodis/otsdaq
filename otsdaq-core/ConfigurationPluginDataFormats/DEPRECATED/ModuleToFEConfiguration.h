@@ -11,15 +11,15 @@ namespace ots
 class ModuleToFEConfiguration : public ConfigurationBase
 {
   public:
-	ModuleToFEConfiguration(void);
-	virtual ~ModuleToFEConfiguration(void);
+	ModuleToFEConfiguration (void);
+	virtual ~ModuleToFEConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 
 	//Getters
-	std::list<std::string> getFEWModulesList(unsigned int FEWNumber) const;
-	std::list<std::string> getFERModulesList(unsigned int FERNumber) const;
+	std::list<std::string> getFEWModulesList (unsigned int FEWNumber) const;
+	std::list<std::string> getFERModulesList (unsigned int FERNumber) const;
 
   private:
 	enum

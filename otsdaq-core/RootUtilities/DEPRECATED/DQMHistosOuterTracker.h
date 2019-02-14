@@ -25,16 +25,16 @@ class ConfigurationManager;
 class DQMHistosOuterTracker
 {
   public:
-	DQMHistosOuterTracker(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID);
-	virtual ~DQMHistosOuterTracker(void);
-	void     setConfigurationManager(ConfigurationManager* configurationManager) { theConfigurationManager_ = configurationManager; }
-	void     book(void);
-	void     fill(std::string& buffer, std::map<std::string, std::string> header);
-	void     save(void);
-	void     load(std::string fileName);
-	TObject* get(std::string name);
+	DQMHistosOuterTracker (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID);
+	virtual ~DQMHistosOuterTracker (void);
+	void     setConfigurationManager (ConfigurationManager* configurationManager) { theConfigurationManager_ = configurationManager; }
+	void     book (void);
+	void     fill (std::string& buffer, std::map<std::string, std::string> header);
+	void     save (void);
+	void     load (std::string fileName);
+	TObject* get (std::string name);
 
-	TFile* getFile() { return theFile_; }  //added by RAR
+	TFile* getFile () { return theFile_; }  //added by RAR
 
 	//Getters
 	//TCanvas*  getCanvas (void){return canvas_;}
@@ -43,8 +43,8 @@ class DQMHistosOuterTracker
 	//TProfile* getProfile(void){return profile_;}
 
   protected:
-	void   openFile(std::string fileName);
-	void   closeFile(void);
+	void   openFile (std::string fileName);
+	void   closeFile (void);
 	TFile* theFile_;
 
 	DataDecoder          theDataDecoder_;

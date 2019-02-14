@@ -3,22 +3,22 @@
 #include <xcept/version.h>
 #include <xdaq/version.h>
 
-GETPACKAGEINFO(CoreSupervisors)
+GETPACKAGEINFO (CoreSupervisors)
 
-void CoreSupervisors::checkPackageDependencies()
+void CoreSupervisors::checkPackageDependencies ()
 {
-	CHECKDEPENDENCY(config);
-	CHECKDEPENDENCY(xcept);
-	CHECKDEPENDENCY(xdaq);
+	CHECKDEPENDENCY (config);
+	CHECKDEPENDENCY (xcept);
+	CHECKDEPENDENCY (xdaq);
 }
 
-std::set<std::string, std::less<std::string> > CoreSupervisors::getPackageDependencies()
+std::set<std::string, std::less<std::string> > CoreSupervisors::getPackageDependencies ()
 {
 	std::set<std::string, std::less<std::string> > dependencies;
 
-	ADDDEPENDENCY(dependencies, config);
-	ADDDEPENDENCY(dependencies, xcept);
-	ADDDEPENDENCY(dependencies, xdaq);
+	ADDDEPENDENCY (dependencies, config);
+	ADDDEPENDENCY (dependencies, xcept);
+	ADDDEPENDENCY (dependencies, xdaq);
 
 	return dependencies;
 }

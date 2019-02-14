@@ -22,36 +22,36 @@ using ots::ConfigurationBase;
 
 template<>
 template<>
-bool MakeSerializable<ConfigurationBase const*>::writeDocumentImpl<JsonData>(JsonData& data) const
+bool MakeSerializable<ConfigurationBase const*>::writeDocumentImpl<JsonData> (JsonData& data) const
 {
 	std::stringstream ss;
 
-	_conf->getView().printJSON(ss);
+	_conf->getView ().printJSON (ss);
 	//std::cout << "!!!!!\n" << ss.str() << std::endl; //for debugging
-	data.json_buffer = ss.str();
+	data.json_buffer = ss.str ();
 
 	return true;
 }
 
 template<>
-std::string MakeSerializable<ConfigurationBase const*>::configurationNameImpl() const
+std::string MakeSerializable<ConfigurationBase const*>::configurationNameImpl () const
 {
-	return _conf->getConfigurationName();
+	return _conf->getConfigurationName ();
 }
 
 template<>
 template<>
-bool MakeSerializable<ConfigurationBase*>::readDocumentImpl<JsonData>(JsonData const& data)
+bool MakeSerializable<ConfigurationBase*>::readDocumentImpl<JsonData> (JsonData const& data)
 {
-	int retVal = _conf->getViewP()->fillFromJSON(data.json_buffer);
+	int retVal = _conf->getViewP ()->fillFromJSON (data.json_buffer);
 
 	return (retVal >= 0);
 }
 
 template<>
-std::string MakeSerializable<ConfigurationBase*>::configurationNameImpl() const
+std::string MakeSerializable<ConfigurationBase*>::configurationNameImpl () const
 {
-	return _conf->getConfigurationName();
+	return _conf->getConfigurationName ();
 }
 
 }  // namespace configuration

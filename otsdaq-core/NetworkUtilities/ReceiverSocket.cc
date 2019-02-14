@@ -13,61 +13,61 @@
 using namespace ots;
 
 //========================================================================================================================
-ReceiverSocket::ReceiverSocket(std::string IPAddress, unsigned int port)
-    : Socket(IPAddress, port)
-    , addressLength_(sizeof(fromAddress_))
-    , numberOfBytes_(0)
-    , readCounter_(0)
+ReceiverSocket::ReceiverSocket (std::string IPAddress, unsigned int port)
+    : Socket (IPAddress, port)
+    , addressLength_ (sizeof (fromAddress_))
+    , numberOfBytes_ (0)
+    , readCounter_ (0)
 {
 	__COUT__ << "ReceiverSocket constructor " << IPAddress << ":" << port << __E__;
 }
 
 //========================================================================================================================
 //protected constructor
-ReceiverSocket::ReceiverSocket(void)
-    : addressLength_(sizeof(fromAddress_))
-    , numberOfBytes_(0)
-    , readCounter_(0)
+ReceiverSocket::ReceiverSocket (void)
+    : addressLength_ (sizeof (fromAddress_))
+    , numberOfBytes_ (0)
+    , readCounter_ (0)
 {
 	__COUT__ << "ReceiverSocket constructor" << __E__;
 }
 
 //========================================================================================================================
-ReceiverSocket::~ReceiverSocket(void)
+ReceiverSocket::~ReceiverSocket (void)
 {
 }
 
 //========================================================================================================================
-int ReceiverSocket::receive(std::string& buffer, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
+int ReceiverSocket::receive (std::string& buffer, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
 {
-	return receive(buffer, dummyIPAddress_, dummyPort_, timeoutSeconds, timeoutUSeconds, verbose);
+	return receive (buffer, dummyIPAddress_, dummyPort_, timeoutSeconds, timeoutUSeconds, verbose);
 }
 
 //========================================================================================================================
 //receive ~~
 //	returns 0 on success, -1 on failure
 //	NOTE: must call Socket::initialize before receiving!
-int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
+int ReceiverSocket::receive (std::string& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
 {
 	//lockout other receivers for the remainder of the scope
-	std::lock_guard<std::mutex> lock(receiveMutex_);
+	std::lock_guard<std::mutex> lock (receiveMutex_);
 
 	//set timeout period for select()
 	timeout_.tv_sec  = timeoutSeconds;
 	timeout_.tv_usec = timeoutUSeconds;
 
-	FD_ZERO(&fileDescriptor_);
-	FD_SET(socketNumber_, &fileDescriptor_);
-	select(socketNumber_ + 1, &fileDescriptor_, 0, 0, &timeout_);
+	FD_ZERO (&fileDescriptor_);
+	FD_SET (socketNumber_, &fileDescriptor_);
+	select (socketNumber_ + 1, &fileDescriptor_, 0, 0, &timeout_);
 
-	if (FD_ISSET(socketNumber_, &fileDescriptor_))
+	if (FD_ISSET (socketNumber_, &fileDescriptor_))
 	{
-		buffer.resize(maxSocketSize_);  //NOTE: this is inexpensive according to Lorenzo/documentation in C++11 (only increases size once and doesn't decrease size)
-		if ((numberOfBytes_ = recvfrom(socketNumber_, &buffer[0], maxSocketSize_, 0, (struct sockaddr*)&fromAddress_, &addressLength_)) == -1)
+		buffer.resize (maxSocketSize_);  //NOTE: this is inexpensive according to Lorenzo/documentation in C++11 (only increases size once and doesn't decrease size)
+		if ((numberOfBytes_ = recvfrom (socketNumber_, &buffer[0], maxSocketSize_, 0, (struct sockaddr*)&fromAddress_, &addressLength_)) == -1)
 		{
-			__COUT__ << "At socket with IPAddress: " << getIPAddress() << " port: " << getPort() << std::endl;
+			__COUT__ << "At socket with IPAddress: " << getIPAddress () << " port: " << getPort () << std::endl;
 			__SS__ << "Error reading buffer from\tIP:\t";
-			std::string fromIP = inet_ntoa(fromAddress_.sin_addr);
+			std::string fromIP = inet_ntoa (fromAddress_.sin_addr);
 			fromIPAddress      = fromAddress_.sin_addr.s_addr;
 			fromPort           = fromAddress_.sin_port;
 			for (int i = 0; i < 4; i++)
@@ -76,9 +76,9 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, u
 				if (i < 3)
 					ss << ".";
 			}
-			ss << "\tPort\t" << ntohs(fromPort) << " IP " << fromIP << std::endl;
+			ss << "\tPort\t" << ntohs (fromPort) << " IP " << fromIP << std::endl;
 			__COUT__ << "\n"
-			         << ss.str();
+			         << ss.str ();
 			return -1;
 		}
 		//char address[INET_ADDRSTRLEN];
@@ -93,16 +93,16 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, u
 		//__COUT__ << "ended at" << tvend.tv_sec << ":" <<tvend.tv_usec << std::endl;
 
 		//NOTE: this is inexpensive according to Lorenzo/documentation in C++11 (only increases size once and doesn't decrease size)
-		buffer.resize(numberOfBytes_);
+		buffer.resize (numberOfBytes_);
 		readCounter_ = 0;
 
 		if (verbose)  //debug
 		{
-			std::string fromIP = inet_ntoa(fromAddress_.sin_addr);
+			std::string fromIP = inet_ntoa (fromAddress_.sin_addr);
 
 			__COUT__ << "Receiving "
-			         << " at: " << getIPAddress() << ":" << getPort() << " from: " << fromIP;
-			std::cout << ":" << ntohs(fromPort) << " size: " << buffer.size() << std::endl;
+			         << " at: " << getIPAddress () << ":" << getPort () << " from: " << fromIP;
+			std::cout << ":" << ntohs (fromPort) << " size: " << buffer.size () << std::endl;
 
 			//			std::stringstream ss;
 			//			ss << "\tRx";
@@ -126,7 +126,7 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, u
 			    << "No new messages for " << timeoutSeconds + timeoutUSeconds / 1000.
 			    << "s (Total " << readCounter_ * (timeoutSeconds + timeoutUSeconds / 1000.)
 			    << "s). Read request timed out receiving on "
-			    << " " << getIPAddress() << ":" << getPort()
+			    << " " << getIPAddress () << ":" << getPort ()
 			    << std::endl;
 		return -1;
 	}
@@ -135,35 +135,35 @@ int ReceiverSocket::receive(std::string& buffer, unsigned long& fromIPAddress, u
 }
 
 //========================================================================================================================
-int ReceiverSocket::receive(std::vector<uint32_t>& buffer, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
+int ReceiverSocket::receive (std::vector<uint32_t>& buffer, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
 {
-	return receive(buffer, dummyIPAddress_, dummyPort_, timeoutSeconds, timeoutUSeconds, verbose);
+	return receive (buffer, dummyIPAddress_, dummyPort_, timeoutSeconds, timeoutUSeconds, verbose);
 }
 
 //========================================================================================================================
 //receive ~~
 //	returns 0 on success, -1 on failure
 //	NOTE: must call Socket::initialize before receiving!
-int ReceiverSocket::receive(std::vector<uint32_t>& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
+int ReceiverSocket::receive (std::vector<uint32_t>& buffer, unsigned long& fromIPAddress, unsigned short& fromPort, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
 {
 	//lockout other receivers for the remainder of the scope
-	std::lock_guard<std::mutex> lock(receiveMutex_);
+	std::lock_guard<std::mutex> lock (receiveMutex_);
 
 	//set timeout period for select()
 	timeout_.tv_sec  = timeoutSeconds;
 	timeout_.tv_usec = timeoutUSeconds;
 
-	FD_ZERO(&fileDescriptor_);
-	FD_SET(socketNumber_, &fileDescriptor_);
-	select(socketNumber_ + 1, &fileDescriptor_, 0, 0, &timeout_);
+	FD_ZERO (&fileDescriptor_);
+	FD_SET (socketNumber_, &fileDescriptor_);
+	select (socketNumber_ + 1, &fileDescriptor_, 0, 0, &timeout_);
 	__COUT__ << "Is this a successful reeeaaad???" << std::endl;
 
-	if (FD_ISSET(socketNumber_, &fileDescriptor_))
+	if (FD_ISSET (socketNumber_, &fileDescriptor_))
 	{
-		buffer.resize(maxSocketSize_ / sizeof(uint32_t));  //NOTE: this is inexpensive according to Lorezno/documentation in C++11 (only increases size once and doesn't decrease size)
-		if ((numberOfBytes_ = recvfrom(socketNumber_, &buffer[0], maxSocketSize_, 0, (struct sockaddr*)&fromAddress_, &addressLength_)) == -1)
+		buffer.resize (maxSocketSize_ / sizeof (uint32_t));  //NOTE: this is inexpensive according to Lorezno/documentation in C++11 (only increases size once and doesn't decrease size)
+		if ((numberOfBytes_ = recvfrom (socketNumber_, &buffer[0], maxSocketSize_, 0, (struct sockaddr*)&fromAddress_, &addressLength_)) == -1)
 		{
-			__COUT__ << "At socket with IPAddress: " << getIPAddress() << " port: " << getPort() << std::endl;
+			__COUT__ << "At socket with IPAddress: " << getIPAddress () << " port: " << getPort () << std::endl;
 			__SS__ << "Error reading buffer from\tIP:\t";
 			for (int i = 0; i < 4; i++)
 			{
@@ -173,7 +173,7 @@ int ReceiverSocket::receive(std::vector<uint32_t>& buffer, unsigned long& fromIP
 			}
 			ss << "\tPort\t" << fromPort << std::endl;
 			__COUT__ << "\n"
-			         << ss.str();
+			         << ss.str ();
 			return -1;
 		}
 		//char address[INET_ADDRSTRLEN];
@@ -188,21 +188,21 @@ int ReceiverSocket::receive(std::vector<uint32_t>& buffer, unsigned long& fromIP
 		//__COUT__ << "ended at" << tvend.tv_sec << ":" <<tvend.tv_usec << std::endl;
 
 		//NOTE: this is inexpensive according to Lorenzo/documentation in C++11 (only increases size once and doesn't decrease size)
-		buffer.resize(numberOfBytes_ / sizeof(uint32_t));
+		buffer.resize (numberOfBytes_ / sizeof (uint32_t));
 		readCounter_ = 0;
 	}
 	else
 	{
 		++readCounter_;
 		struct sockaddr_in sin;
-		socklen_t          len = sizeof(sin);
-		getsockname(socketNumber_, (struct sockaddr*)&sin, &len);
+		socklen_t          len = sizeof (sin);
+		getsockname (socketNumber_, (struct sockaddr*)&sin, &len);
 
 		if (verbose)
 			__COUT__ << __COUT_HDR_FL__
 			         << "No new messages for " << timeoutSeconds + timeoutUSeconds / 1000.
 			         << "s (Total " << readCounter_ * (timeoutSeconds + timeoutUSeconds / 1000.)
-			         << "s). Read request timed out for port: " << ntohs(sin.sin_port)
+			         << "s). Read request timed out for port: " << ntohs (sin.sin_port)
 			         << std::endl;
 		return -1;
 	}

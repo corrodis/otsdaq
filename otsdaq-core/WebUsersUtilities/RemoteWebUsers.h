@@ -19,11 +19,11 @@ class HttpXmlDocument;
 class RemoteWebUsers : public SOAPMessenger
 {
   public:
-	RemoteWebUsers(xdaq::Application* application);
+	RemoteWebUsers (xdaq::Application* application);
 
 	//for external supervisors to check with Supervisor for login
 	//if false, user request handling code should just return.. out is handled on false; on true, out is untouched
-	bool xmlRequestToGateway(
+	bool xmlRequestToGateway (
 	    cgicc::Cgicc&              cgi,
 	    std::ostringstream*        out,
 	    HttpXmlDocument*           xmldoc,
@@ -44,13 +44,13 @@ class RemoteWebUsers : public SOAPMessenger
 	//			std::string* 					userGroups = 0,
 	//			uint64_t* 						activeSessionIndex = 0);
 
-	std::string                                                  getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor);
-	void                                                         sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg);
-	void                                                         makeSystemLogbookEntry(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText);
-	std::pair<std::string /*group name*/, ConfigurationGroupKey> getLastConfigGroup(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& actionOfLastGroup, std::string& actionTimeString);  //actionOfLastGroup = "Configured" or "Started", for example
+	std::string                                                  getActiveUserList (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor);
+	void                                                         sendSystemMessage (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg);
+	void                                                         makeSystemLogbookEntry (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText);
+	std::pair<std::string /*group name*/, ConfigurationGroupKey> getLastConfigGroup (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& actionOfLastGroup, std::string& actionTimeString);  //actionOfLastGroup = "Configured" or "Started", for example
 
   private:
-	bool cookieCodeIsActiveForRequest(
+	bool cookieCodeIsActiveForRequest (
 	    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 	    std::string&                                 cookieCode,
 	    uint8_t*                                     userPermissions = 0,
@@ -58,7 +58,7 @@ class RemoteWebUsers : public SOAPMessenger
 	    bool                                         refreshCookie   = true,
 	    std::string*                                 userWithLock    = 0);
 
-	bool getUserInfoForCookie(
+	bool getUserInfoForCookie (
 	    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 	    std::string&                                 cookieCode,
 	    std::string*                                 userName,

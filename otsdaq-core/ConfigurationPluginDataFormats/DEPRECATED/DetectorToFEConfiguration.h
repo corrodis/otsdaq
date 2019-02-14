@@ -11,19 +11,19 @@ namespace ots
 class DetectorToFEConfiguration : public ConfigurationBase
 {
   public:
-	DetectorToFEConfiguration(void);
-	virtual ~DetectorToFEConfiguration(void);
+	DetectorToFEConfiguration (void);
+	virtual ~DetectorToFEConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager* configManager);
+	void init (ConfigurationManager* configManager);
 
 	//Getters
-	std::vector<std::string> getFEWriterDetectorList(std::string interfaceID) const;
-	std::vector<std::string> getFEReaderDetectorList(std::string interfaceID) const;
+	std::vector<std::string> getFEWriterDetectorList (std::string interfaceID) const;
+	std::vector<std::string> getFEReaderDetectorList (std::string interfaceID) const;
 	//std::vector<std::string>  getFEWCards     (unsigned int supervisorInstance) const;
-	unsigned int getFEWriterChannel(const std::string& detectorID) const;
-	unsigned int getFEWriterDetectorAddress(const std::string& detectorID) const;
-	unsigned int getFEReaderChannel(const std::string& detectorID) const;
+	unsigned int getFEWriterChannel (const std::string& detectorID) const;
+	unsigned int getFEWriterDetectorAddress (const std::string& detectorID) const;
+	unsigned int getFEReaderChannel (const std::string& detectorID) const;
 
   private:
 	enum

@@ -10,11 +10,11 @@ namespace ots
 class DataDecoderConsumer : public DataDecoder, public DataConsumer, public Configurable
 {
   public:
-	DataDecoderConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
-	virtual ~DataDecoderConsumer(void);
+	DataDecoderConsumer (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
+	virtual ~DataDecoderConsumer (void);
 
   protected:
-	bool workLoopThread(toolbox::task::WorkLoop* workLoop);
+	bool workLoopThread (toolbox::task::WorkLoop* workLoop);
 };
 
 }  // namespace ots

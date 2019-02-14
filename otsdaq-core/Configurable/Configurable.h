@@ -8,18 +8,18 @@ namespace ots
 class Configurable
 {
   public:
-	Configurable(const ConfigurationTree& theXDAQContextConfigTree, const std::string& theConfigurationPath);
-	virtual ~Configurable();
+	Configurable (const ConfigurationTree& theXDAQContextConfigTree, const std::string& theConfigurationPath);
+	virtual ~Configurable ();
 
-	ConfigurationTree           getSelfNode() const;
-	const ConfigurationManager* getConfigurationManager() const;
+	ConfigurationTree           getSelfNode () const;
+	const ConfigurationManager* getConfigurationManager () const;
 
-	const std::string& getContextUID() const;
-	const std::string& getApplicationUID() const;
+	const std::string& getContextUID () const;
+	const std::string& getApplicationUID () const;
 
-	unsigned int getApplicationLID() const;
-	std::string  getContextAddress() const;
-	unsigned int getContextPort() const;
+	unsigned int getApplicationLID () const;
+	std::string  getContextAddress () const;
+	unsigned int getContextPort () const;
 
   protected:
 	const ConfigurationTree theXDAQContextConfigTree_;

@@ -9,7 +9,7 @@ namespace ots
 class ControlsVInterface;
 class ConfigurationTree;
 
-ControlsVInterface* makeControls(
+ControlsVInterface* makeControls (
     const std::string& controlsPluginName, const std::string& controlsUID  //Key value for (eventual) ControlsDashboard Table in Configuration
     ,
     const ConfigurationTree& configurationTree  //Pass the big tree

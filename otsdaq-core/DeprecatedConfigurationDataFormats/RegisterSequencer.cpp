@@ -9,8 +9,8 @@
 
 using namespace ots;
 
-RegisterSequencer::RegisterSequencer(std::string staticConfigurationName)
-    : ConfigurationBase(staticConfigurationName)
+RegisterSequencer::RegisterSequencer (std::string staticConfigurationName)
+    : ConfigurationBase (staticConfigurationName)
 {
 	////////////////////////////////////////////////////////////////////////
 	////WARNING: the names and the order MUST match the ones in the enum  //
@@ -29,9 +29,9 @@ RegisterSequencer::RegisterSequencer(std::string staticConfigurationName)
 	//</ROOT>
 }
 
-RegisterSequencer::~RegisterSequencer()
+RegisterSequencer::~RegisterSequencer ()
 {
 	// TODO Auto-generated destructor stub
 }
 
-void RegisterSequencer::init() {}
+void RegisterSequencer::init () {}

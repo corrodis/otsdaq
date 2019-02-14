@@ -21,31 +21,31 @@ class HttpXmlDocument;
 class CodeEditor
 {
   public:
-	CodeEditor();
+	CodeEditor ();
 
 	//request are handled here
-	void xmlRequest(
+	void xmlRequest (
 	    const std::string& option,
 	    cgicc::Cgicc&      cgiIn,
 	    HttpXmlDocument*   xmlOut);
 
   private:
-	void getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
-	void getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
-	void saveFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
-	void build(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
+	void getDirectoryContent (cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
+	void getFileContent (cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
+	void saveFileContent (cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
+	void build (cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
 
-	std::string safePathString(const std::string& path);
-	std::string safeExtensionString(const std::string& extension);
+	std::string safePathString (const std::string& path);
+	std::string safeExtensionString (const std::string& extension);
 
   public:
 	static std::string SPECIAL_TYPE_FEInterface, SPECIAL_TYPE_DataProcessor, SPECIAL_TYPE_ControlsInterface, SPECIAL_TYPE_Tools;
 
 	static std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/>
-	getSpecialsMap(void);
+	getSpecialsMap (void);
 
-	static void readFile(const std::string& path, std::string& contents);
-	static void writeFile(const std::string& path, const std::string& contents, const unsigned long long& insertPos = -1, const std::string& insertString = "");
+	static void readFile (const std::string& path, std::string& contents);
+	static void writeFile (const std::string& path, const std::string& contents, const unsigned long long& insertPos = -1, const std::string& insertString = "");
 
 	const std::set<std::string> ALLOWED_FILE_EXTENSIONS_;
 };

@@ -9,7 +9,7 @@ namespace ots
 {
 struct GetPackageBuildInfo
 {
-	static artdaq::PackageBuildInfo getPackageBuildInfo();
+	static artdaq::PackageBuildInfo getPackageBuildInfo ();
 };
 
 }  // namespace ots

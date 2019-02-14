@@ -6,8 +6,8 @@
 using namespace ots;
 
 //==============================================================================
-MaskConfiguration::MaskConfiguration(void)
-    : ConfigurationBase("MaskConfiguration")
+MaskConfiguration::MaskConfiguration (void)
+    : ConfigurationBase ("MaskConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -25,31 +25,31 @@ MaskConfiguration::MaskConfiguration(void)
 }
 
 //==============================================================================
-MaskConfiguration::~MaskConfiguration(void)
+MaskConfiguration::~MaskConfiguration (void)
 {
 }
 
 //==============================================================================
-void MaskConfiguration::init(ConfigurationManager* configManager)
+void MaskConfiguration::init (ConfigurationManager* configManager)
 {
 	std::string tmpDetectorID;
-	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorID, row, DetectorID);
+		ConfigurationBase::activeConfigurationView_->getValue (tmpDetectorID, row, DetectorID);
 		nameToRow_[tmpDetectorID] = row;
 	}
 }
 
 //==============================================================================
-const std::string& MaskConfiguration::getROCMask(std::string rocName) const
+const std::string& MaskConfiguration::getROCMask (std::string rocName) const
 {
 	//FIXME This check should be removed when you are sure you don't have inconsistencies between configurations
-	if (nameToRow_.find(rocName) == nameToRow_.end())
+	if (nameToRow_.find (rocName) == nameToRow_.end ())
 	{
 		std::cout << __COUT_HDR_FL__ << "ROC named " << rocName << " doesn't exist in the mask configuration." << std::endl;
-		assert(0);
+		assert (0);
 	}
-	return ConfigurationBase::getView().getDataView()[nameToRow_.find(rocName)->second][KillMask];
+	return ConfigurationBase::getView ().getDataView ()[nameToRow_.find (rocName)->second][KillMask];
 }
 
-DEFINE_OTS_CONFIGURATION(MaskConfiguration)
+DEFINE_OTS_CONFIGURATION (MaskConfiguration)

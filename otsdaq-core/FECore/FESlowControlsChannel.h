@@ -9,7 +9,7 @@ namespace ots
 class FESlowControlsChannel
 {
   public:
-	FESlowControlsChannel(
+	FESlowControlsChannel (
 	    const std::string& interfaceUID,
 	    const std::string& channelName,
 	    const std::string& dataType,
@@ -33,18 +33,18 @@ class FESlowControlsChannel
 	    const std::string& hi,
 	    const std::string& hihi);
 
-	~FESlowControlsChannel();
+	~FESlowControlsChannel ();
 
-	char* getUniversalAddress() { return &universalAddress_[0]; }
-	void  handleSample(const std::string& universalReadValue, std::string& txBuffer, FILE* fpAggregate = 0, bool aggregateIsBinaryFormat = false);
-	void  clearAlarms(int targetAlarm = -1);  //default to all
+	char* getUniversalAddress () { return &universalAddress_[0]; }
+	void  handleSample (const std::string& universalReadValue, std::string& txBuffer, FILE* fpAggregate = 0, bool aggregateIsBinaryFormat = false);
+	void  clearAlarms (int targetAlarm = -1);  //default to all
 
-	static std::string underscoreString(const std::string& str);
+	static std::string underscoreString (const std::string& str);
 
   private:
-	void extractSample(const std::string& universalReadValue);
-	char checkAlarms(std::string& txBuffer);
-	void convertStringToBuffer(const std::string& inString, std::string& buffer, bool useDataType = false);
+	void extractSample (const std::string& universalReadValue);
+	char checkAlarms (std::string& txBuffer);
+	void convertStringToBuffer (const std::string& inString, std::string& buffer, bool useDataType = false);
 
   public:
 	const std::string interfaceUID_;

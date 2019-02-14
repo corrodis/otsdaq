@@ -8,10 +8,10 @@ namespace ots
 class ARTDAQFEDataManagerSupervisor : public FEDataManagerSupervisor
 {
   public:
-	XDAQ_INSTANTIATOR();
+	XDAQ_INSTANTIATOR ();
 
-	ARTDAQFEDataManagerSupervisor(xdaq::ApplicationStub* s);
-	virtual ~ARTDAQFEDataManagerSupervisor(void);
+	ARTDAQFEDataManagerSupervisor (xdaq::ApplicationStub* s);
+	virtual ~ARTDAQFEDataManagerSupervisor (void);
 
   private:
 };

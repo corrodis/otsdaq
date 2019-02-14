@@ -20,18 +20,18 @@ class SupervisorDescriptorInfoBase
 {
 	friend class SupervisorInfo;  //"Friend" class needs access to private members
   public:
-	SupervisorDescriptorInfoBase(void);
-	SupervisorDescriptorInfoBase(xdaq::ApplicationContext* applicationContext);
-	virtual ~SupervisorDescriptorInfoBase(void);
+	SupervisorDescriptorInfoBase (void);
+	SupervisorDescriptorInfoBase (xdaq::ApplicationContext* applicationContext);
+	virtual ~SupervisorDescriptorInfoBase (void);
 
 	//XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getSupervisorDescriptor 	    (void) const;
 	//XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getWizardDescriptor 	        (void) const;
 
   protected:
-	virtual void init(xdaq::ApplicationContext* applicationContext);
-	virtual void destroy();
+	virtual void init (xdaq::ApplicationContext* applicationContext);
+	virtual void destroy ();
 
-	const SupervisorDescriptors& getAllDescriptors(void) const;
+	const SupervisorDescriptors& getAllDescriptors (void) const;
 	//    const SupervisorDescriptors& getAllFEDescriptors               	(void) const;
 
 	//    const SupervisorDescriptors& getDataManagerDescriptors        (void) const;

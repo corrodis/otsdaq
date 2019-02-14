@@ -10,71 +10,71 @@
 using namespace ots;
 
 #undef __MF_SUBJECT__
-#define __MF_SUBJECT__ (std::string("Workloop-") + WorkLoop::workLoopName_)
+#define __MF_SUBJECT__ (std::string ("Workloop-") + WorkLoop::workLoopName_)
 
 //========================================================================================================================
-WorkLoop::WorkLoop(const std::string& name)
-    : continueWorkLoop_(false)
-    , workLoopName_(name)
-    , workLoopType_("waiting")
-    , workLoop_(0)
-    , job_(toolbox::task::bind(this, &WorkLoop::workLoopThread, workLoopName_))
+WorkLoop::WorkLoop (const std::string& name)
+    : continueWorkLoop_ (false)
+    , workLoopName_ (name)
+    , workLoopType_ ("waiting")
+    , workLoop_ (0)
+    , job_ (toolbox::task::bind (this, &WorkLoop::workLoopThread, workLoopName_))
 {
 	__COUT__ << "Constructed." << __E__;
 }
 
 //========================================================================================================================
-WorkLoop::~WorkLoop(void)
+WorkLoop::~WorkLoop (void)
 {
 	__COUT__ << "Destructor." << __E__;
-	if (stopWorkLoop())
-		toolbox::task::getWorkLoopFactory()->removeWorkLoop(
+	if (stopWorkLoop ())
+		toolbox::task::getWorkLoopFactory ()->removeWorkLoop (
 		    workLoopName_, workLoopType_);
 	__COUT__ << "Destructed." << __E__;
 }
 
 //========================================================================================================================
-void WorkLoop::startWorkLoop(void)
+void WorkLoop::startWorkLoop (void)
 {
 	__COUT__ << "Starting WorkLoop: " << workLoopName_ << __E__;
 	continueWorkLoop_ = true;
 	try
 	{
-		workLoop_ = toolbox::task::getWorkLoopFactory()->getWorkLoop(
+		workLoop_ = toolbox::task::getWorkLoopFactory ()->getWorkLoop (
 		    workLoopName_, workLoopType_);
 	}
 	catch (xcept::Exception& e)
 	{
 		__COUT__ << "ERROR: Can't create WorkLoop job for " << workLoopName_ << __E__;
-		stopWorkLoop();
+		stopWorkLoop ();
 	}
 
-	if (workLoop_->isActive()) return;  //This might be a consumer producer running at the same time so it has been activated already
+	if (workLoop_->isActive ()) return;  //This might be a consumer producer running at the same time so it has been activated already
 
 	try
 	{
-		workLoop_->submit(job_);
+		workLoop_->submit (job_);
 	}
 	catch (xcept::Exception& e)
 	{
 		__COUT__ << "ERROR: Can't submit WorkLoop job for " << workLoopName_ << __E__;
-		stopWorkLoop();
+		stopWorkLoop ();
 	}
 
 	try
 	{
-		workLoop_->activate();
+		workLoop_->activate ();
 	}
 	catch (xcept::Exception& e)
 	{
 		__COUT__ << "ERROR: Can't activate WorkLoop job for " << workLoopName_
 		         << " Very likely because the name " << workLoopName_ << " is not unique!" << __E__;
-		stopWorkLoop();
+		stopWorkLoop ();
 	}
 }  //end startWorkLoop()
 
 //========================================================================================================================
-bool WorkLoop::stopWorkLoop()
+bool WorkLoop::stopWorkLoop ()
 {
 	__COUT__ << "Stopping WorkLoop: " << workLoopName_ << __E__;
 
@@ -85,24 +85,24 @@ bool WorkLoop::stopWorkLoop()
 		return false;
 	}
 
-	__COUT__ << "initially workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no") << __E__;
+	__COUT__ << "initially workLoop_->isActive() " << (workLoop_->isActive () ? "yes" : "no") << __E__;
 
 	try
 	{
 		//THis method waits until the workloop job returns! Super cool!
-		workLoop_->cancel();
+		workLoop_->cancel ();
 	}
 	catch (xcept::Exception& e)
 	{
 		__COUT__ << "WARNING: Can't cancel WorkLoop job for " << workLoopName_ << " because probably it has never been activated!" << __E__;
 
-		__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no") << __E__;
+		__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive () ? "yes" : "no") << __E__;
 		return true;
 	}
 
 	try
 	{
-		workLoop_->remove(job_);
+		workLoop_->remove (job_);
 	}
 	catch (xcept::Exception& e)
 	{
@@ -111,16 +111,16 @@ bool WorkLoop::stopWorkLoop()
 		// Leaving this try catch allows me to be general in the job threads so I can return true (repeat loop) or false ( loop only once)
 		// without crashing
 		__COUT__ << "WARNING: Can't remove request WorkLoop: " << workLoopName_ << __E__;
-		__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no") << __E__;
+		__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive () ? "yes" : "no") << __E__;
 	}
 
 	__COUT__ << "Stopped WorkLoop: " << workLoopName_ << __E__;
-	__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no") << __E__;
+	__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive () ? "yes" : "no") << __E__;
 	return true;
 }  //end stopWorkLoop()
 
 //========================================================================================================================
-bool WorkLoop::isActive(void) const
+bool WorkLoop::isActive (void) const
 {
-	return workLoop_->isActive() && continueWorkLoop_;
+	return workLoop_->isActive () && continueWorkLoop_;
 }  //end isActive

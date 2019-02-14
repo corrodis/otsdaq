@@ -8,7 +8,7 @@ namespace ots
 {
 class ConfigurationBase;
 
-ConfigurationBase* makeInterfaceConfiguration(std::string const& configurationPluginName);
+ConfigurationBase* makeInterfaceConfiguration (std::string const& configurationPluginName);
 
 }  // namespace ots
 

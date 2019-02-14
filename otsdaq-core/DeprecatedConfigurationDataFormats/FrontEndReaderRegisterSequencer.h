@@ -8,8 +8,8 @@ namespace ots
 class FERRegisterSequencer : public RegisterConfiguration
 {
   public:
-	FERRegisterSequencer(void);
-	virtual ~FERRegisterSequencer(void);
+	FERRegisterSequencer (void);
+	virtual ~FERRegisterSequencer (void);
 };
 }  // namespace ots
 #endif

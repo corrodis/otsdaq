@@ -73,7 +73,7 @@ namespace ots
 class ProgressBar
 {
   public:
-	ProgressBar();
+	ProgressBar ();
 
 //********************************************************************//
 //NOTE!!! don't call reset. Call resetProgressBar(id) as though
@@ -81,16 +81,16 @@ class ProgressBar
 //void resetProgressBar(int id)
 //
 // then the pre-compiler directive:
-#define resetProgressBar(x) reset(__FILE__, S_(__LINE__), x)
+#define resetProgressBar(x) reset (__FILE__, S_ (__LINE__), x)
 	//will call this reset:
-	void reset(std::string file, std::string lineNumber, int id = 0);
+	void reset (std::string file, std::string lineNumber, int id = 0);
 	//********************************************************************//
 
 	//remaining member functions are called normal
-	void        step();  //thread safe
-	void        complete();
-	int         read();                  //if stepsToComplete==0, then define any progress as 50%, thread safe
-	std::string readPercentageString();  //if stepsToComplete==0, then define any progress as 50%, thread safe
+	void        step ();  //thread safe
+	void        complete ();
+	int         read ();                  //if stepsToComplete==0, then define any progress as 50%, thread safe
+	std::string readPercentageString ();  //if stepsToComplete==0, then define any progress as 50%, thread safe
 
   private:
 	const std::string cProgressBarFilePath_;

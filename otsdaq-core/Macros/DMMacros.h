@@ -277,7 +277,7 @@ static std::string __c_meth__ = ACBLightPurple_;
 			{                                                            \
 				PF_ = __FUNCTION__;                                      \
 				if (DMM::__long__) PF_ = __PRETTY_FUNCTION__;            \
-				PFSize = PF_.size();                                     \
+				PFSize = PF_.size ();                                    \
 				if (PFSize >= DMM::__span__)                             \
 				{                                                        \
 					PFSize = DMM::__span__;                              \
@@ -293,7 +293,7 @@ static std::string __c_meth__ = ACBLightPurple_;
 						PFs_ << " ";                                     \
 					}                                                    \
 				}                                                        \
-				if (PFSize < (int)PF_.size())                            \
+				if (PFSize < (int)PF_.size ())                           \
 				{                                                        \
 					maxL -= 4;                                           \
 					PFs_ << ACRed << "...";                              \
@@ -302,7 +302,7 @@ static std::string __c_meth__ = ACBLightPurple_;
 				{                                                        \
 					PFs_ << ACPlain << ACPlain << ACPlain;               \
 				}                                                        \
-				msgS = PFs_.str().size() + 1;                            \
+				msgS = PFs_.str ().size () + 1;                          \
 				if (msgS <= DMM::__span__) msgS = DMM::__span__;         \
 				blankSize = maxL - msgS;                                 \
 				if (blankSize < 0) blankSize = 3;                        \
@@ -313,7 +313,7 @@ static std::string __c_meth__ = ACBLightPurple_;
 				PFs_ << blanks;                                          \
 				msg_ << ACYellow << "["                                  \
 				     << DMM::__c_meth__                                  \
-				     << PFs_.str()                                       \
+				     << PFs_.str ()                                      \
 				     << ACPlain << ACYellow                              \
 				     << "] "                                             \
 				     << ACPlain;                                         \
@@ -321,9 +321,9 @@ static std::string __c_meth__ = ACBLightPurple_;
                                                                          \
 			if (DMM::__file__)                                           \
 			{                                                            \
-				PFs_.str("");                                            \
+				PFs_.str ("");                                           \
 				PF_    = __FILE__;                                       \
-				PFSize = PF_.size();                                     \
+				PFSize = PF_.size ();                                    \
 				if (PFSize >= DMM::__span__)                             \
 				{                                                        \
 					PFSize = DMM::__span__;                              \
@@ -339,7 +339,7 @@ static std::string __c_meth__ = ACBLightPurple_;
 						PFs_ << " ";                                     \
 					}                                                    \
 				}                                                        \
-				if (PFSize < (int)PF_.size())                            \
+				if (PFSize < (int)PF_.size ())                           \
 				{                                                        \
 					maxL -= 4;                                           \
 					PFs_ << ACRed << "...";                              \
@@ -348,7 +348,7 @@ static std::string __c_meth__ = ACBLightPurple_;
 				{                                                        \
 					PFs_ << ACPlain << ACPlain << ACPlain;               \
 				}                                                        \
-				msgS = PFs_.str().size() + 1;                            \
+				msgS = PFs_.str ().size () + 1;                          \
 				if (msgS <= DMM::__span__) msgS = DMM::__span__;         \
 				blankSize = maxL - msgS;                                 \
 				if (blankSize < 0) blankSize = 3;                        \
@@ -359,7 +359,7 @@ static std::string __c_meth__ = ACBLightPurple_;
 				PFs_ << blanks;                                          \
 				msg_ << ACYellow << "["                                  \
 				     << DMM::__c_file__                                  \
-				     << PFs_.str()                                       \
+				     << PFs_.str ()                                      \
 				     << ACPlain << ACYellow                              \
 				     << "] "                                             \
 				     << ACPlain;                                         \
@@ -386,7 +386,7 @@ static std::string __c_meth__ = ACBLightPurple_;
 			}                                                            \
 			if (priority >= DMM::__pthr__)                               \
 			{                                                            \
-				std::cout << msg_.str();                                 \
+				std::cout << msg_.str ();                                \
 				iostream;                                                \
 				cout << ACPlain;                                         \
 			}                                                            \
@@ -394,6 +394,6 @@ static std::string __c_meth__ = ACBLightPurple_;
 	}
 }  // namespace DMM
 
-#define __PRE0__(iostream) __PRE__(0, iostream)
+#define __PRE0__(iostream) __PRE__ (0, iostream)
 
 #endif  // __DM_MACROS__

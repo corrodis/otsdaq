@@ -14,13 +14,13 @@ class ConfigurationTree;
 class TCPDataListenerProducer : public DataProducer, public Configurable, public TCPSocket
 {
   public:
-	TCPDataListenerProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
-	virtual ~TCPDataListenerProducer(void);
+	TCPDataListenerProducer (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
+	virtual ~TCPDataListenerProducer (void);
 
   protected:
-	bool workLoopThread(toolbox::task::WorkLoop* workLoop);
-	void slowWrite(void);
-	void fastWrite(void);
+	bool workLoopThread (toolbox::task::WorkLoop* workLoop);
+	void slowWrite (void);
+	void fastWrite (void);
 	//For slow write
 	std::string                        data_;
 	std::map<std::string, std::string> header_;

@@ -18,7 +18,7 @@
 
 using namespace ots;
 
-int main()
+int main ()
 {
 	//Variables
 	std::string supervisorContextUID_           = "MainContext";
@@ -31,19 +31,19 @@ int main()
 	////////////////////////////////////////////////////////////////
 	//INSERTED GLOBALLY IN THE CODE
 	ConfigurationManager* theConfigurationManager_ = new ConfigurationManager;
-	FEVInterfacesManager  theFEVInterfacesManager_(theConfigurationManager_->getNode(ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME), theSupervisorConfigurationPath_);
+	FEVInterfacesManager  theFEVInterfacesManager_ (theConfigurationManager_->getNode (ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME), theSupervisorConfigurationPath_);
 
 	std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup =
-	    theConfigurationManager_->getConfigurationGroupFromAlias(ConfigurationAlias_);
+	    theConfigurationManager_->getConfigurationGroupFromAlias (ConfigurationAlias_);
 
-	theConfigurationManager_->loadConfigurationGroup(
+	theConfigurationManager_->loadConfigurationGroup (
 	    theGroup.first,
 	    theGroup.second,
 	    true);
 
-	theFEVInterfacesManager_.configure();
+	theFEVInterfacesManager_.configure ();
 	////////////////////////////////////////////////////////////////
-	exit(0);
+	exit (0);
 	////////////////////////////////////////////////////////////////
 	//Getting just the informations about the FEWInterface
 

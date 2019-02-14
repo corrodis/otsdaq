@@ -8,11 +8,11 @@ namespace ots
 class IterateConfiguration : public ConfigurationBase
 {
   public:
-	IterateConfiguration(void);
-	virtual ~IterateConfiguration(void);
+	IterateConfiguration (void);
+	virtual ~IterateConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 
 	//Getters
 
@@ -24,7 +24,7 @@ class IterateConfiguration : public ConfigurationBase
 
 	struct Command
 	{
-		void                       addTarget() { targets_.push_back(CommandTarget()); }
+		void                       addTarget () { targets_.push_back (CommandTarget ()); }
 		std::string                type_;
 		std::vector<CommandTarget> targets_;
 		std::map<
@@ -33,7 +33,7 @@ class IterateConfiguration : public ConfigurationBase
 		    params_;
 	};
 
-	std::vector<IterateConfiguration::Command> getPlanCommands(ConfigurationManager *configManager, const std::string &plan) const;
+	std::vector<IterateConfiguration::Command> getPlanCommands (ConfigurationManager *configManager, const std::string &plan) const;
 
 	static const std::string COMMAND_BEGIN_LABEL;
 	static const std::string COMMAND_CHOOSE_FSM;
@@ -51,7 +51,7 @@ class IterateConfiguration : public ConfigurationBase
 	static const std::string TARGET_TABLE;
 
 	static const std::map<std::string, std::string> commandToTableMap_;
-	static std::map<std::string, std::string>       createCommandToTableMap()
+	static std::map<std::string, std::string>       createCommandToTableMap ()
 	{
 		std::map<std::string, std::string> m;
 		m[COMMAND_BEGIN_LABEL]            = "IterationCommandBeginLabelConfiguration";

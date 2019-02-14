@@ -22,16 +22,16 @@ class RegisterView;
 class RegisterBase : public ots::ConfigurationBase
 {
   public:
-	RegisterBase(std::string configurationName, std::string typeName);
-	virtual ~RegisterBase();
-	void init(void);
+	RegisterBase (std::string configurationName, std::string typeName);
+	virtual ~RegisterBase ();
+	void init (void);
 
-	const RegisterView& getRegisterView(void) const;
-	RegisterView*       getRegisterViewPointer(void);
-	RegisterView*       getMockupRegisterViewPointer(void);
+	const RegisterView& getRegisterView (void) const;
+	RegisterView*       getRegisterViewPointer (void);
+	RegisterView*       getMockupRegisterViewPointer (void);
 
-	RegisterView* getTemporaryRegisterView(int temporaryVersion);
-	std::string   getTypeName(void);
+	RegisterView* getTemporaryRegisterView (int temporaryVersion);
+	std::string   getTypeName (void);
 
 	std::string   componentTypeName_;
 	RegisterView* activeRegisterView_;

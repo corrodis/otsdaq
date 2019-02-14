@@ -13,51 +13,51 @@
 
 using namespace ots;
 
-RegisterBase::RegisterBase(std::string configurationName, std::string componentType)
-    : ConfigurationBase(configurationName)
-    , componentTypeName_(componentType)
+RegisterBase::RegisterBase (std::string configurationName, std::string componentType)
+    : ConfigurationBase (configurationName)
+    , componentTypeName_ (componentType)
 {
 	RegisterConfigurationInfoReader configurationInfoReader;
-	configurationInfoReader.read(this);
+	configurationInfoReader.read (this);
 
 	RegisterSequencerInfoReader sequencerInfoReader;
-	sequencerInfoReader.read(this);
+	sequencerInfoReader.read (this);
 
-	init();
+	init ();
 }
 
-RegisterBase::~RegisterBase()
+RegisterBase::~RegisterBase ()
 {
 	// TODO Auto-generated destructor stub
 }
 //==============================================================================
-void RegisterBase::init(void)
+void RegisterBase::init (void)
 {
-	theComponentList_.clear();
+	theComponentList_.clear ();
 
 	//Loop through each component via the sequencer and add them to theComponentList_
-	for (auto it : *mockupRegisterView_.getRegistersSequencerInfoPointer())
+	for (auto it : *mockupRegisterView_.getRegistersSequencerInfoPointer ())
 	{
 		//	if(theComponentList_.find(it->getComponentName()) != theComponentList_.end())
 		//the insert function will have no effect if it already finds the key (component name) in theComponentList_; otherwise, let's add it
-		theComponentList_.insert(std::make_pair(it.getComponentName(), Component(it.getComponentName())));
+		theComponentList_.insert (std::make_pair (it.getComponentName (), Component (it.getComponentName ())));
 		//theComponentList_ now atleast contains the component, now lets set the state that we are looking at
-		auto regs = theComponentList_.find(it.getComponentName())->second.getRegistersPointer();
-		std::find_if(regs->begin(), regs->end(), [it](auto r) { return r.getName() == it.getRegisterName(); })->setState(it.getState(), it.getValueSequencePair());
+		auto regs = theComponentList_.find (it.getComponentName ())->second.getRegistersPointer ();
+		std::find_if (regs->begin (), regs->end (), [it](auto r) { return r.getName () == it.getRegisterName (); })->setState (it.getState (), it.getValueSequencePair ());
 	}
 	//Iterate through our newly-filled theComponentList_
 	for (auto aComponent : theComponentList_) {
 		//Iterate through each register of the component
-		for (auto registerFromConfiguration : *aComponent.second.getRegistersPointer())
+		for (auto registerFromConfiguration : *aComponent.second.getRegistersPointer ())
 		{
 			//Iterate through MockupView of the xxxRegisterConfiguration.xml
-			for (auto aRegister : *mockupRegisterView_.getRegistersInfoPointer())
+			for (auto aRegister : *mockupRegisterView_.getRegistersInfoPointer ())
 			{
 				//If the Register names match
-				if (aRegister.getRegisterName() == registerFromConfiguration.getName()
+				if (aRegister.getRegisterName () == registerFromConfiguration.getName ()
 				    //&& aRegister.getComponentName() ==  registerFromConfiguration.getComponentName()
 				) {
-					registerFromConfiguration.fillRegisterInfo(aRegister.getBaseAddress(), aRegister.getSize(), aRegister.getAccess());
+					registerFromConfiguration.fillRegisterInfo (aRegister.getBaseAddress (), aRegister.getSize (), aRegister.getAccess ());
 				}
 			}
 		}
@@ -65,7 +65,7 @@ void RegisterBase::init(void)
 
 	//Print for Debugging
 	for (auto aComponent : theComponentList_) {
-		aComponent.second.printInfo();
+		aComponent.second.printInfo ();
 	}
 
 	//create new instance of "Component" and add to "theComponentList_; set Name according to XML
@@ -110,24 +110,24 @@ void RegisterBase::init(void)
     }*/
 }
 //==============================================================================
-const RegisterView& RegisterBase::getRegisterView() const
+const RegisterView& RegisterBase::getRegisterView () const
 {
 	return *activeRegisterView_;
 }
 
 //==============================================================================
-RegisterView* RegisterBase::getRegisterViewPointer()
+RegisterView* RegisterBase::getRegisterViewPointer ()
 {
 	return activeRegisterView_;
 }
 
 //==============================================================================
-RegisterView* RegisterBase::getMockupRegisterViewPointer()
+RegisterView* RegisterBase::getMockupRegisterViewPointer ()
 {
 	return &mockupRegisterView_;
 }
 //==============================================================================
-std::string RegisterBase::getTypeName()
+std::string RegisterBase::getTypeName ()
 {
 	return componentTypeName_;
 }

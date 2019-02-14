@@ -16,10 +16,10 @@ namespace ots
 class RegisterSequencer : public ots::ConfigurationBase
 {
   public:
-	RegisterSequencer(std::string staticConfigurationName);
-	virtual ~RegisterSequencer();
+	RegisterSequencer (std::string staticConfigurationName);
+	virtual ~RegisterSequencer ();
 
-	void init(void);
+	void init (void);
 
 	//getter
 

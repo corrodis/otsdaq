@@ -18,8 +18,8 @@ class BufferImplementation
 {
 	struct ConsumerStruct
 	{
-		ConsumerStruct()
-		    : priority_(CircularBufferBase::LowConsumerPriority), readPointer_(0), subBuffersStatus_(nullptr) {}
+		ConsumerStruct ()
+		    : priority_ (CircularBufferBase::LowConsumerPriority), readPointer_ (0), subBuffersStatus_ (nullptr) {}
 
 		CircularBufferBase::ConsumerPriority priority_;
 		int                                  readPointer_;
@@ -27,31 +27,31 @@ class BufferImplementation
 	};
 
   public:
-	BufferImplementation(const std::string& producerName = "", unsigned int numberOfSubBuffers = 100);
-	BufferImplementation(const BufferImplementation<D, H>& toCopy);
-	BufferImplementation<D, H>& operator=(const BufferImplementation<D, H>& toCopy);
-	virtual ~BufferImplementation(void);
+	BufferImplementation (const std::string& producerName = "", unsigned int numberOfSubBuffers = 100);
+	BufferImplementation (const BufferImplementation<D, H>& toCopy);
+	BufferImplementation<D, H>& operator= (const BufferImplementation<D, H>& toCopy);
+	virtual ~BufferImplementation (void);
 
-	void init(void);
-	void reset(void);
-	void resetConsumerList(void);
-	void registerConsumer(const std::string& name, CircularBufferBase::ConsumerPriority priority);
+	void init (void);
+	void reset (void);
+	void resetConsumerList (void);
+	void registerConsumer (const std::string& name, CircularBufferBase::ConsumerPriority priority);
 	//void unregisterConsumer            	(const std::string& name);
-	int attachToEmptySubBuffer(D*& data, H*& header);
-	int setWrittenSubBuffer(void);
-	int write(const D& buffer, const H& header = H());
-	int read(D& buffer, const std::string& consumer);
-	int read(D& buffer, H& header, const std::string& consumer);
-	int read(D*& buffer, H*& header, const std::string& consumer);
-	int setReadSubBuffer(const std::string& consumer);  //Must be used in conjunction with attachToEmptySubBuffer because it attach to the nextWritePointer buffer
+	int attachToEmptySubBuffer (D*& data, H*& header);
+	int setWrittenSubBuffer (void);
+	int write (const D& buffer, const H& header = H ());
+	int read (D& buffer, const std::string& consumer);
+	int read (D& buffer, H& header, const std::string& consumer);
+	int read (D*& buffer, H*& header, const std::string& consumer);
+	int setReadSubBuffer (const std::string& consumer);  //Must be used in conjunction with attachToEmptySubBuffer because it attach to the nextWritePointer buffer
 
-	bool         isEmpty(void) const;
-	unsigned int bufferSize(void) const { return numberOfSubBuffers_; }
-	unsigned int numberOfWrittenBuffers(void) const;
+	bool         isEmpty (void) const;
+	unsigned int bufferSize (void) const { return numberOfSubBuffers_; }
+	unsigned int numberOfWrittenBuffers (void) const;
 
-	const std::map<std::string, ConsumerStruct>& getConsumers(void) const { return consumers_; };
+	const std::map<std::string, ConsumerStruct>& getConsumers (void) const { return consumers_; };
 
-	void dumpStatus(std::ostream* out = (std::ostream*)&(std::cout)) const;
+	void dumpStatus (std::ostream* out = (std::ostream*)&(std::cout)) const;
 
   protected:
 	const std::string mfSubject_;
@@ -74,18 +74,18 @@ class BufferImplementation
 	std::vector<D>                        subBuffers_;        // Buffers filled with data
 	const bool                            bufferFree_;
 
-	unsigned int      nextWritePointer(void);
-	unsigned int      nextReadPointer(const std::string& consumer);
-	int               getFreeBufferIndex(void);  //can return -1 if there are no free buffers!
-	unsigned int      getReadPointer(const std::string& consumer);
-	void              setWritten(unsigned int subBuffer);
-	void              setFree(unsigned int subBuffer, const std::string& consumer);
-	std::atomic_bool& isFree(unsigned int subBuffer) const;
-	std::atomic_bool& isFree(unsigned int subBuffer, const std::string& consumer) const;
+	unsigned int      nextWritePointer (void);
+	unsigned int      nextReadPointer (const std::string& consumer);
+	int               getFreeBufferIndex (void);  //can return -1 if there are no free buffers!
+	unsigned int      getReadPointer (const std::string& consumer);
+	void              setWritten (unsigned int subBuffer);
+	void              setFree (unsigned int subBuffer, const std::string& consumer);
+	std::atomic_bool& isFree (unsigned int subBuffer) const;
+	std::atomic_bool& isFree (unsigned int subBuffer, const std::string& consumer) const;
 
-	H&   getHeader(unsigned int subBuffer);
-	D&   getSubBuffer(unsigned int subBuffer);
-	void writeSubBuffer(unsigned int subBuffer, const D& buffer, const H& header);
+	H&   getHeader (unsigned int subBuffer);
+	D&   getSubBuffer (unsigned int subBuffer);
+	void writeSubBuffer (unsigned int subBuffer, const D& buffer, const H& header);
 };
 #include "otsdaq-core/DataManager/BufferImplementation.icc"
 

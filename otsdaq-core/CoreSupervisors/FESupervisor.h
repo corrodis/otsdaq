@@ -15,20 +15,20 @@ class FESupervisor : public CoreSupervisorBase
 	//friend FEVInterface;
 
   public:
-	XDAQ_INSTANTIATOR();
+	XDAQ_INSTANTIATOR ();
 
-	FESupervisor(xdaq::ApplicationStub* s);
-	virtual ~FESupervisor(void);
+	FESupervisor (xdaq::ApplicationStub* s);
+	virtual ~FESupervisor (void);
 
-	xoap::MessageReference         frontEndCommunicationRequest(xoap::MessageReference message);
-	xoap::MessageReference         macroMakerSupervisorRequest(xoap::MessageReference message);
-	virtual xoap::MessageReference workLoopStatusRequest(xoap::MessageReference message);
+	xoap::MessageReference         frontEndCommunicationRequest (xoap::MessageReference message);
+	xoap::MessageReference         macroMakerSupervisorRequest (xoap::MessageReference message);
+	virtual xoap::MessageReference workLoopStatusRequest (xoap::MessageReference message);
 
   protected:
 	FEVInterfacesManager* theFEInterfacesManager_;
 
   private:
-	FEVInterfacesManager* extractFEInterfacesManager();  //likely, just used in constructor
+	FEVInterfacesManager* extractFEInterfacesManager ();  //likely, just used in constructor
 };
 
 }  // namespace ots

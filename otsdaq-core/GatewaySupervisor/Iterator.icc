@@ -4,7 +4,7 @@
 //	static function definition
 //	set the value to all targets
 template<class T>
-void Iterator::helpCommandModifyActive(
+void Iterator::helpCommandModifyActive (
     IteratorWorkLoopStruct* iteratorStruct,
     const T&                setValue,
     bool                    doTrackGroupChanges) try
@@ -23,8 +23,8 @@ void Iterator::helpCommandModifyActive(
 	std::stringstream valSS;
 	valSS << setValue;
 
-	std::string           groupName   = cfgMgr->getActiveGroupName();
-	ConfigurationGroupKey originalKey = cfgMgr->getActiveGroupKey();
+	std::string           groupName   = cfgMgr->getActiveGroupName ();
+	ConfigurationGroupKey originalKey = cfgMgr->getActiveGroupKey ();
 
 	__COUT__ << "Active group is '" << groupName << " (" << originalKey << ")'" << __E__;
 
@@ -34,7 +34,7 @@ void Iterator::helpCommandModifyActive(
 	std::map<std::string /*name*/, ConfigurationVersion /*version*/> memberMap;
 	try
 	{
-		cfgMgr->loadConfigurationGroup(
+		cfgMgr->loadConfigurationGroup (
 		    groupName,
 		    originalKey,
 		    0,
@@ -48,7 +48,7 @@ void Iterator::helpCommandModifyActive(
 	}
 	catch (const std::runtime_error& e)
 	{
-		__SS__ << "Failed to load the active configuration group. Is there a valid one activated? " << e.what() << __E__;
+		__SS__ << "Failed to load the active configuration group. Is there a valid one activated? " << e.what () << __E__;
 		__SS_THROW__;
 	}
 
@@ -59,36 +59,36 @@ void Iterator::helpCommandModifyActive(
 	     iteratorStruct->commands_[iteratorStruct->commandIndex_].targets_)
 	{
 		__COUT__ << "target " << target.table_ << ":" << target.UID_ << __E__;
-		ConfigurationTree node = cfgMgr->getNode(
+		ConfigurationTree node = cfgMgr->getNode (
 		                                   target.table_)
-		                             .getNode(
+		                             .getNode (
 		                                 target.UID_)
-		                             .getNode(
+		                             .getNode (
 		                                 pathToField);
 
-		if (!node.isValueNode())
+		if (!node.isValueNode ())
 		{
 			__SS__ << "Invalid target node. The target path '" << pathToField << "' must be a value node." << __E__;
 			__SS_THROW__;
 		}
 
-		__COUT__ << "value node table: " << node.getConfigurationName() << __E__;
-		__COUT__ << "value node UID: " << node.getUIDAsString() << __E__;
+		__COUT__ << "value node table: " << node.getConfigurationName () << __E__;
+		__COUT__ << "value node UID: " << node.getUIDAsString () << __E__;
 
-		__COUT__ << "value node row: " << node.getFieldRow() << __E__;
-		__COUT__ << "value node column: " << node.getFieldColumn() << __E__;
+		__COUT__ << "value node row: " << node.getFieldRow () << __E__;
+		__COUT__ << "value node column: " << node.getFieldColumn () << __E__;
 
-		TableEditStruct valueTable(node.getConfigurationName(), cfgMgr);  // Table ready for editing!
+		TableEditStruct valueTable (node.getConfigurationName (), cfgMgr);  // Table ready for editing!
 
 		try
 		{
-			valueTable.cfgView_->setValueAsString(
-			    valSS.str(),
-			    node.getFieldRow(),
-			    node.getFieldColumn());
+			valueTable.cfgView_->setValueAsString (
+			    valSS.str (),
+			    node.getFieldRow (),
+			    node.getFieldColumn ());
 
-			valueTable.cfgView_->print();
-			valueTable.cfgView_->init();  //verify new table (throws runtime_errors)
+			valueTable.cfgView_->print ();
+			valueTable.cfgView_->init ();  //verify new table (throws runtime_errors)
 		}
 		catch (...)
 		{
@@ -98,7 +98,7 @@ void Iterator::helpCommandModifyActive(
 			{
 				__COUT__ << "Erasing temporary version " << valueTable.configName_ << "-v" << valueTable.temporaryVersion_ << std::endl;
 				//erase with proper version management
-				cfgMgr->eraseTemporaryVersion(valueTable.configName_, valueTable.temporaryVersion_);
+				cfgMgr->eraseTemporaryVersion (valueTable.configName_, valueTable.temporaryVersion_);
 			}
 
 			throw;  //re-throw
@@ -125,32 +125,32 @@ void Iterator::helpCommandModifyActive(
 					//	load into cache 'recent' versions for this table
 					//		'recent' := those already in cache, plus highest version numbers not in cache
 					const std::map<std::string, ConfigurationInfo>& allCfgInfo =
-					    cfgMgr->getAllConfigurationInfo();  //do not refresh
+					    cfgMgr->getAllConfigurationInfo ();  //do not refresh
 
-					auto versionReverseIterator = allCfgInfo.at(configName).versions_.rbegin();  //get reverse iterator
-					__COUT__ << "Filling up cached from " << config->getNumberOfStoredViews() << " to max count of " << config->MAX_VIEWS_IN_CACHE << std::endl;
-					for (; config->getNumberOfStoredViews() < config->MAX_VIEWS_IN_CACHE &&
-					       versionReverseIterator != allCfgInfo.at(configName).versions_.rend();
+					auto versionReverseIterator = allCfgInfo.at (configName).versions_.rbegin ();  //get reverse iterator
+					__COUT__ << "Filling up cached from " << config->getNumberOfStoredViews () << " to max count of " << config->MAX_VIEWS_IN_CACHE << std::endl;
+					for (; config->getNumberOfStoredViews () < config->MAX_VIEWS_IN_CACHE &&
+					       versionReverseIterator != allCfgInfo.at (configName).versions_.rend ();
 					     ++versionReverseIterator)
 					{
 						__COUT__ << "Versions in reverse order " << *versionReverseIterator << std::endl;
-						cfgMgr->getVersionedConfigurationByName(configName, *versionReverseIterator);  //load to cache
+						cfgMgr->getVersionedConfigurationByName (configName, *versionReverseIterator);  //load to cache
 					}
 				}
 
 				//check for duplicates (including original version)
-				newAssignedVersion = config->checkForDuplicate(temporaryModifiedVersion);
+				newAssignedVersion = config->checkForDuplicate (temporaryModifiedVersion);
 
 				__COUT__ << "Check for duplicate tables complete." << std::endl;
 			}
 
-			if (!newAssignedVersion.isInvalid())
+			if (!newAssignedVersion.isInvalid ())
 			{
 				//found an equivalent!
 				__COUT__ << "Equivalent table found in version v" << newAssignedVersion << std::endl;
 
 				//erase modified temporary version
-				cfgMgr->eraseTemporaryVersion(configName, temporaryModifiedVersion);
+				cfgMgr->eraseTemporaryVersion (configName, temporaryModifiedVersion);
 			}
 			else
 			{
@@ -159,7 +159,7 @@ void Iterator::helpCommandModifyActive(
 				__COUT__ << "\t\t**************************** Save v" << temporaryModifiedVersion << " as new table version" << std::endl;
 
 				newAssignedVersion =
-				    cfgMgr->saveNewConfiguration(configName, temporaryModifiedVersion, false /*makeTemporary*/);
+				    cfgMgr->saveNewConfiguration (configName, temporaryModifiedVersion, false /*makeTemporary*/);
 			}
 
 			__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << std::endl;
@@ -181,9 +181,9 @@ void Iterator::helpCommandModifyActive(
 
 	__COUT__ << "Checking for duplicate groups..." << std::endl;
 	ConfigurationGroupKey theKey =
-	    cfgMgr->findConfigurationGroup(groupName, memberMap);
+	    cfgMgr->findConfigurationGroup (groupName, memberMap);
 
-	if (!theKey.isInvalid())
+	if (!theKey.isInvalid ())
 	{
 		__COUT__ << "Found equivalent group key (" << theKey << ") for " << groupName << "." << std::endl;
 	}
@@ -192,7 +192,7 @@ void Iterator::helpCommandModifyActive(
 		__COUT__ << "Saving new group..." << __E__;
 
 		//save new group
-		theKey = cfgMgr->saveNewConfigurationGroup(
+		theKey = cfgMgr->saveNewConfigurationGroup (
 		    groupName,
 		    memberMap,
 		    "Created by Iterator modify active configuration command.");
@@ -202,12 +202,12 @@ void Iterator::helpCommandModifyActive(
 
 	//now active new group
 	__COUT__ << "Activating new group..." << __E__;
-	cfgMgr->activateConfigurationGroup(groupName, theKey);
+	cfgMgr->activateConfigurationGroup (groupName, theKey);
 
 }  //end helpCommandModifyActive()
 catch (const std::runtime_error& e)
 {
-	__SS__ << "Modify command failed! " << e.what() << __E__;
+	__SS__ << "Modify command failed! " << e.what () << __E__;
 
 	__SS_THROW__;
 }

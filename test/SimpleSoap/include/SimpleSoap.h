@@ -31,14 +31,14 @@ namespace ots
 class SimpleSoap : public xdaq::Application, public SOAPMessenger
 {
   public:
-	XDAQ_INSTANTIATOR();
+	XDAQ_INSTANTIATOR ();
 
-	SimpleSoap(xdaq::ApplicationStub* s);
-	void                   Default(xgi::Input* in, xgi::Output* out);
-	void                   StateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
-	xoap::MessageReference Start(xoap::MessageReference msg);
-	void                   stateInitial(toolbox::fsm::FiniteStateMachine& fsm);
-	void                   stateHalted(toolbox::fsm::FiniteStateMachine& fsm);
+	SimpleSoap (xdaq::ApplicationStub* s);
+	void                   Default (xgi::Input* in, xgi::Output* out);
+	void                   StateMachineXgiHandler (xgi::Input* in, xgi::Output* out);
+	xoap::MessageReference Start (xoap::MessageReference msg);
+	void                   stateInitial (toolbox::fsm::FiniteStateMachine& fsm);
+	void                   stateHalted (toolbox::fsm::FiniteStateMachine& fsm);
 
   private:
 	toolbox::fsm::FiniteStateMachine fsm_;

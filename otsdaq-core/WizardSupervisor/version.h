@@ -8,11 +8,11 @@
 #define MYPACKAGE_VERSION_PATCH 0
 #undef MYPACKAGE_PREVIOUS_VERSIONS
 
-#define MYPACKAGE_VERSION_CODE PACKAGE_VERSION_CODE(MYPACKAGE_VERSION_MAJOR, MYPACKAGE_VERSION_MINOR, MYPACKAGE_VERSION_PATCH)
+#define MYPACKAGE_VERSION_CODE PACKAGE_VERSION_CODE (MYPACKAGE_VERSION_MAJOR, MYPACKAGE_VERSION_MINOR, MYPACKAGE_VERSION_PATCH)
 #ifndef MYPACKAGE_PREVIOUS_VERSIONS
-#define MYPACKAGE_FULL_VERSION_LIST PACKAGE_VERSION_STRING(MYPACKAGE_VERSION_MAJOR, MYPACKAGE_VERSION_MINOR, MYPACKAGE_VERSION_PATCH)
+#define MYPACKAGE_FULL_VERSION_LIST PACKAGE_VERSION_STRING (MYPACKAGE_VERSION_MAJOR, MYPACKAGE_VERSION_MINOR, MYPACKAGE_VERSION_PATCH)
 #else
-#define MYPACKAGE_FULL_VERSION_LIST MYPACKAGE_PREVIOUS_VERSIONS "," PACKAGE_VERSION_STRING(MYPACKAGE_VERSION_MAJOR, MYPACKAGE_VERSION_MINOR, MYPACKAGE_VERSION_PATCH)
+#define MYPACKAGE_FULL_VERSION_LIST MYPACKAGE_PREVIOUS_VERSIONS "," PACKAGE_VERSION_STRING (MYPACKAGE_VERSION_MAJOR, MYPACKAGE_VERSION_MINOR, MYPACKAGE_VERSION_PATCH)
 #endif
 
 namespace WizardSupervisor
@@ -24,9 +24,9 @@ const std::string description = "The Wizard Supervisor is the primary server for
 const std::string authors     = "Ryan Rivera, Lorenzo Uplegger";
 const std::string link        = "http://otsdaq.fnal.gov";
 
-config::PackageInfo                            getPackageInfo();
-void                                           checkPackageDependencies() throw(config::PackageInfo::VersionException);
-std::set<std::string, std::less<std::string> > getPackageDependencies();
+config::PackageInfo                            getPackageInfo ();
+void                                           checkPackageDependencies () throw (config::PackageInfo::VersionException);
+std::set<std::string, std::less<std::string> > getPackageDependencies ();
 }  // namespace WizardSupervisor
 
 #endif

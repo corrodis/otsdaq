@@ -12,22 +12,22 @@ namespace ots
 class DataBufferConfiguration : public ConfigurationBase
 {
   public:
-	DataBufferConfiguration(void);
-	virtual ~DataBufferConfiguration(void);
+	DataBufferConfiguration (void);
+	virtual ~DataBufferConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 
 	//Getter
-	std::vector<std::string> getProcessorIDList(std::string dataBufferID) const;
+	std::vector<std::string> getProcessorIDList (std::string dataBufferID) const;
 
-	std::vector<std::string> getProducerIDList(std::string dataBufferID) const;
-	bool                     getProducerStatus(std::string dataBufferID, std::string producerID) const;
-	std::string              getProducerClass(std::string dataBufferID, std::string producerID) const;
+	std::vector<std::string> getProducerIDList (std::string dataBufferID) const;
+	bool                     getProducerStatus (std::string dataBufferID, std::string producerID) const;
+	std::string              getProducerClass (std::string dataBufferID, std::string producerID) const;
 
-	std::vector<std::string> getConsumerIDList(std::string dataBufferID) const;
-	bool                     getConsumerStatus(std::string dataBufferID, std::string consumerID) const;
-	std::string              getConsumerClass(std::string dataBufferID, std::string consumerID) const;
+	std::vector<std::string> getConsumerIDList (std::string dataBufferID) const;
+	bool                     getConsumerStatus (std::string dataBufferID, std::string consumerID) const;
+	std::string              getConsumerClass (std::string dataBufferID, std::string consumerID) const;
 
   private:
 	enum

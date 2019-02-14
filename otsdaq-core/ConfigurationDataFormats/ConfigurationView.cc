@@ -15,13 +15,13 @@ using namespace ots;
 const unsigned int ConfigurationView::INVALID = -1;
 
 //==============================================================================
-ConfigurationView::ConfigurationView(const std::string &name)
-    : uniqueStorageIdentifier_(""), tableName_(name), version_(ConfigurationVersion::INVALID), comment_(""), author_(""), creationTime_(time(0)), lastAccessTime_(0), colUID_(INVALID), colStatus_(INVALID), colPriority_(INVALID), fillWithLooseColumnMatching_(false), sourceColumnMismatchCount_(0), sourceColumnMissingCount_(0)
+ConfigurationView::ConfigurationView (const std::string &name)
+    : uniqueStorageIdentifier_ (""), tableName_ (name), version_ (ConfigurationVersion::INVALID), comment_ (""), author_ (""), creationTime_ (time (0)), lastAccessTime_ (0), colUID_ (INVALID), colStatus_ (INVALID), colPriority_ (INVALID), fillWithLooseColumnMatching_ (false), sourceColumnMismatchCount_ (0), sourceColumnMissingCount_ (0)
 {
 }
 
 //==============================================================================
-ConfigurationView::~ConfigurationView(void)
+ConfigurationView::~ConfigurationView (void)
 {
 }
 
@@ -29,39 +29,39 @@ ConfigurationView::~ConfigurationView(void)
 //operator=
 //	Do NOT allow!... use ConfigurationView::copy
 //	copy is used to maintain consistency with version, creationTime, lastAccessTime, etc)
-ConfigurationView &ConfigurationView::operator=(const ConfigurationView src)
+ConfigurationView &ConfigurationView::operator= (const ConfigurationView src)
 {
 	__SS__ << "Invalid use of operator=... Should not directly copy a ConfigurationView. Please use ConfigurationView::copy(sourceView,author,comment)";
 	__SS_THROW__;
 }
 
 //==============================================================================
-ConfigurationView &ConfigurationView::copy(const ConfigurationView &src,
-                                           ConfigurationVersion     destinationVersion,
-                                           const std::string &      author)
+ConfigurationView &ConfigurationView::copy (const ConfigurationView &src,
+                                            ConfigurationVersion     destinationVersion,
+                                            const std::string &      author)
 {
 	tableName_ = src.tableName_;
 	version_   = destinationVersion;
 	comment_   = src.comment_;
 	author_    = author;  //take new author
 	//creationTime_ 	= time(0); //don't change creation time
-	lastAccessTime_    = time(0);
+	lastAccessTime_    = time (0);
 	columnsInfo_       = src.columnsInfo_;
 	theDataView_       = src.theDataView_;
 	sourceColumnNames_ = src.sourceColumnNames_;
-	init();  // verify consistency
+	init ();  // verify consistency
 	return *this;
 }
 
 //==============================================================================
 //copyRows
 //	return row offset of first row copied in
-unsigned int ConfigurationView::copyRows(const std::string &      author,
-                                         const ConfigurationView &src,
-                                         unsigned int             srcOffsetRow,
-                                         unsigned int             srcRowsToCopy,
-                                         unsigned int             destOffsetRow,
-                                         bool                     generateUniqueDataColumns)
+unsigned int ConfigurationView::copyRows (const std::string &      author,
+                                          const ConfigurationView &src,
+                                          unsigned int             srcOffsetRow,
+                                          unsigned int             srcRowsToCopy,
+                                          unsigned int             destOffsetRow,
+                                          bool                     generateUniqueDataColumns)
 {
 	//__COUTV__(destOffsetRow);
 	//__COUTV__(srcOffsetRow);
@@ -70,31 +70,31 @@ unsigned int ConfigurationView::copyRows(const std::string &      author,
 	unsigned int retRow = (unsigned int)-1;
 
 	//check that column sizes match
-	if (src.getNumberOfColumns() !=
-	    getNumberOfColumns())
+	if (src.getNumberOfColumns () !=
+	    getNumberOfColumns ())
 	{
 		__SS__ << "Error! Number of Columns of source view must match destination view."
-		       << "Dimension of source is [" << src.getNumberOfColumns() << "] and of destination is [" << getNumberOfColumns() << "]." << __E__;
+		       << "Dimension of source is [" << src.getNumberOfColumns () << "] and of destination is [" << getNumberOfColumns () << "]." << __E__;
 		__SS_THROW__;
 	}
 
-	unsigned int srcRows = src.getNumberOfRows();
+	unsigned int srcRows = src.getNumberOfRows ();
 
 	for (unsigned int r = 0; r < srcRowsToCopy; ++r)
 	{
 		if (r + srcOffsetRow >= srcRows)
 			break;  //end when no more source rows to copy (past bounds)
 
-		destOffsetRow = addRow(author, generateUniqueDataColumns /*incrementUniqueData*/, "" /*baseNameAutoUID*/,
-		                       destOffsetRow);  //add and get row created
+		destOffsetRow = addRow (author, generateUniqueDataColumns /*incrementUniqueData*/, "" /*baseNameAutoUID*/,
+		                        destOffsetRow);  //add and get row created
 
 		if (retRow == (unsigned int)-1)
 			retRow = destOffsetRow;  //save row of first copied entry
 
 		//copy data
-		for (unsigned int col = 0; col < getNumberOfColumns(); ++col)
+		for (unsigned int col = 0; col < getNumberOfColumns (); ++col)
 			if (generateUniqueDataColumns &&
-			    columnsInfo_[col].getType() == ViewColumnInfo::TYPE_UNIQUE_DATA)
+			    columnsInfo_[col].getType () == ViewColumnInfo::TYPE_UNIQUE_DATA)
 				continue;  //if leaving unique data, then skip copy
 			else
 				theDataView_[destOffsetRow][col] =
@@ -114,7 +114,7 @@ unsigned int ConfigurationView::copyRows(const std::string &      author,
 //	e.g. identifying the UID column, checking unique data fields, etc.
 //
 // 	Note: this function also sanitizes yes/no, on/off, and true/false types
-void ConfigurationView::init(void)
+void ConfigurationView::init (void)
 {
 	try
 	{
@@ -124,37 +124,37 @@ void ConfigurationView::init(void)
 		std::string           capsColName, colName;
 		for (auto &colInfo : columnsInfo_)
 		{
-			colName = colInfo.getStorageName();
+			colName = colInfo.getStorageName ();
 			if (colName == "COMMENT_DESCRIPTION")
 				colName = "COMMENT";
 			capsColName = "";
-			for (unsigned int i = 0; i < colName.size(); ++i)
+			for (unsigned int i = 0; i < colName.size (); ++i)
 			{
 				if (colName[i] == '_') continue;
 				capsColName += colName[i];
 			}
 
-			colNameSet.emplace(capsColName);
+			colNameSet.emplace (capsColName);
 		}
 
-		if (colNameSet.size() != columnsInfo_.size())
+		if (colNameSet.size () != columnsInfo_.size ())
 		{
 			__SS__ << "Configuration Error:\t"
-			       << " Columns names must be unique! There are " << columnsInfo_.size() << " columns and the unique name count is " << colNameSet.size() << __E__;
+			       << " Columns names must be unique! There are " << columnsInfo_.size () << " columns and the unique name count is " << colNameSet.size () << __E__;
 			__SS_THROW__;
 		}
 
-		getOrInitColUID();  //setup UID column
+		getOrInitColUID ();  //setup UID column
 		try
 		{
-			getOrInitColStatus();  //setup Status column
+			getOrInitColStatus ();  //setup Status column
 		}
 		catch (...)
 		{
 		}  //ignore no Status column
 		try
 		{
-			getOrInitColPriority();  //setup Priority column
+			getOrInitColPriority ();  //setup Priority column
 		}
 		catch (...)
 		{
@@ -162,24 +162,24 @@ void ConfigurationView::init(void)
 
 		//require one comment column
 		unsigned int colPos;
-		if ((colPos = findColByType(ViewColumnInfo::TYPE_COMMENT)) != INVALID)
+		if ((colPos = findColByType (ViewColumnInfo::TYPE_COMMENT)) != INVALID)
 		{
-			if (columnsInfo_[colPos].getName() != "CommentDescription")
+			if (columnsInfo_[colPos].getName () != "CommentDescription")
 			{
 				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_COMMENT << " data type column must have name="
 				       << "CommentDescription" << __E__;
 				__SS_THROW__;
 			}
 
-			if (findColByType(ViewColumnInfo::TYPE_COMMENT, colPos + 1) != INVALID)  //found two!
+			if (findColByType (ViewColumnInfo::TYPE_COMMENT, colPos + 1) != INVALID)  //found two!
 			{
-				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_COMMENT << " data type in column " << columnsInfo_[colPos].getName() << " is repeated. This is not allowed." << __E__;
+				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_COMMENT << " data type in column " << columnsInfo_[colPos].getName () << " is repeated. This is not allowed." << __E__;
 				__SS_THROW__;
 			}
 
-			if (colPos != getNumberOfColumns() - 3)
+			if (colPos != getNumberOfColumns () - 3)
 			{
-				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_COMMENT << " data type column must be 3rd to last (in column " << getNumberOfColumns() - 3 << ")." << __E__;
+				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_COMMENT << " data type column must be 3rd to last (in column " << getNumberOfColumns () - 3 << ")." << __E__;
 				__SS_THROW__;
 			}
 		}
@@ -191,17 +191,17 @@ void ConfigurationView::init(void)
 		}
 
 		//require one author column
-		if ((colPos = findColByType(ViewColumnInfo::TYPE_AUTHOR)) != INVALID)
+		if ((colPos = findColByType (ViewColumnInfo::TYPE_AUTHOR)) != INVALID)
 		{
-			if (findColByType(ViewColumnInfo::TYPE_AUTHOR, colPos + 1) != INVALID)  //found two!
+			if (findColByType (ViewColumnInfo::TYPE_AUTHOR, colPos + 1) != INVALID)  //found two!
 			{
-				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_AUTHOR << " data type in column " << columnsInfo_[colPos].getName() << " is repeated. This is not allowed." << __E__;
+				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_AUTHOR << " data type in column " << columnsInfo_[colPos].getName () << " is repeated. This is not allowed." << __E__;
 				__SS_THROW__;
 			}
 
-			if (colPos != getNumberOfColumns() - 2)
+			if (colPos != getNumberOfColumns () - 2)
 			{
-				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_AUTHOR << " data type column must be 2nd to last (in column " << getNumberOfColumns() - 2 << ")." << __E__;
+				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_AUTHOR << " data type column must be 2nd to last (in column " << getNumberOfColumns () - 2 << ")." << __E__;
 				__SS_THROW__;
 			}
 		}
@@ -213,19 +213,19 @@ void ConfigurationView::init(void)
 		}
 
 		//require one timestamp column
-		if ((colPos = findColByType(ViewColumnInfo::TYPE_TIMESTAMP)) != INVALID)
+		if ((colPos = findColByType (ViewColumnInfo::TYPE_TIMESTAMP)) != INVALID)
 		{
-			if (findColByType(ViewColumnInfo::TYPE_TIMESTAMP, colPos + 1) != INVALID)  //found two!
+			if (findColByType (ViewColumnInfo::TYPE_TIMESTAMP, colPos + 1) != INVALID)  //found two!
 			{
-				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_TIMESTAMP << " data type in column " << columnsInfo_[colPos].getName() << " is repeated. This is not allowed." << __E__;
+				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_TIMESTAMP << " data type in column " << columnsInfo_[colPos].getName () << " is repeated. This is not allowed." << __E__;
 				__SS_THROW__;
 			}
 
-			if (colPos != getNumberOfColumns() - 1)
+			if (colPos != getNumberOfColumns () - 1)
 			{
-				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_TIMESTAMP << " data type column must be last (in column " << getNumberOfColumns() - 1 << ")." << __E__;
+				__SS__ << "Configuration Error:\t" << ViewColumnInfo::TYPE_TIMESTAMP << " data type column must be last (in column " << getNumberOfColumns () - 1 << ")." << __E__;
 				__COUT_ERR__ << "\n"
-				             << ss.str();
+				             << ss.str ();
 				__SS_THROW__;
 			}
 		}
@@ -240,24 +240,24 @@ void ConfigurationView::init(void)
 		// and ... allow letters, numbers, dash, underscore
 		// and ... force size 1
 		std::set<std::string /*uid*/> uidSet;
-		for (unsigned int row = 0; row < getNumberOfRows(); ++row)
+		for (unsigned int row = 0; row < getNumberOfRows (); ++row)
 		{
-			if (uidSet.find(theDataView_[row][colUID_]) != uidSet.end())
+			if (uidSet.find (theDataView_[row][colUID_]) != uidSet.end ())
 			{
 				__SS__ << ("Entries in UID are not unique. Specifically at row=" +
-				           std::to_string(row) + " value=" + theDataView_[row][colUID_])
+				           std::to_string (row) + " value=" + theDataView_[row][colUID_])
 				       << __E__;
 				__SS_THROW__;
 			}
 
-			if (theDataView_[row][colUID_].size() == 0)
+			if (theDataView_[row][colUID_].size () == 0)
 			{
 				__SS__ << "An invalid UID '" << theDataView_[row][colUID_] << "' "
 				       << " was identified. UIDs must contain at least 1 character." << __E__;
 				__SS_THROW__;
 			}
 
-			for (unsigned int i = 0; i < theDataView_[row][colUID_].size(); ++i)
+			for (unsigned int i = 0; i < theDataView_[row][colUID_].size (); ++i)
 				if (!(
 				        (theDataView_[row][colUID_][i] >= 'A' && theDataView_[row][colUID_][i] <= 'Z') ||
 				        (theDataView_[row][colUID_][i] >= 'a' && theDataView_[row][colUID_][i] <= 'z') ||
@@ -271,83 +271,83 @@ void ConfigurationView::init(void)
 					__SS_THROW__;
 				}
 
-			uidSet.insert(theDataView_[row][colUID_]);
+			uidSet.insert (theDataView_[row][colUID_]);
 		}
-		if (uidSet.size() != getNumberOfRows())
+		if (uidSet.size () != getNumberOfRows ())
 		{
 			__SS__ << "Entries in UID are not unique!"
-			       << "There are " << getNumberOfRows() << " records and the unique UID count is " << uidSet.size() << __E__;
+			       << "There are " << getNumberOfRows () << " records and the unique UID count is " << uidSet.size () << __E__;
 			__SS_THROW__;
 		}
 
 		//check that any TYPE_UNIQUE_DATA columns are really unique (no repeats)
 		colPos = (unsigned int)-1;
-		while ((colPos = findColByType(ViewColumnInfo::TYPE_UNIQUE_DATA, colPos + 1)) != INVALID)
+		while ((colPos = findColByType (ViewColumnInfo::TYPE_UNIQUE_DATA, colPos + 1)) != INVALID)
 		{
 			std::set<std::string /*unique data*/> uDataSet;
-			for (unsigned int row = 0; row < getNumberOfRows(); ++row)
+			for (unsigned int row = 0; row < getNumberOfRows (); ++row)
 			{
-				if (uDataSet.find(theDataView_[row][colPos]) != uDataSet.end())
+				if (uDataSet.find (theDataView_[row][colPos]) != uDataSet.end ())
 				{
-					__SS__ << "Entries in Unique Data column " << columnsInfo_[colPos].getName() << (" are not unique. Specifically at row=" + std::to_string(row) + " value=" + theDataView_[row][colPos]) << __E__;
+					__SS__ << "Entries in Unique Data column " << columnsInfo_[colPos].getName () << (" are not unique. Specifically at row=" + std::to_string (row) + " value=" + theDataView_[row][colPos]) << __E__;
 					__SS_THROW__;
 				}
-				uDataSet.insert(theDataView_[row][colPos]);
+				uDataSet.insert (theDataView_[row][colPos]);
 			}
-			if (uDataSet.size() != getNumberOfRows())
+			if (uDataSet.size () != getNumberOfRows ())
 			{
-				__SS__ << "Entries in  Unique Data column " << columnsInfo_[colPos].getName() << " are not unique!"
-				       << "There are " << getNumberOfRows() << " records and the unique data count is " << uDataSet.size() << __E__;
+				__SS__ << "Entries in  Unique Data column " << columnsInfo_[colPos].getName () << " are not unique!"
+				       << "There are " << getNumberOfRows () << " records and the unique data count is " << uDataSet.size () << __E__;
 				__SS_THROW__;
 			}
 		}
 
 		//check that any TYPE_UNIQUE_GROUP_DATA columns are really unique fpr groups (no repeats)
 		colPos = (unsigned int)-1;
-		while ((colPos = findColByType(ViewColumnInfo::TYPE_UNIQUE_GROUP_DATA, colPos + 1)) != INVALID)
+		while ((colPos = findColByType (ViewColumnInfo::TYPE_UNIQUE_GROUP_DATA, colPos + 1)) != INVALID)
 		{
 			//colPos is a unique group data column
 			//now, for each groupId column
 			//	check that data is unique for all groups
-			for (unsigned int groupIdColPos = 0; groupIdColPos < columnsInfo_.size(); ++groupIdColPos)
-				if (columnsInfo_[groupIdColPos].isGroupID())
+			for (unsigned int groupIdColPos = 0; groupIdColPos < columnsInfo_.size (); ++groupIdColPos)
+				if (columnsInfo_[groupIdColPos].isGroupID ())
 				{
 					std::map<std::string /*group name*/,
 					         std::pair<unsigned int /*memberCount*/,
 					                   std::set<std::string /*unique data*/> > >
 					    uGroupDataSets;
 
-					for (unsigned int row = 0; row < getNumberOfRows(); ++row)
+					for (unsigned int row = 0; row < getNumberOfRows (); ++row)
 					{
-						auto groupIds = getSetOfGroupIDs(groupIdColPos, row);
+						auto groupIds = getSetOfGroupIDs (groupIdColPos, row);
 
 						for (const auto &groupId : groupIds)
 						{
 							uGroupDataSets[groupId].first++;  //add to member count
 
-							if (uGroupDataSets[groupId].second.find(theDataView_[row][colPos]) !=
-							    uGroupDataSets[groupId].second.end())
+							if (uGroupDataSets[groupId].second.find (theDataView_[row][colPos]) !=
+							    uGroupDataSets[groupId].second.end ())
 							{
-								__SS__ << "Entries in Unique Group Data column " << columnsInfo_[colPos].getName() << " are not unique for group ID '" << groupId << ".' Specifically at row=" << std::to_string(row) << " value=" << theDataView_[row][colPos] << __E__;
+								__SS__ << "Entries in Unique Group Data column " << columnsInfo_[colPos].getName () << " are not unique for group ID '" << groupId << ".' Specifically at row=" << std::to_string (row) << " value=" << theDataView_[row][colPos] << __E__;
 								__SS_THROW__;
 							}
-							uGroupDataSets[groupId].second.insert(
+							uGroupDataSets[groupId].second.insert (
 							    theDataView_[row][colPos]);
 						}
 					}
 
 					for (const auto &groupPair : uGroupDataSets)
-						if (uGroupDataSets[groupPair.first].second.size() !=
+						if (uGroupDataSets[groupPair.first].second.size () !=
 						    uGroupDataSets[groupPair.first].first)
 						{
-							__SS__ << "Entries in  Unique Data column " << columnsInfo_[colPos].getName() << " are not unique for group '" << groupPair.first << "!'"
-							       << "There are " << uGroupDataSets[groupPair.first].first << " records and the unique data count is " << uGroupDataSets[groupPair.first].second.size() << __E__;
+							__SS__ << "Entries in  Unique Data column " << columnsInfo_[colPos].getName () << " are not unique for group '" << groupPair.first << "!'"
+							       << "There are " << uGroupDataSets[groupPair.first].first << " records and the unique data count is " << uGroupDataSets[groupPair.first].second.size () << __E__;
 							__SS_THROW__;
 						}
 				}
 		}  //end TYPE_UNIQUE_GROUP_DATA check
 
-		auto rowDefaults = getDefaultRowValues();
+		auto rowDefaults = getDefaultRowValues ();
 
 		//check that column types are well behaved
 		//	- check that fixed choice data is one of choices
@@ -359,20 +359,20 @@ void ConfigurationView::init(void)
 		bool                                                               tmpIsGroup;
 		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> tmpLinkPair;
 
-		for (unsigned int col = 0; col < getNumberOfColumns(); ++col)
+		for (unsigned int col = 0; col < getNumberOfColumns (); ++col)
 		{
-			if (columnsInfo_[col].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
+			if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
 			{
 				const std::vector<std::string> &theDataChoices =
-				    columnsInfo_[col].getDataChoices();
+				    columnsInfo_[col].getDataChoices ();
 
 				//check if arbitrary values allowed
-				if (theDataChoices.size() && theDataChoices[0] ==
-				                                 "arbitraryBool=1")
+				if (theDataChoices.size () && theDataChoices[0] ==
+				                                  "arbitraryBool=1")
 					continue;  //arbitrary values allowed
 
 				bool found;
-				for (unsigned int row = 0; row < getNumberOfRows(); ++row)
+				for (unsigned int row = 0; row < getNumberOfRows (); ++row)
 				{
 					found = false;
 					//check against default value first
@@ -389,38 +389,38 @@ void ConfigurationView::init(void)
 					}
 					if (!found)
 					{
-						__SS__ << "Configuration Error:\t'" << theDataView_[row][col] << "' in column " << columnsInfo_[col].getName() << " is not a valid Fixed Choice option. "
+						__SS__ << "Configuration Error:\t'" << theDataView_[row][col] << "' in column " << columnsInfo_[col].getName () << " is not a valid Fixed Choice option. "
 						       << "Possible values are as follows: ";
 
-						for (unsigned int i = 0; i < columnsInfo_[col].getDataChoices().size(); ++i)
+						for (unsigned int i = 0; i < columnsInfo_[col].getDataChoices ().size (); ++i)
 						{
 							if (i) ss << ", ";
-							ss << columnsInfo_[col].getDataChoices()[i];
+							ss << columnsInfo_[col].getDataChoices ()[i];
 						}
 						ss << "." << __E__;
 						__SS_THROW__;
 					}
 				}
 			}
-			else if (columnsInfo_[col].isChildLink())
+			else if (columnsInfo_[col].isChildLink ())
 			{
 				//check if forcing fixed choices
 
 				const std::vector<std::string> &theDataChoices =
-				    columnsInfo_[col].getDataChoices();
+				    columnsInfo_[col].getDataChoices ();
 
 				//check if arbitrary values allowed
-				if (!theDataChoices.size() ||
+				if (!theDataChoices.size () ||
 				    theDataChoices[0] == "arbitraryBool=1")
 					continue;  //arbitrary values allowed
 
 				//skip one if arbitrary setting is embedded as first value
-				bool skipOne = (theDataChoices.size() &&
+				bool skipOne = (theDataChoices.size () &&
 				                theDataChoices[0] == "arbitraryBool=0");
 				bool hasSkipped;
 
 				bool found;
-				for (unsigned int row = 0; row < getNumberOfRows(); ++row)
+				for (unsigned int row = 0; row < getNumberOfRows (); ++row)
 				{
 					found = false;
 
@@ -440,22 +440,22 @@ void ConfigurationView::init(void)
 					}
 					if (!found)
 					{
-						__SS__ << "Configuration Error:\t'" << theDataView_[row][col] << "' in column " << columnsInfo_[col].getName() << " is not a valid Fixed Choice option. "
+						__SS__ << "Configuration Error:\t'" << theDataView_[row][col] << "' in column " << columnsInfo_[col].getName () << " is not a valid Fixed Choice option. "
 						       << "Possible values are as follows: ";
 
 						//ss << StringMacros::vectorToString(columnsInfo_[col].getDataChoices()) << __E__;
-						for (unsigned int i = skipOne ? 1 : 0; i < columnsInfo_[col].getDataChoices().size(); ++i)
+						for (unsigned int i = skipOne ? 1 : 0; i < columnsInfo_[col].getDataChoices ().size (); ++i)
 						{
 							if (i > (skipOne ? 1 : 0)) ss << ", ";
-							ss << columnsInfo_[col].getDataChoices()[i];
+							ss << columnsInfo_[col].getDataChoices ()[i];
 						}
 						ss << "." << __E__;
 						__SS_THROW__;
 					}
 				}
 			}
-			else if (columnsInfo_[col].getType() == ViewColumnInfo::TYPE_ON_OFF)
-				for (unsigned int row = 0; row < getNumberOfRows(); ++row)
+			else if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_ON_OFF)
+				for (unsigned int row = 0; row < getNumberOfRows (); ++row)
 				{
 					if (theDataView_[row][col] == "1" || theDataView_[row][col] == "on" || theDataView_[row][col] == "On" || theDataView_[row][col] == "ON")
 						theDataView_[row][col] = ViewColumnInfo::TYPE_VALUE_ON;
@@ -463,12 +463,12 @@ void ConfigurationView::init(void)
 						theDataView_[row][col] = ViewColumnInfo::TYPE_VALUE_OFF;
 					else
 					{
-						__SS__ << "Configuration Error:\t" << theDataView_[row][col] << " in column " << columnsInfo_[col].getName() << " is not a valid Type (On/Off) std::string. Possible values are 1, on, On, ON, 0, off, Off, OFF." << __E__;
+						__SS__ << "Configuration Error:\t" << theDataView_[row][col] << " in column " << columnsInfo_[col].getName () << " is not a valid Type (On/Off) std::string. Possible values are 1, on, On, ON, 0, off, Off, OFF." << __E__;
 						__SS_THROW__;
 					}
 				}
-			else if (columnsInfo_[col].getType() == ViewColumnInfo::TYPE_TRUE_FALSE)
-				for (unsigned int row = 0; row < getNumberOfRows(); ++row)
+			else if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_TRUE_FALSE)
+				for (unsigned int row = 0; row < getNumberOfRows (); ++row)
 				{
 					if (theDataView_[row][col] == "1" || theDataView_[row][col] == "true" || theDataView_[row][col] == "True" || theDataView_[row][col] == "TRUE")
 						theDataView_[row][col] = ViewColumnInfo::TYPE_VALUE_TRUE;
@@ -476,12 +476,12 @@ void ConfigurationView::init(void)
 						theDataView_[row][col] = ViewColumnInfo::TYPE_VALUE_FALSE;
 					else
 					{
-						__SS__ << "Configuration Error:\t" << theDataView_[row][col] << " in column " << columnsInfo_[col].getName() << " is not a valid Type (True/False) std::string. Possible values are 1, true, True, TRUE, 0, false, False, FALSE." << __E__;
+						__SS__ << "Configuration Error:\t" << theDataView_[row][col] << " in column " << columnsInfo_[col].getName () << " is not a valid Type (True/False) std::string. Possible values are 1, true, True, TRUE, 0, false, False, FALSE." << __E__;
 						__SS_THROW__;
 					}
 				}
-			else if (columnsInfo_[col].getType() == ViewColumnInfo::TYPE_YES_NO)
-				for (unsigned int row = 0; row < getNumberOfRows(); ++row)
+			else if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_YES_NO)
+				for (unsigned int row = 0; row < getNumberOfRows (); ++row)
 				{
 					if (theDataView_[row][col] == "1" || theDataView_[row][col] == "yes" || theDataView_[row][col] == "Yes" || theDataView_[row][col] == "YES")
 						theDataView_[row][col] = ViewColumnInfo::TYPE_VALUE_YES;
@@ -489,21 +489,21 @@ void ConfigurationView::init(void)
 						theDataView_[row][col] = ViewColumnInfo::TYPE_VALUE_NO;
 					else
 					{
-						__SS__ << "Configuration Error:\t" << theDataView_[row][col] << " in column " << columnsInfo_[col].getName() << " is not a valid Type (Yes/No) std::string. Possible values are 1, yes, Yes, YES, 0, no, No, NO." << __E__;
+						__SS__ << "Configuration Error:\t" << theDataView_[row][col] << " in column " << columnsInfo_[col].getName () << " is not a valid Type (Yes/No) std::string. Possible values are 1, yes, Yes, YES, 0, no, No, NO." << __E__;
 						__SS_THROW__;
 					}
 				}
-			else if (columnsInfo_[col].isGroupID())  //GroupID type
+			else if (columnsInfo_[col].isGroupID ())  //GroupID type
 			{
-				colLinkGroupIDs_[columnsInfo_[col].getChildLinkIndex()] = col;  //add to groupid map
+				colLinkGroupIDs_[columnsInfo_[col].getChildLinkIndex ()] = col;  //add to groupid map
 				//check uniqueness
-				groupIdIndexes.emplace(columnsInfo_[col].getChildLinkIndex());
+				groupIdIndexes.emplace (columnsInfo_[col].getChildLinkIndex ());
 				++groupIdIndexesCount;
 			}
-			else if (columnsInfo_[col].isChildLink())  //Child Link type
+			else if (columnsInfo_[col].isChildLink ())  //Child Link type
 			{
 				//sanitize no link to default
-				for (unsigned int row = 0; row < getNumberOfRows(); ++row)
+				for (unsigned int row = 0; row < getNumberOfRows (); ++row)
 					if (theDataView_[row][col] == "NoLink" ||
 					    theDataView_[row][col] == "No_Link" ||
 					    theDataView_[row][col] == "NOLINK" ||
@@ -514,51 +514,51 @@ void ConfigurationView::init(void)
 						theDataView_[row][col] = ViewColumnInfo::DATATYPE_LINK_DEFAULT;
 
 				//check uniqueness
-				childLinkIndexes.emplace(columnsInfo_[col].getChildLinkIndex());
+				childLinkIndexes.emplace (columnsInfo_[col].getChildLinkIndex ());
 				++childLinkIndexesCount;
 
 				//force data type to ViewColumnInfo::DATATYPE_STRING
-				if (columnsInfo_[col].getDataType() != ViewColumnInfo::DATATYPE_STRING)
+				if (columnsInfo_[col].getDataType () != ViewColumnInfo::DATATYPE_STRING)
 				{
 					__SS__ << "Configuration Error:\t"
-					       << "Column " << col << " with name " << columnsInfo_[col].getName() << " is a Child Link column and has an illegal data type of '" << columnsInfo_[col].getDataType() << "'. The data type for Child Link columns must be " << ViewColumnInfo::DATATYPE_STRING << __E__;
+					       << "Column " << col << " with name " << columnsInfo_[col].getName () << " is a Child Link column and has an illegal data type of '" << columnsInfo_[col].getDataType () << "'. The data type for Child Link columns must be " << ViewColumnInfo::DATATYPE_STRING << __E__;
 					__SS_THROW__;
 				}
 
 				//check for link mate (i.e. every child link needs link ID)
-				getChildLink(col, tmpIsGroup, tmpLinkPair);
+				getChildLink (col, tmpIsGroup, tmpLinkPair);
 			}
-			else if (columnsInfo_[col].isChildLinkUID() ||  //Child Link ID type
-			         columnsInfo_[col].isChildLinkGroupID())
+			else if (columnsInfo_[col].isChildLinkUID () ||  //Child Link ID type
+			         columnsInfo_[col].isChildLinkGroupID ())
 			{
 				//check uniqueness
-				childLinkIdLabels.emplace(columnsInfo_[col].getChildLinkIndex());
+				childLinkIdLabels.emplace (columnsInfo_[col].getChildLinkIndex ());
 				++childLinkIdLabelsCount;
 
 				//check that the Link ID is not empty, and force to default
-				for (unsigned int row = 0; row < getNumberOfRows(); ++row)
+				for (unsigned int row = 0; row < getNumberOfRows (); ++row)
 					if (theDataView_[row][col] == "")
 						theDataView_[row][col] = rowDefaults[col];
 
 				//check for link mate (i.e. every child link needs link ID)
-				getChildLink(col, tmpIsGroup, tmpLinkPair);
+				getChildLink (col, tmpIsGroup, tmpLinkPair);
 			}
 		}
 
 		//verify child link index uniqueness
-		if (groupIdIndexes.size() != groupIdIndexesCount)
+		if (groupIdIndexes.size () != groupIdIndexesCount)
 		{
-			__SS__ << ("GroupId Labels are not unique!") << "There are " << groupIdIndexesCount << " GroupId Labels and the unique count is " << groupIdIndexes.size() << __E__;
+			__SS__ << ("GroupId Labels are not unique!") << "There are " << groupIdIndexesCount << " GroupId Labels and the unique count is " << groupIdIndexes.size () << __E__;
 			__SS_THROW__;
 		}
-		if (childLinkIndexes.size() != childLinkIndexesCount)
+		if (childLinkIndexes.size () != childLinkIndexesCount)
 		{
-			__SS__ << ("Child Link Labels are not unique!") << "There are " << childLinkIndexesCount << " Child Link Labels and the unique count is " << childLinkIndexes.size() << __E__;
+			__SS__ << ("Child Link Labels are not unique!") << "There are " << childLinkIndexesCount << " Child Link Labels and the unique count is " << childLinkIndexes.size () << __E__;
 			__SS_THROW__;
 		}
-		if (childLinkIdLabels.size() != childLinkIdLabelsCount)
+		if (childLinkIdLabels.size () != childLinkIdLabelsCount)
 		{
-			__SS__ << ("Child Link ID Labels are not unique!") << "There are " << childLinkIdLabelsCount << " Child Link ID Labels and the unique count is " << childLinkIdLabels.size() << __E__;
+			__SS__ << ("Child Link ID Labels are not unique!") << "There are " << childLinkIdLabelsCount << " Child Link ID Labels and the unique count is " << childLinkIdLabels.size () << __E__;
 			__SS_THROW__;
 		}
 	}
@@ -573,15 +573,15 @@ void ConfigurationView::init(void)
 //getValue
 //	string version
 //	Note: necessary because types of std::basic_string<char> cause compiler problems if no string specific function
-void ConfigurationView::getValue(std::string &value, unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
+void ConfigurationView::getValue (std::string &value, unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
-	if (!(col < columnsInfo_.size() && row < getNumberOfRows()))
+	if (!(col < columnsInfo_.size () && row < getNumberOfRows ()))
 	{
 		__SS__ << "Invalid row col requested" << __E__;
 		__SS_THROW__;
 	}
 
-	value = validateValueForColumn(theDataView_[row][col], col, doConvertEnvironmentVariables);
+	value = validateValueForColumn (theDataView_[row][col], col, doConvertEnvironmentVariables);
 }
 
 //==============================================================================
@@ -589,22 +589,22 @@ void ConfigurationView::getValue(std::string &value, unsigned int row, unsigned 
 //	string version
 //	Note: necessary because types of std::basic_string<char>
 //	cause compiler problems if no string specific function
-std::string ConfigurationView::validateValueForColumn(const std::string &value,
-                                                      unsigned int       col,
-                                                      bool               doConvertEnvironmentVariables) const
+std::string ConfigurationView::validateValueForColumn (const std::string &value,
+                                                       unsigned int       col,
+                                                       bool               doConvertEnvironmentVariables) const
 {
-	if (col >= columnsInfo_.size())
+	if (col >= columnsInfo_.size ())
 	{
 		__SS__ << "Invalid col requested" << __E__;
 		__SS_THROW__;
 	}
 
-	if (columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING)
-		return doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables(value) : value;
-	else if (columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_TIME)
+	if (columnsInfo_[col].getDataType () == ViewColumnInfo::DATATYPE_STRING)
+		return doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables (value) : value;
+	else if (columnsInfo_[col].getDataType () == ViewColumnInfo::DATATYPE_TIME)
 	{
-		return StringMacros::getTimestampString(
-		    doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables(value) : value);
+		return StringMacros::getTimestampString (
+		    doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables (value) : value);
 
 		//		retValue.resize(30); //known fixed size: Thu Aug 23 14:55:02 2001 CST
 		//		time_t timestamp(
@@ -617,10 +617,10 @@ std::string ConfigurationView::validateValueForColumn(const std::string &value,
 	}
 	else
 	{
-		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
+		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType ()
 		       << " in configuration " << tableName_
-		       << " at column=" << columnsInfo_[col].getName()
-		       << " for getValue with type '" << StringMacros::demangleTypeName(typeid(std::string).name())
+		       << " at column=" << columnsInfo_[col].getName ()
+		       << " for getValue with type '" << StringMacros::demangleTypeName (typeid (std::string).name ())
 		       << "'" << __E__;
 		__SS_THROW__;
 	}
@@ -632,9 +632,9 @@ std::string ConfigurationView::validateValueForColumn(const std::string &value,
 //getValueAsString
 //	gets the value with the proper data type and converts to string
 //	as though getValue was called.
-std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
+std::string ConfigurationView::getValueAsString (unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
-	if (!(col < columnsInfo_.size() && row < getNumberOfRows()))
+	if (!(col < columnsInfo_.size () && row < getNumberOfRows ()))
 	{
 		__SS__ << ("Invalid row col requested") << __E__;
 		__SS_THROW__;
@@ -642,21 +642,21 @@ std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int c
 
 	//__COUT__ << columnsInfo_[col].getType() << " " << col << __E__;
 
-	if (columnsInfo_[col].getType() == ViewColumnInfo::TYPE_ON_OFF)
+	if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_ON_OFF)
 	{
 		if (theDataView_[row][col] == "1" || theDataView_[row][col] == "on" || theDataView_[row][col] == "On" || theDataView_[row][col] == "ON")
 			return ViewColumnInfo::TYPE_VALUE_ON;
 		else
 			return ViewColumnInfo::TYPE_VALUE_OFF;
 	}
-	else if (columnsInfo_[col].getType() == ViewColumnInfo::TYPE_TRUE_FALSE)
+	else if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_TRUE_FALSE)
 	{
 		if (theDataView_[row][col] == "1" || theDataView_[row][col] == "true" || theDataView_[row][col] == "True" || theDataView_[row][col] == "TRUE")
 			return ViewColumnInfo::TYPE_VALUE_TRUE;
 		else
 			return ViewColumnInfo::TYPE_VALUE_FALSE;
 	}
-	else if (columnsInfo_[col].getType() == ViewColumnInfo::TYPE_YES_NO)
+	else if (columnsInfo_[col].getType () == ViewColumnInfo::TYPE_YES_NO)
 	{
 		if (theDataView_[row][col] == "1" || theDataView_[row][col] == "yes" || theDataView_[row][col] == "Yes" || theDataView_[row][col] == "YES")
 			return ViewColumnInfo::TYPE_VALUE_YES;
@@ -665,7 +665,7 @@ std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int c
 	}
 
 	//__COUT__ << __E__;
-	return doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables(theDataView_[row][col]) : theDataView_[row][col];
+	return doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables (theDataView_[row][col]) : theDataView_[row][col];
 }
 
 //==============================================================================
@@ -674,12 +674,12 @@ std::string ConfigurationView::getValueAsString(unsigned int row, unsigned int c
 //	as though getValue was called.
 //	then escapes all special characters with slash.
 //	Note: this should be useful for values placed in double quotes, i.e. JSON.
-std::string ConfigurationView::getEscapedValueAsString(unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
+std::string ConfigurationView::getEscapedValueAsString (unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
-	std::string val    = getValueAsString(row, col, doConvertEnvironmentVariables);
+	std::string val    = getValueAsString (row, col, doConvertEnvironmentVariables);
 	std::string retVal = "";
-	retVal.reserve(val.size());  //reserve roughly right size
-	for (unsigned int i = 0; i < val.size(); ++i)
+	retVal.reserve (val.size ());  //reserve roughly right size
+	for (unsigned int i = 0; i < val.size (); ++i)
 	{
 		if (val[i] == '\n')
 			retVal += "\\n";
@@ -702,37 +702,37 @@ std::string ConfigurationView::getEscapedValueAsString(unsigned int row, unsigne
 //==============================================================================
 //setValue
 //	string version
-void ConfigurationView::setValue(const std::string &value, unsigned int row, unsigned int col)
+void ConfigurationView::setValue (const std::string &value, unsigned int row, unsigned int col)
 {
-	if (!(col < columnsInfo_.size() && row < getNumberOfRows()))
+	if (!(col < columnsInfo_.size () && row < getNumberOfRows ()))
 	{
 		__SS__ << "Invalid row (" << row << ") col (" << col << ") requested!" << __E__;
 		__SS_THROW__;
 	}
 
-	if (columnsInfo_[col].getDataType() == ViewColumnInfo::DATATYPE_STRING)
+	if (columnsInfo_[col].getDataType () == ViewColumnInfo::DATATYPE_STRING)
 		theDataView_[row][col] = value;
 	else  // dont allow ViewColumnInfo::DATATYPE_TIME to be set as string.. force use as time_t to standardize string result
 	{
-		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
+		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType ()
 		       << " in configuration " << tableName_
-		       << " at column=" << columnsInfo_[col].getName()
-		       << " for setValue with type '" << StringMacros::demangleTypeName(typeid(value).name())
+		       << " at column=" << columnsInfo_[col].getName ()
+		       << " for setValue with type '" << StringMacros::demangleTypeName (typeid (value).name ())
 		       << "'" << __E__;
 		__SS_THROW__;
 	}
 }
-void ConfigurationView::setValue(const char *value, unsigned int row, unsigned int col)
+void ConfigurationView::setValue (const char *value, unsigned int row, unsigned int col)
 {
-	setValue(std::string(value), row, col);
+	setValue (std::string (value), row, col);
 }
 
 //==============================================================================
 //setValue
 //	string version
-void ConfigurationView::setValueAsString(const std::string &value, unsigned int row, unsigned int col)
+void ConfigurationView::setValueAsString (const std::string &value, unsigned int row, unsigned int col)
 {
-	if (!(col < columnsInfo_.size() && row < getNumberOfRows()))
+	if (!(col < columnsInfo_.size () && row < getNumberOfRows ()))
 	{
 		__SS__ << "Invalid row (" << row << ") col (" << col << ") requested!" << __E__;
 		__SS_THROW__;
@@ -744,17 +744,17 @@ void ConfigurationView::setValueAsString(const std::string &value, unsigned int 
 //==============================================================================
 //getOrInitColUID
 //	if column not found throw error
-const unsigned int ConfigurationView::getOrInitColUID(void)
+const unsigned int ConfigurationView::getOrInitColUID (void)
 {
 	if (colUID_ != INVALID) return colUID_;
 
 	//if doesn't exist throw error! each view must have a UID column
-	colUID_ = findColByType(ViewColumnInfo::TYPE_UID);
+	colUID_ = findColByType (ViewColumnInfo::TYPE_UID);
 	if (colUID_ == INVALID)
 	{
 		__COUT__ << "Column Types: " << __E__;
-		for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
-			std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
+		for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
+			std::cout << columnsInfo_[col].getType () << "() " << columnsInfo_[col].getName () << __E__;
 		__SS__ << "\tMissing UID Column in table named '" << tableName_ << "'" << __E__;
 		__SS_THROW__;
 	}
@@ -764,13 +764,13 @@ const unsigned int ConfigurationView::getOrInitColUID(void)
 //getColOfUID
 //	const version, so don't attempt to lookup
 //	if column not found throw error
-const unsigned int ConfigurationView::getColUID(void) const
+const unsigned int ConfigurationView::getColUID (void) const
 {
 	if (colUID_ != INVALID) return colUID_;
 
 	__COUT__ << "Column Types: " << __E__;
-	for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
+	for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
+		std::cout << columnsInfo_[col].getType () << "() " << columnsInfo_[col].getName () << __E__;
 
 	__SS__ << ("Missing UID Column in config named " + tableName_ +
 	           ". (Possibly ConfigurationView was just not initialized?" +
@@ -782,18 +782,18 @@ const unsigned int ConfigurationView::getColUID(void) const
 //==============================================================================
 //getOrInitColStatus
 //	if column not found throw error
-const unsigned int ConfigurationView::getOrInitColStatus(void)
+const unsigned int ConfigurationView::getOrInitColStatus (void)
 {
 	if (colStatus_ != INVALID) return colStatus_;
 
 	//if doesn't exist throw error! each view must have a UID column
-	colStatus_ = findCol(ViewColumnInfo::COL_NAME_STATUS);
+	colStatus_ = findCol (ViewColumnInfo::COL_NAME_STATUS);
 	if (colStatus_ == INVALID)
 	{
 		__SS__ << "\tMissing " << ViewColumnInfo::COL_NAME_STATUS << " Column in table named '" << tableName_ << "'" << __E__;
 		ss << "Column Types: " << __E__;
-		for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
-			ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
+		for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
+			ss << columnsInfo_[col].getType () << "() " << columnsInfo_[col].getName () << __E__;
 
 		__SS_THROW__;
 	}
@@ -803,18 +803,18 @@ const unsigned int ConfigurationView::getOrInitColStatus(void)
 //==============================================================================
 //getOrInitColPriority
 //	if column not found throw error
-const unsigned int ConfigurationView::getOrInitColPriority(void)
+const unsigned int ConfigurationView::getOrInitColPriority (void)
 {
 	if (colPriority_ != INVALID) return colPriority_;
 
 	//if doesn't exist throw error! each view must have a UID column
-	colPriority_ = findCol("*" + ViewColumnInfo::COL_NAME_PRIORITY);  //wild card search
+	colPriority_ = findCol ("*" + ViewColumnInfo::COL_NAME_PRIORITY);  //wild card search
 	if (colPriority_ == INVALID)
 	{
 		__SS__ << "\tMissing " << ViewColumnInfo::COL_NAME_PRIORITY << " Column in table named '" << tableName_ << "'" << __E__;
 		ss << "Column Types: " << __E__;
-		for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
-			ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
+		for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
+			ss << columnsInfo_[col].getType () << "() " << columnsInfo_[col].getName () << __E__;
 
 		__SS_THROW__;
 	}
@@ -825,13 +825,13 @@ const unsigned int ConfigurationView::getOrInitColPriority(void)
 //getColStatus
 //	const version, so don't attempt to lookup
 //	if column not found throw error
-const unsigned int ConfigurationView::getColStatus(void) const
+const unsigned int ConfigurationView::getColStatus (void) const
 {
 	if (colStatus_ != INVALID) return colStatus_;
 
 	__COUT__ << "Column Types: " << __E__;
-	for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
+	for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
+		std::cout << columnsInfo_[col].getType () << "() " << columnsInfo_[col].getName () << __E__;
 
 	__SS__ << "Missing " << ViewColumnInfo::COL_NAME_STATUS << " Column in config named " << tableName_ << ". (Possibly ConfigurationView was just not initialized?"
 	       << "This is the const call so can not alter class members)" << __E__;
@@ -842,13 +842,13 @@ const unsigned int ConfigurationView::getColStatus(void) const
 //getColPriority
 //	const version, so don't attempt to lookup
 //	if column not found throw error
-const unsigned int ConfigurationView::getColPriority(void) const
+const unsigned int ConfigurationView::getColPriority (void) const
 {
 	if (colPriority_ != INVALID) return colPriority_;
 
 	__COUT__ << "Column Types: " << __E__;
-	for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
+	for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
+		std::cout << columnsInfo_[col].getType () << "() " << columnsInfo_[col].getName () << __E__;
 
 	__SS__ << "Missing " << ViewColumnInfo::COL_NAME_PRIORITY << " Column in config named " << tableName_ << ". (The Priority column is identified when ConfigurationView is initialized)"
 	       << __E__;  // this is the const call, so can not identify the column and set colPriority_ here
@@ -858,12 +858,12 @@ const unsigned int ConfigurationView::getColPriority(void) const
 //==============================================================================
 //addRowToGroup
 //	Group entry can include | to place a record in multiple groups
-void ConfigurationView::addRowToGroup(const unsigned int &row,
-                                      const unsigned int &col,
-                                      const std::string & groupID)  //,
-                                                                   //const std::string &colDefault)
+void ConfigurationView::addRowToGroup (const unsigned int &row,
+                                       const unsigned int &col,
+                                       const std::string & groupID)  //,
+                                                                    //const std::string &colDefault)
 {
-	if (isEntryInGroupCol(row, col, groupID))
+	if (isEntryInGroupCol (row, col, groupID))
 	{
 		__SS__ << "GroupID (" << groupID << ") added to row (" << row
 		       << " is already present!" << __E__;
@@ -875,15 +875,15 @@ void ConfigurationView::addRowToGroup(const unsigned int &row,
 	//		set groupid
 	//	if other groups
 	//		prepend groupId |
-	if (getDataView()[row][col] == "" ||
-	    getDataView()[row][col] == getDefaultRowValues()[col])  //colDefault)
-		setValue(
+	if (getDataView ()[row][col] == "" ||
+	    getDataView ()[row][col] == getDefaultRowValues ()[col])  //colDefault)
+		setValue (
 		    groupID,
 		    row,
 		    col);
 	else
-		setValue(
-		    groupID + " | " + getDataView()[row][col],
+		setValue (
+		    groupID + " | " + getDataView ()[row][col],
 		    row,
 		    col);
 
@@ -895,14 +895,14 @@ void ConfigurationView::addRowToGroup(const unsigned int &row,
 //	Group entry can include | to place a record in multiple groups
 //
 //	returns true if row was deleted because it had no group left
-bool ConfigurationView::removeRowFromGroup(const unsigned int &row,
-                                           const unsigned int &col,
-                                           const std::string & groupNeedle,
-                                           bool                deleteRowIfNoGroupLeft)
+bool ConfigurationView::removeRowFromGroup (const unsigned int &row,
+                                            const unsigned int &col,
+                                            const std::string & groupNeedle,
+                                            bool                deleteRowIfNoGroupLeft)
 {
 	__COUT__ << "groupNeedle " << groupNeedle << __E__;
 	std::set<std::string> groupIDList;
-	if (!isEntryInGroupCol(row, col, groupNeedle, &groupIDList))
+	if (!isEntryInGroupCol (row, col, groupNeedle, &groupIDList))
 	{
 		__SS__ << "GroupID (" << groupNeedle << ") removed from row (" << row
 		       << ") was already removed!" << __E__;
@@ -928,11 +928,11 @@ bool ConfigurationView::removeRowFromGroup(const unsigned int &row,
 	if (deleteRowIfNoGroupLeft && newValue == "")
 	{
 		__COUT__ << "Delete row since it no longer part of any group." << __E__;
-		deleteRow(row);
+		deleteRow (row);
 		wasDeleted = true;
 	}
 	else
-		setValue(newValue, row, col);
+		setValue (newValue, row, col);
 
 	//__COUT__ << getDataView()[row][col] << __E__;
 
@@ -945,13 +945,13 @@ bool ConfigurationView::removeRowFromGroup(const unsigned int &row,
 // 	so that handling is consistent
 //
 //	Group entry can include | to place a record in multiple groups
-bool ConfigurationView::isEntryInGroup(const unsigned int &r,
-                                       const std::string & childLinkIndex,
-                                       const std::string & groupNeedle) const
+bool ConfigurationView::isEntryInGroup (const unsigned int &r,
+                                        const std::string & childLinkIndex,
+                                        const std::string & groupNeedle) const
 {
-	unsigned int c = getColLinkGroupID(childLinkIndex);  //column in question
+	unsigned int c = getColLinkGroupID (childLinkIndex);  //column in question
 
-	return isEntryInGroupCol(r, c, groupNeedle);
+	return isEntryInGroupCol (r, c, groupNeedle);
 }
 
 //==============================================================================
@@ -963,10 +963,10 @@ bool ConfigurationView::isEntryInGroup(const unsigned int &r,
 //	Group entry can include | to place a record in multiple groups
 //
 // Note: should mirror what happens in ConfigurationView::getSetOfGroupIDs
-bool ConfigurationView::isEntryInGroupCol(const unsigned int &   r,
-                                          const unsigned int &   c,
-                                          const std::string &    groupNeedle,
-                                          std::set<std::string> *groupIDList) const
+bool ConfigurationView::isEntryInGroupCol (const unsigned int &   r,
+                                           const unsigned int &   c,
+                                           const std::string &    groupNeedle,
+                                           std::set<std::string> *groupIDList) const
 {
 	unsigned int i     = 0;
 	unsigned int j     = 0;
@@ -975,7 +975,7 @@ bool ConfigurationView::isEntryInGroupCol(const unsigned int &   r,
 	//__COUT__ << "groupNeedle " << groupNeedle << __E__;
 
 	//go through the full groupString extracting groups and comparing to groupNeedle
-	for (; j < theDataView_[r][c].size(); ++j)
+	for (; j < theDataView_[r][c].size (); ++j)
 		if ((theDataView_[r][c][j] == ' ' ||  //ignore leading white space or |
 		     theDataView_[r][c][j] == '|') &&
 		    i == j)
@@ -984,11 +984,11 @@ bool ConfigurationView::isEntryInGroupCol(const unsigned int &   r,
 		          theDataView_[r][c][j] == '|') &&
 		         i != j)  // assume end of group name
 		{
-			if (groupIDList) groupIDList->emplace(theDataView_[r][c].substr(i, j - i));
+			if (groupIDList) groupIDList->emplace (theDataView_[r][c].substr (i, j - i));
 
 			//__COUT__ << "Group found to compare: " <<
 			//		theDataView_[r][c].substr(i,j-i) << __E__;
-			if (groupNeedle == theDataView_[r][c].substr(i, j - i))
+			if (groupNeedle == theDataView_[r][c].substr (i, j - i))
 			{
 				if (!groupIDList)  //dont return if caller is trying to get group list
 					return true;
@@ -1000,11 +1000,11 @@ bool ConfigurationView::isEntryInGroupCol(const unsigned int &   r,
 
 	if (i != j)  //last group check (for case when no ' ' or '|')
 	{
-		if (groupIDList) groupIDList->emplace(theDataView_[r][c].substr(i, j - i));
+		if (groupIDList) groupIDList->emplace (theDataView_[r][c].substr (i, j - i));
 
 		//__COUT__ << "Group found to compare: " <<
 		//		theDataView_[r][c].substr(i,j-i) << __E__;
-		if (groupNeedle == theDataView_[r][c].substr(i, j - i))
+		if (groupNeedle == theDataView_[r][c].substr (i, j - i))
 			return true;
 	}
 
@@ -1019,13 +1019,13 @@ bool ConfigurationView::isEntryInGroupCol(const unsigned int &   r,
 //		associate with childLinkIndex
 //
 // Note: should mirror what happens in ConfigurationView::isEntryInGroupCol
-std::set<std::string> ConfigurationView::getSetOfGroupIDs(const std::string &childLinkIndex,
-                                                          unsigned int       r) const
+std::set<std::string> ConfigurationView::getSetOfGroupIDs (const std::string &childLinkIndex,
+                                                           unsigned int       r) const
 {
-	return getSetOfGroupIDs(getColLinkGroupID(childLinkIndex), r);
+	return getSetOfGroupIDs (getColLinkGroupID (childLinkIndex), r);
 }
-std::set<std::string> ConfigurationView::getSetOfGroupIDs(const unsigned int &c,
-                                                          unsigned int        r) const
+std::set<std::string> ConfigurationView::getSetOfGroupIDs (const unsigned int &c,
+                                                           unsigned int        r) const
 {
 	//__COUT__ << "GroupID col=" << (int)c << __E__;
 
@@ -1036,13 +1036,13 @@ std::set<std::string> ConfigurationView::getSetOfGroupIDs(const unsigned int &c,
 
 	if (r != (unsigned int)-1)
 	{
-		if (r >= getNumberOfRows())
+		if (r >= getNumberOfRows ())
 		{
 			__SS__ << "Invalid row requested!" << __E__;
 			__SS_THROW__;
 		}
 
-		StringMacros::getSetFromString(theDataView_[r][c], retSet);
+		StringMacros::getSetFromString (theDataView_[r][c], retSet);
 		//		//go through the full groupString extracting groups
 		//		//add each found groupId to set
 		//		for(;j<theDataView_[r][c].size();++j)
@@ -1070,9 +1070,9 @@ std::set<std::string> ConfigurationView::getSetOfGroupIDs(const unsigned int &c,
 	else
 	{
 		//do all rows
-		for (r = 0; r < getNumberOfRows(); ++r)
+		for (r = 0; r < getNumberOfRows (); ++r)
 		{
-			StringMacros::getSetFromString(theDataView_[r][c], retSet);
+			StringMacros::getSetFromString (theDataView_[r][c], retSet);
 
 			//			i=0;
 			//			j=0;
@@ -1118,16 +1118,16 @@ std::set<std::string> ConfigurationView::getSetOfGroupIDs(const unsigned int &c,
 //==============================================================================
 //getColOfLinkGroupID
 //	const version, if column not found throw error
-const unsigned int ConfigurationView::getColLinkGroupID(const std::string &childLinkIndex) const
+const unsigned int ConfigurationView::getColLinkGroupID (const std::string &childLinkIndex) const
 {
-	std::map<std::string, unsigned int>::const_iterator it = colLinkGroupIDs_.find(childLinkIndex);
+	std::map<std::string, unsigned int>::const_iterator it = colLinkGroupIDs_.find (childLinkIndex);
 	if (it !=  //if already known, return it
-	    colLinkGroupIDs_.end())
+	    colLinkGroupIDs_.end ())
 		return it->second;
 
 	__COUT__ << "Existing Column Types: " << __E__;
-	for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
+	for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
+		std::cout << columnsInfo_[col].getType () << "() " << columnsInfo_[col].getName () << __E__;
 
 	__SS__ << ("Incompatible table for this group link. Table '" +
 	           tableName_ + "' is missing a GroupID column with data type '" +
@@ -1138,9 +1138,9 @@ const unsigned int ConfigurationView::getColLinkGroupID(const std::string &child
 }
 
 //==============================================================================
-unsigned int ConfigurationView::findRow(unsigned int col, const std::string &value, unsigned int offsetRow) const
+unsigned int ConfigurationView::findRow (unsigned int col, const std::string &value, unsigned int offsetRow) const
 {
-	for (unsigned int row = offsetRow; row < theDataView_.size(); ++row)
+	for (unsigned int row = offsetRow; row < theDataView_.size (); ++row)
 	{
 		if (theDataView_[row][col] == value)
 			return row;
@@ -1148,8 +1148,8 @@ unsigned int ConfigurationView::findRow(unsigned int col, const std::string &val
 
 	__SS__ << "\tIn view: " << tableName_
 	       << ", Can't find value=" << value
-	       << " in column named " << columnsInfo_[col].getName()
-	       << " with type=" << columnsInfo_[col].getType()
+	       << " in column named " << columnsInfo_[col].getName ()
+	       << " with type=" << columnsInfo_[col].getType ()
 	       << __E__;
 	//Note: findRow gets purposely called by configuration GUI a lot looking for exceptions
 	//	so may not want to print out
@@ -1158,17 +1158,17 @@ unsigned int ConfigurationView::findRow(unsigned int col, const std::string &val
 }
 
 //==============================================================================
-unsigned int ConfigurationView::findRowInGroup(unsigned int col, const std::string &value, const std::string &groupId, const std::string &childLinkIndex, unsigned int offsetRow) const
+unsigned int ConfigurationView::findRowInGroup (unsigned int col, const std::string &value, const std::string &groupId, const std::string &childLinkIndex, unsigned int offsetRow) const
 {
-	unsigned int groupIdCol = getColLinkGroupID(childLinkIndex);
-	for (unsigned int row = offsetRow; row < theDataView_.size(); ++row)
+	unsigned int groupIdCol = getColLinkGroupID (childLinkIndex);
+	for (unsigned int row = offsetRow; row < theDataView_.size (); ++row)
 	{
 		if (theDataView_[row][col] == value &&
-		    isEntryInGroupCol(row, groupIdCol, groupId))
+		    isEntryInGroupCol (row, groupIdCol, groupId))
 			return row;
 	}
 
-	__SS__ << "\tIn view: " << tableName_ << ", Can't find in group the value=" << value << " in column named '" << columnsInfo_[col].getName() << "' with type=" << columnsInfo_[col].getType() << " and GroupID: '" << groupId << "' in column '" << groupIdCol << "' with GroupID child link index '" << childLinkIndex << "'" << __E__;
+	__SS__ << "\tIn view: " << tableName_ << ", Can't find in group the value=" << value << " in column named '" << columnsInfo_[col].getName () << "' with type=" << columnsInfo_[col].getType () << " and GroupID: '" << groupId << "' in column '" << groupIdCol << "' with GroupID child link index '" << childLinkIndex << "'" << __E__;
 	//Note: findRowInGroup gets purposely called by configuration GUI a lot looking for exceptions
 	//	so may not want to print out
 	__SS_ONLY_THROW__;
@@ -1177,17 +1177,17 @@ unsigned int ConfigurationView::findRowInGroup(unsigned int col, const std::stri
 //==============================================================================
 //findCol
 //	throws exception if column not found by name
-unsigned int ConfigurationView::findCol(const std::string &wildCardName) const
+unsigned int ConfigurationView::findCol (const std::string &wildCardName) const
 {
-	for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		if (StringMacros::wildCardMatch(wildCardName /*needle*/,
-		                                columnsInfo_[col].getName() /*haystack*/))
+	for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
+		if (StringMacros::wildCardMatch (wildCardName /*needle*/,
+		                                 columnsInfo_[col].getName () /*haystack*/))
 			return col;
 
 	__SS__ << "\tIn view: " << tableName_ << ", Can't find column named '" << wildCardName << "'" << __E__;
 	ss << "Existing columns:\n";
-	for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		ss << "\t" << columnsInfo_[col].getName() << "\n";
+	for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
+		ss << "\t" << columnsInfo_[col].getName () << "\n";
 	//Note: findCol gets purposely called by configuration GUI a lot looking for exceptions
 	//	so may not want to print out
 	__SS_ONLY_THROW__;
@@ -1196,10 +1196,10 @@ unsigned int ConfigurationView::findCol(const std::string &wildCardName) const
 //==============================================================================
 //findColByType
 //	return invalid if type not found
-unsigned int ConfigurationView::findColByType(const std::string &type, int startingCol) const
+unsigned int ConfigurationView::findColByType (const std::string &type, int startingCol) const
 {
-	for (unsigned int col = startingCol; col < columnsInfo_.size(); ++col)
-		if (columnsInfo_[col].getType() == type)
+	for (unsigned int col = startingCol; col < columnsInfo_.size (); ++col)
+		if (columnsInfo_[col].getType () == type)
 			return col;
 
 	return INVALID;
@@ -1207,66 +1207,66 @@ unsigned int ConfigurationView::findColByType(const std::string &type, int start
 
 //Getters
 //==============================================================================
-const std::string &ConfigurationView::getUniqueStorageIdentifier(void) const
+const std::string &ConfigurationView::getUniqueStorageIdentifier (void) const
 {
 	return uniqueStorageIdentifier_;
 }
 
 //==============================================================================
-const std::string &ConfigurationView::getTableName(void) const
+const std::string &ConfigurationView::getTableName (void) const
 {
 	return tableName_;
 }
 
 //==============================================================================
-const ConfigurationVersion &ConfigurationView::getVersion(void) const
+const ConfigurationVersion &ConfigurationView::getVersion (void) const
 {
 	return version_;
 }
 
 //==============================================================================
-const std::string &ConfigurationView::getComment(void) const
+const std::string &ConfigurationView::getComment (void) const
 {
 	return comment_;
 }
 
 //==============================================================================
-const std::string &ConfigurationView::getAuthor(void) const
+const std::string &ConfigurationView::getAuthor (void) const
 {
 	return author_;
 }
 
 //==============================================================================
-const time_t &ConfigurationView::getCreationTime(void) const
+const time_t &ConfigurationView::getCreationTime (void) const
 {
 	return creationTime_;
 }
 
 //==============================================================================
-const time_t &ConfigurationView::getLastAccessTime(void) const
+const time_t &ConfigurationView::getLastAccessTime (void) const
 {
 	return lastAccessTime_;
 }
 
 //==============================================================================
-const bool &ConfigurationView::getLooseColumnMatching(void) const
+const bool &ConfigurationView::getLooseColumnMatching (void) const
 {
 	return fillWithLooseColumnMatching_;
 }
 
 //==============================================================================
 //getDataColumnSize
-const unsigned int ConfigurationView::getDataColumnSize(void) const
+const unsigned int ConfigurationView::getDataColumnSize (void) const
 {
 	//if no data, give benefit of the doubt that phantom data has mockup column size
-	if (!getNumberOfRows()) return getNumberOfColumns();
-	return theDataView_[0].size();  //number of columns in first row of data
+	if (!getNumberOfRows ()) return getNumberOfColumns ();
+	return theDataView_[0].size ();  //number of columns in first row of data
 }
 
 //==============================================================================
 //getSourceColumnMismatch
 //	The source information is only valid after modifying the table with ::fillFromJSON
-const unsigned int &ConfigurationView::getSourceColumnMismatch(void) const
+const unsigned int &ConfigurationView::getSourceColumnMismatch (void) const
 {
 	return sourceColumnMismatchCount_;
 }
@@ -1274,7 +1274,7 @@ const unsigned int &ConfigurationView::getSourceColumnMismatch(void) const
 //==============================================================================
 //getSourceColumnMissing
 //	The source information is only valid after modifying the table with ::fillFromJSON
-const unsigned int &ConfigurationView::getSourceColumnMissing(void) const
+const unsigned int &ConfigurationView::getSourceColumnMissing (void) const
 {
 	return sourceColumnMissingCount_;
 }
@@ -1282,54 +1282,54 @@ const unsigned int &ConfigurationView::getSourceColumnMissing(void) const
 //==============================================================================
 //getSourceColumnNames
 //	The source information is only valid after modifying the table with ::fillFromJSON
-const std::set<std::string> &ConfigurationView::getSourceColumnNames(void) const
+const std::set<std::string> &ConfigurationView::getSourceColumnNames (void) const
 {
 	return sourceColumnNames_;
 }
 
 //==============================================================================
-std::set<std::string> ConfigurationView::getColumnNames(void) const
+std::set<std::string> ConfigurationView::getColumnNames (void) const
 {
 	std::set<std::string> retSet;
 	for (auto &colInfo : columnsInfo_)
-		retSet.emplace(colInfo.getName());
+		retSet.emplace (colInfo.getName ());
 	return retSet;
 }
 
 //==============================================================================
-std::set<std::string> ConfigurationView::getColumnStorageNames(void) const
+std::set<std::string> ConfigurationView::getColumnStorageNames (void) const
 {
 	std::set<std::string> retSet;
 	for (auto &colInfo : columnsInfo_)
-		retSet.emplace(colInfo.getStorageName());
+		retSet.emplace (colInfo.getStorageName ());
 	return retSet;
 }
 
 //==============================================================================
-std::vector<std::string> ConfigurationView::getDefaultRowValues(void) const
+std::vector<std::string> ConfigurationView::getDefaultRowValues (void) const
 {
 	std::vector<std::string> retVec;
 
 	//fill each col of new row with default values
-	for (unsigned int col = 0; col < getNumberOfColumns(); ++col)
+	for (unsigned int col = 0; col < getNumberOfColumns (); ++col)
 	{
 		//if this is a fixed choice Link, and NO_LINK is not in list,
 		//	take first in list to avoid creating illegal rows.
 		//NOTE: this is not a problem for standard fixed choice fields
 		//	because the default value is always required.
 
-		if (columnsInfo_[col].isChildLink())
+		if (columnsInfo_[col].isChildLink ())
 		{
 			const std::vector<std::string> &theDataChoices =
-			    columnsInfo_[col].getDataChoices();
+			    columnsInfo_[col].getDataChoices ();
 
 			//check if arbitrary values allowed
-			if (!theDataChoices.size() ||  //if so, use default
+			if (!theDataChoices.size () ||  //if so, use default
 			    theDataChoices[0] == "arbitraryBool=1")
-				retVec.push_back(columnsInfo_[col].getDefaultValue());
+				retVec.push_back (columnsInfo_[col].getDefaultValue ());
 			else
 			{
-				bool skipOne = (theDataChoices.size() &&
+				bool skipOne = (theDataChoices.size () &&
 				                theDataChoices[0] == "arbitraryBool=0");
 				bool hasSkipped;
 
@@ -1342,40 +1342,40 @@ std::vector<std::string> ConfigurationView::getDefaultRowValues(void) const
 						hasSkipped = true;
 						continue;
 					}
-					else if (choice == columnsInfo_[col].getDefaultValue())
+					else if (choice == columnsInfo_[col].getDefaultValue ())
 					{
 						foundDefault = true;
 						break;
 					}
 
 				//use first choice if possible
-				if (!foundDefault && theDataChoices.size() > (skipOne ? 1 : 0))
-					retVec.push_back(theDataChoices[(skipOne ? 1 : 0)]);
+				if (!foundDefault && theDataChoices.size () > (skipOne ? 1 : 0))
+					retVec.push_back (theDataChoices[(skipOne ? 1 : 0)]);
 				else  //else stick with default
-					retVec.push_back(columnsInfo_[col].getDefaultValue());
+					retVec.push_back (columnsInfo_[col].getDefaultValue ());
 			}
 		}
 		else
-			retVec.push_back(columnsInfo_[col].getDefaultValue());
+			retVec.push_back (columnsInfo_[col].getDefaultValue ());
 	}
 
 	return retVec;
 }
 
 //==============================================================================
-unsigned int ConfigurationView::getNumberOfRows(void) const
+unsigned int ConfigurationView::getNumberOfRows (void) const
 {
-	return theDataView_.size();
+	return theDataView_.size ();
 }
 
 //==============================================================================
-unsigned int ConfigurationView::getNumberOfColumns(void) const
+unsigned int ConfigurationView::getNumberOfColumns (void) const
 {
-	return columnsInfo_.size();
+	return columnsInfo_.size ();
 }
 
 //==============================================================================
-const ConfigurationView::DataView &ConfigurationView::getDataView(void) const
+const ConfigurationView::DataView &ConfigurationView::getDataView (void) const
 {
 	return theDataView_;
 }
@@ -1387,123 +1387,123 @@ const ConfigurationView::DataView &ConfigurationView::getDataView(void) const
 //}
 
 //==============================================================================
-const std::vector<ViewColumnInfo> &ConfigurationView::getColumnsInfo(void) const
+const std::vector<ViewColumnInfo> &ConfigurationView::getColumnsInfo (void) const
 {
 	return columnsInfo_;
 }
 
 //==============================================================================
-std::vector<ViewColumnInfo> *ConfigurationView::getColumnsInfoP(void)
+std::vector<ViewColumnInfo> *ConfigurationView::getColumnsInfoP (void)
 {
 	return &columnsInfo_;
 }
 //==============================================================================
-const ViewColumnInfo &ConfigurationView::getColumnInfo(unsigned int column) const
+const ViewColumnInfo &ConfigurationView::getColumnInfo (unsigned int column) const
 {
-	if (column >= columnsInfo_.size())
+	if (column >= columnsInfo_.size ())
 	{
 		std::stringstream errMsg;
 		errMsg << __COUT_HDR_FL__ << "\nCan't find column " << column << "\n\n\n\nThe column info is likely missing due to incomplete Configuration View filling.\n\n"
 		       << __E__;
-		__THROW__(errMsg.str().c_str());
+		__THROW__ (errMsg.str ().c_str ());
 	}
 	return columnsInfo_[column];
 }
 
 //Setters
 //==============================================================================
-void ConfigurationView::setUniqueStorageIdentifier(const std::string &storageUID)
+void ConfigurationView::setUniqueStorageIdentifier (const std::string &storageUID)
 {
 	uniqueStorageIdentifier_ = storageUID;
 }
 
 //==============================================================================
-void ConfigurationView::setTableName(const std::string &name)
+void ConfigurationView::setTableName (const std::string &name)
 {
 	tableName_ = name;
 }
 
 //==============================================================================
-void ConfigurationView::setComment(const std::string &comment)
+void ConfigurationView::setComment (const std::string &comment)
 {
 	comment_ = comment;
 }
 
 //==============================================================================
-void ConfigurationView::setURIEncodedComment(const std::string &uriComment)
+void ConfigurationView::setURIEncodedComment (const std::string &uriComment)
 {
-	comment_ = StringMacros::decodeURIComponent(uriComment);
+	comment_ = StringMacros::decodeURIComponent (uriComment);
 }
 
 //==============================================================================
-void ConfigurationView::setAuthor(const std::string &author)
+void ConfigurationView::setAuthor (const std::string &author)
 {
 	author_ = author;
 }
 
 //==============================================================================
-void ConfigurationView::setCreationTime(time_t t)
+void ConfigurationView::setCreationTime (time_t t)
 {
 	creationTime_ = t;
 }
 
 //==============================================================================
-void ConfigurationView::setLastAccessTime(time_t t)
+void ConfigurationView::setLastAccessTime (time_t t)
 {
 	lastAccessTime_ = t;
 }
 
 //==============================================================================
-void ConfigurationView::setLooseColumnMatching(bool setValue)
+void ConfigurationView::setLooseColumnMatching (bool setValue)
 {
 	fillWithLooseColumnMatching_ = setValue;
 }
 
 //==============================================================================
-void ConfigurationView::reset(void)
+void ConfigurationView::reset (void)
 {
 	version_ = -1;
 	comment_ = "";
 	author_ + "";
-	columnsInfo_.clear();
-	theDataView_.clear();
+	columnsInfo_.clear ();
+	theDataView_.clear ();
 }
 
 //==============================================================================
-void ConfigurationView::print(std::ostream &out) const
+void ConfigurationView::print (std::ostream &out) const
 {
 	out << "==============================================================================" << __E__;
-	out << "Print: " << tableName_ << " Version: " << version_ << " Comment: " << comment_ << " Author: " << author_ << " Creation Time: " << ctime(&creationTime_) << __E__;
-	out << "\t\tNumber of Cols " << getNumberOfColumns() << __E__;
-	out << "\t\tNumber of Rows " << getNumberOfRows() << __E__;
+	out << "Print: " << tableName_ << " Version: " << version_ << " Comment: " << comment_ << " Author: " << author_ << " Creation Time: " << ctime (&creationTime_) << __E__;
+	out << "\t\tNumber of Cols " << getNumberOfColumns () << __E__;
+	out << "\t\tNumber of Rows " << getNumberOfRows () << __E__;
 
 	out << "Columns:\t";
-	for (int i = 0; i < (int)columnsInfo_.size(); ++i)
-		out << i << ":" << columnsInfo_[i].getName() << ":" << columnsInfo_[i].getStorageName() << ":" << columnsInfo_[i].getDataType() << "\t ";
+	for (int i = 0; i < (int)columnsInfo_.size (); ++i)
+		out << i << ":" << columnsInfo_[i].getName () << ":" << columnsInfo_[i].getStorageName () << ":" << columnsInfo_[i].getDataType () << "\t ";
 	out << __E__;
 
 	out << "Rows:" << __E__;
 	int         num;
 	std::string val;
-	for (int r = 0; r < (int)getNumberOfRows(); ++r)
+	for (int r = 0; r < (int)getNumberOfRows (); ++r)
 	{
 		out << (int)r << ":\t";
-		for (int c = 0; c < (int)getNumberOfColumns(); ++c)
+		for (int c = 0; c < (int)getNumberOfColumns (); ++c)
 		{
 			out << (int)c << ":";
 
 			//if fixed choice type, print index in choice
-			if (columnsInfo_[c].getType() == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
+			if (columnsInfo_[c].getType () == ViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
 			{
 				int                      choiceIndex = -1;
-				std::vector<std::string> choices     = columnsInfo_[c].getDataChoices();
-				val                                  = StringMacros::convertEnvironmentVariables(theDataView_[r][c]);
+				std::vector<std::string> choices     = columnsInfo_[c].getDataChoices ();
+				val                                  = StringMacros::convertEnvironmentVariables (theDataView_[r][c]);
 
-				if (val == columnsInfo_[c].getDefaultValue())
+				if (val == columnsInfo_[c].getDefaultValue ())
 					choiceIndex = 0;
 				else
 				{
-					for (int i = 0; i < (int)choices.size(); ++i)
+					for (int i = 0; i < (int)choices.size (); ++i)
 						if (val == choices[i])
 							choiceIndex = i + 1;
 				}
@@ -1531,7 +1531,7 @@ void ConfigurationView::print(std::ostream &out) const
 }
 
 //==============================================================================
-void ConfigurationView::printJSON(std::ostream &out) const
+void ConfigurationView::printJSON (std::ostream &out) const
 {
 	out << "{\n";
 	out << "\"NAME\" : \"" << tableName_ << "\",\n";
@@ -1544,7 +1544,7 @@ void ConfigurationView::printJSON(std::ostream &out) const
 	std::string val;
 	val = comment_;
 	out << "\"";
-	for (unsigned int i = 0; i < val.size(); ++i)
+	for (unsigned int i = 0; i < val.size (); ++i)
 	{
 		if (val[i] == '\n')
 			out << "\\n";
@@ -1570,11 +1570,11 @@ void ConfigurationView::printJSON(std::ostream &out) const
 	//USELESS... out << "\"NUM_OF_ROWS\" : " <<  getNumberOfRows() << ",\n";
 
 	out << "\"COL_TYPES\" : {\n";
-	for (int c = 0; c < (int)getNumberOfColumns(); ++c)
+	for (int c = 0; c < (int)getNumberOfColumns (); ++c)
 	{
-		out << "\t\t\"" << columnsInfo_[c].getStorageName() << "\" : ";
-		out << "\"" << columnsInfo_[c].getDataType() << "\"";
-		if (c + 1 < (int)getNumberOfColumns())
+		out << "\t\t\"" << columnsInfo_[c].getStorageName () << "\" : ";
+		out << "\"" << columnsInfo_[c].getDataType () << "\"";
+		if (c + 1 < (int)getNumberOfColumns ())
 			out << ",";
 		out << "\n";
 	}
@@ -1582,21 +1582,21 @@ void ConfigurationView::printJSON(std::ostream &out) const
 
 	out << "\"DATA_SET\" : [\n";
 	int num;
-	for (int r = 0; r < (int)getNumberOfRows(); ++r)
+	for (int r = 0; r < (int)getNumberOfRows (); ++r)
 	{
 		out << "\t{\n";
-		for (int c = 0; c < (int)getNumberOfColumns(); ++c)
+		for (int c = 0; c < (int)getNumberOfColumns (); ++c)
 		{
-			out << "\t\t\"" << columnsInfo_[c].getStorageName() << "\" : ";
+			out << "\t\t\"" << columnsInfo_[c].getStorageName () << "\" : ";
 
-			out << "\"" << getEscapedValueAsString(r, c, false) << "\"";  //do not convert env variables
+			out << "\"" << getEscapedValueAsString (r, c, false) << "\"";  //do not convert env variables
 
-			if (c + 1 < (int)getNumberOfColumns())
+			if (c + 1 < (int)getNumberOfColumns ())
 				out << ",";
 			out << "\n";
 		}
 		out << "\t}";
-		if (r + 1 < (int)getNumberOfRows())
+		if (r + 1 < (int)getNumberOfRows ())
 			out << ",";
 		out << "\n";
 	}
@@ -1608,9 +1608,9 @@ void ConfigurationView::printJSON(std::ostream &out) const
 //==============================================================================
 //restoreJSONStringEntities
 //	returns string with literals \n \t \" \r \\ replaced with char
-std::string restoreJSONStringEntities(const std::string &str)
+std::string restoreJSONStringEntities (const std::string &str)
 {
-	unsigned int sz = str.size();
+	unsigned int sz = str.size ();
 	if (!sz) return "";  //empty string, returns empty string
 
 	std::stringstream retStr;
@@ -1649,7 +1649,7 @@ std::string restoreJSONStringEntities(const std::string &str)
 	if (i == sz - 1)
 		retStr << str[sz - 1];  //output last character (which can't escape anything)
 
-	return retStr.str();
+	return retStr.str ();
 }
 
 //==============================================================================
@@ -1661,15 +1661,15 @@ std::string restoreJSONStringEntities(const std::string &str)
 //		NAME
 //		DATA_SET
 
-int ConfigurationView::fillFromJSON(const std::string &json)
+int ConfigurationView::fillFromJSON (const std::string &json)
 {
 	std::vector<std::string> keys;
-	keys.push_back("NAME");
-	keys.push_back("COMMENT");
-	keys.push_back("AUTHOR");
-	keys.push_back("CREATION_TIME");
+	keys.push_back ("NAME");
+	keys.push_back ("COMMENT");
+	keys.push_back ("AUTHOR");
+	keys.push_back ("CREATION_TIME");
 	//keys.push_back ("COL_TYPES");
-	keys.push_back("DATA_SET");
+	keys.push_back ("DATA_SET");
 	enum
 	{
 		CV_JSON_FILL_NAME,
@@ -1684,7 +1684,7 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 
 	sourceColumnMismatchCount_ = 0;
 	sourceColumnMissingCount_  = 0;
-	sourceColumnNames_.clear();  //reset
+	sourceColumnNames_.clear ();  //reset
 	unsigned int      colFoundCount = 0;
 	unsigned int      i             = 0;
 	unsigned int      row           = -1;
@@ -1711,12 +1711,12 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 	unsigned int lastCol    = -1;
 
 	//find all depth 1 matching keys
-	for (; i < json.size(); ++i)
+	for (; i < json.size (); ++i)
 	{
 		switch (json[i])
 		{
 		case '"':
-			if (i - 1 < json.size() &&  //ignore if escaped
+			if (i - 1 < json.size () &&  //ignore if escaped
 			    json[i - 1] == '\\') break;
 
 			inQuotes = !inQuotes;  //toggle in quotes if not escaped
@@ -1724,8 +1724,8 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 				startString = i;
 			else
 			{
-				extractedString = restoreJSONStringEntities(
-				    json.substr(startString + 1, i - startString - 1));
+				extractedString = restoreJSONStringEntities (
+				    json.substr (startString + 1, i - startString - 1));
 				newString = 1;  //have new string!
 			}
 			break;
@@ -1733,15 +1733,15 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 			if (inQuotes) break;  //skip if in quote
 
 			//must be a json object level to have a key
-			if (jsonPathType[jsonPathType.size() - 1] != '{' || !newString)  //and must have a string for key
+			if (jsonPathType[jsonPathType.size () - 1] != '{' || !newString)  //and must have a string for key
 			{
 				__COUT__ << "Invalid ':' position" << __E__;
 				return -1;
 			}
 
 			//valid, so take key
-			jsonPathType.push_back('K');
-			jsonPath.push_back(extractedString);
+			jsonPathType.push_back ('K');
+			jsonPath.push_back (extractedString);
 			startNumber = i;
 			newString   = 0;   //clear flag
 			endNumber   = -1;  //reset end number index
@@ -1762,11 +1762,11 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 			if (lastPopType == '{')  //don't need value again of nested object
 			{
 				//check if the nested object was the value to a key, if so, pop key
-				if (jsonPathType[jsonPathType.size() - 1] == 'K')
+				if (jsonPathType[jsonPathType.size () - 1] == 'K')
 				{
 					lastPopType = 'K';
-					jsonPath.pop_back();
-					jsonPathType.pop_back();
+					jsonPath.pop_back ();
+					jsonPathType.pop_back ();
 				}
 				break;  //skip , handling if {obj} just ended
 			}
@@ -1782,25 +1782,25 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 				if (endNumber <= startNumber)  //empty data, could be {}
 					currVal = "";
 				else
-					currVal = json.substr(startNumber + 1, endNumber - startNumber - 1);
+					currVal = json.substr (startNumber + 1, endNumber - startNumber - 1);
 			}
 
 			currDepth = bracketCount;
 
-			if (jsonPathType[jsonPathType.size() - 1] == 'K')  //this is the value to key
+			if (jsonPathType[jsonPathType.size () - 1] == 'K')  //this is the value to key
 			{
-				currKey  = jsonPath[jsonPathType.size() - 1];
+				currKey  = jsonPath[jsonPathType.size () - 1];
 				newValue = 1;  //new value to consider!
 
 				//pop key
 				lastPopType = 'K';
-				jsonPath.pop_back();
-				jsonPathType.pop_back();
+				jsonPath.pop_back ();
+				jsonPathType.pop_back ();
 			}
-			else if (jsonPathType[jsonPathType.size() - 1] == '[')  //this is a value in array
+			else if (jsonPathType[jsonPathType.size () - 1] == '[')  //this is a value in array
 			{
 				//key is last key
-				for (unsigned int k = jsonPathType.size() - 2; k < jsonPathType.size(); --k)
+				for (unsigned int k = jsonPathType.size () - 2; k < jsonPathType.size (); --k)
 					if (jsonPathType[k] == 'K')
 					{
 						currKey = jsonPath[k];
@@ -1827,8 +1827,8 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 		case '{':
 			if (inQuotes) break;  //skip if in quote
 			lastPopType = '_';    //reset because of new object
-			jsonPathType.push_back('{');
-			jsonPath.push_back("{");
+			jsonPathType.push_back ('{');
+			jsonPath.push_back ("{");
 			++bracketCount;
 			break;
 
@@ -1840,11 +1840,11 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 		case '}':
 			if (inQuotes) break;  //skip if in quote
 
-			if (lastPopType != '{' &&                          //don't need value again of nested object
-			    jsonPathType[jsonPathType.size() - 1] == 'K')  //this is the value to key
+			if (lastPopType != '{' &&                           //don't need value again of nested object
+			    jsonPathType[jsonPathType.size () - 1] == 'K')  //this is the value to key
 			{
 				currDepth = bracketCount;
-				currKey   = jsonPath[jsonPathType.size() - 1];
+				currKey   = jsonPath[jsonPathType.size () - 1];
 				if (newString)
 					currVal = extractedString;
 				else  //number value
@@ -1856,28 +1856,28 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 					if (endNumber <= startNumber)  //empty data, could be {}
 						currVal = "";
 					else
-						currVal = json.substr(startNumber + 1, endNumber - startNumber - 1);
+						currVal = json.substr (startNumber + 1, endNumber - startNumber - 1);
 				}
 				newValue = 1;  //new value to consider!
 				//pop key
-				jsonPath.pop_back();
-				jsonPathType.pop_back();
+				jsonPath.pop_back ();
+				jsonPathType.pop_back ();
 			}
 			//pop {
-			if (jsonPathType[jsonPathType.size() - 1] != '{')
+			if (jsonPathType[jsonPathType.size () - 1] != '{')
 			{
 				__COUT__ << "Invalid '}' position" << __E__;
 				return -1;
 			}
 			lastPopType = '{';
-			jsonPath.pop_back();
-			jsonPathType.pop_back();
+			jsonPath.pop_back ();
+			jsonPathType.pop_back ();
 			--bracketCount;
 			break;
 		case '[':
 			if (inQuotes) break;  //skip if in quote
-			jsonPathType.push_back('[');
-			jsonPath.push_back("[");
+			jsonPathType.push_back ('[');
+			jsonPath.push_back ("[");
 			++sqBracketCount;
 			startNumber = i;
 			break;
@@ -1885,7 +1885,7 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 			if (inQuotes) break;  //skip if in quote
 
 			//must be an array at this level (in order to close it)
-			if (jsonPathType[jsonPathType.size() - 1] != '[')
+			if (jsonPathType[jsonPathType.size () - 1] != '[')
 			{
 				__COUT__ << "Invalid ']' position" << __E__;
 				return -1;
@@ -1905,12 +1905,12 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 				if (endNumber <= startNumber)  //empty data, could be {}
 					currVal = "";
 				else
-					currVal = json.substr(startNumber + 1, endNumber - startNumber - 1);
+					currVal = json.substr (startNumber + 1, endNumber - startNumber - 1);
 			}
 			isDataArray = 1;
 
 			//key is last key
-			for (unsigned int k = jsonPathType.size() - 2; k < jsonPathType.size(); --k)
+			for (unsigned int k = jsonPathType.size () - 2; k < jsonPathType.size (); --k)
 				if (jsonPathType[k] == 'K')
 				{
 					currKey = jsonPath[k];
@@ -1923,14 +1923,14 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 				}
 
 			//pop [
-			if (jsonPathType[jsonPathType.size() - 1] != '[')
+			if (jsonPathType[jsonPathType.size () - 1] != '[')
 			{
 				__COUT__ << "Invalid ']' position" << __E__;
 				return -1;
 			}
 			lastPopType = '[';
-			jsonPath.pop_back();
-			jsonPathType.pop_back();
+			jsonPath.pop_back ();
+			jsonPathType.pop_back ();
 			--sqBracketCount;
 			break;
 		case ' ':  //white space handling for numbers
@@ -1951,7 +1951,7 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 			std::cout << i << ":\t" << json[i] << " - ";
 
 			std::cout << "ExtKey=";
-			for (unsigned int k = 0; k < jsonPath.size(); ++k)
+			for (unsigned int k = 0; k < jsonPath.size (); ++k)
 				std::cout << jsonPath[k] << "/";
 			std::cout << " - ";
 			std::cout << lastPopType << " ";
@@ -1992,7 +1992,7 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 			//handle matching depth 1 keys
 
 			matchedKey = -1;  //init to unfound
-			for (unsigned int k = 0; k < keys.size(); ++k)
+			for (unsigned int k = 0; k < keys.size (); ++k)
 				if ((currDepth == 1 && keys[k] == currKey) ||
 				    (currDepth > 1 && keys[k] == jsonPath[1]))
 					matchedKey = k;
@@ -2005,16 +2005,16 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 				switch (matchedKey)
 				{
 				case CV_JSON_FILL_NAME:
-					if (currDepth == 1) setTableName(currVal);
+					if (currDepth == 1) setTableName (currVal);
 					break;
 				case CV_JSON_FILL_COMMENT:
-					if (currDepth == 1) setComment(currVal);
+					if (currDepth == 1) setComment (currVal);
 					break;
 				case CV_JSON_FILL_AUTHOR:
-					if (currDepth == 1) setAuthor(currVal);
+					if (currDepth == 1) setAuthor (currVal);
 					break;
 				case CV_JSON_FILL_CREATION_TIME:
-					if (currDepth == 1) setCreationTime(strtol(currVal.c_str(), 0, 10));
+					if (currDepth == 1) setCreationTime (strtol (currVal.c_str (), 0, 10));
 					break;
 					//case CV_JSON_FILL_COL_TYPES:
 					//
@@ -2029,7 +2029,7 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 						//if matches first column name.. then add new row
 						//else add to current row
 						unsigned int col, ccnt = 0;
-						unsigned int noc = getNumberOfColumns();
+						unsigned int noc = getNumberOfColumns ();
 						for (; ccnt < noc; ++ccnt)
 						{
 							//use colSpeedup to change the first column we search
@@ -2046,17 +2046,17 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 
 								//auto matched
 								if (col <= lastCol)  //add row (use lastCol in case new column-0 was added
-									row = addRow();
+									row = addRow ();
 								lastCol = col;
-								if (getNumberOfRows() == 1)  //only for first row
-									sourceColumnNames_.emplace(currKey);
+								if (getNumberOfRows () == 1)  //only for first row
+									sourceColumnNames_.emplace (currKey);
 
 								//add value to row and column
 
-								if (row >= getNumberOfRows())
+								if (row >= getNumberOfRows ())
 								{
 									__SS__ << "Invalid row" << __E__;  //should be impossible?
-									std::cout << ss.str();
+									std::cout << ss.str ();
 									__SS_THROW__;
 									return -1;
 								}
@@ -2074,18 +2074,18 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 								keyIsMatch   = true;
 								keyIsComment = true;
 								for (keyIsMatchIndex = 0, keyIsMatchStorageIndex = 0, keyIsMatchCommentIndex = 0;
-								     keyIsMatchIndex < currKey.size();
+								     keyIsMatchIndex < currKey.size ();
 								     ++keyIsMatchIndex)
 								{
-									if (columnsInfo_[col].getStorageName()[keyIsMatchStorageIndex] == '_')
+									if (columnsInfo_[col].getStorageName ()[keyIsMatchStorageIndex] == '_')
 										++keyIsMatchStorageIndex;  //skip to next storage character
 									if (currKey[keyIsMatchIndex] == '_')
 										continue;  //skip to next character
 
 									//match to storage name
-									if (keyIsMatchStorageIndex >= columnsInfo_[col].getStorageName().size() ||
+									if (keyIsMatchStorageIndex >= columnsInfo_[col].getStorageName ().size () ||
 									    currKey[keyIsMatchIndex] !=
-									        columnsInfo_[col].getStorageName()[keyIsMatchStorageIndex])
+									        columnsInfo_[col].getStorageName ()[keyIsMatchStorageIndex])
 									{
 										//size mismatch or character mismatch
 										keyIsMatch = false;
@@ -2094,7 +2094,7 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 									}
 
 									//check also if alternate comment is matched
-									if (keyIsComment && keyIsMatchCommentIndex < COMMENT_ALT_KEY.size())
+									if (keyIsComment && keyIsMatchCommentIndex < COMMENT_ALT_KEY.size ())
 									{
 										if (currKey[keyIsMatchIndex] != COMMENT_ALT_KEY[keyIsMatchCommentIndex])
 										{
@@ -2111,25 +2111,25 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 									//matched
 									if (col <= lastCol)  //add row (use lastCol in case new column-0 was added
 									{
-										if (getNumberOfRows())  //skip first time
-											sourceColumnMissingCount_ += getNumberOfColumns() - colFoundCount;
+										if (getNumberOfRows ())  //skip first time
+											sourceColumnMissingCount_ += getNumberOfColumns () - colFoundCount;
 
 										colFoundCount = 0;  //reset column found count
-										row           = addRow();
+										row           = addRow ();
 									}
 									lastCol = col;
 									++colFoundCount;
 
-									if (getNumberOfRows() == 1)  //only for first row
-										sourceColumnNames_.emplace(currKey);
+									if (getNumberOfRows () == 1)  //only for first row
+										sourceColumnNames_.emplace (currKey);
 
 									//add value to row and column
 
-									if (row >= getNumberOfRows())
+									if (row >= getNumberOfRows ())
 									{
 										__SS__ << "Invalid row" << __E__;  //should be impossible?!
 										__COUT__ << "\n"
-										         << ss.str();
+										         << ss.str ();
 										__SS_THROW__;
 										return -1;  //never gets here
 									}
@@ -2142,16 +2142,16 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 
 						colSpeedup = (colSpeedup + 1) % noc;  //short cut to proper column hopefully in next search
 
-						if (ccnt >= getNumberOfColumns())
+						if (ccnt >= getNumberOfColumns ())
 						{
-							__SS__ << "\n\nInvalid column in JSON source data: " << currKey << " not found in column names of table named " << getTableName() << "." << __E__;  //input data doesn't match config description
+							__SS__ << "\n\nInvalid column in JSON source data: " << currKey << " not found in column names of table named " << getTableName () << "." << __E__;  //input data doesn't match config description
 							__COUT__ << "\n"
-							         << ss.str();
+							         << ss.str ();
 							//CHANGED on 11/10/2016
 							//	to.. try just not populating data instead of error
 							++sourceColumnMismatchCount_;  //but count errors
-							if (getNumberOfRows() == 1)    //only for first row
-								sourceColumnNames_.emplace(currKey);
+							if (getNumberOfRows () == 1)   //only for first row
+								sourceColumnNames_.emplace (currKey);
 
 							//__SS_THROW__;
 							__COUT_WARN__ << "Ignoring error, and not populating missing column." << __E__;
@@ -2181,9 +2181,9 @@ int ConfigurationView::fillFromJSON(const std::string &json)
 }
 
 //==============================================================================
-bool ConfigurationView::isURIEncodedCommentTheSame(const std::string &comment) const
+bool ConfigurationView::isURIEncodedCommentTheSame (const std::string &comment) const
 {
-	std::string compareStr = StringMacros::decodeURIComponent(comment);
+	std::string compareStr = StringMacros::decodeURIComponent (comment);
 	return comment_ == compareStr;
 }
 //
@@ -2241,29 +2241,29 @@ bool ConfigurationView::isURIEncodedCommentTheSame(const std::string &comment) c
 //	Returns 1 if data was same, but columns are different
 //	otherwise 0
 //
-int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffset, const std::string &author) throw(std::runtime_error)
+int ConfigurationView::fillFromCSV (const std::string &data, const int &dataOffset, const std::string &author) throw (std::runtime_error)
 {
 	int retVal = 0;
 
 	int r = dataOffset;
 	int c = 0;
 
-	int i = 0;                  //use to parse data std::string
-	int j = data.find(',', i);  //find next cell delimiter
-	int k = data.find(';', i);  //find next row delimiter
+	int i = 0;                   //use to parse data std::string
+	int j = data.find (',', i);  //find next cell delimiter
+	int k = data.find (';', i);  //find next row delimiter
 
 	bool         rowWasModified;
 	unsigned int countRowsModified = 0;
-	int          authorCol         = findColByType(ViewColumnInfo::TYPE_AUTHOR);
-	int          timestampCol      = findColByType(ViewColumnInfo::TYPE_TIMESTAMP);
+	int          authorCol         = findColByType (ViewColumnInfo::TYPE_AUTHOR);
+	int          timestampCol      = findColByType (ViewColumnInfo::TYPE_TIMESTAMP);
 	//std::string valueStr, tmpTimeStr, originalValueStr;
 
 	while (k != (int)(std::string::npos))
 	{
 		rowWasModified = false;
-		if (r >= (int)getNumberOfRows())
+		if (r >= (int)getNumberOfRows ())
 		{
-			addRow();
+			addRow ();
 			//__COUT__ << "Row added" << __E__;
 			rowWasModified = true;
 		}
@@ -2273,19 +2273,19 @@ int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffse
 			//__COUT__ << "Col " << (int)c << __E__;
 
 			//skip last 2 columns
-			if (c >= (int)getNumberOfColumns() - 2)
+			if (c >= (int)getNumberOfColumns () - 2)
 			{
 				i = j + 1;
-				j = data.find(',', i);  //find next cell delimiter
+				j = data.find (',', i);  //find next cell delimiter
 				++c;
 				continue;
 			}
 
-			if (setURIEncodedValue(data.substr(i, j - i), r, c))
+			if (setURIEncodedValue (data.substr (i, j - i), r, c))
 				rowWasModified = true;
 
 			i = j + 1;
-			j = data.find(',', i);  //find next cell delimiter
+			j = data.find (',', i);  //find next cell delimiter
 			++c;
 		}
 
@@ -2293,8 +2293,8 @@ int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffse
 		if (author != "" && rowWasModified)
 		{
 			__COUT__ << "Row=" << (int)r << " was modified!" << __E__;
-			setValue(author, r, authorCol);
-			setValue(time(0), r, timestampCol);
+			setValue (author, r, authorCol);
+			setValue (time (0), r, timestampCol);
 		}
 
 		if (rowWasModified) ++countRowsModified;
@@ -2303,14 +2303,14 @@ int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffse
 		c = 0;
 
 		i = k + 1;
-		j = data.find(',', i);  //find next cell delimiter
-		k = data.find(';', i);  //find new row delimiter
+		j = data.find (',', i);  //find next cell delimiter
+		k = data.find (';', i);  //find new row delimiter
 	}
 
 	//delete excess rows
-	while (r < (int)getNumberOfRows())
+	while (r < (int)getNumberOfRows ())
 	{
-		deleteRow(r);
+		deleteRow (r);
 		__COUT__ << "Row deleted: " << (int)r << __E__;
 		++countRowsModified;
 	}
@@ -2322,13 +2322,13 @@ int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffse
 		//check that source columns match storage name
 		// otherwise allow same data...
 
-		bool match = getColumnStorageNames().size() ==
-		             getSourceColumnNames().size();
+		bool match = getColumnStorageNames ().size () ==
+		             getSourceColumnNames ().size ();
 		if (match)
 		{
-			for (auto &destColName : getColumnStorageNames())
-				if (getSourceColumnNames().find(destColName) ==
-				    getSourceColumnNames().end())
+			for (auto &destColName : getColumnStorageNames ())
+				if (getSourceColumnNames ().find (destColName) ==
+				    getSourceColumnNames ().end ())
 				{
 					__COUT__ << "Found column name mismach for '" << destColName << "'... So allowing same data!" << __E__;
 
@@ -2341,7 +2341,7 @@ int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffse
 		{
 			__SS__ << "No rows were modified! No reason to fill a view with same content." << __E__;
 			__COUT__ << "\n"
-			         << ss.str();
+			         << ss.str ();
 			return -1;
 		}
 		//else mark with retVal
@@ -2351,11 +2351,11 @@ int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffse
 	//print(); //for debugging
 
 	//setup sourceColumnNames_ to be correct
-	sourceColumnNames_.clear();
-	for (unsigned int i = 0; i < getNumberOfColumns(); ++i)
-		sourceColumnNames_.emplace(getColumnsInfo()[i].getStorageName());
+	sourceColumnNames_.clear ();
+	for (unsigned int i = 0; i < getNumberOfColumns (); ++i)
+		sourceColumnNames_.emplace (getColumnsInfo ()[i].getStorageName ());
 
-	init();  //verify new table (throws runtime_errors)
+	init ();  //verify new table (throws runtime_errors)
 
 	//printout for debugging
 	//	__SS__ << "\n";
@@ -2373,37 +2373,37 @@ int ConfigurationView::fillFromCSV(const std::string &data, const int &dataOffse
 //
 //	if author == "", do nothing special for author and timestamp column
 //	if author != "", assign author for any row that has been modified, and assign now as timestamp
-bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsigned int &r, const unsigned int &c, const std::string &author)
+bool ConfigurationView::setURIEncodedValue (const std::string &value, const unsigned int &r, const unsigned int &c, const std::string &author)
 {
-	if (!(c < columnsInfo_.size() && r < getNumberOfRows()))
+	if (!(c < columnsInfo_.size () && r < getNumberOfRows ()))
 	{
 		__SS__ << "Invalid row (" << (int)r << ") col (" << (int)c << ") requested!"
-		       << "Number of Rows = " << getNumberOfRows() << "Number of Columns = " << columnsInfo_.size() << __E__;
-		print(ss);
+		       << "Number of Rows = " << getNumberOfRows () << "Number of Columns = " << columnsInfo_.size () << __E__;
+		print (ss);
 		__SS_THROW__;
 	}
 
-	std::string valueStr         = StringMacros::decodeURIComponent(value);
-	std::string originalValueStr = getValueAsString(r, c, false);  //do not convert env variables
+	std::string valueStr         = StringMacros::decodeURIComponent (value);
+	std::string originalValueStr = getValueAsString (r, c, false);  //do not convert env variables
 
 	//__COUT__ << "valueStr " << valueStr << __E__;
 	//__COUT__ << "originalValueStr " << originalValueStr << __E__;
 
-	if (columnsInfo_[c].getDataType() == ViewColumnInfo::DATATYPE_NUMBER)
+	if (columnsInfo_[c].getDataType () == ViewColumnInfo::DATATYPE_NUMBER)
 	{
 		//check if valid number
-		std::string convertedString = StringMacros::convertEnvironmentVariables(valueStr);
-		if (!StringMacros::isNumber(convertedString))
+		std::string convertedString = StringMacros::convertEnvironmentVariables (valueStr);
+		if (!StringMacros::isNumber (convertedString))
 		{
 			__SS__ << "\tIn configuration " << tableName_
-			       << " at column=" << columnsInfo_[c].getName()
+			       << " at column=" << columnsInfo_[c].getName ()
 			       << " the value set (" << convertedString << ")"
 			       << " is not a number! Please fix it or change the column type..." << __E__;
 			__SS_THROW__;
 		}
 		theDataView_[r][c] = valueStr;
 	}
-	else if (columnsInfo_[c].getDataType() == ViewColumnInfo::DATATYPE_TIME)
+	else if (columnsInfo_[c].getDataType () == ViewColumnInfo::DATATYPE_TIME)
 	{
 		//				valueStr = StringMacros::decodeURIComponent(data.substr(i,j-i));
 		//
@@ -2415,33 +2415,33 @@ bool ConfigurationView::setURIEncodedValue(const std::string &value, const unsig
 		//					rowWasModified = true;
 		//				}
 
-		setValue(time_t(strtol(valueStr.c_str(), 0, 10)),
-		         r,
-		         c);
+		setValue (time_t (strtol (valueStr.c_str (), 0, 10)),
+		          r,
+		          c);
 	}
 	else
 		theDataView_[r][c] = valueStr;
 
-	bool rowWasModified = (originalValueStr != getValueAsString(r, c, false));  //do not convert env variables
+	bool rowWasModified = (originalValueStr != getValueAsString (r, c, false));  //do not convert env variables
 
 	//if row was modified, assign author and timestamp
 	if (author != "" && rowWasModified)
 	{
 		__COUT__ << "Row=" << (int)r << " was modified!" << __E__;
-		int authorCol    = findColByType(ViewColumnInfo::TYPE_AUTHOR);
-		int timestampCol = findColByType(ViewColumnInfo::TYPE_TIMESTAMP);
-		setValue(author, r, authorCol);
-		setValue(time(0), r, timestampCol);
+		int authorCol    = findColByType (ViewColumnInfo::TYPE_AUTHOR);
+		int timestampCol = findColByType (ViewColumnInfo::TYPE_TIMESTAMP);
+		setValue (author, r, authorCol);
+		setValue (time (0), r, timestampCol);
 	}
 
 	return rowWasModified;
 }
 
 //==============================================================================
-void ConfigurationView::resizeDataView(unsigned int nRows, unsigned int nCols)
+void ConfigurationView::resizeDataView (unsigned int nRows, unsigned int nCols)
 {
 	//FIXME This maybe should disappear but I am using it in ConfigurationHandler still...
-	theDataView_.resize(nRows, std::vector<std::string>(nCols));
+	theDataView_.resize (nRows, std::vector<std::string> (nCols));
 }
 
 //==============================================================================
@@ -2451,27 +2451,27 @@ void ConfigurationView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //
 //	if baseNameAutoUID != "", creates a UID based on this base name
 //		and increments and appends an integer relative to the previous last row
-unsigned int ConfigurationView::addRow(const std::string &author,
-                                       bool               incrementUniqueData,
-                                       std::string        baseNameAutoUID,
-                                       unsigned int       rowToAdd)
+unsigned int ConfigurationView::addRow (const std::string &author,
+                                        bool               incrementUniqueData,
+                                        std::string        baseNameAutoUID,
+                                        unsigned int       rowToAdd)
 {
 	//default to last row
 	if (rowToAdd == (unsigned int)-1)
-		rowToAdd = getNumberOfRows();
+		rowToAdd = getNumberOfRows ();
 
-	theDataView_.resize(getNumberOfRows() + 1, std::vector<std::string>(getNumberOfColumns()));
+	theDataView_.resize (getNumberOfRows () + 1, std::vector<std::string> (getNumberOfColumns ()));
 
 	//shift data down the table if necessary
-	for (unsigned int r = getNumberOfRows() - 2; r >= rowToAdd; --r)
+	for (unsigned int r = getNumberOfRows () - 2; r >= rowToAdd; --r)
 	{
 		if (r == (unsigned int)-1) break;  //quit wrap around case
-		for (unsigned int col = 0; col < getNumberOfColumns(); ++col)
+		for (unsigned int col = 0; col < getNumberOfColumns (); ++col)
 			theDataView_[r + 1][col] = theDataView_[r][col];
 	}
 
 	std::vector<std::string> defaultRowValues =
-	    getDefaultRowValues();
+	    getDefaultRowValues ();
 
 	char         indexString[1000];
 	std::string  tmpString, baseString;
@@ -2482,7 +2482,7 @@ unsigned int ConfigurationView::addRow(const std::string &author,
 
 	//fill each col of new row with default values
 	//	if a row is a unique data row, increment last row in attempt to make a legal column
-	for (unsigned int col = 0; col < getNumberOfColumns(); ++col)
+	for (unsigned int col = 0; col < getNumberOfColumns (); ++col)
 	{
 		//__COUT__ << col << " " << columnsInfo_[col].getType() << " == " <<
 		//		ViewColumnInfo::TYPE_UNIQUE_DATA << __E__;
@@ -2490,9 +2490,9 @@ unsigned int ConfigurationView::addRow(const std::string &author,
 		//baseNameAutoUID indicates to attempt to make row unique
 		//	add index to max number
 		if (incrementUniqueData &&
-		    (col == getColUID() ||
-		     (getNumberOfRows() > 1 && columnsInfo_[col].getType() ==
-		                                   ViewColumnInfo::TYPE_UNIQUE_DATA)))
+		    (col == getColUID () ||
+		     (getNumberOfRows () > 1 && columnsInfo_[col].getType () ==
+		                                    ViewColumnInfo::TYPE_UNIQUE_DATA)))
 		{
 			//__COUT__ << "New unique data entry is '" << theDataView_[row][col] << "'" << __E__;
 
@@ -2504,7 +2504,7 @@ unsigned int ConfigurationView::addRow(const std::string &author,
 
 			//this->print();
 
-			for (unsigned int r = 0; r < getNumberOfRows(); ++r)
+			for (unsigned int r = 0; r < getNumberOfRows (); ++r)
 			{
 				if (r == rowToAdd) continue;  //skip row to add
 
@@ -2515,7 +2515,7 @@ unsigned int ConfigurationView::addRow(const std::string &author,
 
 				//__COUT__ << "tmpString " << tmpString << __E__;
 
-				for (index = tmpString.length() - 1; index < tmpString.length(); --index)
+				for (index = tmpString.length () - 1; index < tmpString.length (); --index)
 				{
 					//__COUT__ << index << " tmpString[index] " << tmpString[index] << __E__;
 					if (!(tmpString[index] >= '0' && tmpString[index] <= '9')) break;  //if not numeric, break
@@ -2524,19 +2524,19 @@ unsigned int ConfigurationView::addRow(const std::string &author,
 
 				//__COUT__ << "index " << index << __E__;
 
-				if (tmpString.length() &&
+				if (tmpString.length () &&
 				    foundAny)  //then found a numeric substring
 				{
 					//create numeric substring
-					numString = tmpString.substr(index + 1);
-					tmpString = tmpString.substr(0, index + 1);
+					numString = tmpString.substr (index + 1);
+					tmpString = tmpString.substr (0, index + 1);
 
 					//__COUT__ << "Found unique data base string '" <<
 					//		tmpString << "' and number string '" << numString <<
 					//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
 
 					//extract number
-					sscanf(numString.c_str(), "%u", &index);
+					sscanf (numString.c_str (), "%u", &index);
 
 					if (index > maxUniqueData)
 					{
@@ -2548,11 +2548,11 @@ unsigned int ConfigurationView::addRow(const std::string &author,
 
 			++maxUniqueData;  //increment
 
-			sprintf(indexString, "%u", maxUniqueData);
+			sprintf (indexString, "%u", maxUniqueData);
 			//__COUT__ << "indexString " << indexString << __E__;
 
 			//__COUT__ << "baseNameAutoUID " << baseNameAutoUID << __E__;
-			if (col == getColUID())
+			if (col == getColUID ())
 			{
 				//handle UID case
 				if (baseNameAutoUID != "")
@@ -2574,10 +2574,10 @@ unsigned int ConfigurationView::addRow(const std::string &author,
 	if (author != "")
 	{
 		__COUT__ << "Row=" << rowToAdd << " was created!" << __E__;
-		int authorCol    = findColByType(ViewColumnInfo::TYPE_AUTHOR);
-		int timestampCol = findColByType(ViewColumnInfo::TYPE_TIMESTAMP);
-		setValue(author, rowToAdd, authorCol);
-		setValue(time(0), rowToAdd, timestampCol);
+		int authorCol    = findColByType (ViewColumnInfo::TYPE_AUTHOR);
+		int timestampCol = findColByType (ViewColumnInfo::TYPE_TIMESTAMP);
+		setValue (author, rowToAdd, authorCol);
+		setValue (time (0), rowToAdd, timestampCol);
 	}
 
 	return rowToAdd;
@@ -2586,16 +2586,16 @@ unsigned int ConfigurationView::addRow(const std::string &author,
 //==============================================================================
 //deleteRow
 //	throws exception on failure
-void ConfigurationView::deleteRow(int r)
+void ConfigurationView::deleteRow (int r)
 {
-	if (r >= (int)getNumberOfRows())
+	if (r >= (int)getNumberOfRows ())
 	{
 		//out of bounds
-		__SS__ << "Row " << (int)r << " is out of bounds (Row Count = " << getNumberOfRows() << ") and can not be deleted." << __E__;
+		__SS__ << "Row " << (int)r << " is out of bounds (Row Count = " << getNumberOfRows () << ") and can not be deleted." << __E__;
 		__SS_THROW__;
 	}
 
-	theDataView_.erase(theDataView_.begin() + r);
+	theDataView_.erase (theDataView_.begin () + r);
 }
 
 //==============================================================================
@@ -2612,9 +2612,9 @@ void ConfigurationView::deleteRow(int r)
 //  a group link is defined by two columns: TYPE_START_CHILD_LINK, TYPE_START_CHILD_LINK_GROUP_ID
 //
 //	returns true if column is member of a group or unique link.
-const bool ConfigurationView::getChildLink(const unsigned int &c, bool &isGroup, std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> &linkPair) const
+const bool ConfigurationView::getChildLink (const unsigned int &c, bool &isGroup, std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> &linkPair) const
 {
-	if (!(c < columnsInfo_.size()))
+	if (!(c < columnsInfo_.size ()))
 	{
 		__SS__ << "Invalid col (" << (int)c << ") requested!" << __E__;
 		__SS_THROW__;
@@ -2624,24 +2624,24 @@ const bool ConfigurationView::getChildLink(const unsigned int &c, bool &isGroup,
 	//		columnsInfo_[c].getType() << "-" << columnsInfo_[c].getName() << __E__;
 
 	//check if column is a child link UID
-	if ((isGroup = columnsInfo_[c].isChildLinkGroupID()) ||
-	    columnsInfo_[c].isChildLinkUID())
+	if ((isGroup = columnsInfo_[c].isChildLinkGroupID ()) ||
+	    columnsInfo_[c].isChildLinkUID ())
 	{
 		//must be part of unique link, (or invalid table?)
 		//__COUT__ << "col: " << (int)c << __E__;
 		linkPair.second   = c;
-		std::string index = columnsInfo_[c].getChildLinkIndex();
+		std::string index = columnsInfo_[c].getChildLinkIndex ();
 
 		//__COUT__ << "index: " << index << __E__;
 
 		//find pair link
-		for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
+		for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
 		{
 			//__COUT__ << "try: " << col << "-" << columnsInfo_[col].getType() << "-" << columnsInfo_[col].getName() << __E__;
 			if (col == c)
 				continue;  //skip column c that we know
-			else if (columnsInfo_[col].isChildLink() &&
-			         index == columnsInfo_[col].getChildLinkIndex())
+			else if (columnsInfo_[col].isChildLink () &&
+			         index == columnsInfo_[col].getChildLinkIndex ())
 			{
 				//found match!
 				//__COUT__ << "getChildLink Found match for col: " << (int)c << " at " << col << __E__;
@@ -2651,21 +2651,21 @@ const bool ConfigurationView::getChildLink(const unsigned int &c, bool &isGroup,
 		}
 
 		//if here then invalid table!
-		__SS__ << "\tIn view: " << tableName_ << ", Can't find complete child link for column name " << columnsInfo_[c].getName() << __E__;
+		__SS__ << "\tIn view: " << tableName_ << ", Can't find complete child link for column name " << columnsInfo_[c].getName () << __E__;
 		__SS_THROW__;
 	}
 
-	if (!columnsInfo_[c].isChildLink())
+	if (!columnsInfo_[c].isChildLink ())
 		return false;  //cant be unique link
 
 	//this is child link, so find pair link uid or gid column
 	linkPair.first    = c;
-	std::string index = columnsInfo_[c].getChildLinkIndex();
+	std::string index = columnsInfo_[c].getChildLinkIndex ();
 
 	//__COUT__ << "index: " << index << __E__;
 
 	//find pair link
-	for (unsigned int col = 0; col < columnsInfo_.size(); ++col)
+	for (unsigned int col = 0; col < columnsInfo_.size (); ++col)
 	{
 		//__COUT__ << "try: " << col << "-" << columnsInfo_[col].getType() << "-" << columnsInfo_[col].getName() << __E__;
 		if (col == c) continue;  //skip column c that we know
@@ -2680,9 +2680,9 @@ const bool ConfigurationView::getChildLink(const unsigned int &c, bool &isGroup,
 		//		if(columnsInfo_[col].isChildLinkGroupID())
 		//			__COUT__ << "-L" << columnsInfo_[col].getChildLinkIndex() << __E__;
 
-		if (((columnsInfo_[col].isChildLinkUID() && !(isGroup = false)) ||
-		     (columnsInfo_[col].isChildLinkGroupID() && (isGroup = true))) &&
-		    index == columnsInfo_[col].getChildLinkIndex())
+		if (((columnsInfo_[col].isChildLinkUID () && !(isGroup = false)) ||
+		     (columnsInfo_[col].isChildLinkGroupID () && (isGroup = true))) &&
+		    index == columnsInfo_[col].getChildLinkIndex ())
 		{
 			//found match!
 			//__COUT__ << "getChildLink Found match for col: " << (int)c << " at " << col << __E__;
@@ -2692,6 +2692,6 @@ const bool ConfigurationView::getChildLink(const unsigned int &c, bool &isGroup,
 	}
 
 	//if here then invalid table!
-	__SS__ << "\tIn view: " << tableName_ << ", Can't find complete child link id for column name " << columnsInfo_[c].getName() << __E__;
+	__SS__ << "\tIn view: " << tableName_ << ", Can't find complete child link id for column name " << columnsInfo_[c].getName () << __E__;
 	__SS_THROW__;
 }

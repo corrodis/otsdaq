@@ -12,7 +12,7 @@ namespace ots
 {
 class ProgressBar;
 
-#define __GET_CONFIG__(X) getConfiguration<X>(QUOTE(X))
+#define __GET_CONFIG__(X) getConfiguration<X> (QUOTE (X))
 
 class ConfigurationManager
 {
@@ -47,14 +47,14 @@ class ConfigurationManager
 	static const std::set<std::string> backboneMemberNames_;  //list of backbone members
 	static const std::set<std::string> iterateMemberNames_;   //list of iterate members
 
-	static const std::set<std::string> &getContextMemberNames(void);
-	static const std::set<std::string> &getBackboneMemberNames(void);
-	static const std::set<std::string> &getIterateMemberNames(void);
+	static const std::set<std::string> &getContextMemberNames (void);
+	static const std::set<std::string> &getBackboneMemberNames (void);
+	static const std::set<std::string> &getIterateMemberNames (void);
 
-	static std::string        encodeURIComponent(const std::string &sourceStr);
-	static const std::string &convertGroupTypeIdToName(int groupTypeId);
-	static int                getTypeOfGroup(const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
-	static const std::string &getTypeNameOfGroup(const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
+	static std::string        encodeURIComponent (const std::string &sourceStr);
+	static const std::string &convertGroupTypeIdToName (int groupTypeId);
+	static int                getTypeOfGroup (const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
+	static const std::string &getTypeNameOfGroup (const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
 
 	//==============================================================================
 	//Construct/Destruct
@@ -67,60 +67,60 @@ class ConfigurationManager
 		CONFIGURATION_TYPE
 	};
 
-	ConfigurationManager();
-	virtual ~ConfigurationManager(void);
+	ConfigurationManager ();
+	virtual ~ConfigurationManager (void);
 
-	void init(std::string *accumulatedErrors = 0);
-	void destroy(void);
-	void destroyConfigurationGroup(const std::string &theGroup = "", bool onlyDeactivate = false);
+	void init (std::string *accumulatedErrors = 0);
+	void destroy (void);
+	void destroyConfigurationGroup (const std::string &theGroup = "", bool onlyDeactivate = false);
 
 	//==============================================================================
 	//Getters
 
-	void                  loadConfigurationGroup(const std::string &configGroupName, ConfigurationGroupKey configGroupKey, bool doActivate = false, std::map<std::string, ConfigurationVersion> *groupMembers = 0, ProgressBar *progressBar = 0, std::string *accumulateWarnings = 0, std::string *groupComment = 0, std::string *groupAuthor = 0, std::string *groupCreateTime = 0, bool doNotLoadMember = false, std::string *groupTypeString = 0, std::map<std::string /*name*/, std::string /*alias*/> *groupAliases = 0);
-	void                  loadMemberMap(const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
-	ConfigurationGroupKey loadConfigurationBackbone(void);
+	void                  loadConfigurationGroup (const std::string &configGroupName, ConfigurationGroupKey configGroupKey, bool doActivate = false, std::map<std::string, ConfigurationVersion> *groupMembers = 0, ProgressBar *progressBar = 0, std::string *accumulateWarnings = 0, std::string *groupComment = 0, std::string *groupAuthor = 0, std::string *groupCreateTime = 0, bool doNotLoadMember = false, std::string *groupTypeString = 0, std::map<std::string /*name*/, std::string /*alias*/> *groupAliases = 0);
+	void                  loadMemberMap (const std::map<std::string /*name*/, ConfigurationVersion /*version*/> &memberMap);
+	ConfigurationGroupKey loadConfigurationBackbone (void);
 
 	//================
 	//getConfiguration
 	//	get configuration * with specific configuration type
 	template<class T>
-	const T *getConfiguration(std::string name) const
+	const T *getConfiguration (std::string name) const
 	{
-		return (T *)(getConfigurationByName(name));
+		return (T *)(getConfigurationByName (name));
 	}
 
-	const ConfigurationBase *getConfigurationByName(const std::string &configurationName) const;
+	const ConfigurationBase *getConfigurationByName (const std::string &configurationName) const;
 
-	void dumpActiveConfiguration(const std::string &filePath, const std::string &dumpType);
+	void dumpActiveConfiguration (const std::string &filePath, const std::string &dumpType);
 
-	std::map<std::string /*groupAlias*/, std::pair<std::string /*groupName*/, ConfigurationGroupKey>> getActiveGroupAliases(void);
+	std::map<std::string /*groupAlias*/, std::pair<std::string /*groupName*/, ConfigurationGroupKey>> getActiveGroupAliases (void);
 	//Note: this ConfigurationManager::getVersionAliases is called internally and by ConfigurationManagerRW::getVersionAliases
-	std::map<std::string /*tableName*/, std::map<std::string /*aliasName*/, ConfigurationVersion>> getVersionAliases(void) const;
+	std::map<std::string /*tableName*/, std::map<std::string /*aliasName*/, ConfigurationVersion>> getVersionAliases (void) const;
 
-	std::pair<std::string /*groupName*/, ConfigurationGroupKey>                                             getConfigurationGroupFromAlias(std::string systemAlias, ProgressBar *progressBar = 0);
-	std::map<std::string /*groupType*/, std::pair<std::string /*groupName*/, ConfigurationGroupKey>>        getActiveConfigurationGroups(void) const;
-	const std::map<std::string /*groupType*/, std::pair<std::string /*groupName*/, ConfigurationGroupKey>> &getFailedConfigurationGroups(void) const { return lastFailedGroupLoad_; }
-	const std::string &                                                                                     getActiveGroupName(const std::string &type = "") const;
-	ConfigurationGroupKey                                                                                   getActiveGroupKey(const std::string &type = "") const;
+	std::pair<std::string /*groupName*/, ConfigurationGroupKey>                                             getConfigurationGroupFromAlias (std::string systemAlias, ProgressBar *progressBar = 0);
+	std::map<std::string /*groupType*/, std::pair<std::string /*groupName*/, ConfigurationGroupKey>>        getActiveConfigurationGroups (void) const;
+	const std::map<std::string /*groupType*/, std::pair<std::string /*groupName*/, ConfigurationGroupKey>> &getFailedConfigurationGroups (void) const { return lastFailedGroupLoad_; }
+	const std::string &                                                                                     getActiveGroupName (const std::string &type = "") const;
+	ConfigurationGroupKey                                                                                   getActiveGroupKey (const std::string &type = "") const;
 
-	ConfigurationTree getNode(const std::string &nodeString, bool doNotThrowOnBrokenUIDLinks = false) const;  //"root/parent/parent/"
-	ConfigurationTree getContextNode(const std::string &contextUID, const std::string &applicationUID) const;
-	ConfigurationTree getSupervisorNode(const std::string &contextUID, const std::string &applicationUID) const;
-	ConfigurationTree getSupervisorConfigurationNode(const std::string &contextUID, const std::string &applicationUID) const;
+	ConfigurationTree getNode (const std::string &nodeString, bool doNotThrowOnBrokenUIDLinks = false) const;  //"root/parent/parent/"
+	ConfigurationTree getContextNode (const std::string &contextUID, const std::string &applicationUID) const;
+	ConfigurationTree getSupervisorNode (const std::string &contextUID, const std::string &applicationUID) const;
+	ConfigurationTree getSupervisorConfigurationNode (const std::string &contextUID, const std::string &applicationUID) const;
 
-	std::vector<std::pair<std::string /*childName*/, ConfigurationTree>> getChildren(std::map<std::string, ConfigurationVersion> *memberMap = 0, std::string *accumulatedTreeErrors = 0) const;
-	std::string                                                          getFirstPathToNode(const ConfigurationTree &node, const std::string &startPath = "/") const;
+	std::vector<std::pair<std::string /*childName*/, ConfigurationTree>> getChildren (std::map<std::string, ConfigurationVersion> *memberMap = 0, std::string *accumulatedTreeErrors = 0) const;
+	std::string                                                          getFirstPathToNode (const ConfigurationTree &node, const std::string &startPath = "/") const;
 
-	std::map<std::string, ConfigurationVersion> getActiveVersions(void) const;
+	std::map<std::string, ConfigurationVersion> getActiveVersions (void) const;
 
 	//==============================================================================
 	//Setters/Modifiers
-	std::shared_ptr<ConfigurationGroupKey> makeTheConfigurationGroupKey(ConfigurationGroupKey key);
-	void                                   restoreActiveConfigurationGroups(bool throwErrors = false, const std::string &pathToActiveGroupsFile = "");
+	std::shared_ptr<ConfigurationGroupKey> makeTheConfigurationGroupKey (ConfigurationGroupKey key);
+	void                                   restoreActiveConfigurationGroups (bool throwErrors = false, const std::string &pathToActiveGroupsFile = "");
 
   private:
-	ConfigurationManager(const std::string &userName);  //private constructor called by ConfigurationManagerRW
+	ConfigurationManager (const std::string &userName);  //private constructor called by ConfigurationManagerRW
 
 	std::string                            username_;  //user of the configuration is READONLY_USER unless using ConfigurationManagerRW
 	ConfigurationInterface *               theInterface_;

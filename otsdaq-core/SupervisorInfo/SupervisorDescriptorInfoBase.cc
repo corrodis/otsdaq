@@ -8,31 +8,31 @@
 using namespace ots;
 
 //========================================================================================================================
-SupervisorDescriptorInfoBase::SupervisorDescriptorInfoBase(void)
+SupervisorDescriptorInfoBase::SupervisorDescriptorInfoBase (void)
 {
 }
 
 //========================================================================================================================
-SupervisorDescriptorInfoBase::SupervisorDescriptorInfoBase(xdaq::ApplicationContext* applicationContext)
+SupervisorDescriptorInfoBase::SupervisorDescriptorInfoBase (xdaq::ApplicationContext* applicationContext)
 {
-	init(applicationContext);
+	init (applicationContext);
 }
 
 //========================================================================================================================
-SupervisorDescriptorInfoBase::~SupervisorDescriptorInfoBase()
+SupervisorDescriptorInfoBase::~SupervisorDescriptorInfoBase ()
 {
 }
 
 //========================================================================================================================
-void SupervisorDescriptorInfoBase::destroy()
+void SupervisorDescriptorInfoBase::destroy ()
 {
-	allSupervisors_.clear();
+	allSupervisors_.clear ();
 }
 
 //========================================================================================================================
-void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationContext)
+void SupervisorDescriptorInfoBase::init (xdaq::ApplicationContext* applicationContext)
 {
-	if (applicationContext->getDefaultZone()->getApplicationGroup("daq") == 0)
+	if (applicationContext->getDefaultZone ()->getApplicationGroup ("daq") == 0)
 	{
 		__SS__ << "Could not find xdaq application group \"daq\" (Must not be present in the xdaq context configuration)" << __E__;
 		__SS_THROW__;
@@ -61,18 +61,18 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 	//get allSupervisors_
 
 	//allFETypeSupervisors_.clear();
-	allSupervisors_.clear();
-	appDescriptors = applicationContext->getDefaultZone()->getApplicationGroup(
-	                                                         "daq")
-	                     ->getApplicationDescriptors();
+	allSupervisors_.clear ();
+	appDescriptors = applicationContext->getDefaultZone ()->getApplicationGroup (
+	                                                          "daq")
+	                     ->getApplicationDescriptors ();
 	for (auto& it : appDescriptors)
 	{
-		auto /*<it,bool*/ retPair = allSupervisors_.emplace(std::pair<xdata::UnsignedIntegerT, XDAQ_CONST_CALL xdaq::ApplicationDescriptor*>(
-		    it->getLocalId(),
+		auto /*<it,bool*/ retPair = allSupervisors_.emplace (std::pair<xdata::UnsignedIntegerT, XDAQ_CONST_CALL xdaq::ApplicationDescriptor*> (
+		    it->getLocalId (),
 		    it));
 		if (!retPair.second)
 		{
-			__SS__ << "Error! Duplicate Application IDs are not allowed. ID =" << it->getLocalId() << __E__;
+			__SS__ << "Error! Duplicate Application IDs are not allowed. ID =" << it->getLocalId () << __E__;
 			__SS_THROW__;
 		}
 	}
@@ -228,7 +228,7 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 //}
 
 //========================================================================================================================
-const SupervisorDescriptors& SupervisorDescriptorInfoBase::getAllDescriptors(void) const
+const SupervisorDescriptors& SupervisorDescriptorInfoBase::getAllDescriptors (void) const
 {
 	return allSupervisors_;
 }

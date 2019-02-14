@@ -10,10 +10,10 @@ namespace ots
 class ARTDAQDataManagerSupervisor : public CoreSupervisorBase
 {
   public:
-	XDAQ_INSTANTIATOR();
+	XDAQ_INSTANTIATOR ();
 
-	ARTDAQDataManagerSupervisor(xdaq::ApplicationStub* s);
-	virtual ~ARTDAQDataManagerSupervisor(void);
+	ARTDAQDataManagerSupervisor (xdaq::ApplicationStub* s);
+	virtual ~ARTDAQDataManagerSupervisor (void);
 
   private:
 };

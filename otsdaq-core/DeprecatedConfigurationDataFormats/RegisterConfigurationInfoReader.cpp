@@ -20,116 +20,116 @@
 
 using namespace ots;
 
-RegisterConfigurationInfoReader::RegisterConfigurationInfoReader()
+RegisterConfigurationInfoReader::RegisterConfigurationInfoReader ()
 {
 	// TODO Auto-generated constructor stub
-	initPlatform();
-	rootTag_               = xercesc::XMLString::transcode("ROOT");
-	headerTag_             = xercesc::XMLString::transcode("HEADER");
-	typeTag_               = xercesc::XMLString::transcode("TYPE");
-	extensionTableNameTag_ = xercesc::XMLString::transcode("EXTENSION_TABLE_NAME");
-	nameTag_               = xercesc::XMLString::transcode("NAME");
-	dataSetTag_            = xercesc::XMLString::transcode("DATA_SET");
-	versionTag_            = xercesc::XMLString::transcode("VERSION");
-	commentDescriptionTag_ = xercesc::XMLString::transcode("COMMENT_DESCRIPTION");
-	createdByUserTag_      = xercesc::XMLString::transcode("CREATED_BY_USER");
-	dataTag_               = xercesc::XMLString::transcode("DATA");
-	typeNameTag_           = xercesc::XMLString::transcode("TYPE_NAME");
-	registerNameTag_       = xercesc::XMLString::transcode("REGISTER_NAME");
-	baseAddressTag_        = xercesc::XMLString::transcode("BASE_ADDRESS");
-	sizeTag_               = xercesc::XMLString::transcode("REGISTER_SIZE");
-	accessTag_             = xercesc::XMLString::transcode("ACCESS");
+	initPlatform ();
+	rootTag_               = xercesc::XMLString::transcode ("ROOT");
+	headerTag_             = xercesc::XMLString::transcode ("HEADER");
+	typeTag_               = xercesc::XMLString::transcode ("TYPE");
+	extensionTableNameTag_ = xercesc::XMLString::transcode ("EXTENSION_TABLE_NAME");
+	nameTag_               = xercesc::XMLString::transcode ("NAME");
+	dataSetTag_            = xercesc::XMLString::transcode ("DATA_SET");
+	versionTag_            = xercesc::XMLString::transcode ("VERSION");
+	commentDescriptionTag_ = xercesc::XMLString::transcode ("COMMENT_DESCRIPTION");
+	createdByUserTag_      = xercesc::XMLString::transcode ("CREATED_BY_USER");
+	dataTag_               = xercesc::XMLString::transcode ("DATA");
+	typeNameTag_           = xercesc::XMLString::transcode ("TYPE_NAME");
+	registerNameTag_       = xercesc::XMLString::transcode ("REGISTER_NAME");
+	baseAddressTag_        = xercesc::XMLString::transcode ("BASE_ADDRESS");
+	sizeTag_               = xercesc::XMLString::transcode ("REGISTER_SIZE");
+	accessTag_             = xercesc::XMLString::transcode ("ACCESS");
 }
 
-RegisterConfigurationInfoReader::~RegisterConfigurationInfoReader()
+RegisterConfigurationInfoReader::~RegisterConfigurationInfoReader ()
 {
 	try
 	{
-		xercesc::XMLString::release(&rootTag_);
-		xercesc::XMLString::release(&headerTag_);
-		xercesc::XMLString::release(&typeTag_);
-		xercesc::XMLString::release(&extensionTableNameTag_);
-		xercesc::XMLString::release(&nameTag_);
-		xercesc::XMLString::release(&dataSetTag_);
-		xercesc::XMLString::release(&versionTag_);
-		xercesc::XMLString::release(&commentDescriptionTag_);
-		xercesc::XMLString::release(&createdByUserTag_);
-		xercesc::XMLString::release(&typeNameTag_);
-		xercesc::XMLString::release(&registerNameTag_);
-		xercesc::XMLString::release(&baseAddressTag_);
-		xercesc::XMLString::release(&sizeTag_);
-		xercesc::XMLString::release(&accessTag_);
+		xercesc::XMLString::release (&rootTag_);
+		xercesc::XMLString::release (&headerTag_);
+		xercesc::XMLString::release (&typeTag_);
+		xercesc::XMLString::release (&extensionTableNameTag_);
+		xercesc::XMLString::release (&nameTag_);
+		xercesc::XMLString::release (&dataSetTag_);
+		xercesc::XMLString::release (&versionTag_);
+		xercesc::XMLString::release (&commentDescriptionTag_);
+		xercesc::XMLString::release (&createdByUserTag_);
+		xercesc::XMLString::release (&typeNameTag_);
+		xercesc::XMLString::release (&registerNameTag_);
+		xercesc::XMLString::release (&baseAddressTag_);
+		xercesc::XMLString::release (&sizeTag_);
+		xercesc::XMLString::release (&accessTag_);
 	}
 	catch (...)
 	{
 		__MOUT_ERROR__ << "Unknown exception encountered in TagNames destructor"
 		               << "     ";
 	}
-	terminatePlatform();  // TODO Auto-generated destructor stub
+	terminatePlatform ();  // TODO Auto-generated destructor stub
 }
 
 //==============================================================================
-void RegisterConfigurationInfoReader::initPlatform(void)
+void RegisterConfigurationInfoReader::initPlatform (void)
 {
 	try
 	{
-		xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
+		xercesc::XMLPlatformUtils::Initialize ();  // Initialize Xerces infrastructure
 	}
 	catch (xercesc::XMLException& e)
 	{
-		__MOUT_ERROR__ << "XML toolkit initialization error: " << XML_TO_CHAR(e.getMessage()) << "     ";
+		__MOUT_ERROR__ << "XML toolkit initialization error: " << XML_TO_CHAR (e.getMessage ()) << "     ";
 		// throw exception here to return ERROR_XERCES_INIT
 	}
 }
 
 //==============================================================================
-void RegisterConfigurationInfoReader::terminatePlatform(void)
+void RegisterConfigurationInfoReader::terminatePlatform (void)
 {
 	try
 	{
-		xercesc::XMLPlatformUtils::Terminate();  // Terminate after release of memory
+		xercesc::XMLPlatformUtils::Terminate ();  // Terminate after release of memory
 	}
 	catch (xercesc::XMLException& e)
 	{
-		__MOUT_ERROR__ << "XML toolkit teardown error: " << XML_TO_CHAR(e.getMessage()) << "     ";
+		__MOUT_ERROR__ << "XML toolkit teardown error: " << XML_TO_CHAR (e.getMessage ()) << "     ";
 	}
 }
 
 //==============================================================================
-xercesc::DOMNode* RegisterConfigurationInfoReader::getNode(XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber)
+xercesc::DOMNode* RegisterConfigurationInfoReader::getNode (XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber)
 {
-	return getNode(tagName, dynamic_cast<xercesc::DOMElement*>(parent), itemNumber);
+	return getNode (tagName, dynamic_cast<xercesc::DOMElement*> (parent), itemNumber);
 }
 
 //==============================================================================
-xercesc::DOMNode* RegisterConfigurationInfoReader::getNode(XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber)
+xercesc::DOMNode* RegisterConfigurationInfoReader::getNode (XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber)
 {
-	xercesc::DOMNodeList* nodeList = parent->getElementsByTagName(tagName);
+	xercesc::DOMNodeList* nodeList = parent->getElementsByTagName (tagName);
 	if (!nodeList)
 	{
-		throw(std::runtime_error(std::string("Can't find ") + XML_TO_CHAR(tagName) + " tag!"));
-		std::cout << __COUT_HDR_FL__ << (std::string("Can't find ") + XML_TO_CHAR(tagName) + " tag!") << std::endl;
+		throw (std::runtime_error (std::string ("Can't find ") + XML_TO_CHAR (tagName) + " tag!"));
+		std::cout << __COUT_HDR_FL__ << (std::string ("Can't find ") + XML_TO_CHAR (tagName) + " tag!") << std::endl;
 	}
 	//    std::cout << __COUT_HDR_FL__<< "Name: "  << XML_TO_CHAR(nodeList->item(itemNumber)->getNodeName()) << std::endl;
 	//    if( nodeList->item(itemNumber)->getFirstChild() != 0 )
 	//        std::cout << __COUT_HDR_FL__<< "Value: " << XML_TO_CHAR(nodeList->item(itemNumber)->getFirstChild()->getNodeValue()) << std::endl;
-	return nodeList->item(itemNumber);
+	return nodeList->item (itemNumber);
 }
 
 //==============================================================================
-xercesc::DOMElement* RegisterConfigurationInfoReader::getElement(XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber)
+xercesc::DOMElement* RegisterConfigurationInfoReader::getElement (XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber)
 {
-	return dynamic_cast<xercesc::DOMElement*>(getNode(tagName, parent, itemNumber));
+	return dynamic_cast<xercesc::DOMElement*> (getNode (tagName, parent, itemNumber));
 }
 
 //==============================================================================
-xercesc::DOMElement* RegisterConfigurationInfoReader::getElement(XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber)
+xercesc::DOMElement* RegisterConfigurationInfoReader::getElement (XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber)
 {
-	return dynamic_cast<xercesc::DOMElement*>(getNode(tagName, parent, itemNumber));
+	return dynamic_cast<xercesc::DOMElement*> (getNode (tagName, parent, itemNumber));
 }
 
 //==============================================================================
-void RegisterConfigurationInfoReader::read(RegisterBase& configuration)
+void RegisterConfigurationInfoReader::read (RegisterBase& configuration)
 {
 	/*
     std::string configurationDataDir = std::string(getenv("CONFIGURATION_DATA_PATH")) + "/" + configuration.getTypeName() + "RegisterConfiguration/";
@@ -222,7 +222,7 @@ void RegisterConfigurationInfoReader::read(RegisterBase& configuration)
 }
 
 //==============================================================================
-void RegisterConfigurationInfoReader::read(RegisterBase* configuration)
+void RegisterConfigurationInfoReader::read (RegisterBase* configuration)
 {
-	read(*configuration);
+	read (*configuration);
 }

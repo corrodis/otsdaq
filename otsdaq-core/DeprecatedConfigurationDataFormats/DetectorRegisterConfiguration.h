@@ -8,8 +8,8 @@ namespace ots
 class DetectorRegisterConfiguration : public ots::RegisterConfiguration
 {
   public:
-	DetectorRegisterConfiguration(void);
-	virtual ~DetectorRegisterConfiguration(void);
+	DetectorRegisterConfiguration (void);
+	virtual ~DetectorRegisterConfiguration (void);
 };
 }  // namespace ots
 #endif

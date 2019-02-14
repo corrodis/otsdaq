@@ -5,13 +5,13 @@
 
 namespace ots
 {
-typedef ConfigurationBase*(cbmakeFunc_t)();
+typedef ConfigurationBase*(cbmakeFunc_t) ();
 }
 
 #define DEFINE_OTS_CONFIGURATION(klass) \
 	extern "C" ConfigurationBase*       \
-	make()                              \
+	make ()                             \
 	{                                   \
-		return new klass();             \
+		return new klass ();            \
 	}
 #endif /* _ots_ConfigurationPluginMacro_h_ */

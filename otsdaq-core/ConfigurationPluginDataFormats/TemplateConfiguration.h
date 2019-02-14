@@ -8,11 +8,11 @@ namespace ots
 class TemplateConfiguration : public ConfigurationBase
 {
   public:
-	TemplateConfiguration(void);
-	virtual ~TemplateConfiguration(void);
+	TemplateConfiguration (void);
+	virtual ~TemplateConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 
 	//Getters
 

@@ -2,38 +2,38 @@
 
 //========================================================================================================================
 template<class T>
-void FEVInterface::sendToFrontEnd(const std::string& targetInterfaceID,
-                                  const T&           value) const
+void FEVInterface::sendToFrontEnd (const std::string& targetInterfaceID,
+                                   const T&           value) const
 {
-	__FE_COUTV__(targetInterfaceID);
+	__FE_COUTV__ (targetInterfaceID);
 	std::stringstream ss;
 	ss << value;
-	__FE_COUTV__(ss.str());
+	__FE_COUTV__ (ss.str ());
 
-	__FE_COUTV__(VStateMachine::parentSupervisor_);
+	__FE_COUTV__ (VStateMachine::parentSupervisor_);
 
 	xoap::MessageReference message =
-	    SOAPUtilities::makeSOAPMessageReference("FECommunication");
+	    SOAPUtilities::makeSOAPMessageReference ("FECommunication");
 
 	SOAPParameters parameters;
-	parameters.addParameter("type", "feSend");
-	parameters.addParameter("sourceInterfaceID", FEVInterface::interfaceUID_);
-	parameters.addParameter("targetInterfaceID", targetInterfaceID);
-	parameters.addParameter("value", ss.str());
-	SOAPUtilities::addParameters(message, parameters);
+	parameters.addParameter ("type", "feSend");
+	parameters.addParameter ("sourceInterfaceID", FEVInterface::interfaceUID_);
+	parameters.addParameter ("targetInterfaceID", targetInterfaceID);
+	parameters.addParameter ("value", ss.str ());
+	SOAPUtilities::addParameters (message, parameters);
 
-	__FE_COUT__ << "Sending FE communication: " << SOAPUtilities::translate(message) << __E__;
+	__FE_COUT__ << "Sending FE communication: " << SOAPUtilities::translate (message) << __E__;
 
-	xoap::MessageReference replyMessage = VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply(
-	    VStateMachine::parentSupervisor_->allSupervisorInfo_.getAllMacroMakerTypeSupervisorInfo().begin()->second.getDescriptor(), message);
+	xoap::MessageReference replyMessage = VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply (
+	    VStateMachine::parentSupervisor_->allSupervisorInfo_.getAllMacroMakerTypeSupervisorInfo ().begin ()->second.getDescriptor (), message);
 
-	__FE_COUT__ << "Response received: " << SOAPUtilities::translate(replyMessage) << __E__;
+	__FE_COUT__ << "Response received: " << SOAPUtilities::translate (replyMessage) << __E__;
 
 	SOAPParameters rxParameters;
-	rxParameters.addParameter("Error");
-	SOAPUtilities::receive(replyMessage, rxParameters);
+	rxParameters.addParameter ("Error");
+	SOAPUtilities::receive (replyMessage, rxParameters);
 
-	std::string error = rxParameters.getValue("Error");
+	std::string error = rxParameters.getValue ("Error");
 
 	if (error != "")
 	{
@@ -49,17 +49,17 @@ void FEVInterface::sendToFrontEnd(const std::string& targetInterfaceID,
 //	* can be used for source interface ID to accept a message from any front-end
 // NOTE: can not overload functions based on return type, so T& passed as value
 template<class T>
-void FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID,
-                                       T&                 retValue,
-                                       unsigned int       timeoutInSeconds) const
+void FEVInterface::receiveFromFrontEnd (const std::string& sourceInterfaceID,
+                                        T&                 retValue,
+                                        unsigned int       timeoutInSeconds) const
 {
-	__FE_COUTV__(sourceInterfaceID);
-	__FE_COUTV__(VStateMachine::parentSupervisor_);
+	__FE_COUTV__ (sourceInterfaceID);
+	__FE_COUTV__ (VStateMachine::parentSupervisor_);
 
 	std::string data;
-	FEVInterface::receiveFromFrontEnd(sourceInterfaceID, data, timeoutInSeconds);
+	FEVInterface::receiveFromFrontEnd (sourceInterfaceID, data, timeoutInSeconds);
 
-	if (!StringMacros::getNumber(data, retValue))
+	if (!StringMacros::getNumber (data, retValue))
 	{
 		__SS__ << (data + " is not a number!") << __E__;
 		__SS_THROW__;
@@ -69,33 +69,33 @@ void FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID,
 //========================================================================================================================
 // NOTE: can not overload functions based on return type, so calls function with T& passed as value
 template<class T>
-T FEVInterface::receiveFromFrontEnd(const std::string& sourceInterfaceID,
-                                    unsigned int       timeoutInSeconds) const
+T FEVInterface::receiveFromFrontEnd (const std::string& sourceInterfaceID,
+                                     unsigned int       timeoutInSeconds) const
 {
 	T retValue;
 	//call receiveFromFrontEnd without <T> so strings are handled well
-	FEVInterface::receiveFromFrontEnd(sourceInterfaceID, retValue, timeoutInSeconds);
+	FEVInterface::receiveFromFrontEnd (sourceInterfaceID, retValue, timeoutInSeconds);
 	return retValue;
 }  //end receiveFromFrontEnd()
 
 //========================================================================================================================
 template<class T>
-std::string& FEVInterface::setFEMacroArgumentValue(
+std::string& FEVInterface::setFEMacroArgumentValue (
     frontEndMacroArgs_t args,
     const std::string&  argName,
     const T&            value) const
 {
 	//modify existing pair
-	std::string&      arg = getFEMacroArgument(args, argName);
+	std::string&      arg = getFEMacroArgument (args, argName);
 	std::stringstream ss;
 	ss << value;
-	arg = ss.str();
+	arg = ss.str ();
 	return arg;
 }  //end setFEMacroArgumentValue()
 
 //========================================================================================================================
 template<class T>
-std::string& FEVInterface::emplaceFEMacroArgumentValue(
+std::string& FEVInterface::emplaceFEMacroArgumentValue (
     frontEndMacroArgs_t args,
     const std::string&  argName,
     const T&            value) const
@@ -103,28 +103,28 @@ std::string& FEVInterface::emplaceFEMacroArgumentValue(
 	//insert new pair
 	std::stringstream ss;
 	ss << value;
-	args.push_back(frontEndMacroArg_t(argName, ss.str()));
-	return args.back().second;
+	args.push_back (frontEndMacroArg_t (argName, ss.str ()));
+	return args.back ().second;
 }  //end emplaceFEMacroArgumentValue()
 
 //========================================================================================================================
 // Note: not a member of FEVInterface
 template<class T>
-T getFEMacroConstArgumentValue(
+T getFEMacroConstArgumentValue (
     FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName)
 {
 	//stolen from ConfigurationView
 	//	only handles number types (strings are handled in non-template function override
 
-	const std::string& data = FEVInterface::getFEMacroConstArgument(args, argName);
+	const std::string& data = FEVInterface::getFEMacroConstArgument (args, argName);
 
 	T retValue;
 
-	if (!StringMacros::getNumber(data, retValue))
+	if (!StringMacros::getNumber (data, retValue))
 	{
 		__SS__ << "Error extracting value for input argument named '" << argName << ".' The value '" << data << "' is not a number!" << std::endl;
 		__COUT__ << "\n"
-		         << ss.str();
+		         << ss.str ();
 		__SS_THROW__;
 	}
 
@@ -134,21 +134,21 @@ T getFEMacroConstArgumentValue(
 //========================================================================================================================
 // Note: not a member of FEVInterface
 template<class T>
-T getFEMacroArgumentValue(
+T getFEMacroArgumentValue (
     FEVInterface::frontEndMacroArgs_t args, const std::string& argName)
 {
 	//stolen from ConfigurationView
 	//	only handles number types (strings are handled in non-template function override
 
-	const std::string& data = FEVInterface::getFEMacroArgument(args, argName);
+	const std::string& data = FEVInterface::getFEMacroArgument (args, argName);
 
 	T retValue;
 
-	if (!StringMacros::getNumber(data, retValue))
+	if (!StringMacros::getNumber (data, retValue))
 	{
 		__SS__ << "Error extracting value for output argument named '" << argName << ".' The value '" << data << "' is not a number!" << std::endl;
 		__COUT__ << "\n"
-		         << ss.str();
+		         << ss.str ();
 		__SS_THROW__;
 	}
 

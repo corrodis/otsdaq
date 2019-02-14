@@ -13,11 +13,11 @@ namespace ots
 class SystemMessenger
 {
   public:
-	SystemMessenger()
-	    : sysMsgLock_(false){};  //constructor
+	SystemMessenger ()
+	    : sysMsgLock_ (false){};  //constructor
 
-	void        addSystemMessage(std::string targetUser, std::string msg);
-	std::string getSystemMessage(std::string targetUser);
+	void        addSystemMessage (std::string targetUser, std::string msg);
+	std::string getSystemMessage (std::string targetUser);
 
   private:
 	//Members for system messages ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,8 +32,8 @@ class SystemMessenger
 	std::vector<std::string> sysMsgMessage_;
 	std::vector<time_t>      sysMsgTime_;
 	std::vector<bool>        sysMsgDelivered_;
-	void                     sysMsgSetLock(bool set);
-	void                     sysMsgCleanup();
+	void                     sysMsgSetLock (bool set);
+	void                     sysMsgCleanup ();
 
 	volatile bool sysMsgLock_;
 

@@ -7,30 +7,30 @@
 using namespace ots;
 
 //==============================================================================
-ConvertFromXML::ConvertFromXML(const XMLCh* const toTranscode)
+ConvertFromXML::ConvertFromXML (const XMLCh* const toTranscode)
 {
-	xmlTranscoded_ = xercesc::XMLString::transcode(toTranscode);
+	xmlTranscoded_ = xercesc::XMLString::transcode (toTranscode);
 }
 
 //==============================================================================
-ConvertFromXML::~ConvertFromXML()
+ConvertFromXML::~ConvertFromXML ()
 {
-	xercesc::XMLString::release(&xmlTranscoded_);
+	xercesc::XMLString::release (&xmlTranscoded_);
 }
 
 //==============================================================================
-const char* ConvertFromXML::toConstChar() const
+const char* ConvertFromXML::toConstChar () const
 {
 	return xmlTranscoded_;
 }
 
 //==============================================================================
-char* ConvertFromXML::toChar() const
+char* ConvertFromXML::toChar () const
 {
 	return xmlTranscoded_;
 }
 //==============================================================================
-std::string ConvertFromXML::toString() const
+std::string ConvertFromXML::toString () const
 {
 	return xmlTranscoded_;
 }

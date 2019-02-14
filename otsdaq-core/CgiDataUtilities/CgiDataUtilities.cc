@@ -8,11 +8,11 @@ using namespace ots;
 // 	return std::string value of needle from get or post std::string
 //		post format is expected to be: needle1=value1&needle2=value2...
 //	if not found, return ""
-std::string CgiDataUtilities::getOrPostData(cgicc::Cgicc& cgi, const std::string& needle)
+std::string CgiDataUtilities::getOrPostData (cgicc::Cgicc& cgi, const std::string& needle)
 {
 	std::string postData = "";
-	if ((postData = CgiDataUtilities::postData(cgi, needle)) == "")
-		postData = CgiDataUtilities::getData(cgi, needle);  //get command from form, if PreviewEntry
+	if ((postData = CgiDataUtilities::postData (cgi, needle)) == "")
+		postData = CgiDataUtilities::getData (cgi, needle);  //get command from form, if PreviewEntry
 	return postData;
 }
 
@@ -21,72 +21,72 @@ std::string CgiDataUtilities::getOrPostData(cgicc::Cgicc& cgi, const std::string
 // 	return std::string value of needle from post std::string
 //		post format is expected to be: needle1=value1&needle2=value2...
 //	if not found, return ""
-std::string CgiDataUtilities::postData(cgicc::Cgicc& cgi, const std::string& needle)
+std::string CgiDataUtilities::postData (cgicc::Cgicc& cgi, const std::string& needle)
 {
-	std::string postData = "&" + cgi.getEnvironment().getPostData();
+	std::string postData = "&" + cgi.getEnvironment ().getPostData ();
 	//__COUT__ << "PostData: " + postData << std::endl;
-	size_t start_pos = postData.find("&" + needle + "=");  //add & and = to make sure found field and not part of a value
-	if (start_pos == std::string::npos) return "";         //needle not found
+	size_t start_pos = postData.find ("&" + needle + "=");  //add & and = to make sure found field and not part of a value
+	if (start_pos == std::string::npos) return "";          //needle not found
 
-	size_t end_pos = postData.find('=', start_pos);  //verify = sign
-	if (end_pos == std::string::npos) return "";     //= not found
+	size_t end_pos = postData.find ('=', start_pos);  //verify = sign
+	if (end_pos == std::string::npos) return "";      //= not found
 
-	start_pos += needle.length() + 2;                     //get past & and field
-	end_pos = postData.find('&', start_pos);              //skip needle and = sign
-	if (end_pos == std::string::npos) postData.length();  //not found, so take data to end
+	start_pos += needle.length () + 2;                     //get past & and field
+	end_pos = postData.find ('&', start_pos);              //skip needle and = sign
+	if (end_pos == std::string::npos) postData.length ();  //not found, so take data to end
 
 	//__COUT__ << "start_pos=" << start_pos
 	//		<< "end_pos=" << end_pos << std::endl;
-	return postData.substr(start_pos, end_pos - start_pos);  //return value
+	return postData.substr (start_pos, end_pos - start_pos);  //return value
 }
 
 //========================================================================================================================
 //getData
 //	returns "" if not found
 //		get query data format is expected to be: needle1=value1&needle2=value2...
-std::string CgiDataUtilities::getData(cgicc::Cgicc& cgi, const std::string& needle)
+std::string CgiDataUtilities::getData (cgicc::Cgicc& cgi, const std::string& needle)
 {
-	std::string getData = "&" + cgi.getEnvironment().getQueryString();
+	std::string getData = "&" + cgi.getEnvironment ().getQueryString ();
 	//__COUT__ << "getData: " + getData << std::endl;
 
-	size_t start_pos = getData.find("&" + needle + "=");  //add & and = to make sure found field and not part of a value
-	if (start_pos == std::string::npos) return "";        //needle not found
+	size_t start_pos = getData.find ("&" + needle + "=");  //add & and = to make sure found field and not part of a value
+	if (start_pos == std::string::npos) return "";         //needle not found
 
-	size_t end_pos = getData.find('=', start_pos);  //verify = sign
-	if (end_pos == std::string::npos) return "";    //= not found
+	size_t end_pos = getData.find ('=', start_pos);  //verify = sign
+	if (end_pos == std::string::npos) return "";     //= not found
 
-	start_pos += needle.length() + 2;                        //get past & and field
-	end_pos = getData.find('&', start_pos);                  //skip needle and = sign
+	start_pos += needle.length () + 2;                       //get past & and field
+	end_pos = getData.find ('&', start_pos);                 //skip needle and = sign
 	if (end_pos != std::string::npos) end_pos -= start_pos;  //found, so determine sz of field
 
 	//__COUT__ << "start_pos=" << start_pos << " '" << getData[start_pos] <<
 	//			"' end_pos=" << end_pos << " := " << getData.substr(start_pos,end_pos) << std::endl;
 
-	return getData.substr(start_pos, end_pos);  //return value
+	return getData.substr (start_pos, end_pos);  //return value
 }
 
 //========================================================================================================================
-int CgiDataUtilities::getOrPostDataAsInt(cgicc::Cgicc& cgi, const std::string& needle)
+int CgiDataUtilities::getOrPostDataAsInt (cgicc::Cgicc& cgi, const std::string& needle)
 {
-	return atoi(getOrPostData(cgi, needle).c_str());
+	return atoi (getOrPostData (cgi, needle).c_str ());
 }
-int CgiDataUtilities::postDataAsInt(cgicc::Cgicc& cgi, const std::string& needle)
+int CgiDataUtilities::postDataAsInt (cgicc::Cgicc& cgi, const std::string& needle)
 {
-	return atoi(postData(cgi, needle).c_str());
+	return atoi (postData (cgi, needle).c_str ());
 }
-int CgiDataUtilities::getDataAsInt(cgicc::Cgicc& cgi, const std::string& needle)
+int CgiDataUtilities::getDataAsInt (cgicc::Cgicc& cgi, const std::string& needle)
 {
-	return atoi(getData(cgi, needle).c_str());
+	return atoi (getData (cgi, needle).c_str ());
 }
 
 //==============================================================================
 //decodeURIComponent
 //	converts all %## to the ascii character
-std::string CgiDataUtilities::decodeURIComponent(const std::string& data)
+std::string CgiDataUtilities::decodeURIComponent (const std::string& data)
 {
-	std::string  decodeURIString(data.size(), 0);  //init to same size
+	std::string  decodeURIString (data.size (), 0);  //init to same size
 	unsigned int j = 0;
-	for (unsigned int i = 0; i < data.size(); ++i, ++j)
+	for (unsigned int i = 0; i < data.size (); ++i, ++j)
 	{
 		if (data[i] == '%')
 		{
@@ -107,6 +107,6 @@ std::string CgiDataUtilities::decodeURIComponent(const std::string& data)
 		else
 			decodeURIString[j] = data[i];
 	}
-	decodeURIString.resize(j);
+	decodeURIString.resize (j);
 	return decodeURIString;
 }

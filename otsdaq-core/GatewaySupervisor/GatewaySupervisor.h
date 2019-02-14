@@ -28,8 +28,8 @@
 #include <string>
 
 //defines used also by OtsConfigurationWizardSupervisor
-#define FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE std::string("FSMLastConfiguredGroupAlias.hist")
-#define FSM_LAST_STARTED_GROUP_ALIAS_FILE std::string("FSMLastStartedGroupAlias.hist")
+#define FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE std::string ("FSMLastConfiguredGroupAlias.hist")
+#define FSM_LAST_STARTED_GROUP_ALIAS_FILE std::string ("FSMLastStartedGroupAlias.hist")
 
 namespace ots
 {
@@ -48,82 +48,82 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 	friend class ARTDAQCommandable;
 
   public:
-	XDAQ_INSTANTIATOR();
+	XDAQ_INSTANTIATOR ();
 
-	GatewaySupervisor(xdaq::ApplicationStub* s);
-	virtual ~GatewaySupervisor(void);
+	GatewaySupervisor (xdaq::ApplicationStub* s);
+	virtual ~GatewaySupervisor (void);
 
-	void init(void);
+	void init (void);
 
-	void Default(xgi::Input* in, xgi::Output* out);
+	void Default (xgi::Input* in, xgi::Output* out);
 	//    void 						TmpTest     				 	(xgi::Input* in, xgi::Output* out ) 	;
 
-	void loginRequest(xgi::Input* in, xgi::Output* out);
-	void request(xgi::Input* in, xgi::Output* out);
-	void tooltipRequest(xgi::Input* in, xgi::Output* out);
+	void loginRequest (xgi::Input* in, xgi::Output* out);
+	void request (xgi::Input* in, xgi::Output* out);
+	void tooltipRequest (xgi::Input* in, xgi::Output* out);
 
 	//State Machine requests handlers
 
-	void stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
+	void stateMachineXgiHandler (xgi::Input* in, xgi::Output* out);
 	//void 						stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output* out )  	;
 
-	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference msg);
-	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference msg);
+	xoap::MessageReference stateMachineXoapHandler (xoap::MessageReference msg);
+	xoap::MessageReference stateMachineResultXoapHandler (xoap::MessageReference msg);
 
-	bool stateMachineThread(toolbox::task::WorkLoop* workLoop);
+	bool stateMachineThread (toolbox::task::WorkLoop* workLoop);
 
 	//Status requests handlers
-	void infoRequestHandler(xgi::Input* in, xgi::Output* out);
-	void infoRequestResultHandler(xgi::Input* in, xgi::Output* out);
-	bool infoRequestThread(toolbox::task::WorkLoop* workLoop);
+	void infoRequestHandler (xgi::Input* in, xgi::Output* out);
+	void infoRequestResultHandler (xgi::Input* in, xgi::Output* out);
+	bool infoRequestThread (toolbox::task::WorkLoop* workLoop);
 
 	//External GatewaySupervisor XOAP handlers
-	xoap::MessageReference supervisorCookieCheck(xoap::MessageReference msg);
-	xoap::MessageReference supervisorGetActiveUsers(xoap::MessageReference msg);
-	xoap::MessageReference supervisorSystemMessage(xoap::MessageReference msg);
-	xoap::MessageReference supervisorGetUserInfo(xoap::MessageReference msg);
-	xoap::MessageReference supervisorSystemLogbookEntry(xoap::MessageReference msg);
-	xoap::MessageReference supervisorLastConfigGroupRequest(xoap::MessageReference msg);
+	xoap::MessageReference supervisorCookieCheck (xoap::MessageReference msg);
+	xoap::MessageReference supervisorGetActiveUsers (xoap::MessageReference msg);
+	xoap::MessageReference supervisorSystemMessage (xoap::MessageReference msg);
+	xoap::MessageReference supervisorGetUserInfo (xoap::MessageReference msg);
+	xoap::MessageReference supervisorSystemLogbookEntry (xoap::MessageReference msg);
+	xoap::MessageReference supervisorLastConfigGroupRequest (xoap::MessageReference msg);
 
 	//Finite State Machine States
-	void stateInitial(toolbox::fsm::FiniteStateMachine& fsm);
-	void statePaused(toolbox::fsm::FiniteStateMachine& fsm);
-	void stateRunning(toolbox::fsm::FiniteStateMachine& fsm);
-	void stateHalted(toolbox::fsm::FiniteStateMachine& fsm);
-	void stateConfigured(toolbox::fsm::FiniteStateMachine& fsm);
-	void inError(toolbox::fsm::FiniteStateMachine& fsm);
+	void stateInitial (toolbox::fsm::FiniteStateMachine& fsm);
+	void statePaused (toolbox::fsm::FiniteStateMachine& fsm);
+	void stateRunning (toolbox::fsm::FiniteStateMachine& fsm);
+	void stateHalted (toolbox::fsm::FiniteStateMachine& fsm);
+	void stateConfigured (toolbox::fsm::FiniteStateMachine& fsm);
+	void inError (toolbox::fsm::FiniteStateMachine& fsm);
 
-	void transitionConfiguring(toolbox::Event::Reference e);
-	void transitionHalting(toolbox::Event::Reference e);
-	void transitionInitializing(toolbox::Event::Reference e);
-	void transitionPausing(toolbox::Event::Reference e);
-	void transitionResuming(toolbox::Event::Reference e);
-	void transitionStarting(toolbox::Event::Reference e);
-	void transitionStopping(toolbox::Event::Reference e);
-	void transitionShuttingDown(toolbox::Event::Reference e);
-	void transitionStartingUp(toolbox::Event::Reference e);
-	void enteringError(toolbox::Event::Reference e);
+	void transitionConfiguring (toolbox::Event::Reference e);
+	void transitionHalting (toolbox::Event::Reference e);
+	void transitionInitializing (toolbox::Event::Reference e);
+	void transitionPausing (toolbox::Event::Reference e);
+	void transitionResuming (toolbox::Event::Reference e);
+	void transitionStarting (toolbox::Event::Reference e);
+	void transitionStopping (toolbox::Event::Reference e);
+	void transitionShuttingDown (toolbox::Event::Reference e);
+	void transitionStartingUp (toolbox::Event::Reference e);
+	void enteringError (toolbox::Event::Reference e);
 
-	void makeSystemLogbookEntry(std::string entryText);
+	void makeSystemLogbookEntry (std::string entryText);
 
-	void checkForAsyncError(void);
+	void checkForAsyncError (void);
 
 	//CorePropertySupervisorBase override functions
-	virtual void setSupervisorPropertyDefaults(void) override;  //override to control supervisor specific defaults
-	virtual void forceSupervisorPropertyValues(void) override;  //override to force supervisor property values (and ignore user settings)
+	virtual void setSupervisorPropertyDefaults (void) override;  //override to control supervisor specific defaults
+	virtual void forceSupervisorPropertyValues (void) override;  //override to force supervisor property values (and ignore user settings)
 
   private:
-	unsigned int                                                        getNextRunNumber(const std::string& fsmName = "");
-	bool                                                                setNextRunNumber(unsigned int runNumber, const std::string& fsmName = "");
-	static std::pair<std::string /*group name*/, ConfigurationGroupKey> loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString);
-	void                                                                saveGroupNameAndKey(const std::pair<std::string /*group name*/, ConfigurationGroupKey>& theGroup, const std::string& fileName);
-	static xoap::MessageReference                                       lastConfigGroupRequestHandler(const SOAPParameters& parameters);
-	static void                                                         launchStartOTSCommand(const std::string& command, ConfigurationManager* cfgMgr);
-	static void                                                         indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
+	unsigned int                                                        getNextRunNumber (const std::string& fsmName = "");
+	bool                                                                setNextRunNumber (unsigned int runNumber, const std::string& fsmName = "");
+	static std::pair<std::string /*group name*/, ConfigurationGroupKey> loadGroupNameAndKey (const std::string& fileName, std::string& returnedTimeString);
+	void                                                                saveGroupNameAndKey (const std::pair<std::string /*group name*/, ConfigurationGroupKey>& theGroup, const std::string& fileName);
+	static xoap::MessageReference                                       lastConfigGroupRequestHandler (const SOAPParameters& parameters);
+	static void                                                         launchStartOTSCommand (const std::string& command, ConfigurationManager* cfgMgr);
+	static void                                                         indicateOtsAlive (const CorePropertySupervisorBase* properties = 0);
 
-	static void StateChangerWorkLoop(GatewaySupervisor* supervisorPtr);
-	std::string attemptStateMachineTransition(HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
-	void        broadcastMessage(xoap::MessageReference msg);
+	static void StateChangerWorkLoop (GatewaySupervisor* supervisorPtr);
+	std::string attemptStateMachineTransition (HttpXmlDocument* xmldoc, std::ostringstream* out, const std::string& command, const std::string& fsmName, const std::string& fsmWindowName, const std::string& username, const std::vector<std::string>& parameters);
+	void        broadcastMessage (xoap::MessageReference msg);
 
 	struct BroadcastMessageIterationsDoneStruct
 	{
@@ -131,29 +131,29 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 		//	because of problems with the standard library
 		//	not allowing passing by reference of bool types.
 		//Broadcast thread implementation requires passing by reference.
-		~BroadcastMessageIterationsDoneStruct()
+		~BroadcastMessageIterationsDoneStruct ()
 		{
 			for (auto& arr : iterationsDone_)
 				delete[] arr;
-			iterationsDone_.clear();
-			arraySizes_.clear();
+			iterationsDone_.clear ();
+			arraySizes_.clear ();
 		}  //end destructor
 
-		void push(const unsigned int& size)
+		void push (const unsigned int& size)
 		{
-			iterationsDone_.push_back(new bool[size]);
-			arraySizes_.push_back(size);
+			iterationsDone_.push_back (new bool[size]);
+			arraySizes_.push_back (size);
 
 			//initialize to false
 			for (unsigned int i = 0; i < size; ++i)
-				iterationsDone_[iterationsDone_.size() - 1][i] = false;
+				iterationsDone_[iterationsDone_.size () - 1][i] = false;
 		}  //end push()
 
-		bool*        operator[](unsigned int i) { return iterationsDone_[i]; }
-		const bool*  operator[](unsigned int i) const { return iterationsDone_[i]; }
-		unsigned int size(unsigned int i = -1)
+		bool*        operator[] (unsigned int i) { return iterationsDone_[i]; }
+		const bool*  operator[] (unsigned int i) const { return iterationsDone_[i]; }
+		unsigned int size (unsigned int i = -1)
 		{
-			if (i == (unsigned int)-1) return iterationsDone_.size();
+			if (i == (unsigned int)-1) return iterationsDone_.size ();
 			return arraySizes_[i];
 		}
 
@@ -165,29 +165,29 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 	struct BroadcastThreadStruct
 	{
 		//===================
-		BroadcastThreadStruct()
-		    : threadIndex_(-1)
-		    , exitThread_(false)
-		    , working_(true)
-		    , workToDo_(false)
-		    , error_(false)
+		BroadcastThreadStruct ()
+		    : threadIndex_ (-1)
+		    , exitThread_ (false)
+		    , working_ (true)
+		    , workToDo_ (false)
+		    , error_ (false)
 		{
 		}  //end BroadcastThreadStruct constructor()
 
 		struct BroadcastMessageStruct
 		{
 			//===================
-			BroadcastMessageStruct(
+			BroadcastMessageStruct (
 			    const SupervisorInfo&  appInfo,
 			    xoap::MessageReference message,
 			    const std::string&     command,
 			    const unsigned int&    iteration,
 			    bool&                  iterationsDone)
-			    : appInfo_(appInfo)
-			    , message_(message)
-			    , command_(command)
-			    , iteration_(iteration)
-			    , iterationsDone_(iterationsDone)
+			    : appInfo_ (appInfo)
+			    , message_ (message)
+			    , command_ (command)
+			    , iteration_ (iteration)
+			    , iterationsDone_ (iterationsDone)
 			{
 			}
 
@@ -201,15 +201,15 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 		};  //end BroadcastMessageStruct definition
 
 		//===================
-		void setMessage(
+		void setMessage (
 		    const SupervisorInfo&  appInfo,
 		    xoap::MessageReference message,
 		    const std::string&     command,
 		    const unsigned int&    iteration,
 		    bool&                  iterationsDone)
 		{
-			messages_.clear();
-			messages_.push_back(BroadcastThreadStruct::BroadcastMessageStruct(
+			messages_.clear ();
+			messages_.push_back (BroadcastThreadStruct::BroadcastMessageStruct (
 			    appInfo,
 			    message,
 			    command,
@@ -218,12 +218,12 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 			workToDo_ = true;
 		}  //end setMessage()
 
-		const SupervisorInfo&  getAppInfo() { return messages_[0].appInfo_; }
-		xoap::MessageReference getMessage() { return messages_[0].message_; }
-		const std::string&     getCommand() { return messages_[0].command_; }
-		const unsigned int&    getIteration() { return messages_[0].iteration_; }
-		std::string&           getReply() { return messages_[0].reply_; }
-		bool&                  getIterationsDone() { return messages_[0].iterationsDone_; }
+		const SupervisorInfo&  getAppInfo () { return messages_[0].appInfo_; }
+		xoap::MessageReference getMessage () { return messages_[0].message_; }
+		const std::string&     getCommand () { return messages_[0].command_; }
+		const unsigned int&    getIteration () { return messages_[0].iteration_; }
+		std::string&           getReply () { return messages_[0].reply_; }
+		bool&                  getIterationsDone () { return messages_[0].iterationsDone_; }
 
 		//each thread accesses these members
 		std::mutex    threadMutex;
@@ -233,8 +233,8 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 		std::vector<BroadcastThreadStruct::BroadcastMessageStruct> messages_;
 
 	};  //end BroadcastThreadStruct declaration
-	static void broadcastMessageThread(GatewaySupervisor* supervisorPtr, GatewaySupervisor::BroadcastThreadStruct* threadStruct);
-	bool        handleBroadcastMessageTarget(const SupervisorInfo& appInfo, xoap::MessageReference message, const std::string& command, const unsigned int& iteration, std::string& reply, unsigned int threadIndex = 0);
+	static void broadcastMessageThread (GatewaySupervisor* supervisorPtr, GatewaySupervisor::BroadcastThreadStruct* threadStruct);
+	bool        handleBroadcastMessageTarget (const SupervisorInfo& appInfo, xoap::MessageReference message, const std::string& command, const unsigned int& iteration, std::string& reply, unsigned int threadIndex = 0);
 
 	bool supervisorGuiHasBeenLoaded_;  //use to indicate first access by user of ots since execution
 
@@ -272,7 +272,7 @@ class GatewaySupervisor : public xdaq::Application, public SOAPMessenger, public
 	char tmpStringForConversions_[100];
 
 	//Trash tests
-	void               wait(int milliseconds, std::string who = "") const;
+	void               wait (int milliseconds, std::string who = "") const;
 	unsigned long long counterTest_;
 	std::vector<int>   vectorTest_;
 	std::string        securityType_;

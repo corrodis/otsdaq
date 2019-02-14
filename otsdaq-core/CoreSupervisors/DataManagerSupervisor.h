@@ -12,10 +12,10 @@ namespace ots
 class DataManagerSupervisor : public CoreSupervisorBase
 {
   public:
-	XDAQ_INSTANTIATOR();
+	XDAQ_INSTANTIATOR ();
 
-	DataManagerSupervisor(xdaq::ApplicationStub* s);
-	virtual ~DataManagerSupervisor(void);
+	DataManagerSupervisor (xdaq::ApplicationStub* s);
+	virtual ~DataManagerSupervisor (void);
 
   private:
 };

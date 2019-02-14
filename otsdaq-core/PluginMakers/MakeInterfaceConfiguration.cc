@@ -5,10 +5,10 @@
 
 namespace ots
 {
-ConfigurationBase* makeInterfaceConfiguration(std::string const& configurationPluginName)
+ConfigurationBase* makeInterfaceConfiguration (std::string const& configurationPluginName)
 {
-	static cet::BasicPluginFactory basicPluginInterfaceFactory("configuration", "make");
+	static cet::BasicPluginFactory basicPluginInterfaceFactory ("configuration", "make");
 
-	return basicPluginInterfaceFactory.makePlugin<ConfigurationBase*>(configurationPluginName);
+	return basicPluginInterfaceFactory.makePlugin<ConfigurationBase*> (configurationPluginName);
 }
 }  // namespace ots

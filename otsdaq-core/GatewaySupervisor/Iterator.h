@@ -18,30 +18,30 @@ class Iterator
 	friend class GatewaySupervisor;
 
   public:
-	Iterator(GatewaySupervisor *supervisor);
-	~Iterator(void);
+	Iterator (GatewaySupervisor *supervisor);
+	~Iterator (void);
 
-	void playIterationPlan(HttpXmlDocument &xmldoc, const std::string &planName);
-	void pauseIterationPlan(HttpXmlDocument &xmldoc);
-	void haltIterationPlan(HttpXmlDocument &xmldoc);
-	void getIterationPlanStatus(HttpXmlDocument &xmldoc);
+	void playIterationPlan (HttpXmlDocument &xmldoc, const std::string &planName);
+	void pauseIterationPlan (HttpXmlDocument &xmldoc);
+	void haltIterationPlan (HttpXmlDocument &xmldoc);
+	void getIterationPlanStatus (HttpXmlDocument &xmldoc);
 
-	bool handleCommandRequest(HttpXmlDocument &xmldoc, const std::string &command, const std::string &parameter);
+	bool handleCommandRequest (HttpXmlDocument &xmldoc, const std::string &command, const std::string &parameter);
 
   private:
 	//begin declaration of iterator workloop members
 	struct IteratorWorkLoopStruct
 	{
-		IteratorWorkLoopStruct(Iterator *iterator, ConfigurationManagerRW *cfgMgr)
-		    : theIterator_(iterator)
-		    , cfgMgr_(cfgMgr)
-		    , originalTrackChanges_(false)
-		    , running_(false)
-		    , commandBusy_(false)
-		    , doPauseAction_(false)
-		    , doHaltAction_(false)
-		    , doResumeAction_(false)
-		    , commandIndex_((unsigned int)-1)
+		IteratorWorkLoopStruct (Iterator *iterator, ConfigurationManagerRW *cfgMgr)
+		    : theIterator_ (iterator)
+		    , cfgMgr_ (cfgMgr)
+		    , originalTrackChanges_ (false)
+		    , running_ (false)
+		    , commandBusy_ (false)
+		    , doPauseAction_ (false)
+		    , doHaltAction_ (false)
+		    , doResumeAction_ (false)
+		    , commandIndex_ ((unsigned int)-1)
 		{
 		}
 
@@ -70,29 +70,29 @@ class Iterator
 
 	};  //end declaration of iterator workloop members
 
-	static void IteratorWorkLoop(Iterator *iterator);
-	static void startCommand(IteratorWorkLoopStruct *iteratorStruct);
-	static bool checkCommand(IteratorWorkLoopStruct *iteratorStruct);
+	static void IteratorWorkLoop (Iterator *iterator);
+	static void startCommand (IteratorWorkLoopStruct *iteratorStruct);
+	static bool checkCommand (IteratorWorkLoopStruct *iteratorStruct);
 
-	static void startCommandChooseFSM(IteratorWorkLoopStruct *iteratorStruct, const std::string &fsmName);
+	static void startCommandChooseFSM (IteratorWorkLoopStruct *iteratorStruct, const std::string &fsmName);
 
-	static void startCommandConfigureActive(IteratorWorkLoopStruct *iteratorStruct);
-	static void startCommandConfigureAlias(IteratorWorkLoopStruct *iteratorStruct, const std::string &systemAlias);
-	static void startCommandConfigureGroup(IteratorWorkLoopStruct *iteratorStruct);
-	static bool checkCommandConfigure(IteratorWorkLoopStruct *iteratorStruct);
+	static void startCommandConfigureActive (IteratorWorkLoopStruct *iteratorStruct);
+	static void startCommandConfigureAlias (IteratorWorkLoopStruct *iteratorStruct, const std::string &systemAlias);
+	static void startCommandConfigureGroup (IteratorWorkLoopStruct *iteratorStruct);
+	static bool checkCommandConfigure (IteratorWorkLoopStruct *iteratorStruct);
 
-	static void startCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct);
+	static void startCommandModifyActive (IteratorWorkLoopStruct *iteratorStruct);
 
-	static void startCommandMacro(IteratorWorkLoopStruct *iteratorStruct, bool isFEMacro);
-	static bool checkCommandMacro(IteratorWorkLoopStruct *iteratorStruct, bool isFEMacro);
+	static void startCommandMacro (IteratorWorkLoopStruct *iteratorStruct, bool isFEMacro);
+	static bool checkCommandMacro (IteratorWorkLoopStruct *iteratorStruct, bool isFEMacro);
 
-	static void startCommandBeginLabel(IteratorWorkLoopStruct *iteratorStruct);
-	static void startCommandRepeatLabel(IteratorWorkLoopStruct *iteratorStruct);
+	static void startCommandBeginLabel (IteratorWorkLoopStruct *iteratorStruct);
+	static void startCommandRepeatLabel (IteratorWorkLoopStruct *iteratorStruct);
 
-	static void startCommandRun(IteratorWorkLoopStruct *iteratorStruct);
-	static bool checkCommandRun(IteratorWorkLoopStruct *iteratorStruct);
+	static void startCommandRun (IteratorWorkLoopStruct *iteratorStruct);
+	static bool checkCommandRun (IteratorWorkLoopStruct *iteratorStruct);
 
-	static bool haltIterator(Iterator *iterator, IteratorWorkLoopStruct *iteratorStruct = 0);  //(GatewaySupervisor* theSupervisor, const std::string& fsmName);
+	static bool haltIterator (Iterator *iterator, IteratorWorkLoopStruct *iteratorStruct = 0);  //(GatewaySupervisor* theSupervisor, const std::string& fsmName);
 
 	std::mutex                accessMutex_;
 	volatile bool             workloopRunning_;
@@ -109,7 +109,7 @@ class Iterator
 	GatewaySupervisor *theSupervisor_;
 
 	template<class T>  //defined in included .icc source
-	static void helpCommandModifyActive(IteratorWorkLoopStruct *iteratorStruct, const T &setValue, bool doTrackGroupChanges);
+	static void helpCommandModifyActive (IteratorWorkLoopStruct *iteratorStruct, const T &setValue, bool doTrackGroupChanges);
 };
 
 #include "otsdaq-core/GatewaySupervisor/Iterator.icc"  //for template definitions

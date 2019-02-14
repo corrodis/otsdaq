@@ -28,24 +28,24 @@ class RegisterView
 	typedef DataView::iterator                     iterator;
 	typedef DataView::const_iterator               const_iterator;
 
-	RegisterView(std::string name = "");
-	virtual ~RegisterView();
+	RegisterView (std::string name = "");
+	virtual ~RegisterView ();
 
-	unsigned int findRow(unsigned int col, const std::string value) const;
-	unsigned int findRow(unsigned int col, const unsigned int value) const;
+	unsigned int findRow (unsigned int col, const std::string value) const;
+	unsigned int findRow (unsigned int col, const unsigned int value) const;
 
 	//Getters
-	std::string                                   getName() const;
-	int                                           getVersion() const;
-	std::string                                   getComment() const;
-	std::string                                   getAuthor() const;
-	time_t                                        getCreationTime() const;
-	unsigned int                                  getNumberOfRows() const;
-	unsigned int                                  getNumberOfColumns() const;
-	const std::vector<ViewRegisterInfo>&          getRegistersInfo() const;
-	std::vector<ViewRegisterInfo>*                getRegistersInfoPointer();
-	const std::vector<ViewRegisterSequencerInfo>& getRegistersSequencerInfo() const;
-	std::vector<ViewRegisterSequencerInfo>*       getRegistersSequencerInfoPointer();
+	std::string                                   getName () const;
+	int                                           getVersion () const;
+	std::string                                   getComment () const;
+	std::string                                   getAuthor () const;
+	time_t                                        getCreationTime () const;
+	unsigned int                                  getNumberOfRows () const;
+	unsigned int                                  getNumberOfColumns () const;
+	const std::vector<ViewRegisterInfo>&          getRegistersInfo () const;
+	std::vector<ViewRegisterInfo>*                getRegistersInfoPointer ();
+	const std::vector<ViewRegisterSequencerInfo>& getRegistersSequencerInfo () const;
+	std::vector<ViewRegisterSequencerInfo>*       getRegistersSequencerInfoPointer ();
 
 	/*template<class T>
 	  void getValue(T& value, unsigned int row, unsigned int col) const
@@ -79,12 +79,12 @@ class RegisterView
 	  }*/
 
 	//Setters
-	void setName(std::string name);
-	void setVersion(int version);
-	void setVersion(char* version);
-	void setComment(std::string name);
-	void setAuthor(std::string name);
-	void setCreationTime(time_t t);
+	void setName (std::string name);
+	void setVersion (int version);
+	void setVersion (char* version);
+	void setComment (std::string name);
+	void setAuthor (std::string name);
+	void setCreationTime (time_t t);
 
 	/*    template<class T>
 	void setValue(T value, unsigned int row, unsigned int col)
@@ -117,8 +117,8 @@ class RegisterView
 		}
 	}*/
 
-	int  addRow();          //returns index of added row, always is last row unless
-	bool deleteRow(int r);  //returns true on success
+	int  addRow ();          //returns index of added row, always is last row unless
+	bool deleteRow (int r);  //returns true on success
 
   private:
 	std::string                            name_;     //View name (extensionTableName in xml)

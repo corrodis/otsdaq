@@ -5,29 +5,29 @@
 using namespace ots;
 
 //========================================================================================================================
-CircularBufferBase::CircularBufferBase(const std::string& bufferID)
-    : dataBufferId_(bufferID)
-    , mfSubject_("CircularBuffer-" + dataBufferId_)
+CircularBufferBase::CircularBufferBase (const std::string& bufferID)
+    : dataBufferId_ (bufferID)
+    , mfSubject_ ("CircularBuffer-" + dataBufferId_)
 {
 }
 
 //========================================================================================================================
-CircularBufferBase::~CircularBufferBase(void)
+CircularBufferBase::~CircularBufferBase (void)
 {
 }
 
 //========================================================================================================================
-void CircularBufferBase::registerProducer(DataProcessor* producer, unsigned int numberOfSubBuffers)
+void CircularBufferBase::registerProducer (DataProcessor* producer, unsigned int numberOfSubBuffers)
 {
-	registerProducer(producer->getProcessorID(), numberOfSubBuffers);
-	producer->setCircularBuffer(this);
+	registerProducer (producer->getProcessorID (), numberOfSubBuffers);
+	producer->setCircularBuffer (this);
 }
 
 //========================================================================================================================
-void CircularBufferBase::registerConsumer(DataProcessor* consumer)
+void CircularBufferBase::registerConsumer (DataProcessor* consumer)
 {
-	registerConsumer(consumer->getProcessorID(), HighConsumerPriority);
-	consumer->setCircularBuffer(this);
+	registerConsumer (consumer->getProcessorID (), HighConsumerPriority);
+	consumer->setCircularBuffer (this);
 }
 //
 ////========================================================================================================================

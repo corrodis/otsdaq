@@ -6,8 +6,8 @@
 using namespace ots;
 
 //==============================================================================
-DetectorToFEConfiguration::DetectorToFEConfiguration(void)
-    : ConfigurationBase("DetectorToFEConfiguration")
+DetectorToFEConfiguration::DetectorToFEConfiguration (void)
+    : ConfigurationBase ("DetectorToFEConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -30,80 +30,80 @@ DetectorToFEConfiguration::DetectorToFEConfiguration(void)
 }
 
 //==============================================================================
-DetectorToFEConfiguration::~DetectorToFEConfiguration(void)
+DetectorToFEConfiguration::~DetectorToFEConfiguration (void)
 {
 }
 
 //==============================================================================
-void DetectorToFEConfiguration::init(ConfigurationManager* configManager)
+void DetectorToFEConfiguration::init (ConfigurationManager* configManager)
 {
 	std::string tmpDetectorName;
-	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorName, row, DetectorID);
-		nameToInfoMap_[tmpDetectorName] = DetectorInfo();
+		ConfigurationBase::activeConfigurationView_->getValue (tmpDetectorName, row, DetectorID);
+		nameToInfoMap_[tmpDetectorName] = DetectorInfo ();
 		DetectorInfo& aDetectorInfo     = nameToInfoMap_[tmpDetectorName];
-		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEWriterID_, row, FEWriterID);
-		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEWriterChannel_, row, FEWriterChannel);
-		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEWriterDetectorAddress_, row, FEWriterDetectorAddress);
-		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEReaderID_, row, FEReaderID);
-		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEReaderChannel_, row, FEReaderChannel);
-		ConfigurationBase::activeConfigurationView_->getValue(aDetectorInfo.theFEReaderDetectorAddress_, row, FEReaderDetectorAddress);
+		ConfigurationBase::activeConfigurationView_->getValue (aDetectorInfo.theFEWriterID_, row, FEWriterID);
+		ConfigurationBase::activeConfigurationView_->getValue (aDetectorInfo.theFEWriterChannel_, row, FEWriterChannel);
+		ConfigurationBase::activeConfigurationView_->getValue (aDetectorInfo.theFEWriterDetectorAddress_, row, FEWriterDetectorAddress);
+		ConfigurationBase::activeConfigurationView_->getValue (aDetectorInfo.theFEReaderID_, row, FEReaderID);
+		ConfigurationBase::activeConfigurationView_->getValue (aDetectorInfo.theFEReaderChannel_, row, FEReaderChannel);
+		ConfigurationBase::activeConfigurationView_->getValue (aDetectorInfo.theFEReaderDetectorAddress_, row, FEReaderDetectorAddress);
 	}
 }
 
 //==============================================================================
-std::vector<std::string> DetectorToFEConfiguration::getFEWriterDetectorList(std::string interfaceID) const
+std::vector<std::string> DetectorToFEConfiguration::getFEWriterDetectorList (std::string interfaceID) const
 {
 	std::string              tmpDetectorID;
 	std::string              tmpFEWriterID;
 	std::vector<std::string> list;
-	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpFEWriterID, row, FEWriterID);
+		ConfigurationBase::activeConfigurationView_->getValue (tmpFEWriterID, row, FEWriterID);
 		if (tmpFEWriterID == interfaceID)
 		{
-			ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorID, row, DetectorID);
-			list.push_back(tmpDetectorID);
+			ConfigurationBase::activeConfigurationView_->getValue (tmpDetectorID, row, DetectorID);
+			list.push_back (tmpDetectorID);
 		}
 	}
 	return list;
 }
 
 //==============================================================================
-std::vector<std::string> DetectorToFEConfiguration::getFEReaderDetectorList(std::string interfaceID) const
+std::vector<std::string> DetectorToFEConfiguration::getFEReaderDetectorList (std::string interfaceID) const
 {
 	std::string              tmpDetectorID;
 	std::string              tmpFEReaderID;
 	std::vector<std::string> list;
-	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(tmpFEReaderID, row, FEReaderID);
+		ConfigurationBase::activeConfigurationView_->getValue (tmpFEReaderID, row, FEReaderID);
 		if (tmpFEReaderID == interfaceID)
 		{
-			ConfigurationBase::activeConfigurationView_->getValue(tmpDetectorID, row, DetectorID);
-			list.push_back(tmpDetectorID);
+			ConfigurationBase::activeConfigurationView_->getValue (tmpDetectorID, row, DetectorID);
+			list.push_back (tmpDetectorID);
 		}
 	}
 	return list;
 }
 
 //==============================================================================
-unsigned int DetectorToFEConfiguration::getFEWriterChannel(const std::string& detectorID) const
+unsigned int DetectorToFEConfiguration::getFEWriterChannel (const std::string& detectorID) const
 {
-	return nameToInfoMap_.find(detectorID)->second.theFEWriterChannel_;
+	return nameToInfoMap_.find (detectorID)->second.theFEWriterChannel_;
 }
 
 //==============================================================================
-unsigned int DetectorToFEConfiguration::getFEWriterDetectorAddress(const std::string& detectorID) const
+unsigned int DetectorToFEConfiguration::getFEWriterDetectorAddress (const std::string& detectorID) const
 {
-	return nameToInfoMap_.find(detectorID)->second.theFEWriterDetectorAddress_;
+	return nameToInfoMap_.find (detectorID)->second.theFEWriterDetectorAddress_;
 }
 
 //==============================================================================
-unsigned int DetectorToFEConfiguration::getFEReaderChannel(const std::string& detectorID) const
+unsigned int DetectorToFEConfiguration::getFEReaderChannel (const std::string& detectorID) const
 {
-	return nameToInfoMap_.find(detectorID)->second.theFEReaderChannel_;
+	return nameToInfoMap_.find (detectorID)->second.theFEReaderChannel_;
 }
 
-DEFINE_OTS_CONFIGURATION(DetectorToFEConfiguration)
+DEFINE_OTS_CONFIGURATION (DetectorToFEConfiguration)

@@ -7,11 +7,11 @@
 #include <iostream>
 using namespace ots;
 
-#define MF_CFG_FILE std::string(getenv("USER_DATA")) + "/MessageFacilityConfigurations/MessageFacilityGen.fcl"
-#define QT_CFG_FILE std::string(getenv("USER_DATA")) + "/MessageFacilityConfigurations/QTMessageViewerGen.fcl"
-#define QUIET_CFG_FILE std::string(getenv("USER_DATA")) + "/MessageFacilityConfigurations/QuietForwarderGen.cfg"
-#define USE_WEB_BOOL_FILE std::string(getenv("USER_DATA")) + "/MessageFacilityConfigurations/UseWebConsole.bool"
-#define USE_QT_BOOL_FILE std::string(getenv("USER_DATA")) + "/MessageFacilityConfigurations/UseQTViewer.bool"
+#define MF_CFG_FILE std::string (getenv ("USER_DATA")) + "/MessageFacilityConfigurations/MessageFacilityGen.fcl"
+#define QT_CFG_FILE std::string (getenv ("USER_DATA")) + "/MessageFacilityConfigurations/QTMessageViewerGen.fcl"
+#define QUIET_CFG_FILE std::string (getenv ("USER_DATA")) + "/MessageFacilityConfigurations/QuietForwarderGen.cfg"
+#define USE_WEB_BOOL_FILE std::string (getenv ("USER_DATA")) + "/MessageFacilityConfigurations/UseWebConsole.bool"
+#define USE_QT_BOOL_FILE std::string (getenv ("USER_DATA")) + "/MessageFacilityConfigurations/UseQTViewer.bool"
 
 //MessageFacilityConfiguration Column names
 #define COL_NAME "UID"
@@ -27,8 +27,8 @@ using namespace ots;
 #define COL_QT_IP "QTViewerForwardingIPAddress"
 #define COL_QT_PORT "QTViewerForwardingPort"
 
-MessageFacilityConfiguration::MessageFacilityConfiguration(void)
-    : ConfigurationBase("MessageFacilityConfiguration")
+MessageFacilityConfiguration::MessageFacilityConfiguration (void)
+    : ConfigurationBase ("MessageFacilityConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names used in C++ MUST match the Configuration INFO  //
@@ -56,11 +56,11 @@ MessageFacilityConfiguration::MessageFacilityConfiguration(void)
 	//		</ROOT>
 }
 
-MessageFacilityConfiguration::~MessageFacilityConfiguration(void)
+MessageFacilityConfiguration::~MessageFacilityConfiguration (void)
 {
 }
 
-void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
+void MessageFacilityConfiguration::init (ConfigurationManager *configManager)
 {
 	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	//	__COUT__ << configManager->__SELF_NODE__ << std::endl;
@@ -69,12 +69,12 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 	int         fwdPort;
 	std::string fwdIP;
 
-	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+	auto childrenMap = configManager->__SELF_NODE__.getChildren ();
 
 	//generate MF_CFG_FILE file
 	std::fstream fs;
-	fs.open(MF_CFG_FILE, std::fstream::out | std::fstream::trunc);
-	if (fs.fail())
+	fs.open (MF_CFG_FILE, std::fstream::out | std::fstream::trunc);
+	if (fs.fail ())
 	{
 		__SS__ << "Failed to open Message Facility configuration file: " << MF_CFG_FILE << std::endl;
 		__SS_THROW__;
@@ -86,18 +86,18 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 	//	exit loop after first active one
 	for (auto &child : childrenMap)
 	{
-		child.second.getNode(COL_STATUS).getValue(status);
+		child.second.getNode (COL_STATUS).getValue (status);
 
 		if (!status) continue;  //skip inactive rows
 
-		child.second.getNode(COL_ENABLE_FWD).getValue(enableFwd);
+		child.second.getNode (COL_ENABLE_FWD).getValue (enableFwd);
 
-		child.second.getNode(COL_USE_WEB).getValue(useWeb);
-		child.second.getNode(COL_USE_QT).getValue(useQT);
+		child.second.getNode (COL_USE_WEB).getValue (useWeb);
+		child.second.getNode (COL_USE_QT).getValue (useQT);
 
 		if (useWeb && useQT)
 		{
-			fs.close();
+			fs.close ();
 			__SS__ << "Illegal Message Facility configuration: "
 			       << "Can only enable Web Console or QT Viewer, not both." << std::endl;
 			__SS_THROW__;
@@ -105,26 +105,26 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 
 		std::fstream bfs;
 		//output use web bool for StartOTS.sh
-		bfs.open(USE_WEB_BOOL_FILE, std::fstream::out | std::fstream::trunc);
-		if (bfs.fail())
+		bfs.open (USE_WEB_BOOL_FILE, std::fstream::out | std::fstream::trunc);
+		if (bfs.fail ())
 		{
-			fs.close();
+			fs.close ();
 			__SS__ << "Failed to open boolean Use of Web Console configuration file: " << USE_WEB_BOOL_FILE << std::endl;
 			__SS_THROW__;
 		}
 		bfs << (useWeb ? 1 : 0);
-		bfs.close();
+		bfs.close ();
 
 		//output use web bool for StartOTS.sh
-		bfs.open(USE_QT_BOOL_FILE, std::fstream::out | std::fstream::trunc);
-		if (bfs.fail())
+		bfs.open (USE_QT_BOOL_FILE, std::fstream::out | std::fstream::trunc);
+		if (bfs.fail ())
 		{
-			fs.close();
+			fs.close ();
 			__SS__ << "Failed to open boolean Use of QT Viewer configuration file: " << USE_QT_BOOL_FILE << std::endl;
 			__SS_THROW__;
 		}
 		bfs << (useQT ? 1 : 0);
-		bfs.close();
+		bfs.close ();
 
 		if (enableFwd)  //write udp forward config
 		{
@@ -133,8 +133,8 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 			{
 				__COUT__ << "Forwarding to Web GUI with UDP forward MesageFacility configuration." << std::endl;
 
-				child.second.getNode(COL_WEB_PORT0).getValue(fwdPort);
-				child.second.getNode(COL_WEB_IP).getValue(fwdIP);
+				child.second.getNode (COL_WEB_PORT0).getValue (fwdPort);
+				child.second.getNode (COL_WEB_IP).getValue (fwdIP);
 
 				fs << "udp: {\n";
 				fs << "\t"
@@ -149,18 +149,18 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 
 				//output quiet forwarder config file
 				std::fstream qtfs;
-				qtfs.open(QUIET_CFG_FILE, std::fstream::out | std::fstream::trunc);
-				if (qtfs.fail())
+				qtfs.open (QUIET_CFG_FILE, std::fstream::out | std::fstream::trunc);
+				if (qtfs.fail ())
 				{
-					fs.close();
+					fs.close ();
 					__SS__ << "Failed to open Web Console's 'Quiet Forwarder' configuration file: " << QUIET_CFG_FILE << std::endl;
 					__SS_THROW__;
 				}
 				qtfs << "RECEIVE_PORT \t " << fwdPort << "\n";
-				child.second.getNode(COL_WEB_PORT1).getValue(fwdPort);
+				child.second.getNode (COL_WEB_PORT1).getValue (fwdPort);
 				qtfs << "DESTINATION_PORT \t " << fwdPort << "\n";
 				qtfs << "DESTINATION_IP \t " << fwdIP << "\n";
-				qtfs.close();
+				qtfs.close ();
 			}
 
 			//handle using qt viewer
@@ -168,8 +168,8 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 			{
 				__COUT__ << "Forwarding to Web GUI with UDP forward MesageFacility configuration." << std::endl;
 
-				child.second.getNode(COL_QT_PORT).getValue(fwdPort);
-				child.second.getNode(COL_QT_IP).getValue(fwdIP);
+				child.second.getNode (COL_QT_PORT).getValue (fwdPort);
+				child.second.getNode (COL_QT_IP).getValue (fwdIP);
 
 				fs << "udp: {\n";
 				fs << "\t"
@@ -184,10 +184,10 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 
 				//output QT Viewer config file
 				std::fstream qtfs;
-				qtfs.open(QT_CFG_FILE, std::fstream::out | std::fstream::trunc);
-				if (qtfs.fail())
+				qtfs.open (QT_CFG_FILE, std::fstream::out | std::fstream::trunc);
+				if (qtfs.fail ())
 				{
-					fs.close();
+					fs.close ();
 					__SS__ << "Failed to open QT Message Viewer configuration file: " << QT_CFG_FILE << std::endl;
 					__SS_THROW__;
 				}
@@ -206,7 +206,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 				qtfs << "threshold: "
 				     << "DEBUG"
 				     << "\n";
-				qtfs.close();
+				qtfs.close ();
 			}
 		}
 		else  //write cout config (not forwarding to external process)
@@ -228,7 +228,7 @@ void MessageFacilityConfiguration::init(ConfigurationManager *configManager)
 	}
 
 	//close MF config file
-	fs.close();
+	fs.close ();
 }
 
-DEFINE_OTS_CONFIGURATION(MessageFacilityConfiguration)
+DEFINE_OTS_CONFIGURATION (MessageFacilityConfiguration)

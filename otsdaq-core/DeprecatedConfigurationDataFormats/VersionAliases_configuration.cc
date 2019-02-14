@@ -6,8 +6,8 @@
 using namespace ots;
 
 //==============================================================================
-VersionAliases::VersionAliases(void)
-    : ConfigurationBase("VersionAliases")
+VersionAliases::VersionAliases (void)
+    : ConfigurationBase ("VersionAliases")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -26,12 +26,12 @@ VersionAliases::VersionAliases(void)
 }
 
 //==============================================================================
-VersionAliases::~VersionAliases(void)
+VersionAliases::~VersionAliases (void)
 {
 }
 
 //==============================================================================
-void VersionAliases::init(ConfigurationManager *configManager)
+void VersionAliases::init (ConfigurationManager *configManager)
 {
 	/*
     std::string       keyName;
@@ -46,4 +46,4 @@ void VersionAliases::init(ConfigurationManager *configManager)
 	 */
 }
 
-DEFINE_OTS_CONFIGURATION(VersionAliases)
+DEFINE_OTS_CONFIGURATION (VersionAliases)

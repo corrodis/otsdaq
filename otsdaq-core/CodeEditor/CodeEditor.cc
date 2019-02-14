@@ -9,8 +9,8 @@
 
 using namespace ots;
 
-#define SOURCE_BASE_PATH std::string(getenv("MRB_SOURCE")) + "/"
-#define CODE_EDITOR_DATA_PATH std::string(getenv("SERVICE_DATA_PATH")) + "/" + "CodeEditorData"
+#define SOURCE_BASE_PATH std::string (getenv ("MRB_SOURCE")) + "/"
+#define CODE_EDITOR_DATA_PATH std::string (getenv ("SERVICE_DATA_PATH")) + "/" + "CodeEditorData"
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "CodeEditor"
@@ -22,14 +22,14 @@ std::string CodeEditor::SPECIAL_TYPE_Tools             = "Tools";
 
 //========================================================================================================================
 //CodeEditor
-CodeEditor::CodeEditor()
-    : ALLOWED_FILE_EXTENSIONS_({"h", "hh", "hpp", "hxx", "c", "cc", "cpp", "cxx", "icc", "txt", "sh", "css", "html", "htm", "js", "py", "fcl", "xml"})
+CodeEditor::CodeEditor ()
+    : ALLOWED_FILE_EXTENSIONS_ ({"h", "hh", "hpp", "hxx", "c", "cc", "cpp", "cxx", "icc", "txt", "sh", "css", "html", "htm", "js", "py", "fcl", "xml"})
 {
 	std::string path = CODE_EDITOR_DATA_PATH;
-	DIR*        dir  = opendir(path.c_str());
+	DIR*        dir  = opendir (path.c_str ());
 	if (dir)
-		closedir(dir);
-	else if (-1 == mkdir(path.c_str(), 0755))
+		closedir (dir);
+	else if (-1 == mkdir (path.c_str (), 0755))
 	{
 		//lets create the service folder (for first time)
 		__SS__ << "Service directory creation failed: " << path << std::endl;
@@ -41,12 +41,12 @@ CodeEditor::CodeEditor()
 //========================================================================================================================
 //xmlRequest
 //	all requests are handled here
-void CodeEditor::xmlRequest(
+void CodeEditor::xmlRequest (
     const std::string& option,
     cgicc::Cgicc&      cgiIn,
     HttpXmlDocument*   xmlOut) try
 {
-	__COUTV__(option);
+	__COUTV__ (option);
 
 	//request options:
 	//
@@ -60,24 +60,24 @@ void CodeEditor::xmlRequest(
 
 	if (option == "getDirectoryContent")
 	{
-		getDirectoryContent(cgiIn, xmlOut);
+		getDirectoryContent (cgiIn, xmlOut);
 	}
 	else if (option == "getFileContent")
 	{
-		getFileContent(cgiIn, xmlOut);
+		getFileContent (cgiIn, xmlOut);
 	}
 	else if (option == "saveFileContent")
 	{
-		saveFileContent(cgiIn, xmlOut);
+		saveFileContent (cgiIn, xmlOut);
 	}
 	else if (option == "build")
 	{
-		build(cgiIn, xmlOut);
+		build (cgiIn, xmlOut);
 	}
 	else if (option == "getAllowedExtensions")
 	{
-		xmlOut->addTextElementToData("AllowedExtensions",
-		                             StringMacros::setToString(ALLOWED_FILE_EXTENSIONS_, ","));
+		xmlOut->addTextElementToData ("AllowedExtensions",
+		                              StringMacros::setToString (ALLOWED_FILE_EXTENSIONS_, ","));
 	}
 	else
 	{
@@ -87,23 +87,23 @@ void CodeEditor::xmlRequest(
 }
 catch (const std::runtime_error& e)
 {
-	__SS__ << "Error encountered while handling the Code Editor request option '" << option << "': " << e.what() << __E__;
-	xmlOut->addTextElementToData("Error", ss.str());
+	__SS__ << "Error encountered while handling the Code Editor request option '" << option << "': " << e.what () << __E__;
+	xmlOut->addTextElementToData ("Error", ss.str ());
 }
 catch (...)
 {
 	__SS__ << "Unknown error encountered while handling the Code Editor request option '" << option << "!'" << __E__;
-	xmlOut->addTextElementToData("Error", ss.str());
+	xmlOut->addTextElementToData ("Error", ss.str ());
 }  //end xmlRequest()
 
 //========================================================================================================================
 //safePathString
-std::string CodeEditor::safePathString(const std::string& path)
+std::string CodeEditor::safePathString (const std::string& path)
 {
 	//__COUTV__(path);
 	//remove all non ascii and non /, -, _,, space
 	std::string fullpath = "";
-	for (unsigned int i = 0; i < path.length(); ++i)
+	for (unsigned int i = 0; i < path.length (); ++i)
 		if ((path[i] >= 'a' && path[i] <= 'z') ||
 		    (path[i] >= 'A' && path[i] <= 'Z') ||
 		    path[i] >= '_' ||
@@ -112,7 +112,7 @@ std::string CodeEditor::safePathString(const std::string& path)
 		    path[i] >= '/')
 			fullpath += path[i];
 	//__COUTV__(fullpath);
-	if (!fullpath.length())
+	if (!fullpath.length ())
 	{
 		__SS__ << "Invalid path '" << fullpath << "' found!" << __E__;
 		__SS_THROW__;
@@ -123,13 +123,13 @@ std::string CodeEditor::safePathString(const std::string& path)
 //========================================================================================================================
 //safeExtensionString
 //	remove all non ascii and make lower case
-std::string CodeEditor::safeExtensionString(const std::string& extension)
+std::string CodeEditor::safeExtensionString (const std::string& extension)
 {
 	//__COUTV__(extension);
 
 	std::string retExt = "";
 	//remove all non ascii
-	for (unsigned int i = 0; i < extension.length(); ++i)
+	for (unsigned int i = 0; i < extension.length (); ++i)
 		if ((extension[i] >= 'a' && extension[i] <= 'z'))
 			retExt += extension[i];
 		else if ((extension[i] >= 'A' && extension[i] <= 'Z'))
@@ -137,8 +137,8 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 
 	//__COUTV__(retExt);
 
-	if (ALLOWED_FILE_EXTENSIONS_.find(retExt) ==  //should match get directory content restrictions
-	    ALLOWED_FILE_EXTENSIONS_.end())
+	if (ALLOWED_FILE_EXTENSIONS_.find (retExt) ==  //should match get directory content restrictions
+	    ALLOWED_FILE_EXTENSIONS_.end ())
 	{
 		__SS__ << "Invalid extension '" << retExt << "' found!" << __E__;
 		__SS_ONLY_THROW__;
@@ -148,16 +148,16 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 
 //========================================================================================================================
 //getDirectoryContent
-void CodeEditor::getDirectoryContent(
+void CodeEditor::getDirectoryContent (
     cgicc::Cgicc&    cgiIn,
     HttpXmlDocument* xmlOut)
 {
-	std::string path = CgiDataUtilities::getData(cgiIn, "path");
-	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
-	__COUTV__(path);
-	__COUTV__(SOURCE_BASE_PATH);
+	std::string path = CgiDataUtilities::getData (cgiIn, "path");
+	path             = safePathString (CgiDataUtilities::decodeURIComponent (path));
+	__COUTV__ (path);
+	__COUTV__ (SOURCE_BASE_PATH);
 
-	xmlOut->addTextElementToData("path", path);
+	xmlOut->addTextElementToData ("path", path);
 
 	const unsigned int numOfTypes         = 4;
 	std::string        specialTypeNames[] = {
@@ -172,7 +172,7 @@ void CodeEditor::getDirectoryContent(
 	    SPECIAL_TYPE_Tools};
 
 	std::string pathMatchPrepend = "/";  //some requests come in with leading "/" and "//"
-	if (path.length() > 1 && path[1] == '/')
+	if (path.length () > 1 && path[1] == '/')
 		pathMatchPrepend += '/';
 
 	for (unsigned int i = 0; i < numOfTypes; ++i)
@@ -183,12 +183,12 @@ void CodeEditor::getDirectoryContent(
 			std::map<std::string /*special type*/,
 			         std::set<std::string> /*special file paths*/>
 			    retMap =
-			        CodeEditor::getSpecialsMap();
-			if (retMap.find(specialTypes[i]) != retMap.end())
+			        CodeEditor::getSpecialsMap ();
+			if (retMap.find (specialTypes[i]) != retMap.end ())
 			{
 				for (const auto& specialTypeFile : retMap[specialTypes[i]])
 				{
-					xmlOut->addTextElementToData("specialFile", specialTypeFile);
+					xmlOut->addTextElementToData ("specialFile", specialTypeFile);
 				}
 			}
 			else
@@ -205,7 +205,7 @@ void CodeEditor::getDirectoryContent(
 	std::string    name;
 	int            type;
 
-	if (!(pDIR = opendir((SOURCE_BASE_PATH + path).c_str())))
+	if (!(pDIR = opendir ((SOURCE_BASE_PATH + path).c_str ())))
 	{
 		__SS__ << "Path '" << path << "' could not be opened!" << __E__;
 		__SS_THROW__;
@@ -216,23 +216,23 @@ void CodeEditor::getDirectoryContent(
 		//add special directory for types
 
 		for (unsigned int i = 0; i < numOfTypes; ++i)
-			xmlOut->addTextElementToData("special", specialTypeNames[i]);
+			xmlOut->addTextElementToData ("special", specialTypeNames[i]);
 	}
 
 	//add to set for alpha ordering
 	//	with insensitive compare
 	struct InsensitiveCompare
 	{
-		bool operator()(const std::string& as, const std::string& bs) const
+		bool operator() (const std::string& as, const std::string& bs) const
 		{
 			//return true, if as < bs
-			const char* a = as.c_str();
-			const char* b = bs.c_str();
+			const char* a = as.c_str ();
+			const char* b = bs.c_str ();
 			int         d;
 
 			//compare each character, until difference, or end of string
 			while (
-			    (d = (std::toupper(*a) - std::toupper(*b))) == 0 &&
+			    (d = (std::toupper (*a) - std::toupper (*b))) == 0 &&
 			    *a)
 				++a, ++b;
 
@@ -247,9 +247,9 @@ void CodeEditor::getDirectoryContent(
 	std::string extension;
 
 	//else directory good, get all folders, .h, .cc, .txt files
-	while ((entry = readdir(pDIR)))
+	while ((entry = readdir (pDIR)))
 	{
-		name = std::string(entry->d_name);
+		name = std::string (entry->d_name);
 		type = int(entry->d_type);
 
 		//__COUT__ << type << " " << name << "\n" << std::endl;
@@ -262,11 +262,11 @@ void CodeEditor::getDirectoryContent(
 			if (type == 0)
 			{
 				//unknown type .. determine if directory
-				DIR* pTmpDIR = opendir((SOURCE_BASE_PATH + path + "/" + name).c_str());
+				DIR* pTmpDIR = opendir ((SOURCE_BASE_PATH + path + "/" + name).c_str ());
 				if (pTmpDIR)
 				{
 					isDir = true;
-					closedir(pTmpDIR);
+					closedir (pTmpDIR);
 				}
 				//else //assume file
 			}
@@ -280,7 +280,7 @@ void CodeEditor::getDirectoryContent(
 			{
 				//__COUT__ << "Directory: " << type << " " << name << __E__;
 
-				orderedDirectories.emplace(name);
+				orderedDirectories.emplace (name);
 				//xmlOut->addTextElementToData("directory",name);
 			}
 			else  //type 8 or 0 is file
@@ -289,10 +289,10 @@ void CodeEditor::getDirectoryContent(
 
 				try
 				{
-					safeExtensionString(name.substr(name.rfind('.')));
+					safeExtensionString (name.substr (name.rfind ('.')));
 					//__COUT__ << "EditFile: " << type << " " << name << __E__;
 
-					orderedFiles.emplace(name);
+					orderedFiles.emplace (name);
 				}
 				catch (...)
 				{
@@ -302,83 +302,83 @@ void CodeEditor::getDirectoryContent(
 		}
 	}  //end directory traversal
 
-	closedir(pDIR);
+	closedir (pDIR);
 
-	__COUT__ << "Found " << orderedDirectories.size() << " directories." << __E__;
-	__COUT__ << "Found " << orderedFiles.size() << " files." << __E__;
+	__COUT__ << "Found " << orderedDirectories.size () << " directories." << __E__;
+	__COUT__ << "Found " << orderedFiles.size () << " files." << __E__;
 
 	for (const auto& name : orderedDirectories)
-		xmlOut->addTextElementToData("directory", name);
+		xmlOut->addTextElementToData ("directory", name);
 	for (const auto& name : orderedFiles)
-		xmlOut->addTextElementToData("file", name);
+		xmlOut->addTextElementToData ("file", name);
 
 }  //end getDirectoryContent
 
 //========================================================================================================================
 //getFileContent
-void CodeEditor::getFileContent(
+void CodeEditor::getFileContent (
     cgicc::Cgicc&    cgiIn,
     HttpXmlDocument* xmlOut)
 {
-	std::string path = CgiDataUtilities::getData(cgiIn, "path");
-	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
-	xmlOut->addTextElementToData("path", path);
+	std::string path = CgiDataUtilities::getData (cgiIn, "path");
+	path             = safePathString (CgiDataUtilities::decodeURIComponent (path));
+	xmlOut->addTextElementToData ("path", path);
 
-	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
-	extension             = safeExtensionString(extension);
-	xmlOut->addTextElementToData("ext", extension);
+	std::string extension = CgiDataUtilities::getData (cgiIn, "ext");
+	extension             = safeExtensionString (extension);
+	xmlOut->addTextElementToData ("ext", extension);
 
 	std::string contents;
-	CodeEditor::readFile(path + "." + extension, contents);
+	CodeEditor::readFile (path + "." + extension, contents);
 
-	xmlOut->addTextElementToData("content", contents);
+	xmlOut->addTextElementToData ("content", contents);
 
 }  //end getFileContent
 
 //========================================================================================================================
 //readFile
-void CodeEditor::readFile(
+void CodeEditor::readFile (
     const std::string& path, std::string& contents)
 {
 	std::string fullpath = SOURCE_BASE_PATH + path;
-	__COUTV__(fullpath);
+	__COUTV__ (fullpath);
 
-	std::FILE* fp = std::fopen(fullpath.c_str(), "rb");
+	std::FILE* fp = std::fopen (fullpath.c_str (), "rb");
 	if (!fp)
 	{
 		__SS__ << "Could not open file at " << path << __E__;
 		__SS_THROW__;
 	}
 
-	std::fseek(fp, 0, SEEK_END);
-	contents.resize(std::ftell(fp));
-	std::rewind(fp);
-	std::fread(&contents[0], 1, contents.size(), fp);
-	std::fclose(fp);
+	std::fseek (fp, 0, SEEK_END);
+	contents.resize (std::ftell (fp));
+	std::rewind (fp);
+	std::fread (&contents[0], 1, contents.size (), fp);
+	std::fclose (fp);
 }  //end readFile
 
 //========================================================================================================================
 //writeFile
-void CodeEditor::writeFile(
+void CodeEditor::writeFile (
     const std::string& path, const std::string& contents, const unsigned long long& insertPos, const std::string& insertString)
 {
 	std::string fullpath = SOURCE_BASE_PATH + path;
-	__COUTV__(fullpath);
+	__COUTV__ (fullpath);
 
 	FILE* fp;
 
 	//get old file size
-	fp = fopen(fullpath.c_str(), "rb");
+	fp = fopen (fullpath.c_str (), "rb");
 	if (!fp)
 	{
 		__SS__ << "Could not open file for saving at " << fullpath << __E__;
 		__SS_THROW__;
 	}
-	std::fseek(fp, 0, SEEK_END);
-	long long int oldSize = std::ftell(fp);
-	fclose(fp);
+	std::fseek (fp, 0, SEEK_END);
+	long long int oldSize = std::ftell (fp);
+	fclose (fp);
 
-	fp = fopen(fullpath.c_str(), "wb");
+	fp = fopen (fullpath.c_str (), "wb");
 	if (!fp)
 	{
 		__SS__ << "Could not open file for saving at " << fullpath << __E__;
@@ -386,27 +386,27 @@ void CodeEditor::writeFile(
 	}
 
 	if (insertPos == (unsigned long long)-1)
-		std::fwrite(&contents[0], 1, contents.size(), fp);
+		std::fwrite (&contents[0], 1, contents.size (), fp);
 	else  //do insert
 	{
-		std::fwrite(&contents[0], 1, insertPos, fp);
-		std::fwrite(&insertString[0], 1, insertString.size(), fp);
-		std::fwrite(&contents[insertPos], 1, contents.size() - insertPos, fp);
+		std::fwrite (&contents[0], 1, insertPos, fp);
+		std::fwrite (&insertString[0], 1, insertString.size (), fp);
+		std::fwrite (&contents[insertPos], 1, contents.size () - insertPos, fp);
 	}
-	std::fclose(fp);
+	std::fclose (fp);
 
 	//log changes
 	{
 		std::string logpath = CODE_EDITOR_DATA_PATH + "/codeEditorChangeLog.txt";
-		fp                  = fopen(logpath.c_str(), "a");
+		fp                  = fopen (logpath.c_str (), "a");
 		if (!fp)
 		{
 			__SS__ << "Could not open change log for change tracking at " << logpath << __E__;
 			__SS_THROW__;
 		}
-		fprintf(fp, "time=%lld old-size=%lld new-size=%lld path=%s\n", (long long)time(0), oldSize, (long long)contents.size(), fullpath.c_str());
+		fprintf (fp, "time=%lld old-size=%lld new-size=%lld path=%s\n", (long long)time (0), oldSize, (long long)contents.size (), fullpath.c_str ());
 
-		fclose(fp);
+		fclose (fp);
 		__COUT__ << "Changes logged to: " << logpath << __E__;
 	}  //end log changes
 
@@ -414,39 +414,39 @@ void CodeEditor::writeFile(
 
 //========================================================================================================================
 //saveFileContent
-void CodeEditor::saveFileContent(
+void CodeEditor::saveFileContent (
     cgicc::Cgicc&    cgiIn,
     HttpXmlDocument* xmlOut)
 {
-	std::string path = CgiDataUtilities::getData(cgiIn, "path");
-	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
-	xmlOut->addTextElementToData("path", path);
+	std::string path = CgiDataUtilities::getData (cgiIn, "path");
+	path             = safePathString (CgiDataUtilities::decodeURIComponent (path));
+	xmlOut->addTextElementToData ("path", path);
 
-	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
-	extension             = safeExtensionString(extension);
-	xmlOut->addTextElementToData("ext", extension);
+	std::string extension = CgiDataUtilities::getData (cgiIn, "ext");
+	extension             = safeExtensionString (extension);
+	xmlOut->addTextElementToData ("ext", extension);
 
-	std::string contents = CgiDataUtilities::postData(cgiIn, "content");
+	std::string contents = CgiDataUtilities::postData (cgiIn, "content");
 	//__COUTV__(contents);
-	contents = StringMacros::decodeURIComponent(contents);
+	contents = StringMacros::decodeURIComponent (contents);
 
-	CodeEditor::writeFile(path + "." + extension, contents);
+	CodeEditor::writeFile (path + "." + extension, contents);
 
 }  //end saveFileContent
 
 //========================================================================================================================
 //build
 //	cleanBuild and incrementalBuild
-void CodeEditor::build(
+void CodeEditor::build (
     cgicc::Cgicc&    cgiIn,
     HttpXmlDocument* xmlOut)
 {
-	bool clean = CgiDataUtilities::getDataAsInt(cgiIn, "clean") ? true : false;
+	bool clean = CgiDataUtilities::getDataAsInt (cgiIn, "clean") ? true : false;
 
-	__COUTV__(clean);
+	__COUTV__ (clean);
 
 	//launch as thread so it does not lock up rest of code
-	std::thread([](bool clean) {
+	std::thread ([](bool clean) {
 
 		std::string cmd;
 		if (clean)
@@ -457,61 +457,61 @@ void CodeEditor::build(
 
 				std::array<char, 128> buffer;
 				std::string           result;
-				std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
-				if (!pipe) __THROW__("popen() failed!");
+				std::shared_ptr<FILE> pipe (popen (cmd.c_str (), "r"), pclose);
+				if (!pipe) __THROW__ ("popen() failed!");
 
 				size_t i;
 				size_t j;
 
-				while (!feof(pipe.get()))
+				while (!feof (pipe.get ()))
 				{
-					if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+					if (fgets (buffer.data (), 128, pipe.get ()) != nullptr)
 					{
-						result += buffer.data();
+						result += buffer.data ();
 
 						//each time there is a new line print out
-						i = result.find('\n');
-						__COUTV__(result.substr(0, i));
-						__MOUT__ << result.substr(0, i);
-						result = result.substr(i + 1);  //discard before new line
+						i = result.find ('\n');
+						__COUTV__ (result.substr (0, i));
+						__MOUT__ << result.substr (0, i);
+						result = result.substr (i + 1);  //discard before new line
 					}
 				}
 
-				__COUTV__(result);
-				__MOUT__ << result.substr(0, i);
+				__COUTV__ (result);
+				__MOUT__ << result.substr (0, i);
 			}
 
-			sleep(1);
+			sleep (1);
 			//mrbsetenv
 			{
 				cmd = "source mrbSetEnv 2>&1";
 
 				std::array<char, 128> buffer;
 				std::string           result;
-				std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
-				if (!pipe) __THROW__("popen() failed!");
+				std::shared_ptr<FILE> pipe (popen (cmd.c_str (), "r"), pclose);
+				if (!pipe) __THROW__ ("popen() failed!");
 
 				size_t i;
 				size_t j;
 
-				while (!feof(pipe.get()))
+				while (!feof (pipe.get ()))
 				{
-					if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+					if (fgets (buffer.data (), 128, pipe.get ()) != nullptr)
 					{
-						result += buffer.data();
+						result += buffer.data ();
 
 						//each time there is a new line print out
-						i = result.find('\n');
-						__COUTV__(result.substr(0, i));
-						__MOUT__ << result.substr(0, i);
-						result = result.substr(i + 1);  //discard before new line
+						i = result.find ('\n');
+						__COUTV__ (result.substr (0, i));
+						__MOUT__ << result.substr (0, i);
+						result = result.substr (i + 1);  //discard before new line
 					}
 				}
 
-				__COUTV__(result);
-				__MOUT__ << result.substr(0, i);
+				__COUTV__ (result);
+				__MOUT__ << result.substr (0, i);
 			}
-			sleep(1);
+			sleep (1);
 		}
 
 		//build
@@ -520,45 +520,45 @@ void CodeEditor::build(
 
 			std::array<char, 128> buffer;
 			std::string           result;
-			std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
-			if (!pipe) __THROW__("popen() failed!");
+			std::shared_ptr<FILE> pipe (popen (cmd.c_str (), "r"), pclose);
+			if (!pipe) __THROW__ ("popen() failed!");
 
 			size_t i;
 			size_t j;
 
-			while (!feof(pipe.get()))
+			while (!feof (pipe.get ()))
 			{
-				if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+				if (fgets (buffer.data (), 128, pipe.get ()) != nullptr)
 				{
-					result += buffer.data();
+					result += buffer.data ();
 
 					//each time there is a new line print out
-					i = result.find('\n');
+					i = result.find ('\n');
 					//__COUTV__(result.substr(0,i));
-					__MOUT__ << result.substr(0, i);
-					result = result.substr(i + 1);  //discard before new line
+					__MOUT__ << result.substr (0, i);
+					result = result.substr (i + 1);  //discard before new line
 				}
 			}
 
 			//__COUTV__(result);
-			__MOUT__ << result.substr(0, i);
+			__MOUT__ << result.substr (0, i);
 		}
 	},
-	            clean)
-	    .detach();
+	             clean)
+	    .detach ();
 
 }  //end build()
 
 //========================================================================================================================
 std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/>
-CodeEditor::getSpecialsMap(void)
+CodeEditor::getSpecialsMap (void)
 {
 	std::map<std::string /*special type*/,
 	         std::set<std::string> /*special file paths*/>
 	    retMap;
-	std::string path = std::string(getenv("MRB_SOURCE"));
+	std::string path = std::string (getenv ("MRB_SOURCE"));
 
-	__COUTV__(path);
+	__COUTV__ (path);
 
 	const unsigned int numOfSpecials    = 5;
 	std::string        specialFolders[] = {
@@ -590,7 +590,7 @@ CodeEditor::getSpecialsMap(void)
 		    DIR*           pDIR;
 		    struct dirent* entry;
 		    bool           isDir;
-		    if (!(pDIR = opendir(path.c_str())))
+		    if (!(pDIR = opendir (path.c_str ())))
 		    {
 			    __SS__ << "Plugin base path '" << path << "' could not be opened!" << __E__;
 			    __SS_THROW__;
@@ -600,9 +600,9 @@ CodeEditor::getSpecialsMap(void)
 		    std::string name;
 		    int         type;
 		    int         childSpecialIndex;
-		    while ((entry = readdir(pDIR)))
+		    while ((entry = readdir (pDIR)))
 		    {
-			    name = std::string(entry->d_name);
+			    name = std::string (entry->d_name);
 			    type = int(entry->d_type);
 
 			    //__COUT__ << type << " " << name << "\n" << std::endl;
@@ -615,11 +615,11 @@ CodeEditor::getSpecialsMap(void)
 				    if (type == 0)
 				    {
 					    //unknown type .. determine if directory
-					    DIR* pTmpDIR = opendir((path + "/" + name).c_str());
+					    DIR* pTmpDIR = opendir ((path + "/" + name).c_str ());
 					    if (pTmpDIR)
 					    {
 						    isDir = true;
-						    closedir(pTmpDIR);
+						    closedir (pTmpDIR);
 					    }
 					    //else //assume file
 				    }
@@ -646,40 +646,40 @@ CodeEditor::getSpecialsMap(void)
 
 					    //recurse deeper!
 					    if (depth < 4)  //limit search depth
-						    localRecurse(path + "/" + name,
-						                 offsetPath + "/" + name,
-						                 depth + 1,
-						                 childSpecialIndex);
+						    localRecurse (path + "/" + name,
+						                  offsetPath + "/" + name,
+						                  depth + 1,
+						                  childSpecialIndex);
 				    }
 				    else if (specialIndex >= 0)
 				    {
 					    //get special files!!
 
 					    if (
-					        name.find(".h") == name.length() - 2 ||
-					        name.find(".cc") == name.length() - 3 ||
-					        name.find(".txt") == name.length() - 4 ||
-					        name.find(".sh") == name.length() - 3 ||
-					        name.find(".py") == name.length() - 3)
+					        name.find (".h") == name.length () - 2 ||
+					        name.find (".cc") == name.length () - 3 ||
+					        name.find (".txt") == name.length () - 4 ||
+					        name.find (".sh") == name.length () - 3 ||
+					        name.find (".py") == name.length () - 3)
 					    {
 						    //__COUT__ << "Found special '" << specialFolders[specialIndex] <<
 						    //		"' file '" << name << "' at path " <<
 						    //		path << " " << specialIndex << __E__;
 
-						    retMap[specialMapTypes[specialIndex]].emplace(
+						    retMap[specialMapTypes[specialIndex]].emplace (
 						        offsetPath + "/" + name);
 					    }
 				    }
 			    }
 		    }  //end directory traversal
 
-		    closedir(pDIR);
+		    closedir (pDIR);
 
 	    };  //end localRecurse() definition
 
 	//start recursive traversal to find special folders
-	localRecurse(path, "" /*offsetPath*/, 0 /*depth*/, -1 /*specialIndex*/);
+	localRecurse (path, "" /*offsetPath*/, 0 /*depth*/, -1 /*specialIndex*/);
 
-	__COUTV__(StringMacros::mapToString(retMap));
+	__COUTV__ (StringMacros::mapToString (retMap));
 	return retMap;
 }  //end getSpecialsMap()

@@ -14,30 +14,30 @@ namespace ots
 class Register
 {
   public:
-	Register(std::string name);
-	virtual ~Register();
+	Register (std::string name);
+	virtual ~Register ();
 
 	//Setters
-	void setState(std::string state, std::pair<int, int> valueSequencePair);
-	void fillRegisterInfo(std::string registerBaseAddress, int registerSize, std::string registerAccess);
-	void setInitialize(std::pair<int, int> initialize);
-	void setConfigure(std::pair<int, int> configure);
-	void setStart(std::pair<int, int> start);
-	void setHalt(std::pair<int, int> halt);
-	void setPause(std::pair<int, int> pause);
-	void setResume(std::pair<int, int> resume);
+	void setState (std::string state, std::pair<int, int> valueSequencePair);
+	void fillRegisterInfo (std::string registerBaseAddress, int registerSize, std::string registerAccess);
+	void setInitialize (std::pair<int, int> initialize);
+	void setConfigure (std::pair<int, int> configure);
+	void setStart (std::pair<int, int> start);
+	void setHalt (std::pair<int, int> halt);
+	void setPause (std::pair<int, int> pause);
+	void setResume (std::pair<int, int> resume);
 
 	//Getters
-	std::string         getName(void);
-	std::string         getBaseAddress(void);
-	int                 getSize(void);
-	std::string         getAccess(void);
-	std::pair<int, int> getInitialize(void);
-	std::pair<int, int> getConfigure(void);
-	std::pair<int, int> getStart(void);
-	std::pair<int, int> getHalt(void);
-	std::pair<int, int> getPause(void);
-	std::pair<int, int> getResume(void);
+	std::string         getName (void);
+	std::string         getBaseAddress (void);
+	int                 getSize (void);
+	std::string         getAccess (void);
+	std::pair<int, int> getInitialize (void);
+	std::pair<int, int> getConfigure (void);
+	std::pair<int, int> getStart (void);
+	std::pair<int, int> getHalt (void);
+	std::pair<int, int> getPause (void);
+	std::pair<int, int> getResume (void);
 
   protected:
 	std::string registerName_;

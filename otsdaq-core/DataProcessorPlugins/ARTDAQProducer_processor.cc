@@ -14,24 +14,24 @@
 
 using namespace ots;
 
-#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
+#define ARTDAQ_FCL_PATH std::string (getenv ("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
 //========================================================================================================================
-ARTDAQProducer::ARTDAQProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
-    : WorkLoop(processorUID)
-    , DataProducer(supervisorApplicationUID, bufferUID, processorUID)
+ARTDAQProducer::ARTDAQProducer (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
+    : WorkLoop (processorUID)
+    , DataProducer (supervisorApplicationUID, bufferUID, processorUID)
     //theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
-    , Configurable(theXDAQContextConfigTree, configurationPath)
+    , Configurable (theXDAQContextConfigTree, configurationPath)
 {
 	__COUT__ << "ARTDAQ PRODUCER CONSTRUCTOR!!!" << std::endl;
 	//__COUT__ << "Configuration string:-" << theXDAQContextConfigTree.getNode(configurationPath).getNode("ConfigurationString").getValue<std::string>() << "-" << std::endl;
 
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
-	std::string uid      = theXDAQContextConfigTree.getNode(configurationPath).getValue();
+	std::string uid      = theXDAQContextConfigTree.getNode (configurationPath).getValue ();
 
 	__COUT__ << "uid: " << uid << std::endl;
-	for (unsigned int i = 0; i < uid.size(); ++i)
+	for (unsigned int i = 0; i < uid.size (); ++i)
 		if ((uid[i] >= 'a' && uid[i] <= 'z') ||
 		    (uid[i] >= 'A' && uid[i] <= 'Z') ||
 		    (uid[i] >= '0' && uid[i] <= '9'))  //only allow alpha numeric in file name
@@ -44,15 +44,15 @@ ARTDAQProducer::ARTDAQProducer(std::string supervisorApplicationUID, std::string
 
 	std::string fileFclString;
 	{
-		std::ifstream in(filename, std::ios::in | std::ios::binary);
+		std::ifstream in (filename, std::ios::in | std::ios::binary);
 		if (in)
 		{
 			std::string contents;
-			in.seekg(0, std::ios::end);
-			fileFclString.resize(in.tellg());
-			in.seekg(0, std::ios::beg);
-			in.read(&fileFclString[0], fileFclString.size());
-			in.close();
+			in.seekg (0, std::ios::end);
+			fileFclString.resize (in.tellg ());
+			in.seekg (0, std::ios::beg);
+			in.read (&fileFclString[0], fileFclString.size ());
+			in.close ();
 		}
 	}
 	//__COUT__ << fileFclString << std::endl;
@@ -62,13 +62,13 @@ ARTDAQProducer::ARTDAQProducer(std::string supervisorApplicationUID, std::string
 	//	SupervisorApplicationUID:"ARTDataManager0"
 	//	BufferUID:"ART_S0_DM0_DataBuffer0"
 	//	ProcessorUID:"ART_S0_DM0_DB0_ARTConsumer0"
-	size_t fcli = fileFclString.find("fragment_receiver: {") +
-	              +strlen("fragment_receiver: {");
+	size_t fcli = fileFclString.find ("fragment_receiver: {") +
+	              +strlen ("fragment_receiver: {");
 	if (fcli == std::string::npos)
 	{
 		__SS__ << "Could not find 'fragment_receiver: {' in Board Reader fcl string!" << std::endl;
 		__COUT__ << "\n"
-		         << ss.str();
+		         << ss.str ();
 		__SS_THROW__;
 	}
 
@@ -84,29 +84,29 @@ ARTDAQProducer::ARTDAQProducer(std::string supervisorApplicationUID, std::string
 		//__COUT__ << "backsteps: " << i+1 << std::endl;
 
 		backj = backi;
-		backi = configurationPath.rfind('/', backi - 1);
+		backi = configurationPath.rfind ('/', backi - 1);
 
 		//__COUT__ << "backi:" << backi << " backj:" << backj << std::endl;
 		//__COUT__ << "substr: " << configurationPath.substr(backi+1,backj-backi-1) << std::endl;
 
 		if (i + 1 == 2)
-			consumerID = configurationPath.substr(backi + 1, backj - backi - 1);
+			consumerID = configurationPath.substr (backi + 1, backj - backi - 1);
 		else if (i + 1 == 4)
-			bufferID = configurationPath.substr(backi + 1, backj - backi - 1);
+			bufferID = configurationPath.substr (backi + 1, backj - backi - 1);
 		else if (i + 1 == 7)
-			appID = configurationPath.substr(backi + 1, backj - backi - 1);
+			appID = configurationPath.substr (backi + 1, backj - backi - 1);
 	}
 
 	//insert parent IDs into fcl string
-	fileFclString = fileFclString.substr(0, fcli) + "\n\t\t" +
+	fileFclString = fileFclString.substr (0, fcli) + "\n\t\t" +
 	                "SupervisorApplicationUID: \"" + appID + "\"\n\t\t" +
 	                "BufferUID: \"" + bufferID + "\"\n\t\t" +
 	                "ProcessorUID: \"" + consumerID + "\"\n" +
-	                fileFclString.substr(fcli);
+	                fileFclString.substr (fcli);
 
 	__COUT__ << fileFclString << std::endl;
 
-	fhicl::make_ParameterSet(fileFclString, fhiclConfiguration_);
+	fhicl::make_ParameterSet (fileFclString, fhiclConfiguration_);
 
 	//fhicl::make_ParameterSet(theXDAQContextConfigTree.getNode(configurationPath).getNode("ConfigurationString").getValue<std::string>(), fhiclConfiguration_);
 }
@@ -119,24 +119,24 @@ ARTDAQProducer::ARTDAQProducer(std::string supervisorApplicationUID, std::string
 //{}
 
 //========================================================================================================================
-ARTDAQProducer::~ARTDAQProducer(void)
+ARTDAQProducer::~ARTDAQProducer (void)
 {
-	halt();
+	halt ();
 	__COUT__ << "DONE DELETING!" << std::endl;
 }
 
 //========================================================================================================================
-void ARTDAQProducer::initLocalGroup(int rank)
+void ARTDAQProducer::initLocalGroup (int rank)
 {
 	name_ = "BoardReader_" + DataProducer::processorUID_;
-	configure(rank);
+	configure (rank);
 }
 
-#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
+#define ARTDAQ_FCL_PATH std::string (getenv ("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
 //========================================================================================================================
-void ARTDAQProducer::configure(int rank)
+void ARTDAQProducer::configure (int rank)
 {
 	std::cout << __COUT_HDR_FL__ << "\tConfigure" << std::endl;
 
@@ -147,81 +147,81 @@ void ARTDAQProducer::configure(int rank)
 	// instance, then create a new one.  Doing it in one step does not
 	// produce the desired result since that creates a new instance and
 	// then deletes the old one, and we need the opposite order.
-	fragment_receiver_ptr_.reset(nullptr);
+	fragment_receiver_ptr_.reset (nullptr);
 	std::cout << __COUT_HDR_FL__ << "\tNew core" << std::endl;
 	my_rank  = rank;
 	app_name = name_;
-	fragment_receiver_ptr_.reset(new artdaq::BoardReaderApp());
+	fragment_receiver_ptr_.reset (new artdaq::BoardReaderApp ());
 	//FIXME These are passed as parameters
 	uint64_t timeout = 45;
 	//uint64_t timestamp = 184467440737095516;
 	uint64_t timestamp = 184467440737095516;
 	std::cout << __COUT_HDR_FL__ << "\tInitialize: " << std::endl;  //<< fhiclConfiguration_.to_string() << std::endl;
-	external_request_status_ = fragment_receiver_ptr_->initialize(fhiclConfiguration_, timeout, timestamp);
+	external_request_status_ = fragment_receiver_ptr_->initialize (fhiclConfiguration_, timeout, timestamp);
 	std::cout << __COUT_HDR_FL__ << "\tDone Initialize" << std::endl;
 	if (!external_request_status_)
 	{
 		report_string_ = "Error initializing ";
-		report_string_.append(name_ + " ");
-		report_string_.append("with ParameterSet = \"" + fhiclConfiguration_.to_string() + "\".");
+		report_string_.append (name_ + " ");
+		report_string_.append ("with ParameterSet = \"" + fhiclConfiguration_.to_string () + "\".");
 	}
 	std::cout << __COUT_HDR_FL__ << "\tDone Configure" << std::endl;
 }
 
 //========================================================================================================================
-void ARTDAQProducer::halt(void)
+void ARTDAQProducer::halt (void)
 {
 	std::cout << __COUT_HDR_FL__ << "\tHalt" << std::endl;
 	//FIXME These are passed as parameters
 	uint64_t timeout = 45;
 	//uint64_t timestamp = 184467440737095516;
 	report_string_           = "";
-	external_request_status_ = fragment_receiver_ptr_->shutdown(timeout);
+	external_request_status_ = fragment_receiver_ptr_->shutdown (timeout);
 	if (!external_request_status_)
 	{
 		report_string_ = "Error shutting down ";
-		report_string_.append(name_ + ".");
+		report_string_.append (name_ + ".");
 	}
 }
 
 //========================================================================================================================
-void ARTDAQProducer::pauseProcessingData(void)
+void ARTDAQProducer::pauseProcessingData (void)
 {
 	std::cout << __COUT_HDR_FL__ << "\tPause" << std::endl;
 	//FIXME These are passed as parameters
 	uint64_t timeout         = 45;
 	uint64_t timestamp       = 184467440737095516;
 	report_string_           = "";
-	external_request_status_ = fragment_receiver_ptr_->pause(timeout, timestamp);
+	external_request_status_ = fragment_receiver_ptr_->pause (timeout, timestamp);
 	if (!external_request_status_)
 	{
 		report_string_ = "Error pausing ";
-		report_string_.append(name_ + ".");
+		report_string_.append (name_ + ".");
 	}
 }
 
 //========================================================================================================================
-void ARTDAQProducer::resumeProcessingData(void)
+void ARTDAQProducer::resumeProcessingData (void)
 {
 	std::cout << __COUT_HDR_FL__ << "\tResume" << std::endl;
 	//FIXME These are passed as parameters
 	uint64_t timeout         = 45;
 	uint64_t timestamp       = 184467440737095516;
 	report_string_           = "";
-	external_request_status_ = fragment_receiver_ptr_->resume(timeout, timestamp);
+	external_request_status_ = fragment_receiver_ptr_->resume (timeout, timestamp);
 	if (!external_request_status_)
 	{
 		report_string_ = "Error resuming ";
-		report_string_.append(name_ + ".");
+		report_string_.append (name_ + ".");
 	}
 }
 
 //========================================================================================================================
-void ARTDAQProducer::startProcessingData(std::string runNumber)
+void ARTDAQProducer::startProcessingData (std::string runNumber)
 {
 	std::cout << __COUT_HDR_FL__ << "\tStart" << std::endl;
 
-	art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(runNumber));
+	art::RunID runId ((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t> (runNumber));
 
 	//FIXME These are passed as parameters
 	uint64_t timeout   = 45;
@@ -229,24 +229,24 @@ void ARTDAQProducer::startProcessingData(std::string runNumber)
 
 	report_string_ = "";
 	std::cout << __COUT_HDR_FL__ << "\tStart run: " << runId << std::endl;
-	external_request_status_ = fragment_receiver_ptr_->start(runId, timeout, timestamp);
+	external_request_status_ = fragment_receiver_ptr_->start (runId, timeout, timestamp);
 	std::cout << __COUT_HDR_FL__ << "\tStart already crashed " << std::endl;
 	if (!external_request_status_)
 	{
 		report_string_ = "Error starting ";
-		report_string_.append(name_ + " ");
-		report_string_.append("for run number ");
-		report_string_.append(boost::lexical_cast<std::string>(runId.run()));
-		report_string_.append(", timeout ");
-		report_string_.append(boost::lexical_cast<std::string>(timeout));
-		report_string_.append(", timestamp ");
-		report_string_.append(boost::lexical_cast<std::string>(timestamp));
-		report_string_.append(".");
+		report_string_.append (name_ + " ");
+		report_string_.append ("for run number ");
+		report_string_.append (boost::lexical_cast<std::string> (runId.run ()));
+		report_string_.append (", timeout ");
+		report_string_.append (boost::lexical_cast<std::string> (timeout));
+		report_string_.append (", timestamp ");
+		report_string_.append (boost::lexical_cast<std::string> (timestamp));
+		report_string_.append (".");
 	}
 }
 
 //========================================================================================================================
-void ARTDAQProducer::stopProcessingData(void)
+void ARTDAQProducer::stopProcessingData (void)
 {
 	std::cout << __COUT_HDR_FL__ << "\tStop" << std::endl;
 	//FIXME These are passed as parameters
@@ -254,16 +254,16 @@ void ARTDAQProducer::stopProcessingData(void)
 	uint64_t timestamp = 184467440737095516;
 	report_string_     = "";
 
-	auto sts = fragment_receiver_ptr_->status();
+	auto sts = fragment_receiver_ptr_->status ();
 	if (sts == "Ready") return;  // Already stopped/never started
 
-	external_request_status_ = fragment_receiver_ptr_->stop(timeout, timestamp);
+	external_request_status_ = fragment_receiver_ptr_->stop (timeout, timestamp);
 	if (!external_request_status_)
 	{
 		report_string_ = "Error stopping ";
-		report_string_.append(name_ + ".");
+		report_string_.append (name_ + ".");
 		//return false;
 	}
 }
 
-DEFINE_OTS_PROCESSOR(ARTDAQProducer)
+DEFINE_OTS_PROCESSOR (ARTDAQProducer)

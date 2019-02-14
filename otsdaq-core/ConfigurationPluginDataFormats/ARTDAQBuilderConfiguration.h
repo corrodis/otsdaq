@@ -12,13 +12,13 @@ class XDAQContextConfiguration;
 class ARTDAQBuilderConfiguration : public ConfigurationBase
 {
   public:
-	ARTDAQBuilderConfiguration(void);
-	virtual ~ARTDAQBuilderConfiguration(void);
+	ARTDAQBuilderConfiguration (void);
+	virtual ~ARTDAQBuilderConfiguration (void);
 
 	//Methods
-	void        init(ConfigurationManager *configManager);
-	void        outputFHICL(ConfigurationManager *configManager, const ConfigurationTree &builderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort, const XDAQContextConfiguration *contextConfig);
-	std::string getFHICLFilename(const ConfigurationTree &builderNode);
+	void        init (ConfigurationManager *configManager);
+	void        outputFHICL (ConfigurationManager *configManager, const ConfigurationTree &builderNode, unsigned int selfRank, std::string selfHost, unsigned int selfPort, const XDAQContextConfiguration *contextConfig);
+	std::string getFHICLFilename (const ConfigurationTree &builderNode);
 };
 }  // namespace ots
 #endif

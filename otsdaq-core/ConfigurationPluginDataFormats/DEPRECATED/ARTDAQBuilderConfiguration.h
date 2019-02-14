@@ -9,16 +9,16 @@ namespace ots
 class ARTDAQBuilderConfiguration : public ConfigurationBase
 {
   public:
-	ARTDAQBuilderConfiguration(void);
-	virtual ~ARTDAQBuilderConfiguration(void);
+	ARTDAQBuilderConfiguration (void);
+	virtual ~ARTDAQBuilderConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 
 	//Getters
-	std::string       getAggregatorID(unsigned int supervisorInstance) const;
-	bool              getStatus(unsigned int supervisorInstance) const;
-	const std::string getConfigurationString(unsigned int supervisorInstance) const;
+	std::string       getAggregatorID (unsigned int supervisorInstance) const;
+	bool              getStatus (unsigned int supervisorInstance) const;
+	const std::string getConfigurationString (unsigned int supervisorInstance) const;
 
   private:
 	enum

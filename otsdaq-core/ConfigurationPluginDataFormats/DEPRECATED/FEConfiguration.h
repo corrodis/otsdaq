@@ -12,11 +12,11 @@ namespace ots
 class FEConfiguration : public ConfigurationBase
 {
   public:
-	FEConfiguration(void);
-	virtual ~FEConfiguration(void);
+	FEConfiguration (void);
+	virtual ~FEConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 	//Getters
 	//	std::vector<std::string>  getListOfFEIDs       (void)                                                                                              const;
 	//	std::vector<std::string>  getListOfFEIDs       (const std::string& supervisorType, unsigned int supervisorInstance)                                const;
@@ -45,7 +45,7 @@ class FEConfiguration : public ConfigurationBase
 		FrontEndId,
 		FrontEndType
 	};
-	std::string                                                composeUniqueName(std::string supervisorName, unsigned int supervisorInstance) const { return supervisorName + std::to_string(supervisorInstance); }
+	std::string                                                composeUniqueName (std::string supervisorName, unsigned int supervisorInstance) const { return supervisorName + std::to_string (supervisorInstance); }
 	std::map<std::string, std::map<std::string, unsigned int>> typeNameToRow_;
 };
 }  // namespace ots

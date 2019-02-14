@@ -11,25 +11,25 @@ namespace ots
 class ViewColumnInfo
 {
   public:
-	ViewColumnInfo(const std::string& type, const std::string& name, const std::string& storageName, const std::string& dataType, const std::string& dataChoicesCSV, std::string* capturedExceptionString);
-	ViewColumnInfo(const ViewColumnInfo& c);             //copy constructor because of bitmap pointer
-	ViewColumnInfo& operator=(const ViewColumnInfo& c);  //assignment operator because of bitmap pointer
+	ViewColumnInfo (const std::string& type, const std::string& name, const std::string& storageName, const std::string& dataType, const std::string& dataChoicesCSV, std::string* capturedExceptionString);
+	ViewColumnInfo (const ViewColumnInfo& c);             //copy constructor because of bitmap pointer
+	ViewColumnInfo& operator= (const ViewColumnInfo& c);  //assignment operator because of bitmap pointer
 
-	virtual ~ViewColumnInfo(void);
+	virtual ~ViewColumnInfo (void);
 
-	const std::string&              getType(void) const;
-	const std::string&              getName(void) const;
-	const std::string&              getStorageName(void) const;
-	const std::string&              getDataType(void) const;
-	const std::string&              getDefaultValue(void) const;
-	const std::vector<std::string>& getDataChoices(void) const;
+	const std::string&              getType (void) const;
+	const std::string&              getName (void) const;
+	const std::string&              getStorageName (void) const;
+	const std::string&              getDataType (void) const;
+	const std::string&              getDefaultValue (void) const;
+	const std::vector<std::string>& getDataChoices (void) const;
 
 	struct BitMapInfo  //uses dataChoices CSV fields if type is TYPE_BITMAP_DATA
 	{
-		BitMapInfo()
-		    : minColor_("")
-		    , midColor_("")
-		    , maxColor_("")
+		BitMapInfo ()
+		    : minColor_ ("")
+		    , midColor_ ("")
+		    , maxColor_ ("")
 		{
 		}
 		unsigned int numOfRows_, numOfColumns_, cellBitSize_;
@@ -39,21 +39,21 @@ class ViewColumnInfo
 		std::string  absMinColor_, absMaxColor_;
 		bool         rowsAscending_, colsAscending_, snakeRows_, snakeCols_;
 	};
-	const BitMapInfo& getBitMapInfo(void) const;  //uses dataChoices CSV fields if type is TYPE_BITMAP_DATA
+	const BitMapInfo& getBitMapInfo (void) const;  //uses dataChoices CSV fields if type is TYPE_BITMAP_DATA
 
-	static std::vector<std::string>                                   getAllTypesForGUI(void);
-	static std::map<std::pair<std::string, std::string>, std::string> getAllDefaultsForGUI(void);
-	static std::vector<std::string>                                   getAllDataTypesForGUI(void);
+	static std::vector<std::string>                                   getAllTypesForGUI (void);
+	static std::map<std::pair<std::string, std::string>, std::string> getAllDefaultsForGUI (void);
+	static std::vector<std::string>                                   getAllDataTypesForGUI (void);
 
-	const bool isChildLink(void) const;
-	const bool isChildLinkUID(void) const;
-	const bool isChildLinkGroupID(void) const;
-	const bool isGroupID(void) const;
-	const bool isUID(void) const;
-	const bool isBoolType(void) const;
-	const bool isNumberDataType(void) const;
+	const bool isChildLink (void) const;
+	const bool isChildLinkUID (void) const;
+	const bool isChildLinkGroupID (void) const;
+	const bool isGroupID (void) const;
+	const bool isUID (void) const;
+	const bool isBoolType (void) const;
+	const bool isNumberDataType (void) const;
 
-	std::string getChildLinkIndex(void) const;
+	std::string getChildLinkIndex (void) const;
 
 	static const std::string TYPE_UID;
 	static const std::string TYPE_DATA, TYPE_UNIQUE_DATA, TYPE_UNIQUE_GROUP_DATA, TYPE_MULTILINE_DATA, TYPE_FIXED_CHOICE_DATA, TYPE_BITMAP_DATA;
@@ -79,8 +79,8 @@ class ViewColumnInfo
 	static const std::string COL_NAME_STATUS, COL_NAME_PRIORITY;
 
   private:
-	ViewColumnInfo();  //private constructor, only used in assignment operator
-	void extractBitMapInfo();
+	ViewColumnInfo ();  //private constructor, only used in assignment operator
+	void extractBitMapInfo ();
 
   protected:
 	std::string              type_;

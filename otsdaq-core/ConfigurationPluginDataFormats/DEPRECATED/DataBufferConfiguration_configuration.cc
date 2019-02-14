@@ -6,8 +6,8 @@
 using namespace ots;
 
 //==============================================================================
-DataBufferConfiguration::DataBufferConfiguration(void)
-    : ConfigurationBase("DataBufferConfiguration")
+DataBufferConfiguration::DataBufferConfiguration (void)
+    : ConfigurationBase ("DataBufferConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
 	//WARNING: the names and the order MUST match the ones in the enum  //
@@ -26,27 +26,27 @@ DataBufferConfiguration::DataBufferConfiguration(void)
 }
 
 //==============================================================================
-DataBufferConfiguration::~DataBufferConfiguration(void)
+DataBufferConfiguration::~DataBufferConfiguration (void)
 {
 }
 
 //==============================================================================
-void DataBufferConfiguration::init(ConfigurationManager* configManager)
+void DataBufferConfiguration::init (ConfigurationManager* configManager)
 {
-	processorInfos_.clear();
+	processorInfos_.clear ();
 
 	//std::string uniqueID;//Right now ignored
 	std::string dataBufferID;
 	std::string processorUID;
 	std::string processorType;
 	Info        processorInfo;
-	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows(); row++)
+	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue(dataBufferID, row, DataBufferID);
-		ConfigurationBase::activeConfigurationView_->getValue(processorUID, row, ProcessorID);
-		ConfigurationBase::activeConfigurationView_->getValue(processorType, row, ProcessorType);
-		ConfigurationBase::activeConfigurationView_->getValue(processorInfo.class_, row, ProcessorClass);
-		ConfigurationBase::activeConfigurationView_->getValue(processorInfo.status_, row, ProcessorStatus);
+		ConfigurationBase::activeConfigurationView_->getValue (dataBufferID, row, DataBufferID);
+		ConfigurationBase::activeConfigurationView_->getValue (processorUID, row, ProcessorID);
+		ConfigurationBase::activeConfigurationView_->getValue (processorType, row, ProcessorType);
+		ConfigurationBase::activeConfigurationView_->getValue (processorInfo.class_, row, ProcessorClass);
+		ConfigurationBase::activeConfigurationView_->getValue (processorInfo.status_, row, ProcessorStatus);
 
 		if (processorType == "Producer")
 		{
@@ -61,60 +61,60 @@ void DataBufferConfiguration::init(ConfigurationManager* configManager)
 		else
 		{
 			std::cout << __COUT_HDR_FL__ << "Unrecognized Processor Type: " << processorType << std::endl;
-			assert(0);
+			assert (0);
 		}
 	}
 }
 
 //==============================================================================
-std::vector<std::string> DataBufferConfiguration::getProcessorIDList(std::string dataBufferID) const
+std::vector<std::string> DataBufferConfiguration::getProcessorIDList (std::string dataBufferID) const
 {
 	std::vector<std::string> list;
-	for (auto const& it : processorInfos_.find(dataBufferID)->second.processors_)
-		list.push_back(it.first);
+	for (auto const& it : processorInfos_.find (dataBufferID)->second.processors_)
+		list.push_back (it.first);
 	return list;
 }
 
 //==============================================================================
-std::vector<std::string> DataBufferConfiguration::getProducerIDList(std::string dataBufferID) const
+std::vector<std::string> DataBufferConfiguration::getProducerIDList (std::string dataBufferID) const
 {
 	std::vector<std::string> list;
-	for (auto const& it : processorInfos_.find(dataBufferID)->second.producers_)
-		list.push_back(it.first);
+	for (auto const& it : processorInfos_.find (dataBufferID)->second.producers_)
+		list.push_back (it.first);
 	return list;
 }
 
 //==============================================================================
-bool DataBufferConfiguration::getProducerStatus(std::string dataBufferID, std::string producerID) const
+bool DataBufferConfiguration::getProducerStatus (std::string dataBufferID, std::string producerID) const
 {
-	return processorInfos_.find(dataBufferID)->second.producers_.find(producerID)->second.status_;
+	return processorInfos_.find (dataBufferID)->second.producers_.find (producerID)->second.status_;
 }
 
 //==============================================================================
-std::string DataBufferConfiguration::getProducerClass(std::string dataBufferID, std::string producerID) const
+std::string DataBufferConfiguration::getProducerClass (std::string dataBufferID, std::string producerID) const
 {
-	return processorInfos_.find(dataBufferID)->second.producers_.find(producerID)->second.class_;
+	return processorInfos_.find (dataBufferID)->second.producers_.find (producerID)->second.class_;
 }
 
 //==============================================================================
-std::vector<std::string> DataBufferConfiguration::getConsumerIDList(std::string dataBufferID) const
+std::vector<std::string> DataBufferConfiguration::getConsumerIDList (std::string dataBufferID) const
 {
 	std::vector<std::string> list;
-	for (auto& it : processorInfos_.find(dataBufferID)->second.consumers_)
-		list.push_back(it.first);
+	for (auto& it : processorInfos_.find (dataBufferID)->second.consumers_)
+		list.push_back (it.first);
 	return list;
 }
 
 //==============================================================================
-bool DataBufferConfiguration::getConsumerStatus(std::string dataBufferID, std::string consumerID) const
+bool DataBufferConfiguration::getConsumerStatus (std::string dataBufferID, std::string consumerID) const
 {
-	return processorInfos_.find(dataBufferID)->second.consumers_.find(consumerID)->second.status_;
+	return processorInfos_.find (dataBufferID)->second.consumers_.find (consumerID)->second.status_;
 }
 
 //==============================================================================
-std::string DataBufferConfiguration::getConsumerClass(std::string dataBufferID, std::string consumerID) const
+std::string DataBufferConfiguration::getConsumerClass (std::string dataBufferID, std::string consumerID) const
 {
-	return processorInfos_.find(dataBufferID)->second.consumers_.find(consumerID)->second.class_;
+	return processorInfos_.find (dataBufferID)->second.consumers_.find (consumerID)->second.class_;
 }
 
-DEFINE_OTS_CONFIGURATION(DataBufferConfiguration)
+DEFINE_OTS_CONFIGURATION (DataBufferConfiguration)

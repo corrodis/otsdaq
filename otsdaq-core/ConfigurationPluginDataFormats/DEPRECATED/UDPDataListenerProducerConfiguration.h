@@ -10,20 +10,20 @@ namespace ots
 class UDPDataListenerProducerConfiguration : public ConfigurationBase
 {
   public:
-	UDPDataListenerProducerConfiguration(void);
-	virtual ~UDPDataListenerProducerConfiguration(void);
+	UDPDataListenerProducerConfiguration (void);
+	virtual ~UDPDataListenerProducerConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
+	void init (ConfigurationManager *configManager);
 
 	//Getter
-	std::vector<std::string> getProcessorIDList(void) const;
-	unsigned int             getBufferSize(std::string processorUID) const;
-	std::string              getIPAddress(std::string processorUID) const;
-	unsigned int             getPort(std::string processorUID) const;
+	std::vector<std::string> getProcessorIDList (void) const;
+	unsigned int             getBufferSize (std::string processorUID) const;
+	std::string              getIPAddress (std::string processorUID) const;
+	unsigned int             getPort (std::string processorUID) const;
 
   private:
-	void check(std::string processorUID) const;
+	void check (std::string processorUID) const;
 	enum
 	{
 		ProcessorID,

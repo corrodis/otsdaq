@@ -46,34 +46,34 @@ class XDAQContextConfiguration : public ConfigurationBase
 		std::vector<XDAQApplication> applications_;
 	};
 
-	XDAQContextConfiguration(void);
-	virtual ~XDAQContextConfiguration(void);
+	XDAQContextConfiguration (void);
+	virtual ~XDAQContextConfiguration (void);
 
 	//Methods
-	void init(ConfigurationManager *configManager);
-	void extractContexts(ConfigurationManager *configManager);
-	void outputXDAQXML(std::ostream &out);
+	void init (ConfigurationManager *configManager);
+	void extractContexts (ConfigurationManager *configManager);
+	void outputXDAQXML (std::ostream &out);
 	//void 								outputAppPriority		(std::ostream &out, const std::string& stateMachineCommand);
 	//void 								outputXDAQScript		(std::ostream &out);
 	//void 								outputARTDAQScript		(std::ostream &out);
 
-	std::string getContextUID(const std::string &url) const;
-	std::string getApplicationUID(const std::string &url, unsigned int id) const;
+	std::string getContextUID (const std::string &url) const;
+	std::string getApplicationUID (const std::string &url, unsigned int id) const;
 
-	const std::vector<XDAQContext> &getContexts() const { return contexts_; }
+	const std::vector<XDAQContext> &getContexts () const { return contexts_; }
 
-	ConfigurationTree getContextNode(const ConfigurationManager *configManager, const std::string &contextUID) const;
-	ConfigurationTree getApplicationNode(const ConfigurationManager *configManager, const std::string &contextUID, const std::string &appUID) const;
-	ConfigurationTree getSupervisorConfigNode(const ConfigurationManager *configManager, const std::string &contextUID, const std::string &appUID) const;
+	ConfigurationTree getContextNode (const ConfigurationManager *configManager, const std::string &contextUID) const;
+	ConfigurationTree getApplicationNode (const ConfigurationManager *configManager, const std::string &contextUID, const std::string &appUID) const;
+	ConfigurationTree getSupervisorConfigNode (const ConfigurationManager *configManager, const std::string &contextUID, const std::string &appUID) const;
 
 	//artdaq specific get methods
-	std::vector<const XDAQContext *> getBoardReaderContexts() const;
-	std::vector<const XDAQContext *> getEventBuilderContexts() const;
-	std::vector<const XDAQContext *> getAggregatorContexts() const;
-	unsigned int                     getARTDAQAppRank(const std::string &contextUID = "X") const;
-	std::string                      getContextAddress(const std::string &contextUID = "X", bool wantHttp = false) const;
-	unsigned int                     getARTDAQDataPort(const ConfigurationManager *configManager, const std::string &contextUID = "X") const;
-	static bool                      isARTDAQContext(const std::string &contextUID);
+	std::vector<const XDAQContext *> getBoardReaderContexts () const;
+	std::vector<const XDAQContext *> getEventBuilderContexts () const;
+	std::vector<const XDAQContext *> getAggregatorContexts () const;
+	unsigned int                     getARTDAQAppRank (const std::string &contextUID = "X") const;
+	std::string                      getContextAddress (const std::string &contextUID = "X", bool wantHttp = false) const;
+	unsigned int                     getARTDAQDataPort (const ConfigurationManager *configManager, const std::string &contextUID = "X") const;
+	static bool                      isARTDAQContext (const std::string &contextUID);
 
   private:
 	std::vector<XDAQContext> contexts_;

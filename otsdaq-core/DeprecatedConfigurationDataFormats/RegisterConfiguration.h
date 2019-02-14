@@ -15,10 +15,10 @@ namespace ots
 class RegisterConfiguration : public ots::ConfigurationBase
 {
   public:
-	RegisterConfiguration(std::string staticConfigurationName);
-	virtual ~RegisterConfiguration();
+	RegisterConfiguration (std::string staticConfigurationName);
+	virtual ~RegisterConfiguration ();
 
-	void init(void);
+	void init (void);
 
   protected:
 	enum

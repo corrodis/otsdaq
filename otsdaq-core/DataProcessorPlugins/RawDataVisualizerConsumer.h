@@ -13,18 +13,18 @@ class ConfigurationManager;
 class RawDataVisualizerConsumer : public DataConsumer, public Configurable
 {
   public:
-	RawDataVisualizerConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
-	virtual ~RawDataVisualizerConsumer(void);
+	RawDataVisualizerConsumer (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
+	virtual ~RawDataVisualizerConsumer (void);
 
-	void startProcessingData(std::string runNumber) override;
-	void stopProcessingData(void) override;
+	void startProcessingData (std::string runNumber) override;
+	void stopProcessingData (void) override;
 
-	const std::string& getLastRawDataBuffer(void) { return data_; }
+	const std::string& getLastRawDataBuffer (void) { return data_; }
 
   private:
-	bool workLoopThread(toolbox::task::WorkLoop* workLoop);
-	void fastRead(void);
-	void slowRead(void);
+	bool workLoopThread (toolbox::task::WorkLoop* workLoop);
+	void fastRead (void);
+	void slowRead (void);
 
 	//For fast read
 	std::string*                        dataP_;

@@ -8,8 +8,8 @@
 using namespace ots;
 
 //==============================================================================
-TemplateConfiguration::TemplateConfiguration(void)
-    : ConfigurationBase("TemplateConfiguration")
+TemplateConfiguration::TemplateConfiguration (void)
+    : ConfigurationBase ("TemplateConfiguration")
 {
 	////////////////////////////////////////////////////////////////////////////
 	//WARNING: the field names used in C++ MUST match the Configuration INFO  //
@@ -17,12 +17,12 @@ TemplateConfiguration::TemplateConfiguration(void)
 }
 
 //==============================================================================
-TemplateConfiguration::~TemplateConfiguration(void)
+TemplateConfiguration::~TemplateConfiguration (void)
 {
 }
 
 //==============================================================================
-void TemplateConfiguration::init(ConfigurationManager *configManager)
+void TemplateConfiguration::init (ConfigurationManager *configManager)
 {
 	//do something to validate or refactor table
 	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
@@ -33,14 +33,14 @@ void TemplateConfiguration::init(ConfigurationManager *configManager)
 
 	std::string                                             value;
 	std::vector<std::pair<std::string, ConfigurationTree> > children =
-	    configManager->__SELF_NODE__.getChildren();
+	    configManager->__SELF_NODE__.getChildren ();
 	for (auto &childPair : children)
 	{
 		//do something for each row in table
 		__COUT__ << childPair.first << std::endl;
-		__COUT__ << childPair.second.getNode(colNames_.colColumnName_) << std::endl;
-		childPair.second.getNode(colNames_.colColumnName_).getValue(value);
+		__COUT__ << childPair.second.getNode (colNames_.colColumnName_) << std::endl;
+		childPair.second.getNode (colNames_.colColumnName_).getValue (value);
 	}
 }
 
-DEFINE_OTS_CONFIGURATION(TemplateConfiguration)
+DEFINE_OTS_CONFIGURATION (TemplateConfiguration)

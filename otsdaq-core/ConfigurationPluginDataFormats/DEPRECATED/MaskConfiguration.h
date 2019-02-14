@@ -11,14 +11,14 @@ namespace ots
 class MaskConfiguration : public ConfigurationBase
 {
   public:
-	MaskConfiguration(void);
-	virtual ~MaskConfiguration(void);
+	MaskConfiguration (void);
+	virtual ~MaskConfiguration (void);
 
 	//Methods
-	virtual void init(ConfigurationManager* configManager);
+	virtual void init (ConfigurationManager* configManager);
 
 	//Getters
-	const std::string& getROCMask(std::string rocName) const;
+	const std::string& getROCMask (std::string rocName) const;
 
   protected:
 	std::map<std::string, unsigned int> nameToRow_;

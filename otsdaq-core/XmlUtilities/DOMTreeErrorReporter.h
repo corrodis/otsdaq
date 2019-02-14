@@ -10,16 +10,16 @@ namespace ots
 class DOMTreeErrorReporter : public xercesc::ErrorHandler
 {
   public:
-	DOMTreeErrorReporter();
-	~DOMTreeErrorReporter();
+	DOMTreeErrorReporter ();
+	~DOMTreeErrorReporter ();
 
-	void warning(const xercesc::SAXParseException& exception);
-	void error(const xercesc::SAXParseException& exception);
-	void fatalError(const xercesc::SAXParseException& exception);
-	void resetErrors(void);
+	void warning (const xercesc::SAXParseException& exception);
+	void error (const xercesc::SAXParseException& exception);
+	void fatalError (const xercesc::SAXParseException& exception);
+	void resetErrors (void);
 
   private:
-	std::string reportParseException(const xercesc::SAXParseException& exception);
+	std::string reportParseException (const xercesc::SAXParseException& exception);
 };
 
 }  // namespace ots

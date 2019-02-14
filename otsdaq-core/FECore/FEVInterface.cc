@@ -10,140 +10,140 @@
 using namespace ots;
 
 //========================================================================================================================
-FEVInterface::FEVInterface(const std::string&       interfaceUID,
-                           const ConfigurationTree& theXDAQContextConfigTree,
-                           const std::string&       configurationPath)
-    : WorkLoop(interfaceUID)
-    , Configurable(theXDAQContextConfigTree, configurationPath)
-    , interfaceUID_(interfaceUID)
+FEVInterface::FEVInterface (const std::string&       interfaceUID,
+                            const ConfigurationTree& theXDAQContextConfigTree,
+                            const std::string&       configurationPath)
+    : WorkLoop (interfaceUID)
+    , Configurable (theXDAQContextConfigTree, configurationPath)
+    , interfaceUID_ (interfaceUID)
     //, interfaceType_				(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>())
     //, daqHardwareType_            	("NOT SET")
     //, firmwareType_               	("NOT SET")
-    , slowControlsWorkLoop_(interfaceUID + "-SlowControls", this)
+    , slowControlsWorkLoop_ (interfaceUID + "-SlowControls", this)
 {
 	//NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the base class versions of function (e.g. getInterfaceType) are called because the derived class has not been instantiate yet!
 	__COUT__ << "'" << interfaceUID << "' Constructed." << __E__;
 }
 
 //========================================================================================================================
-FEVInterface::~FEVInterface(void)
+FEVInterface::~FEVInterface (void)
 {
 	//NOTE:: be careful not to call __FE_COUT__ decoration because it uses the tree and it may already be destructed partially
 	__COUT__ << FEVInterface::interfaceUID_ << " Destructor" << __E__;
 }
 
 //========================================================================================================================
-void FEVInterface::configureSlowControls(void)
+void FEVInterface::configureSlowControls (void)
 {
 	ConfigurationTree slowControlsGroupLink =
-	    theXDAQContextConfigTree_.getBackNode(
+	    theXDAQContextConfigTree_.getBackNode (
 	                                 theConfigurationPath_)
-	        .getNode("LinkToSlowControlChannelsTable");
+	        .getNode ("LinkToSlowControlChannelsTable");
 
-	if (slowControlsGroupLink.isDisconnected())
+	if (slowControlsGroupLink.isDisconnected ())
 	{
 		__FE_COUT__ << "slowControlsGroupLink is disconnected, so done configuring slow controls." << __E__;
 		return;
 	}
 	__FE_COUT__ << "slowControlsGroupLink is valid! Configuring slow controls..." << __E__;
 
-	mapOfSlowControlsChannels_.clear();
+	mapOfSlowControlsChannels_.clear ();
 	std::vector<std::pair<std::string, ConfigurationTree> > groupLinkChildren =
-	    slowControlsGroupLink.getChildren();
+	    slowControlsGroupLink.getChildren ();
 	for (auto& groupLinkChild : groupLinkChildren)
 	{
 		//skip channels that are off
-		if (!(groupLinkChild.second.getNode(ViewColumnInfo::COL_NAME_STATUS).getValue<bool>())) continue;
+		if (!(groupLinkChild.second.getNode (ViewColumnInfo::COL_NAME_STATUS).getValue<bool> ())) continue;
 
-		__FE_COUT__ << "Channel:" << getInterfaceUID() << "/" << groupLinkChild.first << "\t Type:" << groupLinkChild.second.getNode("ChannelDataType") << __E__;
+		__FE_COUT__ << "Channel:" << getInterfaceUID () << "/" << groupLinkChild.first << "\t Type:" << groupLinkChild.second.getNode ("ChannelDataType") << __E__;
 
-		mapOfSlowControlsChannels_.insert(
-		    std::pair<std::string, FESlowControlsChannel>(
+		mapOfSlowControlsChannels_.insert (
+		    std::pair<std::string, FESlowControlsChannel> (
 		        groupLinkChild.first,
-		        FESlowControlsChannel(
-		            getInterfaceUID(),
+		        FESlowControlsChannel (
+		            getInterfaceUID (),
 		            groupLinkChild.first,
-		            groupLinkChild.second.getNode("ChannelDataType").getValue<std::string>(),
+		            groupLinkChild.second.getNode ("ChannelDataType").getValue<std::string> (),
 		            universalDataSize_,
 		            universalAddressSize_,
-		            groupLinkChild.second.getNode("UniversalInterfaceAddress").getValue<std::string>(),
-		            groupLinkChild.second.getNode("UniversalDataBitOffset").getValue<unsigned int>(),
-		            groupLinkChild.second.getNode("ReadAccess").getValue<bool>(),
-		            groupLinkChild.second.getNode("WriteAccess").getValue<bool>(),
-		            groupLinkChild.second.getNode("MonitoringEnabled").getValue<bool>(),
-		            groupLinkChild.second.getNode("RecordChangesOnly").getValue<bool>(),
-		            groupLinkChild.second.getNode("DelayBetweenSamplesInSeconds").getValue<time_t>(),
-		            groupLinkChild.second.getNode("LocalSavingEnabled").getValue<bool>(),
-		            groupLinkChild.second.getNode("LocalFilePath").getValue<std::string>(),
-		            groupLinkChild.second.getNode("RadixFileName").getValue<std::string>(),
-		            groupLinkChild.second.getNode("SaveBinaryFile").getValue<bool>(),
-		            groupLinkChild.second.getNode("AlarmsEnabled").getValue<bool>(),
-		            groupLinkChild.second.getNode("LatchAlarms").getValue<bool>(),
-		            groupLinkChild.second.getNode("LowLowThreshold").getValue<std::string>(),
-		            groupLinkChild.second.getNode("LowThreshold").getValue<std::string>(),
-		            groupLinkChild.second.getNode("HighThreshold").getValue<std::string>(),
-		            groupLinkChild.second.getNode("HighHighThreshold").getValue<std::string>())));
+		            groupLinkChild.second.getNode ("UniversalInterfaceAddress").getValue<std::string> (),
+		            groupLinkChild.second.getNode ("UniversalDataBitOffset").getValue<unsigned int> (),
+		            groupLinkChild.second.getNode ("ReadAccess").getValue<bool> (),
+		            groupLinkChild.second.getNode ("WriteAccess").getValue<bool> (),
+		            groupLinkChild.second.getNode ("MonitoringEnabled").getValue<bool> (),
+		            groupLinkChild.second.getNode ("RecordChangesOnly").getValue<bool> (),
+		            groupLinkChild.second.getNode ("DelayBetweenSamplesInSeconds").getValue<time_t> (),
+		            groupLinkChild.second.getNode ("LocalSavingEnabled").getValue<bool> (),
+		            groupLinkChild.second.getNode ("LocalFilePath").getValue<std::string> (),
+		            groupLinkChild.second.getNode ("RadixFileName").getValue<std::string> (),
+		            groupLinkChild.second.getNode ("SaveBinaryFile").getValue<bool> (),
+		            groupLinkChild.second.getNode ("AlarmsEnabled").getValue<bool> (),
+		            groupLinkChild.second.getNode ("LatchAlarms").getValue<bool> (),
+		            groupLinkChild.second.getNode ("LowLowThreshold").getValue<std::string> (),
+		            groupLinkChild.second.getNode ("LowThreshold").getValue<std::string> (),
+		            groupLinkChild.second.getNode ("HighThreshold").getValue<std::string> (),
+		            groupLinkChild.second.getNode ("HighHighThreshold").getValue<std::string> ())));
 	}
 }
 
 //========================================================================================================================
-bool FEVInterface::slowControlsRunning(void)
+bool FEVInterface::slowControlsRunning (void)
 {
 	__FE_COUT__ << "slowControlsRunning" << __E__;
 	std::string readVal;
-	readVal.resize(universalDataSize_);  //size to data in advance
+	readVal.resize (universalDataSize_);  //size to data in advance
 
 	FESlowControlsChannel* channel;
 
 	const unsigned int txBufferSz            = 1500;
 	const unsigned int txBufferFullThreshold = 750;
 	std::string        txBuffer;
-	txBuffer.reserve(txBufferSz);
+	txBuffer.reserve (txBufferSz);
 
-	ConfigurationTree FEInterfaceNode = theXDAQContextConfigTree_.getBackNode(
+	ConfigurationTree FEInterfaceNode = theXDAQContextConfigTree_.getBackNode (
 	    theConfigurationPath_);
 
 	ConfigurationTree slowControlsInterfaceLink =
-	    FEInterfaceNode.getNode("LinkToSlowControlsMonitorTable");
+	    FEInterfaceNode.getNode ("LinkToSlowControlsMonitorTable");
 
 	std::unique_ptr<UDPDataStreamerBase> txSocket;
 
-	if (slowControlsInterfaceLink.isDisconnected())
+	if (slowControlsInterfaceLink.isDisconnected ())
 	{
 		__FE_COUT__ << "slowControlsInterfaceLink is disconnected, so no socket made." << __E__;
 	}
 	else
 	{
 		__FE_COUT__ << "slowControlsInterfaceLink is valid! Create tx socket..." << __E__;
-		txSocket.reset(new UDPDataStreamerBase(
-		    FEInterfaceNode.getNode("SlowControlsTxSocketIPAddress").getValue<std::string>(),
-		    FEInterfaceNode.getNode("SlowControlsTxSocketPort").getValue<int>(),
-		    slowControlsInterfaceLink.getNode("IPAddress").getValue<std::string>(),
-		    slowControlsInterfaceLink.getNode("Port").getValue<int>()));
+		txSocket.reset (new UDPDataStreamerBase (
+		    FEInterfaceNode.getNode ("SlowControlsTxSocketIPAddress").getValue<std::string> (),
+		    FEInterfaceNode.getNode ("SlowControlsTxSocketPort").getValue<int> (),
+		    slowControlsInterfaceLink.getNode ("IPAddress").getValue<std::string> (),
+		    slowControlsInterfaceLink.getNode ("Port").getValue<int> ()));
 	}
 
 	//check if aggregate saving
 
 	FILE* fp                          = 0;
 	bool  aggregateFileIsBinaryFormat = false;
-	if (FEInterfaceNode.getNode("SlowControlsLocalAggregateSavingEnabled").getValue<bool>())
+	if (FEInterfaceNode.getNode ("SlowControlsLocalAggregateSavingEnabled").getValue<bool> ())
 	{
 		aggregateFileIsBinaryFormat =
-		    FEInterfaceNode.getNode("SlowControlsSaveBinaryFile").getValue<bool>();
+		    FEInterfaceNode.getNode ("SlowControlsSaveBinaryFile").getValue<bool> ();
 
 		__FE_COUT_INFO__ << "Slow Controls Aggregate Saving turned On BinaryFormat=" << aggregateFileIsBinaryFormat << __E__;
 
 		std::string saveFullFileName =
-		    FEInterfaceNode.getNode("SlowControlsLocalFilePath").getValue<std::string>() +
+		    FEInterfaceNode.getNode ("SlowControlsLocalFilePath").getValue<std::string> () +
 		    "/" +
-		    FEInterfaceNode.getNode("SlowControlsRadixFileName").getValue<std::string>() +
+		    FEInterfaceNode.getNode ("SlowControlsRadixFileName").getValue<std::string> () +
 		    "-" +
-		    FESlowControlsChannel::underscoreString(getInterfaceUID()) +
-		    "-" + std::to_string(time(0)) +
+		    FESlowControlsChannel::underscoreString (getInterfaceUID ()) +
+		    "-" + std::to_string (time (0)) +
 		    (aggregateFileIsBinaryFormat ? ".dat" : ".txt");
 
-		fp = fopen(saveFullFileName.c_str(),
-		           aggregateFileIsBinaryFormat ? "ab" : "a");
+		fp = fopen (saveFullFileName.c_str (),
+		            aggregateFileIsBinaryFormat ? "ab" : "a");
 		if (!fp)
 		{
 			__FE_COUT_ERR__ << "Failed to open slow controls channel file: " << saveFullFileName << __E__;
@@ -157,15 +157,15 @@ bool FEVInterface::slowControlsRunning(void)
 
 	time_t timeCounter = 0;
 
-	while (slowControlsWorkLoop_.getContinueWorkLoop())
+	while (slowControlsWorkLoop_.getContinueWorkLoop ())
 	{
-		sleep(1);  //seconds
+		sleep (1);  //seconds
 		++timeCounter;
 
-		if (txBuffer.size())
-			__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
+		if (txBuffer.size ())
+			__FE_COUT__ << "txBuffer sz=" << txBuffer.size () << __E__;
 
-		txBuffer.resize(0);  //clear buffer a la txBuffer = "";
+		txBuffer.resize (0);  //clear buffer a la txBuffer = "";
 
 		//__FE_COUT__ << "timeCounter=" << timeCounter << __E__;
 		//__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
@@ -180,11 +180,11 @@ bool FEVInterface::slowControlsRunning(void)
 			//skip if not a sampling moment in time for channel
 			if (timeCounter % channel->delayBetweenSamples_) continue;
 
-			__FE_COUT__ << "Channel:" << getInterfaceUID() << "/" << slowControlsChannelPair.first << __E__;
+			__FE_COUT__ << "Channel:" << getInterfaceUID () << "/" << slowControlsChannelPair.first << __E__;
 			__FE_COUT__ << "Monitoring..." << __E__;
 
-			universalRead(channel->getUniversalAddress(),
-			              &readVal[0]);
+			universalRead (channel->getUniversalAddress (),
+			               &readVal[0]);
 
 			//			{ //print
 			//				__FE_SS__ << "0x ";
@@ -196,43 +196,43 @@ bool FEVInterface::slowControlsRunning(void)
 			//			}
 
 			//have sample
-			channel->handleSample(readVal, txBuffer, fp, aggregateFileIsBinaryFormat);
-			if (txBuffer.size())
-				__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
+			channel->handleSample (readVal, txBuffer, fp, aggregateFileIsBinaryFormat);
+			if (txBuffer.size ())
+				__FE_COUT__ << "txBuffer sz=" << txBuffer.size () << __E__;
 
 			//make sure buffer hasn't exploded somehow
-			if (txBuffer.size() > txBufferSz)
+			if (txBuffer.size () > txBufferSz)
 			{
 				__FE_SS__ << "This should never happen hopefully!" << __E__;
 				__FE_COUT_ERR__ << "\n"
-				                << ss.str();
+				                << ss.str ();
 				__FE_SS_THROW__;
 			}
 
 			//send early if threshold reached
 			if (txSocket &&
-			    txBuffer.size() > txBufferFullThreshold)
+			    txBuffer.size () > txBufferFullThreshold)
 			{
 				__FE_COUT__ << "Sending now! txBufferFullThreshold=" << txBufferFullThreshold << __E__;
-				txSocket->send(txBuffer);
-				txBuffer.resize(0);  //clear buffer a la txBuffer = "";
+				txSocket->send (txBuffer);
+				txBuffer.resize (0);  //clear buffer a la txBuffer = "";
 			}
 		}
 
-		if (txBuffer.size())
-			__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
+		if (txBuffer.size ())
+			__FE_COUT__ << "txBuffer sz=" << txBuffer.size () << __E__;
 
 		//send anything left
 		if (txSocket &&
-		    txBuffer.size())
+		    txBuffer.size ())
 		{
 			__FE_COUT__ << "Sending now!" << __E__;
-			txSocket->send(txBuffer);
+			txSocket->send (txBuffer);
 		}
 
-		if (fp) fflush(fp);  //flush anything in aggregate file for reading ease
+		if (fp) fflush (fp);  //flush anything in aggregate file for reading ease
 	}
-	if (fp) fclose(fp);
+	if (fp) fclose (fp);
 	return false;
 }  //end slowControlsRunning()
 
@@ -241,37 +241,37 @@ bool FEVInterface::slowControlsRunning(void)
 //	Static -- thread
 //	Send async error or soft error to gateway
 //	Do this as thread so that workloop can end
-void FEVInterface::sendAsyncErrorToGateway(FEVInterface* fe, const std::string& errorMessage, bool isSoftError) try
+void FEVInterface::sendAsyncErrorToGateway (FEVInterface* fe, const std::string& errorMessage, bool isSoftError) try
 {
 	if (isSoftError)
-		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":"
+		__COUT_ERR__ << ":FE:" << fe->getInterfaceType () << ":" << fe->getInterfaceUID () << ":" << fe->theConfigurationRecordName_ << ":"
 		             << "Sending FE Async SOFT Running Error... \n"
 		             << errorMessage << __E__;
 	else
-		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":"
+		__COUT_ERR__ << ":FE:" << fe->getInterfaceType () << ":" << fe->getInterfaceUID () << ":" << fe->theConfigurationRecordName_ << ":"
 		             << "Sending FE Async Running Error... \n"
 		             << errorMessage << __E__;
 
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor =
-	    fe->VStateMachine::parentSupervisor_->allSupervisorInfo_.getGatewayInfo().getDescriptor();
+	    fe->VStateMachine::parentSupervisor_->allSupervisorInfo_.getGatewayInfo ().getDescriptor ();
 
 	SOAPParameters parameters;
-	parameters.addParameter("ErrorMessage", errorMessage);
+	parameters.addParameter ("ErrorMessage", errorMessage);
 
 	xoap::MessageReference replyMessage =
-	    fe->VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply(
+	    fe->VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply (
 	        gatewaySupervisor,
 	        isSoftError ? "AsyncSoftError" : "AsyncError",
 	        parameters);
 
 	std::stringstream replyMessageSStream;
-	replyMessageSStream << SOAPUtilities::translate(replyMessage);
-	__COUT__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":"
-	         << "Received... " << replyMessageSStream.str() << std::endl;
+	replyMessageSStream << SOAPUtilities::translate (replyMessage);
+	__COUT__ << ":FE:" << fe->getInterfaceType () << ":" << fe->getInterfaceUID () << ":" << fe->theConfigurationRecordName_ << ":"
+	         << "Received... " << replyMessageSStream.str () << std::endl;
 
-	if (replyMessageSStream.str().find("Fault") != std::string::npos)
+	if (replyMessageSStream.str ().find ("Fault") != std::string::npos)
 	{
-		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << ":"
+		__COUT_ERR__ << ":FE:" << fe->getInterfaceType () << ":" << fe->getInterfaceUID () << ":" << fe->theConfigurationRecordName_ << ":"
 		             << "Failure to indicate fault to Gateway..." << __E__;
 		throw;
 	}
@@ -279,9 +279,9 @@ void FEVInterface::sendAsyncErrorToGateway(FEVInterface* fe, const std::string& 
 catch (const xdaq::exception::Exception& e)
 {
 	if (isSoftError)
-		__COUT__ << "SOAP message failure indicating front-end asynchronous running SOFT error back to Gateway: " << e.what() << __E__;
+		__COUT__ << "SOAP message failure indicating front-end asynchronous running SOFT error back to Gateway: " << e.what () << __E__;
 	else
-		__COUT__ << "SOAP message failure indicating front-end asynchronous running error back to Gateway: " << e.what() << __E__;
+		__COUT__ << "SOAP message failure indicating front-end asynchronous running error back to Gateway: " << e.what () << __E__;
 }
 catch (...)
 {
@@ -294,11 +294,11 @@ catch (...)
 //========================================================================================================================
 //override WorkLoop::workLoopThread
 //	return false to stop the workloop from calling the thread again
-bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
+bool FEVInterface::workLoopThread (toolbox::task::WorkLoop* workLoop)
 {
 	try
 	{
-		continueWorkLoop_ = running(); /* in case users return false, without using continueWorkLoop_*/
+		continueWorkLoop_ = running (); /* in case users return false, without using continueWorkLoop_*/
 	}
 	catch (...)  //
 	{
@@ -313,12 +313,12 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 		}
 		catch (const __OTS_SOFT_EXCEPTION__& e)
 		{
-			ss << "SOFT Error was caught while configuring: " << e.what() << std::endl;
+			ss << "SOFT Error was caught while configuring: " << e.what () << std::endl;
 			isSoftError = true;
 		}
 		catch (const std::runtime_error& e)
 		{
-			ss << "Caught an error during running at FE Interface '" << Configurable::theConfigurationRecordName_ << "': " << e.what() << __E__;
+			ss << "Caught an error during running at FE Interface '" << Configurable::theConfigurationRecordName_ << "': " << e.what () << __E__;
 		}
 		catch (...)
 		{
@@ -329,16 +329,16 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 		//	during front-end running...
 		//Send async error to Gateway
 
-		__FE_COUT_ERR__ << ss.str();
+		__FE_COUT_ERR__ << ss.str ();
 
-		std::thread([](FEVInterface* fe, const std::string errorMessage, bool isSoftError) {
-			FEVInterface::sendAsyncErrorToGateway(fe, errorMessage, isSoftError);
+		std::thread ([](FEVInterface* fe, const std::string errorMessage, bool isSoftError) {
+			FEVInterface::sendAsyncErrorToGateway (fe, errorMessage, isSoftError);
 		},
-		            //pass the values
-		            this,
-		            ss.str(),
-		            isSoftError)
-		    .detach();
+		             //pass the values
+		             this,
+		             ss.str (),
+		             isSoftError)
+		    .detach ();
 
 		return false;
 	}
@@ -354,7 +354,7 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 //	Front-end Macro Functions are then made accessible through the ots Control System
 //	web interfaces. The menu consisting of all enabled FEs macros is assembled
 //	by the FE Supervisor (and its FE Interface Manager).
-void FEVInterface::registerFEMacroFunction(
+void FEVInterface::registerFEMacroFunction (
     const std::string&              feMacroName,
     frontEndMacroFunction_t         feMacroFunction,
     const std::vector<std::string>& namesOfInputArgs,
@@ -362,19 +362,19 @@ void FEVInterface::registerFEMacroFunction(
     uint8_t                         requiredUserPermissions,
     const std::string&              allowedCallingFEs)
 {
-	if (mapOfFEMacroFunctions_.find(feMacroName) !=
-	    mapOfFEMacroFunctions_.end())
+	if (mapOfFEMacroFunctions_.find (feMacroName) !=
+	    mapOfFEMacroFunctions_.end ())
 	{
 		__FE_SS__ << "feMacroName '" << feMacroName << "' already exists! Not allowed." << __E__;
 		__FE_COUT_ERR__ << "\n"
-		                << ss.str();
+		                << ss.str ();
 		__FE_SS_THROW__;
 	}
 
-	mapOfFEMacroFunctions_.insert(
-	    std::pair<std::string, frontEndMacroStruct_t>(
+	mapOfFEMacroFunctions_.insert (
+	    std::pair<std::string, frontEndMacroStruct_t> (
 	        feMacroName,
-	        frontEndMacroStruct_t(
+	        frontEndMacroStruct_t (
 	            feMacroName,
 	            feMacroFunction,
 	            namesOfInputArgs,
@@ -388,8 +388,8 @@ void FEVInterface::registerFEMacroFunction(
 //	helper function for getting the value of an argument
 //
 //	Note: static function
-const std::string& FEVInterface::getFEMacroConstArgument(frontEndMacroConstArgs_t& args,
-                                                         const std::string&        argName)
+const std::string& FEVInterface::getFEMacroConstArgument (frontEndMacroConstArgs_t& args,
+                                                          const std::string&        argName)
 {
 	for (const frontEndMacroArg_t& pair : args)
 	{
@@ -407,22 +407,22 @@ const std::string& FEVInterface::getFEMacroConstArgument(frontEndMacroConstArgs_
 //getFEMacroConstArgumentValue
 //	helper function for getting the copy of the value of an argument
 template<>
-std::string getFEMacroConstArgumentValue<std::string>(
+std::string getFEMacroConstArgumentValue<std::string> (
     FEVInterface::frontEndMacroConstArgs_t& args,
     const std::string&                      argName)
 {
-	return FEVInterface::getFEMacroConstArgument(args, argName);
+	return FEVInterface::getFEMacroConstArgument (args, argName);
 }
 
 //========================================================================================================================
 //getFEMacroArgumentValue
 //	helper function for getting the copy of the value of an argument
 template<>
-std::string getFEMacroArgumentValue<std::string>(
+std::string getFEMacroArgumentValue<std::string> (
     FEVInterface::frontEndMacroArgs_t& args,
     const std::string&                 argName)
 {
-	return FEVInterface::getFEMacroArgument(args, argName);
+	return FEVInterface::getFEMacroArgument (args, argName);
 }
 
 //========================================================================================================================
@@ -430,7 +430,7 @@ std::string getFEMacroArgumentValue<std::string>(
 //	helper function for getting the value of an argument
 //
 //	Note: static function
-std::string& FEVInterface::getFEMacroArgument(
+std::string& FEVInterface::getFEMacroArgument (
     frontEndMacroArgs_t& args,
     const std::string&   argName)
 {
@@ -449,7 +449,7 @@ std::string& FEVInterface::getFEMacroArgument(
 //	runs a sequence of write commands from a linked section of the configuration tree
 //		based on these fields:
 //			- WriteAddress,  WriteValue, StartingBitPosition, BitFieldSize
-void FEVInterface::runSequenceOfCommands(const std::string& treeLinkName)
+void FEVInterface::runSequenceOfCommands (const std::string& treeLinkName)
 {
 	std::map<uint64_t, uint64_t> writeHistory;
 	uint64_t                     writeAddress, writeValue, bitMask;
@@ -463,42 +463,42 @@ void FEVInterface::runSequenceOfCommands(const std::string& treeLinkName)
 	//ignore errors getting sequence of commands through tree (since it is optional)
 	try
 	{
-		ConfigurationTree configSeqLink = theXDAQContextConfigTree_.getNode(theConfigurationPath_).getNode(treeLinkName);
+		ConfigurationTree configSeqLink = theXDAQContextConfigTree_.getNode (theConfigurationPath_).getNode (treeLinkName);
 
 		//but throw errors if problems executing the sequence of commands
 		try
 		{
-			if (configSeqLink.isDisconnected())
+			if (configSeqLink.isDisconnected ())
 				__FE_COUT__ << "Disconnected configure sequence" << __E__;
 			else
 			{
 				__FE_COUT__ << "Handling configure sequence." << __E__;
-				auto childrenMap = configSeqLink.getChildrenMap();
+				auto childrenMap = configSeqLink.getChildrenMap ();
 				for (const auto& child : childrenMap)
 				{
 					//WriteAddress and WriteValue fields
 
-					writeAddress = child.second.getNode("WriteAddress").getValue<uint64_t>();
-					writeValue   = child.second.getNode("WriteValue").getValue<uint64_t>();
-					bitPosition  = child.second.getNode("StartingBitPosition").getValue<uint8_t>();
-					bitMask      = (1 << child.second.getNode("BitFieldSize").getValue<uint8_t>()) - 1;
+					writeAddress = child.second.getNode ("WriteAddress").getValue<uint64_t> ();
+					writeValue   = child.second.getNode ("WriteValue").getValue<uint64_t> ();
+					bitPosition  = child.second.getNode ("StartingBitPosition").getValue<uint8_t> ();
+					bitMask      = (1 << child.second.getNode ("BitFieldSize").getValue<uint8_t> ()) - 1;
 
 					writeValue &= bitMask;
 					writeValue <<= bitPosition;
 					bitMask = ~(bitMask << bitPosition);
 
 					//place into write history
-					if (writeHistory.find(writeAddress) == writeHistory.end())
+					if (writeHistory.find (writeAddress) == writeHistory.end ())
 						writeHistory[writeAddress] = 0;  //init to 0
 
 					writeHistory[writeAddress] &= bitMask;     //clear incoming bits
 					writeHistory[writeAddress] |= writeValue;  //add incoming bits
 
-					sprintf(msg, "\t Writing %s: \t %ld(0x%lX) \t %ld(0x%lX)", child.first.c_str(), writeAddress, writeAddress, writeHistory[writeAddress], writeHistory[writeAddress]);
+					sprintf (msg, "\t Writing %s: \t %ld(0x%lX) \t %ld(0x%lX)", child.first.c_str (), writeAddress, writeAddress, writeHistory[writeAddress], writeHistory[writeAddress]);
 
 					__FE_COUT__ << msg << __E__;
 
-					universalWrite((char*)&writeAddress, (char*)&(writeHistory[writeAddress]));
+					universalWrite ((char*)&writeAddress, (char*)&(writeHistory[writeAddress]));
 				}
 			}
 		}
@@ -525,7 +525,7 @@ void FEVInterface::runSequenceOfCommands(const std::string& treeLinkName)
 //	Very similar to FEVInterfacesManager::runFEMacro()
 //
 //	Note: that argsOut are populated for caller, can just pass empty vector.
-void FEVInterface::runSelfFrontEndMacro(
+void FEVInterface::runSelfFrontEndMacro (
     const std::string& feMacroName,
     //not equivalent to __ARGS__
     //	left non-const value so caller can modify inputArgs as they are being created
@@ -533,55 +533,55 @@ void FEVInterface::runSelfFrontEndMacro(
     std::vector<FEVInterface::frontEndMacroArg_t>&       argsOut)
 {
 	//have pointer to virtual FEInterface, find Macro structure
-	auto FEMacroIt = this->getMapOfFEMacroFunctions().find(feMacroName);
-	if (FEMacroIt == this->getMapOfFEMacroFunctions().end())
+	auto FEMacroIt = this->getMapOfFEMacroFunctions ().find (feMacroName);
+	if (FEMacroIt == this->getMapOfFEMacroFunctions ().end ())
 	{
-		__CFG_SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" << getInterfaceUID() << "' was not found!" << __E__;
+		__CFG_SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" << getInterfaceUID () << "' was not found!" << __E__;
 		__CFG_COUT_ERR__ << "\n"
-		                 << ss.str();
+		                 << ss.str ();
 		__CFG_SS_THROW__;
 	}
 	const FEVInterface::frontEndMacroStruct_t& feMacro = FEMacroIt->second;
 
 	//check for input arg name match
-	for (unsigned int i = 0; i < argsIn.size(); ++i)
+	for (unsigned int i = 0; i < argsIn.size (); ++i)
 		if (argsIn[i].first != feMacro.namesOfInputArguments_[i])
 		{
-			__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" << getInterfaceUID() << "' was attempted with a mismatch in"
+			__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" << getInterfaceUID () << "' was attempted with a mismatch in"
 			           << " a name of an input argument. " << argsIn[i].first << " was given. " << feMacro.namesOfInputArguments_[i] << " expected." << __E__;
 			__CFG_COUT_ERR__ << "\n"
-			                 << ss.str();
+			                 << ss.str ();
 			__CFG_SS_THROW__;
 		}
 
 	//check namesOfInputArguments_
-	if (feMacro.namesOfInputArguments_.size() != argsIn.size())
+	if (feMacro.namesOfInputArguments_.size () != argsIn.size ())
 	{
-		__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" << getInterfaceUID() << "' was attempted with a mismatch in"
-		           << " number of input arguments. " << argsIn.size() << " were given. " << feMacro.namesOfInputArguments_.size() << " expected." << __E__;
+		__CFG_SS__ << "FE Macro '" << feMacro.feMacroName_ << "' of interfaceID '" << getInterfaceUID () << "' was attempted with a mismatch in"
+		           << " number of input arguments. " << argsIn.size () << " were given. " << feMacro.namesOfInputArguments_.size () << " expected." << __E__;
 		__CFG_COUT_ERR__ << "\n"
-		                 << ss.str();
+		                 << ss.str ();
 		__CFG_SS_THROW__;
 	}
 
-	__CFG_COUT__ << "# of input args = " << argsIn.size() << __E__;
+	__CFG_COUT__ << "# of input args = " << argsIn.size () << __E__;
 	for (auto& argIn : argsIn)
 		__CFG_COUT__ << argIn.first << ": " << argIn.second << __E__;
 
 	__CFG_COUT__ << "Launching FE Macro '" << feMacro.feMacroName_ << "' ..." << __E__;
 
-	argsOut.clear();
-	for (unsigned int i = 0; i < feMacro.namesOfOutputArguments_.size(); ++i)
-		argsOut.push_back(FEVInterface::frontEndMacroArg_t(
+	argsOut.clear ();
+	for (unsigned int i = 0; i < feMacro.namesOfOutputArguments_.size (); ++i)
+		argsOut.push_back (FEVInterface::frontEndMacroArg_t (
 		    feMacro.namesOfOutputArguments_[i],
 		    "DEFAULT"));
 
 	//run it!
-	(this->*(feMacro.macroFunction_))(argsIn, argsOut);
+	(this->*(feMacro.macroFunction_)) (argsIn, argsOut);
 
 	__CFG_COUT__ << "FE Macro complete!" << __E__;
 
-	__CFG_COUT__ << "# of output args = " << argsOut.size() << __E__;
+	__CFG_COUT__ << "# of output args = " << argsOut.size () << __E__;
 	for (const auto& arg : argsOut)
 		__CFG_COUT__ << arg.first << ": " << arg.second << __E__;
 
@@ -590,42 +590,42 @@ void FEVInterface::runSelfFrontEndMacro(
 //========================================================================================================================
 //runFrontEndMacro
 //	run a front-end macro in the target interface plug-in and gets the output arguments back
-void FEVInterface::runFrontEndMacro(const std::string&                                   targetInterfaceID,
-                                    const std::string&                                   feMacroName,
-                                    const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
-                                    std::vector<FEVInterface::frontEndMacroArg_t>&       outputArgs) const
+void FEVInterface::runFrontEndMacro (const std::string&                                   targetInterfaceID,
+                                     const std::string&                                   feMacroName,
+                                     const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
+                                     std::vector<FEVInterface::frontEndMacroArg_t>&       outputArgs) const
 {
-	__FE_COUTV__(targetInterfaceID);
-	__FE_COUTV__(VStateMachine::parentSupervisor_);
+	__FE_COUTV__ (targetInterfaceID);
+	__FE_COUTV__ (VStateMachine::parentSupervisor_);
 
 	std::string inputArgsStr =
-	    StringMacros::vectorToString(inputArgs, ";" /*primaryDelimeter*/, "," /*secondaryDelimeter*/);
+	    StringMacros::vectorToString (inputArgs, ";" /*primaryDelimeter*/, "," /*secondaryDelimeter*/);
 
-	__FE_COUTV__(inputArgsStr);
+	__FE_COUTV__ (inputArgsStr);
 
 	xoap::MessageReference message =
-	    SOAPUtilities::makeSOAPMessageReference("FECommunication");
+	    SOAPUtilities::makeSOAPMessageReference ("FECommunication");
 
 	SOAPParameters parameters;
-	parameters.addParameter("type", "feMacro");
-	parameters.addParameter("requester", FEVInterface::interfaceUID_);
-	parameters.addParameter("targetInterfaceID", targetInterfaceID);
-	parameters.addParameter("feMacroName", feMacroName);
-	parameters.addParameter("inputArgs", inputArgsStr);
-	SOAPUtilities::addParameters(message, parameters);
+	parameters.addParameter ("type", "feMacro");
+	parameters.addParameter ("requester", FEVInterface::interfaceUID_);
+	parameters.addParameter ("targetInterfaceID", targetInterfaceID);
+	parameters.addParameter ("feMacroName", feMacroName);
+	parameters.addParameter ("inputArgs", inputArgsStr);
+	SOAPUtilities::addParameters (message, parameters);
 
-	__FE_COUT__ << "Sending FE communication: " << SOAPUtilities::translate(message) << __E__;
+	__FE_COUT__ << "Sending FE communication: " << SOAPUtilities::translate (message) << __E__;
 
-	xoap::MessageReference replyMessage = VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply(
-	    VStateMachine::parentSupervisor_->allSupervisorInfo_.getAllMacroMakerTypeSupervisorInfo().begin()->second.getDescriptor(), message);
+	xoap::MessageReference replyMessage = VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply (
+	    VStateMachine::parentSupervisor_->allSupervisorInfo_.getAllMacroMakerTypeSupervisorInfo ().begin ()->second.getDescriptor (), message);
 
-	__FE_COUT__ << "Response received: " << SOAPUtilities::translate(replyMessage) << __E__;
+	__FE_COUT__ << "Response received: " << SOAPUtilities::translate (replyMessage) << __E__;
 
 	SOAPParameters rxParameters;
-	rxParameters.addParameter("Error");
-	SOAPUtilities::receive(replyMessage, rxParameters);
+	rxParameters.addParameter ("Error");
+	SOAPUtilities::receive (replyMessage, rxParameters);
 
-	std::string error = rxParameters.getValue("Error");
+	std::string error = rxParameters.getValue ("Error");
 
 	if (error != "")
 	{
@@ -636,22 +636,22 @@ void FEVInterface::runFrontEndMacro(const std::string&                          
 
 	//extract output args
 	SOAPParameters argsOutParameter;
-	argsOutParameter.addParameter("outputArgs");
-	SOAPUtilities::receive(replyMessage, argsOutParameter);
+	argsOutParameter.addParameter ("outputArgs");
+	SOAPUtilities::receive (replyMessage, argsOutParameter);
 
-	std::string    outputArgsStr = argsOutParameter.getValue("outputArgs");
-	std::set<char> pairDelimiter({';'}), nameValueDelimiter({','});
+	std::string    outputArgsStr = argsOutParameter.getValue ("outputArgs");
+	std::set<char> pairDelimiter ({';'}), nameValueDelimiter ({','});
 
 	std::map<std::string, std::string> mapToReturn;
-	StringMacros::getMapFromString(
+	StringMacros::getMapFromString (
 	    outputArgsStr,
 	    mapToReturn,
 	    pairDelimiter,
 	    nameValueDelimiter);
 
-	outputArgs.clear();
+	outputArgs.clear ();
 	for (auto& mapPair : mapToReturn)
-		outputArgs.push_back(mapPair);
+		outputArgs.push_back (mapPair);
 
 }  //end runFrontEndMacro()
 
@@ -660,10 +660,10 @@ void FEVInterface::runFrontEndMacro(const std::string&                          
 //	specialized template function for T=std::string
 //
 //	Note: requester can be a wildcard string as defined in StringMacros
-void FEVInterface::receiveFromFrontEnd(const std::string& requester, std::string& retValue, unsigned int timeoutInSeconds) const
+void FEVInterface::receiveFromFrontEnd (const std::string& requester, std::string& retValue, unsigned int timeoutInSeconds) const
 {
-	__FE_COUTV__(requester);
-	__FE_COUTV__(parentSupervisor_);
+	__FE_COUTV__ (requester);
+	__FE_COUTV__ (parentSupervisor_);
 
 	std::string data  = "0";
 	bool        found = false;
@@ -671,36 +671,36 @@ void FEVInterface::receiveFromFrontEnd(const std::string& requester, std::string
 	{
 		//mutex scope
 		{
-			std::lock_guard<std::mutex> lock(
+			std::lock_guard<std::mutex> lock (
 			    parentInterfaceManager_->frontEndCommunicationReceiveMutex_);
 
 			auto receiveBuffersForTargetIt =
-			    parentInterfaceManager_->frontEndCommunicationReceiveBuffer_.find(
+			    parentInterfaceManager_->frontEndCommunicationReceiveBuffer_.find (
 			        FEVInterface::interfaceUID_);
 			if (receiveBuffersForTargetIt !=
-			    parentInterfaceManager_->frontEndCommunicationReceiveBuffer_.end())
+			    parentInterfaceManager_->frontEndCommunicationReceiveBuffer_.end ())
 			{
-				__FE_COUT__ << "Number of source buffers found for front-end '" << FEVInterface::interfaceUID_ << "': " << receiveBuffersForTargetIt->second.size() << __E__;
+				__FE_COUT__ << "Number of source buffers found for front-end '" << FEVInterface::interfaceUID_ << "': " << receiveBuffersForTargetIt->second.size () << __E__;
 
 				for (auto& buffPair : receiveBuffersForTargetIt->second)
-					__FE_COUTV__(buffPair.first);
+					__FE_COUTV__ (buffPair.first);
 
 				//match requester to map of buffers
 				std::string                        sourceBufferId = "";
 				std::queue<std::string /*value*/>& sourceBuffer =
-				    StringMacros::getWildCardMatchFromMap(requester,
-				                                          receiveBuffersForTargetIt->second,
-				                                          &sourceBufferId);
+				    StringMacros::getWildCardMatchFromMap (requester,
+				                                           receiveBuffersForTargetIt->second,
+				                                           &sourceBufferId);
 
-				__FE_COUT__ << "Found source buffer '" << sourceBufferId << "' with size " << sourceBuffer.size() << __E__;
+				__FE_COUT__ << "Found source buffer '" << sourceBufferId << "' with size " << sourceBuffer.size () << __E__;
 
-				if (sourceBuffer.size())
+				if (sourceBuffer.size ())
 				{
-					__FE_COUT__ << "Found a value in queue of size " << sourceBuffer.size() << __E__;
+					__FE_COUT__ << "Found a value in queue of size " << sourceBuffer.size () << __E__;
 
 					//remove from receive buffer
-					retValue = sourceBuffer.front();
-					sourceBuffer.pop();
+					retValue = sourceBuffer.front ();
+					sourceBuffer.pop ();
 					return;
 				}
 				else
@@ -723,8 +723,8 @@ void FEVInterface::receiveFromFrontEnd(const std::string& requester, std::string
 		__FE_COUT__ << "Waiting for front-end communication from " << requester << " for " << timeoutInSeconds << " more seconds..." << __E__;
 
 		--timeoutInSeconds;
-		sleep(1);  //wait a sec
-	}              //end timeout loop
+		sleep (1);  //wait a sec
+	}               //end timeout loop
 
 	//should never get here
 }  //end receiveFromFrontEnd()
@@ -733,27 +733,27 @@ void FEVInterface::receiveFromFrontEnd(const std::string& requester, std::string
 //receiveFromFrontEnd
 //	specialized template function for T=std::string
 //	Note: if called without template <T> syntax, necessary because types of std::basic_string<char> cause compiler problems if no string specific function
-std::string FEVInterface::receiveFromFrontEnd(const std::string& requester, unsigned int timeoutInSeconds) const
+std::string FEVInterface::receiveFromFrontEnd (const std::string& requester, unsigned int timeoutInSeconds) const
 {
 	std::string retValue;
-	FEVInterface::receiveFromFrontEnd(requester, retValue, timeoutInSeconds);
+	FEVInterface::receiveFromFrontEnd (requester, retValue, timeoutInSeconds);
 	return retValue;
 }  //end receiveFromFrontEnd()
 
 //========================================================================================================================
 //macroStruct_t constructor
-FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
+FEVInterface::macroStruct_t::macroStruct_t (const std::string& macroString)
 {
-	__COUTV__(macroString);
+	__COUTV__ (macroString);
 
 	//example macro string:
 	//	{"name":"testPublic","sequence":"0:w:1001:writeVal,1:r:1001:","time":"Sat Feb 0
 	//	9 2019 10:42:03 GMT-0600 (Central Standard Time)","notes":"","LSBF":"false"}@
 
 	std::vector<std::string> extractVec;
-	StringMacros::getVectorFromString(macroString, extractVec, {'"'});
+	StringMacros::getVectorFromString (macroString, extractVec, {'"'});
 
-	__COUTV__(StringMacros::vectorToString(extractVec, " ||| "));
+	__COUTV__ (StringMacros::vectorToString (extractVec, " ||| "));
 
 	enum
 	{
@@ -766,46 +766,46 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 	};
 
 	//verify fields in sequence (for sanity)
-	if (MACRONAME_NAME_INDEX >= extractVec.size() || extractVec[MACRONAME_NAME_INDEX] != "name")
+	if (MACRONAME_NAME_INDEX >= extractVec.size () || extractVec[MACRONAME_NAME_INDEX] != "name")
 	{
 		__SS__ << "Invalid sequence, 'name' expected in position " << MACRONAME_NAME_INDEX << __E__;
 		__SS_THROW__;
 	}
-	if (SEQUENCE_NAME_INDEX >= extractVec.size() || extractVec[SEQUENCE_NAME_INDEX] != "sequence")
+	if (SEQUENCE_NAME_INDEX >= extractVec.size () || extractVec[SEQUENCE_NAME_INDEX] != "sequence")
 	{
 		__SS__ << "Invalid sequence, 'sequence' expected in position " << SEQUENCE_NAME_INDEX << __E__;
 		__SS_THROW__;
 	}
-	if (LSBF_NAME_INDEX >= extractVec.size() || extractVec[LSBF_NAME_INDEX] != "LSBF")
+	if (LSBF_NAME_INDEX >= extractVec.size () || extractVec[LSBF_NAME_INDEX] != "LSBF")
 	{
 		__SS__ << "Invalid sequence, 'LSBF' expected in position " << LSBF_NAME_INDEX << __E__;
 		__SS_THROW__;
 	}
 	macroName_ = extractVec[MACRONAME_VALUE_INDEX];
-	__COUTV__(macroName_);
+	__COUTV__ (macroName_);
 	lsbf_ = extractVec[LSFBF_VALUE_INDEX] == "false" ? false : true;
-	__COUTV__(lsbf_);
+	__COUTV__ (lsbf_);
 	std::string& sequence = extractVec[SEQUENCE_VALUE_INDEX];
-	__COUTV__(sequence);
+	__COUTV__ (sequence);
 
 	std::vector<std::string> sequenceCommands;
-	StringMacros::getVectorFromString(sequence, sequenceCommands, {','});
+	StringMacros::getVectorFromString (sequence, sequenceCommands, {','});
 
-	__COUTV__(StringMacros::vectorToString(sequenceCommands, " ### "));
+	__COUTV__ (StringMacros::vectorToString (sequenceCommands, " ### "));
 
 	for (auto& command : sequenceCommands)
 	{
-		__COUTV__(command);
+		__COUTV__ (command);
 
 		//Note: the only way to distinguish between variable and data
 		//	is hex characters or not (lower and upper case allowed for hex)
 
 		std::vector<std::string> commandPieces;
-		StringMacros::getVectorFromString(command, commandPieces, {':'});
+		StringMacros::getVectorFromString (command, commandPieces, {':'});
 
-		__COUTV__(StringMacros::vectorToString(commandPieces, " ### "));
+		__COUTV__ (StringMacros::vectorToString (commandPieces, " ### "));
 
-		__COUTV__(commandPieces.size());
+		__COUTV__ (commandPieces.size ());
 
 		//command format
 		//	index | type | address/sleep[ms] | data
@@ -816,9 +816,9 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 		//extract input arguments, as the variables in address/data fields
 		//extract output arguments, as the variables in read data fields
 
-		if (commandPieces.size() < 3 ||
-		    commandPieces.size() > 4 ||
-		    commandPieces[1].size() != 1)
+		if (commandPieces.size () < 3 ||
+		    commandPieces.size () > 4 ||
+		    commandPieces[1].size () != 1)
 		{
 			__SS__ << "Invalid command type specified in command string: " << command << __E__;
 			__SS_THROW__;
@@ -833,7 +833,7 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 		                          const std::string& fieldValue) {
 			    //create local message facility subject
 			    std::string mfSubject_ = "isVar";
-			    __GEN_COUTV__(fieldValue);
+			    __GEN_COUTV__ (fieldValue);
 
 			    //return false if all hex characters found
 			    for (const auto& c : fieldValue)
@@ -845,20 +845,20 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 
 		    };  //end local lambda localIsVariable()
 
-		if (commandPieces[1][0] == 'r' && commandPieces.size() == 4)  //read type
+		if (commandPieces[1][0] == 'r' && commandPieces.size () == 4)  //read type
 		{
 			__COUT__ << "Read type found." << __E__;
 			//2: address or optional variable name
 			//3: optional variable name
 
-			operations_.push_back(std::make_pair(
-			    macroStruct_t::OP_TYPE_READ, readOps_.size()));
+			operations_.push_back (std::make_pair (
+			    macroStruct_t::OP_TYPE_READ, readOps_.size ()));
 
-			readOps_.push_back(macroStruct_t::readOp_t());
-			readOps_.back().addressIsVar_ = localIsVariable(commandPieces[2]);
-			readOps_.back().dataIsVar_    = localIsVariable(commandPieces[3]);
+			readOps_.push_back (macroStruct_t::readOp_t ());
+			readOps_.back ().addressIsVar_ = localIsVariable (commandPieces[2]);
+			readOps_.back ().dataIsVar_    = localIsVariable (commandPieces[3]);
 
-			if (!readOps_.back().addressIsVar_)
+			if (!readOps_.back ().addressIsVar_)
 			{
 				if (lsbf_)  //flip byte order
 				{
@@ -866,52 +866,52 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 
 					//always add leading 0 to guarantee do not miss data
 					commandPieces[2] = "0" + commandPieces[2];
-					for (unsigned int i = 0; i < commandPieces[2].size() / 2; ++i)
+					for (unsigned int i = 0; i < commandPieces[2].size () / 2; ++i)
 					{
-						__COUTV__(commandPieces[2].size() - 2 * (i + 1));
+						__COUTV__ (commandPieces[2].size () - 2 * (i + 1));
 						//add one byte at a time, backwards
-						lsbfData += commandPieces[2][commandPieces[2].size() - 2 * (i + 1)];
-						lsbfData += commandPieces[2][commandPieces[2].size() - 2 * (i + 1) + 1];
-						__COUTV__(lsbfData);
+						lsbfData += commandPieces[2][commandPieces[2].size () - 2 * (i + 1)];
+						lsbfData += commandPieces[2][commandPieces[2].size () - 2 * (i + 1) + 1];
+						__COUTV__ (lsbfData);
 					}
-					__COUTV__(lsbfData);
-					StringMacros::getNumber("0x" + lsbfData,
-					                        readOps_.back().address_);
+					__COUTV__ (lsbfData);
+					StringMacros::getNumber ("0x" + lsbfData,
+					                         readOps_.back ().address_);
 				}
 				else
-					StringMacros::getNumber("0x" + commandPieces[2],
-					                        readOps_.back().address_);
+					StringMacros::getNumber ("0x" + commandPieces[2],
+					                         readOps_.back ().address_);
 			}
 			else
 			{
-				readOps_.back().addressVarName_ = commandPieces[2];
-				__COUTV__(readOps_.back().addressVarName_);
+				readOps_.back ().addressVarName_ = commandPieces[2];
+				__COUTV__ (readOps_.back ().addressVarName_);
 
-				namesOfInputArguments_.emplace(readOps_.back().addressVarName_);
+				namesOfInputArguments_.emplace (readOps_.back ().addressVarName_);
 			}
 
-			if (readOps_.back().dataIsVar_)
+			if (readOps_.back ().dataIsVar_)
 			{
-				readOps_.back().dataVarName_ = commandPieces[3];
-				__COUTV__(readOps_.back().dataVarName_);
+				readOps_.back ().dataVarName_ = commandPieces[3];
+				__COUTV__ (readOps_.back ().dataVarName_);
 
-				namesOfOutputArguments_.emplace(readOps_.back().dataVarName_);
+				namesOfOutputArguments_.emplace (readOps_.back ().dataVarName_);
 			}
 		}
-		else if (commandPieces[1][0] == 'w' && commandPieces.size() == 4)  //write type
+		else if (commandPieces[1][0] == 'w' && commandPieces.size () == 4)  //write type
 		{
 			__COUT__ << "Write type found." << __E__;
 			//2: address or optional variable name
 			//3: data or optional variable name
 
-			operations_.push_back(std::make_pair(
-			    macroStruct_t::OP_TYPE_WRITE, writeOps_.size()));
+			operations_.push_back (std::make_pair (
+			    macroStruct_t::OP_TYPE_WRITE, writeOps_.size ()));
 
-			writeOps_.push_back(macroStruct_t::writeOp_t());
-			writeOps_.back().addressIsVar_ = localIsVariable(commandPieces[2]);
-			writeOps_.back().dataIsVar_    = localIsVariable(commandPieces[3]);
+			writeOps_.push_back (macroStruct_t::writeOp_t ());
+			writeOps_.back ().addressIsVar_ = localIsVariable (commandPieces[2]);
+			writeOps_.back ().dataIsVar_    = localIsVariable (commandPieces[3]);
 
-			if (!writeOps_.back().addressIsVar_)
+			if (!writeOps_.back ().addressIsVar_)
 			{
 				if (lsbf_)  //flip byte order
 				{
@@ -919,31 +919,31 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 
 					//always add leading 0 to guarantee do not miss data
 					commandPieces[2] = "0" + commandPieces[2];
-					for (unsigned int i = 0; i < commandPieces[2].size() / 2; ++i)
+					for (unsigned int i = 0; i < commandPieces[2].size () / 2; ++i)
 					{
-						__COUTV__(commandPieces[2].size() - 2 * (i + 1));
+						__COUTV__ (commandPieces[2].size () - 2 * (i + 1));
 						//add one byte at a time, backwards
-						lsbfData += commandPieces[2][commandPieces[2].size() - 2 * (i + 1)];
-						lsbfData += commandPieces[2][commandPieces[2].size() - 2 * (i + 1) + 1];
-						__COUTV__(lsbfData);
+						lsbfData += commandPieces[2][commandPieces[2].size () - 2 * (i + 1)];
+						lsbfData += commandPieces[2][commandPieces[2].size () - 2 * (i + 1) + 1];
+						__COUTV__ (lsbfData);
 					}
-					__COUTV__(lsbfData);
-					StringMacros::getNumber("0x" + lsbfData,
-					                        writeOps_.back().address_);
+					__COUTV__ (lsbfData);
+					StringMacros::getNumber ("0x" + lsbfData,
+					                         writeOps_.back ().address_);
 				}
 				else
-					StringMacros::getNumber("0x" + commandPieces[2],
-					                        writeOps_.back().address_);
+					StringMacros::getNumber ("0x" + commandPieces[2],
+					                         writeOps_.back ().address_);
 			}
 			else
 			{
-				writeOps_.back().addressVarName_ = commandPieces[2];
-				__COUTV__(writeOps_.back().addressVarName_);
+				writeOps_.back ().addressVarName_ = commandPieces[2];
+				__COUTV__ (writeOps_.back ().addressVarName_);
 
-				namesOfInputArguments_.emplace(writeOps_.back().addressVarName_);
+				namesOfInputArguments_.emplace (writeOps_.back ().addressVarName_);
 			}
 
-			if (!writeOps_.back().dataIsVar_)
+			if (!writeOps_.back ().dataIsVar_)
 			{
 				if (lsbf_)  //flip byte order
 				{
@@ -951,61 +951,61 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 
 					//always add leading 0 to guarantee do not miss data
 					commandPieces[2] = "0" + commandPieces[3];
-					for (unsigned int i = 0; i < commandPieces[3].size() / 2; ++i)
+					for (unsigned int i = 0; i < commandPieces[3].size () / 2; ++i)
 					{
-						__COUTV__(commandPieces[3].size() - 2 * (i + 1));
+						__COUTV__ (commandPieces[3].size () - 2 * (i + 1));
 						//add one byte at a time, backwards
-						lsbfData += commandPieces[3][commandPieces[3].size() - 2 * (i + 1)];
-						lsbfData += commandPieces[3][commandPieces[3].size() - 2 * (i + 1) + 1];
-						__COUTV__(lsbfData);
+						lsbfData += commandPieces[3][commandPieces[3].size () - 2 * (i + 1)];
+						lsbfData += commandPieces[3][commandPieces[3].size () - 2 * (i + 1) + 1];
+						__COUTV__ (lsbfData);
 					}
-					__COUTV__(lsbfData);
-					StringMacros::getNumber("0x" + lsbfData,
-					                        writeOps_.back().data_);
+					__COUTV__ (lsbfData);
+					StringMacros::getNumber ("0x" + lsbfData,
+					                         writeOps_.back ().data_);
 				}
 				else
-					StringMacros::getNumber("0x" + commandPieces[3],
-					                        writeOps_.back().data_);
+					StringMacros::getNumber ("0x" + commandPieces[3],
+					                         writeOps_.back ().data_);
 			}
 			else
 			{
-				writeOps_.back().dataVarName_ = commandPieces[3];
-				__COUTV__(writeOps_.back().dataVarName_);
+				writeOps_.back ().dataVarName_ = commandPieces[3];
+				__COUTV__ (writeOps_.back ().dataVarName_);
 
-				namesOfInputArguments_.emplace(writeOps_.back().dataVarName_);
+				namesOfInputArguments_.emplace (writeOps_.back ().dataVarName_);
 			}
 		}
-		else if (commandPieces[1][0] == 'd' && commandPieces.size() == 3)  //delay type
+		else if (commandPieces[1][0] == 'd' && commandPieces.size () == 3)  //delay type
 		{
 			__COUT__ << "Delay type found." << __E__;
 			//2: delay[ms] or optional variable name
 
-			operations_.push_back(std::make_pair(
-			    macroStruct_t::OP_TYPE_DELAY, delayOps_.size()));
+			operations_.push_back (std::make_pair (
+			    macroStruct_t::OP_TYPE_DELAY, delayOps_.size ()));
 
-			delayOps_.push_back(macroStruct_t::delayOp_t());
-			delayOps_.back().delayIsVar_ = localIsVariable(commandPieces[2]);
+			delayOps_.push_back (macroStruct_t::delayOp_t ());
+			delayOps_.back ().delayIsVar_ = localIsVariable (commandPieces[2]);
 
-			if (!delayOps_.back().delayIsVar_)
-				StringMacros::getNumber("0x" + commandPieces[2],
-				                        delayOps_.back().delay_);
+			if (!delayOps_.back ().delayIsVar_)
+				StringMacros::getNumber ("0x" + commandPieces[2],
+				                         delayOps_.back ().delay_);
 			else
 			{
-				delayOps_.back().delayVarName_ = commandPieces[2];
-				__COUTV__(delayOps_.back().delayVarName_);
+				delayOps_.back ().delayVarName_ = commandPieces[2];
+				__COUTV__ (delayOps_.back ().delayVarName_);
 
-				namesOfInputArguments_.emplace(delayOps_.back().delayVarName_);
+				namesOfInputArguments_.emplace (delayOps_.back ().delayVarName_);
 			}
 		}
 		else  //invalid type
 		{
-			__SS__ << "Invalid command type '" << commandPieces[1][0] << "' specified with " << commandPieces.size() << " components." << __E__;
+			__SS__ << "Invalid command type '" << commandPieces[1][0] << "' specified with " << commandPieces.size () << " components." << __E__;
 			__SS_THROW__;
 		}
 
 	}  //end sequence commands extraction loop
 
-	__COUT__ << operations_.size() << " operations extracted: \n\t" << readOps_.size() << " reads \n\t" << writeOps_.size() << " writes \n\t" << delayOps_.size() << " delays" << __E__;
+	__COUT__ << operations_.size () << " operations extracted: \n\t" << readOps_.size () << " reads \n\t" << writeOps_.size () << " writes \n\t" << delayOps_.size () << " delays" << __E__;
 
 	__COUT__ << "Input arguments: " << __E__;
 	for (const auto& inputArg : namesOfInputArguments_)
@@ -1019,13 +1019,13 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 
 //========================================================================================================================
 //runMacro
-void FEVInterface::runMacro(
+void FEVInterface::runMacro (
     FEVInterface::macroStruct_t&                        macro,
     std::map<std::string /*name*/, uint64_t /*value*/>& variableMap)
 {
 	//Similar to FEVInterface::runSequenceOfCommands()
 
-	__FE_COUT__ << "Running Macro '" << macro.macroName_ << "' of " << macro.operations_.size() << " operations." << __E__;
+	__FE_COUT__ << "Running Macro '" << macro.macroName_ << "' of " << macro.operations_.size () << " operations." << __E__;
 
 	for (auto& op : macro.operations_)
 	{
@@ -1035,22 +1035,22 @@ void FEVInterface::runMacro(
 			macroStruct_t::readOp_t& readOp = macro.readOps_[op.second];
 			if (readOp.addressIsVar_)
 			{
-				__FE_COUTV__(readOp.addressVarName_);
-				readOp.address_ = variableMap.at(readOp.addressVarName_);
+				__FE_COUTV__ (readOp.addressVarName_);
+				readOp.address_ = variableMap.at (readOp.addressVarName_);
 			}
 
 			uint64_t dataValue;
 
 			__FE_COUT__ << std::hex << "Read address: \t 0x" << readOp.address_ << __E__ << std::dec;
 
-			universalRead((char*)&readOp.address_, (char*)&dataValue);
+			universalRead ((char*)&readOp.address_, (char*)&dataValue);
 
 			__FE_COUT__ << std::hex << "Read data: \t 0x" << dataValue << __E__ << std::dec;
 
 			if (readOp.dataIsVar_)
 			{
-				__FE_COUTV__(readOp.dataVarName_);
-				variableMap.at(readOp.dataVarName_) = dataValue;
+				__FE_COUTV__ (readOp.dataVarName_);
+				variableMap.at (readOp.dataVarName_) = dataValue;
 			}
 
 		}  //end read op
@@ -1060,19 +1060,19 @@ void FEVInterface::runMacro(
 			macroStruct_t::writeOp_t& writeOp = macro.writeOps_[op.second];
 			if (writeOp.addressIsVar_)
 			{
-				__FE_COUTV__(writeOp.addressVarName_);
-				writeOp.address_ = variableMap.at(writeOp.addressVarName_);
+				__FE_COUTV__ (writeOp.addressVarName_);
+				writeOp.address_ = variableMap.at (writeOp.addressVarName_);
 			}
 			if (writeOp.dataIsVar_)
 			{
-				__FE_COUTV__(writeOp.dataVarName_);
-				writeOp.data_ = variableMap.at(writeOp.dataVarName_);
+				__FE_COUTV__ (writeOp.dataVarName_);
+				writeOp.data_ = variableMap.at (writeOp.dataVarName_);
 			}
 
 			__FE_COUT__ << std::hex << "Write address: \t 0x" << writeOp.address_ << __E__ << std::dec;
 			__FE_COUT__ << std::hex << "Write data: \t 0x" << writeOp.data_ << __E__ << std::dec;
 
-			universalWrite((char*)&writeOp.address_, (char*)&writeOp.data_);
+			universalWrite ((char*)&writeOp.address_, (char*)&writeOp.data_);
 
 		}  //end write op
 		else if (op.first == macroStruct_t::OP_TYPE_DELAY)
@@ -1082,13 +1082,13 @@ void FEVInterface::runMacro(
 			macroStruct_t::delayOp_t& delayOp = macro.delayOps_[op.second];
 			if (delayOp.delayIsVar_)
 			{
-				__FE_COUTV__(delayOp.delayVarName_);
-				delayOp.delay_ = variableMap.at(delayOp.delayVarName_);
+				__FE_COUTV__ (delayOp.delayVarName_);
+				delayOp.delay_ = variableMap.at (delayOp.delayVarName_);
 			}
 
 			__FE_COUT__ << std::dec << "Delay ms: \t " << delayOp.delay_ << __E__;
 
-			usleep(delayOp.delay_ /*ms*/ * 1000);
+			usleep (delayOp.delay_ /*ms*/ * 1000);
 
 		}     //end delay op
 		else  //invalid type
