@@ -429,8 +429,12 @@ if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 #	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${ARTDAQ_DATABASE_DIR}/fromIndexRebuild file exists, so not rebuilding indices."
 fi
 
-export CONFIGURATION_DATA_PATH=${USER_DATA}/ConfigurationDataExamples
-export CONFIGURATION_INFO_PATH=${USER_DATA}/ConfigurationInfo
+if [ -d ${USER_DATA}/ConfigurationInfo ]; then
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t{USER_DATA}/ConfigurationInfo path should now be TableInfo/ ...Perhaps you need to run otsdaq_convert_config_to_table ? Aborting..."
+	exit
+fi
+
+export TABLE_INFO_PATH=${USER_DATA}/TableInfo
 export SERVICE_DATA_PATH=${USER_DATA}/ServiceData
 export XDAQ_CONFIGURATION_DATA_PATH=${USER_DATA}/XDAQConfigurations
 export LOGIN_DATA_PATH=${USER_DATA}/ServiceData/LoginData

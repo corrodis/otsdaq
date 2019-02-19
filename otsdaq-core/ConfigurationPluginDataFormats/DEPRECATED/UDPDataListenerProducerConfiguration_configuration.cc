@@ -6,16 +6,17 @@
 using namespace ots;
 
 //==============================================================================
-UDPDataListenerProducerConfiguration::UDPDataListenerProducerConfiguration (void)
-    : ConfigurationBase ("UDPDataListenerProducerConfiguration")
+UDPDataListenerProducerConfiguration::UDPDataListenerProducerConfiguration(void)
+    : TableBase("UDPDataListenerProducerConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
-	//WARNING: the names and the order MUST match the ones in the enum  //
+	// WARNING: the names and the order MUST match the ones in the enum  //
 	//////////////////////////////////////////////////////////////////////
 	//	<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-	//	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
-	//	  <CONFIGURATION Name="UDPDataListenerProducerConfiguration">
-	//	    <VIEW Name="UDP_DATA_LISTENER_PRODUCER_CONFIGURATION" Type="File,Database,DatabaseTest">
+	//	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	// xsi:noNamespaceSchemaLocation="TableInfo.xsd"> 	  <CONFIGURATION
+	// Name="UDPDataListenerProducerConfiguration"> 	    <VIEW
+	// Name="UDP_DATA_LISTENER_PRODUCER_CONFIGURATION" Type="File,Database,DatabaseTest">
 	//	      <COLUMN Name="ProcessorID" StorageName="PROCESSOR_ID" DataType="VARCHAR2"/>
 	//	      <COLUMN Name="BufferSize"  StorageName="BUFFER_SIZE"  DataType="NUMBER"  />
 	//	      <COLUMN Name="IPAddress"   StorageName="IP_ADDRESS"   DataType="VARCHAR2"/>
@@ -26,56 +27,60 @@ UDPDataListenerProducerConfiguration::UDPDataListenerProducerConfiguration (void
 }
 
 //==============================================================================
-UDPDataListenerProducerConfiguration::~UDPDataListenerProducerConfiguration (void)
-{
-}
+UDPDataListenerProducerConfiguration::~UDPDataListenerProducerConfiguration(void) {}
 
 //==============================================================================
-void UDPDataListenerProducerConfiguration::init (ConfigurationManager *configManager)
+void UDPDataListenerProducerConfiguration::init(ConfigurationManager* configManager)
 {
 	std::string processorUID;
-	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
+	for(unsigned int row = 0; row < TableBase::activeTableView_->getNumberOfRows(); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue (processorUID, row, ProcessorID);
+		TableBase::activeTableView_->getValue(processorUID, row, ProcessorID);
 		processorIDToRowMap_[processorUID] = row;
 	}
 }
 
 //==============================================================================
-unsigned int UDPDataListenerProducerConfiguration::getBufferSize (std::string processorUID) const
+unsigned int UDPDataListenerProducerConfiguration::getBufferSize(
+    std::string processorUID) const
 {
-	check (processorUID);
+	check(processorUID);
 	unsigned int val;
-	ConfigurationBase::activeConfigurationView_->getValue (val, processorIDToRowMap_.find (processorUID)->second, BufferSize);
+	TableBase::activeTableView_->getValue(
+	    val, processorIDToRowMap_.find(processorUID)->second, BufferSize);
 	return val;
 }
 
 //==============================================================================
-std::string UDPDataListenerProducerConfiguration::getIPAddress (std::string processorUID) const
+std::string UDPDataListenerProducerConfiguration::getIPAddress(
+    std::string processorUID) const
 {
-	check (processorUID);
+	check(processorUID);
 	std::string val;
-	ConfigurationBase::activeConfigurationView_->getValue (val, processorIDToRowMap_.find (processorUID)->second, IPAddress);
+	TableBase::activeTableView_->getValue(
+	    val, processorIDToRowMap_.find(processorUID)->second, IPAddress);
 	return val;
 }
 
 //==============================================================================
-unsigned int UDPDataListenerProducerConfiguration::getPort (std::string processorUID) const
+unsigned int UDPDataListenerProducerConfiguration::getPort(std::string processorUID) const
 {
-	check (processorUID);
+	check(processorUID);
 	unsigned int val;
-	ConfigurationBase::activeConfigurationView_->getValue (val, processorIDToRowMap_.find (processorUID)->second, Port);
+	TableBase::activeTableView_->getValue(
+	    val, processorIDToRowMap_.find(processorUID)->second, Port);
 	return val;
 }
 
 //==============================================================================
-void UDPDataListenerProducerConfiguration::check (std::string processorUID) const
+void UDPDataListenerProducerConfiguration::check(std::string processorUID) const
 {
-	if (processorIDToRowMap_.find (processorUID) == processorIDToRowMap_.end ())
+	if(processorIDToRowMap_.find(processorUID) == processorIDToRowMap_.end())
 	{
-		std::cout << __COUT_HDR_FL__ << "Couldn't find processor " << processorUID << " in the UDPDataStreamerConsumerConfiguration!" << std::endl;
-		assert (0);
+		std::cout << __COUT_HDR_FL__ << "Couldn't find processor " << processorUID
+		          << " in the UDPDataStreamerConsumerConfiguration!" << std::endl;
+		assert(0);
 	}
 }
 
-DEFINE_OTS_CONFIGURATION (UDPDataListenerProducerConfiguration)
+DEFINE_OTS_CONFIGURATION(UDPDataListenerProducerConfiguration)

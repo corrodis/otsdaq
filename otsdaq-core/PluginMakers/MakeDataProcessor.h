@@ -10,8 +10,12 @@ namespace ots
 class DataProcessor;
 class ConfigurationTree;
 
-DataProcessor* makeDataProcessor (
-    std::string const& processorPluginName, std::string const& supervisorApplicationUID, std::string const& bufferUID, std::string const& processorUID, ConfigurationTree const& configurationTree, std::string const& pathToInterfaceConfiguration);
+DataProcessor* makeDataProcessor(std::string const&       processorPluginName,
+                                 std::string const&       supervisorApplicationUID,
+                                 std::string const&       bufferUID,
+                                 std::string const&       processorUID,
+                                 ConfigurationTree const& configurationTree,
+                                 std::string const&       pathToInterfaceConfiguration);
 }  // namespace ots
 
 #endif /* _ots_MakeDataProcessor_h_ */

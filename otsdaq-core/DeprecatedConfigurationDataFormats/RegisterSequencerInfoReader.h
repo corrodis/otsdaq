@@ -19,20 +19,28 @@ class RegisterBase;
 class RegisterSequencerInfoReader
 {
   public:
-	RegisterSequencerInfoReader ();
-	virtual ~RegisterSequencerInfoReader ();
-	void read (RegisterBase& configuration);
-	void read (RegisterBase* configuration);
+	RegisterSequencerInfoReader();
+	virtual ~RegisterSequencerInfoReader();
+	void read(RegisterBase& configuration);
+	void read(RegisterBase* configuration);
 
   private:
-	void initPlatform (void);
-	void terminatePlatform (void);
-	bool checkViewType (std::string type);
+	void initPlatform(void);
+	void terminatePlatform(void);
+	bool checkViewType(std::string type);
 
-	xercesc::DOMNode*    getNode (XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber);
-	xercesc::DOMNode*    getNode (XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber);
-	xercesc::DOMElement* getElement (XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber);
-	xercesc::DOMElement* getElement (XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber);
+	xercesc::DOMNode*    getNode(XMLCh*            tagName,
+	                             xercesc::DOMNode* parent,
+	                             unsigned int      itemNumber);
+	xercesc::DOMNode*    getNode(XMLCh*               tagName,
+	                             xercesc::DOMElement* parent,
+	                             unsigned int         itemNumber);
+	xercesc::DOMElement* getElement(XMLCh*            tagName,
+	                                xercesc::DOMNode* parent,
+	                                unsigned int      itemNumber);
+	xercesc::DOMElement* getElement(XMLCh*               tagName,
+	                                xercesc::DOMElement* parent,
+	                                unsigned int         itemNumber);
 	XMLCh*               rootTag_;
 	XMLCh*               headerTag_;
 	XMLCh*               typeTag_;

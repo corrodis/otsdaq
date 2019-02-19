@@ -1,20 +1,20 @@
 #ifndef _ots_IterateConfiguration_h_
 #define _ots_IterateConfiguration_h_
 
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
+#include "otsdaq-core/TableCore/TableBase.h"
 
 namespace ots
 {
-class IterateConfiguration : public ConfigurationBase
+class IterateConfiguration : public TableBase
 {
   public:
-	IterateConfiguration (void);
-	virtual ~IterateConfiguration (void);
+	IterateConfiguration(void);
+	virtual ~IterateConfiguration(void);
 
-	//Methods
-	void init (ConfigurationManager *configManager);
+	// Methods
+	void init(ConfigurationManager* configManager);
 
-	//Getters
+	// Getters
 
 	struct CommandTarget
 	{
@@ -24,16 +24,14 @@ class IterateConfiguration : public ConfigurationBase
 
 	struct Command
 	{
-		void                       addTarget () { targets_.push_back (CommandTarget ()); }
+		void                       addTarget() { targets_.push_back(CommandTarget()); }
 		std::string                type_;
 		std::vector<CommandTarget> targets_;
-		std::map<
-		    std::string /*param name*/,
-		    std::string /*param value*/>
-		    params_;
+		std::map<std::string /*param name*/, std::string /*param value*/> params_;
 	};
 
-	std::vector<IterateConfiguration::Command> getPlanCommands (ConfigurationManager *configManager, const std::string &plan) const;
+	std::vector<IterateConfiguration::Command> getPlanCommands(
+	    ConfigurationManager* configManager, const std::string& plan) const;
 
 	static const std::string COMMAND_BEGIN_LABEL;
 	static const std::string COMMAND_CHOOSE_FSM;
@@ -51,12 +49,12 @@ class IterateConfiguration : public ConfigurationBase
 	static const std::string TARGET_TABLE;
 
 	static const std::map<std::string, std::string> commandToTableMap_;
-	static std::map<std::string, std::string>       createCommandToTableMap ()
+	static std::map<std::string, std::string>       createCommandToTableMap()
 	{
 		std::map<std::string, std::string> m;
 		m[COMMAND_BEGIN_LABEL]            = "IterationCommandBeginLabelConfiguration";
 		m[COMMAND_CHOOSE_FSM]             = "IterationCommandChooseFSMConfiguration";
-		m[COMMAND_CONFIGURE_ACTIVE_GROUP] = "";  //no parameters
+		m[COMMAND_CONFIGURE_ACTIVE_GROUP] = "";  // no parameters
 		m[COMMAND_CONFIGURE_ALIAS]        = "IterationCommandConfigureAliasConfiguration";
 		m[COMMAND_CONFIGURE_GROUP]        = "IterationCommandConfigureGroupConfiguration";
 		m[COMMAND_EXECUTE_FE_MACRO]       = "IterationCommandExecuteFEMacroConfiguration";
@@ -73,11 +71,11 @@ class IterateConfiguration : public ConfigurationBase
 	} commandBeginLabelParams_;
 	static struct CommandChooseFSMParams
 	{
-		const std::string NameOfFSM_ = "NameOfStateMachine";  //by default ""
+		const std::string NameOfFSM_ = "NameOfStateMachine";  // by default ""
 	} commandChooseFSMParams_;
 	static struct CommandConfigureActiveParams
 	{
-		//no parameters
+		// no parameters
 	} commandConfigureActiveParams_;
 	static struct CommandConfigureAliasParams
 	{
@@ -88,9 +86,9 @@ class IterateConfiguration : public ConfigurationBase
 		const std::string GroupName_ = "GroupName";
 		const std::string GroupKey_  = "GroupKey";
 	} commandConfigureGroupParams_;
-	static struct CommandExecuteMacroParams  //treat FE and Macro the same
+	static struct CommandExecuteMacroParams  // treat FE and Macro the same
 	{
-		//targets
+		// targets
 		const std::string MacroName_          = "MacroName";
 		const std::string MacroParameterLink_ = "LinkToMacroDimensionalLoopTable";
 		const std::string EnableSavingOutput_ = "EnableSavingOutputsToFile";
@@ -99,11 +97,11 @@ class IterateConfiguration : public ConfigurationBase
 
 		const std::string MacroArgumentString_ = "MacroArgumentString";
 
-		//macro parameters
+		// macro parameters
 	} commandExecuteMacroParams_;
 	static struct CommandModifyActiveParams
 	{
-		//targets
+		// targets
 		const std::string DoTrackGroupChanges_    = "DoTrackGroupChanges";
 		const std::string RelativePathToField_    = "RelativePathToField";
 		const std::string FieldStartValue_        = "FieldStartValue";
@@ -120,7 +118,7 @@ class IterateConfiguration : public ConfigurationBase
 		const std::string DurationInSeconds_    = "DurationInSeconds";
 	} commandRunParams_;
 
-	//for targets
+	// for targets
 	static struct TargetParams
 	{
 		const std::string Tables_ = "CSVTargetTables";
@@ -139,7 +137,7 @@ class IterateConfiguration : public ConfigurationBase
 		const std::string TargetLinkUID_ = "LinkToTargetUID";
 	} targetCols_;
 
-	//for macro dimensional loop parameters
+	// for macro dimensional loop parameters
 	static struct MacroDimLoopTableColumns
 	{
 		const std::string Priority_           = "DimensionalLoopPriority";
@@ -154,14 +152,14 @@ class IterateConfiguration : public ConfigurationBase
 
 	} macroParamCols_;
 
-	//Table hierarchy is as follows:
+	// Table hierarchy is as follows:
 	//	Iterate
 	//		|- Plan
 	//			|-Command Type 1
 	//			|-Command Type 2 ...
 	//			|-Command Type n
 
-	//Column names
+	// Column names
 
 	static struct IterateTableColumns
 	{
@@ -170,7 +168,7 @@ class IterateConfiguration : public ConfigurationBase
 
 	static struct PlanTableColumns
 	{
-		const std::string Status_      = ViewColumnInfo::COL_NAME_STATUS;
+		const std::string Status_      = TableViewColumnInfo::COL_NAME_STATUS;
 		const std::string GroupID_     = "IterationPlanGroupID";
 		const std::string CommandLink_ = "LinkToCommandUID";
 		const std::string CommandType_ = "CommandType";

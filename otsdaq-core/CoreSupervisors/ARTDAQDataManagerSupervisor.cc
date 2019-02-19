@@ -6,17 +6,17 @@
 
 using namespace ots;
 
-XDAQ_INSTANTIATOR_IMPL (ARTDAQDataManagerSupervisor)
+XDAQ_INSTANTIATOR_IMPL(ARTDAQDataManagerSupervisor)
 
 //========================================================================================================================
-ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor (xdaq::ApplicationStub* s)
-    : CoreSupervisorBase (s)
+ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub* s)
+    : CoreSupervisorBase(s)
 {
 	__SUP_COUT__ << "Constructor." << std::endl;
 
-	CoreSupervisorBase::theStateMachineImplementation_.push_back (
-	    DataManagerSingleton::getInstance<ARTDAQDataManager> (
-	        CorePropertySupervisorBase::getContextTreeNode (),
+	CoreSupervisorBase::theStateMachineImplementation_.push_back(
+	    DataManagerSingleton::getInstance<ARTDAQDataManager>(
+	        CorePropertySupervisorBase::getContextTreeNode(),
 	        CorePropertySupervisorBase::supervisorConfigurationPath_,
 	        CorePropertySupervisorBase::supervisorApplicationUID_));
 
@@ -24,10 +24,11 @@ ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor (xdaq::ApplicationStub*
 }
 
 //========================================================================================================================
-ARTDAQDataManagerSupervisor::~ARTDAQDataManagerSupervisor (void)
+ARTDAQDataManagerSupervisor::~ARTDAQDataManagerSupervisor(void)
 {
 	__SUP_COUT__ << "Destroying..." << std::endl;
-	DataManagerSingleton::deleteInstance (CorePropertySupervisorBase::supervisorApplicationUID_);
-	theStateMachineImplementation_.pop_back ();
+	DataManagerSingleton::deleteInstance(
+	    CorePropertySupervisorBase::supervisorApplicationUID_);
+	theStateMachineImplementation_.pop_back();
 	__SUP_COUT__ << "Destructed." << __E__;
 }

@@ -10,20 +10,20 @@ namespace ots
 class WorkLoop : public virtual toolbox::lang::Class
 {
   public:
-	WorkLoop (const std::string& name);
-	virtual ~WorkLoop (void);
+	WorkLoop(const std::string& name);
+	virtual ~WorkLoop(void);
 
-	void startWorkLoop (void);
-	bool stopWorkLoop (void);
-	bool isActive (void) const;
+	void startWorkLoop(void);
+	bool stopWorkLoop(void);
+	bool isActive(void) const;
 
   protected:
 	volatile bool continueWorkLoop_;
 
-	virtual bool workLoopThread (toolbox::task::WorkLoop* workLoop) = 0;
+	virtual bool workLoopThread(toolbox::task::WorkLoop* workLoop) = 0;
 
-	//Getters
-	const std::string& getWorkLoopName (void) const { return workLoopName_; }
+	// Getters
+	const std::string& getWorkLoopName(void) const { return workLoopName_; }
 
   private:
 	const std::string               workLoopName_;

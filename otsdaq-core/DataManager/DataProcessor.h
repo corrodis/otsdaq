@@ -8,26 +8,28 @@
 
 namespace ots
 {
-//DataProcessor
+// DataProcessor
 //	This class provides common functionality for Data Producers and Consumers.
 class DataProcessor
 {
   public:
-	DataProcessor (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID);
-	virtual ~DataProcessor (void);
+	DataProcessor(std::string supervisorApplicationUID,
+	              std::string bufferUID,
+	              std::string processorUID);
+	virtual ~DataProcessor(void);
 
-	virtual void registerToBuffer (void) = 0;
-	//virtual void unregisterFromBuffer(void) = 0;
+	virtual void registerToBuffer(void) = 0;
+	// virtual void unregisterFromBuffer(void) = 0;
 
-	virtual void startProcessingData (std::string runNumber) = 0;
-	virtual void stopProcessingData (void)                   = 0;
-	virtual void pauseProcessingData (void) { stopProcessingData (); }
-	virtual void resumeProcessingData (void) { startProcessingData (""); }
+	virtual void startProcessingData(std::string runNumber) = 0;
+	virtual void stopProcessingData(void)                   = 0;
+	virtual void pauseProcessingData(void) { stopProcessingData(); }
+	virtual void resumeProcessingData(void) { startProcessingData(""); }
 
-	//Getters
-	const std::string& getProcessorID (void) const { return processorUID_; }
+	// Getters
+	const std::string& getProcessorID(void) const { return processorUID_; }
 
-	void setCircularBuffer (CircularBufferBase* circularBuffer);
+	void setCircularBuffer(CircularBufferBase* circularBuffer);
 
   protected:
 	const std::string   supervisorApplicationUID_;

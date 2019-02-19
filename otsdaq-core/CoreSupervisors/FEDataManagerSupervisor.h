@@ -12,20 +12,20 @@ class DataManager;
 class FEDataManagerSupervisor : public FESupervisor
 {
   public:
-	XDAQ_INSTANTIATOR ();
+	XDAQ_INSTANTIATOR();
 
-	FEDataManagerSupervisor (xdaq::ApplicationStub* s, bool artdaqDataManager = false);
-	virtual ~FEDataManagerSupervisor (void);
+	FEDataManagerSupervisor(xdaq::ApplicationStub* s, bool artdaqDataManager = false);
+	virtual ~FEDataManagerSupervisor(void);
 
-	virtual void transitionConfiguring (toolbox::Event::Reference e) override;
-	virtual void transitionStarting (toolbox::Event::Reference e) override;
-	virtual void transitionResuming (toolbox::Event::Reference e) override;
+	virtual void transitionConfiguring(toolbox::Event::Reference e) override;
+	virtual void transitionStarting(toolbox::Event::Reference e) override;
+	virtual void transitionResuming(toolbox::Event::Reference e) override;
 
   protected:
 	DataManager* theDataManager_;
 
   private:
-	DataManager* extractDataManager ();  //likely, just used in constructor
+	DataManager* extractDataManager();  // likely, just used in constructor
 };
 
 }  // namespace ots

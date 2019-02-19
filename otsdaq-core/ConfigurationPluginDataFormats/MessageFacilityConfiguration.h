@@ -2,18 +2,19 @@
 #define _ots_DesktopIconConfiguration_h_
 
 #include <string>
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
+
+#include "otsdaq-core/TableCore/TableBase.h"
 
 namespace ots
 {
-class MessageFacilityConfiguration : public ConfigurationBase
+class MessageFacilityConfiguration : public TableBase
 {
   public:
-	MessageFacilityConfiguration (void);
-	virtual ~MessageFacilityConfiguration (void);
+	MessageFacilityConfiguration(void);
+	virtual ~MessageFacilityConfiguration(void);
 
-	//Methods
-	void init (ConfigurationManager *configManager);
+	// Methods
+	void init(ConfigurationManager* configManager);
 
   private:
 };

@@ -71,25 +71,28 @@ typedef std::list<packetBuffer_t> packetBuffer_list_t;
 class UDPReceiver : public artdaq::CommandableFragmentGenerator
 {
   public:
-	explicit UDPReceiver (fhicl::ParameterSet const& ps);
-	virtual ~UDPReceiver ();
+	explicit UDPReceiver(fhicl::ParameterSet const& ps);
+	virtual ~UDPReceiver();
 
   protected:
 	// The "getNext_" function is used to implement user-specific
 	// functionality; it's a mandatory override of the pure virtual
 	// getNext_ function declared in CommandableFragmentGenerator
 
-	bool         getNext_ (artdaq::FragmentPtrs& output) override;
-	void         start (void) override;
-	virtual void start_ ();
-	virtual void stop (void) override;
-	virtual void stopNoMutex (void) override;
+	bool         getNext_(artdaq::FragmentPtrs& output) override;
+	void         start(void) override;
+	virtual void start_();
+	virtual void stop(void) override;
+	virtual void stopNoMutex(void) override;
 
-	virtual void ProcessData_ (artdaq::FragmentPtrs& output);
+	virtual void ProcessData_(artdaq::FragmentPtrs& output);
 
-	DataType   getDataType (uint8_t byte) { return static_cast<DataType> ((byte & 0xF0) >> 4); }
-	ReturnCode getReturnCode (uint8_t byte) { return static_cast<ReturnCode> (byte & 0xF); }
-	void       send (CommandType flag);
+	DataType getDataType(uint8_t byte)
+	{
+		return static_cast<DataType>((byte & 0xF0) >> 4);
+	}
+	ReturnCode getReturnCode(uint8_t byte) { return static_cast<ReturnCode>(byte & 0xF); }
+	void       send(CommandType flag);
 
 	packetBuffer_list_t packetBuffers_;
 
@@ -103,17 +106,17 @@ class UDPReceiver : public artdaq::CommandableFragmentGenerator
 	std::string ip_;
 	int         rcvbuf_;
 
-	//The packet number of the next packet. Used to discover dropped packets
+	// The packet number of the next packet. Used to discover dropped packets
 	uint8_t expectedPacketNumber_;
 
-	//Socket parameters
+	// Socket parameters
 	struct sockaddr_in si_data_;
 	int                datasocket_;
 	bool               sendCommands_;
 
   private:
-	void receiveLoop_ ();
-	bool isTimerExpired_ ();
+	void receiveLoop_();
+	bool isTimerExpired_();
 
 	std::thread         receiverThread_;
 	std::mutex          receiveBufferLock_;

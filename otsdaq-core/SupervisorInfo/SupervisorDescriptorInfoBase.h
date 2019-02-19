@@ -1,5 +1,5 @@
-#ifndef _ots_SupervisorConfigurationBase_h_
-#define _ots_SupervisorConfigurationBase_h_
+#ifndef _ots_SupervisorTableBase_h_
+#define _ots_SupervisorTableBase_h_
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -14,24 +14,26 @@
 namespace ots
 {
 // key is the crate number
-typedef std::map<xdata::UnsignedIntegerT, XDAQ_CONST_CALL xdaq::ApplicationDescriptor*> SupervisorDescriptors;
+typedef std::map<xdata::UnsignedIntegerT, XDAQ_CONST_CALL xdaq::ApplicationDescriptor*>
+    SupervisorDescriptors;
 
 class SupervisorDescriptorInfoBase
 {
 	friend class SupervisorInfo;  //"Friend" class needs access to private members
   public:
-	SupervisorDescriptorInfoBase (void);
-	SupervisorDescriptorInfoBase (xdaq::ApplicationContext* applicationContext);
-	virtual ~SupervisorDescriptorInfoBase (void);
+	SupervisorDescriptorInfoBase(void);
+	SupervisorDescriptorInfoBase(xdaq::ApplicationContext* applicationContext);
+	virtual ~SupervisorDescriptorInfoBase(void);
 
-	//XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getSupervisorDescriptor 	    (void) const;
-	//XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getWizardDescriptor 	        (void) const;
+	// XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getSupervisorDescriptor 	    (void)
+	// const;  XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getWizardDescriptor
+	// (void) const;
 
   protected:
-	virtual void init (xdaq::ApplicationContext* applicationContext);
-	virtual void destroy ();
+	virtual void init(xdaq::ApplicationContext* applicationContext);
+	virtual void destroy();
 
-	const SupervisorDescriptors& getAllDescriptors (void) const;
+	const SupervisorDescriptors& getAllDescriptors(void) const;
 	//    const SupervisorDescriptors& getAllFEDescriptors               	(void) const;
 
 	//    const SupervisorDescriptors& getDataManagerDescriptors        (void) const;
@@ -45,19 +47,30 @@ class SupervisorDescriptorInfoBase
 	//    const SupervisorDescriptors& getARTDAQAggregatorDescriptors   (void) const;
 	//    const SupervisorDescriptors& getVisualDescriptors             (void) const;
 
-	// XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getLogbookDescriptor 	         (void) const;
-	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDataManagerDescriptor        (xdata::UnsignedIntegerT instance) const;
-	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getFEDescriptor        	     (xdata::UnsignedIntegerT instance) const;
-	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDTCDescriptor        	     (xdata::UnsignedIntegerT instance) const;
-	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getFEDataManagerDescriptor      (xdata::UnsignedIntegerT instance) const;
-	//    //xdaq::ApplicationDescriptor* getARTDAQFEDescriptor          (xdata::UnsignedIntegerT instance) const;
-	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getARTDAQFEDataManagerDescriptor(xdata::UnsignedIntegerT instance) const;
-	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getARTDAQDataManagerDescriptor  (xdata::UnsignedIntegerT instance) const;
-	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getARTDAQBuilderDescriptor      (xdata::UnsignedIntegerT instance) const;
-	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getARTDAQAggregatorDescriptor   (xdata::UnsignedIntegerT instance) const;
-	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getVisualDescriptor   	         (xdata::UnsignedIntegerT instance) const;
+	// XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getLogbookDescriptor (void) const;
+	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDataManagerDescriptor
+	//    (xdata::UnsignedIntegerT instance) const; XDAQ_CONST_CALL
+	//    xdaq::ApplicationDescriptor* getFEDescriptor
+	//    (xdata::UnsignedIntegerT instance) const; XDAQ_CONST_CALL
+	//    xdaq::ApplicationDescriptor* getDTCDescriptor
+	//    (xdata::UnsignedIntegerT instance) const; XDAQ_CONST_CALL
+	//    xdaq::ApplicationDescriptor* getFEDataManagerDescriptor
+	//    (xdata::UnsignedIntegerT instance) const;
+	//    //xdaq::ApplicationDescriptor* getARTDAQFEDescriptor
+	//    (xdata::UnsignedIntegerT instance) const; XDAQ_CONST_CALL
+	//    xdaq::ApplicationDescriptor*
+	//    getARTDAQFEDataManagerDescriptor(xdata::UnsignedIntegerT instance) const;
+	//    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getARTDAQDataManagerDescriptor
+	//    (xdata::UnsignedIntegerT instance) const; XDAQ_CONST_CALL
+	//    xdaq::ApplicationDescriptor* getARTDAQBuilderDescriptor
+	//    (xdata::UnsignedIntegerT instance) const; XDAQ_CONST_CALL
+	//    xdaq::ApplicationDescriptor* getARTDAQAggregatorDescriptor
+	//    (xdata::UnsignedIntegerT instance) const; XDAQ_CONST_CALL
+	//    xdaq::ApplicationDescriptor* getVisualDescriptor
+	//    (xdata::UnsignedIntegerT instance) const;
 
-	//   std::string 								getFEURL               (xdata::UnsignedIntegerT instance) const;
+	//   std::string 								getFEURL
+	//   (xdata::UnsignedIntegerT instance) const;
 
 	//    std::string getARTDAQFEURL         (xdata::UnsignedIntegerT instance) const;
 	//    std::string getARTDAQBuilderURL    (xdata::UnsignedIntegerT instance) const;
@@ -80,7 +93,7 @@ class SupervisorDescriptorInfoBase
 	//    SupervisorDescriptors        theARTDAQAggregatorSupervisors_;
 
 	SupervisorDescriptors allSupervisors_;
-	//SupervisorDescriptors		 allFETypeSupervisors_;
+	// SupervisorDescriptors		 allFETypeSupervisors_;
 };
 }  // namespace ots
 #endif

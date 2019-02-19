@@ -6,150 +6,177 @@
 //#include <set>
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
-//Configuration Types
+// Configuration Types
 
 //#include <memory>
 
 namespace ots
 {
-struct ConfigurationInfo
+struct TableInfo
 {
-	ConfigurationInfo ()
-	    :  //constructor
-	    configurationPtr_ (0)
+	TableInfo()
+	    :  // constructor
+	    tablePtr_(0)
 	{
 	}
 
-	std::set<ConfigurationVersion> versions_;
-	ConfigurationBase*             configurationPtr_;
+	std::set<TableVersion> versions_;
+	TableBase*             tablePtr_;
 };
 
 struct GroupInfo
 {
-	std::set<ConfigurationGroupKey> keys_;
-	std::string                     latestKeyGroupAuthor_, latestKeyGroupComment_,
+	std::set<TableGroupKey> keys_;
+	std::string             latestKeyGroupAuthor_, latestKeyGroupComment_,
 	    latestKeyGroupCreationTime_, latestKeyGroupTypeString_;
-	std::map<std::string /*name*/, ConfigurationVersion /*version*/> latestKeyMemberMap_;
+	std::map<std::string /*name*/, TableVersion /*version*/> latestKeyMemberMap_;
 
-	ConfigurationGroupKey getLatestKey () { return *(keys_.rbegin ()); }
+	TableGroupKey getLatestKey() { return *(keys_.rbegin()); }
 };
 
 #define Q(X) #X
-#define QUOTE(X) Q (X)
-#define __GETCFG_RW__(X) getConfigurationRW<X> (QUOTE (X))
+#define QUOTE(X) Q(X)
+#define __GETCFG_RW__(X) getConfigurationRW<X>(QUOTE(X))
 
 //==============================================================================
-//ConfigurationManagerRW
+// ConfigurationManagerRW
 //	This is the ConfigurationManger with write access
 //	This class inherits all public function from ConfigurationManager
 // and is a "Friend" class of ConfigurationManager so has access to private members.
 class ConfigurationManagerRW : public ConfigurationManager
 {
   public:
-	ConfigurationManagerRW (std::string username);
+	ConfigurationManagerRW(std::string username);
 
 	//==============================================================================
-	//Getters
-	const std::string&      getUsername (void) const { return username_; }
-	ConfigurationInterface* getConfigurationInterface (void) const { return theInterface_; }
+	// Getters
+	const std::string&      getUsername(void) const { return username_; }
+	ConfigurationInterface* getConfigurationInterface(void) const
+	{
+		return theInterface_;
+	}
 
-	const std::map<std::string, ConfigurationInfo>&                                                             getAllConfigurationInfo (bool refresh = false, std::string* accumulatedErrors = 0, const std::string& errorFilterName = "");
-	std::map<std::string /*tableName*/, std::map<std::string /*aliasName*/, ConfigurationVersion /*version*/> > getVersionAliases (void) const;
+	const std::map<std::string, TableInfo>& getAllTableInfo(
+	    bool               refresh           = false,
+	    std::string*       accumulatedErrors = 0,
+	    const std::string& errorFilterName   = "");
+	std::map<std::string /*tableName*/,
+	         std::map<std::string /*aliasName*/, TableVersion /*version*/> >
+	getVersionAliases(void) const;
 
 	template<class T>
-	T* getConfigurationRW (std::string name)
+	T* getConfigurationRW(std::string name)
 	{
-		return (T*)getConfigurationByName (name);
+		return (T*)getTableByName(name);
 	}
-	ConfigurationBase*    getVersionedConfigurationByName (const std::string& configurationName, ConfigurationVersion version, bool looseColumnMatching = false);
-	ConfigurationBase*    getConfigurationByName (const std::string& configurationName);
-	ConfigurationGroupKey findConfigurationGroup (const std::string& groupName, const std::map<std::string, ConfigurationVersion>& groupMembers, const std::map<std::string /*name*/, std::string /*alias*/>& groupAliases = std::map<std::string /*name*/, std::string /*alias*/> ());
-	ConfigurationBase*    getMetadataTable (void) { return &groupMetadataTable_; /* created for use in otsdaq_flatten_system_aliases, e.g. */ }
+	TableBase*    getVersionedTableByName(const std::string& tableName,
+	                                      TableVersion       version,
+	                                      bool               looseColumnMatching = false);
+	TableBase*    getTableByName(const std::string& tableName);
+	TableGroupKey findTableGroup(
+	    const std::string&                                           groupName,
+	    const std::map<std::string, TableVersion>&                   groupMembers,
+	    const std::map<std::string /*name*/, std::string /*alias*/>& groupAliases =
+	        std::map<std::string /*name*/, std::string /*alias*/>());
+	TableBase* getMetadataTable(void)
+	{
+		return &groupMetadataTable_; /* created for use in otsdaq_flatten_system_aliases,
+		                                e.g. */
+	}
 
 	//==============================================================================
-	//modifiers of generic ConfigurationBase
+	// modifiers of generic TableBase
 
-	ConfigurationVersion saveNewConfiguration (const std::string& configurationName, ConfigurationVersion temporaryVersion = ConfigurationVersion (), bool makeTemporary = false);  //, bool saveToScratchVersion = false);
-	ConfigurationVersion copyViewToCurrentColumns (const std::string& configurationName, ConfigurationVersion sourceVersion);
-	void                 eraseTemporaryVersion (const std::string& configurationName, ConfigurationVersion targetVersion = ConfigurationVersion ());
-	void                 clearCachedVersions (const std::string& configurationName);
-	void                 clearAllCachedVersions ();
-
-	//==============================================================================
-	//modifiers of configuration groups
-
-	void activateConfigurationGroup (const std::string& configGroupName, ConfigurationGroupKey configGroupKey, std::string* accumulatedTreeErrors = 0);
-
-	ConfigurationVersion createTemporaryBackboneView (ConfigurationVersion sourceViewVersion = ConfigurationVersion ());  //-1, from MockUp, else from valid backbone view version
-	ConfigurationVersion saveNewBackbone (ConfigurationVersion temporaryVersion = ConfigurationVersion ());
+	TableVersion saveNewTable(
+	    const std::string& tableName,
+	    TableVersion       temporaryVersion = TableVersion(),
+	    bool makeTemporary = false);  //, bool saveToScratchVersion = false);
+	TableVersion copyViewToCurrentColumns(const std::string& tableName,
+	                                      TableVersion       sourceVersion);
+	void         eraseTemporaryVersion(const std::string& tableName,
+	                                   TableVersion       targetVersion = TableVersion());
+	void         clearCachedVersions(const std::string& tableName);
+	void         clearAllCachedVersions();
 
 	//==============================================================================
-	//modifiers of a configuration group based on alias, e.g. "Physics"
-	ConfigurationGroupKey saveNewConfigurationGroup (const std::string& groupName, std::map<std::string, ConfigurationVersion>& groupMembers, const std::string& groupComment = ViewColumnInfo::DATATYPE_COMMENT_DEFAULT, std::map<std::string /*table*/, std::string /*alias*/>* groupAliases = 0);
+	// modifiers of table groups
+
+	void activateConfigurationGroup(const std::string& configGroupName,
+	                                TableGroupKey      configGroupKey,
+	                                std::string*       accumulatedTreeErrors = 0);
+
+	TableVersion createTemporaryBackboneView(
+	    TableVersion sourceViewVersion =
+	        TableVersion());  //-1, from MockUp, else from valid backbone view version
+	TableVersion saveNewBackbone(TableVersion temporaryVersion = TableVersion());
 
 	//==============================================================================
-	//public group cache handling
-	const GroupInfo&                        getGroupInfo (const std::string& groupName);
-	const std::map<std::string, GroupInfo>& getAllGroupInfo () { return allGroupInfo_; }
+	// modifiers of a table group based on alias, e.g. "Physics"
+	TableGroupKey saveNewTableGroup(
+	    const std::string&                   groupName,
+	    std::map<std::string, TableVersion>& groupMembers,
+	    const std::string& groupComment = TableViewColumnInfo::DATATYPE_COMMENT_DEFAULT,
+	    std::map<std::string /*table*/, std::string /*alias*/>* groupAliases = 0);
 
-	void testXDAQContext ();  //for debugging
+	//==============================================================================
+	// public group cache handling
+	const GroupInfo&                        getGroupInfo(const std::string& groupName);
+	const std::map<std::string, GroupInfo>& getAllGroupInfo() { return allGroupInfo_; }
+
+	void testXDAQContext();  // for debugging
 
   private:
 	//==============================================================================
-	//group cache handling
-	void cacheGroupKey (const std::string& groupName, ConfigurationGroupKey key);
+	// group cache handling
+	void cacheGroupKey(const std::string& groupName, TableGroupKey key);
 
 	//==============================================================================
-	//private members
-	std::map<std::string, ConfigurationInfo> allConfigurationInfo_;
-	std::map<std::string, GroupInfo>         allGroupInfo_;
+	// private members
+	std::map<std::string, TableInfo> allTableInfo_;
+	std::map<std::string, GroupInfo> allGroupInfo_;
 };
 
 /////
 struct TableEditStruct
 {
-	//everything needed for editing a table
-	ConfigurationBase*   config_;
-	ConfigurationView*   cfgView_;
-	ConfigurationVersion temporaryVersion_, originalVersion_;
-	bool                 createdTemporaryVersion_;  //indicates if temp version was created here
-	bool                 modified_;                 //indicates if temp version was modified
-	std::string          configName_;
+	// everything needed for editing a table
+	TableBase*   table_;
+	TableView*   tableView_;
+	TableVersion temporaryVersion_, originalVersion_;
+	bool         createdTemporaryVersion_;  // indicates if temp version was created here
+	bool         modified_;                 // indicates if temp version was modified
+	std::string  tableName_;
 	/////
-	TableEditStruct ()
+	TableEditStruct()
 	{
 		__SS__ << "impossible!" << std::endl;
 		__SS_THROW__;
 	}
-	TableEditStruct (const std::string& configName, ConfigurationManagerRW* cfgMgr)
-	    : createdTemporaryVersion_ (false)
-	    , modified_ (false)
-	    , configName_ (configName)
+	TableEditStruct(const std::string& tableName, ConfigurationManagerRW* cfgMgr)
+	    : createdTemporaryVersion_(false), modified_(false), tableName_(tableName)
 	{
-		__COUT__ << "Creating Table-Edit Struct for " << configName_ << std::endl;
-		config_ = cfgMgr->getConfigurationByName (configName_);
+		__COUT__ << "Creating Table-Edit Struct for " << tableName_ << std::endl;
+		table_ = cfgMgr->getTableByName(tableName_);
 
-		if (!(originalVersion_ =
-		          config_->getView ().getVersion ())
-		         .isTemporaryVersion ())
+		if(!(originalVersion_ = table_->getView().getVersion()).isTemporaryVersion())
 		{
 			__COUT__ << "Start version " << originalVersion_ << std::endl;
-			//create temporary version for editing
-			temporaryVersion_ = config_->createTemporaryView (originalVersion_);
-			cfgMgr->saveNewConfiguration (
-			    configName_,
+			// create temporary version for editing
+			temporaryVersion_ = table_->createTemporaryView(originalVersion_);
+			cfgMgr->saveNewTable(
+			    tableName_,
 			    temporaryVersion_,
-			    true);  //proper bookkeeping for temporary version with the new version
+			    true);  // proper bookkeeping for temporary version with the new version
 
 			__COUT__ << "Created temporary version " << temporaryVersion_ << std::endl;
 			createdTemporaryVersion_ = true;
 		}
-		else  //else table is already temporary version
+		else  // else table is already temporary version
 			__COUT__ << "Using temporary version " << temporaryVersion_ << std::endl;
 
-		cfgView_ = config_->getViewP ();
+		tableView_ = table_->getViewP();
 	}
-};  //end TableEditStruct declaration
+};  // end TableEditStruct declaration
 
 }  // namespace ots
 

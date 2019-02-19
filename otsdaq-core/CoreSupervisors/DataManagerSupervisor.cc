@@ -5,24 +5,25 @@
 
 using namespace ots;
 
-XDAQ_INSTANTIATOR_IMPL (DataManagerSupervisor)
+XDAQ_INSTANTIATOR_IMPL(DataManagerSupervisor)
 
 //========================================================================================================================
-DataManagerSupervisor::DataManagerSupervisor (xdaq::ApplicationStub* s)
-    : CoreSupervisorBase (s)
+DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub* s)
+    : CoreSupervisorBase(s)
 {
-	CoreSupervisorBase::theStateMachineImplementation_.push_back (
-	    DataManagerSingleton::getInstance<DataManager> (
-	        CorePropertySupervisorBase::getContextTreeNode (),
+	CoreSupervisorBase::theStateMachineImplementation_.push_back(
+	    DataManagerSingleton::getInstance<DataManager>(
+	        CorePropertySupervisorBase::getContextTreeNode(),
 	        CorePropertySupervisorBase::supervisorConfigurationPath_,
 	        CorePropertySupervisorBase::supervisorApplicationUID_));
 }
 
 //========================================================================================================================
-DataManagerSupervisor::~DataManagerSupervisor (void)
+DataManagerSupervisor::~DataManagerSupervisor(void)
 {
 	__SUP_COUT__ << "Destroying..." << std::endl;
 
-	DataManagerSingleton::deleteInstance (CorePropertySupervisorBase::supervisorApplicationUID_);
-	theStateMachineImplementation_.pop_back ();
+	DataManagerSingleton::deleteInstance(
+	    CorePropertySupervisorBase::supervisorApplicationUID_);
+	theStateMachineImplementation_.pop_back();
 }

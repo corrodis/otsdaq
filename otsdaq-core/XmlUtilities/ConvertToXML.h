@@ -9,18 +9,18 @@ namespace ots
 class ConvertToXML
 {
   public:
-	ConvertToXML (const char* const toTranscode);
-	ConvertToXML (const std::string& toTranscode);
-	ConvertToXML (const int toTranscode);
-	~ConvertToXML (void);
+	ConvertToXML(const char* const toTranscode);
+	ConvertToXML(const std::string& toTranscode);
+	ConvertToXML(const int toTranscode);
+	~ConvertToXML(void);
 
-	const XMLCh* unicodeForm () const;
+	const XMLCh* unicodeForm() const;
 
   private:
 	XMLCh* fUnicodeForm_;
 };
 
-#define CONVERT_TO_XML(str) ConvertToXML (str).unicodeForm ()
+#define CONVERT_TO_XML(str) ConvertToXML(str).unicodeForm()
 
 }  // namespace ots
 

@@ -1,7 +1,7 @@
 cet_make(LIBRARY_NAME ConfigurationInterface
 		 LIBRARIES
 		 PluginMakers
-		 ConfigurationDataFormats
+		 TableCore
 		 ProgressBar		 
 		 Macros
 		 dl

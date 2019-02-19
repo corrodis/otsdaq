@@ -7,50 +7,51 @@
 using namespace ots;
 
 #undef __MF_SUBJECT__
-#define __MF_SUBJECT__ (std::string ("Consumer-") + DataProcessor::processorUID_)
+#define __MF_SUBJECT__ (std::string("Consumer-") + DataProcessor::processorUID_)
 
 //========================================================================================================================
-DataConsumer::DataConsumer (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, ConsumerPriority priority)
-    : WorkLoop (processorUID)
-    , DataProcessor (supervisorApplicationUID, bufferUID, processorUID)
-    , priority_ (priority)
+DataConsumer::DataConsumer(std::string      supervisorApplicationUID,
+                           std::string      bufferUID,
+                           std::string      processorUID,
+                           ConsumerPriority priority)
+    : WorkLoop(processorUID)
+    , DataProcessor(supervisorApplicationUID, bufferUID, processorUID)
+    , priority_(priority)
 {
 	__COUT__ << "Constructor." << __E__;
-	registerToBuffer ();
+	registerToBuffer();
 	__COUT__ << "Constructed." << __E__;
 }
 
 //========================================================================================================================
-DataConsumer::~DataConsumer (void)
+DataConsumer::~DataConsumer(void)
 {
 	__COUT__ << "Destructor." << __E__;
-	//unregisterFromBuffer();
+	// unregisterFromBuffer();
 	__COUT__ << "Destructed." << __E__;
 }
 
 //========================================================================================================================
-DataConsumer::ConsumerPriority DataConsumer::getPriority (void)
-{
-	return priority_;
-}
+DataConsumer::ConsumerPriority DataConsumer::getPriority(void) { return priority_; }
 
 //========================================================================================================================
-//mirror DataProducerBase::registerToBuffer
-void DataConsumer::registerToBuffer (void)
+// mirror DataProducerBase::registerToBuffer
+void DataConsumer::registerToBuffer(void)
 {
-	__COUT__ << "Consumer '" << DataProcessor::processorUID_ << "' is registering to DataManager Supervisor Buffer '" << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
+	__COUT__ << "Consumer '" << DataProcessor::processorUID_
+	         << "' is registering to DataManager Supervisor Buffer '"
+	         << DataProcessor::supervisorApplicationUID_ << ":"
+	         << DataProcessor::bufferUID_ << ".'" << std::endl;
 
 	DataManager* dataManager =
-	    (DataManagerSingleton::getInstance (
-	        supervisorApplicationUID_));
+	    (DataManagerSingleton::getInstance(supervisorApplicationUID_));
 
-	dataManager->registerConsumer (
-	    bufferUID_, this);
+	dataManager->registerConsumer(bufferUID_, this);
 
 	{
 		__SS__;
-		dataManager->dumpStatus (&ss);
-		std::cout << ss.str () << __E__;
+		dataManager->dumpStatus(&ss);
+		std::cout << ss.str() << __E__;
 	}
 
 	__COUT__ << "Consumer '" << DataProcessor::processorUID_ << "' Registered." << __E__;
@@ -66,11 +67,11 @@ void DataConsumer::registerToBuffer (void)
 	//					bufferUID_,this);
 	//
 	//	__COUT__ << "Registered." << __E__;
-}  //end registerToBuffer()
+}  // end registerToBuffer()
 
 ////========================================================================================================================
 ////mirror DataProducerBase::unregisterFromBuffer
-//void DataConsumer::unregisterFromBuffer(void)
+// void DataConsumer::unregisterFromBuffer(void)
 //{
 //	__COUT__ << "Consumer '" << DataProcessor::processorUID_ <<
 //			"' is unregistering to DataManager Supervisor Buffer '" <<
@@ -95,13 +96,10 @@ void DataConsumer::registerToBuffer (void)
 //} //end unregisterFromBuffer()
 
 //========================================================================================================================
-void DataConsumer::startProcessingData (std::string runNumber)
+void DataConsumer::startProcessingData(std::string runNumber)
 {
-	WorkLoop::startWorkLoop ();
+	WorkLoop::startWorkLoop();
 }
 
 //========================================================================================================================
-void DataConsumer::stopProcessingData (void)
-{
-	WorkLoop::stopWorkLoop ();
-}
+void DataConsumer::stopProcessingData(void) { WorkLoop::stopWorkLoop(); }

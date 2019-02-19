@@ -11,29 +11,29 @@ using namespace ots;
 #define __MF_SUBJECT__ "producer-" << bufferUID_ << "-" << processorUID_
 
 //========================================================================================================================
-DataProducer::DataProducer (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, unsigned int bufferSize)
-    : WorkLoop (processorUID)
-    , DataProducerBase (supervisorApplicationUID, bufferUID, processorUID, bufferSize)
+DataProducer::DataProducer(std::string  supervisorApplicationUID,
+                           std::string  bufferUID,
+                           std::string  processorUID,
+                           unsigned int bufferSize)
+    : WorkLoop(processorUID)
+    , DataProducerBase(supervisorApplicationUID, bufferUID, processorUID, bufferSize)
 {
 	__COUT__ << "Constructed." << __E__;
 }
 
 //========================================================================================================================
-DataProducer::~DataProducer (void)
-{
-	__COUT__ << "Destructed." << __E__;
-}
+DataProducer::~DataProducer(void) { __COUT__ << "Destructed." << __E__; }
 
 //========================================================================================================================
-void DataProducer::startProcessingData (std::string runNumber)
+void DataProducer::startProcessingData(std::string runNumber)
 {
 	__COUT__ << "startWorkLoop..." << std::endl;
-	WorkLoop::startWorkLoop ();
+	WorkLoop::startWorkLoop();
 }
 
 //========================================================================================================================
-void DataProducer::stopProcessingData (void)
+void DataProducer::stopProcessingData(void)
 {
 	__COUT__ << "stopWorkLoop..." << std::endl;
-	WorkLoop::stopWorkLoop ();
+	WorkLoop::stopWorkLoop();
 }

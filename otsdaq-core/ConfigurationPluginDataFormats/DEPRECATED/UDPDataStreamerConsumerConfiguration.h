@@ -1,30 +1,30 @@
 #ifndef _ots_UDPDataStreamerConsumerConfiguration_h_
 #define _ots_UDPDataStreamerConsumerConfiguration_h_
 
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
-
 #include <string>
+
+#include "../../TableCore/TableBase.h"
 
 namespace ots
 {
-class UDPDataStreamerConsumerConfiguration : public ConfigurationBase
+class UDPDataStreamerConsumerConfiguration : public TableBase
 {
   public:
-	UDPDataStreamerConsumerConfiguration (void);
-	virtual ~UDPDataStreamerConsumerConfiguration (void);
+	UDPDataStreamerConsumerConfiguration(void);
+	virtual ~UDPDataStreamerConsumerConfiguration(void);
 
-	//Methods
-	void init (ConfigurationManager *configManager);
+	// Methods
+	void init(ConfigurationManager* configManager);
 
-	//Getter
-	std::vector<std::string> getProcessorIDList (void) const;
-	std::string              getIPAddress (std::string processorUID) const;
-	unsigned int             getPort (std::string processorUID) const;
-	std::string              getStreamToIPAddress (std::string processorUID) const;
-	unsigned int             getStreamToPort (std::string processorUID) const;
+	// Getter
+	std::vector<std::string> getProcessorIDList(void) const;
+	std::string              getIPAddress(std::string processorUID) const;
+	unsigned int             getPort(std::string processorUID) const;
+	std::string              getStreamToIPAddress(std::string processorUID) const;
+	unsigned int             getStreamToPort(std::string processorUID) const;
 
   private:
-	void check (std::string processorUID) const;
+	void check(std::string processorUID) const;
 	enum
 	{
 		ProcessorID,

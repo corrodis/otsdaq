@@ -8,20 +8,20 @@
 #ifndef REGISTERSEQUENCER_H_
 #define REGISTERSEQUENCER_H_
 
-#include "ConfigurationBase.h"
 #include "ROCDACs.h"
+#include "otsdaq-core/TableCore/TableBase.h"
 
 namespace ots
 {
-class RegisterSequencer : public ots::ConfigurationBase
+class RegisterSequencer : public ots::TableBase
 {
   public:
-	RegisterSequencer (std::string staticConfigurationName);
-	virtual ~RegisterSequencer ();
+	RegisterSequencer(std::string staticConfigurationName);
+	virtual ~RegisterSequencer();
 
-	void init (void);
+	void init(void);
 
-	//getter
+	// getter
 
   protected:
 	enum

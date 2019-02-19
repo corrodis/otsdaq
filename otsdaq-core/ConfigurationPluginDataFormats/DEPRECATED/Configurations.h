@@ -1,38 +1,46 @@
 #ifndef _ots_Configurations_h_
 #define _ots_Configurations_h_
 
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationVersion.h"
-
 #include <set>
 #include <string>
 
+#include "../../TableCore/TableBase.h"
+#include "../../TableCore/TableGroupKey.h"
+#include "../../TableCore/TableVersion.h"
+
 namespace ots
 {
-class Configurations : public ConfigurationBase
+class Configurations : public TableBase
 {
   public:
-	Configurations (void);
-	virtual ~Configurations (void);
+	Configurations(void);
+	virtual ~Configurations(void);
 
-	//Methods
-	void init (ConfigurationManager *configManager);
-	bool findKOC (ConfigurationGroupKey ConfigurationGroupKey, std::string koc) const;
+	// Methods
+	void init(ConfigurationManager* configManager);
+	bool findKOC(TableGroupKey TableGroupKey, std::string koc) const;
 
-	//Getters
-	ConfigurationVersion getConditionVersion (const ConfigurationGroupKey &ConfigurationGroupKey, std::string koc) const;
+	// Getters
+	TableVersion getConditionVersion(const TableGroupKey& TableGroupKey,
+	                                 std::string          koc) const;
 
-	std::set<std::string> getListOfKocs (ConfigurationGroupKey ConfigurationGroupKey = ConfigurationGroupKey ()) const;                                                                     //INVALID to get all Kocs
-	void                  getListOfKocsForView (ConfigurationView *cfgView, std::set<std::string> &kocList, ConfigurationGroupKey ConfigurationGroupKey = ConfigurationGroupKey ()) const;  //INVALID to get all Kocs
+	std::set<std::string> getListOfKocs(
+	    TableGroupKey TableGroupKey = TableGroupKey()) const;  // INVALID to get all Kocs
+	void getListOfKocsForView(
+	    TableView*             cfgView,
+	    std::set<std::string>& kocList,
+	    TableGroupKey TableGroupKey = TableGroupKey()) const;  // INVALID to get all Kocs
 
-	//Setters
-	int setConditionVersionForView (ConfigurationView *cfgView, ConfigurationGroupKey ConfigurationGroupKey, std::string koc, ConfigurationVersion newKOCVersion);
+	// Setters
+	int setConditionVersionForView(TableView*    cfgView,
+	                               TableGroupKey TableGroupKey,
+	                               std::string   koc,
+	                               TableVersion  newKOCVersion);
 
   private:
 	enum
 	{
-		ConfigurationGroupKeyAlias,
+		TableGroupKeyAlias,
 		KOC,
 		ConditionVersion
 	};

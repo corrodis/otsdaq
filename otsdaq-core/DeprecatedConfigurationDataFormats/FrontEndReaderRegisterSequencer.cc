@@ -6,11 +6,9 @@ using namespace ots;
 
 const std::string FERRegisterSequencer::staticConfigurationName_ = "FERRegisterSequencer";
 //==============================================================================
-FERRegisterSequencer::FERRegisterSequencer ()
-    : RegisterConfiguration (FERRegisterSequencer::staticConfigurationName_)
+FERRegisterSequencer::FERRegisterSequencer()
+    : RegisterConfiguration(FERRegisterSequencer::staticConfigurationName_)
 {
 }
 //==============================================================================
-FERRegisterSequencer::~FERRegisterSequencer (void)
-{
-}
+FERRegisterSequencer::~FERRegisterSequencer(void) {}

@@ -1,8 +1,9 @@
 //#include <otsdaq_demo/otsdaq-demo/FEInterfaces/FEWROtsUDPFSSRInterface.h>
-//#include <otsdaq_demo/otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceConfiguration.h>
+//#include
+//<otsdaq_demo/otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceConfiguration.h>
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/FECore/FEVInterfacesManager.h"
-//#include "otsdaq-core/ConfigurationDataFormats/ConfigurationGroupKey.h"
+//#include "otsdaq-core/ConfigurationDataFormats/TableGroupKey.h"
 
 //#include "otsdaq-demo/FEInterfaces/FEWOtsGenericInterface.h"
 #include "otsdaq-core/FECore/FEVInterface.h"
@@ -18,56 +19,64 @@
 
 using namespace ots;
 
-int main ()
+int main()
 {
-	//Variables
-	std::string supervisorContextUID_           = "MainContext";
-	std::string supervisorApplicationUID_       = "FeSupervisor0";
-	std::string ConfigurationAlias_             = "Physics";
-	std::string theSupervisorConfigurationPath_ = supervisorContextUID_ + "/LinkToApplicationTable/" + supervisorApplicationUID_ + "/LinkToSupervisorTable";
-	//const int ConfigurationGroupKeyValue_ = 0;
-	//std::shared_ptr<ConfigurationGroupKey> theConfigurationGroupKey_(new ConfigurationGroupKey(ConfigurationGroupKeyValue_));
+	// Variables
+	std::string supervisorContextUID_     = "MainContext";
+	std::string supervisorApplicationUID_ = "FeSupervisor0";
+	std::string ConfigurationAlias_       = "Physics";
+	std::string theSupervisorConfigurationPath_ =
+	    supervisorContextUID_ + "/LinkToApplicationTable/" + supervisorApplicationUID_ +
+	    "/LinkToSupervisorTable";
+	// const int TableGroupKeyValue_ = 0;
+	// std::shared_ptr<TableGroupKey> theTableGroupKey_(new
+	// TableGroupKey(TableGroupKeyValue_));
 
 	////////////////////////////////////////////////////////////////
-	//INSERTED GLOBALLY IN THE CODE
+	// INSERTED GLOBALLY IN THE CODE
 	ConfigurationManager* theConfigurationManager_ = new ConfigurationManager;
-	FEVInterfacesManager  theFEVInterfacesManager_ (theConfigurationManager_->getNode (ConfigurationManager::XDAQ_CONTEXT_CONFIG_NAME), theSupervisorConfigurationPath_);
+	FEVInterfacesManager  theFEVInterfacesManager_(
+        theConfigurationManager_->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME),
+        theSupervisorConfigurationPath_);
 
-	std::pair<std::string /*group name*/, ConfigurationGroupKey> theGroup =
-	    theConfigurationManager_->getConfigurationGroupFromAlias (ConfigurationAlias_);
+	std::pair<std::string /*group name*/, TableGroupKey> theGroup =
+	    theConfigurationManager_->getConfigurationGroupFromAlias(ConfigurationAlias_);
 
-	theConfigurationManager_->loadConfigurationGroup (
-	    theGroup.first,
-	    theGroup.second,
-	    true);
+	theConfigurationManager_->loadConfigurationGroup(
+	    theGroup.first, theGroup.second, true);
 
-	theFEVInterfacesManager_.configure ();
+	theFEVInterfacesManager_.configure();
 	////////////////////////////////////////////////////////////////
-	exit (0);
+	exit(0);
 	////////////////////////////////////////////////////////////////
-	//Getting just the informations about the FEWInterface
+	// Getting just the informations about the FEWInterface
 
 	//	const std::string feId_ = "0";
 	//	ConfigurationInterface* theInterface_;
-	//	theInterface_ = ConfigurationInterface::getInstance(true);//FIXME This will be variable because if false it takes it from the database
-	//	Configurations* configurations = 0;
-	//	theInterface_->get((ConfigurationBase*&)configurations,"Configurations");
-	//	ConfigurationBase* frontEndConfiguration = 0;
-	//	theInterface_->get(frontEndConfiguration, "FEConfiguration", theConfigurationGroupKey_, configurations);
+	//	theInterface_ = ConfigurationInterface::getInstance(true);//FIXME This will be
+	// variable because if false it takes it from the database 	Configurations*
+	// configurations = 0;
+	//	theInterface_->get((TableBase*&)configurations,"Configurations");
+	//	TableBase* frontEndConfiguration = 0;
+	//	theInterface_->get(frontEndConfiguration, "FEConfiguration", theTableGroupKey_,
+	// configurations);
 	//
 	//	const std::string interfaceName     =  "FEOtsUDPFSSRInterface";
 	//	const std::string configurationName =  interfaceName + "Configuration";
 	//
 	//	//FEWOtsUDPHardwareConfiguration* interfaceConfiguration_ = 0;
 	//
-	//	ConfigurationBase* interfaceConfiguration_ = 0;//makeConfigurationInterface(configurationName);
+	//	TableBase* interfaceConfiguration_ =
+	// 0;//makeConfigurationInterface(configurationName);
 	//
-	//	if(configurations->findKOC(*theConfigurationGroupKey_,configurationName))
+	//	if(configurations->findKOC(*theTableGroupKey_,configurationName))
 	//	{
-	//		theInterface_->get(interfaceConfiguration_, configurationName, theConfigurationGroupKey_, configurations);
+	//		theInterface_->get(interfaceConfiguration_, configurationName,
+	// theTableGroupKey_, configurations);
 	//	}
 	//
-	//	std::unique_ptr<FEVInterface> theFEWInterface  = makeInterface(interfaceName, feId_, (FEInterfaceConfigurationBase*)interfaceConfiguration_);
+	//	std::unique_ptr<FEVInterface> theFEWInterface  = makeInterface(interfaceName,
+	// feId_, (FEInterfaceTableBase*)interfaceConfiguration_);
 
 	////////////////////////////////////////////////////////////////
 

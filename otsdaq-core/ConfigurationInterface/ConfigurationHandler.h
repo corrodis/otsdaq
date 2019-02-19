@@ -4,45 +4,52 @@
 #include <string>
 #include <xercesc/dom/DOMDocument.hpp>
 #include <xercesc/util/XMLChar.hpp>
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationVersion.h"
+
+#include "otsdaq-core/TableCore/TableVersion.h"
 
 namespace ots
 {
-class ConfigurationBase;
+class TableBase;
 
 class ConfigurationHandler
 {
   public:
-	ConfigurationHandler (void);
-	virtual ~ConfigurationHandler (void);
-	virtual void read (ConfigurationBase& configuration)
-	{
-		;
-	}
-	virtual void write (const ConfigurationBase& configuration)
-	{
-		;
-	}
+	ConfigurationHandler(void);
+	virtual ~ConfigurationHandler(void);
+	virtual void read(TableBase& configuration) { ; }
+	virtual void write(const TableBase& configuration) { ; }
 
-	static void        readXML (ConfigurationBase& configuration, ConfigurationVersion version);
-	static void        readXML (ConfigurationBase* configuration, ConfigurationVersion version);
-	static std::string writeXML (const ConfigurationBase& configuration);  //returns the file name
-	static std::string writeXML (const ConfigurationBase* configuration);  //returns the file name
+	static void        readXML(TableBase& configuration, TableVersion version);
+	static void        readXML(TableBase* configuration, TableVersion version);
+	static std::string writeXML(const TableBase& configuration);  // returns the file name
+	static std::string writeXML(const TableBase* configuration);  // returns the file name
 
-	//FIXME These are methods that should not exist as public but I don't know what to do until I know how to make the database interface
-	static std::string getXMLDir (const ConfigurationBase* configuration);
+	// FIXME These are methods that should not exist as public but I don't know what to do
+	// until I know how to make the database interface
+	static std::string getXMLDir(const TableBase* configuration);
 
   private:
-	static void        initPlatform (void);
-	static void        terminatePlatform (void);
-	static bool        validateNode (XMLCh* tagName, xercesc::DOMNode* node, const std::string& expectedValue);
-	static void        outputXML (xercesc::DOMDocument* pmyDOMDocument, std::string filePath);
-	static std::string getXMLFileName (const ConfigurationBase& configuration, ConfigurationVersion version);
+	static void initPlatform(void);
+	static void terminatePlatform(void);
+	static bool validateNode(XMLCh*             tagName,
+	                         xercesc::DOMNode*  node,
+	                         const std::string& expectedValue);
+	static void outputXML(xercesc::DOMDocument* pmyDOMDocument, std::string filePath);
+	static std::string getXMLFileName(const TableBase& configuration,
+	                                  TableVersion     version);
 
-	static xercesc::DOMNode*    getNode (XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber);
-	static xercesc::DOMNode*    getNode (XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber);
-	static xercesc::DOMElement* getElement (XMLCh* tagName, xercesc::DOMNode* parent, unsigned int itemNumber);
-	static xercesc::DOMElement* getElement (XMLCh* tagName, xercesc::DOMElement* parent, unsigned int itemNumber);
+	static xercesc::DOMNode*    getNode(XMLCh*            tagName,
+	                                    xercesc::DOMNode* parent,
+	                                    unsigned int      itemNumber);
+	static xercesc::DOMNode*    getNode(XMLCh*               tagName,
+	                                    xercesc::DOMElement* parent,
+	                                    unsigned int         itemNumber);
+	static xercesc::DOMElement* getElement(XMLCh*            tagName,
+	                                       xercesc::DOMNode* parent,
+	                                       unsigned int      itemNumber);
+	static xercesc::DOMElement* getElement(XMLCh*               tagName,
+	                                       xercesc::DOMElement* parent,
+	                                       unsigned int         itemNumber);
 	static XMLCh*               rootTag_;
 	static XMLCh*               headerTag_;
 	static XMLCh*               typeTag_;
@@ -65,4 +72,4 @@ class ConfigurationHandler
 
 }  // namespace ots
 
-#endif  //ots_ConfigurationHandler_h
+#endif  // ots_ConfigurationHandler_h

@@ -27,7 +27,7 @@ namespace ots
 {
 class HttpXmlDocument;
 
-//WizardSupervisor
+// WizardSupervisor
 //	This class is a xdaq application.
 //
 //	It is instantiated by the xdaq context when otsdaq is in "Wiz Mode."
@@ -39,34 +39,42 @@ class HttpXmlDocument;
 class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 {
   public:
-	XDAQ_INSTANTIATOR ();
+	XDAQ_INSTANTIATOR();
 
-	WizardSupervisor (xdaq::ApplicationStub*) throw (xdaq::exception::Exception);
-	virtual ~WizardSupervisor (void);
+	WizardSupervisor(xdaq::ApplicationStub*) throw(xdaq::exception::Exception);
+	virtual ~WizardSupervisor(void);
 
-	void init (void);
-	void destroy (void);
+	void init(void);
+	void destroy(void);
 
-	void        generateURL (void);
-	static void printURL (WizardSupervisor* ptr, std::string securityCode);
+	void        generateURL(void);
+	static void printURL(WizardSupervisor* ptr, std::string securityCode);
 
-	void Default (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
-	void verification (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
-	void request (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
-	void requestIcons (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
+	void Default(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void verification(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void request(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void requestIcons(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
 
-	void        editSecurity (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
-	void        UserSettings (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
-	void        tooltipRequest (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
-	void        toggleSecurityCodeGeneration (xgi::Input* in, xgi::Output* out) throw (xgi::exception::Exception);
-	std::string validateUploadFileType (const std::string fileType);
-	void        cleanUpPreviews ();
-	void        savePostPreview (std::string& subject, std::string& text, const std::vector<cgicc::FormFile>& files, std::string creator, HttpXmlDocument* xmldoc = nullptr);
-	std::string exec (const char* cmd);
+	void editSecurity(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void UserSettings(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void tooltipRequest(xgi::Input*  in,
+	                    xgi::Output* out) throw(xgi::exception::Exception);
+	void toggleSecurityCodeGeneration(xgi::Input*  in,
+	                                  xgi::Output* out) throw(xgi::exception::Exception);
+	std::string validateUploadFileType(const std::string fileType);
+	void        cleanUpPreviews();
+	void        savePostPreview(std::string&                        subject,
+	                            std::string&                        text,
+	                            const std::vector<cgicc::FormFile>& files,
+	                            std::string                         creator,
+	                            HttpXmlDocument*                    xmldoc = nullptr);
+	std::string exec(const char* cmd);
 
-	//External Supervisor XOAP handlers
-	xoap::MessageReference supervisorSequenceCheck (xoap::MessageReference msg) throw (xoap::exception::Exception);
-	xoap::MessageReference supervisorLastConfigGroupRequest (xoap::MessageReference msg) throw (xoap::exception::Exception);
+	// External Supervisor XOAP handlers
+	xoap::MessageReference supervisorSequenceCheck(xoap::MessageReference msg) throw(
+	    xoap::exception::Exception);
+	xoap::MessageReference supervisorLastConfigGroupRequest(
+	    xoap::MessageReference msg) throw(xoap::exception::Exception);
 
   private:
 	std::string              securityCode_;
@@ -81,7 +89,7 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 		ADMIN_PERMISSIONS_THRESHOLD = 255,
 		EXPERIMENT_NAME_MIN_LENTH   = 3,
 		EXPERIMENT_NAME_MAX_LENTH   = 25,
-		USER_DATA_EXPIRATION_TIME   = 60 * 20,  //20 minutes
+		USER_DATA_EXPIRATION_TIME   = 60 * 20,  // 20 minutes
 	};
 
 	CodeEditor codeEditor_;

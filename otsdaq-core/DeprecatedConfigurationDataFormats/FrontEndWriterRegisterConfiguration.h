@@ -8,8 +8,8 @@ namespace ots
 class FEWRegisterConfiguration : public ots::RegisterConfiguration
 {
   public:
-	FEWRegisterConfiguration (void);
-	virtual ~FEWRegisterConfiguration (void);
+	FEWRegisterConfiguration(void);
+	virtual ~FEWRegisterConfiguration(void);
 };
 }  // namespace ots
 #endif

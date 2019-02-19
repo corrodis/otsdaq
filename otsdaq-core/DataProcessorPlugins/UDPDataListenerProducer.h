@@ -11,20 +11,26 @@ namespace ots
 {
 class ConfigurationTree;
 
-class UDPDataListenerProducer : public DataProducer, public Configurable, public ReceiverSocket
+class UDPDataListenerProducer : public DataProducer,
+                                public Configurable,
+                                public ReceiverSocket
 {
   public:
-	UDPDataListenerProducer (std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath);
-	virtual ~UDPDataListenerProducer (void);
+	UDPDataListenerProducer(std::string              supervisorApplicationUID,
+	                        std::string              bufferUID,
+	                        std::string              processorUID,
+	                        const ConfigurationTree& theXDAQContextConfigTree,
+	                        const std::string&       configurationPath);
+	virtual ~UDPDataListenerProducer(void);
 
   protected:
-	bool workLoopThread (toolbox::task::WorkLoop* workLoop);
-	void slowWrite (void);
-	void fastWrite (void);
-	//For slow write
+	bool workLoopThread(toolbox::task::WorkLoop* workLoop);
+	void slowWrite(void);
+	void fastWrite(void);
+	// For slow write
 	std::string                        data_;
 	std::map<std::string, std::string> header_;
-	//For fast write
+	// For fast write
 	std::string*                        dataP_;
 	std::map<std::string, std::string>* headerP_;
 
@@ -32,7 +38,7 @@ class UDPDataListenerProducer : public DataProducer, public Configurable, public
 	unsigned short port_;
 
 	unsigned char lastSeqId_;
-	//bool getNextFragment(void);
+	// bool getNextFragment(void);
 };
 
 }  // namespace ots

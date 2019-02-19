@@ -1,26 +1,26 @@
 #ifndef _ots_FESlowControlsConfiguration_h_
 #define _ots_FESlowControlsConfiguration_h_
 
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
 #include <string>
+#include "otsdaq-core/TableCore/TableBase.h"
 
 namespace ots
 {
-class FESlowControlsConfiguration : public ConfigurationBase
+class FESlowControlsConfiguration : public TableBase
 {
   public:
-	FESlowControlsConfiguration (void);
-	virtual ~FESlowControlsConfiguration (void);
+	FESlowControlsConfiguration(void);
+	virtual ~FESlowControlsConfiguration(void);
 
-	//Methods
-	void init (ConfigurationManager *configManager);
+	// Methods
+	void init(ConfigurationManager* configManager);
 
-	//Getters
+	// Getters
 
   private:
-	//Column names
+	// Column names
 	struct ColSlowControls
 	{
 		std::string const colDataType_ = "ChannelDataType";

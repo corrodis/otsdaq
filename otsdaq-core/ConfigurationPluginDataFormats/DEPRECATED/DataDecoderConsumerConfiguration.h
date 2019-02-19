@@ -1,26 +1,26 @@
 #ifndef _ots_DataDecoderConsumerConfiguration_h_
 #define _ots_DataDecoderConsumerConfiguration_h_
 
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
-
 #include <string>
+
+#include "../../TableCore/TableBase.h"
 
 namespace ots
 {
-class DataDecoderConsumerConfiguration : public ConfigurationBase
+class DataDecoderConsumerConfiguration : public TableBase
 {
   public:
-	DataDecoderConsumerConfiguration (void);
-	virtual ~DataDecoderConsumerConfiguration (void);
+	DataDecoderConsumerConfiguration(void);
+	virtual ~DataDecoderConsumerConfiguration(void);
 
-	//Methods
-	void init (ConfigurationManager *configManager);
+	// Methods
+	void init(ConfigurationManager* configManager);
 
-	//Getter
-	std::vector<std::string> getProcessorIDList (void) const;
+	// Getter
+	std::vector<std::string> getProcessorIDList(void) const;
 
   private:
-	void check (std::string processorUID) const;
+	void check(std::string processorUID) const;
 	enum
 	{
 		ProcessorID

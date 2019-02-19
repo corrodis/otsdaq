@@ -13,7 +13,7 @@ namespace ots
 typedef std::map<unsigned int, const SupervisorInfo&> SupervisorInfoMap;
 
 ////// class define
-//AllSupervisorInfo
+// AllSupervisorInfo
 //	xdaq Supervisors can use this class to gain access to
 //	info for all supervisors in the xdaq Context. Supervisors
 //	are organized by type/class. Note that if a supervisor is
@@ -28,42 +28,59 @@ typedef std::map<unsigned int, const SupervisorInfo&> SupervisorInfoMap;
 class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 {
   public:
-	AllSupervisorInfo (void);
-	AllSupervisorInfo (xdaq::ApplicationContext* applicationContext);
-	~AllSupervisorInfo (void);
+	AllSupervisorInfo(void);
+	AllSupervisorInfo(xdaq::ApplicationContext* applicationContext);
+	~AllSupervisorInfo(void);
 
-	void init (xdaq::ApplicationContext* applicationContext);
-	void destroy (void);
+	void init(xdaq::ApplicationContext* applicationContext);
+	void destroy(void);
 
-	//BOOLs
-	bool isWizardMode (void) const { return theWizardInfo_ ? true : false; }
+	// BOOLs
+	bool isWizardMode(void) const { return theWizardInfo_ ? true : false; }
 
-	//SETTERs
-	void setSupervisorStatus (xdaq::Application* app, const std::string& status);
-	void setSupervisorStatus (const SupervisorInfo& appInfo, const std::string& status);
-	void setSupervisorStatus (const unsigned int& id, const std::string& status);
+	// SETTERs
+	void setSupervisorStatus(xdaq::Application* app, const std::string& status);
+	void setSupervisorStatus(const SupervisorInfo& appInfo, const std::string& status);
+	void setSupervisorStatus(const unsigned int& id, const std::string& status);
 
-	//GETTERs (so searching and iterating is easier)
-	const std::map<unsigned int, SupervisorInfo>& getAllSupervisorInfo (void) const { return allSupervisorInfo_; }
-	const SupervisorInfoMap&                      getAllFETypeSupervisorInfo (void) const { return allFETypeSupervisorInfo_; }
-	const SupervisorInfoMap&                      getAllDMTypeSupervisorInfo (void) const { return allDMTypeSupervisorInfo_; }
-	const SupervisorInfoMap&                      getAllLogbookTypeSupervisorInfo (void) const { return allLogbookTypeSupervisorInfo_; }
-	const SupervisorInfoMap&                      getAllMacroMakerTypeSupervisorInfo (void) const { return allMacroMakerTypeSupervisorInfo_; }
+	// GETTERs (so searching and iterating is easier)
+	const std::map<unsigned int, SupervisorInfo>& getAllSupervisorInfo(void) const
+	{
+		return allSupervisorInfo_;
+	}
+	const SupervisorInfoMap& getAllFETypeSupervisorInfo(void) const
+	{
+		return allFETypeSupervisorInfo_;
+	}
+	const SupervisorInfoMap& getAllDMTypeSupervisorInfo(void) const
+	{
+		return allDMTypeSupervisorInfo_;
+	}
+	const SupervisorInfoMap& getAllLogbookTypeSupervisorInfo(void) const
+	{
+		return allLogbookTypeSupervisorInfo_;
+	}
+	const SupervisorInfoMap& getAllMacroMakerTypeSupervisorInfo(void) const
+	{
+		return allMacroMakerTypeSupervisorInfo_;
+	}
 
-	const SupervisorInfo& getSupervisorInfo (xdaq::Application* app) const;
-	const SupervisorInfo& getGatewayInfo (void) const;
-	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getGatewayDescriptor (void) const;
-	const SupervisorInfo&                        getWizardInfo (void) const;
-	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getWizardDescriptor (void) const;
+	const SupervisorInfo& getSupervisorInfo(xdaq::Application* app) const;
+	const SupervisorInfo& getGatewayInfo(void) const;
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getGatewayDescriptor(void) const;
+	const SupervisorInfo&                        getWizardInfo(void) const;
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getWizardDescriptor(void) const;
 
-	std::vector<std::vector<const SupervisorInfo*>> getOrderedSupervisorDescriptors (const std::string& stateMachineCommand) const;
+	std::vector<std::vector<const SupervisorInfo*>> getOrderedSupervisorDescriptors(
+	    const std::string& stateMachineCommand) const;
 
   private:
 	SupervisorInfo* theSupervisorInfo_;
 	SupervisorInfo* theWizardInfo_;
 
 	std::map<unsigned int, SupervisorInfo> allSupervisorInfo_;
-	SupervisorInfoMap                      allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_, allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_;
+	SupervisorInfoMap allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_,
+	    allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_;
 };
 
 }  // namespace ots

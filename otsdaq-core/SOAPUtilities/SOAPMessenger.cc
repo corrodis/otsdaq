@@ -20,14 +20,14 @@
 using namespace ots;
 
 //========================================================================================================================
-SOAPMessenger::SOAPMessenger (xdaq::Application* application)
-    : theApplication_ (application)
+SOAPMessenger::SOAPMessenger(xdaq::Application* application)
+    : theApplication_(application)
 {
 }
 
 //========================================================================================================================
-SOAPMessenger::SOAPMessenger (const SOAPMessenger& aSOAPMessenger)
-    : theApplication_ (aSOAPMessenger.theApplication_)
+SOAPMessenger::SOAPMessenger(const SOAPMessenger& aSOAPMessenger)
+    : theApplication_(aSOAPMessenger.theApplication_)
 {
 }
 
@@ -36,127 +36,132 @@ SOAPMessenger::SOAPMessenger (const SOAPMessenger& aSOAPMessenger)
 //    xdaq::ApplicationDescriptor* sourceptr;
 // void getURN()
 //
-std::string SOAPMessenger::send (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
-                                 xoap::MessageReference                       message)
+std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
+                                xoap::MessageReference                       message)
 
 {
-	return SOAPUtilities::receive (sendWithSOAPReply (ind, message));
+	return SOAPUtilities::receive(sendWithSOAPReply(ind, message));
 }
 
 //========================================================================================================================
-std::string SOAPMessenger::send (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, SOAPCommand soapCommand)
+std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d,
+                                SOAPCommand                                  soapCommand)
 
 {
-	if (soapCommand.hasParameters ())
-		return send (d, soapCommand.getCommand (), soapCommand.getParameters ());
+	if(soapCommand.hasParameters())
+		return send(d, soapCommand.getCommand(), soapCommand.getParameters());
 	else
-		return send (d, soapCommand.getCommand ());
+		return send(d, soapCommand.getCommand());
 }
 
 //========================================================================================================================
-std::string SOAPMessenger::send (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, std::string command)
+std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d,
+                                std::string                                  command)
 
 {
-	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference (command);
-	return send (d, message);
+	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(command);
+	return send(d, message);
 }
 
 //========================================================================================================================
-std::string SOAPMessenger::send (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind, std::string cmd, SOAPParameters parameters)
+std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
+                                std::string                                  cmd,
+                                SOAPParameters                               parameters)
 
 {
-	return SOAPUtilities::receive (sendWithSOAPReply (ind, cmd, parameters));
+	return SOAPUtilities::receive(sendWithSOAPReply(ind, cmd, parameters));
 }
 
 //========================================================================================================================
-xoap::MessageReference SOAPMessenger::sendWithSOAPReply (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
-                                                         std::string                                  cmd)
+xoap::MessageReference SOAPMessenger::sendWithSOAPReply(
+    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind, std::string cmd)
 
 {
-	return sendWithSOAPReply (ind, SOAPUtilities::makeSOAPMessageReference (cmd));
+	return sendWithSOAPReply(ind, SOAPUtilities::makeSOAPMessageReference(cmd));
 }
 
 //========================================================================================================================
-xoap::MessageReference SOAPMessenger::sendWithSOAPReply (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
-                                                         xoap::MessageReference                       message)
+xoap::MessageReference SOAPMessenger::sendWithSOAPReply(
+    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind, xoap::MessageReference message)
 
 {
-	//const_cast away the const
+	// const_cast away the const
 	//	so that this line is compatible with slf6 and slf7 versions of xdaq
 	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d =
-	    const_cast<xdaq::ApplicationDescriptor*> (ind);
+	    const_cast<xdaq::ApplicationDescriptor*>(ind);
 	try
 	{
-		message->getMimeHeaders ()->setHeader ("Content-Location", d->getURN ());
+		message->getMimeHeaders()->setHeader("Content-Location", d->getURN());
 
 		//__COUT__ << d->getURN() << __E__;
 		//__COUT__ << SOAPUtilities::translate(message) << __E__;
 		std::string mystring;
-		message->writeTo (mystring);
+		message->writeTo(mystring);
 		//__COUT__<< mystring << std::endl;
 
-		xoap::MessageReference reply = theApplication_->getApplicationContext ()->postSOAP (
-		    message,
-		    *(theApplication_->getApplicationDescriptor ()),
-		    *d);
+		xoap::MessageReference reply = theApplication_->getApplicationContext()->postSOAP(
+		    message, *(theApplication_->getApplicationDescriptor()), *d);
 		return reply;
 	}
-	catch (xdaq::exception::Exception& e)
+	catch(xdaq::exception::Exception& e)
 	{
 		__COUT__ << "This application failed to send a SOAP message to "
-		         << d->getClassName () << " instance " << d->getInstance ()
-		         << " re-throwing exception = " << xcept::stdformat_exception_history (e);
+		         << d->getClassName() << " instance " << d->getInstance()
+		         << " re-throwing exception = " << xcept::stdformat_exception_history(e);
 		std::string mystring;
-		message->writeTo (mystring);
+		message->writeTo(mystring);
 		__COUT_ERR__ << mystring << std::endl;
-		XCEPT_RETHROW (xdaq::exception::Exception, "Failed to send SOAP command.", e);
+		XCEPT_RETHROW(xdaq::exception::Exception, "Failed to send SOAP command.", e);
 	}
 }
 
 //========================================================================================================================
-xoap::MessageReference SOAPMessenger::sendWithSOAPReply (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
-                                                         std::string                                  cmd,
-                                                         SOAPParameters                               parameters)
+xoap::MessageReference SOAPMessenger::sendWithSOAPReply(
+    XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
+    std::string                                  cmd,
+    SOAPParameters                               parameters)
 
 {
-	return sendWithSOAPReply (ind, SOAPUtilities::makeSOAPMessageReference (cmd, parameters));
+	return sendWithSOAPReply(ind,
+	                         SOAPUtilities::makeSOAPMessageReference(cmd, parameters));
 }
 
 //========================================================================================================================
-std::string SOAPMessenger::sendStatus (XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
-                                       std::string                                  message)
+std::string SOAPMessenger::sendStatus(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* ind,
+                                      std::string message)
 
 {
-	//const_cast away the const
+	// const_cast away the const
 	//	so that this line is compatible with slf6 and slf7 versions of xdaq
 	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d =
-	    const_cast<xdaq::ApplicationDescriptor*> (ind);
+	    const_cast<xdaq::ApplicationDescriptor*>(ind);
 
 	std::string cmd = "StatusNotification";
 	try
 	{
-		timeval tv;  //keep track of when the message comes
-		gettimeofday (&tv, NULL);
+		timeval tv;  // keep track of when the message comes
+		gettimeofday(&tv, NULL);
 
 		std::stringstream ss;
 		SOAPParameters    parameters;
-		parameters.addParameter ("Description", message);
-		ss.str ("");
+		parameters.addParameter("Description", message);
+		ss.str("");
 		ss << tv.tv_sec;
-		parameters.addParameter ("Time", ss.str ());
-		ss.str ("");
+		parameters.addParameter("Time", ss.str());
+		ss.str("");
 		ss << tv.tv_usec;
-		parameters.addParameter ("usec", ss.str ());
-		return send (d, cmd, parameters);
+		parameters.addParameter("usec", ss.str());
+		return send(d, cmd, parameters);
 	}
-	catch (xdaq::exception::Exception& e)
+	catch(xdaq::exception::Exception& e)
 	{
 		__COUT__ << "This application failed to send a SOAP error message to "
-		         << d->getClassName () << " instance " << d->getInstance ()
+		         << d->getClassName() << " instance " << d->getInstance()
 		         << " with command = " << cmd
-		         << " re-throwing exception = " << xcept::stdformat_exception_history (e) << std::endl;
-		XCEPT_RETHROW (xdaq::exception::Exception, "Failed to send SOAP command.", e);
+		         << " re-throwing exception = " << xcept::stdformat_exception_history(e)
+		         << std::endl;
+		XCEPT_RETHROW(xdaq::exception::Exception, "Failed to send SOAP command.", e);
 	}
 }

@@ -1,23 +1,23 @@
 #ifndef _ots_TemplateConfiguration_h_
 #define _ots_TemplateConfiguration_h_
 
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
+#include "otsdaq-core/TableCore/TableBase.h"
 
 namespace ots
 {
-class TemplateConfiguration : public ConfigurationBase
+class TemplateConfiguration : public TableBase
 {
   public:
-	TemplateConfiguration (void);
-	virtual ~TemplateConfiguration (void);
+	TemplateConfiguration(void);
+	virtual ~TemplateConfiguration(void);
 
-	//Methods
-	void init (ConfigurationManager *configManager);
+	// Methods
+	void init(ConfigurationManager* configManager);
 
-	//Getters
+	// Getters
 
   private:
-	//Column names
+	// Column names
 	struct ColTemplate
 	{
 		std::string const colColumnName_ = "ColumnName";

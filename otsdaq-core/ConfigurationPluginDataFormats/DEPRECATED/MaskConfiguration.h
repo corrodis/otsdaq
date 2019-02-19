@@ -1,24 +1,24 @@
 #ifndef _ots_MaskConfiguration_h_
 #define _ots_MaskConfiguration_h_
 
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
-
 #include <map>
 #include <string>
 
+#include "../../TableCore/TableBase.h"
+
 namespace ots
 {
-class MaskConfiguration : public ConfigurationBase
+class MaskConfiguration : public TableBase
 {
   public:
-	MaskConfiguration (void);
-	virtual ~MaskConfiguration (void);
+	MaskConfiguration(void);
+	virtual ~MaskConfiguration(void);
 
-	//Methods
-	virtual void init (ConfigurationManager* configManager);
+	// Methods
+	virtual void init(ConfigurationManager* configManager);
 
-	//Getters
-	const std::string& getROCMask (std::string rocName) const;
+	// Getters
+	const std::string& getROCMask(std::string rocName) const;
 
   protected:
 	std::map<std::string, unsigned int> nameToRow_;

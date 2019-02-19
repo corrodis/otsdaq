@@ -6,49 +6,50 @@
 using namespace ots;
 
 //==============================================================================
-FEConfiguration::FEConfiguration (void)
-    : ConfigurationBase ("FEConfiguration")
+FEConfiguration::FEConfiguration(void) : TableBase("FEConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
-	//WARNING: the names and the order MUST match the ones in the enum  //
+	// WARNING: the names and the order MUST match the ones in the enum  //
 	//////////////////////////////////////////////////////////////////////
-	//FEConfigurationInfo.xml
+	// FEConfigurationInfo.xml
 	//<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-	//<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
+	//<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	// xsi:noNamespaceSchemaLocation="TableInfo.xsd">
 	//  <CONFIGURATION Name="FEConfiguration">
 	//    <VIEW Name="FE_CONFIGURATION" Type="File,Database,DatabaseTest">
-	//      <COLUMN Name="SupervisorType"     StorageName="SUPERVISOR_TYPE"     DataType="VARCHAR2"/>
-	//      <COLUMN Name="SupervisorInstance" StorageName="SUPERVISOR_INSTANCE" DataType="NUMBER"  />
-	//      <COLUMN Name="FrontEndType"       StorageName="FRONT_END_TYPE"      DataType="VARCHAR2"/>
-	//      <COLUMN Name="FrontEndID"         StorageName="INTERFACE_ID"        DataType="VARCHAR2"/>
+	//      <COLUMN Name="SupervisorType"     StorageName="SUPERVISOR_TYPE"
+	//      DataType="VARCHAR2"/> <COLUMN Name="SupervisorInstance"
+	//      StorageName="SUPERVISOR_INSTANCE" DataType="NUMBER"  /> <COLUMN
+	//      Name="FrontEndType"       StorageName="FRONT_END_TYPE" DataType="VARCHAR2"/>
+	//      <COLUMN Name="FrontEndID"         StorageName="INTERFACE_ID"
+	//      DataType="VARCHAR2"/>
 	//    </VIEW>
 	//  </CONFIGURATION>
 	//</ROOT>
 }
 
 //==============================================================================
-FEConfiguration::~FEConfiguration (void)
-{
-}
+FEConfiguration::~FEConfiguration(void) {}
 
 //==============================================================================
-void FEConfiguration::init (ConfigurationManager *configManager)
+void FEConfiguration::init(ConfigurationManager* configManager)
 {
 	std::string  tmpType;
 	unsigned int tmpInstance;
 	std::string  tmpID;
-	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
+	for(unsigned int row = 0; row < TableBase::activeTableView_->getNumberOfRows(); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue (tmpType, row, SupervisorType);
-		ConfigurationBase::activeConfigurationView_->getValue (tmpInstance, row, SupervisorInstance);
-		ConfigurationBase::activeConfigurationView_->getValue (tmpID, row, FrontEndId);
-		std::cout << __COUT_HDR_FL__ << "Type: " << tmpType << " Name: " << tmpInstance << " row: " << row << std::endl;
-		typeNameToRow_[composeUniqueName (tmpType, tmpInstance)][tmpID] = row;
+		TableBase::activeTableView_->getValue(tmpType, row, SupervisorType);
+		TableBase::activeTableView_->getValue(tmpInstance, row, SupervisorInstance);
+		TableBase::activeTableView_->getValue(tmpID, row, FrontEndId);
+		std::cout << __COUT_HDR_FL__ << "Type: " << tmpType << " Name: " << tmpInstance
+		          << " row: " << row << std::endl;
+		typeNameToRow_[composeUniqueName(tmpType, tmpInstance)][tmpID] = row;
 	}
 }
 //
 ////==============================================================================
-//std::vector<std::string> FEConfiguration::getListOfFEIDs(void) const
+// std::vector<std::string> FEConfiguration::getListOfFEIDs(void) const
 //{
 //	std::vector<std::string> list;
 //	for(const auto& itSupervisors : typeNameToRow_)
@@ -58,7 +59,8 @@ void FEConfiguration::init (ConfigurationManager *configManager)
 //}
 //
 ////==============================================================================
-//std::vector<std::string> FEConfiguration::getListOfFEIDs(const std::string& supervisorType, unsigned int supervisorInstance) const
+// std::vector<std::string> FEConfiguration::getListOfFEIDs(const std::string&
+// supervisorType, unsigned int supervisorInstance) const
 //{
 //	std::string uniqueName = composeUniqueName(supervisorType, supervisorInstance);
 //	std::vector<std::string> list;
@@ -80,20 +82,23 @@ void FEConfiguration::init (ConfigurationManager *configManager)
 //}
 //
 ////==============================================================================
-//const std::string FEConfiguration::getFEInterfaceType(const std::string& frontEndID) const
+// const std::string FEConfiguration::getFEInterfaceType(const std::string& frontEndID)
+// const
 //{
 //	for(const auto& itSupervisors : typeNameToRow_)
 //		for(const auto& itFrontEnds : itSupervisors.second)
 //			if(itFrontEnds.first == frontEndID)
-//				return ConfigurationBase::getView().getDataView()[typeNameToRow_.find(itSupervisors.first)->second.find(frontEndID)->second][FrontEndType];
-//	std::cout << __COUT_HDR_FL__ << "Didn't find any interface with ID: " << frontEndID << std::endl;
-//	assert(0);
+//				return
+// TableBase::getView().getDataView()[typeNameToRow_.find(itSupervisors.first)->second.find(frontEndID)->second][FrontEndType];
+//	std::cout << __COUT_HDR_FL__ << "Didn't find any interface with ID: " << frontEndID <<
+// std::endl; 	assert(0);
 //	__THROW__("FEID not found!");
 //	return "";
 //}
 //
 ////==============================================================================
-//const std::string FEConfiguration::getFEInterfaceType(const std::string& supervisorType, unsigned int supervisorInstance, const std::string& frontEndID) const
+// const std::string FEConfiguration::getFEInterfaceType(const std::string&
+// supervisorType, unsigned int supervisorInstance, const std::string& frontEndID) const
 //{
 //	std::string uniqueName = composeUniqueName(supervisorType, supervisorInstance);
 //	if(typeNameToRow_.find(uniqueName) == typeNameToRow_.end())
@@ -104,7 +109,8 @@ void FEConfiguration::init (ConfigurationManager *configManager)
 //				<< std::endl;
 //		assert(0);
 //	}
-//	if(typeNameToRow_.find(uniqueName)->second.find(frontEndID) == typeNameToRow_.find(uniqueName)->second.end())
+//	if(typeNameToRow_.find(uniqueName)->second.find(frontEndID) ==
+// typeNameToRow_.find(uniqueName)->second.end())
 //	{
 //		std::cout << __COUT_HDR_FL__
 //				<< "Couldn't find any front end ID " << frontEndID
@@ -114,61 +120,65 @@ void FEConfiguration::init (ConfigurationManager *configManager)
 //		assert(0);
 //	}
 //
-//	return ConfigurationBase::getView().getDataView()[typeNameToRow_.find(uniqueName)->second.find(frontEndID)->second][FrontEndType];
+//	return
+// TableBase::getView().getDataView()[typeNameToRow_.find(uniqueName)->second.find(frontEndID)->second][FrontEndType];
 //}
 
 ////==============================================================================
-//std::vector<unsigned int> FEConfiguration::getListOfFEWRs(void) const
+// std::vector<unsigned int> FEConfiguration::getListOfFEWRs(void) const
 //{
 //    return getListOfFEs("FEWR");
 //}
 //
 ////==============================================================================
-//std::vector<unsigned int> FEConfiguration::getListOfFEWRs(unsigned int supervisorInstance) const
+// std::vector<unsigned int> FEConfiguration::getListOfFEWRs(unsigned int
+// supervisorInstance) const
 //{
 //    return getListOfFEs("FEWR",supervisorInstance);
 //}
 //
 ////==============================================================================
-//const std::string& FEConfiguration::getFEWRInterfaceName(unsigned int id) const
+// const std::string& FEConfiguration::getFEWRInterfaceName(unsigned int id) const
 //{
 //	return getFEInterfaceType("FEWR", id);
 //}
 //
 ////==============================================================================
-//std::vector<unsigned int> FEConfiguration::getListOfFEWs(void) const
+// std::vector<unsigned int> FEConfiguration::getListOfFEWs(void) const
 //{
 //    return getListOfFEs("FEW");
 //}
 //
 ////==============================================================================
-//std::vector<unsigned int> FEConfiguration::getListOfFEWs(unsigned int supervisorInstance) const
+// std::vector<unsigned int> FEConfiguration::getListOfFEWs(unsigned int
+// supervisorInstance) const
 //{
 //    return getListOfFEs("FEW",supervisorInstance);
 //}
 //
 ////==============================================================================
-//const std::string& FEConfiguration::getFEWInterfaceName(unsigned int id) const
+// const std::string& FEConfiguration::getFEWInterfaceName(unsigned int id) const
 //{
 //	return getFEInterfaceType("FEW", id);
 //}
 //
 ////==============================================================================
-//std::vector<unsigned int> FEConfiguration::getListOfFERs(void) const
+// std::vector<unsigned int> FEConfiguration::getListOfFERs(void) const
 //{
 //    return getListOfFEs("FER");
 //}
 //
 ////==============================================================================
-//std::vector<unsigned int> FEConfiguration::getListOfFERs(unsigned int supervisorInstance) const
+// std::vector<unsigned int> FEConfiguration::getListOfFERs(unsigned int
+// supervisorInstance) const
 //{
 //    return getListOfFEs("FER",supervisorInstance);
 //}
 //
 ////==============================================================================
-//const std::string& FEConfiguration::getFERInterfaceName(unsigned int id) const
+// const std::string& FEConfiguration::getFERInterfaceName(unsigned int id) const
 //{
 //	return getFEInterfaceType("FER", id);
 //}
 
-DEFINE_OTS_CONFIGURATION (FEConfiguration)
+DEFINE_OTS_CONFIGURATION(FEConfiguration)

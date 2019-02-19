@@ -6,13 +6,13 @@
 
 using namespace ots;
 
-XDAQ_INSTANTIATOR_IMPL (ARTDAQFEDataManagerSupervisor)
+XDAQ_INSTANTIATOR_IMPL(ARTDAQFEDataManagerSupervisor)
 
 //========================================================================================================================
 // The intention is that the artdaq Board Reader would be a onsumer
 //	extracting data that the front-end places in the buffer.
-ARTDAQFEDataManagerSupervisor::ARTDAQFEDataManagerSupervisor (xdaq::ApplicationStub* s)
-    : FEDataManagerSupervisor (s, true /*artdaq Data Manager*/)
+ARTDAQFEDataManagerSupervisor::ARTDAQFEDataManagerSupervisor(xdaq::ApplicationStub* s)
+    : FEDataManagerSupervisor(s, true /*artdaq Data Manager*/)
 {
 	//	__SUP_COUT__ << "Constructor." << std::endl;
 	//
@@ -44,18 +44,19 @@ ARTDAQFEDataManagerSupervisor::ARTDAQFEDataManagerSupervisor (xdaq::ApplicationS
 	//	extractDataManager();
 
 	__SUP_COUT__ << "Constructed." << __E__;
-}  //end constructor()
+}  // end constructor()
 
 //========================================================================================================================
-ARTDAQFEDataManagerSupervisor::~ARTDAQFEDataManagerSupervisor (void)
+ARTDAQFEDataManagerSupervisor::~ARTDAQFEDataManagerSupervisor(void)
 {
 	//	__SUP_COUT__ << "Destroying..." << std::endl;
 	//
-	//	//theStateMachineImplementation_ is reset and the object it points to deleted in ~CoreSupervisorBase()
+	//	//theStateMachineImplementation_ is reset and the object it points to deleted in
+	//~CoreSupervisorBase()
 	//	//This destructor must happen before the CoreSupervisor destructor
 	//
 	//	DataManagerSingleton::deleteInstance(CoreSupervisorBase::supervisorApplicationUID_);
 	//	theStateMachineImplementation_.pop_back();
 
 	__SUP_COUT__ << "Destructed." << __E__;
-}  //end destructor()
+}  // end destructor()

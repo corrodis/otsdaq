@@ -1,14 +1,14 @@
 #include "otsdaq-core/PluginMakers/MakeInterfaceConfiguration.h"
-#include "otsdaq-core/ConfigurationDataFormats/ConfigurationBase.h"
-
 #include <cetlib/BasicPluginFactory.h>
+
+#include "otsdaq-core/TableCore/TableBase.h"
 
 namespace ots
 {
-ConfigurationBase* makeInterfaceConfiguration (std::string const& configurationPluginName)
+TableBase* makeInterfaceConfiguration(std::string const& configurationPluginName)
 {
-	static cet::BasicPluginFactory basicPluginInterfaceFactory ("configuration", "make");
+	static cet::BasicPluginFactory basicPluginInterfaceFactory("configuration", "make");
 
-	return basicPluginInterfaceFactory.makePlugin<ConfigurationBase*> (configurationPluginName);
+	return basicPluginInterfaceFactory.makePlugin<TableBase*>(configurationPluginName);
 }
 }  // namespace ots

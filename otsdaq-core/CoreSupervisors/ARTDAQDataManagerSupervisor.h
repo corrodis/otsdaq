@@ -5,15 +5,15 @@
 
 namespace ots
 {
-//ARTDAQDataManagerSupervisor
+// ARTDAQDataManagerSupervisor
 //	This class handles a single artdaq Board Reader instance.
 class ARTDAQDataManagerSupervisor : public CoreSupervisorBase
 {
   public:
-	XDAQ_INSTANTIATOR ();
+	XDAQ_INSTANTIATOR();
 
-	ARTDAQDataManagerSupervisor (xdaq::ApplicationStub* s);
-	virtual ~ARTDAQDataManagerSupervisor (void);
+	ARTDAQDataManagerSupervisor(xdaq::ApplicationStub* s);
+	virtual ~ARTDAQDataManagerSupervisor(void);
 
   private:
 };

@@ -9,12 +9,12 @@ namespace ots
 class TCPDataStreamerBase : public TCPSocket
 {
   public:
-	TCPDataStreamerBase (unsigned int port);
-	virtual ~TCPDataStreamerBase (void);
+	TCPDataStreamerBase(unsigned int port);
+	virtual ~TCPDataStreamerBase(void);
 
-	int send (const std::string& buffer) { return TCPSocket::send (buffer); }
-	int send (const std::vector<uint32_t>& buffer) { return TCPSocket::send (buffer); }
-	int send (const std::vector<uint16_t>& buffer) { return TCPSocket::send (buffer); }
+	int send(const std::string& buffer) { return TCPSocket::send(buffer); }
+	int send(const std::vector<uint32_t>& buffer) { return TCPSocket::send(buffer); }
+	int send(const std::vector<uint16_t>& buffer) { return TCPSocket::send(buffer); }
 };
 
 }  // namespace ots

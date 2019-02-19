@@ -23,46 +23,49 @@
 namespace ots
 {
 class ConfigurationManager;
-class ConfigurationGroupKey;
+class TableGroupKey;
 
-//DataLoggerApp
+// DataLoggerApp
 //	This class provides the otsdaq interface to a single artdaq Data Logger.
-class DataLoggerApp : public xdaq::Application, public SOAPMessenger, public RunControlStateMachine
+class DataLoggerApp : public xdaq::Application,
+                      public SOAPMessenger,
+                      public RunControlStateMachine
 {
   public:
-	XDAQ_INSTANTIATOR ();
+	XDAQ_INSTANTIATOR();
 
-	DataLoggerApp (xdaq::ApplicationStub* s);
-	virtual ~DataLoggerApp (void);
-	void init (void);
-	void destroy (void);
-	void Default (xgi::Input* in, xgi::Output* out);
+	DataLoggerApp(xdaq::ApplicationStub* s);
+	virtual ~DataLoggerApp(void);
+	void init(void);
+	void destroy(void);
+	void Default(xgi::Input* in, xgi::Output* out);
 
-	//State Machine requests handlers
-	void                   stateMachineXgiHandler (xgi::Input* in, xgi::Output* out);
-	void                   stateMachineResultXgiHandler (xgi::Input* in, xgi::Output* out);
-	xoap::MessageReference stateMachineXoapHandler (xoap::MessageReference message);
-	xoap::MessageReference stateMachineResultXoapHandler (xoap::MessageReference message);
-	bool                   stateMachineThread (toolbox::task::WorkLoop* workLoop);
+	// State Machine requests handlers
+	void                   stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
+	void                   stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out);
+	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference message);
+	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference message);
+	bool                   stateMachineThread(toolbox::task::WorkLoop* workLoop);
 
-	xoap::MessageReference stateMachineStateRequest (xoap::MessageReference message);
-	xoap::MessageReference stateMachineErrorMessageRequest (xoap::MessageReference message);
+	xoap::MessageReference stateMachineStateRequest(xoap::MessageReference message);
+	xoap::MessageReference stateMachineErrorMessageRequest(
+	    xoap::MessageReference message);
 
-	void stateInitial (toolbox::fsm::FiniteStateMachine& fsm);
-	void statePaused (toolbox::fsm::FiniteStateMachine& fsm);
-	void stateRunning (toolbox::fsm::FiniteStateMachine& fsm);
-	void stateHalted (toolbox::fsm::FiniteStateMachine& fsm);
-	void stateConfigured (toolbox::fsm::FiniteStateMachine& fsm);
-	void inError (toolbox::fsm::FiniteStateMachine& fsm);
+	void stateInitial(toolbox::fsm::FiniteStateMachine& fsm);
+	void statePaused(toolbox::fsm::FiniteStateMachine& fsm);
+	void stateRunning(toolbox::fsm::FiniteStateMachine& fsm);
+	void stateHalted(toolbox::fsm::FiniteStateMachine& fsm);
+	void stateConfigured(toolbox::fsm::FiniteStateMachine& fsm);
+	void inError(toolbox::fsm::FiniteStateMachine& fsm);
 
-	void transitionConfiguring (toolbox::Event::Reference e);
-	void transitionHalting (toolbox::Event::Reference e);
-	void transitionInitializing (toolbox::Event::Reference e);
-	void transitionPausing (toolbox::Event::Reference e);
-	void transitionResuming (toolbox::Event::Reference e);
-	void transitionStarting (toolbox::Event::Reference e);
-	void transitionStopping (toolbox::Event::Reference e);
-	void enteringError (toolbox::Event::Reference e);
+	void transitionConfiguring(toolbox::Event::Reference e);
+	void transitionHalting(toolbox::Event::Reference e);
+	void transitionInitializing(toolbox::Event::Reference e);
+	void transitionPausing(toolbox::Event::Reference e);
+	void transitionResuming(toolbox::Event::Reference e);
+	void transitionStarting(toolbox::Event::Reference e);
+	void transitionStopping(toolbox::Event::Reference e);
+	void enteringError(toolbox::Event::Reference e);
 
   private:
 	WorkLoopManager stateMachineWorkLoopManager_;

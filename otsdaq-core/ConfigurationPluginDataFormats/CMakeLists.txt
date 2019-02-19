@@ -1,57 +1,57 @@
 #cet_make(LIBRARY_NAME ConfigurationPluginDataFormat
 #		 LIBRARIES
-#		 ConfigurationDataFormats
+#		 TableCore
 #         ${CETLIB}
 #)
   
 simple_plugin(ARTDAQBoardReaderConfiguration "configuration"
-  ConfigurationDataFormats 
+  TableCore 
   ConfigurationInterface
   otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
   ${CETLIB}
   )
   
 simple_plugin(ARTDAQAggregatorConfiguration "configuration"
-  ConfigurationDataFormats 
+  TableCore 
   ConfigurationInterface
   otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
   ${CETLIB}
   )
   
 simple_plugin(ARTDAQBuilderConfiguration "configuration"
-  ConfigurationDataFormats 
+  TableCore 
   ConfigurationInterface
   otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
   ${CETLIB}
   )
   
 simple_plugin(FESlowControlsConfiguration "configuration"
-  ConfigurationDataFormats 
+  TableCore 
   ConfigurationInterface
   ${CETLIB}
   )
   
 simple_plugin(XDAQContextConfiguration "configuration"
-  ConfigurationDataFormats  
+  TableCore  
   ConfigurationInterface
   ${CETLIB}
   )
   
 simple_plugin(DesktopIconConfiguration "configuration"
-  ConfigurationDataFormats
+  TableCore
   ConfigurationInterface
   WebUsersUtilities
   ${CETLIB}
   )
   
 simple_plugin(MessageFacilityConfiguration "configuration"
-  ConfigurationDataFormats
+  TableCore
   ConfigurationInterface
   ${CETLIB}
   )
     
 simple_plugin(IterateConfiguration "configuration"
-  ConfigurationDataFormats
+  TableCore
   ConfigurationInterface
   ${CETLIB}
   )

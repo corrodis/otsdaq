@@ -69,7 +69,7 @@ simple_plugin(RawDataVisualizerConsumer "processor"
     WorkLoopManager
 	#MessageFacility
     ConfigurationInterface
-    ConfigurationDataFormats
+    TableCore
 	${MF_MESSAGELOGGER}
   )
 

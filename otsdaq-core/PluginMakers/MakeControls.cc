@@ -3,21 +3,18 @@
 
 #include <cetlib/BasicPluginFactory.h>
 
-ots::ControlsVInterface* ots::makeControls (
-    const std::string&            controlsPluginName,
-    const std::string&            controlsUID,       //Key value for (eventual) ControlsDashboard Table in Configuration
-    const ots::ConfigurationTree& configuration,     //Pass the big tree
-    const std::string&            pathToControlsConfiguration)  //Path to ControlsDashboard Table
+ots::ControlsVInterface* ots::makeControls(
+    const std::string& controlsPluginName,
+    const std::string&
+                                  controlsUID,  // Key value for (eventual) ControlsDashboard Table in Configuration
+    const ots::ConfigurationTree& configuration,     // Pass the big tree
+    const std::string& pathToControlsConfiguration)  // Path to ControlsDashboard Table
 {
-	static cet::BasicPluginFactory basicPluginInterfaceFactory ("controls", "make");
+	static cet::BasicPluginFactory basicPluginInterfaceFactory("controls", "make");
 
-	return basicPluginInterfaceFactory.makePlugin<
-	    ots::ControlsVInterface*,
-	    const std::string&,
-	    const ots::ConfigurationTree&,
-	    const std::string&> (
-	    controlsPluginName,
-	    controlsUID,
-	    configuration,
-	    pathToControlsConfiguration);
+	return basicPluginInterfaceFactory.makePlugin<ots::ControlsVInterface*,
+	                                              const std::string&,
+	                                              const ots::ConfigurationTree&,
+	                                              const std::string&>(
+	    controlsPluginName, controlsUID, configuration, pathToControlsConfiguration);
 }

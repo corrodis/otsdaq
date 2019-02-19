@@ -1,4 +1,4 @@
-cet_make(LIBRARY_NAME ConfigurationDataFormats
+cet_make(LIBRARY_NAME TableCore
 		 LIBRARIES
 		 XmlUtilities
 		 Macros

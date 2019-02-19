@@ -3,7 +3,7 @@ cet_make(LIBRARY_NAME RootUtilities
 	      ${ROOT_BASIC_LIB_LIST}
 	     #zzzzzzzDataDecoders
 	      NetworkUtilities
-	      ConfigurationDataFormats
+	      TableCore
 	      ConfigurationInterface	      
           #otsdaq-core_ConfigurationPluginDataFormats_DataBufferConfiguration_configuration
           #otsdaq-core_ConfigurationPluginDataFormats_UDPDataStreamerConsumerConfiguration_configuration

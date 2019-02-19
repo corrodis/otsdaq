@@ -5,11 +5,10 @@
 
 using namespace ots;
 
-//NOTE: if you want to inherit from this one you MUST initialize
-//the Socket Constructor that is commented out here in your class
+// NOTE: if you want to inherit from this one you MUST initialize
+// the Socket Constructor that is commented out here in your class
 //========================================================================================================================
-TCPDataStreamerBase::TCPDataStreamerBase (unsigned int port)
-    : TCPSocket (port)
+TCPDataStreamerBase::TCPDataStreamerBase(unsigned int port) : TCPSocket(port)
 {
 	std::cout << __COUT_HDR_FL__ << "port " << port << std::endl;
 	std::cout << __COUT_HDR_FL__ << std::endl;
@@ -22,6 +21,4 @@ TCPDataStreamerBase::TCPDataStreamerBase (unsigned int port)
 }
 
 //========================================================================================================================
-TCPDataStreamerBase::~TCPDataStreamerBase (void)
-{
-}
+TCPDataStreamerBase::~TCPDataStreamerBase(void) {}

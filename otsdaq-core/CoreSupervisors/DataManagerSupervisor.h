@@ -5,17 +5,17 @@
 
 namespace ots
 {
-//DataManagerSupervisor
+// DataManagerSupervisor
 //	This class handles a collection of Data Processor plugins. It provides
 //	a mechanism for Data Processor Producers to store data in Buffers, and for
 //	Data Processor Consumers to retrive data from the Buffers.
 class DataManagerSupervisor : public CoreSupervisorBase
 {
   public:
-	XDAQ_INSTANTIATOR ();
+	XDAQ_INSTANTIATOR();
 
-	DataManagerSupervisor (xdaq::ApplicationStub* s);
-	virtual ~DataManagerSupervisor (void);
+	DataManagerSupervisor(xdaq::ApplicationStub* s);
+	virtual ~DataManagerSupervisor(void);
 
   private:
 };

@@ -6,55 +6,56 @@
 using namespace ots;
 
 //==============================================================================
-DataDecoderConsumerConfiguration::DataDecoderConsumerConfiguration (void)
-    : ConfigurationBase ("DataDecoderConsumerConfiguration")
+DataDecoderConsumerConfiguration::DataDecoderConsumerConfiguration(void)
+    : TableBase("DataDecoderConsumerConfiguration")
 {
 	//////////////////////////////////////////////////////////////////////
-	//WARNING: the names and the order MUST match the ones in the enum  //
+	// WARNING: the names and the order MUST match the ones in the enum  //
 	//////////////////////////////////////////////////////////////////////
 	//	<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-	//	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
-	//	  <CONFIGURATION Name="DataDecoderConsumerConfiguration">
-	//	    <VIEW Name="DATA_DECODER_CONSUMER_CONFIGURATION" Type="File,Database,DatabaseTest">
-	//	      <COLUMN Name="ProcessorID"   StorageName="PROCESSOR_ID"    DataType="VARCHAR2"/>
+	//	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	// xsi:noNamespaceSchemaLocation="TableInfo.xsd"> 	  <CONFIGURATION
+	// Name="DataDecoderConsumerConfiguration"> 	    <VIEW
+	// Name="DATA_DECODER_CONSUMER_CONFIGURATION" Type="File,Database,DatabaseTest">
+	//	      <COLUMN Name="ProcessorID"   StorageName="PROCESSOR_ID"
+	// DataType="VARCHAR2"/>
 	//	    </VIEW>
 	//	  </CONFIGURATION>
 	//	</ROOT>
 }
 
 //==============================================================================
-DataDecoderConsumerConfiguration::~DataDecoderConsumerConfiguration (void)
-{
-}
+DataDecoderConsumerConfiguration::~DataDecoderConsumerConfiguration(void) {}
 
 //==============================================================================
-void DataDecoderConsumerConfiguration::init (ConfigurationManager* configManager)
+void DataDecoderConsumerConfiguration::init(ConfigurationManager* configManager)
 {
 	std::string processorUID;
-	for (unsigned int row = 0; row < ConfigurationBase::activeConfigurationView_->getNumberOfRows (); row++)
+	for(unsigned int row = 0; row < TableBase::activeTableView_->getNumberOfRows(); row++)
 	{
-		ConfigurationBase::activeConfigurationView_->getValue (processorUID, row, ProcessorID);
+		TableBase::activeTableView_->getValue(processorUID, row, ProcessorID);
 		processorIDToRowMap_[processorUID] = row;
 	}
 }
 
 //==============================================================================
-std::vector<std::string> DataDecoderConsumerConfiguration::getProcessorIDList (void) const
+std::vector<std::string> DataDecoderConsumerConfiguration::getProcessorIDList(void) const
 {
 	std::vector<std::string> list;
-	for (auto& it : processorIDToRowMap_)
-		list.push_back (it.first);
+	for(auto& it : processorIDToRowMap_)
+		list.push_back(it.first);
 	return list;
 }
 
 //==============================================================================
-void DataDecoderConsumerConfiguration::check (std::string processorUID) const
+void DataDecoderConsumerConfiguration::check(std::string processorUID) const
 {
-	if (processorIDToRowMap_.find (processorUID) == processorIDToRowMap_.end ())
+	if(processorIDToRowMap_.find(processorUID) == processorIDToRowMap_.end())
 	{
-		__MOUT_ERROR__ << "Couldn't find processor " << processorUID << " in the UDPDataStreamerConsumerConfiguration!" << std::endl;
-		assert (0);
+		__MOUT_ERROR__ << "Couldn't find processor " << processorUID
+		               << " in the UDPDataStreamerConsumerConfiguration!" << std::endl;
+		assert(0);
 	}
 }
 
-DEFINE_OTS_CONFIGURATION (DataDecoderConsumerConfiguration)
+DEFINE_OTS_CONFIGURATION(DataDecoderConsumerConfiguration)

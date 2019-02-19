@@ -10,13 +10,14 @@ namespace ots
 class Socket
 {
   public:
-	Socket (const std::string& IPAddress, unsigned int port = 0);
-	virtual ~Socket (void);
+	Socket(const std::string& IPAddress, unsigned int port = 0);
+	virtual ~Socket(void);
 
-	virtual void              initialize (unsigned int socketReceiveBufferSize = defaultSocketReceiveSize_);
-	const struct sockaddr_in& getSocketAddress (void);
-	const std::string&        getIPAddress () { return IPAddress_; }
-	uint16_t                  getPort ();
+	virtual void initialize(
+	    unsigned int socketReceiveBufferSize = defaultSocketReceiveSize_);
+	const struct sockaddr_in& getSocketAddress(void);
+	const std::string&        getIPAddress() { return IPAddress_; }
+	uint16_t                  getPort();
 
   protected:
 	enum
@@ -25,10 +26,10 @@ class Socket
 		defaultSocketReceiveSize_ = 0x10000
 	};
 
-	Socket (void);
+	Socket(void);
 	struct sockaddr_in socketAddress_;
 	int                socketNumber_;
-	//unsigned int maxSocketSize_;
+	// unsigned int maxSocketSize_;
 
   protected:
 	enum

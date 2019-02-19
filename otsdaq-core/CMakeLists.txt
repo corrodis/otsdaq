@@ -1,7 +1,7 @@
 add_subdirectory(PluginMakers)
 add_subdirectory(BitManipulator)
 add_subdirectory(CgiDataUtilities)
-add_subdirectory(ConfigurationDataFormats)
+add_subdirectory(TableCore)
 add_subdirectory(ConfigurationPluginDataFormats)
 add_subdirectory(ConfigurationInterface)
 add_subdirectory(Configurable)

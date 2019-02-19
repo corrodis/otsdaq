@@ -1,0 +1,134 @@
+#!/bin/sh
+#
+# otsdaq_convert_config_to_table
+# 	Script to convert User Data and User Database
+#	from using 'configuration' to 'table'
+#
+#	The thinking is that table is more clear
+#	especially considering the overloading of the word
+#	for Configuration group
+#
+#	Created by rrivera and uplegger in February 2019
+#
+
+
+START_DIR=${PWD}
+
+echo
+echo
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Do not source this script, run it as 'otsdaq_convert_config_to_table'"
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t You must have USER_DATA and ARTDAQ_DATABASE_URI environment variables setup. They are usually setup when you setup otsdaq."
+return  >/dev/null 2>&1 #return is used if script is sourced
+
+echo
+echo	
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Checking environment..."
+		
+if [[ "x$USER_DATA" == "x" ]]; then
+	echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t USER_DATA environment variable must be setup. Is your ots instance setup?"
+	exit
+fi
+
+TABLE_DIR=$USER_DATA/ConfigurationInfo
+if [ ! -d $TABLE_DIR ]; then
+	echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t TABLE_DIR=${TABLE_DIR} path does not exist. Is your ots instance setup? Perhaps you already did this conversion?"
+	exit
+fi
+	
+NEW_TABLE_DIR=$USER_DATA/TableInfo
+if [ -d $NEW_TABLE_DIR ]; then
+	echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t NEW_TABLE_DIR=${NEW_TABLE_DIR} path already exits. Perhaps you already did this conversion?"
+	exit
+fi
+
+echo
+echo
+
+ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`	
+
+
+if [[ "x$ARTDAQ_DATABASE_DIR" == "x" ]]; then
+	echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t ARTDAQ_DATABASE_URI environment variable must be setup. Is your ots instance setup?"
+	exit
+fi
+
+if [ ! -d $ARTDAQ_DATABASE_DIR ]; then
+	echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t ARTDAQ_DATABASE_URI environment variable must be setup. Is your ots instance setup?"
+	exit
+fi
+
+
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t USER_DATA=${USER_DATA}"
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t TABLE_DIR=${TABLE_DIR}"
+echo
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t ARTDAQ_DATABASE_URI=${ARTDAQ_DATABASE_URI}"
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t ARTDAQ_DATABASE_DIR=${ARTDAQ_DATABASE_DIR}"
+
+
+###########
+#=====================================
+###########	USER DATA conversion
+echo
+echo
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Converting Config to Table for path USER_DATA..."
+
+echo
+
+
+cd $TABLE_DIR
+
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Renaming Table Info files..."
+for f in *ConfigurationInfo.xml; do mv -n "$f" "${f/ConfigurationInfo.xml}TableInfo.xml"; done; 
+
+mv ConfigurationInfo.xsd TableInfo.xsd
+
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Modifying Table Info file content..."
+sed -i s/Configuration/Table/g *ableInfo.x*
+sed -i s/CONFIGURATION/TABLE/g *ableInfo.x*
+sed -i s/configuration/table/g *ableInfo.x*
+
+
+#rename ConfigurationInfo/ to TableInfo/
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Renaming Table Info folder..."
+mv $TABLE_DIR $NEW_TABLE_DIR
+
+###########
+#=====================================
+###########	USER DATABASE conversion
+
+echo
+echo
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Converting Config to Table for path USER_DATA..."
+
+echo
+
+cd $ARTDAQ_DATABASE_DIR
+
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Renaming Table database folders..."
+for f in *Configuration; do mv -n "$f" "${f/Configuration}Table"; done;
+
+#hide index from transformation
+for f in *Table; do mv -n "$f/index.json" "$f/index.txt"; done; 
+
+sed -i s/Configuration/Table/g *Table/*.json
+sed -i s/CONFIGURATION/TABLE/g *Table/*.json
+sed -i s/configuration/table/g *Table/*.json
+
+#return index after transformation
+for f in *Table; do mv -n "$f/index.txt" "$f/index.json"; done; 
+
+
+###########
+#=====================================
+###########	Done
+
+cd $START_DIR
+
+
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Done with conversion."
+
+
+echo
+echo
+echo
+echo

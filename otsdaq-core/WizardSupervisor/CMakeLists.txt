@@ -3,7 +3,7 @@ cet_make(LIBRARY_NAME WizardSupervisor
 		 LIBRARIES
 		 ${XDAQ_BASIC_LIB_LIST}
 		 ConfigurationInterface
-		 ConfigurationDataFormats
+		 TableCore
 		 SupervisorInfo
 		 GatewaySupervisor
 		 CgiDataUtilities
