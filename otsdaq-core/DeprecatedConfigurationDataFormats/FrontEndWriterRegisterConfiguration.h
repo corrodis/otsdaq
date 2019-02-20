@@ -1,7 +1,7 @@
 #ifndef _ots_FEWRegisterConfiguration_h_
 #define _ots_FEWRegisterConfiguration_h_
 
-#include "otsdaq-core/ConfigurationDataFormats/RegisterConfiguration.h"
+#include "otsdaq-core/ConfigurationDataFormats/RegisterTable.h"
 
 namespace ots
 {

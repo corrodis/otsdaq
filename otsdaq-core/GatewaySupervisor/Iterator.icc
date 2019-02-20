@@ -13,7 +13,7 @@ void Iterator::helpCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct,
 
 	const std::string& pathToField =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-	        [IterateConfiguration::commandModifyActiveParams_.RelativePathToField_];
+	        [IterateTable::commandModifyActiveParams_.RelativePathToField_];
 
 	__COUT__ << "pathToField " << pathToField << std::endl;
 

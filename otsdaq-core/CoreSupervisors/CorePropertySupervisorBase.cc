@@ -52,7 +52,7 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	try
 	{
 		CorePropertySupervisorBase::supervisorContextUID_ =
-		    theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)
+		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
 		        ->getContextUID(application->getApplicationContext()
 		                            ->getContextDescriptor()
 		                            ->getURL());
@@ -73,7 +73,7 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	try
 	{
 		CorePropertySupervisorBase::supervisorApplicationUID_ =
-		    theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)
+		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
 		        ->getApplicationUID(
 		            application->getApplicationContext()
 		                ->getContextDescriptor()

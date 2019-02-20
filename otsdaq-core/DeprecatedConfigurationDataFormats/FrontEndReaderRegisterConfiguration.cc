@@ -1,4 +1,4 @@
-#include "otsdaq-core/ConfigurationDataFormats/FERRegisterConfiguration.h"
+#include "otsdaq-core/ConfigurationDataFormats/FERRegisterTable.h"
 
 #include <iostream>
 

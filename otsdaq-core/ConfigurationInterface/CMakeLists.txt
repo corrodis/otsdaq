@@ -22,16 +22,16 @@ install_headers()
 install_source()
 
 
-#		 otsdaq-core_ConfigurationPluginDataFormats_ConfigurationAliases_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_Configurations_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_DataManagerConfiguration_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_DefaultConfigurations_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_DetectorConfiguration_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_FEConfiguration_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_MaskConfiguration_configuration
-#		 otsdaq-core_ConfigsurationPluginDataFormats_ModuleToFEConfiguration_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_DetectorToFEConfiguration_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_TemplateConfiguration_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_VersionAliases_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_XDAQApplicationConfiguration_configuration
-#		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
+#		 otsdaq-core_TablePluginDataFormats_ConfigurationAliases_table
+#		 otsdaq-core_TablePluginDataFormats_Configurations_table
+#		 otsdaq-core_TablePluginDataFormats_DataManagerConfiguration_table
+#		 otsdaq-core_TablePluginDataFormats_DefaultConfigurations_table
+#		 otsdaq-core_TablePluginDataFormats_DetectorConfiguration_table
+#		 otsdaq-core_TablePluginDataFormats_FEConfiguration_table
+#		 otsdaq-core_TablePluginDataFormats_MaskConfiguration_table
+#		 otsdaq-core_ConfigsurationPluginDataFormats_ModuleToFEConfiguration_table
+#		 otsdaq-core_TablePluginDataFormats_DetectorToFEConfiguration_table
+#		 otsdaq-core_TablePluginDataFormats_TemplateConfiguration_table
+#		 otsdaq-core_TablePluginDataFormats_VersionAliases_table
+#		 otsdaq-core_TablePluginDataFormats_XDAQApplicationConfiguration_table
+#		 otsdaq-core_TablePluginDataFormats_XDAQContextTable_table

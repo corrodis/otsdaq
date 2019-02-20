@@ -504,8 +504,8 @@ const TableVersion& ConfigurationTree::getTableVersion(void) const
 }
 
 //==============================================================================
-// getConfigurationCreationTime
-const time_t& ConfigurationTree::getConfigurationCreationTime(void) const
+// getTableCreationTime
+const time_t& ConfigurationTree::getTableCreationTime(void) const
 {
 	if(!tableView_)
 	{

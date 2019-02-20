@@ -185,7 +185,7 @@ class ConfigurationTree
 	const std::string&          getTableName(void) const;
 	const std::string&          getFieldTableName(void) const;
 	const TableVersion&         getTableVersion(void) const;
-	const time_t&               getConfigurationCreationTime(void) const;
+	const time_t&               getTableCreationTime(void) const;
 	std::vector<std::vector<std::string>> getChildrenNamesByPriority(
 	    bool onlyStatusTrue = false) const;
 	std::vector<std::string> getChildrenNames(bool byPriority     = false,

@@ -8,11 +8,11 @@
 #include "otsdaq-core/PluginMakers/MakeDataProcessor.h"
 
 /*
-#include "otsdaq-core/ConfigurationPluginDataFormats/ARTDAQConsumerConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/DataBufferConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/DataManagerConfiguration.h"
+#include "otsdaq-core/TablePluginDataFormats/ARTDAQConsumerTable.h"
+#include "otsdaq-core/TablePluginDataFormats/DataBufferTable.h"
+#include "otsdaq-core/TablePluginDataFormats/DataManagerTable.h"
 #include
-"otsdaq-core/ConfigurationPluginDataFormats/UDPDataListenerProducerConfiguration.h"
+"otsdaq-core/TablePluginDataFormats/UDPDataListenerProducerTable.h"
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQConsumer.h"
 #include "otsdaq-core/DataProcessorPlugins/DQMHistosConsumer.h"
 #include "otsdaq-core/DataProcessorPlugins/DataListenerProducer.h"

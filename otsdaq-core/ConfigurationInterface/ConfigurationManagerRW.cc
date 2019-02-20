@@ -1,18 +1,18 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
 
 // backbone includes
-//#include "otsdaq-core/ConfigurationPluginDataFormats/ConfigurationAliases.h"
-//#include "otsdaq-core/ConfigurationPluginDataFormats/Configurations.h"
-//#include "otsdaq-core/ConfigurationPluginDataFormats/DefaultConfigurations.h"
-//#include "otsdaq-core/ConfigurationPluginDataFormats/VersionAliases.h"
+//#include "otsdaq-core/TablePluginDataFormats/ConfigurationAliases.h"
+//#include "otsdaq-core/TablePluginDataFormats/Configurations.h"
+//#include "otsdaq-core/TablePluginDataFormats/DefaultConfigurations.h"
+//#include "otsdaq-core/TablePluginDataFormats/VersionAliases.h"
 
 //#include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"//All configurable
 // objects are included here
 
 //
-//#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorConfiguration.h"
-//#include "otsdaq-core/ConfigurationPluginDataFormats/MaskConfiguration.h"
-//#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorToFEConfiguration.h"
+//#include "otsdaq-core/TablePluginDataFormats/DetectorTable.h"
+//#include "otsdaq-core/TablePluginDataFormats/MaskTable.h"
+//#include "otsdaq-core/TablePluginDataFormats/DetectorToFETable.h"
 //
 
 //#include "otsdaq-core/ConfigurationInterface/DACStream.h"
@@ -1190,10 +1190,10 @@ void ConfigurationManagerRW::testXDAQContext()
 
 		return;
 
-		// ConfigurationTree t = getNode("XDAQContextConfiguration");
+		// ConfigurationTree t = getNode("XDAQContextTable");
 		// ConfigurationTree t = getNode("/FEConfiguration/OtsUDPFSSR3/FrontEndType");
 		// ConfigurationTree t = getNode("/FEConfiguration").getNode("OtsUDPFSSR3");
-		//		ConfigurationTree t = getNode("/XDAQContextConfiguration/testContext/");
+		//		ConfigurationTree t = getNode("/XDAQContextTable/testContext/");
 		//
 		//		__COUT__ << std::endl;
 		//		t.getValue(v);

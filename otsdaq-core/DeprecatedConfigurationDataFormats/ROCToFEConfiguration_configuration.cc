@@ -1,7 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/ROCToFEConfiguration.h"
-#include "otsdaq-core/Macros/ConfigurationPluginMacros.h"
-
+#include "otsdaq-core/TablePluginDataFormats/ROCToFETable.h"
 #include <iostream>
+#include "../Macros/TablePluginMacros.h"
 
 using namespace ots;
 

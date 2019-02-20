@@ -5,17 +5,17 @@
 #include "otsdaq-core/NetworkUtilities/NetworkConverters.h"
 
 #include "otsdaq-core/ConfigurationDataFormats/FEInterfaceTableBase.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/DataBufferConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/DataManagerConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorToFEConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/FEConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/UDPDataListenerProducerConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/UDPDataStreamerConsumerConfiguration.h"
+#include "otsdaq-core/TablePluginDataFormats/DataBufferTable.h"
+#include "otsdaq-core/TablePluginDataFormats/DataManagerTable.h"
+#include "otsdaq-core/TablePluginDataFormats/DetectorTable.h"
+#include "otsdaq-core/TablePluginDataFormats/DetectorToFETable.h"
+#include "otsdaq-core/TablePluginDataFormats/FETable.h"
+#include "otsdaq-core/TablePluginDataFormats/UDPDataListenerProducerTable.h"
+#include "otsdaq-core/TablePluginDataFormats/UDPDataStreamerConsumerTable.h"
 //#include
-//"otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceConfiguration.h"
+//"otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceTable.h"
 //#include
-//"otsdaq-demo/UserConfigurationDataFormats/FEWRPurdueFSSRInterfaceConfiguration.h"
+//"otsdaq-demo/UserConfigurationDataFormats/FEWRPurdueFSSRInterfaceTable.h"
 
 #include <iostream>
 #include <sstream>

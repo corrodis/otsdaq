@@ -1,3 +1,4 @@
+
 #define BOOST_TEST_MODULE (databaseconfiguration test)
 
 #include "boost/test/auto_unit_test.hpp"
@@ -12,13 +13,13 @@
 //<otsdaq_demo/otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceConfiguration.h>
 #include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-//#include "otsdaq-core/ConfigurationPluginDataFormats/Configurations.h"
-//#include "otsdaq-core/ConfigurationPluginDataFormats/ConfigurationAliases.h"
-//#include "otsdaq-core/ConfigurationPluginDataFormats/FEConfiguration.h"
+//#include "otsdaq-core/TablePluginDataFormats/Configurations.h"
+//#include "otsdaq-core/TablePluginDataFormats/ConfigurationAliases.h"
+//#include "otsdaq-core/TablePluginDataFormats/FETable.h"
 #include "artdaq-database/JsonDocument/JSONDocument.h"
 #include "artdaq-database/StorageProviders/FileSystemDB/provider_filedb_index.h"
 #include "otsdaq-core/PluginMakers/MakeInterface.h"
-#include "otsdaq-core/PluginMakers/MakeInterfaceConfiguration.h"
+#include "otsdaq-core/PluginMakers/MakeInterfaceTable.h"
 
 using namespace ots;
 

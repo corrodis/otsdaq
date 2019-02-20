@@ -8,8 +8,8 @@
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/DesktopIconConfiguration.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+#include "otsdaq-core/TablePluginDataFormats/DesktopIconTable.h"
+#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
 #include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 
@@ -144,17 +144,17 @@ void GatewaySupervisor::init(void)
 {
 	supervisorGuiHasBeenLoaded_ = false;
 
-	//	const XDAQContextConfiguration* contextConfiguration =
-	// CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration);
+	//	const XDAQContextTable* contextTable =
+	// CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextTable);
 	//
 	//	CorePropertySupervisorBase::supervisorContextUID_ =
-	// contextConfiguration->getContextUID(
+	// contextTable->getContextUID(
 	//		getApplicationContext()->getContextDescriptor()->getURL()
 	//	);
 	//	__COUT__ << "Context UID:" << supervisorContextUID_ << __E__;
 	//
 	//	CorePropertySupervisorBase::supervisorApplicationUID_ =
-	// contextConfiguration->getApplicationUID(
+	// contextTable->getApplicationUID(
 	//		getApplicationContext()->getContextDescriptor()->getURL(),
 	//		getApplicationDescriptor()->getLocalId()
 	//	);
@@ -176,7 +176,7 @@ void GatewaySupervisor::init(void)
 	bool enableStateChanges = false;
 	try
 	{
-		enableStateChanges = CorePropertySupervisorBase::getSupervisorConfigurationNode()
+		enableStateChanges = CorePropertySupervisorBase::getSupervisorTableNode()
 		                         .getNode("EnableStateChangesOverUDP")
 		                         .getValue<bool>();
 	}
@@ -188,17 +188,17 @@ void GatewaySupervisor::init(void)
 	try
 	{
 		auto artdaqStateChangeEnabled =
-		    CorePropertySupervisorBase::getSupervisorConfigurationNode()
+		    CorePropertySupervisorBase::getSupervisorTableNode()
 		        .getNode("EnableARTDAQCommanderPlugin")
 		        .getValue<bool>();
 		if(artdaqStateChangeEnabled)
 		{
 			auto artdaqStateChangePort =
-			    CorePropertySupervisorBase::getSupervisorConfigurationNode()
+			    CorePropertySupervisorBase::getSupervisorTableNode()
 			        .getNode("ARTDAQCommanderID")
 			        .getValue<int>();
 			auto artdaqStateChangePluginType =
-			    CorePropertySupervisorBase::getSupervisorConfigurationNode()
+			    CorePropertySupervisorBase::getSupervisorTableNode()
 			        .getNode("ARTDAQCommanderType")
 			        .getValue<std::string>();
 			theArtdaqCommandable_.init(artdaqStateChangePort,
@@ -365,7 +365,7 @@ void GatewaySupervisor::init(void)
 void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 {
 	ConfigurationTree configLinkNode =
-	    theSupervisor->CorePropertySupervisorBase::getSupervisorConfigurationNode();
+	    theSupervisor->CorePropertySupervisorBase::getSupervisorTableNode();
 
 	std::string ipAddressForStateChangesOverUDP =
 	    configLinkNode.getNode("IPAddressForStateChangesOverUDP").getValue<std::string>();
@@ -381,7 +381,7 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 	//__COUT__ << "acknowledgmentEnabled           = " << acknowledgmentEnabled << __E__;
 
 	TransceiverSocket sock(ipAddressForStateChangesOverUDP,
-	                       portForStateChangesOverUDP);  // Take Port from Configuration
+	                       portForStateChangesOverUDP);  // Take Port from Table
 	try
 	{
 		sock.initialize();
@@ -1437,7 +1437,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	{
 		ConfigurationTree configLinkNode =
 		    CorePropertySupervisorBase::theConfigurationManager_
-		        ->getSupervisorConfigurationNode(supervisorContextUID_,
+		        ->getSupervisorTableNode(supervisorContextUID_,
 		                                         supervisorApplicationUID_);
 		if(!configLinkNode.isDisconnected())
 		{
@@ -1685,7 +1685,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 	{
 		ConfigurationTree configLinkNode =
 		    CorePropertySupervisorBase::theConfigurationManager_
-		        ->getSupervisorConfigurationNode(supervisorContextUID_,
+		        ->getSupervisorTableNode(supervisorContextUID_,
 		                                         supervisorApplicationUID_);
 		if(!configLinkNode.isDisconnected())
 		{
@@ -2160,7 +2160,7 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 
 	try
 	{
-		numberOfThreads = CorePropertySupervisorBase::getSupervisorConfigurationNode()
+		numberOfThreads = CorePropertySupervisorBase::getSupervisorTableNode()
 		                      .getNode("NumberOfStateMachineBroadcastThreads")
 		                      .getValue<unsigned int>();
 	}
@@ -2841,7 +2841,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			// get stateMachineAliasFilter if possible
 			ConfigurationTree configLinkNode =
 			    CorePropertySupervisorBase::theConfigurationManager_
-			        ->getSupervisorConfigurationNode(supervisorContextUID_,
+			        ->getSupervisorTableNode(supervisorContextUID_,
 			                                         supervisorApplicationUID_);
 
 			if(!configLinkNode.isDisconnected())
@@ -3196,7 +3196,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			// get stateMachineAliasFilter if possible
 			ConfigurationTree configLinkNode =
 			    CorePropertySupervisorBase::theConfigurationManager_
-			        ->getSupervisorConfigurationNode(supervisorContextUID_,
+			        ->getSupervisorTableNode(supervisorContextUID_,
 			                                         supervisorApplicationUID_);
 
 			try
@@ -3255,7 +3255,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				// get stateMachineAliasFilter if possible
 				ConfigurationTree configLinkNode =
 				    CorePropertySupervisorBase::theConfigurationManager_
-				        ->getSupervisorConfigurationNode(supervisorContextUID_,
+				        ->getSupervisorTableNode(supervisorContextUID_,
 				                                         supervisorApplicationUID_);
 
 				if(!configLinkNode.isDisconnected())
@@ -3338,11 +3338,11 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			//	note: each icon has own permission threshold, so each user can have
 			//		a unique desktop icon experience.
 
-			const DesktopIconConfiguration* iconConfiguration =
+			const DesktopIconTable* iconTable =
 			    CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(
-			        DesktopIconConfiguration);
-			std::vector<DesktopIconConfiguration::DesktopIcon> icons =
-			    iconConfiguration->getAllDesktopIcons();
+			        DesktopIconTable);
+			std::vector<DesktopIconTable::DesktopIcon> icons =
+			    iconTable->getAllDesktopIcons();
 
 			std::string iconString = "";  // comma-separated icon string, 7 fields:
 			//				0 - caption 		= text below icon
@@ -3354,7 +3354,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			// open 				6 - folderPath 		= folder and subfolder location
 			// '/'
 			// separated  for example:  State
-			// Machine,FSM,1,200,icon-Physics.gif,/WebPath/html/StateMachine.html?fsm_name=OtherRuns0,,Chat,CHAT,1,1,icon-Chat.png,/urn:xdaq-application:lid=250,,Visualizer,VIS,0,10,icon-Visualizer.png,/WebPath/html/Visualization.html?urn=270,,Configure,CFG,0,10,icon-Configure.png,/urn:xdaq-application:lid=281,,Front-ends,CFG,0,15,icon-Configure.png,/WebPath/html/ConfigurationGUI_subset.html?urn=281&subsetBasePath=FEInterfaceConfiguration&groupingFieldList=Status%2CFEInterfacePluginName&recordAlias=Front%2Dends&editableFieldList=%21%2ACommentDescription%2C%21SlowControls%2A,Config
+			// Machine,FSM,1,200,icon-Physics.gif,/WebPath/html/StateMachine.html?fsm_name=OtherRuns0,,Chat,CHAT,1,1,icon-Chat.png,/urn:xdaq-application:lid=250,,Visualizer,VIS,0,10,icon-Visualizer.png,/WebPath/html/Visualization.html?urn=270,,Configure,CFG,0,10,icon-Configure.png,/urn:xdaq-application:lid=281,,Front-ends,CFG,0,15,icon-Configure.png,/WebPath/html/ConfigurationGUI_subset.html?urn=281&subsetBasePath=FEInterfaceTable&groupingFieldList=Status%2CFEInterfacePluginName&recordAlias=Front%2Dends&editableFieldList=%21%2ACommentDescription%2C%21SlowControls%2A,Config
 			// Subsets
 
 			//__COUTV__((unsigned int)userInfo.permissionLevel_);
@@ -3479,10 +3479,10 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string&    command,
 	{
 		cfgMgr->init();  // completely reset to re-align with any changes
 
-		const XDAQContextConfiguration* contextConfiguration =
-		    cfgMgr->__GET_CONFIG__(XDAQContextConfiguration);
+		const XDAQContextTable* contextTable =
+		    cfgMgr->__GET_CONFIG__(XDAQContextTable);
 
-		auto         contexts = contextConfiguration->getContexts();
+		auto         contexts = contextTable->getContexts();
 		unsigned int i, j;
 		for(const auto& context : contexts)
 		{

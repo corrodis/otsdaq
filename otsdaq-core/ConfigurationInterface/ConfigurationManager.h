@@ -142,7 +142,7 @@ class ConfigurationManager
 	                                 const std::string& applicationUID) const;
 	ConfigurationTree getSupervisorNode(const std::string& contextUID,
 	                                    const std::string& applicationUID) const;
-	ConfigurationTree getSupervisorConfigurationNode(
+	ConfigurationTree getSupervisorTableNode(
 	    const std::string& contextUID, const std::string& applicationUID) const;
 
 	std::vector<std::pair<std::string /*childName*/, ConfigurationTree>> getChildren(

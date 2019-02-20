@@ -24,7 +24,7 @@ cet_make(LIBRARY_NAME EventBuilderApp
 		 SupervisorInfo
 		 FiniteStateMachine
 		 ConfigurationInterface
-		 otsdaq-core_ConfigurationPluginDataFormats_XDAQContextConfiguration_configuration
+		 otsdaq-core_TablePluginDataFormats_XDAQContextTable_table
 )
 
 install_headers()

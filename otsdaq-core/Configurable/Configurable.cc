@@ -1,6 +1,6 @@
 #include "otsdaq-core/Configurable/Configurable.h"
 
-#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
 
 using namespace ots;
 
@@ -49,8 +49,8 @@ const std::string& Configurable::getApplicationUID() const
 //==============================================================================
 unsigned int Configurable::getApplicationLID() const
 {
-	const XDAQContextConfiguration* contextConfig =
-	    getConfigurationManager()->__GET_CONFIG__(XDAQContextConfiguration);
+	const XDAQContextTable* contextConfig =
+	    getConfigurationManager()->__GET_CONFIG__(XDAQContextTable);
 
 	return contextConfig
 	    ->getApplicationNode(
@@ -62,8 +62,8 @@ unsigned int Configurable::getApplicationLID() const
 //==============================================================================
 std::string Configurable::getContextAddress() const
 {
-	const XDAQContextConfiguration* contextConfig =
-	    getConfigurationManager()->__GET_CONFIG__(XDAQContextConfiguration);
+	const XDAQContextTable* contextConfig =
+	    getConfigurationManager()->__GET_CONFIG__(XDAQContextTable);
 
 	return contextConfig->getContextNode(getConfigurationManager(), getContextUID())
 	    .getNode(contextConfig->colContext_.colAddress_)
@@ -73,8 +73,8 @@ std::string Configurable::getContextAddress() const
 //==============================================================================
 unsigned int Configurable::getContextPort() const
 {
-	const XDAQContextConfiguration* contextConfig =
-	    getConfigurationManager()->__GET_CONFIG__(XDAQContextConfiguration);
+	const XDAQContextTable* contextConfig =
+	    getConfigurationManager()->__GET_CONFIG__(XDAQContextTable);
 
 	return contextConfig->getContextNode(getConfigurationManager(), getContextUID())
 	    .getNode(contextConfig->colContext_.colPort_)

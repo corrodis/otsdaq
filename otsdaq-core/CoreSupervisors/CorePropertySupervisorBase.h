@@ -3,7 +3,7 @@
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationTree.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
@@ -48,10 +48,10 @@ class CorePropertySupervisorBase
 	ConfigurationTree getContextTreeNode(void) const
 	{
 		return theConfigurationManager_->getNode(
-		    theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)
+		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
 		        ->getTableName());
 	}
-	ConfigurationTree getSupervisorConfigurationNode(void) const
+	ConfigurationTree getSupervisorTableNode(void) const
 	{
 		return getContextTreeNode().getNode(supervisorConfigurationPath_);
 	}

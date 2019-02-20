@@ -1,7 +1,7 @@
 #ifndef ots_DetectorRegisterConfiguration_h
 #define ots_DetectorRegisterConfiguration_h
 
-#include "otsdaq-core/ConfigurationDataFormats/RegisterConfiguration.h"
+#include "otsdaq-core/ConfigurationDataFormats/RegisterTable.h"
 
 namespace ots
 {

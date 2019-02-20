@@ -1,4 +1,4 @@
-#include "otsdaq-core/ConfigurationDataFormats/FEWRegisterConfiguration.h"
+#include "otsdaq-core/ConfigurationDataFormats/FEWRegisterTable.h"
 
 #include <iostream>
 

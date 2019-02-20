@@ -59,9 +59,9 @@ void Iterator::IteratorWorkLoop(Iterator* iterator) try
 
 	IteratorWorkLoopStruct theIteratorStruct(iterator, &theConfigurationManager);
 
-	const IterateConfiguration* itConfig;
+	const IterateTable* itConfig;
 
-	std::vector<IterateConfiguration::Command> commands;
+	std::vector<IterateTable::Command> commands;
 
 	while(1)
 	{
@@ -275,7 +275,7 @@ void Iterator::IteratorWorkLoop(Iterator* iterator) try
 				theIteratorStruct.cfgMgr_
 				    ->init();  // completely reset to re-align with any changes
 				itConfig =
-				    theIteratorStruct.cfgMgr_->__GET_CONFIG__(IterateConfiguration);
+				    theIteratorStruct.cfgMgr_->__GET_CONFIG__(IterateTable);
 
 				theIteratorStruct.commands_ = itConfig->getPlanCommands(
 				    theIteratorStruct.cfgMgr_, theIteratorStruct.activePlan_);
@@ -287,7 +287,7 @@ void Iterator::IteratorWorkLoop(Iterator* iterator) try
 					theIteratorStruct.commandIterations_.push_back(0);
 					__COUT__ << "command " << command.type_ << __E__;
 					__COUT__ << "table "
-					         << IterateConfiguration::commandToTableMap_.at(command.type_)
+					         << IterateTable::commandToTableMap_.at(command.type_)
 					         << __E__;
 					__COUT__ << "param count = " << command.params_.size() << __E__;
 
@@ -497,49 +497,49 @@ void Iterator::startCommand(IteratorWorkLoopStruct* iteratorStruct) try
 	++iteratorStruct->commandIterations_[iteratorStruct->commandIndex_];
 
 	std::string type = iteratorStruct->commands_[iteratorStruct->commandIndex_].type_;
-	if(type == IterateConfiguration::COMMAND_BEGIN_LABEL)
+	if(type == IterateTable::COMMAND_BEGIN_LABEL)
 	{
 		return startCommandBeginLabel(iteratorStruct);
 	}
-	else if(type == IterateConfiguration::COMMAND_CHOOSE_FSM)
+	else if(type == IterateTable::COMMAND_CHOOSE_FSM)
 	{
 		return startCommandChooseFSM(
 		    iteratorStruct,
 		    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-		        .params_[IterateConfiguration::commandChooseFSMParams_.NameOfFSM_]);
+		        .params_[IterateTable::commandChooseFSMParams_.NameOfFSM_]);
 	}
-	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP)
+	else if(type == IterateTable::COMMAND_CONFIGURE_ACTIVE_GROUP)
 	{
 		return startCommandConfigureActive(iteratorStruct);
 	}
-	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS)
+	else if(type == IterateTable::COMMAND_CONFIGURE_ALIAS)
 	{
 		return startCommandConfigureAlias(
 		    iteratorStruct,
 		    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-		        [IterateConfiguration::commandConfigureAliasParams_.SystemAlias_]);
+		        [IterateTable::commandConfigureAliasParams_.SystemAlias_]);
 	}
-	else if(type == IterateConfiguration::COMMAND_CONFIGURE_GROUP)
+	else if(type == IterateTable::COMMAND_CONFIGURE_GROUP)
 	{
 		return startCommandConfigureGroup(iteratorStruct);
 	}
-	else if(type == IterateConfiguration::COMMAND_EXECUTE_FE_MACRO)
+	else if(type == IterateTable::COMMAND_EXECUTE_FE_MACRO)
 	{
 		return startCommandMacro(iteratorStruct, true /*isFEMacro*/);
 	}
-	else if(type == IterateConfiguration::COMMAND_EXECUTE_MACRO)
+	else if(type == IterateTable::COMMAND_EXECUTE_MACRO)
 	{
 		return startCommandMacro(iteratorStruct, false /*isFEMacro*/);
 	}
-	else if(type == IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP)
+	else if(type == IterateTable::COMMAND_MODIFY_ACTIVE_GROUP)
 	{
 		return startCommandModifyActive(iteratorStruct);
 	}
-	else if(type == IterateConfiguration::COMMAND_REPEAT_LABEL)
+	else if(type == IterateTable::COMMAND_REPEAT_LABEL)
 	{
 		return startCommandRepeatLabel(iteratorStruct);
 	}
-	else if(type == IterateConfiguration::COMMAND_RUN)
+	else if(type == IterateTable::COMMAND_RUN)
 	{
 		return startCommandRun(iteratorStruct);
 	}
@@ -584,41 +584,41 @@ bool Iterator::checkCommand(IteratorWorkLoopStruct* iteratorStruct) try
 	}
 
 	std::string type = iteratorStruct->commands_[iteratorStruct->commandIndex_].type_;
-	if(type == IterateConfiguration::COMMAND_BEGIN_LABEL)
+	if(type == IterateTable::COMMAND_BEGIN_LABEL)
 	{
 		// do nothing
 		return true;
 	}
-	else if(type == IterateConfiguration::COMMAND_CHOOSE_FSM)
+	else if(type == IterateTable::COMMAND_CHOOSE_FSM)
 	{
 		// do nothing
 		return true;
 	}
-	else if(type == IterateConfiguration::COMMAND_CONFIGURE_ALIAS ||
-	        type == IterateConfiguration::COMMAND_CONFIGURE_ACTIVE_GROUP ||
-	        type == IterateConfiguration::COMMAND_CONFIGURE_GROUP)
+	else if(type == IterateTable::COMMAND_CONFIGURE_ALIAS ||
+	        type == IterateTable::COMMAND_CONFIGURE_ACTIVE_GROUP ||
+	        type == IterateTable::COMMAND_CONFIGURE_GROUP)
 	{
 		return checkCommandConfigure(iteratorStruct);
 	}
-	else if(type == IterateConfiguration::COMMAND_EXECUTE_FE_MACRO)
+	else if(type == IterateTable::COMMAND_EXECUTE_FE_MACRO)
 	{
 		return checkCommandMacro(iteratorStruct, true /*isFEMacro*/);
 	}
-	else if(type == IterateConfiguration::COMMAND_EXECUTE_MACRO)
+	else if(type == IterateTable::COMMAND_EXECUTE_MACRO)
 	{
 		return checkCommandMacro(iteratorStruct, false /*isFEMacro*/);
 	}
-	else if(type == IterateConfiguration::COMMAND_MODIFY_ACTIVE_GROUP)
+	else if(type == IterateTable::COMMAND_MODIFY_ACTIVE_GROUP)
 	{
 		// do nothing
 		return true;
 	}
-	else if(type == IterateConfiguration::COMMAND_REPEAT_LABEL)
+	else if(type == IterateTable::COMMAND_REPEAT_LABEL)
 	{
 		// do nothing
 		return true;
 	}
-	else if(type == IterateConfiguration::COMMAND_RUN)
+	else if(type == IterateTable::COMMAND_RUN)
 	{
 		return checkCommandRun(iteratorStruct);
 	}
@@ -669,7 +669,7 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct* iteratorStruct,
 
 	// get stateMachineAliasFilter if possible
 	ConfigurationTree configLinkNode =
-	    iteratorStruct->cfgMgr_->getSupervisorConfigurationNode(
+	    iteratorStruct->cfgMgr_->getSupervisorTableNode(
 	        iteratorStruct->theIterator_->theSupervisor_->supervisorContextUID_,
 	        iteratorStruct->theIterator_->theSupervisor_->supervisorApplicationUID_);
 
@@ -832,7 +832,7 @@ void Iterator::startCommandBeginLabel(IteratorWorkLoopStruct* iteratorStruct)
 {
 	__COUT__ << "Entering label '"
 	         << iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	                .params_[IterateConfiguration::commandBeginLabelParams_.Label_]
+	                .params_[IterateTable::commandBeginLabelParams_.Label_]
 	         << "'..." << std::endl;
 
 	// add new step index to stack
@@ -847,7 +847,7 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct* iteratorStruct)
 	int numOfRepetitions;
 	sscanf(
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	        .params_[IterateConfiguration::commandRepeatLabelParams_.NumberOfRepetitions_]
+	        .params_[IterateTable::commandRepeatLabelParams_.NumberOfRepetitions_]
 	        .c_str(),
 	    "%d",
 	    &numOfRepetitions);
@@ -860,7 +860,7 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct* iteratorStruct)
 		// write original number of repetitions value back
 		sprintf(repStr, "%d", iteratorStruct->stepIndexStack_.back());
 		iteratorStruct->commands_[iteratorStruct->commandIndex_]
-		    .params_[IterateConfiguration::commandRepeatLabelParams_
+		    .params_[IterateTable::commandRepeatLabelParams_
 		                 .NumberOfRepetitions_] = repStr;  // re-store as string
 
 		// remove step index from stack
@@ -878,16 +878,16 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct* iteratorStruct)
 	for(i = iteratorStruct->commandIndex_; i > 0;
 	    --i)  // assume 0 is always the fallback option
 		if(iteratorStruct->commands_[i].type_ ==
-		       IterateConfiguration::COMMAND_BEGIN_LABEL &&
+		       IterateTable::COMMAND_BEGIN_LABEL &&
 		   iteratorStruct->commands_[iteratorStruct->commandIndex_]
-		           .params_[IterateConfiguration::commandRepeatLabelParams_.Label_] ==
+		           .params_[IterateTable::commandRepeatLabelParams_.Label_] ==
 		       iteratorStruct->commands_[i]
-		           .params_[IterateConfiguration::commandBeginLabelParams_.Label_])
+		           .params_[IterateTable::commandBeginLabelParams_.Label_])
 			break;
 
 	sprintf(repStr, "%d", numOfRepetitions);
 	iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	    .params_[IterateConfiguration::commandRepeatLabelParams_.NumberOfRepetitions_] =
+	    .params_[IterateTable::commandRepeatLabelParams_.NumberOfRepetitions_] =
 	    repStr;  // re-store as string
 
 	iteratorStruct->commandIndex_ = i;
@@ -966,10 +966,10 @@ void Iterator::startCommandConfigureGroup(IteratorWorkLoopStruct* iteratorStruct
 
 	std::string group =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	        .params_[IterateConfiguration::commandConfigureGroupParams_.GroupName_];
+	        .params_[IterateTable::commandConfigureGroupParams_.GroupName_];
 	TableGroupKey key = TableGroupKey(
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	        .params_[IterateConfiguration::commandConfigureGroupParams_.GroupKey_]);
+	        .params_[IterateTable::commandConfigureGroupParams_.GroupKey_]);
 
 	__COUT__ << "group " << group << __E__;
 	__COUT__ << "key " << key << __E__;
@@ -1061,19 +1061,19 @@ void Iterator::startCommandMacro(IteratorWorkLoopStruct* iteratorStruct,
 
 	const std::string& macroName =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	        .params_[IterateConfiguration::commandExecuteMacroParams_.MacroName_];
+	        .params_[IterateTable::commandExecuteMacroParams_.MacroName_];
 	const std::string& enableSavingOutput =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-	        [IterateConfiguration::commandExecuteMacroParams_.EnableSavingOutput_];
+	        [IterateTable::commandExecuteMacroParams_.EnableSavingOutput_];
 	const std::string& outputFilePath =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	        .params_[IterateConfiguration::commandExecuteMacroParams_.OutputFilePath_];
+	        .params_[IterateTable::commandExecuteMacroParams_.OutputFilePath_];
 	const std::string& outputFileRadix =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	        .params_[IterateConfiguration::commandExecuteMacroParams_.OutputFileRadix_];
+	        .params_[IterateTable::commandExecuteMacroParams_.OutputFileRadix_];
 	const std::string& inputArgs =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-	        [IterateConfiguration::commandExecuteMacroParams_.MacroArgumentString_];
+	        [IterateTable::commandExecuteMacroParams_.MacroArgumentString_];
 
 	__COUTV__(macroName);
 	__COUTV__(enableSavingOutput);
@@ -1161,7 +1161,7 @@ bool Iterator::checkCommandMacro(IteratorWorkLoopStruct* iteratorStruct,
 
 	const std::string& macroName =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	        .params_[IterateConfiguration::commandExecuteMacroParams_.MacroName_];
+	        .params_[IterateTable::commandExecuteMacroParams_.MacroName_];
 
 	__COUTV__(macroName);
 
@@ -1172,7 +1172,7 @@ bool Iterator::checkCommandMacro(IteratorWorkLoopStruct* iteratorStruct,
 	    i < iteratorStruct->commands_[iteratorStruct->commandIndex_].targets_.size();
 	    ++i)
 	{
-		ots::IterateConfiguration::CommandTarget& target =
+		ots::IterateTable::CommandTarget& target =
 		    iteratorStruct->commands_[iteratorStruct->commandIndex_].targets_[i];
 
 		__COUT__ << "target " << target.table_ << ":" << target.UID_ << __E__;
@@ -1260,16 +1260,16 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct)
 
 	bool doTrackGroupChanges = false;
 	if("True" == iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	                 .params_[IterateConfiguration::commandModifyActiveParams_
+	                 .params_[IterateTable::commandModifyActiveParams_
 	                              .DoTrackGroupChanges_])
 		doTrackGroupChanges = true;
 
 	const std::string& startValueStr =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	        .params_[IterateConfiguration::commandModifyActiveParams_.FieldStartValue_];
+	        .params_[IterateTable::commandModifyActiveParams_.FieldStartValue_];
 	const std::string& stepSizeStr =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-	        [IterateConfiguration::commandModifyActiveParams_.FieldIterationStepSize_];
+	        [IterateTable::commandModifyActiveParams_.FieldIterationStepSize_];
 
 	const unsigned int stepIndex = iteratorStruct->stepIndexStack_.back();
 
@@ -1507,13 +1507,13 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 		bool waitOnRunningThreads = false;
 		if("True" ==
 		   iteratorStruct->commands_[iteratorStruct->commandIndex_]
-		       .params_[IterateConfiguration::commandRunParams_.WaitOnRunningThreads_])
+		       .params_[IterateTable::commandRunParams_.WaitOnRunningThreads_])
 			waitOnRunningThreads = true;
 
 		time_t remainingDurationInSeconds;  // parameter converted during start to the
 		                                    // stop linux timestamp
 		sscanf(iteratorStruct->commands_[iteratorStruct->commandIndex_]
-		           .params_[IterateConfiguration::commandRunParams_.DurationInSeconds_]
+		           .params_[IterateTable::commandRunParams_.DurationInSeconds_]
 		           .c_str(),
 		       "%ld",
 		       &remainingDurationInSeconds);
@@ -1603,7 +1603,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 			char str[200];
 			sprintf(str, "%ld", remainingDurationInSeconds);
 			iteratorStruct->commands_[iteratorStruct->commandIndex_]
-			    .params_[IterateConfiguration::commandRunParams_.DurationInSeconds_] =
+			    .params_[IterateTable::commandRunParams_.DurationInSeconds_] =
 			    str;  // re-store as string
 		}
 		else if(remainingDurationInSeconds == 1)

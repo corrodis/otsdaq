@@ -3,16 +3,17 @@
 //<otsdaq_demo/otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceConfiguration.h>
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/FECore/FEVInterfacesManager.h"
-//#include "otsdaq-core/ConfigurationDataFormats/TableGroupKey.h"
+//#include "otsdaq-core/TableDataFormats/TableGroupKey.h"
 
 //#include "otsdaq-demo/FEInterfaces/FEWOtsGenericInterface.h"
 #include "otsdaq-core/FECore/FEVInterface.h"
 
 #include <iostream>
 #include <memory>
+
+#include "otsdaq-core/PluginMakers/MakeTable.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq-core/PluginMakers/MakeInterface.h"
-#include "otsdaq-core/PluginMakers/MakeInterfaceConfiguration.h"
 
 //#include "otsdaq-components/FEInterfaces/FEWOtsUDPFSSRInterface.h"
 //#include "otsdaq-components/FEInterfaces/FEWOtsUDPHCALInterface.h"

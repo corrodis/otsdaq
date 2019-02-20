@@ -89,7 +89,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	       (std::string(getenv("USER_DATA")) + "/ServiceData").c_str(),
 	       1);
 
-	// also xdaq envs for XDAQContextConfiguration
+	// also xdaq envs for XDAQContextTable
 	setenv("XDAQ_CONFIGURATION_DATA_PATH",
 	       (std::string(getenv("USER_DATA")) + "/XDAQConfigurations").c_str(),
 	       1);

@@ -2,12 +2,12 @@
 #define _ots_ConfigurationInterface_h_
 
 #include "otsdaq-core/Macros/CoutMacros.h"
-//#include "otsdaq-core/ConfigurationPluginDataFormats/Configurations.h"
+//#include "otsdaq-core/TablePluginDataFormats/Configurations.h"
 #include <memory>
 #include <set>
 #include <sstream>
 
-#include "otsdaq-core/PluginMakers/MakeInterfaceConfiguration.h"
+#include "../PluginMakers/MakeTable.h"
 #include "otsdaq-core/TableCore/TableBase.h"
 #include "otsdaq-core/TableCore/TableGroupKey.h"
 #include "otsdaq-core/TableCore/TableVersion.h"
@@ -51,7 +51,7 @@ class ConfigurationInterface
 			// try making configuration table plugin, if fails use TableBase
 			try
 			{
-				configuration = makeInterfaceConfiguration(configurationName);
+				configuration = makeTable(configurationName);
 			}
 			catch(...)
 			{

@@ -4,7 +4,7 @@
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
 
 #include <iostream>
 
@@ -59,7 +59,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	// descriptor.second->getContextDescriptor()->getURL() << __E__;
 	//
 	//	}
-	//	__COUTV__(XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS);
+	//	__COUTV__(XDAQContextTable::GATEWAY_SUPERVISOR_CLASS);
 
 	// Steps:
 	//	1. first pass, identify Wiz mode or not
@@ -98,8 +98,8 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 		__COUT__ << "Initializing info for Normal mode XDAQ context..." << __E__;
 	std::unique_ptr<ConfigurationManager> cfgMgr(
 	    isWizardMode ? 0 : new ConfigurationManager());
-	const XDAQContextConfiguration* contextConfig =
-	    isWizardMode ? 0 : cfgMgr->__GET_CONFIG__(XDAQContextConfiguration);
+	const XDAQContextTable* contextConfig =
+	    isWizardMode ? 0 : cfgMgr->__GET_CONFIG__(XDAQContextTable);
 
 	// do not involve the Configuration Manager
 	//	as it adds no valid information to the supervisors
@@ -138,7 +138,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 			if(theSupervisorInfo_)
 			{
 				__SS__ << "Error! Multiple Gateway Supervisors of class "
-				       << XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS
+				       << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS
 				       << " found. There can only be one. ID ="
 				       << descriptor.second->getLocalId() << __E__;
 				__SS_THROW__;
@@ -155,7 +155,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 			if(theWizardInfo_)
 			{
 				__SS__ << "Error! Multiple Wizard Supervisors of class "
-				       << XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS
+				       << XDAQContextTable::WIZARD_SUPERVISOR_CLASS
 				       << " found. There can only be one. ID ="
 				       << descriptor.second->getLocalId() << __E__;
 				__SS_THROW__;
@@ -210,8 +210,8 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	//
 	//
 	//		ConfigurationManager cfgMgr;
-	//		const XDAQContextConfiguration* contextConfig =
-	//				cfgMgr.__GET_CONFIG__(XDAQContextConfiguration);
+	//		const XDAQContextTable* contextConfig =
+	//				cfgMgr.__GET_CONFIG__(XDAQContextTable);
 	//
 	//
 	//		//second pass, organize supervisors
@@ -249,7 +249,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	//				if(theSupervisorInfo_)
 	//				{
 	//					__SS__ << "Error! Multiple Gateway Supervisors of class " <<
-	// XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS << 							"
+	// XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << 							"
 	// found. There can only be one. ID =" <<
 	//							descriptor.second->getLocalId() << __E__;
 	//					__SS_THROW__;
@@ -266,7 +266,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	//				if(theWizardInfo_)
 	//				{
 	//					__SS__ << "Error! Multiple Wizard Supervisors of class " <<
-	// XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS <<
+	// XDAQContextTable::WIZARD_SUPERVISOR_CLASS <<
 	//							" found. There can only be one. ID =" <<
 	//							descriptor.second->getLocalId() << __E__;
 	//					__SS_THROW__;
@@ -319,8 +319,8 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	if((!theWizardInfo_ && !theSupervisorInfo_) || (theWizardInfo_ && theSupervisorInfo_))
 	{
 		__SS__ << "Error! Must have one "
-		       << XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS << " OR one "
-		       << XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS
+		       << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << " OR one "
+		       << XDAQContextTable::WIZARD_SUPERVISOR_CLASS
 		       << " as part of the context configuration! "
 		       << "Neither were found." << __E__;
 		__SS_THROW__;
@@ -378,7 +378,7 @@ const SupervisorInfo& AllSupervisorInfo::getGatewayInfo(void) const
 	if(!theSupervisorInfo_)
 	{
 		__SS__ << "AllSupervisorInfo was not initialized or no Application of type "
-		       << XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS << " found!"
+		       << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << " found!"
 		       << __E__;
 		__SS_THROW__;
 	}
@@ -397,7 +397,7 @@ const SupervisorInfo& AllSupervisorInfo::getWizardInfo(void) const
 	if(!theWizardInfo_)
 	{
 		__SS__ << "AllSupervisorInfo was not initialized or no Application of type "
-		       << XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS << "  found!"
+		       << XDAQContextTable::WIZARD_SUPERVISOR_CLASS << "  found!"
 		       << __E__;
 		__SS_THROW__;
 	}
@@ -423,8 +423,8 @@ AllSupervisorInfo::getOrderedSupervisorDescriptors(
 	try
 	{
 		ConfigurationManager                                      cfgMgr;
-		const std::vector<XDAQContextConfiguration::XDAQContext>& contexts =
-		    cfgMgr.__GET_CONFIG__(XDAQContextConfiguration)->getContexts();
+		const std::vector<XDAQContextTable::XDAQContext>& contexts =
+		    cfgMgr.__GET_CONFIG__(XDAQContextTable)->getContexts();
 
 		for(const auto& context : contexts)
 			if(context.status_)
@@ -435,16 +435,16 @@ AllSupervisorInfo::getOrderedSupervisorDescriptors(
 
 					auto it = app.stateMachineCommandPriority_.find(stateMachineCommand);
 					if(it == app.stateMachineCommandPriority_.end())
-						orderedByPriority[XDAQContextConfiguration::XDAQApplication::
+						orderedByPriority[XDAQContextTable::XDAQApplication::
 						                      DEFAULT_PRIORITY]
 						    .push_back(
 						        app.id_);  // if no priority, then default to
-						                   // XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY
+						                   // XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY
 					else  // take value, and do not allow DEFAULT value of 0 -> force to
-					      // XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY
+					      // XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY
 						orderedByPriority[it->second
 						                      ? it->second
-						                      : XDAQContextConfiguration::
+						                      : XDAQContextTable::
 						                            XDAQApplication::DEFAULT_PRIORITY]
 						    .push_back(app.id_);
 
@@ -509,7 +509,7 @@ AllSupervisorInfo::getOrderedSupervisorDescriptors(
 				// if default priority, create a new vector container for each entry
 				//	so they happen in sequence by default
 				// if(priorityAppVector.first !=
-				//		XDAQContextConfiguration::XDAQApplication::DEFAULT_PRIORITY)
+				//		XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY)
 				// createContainer = false;
 
 				createContainer = false;

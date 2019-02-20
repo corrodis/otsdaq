@@ -5,14 +5,14 @@ cet_make(LIBRARY_NAME RootUtilities
 	      NetworkUtilities
 	      TableCore
 	      ConfigurationInterface	      
-          #otsdaq-core_ConfigurationPluginDataFormats_DataBufferConfiguration_configuration
-          #otsdaq-core_ConfigurationPluginDataFormats_UDPDataStreamerConsumerConfiguration_configuration
-          #otsdaq-core_ConfigurationPluginDataFormats_UDPDataListenerProducerConfiguration_configuration
+          #otsdaq-core_TablePluginDataFormats_DataBufferConfiguration_table
+          #otsdaq-core_TablePluginDataFormats_UDPDataStreamerConsumerConfiguration_table
+          #otsdaq-core_TablePluginDataFormats_UDPDataListenerProducerConfiguration_table
           #added by RAR after artdaqdb change
-          #otsdaq-core_ConfigurationPluginDataFormats_DataManagerConfiguration_configuration
-          #otsdaq-core_ConfigurationPluginDataFormats_FEConfiguration_configuration
-          #otsdaq-core_ConfigurationPluginDataFormats_DetectorToFEConfiguration_configuration
-          #otsdaq-core_ConfigurationPluginDataFormats_DetectorConfiguration_configuration
+          #otsdaq-core_TablePluginDataFormats_DataManagerConfiguration_table
+          #otsdaq-core_TablePluginDataFormats_FEConfiguration_table
+          #otsdaq-core_TablePluginDataFormats_DetectorToFEConfiguration_table
+          #otsdaq-core_TablePluginDataFormats_DetectorConfiguration_table
 )
 
 install_headers()

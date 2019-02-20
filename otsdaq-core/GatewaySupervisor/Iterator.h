@@ -3,7 +3,7 @@
 
 #include <mutex>  //for std::mutex
 #include <string>
-#include "otsdaq-core/ConfigurationPluginDataFormats/IterateConfiguration.h"
+#include "otsdaq-core/TablePluginDataFormats/IterateTable.h"
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
@@ -57,7 +57,7 @@ class Iterator
 		bool doPauseAction_, doHaltAction_, doResumeAction_;
 
 		std::string                                activePlan_;
-		std::vector<IterateConfiguration::Command> commands_;
+		std::vector<IterateTable::Command> commands_;
 		std::vector<unsigned int>                  commandIterations_;
 		unsigned int                               commandIndex_;
 		std::vector<unsigned int>                  stepIndexStack_;

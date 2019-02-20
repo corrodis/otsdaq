@@ -1432,7 +1432,7 @@ ConfigurationTree ConfigurationManager::getSupervisorNode(
 }
 
 //==============================================================================
-ConfigurationTree ConfigurationManager::getSupervisorConfigurationNode(
+ConfigurationTree ConfigurationManager::getSupervisorTableNode(
     const std::string& contextUID, const std::string& applicationUID) const
 {
 	return getNode("/" + getTableByName(XDAQ_CONTEXT_TABLE_NAME)->getTableName() + "/" +

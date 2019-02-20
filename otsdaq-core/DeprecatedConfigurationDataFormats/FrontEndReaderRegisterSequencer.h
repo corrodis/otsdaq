@@ -1,7 +1,7 @@
 #ifndef _ots_FERRegisterSequencer_h_
 #define _ots_FERRegisterSequencer_h_
 
-#include "otsdaq-core/ConfigurationDataFormats/RegisterConfiguration.h"
+#include "otsdaq-core/ConfigurationDataFormats/RegisterTable.h"
 
 namespace ots
 {

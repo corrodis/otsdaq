@@ -2,7 +2,7 @@
 #define _ots_SupervisorInfo_h_
 
 #include <string>
-#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
 #include "otsdaq-core/Macros/CoutMacros.h" /* also for XDAQ_CONST_CALL */
 
 #pragma GCC diagnostic push
@@ -58,46 +58,46 @@ class SupervisorInfo
 	// BOOLs	-------------------
 	bool isGatewaySupervisor(void) const
 	{
-		return class_ == XDAQContextConfiguration::GATEWAY_SUPERVISOR_CLASS;
+		return class_ == XDAQContextTable::GATEWAY_SUPERVISOR_CLASS;
 	}
 	bool isWizardSupervisor(void) const
 	{
-		return class_ == XDAQContextConfiguration::WIZARD_SUPERVISOR_CLASS;
+		return class_ == XDAQContextTable::WIZARD_SUPERVISOR_CLASS;
 	}
 	bool isTypeFESupervisor(void) const
 	{
-		return XDAQContextConfiguration::FETypeClassNames_.find(class_) !=
-		       XDAQContextConfiguration::FETypeClassNames_.end();
+		return XDAQContextTable::FETypeClassNames_.find(class_) !=
+		       XDAQContextTable::FETypeClassNames_.end();
 	}
 	bool isTypeDMSupervisor(void) const
 	{
-		return XDAQContextConfiguration::DMTypeClassNames_.find(class_) !=
-		       XDAQContextConfiguration::DMTypeClassNames_.end();
+		return XDAQContextTable::DMTypeClassNames_.find(class_) !=
+		       XDAQContextTable::DMTypeClassNames_.end();
 	}
 	bool isTypeLogbookSupervisor(void) const
 	{
-		return XDAQContextConfiguration::LogbookTypeClassNames_.find(class_) !=
-		       XDAQContextConfiguration::LogbookTypeClassNames_.end();
+		return XDAQContextTable::LogbookTypeClassNames_.find(class_) !=
+		       XDAQContextTable::LogbookTypeClassNames_.end();
 	}
 	bool isTypeMacroMakerSupervisor(void) const
 	{
-		return XDAQContextConfiguration::MacroMakerTypeClassNames_.find(class_) !=
-		       XDAQContextConfiguration::MacroMakerTypeClassNames_.end();
+		return XDAQContextTable::MacroMakerTypeClassNames_.find(class_) !=
+		       XDAQContextTable::MacroMakerTypeClassNames_.end();
 	}
 	bool isTypeConfigurationGUISupervisor(void) const
 	{
-		return XDAQContextConfiguration::ConfigurationGUITypeClassNames_.find(class_) !=
-		       XDAQContextConfiguration::ConfigurationGUITypeClassNames_.end();
+		return XDAQContextTable::ConfigurationGUITypeClassNames_.find(class_) !=
+		       XDAQContextTable::ConfigurationGUITypeClassNames_.end();
 	}
 	bool isTypeChatSupervisor(void) const
 	{
-		return XDAQContextConfiguration::ChatTypeClassNames_.find(class_) !=
-		       XDAQContextConfiguration::ChatTypeClassNames_.end();
+		return XDAQContextTable::ChatTypeClassNames_.find(class_) !=
+		       XDAQContextTable::ChatTypeClassNames_.end();
 	}
 	bool isTypeConsoleSupervisor(void) const
 	{
-		return XDAQContextConfiguration::ConsoleTypeClassNames_.find(class_) !=
-		       XDAQContextConfiguration::ConsoleTypeClassNames_.end();
+		return XDAQContextTable::ConsoleTypeClassNames_.find(class_) !=
+		       XDAQContextTable::ConsoleTypeClassNames_.end();
 	}
 
 	// Getters -------------------

@@ -1,4 +1,4 @@
-#include "otsdaq-core/ConfigurationDataFormats/DetectorRegisterConfiguration.h"
+#include "otsdaq-core/ConfigurationDataFormats/DetectorRegisterTable.h"
 
 #include <iostream>
 

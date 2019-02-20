@@ -6,7 +6,7 @@
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/ConfigurationPluginDataFormats/XDAQContextConfiguration.h"
+#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
 
 #include <toolbox/fsm/FailedEvent.h>
 
@@ -43,7 +43,7 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s)
                                      // load a partial configuration (new
                                      // ConfigurationManager)
     , XDAQContextTableName_(
-          theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)
+          theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
               ->getTableName())
     , supervisorConfigurationPath_(
           "INITIALIZED INSIDE THE CONTRUCTOR BECAUSE IT NEEDS supervisorContextUID_ and "
@@ -68,7 +68,7 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s)
 	try
 	{
 		supervisorContextUID_ =
-		    theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)
+		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
 		        ->getContextUID(
 		            getApplicationContext()->getContextDescriptor()->getURL());
 	}
@@ -84,7 +84,7 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s)
 	try
 	{
 		supervisorApplicationUID_ =
-		    theConfigurationManager_->__GET_CONFIG__(XDAQContextConfiguration)
+		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
 		        ->getApplicationUID(
 		            getApplicationContext()->getContextDescriptor()->getURL(),
 		            getApplicationDescriptor()->getLocalId());

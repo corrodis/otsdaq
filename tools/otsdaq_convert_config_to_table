@@ -32,13 +32,13 @@ fi
 TABLE_DIR=$USER_DATA/ConfigurationInfo
 if [ ! -d $TABLE_DIR ]; then
 	echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t TABLE_DIR=${TABLE_DIR} path does not exist. Is your ots instance setup? Perhaps you already did this conversion?"
-	exit
+	#exit
 fi
 	
 NEW_TABLE_DIR=$USER_DATA/TableInfo
 if [ -d $NEW_TABLE_DIR ]; then
 	echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t NEW_TABLE_DIR=${NEW_TABLE_DIR} path already exits. Perhaps you already did this conversion?"
-	exit
+	#exit
 fi
 
 echo
@@ -63,7 +63,6 @@ echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t TABLE_DIR=
 echo
 echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t ARTDAQ_DATABASE_URI=${ARTDAQ_DATABASE_URI}"
 echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t ARTDAQ_DATABASE_DIR=${ARTDAQ_DATABASE_DIR}"
-
 
 ###########
 #=====================================
@@ -110,13 +109,91 @@ for f in *Configuration; do mv -n "$f" "${f/Configuration}Table"; done;
 #hide index from transformation
 for f in *Table; do mv -n "$f/index.json" "$f/index.txt"; done; 
 
-sed -i s/Configuration/Table/g *Table/*.json
-sed -i s/CONFIGURATION/TABLE/g *Table/*.json
-sed -i s/configuration/table/g *Table/*.json
+sed -i s/Configuration/Table/g *Table/*.json #*/ end C++ comment coloring
+sed -i s/CONFIGURATION/TABLE/g *Table/*.json #*/ end C++ comment coloring
+sed -i s/configuration/table/g *Table/*.json #*/ end C++ comment coloring
 
 #return index after transformation
 for f in *Table; do mv -n "$f/index.txt" "$f/index.json"; done; 
 
+
+
+###########
+#=====================================
+###########	ConfigurationPlugin to TablePlugin conversion
+
+echo
+echo
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Converting ConfigurationPlugin to TablePlugin for all repositories..."
+
+echo
+
+#for every repo
+# look for ConfigurationPluginDataFormats
+#	move folder to TablePluginDataFormats
+#		Convert each .cc and .h to _table.cc
+#			Search and replace class names in the .h .cc
+
+REPO_DIR="$(find $MRB_SOURCE/* -maxdepth 1 -iname 'otsdaq*')"
+
+
+for p in ${REPO_DIR[@]}; do
+	if [ -d $p ]; then    
+	if [ -d $p/ConfigurationPluginDataFormats ]; then
+		echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Plugin directory $p/ConfigurationPluginDataFormats"
+		
+		cd $p/ConfigurationPluginDataFormats
+		
+		for f in *Configuration*.cc ; do mv $f ${f//configuration/table} ; done
+		for f in *Configuration* ; do mv $f ${f//Configuration/Table} ; done
+		
+		sed -i s/Configuration/Table/g *Table*;
+		sed -i s/CONFIGURATION/TABLE/g *Table*;
+		sed -i s/configuration/table/g *Table*;
+		sed -i s/TableInterface/ConfigurationInterface/g *Table*;
+		sed -i s/TableTree/ConfigurationTree/g *Table*;
+		sed -i s/TableManager/ConfigurationManager/g *Table*;
+		sed -i s/TableGUITypeClassNames_/ConfigurationGUITypeClassNames_/g *Table*;
+		sed -i s/FSSRDACsTable/FSSRDACsConfiguration/g *Table*;
+		
+		
+		sed -i s/"configuration"/"table"/g CMakeLists.txt;
+		sed -i s/Configuration/Table/g CMakeLists.txt;
+		sed -i s/TableInterface/ConfigurationInterface/g CMakeLists.txt;
+		
+		cd ..
+		mv $p/ConfigurationPluginDataFormats $p/TablePluginDataFormats
+	fi
+	
+
+	if [ -d $p/UserConfigurationDataFormats ]; then
+		echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Plugin directory $p/UserConfigurationDataFormats"
+		
+		cd $p/UserConfigurationDataFormats
+		
+		for f in *Configuration*.cc ; do mv $f ${f//configuration/table} ; done
+		for f in *Configuration* ; do mv $f ${f//Configuration/Table} ; done
+		
+		sed -i s/Configuration/Table/g *Table*;
+		sed -i s/CONFIGURATION/TABLE/g *Table*;
+		sed -i s/configuration/table/g *Table*;
+		sed -i s/TableInterface/ConfigurationInterface/g *Table*;
+		sed -i s/TableTree/ConfigurationTree/g *Table*;
+		sed -i s/TableManager/ConfigurationManager/g *Table*;
+		sed -i s/TableGUITypeClassNames_/ConfigurationGUITypeClassNames_/g *Table*;
+		sed -i s/FSSRDACsTable/FSSRDACsConfiguration/g *Table*;
+		
+		
+		sed -i s/"configuration"/"table"/g CMakeLists.txt;
+		sed -i s/Configuration/Table/g CMakeLists.txt;
+		sed -i s/TableInterface/ConfigurationInterface/g CMakeLists.txt;
+		
+		cd ..
+		mv $p/UserConfigurationDataFormats $p/UserTableDataFormats
+	fi
+	
+	fi
+done
 
 ###########
 #=====================================
