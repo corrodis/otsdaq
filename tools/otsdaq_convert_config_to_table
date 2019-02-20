@@ -156,6 +156,11 @@ for p in ${REPO_DIR[@]}; do
 		sed -i s/TableGUITypeClassNames_/ConfigurationGUITypeClassNames_/g *Table*;
 		sed -i s/FSSRDACsTable/FSSRDACsConfiguration/g *Table*;
 		
+		sed -i s/MessageFacilityTables/MessageFacilityConfigurations/g *Table*;
+		sed -i s/XDAQ_TABLE_DATA_PATH/XDAQ_CONFIGURATION_DATA_PATH/g *Table*;
+		sed -i s/XDAQ_TABLE_XML/XDAQ_CONFIGURATION_XML/g *Table*;
+		
+		
 		
 		sed -i s/"configuration"/"table"/g CMakeLists.txt;
 		sed -i s/Configuration/Table/g CMakeLists.txt;
@@ -182,6 +187,10 @@ for p in ${REPO_DIR[@]}; do
 		sed -i s/TableManager/ConfigurationManager/g *Table*;
 		sed -i s/TableGUITypeClassNames_/ConfigurationGUITypeClassNames_/g *Table*;
 		sed -i s/FSSRDACsTable/FSSRDACsConfiguration/g *Table*;
+
+		sed -i s/MessageFacilityTables/MessageFacilityConfigurations/g *Table*;
+		sed -i s/XDAQ_TABLE_DATA_PATH/XDAQ_CONFIGURATION_DATA_PATH/g *Table*;
+		sed -i s/XDAQ_TABLE_XML/XDAQ_CONFIGURATION_XML/g *Table*;
 		
 		
 		sed -i s/"configuration"/"table"/g CMakeLists.txt;

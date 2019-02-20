@@ -1225,7 +1225,7 @@ void ConfigurationManager::loadConfigurationGroup(
 				}
 				catch(...)
 				{
-					__SS__ << "Error detected calling "
+					__SS__ << "Unknown Error detected calling "
 					       << nameToConfigurationMap_[memberPair.first]->getTableName()
 					       << ".init()!\n\n " << std::endl;
 					__SS_THROW__;
@@ -1304,7 +1304,8 @@ void ConfigurationManager::loadConfigurationGroup(
 		}
 		catch(const std::runtime_error& e)
 		{
-			__SS__ << "Error occurred while loading configuration group: " << e.what()
+			__SS__ << "Error occurred while loading configuration group '" <<
+					configGroupName << "(" << configGroupKey << ")': \n" << e.what()
 			       << __E__;
 			__COUT_WARN__ << ss.str();
 			if(accumulatedTreeErrors)
@@ -1312,7 +1313,8 @@ void ConfigurationManager::loadConfigurationGroup(
 		}
 		catch(...)
 		{
-			__SS__ << "An unknown error occurred while loading configuration group."
+			__SS__ << "An unknown error occurred while loading configuration group '" <<
+					configGroupName << "(" << configGroupKey << ")."
 			       << __E__;
 			__COUT_WARN__ << ss.str();
 			if(accumulatedTreeErrors)
