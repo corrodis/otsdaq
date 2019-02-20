@@ -69,7 +69,7 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 		    << "XDAQ Supervisor could not access it's configuration through the "
 		       "theConfigurationManager_."
 		    <<
-		    //" The XDAQContextConfigurationName = " << XDAQContextConfigurationName_ <<
+		    //" The XDAQContextTableName = " << XDAQContextTableName_ <<
 		    ". The getApplicationContext()->getContextDescriptor()->getURL() = "
 		    << application->getApplicationContext()->getContextDescriptor()->getURL()
 		    << std::endl;

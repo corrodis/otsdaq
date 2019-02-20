@@ -16,7 +16,7 @@ namespace ots
 class RegisterSequencer : public ots::TableBase
 {
   public:
-	RegisterSequencer(std::string staticConfigurationName);
+	RegisterSequencer(std::string staticTableName);
 	virtual ~RegisterSequencer();
 
 	void init(void);

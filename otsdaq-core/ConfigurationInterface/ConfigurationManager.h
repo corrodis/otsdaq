@@ -76,13 +76,13 @@ class ConfigurationManager
 
 	void init(std::string* accumulatedErrors = 0);
 	void destroy(void);
-	void destroyConfigurationGroup(const std::string& theGroup       = "",
+	void destroyTableGroup(const std::string& theGroup       = "",
 	                               bool               onlyDeactivate = false);
 
 	//==============================================================================
 	// Getters
 
-	void loadConfigurationGroup(
+	void loadTableGroup(
 	    const std::string&                                     configGroupName,
 	    TableGroupKey                                          configGroupKey,
 	    bool                                                   doActivate         = false,
@@ -121,14 +121,14 @@ class ConfigurationManager
 	std::map<std::string /*tableName*/, std::map<std::string /*aliasName*/, TableVersion>>
 	getVersionAliases(void) const;
 
-	std::pair<std::string /*groupName*/, TableGroupKey> getConfigurationGroupFromAlias(
+	std::pair<std::string /*groupName*/, TableGroupKey> getTableGroupFromAlias(
 	    std::string systemAlias, ProgressBar* progressBar = 0);
 	std::map<std::string /*groupType*/,
 	         std::pair<std::string /*groupName*/, TableGroupKey>>
-	getActiveConfigurationGroups(void) const;
+	getActiveTableGroups(void) const;
 	const std::map<std::string /*groupType*/,
 	               std::pair<std::string /*groupName*/, TableGroupKey>>&
-	getFailedConfigurationGroups(void) const
+	getFailedTableGroups(void) const
 	{
 		return lastFailedGroupLoad_;
 	}
@@ -156,7 +156,7 @@ class ConfigurationManager
 	//==============================================================================
 	// Setters/Modifiers
 	std::shared_ptr<TableGroupKey> makeTheTableGroupKey(TableGroupKey key);
-	void restoreActiveConfigurationGroups(bool               throwErrors = false,
+	void restoreActiveTableGroups(bool               throwErrors = false,
 	                                      const std::string& pathToActiveGroupsFile = "");
 
   private:
@@ -166,10 +166,10 @@ class ConfigurationManager
 	std::string username_;  // user of the configuration is READONLY_USER unless using
 	                        // ConfigurationManagerRW
 	ConfigurationInterface*        theInterface_;
-	std::shared_ptr<TableGroupKey> theTableGroupKey_, theContextGroupKey_,
-	    theBackboneGroupKey_, theIterateGroupKey_;
-	std::string theConfigurationGroup_, theContextGroup_, theBackboneGroup_,
-	    theIterateGroup_;
+	std::shared_ptr<TableGroupKey> theConfigurationTableGroupKey_, theContextTableGroupKey_,
+	    theBackboneTableGroupKey_, theIterateTableGroupKey_;
+	std::string theConfigurationTableGroup_, theContextTableGroup_, theBackboneTableGroup_,
+	    theIterateTableGroup_;
 
 	std::map<std::string, std::pair<std::string, TableGroupKey>> lastFailedGroupLoad_;
 

@@ -141,7 +141,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 		// load group, group metadata, and tables from original DB
 		try
 		{
-			cfgMgr->loadConfigurationGroup(
+			cfgMgr->loadTableGroup(
 			    activeGroupPair.second.first,
 			    activeGroupPair.second.second,
 			    true /*doActivate*/,
@@ -337,7 +337,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 		          << std::endl;
 		config            = cfgMgr->getTableByName(versionAliasesName);
 		cfgView           = config->getViewP();
-		unsigned int col1 = cfgView->findCol("ConfigurationName");
+		unsigned int col1 = cfgView->findCol("TableName");
 		unsigned int col2 = cfgView->findCol("Version");
 
 		// change all version entries to active tables to flatVersion

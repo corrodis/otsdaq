@@ -33,7 +33,7 @@ void Iterator::helpCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct,
 	std::map<std::string /*name*/, TableVersion /*version*/> memberMap;
 	try
 	{
-		cfgMgr->loadConfigurationGroup(groupName,
+		cfgMgr->loadTableGroup(groupName,
 		                               originalKey,
 		                               0,
 		                               &memberMap,

@@ -4,10 +4,10 @@
 
 using namespace ots;
 
-const std::string FERRegisterSequencer::staticConfigurationName_ = "FERRegisterSequencer";
+const std::string FERRegisterSequencer::staticTableName_ = "FERRegisterSequencer";
 //==============================================================================
 FERRegisterSequencer::FERRegisterSequencer()
-    : RegisterConfiguration(FERRegisterSequencer::staticConfigurationName_)
+    : RegisterConfiguration(FERRegisterSequencer::staticTableName_)
 {
 }
 //==============================================================================

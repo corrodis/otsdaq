@@ -1687,7 +1687,7 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct* iteratorStruct)
 		std::pair<std::string, TableGroupKey> newActiveGroup =
 		    iteratorStruct->cfgMgr_->getConfigurationGroupFromAlias(
 		        iteratorStruct->fsmCommandParameters_[0]);
-		iteratorStruct->cfgMgr_->loadConfigurationGroup(
+		iteratorStruct->cfgMgr_->loadTableGroup(
 		    newActiveGroup.first, newActiveGroup.second, true /*activate*/);
 
 		__COUT__ << "originalTrackChanges " << iteratorStruct->originalTrackChanges_

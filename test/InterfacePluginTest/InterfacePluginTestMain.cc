@@ -30,7 +30,7 @@ int main()
 	    supervisorContextUID_ + "/LinkToApplicationTable/" + supervisorApplicationUID_ +
 	    "/LinkToSupervisorTable";
 	// const int TableGroupKeyValue_ = 0;
-	// std::shared_ptr<TableGroupKey> theTableGroupKey_(new
+	// std::shared_ptr<TableGroupKey> theConfigurationTableGroupKey_(new
 	// TableGroupKey(TableGroupKeyValue_));
 
 	////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ int main()
 	std::pair<std::string /*group name*/, TableGroupKey> theGroup =
 	    theConfigurationManager_->getConfigurationGroupFromAlias(ConfigurationAlias_);
 
-	theConfigurationManager_->loadConfigurationGroup(
+	theConfigurationManager_->loadTableGroup(
 	    theGroup.first, theGroup.second, true);
 
 	theFEVInterfacesManager_.configure();
@@ -59,7 +59,7 @@ int main()
 	// configurations = 0;
 	//	theInterface_->get((TableBase*&)configurations,"Configurations");
 	//	TableBase* frontEndConfiguration = 0;
-	//	theInterface_->get(frontEndConfiguration, "FEConfiguration", theTableGroupKey_,
+	//	theInterface_->get(frontEndConfiguration, "FEConfiguration", theConfigurationTableGroupKey_,
 	// configurations);
 	//
 	//	const std::string interfaceName     =  "FEOtsUDPFSSRInterface";
@@ -70,10 +70,10 @@ int main()
 	//	TableBase* interfaceConfiguration_ =
 	// 0;//makeConfigurationInterface(configurationName);
 	//
-	//	if(configurations->findKOC(*theTableGroupKey_,configurationName))
+	//	if(configurations->findKOC(*theConfigurationTableGroupKey_,configurationName))
 	//	{
 	//		theInterface_->get(interfaceConfiguration_, configurationName,
-	// theTableGroupKey_, configurations);
+	// theConfigurationTableGroupKey_, configurations);
 	//	}
 	//
 	//	std::unique_ptr<FEVInterface> theFEWInterface  = makeInterface(interfaceName,

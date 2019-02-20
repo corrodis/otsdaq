@@ -529,15 +529,15 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 		std::pair<std::string /*group name*/, TableGroupKey> theGroup(
 		    SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
 		        .getParameters()
-		        .getValue("ConfigurationGroupName"),
+		        .getValue("ConfigurationTableGroupName"),
 		    TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
 		                      .getParameters()
-		                      .getValue("TableGroupKey")));
+		                      .getValue("ConfigurationTableGroupKey")));
 
 		__SUP_COUT__ << "Configuration group name: " << theGroup.first
 		             << " key: " << theGroup.second << std::endl;
 
-		theConfigurationManager_->loadConfigurationGroup(
+		theConfigurationManager_->loadTableGroup(
 		    theGroup.first, theGroup.second, true);
 	}
 

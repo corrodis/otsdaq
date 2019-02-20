@@ -379,7 +379,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			if(TableVersion(aliasPair.second.getNode("Version").getValueAsString())
 			       .isInvalid())
 				continue;
-			if(aliasPair.second.getNode("ConfigurationName").getValueAsString() == "")
+			if(aliasPair.second.getNode("TableName").getValueAsString() == "")
 				continue;
 			aliasName = aliasPair.second.getNode("VersionAlias").getValueAsString();
 			if(aliasName == "")
@@ -388,7 +388,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			if(aliasName[0] >= 'a' && aliasName[0] <= 'z')  // capitalize the name
 				aliasName[0] -= 32;
 			aliasName = prependBaseName + aliasName;
-			__COUTV__(aliasPair.second.getNode("ConfigurationName").getValueAsString());
+			__COUTV__(aliasPair.second.getNode("TableName").getValueAsString());
 			__COUTV__(aliasName);
 			__COUTV__(aliasPair.second.getNode("Version").getValueAsString());
 
@@ -402,7 +402,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			}
 
 			originalTableAliasMap[aliasName] = std::pair<std::string, TableVersion>(
-			    aliasPair.second.getNode("ConfigurationName").getValueAsString(),
+			    aliasPair.second.getNode("TableName").getValueAsString(),
 			    TableVersion(aliasPair.second.getNode("Version").getValueAsString()));
 		}  // end table aliases loop
 	}      // end extract group set
@@ -503,7 +503,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 		// load group, group metadata, and tables from original DB
 		try
 		{
-			cfgMgr->loadConfigurationGroup(groupPair.first.first,
+			cfgMgr->loadTableGroup(groupPair.first.first,
 			                               groupPair.first.second,
 			                               true /*doActivate*/,
 			                               &memberMap /*memberMap*/,
@@ -790,7 +790,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 		std::string activeBackboneGroupName =
 		    cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
-		cfgMgr->loadConfigurationGroup(
+		cfgMgr->loadTableGroup(
 		    activeBackboneGroupName,
 		    cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE),
 		    true,
@@ -846,7 +846,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			config            = cfgMgr->getTableByName(versionAliasesTableName);
 			cfgView           = config->getViewP();
 			unsigned int col0 = cfgView->findCol("VersionAlias");
-			unsigned int col1 = cfgView->findCol("ConfigurationName");
+			unsigned int col1 = cfgView->findCol("TableName");
 			unsigned int col2 = cfgView->findCol("Version");
 
 			unsigned int row;

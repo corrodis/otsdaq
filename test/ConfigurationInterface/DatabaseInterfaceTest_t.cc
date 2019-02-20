@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(list_configuration_types)
 {
 	auto ifc = DatabaseConfigurationInterface();
 
-	auto list = ifc.getAllConfigurationNames();
+	auto list = ifc.getAllTableNames();
 
 	BOOST_CHECK_EQUAL(list.size(), 2);
 

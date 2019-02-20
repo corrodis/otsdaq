@@ -4,10 +4,10 @@
 
 using namespace ots;
 
-const std::string ROCToFEConfiguration::staticConfigurationName_ = "ROCToFEConfiguration";
+const std::string ROCToFEConfiguration::staticTableName_ = "ROCToFEConfiguration";
 //==============================================================================
 ROCToFEConfiguration::ROCToFEConfiguration(void)
-    : TableBase(ROCToFEConfiguration::staticConfigurationName_)
+    : TableBase(ROCToFEConfiguration::staticTableName_)
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names and the order MUST match the ones in the enum  //

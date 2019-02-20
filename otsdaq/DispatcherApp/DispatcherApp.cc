@@ -75,7 +75,7 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s)
 	{
 		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the "
 		                "Configuration Context Group."
-		             << " The XDAQContextConfigurationName = " << XDAQContextTableName_
+		             << " The XDAQContextTableName = " << XDAQContextTableName_
 		             << ". The supervisorApplicationUID = " << supervisorApplicationUID_
 		             << std::endl;
 		throw;
@@ -274,15 +274,15 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 	std::pair<std::string /*group name*/, TableGroupKey> theGroup(
 	    SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
 	        .getParameters()
-	        .getValue("ConfigurationGroupName"),
+	        .getValue("ConfigurationTableGroupName"),
 	    TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
 	                      .getParameters()
-	                      .getValue("TableGroupKey")));
+	                      .getValue("ConfigurationTableGroupKey")));
 
 	__COUT__ << "Configuration group name: " << theGroup.first
 	         << " key: " << theGroup.second << std::endl;
 
-	theConfigurationManager_->loadConfigurationGroup(
+	theConfigurationManager_->loadTableGroup(
 	    theGroup.first, theGroup.second, true);
 
 	std::string path   = "";

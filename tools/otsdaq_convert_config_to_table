@@ -91,6 +91,8 @@ sed -i s/configuration/table/g *ableInfo.x*
 echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Renaming Table Info folder..."
 mv $TABLE_DIR $NEW_TABLE_DIR
 
+mv $USER_DATA/ServiceData/ActiveConfigurationGroups.cfg $USER_DATA/ServiceData/ActiveTableGroups.cfg
+
 ###########
 #=====================================
 ###########	USER DATABASE conversion

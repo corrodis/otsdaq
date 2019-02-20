@@ -34,7 +34,7 @@ class DatabaseConfigurationInterface : public ConfigurationInterface
 	TableVersion findLatestVersion(const TableBase* /*configuration*/) const noexcept;
 
 	// returns a list of all configuration names
-	std::set<std::string /*name*/> getAllConfigurationNames() const
+	std::set<std::string /*name*/> getAllTableNames() const
 	    throw(std::runtime_error);
 	// find all configuration versions by configuration type
 	std::set<TableVersion> getVersions(const TableBase* /*configuration*/) const noexcept;

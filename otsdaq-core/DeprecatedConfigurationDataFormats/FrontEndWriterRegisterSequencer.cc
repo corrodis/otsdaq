@@ -4,10 +4,10 @@
 
 using namespace ots;
 
-const std::string FEWRegisterSequencer::staticConfigurationName_ = "FEWRegisterSequencer";
+const std::string FEWRegisterSequencer::staticTableName_ = "FEWRegisterSequencer";
 //==============================================================================
 FEWRegisterSequencer::FEWRegisterSequencer()
-    : RegisterConfiguration(FEWRegisterSequencer::staticConfigurationName_)
+    : RegisterConfiguration(FEWRegisterSequencer::staticTableName_)
 {
 }
 //==============================================================================

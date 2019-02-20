@@ -369,7 +369,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 		// load group, group metadata, and tables from original DB
 		try
 		{
-			cfgMgr->loadConfigurationGroup(groupPair.first.first,
+			cfgMgr->loadTableGroup(groupPair.first.first,
 			                               groupPair.first.second,
 			                               true /*doActivate*/,
 			                               &memberMap /*memberMap*/,
@@ -671,7 +671,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 	          << std::endl;
 
 	{
-		cfgMgr->loadConfigurationGroup(activeBackboneGroupName,
+		cfgMgr->loadTableGroup(activeBackboneGroupName,
 		                               activeGroupKeys[activeBackboneGroupName].second,
 		                               true,
 		                               &memberMap,
@@ -735,7 +735,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			__COUT__ << "\n\nModifying " << versionAliasesName << std::endl;
 			config            = cfgMgr->getTableByName(versionAliasesName);
 			cfgView           = config->getViewP();
-			unsigned int col1 = cfgView->findCol("ConfigurationName");
+			unsigned int col1 = cfgView->findCol("TableName");
 			unsigned int col2 = cfgView->findCol("Version");
 
 			// change all version entries to the new version and delete rows with no match
@@ -831,22 +831,22 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 
 		__COUT__ << "Backup file name: " << renameFile << std::endl;
 
-		TableGroupKey *theTableGroupKey_, *theContextGroupKey_, *theBackboneGroupKey_,
-		    *theIterateGroupKey_;
-		std::string theConfigurationGroup_, theContextGroup_, theBackboneGroup_,
-		    theIterateGroup_;
+		TableGroupKey *theConfigurationTableGroupKey_, *theContextTableGroupKey_, *theBackboneTableGroupKey_,
+		    *theIterateTableGroupKey_;
+		std::string theConfigurationTableGroup_, theContextTableGroup_, theBackboneTableGroup_,
+		    theIterateTableGroup_;
 
-		theConfigurationGroup_ = activeConfigGroupName;
-		theTableGroupKey_      = &(activeGroupKeys[activeConfigGroupName].second);
+		theConfigurationTableGroup_ = activeConfigGroupName;
+		theConfigurationTableGroupKey_      = &(activeGroupKeys[activeConfigGroupName].second);
 
-		theContextGroup_    = activeContextGroupName;
-		theContextGroupKey_ = &(activeGroupKeys[activeContextGroupName].second);
+		theContextTableGroup_    = activeContextGroupName;
+		theContextTableGroupKey_ = &(activeGroupKeys[activeContextGroupName].second);
 
-		theBackboneGroup_    = activeBackboneGroupName;
-		theBackboneGroupKey_ = &(activeGroupKeys[activeBackboneGroupName].second);
+		theBackboneTableGroup_    = activeBackboneGroupName;
+		theBackboneTableGroupKey_ = &(activeGroupKeys[activeBackboneGroupName].second);
 
-		theIterateGroup_    = activeIterateGroupName;
-		theIterateGroupKey_ = &(activeGroupKeys[activeIterateGroupName].second);
+		theIterateTableGroup_    = activeIterateGroupName;
+		theIterateTableGroupKey_ = &(activeGroupKeys[activeIterateGroupName].second);
 
 		// the following is copied from ConfigurationManagerRW::activateConfigurationGroup
 		{
@@ -859,23 +859,23 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			if(!fp)
 				return;
 
-			fprintf(fp, "%s\n", theContextGroup_.c_str());
+			fprintf(fp, "%s\n", theContextTableGroup_.c_str());
 			fprintf(fp,
 			        "%s\n",
-			        theContextGroupKey_ ? theContextGroupKey_->toString().c_str() : "-1");
-			fprintf(fp, "%s\n", theBackboneGroup_.c_str());
+			        theContextTableGroupKey_ ? theContextTableGroupKey_->toString().c_str() : "-1");
+			fprintf(fp, "%s\n", theBackboneTableGroup_.c_str());
 			fprintf(
 			    fp,
 			    "%s\n",
-			    theBackboneGroupKey_ ? theBackboneGroupKey_->toString().c_str() : "-1");
-			fprintf(fp, "%s\n", theConfigurationGroup_.c_str());
+			    theBackboneTableGroupKey_ ? theBackboneTableGroupKey_->toString().c_str() : "-1");
+			fprintf(fp, "%s\n", theConfigurationTableGroup_.c_str());
 			fprintf(fp,
 			        "%s\n",
-			        theTableGroupKey_ ? theTableGroupKey_->toString().c_str() : "-1");
-			fprintf(fp, "%s\n", theIterateGroup_.c_str());
+			        theConfigurationTableGroupKey_ ? theConfigurationTableGroupKey_->toString().c_str() : "-1");
+			fprintf(fp, "%s\n", theIterateTableGroup_.c_str());
 			fprintf(fp,
 			        "%s\n",
-			        theIterateGroupKey_ ? theIterateGroupKey_->toString().c_str() : "-1");
+			        theIterateTableGroupKey_ ? theIterateTableGroupKey_->toString().c_str() : "-1");
 			fclose(fp);
 		}
 	}

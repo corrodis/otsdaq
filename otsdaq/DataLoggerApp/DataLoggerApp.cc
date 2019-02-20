@@ -43,7 +43,7 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* s)
                                      ////I always load the full config but if I want to
                                      // load a partial configuration (new
                                      // ConfigurationManager)
-    , XDAQContextConfigurationName_(
+    , XDAQContextTableName_(
           theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)->getTableName())
     , supervisorConfigurationPath_(
           "INITIALIZED INSIDE THE CONTRUCTOR BECAUSE IT NEEDS supervisorContextUID_ and "
@@ -76,8 +76,8 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* s)
 	{
 		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the "
 		                "Configuration Context Group."
-		             << " The XDAQContextConfigurationName = "
-		             << XDAQContextConfigurationName_
+		             << " The XDAQContextTableName = "
+		             << XDAQContextTableName_
 		             << ". The supervisorApplicationUID = " << supervisorApplicationUID_
 		             << std::endl;
 		throw;
@@ -273,15 +273,15 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 	std::pair<std::string /*group name*/, TableGroupKey> theGroup(
 	    SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
 	        .getParameters()
-	        .getValue("ConfigurationGroupName"),
+	        .getValue("ConfigurationTableGroupName"),
 	    TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
 	                      .getParameters()
-	                      .getValue("TableGroupKey")));
+	                      .getValue("ConfigurationTableGroupKey")));
 
 	__COUT__ << "Configuration group name: " << theGroup.first
 	         << " key: " << theGroup.second << std::endl;
 
-	theConfigurationManager_->loadConfigurationGroup(
+	theConfigurationManager_->loadTableGroup(
 	    theGroup.first, theGroup.second, true);
 
 	std::string path   = "";
@@ -353,7 +353,7 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 	// fhicl::make_ParameterSet(configString, pset);
 
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
-	std::string uid = theConfigurationManager_->getNode(XDAQContextConfigurationName_)
+	std::string uid = theConfigurationManager_->getNode(XDAQContextTableName_)
 	                      .getNode(supervisorConfigurationPath_)
 	                      .getValue();
 
@@ -384,7 +384,7 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 
 	__COUT__ << fileFclString << std::endl;
 	fhicl::make_ParameterSet(fileFclString, pset);
-	// fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextConfigurationName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(),
+	// fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextTableName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(),
 	// pset);
 
 	theDataLoggerInterface_->initialize(pset, 0, 0);

@@ -58,7 +58,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
     , RunControlStateMachine("GatewaySupervisor")
     , CorePropertySupervisorBase(this)
     //, CorePropertySupervisorBase::theConfigurationManager_(new ConfigurationManager)
-    //,theTableGroupKey_    (nullptr)
+    //,theConfigurationTableGroupKey_    (nullptr)
     , theArtdaqCommandable_(this)
     , stateMachineWorkLoopManager_(toolbox::task::bind(
           this, &GatewaySupervisor::stateMachineThread, "StateMachine"))
@@ -1372,7 +1372,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	// Translate the system alias to a group name/key
 	try
 	{
-		theConfigurationGroup_ = CorePropertySupervisorBase::theConfigurationManager_
+		theConfigurationTableGroup_ = CorePropertySupervisorBase::theConfigurationManager_
 		                             ->getConfigurationGroupFromAlias(systemAlias);
 	}
 	catch(...)
@@ -1382,7 +1382,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	RunControlStateMachine::theProgressBar_.step();
 
-	if(theConfigurationGroup_.second.isInvalid())
+	if(theConfigurationTableGroup_.second.isInvalid())
 	{
 		__SS__ << "\nTransition to Configuring interrupted! System Alias " << systemAlias
 		       << " could not be translated to a group name and key." << __E__;
@@ -1394,14 +1394,14 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	RunControlStateMachine::theProgressBar_.step();
 
-	__COUT__ << "Configuration group name: " << theConfigurationGroup_.first
-	         << " key: " << theConfigurationGroup_.second << __E__;
+	__COUT__ << "Configuration group name: " << theConfigurationTableGroup_.first
+	         << " key: " << theConfigurationTableGroup_.second << __E__;
 
 	// make logbook entry
 	{
 		std::stringstream ss;
 		ss << "Configuring '" << systemAlias << "' which translates to "
-		   << theConfigurationGroup_.first << " (" << theConfigurationGroup_.second
+		   << theConfigurationTableGroup_.first << " (" << theConfigurationTableGroup_.second
 		   << ").";
 		makeSystemLogbookEntry(ss.str());
 	}
@@ -1411,19 +1411,19 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	// load and activate
 	try
 	{
-		CorePropertySupervisorBase::theConfigurationManager_->loadConfigurationGroup(
-		    theConfigurationGroup_.first, theConfigurationGroup_.second, true);
+		CorePropertySupervisorBase::theConfigurationManager_->loadTableGroup(
+		    theConfigurationTableGroup_.first, theConfigurationTableGroup_.second, true);
 
 		// When configured, set the translated System Alias to be persistently active
 		ConfigurationManagerRW tmpCfgMgr("TheSupervisor");
-		tmpCfgMgr.activateConfigurationGroup(theConfigurationGroup_.first,
-		                                     theConfigurationGroup_.second);
+		tmpCfgMgr.activateConfigurationGroup(theConfigurationTableGroup_.first,
+		                                     theConfigurationTableGroup_.second);
 	}
 	catch(...)
 	{
 		__SS__ << "\nTransition to Configuring interrupted! System Alias " << systemAlias
-		       << " was translated to " << theConfigurationGroup_.first << " ("
-		       << theConfigurationGroup_.second
+		       << " was translated to " << theConfigurationTableGroup_.first << " ("
+		       << theConfigurationTableGroup_.second
 		       << ") but could not be loaded and initialized." << __E__;
 		ss << "\n\nTo debug this problem, try activating this group in the Configuration "
 		      "GUI "
@@ -1502,8 +1502,8 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	RunControlStateMachine::theProgressBar_.step();
 	SOAPParameters parameters;
-	parameters.addParameter("ConfigurationGroupName", theConfigurationGroup_.first);
-	parameters.addParameter("TableGroupKey", theConfigurationGroup_.second.toString());
+	parameters.addParameter("ConfigurationTableGroupName", theConfigurationTableGroup_.first);
+	parameters.addParameter("ConfigurationTableGroupKey", theConfigurationTableGroup_.second.toString());
 
 	// update Macro Maker front end list
 	{
@@ -1513,8 +1513,8 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 		SOAPParameters parameters;
 		parameters.addParameter("type", "initFElist");
-		parameters.addParameter("groupName", theConfigurationGroup_.first);
-		parameters.addParameter("groupKey", theConfigurationGroup_.second.toString());
+		parameters.addParameter("groupName", theConfigurationTableGroup_.first);
+		parameters.addParameter("groupKey", theConfigurationTableGroup_.second.toString());
 		SOAPUtilities::addParameters(message, parameters);
 
 		__COUT__ << "Sending FE communication: " << SOAPUtilities::translate(message)
@@ -1541,7 +1541,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	// diagService_->reportError("GatewaySupervisor::stateConfiguring: Exiting",DIAGINFO);
 
 	// save last configured group name/key
-	saveGroupNameAndKey(theConfigurationGroup_, FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
+	saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
 
 	__COUT__ << "Done configuring." << __E__;
 	RunControlStateMachine::theProgressBar_.complete();
@@ -1749,7 +1749,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 	broadcastMessage(theStateMachine_.getCurrentMessage());
 
 	// save last started group name/key
-	saveGroupNameAndKey(theConfigurationGroup_, FSM_LAST_STARTED_GROUP_ALIAS_FILE);
+	saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_STARTED_GROUP_ALIAS_FILE);
 }
 
 //========================================================================================================================
@@ -2965,7 +2965,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 					try
 					{
 						CorePropertySupervisorBase::theConfigurationManager_
-						    ->loadConfigurationGroup(
+						    ->loadTableGroup(
 						        aliasMapPair.second.first,
 						        aliasMapPair.second.second,
 						        false,

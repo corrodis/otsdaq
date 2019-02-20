@@ -234,7 +234,7 @@ class ConfigurationInterface
 	}  // end get()
 
 	// table handling
-	virtual std::set<std::string /*name*/> getAllConfigurationNames() const
+	virtual std::set<std::string /*name*/> getAllTableNames() const
 	    throw(std::runtime_error)
 	{
 		__SS__;

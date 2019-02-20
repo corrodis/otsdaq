@@ -50,7 +50,7 @@ EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
     , supervisorContextUID_("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
     , supervisorApplicationUID_(
           "INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
-//, theTableGroupKey_   (nullptr)
+//, theConfigurationTableGroupKey_   (nullptr)
 //, supervisorInstance_         (this->getApplicationDescriptor()->getInstance())
 //        theFEWInterfacesManager_
 //        (theConfigurationManager_,this->getApplicationDescriptor()->getInstance())
@@ -79,7 +79,7 @@ EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
 	{
 		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the "
 		                "Configuration Context Group."
-		             << " The XDAQContextConfigurationName = " << XDAQContextTableName_
+		             << " The XDAQContextTableName = " << XDAQContextTableName_
 		             << ". The supervisorApplicationUID = " << supervisorApplicationUID_
 		             << std::endl;
 		throw;
@@ -292,18 +292,18 @@ void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
 	std::pair<std::string /*group name*/, TableGroupKey> theGroup(
 	    SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
 	        .getParameters()
-	        .getValue("ConfigurationGroupName"),
+	        .getValue("ConfigurationTableGroupName"),
 	    TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
 	                      .getParameters()
-	                      .getValue("TableGroupKey")));
+	                      .getValue("ConfigurationTableGroupKey")));
 
 	__COUT__ << "Configuration group name: " << theGroup.first
 	         << " key: " << theGroup.second << std::endl;
 
-	theConfigurationManager_->loadConfigurationGroup(
+	theConfigurationManager_->loadTableGroup(
 	    theGroup.first, theGroup.second, true);
 
-	// theConfigurationManager_->setupEventBuilderAppConfiguration(theTableGroupKey_,supervisorInstance_);
+	// theConfigurationManager_->setupEventBuilderAppConfiguration(theConfigurationTableGroupKey_,supervisorInstance_);
 
 	// Now that the configuration manager has all the necessary configurations I can
 	// create all objects dependent of the configuration  std::string configString =

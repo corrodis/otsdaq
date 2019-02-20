@@ -73,7 +73,7 @@ class DataLoggerApp : public xdaq::Application,
 
 	AllSupervisorInfo     allSupervisorInfo_;
 	ConfigurationManager* theConfigurationManager_;
-	std::string           XDAQContextConfigurationName_;
+	std::string           XDAQContextTableName_;
 	std::string           supervisorConfigurationPath_;
 	std::string           supervisorContextUID_;
 	std::string           supervisorApplicationUID_;

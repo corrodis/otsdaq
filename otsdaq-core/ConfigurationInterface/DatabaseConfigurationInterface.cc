@@ -187,7 +187,7 @@ catch(std::exception const& e)
 
 //==============================================================================
 // returns a list of all configuration names
-std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllConfigurationNames()
+std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableNames()
     const throw(std::runtime_error) try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};

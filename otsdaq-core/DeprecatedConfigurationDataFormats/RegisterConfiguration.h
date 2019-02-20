@@ -15,7 +15,7 @@ namespace ots
 class RegisterConfiguration : public ots::TableBase
 {
   public:
-	RegisterConfiguration(std::string staticConfigurationName);
+	RegisterConfiguration(std::string staticTableName);
 	virtual ~RegisterConfiguration();
 
 	void init(void);

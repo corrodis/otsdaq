@@ -253,7 +253,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 		{
 			try
 			{
-				loadConfigurationGroup(
+				loadTableGroup(
 				    groupInfo.first /*groupName*/,
 				    groupInfo.second.getLatestKey(),
 				    false /*doActivate*/,
@@ -336,7 +336,7 @@ void ConfigurationManagerRW::activateConfigurationGroup(
     TableGroupKey      configGroupKey,
     std::string*       accumulatedTreeErrors)
 {
-	loadConfigurationGroup(configGroupName,
+	loadTableGroup(configGroupName,
 	                       configGroupKey,
 	                       true,                    // loads and activates
 	                       0,                       // no members needed
@@ -373,38 +373,38 @@ void ConfigurationManagerRW::activateConfigurationGroup(
 		return;
 	}
 
-	__MCOUT_INFO__("Active Context: " << theContextGroup_ << "("
-	                                  << (theContextGroupKey_
-	                                          ? theContextGroupKey_->toString().c_str()
+	__MCOUT_INFO__("Active Context: " << theContextTableGroup_ << "("
+	                                  << (theContextTableGroupKey_
+	                                          ? theContextTableGroupKey_->toString().c_str()
 	                                          : "-1")
 	                                  << ")" << std::endl);
-	__MCOUT_INFO__("Active Backbone: " << theBackboneGroup_ << "("
-	                                   << (theBackboneGroupKey_
-	                                           ? theBackboneGroupKey_->toString().c_str()
+	__MCOUT_INFO__("Active Backbone: " << theBackboneTableGroup_ << "("
+	                                   << (theBackboneTableGroupKey_
+	                                           ? theBackboneTableGroupKey_->toString().c_str()
 	                                           : "-1")
 	                                   << ")" << std::endl);
-	__MCOUT_INFO__("Active Iterate: " << theIterateGroup_ << "("
-	                                  << (theIterateGroupKey_
-	                                          ? theIterateGroupKey_->toString().c_str()
+	__MCOUT_INFO__("Active Iterate: " << theIterateTableGroup_ << "("
+	                                  << (theIterateTableGroupKey_
+	                                          ? theIterateTableGroupKey_->toString().c_str()
 	                                          : "-1")
 	                                  << ")" << std::endl);
 	__MCOUT_INFO__("Active Configuration: "
-	               << theConfigurationGroup_ << "("
-	               << (theTableGroupKey_ ? theTableGroupKey_->toString().c_str() : "-1")
+	               << theConfigurationTableGroup_ << "("
+	               << (theConfigurationTableGroupKey_ ? theConfigurationTableGroupKey_->toString().c_str() : "-1")
 	               << ")" << std::endl);
 
-	fprintf(fp, "%s\n", theContextGroup_.c_str());
+	fprintf(fp, "%s\n", theContextTableGroup_.c_str());
 	fprintf(
-	    fp, "%s\n", theContextGroupKey_ ? theContextGroupKey_->toString().c_str() : "-1");
-	fprintf(fp, "%s\n", theBackboneGroup_.c_str());
+	    fp, "%s\n", theContextTableGroupKey_ ? theContextTableGroupKey_->toString().c_str() : "-1");
+	fprintf(fp, "%s\n", theBackboneTableGroup_.c_str());
 	fprintf(fp,
 	        "%s\n",
-	        theBackboneGroupKey_ ? theBackboneGroupKey_->toString().c_str() : "-1");
-	fprintf(fp, "%s\n", theIterateGroup_.c_str());
+	        theBackboneTableGroupKey_ ? theBackboneTableGroupKey_->toString().c_str() : "-1");
+	fprintf(fp, "%s\n", theIterateTableGroup_.c_str());
 	fprintf(
-	    fp, "%s\n", theIterateGroupKey_ ? theIterateGroupKey_->toString().c_str() : "-1");
-	fprintf(fp, "%s\n", theConfigurationGroup_.c_str());
-	fprintf(fp, "%s\n", theTableGroupKey_ ? theTableGroupKey_->toString().c_str() : "-1");
+	    fp, "%s\n", theIterateTableGroupKey_ ? theIterateTableGroupKey_->toString().c_str() : "-1");
+	fprintf(fp, "%s\n", theConfigurationTableGroup_.c_str());
+	fprintf(fp, "%s\n", theConfigurationTableGroupKey_ ? theConfigurationTableGroupKey_->toString().c_str() : "-1");
 	fclose(fp);
 }
 
@@ -748,7 +748,7 @@ TableGroupKey ConfigurationManagerRW::findTableGroup(
 		//		compareToMemberMap =
 		// theInterface_->getConfigurationGroupMembers(fullName);
 
-		loadConfigurationGroup(groupName,
+		loadTableGroup(groupName,
 		                       key,
 		                       false /*doActivate*/,
 		                       &compareToMemberMap /*memberMap*/,
@@ -1038,13 +1038,13 @@ void ConfigurationManagerRW::testXDAQContext()
 	//			}
 	//
 	//			//std::map<std::string, TableVersion >
-	//			//	loadConfigurationGroup
+	//			//	loadTableGroup
 	//			//	(const std::string &configGroupName,
 	//			//	TableGroupKey configGroupKey, bool doActivate=false, ProgressBar*
 	// progressBar=0, std::string *accumulateWarnings=0);
 	//			{
 	//				std::map<std::string, TableVersion > memberMap =
-	//						loadConfigurationGroup(groupName,newKey);
+	//						loadTableGroup(groupName,newKey);
 	//				__COUT__ << "Group members:" << std::endl;
 	//				for(const auto &member: memberMap)
 	//					__COUT__ << member.first << " " << member.second << std::endl;
@@ -1066,13 +1066,13 @@ void ConfigurationManagerRW::testXDAQContext()
 	//			}
 	//
 	//			//std::map<std::string, TableVersion >
-	//			//	loadConfigurationGroup
+	//			//	loadTableGroup
 	//			//	(const std::string &configGroupName,
 	//			//	TableGroupKey configGroupKey, bool doActivate=false, ProgressBar*
 	// progressBar=0, std::string *accumulateWarnings=0);
 	//			{
 	//				std::map<std::string, TableVersion > memberMap =
-	//						loadConfigurationGroup(groupName,newKey);
+	//						loadTableGroup(groupName,newKey);
 	//				__COUT__ << "Group members:" << std::endl;
 	//				for(const auto &member: memberMap)
 	//					__COUT__ << member.first << " " << member.second << std::endl;
@@ -1114,7 +1114,7 @@ void ConfigurationManagerRW::testXDAQContext()
 	// std::endl;
 	//		}
 	//
-	//		auto cfgs = theInterface_->getAllConfigurationNames();
+	//		auto cfgs = theInterface_->getAllTableNames();
 	//		__COUT__ << "Sub-table size: " << cfgs.size() << std::endl;
 	//		for(auto &c:cfgs)
 	//		{
@@ -1178,7 +1178,7 @@ void ConfigurationManagerRW::testXDAQContext()
 	try
 	{
 		__COUT__ << "Loading table..." << std::endl;
-		loadConfigurationGroup("FETest", TableGroupKey(2));  // Context_1
+		loadTableGroup("FETest", TableGroupKey(2));  // Context_1
 		ConfigurationTree t = getNode("/FEConfiguration/DEFAULT/FrontEndType");
 
 		std::string v;
