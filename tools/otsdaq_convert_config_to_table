@@ -113,6 +113,10 @@ sed -i s/Configuration/Table/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/CONFIGURATION/TABLE/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/configuration/table/g *Table/*.json #*/ end C++ comment coloring
 
+#revert things that have gone too far!
+sed -i s/TableGUI/ConfigurationGUI/g *Table/*.json #*/ end C++ comment coloring
+
+
 #return index after transformation
 for f in *Table; do mv -n "$f/index.txt" "$f/index.json"; done; 
 
@@ -155,11 +159,12 @@ for p in ${REPO_DIR[@]}; do
 		sed -i s/TableManager/ConfigurationManager/g *Table*;
 		sed -i s/TableGUITypeClassNames_/ConfigurationGUITypeClassNames_/g *Table*;
 		sed -i s/FSSRDACsTable/FSSRDACsConfiguration/g *Table*;
-		
+
+		#revert things that have gone too far!
 		sed -i s/MessageFacilityTables/MessageFacilityConfigurations/g *Table*;
 		sed -i s/XDAQ_TABLE_DATA_PATH/XDAQ_CONFIGURATION_DATA_PATH/g *Table*;
 		sed -i s/XDAQ_TABLE_XML/XDAQ_CONFIGURATION_XML/g *Table*;
-		
+		sed -i s/XMLTable-30/XMLConfiguration-30/g *Table*;
 		
 		
 		sed -i s/"configuration"/"table"/g CMakeLists.txt;
@@ -188,9 +193,11 @@ for p in ${REPO_DIR[@]}; do
 		sed -i s/TableGUITypeClassNames_/ConfigurationGUITypeClassNames_/g *Table*;
 		sed -i s/FSSRDACsTable/FSSRDACsConfiguration/g *Table*;
 
+		#revert things that have gone too far!
 		sed -i s/MessageFacilityTables/MessageFacilityConfigurations/g *Table*;
 		sed -i s/XDAQ_TABLE_DATA_PATH/XDAQ_CONFIGURATION_DATA_PATH/g *Table*;
 		sed -i s/XDAQ_TABLE_XML/XDAQ_CONFIGURATION_XML/g *Table*;
+		sed -i s/XMLTable-30/XMLConfiguration-30/g *Table*;
 		
 		
 		sed -i s/"configuration"/"table"/g CMakeLists.txt;

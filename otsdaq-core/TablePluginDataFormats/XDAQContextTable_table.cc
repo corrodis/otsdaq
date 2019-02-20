@@ -816,7 +816,7 @@ void XDAQContextTable::outputXDAQXML(std::ostream& out)
 	    << "<xc:Partition \txmlns:xsi\t= \"http://www.w3.org/2001/XMLSchema-instance\"\n"
 	    << "\t\txmlns:soapenc\t= \"http://schemas.xmlsoap.org/soap/encoding/\"\n"
 	    << "\t\txmlns:xc\t= "
-	       "\"http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLTable-30\">\n\n";
+	       "\"http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30\">\n\n";
 
 	// print partition open
 	// for each context
