@@ -101,7 +101,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 	//==============================================================================
 	// modifiers of table groups
 
-	void activateConfigurationGroup(const std::string& configGroupName,
+	void activateTableGroup(const std::string& configGroupName,
 	                                TableGroupKey      configGroupKey,
 	                                std::string*       accumulatedTreeErrors = 0);
 

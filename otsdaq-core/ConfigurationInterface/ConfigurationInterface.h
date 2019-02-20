@@ -81,11 +81,11 @@ class ConfigurationInterface
 		}
 
 		if(groupKey != 0 && groupName != 0)
-		{  // FIXME -- new ConfigurationGroup and TableGroupKey should be used!
+		{  // FIXME -- new TableGroup and TableGroupKey should be used!
 			// version = configurations->getConditionVersion(*groupKey,
 			// configuration->getTableName());
 			__SS__
-			    << "FATAL ERROR: new ConfigurationGroup and TableGroupKey should be used!"
+			    << "FATAL ERROR: new TableGroup and TableGroupKey should be used!"
 			    << std::endl;
 			__SS_THROW__;
 		}
@@ -250,7 +250,7 @@ class ConfigurationInterface
 	                                              TableVersion newVersion = TableVersion());
 
 	// group handling
-	virtual std::set<std::string /*name*/> getAllConfigurationGroupNames(
+	virtual std::set<std::string /*name*/> getAllTableGroupNames(
 	    const std::string& filterString = "") const throw(std::runtime_error)
 	{
 		__SS__;
@@ -268,11 +268,11 @@ class ConfigurationInterface
 		          "implemented (e.g. DatabaseConfigurationInterface).");
 	}
 
-	// Caution: getConfigurationGroupMembers must be carefully used.. the table versions
+	// Caution: getTableGroupMembers must be carefully used.. the table versions
 	// are as initially defined for table versions aliases, i.e. not converted according
 	// to the metadata groupAliases!
 	virtual std::map<std::string /*name*/, TableVersion /*version*/>
-	getConfigurationGroupMembers(std::string const& /*globalConfiguration*/,
+	getTableGroupMembers(std::string const& /*globalConfiguration*/,
 	                             bool includeMetaDataTable = false) const
 	    throw(std::runtime_error)
 	{
@@ -283,7 +283,7 @@ class ConfigurationInterface
 		          "implemented (e.g. DatabaseConfigurationInterface).");
 	}
 
-	virtual void saveConfigurationGroup(
+	virtual void saveTableGroup(
 	    std::map<std::string /*name*/,
 	             TableVersion /*version*/> const& /*configurationMap*/,
 	    std::string const& /*globalConfiguration*/) const throw(std::runtime_error)

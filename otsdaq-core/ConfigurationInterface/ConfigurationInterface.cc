@@ -20,7 +20,7 @@ bool                    ConfigurationInterface::theMode_                   = tru
 bool                    ConfigurationInterface::theVersionTrackingEnabled_ = true;
 
 const std::string ConfigurationInterface::GROUP_METADATA_TABLE_NAME =
-    "ConfigurationGroupMetadata";
+    "TableGroupMetadata";
 
 //==============================================================================
 ConfigurationInterface::ConfigurationInterface() {}
