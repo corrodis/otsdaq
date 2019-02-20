@@ -11,9 +11,9 @@
 #include <iostream>
 #include <memory>
 
-#include "otsdaq-core/PluginMakers/MakeTable.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq-core/PluginMakers/MakeInterface.h"
+#include "otsdaq-core/PluginMakers/MakeTable.h"
 
 //#include "otsdaq-components/FEInterfaces/FEWOtsUDPFSSRInterface.h"
 //#include "otsdaq-components/FEInterfaces/FEWOtsUDPHCALInterface.h"

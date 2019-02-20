@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/DataBufferTable.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/DataBufferTable.h"
 
 using namespace ots;
 

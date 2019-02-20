@@ -13,12 +13,18 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
     , supervisorClassNoNamespace_(supervisorClass_.substr(
           supervisorClass_.find_last_of(":") + 1,
           supervisorClass_.length() - supervisorClass_.find_last_of(":")))
-    , supervisorContextUID_(
-          "UNINITIALIZED_supervisorContextUID") //MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS on bad conditions
+    , supervisorContextUID_("UNINITIALIZED_supervisorContextUID")  // MUST BE INITIALIZED
+                                                                   // INSIDE THE CONTRUCTOR
+                                                                   // TO THROW EXCEPTIONS
+                                                                   // on bad conditions
     , supervisorApplicationUID_(
-          "UNINITIALIZED_supervisorApplicationUID") //MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS on bad conditions
+          "UNINITIALIZED_supervisorApplicationUID")  // MUST BE INITIALIZED INSIDE THE
+                                                     // CONTRUCTOR TO THROW EXCEPTIONS on
+                                                     // bad conditions
     , supervisorConfigurationPath_(
-          "UNINITIALIZED_supervisorConfigurationPath") //MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS on bad conditions
+          "UNINITIALIZED_supervisorConfigurationPath")  // MUST BE INITIALIZED INSIDE THE
+                                                        // CONTRUCTOR TO THROW EXCEPTIONS
+                                                        // on bad conditions
     , propertiesAreSetup_(false)
 {
 	INIT_MF("CorePropertySupervisorBase");

@@ -1,6 +1,6 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/TablePluginDataFormats/MessageFacilityTable.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
+#include "otsdaq-core/TablePluginDataFormats/MessageFacilityTable.h"
 
 #include <stdio.h>
 #include <fstream>  // std::fstream
@@ -37,8 +37,7 @@ using namespace ots;
 #define COL_QT_IP "QTViewerForwardingIPAddress"
 #define COL_QT_PORT "QTViewerForwardingPort"
 
-MessageFacilityTable::MessageFacilityTable(void)
-    : TableBase("MessageFacilityTable")
+MessageFacilityTable::MessageFacilityTable(void) : TableBase("MessageFacilityTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //

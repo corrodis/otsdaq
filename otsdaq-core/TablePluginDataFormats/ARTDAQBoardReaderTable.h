@@ -18,12 +18,12 @@ class ARTDAQBoardReaderTable : public TableBase
 
 	// Methods
 	void        init(ConfigurationManager* configManager);
-	void        outputFHICL(ConfigurationManager*           configManager,
-	                        const ConfigurationTree&        readerNode,
-	                        unsigned int                    selfRank,
-	                        std::string                     selfHost,
-	                        unsigned int                    selfPort,
-	                        const XDAQContextTable* contextConfig);
+	void        outputFHICL(ConfigurationManager*    configManager,
+	                        const ConfigurationTree& readerNode,
+	                        unsigned int             selfRank,
+	                        std::string              selfHost,
+	                        unsigned int             selfPort,
+	                        const XDAQContextTable*  contextConfig);
 	std::string getFHICLFilename(const ConfigurationTree& readerNode);
 
 	// std::string	getBoardReaderApplication	(const ConfigurationTree &readerNode,

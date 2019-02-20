@@ -1,6 +1,6 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
+#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
 
 #include <stdio.h>
 #include <fstream>  // std::fstream
@@ -21,10 +21,8 @@ using namespace ots;
 
 const std::string XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS =
     "ots::Supervisor";  // still allowed for now, in StartOTS
-const std::string XDAQContextTable::GATEWAY_SUPERVISOR_CLASS =
-    "ots::GatewaySupervisor";
-const std::string XDAQContextTable::WIZARD_SUPERVISOR_CLASS =
-    "ots::WizardSupervisor";
+const std::string XDAQContextTable::GATEWAY_SUPERVISOR_CLASS = "ots::GatewaySupervisor";
+const std::string XDAQContextTable::WIZARD_SUPERVISOR_CLASS  = "ots::WizardSupervisor";
 const std::set<std::string> XDAQContextTable::FETypeClassNames_ = {
     "ots::FESupervisor",
     "ots::FEDataManagerSupervisor",
@@ -49,8 +47,7 @@ const std::string XDAQContextTable::ARTDAQ_OFFSET_PORT = "OffsetPort";
 const uint8_t XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY = 100;
 
 //========================================================================================================================
-XDAQContextTable::XDAQContextTable(void)
-    : TableBase("XDAQContextTable")
+XDAQContextTable::XDAQContextTable(void) : TableBase("XDAQContextTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -127,8 +124,7 @@ bool XDAQContextTable::isARTDAQContext(const std::string& contextUID)
 //
 //	if contextUID == "X" (which happens automatically for broken link)
 //		then highest possible rank plus 1 is returned
-unsigned int XDAQContextTable::getARTDAQAppRank(
-    const std::string& contextUID) const
+unsigned int XDAQContextTable::getARTDAQAppRank(const std::string& contextUID) const
 {
 	//	__COUT__ << "artdaqContexts_.size() = " <<
 	//			artdaqContexts_.size() << std::endl;
@@ -177,7 +173,7 @@ unsigned int XDAQContextTable::getARTDAQAppRank(
 
 //========================================================================================================================
 std::string XDAQContextTable::getContextAddress(const std::string& contextUID,
-                                                        bool               wantHttp) const
+                                                bool               wantHttp) const
 {
 	if(contextUID == "X")
 		return "";
@@ -462,8 +458,8 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				contexts_.back().applications_.back().class_ =
 				    XDAQContextTable::GATEWAY_SUPERVISOR_CLASS;
 				__COUT__ << "Fixing deprecated Supervisor class from "
-				         << XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS
-				         << " to " << (contexts_.back().applications_.back().class_);
+				         << XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS << " to "
+				         << (contexts_.back().applications_.back().class_);
 			}
 			if(contexts_.back().applications_.back().module_.find("libSupervisor.so") !=
 			   std::string::npos)
@@ -954,7 +950,7 @@ std::string XDAQContextTable::getContextUID(const std::string& url) const
 
 //========================================================================================================================
 std::string XDAQContextTable::getApplicationUID(const std::string& url,
-                                                        unsigned int       id) const
+                                                unsigned int       id) const
 {
 	//__COUTV__(url); __COUTV__(id);
 	for(auto context : contexts_)

@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/ModuleToFETable.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/ModuleToFETable.h"
 
 using namespace ots;
 

@@ -318,9 +318,8 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 
 	if((!theWizardInfo_ && !theSupervisorInfo_) || (theWizardInfo_ && theSupervisorInfo_))
 	{
-		__SS__ << "Error! Must have one "
-		       << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << " OR one "
-		       << XDAQContextTable::WIZARD_SUPERVISOR_CLASS
+		__SS__ << "Error! Must have one " << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS
+		       << " OR one " << XDAQContextTable::WIZARD_SUPERVISOR_CLASS
 		       << " as part of the context configuration! "
 		       << "Neither were found." << __E__;
 		__SS_THROW__;
@@ -378,8 +377,7 @@ const SupervisorInfo& AllSupervisorInfo::getGatewayInfo(void) const
 	if(!theSupervisorInfo_)
 	{
 		__SS__ << "AllSupervisorInfo was not initialized or no Application of type "
-		       << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << " found!"
-		       << __E__;
+		       << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << " found!" << __E__;
 		__SS_THROW__;
 	}
 	return *theSupervisorInfo_;
@@ -397,8 +395,7 @@ const SupervisorInfo& AllSupervisorInfo::getWizardInfo(void) const
 	if(!theWizardInfo_)
 	{
 		__SS__ << "AllSupervisorInfo was not initialized or no Application of type "
-		       << XDAQContextTable::WIZARD_SUPERVISOR_CLASS << "  found!"
-		       << __E__;
+		       << XDAQContextTable::WIZARD_SUPERVISOR_CLASS << "  found!" << __E__;
 		__SS_THROW__;
 	}
 	return *theWizardInfo_;
@@ -422,7 +419,7 @@ AllSupervisorInfo::getOrderedSupervisorDescriptors(
 
 	try
 	{
-		ConfigurationManager                                      cfgMgr;
+		ConfigurationManager                              cfgMgr;
 		const std::vector<XDAQContextTable::XDAQContext>& contexts =
 		    cfgMgr.__GET_CONFIG__(XDAQContextTable)->getContexts();
 
@@ -442,10 +439,9 @@ AllSupervisorInfo::getOrderedSupervisorDescriptors(
 						                   // XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY
 					else  // take value, and do not allow DEFAULT value of 0 -> force to
 					      // XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY
-						orderedByPriority[it->second
-						                      ? it->second
-						                      : XDAQContextTable::
-						                            XDAQApplication::DEFAULT_PRIORITY]
+						orderedByPriority[it->second ? it->second
+						                             : XDAQContextTable::XDAQApplication::
+						                                   DEFAULT_PRIORITY]
 						    .push_back(app.id_);
 
 					//__COUT__ << "app.id_ " << app.id_ << __E__;

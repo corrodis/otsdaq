@@ -1,7 +1,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/Macros/TablePluginMacros.h"
 #include "otsdaq-core/TablePluginDataFormats/ARTDAQBuilderTable.h"
 #include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
-#include "otsdaq-core/Macros/TablePluginMacros.h"
 
 #include <stdio.h>
 #include <sys/stat.h>  //for mkdir
@@ -21,8 +21,7 @@ using namespace ots;
 #define POPCOMMENT commentStr.resize(commentStr.size() - 2)
 
 //========================================================================================================================
-ARTDAQBuilderTable::ARTDAQBuilderTable(void)
-    : TableBase("ARTDAQBuilderTable")
+ARTDAQBuilderTable::ARTDAQBuilderTable(void) : TableBase("ARTDAQBuilderTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -75,8 +74,7 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 }
 
 //========================================================================================================================
-std::string ARTDAQBuilderTable::getFHICLFilename(
-    const ConfigurationTree& builderNode)
+std::string ARTDAQBuilderTable::getFHICLFilename(const ConfigurationTree& builderNode)
 {
 	__COUT__ << "ARTDAQ Builder UID: " << builderNode.getValue() << std::endl;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
@@ -94,13 +92,12 @@ std::string ARTDAQBuilderTable::getFHICLFilename(
 }
 
 //========================================================================================================================
-void ARTDAQBuilderTable::outputFHICL(
-    ConfigurationManager*           configManager,
-    const ConfigurationTree&        builderNode,
-    unsigned int                    selfRank,
-    std::string                     selfHost,
-    unsigned int                    selfPort,
-    const XDAQContextTable* contextConfig)
+void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
+                                     const ConfigurationTree& builderNode,
+                                     unsigned int             selfRank,
+                                     std::string              selfHost,
+                                     unsigned int             selfPort,
+                                     const XDAQContextTable*  contextConfig)
 {
 	/*
 	the file will look something like this:
@@ -307,8 +304,7 @@ void ARTDAQBuilderTable::outputFHICL(
 					    << " destination_rank: " << destinationRank
 					    << " max_fragment_size_words: "
 					    << destination.second
-					           .getNode(
-					               "ARTDAQGlobalTableLink/maxFragmentSizeWords")
+					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
 					           .getValue<unsigned int>()
 					    << " host_map: [{rank: " << destinationRank << " host: \"" << host
 					    << "\" portOffset: " << std::to_string(port) << "}, "
@@ -396,8 +392,7 @@ void ARTDAQBuilderTable::outputFHICL(
 					    << source.second.getNode("transferPluginType").getValue()
 					    << " source_rank: " << sourceRank << " max_fragment_size_words: "
 					    << source.second
-					           .getNode(
-					               "ARTDAQGlobalTableLink/maxFragmentSizeWords")
+					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
 					           .getValue<unsigned int>()
 					    << " host_map: [{rank: " << sourceRank << " host: \"" << host
 					    << "\" portOffset: " << std::to_string(port) << "}, "

@@ -60,8 +60,8 @@ class GatewaySupervisor : public xdaq::Application,
 	void init(void);
 
 	void Default(xgi::Input* in, xgi::Output* out);
-	//    void 						TmpTest     				 	(xgi::Input* in, xgi::Output*
-	//    out
+	//    void 						TmpTest     				 	(xgi::Input* in,
+	//    xgi::Output* out
 	//    )
 	//    ;
 
@@ -72,8 +72,8 @@ class GatewaySupervisor : public xdaq::Application,
 	// State Machine requests handlers
 
 	void stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
-	// void 						stateMachineResultXgiHandler 	(xgi::Input* in, xgi::Output*
-	// out
+	// void 						stateMachineResultXgiHandler 	(xgi::Input* in,
+	// xgi::Output* out
 	// )
 	// ;
 

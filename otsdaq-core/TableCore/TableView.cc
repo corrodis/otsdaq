@@ -1244,11 +1244,12 @@ std::set<std::string> TableView::getSetOfGroupIDs(const unsigned int& c,
 			//				//__COUT__ << "i:" << i << " j:" << j << __E__;
 			//
 			//				if((theDataView_[r][c][j] == ' ' || //ignore leading white
-			//space  or | 						theDataView_[r][c][j] == '|')
+			// space  or | 						theDataView_[r][c][j] == '|')
 			//						&& i == j)
 			//					++i;
-			//				else if((theDataView_[r][c][j] == ' ' || //trailing white space
-			//or |  indicates group 						theDataView_[r][c][j] == '|')
+			//				else if((theDataView_[r][c][j] == ' ' || //trailing white
+			//space  or |  indicates group 						theDataView_[r][c][j] ==
+			// '|')
 			//						&& i != j) // assume end of group name
 			//				{
 			//					//__COUT__ << "Group found: " <<

@@ -1313,7 +1313,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 	//								else if field is not in list, ignore field
 	//						else if depth > 0 and is UID-Link
 	//							if Link Table/UID pair is not found in <field candidates
-	//list> (avoid  endless loops through tree)
+	// list> (avoid  endless loops through tree)
 	// recursiveGetCommonFields()
 	//				=====================
 	//

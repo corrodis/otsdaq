@@ -8,9 +8,9 @@
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
+#include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 #include "otsdaq-core/TablePluginDataFormats/DesktopIconTable.h"
 #include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
-#include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 
 #include "otsdaq-core/NetworkUtilities/TransceiverSocket.h"  // for UDP state changer
@@ -1436,9 +1436,8 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	// check if configuration dump is enabled on configure transition
 	{
 		ConfigurationTree configLinkNode =
-		    CorePropertySupervisorBase::theConfigurationManager_
-		        ->getSupervisorTableNode(supervisorContextUID_,
-		                                         supervisorApplicationUID_);
+		    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(
+		        supervisorContextUID_, supervisorApplicationUID_);
 		if(!configLinkNode.isDisconnected())
 		{
 			try  // errors in dump are not tolerated
@@ -1684,9 +1683,8 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 	// check if configuration dump is enabled on configure transition
 	{
 		ConfigurationTree configLinkNode =
-		    CorePropertySupervisorBase::theConfigurationManager_
-		        ->getSupervisorTableNode(supervisorContextUID_,
-		                                         supervisorApplicationUID_);
+		    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(
+		        supervisorContextUID_, supervisorApplicationUID_);
 		if(!configLinkNode.isDisconnected())
 		{
 			try  // errors in dump are not tolerated
@@ -2842,7 +2840,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			ConfigurationTree configLinkNode =
 			    CorePropertySupervisorBase::theConfigurationManager_
 			        ->getSupervisorTableNode(supervisorContextUID_,
-			                                         supervisorApplicationUID_);
+			                                 supervisorApplicationUID_);
 
 			if(!configLinkNode.isDisconnected())
 			{
@@ -3197,7 +3195,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			ConfigurationTree configLinkNode =
 			    CorePropertySupervisorBase::theConfigurationManager_
 			        ->getSupervisorTableNode(supervisorContextUID_,
-			                                         supervisorApplicationUID_);
+			                                 supervisorApplicationUID_);
 
 			try
 			{
@@ -3256,7 +3254,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				ConfigurationTree configLinkNode =
 				    CorePropertySupervisorBase::theConfigurationManager_
 				        ->getSupervisorTableNode(supervisorContextUID_,
-				                                         supervisorApplicationUID_);
+				                                 supervisorApplicationUID_);
 
 				if(!configLinkNode.isDisconnected())
 				{
@@ -3479,8 +3477,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string&    command,
 	{
 		cfgMgr->init();  // completely reset to re-align with any changes
 
-		const XDAQContextTable* contextTable =
-		    cfgMgr->__GET_CONFIG__(XDAQContextTable);
+		const XDAQContextTable* contextTable = cfgMgr->__GET_CONFIG__(XDAQContextTable);
 
 		auto         contexts = contextTable->getContexts();
 		unsigned int i, j;

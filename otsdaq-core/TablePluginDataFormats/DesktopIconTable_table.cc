@@ -1,6 +1,6 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/TablePluginDataFormats/DesktopIconTable.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
+#include "otsdaq-core/TablePluginDataFormats/DesktopIconTable.h"
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h"
 
 #include <stdio.h>
@@ -30,8 +30,7 @@ using namespace ots;
 #define COL_APP_ID "Id"
 
 //==============================================================================
-DesktopIconTable::DesktopIconTable(void)
-    : TableBase("DesktopIconTable")
+DesktopIconTable::DesktopIconTable(void) : TableBase("DesktopIconTable")
 {
 	// Icon list no longer passes through file! so delete it from user's $USER_DATA
 	std::system(("rm -rf " + (std::string)DESKTOP_ICONS_FILE).c_str());
@@ -99,9 +98,9 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 	activeDesktopIcons_.clear();
 
 	DesktopIconTable::DesktopIcon* icon;
-	bool                                   addedAppId;
-	bool                                   numeric;
-	unsigned int                           i;
+	bool                           addedAppId;
+	bool                           numeric;
+	unsigned int                   i;
 	for(auto& child : childrenMap)
 	{
 		if(!child.second.getNode(COL_STATUS).getValue<bool>())
@@ -302,8 +301,8 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 }
 
 std::string DesktopIconTable::removeCommas(const std::string& str,
-                                                   bool               andHexReplace,
-                                                   bool               andHTMLReplace)
+                                           bool               andHexReplace,
+                                           bool               andHTMLReplace)
 {
 	std::string retStr = "";
 	retStr.reserve(str.length());

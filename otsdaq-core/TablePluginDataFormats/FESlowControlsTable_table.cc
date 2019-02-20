@@ -1,5 +1,5 @@
-#include "otsdaq-core/TablePluginDataFormats/FESlowControlsTable.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
+#include "otsdaq-core/TablePluginDataFormats/FESlowControlsTable.h"
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
@@ -8,8 +8,7 @@
 using namespace ots;
 
 //==============================================================================
-FESlowControlsTable::FESlowControlsTable(void)
-    : TableBase("FESlowControlsTable")
+FESlowControlsTable::FESlowControlsTable(void) : TableBase("FESlowControlsTable")
 {
 	//	<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 	//		<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

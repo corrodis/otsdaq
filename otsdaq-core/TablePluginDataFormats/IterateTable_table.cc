@@ -1,6 +1,6 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/TablePluginDataFormats/IterateTable.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
+#include "otsdaq-core/TablePluginDataFormats/IterateTable.h"
 
 #include <iostream>
 #include <string>
@@ -9,18 +9,16 @@ using namespace ots;
 
 // instantiate static members
 
-const std::string IterateTable::COMMAND_BEGIN_LABEL = "BEGIN_LABEL";
-const std::string IterateTable::COMMAND_CHOOSE_FSM  = "CHOOSE_FSM";
-const std::string IterateTable::COMMAND_CONFIGURE_ACTIVE_GROUP =
-    "CONFIGURE_ACTIVE_GROUP";
-const std::string IterateTable::COMMAND_CONFIGURE_ALIAS  = "CONFIGURE_ALIAS";
-const std::string IterateTable::COMMAND_CONFIGURE_GROUP  = "CONFIGURE_GROUP";
-const std::string IterateTable::COMMAND_EXECUTE_FE_MACRO = "EXECUTE_FE_MACRO";
-const std::string IterateTable::COMMAND_EXECUTE_MACRO    = "EXECUTE_MACRO";
-const std::string IterateTable::COMMAND_MODIFY_ACTIVE_GROUP =
-    "MODIFY_ACTIVE_GROUP";
-const std::string IterateTable::COMMAND_REPEAT_LABEL = "REPEAT_LABEL";
-const std::string IterateTable::COMMAND_RUN          = "RUN";
+const std::string IterateTable::COMMAND_BEGIN_LABEL            = "BEGIN_LABEL";
+const std::string IterateTable::COMMAND_CHOOSE_FSM             = "CHOOSE_FSM";
+const std::string IterateTable::COMMAND_CONFIGURE_ACTIVE_GROUP = "CONFIGURE_ACTIVE_GROUP";
+const std::string IterateTable::COMMAND_CONFIGURE_ALIAS        = "CONFIGURE_ALIAS";
+const std::string IterateTable::COMMAND_CONFIGURE_GROUP        = "CONFIGURE_GROUP";
+const std::string IterateTable::COMMAND_EXECUTE_FE_MACRO       = "EXECUTE_FE_MACRO";
+const std::string IterateTable::COMMAND_EXECUTE_MACRO          = "EXECUTE_MACRO";
+const std::string IterateTable::COMMAND_MODIFY_ACTIVE_GROUP    = "MODIFY_ACTIVE_GROUP";
+const std::string IterateTable::COMMAND_REPEAT_LABEL           = "REPEAT_LABEL";
+const std::string IterateTable::COMMAND_RUN                    = "RUN";
 
 const std::string IterateTable::ITERATE_TABLE = "IterateTable";
 const std::string IterateTable::PLAN_TABLE    = "IterationPlanTable";
@@ -32,23 +30,15 @@ const std::map<std::string, std::string> IterateTable::commandToTableMap_ =
 IterateTable::PlanTableColumns    IterateTable::planTableCols_;
 IterateTable::IterateTableColumns IterateTable::iterateTableCols_;
 
-IterateTable::CommandBeginLabelParams
-    IterateTable::commandBeginLabelParams_;
-IterateTable::CommandConfigureActiveParams
-    IterateTable::commandConfigureActiveParams_;
-IterateTable::CommandConfigureAliasParams
-    IterateTable::commandConfigureAliasParams_;
-IterateTable::CommandConfigureGroupParams
-    IterateTable::commandConfigureGroupParams_;
-IterateTable::CommandExecuteMacroParams
-    IterateTable::commandExecuteMacroParams_;
-IterateTable::CommandModifyActiveParams
-    IterateTable::commandModifyActiveParams_;
-IterateTable::CommandRepeatLabelParams
-                                       IterateTable::commandRepeatLabelParams_;
-IterateTable::CommandRunParams IterateTable::commandRunParams_;
-IterateTable::CommandChooseFSMParams
-    IterateTable::commandChooseFSMParams_;
+IterateTable::CommandBeginLabelParams      IterateTable::commandBeginLabelParams_;
+IterateTable::CommandConfigureActiveParams IterateTable::commandConfigureActiveParams_;
+IterateTable::CommandConfigureAliasParams  IterateTable::commandConfigureAliasParams_;
+IterateTable::CommandConfigureGroupParams  IterateTable::commandConfigureGroupParams_;
+IterateTable::CommandExecuteMacroParams    IterateTable::commandExecuteMacroParams_;
+IterateTable::CommandModifyActiveParams    IterateTable::commandModifyActiveParams_;
+IterateTable::CommandRepeatLabelParams     IterateTable::commandRepeatLabelParams_;
+IterateTable::CommandRunParams             IterateTable::commandRunParams_;
+IterateTable::CommandChooseFSMParams       IterateTable::commandChooseFSMParams_;
 
 IterateTable::TargetParams         IterateTable::targetParams_;
 IterateTable::TargetTableColumns   IterateTable::targetCols_;
@@ -58,10 +48,7 @@ IterateTable::MacroDimLoopTableColumns IterateTable::macroDimLoopCols_;
 IterateTable::MacroParamTableColumns   IterateTable::macroParamCols_;
 
 //==============================================================================
-IterateTable::IterateTable(void)
-    : TableBase(IterateTable::ITERATE_TABLE)
-{
-}
+IterateTable::IterateTable(void) : TableBase(IterateTable::ITERATE_TABLE) {}
 
 //==============================================================================
 IterateTable::~IterateTable(void) {}
@@ -110,13 +97,11 @@ std::vector<IterateTable::Command> IterateTable::getPlanCommands(
 		__COUT__ << "Command \t" << commandChild.first << std::endl;
 
 		__COUT__ << "\t\tStatus \t"
-		         << commandChild.second.getNode(
-		                IterateTable::planTableCols_.Status_)
+		         << commandChild.second.getNode(IterateTable::planTableCols_.Status_)
 		         << std::endl;
 
 		__COUT__ << "\t\tType \t"
-		         << commandChild.second.getNode(
-		                IterateTable::planTableCols_.CommandType_)
+		         << commandChild.second.getNode(IterateTable::planTableCols_.CommandType_)
 		         << std::endl;
 
 		if(!commandChild.second.getNode(IterateTable::planTableCols_.Status_)
@@ -157,8 +142,8 @@ std::vector<IterateTable::Command> IterateTable::getPlanCommands(
 				{
 					__COUT__ << "\t\t\tTarget \t" << target.first << __E__;
 
-					ConfigurationTree targetNode = target.second.getNode(
-					    IterateTable::targetCols_.TargetLink_);
+					ConfigurationTree targetNode =
+					    target.second.getNode(IterateTable::targetCols_.TargetLink_);
 					if(targetNode.isDisconnected())
 					{
 						__COUT_ERR__ << "Disconnected target!?" << __E__;
@@ -217,8 +202,7 @@ std::vector<IterateTable::Command> IterateTable::getPlanCommands(
 
 					numberOfIterations =
 					    dimensionalLoop.second
-					        .getNode(IterateTable::macroDimLoopCols_
-					                     .NumberOfIterations_)
+					        .getNode(IterateTable::macroDimLoopCols_.NumberOfIterations_)
 					        .getValue<unsigned long>();
 
 					__COUTV__(numberOfIterations);
@@ -261,18 +245,15 @@ std::vector<IterateTable::Command> IterateTable::getPlanCommands(
 
 						argStr += ",";
 						argStr +=
-						    macroParam.second
-						        .getNode(IterateTable::macroParamCols_.Name_)
+						    macroParam.second.getNode(IterateTable::macroParamCols_.Name_)
 						        .getValue<std::string>();
 						argStr += ":";
-						argStr +=
-						    macroParam.second
-						        .getNode(IterateTable::macroParamCols_.Value_)
-						        .getValue<std::string>();
+						argStr += macroParam.second
+						              .getNode(IterateTable::macroParamCols_.Value_)
+						              .getValue<std::string>();
 						argStr += ":";
 						argStr +=
-						    macroParam.second
-						        .getNode(IterateTable::macroParamCols_.Step_)
+						    macroParam.second.getNode(IterateTable::macroParamCols_.Step_)
 						        .getValue<std::string>();
 
 					}  // end parameter loop
@@ -285,10 +266,10 @@ std::vector<IterateTable::Command> IterateTable::getPlanCommands(
 				//	because of prepend
 				// IterateTable::commandExecuteMacroParams_.MacroParameterPrepend_
 				//+
-				commands.back().params_.emplace(std::pair<std::string /*param name*/,
-				                                          std::string /*param value*/>(
-				    IterateTable::commandExecuteMacroParams_.MacroArgumentString_,
-				    argStr));
+				commands.back().params_.emplace(
+				    std::pair<std::string /*param name*/, std::string /*param value*/>(
+				        IterateTable::commandExecuteMacroParams_.MacroArgumentString_,
+				        argStr));
 			}
 			else  // all other non-special fields
 			{

@@ -142,8 +142,8 @@ class ConfigurationManager
 	                                 const std::string& applicationUID) const;
 	ConfigurationTree getSupervisorNode(const std::string& contextUID,
 	                                    const std::string& applicationUID) const;
-	ConfigurationTree getSupervisorTableNode(
-	    const std::string& contextUID, const std::string& applicationUID) const;
+	ConfigurationTree getSupervisorTableNode(const std::string& contextUID,
+	                                         const std::string& applicationUID) const;
 
 	std::vector<std::pair<std::string /*childName*/, ConfigurationTree>> getChildren(
 	    std::map<std::string, TableVersion>* memberMap             = 0,

@@ -408,7 +408,7 @@ void FixNewTableFields(int argc, char* argv[])
 				//				//change the version of the active view to flatVersion and
 				// save  it 				config =
 				// cfgMgr->getTableByName(memberPair.first); 				cfgView =
-				//config->getViewP();
+				// config->getViewP();
 				//				cfgView->setVersion(TableVersion(flatVersion));
 				//				theInterface_->saveActiveVersion(config);
 				//

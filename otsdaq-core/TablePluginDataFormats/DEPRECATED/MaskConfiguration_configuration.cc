@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/MaskTable.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/MaskTable.h"
 
 using namespace ots;
 

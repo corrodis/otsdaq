@@ -1,7 +1,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/Macros/TablePluginMacros.h"
 #include "otsdaq-core/TablePluginDataFormats/ARTDAQAggregatorTable.h"
 #include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
-#include "otsdaq-core/Macros/TablePluginMacros.h"
 
 #include <stdio.h>
 #include <sys/stat.h>  //for mkdir
@@ -21,8 +21,7 @@ using namespace ots;
 #define POPCOMMENT commentStr.resize(commentStr.size() - 2)
 
 //========================================================================================================================
-ARTDAQAggregatorTable::ARTDAQAggregatorTable(void)
-    : TableBase("ARTDAQAggregatorTable")
+ARTDAQAggregatorTable::ARTDAQAggregatorTable(void) : TableBase("ARTDAQAggregatorTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -89,13 +88,12 @@ std::string ARTDAQAggregatorTable::getFHICLFilename(
 }
 
 //========================================================================================================================
-void ARTDAQAggregatorTable::outputFHICL(
-    ConfigurationManager*           configManager,
-    const ConfigurationTree&        aggregatorNode,
-    unsigned int                    selfRank,
-    std::string                     selfHost,
-    unsigned int                    selfPort,
-    const XDAQContextTable* contextConfig)
+void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
+                                        const ConfigurationTree& aggregatorNode,
+                                        unsigned int             selfRank,
+                                        std::string              selfHost,
+                                        unsigned int             selfPort,
+                                        const XDAQContextTable*  contextConfig)
 {
 	/*
 	    the file will look something like this:
@@ -368,8 +366,7 @@ void ARTDAQAggregatorTable::outputFHICL(
 					    << source.second.getNode("transferPluginType").getValue()
 					    << " source_rank: " << sourceRank << " max_fragment_size_words: "
 					    << source.second
-					           .getNode(
-					               "ARTDAQGlobalTableLink/maxFragmentSizeWords")
+					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
 					           .getValue<unsigned int>()
 					    << " host_map: [{rank: " << sourceRank << " host: \"" << host
 					    << "\" portOffset: " << std::to_string(port) << "}, "
@@ -486,8 +483,7 @@ void ARTDAQAggregatorTable::outputFHICL(
 					    << " destination_rank: " << destinationRank
 					    << " max_fragment_size_words: "
 					    << destination.second
-					           .getNode(
-					               "ARTDAQGlobalTableLink/maxFragmentSizeWords")
+					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
 					           .getValue<unsigned int>()
 					    << " host_map: [{rank: " << destinationRank << " host: \"" << host
 					    << "\" portOffset: " << std::to_string(port) << "}, "

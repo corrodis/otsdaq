@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorToFETable.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorToFETable.h"
 
 using namespace ots;
 

@@ -12,8 +12,8 @@ void Iterator::helpCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct,
 	__COUT__ << "doTrackGroupChanges " << doTrackGroupChanges << __E__;
 
 	const std::string& pathToField =
-	    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-	        [IterateTable::commandModifyActiveParams_.RelativePathToField_];
+	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
+	        .params_[IterateTable::commandModifyActiveParams_.RelativePathToField_];
 
 	__COUT__ << "pathToField " << pathToField << std::endl;
 

@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/UDPDataListenerProducerTable.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/UDPDataListenerProducerTable.h"
 
 using namespace ots;
 

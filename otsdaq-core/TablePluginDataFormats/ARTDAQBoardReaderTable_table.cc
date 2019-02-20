@@ -1,7 +1,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/Macros/TablePluginMacros.h"
 #include "otsdaq-core/TablePluginDataFormats/ARTDAQBoardReaderTable.h"
 #include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
-#include "otsdaq-core/Macros/TablePluginMacros.h"
 
 #include <stdio.h>
 #include <sys/stat.h>  //for mkdir
@@ -21,8 +21,7 @@ using namespace ots;
 #define POPCOMMENT commentStr.resize(commentStr.size() - 2)
 
 //========================================================================================================================
-ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void)
-    : TableBase("ARTDAQBoardReaderTable")
+ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void) : TableBase("ARTDAQBoardReaderTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -177,13 +176,12 @@ std::string ARTDAQBoardReaderTable::getFHICLFilename(
 }
 
 //========================================================================================================================
-void ARTDAQBoardReaderTable::outputFHICL(
-    ConfigurationManager*           configManager,
-    const ConfigurationTree&        boardReaderNode,
-    unsigned int                    selfRank,
-    std::string                     selfHost,
-    unsigned int                    selfPort,
-    const XDAQContextTable* contextConfig)
+void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
+                                         const ConfigurationTree& boardReaderNode,
+                                         unsigned int             selfRank,
+                                         std::string              selfHost,
+                                         unsigned int             selfPort,
+                                         const XDAQContextTable*  contextConfig)
 {
 	/*
 	    the file will look something like this:

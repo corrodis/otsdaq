@@ -43,8 +43,7 @@ EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
                                      // load a partial configuration (new
                                      // ConfigurationManager)
     , XDAQContextTableName_(
-          theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
-              ->getTableName())
+          theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)->getTableName())
     , supervisorConfigurationPath_(
           "INITIALIZED INSIDE THE CONTRUCTOR BECAUSE IT NEEDS supervisorContextUID_ and "
           "supervisorApplicationUID_")

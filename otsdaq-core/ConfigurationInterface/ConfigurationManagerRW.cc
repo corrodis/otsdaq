@@ -80,8 +80,8 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	__COUT__ << "Refreshing all! Extracting list of tables..." << std::endl;
 	DIR*                pDIR;
 	struct dirent*      entry;
-	std::string         path               = TABLE_INFO_PATH;
-	char                fileExt[]          = TABLE_INFO_EXT;
+	std::string         path              = TABLE_INFO_PATH;
+	char                fileExt[]         = TABLE_INFO_EXT;
 	const unsigned char MIN_TABLE_NAME_SZ = 3;
 	if((pDIR = opendir(path.c_str())) != 0)
 	{

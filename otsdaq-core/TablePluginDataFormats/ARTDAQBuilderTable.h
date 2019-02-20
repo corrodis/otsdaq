@@ -18,12 +18,12 @@ class ARTDAQBuilderTable : public TableBase
 
 	// Methods
 	void        init(ConfigurationManager* configManager);
-	void        outputFHICL(ConfigurationManager*           configManager,
-	                        const ConfigurationTree&        builderNode,
-	                        unsigned int                    selfRank,
-	                        std::string                     selfHost,
-	                        unsigned int                    selfPort,
-	                        const XDAQContextTable* contextConfig);
+	void        outputFHICL(ConfigurationManager*    configManager,
+	                        const ConfigurationTree& builderNode,
+	                        unsigned int             selfRank,
+	                        std::string              selfHost,
+	                        unsigned int             selfPort,
+	                        const XDAQContextTable*  contextConfig);
 	std::string getFHICLFilename(const ConfigurationTree& builderNode);
 };
 }  // namespace ots

@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/Configurations.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/Configurations.h"
 
 using namespace ots;
 

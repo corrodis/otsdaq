@@ -37,8 +37,8 @@ TableBase::TableBase(std::string  tableName,
 	}
 	catch(...)  // if accumulating exceptions, continue to and return, else throw
 	{
-		__SS__ << "Failure in tableInfoReader.read(this). " <<
-				"Perhaps you need to run otsdaq_convert_config_to_table ?" << __E__;
+		__SS__ << "Failure in tableInfoReader.read(this). "
+		       << "Perhaps you need to run otsdaq_convert_config_to_table ?" << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		if(accumulatedExceptions)
 			*accumulatedExceptions += std::string("\n") + ss.str();

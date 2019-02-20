@@ -56,11 +56,11 @@ class Iterator
 		bool running_, commandBusy_;
 		bool doPauseAction_, doHaltAction_, doResumeAction_;
 
-		std::string                                activePlan_;
+		std::string                        activePlan_;
 		std::vector<IterateTable::Command> commands_;
-		std::vector<unsigned int>                  commandIterations_;
-		unsigned int                               commandIndex_;
-		std::vector<unsigned int>                  stepIndexStack_;
+		std::vector<unsigned int>          commandIterations_;
+		unsigned int                       commandIndex_;
+		std::vector<unsigned int>          stepIndexStack_;
 
 		// associated with FSM
 		std::string  fsmName_, fsmRunAlias_;

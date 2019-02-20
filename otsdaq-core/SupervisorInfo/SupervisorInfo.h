@@ -2,8 +2,8 @@
 #define _ots_SupervisorInfo_h_
 
 #include <string>
-#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
 #include "otsdaq-core/Macros/CoutMacros.h" /* also for XDAQ_CONST_CALL */
+#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

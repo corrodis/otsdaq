@@ -52,8 +52,8 @@ using namespace ots;
 //							,!automaticCommand			//true/false refresh cookie code
 //							,USER_PERMISSIONS_THRESHOLD //set access level requirement to
 // pass  gateway
-//							,checkLock					//true/false enable check that system is
-//unlocked  or  this user has the lock 							,lockRequired
+//							,checkLock					//true/false enable check that system
+//is  unlocked  or  this user has the lock 							,lockRequired
 ////true/false requires this user has the lock to  proceed
 //							,&userWithLock				//acquire username with lock
 //(optionally  null  pointer)
@@ -62,11 +62,11 @@ using namespace ots;
 // null  pointer) 							,0//,&displayName			//acquire user's
 // Display  Name
 //							,0//,&activeSessionIndex	//acquire user's session index
-//associated  with  the cookieCode
+// associated  with  the cookieCode
 //							))
 //					{	//failure
 //						//std::cout << out->str() << std::endl; //could print out return
-//string  on  failure 						return;
+// string  on  failure 						return;
 //					}
 //				}
 //				//done checking cookieCode, sequence, userWithLock, and permissions access

@@ -52,7 +52,7 @@ namespace ots
 //				void setupProgress(int i)
 //				{
 //					myProgressBar.resetProgressBar(i);		//this reset is shared by
-//sequence  one  and
+// sequence  one  and
 //															//two so must identify with
 // integer
 //

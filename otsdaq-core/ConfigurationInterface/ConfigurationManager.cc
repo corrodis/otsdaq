@@ -13,12 +13,10 @@ using namespace ots;
 
 const std::string ConfigurationManager::READONLY_USER = "READONLY_USER";
 
-const std::string ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME =
-    "XDAQContextTable";
+const std::string ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME = "XDAQContextTable";
 const std::string ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME =
     "XDAQApplicationTable";
-const std::string ConfigurationManager::GROUP_ALIASES_TABLE_NAME =
-    "GroupAliasesTable";
+const std::string ConfigurationManager::GROUP_ALIASES_TABLE_NAME = "GroupAliasesTable";
 const std::string ConfigurationManager::VERSION_ALIASES_TABLE_NAME =
     "VersionAliasesTable";
 
@@ -1304,18 +1302,17 @@ void ConfigurationManager::loadConfigurationGroup(
 		}
 		catch(const std::runtime_error& e)
 		{
-			__SS__ << "Error occurred while loading configuration group '" <<
-					configGroupName << "(" << configGroupKey << ")': \n" << e.what()
-			       << __E__;
+			__SS__ << "Error occurred while loading configuration group '"
+			       << configGroupName << "(" << configGroupKey << ")': \n"
+			       << e.what() << __E__;
 			__COUT_WARN__ << ss.str();
 			if(accumulatedTreeErrors)
 				*accumulatedTreeErrors = ss.str();
 		}
 		catch(...)
 		{
-			__SS__ << "An unknown error occurred while loading configuration group '" <<
-					configGroupName << "(" << configGroupKey << ")."
-			       << __E__;
+			__SS__ << "An unknown error occurred while loading configuration group '"
+			       << configGroupName << "(" << configGroupKey << ")." << __E__;
 			__COUT_WARN__ << ss.str();
 			if(accumulatedTreeErrors)
 				*accumulatedTreeErrors = ss.str();

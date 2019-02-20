@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorTable.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/DetectorTable.h"
 
 using namespace ots;
 

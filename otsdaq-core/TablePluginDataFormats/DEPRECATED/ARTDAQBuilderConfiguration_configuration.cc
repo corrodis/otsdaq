@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/ARTDAQBuilderTable.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/ARTDAQBuilderTable.h"
 
 using namespace ots;
 

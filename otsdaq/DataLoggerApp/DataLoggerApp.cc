@@ -44,8 +44,7 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* s)
                                      // load a partial configuration (new
                                      // ConfigurationManager)
     , XDAQContextConfigurationName_(
-          theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
-              ->getTableName())
+          theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)->getTableName())
     , supervisorConfigurationPath_(
           "INITIALIZED INSIDE THE CONTRUCTOR BECAUSE IT NEEDS supervisorContextUID_ and "
           "supervisorApplicationUID_")

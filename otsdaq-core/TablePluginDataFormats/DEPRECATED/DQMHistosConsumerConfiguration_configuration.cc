@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/DQMHistosConsumerTable.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/DQMHistosConsumerTable.h"
 
 using namespace ots;
 

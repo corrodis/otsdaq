@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/RawDataSaverConsumerTable.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/RawDataSaverConsumerTable.h"
 
 using namespace ots;
 

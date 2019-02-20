@@ -274,8 +274,7 @@ void Iterator::IteratorWorkLoop(Iterator* iterator) try
 
 				theIteratorStruct.cfgMgr_
 				    ->init();  // completely reset to re-align with any changes
-				itConfig =
-				    theIteratorStruct.cfgMgr_->__GET_CONFIG__(IterateTable);
+				itConfig = theIteratorStruct.cfgMgr_->__GET_CONFIG__(IterateTable);
 
 				theIteratorStruct.commands_ = itConfig->getPlanCommands(
 				    theIteratorStruct.cfgMgr_, theIteratorStruct.activePlan_);
@@ -375,7 +374,7 @@ void Iterator::IteratorWorkLoop(Iterator* iterator) try
 					//					//lockout the messages array for the remainder of
 					// the  scope
 					//					//this guarantees the reading thread can safely
-					//access  the  messages
+					// access  the  messages
 					//					if(iterator->theSupervisor_->VERBOSE_MUTEX)
 					//__COUT__
 					//<< "Waiting for iterator access" << __E__;
@@ -516,8 +515,8 @@ void Iterator::startCommand(IteratorWorkLoopStruct* iteratorStruct) try
 	{
 		return startCommandConfigureAlias(
 		    iteratorStruct,
-		    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-		        [IterateTable::commandConfigureAliasParams_.SystemAlias_]);
+		    iteratorStruct->commands_[iteratorStruct->commandIndex_]
+		        .params_[IterateTable::commandConfigureAliasParams_.SystemAlias_]);
 	}
 	else if(type == IterateTable::COMMAND_CONFIGURE_GROUP)
 	{
@@ -668,10 +667,9 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct* iteratorStruct,
 	iteratorStruct->fsmRunAlias_ = "Run";  // default to "Run"
 
 	// get stateMachineAliasFilter if possible
-	ConfigurationTree configLinkNode =
-	    iteratorStruct->cfgMgr_->getSupervisorTableNode(
-	        iteratorStruct->theIterator_->theSupervisor_->supervisorContextUID_,
-	        iteratorStruct->theIterator_->theSupervisor_->supervisorApplicationUID_);
+	ConfigurationTree configLinkNode = iteratorStruct->cfgMgr_->getSupervisorTableNode(
+	    iteratorStruct->theIterator_->theSupervisor_->supervisorContextUID_,
+	    iteratorStruct->theIterator_->theSupervisor_->supervisorApplicationUID_);
 
 	if(!configLinkNode.isDisconnected())
 	{
@@ -845,12 +843,11 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct* iteratorStruct)
 	// search for first matching label backward and set command to there
 
 	int numOfRepetitions;
-	sscanf(
-	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	        .params_[IterateTable::commandRepeatLabelParams_.NumberOfRepetitions_]
-	        .c_str(),
-	    "%d",
-	    &numOfRepetitions);
+	sscanf(iteratorStruct->commands_[iteratorStruct->commandIndex_]
+	           .params_[IterateTable::commandRepeatLabelParams_.NumberOfRepetitions_]
+	           .c_str(),
+	       "%d",
+	       &numOfRepetitions);
 	__COUT__ << "numOfRepetitions remaining = " << numOfRepetitions << __E__;
 
 	char repStr[200];
@@ -860,8 +857,8 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct* iteratorStruct)
 		// write original number of repetitions value back
 		sprintf(repStr, "%d", iteratorStruct->stepIndexStack_.back());
 		iteratorStruct->commands_[iteratorStruct->commandIndex_]
-		    .params_[IterateTable::commandRepeatLabelParams_
-		                 .NumberOfRepetitions_] = repStr;  // re-store as string
+		    .params_[IterateTable::commandRepeatLabelParams_.NumberOfRepetitions_] =
+		    repStr;  // re-store as string
 
 		// remove step index from stack
 		iteratorStruct->stepIndexStack_.pop_back();
@@ -877,8 +874,7 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct* iteratorStruct)
 	unsigned int i;
 	for(i = iteratorStruct->commandIndex_; i > 0;
 	    --i)  // assume 0 is always the fallback option
-		if(iteratorStruct->commands_[i].type_ ==
-		       IterateTable::COMMAND_BEGIN_LABEL &&
+		if(iteratorStruct->commands_[i].type_ == IterateTable::COMMAND_BEGIN_LABEL &&
 		   iteratorStruct->commands_[iteratorStruct->commandIndex_]
 		           .params_[IterateTable::commandRepeatLabelParams_.Label_] ==
 		       iteratorStruct->commands_[i]
@@ -967,9 +963,9 @@ void Iterator::startCommandConfigureGroup(IteratorWorkLoopStruct* iteratorStruct
 	std::string group =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
 	        .params_[IterateTable::commandConfigureGroupParams_.GroupName_];
-	TableGroupKey key = TableGroupKey(
-	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	        .params_[IterateTable::commandConfigureGroupParams_.GroupKey_]);
+	TableGroupKey key =
+	    TableGroupKey(iteratorStruct->commands_[iteratorStruct->commandIndex_]
+	                      .params_[IterateTable::commandConfigureGroupParams_.GroupKey_]);
 
 	__COUT__ << "group " << group << __E__;
 	__COUT__ << "key " << key << __E__;
@@ -1063,8 +1059,8 @@ void Iterator::startCommandMacro(IteratorWorkLoopStruct* iteratorStruct,
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
 	        .params_[IterateTable::commandExecuteMacroParams_.MacroName_];
 	const std::string& enableSavingOutput =
-	    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-	        [IterateTable::commandExecuteMacroParams_.EnableSavingOutput_];
+	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
+	        .params_[IterateTable::commandExecuteMacroParams_.EnableSavingOutput_];
 	const std::string& outputFilePath =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
 	        .params_[IterateTable::commandExecuteMacroParams_.OutputFilePath_];
@@ -1072,8 +1068,8 @@ void Iterator::startCommandMacro(IteratorWorkLoopStruct* iteratorStruct,
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
 	        .params_[IterateTable::commandExecuteMacroParams_.OutputFileRadix_];
 	const std::string& inputArgs =
-	    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-	        [IterateTable::commandExecuteMacroParams_.MacroArgumentString_];
+	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
+	        .params_[IterateTable::commandExecuteMacroParams_.MacroArgumentString_];
 
 	__COUTV__(macroName);
 	__COUTV__(enableSavingOutput);
@@ -1259,17 +1255,17 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct)
 	//		activate group
 
 	bool doTrackGroupChanges = false;
-	if("True" == iteratorStruct->commands_[iteratorStruct->commandIndex_]
-	                 .params_[IterateTable::commandModifyActiveParams_
-	                              .DoTrackGroupChanges_])
+	if("True" ==
+	   iteratorStruct->commands_[iteratorStruct->commandIndex_]
+	       .params_[IterateTable::commandModifyActiveParams_.DoTrackGroupChanges_])
 		doTrackGroupChanges = true;
 
 	const std::string& startValueStr =
 	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
 	        .params_[IterateTable::commandModifyActiveParams_.FieldStartValue_];
 	const std::string& stepSizeStr =
-	    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_
-	        [IterateTable::commandModifyActiveParams_.FieldIterationStepSize_];
+	    iteratorStruct->commands_[iteratorStruct->commandIndex_]
+	        .params_[IterateTable::commandModifyActiveParams_.FieldIterationStepSize_];
 
 	const unsigned int stepIndex = iteratorStruct->stepIndexStack_.back();
 
@@ -1505,9 +1501,8 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 	else  // else in Running state! Check for end of run
 	{
 		bool waitOnRunningThreads = false;
-		if("True" ==
-		   iteratorStruct->commands_[iteratorStruct->commandIndex_]
-		       .params_[IterateTable::commandRunParams_.WaitOnRunningThreads_])
+		if("True" == iteratorStruct->commands_[iteratorStruct->commandIndex_]
+		                 .params_[IterateTable::commandRunParams_.WaitOnRunningThreads_])
 			waitOnRunningThreads = true;
 
 		time_t remainingDurationInSeconds;  // parameter converted during start to the

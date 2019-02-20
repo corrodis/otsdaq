@@ -1,6 +1,6 @@
-#include "otsdaq-core/ConfigurationPluginDataFormats/DataDecoderConsumerTable.h"
 #include <iostream>
 #include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-core/ConfigurationPluginDataFormats/DataDecoderConsumerTable.h"
 
 using namespace ots;
 

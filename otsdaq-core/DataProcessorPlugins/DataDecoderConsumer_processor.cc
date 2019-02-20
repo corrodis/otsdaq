@@ -1,8 +1,8 @@
-#include "otsdaq-core/TablePluginDataFormats/DataDecoderConsumerTable.h"
 #include "otsdaq-core/DataProcessorPlugins/DataDecoderConsumer.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/Macros/ProcessorPluginMacros.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
+#include "otsdaq-core/TablePluginDataFormats/DataDecoderConsumerTable.h"
 
 #include <unistd.h>
 #include <cassert>
