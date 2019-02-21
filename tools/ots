@@ -433,6 +433,11 @@ fi
 #check for somewhat-antiquated(pre-configuration-to-table) artdaq database
 if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion ]; then
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConverting configuration to table for user data and databases..."
+	
+	#backup because we are scared
+	cp -r ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}bk12345
+	cp -r ${USER_DATA} ${USER_DATA}bk12345
+	
 	otsdaq_convert_config_to_table	
 	echo "converted" > ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
@@ -440,6 +445,11 @@ if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion ]; then
 fi
 if [ -d ${USER_DATA}/ConfigurationInfo ]; then
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConverting configuration to table for user data and databases..."
+		
+	#backup because we are scared
+	cp -r ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}bk12345
+	cp -r ${USER_DATA} ${USER_DATA}bk12345
+	
 	otsdaq_convert_config_to_table
 	echo "converted" > ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
