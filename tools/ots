@@ -415,7 +415,7 @@ echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan
 echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\$OTSDAQ_DATA             = ${YELLOW}${OTSDAQ_DATA}${Reset}        "
 #end print out important environment variables
 
-#check for antiquated artdaq databse
+#check for antiquated artdaq database
 ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`	
 if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 	# Rebuild ARTDAQ_DATABASE indicies
@@ -429,8 +429,20 @@ if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 #	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${ARTDAQ_DATABASE_DIR}/fromIndexRebuild file exists, so not rebuilding indices."
 fi
 
+
+#check for somewhat-antiquated(pre-configuration-to-table) artdaq database
+if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion ]; then
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConverting configuration to table for user data and databases..."
+	otsdaq_convert_config_to_table	
+	echo "converted" > ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
+	exit
+fi
 if [ -d ${USER_DATA}/ConfigurationInfo ]; then
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t{USER_DATA}/ConfigurationInfo path should now be TableInfo/ ...Perhaps you need to run otsdaq_convert_config_to_table ? Aborting..."
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConverting configuration to table for user data and databases..."
+	otsdaq_convert_config_to_table
+	echo "converted" > ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
 	exit
 fi
 
