@@ -537,8 +537,7 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 		__SUP_COUT__ << "Configuration table group name: " << theGroup.first
 		             << " key: " << theGroup.second << std::endl;
 
-		theConfigurationManager_->loadTableGroup(
-		    theGroup.first, theGroup.second, true);
+		theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true);
 	}
 
 	// Now that the configuration manager has all the necessary configurations,

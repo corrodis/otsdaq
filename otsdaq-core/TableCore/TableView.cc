@@ -1248,7 +1248,8 @@ std::set<std::string> TableView::getSetOfGroupIDs(const unsigned int& c,
 			//						&& i == j)
 			//					++i;
 			//				else if((theDataView_[r][c][j] == ' ' || //trailing white
-			//space  or |  indicates group 						theDataView_[r][c][j] ==
+			// space  or |  indicates group 						theDataView_[r][c][j]
+			// ==
 			// '|')
 			//						&& i != j) // assume end of group name
 			//				{

@@ -13,10 +13,11 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
     , supervisorClassNoNamespace_(supervisorClass_.substr(
           supervisorClass_.find_last_of(":") + 1,
           supervisorClass_.length() - supervisorClass_.find_last_of(":")))
-    , supervisorContextUID_("UNINITIALIZED_supervisorContextUID")  // MUST BE INITIALIZED
-                                                                   // INSIDE THE CONTRUCTOR
-                                                                   // TO THROW EXCEPTIONS
-                                                                   // on bad conditions
+    , supervisorContextUID_(
+          "UNINITIALIZED_supervisorContextUID")  // MUST BE INITIALIZED
+                                                 // INSIDE THE CONTRUCTOR
+                                                 // TO THROW EXCEPTIONS
+                                                 // on bad conditions
     , supervisorApplicationUID_(
           "UNINITIALIZED_supervisorApplicationUID")  // MUST BE INITIALIZED INSIDE THE
                                                      // CONTRUCTOR TO THROW EXCEPTIONS on
@@ -67,8 +68,8 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	{
 		__SUP_COUT_ERR__
 		    << "XDAQ Supervisor could not access it's configuration through "
-		       "the Configuration Manager." <<
-		    ". The getApplicationContext()->getContextDescriptor()->getURL() = "
+		       "the Configuration Manager."
+		    << ". The getApplicationContext()->getContextDescriptor()->getURL() = "
 		    << application->getApplicationContext()->getContextDescriptor()->getURL()
 		    << __E__;
 		throw;

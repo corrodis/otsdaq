@@ -282,8 +282,8 @@ class GatewaySupervisor : public xdaq::Application,
 	                                      // configure transition
 	std::string activeStateMachineWindowName_;
 	std::pair<std::string /*group name*/, TableGroupKey>
-	    theConfigurationTableGroup_;  // used to track the active configuration group at states
-	                             // after the configure state
+	    theConfigurationTableGroup_;  // used to track the active configuration group at
+	                                  // states after the configure state
 
 	Iterator   theIterator_;
 	std::mutex stateMachineAccessMutex_;  // for sharing state machine access with

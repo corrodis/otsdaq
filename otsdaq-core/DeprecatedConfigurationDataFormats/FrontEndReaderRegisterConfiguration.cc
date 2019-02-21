@@ -4,8 +4,7 @@
 
 using namespace ots;
 
-const std::string FERRegisterConfiguration::staticTableName_ =
-    "FERRegisterConfiguration";
+const std::string FERRegisterConfiguration::staticTableName_ = "FERRegisterConfiguration";
 //==============================================================================
 FERRegisterConfiguration::FERRegisterConfiguration()
     : RegisterConfiguration(FERRegisterConfiguration::staticTableName_)

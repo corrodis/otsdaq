@@ -1372,8 +1372,9 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	// Translate the system alias to a group name/key
 	try
 	{
-		theConfigurationTableGroup_ = CorePropertySupervisorBase::theConfigurationManager_
-		                             ->getTableGroupFromAlias(systemAlias);
+		theConfigurationTableGroup_ =
+		    CorePropertySupervisorBase::theConfigurationManager_->getTableGroupFromAlias(
+		        systemAlias);
 	}
 	catch(...)
 	{
@@ -1401,8 +1402,8 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	{
 		std::stringstream ss;
 		ss << "Configuring '" << systemAlias << "' which translates to "
-		   << theConfigurationTableGroup_.first << " (" << theConfigurationTableGroup_.second
-		   << ").";
+		   << theConfigurationTableGroup_.first << " ("
+		   << theConfigurationTableGroup_.second << ").";
 		makeSystemLogbookEntry(ss.str());
 	}
 
@@ -1417,7 +1418,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		// When configured, set the translated System Alias to be persistently active
 		ConfigurationManagerRW tmpCfgMgr("TheSupervisor");
 		tmpCfgMgr.activateTableGroup(theConfigurationTableGroup_.first,
-		                                     theConfigurationTableGroup_.second);
+		                             theConfigurationTableGroup_.second);
 	}
 	catch(...)
 	{
@@ -1502,8 +1503,10 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	RunControlStateMachine::theProgressBar_.step();
 	SOAPParameters parameters;
-	parameters.addParameter("ConfigurationTableGroupName", theConfigurationTableGroup_.first);
-	parameters.addParameter("ConfigurationTableGroupKey", theConfigurationTableGroup_.second.toString());
+	parameters.addParameter("ConfigurationTableGroupName",
+	                        theConfigurationTableGroup_.first);
+	parameters.addParameter("ConfigurationTableGroupKey",
+	                        theConfigurationTableGroup_.second.toString());
 
 	// update Macro Maker front end list
 	{
@@ -1514,7 +1517,8 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		SOAPParameters parameters;
 		parameters.addParameter("type", "initFElist");
 		parameters.addParameter("groupName", theConfigurationTableGroup_.first);
-		parameters.addParameter("groupKey", theConfigurationTableGroup_.second.toString());
+		parameters.addParameter("groupKey",
+		                        theConfigurationTableGroup_.second.toString());
 		SOAPUtilities::addParameters(message, parameters);
 
 		__COUT__ << "Sending FE communication: " << SOAPUtilities::translate(message)
@@ -1541,7 +1545,8 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	// diagService_->reportError("GatewaySupervisor::stateConfiguring: Exiting",DIAGINFO);
 
 	// save last configured group name/key
-	saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
+	saveGroupNameAndKey(theConfigurationTableGroup_,
+	                    FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
 
 	__COUT__ << "Done configuring." << __E__;
 	RunControlStateMachine::theProgressBar_.complete();
@@ -2965,17 +2970,16 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 					try
 					{
 						CorePropertySupervisorBase::theConfigurationManager_
-						    ->loadTableGroup(
-						        aliasMapPair.second.first,
-						        aliasMapPair.second.second,
-						        false,
-						        0,
-						        0,
-						        0,
-						        &groupComment,
-						        &groupAuthor,
-						        &groupCreationTime,
-						        false /*false to not load member map*/);
+						    ->loadTableGroup(aliasMapPair.second.first,
+						                     aliasMapPair.second.second,
+						                     false,
+						                     0,
+						                     0,
+						                     0,
+						                     &groupComment,
+						                     &groupAuthor,
+						                     &groupCreationTime,
+						                     false /*false to not load member map*/);
 
 						xmlOut.addTextElementToData("config_comment", groupComment);
 						xmlOut.addTextElementToData("config_author", groupAuthor);

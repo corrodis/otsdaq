@@ -74,11 +74,10 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s)
 	catch(...)
 	{
 		__COUT_ERR__
-		<< "XDAQ Supervisor could not access it's configuration through "
-		"the Configuration Manager." <<
-		". The getApplicationContext()->getContextDescriptor()->getURL() = "
-		<< getApplicationContext()->getContextDescriptor()->getURL()
-		<< __E__;
+		    << "XDAQ Supervisor could not access it's configuration through "
+		       "the Configuration Manager."
+		    << ". The getApplicationContext()->getContextDescriptor()->getURL() = "
+		    << getApplicationContext()->getContextDescriptor()->getURL() << __E__;
 		throw;
 	}
 	try
@@ -92,10 +91,10 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s)
 	catch(...)
 	{
 		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
-                "the Configuration Manager."
-             << " The supervisorContextUID_ = " << supervisorContextUID_
-             << ". The supervisorApplicationUID = "
-             << supervisorApplicationUID_ << __E__;
+		                "the Configuration Manager."
+		             << " The supervisorContextUID_ = " << supervisorContextUID_
+		             << ". The supervisorApplicationUID = " << supervisorApplicationUID_
+		             << __E__;
 		throw;
 	}
 	supervisorConfigurationPath_ = "/" + supervisorContextUID_ +
@@ -241,8 +240,7 @@ void DispatcherApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm) {}
 void DispatcherApp::inError(toolbox::fsm::FiniteStateMachine& fsm)
 {
 	std::cout << __COUT_HDR_FL__
-	          << "Fsm current state: " << theStateMachine_.getCurrentStateName()
-	          << __E__;
+	          << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 	// rcmsStateNotifier_.stateChanged("Error", "");
 }
 
@@ -250,8 +248,7 @@ void DispatcherApp::inError(toolbox::fsm::FiniteStateMachine& fsm)
 void DispatcherApp::enteringError(toolbox::Event::Reference e)
 {
 	std::cout << __COUT_HDR_FL__
-	          << "Fsm current state: " << theStateMachine_.getCurrentStateName()
-	          << __E__;
+	          << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
 	std::ostringstream         error;
 	error << "Failure performing transition from " << failedEvent.getFromState() << " to "
@@ -270,8 +267,7 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 	          << "ARTDAQDispatcher SUPERVISOR CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 	          << __E__;
 	std::cout << __COUT_HDR_FL__
-	          << SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
-	          << __E__;
+	          << SOAPUtilities::translate(theStateMachine_.getCurrentMessage()) << __E__;
 
 	std::pair<std::string /*group name*/, TableGroupKey> theGroup(
 	    SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
@@ -284,8 +280,7 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 	__COUT__ << "Configuration group name: " << theGroup.first
 	         << " key: " << theGroup.second << __E__;
 
-	theConfigurationManager_->loadTableGroup(
-	    theGroup.first, theGroup.second, true);
+	theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true);
 
 	std::string path   = "";
 	char*       dirMRB = getenv("MRB_BUILDDIR");

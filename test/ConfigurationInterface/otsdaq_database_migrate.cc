@@ -27,13 +27,11 @@ void readxml_writedb_configurations()
 	// artdaq::database::jsonutils::debug::enableJSONDocument();
 
 	std::string dbDir = std::string(getenv("ARTDAQ_DATABASE_DATADIR"));
-	__COUT__
-	          << "Destination DB Directory ARTDAQ_DATABASE_DATADIR: " << dbDir
-	          << std::endl;
+	__COUT__ << "Destination DB Directory ARTDAQ_DATABASE_DATADIR: " << dbDir
+	         << std::endl;
 
 	if(getenv("USER_DATA") == NULL)
-		__COUT__ << "Missing env variable: USER_DATA. It must be set!"
-		          << std::endl;
+		__COUT__ << "Missing env variable: USER_DATA. It must be set!" << std::endl;
 
 	std::vector<std::string> configTables;  // list of tables to migrate
 	std::vector<std::string>
@@ -59,8 +57,8 @@ void readxml_writedb_configurations()
 
 		if((dp = opendir(configDir.c_str())) == 0)
 		{
-			__COUT__ << "ERROR:(" << errno
-			          << ").  Can't open directory: " << configDir << std::endl;
+			__COUT__ << "ERROR:(" << errno << ").  Can't open directory: " << configDir
+			         << std::endl;
 			exit(0);
 		}
 
@@ -85,8 +83,8 @@ void readxml_writedb_configurations()
 		TableBase* base = 0;
 		__COUT__ << std::endl;
 		__COUT__ << std::endl;
-		__COUT__ << (i + 1) << " of " << configTables.size() << ": "
-		          << configTables[i] << std::endl;
+		__COUT__ << (i + 1) << " of " << configTables.size() << ": " << configTables[i]
+		         << std::endl;
 
 		try
 		{
@@ -100,10 +98,9 @@ void readxml_writedb_configurations()
 		catch(cet::exception e)
 		{
 			__COUT__ << std::endl << e.what() << std::endl;
-			__COUT__
-			          << "Caught exception, so skip. (likely not a defined configuration "
-			             "class) "
-			          << std::endl;
+			__COUT__ << "Caught exception, so skip. (likely not a defined configuration "
+			            "class) "
+			         << std::endl;
 
 			++skippedConfigurations;
 			failedConfigVersions.push_back(configTables[i] + ":*");
@@ -115,8 +112,8 @@ void readxml_writedb_configurations()
 
 		for(auto currVersion : version)
 		{
-			__COUT__ << "loading " << configTables[i] << " version "
-			          << currVersion << std::endl;
+			__COUT__ << "loading " << configTables[i] << " version " << currVersion
+			         << std::endl;
 
 			try
 			{
@@ -132,10 +129,9 @@ void readxml_writedb_configurations()
 			catch(std::runtime_error e)
 			{
 				__COUT__ << std::endl << e.what() << std::endl;
-				__COUT__
-				          << "Caught exception for version, so skip. (likely invalid "
-				             "column names) "
-				          << std::endl;
+				__COUT__ << "Caught exception for version, so skip. (likely invalid "
+				            "column names) "
+				         << std::endl;
 
 				++skippedVersions;
 				failedConfigVersions.push_back(configTables[i] + ":" +
@@ -147,10 +143,8 @@ void readxml_writedb_configurations()
 			__COUT__ << "loaded " << configTables[i] << std::endl;
 
 			// save the active version
-			__COUT__ << "Current version: " << base->getViewVersion()
-			          << std::endl;
-			__COUT__
-			          << "Current version: " << base->getView().getVersion() << std::endl;
+			__COUT__ << "Current version: " << base->getViewVersion() << std::endl;
+			__COUT__ << "Current version: " << base->getView().getVersion() << std::endl;
 
 			//
 			//		**** switch to db style interface?!!?!? ****   //
@@ -198,21 +192,17 @@ void readxml_writedb_configurations()
 	__COUT__ << "End of migrating Configuration!" << std::endl;
 
 	__COUT__ << "\n\nList of failed configs:versions (size="
-	          << failedConfigVersions.size() << std::endl;
+	         << failedConfigVersions.size() << std::endl;
 	for(auto& f : failedConfigVersions)
 		__COUT__ << f << std::endl;
 
-	__COUT__ << "\n\nEND List of failed configs:versions"
-	          << std::endl;
+	__COUT__ << "\n\nEND List of failed configs:versions" << std::endl;
 
 	__COUT__ << "\n\n\tStats:" << std::endl;
-	__COUT__ << "\t\tconfigurationsCount: " << configurationsCount
-	          << std::endl;
-	__COUT__ << "\t\tskippedConfigurations: " << skippedConfigurations
-	          << std::endl;
+	__COUT__ << "\t\tconfigurationsCount: " << configurationsCount << std::endl;
+	__COUT__ << "\t\tskippedConfigurations: " << skippedConfigurations << std::endl;
 	__COUT__ << "\t\tversionsCount: " << versionsCount << std::endl;
-	__COUT__ << "\t\tskippedVersions: " << skippedVersions
-	          << std::endl;
+	__COUT__ << "\t\tskippedVersions: " << skippedVersions << std::endl;
 
 	__COUT__ << "\nEnd of migrating Configuration!" << std::endl;
 

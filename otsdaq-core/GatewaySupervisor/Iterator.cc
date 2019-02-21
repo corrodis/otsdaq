@@ -558,8 +558,8 @@ catch(...)
 	__COUT__ << "Activating original group..." << __E__;
 	try
 	{
-		iteratorStruct->cfgMgr_->activateTableGroup(
-		    iteratorStruct->originalConfigGroup_, iteratorStruct->originalConfigKey_);
+		iteratorStruct->cfgMgr_->activateTableGroup(iteratorStruct->originalConfigGroup_,
+		                                            iteratorStruct->originalConfigKey_);
 	}
 	catch(...)
 	{
@@ -637,8 +637,8 @@ catch(...)
 	__COUT__ << "Activating original group..." << __E__;
 	try
 	{
-		iteratorStruct->cfgMgr_->activateTableGroup(
-		    iteratorStruct->originalConfigGroup_, iteratorStruct->originalConfigKey_);
+		iteratorStruct->cfgMgr_->activateTableGroup(iteratorStruct->originalConfigGroup_,
+		                                            iteratorStruct->originalConfigKey_);
 	}
 	catch(...)
 	{

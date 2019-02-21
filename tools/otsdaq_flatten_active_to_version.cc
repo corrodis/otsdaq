@@ -21,8 +21,7 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 	std::cout << "=================================================\n";
 	std::cout << "=================================================\n";
 	std::cout << "=================================================\n";
-	__COUT__ << "\nFlattening Active Table Groups!"
-	          << std::endl;
+	__COUT__ << "\nFlattening Active Table Groups!" << std::endl;
 
 	std::cout << "\n\nusage: Two arguments:\n\t pathToSwapIn <flatVersion> <pathToSwapIn "
 	             "(optional)> \n\n"
@@ -122,14 +121,13 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 	{
 		if(activeGroupPair.second.second.isInvalid())
 		{
-			__COUT__ << "Skipping invalid " << activeGroupPair.first
-			          << std::endl;
+			__COUT__ << "Skipping invalid " << activeGroupPair.first << std::endl;
 			continue;
 		}
 
-		__COUT__ << "Loading members for " << activeGroupPair.first
-		          << "\t" << activeGroupPair.second.first << "("
-		          << activeGroupPair.second.second << ")" << std::endl;
+		__COUT__ << "Loading members for " << activeGroupPair.first << "\t"
+		         << activeGroupPair.second.first << "(" << activeGroupPair.second.second
+		         << ")" << std::endl;
 
 		//		//old way before metadata
 		//		activeGroupMembersMap[activeGroupPair.second.first] =
@@ -192,8 +190,7 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 		currentDir = currentDir.substr(0, currentDir.length() - 1);
 	std::string moveToDir = currentDir + "_" + std::to_string(time(0));
 
-	__COUT__ << "Moving current directory: \t" << currentDir
-	          << std::endl;
+	__COUT__ << "Moving current directory: \t" << currentDir << std::endl;
 	__COUT__ << "\t... to: \t\t" << moveToDir << std::endl;
 
 	if(argc < 2)
@@ -234,14 +231,13 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 		DIR* dp;
 		if((dp = opendir(pathToSwapIn.c_str())) == 0)
 		{
-			__COUT__ << "ERROR:(" << errno
-			          << ").  Can't open directory: " << pathToSwapIn << std::endl;
+			__COUT__ << "ERROR:(" << errno << ").  Can't open directory: " << pathToSwapIn
+			         << std::endl;
 			exit(0);
 		}
 		closedir(dp);
 
-		__COUT__ << "Swapping in directory: \t" << pathToSwapIn
-		          << std::endl;
+		__COUT__ << "Swapping in directory: \t" << pathToSwapIn << std::endl;
 		__COUT__ << "\t.. to: \t\t" << currentDir << std::endl;
 
 		rename(pathToSwapIn.c_str(), currentDir.c_str());
@@ -291,7 +287,7 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 	   TableVersion(flatVersion).isTemporaryVersion())
 	{
 		__COUT__ << "\n\nflatVersion " << TableVersion(flatVersion)
-		          << " is an invalid or temporary version. Skipping to end!" << std::endl;
+		         << " is an invalid or temporary version. Skipping to end!" << std::endl;
 		goto CLEAN_UP;
 	}
 
@@ -317,11 +313,11 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 				{
 					// found a matching group/key pair
 					__COUT__ << "Changing row " << row << " for "
-					          << cfgView->getDataView()[row][col1]
-					          << " key=" << cfgView->getDataView()[row][col2]
-					          << " to DEFAULT="
-					          << TableGroupKey(TableGroupKey::getDefaultKey())
-					          << std::endl;
+					         << cfgView->getDataView()[row][col1]
+					         << " key=" << cfgView->getDataView()[row][col2]
+					         << " to DEFAULT="
+					         << TableGroupKey(TableGroupKey::getDefaultKey())
+					         << std::endl;
 					cfgView->setValue(
 					    TableGroupKey(TableGroupKey::getDefaultKey()).toString(),
 					    row,
@@ -333,8 +329,7 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 	// modify Version Aliases Table
 	if(activeMap.find(versionAliasesName) != activeMap.end())
 	{
-		__COUT__ << "\n\nModifying " << versionAliasesName
-		          << std::endl;
+		__COUT__ << "\n\nModifying " << versionAliasesName << std::endl;
 		config            = cfgMgr->getTableByName(versionAliasesName);
 		cfgView           = config->getViewP();
 		unsigned int col1 = cfgView->findCol("TableName");
@@ -348,10 +343,10 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 				{
 					// found a matching group/key pair
 					__COUT__ << "Changing row " << row << " for "
-					          << cfgView->getDataView()[row][col1]
-					          << " version=" << cfgView->getDataView()[row][col2]
-					          << " to flatVersion=" << TableVersion(flatVersion)
-					          << std::endl;
+					         << cfgView->getDataView()[row][col1]
+					         << " version=" << cfgView->getDataView()[row][col2]
+					         << " to flatVersion=" << TableVersion(flatVersion)
+					         << std::endl;
 					cfgView->setValue(TableVersion(flatVersion).toString(), row, col2);
 					break;
 				}
@@ -361,8 +356,7 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 
 	for(auto& activePair : activeMap)
 	{
-		__COUT__ << activePair.first << ":v" << activePair.second
-		          << std::endl;
+		__COUT__ << activePair.first << ":v" << activePair.second << std::endl;
 		// change the version of the active view to flatVersion and save it
 		config  = cfgMgr->getTableByName(activePair.first);
 		cfgView = config->getViewP();
@@ -375,20 +369,19 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 	// Note: do not try this at home kids.
 	for(auto& activeGroupMembersPair : activeGroupMembersMap)
 	{
-		__COUT__ << "Group " << activeGroupMembersPair.first
-		          << std::endl;
+		__COUT__ << "Group " << activeGroupMembersPair.first << std::endl;
 
 		for(auto& groupMemberPair : activeGroupMembersPair.second)
 		{
-			__COUT__ << "\t from...\t" << groupMemberPair.first
-			          << ":v" << groupMemberPair.second << std::endl;
+			__COUT__ << "\t from...\t" << groupMemberPair.first << ":v"
+			         << groupMemberPair.second << std::endl;
 			groupMemberPair.second = flatVersion;
 		}
 
 		for(auto& groupMemberPair : activeGroupMembersPair.second)
 		{
 			__COUT__ << "\t to...\t" << groupMemberPair.first << ":v"
-			          << groupMemberPair.second << std::endl;
+			         << groupMemberPair.second << std::endl;
 		}
 
 		// Note: this code copies actions in ConfigurationManagerRW::saveNewTableGroup
@@ -437,25 +430,20 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 		    groupMetadataTable->getViewVersion();
 
 		// memberMap should now consist of members with new flat version, so save group
-		theInterface_->saveTableGroup(
-		    activeGroupMembersPair.second,
-		    TableGroupKey::getFullGroupString(
-		        activeGroupMembersPair.first,
-		        TableGroupKey(TableGroupKey::getDefaultKey())));
+		theInterface_->saveTableGroup(activeGroupMembersPair.second,
+		                              TableGroupKey::getFullGroupString(
+		                                  activeGroupMembersPair.first,
+		                                  TableGroupKey(TableGroupKey::getDefaultKey())));
 	}
 
 CLEAN_UP:
 	//==============================================================================
-	__COUT__
-	          << "\n\nEnd of Flattening Active Table Groups!\n\n\n"
-	          << std::endl;
+	__COUT__ << "\n\nEnd of Flattening Active Table Groups!\n\n\n" << std::endl;
 
-	__COUT__
-	          << "Run the following to return to your previous database structure:"
-	          << std::endl;
-	__COUT__ << "\t otsdaq_flatten_active_to_version -1 " << moveToDir
-	          << "\n\n"
-	          << std::endl;
+	__COUT__ << "Run the following to return to your previous database structure:"
+	         << std::endl;
+	__COUT__ << "\t otsdaq_flatten_active_to_version -1 " << moveToDir << "\n\n"
+	         << std::endl;
 
 	return;
 }

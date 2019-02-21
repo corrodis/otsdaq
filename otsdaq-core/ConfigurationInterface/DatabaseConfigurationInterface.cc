@@ -187,8 +187,8 @@ catch(std::exception const& e)
 
 //==============================================================================
 // returns a list of all configuration names
-std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableNames()
-    const throw(std::runtime_error) try
+std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableNames() const
+    throw(std::runtime_error) try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
@@ -209,8 +209,7 @@ catch(...)
 
 //==============================================================================
 // find all configuration groups in database
-std::set<std::string /*name*/>
-DatabaseConfigurationInterface::getAllTableGroupNames(
+std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableGroupNames(
     const std::string& filterString) const throw(std::runtime_error) try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
@@ -298,19 +297,19 @@ config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(
 	};
 
 	return to_map(result, includeMetaDataTable);
-} //end getTableGroupMembers()
+}  // end getTableGroupMembers()
 catch(std::exception const& e)
 {
-	__SS__ << "DBI Exception getting Group's member tables for '"
-	       << tableGroup << "':\n\n"
+	__SS__ << "DBI Exception getting Group's member tables for '" << tableGroup
+	       << "':\n\n"
 	       << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 catch(...)
 {
-	__SS__ << "DBI Unknown exception getting Group's member tables for '"
-	       << tableGroup << ".'\n";
+	__SS__ << "DBI Unknown exception getting Group's member tables for '" << tableGroup
+	       << ".'\n";
 	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }

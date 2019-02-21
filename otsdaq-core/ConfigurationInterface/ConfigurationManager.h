@@ -76,8 +76,7 @@ class ConfigurationManager
 
 	void init(std::string* accumulatedErrors = 0);
 	void destroy(void);
-	void destroyTableGroup(const std::string& theGroup       = "",
-	                               bool               onlyDeactivate = false);
+	void destroyTableGroup(const std::string& theGroup = "", bool onlyDeactivate = false);
 
 	//==============================================================================
 	// Getters
@@ -156,8 +155,8 @@ class ConfigurationManager
 	//==============================================================================
 	// Setters/Modifiers
 	std::shared_ptr<TableGroupKey> makeTheTableGroupKey(TableGroupKey key);
-	void restoreActiveTableGroups(bool               throwErrors = false,
-	                                      const std::string& pathToActiveGroupsFile = "");
+	void                           restoreActiveTableGroups(bool               throwErrors = false,
+	                                                        const std::string& pathToActiveGroupsFile = "");
 
   private:
 	ConfigurationManager(const std::string& userName);  // private constructor called by
@@ -166,10 +165,10 @@ class ConfigurationManager
 	std::string username_;  // user of the configuration is READONLY_USER unless using
 	                        // ConfigurationManagerRW
 	ConfigurationInterface*        theInterface_;
-	std::shared_ptr<TableGroupKey> theConfigurationTableGroupKey_, theContextTableGroupKey_,
-	    theBackboneTableGroupKey_, theIterateTableGroupKey_;
-	std::string theConfigurationTableGroup_, theContextTableGroup_, theBackboneTableGroup_,
-	    theIterateTableGroup_;
+	std::shared_ptr<TableGroupKey> theConfigurationTableGroupKey_,
+	    theContextTableGroupKey_, theBackboneTableGroupKey_, theIterateTableGroupKey_;
+	std::string theConfigurationTableGroup_, theContextTableGroup_,
+	    theBackboneTableGroup_, theIterateTableGroup_;
 
 	std::map<std::string, std::pair<std::string, TableGroupKey>> lastFailedGroupLoad_;
 

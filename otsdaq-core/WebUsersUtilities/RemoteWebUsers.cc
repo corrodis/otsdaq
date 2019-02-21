@@ -52,8 +52,8 @@ using namespace ots;
 //							,!automaticCommand			//true/false refresh cookie code
 //							,USER_PERMISSIONS_THRESHOLD //set access level requirement to
 // pass  gateway
-//							,checkLock					//true/false enable check that system
-//is  unlocked  or  this user has the lock 							,lockRequired
+//							,checkLock					//true/false enable check that
+//system  is  unlocked  or  this user has the lock 							,lockRequired
 ////true/false requires this user has the lock to  proceed
 //							,&userWithLock				//acquire username with lock
 //(optionally  null  pointer)

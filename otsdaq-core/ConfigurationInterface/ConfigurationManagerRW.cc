@@ -37,8 +37,7 @@ using namespace ots;
 ConfigurationManagerRW::ConfigurationManagerRW(std::string username)
     : ConfigurationManager(username)  // for use as author of new views
 {
-	__COUT__ << "Using Config Mgr with Write Access! (for " << username << ")"
-	         << __E__;
+	__COUT__ << "Using Config Mgr with Write Access! (for " << username << ")" << __E__;
 
 	// FIXME only necessarily temporarily while Lore is still using fileSystem xml
 	theInterface_ =
@@ -187,8 +186,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 
 						try  // do NOT let TableView::init() throw here
 						{
-							nameToTableMap_[entry->d_name]->setActiveView(
-							    version);
+							nameToTableMap_[entry->d_name]->setActiveView(version);
 							table->copyView(  // this calls TableView::init()
 							    nameToTableMap_[entry->d_name]->getView(),
 							    version,
@@ -253,18 +251,17 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 		{
 			try
 			{
-				loadTableGroup(
-				    groupInfo.first /*groupName*/,
-				    groupInfo.second.getLatestKey(),
-				    false /*doActivate*/,
-				    &groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
-				    0 /*progressBar*/,
-				    0 /*accumulateErrors*/,
-				    &groupInfo.second.latestKeyGroupComment_,
-				    &groupInfo.second.latestKeyGroupAuthor_,
-				    &groupInfo.second.latestKeyGroupCreationTime_,
-				    true /*doNotLoadMember*/,
-				    &groupInfo.second.latestKeyGroupTypeString_);
+				loadTableGroup(groupInfo.first /*groupName*/,
+				               groupInfo.second.getLatestKey(),
+				               false /*doActivate*/,
+				               &groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
+				               0 /*progressBar*/,
+				               0 /*accumulateErrors*/,
+				               &groupInfo.second.latestKeyGroupComment_,
+				               &groupInfo.second.latestKeyGroupAuthor_,
+				               &groupInfo.second.latestKeyGroupCreationTime_,
+				               true /*doNotLoadMember*/,
+				               &groupInfo.second.latestKeyGroupTypeString_);
 			}
 			catch(...)
 			{
@@ -331,17 +328,16 @@ ConfigurationManagerRW::getVersionAliases(void) const
 // setActiveGlobalConfiguration
 //	load table group and activate
 //	deactivates previous table group of same type if necessary
-void ConfigurationManagerRW::activateTableGroup(
-    const std::string& configGroupName,
-    TableGroupKey      configGroupKey,
-    std::string*       accumulatedTreeErrors)
+void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupName,
+                                                TableGroupKey      configGroupKey,
+                                                std::string*       accumulatedTreeErrors)
 {
 	loadTableGroup(configGroupName,
-	                       configGroupKey,
-	                       true,                    // loads and activates
-	                       0,                       // no members needed
-	                       0,                       // no progress bar
-	                       accumulatedTreeErrors);  // accumulate warnings or not
+	               configGroupKey,
+	               true,                    // loads and activates
+	               0,                       // no members needed
+	               0,                       // no progress bar
+	               accumulatedTreeErrors);  // accumulate warnings or not
 
 	if(accumulatedTreeErrors && *accumulatedTreeErrors != "")
 	{
@@ -373,38 +369,52 @@ void ConfigurationManagerRW::activateTableGroup(
 		return;
 	}
 
-	__MCOUT_INFO__("Active Context table group: " << theContextTableGroup_ << "("
-	                                  << (theContextTableGroupKey_
-	                                          ? theContextTableGroupKey_->toString().c_str()
-	                                          : "-1")
-	                                  << ")" << __E__);
-	__MCOUT_INFO__("Active Backbone table group: " << theBackboneTableGroup_ << "("
-	                                   << (theBackboneTableGroupKey_
-	                                           ? theBackboneTableGroupKey_->toString().c_str()
-	                                           : "-1")
-	                                   << ")" << __E__);
-	__MCOUT_INFO__("Active Iterate table group: " << theIterateTableGroup_ << "("
-	                                  << (theIterateTableGroupKey_
-	                                          ? theIterateTableGroupKey_->toString().c_str()
-	                                          : "-1")
-	                                  << ")" << __E__);
+	__MCOUT_INFO__("Active Context table group: "
+	               << theContextTableGroup_ << "("
+	               << (theContextTableGroupKey_
+	                       ? theContextTableGroupKey_->toString().c_str()
+	                       : "-1")
+	               << ")" << __E__);
+	__MCOUT_INFO__("Active Backbone table group: "
+	               << theBackboneTableGroup_ << "("
+	               << (theBackboneTableGroupKey_
+	                       ? theBackboneTableGroupKey_->toString().c_str()
+	                       : "-1")
+	               << ")" << __E__);
+	__MCOUT_INFO__("Active Iterate table group: "
+	               << theIterateTableGroup_ << "("
+	               << (theIterateTableGroupKey_
+	                       ? theIterateTableGroupKey_->toString().c_str()
+	                       : "-1")
+	               << ")" << __E__);
 	__MCOUT_INFO__("Active Configuration table group: "
 	               << theConfigurationTableGroup_ << "("
-	               << (theConfigurationTableGroupKey_ ? theConfigurationTableGroupKey_->toString().c_str() : "-1")
+	               << (theConfigurationTableGroupKey_
+	                       ? theConfigurationTableGroupKey_->toString().c_str()
+	                       : "-1")
 	               << ")" << __E__);
 
 	fprintf(fp, "%s\n", theContextTableGroup_.c_str());
 	fprintf(
-	    fp, "%s\n", theContextTableGroupKey_ ? theContextTableGroupKey_->toString().c_str() : "-1");
+	    fp,
+	    "%s\n",
+	    theContextTableGroupKey_ ? theContextTableGroupKey_->toString().c_str() : "-1");
 	fprintf(fp, "%s\n", theBackboneTableGroup_.c_str());
-	fprintf(fp,
-	        "%s\n",
-	        theBackboneTableGroupKey_ ? theBackboneTableGroupKey_->toString().c_str() : "-1");
+	fprintf(
+	    fp,
+	    "%s\n",
+	    theBackboneTableGroupKey_ ? theBackboneTableGroupKey_->toString().c_str() : "-1");
 	fprintf(fp, "%s\n", theIterateTableGroup_.c_str());
 	fprintf(
-	    fp, "%s\n", theIterateTableGroupKey_ ? theIterateTableGroupKey_->toString().c_str() : "-1");
+	    fp,
+	    "%s\n",
+	    theIterateTableGroupKey_ ? theIterateTableGroupKey_->toString().c_str() : "-1");
 	fprintf(fp, "%s\n", theConfigurationTableGroup_.c_str());
-	fprintf(fp, "%s\n", theConfigurationTableGroupKey_ ? theConfigurationTableGroupKey_->toString().c_str() : "-1");
+	fprintf(fp,
+	        "%s\n",
+	        theConfigurationTableGroupKey_
+	            ? theConfigurationTableGroupKey_->toString().c_str()
+	            : "-1");
 	fclose(fp);
 }
 
@@ -441,8 +451,7 @@ TableVersion ConfigurationManagerRW::createTemporaryBackboneView(
 		if(retTmpVersion != tmpVersion)
 		{
 			__SS__ << "Failure! Temporary view requested was " << tmpVersion
-			       << ". Mismatched temporary view created: " << retTmpVersion
-			       << __E__;
+			       << ". Mismatched temporary view created: " << retTmpVersion << __E__;
 			__COUT_ERR__ << ss.str();
 			__SS_THROW__;
 		}
@@ -749,17 +758,17 @@ TableGroupKey ConfigurationManagerRW::findTableGroup(
 		// theInterface_->getTableGroupMembers(fullName);
 
 		loadTableGroup(groupName,
-		                       key,
-		                       false /*doActivate*/,
-		                       &compareToMemberMap /*memberMap*/,
-		                       0,
-		                       0,
-		                       0,
-		                       0,
-		                       0, /*null pointers*/
-		                       true /*doNotLoadMember*/,
-		                       0 /*groupTypeString*/,
-		                       &compareToGroupAliases);
+		               key,
+		               false /*doActivate*/,
+		               &compareToMemberMap /*memberMap*/,
+		               0,
+		               0,
+		               0,
+		               0,
+		               0, /*null pointers*/
+		               true /*doNotLoadMember*/,
+		               0 /*groupTypeString*/,
+		               &compareToGroupAliases);
 
 		isDifferent = false;
 		for(auto& memberPair : groupMemberMap)

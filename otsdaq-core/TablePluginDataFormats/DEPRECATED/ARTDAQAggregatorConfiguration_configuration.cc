@@ -1,6 +1,6 @@
 #include <iostream>
-#include "otsdaq-coreMacros/TablePluginMacros.h"
 #include "otsdaq-core/ConfigurationPluginDataFormats/ARTDAQAggregatorTable.h"
+#include "otsdaq-coreMacros/TablePluginMacros.h"
 
 using namespace ots;
 

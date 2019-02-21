@@ -1,10 +1,10 @@
 #ifndef _ots_ConfigurationInterface_h_
 #define _ots_ConfigurationInterface_h_
 
-#include "otsdaq-core/Macros/CoutMacros.h"
 #include <memory>
 #include <set>
 #include <sstream>
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include "otsdaq-core/PluginMakers/MakeTable.h"
 #include "otsdaq-core/TableCore/TableBase.h"
@@ -83,9 +83,8 @@ class ConfigurationInterface
 		{  // FIXME -- new TableGroup and TableGroupKey should be used!
 			// version = configurations->getConditionVersion(*groupKey,
 			// table->getTableName());
-			__SS__
-			    << "FATAL ERROR: new TableGroup and TableGroupKey should be used!"
-			    << std::endl;
+			__SS__ << "FATAL ERROR: new TableGroup and TableGroupKey should be used!"
+			       << std::endl;
 			__SS_THROW__;
 		}
 		else if(!dontFill)
@@ -171,9 +170,8 @@ class ConfigurationInterface
 			// verify the new view
 			if(table->getViewP()->getVersion() != version)
 			{
-				__COUT__ << "Version mismatch!! "
-				         << table->getViewP()->getVersion() << " vs " << version
-				         << std::endl;
+				__COUT__ << "Version mismatch!! " << table->getViewP()->getVersion()
+				         << " vs " << version << std::endl;
 				throw;
 			}
 
@@ -184,8 +182,8 @@ class ConfigurationInterface
 			    nameIsMatchIndex < table->getViewP()->getTableName().size();
 			    ++nameIsMatchIndex)
 			{
-				if(table->getMockupViewP()
-				       ->getTableName()[nameIsMatchStorageIndex] == '_')
+				if(table->getMockupViewP()->getTableName()[nameIsMatchStorageIndex] ==
+				   '_')
 					++nameIsMatchStorageIndex;  // skip to next storage character
 				if(table->getViewP()->getTableName()[nameIsMatchIndex] == '_')
 					continue;  // skip to next character
@@ -194,8 +192,7 @@ class ConfigurationInterface
 				if(nameIsMatchStorageIndex >=
 				       table->getMockupViewP()->getTableName().size() ||
 				   table->getViewP()->getTableName()[nameIsMatchIndex] !=
-				       table->getMockupViewP()
-				           ->getTableName()[nameIsMatchStorageIndex])
+				       table->getMockupViewP()->getTableName()[nameIsMatchStorageIndex])
 				{
 					// size mismatch or character mismatch
 					nameIsMatch = false;
@@ -206,8 +203,7 @@ class ConfigurationInterface
 
 			if(nameIsMatch)  // if name is considered match by above rule, then force
 			                 // matchup
-				table->getViewP()->setTableName(
-				    table->getMockupViewP()->getTableName());
+				table->getViewP()->setTableName(table->getMockupViewP()->getTableName());
 			else  // table->getViewP()->getTableName() !=
 			      // table->getMockupViewP()->getTableName())
 			{
@@ -224,8 +220,8 @@ class ConfigurationInterface
 		}
 		catch(...)
 		{
-			__COUT__ << "Error occurred while getting and filling Table \""
-			         << tableName << "\" version:" << version << std::endl;
+			__COUT__ << "Error occurred while getting and filling Table \"" << tableName
+			         << "\" version:" << version << std::endl;
 			__COUT__ << "\t-Configuration interface mode=" << theMode_ << std::endl;
 			throw;
 		}
@@ -270,9 +266,8 @@ class ConfigurationInterface
 	// Caution: getTableGroupMembers must be carefully used.. the table versions
 	// are as initially defined for table versions aliases, i.e. not converted according
 	// to the metadata groupAliases!
-	virtual std::map<std::string /*name*/, TableVersion /*version*/>
-	getTableGroupMembers(std::string const& /*groupName*/,
-	                             bool includeMetaDataTable = false) const
+	virtual std::map<std::string /*name*/, TableVersion /*version*/> getTableGroupMembers(
+	    std::string const& /*groupName*/, bool includeMetaDataTable = false) const
 	    throw(std::runtime_error)
 	{
 		__SS__;

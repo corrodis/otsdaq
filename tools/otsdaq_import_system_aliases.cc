@@ -285,8 +285,7 @@ void ImportSystemAliasTableGroups(int argc, char* argv[])
 	try
 	{
 		//		- get active groups from user data file
-		cfgMgr->restoreActiveTableGroups(true /*throwErrors*/,
-		                                         pathToImportActiveGroups);
+		cfgMgr->restoreActiveTableGroups(true /*throwErrors*/, pathToImportActiveGroups);
 
 		// add active groups to set
 		std::map<std::string, std::pair<std::string, TableGroupKey>> activeGroupsMap =
@@ -504,17 +503,17 @@ void ImportSystemAliasTableGroups(int argc, char* argv[])
 		try
 		{
 			cfgMgr->loadTableGroup(groupPair.first.first,
-			                               groupPair.first.second,
-			                               true /*doActivate*/,
-			                               &memberMap /*memberMap*/,
-			                               0 /*progressBar*/,
-			                               &accumulateErrors,
-			                               &groupComment,
-			                               &groupAuthor,
-			                               &groupCreateTime,
-			                               false /*doNotLoadMember*/,
-			                               0 /*groupTypeString*/,
-			                               &groupAliases);
+			                       groupPair.first.second,
+			                       true /*doActivate*/,
+			                       &memberMap /*memberMap*/,
+			                       0 /*progressBar*/,
+			                       &accumulateErrors,
+			                       &groupComment,
+			                       &groupAuthor,
+			                       &groupCreateTime,
+			                       false /*doNotLoadMember*/,
+			                       0 /*groupTypeString*/,
+			                       &groupAliases);
 		}
 		catch(std::runtime_error& e)
 		{
@@ -934,7 +933,7 @@ void ImportSystemAliasTableGroups(int argc, char* argv[])
 		         << "' to ... '" << renameFile << "'" << std::endl;
 
 		cfgMgr->activateTableGroup(activeBackboneGroupName,
-		                                   newKey);  // and write to active group file
+		                           newKey);  // and write to active group file
 
 	}  // end try
 	catch(const std::runtime_error& e)

@@ -78,11 +78,10 @@ EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
 	catch(...)
 	{
 		__COUT_ERR__
-	    << "XDAQ Supervisor could not access it's configuration through "
-	       "the Configuration Manager." <<
-	    ". The getApplicationContext()->getContextDescriptor()->getURL() = "
-	    << getApplicationContext()->getContextDescriptor()->getURL()
-	    << __E__;
+		    << "XDAQ Supervisor could not access it's configuration through "
+		       "the Configuration Manager."
+		    << ". The getApplicationContext()->getContextDescriptor()->getURL() = "
+		    << getApplicationContext()->getContextDescriptor()->getURL() << __E__;
 		throw;
 	}
 	try
@@ -96,10 +95,10 @@ EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
 	catch(...)
 	{
 		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
-                "the Configuration Manager."
-             << " The supervisorContextUID_ = " << supervisorContextUID_
-             << ". The supervisorApplicationUID = "
-             << supervisorApplicationUID_ << __E__;
+		                "the Configuration Manager."
+		             << " The supervisorContextUID_ = " << supervisorContextUID_
+		             << ". The supervisorApplicationUID = " << supervisorApplicationUID_
+		             << __E__;
 		throw;
 	}
 	supervisorConfigurationPath_ = "/" + supervisorContextUID_ +
@@ -302,8 +301,7 @@ void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
 	__COUT__ << "Configuration table group name: " << theGroup.first
 	         << " key: " << theGroup.second << std::endl;
 
-	theConfigurationManager_->loadTableGroup(
-	    theGroup.first, theGroup.second, true);
+	theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true);
 
 	// theConfigurationManager_->setupEventBuilderAppConfiguration(theConfigurationTableGroupKey_,supervisorInstance_);
 

@@ -43,8 +43,7 @@ int main()
 	std::pair<std::string /*group name*/, TableGroupKey> theGroup =
 	    theConfigurationManager_->getTableGroupFromAlias(ConfigurationAlias_);
 
-	theConfigurationManager_->loadTableGroup(
-	    theGroup.first, theGroup.second, true);
+	theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true);
 
 	theFEVInterfacesManager_.configure();
 	////////////////////////////////////////////////////////////////
@@ -59,7 +58,8 @@ int main()
 	// configurations = 0;
 	//	theInterface_->get((TableBase*&)configurations,"Configurations");
 	//	TableBase* frontEndConfiguration = 0;
-	//	theInterface_->get(frontEndConfiguration, "FEConfiguration", theConfigurationTableGroupKey_,
+	//	theInterface_->get(frontEndConfiguration, "FEConfiguration",
+	//theConfigurationTableGroupKey_,
 	// configurations);
 	//
 	//	const std::string interfaceName     =  "FEOtsUDPFSSRInterface";

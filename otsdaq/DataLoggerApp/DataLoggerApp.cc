@@ -75,11 +75,10 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* s)
 	catch(...)
 	{
 		__COUT_ERR__
-	    << "XDAQ Supervisor could not access it's configuration through "
-	       "the Configuration Manager." <<
-	    ". The getApplicationContext()->getContextDescriptor()->getURL() = "
-	    << getApplicationContext()->getContextDescriptor()->getURL()
-	    << __E__;
+		    << "XDAQ Supervisor could not access it's configuration through "
+		       "the Configuration Manager."
+		    << ". The getApplicationContext()->getContextDescriptor()->getURL() = "
+		    << getApplicationContext()->getContextDescriptor()->getURL() << __E__;
 		throw;
 	}
 	try
@@ -93,10 +92,10 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* s)
 	catch(...)
 	{
 		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
-                "the Configuration Manager."
-             << " The supervisorContextUID_ = " << supervisorContextUID_
-             << ". The supervisorApplicationUID = "
-             << supervisorApplicationUID_ << __E__;
+		                "the Configuration Manager."
+		             << " The supervisorContextUID_ = " << supervisorContextUID_
+		             << ". The supervisorApplicationUID = " << supervisorApplicationUID_
+		             << __E__;
 		throw;
 	}
 	supervisorConfigurationPath_ = "/" + supervisorContextUID_ +
@@ -282,8 +281,7 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 	__COUT__ << "Configuration group name: " << theGroup.first
 	         << " key: " << theGroup.second << std::endl;
 
-	theConfigurationManager_->loadTableGroup(
-	    theGroup.first, theGroup.second, true);
+	theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true);
 
 	std::string path   = "";
 	char*       dirMRB = getenv("MRB_BUILDDIR");
@@ -354,7 +352,7 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 	// fhicl::make_ParameterSet(configString, pset);
 
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
-	std::string uid = theConfigurationManager_->getNode(XDAQContextTableName_)
+	std::string uid      = theConfigurationManager_->getNode(XDAQContextTableName_)
 	                      .getNode(supervisorConfigurationPath_)
 	                      .getValue();
 

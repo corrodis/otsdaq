@@ -34,8 +34,7 @@ class DatabaseConfigurationInterface : public ConfigurationInterface
 	TableVersion findLatestVersion(const TableBase* /*configuration*/) const noexcept;
 
 	// returns a list of all configuration names
-	std::set<std::string /*name*/> getAllTableNames() const
-	    throw(std::runtime_error);
+	std::set<std::string /*name*/> getAllTableNames() const throw(std::runtime_error);
 	// find all configuration versions by configuration type
 	std::set<TableVersion> getVersions(const TableBase* /*configuration*/) const noexcept;
 
@@ -46,13 +45,13 @@ class DatabaseConfigurationInterface : public ConfigurationInterface
 	TableGroupKey findLatestGroupKey(const std::string& groupName) const noexcept;
 
 	// return the contents of a configuration group
-	config_version_map_t getTableGroupMembers(
-	    std::string const& /*configurationGroup*/,
-	    bool includeMetaDataTable = false) const throw(std::runtime_error);
+	config_version_map_t getTableGroupMembers(std::string const& /*configurationGroup*/,
+	                                          bool includeMetaDataTable = false) const
+	    throw(std::runtime_error);
 
 	// create a new configuration group from the contents map
 	void saveTableGroup(config_version_map_t const& /*configurationMap*/,
-	                            std::string const& /*configurationGroup*/) const
+	                    std::string const& /*configurationGroup*/) const
 	    throw(std::runtime_error);
 
   private:

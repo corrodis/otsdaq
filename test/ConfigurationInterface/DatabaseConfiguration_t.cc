@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 
 		if((dp = opendir(configDir.c_str())) == 0)
 		{
-			__COUT__ << "ERROR:(" << errno
-			          << ").  Can't open directory: " << configDir << __E__;
+			__COUT__ << "ERROR:(" << errno << ").  Can't open directory: " << configDir
+			         << __E__;
 			exit(0);
 		}
 
@@ -76,8 +76,8 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 		TableBase* base = 0;
 		__COUT__ << __E__;
 		__COUT__ << __E__;
-		__COUT__ << (i + 1) << " of " << configTables.size() << ": "
-		          << configTables[i] << __E__;
+		__COUT__ << (i + 1) << " of " << configTables.size() << ": " << configTables[i]
+		         << __E__;
 
 		theInterface_->get(
 		    base,
@@ -92,8 +92,7 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 		// if(configTables[i]  != "ARTDAQAggregatorConfiguration") continue;
 
 		// save the active version
-		__COUT__ << "Current version: " << base->getViewVersion()
-		          << __E__;
+		__COUT__ << "Current version: " << base->getViewVersion() << __E__;
 
 		//
 		//		**** switch to db style interface?!!?!? ****   //
@@ -142,8 +141,8 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 
 		if((dp = opendir(configDir.c_str())) == 0)
 		{
-			__COUT__ << "ERROR:(" << errno
-			          << ").  Can't open directory: " << configDir << __E__;
+			__COUT__ << "ERROR:(" << errno << ").  Can't open directory: " << configDir
+			         << __E__;
 			exit(0);
 		}
 
@@ -166,8 +165,8 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 		TableBase* base = 0;
 		__COUT__ << __E__;
 		__COUT__ << __E__;
-		__COUT__ << (i + 1) << " of " << configTables.size() << ": "
-		          << configTables[i] << __E__;
+		__COUT__ << (i + 1) << " of " << configTables.size() << ": " << configTables[i]
+		         << __E__;
 
 		theInterface_->get(
 		    base,
@@ -180,8 +179,7 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 		__COUT__ << "loaded " << configTables[i] << __E__;
 
 		// save the active version
-		__COUT__ << "Current version: " << base->getViewVersion()
-		          << __E__;
+		__COUT__ << "Current version: " << base->getViewVersion() << __E__;
 
 		//
 		//		**** switch to db style interface?!!?!? ****   //
