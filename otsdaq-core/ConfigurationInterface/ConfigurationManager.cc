@@ -890,8 +890,8 @@ void ConfigurationManager::loadMemberMap(
 //	load all members of configuration group
 //	if doActivate
 //		DOES set theConfigurationTableGroup_, theContextTableGroup_, or
-//theBackboneTableGroup_ on success 			this also happens with
-//ConfigurationManagerRW::activateTableGroup 		for each member
+// theBackboneTableGroup_ on success 			this also happens with
+// ConfigurationManagerRW::activateTableGroup 		for each member
 //			configBase->init()
 //
 //	if progressBar != 0, then do step handling, for finer granularity
@@ -950,7 +950,7 @@ void ConfigurationManager::loadTableGroup(
 	//
 	//	if doActivate
 	//		set theConfigurationTableGroup_, theContextTableGroup_, or
-	//theBackboneTableGroup_ on success
+	// theBackboneTableGroup_ on success
 
 	//	__COUT_INFO__ << "Loading Table Group: " << groupName <<
 	//			"(" << groupKey << ")" << __E__;
@@ -1238,7 +1238,7 @@ void ConfigurationManager::loadTableGroup(
 
 		//	if doActivate
 		//		set theConfigurationTableGroup_, theContextTableGroup_, or
-		//theBackboneTableGroup_ on
+		// theBackboneTableGroup_ on
 		// success
 
 		if(doActivate)

@@ -1280,23 +1280,47 @@ std::set<std::string> TableView::getSetOfGroupIDs(const unsigned int& c,
 //	const version, if column not found throw error
 const unsigned int TableView::getColLinkGroupID(const std::string& childLinkIndex) const
 {
+	if(!childLinkIndex.size())
+	{
+		__SS__ << "Empty childLinkIndex string parameter!" << __E__;
+		__SS_THROW__;
+	}
+
+	const char* needleChildLinkIndex = &childLinkIndex[0];
+
+	// allow space syntax to target a childLinkIndex from a different parentLinkIndex
+	// e.g. "parentLinkIndex childLinkIndex"
+	size_t spacePos = childLinkIndex.find(' ');
+	if(spacePos != std::string::npos &&
+	   spacePos + 1 < childLinkIndex.size())  // make sure there are more characters
+	{
+		// found space syntax for targeting childLinkIndex
+		needleChildLinkIndex = &childLinkIndex[spacePos + 1];
+	}
+
 	std::map<std::string, unsigned int>::const_iterator it =
-	    colLinkGroupIDs_.find(childLinkIndex);
+	    colLinkGroupIDs_.find(needleChildLinkIndex);
 	if(it !=  // if already known, return it
 	   colLinkGroupIDs_.end())
 		return it->second;
 
+	__COUT__ << "Existing Column GroupIDs: " << __E__;
+	for(auto& groupIdColPair : colLinkGroupIDs_)
+		std::cout << "\t" << groupIdColPair.first << " : col-" << groupIdColPair.second
+		          << __E__;
+
 	__COUT__ << "Existing Column Types: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-		          << __E__;
+		std::cout << "\t" << columnsInfo_[col].getType() << "() "
+		          << columnsInfo_[col].getName() << __E__;
 
 	__SS__ << ("Incompatible table for this group link. Table '" + tableName_ +
 	           "' is missing a GroupID column with data type '" +
-	           (TableViewColumnInfo::TYPE_START_GROUP_ID + "-" + childLinkIndex) + "'.")
+	           (TableViewColumnInfo::TYPE_START_GROUP_ID + "-" + needleChildLinkIndex) +
+	           "'.")
 	       << __E__;
 	__SS_THROW__;
-}
+}  // end getColLinkGroupID()
 
 //==============================================================================
 unsigned int TableView::findRow(unsigned int       col,
@@ -1316,7 +1340,7 @@ unsigned int TableView::findRow(unsigned int       col,
 	// exceptions 	so may not want to print out
 	//__COUT__ << "\n" << ss.str();
 	__SS_ONLY_THROW__;
-}
+}  // end findRow()
 
 //==============================================================================
 unsigned int TableView::findRowInGroup(unsigned int       col,
@@ -1340,7 +1364,7 @@ unsigned int TableView::findRowInGroup(unsigned int       col,
 	// Note: findRowInGroup gets purposely called by configuration GUI a lot looking for
 	// exceptions 	so may not want to print out
 	__SS_ONLY_THROW__;
-}
+}  // end findRowInGroup()
 
 //==============================================================================
 // findCol
@@ -1360,7 +1384,7 @@ unsigned int TableView::findCol(const std::string& wildCardName) const
 	// Note: findCol gets purposely called by configuration GUI a lot looking for
 	// exceptions 	so may not want to print out
 	__SS_ONLY_THROW__;
-}
+}  // end findCol()
 
 //==============================================================================
 // findColByType
@@ -1372,7 +1396,7 @@ unsigned int TableView::findColByType(const std::string& type, int startingCol) 
 			return col;
 
 	return INVALID;
-}
+}  // end findColByType()
 
 // Getters
 //==============================================================================
@@ -1513,7 +1537,7 @@ std::vector<std::string> TableView::getDefaultRowValues(void) const
 	}
 
 	return retVec;
-}
+}  // end getDefaultRowValues()
 
 //==============================================================================
 unsigned int TableView::getNumberOfRows(void) const { return theDataView_.size(); }
@@ -1554,7 +1578,7 @@ const TableViewColumnInfo& TableView::getColumnInfo(unsigned int column) const
 		__THROW__(errMsg.str().c_str());
 	}
 	return columnsInfo_[column];
-}
+}  // end getColumnInfo()
 
 // Setters
 //==============================================================================
@@ -1598,7 +1622,7 @@ void TableView::reset(void)
 	author_ + "";
 	columnsInfo_.clear();
 	theDataView_.clear();
-}
+}  // end reset()
 
 //==============================================================================
 void TableView::print(std::ostream& out) const
@@ -1664,7 +1688,7 @@ void TableView::print(std::ostream& out) const
 		}
 		out << __E__;
 	}
-}
+}  // end print()
 
 //==============================================================================
 void TableView::printJSON(std::ostream& out) const
@@ -1739,7 +1763,7 @@ void TableView::printJSON(std::ostream& out) const
 	out << "]\n";  // close DATA_SET
 
 	out << "}";
-}
+}  // end printJSON()
 
 //==============================================================================
 // restoreJSONStringEntities
@@ -1787,7 +1811,7 @@ std::string restoreJSONStringEntities(const std::string& str)
 		retStr << str[sz - 1];  // output last character (which can't escape anything)
 
 	return retStr.str();
-}
+}  // end restoreJSONStringEntities()
 
 //==============================================================================
 // fillFromJSON
@@ -1797,7 +1821,6 @@ std::string restoreJSONStringEntities(const std::string& str)
 //	first level keys:
 //		NAME
 //		DATA_SET
-
 int TableView::fillFromJSON(const std::string& json)
 {
 	std::vector<std::string> keys;
@@ -2358,7 +2381,7 @@ int TableView::fillFromJSON(const std::string& json)
 	// print();
 
 	return 0;  // success
-}
+}  // end fillFromJSON()
 
 //==============================================================================
 bool TableView::isURIEncodedCommentTheSame(const std::string& comment) const
@@ -2548,7 +2571,7 @@ int TableView::fillFromCSV(const std::string& data,
 	//	__COUT__ << "\n" << ss.str() << __E__;
 
 	return retVal;
-}
+}  // end fillFromCSV()
 
 //==============================================================================
 // setURIEncodedValue
@@ -2627,7 +2650,7 @@ bool TableView::setURIEncodedValue(const std::string&  value,
 	}
 
 	return rowWasModified;
-}
+}  // end setURIEncodedValue()
 
 //==============================================================================
 void TableView::resizeDataView(unsigned int nRows, unsigned int nCols)
@@ -2780,7 +2803,7 @@ unsigned int TableView::addRow(const std::string& author,
 	}
 
 	return rowToAdd;
-}
+}  // end addRow()
 
 //==============================================================================
 // deleteRow
@@ -2797,10 +2820,10 @@ void TableView::deleteRow(int r)
 	}
 
 	theDataView_.erase(theDataView_.begin() + r);
-}
+}  // end deleteRow()
 
 //==============================================================================
-// isColChildLinkUnique ~
+// getChildLink ~
 //	find the pair of columns associated with a child link.
 //
 //	c := a member column of the pair
@@ -2909,4 +2932,4 @@ const bool TableView::getChildLink(
 	       << ", Can't find complete child link id for column name "
 	       << columnsInfo_[c].getName() << __E__;
 	__SS_THROW__;
-}
+}  // end getChildLink()

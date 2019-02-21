@@ -522,7 +522,6 @@ bool TableBase::setActiveView(TableVersion version)
 		// think??)
 		__SS__ << "\nsetActiveView() ERROR: View with version " << version
 		       << " has never been stored before!" << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 		return false;
 	}

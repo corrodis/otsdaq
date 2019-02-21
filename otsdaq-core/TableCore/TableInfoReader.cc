@@ -29,7 +29,10 @@
 using namespace ots;
 
 #undef __COUT_HDR__
-#define __COUT_HDR__ "ConfigInfoReader"
+#define __COUT_HDR__ "TableInfoReader"
+
+const std::string TableInfoReader::CONFIGURATION_BACKEND_TYPE_ =
+    getenv("CONFIGURATION_TYPE");
 
 //==============================================================================
 TableInfoReader::TableInfoReader(bool allowIllegalColumns)
@@ -72,8 +75,7 @@ TableInfoReader::~TableInfoReader(void)
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "Unknown exception encountered in TagNames destructor"
-		             << std::endl;
+		__COUT_ERR__ << "Unknown exception encountered in TagNames destructor" << __E__;
 	}
 	terminatePlatform();
 }
@@ -88,7 +90,7 @@ void TableInfoReader::initPlatform(void)
 	catch(xercesc::XMLException& e)
 	{
 		__COUT_ERR__ << "XML toolkit initialization error: "
-		             << XML_TO_CHAR(e.getMessage()) << std::endl;
+		             << XML_TO_CHAR(e.getMessage()) << __E__;
 		// throw exception here to return ERROR_XERCES_INIT
 	}
 }
@@ -103,7 +105,7 @@ void TableInfoReader::terminatePlatform(void)
 	catch(xercesc::XMLException& e)
 	{
 		__COUT_ERR__ << "XML tolkit teardown error: " << XML_TO_CHAR(e.getMessage())
-		             << std::endl;
+		             << __E__;
 	}
 }
 
@@ -128,7 +130,8 @@ bool TableInfoReader::checkViewType(std::string type)
 	}
 	types.push_back(type.substr(currentIndex, type.size()));
 
-	std::string systemType = getenv("CONFIGURATION_TYPE");
+	const std::string& systemType = TableInfoReader::CONFIGURATION_BACKEND_TYPE_;
+
 	for(unsigned int i = 0; i < types.size(); i++)
 	{
 		if(types[i] == systemType)
@@ -142,10 +145,10 @@ bool TableInfoReader::checkViewType(std::string type)
 	if(systemType != allowedNames[0] && systemType != allowedNames[1] &&
 	   systemType != allowedNames[2])
 	{
-		__COUT__ << "The type defined in CONFIGURATION_TYPE (" << systemType
+		__COUT__ << "The type defined in CONFIGURATION_BACKEND_TYPE (" << systemType
 		         << ") doesn't match with any of the allowed types: File,Database or "
 		            "DatabaseTest"
-		         << std::endl;
+		         << __E__;
 
 		throw(std::runtime_error("Illegal table type"));
 	}
@@ -157,7 +160,7 @@ bool TableInfoReader::checkViewType(std::string type)
 			__COUT__ << "The type defined in the info file (" << types[i]
 			         << ") doesn't match with any of the allowed types: "
 			         << allowedNames[0] << ", " << allowedNames[1] << " or "
-			         << allowedNames[2] << std::endl;
+			         << allowedNames[2] << __E__;
 			throw(std::runtime_error("Illegal Type!"));
 		}
 	}
@@ -184,13 +187,13 @@ xercesc::DOMNode* TableInfoReader::getNode(XMLCh*               tagName,
 		throw(std::runtime_error(std::string("Can't find ") + XML_TO_CHAR(tagName) +
 		                         " tag!"));
 		__COUT__ << (std::string("Can't find ") + XML_TO_CHAR(tagName) + " tag!")
-		         << std::endl;
+		         << __E__;
 	}
 	//    __COUT__<< "Name: "  << XML_TO_CHAR(nodeList->item(itemNumber)->getNodeName())
-	//    << std::endl; if( nodeList->item(itemNumber)->getFirstChild() != 0 )
+	//    << __E__; if( nodeList->item(itemNumber)->getFirstChild() != 0 )
 	//        __COUT__<< "Value: " <<
 	//        XML_TO_CHAR(nodeList->item(itemNumber)->getFirstChild()->getNodeValue()) <<
-	//        std::endl;
+	//        __E__;
 	return nodeList->item(itemNumber);
 }
 
@@ -224,13 +227,12 @@ std::string TableInfoReader::read(TableBase& table)
 	// Gennadiy...
 
 	// These environment variables are required
-	if(getenv("CONFIGURATION_TYPE") == NULL)
-		__COUT__ << "Missing env variable: CONFIGURATION_TYPE. It must be set!"
-		         << std::endl;
+	if(TableInfoReader::CONFIGURATION_BACKEND_TYPE_ == "")
+		__COUT__ << "Missing env variable: CONFIGURATION_TYPE. It must be set!" << __E__;
 	// if(getenv("CONFIGURATION_DATA_PATH") == NULL) __COUT__ << "Missing env variable:
-	// CONFIGURATION_DATA_PATH. It must be set!" << std::endl;
+	// CONFIGURATION_DATA_PATH. It must be set!" << __E__;
 	if(getenv("TABLE_INFO_PATH") == NULL)
-		__COUT__ << "Missing env variable: TABLE_INFO_PATH. It must be set!" << std::endl;
+		__COUT__ << "Missing env variable: TABLE_INFO_PATH. It must be set!" << __E__;
 
 	// example c++ setting of necessary environment variables
 	// setenv("CONFIGURATION_TYPE","File",1);
@@ -241,39 +243,39 @@ std::string TableInfoReader::read(TableBase& table)
 
 	std::string tableDataDir = std::string(getenv("TABLE_INFO_PATH")) + "/";
 	std::string tableFile    = tableDataDir + table.getTableName() + "Info.xml";
-	//__COUT__ << tableFile << std::endl;
+	//__COUT__ << tableFile << __E__;
 	struct stat fileStatus;
 
 	int iretStat = stat(tableFile.c_str(), &fileStatus);
 	if(iretStat == ENOENT)
 	{
 		__SS__ << ("Path file_name does not exist, or path is an empty std::string.")
-		       << std::endl;
+		       << __E__;
 		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 	else if(iretStat == ENOTDIR)
 	{
-		__SS__ << ("A component of the path is not a directory.") << std::endl;
+		__SS__ << ("A component of the path is not a directory.") << __E__;
 		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 	else if(iretStat == ELOOP)
 	{
 		__SS__ << ("Too many symbolic links encountered while traversing the path.")
-		       << std::endl;
+		       << __E__;
 		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 	else if(iretStat == EACCES)
 	{
-		__SS__ << ("Permission denied.") << std::endl;
+		__SS__ << ("Permission denied.") << __E__;
 		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 	else if(iretStat == ENAMETOOLONG)
 	{
-		__SS__ << ("File can not be read. Name too long.") << std::endl;
+		__SS__ << ("File can not be read. Name too long.") << __E__;
 		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
@@ -311,7 +313,7 @@ std::string TableInfoReader::read(TableBase& table)
 			__SS__ << "In " << tableFile << " the table name "
 			       << XML_TO_CHAR(tableElement->getAttribute(tableNameAttributeTag_))
 			       << " doesn't match the the class table name " << table.getTableName()
-			       << std::endl;
+			       << __E__;
 
 			delete parser;
 			delete errorHandler;
@@ -327,7 +329,7 @@ std::string TableInfoReader::read(TableBase& table)
 			__SS__ << "In " << tableFile << " the table name "
 			       << XML_TO_CHAR(tableElement->getAttribute(tableNameAttributeTag_))
 			       << " there must only be one view. There were "
-			       << viewNodeList->getLength() << " found." << std::endl;
+			       << viewNodeList->getLength() << " found." << __E__;
 
 			delete parser;
 			delete errorHandler;
@@ -359,7 +361,7 @@ std::string TableInfoReader::read(TableBase& table)
 				    dynamic_cast<xercesc::DOMElement*>(columnNodeList->item(column));
 				//__COUT__ <<
 				// XML_TO_CHAR(columnElement->getAttribute(columnNameAttributeTag_)) <<
-				// std::endl;
+				// __E__;
 
 				// automatically delete the persistent version of the column info
 				std::string capturedException;
@@ -390,16 +392,16 @@ std::string TableInfoReader::read(TableBase& table)
 			    XML_TO_CHAR(viewElement->getAttribute(viewDescriptionAttributeTag_));
 
 			table.setTableDescription(StringMacros::decodeURIComponent(tableDescription));
-			//__COUT__ << "tableDescription = " << tableDescription << std::endl;
+			//__COUT__ << "tableDescription = " << tableDescription << __E__;
 
 			//</VIEW>
 		}
 		if(!storageTypeFound)
 		{
-			__COUT__ << "The type defined in CONFIGURATION_TYPE ("
-			         << getenv("CONFIGURATION_TYPE")
+			__COUT__ << "The type defined in CONFIGURATION_BACKEND_TYPE ("
+			         << TableInfoReader::CONFIGURATION_BACKEND_TYPE_
 			         << ") doesn't match with any of the types defined in " << tableFile
-			         << std::endl;
+			         << __E__;
 
 			delete parser;
 			delete errorHandler;
@@ -416,7 +418,7 @@ std::string TableInfoReader::read(TableBase& table)
 	delete parser;
 	delete errorHandler;
 
-	//__COUT__ << std::endl;
+	//__COUT__ << __E__;
 
 	// if exceptions have been accumulated
 	//	then in allowIllegalColumns mode

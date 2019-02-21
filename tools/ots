@@ -341,7 +341,8 @@ if [ $ISCONFIG == 1 ]; then
     export OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER=$SERVER
 fi
 
- #Can be File, Database, DatabaseTest
+#At one point, could be File, Database, DatabaseTest
+#  Now,.. artdaq_database expects File, and the ARTDAQ_DATABASE_URI decides the rest
 export CONFIGURATION_TYPE=File
 
 # Setup environment when building with MRB

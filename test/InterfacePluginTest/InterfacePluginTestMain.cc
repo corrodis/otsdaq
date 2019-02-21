@@ -59,7 +59,7 @@ int main()
 	//	theInterface_->get((TableBase*&)configurations,"Configurations");
 	//	TableBase* frontEndConfiguration = 0;
 	//	theInterface_->get(frontEndConfiguration, "FEConfiguration",
-	//theConfigurationTableGroupKey_,
+	// theConfigurationTableGroupKey_,
 	// configurations);
 	//
 	//	const std::string interfaceName     =  "FEOtsUDPFSSRInterface";

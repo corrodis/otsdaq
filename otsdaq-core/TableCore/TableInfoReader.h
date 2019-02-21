@@ -53,6 +53,8 @@ class TableInfoReader
 	XMLCh* columnDataChoicesAttributeTag_;
 
 	bool allowIllegalColumns_;
+
+	const static std::string CONFIGURATION_BACKEND_TYPE_;
 };
 
 }  // namespace ots

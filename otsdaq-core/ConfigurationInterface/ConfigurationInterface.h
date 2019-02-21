@@ -148,11 +148,10 @@ class ConfigurationInterface
 		{
 			if(version.isTemporaryVersion())
 			{
-				__COUT_ERR__ << "FATAL ERROR: Can not use interface to fill a "
-				                "table object with a temporary version!"
-				             << std::endl;
-				__SS__ << "FATAL ERROR: Invalid temporary version v" << version
+				__SS__ << "FATAL ERROR: Can not use interface to fill a "
+				          "table object with a temporary version!"
 				       << std::endl;
+				ss << "FATAL ERROR: Invalid temporary version v" << version << std::endl;
 				__SS_THROW__;
 			}
 
