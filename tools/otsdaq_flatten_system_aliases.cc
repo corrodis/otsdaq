@@ -16,7 +16,7 @@
 
 using namespace ots;
 
-void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
+void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 {
 	std::cout << "=================================================\n";
 	std::cout << "=================================================\n";
@@ -159,7 +159,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 
 	// add active groups to set
 	std::map<std::string, std::pair<std::string, TableGroupKey>> activeGroupsMap =
-	    cfgMgr->getActiveConfigurationGroups();
+	    cfgMgr->getActiveTableGroups();
 
 	for(const auto& activeGroup : activeGroupsMap)
 	{
@@ -534,7 +534,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 
 			// memberMap should now consist of members with new flat version, so save
 			// group
-			theInterface_->saveConfigurationGroup(
+			theInterface_->saveTableGroup(
 			    memberMap,
 			    TableGroupKey::getFullGroupString(groupPair.first.first,
 			                                      TableGroupKey(flatVersion)));
@@ -678,7 +678,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 		                               0,
 		                               &accumulateErrors);
 
-		// modify Group Aliases Configuration and Version Aliases Configuration to point
+		// modify Group Aliases Table and Version Aliases Table to point
 		//	at DEFAULT and flatVersion respectively
 
 		const std::string groupAliasesName =
@@ -688,7 +688,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 
 		std::map<std::string, TableVersion> activeMap = cfgMgr->getActiveVersions();
 
-		// modify Group Aliases Configuration
+		// modify Group Aliases Table
 		if(activeMap.find(groupAliasesName) != activeMap.end())
 		{
 			__COUT__ << "\n\nModifying " << groupAliasesName << std::endl;
@@ -729,7 +729,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			// cfgView->print();
 		}
 
-		// modify Version Aliases Configuration
+		// modify Version Aliases Table
 		if(activeMap.find(versionAliasesName) != activeMap.end())
 		{
 			__COUT__ << "\n\nModifying " << versionAliasesName << std::endl;
@@ -762,7 +762,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 			}
 		}
 
-		// save new Group Aliases Configuration and Version Aliases Configuration
+		// save new Group Aliases Table and Version Aliases Table
 
 		__COUT__ << groupAliasesName << ":v" << memberMap[groupAliasesName] << std::endl;
 		// change the version of the active view to flatVersion and save it
@@ -790,7 +790,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 		         << memberMap[versionAliasesName] << std::endl;
 
 		// memberMap should now consist of members with new flat version, so save
-		theInterface_->saveConfigurationGroup(
+		theInterface_->saveTableGroup(
 		    memberMap,
 		    TableGroupKey::getFullGroupString(activeBackboneGroupName,
 		                                      TableGroupKey(flatVersion)));
@@ -848,7 +848,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 		theIterateTableGroup_    = activeIterateGroupName;
 		theIterateTableGroupKey_ = &(activeGroupKeys[activeIterateGroupName].second);
 
-		// the following is copied from ConfigurationManagerRW::activateConfigurationGroup
+		// the following is copied from ConfigurationManagerRW::activateTableGroup
 		{
 			__COUT__ << "Updating persistent active groups to "
 			         << ConfigurationManager::ACTIVE_GROUPS_FILENAME << " ..."
@@ -902,7 +902,7 @@ void FlattenActiveSystemAliasConfigurationGroups(int argc, char* argv[])
 CLEAN_UP:
 	//==============================================================================
 	std::cout << "\n\n"
-	          << __COUT_HDR_FL__ << "End of Flattening Active Configuration Groups!\n\n\n"
+	          << __COUT_HDR_FL__ << "End of Flattening Active Table Groups!\n\n\n"
 	          << std::endl;
 
 	__COUT__ << "****************************" << std::endl;
@@ -924,7 +924,7 @@ CLEAN_UP:
 
 int main(int argc, char* argv[])
 {
-	FlattenActiveSystemAliasConfigurationGroups(argc, argv);
+	FlattenActiveSystemAliasTableGroups(argc, argv);
 	return 0;
 }
 // BOOST_AUTO_TEST_SUITE_END()

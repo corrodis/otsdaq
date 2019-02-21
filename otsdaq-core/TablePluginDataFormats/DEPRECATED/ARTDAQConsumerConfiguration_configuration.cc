@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../../Macros/TablePluginMacros.h"
+#include "otsdaq-coreMacros/TablePluginMacros.h"
 #include "otsdaq-core/ConfigurationPluginDataFormats/ARTDAQConsumerTable.h"
 
 using namespace ots;

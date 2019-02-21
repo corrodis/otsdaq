@@ -815,7 +815,7 @@ void WizardSupervisor::UserSettings(xgi::Input*  in,
 			//
 			//			//Zip current files into TMP directory
 			//			command = std::string("tar -cvf user_settings.tar") +
-			//					std::string("ActiveConfigurationGroups.cfg ") +
+			//					std::string("ActiveTableGroups.cfg ") +
 			//					std::string("ConsolePreferences ") +
 			//					std::string("CoreTableInfoNames.dat ") +
 			//					std::string("LoginData ") +

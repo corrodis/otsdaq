@@ -350,7 +350,7 @@ void Iterator::IteratorWorkLoop(Iterator* iterator) try
 					__COUT__ << "Activating original group..." << __E__;
 					try
 					{
-						theIteratorStruct.cfgMgr_->activateConfigurationGroup(
+						theIteratorStruct.cfgMgr_->activateTableGroup(
 						    theIteratorStruct.originalConfigGroup_,
 						    theIteratorStruct.originalConfigKey_);
 					}
@@ -558,7 +558,7 @@ catch(...)
 	__COUT__ << "Activating original group..." << __E__;
 	try
 	{
-		iteratorStruct->cfgMgr_->activateConfigurationGroup(
+		iteratorStruct->cfgMgr_->activateTableGroup(
 		    iteratorStruct->originalConfigGroup_, iteratorStruct->originalConfigKey_);
 	}
 	catch(...)
@@ -637,7 +637,7 @@ catch(...)
 	__COUT__ << "Activating original group..." << __E__;
 	try
 	{
-		iteratorStruct->cfgMgr_->activateConfigurationGroup(
+		iteratorStruct->cfgMgr_->activateTableGroup(
 		    iteratorStruct->originalConfigGroup_, iteratorStruct->originalConfigKey_);
 	}
 	catch(...)
@@ -784,7 +784,7 @@ bool Iterator::haltIterator(Iterator* iterator, IteratorWorkLoopStruct* iterator
 		__COUT__ << "Activating original group..." << __E__;
 		try
 		{
-			iteratorStruct->cfgMgr_->activateConfigurationGroup(
+			iteratorStruct->cfgMgr_->activateTableGroup(
 			    iteratorStruct->originalConfigGroup_, iteratorStruct->originalConfigKey_);
 		}
 		catch(...)
@@ -1685,7 +1685,7 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct* iteratorStruct)
 
 		// also activate the Iterator config manager to mimic active config
 		std::pair<std::string, TableGroupKey> newActiveGroup =
-		    iteratorStruct->cfgMgr_->getConfigurationGroupFromAlias(
+		    iteratorStruct->cfgMgr_->getTableGroupFromAlias(
 		        iteratorStruct->fsmCommandParameters_[0]);
 		iteratorStruct->cfgMgr_->loadTableGroup(
 		    newActiveGroup.first, newActiveGroup.second, true /*activate*/);

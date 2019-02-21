@@ -215,8 +215,8 @@ class TableView
 	                                       // re-writable views ("temporary views") in
 	                                       // artdaq db
 	std::string  tableName_;               // View name (extensionTableName in xml)
-	TableVersion version_;                 // Configuration version
-	std::string  comment_;                 // Configuration version comment
+	TableVersion version_;                 // Table version
+	std::string  comment_;                 // Table version comment
 	std::string  author_;
 	time_t       creationTime_;  // used more like "construction"(constructor) time
 	time_t lastAccessTime_;  // last time the ConfigurationInterface:get() retrieved this

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../../TableCore/TableBase.h"
+#include "otsdaq-coreTableCore/TableBase.h"
 
 namespace ots
 {

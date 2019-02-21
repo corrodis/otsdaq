@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "../../TableCore/TableBase.h"
+#include "otsdaq-coreTableCore/TableBase.h"
 
 namespace ots
 {

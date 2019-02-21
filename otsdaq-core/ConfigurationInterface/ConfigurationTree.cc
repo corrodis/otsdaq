@@ -1205,8 +1205,8 @@ bool ConfigurationTree::isLinkNode(void) const { return linkColName_ != ""; }
 //==============================================================================
 // getNodeType
 //	return node type as string
-const std::string ConfigurationTree::NODE_TYPE_GROUP_TABLE = "GroupConfigurationNode";
-const std::string ConfigurationTree::NODE_TYPE_TABLE       = "ConfigurationNode";
+const std::string ConfigurationTree::NODE_TYPE_GROUP_TABLE = "GroupTableNode";
+const std::string ConfigurationTree::NODE_TYPE_TABLE       = "TableNode";
 const std::string ConfigurationTree::NODE_TYPE_GROUP_LINK  = "GroupLinkNode";
 const std::string ConfigurationTree::NODE_TYPE_UID_LINK    = "UIDLinkNode";
 const std::string ConfigurationTree::NODE_TYPE_VALUE       = "ValueNode";

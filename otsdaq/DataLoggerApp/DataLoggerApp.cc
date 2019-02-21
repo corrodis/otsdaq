@@ -25,7 +25,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
-#include "../../otsdaq-core/TableCore/TableGroupKey.h"
+#include "otsdaq-core/TableCore/TableGroupKey.h"
 
 using namespace ots;
 
@@ -74,12 +74,12 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* s)
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the "
-		                "Configuration Context Group."
-		             << " The XDAQContextTableName = "
-		             << XDAQContextTableName_
-		             << ". The supervisorApplicationUID = " << supervisorApplicationUID_
-		             << std::endl;
+		__COUT_ERR__
+	    << "XDAQ Supervisor could not access it's configuration through "
+	       "the Configuration Manager." <<
+	    ". The getApplicationContext()->getContextDescriptor()->getURL() = "
+	    << getApplicationContext()->getContextDescriptor()->getURL()
+	    << __E__;
 		throw;
 	}
 	try
@@ -92,10 +92,11 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* s)
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the "
-		                "Configuration Application Group."
-		             << " The supervisorApplicationUID = " << supervisorApplicationUID_
-		             << std::endl;
+		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
+                "the Configuration Manager."
+             << " The supervisorContextUID_ = " << supervisorContextUID_
+             << ". The supervisorApplicationUID = "
+             << supervisorApplicationUID_ << __E__;
 		throw;
 	}
 	supervisorConfigurationPath_ = "/" + supervisorContextUID_ +

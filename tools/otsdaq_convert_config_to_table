@@ -122,6 +122,24 @@ sed -i s/TableGUI/ConfigurationGUI/g *Table/*.json #*/ end C++ comment coloring
 #return index after transformation
 for f in *Table; do mv -n "$f/index.txt" "$f/index.json"; done; 
 
+#do same thing for MetaData table
+echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Fixing Metadata Table..."
+mv ConfigurationGroupMetadata TableGroupMetadata
+
+#hide index from transformation
+mv TableGroupMetadata/index.json TableGroupMetadata/index.txt
+
+sed -i s/Configuration/Table/g TableGroupMetadata/*.json #*/ end C++ comment coloring
+sed -i s/CONFIGURATION/TABLE/g TableGroupMetadata/*.json #*/ end C++ comment coloring
+sed -i s/configuration/table/g TableGroupMetadata/*.json #*/ end C++ comment coloring
+
+#revert things that have gone too far!
+sed -i s/TableGUI/ConfigurationGUI/g TableGroupMetadata/*.json #*/ end C++ comment coloring
+
+
+#return index after transformation
+mv TableGroupMetadata/index.txt TableGroupMetadata/index.json
+
 
 
 ###########

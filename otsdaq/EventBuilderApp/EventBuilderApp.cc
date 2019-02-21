@@ -23,7 +23,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
-#include "../../otsdaq-core/TableCore/TableGroupKey.h"
+#include "otsdaq-core/TableCore/TableGroupKey.h"
 
 using namespace ots;
 
@@ -77,11 +77,12 @@ EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the "
-		                "Configuration Context Group."
-		             << " The XDAQContextTableName = " << XDAQContextTableName_
-		             << ". The supervisorApplicationUID = " << supervisorApplicationUID_
-		             << std::endl;
+		__COUT_ERR__
+	    << "XDAQ Supervisor could not access it's configuration through "
+	       "the Configuration Manager." <<
+	    ". The getApplicationContext()->getContextDescriptor()->getURL() = "
+	    << getApplicationContext()->getContextDescriptor()->getURL()
+	    << __E__;
 		throw;
 	}
 	try
@@ -94,10 +95,11 @@ EventBuilderApp::EventBuilderApp(xdaq::ApplicationStub* stub)
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the "
-		                "Configuration Application Group."
-		             << " The supervisorApplicationUID = " << supervisorApplicationUID_
-		             << std::endl;
+		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
+                "the Configuration Manager."
+             << " The supervisorContextUID_ = " << supervisorContextUID_
+             << ". The supervisorApplicationUID = "
+             << supervisorApplicationUID_ << __E__;
 		throw;
 	}
 	supervisorConfigurationPath_ = "/" + supervisorContextUID_ +
@@ -297,7 +299,7 @@ void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
 	                      .getParameters()
 	                      .getValue("ConfigurationTableGroupKey")));
 
-	__COUT__ << "Configuration group name: " << theGroup.first
+	__COUT__ << "Configuration table group name: " << theGroup.first
 	         << " key: " << theGroup.second << std::endl;
 
 	theConfigurationManager_->loadTableGroup(

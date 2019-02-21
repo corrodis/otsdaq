@@ -175,11 +175,11 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 
 			//__COUT__ << "Instance created: " << entry->d_name << "\n"; //found!
 
-			if(nameToConfigurationMap_[entry->d_name])  // handle if instance existed
+			if(nameToTableMap_[entry->d_name])  // handle if instance existed
 			{
 				// copy the temporary versions! (or else all is lost)
 				std::set<TableVersion> versions =
-				    nameToConfigurationMap_[entry->d_name]->getStoredVersions();
+				    nameToTableMap_[entry->d_name]->getStoredVersions();
 				for(auto& version : versions)
 					if(version.isTemporaryVersion())
 					{
@@ -187,10 +187,10 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 
 						try  // do NOT let TableView::init() throw here
 						{
-							nameToConfigurationMap_[entry->d_name]->setActiveView(
+							nameToTableMap_[entry->d_name]->setActiveView(
 							    version);
 							table->copyView(  // this calls TableView::init()
-							    nameToConfigurationMap_[entry->d_name]->getView(),
+							    nameToTableMap_[entry->d_name]->getView(),
 							    version,
 							    username_);
 						}
@@ -200,11 +200,11 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 						}  // just trust configurationBase throws out the failed version
 					}
 				//__COUT__ << "deleting: " << entry->d_name << "\n"; //found!
-				delete nameToConfigurationMap_[entry->d_name];
-				nameToConfigurationMap_[entry->d_name] = 0;
+				delete nameToTableMap_[entry->d_name];
+				nameToTableMap_[entry->d_name] = 0;
 			}
 
-			nameToConfigurationMap_[entry->d_name] = table;
+			nameToTableMap_[entry->d_name] = table;
 
 			allTableInfo_[entry->d_name].tablePtr_ = table;
 			allTableInfo_[entry->d_name].versions_ = theInterface_->getVersions(table);
@@ -212,7 +212,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 			// also add any existing temporary versions to all table info
 			//	because the interface wont find those versions
 			std::set<TableVersion> versions =
-			    nameToConfigurationMap_[entry->d_name]->getStoredVersions();
+			    nameToTableMap_[entry->d_name]->getStoredVersions();
 			for(auto& version : versions)
 				if(version.isTemporaryVersion())
 				{
@@ -222,7 +222,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 		}
 		closedir(pDIR);
 	}
-	__COUT__ << "Extracting list of Configuration tables complete" << __E__;
+	__COUT__ << "Extracting list of tables complete" << __E__;
 
 	// call init to load active versions by default
 	init(accumulatedErrors);
@@ -236,13 +236,13 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	{
 		// build allGroupInfo_ for the ConfigurationManagerRW
 
-		std::set<std::string /*name*/> configGroups =
+		std::set<std::string /*name*/> tableGroups =
 		    theInterface_->getAllTableGroupNames();
-		__COUT__ << "Number of Groups: " << configGroups.size() << __E__;
+		__COUT__ << "Number of Groups: " << tableGroups.size() << __E__;
 
 		TableGroupKey key;
 		std::string   name;
-		for(const auto& fullName : configGroups)
+		for(const auto& fullName : tableGroups)
 		{
 			TableGroupKey::getGroupNameAndKey(fullName, name, key);
 			cacheGroupKey(name, key);
@@ -373,22 +373,22 @@ void ConfigurationManagerRW::activateTableGroup(
 		return;
 	}
 
-	__MCOUT_INFO__("Active Context: " << theContextTableGroup_ << "("
+	__MCOUT_INFO__("Active Context table group: " << theContextTableGroup_ << "("
 	                                  << (theContextTableGroupKey_
 	                                          ? theContextTableGroupKey_->toString().c_str()
 	                                          : "-1")
 	                                  << ")" << __E__);
-	__MCOUT_INFO__("Active Backbone: " << theBackboneTableGroup_ << "("
+	__MCOUT_INFO__("Active Backbone table group: " << theBackboneTableGroup_ << "("
 	                                   << (theBackboneTableGroupKey_
 	                                           ? theBackboneTableGroupKey_->toString().c_str()
 	                                           : "-1")
 	                                   << ")" << __E__);
-	__MCOUT_INFO__("Active Iterate: " << theIterateTableGroup_ << "("
+	__MCOUT_INFO__("Active Iterate table group: " << theIterateTableGroup_ << "("
 	                                  << (theIterateTableGroupKey_
 	                                          ? theIterateTableGroupKey_->toString().c_str()
 	                                          : "-1")
 	                                  << ")" << __E__);
-	__MCOUT_INFO__("Active Configuration: "
+	__MCOUT_INFO__("Active Configuration table group: "
 	               << theConfigurationTableGroup_ << "("
 	               << (theConfigurationTableGroupKey_ ? theConfigurationTableGroupKey_->toString().c_str() : "-1")
 	               << ")" << __E__);
@@ -454,9 +454,9 @@ TableVersion ConfigurationManagerRW::createTemporaryBackboneView(
 //==============================================================================
 TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
 {
-	if(nameToConfigurationMap_.find(tableName) == nameToConfigurationMap_.end())
+	if(nameToTableMap_.find(tableName) == nameToTableMap_.end())
 	{
-		__SS__ << "Configuration not found with name: " << tableName << __E__;
+		__SS__ << "Table not found with name: " << tableName << __E__;
 		size_t f;
 		if((f = tableName.find(' ')) != std::string::npos)
 			ss << "There was a space character found in the table name needle at "
@@ -465,7 +465,7 @@ TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
 		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
-	return nameToConfigurationMap_[tableName];
+	return nameToTableMap_[tableName];
 }
 
 //==============================================================================
@@ -477,12 +477,12 @@ TableBase* ConfigurationManagerRW::getVersionedTableByName(const std::string& ta
                                                            TableVersion       version,
                                                            bool looseColumnMatching)
 {
-	auto it = nameToConfigurationMap_.find(tableName);
-	if(it == nameToConfigurationMap_.end())
+	auto it = nameToTableMap_.find(tableName);
+	if(it == nameToTableMap_.end())
 	{
 		__SS__ << "\nCan not find table named '" << tableName
 		       << "'\n\n\n\nYou need to load the table before it can be used."
-		       << "It probably is missing from the member list of the Configuration "
+		       << "It probably is missing from the member list of the Table "
 		          "Group that was loaded?\n\n\n\n\n"
 		       << __E__;
 		__SS_THROW__;
@@ -1027,7 +1027,7 @@ void ConfigurationManagerRW::testXDAQContext()
 	//		{
 	//			{
 	//				std::map<std::string, TableVersion> members;
-	//				members["ARTDAQAggregatorConfiguration"] = TableVersion(1);
+	//				members["ARTDAQAggregatorTable"] = TableVersion(1);
 	//
 	//				//TableGroupKey
 	//				//	saveNewTableGroup
@@ -1055,7 +1055,7 @@ void ConfigurationManagerRW::testXDAQContext()
 	//			//do it again
 	//			{
 	//				std::map<std::string, TableVersion> members;
-	//				members["ARTDAQAggregatorConfiguration"] = TableVersion(1);
+	//				members["ARTDAQAggregatorTable"] = TableVersion(1);
 	//
 	//				//TableGroupKey
 	//				//	saveNewTableGroup
@@ -1124,7 +1124,7 @@ void ConfigurationManagerRW::testXDAQContext()
 	//				__COUT__ << "\tversion " << v << __E__;
 	//		}
 	//
-	//		if(0) //create a global table group (storeGlobalConfiguration)
+	//		if(0) //create a table group (storeGlobalConfiguration)
 	//		{
 	//			//storeGlobalConfiguration with latest of each
 	//			std::map<std::string /*name*/, TableVersion /*version*/> gcMap;
@@ -1179,7 +1179,7 @@ void ConfigurationManagerRW::testXDAQContext()
 	{
 		__COUT__ << "Loading table..." << __E__;
 		loadTableGroup("FETest", TableGroupKey(2));  // Context_1
-		ConfigurationTree t = getNode("/FEConfiguration/DEFAULT/FrontEndType");
+		ConfigurationTree t = getNode("/FETable/DEFAULT/FrontEndType");
 
 		std::string v;
 
@@ -1191,8 +1191,8 @@ void ConfigurationManagerRW::testXDAQContext()
 		return;
 
 		// ConfigurationTree t = getNode("XDAQContextTable");
-		// ConfigurationTree t = getNode("/FEConfiguration/OtsUDPFSSR3/FrontEndType");
-		// ConfigurationTree t = getNode("/FEConfiguration").getNode("OtsUDPFSSR3");
+		// ConfigurationTree t = getNode("/FETable/OtsUDPFSSR3/FrontEndType");
+		// ConfigurationTree t = getNode("/FETable").getNode("OtsUDPFSSR3");
 		//		ConfigurationTree t = getNode("/XDAQContextTable/testContext/");
 		//
 		//		__COUT__ << __E__;

@@ -41,7 +41,7 @@ int main()
         theSupervisorConfigurationPath_);
 
 	std::pair<std::string /*group name*/, TableGroupKey> theGroup =
-	    theConfigurationManager_->getConfigurationGroupFromAlias(ConfigurationAlias_);
+	    theConfigurationManager_->getTableGroupFromAlias(ConfigurationAlias_);
 
 	theConfigurationManager_->loadTableGroup(
 	    theGroup.first, theGroup.second, true);
@@ -63,7 +63,7 @@ int main()
 	// configurations);
 	//
 	//	const std::string interfaceName     =  "FEOtsUDPFSSRInterface";
-	//	const std::string configurationName =  interfaceName + "Configuration";
+	//	const std::string configurationName =  interfaceName + "Table";
 	//
 	//	//FEWOtsUDPHardwareConfiguration* interfaceConfiguration_ = 0;
 	//

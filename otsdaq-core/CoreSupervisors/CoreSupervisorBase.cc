@@ -534,7 +534,7 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 		                      .getParameters()
 		                      .getValue("ConfigurationTableGroupKey")));
 
-		__SUP_COUT__ << "Configuration group name: " << theGroup.first
+		__SUP_COUT__ << "Configuration table group name: " << theGroup.first
 		             << " key: " << theGroup.second << std::endl;
 
 		theConfigurationManager_->loadTableGroup(

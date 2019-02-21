@@ -40,18 +40,18 @@ class DatabaseConfigurationInterface : public ConfigurationInterface
 	std::set<TableVersion> getVersions(const TableBase* /*configuration*/) const noexcept;
 
 	// find all configuration groups in database
-	std::set<std::string /*name+version*/> getAllConfigurationGroupNames(
+	std::set<std::string /*name+version*/> getAllTableGroupNames(
 	    const std::string& filterString = "") const throw(std::runtime_error);
 	std::set<TableGroupKey> getKeys(const std::string& groupName) const;
 	TableGroupKey findLatestGroupKey(const std::string& groupName) const noexcept;
 
 	// return the contents of a configuration group
-	config_version_map_t getConfigurationGroupMembers(
+	config_version_map_t getTableGroupMembers(
 	    std::string const& /*configurationGroup*/,
 	    bool includeMetaDataTable = false) const throw(std::runtime_error);
 
 	// create a new configuration group from the contents map
-	void saveConfigurationGroup(config_version_map_t const& /*configurationMap*/,
+	void saveTableGroup(config_version_map_t const& /*configurationMap*/,
 	                            std::string const& /*configurationGroup*/) const
 	    throw(std::runtime_error);
 

@@ -214,7 +214,7 @@ void Iterator::helpCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct,
 
 	// now active new group
 	__COUT__ << "Activating new group..." << __E__;
-	cfgMgr->activateConfigurationGroup(groupName, theKey);
+	cfgMgr->activateTableGroup(groupName, theKey);
 
 }  // end helpCommandModifyActive()
 catch(const std::runtime_error& e)

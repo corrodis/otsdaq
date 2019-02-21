@@ -66,13 +66,11 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	catch(...)
 	{
 		__SUP_COUT_ERR__
-		    << "XDAQ Supervisor could not access it's configuration through the "
-		       "theConfigurationManager_."
-		    <<
-		    //" The XDAQContextTableName = " << XDAQContextTableName_ <<
+		    << "XDAQ Supervisor could not access it's configuration through "
+		       "the Configuration Manager." <<
 		    ". The getApplicationContext()->getContextDescriptor()->getURL() = "
 		    << application->getApplicationContext()->getContextDescriptor()->getURL()
-		    << std::endl;
+		    << __E__;
 		throw;
 	}
 
@@ -89,10 +87,10 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	catch(...)
 	{
 		__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
-		                    "the theConfigurationManager_."
+		                    "the Configuration Manager."
 		                 << " The supervisorContextUID_ = " << supervisorContextUID_
 		                 << ". The supervisorApplicationUID = "
-		                 << supervisorApplicationUID_ << std::endl;
+		                 << supervisorApplicationUID_ << __E__;
 		throw;
 	}
 
@@ -342,7 +340,7 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 		++setIt;
 	}
 
-	__SUP_COUT__ << "Final supervisor property settings:" << std::endl;
+	__SUP_COUT__ << "Final supervisor property settings:" << __E__;
 	for(auto& property : propertyMap_)
 		__SUP_COUT__ << "\t" << property.first << " = " << property.second << __E__;
 }
@@ -368,7 +366,7 @@ catch(...)
 	       "theConfigurationManager_ "
 	    << "(Did you remember to initialize using CorePropertySupervisorBase::init()?)."
 	    << " The supervisorContextUID_ = " << supervisorContextUID_
-	    << ". The supervisorApplicationUID = " << supervisorApplicationUID_ << std::endl;
+	    << ". The supervisorApplicationUID = " << supervisorApplicationUID_ << __E__;
 	throw;
 }
 
@@ -480,7 +478,7 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 	checkSupervisorPropertySetup();
 
 	//__SUP_COUT__ << "userInfo.requestType_ " << userInfo.requestType_ << " files: " <<
-	// cgiIn.getFiles().size() << std::endl;
+	// cgiIn.getFiles().size() << __E__;
 
 	userInfo.automatedCommand_ = StringMacros::inWildCardSet(
 	    userInfo.requestType_,

@@ -4,9 +4,9 @@
 #include <set>
 #include <string>
 
-#include "../../TableCore/TableBase.h"
-#include "../../TableCore/TableGroupKey.h"
-#include "../../TableCore/TableVersion.h"
+#include "otsdaq-coreTableCore/TableBase.h"
+#include "otsdaq-coreTableCore/TableGroupKey.h"
+#include "otsdaq-coreTableCore/TableVersion.h"
 
 namespace ots
 {

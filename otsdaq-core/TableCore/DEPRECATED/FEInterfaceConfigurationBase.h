@@ -1,7 +1,7 @@
 #ifndef _ots_FEInterfaceTableBase_h_
 #define _ots_FEInterfaceTableBase_h_
 
-#include "../../TableCore/TableBase.h"
+#include "otsdaq-coreTableCore/TableBase.h"
 
 namespace ots
 {

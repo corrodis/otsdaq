@@ -14,7 +14,7 @@
 
 using namespace ots;
 
-void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
+void ImportSystemAliasTableGroups(int argc, char* argv[])
 {
 	__COUT__ << "=================================================\n";
 	__COUT__ << "=================================================\n";
@@ -36,7 +36,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	          << "\t\tfor example:\n\n"
 	          << "\t\t\totsdaq_import_system_aliases "
 	             "~/databaseToImport/filesystemdb/test_db "
-	             "~/UserDataToImport/ServiceData/ActiveConfigurationGroups.cfg"
+	             "~/UserDataToImport/ServiceData/ActiveTableGroups.cfg"
 	          << __E__;
 
 	std::cout << "\n\n\tExample active groups file content:\n\n"
@@ -285,12 +285,12 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	try
 	{
 		//		- get active groups from user data file
-		cfgMgr->restoreActiveConfigurationGroups(true /*throwErrors*/,
+		cfgMgr->restoreActiveTableGroups(true /*throwErrors*/,
 		                                         pathToImportActiveGroups);
 
 		// add active groups to set
 		std::map<std::string, std::pair<std::string, TableGroupKey>> activeGroupsMap =
-		    cfgMgr->getActiveConfigurationGroups();
+		    cfgMgr->getActiveTableGroups();
 
 		for(const auto& activeGroup : activeGroupsMap)
 		{
@@ -491,7 +491,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			importedDbInPlace = true;
 		}
 
-		// cfgMgr->restoreActiveConfigurationGroups(true
+		// cfgMgr->restoreActiveTableGroups(true
 		// /*throwErrors*/,pathToImportActiveGroups);
 
 		__COUT__ << "****************************" << std::endl;
@@ -673,7 +673,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			__COUTV__(newKey);
 
 			// memberMap should now consist of members with new flat version, so save
-			theInterface_->saveConfigurationGroup(
+			theInterface_->saveTableGroup(
 			    memberMap,
 			    TableGroupKey::getFullGroupString(groupPair.first.first, newKey));
 
@@ -769,7 +769,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 	//	-- in current-db after loop...
 	//		- destroy and reload active groups
 	cfgMgr->destroy();
-	cfgMgr->restoreActiveConfigurationGroups(true /*throwErrors*/);
+	cfgMgr->restoreActiveTableGroups(true /*throwErrors*/);
 
 	// 	-- insert new aliases for imported groups
 	//		- should be basename+alias connection to (hop through maps) new groupName &
@@ -785,7 +785,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 	try
 	{
-		// modify Group Aliases Configuration and Version Aliases Configuration to
+		// modify Group Aliases Table and Version Aliases Table to
 		//	include new groups and tables
 
 		std::string activeBackboneGroupName =
@@ -800,7 +800,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 		std::map<std::string, TableVersion> activeMap = cfgMgr->getActiveVersions();
 
-		// modify Group Aliases Configuration
+		// modify Group Aliases Table
 		if(activeMap.find(groupAliasesTableName) != activeMap.end())
 		{
 			__COUT__ << "\n\nModifying " << groupAliasesTableName << std::endl;
@@ -839,7 +839,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			cfgView->print();
 		}
 
-		// modify Version Aliases Configuration
+		// modify Version Aliases Table
 		if(activeMap.find(versionAliasesTableName) != activeMap.end())
 		{
 			__COUT__ << "\n\nModifying " << versionAliasesTableName << std::endl;
@@ -879,7 +879,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 			cfgView->print();
 		}
 
-		// save new Group Aliases Configuration and Version Aliases Configuration
+		// save new Group Aliases Table and Version Aliases Table
 
 		// change the version of the active view to flatVersion and save it
 		config  = cfgMgr->getTableByName(groupAliasesTableName);
@@ -922,7 +922,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 		__COUTV__(newKey);
 
 		// memberMap should now consist of members with new flat version, so save
-		theInterface_->saveConfigurationGroup(
+		theInterface_->saveTableGroup(
 		    memberMap,
 		    TableGroupKey::getFullGroupString(activeBackboneGroupName, newKey));
 
@@ -933,7 +933,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 		__COUT__ << "Backing up '" << ConfigurationManager::ACTIVE_GROUPS_FILENAME
 		         << "' to ... '" << renameFile << "'" << std::endl;
 
-		cfgMgr->activateConfigurationGroup(activeBackboneGroupName,
+		cfgMgr->activateTableGroup(activeBackboneGroupName,
 		                                   newKey);  // and write to active group file
 
 	}  // end try
@@ -955,7 +955,7 @@ void ImportSystemAliasConfigurationGroups(int argc, char* argv[])
 
 CLEAN_UP:
 	//==============================================================================
-	__COUT__ << "End of Importing Active Configuration Groups!\n\n\n" << std::endl;
+	__COUT__ << "End of Importing Active Table Groups!\n\n\n" << std::endl;
 
 	__COUT__ << "****************************" << std::endl;
 	__COUT__ << "There were " << groupSet.size() << " groups considered, and there were "
@@ -976,7 +976,7 @@ CLEAN_UP:
 
 int main(int argc, char* argv[])
 {
-	ImportSystemAliasConfigurationGroups(argc, argv);
+	ImportSystemAliasTableGroups(argc, argv);
 	return 0;
 }
 // BOOST_AUTO_TEST_SUITE_END()

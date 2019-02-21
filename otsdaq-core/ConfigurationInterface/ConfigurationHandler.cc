@@ -698,7 +698,7 @@ void ConfigurationHandler::outputXML(xercesc::DOMDocument* pmyDOMDocument,
                                      std::string           fileName)
 {
 	std::string directory = fileName.substr(0, fileName.rfind("/") + 1);
-	__COUT__ << "Saving Configuration to " << fileName << " in directory: " << directory
+	__COUT__ << "Saving XML to " << fileName << " in directory: " << directory
 	         << std::endl;
 
 	mkdir(directory.c_str(), 0755);

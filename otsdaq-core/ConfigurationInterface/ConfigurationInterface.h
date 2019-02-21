@@ -2,12 +2,11 @@
 #define _ots_ConfigurationInterface_h_
 
 #include "otsdaq-core/Macros/CoutMacros.h"
-//#include "otsdaq-core/TablePluginDataFormats/Configurations.h"
 #include <memory>
 #include <set>
 #include <sstream>
 
-#include "../PluginMakers/MakeTable.h"
+#include "otsdaq-core/PluginMakers/MakeTable.h"
 #include "otsdaq-core/TableCore/TableBase.h"
 #include "otsdaq-core/TableCore/TableGroupKey.h"
 #include "otsdaq-core/TableCore/TableVersion.h"
@@ -37,8 +36,8 @@ class ConfigurationInterface
 	//
 	//	Loose column matching can be used to ignore column names when filling.
 	//
-	void get(TableBase*&                          configuration,
-	         const std::string                    configurationName,
+	void get(TableBase*&                          table,
+	         const std::string                    tableName,
 	         std::shared_ptr<const TableGroupKey> groupKey            = 0,
 	         const std::string*                   groupName           = 0,
 	         bool                                 dontFill            = false,
@@ -46,44 +45,44 @@ class ConfigurationInterface
 	         bool                                 resetConfiguration  = true,
 	         bool                                 looseColumnMatching = false)
 	{
-		if(configuration == 0)
+		if(table == 0)
 		{
-			// try making configuration table plugin, if fails use TableBase
+			// try making table table plugin, if fails use TableBase
 			try
 			{
-				configuration = makeTable(configurationName);
+				table = makeTable(tableName);
 			}
 			catch(...)
 			{
 			}
 
-			if(configuration == 0)
+			if(table == 0)
 			{
-				//__COUT__ << "Using TableBase object with configuration name " <<
-				// configurationName << std::endl;
+				//__COUT__ << "Using TableBase object with table name " <<
+				// tableName << std::endl;
 
-				// try making configuration base..
+				// try making table base..
 				//	if it fails, then probably something wrong with Info file
 				try
 				{
-					configuration = new TableBase(configurationName);
+					table = new TableBase(tableName);
 				}
-				catch(...)  // failure so cleanup any halfway complete configuration work
+				catch(...)  // failure so cleanup any halfway complete table work
 				{
 					__COUT_WARN__ << "Failed to even use TableBase!" << std::endl;
-					if(configuration)
-						delete configuration;
-					configuration = 0;
+					if(table)
+						delete table;
+					table = 0;
 					throw;
 				}
 			}
-			//__COUT__ << "Configuration constructed!" << std::endl;
+			//__COUT__ << "Table constructed!" << std::endl;
 		}
 
 		if(groupKey != 0 && groupName != 0)
 		{  // FIXME -- new TableGroup and TableGroupKey should be used!
 			// version = configurations->getConditionVersion(*groupKey,
-			// configuration->getTableName());
+			// table->getTableName());
 			__SS__
 			    << "FATAL ERROR: new TableGroup and TableGroupKey should be used!"
 			    << std::endl;
@@ -93,24 +92,24 @@ class ConfigurationInterface
 		{
 			// check version choice
 			if(version == TableVersion::INVALID &&
-			   (version = findLatestVersion(configuration)) == TableVersion::INVALID)
+			   (version = findLatestVersion(table)) == TableVersion::INVALID)
 			{
-				__COUT__ << "FATAL ERROR: Can't ask to fill a configuration object with "
+				__COUT__ << "FATAL ERROR: Can't ask to fill a table object with "
 				            "a negative version! "
-				         << configurationName << std::endl;
+				         << tableName << std::endl;
 				__SS__ << "FATAL ERROR: Invalid latest version." << std::endl
 				       << std::endl
 				       << std::endl
 				       << "*******************" << std::endl
 				       << "Suggestion: If you expect a version to exist for this "
-				          "configuration, perhaps this is your first time running with "
+				          "table, perhaps this is your first time running with "
 				          "the artdaq database. (and your old configurations have not "
 				          "been transferred?) "
 				       << std::endl
 				       << "Try running this once:\n\n\totsdaq_database_migrate"
 				       << std::endl
 				       << std::endl
-				       << "This will migrate the old ots file system configuration to "
+				       << "This will migrate the old ots file system table to "
 				          "the artdaq database approach."
 				       << std::endl
 				       << std::endl
@@ -119,13 +118,13 @@ class ConfigurationInterface
 			}
 		}
 
-		if(resetConfiguration)  // reset to empty configuration views and no active view
+		if(resetConfiguration)  // reset to empty table views and no active view
 		{  // EXCEPT, keep temporary views! (call TableBase::reset to really reset all)
-			configuration->deactivate();
-			std::set<TableVersion> versions = configuration->getStoredVersions();
+			table->deactivate();
+			std::set<TableVersion> versions = table->getStoredVersions();
 			for(auto& version : versions)
 				if(!version.isTemporaryVersion())  // if not temporary
-					configuration->eraseView(version);
+					table->eraseView(version);
 		}
 
 		if(dontFill)
@@ -134,15 +133,15 @@ class ConfigurationInterface
 		// Note: assume new view becomes active view
 
 		// take advantage of version possibly being cached
-		if(configuration->isStored(version))
+		if(table->isStored(version))
 		{
 			//__COUT__ << "Using archived version: " << version << std::endl;
 
 			// Make sure this version is not already active
-			if(!configuration->isActive() || version != configuration->getViewVersion())
-				configuration->setActiveView(version);
+			if(!table->isActive() || version != table->getViewVersion())
+				table->setActiveView(version);
 
-			configuration->getViewP()->setLastAccessTime();
+			table->getViewP()->setLastAccessTime();
 			return;
 		}
 
@@ -151,29 +150,29 @@ class ConfigurationInterface
 			if(version.isTemporaryVersion())
 			{
 				__COUT_ERR__ << "FATAL ERROR: Can not use interface to fill a "
-				                "configuration object with a temporary version!"
+				                "table object with a temporary version!"
 				             << std::endl;
 				__SS__ << "FATAL ERROR: Invalid temporary version v" << version
 				       << std::endl;
 				__SS_THROW__;
 			}
 
-			configuration->setupMockupView(version);
-			configuration->setActiveView(version);
+			table->setupMockupView(version);
+			table->setActiveView(version);
 
 			// loose column matching can be used to ignore column names
-			configuration->getViewP()->setLooseColumnMatching(looseColumnMatching);
-			fill(configuration, version);
+			table->getViewP()->setLooseColumnMatching(looseColumnMatching);
+			fill(table, version);
 			if(looseColumnMatching)
-				configuration->getViewP()->setLooseColumnMatching(false);
-			configuration->getViewP()->setLastAccessTime();
+				table->getViewP()->setLooseColumnMatching(false);
+			table->getViewP()->setLastAccessTime();
 
 			/////////////////////
 			// verify the new view
-			if(configuration->getViewP()->getVersion() != version)
+			if(table->getViewP()->getVersion() != version)
 			{
 				__COUT__ << "Version mismatch!! "
-				         << configuration->getViewP()->getVersion() << " vs " << version
+				         << table->getViewP()->getVersion() << " vs " << version
 				         << std::endl;
 				throw;
 			}
@@ -182,20 +181,20 @@ class ConfigurationInterface
 			bool         nameIsMatch = true;
 			unsigned int nameIsMatchIndex, nameIsMatchStorageIndex;
 			for(nameIsMatchIndex = 0, nameIsMatchStorageIndex = 0;
-			    nameIsMatchIndex < configuration->getViewP()->getTableName().size();
+			    nameIsMatchIndex < table->getViewP()->getTableName().size();
 			    ++nameIsMatchIndex)
 			{
-				if(configuration->getMockupViewP()
+				if(table->getMockupViewP()
 				       ->getTableName()[nameIsMatchStorageIndex] == '_')
 					++nameIsMatchStorageIndex;  // skip to next storage character
-				if(configuration->getViewP()->getTableName()[nameIsMatchIndex] == '_')
+				if(table->getViewP()->getTableName()[nameIsMatchIndex] == '_')
 					continue;  // skip to next character
 
 				// match to storage name
 				if(nameIsMatchStorageIndex >=
-				       configuration->getMockupViewP()->getTableName().size() ||
-				   configuration->getViewP()->getTableName()[nameIsMatchIndex] !=
-				       configuration->getMockupViewP()
+				       table->getMockupViewP()->getTableName().size() ||
+				   table->getViewP()->getTableName()[nameIsMatchIndex] !=
+				       table->getMockupViewP()
 				           ->getTableName()[nameIsMatchStorageIndex])
 				{
 					// size mismatch or character mismatch
@@ -207,17 +206,17 @@ class ConfigurationInterface
 
 			if(nameIsMatch)  // if name is considered match by above rule, then force
 			                 // matchup
-				configuration->getViewP()->setTableName(
-				    configuration->getMockupViewP()->getTableName());
-			else  // configuration->getViewP()->getTableName() !=
-			      // configuration->getMockupViewP()->getTableName())
+				table->getViewP()->setTableName(
+				    table->getMockupViewP()->getTableName());
+			else  // table->getViewP()->getTableName() !=
+			      // table->getMockupViewP()->getTableName())
 			{
 				__COUT__ << "View Table Name mismatch!! "
-				         << configuration->getViewP()->getTableName() << " vs "
-				         << configuration->getMockupViewP()->getTableName() << std::endl;
+				         << table->getViewP()->getTableName() << " vs "
+				         << table->getMockupViewP()->getTableName() << std::endl;
 				throw;
 			}
-			configuration->getViewP()
+			table->getViewP()
 			    ->init();  // sanitize for column info (and possibly on dataType soon?)
 
 			// at this point, view has been verified!
@@ -225,8 +224,8 @@ class ConfigurationInterface
 		}
 		catch(...)
 		{
-			__COUT__ << "Error occurred while getting and filling Configuration \""
-			         << configurationName << "\" version:" << version << std::endl;
+			__COUT__ << "Error occurred while getting and filling Table \""
+			         << tableName << "\" version:" << version << std::endl;
 			__COUT__ << "\t-Configuration interface mode=" << theMode_ << std::endl;
 			throw;
 		}
@@ -240,7 +239,7 @@ class ConfigurationInterface
 		__SS__;
 		__THROW__(ss.str() +
 		          "ConfigurationInterface::... Must only call "
-		          "findAllGlobalConfigurations in a mode with this functionality "
+		          "getAllTableNames in a mode with this functionality "
 		          "implemented (e.g. DatabaseConfigurationInterface).");
 	}
 	virtual std::set<TableVersion> getVersions(const TableBase* configuration) const = 0;
@@ -256,7 +255,7 @@ class ConfigurationInterface
 		__SS__;
 		__THROW__(ss.str() +
 		          "ConfigurationInterface::... Must only call "
-		          "findAllGlobalConfigurations in a mode with this functionality "
+		          "getAllTableGroupNames in a mode with this functionality "
 		          "implemented (e.g. DatabaseConfigurationInterface).");
 	}
 	virtual std::set<TableGroupKey> getKeys(const std::string& groupName) const
@@ -264,7 +263,7 @@ class ConfigurationInterface
 		__SS__;
 		__THROW__(ss.str() +
 		          "ConfigurationInterface::... Must only call "
-		          "findAllGlobalConfigurations in a mode with this functionality "
+		          "getKeys in a mode with this functionality "
 		          "implemented (e.g. DatabaseConfigurationInterface).");
 	}
 
@@ -272,26 +271,26 @@ class ConfigurationInterface
 	// are as initially defined for table versions aliases, i.e. not converted according
 	// to the metadata groupAliases!
 	virtual std::map<std::string /*name*/, TableVersion /*version*/>
-	getTableGroupMembers(std::string const& /*globalConfiguration*/,
+	getTableGroupMembers(std::string const& /*groupName*/,
 	                             bool includeMetaDataTable = false) const
 	    throw(std::runtime_error)
 	{
 		__SS__;
 		__THROW__(ss.str() +
 		          "ConfigurationInterface::... Must only call "
-		          "findAllGlobalConfigurations in a mode with this functionality "
+		          "getTableGroupMembers in a mode with this functionality "
 		          "implemented (e.g. DatabaseConfigurationInterface).");
 	}
 
 	virtual void saveTableGroup(
 	    std::map<std::string /*name*/,
-	             TableVersion /*version*/> const& /*configurationMap*/,
-	    std::string const& /*globalConfiguration*/) const throw(std::runtime_error)
+	             TableVersion /*version*/> const& /*tableToVersionMap*/,
+	    std::string const& /*groupName*/) const throw(std::runtime_error)
 	{
 		__SS__;
 		__THROW__(ss.str() +
 		          "ConfigurationInterface::... Must only call "
-		          "findAllGlobalConfigurations in a mode with this functionality "
+		          "saveTableGroup in a mode with this functionality "
 		          "implemented (e.g. DatabaseConfigurationInterface).");
 	};
 

@@ -13,7 +13,7 @@ namespace ots
 {
 class ProgressBar;
 
-#define __GET_CONFIG__(X) getConfiguration<X>(QUOTE(X))
+#define __GET_CONFIG__(X) getTable<X>(QUOTE(X))
 
 class ConfigurationManager
 {
@@ -100,10 +100,10 @@ class ConfigurationManager
 	TableGroupKey loadConfigurationBackbone(void);
 
 	//================
-	// getConfiguration
+	// getTable
 	//	get configuration * with specific configuration type
 	template<class T>
-	const T* getConfiguration(std::string name) const
+	const T* getTable(std::string name) const
 	{
 		return (T*)(getTableByName(name));
 	}
@@ -173,7 +173,7 @@ class ConfigurationManager
 
 	std::map<std::string, std::pair<std::string, TableGroupKey>> lastFailedGroupLoad_;
 
-	std::map<std::string, TableBase*> nameToConfigurationMap_;
+	std::map<std::string, TableBase*> nameToTableMap_;
 
 	TableBase groupMetadataTable_;  // special table - version saved each time a group is
 	                                // created

@@ -16,12 +16,12 @@
 
 using namespace ots;
 
-void FlattenActiveConfigurationGroups(int argc, char* argv[])
+void FlattenActiveTableGroups(int argc, char* argv[])
 {
 	std::cout << "=================================================\n";
 	std::cout << "=================================================\n";
 	std::cout << "=================================================\n";
-	std::cout << __COUT_HDR_FL__ << "\nFlattening Active Configuration Groups!"
+	__COUT__ << "\nFlattening Active Table Groups!"
 	          << std::endl;
 
 	std::cout << "\n\nusage: Two arguments:\n\t pathToSwapIn <flatVersion> <pathToSwapIn "
@@ -67,8 +67,8 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	if(argc >= 3)
 		pathToSwapIn = argv[2];
 
-	std::cout << __COUT_HDR_FL__ << "flatVersion = " << flatVersion << std::endl;
-	std::cout << __COUT_HDR_FL__ << "pathToSwapIn = " << pathToSwapIn << std::endl;
+	__COUT__ << "flatVersion = " << flatVersion << std::endl;
+	__COUT__ << "pathToSwapIn = " << pathToSwapIn << std::endl;
 
 	//==============================================================================
 	// Define environment variables
@@ -103,11 +103,11 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	ConfigurationManagerRW  cfgMgrInst("flatten_admin");
 	ConfigurationManagerRW* cfgMgr = &cfgMgrInst;
 
-	std::cout << __COUT_HDR_FL__ << "\n\n\nLoading activeGroupsMap..." << std::endl;
+	__COUT__ << "\n\n\nLoading activeGroupsMap..." << std::endl;
 
 	// save group members to reform groups
 	std::map<std::string, std::pair<std::string, TableGroupKey> > activeGroupsMap =
-	    cfgMgr->getActiveConfigurationGroups();
+	    cfgMgr->getActiveTableGroups();
 
 	std::map<std::string, std::map<std::string, TableVersion> > activeGroupMembersMap;
 	std::map<std::string, std::map<std::string /*name*/, std::string /*alias*/> >
@@ -122,18 +122,18 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	{
 		if(activeGroupPair.second.second.isInvalid())
 		{
-			std::cout << __COUT_HDR_FL__ << "Skipping invalid " << activeGroupPair.first
+			__COUT__ << "Skipping invalid " << activeGroupPair.first
 			          << std::endl;
 			continue;
 		}
 
-		std::cout << __COUT_HDR_FL__ << "Loading members for " << activeGroupPair.first
+		__COUT__ << "Loading members for " << activeGroupPair.first
 		          << "\t" << activeGroupPair.second.first << "("
 		          << activeGroupPair.second.second << ")" << std::endl;
 
 		//		//old way before metadata
 		//		activeGroupMembersMap[activeGroupPair.second.first] =
-		//				cfgMgr->getConfigurationInterface()->getConfigurationGroupMembers(
+		//				cfgMgr->getConfigurationInterface()->getTableGroupMembers(
 		//						TableGroupKey::getFullGroupString(
 		//								activeGroupPair.second.first,activeGroupPair.second.second));
 
@@ -192,9 +192,9 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 		currentDir = currentDir.substr(0, currentDir.length() - 1);
 	std::string moveToDir = currentDir + "_" + std::to_string(time(0));
 
-	std::cout << __COUT_HDR_FL__ << "Moving current directory: \t" << currentDir
+	__COUT__ << "Moving current directory: \t" << currentDir
 	          << std::endl;
-	std::cout << __COUT_HDR_FL__ << "\t... to: \t\t" << moveToDir << std::endl;
+	__COUT__ << "\t... to: \t\t" << moveToDir << std::endl;
 
 	if(argc < 2)
 	{
@@ -207,7 +207,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	rename(currentDir.c_str(), moveToDir.c_str());
 	FILE* fp = fopen((moveToDir + "/README_otsdaq_flatten.txt").c_str(), "a");
 	if(!fp)
-		std::cout << __COUT_HDR_FL__ << "\tError opening README file!" << std::endl;
+		__COUT__ << "\tError opening README file!" << std::endl;
 	else
 	{
 		time_t     rawtime;
@@ -234,20 +234,20 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 		DIR* dp;
 		if((dp = opendir(pathToSwapIn.c_str())) == 0)
 		{
-			std::cout << __COUT_HDR_FL__ << "ERROR:(" << errno
+			__COUT__ << "ERROR:(" << errno
 			          << ").  Can't open directory: " << pathToSwapIn << std::endl;
 			exit(0);
 		}
 		closedir(dp);
 
-		std::cout << __COUT_HDR_FL__ << "Swapping in directory: \t" << pathToSwapIn
+		__COUT__ << "Swapping in directory: \t" << pathToSwapIn
 		          << std::endl;
-		std::cout << __COUT_HDR_FL__ << "\t.. to: \t\t" << currentDir << std::endl;
+		__COUT__ << "\t.. to: \t\t" << currentDir << std::endl;
 
 		rename(pathToSwapIn.c_str(), currentDir.c_str());
 		FILE* fp = fopen((currentDir + "/README_otsdaq_flatten.txt").c_str(), "a");
 		if(!fp)
-			std::cout << __COUT_HDR_FL__ << "\tError opening README file!" << std::endl;
+			__COUT__ << "\tError opening README file!" << std::endl;
 		else
 		{
 			time_t     rawtime;
@@ -279,7 +279,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 
 	std::map<std::string, TableVersion> activeMap = cfgMgr->getActiveVersions();
 
-	// modify Group Aliases Configuration and Version Aliases Configuration to point
+	// modify Group Aliases Table and Version Aliases Table to point
 	//	at DEFAULT and flatVersion respectively
 
 	const std::string groupAliasesName = ConfigurationManager::GROUP_ALIASES_TABLE_NAME;
@@ -290,15 +290,15 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	if(TableVersion(flatVersion).isInvalid() ||
 	   TableVersion(flatVersion).isTemporaryVersion())
 	{
-		std::cout << __COUT_HDR_FL__ << "\n\nflatVersion " << TableVersion(flatVersion)
+		__COUT__ << "\n\nflatVersion " << TableVersion(flatVersion)
 		          << " is an invalid or temporary version. Skipping to end!" << std::endl;
 		goto CLEAN_UP;
 	}
 
-	// modify Group Aliases Configuration
+	// modify Group Aliases Table
 	if(activeMap.find(groupAliasesName) != activeMap.end())
 	{
-		std::cout << __COUT_HDR_FL__ << "\n\nModifying " << groupAliasesName << std::endl;
+		__COUT__ << "\n\nModifying " << groupAliasesName << std::endl;
 		config  = cfgMgr->getTableByName(groupAliasesName);
 		cfgView = config->getViewP();
 
@@ -316,7 +316,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 				            activeGroupPair.second.second.toString())
 				{
 					// found a matching group/key pair
-					std::cout << __COUT_HDR_FL__ << "Changing row " << row << " for "
+					__COUT__ << "Changing row " << row << " for "
 					          << cfgView->getDataView()[row][col1]
 					          << " key=" << cfgView->getDataView()[row][col2]
 					          << " to DEFAULT="
@@ -330,10 +330,10 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 				}
 	}
 
-	// modify Version Aliases Configuration
+	// modify Version Aliases Table
 	if(activeMap.find(versionAliasesName) != activeMap.end())
 	{
-		std::cout << __COUT_HDR_FL__ << "\n\nModifying " << versionAliasesName
+		__COUT__ << "\n\nModifying " << versionAliasesName
 		          << std::endl;
 		config            = cfgMgr->getTableByName(versionAliasesName);
 		cfgView           = config->getViewP();
@@ -347,7 +347,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 				   cfgView->getDataView()[row][col2] == activePair.second.toString())
 				{
 					// found a matching group/key pair
-					std::cout << __COUT_HDR_FL__ << "Changing row " << row << " for "
+					__COUT__ << "Changing row " << row << " for "
 					          << cfgView->getDataView()[row][col1]
 					          << " version=" << cfgView->getDataView()[row][col2]
 					          << " to flatVersion=" << TableVersion(flatVersion)
@@ -357,11 +357,11 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 				}
 	}
 
-	std::cout << __COUT_HDR_FL__ << "\n\nChanging versions... " << std::endl;
+	__COUT__ << "\n\nChanging versions... " << std::endl;
 
 	for(auto& activePair : activeMap)
 	{
-		std::cout << __COUT_HDR_FL__ << activePair.first << ":v" << activePair.second
+		__COUT__ << activePair.first << ":v" << activePair.second
 		          << std::endl;
 		// change the version of the active view to flatVersion and save it
 		config  = cfgMgr->getTableByName(activePair.first);
@@ -375,19 +375,19 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 	// Note: do not try this at home kids.
 	for(auto& activeGroupMembersPair : activeGroupMembersMap)
 	{
-		std::cout << __COUT_HDR_FL__ << "Group " << activeGroupMembersPair.first
+		__COUT__ << "Group " << activeGroupMembersPair.first
 		          << std::endl;
 
 		for(auto& groupMemberPair : activeGroupMembersPair.second)
 		{
-			std::cout << __COUT_HDR_FL__ << "\t from...\t" << groupMemberPair.first
+			__COUT__ << "\t from...\t" << groupMemberPair.first
 			          << ":v" << groupMemberPair.second << std::endl;
 			groupMemberPair.second = flatVersion;
 		}
 
 		for(auto& groupMemberPair : activeGroupMembersPair.second)
 		{
-			std::cout << __COUT_HDR_FL__ << "\t to...\t" << groupMemberPair.first << ":v"
+			__COUT__ << "\t to...\t" << groupMemberPair.first << ":v"
 			          << groupMemberPair.second << std::endl;
 		}
 
@@ -437,7 +437,7 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 		    groupMetadataTable->getViewVersion();
 
 		// memberMap should now consist of members with new flat version, so save group
-		theInterface_->saveConfigurationGroup(
+		theInterface_->saveTableGroup(
 		    activeGroupMembersPair.second,
 		    TableGroupKey::getFullGroupString(
 		        activeGroupMembersPair.first,
@@ -446,14 +446,14 @@ void FlattenActiveConfigurationGroups(int argc, char* argv[])
 
 CLEAN_UP:
 	//==============================================================================
-	std::cout << __COUT_HDR_FL__
-	          << "\n\nEnd of Flattening Active Configuration Groups!\n\n\n"
+	__COUT__
+	          << "\n\nEnd of Flattening Active Table Groups!\n\n\n"
 	          << std::endl;
 
-	std::cout << __COUT_HDR_FL__
+	__COUT__
 	          << "Run the following to return to your previous database structure:"
 	          << std::endl;
-	std::cout << __COUT_HDR_FL__ << "\t otsdaq_flatten_active_to_version -1 " << moveToDir
+	__COUT__ << "\t otsdaq_flatten_active_to_version -1 " << moveToDir
 	          << "\n\n"
 	          << std::endl;
 
@@ -462,7 +462,7 @@ CLEAN_UP:
 
 int main(int argc, char* argv[])
 {
-	FlattenActiveConfigurationGroups(argc, argv);
+	FlattenActiveTableGroups(argc, argv);
 	return 0;
 }
 // BOOST_AUTO_TEST_SUITE_END()

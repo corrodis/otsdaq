@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(store_configuration)
 
 	BOOST_CHECK_EQUAL(cfg1->getViewP()->getVersion(), fixture.version());
 
-	//  std::cout << "Configuration Version " <<
+	//  std::cout << "Table Version " <<
 	//  std::to_string(cfg1->getViewP()->getVersion() ) << "\n";
 
 	ifc.saveActiveVersion(cfg1.get());
@@ -149,13 +149,13 @@ BOOST_AUTO_TEST_CASE(store_global_configuration)
 	map[cfg1->getTableName()] = cfg1->getView().getVersion();
 	map[cfg2->getTableName()] = cfg2->getView().getVersion();
 
-	auto configName = std::string{"config"} + std::to_string(fixture.version());
+	auto tableName = std::string{"config"} + std::to_string(fixture.version());
 
-	auto list = ifc.getAllConfigurationGroupNames();
+	auto list = ifc.getAllTableGroupNames();
 
 	fixture.updateConfigCount(list.size());
 
-	ifc.saveConfigurationGroup(map, configName);
+	ifc.saveTableGroup(map, tableName);
 
 	return;
 }
@@ -164,9 +164,9 @@ BOOST_AUTO_TEST_CASE(load_global_configuration)
 {
 	auto ifc = DatabaseConfigurationInterface();
 
-	auto configName = std::string{"config"} + std::to_string(fixture.version());
+	auto tableName = std::string{"config"} + std::to_string(fixture.version());
 
-	auto map = ifc.getConfigurationGroupMembers(configName);
+	auto map = ifc.getTableGroupMembers(tableName);
 
 	BOOST_CHECK_EQUAL(map.size(), 2);
 
@@ -183,13 +183,13 @@ BOOST_AUTO_TEST_CASE(find_all_global_configurations)
 {
 	auto ifc = DatabaseConfigurationInterface();
 
-	auto list = ifc.getAllConfigurationGroupNames();
+	auto list = ifc.getAllTableGroupNames();
 
 	BOOST_CHECK_EQUAL(list.size(), fixture.oldConfigCount() + 1);
 
-	auto configName = std::string{"config"} + std::to_string(fixture.version());
+	auto tableName = std::string{"config"} + std::to_string(fixture.version());
 
-	auto found = (std::find(list.begin(), list.end(), configName) != list.end());
+	auto found = (std::find(list.begin(), list.end(), tableName) != list.end());
 
 	BOOST_CHECK_EQUAL(found, true);
 

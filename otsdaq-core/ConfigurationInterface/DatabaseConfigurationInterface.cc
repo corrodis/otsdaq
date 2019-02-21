@@ -210,7 +210,7 @@ catch(...)
 //==============================================================================
 // find all configuration groups in database
 std::set<std::string /*name*/>
-DatabaseConfigurationInterface::getAllConfigurationGroupNames(
+DatabaseConfigurationInterface::getAllTableGroupNames(
     const std::string& filterString) const throw(std::runtime_error) try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
@@ -260,7 +260,7 @@ std::set<TableGroupKey /*key*/> DatabaseConfigurationInterface::getKeys(
     const std::string& groupName) const
 {
 	std::set<TableGroupKey>        retSet;
-	std::set<std::string /*name*/> names = getAllConfigurationGroupNames();
+	std::set<std::string /*name*/> names = getAllTableGroupNames();
 	for(auto& n : names)
 		if(n.find(groupName) == 0)
 			retSet.insert(TableGroupKey(n));
@@ -269,12 +269,12 @@ std::set<TableGroupKey /*key*/> DatabaseConfigurationInterface::getKeys(
 
 //==============================================================================
 // return the contents of a configuration group
-config_version_map_t DatabaseConfigurationInterface::getConfigurationGroupMembers(
-    std::string const& configurationGroup, bool includeMetaDataTable) const
+config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(
+    std::string const& tableGroup, bool includeMetaDataTable) const
     throw(std::runtime_error) try
 {
 	auto ifc    = db::ConfigurationInterface{default_dbprovider};
-	auto result = ifc.loadGlobalConfiguration(configurationGroup);
+	auto result = ifc.loadGlobalConfiguration(tableGroup);
 
 	//	for(auto &item:result)
 	//		__COUT__ << "====================>" << item.configuration << ": " <<
@@ -298,26 +298,26 @@ config_version_map_t DatabaseConfigurationInterface::getConfigurationGroupMember
 	};
 
 	return to_map(result, includeMetaDataTable);
-}
+} //end getTableGroupMembers()
 catch(std::exception const& e)
 {
-	__SS__ << "DBI Exception getting Configuration Group Members for '"
-	       << configurationGroup << "':\n\n"
+	__SS__ << "DBI Exception getting Group's member tables for '"
+	       << tableGroup << "':\n\n"
 	       << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 catch(...)
 {
-	__SS__ << "DBI Unknown exception getting Configuration Group Members for '"
-	       << configurationGroup << ".'\n";
+	__SS__ << "DBI Unknown exception getting Group's member tables for '"
+	       << tableGroup << ".'\n";
 	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 
 //==============================================================================
 // create a new configuration group from the contents map
-void DatabaseConfigurationInterface::saveConfigurationGroup(
+void DatabaseConfigurationInterface::saveTableGroup(
     config_version_map_t const& configurationMap,
     std::string const&          configurationGroup) const throw(std::runtime_error) try
 {
@@ -344,7 +344,7 @@ void DatabaseConfigurationInterface::saveConfigurationGroup(
 		return;
 
 	__THROW__(result.second);
-}  // end saveConfigurationGroup()
+}  // end saveTableGroup()
 catch(std::exception const& e)
 {
 	__SS__ << "DBI Exception:" << e.what() << "\n";

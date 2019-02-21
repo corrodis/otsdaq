@@ -1373,7 +1373,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	try
 	{
 		theConfigurationTableGroup_ = CorePropertySupervisorBase::theConfigurationManager_
-		                             ->getConfigurationGroupFromAlias(systemAlias);
+		                             ->getTableGroupFromAlias(systemAlias);
 	}
 	catch(...)
 	{
@@ -1394,7 +1394,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	RunControlStateMachine::theProgressBar_.step();
 
-	__COUT__ << "Configuration group name: " << theConfigurationTableGroup_.first
+	__COUT__ << "Configuration table group name: " << theConfigurationTableGroup_.first
 	         << " key: " << theConfigurationTableGroup_.second << __E__;
 
 	// make logbook entry
@@ -1416,7 +1416,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 		// When configured, set the translated System Alias to be persistently active
 		ConfigurationManagerRW tmpCfgMgr("TheSupervisor");
-		tmpCfgMgr.activateConfigurationGroup(theConfigurationTableGroup_.first,
+		tmpCfgMgr.activateTableGroup(theConfigurationTableGroup_.first,
 		                                     theConfigurationTableGroup_.second);
 	}
 	catch(...)

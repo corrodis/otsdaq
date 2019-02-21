@@ -153,7 +153,7 @@ void TableView::init(void)
 
 		if(colNameSet.size() != columnsInfo_.size())
 		{
-			__SS__ << "Configuration Error:\t"
+			__SS__ << "Table Error:\t"
 			       << " Columns names must be unique! There are " << columnsInfo_.size()
 			       << " columns and the unique name count is " << colNameSet.size()
 			       << __E__;
@@ -182,7 +182,7 @@ void TableView::init(void)
 		{
 			if(columnsInfo_[colPos].getName() != "CommentDescription")
 			{
-				__SS__ << "Configuration Error:\t" << TableViewColumnInfo::TYPE_COMMENT
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT
 				       << " data type column must have name="
 				       << "CommentDescription" << __E__;
 				__SS_THROW__;
@@ -191,7 +191,7 @@ void TableView::init(void)
 			if(findColByType(TableViewColumnInfo::TYPE_COMMENT, colPos + 1) !=
 			   INVALID)  // found two!
 			{
-				__SS__ << "Configuration Error:\t" << TableViewColumnInfo::TYPE_COMMENT
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT
 				       << " data type in column " << columnsInfo_[colPos].getName()
 				       << " is repeated. This is not allowed." << __E__;
 				__SS_THROW__;
@@ -199,7 +199,7 @@ void TableView::init(void)
 
 			if(colPos != getNumberOfColumns() - 3)
 			{
-				__SS__ << "Configuration Error:\t" << TableViewColumnInfo::TYPE_COMMENT
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT
 				       << " data type column must be 3rd to last (in column "
 				       << getNumberOfColumns() - 3 << ")." << __E__;
 				__SS_THROW__;
@@ -207,7 +207,7 @@ void TableView::init(void)
 		}
 		else
 		{
-			__SS__ << "Configuration Error:\t" << TableViewColumnInfo::TYPE_COMMENT
+			__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT
 			       << " data type column "
 			       << " is missing. This is not allowed." << __E__;
 			__SS_THROW__;
@@ -219,7 +219,7 @@ void TableView::init(void)
 			if(findColByType(TableViewColumnInfo::TYPE_AUTHOR, colPos + 1) !=
 			   INVALID)  // found two!
 			{
-				__SS__ << "Configuration Error:\t" << TableViewColumnInfo::TYPE_AUTHOR
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_AUTHOR
 				       << " data type in column " << columnsInfo_[colPos].getName()
 				       << " is repeated. This is not allowed." << __E__;
 				__SS_THROW__;
@@ -227,7 +227,7 @@ void TableView::init(void)
 
 			if(colPos != getNumberOfColumns() - 2)
 			{
-				__SS__ << "Configuration Error:\t" << TableViewColumnInfo::TYPE_AUTHOR
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_AUTHOR
 				       << " data type column must be 2nd to last (in column "
 				       << getNumberOfColumns() - 2 << ")." << __E__;
 				__SS_THROW__;
@@ -235,7 +235,7 @@ void TableView::init(void)
 		}
 		else
 		{
-			__SS__ << "Configuration Error:\t" << TableViewColumnInfo::TYPE_AUTHOR
+			__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_AUTHOR
 			       << " data type column "
 			       << " is missing. This is not allowed." << __E__;
 			__SS_THROW__;
@@ -247,7 +247,7 @@ void TableView::init(void)
 			if(findColByType(TableViewColumnInfo::TYPE_TIMESTAMP, colPos + 1) !=
 			   INVALID)  // found two!
 			{
-				__SS__ << "Configuration Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP
 				       << " data type in column " << columnsInfo_[colPos].getName()
 				       << " is repeated. This is not allowed." << __E__;
 				__SS_THROW__;
@@ -255,7 +255,7 @@ void TableView::init(void)
 
 			if(colPos != getNumberOfColumns() - 1)
 			{
-				__SS__ << "Configuration Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP
 				       << " data type column must be last (in column "
 				       << getNumberOfColumns() - 1 << ")." << __E__;
 				__COUT_ERR__ << "\n" << ss.str();
@@ -264,7 +264,7 @@ void TableView::init(void)
 		}
 		else
 		{
-			__SS__ << "Configuration Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP
+			__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP
 			       << " data type column "
 			       << " is missing. This is not allowed." << __E__;
 			__SS_THROW__;
@@ -450,7 +450,7 @@ void TableView::init(void)
 					}
 					if(!found)
 					{
-						__SS__ << "Configuration Error:\t'" << theDataView_[row][col]
+						__SS__ << "Table Error:\t'" << theDataView_[row][col]
 						       << "' in column " << columnsInfo_[col].getName()
 						       << " is not a valid Fixed Choice option. "
 						       << "Possible values are as follows: ";
@@ -506,7 +506,7 @@ void TableView::init(void)
 					}
 					if(!found)
 					{
-						__SS__ << "Configuration Error:\t'" << theDataView_[row][col]
+						__SS__ << "Table Error:\t'" << theDataView_[row][col]
 						       << "' in column " << columnsInfo_[col].getName()
 						       << " is not a valid Fixed Choice option. "
 						       << "Possible values are as follows: ";
@@ -540,7 +540,7 @@ void TableView::init(void)
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_OFF;
 					else
 					{
-						__SS__ << "Configuration Error:\t" << theDataView_[row][col]
+						__SS__ << "Table Error:\t" << theDataView_[row][col]
 						       << " in column " << columnsInfo_[col].getName()
 						       << " is not a valid Type (On/Off) std::string. Possible "
 						          "values are 1, on, On, ON, 0, off, Off, OFF."
@@ -563,7 +563,7 @@ void TableView::init(void)
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_FALSE;
 					else
 					{
-						__SS__ << "Configuration Error:\t" << theDataView_[row][col]
+						__SS__ << "Table Error:\t" << theDataView_[row][col]
 						       << " in column " << columnsInfo_[col].getName()
 						       << " is not a valid Type (True/False) std::string. "
 						          "Possible values are 1, true, True, TRUE, 0, false, "
@@ -585,7 +585,7 @@ void TableView::init(void)
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_NO;
 					else
 					{
-						__SS__ << "Configuration Error:\t" << theDataView_[row][col]
+						__SS__ << "Table Error:\t" << theDataView_[row][col]
 						       << " in column " << columnsInfo_[col].getName()
 						       << " is not a valid Type (Yes/No) std::string. Possible "
 						          "values are 1, yes, Yes, YES, 0, no, No, NO."
@@ -623,7 +623,7 @@ void TableView::init(void)
 				if(columnsInfo_[col].getDataType() !=
 				   TableViewColumnInfo::DATATYPE_STRING)
 				{
-					__SS__ << "Configuration Error:\t"
+					__SS__ << "Table Error:\t"
 					       << "Column " << col << " with name "
 					       << columnsInfo_[col].getName()
 					       << " is a Child Link column and has an illegal data type of '"

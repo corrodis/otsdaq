@@ -27,12 +27,12 @@ void readxml_writedb_configurations()
 	// artdaq::database::jsonutils::debug::enableJSONDocument();
 
 	std::string dbDir = std::string(getenv("ARTDAQ_DATABASE_DATADIR"));
-	std::cout << __COUT_HDR_FL__
+	__COUT__
 	          << "Destination DB Directory ARTDAQ_DATABASE_DATADIR: " << dbDir
 	          << std::endl;
 
 	if(getenv("USER_DATA") == NULL)
-		std::cout << __COUT_HDR_FL__ << "Missing env variable: USER_DATA. It must be set!"
+		__COUT__ << "Missing env variable: USER_DATA. It must be set!"
 		          << std::endl;
 
 	std::vector<std::string> configTables;  // list of tables to migrate
@@ -52,14 +52,14 @@ void readxml_writedb_configurations()
 
 	// add configurations to vector list from directory
 	{
-		std::cout << __COUT_HDR_FL__ << "ConfigurationDir: " << configDir << std::endl;
+		__COUT__ << "ConfigurationDir: " << configDir << std::endl;
 		DIR* dp;
 
 		struct dirent* dirp;
 
 		if((dp = opendir(configDir.c_str())) == 0)
 		{
-			std::cout << __COUT_HDR_FL__ << "ERROR:(" << errno
+			__COUT__ << "ERROR:(" << errno
 			          << ").  Can't open directory: " << configDir << std::endl;
 			exit(0);
 		}
@@ -68,7 +68,7 @@ void readxml_writedb_configurations()
 		while((dirp = readdir(dp)) != 0)
 			if(dirp->d_type == isDir && dirp->d_name[0] != '.')
 			{
-				std::cout << __COUT_HDR_FL__ << dirp->d_name << std::endl;
+				__COUT__ << dirp->d_name << std::endl;
 				configTables.push_back(dirp->d_name);
 			}
 
@@ -83,9 +83,9 @@ void readxml_writedb_configurations()
 	for(unsigned int i = 0; i < configTables.size(); ++i)
 	{
 		TableBase* base = 0;
-		std::cout << __COUT_HDR_FL__ << std::endl;
-		std::cout << __COUT_HDR_FL__ << std::endl;
-		std::cout << __COUT_HDR_FL__ << (i + 1) << " of " << configTables.size() << ": "
+		__COUT__ << std::endl;
+		__COUT__ << std::endl;
+		__COUT__ << (i + 1) << " of " << configTables.size() << ": "
 		          << configTables[i] << std::endl;
 
 		try
@@ -99,8 +99,8 @@ void readxml_writedb_configurations()
 		}
 		catch(cet::exception e)
 		{
-			std::cout << __COUT_HDR_FL__ << std::endl << e.what() << std::endl;
-			std::cout << __COUT_HDR_FL__
+			__COUT__ << std::endl << e.what() << std::endl;
+			__COUT__
 			          << "Caught exception, so skip. (likely not a defined configuration "
 			             "class) "
 			          << std::endl;
@@ -115,7 +115,7 @@ void readxml_writedb_configurations()
 
 		for(auto currVersion : version)
 		{
-			std::cout << __COUT_HDR_FL__ << "loading " << configTables[i] << " version "
+			__COUT__ << "loading " << configTables[i] << " version "
 			          << currVersion << std::endl;
 
 			try
@@ -131,8 +131,8 @@ void readxml_writedb_configurations()
 			}
 			catch(std::runtime_error e)
 			{
-				std::cout << __COUT_HDR_FL__ << std::endl << e.what() << std::endl;
-				std::cout << __COUT_HDR_FL__
+				__COUT__ << std::endl << e.what() << std::endl;
+				__COUT__
 				          << "Caught exception for version, so skip. (likely invalid "
 				             "column names) "
 				          << std::endl;
@@ -144,12 +144,12 @@ void readxml_writedb_configurations()
 			}
 			++versionsCount;
 
-			std::cout << __COUT_HDR_FL__ << "loaded " << configTables[i] << std::endl;
+			__COUT__ << "loaded " << configTables[i] << std::endl;
 
 			// save the active version
-			std::cout << __COUT_HDR_FL__ << "Current version: " << base->getViewVersion()
+			__COUT__ << "Current version: " << base->getViewVersion()
 			          << std::endl;
-			std::cout << __COUT_HDR_FL__
+			__COUT__
 			          << "Current version: " << base->getView().getVersion() << std::endl;
 
 			//
@@ -176,7 +176,7 @@ void readxml_writedb_configurations()
 			//
 			// =========== END Save as Current Version Number ========== //
 
-			std::cout << __COUT_HDR_FL__ << "Version saved " << std::endl;
+			__COUT__ << "Version saved " << std::endl;
 
 			//*****************************************
 			//*****************************************
@@ -195,26 +195,26 @@ void readxml_writedb_configurations()
 		              // debugging)
 	}
 
-	std::cout << __COUT_HDR_FL__ << "End of migrating Configuration!" << std::endl;
+	__COUT__ << "End of migrating Configuration!" << std::endl;
 
-	std::cout << __COUT_HDR_FL__ << "\n\nList of failed configs:versions (size="
+	__COUT__ << "\n\nList of failed configs:versions (size="
 	          << failedConfigVersions.size() << std::endl;
 	for(auto& f : failedConfigVersions)
-		std::cout << __COUT_HDR_FL__ << f << std::endl;
+		__COUT__ << f << std::endl;
 
-	std::cout << __COUT_HDR_FL__ << "\n\nEND List of failed configs:versions"
-	          << std::endl;
-
-	std::cout << __COUT_HDR_FL__ << "\n\n\tStats:" << std::endl;
-	std::cout << __COUT_HDR_FL__ << "\t\tconfigurationsCount: " << configurationsCount
-	          << std::endl;
-	std::cout << __COUT_HDR_FL__ << "\t\tskippedConfigurations: " << skippedConfigurations
-	          << std::endl;
-	std::cout << __COUT_HDR_FL__ << "\t\tversionsCount: " << versionsCount << std::endl;
-	std::cout << __COUT_HDR_FL__ << "\t\tskippedVersions: " << skippedVersions
+	__COUT__ << "\n\nEND List of failed configs:versions"
 	          << std::endl;
 
-	std::cout << __COUT_HDR_FL__ << "\nEnd of migrating Configuration!" << std::endl;
+	__COUT__ << "\n\n\tStats:" << std::endl;
+	__COUT__ << "\t\tconfigurationsCount: " << configurationsCount
+	          << std::endl;
+	__COUT__ << "\t\tskippedConfigurations: " << skippedConfigurations
+	          << std::endl;
+	__COUT__ << "\t\tversionsCount: " << versionsCount << std::endl;
+	__COUT__ << "\t\tskippedVersions: " << skippedVersions
+	          << std::endl;
+
+	__COUT__ << "\nEnd of migrating Configuration!" << std::endl;
 
 	return;
 }

@@ -1,14 +1,7 @@
 #ifndef _ots_ConfigurationManagerRW_h_
 #define _ots_ConfigurationManagerRW_h_
 
-//#include <string>
-//#include <map>
-//#include <set>
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-
-// Configuration Types
-
-//#include <memory>
 
 namespace ots
 {

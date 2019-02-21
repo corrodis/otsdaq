@@ -45,15 +45,15 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 
 	// add configurations to vector list from directory
 	{
-		std::cout << __COUT_HDR_FL__ << "ConfigurationDir: " << configDir << std::endl;
+		__COUT__ << "ConfigurationDir: " << configDir << __E__;
 		DIR* dp;
 
 		struct dirent* dirp;
 
 		if((dp = opendir(configDir.c_str())) == 0)
 		{
-			std::cout << __COUT_HDR_FL__ << "ERROR:(" << errno
-			          << ").  Can't open directory: " << configDir << std::endl;
+			__COUT__ << "ERROR:(" << errno
+			          << ").  Can't open directory: " << configDir << __E__;
 			exit(0);
 		}
 
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 		while((dirp = readdir(dp)) != 0)
 			if(dirp->d_type == isDir && dirp->d_name[0] != '.')
 			{
-				std::cout << __COUT_HDR_FL__ << dirp->d_name << std::endl;
+				__COUT__ << dirp->d_name << __E__;
 				configTables.push_back(dirp->d_name);
 			}
 
@@ -74,10 +74,10 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 	{
 		theInterface_   = ConfigurationInterface::getInstance(true);
 		TableBase* base = 0;
-		std::cout << __COUT_HDR_FL__ << std::endl;
-		std::cout << __COUT_HDR_FL__ << std::endl;
-		std::cout << __COUT_HDR_FL__ << (i + 1) << " of " << configTables.size() << ": "
-		          << configTables[i] << std::endl;
+		__COUT__ << __E__;
+		__COUT__ << __E__;
+		__COUT__ << (i + 1) << " of " << configTables.size() << ": "
+		          << configTables[i] << __E__;
 
 		theInterface_->get(
 		    base,
@@ -87,13 +87,13 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 		    false,
 		    TableVersion(TableVersion::DEFAULT));  // load version 0 for all
 
-		std::cout << __COUT_HDR_FL__ << "loaded " << configTables[i] << std::endl;
+		__COUT__ << "loaded " << configTables[i] << __E__;
 
 		// if(configTables[i]  != "ARTDAQAggregatorConfiguration") continue;
 
 		// save the active version
-		std::cout << __COUT_HDR_FL__ << "Current version: " << base->getViewVersion()
-		          << std::endl;
+		__COUT__ << "Current version: " << base->getViewVersion()
+		          << __E__;
 
 		//
 		//		**** switch to db style interface?!!?!? ****   //
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 		// break;
 	}
 
-	std::cout << __COUT_HDR_FL__ << "end of debugging Configuration!" << std::endl;
+	__COUT__ << "end of debugging Configuration!" << __E__;
 	return;
 }
 
@@ -135,15 +135,15 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 
 	// add configurations to vector list from directory
 	{
-		std::cout << __COUT_HDR_FL__ << "ConfigurationDir: " << configDir << std::endl;
+		__COUT__ << "ConfigurationDir: " << configDir << __E__;
 		DIR* dp;
 
 		struct dirent* dirp;
 
 		if((dp = opendir(configDir.c_str())) == 0)
 		{
-			std::cout << __COUT_HDR_FL__ << "ERROR:(" << errno
-			          << ").  Can't open directory: " << configDir << std::endl;
+			__COUT__ << "ERROR:(" << errno
+			          << ").  Can't open directory: " << configDir << __E__;
 			exit(0);
 		}
 
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 		while((dirp = readdir(dp)) != 0)
 			if(dirp->d_type == isDir && dirp->d_name[0] != '.')
 			{
-				std::cout << __COUT_HDR_FL__ << dirp->d_name << std::endl;
+				__COUT__ << dirp->d_name << __E__;
 				configTables.push_back(dirp->d_name);
 			}
 
@@ -164,10 +164,10 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 	{
 		theInterface_   = ConfigurationInterface::getInstance(false);
 		TableBase* base = 0;
-		std::cout << __COUT_HDR_FL__ << std::endl;
-		std::cout << __COUT_HDR_FL__ << std::endl;
-		std::cout << __COUT_HDR_FL__ << (i + 1) << " of " << configTables.size() << ": "
-		          << configTables[i] << std::endl;
+		__COUT__ << __E__;
+		__COUT__ << __E__;
+		__COUT__ << (i + 1) << " of " << configTables.size() << ": "
+		          << configTables[i] << __E__;
 
 		theInterface_->get(
 		    base,
@@ -177,11 +177,11 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 		    false,
 		    TableVersion(TableVersion::DEFAULT));  // load version 0 for all
 
-		std::cout << __COUT_HDR_FL__ << "loaded " << configTables[i] << std::endl;
+		__COUT__ << "loaded " << configTables[i] << __E__;
 
 		// save the active version
-		std::cout << __COUT_HDR_FL__ << "Current version: " << base->getViewVersion()
-		          << std::endl;
+		__COUT__ << "Current version: " << base->getViewVersion()
+		          << __E__;
 
 		//
 		//		**** switch to db style interface?!!?!? ****   //
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 		              // break;
 	}
 
-	std::cout << __COUT_HDR_FL__ << "end of debugging Configuration!" << std::endl;
+	__COUT__ << "end of debugging Configuration!" << __E__;
 	return;
 }
 

@@ -119,7 +119,7 @@ void DQMHistosOuterTracker::book()
 		{
 			const TableBase* interfaceConfiguration =
 			    theConfigurationManager_->getTableByName(
-			        feConfiguration->getFEInterfaceType(itInterfaces) + "Configuration");
+			        feConfiguration->getFEInterfaceType(itInterfaces) + "Table");
 			auto feinterfaceConfiguration =
 			    dynamic_cast<const FEInterfaceTableBase*>(interfaceConfiguration);
 			if(feinterfaceConfiguration)

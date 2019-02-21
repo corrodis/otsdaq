@@ -149,7 +149,7 @@ void FixNewTableFields(int argc, char* argv[])
 
 	// add active groups to set
 	std::map<std::string, std::pair<std::string, TableGroupKey>> activeGroupsMap =
-	    cfgMgr->getActiveConfigurationGroups();
+	    cfgMgr->getActiveTableGroups();
 
 	for(const auto& activeGroup : activeGroupsMap)
 	{
@@ -487,7 +487,7 @@ void FixNewTableFields(int argc, char* argv[])
 			//					groupMetadataTable->getViewVersion();
 			//
 			//			//memberMap should now consist of members with new flat version,
-			// so  save group 			theInterface_->saveConfigurationGroup(memberMap,
+			// so  save group 			theInterface_->saveTableGroup(memberMap,
 			//					TableGroupKey::getFullGroupString(
 			//							groupPair.first.first,
 			//							TableGroupKey(flatVersion)));
@@ -628,7 +628,7 @@ void FixNewTableFields(int argc, char* argv[])
 		                               &accumulateErrors,
 		                               &groupComment);
 
-		// modify Group Aliases Configuration and Version Aliases Configuration to point
+		// modify Group Aliases Table and Version Aliases Table to point
 		//	at DEFAULT and flatVersion respectively
 
 		const std::string groupAliasesName =
@@ -638,7 +638,7 @@ void FixNewTableFields(int argc, char* argv[])
 
 		std::map<std::string, TableVersion> activeMap = cfgMgr->getActiveVersions();
 
-		// modify Group Aliases Configuration
+		// modify Group Aliases Table
 		if(activeMap.find(groupAliasesName) != activeMap.end())
 		{
 			__COUT__ << "\n\nModifying " << groupAliasesName << __E__;
@@ -713,7 +713,7 @@ void FixNewTableFields(int argc, char* argv[])
 
 		}  // done modifying group aliases
 
-		// modify Version Aliases Configuration
+		// modify Version Aliases Table
 		if(activeMap.find(versionAliasesName) != activeMap.end())
 		{
 			__COUT__ << "\n\nModifying " << versionAliasesName << __E__;
@@ -785,7 +785,7 @@ void FixNewTableFields(int argc, char* argv[])
 		    0 /*groupAliases*/);  // Do we need groupAliases for backbone here?
 
 		// TableGroupKey cfgMgr->saveNewTableGroup
-		//		theInterface_->saveConfigurationGroup(memberMap,
+		//		theInterface_->saveTableGroup(memberMap,
 		//				TableGroupKey::getFullGroupString(
 		//						activeBackboneGroupName,
 		//						TableGroupKey(flatVersion)));
@@ -841,7 +841,7 @@ void FixNewTableFields(int argc, char* argv[])
 		theIterateTableGroup_    = activeIterateGroupName;
 		theIterateTableGroupKey_ = &(activeGroupKeys[activeIterateGroupName].second);
 
-		// the following is copied from ConfigurationManagerRW::activateConfigurationGroup
+		// the following is copied from ConfigurationManagerRW::activateTableGroup
 		{
 			__COUT__ << "Updating persistent active groups to "
 			         << ConfigurationManager::ACTIVE_GROUPS_FILENAME << " ..." << __E__;
@@ -893,7 +893,7 @@ void FixNewTableFields(int argc, char* argv[])
 
 CLEAN_UP:
 	//==============================================================================
-	__COUT__ << "End of Flattening Active Configuration Groups!\n\n\n" << __E__;
+	__COUT__ << "End of Flattening Active Table Groups!\n\n\n" << __E__;
 
 	__COUT__ << "****************************" << __E__;
 	__COUT__ << "There were " << groupSet.size() << " groups considered, and there were "

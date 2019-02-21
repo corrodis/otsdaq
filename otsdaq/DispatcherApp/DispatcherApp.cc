@@ -24,7 +24,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
-#include "../../otsdaq-core/TableCore/TableGroupKey.h"
+#include "otsdaq-core/TableCore/TableGroupKey.h"
 
 using namespace ots;
 
@@ -73,11 +73,12 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s)
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the "
-		                "Configuration Context Group."
-		             << " The XDAQContextTableName = " << XDAQContextTableName_
-		             << ". The supervisorApplicationUID = " << supervisorApplicationUID_
-		             << std::endl;
+		__COUT_ERR__
+		<< "XDAQ Supervisor could not access it's configuration through "
+		"the Configuration Manager." <<
+		". The getApplicationContext()->getContextDescriptor()->getURL() = "
+		<< getApplicationContext()->getContextDescriptor()->getURL()
+		<< __E__;
 		throw;
 	}
 	try
@@ -90,10 +91,11 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s)
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through the "
-		                "Configuration Application Group."
-		             << " The supervisorApplicationUID = " << supervisorApplicationUID_
-		             << std::endl;
+		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
+                "the Configuration Manager."
+             << " The supervisorContextUID_ = " << supervisorContextUID_
+             << ". The supervisorApplicationUID = "
+             << supervisorApplicationUID_ << __E__;
 		throw;
 	}
 	supervisorConfigurationPath_ = "/" + supervisorContextUID_ +
@@ -110,7 +112,7 @@ void DispatcherApp::init(void)
 {
 	std::cout << __COUT_HDR_FL__
 	          << "ARTDAQDispatcher SUPERVISOR INIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	          << std::endl;
+	          << __E__;
 	allSupervisorInfo_.init(getApplicationContext());
 	artdaq::configureMessageFacility("Dispatcher");
 
@@ -118,7 +120,7 @@ void DispatcherApp::init(void)
 
 	std::cout << __COUT_HDR_FL__
 	          << "ARTDAQDispatcher SUPERVISOR INIT4!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	          << std::endl;
+	          << __E__;
 	std::string    name = "Dispatcher";
 	unsigned short port = 5300;
 	//    artdaq::setMsgFacAppName(supervisorApplicationUID_, port);
@@ -159,10 +161,10 @@ void DispatcherApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* ou
 xoap::MessageReference DispatcherApp::stateMachineXoapHandler(
     xoap::MessageReference message)
 {
-	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << std::endl;
+	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << __E__;
 	stateMachineWorkLoopManager_.removeProcessedRequests();
 	stateMachineWorkLoopManager_.processRequest(message);
-	std::cout << __COUT_HDR_FL__ << "Done - Soap Handler!" << std::endl;
+	std::cout << __COUT_HDR_FL__ << "Done - Soap Handler!" << __E__;
 	return message;
 }
 
@@ -170,10 +172,10 @@ xoap::MessageReference DispatcherApp::stateMachineXoapHandler(
 xoap::MessageReference DispatcherApp::stateMachineResultXoapHandler(
     xoap::MessageReference message)
 {
-	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << std::endl;
+	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << __E__;
 	// stateMachineWorkLoopManager_.removeProcessedRequests();
 	// stateMachineWorkLoopManager_.processRequest(message);
-	std::cout << __COUT_HDR_FL__ << "Done - Soap Handler!" << std::endl;
+	std::cout << __COUT_HDR_FL__ << "Done - Soap Handler!" << __E__;
 	return message;
 }
 
@@ -185,11 +187,11 @@ bool DispatcherApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 	          << SOAPUtilities::translate(
 	                 stateMachineWorkLoopManager_.getMessage(workLoop))
 	                 .getCommand()
-	          << std::endl;
+	          << __E__;
 	std::string reply = send(this->getApplicationDescriptor(),
 	                         stateMachineWorkLoopManager_.getMessage(workLoop));
 	stateMachineWorkLoopManager_.report(workLoop, reply, 100, true);
-	std::cout << __COUT_HDR_FL__ << "Done with message" << std::endl;
+	std::cout << __COUT_HDR_FL__ << "Done with message" << __E__;
 	stateMachineSemaphore_.give();
 	return false;  // execute once and automatically remove the workloop so in
 	               // WorkLoopManager the try workLoop->remove(job_) could be commented
@@ -201,7 +203,7 @@ bool DispatcherApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 xoap::MessageReference DispatcherApp::stateMachineStateRequest(
     xoap::MessageReference message)
 {
-	std::cout << __COUT_HDR_FL__ << theStateMachine_.getCurrentStateName() << std::endl;
+	std::cout << __COUT_HDR_FL__ << theStateMachine_.getCurrentStateName() << __E__;
 	return SOAPUtilities::makeSOAPMessageReference(
 	    theStateMachine_.getCurrentStateName());
 }
@@ -212,7 +214,7 @@ xoap::MessageReference DispatcherApp::stateMachineErrorMessageRequest(
 
 {
 	__COUT__ << "theStateMachine_.getErrorMessage() = "
-	         << theStateMachine_.getErrorMessage() << std::endl;
+	         << theStateMachine_.getErrorMessage() << __E__;
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("ErrorMessage", theStateMachine_.getErrorMessage());
@@ -240,7 +242,7 @@ void DispatcherApp::inError(toolbox::fsm::FiniteStateMachine& fsm)
 {
 	std::cout << __COUT_HDR_FL__
 	          << "Fsm current state: " << theStateMachine_.getCurrentStateName()
-	          << std::endl;
+	          << __E__;
 	// rcmsStateNotifier_.stateChanged("Error", "");
 }
 
@@ -249,13 +251,13 @@ void DispatcherApp::enteringError(toolbox::Event::Reference e)
 {
 	std::cout << __COUT_HDR_FL__
 	          << "Fsm current state: " << theStateMachine_.getCurrentStateName()
-	          << std::endl;
+	          << __E__;
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
 	std::ostringstream         error;
 	error << "Failure performing transition from " << failedEvent.getFromState() << " to "
 	      << failedEvent.getToState()
 	      << " exception: " << failedEvent.getException().what();
-	std::cout << __COUT_HDR_FL__ << error.str() << std::endl;
+	std::cout << __COUT_HDR_FL__ << error.str() << __E__;
 	// diagService_->reportError(errstr.str(),DIAGERROR);
 }
 
@@ -266,10 +268,10 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 {
 	std::cout << __COUT_HDR_FL__
 	          << "ARTDAQDispatcher SUPERVISOR CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	          << std::endl;
+	          << __E__;
 	std::cout << __COUT_HDR_FL__
 	          << SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
-	          << std::endl;
+	          << __E__;
 
 	std::pair<std::string /*group name*/, TableGroupKey> theGroup(
 	    SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
@@ -280,7 +282,7 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 	                      .getValue("ConfigurationTableGroupKey")));
 
 	__COUT__ << "Configuration group name: " << theGroup.first
-	         << " key: " << theGroup.second << std::endl;
+	         << " key: " << theGroup.second << __E__;
 
 	theConfigurationManager_->loadTableGroup(
 	    theGroup.first, theGroup.second, true);
@@ -358,16 +360,16 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 	                      .getNode(supervisorConfigurationPath_)
 	                      .getValue();
 
-	__COUT__ << "uid: " << uid << std::endl;
+	__COUT__ << "uid: " << uid << __E__;
 	for(unsigned int i = 0; i < uid.size(); ++i)
 		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
 		   (uid[i] >= '0' && uid[i] <= '9'))  // only allow alpha numeric in file name
 			filename += uid[i];
 	filename += ".fcl";
 
-	__COUT__ << std::endl;
-	__COUT__ << std::endl;
-	__COUT__ << "filename: " << filename << std::endl;
+	__COUT__ << __E__;
+	__COUT__ << __E__;
+	__COUT__ << "filename: " << filename << __E__;
 
 	std::string fileFclString;
 	{
@@ -383,7 +385,7 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 		}
 	}
 
-	__COUT__ << fileFclString << std::endl;
+	__COUT__ << fileFclString << __E__;
 	fhicl::make_ParameterSet(fileFclString, pset);
 	// fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextTableName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(),
 	// pset);

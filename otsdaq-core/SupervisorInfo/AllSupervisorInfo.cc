@@ -450,7 +450,7 @@ AllSupervisorInfo::getOrderedSupervisorDescriptors(
 	catch(...)
 	{
 		__COUT_ERR__ << "SupervisorDescriptorInfoBase could not access the XDAQ Context "
-		                "and Application configuration through the Configuration Context "
+		                "and Application configuration through the Context Table "
 		                "Group."
 		             << __E__;
 		throw;

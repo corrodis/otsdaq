@@ -3348,7 +3348,7 @@ void WebUsers::deleteUserData()
 
 	// DO NOT delete active groups file (this messes with people's configuration world,
 	// which is not expected when "resetting user info")  std::system(("rm -rf " +
-	// std::string(serviceDataPath) + "/ActiveConfigurationGroups.cfg").c_str());
+	// std::string(serviceDataPath) + "/ActiveTableGroups.cfg").c_str());
 
 	// delete Logbook folders
 	std::system(("rm -rf " + std::string(getenv("LOGBOOK_DATA_PATH")) + "/").c_str());
