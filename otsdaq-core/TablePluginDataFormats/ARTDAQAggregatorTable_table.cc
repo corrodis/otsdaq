@@ -10,7 +10,7 @@
 
 using namespace ots;
 
-#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQTables/"
+#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE "aggregator"
 
 // helpers
