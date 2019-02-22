@@ -108,98 +108,34 @@ void UDPDataListenerProducer::fastWrite(void)
 		return;
 	}
 
-	if(0)  // test data buffers
-	{
-		sleep(1);
-		unsigned long long value  = 0xA54321;  // this is 8-bytes
-		std::string&       buffer = *dataP_;
-		buffer.resize(
-		    8);  // NOTE: this is inexpensive according to Lorenzo/documentation
-		         // in C++11 (only increases size once and doesn't decrease size)
-		memcpy((void*)&buffer[0] /*dest*/, (void*)&value /*src*/, 8 /*numOfBytes*/);
-
-		// size() and length() are equivalent
-		__CFG_COUT__ << "Writing to buffer " << buffer.size() << " bytes!" << __E__;
-		__CFG_COUT__ << "Writing to buffer length " << buffer.length() << " bytes!"
-		             << __E__;
-
-		__CFG_COUT__ << "Buffer Data: "
-		             << BinaryStringMacros::binaryTo8ByteHexString(buffer) << __E__;
-
-		__CFG_COUTV__(DataProcessor::theCircularBuffer_);
-
-		DataProducer::setWrittenSubBuffer<std::string,
-		                                  std::map<std::string, std::string> >();
-		return;
-	}
+//	if(0)  // test data buffers
+//	{
+//		sleep(1);
+//		unsigned long long value  = 0xA54321;  // this is 8-bytes
+//		std::string&       buffer = *dataP_;
+//		buffer.resize(
+//		    8);  // NOTE: this is inexpensive according to Lorenzo/documentation
+//		         // in C++11 (only increases size once and doesn't decrease size)
+//		memcpy((void*)&buffer[0] /*dest*/, (void*)&value /*src*/, 8 /*numOfBytes*/);
+//
+//		// size() and length() are equivalent
+//		__CFG_COUT__ << "Writing to buffer " << buffer.size() << " bytes!" << __E__;
+//		__CFG_COUT__ << "Writing to buffer length " << buffer.length() << " bytes!"
+//		             << __E__;
+//
+//		__CFG_COUT__ << "Buffer Data: "
+//		             << BinaryStringMacros::binaryTo8ByteHexString(buffer) << __E__;
+//
+//		__CFG_COUTV__(DataProcessor::theCircularBuffer_);
+//
+//		DataProducer::setWrittenSubBuffer<std::string,
+//		                                  std::map<std::string, std::string> >();
+//		return;
+//	}
 
 	if(ReceiverSocket::receive(*dataP_, ipAddress_, port_, 1, 0, true) != -1)
 	{
-		(*headerP_)["IPAddress"] = NetworkConverters::networkToStringIP(ipAddress_);
-		(*headerP_)["Port"]      = NetworkConverters::networkToStringPort(port_);
-		//__CFG_COUT__ << "Data for ip: " << IPAddress_ << " listening on port: " <<
-		// requestedPort_ << std::endl;
-
-		if((requestedPort_ == 47000 || requestedPort_ == 47001 ||
-		    requestedPort_ == 47002) &&
-		   dataP_->length() > 2)
-		{
-			unsigned char seqId = (*dataP_)[1];
-			if(!(lastSeqId_ + 1 == seqId || (lastSeqId_ == 255 && seqId == 0)))
-			{
-				__CFG_COUT__ << requestedPort_ << "?????? NOOOO Missing Packets: "
-				             << (unsigned int)lastSeqId_ << " v " << (unsigned int)seqId
-				             << __E__;
-			}
-
-			// if(seqId == 0)
-			//	__CFG_COUT__ << requestedPort_ << " test" << __E__;
-
-			lastSeqId_ = seqId;
-		}
-
-		//		char str[5];
-		//		for(unsigned int j=0;j<dataP_->size();++j)
-		//		{
-		//			sprintf(str,"%2.2x",((unsigned int)(*dataP_)[j]) & ((unsigned
-		// int)(0x0FF)));
-		//
-		//			if(j%64 == 0) std::cout << "RECV 0x\t";
-		//			std::cout << str;
-		//			if(j%8 == 7) std::cout << " ";
-		//			if(j%64 == 63) std::cout << std::endl;
-		//		}
-
-		// unsigned long long value;
-		// memcpy((void *)&value, (void *) dataP_->substr(2).data(),8); //make data
-		// counter
-		//__CFG_COUT__ << "Got data: " << dataP_->size()
-		//		<< std::hex << value << std::dec
-		//		<< " from port: " << NetworkConverters::networkToUnsignedPort(port_)
-		//										 << std::endl;
-		// if( NetworkConverters::networkToUnsignedPort(port_) == 2001)
-		//{
-		//			std::cout << __CFG_COUT_HDR_FL__ << dataP_->size() << std::endl;
-		//	*dataP_ = dataP_->substr(2);
-		//			std::cout << __CFG_COUT_HDR_FL__ << dataP_->size() << std::endl;
-		//			unsigned int oldValue32;
-		//			memcpy((void *)&oldValue32, (void *) dataP_->data(),4);
-		//			unsigned int value32;
-		//			for(unsigned int i=8; i<dataP_->size(); i+=8)
-		//			{
-		//				memcpy((void *)&value32, (void *) dataP_->substr(i).data(),4);
-		////make  data counter 				if(value32 == oldValue32)
-		//					std::cout << __CFG_COUT_HDR_FL__ << "Trimming! i=" << i
-		//					<< std::hex << " v: " << value32 << std::dec
-		//					<< " from port: " <<
-		// NetworkConverters::networkToUnsignedPort(port_)
-		//<< std::endl;
-		//
-		//				oldValue32 = value32;
-		//			}
-		//}
-		DataProducer::setWrittenSubBuffer<std::string,
-		                                  std::map<std::string, std::string> >();
+		DataProducer::setWrittenSubBuffer<std::string, std::map<std::string, std::string> >();
 	}
 }
 
