@@ -309,16 +309,17 @@ bool ots::UDPReceiver::isTimerExpired_()
 
 void ots::UDPReceiver::stop()
 {
-#pragma message "Using default implementation of UDPReceiver::stop()"
+	//#pragma message "Using default implementation of UDPReceiver::stop()"
 }
 
 void ots::UDPReceiver::stopNoMutex()
 {
-#pragma message "Using default implementation of UDPReceiver::stopNoMutex()"
+	//#pragma message "Using default implementation of UDPReceiver::stopNoMutex()"
 }
 
-void ots::UDPReceiver::start_(){
-#pragma message "Using default implementation of UDPReceiver::start_()"
+void ots::UDPReceiver::start_()
+{
+	//#pragma message "Using default implementation of UDPReceiver::start_()"
 }
 
 // The following macro is defined in artdaq's GeneratorMacros.hh header
