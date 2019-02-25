@@ -118,6 +118,7 @@ for f in *Table; do mv -n "$f/index.json" "$f/index.txt"; done;
 sed -i s/Configuration/Table/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/CONFIGURATION/TABLE/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/configuration/table/g *Table/*.json #*/ end C++ comment coloring
+sed -i s/TheSupervisor/GatewaySupervisor/g *Table/*.json #*/ end C++ comment coloring
 
 #revert things that have gone too far!
 sed -i s/TableGUI/ConfigurationGUI/g *Table/*.json #*/ end C++ comment coloring
