@@ -786,13 +786,15 @@ const std::string& ConfigurationTree::getValueName(void) const
 //	Used by ConfigurationTree to handle / syntax of getNode
 ConfigurationTree ConfigurationTree::recurse(const ConfigurationTree& tree,
                                              const std::string&       childPath,
-                                             bool doNotThrowOnBrokenUIDLinks)
+                                             bool doNotThrowOnBrokenUIDLinks,
+                                             const std::string& originalNodeString)
 {
 	//__COUT__ << tree.row_ << " " << tree.col_ << __E__;
 	//__COUT__ << "childPath=" << childPath << " " << childPath.length() << __E__;
 	if(childPath.length() <= 1)  // only "/" or ""
 		return tree;
-	return tree.getNode(childPath, doNotThrowOnBrokenUIDLinks);
+	return tree.recursiveGetNode(
+	    childPath, doNotThrowOnBrokenUIDLinks, originalNodeString);
 }
 
 ////==============================================================================
@@ -831,6 +833,14 @@ ConfigurationTree ConfigurationTree::recurse(const ConfigurationTree& tree,
 ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
                                              bool doNotThrowOnBrokenUIDLinks) const
 {
+	return recursiveGetNode(
+	    nodeString, doNotThrowOnBrokenUIDLinks, "" /*originalNodeString*/);
+}
+ConfigurationTree ConfigurationTree::recursiveGetNode(
+    const std::string& nodeString,
+    bool               doNotThrowOnBrokenUIDLinks,
+    const std::string& originalNodeString) const
+{
 	//__COUT__ << "nodeString=" << nodeString << " " << nodeString.length() << __E__;
 	//__COUT__ << "doNotThrowOnBrokenUIDLinks=" << doNotThrowOnBrokenUIDLinks <<
 	// __E__;
@@ -863,8 +873,10 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 		{
 			// root node
 			// so return config node
-			return recurse(
-			    configMgr_->getNode(nodeName), childPath, doNotThrowOnBrokenUIDLinks);
+			return recurse(configMgr_->getNode(nodeName),
+			               childPath,
+			               doNotThrowOnBrokenUIDLinks,
+			               originalNodeString);
 		}
 		else if(row_ == TableView::INVALID && col_ == TableView::INVALID)
 		{
@@ -900,7 +912,8 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 			                                         groupId_,
 			                                         childLinkIndex_)),
 			    childPath,
-			    doNotThrowOnBrokenUIDLinks);
+			    doNotThrowOnBrokenUIDLinks,
+			    originalNodeString);
 		}
 		else if(row_ == TableView::INVALID)
 		{
@@ -1003,7 +1016,8 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 				            childConfig->getView().getColUID(),
 				            tableView_->getDataView()[row_][linkPair.second])),
 				    childPath,
-				    doNotThrowOnBrokenUIDLinks);
+				    doNotThrowOnBrokenUIDLinks,
+				    originalNodeString);
 			}
 			else if(isLink)
 			{
@@ -1068,7 +1082,8 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 				        "",  // ignore since is connected
 				        tableView_->getColumnInfo(c).getChildLinkIndex()),
 				    childPath,
-				    doNotThrowOnBrokenUIDLinks);
+				    doNotThrowOnBrokenUIDLinks,
+				    originalNodeString);
 			}
 			else
 			{
@@ -1096,29 +1111,10 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 		       << "' in table '" << getTableName() << "' looking for child '" << nodeName
 		       << "'\n\n"
 		       << __E__;
+		ss << "The original node search string was '" << originalNodeString << ".'"
+		   << __E__;
 		ss << "--- Additional error detail: \n\n" << e.what() << __E__;
-
-		try
-		{
-			auto children = getChildrenNames();
-			ss << "\t"
-			   << "Here is the list of possible children (count = " << children.size()
-			   << "):" << __E__;
-			for(auto& child : children)
-				ss << "\t\t" << child << __E__;
-			if(tableView_)
-			{
-				ss << "\n\nHere is the culprit table printout:\n\n";
-				tableView_->print(ss);
-			}
-		}
-		catch(...)
-		{
-		}  // ignore errors trying to show children
-
-#if MESSAGEFACILITY_HEX_VERSION > 0x20100
-		ss << "\n\nBoost stacktrace:" << boost::stacktrace::stacktrace();
-#endif
+		ss << nodeDump() << __E__;
 		__SS_ONLY_THROW__;
 	}
 	catch(...)
@@ -1127,27 +1123,9 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 		       << "' in table '" << getTableName() << "' looking for child '" << nodeName
 		       << "'\n\n"
 		       << __E__;
-		try
-		{
-			auto children = getChildrenNames();
-			ss << "\t"
-			   << "Here is the list of possible children (count = " << children.size()
-			   << "):" << __E__;
-			for(auto& child : children)
-				ss << "\t\t" << child << __E__;
-			if(tableView_)
-			{
-				ss << "\n\nHere is the culprit table printout:\n\n";
-				tableView_->print(ss);
-			}
-		}
-		catch(...)
-		{
-		}  // ignore errors trying to show children
-
-#if MESSAGEFACILITY_HEX_VERSION > 0x20100
-		ss << "\n\nBoost stacktrace:" << boost::stacktrace::stacktrace();
-#endif
+		ss << "The original node search string was '" << originalNodeString << ".'"
+		   << __E__;
+		ss << nodeDump() << __E__;
 		__SS_ONLY_THROW__;
 	}
 
@@ -1157,11 +1135,69 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 	    << getTableName() << "' looking for child '" << nodeName << "'\n\n"
 	    << "Invalid depth! getNode() called from a value point in the Configuration Tree."
 	    << __E__;
-#if MESSAGEFACILITY_HEX_VERSION > 0x20100
-	ss << "\n\nBoost stacktrace:" << boost::stacktrace::stacktrace();
-#endif
+	ss << "The original node search string was '" << originalNodeString << ".'" << __E__;
+	ss << nodeDump() << __E__;
 	__SS_ONLY_THROW__;  // this node is value node, cant go any deeper!
 }
+
+//==============================================================================
+// nodeDump
+//	Useful for debugging a node failure, like when throwing an exception
+std::string ConfigurationTree::nodeDump(void) const
+{
+	__SS__ << "ConfigurationTree::nodeDump() "
+	          "=====================================\nConfigurationTree::nodeDump():"
+	       << __E__;
+
+	// try each level of debug.. and ignore errors
+	try
+	{
+		ss << "\t"
+		   << "Error occurred from node '" << getValueAsString() << "'..." << __E__;
+	}
+	catch(...)
+	{
+	}  // ignore errors
+	try
+	{
+		ss << "\t"
+		   << "Error occurred from node '" << getValue() << "' in table '"
+		   << getTableName() << ".'" << __E__;
+	}
+	catch(...)
+	{
+	}  // ignore errors
+	try
+	{
+		auto children = getChildrenNames();
+		ss << "\t"
+		   << "Here is the list of possible children (count = " << children.size()
+		   << "):" << __E__;
+		for(auto& child : children)
+			ss << "\t\t" << child << __E__;
+		if(tableView_)
+		{
+			ss << "\n\nHere is the culprit table printout:\n\n";
+			tableView_->print(ss);
+		}
+	}
+	catch(...)
+	{
+	}  // ignore errors trying to show children
+
+	try
+	{
+		ss << "\n\n" << StringMacros::stackTrace() << __E__;
+	}
+	catch(...)
+	{
+	}  // ignore errors
+
+	ss << "end ConfigurationTree::nodeDump() ====================================="
+	   << __E__;
+
+	return ss.str();
+}  // end nodeDump()
 
 //==============================================================================
 ConfigurationTree ConfigurationTree::getBackNode(std::string  nodeName,

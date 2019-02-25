@@ -3,6 +3,7 @@
 
 #include "otsdaq-core/DataManager/CircularBufferBase.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq-core/Macros/StringMacros.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 
 #include <atomic>

@@ -14,7 +14,7 @@ void ConfigurationTree::getValue(T& value) const
 		{
 			ConfigurationTree valueAsTreeNode = getValueAsTreeNode();
 			// valueAsTreeNode.getValue<T>(value);
-			__COUT__ << "Success following path to tree node!" << std::endl;
+			__COUT__ << "Success following path to tree node!" << __E__;
 			// value has been interpreted as a tree node value
 			// now verify result under the rules of this column
 			//				if(typeid(std::string) == typeid(value) ||
@@ -27,12 +27,12 @@ void ConfigurationTree::getValue(T& value) const
 			value = handleValidateValueForColumn(
 			    tableView_, valueAsTreeNode.getValueAsString(), col_, identity<T>());
 
-			__COUT__ << "Successful value!" << std::endl;
+			__COUT__ << "Successful value!" << __E__;
 			return;
 		}
 		catch(...)  // tree node path interpretation failed
 		{
-			//__COUT__ << "Invalid path, just returning normal value." << std::endl;
+			//__COUT__ << "Invalid path, just returning normal value." << __E__;
 		}
 
 		// else normal return
@@ -41,28 +41,28 @@ void ConfigurationTree::getValue(T& value) const
 	else if(row_ == TableView::INVALID &&
 	        col_ == TableView::INVALID)  // this node is config node maybe with groupId
 	{
-		__SS__ << "Requesting getValue on config node level. Must be a value node."
-		       << std::endl;
-		__COUT_ERR__ << ss.str();
+		__SS__ << "Requesting getValue on config node level. Must be a value node. "
+		       << __E__;
+		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
 	else if(row_ == TableView::INVALID)
 	{
-		__SS__ << "Malformed ConfigurationTree" << std::endl;
-		__COUT_ERR__ << ss.str();
+		__SS__ << "Malformed ConfigurationTree. " << __E__;
+		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
 	else if(col_ == TableView::INVALID)  // this node is uid node
 	{
-		__SS__ << "Requesting getValue on uid node level. Must be a value node."
-		       << std::endl;
-		__COUT_ERR__ << ss.str();
+		__SS__ << "Requesting getValue on uid node level. Must be a value node. "
+		       << __E__;
+		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
 	else
 	{
-		__SS__ << "Impossible" << std::endl;
-		__COUT_ERR__ << ss.str();
+		__SS__ << "Impossible! " << __E__;
+		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
 }  // end getValue<T>()
@@ -89,10 +89,9 @@ T ConfigurationTree::handleValidateValueForColumn(const TableView* configView,
 {
 	if(!configView)
 	{
-		__SS__ << "Null configView" << std::endl;
-		__COUT_ERR__ << ss.str();
+		__SS__ << "Null configView" << __E__;
 		__SS_THROW__;
 	}
-	__COUT__ << "handleValidateValueForColumn<T>" << std::endl;
+	__COUT__ << "handleValidateValueForColumn<T>" << __E__;
 	return configView->validateValueForColumn<T>(value, col);
 }  // end T handleValidateValueForColumn()

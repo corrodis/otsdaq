@@ -250,8 +250,8 @@ void GatewaySupervisor::init(void)
 				{
 					if(strlen(line) < 1)
 						continue;
-					line[strlen(line) - 1] = '\0';       // remove endline
-					if(strcmp(line, name.c_str()) == 0)  // is match?
+					line[strlen(line) - 1] = '\0';  // remove endline
+					if(strcmp(line, ("ContextGroup/" + name).c_str()) == 0)  // is match?
 					{
 						foundVector.back() = true;
 						//__COUTV__(name);
@@ -268,8 +268,8 @@ void GatewaySupervisor::init(void)
 				{
 					if(strlen(line) < 1)
 						continue;
-					line[strlen(line) - 1] = '\0';       // remove endline
-					if(strcmp(line, name.c_str()) == 0)  // is match?
+					line[strlen(line) - 1] = '\0';  // remove endline
+					if(strcmp(line, ("BackboneGroup/" + name).c_str()) == 0)  // is match?
 					{
 						foundVector.back() = true;
 						//__COUTV__(name);
@@ -286,8 +286,8 @@ void GatewaySupervisor::init(void)
 				{
 					if(strlen(line) < 1)
 						continue;
-					line[strlen(line) - 1] = '\0';       // remove endline
-					if(strcmp(line, name.c_str()) == 0)  // is match?
+					line[strlen(line) - 1] = '\0';  // remove endline
+					if(strcmp(line, ("IterateGroup/" + name).c_str()) == 0)  // is match?
 					{
 						foundVector.back() = true;
 						//__COUTV__(name);
@@ -309,21 +309,21 @@ void GatewaySupervisor::init(void)
 				for(const auto& name : contextMemberNames)
 				{
 					if(!foundVector[i])
-						fprintf(fp, "%s\n", name.c_str());
+						fprintf(fp, "ContextGroup/%s\n", name.c_str());
 
 					++i;
 				}
 				for(const auto& name : backboneMemberNames)
 				{
 					if(!foundVector[i])
-						fprintf(fp, "%s\n", name.c_str());
+						fprintf(fp, "BackboneGroup/%s\n", name.c_str());
 
 					++i;
 				}
 				for(const auto& name : iterateMemberNames)
 				{
 					if(!foundVector[i])
-						fprintf(fp, "%s\n", name.c_str());
+						fprintf(fp, "IterateGroup/%s\n", name.c_str());
 
 					++i;
 				}
@@ -2678,8 +2678,7 @@ void GatewaySupervisor::setSupervisorPropertyDefaults()
 {
 	CorePropertySupervisorBase::setSupervisorProperty(
 	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,
-	    std::string() +
-	        "*=1 | gatewayLaunchOTS=-1 | gatewayLaunchWiz=-1 | codeEditor=-1");
+	    std::string() + "*=1 | gatewayLaunchOTS=-1 | gatewayLaunchWiz=-1");
 }
 
 //========================================================================================================================
@@ -2696,7 +2695,7 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 	    "getSystemMessages | getCurrentState | getIterationPlanStatus");
 	CorePropertySupervisorBase::setSupervisorProperty(
 	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireUserLockRequestTypes,
-	    "gatewayLaunchOTS | gatewayLaunchWiz | codeEditor");
+	    "gatewayLaunchOTS | gatewayLaunchWiz");
 	//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedUsernameRequestTypes,
 	//			"StateMachine*"); //for all stateMachineXgiHandler requests
 }
@@ -2749,8 +2748,6 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 	// gatewayLaunchOTS
 	// gatewayLaunchWiz
-
-	// codeEditor
 
 	try
 	{
@@ -3426,13 +3423,6 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		else if(requestType == "resetUserTooltips")
 		{
 			WebUsers::resetAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_));
-		}
-		else if(requestType == "codeEditor")
-		{
-			__COUT__ << "Code Editor" << __E__;
-
-			codeEditor_.xmlRequest(
-			    CgiDataUtilities::getData(cgiIn, "option"), cgiIn, &xmlOut);
 		}
 		else
 		{

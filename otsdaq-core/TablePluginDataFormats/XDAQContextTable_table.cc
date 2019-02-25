@@ -102,7 +102,7 @@ void XDAQContextTable::init(ConfigurationManager* configManager)
 		fs.open(XDAQ_RUN_FILE, std::fstream::out | std::fstream::trunc);
 		if(fs.fail())
 		{
-			__SS__ << "Failed to open XDAQ run file: " << XDAQ_RUN_FILE << std::endl;
+			__SS__ << "Failed to open XDAQ run file: " << XDAQ_RUN_FILE << __E__;
 			__SS_THROW__;
 		}
 		outputXDAQXML((std::ostream&)fs);
@@ -118,7 +118,46 @@ bool XDAQContextTable::isARTDAQContext(const std::string& contextUID)
 }
 
 //========================================================================================================================
-// isARTDAQContext
+std::map<std::string /*contextUID*/,
+         std::pair<std::string /*host_name*/, unsigned int /*rank*/>>
+XDAQContextTable::getARTDAQAppRankMap() const
+{
+	std::map<std::string /*contextUID*/,
+	         std::pair<std::string /*host_name*/, unsigned int /*rank*/>>
+	    returnMap;
+
+	if(artdaqBoardReaders_.size() == 0 && artdaqEventBuilders_.size() == 0 &&
+	   artdaqAggregators_.size() == 0)
+	{
+		__COUT_WARN__ << "Assuming since there are 0 active ARTDAQ context UID(s), we "
+		                 "can ignore empty rank map."
+		              << __E__;
+		return returnMap;
+	}
+
+	for(auto& i : artdaqBoardReaders_)
+		returnMap.emplace(
+		    std::make_pair(contexts_[i].contextUID_,
+		                   std::make_pair(contexts_[i].address_,
+		                                  getARTDAQAppRank(contexts_[i].contextUID_))));
+
+	for(auto& i : artdaqEventBuilders_)
+		returnMap.emplace(
+		    std::make_pair(contexts_[i].contextUID_,
+		                   std::make_pair(contexts_[i].address_,
+		                                  getARTDAQAppRank(contexts_[i].contextUID_))));
+
+	for(auto& i : artdaqAggregators_)
+		returnMap.emplace(
+		    std::make_pair(contexts_[i].contextUID_,
+		                   std::make_pair(contexts_[i].address_,
+		                                  getARTDAQAppRank(contexts_[i].contextUID_))));
+
+	return returnMap;
+}  // end getARTDAQAppRankMap
+
+//========================================================================================================================
+// getARTDAQAppRank
 //	looks through all active artdaq contexts for UID
 //	throws exception if not found
 //
@@ -126,15 +165,12 @@ bool XDAQContextTable::isARTDAQContext(const std::string& contextUID)
 //		then highest possible rank plus 1 is returned
 unsigned int XDAQContextTable::getARTDAQAppRank(const std::string& contextUID) const
 {
-	//	__COUT__ << "artdaqContexts_.size() = " <<
-	//			artdaqContexts_.size() << std::endl;
-
 	if(artdaqBoardReaders_.size() == 0 && artdaqEventBuilders_.size() == 0 &&
 	   artdaqAggregators_.size() == 0)
 	{
 		__COUT_WARN__ << "Assuming since there are 0 active ARTDAQ context UID(s), we "
 		                 "can ignore rank failure."
-		              << std::endl;
+		              << __E__;
 		return -1;
 	}
 
@@ -167,9 +203,9 @@ unsigned int XDAQContextTable::getARTDAQAppRank(const std::string& contextUID) c
 	//	return -1; //assume disconnected link should not error?
 
 	__SS__ << "ARTDAQ rank could not be found for context UID '" << contextUID << ".'"
-	       << std::endl;
+	       << __E__;
 	__SS_THROW__;  // should never happen!
-}
+}  // end getARTDAQAppRank()
 
 //========================================================================================================================
 std::string XDAQContextTable::getContextAddress(const std::string& contextUID,
@@ -319,11 +355,11 @@ ConfigurationTree XDAQContextTable::getSupervisorConfigNode(
 //		This doesn't re-write config files, it just re-makes constructs in software.
 void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 {
-	//__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	//__COUT__ << configManager->__SELF_NODE__ << std::endl;
+	//__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	//__COUT__ << configManager->__SELF_NODE__ << __E__;
 
 	//	__COUT__ << configManager->getNode(this->getTableName()).getValueAsString()
-	//		  											  << std::endl;
+	//		  											  << __E__;
 
 	auto children = configManager->__SELF_NODE__.getChildren();
 
@@ -342,8 +378,8 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 	for(auto& child : children)
 	{
 		contexts_.push_back(XDAQContext());
-		//__COUT__ << child.first << std::endl;
-		//		__COUT__ << child.second.getNode(colContextUID_) << std::endl;
+		//__COUT__ << child.first << __E__;
+		//		__COUT__ << child.second.getNode(colContextUID_) << __E__;
 
 		contexts_.back().contextUID_ = child.first;
 
@@ -359,11 +395,11 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 		child.second.getNode(colContext_.colPort_).getValue(contexts_.back().port_);
 		// child.second.getNode(colContext_.colARTDAQDataPort_).getValue(contexts_.back().artdaqDataPort_);
 
-		//__COUT__ << contexts_.back().address_ << std::endl;
+		//__COUT__ << contexts_.back().address_ << __E__;
 		auto appLink = child.second.getNode(colContext_.colLinkToApplicationTable_);
 		if(appLink.isDisconnected())
 		{
-			__SS__ << "Application link is disconnected!" << std::endl;
+			__SS__ << "Application link is disconnected!" << __E__;
 			__SS_THROW__;
 		}
 
@@ -371,7 +407,7 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 		auto appChildren = appLink.getChildren();
 		for(auto appChild : appChildren)
 		{
-			//__COUT__ << "Loop: " << child.first << "/" << appChild.first << std::endl;
+			//__COUT__ << "Loop: " << child.first << "/" << appChild.first << __E__;
 
 			contexts_.back().applications_.push_back(XDAQApplication());
 
@@ -407,8 +443,7 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				       << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS
 				       << ". Conflict specifically at id="
 				       << contexts_.back().applications_.back().id_ << " appName="
-				       << contexts_.back().applications_.back().applicationUID_
-				       << std::endl;
+				       << contexts_.back().applications_.back().applicationUID_ << __E__;
 				__SS_THROW__;
 			}
 
@@ -422,7 +457,7 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 					__SS__ << "XDAQ Application IDs are not unique. Specifically at id="
 					       << contexts_.back().applications_.back().id_ << " appName="
 					       << contexts_.back().applications_.back().applicationUID_
-					       << std::endl;
+					       << __E__;
 					__COUT_ERR__ << "\n" << ss.str();
 					__SS_THROW__;
 				}
@@ -504,7 +539,7 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				auto appPropertyChildren = appPropertyLink.getChildren();
 
 				//__COUT__ << "appPropertyChildren.size() " << appPropertyChildren.size()
-				//<< std::endl;
+				//<< __E__;
 
 				for(auto appPropertyChild : appPropertyChildren)
 				{
@@ -525,11 +560,11 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 
 					//__COUT__ <<
 					// contexts_.back().applications_.back().properties_.back().name_ <<
-					// std::endl;
+					// __E__;
 				}
 			}
 			// else
-			//	__COUT__ << "Disconnected." << std::endl;
+			//	__COUT__ << "Disconnected." << __E__;
 		}
 
 		// check artdaq type
@@ -542,7 +577,7 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				__SS__ << "ARTDAQ Context '" << contexts_.back().contextUID_
 				       << "' must have one Application! "
 				       << contexts_.back().applications_.size() << " were found. "
-				       << std::endl;
+				       << __E__;
 				__SS_THROW__;
 			}
 
@@ -569,7 +604,7 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				       << "\tots::DataLoggerApp\n"
 				       << "\tots::DispatcherApp\n"
 				       << "\nClass found was " << contexts_.back().applications_[0].class_
-				       << std::endl;
+				       << __E__;
 				__SS_THROW__;
 			}
 		}
@@ -680,12 +715,12 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
                 done
          */
 
-//	__COUT__ << artdaqContexts_.size() << " total artdaq context(s)." << std::endl;
+//	__COUT__ << artdaqContexts_.size() << " total artdaq context(s)." << __E__;
 //	__COUT__ << artdaqBoardReaders_.size() << " active artdaq board reader(s)." <<
-// std::endl;
+// __E__;
 //	__COUT__ << artdaqEventBuilders_.size() << " active artdaq event builder(s)." <<
-// std::endl;
-//	__COUT__ << artdaqAggregators_.size() << " active artdaq aggregator(s)." << std::endl;
+// __E__;
+//	__COUT__ << artdaqAggregators_.size() << " active artdaq aggregator(s)." << __E__;
 //
 //	out << "#!/bin/sh\n\n";
 //
@@ -830,7 +865,7 @@ void XDAQContextTable::outputXDAQXML(std::ostream& out)
 	char tmp[200];
 	for(XDAQContext& context : contexts_)
 	{
-		//__COUT__ << context.contextUID_ << std::endl;
+		//__COUT__ << context.contextUID_ << __E__;
 
 		sprintf(tmp,
 		        "\t<!-- ContextUID='%s' sourceConfig='%s' -->",
@@ -850,7 +885,7 @@ void XDAQContextTable::outputXDAQXML(std::ostream& out)
 
 		for(XDAQApplication& app : context.applications_)
 		{
-			//__COUT__ << app.id_ << std::endl;
+			//__COUT__ << app.id_ << __E__;
 
 			if(context.status_)
 			{
@@ -889,7 +924,7 @@ void XDAQContextTable::outputXDAQXML(std::ostream& out)
 			out << "\t\t\t<properties xmlns=\"urn:xdaq-application:"
 			    << app.class_.substr(foundColon) << "\" xsi:type=\"soapenc:Struct\">\n";
 
-			//__COUT__ << "app.properties_ " << app.properties_.size() << std::endl;
+			//__COUT__ << "app.properties_ " << app.properties_.size() << __E__;
 			for(XDAQApplicationProperty& appProperty : app.properties_)
 			{
 				if(appProperty.type_ == "ots::SupervisorProperty")

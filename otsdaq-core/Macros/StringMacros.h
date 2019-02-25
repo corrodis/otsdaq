@@ -158,6 +158,8 @@ struct StringMacros
 	                                  const std::string& secondaryDelimeter = ":");
 
 	static std::string demangleTypeName(const char* name);
+	static std::string stackTrace();
+	static std::string exec(const char* cmd);
 
 };  // end StringMarcos static class
 

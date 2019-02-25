@@ -68,7 +68,6 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 	                            const std::vector<cgicc::FormFile>& files,
 	                            std::string                         creator,
 	                            HttpXmlDocument*                    xmldoc = nullptr);
-	std::string exec(const char* cmd);
 
 	// External Supervisor XOAP handlers
 	xoap::MessageReference supervisorSequenceCheck(xoap::MessageReference msg) throw(
@@ -91,8 +90,6 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 		EXPERIMENT_NAME_MAX_LENTH   = 25,
 		USER_DATA_EXPIRATION_TIME   = 60 * 20,  // 20 minutes
 	};
-
-	CodeEditor codeEditor_;
 };
 
 }  // namespace ots

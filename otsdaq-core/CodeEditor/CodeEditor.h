@@ -26,13 +26,16 @@ class CodeEditor
 	// request are handled here
 	void xmlRequest(const std::string& option,
 	                cgicc::Cgicc&      cgiIn,
-	                HttpXmlDocument*   xmlOut);
+	                HttpXmlDocument*   xmlOut,
+	                const std::string& username);
 
   private:
 	void getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
 	void getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
-	void saveFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
-	void build(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
+	void saveFileContent(cgicc::Cgicc&      cgiIn,
+	                     HttpXmlDocument*   xmlOut,
+	                     const std::string& username);
+	void build(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::string& username);
 
 	std::string safePathString(const std::string& path);
 	std::string safeExtensionString(const std::string& extension);
@@ -48,6 +51,7 @@ class CodeEditor
 	static void readFile(const std::string& path, std::string& contents);
 	static void writeFile(const std::string&        path,
 	                      const std::string&        contents,
+	                      const std::string&        username,
 	                      const unsigned long long& insertPos    = -1,
 	                      const std::string&        insertString = "");
 

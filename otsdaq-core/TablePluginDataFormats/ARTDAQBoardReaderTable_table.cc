@@ -37,8 +37,8 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 	// make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
-	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__COUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	__COUT__ << configManager->__SELF_NODE__ << __E__;
 
 	const XDAQContextTable* contextConfig =
 	    configManager->__GET_CONFIG__(XDAQContextTable);
@@ -60,10 +60,10 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 
 			__COUT__ << "Path for this reader config is " << readerContext->contextUID_
 			         << "/" << readerContext->applications_[0].applicationUID_ << "/"
-			         << readerConfigNode.getValueAsString() << std::endl;
+			         << readerConfigNode.getValueAsString() << __E__;
 
 			__COUT__ << "Checking that this reader supervisor node is DataManager-like."
-			         << std::endl;
+			         << __E__;
 
 			readerConfigNode.getNode("LinkToDataBufferTable").getChildren();
 		}
@@ -72,14 +72,14 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 			__SS__ << "artdaq Board Readers must be instantiated as a Consumer within a "
 			          "DataManager table. "
 			       << "Error found while checking for LinkToDataBufferTable: " << e.what()
-			       << std::endl;
+			       << __E__;
 			__COUT_ERR__ << ss.str();
 			__COUT__ << "Path for this reader config is " << readerContext->contextUID_
 			         << "/" << readerContext->applications_[0].applicationUID_ << "/X"
-			         << std::endl;
+			         << __E__;
 			__COUT_ERR__ << "This board reader will likely not get instantiated "
 			                "properly! Proceeding anyway with fcl generation."
-			             << std::endl;
+			             << __E__;
 
 			// proceed anyway, because it was really annoying to not be able to activate
 			// the table group when the context is being developed also.
@@ -118,7 +118,7 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 					if(processorConfUID == child.second.getValue())
 					{
 						__COUT__ << "Found match for context UID: "
-						         << readerContext->contextUID_ << std::endl;
+						         << readerContext->contextUID_ << __E__;
 						thisContext = readerContext;
 					}
 				}
@@ -127,8 +127,7 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 
 		if(thisContext == nullptr)
 		{
-			__COUT_ERR__ << "Could not find matching context for this table!"
-			             << std::endl;
+			__COUT_ERR__ << "Could not find matching context for this table!" << __E__;
 		}
 		else
 		{
@@ -160,7 +159,7 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 std::string ARTDAQBoardReaderTable::getFHICLFilename(
     const ConfigurationTree& boardReaderNode)
 {
-	__COUT__ << "ARTDAQ BoardReader UID: " << boardReaderNode.getValue() << std::endl;
+	__COUT__ << "ARTDAQ BoardReader UID: " << boardReaderNode.getValue() << __E__;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
 	std::string uid      = boardReaderNode.getValue();
 	for(unsigned int i = 0; i < uid.size(); ++i)
@@ -170,7 +169,7 @@ std::string ARTDAQBoardReaderTable::getFHICLFilename(
 
 	filename += ".fcl";
 
-	__COUT__ << "fcl: " << filename << std::endl;
+	__COUT__ << "fcl: " << filename << __E__;
 
 	return filename;
 }
@@ -245,9 +244,32 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 
 
 	            destinations: {
-	              d2: { transferPluginType: MPI destination_rank: 2
-	   max_fragment_size_words: 2097152} d3: { transferPluginType: MPI destination_rank: 3
-	   max_fragment_size_words: 2097152}
+	              d2: { transferPluginType: MPI
+	                      destination_rank: 2
+	                       max_fragment_size_words: 2097152
+	                       host_map: [
+	           {
+	              host: "mu2edaq01.fnal.gov"
+	              rank: 0
+	           },
+	           {
+	              host: "mu2edaq01.fnal.gov"
+	              rank: 1
+	           }]
+	                       }
+	               d3: { transferPluginType: MPI
+	                       destination_rank: 3
+	                       max_fragment_size_words: 2097152
+	                       host_map: [
+	           {
+	              host: "mu2edaq01.fnal.gov"
+	              rank: 0
+	           },
+	           {
+	              host: "mu2edaq01.fnal.gov"
+	              rank: 1
+	           }]
+	           }
 
 	            }
 	          }
@@ -297,9 +319,21 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 	out.open(filename, std::fstream::out | std::fstream::trunc);
 	if(out.fail())
 	{
-		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << std::endl;
+		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << __E__;
 		__SS_THROW__;
 	}
+
+	//--------------------------------------
+	// header
+	OUT << "###########################################################" << __E__;
+	OUT << "#" << __E__;
+	OUT << "# artdaq reader fcl configuration file produced by otsdaq." << __E__;
+	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename: " << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ Reader UID: " << boardReaderNode.getValue() << __E__;
+	OUT << "#" << __E__;
+	OUT << "###########################################################" << __E__;
+	OUT << "\n\n";
 
 	// no primary link to table tree for reader node!
 	try
@@ -314,7 +348,7 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 	}
 	catch(const std::runtime_error)
 	{
-		__COUT__ << "Ignoring error, assume this a valid UID node." << std::endl;
+		__COUT__ << "Ignoring error, assume this a valid UID node." << __E__;
 		// error is expected here for UIDs.. so just ignore
 		// this check is valuable if source node is a unique-Link node, rather than UID
 	}
@@ -417,27 +451,60 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 				unsigned int port = contextConfig->getARTDAQDataPort(
 				    configManager, destinationContextUID);
 
-				OUT << destination.second.getNode("destinationKey").getValue() << ": {"
-				    << " transferPluginType: "
+				// open destination object
+				OUT << destination.second.getNode("destinationKey").getValue() << ": {\n";
+				PUSHTAB;
+
+				OUT << "transferPluginType: "
 				    << destination.second.getNode("transferPluginType").getValue()
-				    << " destination_rank: " << destinationRank
-				    << " max_fragment_size_words: "
-				    << destination.second
-				           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
-				           .getValue<unsigned int>()
-				    << " host_map: [{rank: " << destinationRank << " host: \"" << host
-				    << "\" portOffset: " << std::to_string(port) << "}, "
-				    << "{rank: " << selfRank << " host: \"" << selfHost
-				    << "\" portOffset: " << std::to_string(selfPort) << "}]"
-				    << "}\n";
+				    << __E__;
+
+				OUT << "destination_rank: " << destinationRank << __E__;
+
+				try
+				{
+					OUT << "max_fragment_size_words: "
+					    << destination.second
+					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
+					           .getValue<unsigned int>()
+					    << __E__;
+				}
+				catch(...)
+				{
+					__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeWords "
+					          "could not be accessed. Make sure the link is valid."
+					       << __E__;
+					__SS_THROW__;
+				}
+
+				OUT << "host_map: [\n";
+				PUSHTAB;
+				OUT << "{\n";
+				PUSHTAB;
+				OUT << "rank: " << destinationRank << __E__;
+				OUT << "host: \"" << host << "\"" << __E__;
+				OUT << "portOffset: " << std::to_string(port) << __E__;
+				POPTAB;
+				OUT << "},\n";
+				OUT << "{\n";
+				PUSHTAB;
+				OUT << "rank: " << selfRank << __E__;
+				OUT << "host: \"" << selfHost << "\"" << __E__;
+				OUT << "portOffset: " << std::to_string(selfPort) << __E__;
+				POPTAB;
+				OUT << "}" << __E__;
+				POPTAB;
+				OUT << "]" << __E__;  // close host_map
+
+				POPTAB;
+				OUT << "}" << __E__;  // close destination object
 			}
 		}
 		catch(const std::runtime_error& e)
 		{
 			__SS__ << "Are the DAQ destinations valid? Error occurred looking for Board "
 			          "Reader DAQ sources for UID '"
-			       << boardReaderNode.getValue() << "': " << e.what() << std::endl;
-			__COUT_ERR__ << ss.str() << std::endl;
+			       << boardReaderNode.getValue() << "': " << e.what() << __E__;
 			__SS_THROW__;
 		}
 	}

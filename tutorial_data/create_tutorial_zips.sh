@@ -90,6 +90,7 @@ rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases; #replace databases
 cp -r ${UDATABASES} ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases;
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db.*; 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db_*;
+rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_dbb*; #remove backups or bkups
 cd ${SRC}
 git add ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db
 cd -

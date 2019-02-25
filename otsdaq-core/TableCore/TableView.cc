@@ -1314,11 +1314,16 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 		std::cout << "\t" << columnsInfo_[col].getType() << "() "
 		          << columnsInfo_[col].getName() << __E__;
 
-	__SS__ << ("Incompatible table for this group link. Table '" + tableName_ +
-	           "' is missing a GroupID column with data type '" +
-	           (TableViewColumnInfo::TYPE_START_GROUP_ID + "-" + needleChildLinkIndex) +
-	           "'.")
-	       << __E__;
+	__SS__
+	    << "Incompatible table for this group link. Table '" << tableName_
+	    << "' is missing a GroupID column with data type '"
+	    << TableViewColumnInfo::TYPE_START_GROUP_ID << "-" << needleChildLinkIndex
+	    << "'.\n\n"
+	    << "Note: you can separate the child GroupID column data type from "
+	    << "the parent GroupLink column data type; this is accomplished by using a space "
+	    << "character at the parent level - the string after the space will be treated "
+	       "as the "
+	    << "child GroupID column data type." << __E__;
 	__SS_THROW__;
 }  // end getColLinkGroupID()
 

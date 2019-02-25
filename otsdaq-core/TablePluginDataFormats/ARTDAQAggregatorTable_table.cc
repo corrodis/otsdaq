@@ -258,14 +258,17 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 		__SS_THROW__;
 	}
 
-	// no primary link to table tree for aggregator node!
-	if(aggregatorNode.isDisconnected())
-	{
-		// create empty fcl
-		OUT << "{}\n\n";
-		out.close();
-		return;
-	}
+	//--------------------------------------
+	// header
+	OUT << "###########################################################" << __E__;
+	OUT << "#" << __E__;
+	OUT << "# artdaq aggregator fcl configuration file produced by otsdaq." << __E__;
+	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename: " << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ Aggregator UID: " << aggregatorNode.getValue() << __E__;
+	OUT << "#" << __E__;
+	OUT << "###########################################################" << __E__;
+	OUT << "\n\n";
 
 	//--------------------------------------
 	// handle services
@@ -361,18 +364,53 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 					unsigned int port =
 					    contextConfig->getARTDAQDataPort(configManager, sourceContextUID);
 
-					OUT << source.second.getNode("sourceKey").getValue() << ": {"
-					    << " transferPluginType: "
+					// open source object
+					OUT << source.second.getNode("sourceKey").getValue() << ": {\n";
+					PUSHTAB;
+
+					OUT << "transferPluginType: "
 					    << source.second.getNode("transferPluginType").getValue()
-					    << " source_rank: " << sourceRank << " max_fragment_size_words: "
-					    << source.second
-					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
-					           .getValue<unsigned int>()
-					    << " host_map: [{rank: " << sourceRank << " host: \"" << host
-					    << "\" portOffset: " << std::to_string(port) << "}, "
-					    << "{rank: " << selfRank << " host: \"" << selfHost
-					    << "\" portOffset: " << std::to_string(selfPort) << "}]"
-					    << "}\n";
+					    << __E__;
+
+					OUT << "source_rank: " << sourceRank << __E__;
+
+					try
+					{
+						OUT << "max_fragment_size_words: "
+						    << source.second
+						           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
+						           .getValue<unsigned int>()
+						    << __E__;
+					}
+					catch(...)
+					{
+						__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeWords "
+						          "could not be accessed. Make sure the link is valid."
+						       << __E__;
+						__SS_THROW__;
+					}
+
+					OUT << "host_map: [\n";
+					PUSHTAB;
+					OUT << "{\n";
+					PUSHTAB;
+					OUT << "rank: " << sourceRank << __E__;
+					OUT << "host: \"" << host << "\"" << __E__;
+					OUT << "portOffset: " << std::to_string(port) << __E__;
+					POPTAB;
+					OUT << "},\n";
+					OUT << "{\n";
+					PUSHTAB;
+					OUT << "rank: " << selfRank << __E__;
+					OUT << "host: \"" << selfHost << "\"" << __E__;
+					OUT << "portOffset: " << std::to_string(selfPort) << __E__;
+					POPTAB;
+					OUT << "}" << __E__;
+					POPTAB;
+					OUT << "]" << __E__;  // close host_map
+
+					POPTAB;
+					OUT << "}" << __E__;  // close source object
 				}
 			}
 			catch(const std::runtime_error& e)
@@ -475,21 +513,54 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 					unsigned int port = contextConfig->getARTDAQDataPort(
 					    configManager, destinationContextUID);
 
+					// open destination object
 					OUT << destination.second.getNode("destinationKey").getValue()
-					    << ": {"
-					    << " transferPluginType: "
+					    << ": {\n";
+					PUSHTAB;
+
+					OUT << "transferPluginType: "
 					    << destination.second.getNode("transferPluginType").getValue()
-					    << " source_rank: " << selfRank
-					    << " destination_rank: " << destinationRank
-					    << " max_fragment_size_words: "
-					    << destination.second
-					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
-					           .getValue<unsigned int>()
-					    << " host_map: [{rank: " << destinationRank << " host: \"" << host
-					    << "\" portOffset: " << std::to_string(port) << "}, "
-					    << "{rank: " << selfRank << " host: \"" << selfHost
-					    << "\" portOffset: " << std::to_string(selfPort) << "}]"
-					    << "}\n";
+					    << __E__;
+
+					OUT << "source_rank: " << destinationRank << __E__;
+
+					try
+					{
+						OUT << "max_fragment_size_words: "
+						    << destination.second
+						           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
+						           .getValue<unsigned int>()
+						    << __E__;
+					}
+					catch(...)
+					{
+						__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeWords "
+						          "could not be accessed. Make sure the link is valid."
+						       << __E__;
+						__SS_THROW__;
+					}
+
+					OUT << "host_map: [\n";
+					PUSHTAB;
+					OUT << "{\n";
+					PUSHTAB;
+					OUT << "rank: " << destinationRank << __E__;
+					OUT << "host: \"" << host << "\"" << __E__;
+					OUT << "portOffset: " << std::to_string(port) << __E__;
+					POPTAB;
+					OUT << "},\n";
+					OUT << "{\n";
+					PUSHTAB;
+					OUT << "rank: " << selfRank << __E__;
+					OUT << "host: \"" << selfHost << "\"" << __E__;
+					OUT << "portOffset: " << std::to_string(selfPort) << __E__;
+					POPTAB;
+					OUT << "}" << __E__;
+					POPTAB;
+					OUT << "]" << __E__;  // close host_map
+
+					POPTAB;
+					OUT << "}" << __E__;  // close source object
 				}
 			}
 			catch(const std::runtime_error& e)
@@ -792,10 +863,22 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 
 	//--------------------------------------
 	// handle process_name
-	OUT << "process_name: "
-	    << aggregatorNode.getNode(
-	           "ARTDAQGlobalTableForProcessNameLink/processNameForAggregators")
-	    << "\n";
+	try
+	{
+		OUT << "process_name: "
+		    << aggregatorNode.getNode(
+		           "ARTDAQGlobalTableForProcessNameLink/processNameForAggregators")
+		    << "\n";
+	}
+	catch(...)
+	{
+		__SS__ << "The field "
+		          "ARTDAQGlobalTableForProcessNameLink/processNameForAggregators could "
+		          "not be accessed. "
+		       << "Make sure the link is valid from aggregator '"
+		       << aggregatorNode.getValue() << ".'" << __E__;
+		__SS_THROW__;
+	}
 
 	out.close();
 }

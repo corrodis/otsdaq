@@ -108,34 +108,35 @@ void UDPDataListenerProducer::fastWrite(void)
 		return;
 	}
 
-//	if(0)  // test data buffers
-//	{
-//		sleep(1);
-//		unsigned long long value  = 0xA54321;  // this is 8-bytes
-//		std::string&       buffer = *dataP_;
-//		buffer.resize(
-//		    8);  // NOTE: this is inexpensive according to Lorenzo/documentation
-//		         // in C++11 (only increases size once and doesn't decrease size)
-//		memcpy((void*)&buffer[0] /*dest*/, (void*)&value /*src*/, 8 /*numOfBytes*/);
-//
-//		// size() and length() are equivalent
-//		__CFG_COUT__ << "Writing to buffer " << buffer.size() << " bytes!" << __E__;
-//		__CFG_COUT__ << "Writing to buffer length " << buffer.length() << " bytes!"
-//		             << __E__;
-//
-//		__CFG_COUT__ << "Buffer Data: "
-//		             << BinaryStringMacros::binaryTo8ByteHexString(buffer) << __E__;
-//
-//		__CFG_COUTV__(DataProcessor::theCircularBuffer_);
-//
-//		DataProducer::setWrittenSubBuffer<std::string,
-//		                                  std::map<std::string, std::string> >();
-//		return;
-//	}
+	//	if(0)  // test data buffers
+	//	{
+	//		sleep(1);
+	//		unsigned long long value  = 0xA54321;  // this is 8-bytes
+	//		std::string&       buffer = *dataP_;
+	//		buffer.resize(
+	//		    8);  // NOTE: this is inexpensive according to Lorenzo/documentation
+	//		         // in C++11 (only increases size once and doesn't decrease size)
+	//		memcpy((void*)&buffer[0] /*dest*/, (void*)&value /*src*/, 8 /*numOfBytes*/);
+	//
+	//		// size() and length() are equivalent
+	//		__CFG_COUT__ << "Writing to buffer " << buffer.size() << " bytes!" << __E__;
+	//		__CFG_COUT__ << "Writing to buffer length " << buffer.length() << " bytes!"
+	//		             << __E__;
+	//
+	//		__CFG_COUT__ << "Buffer Data: "
+	//		             << BinaryStringMacros::binaryTo8ByteHexString(buffer) << __E__;
+	//
+	//		__CFG_COUTV__(DataProcessor::theCircularBuffer_);
+	//
+	//		DataProducer::setWrittenSubBuffer<std::string,
+	//		                                  std::map<std::string, std::string> >();
+	//		return;
+	//	}
 
 	if(ReceiverSocket::receive(*dataP_, ipAddress_, port_, 1, 0, true) != -1)
 	{
-		DataProducer::setWrittenSubBuffer<std::string, std::map<std::string, std::string> >();
+		DataProducer::setWrittenSubBuffer<std::string,
+		                                  std::map<std::string, std::string> >();
 	}
 }
 

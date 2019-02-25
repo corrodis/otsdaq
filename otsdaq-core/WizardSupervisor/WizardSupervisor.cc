@@ -129,6 +129,138 @@ void WizardSupervisor::init(void)
 }
 
 //========================================================================================================================
+void WizardSupervisor::requestIcons(xgi::Input*  in,
+                                    xgi::Output* out) throw(xgi::exception::Exception)
+{
+	cgicc::Cgicc cgi(in);
+
+	std::string submittedSequence = CgiDataUtilities::postData(cgi, "sequence");
+
+	// SECURITY CHECK START ****
+	if(securityCode_.compare(submittedSequence) != 0)
+	{
+		__COUT__ << "Unauthorized Request made, security sequence doesn't match! "
+		         << time(0) << std::endl;
+		return;
+	}
+	else
+	{
+		__COUT__ << "***Successfully authenticated security sequence. " << time(0)
+		         << std::endl;
+	}
+	// SECURITY CHECK END ****
+
+	// an icon is 7 fields.. give comma-separated
+	// 0 - subtext = text below icon
+	// 1 - altText = text for icon if image set to 0
+	// 2 - uniqueWin = if true, only one window is allowed, else multiple instances of
+	// window  3 - permissions = security level needed to see icon  4 - picfn = icon image
+	// filename, 0 for no image  5 - linkurl = url of the window to open  6 - folderPath =
+	// folder and subfolder location
+
+	*out << "Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/"
+	     << ",Table "
+	        "Editor,TBL,0,1,icon-IconEditor.png,/urn:xdaq-application:lid=280/"
+	        "?configWindowName=tableEditor,/"
+	     << ",Security "
+	        "Settings,SEC,1,1,icon-SecuritySettings.png,/WebPath/html/"
+	        "SecuritySettings.html,/User Settings"
+	     << ",Edit User "
+	        "Data,USER,1,1,icon-EditUserData.png,/WebPath/html/EditUserData.html,/User "
+	        "Settings"
+	     <<
+
+	    ",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" <<
+
+	    //",Iterate,IT,0,1,icon-Iterate.png,/urn:xdaq-application:lid=280/?configWindowName=iterate,/"
+	    //<<
+	    //",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,myFolder"
+	    //<<
+	    //",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/myFolder/mySub.folder"
+	    //<<
+	    //",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,myFolder/"
+	    //<<
+	    ",Front-end "
+	    "Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/"
+	    "RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Front%2Dend,Config Wizards"
+	     << ",Processor "
+	        "Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/"
+	        "RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Processor,Config Wizards"
+	     << ",Block "
+	        "Diagram,CFG,0,1,icon-Configure.png,/WebPath/html/"
+	        "ConfigurationSubsetBlockDiagram.html?urn=280,Config Wizards"
+	     <<
+	    //",Consumer
+	    // Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&subsetBasePath=FEInterfaceConfiguration&recordAlias=Consumer,Config
+	    // Wizards" <<
+
+	    //",DB Utilities,DB,1,1,0,http://127.0.0.1:8080/db/client.html" <<
+
+	    ",Code Editor,CODE,0,1,icon-CodeEditor.png,/urn:xdaq-application:lid=240/,/"
+	     //",Code Editor,CODE,0,1,icon-CodeEditor.png,/WebPath/html/CodeEditor.html,/"
+	     << "";
+	return;
+}  // end requestIcons()
+
+//========================================================================================================================
+void WizardSupervisor::verification(xgi::Input*  in,
+                                    xgi::Output* out) throw(xgi::exception::Exception)
+{
+	cgicc::Cgicc cgi(in);
+	std::string  submittedSequence = CgiDataUtilities::getData(cgi, "code");
+	__COUT__ << "submittedSequence=" << submittedSequence << " " << time(0) << std::endl;
+
+	std::string securityWarning = "";
+
+	if(securityCode_.compare(submittedSequence) != 0)
+	{
+		__COUT__ << "Unauthorized Request made, security sequence doesn't match!"
+		         << std::endl;
+		*out << "Invalid code.";
+		return;
+	}
+	else
+	{
+		// defaultSequence_ = false;
+		__COUT__ << "*** Successfully authenticated security sequence "
+		         << "@ " << time(0) << std::endl;
+
+		if(defaultSequence_)
+		{
+			//__COUT__ << " UNSECURE!!!" << std::endl;
+			securityWarning = "&secure=False";
+		}
+	}
+
+	*out << "<!DOCTYPE HTML><html lang='en'><head><title>ots wiz</title>" <<
+	    // show ots icon
+	    //	from http://www.favicon-generator.org/
+	    "<link rel='apple-touch-icon' sizes='57x57' href='/WebPath/images/otsdaqIcons/apple-icon-57x57.png'>\
+		<link rel='apple-touch-icon' sizes='60x60' href='/WebPath/images/otsdaqIcons/apple-icon-60x60.png'>\
+		<link rel='apple-touch-icon' sizes='72x72' href='/WebPath/images/otsdaqIcons/apple-icon-72x72.png'>\
+		<link rel='apple-touch-icon' sizes='76x76' href='/WebPath/images/otsdaqIcons/apple-icon-76x76.png'>\
+		<link rel='apple-touch-icon' sizes='114x114' href='/WebPath/images/otsdaqIcons/apple-icon-114x114.png'>\
+		<link rel='apple-touch-icon' sizes='120x120' href='/WebPath/images/otsdaqIcons/apple-icon-120x120.png'>\
+		<link rel='apple-touch-icon' sizes='144x144' href='/WebPath/images/otsdaqIcons/apple-icon-144x144.png'>\
+		<link rel='apple-touch-icon' sizes='152x152' href='/WebPath/images/otsdaqIcons/apple-icon-152x152.png'>\
+		<link rel='apple-touch-icon' sizes='180x180' href='/WebPath/images/otsdaqIcons/apple-icon-180x180.png'>\
+		<link rel='icon' type='image/png' sizes='192x192'  href='/WebPath/images/otsdaqIcons/android-icon-192x192.png'>\
+		<link rel='icon' type='image/png' sizes='32x32' href='/WebPath/images/otsdaqIcons/favicon-32x32.png'>\
+		<link rel='icon' type='image/png' sizes='96x96' href='/WebPath/images/otsdaqIcons/favicon-96x96.png'>\
+		<link rel='icon' type='image/png' sizes='16x16' href='/WebPath/images/otsdaqIcons/favicon-16x16.png'>\
+		<link rel='manifest' href='/WebPath/images/otsdaqIcons/manifest.json'>\
+		<meta name='msapplication-TileColor' content='#ffffff'>\
+		<meta name='msapplication-TileImage' content='/ms-icon-144x144.png'>\
+		<meta name='theme-color' content='#ffffff'>"
+	     <<
+	    // end show ots icon
+	    "</head>"
+	     << "<frameset col='100%' row='100%'><frame src='/WebPath/html/Wizard.html?urn="
+	     << this->getApplicationDescriptor()->getLocalId() << securityWarning
+	     << "'></frameset></html>";
+}  // end verification()
+
+//========================================================================================================================
 void WizardSupervisor::generateURL()
 {
 	defaultSequence_ = true;
@@ -384,64 +516,6 @@ void WizardSupervisor::Default(xgi::Input*  in,
 }
 
 //========================================================================================================================
-void WizardSupervisor::verification(xgi::Input*  in,
-                                    xgi::Output* out) throw(xgi::exception::Exception)
-{
-	cgicc::Cgicc cgi(in);
-	std::string  submittedSequence = CgiDataUtilities::getData(cgi, "code");
-	__COUT__ << "submittedSequence=" << submittedSequence << " " << time(0) << std::endl;
-
-	std::string securityWarning = "";
-
-	if(securityCode_.compare(submittedSequence) != 0)
-	{
-		__COUT__ << "Unauthorized Request made, security sequence doesn't match!"
-		         << std::endl;
-		*out << "Invalid code.";
-		return;
-	}
-	else
-	{
-		// defaultSequence_ = false;
-		__COUT__ << "*** Successfully authenticated security sequence "
-		         << "@ " << time(0) << std::endl;
-
-		if(defaultSequence_)
-		{
-			//__COUT__ << " UNSECURE!!!" << std::endl;
-			securityWarning = "&secure=False";
-		}
-	}
-
-	*out << "<!DOCTYPE HTML><html lang='en'><head><title>ots wiz</title>" <<
-	    // show ots icon
-	    //	from http://www.favicon-generator.org/
-	    "<link rel='apple-touch-icon' sizes='57x57' href='/WebPath/images/otsdaqIcons/apple-icon-57x57.png'>\
-		<link rel='apple-touch-icon' sizes='60x60' href='/WebPath/images/otsdaqIcons/apple-icon-60x60.png'>\
-		<link rel='apple-touch-icon' sizes='72x72' href='/WebPath/images/otsdaqIcons/apple-icon-72x72.png'>\
-		<link rel='apple-touch-icon' sizes='76x76' href='/WebPath/images/otsdaqIcons/apple-icon-76x76.png'>\
-		<link rel='apple-touch-icon' sizes='114x114' href='/WebPath/images/otsdaqIcons/apple-icon-114x114.png'>\
-		<link rel='apple-touch-icon' sizes='120x120' href='/WebPath/images/otsdaqIcons/apple-icon-120x120.png'>\
-		<link rel='apple-touch-icon' sizes='144x144' href='/WebPath/images/otsdaqIcons/apple-icon-144x144.png'>\
-		<link rel='apple-touch-icon' sizes='152x152' href='/WebPath/images/otsdaqIcons/apple-icon-152x152.png'>\
-		<link rel='apple-touch-icon' sizes='180x180' href='/WebPath/images/otsdaqIcons/apple-icon-180x180.png'>\
-		<link rel='icon' type='image/png' sizes='192x192'  href='/WebPath/images/otsdaqIcons/android-icon-192x192.png'>\
-		<link rel='icon' type='image/png' sizes='32x32' href='/WebPath/images/otsdaqIcons/favicon-32x32.png'>\
-		<link rel='icon' type='image/png' sizes='96x96' href='/WebPath/images/otsdaqIcons/favicon-96x96.png'>\
-		<link rel='icon' type='image/png' sizes='16x16' href='/WebPath/images/otsdaqIcons/favicon-16x16.png'>\
-		<link rel='manifest' href='/WebPath/images/otsdaqIcons/manifest.json'>\
-		<meta name='msapplication-TileColor' content='#ffffff'>\
-		<meta name='msapplication-TileImage' content='/ms-icon-144x144.png'>\
-		<meta name='theme-color' content='#ffffff'>"
-	     <<
-	    // end show ots icon
-	    "</head>"
-	     << "<frameset col='100%' row='100%'><frame src='/WebPath/html/Wizard.html?urn="
-	     << this->getApplicationDescriptor()->getLocalId() << securityWarning
-	     << "'></frameset></html>";
-}
-
-//========================================================================================================================
 void WizardSupervisor::request(xgi::Input*  in,
                                xgi::Output* out) throw(xgi::exception::Exception)
 {
@@ -470,13 +544,7 @@ void WizardSupervisor::request(xgi::Input*  in,
 
 	try
 	{
-		if(requestType == "codeEditor")
-		{
-			__COUT__ << "Code Editor" << __E__;
-			codeEditor_.xmlRequest(
-			    CgiDataUtilities::getData(cgiIn, "option"), cgiIn, &xmlOut);
-		}
-		else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
+		if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{
 			// NOTE: similar to ConfigurationGUI version but DOES keep active sessions
 
@@ -520,78 +588,6 @@ void WizardSupervisor::request(xgi::Input*  in,
 	    true /*allowWhiteSpace*/);  // Note: allow white space need for error response
 
 }  // end request()
-
-//========================================================================================================================
-void WizardSupervisor::requestIcons(xgi::Input*  in,
-                                    xgi::Output* out) throw(xgi::exception::Exception)
-{
-	cgicc::Cgicc cgi(in);
-
-	std::string submittedSequence = CgiDataUtilities::postData(cgi, "sequence");
-
-	// SECURITY CHECK START ****
-	if(securityCode_.compare(submittedSequence) != 0)
-	{
-		__COUT__ << "Unauthorized Request made, security sequence doesn't match! "
-		         << time(0) << std::endl;
-		return;
-	}
-	else
-	{
-		__COUT__ << "***Successfully authenticated security sequence. " << time(0)
-		         << std::endl;
-	}
-	// SECURITY CHECK END ****
-
-	// an icon is 7 fields.. give comma-separated
-	// 0 - subtext = text below icon
-	// 1 - altText = text for icon if image set to 0
-	// 2 - uniqueWin = if true, only one window is allowed, else multiple instances of
-	// window  3 - permissions = security level needed to see icon  4 - picfn = icon image
-	// filename, 0 for no image  5 - linkurl = url of the window to open  6 - folderPath =
-	// folder and subfolder location
-
-	*out << "Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/"
-	     << ",Table "
-	        "Editor,TBL,0,1,icon-IconEditor.png,/urn:xdaq-application:lid=280/"
-	        "?configWindowName=tableEditor,/"
-	     << ",Security "
-	        "Settings,SEC,1,1,icon-SecuritySettings.png,/WebPath/html/"
-	        "SecuritySettings.html,/User Settings"
-	     << ",Edit User "
-	        "Data,USER,1,1,icon-EditUserData.png,/WebPath/html/EditUserData.html,/User "
-	        "Settings"
-	     <<
-
-	    ",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" <<
-
-	    //",Iterate,IT,0,1,icon-Iterate.png,/urn:xdaq-application:lid=280/?configWindowName=iterate,/"
-	    //<<
-	    //",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,myFolder"
-	    //<<
-	    //",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/myFolder/mySub.folder"
-	    //<<
-	    //",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,myFolder/"
-	    //<<
-	    ",Front-end "
-	    "Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/"
-	    "RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Front%2Dend,Config Wizards"
-	     << ",Processor "
-	        "Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/"
-	        "RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Processor,Config Wizards"
-	     << ",Block "
-	        "Diagram,CFG,0,1,icon-Configure.png,/WebPath/html/"
-	        "ConfigurationSubsetBlockDiagram.html?urn=280,Config Wizards"
-	     <<
-	    //",Consumer
-	    // Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&subsetBasePath=FEInterfaceConfiguration&recordAlias=Consumer,Config
-	    // Wizards" <<
-
-	    //",DB Utilities,DB,1,1,0,http://127.0.0.1:8080/db/client.html" <<
-	    ",Code Editor,CODE,0,1,icon-CodeEditor.png,/WebPath/html/CodeEditor.html,/"
-	     << "";
-	return;
-}
 
 //========================================================================================================================
 void WizardSupervisor::editSecurity(xgi::Input*  in,
@@ -1007,20 +1003,4 @@ void WizardSupervisor::savePostPreview(std::string&                        subje
 	if(xmldoc) xmldoc->addTextElementToData(XML_STATUS,"1"); //1 indicates success!
 	if(xmldoc) xmldoc->addTextElementToData(XML_PREVIEW_INDEX,"1"); //1 indicates is a
 	preview post*/
-}
-
-//========================================================================================================================
-std::string WizardSupervisor::exec(const char* cmd)
-{
-	std::array<char, 128> buffer;
-	std::string           result;
-	std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
-	if(!pipe)
-		__THROW__("popen() failed!");
-	while(!feof(pipe.get()))
-	{
-		if(fgets(buffer.data(), 128, pipe.get()) != nullptr)
-			result += buffer.data();
-	}
-	return result;
 }

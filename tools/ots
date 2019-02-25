@@ -600,6 +600,7 @@ launchOTSWiz() {
 	
 	
 	#setup wiz mode environment variables
+	export CODE_EDITOR_SUPERVISOR_ID=240
 	export CONSOLE_SUPERVISOR_ID=260
 	export CONFIGURATION_GUI_SUPERVISOR_ID=280
 	export WIZARD_SUPERVISOR_ID=290	

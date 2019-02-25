@@ -193,9 +193,12 @@ void CoreSupervisorBase::request(const std::string&               requestType,
                                  HttpXmlDocument&                 xmlOut,
                                  const WebUsers::RequestUserInfo& userInfo)
 {
-	__SUP_COUT__ << "This is the empty Core Supervisor request. Supervisors should "
-	                "override this function."
-	             << __E__;
+	__SUP_SS__ << "This is the empty Core Supervisor request. Supervisors should "
+	              "override this function."
+	           << __E__;
+	__SUP_COUT__ << ss.str();
+	xmlOut.addTextElementToData("Error", ss.str());
+	return;
 
 	// KEEP:
 	//	here are some possibly interesting example lines of code for overriding
@@ -242,7 +245,7 @@ void CoreSupervisorBase::request(const std::string&               requestType,
 	//		xmlOut.addTextElementToData("Error", ss.str());
 	//	}
 	// END KEEP.
-}
+}  // end request()
 
 //========================================================================================================================
 // nonXmlRequest

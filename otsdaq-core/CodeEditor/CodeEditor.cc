@@ -61,7 +61,8 @@ CodeEditor::CodeEditor()
 //	all requests are handled here
 void CodeEditor::xmlRequest(const std::string& option,
                             cgicc::Cgicc&      cgiIn,
-                            HttpXmlDocument*   xmlOut) try
+                            HttpXmlDocument*   xmlOut,
+                            const std::string& username) try
 {
 	__COUTV__(option);
 
@@ -85,11 +86,11 @@ void CodeEditor::xmlRequest(const std::string& option,
 	}
 	else if(option == "saveFileContent")
 	{
-		saveFileContent(cgiIn, xmlOut);
+		saveFileContent(cgiIn, xmlOut, username);
 	}
 	else if(option == "build")
 	{
-		build(cgiIn, xmlOut);
+		build(cgiIn, xmlOut, username);
 	}
 	else if(option == "getAllowedExtensions")
 	{
@@ -372,6 +373,7 @@ void CodeEditor::readFile(const std::string& path, std::string& contents)
 // writeFile
 void CodeEditor::writeFile(const std::string&        path,
                            const std::string&        contents,
+                           const std::string&        username,
                            const unsigned long long& insertPos,
                            const std::string&        insertString)
 {
@@ -419,8 +421,9 @@ void CodeEditor::writeFile(const std::string&        path,
 			__SS_THROW__;
 		}
 		fprintf(fp,
-		        "time=%lld old-size=%lld new-size=%lld path=%s\n",
+		        "time=%lld author%s old-size=%lld new-size=%lld path=%s\n",
 		        (long long)time(0),
+		        username.c_str(),
 		        oldSize,
 		        (long long)contents.size(),
 		        fullpath.c_str());
@@ -433,7 +436,9 @@ void CodeEditor::writeFile(const std::string&        path,
 
 //========================================================================================================================
 // saveFileContent
-void CodeEditor::saveFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
+void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
+                                 HttpXmlDocument*   xmlOut,
+                                 const std::string& username)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
 	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
@@ -447,18 +452,21 @@ void CodeEditor::saveFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 	//__COUTV__(contents);
 	contents = StringMacros::decodeURIComponent(contents);
 
-	CodeEditor::writeFile(path + "." + extension, contents);
+	CodeEditor::writeFile(path + "." + extension, contents, username);
 
 }  // end saveFileContent
 
 //========================================================================================================================
 // build
 //	cleanBuild and incrementalBuild
-void CodeEditor::build(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
+void CodeEditor::build(cgicc::Cgicc&      cgiIn,
+                       HttpXmlDocument*   xmlOut,
+                       const std::string& username)
 {
 	bool clean = CgiDataUtilities::getDataAsInt(cgiIn, "clean") ? true : false;
 
-	__COUTV__(clean);
+	__MCOUT_INFO__("Build (clean=" << clean << ") launched by '" << username << "'..."
+	                               << __E__);
 
 	// launch as thread so it does not lock up rest of code
 	std::thread(
@@ -700,6 +708,6 @@ CodeEditor::getSpecialsMap(void)
 	// start recursive traversal to find special folders
 	localRecurse(path, "" /*offsetPath*/, 0 /*depth*/, -1 /*specialIndex*/);
 
-	__COUTV__(StringMacros::mapToString(retMap));
+	//__COUTV__(StringMacros::mapToString(retMap));
 	return retMap;
 }  // end getSpecialsMap()

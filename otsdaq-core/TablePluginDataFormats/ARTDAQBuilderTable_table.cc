@@ -37,8 +37,8 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 	// make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
-	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__COUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	__COUT__ << configManager->__SELF_NODE__ << __E__;
 
 	const XDAQContextTable* contextConfig =
 	    configManager->__GET_CONFIG__(XDAQContextTable);
@@ -61,7 +61,7 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 
 		__COUT__ << "Path for this aggregator config is " << builderContext->contextUID_
 		         << "/" << builderContext->applications_[0].applicationUID_ << "/"
-		         << builderConfigNode.getValueAsString() << std::endl;
+		         << builderConfigNode.getValueAsString() << __E__;
 
 		outputFHICL(
 		    configManager,
@@ -76,7 +76,7 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 //========================================================================================================================
 std::string ARTDAQBuilderTable::getFHICLFilename(const ConfigurationTree& builderNode)
 {
-	__COUT__ << "ARTDAQ Builder UID: " << builderNode.getValue() << std::endl;
+	__COUT__ << "ARTDAQ Builder UID: " << builderNode.getValue() << __E__;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
 	std::string uid      = builderNode.getValue();
 	for(unsigned int i = 0; i < uid.size(); ++i)
@@ -86,7 +86,7 @@ std::string ARTDAQBuilderTable::getFHICLFilename(const ConfigurationTree& builde
 
 	filename += ".fcl";
 
-	__COUT__ << "fcl: " << filename << std::endl;
+	__COUT__ << "fcl: " << filename << __E__;
 
 	return filename;
 }
@@ -231,9 +231,21 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 	out.open(filename, std::fstream::out | std::fstream::trunc);
 	if(out.fail())
 	{
-		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << std::endl;
+		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << __E__;
 		__SS_THROW__;
 	}
+
+	//--------------------------------------
+	// header
+	OUT << "###########################################################" << __E__;
+	OUT << "#" << __E__;
+	OUT << "# artdaq builder fcl configuration file produced by otsdaq." << __E__;
+	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename: " << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ Builder UID: " << builderNode.getValue() << __E__;
+	OUT << "#" << __E__;
+	OUT << "###########################################################" << __E__;
+	OUT << "\n\n";
 
 	// no primary link to table tree for reader node!
 	if(builderNode.isDisconnected())
@@ -297,20 +309,54 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 					unsigned int port = contextConfig->getARTDAQDataPort(
 					    configManager, destinationContextUID);
 
+					// open destination object
 					OUT << destination.second.getNode("destinationKey").getValue()
-					    << ": {"
-					    << " transferPluginType: "
+					    << ": {\n";
+					PUSHTAB;
+
+					OUT << "transferPluginType: "
 					    << destination.second.getNode("transferPluginType").getValue()
-					    << " destination_rank: " << destinationRank
-					    << " max_fragment_size_words: "
-					    << destination.second
-					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
-					           .getValue<unsigned int>()
-					    << " host_map: [{rank: " << destinationRank << " host: \"" << host
-					    << "\" portOffset: " << std::to_string(port) << "}, "
-					    << "{rank: " << selfRank << " host: \"" << selfHost
-					    << "\" portOffset: " << std::to_string(selfPort) << "}]"
-					    << "}\n";
+					    << __E__;
+
+					OUT << "destination_rank: " << destinationRank << __E__;
+
+					try
+					{
+						OUT << "max_fragment_size_words: "
+						    << destination.second
+						           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
+						           .getValue<unsigned int>()
+						    << __E__;
+					}
+					catch(...)
+					{
+						__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeWords "
+						          "could not be accessed. Make sure the link is valid."
+						       << __E__;
+						__SS_THROW__;
+					}
+
+					OUT << "host_map: [\n";
+					PUSHTAB;
+					OUT << "{\n";
+					PUSHTAB;
+					OUT << "rank: " << destinationRank << __E__;
+					OUT << "host: \"" << host << "\"" << __E__;
+					OUT << "portOffset: " << std::to_string(port) << __E__;
+					POPTAB;
+					OUT << "},\n";
+					OUT << "{\n";
+					PUSHTAB;
+					OUT << "rank: " << selfRank << __E__;
+					OUT << "host: \"" << selfHost << "\"" << __E__;
+					OUT << "portOffset: " << std::to_string(selfPort) << __E__;
+					POPTAB;
+					OUT << "}" << __E__;
+					POPTAB;
+					OUT << "]" << __E__;  // close host_map
+
+					POPTAB;
+					OUT << "}" << __E__;  // close destination object
 				}
 			}
 			catch(const std::runtime_error& e)
@@ -318,8 +364,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				__SS__ << "Are the Net Monitor Transport Service destinations valid? "
 				          "Error occurred looking for Event Builder transport service "
 				          "destinations for UID '"
-				       << builderNode.getValue() << "': " << e.what() << std::endl;
-				__COUT_ERR__ << ss.str() << std::endl;
+				       << builderNode.getValue() << "': " << e.what() << __E__;
 				__SS_THROW__;
 			}
 		}
@@ -387,26 +432,60 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 					unsigned int port =
 					    contextConfig->getARTDAQDataPort(configManager, sourceContextUID);
 
-					OUT << source.second.getNode("sourceKey").getValue() << ": {"
-					    << " transferPluginType: "
+					// open source object
+					OUT << source.second.getNode("sourceKey").getValue() << ": {\n";
+					PUSHTAB;
+
+					OUT << "transferPluginType: "
 					    << source.second.getNode("transferPluginType").getValue()
-					    << " source_rank: " << sourceRank << " max_fragment_size_words: "
-					    << source.second
-					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
-					           .getValue<unsigned int>()
-					    << " host_map: [{rank: " << sourceRank << " host: \"" << host
-					    << "\" portOffset: " << std::to_string(port) << "}, "
-					    << "{rank: " << selfRank << " host: \"" << selfHost
-					    << "\" portOffset: " << std::to_string(selfPort) << "}]"
-					    << "}\n";
+					    << __E__;
+
+					OUT << "source_rank: " << sourceRank << __E__;
+
+					try
+					{
+						OUT << "max_fragment_size_words: "
+						    << source.second
+						           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
+						           .getValue<unsigned int>()
+						    << __E__;
+					}
+					catch(...)
+					{
+						__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeWords "
+						          "could not be accessed. Make sure the link is valid."
+						       << __E__;
+						__SS_THROW__;
+					}
+
+					OUT << "host_map: [\n";
+					PUSHTAB;
+					OUT << "{\n";
+					PUSHTAB;
+					OUT << "rank: " << sourceRank << __E__;
+					OUT << "host: \"" << host << "\"" << __E__;
+					OUT << "portOffset: " << std::to_string(port) << __E__;
+					POPTAB;
+					OUT << "},\n";
+					OUT << "{\n";
+					PUSHTAB;
+					OUT << "rank: " << selfRank << __E__;
+					OUT << "host: \"" << selfHost << "\"" << __E__;
+					OUT << "portOffset: " << std::to_string(selfPort) << __E__;
+					POPTAB;
+					OUT << "}" << __E__;
+					POPTAB;
+					OUT << "]" << __E__;  // close host_map
+
+					POPTAB;
+					OUT << "}" << __E__;  // close source object
 				}
 			}
 			catch(const std::runtime_error& e)
 			{
 				__SS__ << "Are the DAQ sources valid? Error occurred looking for Event "
 				          "Builder DAQ sources for UID '"
-				       << builderNode.getValue() << "': " << e.what() << std::endl;
-				__COUT_ERR__ << ss.str() << std::endl;
+				       << builderNode.getValue() << "': " << e.what() << __E__;
 				__SS_THROW__;
 			}
 		}
@@ -494,10 +573,14 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			        .getValue<bool>())
 				PUSHCOMMENT;
 
+			std::string moduleType =
+			    outputPlugin.second.getNode("outputModuleType").getValue();
+
 			OUT << outputPlugin.second.getNode("outputKey").getValue() << ": {\n";
 			PUSHTAB;
-			OUT << "module_type: "
-			    << outputPlugin.second.getNode("outputModuleType").getValue() << "\n";
+
+			OUT << "module_type: " << moduleType << "\n";
+
 			auto pluginParameterLink =
 			    outputPlugin.second.getNode("outputModuleParameterLink");
 			if(!pluginParameterLink.isDisconnected())
@@ -522,6 +605,119 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 						POPCOMMENT;
 				}
 			}
+
+			// ONLY For output module type 'BinaryNetOuput,' allow destinations
+			auto destinationsGroup =
+			    outputPlugin.second.getNode("outputModuleDestinationLink");
+			if(!destinationsGroup.isDisconnected())
+			{
+				try
+				{
+					if(moduleType.find("BinaryNetOuput") == std::string::npos)
+					{
+						__SS__ << "Illegal output module type '" << moduleType
+						       << "' to include destinations. Only modules of type "
+						          "'BinaryNetOuput' "
+						       << "are allowed to have destinations." << __E__;
+						__SS_THROW__;
+					}
+
+					OUT << "destinations: {\n";
+					PUSHTAB;
+
+					auto destinations = destinationsGroup.getChildren();
+					for(auto& destination : destinations)
+						try
+						{
+							auto destinationContextUID =
+							    destination.second.getNode("destinationARTDAQContextLink")
+							        .getValueAsString();
+
+							unsigned int destinationRank =
+							    contextConfig->getARTDAQAppRank(destinationContextUID);
+							std::string host =
+							    contextConfig->getContextAddress(destinationContextUID);
+							unsigned int port = contextConfig->getARTDAQDataPort(
+							    configManager, destinationContextUID);
+
+							// open destination object
+							OUT << destination.second.getNode("destinationKey").getValue()
+							    << ": {\n";
+							PUSHTAB;
+
+							OUT << "transferPluginType: "
+							    << destination.second.getNode("transferPluginType")
+							           .getValue()
+							    << __E__;
+
+							OUT << "destination_rank: " << destinationRank << __E__;
+
+							try
+							{
+								OUT << "max_fragment_size_words: "
+								    << destination.second
+								           .getNode(
+								               "ARTDAQGlobalTableLink/"
+								               "maxFragmentSizeWords")
+								           .getValue<unsigned int>()
+								    << __E__;
+							}
+							catch(...)
+							{
+								__SS__
+								    << "The field "
+								       "ARTDAQGlobalTableLink/maxFragmentSizeWords could "
+								       "not be accessed. Make sure the link is valid."
+								    << __E__;
+								__SS_THROW__;
+							}
+
+							OUT << "host_map: [\n";
+							PUSHTAB;
+							OUT << "{\n";
+							PUSHTAB;
+							OUT << "rank: " << destinationRank << __E__;
+							OUT << "host: \"" << host << "\"" << __E__;
+							OUT << "portOffset: " << std::to_string(port) << __E__;
+							POPTAB;
+							OUT << "},\n";
+							OUT << "{\n";
+							PUSHTAB;
+							OUT << "rank: " << selfRank << __E__;
+							OUT << "host: \"" << selfHost << "\"" << __E__;
+							OUT << "portOffset: " << std::to_string(selfPort) << __E__;
+							POPTAB;
+							OUT << "}" << __E__;
+							POPTAB;
+							OUT << "]" << __E__;  // close host_map
+
+							POPTAB;
+							OUT << "}" << __E__;  // close destination object
+						}
+						catch(const std::runtime_error& e)
+						{
+							__SS__ << "Error encountered populating parameters for "
+							          "output module destination '"
+							       << destination.first
+							       << "'... Please verify fields. Here was the error: "
+							       << e.what() << __E__;
+							__SS_ONLY_THROW__;
+						}
+
+					POPTAB;
+					OUT << "}\n\n";  // end destinations
+				}
+				catch(const std::runtime_error& e)
+				{
+					__SS__ << "Are the Output module destinations valid? "
+					          "Error occurred looking for Event Builder output module "
+					          "destinations for UID '"
+					       << outputPlugin.second.getValue() << "': " << e.what()
+					       << __E__;
+					__SS_THROW__;
+				}
+			}
+
 			POPTAB;
 			OUT << "}\n\n";  // end output module
 

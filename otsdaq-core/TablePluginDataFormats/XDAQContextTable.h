@@ -78,6 +78,9 @@ class XDAQContextTable : public TableBase
 	std::vector<const XDAQContext*> getEventBuilderContexts() const;
 	std::vector<const XDAQContext*> getAggregatorContexts() const;
 	unsigned int getARTDAQAppRank(const std::string& contextUID = "X") const;
+	std::map<std::string /*contextUID*/,
+	         std::pair<std::string /*host_name*/, unsigned int /*rank*/>>
+	             getARTDAQAppRankMap() const;
 	std::string  getContextAddress(const std::string& contextUID = "X",
 	                               bool               wantHttp   = false) const;
 	unsigned int getARTDAQDataPort(const ConfigurationManager* configManager,

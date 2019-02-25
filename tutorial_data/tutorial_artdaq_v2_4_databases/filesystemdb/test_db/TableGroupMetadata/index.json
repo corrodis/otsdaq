@@ -1,0 +1,96 @@
+{
+"ouid" : [
+"2a1d4c379aaf4ecf940e5436",
+"8c26e704e34540b9907eb9ac",
+"9dbfc9e161da4f4d8ee65567",
+"a9c3da585af04fb795de3995",
+"ae776a2f5a324648ad006917",
+"e9f33542febc4c028e7da54c"
+],
+"version" : {
+"0" : [
+"a9c3da585af04fb795de3995"
+],
+"1" : [
+"8c26e704e34540b9907eb9ac"
+],
+"2" : [
+"2a1d4c379aaf4ecf940e5436"
+],
+"3" : [
+"e9f33542febc4c028e7da54c"
+],
+"4" : [
+"9dbfc9e161da4f4d8ee65567"
+],
+"5" : [
+"ae776a2f5a324648ad006917"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"2a1d4c379aaf4ecf940e5436",
+"8c26e704e34540b9907eb9ac",
+"9dbfc9e161da4f4d8ee65567",
+"a9c3da585af04fb795de3995",
+"ae776a2f5a324648ad006917",
+"e9f33542febc4c028e7da54c"
+],
+"TableEditWizBackbone_v1" : [
+"8c26e704e34540b9907eb9ac"
+],
+"artdaqConfig_v2" : [
+"2a1d4c379aaf4ecf940e5436"
+],
+"artdaqContext_v3" : [
+"e9f33542febc4c028e7da54c"
+],
+"defaultConfig_v4" : [
+"9dbfc9e161da4f4d8ee65567"
+],
+"testContext_v5" : [
+"ae776a2f5a324648ad006917"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"2a1d4c379aaf4ecf940e5436",
+"8c26e704e34540b9907eb9ac",
+"9dbfc9e161da4f4d8ee65567",
+"a9c3da585af04fb795de3995",
+"ae776a2f5a324648ad006917",
+"e9f33542febc4c028e7da54c"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+},
+"configurations.assigned" : {
+"notprovided" : [
+"2019-02-24T14:13:35.198-0600",
+"2019-02-24T14:13:35.394-0600",
+"2019-02-24T14:13:38.550-0600",
+"2019-02-24T14:13:41.694-0600",
+"2019-02-24T14:13:42.588-0600",
+"2019-02-24T14:13:43.548-0600"
+],
+"TableEditWizBackbone_v1" : [
+"2019-02-24T14:13:35.493-0600"
+],
+"artdaqConfig_v2" : [
+"2019-02-24T14:13:40.898-0600"
+],
+"artdaqContext_v3" : [
+"2019-02-24T14:13:42.035-0600"
+],
+"defaultConfig_v4" : [
+"2019-02-24T14:13:43.122-0600"
+],
+"testContext_v5" : [
+"2019-02-24T14:13:43.896-0600"
+]
+}
+}

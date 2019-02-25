@@ -15,10 +15,8 @@ class DQMHistosConsumerBase : public DQMHistosBase, public DataConsumer
 	                      std::string      processorUID,
 	                      ConsumerPriority priority)
 	    : WorkLoop(processorUID)
-	    , DataConsumer(supervisorApplicationUID
-	    			, bufferUID
-					, processorUID
-					, LowConsumerPriority)
+	    , DataConsumer(
+	          supervisorApplicationUID, bufferUID, processorUID, LowConsumerPriority)
 	{
 		;
 	}
