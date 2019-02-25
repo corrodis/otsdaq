@@ -95,6 +95,7 @@ mv $USER_DATA/ServiceData/ActiveConfigurationGroups.cfg $USER_DATA/ServiceData/A
 #convert TheSupervisor to GatewaySupervisor
 mv TheSupervisorTableInfo.xml GatewaySupervisorTableInfo.xml
 sed -i s/TheSupervisor/GatewaySupervisor/g GatewaySupervisorTableInfo.xml
+sed -i s/THE_SUPERVISOR/GATEWAY_SUPERVISOR/g GatewaySupervisorTableInfo.xml
 
 
 ###########
@@ -119,6 +120,7 @@ sed -i s/Configuration/Table/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/CONFIGURATION/TABLE/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/configuration/table/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/TheSupervisor/GatewaySupervisor/g *Table/*.json #*/ end C++ comment coloring
+sed -i s/THE_SUPERVISOR/GATEWAY_SUPERVISOR/g *Table/*.json #*/ end C++ comment coloring
 
 #revert things that have gone too far!
 sed -i s/TableGUI/ConfigurationGUI/g *Table/*.json #*/ end C++ comment coloring
@@ -132,6 +134,7 @@ for f in *Table; do mv -n "$f/index.txt" "$f/index.json"; done;
 echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Converting TheSupervisor Table to GatewaySupervisor..."
 mv TheSupervisorTable GatewaySupervisorTable
 sed -i s/TheSupervisor/GatewaySupervisor/g GatewaySupervisorTable/*.json #*/ end C++ comment coloring
+sed -i s/THE_SUPERVISOR/GATEWAY_SUPERVISOR/g GatewaySupervisorTable/*.json #*/ end C++ comment coloring
 
 
 #do same thing for MetaData table
