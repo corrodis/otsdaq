@@ -11,6 +11,7 @@ Configurable::Configurable(const ConfigurationTree& theXDAQContextConfigTree,
     , theConfigurationPath_(theConfigurationPath)
     , theConfigurationRecordName_(
           theXDAQContextConfigTree_.getNode(theConfigurationPath_).getValueAsString())
+    , selfNode_(theXDAQContextConfigTree_.getNode(theConfigurationPath_))
 {
 	__CFG_COUT__ << " Configurable class constructed. " << __E__;
 }
@@ -19,9 +20,9 @@ Configurable::Configurable(const ConfigurationTree& theXDAQContextConfigTree,
 Configurable::~Configurable(void) {}
 
 //==============================================================================
-ConfigurationTree Configurable::getSelfNode() const
+const ConfigurationTree& Configurable::getSelfNode() const
 {
-	return theXDAQContextConfigTree_.getNode(theConfigurationPath_);
+	return selfNode_;  // theXDAQContextConfigTree_.getNode(theConfigurationPath_);
 }
 
 //==============================================================================

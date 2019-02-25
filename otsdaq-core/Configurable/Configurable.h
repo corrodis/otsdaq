@@ -12,7 +12,7 @@ class Configurable
 	             const std::string&       theConfigurationPath);
 	virtual ~Configurable();
 
-	ConfigurationTree           getSelfNode() const;
+	const ConfigurationTree&    getSelfNode() const;
 	const ConfigurationManager* getConfigurationManager() const;
 
 	const std::string& getContextUID() const;
@@ -26,6 +26,7 @@ class Configurable
 	const ConfigurationTree theXDAQContextConfigTree_;
 	const std::string       theConfigurationPath_;
 	const std::string       theConfigurationRecordName_;
+	const ConfigurationTree selfNode_;
 };
 }  // namespace ots
 
