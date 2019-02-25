@@ -88,6 +88,8 @@ echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Modifying 
 sed -i s/Configuration/Table/g *ableInfo.x*
 sed -i s/CONFIGURATION/TABLE/g *ableInfo.x*
 sed -i s/configuration/table/g *ableInfo.x*
+sed -i s/TheSupervisor/GatewaySupervisor/g *ableInfo.x*
+sed -i s/OtsConfigurationWizard/WizardSupervisor/g *ableInfo.x*
 
 echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Renaming Active Groups file..."
 mv $USER_DATA/ServiceData/ActiveConfigurationGroups.cfg $USER_DATA/ServiceData/ActiveTableGroups.cfg
@@ -122,6 +124,7 @@ sed -i s/configuration/table/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/TheSupervisor/GatewaySupervisor/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/THE_SUPERVISOR/GATEWAY_SUPERVISOR/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/libSupervisor/libGatewaySupervisor/g *Table/*.json #*/ end C++ comment coloring
+sed -i s/OtsConfigurationWizard/WizardSupervisor/g *Table/*.json #*/ end C++ comment coloring
 
 #revert things that have gone too far!
 sed -i s/TableGUI/ConfigurationGUI/g *Table/*.json #*/ end C++ comment coloring
@@ -137,7 +140,7 @@ mv TheSupervisorTable GatewaySupervisorTable
 sed -i s/TheSupervisor/GatewaySupervisor/g GatewaySupervisorTable/*.json #*/ end C++ comment coloring
 sed -i s/THE_SUPERVISOR/GATEWAY_SUPERVISOR/g GatewaySupervisorTable/*.json #*/ end C++ comment coloring
 sed -i s/libSupervisor/libGatewaySupervisor/g GatewaySupervisorTable/*.json #*/ end C++ comment coloring
-
+sed -i s/OtsConfigurationWizard/WizardSupervisor/g GatewaySupervisorTable/*.json #*/ end C++ comment coloring
 
 #do same thing for MetaData table
 echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Fixing Metadata Table..."
