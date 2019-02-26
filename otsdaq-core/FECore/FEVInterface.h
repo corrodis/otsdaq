@@ -122,8 +122,6 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	using frontEndMacroArg_t =
 	    std::pair<const std::string /* arg name */, std::string /* arg return value */>;
 	using frontEndMacroArgs_t = std::vector<frontEndMacroArg_t>&;
-	// using	frontEndMacroConstArg_t	= std::pair<const std::string /* input arg name */
-	// , const std::string /* arg input value */ >;
 	using frontEndMacroConstArgs_t = const std::vector<frontEndMacroArg_t>&;
 	struct frontEndMacroStruct_t; //declare name for __ARGS__
 	using frontEndMacroFunction_t  = void (ots::FEVInterface::*)(__ARGS__);    // void function (vector-of-inputs, vector-of-outputs)
@@ -157,6 +155,10 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	{
 		return mapOfFEMacroFunctions_;
 	}
+	void runSelfFrontEndMacro(
+	    const std::string&                                   feMacroName,
+	    const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
+	    std::vector<FEVInterface::frontEndMacroArg_t>&       outputArgs);
 	// end FE Macros
 	/////////
 
@@ -209,10 +211,10 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 		std::set<std::string> namesOfInputArguments_, namesOfOutputArguments_;
 		bool                  lsbf_;  // least significant byte first
 	};                                // end macroStruct_t declaration
-	void runSelfFrontEndMacro(
-	    const std::string&                                   feMacroName,
-	    const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
-	    std::vector<FEVInterface::frontEndMacroArg_t>&       outputArgs);
+  protected:
+	void 		runMacro(FEVInterface::macroStruct_t&                        macro,
+	              std::map<std::string /*name*/, uint64_t /*value*/>& variableMap);
+  public:
 	// end FE Macros
 	/////////
 
@@ -252,8 +254,6 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	/////////
 
   protected:
-	void 		runMacro(FEVInterface::macroStruct_t&                        macro,
-	              std::map<std::string /*name*/, uint64_t /*value*/>& variableMap);
 	bool        workLoopThread(toolbox::task::WorkLoop* workLoop);
 	std::string interfaceUID_;
 
