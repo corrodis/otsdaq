@@ -332,6 +332,10 @@ if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPL
 	echo
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExiting ots. Please see usage tips above."
 	echo
+	
+	echo -e "${Reset}"
+	echo -e "${Reset}"
+	
 	exit
 fi
 
