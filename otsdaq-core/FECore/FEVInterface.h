@@ -23,6 +23,7 @@
 #include "otsdaq-core/Macros/CoutMacros.h"
 
 #define __ARGS__                                   \
+	frontEndMacroStruct_t feMacroStruct,		   \
 	FEVInterface::frontEndMacroConstArgs_t argsIn, \
 	    FEVInterface::frontEndMacroArgs_t  argsOut
 
@@ -125,9 +126,8 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	// using	frontEndMacroConstArg_t	= std::pair<const std::string /* input arg name */
 	// , const std::string /* arg input value */ >;
 	using frontEndMacroConstArgs_t = const std::vector<frontEndMacroArg_t>&;
-	using frontEndMacroFunction_t  = void (ots::FEVInterface::*)(
-        frontEndMacroConstArgs_t,
-        frontEndMacroArgs_t);    // void function (vector-of-inputs, vector-of-outputs)
+	struct frontEndMacroStruct_t; //declare name for __ARGS__
+	using frontEndMacroFunction_t  = void (ots::FEVInterface::*)(__ARGS__);    // void function (vector-of-inputs, vector-of-outputs)
 	struct frontEndMacroStruct_t  // members fully define a front-end macro function
 	{
 		frontEndMacroStruct_t(
@@ -220,53 +220,6 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 
 	template<class T>
 	void sendToFrontEnd(const std::string& targetInterfaceID, const T& value) const;
-	//    {
-	//    	__FE_COUTV__(targetInterfaceID);
-	//    	std::stringstream ss;
-	//    	ss << value;
-	//    	__FE_COUTV__(ss.str());
-	//
-	//    	__FE_COUTV__(VStateMachine::parentSupervisor_);
-	//
-	//    	xoap::MessageReference message =
-	//    		SOAPUtilities::makeSOAPMessageReference("FECommunication");
-	//
-	//		SOAPParameters parameters;
-	//		parameters.addParameter("type", "feSend");
-	//		parameters.addParameter("requester", FEVInterface::interfaceUID_);
-	//		parameters.addParameter("targetInterfaceID", targetInterfaceID);
-	//		parameters.addParameter("value", ss.str());
-	//		SOAPUtilities::addParameters(message, parameters);
-	//
-	//		__FE_COUT__ << "Sending FE communication: " <<
-	//				SOAPUtilities::translate(message) << __E__;
-	//
-	//		xoap::MessageReference replyMessage =
-	// VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply(
-	//			VStateMachine::parentSupervisor_->allSupervisorInfo_.getAllMacroMakerTypeSupervisorInfo().
-	//			begin()->second.getDescriptor(), message);
-	//
-	//		__FE_COUT__ << "Response received: " <<
-	//				SOAPUtilities::translate(replyMessage) << __E__;
-	//
-	//		SOAPParameters rxParameters;
-	//		rxParameters.addParameter("Error");
-	//		SOAPUtilities::receive(replyMessage,rxParameters);
-	//
-	//		std::string error = rxParameters.getValue("Error");
-	//
-	//		if(error != "")
-	//		{
-	//			//error occurred!
-	//			__FE_SS__ << "Error transmitting request to target interface '" <<
-	//					targetInterfaceID << "' from '" << FEVInterface::interfaceUID_ <<
-	//".'
-	//"
-	//<< 					error << __E__;
-	//			__FE_SS_THROW__;
-	//		}
-	//
-	//    } //end sendToFrontEnd()
 	void runFrontEndMacro(
 	    const std::string&                                   targetInterfaceID,
 	    const std::string&                                   feMacroName,
@@ -285,19 +238,6 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	void receiveFromFrontEnd(const std::string& requester,
 	                         T&                 retValue,
 	                         unsigned int       timeoutInSeconds = 1) const;
-	//    {
-	//    	__FE_COUTV__(requester);
-	//    	__FE_COUTV__(VStateMachine::parentSupervisor_);
-	//
-	//    	std::string data;
-	//    	FEVInterface::receiveFromFrontEnd(requester,data,timeoutInSeconds);
-	//
-	//    	if(!StringMacros::getNumber(data,retValue))
-	//    	{
-	//    		__SS__ << (data + " is not a number!") << __E__;
-	//    		__SS_THROW__;
-	//    	}
-	//    } //end receiveFromFrontEnd()
 	//	specialized template function for T=std::string
 	void receiveFromFrontEnd(const std::string& requester,
 	                         std::string&       retValue,
@@ -307,12 +247,6 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	template<class T>
 	T receiveFromFrontEnd(const std::string& requester        = "*",
 	                      unsigned int       timeoutInSeconds = 1) const;
-	//    {
-	//    	T retValue;
-	//    	//call receiveFromFrontEnd without <T> so strings are handled well
-	//    	FEVInterface::receiveFromFrontEnd(requester, retValue, timeoutInSeconds);
-	//    	return retValue;
-	//    } //end receiveFromFrontEnd()
 	//	specialized template function for T=std::string
 	std::string receiveFromFrontEnd(const std::string& requester        = "*",
 	                                unsigned int       timeoutInSeconds = 1) const;
