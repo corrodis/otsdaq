@@ -562,7 +562,7 @@ void FEVInterface::runSequenceOfCommands(const std::string& treeLinkName)
 
 //========================================================================================================================
 // runFrontEndMacro
-//	Helper funtion to run this FEInterface's own front-end macro
+//	Helper function to run this FEInterface's own front-end macro
 // and gets the output arguments back.
 //
 //	Very similar to FEVInterfacesManager::runFEMacro()
@@ -622,7 +622,7 @@ void FEVInterface::runSelfFrontEndMacro(
 		    feMacro.namesOfOutputArguments_[i], "DEFAULT"));
 
 	// run it!
-	(this->*(feMacro.macroFunction_))(argsIn, argsOut);
+	(this->*(feMacro.macroFunction_))(feMacro, argsIn, argsOut);
 
 	__CFG_COUT__ << "FE Macro complete!" << __E__;
 

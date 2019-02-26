@@ -1532,7 +1532,7 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(
 					        }  // done building argsIn
 
 					        // have pointer to Macro structure, so run it
-					        (fe->*(feMacro.macroFunction_))(argsIn, argsOut);
+					        (fe->*(feMacro.macroFunction_))(feMacro, argsIn, argsOut);
 
 					        __GEN_COUT__ << "FE Macro complete!" << __E__;
 
@@ -1954,7 +1954,7 @@ void FEVInterfacesManager::runFEMacro(const std::string& interfaceID,
 	__CFG_COUT__ << "Launching FE Macro '" << feMacro.feMacroName_ << "' ..." << __E__;
 
 	// have pointer to Macro structure, so run it
-	(getFEInterfaceP(interfaceID)->*(feMacro.macroFunction_))(argsIn, argsOut);
+	(getFEInterfaceP(interfaceID)->*(feMacro.macroFunction_))(feMacro, argsIn, argsOut);
 
 	__CFG_COUT__ << "FE Macro complete!" << __E__;
 

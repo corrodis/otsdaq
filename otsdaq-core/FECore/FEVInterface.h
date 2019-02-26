@@ -23,7 +23,7 @@
 #include "otsdaq-core/Macros/CoutMacros.h"
 
 #define __ARGS__                                   \
-	frontEndMacroStruct_t feMacroStruct,		   \
+	const frontEndMacroStruct_t& feMacroStruct,		   \
 	FEVInterface::frontEndMacroConstArgs_t argsIn, \
 	    FEVInterface::frontEndMacroArgs_t  argsOut
 
@@ -35,9 +35,6 @@
 
 namespace ots
 {
-// class FrontEndHardwareBase;
-// class FrontEndFirmwareBase;
-// class FEInterfaceTableBase;
 // class SlowControlsChannelInfo;
 class FEVInterfacesManager;
 
@@ -52,6 +49,8 @@ class FEVInterfacesManager;
 // desired.
 class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 {
+	friend class FEVInterfacesManager;
+
   public:
 	FEVInterface(const std::string&       interfaceUID,
 	             const ConfigurationTree& theXDAQContextConfigTree,
@@ -210,8 +209,10 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 		std::set<std::string> namesOfInputArguments_, namesOfOutputArguments_;
 		bool                  lsbf_;  // least significant byte first
 	};                                // end macroStruct_t declaration
-	void runMacro(FEVInterface::macroStruct_t&                        macro,
-	              std::map<std::string /*name*/, uint64_t /*value*/>& variableMap);
+	void runSelfFrontEndMacro(
+	    const std::string&                                   feMacroName,
+	    const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
+	    std::vector<FEVInterface::frontEndMacroArg_t>&       outputArgs);
 	// end FE Macros
 	/////////
 
@@ -225,10 +226,6 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	    const std::string&                                   feMacroName,
 	    const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
 	    std::vector<FEVInterface::frontEndMacroArg_t>&       outputArgs) const;
-	void runSelfFrontEndMacro(
-	    const std::string&                                   feMacroName,
-	    const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
-	    std::vector<FEVInterface::frontEndMacroArg_t>&       outputArgs);
 
 	/////////
 	// receiveFromFrontEnd
@@ -255,6 +252,8 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	/////////
 
   protected:
+	void 		runMacro(FEVInterface::macroStruct_t&                        macro,
+	              std::map<std::string /*name*/, uint64_t /*value*/>& variableMap);
 	bool        workLoopThread(toolbox::task::WorkLoop* workLoop);
 	std::string interfaceUID_;
 
