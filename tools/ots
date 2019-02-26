@@ -397,6 +397,9 @@ if [ "x$USER_DATA" == "x" ]; then
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Aborting launch${Reset} "
 	echo
+	
+	echo -e "${Reset}"
+	echo -e "${Reset}"
 	exit    
 fi
 
@@ -411,6 +414,9 @@ if [ ! -d $USER_DATA ]; then
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Aborting launch${Reset} "
 	echo
+	
+	echo -e "${Reset}"
+	echo -e "${Reset}"
 	exit   
 fi
 
@@ -447,7 +453,10 @@ if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion ]; then
 	echo "converted" > ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
 	
-	if [ $ISCONFIG == 0 ]; then		
+	if [ $ISCONFIG == 0 ]; then	
+	
+		echo -e "${Reset}"
+		echo -e "${Reset}"	
 		exit
 	fi
 fi
@@ -463,6 +472,9 @@ if [ -d ${USER_DATA}/ConfigurationInfo ]; then
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
 	
 	if [ $ISCONFIG == 0 ]; then		
+	
+		echo -e "${Reset}"
+		echo -e "${Reset}"
 		exit
 	fi
 fi
@@ -586,6 +598,9 @@ launchOTSWiz() {
 			echo
 			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tError: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
 			echo
+			
+			echo -e "${Reset}"
+			echo -e "${Reset}"
 			exit
 		fi
 		
@@ -713,6 +728,10 @@ launchOTSWiz() {
 	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$WIZARD_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	
 	printMainURL &
+	
+	
+	echo -e "${Reset}"
+	echo -e "${Reset}"
 	
 } #end launchOTSWiz
 export -f launchOTSWiz
