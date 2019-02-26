@@ -1311,6 +1311,8 @@ void ConfigurationManager::loadTableGroup(
 			__COUT_WARN__ << ss.str();
 			if(accumulatedTreeErrors)
 				*accumulatedTreeErrors = ss.str();
+			else
+				__SS_THROW__;
 		}
 		catch(...)
 		{
@@ -1319,6 +1321,8 @@ void ConfigurationManager::loadTableGroup(
 			__COUT_WARN__ << ss.str();
 			if(accumulatedTreeErrors)
 				*accumulatedTreeErrors = ss.str();
+			else
+				__SS_THROW__;
 		}
 	}
 
@@ -1340,6 +1344,8 @@ catch(...)
 		__COUT_WARN__ << ss.str();
 		if(accumulatedTreeErrors)
 			*accumulatedTreeErrors = ss.str();
+		else
+			__SS_THROW__;
 	}
 	catch(...)
 	{
@@ -1347,6 +1353,8 @@ catch(...)
 		__COUT_WARN__ << ss.str();
 		if(accumulatedTreeErrors)
 			*accumulatedTreeErrors = ss.str();
+		else
+			__SS_THROW__;
 	}
 }  // end loadTableGroup()
 
