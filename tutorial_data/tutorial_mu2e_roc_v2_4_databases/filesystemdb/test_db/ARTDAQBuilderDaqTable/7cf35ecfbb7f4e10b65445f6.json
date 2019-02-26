@@ -1,0 +1,162 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_BUILDER_DAQ_TABLE",
+"COMMENT" : "",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1504818287,
+"COL_TYPES" : {
+"DAQ_UID" : "VARCHAR2",
+"DAQ_EVENT_BUILDER_PARAMETERS_LINK" : "VARCHAR2",
+"DAQ_EVENT_BUILDER_PARAMETERS_LINK_GROUP_ID" : "VARCHAR2",
+"DAQ_EVENT_BUILDER_SOURCES_LINK" : "VARCHAR2",
+"DAQ_EVENT_BUILDER_SOURCES_LINK_GROUP_ID" : "VARCHAR2",
+"DAQ_METRICS_LINK" : "VARCHAR2",
+"DAQ_METRICS_LINK_GROUP_ID" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"DAQ_UID" : "builder0daq0",
+"DAQ_EVENT_BUILDER_PARAMETERS_LINK" : "ARTDAQBuilderDaqParameterTable",
+"DAQ_EVENT_BUILDER_PARAMETERS_LINK_GROUP_ID" : "builder0PGroup",
+"DAQ_EVENT_BUILDER_SOURCES_LINK" : "ARTDAQDaqSourceTable",
+"DAQ_EVENT_BUILDER_SOURCES_LINK_GROUP_ID" : "reader0sources",
+"DAQ_METRICS_LINK" : "ARTDAQDaqMetricTable",
+"DAQ_METRICS_LINK_GROUP_ID" : "builder0Metrics",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2017-09-18T14:41:26.000-0500",
+"rawdata" : [
+
+]
+},
+"version" : "1",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+}
+],
+"tables" : [
+{
+"name" : "notprovided",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+},
+{
+"name" : "artdaqConfig_v1",
+"assigned" : "2017-09-18T14:41:27.000-0500"
+},
+{
+"name" : "artdaqConfig_v2",
+"assigned" : "2019-01-29T21:41:41.558-0600"
+},
+{
+"name" : "artdaqConfig_v3",
+"assigned" : "2019-01-29T22:19:30.154-0600"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addTable",
+"timestamp" : "2017-09-18T14:41:26.000-0500",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2017-09-18T14:41:26.000-0500",
+"value" : {
+"name" : "1",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2017-09-18T14:41:26.000-0500",
+"value" : {
+"name" : "ARTDAQBuilderDaqTable",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2017-09-18T14:41:26.000-0500",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2017-09-18T14:41:26.000-0500"
+}
+},
+{
+"event" : "addTable",
+"timestamp" : "2017-09-18T14:41:27.000-0500",
+"value" : {
+"name" : "artdaqConfig_v1",
+"assigned" : "2017-09-18T14:41:27.000-0500"
+}
+},
+{
+"event" : "addTable",
+"timestamp" : "2019-01-29T21:41:41.558-0600",
+"value" : {
+"name" : "artdaqConfig_v2",
+"assigned" : "2019-01-29T21:41:41.558-0600"
+}
+},
+{
+"event" : "addTable",
+"timestamp" : "2019-01-29T22:19:30.154-0600",
+"value" : {
+"name" : "artdaqConfig_v3",
+"assigned" : "2019-01-29T22:19:30.154-0600"
+}
+}
+],
+"created" : "2017-09-18T14:41:26.000-0500"
+},
+"_id" : {
+"$oid" : "7cf35ecfbb7f4e10b65445f6"
+},
+"collection" : "ARTDAQBuilderDaqTable",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

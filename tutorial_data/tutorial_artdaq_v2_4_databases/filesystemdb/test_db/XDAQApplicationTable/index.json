@@ -1,32 +1,65 @@
 {
 "ouid" : [
-"1077097d23ae4a5bb051d450",
-"792313fb66c2435aaf0b2f1c"
+"25f82909e8094457a00ce6a9",
+"a1af4a2f8aa148e2b392dca3",
+"e3e9a6002be4435db269d717",
+"e4d3c5d13ffb4df5a3799da5",
+"f081321b8b0e4989b40b5612"
 ],
 "version" : {
-"3" : [
-"1077097d23ae4a5bb051d450"
+"4" : [
+"e3e9a6002be4435db269d717"
+],
+"2" : [
+"e4d3c5d13ffb4df5a3799da5"
 ],
 "5" : [
-"792313fb66c2435aaf0b2f1c"
+"f081321b8b0e4989b40b5612"
+],
+"6" : [
+"25f82909e8094457a00ce6a9"
+],
+"7" : [
+"a1af4a2f8aa148e2b392dca3"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"1077097d23ae4a5bb051d450",
-"792313fb66c2435aaf0b2f1c"
+"25f82909e8094457a00ce6a9",
+"a1af4a2f8aa148e2b392dca3",
+"e3e9a6002be4435db269d717",
+"e4d3c5d13ffb4df5a3799da5",
+"f081321b8b0e4989b40b5612"
+],
+"testContext_v4" : [
+"e3e9a6002be4435db269d717"
+],
+"artdaqContext_v2" : [
+"e4d3c5d13ffb4df5a3799da5"
 ],
 "artdaqContext_v3" : [
-"1077097d23ae4a5bb051d450"
+"f081321b8b0e4989b40b5612"
 ],
 "testContext_v5" : [
-"792313fb66c2435aaf0b2f1c"
+"f081321b8b0e4989b40b5612"
+],
+"artdaqContext_v4" : [
+"25f82909e8094457a00ce6a9"
+],
+"artdaqContext_v5" : [
+"25f82909e8094457a00ce6a9"
+],
+"artdaqContext_v6" : [
+"a1af4a2f8aa148e2b392dca3"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"1077097d23ae4a5bb051d450",
-"792313fb66c2435aaf0b2f1c"
+"25f82909e8094457a00ce6a9",
+"a1af4a2f8aa148e2b392dca3",
+"e3e9a6002be4435db269d717",
+"e4d3c5d13ffb4df5a3799da5",
+"f081321b8b0e4989b40b5612"
 ]
 },
 "aliases.active.name" : {
@@ -37,14 +70,32 @@
 },
 "configurations.assigned" : {
 "notprovided" : [
-"2019-02-24T14:13:41.545-0600",
-"2019-02-24T14:13:43.447-0600"
+"2017-09-18T14:41:28.000-0500",
+"2017-09-18T14:41:29.000-0500",
+"2019-01-28T16:56:54.562-0600",
+"2019-01-29T13:30:01.508-0600",
+"2019-01-29T21:53:46.415-0600"
+],
+"testContext_v4" : [
+"2017-09-18T14:41:29.000-0500"
+],
+"artdaqContext_v2" : [
+"2017-09-18T14:41:28.000-0500"
 ],
 "artdaqContext_v3" : [
-"2019-02-24T14:13:42.147-0600"
+"2019-01-28T16:58:16.666-0600"
 ],
 "testContext_v5" : [
-"2019-02-24T14:13:44.006-0600"
+"2019-01-29T10:13:54.078-0600"
+],
+"artdaqContext_v4" : [
+"2019-01-29T13:31:13.181-0600"
+],
+"artdaqContext_v5" : [
+"2019-01-29T21:44:27.140-0600"
+],
+"artdaqContext_v6" : [
+"2019-01-29T21:53:47.320-0600"
 ]
 }
 }

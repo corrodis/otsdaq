@@ -1,0 +1,297 @@
+{
+"ouid" : [
+"03301ea412344c658a91e207",
+"0be56e81fe584027b95823b8",
+"0dd7404a2bd644eda27439aa",
+"1c6e3491a4604371b046b854",
+"22aeb14e132e43d78986a558",
+"6ced01f56cd940f282b5b66b",
+"6ee3d12c3fff4dd09a9f8a82",
+"74601a323c34457791547b21",
+"78038d657e6244ebb495e356",
+"839deea25aa1412e8f5c1596",
+"8734551684ad4fb3b32dd45b",
+"87cbc3db902045c695f6c01d",
+"88b87176e35744d6b08eba7b",
+"8d7e0e04ed17429b9bf5341c",
+"a5020998a33240fbbd9ee01e",
+"b87456ba8e5841d1a1593f0a",
+"b92a804e3cf34f4b93bdd512",
+"dc6b80a33b434eecacf3f56f",
+"e2ea2081e53f45579bfeb76c",
+"f05d7c82612547a890d835ea",
+"fe403156bfe949c9bd0a0e92"
+],
+"version" : {
+"0" : [
+"88b87176e35744d6b08eba7b"
+],
+"1" : [
+"dc6b80a33b434eecacf3f56f"
+],
+"2" : [
+"74601a323c34457791547b21"
+],
+"3" : [
+"b87456ba8e5841d1a1593f0a"
+],
+"4" : [
+"0be56e81fe584027b95823b8"
+],
+"5" : [
+"8d7e0e04ed17429b9bf5341c"
+],
+"6" : [
+"87cbc3db902045c695f6c01d"
+],
+"7" : [
+"1c6e3491a4604371b046b854"
+],
+"8" : [
+"839deea25aa1412e8f5c1596"
+],
+"9" : [
+"03301ea412344c658a91e207"
+],
+"10" : [
+"a5020998a33240fbbd9ee01e"
+],
+"11" : [
+"6ee3d12c3fff4dd09a9f8a82"
+],
+"12" : [
+"8734551684ad4fb3b32dd45b"
+],
+"13" : [
+"22aeb14e132e43d78986a558"
+],
+"14" : [
+"b92a804e3cf34f4b93bdd512"
+],
+"15" : [
+"fe403156bfe949c9bd0a0e92"
+],
+"16" : [
+"6ced01f56cd940f282b5b66b"
+],
+"17" : [
+"e2ea2081e53f45579bfeb76c"
+],
+"18" : [
+"78038d657e6244ebb495e356"
+],
+"19" : [
+"0dd7404a2bd644eda27439aa"
+],
+"20" : [
+"f05d7c82612547a890d835ea"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"03301ea412344c658a91e207",
+"0be56e81fe584027b95823b8",
+"0dd7404a2bd644eda27439aa",
+"1c6e3491a4604371b046b854",
+"22aeb14e132e43d78986a558",
+"6ced01f56cd940f282b5b66b",
+"6ee3d12c3fff4dd09a9f8a82",
+"74601a323c34457791547b21",
+"78038d657e6244ebb495e356",
+"839deea25aa1412e8f5c1596",
+"8734551684ad4fb3b32dd45b",
+"87cbc3db902045c695f6c01d",
+"88b87176e35744d6b08eba7b",
+"8d7e0e04ed17429b9bf5341c",
+"a5020998a33240fbbd9ee01e",
+"b87456ba8e5841d1a1593f0a",
+"b92a804e3cf34f4b93bdd512",
+"dc6b80a33b434eecacf3f56f",
+"e2ea2081e53f45579bfeb76c",
+"f05d7c82612547a890d835ea",
+"fe403156bfe949c9bd0a0e92"
+],
+"artdaqContext_v3" : [
+"88b87176e35744d6b08eba7b"
+],
+"testContext_v5" : [
+"dc6b80a33b434eecacf3f56f"
+],
+"GroupAliasWizBackbone_v0" : [
+"74601a323c34457791547b21"
+],
+"artdaqContext_v4" : [
+"b87456ba8e5841d1a1593f0a"
+],
+"GroupAliasWizBackbone_v1" : [
+"0be56e81fe584027b95823b8"
+],
+"defaultConfig_v4" : [
+"8d7e0e04ed17429b9bf5341c"
+],
+"TableEditWizBackbone_v0" : [
+"87cbc3db902045c695f6c01d"
+],
+"artdaqConfig_v2" : [
+"1c6e3491a4604371b046b854"
+],
+"GroupAliasWizBackbone_v2" : [
+"839deea25aa1412e8f5c1596"
+],
+"artdaqContext_v5" : [
+"03301ea412344c658a91e207"
+],
+"TableEditWizBackbone_v1" : [
+"a5020998a33240fbbd9ee01e"
+],
+"artdaqContext_v6" : [
+"6ee3d12c3fff4dd09a9f8a82"
+],
+"GroupAliasTreeEditWizBackbone_v6" : [
+"8734551684ad4fb3b32dd45b"
+],
+"artdaqConfig_v3" : [
+"22aeb14e132e43d78986a558"
+],
+"GroupAliasTreeEditWizBackbone_v7" : [
+"b92a804e3cf34f4b93bdd512"
+],
+"defaultConfig_v5" : [
+"fe403156bfe949c9bd0a0e92"
+],
+"TableEditWizBackbone_v2" : [
+"6ced01f56cd940f282b5b66b"
+],
+"defaultConfig_v6" : [
+"e2ea2081e53f45579bfeb76c"
+],
+"GroupAliasTreeEditWizBackbone_v8" : [
+"78038d657e6244ebb495e356"
+],
+"testContext_v6" : [
+"0dd7404a2bd644eda27439aa"
+],
+"GroupAliasTreeEditWizBackbone_v9" : [
+"f05d7c82612547a890d835ea"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"03301ea412344c658a91e207",
+"0be56e81fe584027b95823b8",
+"0dd7404a2bd644eda27439aa",
+"1c6e3491a4604371b046b854",
+"22aeb14e132e43d78986a558",
+"6ced01f56cd940f282b5b66b",
+"6ee3d12c3fff4dd09a9f8a82",
+"74601a323c34457791547b21",
+"78038d657e6244ebb495e356",
+"839deea25aa1412e8f5c1596",
+"8734551684ad4fb3b32dd45b",
+"87cbc3db902045c695f6c01d",
+"88b87176e35744d6b08eba7b",
+"8d7e0e04ed17429b9bf5341c",
+"a5020998a33240fbbd9ee01e",
+"b87456ba8e5841d1a1593f0a",
+"b92a804e3cf34f4b93bdd512",
+"dc6b80a33b434eecacf3f56f",
+"e2ea2081e53f45579bfeb76c",
+"f05d7c82612547a890d835ea",
+"fe403156bfe949c9bd0a0e92"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+},
+"configurations.assigned" : {
+"notprovided" : [
+"2019-01-28T16:58:16.274-0600",
+"2019-01-29T10:13:53.735-0600",
+"2019-01-29T10:14:17.002-0600",
+"2019-01-29T13:31:12.852-0600",
+"2019-01-29T13:31:23.461-0600",
+"2019-01-29T21:37:13.971-0600",
+"2019-01-29T21:37:15.287-0600",
+"2019-01-29T21:41:41.041-0600",
+"2019-01-29T21:42:06.367-0600",
+"2019-01-29T21:44:26.774-0600",
+"2019-01-29T21:44:28.030-0600",
+"2019-01-29T21:53:46.952-0600",
+"2019-01-29T21:53:48.082-0600",
+"2019-01-29T22:19:29.670-0600",
+"2019-01-29T22:19:33.128-0600",
+"2019-02-25T20:57:29.299-0600",
+"2019-02-25T20:57:30.944-0600",
+"2019-02-25T21:03:32.960-0600",
+"2019-02-25T21:03:34.696-0600",
+"2019-02-25T21:09:24.580-0600",
+"2019-02-25T21:09:25.764-0600"
+],
+"artdaqContext_v3" : [
+"2019-01-28T16:58:16.321-0600"
+],
+"testContext_v5" : [
+"2019-01-29T10:13:53.778-0600"
+],
+"GroupAliasWizBackbone_v0" : [
+"2019-01-29T10:14:17.045-0600"
+],
+"artdaqContext_v4" : [
+"2019-01-29T13:31:12.890-0600"
+],
+"GroupAliasWizBackbone_v1" : [
+"2019-01-29T13:31:23.499-0600"
+],
+"defaultConfig_v4" : [
+"2019-01-29T21:37:14.007-0600"
+],
+"TableEditWizBackbone_v0" : [
+"2019-01-29T21:37:15.328-0600"
+],
+"artdaqConfig_v2" : [
+"2019-01-29T21:41:42.872-0600"
+],
+"GroupAliasWizBackbone_v2" : [
+"2019-01-29T21:42:06.406-0600"
+],
+"artdaqContext_v5" : [
+"2019-01-29T21:44:26.817-0600"
+],
+"TableEditWizBackbone_v1" : [
+"2019-01-29T21:44:28.076-0600"
+],
+"artdaqContext_v6" : [
+"2019-01-29T21:53:46.993-0600"
+],
+"GroupAliasTreeEditWizBackbone_v6" : [
+"2019-01-29T21:53:48.118-0600"
+],
+"artdaqConfig_v3" : [
+"2019-01-29T22:19:31.534-0600"
+],
+"GroupAliasTreeEditWizBackbone_v7" : [
+"2019-01-29T22:19:33.173-0600"
+],
+"defaultConfig_v5" : [
+"2019-02-25T20:57:30.042-0600"
+],
+"TableEditWizBackbone_v2" : [
+"2019-02-25T20:57:31.048-0600"
+],
+"defaultConfig_v6" : [
+"2019-02-25T21:03:33.835-0600"
+],
+"GroupAliasTreeEditWizBackbone_v8" : [
+"2019-02-25T21:03:34.779-0600"
+],
+"testContext_v6" : [
+"2019-02-25T21:09:24.855-0600"
+],
+"GroupAliasTreeEditWizBackbone_v9" : [
+"2019-02-25T21:09:25.863-0600"
+]
+}
+}

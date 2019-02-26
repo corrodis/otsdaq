@@ -1,0 +1,135 @@
+{
+"document" : {
+"data" : {
+"NAME" : "CFO_INTERFACE_TABLE",
+"COMMENT" : "Auto-generated from mock-up.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1551149849,
+"COL_TYPES" : {
+"UID" : "VARCHAR2",
+"DEVICE_INDEX" : "NUMBER",
+"CONFIGURE_CLOCK" : "NUMBER",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2019-02-25T20:57:29.062-0600",
+"rawdata" : [
+
+]
+},
+"version" : "0",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2019-02-25T20:57:29.062-0600"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "2019-02-25T20:57:29.062-0600"
+},
+{
+"name" : "defaultConfig_v5",
+"assigned" : "2019-02-25T20:57:29.339-0600"
+},
+{
+"name" : "defaultConfig_v6",
+"assigned" : "2019-02-25T21:03:33.012-0600"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-02-25T20:57:29.062-0600",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2019-02-25T20:57:29.062-0600"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2019-02-25T20:57:29.062-0600",
+"value" : {
+"name" : "0",
+"assigned" : "2019-02-25T20:57:29.062-0600"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2019-02-25T20:57:29.062-0600",
+"value" : {
+"name" : "CFOInterfaceTable",
+"assigned" : "2019-02-25T20:57:29.062-0600"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2019-02-25T20:57:29.062-0600",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2019-02-25T20:57:29.062-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-02-25T20:57:29.339-0600",
+"value" : {
+"name" : "defaultConfig_v5",
+"assigned" : "2019-02-25T20:57:29.339-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-02-25T21:03:33.012-0600",
+"value" : {
+"name" : "defaultConfig_v6",
+"assigned" : "2019-02-25T21:03:33.012-0600"
+}
+}
+],
+"created" : "2019-02-25T20:57:29.062-0600"
+},
+"_id" : {
+"$oid" : "551e9649994d45ec92f3c3c7"
+},
+"collection" : "CFOInterfaceTable",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}
