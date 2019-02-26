@@ -916,8 +916,6 @@ void ConfigurationManager::loadTableGroup(
     std::map<std::string /*name*/, std::string /*alias*/>* groupAliases) try
 {
 	// clear to defaults
-	if(accumulatedTreeErrors)
-		*accumulatedTreeErrors = "";
 	if(groupComment)
 		*groupComment = "NO COMMENT FOUND";
 	if(groupAuthor)
@@ -1310,7 +1308,7 @@ void ConfigurationManager::loadTableGroup(
 			       << e.what() << __E__;
 			__COUT_WARN__ << ss.str();
 			if(accumulatedTreeErrors)
-				*accumulatedTreeErrors = ss.str();
+				*accumulatedTreeErrors += ss.str();
 			else
 				__SS_THROW__;
 		}
@@ -1320,7 +1318,7 @@ void ConfigurationManager::loadTableGroup(
 			       << "(" << groupKey << ")." << __E__;
 			__COUT_WARN__ << ss.str();
 			if(accumulatedTreeErrors)
-				*accumulatedTreeErrors = ss.str();
+				*accumulatedTreeErrors += ss.str();
 			else
 				__SS_THROW__;
 		}
@@ -1343,7 +1341,7 @@ catch(...)
 		__SS__ << "Error occurred while loading table group: " << e.what() << __E__;
 		__COUT_WARN__ << ss.str();
 		if(accumulatedTreeErrors)
-			*accumulatedTreeErrors = ss.str();
+			*accumulatedTreeErrors += ss.str();
 		else
 			__SS_THROW__;
 	}
@@ -1352,7 +1350,7 @@ catch(...)
 		__SS__ << "An unknown error occurred while loading table group." << __E__;
 		__COUT_WARN__ << ss.str();
 		if(accumulatedTreeErrors)
-			*accumulatedTreeErrors = ss.str();
+			*accumulatedTreeErrors += ss.str();
 		else
 			__SS_THROW__;
 	}
