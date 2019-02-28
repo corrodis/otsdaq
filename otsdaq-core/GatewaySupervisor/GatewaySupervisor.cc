@@ -1392,6 +1392,14 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		                        message);
 
 		__COUT__ << "Macro Maker init reply: " << reply << __E__;
+		if(reply == "Error")
+		{
+			__SS__ << "\nTransition to Configuring interrupted! There was an error "
+			          "identified initializing Macro Maker.\n\n " << __E__;
+			__COUT_ERR__ << "\n" << ss.str();
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+			return;
+		}
 	}
 
 	// xoap::MessageReference message =
