@@ -107,7 +107,8 @@ unsigned int TableView::copyRows(const std::string& author,
 		// copy data
 		for(unsigned int col = 0; col < getNumberOfColumns(); ++col)
 			if(generateUniqueDataColumns &&
-			   columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA)
+			   (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA  ||
+			    		 columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))
 				continue;  // if leaving unique data, then skip copy
 			else
 				theDataView_[destOffsetRow][col] =
@@ -380,6 +381,7 @@ void TableView::init(void)
 							   uGroupDataSets[groupId].second.end())
 							{
 								__SS__ << "Entries in Unique Group Data column "
+									   << colPos << ":"
 								       << columnsInfo_[colPos].getName()
 								       << " are not unique for group ID '" << groupId
 								       << ".' Specifically at row=" << std::to_string(row)
@@ -1643,7 +1645,8 @@ void TableView::print(std::ostream& out) const
 	out << "Columns:\t";
 	for(int i = 0; i < (int)columnsInfo_.size(); ++i)
 		out << i << ":" << columnsInfo_[i].getName() << ":"
-		    << columnsInfo_[i].getStorageName() << ":" << columnsInfo_[i].getDataType()
+		    << columnsInfo_[i].getStorageName() << ":" << columnsInfo_[i].getType()
+			<< ":" << columnsInfo_[i].getDataType()
 		    << "\t ";
 	out << __E__;
 
@@ -2707,18 +2710,20 @@ unsigned int TableView::addRow(const std::string& author,
 	// column
 	for(unsigned int col = 0; col < getNumberOfColumns(); ++col)
 	{
-		//__COUT__ << col << " " << columnsInfo_[col].getType() << " == " <<
-		//		TableViewColumnInfo::TYPE_UNIQUE_DATA << __E__;
+//		__COUT__ << col << " " << columnsInfo_[col].getType() << " == " <<
+//				TableViewColumnInfo::TYPE_UNIQUE_DATA << __E__;
 
 		// baseNameAutoUID indicates to attempt to make row unique
 		//	add index to max number
 		if(incrementUniqueData &&
 		   (col == getColUID() ||
 		    (getNumberOfRows() > 1 &&
-		     columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA)))
+		     (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
+		    		 columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))))
 		{
-			//__COUT__ << "New unique data entry is '" << theDataView_[row][col] << "'" <<
-			//__E__;
+//			__COUT__ << "Current unique data entry is data[" << rowToAdd
+//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col] << "'"
+//			         << __E__;
 
 			maxUniqueData = 0;
 			tmpString     = "";
@@ -2789,10 +2794,11 @@ unsigned int TableView::addRow(const std::string& author,
 			else
 				theDataView_[rowToAdd][col] = baseString + indexString;
 
-			__COUT__ << "New unique data entry is '" << theDataView_[rowToAdd][col] << "'"
+			__COUT__ << "New unique data entry is data[" << rowToAdd
+					<< "][" << col << "] = '" << theDataView_[rowToAdd][col] << "'"
 			         << __E__;
 
-			// this->print();
+			 //this->print();
 		}
 		else
 			theDataView_[rowToAdd][col] = defaultRowValues[col];
