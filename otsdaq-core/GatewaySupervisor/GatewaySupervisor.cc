@@ -40,7 +40,6 @@ using namespace ots;
 #define FSM_LAST_GROUP_ALIAS_FILE_START std::string("FSMLastGroupAlias-")
 #define FSM_USERS_PREFERENCES_FILETYPE "pref"
 
-
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "GatewaySupervisor"
 
@@ -217,7 +216,7 @@ void GatewaySupervisor::init(void)
 	else
 		__COUT__ << "State changes over UDP are disabled." << __E__;
 
-} //end init()
+}  // end init()
 
 //========================================================================================================================
 // StateChangerWorkLoop
@@ -1395,7 +1394,8 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		if(reply == "Error")
 		{
 			__SS__ << "\nTransition to Configuring interrupted! There was an error "
-			          "identified initializing Macro Maker.\n\n " << __E__;
+			          "identified initializing Macro Maker.\n\n "
+			       << __E__;
 			__COUT_ERR__ << "\n" << ss.str();
 			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			return;

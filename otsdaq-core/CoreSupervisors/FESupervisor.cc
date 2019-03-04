@@ -13,8 +13,10 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* s) : CoreSupervisorBase(s)
 	           &FESupervisor::macroMakerSupervisorRequest,
 	           "MacroMakerSupervisorRequest",
 	           XDAQ_NS_URI);
+
 	xoap::bind(
 	    this, &FESupervisor::workLoopStatusRequest, "WorkLoopStatusRequest", XDAQ_NS_URI);
+
 	xoap::bind(this,
 	           &FESupervisor::frontEndCommunicationRequest,
 	           "FECommunication",
@@ -31,7 +33,7 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* s) : CoreSupervisorBase(s)
 //========================================================================================================================
 FESupervisor::~FESupervisor(void)
 {
-	__SUP_COUT__ << "Destroying..." << std::endl;
+	__SUP_COUT__ << "Destroying..." << __E__;
 	// theStateMachineImplementation_ is reset and the object it points to deleted in
 	// ~CoreSupervisorBase()0
 }  // end destructor
@@ -44,7 +46,7 @@ xoap::MessageReference FESupervisor::frontEndCommunicationRequest(
 
 	if(!theFEInterfacesManager_)
 	{
-		__SUP_SS__ << "No FE Interface Manager!" << std::endl;
+		__SUP_SS__ << "No FE Interface Manager!" << __E__;
 		__SUP_SS_THROW__;
 	}
 	SOAPParameters typeParameter, rxParameters;  // params for xoap to recv
@@ -52,6 +54,14 @@ xoap::MessageReference FESupervisor::frontEndCommunicationRequest(
 	SOAPUtilities::receive(message, typeParameter);
 
 	std::string type = typeParameter.getValue("type");
+
+	// types
+	//	feSend
+	//	feMacro
+	//	feMacroMultiDimensionalStart
+	//	macroMultiDimensionalStart
+	//	feMacroMultiDimensionalCheck
+	//	macroMultiDimensionalCheck
 
 	rxParameters.addParameter("requester");
 	rxParameters.addParameter("targetInterfaceID");
@@ -129,7 +139,7 @@ xoap::MessageReference FESupervisor::frontEndCommunicationRequest(
 			           << getApplicationDescriptor()->getLocalId()
 			           << " the FE Macro named '" << feMacroName << "' with target FE '"
 			           << targetInterfaceID << "' failed. Here is the error:\n\n"
-			           << e.what() << std::endl;
+			           << e.what() << __E__;
 			__SUP_SS_THROW__;
 		}
 		catch(...)
@@ -223,7 +233,7 @@ xoap::MessageReference FESupervisor::frontEndCommunicationRequest(
 				           << targetInterfaceID
 				           << "' failed to start multi-dimensional launch. "
 				           << "Here is the error:\n\n"
-				           << e.what() << std::endl;
+				           << e.what() << __E__;
 				__SUP_SS_THROW__;
 			}
 			catch(...)
@@ -257,7 +267,7 @@ xoap::MessageReference FESupervisor::frontEndCommunicationRequest(
 				           << targetInterfaceID
 				           << "' failed to start multi-dimensional launch. "
 				           << "Here is the error:\n\n"
-				           << e.what() << std::endl;
+				           << e.what() << __E__;
 				__SUP_SS_THROW__;
 			}
 			catch(...)
@@ -319,7 +329,7 @@ xoap::MessageReference FESupervisor::frontEndCommunicationRequest(
 			           << targetInterfaceID
 			           << "' failed to check multi-dimensional launch. "
 			           << "Here is the error:\n\n"
-			           << e.what() << std::endl;
+			           << e.what() << __E__;
 			__SUP_SS_THROW__;
 		}
 		catch(...)
@@ -383,32 +393,28 @@ catch(...)
 xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
     xoap::MessageReference message)
 {
-	__SUP_COUT__ << "$$$$$$$$$$$$$$$$$" << std::endl;
+	__SUP_COUT__ << "$$$$$$$$$$$$$$$$$" << __E__;
 
 	// receive request parameters
 	SOAPParameters parameters;
 	parameters.addParameter("Request");
-	parameters.addParameter("InterfaceID");
 
-	// params for universal commands
-	parameters.addParameter("Address");
-	parameters.addParameter("Data");
-
-	// params for running macros
-	parameters.addParameter("feMacroName");
-	parameters.addParameter("inputArgs");
-	parameters.addParameter("outputArgs");
+	__SUP_COUT__ << "Received Macro Maker message: " << SOAPUtilities::translate(message)
+	             << __E__;
 
 	SOAPUtilities::receive(message, parameters);
 	std::string request     = parameters.getValue("Request");
-	std::string addressStr  = parameters.getValue("Address");
-	std::string dataStr     = parameters.getValue("Data");
-	std::string InterfaceID = parameters.getValue("InterfaceID");
 
-	__SUP_COUT__ << "request: " << request << std::endl;
+	__SUP_COUT__ << "request: " << request << __E__;
 
-	__SUP_COUT__ << "Address: " << addressStr << " Data: " << dataStr
-	             << " InterfaceID: " << InterfaceID << std::endl;
+	// request types:
+	//	GetInterfaces
+	//	UniversalWrite
+	//	UniversalRead
+	//	GetInterfaceMacros
+	//	RunInterfaceMacro
+	//	RunMacroMakerMacro
+
 
 	SOAPParameters retParameters;
 
@@ -431,11 +437,22 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 		{
 			if(!theFEInterfacesManager_)
 			{
-				__SUP_COUT_INFO__ << "No FE Interface Manager! (So no write occurred)"
-				                  << std::endl;
-				return SOAPUtilities::makeSOAPMessageReference(
-				    supervisorClassNoNamespace_ + "DataWritten", retParameters);
+				__SUP_SS__ << "No FE Interface Manager! Are you configured?"
+				                  << __E__;
+				__SUP_SS_THROW__;
 			}
+			// params for running macros
+			SOAPParameters requestParameters;
+			requestParameters.addParameter("InterfaceID");
+			requestParameters.addParameter("Address");
+			requestParameters.addParameter("Data");
+			SOAPUtilities::receive(message, requestParameters);
+			std::string interfaceID = requestParameters.getValue("InterfaceID");
+			std::string addressStr   = requestParameters.getValue("Address");
+			std::string dataStr  = requestParameters.getValue("Data");
+
+			__SUP_COUT__ << "Address: " << addressStr << " Data: " << dataStr
+			             << " InterfaceID: " << interfaceID << __E__;
 
 			// parameters interface index!
 			// unsigned int index = stoi(indexStr);	// As long as the supervisor has only
@@ -443,12 +460,12 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 
 			__SUP_COUT__
 			    << "theFEInterfacesManager_->getInterfaceUniversalAddressSize(index) "
-			    << theFEInterfacesManager_->getInterfaceUniversalAddressSize(InterfaceID)
-			    << std::endl;
+			    << theFEInterfacesManager_->getInterfaceUniversalAddressSize(interfaceID)
+			    << __E__;
 			__SUP_COUT__
 			    << "theFEInterfacesManager_->getInterfaceUniversalDataSize(index) "
-			    << theFEInterfacesManager_->getInterfaceUniversalDataSize(InterfaceID)
-			    << std::endl;
+			    << theFEInterfacesManager_->getInterfaceUniversalDataSize(interfaceID)
+			    << __E__;
 
 			// Converting std::string to char*
 			// char address
@@ -460,7 +477,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 
 			std::string addressTmp;
 			addressTmp.reserve(
-			    theFEInterfacesManager_->getInterfaceUniversalAddressSize(InterfaceID));
+			    theFEInterfacesManager_->getInterfaceUniversalAddressSize(interfaceID));
 			char* address = &addressTmp[0];
 
 			if(addressStr.size() % 2)  // if odd, make even
@@ -468,7 +485,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			unsigned int i = 0;
 			for(; i < addressStr.size() &&
 			      i / 2 < theFEInterfacesManager_->getInterfaceUniversalAddressSize(
-			                  InterfaceID);
+			                  interfaceID);
 			    i += 2)
 			{
 				tmpHex[0] = addressStr[addressStr.size() - 1 - i - 1];
@@ -478,20 +495,20 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			}
 			// finish and fill with 0s
 			for(; i / 2 <
-			      theFEInterfacesManager_->getInterfaceUniversalAddressSize(InterfaceID);
+			      theFEInterfacesManager_->getInterfaceUniversalAddressSize(interfaceID);
 			    i += 2)
 			{
 				address[i / 2] = 0;
 				printf("%2.2X", (unsigned char)address[i / 2]);
 			}
 
-			std::cout << std::endl;
+			std::cout << __E__;
 
 			__SUP_COUT__ << "Translating data: ";
 
 			std::string dataTmp;
 			dataTmp.reserve(
-			    theFEInterfacesManager_->getInterfaceUniversalDataSize(InterfaceID));
+			    theFEInterfacesManager_->getInterfaceUniversalDataSize(interfaceID));
 			char* data = &dataTmp[0];
 
 			if(dataStr.size() % 2)  // if odd, make even
@@ -500,7 +517,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			i = 0;
 			for(; i < dataStr.size() &&
 			      i / 2 <
-			          theFEInterfacesManager_->getInterfaceUniversalDataSize(InterfaceID);
+			          theFEInterfacesManager_->getInterfaceUniversalDataSize(interfaceID);
 			    i += 2)
 			{
 				tmpHex[0] = dataStr[dataStr.size() - 1 - i - 1];
@@ -510,14 +527,14 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			}
 			// finish and fill with 0s
 			for(; i / 2 <
-			      theFEInterfacesManager_->getInterfaceUniversalDataSize(InterfaceID);
+			      theFEInterfacesManager_->getInterfaceUniversalDataSize(interfaceID);
 			    i += 2)
 			{
 				data[i / 2] = 0;
 				printf("%2.2X", (unsigned char)data[i / 2]);
 			}
 
-			std::cout << std::endl;
+			std::cout << __E__;
 
 			// char* address = new char[addressStr.size() + 1];
 			// std::copy(addressStr.begin(), addressStr.end(), address);
@@ -526,7 +543,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			//		std::copy(dataStr.begin(), dataStr.end(), data);
 			//		data[dataStr.size()] = '\0';
 
-			theFEInterfacesManager_->universalWrite(InterfaceID, address, data);
+			theFEInterfacesManager_->universalWrite(interfaceID, address, data);
 
 			// delete[] address;
 			// delete[] data;
@@ -538,11 +555,22 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 		{
 			if(!theFEInterfacesManager_)
 			{
-				__SUP_COUT_INFO__ << "No FE Interface Manager! (So no read occurred)"
-				                  << std::endl;
-				return SOAPUtilities::makeSOAPMessageReference(
-				    supervisorClassNoNamespace_ + "aa", retParameters);
+				__SUP_SS__ << "No FE Interface Manager! Are you configured?"
+				                  << __E__;
+				__SUP_SS_THROW__;
 			}
+
+			// params for running macros
+			SOAPParameters requestParameters;
+			requestParameters.addParameter("InterfaceID");
+			requestParameters.addParameter("Address");
+			SOAPUtilities::receive(message, requestParameters);
+			std::string interfaceID = requestParameters.getValue("InterfaceID");
+			std::string addressStr   = requestParameters.getValue("Address");
+
+			__SUP_COUT__ << "Address: " << addressStr <<
+					" InterfaceID: " << interfaceID << __E__;
+
 
 			// parameters interface index!
 			// parameter address and data
@@ -551,12 +579,12 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 
 			__SUP_COUT__
 			    << "theFEInterfacesManager_->getInterfaceUniversalAddressSize(index) "
-			    << theFEInterfacesManager_->getInterfaceUniversalAddressSize(InterfaceID)
-			    << std::endl;
+			    << theFEInterfacesManager_->getInterfaceUniversalAddressSize(interfaceID)
+			    << __E__;
 			__SUP_COUT__
 			    << "theFEInterfacesManager_->getInterfaceUniversalDataSize(index) "
-			    << theFEInterfacesManager_->getInterfaceUniversalDataSize(InterfaceID)
-			    << std::endl;
+			    << theFEInterfacesManager_->getInterfaceUniversalDataSize(interfaceID)
+			    << __E__;
 
 			char tmpHex[3];  // for use converting hex to binary
 			tmpHex[2] = '\0';
@@ -565,7 +593,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 
 			std::string addressTmp;
 			addressTmp.reserve(
-			    theFEInterfacesManager_->getInterfaceUniversalAddressSize(InterfaceID));
+			    theFEInterfacesManager_->getInterfaceUniversalAddressSize(interfaceID));
 			char* address = &addressTmp[0];
 
 			if(addressStr.size() % 2)  // if odd, make even
@@ -574,7 +602,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			unsigned int i = 0;
 			for(; i < addressStr.size() &&
 			      i / 2 < theFEInterfacesManager_->getInterfaceUniversalAddressSize(
-			                  InterfaceID);
+			                  interfaceID);
 			    i += 2)
 			{
 				tmpHex[0] = addressStr[addressStr.size() - 1 - i - 1];
@@ -584,36 +612,35 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			}
 			// finish and fill with 0s
 			for(; i / 2 <
-			      theFEInterfacesManager_->getInterfaceUniversalAddressSize(InterfaceID);
+			      theFEInterfacesManager_->getInterfaceUniversalAddressSize(interfaceID);
 			    i += 2)
 			{
 				address[i / 2] = 0;
 				printf("%2.2X", (unsigned char)address[i / 2]);
 			}
 
-			std::cout << std::endl;
+			std::cout << __E__;
 
 			unsigned int dataSz =
-			    theFEInterfacesManager_->getInterfaceUniversalDataSize(InterfaceID);
+			    theFEInterfacesManager_->getInterfaceUniversalDataSize(interfaceID);
 			std::string dataStr;
 			dataStr.resize(dataSz);
 			char* data = &dataStr[0];
 
 			//    	std::string result =
 			//    theFEInterfacesManager_->universalRead(index,address,data);
-			//    	__SUP_COUT__<< result << std::endl << std::endl;
+			//    	__SUP_COUT__<< result << __E__ << __E__;
 
 			try
 			{
-				theFEInterfacesManager_->universalRead(InterfaceID, address, data);
+				theFEInterfacesManager_->universalRead(interfaceID, address, data);
 			}
 			catch(const std::runtime_error& e)
 			{
 				// do not allow read exception to crash everything when a macromaker
 				// command
-				__MOUT_ERR__ << "Exception caught during read: " << e.what() << std::endl;
-				__SUP_COUT_ERR__ << "Exception caught during read: " << e.what()
-				                 << std::endl;
+				__MOUT_ERR__ << "Exception caught during read: " << e.what() << __E__;
+				__SUP_COUT_ERR__ << "Exception caught during read: " << e.what() << __E__;
 				retParameters.addParameter("dataResult", "Time Out Error");
 				return SOAPUtilities::makeSOAPMessageReference(
 				    supervisorClassNoNamespace_ + "aa", retParameters);
@@ -622,8 +649,8 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			{
 				// do not allow read exception to crash everything when a macromaker
 				// command
-				__MOUT_ERR__ << "Exception caught during read." << std::endl;
-				__SUP_COUT_ERR__ << "Exception caught during read." << std::endl;
+				__MOUT_ERR__ << "Exception caught during read." << __E__;
+				__SUP_COUT_ERR__ << "Exception caught during read." << __E__;
 				retParameters.addParameter("dataResult", "Time Out Error");
 				return SOAPUtilities::makeSOAPMessageReference(
 				    supervisorClassNoNamespace_ + "aa", retParameters);
@@ -636,7 +663,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 				str8.resize(8);
 				__SUP_COUT__ << "decResult[" << dataSz
 				             << " bytes]: " << *((unsigned long long*)(&str8[0]))
-				             << std::endl;
+				             << __E__;
 			}
 
 			std::string hexResultStr;
@@ -651,7 +678,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			}
 
 			__SUP_COUT__ << "hexResult[" << strlen(hexResult)
-			             << " nibbles]: " << std::string(hexResult) << std::endl;
+			             << " nibbles]: " << std::string(hexResult) << __E__;
 
 			retParameters.addParameter("dataResult", hexResult);
 			return SOAPUtilities::makeSOAPMessageReference(
@@ -673,51 +700,111 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 		}
 		else if(request == "RunInterfaceMacro")
 		{
+
 			if(!theFEInterfacesManager_)
 			{
-				retParameters.addParameter("success", "0");
-				retParameters.addParameter("outputArgs", "");
-				return SOAPUtilities::makeSOAPMessageReference(
-				    supervisorClassNoNamespace_ + "Response", retParameters);
+				__SUP_SS__ << "Missing FE Interface Manager! Are you configured?"
+				           << __E__;
+				__SUP_SS_THROW__;
 			}
 
-			std::string feMacroName = parameters.getValue("feMacroName");
-			std::string inputArgs   = parameters.getValue("inputArgs");
-			std::string outputArgs  = parameters.getValue("outputArgs");
+
+			// params for running macros
+			SOAPParameters requestParameters;
+			requestParameters.addParameter("feMacroName");
+			requestParameters.addParameter("inputArgs");
+			requestParameters.addParameter("outputArgs");
+			requestParameters.addParameter("InterfaceID");
+			SOAPUtilities::receive(message, requestParameters);
+			std::string interfaceID = requestParameters.getValue("InterfaceID");
+			std::string feMacroName = requestParameters.getValue("feMacroName");
+			std::string inputArgs   = requestParameters.getValue("inputArgs");
+			std::string outputArgs  = requestParameters.getValue("outputArgs");
 
 			// outputArgs must be filled with the proper argument names
 			//	and then the response output values will be returned in the string.
-			bool success = true;
 			try
 			{
 				theFEInterfacesManager_->runFEMacro(
-				    InterfaceID, feMacroName, inputArgs, outputArgs);
+				    interfaceID, feMacroName, inputArgs, outputArgs);
 			}
 			catch(std::runtime_error& e)
 			{
 				__SUP_SS__ << "In Supervisor with LID="
 				           << getApplicationDescriptor()->getLocalId()
 				           << " the FE Macro named '" << feMacroName
-				           << "' with target FE '" << InterfaceID
+				           << "' with target FE '" << interfaceID
 				           << "' failed. Here is the error:\n\n"
-				           << e.what() << std::endl;
-				__SUP_COUT_ERR__ << "\n" << ss.str();
-				success    = false;
-				outputArgs = ss.str();
+				           << e.what() << __E__;
+				__SUP_SS_THROW__;
 			}
 			catch(...)
 			{
 				__SUP_SS__ << "In Supervisor with LID="
 				           << getApplicationDescriptor()->getLocalId()
 				           << " the FE Macro named '" << feMacroName
-				           << "' with target FE '" << InterfaceID
+				           << "' with target FE '" << interfaceID
 				           << "' failed due to an unknown error." << __E__;
-				__SUP_COUT_ERR__ << "\n" << ss.str();
-				success    = false;
-				outputArgs = ss.str();
+				__SUP_SS_THROW__;
 			}
 
-			retParameters.addParameter("success", success ? "1" : "0");
+			// retParameters.addParameter("success", success ? "1" : "0");
+			retParameters.addParameter("outputArgs", outputArgs);
+
+			return SOAPUtilities::makeSOAPMessageReference(
+			    supervisorClassNoNamespace_ + "Response", retParameters);
+		}
+		else if(request == "RunMacroMakerMacro")
+		{
+			if(!theFEInterfacesManager_)
+			{
+				__SUP_SS__ << "Missing FE Interface Manager! Are you configured?"
+				           << __E__;
+				__SUP_SS_THROW__;
+			}
+
+			// params for running macros
+			SOAPParameters requestParameters;
+			requestParameters.addParameter("macroName");
+			requestParameters.addParameter("macroString");
+			requestParameters.addParameter("inputArgs");
+			requestParameters.addParameter("outputArgs");
+			requestParameters.addParameter("InterfaceID");
+			SOAPUtilities::receive(message, requestParameters);
+			std::string interfaceID = requestParameters.getValue("InterfaceID");
+			std::string macroName = requestParameters.getValue("macroName");
+			std::string macroString = requestParameters.getValue("macroString");
+			std::string inputArgs   = requestParameters.getValue("inputArgs");
+			std::string outputArgs  = requestParameters.getValue("outputArgs");
+
+
+			// outputArgs must be filled with the proper argument names
+			//	and then the response output values will be returned in the string.
+			try
+			{
+				theFEInterfacesManager_->runMacro(
+				    interfaceID, macroString, inputArgs, outputArgs);
+			}
+			catch(std::runtime_error& e)
+			{
+				__SUP_SS__ << "In Supervisor with LID="
+				           << getApplicationDescriptor()->getLocalId()
+				           << " the MacroMaker Macro named '" << macroName
+				           << "' with target FE '" << interfaceID
+				           << "' failed. Here is the error:\n\n"
+				           << e.what() << __E__;
+				__SUP_SS_THROW__;
+			}
+			catch(...)
+			{
+				__SUP_SS__ << "In Supervisor with LID="
+				           << getApplicationDescriptor()->getLocalId()
+				           << " the MacroMaker Macro named '" << macroName
+				           << "' with target FE '" << interfaceID
+				           << "' failed due to an unknown error." << __E__;
+				__SUP_SS_THROW__;
+			}
+
 			retParameters.addParameter("outputArgs", outputArgs);
 
 			return SOAPUtilities::makeSOAPMessageReference(
@@ -725,8 +812,8 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 		}
 		else
 		{
-			__SUP_COUT_WARN__ << "Unrecognized request received! '" << request << "'"
-			                  << std::endl;
+			__SUP_SS__ << "Unrecognized request received! '" << request << "'" << __E__;
+			__SUP_SS_THROW__;
 		}
 	}
 	catch(const std::runtime_error& e)
@@ -754,8 +841,7 @@ xoap::MessageReference FESupervisor::workLoopStatusRequest(xoap::MessageReferenc
 	{
 		__SUP_SS__ << "Invalid request for front-end workloop status from Supervisor "
 		              "without a FEVInterfacesManager."
-		           << std::endl;
-		__SUP_COUT_ERR__ << ss.str();
+		           << __E__;
 		__SUP_SS_THROW__;
 	}
 
@@ -786,24 +872,23 @@ FEVInterfacesManager* FESupervisor::extractFEInterfacesManager()
 			if(!theFEInterfacesManager_)
 			{
 				// dynamic_cast returns null pointer on failure
-				__SUP_SS__ << "Dynamic cast failure!" << std::endl;
-				__SUP_COUT_ERR__ << ss.str();
+				__SUP_SS__ << "Dynamic cast failure!" << __E__;
 				__SUP_SS_THROW__;
 			}
 			__SUP_COUT__ << "State Machine " << i << " WAS of type FEVInterfacesManager"
-			             << std::endl;
+			             << __E__;
 
 			break;
 		}
 		catch(...)
 		{
 			__SUP_COUT__ << "State Machine " << i
-			             << " was NOT of type FEVInterfacesManager" << std::endl;
+			             << " was NOT of type FEVInterfacesManager" << __E__;
 		}
 	}
 
 	__SUP_COUT__ << "theFEInterfacesManager pointer = " << theFEInterfacesManager_
-	             << std::endl;
+	             << __E__;
 
 	return theFEInterfacesManager_;
 }  // end extractFEInterfaceManager()

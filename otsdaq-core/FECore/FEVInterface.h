@@ -22,10 +22,10 @@
 
 #include "otsdaq-core/Macros/CoutMacros.h"
 
-#define __ARGS__                                   \
-	const frontEndMacroStruct_t& feMacroStruct,		   \
-	FEVInterface::frontEndMacroConstArgs_t argsIn, \
-	    FEVInterface::frontEndMacroArgs_t  argsOut
+#define __ARGS__                                              \
+	const frontEndMacroStruct_t &              feMacroStruct, \
+	    FEVInterface::frontEndMacroConstArgs_t argsIn,        \
+	    FEVInterface::frontEndMacroArgs_t      argsOut
 
 #define __GET_ARG_IN__(X, Y) getFEMacroConstArgumentValue<Y>(argsIn, X)
 #define __GET_ARG_OUT__(X, Y) getFEMacroArgumentValue<Y>(argsOut, X)
@@ -121,10 +121,11 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	// public types and functions for map of FE macros
 	using frontEndMacroArg_t =
 	    std::pair<const std::string /* arg name */, std::string /* arg return value */>;
-	using frontEndMacroArgs_t = std::vector<frontEndMacroArg_t>&;
+	using frontEndMacroArgs_t      = std::vector<frontEndMacroArg_t>&;
 	using frontEndMacroConstArgs_t = const std::vector<frontEndMacroArg_t>&;
-	struct frontEndMacroStruct_t; //declare name for __ARGS__
-	using frontEndMacroFunction_t  = void (ots::FEVInterface::*)(__ARGS__);    // void function (vector-of-inputs, vector-of-outputs)
+	struct frontEndMacroStruct_t;  // declare name for __ARGS__
+	using frontEndMacroFunction_t = void (ots::FEVInterface::*)(
+	    __ARGS__);                // void function (vector-of-inputs, vector-of-outputs)
 	struct frontEndMacroStruct_t  // members fully define a front-end macro function
 	{
 		frontEndMacroStruct_t(
@@ -212,8 +213,9 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 		bool                  lsbf_;  // least significant byte first
 	};                                // end macroStruct_t declaration
   protected:
-	void 		runMacro(FEVInterface::macroStruct_t&                        macro,
+	void runMacro(FEVInterface::macroStruct_t&                        macro,
 	              std::map<std::string /*name*/, uint64_t /*value*/>& variableMap);
+
   public:
 	// end FE Macros
 	/////////

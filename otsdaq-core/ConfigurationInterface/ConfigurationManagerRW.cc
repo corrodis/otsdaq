@@ -52,14 +52,13 @@ ConfigurationManagerRW::ConfigurationManagerRW(std::string username)
 	                                                 // interface once RW and regular use
 	                                                 // same interface instance
 
-
 	//=========================
 	// dump names of core tables (so UpdateOTS.sh can copy core tables for user)
 	// only if table does not exist
 	{
-		const std::set<std::string>& contextMemberNames = getContextMemberNames();
+		const std::set<std::string>& contextMemberNames  = getContextMemberNames();
 		const std::set<std::string>& backboneMemberNames = getBackboneMemberNames();
-		const std::set<std::string>& iterateMemberNames = getIterateMemberNames();
+		const std::set<std::string>& iterateMemberNames  = getIterateMemberNames();
 
 		FILE* fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "r");
 
@@ -183,8 +182,8 @@ ConfigurationManagerRW::ConfigurationManagerRW(std::string username)
 				__SS_THROW__;
 			}
 		}
-	} //end dump names of core tables
-} //end constructor
+	}  // end dump names of core tables
+}  // end constructor
 
 //==============================================================================
 // getAllTableInfo()

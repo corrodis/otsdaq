@@ -787,7 +787,9 @@ void WizardSupervisor::UserSettings(xgi::Input*  in,
 		}
 		else if(Command == "Export")
 		{
-			__SS__ << "This has been commented out due to problems compiling. Contact system admins." << __E__;
+			__SS__ << "This has been commented out due to problems compiling. Contact "
+			          "system admins."
+			       << __E__;
 			__SS_THROW__;
 			//
 			//			__COUT__ << "We are exporting Users' Settings!!!" << std::endl;

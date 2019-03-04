@@ -9,17 +9,23 @@
 
 using namespace ots;
 
-#define SOURCE_BASE_PATH std::string(getenv("MRB_SOURCE")) + "/"
 #define CODE_EDITOR_DATA_PATH \
 	std::string(getenv("SERVICE_DATA_PATH")) + "/" + "CodeEditorData"
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "CodeEditor"
 
-std::string CodeEditor::SPECIAL_TYPE_FEInterface       = "FEInterface";
-std::string CodeEditor::SPECIAL_TYPE_DataProcessor     = "DataProcessor";
-std::string CodeEditor::SPECIAL_TYPE_ControlsInterface = "ControlsInterface";
-std::string CodeEditor::SPECIAL_TYPE_Tools             = "Tools";
+const std::string CodeEditor::SPECIAL_TYPE_FEInterface       = "FEInterface";
+const std::string CodeEditor::SPECIAL_TYPE_DataProcessor     = "DataProcessor";
+const std::string CodeEditor::SPECIAL_TYPE_Table             = "Table";
+const std::string CodeEditor::SPECIAL_TYPE_ControlsInterface = "ControlsInterface";
+const std::string CodeEditor::SPECIAL_TYPE_Tools             = "Tools";
+const std::string CodeEditor::SPECIAL_TYPE_UserData          = "UserData";
+const std::string CodeEditor::SPECIAL_TYPE_OutputData        = "OutputData";
+
+const std::string CodeEditor::SOURCE_BASE_PATH = std::string(getenv("MRB_SOURCE")) + "/";
+const std::string CodeEditor::USER_DATA_PATH   = std::string(getenv("USER_DATA")) + "/";
+const std::string CodeEditor::OTSDAQ_DATA_PATH = std::string(getenv("OTSDAQ_DATA")) + "/";
 
 //========================================================================================================================
 // CodeEditor
@@ -171,19 +177,25 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
 	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
 	__COUTV__(path);
-	__COUTV__(SOURCE_BASE_PATH);
+	__COUTV__(CodeEditor::SOURCE_BASE_PATH);
 
 	xmlOut->addTextElementToData("path", path);
 
-	const unsigned int numOfTypes         = 4;
+	const unsigned int numOfTypes         = 7;
 	std::string        specialTypeNames[] = {"Front-End Plugins",
                                       "Data Processor Plugins",
+                                      "Configuration Table Plugins",
                                       "Controls Interface Plugins",
-                                      "Tools and Scripts"};
+                                      "Tools and Scripts",
+                                      "$USER_DATA",
+                                      "$OTSDAQ_DATA"};
 	std::string        specialTypes[]     = {SPECIAL_TYPE_FEInterface,
                                   SPECIAL_TYPE_DataProcessor,
+                                  SPECIAL_TYPE_Table,
                                   SPECIAL_TYPE_ControlsInterface,
-                                  SPECIAL_TYPE_Tools};
+                                  SPECIAL_TYPE_Tools,
+                                  SPECIAL_TYPE_UserData,
+                                  SPECIAL_TYPE_OutputData};
 
 	std::string pathMatchPrepend = "/";  // some requests come in with leading "/" and
 	                                     // "//"
@@ -194,6 +206,19 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 		if(path == pathMatchPrepend + specialTypeNames[i])
 		{
 			__COUT__ << "Getting all " << specialTypeNames[i] << "..." << __E__;
+
+			// handle UserData and OutputData differently
+			//	since there is only one path to check
+			if(specialTypes[i] == SPECIAL_TYPE_UserData)
+			{
+				getPathContent("/", CodeEditor::USER_DATA_PATH, xmlOut);
+				return;
+			}
+			else if(specialTypes[i] == SPECIAL_TYPE_OutputData)
+			{
+				getPathContent("/", CodeEditor::OTSDAQ_DATA_PATH, xmlOut);
+				return;
+			}
 
 			std::map<std::string /*special type*/,
 			         std::set<std::string> /*special file paths*/>
@@ -214,24 +239,44 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 			return;
 		}
 
+	// if root directory, add special directory for types
+	if(path == "/")
+		for(unsigned int i = 0; i < numOfTypes; ++i)
+			xmlOut->addTextElementToData("special", specialTypeNames[i]);
+
+	std::string contents;
+	size_t i;
+	if((i=path.find("$USER_DATA/")) == 0 ||
+			(i == 1 && path[0] == '/')) //if leading / or without
+		getPathContent(CodeEditor::USER_DATA_PATH,
+		               path.substr(std::string("/$USER_DATA/").size()),
+		               xmlOut);
+	else if((i=path.find("$OTSDAQ_DATA/")) == 0 ||
+			(i == 1 && path[0] == '/')) //if leading / or without
+		getPathContent(CodeEditor::OTSDAQ_DATA_PATH,
+		               path.substr(std::string("/$OTSDAQ_DATA/").size()),
+		               xmlOut);
+	else
+		getPathContent(CodeEditor::SOURCE_BASE_PATH, path, xmlOut);
+
+}  // end getDirectoryContent()
+
+//========================================================================================================================
+// getPathContent
+void CodeEditor::getPathContent(const std::string& basepath,
+                                const std::string& path,
+                                HttpXmlDocument*   xmlOut)
+{
 	DIR*           pDIR;
 	struct dirent* entry;
 	bool           isDir;
 	std::string    name;
 	int            type;
 
-	if(!(pDIR = opendir((SOURCE_BASE_PATH + path).c_str())))
+	if(!(pDIR = opendir((basepath + path).c_str())))
 	{
 		__SS__ << "Path '" << path << "' could not be opened!" << __E__;
 		__SS_THROW__;
-	}
-
-	if(path == "/")
-	{
-		// add special directory for types
-
-		for(unsigned int i = 0; i < numOfTypes; ++i)
-			xmlOut->addTextElementToData("special", specialTypeNames[i]);
 	}
 
 	// add to set for alpha ordering
@@ -276,7 +321,8 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 			if(type == 0)
 			{
 				// unknown type .. determine if directory
-				DIR* pTmpDIR = opendir((SOURCE_BASE_PATH + path + "/" + name).c_str());
+				DIR* pTmpDIR =
+				    opendir((CodeEditor::SOURCE_BASE_PATH + path + "/" + name).c_str());
 				if(pTmpDIR)
 				{
 					isDir = true;
@@ -326,8 +372,7 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 		xmlOut->addTextElementToData("directory", name);
 	for(const auto& name : orderedFiles)
 		xmlOut->addTextElementToData("file", name);
-
-}  // end getDirectoryContent
+}  // end getPathContent()
 
 //========================================================================================================================
 // getFileContent
@@ -342,17 +387,34 @@ void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 	xmlOut->addTextElementToData("ext", extension);
 
 	std::string contents;
-	CodeEditor::readFile(path + "." + extension, contents);
+	size_t i;
+	if((i=path.find("$USER_DATA/")) == 0 ||
+			(i == 1 && path[0] == '/')) //if leading / or without
+		CodeEditor::readFile(
+		    CodeEditor::USER_DATA_PATH,
+		    path.substr(i + std::string("$USER_DATA/").size()) + "." + extension,
+		    contents);
+	else if((i=path.find("$OTSDAQ_DATA/")) == 0 ||
+			(i == 1 && path[0] == '/')) //if leading / or without
+		CodeEditor::readFile(
+		    CodeEditor::OTSDAQ_DATA_PATH,
+		    path.substr(std::string("/$OTSDAQ_DATA/").size()) + "." + extension,
+		    contents);
+	else
+		CodeEditor::readFile(
+		    CodeEditor::SOURCE_BASE_PATH, path + "." + extension, contents);
 
 	xmlOut->addTextElementToData("content", contents);
 
-}  // end getFileContent
+}  // end getFileContent()
 
 //========================================================================================================================
 // readFile
-void CodeEditor::readFile(const std::string& path, std::string& contents)
+void CodeEditor::readFile(const std::string& basepath,
+                          const std::string& path,
+                          std::string&       contents)
 {
-	std::string fullpath = SOURCE_BASE_PATH + path;
+	std::string fullpath = basepath + "/" + path;
 	__COUTV__(fullpath);
 
 	std::FILE* fp = std::fopen(fullpath.c_str(), "rb");
@@ -371,13 +433,14 @@ void CodeEditor::readFile(const std::string& path, std::string& contents)
 
 //========================================================================================================================
 // writeFile
-void CodeEditor::writeFile(const std::string&        path,
+void CodeEditor::writeFile(const std::string&        basepath,
+                           const std::string&        path,
                            const std::string&        contents,
                            const std::string&        username,
                            const unsigned long long& insertPos,
                            const std::string&        insertString)
 {
-	std::string fullpath = SOURCE_BASE_PATH + path;
+	std::string fullpath = basepath + path;
 	__COUTV__(fullpath);
 
 	FILE* fp;
@@ -452,7 +515,8 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 	//__COUTV__(contents);
 	contents = StringMacros::decodeURIComponent(contents);
 
-	CodeEditor::writeFile(path + "." + extension, contents, username);
+	CodeEditor::writeFile(
+	    CodeEditor::SOURCE_BASE_PATH, path + "." + extension, contents, username);
 
 }  // end saveFileContent
 
@@ -586,14 +650,18 @@ CodeEditor::getSpecialsMap(void)
 
 	__COUTV__(path);
 
-	const unsigned int numOfSpecials     = 5;
+	const unsigned int numOfSpecials     = 7;
 	std::string        specialFolders[]  = {"FEInterfaces",
                                     "DataProcessorPlugins",
+                                    "UserTableDataFormats",
+                                    "TablePluginDataFormats",
                                     "ControlsInterfacePlugins",
                                     "FEInterfacePlugins",
                                     "tools"};
 	std::string        specialMapTypes[] = {CodeEditor::SPECIAL_TYPE_FEInterface,
                                      CodeEditor::SPECIAL_TYPE_DataProcessor,
+                                     CodeEditor::SPECIAL_TYPE_Table,
+                                     CodeEditor::SPECIAL_TYPE_Table,
                                      CodeEditor::SPECIAL_TYPE_ControlsInterface,
                                      CodeEditor::SPECIAL_TYPE_FEInterface,
                                      CodeEditor::SPECIAL_TYPE_Tools};

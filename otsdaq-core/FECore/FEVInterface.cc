@@ -1112,7 +1112,7 @@ void FEVInterface::runMacro(
 				readOp.address_ = variableMap.at(readOp.addressVarName_);
 			}
 
-			uint64_t dataValue;
+			uint64_t dataValue = 0;
 
 			__FE_COUT__ << std::hex << "Read address: \t 0x" << readOp.address_ << __E__
 			            << std::dec;

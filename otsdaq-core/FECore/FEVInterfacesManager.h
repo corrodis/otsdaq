@@ -55,6 +55,10 @@ class FEVInterfacesManager : public VStateMachine, public Configurable
 	                const std::string& feMacroName,
 	                const std::string& inputArgs,
 	                std::string&       outputArgs);  // used by MacroMaker
+	void runMacro(const std::string& interfaceID,
+	              const std::string& macroObjectString,
+	              const std::string& inputArgs,
+	              std::string&       outputArgs);  // used by MacroMaker
 	void runFEMacroByFE(
 	    const std::string& callingInterfaceID,
 	    const std::string& interfaceID,

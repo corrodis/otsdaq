@@ -1812,6 +1812,160 @@ void FEVInterfacesManager::runFEMacroByFE(const std::string& callingInterfaceID,
 }  // end runFEMacroByFE()
 
 //========================================================================================================================
+// runMacro
+//	Runs the MacroMaker Macro in the specified FE interface.
+//
+//	inputs:
+//		- inputArgs: colon-separated name/value pairs, and then comma-separated
+//		- outputArgs: comma-separated
+//
+//	outputs:
+//		- throws exception on failure
+//		- outputArgs: colon-separate name/value pairs, and then comma-separated
+void FEVInterfacesManager::runMacro(const std::string& interfaceID,
+                                    const std::string& macroObjectString,
+                                    const std::string& inputArgs,
+                                    std::string&       outputArgs)
+{
+	//-------------------------------
+	// extract macro object
+	FEVInterface::macroStruct_t macro(macroObjectString);
+
+	// check for interfaceID
+	FEVInterface* fe = getFEInterfaceP(interfaceID);
+
+	// build input arguments
+	//	parse args, semicolon-separated pairs, and then comma-separated
+	std::vector<FEVInterface::frontEndMacroArg_t> argsIn;
+	{
+		std::istringstream inputStream(inputArgs);
+		std::string        splitVal, argName, argValue;
+		while(getline(inputStream, splitVal, ';'))
+		{
+			std::istringstream pairInputStream(splitVal);
+			getline(pairInputStream, argName, ',');
+			getline(pairInputStream, argValue, ',');
+			argsIn.push_back(std::make_pair(argName, argValue));
+		}
+	}
+
+	// check namesOfInputArguments_
+	if(macro.namesOfInputArguments_.size() != argsIn.size())
+	{
+		__CFG_SS__ << "MacroMaker Macro '" << macro.macroName_
+		           << "' was attempted on interfaceID '" << interfaceID
+		           << "' with a mismatch in"
+		           << " number of input arguments. " << argsIn.size() << " were given. "
+		           << macro.namesOfInputArguments_.size() << " expected." << __E__;
+		__CFG_SS_THROW__;
+	}
+	for(unsigned int i = 0; i < argsIn.size(); ++i)
+		if(macro.namesOfInputArguments_.find(argsIn[i].first) ==
+		   macro.namesOfInputArguments_.end())
+		{
+			__CFG_SS__ << "MacroMaker Macro '" << macro.macroName_
+			           << "' was attempted on interfaceID '" << interfaceID
+			           << "' with a mismatch in"
+			           << " a name of an input argument. " << argsIn[i].first
+			           << " was given. Expected: "
+			           << StringMacros::setToString(macro.namesOfInputArguments_)
+			           << __E__;
+
+			__CFG_SS_THROW__;
+		}
+
+	// build output arguments
+	std::vector<std::string>                      returnStrings;
+	std::vector<FEVInterface::frontEndMacroArg_t> argsOut;
+
+	{
+		std::istringstream inputStream(outputArgs);
+		std::string        argName;
+		while(getline(inputStream, argName, ','))
+		{
+			__CFG_COUT__ << "argName " << argName << __E__;
+
+			returnStrings.push_back("DEFAULT");  // std::string());
+			argsOut.push_back(FEVInterface::frontEndMacroArg_t(
+			    argName, returnStrings[returnStrings.size() - 1]));
+			//
+			//			__CFG_COUT__ << argsOut[argsOut.size()-1].first << __E__;
+			//__CFG_COUT__ << (uint64_t) & (returnStrings[returnStrings.size() - 1])
+			//	                                		 << __E__;
+		}
+	}
+
+	// check namesOfOutputArguments_
+	if(macro.namesOfOutputArguments_.size() != argsOut.size())
+	{
+		__CFG_SS__ << "MacroMaker Macro '" << macro.macroName_
+		           << "' was attempted on interfaceID '" << interfaceID
+		           << "' with a mismatch in"
+		           << " number of output arguments. " << argsOut.size() << " were given. "
+		           << macro.namesOfOutputArguments_.size() << " expected." << __E__;
+
+		__CFG_SS_THROW__;
+	}
+	for(unsigned int i = 0; i < argsOut.size(); ++i)
+		if(macro.namesOfOutputArguments_.find(argsOut[i].first) ==
+		   macro.namesOfOutputArguments_.end())
+		{
+			__CFG_SS__ << "MacroMaker Macro '" << macro.macroName_
+			           << "' was attempted on interfaceID '" << interfaceID
+			           << "' with a mismatch in"
+			           << " a name of an output argument. " << argsOut[i].first
+			           << " were given. Expected: "
+			           << StringMacros::setToString(macro.namesOfOutputArguments_)
+			           << __E__;
+
+			__CFG_SS_THROW__;
+		}
+
+	__CFG_COUT__ << "# of input args = " << argsIn.size() << __E__;
+
+	std::map<std::string /*name*/, uint64_t /*value*/> variableMap;
+	// fill variable map
+	for(const auto& outputArgName : macro.namesOfOutputArguments_)
+		variableMap.emplace(  // do not care about output arg value
+		    std::pair<std::string /*name*/, uint64_t /*value*/>(outputArgName, 0));
+	for(const auto& inputArgName : macro.namesOfInputArguments_)
+		variableMap.emplace(  // do not care about input arg value
+		    std::pair<std::string /*name*/, uint64_t /*value*/>(inputArgName, 0));
+
+	for(auto& argIn : argsIn)  // set map values
+	{
+		__CFG_COUT__ << argIn.first << ": " << argIn.second << __E__;
+		StringMacros::getNumber(argIn.second, variableMap.at(argIn.first));
+	}
+
+	fe->runMacro(macro, variableMap);
+
+	__CFG_COUT__ << "MacroMaker Macro complete!" << __E__;
+
+	__CFG_COUT__ << "# of output args = " << argsOut.size() << __E__;
+	for(auto& arg : argsOut)
+	{
+		std::stringstream numberSs;
+		numberSs << std::dec << variableMap.at(arg.first) << " (0x" <<
+				std::hex << variableMap.at(arg.first) << ")" << std::dec;
+		arg.second = numberSs.str();
+		__CFG_COUT__ << arg.first << ": " << arg.second << __E__;
+	}
+
+	// Success! at this point so return the output string
+	outputArgs = "";
+	for(unsigned int i = 0; i < argsOut.size(); ++i)
+	{
+		if(i)
+			outputArgs += ";";
+		outputArgs += argsOut[i].first + "," + argsOut[i].second;
+	}
+
+	__CFG_COUT__ << "outputArgs = " << outputArgs << __E__;
+
+}  // end runMacro()
+
+//========================================================================================================================
 // runFEMacro
 //	Runs the FE Macro in the specified FE interface.
 //
@@ -1981,6 +2135,25 @@ void FEVInterfacesManager::runFEMacro(const std::string& interfaceID,
 	{
 		if(i)
 			outputArgs += ";";
+
+		//attempt to get number, and output hex version
+		// otherwise just output result
+		try
+		{
+			uint64_t tmpNumber;
+			if(StringMacros::getNumber(argsOut[i].second,tmpNumber))
+			{
+				std::stringstream outNumberSs;
+				outNumberSs << std::dec << tmpNumber << " (0x" <<
+						std::hex << tmpNumber << ")" << std::dec;
+				outputArgs += argsOut[i].first + "," + outNumberSs.str();
+				continue;
+			}
+		}
+		catch(...)
+		{ //ignore error, assume not a number
+		}
+
 		outputArgs += argsOut[i].first + "," + argsOut[i].second;
 	}
 
