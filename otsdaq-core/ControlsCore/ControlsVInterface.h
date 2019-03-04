@@ -13,11 +13,15 @@ class ControlsVInterface : public Configurable
 	                   const ConfigurationTree& theXDAQContextConfigTree,
 	                   const std::string&       configurationPath)
 	    : Configurable(theXDAQContextConfigTree, configurationPath)
-	//, interfaceUID_                 (interfaceUID)
-	// , interfaceType_
-	// ("MADEUP_FIXME")//theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("ControlsInterfacePluginName").getValue<std::string>())
+	, interfaceUID_                 (interfaceUID)
+	, interfaceType_				(Configurable::getSelfNode().getNode("ControlsInterfacePluginType").getValue<std::string>())
+  	, mfSubject_					("controls-" + interfaceType_ + "-" + interfaceUID_)
 	{
-		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		//inheriting children classes should use __GEN_COUT_*
+		//	for decorations using mfSubject.
+		__GEN_COUT__ << __E__;
+		__GEN_COUTV__(interfaceUID_);
+		__GEN_COUTV__(mfSubject_);
 	}
 
 	virtual ~ControlsVInterface(void) {}
@@ -32,8 +36,9 @@ class ControlsVInterface : public Configurable
 	virtual std::array<std::string, 9> getSettings(std::string Name)     = 0;
 
   protected:
-	std::string interfaceUID_;
-	std::string interfaceType_;
+	const std::string interfaceUID_;
+	const std::string interfaceType_;
+	const std::string mfSubject_;
 };
 
 }  // namespace ots

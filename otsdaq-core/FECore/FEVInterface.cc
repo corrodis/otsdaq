@@ -97,12 +97,18 @@ void FEVInterface::configureSlowControls(void)
 		        groupLinkChild.second.getNode("HighHighThreshold")
 		            .getValue<std::string>())));
 	}
-}
+} //end configureSlowControls()
 
 //========================================================================================================================
 bool FEVInterface::slowControlsRunning(void)
 {
 	__FE_COUT__ << "slowControlsRunning" << __E__;
+
+	if(mapOfSlowControlsChannels_.size() == 0)
+	{
+		__FE_COUT__ << "No slow controls channels to monitor, exiting slow controls workloop." << __E__;
+		return false;
+	}
 	std::string readVal;
 	readVal.resize(universalDataSize_);  // size to data in advance
 

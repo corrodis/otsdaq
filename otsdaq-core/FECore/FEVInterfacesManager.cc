@@ -186,8 +186,8 @@ void FEVInterfacesManager::configure(void)
 
 		// configure slow controls and start slow controls workloop
 		//	slow controls workloop stays alive through start/stop.. and dies on halt
-		// fe->configureSlowControls();
-		////fe->startSlowControlsWorkLooop();
+		fe->configureSlowControls();
+		fe->startSlowControlsWorkLooop();
 
 		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
 		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;

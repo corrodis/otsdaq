@@ -109,7 +109,7 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	/////////===========================
 	// start Slow Controls
 	void configureSlowControls(void);
-	bool slowControlsRunning(void);
+	bool slowControlsRunning(void); //slow controls workloop calls this
 	void startSlowControlsWorkLooop(void) { slowControlsWorkLoop_.startWorkLoop(); }
 	void stopSlowControlsWorkLooop(void) { slowControlsWorkLoop_.stopWorkLoop(); }
 	// end Slow Controls
