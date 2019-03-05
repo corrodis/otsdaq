@@ -2707,8 +2707,9 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 		fgets(line, 100, fp);
 		// int val = fgetc(fp);
 		sscanf(line, "%ld", &val);
-		__COUT__ << "tooltip value read = " << val << __E__;
 		fclose(fp);
+
+		__COUT__ << "tooltip value read = " << val << " vs time(0)=" << time(0) << __E__;
 
 		// if first line in file is a 1 then do not show
 		//	else show if current time is greater than value
@@ -2717,7 +2718,7 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 	}
 	else  // default to show tool tip
 		xmldoc->addTextElementToData("ShowTooltip", "1");
-}
+}  //end tooltipCheckForUsername();
 
 //========================================================================================================================
 // WebUsers::resetAllUserTooltips

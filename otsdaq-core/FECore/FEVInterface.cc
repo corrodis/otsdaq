@@ -228,7 +228,6 @@ bool FEVInterface::slowControlsRunning(void)
 			if(txBuffer.size() > txBufferSz)
 			{
 				__FE_SS__ << "This should never happen hopefully!" << __E__;
-				__FE_COUT_ERR__ << "\n" << ss.str();
 				__FE_SS_THROW__;
 			}
 
