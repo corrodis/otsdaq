@@ -54,7 +54,7 @@ class TableInfoReader
 
 	bool allowIllegalColumns_;
 
-	const static std::string CONFIGURATION_BACKEND_TYPE_;
+	//static const std::string CONFIGURATION_BACKEND_TYPE_;
 };
 
 }  // namespace ots

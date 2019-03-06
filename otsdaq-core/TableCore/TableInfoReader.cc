@@ -31,8 +31,9 @@ using namespace ots;
 #undef __COUT_HDR__
 #define __COUT_HDR__ "TableInfoReader"
 
-const std::string TableInfoReader::CONFIGURATION_BACKEND_TYPE_ =
-    getenv("CONFIGURATION_TYPE");
+//const std::string TableInfoReader::CONFIGURATION_BACKEND_TYPE_ =
+//    getenv("CONFIGURATION_TYPE");
+#define CONFIGURATION_BACKEND_TYPE_ 	getenv("CONFIGURATION_TYPE")
 
 //==============================================================================
 TableInfoReader::TableInfoReader(bool allowIllegalColumns)
@@ -130,7 +131,7 @@ bool TableInfoReader::checkViewType(std::string type)
 	}
 	types.push_back(type.substr(currentIndex, type.size()));
 
-	const std::string& systemType = TableInfoReader::CONFIGURATION_BACKEND_TYPE_;
+	const std::string systemType = CONFIGURATION_BACKEND_TYPE_;
 
 	for(unsigned int i = 0; i < types.size(); i++)
 	{
@@ -227,7 +228,7 @@ std::string TableInfoReader::read(TableBase& table)
 	// Gennadiy...
 
 	// These environment variables are required
-	if(TableInfoReader::CONFIGURATION_BACKEND_TYPE_ == "")
+	if(getenv("CONFIGURATION_TYPE") == NULL)
 		__COUT__ << "Missing env variable: CONFIGURATION_TYPE. It must be set!" << __E__;
 	// if(getenv("CONFIGURATION_DATA_PATH") == NULL) __COUT__ << "Missing env variable:
 	// CONFIGURATION_DATA_PATH. It must be set!" << __E__;
@@ -399,7 +400,7 @@ std::string TableInfoReader::read(TableBase& table)
 		if(!storageTypeFound)
 		{
 			__COUT__ << "The type defined in CONFIGURATION_BACKEND_TYPE ("
-			         << TableInfoReader::CONFIGURATION_BACKEND_TYPE_
+			         << CONFIGURATION_BACKEND_TYPE_
 			         << ") doesn't match with any of the types defined in " << tableFile
 			         << __E__;
 
