@@ -41,7 +41,7 @@ void FEVInterface::configureSlowControls(void)
 {
 	ConfigurationTree slowControlsGroupLink =
 	    theXDAQContextConfigTree_.getBackNode(theConfigurationPath_)
-	        .getNode("LinkToSlowControlChannelsTable");
+	        .getNode("LinkToSlowControlsChannelTable");
 
 	if(slowControlsGroupLink.isDisconnected())
 	{
