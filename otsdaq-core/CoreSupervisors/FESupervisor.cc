@@ -7,7 +7,8 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(FESupervisor)
 
 //========================================================================================================================
-FESupervisor::FESupervisor(xdaq::ApplicationStub* s) : CoreSupervisorBase(s)
+FESupervisor::FESupervisor(xdaq::ApplicationStub* stub)
+: CoreSupervisorBase(stub)
 {
 	xoap::bind(this,
 	           &FESupervisor::macroMakerSupervisorRequest,
@@ -24,10 +25,11 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* s) : CoreSupervisorBase(s)
 
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(new FEVInterfacesManager(
 	    CorePropertySupervisorBase::getContextTreeNode(),
-	    CorePropertySupervisorBase::supervisorConfigurationPath_));
+	    CorePropertySupervisorBase::getSupervisorConfigurationPath()));
 
 	extractFEInterfacesManager();
 
+	__SUP_COUT__ << "Destructed." << __E__;
 }  // end constructor
 
 //========================================================================================================================
@@ -35,7 +37,8 @@ FESupervisor::~FESupervisor(void)
 {
 	__SUP_COUT__ << "Destroying..." << __E__;
 	// theStateMachineImplementation_ is reset and the object it points to deleted in
-	// ~CoreSupervisorBase()0
+	// ~CoreSupervisorBase()
+	__SUP_COUT__ << "Destructed." << __E__;
 }  // end destructor
 
 //========================================================================================================================
@@ -403,7 +406,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 	             << __E__;
 
 	SOAPUtilities::receive(message, parameters);
-	std::string request     = parameters.getValue("Request");
+	std::string request = parameters.getValue("Request");
 
 	__SUP_COUT__ << "request: " << request << __E__;
 
@@ -414,7 +417,6 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 	//	GetInterfaceMacros
 	//	RunInterfaceMacro
 	//	RunMacroMakerMacro
-
 
 	SOAPParameters retParameters;
 
@@ -437,8 +439,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 		{
 			if(!theFEInterfacesManager_)
 			{
-				__SUP_SS__ << "No FE Interface Manager! Are you configured?"
-				                  << __E__;
+				__SUP_SS__ << "No FE Interface Manager! Are you configured?" << __E__;
 				__SUP_SS_THROW__;
 			}
 			// params for running macros
@@ -448,8 +449,8 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			requestParameters.addParameter("Data");
 			SOAPUtilities::receive(message, requestParameters);
 			std::string interfaceID = requestParameters.getValue("InterfaceID");
-			std::string addressStr   = requestParameters.getValue("Address");
-			std::string dataStr  = requestParameters.getValue("Data");
+			std::string addressStr  = requestParameters.getValue("Address");
+			std::string dataStr     = requestParameters.getValue("Data");
 
 			__SUP_COUT__ << "Address: " << addressStr << " Data: " << dataStr
 			             << " InterfaceID: " << interfaceID << __E__;
@@ -555,8 +556,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 		{
 			if(!theFEInterfacesManager_)
 			{
-				__SUP_SS__ << "No FE Interface Manager! Are you configured?"
-				                  << __E__;
+				__SUP_SS__ << "No FE Interface Manager! Are you configured?" << __E__;
 				__SUP_SS_THROW__;
 			}
 
@@ -566,11 +566,10 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			requestParameters.addParameter("Address");
 			SOAPUtilities::receive(message, requestParameters);
 			std::string interfaceID = requestParameters.getValue("InterfaceID");
-			std::string addressStr   = requestParameters.getValue("Address");
+			std::string addressStr  = requestParameters.getValue("Address");
 
-			__SUP_COUT__ << "Address: " << addressStr <<
-					" InterfaceID: " << interfaceID << __E__;
-
+			__SUP_COUT__ << "Address: " << addressStr << " InterfaceID: " << interfaceID
+			             << __E__;
 
 			// parameters interface index!
 			// parameter address and data
@@ -689,9 +688,10 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			if(theFEInterfacesManager_)
 				retParameters.addParameter(
 				    "FEMacros",
-				    theFEInterfacesManager_->getFEMacrosString(
-				        supervisorApplicationUID_,
-				        std::to_string(getApplicationDescriptor()->getLocalId())));
+					theFEInterfacesManager_->getFEMacrosString(
+							CorePropertySupervisorBase::getSupervisorUID(),
+							std::to_string(
+									CoreSupervisorBase::getSupervisorLID())));
 			else
 				retParameters.addParameter("FEMacros", "");
 
@@ -700,14 +700,12 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 		}
 		else if(request == "RunInterfaceMacro")
 		{
-
 			if(!theFEInterfacesManager_)
 			{
 				__SUP_SS__ << "Missing FE Interface Manager! Are you configured?"
 				           << __E__;
 				__SUP_SS_THROW__;
 			}
-
 
 			// params for running macros
 			SOAPParameters requestParameters;
@@ -772,11 +770,10 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			requestParameters.addParameter("InterfaceID");
 			SOAPUtilities::receive(message, requestParameters);
 			std::string interfaceID = requestParameters.getValue("InterfaceID");
-			std::string macroName = requestParameters.getValue("macroName");
+			std::string macroName   = requestParameters.getValue("macroName");
 			std::string macroString = requestParameters.getValue("macroString");
 			std::string inputArgs   = requestParameters.getValue("inputArgs");
 			std::string outputArgs  = requestParameters.getValue("outputArgs");
-
 
 			// outputArgs must be filled with the proper argument names
 			//	and then the response output values will be returned in the string.

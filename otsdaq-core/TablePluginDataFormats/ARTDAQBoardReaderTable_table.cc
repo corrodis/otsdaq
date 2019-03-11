@@ -246,7 +246,7 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 	            destinations: {
 	              d2: { transferPluginType: MPI
 	                      destination_rank: 2
-	                       max_fragment_size_words: 2097152
+	                       max_fragment_size_bytes: 2097152
 	                       host_map: [
 	           {
 	              host: "mu2edaq01.fnal.gov"
@@ -259,7 +259,7 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 	                       }
 	               d3: { transferPluginType: MPI
 	                       destination_rank: 3
-	                       max_fragment_size_words: 2097152
+	                       max_fragment_size_bytes: 2097152
 	                       host_map: [
 	           {
 	              host: "mu2edaq01.fnal.gov"
@@ -463,15 +463,15 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 
 				try
 				{
-					OUT << "max_fragment_size_words: "
+					OUT << "max_fragment_size_bytes: "
 					    << destination.second
-					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
-					           .getValue<unsigned int>()
+					           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeBytes")
+					           .getValue<unsigned long long>()
 					    << __E__;
 				}
 				catch(...)
 				{
-					__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeWords "
+					__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeBytes "
 					          "could not be accessed. Make sure the link is valid."
 					       << __E__;
 					__SS_THROW__;

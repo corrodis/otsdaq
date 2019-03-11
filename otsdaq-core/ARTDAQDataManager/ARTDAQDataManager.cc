@@ -1,4 +1,5 @@
-#include "otsdaq-core/ARTDAQDataManager/ARTDAQDataManager.h"
+#include "../ARTDAQDataManager/ARTDAQDataManager.h"
+
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQConsumer.h"
 #include "otsdaq-core/DataProcessorPlugins/ARTDAQProducer.h"
 
@@ -31,7 +32,7 @@ ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConf
 	// artdaq::configureMessageFacility("boardreader");
 	// artdaq::configureMessageFacility(name.c_str());
 
-	__CFG_COUT__ << "MF initialized" << std::endl;
+	__CFG_COUT__ << "MF initialized" << __E__;
 
 	rank_ = Configurable::getApplicationLID();
 
@@ -43,7 +44,7 @@ ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConf
 
 	// create the BoardReaderApp
 	//	  artdaq::BoardReaderApp br_app(local_group_comm, name);
-	__CFG_COUT__ << "END" << std::endl;
+	__CFG_COUT__ << "END" << __E__;
 
 	__CFG_COUT__ << "Constructed." << __E__;
 }
@@ -54,7 +55,7 @@ ARTDAQDataManager::~ARTDAQDataManager(void) {}
 //========================================================================================================================
 void ARTDAQDataManager::configure(void)
 {
-	__CFG_COUT__ << "ARTDAQDataManager configuring..." << std::endl;
+	__CFG_COUT__ << "ARTDAQDataManager configuring..." << __E__;
 
 	DataManager::configure();
 
@@ -62,31 +63,44 @@ void ARTDAQDataManager::configure(void)
 	//	and initialize with rank info
 
 	__CFG_COUT__ << "ARTDAQDataManager DataManager configured now pass the MPI stuff"
-	             << std::endl;
+	             << __E__;
 	for(auto it = DataManager::buffers_.begin(); it != DataManager::buffers_.end(); it++)
 		for(auto& consumer : it->second.consumers_)
 			if(dynamic_cast<ARTDAQConsumer*>(consumer))
 			{
+				__CFG_COUT__ << "Found an ARTDAQ Consumer: " << consumer->getProcessorID()
+				             << __E__;
+
 				dynamic_cast<ARTDAQConsumer*>(consumer)->initLocalGroup(rank_);
 				return;  // There can only be 1 ARTDAQConsumer for each
 				         // ARTDAQDataManager!!!!!!!
 			}
 
-	__CFG_SS__ << "There was no ARTDAQ Consumer found on a buffer!" << std::endl;
+	__CFG_SS__ << "There was no ARTDAQ Consumer found on a buffer!" << __E__;
 	__CFG_COUT__ << ss.str();
 
-	__CFG_COUT__ << "Looking for an ARTDAQ Producer..." << std::endl;
+	__CFG_COUT__ << "Looking for an ARTDAQ Producer..." << __E__;
 
 	for(auto it = DataManager::buffers_.begin(); it != DataManager::buffers_.end(); it++)
 		for(auto& producer : it->second.producers_)
 			if(dynamic_cast<ARTDAQProducer*>(producer))
 			{
+				__CFG_COUT__ << "Found an ARTDAQ Producer: " << producer->getProcessorID()
+				             << __E__;
+
 				dynamic_cast<ARTDAQProducer*>(producer)->initLocalGroup(rank_);
 				return;  // There can only be 1 ARTDAQProducer for each
 				         // ARTDAQDataManager!!!!!!!
 			}
 
-	__CFG_COUT__ << "No ARTDAQ Producers found either... so error!" << std::endl;
+	ss << "No ARTDAQ Producers found either... so error!" << __E__;
+	__CFG_COUT__ << ss.str();
+
+	{
+		__CFG_SS__;
+		DataManager::dumpStatus((std::ostream*)&ss);
+		__COUT__ << ss.str() << __E__;
+	}
 
 	__CFG_COUT_ERR__ << ss.str();
 	__CFG_SS_THROW__;

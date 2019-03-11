@@ -1,125 +1,138 @@
 #include "otsdaq/DispatcherApp/DispatcherApp.h"
-#include "otsdaq-core/Macros/CoutMacros.h"
-#include "otsdaq-core/MessageFacility/MessageFacility.h"
-#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
-#include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
-#include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
+//#include "otsdaq-core/Macros/CoutMacros.h"
+//#include "otsdaq-core/MessageFacility/MessageFacility.h"
+//#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
+//#include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
+//#include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
+//
+//#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+//#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
+//
+//#include <toolbox/fsm/FailedEvent.h>
+//
+//#include <xdaq/NamespaceURI.h>
+//#include <xoap/Method.h>
 
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
-
-#include <toolbox/fsm/FailedEvent.h>
-
-#include <xdaq/NamespaceURI.h>
-#include <xoap/Method.h>
-
-#include <memory>
+//#include <memory>
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "artdaq/DAQdata/Globals.hh"
 #include "cetlib_except/exception.h"
 #include "fhiclcpp/make_ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
+//#include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include <cassert>
-#include <fstream>
-#include <iostream>
-#include "otsdaq-core/TableCore/TableGroupKey.h"
+//#include <cassert>
+//#include <fstream>
+//#include <iostream>
+//#include "otsdaq-core/TableCore/TableGroupKey.h"
 
 using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(DispatcherApp)
 
+#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
+#define ARTDAQ_FILE_PREAMBLE "aggregator"
+
 //========================================================================================================================
-DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s)
-    : xdaq::Application(s)
-    , SOAPMessenger(this)
-    , stateMachineWorkLoopManager_(
-          toolbox::task::bind(this, &DispatcherApp::stateMachineThread, "StateMachine"))
-    , stateMachineSemaphore_(toolbox::BSem::FULL)
-    , theConfigurationManager_(
-          new ConfigurationManager)  //(Singleton<ConfigurationManager>::getInstance())
-                                     ////I always load the full config but if I want to
-                                     // load a partial configuration (new
-                                     // ConfigurationManager)
-    , XDAQContextTableName_(
-          theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)->getTableName())
-    , supervisorConfigurationPath_(
-          "INITIALIZED INSIDE THE CONTRUCTOR BECAUSE IT NEEDS supervisorContextUID_ and "
-          "supervisorApplicationUID_")
-    , supervisorContextUID_("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
-    , supervisorApplicationUID_(
-          "INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
+DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s) : CoreSupervisorBase(s)
+//   : xdaq::Application(s)
+//    , SOAPMessenger(this)
+//    , stateMachineWorkLoopManager_(
+//          toolbox::task::bind(this, &DispatcherApp::stateMachineThread, "StateMachine"))
+//    , stateMachineSemaphore_(toolbox::BSem::FULL)
+//    , theConfigurationManager_(
+//          new ConfigurationManager)  //(Singleton<ConfigurationManager>::getInstance())
+//                                     ////I always load the full config but if I want to
+//                                     // load a partial configuration (new
+//                                     // ConfigurationManager)
+//    , XDAQContextTableName_(
+//          theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)->getTableName())
+//    , supervisorConfigurationPath_(
+//          "INITIALIZED INSIDE THE CONTRUCTOR BECAUSE IT NEEDS supervisorContextUID_ and
+//          " "supervisorApplicationUID_")
+//    , supervisorContextUID_("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
+//    , supervisorApplicationUID_(
+//          "INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
 {
+	__SUP_COUT__ << "Constructor." << __E__;
+
 	INIT_MF("DispatcherApp");
-	xgi::bind(this, &DispatcherApp::Default, "Default");
-	xgi::bind(this, &DispatcherApp::stateMachineXgiHandler, "StateMachineXgiHandler");
 
-	xoap::bind(this,
-	           &DispatcherApp::stateMachineStateRequest,
-	           "StateMachineStateRequest",
-	           XDAQ_NS_URI);
-	xoap::bind(this,
-	           &DispatcherApp::stateMachineErrorMessageRequest,
-	           "StateMachineErrorMessageRequest",
-	           XDAQ_NS_URI);
-
-	try
-	{
-		supervisorContextUID_ =
-		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
-		        ->getContextUID(
-		            getApplicationContext()->getContextDescriptor()->getURL());
-	}
-	catch(...)
-	{
-		__COUT_ERR__
-		    << "XDAQ Supervisor could not access it's configuration through "
-		       "the Configuration Manager."
-		    << ". The getApplicationContext()->getContextDescriptor()->getURL() = "
-		    << getApplicationContext()->getContextDescriptor()->getURL() << __E__;
-		throw;
-	}
-	try
-	{
-		supervisorApplicationUID_ =
-		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
-		        ->getApplicationUID(
-		            getApplicationContext()->getContextDescriptor()->getURL(),
-		            getApplicationDescriptor()->getLocalId());
-	}
-	catch(...)
-	{
-		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
-		                "the Configuration Manager."
-		             << " The supervisorContextUID_ = " << supervisorContextUID_
-		             << ". The supervisorApplicationUID = " << supervisorApplicationUID_
-		             << __E__;
-		throw;
-	}
-	supervisorConfigurationPath_ = "/" + supervisorContextUID_ +
-	                               "/LinkToApplicationTable/" +
-	                               supervisorApplicationUID_ + "/LinkToSupervisorTable";
-
-	setStateMachineName(supervisorApplicationUID_);
-}
+	//	xgi::bind(this, &DispatcherApp::Default, "Default");
+	//	xgi::bind(this, &DispatcherApp::stateMachineXgiHandler, "StateMachineXgiHandler");
+	//
+	//	xoap::bind(this,
+	//	           &DispatcherApp::stateMachineStateRequest,
+	//	           "StateMachineStateRequest",
+	//	           XDAQ_NS_URI);
+	//	xoap::bind(this,
+	//	           &DispatcherApp::stateMachineErrorMessageRequest,
+	//	           "StateMachineErrorMessageRequest",
+	//	           XDAQ_NS_URI);
+	//
+	//	try
+	//	{
+	//		supervisorContextUID_ =
+	//		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
+	//		        ->getContextUID(
+	//		            getApplicationContext()->getContextDescriptor()->getURL());
+	//	}
+	//	catch(...)
+	//	{
+	//		__COUT_ERR__
+	//		    << "XDAQ Supervisor could not access it's configuration through "
+	//		       "the Configuration Manager."
+	//		    << ". The getApplicationContext()->getContextDescriptor()->getURL() = "
+	//		    << getApplicationContext()->getContextDescriptor()->getURL() << __E__;
+	//		throw;
+	//	}
+	//	try
+	//	{
+	//		supervisorApplicationUID_ =
+	//		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
+	//		        ->getApplicationUID(
+	//		            getApplicationContext()->getContextDescriptor()->getURL(),
+	//		            getApplicationDescriptor()->getLocalId());
+	//	}
+	//	catch(...)
+	//	{
+	//		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
+	//		                "the Configuration Manager."
+	//		             << " The supervisorContextUID_ = " << supervisorContextUID_
+	//		             << ". The supervisorApplicationUID = " <<
+	// supervisorApplicationUID_
+	//		             << __E__;
+	//		throw;
+	//	}
+	//	supervisorConfigurationPath_ = "/" + supervisorContextUID_ +
+	//	                               "/LinkToApplicationTable/" +
+	//	                               supervisorApplicationUID_ +
+	//"/LinkToSupervisorTable";
+	//
+	//	setStateMachineName(supervisorApplicationUID_);
+	__SUP_COUT__ << "Constructed." << __E__;
+}  // end constructor()
 
 //========================================================================================================================
-DispatcherApp::~DispatcherApp(void) { destroy(); }
+DispatcherApp::~DispatcherApp(void)
+{
+	__SUP_COUT__ << "Destructor." << __E__;
+	destroy();
+	__SUP_COUT__ << "Destructed." << __E__;
+}  // end destructor()
+
 //========================================================================================================================
 void DispatcherApp::init(void)
 {
-	std::cout << __COUT_HDR_FL__
-	          << "ARTDAQDispatcher SUPERVISOR INIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	          << __E__;
-	allSupervisorInfo_.init(getApplicationContext());
+	__SUP_COUT__ << "Initializing..." << __E__;
+
+	// allSupervisorInfo_.init(getApplicationContext());
+
 	artdaq::configureMessageFacility("Dispatcher");
+	__SUP_COUT__ << "artdaq MF configured." << __E__;
 
 	// initialization
 
-	std::cout << __COUT_HDR_FL__
-	          << "ARTDAQDispatcher SUPERVISOR INIT4!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	          << __E__;
 	std::string    name = "Dispatcher";
 	unsigned short port = 5300;
 	//    artdaq::setMsgFacAppName(supervisorApplicationUID_, port);
@@ -137,137 +150,141 @@ void DispatcherApp::init(void)
 	theDispatcherInterface_.reset(new artdaq::DispatcherApp());
 	// theDispatcherInterface_ = new DispatcherInterface(mpiSentry_->rank(),
 	// local_group_comm, supervisorApplicationUID_ );
-}
+
+	__SUP_COUT__ << "Initialized." << __E__;
+}  // end init()
 
 //========================================================================================================================
-void DispatcherApp::destroy(void) { theDispatcherInterface_.reset(nullptr); }
-
-//========================================================================================================================
-void DispatcherApp::Default(xgi::Input* in, xgi::Output* out)
+void DispatcherApp::destroy(void)
 {
-	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame "
-	        "src='/WebPath/html/DispatcherApp.html?urn="
-	     << this->getApplicationDescriptor()->getLocalId() << "'></frameset></html>";
-}
+	__SUP_COUT__ << "Destroying..." << __E__;
+	theDispatcherInterface_.reset(nullptr);
+	__SUP_COUT__ << "Destroyed." << __E__;
+}  // end destroy()
+//
+////========================================================================================================================
+// void DispatcherApp::Default(xgi::Input* in, xgi::Output* out)
+//{
+//	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame "
+//	        "src='/WebPath/html/DispatcherApp.html?urn="
+//	     << this->getApplicationDescriptor()->getLocalId() << "'></frameset></html>";
+//}
+//
+////========================================================================================================================
+// void DispatcherApp::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out) {}
+//
+////========================================================================================================================
+// void DispatcherApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out) {}
+//
+////========================================================================================================================
+// xoap::MessageReference DispatcherApp::stateMachineXoapHandler(
+//    xoap::MessageReference message)
+//{
+//	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << __E__;
+//	stateMachineWorkLoopManager_.removeProcessedRequests();
+//	stateMachineWorkLoopManager_.processRequest(message);
+//	std::cout << __COUT_HDR_FL__ << "Done - Soap Handler!" << __E__;
+//	return message;
+//}
+//
+////========================================================================================================================
+// xoap::MessageReference DispatcherApp::stateMachineResultXoapHandler(
+//    xoap::MessageReference message)
+//{
+//	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << __E__;
+//	// stateMachineWorkLoopManager_.removeProcessedRequests();
+//	// stateMachineWorkLoopManager_.processRequest(message);
+//	std::cout << __COUT_HDR_FL__ << "Done - Soap Handler!" << __E__;
+//	return message;
+//}
+//
+////========================================================================================================================
+// bool DispatcherApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
+//{
+//	stateMachineSemaphore_.take();
+//	std::cout << __COUT_HDR_FL__ << "Re-sending message..."
+//	          << SOAPUtilities::translate(
+//	                 stateMachineWorkLoopManager_.getMessage(workLoop))
+//	                 .getCommand()
+//	          << __E__;
+//	std::string reply = send(this->getApplicationDescriptor(),
+//	                         stateMachineWorkLoopManager_.getMessage(workLoop));
+//	stateMachineWorkLoopManager_.report(workLoop, reply, 100, true);
+//	std::cout << __COUT_HDR_FL__ << "Done with message" << __E__;
+//	stateMachineSemaphore_.give();
+//	return false;  // execute once and automatically remove the workloop so in
+//	               // WorkLoopManager the try workLoop->remove(job_) could be commented
+//	               // out return true;//go on and then you must do the
+//	               // workLoop->remove(job_) in WorkLoopManager
+//}
+//
+////========================================================================================================================
+// xoap::MessageReference DispatcherApp::stateMachineStateRequest(
+//    xoap::MessageReference message)
+//{
+//	std::cout << __COUT_HDR_FL__ << theStateMachine_.getCurrentStateName() << __E__;
+//	return SOAPUtilities::makeSOAPMessageReference(
+//	    theStateMachine_.getCurrentStateName());
+//}
+//
+////========================================================================================================================
+// xoap::MessageReference DispatcherApp::stateMachineErrorMessageRequest(
+//    xoap::MessageReference message)
+//
+//{
+//	__COUT__ << "theStateMachine_.getErrorMessage() = "
+//	         << theStateMachine_.getErrorMessage() << __E__;
+//
+//	SOAPParameters retParameters;
+//	retParameters.addParameter("ErrorMessage", theStateMachine_.getErrorMessage());
+//	return SOAPUtilities::makeSOAPMessageReference("stateMachineErrorMessageRequestReply",
+//	                                               retParameters);
+//}
+//
+////========================================================================================================================
+// void DispatcherApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) {}
+//
+////========================================================================================================================
+// void DispatcherApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm) {}
+//
+////========================================================================================================================
+// void DispatcherApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm) {}
+//
+////========================================================================================================================
+// void DispatcherApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm) {}
+//
+////========================================================================================================================
+// void DispatcherApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm) {}
+//
+////========================================================================================================================
+// void DispatcherApp::inError(toolbox::fsm::FiniteStateMachine& fsm)
+//{
+//	std::cout << __COUT_HDR_FL__
+//	          << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+//	// rcmsStateNotifier_.stateChanged("Error", "");
+//}
+//
+////========================================================================================================================
+// void DispatcherApp::enteringError(toolbox::Event::Reference e)
+//{
+//	std::cout << __COUT_HDR_FL__
+//	          << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+//	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
+//	std::ostringstream         error;
+//	error << "Failure performing transition from " << failedEvent.getFromState() << " to "
+//	      << failedEvent.getToState()
+//	      << " exception: " << failedEvent.getException().what();
+//	std::cout << __COUT_HDR_FL__ << error.str() << __E__;
+//	// diagService_->reportError(errstr.str(),DIAGERROR);
+//}
 
-//========================================================================================================================
-void DispatcherApp::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out) {}
-
-//========================================================================================================================
-void DispatcherApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out) {}
-
-//========================================================================================================================
-xoap::MessageReference DispatcherApp::stateMachineXoapHandler(
-    xoap::MessageReference message)
-{
-	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << __E__;
-	stateMachineWorkLoopManager_.removeProcessedRequests();
-	stateMachineWorkLoopManager_.processRequest(message);
-	std::cout << __COUT_HDR_FL__ << "Done - Soap Handler!" << __E__;
-	return message;
-}
-
-//========================================================================================================================
-xoap::MessageReference DispatcherApp::stateMachineResultXoapHandler(
-    xoap::MessageReference message)
-{
-	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << __E__;
-	// stateMachineWorkLoopManager_.removeProcessedRequests();
-	// stateMachineWorkLoopManager_.processRequest(message);
-	std::cout << __COUT_HDR_FL__ << "Done - Soap Handler!" << __E__;
-	return message;
-}
-
-//========================================================================================================================
-bool DispatcherApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
-{
-	stateMachineSemaphore_.take();
-	std::cout << __COUT_HDR_FL__ << "Re-sending message..."
-	          << SOAPUtilities::translate(
-	                 stateMachineWorkLoopManager_.getMessage(workLoop))
-	                 .getCommand()
-	          << __E__;
-	std::string reply = send(this->getApplicationDescriptor(),
-	                         stateMachineWorkLoopManager_.getMessage(workLoop));
-	stateMachineWorkLoopManager_.report(workLoop, reply, 100, true);
-	std::cout << __COUT_HDR_FL__ << "Done with message" << __E__;
-	stateMachineSemaphore_.give();
-	return false;  // execute once and automatically remove the workloop so in
-	               // WorkLoopManager the try workLoop->remove(job_) could be commented
-	               // out return true;//go on and then you must do the
-	               // workLoop->remove(job_) in WorkLoopManager
-}
-
-//========================================================================================================================
-xoap::MessageReference DispatcherApp::stateMachineStateRequest(
-    xoap::MessageReference message)
-{
-	std::cout << __COUT_HDR_FL__ << theStateMachine_.getCurrentStateName() << __E__;
-	return SOAPUtilities::makeSOAPMessageReference(
-	    theStateMachine_.getCurrentStateName());
-}
-
-//========================================================================================================================
-xoap::MessageReference DispatcherApp::stateMachineErrorMessageRequest(
-    xoap::MessageReference message)
-
-{
-	__COUT__ << "theStateMachine_.getErrorMessage() = "
-	         << theStateMachine_.getErrorMessage() << __E__;
-
-	SOAPParameters retParameters;
-	retParameters.addParameter("ErrorMessage", theStateMachine_.getErrorMessage());
-	return SOAPUtilities::makeSOAPMessageReference("stateMachineErrorMessageRequestReply",
-	                                               retParameters);
-}
-
-//========================================================================================================================
-void DispatcherApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) {}
-
-//========================================================================================================================
-void DispatcherApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm) {}
-
-//========================================================================================================================
-void DispatcherApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm) {}
-
-//========================================================================================================================
-void DispatcherApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm) {}
-
-//========================================================================================================================
-void DispatcherApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm) {}
-
-//========================================================================================================================
-void DispatcherApp::inError(toolbox::fsm::FiniteStateMachine& fsm)
-{
-	std::cout << __COUT_HDR_FL__
-	          << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-	// rcmsStateNotifier_.stateChanged("Error", "");
-}
-
-//========================================================================================================================
-void DispatcherApp::enteringError(toolbox::Event::Reference e)
-{
-	std::cout << __COUT_HDR_FL__
-	          << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
-	std::ostringstream         error;
-	error << "Failure performing transition from " << failedEvent.getFromState() << " to "
-	      << failedEvent.getToState()
-	      << " exception: " << failedEvent.getException().what();
-	std::cout << __COUT_HDR_FL__ << error.str() << __E__;
-	// diagService_->reportError(errstr.str(),DIAGERROR);
-}
-
-#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
-#define ARTDAQ_FILE_PREAMBLE "aggregator"
 //========================================================================================================================
 void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 {
-	std::cout << __COUT_HDR_FL__
-	          << "ARTDAQDispatcher SUPERVISOR CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	          << __E__;
-	std::cout << __COUT_HDR_FL__
-	          << SOAPUtilities::translate(theStateMachine_.getCurrentMessage()) << __E__;
+	__SUP_COUT__ << "Configuring..." << __E__;
+
+	__SUP_COUT__ << SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
+	             << __E__;
 
 	std::pair<std::string /*group name*/, TableGroupKey> theGroup(
 	    SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
@@ -277,94 +294,25 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 	                      .getParameters()
 	                      .getValue("ConfigurationTableGroupKey")));
 
-	__COUT__ << "Configuration group name: " << theGroup.first
-	         << " key: " << theGroup.second << __E__;
+	__SUP_COUT__ << "Configuration group name: " << theGroup.first
+	             << " key: " << theGroup.second << __E__;
 
 	theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true);
 
-	std::string path   = "";
-	char*       dirMRB = getenv("MRB_BUILDDIR");
-	char*       dirP   = getenv("OTSDAQ_DIR");
-
-	if(dirMRB)
-	{
-		path = std::string(dirMRB) + "/otsdaq_demo/";
-	}
-	else if(dirP)
-	{
-		path = std::string(dirP) + "/";
-	}
-
-	// Now that the configuration manager has all the necessary configurations I can
-	// create all objects dependent of the configuration  std::string configString =
-	// "daq:{Dispatcher:{event_builder_count:2 event_queue_depth:20
-	// event_queue_wait_time:5 expected_events_per_bunch:1 file_duration:0
-	// file_event_count:0 file_size_MB:0 first_event_builder_rank:2 mpi_buffer_count:8
-	// print_event_store_stats:true
-	// xmlrpc_client_list:\";http://localhost:5603/RPC2,3;http://localhost:5604/RPC2,3;http://localhost:5605/RPC2,4;http://localhost:5606/RPC2,4;http://localhost:5601/RPC2,5;http://localhost:5602/RPC2,5\"}
-	// max_fragment_size_words:2.097152e6}
-	// outputs:{normalOutput:{fileName:\"/data/otsdata/data/artdaqots_r%06r_sr%02s_%to.root\"
-	// module_type:\"RootOutput\"}} physics:{my_output_modules:[\"normalOutput\"]
-	// p2:[\"BuildInfo\"] producers:{BuildInfo:{instance_name:\"ArtdaqOts\"
-	// module_type:\"ArtdaqOtsBuildInfo\"}}} process_name:\"DAQAG\"
-	// services:{Timing:{summaryOnly:true} scheduler:{fileMode:\"NOMERGE\"}
-	// user:{NetMonTransportServiceInterface:{max_fragment_size_words:2.097152e6
-	// service_provider:\"NetMonTransportService\"}}}
-	// source:{module_type:\"NetMonInput\"}";  ONLY 1 BOARD READER
-	//    std::string configString = "daq:{Dispatcher:{event_builder_count:1
-	//    event_queue_depth:20 event_queue_wait_time:5 expected_events_per_bunch:1
-	//    file_duration:0 file_event_count:0 file_size_MB:0 first_event_builder_rank:1
-	//    mpi_buffer_count:8 print_event_store_stats:true
-	//    xmlrpc_client_list:\";http://localhost:5100/RPC2,3;http://localhost:5101/RPC2,3;http://localhost:5200/RPC2,4;http://localhost:5201/RPC2,4;http://localhost:5300/RPC2,5;http://localhost:5301/RPC2,5\"}
-	//    max_fragment_size_words:2.097152e6}
-	//    outputs:{normalOutput:{fileName:\""+path+"artdaqots_r%06r_sr%02s_%to.root\"
-	//    module_type:\"RootOutput\"}} physics:{my_output_modules:[\"normalOutput\"]
-	//    p2:[\"BuildInfo\"] a1:[\"wf\"] producers:{BuildInfo:{instance_name:\"ArtdaqOts\"
-	//    module_type:\"ArtdaqOtsBuildInfo\"}} analyzers:{wf: {module_type:\"WFViewer\"
-	//    fragment_ids:[0] fragment_type_labels:[ \"DataGen\" ] prescale:60
-	//    write_to_file:true fileName:\""+path+"otsdaqdemo_onmon.root\"}}}
-	//    process_name:\"DAQAG\" services:{Timing:{summaryOnly:true}
-	//    scheduler:{fileMode:\"NOMERGE\" errorOnFailureToPut: false}
-	//    NetMonTransportServiceInterface:{max_fragment_size_words:2097152
-	//    service_provider:\"NetMonTransportService\"}}
-	//    source:{module_type:\"NetMonInput\"}";
-	// 2 BOARD READERS
-	// std::string configString = "daq:{Dispatcher:{event_builder_count:1
-	// event_queue_depth:20 event_queue_wait_time:5 expected_events_per_bunch:1
-	// file_duration:0 file_event_count:0 file_size_MB:0 first_event_builder_rank:1
-	// mpi_buffer_count:8 print_event_store_stats:true
-	// xmlrpc_client_list:\";http://localhost:5100/RPC2,3;http://localhost:5101/RPC2,3;http://localhost:5200/RPC2,4;http://localhost:5201/RPC2,4;http://localhost:5300/RPC2,5;http://localhost:5301/RPC2,5\"}
-	// max_fragment_size_words:2.097152e6}
-	// outputs:{normalOutput:{fileName:\""+path+"artdaqots_r%06r_sr%02s_%to.root\"
-	// module_type:\"RootOutput\"}} physics:{my_output_modules:[\"normalOutput\"]
-	// p2:[\"BuildInfo\"] a1:[\"wf\"] producers:{BuildInfo:{instance_name:\"ArtdaqOts\"
-	// module_type:\"ArtdaqOtsBuildInfo\"}} analyzers:{wf: {module_type:\"WFViewer\"
-	// fragment_ids:[0] fragment_type_labels:[ \"DataGen\" ] prescale:60
-	// write_to_file:true fileName:\""+path+"otsdaqdemo_onmon.root\"}}}
-	// process_name:\"DAQAG\" services:{Timing:{summaryOnly:true}
-	// scheduler:{fileMode:\"NOMERGE\" errorOnFailureToPut: false}
-	// NetMonTransportServiceInterface:{max_fragment_size_words:2097152
-	// service_provider:\"NetMonTransportService\"}}
-	// source:{module_type:\"NetMonInput\"}";
-
+	// load fcl string from dedicated file
 	fhicl::ParameterSet pset;
-	// fhicl::make_ParameterSet(configString, pset);
 
-	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
-	std::string uid      = theConfigurationManager_->getNode(XDAQContextTableName_)
-	                      .getNode(supervisorConfigurationPath_)
-	                      .getValue();
+	std::string        filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
+	const std::string& uid      = CorePropertySupervisorBase::getSupervisorUID();
 
-	__COUT__ << "uid: " << uid << __E__;
+	__SUP_COUTV__(uid);
 	for(unsigned int i = 0; i < uid.size(); ++i)
 		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
 		   (uid[i] >= '0' && uid[i] <= '9'))  // only allow alpha numeric in file name
 			filename += uid[i];
 	filename += ".fcl";
 
-	__COUT__ << __E__;
-	__COUT__ << __E__;
-	__COUT__ << "filename: " << filename << __E__;
+	__SUP_COUTV__(filename);
 
 	std::string fileFclString;
 	{
@@ -380,19 +328,34 @@ void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
 		}
 	}
 
-	__COUT__ << fileFclString << __E__;
-	fhicl::make_ParameterSet(fileFclString, pset);
-	// fhicl::make_ParameterSet(theConfigurationManager_->getNode(XDAQContextTableName_).getNode(supervisorConfigurationPath_).getNode("ConfigurationString").getValue<std::string>(),
-	// pset);
+	__SUP_COUTV__(fileFclString);
 
-	theDispatcherInterface_->initialize(pset, 0, 0);
-	TLOG(TLVL_INFO, "DispatcherInterface")
-	    << "ARTDAQDispatcher SUPERVISOR DONE CONFIGURING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-}
+	try
+	{
+		fhicl::make_ParameterSet(fileFclString, pset);
+		theDispatcherInterface_->initialize(pset, 0, 0);
+	}
+	catch(const cet::coded_exception<fhicl::error, &fhicl::detail::translate>& e)
+	{
+		__SUP_SS__ << "Error was caught while configuring: " << e.what() << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+		    "Transition Error" /*name*/,
+		    ss.str() /* message*/,
+		    "DispatcherApp::transitionConfiguring" /*module*/,
+		    __LINE__ /*line*/,
+		    __FUNCTION__ /*function*/
+		);
+	}
+
+	__SUP_COUT__ << "Configured." << __E__;
+}  // end transitionConfiguring()
 
 //========================================================================================================================
 void DispatcherApp::transitionHalting(toolbox::Event::Reference e)
 {
+	__SUP_COUT__ << "Halting..." << __E__;
 	try
 	{
 		theDispatcherInterface_->stop(45, 0);
@@ -400,6 +363,7 @@ void DispatcherApp::transitionHalting(toolbox::Event::Reference e)
 	catch(...)
 	{
 		// It is okay for this to fail, esp. if already stopped...
+		__SUP_COUT__ << "Ignoring error on halt." << __E__;
 	}
 
 	try
@@ -408,40 +372,65 @@ void DispatcherApp::transitionHalting(toolbox::Event::Reference e)
 	}
 	catch(...)
 	{
-		__MOUT_ERR__ << "ERROR OCCURRED DURING SHUTDOWN! STATE="
-		             << theDispatcherInterface_->status();
+		__SUP_COUT_ERR__ << "Error occurred during shutdown! State="
+		                 << theDispatcherInterface_->status();
 	}
 
 	init();
-}
+
+	__SUP_COUT__ << "Halted." << __E__;
+}  // end transitionHalting()
 
 //========================================================================================================================
-void DispatcherApp::transitionInitializing(toolbox::Event::Reference e) { init(); }
+void DispatcherApp::transitionInitializing(toolbox::Event::Reference e)
+{
+	__SUP_COUT__ << "Initializing..." << __E__;
+	init();
+	__SUP_COUT__ << "Initialized." << __E__;
+}  // end transitionInitializing()
 
 //========================================================================================================================
 void DispatcherApp::transitionPausing(toolbox::Event::Reference e)
 {
+	__SUP_COUT__ << "Pausing..." << __E__;
 	theDispatcherInterface_->pause(0, 0);
-}
+	__SUP_COUT__ << "Paused." << __E__;
+}  // end transitionPausing()
 
 //========================================================================================================================
 void DispatcherApp::transitionResuming(toolbox::Event::Reference e)
 {
+	__SUP_COUT__ << "Resuming..." << __E__;
 	theDispatcherInterface_->resume(0, 0);
-}
+	__SUP_COUT__ << "Resumed." << __E__;
+}  // end transitionResuming()
 
 //========================================================================================================================
 void DispatcherApp::transitionStarting(toolbox::Event::Reference e)
 {
-	art::RunID runId((art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(
-	    SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
-	        .getParameters()
-	        .getValue("RunNumber")));
-	theDispatcherInterface_->start(runId, 0, 0);
-}
+	__SUP_COUT__ << "Starting..." << __E__;
+
+	auto runNumber = SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
+	                     .getParameters()
+	                     .getValue("RunNumber");
+	try
+	{
+		art::RunID runId(
+		    (art::RunNumber_t)boost::lexical_cast<art::RunNumber_t>(runNumber));
+		theDispatcherInterface_->start(runId, 0, 0);
+	}
+	catch(const boost::exception& e)
+	{
+		__SUP_SS__ << "Error parsing string to art::RunNumber_t: " << runNumber << __E__;
+		__SUP_SS_THROW__;
+	}
+	__SUP_COUT__ << "Started." << __E__;
+}  // end transitionStarting()
 
 //========================================================================================================================
 void DispatcherApp::transitionStopping(toolbox::Event::Reference e)
 {
+	__SUP_COUT__ << "Stopping..." << __E__;
 	theDispatcherInterface_->stop(45, 0);
-}
+	__SUP_COUT__ << "Stopped." << __E__;
+}  // end transitionStopping()

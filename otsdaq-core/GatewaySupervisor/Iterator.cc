@@ -668,8 +668,8 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct* iteratorStruct,
 
 	// get stateMachineAliasFilter if possible
 	ConfigurationTree configLinkNode = iteratorStruct->cfgMgr_->getSupervisorTableNode(
-	    iteratorStruct->theIterator_->theSupervisor_->supervisorContextUID_,
-	    iteratorStruct->theIterator_->theSupervisor_->supervisorApplicationUID_);
+	    iteratorStruct->theIterator_->theSupervisor_->getContextUID(),
+	    iteratorStruct->theIterator_->theSupervisor_->getSupervisorUID());
 
 	if(!configLinkNode.isDisconnected())
 	{

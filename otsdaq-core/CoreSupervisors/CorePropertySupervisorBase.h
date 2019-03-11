@@ -23,9 +23,16 @@ namespace ots
 // variables 		generally useful to the configuration of client supervisors.
 class CorePropertySupervisorBase
 {
+	friend class GatewaySupervisor; // for access to indicateOtsAlive()
+
   public:
 	CorePropertySupervisorBase(xdaq::Application* application);
 	virtual ~CorePropertySupervisorBase(void);
+
+
+	AllSupervisorInfo     allSupervisorInfo_;
+	ConfigurationManager* theConfigurationManager_;
+
 
 	virtual void setSupervisorPropertyDefaults(
 	    void);  // override to control supervisor specific defaults
@@ -55,20 +62,27 @@ class CorePropertySupervisorBase
 		return getContextTreeNode().getNode(supervisorConfigurationPath_);
 	}
 
-	AllSupervisorInfo allSupervisorInfo_;
+	const std::string& getContextUID(void) const { return supervisorContextUID_; }
+	const std::string& getSupervisorUID(void) const { return supervisorApplicationUID_; }
+	const std::string& getSupervisorConfigurationPath(void) const
+	{
+		return supervisorConfigurationPath_;
+	}
+
+
 
   protected:
-	static void indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
-
-	ConfigurationManager* theConfigurationManager_;
-
 	const std::string supervisorClass_;
 	const std::string supervisorClassNoNamespace_;
+
+  private:
+	static void indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
 
 	std::string supervisorContextUID_;
 	std::string supervisorApplicationUID_;
 	std::string supervisorConfigurationPath_;
 
+  protected:
 	// Supervisor Property names
 	//	to access, use CorePropertySupervisorBase::getSupervisorProperty and
 	// CorePropertySupervisorBase::setSupervisorProperty

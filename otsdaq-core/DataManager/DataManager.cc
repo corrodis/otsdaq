@@ -99,7 +99,7 @@ void DataManager::configure(void)
 	        .getNode(theConfigurationPath_ + "/" + COL_NAME_bufferGroupLink)
 	        .getChildren())  //"/LinkToDataManagerTable").getChildren())
 	{
-		__CFG_COUT__ << "Data Buffer Name: " << buffer.first << std::endl;
+		__CFG_COUT__ << "Data Buffer Name: " << buffer.first << __E__;
 		if(buffer.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 		{
 			std::vector<unsigned int> producersVectorLocation;
@@ -110,8 +110,7 @@ void DataManager::configure(void)
 			unsigned int location = 0;
 			for(const auto& bufferConfiguration : bufferConfigurationList)
 			{
-				__CFG_COUT__ << "Processor id: " << bufferConfiguration.first
-				             << std::endl;
+				__CFG_COUT__ << "Processor id: " << bufferConfiguration.first << __E__;
 				if(bufferConfiguration.second
 				       .getNode(TableViewColumnInfo::COL_NAME_STATUS)
 				       .getValue<bool>())
@@ -135,7 +134,7 @@ void DataManager::configure(void)
 						                  .getValue<std::string>()
 						           << " is invalid. The only accepted types are Producer "
 						              "and Consumer"
-						           << std::endl;
+						           << __E__;
 						__CFG_MOUT_ERR__ << ss.str();
 						__CFG_SS_THROW__;
 					}
@@ -153,7 +152,7 @@ void DataManager::configure(void)
 				           << " and " << consumersVectorLocation.size() << " Consumers"
 				           << " there must be at least 1 Producer "
 				           <<  //	of both configured
-				    "for the buffer!" << std::endl;
+				    "for the buffer!" << __E__;
 				__CFG_MOUT_ERR__ << ss.str();
 				__CFG_SS_THROW__;
 			}
@@ -169,20 +168,19 @@ void DataManager::configure(void)
 
 			for(auto& producerLocation : producersVectorLocation)
 			{
-				//				__CFG_COUT__ << theConfigurationPath_ << std::endl;
-				//				__CFG_COUT__ << buffer.first << std::endl;
+				//				__CFG_COUT__ << theConfigurationPath_ << __E__;
+				//				__CFG_COUT__ << buffer.first << __E__;
 				__CFG_COUT__ << "Creating producer... "
-				             << bufferConfigurationList[producerLocation].first
-				             << std::endl;
+				             << bufferConfigurationList[producerLocation].first << __E__;
 				//				__CFG_COUT__ <<
 				// bufferConfigurationMap[producer].getNode(COL_NAME_processorPlugin).getValue<std::string>()
-				//<< std::endl;
+				//<< __E__;
 				//				__CFG_COUT__ <<
 				// bufferConfigurationMap[producer].getNode("LinkToProcessorTable") <<
-				// std::endl;
+				// __E__;
 				//				__CFG_COUT__ << "THIS DATA MANAGER POINTER: " << this <<
-				// std::endl;
-				//				__CFG_COUT__ << "PASSED" << std::endl;
+				// __E__;
+				//				__CFG_COUT__ << "PASSED" << __E__;
 
 				try
 				{
@@ -203,10 +201,19 @@ void DataManager::configure(void)
 					            bufferConfigurationList[producerLocation].first + "/" +
 					            COL_NAME_processorLink));  //));
 
+					if(!tmpCastCheck)
+					{
+						__CFG_SS__ << "Construction failed for producer '"
+						           << bufferConfigurationList[producerLocation].first
+						           << "!' Null pointer returned." << __E__;
+						__CFG_SS_THROW__;
+					}
+					__CFG_COUT__ << tmpCastCheck->getProcessorID() << __E__;
+
 					{
 						__CFG_SS__;
 						dumpStatus((std::ostream*)&ss);
-						std::cout << ss.str() << __E__;
+						__CFG_COUT__ << ss.str() << __E__;
 					}
 				}
 				catch(const std::bad_cast& e)
@@ -258,32 +265,32 @@ void DataManager::configure(void)
 					                  .getValue<std::string>()
 					           << "' due to an unknown error." << __E__;
 					__CFG_MOUT_ERR__ << ss.str();
-					throw;  // if we do not throw, it is hard to tell what is happening..
+					throw;  // if we do not throw, it is hard to tell what is causing the
+					        // problem..
 					        //__CFG_SS_THROW__;
 				}
 				__CFG_COUT__ << bufferConfigurationList[producerLocation].first
-				             << " has been created!" << std::endl;
+				             << " has been created!" << __E__;
 			}  // end producer creation loop
 
 			for(auto& consumerLocation : consumersVectorLocation)
 			{
-				//				__CFG_COUT__ << theConfigurationPath_ << std::endl;
-				//				__CFG_COUT__ << buffer.first << std::endl;
+				//				__CFG_COUT__ << theConfigurationPath_ << __E__;
+				//				__CFG_COUT__ << buffer.first << __E__;
 				__CFG_COUT__ << "Creating consumer... "
-				             << bufferConfigurationList[consumerLocation].first
-				             << std::endl;
+				             << bufferConfigurationList[consumerLocation].first << __E__;
 				//				__CFG_COUT__ <<
 				// bufferConfigurationMap[consumer].getNode(COL_NAME_processorPlugin).getValue<std::string>()
-				//<< std::endl;
+				//<< __E__;
 				//				__CFG_COUT__ <<
 				// bufferConfigurationMap[consumer].getNode("LinkToProcessorTable") <<
-				// std::endl;
+				// __E__;
 				//				__CFG_COUT__ <<
 				// theXDAQContextConfigTree_.getBackNode(theConfigurationPath_) <<
-				// std::endl;
+				// __E__;
 				//				__CFG_COUT__ << "THIS DATA MANAGER POINTER: " << this <<
-				// std::endl;
-				//				__CFG_COUT__ << "PASSED" << std::endl;
+				// __E__;
+				//				__CFG_COUT__ << "PASSED" << __E__;
 				try
 				{
 					// buffers_[buffer.first].consumers_.push_back(std::shared_ptr<DataConsumer>(
@@ -303,10 +310,18 @@ void DataManager::configure(void)
 					            bufferConfigurationList[consumerLocation].first + "/" +
 					            COL_NAME_processorLink));  //));
 
+					if(!tmpCastCheck)
+					{
+						__CFG_SS__ << "Construction failed for consumer '"
+						           << bufferConfigurationList[consumerLocation].first
+						           << "!' Null pointer returned." << __E__;
+						__CFG_SS_THROW__;
+					}
+
 					{
 						__CFG_SS__;
 						dumpStatus((std::ostream*)&ss);
-						std::cout << ss.str() << __E__;
+						__CFG_COUT__ << ss.str() << __E__;
 					}
 				}
 				catch(const std::bad_cast& e)
@@ -362,7 +377,7 @@ void DataManager::configure(void)
 					        //__CFG_SS_THROW__;
 				}
 				__CFG_COUT__ << bufferConfigurationList[consumerLocation].first
-				             << " has been created!" << std::endl;
+				             << " has been created!" << __E__;
 			}  // end consumer creation loop
 		}
 	}
@@ -374,6 +389,17 @@ void DataManager::halt(void)
 	const std::string transitionName = "Halting";
 
 	__CFG_COUT__ << transitionName << " DataManager " << __E__;
+
+	// since halting also occurs on errors, ignore more errors
+	try
+	{
+		stop();
+	}
+	catch(...)
+	{
+		__CFG_COUT_WARN__ << "An error occurred while halting the Data Manager, ignoring."
+		                  << __E__;
+	}
 
 	stop();
 
@@ -518,7 +544,7 @@ void DataManager::destroyBuffers(void)
 //
 //	__CFG_COUT__ << "Un-Registered consumer '" << consumerID <<
 //			"' from buffer '" << bufferID << ".'" << __E__;
-//	{__CFG_SS__; dumpStatus((std::ostream*)&ss); std::cout << ss.str() << __E__;}
+//	{__CFG_SS__; dumpStatus((std::ostream*)&ss); __CFG_COUT__ << ss.str() << __E__;}
 ////
 ////	__CFG_COUT__ << "Un-Registering consumer '" << consumerID <<
 ////			"'..." << __E__;
@@ -549,7 +575,7 @@ void DataManager::destroyBuffers(void)
 ////
 ////			__CFG_COUT__ << "Un-Registered consumer '" << consumerID <<
 ////					".'" << __E__;
-////			{__CFG_SS__; dumpStatus((std::ostream*)&ss); std::cout << ss.str() <<
+////			{__CFG_SS__; dumpStatus((std::ostream*)&ss); __CFG_COUT__ << ss.str() <<
 ///__E__;}
 ////
 ////			return;
@@ -566,7 +592,8 @@ void DataManager::destroyBuffers(void)
 ////			{
 ////				it->second.buffer_->unregisterConsumer(itc.get());
 ////
-////				{__CFG_SS__; dumpStatus((std::ostream*)&ss); std::cout << ss.str() <<
+////				{__CFG_SS__; dumpStatus((std::ostream*)&ss); __CFG_COUT__ << ss.str()
+///<<
 ///__E__;}
 ////
 ////				return;
@@ -598,7 +625,7 @@ void DataManager::destroyBuffers(void)
 //
 //	__CFG_COUT__ << "Un-Registered producer '" << producerID <<
 //			"' from buffer '" << bufferID << ".'" << __E__;
-//	{__CFG_SS__; dumpStatus((std::ostream*)&ss); std::cout << ss.str() << __E__;}
+//	{__CFG_SS__; dumpStatus((std::ostream*)&ss); __CFG_COUT__ << ss.str() << __E__;}
 //} //end unregisterProducer()
 
 //========================================================================================================================
@@ -639,7 +666,7 @@ void DataManager::unregisterFEProducer(const std::string& bufferID,
 	{
 		__CFG_SS__;
 		dumpStatus((std::ostream*)&ss);
-		std::cout << ss.str() << __E__;
+		__CFG_COUT__ << ss.str() << __E__;
 	}
 
 }  // end unregisterFEProducer()
@@ -674,7 +701,7 @@ void DataManager::registerProducer(const std::string& bufferUID,
 	{
 		__CFG_SS__ << "Before!" << __E__;
 		dumpStatus((std::ostream*)&ss);
-		std::cout << ss.str() << __E__;
+		__CFG_COUT__ << ss.str() << __E__;
 	}
 
 	__CFG_COUTV__(producer->getBufferSize());
@@ -684,7 +711,7 @@ void DataManager::registerProducer(const std::string& bufferUID,
 	{
 		__CFG_SS__ << "After!" << __E__;
 		dumpStatus((std::ostream*)&ss);
-		std::cout << ss.str() << __E__;
+		__CFG_COUT__ << ss.str() << __E__;
 	}
 }
 
@@ -711,7 +738,7 @@ void DataManager::registerConsumer(const std::string& bufferUID, DataConsumer* c
 	{
 		__CFG_SS__ << "Before!" << __E__;
 		dumpStatus((std::ostream*)&ss);
-		std::cout << ss.str() << __E__;
+		__CFG_COUT__ << ss.str() << __E__;
 	}
 
 	bufferIt->second.buffer_->registerConsumer(consumer);
@@ -720,7 +747,7 @@ void DataManager::registerConsumer(const std::string& bufferUID, DataConsumer* c
 	{
 		__CFG_SS__ << "After!" << __E__;
 		dumpStatus((std::ostream*)&ss);
-		std::cout << ss.str() << __E__;
+		__CFG_COUT__ << ss.str() << __E__;
 	}
 }
 
@@ -755,23 +782,63 @@ void DataManager::pauseAllBuffers(void)
 //========================================================================================================================
 void DataManager::startBuffer(const std::string& bufferUID, std::string runNumber)
 {
-	__CFG_COUT__ << "Starting... " << bufferUID << std::endl;
+	__CFG_COUT__ << "Starting... " << bufferUID << __E__;
 
 	buffers_[bufferUID].buffer_->reset();
 	for(auto& it : buffers_[bufferUID].consumers_)
-		it->startProcessingData(runNumber);
+	{
+		// use try..catch to make sure there is some identifying trail for errors
+		try
+		{
+			it->startProcessingData(runNumber);
+		}
+		catch(...)
+		{
+			__CFG_COUT_WARN__ << "An error occurred while starting consumer '"
+			                  << it->getProcessorID() << "'..." << __E__;
+			throw;
+		}
+	}
+
 	for(auto& it : buffers_[bufferUID].producers_)
-		it->startProcessingData(runNumber);
+	{
+		// use try..catch to make sure there is some identifying trail for errors
+		try
+		{
+			it->startProcessingData(runNumber);
+		}
+		catch(...)
+		{
+			__CFG_COUT_WARN__ << "An error occurred while starting producer '"
+			                  << it->getProcessorID() << "'..." << __E__;
+			throw;
+		}
+	}
+
 	buffers_[bufferUID].status_ = Running;
-}
+
+}  // end startBuffer()
 
 //========================================================================================================================
 void DataManager::stopBuffer(const std::string& bufferUID)
 {
-	__CFG_COUT__ << "Stopping... " << bufferUID << std::endl;
+	__CFG_COUT__ << "Stopping... " << bufferUID << __E__;
 
+	__CFG_COUT__ << "Stopping producers..." << __E__;
 	for(auto& it : buffers_[bufferUID].producers_)
-		it->stopProcessingData();
+	{
+		// use try..catch to make sure there is some identifying trail for errors
+		try
+		{
+			it->stopProcessingData();
+		}
+		catch(...)
+		{
+			__CFG_COUT_WARN__ << "An error occurred while stopping producer '"
+			                  << it->getProcessorID() << "'..." << __E__;
+			throw;
+		}
+	}
 
 	// Wait until all buffers are flushed
 	unsigned int       timeOut   = 0;
@@ -789,36 +856,51 @@ void DataManager::stopBuffer(const std::string& bufferUID)
 		timeOut += sleepTime;
 		if(timeOut > totalSleepTime)
 		{
-			std::cout << "Couldn't flush all buffers! Timing out after "
-			          << totalSleepTime / 1000000. << " seconds!" << std::endl;
+			__CFG_COUT__ << "Couldn't flush all buffers! Timing out after "
+			             << totalSleepTime / 1000000. << " seconds!" << __E__;
 			buffers_[bufferUID].buffer_->isEmpty();
 			break;
 		}
 	}
-	std::cout << "Stopping consumers, buffer MUST BE EMPTY. Is buffer empty? "
-	          << buffers_[bufferUID].buffer_->isEmpty() << std::endl;
+	__CFG_COUT__ << "Stopping consumers, buffer MUST BE EMPTY. Is buffer empty? "
+	             << (buffers_[bufferUID].buffer_->isEmpty() ? "yes" : "no") << __E__;
+
 	for(auto& it : buffers_[bufferUID].consumers_)
-		it->stopProcessingData();
+	{
+		// use try..catch to make sure there is some identifying trail for errors
+		try
+		{
+			it->stopProcessingData();
+		}
+		catch(...)
+		{
+			__CFG_COUT_WARN__ << "An error occurred while stopping consumer '"
+			                  << it->getProcessorID() << "'..." << __E__;
+			throw;
+		}
+	}
+
 	buffers_[bufferUID].buffer_->reset();
 	buffers_[bufferUID].status_ = Initialized;
-}
+}  // end stopBuffer()
 
 //========================================================================================================================
 void DataManager::resumeBuffer(const std::string& bufferUID)
 {
-	__CFG_COUT__ << "Resuming... " << bufferUID << std::endl;
+	__CFG_COUT__ << "Resuming... " << bufferUID << __E__;
 
 	for(auto& it : buffers_[bufferUID].consumers_)
 		it->resumeProcessingData();
 	for(auto& it : buffers_[bufferUID].producers_)
 		it->resumeProcessingData();
+
 	buffers_[bufferUID].status_ = Running;
-}
+}  // end resumeBuffer()
 
 //========================================================================================================================
 void DataManager::pauseBuffer(const std::string& bufferUID)
 {
-	__CFG_COUT__ << "Pausing... " << bufferUID << std::endl;
+	__CFG_COUT__ << "Pausing... " << bufferUID << __E__;
 
 	for(auto& it : buffers_[bufferUID].producers_)
 		it->pauseProcessingData();
@@ -836,14 +918,14 @@ void DataManager::pauseBuffer(const std::string& bufferUID)
 		                                                                   // for each
 		                                                                   // buffer!!!!
 		{
-			std::cout << "Couldn't flush all buffers! Timing out after "
-			          << buffers_[bufferUID].buffer_->getTotalNumberOfSubBuffers() *
-			                 sleepTime / 1000000.
-			          << " seconds!" << std::endl;
+			__CFG_COUT__ << "Couldn't flush all buffers! Timing out after "
+			             << buffers_[bufferUID].buffer_->getTotalNumberOfSubBuffers() *
+			                    sleepTime / 1000000.
+			             << " seconds!" << __E__;
 			break;
 		}
 	}
 	for(auto& it : buffers_[bufferUID].consumers_)
 		it->pauseProcessingData();
 	buffers_[bufferUID].status_ = Initialized;
-}
+}  // end pauseBuffer()

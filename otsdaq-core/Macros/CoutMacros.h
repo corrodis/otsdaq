@@ -273,10 +273,10 @@
 // subject
 #define __SUP_COUT_TYPE__(X)                                           \
 	std::cout << QUOTE(X) << ":" << supervisorClassNoNamespace_ << ":" \
-	          << CorePropertySupervisorBase::supervisorApplicationUID_ << ":"
+	          << CorePropertySupervisorBase::getSupervisorUID() << ":"
 #define __SUP_MF_TYPE__(X)                    \
 	mf::X(supervisorClassNoNamespace_ + "-" + \
-	      CorePropertySupervisorBase::supervisorApplicationUID_)
+	      CorePropertySupervisorBase::getSupervisorUID())
 
 #define __SUP_MOUT_ERR__ __SUP_MF_TYPE__(LogError) << __COUT_HDR__
 #define __SUP_MOUT_WARN__ __SUP_MF_TYPE__(LogWarning) << __COUT_HDR__
@@ -318,7 +318,7 @@
 #define __SUP_SS__                                  \
 	std::stringstream ss;                           \
 	ss << ":" << supervisorClassNoNamespace_ << ":" \
-	   << CorePropertySupervisorBase::supervisorApplicationUID_ << ":" << __COUT_HDR__
+	   << CorePropertySupervisorBase::getSupervisorUID() << ":" << __COUT_HDR__
 #define __SUP_SS_THROW__                  \
 	__SUP_COUT_ERR__ << "\n" << ss.str(); \
 	throw std::runtime_error(ss.str())

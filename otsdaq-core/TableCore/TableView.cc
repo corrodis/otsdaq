@@ -2614,15 +2614,20 @@ bool TableView::setURIEncodedValue(const std::string&  value,
 	{
 		// check if valid number
 		std::string convertedString = StringMacros::convertEnvironmentVariables(valueStr);
-		if(!StringMacros::isNumber(convertedString))
-		{
-			__SS__ << "\tIn configuration " << tableName_
-			       << " at column=" << columnsInfo_[c].getName() << " the value set ("
-			       << convertedString << ")"
-			       << " is not a number! Please fix it or change the column type..."
-			       << __E__;
-			__SS_THROW__;
-		}
+		// do not check here, let init check
+		//	if this is a link to valid number, then this is an improper check.
+		//		if(!StringMacros::isNumber(convertedString))
+		//		{
+		//			__SS__ << "\tIn configuration " << tableName_
+		//			       << " at column=" << columnsInfo_[c].getName() << " the value
+		//set
+		//("
+		//			       << convertedString << ")"
+		//			       << " is not a number! Please fix it or change the column
+		// type..."
+		//			       << __E__;
+		//			__SS_THROW__;
+		//		}
 		theDataView_[r][c] = valueStr;
 	}
 	else if(columnsInfo_[c].getDataType() == TableViewColumnInfo::DATATYPE_TIME)
@@ -2722,7 +2727,8 @@ unsigned int TableView::addRow(const std::string& author,
 		          TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))))
 		{
 			//			__COUT__ << "Current unique data entry is data[" << rowToAdd
-			//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col] <<
+			//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col]
+			//<<
 			//"'"
 			//			         << __E__;
 

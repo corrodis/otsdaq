@@ -1,6 +1,6 @@
 #include "otsdaq-core/CoreSupervisors/FEDataManagerSupervisor.h"
-//#include "otsdaq-core/FECore/FEVInterfacesManager.h"
-#include "otsdaq-core/ARTDAQDataManager/ARTDAQDataManager.h"
+
+#include "../ARTDAQDataManager/ARTDAQDataManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/DataManager/DataManager.h"
 #include "otsdaq-core/DataManager/DataManagerSingleton.h"
@@ -16,7 +16,7 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub* s,
                                                  bool                   artdaqDataManager)
     : FESupervisor(s)
 {
-	__SUP_COUT__ << "Constructor." << std::endl;
+	__SUP_COUT__ << "Constructor." << __E__;
 
 	// WARNING THE ORDER IS IMPORTANT SINCE THE FIRST STATE MACHINE ELEMENT
 	//	WILL BE CALLED FIRST DURING TRANSITION!!!!!
@@ -41,8 +41,8 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub* s,
 		CoreSupervisorBase::theStateMachineImplementation_.push_back(
 		    DataManagerSingleton::getInstance<ARTDAQDataManager>(
 		        CorePropertySupervisorBase::getContextTreeNode(),
-		        CorePropertySupervisorBase::supervisorConfigurationPath_,
-		        CorePropertySupervisorBase::supervisorApplicationUID_));
+		        CorePropertySupervisorBase::getSupervisorConfigurationPath(),
+		        CorePropertySupervisorBase::getSupervisorUID()));
 	}
 	else
 	{
@@ -50,8 +50,8 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub* s,
 		CoreSupervisorBase::theStateMachineImplementation_.push_back(
 		    DataManagerSingleton::getInstance<DataManager>(
 		        CorePropertySupervisorBase::getContextTreeNode(),
-		        CorePropertySupervisorBase::supervisorConfigurationPath_,
-		        CorePropertySupervisorBase::supervisorApplicationUID_));
+		        CorePropertySupervisorBase::getSupervisorConfigurationPath(),
+		        CorePropertySupervisorBase::getSupervisorUID()));
 	}
 
 	extractDataManager();
@@ -62,13 +62,13 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub* s,
 //========================================================================================================================
 FEDataManagerSupervisor::~FEDataManagerSupervisor(void)
 {
-	__SUP_COUT__ << "Destroying..." << std::endl;
+	__SUP_COUT__ << "Destroying..." << __E__;
 
 	// theStateMachineImplementation_ is reset and the object it points to deleted in
 	// ~CoreSupervisorBase()  This destructor must happen before the CoreSupervisor
 	// destructor
 
-	DataManagerSingleton::deleteInstance(CoreSupervisorBase::supervisorApplicationUID_);
+	DataManagerSingleton::deleteInstance(CoreSupervisorBase::getSupervisorUID());
 	theStateMachineImplementation_.pop_back();
 
 	__SUP_COUT__ << "Destructed." << __E__;
@@ -80,7 +80,7 @@ FEDataManagerSupervisor::~FEDataManagerSupervisor(void)
 //		so that DataManager gets configured first.
 void FEDataManagerSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 {
-	__SUP_COUT__ << "transitionConfiguring" << std::endl;
+	__SUP_COUT__ << "transitionConfiguring" << __E__;
 
 	// Data Manager needs to be configured (instantiate buffers)
 	//	before FEVinterfaceManager configures (creates interfaces)
@@ -123,7 +123,7 @@ void FEDataManagerSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 //	buffers need to be ready before FEs start writing to them
 void FEDataManagerSupervisor::transitionStarting(toolbox::Event::Reference e)
 {
-	__SUP_COUT__ << "transitionStarting" << std::endl;
+	__SUP_COUT__ << "transitionStarting" << __E__;
 
 	// Data Manager needs to be started (start buffers)
 	//	before FEVinterfaceManager starts (interfaces write)
@@ -154,7 +154,7 @@ void FEDataManagerSupervisor::transitionStarting(toolbox::Event::Reference e)
 //	buffers need to be ready before FEs start writing to them
 void FEDataManagerSupervisor::transitionResuming(toolbox::Event::Reference e)
 {
-	__SUP_COUT__ << "transitionStarting" << std::endl;
+	__SUP_COUT__ << "transitionStarting" << __E__;
 
 	// Data Manager needs to be resumed (resume buffers)
 	//	before FEVinterfaceManager resumes (interfaces write)
@@ -199,23 +199,22 @@ DataManager* FEDataManagerSupervisor::extractDataManager()
 			if(!theDataManager_)
 			{
 				// dynamic_cast returns null pointer on failure
-				__SUP_SS__ << "Dynamic cast failure!" << std::endl;
+				__SUP_SS__ << "Dynamic cast failure!" << __E__;
 				__SUP_COUT_ERR__ << ss.str();
 				__SUP_SS_THROW__;
 			}
-			__SUP_COUT__ << "State Machine " << i << " WAS of type DataManager"
-			             << std::endl;
+			__SUP_COUT__ << "State Machine " << i << " WAS of type DataManager" << __E__;
 
 			break;
 		}
 		catch(...)
 		{
 			__SUP_COUT__ << "State Machine " << i << " was NOT of type DataManager"
-			             << std::endl;
+			             << __E__;
 		}
 	}
 
-	__SUP_COUT__ << "theDataManager pointer = " << theDataManager_ << std::endl;
+	__SUP_COUT__ << "theDataManager pointer = " << theDataManager_ << __E__;
 
 	return theDataManager_;
 }  // end extractDataManager()

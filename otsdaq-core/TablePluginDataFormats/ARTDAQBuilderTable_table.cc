@@ -111,7 +111,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 	        service_provider: NetMonTransportService
 	        #broadcast_sends: true
 	        destinations: {
-	          d4: { transferPluginType: MPI destination_rank: 4 max_fragment_size_words:
+	          d4: { transferPluginType: MPI destination_rank: 4 max_fragment_size_bytes:
 	2097152}
 
 	        }
@@ -131,8 +131,8 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 	        request_address:
 
 	        sources: {
-	            s0: { transferPluginType: MPI source_rank: 0 max_fragment_size_words:
-	2097152} s1: { transferPluginType: MPI source_rank: 1 max_fragment_size_words:
+	            s0: { transferPluginType: MPI source_rank: 0 max_fragment_size_bytes:
+	2097152} s1: { transferPluginType: MPI source_rank: 1 max_fragment_size_bytes:
 	2097152}
 
 	        }
@@ -322,15 +322,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 					try
 					{
-						OUT << "max_fragment_size_words: "
+						OUT << "max_fragment_size_bytes: "
 						    << destination.second
-						           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
-						           .getValue<unsigned int>()
+						           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeBytes")
+						           .getValue<unsigned long long>()
 						    << __E__;
 					}
 					catch(...)
 					{
-						__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeWords "
+						__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeBytes "
 						          "could not be accessed. Make sure the link is valid."
 						       << __E__;
 						__SS_THROW__;
@@ -391,6 +391,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		OUT << "event_builder: {\n";
 
 		PUSHTAB;
+
+		OUT << "max_fragment_size_bytes: "
+		    << daq.getNode("daqEventBuilderMaxFragmentSizeBytes")
+		           .getValue<unsigned long long>()
+		    << __E__;
+		OUT << "buffer_count: "
+		    << daq.getNode("daqEventBuilderBufferCount").getValue<unsigned long long>()
+		    << __E__;
+
 		auto parametersLink = daq.getNode("daqEventBuilderParametersLink");
 		if(!parametersLink.isDisconnected())
 		{
@@ -444,15 +453,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 					try
 					{
-						OUT << "max_fragment_size_words: "
+						OUT << "max_fragment_size_bytes: "
 						    << source.second
-						           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeWords")
-						           .getValue<unsigned int>()
+						           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeBytes")
+						           .getValue<unsigned long long>()
 						    << __E__;
 					}
 					catch(...)
 					{
-						__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeWords "
+						__SS__ << "The field ARTDAQGlobalTableLink/maxFragmentSizeBytes "
 						          "could not be accessed. Make sure the link is valid."
 						       << __E__;
 						__SS_THROW__;
@@ -654,19 +663,19 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 							try
 							{
-								OUT << "max_fragment_size_words: "
+								OUT << "max_fragment_size_bytes: "
 								    << destination.second
 								           .getNode(
 								               "ARTDAQGlobalTableLink/"
-								               "maxFragmentSizeWords")
-								           .getValue<unsigned int>()
+								               "maxFragmentSizeBytes")
+								           .getValue<unsigned long long>()
 								    << __E__;
 							}
 							catch(...)
 							{
 								__SS__
 								    << "The field "
-								       "ARTDAQGlobalTableLink/maxFragmentSizeWords could "
+								       "ARTDAQGlobalTableLink/maxFragmentSizeBytes could "
 								       "not be accessed. Make sure the link is valid."
 								    << __E__;
 								__SS_THROW__;

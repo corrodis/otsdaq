@@ -22,10 +22,15 @@ FEVInterfacesManager::FEVInterfacesManager(
     : Configurable(theXDAQContextConfigTree, supervisorConfigurationPath)
 {
 	init();
+	__CFG_COUT__ << "Constructed." << __E__;
 }
 
 //========================================================================================================================
-FEVInterfacesManager::~FEVInterfacesManager(void) { destroy(); }
+FEVInterfacesManager::~FEVInterfacesManager(void)
+{
+	destroy();
+	__CFG_COUT__ << "Destructed." << __E__;
+}
 
 //========================================================================================================================
 void FEVInterfacesManager::init(void) {}
@@ -224,9 +229,42 @@ void FEVInterfacesManager::halt(void)
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 
 		preStateMachineExecution(i);
-		fe->stopWorkLoop();
-		fe->stopSlowControlsWorkLooop();
-		fe->halt();
+
+		// since halting also occurs on errors, ignore more errors
+		try
+		{
+			fe->stopWorkLoop();
+		}
+		catch(...)
+		{
+			__CFG_COUT_WARN__
+			    << "An error occurred while halting the front-end workloop for '" << name
+			    << ",' ignoring." << __E__;
+		}
+
+		// since halting also occurs on errors, ignore more errors
+		try
+		{
+			fe->stopSlowControlsWorkLooop();
+		}
+		catch(...)
+		{
+			__CFG_COUT_WARN__ << "An error occurred while halting the Slow Controls "
+			                     "front-end workloop for '"
+			                  << name << ",' ignoring." << __E__;
+		}
+
+		// since halting also occurs on errors, ignore more errors
+		try
+		{
+			fe->halt();
+		}
+		catch(...)
+		{
+			__CFG_COUT_WARN__ << "An error occurred while halting the front-end '" << name
+			                  << ",' ignoring." << __E__;
+		}
+
 		postStateMachineExecution(i);
 
 		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
@@ -1946,8 +1984,8 @@ void FEVInterfacesManager::runMacro(const std::string& interfaceID,
 	for(auto& arg : argsOut)
 	{
 		std::stringstream numberSs;
-		numberSs << std::dec << variableMap.at(arg.first) << " (0x" <<
-				std::hex << variableMap.at(arg.first) << ")" << std::dec;
+		numberSs << std::dec << variableMap.at(arg.first) << " (0x" << std::hex
+		         << variableMap.at(arg.first) << ")" << std::dec;
 		arg.second = numberSs.str();
 		__CFG_COUT__ << arg.first << ": " << arg.second << __E__;
 	}
@@ -2136,22 +2174,22 @@ void FEVInterfacesManager::runFEMacro(const std::string& interfaceID,
 		if(i)
 			outputArgs += ";";
 
-		//attempt to get number, and output hex version
+		// attempt to get number, and output hex version
 		// otherwise just output result
 		try
 		{
 			uint64_t tmpNumber;
-			if(StringMacros::getNumber(argsOut[i].second,tmpNumber))
+			if(StringMacros::getNumber(argsOut[i].second, tmpNumber))
 			{
 				std::stringstream outNumberSs;
-				outNumberSs << std::dec << tmpNumber << " (0x" <<
-						std::hex << tmpNumber << ")" << std::dec;
+				outNumberSs << std::dec << tmpNumber << " (0x" << std::hex << tmpNumber
+				            << ")" << std::dec;
 				outputArgs += argsOut[i].first + "," + outNumberSs.str();
 				continue;
 			}
 		}
 		catch(...)
-		{ //ignore error, assume not a number
+		{  // ignore error, assume not a number
 		}
 
 		outputArgs += argsOut[i].first + "," + argsOut[i].second;

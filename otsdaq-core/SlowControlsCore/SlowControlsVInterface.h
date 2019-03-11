@@ -1,30 +1,32 @@
-#ifndef _ots_ControlsVInterface_h_
-#define _ots_ControlsVInterface_h_
+#ifndef _ots_SlowControlsVInterface_h_
+#define _ots_SlowControlsVInterface_h_
 #include "otsdaq-core/Configurable/Configurable.h"
 
 #include <array>
 #include <string>
 namespace ots
 {
-class ControlsVInterface : public Configurable
+class SlowControlsVInterface : public Configurable
 {
   public:
-	ControlsVInterface(const std::string&       interfaceUID,
-	                   const ConfigurationTree& theXDAQContextConfigTree,
-	                   const std::string&       configurationPath)
+	SlowControlsVInterface(const std::string&       interfaceUID,
+	                       const ConfigurationTree& theXDAQContextConfigTree,
+	                       const std::string&       configurationPath)
 	    : Configurable(theXDAQContextConfigTree, configurationPath)
-	, interfaceUID_                 (interfaceUID)
-	, interfaceType_				(Configurable::getSelfNode().getNode("ControlsInterfacePluginType").getValue<std::string>())
-  	, mfSubject_					("controls-" + interfaceType_ + "-" + interfaceUID_)
+	    , interfaceUID_(interfaceUID)
+	    , interfaceType_(Configurable::getSelfNode()
+	                         .getNode("ControlsInterfacePluginType")
+	                         .getValue<std::string>())
+	    , mfSubject_("controls-" + interfaceType_ + "-" + interfaceUID_)
 	{
-		//inheriting children classes should use __GEN_COUT_*
+		// inheriting children classes should use __GEN_COUT_*
 		//	for decorations using mfSubject.
 		__GEN_COUT__ << __E__;
 		__GEN_COUTV__(interfaceUID_);
 		__GEN_COUTV__(mfSubject_);
 	}
 
-	virtual ~ControlsVInterface(void) {}
+	virtual ~SlowControlsVInterface(void) {}
 
 	virtual void initialize() = 0;
 

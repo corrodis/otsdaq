@@ -1,4 +1,4 @@
-cet_make(LIBRARY_NAME ControlsCore
+cet_make(LIBRARY_NAME SlowControlsCore
 		 LIBRARIES
         	 ${XDAQ_BASIC_LIB_LIST}
 		 ${CETLIB}

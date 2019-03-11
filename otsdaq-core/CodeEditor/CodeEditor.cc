@@ -245,14 +245,14 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 			xmlOut->addTextElementToData("special", specialTypeNames[i]);
 
 	std::string contents;
-	size_t i;
-	if((i=path.find("$USER_DATA/")) == 0 ||
-			(i == 1 && path[0] == '/')) //if leading / or without
+	size_t      i;
+	if((i = path.find("$USER_DATA/")) == 0 ||
+	   (i == 1 && path[0] == '/'))  // if leading / or without
 		getPathContent(CodeEditor::USER_DATA_PATH,
 		               path.substr(std::string("/$USER_DATA/").size()),
 		               xmlOut);
-	else if((i=path.find("$OTSDAQ_DATA/")) == 0 ||
-			(i == 1 && path[0] == '/')) //if leading / or without
+	else if((i = path.find("$OTSDAQ_DATA/")) == 0 ||
+	        (i == 1 && path[0] == '/'))  // if leading / or without
 		getPathContent(CodeEditor::OTSDAQ_DATA_PATH,
 		               path.substr(std::string("/$OTSDAQ_DATA/").size()),
 		               xmlOut);
@@ -387,15 +387,15 @@ void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 	xmlOut->addTextElementToData("ext", extension);
 
 	std::string contents;
-	size_t i;
-	if((i=path.find("$USER_DATA/")) == 0 ||
-			(i == 1 && path[0] == '/')) //if leading / or without
+	size_t      i;
+	if((i = path.find("$USER_DATA/")) == 0 ||
+	   (i == 1 && path[0] == '/'))  // if leading / or without
 		CodeEditor::readFile(
 		    CodeEditor::USER_DATA_PATH,
 		    path.substr(i + std::string("$USER_DATA/").size()) + "." + extension,
 		    contents);
-	else if((i=path.find("$OTSDAQ_DATA/")) == 0 ||
-			(i == 1 && path[0] == '/')) //if leading / or without
+	else if((i = path.find("$OTSDAQ_DATA/")) == 0 ||
+	        (i == 1 && path[0] == '/'))  // if leading / or without
 		CodeEditor::readFile(
 		    CodeEditor::OTSDAQ_DATA_PATH,
 		    path.substr(std::string("/$OTSDAQ_DATA/").size()) + "." + extension,
@@ -655,7 +655,7 @@ CodeEditor::getSpecialsMap(void)
                                     "DataProcessorPlugins",
                                     "UserTableDataFormats",
                                     "TablePluginDataFormats",
-                                    "ControlsInterfacePlugins",
+                                    "SlowControlsInterfacePlugins",
                                     "FEInterfacePlugins",
                                     "tools"};
 	std::string        specialMapTypes[] = {CodeEditor::SPECIAL_TYPE_FEInterface,

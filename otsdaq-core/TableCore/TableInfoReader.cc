@@ -31,9 +31,9 @@ using namespace ots;
 #undef __COUT_HDR__
 #define __COUT_HDR__ "TableInfoReader"
 
-//const std::string TableInfoReader::CONFIGURATION_BACKEND_TYPE_ =
+// const std::string TableInfoReader::CONFIGURATION_BACKEND_TYPE_ =
 //    getenv("CONFIGURATION_TYPE");
-#define CONFIGURATION_BACKEND_TYPE_ 	getenv("CONFIGURATION_TYPE")
+#define CONFIGURATION_BACKEND_TYPE_ getenv("CONFIGURATION_TYPE")
 
 //==============================================================================
 TableInfoReader::TableInfoReader(bool allowIllegalColumns)

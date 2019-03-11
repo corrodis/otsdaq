@@ -1,5 +1,6 @@
 #include "otsdaq-core/CoreSupervisors/ARTDAQFEDataManagerSupervisor.h"
-#include "otsdaq-core/ARTDAQDataManager/ARTDAQDataManager.h"
+
+#include "../ARTDAQDataManager/ARTDAQDataManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/DataManager/DataManagerSingleton.h"
 #include "otsdaq-core/FECore/FEVInterfacesManager.h"

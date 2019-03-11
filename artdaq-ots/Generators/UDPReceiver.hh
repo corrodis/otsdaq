@@ -1,7 +1,7 @@
 #ifndef artdaq_ots_Generators_UDPReceiver_hh
 #define artdaq_ots_Generators_UDPReceiver_hh
 
-// The UDP Receiver class recieves UDP data from an OtSDAQ applicance and
+// The UDP Receiver class receives UDP data from an otsdaq application and
 // puts that data into UDPFragments for further ARTDAQ analysis.
 //
 // It currently assumes two things to be true:

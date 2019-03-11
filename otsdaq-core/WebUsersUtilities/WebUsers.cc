@@ -2718,7 +2718,7 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 	}
 	else  // default to show tool tip
 		xmldoc->addTextElementToData("ShowTooltip", "1");
-}  //end tooltipCheckForUsername();
+}  // end tooltipCheckForUsername();
 
 //========================================================================================================================
 // WebUsers::resetAllUserTooltips

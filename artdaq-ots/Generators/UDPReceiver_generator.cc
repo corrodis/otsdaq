@@ -14,6 +14,8 @@
 #include <iostream>
 #include <iterator>
 
+
+//========================================================================================================================
 ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const& ps)
     : CommandableFragmentGenerator(ps)
     , rawOutput_(ps.get<bool>("raw_output_enabled", false))
@@ -26,6 +28,8 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const& ps)
     , fragmentWindow_(ps.get<double>("fragment_time_window_ms", 1000))
     , lastFrag_(std::chrono::high_resolution_clock::now())
 {
+	__COUT__ << "Constructor." << __E__;
+
 	datasocket_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if(!datasocket_)
 	{
@@ -67,18 +71,36 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const& ps)
 		exit(1);
 	}
 	TLOG_INFO("UDPReceiver") << "UDP Receiver Construction Complete!" << TLOG_ENDL;
-}
 
-ots::UDPReceiver::~UDPReceiver() { receiverThread_.join(); }
+	__COUT__ << "Constructed." << __E__;
+} //end constructor()
 
+//========================================================================================================================
+ots::UDPReceiver::~UDPReceiver()
+{
+	__COUT__ << "Destructor." << __E__;
+
+	//join waits for thread to complete
+	if(receiverThread_.joinable()) //only join if thread has started
+		receiverThread_.join();
+
+	__COUT__ << "Destructed." << __E__;
+} //end destructor()
+
+//========================================================================================================================
 void ots::UDPReceiver::start()
 {
+	__COUT__ << "Starting..." << __E__;
+
 	TLOG_INFO("UDPReceiver") << "Starting..." << TLOG_ENDL;
 
 	receiverThread_ = std::thread(&UDPReceiver::receiveLoop_, this);
 	start_();
-}
 
+	__COUT__ << "Started." << __E__;
+} //end start()
+
+//========================================================================================================================
 void ots::UDPReceiver::receiveLoop_()
 {
 	while(!should_stop())
@@ -183,6 +205,7 @@ void ots::UDPReceiver::receiveLoop_()
 	TLOG_INFO("UDPReceiver") << "receive Loop exiting..." << TLOG_ENDL;
 }
 
+//========================================================================================================================
 bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs& output)
 {
 	if(should_stop())
@@ -223,6 +246,7 @@ bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs& output)
 	return true;
 }
 
+//========================================================================================================================
 void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs& output)
 {
 	ots::UDPFragment::Metadata metadata;
@@ -284,6 +308,7 @@ void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs& output)
 		rawOutput.close();
 }
 
+//========================================================================================================================
 void ots::UDPReceiver::send(CommandType command)
 {
 	if(sendCommands_)
@@ -300,6 +325,7 @@ void ots::UDPReceiver::send(CommandType command)
 	}
 }
 
+//========================================================================================================================
 bool ots::UDPReceiver::isTimerExpired_()
 {
 	auto now  = std::chrono::high_resolution_clock::now();
@@ -307,16 +333,20 @@ bool ots::UDPReceiver::isTimerExpired_()
 	return diff > fragmentWindow_;
 }
 
+//========================================================================================================================
 void ots::UDPReceiver::stop()
 {
+	__COUT__ << "Stopping..." << __E__;
 	//#pragma message "Using default implementation of UDPReceiver::stop()"
 }
 
+//========================================================================================================================
 void ots::UDPReceiver::stopNoMutex()
 {
 	//#pragma message "Using default implementation of UDPReceiver::stopNoMutex()"
 }
 
+//========================================================================================================================
 void ots::UDPReceiver::start_()
 {
 	//#pragma message "Using default implementation of UDPReceiver::start_()"

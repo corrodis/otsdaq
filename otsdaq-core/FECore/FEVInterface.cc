@@ -33,12 +33,16 @@ FEVInterface::~FEVInterface(void)
 {
 	// NOTE:: be careful not to call __FE_COUT__ decoration because it uses the tree and
 	// it may already be destructed partially
-	__COUT__ << FEVInterface::interfaceUID_ << " Destructor" << __E__;
+	__COUT__ << FEVInterface::interfaceUID_ << " Destructed." << __E__;
 }
 
 //========================================================================================================================
 void FEVInterface::configureSlowControls(void)
 {
+	// START IT HERE
+	if(metricMan && !metricMan->Running() && metricMan->Initialized())
+		metricMan->do_start();
+
 	ConfigurationTree slowControlsGroupLink =
 	    theXDAQContextConfigTree_.getBackNode(theConfigurationPath_)
 	        .getNode("LinkToSlowControlsChannelTable");
@@ -97,7 +101,7 @@ void FEVInterface::configureSlowControls(void)
 		        groupLinkChild.second.getNode("HighHighThreshold")
 		            .getValue<std::string>())));
 	}
-} //end configureSlowControls()
+}  // end configureSlowControls()
 
 //========================================================================================================================
 bool FEVInterface::slowControlsRunning(void)
@@ -106,7 +110,9 @@ bool FEVInterface::slowControlsRunning(void)
 
 	if(mapOfSlowControlsChannels_.size() == 0)
 	{
-		__FE_COUT__ << "No slow controls channels to monitor, exiting slow controls workloop." << __E__;
+		__FE_COUT__
+		    << "No slow controls channels to monitor, exiting slow controls workloop."
+		    << __E__;
 		return false;
 	}
 	std::string readVal;
@@ -223,6 +229,19 @@ bool FEVInterface::slowControlsRunning(void)
 			channel->handleSample(readVal, txBuffer, fp, aggregateFileIsBinaryFormat);
 			if(txBuffer.size())
 				__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
+
+			//"Channel:" << getInterfaceUID() << "/"
+			//			            << slowControlsChannelPair.first << __E__;
+			// Value << readVal
+
+			// For example,
+			if(metricMan)
+				metricMan->sendMetric(
+				    getInterfaceUID() + "/" + slowControlsChannelPair.first,
+				    readVal,
+				    "",
+				    3,
+				    artdaq::MetricMode::LastPoint);
 
 			// make sure buffer hasn't exploded somehow
 			if(txBuffer.size() > txBufferSz)
