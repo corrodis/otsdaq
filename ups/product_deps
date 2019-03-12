@@ -18,10 +18,10 @@ fcldir      -
 
 #
 product		 version	optional
-artdaq              v3_03_02
-artdaq_database     v1_04_69
+artdaq              v3_04_00
+artdaq_database     v1_04_70
 xdaq                v14_4_1a
-artdaq_mfextensions v1_03_03   	-        optional
+artdaq_mfextensions v1_03_03a   	-        optional
 smc_compiler        v6_6_0      -        only_for_build
 cetbuildtools       v7_02_01    -        only_for_build
 end_product_list
