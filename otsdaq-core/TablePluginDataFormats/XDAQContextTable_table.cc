@@ -251,7 +251,9 @@ unsigned int XDAQContextTable::getARTDAQDataPort(
 				__SS_THROW__;
 			}
 
-			if(context.applications_[0].class_ == "ots::ARTDAQDataManagerSupervisor")
+			//Board Reader port is through Processor table
+			if(context.applications_[0].class_ == "ots::ARTDAQDataManagerSupervisor" ||
+					context.applications_[0].class_ == "ots::ARTDAQFEDataManagerSupervisor")
 			{
 				auto processors =
 				    getSupervisorConfigNode(configManager,
@@ -282,7 +284,7 @@ unsigned int XDAQContextTable::getARTDAQDataPort(
 				       << __E__;
 				__SS_THROW__;
 			}
-			// else
+			// else, Builder or Aggregator
 			return getSupervisorConfigNode(configManager,
 			                               context.contextUID_,
 			                               context.applications_[0].applicationUID_)
@@ -585,7 +587,9 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				continue;  // skip if disabled
 
 			if(contexts_.back().applications_[0].class_ ==  // if board reader
-			   "ots::ARTDAQDataManagerSupervisor")
+			   "ots::ARTDAQDataManagerSupervisor" ||
+			   contexts_.back().applications_[0].class_ ==  // if board reader
+			   			   "ots::ARTDAQFEDataManagerSupervisor")
 				artdaqBoardReaders_.push_back(contexts_.size() - 1);
 			else if(contexts_.back().applications_[0].class_ ==  // if event builder
 			        "ots::EventBuilderApp")
@@ -598,11 +602,12 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 			else
 			{
 				__SS__ << "ARTDAQ Context must be have Application of an allowed class "
-				          "type:\n "
-				       << "\tots::ARTDAQDataManagerSupervisor\n"
-				       << "\tots::EventBuilderApp\n"
-				       << "\tots::DataLoggerApp\n"
-				       << "\tots::DispatcherApp\n"
+				          "type:\n"
+				       << "\tots::ARTDAQDataManagerSupervisor (Board Reader)\n"
+				       << "\tots::ARTDAQFEDataManagerSupervisor (Board Reader)\n"
+				       << "\tots::EventBuilderApp (Event Builder)\n"
+				       << "\tots::DataLoggerApp (Aggregator)\n"
+				       << "\tots::DispatcherApp (Aggregator)\n"
 				       << "\nClass found was " << contexts_.back().applications_[0].class_
 				       << __E__;
 				__SS_THROW__;

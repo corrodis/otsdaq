@@ -236,6 +236,8 @@ echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 # function to kill all things ots
 function killprocs 
 {	
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tKilling processes $1..."
+
 	if [[ "x$1" == "x" ]]; then #kill all ots processes
 
 		killall ots.exe 	&>/dev/null 2>&1 #hide output
@@ -268,8 +270,11 @@ function killprocs
 
 		unset ContextPIDArray #done with array of PIDs, so clear
 	fi
-	
+		
 	sleep 1 #give time for cleanup to occur
+	
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tDone killing processes $1"
+	echo -e "${Reset}"
 	
 } #end killprocs
 export -f killprocs
@@ -1052,16 +1057,21 @@ launchOTS() {
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tNongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${Reset}"
 		
 		TempContextPIDArray+=($LAST_OTS_PID)
+		ContextPIDArray+=($LAST_OTS_PID)
 		
 		i=$(( $i + 1 ))
 	done
 	
 
 	if [ $RELAUNCHCHECK == 1 ]; then
+		
 		####################################################################
 		###########  test for relaunch of non-Gateway contexts	############
 		####################################################################	
+		
 		sleep 4 #give time before relaunch test
+		
+		unset ContextPIDArray #reset  
 		i=0
 		j=0
 		for port in "${xdaqPort[@]}"

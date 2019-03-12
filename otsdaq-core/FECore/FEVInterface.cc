@@ -105,6 +105,7 @@ void FEVInterface::configureSlowControls(void)
 
 //========================================================================================================================
 bool FEVInterface::slowControlsRunning(void)
+try
 {
 	__FE_COUT__ << "slowControlsRunning" << __E__;
 
@@ -128,26 +129,54 @@ bool FEVInterface::slowControlsRunning(void)
 	ConfigurationTree FEInterfaceNode =
 	    theXDAQContextConfigTree_.getBackNode(theConfigurationPath_);
 
-	ConfigurationTree slowControlsInterfaceLink =
-	    FEInterfaceNode.getNode("LinkToSlowControlsMonitorTable");
 
-	std::unique_ptr<UDPDataStreamerBase> txSocket;
-
-	if(slowControlsInterfaceLink.isDisconnected())
+	//attempt to make Slow Controls transfer socket
+	std::unique_ptr<UDPDataStreamerBase> slowContrlolsTxSocket;
+	std::string slowControlsSupervisorIPAddress = "", slowControlsSelfIPAddress = "";
+	int slowControlsSupervisorPort = 0, slowControlsSelfPort = 0;
+	try
 	{
-		__FE_COUT__ << "slowControlsInterfaceLink is disconnected, so no socket made."
-		            << __E__;
+		ConfigurationTree slowControlsInterfaceLink =
+			FEInterfaceNode.getNode("LinkToSlowControlsSupervisorTable");
+
+
+		if(slowControlsInterfaceLink.isDisconnected())
+		{
+			__FE_SS__ << "slowControlsInterfaceLink is disconnected, so no socket made."
+						<< __E__;
+			__FE_SS_THROW__;
+		}
+
+		slowControlsSelfIPAddress = FEInterfaceNode.getNode("SlowControlsTxSocketIPAddress")
+						.getValue<std::string>();
+		slowControlsSelfPort = FEInterfaceNode.getNode("SlowControlsTxSocketPort").getValue<int>();
+		slowControlsSupervisorIPAddress = slowControlsInterfaceLink.getNode(
+				"IPAddress").getValue<std::string>();
+		slowControlsSupervisorPort = slowControlsInterfaceLink.getNode("Port").getValue<int>();
+	}
+	catch(...)
+	{
+		__FE_COUT__ << "Link to slow controls supervisor is missing, so no socket made."
+								<< __E__;
+	}
+
+	if(slowControlsSupervisorPort && slowControlsSelfPort &&
+			slowControlsSupervisorIPAddress != "" &&
+			slowControlsSelfIPAddress != "")
+	{
+
+		__FE_COUT__ << "slowControlsInterfaceLink is valid! Create tx socket..." << __E__;
+		slowContrlolsTxSocket.reset(new UDPDataStreamerBase(
+				slowControlsSelfIPAddress,
+				slowControlsSelfPort,
+				slowControlsSupervisorIPAddress,
+				slowControlsSupervisorPort));
 	}
 	else
 	{
-		__FE_COUT__ << "slowControlsInterfaceLink is valid! Create tx socket..." << __E__;
-		txSocket.reset(new UDPDataStreamerBase(
-		    FEInterfaceNode.getNode("SlowControlsTxSocketIPAddress")
-		        .getValue<std::string>(),
-		    FEInterfaceNode.getNode("SlowControlsTxSocketPort").getValue<int>(),
-		    slowControlsInterfaceLink.getNode("IPAddress").getValue<std::string>(),
-		    slowControlsInterfaceLink.getNode("Port").getValue<int>()));
+		__FE_COUT__ << "Invalid Slow Controls socket parameters, so no socket made." << __E__;
 	}
+
 
 	// check if aggregate saving
 
@@ -235,13 +264,23 @@ bool FEVInterface::slowControlsRunning(void)
 			// Value << readVal
 
 			// For example,
-			if(metricMan)
+			if(metricMan && universalAddressSize_ <= 8)
+			{
+
+				uint64_t val = 0; // 64 bits!
+				for(size_t ii = 0; ii < universalAddressSize_; ++ii)
+					val += (uint8_t)readVal[ii] << (ii * 4);
+                                
+                                             
+
+				__FE_COUT__ << "Sending sample to Metric Manager..." << __E__;
 				metricMan->sendMetric(
 				    getInterfaceUID() + "/" + slowControlsChannelPair.first,
-				    readVal,
+				    val,
 				    "",
 				    3,
 				    artdaq::MetricMode::LastPoint);
+			}
 
 			// make sure buffer hasn't exploded somehow
 			if(txBuffer.size() > txBufferSz)
@@ -251,11 +290,11 @@ bool FEVInterface::slowControlsRunning(void)
 			}
 
 			// send early if threshold reached
-			if(txSocket && txBuffer.size() > txBufferFullThreshold)
+			if(slowContrlolsTxSocket && txBuffer.size() > txBufferFullThreshold)
 			{
 				__FE_COUT__ << "Sending now! txBufferFullThreshold="
 				            << txBufferFullThreshold << __E__;
-				txSocket->send(txBuffer);
+				slowContrlolsTxSocket->send(txBuffer);
 				txBuffer.resize(0);  // clear buffer a la txBuffer = "";
 			}
 		}
@@ -264,19 +303,31 @@ bool FEVInterface::slowControlsRunning(void)
 			__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 		// send anything left
-		if(txSocket && txBuffer.size())
+		if(slowContrlolsTxSocket && txBuffer.size())
 		{
 			__FE_COUT__ << "Sending now!" << __E__;
-			txSocket->send(txBuffer);
+			slowContrlolsTxSocket->send(txBuffer);
 		}
 
 		if(fp)
 			fflush(fp);  // flush anything in aggregate file for reading ease
 	}
+
 	if(fp)
 		fclose(fp);
+
 	return false;
-}  // end slowControlsRunning()
+} // end slowControlsRunning()
+catch(const std::runtime_error& e)
+{
+	__FE_COUT__ << "Error caught during slow controls running thread: " << e.what() << __E__;
+	return false;
+}
+catch(...)
+{
+	__FE_COUT__ << "Unknown error caught during slow controls running thread." << __E__;
+	return false;
+} // end slowControlsRunning()
 
 //========================================================================================================================
 // SendAsyncErrorToGateway

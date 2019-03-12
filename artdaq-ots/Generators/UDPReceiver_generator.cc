@@ -84,6 +84,12 @@ ots::UDPReceiver::~UDPReceiver()
 	if(receiverThread_.joinable()) //only join if thread has started
 		receiverThread_.join();
 
+	if(datasocket_) 
+        {
+	close(datasocket_);
+	datasocket_ = -1;
+        }
+
 	__COUT__ << "Destructed." << __E__;
 } //end destructor()
 
