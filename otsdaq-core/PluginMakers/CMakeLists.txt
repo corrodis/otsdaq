@@ -1,5 +1,6 @@
 cet_make(LIBRARY_NAME PluginMakers
 		 LIBRARIES
+         artdaq_DAQdata
         ${XDAQ_XERCES-C} 
 	${CETLIB}
          ${CETLIB_EXCEPT}
