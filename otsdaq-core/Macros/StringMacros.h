@@ -7,6 +7,7 @@
 #include <set>
 #include <typeinfo>  // operator typeid
 #include <vector>
+#include <memory> //shared_ptr
 
 namespace ots
 {
