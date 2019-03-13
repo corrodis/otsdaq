@@ -1,22 +1,15 @@
 #ifndef ots_DetectorRegisterConfiguration_h
 #define ots_DetectorRegisterConfiguration_h
 
-#include "otsdaq-core/ConfigurationDataFormats/RegisterConfiguration.h"
+#include "otsdaq-core/ConfigurationDataFormats/RegisterTable.h"
 
 namespace ots
 {
-
 class DetectorRegisterConfiguration : public ots::RegisterConfiguration
 {
-
-public:
-
+  public:
 	DetectorRegisterConfiguration(void);
-    virtual ~DetectorRegisterConfiguration(void);
-
-    
-
-
+	virtual ~DetectorRegisterConfiguration(void);
 };
-}
+}  // namespace ots
 #endif

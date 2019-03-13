@@ -10,29 +10,13 @@ include_directories(${CMAKE_BINARY_DIR}/artdaq)
 simple_plugin(ARTDAQConsumer "processor"
   		${CETLIB}
   		DataManager
-        artdaq_Application
-		artdaq_DAQdata
-        artdaq_BuildInfo
-		canvas
-		${Boost_SYSTEM_LIBRARY}
-		${Boost_THREAD_LIBRARY}
-		${FHICLCPP}
-#		MessageFacility
-		${MF_UTILITIES}
+  		ARTDAQReaderCore
   )
 
 simple_plugin(ARTDAQProducer "processor"
   		${CETLIB}
   		DataManager
-        artdaq_Application
-		artdaq_DAQdata
-        artdaq_BuildInfo
-		canvas
-		${Boost_SYSTEM_LIBRARY}
-		${Boost_THREAD_LIBRARY}
-		${FHICLCPP}
-	#	MessageFacility
-		${MF_UTILITIES}
+ 		ARTDAQReaderCore
   )
 
 simple_plugin(UDPDataListenerProducer "processor"
@@ -69,7 +53,7 @@ simple_plugin(RawDataVisualizerConsumer "processor"
     WorkLoopManager
 	#MessageFacility
     ConfigurationInterface
-    ConfigurationDataFormats
+    TableCore
 	${MF_MESSAGELOGGER}
   )
 

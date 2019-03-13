@@ -8,34 +8,32 @@
 #ifndef REGISTERSEQUENCER_H_
 #define REGISTERSEQUENCER_H_
 
-#include "ConfigurationBase.h"
 #include "ROCDACs.h"
+#include "otsdaq-core/TableCore/TableBase.h"
 
-namespace ots {
-
-class RegisterSequencer: public ots::ConfigurationBase
+namespace ots
 {
-public:
-    RegisterSequencer (std::string staticConfigurationName);
-    virtual 		  ~RegisterSequencer ();
+class RegisterSequencer : public ots::TableBase
+{
+  public:
+	RegisterSequencer(std::string staticTableName);
+	virtual ~RegisterSequencer();
 
-    void 		  init (void);
+	void init(void);
 
-    //getter
+	// getter
 
-protected:
-
-    enum{ComponentName,
-         RegisterName,
-		 RegisterValue,
-		 SequencerNumber,
-		 State
-        };
-
-
-
+  protected:
+	enum
+	{
+		ComponentName,
+		RegisterName,
+		RegisterValue,
+		SequencerNumber,
+		State
+	};
 };
 
-}
+}  // namespace ots
 
 #endif /* REGISTERCONFIGURATION_H_ */

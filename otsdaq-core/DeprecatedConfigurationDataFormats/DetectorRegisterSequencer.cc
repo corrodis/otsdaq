@@ -4,11 +4,12 @@
 
 using namespace ots;
 
-const std::string DetectorRegisterSequencer::staticConfigurationName_ = "DetectorRegisterSequencer";
+const std::string DetectorRegisterSequencer::staticTableName_ =
+    "DetectorRegisterSequencer";
 //==============================================================================
-DetectorRegisterSequencer::DetectorRegisterSequencer() :
-	RegisterConfiguration(DetectorRegisterSequencer::staticConfigurationName_)
-{}
+DetectorRegisterSequencer::DetectorRegisterSequencer()
+    : RegisterConfiguration(DetectorRegisterSequencer::staticTableName_)
+{
+}
 //==============================================================================
-DetectorRegisterSequencer::~DetectorRegisterSequencer(void)
-{}
+DetectorRegisterSequencer::~DetectorRegisterSequencer(void) {}

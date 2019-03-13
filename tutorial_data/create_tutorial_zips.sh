@@ -90,13 +90,15 @@ rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases; #replace databases
 cp -r ${UDATABASES} ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases;
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db.*; 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db_*;
+rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_dbb*; #remove backups or bkups
 cd ${SRC}
 git add ${SRC}/tutorial_${TUTORIAL}_${VERSION}_databases/filesystemdb/test_db
 cd -
 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data; #replace data
 cp -r ${UDATA} ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data; 
-rm ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/ActiveConfigurationGroups.cfg.*; 
+rm ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/ActiveConfigurationGroups.cf*;
+rm ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ServiceData/ActiveTableGroups.cfg.*; 
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/ConfigurationInfo.*
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/OutputData/*   #*/ fix comment text coloring
 rm -rf ${SRC}/tutorial_${TUTORIAL}_${VERSION}_Data/Logs/*   #*/ fix comment text coloring

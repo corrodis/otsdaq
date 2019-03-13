@@ -10,7 +10,7 @@ cet_make_exec(InterfacePluginTestMain
         ${Boost_FILESYSTEM_LIBRARY}
 		#DAQHardware
 		#FEInterfaces
-		#ConfigurationDataFormats
+		#TableCore
         #WorkLoopManager
         #SupervisorInfo
         #CgiDataUtilities

@@ -11,6 +11,7 @@ cet_script(
 	xt_cmd.sh
 	StartOTS.sh
 	ots
+	otsdaq_convert_config_to_table
 )
 
 

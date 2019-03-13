@@ -12,21 +12,20 @@
 
 using namespace ots;
 
-
 //==============================================================================
-ViewRegisterInfo::ViewRegisterInfo(std::string typeName, std::string registerName, std::string baseAddress, int size, std::string access)
+ViewRegisterInfo::ViewRegisterInfo(std::string typeName,
+                                   std::string registerName,
+                                   std::string baseAddress,
+                                   int         size,
+                                   std::string access)
 {
-		dataTable_.push_back(typeName),
-		dataTable_.push_back(registerName),
-		dataTable_.push_back(baseAddress),
-		  dataTable_.push_back(std::to_string(size)),
-		dataTable_.push_back(access);
+	dataTable_.push_back(typeName), dataTable_.push_back(registerName),
+	    dataTable_.push_back(baseAddress), dataTable_.push_back(std::to_string(size)),
+	    dataTable_.push_back(access);
 }
 
 //==============================================================================
-ViewRegisterInfo::~ViewRegisterInfo(void)
-{
-}
+ViewRegisterInfo::~ViewRegisterInfo(void) {}
 
 //==============================================================================
 const std::string& ViewRegisterInfo::getTypeName(void) const
@@ -47,7 +46,7 @@ const std::string& ViewRegisterInfo::getBaseAddress(void) const
 //==============================================================================
 const int ViewRegisterInfo::getSize(void) const
 {
-  return std::stoi(dataTable_.at(size_));
+	return std::stoi(dataTable_.at(size_));
 }
 //==============================================================================
 const std::string& ViewRegisterInfo::getAccess(void) const
@@ -55,8 +54,4 @@ const std::string& ViewRegisterInfo::getAccess(void) const
 	return dataTable_.at(access_);
 }
 //==============================================================================
-const int ViewRegisterInfo::getNumberOfColumns(void) const{
-	return dataTable_.size();
-}
-
-
+const int ViewRegisterInfo::getNumberOfColumns(void) const { return dataTable_.size(); }

@@ -8,17 +8,15 @@
 
 namespace ots
 {
-
-class SOAPParameters : public Parameters<std::string,std::string>
+class SOAPParameters : public Parameters<std::string, std::string>
 {
-public:
-    SOAPParameters(void);
-    SOAPParameters(const std::string& name, const std::string& value="");
-    SOAPParameters(SOAPParameter parameter);
-    ~SOAPParameters(void);
-    void addParameter(const std::string& name, const std::string& value="");
-    void addParameter(const std::string& name, const int value);
-
+  public:
+	SOAPParameters(void);
+	SOAPParameters(const std::string& name, const std::string& value = "");
+	SOAPParameters(SOAPParameter parameter);
+	~SOAPParameters(void);
+	void addParameter(const std::string& name, const std::string& value = "");
+	void addParameter(const std::string& name, const int value);
 };
-}
+}  // namespace ots
 #endif

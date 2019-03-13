@@ -3,16 +3,15 @@
 #include <xdaq/version.h>
 #include "otsdaq-core/WizardSupervisor/version.h"
 
-
 GETPACKAGEINFO(WizardSupervisor)
 
-
 //========================================================================================================================
-void WizardSupervisor::checkPackageDependencies() throw (config::PackageInfo::VersionException)
+void WizardSupervisor::checkPackageDependencies() throw(
+    config::PackageInfo::VersionException)
 {
 	CHECKDEPENDENCY(config);
-	CHECKDEPENDENCY(xcept );
-	CHECKDEPENDENCY(xdaq  );
+	CHECKDEPENDENCY(xcept);
+	CHECKDEPENDENCY(xdaq);
 }
 
 //========================================================================================================================
@@ -20,9 +19,9 @@ std::set<std::string, std::less<std::string> > WizardSupervisor::getPackageDepen
 {
 	std::set<std::string, std::less<std::string> > dependencies;
 
-	ADDDEPENDENCY(dependencies,config);
-	ADDDEPENDENCY(dependencies,xcept );
-	ADDDEPENDENCY(dependencies,xdaq  );
+	ADDDEPENDENCY(dependencies, config);
+	ADDDEPENDENCY(dependencies, xcept);
+	ADDDEPENDENCY(dependencies, xdaq);
 
 	return dependencies;
 }

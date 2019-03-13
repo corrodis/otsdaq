@@ -1,35 +1,36 @@
 #include "otsdaq-core/CoreSupervisors/ARTDAQDataManagerSupervisor.h"
-#include "otsdaq-core/FECore/FEVInterfacesManager.h"
-#include "otsdaq-core/ARTDAQDataManager/ARTDAQDataManager.h"
-#include "otsdaq-core/DataManager/DataManagerSingleton.h"
+
+#include "../ARTDAQDataManager/ARTDAQDataManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq-core/DataManager/DataManagerSingleton.h"
+#include "otsdaq-core/FECore/FEVInterfacesManager.h"
 
 using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(ARTDAQDataManagerSupervisor)
 
 //========================================================================================================================
-ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub * s) 
-: CoreSupervisorBase(s)
+ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub* s)
+    : CoreSupervisorBase(s)
 {
-	__SUP_COUT__ << "Constructor." << std::endl;
+	__SUP_COUT__ << "Constructor." << __E__;
 
 	CoreSupervisorBase::theStateMachineImplementation_.push_back(
-			DataManagerSingleton::getInstance<ARTDAQDataManager>(
-					CorePropertySupervisorBase::getContextTreeNode(),
-					CorePropertySupervisorBase::supervisorConfigurationPath_,
-					CorePropertySupervisorBase::supervisorApplicationUID_)
-	);
+	    DataManagerSingleton::getInstance<ARTDAQDataManager>(
+	        CorePropertySupervisorBase::getContextTreeNode(),
+	        CorePropertySupervisorBase::getSupervisorConfigurationPath(),
+	        CorePropertySupervisorBase::getSupervisorUID()));
 
 	__SUP_COUT__ << "Constructed." << __E__;
-
-}
+}  // end constructor()
 
 //========================================================================================================================
 ARTDAQDataManagerSupervisor::~ARTDAQDataManagerSupervisor(void)
 {
-	__SUP_COUT__ << "Destroying..." << std::endl;
-	DataManagerSingleton::deleteInstance(CorePropertySupervisorBase::supervisorApplicationUID_);
+	__SUP_COUT__ << "Destructor." << __E__;
+
+	DataManagerSingleton::deleteInstance(CorePropertySupervisorBase::getSupervisorUID());
 	theStateMachineImplementation_.pop_back();
+
 	__SUP_COUT__ << "Destructed." << __E__;
-}
+}  // end destructor()

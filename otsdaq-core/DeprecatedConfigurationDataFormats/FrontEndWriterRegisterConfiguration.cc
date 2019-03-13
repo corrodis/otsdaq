@@ -1,14 +1,14 @@
-#include "otsdaq-core/ConfigurationDataFormats/FEWRegisterConfiguration.h"
+#include "otsdaq-core/ConfigurationDataFormats/FEWRegisterTable.h"
 
 #include <iostream>
 
 using namespace ots;
 
-const std::string FEWRegisterConfiguration::staticConfigurationName_ = "FEWRegisterConfiguration";
+const std::string FEWRegisterConfiguration::staticTableName_ = "FEWRegisterConfiguration";
 //==============================================================================
-FEWRegisterConfiguration::FEWRegisterConfiguration() :
-		RegisterConfiguration(FEWRegisterConfiguration::staticConfigurationName_)
-{}
+FEWRegisterConfiguration::FEWRegisterConfiguration()
+    : RegisterConfiguration(FEWRegisterConfiguration::staticTableName_)
+{
+}
 //==============================================================================
-FEWRegisterConfiguration::~FEWRegisterConfiguration(void)
-{}
+FEWRegisterConfiguration::~FEWRegisterConfiguration(void) {}

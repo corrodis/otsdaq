@@ -8,15 +8,14 @@
 
 namespace ots
 {
-
 class FEVInterface;
 class ConfigurationTree;
 
 std::unique_ptr<FEVInterface> makeInterface(
-		const std::string&         interfacePluginName
-		, const std::string&       interfaceUID
-		, const ConfigurationTree& configurationTree
-		, const std::string&       pathToInterfaceConfiguration);
-}
+    const std::string&       interfacePluginName,
+    const std::string&       interfaceUID,
+    const ConfigurationTree& configurationTree,
+    const std::string&       pathToInterfaceConfiguration);
+}  // namespace ots
 
 #endif /* _ots_MakeInterface_h_ */

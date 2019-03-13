@@ -236,6 +236,8 @@ echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 # function to kill all things ots
 function killprocs 
 {	
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tKilling processes $1..."
+
 	if [[ "x$1" == "x" ]]; then #kill all ots processes
 
 		killall ots.exe 	&>/dev/null 2>&1 #hide output
@@ -268,8 +270,11 @@ function killprocs
 
 		unset ContextPIDArray #done with array of PIDs, so clear
 	fi
-	
+		
 	sleep 1 #give time for cleanup to occur
+	
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tDone killing processes $1"
+	echo -e "${Reset}"
 	
 } #end killprocs
 export -f killprocs
@@ -332,6 +337,10 @@ if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPL
 	echo
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExiting ots. Please see usage tips above."
 	echo
+	
+	echo -e "${Reset}"
+	echo -e "${Reset}"
+	
 	exit
 fi
 
@@ -341,7 +350,8 @@ if [ $ISCONFIG == 1 ]; then
     export OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER=$SERVER
 fi
 
- #Can be File, Database, DatabaseTest
+#At one point, could be File, Database, DatabaseTest
+#  Now,.. artdaq_database expects File, and the ARTDAQ_DATABASE_URI decides the rest
 export CONFIGURATION_TYPE=File
 
 # Setup environment when building with MRB
@@ -392,6 +402,9 @@ if [ "x$USER_DATA" == "x" ]; then
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Aborting launch${Reset} "
 	echo
+	
+	echo -e "${Reset}"
+	echo -e "${Reset}"
 	exit    
 fi
 
@@ -406,6 +419,9 @@ if [ ! -d $USER_DATA ]; then
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Aborting launch${Reset} "
 	echo
+	
+	echo -e "${Reset}"
+	echo -e "${Reset}"
 	exit   
 fi
 
@@ -415,7 +431,7 @@ echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan
 echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\$OTSDAQ_DATA             = ${YELLOW}${OTSDAQ_DATA}${Reset}        "
 #end print out important environment variables
 
-#check for antiquated artdaq databse
+#check for antiquated artdaq database
 ARTDAQ_DATABASE_DIR=`echo ${ARTDAQ_DATABASE_URI}|sed 's|.*//|/|'`	
 if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 	# Rebuild ARTDAQ_DATABASE indicies
@@ -429,8 +445,46 @@ if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromIndexRebuild ]; then
 #	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${ARTDAQ_DATABASE_DIR}/fromIndexRebuild file exists, so not rebuilding indices."
 fi
 
-export CONFIGURATION_DATA_PATH=${USER_DATA}/ConfigurationDataExamples
-export CONFIGURATION_INFO_PATH=${USER_DATA}/ConfigurationInfo
+
+#check for somewhat-antiquated(pre-configuration-to-table) artdaq database
+if [ ! -e ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion ]; then
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConverting configuration to table for user data and databases..."
+	
+	#backup because we are scared
+	cp -r ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}bk12345
+	cp -r ${USER_DATA} ${USER_DATA}bk12345
+	
+	otsdaq_convert_config_to_table	
+	echo "converted" > ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
+	
+	if [ $ISCONFIG == 0 ]; then	
+	
+		echo -e "${Reset}"
+		echo -e "${Reset}"	
+		exit
+	fi
+fi
+if [ -d ${USER_DATA}/ConfigurationInfo ]; then
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConverting configuration to table for user data and databases..."
+		
+	#backup because we are scared
+	cp -r ${ARTDAQ_DATABASE_DIR} ${ARTDAQ_DATABASE_DIR}bk12345
+	cp -r ${USER_DATA} ${USER_DATA}bk12345
+	
+	otsdaq_convert_config_to_table
+	echo "converted" > ${ARTDAQ_DATABASE_DIR}/fromConfigurationToTableConversion
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
+	
+	if [ $ISCONFIG == 0 ]; then		
+	
+		echo -e "${Reset}"
+		echo -e "${Reset}"
+		exit
+	fi
+fi
+
+export TABLE_INFO_PATH=${USER_DATA}/TableInfo
 export SERVICE_DATA_PATH=${USER_DATA}/ServiceData
 export XDAQ_CONFIGURATION_DATA_PATH=${USER_DATA}/XDAQConfigurations
 export LOGIN_DATA_PATH=${USER_DATA}/ServiceData/LoginData
@@ -549,6 +603,9 @@ launchOTSWiz() {
 			echo
 			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tError: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
 			echo
+			
+			echo -e "${Reset}"
+			echo -e "${Reset}"
 			exit
 		fi
 		
@@ -567,6 +624,7 @@ launchOTSWiz() {
 	
 	
 	#setup wiz mode environment variables
+	export CODE_EDITOR_SUPERVISOR_ID=240
 	export CONSOLE_SUPERVISOR_ID=260
 	export CONFIGURATION_GUI_SUPERVISOR_ID=280
 	export WIZARD_SUPERVISOR_ID=290	
@@ -675,6 +733,10 @@ launchOTSWiz() {
 	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$WIZARD_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	
 	printMainURL &
+	
+	
+	echo -e "${Reset}"
+	echo -e "${Reset}"
 	
 } #end launchOTSWiz
 export -f launchOTSWiz
@@ -995,16 +1057,21 @@ launchOTS() {
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tNongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${Reset}"
 		
 		TempContextPIDArray+=($LAST_OTS_PID)
+		ContextPIDArray+=($LAST_OTS_PID)
 		
 		i=$(( $i + 1 ))
 	done
 	
 
 	if [ $RELAUNCHCHECK == 1 ]; then
+		
 		####################################################################
 		###########  test for relaunch of non-Gateway contexts	############
 		####################################################################	
+		
 		sleep 4 #give time before relaunch test
+		
+		unset ContextPIDArray #reset  
 		i=0
 		j=0
 		for port in "${xdaqPort[@]}"
@@ -1298,11 +1365,16 @@ otsActionHandler() {
 				echo "EXIT_LOOP ${STARTTIME}-${LINENO}-${HOSTNAME_ARR[0]}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 			fi
 			
+			echo -e "${Reset}"
+			echo -e "${Reset}"
 		    exit
 			
 		elif [[ "${OTSDAQ_STARTOTS_ACTION:-"0"}" != "0"  || "${OTSDAQ_STARTOTS_QUIT:-"0"}" != "0" || "${OTSDAQ_STARTOTS_LOCAL_QUIT:-"0"}" != "0" ]]; then
 		
 			echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExiting ots.. Unrecognized command !=0 in Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"			
+			
+			echo -e "${Reset}"
+			echo -e "${Reset}"
 			exit
 			
 		fi

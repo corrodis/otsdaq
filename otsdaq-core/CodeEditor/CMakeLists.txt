@@ -4,6 +4,7 @@ cet_make(LIBRARY_NAME CodeEditor
          CgiDataUtilities
 		 XmlUtilities
 		 Macros
+		 CoreSupervisors
 )
 
 
