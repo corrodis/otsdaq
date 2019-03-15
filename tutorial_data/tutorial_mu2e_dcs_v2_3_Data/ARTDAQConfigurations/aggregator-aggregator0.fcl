@@ -1,0 +1,124 @@
+###########################################################
+#
+# artdaq aggregator fcl configuration file produced by otsdaq.
+# 	Creation timestamp: Thu Mar 14 09:27:23 2019 CDT
+# 	Original filename: /home/rrivera/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/aggregator-aggregator0.fcl
+#	otsdaq-ARTDAQ Aggregator UID: aggregator0
+#
+###########################################################
+
+
+services: {
+	scheduler: {
+		fileMode: NOMERGE
+		errorOnFailureToPut: false
+	}
+
+	NetMonTransportServiceInterface: {
+		service_provider: NetMonTransportService
+	}
+
+}
+
+daq: {
+	aggregator: {
+		expected_events_per_bunch: 1
+		print_event_store_stats: true
+		event_queue_depth: 20
+		event_queue_wait_time: 5
+		onmon_event_prescale: 1
+		xmlrpc_client_list: ";http://ironwork.fnal.gov:5205/RPC2,3;http://ironwork.fnal.gov:5206/RPC2,3;http://ironwork.fnal.gov:5235/RPC2,4;http://ironwork.fnal.gov:5236/RPC2,4;http://ironwork.fnal.gov:5265/RPC2,5;http://ironwork.fnal.gov:5266/RPC2,5"
+		file_size_MB: 0.0
+		file_duration: 0
+		file_event_count: 0
+		is_data_logger: true
+		
+		sources: {
+			s4: {
+				transferPluginType: MPI
+				source_rank: 501
+				max_fragment_size_bytes: 2097152
+				host_map: [
+					{
+						rank: 501
+						host: "correlator2.fnal.gov"
+						portOffset: 0
+					},
+					{
+						rank: 502
+						host: "correlator2.fnal.gov"
+						portOffset: 0
+					}
+				]
+			}
+		}
+
+	}
+
+	metrics: {
+		# ganglia: {
+			# metricPluginType: "ganglia"
+			# level: %{ganglia_level}
+			# reporting_interval: 15.0
+			# configFile: "/etc/ganglia/gmond.conf"
+			# group: "ARTDAQ"
+		# }
+
+		# msgfac: {
+			# metricPluginType: "msgFacility"
+			# level: %{mf_level}
+			# output_message_application_name: "ARTDAQ Metric"
+			# output_message_severity: 0
+		# }
+
+		# graphite: {
+			# metricPluginType: "graphite"
+			# level: %{graphite_level}
+			# DEFAULT: DEFAULT
+			# DEFAULT: DEFAULT
+			# DEFAULT: DEFAULT
+		# }
+
+		aggFile: {
+			metricPluginType: "file"
+			level: 3
+			fileName: "/tmp/aggregator/agg_%UID%_metrics.log"
+			uniquify: true
+		}
+
+	}
+
+	destinations: {
+	}
+
+}
+
+source: {
+	module_type: NetMonInput
+}
+
+outputs: {
+	normalOutput: {
+		module_type: RootOutput
+		fileName: "/home/rrivera/ots/srcs/otsdaq_demo/NoGitData/OutputData/artdaqdemo_r%r_s%s_%#.root"
+	}
+
+}
+
+physics: {
+	analyzers: {
+		wf: {
+			module_type: "WFViewer"
+			fragment_ids: [0]
+			fragment_type_labels: [ "DataGen" ]
+			prescale: 60
+			write_to_file: true
+			fileName: "/tmp/otsdaqdemp_onmon_agg.root"
+		}
+
+	}
+
+	my_output_modules: [ normalOutput ]
+}
+
+process_name: DAQAG

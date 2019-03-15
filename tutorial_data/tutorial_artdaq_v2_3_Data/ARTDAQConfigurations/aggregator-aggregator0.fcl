@@ -1,3 +1,13 @@
+###########################################################
+#
+# artdaq aggregator fcl configuration file produced by otsdaq.
+# 	Creation timestamp: Thu Mar 14 19:34:02 2019 CDT
+# 	Original filename: /home/rrivera/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/aggregator-aggregator0.fcl
+#	otsdaq-ARTDAQ Aggregator UID: aggregator0
+#
+###########################################################
+
+
 services: {
 	scheduler: {
 		fileMode: NOMERGE
@@ -24,7 +34,23 @@ daq: {
 		is_data_logger: true
 		
 		sources: {
-			s4: { transferPluginType: MPI source_rank: 501 max_fragment_size_words: 2097152 host_map: [{rank: 501 host: "correlator2.fnal.gov" portOffset: 0}, {rank: 502 host: "correlator2.fnal.gov" portOffset: 0}]}
+			s4: {
+				transferPluginType: MPI
+				source_rank: 501
+				max_fragment_size_bytes: 0
+				host_map: [
+					{
+						rank: 501
+						host: "correlator2.fnal.gov"
+						portOffset: 0
+					},
+					{
+						rank: 502
+						host: "correlator2.fnal.gov"
+						portOffset: 0
+					}
+				]
+			}
 		}
 
 	}

@@ -1,3 +1,13 @@
+###########################################################
+#
+# artdaq reader fcl configuration file produced by otsdaq.
+# 	Creation timestamp: Thu Mar 14 19:34:02 2019 CDT
+# 	Original filename: /home/rrivera/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/boardReader-reader0.fcl
+#	otsdaq-ARTDAQ Reader UID: reader0
+#
+###########################################################
+
+
 daq: {
 	fragment_receiver: {
 		generator: UDPReceiver	 #daq generator plug-in type
@@ -34,7 +44,23 @@ daq: {
 		ip: "127.0.0.1"
 		
 		destinations: {
-			d2: { transferPluginType: MPI destination_rank: 501 max_fragment_size_words: 2097152 host_map: [{rank: 501 host: "correlator2.fnal.gov" portOffset: 0}, {rank: 500 host: "correlator2.fnal.gov" portOffset: 0}]}
+			d2: {
+				transferPluginType: MPI
+				destination_rank: 501
+				max_fragment_size_bytes: 0
+				host_map: [
+					{
+						rank: 501
+						host: "correlator2.fnal.gov"
+						portOffset: 0
+					},
+					{
+						rank: 500
+						host: "correlator2.fnal.gov"
+						portOffset: 0
+					}
+				]
+			}
 		}
 
 	}

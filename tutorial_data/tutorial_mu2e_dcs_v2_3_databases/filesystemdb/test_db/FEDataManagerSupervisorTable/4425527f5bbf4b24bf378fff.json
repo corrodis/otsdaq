@@ -1,0 +1,125 @@
+{
+"document" : {
+"data" : {
+"NAME" : "FE_DATA_MANAGER_SUPERVISOR_TABLE",
+"COMMENT" : "Auto-generated from mock-up.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1551974664,
+"COL_TYPES" : {
+"SUPERVISOR_UID" : "VARCHAR2",
+"LINK_TO_FE_INTERFACE_TABLE" : "VARCHAR2",
+"LINK_TO_FE_INTERFACE_GROUP_ID" : "VARCHAR2",
+"LINK_TO_DATA_BUFFER_TABLE" : "VARCHAR2",
+"LINK_TO_DATA_BUFFER_GROUP_ID" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2019-03-07T10:04:24.814-0600",
+"rawdata" : [
+
+]
+},
+"version" : "0",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2019-03-07T10:04:24.815-0600"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "2019-03-07T10:04:24.815-0600"
+},
+{
+"name" : "artdaqConfig_v5",
+"assigned" : "2019-03-07T10:04:27.285-0600"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:04:24.815-0600",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2019-03-07T10:04:24.815-0600"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2019-03-07T10:04:24.815-0600",
+"value" : {
+"name" : "0",
+"assigned" : "2019-03-07T10:04:24.815-0600"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2019-03-07T10:04:24.815-0600",
+"value" : {
+"name" : "FEDataManagerSupervisorTable",
+"assigned" : "2019-03-07T10:04:24.815-0600"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2019-03-07T10:04:24.815-0600",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2019-03-07T10:04:24.815-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:04:27.286-0600",
+"value" : {
+"name" : "artdaqConfig_v5",
+"assigned" : "2019-03-07T10:04:27.285-0600"
+}
+}
+],
+"created" : "2019-03-07T10:04:24.814-0600"
+},
+"_id" : {
+"$oid" : "4425527f5bbf4b24bf378fff"
+},
+"collection" : "FEDataManagerSupervisorTable",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

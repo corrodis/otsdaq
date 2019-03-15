@@ -131,6 +131,8 @@ ConfigurationManagerRW::ConfigurationManagerRW(std::string username)
 			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "a");
 			if(fp)
 			{
+				fprintf(fp,"\n"); //in case there is no new line currently
+
 				unsigned int i = 0;
 				for(const auto& name : contextMemberNames)
 				{

@@ -597,7 +597,7 @@ int ConfigurationManager::getTypeOfGroup(
 	{
 		__SS__ << "This group is an incomplete match to a Iterate group: "
 		       << " Size=" << matchCount << " but should be "
-		       << backboneMemberNames_.size() << __E__;
+		       << iterateMemberNames_.size() << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		ss << "\nThe members currently are...\n";
 		int i = 0;

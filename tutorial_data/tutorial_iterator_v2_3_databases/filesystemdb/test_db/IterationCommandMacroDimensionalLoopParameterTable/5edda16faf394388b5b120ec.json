@@ -1,0 +1,125 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ITERATION_COMMAND_MACRO_DIMENSIONAL_LOOP_PARAMETER_TABLE",
+"COMMENT" : "Auto-generated from mock-up.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1552611639,
+"COL_TYPES" : {
+"PARAMETER_ID" : "VARCHAR2",
+"PARAMETER_GROUP_ID" : "VARCHAR2",
+"PARAMETER_NAME" : "VARCHAR2",
+"PARAMETER_INITIAL_VALUE" : "VARCHAR2",
+"PARAMETER_STEP_SIZE" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2019-03-14T20:08:06.143-0500",
+"rawdata" : [
+
+]
+},
+"version" : "2",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2019-03-14T20:08:06.144-0500"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "2019-03-14T20:08:06.144-0500"
+},
+{
+"name" : "iterateDefaultGroup_v2",
+"assigned" : "2019-03-14T20:08:06.758-0500"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-14T20:08:06.144-0500",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2019-03-14T20:08:06.144-0500"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2019-03-14T20:08:06.144-0500",
+"value" : {
+"name" : "2",
+"assigned" : "2019-03-14T20:08:06.144-0500"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2019-03-14T20:08:06.144-0500",
+"value" : {
+"name" : "IterationCommandMacroDimensionalLoopParameterTable",
+"assigned" : "2019-03-14T20:08:06.144-0500"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2019-03-14T20:08:06.144-0500",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2019-03-14T20:08:06.144-0500"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-14T20:08:06.758-0500",
+"value" : {
+"name" : "iterateDefaultGroup_v2",
+"assigned" : "2019-03-14T20:08:06.758-0500"
+}
+}
+],
+"created" : "2019-03-14T20:08:06.143-0500"
+},
+"_id" : {
+"$oid" : "5edda16faf394388b5b120ec"
+},
+"collection" : "IterationCommandMacroDimensionalLoopParameterTable",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

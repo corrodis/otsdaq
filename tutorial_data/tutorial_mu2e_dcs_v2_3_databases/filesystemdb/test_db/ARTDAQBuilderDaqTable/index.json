@@ -1,0 +1,117 @@
+{
+"ouid" : [
+"121797d8cb504be68593ba76",
+"2a12f1608b2846f0a1f0225f",
+"2ee371b206e14ebdbf8440bf"
+],
+"version" : {
+"2" : [
+"121797d8cb504be68593ba76"
+],
+"3" : [
+"2a12f1608b2846f0a1f0225f"
+],
+"4" : [
+"2ee371b206e14ebdbf8440bf"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"121797d8cb504be68593ba76",
+"2a12f1608b2846f0a1f0225f",
+"2ee371b206e14ebdbf8440bf"
+],
+"artdaqConfig_v2" : [
+"121797d8cb504be68593ba76"
+],
+"artdaqConfig_v3" : [
+"121797d8cb504be68593ba76"
+],
+"artdaqConfig_v4" : [
+"121797d8cb504be68593ba76"
+],
+"artdaqConfig_v5" : [
+"121797d8cb504be68593ba76"
+],
+"artdaqConfig_v6" : [
+"121797d8cb504be68593ba76"
+],
+"artdaqConfig_v7" : [
+"121797d8cb504be68593ba76"
+],
+"artdaqConfig_v8" : [
+"121797d8cb504be68593ba76"
+],
+"artdaqConfig_v9" : [
+"2a12f1608b2846f0a1f0225f"
+],
+"artdaqConfig_v10" : [
+"2ee371b206e14ebdbf8440bf"
+],
+"artdaqConfig_v11" : [
+"2ee371b206e14ebdbf8440bf"
+],
+"artdaqConfig_v12" : [
+"2ee371b206e14ebdbf8440bf"
+],
+"artdaqConfig_v13" : [
+"2ee371b206e14ebdbf8440bf"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"121797d8cb504be68593ba76",
+"2a12f1608b2846f0a1f0225f",
+"2ee371b206e14ebdbf8440bf"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+},
+"configurations.assigned" : {
+"notprovided" : [
+"2019-02-26T11:06:43.266-0600",
+"2019-03-07T11:45:55.020-0600",
+"2019-03-07T11:53:32.597-0600"
+],
+"artdaqConfig_v2" : [
+"2019-02-26T11:06:46.020-0600"
+],
+"artdaqConfig_v3" : [
+"2019-03-07T09:59:27.372-0600"
+],
+"artdaqConfig_v4" : [
+"2019-03-07T10:00:10.744-0600"
+],
+"artdaqConfig_v5" : [
+"2019-03-07T10:04:25.489-0600"
+],
+"artdaqConfig_v6" : [
+"2019-03-07T10:07:00.662-0600"
+],
+"artdaqConfig_v7" : [
+"2019-03-07T10:29:29.031-0600"
+],
+"artdaqConfig_v8" : [
+"2019-03-07T10:51:06.468-0600"
+],
+"artdaqConfig_v9" : [
+"2019-03-07T11:45:56.359-0600"
+],
+"artdaqConfig_v10" : [
+"2019-03-07T11:53:33.719-0600"
+],
+"artdaqConfig_v11" : [
+"2019-03-07T11:57:02.735-0600"
+],
+"artdaqConfig_v12" : [
+"2019-03-07T11:59:11.326-0600"
+],
+"artdaqConfig_v13" : [
+"2019-03-12T11:08:27.053-0500"
+]
+}
+}

@@ -1,0 +1,238 @@
+{
+"document" : {
+"data" : {
+"NAME" : "DATA_BUFFER_TABLE",
+"COMMENT" : "Data Buffer table for tutorial for artdaq",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1551974819,
+"COL_TYPES" : {
+"DATA_BUFFER_GROUP_ID" : "VARCHAR2",
+"DATA_BUFFER_UID" : "VARCHAR2",
+"LINK_TO_DATA_PROCESSOR_TABLE" : "VARCHAR2",
+"LINK_TO_DATA_PROCESSOR_GROUP_ID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"DATA_BUFFER_GROUP_ID" : "DMGroup0",
+"DATA_BUFFER_UID" : "DB0",
+"LINK_TO_DATA_PROCESSOR_TABLE" : "DataProcessorTable",
+"LINK_TO_DATA_PROCESSOR_GROUP_ID" : "DBGroup0",
+"STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1548791143"
+},
+{
+"DATA_BUFFER_GROUP_ID" : "DMVisualizerGroup0",
+"DATA_BUFFER_UID" : "DB1",
+"LINK_TO_DATA_PROCESSOR_TABLE" : "DataProcessorTable",
+"LINK_TO_DATA_PROCESSOR_GROUP_ID" : "DBGroup1",
+"STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1548791143"
+},
+{
+"DATA_BUFFER_GROUP_ID" : " | ARTDAQDMGroup0",
+"DATA_BUFFER_UID" : "readerDB0",
+"LINK_TO_DATA_PROCESSOR_TABLE" : "DataProcessorTable",
+"LINK_TO_DATA_PROCESSOR_GROUP_ID" : "reader0DBGroup",
+"STATUS" : "On",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1548819604"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2019-03-07T10:06:59.281-0600",
+"rawdata" : [
+
+]
+},
+"version" : "5",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2019-03-07T10:06:59.281-0600"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "2019-03-07T10:06:59.281-0600"
+},
+{
+"name" : "artdaqConfig_v6",
+"assigned" : "2019-03-07T10:07:02.238-0600"
+},
+{
+"name" : "artdaqConfig_v7",
+"assigned" : "2019-03-07T10:29:30.548-0600"
+},
+{
+"name" : "artdaqConfig_v8",
+"assigned" : "2019-03-07T10:51:08.097-0600"
+},
+{
+"name" : "artdaqConfig_v9",
+"assigned" : "2019-03-07T11:45:57.967-0600"
+},
+{
+"name" : "artdaqConfig_v10",
+"assigned" : "2019-03-07T11:53:35.088-0600"
+},
+{
+"name" : "artdaqConfig_v11",
+"assigned" : "2019-03-07T11:57:04.401-0600"
+},
+{
+"name" : "artdaqConfig_v12",
+"assigned" : "2019-03-07T11:59:12.915-0600"
+},
+{
+"name" : "artdaqConfig_v13",
+"assigned" : "2019-03-12T11:08:29.111-0500"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:06:59.281-0600",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2019-03-07T10:06:59.281-0600"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2019-03-07T10:06:59.281-0600",
+"value" : {
+"name" : "5",
+"assigned" : "2019-03-07T10:06:59.281-0600"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2019-03-07T10:06:59.281-0600",
+"value" : {
+"name" : "DataBufferTable",
+"assigned" : "2019-03-07T10:06:59.281-0600"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2019-03-07T10:06:59.281-0600",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2019-03-07T10:06:59.281-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:07:02.238-0600",
+"value" : {
+"name" : "artdaqConfig_v6",
+"assigned" : "2019-03-07T10:07:02.238-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:29:30.548-0600",
+"value" : {
+"name" : "artdaqConfig_v7",
+"assigned" : "2019-03-07T10:29:30.548-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:51:08.097-0600",
+"value" : {
+"name" : "artdaqConfig_v8",
+"assigned" : "2019-03-07T10:51:08.097-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T11:45:57.967-0600",
+"value" : {
+"name" : "artdaqConfig_v9",
+"assigned" : "2019-03-07T11:45:57.967-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T11:53:35.088-0600",
+"value" : {
+"name" : "artdaqConfig_v10",
+"assigned" : "2019-03-07T11:53:35.088-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T11:57:04.401-0600",
+"value" : {
+"name" : "artdaqConfig_v11",
+"assigned" : "2019-03-07T11:57:04.401-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T11:59:12.915-0600",
+"value" : {
+"name" : "artdaqConfig_v12",
+"assigned" : "2019-03-07T11:59:12.915-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-12T11:08:29.111-0500",
+"value" : {
+"name" : "artdaqConfig_v13",
+"assigned" : "2019-03-12T11:08:29.111-0500"
+}
+}
+],
+"created" : "2019-03-07T10:06:59.281-0600"
+},
+"_id" : {
+"$oid" : "863e30aca73840acb84a4eb6"
+},
+"collection" : "DataBufferTable",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

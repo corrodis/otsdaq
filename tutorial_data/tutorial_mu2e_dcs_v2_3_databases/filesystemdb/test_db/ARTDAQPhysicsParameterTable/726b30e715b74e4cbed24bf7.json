@@ -1,0 +1,268 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_PHYSICS_PARAMETER_TABLE",
+"COMMENT" : "",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1504824125,
+"COL_TYPES" : {
+"PHYSICS_PARAMETER_GROUP_ID" : "VARCHAR2",
+"PHYSICS_PARAMETER_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"PHYSICS_PARAMETER_KEY" : "VARCHAR2",
+"PHYSICS_PARAMETER_VALUE" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"PHYSICS_PARAMETER_GROUP_ID" : "aggergator0PhysicsPGroup",
+"PHYSICS_PARAMETER_UID" : "aggregatorPhysicsP0",
+"STATUS" : "On",
+"PHYSICS_PARAMETER_KEY" : "my_output_modules",
+"PHYSICS_PARAMETER_VALUE" : "[ normalOutput ]",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2019-02-26T11:06:44.396-0600",
+"rawdata" : [
+
+]
+},
+"version" : "2",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2019-02-26T11:06:44.397-0600"
+}
+],
+"tables" : [
+{
+"name" : "notprovided",
+"assigned" : "2019-02-26T11:06:44.397-0600"
+},
+{
+"name" : "artdaqConfig_v2",
+"assigned" : "2019-02-26T11:06:47.002-0600"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addTable",
+"timestamp" : "2019-02-26T11:06:44.397-0600",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2019-02-26T11:06:44.397-0600"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2019-02-26T11:06:44.397-0600",
+"value" : {
+"name" : "2",
+"assigned" : "2019-02-26T11:06:44.397-0600"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2019-02-26T11:06:44.397-0600",
+"value" : {
+"name" : "ARTDAQPhysicsParameterTable",
+"assigned" : "2019-02-26T11:06:44.397-0600"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2019-02-26T11:06:44.397-0600",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2019-02-26T11:06:44.397-0600"
+}
+},
+{
+"event" : "addTable",
+"timestamp" : "2019-02-26T11:06:47.002-0600",
+"value" : {
+"name" : "artdaqConfig_v2",
+"assigned" : "2019-02-26T11:06:47.002-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T09:59:28.548-0600",
+"value" : {
+"name" : "artdaqConfig_v3",
+"assigned" : "2019-03-07T09:59:28.548-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:00:11.925-0600",
+"value" : {
+"name" : "artdaqConfig_v4",
+"assigned" : "2019-03-07T10:00:11.925-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:04:26.685-0600",
+"value" : {
+"name" : "artdaqConfig_v5",
+"assigned" : "2019-03-07T10:04:26.685-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:07:01.869-0600",
+"value" : {
+"name" : "artdaqConfig_v6",
+"assigned" : "2019-03-07T10:07:01.869-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:29:30.200-0600",
+"value" : {
+"name" : "artdaqConfig_v7",
+"assigned" : "2019-03-07T10:29:30.200-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T10:51:07.730-0600",
+"value" : {
+"name" : "artdaqConfig_v8",
+"assigned" : "2019-03-07T10:51:07.730-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T11:45:57.605-0600",
+"value" : {
+"name" : "artdaqConfig_v9",
+"assigned" : "2019-03-07T11:45:57.605-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T11:53:34.729-0600",
+"value" : {
+"name" : "artdaqConfig_v10",
+"assigned" : "2019-03-07T11:53:34.729-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T11:57:04.016-0600",
+"value" : {
+"name" : "artdaqConfig_v11",
+"assigned" : "2019-03-07T11:57:04.016-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-07T11:59:12.541-0600",
+"value" : {
+"name" : "artdaqConfig_v12",
+"assigned" : "2019-03-07T11:59:12.541-0600"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-03-12T11:08:28.693-0500",
+"value" : {
+"name" : "artdaqConfig_v13",
+"assigned" : "2019-03-12T11:08:28.693-0500"
+}
+}
+],
+"created" : "2019-02-26T11:06:44.396-0600"
+},
+"_id" : {
+"$oid" : "726b30e715b74e4cbed24bf7"
+},
+"collection" : "ARTDAQPhysicsParameterTable",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided",
+"configurations" : [
+{
+"name" : "artdaqConfig_v3",
+"assigned" : "2019-03-07T09:59:28.548-0600"
+},
+{
+"name" : "artdaqConfig_v4",
+"assigned" : "2019-03-07T10:00:11.925-0600"
+},
+{
+"name" : "artdaqConfig_v5",
+"assigned" : "2019-03-07T10:04:26.685-0600"
+},
+{
+"name" : "artdaqConfig_v6",
+"assigned" : "2019-03-07T10:07:01.869-0600"
+},
+{
+"name" : "artdaqConfig_v7",
+"assigned" : "2019-03-07T10:29:30.200-0600"
+},
+{
+"name" : "artdaqConfig_v8",
+"assigned" : "2019-03-07T10:51:07.730-0600"
+},
+{
+"name" : "artdaqConfig_v9",
+"assigned" : "2019-03-07T11:45:57.605-0600"
+},
+{
+"name" : "artdaqConfig_v10",
+"assigned" : "2019-03-07T11:53:34.729-0600"
+},
+{
+"name" : "artdaqConfig_v11",
+"assigned" : "2019-03-07T11:57:04.016-0600"
+},
+{
+"name" : "artdaqConfig_v12",
+"assigned" : "2019-03-07T11:59:12.541-0600"
+},
+{
+"name" : "artdaqConfig_v13",
+"assigned" : "2019-03-12T11:08:28.693-0500"
+}
+]
+}
