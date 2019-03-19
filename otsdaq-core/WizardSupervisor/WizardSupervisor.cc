@@ -353,7 +353,7 @@ void WizardSupervisor::tooltipRequest(xgi::Input*  in,
 	cgicc::Cgicc cgi(in);
 
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
-	__COUT__ << "Command = " << Command << std::endl;
+	//__COUT__ << "Command = " << Command << std::endl;
 
 	std::string submittedSequence = CgiDataUtilities::postData(cgi, "sequence");
 
@@ -364,10 +364,10 @@ void WizardSupervisor::tooltipRequest(xgi::Input*  in,
 		         << std::endl;
 		return;
 	}
-	else
-	{
-		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
-	}
+//	else
+//	{
+//		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
+//	}
 	// SECURITY CHECK END ****
 
 	HttpXmlDocument xmldoc;

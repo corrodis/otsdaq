@@ -47,6 +47,12 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 		supervisorApplicationUID_ =
 		    std::to_string(application->getApplicationDescriptor()->getLocalId());
 		supervisorConfigurationPath_ = "NO APP PATH IN WIZ MODE";
+
+
+		__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
+		__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
+		__SUP_COUTV__(CorePropertySupervisorBase::supervisorConfigurationPath_);
+
 		return;
 	}
 
