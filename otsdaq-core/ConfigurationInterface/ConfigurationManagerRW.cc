@@ -661,7 +661,7 @@ TableVersion ConfigurationManagerRW::saveNewTable(const std::string& tableName,
 	// set author of version
 	TableBase* table = getTableByName(tableName);
 	table->getTemporaryView(temporaryVersion)->setAuthor(username_);
-	// NOTE: somehow? author is assigned to permanent versions when saved to DBI?
+	// NOTE: author is assigned to permanent versions when saved to DBI
 
 	if(!makeTemporary)  // saveNewVersion makes the new version the active version
 		newVersion = theInterface_->saveNewVersion(table, temporaryVersion);
@@ -709,6 +709,7 @@ TableVersion ConfigurationManagerRW::saveNewTable(const std::string& tableName,
 
 	__COUT__ << "New version added to info " << newVersion << __E__;
 
+	//table->getView().print();
 	return newVersion;
 }
 

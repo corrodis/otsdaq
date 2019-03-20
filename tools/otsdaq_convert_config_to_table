@@ -128,6 +128,7 @@ sed -i s/OtsConfigurationWizard/WizardSupervisor/g *Table/*.json #*/ end C++ com
 
 #revert things that have gone too far!
 sed -i s/TableGUI/ConfigurationGUI/g *Table/*.json #*/ end C++ comment coloring
+sed -i s/TableSubset/ConfigurationSubset/g *Table/*.json #*/ end C++ comment coloring
 
 
 #return index after transformation
@@ -205,6 +206,8 @@ for p in ${REPO_DIR[@]}; do
 		sed -i s/XDAQ_TABLE_DATA_PATH/XDAQ_CONFIGURATION_DATA_PATH/g *Table*;
 		sed -i s/XDAQ_TABLE_XML/XDAQ_CONFIGURATION_XML/g *Table*;
 		sed -i s/XMLTable-30/XMLConfiguration-30/g *Table*;
+		sed -i s/TableGUI/ConfigurationGUI/g *Table*;
+		sed -i s/TableSubset/ConfigurationSubset/g *Table*;
 		
 		
 		sed -i s/"configuration"/"table"/g CMakeLists.txt;
