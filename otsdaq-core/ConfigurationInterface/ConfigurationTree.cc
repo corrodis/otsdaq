@@ -1400,7 +1400,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
     const std::vector<std::string /*uid*/>&           recordList,
     const std::vector<std::string /*relative-path*/>& fieldAcceptList,
     const std::vector<std::string /*relative-path*/>& fieldRejectList,
-    unsigned int                                      depth) const
+    unsigned int                                      depth,
+	bool											  autoSelectFilterFields) const
 {
 	// enforce that starting point is a table node
 	if(!isRootNode() && !isConfigurationNode())
@@ -1463,18 +1464,25 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		auto recordChildren = getNode(recordList[i]).getChildren();
 		for(const auto& fieldNode : recordChildren)
 		{
-			//			__COUT__ << "All... " << fieldNode.second.getNodeType() <<
-			//					" -- " << fieldNode.first << __E__;
-			if(fieldNode.second.isValueNode())
+//			__COUT__ << "All... " << fieldNode.second.getNodeType() <<
+//					" -- " << fieldNode.first << __E__;
+
+			if(fieldNode.second.isValueNode() ||
+					fieldNode.second.isGroupLinkNode())
 			{
 				// skip author and record insertion time
-				if(fieldNode.second.getColumnInfo().getType() ==
-				       TableViewColumnInfo::TYPE_AUTHOR ||
-				   fieldNode.second.getColumnInfo().getType() ==
-				       TableViewColumnInfo::TYPE_TIMESTAMP)
-					continue;
+				if(fieldNode.second.isValueNode())
+				{
+					if(fieldNode.second.getColumnInfo().getType() ==
+						   TableViewColumnInfo::TYPE_AUTHOR ||
+					   fieldNode.second.getColumnInfo().getType() ==
+						   TableViewColumnInfo::TYPE_TIMESTAMP)
+						continue;
 
-				//__COUT__ << "isValueNode " << fieldNode.first << __E__;
+					//__COUT__ << "isValueNode " << fieldNode.first << __E__;
+				}
+
+
 				if(!i)  // first uid record
 				{
 					// check field accept filter list
@@ -1504,18 +1512,52 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 					// UIDs in same table)
 					if(found)
 					{
-						fieldCandidateList.push_back(ConfigurationTree::RecordField(
-						    fieldNode.second.getTableName(),
-						    recordList[i],
-						    fieldNode.first,
-						    "",  // relative path, not including columnName_
-						    &fieldNode.second.getColumnInfo()));
-						fieldCount.push_back(-1);  // mark guaranteed field
+
+						if(fieldNode.second.isGroupLinkNode())
+						{
+							__COUT__ << "isGroupLinkNode " << fieldNode.first << __E__;
+
+							//must get column info differently for group link column
+
+							std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
+							bool isGroupLink;
+							tableView_->getChildLink(
+									tableView_->findCol(fieldNode.first),
+									isGroupLink, linkPair);
+
+							//add both link columns
+
+							fieldCandidateList.push_back(ConfigurationTree::RecordField(
+								table_->getTableName(),
+							    recordList[i],
+								tableView_->getColumnInfo(linkPair.first).getName(),
+							    "",  // relative path, not including columnName_
+							    &tableView_->getColumnInfo(linkPair.first)));
+							fieldCount.push_back(-1);  // mark guaranteed field
+
+							fieldCandidateList.push_back(ConfigurationTree::RecordField(
+							    table_->getTableName(),
+							    recordList[i],
+								tableView_->getColumnInfo(linkPair.second).getName(),
+							    "",  // relative path, not including columnName_
+							    &tableView_->getColumnInfo(linkPair.second)));
+							fieldCount.push_back(-1);  // mark guaranteed field
+						}
+						else //value node
+						{
+							fieldCandidateList.push_back(ConfigurationTree::RecordField(
+							    fieldNode.second.getTableName(),
+							    recordList[i],
+							    fieldNode.first,
+							    "",  // relative path, not including columnName_
+							    &fieldNode.second.getColumnInfo()));
+							fieldCount.push_back(-1);  // mark guaranteed field
+						}
 					}
 				}
 				// else // not first uid record, do not need to check, must be same as
 				// first record!
-			}
+			} //end value field handling
 			else if(depth > 0 && fieldNode.second.isUIDLinkNode() &&
 			        !fieldNode.second.isDisconnected())
 			{
@@ -1529,9 +1571,9 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 				    fieldNode.first + "/",  // relativePathBase
 				    !i                      // launch inFirstRecord (or not) depth search
 				);
-			}
+			} //end unique link handling
 		}
-	}
+	} //end record loop
 
 	//__COUT__ << "======================= check for count = " <<
 	//		(int)recordList.size() << __E__;
@@ -1554,9 +1596,92 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		}
 	}
 
-	//	for(unsigned int i=0;i<fieldCandidateList.size();++i)
-	//		__COUT__ << "Final " << fieldCandidateList[i].relativePath_ <<
-	//				fieldCandidateList[i].columnName_ << __E__;
+//	for(unsigned int i=0;i<fieldCandidateList.size();++i)
+//		__COUT__ << "Pre-Final " << fieldCandidateList[i].relativePath_ <<
+//			fieldCandidateList[i].columnName_ << __E__;
+
+	if(autoSelectFilterFields)
+	{
+		//filter for just 3 of the best filter fields
+		//	i.e. preference	for GroupID, On/Off, and FixedChoice fields.
+		std::set<std::pair<unsigned int /*fieldPriority*/,unsigned int /*fieldIndex*/>> prioritySet;
+
+		unsigned int highestPriority = 0;
+		for(unsigned int i=0;i<fieldCandidateList.size();++i)
+		{
+//				__COUT__ << "Option " << fieldCandidateList[i].relativePath_ <<
+//						fieldCandidateList[i].columnName_ << " : " <<
+//						fieldCandidateList[i].columnInfo_->getType() << ":" <<
+//						fieldCandidateList[i].columnInfo_->getDataType() << __E__;
+
+				if(fieldCandidateList[i].columnInfo_->isBoolType())
+					prioritySet.emplace(std::make_pair(
+							0 /*fieldPriority*/, i /*fieldIndex*/));
+				else if(fieldCandidateList[i].columnInfo_->isGroupID())
+				{
+					prioritySet.emplace(std::make_pair(
+							1 /*fieldPriority*/, i /*fieldIndex*/));
+					if(highestPriority < 1)
+						highestPriority = 1;
+				}
+				else if(fieldCandidateList[i].columnInfo_->getType() ==
+						TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
+				{
+					prioritySet.emplace(std::make_pair(
+							3 /*fieldPriority*/, i /*fieldIndex*/));
+					if(highestPriority < 3)
+						highestPriority = 3;
+				}
+				else if(fieldCandidateList[i].columnInfo_->getType() ==
+						TableViewColumnInfo::TYPE_DATA)
+				{
+					prioritySet.emplace(std::make_pair(
+							10 /*fieldPriority*/, i /*fieldIndex*/));
+					if(highestPriority < 10)
+						highestPriority = 10;
+				}
+				else //skip other fields and mark for erasing
+				{
+					fieldCandidateList[i].tableName_ =
+							""; //clear table name as indicator for erase
+					continue;
+				}
+
+		} //done ranking fields
+
+		__COUTV__(StringMacros::setToString(prioritySet));
+
+		//now choose the top 3, and delete the rest
+		//	clear table name to indicate field should be erased
+		{
+			unsigned int cnt = 0;
+			for(const auto& priorityFieldIndex : prioritySet)
+				if(++cnt > 3) //then mark for erasing
+				{
+//					__COUT__ << cnt << " marking " << fieldCandidateList[
+//								priorityFieldIndex.second].relativePath_ <<
+//							fieldCandidateList[priorityFieldIndex.second].columnName_ <<
+//							__E__;
+					fieldCandidateList[priorityFieldIndex.second].tableName_ =
+							""; //clear table name as indicator for erase
+				}
+		}
+
+		for(unsigned int i = 0; i < fieldCandidateList.size(); ++i)
+		{
+			if(fieldCandidateList[i].tableName_ == "") //then erase
+			{
+//				__COUT__ << "Erasing " << fieldCandidateList[i].relativePath_ <<
+//						fieldCandidateList[i].columnName_ << __E__;
+				fieldCandidateList.erase(fieldCandidateList.begin() + i);
+				--i;  // rewind to look at next after deleted
+			}
+		}
+	} // end AUTO filter field selection
+
+	for(unsigned int i=0;i<fieldCandidateList.size();++i)
+		__COUT__ << "Final " << fieldCandidateList[i].relativePath_ <<
+			fieldCandidateList[i].columnName_ << __E__;
 
 	return fieldCandidateList;
 } //end getCommonFields()

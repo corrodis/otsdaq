@@ -24,11 +24,10 @@ cet_enable_asserts()
 
 link_libraries(
 	    ConfigurationInterface
-#        FECore
         ${CETLIB}
         ${FHICLCPP}
-  ${BSONCXXLIB}
-  ${MONGOCXXLIB}
+	    ${BSONCXXLIB}
+	    ${MONGOCXXLIB}
     	${artdaq-database_ConfigurationDB}
 		$ENV{XDAQ_LIB}/liblog4cplus.so
 		$ENV{XDAQ_LIB}/libasyncresolv
@@ -48,7 +47,10 @@ link_libraries(
 		/usr/lib64/libuuid.so
 		${Boost_SYSTEM_LIBRARY}
 )
+
 #cet_make_exec(otsdaq_flatten_active_to_version)
 cet_make_exec(otsdaq_flatten_system_aliases)
 cet_make_exec(otsdaq_import_system_aliases)
 cet_make_exec(otsdaq_fix_new_table_fields_tool)
+
+

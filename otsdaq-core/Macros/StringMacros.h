@@ -147,6 +147,10 @@ struct StringMacros
 	                               const std::string& delimeter = ", ");
 	static std::string setToString(const std::set<uint8_t>& setToReturn,
 	                               const std::string&       delimeter = ", ");
+	template<class S, class T>
+	static std::string setToString(const std::set<std::pair<S, T>>& setToReturn,
+	                                  const std::string& primaryDelimeter   = ", ",
+	                                  const std::string& secondaryDelimeter = ":");
 
 	template<class T>
 	static std::string vectorToString(const std::vector<T>& setToReturn,

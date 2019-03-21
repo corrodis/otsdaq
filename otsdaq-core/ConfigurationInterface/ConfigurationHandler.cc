@@ -208,21 +208,21 @@ xercesc::DOMElement* ConfigurationHandler::getElement(XMLCh*               tagNa
 }
 
 //==============================================================================
-void ConfigurationHandler::readXML(TableBase* configuration, TableVersion version)
+void ConfigurationHandler::readXML(TableBase* table, TableVersion version)
 {
-	readXML(*configuration, version);
+	readXML(*table, version);
 }
 
 //==============================================================================
-void ConfigurationHandler::readXML(TableBase& configuration, TableVersion version)
+void ConfigurationHandler::readXML(TableBase& table, TableVersion version)
 {
 	initPlatform();
-	std::string configFile = getXMLFileName(configuration, version);
+	std::string configFile = getXMLFileName(table, version);
 
 	__COUT__ << "Reading: " << configFile << std::endl;
-	__COUT__ << "Into View with Table Name: " << configuration.getViewP()->getTableName()
+	__COUT__ << "Into View with Table Name: " << table.getViewP()->getTableName()
 	         << std::endl;
-	__COUT__ << "Into View with version: " << configuration.getViewP()->getVersion()
+	__COUT__ << "Into View with version: " << table.getViewP()->getVersion()
 	         << " and version-to-read: " << version << std::endl;
 
 	struct stat fileStatus;
@@ -296,12 +296,12 @@ void ConfigurationHandler::readXML(TableBase& configuration, TableVersion versio
 		    getNode(extensionTableNameTag_, typeElement, 0);
 		if(!validateNode(extensionTableNameTag_,
 		                 extensionTableNameNode,
-		                 configuration.getView().getTableName()))
+		                 table.getView().getTableName()))
 			throw(std::runtime_error(
 			    std::string("The document is missing the mandatory tag: ") +
 			    XML_TO_STRING(extensionTableNameTag_)));
 		xercesc::DOMNode* nameNode = getNode(nameTag_, typeElement, 0);
-		if(!validateNode(nameTag_, nameNode, configuration.getTableName()))
+		if(!validateNode(nameTag_, nameNode, table.getTableName()))
 			throw(std::runtime_error(
 			    std::string("The document is missing the mandatory tag: ") +
 			    XML_TO_STRING(nameTag_)));
@@ -316,7 +316,7 @@ void ConfigurationHandler::readXML(TableBase& configuration, TableVersion versio
 			    std::string("The document is missing the mandatory tag: ") +
 			    XML_TO_STRING(runTag_)));
 		xercesc::DOMNode* runTypeNode = getNode(runTypeTag_, runElement, 0);
-		assert(validateNode(runTypeTag_, runTypeNode, configuration.getTableName()));
+		assert(validateNode(runTypeTag_, runTypeNode, table.getTableName()));
 		xercesc::DOMNode* runNumberNode = getNode(runNumberTag_, runElement, 0);
 		if(!runNumberNode)
 			throw(std::runtime_error(
@@ -376,19 +376,19 @@ void ConfigurationHandler::readXML(TableBase& configuration, TableVersion versio
 				    tmpVersionStr));
 		}
 		// version is valid
-		configuration.getViewP()->setVersion(
+		table.getViewP()->setVersion(
 		    XML_TO_CHAR(versionNode->getFirstChild()->getNodeValue()));
 
 		xercesc::DOMNode* commentDescriptionNode =
 		    getNode(commentDescriptionTag_, datasetElement, 0);
 		if(commentDescriptionNode->getFirstChild() != 0)
-			configuration.getViewP()->setComment(
+			table.getViewP()->setComment(
 			    XML_TO_CHAR(commentDescriptionNode->getFirstChild()->getNodeValue()));
 
 		xercesc::DOMNode* createdByUserNode =
 		    getNode(createdByUserTag_, datasetElement, 0);
 		if(createdByUserNode->getFirstChild() != 0)
-			configuration.getViewP()->setAuthor(
+			table.getViewP()->setAuthor(
 			    XML_TO_CHAR(createdByUserNode->getFirstChild()->getNodeValue()));
 
 		//<DATA>
@@ -410,11 +410,11 @@ void ConfigurationHandler::readXML(TableBase& configuration, TableVersion versio
 			__SS_THROW__;
 		}
 
-		//__COUT__ << configuration.getView().getColumnsInfo().size() << std::endl;
+		//__COUT__ << table.getView().getColumnsInfo().size() << std::endl;
 		// First I can build the matrix and then fill it since I know the number of rows
 		// and columns
-		configuration.getViewP()->resizeDataView(
-		    dataNodeList->getLength(), configuration.getView().getNumberOfColumns());
+		table.getViewP()->resizeDataView(
+		    dataNodeList->getLength(), table.getView().getNumberOfColumns());
 
 		for(XMLSize_t row = 0; row < dataNodeList->getLength(); row++)
 		{
@@ -438,17 +438,17 @@ void ConfigurationHandler::readXML(TableBase& configuration, TableVersion versio
 				xercesc::DOMElement* columnElement =
 				    dynamic_cast<xercesc::DOMElement*>(columnNodeList->item(col));
 
-				if(configuration.getView().getColumnInfo(colNumber).getStorageName() !=
+				if(table.getView().getColumnInfo(colNumber).getStorageName() !=
 				   XML_TO_STRING(columnElement->getTagName()))
 				{
 					std::stringstream error;
 					error << __COUT_HDR__ << std::endl
 					      << "The column number " << colNumber << " named "
-					      << configuration.getView()
+					      << table.getView()
 					             .getColumnInfo(colNumber)
 					             .getStorageName()
 					      << " defined in the view "
-					      << configuration.getView().getTableName()
+					      << table.getView().getTableName()
 					      << " doesn't match the file column order, since the "
 					      << colNumber + 1
 					      << (colNumber == 0
@@ -464,17 +464,17 @@ void ConfigurationHandler::readXML(TableBase& configuration, TableVersion versio
 
 				//                if( row==0 )
 				//                {
-				//                    configuration.getViewP()->getDataViewP()->push_back(vector<string>(dataNodeList->getLength()+1));//#
+				//                    table.getViewP()->getDataViewP()->push_back(vector<string>(dataNodeList->getLength()+1));//#
 				//                    of data + names
-				//                    (*configuration.getViewP()->getDataViewP())[colNumber][0]
+				//                    (*table.getViewP()->getDataViewP())[colNumber][0]
 				//                    = XML_TO_STRING(columnElement->getTagName());
 				//                }
-				configuration.getViewP()->setValueAsString(
+				table.getViewP()->setValueAsString(
 				    XML_TO_STRING(
 				        columnNodeList->item(col)->getFirstChild()->getNodeValue()),
 				    row,
 				    colNumber);
-				//(*configuration.getViewP()->getDataViewP())[row][colNumber] =
+				//(*table.getViewP()->getDataViewP())[row][colNumber] =
 				// XML_TO_STRING(columnNodeList->item(col)->getFirstChild()->getNodeValue());
 				++colNumber;
 			}
@@ -487,7 +487,7 @@ void ConfigurationHandler::readXML(TableBase& configuration, TableVersion versio
 		errBuf << "Error parsing file: " << XML_TO_CHAR(e.getMessage()) << std::flush;
 	}
 
-	__COUT__ << "Done with configuration file: " << configFile << std::endl;
+	__COUT__ << "Done with table file: " << configFile << std::endl;
 
 	delete parser;
 	delete errorHandler;
@@ -495,15 +495,15 @@ void ConfigurationHandler::readXML(TableBase& configuration, TableVersion versio
 }
 
 //==============================================================================
-std::string ConfigurationHandler::writeXML(const TableBase& configuration)
+std::string ConfigurationHandler::writeXML(const TableBase& table)
 {
 	initPlatform();
 
 	std::string configFile = getXMLFileName(
-	    configuration,
-	    configuration
+	    table,
+	    table
 	        .getViewVersion());  // std::string(getenv("CONFIGURATION_DATA_PATH")) + "/" +
-	                             // configuration.getTableName() + "_write.xml";
+	                             // table.getTableName() + "_write.xml";
 
 	xercesc::DOMImplementation* implementation =
 	    xercesc::DOMImplementationRegistry::getDOMImplementation(CONVERT_TO_XML("Core"));
@@ -541,13 +541,13 @@ std::string ConfigurationHandler::writeXML(const TableBase& configuration)
 			    document->createElement(extensionTableNameTag_);
 			typeElement->appendChild(extensionTableNameElement);
 			xercesc::DOMText* extensionTableNameValue = document->createTextNode(
-			    CONVERT_TO_XML(configuration.getView().getTableName().c_str()));
+			    CONVERT_TO_XML(table.getView().getTableName().c_str()));
 			extensionTableNameElement->appendChild(extensionTableNameValue);
 
 			xercesc::DOMElement* nameElement = document->createElement(nameTag_);
 			typeElement->appendChild(nameElement);
 			xercesc::DOMText* nameValue = document->createTextNode(
-			    CONVERT_TO_XML(configuration.getTableName().c_str()));
+			    CONVERT_TO_XML(table.getTableName().c_str()));
 			nameElement->appendChild(nameValue);
 			//</TYPE>
 
@@ -558,7 +558,7 @@ std::string ConfigurationHandler::writeXML(const TableBase& configuration)
 			xercesc::DOMElement* runTypeElement = document->createElement(runTypeTag_);
 			runElement->appendChild(runTypeElement);
 			xercesc::DOMText* runTypeValue = document->createTextNode(
-			    CONVERT_TO_XML(configuration.getTableName().c_str()));
+			    CONVERT_TO_XML(table.getTableName().c_str()));
 			runTypeElement->appendChild(runTypeValue);
 
 			xercesc::DOMElement* runNumberElement =
@@ -609,43 +609,43 @@ std::string ConfigurationHandler::writeXML(const TableBase& configuration)
 			xercesc::DOMElement* versionElement = document->createElement(versionTag_);
 			datasetElement->appendChild(versionElement);
 			xercesc::DOMText* versionValue = document->createTextNode(
-			    CONVERT_TO_XML(configuration.getView().getVersion().version()));
+			    CONVERT_TO_XML(table.getView().getVersion().version()));
 			versionElement->appendChild(versionValue);
 
 			xercesc::DOMElement* commentDescriptionElement =
 			    document->createElement(commentDescriptionTag_);
 			datasetElement->appendChild(commentDescriptionElement);
 			xercesc::DOMText* commentDescriptionValue = document->createTextNode(
-			    CONVERT_TO_XML(configuration.getView().getComment().c_str()));
+			    CONVERT_TO_XML(table.getView().getComment().c_str()));
 			commentDescriptionElement->appendChild(commentDescriptionValue);
 
 			xercesc::DOMElement* createdByUserElement =
 			    document->createElement(createdByUserTag_);
 			datasetElement->appendChild(createdByUserElement);
 			xercesc::DOMText* createdByUserValue = document->createTextNode(
-			    CONVERT_TO_XML(configuration.getView().getAuthor().c_str()));
+			    CONVERT_TO_XML(table.getView().getAuthor().c_str()));
 			createdByUserElement->appendChild(createdByUserValue);
-			// for(TableView::iterator it=configuration.getView().begin();
-			// it!=configuration.getView().end(); it++)
+			// for(TableView::iterator it=table.getView().begin();
+			// it!=table.getView().end(); it++)
 
-			for(unsigned int row = 0; row < configuration.getView().getNumberOfRows();
+			for(unsigned int row = 0; row < table.getView().getNumberOfRows();
 			    row++)
 			{
 				xercesc::DOMElement* dataElement = document->createElement(dataTag_);
 				datasetElement->appendChild(dataElement);
 
 				for(unsigned int col = 0;
-				    col < configuration.getView().getNumberOfColumns();
+				    col < table.getView().getNumberOfColumns();
 				    col++)
 				{
 					xercesc::DOMElement* element =
-					    document->createElement(CONVERT_TO_XML(configuration.getView()
+					    document->createElement(CONVERT_TO_XML(table.getView()
 					                                               .getColumnInfo(col)
 					                                               .getStorageName()
 					                                               .c_str()));
 					dataElement->appendChild(element);
 					xercesc::DOMText* value = document->createTextNode(CONVERT_TO_XML(
-					    configuration.getView().getDataView()[row][col].c_str()));
+					    table.getView().getDataView()[row][col].c_str()));
 					element->appendChild(value);
 				}
 			}
@@ -780,24 +780,24 @@ void ConfigurationHandler::outputXML(xercesc::DOMDocument* pmyDOMDocument,
 }
 
 //==============================================================================
-std::string ConfigurationHandler::writeXML(const TableBase* configuration)
+std::string ConfigurationHandler::writeXML(const TableBase* table)
 {
-	return writeXML(*configuration);
+	return writeXML(*table);
 }
 
 //==============================================================================
-std::string ConfigurationHandler::getXMLFileName(const TableBase& configuration,
+std::string ConfigurationHandler::getXMLFileName(const TableBase& table,
                                                  TableVersion     version)
 {
 	std::stringstream fileName;
-	fileName << getXMLDir(&configuration) << version << '/'
-	         << configuration.getTableName() << "_v" << version << ".xml";
+	fileName << getXMLDir(&table) << version << '/'
+	         << table.getTableName() << "_v" << version << ".xml";
 	return fileName.str();
 }
 
 //==============================================================================
-std::string ConfigurationHandler::getXMLDir(const TableBase* configuration)
+std::string ConfigurationHandler::getXMLDir(const TableBase* table)
 {
 	return std::string(getenv("CONFIGURATION_DATA_PATH")) + '/' +
-	       configuration->getTableName() + '/';
+	       table->getTableName() + '/';
 }

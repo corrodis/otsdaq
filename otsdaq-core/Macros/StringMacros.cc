@@ -594,6 +594,7 @@ std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn,
 	}
 	return ss.str();
 }
+
 //==============================================================================
 // vectorToString
 std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn,

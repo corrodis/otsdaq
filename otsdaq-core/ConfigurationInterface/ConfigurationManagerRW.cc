@@ -131,27 +131,25 @@ ConfigurationManagerRW::ConfigurationManagerRW(std::string username)
 			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "a");
 			if(fp)
 			{
-				fprintf(fp,"\n"); //in case there is no new line currently
-
 				unsigned int i = 0;
 				for(const auto& name : contextMemberNames)
 				{
 					if(!foundVector[i])
-						fprintf(fp, "ContextGroup/%s\n", name.c_str());
+						fprintf(fp, "\nContextGroup/%s", name.c_str());
 
 					++i;
 				}
 				for(const auto& name : backboneMemberNames)
 				{
 					if(!foundVector[i])
-						fprintf(fp, "BackboneGroup/%s\n", name.c_str());
+						fprintf(fp, "\nBackboneGroup/%s", name.c_str());
 
 					++i;
 				}
 				for(const auto& name : iterateMemberNames)
 				{
 					if(!foundVector[i])
-						fprintf(fp, "IterateGroup/%s\n", name.c_str());
+						fprintf(fp, "\nIterateGroup/%s", name.c_str());
 
 					++i;
 				}
@@ -170,11 +168,11 @@ ConfigurationManagerRW::ConfigurationManagerRW(std::string username)
 			if(fp)
 			{
 				for(const auto& name : contextMemberNames)
-					fprintf(fp, "ContextGroup/%s\n", name.c_str());
+					fprintf(fp, "\nContextGroup/%s", name.c_str());
 				for(const auto& name : backboneMemberNames)
-					fprintf(fp, "BackboneGroup/%s\n", name.c_str());
+					fprintf(fp, "\nBackboneGroup/%s", name.c_str());
 				for(const auto& name : iterateMemberNames)
-					fprintf(fp, "IterateGroup/%s\n", name.c_str());
+					fprintf(fp, "\nIterateGroup/%s", name.c_str());
 				fclose(fp);
 			}
 			else
