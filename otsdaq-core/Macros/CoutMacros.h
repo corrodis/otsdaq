@@ -66,7 +66,7 @@
 
 #endif
 
-#define __MOUTV__(X) __MOUT__ << QUOTE(X) << " = " << X << _E__
+#define __MOUTV__(X) __MOUT__ << QUOTE(X) << " = " << X
 
 //////// ==============================================================
 //////// Use __MCOUT__ for cout and Message Facility use in one line (that compiler
@@ -107,6 +107,7 @@
 	__COUT_ERR__ << "\n" << ss.str(); \
 	throw std::runtime_error(ss.str())
 #define __SS_ONLY_THROW__ throw std::runtime_error(ss.str())
+#define __SSV__(X) << QUOTE(X) << " = " << X
 
 //////// ==============================================================
 
