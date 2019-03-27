@@ -322,11 +322,12 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 					try
 					{
-						OUT << "max_fragment_size_bytes: "
-						    << destination.second
-						           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeBytes")
-						           .getValue<unsigned long long>()
-						    << __E__;
+						auto mfsb =
+						    destination.second
+						        .getNode("ARTDAQGlobalTableLink/maxFragmentSizeBytes")
+						        .getValue<unsigned long long>();
+						OUT << "max_fragment_size_bytes: " << mfsb << __E__;
+						OUT << "max_fragment_size_words: " << (mfsb / 8) << __E__;
 					}
 					catch(...)
 					{
@@ -392,10 +393,10 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 		PUSHTAB;
 
-		OUT << "max_fragment_size_bytes: "
-		    << daq.getNode("daqEventBuilderMaxFragmentSizeBytes")
-		           .getValue<unsigned long long>()
-		    << __E__;
+		auto mfsb = daq.getNode("ARTDAQGlobalTableLink/maxFragmentSizeBytes")
+		        .getValue<unsigned long long>();
+		OUT << "max_fragment_size_bytes: " << mfsb << __E__;
+		OUT << "max_fragment_size_words: " << (mfsb / 8) << __E__;
 		OUT << "buffer_count: "
 		    << daq.getNode("daqEventBuilderBufferCount").getValue<unsigned long long>()
 		    << __E__;
@@ -453,11 +454,12 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 					try
 					{
-						OUT << "max_fragment_size_bytes: "
-						    << source.second
-						           .getNode("ARTDAQGlobalTableLink/maxFragmentSizeBytes")
-						           .getValue<unsigned long long>()
-						    << __E__;
+						auto mfsb =
+						    source.second
+						        .getNode("ARTDAQGlobalTableLink/maxFragmentSizeBytes")
+						        .getValue<unsigned long long>();
+						OUT << "max_fragment_size_bytes: " << mfsb << __E__;
+						OUT << "max_fragment_size_words: " << (mfsb / 8) << __E__;
 					}
 					catch(...)
 					{
@@ -663,13 +665,13 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 							try
 							{
-								OUT << "max_fragment_size_bytes: "
-								    << destination.second
-								           .getNode(
-								               "ARTDAQGlobalTableLink/"
-								               "maxFragmentSizeBytes")
-								           .getValue<unsigned long long>()
-								    << __E__;
+								auto mfsb =
+								    destination.second
+								        .getNode(
+								            "ARTDAQGlobalTableLink/maxFragmentSizeBytes")
+								        .getValue<unsigned long long>();
+								OUT << "max_fragment_size_bytes: " << mfsb << __E__;
+								OUT << "max_fragment_size_words: " << (mfsb / 8) << __E__;
 							}
 							catch(...)
 							{
