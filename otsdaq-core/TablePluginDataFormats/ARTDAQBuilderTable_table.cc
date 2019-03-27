@@ -393,7 +393,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 		PUSHTAB;
 
-		auto mfsb = daq.getNode("ARTDAQGlobalTableLink/maxFragmentSizeBytes")
+		auto mfsb = daq.getNode("daqEventBuilderMaxFragmentSizeBytes")
 		        .getValue<unsigned long long>();
 		OUT << "max_fragment_size_bytes: " << mfsb << __E__;
 		OUT << "max_fragment_size_words: " << (mfsb / 8) << __E__;
