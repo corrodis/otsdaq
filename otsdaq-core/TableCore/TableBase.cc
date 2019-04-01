@@ -170,7 +170,7 @@ void TableBase::trimCache(unsigned int trimSize)
 
 		if(versionToDelete.isInvalid())
 		{
-			__SS__ << "Can NOT have a stored view with an invalid version!";
+			__SS__ << "Can NOT have a stored view with an invalid version!" << __E__;
 			__SS_THROW__;
 		}
 
@@ -451,7 +451,7 @@ unsigned int TableBase::getNumberOfStoredViews(void) const
 			continue;
 		else if(viewPair.first.isInvalid())
 		{
-			//__SS__ << "Can NOT have a stored view with an invalid version!";
+			//__SS__ << "Can NOT have a stored view with an invalid version!" << __E__;
 			//__SS_THROW__;
 
 			// NOTE: if this starts happening a lot, could just auto-correct and remove
@@ -473,7 +473,7 @@ const TableView& TableBase::getView(void) const
 	if(!activeTableView_)
 	{
 		__SS__ << "activeTableView_ pointer is null! (...likely the active view was not "
-		          "setup properly. Check your system setup.)";
+		          "setup properly. Check your system setup.)" << __E__;
 		__SS_THROW__;
 	}
 	return *activeTableView_;
@@ -485,7 +485,7 @@ TableView* TableBase::getViewP(void)
 	if(!activeTableView_)
 	{
 		__SS__ << "activeTableView_ pointer is null! (...likely the active view was not "
-		          "setup properly. Check your system setup.)";
+		          "setup properly. Check your system setup.)" << __E__;
 		__SS_THROW__;
 	}
 	return activeTableView_;

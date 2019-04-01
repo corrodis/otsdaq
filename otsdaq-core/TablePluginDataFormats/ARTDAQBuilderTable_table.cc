@@ -302,8 +302,23 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 					    destination.second.getNode("destinationARTDAQContextLink")
 					        .getValueAsString();
 
-					unsigned int destinationRank =
-					    contextConfig->getARTDAQAppRank(destinationContextUID);
+					unsigned int destinationRank = -1;
+					try
+					{
+						destinationRank = contextConfig->getARTDAQAppRank(
+								destinationContextUID);
+					}
+					catch(const std::runtime_error& e)
+					{
+						__MCOUT_WARN__("Are the Transport Service destinations valid? " <<
+								"Perhaps a Context has been turned off? " <<
+								"Skipping destination due to an error looking for Event " <<
+								"Builder DAQ source context '" << destinationContextUID <<
+								"' for UID '" <<
+								builderNode.getValue() << "': " << e.what() << __E__);
+						continue;
+					}
+
 					std::string host =
 					    contextConfig->getContextAddress(destinationContextUID);
 					unsigned int port = contextConfig->getARTDAQDataPort(
@@ -435,8 +450,23 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 					    source.second.getNode("sourceARTDAQContextLink")
 					        .getValueAsString();
 
-					unsigned int sourceRank =
-					    contextConfig->getARTDAQAppRank(sourceContextUID);
+					unsigned int sourceRank = -1;
+					try
+					{
+						sourceRank = contextConfig->getARTDAQAppRank(sourceContextUID);
+					}
+					catch(const std::runtime_error& e)
+					{
+						__MCOUT_WARN__("Are the DAQ sources valid? " <<
+								"Perhaps a Context has been turned off? " <<
+								"Skipping source due to an error looking for Event " <<
+								"Builder DAQ source context '" << sourceContextUID <<
+								"' for UID '" <<
+								builderNode.getValue() << "': " << e.what() << __E__);
+						continue;
+					}
+
+
 					std::string host = contextConfig->getContextAddress(sourceContextUID);
 					unsigned int port =
 					    contextConfig->getARTDAQDataPort(configManager, sourceContextUID);
@@ -642,8 +672,23 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 							    destination.second.getNode("destinationARTDAQContextLink")
 							        .getValueAsString();
 
-							unsigned int destinationRank =
-							    contextConfig->getARTDAQAppRank(destinationContextUID);
+							unsigned int destinationRank = -1;
+							try
+							{
+								destinationRank = contextConfig->getARTDAQAppRank(
+										destinationContextUID);
+							}
+							catch(const std::runtime_error& e)
+							{
+								__MCOUT_WARN__("Are the DAQ destinations valid? " <<
+										"Perhaps a Context has been turned off? " <<
+										"Skipping destination due to an error looking for Event " <<
+										"Builder DAQ source context '" << destinationContextUID <<
+										"' for UID '" <<
+										builderNode.getValue() << "': " << e.what() << __E__);
+								continue;
+							}
+
 							std::string host =
 							    contextConfig->getContextAddress(destinationContextUID);
 							unsigned int port = contextConfig->getARTDAQDataPort(

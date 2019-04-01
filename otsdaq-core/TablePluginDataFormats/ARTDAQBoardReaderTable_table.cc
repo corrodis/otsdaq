@@ -444,8 +444,23 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 				    destination.second.getNode("destinationARTDAQContextLink")
 				        .getValueAsString();
 
-				unsigned int destinationRank =
-				    contextConfig->getARTDAQAppRank(destinationContextUID);
+				unsigned int destinationRank = -1;
+				try
+				{
+					destinationRank = contextConfig->getARTDAQAppRank(
+							destinationContextUID);
+				}
+				catch(const std::runtime_error& e)
+				{
+					__MCOUT_WARN__("Are the DAQ destinations valid? " <<
+							"Perhaps a Context has been turned off? " <<
+							"Skipping destination due to an error looking for Board " <<
+							"Reader DAQ source context '" << destinationContextUID <<
+							"' for UID '" <<
+							boardReaderNode.getValue() << "': " << e.what() << __E__);
+					continue;
+				}
+
 				std::string host =
 				    contextConfig->getContextAddress(destinationContextUID);
 				unsigned int port = contextConfig->getARTDAQDataPort(

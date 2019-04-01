@@ -1637,23 +1637,24 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 										break;
 									}
 								if(!found)
-									*accumulatedTreeErrors +=
-									    std::string(
-									        "\nNote: It may be safe to ignore this "
-									        "error ") +
-									    "since the link's target table " +
-									    twoDeepChild.second.getDisconnectedTableName() +
-									    " is not a member of this group (and may not be "
-									    "loaded yet).";
+								{
+									__SS__ << "Note: It may be safe to ignore this " <<
+									        "error since the link's target table " <<
+									    twoDeepChild.second.getDisconnectedTableName() <<
+									    " is not a member of this group (and may not be " <<
+									    "loaded yet)" << __E__;
+									*accumulatedTreeErrors += ss.str();
+								}
 							}
 						}
 					}
 				}
 				catch(std::runtime_error& e)
 				{
-					*accumulatedTreeErrors +=
-					    "\n\nAt node '" + memberPair.first +
-					    "' error detected descending through children:\n" + e.what();
+					__SS__ << "At node '" << memberPair.first <<
+						    "' error detected descending through children:\n" <<
+							e.what() << __E__;
+					*accumulatedTreeErrors += ss.str();
 				}
 			}
 
@@ -1663,7 +1664,7 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 	}
 
 	return retMap;
-}
+} //end getChildren()
 
 //==============================================================================
 // getTableByName
