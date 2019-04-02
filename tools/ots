@@ -547,7 +547,7 @@ launchOTSWiz() {
 	#kill all things otsdaq, before launching new things	
 	killprocs
 	
-		#cleanup alive files
+	#cleanup alive files
 	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive* &>/dev/null 2>&1 #hide output #remove alive file
 
 
@@ -759,6 +759,13 @@ launchOTS() {
 		unset ContextPIDArray 
 		unset xdaqPort
 		unset xdaqHost	
+		
+		if [ $BACKUPLOGS == 0 ]; then
+			#cleanup log files
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCleaning LOG files at ${OTSDAQ_LOG_DIR} ${Reset}"
+			rm -rf ${OTSDAQ_LOG_DIR}/* &>/dev/null 2>&1 #hide output #remove alive file
+		fi
+		
 		
 	else 					#else is full gateway and nongateway launch
 		GATEWAY_PID=-1
