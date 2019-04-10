@@ -1679,7 +1679,8 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 			}
 
 			retMap.push_back(
-			    std::pair<std::string, ConfigurationTree>(memberPair.first, newNode));
+			    std::pair<std::string, ConfigurationTree>(
+			    	memberPair.first, newNode));
 		}
 	}
 
