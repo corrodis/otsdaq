@@ -441,7 +441,10 @@ const std::string& ConfigurationTree::getTableName(void) const
 		if(linkParentConfig_)
 		{
 			ss << "Error occurred traversing from " << linkParentConfig_->getTableName()
-			   << " row " << linkBackRow_ << " col '"
+			   << " UID '" << linkParentConfig_->getView().getValueAsString(
+			   		linkBackRow_ , 
+			   		linkParentConfig_->getView().getColUID())
+			   << "' at row " << linkBackRow_ << " col '"
 			   << linkParentConfig_->getView().getColumnInfo(linkBackCol_).getName()
 			   << ".'" << __E__;
 		}

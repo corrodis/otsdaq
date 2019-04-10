@@ -158,13 +158,13 @@ ConfigurationManager::~ConfigurationManager() { destroy(); }
 //	else throw errors (but do not ask restoreActiveTableGroups to throw errors)
 void ConfigurationManager::init(std::string* accumulatedErrors)
 {
-	if(accumulatedErrors)
-		*accumulatedErrors = "";
+	//if(accumulatedErrors)
+	//	*accumulatedErrors = "";
 
 	// destroy();
 
-	// once Interface is false (using artdaq db) .. then can cTableGroupce_->getMode() ==
-	// false)
+	// once Interface is false (using artdaq db) .. 
+	//	then can test (configurationInterface_->getMode() == false)
 	{
 		try
 		{
@@ -173,7 +173,7 @@ void ConfigurationManager::init(std::string* accumulatedErrors)
 		catch(std::runtime_error& e)
 		{
 			if(accumulatedErrors)
-				*accumulatedErrors = e.what();
+				*accumulatedErrors += e.what();
 			else
 				throw;
 		}
@@ -274,7 +274,11 @@ void ConfigurationManager::restoreActiveTableGroups(
 		try
 		{
 			// load and doActivate
-			loadTableGroup(groupName, TableGroupKey(strVal), true);
+			loadTableGroup(
+				groupName, 
+				TableGroupKey(strVal),
+				true /*doActivate*/
+				);
 		}
 		catch(std::runtime_error& e)
 		{
@@ -1209,6 +1213,7 @@ void ConfigurationManager::loadTableGroup(
 					__SS_THROW__;
 				}
 
+				//__COUTV__(memberPair.first);
 				// attempt to init using the configuration's specific init
 				//	this could be risky user code, try and catch
 				try
@@ -1227,8 +1232,8 @@ void ConfigurationManager::loadTableGroup(
 					{
 						*accumulatedTreeErrors += ss.str();
 					}
-					else //ignore error
-						__COUT_WARN__ << ss.str();
+					else 
+						__SS_THROW__;//__COUT_WARN__ << ss.str();
 				}
 				catch(...)
 				{
@@ -1528,8 +1533,9 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
     std::string*                         accumulatedTreeErrors) const
 {
 	std::vector<std::pair<std::string, ConfigurationTree>> retMap;
-	if(accumulatedTreeErrors)
-		*accumulatedTreeErrors = "";
+	
+	//if(accumulatedTreeErrors)
+	//	*accumulatedTreeErrors = "";
 
 	if(!memberMap || memberMap->empty())  // return all present active members
 	{

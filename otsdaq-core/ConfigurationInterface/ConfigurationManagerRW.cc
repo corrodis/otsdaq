@@ -196,8 +196,8 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 {
 	// allTableInfo_ is container to be returned
 
-	if(accumulatedErrors)
-		*accumulatedErrors = "";
+	//if(accumulatedErrors)
+	//	*accumulatedErrors = "";
 
 	if(!refresh)
 		return allTableInfo_;
@@ -358,7 +358,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 		}
 		closedir(pDIR);
 	}
-	__COUT__ << "Extracting list of tables complete" << __E__;
+	__COUT__ << "Extracting list of tables complete. Now initializing..." << __E__;
 
 	// call init to load active versions by default
 	init(accumulatedErrors);
