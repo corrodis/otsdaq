@@ -1220,14 +1220,28 @@ void ConfigurationManager::loadTableGroup(
 					__SS__ << "Error detected calling "
 					       << nameToTableMap_[memberPair.first]->getTableName()
 					       << ".init()!\n\n " << e.what() << __E__;
-					__SS_THROW__;
+
+					//__SS_THROW__;
+
+					if(accumulatedTreeErrors)
+					{
+						*accumulatedTreeErrors += ss.str();
+					}
+					else //ignore error
+						__COUT_WARN__ << ss.str();
 				}
 				catch(...)
 				{
 					__SS__ << "Unknown Error detected calling "
 					       << nameToTableMap_[memberPair.first]->getTableName()
 					       << ".init()!\n\n " << __E__;
-					__SS_THROW__;
+					//__SS_THROW__;
+					if(accumulatedTreeErrors)
+					{
+						*accumulatedTreeErrors += ss.str();
+					}
+					else //ignore error
+						__COUT_WARN__ << ss.str();
 				}
 			}
 
