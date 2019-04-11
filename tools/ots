@@ -79,7 +79,8 @@ function defineColors ()
   DUNDERLINE=`tput rmul`    # Disable underline mode            
   REV=`tput rev`            # Turn on reverse video mode        
 #Reset=`tput sgr0`         # Reset all
-  Reset=`tput init`         # Reset all
+#Reset=`tput init`         # Reset all
+  Reset=`tput init;tput sgr0`         # Reset all
   EBold=`tput smso`         # Enter standout (bold) mode        
   DBold=`tput rmso`         # Exit standout mode                
 }
@@ -282,8 +283,8 @@ export -f killprocs
 if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
 
 	echo
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}******************************************************"
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}*************       kill otsdaq!        **************"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}******************************************************${Reset}"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}*************       kill otsdaq!        **************${Reset}"
     echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}${Rev}******************************************************${Reset}"
 	
 	echo -e "${Reset}"
@@ -292,7 +293,7 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
 	echo "EXIT_LOOP ${STARTTIME}-${LINENO}-${HOSTNAME_ARR[0]}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 	
-    echo  -e "${IBRed}${Reset}"
+    echo  -e "${IBRed}"
     killprocs	
 	killall -9 ots &>/dev/null 2>&1 #hide output
     
@@ -830,7 +831,7 @@ launchOTS() {
 			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching QT console viewer...${Reset}"
 			if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
 				echo
-				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Error${Reset}: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
+				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Error${Reset}: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!${Reset}"
 				echo
 				exit
 			fi
@@ -854,7 +855,7 @@ launchOTS() {
 	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
 	
 	#echo
-	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tXDAQ ARGS PASSED TO ots.exe:"
+	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tXDAQ ARGS PASSED TO ots.exe:${Reset}"
 	#echo ${XDAQ_ARGS}
 	#echo
 	#echo	
@@ -866,13 +867,13 @@ launchOTS() {
 	#sed -i s/libSupervisor\.so/libGatewaySupervisor\.so/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 
 	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`	
-	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t$value"
+	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t$value${Reset}"
 	#re="http://(${HOSTNAME}):([0-9]+)"
 	
 	re="http(s*)://(.+):([0-9]+)"
 	superRe="id=\"([0-9]+)\""		
 	
-	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tMATCHING REGEX"
+	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tMATCHING REGEX${Reset}"
 	
 	haveXDAQContextPort=false
 	insideContext=false
@@ -895,7 +896,7 @@ launchOTS() {
 		if [[ ${ignore} == true ]]; then
 			continue
 		fi
-		#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t$line"
+		#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t$line${Reset}"
 				
 		if [[ ($line == *"xc:Context"*) && ($line == *"url"*) ]]; then
 			if [[ ($line =~ $re) ]]; then
@@ -912,7 +913,7 @@ launchOTS() {
 				host=${BASH_REMATCH[2]}
 				insideContext=true
 						
-				#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t$host $port "				
+				#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t$host $port ${Reset}"				
 						
 				if [[ (${BASH_REMATCH[2]} == ${HOSTNAME}) || (${BASH_REMATCH[2]} == ${HOSTNAME}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
 				    isLocal=true
@@ -1214,7 +1215,7 @@ printMainURL() {
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOpen the URL below in your Google Chrome or Mozilla Firefox web browser:"	
 	
 	if [ $MAIN_URL == "unknown_url" ]; then
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tINFO: No gateway supervisor found for node {${HOSTNAME}}."
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tINFO: No gateway supervisor found for node {${HOSTNAME}}.{Reset}"
 		exit
 	fi
 	
