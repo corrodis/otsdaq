@@ -1184,7 +1184,8 @@ void ConfigurationManager::loadTableGroup(
 			if(*accumulatedTreeErrors != "")
 			{
 				__COUT_ERR__ << "Errors detected while loading Table Group: " << groupName
-				             << "(" << groupKey << "). Aborting." << __E__;
+				             << "(" << groupKey << "). Aborting." 
+				             << "\n" << *accumulatedTreeErrors << __E__;
 				return;  // memberMap; //return member name map to version
 			}
 		}
