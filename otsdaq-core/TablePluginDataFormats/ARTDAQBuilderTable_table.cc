@@ -390,6 +390,32 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		POPTAB;
 		OUT << "}\n\n";  // end NetMonTransportServiceInterface
 
+		auto otherParameterLink = services.getNode("ServicesParametersLink");
+		if(!otherParameterLink.isDisconnected())
+		{
+			///////////////////////
+			auto servicesParameters = otherParameterLink.getChildren();
+			
+			//__COUTV__(servicesParameters.size());
+			for(auto& parameter : servicesParameters)
+			{
+				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+				        .getValue<bool>())
+					PUSHCOMMENT;
+
+				OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
+				    << parameter.second.getNode("daqParameterValue").getValue()
+				    << "\n";
+
+				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+				        .getValue<bool>())
+					POPCOMMENT;
+			}
+		}
+		//else
+		//	__COUT__ << "No services parameters found" << __E__;
+
+
 		POPTAB;
 		OUT << "}\n\n";  // end services
 	}
