@@ -1306,16 +1306,6 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 	   colLinkGroupIDs_.end())
 		return it->second;
 
-	__COUT__ << "Existing Column GroupIDs: " << __E__;
-	for(auto& groupIdColPair : colLinkGroupIDs_)
-		std::cout << "\t" << groupIdColPair.first << " : col-" << groupIdColPair.second
-		          << __E__;
-
-	__COUT__ << "Existing Column Types: " << __E__;
-	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << "\t" << columnsInfo_[col].getType() << "() "
-		          << columnsInfo_[col].getName() << __E__;
-
 	__SS__
 	    << "Incompatible table for this group link. Table '" << tableName_
 	    << "' is missing a GroupID column with data type '"
@@ -1326,6 +1316,17 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 	    << "character at the parent level - the string after the space will be treated "
 	       "as the "
 	    << "child GroupID column data type." << __E__;
+	ss << "Existing Column GroupIDs: " << __E__;
+	for(auto& groupIdColPair : colLinkGroupIDs_)
+		ss << "\t" << groupIdColPair.first << " : col-" << groupIdColPair.second
+		          << __E__;
+
+	ss << "Existing Column Types: " << __E__;
+	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
+		ss << "\t" << columnsInfo_[col].getType() << "() "
+		          << columnsInfo_[col].getName() << __E__;
+
+	
 	__SS_THROW__;
 }  // end getColLinkGroupID()
 

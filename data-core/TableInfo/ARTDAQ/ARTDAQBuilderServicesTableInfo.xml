@@ -8,8 +8,8 @@
 				<COLUMN Type="Data" 	 Name="NetMonTrasportServiceInterfaceServiceProvider" 	 StorageName="NET_MON_TRASPORT_SERVICE_INTERFACE_SERVICE_PROVIDER" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-destinations" 	 Name="NetMonTrasportServiceInterfaceDestinationsLink" 	 StorageName="NET_MON_TRASPORT_SERVICE_INTERFACE_DESTINATIONS_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQBuilderServicesDestinationTable"/>
 				<COLUMN Type="ChildLinkGroupID-destinations" 	 Name="NetMonTrasportServiceInterfaceDestinationsLinkGroupID" 	 StorageName="NET_MON_TRASPORT_SERVICE_INTERFACE_DESTINATIONS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="ChildLink-parameters" 	 Name="ServicesParametersLink" 	 StorageName="SERVICES_PARAMETERS_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQBuilderDaqParameterTable"/>
-				<COLUMN Type="ChildLinkGroupID-parameters" 	 Name="ServiceParametersLinkGroupID" 	 StorageName="SERVICE_PARAMETERS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-daqParameters" 	 Name="ServicesParametersLink" 	 StorageName="SERVICES_PARAMETERS_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQBuilderDaqParameterTable"/>
+				<COLUMN Type="ChildLinkGroupID-daqParameters" 	 Name="ServiceParametersLinkGroupID" 	 StorageName="SERVICE_PARAMETERS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
