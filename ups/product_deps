@@ -18,7 +18,7 @@ fcldir      -
 
 #
 product		 version	optional
-artdaq              v3_04_00
+artdaq              v3_04_01
 artdaq_database     v1_04_70
 xdaq                v14_4_1a
 artdaq_mfextensions v1_03_03a   	-        optional
