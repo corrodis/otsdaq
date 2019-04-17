@@ -513,7 +513,7 @@ const std::string& FEVInterface::getFEMacroConstArgument(frontEndMacroConstArgs_
 // getFEMacroConstArgumentValue
 //	helper function for getting the copy of the value of an argument
 template<>
-std::string getFEMacroConstArgumentValue<std::string>(
+std::string ots::getFEMacroConstArgumentValue<std::string>(
     FEVInterface::frontEndMacroConstArgs_t& args, const std::string& argName)
 {
 	return FEVInterface::getFEMacroConstArgument(args, argName);
@@ -523,7 +523,7 @@ std::string getFEMacroConstArgumentValue<std::string>(
 // getFEMacroArgumentValue
 //	helper function for getting the copy of the value of an argument
 template<>
-std::string getFEMacroArgumentValue<std::string>(FEVInterface::frontEndMacroArgs_t& args,
+std::string ots::getFEMacroArgumentValue<std::string>(FEVInterface::frontEndMacroArgs_t& args,
                                                  const std::string& argName)
 {
 	return FEVInterface::getFEMacroArgument(args, argName);

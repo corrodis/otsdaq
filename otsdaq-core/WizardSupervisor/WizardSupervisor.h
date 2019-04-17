@@ -41,7 +41,7 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
   public:
 	XDAQ_INSTANTIATOR();
 
-	WizardSupervisor(xdaq::ApplicationStub*) throw(xdaq::exception::Exception);
+	WizardSupervisor(xdaq::ApplicationStub*);
 	virtual ~WizardSupervisor(void);
 
 	void init(void);
@@ -50,17 +50,17 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 	void        generateURL(void);
 	static void printURL(WizardSupervisor* ptr, std::string securityCode);
 
-	void Default(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
-	void verification(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
-	void request(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
-	void requestIcons(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void Default(xgi::Input* in, xgi::Output* out);
+	void verification(xgi::Input* in, xgi::Output* out);
+	void request(xgi::Input* in, xgi::Output* out);
+	void requestIcons(xgi::Input* in, xgi::Output* out);
 
-	void editSecurity(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
-	void UserSettings(xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception);
+	void editSecurity(xgi::Input* in, xgi::Output* out);
+	void UserSettings(xgi::Input* in, xgi::Output* out);
 	void tooltipRequest(xgi::Input*  in,
-	                    xgi::Output* out) throw(xgi::exception::Exception);
+	                    xgi::Output* out);
 	void toggleSecurityCodeGeneration(xgi::Input*  in,
-	                                  xgi::Output* out) throw(xgi::exception::Exception);
+	                                  xgi::Output* out);
 	std::string validateUploadFileType(const std::string fileType);
 	void        cleanUpPreviews();
 	void        savePostPreview(std::string&                        subject,
@@ -70,10 +70,9 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 	                            HttpXmlDocument*                    xmldoc = nullptr);
 
 	// External Supervisor XOAP handlers
-	xoap::MessageReference supervisorSequenceCheck(xoap::MessageReference msg) throw(
-	    xoap::exception::Exception);
+	xoap::MessageReference supervisorSequenceCheck(xoap::MessageReference msg);
 	xoap::MessageReference supervisorLastConfigGroupRequest(
-	    xoap::MessageReference msg) throw(xoap::exception::Exception);
+	    xoap::MessageReference msg);
 
   private:
 	std::string              securityCode_;

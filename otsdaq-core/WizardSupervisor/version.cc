@@ -6,8 +6,7 @@
 GETPACKAGEINFO(WizardSupervisor)
 
 //========================================================================================================================
-void WizardSupervisor::checkPackageDependencies() throw(
-    config::PackageInfo::VersionException)
+void WizardSupervisor::checkPackageDependencies()
 {
 	CHECKDEPENDENCY(config);
 	CHECKDEPENDENCY(xcept);
