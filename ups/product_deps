@@ -20,7 +20,7 @@ fcldir      -
 product		 version	optional
 artdaq              v3_04_01
 artdaq_database     v1_04_70
-xdaq                v14_12_0
+xdaq                v14_4_1a
 artdaq_mfextensions v1_03_03a   	-        optional
 smc_compiler        v6_6_0      -        only_for_build
 cetbuildtools       v7_02_01    -        only_for_build
@@ -32,10 +32,10 @@ end_product_list
 # -nq- here means there is no qualifier
 # a "-" here means the dependent product is not required by the parent and will not be setup
 qualifier    	   artdaq	 	 artdaq_database	xdaq   	   artdaq_mfextensions 	notes
-e17:s67:prof       e17:s67:prof    	 e17:s67:prof 		e17:prof   e17:s67:prof 	-std=c++17
-e17:s67:debug      e17:s67:debug   	 e17:s67:debug		e17:debug  e17:s67:debug 	-std=c++17
 e15:s67:prof       e15:s67:prof    	 e15:s67:prof 		e15:prof   e15:s67:prof 	-std=c++14
 e15:s67:debug      e15:s67:debug   	 e15:s67:debug		e15:debug  e15:s67:debug 	-std=c++14
+e15:s65:prof       e15:s65:prof    	 e15:s65:prof 		e15:prof   e15:s65:prof 	-std=c++14
+e15:s65:debug      e15:s65:debug   	 e15:s65:debug		e15:debug  e15:s65:debug 	-std=c++14
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:

@@ -60,7 +60,8 @@ XDAQ_INSTANTIATOR_IMPL(WizardSupervisor)
 #define __MF_SUBJECT__ "Wizard"
 
 //========================================================================================================================
-WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
+WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s) throw(
+    xdaq::exception::Exception)
     : xdaq::Application(s)
     , SOAPMessenger(this)
     , supervisorClass_(getApplicationDescriptor()->getClassName())
@@ -129,7 +130,7 @@ void WizardSupervisor::init(void)
 
 //========================================================================================================================
 void WizardSupervisor::requestIcons(xgi::Input*  in,
-                                    xgi::Output* out)
+                                    xgi::Output* out) throw(xgi::exception::Exception)
 {
 	cgicc::Cgicc cgi(in);
 
@@ -203,7 +204,7 @@ void WizardSupervisor::requestIcons(xgi::Input*  in,
 
 //========================================================================================================================
 void WizardSupervisor::verification(xgi::Input*  in,
-                                    xgi::Output* out)
+                                    xgi::Output* out) throw(xgi::exception::Exception)
 {
 	cgicc::Cgicc cgi(in);
 	std::string  submittedSequence = CgiDataUtilities::getData(cgi, "code");
@@ -347,7 +348,7 @@ void WizardSupervisor::destroy(void)
 
 //========================================================================================================================
 void WizardSupervisor::tooltipRequest(xgi::Input*  in,
-                                      xgi::Output* out)
+                                      xgi::Output* out) throw(xgi::exception::Exception)
 {
 	cgicc::Cgicc cgi(in);
 
@@ -398,7 +399,7 @@ void WizardSupervisor::tooltipRequest(xgi::Input*  in,
 
 //========================================================================================================================
 void WizardSupervisor::toggleSecurityCodeGeneration(
-    xgi::Input* in, xgi::Output* out)
+    xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception)
 {
 	cgicc::Cgicc cgi(in);
 
@@ -456,7 +457,7 @@ void WizardSupervisor::toggleSecurityCodeGeneration(
 // xoap::supervisorSequenceCheck
 //	verify cookie
 xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(
-    xoap::MessageReference message)
+    xoap::MessageReference message) throw(xoap::exception::Exception)
 {
 	// SOAPUtilities::receive request parameters
 	SOAPParameters parameters;
@@ -496,7 +497,7 @@ xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(
 //
 //	Note: same as Supervisor::supervisorLastConfigGroupRequest
 xoap::MessageReference WizardSupervisor::supervisorLastConfigGroupRequest(
-    xoap::MessageReference message)
+    xoap::MessageReference message) throw(xoap::exception::Exception)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ActionOfLastGroup");
@@ -507,7 +508,7 @@ xoap::MessageReference WizardSupervisor::supervisorLastConfigGroupRequest(
 
 //========================================================================================================================
 void WizardSupervisor::Default(xgi::Input*  in,
-                               xgi::Output* out)
+                               xgi::Output* out) throw(xgi::exception::Exception)
 {
 	__COUT__ << "Unauthorized Request made, security sequence doesn't match!"
 	         << std::endl;
@@ -516,7 +517,7 @@ void WizardSupervisor::Default(xgi::Input*  in,
 
 //========================================================================================================================
 void WizardSupervisor::request(xgi::Input*  in,
-                               xgi::Output* out)
+                               xgi::Output* out) throw(xgi::exception::Exception)
 {
 	cgicc::Cgicc cgiIn(in);
 
@@ -590,7 +591,7 @@ void WizardSupervisor::request(xgi::Input*  in,
 
 //========================================================================================================================
 void WizardSupervisor::editSecurity(xgi::Input*  in,
-                                    xgi::Output* out)
+                                    xgi::Output* out) throw(xgi::exception::Exception)
 {
 	// if sequence doesn't match up -> return
 	cgicc::Cgicc cgi(in);
@@ -697,7 +698,7 @@ void WizardSupervisor::editSecurity(xgi::Input*  in,
 }
 //========================================================================================================================
 void WizardSupervisor::UserSettings(xgi::Input*  in,
-                                    xgi::Output* out)
+                                    xgi::Output* out) throw(xgi::exception::Exception)
 {
 	// if sequence doesn't match up -> return
 	cgicc::Cgicc cgi(in);

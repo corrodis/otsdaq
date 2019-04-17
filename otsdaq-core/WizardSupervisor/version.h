@@ -33,7 +33,7 @@ const std::string authors = "Ryan Rivera, Lorenzo Uplegger";
 const std::string link    = "http://otsdaq.fnal.gov";
 
 config::PackageInfo getPackageInfo();
-void checkPackageDependencies();
+void checkPackageDependencies() throw(config::PackageInfo::VersionException);
 std::set<std::string, std::less<std::string> > getPackageDependencies();
 }  // namespace WizardSupervisor
 
