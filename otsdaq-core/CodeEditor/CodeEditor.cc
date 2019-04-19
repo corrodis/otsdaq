@@ -656,12 +656,14 @@ CodeEditor::getSpecialsMap(void)
                                     "UserTableDataFormats",
                                     "TablePluginDataFormats",
                                     "SlowControlsInterfacePlugins",
+                                    "ControlsInterfacePlugins",
                                     "FEInterfacePlugins",
                                     "tools"};
 	std::string        specialMapTypes[] = {CodeEditor::SPECIAL_TYPE_FEInterface,
                                      CodeEditor::SPECIAL_TYPE_DataProcessor,
                                      CodeEditor::SPECIAL_TYPE_Table,
                                      CodeEditor::SPECIAL_TYPE_Table,
+                                     CodeEditor::SPECIAL_TYPE_ControlsInterface,
                                      CodeEditor::SPECIAL_TYPE_ControlsInterface,
                                      CodeEditor::SPECIAL_TYPE_FEInterface,
                                      CodeEditor::SPECIAL_TYPE_Tools};
