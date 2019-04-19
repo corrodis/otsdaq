@@ -1033,6 +1033,33 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 	           "ARTDAQGlobalTableForProcessNameLink/processNameForBuilders")
 	    << "\n";
 
+
+	auto otherParameterLink = builderNode.getNode("addOnParametersLink");
+	if(!otherParameterLink.isDisconnected())
+	{
+		///////////////////////
+		auto otherParameters = otherParameterLink.getChildren();
+		
+		//__COUTV__(otherParameters.size());
+		for(auto& parameter : otherParameters)
+		{
+			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+			        .getValue<bool>())
+				PUSHCOMMENT;
+
+			OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
+			    << parameter.second.getNode("daqParameterValue").getValue()
+			    << "\n";
+
+			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+			        .getValue<bool>())
+				POPCOMMENT;
+		}
+	}
+	//else
+	//	__COUT__ << "No add-on parameters found" << __E__;
+
+
 	out.close();
 }
 
