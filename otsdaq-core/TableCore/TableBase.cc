@@ -61,6 +61,7 @@ TableBase::TableBase(std::string  tableName,
 			throw;
 	}
 }
+
 //==============================================================================
 // TableBase
 //	Default constructor is only used  to create special tables

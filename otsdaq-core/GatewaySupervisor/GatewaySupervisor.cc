@@ -1272,12 +1272,16 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	try
 	{
 		CorePropertySupervisorBase::theConfigurationManager_->loadTableGroup(
-		    theConfigurationTableGroup_.first, theConfigurationTableGroup_.second, true);
+		    theConfigurationTableGroup_.first, theConfigurationTableGroup_.second, true /*doActivate*/);
 
+		__COUT__ << "Done loading Configuration Alias." << __E__;
+		
 		// When configured, set the translated System Alias to be persistently active
 		ConfigurationManagerRW tmpCfgMgr("TheSupervisor");
 		tmpCfgMgr.activateTableGroup(theConfigurationTableGroup_.first,
 		                             theConfigurationTableGroup_.second);
+		
+		__COUT__ << "Done activating Configuration Alias." << __E__;
 	}
 	catch(...)
 	{
@@ -1660,8 +1664,15 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 
 	while(!subIterationsDone)  // start subIteration handling loop
 	{
+		__COUT__ << "Broadcast thread " << threadIndex << "\t"
+				<< "Supervisor instance = '" << appInfo.getName()
+				<< "' [LID=" << appInfo.getId() << "] in Context '"
+				<< appInfo.getContextName() << "' [URL=" << appInfo.getURL()
+				<< "] Command = " << command << __E__;
+	
 		subIterationsDone = true;
 		RunControlStateMachine::theProgressBar_.step();
+		
 
 		// add subIteration index to message
 		if(subIteration)
@@ -1679,11 +1690,12 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 		RunControlStateMachine::theProgressBar_.step();
 
 		if(iteration == 0 && subIteration == 0)
-		{
+		{	  
 			for(unsigned int j = 0; j < 4; ++j)
 				__COUT__ << "Broadcast thread " << threadIndex << "\t"
 				         << "Sending message to Supervisor " << appInfo.getName()
-				         << " [LID=" << appInfo.getId() << "]: " << command << __E__;
+				         << " [LID=" << appInfo.getId() << "]: " << command << __E__;				         
+				      
 		}
 		else  // else this not the first time through the supervisors
 		{
