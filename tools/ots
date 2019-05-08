@@ -1215,7 +1215,7 @@ printMainURL() {
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOpen the URL below in your Google Chrome or Mozilla Firefox web browser:"	
 	
 	if [ $MAIN_URL == "unknown_url" ]; then
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tINFO: No gateway supervisor found for node {${HOSTNAME}}.{Reset}"
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tINFO: No gateway supervisor found for node {${HOSTNAME}}.${Reset}"
 		exit
 	fi
 	
