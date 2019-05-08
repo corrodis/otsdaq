@@ -65,7 +65,7 @@ void FEVInterfacesManager::createInterfaces(void)
 
 	ConfigurationTree feGroupLinkNode =
 	    Configurable::getSelfNode().getNode(COL_NAME_feGroupLink);
-
+		
 	std::vector<std::pair<std::string, ConfigurationTree>> feChildren =
 	    feGroupLinkNode.getChildren();
 
