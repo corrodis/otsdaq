@@ -513,15 +513,30 @@ if [ "x${ARTDAQ_OUTPUT_DIR}" == "x" ]; then
 fi
 
 if [ ! -d $ARTDAQ_OUTPUT_DIR ]; then
-    mkdir -p $ARTDAQ_OUTPUT_DIR
+	if [ ! -L $ARTDAQ_OUTPUT_DIR ]; then
+	    mkdir -p $ARTDAQ_OUTPUT_DIR
+	else
+		mkdir -p `readlink -f $ARTDAQ_OUTPUT_DIR`
+	fi
 fi
 
 if [ ! -d $OTSDAQ_LOG_DIR ]; then
-    mkdir -p $OTSDAQ_LOG_DIR
+	if [ ! -L $OTSDAQ_LOG_DIR ]; then
+	    mkdir -p $OTSDAQ_LOG_DIR
+	else
+		mkdir -p `readlink -f $OTSDAQ_LOG_DIR`
+	fi
 fi
 export OTSDAQ_LOG_ROOT=$OTSDAQ_LOG_DIR
 
 
+if [ ! -d ${USER_DATA}/MessageFacilityConfigurations ];then
+	if [ ! -L ${USER_DATA}/MessageFacilityConfigurations ]; then
+		mkdir -p ${USER_DATA}/MessageFacilityConfigurations
+	else
+		mkdir -p `readlink -f ${USER_DATA}/MessageFacilityConfigurations`
+	fi
+fi
 
 ##############################################################################
 export XDAQ_CONFIGURATION_XML=otsConfigurationNoRU_CMake #-> 
@@ -563,7 +578,7 @@ launchOTSWiz() {
 	####################################################################
 	#decide which MessageFacility console viewer to run
 	# and configure otsdaq MF library with MessageFacility*.fcl to use
-	
+
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityGen.fcl
 	#this fcl tells the MF library used by ots source how to behave
 	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
