@@ -1,6 +1,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"  //All configurable objects are included here
 #include "otsdaq-core/ProgressBar/ProgressBar.h"
+#include "artdaq/Application/LoadParameterSet.hh"
 
 #include <fstream>  // std::ofstream
 
@@ -69,7 +70,7 @@ const std::set<std::string> ConfigurationManager::iterateMemberNames_ = {
     "IterationCommandRunTable"};
 
 //==============================================================================
-ConfigurationManager::ConfigurationManager()
+ConfigurationManager::ConfigurationManager(bool doInitializeFromFhicl)
     : username_(ConfigurationManager::READONLY_USER)
     , theInterface_(0)
     , theConfigurationTableGroupKey_(0)
@@ -80,8 +81,8 @@ ConfigurationManager::ConfigurationManager()
     , theBackboneTableGroup_("")
 {
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
-	// NOTE: in ConfigurationManagerRW using false currently.. think about consistency!
-	// FIXME
+
+
 
 	// initialize special group metadata table
 	{
@@ -139,7 +140,19 @@ ConfigurationManager::ConfigurationManager()
 		groupMetadataTable_.getViewP()->addRow();
 	}
 
+
+
+	if(doInitializeFromFhicl)
+	{
+		//create tables and fill based on fhicl
+		initializeFromFhicl(getenv("CONFIGURATION_INIT_FCL"));
+		return;
+	}
+	//else do normal init
+
 	init();
+
+
 }  // end constructor()
 
 //==============================================================================
@@ -877,7 +890,7 @@ void ConfigurationManager::loadMemberMap(
 		nameToTableMap_[memberPair.first] = tmpConfigBasePtr;
 		if(nameToTableMap_[memberPair.first]->getViewP())
 		{
-			//__COUT__ << "\t\tActivated version: " <<
+			//__COUT__ << "Activated version: " <<
 			// nameToTableMap_[memberPair.first]->getViewVersion() << __E__;
 		}
 		else
@@ -1708,6 +1721,8 @@ const TableBase* ConfigurationManager::getTableByName(const std::string& tableNa
 		       << "\n\n\n\n"
 		       << __E__;
 
+		ss << __E__ << StringMacros::stackTrace() << __E__;
+
 		// prints out too often, so only throw
 		// if(tableName != TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 		//	__COUT_WARN__ << "\n" << ss.str();
@@ -1971,3 +1986,293 @@ const std::set<std::string>& ConfigurationManager::getIterateMemberNames()
 {
 	return ConfigurationManager::iterateMemberNames_;
 }
+
+//==============================================================================
+void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
+{
+	__COUT__ << "Initializing from fhicl: " << fhiclPath << __E__;
+
+	//https://cdcvs.fnal.gov/redmine/projects/fhicl-cpp/wiki
+
+	//LoadParameterSet() ... from  $ARTDAQ_INC/artdaq/Application/LoadParameterSet.hh
+	fhicl::ParameterSet pset = LoadParameterSet(fhiclPath);
+
+	//fcl should be FE record(s)
+	//	interface0: {
+	//		fe_type:	"OTSUdpTemplate"
+	//		port: 		2007
+	//		ip: 		"192.168.133.7"
+	//	}
+	//	interface1: {
+	//		fe_type:	"OTSUdpTemplate"
+	//		port: 		2007
+	//		ip: 		"192.168.133.7"
+	//		FESpecialTable:{
+	//			threshold:   10
+	//		}
+	//	}
+
+	//	auto names = pset.get_names();
+	//	for(const auto& name: names)
+	//	{
+	//		if(!pset.is_key_to_atom(name)) continue;
+	//
+	//		__COUTV__(name);
+	//		__COUTV__(pset.get<std::string>(name));
+	//	}
+
+
+
+	//Steps:
+	//	Create one context with one FE supervisor
+	//		and one/many FEs specified by fcl
+	//
+
+
+
+	TableBase* table;
+
+	//create context and add context record
+	{
+		table = 0;
+		theInterface_->get(
+				table,   // configurationPtr
+				ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,   // tableName
+				0,                  // groupKey
+				0,                  // groupName
+				true              // dontFill=false to fill
+		);
+
+		nameToTableMap_[ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME] = table;
+
+		table->setupMockupView(TableVersion(TableVersion::DEFAULT));
+		table->setActiveView(TableVersion(TableVersion::DEFAULT));
+
+		TableView* view = table->getViewP();
+		__COUT__ << "Activated version: " <<
+				view->getVersion() << __E__;
+		//view->print();
+
+		//add context record 		---------------------
+		view->addRow();
+		auto colMap = view->getColumnNamesMap();
+
+		view->setValue("MacroMakerFEContext",0,		colMap["ContextUID"]);
+		view->setValue("XDAQApplicationTable",0,	colMap["LinkToApplicationTable"]);
+		view->setValue("MacroMakerFEContextApps",0,	colMap["ApplicationGroupID"]);
+		view->setValue("1",0,colMap["Status"]);
+
+		__COUT__ << "Done adding context record..." << __E__;
+		view->print();
+
+	} //done with context record
+
+	//create app table and add application record
+	{
+		table = 0;
+		theInterface_->get(
+				table,   // configurationPtr
+				ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,   // tableName
+				0,                  // groupKey
+				0,                  // groupName
+				true              // dontFill=false to fill
+		);
+
+		nameToTableMap_[ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME] = table;
+
+		table->setupMockupView(TableVersion(TableVersion::DEFAULT));
+		table->setActiveView(TableVersion(TableVersion::DEFAULT));
+
+		TableView* view = table->getViewP();
+		__COUT__ << "Activated version: " <<
+				view->getVersion() << __E__;
+		//view->print();
+
+		//add application record 		---------------------
+		view->addRow();
+		auto colMap = view->getColumnNamesMap();
+
+		view->setValue("MacroMakerFEContextApps",0,	colMap["ApplicationGroupID"]);
+		view->setValue("MacroMakerFESupervisor",0,	colMap["ApplicationUID"]);
+		view->setValue("FESupervisorTable",0,		colMap["LinkToSupervisorTable"]);
+		view->setValue("MacroMakerFESupervisor",0,	colMap["LinkToSupervisorUID"]);
+		view->setValue("1",0,						colMap["Status"]);
+
+		__COUT__ << "Done adding application record..." << __E__;
+		view->print();
+	} //done with app record
+
+	//create FE Supervisor table and Supervisor record
+	{
+		table = 0;
+		theInterface_->get(
+				table,   // configurationPtr
+				"FESupervisorTable",   // tableName
+				0,                  // groupKey
+				0,                  // groupName
+				true              // dontFill=false to fill
+		);
+
+		nameToTableMap_["FESupervisorTable"] = table;
+
+		table->setupMockupView(TableVersion(TableVersion::DEFAULT));
+		table->setActiveView(TableVersion(TableVersion::DEFAULT));
+
+		TableView* view = table->getViewP();
+		__COUT__ << "Activated version: " <<
+				view->getVersion() << __E__;
+		//view->print();
+
+		//add application record 		---------------------
+		view->addRow();
+		auto colMap = view->getColumnNamesMap();
+
+		view->setValue("MacroMakerFESupervisor",0,	colMap["SupervisorUID"]);
+		view->setValue("FETable",0,					colMap["LinkToFEInterfaceTable"]);
+		view->setValue("MacroMakerFESupervisorInterfaces",0,	colMap["LinkToFEInterfaceGroupID"]);
+
+		__COUT__ << "Done adding supervisor record..." << __E__;
+		view->print();
+	} //done with app record
+
+	//create FE Interface table and interface record(s)
+	recursiveInitFromFhiclPSet(
+			"FEInterfaceTable" /*tableName*/,
+			pset /*fhicl parameter set*/,
+			"" /*uid*/,
+			"MacroMakerFESupervisorInterfaces" /*groupID*/);
+
+//	std::vector<std::pair<std::string /*fe UID*/,
+//			std::map<std::string /*parameter name*/,
+//			std::string /*parameter value*/> > > fes;
+//
+//		auto psets = pset.get_pset_names();
+//		for(const auto& ps: psets)
+//		{
+//			__COUT__ << "------------" << __E__;
+//			__COUTV__(ps);
+//
+//			bool extracted = false;
+//			std::map<std::string /*parameter name*/,
+//					std::string /*parameter value*/> feParams;
+//
+//			try
+//			{
+//				fhicl::ParameterSet fePset = pset.get<fhicl::ParameterSet>(ps);
+//				auto names = fePset.get_names();
+//				for(const auto& name: names)
+//				{
+//					__COUTV__(name);
+//					__COUTV__(fePset.get<std::string>(name));
+//				}
+//
+//				extracted = true;
+//			}
+//			catch(...)
+//			{
+//				__COUT_WARN__ << "Failed to extract fhicl parameters for FE '" <<
+//						ps << "'" << __E__;
+//			}
+//
+//			if(extracted)
+//			{
+//				__COUT__<< "Extracted '" << ps << "'" << __E__;
+//				__COUTV__(StringMacros::mapToString(feParams));
+//				fes.push_back(std::make_pair(ps,feParams));
+//			}
+//		}
+//
+//		__COUT__ << "Front-ends extracted from fhicl: " << fes.size() << __E__;
+
+
+
+} //end initializeFromFhicl()
+
+
+//==============================================================================
+void ConfigurationManager::recursiveInitFromFhiclPSet(
+		const std::string& tableName,
+		const fhicl::ParameterSet& pset,
+		const std::string& recordName,
+		const std::string& groupName)
+{
+	__COUT__ << "Adding table '" << tableName << "' record(s)..." << __E__;
+
+	TableBase* table;
+	//create context and add context record
+	{
+		table = 0;
+		if(nameToTableMap_.find(tableName) == nameToTableMap_.end())
+		{
+			theInterface_->get(
+					table,   // configurationPtr
+					tableName,   // tableName
+					0,                  // groupKey
+					0,                  // groupName
+					true              // dontFill=false to fill
+			);
+
+			nameToTableMap_[tableName] = table;
+		}
+		else
+			table = nameToTableMap_[tableName];
+
+		table->setupMockupView(TableVersion(TableVersion::DEFAULT));
+		table->setActiveView(TableVersion(TableVersion::DEFAULT));
+
+		TableView* view = table->getViewP();
+		__COUT__ << "Activated version: " <<
+				view->getVersion() << __E__;
+		//view->print();
+
+		if(recordName != "") //then add this record
+		{
+			__COUTV__(recordName);
+			unsigned int r = view->addRow();
+			auto colMap = view->getColumnNamesMap();
+
+			//		view->setValue("MacroMakerFEContext",0,		colMap["ContextUID"]);
+			//		view->setValue("XDAQApplicationTable",0,	colMap["LinkToApplicationTable"]);
+			//		view->setValue("MacroMakerFEContextApps",0,	colMap["ApplicationGroupID"]);
+			//		view->setValue("1",0,colMap["Status"]);
+
+
+			view->setValue(recordName,r,view->getColUID());
+			try	{view->setValue("1",r,view->getColStatus());}
+			catch(...){__COUT__ << "No status column to set for '" << recordName << "'" << __E__;}
+		}
+		else if(groupName != "") //then add group of records
+		{
+			//get_pset_names();
+			//get_names
+			__COUTV__(groupName);
+			auto psets = pset.get_pset_names();
+			for(const auto& ps: psets)
+			{
+				__COUTV__(ps);
+				recursiveInitFromFhiclPSet(
+						tableName /*tableName*/,
+						pset.get<fhicl::ParameterSet>(ps) /*fhicl parameter set*/,
+						ps /*uid*/,
+						groupName /*groupID*/);
+			}
+		}
+		else
+		{
+			__SS__ << "Illegal recursive parameters!" << __E__;
+			__SS_THROW__;
+		}
+
+		view->print();
+	}
+
+	__COUT__ << "Done adding table '" << tableName << "' record(s)..." << __E__;
+
+
+} //end recursiveInitFromFhiclPSet()
+
+
+
+
+
+

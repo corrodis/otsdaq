@@ -8,7 +8,7 @@ const CorePropertySupervisorBase::SupervisorProperties
 
 //========================================================================================================================
 CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* application)
-    : theConfigurationManager_(new ConfigurationManager)
+    : theConfigurationManager_(0)//new ConfigurationManager)
     , supervisorClass_(application->getApplicationDescriptor()->getClassName())
     , supervisorClassNoNamespace_(supervisorClass_.substr(
           supervisorClass_.find_last_of(":") + 1,
@@ -35,10 +35,30 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	__SUP_COUTV__(supervisorClass_);
 	__SUP_COUTV__(supervisorClassNoNamespace_);
 
-	// get all supervisor info, and wiz mode or not
+	// get all supervisor info, and wiz mode, macroMaker mode, or not
 	allSupervisorInfo_.init(application->getApplicationContext());
 
-	if(allSupervisorInfo_.isWizardMode())
+	if(allSupervisorInfo_.isMacroMakerMode())
+	{
+		theConfigurationManager_ = new ConfigurationManager(true /*initializeFromFhicl*/);
+		__SUP_COUT__ << "Macro Maker mode detected. So skipping configuration location work for "
+				"supervisor of class '"
+				<< supervisorClass_ << "'" << __E__;
+
+		supervisorContextUID_ = "MacroMakerFEContext";
+		supervisorApplicationUID_ = "MacroMakerFESupervisor";
+		supervisorConfigurationPath_ = CorePropertySupervisorBase::supervisorContextUID_ +
+				"/LinkToApplicationTable/" +
+				CorePropertySupervisorBase::supervisorApplicationUID_ +
+				"/LinkToSupervisorTable";
+
+		__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
+		__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
+		__SUP_COUTV__(CorePropertySupervisorBase::supervisorConfigurationPath_);
+
+		return;
+	}
+	else if(allSupervisorInfo_.isWizardMode())
 	{
 		__SUP_COUT__ << "Wiz mode detected. So skipping configuration location work for "
 		                "supervisor of class '"
@@ -64,6 +84,7 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 
 	try
 	{
+		theConfigurationManager_ = new ConfigurationManager();
 		CorePropertySupervisorBase::supervisorContextUID_ =
 		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
 		        ->getContextUID(application->getApplicationContext()

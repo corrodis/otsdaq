@@ -74,6 +74,7 @@ class TableView
 	const unsigned int&          getSourceColumnMissing(void) const;
 	const std::set<std::string>& getSourceColumnNames(void) const;
 	std::set<std::string>        getColumnNames(void) const;
+	std::map<std::string, unsigned int /*col*/>        getColumnNamesMap(void) const;
 	std::set<std::string>        getColumnStorageNames(void) const;
 	std::vector<std::string>     getDefaultRowValues(void) const;
 

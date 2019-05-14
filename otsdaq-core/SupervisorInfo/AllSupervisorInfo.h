@@ -37,6 +37,7 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 
 	// BOOLs
 	bool isWizardMode(void) const { return theWizardInfo_ ? true : false; }
+	bool isMacroMakerMode(void) const { return AllSupervisorInfo::MACROMAKER_MODE; }
 
 	// SETTERs
 	void setSupervisorStatus(xdaq::Application* app, const std::string& status);
@@ -81,6 +82,8 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	std::map<unsigned int, SupervisorInfo> allSupervisorInfo_;
 	SupervisorInfoMap allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_,
 	    allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_;
+
+	static const bool			MACROMAKER_MODE;
 };
 
 }  // namespace ots

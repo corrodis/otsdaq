@@ -1478,7 +1478,17 @@ std::set<std::string> TableView::getColumnNames(void) const
 	for(auto& colInfo : columnsInfo_)
 		retSet.emplace(colInfo.getName());
 	return retSet;
-}
+} //end getColumnNames()
+
+//==============================================================================
+std::map<std::string, unsigned int /*col*/> TableView::getColumnNamesMap(void) const
+{
+	std::map<std::string, unsigned int /*col*/> retMap;
+	unsigned int c = 0;
+	for(auto& colInfo : columnsInfo_)
+		retMap.emplace(std::make_pair(colInfo.getName(),c++));
+	return retMap;
+} //end getColumnNamesMap()
 
 //==============================================================================
 std::set<std::string> TableView::getColumnStorageNames(void) const

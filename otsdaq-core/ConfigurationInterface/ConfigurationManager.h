@@ -71,7 +71,7 @@ class ConfigurationManager
 		CONFIGURATION_TYPE
 	};
 
-	ConfigurationManager();
+	ConfigurationManager(bool initializeFromFhicl = false);
 	virtual ~ConfigurationManager(void);
 
 	void init(std::string* accumulatedErrors = 0);
@@ -161,6 +161,9 @@ class ConfigurationManager
   private:
 	ConfigurationManager(const std::string& userName);  // private constructor called by
 	                                                    // ConfigurationManagerRW
+	void				initializeFromFhicl(const std::string& fhiclPath);
+	void				recursiveInitFromFhiclPSet(const std::string& tableName, const fhicl::ParameterSet& pset, const std::string& recordName = "", const std::string& groupName = "");
+
 
 	std::string username_;  // user of the configuration is READONLY_USER unless using
 	                        // ConfigurationManagerRW

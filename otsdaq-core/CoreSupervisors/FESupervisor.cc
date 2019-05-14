@@ -10,26 +10,43 @@ XDAQ_INSTANTIATOR_IMPL(FESupervisor)
 FESupervisor::FESupervisor(xdaq::ApplicationStub* stub)
 : CoreSupervisorBase(stub)
 {
+	__SUP_COUT__ << "Constructing..." << __E__;
+
 	xoap::bind(this,
 	           &FESupervisor::macroMakerSupervisorRequest,
 	           "MacroMakerSupervisorRequest",
 	           XDAQ_NS_URI);
 
-	xoap::bind(
-	    this, &FESupervisor::workLoopStatusRequest, "WorkLoopStatusRequest", XDAQ_NS_URI);
+	xoap::bind(this,
+				&FESupervisor::workLoopStatusRequest,
+				"WorkLoopStatusRequest",
+				XDAQ_NS_URI);
 
 	xoap::bind(this,
 	           &FESupervisor::frontEndCommunicationRequest,
 	           "FECommunication",
 	           XDAQ_NS_URI);
 
-	CoreSupervisorBase::theStateMachineImplementation_.push_back(new FEVInterfacesManager(
-	    CorePropertySupervisorBase::getContextTreeNode(),
-	    CorePropertySupervisorBase::getSupervisorConfigurationPath()));
+
+
+	try
+	{
+		CoreSupervisorBase::theStateMachineImplementation_.push_back(new FEVInterfacesManager(
+			CorePropertySupervisorBase::getContextTreeNode(),
+			CorePropertySupervisorBase::getSupervisorConfigurationPath()));
+	}
+	catch(...)
+	{
+		if(CorePropertySupervisorBase::allSupervisorInfo_.isMacroMakerMode())
+		{
+			__SUP_COUT_WARN__ << "Error caught constructing FE Interface Manager. In Macro Maker mode, the input fhicl defines the configuration tree, make sure you specified a valid fcl file path." << __E__;
+		}
+		throw;
+	}
 
 	extractFEInterfacesManager();
 
-	__SUP_COUT__ << "Destructed." << __E__;
+	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor
 
 //========================================================================================================================

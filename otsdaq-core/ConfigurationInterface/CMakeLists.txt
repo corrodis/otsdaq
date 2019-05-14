@@ -6,6 +6,7 @@ cet_make(LIBRARY_NAME ConfigurationInterface
 		 Macros
 		 dl
 		 
+		 ${FHICLCPP}
          ${CETLIB}
          artdaq-database_ConfigurationDB
          artdaq-database_DataFormats_Json
