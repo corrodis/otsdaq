@@ -447,6 +447,8 @@ const std::string& ConfigurationTree::getTableName(void) const
 			   << "' at row " << linkBackRow_ << " col '"
 			   << linkParentConfig_->getView().getColumnInfo(linkBackCol_).getName()
 			   << ".'" << __E__;
+			   
+			ss << StringMacros::stackTrace() << __E__;
 		}
 
 		__SS_ONLY_THROW__;

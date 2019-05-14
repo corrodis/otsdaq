@@ -70,7 +70,9 @@ const std::set<std::string> ConfigurationManager::iterateMemberNames_ = {
     "IterationCommandRunTable"};
 
 //==============================================================================
-ConfigurationManager::ConfigurationManager(bool doInitializeFromFhicl)
+ConfigurationManager::ConfigurationManager(
+		bool initForWriteAccess /*=false*/,
+		bool doInitializeFromFhicl /*=false*/)
     : username_(ConfigurationManager::READONLY_USER)
     , theInterface_(0)
     , theConfigurationTableGroupKey_(0)
@@ -140,8 +142,6 @@ ConfigurationManager::ConfigurationManager(bool doInitializeFromFhicl)
 		groupMetadataTable_.getViewP()->addRow();
 	}
 
-
-
 	if(doInitializeFromFhicl)
 	{
 		//create tables and fill based on fhicl
@@ -149,16 +149,15 @@ ConfigurationManager::ConfigurationManager(bool doInitializeFromFhicl)
 		return;
 	}
 	//else do normal init
-
-	init();
-
+	init(0 /*accumulatedErrors*/,initForWriteAccess);
 
 }  // end constructor()
 
 //==============================================================================
 ConfigurationManager::ConfigurationManager(const std::string& username)
-    : ConfigurationManager()
+    : ConfigurationManager(true /*initForWriteAccess*/)
 {
+	__COUT_INFO__ << "Private constructor for write access called." << __E__;
 	username_ = username;
 }  // end constructor(username)
 
@@ -169,7 +168,8 @@ ConfigurationManager::~ConfigurationManager() { destroy(); }
 // init
 //	if accumulatedErrors is not null.. fill it with errors
 //	else throw errors (but do not ask restoreActiveTableGroups to throw errors)
-void ConfigurationManager::init(std::string* accumulatedErrors)
+void ConfigurationManager::init(std::string* accumulatedErrors,
+	bool initForWriteAccess /*= false*/)
 {
 	//if(accumulatedErrors)
 	//	*accumulatedErrors = "";
@@ -181,7 +181,14 @@ void ConfigurationManager::init(std::string* accumulatedErrors)
 	{
 		try
 		{
-			restoreActiveTableGroups(accumulatedErrors ? true : false);
+			__COUTV__(username_);
+			
+			restoreActiveTableGroups(
+				accumulatedErrors ? true : false /*throwErrors*/,
+				"" /*pathToActiveGroupsFile*/,
+				//(initForWriteAccess || //if write access, then load everything 
+					(username_ == ConfigurationManager::READONLY_USER)? 
+					true : false /*onlyLoadIfBackboneOrContext*/);
 		}
 		catch(std::runtime_error& e)
 		{
@@ -199,7 +206,9 @@ void ConfigurationManager::init(std::string* accumulatedErrors)
 //	Note: this should be used by the Supervisor to maintain
 //		the same configurationGroups surviving software system restarts
 void ConfigurationManager::restoreActiveTableGroups(
-    bool throwErrors, const std::string& pathToActiveGroupsFile)
+    bool 				throwErrors, 
+    const std::string& 	pathToActiveGroupsFile,
+    bool				onlyLoadIfBackboneOrContext /*= false*/)
 {
 	destroyTableGroup("", true);  // deactivate all
 
@@ -290,7 +299,17 @@ void ConfigurationManager::restoreActiveTableGroups(
 			loadTableGroup(
 				groupName, 
 				TableGroupKey(strVal),
-				true /*doActivate*/
+				true /*doActivate*/,
+			    0 /*groupMembers*/,
+			    0 /*progressBar*/,
+			    0 /*accumulateWarnings = 0*/,
+			    0 /*groupComment       = 0*/,
+			    0 /*groupAuthor        = 0*/,
+			    0 /*groupCreateTime    = 0*/,
+			    0 /*doNotLoadMember    = false*/,
+			    0 /*groupTypeString    = 0*/,
+			    0 /*groupAliases       = 0*/,
+			    onlyLoadIfBackboneOrContext /*onlyLoadIfBackboneOrContext = false*/
 				);
 		}
 		catch(std::runtime_error& e)
@@ -930,7 +949,8 @@ void ConfigurationManager::loadTableGroup(
     std::string*                                           groupCreateTime,
     bool                                                   doNotLoadMember /*=false*/,
     std::string*                                           groupTypeString,
-    std::map<std::string /*name*/, std::string /*alias*/>* groupAliases) try
+    std::map<std::string /*name*/, std::string /*alias*/>* groupAliases,
+    bool												   onlyLoadIfBackboneOrContext /*=false*/) try
 {
 	// clear to defaults
 	if(groupComment)
@@ -1129,12 +1149,23 @@ void ConfigurationManager::loadTableGroup(
 		//			}
 		//		}
 
+		
+		
 		if(doNotLoadMember)
 			return;  // memberMap; //this is useful if just getting group metadata
 
 		// if not already done, determine the type configuration group
 		if(!groupTypeString)
 			groupType = getTypeOfGroup(memberMap);
+
+		if(onlyLoadIfBackboneOrContext && 
+			groupType != ConfigurationManager::CONTEXT_TYPE && 
+			groupType != ConfigurationManager::BACKBONE_TYPE)
+		{
+			__COUT_WARN__ << "Not loading group because it is not of type Context or Backbone (it is type '" <<
+				convertGroupTypeIdToName(groupType) << "')." << __E__;
+			return;
+		}
 
 		if(doActivate)
 			__COUT__ << "------------------------------------- init start    \t [for all "
@@ -2270,6 +2301,31 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(
 
 
 } //end recursiveInitFromFhiclPSet()
+
+//==============================================================================
+bool ConfigurationManager::isOwnerFirstAppInContext()
+{
+	__COUT__ <<	"Checking if owner is first App in Context." << __E__;
+	if(ownerContextUID_ == "" || ownerAppUID_ == "") return true; //default to 'yes'
+
+	__COUTV__(ownerContextUID_);
+	__COUTV__(ownerAppUID_);
+	
+	
+	auto contextChildren =
+	    getNode(
+	    	ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME + "/" +
+	    	ownerContextUID_).getChildrenNames();
+	
+	bool isFirstAppInContext = contextChildren.size() == 0 || 
+		contextChildren[0] == ownerAppUID_;
+		
+	__COUTV__(isFirstAppInContext);	
+	
+	return isFirstAppInContext;
+} //end isOwnerFirstAppInContext()
+
+
 
 
 

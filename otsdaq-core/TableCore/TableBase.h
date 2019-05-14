@@ -33,7 +33,7 @@ class TableBase
 	void reset(bool keepTemporaryVersions = false);
 	void deactivate(void);
 	bool isActive(void);
-
+	
 	void print(std::ostream& out = std::cout) const;  // always prints active view
 
 	std::string getTypeId(void);

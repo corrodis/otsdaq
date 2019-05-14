@@ -132,6 +132,9 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorConfigurationPath_);
 
 	CorePropertySupervisorBase::indicateOtsAlive(this);
+	
+	theConfigurationManager_->setOwnerContext(CorePropertySupervisorBase::supervisorContextUID_);
+	theConfigurationManager_->setOwnerApp(CorePropertySupervisorBase::supervisorApplicationUID_);
 
 }  // end constructor
 
