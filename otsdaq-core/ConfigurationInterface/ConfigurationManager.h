@@ -172,7 +172,7 @@ class ConfigurationManager
 	ConfigurationManager(const std::string& userName);  // private constructor called by
 	                                                    // ConfigurationManagerRW
 	void				initializeFromFhicl(const std::string& fhiclPath);
-	void				recursiveInitFromFhiclPSet(const std::string& tableName, const fhicl::ParameterSet& pset, const std::string& recordName = "", const std::string& groupName = "");
+	void				recursiveInitFromFhiclPSet(const std::string& tableName, const fhicl::ParameterSet& pset, const std::string& recordName = "", const std::string& groupName = "", const std::string& groupLinkIndex = "");
 
 
 	std::string username_;  // user of the configuration is READONLY_USER unless using

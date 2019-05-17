@@ -40,7 +40,7 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 
 	if(allSupervisorInfo_.isMacroMakerMode())
 	{
-		theConfigurationManager_ = new ConfigurationManager(true /*initializeFromFhicl*/);
+		theConfigurationManager_ = new ConfigurationManager(false /*initForWriteAccess*/, true /*initializeFromFhicl*/);
 		__SUP_COUT__ << "Macro Maker mode detected. So skipping configuration location work for "
 				"supervisor of class '"
 				<< supervisorClass_ << "'" << __E__;

@@ -123,18 +123,17 @@ void TableBase::setupMockupView(TableVersion version)
 		trimCache();
 		if(!isStored(version))  // the trim cache is misbehaving!
 		{
-			__SS__ << "\nsetupMockupView() IMPOSSIBLE ERROR: trimCache() is deleting the "
+			__SS__ << __COUT_HDR_P__ << "IMPOSSIBLE ERROR: trimCache() is deleting the "
 			          "latest view version "
 			       << version << "!" << __E__;
-			__COUT_ERR__ << "\n" << ss.str();
 			__SS_THROW__;
 		}
 	}
 	else
 	{
-		__SS__ << "\nsetupMockupView() ERROR: View to fill with mockup already exists: "
+		__SS__ << __COUT_HDR_P__ << "View to fill with mockup already exists: "
 		       << version << ". Cannot overwrite!" << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
+		ss << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
 }

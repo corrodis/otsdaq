@@ -2028,29 +2028,24 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 	//LoadParameterSet() ... from  $ARTDAQ_INC/artdaq/Application/LoadParameterSet.hh
 	fhicl::ParameterSet pset = LoadParameterSet(fhiclPath);
 
-	//fcl should be FE record(s)
-	//	interface0: {
-	//		fe_type:	"OTSUdpTemplate"
-	//		port: 		2007
-	//		ip: 		"192.168.133.7"
-	//	}
-	//	interface1: {
-	//		fe_type:	"OTSUdpTemplate"
-	//		port: 		2007
-	//		ip: 		"192.168.133.7"
-	//		FESpecialTable:{
-	//			threshold:   10
-	//		}
-	//	}
 
-	//	auto names = pset.get_names();
-	//	for(const auto& name: names)
-	//	{
-	//		if(!pset.is_key_to_atom(name)) continue;
-	//
-	//		__COUTV__(name);
-	//		__COUTV__(pset.get<std::string>(name));
-	//	}
+	//===========================
+	//fcl should be FE record(s):
+	//	interface0: {
+	//		FEInterfacePluginName:	"FEOtsUDPTemplateInterface"
+	//		LinkToFETypeTable_FEOtsUDPTemplateInterfaceTable:		{
+	//			OtsInterface0:			{
+	//				InterfaceIPAddress:		"127.0.0.1"
+	//				InterfacePort:			4000
+	//				HostIPAddress:			"127.0.0.1"
+	//				HostPort:				4020
+	//				StreamToIPAddress:		"127.0.0.1"
+	//				StreamToPort:			4021
+	//			}
+	//		} //end FEOtsUDPTemplateInterfaceTable link record
+	//	} //end interface0
+	//===========================
+
 
 
 
@@ -2159,7 +2154,7 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 		auto colMap = view->getColumnNamesMap();
 
 		view->setValue("MacroMakerFESupervisor",0,	colMap["SupervisorUID"]);
-		view->setValue("FETable",0,					colMap["LinkToFEInterfaceTable"]);
+		view->setValue("FEInterfaceTable",0,					colMap["LinkToFEInterfaceTable"]);
 		view->setValue("MacroMakerFESupervisorInterfaces",0,	colMap["LinkToFEInterfaceGroupID"]);
 
 		__COUT__ << "Done adding supervisor record..." << __E__;
@@ -2171,49 +2166,69 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 			"FEInterfaceTable" /*tableName*/,
 			pset /*fhicl parameter set*/,
 			"" /*uid*/,
-			"MacroMakerFESupervisorInterfaces" /*groupID*/);
+			"MacroMakerFESupervisorInterfaces" /*groupID*/,
+			"FE" /*childLinkIndex*/);
 
-//	std::vector<std::pair<std::string /*fe UID*/,
-//			std::map<std::string /*parameter name*/,
-//			std::string /*parameter value*/> > > fes;
-//
-//		auto psets = pset.get_pset_names();
-//		for(const auto& ps: psets)
-//		{
-//			__COUT__ << "------------" << __E__;
-//			__COUTV__(ps);
-//
-//			bool extracted = false;
-//			std::map<std::string /*parameter name*/,
-//					std::string /*parameter value*/> feParams;
-//
-//			try
-//			{
-//				fhicl::ParameterSet fePset = pset.get<fhicl::ParameterSet>(ps);
-//				auto names = fePset.get_names();
-//				for(const auto& name: names)
-//				{
-//					__COUTV__(name);
-//					__COUTV__(fePset.get<std::string>(name));
-//				}
-//
-//				extracted = true;
-//			}
-//			catch(...)
-//			{
-//				__COUT_WARN__ << "Failed to extract fhicl parameters for FE '" <<
-//						ps << "'" << __E__;
-//			}
-//
-//			if(extracted)
-//			{
-//				__COUT__<< "Extracted '" << ps << "'" << __E__;
-//				__COUTV__(StringMacros::mapToString(feParams));
-//				fes.push_back(std::make_pair(ps,feParams));
-//			}
-//		}
-//
-//		__COUT__ << "Front-ends extracted from fhicl: " << fes.size() << __E__;
+	//init every table after modifications
+	for(auto& table: nameToTableMap_)
+	{
+		table.second->getViewP()->init();
+	}
+
+	//verify extraction
+	if(0)
+	{
+		__COUT__ << "================================================" << __E__;
+		nameToTableMap_["FESupervisorTable"]->getViewP()->print();
+		nameToTableMap_["FEInterfaceTable"]->getViewP()->print();
+
+		auto sups = getNode("FESupervisorTable").getChildrenNames();
+		__COUT__ << "Supervisors extracted from fhicl: " << sups.size() << __E__;
+		auto fes = getNode("FEInterfaceTable").getChildrenNames();
+		__COUT__ << "Front-ends extracted from fhicl: " << fes.size() << __E__;
+		{
+			auto a = getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
+			__COUTV__(a.getValueAsString());
+
+			auto b = a.getNode("MacroMakerFEContext");
+			__COUTV__(b.getValueAsString());
+
+			auto c = b.getNode("LinkToApplicationTable");
+			__COUTV__(c.getValueAsString());
+
+			auto d = c.getNode("MacroMakerFESupervisor");
+			__COUTV__(d.getValueAsString());
+
+			auto e = d.getNode("LinkToSupervisorTable");
+			__COUTV__(e.getValueAsString());
+
+			auto f = e.getNode("LinkToFEInterfaceTable");
+			__COUTV__(f.getValueAsString());
+
+			auto z = f.getChildrenNames();
+			__COUTV__(StringMacros::vectorToString(z));
+			__COUTV__(z.size());
+			auto y = f.getChildrenNames(false /*byPriority*/, true /*onlyStatusTrue*/);
+			__COUTV__(StringMacros::vectorToString(y));
+			__COUTV__(y.size());
+			auto x = f.getChildrenNames(true /*byPriority*/, true /*onlyStatusTrue*/);
+			__COUTV__(StringMacros::vectorToString(x));
+			__COUTV__(x.size());
+
+			auto g = f.getNode("dtc0");
+			__COUTV__(g.getValueAsString());
+			auto h = f.getNode("interface0");
+			__COUTV__(h.getValueAsString());
+
+
+			auto fes = getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME).
+					getNode("MacroMakerFEContext/LinkToApplicationTable/MacroMakerFESupervisor/LinkToSupervisorTable").
+					getNode("LinkToFEInterfaceTable")
+					.getChildrenNames(true /*byPriority*/, true /*onlyStatusTrue*/);
+			__COUTV__(fes.size());
+			__COUTV__(StringMacros::vectorToString(fes));
+		}
+	}
 
 
 
@@ -2221,13 +2236,18 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 
 
 //==============================================================================
+// recursiveInitFromFhiclPSet
+//		Add records and all children parameters starting at table
+//			recursively. If groupName given then loop through
+//			records and add to table.
 void ConfigurationManager::recursiveInitFromFhiclPSet(
 		const std::string& tableName,
 		const fhicl::ParameterSet& pset,
 		const std::string& recordName,
-		const std::string& groupName)
+		const std::string& groupName,
+		const std::string& groupLinkIndex)
 {
-	__COUT__ << "Adding table '" << tableName << "' record(s)..." << __E__;
+	__COUT__ << __COUT_HDR_P__ << "Adding table '" << tableName << "' record(s)..." << __E__;
 
 	TableBase* table;
 	//create context and add context record
@@ -2235,6 +2255,7 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(
 		table = 0;
 		if(nameToTableMap_.find(tableName) == nameToTableMap_.end())
 		{
+			__COUT__ << "Table not found, so making '" << tableName << "'instance..." << __E__;
 			theInterface_->get(
 					table,   // configurationPtr
 					tableName,   // tableName
@@ -2244,11 +2265,14 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(
 			);
 
 			nameToTableMap_[tableName] = table;
+			table->setupMockupView(TableVersion(TableVersion::DEFAULT));
 		}
 		else
+		{
+			__COUT__ << "Existing table found, so using '" << tableName << "'instance..." << __E__;
 			table = nameToTableMap_[tableName];
+		}
 
-		table->setupMockupView(TableVersion(TableVersion::DEFAULT));
 		table->setActiveView(TableVersion(TableVersion::DEFAULT));
 
 		TableView* view = table->getViewP();
@@ -2258,19 +2282,163 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(
 
 		if(recordName != "") //then add this record
 		{
+			//Steps:
+			//	- add row
+			//	- set UID and enable (if possible)
+			//	- set values for parameter columns
+			//	- define links
+
 			__COUTV__(recordName);
+
+			//add row and get column map
 			unsigned int r = view->addRow();
 			auto colMap = view->getColumnNamesMap();
 
-			//		view->setValue("MacroMakerFEContext",0,		colMap["ContextUID"]);
-			//		view->setValue("XDAQApplicationTable",0,	colMap["LinkToApplicationTable"]);
-			//		view->setValue("MacroMakerFEContextApps",0,	colMap["ApplicationGroupID"]);
-			//		view->setValue("1",0,colMap["Status"]);
-
-
+			//set UID and enable (if possible)
 			view->setValue(recordName,r,view->getColUID());
 			try	{view->setValue("1",r,view->getColStatus());}
 			catch(...){__COUT__ << "No status column to set for '" << recordName << "'" << __E__;}
+
+			if(groupName != "") //then set groupID for this record
+			{
+				int groupIDCol = view->getColLinkGroupID(groupLinkIndex);
+				__COUT__ << "Setting group ID for group link ID '" <<
+						groupLinkIndex << "' at column " << groupIDCol <<
+						" to '" << groupName << ".'" << __E__;
+
+				view->setValue(groupName,r,groupIDCol);
+			}
+
+			//then set parameters
+			auto names = pset.get_names();
+			for(const auto& colName: names)
+			{
+				if(!pset.is_key_to_atom(colName)) continue;
+
+				auto colIt = colMap.find(colName);
+				if(colIt == colMap.end())
+				{
+					__SS__ << "Field '" << colName << "' of record '" << recordName <<
+							"' in table '" << tableName << "' was not found in columns." <<
+							"\n\nHere are the existing column names:\n";
+					unsigned int i = 0;
+					for(const auto& col: colMap)
+						ss << "\n" << ++i << ".\t" << col.first;
+					ss << __E__;
+					__SS_THROW__;
+				}
+				const std::string value =  pset.get<std::string>(colName);
+				__COUT__ << "Setting '" << recordName << "' parameter at column " <<
+						colIt->second << ", '" <<
+						colName << "'\t = " << value << __E__;
+				view->setValueAsString(value,r,colIt->second);
+			} //end set parameters
+
+			//then define links
+			for(const auto& linkName: names)
+			{
+				if(pset.is_key_to_atom(linkName)) continue;
+
+				__COUTV__(linkName);
+
+				//split into column name and table
+				unsigned int c = linkName.size()-1;
+				for(;c >= 1;--c)
+					if(linkName[c] == '_') //find first underscore to split linkName
+						break;
+
+				if(c == 0)
+				{
+					__SS__ << "Illegal link name '" << linkName << "' found. The format must be <Column name>_<Target table name>,.. for example '" <<
+							"LinkToFETypeTable_FEOtsUDPTemplateInterfaceTable'" << __E__;
+					__SS_THROW__;
+				}
+				std::string colName = linkName.substr(0,c);
+				__COUTV__(colName);
+
+				auto colIt = colMap.find(colName);
+				if(colIt == colMap.end())
+				{
+					__SS__ << "Link '" << colName << "' of record '" << recordName <<
+							"' in table '" << tableName << "' was not found in columns." <<
+							"\n\nHere are the existing column names:\n";
+					unsigned int i = 0;
+					for(const auto& col: colMap)
+						ss << "\n" << i << ".\t" << col.first << __E__;
+					__SS_THROW__;
+				}
+				//__COUT__ << "Setting link at column " << colIt->second << __E__;
+
+				std::pair<unsigned int /*link col*/,
+							  unsigned int /*link id col*/> linkPair;
+				bool isGroupLink;
+				view->getChildLink(colIt->second, isGroupLink, linkPair);
+
+				//__COUTV__(isGroupLink);
+				//__COUTV__(linkPair.first);
+				//__COUTV__(linkPair.second);
+
+				std::string linkTableName = linkName.substr(c+1);
+				__COUTV__(linkTableName);
+
+				auto linkPset = pset.get<fhicl::ParameterSet>(linkName);
+				auto linkRecords = linkPset.get_pset_names();
+				if(!isGroupLink && linkRecords.size() > 1)
+				{
+					__SS__ << "A Unique Link can only point to one record. " <<
+							"The specified link '" << colName << "' of record '" << recordName <<
+							"' in table '" << tableName << "' has " << linkRecords.size() <<
+							" children records specified. " << __E__;
+					__SS_THROW__;
+				}
+
+				if(linkRecords.size() == 0)
+				{
+					__COUT__ << "No child records, so leaving link disconnected." << __E__;
+					continue;
+				}
+
+
+				__COUT__ << "Setting Link at columns [" << linkPair.first <<
+						"," << linkPair.second << "]" << __E__;
+				view->setValue(linkTableName,r,linkPair.first);
+
+				if(!isGroupLink)
+				{
+					__COUT__ << "Setting up Unique link to " << linkRecords[0] << __E__;
+
+					view->setValue(linkRecords[0],r,linkPair.second);
+
+					recursiveInitFromFhiclPSet(
+							linkTableName /*tableName*/,
+							linkPset.get<fhicl::ParameterSet>(linkRecords[0]) /*fhicl parameter set*/,
+							linkRecords[0] /*uid*/,
+							"" /*groupID*/);
+
+					view->print();
+				}
+				else
+				{
+					std::string childLinkIndex = view->getColumnInfo(linkPair.first).getChildLinkIndex();
+					std::string groupName = recordName + "Group";
+
+					view->setValue(groupName,r,linkPair.second);
+
+					for(const auto& groupRecord : linkRecords)
+					{
+						__COUT__ << "Setting '" << childLinkIndex << "' Group link to '" << groupName <<
+								"' record '" << groupRecord << "'" << __E__;
+
+						recursiveInitFromFhiclPSet(
+								linkTableName /*tableName*/,
+								linkPset.get<fhicl::ParameterSet>(groupRecord) /*fhicl parameter set*/,
+								groupRecord /*uid*/,
+								groupName /*groupID*/,
+								childLinkIndex /*groupLinkIndex*/);
+					}
+				}
+
+			} //end link handling
 		}
 		else if(groupName != "") //then add group of records
 		{
@@ -2285,8 +2453,11 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(
 						tableName /*tableName*/,
 						pset.get<fhicl::ParameterSet>(ps) /*fhicl parameter set*/,
 						ps /*uid*/,
-						groupName /*groupID*/);
+						groupName /*groupID*/,
+						groupLinkIndex /*groupLinkIndex*/);
 			}
+
+			view->print();
 		}
 		else
 		{
@@ -2294,10 +2465,9 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(
 			__SS_THROW__;
 		}
 
-		view->print();
 	}
 
-	__COUT__ << "Done adding table '" << tableName << "' record(s)..." << __E__;
+	__COUT__ << __COUT_HDR_P__ << "Done adding table '" << tableName << "' record(s)..." << __E__;
 
 
 } //end recursiveInitFromFhiclPSet()

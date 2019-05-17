@@ -30,16 +30,16 @@ dtc0: {
 					ROCInterfacePluginName:	"ROCPolarFireCoreInterface"
 					linkID:					0
 					EventWindowDelayOffset:	10
-					EmulateIndDTCHardware:	"0"
+					EmulateInDTCHardware:	"0"
 					//ROCTypeLinkTable_ROCTypeLinkTable:	{}
 						
 				}
 				roc1:					{
 					Status:					"1"
 					ROCInterfacePluginName:	"ROCPolarFireCoreInterface"
-					linkID:					0
+					linkID:					1
 					EventWindowDelayOffset:	10
-					EmulateIndDTCHardware:	"0"
+					EmulateInDTCHardware:	"0"
 					//ROCTypeLinkTable_ROCTypeLinkTable:	{}
 						
 				}

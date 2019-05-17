@@ -669,7 +669,7 @@ launchOTSMacromaker() {
 	fi
 	LAST_OTS_PID=$!
 	
-	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$MACROMAKER_SUPERVISOR_ID/"
+	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$MACROMAKER_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	
 	printMainURL &
 	

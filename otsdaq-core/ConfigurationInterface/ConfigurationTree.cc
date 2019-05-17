@@ -2297,6 +2297,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority,
 						{
 							tableView_->getValue(
 							    tmpStatus, r, tableView_->getColStatus());
+
 							if(!tmpStatus)
 								continue;  // skip those with status false
 						}
@@ -2335,6 +2336,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority,
 				if(onlyStatusTrue)
 				{
 					tableView_->getValue(tmpStatus, r, tableView_->getColStatus());
+
 					if(!tmpStatus)
 						continue;  // skip those with status false
 				}

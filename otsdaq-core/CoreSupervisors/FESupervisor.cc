@@ -47,6 +47,74 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub)
 	extractFEInterfacesManager();
 
 	__SUP_COUT__ << "Constructed." << __E__;
+
+	if(CorePropertySupervisorBase::allSupervisorInfo_.isMacroMakerMode())
+	{
+		__SUP_COUT_INFO__ << "Macro Maker mode, so configuring at startup!" << __E__;
+		if(!theFEInterfacesManager_)
+		{
+			__SUP_SS__ << "Mising FE Interface manager!" << __E__;
+			__SUP_SS_THROW__;
+		}
+
+		//copied from CoreSupervisorBase::transitionConfiguring()
+
+		// Now that the configuration manager has all the necessary configurations,
+		//	create all objects that depend on the configuration (the first iteration)
+
+		try
+		{
+			__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+			preStateMachineExecutionLoop();
+			for(unsigned int i = 0; i < theStateMachineImplementation_.size(); ++i)
+			{
+				// if one state machine is doing a sub-iteration, then target that one
+				if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+						i != subIterationWorkStateMachineIndex_)
+					continue;  // skip those not in the sub-iteration
+
+				if(stateMachinesIterationDone_[i])
+					continue;  // skip state machines already done
+
+				preStateMachineExecution(i);
+				theStateMachineImplementation_[i]->parentSupervisor_ =
+						this;  // for backwards compatibility, kept out of configure parameters
+				theStateMachineImplementation_[i]->configure();  // e.g. for FESupervisor,
+				// this is configure of
+				// FEVInterfacesManager
+				postStateMachineExecution(i);
+			}
+			postStateMachineExecutionLoop();
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SUP_SS__ << "Error was caught while configuring: " << e.what() << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			theStateMachine_.setErrorMessage(ss.str());
+			throw toolbox::fsm::exception::Exception(
+					"Transition Error" /*name*/,
+					ss.str() /* message*/,
+					"CoreSupervisorBase::transitionConfiguring" /*module*/,
+					__LINE__ /*line*/,
+					__FUNCTION__ /*function*/
+			);
+		}
+		catch(...)
+		{
+			__SUP_SS__
+			<< "Unknown error was caught while configuring. Please checked the logs."
+			<< __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			theStateMachine_.setErrorMessage(ss.str());
+			throw toolbox::fsm::exception::Exception(
+					"Transition Error" /*name*/,
+					ss.str() /* message*/,
+					"CoreSupervisorBase::transitionConfiguring" /*module*/,
+					__LINE__ /*line*/,
+					__FUNCTION__ /*function*/
+			);
+		}
+	}
 }  // end constructor
 
 //========================================================================================================================

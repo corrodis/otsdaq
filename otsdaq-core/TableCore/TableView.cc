@@ -981,10 +981,12 @@ const unsigned int TableView::getColStatus(void) const
 	if(colStatus_ != INVALID)
 		return colStatus_;
 
-	__COUT__ << "Column Types: " << __E__;
+	__COUT__ << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
+		std::cout << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
 		          << __E__;
+
+	std::cout << __E__;
 
 	__SS__ << "Missing " << TableViewColumnInfo::COL_NAME_STATUS
 	       << " Column in config named " << tableName_
@@ -1002,10 +1004,11 @@ const unsigned int TableView::getColPriority(void) const
 	if(colPriority_ != INVALID)
 		return colPriority_;
 
-	__COUT__ << "Column Types: " << __E__;
+	__COUT__ << "Priority column was not found... \nColumn Types: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
+		std::cout << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
 		          << __E__;
+	std::cout << __E__;
 
 	__SS__ << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
 	       << " Column in config named " << tableName_
