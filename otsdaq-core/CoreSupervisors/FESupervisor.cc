@@ -53,7 +53,7 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub)
 		__SUP_COUT_INFO__ << "Macro Maker mode, so configuring at startup!" << __E__;
 		if(!theFEInterfacesManager_)
 		{
-			__SUP_SS__ << "Mising FE Interface manager!" << __E__;
+			__SUP_SS__ << "Missing FE Interface manager!" << __E__;
 			__SUP_SS_THROW__;
 		}
 
@@ -91,13 +91,6 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub)
 			__SUP_SS__ << "Error was caught while configuring: " << e.what() << __E__;
 			__SUP_COUT_ERR__ << "\n" << ss.str();
 			theStateMachine_.setErrorMessage(ss.str());
-			throw toolbox::fsm::exception::Exception(
-					"Transition Error" /*name*/,
-					ss.str() /* message*/,
-					"CoreSupervisorBase::transitionConfiguring" /*module*/,
-					__LINE__ /*line*/,
-					__FUNCTION__ /*function*/
-			);
 		}
 		catch(...)
 		{
@@ -106,15 +99,8 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub)
 			<< __E__;
 			__SUP_COUT_ERR__ << "\n" << ss.str();
 			theStateMachine_.setErrorMessage(ss.str());
-			throw toolbox::fsm::exception::Exception(
-					"Transition Error" /*name*/,
-					ss.str() /* message*/,
-					"CoreSupervisorBase::transitionConfiguring" /*module*/,
-					__LINE__ /*line*/,
-					__FUNCTION__ /*function*/
-			);
 		}
-	}
+	} //end Macro Maker mode initial configure
 }  // end constructor
 
 //========================================================================================================================

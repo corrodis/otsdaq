@@ -152,7 +152,7 @@ void CorePropertySupervisorBase::indicateOtsAlive(
 	char        portStr[100] = "0";
 	std::string hostname     = "wiz";
 
-	// Note: the environment variable getenv("HOSTNAME") fails in multinode ots systems
+	// Note: the environment variable __ENV__("HOSTNAME") fails in multinode ots systems
 	// started through ssh
 
 	if(properties)
@@ -176,7 +176,7 @@ void CorePropertySupervisorBase::indicateOtsAlive(
 	}
 
 	// indicate ots is alive (for StartOTS.sh to verify launch was successful)
-	std::string filename = std::string(getenv("OTSDAQ_LOG_DIR")) + "/otsdaq_is_alive-" +
+	std::string filename = std::string(__ENV__("OTSDAQ_LOG_DIR")) + "/otsdaq_is_alive-" +
 	                       hostname + "-" + portStr + ".dat";
 	FILE* fp = fopen(filename.c_str(), "w");
 	if(!fp)
@@ -330,6 +330,10 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 		__SUP_COUT__ << "Wiz mode detected. Skipping setup of supervisor properties for "
 		                "supervisor of class '"
 		             << supervisorClass_ << "'" << __E__;
+	else if(allSupervisorInfo_.isMacroMakerMode())
+		__SUP_COUT__ << "Maker Maker mode detected. Skipping setup of supervisor properties for "
+		"supervisor of class '"
+		<< supervisorClass_ << "'" << __E__;
 	else
 		CorePropertySupervisorBase::loadUserSupervisorProperties();  // loads user
 		                                                             // settings from

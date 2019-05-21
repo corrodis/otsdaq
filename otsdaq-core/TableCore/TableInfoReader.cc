@@ -32,8 +32,8 @@ using namespace ots;
 #define __COUT_HDR__ "TableInfoReader"
 
 // const std::string TableInfoReader::CONFIGURATION_BACKEND_TYPE_ =
-//    getenv("CONFIGURATION_TYPE");
-#define CONFIGURATION_BACKEND_TYPE_ getenv("CONFIGURATION_TYPE")
+//    __ENV__("CONFIGURATION_TYPE");
+#define CONFIGURATION_BACKEND_TYPE_ __ENV__("CONFIGURATION_TYPE")
 
 //==============================================================================
 TableInfoReader::TableInfoReader(bool allowIllegalColumns)
@@ -228,21 +228,21 @@ std::string TableInfoReader::read(TableBase& table)
 	// Gennadiy...
 
 	// These environment variables are required
-	if(getenv("CONFIGURATION_TYPE") == NULL)
+	if(__ENV__("CONFIGURATION_TYPE") == NULL)
 		__COUT__ << "Missing env variable: CONFIGURATION_TYPE. It must be set!" << __E__;
-	// if(getenv("CONFIGURATION_DATA_PATH") == NULL) __COUT__ << "Missing env variable:
+	// if(__ENV__("CONFIGURATION_DATA_PATH") == NULL) __COUT__ << "Missing env variable:
 	// CONFIGURATION_DATA_PATH. It must be set!" << __E__;
-	if(getenv("TABLE_INFO_PATH") == NULL)
+	if(__ENV__("TABLE_INFO_PATH") == NULL)
 		__COUT__ << "Missing env variable: TABLE_INFO_PATH. It must be set!" << __E__;
 
 	// example c++ setting of necessary environment variables
 	// setenv("CONFIGURATION_TYPE","File",1);
-	// setenv("CONFIGURATION_DATA_PATH",(std::string(getenv("USER_DATA")) +
+	// setenv("CONFIGURATION_DATA_PATH",(std::string(__ENV__("USER_DATA")) +
 	// "/TableDataExamples").c_str(),1);
-	// setenv("TABLE_INFO_PATH",(std::string(getenv("USER_DATA")) +
+	// setenv("TABLE_INFO_PATH",(std::string(__ENV__("USER_DATA")) +
 	// "/TableInfo").c_str(),1);
 
-	std::string tableDataDir = std::string(getenv("TABLE_INFO_PATH")) + "/";
+	std::string tableDataDir = std::string(__ENV__("TABLE_INFO_PATH")) + "/";
 	std::string tableFile    = tableDataDir + table.getTableName() + "Info.xml";
 	//__COUT__ << tableFile << __E__;
 	struct stat fileStatus;

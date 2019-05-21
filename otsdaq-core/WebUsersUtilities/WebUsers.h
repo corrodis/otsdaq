@@ -12,8 +12,8 @@
 #include <unordered_map>
 #include <vector>
 
-#define WEB_LOGIN_DB_PATH std::string(getenv("SERVICE_DATA_PATH")) + "/LoginData/"
-#define WEB_LOGIN_CERTDATA_PATH std::string(getenv("CERT_DATA_PATH"))
+#define WEB_LOGIN_DB_PATH std::string(__ENV__("SERVICE_DATA_PATH")) + "/LoginData/"
+#define WEB_LOGIN_CERTDATA_PATH std::string(__ENV__("CERT_DATA_PATH"))
 #define HASHES_DB_PATH "HashesData/"
 #define USERS_DB_PATH "UsersData/"
 #define USERS_LOGIN_HISTORY_PATH USERS_DB_PATH + "UserLoginHistoryData/"

@@ -10,7 +10,7 @@
 using namespace ots;
 
 #define CODE_EDITOR_DATA_PATH \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/" + "CodeEditorData"
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/" + "CodeEditorData"
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "CodeEditor"
@@ -23,9 +23,9 @@ const std::string CodeEditor::SPECIAL_TYPE_Tools             = "Tools";
 const std::string CodeEditor::SPECIAL_TYPE_UserData          = "UserData";
 const std::string CodeEditor::SPECIAL_TYPE_OutputData        = "OutputData";
 
-const std::string CodeEditor::SOURCE_BASE_PATH = std::string(getenv("MRB_SOURCE")) + "/";
-const std::string CodeEditor::USER_DATA_PATH   = std::string(getenv("USER_DATA")) + "/";
-const std::string CodeEditor::OTSDAQ_DATA_PATH = std::string(getenv("OTSDAQ_DATA")) + "/";
+const std::string CodeEditor::SOURCE_BASE_PATH = std::string(__ENV__("MRB_SOURCE")) + "/";
+const std::string CodeEditor::USER_DATA_PATH   = std::string(__ENV__("USER_DATA")) + "/";
+const std::string CodeEditor::OTSDAQ_DATA_PATH = std::string(__ENV__("OTSDAQ_DATA")) + "/";
 
 //========================================================================================================================
 // CodeEditor
@@ -646,7 +646,7 @@ CodeEditor::getSpecialsMap(void)
 {
 	std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/>
 	            retMap;
-	std::string path = std::string(getenv("MRB_SOURCE"));
+	std::string path = std::string(__ENV__("MRB_SOURCE"));
 
 	__COUTV__(path);
 

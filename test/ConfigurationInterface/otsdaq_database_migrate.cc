@@ -26,11 +26,11 @@ void readxml_writedb_configurations()
 	// artdaq::database::filesystem::index::debug::enable();
 	// artdaq::database::jsonutils::debug::enableJSONDocument();
 
-	std::string dbDir = std::string(getenv("ARTDAQ_DATABASE_DATADIR"));
+	std::string dbDir = std::string(__ENV__("ARTDAQ_DATABASE_DATADIR"));
 	__COUT__ << "Destination DB Directory ARTDAQ_DATABASE_DATADIR: " << dbDir
 	         << std::endl;
 
-	if(getenv("USER_DATA") == NULL)
+	if(__ENV__("USER_DATA") == NULL)
 		__COUT__ << "Missing env variable: USER_DATA. It must be set!" << std::endl;
 
 	std::vector<std::string> configTables;  // list of tables to migrate
@@ -39,9 +39,9 @@ void readxml_writedb_configurations()
 
 	// normally CONFIGURATION_TYPE is set by StartOTS.sh
 	setenv("CONFIGURATION_DATA_PATH",
-	       (std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
+	       (std::string(__ENV__("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
 	       1);
-	std::string configDir = std::string(getenv("CONFIGURATION_DATA_PATH")) + '/';
+	std::string configDir = std::string(__ENV__("CONFIGURATION_DATA_PATH")) + '/';
 
 	// CONFIGURATION_TYPE needed by
 	// otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]  Can

@@ -17,7 +17,7 @@ using namespace ots;
 #define WEB_LOGIN_BKUP_DB_PATH "bkup/"
 
 #define SECURITY_FILE_NAME \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
 
 #define USERS_ACTIVE_SESSIONS_FILE USERS_DB_PATH + "/activeSessions.sv"
 
@@ -3321,7 +3321,7 @@ void WebUsers::deleteUserData()
 	        .c_str());
 	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + TOOLTIP_DB_PATH).c_str());
 
-	std::string serviceDataPath = getenv("SERVICE_DATA_PATH");
+	std::string serviceDataPath = __ENV__("SERVICE_DATA_PATH");
 	// delete macro maker folders
 	std::system(("rm -rf " + std::string(serviceDataPath) + "/MacroData/").c_str());
 	std::system(("rm -rf " + std::string(serviceDataPath) + "/MacroHistory/").c_str());
@@ -3352,7 +3352,7 @@ void WebUsers::deleteUserData()
 	// std::string(serviceDataPath) + "/ActiveTableGroups.cfg").c_str());
 
 	// delete Logbook folders
-	std::system(("rm -rf " + std::string(getenv("LOGBOOK_DATA_PATH")) + "/").c_str());
+	std::system(("rm -rf " + std::string(__ENV__("LOGBOOK_DATA_PATH")) + "/").c_str());
 
 	std::cout << __COUT_HDR_FL__
 	          << "$$$$$$$$$$$$$$ Successfully deleted ALL service user data $$$$$$$$$$$$"

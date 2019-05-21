@@ -163,7 +163,7 @@ std::string StringMacros::convertEnvironmentVariables(const std::string& data)
 		}
 		//__COUTV__(data);
 		//__COUTV__(envVariable);
-		char* envResult = getenv(envVariable.c_str());
+		char* envResult = __ENV__(envVariable.c_str());
 
 		if(envResult)
 		{
@@ -724,6 +724,25 @@ std::string StringMacros::stackTrace()
 
 	return ss.str();
 }  // end stackTrace
+
+//==============================================================================
+// otsGetEnvironmentVarable
+// 		declare special ots environment variable get,
+//		that throws exception instead of causing crashes with null pointer.
+//		Note: usually called with __ENV__(X) in CoutMacros.h
+char* StringMacros::otsGetEnvironmentVarable(const char* name,
+		const std::string& location, const unsigned int& line)
+{
+	char* environmentVariablePtr = getenv(name);
+	if(!environmentVariablePtr)
+	{
+		__SS__ << "Environment variable '" << name << "' not defined at " <<
+				location << "[" << line << "]" << __E__;
+		ss << "\n\n" << StringMacros::stackTrace() << __E__;
+		__SS_THROW__;
+	}
+	return environmentVariablePtr;
+} //end otsGetEnvironmentVarable()
 
 #ifdef __GNUG__
 #include <cxxabi.h>

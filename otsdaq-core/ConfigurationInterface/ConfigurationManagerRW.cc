@@ -29,13 +29,13 @@ using namespace ots;
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "ConfigurationManagerRW"
 
-#define TABLE_INFO_PATH std::string(getenv("TABLE_INFO_PATH")) + "/"
+#define TABLE_INFO_PATH std::string(__ENV__("TABLE_INFO_PATH")) + "/"
 #define TABLE_INFO_EXT "Info.xml"
 
 #define CORE_TABLE_INFO_FILENAME                               \
-	((getenv("SERVICE_DATA_PATH") == NULL)                     \
-	     ? (std::string(getenv("USER_DATA")) + "/ServiceData") \
-	     : (std::string(getenv("SERVICE_DATA_PATH")))) +       \
+	((__ENV__("SERVICE_DATA_PATH") == NULL)                     \
+	     ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") \
+	     : (std::string(__ENV__("SERVICE_DATA_PATH")))) +       \
 	    "/CoreTableInfoNames.dat"
 
 //==============================================================================

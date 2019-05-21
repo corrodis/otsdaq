@@ -166,6 +166,8 @@ struct StringMacros
 	static std::string stackTrace();
 	static std::string exec(const char* cmd);
 
+	static char* otsGetEnvironmentVarable(const char* name, const std::string& location, const unsigned int& line);
+
 };  // end StringMarcos static class
 
 #include "otsdaq-core/Macros/StringMacros.icc"  //define template functions

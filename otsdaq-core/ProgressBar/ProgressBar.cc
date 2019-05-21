@@ -1,5 +1,6 @@
 #include "otsdaq-core/ProgressBar/ProgressBar.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq-core/Macros/StringMacros.h"
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 
 #include <dirent.h>  //for DIR
@@ -14,7 +15,7 @@ using namespace ots;
 
 //========================================================================================================================
 ProgressBar::ProgressBar()
-    : cProgressBarFilePath_(std::string(getenv("SERVICE_DATA_PATH")) +
+    : cProgressBarFilePath_(std::string(__ENV__("SERVICE_DATA_PATH")) +
                             "/ProgressBarData/")
     , cProgressBarFileExtension_(".txt")
     , totalStepsFileName_("")

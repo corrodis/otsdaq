@@ -23,12 +23,12 @@
 using namespace ots;
 
 #define SECURITY_FILE_NAME \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
 #define SEQUENCE_FILE_NAME \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.dat"
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.dat"
 #define SEQUENCE_OUT_FILE_NAME \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.out"
-#define USER_DATA_PATH std::string(getenv("SERVICE_DATA_PATH")) + std::string("/")
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.out"
+#define USER_DATA_PATH std::string(__ENV__("SERVICE_DATA_PATH")) + std::string("/")
 //#define LOGBOOK_PREVIEWS_PATH 			"uploads/"
 
 #define XML_STATUS "editUserData_status"
@@ -74,8 +74,8 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s) throw(
 	INIT_MF("OtsConfigurationWizard");
 
 	// attempt to make directory structure (just in case)
-	mkdir((std::string(getenv("SERVICE_DATA_PATH"))).c_str(), 0755);
-	mkdir((std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData").c_str(), 0755);
+	mkdir((std::string(__ENV__("SERVICE_DATA_PATH"))).c_str(), 0755);
+	mkdir((std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData").c_str(), 0755);
 
 	GatewaySupervisor::indicateOtsAlive();
 
@@ -293,7 +293,7 @@ void WizardSupervisor::generateURL()
 
 	securityCode_ = "";
 
-	static const char alphanum[] =
+	const char alphanum[] =
 	    "0123456789"
 	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	    "abcdefghijklmnopqrstuvwxyz";
@@ -303,8 +303,8 @@ void WizardSupervisor::generateURL()
 		securityCode_ += alphanum[rand() % (sizeof(alphanum) - 1)];
 	}
 
-	__COUT__ << getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":"
-	         << getenv("PORT") << "/urn:xdaq-application:lid="
+	__COUT__ << __ENV__("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":"
+	         << __ENV__("PORT") << "/urn:xdaq-application:lid="
 	         << this->getApplicationDescriptor()->getLocalId()
 	         << "/Verify?code=" << securityCode_ << std::endl;
 
@@ -333,8 +333,8 @@ void WizardSupervisor::printURL(WizardSupervisor* ptr, std::string securityCode)
 	for(; i < 5; ++i)
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(2));
-		__COUT__ << getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":"
-		         << getenv("PORT") << "/urn:xdaq-application:lid="
+		__COUT__ << __ENV__("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":"
+		         << __ENV__("PORT") << "/urn:xdaq-application:lid="
 		         << ptr->getApplicationDescriptor()->getLocalId()
 		         << "/Verify?code=" << securityCode << std::endl;
 	}
@@ -433,8 +433,8 @@ void WizardSupervisor::toggleSecurityCodeGeneration(
 		generateURL();
 
 		// std::stringstream url;
-		//	url << getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":" <<
-		// getenv("PORT")
+		//	url << __ENV__("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":" <<
+		// __ENV__("PORT")
 		//	    << "/urn:xdaq-application:lid=" <<
 		// this->getApplicationDescriptor()->getLocalId()
 		//	    << "/Verify?code=" << securityCode_;

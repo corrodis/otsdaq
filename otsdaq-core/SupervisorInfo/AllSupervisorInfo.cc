@@ -10,7 +10,7 @@
 
 using namespace ots;
 
-const bool AllSupervisorInfo::MACROMAKER_MODE = (std::string(getenv("MACROMAKER_MODE")) == "1") ?
+const bool AllSupervisorInfo::MACROMAKER_MODE = (std::string(__ENV__("MACROMAKER_MODE")) == "1") ?
 		true : false;
 
 

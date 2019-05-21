@@ -9,15 +9,15 @@
 using namespace ots;
 
 #define XDAQ_RUN_FILE                                           \
-	std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
-	    std::string(getenv("XDAQ_CONFIGURATION_XML")) + ".xml"
+	std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
+	    std::string(__ENV__("XDAQ_CONFIGURATION_XML")) + ".xml"
 #define APP_PRIORITY_FILE                                       \
-	std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
+	std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
 	    "xdaqAppStateMachinePriority"
 
-//#define XDAQ_SCRIPT				std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) +
+//#define XDAQ_SCRIPT				std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) +
 //"/"+ "StartXDAQ_gen.sh" #define ARTDAQ_MPI_SCRIPT
-// std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartMPI_gen.sh"
+// std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartMPI_gen.sh"
 
 const std::string XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS =
     "ots::Supervisor";  // still allowed for now, in StartOTS

@@ -502,7 +502,7 @@ std::string ConfigurationHandler::writeXML(const TableBase& table)
 	std::string configFile = getXMLFileName(
 	    table,
 	    table
-	        .getViewVersion());  // std::string(getenv("CONFIGURATION_DATA_PATH")) + "/" +
+	        .getViewVersion());  // std::string(__ENV__("CONFIGURATION_DATA_PATH")) + "/" +
 	                             // table.getTableName() + "_write.xml";
 
 	xercesc::DOMImplementation* implementation =
@@ -798,6 +798,6 @@ std::string ConfigurationHandler::getXMLFileName(const TableBase& table,
 //==============================================================================
 std::string ConfigurationHandler::getXMLDir(const TableBase* table)
 {
-	return std::string(getenv("CONFIGURATION_DATA_PATH")) + '/' +
+	return std::string(__ENV__("CONFIGURATION_DATA_PATH")) + '/' +
 	       table->getTableName() + '/';
 }

@@ -33,10 +33,10 @@
 
 using namespace ots;
 
-#define RUN_NUMBER_PATH std::string(getenv("SERVICE_DATA_PATH")) + "/RunNumber/"
+#define RUN_NUMBER_PATH std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunNumber/"
 #define RUN_NUMBER_FILE_NAME "NextRunNumber.txt"
 #define FSM_LAST_GROUP_ALIAS_PATH \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/RunControlData/"
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunControlData/"
 #define FSM_LAST_GROUP_ALIAS_FILE_START std::string("FSMLastGroupAlias-")
 #define FSM_USERS_PREFERENCES_FILETYPE "pref"
 
@@ -69,7 +69,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	__COUT__ << __E__;
 
 	// attempt to make directory structure (just in case)
-	mkdir((std::string(getenv("SERVICE_DATA_PATH"))).c_str(), 0755);
+	mkdir((std::string(__ENV__("SERVICE_DATA_PATH"))).c_str(), 0755);
 	mkdir((FSM_LAST_GROUP_ALIAS_PATH).c_str(), 0755);
 	mkdir((RUN_NUMBER_PATH).c_str(), 0755);
 
@@ -1083,7 +1083,7 @@ xcept::stdformat_exception_history(e),DIAGERROR);
 {
 	 configurationTimer_.stop();
 
-	 std::string confsource(getenv("PIXELCONFIGURATIONBASE"));
+	 std::string confsource(__ENV__("PIXELCONFIGURATIONBASE"));
 	 if (confsource != "DB") confsource = "files";
 
 	 diagService_->reportError("Total configuration time ["+confsource+"] =
@@ -3379,7 +3379,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string&    command,
 
 	for(const auto& hostname : hostnames)
 	{
-		std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) + "/StartOTS_action_" +
+		std::string fn = (std::string(__ENV__("SERVICE_DATA_PATH")) + "/StartOTS_action_" +
 		                  hostname + ".cmd");
 		FILE*       fp = fopen(fn.c_str(), "w");
 		if(fp)
@@ -3399,7 +3399,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string&    command,
 
 	for(const auto& hostname : hostnames)
 	{
-		std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) + "/StartOTS_action_" +
+		std::string fn = (std::string(__ENV__("SERVICE_DATA_PATH")) + "/StartOTS_action_" +
 		                  hostname + ".cmd");
 		FILE*       fp = fopen(fn.c_str(), "r");
 		if(fp)

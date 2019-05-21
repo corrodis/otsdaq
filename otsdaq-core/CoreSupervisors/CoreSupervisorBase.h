@@ -44,6 +44,8 @@ class CoreSupervisorBase : public xdaq::Application,
                            public CorePropertySupervisorBase,
                            public RunControlStateMachine
 {
+	friend class MacroMakerSupervisor; //to allow MacroMakerSupervisor to call requestWrapper in Macro Maker mode
+
   public:
 	CoreSupervisorBase(xdaq::ApplicationStub* stub);
 	virtual ~CoreSupervisorBase(void);

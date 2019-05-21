@@ -23,9 +23,9 @@ const std::string ConfigurationManager::VERSION_ALIASES_TABLE_NAME =
 
 // added env check for otsdaq_flatten_active_to_version to function
 const std::string ConfigurationManager::ACTIVE_GROUPS_FILENAME =
-    ((getenv("SERVICE_DATA_PATH") == NULL)
-         ? (std::string(getenv("USER_DATA")) + "/ServiceData")
-         : (std::string(getenv("SERVICE_DATA_PATH")))) +
+    ((__ENV__("SERVICE_DATA_PATH") == NULL)
+         ? (std::string(__ENV__("USER_DATA")) + "/ServiceData")
+         : (std::string(__ENV__("SERVICE_DATA_PATH")))) +
     "/ActiveTableGroups.cfg";
 const std::string ConfigurationManager::ALIAS_VERSION_PREAMBLE = "ALIAS:";
 const std::string ConfigurationManager::SCRATCH_VERSION_ALIAS  = "Scratch";
@@ -145,7 +145,7 @@ ConfigurationManager::ConfigurationManager(
 	if(doInitializeFromFhicl)
 	{
 		//create tables and fill based on fhicl
-		initializeFromFhicl(getenv("CONFIGURATION_INIT_FCL"));
+		initializeFromFhicl(__ENV__("CONFIGURATION_INIT_FCL"));
 		return;
 	}
 	//else do normal init
@@ -217,7 +217,7 @@ void ConfigurationManager::restoreActiveTableGroups(
 	FILE* fp = fopen(fn.c_str(), "r");
 
 	__COUT__ << "ACTIVE_GROUPS_FILENAME = " << fn << __E__;
-	__COUT__ << "ARTDAQ_DATABASE_URI = " << std::string(getenv("ARTDAQ_DATABASE_URI"))
+	__COUT__ << "ARTDAQ_DATABASE_URI = " << std::string(__ENV__("ARTDAQ_DATABASE_URI"))
 	         << __E__;
 
 	if(!fp)
@@ -697,7 +697,7 @@ void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath,
 	(*out) << "#################################" << __E__;
 	(*out) << "This is an ots configuration dump.\n\n" << __E__;
 	(*out) << "Source database is $ARTDAQ_DATABASE_URI = \t"
-	       << getenv("ARTDAQ_DATABASE_URI") << __E__;
+	       << __ENV__("ARTDAQ_DATABASE_URI") << __E__;
 	(*out) << "\nOriginal location of dump: \t" << filePath << __E__;
 	(*out) << "Type of dump: \t" << dumpType << __E__;
 	(*out) << "Linux time for dump: \t" << rawtime << __E__;

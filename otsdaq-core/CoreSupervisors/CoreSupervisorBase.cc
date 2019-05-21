@@ -97,13 +97,14 @@ void CoreSupervisorBase::defaultPage(xgi::Input* in, xgi::Output* out)
 void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 
 {
+
 	// checkSupervisorPropertySetup();
 
 	cgicc::Cgicc cgiIn(in);
 	std::string  requestType = CgiDataUtilities::getData(cgiIn, "RequestType");
 
-	//__SUP_COUT__ << "requestType " << requestType << " files: " <<
-	// cgiIn.getFiles().size() << __E__;
+	//	__SUP_COUT__ << "requestType " << requestType << " files: " <<
+	//			cgiIn.getFiles().size() << __E__;
 
 	HttpXmlDocument           xmlOut;
 	WebUsers::RequestUserInfo userInfo(

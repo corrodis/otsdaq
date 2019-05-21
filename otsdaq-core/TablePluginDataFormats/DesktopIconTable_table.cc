@@ -9,7 +9,7 @@
 using namespace ots;
 
 #define DESKTOP_ICONS_FILE \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
 
 // DesktopIconTable Column names
 #define COL_NAME "IconName"

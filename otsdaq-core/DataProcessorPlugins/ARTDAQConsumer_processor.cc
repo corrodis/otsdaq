@@ -15,7 +15,7 @@
 
 using namespace ots;
 //
-//#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
+//#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 //#define ARTDAQ_FILE_PREAMBLE "boardReader"
 
 //========================================================================================================================
@@ -146,7 +146,7 @@ ARTDAQConsumer::~ARTDAQConsumer(void)
 //	configure(rank);
 //}
 //
-//#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
+//#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 //#define ARTDAQ_FILE_PREAMBLE "boardReader"
 //
 ////========================================================================================================================
