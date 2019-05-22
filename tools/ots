@@ -164,6 +164,7 @@ CHROME=0
 FIREFOX=0
 BACKUPLOGS=0
 RELAUNCHCHECK=0
+export MACROMAKER_MODE=0
 
 #check for options
 if [[ "$1"  == "--macromaker" || "$2"  == "--macromaker" || "$1"  == "-mm" || "$2"  == "-mm"  ]]; then
