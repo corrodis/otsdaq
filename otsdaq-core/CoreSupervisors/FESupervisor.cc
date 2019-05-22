@@ -503,6 +503,10 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			else  // if no FE interfaces, return empty string
 				retParameters.addParameter("FEList", "");
 
+			//if errors in state machine, send also
+			if(theStateMachine_.getErrorMessage() != "")
+				retParameters.addParameter("frontEndError", theStateMachine_.getErrorMessage());
+
 			return SOAPUtilities::makeSOAPMessageReference(
 			    supervisorClassNoNamespace_ + "Response", retParameters);
 		}
