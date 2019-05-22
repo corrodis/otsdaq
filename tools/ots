@@ -586,7 +586,13 @@ launchOTSMacromaker() {
 	if [ $QUIET == 1 ]; then
 	
 		if [[ "x$2" = "x" ]]; then
-			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tMust specify fcl file path parameter for Macro Maker mode!${Reset}"
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tError! Must specify fcl file path parameter for Macro Maker mode!${Reset}"
+			echo
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExample Macro Maker mode usage:"
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
+			echo
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tTo get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
+			
 			exit
 		fi
 	
@@ -598,7 +604,13 @@ launchOTSMacromaker() {
 	else
 	
 		if [[ "x$3" = "x" ]]; then
-			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tMust specify fcl file path parameter for Macro Maker mode!${Reset}"
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tError! Must specify fcl file path parameter for Macro Maker mode!${Reset}"
+			echo
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExample Macro Maker mode usage:"
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
+			echo
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tTo get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
+			
 			exit
 		fi
 		
