@@ -240,6 +240,13 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 	return true;  // number was valid and is passed by reference in retValue
 }  // end static getNumber<T>()
 
+
+template<>
+inline bool StringMacros::getNumber(const std::string& s, bool& retValue)
+{
+return false;
+}
+
 //==============================================================================
 // validateValueForDefaultStringDataType
 //	static template function

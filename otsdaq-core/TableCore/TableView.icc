@@ -101,11 +101,12 @@ T TableView::validateValueForColumn(const std::string& value,
 
 				// consider arbitrary bool
 				bool skipOne = (choices.size() && choices[0].find("arbitraryBool=") == 0);
+				size_t index = 0;
 
-				for(retValue = 1 + (skipOne ? 1 : 0); retValue - 1 < (T)choices.size();
-				    ++retValue)
-					if(value == choices[retValue - 1])
-						return retValue - (skipOne ? 1 : 0);  // value has been set to
+				for(index = 1 + (skipOne ? 1 : 0); index - 1 < choices.size();
+				    ++index)
+					if(value == choices[index - 1])
+						return static_cast<T>(index - (skipOne ? 1 : 0));  // value has been set to
 						                                      // selected choice index, so
 						                                      // return
 
