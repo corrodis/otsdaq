@@ -314,10 +314,12 @@ void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
 	fhicl::ParameterSet pset;
 
 	std::string        filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
-	const std::string& uid      = theConfigurationManager_ ->getNode(
-		ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME + "/" +
-		CorePropertySupervisorBase::getSupervisorUID() + "/" +
-		"LinkToSupervisorTable").getValueAsString();
+	const std::string& uid =
+	    theConfigurationManager_
+	        ->getNode(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME + "/" +
+	                  CorePropertySupervisorBase::getSupervisorUID() + "/" +
+	                  "LinkToSupervisorTable")
+	        .getValueAsString();
 
 	__SUP_COUTV__(uid);
 	for(unsigned int i = 0; i < uid.size(); ++i)

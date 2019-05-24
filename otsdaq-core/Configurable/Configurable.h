@@ -12,7 +12,7 @@ class Configurable
 	             const std::string&       theConfigurationPath);
 	virtual ~Configurable();
 
-	ConfigurationTree    getSelfNode() const;
+	ConfigurationTree           getSelfNode() const;
 	const ConfigurationManager* getConfigurationManager() const;
 
 	const std::string& getContextUID() const;

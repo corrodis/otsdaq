@@ -213,7 +213,6 @@ class ConfigurationTree
 	const std::string&       getChildLinkIndex(void) const;
 	std::vector<std::string> getFixedChoices(void) const;
 
-
   public:
 	// boolean info
 	bool isDefaultValue(void) const;
@@ -270,7 +269,7 @@ class ConfigurationTree
 	    const std::vector<std::string /*relative-path*/>& fieldAcceptList,
 	    const std::vector<std::string /*relative-path*/>& fieldRejectList,
 	    unsigned int                                      depth = -1,
-		bool											  autoSelectFilterFields = false) const;
+	    bool autoSelectFilterFields                             = false) const;
 	std::set<std::string /*unique-value*/> getUniqueValuesForField(
 	    const std::vector<std::string /*relative-path*/>& recordList,
 	    const std::string&                                fieldName) const;

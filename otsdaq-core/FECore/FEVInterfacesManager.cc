@@ -62,14 +62,15 @@ void FEVInterfacesManager::createInterfaces(void)
 		    theXDAQContextConfigTree_.getBackNode(theConfigurationPath_, 1);
 		__CFG_COUTV__(appNode.getValueAsString());
 
-		auto fes = appNode.getNode("LinkToSupervisorTable").
-					getNode("LinkToFEInterfaceTable").getChildrenNames(true /*byPriority*/, true /*onlyStatusTrue*/);
+		auto fes = appNode.getNode("LinkToSupervisorTable")
+		               .getNode("LinkToFEInterfaceTable")
+		               .getChildrenNames(true /*byPriority*/, true /*onlyStatusTrue*/);
 		__CFG_COUTV__(StringMacros::vectorToString(fes));
 	}
 
 	ConfigurationTree feGroupLinkNode =
 	    Configurable::getSelfNode().getNode(COL_NAME_feGroupLink);
-		
+
 	std::vector<std::pair<std::string, ConfigurationTree>> feChildren =
 	    feGroupLinkNode.getChildren();
 

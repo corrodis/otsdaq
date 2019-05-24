@@ -324,7 +324,8 @@
 	__SUP_COUT_ERR__ << "\n" << ss.str(); \
 	throw std::runtime_error(ss.str())
 
-#define __ENV__(X) StringMacros::otsGetEnvironmentVarable(X,std::string(__SHORTFILE__),__LINE__)
+#define __ENV__(X) \
+	StringMacros::otsGetEnvironmentVarable(X, std::string(__SHORTFILE__), __LINE__)
 
 //========================================================================================================================
 // const_cast away the const
@@ -350,6 +351,6 @@ struct __OTS_SOFT_EXCEPTION__ : public std::exception
 	std::string         what_;
 };
 
-}  //end namespace ots
+}  // end namespace ots
 
 #endif

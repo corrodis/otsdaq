@@ -4,10 +4,10 @@
 #include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <map>
+#include <memory>  //shared_ptr
 #include <set>
 #include <typeinfo>  // operator typeid
 #include <vector>
-#include <memory> //shared_ptr
 
 namespace ots
 {
@@ -149,8 +149,8 @@ struct StringMacros
 	                               const std::string&       delimeter = ", ");
 	template<class S, class T>
 	static std::string setToString(const std::set<std::pair<S, T>>& setToReturn,
-	                                  const std::string& primaryDelimeter   = ", ",
-	                                  const std::string& secondaryDelimeter = ":");
+	                               const std::string& primaryDelimeter   = ", ",
+	                               const std::string& secondaryDelimeter = ":");
 
 	template<class T>
 	static std::string vectorToString(const std::vector<T>& setToReturn,
@@ -166,7 +166,9 @@ struct StringMacros
 	static std::string stackTrace();
 	static std::string exec(const char* cmd);
 
-	static char* otsGetEnvironmentVarable(const char* name, const std::string& location, const unsigned int& line);
+	static char* otsGetEnvironmentVarable(const char*         name,
+	                                      const std::string&  location,
+	                                      const unsigned int& line);
 
 };  // end StringMarcos static class
 

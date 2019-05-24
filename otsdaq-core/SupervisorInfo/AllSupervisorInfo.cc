@@ -10,9 +10,8 @@
 
 using namespace ots;
 
-const bool AllSupervisorInfo::MACROMAKER_MODE = (std::string(__ENV__("MACROMAKER_MODE")) == "1") ?
-		true : false;
-
+const bool AllSupervisorInfo::MACROMAKER_MODE =
+    (std::string(__ENV__("MACROMAKER_MODE")) == "1") ? true : false;
 
 //========================================================================================================================
 AllSupervisorInfo::AllSupervisorInfo(void) : theSupervisorInfo_(0), theWizardInfo_(0) {}
@@ -103,11 +102,13 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	else
 		__COUT__ << "Initializing info for Normal mode XDAQ context..." << __E__;
 	std::unique_ptr<ConfigurationManager> cfgMgr(
-	    (isWizardMode || AllSupervisorInfo::MACROMAKER_MODE) ?
-	    		0 : new ConfigurationManager());
+	    (isWizardMode || AllSupervisorInfo::MACROMAKER_MODE)
+	        ? 0
+	        : new ConfigurationManager());
 	const XDAQContextTable* contextConfig =
-	    (isWizardMode || AllSupervisorInfo::MACROMAKER_MODE) ?
-	    		0 : cfgMgr->__GET_CONFIG__(XDAQContextTable);
+	    (isWizardMode || AllSupervisorInfo::MACROMAKER_MODE)
+	        ? 0
+	        : cfgMgr->__GET_CONFIG__(XDAQContextTable);
 
 	// do not involve the Configuration Manager
 	//	as it adds no valid information to the supervisors
@@ -328,14 +329,16 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	{
 		if(theWizardInfo_ || theSupervisorInfo_)
 		{
-			__SS__ << "Error! For MacroMaker mode, must not have one " << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS
-					<< " OR one " << XDAQContextTable::WIZARD_SUPERVISOR_CLASS
-					<< " as part of the context configuration! "
-					<< "One was found." << __E__;
+			__SS__ << "Error! For MacroMaker mode, must not have one "
+			       << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << " OR one "
+			       << XDAQContextTable::WIZARD_SUPERVISOR_CLASS
+			       << " as part of the context configuration! "
+			       << "One was found." << __E__;
 			__SS_THROW__;
 		}
 	}
-	else if((!theWizardInfo_ && !theSupervisorInfo_) || (theWizardInfo_ && theSupervisorInfo_))
+	else if((!theWizardInfo_ && !theSupervisorInfo_) ||
+	        (theWizardInfo_ && theSupervisorInfo_))
 	{
 		__SS__ << "Error! Must have one " << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS
 		       << " OR one " << XDAQContextTable::WIZARD_SUPERVISOR_CLASS
@@ -350,7 +353,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 
 	// for debugging
 	// getOrderedSupervisorDescriptors("Configure");
-} //end init()
+}  // end init()
 
 //========================================================================================================================
 const SupervisorInfo& AllSupervisorInfo::getSupervisorInfo(xdaq::Application* app) const

@@ -15,7 +15,8 @@
 
 using namespace ots;
 
-void usage() {
+void usage()
+{
 	std::cout << "\n\nusage: Two arguments:\n\n\t otsdaq_import_system_aliases "
 	             "<path_to_import_database_folder> <path_to_active_groups_file> "
 	             "<import_prepend_base_name (optional)> \n\n"
@@ -52,7 +53,8 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	    ConfigurationManager::VERSION_ALIASES_TABLE_NAME;
 
 	// determine if help was requested
-	if(pset.get<bool>("do_help", false) || !pset.has_key("current_database_path") || !pset.has_key("active_groups_file"))
+	if(pset.get<bool>("do_help", false) || !pset.has_key("current_database_path") ||
+	   !pset.has_key("active_groups_file"))
 	{
 		usage();
 		return;
@@ -156,7 +158,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	//==============================================================================
 
 	// create objects
-	
+
 	std::map<std::string /*importGroupAlias*/,
 	         /*original*/ std::pair<std::string /*groupName*/, TableGroupKey>>
 	    originalGroupAliasMap;
@@ -215,7 +217,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	    existingTableAliases = cfgMgr->ConfigurationManager::getVersionAliases();
 	std::map<std::string /*alias*/, std::pair<std::string /*group name*/, TableGroupKey>>
 	    existingGroupAliases = cfgMgr->getActiveGroupAliases();
-	
+
 	//	-- swap to import-db and clear cache
 	{
 		// back up current directory now
