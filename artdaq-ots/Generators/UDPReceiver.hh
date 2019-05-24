@@ -15,7 +15,7 @@
 // -Append a "_" to every private member function and variable
 
 #include "artdaq-core/Data/Fragment.hh"
-#include "artdaq/Application/CommandableFragmentGenerator.hh"
+#include "artdaq/Generators/CommandableFragmentGenerator.hh"
 #include "fhiclcpp/fwd.h"
 
 #include <arpa/inet.h>

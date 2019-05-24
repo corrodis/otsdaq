@@ -3,7 +3,7 @@
 #include "artdaq-core/Utilities/SimpleLookupPolicy.hh"
 #include "artdaq-ots/Overlays/FragmentType.hh"
 #include "artdaq-ots/Overlays/UDPFragmentWriter.hh"
-#include "artdaq/Application/GeneratorMacros.hh"
+#include "artdaq/Generators/GeneratorMacros.hh"
 #include "canvas/Utilities/Exception.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "otsdaq-core/Macros/CoutMacros.h"

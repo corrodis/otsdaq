@@ -246,7 +246,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 				theInterface_->get(table, entry->d_name, 0, 0,
 				                   true);  // dont fill
 			}
-			catch(cet::exception)
+			catch(cet::exception const&)
 			{
 				if(table)
 					delete table;
