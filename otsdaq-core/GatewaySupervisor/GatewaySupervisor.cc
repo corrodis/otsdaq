@@ -1946,7 +1946,7 @@ void GatewaySupervisor::broadcastMessageThread(
 				       threadStruct->threadIndex_))
 					threadStruct->getIterationsDone() = true;
 			}
-			catch(toolbox::fsm::exception::Exception e)
+			catch(toolbox::fsm::exception::Exception const& e)
 			{
 				__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t"
 				         << "going into error: " << e.what() << __E__;

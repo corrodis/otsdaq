@@ -346,7 +346,7 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 			return;
 		}
 	}
-	catch(const std::runtime_error)
+	catch(const std::runtime_error&)
 	{
 		__COUT__ << "Ignoring error, assume this a valid UID node." << __E__;
 		// error is expected here for UIDs.. so just ignore
