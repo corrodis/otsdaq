@@ -577,8 +577,8 @@ std::string StringMacros::setToString(const std::set<T>& setToReturn,
 // static template function
 template<class S, class T>
 std::string StringMacros::setToString(const std::set<std::pair<S, T>>& setToReturn,
-                                         const std::string& primaryDelimeter /*= ", "*/,
-                                         const std::string& secondaryDelimeter /*= ":"*/)
+                                      const std::string& primaryDelimeter /*= ", "*/,
+                                      const std::string& secondaryDelimeter /*= ":"*/)
 {
 	// this is a somewhat specific vector format (one usage is in FE Macro arguments)
 	std::stringstream ss;

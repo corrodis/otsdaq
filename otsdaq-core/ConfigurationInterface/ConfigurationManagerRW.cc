@@ -32,7 +32,7 @@ using namespace ots;
 #define TABLE_INFO_PATH std::string(__ENV__("TABLE_INFO_PATH")) + "/"
 #define TABLE_INFO_EXT "Info.xml"
 
-#define CORE_TABLE_INFO_FILENAME                               \
+#define CORE_TABLE_INFO_FILENAME                                \
 	((__ENV__("SERVICE_DATA_PATH") == NULL)                     \
 	     ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") \
 	     : (std::string(__ENV__("SERVICE_DATA_PATH")))) +       \
@@ -196,7 +196,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 {
 	// allTableInfo_ is container to be returned
 
-	//if(accumulatedErrors)
+	// if(accumulatedErrors)
 	//	*accumulatedErrors = "";
 
 	if(!refresh)
@@ -707,7 +707,7 @@ TableVersion ConfigurationManagerRW::saveNewTable(const std::string& tableName,
 
 	__COUT__ << "New version added to info " << newVersion << __E__;
 
-	//table->getView().print();
+	// table->getView().print();
 	return newVersion;
 }
 

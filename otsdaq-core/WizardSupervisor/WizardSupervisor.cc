@@ -322,7 +322,7 @@ void WizardSupervisor::generateURL()
 		             << std::endl;
 
 	return;
-} //end generateURL()
+}  // end generateURL()
 
 void WizardSupervisor::printURL(WizardSupervisor* ptr, std::string securityCode)
 {
@@ -363,10 +363,10 @@ void WizardSupervisor::tooltipRequest(xgi::Input*  in,
 		         << std::endl;
 		return;
 	}
-//	else
-//	{
-//		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
-//	}
+	//	else
+	//	{
+	//		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
+	//	}
 	// SECURITY CHECK END ****
 
 	HttpXmlDocument xmldoc;
@@ -394,7 +394,7 @@ void WizardSupervisor::tooltipRequest(xgi::Input*  in,
 		__COUT__ << "Command Request, " << Command << ", not recognized." << std::endl;
 
 	xmldoc.outputXmlDocument((std::ostringstream*)out, false, true);
-} //end tooltipRequest()
+}  // end tooltipRequest()
 
 //========================================================================================================================
 void WizardSupervisor::toggleSecurityCodeGeneration(

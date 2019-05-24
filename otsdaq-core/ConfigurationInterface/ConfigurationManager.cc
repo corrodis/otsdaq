@@ -1,7 +1,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+#include "artdaq/Application/LoadParameterSet.hh"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"  //All configurable objects are included here
 #include "otsdaq-core/ProgressBar/ProgressBar.h"
-#include "artdaq/Application/LoadParameterSet.hh"
 
 #include <fstream>  // std::ofstream
 
@@ -70,9 +70,8 @@ const std::set<std::string> ConfigurationManager::iterateMemberNames_ = {
     "IterationCommandRunTable"};
 
 //==============================================================================
-ConfigurationManager::ConfigurationManager(
-		bool initForWriteAccess /*=false*/,
-		bool doInitializeFromFhicl /*=false*/)
+ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/,
+                                           bool doInitializeFromFhicl /*=false*/)
     : username_(ConfigurationManager::READONLY_USER)
     , theInterface_(0)
     , theConfigurationTableGroupKey_(0)
@@ -83,8 +82,6 @@ ConfigurationManager::ConfigurationManager(
     , theBackboneTableGroup_("")
 {
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
-
-
 
 	// initialize special group metadata table
 	{
@@ -144,12 +141,12 @@ ConfigurationManager::ConfigurationManager(
 
 	if(doInitializeFromFhicl)
 	{
-		//create tables and fill based on fhicl
+		// create tables and fill based on fhicl
 		initializeFromFhicl(__ENV__("CONFIGURATION_INIT_FCL"));
 		return;
 	}
-	//else do normal init
-	init(0 /*accumulatedErrors*/,initForWriteAccess);
+	// else do normal init
+	init(0 /*accumulatedErrors*/, initForWriteAccess);
 
 }  // end constructor()
 
@@ -169,26 +166,27 @@ ConfigurationManager::~ConfigurationManager() { destroy(); }
 //	if accumulatedErrors is not null.. fill it with errors
 //	else throw errors (but do not ask restoreActiveTableGroups to throw errors)
 void ConfigurationManager::init(std::string* accumulatedErrors,
-	bool initForWriteAccess /*= false*/)
+                                bool         initForWriteAccess /*= false*/)
 {
-	//if(accumulatedErrors)
+	// if(accumulatedErrors)
 	//	*accumulatedErrors = "";
 
 	// destroy();
 
-	// once Interface is false (using artdaq db) .. 
+	// once Interface is false (using artdaq db) ..
 	//	then can test (configurationInterface_->getMode() == false)
 	{
 		try
 		{
 			__COUTV__(username_);
-			
+
 			restoreActiveTableGroups(
-				accumulatedErrors ? true : false /*throwErrors*/,
-				"" /*pathToActiveGroupsFile*/,
-				//(initForWriteAccess || //if write access, then load everything 
-					(username_ == ConfigurationManager::READONLY_USER)? 
-					true : false /*onlyLoadIfBackboneOrContext*/);
+			    accumulatedErrors ? true : false /*throwErrors*/,
+			    "" /*pathToActiveGroupsFile*/,
+			    //(initForWriteAccess || //if write access, then load everything
+			    (username_ == ConfigurationManager::READONLY_USER)
+			        ? true
+			        : false /*onlyLoadIfBackboneOrContext*/);
 		}
 		catch(std::runtime_error& e)
 		{
@@ -206,9 +204,9 @@ void ConfigurationManager::init(std::string* accumulatedErrors,
 //	Note: this should be used by the Supervisor to maintain
 //		the same configurationGroups surviving software system restarts
 void ConfigurationManager::restoreActiveTableGroups(
-    bool 				throwErrors, 
-    const std::string& 	pathToActiveGroupsFile,
-    bool				onlyLoadIfBackboneOrContext /*= false*/)
+    bool               throwErrors,
+    const std::string& pathToActiveGroupsFile,
+    bool               onlyLoadIfBackboneOrContext /*= false*/)
 {
 	destroyTableGroup("", true);  // deactivate all
 
@@ -297,9 +295,9 @@ void ConfigurationManager::restoreActiveTableGroups(
 		{
 			// load and doActivate
 			loadTableGroup(
-				groupName, 
-				TableGroupKey(strVal),
-				true /*doActivate*/,
+			    groupName,
+			    TableGroupKey(strVal),
+			    true /*doActivate*/,
 			    0 /*groupMembers*/,
 			    0 /*progressBar*/,
 			    0 /*accumulateWarnings = 0*/,
@@ -310,7 +308,7 @@ void ConfigurationManager::restoreActiveTableGroups(
 			    0 /*groupTypeString    = 0*/,
 			    0 /*groupAliases       = 0*/,
 			    onlyLoadIfBackboneOrContext /*onlyLoadIfBackboneOrContext = false*/
-				);
+			);
 		}
 		catch(std::runtime_error& e)
 		{
@@ -950,7 +948,7 @@ void ConfigurationManager::loadTableGroup(
     bool                                                   doNotLoadMember /*=false*/,
     std::string*                                           groupTypeString,
     std::map<std::string /*name*/, std::string /*alias*/>* groupAliases,
-    bool												   onlyLoadIfBackboneOrContext /*=false*/) try
+    bool onlyLoadIfBackboneOrContext /*=false*/) try
 {
 	// clear to defaults
 	if(groupComment)
@@ -1149,8 +1147,6 @@ void ConfigurationManager::loadTableGroup(
 		//			}
 		//		}
 
-		
-		
 		if(doNotLoadMember)
 			return;  // memberMap; //this is useful if just getting group metadata
 
@@ -1158,12 +1154,13 @@ void ConfigurationManager::loadTableGroup(
 		if(!groupTypeString)
 			groupType = getTypeOfGroup(memberMap);
 
-		if(onlyLoadIfBackboneOrContext && 
-			groupType != ConfigurationManager::CONTEXT_TYPE && 
-			groupType != ConfigurationManager::BACKBONE_TYPE)
+		if(onlyLoadIfBackboneOrContext &&
+		   groupType != ConfigurationManager::CONTEXT_TYPE &&
+		   groupType != ConfigurationManager::BACKBONE_TYPE)
 		{
-			__COUT_WARN__ << "Not loading group because it is not of type Context or Backbone (it is type '" <<
-				convertGroupTypeIdToName(groupType) << "')." << __E__;
+			__COUT_WARN__ << "Not loading group because it is not of type Context or "
+			                 "Backbone (it is type '"
+			              << convertGroupTypeIdToName(groupType) << "')." << __E__;
 			return;
 		}
 
@@ -1228,8 +1225,9 @@ void ConfigurationManager::loadTableGroup(
 			if(*accumulatedTreeErrors != "")
 			{
 				__COUT_ERR__ << "Errors detected while loading Table Group: " << groupName
-				             << "(" << groupKey << "). Aborting." 
-				             << "\n" << *accumulatedTreeErrors << __E__;
+				             << "(" << groupKey << "). Aborting."
+				             << "\n"
+				             << *accumulatedTreeErrors << __E__;
 				return;  // memberMap; //return member name map to version
 			}
 		}
@@ -1277,8 +1275,8 @@ void ConfigurationManager::loadTableGroup(
 					{
 						*accumulatedTreeErrors += ss.str();
 					}
-					else 
-						__SS_THROW__;//__COUT_WARN__ << ss.str();
+					else
+						__SS_THROW__;  //__COUT_WARN__ << ss.str();
 				}
 				catch(...)
 				{
@@ -1290,7 +1288,7 @@ void ConfigurationManager::loadTableGroup(
 					{
 						*accumulatedTreeErrors += ss.str();
 					}
-					else //ignore error
+					else  // ignore error
 						__COUT_WARN__ << ss.str();
 				}
 			}
@@ -1578,8 +1576,8 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
     std::string*                         accumulatedTreeErrors) const
 {
 	std::vector<std::pair<std::string, ConfigurationTree>> retMap;
-	
-	//if(accumulatedTreeErrors)
+
+	// if(accumulatedTreeErrors)
 	//	*accumulatedTreeErrors = "";
 
 	if(!memberMap || memberMap->empty())  // return all present active members
@@ -1703,11 +1701,13 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 									}
 								if(!found)
 								{
-									__SS__ << "Note: It may be safe to ignore this " <<
-									        "error since the link's target table " <<
-									    twoDeepChild.second.getDisconnectedTableName() <<
-									    " is not a member of this group (and may not be " <<
-									    "loaded yet)" << __E__;
+									__SS__
+									    << "Note: It may be safe to ignore this "
+									    << "error since the link's target table "
+									    << twoDeepChild.second.getDisconnectedTableName()
+									    << " is not a member of this group (and may not "
+									       "be "
+									    << "loaded yet)" << __E__;
 									*accumulatedTreeErrors += ss.str();
 								}
 							}
@@ -1716,21 +1716,20 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 				}
 				catch(std::runtime_error& e)
 				{
-					__SS__ << "At node '" << memberPair.first <<
-						    "' error detected descending through children:\n" <<
-							e.what() << __E__;
+					__SS__ << "At node '" << memberPair.first
+					       << "' error detected descending through children:\n"
+					       << e.what() << __E__;
 					*accumulatedTreeErrors += ss.str();
 				}
 			}
 
 			retMap.push_back(
-			    std::pair<std::string, ConfigurationTree>(
-			    	memberPair.first, newNode));
+			    std::pair<std::string, ConfigurationTree>(memberPair.first, newNode));
 		}
 	}
 
 	return retMap;
-} //end getChildren()
+}  // end getChildren()
 
 //==============================================================================
 // getTableByName
@@ -2023,14 +2022,13 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 {
 	__COUT__ << "Initializing from fhicl: " << fhiclPath << __E__;
 
-	//https://cdcvs.fnal.gov/redmine/projects/fhicl-cpp/wiki
+	// https://cdcvs.fnal.gov/redmine/projects/fhicl-cpp/wiki
 
-	//LoadParameterSet() ... from  $ARTDAQ_INC/artdaq/Application/LoadParameterSet.hh
+	// LoadParameterSet() ... from  $ARTDAQ_INC/artdaq/Application/LoadParameterSet.hh
 	fhicl::ParameterSet pset = LoadParameterSet(fhiclPath);
 
-
 	//===========================
-	//fcl should be FE record(s):
+	// fcl should be FE record(s):
 	//	interface0: {
 	//		FEInterfacePluginName:	"FEOtsUDPTemplateInterface"
 	//		LinkToFETypeTable_FEOtsUDPTemplateInterfaceTable:		{
@@ -2046,27 +2044,21 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 	//	} //end interface0
 	//===========================
 
-
-
-
-	//Steps:
+	// Steps:
 	//	Create one context with one FE supervisor
 	//		and one/many FEs specified by fcl
 	//
 
-
-
 	TableBase* table;
 
-	//create context and add context record
+	// create context and add context record
 	{
 		table = 0;
-		theInterface_->get(
-				table,   // configurationPtr
-				ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,   // tableName
-				0,                  // groupKey
-				0,                  // groupName
-				true              // dontFill=false to fill
+		theInterface_->get(table,  // configurationPtr
+		                   ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,  // tableName
+		                   0,                                              // groupKey
+		                   0,                                              // groupName
+		                   true  // dontFill=false to fill
 		);
 
 		nameToTableMap_[ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME] = table;
@@ -2075,33 +2067,32 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 		table->setActiveView(TableVersion(TableVersion::DEFAULT));
 
 		TableView* view = table->getViewP();
-		__COUT__ << "Activated version: " <<
-				view->getVersion() << __E__;
-		//view->print();
+		__COUT__ << "Activated version: " << view->getVersion() << __E__;
+		// view->print();
 
-		//add context record 		---------------------
+		// add context record 		---------------------
 		view->addRow();
 		auto colMap = view->getColumnNamesMap();
 
-		view->setValue("MacroMakerFEContext",0,		colMap["ContextUID"]);
-		view->setValue("XDAQApplicationTable",0,	colMap["LinkToApplicationTable"]);
-		view->setValue("MacroMakerFEContextApps",0,	colMap["ApplicationGroupID"]);
-		view->setValue("1",0,colMap["Status"]);
+		view->setValue("MacroMakerFEContext", 0, colMap["ContextUID"]);
+		view->setValue("XDAQApplicationTable", 0, colMap["LinkToApplicationTable"]);
+		view->setValue("MacroMakerFEContextApps", 0, colMap["ApplicationGroupID"]);
+		view->setValue("1", 0, colMap["Status"]);
 
 		__COUT__ << "Done adding context record..." << __E__;
 		view->print();
 
-	} //done with context record
+	}  // done with context record
 
-	//create app table and add application record
+	// create app table and add application record
 	{
 		table = 0;
 		theInterface_->get(
-				table,   // configurationPtr
-				ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,   // tableName
-				0,                  // groupKey
-				0,                  // groupName
-				true              // dontFill=false to fill
+		    table,                                              // configurationPtr
+		    ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,  // tableName
+		    0,                                                  // groupKey
+		    0,                                                  // groupName
+		    true                                                // dontFill=false to fill
 		);
 
 		nameToTableMap_[ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME] = table;
@@ -2110,33 +2101,31 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 		table->setActiveView(TableVersion(TableVersion::DEFAULT));
 
 		TableView* view = table->getViewP();
-		__COUT__ << "Activated version: " <<
-				view->getVersion() << __E__;
-		//view->print();
+		__COUT__ << "Activated version: " << view->getVersion() << __E__;
+		// view->print();
 
-		//add application record 		---------------------
+		// add application record 		---------------------
 		view->addRow();
 		auto colMap = view->getColumnNamesMap();
 
-		view->setValue("MacroMakerFEContextApps",0,	colMap["ApplicationGroupID"]);
-		view->setValue("MacroMakerFESupervisor",0,	colMap["ApplicationUID"]);
-		view->setValue("FESupervisorTable",0,		colMap["LinkToSupervisorTable"]);
-		view->setValue("MacroMakerFESupervisor",0,	colMap["LinkToSupervisorUID"]);
-		view->setValue("1",0,						colMap["Status"]);
+		view->setValue("MacroMakerFEContextApps", 0, colMap["ApplicationGroupID"]);
+		view->setValue("MacroMakerFESupervisor", 0, colMap["ApplicationUID"]);
+		view->setValue("FESupervisorTable", 0, colMap["LinkToSupervisorTable"]);
+		view->setValue("MacroMakerFESupervisor", 0, colMap["LinkToSupervisorUID"]);
+		view->setValue("1", 0, colMap["Status"]);
 
 		__COUT__ << "Done adding application record..." << __E__;
 		view->print();
-	} //done with app record
+	}  // done with app record
 
-	//create FE Supervisor table and Supervisor record
+	// create FE Supervisor table and Supervisor record
 	{
 		table = 0;
-		theInterface_->get(
-				table,   // configurationPtr
-				"FESupervisorTable",   // tableName
-				0,                  // groupKey
-				0,                  // groupName
-				true              // dontFill=false to fill
+		theInterface_->get(table,                // configurationPtr
+		                   "FESupervisorTable",  // tableName
+		                   0,                    // groupKey
+		                   0,                    // groupName
+		                   true                  // dontFill=false to fill
 		);
 
 		nameToTableMap_["FESupervisorTable"] = table;
@@ -2145,37 +2134,36 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 		table->setActiveView(TableVersion(TableVersion::DEFAULT));
 
 		TableView* view = table->getViewP();
-		__COUT__ << "Activated version: " <<
-				view->getVersion() << __E__;
-		//view->print();
+		__COUT__ << "Activated version: " << view->getVersion() << __E__;
+		// view->print();
 
-		//add application record 		---------------------
+		// add application record 		---------------------
 		view->addRow();
 		auto colMap = view->getColumnNamesMap();
 
-		view->setValue("MacroMakerFESupervisor",0,	colMap["SupervisorUID"]);
-		view->setValue("FEInterfaceTable",0,					colMap["LinkToFEInterfaceTable"]);
-		view->setValue("MacroMakerFESupervisorInterfaces",0,	colMap["LinkToFEInterfaceGroupID"]);
+		view->setValue("MacroMakerFESupervisor", 0, colMap["SupervisorUID"]);
+		view->setValue("FEInterfaceTable", 0, colMap["LinkToFEInterfaceTable"]);
+		view->setValue(
+		    "MacroMakerFESupervisorInterfaces", 0, colMap["LinkToFEInterfaceGroupID"]);
 
 		__COUT__ << "Done adding supervisor record..." << __E__;
 		view->print();
-	} //done with app record
+	}  // done with app record
 
-	//create FE Interface table and interface record(s)
-	recursiveInitFromFhiclPSet(
-			"FEInterfaceTable" /*tableName*/,
-			pset /*fhicl parameter set*/,
-			"" /*uid*/,
-			"MacroMakerFESupervisorInterfaces" /*groupID*/,
-			"FE" /*childLinkIndex*/);
+	// create FE Interface table and interface record(s)
+	recursiveInitFromFhiclPSet("FEInterfaceTable" /*tableName*/,
+	                           pset /*fhicl parameter set*/,
+	                           "" /*uid*/,
+	                           "MacroMakerFESupervisorInterfaces" /*groupID*/,
+	                           "FE" /*childLinkIndex*/);
 
-	//init every table after modifications
-	for(auto& table: nameToTableMap_)
+	// init every table after modifications
+	for(auto& table : nameToTableMap_)
 	{
 		table.second->getViewP()->init();
 	}
 
-	//verify extraction
+	// verify extraction
 	if(0)
 	{
 		__COUT__ << "================================================" << __E__;
@@ -2220,48 +2208,47 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 			auto h = f.getNode("interface0");
 			__COUTV__(h.getValueAsString());
 
-
-			auto fes = getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME).
-					getNode("MacroMakerFEContext/LinkToApplicationTable/MacroMakerFESupervisor/LinkToSupervisorTable").
-					getNode("LinkToFEInterfaceTable")
-					.getChildrenNames(true /*byPriority*/, true /*onlyStatusTrue*/);
+			auto fes =
+			    getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME)
+			        .getNode(
+			            "MacroMakerFEContext/LinkToApplicationTable/"
+			            "MacroMakerFESupervisor/LinkToSupervisorTable")
+			        .getNode("LinkToFEInterfaceTable")
+			        .getChildrenNames(true /*byPriority*/, true /*onlyStatusTrue*/);
 			__COUTV__(fes.size());
 			__COUTV__(StringMacros::vectorToString(fes));
 		}
 	}
 
-
-
-} //end initializeFromFhicl()
-
+}  // end initializeFromFhicl()
 
 //==============================================================================
 // recursiveInitFromFhiclPSet
 //		Add records and all children parameters starting at table
 //			recursively. If groupName given then loop through
 //			records and add to table.
-void ConfigurationManager::recursiveInitFromFhiclPSet(
-		const std::string& tableName,
-		const fhicl::ParameterSet& pset,
-		const std::string& recordName,
-		const std::string& groupName,
-		const std::string& groupLinkIndex)
+void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string& tableName,
+                                                      const fhicl::ParameterSet& pset,
+                                                      const std::string& recordName,
+                                                      const std::string& groupName,
+                                                      const std::string& groupLinkIndex)
 {
-	__COUT__ << __COUT_HDR_P__ << "Adding table '" << tableName << "' record(s)..." << __E__;
+	__COUT__ << __COUT_HDR_P__ << "Adding table '" << tableName << "' record(s)..."
+	         << __E__;
 
 	TableBase* table;
-	//create context and add context record
+	// create context and add context record
 	{
 		table = 0;
 		if(nameToTableMap_.find(tableName) == nameToTableMap_.end())
 		{
-			__COUT__ << "Table not found, so making '" << tableName << "'instance..." << __E__;
-			theInterface_->get(
-					table,   // configurationPtr
-					tableName,   // tableName
-					0,                  // groupKey
-					0,                  // groupName
-					true              // dontFill=false to fill
+			__COUT__ << "Table not found, so making '" << tableName << "'instance..."
+			         << __E__;
+			theInterface_->get(table,      // configurationPtr
+			                   tableName,  // tableName
+			                   0,          // groupKey
+			                   0,          // groupName
+			                   true        // dontFill=false to fill
 			);
 
 			nameToTableMap_[tableName] = table;
@@ -2269,20 +2256,20 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(
 		}
 		else
 		{
-			__COUT__ << "Existing table found, so using '" << tableName << "'instance..." << __E__;
+			__COUT__ << "Existing table found, so using '" << tableName << "'instance..."
+			         << __E__;
 			table = nameToTableMap_[tableName];
 		}
 
 		table->setActiveView(TableVersion(TableVersion::DEFAULT));
 
 		TableView* view = table->getViewP();
-		__COUT__ << "Activated version: " <<
-				view->getVersion() << __E__;
-		//view->print();
+		__COUT__ << "Activated version: " << view->getVersion() << __E__;
+		// view->print();
 
-		if(recordName != "") //then add this record
+		if(recordName != "")  // then add this record
 		{
-			//Steps:
+			// Steps:
 			//	- add row
 			//	- set UID and enable (if possible)
 			//	- set values for parameter columns
@@ -2290,87 +2277,98 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(
 
 			__COUTV__(recordName);
 
-			//add row and get column map
-			unsigned int r = view->addRow();
-			auto colMap = view->getColumnNamesMap();
+			// add row and get column map
+			unsigned int r      = view->addRow();
+			auto         colMap = view->getColumnNamesMap();
 
-			//set UID and enable (if possible)
-			view->setValue(recordName,r,view->getColUID());
-			try	{view->setValue("1",r,view->getColStatus());}
-			catch(...){__COUT__ << "No status column to set for '" << recordName << "'" << __E__;}
-
-			if(groupName != "") //then set groupID for this record
+			// set UID and enable (if possible)
+			view->setValue(recordName, r, view->getColUID());
+			try
 			{
-				int groupIDCol = view->getColLinkGroupID(groupLinkIndex);
-				__COUT__ << "Setting group ID for group link ID '" <<
-						groupLinkIndex << "' at column " << groupIDCol <<
-						" to '" << groupName << ".'" << __E__;
-
-				view->setValue(groupName,r,groupIDCol);
+				view->setValue("1", r, view->getColStatus());
+			}
+			catch(...)
+			{
+				__COUT__ << "No status column to set for '" << recordName << "'" << __E__;
 			}
 
-			//then set parameters
-			auto names = pset.get_names();
-			for(const auto& colName: names)
+			if(groupName != "")  // then set groupID for this record
 			{
-				if(!pset.is_key_to_atom(colName)) continue;
+				int groupIDCol = view->getColLinkGroupID(groupLinkIndex);
+				__COUT__ << "Setting group ID for group link ID '" << groupLinkIndex
+				         << "' at column " << groupIDCol << " to '" << groupName << ".'"
+				         << __E__;
+
+				view->setValue(groupName, r, groupIDCol);
+			}
+
+			// then set parameters
+			auto names = pset.get_names();
+			for(const auto& colName : names)
+			{
+				if(!pset.is_key_to_atom(colName))
+					continue;
 
 				auto colIt = colMap.find(colName);
 				if(colIt == colMap.end())
 				{
-					__SS__ << "Field '" << colName << "' of record '" << recordName <<
-							"' in table '" << tableName << "' was not found in columns." <<
-							"\n\nHere are the existing column names:\n";
+					__SS__ << "Field '" << colName << "' of record '" << recordName
+					       << "' in table '" << tableName << "' was not found in columns."
+					       << "\n\nHere are the existing column names:\n";
 					unsigned int i = 0;
-					for(const auto& col: colMap)
+					for(const auto& col : colMap)
 						ss << "\n" << ++i << ".\t" << col.first;
 					ss << __E__;
 					__SS_THROW__;
 				}
-				const std::string value =  pset.get<std::string>(colName);
-				__COUT__ << "Setting '" << recordName << "' parameter at column " <<
-						colIt->second << ", '" <<
-						colName << "'\t = " << value << __E__;
-				view->setValueAsString(value,r,colIt->second);
-			} //end set parameters
+				const std::string value = pset.get<std::string>(colName);
+				__COUT__ << "Setting '" << recordName << "' parameter at column "
+				         << colIt->second << ", '" << colName << "'\t = " << value
+				         << __E__;
+				view->setValueAsString(value, r, colIt->second);
+			}  // end set parameters
 
-			//then define links
-			for(const auto& linkName: names)
+			// then define links
+			for(const auto& linkName : names)
 			{
-				if(pset.is_key_to_atom(linkName)) continue;
+				if(pset.is_key_to_atom(linkName))
+					continue;
 
 				__COUTV__(linkName);
 
-				//split into column name and table
-				unsigned int c = linkName.size()-1;
-				for(;c >= 1;--c)
-					if(linkName[c] == '_') //find first underscore to split linkName
+				// split into column name and table
+				unsigned int c = linkName.size() - 1;
+				for(; c >= 1; --c)
+					if(linkName[c] == '_')  // find first underscore to split linkName
 						break;
 
 				if(c == 0)
 				{
-					__SS__ << "Illegal link name '" << linkName << "' found. The format must be <Column name>_<Target table name>,.. for example '" <<
-							"LinkToFETypeTable_FEOtsUDPTemplateInterfaceTable'" << __E__;
+					__SS__ << "Illegal link name '" << linkName
+					       << "' found. The format must be <Column name>_<Target table "
+					          "name>,.. for example '"
+					       << "LinkToFETypeTable_FEOtsUDPTemplateInterfaceTable'"
+					       << __E__;
 					__SS_THROW__;
 				}
-				std::string colName = linkName.substr(0,c);
+				std::string colName = linkName.substr(0, c);
 				__COUTV__(colName);
 
 				auto colIt = colMap.find(colName);
 				if(colIt == colMap.end())
 				{
-					__SS__ << "Link '" << colName << "' of record '" << recordName <<
-							"' in table '" << tableName << "' was not found in columns." <<
-							"\n\nHere are the existing column names:\n";
+					__SS__ << "Link '" << colName << "' of record '" << recordName
+					       << "' in table '" << tableName << "' was not found in columns."
+					       << "\n\nHere are the existing column names:\n";
 					unsigned int i = 0;
-					for(const auto& col: colMap)
+					for(const auto& col : colMap)
 						ss << "\n" << i << ".\t" << col.first << __E__;
 					__SS_THROW__;
 				}
 				//__COUT__ << "Setting link at column " << colIt->second << __E__;
 
-				std::pair<unsigned int /*link col*/,
-							  unsigned int /*link id col*/> linkPair;
+				std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>
+				     linkPair;
 				bool isGroupLink;
 				view->getChildLink(colIt->second, isGroupLink, linkPair);
 
@@ -2378,83 +2376,88 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(
 				//__COUTV__(linkPair.first);
 				//__COUTV__(linkPair.second);
 
-				std::string linkTableName = linkName.substr(c+1);
+				std::string linkTableName = linkName.substr(c + 1);
 				__COUTV__(linkTableName);
 
-				auto linkPset = pset.get<fhicl::ParameterSet>(linkName);
+				auto linkPset    = pset.get<fhicl::ParameterSet>(linkName);
 				auto linkRecords = linkPset.get_pset_names();
 				if(!isGroupLink && linkRecords.size() > 1)
 				{
-					__SS__ << "A Unique Link can only point to one record. " <<
-							"The specified link '" << colName << "' of record '" << recordName <<
-							"' in table '" << tableName << "' has " << linkRecords.size() <<
-							" children records specified. " << __E__;
+					__SS__ << "A Unique Link can only point to one record. "
+					       << "The specified link '" << colName << "' of record '"
+					       << recordName << "' in table '" << tableName << "' has "
+					       << linkRecords.size() << " children records specified. "
+					       << __E__;
 					__SS_THROW__;
 				}
 
 				if(linkRecords.size() == 0)
 				{
-					__COUT__ << "No child records, so leaving link disconnected." << __E__;
+					__COUT__ << "No child records, so leaving link disconnected."
+					         << __E__;
 					continue;
 				}
 
-
-				__COUT__ << "Setting Link at columns [" << linkPair.first <<
-						"," << linkPair.second << "]" << __E__;
-				view->setValue(linkTableName,r,linkPair.first);
+				__COUT__ << "Setting Link at columns [" << linkPair.first << ","
+				         << linkPair.second << "]" << __E__;
+				view->setValue(linkTableName, r, linkPair.first);
 
 				if(!isGroupLink)
 				{
 					__COUT__ << "Setting up Unique link to " << linkRecords[0] << __E__;
 
-					view->setValue(linkRecords[0],r,linkPair.second);
+					view->setValue(linkRecords[0], r, linkPair.second);
 
 					recursiveInitFromFhiclPSet(
-							linkTableName /*tableName*/,
-							linkPset.get<fhicl::ParameterSet>(linkRecords[0]) /*fhicl parameter set*/,
-							linkRecords[0] /*uid*/,
-							"" /*groupID*/);
+					    linkTableName /*tableName*/,
+					    linkPset.get<fhicl::ParameterSet>(
+					        linkRecords[0]) /*fhicl parameter set*/,
+					    linkRecords[0] /*uid*/,
+					    "" /*groupID*/);
 
 					view->print();
 				}
 				else
 				{
-					std::string childLinkIndex = view->getColumnInfo(linkPair.first).getChildLinkIndex();
+					std::string childLinkIndex =
+					    view->getColumnInfo(linkPair.first).getChildLinkIndex();
 					std::string groupName = recordName + "Group";
 
-					view->setValue(groupName,r,linkPair.second);
+					view->setValue(groupName, r, linkPair.second);
 
 					for(const auto& groupRecord : linkRecords)
 					{
-						__COUT__ << "Setting '" << childLinkIndex << "' Group link to '" << groupName <<
-								"' record '" << groupRecord << "'" << __E__;
+						__COUT__ << "Setting '" << childLinkIndex << "' Group link to '"
+						         << groupName << "' record '" << groupRecord << "'"
+						         << __E__;
 
 						recursiveInitFromFhiclPSet(
-								linkTableName /*tableName*/,
-								linkPset.get<fhicl::ParameterSet>(groupRecord) /*fhicl parameter set*/,
-								groupRecord /*uid*/,
-								groupName /*groupID*/,
-								childLinkIndex /*groupLinkIndex*/);
+						    linkTableName /*tableName*/,
+						    linkPset.get<fhicl::ParameterSet>(
+						        groupRecord) /*fhicl parameter set*/,
+						    groupRecord /*uid*/,
+						    groupName /*groupID*/,
+						    childLinkIndex /*groupLinkIndex*/);
 					}
 				}
 
-			} //end link handling
+			}  // end link handling
 		}
-		else if(groupName != "") //then add group of records
+		else if(groupName != "")  // then add group of records
 		{
-			//get_pset_names();
-			//get_names
+			// get_pset_names();
+			// get_names
 			__COUTV__(groupName);
 			auto psets = pset.get_pset_names();
-			for(const auto& ps: psets)
+			for(const auto& ps : psets)
 			{
 				__COUTV__(ps);
 				recursiveInitFromFhiclPSet(
-						tableName /*tableName*/,
-						pset.get<fhicl::ParameterSet>(ps) /*fhicl parameter set*/,
-						ps /*uid*/,
-						groupName /*groupID*/,
-						groupLinkIndex /*groupLinkIndex*/);
+				    tableName /*tableName*/,
+				    pset.get<fhicl::ParameterSet>(ps) /*fhicl parameter set*/,
+				    ps /*uid*/,
+				    groupName /*groupID*/,
+				    groupLinkIndex /*groupLinkIndex*/);
 			}
 
 			view->print();
@@ -2464,41 +2467,31 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(
 			__SS__ << "Illegal recursive parameters!" << __E__;
 			__SS_THROW__;
 		}
-
 	}
 
-	__COUT__ << __COUT_HDR_P__ << "Done adding table '" << tableName << "' record(s)..." << __E__;
+	__COUT__ << __COUT_HDR_P__ << "Done adding table '" << tableName << "' record(s)..."
+	         << __E__;
 
-
-} //end recursiveInitFromFhiclPSet()
+}  // end recursiveInitFromFhiclPSet()
 
 //==============================================================================
 bool ConfigurationManager::isOwnerFirstAppInContext()
 {
-	__COUT__ <<	"Checking if owner is first App in Context." << __E__;
-	if(ownerContextUID_ == "" || ownerAppUID_ == "") return true; //default to 'yes'
+	__COUT__ << "Checking if owner is first App in Context." << __E__;
+	if(ownerContextUID_ == "" || ownerAppUID_ == "")
+		return true;  // default to 'yes'
 
 	__COUTV__(ownerContextUID_);
 	__COUTV__(ownerAppUID_);
-	
-	
+
 	auto contextChildren =
-	    getNode(
-	    	ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME + "/" +
-	    	ownerContextUID_).getChildrenNames();
-	
-	bool isFirstAppInContext = contextChildren.size() == 0 || 
-		contextChildren[0] == ownerAppUID_;
-		
-	__COUTV__(isFirstAppInContext);	
-	
+	    getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME + "/" + ownerContextUID_)
+	        .getChildrenNames();
+
+	bool isFirstAppInContext =
+	    contextChildren.size() == 0 || contextChildren[0] == ownerAppUID_;
+
+	__COUTV__(isFirstAppInContext);
+
 	return isFirstAppInContext;
-} //end isOwnerFirstAppInContext()
-
-
-
-
-
-
-
-
+}  // end isOwnerFirstAppInContext()

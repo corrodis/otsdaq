@@ -83,7 +83,7 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	SupervisorInfoMap allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_,
 	    allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_;
 
-	static const bool			MACROMAKER_MODE;
+	static const bool MACROMAKER_MODE;
 };
 
 }  // namespace ots

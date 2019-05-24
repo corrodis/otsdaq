@@ -104,8 +104,7 @@ void FEVInterface::configureSlowControls(void)
 }  // end configureSlowControls()
 
 //========================================================================================================================
-bool FEVInterface::slowControlsRunning(void)
-try
+bool FEVInterface::slowControlsRunning(void) try
 {
 	__FE_COUT__ << "slowControlsRunning" << __E__;
 
@@ -129,54 +128,53 @@ try
 	ConfigurationTree FEInterfaceNode =
 	    theXDAQContextConfigTree_.getBackNode(theConfigurationPath_);
 
-
-	//attempt to make Slow Controls transfer socket
+	// attempt to make Slow Controls transfer socket
 	std::unique_ptr<UDPDataStreamerBase> slowContrlolsTxSocket;
 	std::string slowControlsSupervisorIPAddress = "", slowControlsSelfIPAddress = "";
-	int slowControlsSupervisorPort = 0, slowControlsSelfPort = 0;
+	int         slowControlsSupervisorPort = 0, slowControlsSelfPort = 0;
 	try
 	{
 		ConfigurationTree slowControlsInterfaceLink =
-			FEInterfaceNode.getNode("LinkToSlowControlsSupervisorTable");
-
+		    FEInterfaceNode.getNode("LinkToSlowControlsSupervisorTable");
 
 		if(slowControlsInterfaceLink.isDisconnected())
 		{
 			__FE_SS__ << "slowControlsInterfaceLink is disconnected, so no socket made."
-						<< __E__;
+			          << __E__;
 			__FE_SS_THROW__;
 		}
 
-		slowControlsSelfIPAddress = FEInterfaceNode.getNode("SlowControlsTxSocketIPAddress")
-						.getValue<std::string>();
-		slowControlsSelfPort = FEInterfaceNode.getNode("SlowControlsTxSocketPort").getValue<int>();
-		slowControlsSupervisorIPAddress = slowControlsInterfaceLink.getNode(
-				"IPAddress").getValue<std::string>();
-		slowControlsSupervisorPort = slowControlsInterfaceLink.getNode("Port").getValue<int>();
+		slowControlsSelfIPAddress =
+		    FEInterfaceNode.getNode("SlowControlsTxSocketIPAddress")
+		        .getValue<std::string>();
+		slowControlsSelfPort =
+		    FEInterfaceNode.getNode("SlowControlsTxSocketPort").getValue<int>();
+		slowControlsSupervisorIPAddress =
+		    slowControlsInterfaceLink.getNode("IPAddress").getValue<std::string>();
+		slowControlsSupervisorPort =
+		    slowControlsInterfaceLink.getNode("Port").getValue<int>();
 	}
 	catch(...)
 	{
 		__FE_COUT__ << "Link to slow controls supervisor is missing, so no socket made."
-								<< __E__;
+		            << __E__;
 	}
 
 	if(slowControlsSupervisorPort && slowControlsSelfPort &&
-			slowControlsSupervisorIPAddress != "" &&
-			slowControlsSelfIPAddress != "")
+	   slowControlsSupervisorIPAddress != "" && slowControlsSelfIPAddress != "")
 	{
-
 		__FE_COUT__ << "slowControlsInterfaceLink is valid! Create tx socket..." << __E__;
-		slowContrlolsTxSocket.reset(new UDPDataStreamerBase(
-				slowControlsSelfIPAddress,
-				slowControlsSelfPort,
-				slowControlsSupervisorIPAddress,
-				slowControlsSupervisorPort));
+		slowContrlolsTxSocket.reset(
+		    new UDPDataStreamerBase(slowControlsSelfIPAddress,
+		                            slowControlsSelfPort,
+		                            slowControlsSupervisorIPAddress,
+		                            slowControlsSupervisorPort));
 	}
 	else
 	{
-		__FE_COUT__ << "Invalid Slow Controls socket parameters, so no socket made." << __E__;
+		__FE_COUT__ << "Invalid Slow Controls socket parameters, so no socket made."
+		            << __E__;
 	}
-
 
 	// check if aggregate saving
 
@@ -266,12 +264,9 @@ try
 			// For example,
 			if(metricMan && universalAddressSize_ <= 8)
 			{
-
-				uint64_t val = 0; // 64 bits!
+				uint64_t val = 0;  // 64 bits!
 				for(size_t ii = 0; ii < universalAddressSize_; ++ii)
 					val += (uint8_t)readVal[ii] << (ii * 4);
-                                
-                                             
 
 				__FE_COUT__ << "Sending sample to Metric Manager..." << __E__;
 				metricMan->sendMetric(
@@ -317,17 +312,18 @@ try
 		fclose(fp);
 
 	return false;
-} // end slowControlsRunning()
+}  // end slowControlsRunning()
 catch(const std::runtime_error& e)
 {
-	__FE_COUT__ << "Error caught during slow controls running thread: " << e.what() << __E__;
+	__FE_COUT__ << "Error caught during slow controls running thread: " << e.what()
+	            << __E__;
 	return false;
 }
 catch(...)
 {
 	__FE_COUT__ << "Unknown error caught during slow controls running thread." << __E__;
 	return false;
-} // end slowControlsRunning()
+}  // end slowControlsRunning()
 
 //========================================================================================================================
 // SendAsyncErrorToGateway

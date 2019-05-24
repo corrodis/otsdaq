@@ -25,7 +25,8 @@ const std::string CodeEditor::SPECIAL_TYPE_OutputData        = "OutputData";
 
 const std::string CodeEditor::SOURCE_BASE_PATH = std::string(__ENV__("MRB_SOURCE")) + "/";
 const std::string CodeEditor::USER_DATA_PATH   = std::string(__ENV__("USER_DATA")) + "/";
-const std::string CodeEditor::OTSDAQ_DATA_PATH = std::string(__ENV__("OTSDAQ_DATA")) + "/";
+const std::string CodeEditor::OTSDAQ_DATA_PATH =
+    std::string(__ENV__("OTSDAQ_DATA")) + "/";
 
 //========================================================================================================================
 // CodeEditor

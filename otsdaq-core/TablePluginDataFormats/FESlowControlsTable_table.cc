@@ -55,7 +55,7 @@ FESlowControlsTable::FESlowControlsTable(void) : TableBase("FESlowControlsTable"
 FESlowControlsTable::~FESlowControlsTable(void) {}
 
 //==============================================================================
-//init
+// init
 //	Validates user inputs for data type.
 //
 void FESlowControlsTable::init(ConfigurationManager* configManager)
@@ -111,6 +111,6 @@ void FESlowControlsTable::init(ConfigurationManager* configManager)
 			__SS_THROW__;
 		}
 	}
-} //end init()
+}  // end init()
 
 DEFINE_OTS_TABLE(FESlowControlsTable)

@@ -162,7 +162,7 @@ T TableView::validateValueForColumn(const std::string& value,
 		__SS_THROW__;
 	}
 	catch(const std::runtime_error& e)
-	{	
+	{
 		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
 		       << " and column type: " << columnsInfo_[col].getType()
 		       << ", in configuration " << tableName_
@@ -175,11 +175,12 @@ T TableView::validateValueForColumn(const std::string& value,
 			ss << "For column type " << TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA
 			   << " the only valid numeric types are 'int' and 'unsigned int.'" << __E__;
 		else if(columnsInfo_[col].getDataType() != TableViewColumnInfo::DATATYPE_STRING &&
-				(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_ON_OFF ||
-						columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_TRUE_FALSE ||
-						columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_YES_NO))
-			ss << "For boolean column types (e.g. On/Off, True/False, Yes/No), you must choose " <<
-				"datatype '" << TableViewColumnInfo::DATATYPE_STRING << ".'" << __E__; 
+		        (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_ON_OFF ||
+		         columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_TRUE_FALSE ||
+		         columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_YES_NO))
+			ss << "For boolean column types (e.g. On/Off, True/False, Yes/No), you must "
+			      "choose "
+			   << "datatype '" << TableViewColumnInfo::DATATYPE_STRING << ".'" << __E__;
 
 		ss << e.what() << __E__;
 		__SS_THROW__;

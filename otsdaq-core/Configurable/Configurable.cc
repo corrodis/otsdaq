@@ -21,7 +21,8 @@ Configurable::~Configurable(void) {}
 //==============================================================================
 ConfigurationTree Configurable::getSelfNode() const
 {
-	//Note: do not save self node as member, because it may change as configuration is activated
+	// Note: do not save self node as member, because it may change as configuration is
+	// activated
 	return theXDAQContextConfigTree_.getNode(theConfigurationPath_);
 }
 

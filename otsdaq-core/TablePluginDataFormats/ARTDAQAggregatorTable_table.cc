@@ -365,12 +365,13 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 					}
 					catch(const std::runtime_error& e)
 					{
-						__MCOUT_WARN__("Are the DAQ sources valid? " <<
-								"Perhaps a Context has been turned off? " <<
-								"Skipping source due to an error looking for " <<
-								"Aggregator DAQ source context '" << sourceContextUID <<
-								"' for UID '" <<
-								aggregatorNode.getValue() << "': " << e.what() << __E__);
+						__MCOUT_WARN__("Are the DAQ sources valid? "
+						               << "Perhaps a Context has been turned off? "
+						               << "Skipping source due to an error looking for "
+						               << "Aggregator DAQ source context '"
+						               << sourceContextUID << "' for UID '"
+						               << aggregatorNode.getValue() << "': " << e.what()
+						               << __E__);
 						continue;
 					}
 
@@ -394,8 +395,7 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 						    source.second
 						        .getNode("ARTDAQGlobalTableLink/maxFragmentSizeBytes")
 						        .getValue<unsigned long long>();
-						OUT << "max_fragment_size_bytes: "
-						    << mfsb << __E__;
+						OUT << "max_fragment_size_bytes: " << mfsb << __E__;
 						OUT << "max_fragment_size_words: " << (mfsb / 8) << __E__;
 					}
 					catch(...)
@@ -525,17 +525,18 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 					unsigned int destinationRank = -1;
 					try
 					{
-						destinationRank = contextConfig->getARTDAQAppRank(
-								destinationContextUID);
+						destinationRank =
+						    contextConfig->getARTDAQAppRank(destinationContextUID);
 					}
 					catch(const std::runtime_error& e)
 					{
-						__MCOUT_WARN__("Are the DAQ destinations valid? " <<
-								"Perhaps a Context has been turned off? " <<
-								"Skipping destination due to an error looking for " <<
-								"Aggregator DAQ source context '" << destinationContextUID <<
-								"' for UID '" <<
-								aggregatorNode.getValue() << "': " << e.what() << __E__);
+						__MCOUT_WARN__(
+						    "Are the DAQ destinations valid? "
+						    << "Perhaps a Context has been turned off? "
+						    << "Skipping destination due to an error looking for "
+						    << "Aggregator DAQ source context '" << destinationContextUID
+						    << "' for UID '" << aggregatorNode.getValue()
+						    << "': " << e.what() << __E__);
 						continue;
 					}
 					std::string host =
