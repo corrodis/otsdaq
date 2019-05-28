@@ -3,7 +3,9 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#if __GNUC__ >= 8
 #pragma GCC diagnostic ignored "-Wcatch-value="
+#endif
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
 #include <xcept/tools.h>
