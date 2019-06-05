@@ -94,7 +94,6 @@ void CoreSupervisorBase::defaultPage(xgi::Input* in, xgi::Output* out)
 // requestWrapper ~
 //	wrapper for inheritance Supervisor request call
 void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
-
 {
 	// checkSupervisorPropertySetup();
 
