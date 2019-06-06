@@ -95,7 +95,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 	// modifiers of table groups
 
 	void activateTableGroup(const std::string& configGroupName,
-	                        TableGroupKey      configGroupKey,
+	                        TableGroupKey      tableGroupKey,
 	                        std::string*       accumulatedTreeErrors = 0);
 
 	TableVersion createTemporaryBackboneView(

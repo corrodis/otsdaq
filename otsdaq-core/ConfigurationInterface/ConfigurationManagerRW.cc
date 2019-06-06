@@ -467,11 +467,11 @@ ConfigurationManagerRW::getVersionAliases(void) const
 //	load table group and activate
 //	deactivates previous table group of same type if necessary
 void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupName,
-                                                TableGroupKey      configGroupKey,
+                                                TableGroupKey      tableGroupKey,
                                                 std::string*       accumulatedTreeErrors)
 {
 	loadTableGroup(configGroupName,
-	               configGroupKey,
+	               tableGroupKey,
 	               true,                    // loads and activates
 	               0,                       // no members needed
 	               0,                       // no progress bar
@@ -480,7 +480,7 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupNa
 	if(accumulatedTreeErrors && *accumulatedTreeErrors != "")
 	{
 		__COUT_ERR__ << "Errors were accumulated so de-activating group: "
-		             << configGroupName << " (" << configGroupKey << ")" << __E__;
+		             << configGroupName << " (" << tableGroupKey << ")" << __E__;
 		try  // just in case any lingering pieces, lets deactivate
 		{
 			destroyTableGroup(configGroupName, true);
@@ -1188,7 +1188,7 @@ void ConfigurationManagerRW::testXDAQContext()
 	//			//std::map<std::string, TableVersion >
 	//			//	loadTableGroup
 	//			//	(const std::string &configGroupName,
-	//			//	TableGroupKey configGroupKey, bool doActivate=false, ProgressBar*
+	//			//	TableGroupKey tableGroupKey, bool doActivate=false, ProgressBar*
 	// progressBar=0, std::string *accumulateWarnings=0);
 	//			{
 	//				std::map<std::string, TableVersion > memberMap =
@@ -1216,7 +1216,7 @@ void ConfigurationManagerRW::testXDAQContext()
 	//			//std::map<std::string, TableVersion >
 	//			//	loadTableGroup
 	//			//	(const std::string &configGroupName,
-	//			//	TableGroupKey configGroupKey, bool doActivate=false, ProgressBar*
+	//			//	TableGroupKey tableGroupKey, bool doActivate=false, ProgressBar*
 	// progressBar=0, std::string *accumulateWarnings=0);
 	//			{
 	//				std::map<std::string, TableVersion > memberMap =

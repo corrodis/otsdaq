@@ -84,7 +84,7 @@ class ConfigurationManager
 
 	void loadTableGroup(
 	    const std::string&                                     configGroupName,
-	    TableGroupKey                                          configGroupKey,
+	    TableGroupKey                                          tableGroupKey,
 	    bool                                                   doActivate         = false,
 	    std::map<std::string, TableVersion>*                   groupMembers       = 0,
 	    ProgressBar*                                           progressBar        = 0,
