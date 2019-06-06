@@ -2756,6 +2756,7 @@ void WebUsers::insertSettingsForUser(uint64_t         uid,
 {
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> permissionMap =
 	    getPermissionsForUser(uid);
+	    
 	__COUTV__(StringMacros::mapToString(permissionMap));
 	if(isInactiveForGroup(permissionMap))
 		return;  // not an active user
@@ -2786,8 +2787,6 @@ void WebUsers::insertSettingsForUser(uint64_t         uid,
 		xmldoc->copyDataChildren(prefXml);
 	}
 
-	char permStr[10];
-
 	// add settings if super user
 	if(includeAccounts && isAdminForGroup(permissionMap))
 	{
@@ -2813,17 +2812,18 @@ void WebUsers::insertSettingsForUser(uint64_t         uid,
 				xmldoc->addTextElementToParent("useremail", "", PREF_XML_ACCOUNTS_FIELD);
 			}
 
-			sprintf(permStr,
-			        "%s",
-			        StringMacros::mapToString(UsersPermissionsVector[i]).c_str());
 			xmldoc->addTextElementToParent(
-			    "permissions", permStr, PREF_XML_ACCOUNTS_FIELD);
+			    "permissions", 
+			    StringMacros::mapToString(UsersPermissionsVector[i]), 
+			    PREF_XML_ACCOUNTS_FIELD);
+			    
+			char nacStr[10];
 			if(UsersSaltVector[i] ==
 			   "")  // only give nac if account has not been activated yet with password
-				sprintf(permStr, "%d", int(UsersAccountCreatedTimeVector[i] & 0xffff));
+				sprintf(nacStr, "%d", int(UsersAccountCreatedTimeVector[i] & 0xffff));
 			else
-				permStr[0] = '\0';
-			xmldoc->addTextElementToParent("nac", permStr, PREF_XML_ACCOUNTS_FIELD);
+				nacStr[0] = '\0';
+			xmldoc->addTextElementToParent("nac", nacStr, PREF_XML_ACCOUNTS_FIELD);
 		}
 	}
 
@@ -2843,16 +2843,21 @@ void WebUsers::insertSettingsForUser(uint64_t         uid,
 		__COUT__ << "Saved System Preferences found." << __E__;
 		xmldoc->copyDataChildren(prefXml);
 	}
+	
+	__COUTV__(StringMacros::mapToString(permissionMap));
 
-	// add permissions value
-	sprintf(permStr, "%s", StringMacros::mapToString(permissionMap).c_str());
-	xmldoc->addTextElementToData(PREF_XML_PERMISSIONS_FIELD, permStr);
+
+	// add permissions value	
+	xmldoc->addTextElementToData(PREF_XML_PERMISSIONS_FIELD, 
+		StringMacros::mapToString(permissionMap));
 
 	// add user with lock
 	xmldoc->addTextElementToData(PREF_XML_USERLOCK_FIELD, usersUsernameWithLock_);
+	
 	// add user name
 	xmldoc->addTextElementToData(PREF_XML_USERNAME_FIELD, getUsersUsername(uid));
-}
+	
+} // end insertSettingsForUser()
 
 //========================================================================================================================
 // WebUsers::setGenericPreference
