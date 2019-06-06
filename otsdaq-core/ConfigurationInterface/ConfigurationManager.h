@@ -71,10 +71,11 @@ class ConfigurationManager
 		CONFIGURATION_TYPE
 	};
 
-	ConfigurationManager();
+	ConfigurationManager(bool initForWriteAccess  = false,
+	                     bool initializeFromFhicl = false);
 	virtual ~ConfigurationManager(void);
 
-	void init(std::string* accumulatedErrors = 0);
+	void init(std::string* accumulatedErrors = 0, bool initForWriteAccess = false);
 	void destroy(void);
 	void destroyTableGroup(const std::string& theGroup = "", bool onlyDeactivate = false);
 
@@ -93,7 +94,8 @@ class ConfigurationManager
 	    std::string*                                           groupCreateTime    = 0,
 	    bool                                                   doNotLoadMember    = false,
 	    std::string*                                           groupTypeString    = 0,
-	    std::map<std::string /*name*/, std::string /*alias*/>* groupAliases       = 0);
+	    std::map<std::string /*name*/, std::string /*alias*/>* groupAliases       = 0,
+	    bool onlyLoadIfBackboneOrContext = false);
 	void loadMemberMap(
 	    const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
 	TableGroupKey loadConfigurationBackbone(void);
@@ -152,15 +154,29 @@ class ConfigurationManager
 
 	std::map<std::string, TableVersion> getActiveVersions(void) const;
 
+	const std::string& getOwnerContext(void) { return ownerContextUID_; }
+	const std::string& getOwnerApp(void) { return ownerAppUID_; }
+	bool               isOwnerFirstAppInContext(void);
+
 	//==============================================================================
 	// Setters/Modifiers
 	std::shared_ptr<TableGroupKey> makeTheTableGroupKey(TableGroupKey key);
 	void                           restoreActiveTableGroups(bool               throwErrors = false,
-	                                                        const std::string& pathToActiveGroupsFile = "");
+	                                                        const std::string& pathToActiveGroupsFile = "",
+	                                                        bool               onlyLoadIfBackboneOrContext = false);
+
+	void setOwnerContext(const std::string& contextUID) { ownerContextUID_ = contextUID; }
+	void setOwnerApp(const std::string& appUID) { ownerAppUID_ = appUID; }
 
   private:
 	ConfigurationManager(const std::string& userName);  // private constructor called by
 	                                                    // ConfigurationManagerRW
+	void initializeFromFhicl(const std::string& fhiclPath);
+	void recursiveInitFromFhiclPSet(const std::string&         tableName,
+	                                const fhicl::ParameterSet& pset,
+	                                const std::string&         recordName     = "",
+	                                const std::string&         groupName      = "",
+	                                const std::string&         groupLinkIndex = "");
 
 	std::string username_;  // user of the configuration is READONLY_USER unless using
 	                        // ConfigurationManagerRW
@@ -176,6 +192,11 @@ class ConfigurationManager
 
 	TableBase groupMetadataTable_;  // special table - version saved each time a group is
 	                                // created
+
+	std::string ownerContextUID_;  // optional, often there is a context that owns this
+	                               // configuration manager
+	std::string ownerAppUID_;  // optional, often there is a supervisor that owns this
+	                           // configuration manager
 };
 }  // namespace ots
 

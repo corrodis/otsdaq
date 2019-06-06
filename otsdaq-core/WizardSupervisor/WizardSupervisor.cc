@@ -23,12 +23,12 @@
 using namespace ots;
 
 #define SECURITY_FILE_NAME \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
 #define SEQUENCE_FILE_NAME \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.dat"
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.dat"
 #define SEQUENCE_OUT_FILE_NAME \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.out"
-#define USER_DATA_PATH std::string(getenv("SERVICE_DATA_PATH")) + std::string("/")
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/sequence.out"
+#define USER_DATA_PATH std::string(__ENV__("SERVICE_DATA_PATH")) + std::string("/")
 //#define LOGBOOK_PREVIEWS_PATH 			"uploads/"
 
 #define XML_STATUS "editUserData_status"
@@ -60,8 +60,7 @@ XDAQ_INSTANTIATOR_IMPL(WizardSupervisor)
 #define __MF_SUBJECT__ "Wizard"
 
 //========================================================================================================================
-WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s) throw(
-    xdaq::exception::Exception)
+WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
     : xdaq::Application(s)
     , SOAPMessenger(this)
     , supervisorClass_(getApplicationDescriptor()->getClassName())
@@ -74,8 +73,8 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s) throw(
 	INIT_MF("OtsConfigurationWizard");
 
 	// attempt to make directory structure (just in case)
-	mkdir((std::string(getenv("SERVICE_DATA_PATH"))).c_str(), 0755);
-	mkdir((std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData").c_str(), 0755);
+	mkdir((std::string(__ENV__("SERVICE_DATA_PATH"))).c_str(), 0755);
+	mkdir((std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData").c_str(), 0755);
 
 	GatewaySupervisor::indicateOtsAlive();
 
@@ -130,7 +129,7 @@ void WizardSupervisor::init(void)
 
 //========================================================================================================================
 void WizardSupervisor::requestIcons(xgi::Input*  in,
-                                    xgi::Output* out) throw(xgi::exception::Exception)
+                                    xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
 
@@ -204,7 +203,7 @@ void WizardSupervisor::requestIcons(xgi::Input*  in,
 
 //========================================================================================================================
 void WizardSupervisor::verification(xgi::Input*  in,
-                                    xgi::Output* out) throw(xgi::exception::Exception)
+                                    xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
 	std::string  submittedSequence = CgiDataUtilities::getData(cgi, "code");
@@ -293,7 +292,7 @@ void WizardSupervisor::generateURL()
 
 	securityCode_ = "";
 
-	static const char alphanum[] =
+	const char alphanum[] =
 	    "0123456789"
 	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	    "abcdefghijklmnopqrstuvwxyz";
@@ -303,8 +302,8 @@ void WizardSupervisor::generateURL()
 		securityCode_ += alphanum[rand() % (sizeof(alphanum) - 1)];
 	}
 
-	__COUT__ << getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":"
-	         << getenv("PORT") << "/urn:xdaq-application:lid="
+	__COUT__ << __ENV__("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":"
+	         << __ENV__("PORT") << "/urn:xdaq-application:lid="
 	         << this->getApplicationDescriptor()->getLocalId()
 	         << "/Verify?code=" << securityCode_ << std::endl;
 
@@ -323,7 +322,7 @@ void WizardSupervisor::generateURL()
 		             << std::endl;
 
 	return;
-}
+}  // end generateURL()
 
 void WizardSupervisor::printURL(WizardSupervisor* ptr, std::string securityCode)
 {
@@ -333,8 +332,8 @@ void WizardSupervisor::printURL(WizardSupervisor* ptr, std::string securityCode)
 	for(; i < 5; ++i)
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(2));
-		__COUT__ << getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":"
-		         << getenv("PORT") << "/urn:xdaq-application:lid="
+		__COUT__ << __ENV__("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":"
+		         << __ENV__("PORT") << "/urn:xdaq-application:lid="
 		         << ptr->getApplicationDescriptor()->getLocalId()
 		         << "/Verify?code=" << securityCode << std::endl;
 	}
@@ -348,7 +347,7 @@ void WizardSupervisor::destroy(void)
 
 //========================================================================================================================
 void WizardSupervisor::tooltipRequest(xgi::Input*  in,
-                                      xgi::Output* out) throw(xgi::exception::Exception)
+                                      xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
 
@@ -364,10 +363,10 @@ void WizardSupervisor::tooltipRequest(xgi::Input*  in,
 		         << std::endl;
 		return;
 	}
-//	else
-//	{
-//		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
-//	}
+	//	else
+	//	{
+	//		__COUT__ << "***Successfully authenticated security sequence." << std::endl;
+	//	}
 	// SECURITY CHECK END ****
 
 	HttpXmlDocument xmldoc;
@@ -395,11 +394,11 @@ void WizardSupervisor::tooltipRequest(xgi::Input*  in,
 		__COUT__ << "Command Request, " << Command << ", not recognized." << std::endl;
 
 	xmldoc.outputXmlDocument((std::ostringstream*)out, false, true);
-}
+}  // end tooltipRequest()
 
 //========================================================================================================================
 void WizardSupervisor::toggleSecurityCodeGeneration(
-    xgi::Input* in, xgi::Output* out) throw(xgi::exception::Exception)
+    xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
 
@@ -433,8 +432,8 @@ void WizardSupervisor::toggleSecurityCodeGeneration(
 		generateURL();
 
 		// std::stringstream url;
-		//	url << getenv("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":" <<
-		// getenv("PORT")
+		//	url << __ENV__("OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER") << ":" <<
+		// __ENV__("PORT")
 		//	    << "/urn:xdaq-application:lid=" <<
 		// this->getApplicationDescriptor()->getLocalId()
 		//	    << "/Verify?code=" << securityCode_;
@@ -457,7 +456,7 @@ void WizardSupervisor::toggleSecurityCodeGeneration(
 // xoap::supervisorSequenceCheck
 //	verify cookie
 xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(
-    xoap::MessageReference message) throw(xoap::exception::Exception)
+    xoap::MessageReference message)
 {
 	// SOAPUtilities::receive request parameters
 	SOAPParameters parameters;
@@ -497,7 +496,7 @@ xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(
 //
 //	Note: same as Supervisor::supervisorLastConfigGroupRequest
 xoap::MessageReference WizardSupervisor::supervisorLastConfigGroupRequest(
-    xoap::MessageReference message) throw(xoap::exception::Exception)
+    xoap::MessageReference message)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ActionOfLastGroup");
@@ -508,7 +507,7 @@ xoap::MessageReference WizardSupervisor::supervisorLastConfigGroupRequest(
 
 //========================================================================================================================
 void WizardSupervisor::Default(xgi::Input*  in,
-                               xgi::Output* out) throw(xgi::exception::Exception)
+                               xgi::Output* out)
 {
 	__COUT__ << "Unauthorized Request made, security sequence doesn't match!"
 	         << std::endl;
@@ -517,7 +516,7 @@ void WizardSupervisor::Default(xgi::Input*  in,
 
 //========================================================================================================================
 void WizardSupervisor::request(xgi::Input*  in,
-                               xgi::Output* out) throw(xgi::exception::Exception)
+                               xgi::Output* out)
 {
 	cgicc::Cgicc cgiIn(in);
 
@@ -591,7 +590,7 @@ void WizardSupervisor::request(xgi::Input*  in,
 
 //========================================================================================================================
 void WizardSupervisor::editSecurity(xgi::Input*  in,
-                                    xgi::Output* out) throw(xgi::exception::Exception)
+                                    xgi::Output* out)
 {
 	// if sequence doesn't match up -> return
 	cgicc::Cgicc cgi(in);
@@ -698,7 +697,7 @@ void WizardSupervisor::editSecurity(xgi::Input*  in,
 }
 //========================================================================================================================
 void WizardSupervisor::UserSettings(xgi::Input*  in,
-                                    xgi::Output* out) throw(xgi::exception::Exception)
+                                    xgi::Output* out)
 {
 	// if sequence doesn't match up -> return
 	cgicc::Cgicc cgi(in);

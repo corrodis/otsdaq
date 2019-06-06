@@ -29,13 +29,13 @@ using namespace ots;
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "ConfigurationManagerRW"
 
-#define TABLE_INFO_PATH std::string(getenv("TABLE_INFO_PATH")) + "/"
+#define TABLE_INFO_PATH std::string(__ENV__("TABLE_INFO_PATH")) + "/"
 #define TABLE_INFO_EXT "Info.xml"
 
-#define CORE_TABLE_INFO_FILENAME                               \
-	((getenv("SERVICE_DATA_PATH") == NULL)                     \
-	     ? (std::string(getenv("USER_DATA")) + "/ServiceData") \
-	     : (std::string(getenv("SERVICE_DATA_PATH")))) +       \
+#define CORE_TABLE_INFO_FILENAME                                \
+	((__ENV__("SERVICE_DATA_PATH") == NULL)                     \
+	     ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") \
+	     : (std::string(__ENV__("SERVICE_DATA_PATH")))) +       \
 	    "/CoreTableInfoNames.dat"
 
 //==============================================================================
@@ -196,7 +196,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 {
 	// allTableInfo_ is container to be returned
 
-	//if(accumulatedErrors)
+	// if(accumulatedErrors)
 	//	*accumulatedErrors = "";
 
 	if(!refresh)
@@ -246,7 +246,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 				theInterface_->get(table, entry->d_name, 0, 0,
 				                   true);  // dont fill
 			}
-			catch(cet::exception)
+			catch(cet::exception const&)
 			{
 				if(table)
 					delete table;
@@ -707,7 +707,7 @@ TableVersion ConfigurationManagerRW::saveNewTable(const std::string& tableName,
 
 	__COUT__ << "New version added to info " << newVersion << __E__;
 
-	//table->getView().print();
+	// table->getView().print();
 	return newVersion;
 }
 

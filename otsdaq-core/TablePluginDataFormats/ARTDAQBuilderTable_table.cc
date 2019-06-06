@@ -10,7 +10,7 @@
 
 using namespace ots;
 
-#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
+#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE "builder"
 
 // helpers
@@ -305,17 +305,18 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 					unsigned int destinationRank = -1;
 					try
 					{
-						destinationRank = contextConfig->getARTDAQAppRank(
-								destinationContextUID);
+						destinationRank =
+						    contextConfig->getARTDAQAppRank(destinationContextUID);
 					}
 					catch(const std::runtime_error& e)
 					{
-						__MCOUT_WARN__("Are the Transport Service destinations valid? " <<
-								"Perhaps a Context has been turned off? " <<
-								"Skipping destination due to an error looking for Event " <<
-								"Builder DAQ source context '" << destinationContextUID <<
-								"' for UID '" <<
-								builderNode.getValue() << "': " << e.what() << __E__);
+						__MCOUT_WARN__(
+						    "Are the Transport Service destinations valid? "
+						    << "Perhaps a Context has been turned off? "
+						    << "Skipping destination due to an error looking for Event "
+						    << "Builder DAQ source context '" << destinationContextUID
+						    << "' for UID '" << builderNode.getValue()
+						    << "': " << e.what() << __E__);
 						continue;
 					}
 
@@ -395,7 +396,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		{
 			///////////////////////
 			auto servicesParameters = otherParameterLink.getChildren();
-			
+
 			//__COUTV__(servicesParameters.size());
 			for(auto& parameter : servicesParameters)
 			{
@@ -404,17 +405,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 					PUSHCOMMENT;
 
 				OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
-				    << parameter.second.getNode("daqParameterValue").getValue()
-				    << "\n";
+				    << parameter.second.getNode("daqParameterValue").getValue() << "\n";
 
 				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 				        .getValue<bool>())
 					POPCOMMENT;
 			}
 		}
-		//else
+		// else
 		//	__COUT__ << "No services parameters found" << __E__;
-
 
 		POPTAB;
 		OUT << "}\n\n";  // end services
@@ -435,7 +434,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		PUSHTAB;
 
 		auto mfsb = daq.getNode("daqEventBuilderMaxFragmentSizeBytes")
-		        .getValue<unsigned long long>();
+		                .getValue<unsigned long long>();
 		OUT << "max_fragment_size_bytes: " << mfsb << __E__;
 		OUT << "max_fragment_size_words: " << (mfsb / 8) << __E__;
 		OUT << "buffer_count: "
@@ -484,15 +483,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 					}
 					catch(const std::runtime_error& e)
 					{
-						__MCOUT_WARN__("Are the DAQ sources valid? " <<
-								"Perhaps a Context has been turned off? " <<
-								"Skipping source due to an error looking for Event " <<
-								"Builder DAQ source context '" << sourceContextUID <<
-								"' for UID '" <<
-								builderNode.getValue() << "': " << e.what() << __E__);
+						__MCOUT_WARN__(
+						    "Are the DAQ sources valid? "
+						    << "Perhaps a Context has been turned off? "
+						    << "Skipping source due to an error looking for Event "
+						    << "Builder DAQ source context '" << sourceContextUID
+						    << "' for UID '" << builderNode.getValue()
+						    << "': " << e.what() << __E__);
 						continue;
 					}
-
 
 					std::string host = contextConfig->getContextAddress(sourceContextUID);
 					unsigned int port =
@@ -704,16 +703,19 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 							try
 							{
 								destinationRank = contextConfig->getARTDAQAppRank(
-										destinationContextUID);
+								    destinationContextUID);
 							}
 							catch(const std::runtime_error& e)
 							{
-								__MCOUT_WARN__("Are the DAQ destinations valid? " <<
-										"Perhaps a Context has been turned off? " <<
-										"Skipping destination due to an error looking for Event " <<
-										"Builder DAQ source context '" << destinationContextUID <<
-										"' for UID '" <<
-										builderNode.getValue() << "': " << e.what() << __E__);
+								__MCOUT_WARN__(
+								    "Are the DAQ destinations valid? "
+								    << "Perhaps a Context has been turned off? "
+								    << "Skipping destination due to an error looking for "
+								       "Event "
+								    << "Builder DAQ source context '"
+								    << destinationContextUID << "' for UID '"
+								    << builderNode.getValue() << "': " << e.what()
+								    << __E__);
 								continue;
 							}
 
@@ -1033,13 +1035,12 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 	           "ARTDAQGlobalTableForProcessNameLink/processNameForBuilders")
 	    << "\n";
 
-
 	auto otherParameterLink = builderNode.getNode("addOnParametersLink");
 	if(!otherParameterLink.isDisconnected())
 	{
 		///////////////////////
 		auto otherParameters = otherParameterLink.getChildren();
-		
+
 		//__COUTV__(otherParameters.size());
 		for(auto& parameter : otherParameters)
 		{
@@ -1048,17 +1049,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				PUSHCOMMENT;
 
 			OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
-			    << parameter.second.getNode("daqParameterValue").getValue()
-			    << "\n";
+			    << parameter.second.getNode("daqParameterValue").getValue() << "\n";
 
 			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 			        .getValue<bool>())
 				POPCOMMENT;
 		}
 	}
-	//else
+	// else
 	//	__COUT__ << "No add-on parameters found" << __E__;
-
 
 	out.close();
 }

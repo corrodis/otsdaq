@@ -7,21 +7,22 @@
 #include <iostream>
 using namespace ots;
 
-#define MF_CFG_FILE                    \
-	std::string(getenv("USER_DATA")) + \
+#define MF_CFG_FILE                     \
+	std::string(__ENV__("USER_DATA")) + \
 	    "/MessageFacilityConfigurations/MessageFacilityGen.fcl"
-#define QT_CFG_FILE                    \
-	std::string(getenv("USER_DATA")) + \
+#define QT_CFG_FILE                     \
+	std::string(__ENV__("USER_DATA")) + \
 	    "/MessageFacilityConfigurations/QTMessageViewerGen.fcl"
-#define QUIET_CFG_FILE                 \
-	std::string(getenv("USER_DATA")) + \
+#define QUIET_CFG_FILE                  \
+	std::string(__ENV__("USER_DATA")) + \
 	    "/MessageFacilityConfigurations/QuietForwarderGen.cfg"
 #define USE_WEB_BOOL_FILE                 \
-	std::string(getenv("USER_DATA")) +    \
+	std::string(__ENV__("USER_DATA")) +   \
 	    "/MessageFacilityConfigurations/" \
 	    "UseWebConsole.bool"
-#define USE_QT_BOOL_FILE \
-	std::string(getenv("USER_DATA")) + "/MessageFacilityConfigurations/UseQTViewer.bool"
+#define USE_QT_BOOL_FILE                                                  \
+	std::string(__ENV__("USER_DATA")) + "/MessageFacilityConfigurations/" \
+	                                    "UseQTViewer.bool"
 
 // MessageFacilityTable Column names
 #define COL_NAME "UID"

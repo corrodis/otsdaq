@@ -981,10 +981,12 @@ const unsigned int TableView::getColStatus(void) const
 	if(colStatus_ != INVALID)
 		return colStatus_;
 
-	__COUT__ << "Column Types: " << __E__;
+	__COUT__ << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-		          << __E__;
+		std::cout << "\t" << columnsInfo_[col].getType() << "() "
+		          << columnsInfo_[col].getName() << __E__;
+
+	std::cout << __E__;
 
 	__SS__ << "Missing " << TableViewColumnInfo::COL_NAME_STATUS
 	       << " Column in config named " << tableName_
@@ -1002,10 +1004,11 @@ const unsigned int TableView::getColPriority(void) const
 	if(colPriority_ != INVALID)
 		return colPriority_;
 
-	__COUT__ << "Column Types: " << __E__;
+	__COUT__ << "Priority column was not found... \nColumn Types: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-		          << __E__;
+		std::cout << "\t" << columnsInfo_[col].getType() << "() "
+		          << columnsInfo_[col].getName() << __E__;
+	std::cout << __E__;
 
 	__SS__ << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
 	       << " Column in config named " << tableName_
@@ -1318,15 +1321,13 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 	    << "child GroupID column data type." << __E__;
 	ss << "Existing Column GroupIDs: " << __E__;
 	for(auto& groupIdColPair : colLinkGroupIDs_)
-		ss << "\t" << groupIdColPair.first << " : col-" << groupIdColPair.second
-		          << __E__;
+		ss << "\t" << groupIdColPair.first << " : col-" << groupIdColPair.second << __E__;
 
 	ss << "Existing Column Types: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		ss << "\t" << columnsInfo_[col].getType() << "() "
-		          << columnsInfo_[col].getName() << __E__;
+		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
+		   << __E__;
 
-	
 	__SS_THROW__;
 }  // end getColLinkGroupID()
 
@@ -1478,7 +1479,17 @@ std::set<std::string> TableView::getColumnNames(void) const
 	for(auto& colInfo : columnsInfo_)
 		retSet.emplace(colInfo.getName());
 	return retSet;
-}
+}  // end getColumnNames()
+
+//==============================================================================
+std::map<std::string, unsigned int /*col*/> TableView::getColumnNamesMap(void) const
+{
+	std::map<std::string, unsigned int /*col*/> retMap;
+	unsigned int                                c = 0;
+	for(auto& colInfo : columnsInfo_)
+		retMap.emplace(std::make_pair(colInfo.getName(), c++));
+	return retMap;
+}  // end getColumnNamesMap()
 
 //==============================================================================
 std::set<std::string> TableView::getColumnStorageNames(void) const
@@ -2621,7 +2632,7 @@ bool TableView::setURIEncodedValue(const std::string&  value,
 		//		{
 		//			__SS__ << "\tIn configuration " << tableName_
 		//			       << " at column=" << columnsInfo_[c].getName() << " the value
-		//set
+		// set
 		//("
 		//			       << convertedString << ")"
 		//			       << " is not a number! Please fix it or change the column

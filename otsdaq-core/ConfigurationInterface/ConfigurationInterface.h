@@ -229,7 +229,6 @@ class ConfigurationInterface
 
 	// table handling
 	virtual std::set<std::string /*name*/> getAllTableNames() const
-	    throw(std::runtime_error)
 	{
 		__SS__;
 		__THROW__(ss.str() +
@@ -245,7 +244,7 @@ class ConfigurationInterface
 
 	// group handling
 	virtual std::set<std::string /*name*/> getAllTableGroupNames(
-	    const std::string& filterString = "") const throw(std::runtime_error)
+	    const std::string& filterString = "") const
 	{
 		__SS__;
 		__THROW__(ss.str() +
@@ -267,7 +266,6 @@ class ConfigurationInterface
 	// to the metadata groupAliases!
 	virtual std::map<std::string /*name*/, TableVersion /*version*/> getTableGroupMembers(
 	    std::string const& /*groupName*/, bool includeMetaDataTable = false) const
-	    throw(std::runtime_error)
 	{
 		__SS__;
 		__THROW__(ss.str() +
@@ -279,7 +277,7 @@ class ConfigurationInterface
 	virtual void saveTableGroup(
 	    std::map<std::string /*name*/,
 	             TableVersion /*version*/> const& /*tableToVersionMap*/,
-	    std::string const& /*groupName*/) const throw(std::runtime_error)
+	    std::string const& /*groupName*/) const 
 	{
 		__SS__;
 		__THROW__(ss.str() +

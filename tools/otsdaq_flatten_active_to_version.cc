@@ -77,20 +77,20 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 	// otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [207]
 	setenv("CONFIGURATION_TYPE", "File", 1);  // Can be File, Database, DatabaseTest
 	setenv("CONFIGURATION_DATA_PATH",
-	       (std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
+	       (std::string(__ENV__("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
 	       1);
 	setenv(
-	    "TABLE_INFO_PATH", (std::string(getenv("USER_DATA")) + "/TableInfo").c_str(), 1);
+	    "TABLE_INFO_PATH", (std::string(__ENV__("USER_DATA")) + "/TableInfo").c_str(), 1);
 	////////////////////////////////////////////////////
 
-	// Some configuration plug-ins use getenv("SERVICE_DATA_PATH") in init() so define it
+	// Some configuration plug-ins use __ENV__("SERVICE_DATA_PATH") in init() so define it
 	setenv("SERVICE_DATA_PATH",
-	       (std::string(getenv("USER_DATA")) + "/ServiceData").c_str(),
+	       (std::string(__ENV__("USER_DATA")) + "/ServiceData").c_str(),
 	       1);
 
 	// also xdaq envs for XDAQContextTable
 	setenv("XDAQ_CONFIGURATION_DATA_PATH",
-	       (std::string(getenv("USER_DATA")) + "/XDAQConfigurations").c_str(),
+	       (std::string(__ENV__("USER_DATA")) + "/XDAQConfigurations").c_str(),
 	       1);
 	setenv("XDAQ_CONFIGURATION_XML", "otsConfigurationNoRU_CMake", 1);
 	////////////////////////////////////////////////////
@@ -175,7 +175,7 @@ void FlattenActiveTableGroups(int argc, char* argv[])
 
 	//==============================================================================
 	// manipulate directories
-	std::string currentDir = getenv("ARTDAQ_DATABASE_URI");
+	std::string currentDir = __ENV__("ARTDAQ_DATABASE_URI");
 
 	if(currentDir.find("filesystemdb://") != 0)
 	{

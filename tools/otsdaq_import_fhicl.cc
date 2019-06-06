@@ -15,7 +15,8 @@
 
 using namespace ots;
 
-void usage() {
+void usage()
+{
 	std::cout << "\n\nusage: Two arguments:\n\n\t otsdaq_import_system_aliases "
 	             "<path_to_import_database_folder> <path_to_active_groups_file> "
 	             "<import_prepend_base_name (optional)> \n\n"
@@ -52,7 +53,8 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	    ConfigurationManager::VERSION_ALIASES_TABLE_NAME;
 
 	// determine if help was requested
-	if(pset.get<bool>("do_help", false) || !pset.has_key("current_database_path") || !pset.has_key("active_groups_file"))
+	if(pset.get<bool>("do_help", false) || !pset.has_key("current_database_path") ||
+	   !pset.has_key("active_groups_file"))
 	{
 		usage();
 		return;
@@ -73,28 +75,28 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	// otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [207]
 	setenv("CONFIGURATION_TYPE", "File", 1);  // Can be File, Database, DatabaseTest
 	setenv("CONFIGURATION_DATA_PATH",
-	       (std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
+	       (std::string(__ENV__("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
 	       1);
 	setenv(
-	    "TABLE_INFO_PATH", (std::string(getenv("USER_DATA")) + "/TableInfo").c_str(), 1);
+	    "TABLE_INFO_PATH", (std::string(__ENV__("USER_DATA")) + "/TableInfo").c_str(), 1);
 	////////////////////////////////////////////////////
 
-	// Some configuration plug-ins use getenv("SERVICE_DATA_PATH") in init() so define it
+	// Some configuration plug-ins use __ENV__("SERVICE_DATA_PATH") in init() so define it
 	setenv("SERVICE_DATA_PATH",
-	       (std::string(getenv("USER_DATA")) + "/ServiceData").c_str(),
+	       (std::string(__ENV__("USER_DATA")) + "/ServiceData").c_str(),
 	       1);
 
-	// Some configuration plug-ins use getenv("OTSDAQ_LIB") and
-	// getenv("OTSDAQ_UTILITIES_LIB") in init() so define it 	to a non-sense place is ok
-	setenv("OTSDAQ_LIB", (std::string(getenv("USER_DATA")) + "/").c_str(), 1);
-	setenv("OTSDAQ_UTILITIES_LIB", (std::string(getenv("USER_DATA")) + "/").c_str(), 1);
+	// Some configuration plug-ins use __ENV__("OTSDAQ_LIB") and
+	// __ENV__("OTSDAQ_UTILITIES_LIB") in init() so define it 	to a non-sense place is ok
+	setenv("OTSDAQ_LIB", (std::string(__ENV__("USER_DATA")) + "/").c_str(), 1);
+	setenv("OTSDAQ_UTILITIES_LIB", (std::string(__ENV__("USER_DATA")) + "/").c_str(), 1);
 
-	// Some configuration plug-ins use getenv("OTS_MAIN_PORT") in init() so define it
+	// Some configuration plug-ins use __ENV__("OTS_MAIN_PORT") in init() so define it
 	setenv("OTS_MAIN_PORT", "2015", 1);
 
 	// also xdaq envs for XDAQContextTable
 	setenv("XDAQ_CONFIGURATION_DATA_PATH",
-	       (std::string(getenv("USER_DATA")) + "/XDAQConfigurations").c_str(),
+	       (std::string(__ENV__("USER_DATA")) + "/XDAQConfigurations").c_str(),
 	       1);
 	setenv("XDAQ_CONFIGURATION_XML", "otsConfigurationNoRU_CMake", 1);
 	////////////////////////////////////////////////////
@@ -156,7 +158,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	//==============================================================================
 
 	// create objects
-	
+
 	std::map<std::string /*importGroupAlias*/,
 	         /*original*/ std::pair<std::string /*groupName*/, TableGroupKey>>
 	    originalGroupAliasMap;
@@ -188,7 +190,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	__COUT__ << "Configuration manager initialized." << __E__;
 
 	std::string nowTime    = std::to_string(time(0));
-	std::string currentDir = getenv("ARTDAQ_DATABASE_URI");
+	std::string currentDir = __ENV__("ARTDAQ_DATABASE_URI");
 
 	if(currentDir.find("filesystemdb://") != 0)
 	{
@@ -215,7 +217,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	    existingTableAliases = cfgMgr->ConfigurationManager::getVersionAliases();
 	std::map<std::string /*alias*/, std::pair<std::string /*group name*/, TableGroupKey>>
 	    existingGroupAliases = cfgMgr->getActiveGroupAliases();
-	
+
 	//	-- swap to import-db and clear cache
 	{
 		// back up current directory now

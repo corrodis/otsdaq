@@ -8,7 +8,7 @@ const CorePropertySupervisorBase::SupervisorProperties
 
 //========================================================================================================================
 CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* application)
-    : theConfigurationManager_(new ConfigurationManager)
+    : theConfigurationManager_(0)  // new ConfigurationManager)
     , supervisorClass_(application->getApplicationDescriptor()->getClassName())
     , supervisorClassNoNamespace_(supervisorClass_.substr(
           supervisorClass_.find_last_of(":") + 1,
@@ -35,10 +35,33 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	__SUP_COUTV__(supervisorClass_);
 	__SUP_COUTV__(supervisorClassNoNamespace_);
 
-	// get all supervisor info, and wiz mode or not
+	// get all supervisor info, and wiz mode, macroMaker mode, or not
 	allSupervisorInfo_.init(application->getApplicationContext());
 
-	if(allSupervisorInfo_.isWizardMode())
+	if(allSupervisorInfo_.isMacroMakerMode())
+	{
+		theConfigurationManager_ = new ConfigurationManager(false /*initForWriteAccess*/,
+		                                                    true /*initializeFromFhicl*/);
+		__SUP_COUT__
+		    << "Macro Maker mode detected. So skipping configuration location work for "
+		       "supervisor of class '"
+		    << supervisorClass_ << "'" << __E__;
+
+		supervisorContextUID_     = "MacroMakerFEContext";
+		supervisorApplicationUID_ = "MacroMakerFESupervisor";
+		supervisorConfigurationPath_ =
+		    CorePropertySupervisorBase::supervisorContextUID_ +
+		    "/LinkToApplicationTable/" +
+		    CorePropertySupervisorBase::supervisorApplicationUID_ +
+		    "/LinkToSupervisorTable";
+
+		__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
+		__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
+		__SUP_COUTV__(CorePropertySupervisorBase::supervisorConfigurationPath_);
+
+		return;
+	}
+	else if(allSupervisorInfo_.isWizardMode())
 	{
 		__SUP_COUT__ << "Wiz mode detected. So skipping configuration location work for "
 		                "supervisor of class '"
@@ -47,7 +70,6 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 		supervisorApplicationUID_ =
 		    std::to_string(application->getApplicationDescriptor()->getLocalId());
 		supervisorConfigurationPath_ = "NO APP PATH IN WIZ MODE";
-
 
 		__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
 		__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
@@ -64,6 +86,7 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 
 	try
 	{
+		theConfigurationManager_ = new ConfigurationManager();
 		CorePropertySupervisorBase::supervisorContextUID_ =
 		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
 		        ->getContextUID(application->getApplicationContext()
@@ -112,6 +135,11 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 
 	CorePropertySupervisorBase::indicateOtsAlive(this);
 
+	theConfigurationManager_->setOwnerContext(
+	    CorePropertySupervisorBase::supervisorContextUID_);
+	theConfigurationManager_->setOwnerApp(
+	    CorePropertySupervisorBase::supervisorApplicationUID_);
+
 }  // end constructor
 
 //========================================================================================================================
@@ -128,7 +156,7 @@ void CorePropertySupervisorBase::indicateOtsAlive(
 	char        portStr[100] = "0";
 	std::string hostname     = "wiz";
 
-	// Note: the environment variable getenv("HOSTNAME") fails in multinode ots systems
+	// Note: the environment variable __ENV__("HOSTNAME") fails in multinode ots systems
 	// started through ssh
 
 	if(properties)
@@ -152,7 +180,7 @@ void CorePropertySupervisorBase::indicateOtsAlive(
 	}
 
 	// indicate ots is alive (for StartOTS.sh to verify launch was successful)
-	std::string filename = std::string(getenv("OTSDAQ_LOG_DIR")) + "/otsdaq_is_alive-" +
+	std::string filename = std::string(__ENV__("OTSDAQ_LOG_DIR")) + "/otsdaq_is_alive-" +
 	                       hostname + "-" + portStr + ".dat";
 	FILE* fp = fopen(filename.c_str(), "w");
 	if(!fp)
@@ -306,6 +334,11 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 		__SUP_COUT__ << "Wiz mode detected. Skipping setup of supervisor properties for "
 		                "supervisor of class '"
 		             << supervisorClass_ << "'" << __E__;
+	else if(allSupervisorInfo_.isMacroMakerMode())
+		__SUP_COUT__
+		    << "Maker Maker mode detected. Skipping setup of supervisor properties for "
+		       "supervisor of class '"
+		    << supervisorClass_ << "'" << __E__;
 	else
 		CorePropertySupervisorBase::loadUserSupervisorProperties();  // loads user
 		                                                             // settings from

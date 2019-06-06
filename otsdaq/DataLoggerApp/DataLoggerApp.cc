@@ -33,7 +33,7 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(DataLoggerApp)
 
-#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
+#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE "aggregator"
 
 //========================================================================================================================
@@ -101,7 +101,7 @@ DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* stub) : CoreSupervisorBase(s
 	//	catch(...)
 	//	{
 	//		__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration
-	//through " 		                "the Configuration Manager."
+	// through " 		                "the Configuration Manager."
 	//		             << " The supervisorContextUID_ = " << supervisorContextUID_
 	//		             << ". The supervisorApplicationUID = " <<
 	// supervisorApplicationUID_
@@ -306,7 +306,12 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 	fhicl::ParameterSet pset;
 
 	std::string        filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
-	const std::string& uid      = CorePropertySupervisorBase::getSupervisorUID();
+	const std::string& uid =
+	    theConfigurationManager_
+	        ->getNode(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME + "/" +
+	                  CorePropertySupervisorBase::getSupervisorUID() + "/" +
+	                  "LinkToSupervisorTable")
+	        .getValueAsString();
 
 	__SUP_COUTV__(uid);
 	for(unsigned int i = 0; i < uid.size(); ++i)
@@ -328,6 +333,11 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 			in.seekg(0, std::ios::beg);
 			in.read(&fileFclString[0], fileFclString.size());
 			in.close();
+		}
+		else
+		{
+			__SUP_SS__ << "Fhicl file not found! " << filename << __E__;
+			__SUP_SS_THROW__;
 		}
 	}
 

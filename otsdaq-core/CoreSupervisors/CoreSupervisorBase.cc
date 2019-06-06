@@ -29,7 +29,6 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub* stub)
 
 	INIT_MF("CoreSupervisorBase");
 
-
 	xgi::bind(this, &CoreSupervisorBase::defaultPageWrapper, "Default");
 	xgi::bind(this, &CoreSupervisorBase::requestWrapper, "Request");
 
@@ -50,7 +49,7 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub* stub)
 	           XDAQ_NS_URI);
 
 	__SUP_COUT__ << "Constructed." << __E__;
-} //end constructor
+}  // end constructor
 
 //========================================================================================================================
 CoreSupervisorBase::~CoreSupervisorBase(void)
@@ -67,7 +66,7 @@ void CoreSupervisorBase::destroy(void)
 	for(auto& it : theStateMachineImplementation_)
 		delete it;
 	theStateMachineImplementation_.clear();
-} //end destroy()
+}  // end destroy()
 
 //========================================================================================================================
 // wrapper for inheritance call
@@ -95,15 +94,14 @@ void CoreSupervisorBase::defaultPage(xgi::Input* in, xgi::Output* out)
 // requestWrapper ~
 //	wrapper for inheritance Supervisor request call
 void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
-
 {
 	// checkSupervisorPropertySetup();
 
 	cgicc::Cgicc cgiIn(in);
 	std::string  requestType = CgiDataUtilities::getData(cgiIn, "RequestType");
 
-	//__SUP_COUT__ << "requestType " << requestType << " files: " <<
-	// cgiIn.getFiles().size() << __E__;
+	//	__SUP_COUT__ << "requestType " << requestType << " files: " <<
+	//			cgiIn.getFiles().size() << __E__;
 
 	HttpXmlDocument           xmlOut;
 	WebUsers::RequestUserInfo userInfo(
@@ -546,7 +544,8 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 		__SUP_COUT__ << "Configuration table group name: " << theGroup.first
 		             << " key: " << theGroup.second << __E__;
 
-		theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true);
+		theConfigurationManager_->loadTableGroup(
+		    theGroup.first, theGroup.second, true /*doActivate*/);
 	}
 
 	// Now that the configuration manager has all the necessary configurations,

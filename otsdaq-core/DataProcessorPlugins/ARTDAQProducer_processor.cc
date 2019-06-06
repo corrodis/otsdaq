@@ -15,8 +15,8 @@
 
 using namespace ots;
 //
-//#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
-//#define ARTDAQ_FILE_PREAMBLE "boardReader"
+//#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" +
+//"ARTDAQConfigurations/" #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
 //========================================================================================================================
 ARTDAQProducer::ARTDAQProducer(std::string              supervisorApplicationUID,
@@ -151,8 +151,8 @@ ARTDAQProducer::~ARTDAQProducer(void)
 //	configure(rank);
 //}
 //
-//#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
-//#define ARTDAQ_FILE_PREAMBLE "boardReader"
+//#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" +
+//"ARTDAQConfigurations/" #define ARTDAQ_FILE_PREAMBLE "boardReader"
 //
 ////========================================================================================================================
 // void ARTDAQProducer::configure(int rank)

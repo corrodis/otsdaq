@@ -10,7 +10,7 @@
 
 using namespace ots;
 
-#define ARTDAQ_FCL_PATH std::string(getenv("USER_DATA")) + "/" + "ARTDAQConfigurations/"
+#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
 // helpers
@@ -346,7 +346,7 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 			return;
 		}
 	}
-	catch(const std::runtime_error)
+	catch(const std::runtime_error&)
 	{
 		__COUT__ << "Ignoring error, assume this a valid UID node." << __E__;
 		// error is expected here for UIDs.. so just ignore
@@ -447,17 +447,18 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 				unsigned int destinationRank = -1;
 				try
 				{
-					destinationRank = contextConfig->getARTDAQAppRank(
-							destinationContextUID);
+					destinationRank =
+					    contextConfig->getARTDAQAppRank(destinationContextUID);
 				}
 				catch(const std::runtime_error& e)
 				{
-					__MCOUT_WARN__("Are the DAQ destinations valid? " <<
-							"Perhaps a Context has been turned off? " <<
-							"Skipping destination due to an error looking for Board " <<
-							"Reader DAQ source context '" << destinationContextUID <<
-							"' for UID '" <<
-							boardReaderNode.getValue() << "': " << e.what() << __E__);
+					__MCOUT_WARN__(
+					    "Are the DAQ destinations valid? "
+					    << "Perhaps a Context has been turned off? "
+					    << "Skipping destination due to an error looking for Board "
+					    << "Reader DAQ source context '" << destinationContextUID
+					    << "' for UID '" << boardReaderNode.getValue()
+					    << "': " << e.what() << __E__);
 					continue;
 				}
 

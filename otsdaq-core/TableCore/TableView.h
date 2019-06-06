@@ -61,21 +61,22 @@ class TableView
 	unsigned int findColByType(const std::string& type, int startingCol = 0) const;
 
 	// Getters
-	const std::string&           getUniqueStorageIdentifier(void) const;
-	const std::string&           getTableName(void) const;
-	const TableVersion&          getVersion(void) const;
-	const std::string&           getComment(void) const;
-	const std::string&           getAuthor(void) const;
-	const time_t&                getCreationTime(void) const;
-	const time_t&                getLastAccessTime(void) const;
-	const bool&                  getLooseColumnMatching(void) const;
-	const unsigned int           getDataColumnSize(void) const;
-	const unsigned int&          getSourceColumnMismatch(void) const;
-	const unsigned int&          getSourceColumnMissing(void) const;
-	const std::set<std::string>& getSourceColumnNames(void) const;
-	std::set<std::string>        getColumnNames(void) const;
-	std::set<std::string>        getColumnStorageNames(void) const;
-	std::vector<std::string>     getDefaultRowValues(void) const;
+	const std::string&                          getUniqueStorageIdentifier(void) const;
+	const std::string&                          getTableName(void) const;
+	const TableVersion&                         getVersion(void) const;
+	const std::string&                          getComment(void) const;
+	const std::string&                          getAuthor(void) const;
+	const time_t&                               getCreationTime(void) const;
+	const time_t&                               getLastAccessTime(void) const;
+	const bool&                                 getLooseColumnMatching(void) const;
+	const unsigned int                          getDataColumnSize(void) const;
+	const unsigned int&                         getSourceColumnMismatch(void) const;
+	const unsigned int&                         getSourceColumnMissing(void) const;
+	const std::set<std::string>&                getSourceColumnNames(void) const;
+	std::set<std::string>                       getColumnNames(void) const;
+	std::map<std::string, unsigned int /*col*/> getColumnNamesMap(void) const;
+	std::set<std::string>                       getColumnStorageNames(void) const;
+	std::vector<std::string>                    getDefaultRowValues(void) const;
 
 	unsigned int       getNumberOfRows(void) const;
 	unsigned int       getNumberOfColumns(void) const;

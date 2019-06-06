@@ -44,14 +44,19 @@ class CoreSupervisorBase : public xdaq::Application,
                            public CorePropertySupervisorBase,
                            public RunControlStateMachine
 {
+	friend class MacroMakerSupervisor;  // to allow MacroMakerSupervisor to call
+	                                    // requestWrapper in Macro Maker mode
+
   public:
 	CoreSupervisorBase(xdaq::ApplicationStub* stub);
 	virtual ~CoreSupervisorBase(void);
 
 	void destroy(void);
 
-
-	const unsigned int getSupervisorLID(void) const { return getApplicationDescriptor()->getLocalId(); }
+	const unsigned int getSupervisorLID(void) const
+	{
+		return getApplicationDescriptor()->getLocalId();
+	}
 
 	// Here are the common web request handlers:
 	//	defaultPage returns the public html page

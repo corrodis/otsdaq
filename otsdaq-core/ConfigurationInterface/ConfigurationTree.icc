@@ -49,7 +49,7 @@ void ConfigurationTree::getValue(T& value) const
 	else if(row_ == TableView::INVALID)
 	{
 		__SS__ << "Malformed ConfigurationTree. " << __E__;
-		
+
 		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
@@ -57,14 +57,14 @@ void ConfigurationTree::getValue(T& value) const
 	{
 		__SS__ << "Requesting getValue on uid node level. Must be a value node. "
 		       << __E__;
-		
+
 		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
 	else
 	{
 		__SS__ << "Impossible! " << __E__;
-		
+
 		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
@@ -93,7 +93,7 @@ T ConfigurationTree::handleValidateValueForColumn(const TableView* configView,
 	if(!configView)
 	{
 		__SS__ << "Null configView" << __E__;
-		
+
 		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}

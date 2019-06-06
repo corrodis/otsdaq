@@ -35,7 +35,7 @@ ConfigurationTree::ConfigurationTree()
 	//__COUT__ << __E__;
 	//__COUT__ << "EMPTY CONSTRUCTOR ConfigManager: " << configMgr_ << " configuration: "
 	//<< table_  << __E__;
-} //end empty constructor
+}  // end empty constructor
 
 //==============================================================================
 ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMgr,
@@ -57,7 +57,7 @@ ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMg
 	//__COUT__ << __E__;
 	//__COUT__ << "SHORT CONTRUCTOR ConfigManager: " << configMgr_ << " configuration: "
 	//<< table_  << __E__;
-} //end short constructor
+}  // end short constructor
 
 //==============================================================================
 ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMgr,
@@ -94,8 +94,8 @@ ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMg
 	if(!configMgr_)  // || !table_ || !tableView_)
 	{
 		__SS__ << "Invalid empty pointer given to tree!\n"
-		   << "\n\tconfigMgr_=" << configMgr_ << "\n\tconfiguration_=" << table_
-		   << "\n\tconfigView_=" << tableView_ << __E__;
+		       << "\n\tconfigMgr_=" << configMgr_ << "\n\tconfiguration_=" << table_
+		       << "\n\tconfigView_=" << tableView_ << __E__;
 
 		ss << nodeDump() << __E__;
 		__SS_THROW__;
@@ -115,14 +115,14 @@ ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMg
 		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
-} //end full constructor
+}  // end full constructor
 
 //==============================================================================
 // destructor
 ConfigurationTree::~ConfigurationTree(void)
 {
 	//__COUT__ << __E__;
-} //end destructor
+}  // end destructor
 
 //==============================================================================
 // print
@@ -133,7 +133,7 @@ ConfigurationTree::~ConfigurationTree(void)
 void ConfigurationTree::print(const unsigned int& depth, std::ostream& out) const
 {
 	recursivePrint(*this, depth, out, "\t");
-} //end print()
+}  // end print()
 
 //==============================================================================
 void ConfigurationTree::recursivePrint(const ConfigurationTree& t,
@@ -172,7 +172,7 @@ void ConfigurationTree::recursivePrint(const ConfigurationTree& t,
 				out << space << "}" << __E__;
 		}
 	}
-} //end recursivePrint()
+}  // end recursivePrint()
 
 //==============================================================================
 std::string ConfigurationTree::handleValidateValueForColumn(
@@ -259,7 +259,7 @@ void ConfigurationTree::getValue(std::string& value) const
 		__SS__ << "Impossible." << __E__;
 		__SS_THROW__;
 	}
-} //end getValue()
+}  // end getValue()
 
 //==============================================================================
 // getValue
@@ -279,7 +279,7 @@ std::string ConfigurationTree::getValue() const
 	std::string value;
 	ConfigurationTree::getValue(value);
 	return value;
-} //end getValue()
+}  // end getValue()
 
 //==============================================================================
 // getValue (only ConfigurationTree::BitMap value)
@@ -401,7 +401,7 @@ void ConfigurationTree::getValueAsBitMap(ConfigurationTree::BitMap& bitmap) cons
 		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
-} //end getValueAsBitMap()
+}  // end getValueAsBitMap()
 
 //==============================================================================
 // getValue
@@ -412,7 +412,7 @@ ConfigurationTree::BitMap ConfigurationTree::getValueAsBitMap() const
 	ConfigurationTree::BitMap value;
 	ConfigurationTree::getValueAsBitMap(value);
 	return value;
-} //end getValueAsBitMap()
+}  // end getValueAsBitMap()
 
 //==============================================================================
 // getEscapedValue
@@ -428,7 +428,7 @@ std::string ConfigurationTree::getEscapedValue() const
 
 	ss << nodeDump() << __E__;
 	__SS_THROW__;
-} //end getEscapedValue()
+}  // end getEscapedValue()
 
 //==============================================================================
 // getTableName
@@ -441,18 +441,20 @@ const std::string& ConfigurationTree::getTableName(void) const
 		if(linkParentConfig_)
 		{
 			ss << "Error occurred traversing from " << linkParentConfig_->getTableName()
-			   << " UID '" << linkParentConfig_->getView().getValueAsString(
-			   		linkBackRow_ , 
-			   		linkParentConfig_->getView().getColUID())
+			   << " UID '"
+			   << linkParentConfig_->getView().getValueAsString(
+			          linkBackRow_, linkParentConfig_->getView().getColUID())
 			   << "' at row " << linkBackRow_ << " col '"
 			   << linkParentConfig_->getView().getColumnInfo(linkBackCol_).getName()
 			   << ".'" << __E__;
+
+			ss << StringMacros::stackTrace() << __E__;
 		}
 
 		__SS_ONLY_THROW__;
 	}
 	return table_->getTableName();
-} //end getTableName()
+}  // end getTableName()
 
 //==============================================================================
 // getFieldTableName
@@ -476,7 +478,7 @@ const std::string& ConfigurationTree::getFieldTableName(void) const
 	}
 	else
 		return getTableName();
-} //end getFieldTableName()
+}  // end getFieldTableName()
 
 //==============================================================================
 // getDisconnectedTableName
@@ -491,7 +493,7 @@ const std::string& ConfigurationTree::getDisconnectedTableName(void) const
 
 	ss << nodeDump() << __E__;
 	__SS_ONLY_THROW__;
-} //end getDisconnectedTableName()
+}  // end getDisconnectedTableName()
 
 //==============================================================================
 // getDisconnectedLinkID
@@ -506,7 +508,7 @@ const std::string& ConfigurationTree::getDisconnectedLinkID(void) const
 
 	ss << nodeDump() << __E__;
 	__SS_ONLY_THROW__;
-} //end getDisconnectedLinkID()
+}  // end getDisconnectedLinkID()
 
 //==============================================================================
 // getTableVersion
@@ -521,7 +523,7 @@ const TableVersion& ConfigurationTree::getTableVersion(void) const
 		__SS_ONLY_THROW__;
 	}
 	return tableView_->getVersion();
-} //end getTableVersion()
+}  // end getTableVersion()
 
 //==============================================================================
 // getTableCreationTime
@@ -537,7 +539,7 @@ const time_t& ConfigurationTree::getTableCreationTime(void) const
 		__SS_ONLY_THROW__;
 	}
 	return tableView_->getCreationTime();
-} //end getTableCreationTime()
+}  // end getTableCreationTime()
 
 //==============================================================================
 // getFixedChoices
@@ -608,7 +610,7 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 		retVec.push_back(choice);
 
 	return retVec;
-} //end getFixedChoices()
+}  // end getFixedChoices()
 
 //==============================================================================
 // getValueAsString
@@ -661,7 +663,7 @@ const std::string& ConfigurationTree::getValueAsString(bool returnLinkTableValue
 		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
-} //end getValueAsString()
+}  // end getValueAsString()
 
 //==============================================================================
 // getUIDAsString
@@ -680,7 +682,7 @@ const std::string& ConfigurationTree::getUIDAsString(void) const
 		ss << nodeDump() << __E__;
 		__SS_ONLY_THROW__;
 	}
-} //end getUIDAsString()
+}  // end getUIDAsString()
 
 //==============================================================================
 // getValueDataType
@@ -691,7 +693,7 @@ const std::string& ConfigurationTree::getValueDataType(void) const
 		return tableView_->getColumnInfo(col_).getDataType();
 	else  // must be std::string
 		return TableViewColumnInfo::DATATYPE_STRING;
-} //end getValueDataType()
+}  // end getValueDataType()
 
 //==============================================================================
 // isDefaultValue
@@ -722,7 +724,7 @@ bool ConfigurationTree::isDefaultValue(void) const
 		return getValueAsString() == TableViewColumnInfo::DATATYPE_TIME_DEFAULT;
 	else
 		return false;
-} //end isDefaultValue()
+}  // end isDefaultValue()
 
 //==============================================================================
 // getValueType
@@ -735,7 +737,7 @@ const std::string& ConfigurationTree::getValueType(void) const
 		return ConfigurationTree::VALUE_TYPE_DISCONNECTED;
 	else  // just call all non-value nodes data
 		return ConfigurationTree::VALUE_TYPE_NODE;
-} //end getValueType()
+}  // end getValueType()
 
 //==============================================================================
 // getColumnInfo
@@ -752,7 +754,7 @@ const TableViewColumnInfo& ConfigurationTree::getColumnInfo(void) const
 		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
-} //end getColumnInfo()
+}  // end getColumnInfo()
 
 //==============================================================================
 // getRow
@@ -774,7 +776,7 @@ const unsigned int& ConfigurationTree::getFieldRow(void) const
 	}
 	else
 		return row_;
-} //end getFieldRow()
+}  // end getFieldRow()
 
 //==============================================================================
 // getFieldColumn
@@ -788,7 +790,7 @@ const unsigned int& ConfigurationTree::getFieldColumn(void) const
 	}
 	else
 		return col_;
-} //end getFieldColumn()
+}  // end getFieldColumn()
 
 //==============================================================================
 // getChildLinkIndex
@@ -803,7 +805,7 @@ const std::string& ConfigurationTree::getChildLinkIndex(void) const
 		__SS_THROW__;
 	}
 	return childLinkIndex_;
-} //end getChildLinkIndex()
+}  // end getChildLinkIndex()
 
 //==============================================================================
 // getValueName
@@ -821,7 +823,7 @@ const std::string& ConfigurationTree::getValueName(void) const
 		ss << nodeDump() << __E__;
 		__SS_THROW__;
 	}
-} //end getValueName()
+}  // end getValueName()
 
 //==============================================================================
 // recurse
@@ -837,7 +839,7 @@ ConfigurationTree ConfigurationTree::recurse(const ConfigurationTree& tree,
 		return tree;
 	return tree.recursiveGetNode(
 	    childPath, doNotThrowOnBrokenUIDLinks, originalNodeString);
-} //end recurse()
+}  // end recurse()
 
 ////==============================================================================
 ////getRecordFieldValueAsString
@@ -879,7 +881,7 @@ ConfigurationTree ConfigurationTree::getNode(const std::string& nodeString,
 {
 	return recursiveGetNode(
 	    nodeString, doNotThrowOnBrokenUIDLinks, "" /*originalNodeString*/);
-} //end getNode() connected to recursiveGetNode()
+}  // end getNode() connected to recursiveGetNode()
 ConfigurationTree ConfigurationTree::recursiveGetNode(
     const std::string& nodeString,
     bool               doNotThrowOnBrokenUIDLinks,
@@ -1193,7 +1195,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(
 
 	ss << nodeDump() << __E__;
 	__SS_ONLY_THROW__;  // this node is value node, cant go any deeper!
-} //end recursiveGetNode()
+}  // end recursiveGetNode()
 
 //==============================================================================
 // nodeDump
@@ -1252,7 +1254,7 @@ std::string ConfigurationTree::nodeDump(void) const
 	   << __E__;
 
 	return ss.str();
-}  //end nodeDump()
+}  // end nodeDump()
 
 //==============================================================================
 ConfigurationTree ConfigurationTree::getBackNode(std::string  nodeName,
@@ -1262,7 +1264,7 @@ ConfigurationTree ConfigurationTree::getBackNode(std::string  nodeName,
 		nodeName = nodeName.substr(0, nodeName.find_last_of('/'));
 
 	return getNode(nodeName);
-} //end getBackNode()
+}  // end getBackNode()
 
 //==============================================================================
 ConfigurationTree ConfigurationTree::getForwardNode(std::string  nodeName,
@@ -1278,7 +1280,7 @@ ConfigurationTree ConfigurationTree::getForwardNode(std::string  nodeName,
 		s = nodeName.find('/', s) + 1;
 
 	return getNode(nodeName.substr(0, s));
-} //end getForwardNode()
+}  // end getForwardNode()
 
 //==============================================================================
 // isValueNode
@@ -1286,7 +1288,7 @@ ConfigurationTree ConfigurationTree::getForwardNode(std::string  nodeName,
 bool ConfigurationTree::isValueNode(void) const
 {
 	return (row_ != TableView::INVALID && col_ != TableView::INVALID);
-} //end isValueNode()
+}  // end isValueNode()
 
 //==============================================================================
 // isValueBoolType
@@ -1324,7 +1326,7 @@ bool ConfigurationTree::isDisconnected(void) const
 	}
 
 	return !table_ || !tableView_;
-} //end isDisconnected()
+}  // end isDisconnected()
 
 //==============================================================================
 // isLinkNode
@@ -1357,7 +1359,7 @@ std::string ConfigurationTree::getNodeType(void) const
 	if(isValueNode())
 		return ConfigurationTree::NODE_TYPE_VALUE;
 	return ConfigurationTree::NODE_TYPE_UID;
-} //end getNodeType()
+}  // end getNodeType()
 
 //==============================================================================
 // isGroupLinkNode
@@ -1404,7 +1406,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
     const std::vector<std::string /*relative-path*/>& fieldAcceptList,
     const std::vector<std::string /*relative-path*/>& fieldRejectList,
     unsigned int                                      depth,
-	bool											  autoSelectFilterFields) const
+    bool                                              autoSelectFilterFields) const
 {
 	// enforce that starting point is a table node
 	if(!isRootNode() && !isConfigurationNode())
@@ -1467,24 +1469,22 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		auto recordChildren = getNode(recordList[i]).getChildren();
 		for(const auto& fieldNode : recordChildren)
 		{
-//			__COUT__ << "All... " << fieldNode.second.getNodeType() <<
-//					" -- " << fieldNode.first << __E__;
+			//			__COUT__ << "All... " << fieldNode.second.getNodeType() <<
+			//					" -- " << fieldNode.first << __E__;
 
-			if(fieldNode.second.isValueNode() ||
-					fieldNode.second.isGroupLinkNode())
+			if(fieldNode.second.isValueNode() || fieldNode.second.isGroupLinkNode())
 			{
 				// skip author and record insertion time
 				if(fieldNode.second.isValueNode())
 				{
 					if(fieldNode.second.getColumnInfo().getType() ==
-						   TableViewColumnInfo::TYPE_AUTHOR ||
+					       TableViewColumnInfo::TYPE_AUTHOR ||
 					   fieldNode.second.getColumnInfo().getType() ==
-						   TableViewColumnInfo::TYPE_TIMESTAMP)
+					       TableViewColumnInfo::TYPE_TIMESTAMP)
 						continue;
 
 					//__COUT__ << "isValueNode " << fieldNode.first << __E__;
 				}
-
 
 				if(!i)  // first uid record
 				{
@@ -1515,25 +1515,26 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 					// UIDs in same table)
 					if(found)
 					{
-
 						if(fieldNode.second.isGroupLinkNode())
 						{
 							__COUT__ << "isGroupLinkNode " << fieldNode.first << __E__;
 
-							//must get column info differently for group link column
+							// must get column info differently for group link column
 
-							std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
+							std::pair<unsigned int /*link col*/,
+							          unsigned int /*link id col*/>
+							     linkPair;
 							bool isGroupLink;
-							tableView_->getChildLink(
-									tableView_->findCol(fieldNode.first),
-									isGroupLink, linkPair);
+							tableView_->getChildLink(tableView_->findCol(fieldNode.first),
+							                         isGroupLink,
+							                         linkPair);
 
-							//add both link columns
+							// add both link columns
 
 							fieldCandidateList.push_back(ConfigurationTree::RecordField(
-								table_->getTableName(),
+							    table_->getTableName(),
 							    recordList[i],
-								tableView_->getColumnInfo(linkPair.first).getName(),
+							    tableView_->getColumnInfo(linkPair.first).getName(),
 							    "",  // relative path, not including columnName_
 							    &tableView_->getColumnInfo(linkPair.first)));
 							fieldCount.push_back(-1);  // mark guaranteed field
@@ -1541,12 +1542,12 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 							fieldCandidateList.push_back(ConfigurationTree::RecordField(
 							    table_->getTableName(),
 							    recordList[i],
-								tableView_->getColumnInfo(linkPair.second).getName(),
+							    tableView_->getColumnInfo(linkPair.second).getName(),
 							    "",  // relative path, not including columnName_
 							    &tableView_->getColumnInfo(linkPair.second)));
 							fieldCount.push_back(-1);  // mark guaranteed field
 						}
-						else //value node
+						else  // value node
 						{
 							fieldCandidateList.push_back(ConfigurationTree::RecordField(
 							    fieldNode.second.getTableName(),
@@ -1560,7 +1561,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 				}
 				// else // not first uid record, do not need to check, must be same as
 				// first record!
-			} //end value field handling
+			}  // end value field handling
 			else if(depth > 0 && fieldNode.second.isUIDLinkNode() &&
 			        !fieldNode.second.isDisconnected())
 			{
@@ -1574,9 +1575,9 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 				    fieldNode.first + "/",  // relativePathBase
 				    !i                      // launch inFirstRecord (or not) depth search
 				);
-			} //end unique link handling
+			}  // end unique link handling
 		}
-	} //end record loop
+	}  // end record loop
 
 	//__COUT__ << "======================= check for count = " <<
 	//		(int)recordList.size() << __E__;
@@ -1599,95 +1600,100 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		}
 	}
 
-//	for(unsigned int i=0;i<fieldCandidateList.size();++i)
-//		__COUT__ << "Pre-Final " << fieldCandidateList[i].relativePath_ <<
-//			fieldCandidateList[i].columnName_ << __E__;
+	//	for(unsigned int i=0;i<fieldCandidateList.size();++i)
+	//		__COUT__ << "Pre-Final " << fieldCandidateList[i].relativePath_ <<
+	//			fieldCandidateList[i].columnName_ << __E__;
 
 	if(autoSelectFilterFields)
 	{
-		//filter for just 3 of the best filter fields
+		// filter for just 3 of the best filter fields
 		//	i.e. preference	for GroupID, On/Off, and FixedChoice fields.
-		std::set<std::pair<unsigned int /*fieldPriority*/,unsigned int /*fieldIndex*/>> prioritySet;
+		std::set<std::pair<unsigned int /*fieldPriority*/, unsigned int /*fieldIndex*/>>
+		    prioritySet;
 
 		unsigned int highestPriority = 0;
-		for(unsigned int i=0;i<fieldCandidateList.size();++i)
+		for(unsigned int i = 0; i < fieldCandidateList.size(); ++i)
 		{
-//				__COUT__ << "Option " << fieldCandidateList[i].relativePath_ <<
-//						fieldCandidateList[i].columnName_ << " : " <<
-//						fieldCandidateList[i].columnInfo_->getType() << ":" <<
-//						fieldCandidateList[i].columnInfo_->getDataType() << __E__;
+			//				__COUT__ << "Option " << fieldCandidateList[i].relativePath_
+			//<< 						fieldCandidateList[i].columnName_ << " : " <<
+			//						fieldCandidateList[i].columnInfo_->getType() << ":" <<
+			//						fieldCandidateList[i].columnInfo_->getDataType() <<
+			//__E__;
 
-				if(fieldCandidateList[i].columnInfo_->isBoolType())
-					prioritySet.emplace(std::make_pair(
-							0 /*fieldPriority*/, i /*fieldIndex*/));
-				else if(fieldCandidateList[i].columnInfo_->isGroupID())
-				{
-					prioritySet.emplace(std::make_pair(
-							1 /*fieldPriority*/, i /*fieldIndex*/));
-					if(highestPriority < 1)
-						highestPriority = 1;
-				}
-				else if(fieldCandidateList[i].columnInfo_->getType() ==
-						TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
-				{
-					prioritySet.emplace(std::make_pair(
-							3 /*fieldPriority*/, i /*fieldIndex*/));
-					if(highestPriority < 3)
-						highestPriority = 3;
-				}
-				else if(fieldCandidateList[i].columnInfo_->getType() ==
-						TableViewColumnInfo::TYPE_DATA)
-				{
-					prioritySet.emplace(std::make_pair(
-							10 /*fieldPriority*/, i /*fieldIndex*/));
-					if(highestPriority < 10)
-						highestPriority = 10;
-				}
-				else //skip other fields and mark for erasing
-				{
-					fieldCandidateList[i].tableName_ =
-							""; //clear table name as indicator for erase
-					continue;
-				}
+			if(fieldCandidateList[i].columnInfo_->isBoolType())
+				prioritySet.emplace(
+				    std::make_pair(0 /*fieldPriority*/, i /*fieldIndex*/));
+			else if(fieldCandidateList[i].columnInfo_->isGroupID())
+			{
+				prioritySet.emplace(
+				    std::make_pair(1 /*fieldPriority*/, i /*fieldIndex*/));
+				if(highestPriority < 1)
+					highestPriority = 1;
+			}
+			else if(fieldCandidateList[i].columnInfo_->getType() ==
+			        TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
+			{
+				prioritySet.emplace(
+				    std::make_pair(3 /*fieldPriority*/, i /*fieldIndex*/));
+				if(highestPriority < 3)
+					highestPriority = 3;
+			}
+			else if(fieldCandidateList[i].columnInfo_->getType() ==
+			        TableViewColumnInfo::TYPE_DATA)
+			{
+				prioritySet.emplace(
+				    std::make_pair(10 /*fieldPriority*/, i /*fieldIndex*/));
+				if(highestPriority < 10)
+					highestPriority = 10;
+			}
+			else  // skip other fields and mark for erasing
+			{
+				fieldCandidateList[i].tableName_ =
+				    "";  // clear table name as indicator for erase
+				continue;
+			}
 
-		} //done ranking fields
+		}  // done ranking fields
 
 		__COUTV__(StringMacros::setToString(prioritySet));
 
-		//now choose the top 3, and delete the rest
+		// now choose the top 3, and delete the rest
 		//	clear table name to indicate field should be erased
 		{
 			unsigned int cnt = 0;
 			for(const auto& priorityFieldIndex : prioritySet)
-				if(++cnt > 3) //then mark for erasing
+				if(++cnt > 3)  // then mark for erasing
 				{
-//					__COUT__ << cnt << " marking " << fieldCandidateList[
-//								priorityFieldIndex.second].relativePath_ <<
-//							fieldCandidateList[priorityFieldIndex.second].columnName_ <<
-//							__E__;
+					//					__COUT__ << cnt << " marking " <<
+					//fieldCandidateList[
+					//								priorityFieldIndex.second].relativePath_
+					//<<
+					//							fieldCandidateList[priorityFieldIndex.second].columnName_
+					//<<
+					//							__E__;
 					fieldCandidateList[priorityFieldIndex.second].tableName_ =
-							""; //clear table name as indicator for erase
+					    "";  // clear table name as indicator for erase
 				}
 		}
 
 		for(unsigned int i = 0; i < fieldCandidateList.size(); ++i)
 		{
-			if(fieldCandidateList[i].tableName_ == "") //then erase
+			if(fieldCandidateList[i].tableName_ == "")  // then erase
 			{
-//				__COUT__ << "Erasing " << fieldCandidateList[i].relativePath_ <<
-//						fieldCandidateList[i].columnName_ << __E__;
+				//				__COUT__ << "Erasing " << fieldCandidateList[i].relativePath_
+				//<< 						fieldCandidateList[i].columnName_ << __E__;
 				fieldCandidateList.erase(fieldCandidateList.begin() + i);
 				--i;  // rewind to look at next after deleted
 			}
 		}
-	} // end AUTO filter field selection
+	}  // end AUTO filter field selection
 
-	for(unsigned int i=0;i<fieldCandidateList.size();++i)
-		__COUT__ << "Final " << fieldCandidateList[i].relativePath_ <<
-			fieldCandidateList[i].columnName_ << __E__;
+	for(unsigned int i = 0; i < fieldCandidateList.size(); ++i)
+		__COUT__ << "Final " << fieldCandidateList[i].relativePath_
+		         << fieldCandidateList[i].columnName_ << __E__;
 
 	return fieldCandidateList;
-} //end getCommonFields()
+}  // end getCommonFields()
 
 //==============================================================================
 // getUniqueValuesForField
@@ -1730,7 +1736,7 @@ std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForFiel
 	}
 
 	return uniqueValues;
-} //end getUniqueValuesForField()
+}  // end getUniqueValuesForField()
 
 //==============================================================================
 // recursiveGetCommonFields
@@ -1857,7 +1863,7 @@ void ConfigurationTree::recursiveGetCommonFields(
 			);
 		}
 	}
-} //end recursiveGetCommonFields()
+}  // end recursiveGetCommonFields()
 
 //==============================================================================
 // getChildrenByPriority
@@ -2078,7 +2084,7 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationTree::getChi
 
 	//__COUT__ << "Done w/Children of node: " << getValueAsString() << __E__;
 	return retVector;
-} //end getChildren()
+}  // end getChildren()
 
 //==============================================================================
 // getChildren
@@ -2099,7 +2105,7 @@ std::map<std::string, ConfigurationTree> ConfigurationTree::getChildrenMap(void)
 
 	//__COUT__ << "Done w/Children of node: " << getValueAsString() << __E__;
 	return retMap;
-} //end getChildrenMap()
+}  // end getChildrenMap()
 
 //==============================================================================
 bool ConfigurationTree::isRootNode(void) const { return (!table_); }
@@ -2247,7 +2253,7 @@ std::vector<std::vector<std::string>> ConfigurationTree::getChildrenNamesByPrior
 	}
 
 	return retVector;
-} //end getChildrenNamesByPriority()
+}  // end getChildrenNamesByPriority()
 
 //==============================================================================
 // getChildrenNames
@@ -2295,6 +2301,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority,
 						{
 							tableView_->getValue(
 							    tmpStatus, r, tableView_->getColStatus());
+
 							if(!tmpStatus)
 								continue;  // skip those with status false
 						}
@@ -2333,6 +2340,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority,
 				if(onlyStatusTrue)
 				{
 					tableView_->getValue(tmpStatus, r, tableView_->getColStatus());
+
 					if(!tmpStatus)
 						continue;  // skip those with status false
 				}
@@ -2376,7 +2384,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority,
 	}
 
 	return retVector;
-} //end getChildrenNames()
+}  // end getChildrenNames()
 
 //==============================================================================
 // getValueAsTreeNode
@@ -2418,4 +2426,4 @@ ConfigurationTree ConfigurationTree::getValueAsTreeNode(void) const
 		       << "' - must start with a '/' character." << __E__;
 		__SS_ONLY_THROW__;
 	}
-} //end getValueAsTreeNode()
+}  // end getValueAsTreeNode()

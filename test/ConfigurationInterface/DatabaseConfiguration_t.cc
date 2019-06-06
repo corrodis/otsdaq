@@ -34,9 +34,9 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 
 	// normally CONFIGURATION_TYPE is set by StartOTS.sh
 	setenv("CONFIGURATION_DATA_PATH",
-	       (std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
+	       (std::string(__ENV__("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
 	       1);
-	std::string configDir = std::string(getenv("CONFIGURATION_DATA_PATH")) + '/';
+	std::string configDir = std::string(__ENV__("CONFIGURATION_DATA_PATH")) + '/';
 
 	// CONFIGURATION_TYPE needed by
 	// otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]  Can
@@ -123,9 +123,9 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 
 	// normally CONFIGURATION_TYPE is set by StartOTS.sh
 	setenv("CONFIGURATION_DATA_PATH",
-	       (std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
+	       (std::string(__ENV__("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
 	       1);
-	std::string configDir = std::string(getenv("CONFIGURATION_DATA_PATH")) + '/';
+	std::string configDir = std::string(__ENV__("CONFIGURATION_DATA_PATH")) + '/';
 
 	// CONFIGURATION_TYPE needed by
 	// otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]  Can

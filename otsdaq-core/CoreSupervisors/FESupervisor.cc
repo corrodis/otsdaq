@@ -7,9 +7,10 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(FESupervisor)
 
 //========================================================================================================================
-FESupervisor::FESupervisor(xdaq::ApplicationStub* stub)
-: CoreSupervisorBase(stub)
+FESupervisor::FESupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stub)
 {
+	__SUP_COUT__ << "Constructing..." << __E__;
+
 	xoap::bind(this,
 	           &FESupervisor::macroMakerSupervisorRequest,
 	           "MacroMakerSupervisorRequest",
@@ -23,13 +24,84 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub)
 	           "FECommunication",
 	           XDAQ_NS_URI);
 
-	CoreSupervisorBase::theStateMachineImplementation_.push_back(new FEVInterfacesManager(
-	    CorePropertySupervisorBase::getContextTreeNode(),
-	    CorePropertySupervisorBase::getSupervisorConfigurationPath()));
+	try
+	{
+		CoreSupervisorBase::theStateMachineImplementation_.push_back(
+		    new FEVInterfacesManager(
+		        CorePropertySupervisorBase::getContextTreeNode(),
+		        CorePropertySupervisorBase::getSupervisorConfigurationPath()));
+	}
+	catch(...)
+	{
+		if(CorePropertySupervisorBase::allSupervisorInfo_.isMacroMakerMode())
+		{
+			__SUP_COUT_WARN__ << "Error caught constructing FE Interface Manager. In "
+			                     "Macro Maker mode, the input fhicl defines the "
+			                     "configuration tree, make sure you specified a valid "
+			                     "fcl file path."
+			                  << __E__;
+		}
+		throw;
+	}
 
 	extractFEInterfacesManager();
 
-	__SUP_COUT__ << "Destructed." << __E__;
+	__SUP_COUT__ << "Constructed." << __E__;
+
+	if(CorePropertySupervisorBase::allSupervisorInfo_.isMacroMakerMode())
+	{
+		__SUP_COUT_INFO__ << "Macro Maker mode, so configuring at startup!" << __E__;
+		if(!theFEInterfacesManager_)
+		{
+			__SUP_SS__ << "Missing FE Interface manager!" << __E__;
+			__SUP_SS_THROW__;
+		}
+
+		// copied from CoreSupervisorBase::transitionConfiguring()
+
+		// Now that the configuration manager has all the necessary configurations,
+		//	create all objects that depend on the configuration (the first iteration)
+
+		try
+		{
+			__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+			preStateMachineExecutionLoop();
+			for(unsigned int i = 0; i < theStateMachineImplementation_.size(); ++i)
+			{
+				// if one state machine is doing a sub-iteration, then target that one
+				if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 &&
+				   i != subIterationWorkStateMachineIndex_)
+					continue;  // skip those not in the sub-iteration
+
+				if(stateMachinesIterationDone_[i])
+					continue;  // skip state machines already done
+
+				preStateMachineExecution(i);
+				theStateMachineImplementation_[i]->parentSupervisor_ =
+				    this;  // for backwards compatibility, kept out of configure
+				           // parameters
+				theStateMachineImplementation_[i]->configure();  // e.g. for FESupervisor,
+				// this is configure of
+				// FEVInterfacesManager
+				postStateMachineExecution(i);
+			}
+			postStateMachineExecutionLoop();
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SUP_SS__ << "Error was caught while configuring: " << e.what() << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			theStateMachine_.setErrorMessage(ss.str());
+		}
+		catch(...)
+		{
+			__SUP_SS__
+			    << "Unknown error was caught while configuring. Please checked the logs."
+			    << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+			theStateMachine_.setErrorMessage(ss.str());
+		}
+	}  // end Macro Maker mode initial configure
 }  // end constructor
 
 //========================================================================================================================
@@ -432,6 +504,11 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			else  // if no FE interfaces, return empty string
 				retParameters.addParameter("FEList", "");
 
+			// if errors in state machine, send also
+			if(theStateMachine_.getErrorMessage() != "")
+				retParameters.addParameter("frontEndError",
+				                           theStateMachine_.getErrorMessage());
+
 			return SOAPUtilities::makeSOAPMessageReference(
 			    supervisorClassNoNamespace_ + "Response", retParameters);
 		}
@@ -688,10 +765,9 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(
 			if(theFEInterfacesManager_)
 				retParameters.addParameter(
 				    "FEMacros",
-					theFEInterfacesManager_->getFEMacrosString(
-							CorePropertySupervisorBase::getSupervisorUID(),
-							std::to_string(
-									CoreSupervisorBase::getSupervisorLID())));
+				    theFEInterfacesManager_->getFEMacrosString(
+				        CorePropertySupervisorBase::getSupervisorUID(),
+				        std::to_string(CoreSupervisorBase::getSupervisorLID())));
 			else
 				retParameters.addParameter("FEMacros", "");
 

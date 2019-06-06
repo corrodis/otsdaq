@@ -44,7 +44,7 @@ void TimeFormatter::stopTimer(void)
 //==============================================================================
 std::string TimeFormatter::getTime(void)
 {
-	char        theDate[20];
+	char        theDate[72];
 	struct tm*  thisTime;
 	time_t      aclock;
 	std::string date;

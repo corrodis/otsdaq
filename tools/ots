@@ -85,7 +85,7 @@ function defineColors ()
   DBold=`tput rmso`         # Exit standout mode                
 }
 
-#for some reason, this function does not exist in this script.. recreating
+#trace helper functions
 function toffS () 
 { 
 	${TRACE_BIN}/trace_cntl lvlclr 0 `bitN_to_mask "$@"` 0
@@ -157,15 +157,21 @@ SCRIPT_DIR="$(
 unalias ots.exe &>/dev/null 2>&1 #hide output
 alias ots.exe='xdaq.exe' &>/dev/null #hide output
 
-
+ISMACROMAKER=0
 ISCONFIG=0
 QUIET=1
 CHROME=0
 FIREFOX=0
 BACKUPLOGS=0
 RELAUNCHCHECK=0
+export MACROMAKER_MODE=0
 
 #check for options
+if [[ "$1"  == "--macromaker" || "$2"  == "--macromaker" || "$1"  == "-mm" || "$2"  == "-mm"  ]]; then
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t************* ${RED}MACRO-MAKER ONLY MODE!${Reset} ************"
+	ISMACROMAKER=1
+fi
+
 if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" || "$2"  == "--config" || "$2"  == "--configure" || "$2"  == "--wizard" || "$2"  == "--wiz" || "$2"  == "-w" ]]; then	
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t************* ${RED}WIZ MODE ENABLED!${Reset}             *************"      
     ISCONFIG=1
@@ -303,7 +309,7 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	exit
 fi
 
-if [[ $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPLOGS == 0 && $RELAUNCHCHECK == 0 && "$1x" != "x" ]]; then
+if [[ ISMACROMAKER == 0 && $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPLOGS == 0 && $RELAUNCHCHECK == 0 && "$1x" != "x" ]]; then
 	echo 
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Unrecognized parameter(s)${Reset} ${BIBlue}$1 $2${Reset} [Note: only two parameters are considered, others are ignored]. "
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${BIGreen}Usage${Reset}:"
@@ -513,15 +519,30 @@ if [ "x${ARTDAQ_OUTPUT_DIR}" == "x" ]; then
 fi
 
 if [ ! -d $ARTDAQ_OUTPUT_DIR ]; then
-    mkdir -p $ARTDAQ_OUTPUT_DIR
+	if [ ! -L $ARTDAQ_OUTPUT_DIR ]; then
+	    mkdir -p $ARTDAQ_OUTPUT_DIR
+	else
+		mkdir -p `readlink -f $ARTDAQ_OUTPUT_DIR`
+	fi
 fi
 
 if [ ! -d $OTSDAQ_LOG_DIR ]; then
-    mkdir -p $OTSDAQ_LOG_DIR
+	if [ ! -L $OTSDAQ_LOG_DIR ]; then
+	    mkdir -p $OTSDAQ_LOG_DIR
+	else
+		mkdir -p `readlink -f $OTSDAQ_LOG_DIR`
+	fi
 fi
 export OTSDAQ_LOG_ROOT=$OTSDAQ_LOG_DIR
 
 
+if [ ! -d ${USER_DATA}/MessageFacilityConfigurations ];then
+	if [ ! -L ${USER_DATA}/MessageFacilityConfigurations ]; then
+		mkdir -p ${USER_DATA}/MessageFacilityConfigurations
+	else
+		mkdir -p `readlink -f ${USER_DATA}/MessageFacilityConfigurations`
+	fi
+fi
 
 ##############################################################################
 export XDAQ_CONFIGURATION_XML=otsConfigurationNoRU_CMake #-> 
@@ -536,6 +557,141 @@ MPI_RUN_CMD=""
 
 	
 #declare launch functions
+
+
+####################################################################
+####################################################################
+################## MacroMaker Mode OTS Launch ######################
+####################################################################
+####################################################################
+#make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
+launchOTSMacromaker() {	
+	
+	#kill all things otsdaq, before launching new things	
+	killprocs
+	
+	#cleanup alive files
+	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive* &>/dev/null 2>&1 #hide output #remove alive file
+
+
+	echo
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t*****************************************************"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t**********   Launching MacroMaker MODE!    **********"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t*****************************************************"
+	echo
+	
+	
+	export MACROMAKER_MODE=1
+	
+	#assume verbose requires extra -v option
+	if [ $QUIET == 1 ]; then
+	
+		if [[ "x$2" = "x" ]]; then
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tError! Must specify fcl file path parameter for Macro Maker mode!${Reset}"
+			echo
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExample Macro Maker mode usage:"
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
+			echo
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tTo get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
+			
+			exit
+		fi
+	
+		if [[ "$2" = /* ]]; then #absolute path
+			export CONFIGURATION_INIT_FCL=$2
+		else
+			export CONFIGURATION_INIT_FCL="${PWD}/$2"
+		fi
+	else
+	
+		if [[ "x$3" = "x" ]]; then
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tError! Must specify fcl file path parameter for Macro Maker mode!${Reset}"
+			echo
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tExample Macro Maker mode usage:"
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
+			echo
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tTo get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
+			
+			exit
+		fi
+		
+		if [[ "$3" = /* ]]; then #absolute path
+			export CONFIGURATION_INIT_FCL=$3
+		else
+			export CONFIGURATION_INIT_FCL="${PWD}/$3"
+		fi
+	fi
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCONFIGURATION_INIT_FCL = ${CONFIGURATION_INIT_FCL}"
+	
+	#setup wiz mode environment variables
+	export FE_SUPERVISOR_ID=280
+	export MACROMAKER_SUPERVISOR_ID=290
+	MAIN_PORT=2015
+
+	if [ "x$OTS_MAIN_PORT" != "x" ]; then
+	  MAIN_PORT=${OTS_MAIN_PORT}
+	elif [ $USER == rrivera ]; then
+	  MAIN_PORT=1983
+	elif [ $USER == lukhanin ]; then
+	  MAIN_PORT=2060
+	elif [ $USER == uplegger ]; then
+	  MAIN_PORT=1974
+	elif [ $USER == parilla ]; then
+	   MAIN_PORT=9000
+	elif [ $USER == eflumerf ]; then
+	   MAIN_PORT=1987
+	elif [ $USER == swu ]; then
+	   MAIN_PORT=1994
+	elif [ $USER == rrivera ]; then
+	   MAIN_PORT=1776
+	elif [ $USER == naodell ]; then
+	   MAIN_PORT=2030
+	elif [ $USER == bschneid ]; then
+	   MAIN_PORT=2050
+	fi
+	export PORT=${MAIN_PORT}	
+	
+		
+	#substitute environment variables into template wiz-mode xdaq config xml
+	envsubst <${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_MacroMaker_CMake.xml > ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_MacroMaker_CMake_Run.xml
+	
+	#use safe Message Facility fcl in config mode
+	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl
+	
+	echo
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tStarting MacroMaker mode on port ${PORT}; to change, please setup environment variable OTS_MAIN_PORT."
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tMacroMaker mode ots context is defined by ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_MacroMaker_CMake_Run.xml"
+
+	#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
+		
+	if [ $QUIET == 1 ]; then
+		echo
+
+		if [ $BACKUPLOGS == 1 ]; then
+			DATESTRING=`date +'%s'`
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t     Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${HOSTNAME}.${DATESTRING}.txt ***"
+			mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${HOSTNAME}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${HOSTNAME}.${DATESTRING}.txt
+		fi
+		
+		echo
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. Output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${HOSTNAME}.txt ***  "
+		echo "ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_MacroMaker_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${HOSTNAME}.txt &"
+		ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_MacroMaker_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${HOSTNAME}.txt &
+	else
+		ots.exe -p ${PORT} -h ${HOSTNAME} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_MacroMaker_CMake_Run.xml &
+	fi
+	LAST_OTS_PID=$!
+	
+	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$MACROMAKER_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
+	
+	printMainURL &
+	
+	
+	echo -e "${Reset}"
+	echo -e "${Reset}"
+	
+} #end launchOTSMacromaker
+export -f launchOTSMacromaker
 
 ####################################################################
 ####################################################################
@@ -563,7 +719,7 @@ launchOTSWiz() {
 	####################################################################
 	#decide which MessageFacility console viewer to run
 	# and configure otsdaq MF library with MessageFacility*.fcl to use
-	
+
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityGen.fcl
 	#this fcl tells the MF library used by ots source how to behave
 	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
@@ -1411,7 +1567,11 @@ export -f otsActionHandler
 #now launch things
 
 
-if [ $ISCONFIG == 1 ]; then
+
+if [ $ISMACROMAKER == 1 ]; then
+	launchOTSMacromaker $1 $2 $3
+	exit
+elif [ $ISCONFIG == 1 ]; then
 	launchOTSWiz
 else
 	launchOTS  #only launch gateway once.. on shutdown and startup others can relaunch

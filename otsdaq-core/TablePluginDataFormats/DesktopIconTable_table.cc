@@ -9,7 +9,7 @@
 using namespace ots;
 
 #define DESKTOP_ICONS_FILE \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
 
 // DesktopIconTable Column names
 #define COL_NAME "IconName"
@@ -123,6 +123,11 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 
 		if(icon->folderPath_ == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
 			icon->folderPath_ = "";  // convert DEFAULT to empty string
+
+		if(icon->permissionThresholdString_ ==
+		   TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+			icon->permissionThresholdString_ =
+			    "1";  // convert DEFAULT to standard user allow
 
 		numeric = true;
 		for(i = 0; i < icon->permissionThresholdString_.size(); ++i)

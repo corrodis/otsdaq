@@ -61,6 +61,7 @@ TableBase::TableBase(std::string  tableName,
 			throw;
 	}
 }
+
 //==============================================================================
 // TableBase
 //	Default constructor is only used  to create special tables
@@ -122,18 +123,18 @@ void TableBase::setupMockupView(TableVersion version)
 		trimCache();
 		if(!isStored(version))  // the trim cache is misbehaving!
 		{
-			__SS__ << "\nsetupMockupView() IMPOSSIBLE ERROR: trimCache() is deleting the "
+			__SS__ << __COUT_HDR_P__
+			       << "IMPOSSIBLE ERROR: trimCache() is deleting the "
 			          "latest view version "
 			       << version << "!" << __E__;
-			__COUT_ERR__ << "\n" << ss.str();
 			__SS_THROW__;
 		}
 	}
 	else
 	{
-		__SS__ << "\nsetupMockupView() ERROR: View to fill with mockup already exists: "
-		       << version << ". Cannot overwrite!" << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
+		__SS__ << __COUT_HDR_P__ << "View to fill with mockup already exists: " << version
+		       << ". Cannot overwrite!" << __E__;
+		ss << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
 }
@@ -473,7 +474,8 @@ const TableView& TableBase::getView(void) const
 	if(!activeTableView_)
 	{
 		__SS__ << "activeTableView_ pointer is null! (...likely the active view was not "
-		          "setup properly. Check your system setup.)" << __E__;
+		          "setup properly. Check your system setup.)"
+		       << __E__;
 		__SS_THROW__;
 	}
 	return *activeTableView_;
@@ -485,7 +487,8 @@ TableView* TableBase::getViewP(void)
 	if(!activeTableView_)
 	{
 		__SS__ << "activeTableView_ pointer is null! (...likely the active view was not "
-		          "setup properly. Check your system setup.)" << __E__;
+		          "setup properly. Check your system setup.)"
+		       << __E__;
 		__SS_THROW__;
 	}
 	return activeTableView_;

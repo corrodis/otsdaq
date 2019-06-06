@@ -1,0 +1,50 @@
+
+
+
+interface0: {
+	FEInterfacePluginName:	"FEOtsUDPTemplateInterface"
+	LinkToFETypeTable_FEOtsUDPTemplateInterfaceTable:		{
+		OtsInterface0:			{
+			InterfaceIPAddress:		"127.0.0.1"
+			InterfacePort:			4000
+			HostIPAddress:			"127.0.0.1"
+			HostPort:				4020
+			StreamToIPAddress:		"127.0.0.1"
+			StreamToPort:			4021
+		}
+	} //end FEOtsUDPTemplateInterfaceTable link record
+} //end interface0
+
+dtc0: {
+	FEInterfacePluginName:	"DTCFrontEndInterface"
+	LinkToFETypeTable_DTCInterfaceTable:		{
+		dtc0:					{
+			EmulatorMode:			"1"
+			LocationInChain:		0
+			DeviceIndex:			0
+			EmulateCFO:				"1"
+			ConfigureClock:			"0"
+			LinkToROCGroupTable_ROCInterfaceTable:	{
+				roc0:					{
+					Status:					"1"
+					ROCInterfacePluginName:	"ROCPolarFireCoreInterface"
+					linkID:					0
+					EventWindowDelayOffset:	10
+					EmulateInDTCHardware:	"0"
+					//ROCTypeLinkTable_ROCTypeLinkTable:	{}
+						
+				}
+				roc1:					{
+					Status:					"1"
+					ROCInterfacePluginName:	"ROCPolarFireCoreInterface"
+					linkID:					1
+					EventWindowDelayOffset:	10
+					EmulateInDTCHardware:	"0"
+					//ROCTypeLinkTable_ROCTypeLinkTable:	{}
+						
+				}
+					
+			} //end ROCInterfaceTable group link records
+		}
+	} //end DTCInterfaceTable link record
+} //end dtc0

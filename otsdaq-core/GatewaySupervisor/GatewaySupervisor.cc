@@ -33,10 +33,10 @@
 
 using namespace ots;
 
-#define RUN_NUMBER_PATH std::string(getenv("SERVICE_DATA_PATH")) + "/RunNumber/"
+#define RUN_NUMBER_PATH std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunNumber/"
 #define RUN_NUMBER_FILE_NAME "NextRunNumber.txt"
 #define FSM_LAST_GROUP_ALIAS_PATH \
-	std::string(getenv("SERVICE_DATA_PATH")) + "/RunControlData/"
+	std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunControlData/"
 #define FSM_LAST_GROUP_ALIAS_FILE_START std::string("FSMLastGroupAlias-")
 #define FSM_USERS_PREFERENCES_FILETYPE "pref"
 
@@ -69,7 +69,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	__COUT__ << __E__;
 
 	// attempt to make directory structure (just in case)
-	mkdir((std::string(getenv("SERVICE_DATA_PATH"))).c_str(), 0755);
+	mkdir((std::string(__ENV__("SERVICE_DATA_PATH"))).c_str(), 0755);
 	mkdir((FSM_LAST_GROUP_ALIAS_PATH).c_str(), 0755);
 	mkdir((RUN_NUMBER_PATH).c_str(), 0755);
 
@@ -1083,7 +1083,7 @@ xcept::stdformat_exception_history(e),DIAGERROR);
 {
 	 configurationTimer_.stop();
 
-	 std::string confsource(getenv("PIXELCONFIGURATIONBASE"));
+	 std::string confsource(__ENV__("PIXELCONFIGURATIONBASE"));
 	 if (confsource != "DB") confsource = "files";
 
 	 diagService_->reportError("Total configuration time ["+confsource+"] =
@@ -1272,12 +1272,18 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	try
 	{
 		CorePropertySupervisorBase::theConfigurationManager_->loadTableGroup(
-		    theConfigurationTableGroup_.first, theConfigurationTableGroup_.second, true);
+		    theConfigurationTableGroup_.first,
+		    theConfigurationTableGroup_.second,
+		    true /*doActivate*/);
+
+		__COUT__ << "Done loading Configuration Alias." << __E__;
 
 		// When configured, set the translated System Alias to be persistently active
 		ConfigurationManagerRW tmpCfgMgr("TheSupervisor");
 		tmpCfgMgr.activateTableGroup(theConfigurationTableGroup_.first,
 		                             theConfigurationTableGroup_.second);
+
+		__COUT__ << "Done activating Configuration Alias." << __E__;
 	}
 	catch(...)
 	{
@@ -1660,6 +1666,12 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 
 	while(!subIterationsDone)  // start subIteration handling loop
 	{
+		__COUT__ << "Broadcast thread " << threadIndex << "\t"
+		         << "Supervisor instance = '" << appInfo.getName()
+		         << "' [LID=" << appInfo.getId() << "] in Context '"
+		         << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
+		         << "] Command = " << command << __E__;
+
 		subIterationsDone = true;
 		RunControlStateMachine::theProgressBar_.step();
 
@@ -1934,7 +1946,7 @@ void GatewaySupervisor::broadcastMessageThread(
 				       threadStruct->threadIndex_))
 					threadStruct->getIterationsDone() = true;
 			}
-			catch(toolbox::fsm::exception::Exception e)
+			catch(toolbox::fsm::exception::Exception const& e)
 			{
 				__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t"
 				         << "going into error: " << e.what() << __E__;
@@ -3367,8 +3379,8 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string&    command,
 
 	for(const auto& hostname : hostnames)
 	{
-		std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) + "/StartOTS_action_" +
-		                  hostname + ".cmd");
+		std::string fn = (std::string(__ENV__("SERVICE_DATA_PATH")) +
+		                  "/StartOTS_action_" + hostname + ".cmd");
 		FILE*       fp = fopen(fn.c_str(), "w");
 		if(fp)
 		{
@@ -3387,8 +3399,8 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string&    command,
 
 	for(const auto& hostname : hostnames)
 	{
-		std::string fn = (std::string(getenv("SERVICE_DATA_PATH")) + "/StartOTS_action_" +
-		                  hostname + ".cmd");
+		std::string fn = (std::string(__ENV__("SERVICE_DATA_PATH")) +
+		                  "/StartOTS_action_" + hostname + ".cmd");
 		FILE*       fp = fopen(fn.c_str(), "r");
 		if(fp)
 		{

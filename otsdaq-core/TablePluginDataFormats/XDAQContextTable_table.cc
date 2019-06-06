@@ -8,16 +8,16 @@
 
 using namespace ots;
 
-#define XDAQ_RUN_FILE                                           \
-	std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
-	    std::string(getenv("XDAQ_CONFIGURATION_XML")) + ".xml"
-#define APP_PRIORITY_FILE                                       \
-	std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
+#define XDAQ_RUN_FILE                                            \
+	std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
+	    std::string(__ENV__("XDAQ_CONFIGURATION_XML")) + ".xml"
+#define APP_PRIORITY_FILE                                        \
+	std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
 	    "xdaqAppStateMachinePriority"
 
-//#define XDAQ_SCRIPT				std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) +
+//#define XDAQ_SCRIPT				std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) +
 //"/"+ "StartXDAQ_gen.sh" #define ARTDAQ_MPI_SCRIPT
-// std::string(getenv("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartMPI_gen.sh"
+// std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartMPI_gen.sh"
 
 const std::string XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS =
     "ots::Supervisor";  // still allowed for now, in StartOTS
@@ -251,9 +251,9 @@ unsigned int XDAQContextTable::getARTDAQDataPort(
 				__SS_THROW__;
 			}
 
-			//Board Reader port is through Processor table
+			// Board Reader port is through Processor table
 			if(context.applications_[0].class_ == "ots::ARTDAQDataManagerSupervisor" ||
-					context.applications_[0].class_ == "ots::ARTDAQFEDataManagerSupervisor")
+			   context.applications_[0].class_ == "ots::ARTDAQFEDataManagerSupervisor")
 			{
 				auto processors =
 				    getSupervisorConfigNode(configManager,
@@ -587,9 +587,9 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				continue;  // skip if disabled
 
 			if(contexts_.back().applications_[0].class_ ==  // if board reader
-			   "ots::ARTDAQDataManagerSupervisor" ||
+			       "ots::ARTDAQDataManagerSupervisor" ||
 			   contexts_.back().applications_[0].class_ ==  // if board reader
-			   			   "ots::ARTDAQFEDataManagerSupervisor")
+			       "ots::ARTDAQFEDataManagerSupervisor")
 				artdaqBoardReaders_.push_back(contexts_.size() - 1);
 			else if(contexts_.back().applications_[0].class_ ==  // if event builder
 			        "ots::EventBuilderApp")

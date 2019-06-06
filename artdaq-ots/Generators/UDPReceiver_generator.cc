@@ -3,7 +3,7 @@
 #include "artdaq-core/Utilities/SimpleLookupPolicy.hh"
 #include "artdaq-ots/Overlays/FragmentType.hh"
 #include "artdaq-ots/Overlays/UDPFragmentWriter.hh"
-#include "artdaq/Application/GeneratorMacros.hh"
+#include "artdaq/Generators/GeneratorMacros.hh"
 #include "canvas/Utilities/Exception.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
@@ -13,7 +13,6 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
-
 
 //========================================================================================================================
 ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const& ps)
@@ -73,25 +72,25 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const& ps)
 	TLOG_INFO("UDPReceiver") << "UDP Receiver Construction Complete!" << TLOG_ENDL;
 
 	__COUT__ << "Constructed." << __E__;
-} //end constructor()
+}  // end constructor()
 
 //========================================================================================================================
 ots::UDPReceiver::~UDPReceiver()
 {
 	__COUT__ << "Destructor." << __E__;
 
-	//join waits for thread to complete
-	if(receiverThread_.joinable()) //only join if thread has started
+	// join waits for thread to complete
+	if(receiverThread_.joinable())  // only join if thread has started
 		receiverThread_.join();
 
-	if(datasocket_) 
-        {
-	close(datasocket_);
-	datasocket_ = -1;
-        }
+	if(datasocket_)
+	{
+		close(datasocket_);
+		datasocket_ = -1;
+	}
 
 	__COUT__ << "Destructed." << __E__;
-} //end destructor()
+}  // end destructor()
 
 //========================================================================================================================
 void ots::UDPReceiver::start()
@@ -104,7 +103,7 @@ void ots::UDPReceiver::start()
 	start_();
 
 	__COUT__ << "Started." << __E__;
-} //end start()
+}  // end start()
 
 //========================================================================================================================
 void ots::UDPReceiver::receiveLoop_()

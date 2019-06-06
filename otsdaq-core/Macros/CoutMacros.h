@@ -22,7 +22,7 @@
 
 #define __COUT_HDR_FL__ __SHORTFILE__ << " [" << std::dec << __LINE__ << "]\t"
 #define __COUT_HDR_FP__ __SHORTFILE__ << " : " << __PRETTY_FUNCTION__ << "\t"
-#define __COUT_HDR_PL__ __PRETTY_FUNCTION__ << " [" << std::dec << __LINE__ << "]\t"
+//#define __COUT_HDR_PL__ __PRETTY_FUNCTION__ << " [" << std::dec << __LINE__ << "]\t"
 #define __COUT_HDR_F__ __SHORTFILE__ << "\t"
 #define __COUT_HDR_L__ std::dec << __LINE__ << "\t"
 #define __COUT_HDR_P__ __PRETTY_FUNCTION__ << "\t"
@@ -47,7 +47,7 @@
 
 #define Q(X) #X
 #define QUOTE(X) Q(X)
-//#define __MF_TYPE__(X)	FIXME ?? how to do this ...(getenv("OTSDAQ_USING_MF")=="1"?
+//#define __MF_TYPE__(X)	FIXME ?? how to do this ...(__ENV__("OTSDAQ_USING_MF")=="1"?
 // mf::X (__MF_SUBJECT__) : std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":")
 
 #define __MF_HDR__ __COUT_HDR__
@@ -324,6 +324,9 @@
 	__SUP_COUT_ERR__ << "\n" << ss.str(); \
 	throw std::runtime_error(ss.str())
 
+#define __ENV__(X) \
+	StringMacros::otsGetEnvironmentVarable(X, std::string(__SHORTFILE__), __LINE__)
+
 //========================================================================================================================
 // const_cast away the const
 //	so that otsdaq is compatible with slf6 and slf7 versions of xdaq
@@ -337,8 +340,8 @@
 
 //========================================================================================================================
 // declare special ots soft exception
-//	a SOFT exception thrown during runnning workloop by a state machine plugin will pause
-// the 	global state machine and allow for manual intervention to resume a run.
+//	a SOFT exception thrown during running workloop by a state machine plugin will pause
+// the global state machine and allow for manual intervention to resume a run.
 namespace ots
 {
 struct __OTS_SOFT_EXCEPTION__ : public std::exception
@@ -348,6 +351,6 @@ struct __OTS_SOFT_EXCEPTION__ : public std::exception
 	std::string         what_;
 };
 
-}  // namespace ots
+}  // end namespace ots
 
 #endif
