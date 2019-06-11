@@ -448,16 +448,24 @@ void CodeEditor::writeFile(const std::string&        basepath,
 
 	FILE* fp;
 
-	// get old file size
-	fp = fopen(fullpath.c_str(), "rb");
-	if(!fp)
+	long long int oldSize = 0;
+	try
 	{
-		__SS__ << "Could not open file for saving at " << fullpath << __E__;
-		__SS_THROW__;
+		// get old file size
+		fp = fopen(fullpath.c_str(), "rb");
+		if(!fp)
+		{
+			__SS__ << "Could not open file for saving at " << fullpath << __E__;
+			__SS_THROW__;
+		}
+		std::fseek(fp, 0, SEEK_END);
+		oldSize = std::ftell(fp);
+		fclose(fp);
 	}
-	std::fseek(fp, 0, SEEK_END);
-	long long int oldSize = std::ftell(fp);
-	fclose(fp);
+	catch(...)
+	{
+		__COUT_WARN__ << "Ignoring file not existing..." << __E__;
+	}
 
 	fp = fopen(fullpath.c_str(), "wb");
 	if(!fp)
