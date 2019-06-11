@@ -154,15 +154,8 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 
 	std::string retExt = "";
 	// remove all non ascii
-
-	if(extension[0] != '.')
-	{
-		__SS__ << "Invalid extension non-period " << int(extension[0]) << " found!" << __E__;
-		__SS_ONLY_THROW__;
-	}
-
-	//	skip first '.'
-	for(unsigned int i = 1; i < extension.length(); ++i)
+	//	skip first potential '.' (depends on parent calling function if extension includes '.')
+	for(unsigned int i = 0; i < extension.length(); ++i)
 		if((extension[i] >= 'a' && extension[i] <= 'z'))
 			retExt += extension[i];
 		else if((extension[i] >= 'A' && extension[i] <= 'Z'))
