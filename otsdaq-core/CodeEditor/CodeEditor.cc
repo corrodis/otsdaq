@@ -517,6 +517,34 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
 	xmlOut->addTextElementToData("path", path);
 
+	std::string basepath = CodeEditor::SOURCE_BASE_PATH;
+
+	std::string pathMatchPrepend = "/";  	// some requests come in with leading "/" and
+											// "//"
+	if(path.length() > 1 && path[1] == '/')
+		pathMatchPrepend += '/';
+
+	__COUTV__(path);
+	__COUTV__(pathMatchPrepend);
+
+	//fix path for special environment variables
+	if(path.substr(0,(pathMatchPrepend + "$USER_DATA/").size()) ==
+			pathMatchPrepend + "$USER_DATA/")
+	{
+		basepath = "/";
+		path = CodeEditor::USER_DATA_PATH + "/" +
+				path.substr((pathMatchPrepend + "$USER_DATA/").size());
+	}
+	else if(path.substr(0,(pathMatchPrepend + "$OTSDAQ_DATA/").size()) ==
+			pathMatchPrepend + "$OTSDAQ_DATA/")
+	{
+		basepath = "/";
+		path = CodeEditor::OTSDAQ_DATA_PATH + "/" +
+				path.substr((pathMatchPrepend + "$OTSDAQ_DATA/").size());
+	}
+	__COUTV__(path);
+	__COUTV__(basepath);
+
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
 	if (!(path.length() > 4 && path.substr(path.length()-4) == "/ots"))
 		extension             = safeExtensionString(extension);
@@ -527,7 +555,8 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 	contents = StringMacros::decodeURIComponent(contents);
 
 	CodeEditor::writeFile(
-	    CodeEditor::SOURCE_BASE_PATH, path + (extension.size()?".":"") + extension, contents, username);
+			basepath, path + (extension.size()?".":"") + extension,
+		contents, username);
 
 }  // end saveFileContent
 
