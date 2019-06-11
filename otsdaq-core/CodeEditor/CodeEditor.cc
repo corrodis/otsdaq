@@ -160,7 +160,7 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 			retExt += extension[i];
 		else if((extension[i] >= 'A' && extension[i] <= 'Z'))
 			retExt += extension[i] + 32;  // make lowercase
-		else
+		else if(i > 0 || extension[i] != '.')
 		{
 			__SS__ << "Invalid extension non-alpha " << int(extension[i]) << " found!" << __E__;
 			__SS_ONLY_THROW__;
