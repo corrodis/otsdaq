@@ -40,6 +40,7 @@ CodeEditor::CodeEditor()
                                 "cpp",
                                 "cxx",
                                 "icc",
+								"dat",
                                 "txt",
                                 "sh",
                                 "css",
@@ -153,11 +154,17 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 
 	std::string retExt = "";
 	// remove all non ascii
+	//	skip first potential '.' (depends on parent calling function if extension includes '.')
 	for(unsigned int i = 0; i < extension.length(); ++i)
 		if((extension[i] >= 'a' && extension[i] <= 'z'))
 			retExt += extension[i];
 		else if((extension[i] >= 'A' && extension[i] <= 'Z'))
 			retExt += extension[i] + 32;  // make lowercase
+		else if(i > 0 || extension[i] != '.')
+		{
+			__SS__ << "Invalid extension non-alpha " << int(extension[i]) << " found!" << __E__;
+			__SS_ONLY_THROW__;
+		}
 
 	//__COUTV__(retExt);
 
@@ -518,6 +525,34 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
 	xmlOut->addTextElementToData("path", path);
 
+	std::string basepath = CodeEditor::SOURCE_BASE_PATH;
+
+	std::string pathMatchPrepend = "/";  	// some requests come in with leading "/" and
+											// "//"
+	if(path.length() > 1 && path[1] == '/')
+		pathMatchPrepend += '/';
+
+	__COUTV__(path);
+	__COUTV__(pathMatchPrepend);
+
+	//fix path for special environment variables
+	if(path.substr(0,(pathMatchPrepend + "$USER_DATA/").size()) ==
+			pathMatchPrepend + "$USER_DATA/")
+	{
+		basepath = "/";
+		path = CodeEditor::USER_DATA_PATH + "/" +
+				path.substr((pathMatchPrepend + "$USER_DATA/").size());
+	}
+	else if(path.substr(0,(pathMatchPrepend + "$OTSDAQ_DATA/").size()) ==
+			pathMatchPrepend + "$OTSDAQ_DATA/")
+	{
+		basepath = "/";
+		path = CodeEditor::OTSDAQ_DATA_PATH + "/" +
+				path.substr((pathMatchPrepend + "$OTSDAQ_DATA/").size());
+	}
+	__COUTV__(path);
+	__COUTV__(basepath);
+
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
 	if (!(path.length() > 4 && path.substr(path.length()-4) == "/ots"))
 		extension             = safeExtensionString(extension);
@@ -528,7 +563,8 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 	contents = StringMacros::decodeURIComponent(contents);
 
 	CodeEditor::writeFile(
-	    CodeEditor::SOURCE_BASE_PATH, path + (extension.size()?".":"") + extension, contents, username);
+			basepath, path + (extension.size()?".":"") + extension,
+		contents, username);
 
 }  // end saveFileContent
 
