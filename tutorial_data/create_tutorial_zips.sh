@@ -33,9 +33,9 @@ echo -e `date +"%h%y %T"` "create_tutorial_zips.sh [${LINENO}]  \t Extracting pa
 echo
 
 
-SRC='/home/rrivera/ots/srcs/otsdaq/tutorial_data'
-UDATA='/home/rrivera/ots/srcs/otsdaq_demo/NoGitData'
-UDATABASES='/home/rrivera/ots/srcs/otsdaq_demo/NoGitDatabases'
+SRC='/home/rrivera/data/ots/srcs/otsdaq/tutorial_data'
+UDATA='/home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData'
+UDATABASES='/home/rrivera/data/ots/srcs/otsdaq_demo/NoGitDatabases'
 		
 
 if [[ "$1"  == "--tutorial" && "x$2" != "x" ]]; then

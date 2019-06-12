@@ -1,50 +1,41 @@
 {
 "ouid" : [
-"26d9c072a5c7409b9745958a",
-"4e5ad895f92945c58e1122c5",
-"be713582e4b84221b766272f",
-"fc5db2f5ac35481aa77faeff"
+"42715338351e46349556d89c",
+"ac58220f3acc4eecb2483eb2",
+"ef88ef9577b24300b12e3b7e"
 ],
 "version" : {
+"2" : [
+"42715338351e46349556d89c"
+],
 "0" : [
-"4e5ad895f92945c58e1122c5"
+"ac58220f3acc4eecb2483eb2"
 ],
 "1" : [
-"fc5db2f5ac35481aa77faeff"
-],
-"2" : [
-"be713582e4b84221b766272f"
-],
-"3" : [
-"26d9c072a5c7409b9745958a"
+"ef88ef9577b24300b12e3b7e"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"26d9c072a5c7409b9745958a",
-"4e5ad895f92945c58e1122c5",
-"be713582e4b84221b766272f",
-"fc5db2f5ac35481aa77faeff"
+"42715338351e46349556d89c",
+"ac58220f3acc4eecb2483eb2",
+"ef88ef9577b24300b12e3b7e"
 ],
-"testContext_v3" : [
-"4e5ad895f92945c58e1122c5"
+"testContext_v2" : [
+"42715338351e46349556d89c"
 ],
-"testContext_v4" : [
-"fc5db2f5ac35481aa77faeff"
+"TableEditWizBackbone_v0" : [
+"ac58220f3acc4eecb2483eb2"
 ],
-"defaultConfig_v2" : [
-"be713582e4b84221b766272f"
-],
-"TableEditWizBackbone_v4" : [
-"26d9c072a5c7409b9745958a"
+"defaultConfig_v1" : [
+"ef88ef9577b24300b12e3b7e"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"26d9c072a5c7409b9745958a",
-"4e5ad895f92945c58e1122c5",
-"be713582e4b84221b766272f",
-"fc5db2f5ac35481aa77faeff"
+"42715338351e46349556d89c",
+"ac58220f3acc4eecb2483eb2",
+"ef88ef9577b24300b12e3b7e"
 ]
 },
 "aliases.active.name" : {
@@ -55,22 +46,18 @@
 },
 "configurations.assigned" : {
 "notprovided" : [
-"2019-01-28T12:26:39.590-0600",
-"2019-01-28T14:42:09.673-0600",
-"2019-01-28T14:58:36.118-0600",
-"2019-01-28T14:58:37.273-0600"
+"2019-06-12T10:30:20.265-0500",
+"2019-06-12T10:30:21.484-0500",
+"2019-06-12T10:30:22.787-0500"
 ],
-"testContext_v3" : [
-"2019-01-28T12:26:39.637-0600"
+"testContext_v2" : [
+"2019-06-12T10:30:23.120-0500"
 ],
-"testContext_v4" : [
-"2019-01-28T14:42:09.725-0600"
+"TableEditWizBackbone_v0" : [
+"2019-06-12T10:30:20.410-0500"
 ],
-"defaultConfig_v2" : [
-"2019-01-28T14:58:36.167-0600"
-],
-"TableEditWizBackbone_v4" : [
-"2019-01-28T14:58:37.318-0600"
+"defaultConfig_v1" : [
+"2019-06-12T10:30:22.018-0500"
 ]
 }
 }

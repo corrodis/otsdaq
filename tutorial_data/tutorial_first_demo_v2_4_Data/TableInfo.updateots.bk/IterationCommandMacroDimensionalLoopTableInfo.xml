@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-        <ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigurationInfo.xsd">
-                <CONFIGURATION Name="IterationCommandMacroDimensionalLoopConfiguration">
-                        <VIEW Name="ITERATION_COMMAND_MACRO_DIMENSIONAL_LOOP_CONFIGURATION" Type="File,Database,DatabaseTest" Description="No%20description.">
+        <ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
+                <TABLE Name="IterationCommandMacroDimensionalLoopTable">
+                        <VIEW Name="ITERATION_COMMAND_MACRO_DIMENSIONAL_LOOP_TABLE" Type="File,Database,DatabaseTest" Description="No%20description.">
                                 <COLUMN Type="UID"          Name="DimensionalLoopID"          StorageName="DIMENSIONAL_LOOP_ID"                 DataType="VARCHAR2"                 DataChoices=""/>
                                 <COLUMN Type="GroupID-macroDimensionalLoops"          Name="DimensionalLoopGroupID"          StorageName="DIMENSIONAL_LOOP_GROUP_ID"                 DataType="VARCHAR2"                 DataChoices=""/>
                                 <COLUMN Type="Data"          Name="DimensionalLoopPriority"          StorageName="DIMENSIONAL_LOOP_PRIORITY"                 DataType="NUMBER"                 DataChoices=""/>
@@ -12,5 +12,5 @@
                                 <COLUMN Type="Author"          Name="Author"          StorageName="AUTHOR"                 DataType="VARCHAR2"                 DataChoices=""/>
                                 <COLUMN Type="Timestamp"          Name="RecordInsertionTime"          StorageName="RECORD_INSERTION_TIME"                 DataType="TIMESTAMP WITH TIMEZONE"                 DataChoices=""/>
                         </VIEW>
-                </CONFIGURATION>
+                </TABLE>
         </ROOT>
