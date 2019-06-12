@@ -72,6 +72,7 @@ class GatewaySupervisor : public xdaq::Application,
 	// State Machine requests handlers
 
 	void stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
+	void stateMachineIterationBreakpoint(xgi::Input* in, xgi::Output* out);
 	// void 						stateMachineResultXgiHandler 	(xgi::Input* in,
 	// xgi::Output* out
 	// )
@@ -300,6 +301,8 @@ class GatewaySupervisor : public xdaq::Application,
 	std::mutex   broadcastCommandMessageIndexMutex_, broadcastIterationsDoneMutex_;
 	unsigned int broadcastCommandMessageIndex_;
 	bool         broadcastIterationsDone_;
+	std::mutex	 broadcastIterationBreakpointMutex_;
+	unsigned int broadcastIterationBreakpoint_; //pause transition when iteration index matches breakpoint index
 
 	// temporary member variable to avoid redeclaration in repetitive functions
 	char tmpStringForConversions_[100];

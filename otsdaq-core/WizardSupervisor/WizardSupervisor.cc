@@ -159,8 +159,12 @@ void WizardSupervisor::requestIcons(xgi::Input*  in,
 
 	*out << "Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/"
 	     << ",Table "
-	        "Editor,TBL,0,1,icon-IconEditor.png,/urn:xdaq-application:lid=280/"
+	        "Editor,TBL,0,1,icon-ControlsDashboard.png,/urn:xdaq-application:lid=280/"
 	        "?configWindowName=tableEditor,/"
+	     << ",Icon "
+	        "Editor,ICON,0,1,icon-IconEditor.png,/WebPath/html/"
+	        "ConfigurationGUI_subset.html?urn=280&subsetBasePath=DesktopIconTable&recordAlias=Icons&"
+		 	"groupingFieldList=Status%2CForceOnlyOneInstance%2CRequiredPermissionLevel,/"
 	     << ",Security "
 	        "Settings,SEC,1,1,icon-SecuritySettings.png,/WebPath/html/"
 	        "SecuritySettings.html,/User Settings"
