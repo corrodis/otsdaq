@@ -59,6 +59,8 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 		__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
 		__SUP_COUTV__(CorePropertySupervisorBase::supervisorConfigurationPath_);
 
+		CorePropertySupervisorBase::indicateOtsAlive(0);
+
 		return;
 	}
 	else if(allSupervisorInfo_.isWizardMode())
