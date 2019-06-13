@@ -33,7 +33,7 @@ using namespace ots;
 #define TABLE_INFO_EXT "Info.xml"
 
 #define CORE_TABLE_INFO_FILENAME                                \
-	((__ENV__("SERVICE_DATA_PATH") == NULL)                     \
+	((getenv("SERVICE_DATA_PATH") == NULL)                     \
 	     ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") \
 	     : (std::string(__ENV__("SERVICE_DATA_PATH")))) +       \
 	    "/CoreTableInfoNames.dat"

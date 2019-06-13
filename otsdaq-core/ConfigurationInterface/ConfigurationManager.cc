@@ -23,7 +23,7 @@ const std::string ConfigurationManager::VERSION_ALIASES_TABLE_NAME =
 
 // added env check for otsdaq_flatten_active_to_version to function
 const std::string ConfigurationManager::ACTIVE_GROUPS_FILENAME =
-    ((__ENV__("SERVICE_DATA_PATH") == NULL)
+    ((getenv("SERVICE_DATA_PATH") == NULL)
          ? (std::string(__ENV__("USER_DATA")) + "/ServiceData")
          : (std::string(__ENV__("SERVICE_DATA_PATH")))) +
     "/ActiveTableGroups.cfg";
@@ -183,9 +183,9 @@ void ConfigurationManager::init(std::string* accumulatedErrors,
 			restoreActiveTableGroups(
 			    accumulatedErrors ? true : false /*throwErrors*/,
 			    "" /*pathToActiveGroupsFile*/,
-			    //(initForWriteAccess || //if write access, then load everything
+			    //if write access, then load everything
 			    (username_ == ConfigurationManager::READONLY_USER)
-			        ? true
+			        ? (!initForWriteAccess) //important to consider initForWriteAccess because this may be called before username_ is properly initialized
 			        : false /*onlyLoadIfBackboneOrContext*/);
 		}
 		catch(std::runtime_error& e)

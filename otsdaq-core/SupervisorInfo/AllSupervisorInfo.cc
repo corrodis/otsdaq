@@ -11,7 +11,9 @@
 using namespace ots;
 
 const bool AllSupervisorInfo::MACROMAKER_MODE =
-    (std::string(__ENV__("MACROMAKER_MODE")) == "1") ? true : false;
+		 ((getenv("MACROMAKER_MODE") == NULL) //check Macro Maker mode environment variable in a safe way
+		         ? (false)
+		         : ((std::string(__ENV__("MACROMAKER_MODE")) == "1") ? true : false));
 
 //========================================================================================================================
 AllSupervisorInfo::AllSupervisorInfo(void) : theSupervisorInfo_(0), theWizardInfo_(0) {}
