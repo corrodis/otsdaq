@@ -40,7 +40,7 @@ CodeEditor::CodeEditor()
                                 "cpp",
                                 "cxx",
                                 "icc",
-								"dat",
+                                "dat",
                                 "txt",
                                 "sh",
                                 "css",
@@ -154,7 +154,8 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 
 	std::string retExt = "";
 	// remove all non ascii
-	//	skip first potential '.' (depends on parent calling function if extension includes '.')
+	//	skip first potential '.' (depends on parent calling function if extension includes
+	//'.')
 	for(unsigned int i = 0; i < extension.length(); ++i)
 		if((extension[i] >= 'a' && extension[i] <= 'z'))
 			retExt += extension[i];
@@ -162,7 +163,8 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 			retExt += extension[i] + 32;  // make lowercase
 		else if(i > 0 || extension[i] != '.')
 		{
-			__SS__ << "Invalid extension non-alpha " << int(extension[i]) << " found!" << __E__;
+			__SS__ << "Invalid extension non-alpha " << int(extension[i]) << " found!"
+			       << __E__;
 			__SS_ONLY_THROW__;
 		}
 
@@ -357,7 +359,7 @@ void CodeEditor::getPathContent(const std::string& basepath,
 
 				try
 				{
-					if (name != "ots") 
+					if(name != "ots")
 						safeExtensionString(name.substr(name.rfind('.')));
 					//__COUT__ << "EditFile: " << type << " " << name << __E__;
 
@@ -392,27 +394,28 @@ void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 	xmlOut->addTextElementToData("path", path);
 
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
-	if (!(path.length() > 4 && path.substr(path.length()-4) == "/ots"))
-		extension             = safeExtensionString(extension);
+	if(!(path.length() > 4 && path.substr(path.length() - 4) == "/ots"))
+		extension = safeExtensionString(extension);
 	xmlOut->addTextElementToData("ext", extension);
 
 	std::string contents;
 	size_t      i;
 	if((i = path.find("$USER_DATA/")) == 0 ||
 	   (i == 1 && path[0] == '/'))  // if leading / or without
-		CodeEditor::readFile(
-		    CodeEditor::USER_DATA_PATH,
-		    path.substr(i + std::string("$USER_DATA/").size()) + (extension.size()?".":"") + extension,
-		    contents);
+		CodeEditor::readFile(CodeEditor::USER_DATA_PATH,
+		                     path.substr(i + std::string("$USER_DATA/").size()) +
+		                         (extension.size() ? "." : "") + extension,
+		                     contents);
 	else if((i = path.find("$OTSDAQ_DATA/")) == 0 ||
 	        (i == 1 && path[0] == '/'))  // if leading / or without
-		CodeEditor::readFile(
-		    CodeEditor::OTSDAQ_DATA_PATH,
-		    path.substr(std::string("/$OTSDAQ_DATA/").size()) + (extension.size()?".":"") + extension,
-		    contents);
+		CodeEditor::readFile(CodeEditor::OTSDAQ_DATA_PATH,
+		                     path.substr(std::string("/$OTSDAQ_DATA/").size()) +
+		                         (extension.size() ? "." : "") + extension,
+		                     contents);
 	else
-		CodeEditor::readFile(
-		    CodeEditor::SOURCE_BASE_PATH, path + (extension.size()?".":"") + extension, contents);
+		CodeEditor::readFile(CodeEditor::SOURCE_BASE_PATH,
+		                     path + (extension.size() ? "." : "") + extension,
+		                     contents);
 
 	xmlOut->addTextElementToData("content", contents);
 
@@ -527,35 +530,35 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 
 	std::string basepath = CodeEditor::SOURCE_BASE_PATH;
 
-	std::string pathMatchPrepend = "/";  	// some requests come in with leading "/" and
-											// "//"
+	std::string pathMatchPrepend = "/";  // some requests come in with leading "/" and
+	                                     // "//"
 	if(path.length() > 1 && path[1] == '/')
 		pathMatchPrepend += '/';
 
 	__COUTV__(path);
 	__COUTV__(pathMatchPrepend);
 
-	//fix path for special environment variables
-	if(path.substr(0,(pathMatchPrepend + "$USER_DATA/").size()) ==
-			pathMatchPrepend + "$USER_DATA/")
+	// fix path for special environment variables
+	if(path.substr(0, (pathMatchPrepend + "$USER_DATA/").size()) ==
+	   pathMatchPrepend + "$USER_DATA/")
 	{
 		basepath = "/";
-		path = CodeEditor::USER_DATA_PATH + "/" +
-				path.substr((pathMatchPrepend + "$USER_DATA/").size());
+		path     = CodeEditor::USER_DATA_PATH + "/" +
+		       path.substr((pathMatchPrepend + "$USER_DATA/").size());
 	}
-	else if(path.substr(0,(pathMatchPrepend + "$OTSDAQ_DATA/").size()) ==
-			pathMatchPrepend + "$OTSDAQ_DATA/")
+	else if(path.substr(0, (pathMatchPrepend + "$OTSDAQ_DATA/").size()) ==
+	        pathMatchPrepend + "$OTSDAQ_DATA/")
 	{
 		basepath = "/";
-		path = CodeEditor::OTSDAQ_DATA_PATH + "/" +
-				path.substr((pathMatchPrepend + "$OTSDAQ_DATA/").size());
+		path     = CodeEditor::OTSDAQ_DATA_PATH + "/" +
+		       path.substr((pathMatchPrepend + "$OTSDAQ_DATA/").size());
 	}
 	__COUTV__(path);
 	__COUTV__(basepath);
 
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
-	if (!(path.length() > 4 && path.substr(path.length()-4) == "/ots"))
-		extension             = safeExtensionString(extension);
+	if(!(path.length() > 4 && path.substr(path.length() - 4) == "/ots"))
+		extension = safeExtensionString(extension);
 	xmlOut->addTextElementToData("ext", extension);
 
 	std::string contents = CgiDataUtilities::postData(cgiIn, "content");
@@ -563,8 +566,7 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 	contents = StringMacros::decodeURIComponent(contents);
 
 	CodeEditor::writeFile(
-			basepath, path + (extension.size()?".":"") + extension,
-		contents, username);
+	    basepath, path + (extension.size() ? "." : "") + extension, contents, username);
 
 }  // end saveFileContent
 

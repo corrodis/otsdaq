@@ -452,7 +452,7 @@ void TableView::init(void)
 					}
 					if(!found)
 					{
-						__SS__ << "Table Error:\t'" << theDataView_[row][col]
+						__SS__ << getTableName() << " Error:\t'" << theDataView_[row][col]
 						       << "' in column " << columnsInfo_[col].getName()
 						       << " is not a valid Fixed Choice option. "
 						       << "Possible values are as follows: ";
@@ -508,8 +508,9 @@ void TableView::init(void)
 					}
 					if(!found)
 					{
-						__SS__ << "Table Error:\t'" << theDataView_[row][col]
-						       << "' in column " << columnsInfo_[col].getName()
+						__SS__ << getTableName() << " Error:\t the value '"
+						       << theDataView_[row][col] << "' in column "
+						       << columnsInfo_[col].getName()
 						       << " is not a valid Fixed Choice option. "
 						       << "Possible values are as follows: ";
 
@@ -542,8 +543,9 @@ void TableView::init(void)
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_OFF;
 					else
 					{
-						__SS__ << "Table Error:\t" << theDataView_[row][col]
-						       << " in column " << columnsInfo_[col].getName()
+						__SS__ << getTableName() << " Error:\t the value '"
+						       << theDataView_[row][col] << "' in column "
+						       << columnsInfo_[col].getName()
 						       << " is not a valid Type (On/Off) std::string. Possible "
 						          "values are 1, on, On, ON, 0, off, Off, OFF."
 						       << __E__;
@@ -565,8 +567,9 @@ void TableView::init(void)
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_FALSE;
 					else
 					{
-						__SS__ << "Table Error:\t" << theDataView_[row][col]
-						       << " in column " << columnsInfo_[col].getName()
+						__SS__ << getTableName() << " Error:\t the value '"
+						       << theDataView_[row][col] << "' in column "
+						       << columnsInfo_[col].getName()
 						       << " is not a valid Type (True/False) std::string. "
 						          "Possible values are 1, true, True, TRUE, 0, false, "
 						          "False, FALSE."
@@ -587,8 +590,9 @@ void TableView::init(void)
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_NO;
 					else
 					{
-						__SS__ << "Table Error:\t" << theDataView_[row][col]
-						       << " in column " << columnsInfo_[col].getName()
+						__SS__ << getTableName() << " Error:\t the value '"
+						       << theDataView_[row][col] << "' in column "
+						       << columnsInfo_[col].getName()
 						       << " is not a valid Type (Yes/No) std::string. Possible "
 						          "values are 1, yes, Yes, YES, 0, no, No, NO."
 						       << __E__;
@@ -625,10 +629,10 @@ void TableView::init(void)
 				if(columnsInfo_[col].getDataType() !=
 				   TableViewColumnInfo::DATATYPE_STRING)
 				{
-					__SS__ << "Table Error:\t"
-					       << "Column " << col << " with name "
+					__SS__ << getTableName() << " Error:\t"
+					       << "Column " << col << " with name '"
 					       << columnsInfo_[col].getName()
-					       << " is a Child Link column and has an illegal data type of '"
+					       << "' is a Child Link column and has an illegal data type of '"
 					       << columnsInfo_[col].getDataType()
 					       << "'. The data type for Child Link columns must be "
 					       << TableViewColumnInfo::DATATYPE_STRING << __E__;

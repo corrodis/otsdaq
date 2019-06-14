@@ -49,20 +49,6 @@ class ConfigurationManager
 	static const std::set<std::string> backboneMemberNames_;  // list of backbone members
 	static const std::set<std::string> iterateMemberNames_;   // list of iterate members
 
-	static const std::set<std::string>& getContextMemberNames(void);
-	static const std::set<std::string>& getBackboneMemberNames(void);
-	static const std::set<std::string>& getIterateMemberNames(void);
-
-	static std::string        encodeURIComponent(const std::string& sourceStr);
-	static const std::string& convertGroupTypeIdToName(int groupTypeId);
-	static int                getTypeOfGroup(
-	                   const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
-	static const std::string& getTypeNameOfGroup(
-	    const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
-
-	//==============================================================================
-	// Construct/Destruct
-
 	enum
 	{
 		CONTEXT_TYPE,
@@ -71,18 +57,32 @@ class ConfigurationManager
 		CONFIGURATION_TYPE
 	};
 
+	// clang-format off
+
+	static const std::set<std::string>& getContextMemberNames		(void);
+	static const std::set<std::string>& getBackboneMemberNames		(void);
+	static const std::set<std::string>& getIterateMemberNames		(void);
+
+	static std::string        			encodeURIComponent			(const std::string& sourceStr);
+	static const std::string& 			convertGroupTypeIdToName	(int groupTypeId);
+	static int                			getTypeOfGroup				(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
+	static const std::string& 			getTypeNameOfGroup			(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
+
+	//==============================================================================
+	// Construct/Destruct
+
 	ConfigurationManager(bool initForWriteAccess  = false,
 	                     bool initializeFromFhicl = false);
 	virtual ~ConfigurationManager(void);
 
-	void init(std::string* accumulatedErrors = 0, bool initForWriteAccess = false);
-	void destroy(void);
-	void destroyTableGroup(const std::string& theGroup = "", bool onlyDeactivate = false);
+	void 								init						(std::string* accumulatedErrors = 0, bool initForWriteAccess = false);
+	void 								destroy						(void);
+	void 								destroyTableGroup			(const std::string& theGroup = "", bool onlyDeactivate = false);
 
 	//==============================================================================
 	// Getters
 
-	void loadTableGroup(
+	void 								loadTableGroup				(
 	    const std::string&                                     configGroupName,
 	    TableGroupKey                                          tableGroupKey,
 	    bool                                                   doActivate         = false,
@@ -95,10 +95,11 @@ class ConfigurationManager
 	    bool                                                   doNotLoadMember    = false,
 	    std::string*                                           groupTypeString    = 0,
 	    std::map<std::string /*name*/, std::string /*alias*/>* groupAliases       = 0,
-	    bool onlyLoadIfBackboneOrContext = false);
-	void loadMemberMap(
-	    const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
-	TableGroupKey loadConfigurationBackbone(void);
+	    bool 												   onlyLoadIfBackboneOrContext = false);
+	void 								loadMemberMap(
+	    const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap,
+		std::string*                                           accumulateWarnings = 0);
+	TableGroupKey 						loadConfigurationBackbone	(void);
 
 	//================
 	// getTable
@@ -109,94 +110,83 @@ class ConfigurationManager
 		return (T*)(getTableByName(name));
 	}
 
-	const TableBase* getTableByName(const std::string& configurationName) const;
+	const TableBase* 					getTableByName				(const std::string& configurationName) const;
 
-	void dumpActiveConfiguration(const std::string& filePath,
-	                             const std::string& dumpType);
+	void 								dumpActiveConfiguration		(const std::string& filePath, const std::string& dumpType);
 
 	std::map<std::string /*groupAlias*/,
-	         std::pair<std::string /*groupName*/, TableGroupKey>>
-	getActiveGroupAliases(void);
+		 std::pair<std::string /*groupName*/,
+		 TableGroupKey>> 				getActiveGroupAliases		(void);
 	// Note: this ConfigurationManager::getVersionAliases is called internally and by
 	// ConfigurationManagerRW::getVersionAliases
-	std::map<std::string /*tableName*/, std::map<std::string /*aliasName*/, TableVersion>>
-	getVersionAliases(void) const;
-
-	std::pair<std::string /*groupName*/, TableGroupKey> getTableGroupFromAlias(
-	    std::string systemAlias, ProgressBar* progressBar = 0);
+	std::map<std::string /*tableName*/,
+		std::map<std::string /*aliasName*/,
+		TableVersion>>					getVersionAliases			(void) const;
+	std::pair<std::string /*groupName*/,
+		TableGroupKey> 					getTableGroupFromAlias		(std::string systemAlias, ProgressBar* progressBar = 0);
 	std::map<std::string /*groupType*/,
-	         std::pair<std::string /*groupName*/, TableGroupKey>>
-	getActiveTableGroups(void) const;
+		 std::pair<std::string /*groupName*/,
+		 TableGroupKey>>				getActiveTableGroups		(void) const;
 	const std::map<std::string /*groupType*/,
-	               std::pair<std::string /*groupName*/, TableGroupKey>>&
-	getFailedTableGroups(void) const
-	{
-		return lastFailedGroupLoad_;
-	}
-	const std::string& getActiveGroupName(const std::string& type = "") const;
-	TableGroupKey      getActiveGroupKey(const std::string& type = "") const;
+		std::pair<std::string /*groupName*/,
+		TableGroupKey>>& 				getFailedTableGroups		(void) const {return lastFailedGroupLoad_;}
+	const std::string& 					getActiveGroupName			(const std::string& type = "") const;
+	TableGroupKey      					getActiveGroupKey			(const std::string& type = "") const;
 
-	ConfigurationTree getNode(
-	    const std::string& nodeString,
-	    bool doNotThrowOnBrokenUIDLinks = false) const;  //"root/parent/parent/"
-	ConfigurationTree getContextNode(const std::string& contextUID,
-	                                 const std::string& applicationUID) const;
-	ConfigurationTree getSupervisorNode(const std::string& contextUID,
-	                                    const std::string& applicationUID) const;
-	ConfigurationTree getSupervisorTableNode(const std::string& contextUID,
-	                                         const std::string& applicationUID) const;
+	ConfigurationTree 					getNode						(const std::string& nodeString, bool doNotThrowOnBrokenUIDLinks = false) const;  //"root/parent/parent/"
+	ConfigurationTree 					getContextNode				(const std::string& contextUID, const std::string& applicationUID) const;
+	ConfigurationTree 					getSupervisorNode			(const std::string& contextUID, const std::string& applicationUID) const;
+	ConfigurationTree 					getSupervisorTableNode		(const std::string& contextUID, const std::string& applicationUID) const;
 
-	std::vector<std::pair<std::string /*childName*/, ConfigurationTree>> getChildren(
+	std::vector<std::pair<std::string /*childName*/,
+		ConfigurationTree>> 			getChildren					(
 	    std::map<std::string, TableVersion>* memberMap             = 0,
 	    std::string*                         accumulatedTreeErrors = 0) const;
-	std::string getFirstPathToNode(const ConfigurationTree& node,
-	                               const std::string&       startPath = "/") const;
+	std::string 						getFirstPathToNode			(const ConfigurationTree& node, const std::string&       startPath = "/") const;
 
-	std::map<std::string, TableVersion> getActiveVersions(void) const;
+	std::map<std::string, TableVersion> getActiveVersions			(void) const;
 
-	const std::string& getOwnerContext(void) { return ownerContextUID_; }
-	const std::string& getOwnerApp(void) { return ownerAppUID_; }
-	bool               isOwnerFirstAppInContext(void);
+	const std::string& 					getOwnerContext				(void) { return ownerContextUID_; }
+	const std::string& 					getOwnerApp					(void) { return ownerAppUID_; }
+	bool               					isOwnerFirstAppInContext	(void);
 
 	//==============================================================================
 	// Setters/Modifiers
-	std::shared_ptr<TableGroupKey> makeTheTableGroupKey(TableGroupKey key);
-	void                           restoreActiveTableGroups(bool               throwErrors = false,
-	                                                        const std::string& pathToActiveGroupsFile = "",
-	                                                        bool               onlyLoadIfBackboneOrContext = false);
+	std::shared_ptr<TableGroupKey> 		makeTheTableGroupKey		(TableGroupKey key);
+	void                           		restoreActiveTableGroups	(
+			bool               throwErrors = false,
+			const std::string& pathToActiveGroupsFile = "",
+			bool               onlyLoadIfBackboneOrContext = false);
 
-	void setOwnerContext(const std::string& contextUID) { ownerContextUID_ = contextUID; }
-	void setOwnerApp(const std::string& appUID) { ownerAppUID_ = appUID; }
+	void 								setOwnerContext				(const std::string& contextUID) { ownerContextUID_ = contextUID; }
+	void 								setOwnerApp					(const std::string& appUID) { ownerAppUID_ = appUID; }
 
   private:
-	ConfigurationManager(const std::string& userName);  // private constructor called by
-	                                                    // ConfigurationManagerRW
-	void initializeFromFhicl(const std::string& fhiclPath);
-	void recursiveInitFromFhiclPSet(const std::string&         tableName,
-	                                const fhicl::ParameterSet& pset,
-	                                const std::string&         recordName     = "",
-	                                const std::string&         groupName      = "",
-	                                const std::string&         groupLinkIndex = "");
+	ConfigurationManager				(const std::string& userName);  // private constructor called by ConfigurationManagerRW
 
-	std::string username_;  // user of the configuration is READONLY_USER unless using
-	                        // ConfigurationManagerRW
-	ConfigurationInterface*        theInterface_;
-	std::shared_ptr<TableGroupKey> theConfigurationTableGroupKey_,
-	    theContextTableGroupKey_, theBackboneTableGroupKey_, theIterateTableGroupKey_;
-	std::string theConfigurationTableGroup_, theContextTableGroup_,
-	    theBackboneTableGroup_, theIterateTableGroup_;
+	void 								initializeFromFhicl			(const std::string& fhiclPath);
+	void 								recursiveInitFromFhiclPSet(
+			const std::string&         tableName,
+			const fhicl::ParameterSet& pset,
+			const std::string&         recordName     = "",
+			const std::string&         groupName      = "",
+			const std::string&         groupLinkIndex = "");
+
+	std::string 						username_;  // user of the configuration is READONLY_USER unless using ConfigurationManagerRW
+	ConfigurationInterface*        		theInterface_;
+	std::shared_ptr<TableGroupKey> 		theConfigurationTableGroupKey_, theContextTableGroupKey_, theBackboneTableGroupKey_, theIterateTableGroupKey_;
+	std::string 						theConfigurationTableGroup_, theContextTableGroup_, theBackboneTableGroup_, theIterateTableGroup_;
 
 	std::map<std::string, std::pair<std::string, TableGroupKey>> lastFailedGroupLoad_;
 
-	std::map<std::string, TableBase*> nameToTableMap_;
+	std::map<std::string, TableBase*> 	nameToTableMap_;
 
-	TableBase groupMetadataTable_;  // special table - version saved each time a group is
-	                                // created
+	TableBase 							groupMetadataTable_;  	// special table - version saved each time a group is created
 
-	std::string ownerContextUID_;  // optional, often there is a context that owns this
-	                               // configuration manager
-	std::string ownerAppUID_;  // optional, often there is a supervisor that owns this
-	                           // configuration manager
+	std::string 						ownerContextUID_;  // optional, often there is a context that owns this configuration manager
+	std::string 						ownerAppUID_;  // optional, often there is a supervisor that owns this configuration manager
+
+	// clang-format on
 };
 }  // namespace ots
 

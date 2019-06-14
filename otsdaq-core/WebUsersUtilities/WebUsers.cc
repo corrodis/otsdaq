@@ -2756,7 +2756,7 @@ void WebUsers::insertSettingsForUser(uint64_t         uid,
 {
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> permissionMap =
 	    getPermissionsForUser(uid);
-	    
+
 	__COUTV__(StringMacros::mapToString(permissionMap));
 	if(isInactiveForGroup(permissionMap))
 		return;  // not an active user
@@ -2813,10 +2813,10 @@ void WebUsers::insertSettingsForUser(uint64_t         uid,
 			}
 
 			xmldoc->addTextElementToParent(
-			    "permissions", 
-			    StringMacros::mapToString(UsersPermissionsVector[i]), 
+			    "permissions",
+			    StringMacros::mapToString(UsersPermissionsVector[i]),
 			    PREF_XML_ACCOUNTS_FIELD);
-			    
+
 			char nacStr[10];
 			if(UsersSaltVector[i] ==
 			   "")  // only give nac if account has not been activated yet with password
@@ -2843,21 +2843,20 @@ void WebUsers::insertSettingsForUser(uint64_t         uid,
 		__COUT__ << "Saved System Preferences found." << __E__;
 		xmldoc->copyDataChildren(prefXml);
 	}
-	
+
 	__COUTV__(StringMacros::mapToString(permissionMap));
 
-
-	// add permissions value	
-	xmldoc->addTextElementToData(PREF_XML_PERMISSIONS_FIELD, 
-		StringMacros::mapToString(permissionMap));
+	// add permissions value
+	xmldoc->addTextElementToData(PREF_XML_PERMISSIONS_FIELD,
+	                             StringMacros::mapToString(permissionMap));
 
 	// add user with lock
 	xmldoc->addTextElementToData(PREF_XML_USERLOCK_FIELD, usersUsernameWithLock_);
-	
+
 	// add user name
 	xmldoc->addTextElementToData(PREF_XML_USERNAME_FIELD, getUsersUsername(uid));
-	
-} // end insertSettingsForUser()
+
+}  // end insertSettingsForUser()
 
 //========================================================================================================================
 // WebUsers::setGenericPreference

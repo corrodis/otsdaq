@@ -78,7 +78,7 @@ DatabaseConfigurationInterface::DatabaseConfigurationInterface()
 // version = -1 means latest version
 void DatabaseConfigurationInterface::fill(TableBase*   configuration,
                                           TableVersion version) const
-    
+
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
@@ -107,7 +107,7 @@ void DatabaseConfigurationInterface::fill(TableBase*   configuration,
 // write configuration to database
 void DatabaseConfigurationInterface::saveActiveVersion(const TableBase* configuration,
                                                        bool             overwrite) const
-    
+
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
@@ -188,7 +188,7 @@ catch(std::exception const& e)
 //==============================================================================
 // returns a list of all configuration names
 std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableNames() const
-     try
+    try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
@@ -210,7 +210,7 @@ catch(...)
 //==============================================================================
 // find all configuration groups in database
 std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableGroupNames(
-    const std::string& filterString) const  try
+    const std::string& filterString) const try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
@@ -269,8 +269,7 @@ std::set<TableGroupKey /*key*/> DatabaseConfigurationInterface::getKeys(
 //==============================================================================
 // return the contents of a configuration group
 config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(
-    std::string const& tableGroup, bool includeMetaDataTable) const
-     try
+    std::string const& tableGroup, bool includeMetaDataTable) const try
 {
 	auto ifc    = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.loadGlobalConfiguration(tableGroup);
@@ -318,7 +317,7 @@ catch(...)
 // create a new configuration group from the contents map
 void DatabaseConfigurationInterface::saveTableGroup(
     config_version_map_t const& configurationMap,
-    std::string const&          configurationGroup) const  try
+    std::string const&          configurationGroup) const try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 

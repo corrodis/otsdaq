@@ -55,12 +55,10 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 	void request(xgi::Input* in, xgi::Output* out);
 	void requestIcons(xgi::Input* in, xgi::Output* out);
 
-	void editSecurity(xgi::Input* in, xgi::Output* out);
-	void UserSettings(xgi::Input* in, xgi::Output* out);
-	void tooltipRequest(xgi::Input*  in,
-	                    xgi::Output* out);
-	void toggleSecurityCodeGeneration(xgi::Input*  in,
-	                                  xgi::Output* out);
+	void        editSecurity(xgi::Input* in, xgi::Output* out);
+	void        UserSettings(xgi::Input* in, xgi::Output* out);
+	void        tooltipRequest(xgi::Input* in, xgi::Output* out);
+	void        toggleSecurityCodeGeneration(xgi::Input* in, xgi::Output* out);
 	std::string validateUploadFileType(const std::string fileType);
 	void        cleanUpPreviews();
 	void        savePostPreview(std::string&                        subject,
@@ -71,8 +69,7 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 
 	// External Supervisor XOAP handlers
 	xoap::MessageReference supervisorSequenceCheck(xoap::MessageReference msg);
-	xoap::MessageReference supervisorLastConfigGroupRequest(
-	    xoap::MessageReference msg);
+	xoap::MessageReference supervisorLastConfigGroupRequest(xoap::MessageReference msg);
 
   private:
 	std::string              securityCode_;

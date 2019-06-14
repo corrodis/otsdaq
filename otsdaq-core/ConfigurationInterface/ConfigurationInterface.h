@@ -277,7 +277,7 @@ class ConfigurationInterface
 	virtual void saveTableGroup(
 	    std::map<std::string /*name*/,
 	             TableVersion /*version*/> const& /*tableToVersionMap*/,
-	    std::string const& /*groupName*/) const 
+	    std::string const& /*groupName*/) const
 	{
 		__SS__;
 		__THROW__(ss.str() +

@@ -301,8 +301,9 @@ class GatewaySupervisor : public xdaq::Application,
 	std::mutex   broadcastCommandMessageIndexMutex_, broadcastIterationsDoneMutex_;
 	unsigned int broadcastCommandMessageIndex_;
 	bool         broadcastIterationsDone_;
-	std::mutex	 broadcastIterationBreakpointMutex_;
-	unsigned int broadcastIterationBreakpoint_; //pause transition when iteration index matches breakpoint index
+	std::mutex   broadcastIterationBreakpointMutex_;
+	unsigned int broadcastIterationBreakpoint_;  // pause transition when iteration index
+	                                             // matches breakpoint index
 
 	// temporary member variable to avoid redeclaration in repetitive functions
 	char tmpStringForConversions_[100];

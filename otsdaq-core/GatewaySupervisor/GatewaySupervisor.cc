@@ -63,7 +63,8 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
     , activeStateMachineName_("")
     , theIterator_(this)
     , broadcastCommandMessageIndex_(0)
-	, broadcastIterationBreakpoint_(-1) //for standard transitions, ignore the breakpoint
+    , broadcastIterationBreakpoint_(
+          -1)  // for standard transitions, ignore the breakpoint
     , counterTest_(0)
 {
 	INIT_MF("GatewaySupervisor");
@@ -82,7 +83,9 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	xgi::bind(this, &GatewaySupervisor::loginRequest, "LoginRequest");
 	xgi::bind(this, &GatewaySupervisor::request, "Request");
 	xgi::bind(this, &GatewaySupervisor::stateMachineXgiHandler, "StateMachineXgiHandler");
-	xgi::bind(this, &GatewaySupervisor::stateMachineIterationBreakpoint, "StateMachineIterationBreakpoint");
+	xgi::bind(this,
+	          &GatewaySupervisor::stateMachineIterationBreakpoint,
+	          "StateMachineIterationBreakpoint");
 
 	xgi::bind(this, &GatewaySupervisor::infoRequestHandler, "InfoRequestHandler");
 	xgi::bind(
@@ -470,8 +473,8 @@ void GatewaySupervisor::Default(xgi::Input* in, xgi::Output* out)
 // stateMachineIterationBreakpoint
 //		get/set the state machine iteration breakpoint
 //		If the iteration index >= breakpoint, then pause.
-void GatewaySupervisor::stateMachineIterationBreakpoint(xgi::Input* in, xgi::Output* out)
-try
+void GatewaySupervisor::stateMachineIterationBreakpoint(xgi::Input*  in,
+                                                        xgi::Output* out) try
 {
 	cgicc::Cgicc cgiIn(in);
 
@@ -479,7 +482,7 @@ try
 
 	HttpXmlDocument           xmlOut;
 	WebUsers::RequestUserInfo userInfo(requestType,
-			CgiDataUtilities::postData(cgiIn, "CookieCode"));
+	                                   CgiDataUtilities::postData(cgiIn, "CookieCode"));
 
 	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
 
@@ -490,64 +493,56 @@ try
 
 	try
 	{
-
 		if(requestType == "get")
 		{
 			std::stringstream v;
-			{ //start mutex scope
+			{  // start mutex scope
 				std::lock_guard<std::mutex> lock(broadcastIterationBreakpointMutex_);
 				v << broadcastIterationBreakpoint_;
-			} //end mutex scope
+			}  // end mutex scope
 
-			xmlOut.addTextElementToData(
-					"iterationBreakpoint",
-					v.str());
+			xmlOut.addTextElementToData("iterationBreakpoint", v.str());
 		}
 		else if(requestType == "set")
 		{
 			unsigned int breakpointSetValue =
-					CgiDataUtilities::getDataAsInt(cgiIn, "breakpointSetValue");
+			    CgiDataUtilities::getDataAsInt(cgiIn, "breakpointSetValue");
 			__COUTV__(breakpointSetValue);
 
-			{ //start mutex scope
+			{  // start mutex scope
 				std::lock_guard<std::mutex> lock(broadcastIterationBreakpointMutex_);
 				broadcastIterationBreakpoint_ = breakpointSetValue;
-			} //end mutex scope
+			}  // end mutex scope
 
-			//return the value that was set
+			// return the value that was set
 			std::stringstream v;
 			v << breakpointSetValue;
-			xmlOut.addTextElementToData(
-					"iterationBreakpoint",
-					v.str());
+			xmlOut.addTextElementToData("iterationBreakpoint", v.str());
 		}
 		else
 		{
-			__SS__ << "Unknown iteration breakpoint request type = " << requestType << __E__;
+			__SS__ << "Unknown iteration breakpoint request type = " << requestType
+			       << __E__;
 			__SS_THROW__;
 		}
 	}
 	catch(const std::runtime_error& e)
 	{
-		__SS__ << "Error caught handling iteration breakpoint command: " << e.what() << __E__;
+		__SS__ << "Error caught handling iteration breakpoint command: " << e.what()
+		       << __E__;
 		__COUT_ERR__ << ss.str();
-		xmlOut.addTextElementToData(
-				    "Error",
-				    ss.str());
+		xmlOut.addTextElementToData("Error", ss.str());
 	}
 	catch(...)
 	{
 		__SS__ << "Unknown error caught handling iteration breakpoint command." << __E__;
 		__COUT_ERR__ << ss.str();
-		xmlOut.addTextElementToData(
-				    "Error",
-				    ss.str());
-	}  //end stateMachineIterationBreakpoint() catch
-
+		xmlOut.addTextElementToData("Error", ss.str());
+	}  // end stateMachineIterationBreakpoint() catch
 
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false, true);
 
-} //end stateMachineIterationBreakpoint()
+}  // end stateMachineIterationBreakpoint()
 catch(const std::runtime_error& e)
 {
 	__SS__ << "Error caught handling iteration breakpoint command: " << e.what() << __E__;
@@ -557,7 +552,7 @@ catch(...)
 {
 	__SS__ << "Unknown error caught handling iteration breakpoint command." << __E__;
 	__COUT_ERR__ << ss.str();
-}  //end stateMachineIterationBreakpoint() catch
+}  // end stateMachineIterationBreakpoint() catch
 
 //========================================================================================================================
 void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
@@ -671,7 +666,7 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 	attemptStateMachineTransition(
 	    &xmlOut, out, command, fsmName, fsmWindowName, userInfo.username_, parameters);
 
-} // end stateMachineXgiHandler()
+}  // end stateMachineXgiHandler()
 
 //========================================================================================================================
 std::string GatewaySupervisor::attemptStateMachineTransition(
@@ -893,7 +888,7 @@ xoap::MessageReference GatewaySupervisor::stateMachineXoapHandler(
 }
 
 ////========================================================================================================================
-//xoap::MessageReference GatewaySupervisor::stateMachineResultXoapHandler(
+// xoap::MessageReference GatewaySupervisor::stateMachineResultXoapHandler(
 //    xoap::MessageReference message)
 //
 //{
@@ -908,7 +903,8 @@ xoap::MessageReference GatewaySupervisor::stateMachineXoapHandler(
 // stateMachineThread
 //		This asynchronously sends the xoap message to its own RunControlStateMachine
 //			(that the Gateway inherits from), which then calls the Gateway
-//			transition functions and eventually the broadcast to transition the global state machine.
+//			transition functions and eventually the broadcast to transition the global state
+//machine.
 bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 {
 	stateMachineSemaphore_.take();
@@ -936,7 +932,7 @@ bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 	               // WorkLoopManager the try workLoop->remove(job_) could be commented
 	               // out return true;//go on and then you must do the
 	               // workLoop->remove(job_) in WorkLoopManager
-} // end stateMachineThread()
+}  // end stateMachineThread()
 
 //========================================================================================================================
 // infoRequestHandler ~~
@@ -1277,7 +1273,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 
 	// move everything else to Error!
 	broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Error"));
-} // end enteringError()
+}  // end enteringError()
 
 //========================================================================================================================
 void GatewaySupervisor::checkForAsyncError()
@@ -2194,21 +2190,21 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 		{
 			broadcastIterationsDone_ = true;
 
-
-			{ //start mutex scope
+			{  // start mutex scope
 				std::lock_guard<std::mutex> lock(broadcastIterationBreakpointMutex_);
-				iterationBreakpoint = broadcastIterationBreakpoint_; //get breakpoint
-			} //end mutex scope
+				iterationBreakpoint = broadcastIterationBreakpoint_;  // get breakpoint
+			}                                                         // end mutex scope
 
 			if(iterationBreakpoint < (unsigned int)-1)
-				__COUT__ << "Iteration breakpoint currently is " << iterationBreakpoint << __E__;
+				__COUT__ << "Iteration breakpoint currently is " << iterationBreakpoint
+				         << __E__;
 			if(iteration >= iterationBreakpoint)
 			{
 				broadcastIterationsDone_ = false;
-				__COUT__ << "Waiting at transition breakpoint - iteration = " <<
-						iteration << __E__;
+				__COUT__ << "Waiting at transition breakpoint - iteration = " << iteration
+				         << __E__;
 				usleep(5 * 1000 * 1000 /*5 s*/);
-				continue; //wait until breakpoint moved
+				continue;  // wait until breakpoint moved
 			}
 
 			if(iteration)

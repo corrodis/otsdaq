@@ -183,9 +183,11 @@ void ConfigurationManager::init(std::string* accumulatedErrors,
 			restoreActiveTableGroups(
 			    accumulatedErrors ? true : false /*throwErrors*/,
 			    "" /*pathToActiveGroupsFile*/,
-			    //if write access, then load everything
+			    // if write access, then load everything
 			    (username_ == ConfigurationManager::READONLY_USER)
-			        ? (!initForWriteAccess) //important to consider initForWriteAccess because this may be called before username_ is properly initialized
+			        ? (!initForWriteAccess)  // important to consider initForWriteAccess
+			                                 // because this may be called before username_
+			                                 // is properly initialized
 			        : false /*onlyLoadIfBackboneOrContext*/);
 		}
 		catch(std::runtime_error& e)
@@ -875,7 +877,8 @@ void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath,
 //	loads tables given by name/version pairs in memberMap
 //	Note: does not activate them.
 void ConfigurationManager::loadMemberMap(
-    const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap)
+    const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap,
+    std::string* accumulateWarnings /* =0 */)
 {
 	TableBase* tmpConfigBasePtr;
 	//	for each member
@@ -895,20 +898,41 @@ void ConfigurationManager::loadMemberMap(
 		if(nameToTableMap_.find(memberPair.first) != nameToTableMap_.end())
 			tmpConfigBasePtr = nameToTableMap_[memberPair.first];
 
-		theInterface_->get(tmpConfigBasePtr,   // configurationPtr
-		                   memberPair.first,   // tableName
-		                   0,                  // groupKey
-		                   0,                  // groupName
-		                   false,              // dontFill=false to fill
-		                   memberPair.second,  // version
-		                   false               // resetTable
-		);
+		std::string getError = "";
+		try
+		{
+			theInterface_->get(tmpConfigBasePtr,   // configurationPtr
+			                   memberPair.first,   // tableName
+			                   0,                  // groupKey
+			                   0,                  // groupName
+			                   false,              // dontFill=false to fill
+			                   memberPair.second,  // version
+			                   false               // resetTable
+			);
+		}
+		catch(const std::runtime_error& e)
+		{
+			// if accumulating warnings and table view was created, then continue
+			if(accumulateWarnings)
+				getError = e.what();
+			else
+				throw;
+		}
 
 		nameToTableMap_[memberPair.first] = tmpConfigBasePtr;
 		if(nameToTableMap_[memberPair.first]->getViewP())
 		{
 			//__COUT__ << "Activated version: " <<
 			// nameToTableMap_[memberPair.first]->getViewVersion() << __E__;
+
+			if(accumulateWarnings && getError != "")
+			{
+				__SS__ << "Error caught during '" << memberPair.first
+				       << "' table retrieval: \n"
+				       << getError << __E__;
+				__COUT_ERR__ << ss.str();
+				*accumulateWarnings += ss.str();
+			}
 		}
 		else
 		{
@@ -1116,7 +1140,7 @@ void ConfigurationManager::loadTableGroup(
 				}
 			}
 		}
-	}
+	}  // end metadata handling
 
 	if(groupMembers)
 		*groupMembers = memberMap;  // copy map for return
@@ -1210,9 +1234,11 @@ void ConfigurationManager::loadTableGroup(
 		if(progressBar)
 			progressBar->step();
 
-		//__COUT__ << "Activating chosen group:" << __E__;
+		//__COUT__ << "Loading member map..." << __E__;
 
-		loadMemberMap(memberMap);
+		loadMemberMap(memberMap, accumulatedTreeErrors);
+
+		//__COUT__ << "Member map loaded..." << __E__;
 
 		if(progressBar)
 			progressBar->step();
@@ -1257,6 +1283,7 @@ void ConfigurationManager::loadTableGroup(
 				}
 
 				//__COUTV__(memberPair.first);
+
 				// attempt to init using the configuration's specific init
 				//	this could be risky user code, try and catch
 				try

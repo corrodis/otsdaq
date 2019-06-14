@@ -1,7 +1,5 @@
 
 
-
-
 #include <dirent.h>
 #include <cassert>
 #include <iostream>
@@ -76,7 +74,6 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 
 	// return;
 
-
 	//==============================================================================
 	// Define environment variables
 	//	Note: normally these environment variables are set by StartOTS.sh
@@ -85,17 +82,16 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 	// otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [207]
 	setenv("CONFIGURATION_TYPE", "File", 1);  // Can be File, Database, DatabaseTest
 	setenv("CONFIGURATION_DATA_PATH",
-			(std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
-			1);
+	       (std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
+	       1);
 	setenv(
-			"TABLE_INFO_PATH", (std::string(getenv("USER_DATA")) + "/TableInfo").c_str(), 1);
+	    "TABLE_INFO_PATH", (std::string(getenv("USER_DATA")) + "/TableInfo").c_str(), 1);
 	////////////////////////////////////////////////////
 
 	// Some configuration plug-ins use __ENV__("SERVICE_DATA_PATH") in init() so define it
 	setenv("SERVICE_DATA_PATH",
-			(std::string(getenv("USER_DATA")) + "/ServiceData").c_str(),
-			1);
-
+	       (std::string(getenv("USER_DATA")) + "/ServiceData").c_str(),
+	       1);
 
 	// Some configuration plug-ins use __ENV__("OTSDAQ_LIB") and
 	// __ENV__("OTSDAQ_UTILITIES_LIB") in init() so define it 	to a non-sense place is ok
@@ -107,8 +103,8 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 
 	// also xdaq envs for XDAQContextTable
 	setenv("XDAQ_CONFIGURATION_DATA_PATH",
-			(std::string(getenv("USER_DATA")) + "/XDAQConfigurations").c_str(),
-			1);
+	       (std::string(getenv("USER_DATA")) + "/XDAQConfigurations").c_str(),
+	       1);
 	setenv("XDAQ_CONFIGURATION_XML", "otsConfigurationNoRU_CMake", 1);
 	////////////////////////////////////////////////////
 
@@ -184,35 +180,31 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 		if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE)
 		{
 			activeBackboneGroupName = activeGroup.second.first;
-			__COUT__
-			          << "found activeBackboneGroupName = " << activeBackboneGroupName
-			          << std::endl;
+			__COUT__ << "found activeBackboneGroupName = " << activeBackboneGroupName
+			         << std::endl;
 		}
 		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
 		{
 			activeContextGroupName = activeGroup.second.first;
-			__COUT__
-			          << "found activeContextGroupName = " << activeContextGroupName
-			          << std::endl;
+			__COUT__ << "found activeContextGroupName = " << activeContextGroupName
+			         << std::endl;
 		}
 		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE)
 		{
 			activeIterateGroupName = activeGroup.second.first;
-			__COUT__
-			          << "found activeIterateGroupName = " << activeIterateGroupName
-			          << std::endl;
+			__COUT__ << "found activeIterateGroupName = " << activeIterateGroupName
+			         << std::endl;
 		}
 		else if(activeGroup.first ==
 		        ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
 		{
 			activeConfigGroupName = activeGroup.second.first;
-			__COUT__
-			          << "found activeConfigGroupName = " << activeConfigGroupName
-			          << std::endl;
+			__COUT__ << "found activeConfigGroupName = " << activeConfigGroupName
+			         << std::endl;
 		}
 	}
 
-	//return;
+	// return;
 
 	// add system alias groups to set
 	const std::string groupAliasesTableName =
@@ -238,8 +230,7 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 
 	__COUT__ << "Identified groups:" << std::endl;
 	for(auto& group : groupSet)
-		__COUT__ << group.first.first << " " << group.first.second
-		          << std::endl;
+		__COUT__ << group.first.first << " " << group.first.second << std::endl;
 	__COUT__ << std::endl;
 	__COUT__ << std::endl;
 
@@ -273,8 +264,8 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 		DIR* dp;
 		if((dp = opendir(pathToSwapIn.c_str())) == 0)
 		{
-			__COUT__ << "ERROR:(" << errno
-			          << ").  Can't open directory: " << pathToSwapIn << std::endl;
+			__COUT__ << "ERROR:(" << errno << ").  Can't open directory: " << pathToSwapIn
+			         << std::endl;
 			exit(0);
 		}
 		closedir(dp);

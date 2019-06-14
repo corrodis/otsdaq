@@ -1665,7 +1665,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 				if(++cnt > 3)  // then mark for erasing
 				{
 					//					__COUT__ << cnt << " marking " <<
-					//fieldCandidateList[
+					// fieldCandidateList[
 					//								priorityFieldIndex.second].relativePath_
 					//<<
 					//							fieldCandidateList[priorityFieldIndex.second].columnName_
@@ -1680,7 +1680,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		{
 			if(fieldCandidateList[i].tableName_ == "")  // then erase
 			{
-				//				__COUT__ << "Erasing " << fieldCandidateList[i].relativePath_
+				//				__COUT__ << "Erasing " <<
+				//fieldCandidateList[i].relativePath_
 				//<< 						fieldCandidateList[i].columnName_ << __E__;
 				fieldCandidateList.erase(fieldCandidateList.begin() + i);
 				--i;  // rewind to look at next after deleted

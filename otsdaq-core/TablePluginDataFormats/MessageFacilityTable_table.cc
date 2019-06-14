@@ -20,9 +20,10 @@ using namespace ots;
 	std::string(__ENV__("USER_DATA")) +   \
 	    "/MessageFacilityConfigurations/" \
 	    "UseWebConsole.bool"
-#define USE_QT_BOOL_FILE                                                  \
-	std::string(__ENV__("USER_DATA")) + "/MessageFacilityConfigurations/" \
-	                                    "UseQTViewer.bool"
+#define USE_QT_BOOL_FILE                  \
+	std::string(__ENV__("USER_DATA")) +   \
+	    "/MessageFacilityConfigurations/" \
+	    "UseQTViewer.bool"
 
 // MessageFacilityTable Column names
 #define COL_NAME "UID"

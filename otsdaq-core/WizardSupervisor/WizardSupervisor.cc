@@ -128,8 +128,7 @@ void WizardSupervisor::init(void)
 }
 
 //========================================================================================================================
-void WizardSupervisor::requestIcons(xgi::Input*  in,
-                                    xgi::Output* out)
+void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
 
@@ -163,8 +162,9 @@ void WizardSupervisor::requestIcons(xgi::Input*  in,
 	        "?configWindowName=tableEditor,/"
 	     << ",Icon "
 	        "Editor,ICON,0,1,icon-IconEditor.png,/WebPath/html/"
-	        "ConfigurationGUI_subset.html?urn=280&subsetBasePath=DesktopIconTable&recordAlias=Icons&"
-		 	"groupingFieldList=Status%2CForceOnlyOneInstance%2CRequiredPermissionLevel,/"
+	        "ConfigurationGUI_subset.html?urn=280&subsetBasePath=DesktopIconTable&"
+	        "recordAlias=Icons&"
+	        "groupingFieldList=Status%2CForceOnlyOneInstance%2CRequiredPermissionLevel,/"
 	     << ",Security "
 	        "Settings,SEC,1,1,icon-SecuritySettings.png,/WebPath/html/"
 	        "SecuritySettings.html,/User Settings"
@@ -206,8 +206,7 @@ void WizardSupervisor::requestIcons(xgi::Input*  in,
 }  // end requestIcons()
 
 //========================================================================================================================
-void WizardSupervisor::verification(xgi::Input*  in,
-                                    xgi::Output* out)
+void WizardSupervisor::verification(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
 	std::string  submittedSequence = CgiDataUtilities::getData(cgi, "code");
@@ -350,8 +349,7 @@ void WizardSupervisor::destroy(void)
 }
 
 //========================================================================================================================
-void WizardSupervisor::tooltipRequest(xgi::Input*  in,
-                                      xgi::Output* out)
+void WizardSupervisor::tooltipRequest(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
 
@@ -401,8 +399,7 @@ void WizardSupervisor::tooltipRequest(xgi::Input*  in,
 }  // end tooltipRequest()
 
 //========================================================================================================================
-void WizardSupervisor::toggleSecurityCodeGeneration(
-    xgi::Input* in, xgi::Output* out)
+void WizardSupervisor::toggleSecurityCodeGeneration(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
 
@@ -510,8 +507,7 @@ xoap::MessageReference WizardSupervisor::supervisorLastConfigGroupRequest(
 }
 
 //========================================================================================================================
-void WizardSupervisor::Default(xgi::Input*  in,
-                               xgi::Output* out)
+void WizardSupervisor::Default(xgi::Input* in, xgi::Output* out)
 {
 	__COUT__ << "Unauthorized Request made, security sequence doesn't match!"
 	         << std::endl;
@@ -519,8 +515,7 @@ void WizardSupervisor::Default(xgi::Input*  in,
 }
 
 //========================================================================================================================
-void WizardSupervisor::request(xgi::Input*  in,
-                               xgi::Output* out)
+void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgiIn(in);
 
@@ -593,8 +588,7 @@ void WizardSupervisor::request(xgi::Input*  in,
 }  // end request()
 
 //========================================================================================================================
-void WizardSupervisor::editSecurity(xgi::Input*  in,
-                                    xgi::Output* out)
+void WizardSupervisor::editSecurity(xgi::Input* in, xgi::Output* out)
 {
 	// if sequence doesn't match up -> return
 	cgicc::Cgicc cgi(in);
@@ -700,8 +694,7 @@ void WizardSupervisor::editSecurity(xgi::Input*  in,
 	*out << security;
 }
 //========================================================================================================================
-void WizardSupervisor::UserSettings(xgi::Input*  in,
-                                    xgi::Output* out)
+void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)
 {
 	// if sequence doesn't match up -> return
 	cgicc::Cgicc cgi(in);
