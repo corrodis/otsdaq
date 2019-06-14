@@ -663,6 +663,19 @@ launchOTSMacromaker() {
 	fi
 	export PORT=${MAIN_PORT}	
 	
+	
+	#check for mm xml file, if missing download it	
+	if [ ! -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_MacroMaker_CMake.xml ]; then
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tDownloading MacroMaker mode context configuration..."
+		wget https://cdcvs.fnal.gov/redmine/projects/otsdaq/repository/revisions/develop/raw/data-core/XDAQConfigurations/otsConfigurationNoRU_MacroMaker_CMake.xml -P ${XDAQ_CONFIGURATION_DATA_PATH} --no-check-certificate	
+	fi
+	
+	#check for message facility file, if missing download it	
+	if [ ! -e ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl ]; then
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tDownloading MacroMaker mode context configuration..."
+		wget https://cdcvs.fnal.gov/redmine/projects/otsdaq/repository/revisions/develop/raw/data-core/MessageFacilityConfigurations/MessageFacilityWithCout.fcl -P ${USER_DATA}/MessageFacilityConfigurations --no-check-certificate	
+	fi
+	
 		
 	#substitute environment variables into template wiz-mode xdaq config xml
 	envsubst <${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_MacroMaker_CMake.xml > ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_MacroMaker_CMake_Run.xml
