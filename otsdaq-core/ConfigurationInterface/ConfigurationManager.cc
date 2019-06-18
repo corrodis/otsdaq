@@ -919,6 +919,22 @@ void ConfigurationManager::loadMemberMap(
 				throw;
 		}
 
+		if(!tmpConfigBasePtr)
+		{
+			__SS__ << "Null pointer returned for table '" <<
+					memberPair.first << ".' Was the table info deleted?" << __E__;
+			__COUT_ERR__ << ss.str();
+
+			nameToTableMap_.erase(memberPair.first);
+			if(accumulateWarnings)
+			{
+				*accumulateWarnings += ss.str();
+				continue;
+			}
+			else
+				__SS_THROW__;
+		}
+
 		nameToTableMap_[memberPair.first] = tmpConfigBasePtr;
 		if(nameToTableMap_[memberPair.first]->getViewP())
 		{

@@ -1,0 +1,89 @@
+{
+"ouid" : [
+"0e5e64c248174fc0a7648f64",
+"2ded4b2861c0442d8abb821d",
+"941f17663978400c9de0f491",
+"a8b0a9cf4d24470293bc137b",
+"c67ce90f00fe41afbe78d404"
+],
+"version" : {
+"0" : [
+"c67ce90f00fe41afbe78d404"
+],
+"1" : [
+"a8b0a9cf4d24470293bc137b"
+],
+"2" : [
+"941f17663978400c9de0f491"
+],
+"3" : [
+"2ded4b2861c0442d8abb821d"
+],
+"4" : [
+"0e5e64c248174fc0a7648f64"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"0e5e64c248174fc0a7648f64",
+"2ded4b2861c0442d8abb821d",
+"941f17663978400c9de0f491",
+"a8b0a9cf4d24470293bc137b",
+"c67ce90f00fe41afbe78d404"
+],
+"TableEditWizBackbone_v0" : [
+"c67ce90f00fe41afbe78d404"
+],
+"artdaqConfig_v1" : [
+"a8b0a9cf4d24470293bc137b"
+],
+"artdaqContext_v2" : [
+"941f17663978400c9de0f491"
+],
+"defaultConfig_v3" : [
+"2ded4b2861c0442d8abb821d"
+],
+"testContext_v4" : [
+"0e5e64c248174fc0a7648f64"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"0e5e64c248174fc0a7648f64",
+"2ded4b2861c0442d8abb821d",
+"941f17663978400c9de0f491",
+"a8b0a9cf4d24470293bc137b",
+"c67ce90f00fe41afbe78d404"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+},
+"configurations.assigned" : {
+"notprovided" : [
+"2019-06-17T23:09:23.320-0500",
+"2019-06-17T23:09:27.114-0500",
+"2019-06-17T23:09:30.962-0500",
+"2019-06-17T23:09:32.308-0500",
+"2019-06-17T23:09:33.626-0500"
+],
+"TableEditWizBackbone_v0" : [
+"2019-06-17T23:09:23.474-0500"
+],
+"artdaqConfig_v1" : [
+"2019-06-17T23:09:30.078-0500"
+],
+"artdaqContext_v2" : [
+"2019-06-17T23:09:31.310-0500"
+],
+"defaultConfig_v3" : [
+"2019-06-17T23:09:33.107-0500"
+],
+"testContext_v4" : [
+"2019-06-17T23:09:34.019-0500"
+]
+}
+}

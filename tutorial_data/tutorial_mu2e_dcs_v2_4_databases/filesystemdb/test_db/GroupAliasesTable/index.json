@@ -1,0 +1,50 @@
+{
+"ouid" : [
+"87db3272e82c418094093897",
+"d56a0d711aee490c8f926acd"
+],
+"version" : {
+"0" : [
+"87db3272e82c418094093897"
+],
+"5" : [
+"d56a0d711aee490c8f926acd"
+]
+},
+"configurations.name" : {
+"notprovided" : [
+"87db3272e82c418094093897",
+"d56a0d711aee490c8f926acd"
+],
+"TableEditWizBackbone_v0" : [
+"87db3272e82c418094093897"
+],
+"TableEditWizBackbone_v5" : [
+"d56a0d711aee490c8f926acd"
+]
+},
+"entities.name" : {
+"OTSROOT" : [
+"87db3272e82c418094093897",
+"d56a0d711aee490c8f926acd"
+]
+},
+"aliases.active.name" : {
+
+},
+"runs.name" : {
+
+},
+"configurations.assigned" : {
+"notprovided" : [
+"2019-06-17T23:09:23.121-0500",
+"2019-06-17T23:09:34.292-0500"
+],
+"TableEditWizBackbone_v0" : [
+"2019-06-17T23:09:23.394-0500"
+],
+"TableEditWizBackbone_v5" : [
+"2019-06-17T23:09:34.394-0500"
+]
+}
+}

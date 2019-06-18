@@ -10,45 +10,6 @@ using namespace ots;
 //==============================================================================
 FESlowControlsTable::FESlowControlsTable(void) : TableBase("FESlowControlsTable")
 {
-	//	<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-	//		<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	// xsi:noNamespaceSchemaLocation="TableInfo.xsd"> 			<TABLE
-	// Name="FESlowControlsTable"> 				<VIEW
-	// Name="SLOW_CONTROLS_OTS_FE_CHANNELS_TABLE"
-	// Type="File,Database,DatabaseTest"> 					<COLUMN
-	// Type="GroupID-SlowControls" 	 Name="FEGroupID" 	 StorageName="FE_GROUP_ID"
-	// DataType="VARCHAR2"/> 					<COLUMN Type="UID" 	 Name="ChannelName"
-	// StorageName="CHANNEL_NAME" 		DataType="VARCHAR2"/> 					<COLUMN
-	// Type="Data" 	 Name="ChannelDataType" 	 StorageName="CHANNEL_DATA_TYPE"
-	// DataType="VARCHAR2"/> 					<COLUMN Type="Data"
-	// Name="UniversalInterfaceAddress" 	 StorageName="UNIVERSAL_INTERFACE_ADDRESS"
-	// DataType="VARCHAR2"/> 					<COLUMN Type="YesNo"
-	// Name="ReadAccess" 	 StorageName="READ_ACCESS" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="YesNo" 	 Name="WriteAccess"
-	// StorageName="WRITE_ACCESS"  DataType="VARCHAR2"/> 					<COLUMN
-	// Type="YesNo"  Name="MonitoringEnabled" 	 StorageName="MONITORING_ENABLED"
-	// DataType="VARCHAR2"/> 					<COLUMN Type="TrueFalse"
-	// Name="TransmitChangesOnly" 	 StorageName="TRANSMIT_CHANGES_ONLY"
-	// DataType="VARCHAR2"/> 					<COLUMN Type="Data"
-	// Name="DelayBetweenSamples" 	 StorageName="DELAY_BETWEEN_SAMPLES"
-	// DataType="NUMBER"/> 					<COLUMN Type="YesNo" 	 Name="AlarmsEnabled"
-	// StorageName="ALARMS_ENABLED" 		DataType="VARCHAR2"/> <COLUMN
-	// Type="Data" 	 Name="LowThreshold" 	 StorageName="LOW_THRESHOLD"
-	// DataType="VARCHAR2"/> 					<COLUMN Type="Data"
-	// Name="LowLowThreshold" 	 StorageName="LOW_LOW_THRESHOLD"
-	// DataType="VARCHAR2"/> 					<COLUMN Type="Data"
-	// Name="HighThreshold" 	 StorageName="HIGH_THRESHOLD" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="Data" 	 Name="HighHighThreshold"
-	// StorageName="HIGH_HIGH_THRESHOLD" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="Comment" 	 Name="CommentDescription"
-	// StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR"
-	// DataType="VARCHAR2"/> 					<COLUMN Type="Timestamp"
-	// Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME"
-	// DataType="TIMESTAMP WITH TIMEZONE"/>
-	//				</VIEW>
-	//			</TABLE>
-	//		</ROOT>
 }
 
 //==============================================================================
@@ -57,7 +18,6 @@ FESlowControlsTable::~FESlowControlsTable(void) {}
 //==============================================================================
 // init
 //	Validates user inputs for data type.
-//
 void FESlowControlsTable::init(ConfigurationManager* configManager)
 {
 	// check for valid data types
@@ -66,6 +26,7 @@ void FESlowControlsTable::init(ConfigurationManager* configManager)
 
 	//	__COUT__ << configManager->getNode(this->getTableName()).getValueAsString()
 	//		  											  << std::endl;
+
 
 	std::string childType;
 	auto        childrenMap = configManager->__SELF_NODE__.getChildren();
