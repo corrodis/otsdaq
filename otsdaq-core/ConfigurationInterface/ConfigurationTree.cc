@@ -1469,8 +1469,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		auto recordChildren = getNode(recordList[i]).getChildren();
 		for(const auto& fieldNode : recordChildren)
 		{
-			//			__COUT__ << "All... " << fieldNode.second.getNodeType() <<
-			//					" -- " << fieldNode.first << __E__;
+			//__COUT__ << "All... " << fieldNode.second.getNodeType() <<
+			//		" -- " << fieldNode.first << __E__;
 
 			if(fieldNode.second.isValueNode() || fieldNode.second.isGroupLinkNode())
 			{
@@ -1517,7 +1517,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 					{
 						if(fieldNode.second.isGroupLinkNode())
 						{
-							__COUT__ << "isGroupLinkNode " << fieldNode.first << __E__;
+							//__COUT__ << "isGroupLinkNode " << fieldNode.first << __E__;
 
 							// must get column info differently for group link column
 
@@ -1562,19 +1562,80 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 				// else // not first uid record, do not need to check, must be same as
 				// first record!
 			}  // end value field handling
-			else if(depth > 0 && fieldNode.second.isUIDLinkNode() &&
-			        !fieldNode.second.isDisconnected())
+			else if(depth > 0 && fieldNode.second.isUIDLinkNode())
 			{
 				//__COUT__ << "isUIDLinkNode " << fieldNode.first << __E__;
-				fieldNode.second.recursiveGetCommonFields(
-				    fieldCandidateList,
-				    fieldCount,
-				    fieldAcceptList,
-				    fieldRejectList,
-				    depth,
-				    fieldNode.first + "/",  // relativePathBase
-				    !i                      // launch inFirstRecord (or not) depth search
-				);
+
+				// must get column info differently for UID link column
+
+				//add link fields and recursively traverse for fields
+				if(!i)  // first uid record
+				{
+					// check field accept filter list
+					found = fieldAcceptList.size() ? false
+							: true;  // accept if no filter list
+					for(const auto& fieldFilter : fieldAcceptList)
+						if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
+						{
+							found = true;
+							break;
+						}
+
+					if(found)
+					{
+						// check field reject filter list
+
+						found = true;  // accept if no filter list
+						for(const auto& fieldFilter : fieldRejectList)
+							if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
+							{
+								found = false;  // reject if match
+								break;
+							}
+					}
+
+					// if found, guaranteed field (all UID link fields must be common for
+					// UIDs in same table)
+					if(found)
+					{
+						std::pair<unsigned int /*link col*/,
+						unsigned int /*link id col*/> linkPair;
+						bool isGroupLink;
+						tableView_->getChildLink(tableView_->findCol(fieldNode.first),
+								isGroupLink,
+								linkPair);
+
+						// add both link columns
+
+						fieldCandidateList.push_back(ConfigurationTree::RecordField(
+								table_->getTableName(),
+								recordList[i],
+								tableView_->getColumnInfo(linkPair.first).getName(),
+								"",  // relative path, not including columnName_
+								&tableView_->getColumnInfo(linkPair.first)));
+						fieldCount.push_back(-1);  // mark guaranteed field
+
+						fieldCandidateList.push_back(ConfigurationTree::RecordField(
+								table_->getTableName(),
+								recordList[i],
+								tableView_->getColumnInfo(linkPair.second).getName(),
+								"",  // relative path, not including columnName_
+								&tableView_->getColumnInfo(linkPair.second)));
+						fieldCount.push_back(-1);  // mark guaranteed field
+					}
+				}
+
+				//recursive field traversal is (currently) a bit different from first level in that it does not add the link fields
+				if(!fieldNode.second.isDisconnected())
+					fieldNode.second.recursiveGetCommonFields(
+						fieldCandidateList,
+						fieldCount,
+						fieldAcceptList,
+						fieldRejectList,
+						depth,
+						fieldNode.first + "/",  // relativePathBase
+						!i                      // launch inFirstRecord (or not) depth search
+					);
 			}  // end unique link handling
 		}
 	}  // end record loop
@@ -1780,6 +1841,9 @@ void ConfigurationTree::recursiveGetCommonFields(
 	auto recordChildren = getChildren();
 	for(const auto& fieldNode : recordChildren)
 	{
+		//		__COUT__ << "All... " << fieldNode.second.getNodeType() <<
+		//				" -- " << (relativePathBase + fieldNode.first) << __E__;
+
 		if(fieldNode.second.isValueNode())
 		{
 			// skip author and record insertion time
@@ -1852,7 +1916,7 @@ void ConfigurationTree::recursiveGetCommonFields(
 		        !fieldNode.second.isDisconnected())
 		{
 			//__COUT__ << "isUIDLinkNode " << (relativePathBase + fieldNode.first) <<
-			// __E__;
+			//		__E__;
 			fieldNode.second.recursiveGetCommonFields(
 			    fieldCandidateList,
 			    fieldCount,
