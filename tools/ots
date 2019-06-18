@@ -397,7 +397,8 @@ WEB_PATH=${OTSDAQ_UTILITIES_DIR}/WebGUI
 #echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tUSER_WEB_PATH=$USER_WEB_PATH"
 #echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tMaking symbolic link to USER_WEB_PATH"
 #echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
-ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath &>/dev/null  #hide output
+rm $WEB_PATH/UserWebPath &>/dev/null  #delete link first, hide output
+ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath &>/dev/null  #make link, hide output
 
 
 if [ "x$USER_DATA" == "x" ]; then
