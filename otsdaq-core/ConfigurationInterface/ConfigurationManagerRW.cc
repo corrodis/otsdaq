@@ -1,18 +1,18 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
 
 // backbone includes
-//#include "otsdaq-core/TablePluginDataFormats/ConfigurationAliases.h"
-//#include "otsdaq-core/TablePluginDataFormats/Configurations.h"
-//#include "otsdaq-core/TablePluginDataFormats/DefaultConfigurations.h"
-//#include "otsdaq-core/TablePluginDataFormats/VersionAliases.h"
+//#include "otsdaq-core/TablePlugins/ConfigurationAliases.h"
+//#include "otsdaq-core/TablePlugins/Configurations.h"
+//#include "otsdaq-core/TablePlugins/DefaultConfigurations.h"
+//#include "otsdaq-core/TablePlugins/VersionAliases.h"
 
 //#include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"//All configurable
 // objects are included here
 
 //
-//#include "otsdaq-core/TablePluginDataFormats/DetectorTable.h"
-//#include "otsdaq-core/TablePluginDataFormats/MaskTable.h"
-//#include "otsdaq-core/TablePluginDataFormats/DetectorToFETable.h"
+//#include "otsdaq-core/TablePlugins/DetectorTable.h"
+//#include "otsdaq-core/TablePlugins/MaskTable.h"
+//#include "otsdaq-core/TablePlugins/DetectorToFETable.h"
 //
 
 //#include "otsdaq-core/ConfigurationInterface/DACStream.h"

@@ -3,7 +3,7 @@
 
 #include <string>
 #include "otsdaq-core/Macros/CoutMacros.h" /* also for XDAQ_CONST_CALL */
-#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
+#include "otsdaq-core/TablePlugins/XDAQContextTable.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

@@ -182,11 +182,11 @@ void TableView::init(void)
 		unsigned int colPos;
 		if((colPos = findColByType(TableViewColumnInfo::TYPE_COMMENT)) != INVALID)
 		{
-			if(columnsInfo_[colPos].getName() != "CommentDescription")
+			if(columnsInfo_[colPos].getName() != TableViewColumnInfo::COL_NAME_COMMENT)
 			{
 				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT
 				       << " data type column must have name="
-				       << "CommentDescription" << __E__;
+				       << TableViewColumnInfo::COL_NAME_COMMENT << __E__;
 				__SS_THROW__;
 			}
 

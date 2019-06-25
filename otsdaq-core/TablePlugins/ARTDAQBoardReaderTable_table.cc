@@ -1,7 +1,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
-#include "otsdaq-core/TablePluginDataFormats/ARTDAQBoardReaderTable.h"
-#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
+#include "otsdaq-core/TablePlugins/ARTDAQBoardReaderTable.h"
+#include "otsdaq-core/TablePlugins/XDAQContextTable.h"
 
 #include <stdio.h>
 #include <sys/stat.h>  //for mkdir
@@ -34,6 +34,13 @@ ARTDAQBoardReaderTable::~ARTDAQBoardReaderTable(void) {}
 //========================================================================================================================
 void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 {
+	//use isFirstAppInContext to only run once per context, for example to avoid
+	//	generating files on local disk multiple times.
+	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
+
+	//__COUTV__(isFirstAppInContext);
+	if(!isFirstAppInContext) return;
+
 	// make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
@@ -389,7 +396,7 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 				//						<<
 				//						"\n";
 
-				auto comment = parameter.second.getNode("CommentDescription");
+				auto comment = parameter.second.getNode(TableViewColumnInfo::COL_NAME_COMMENT);
 				OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
 				    << parameter.second.getNode("daqParameterValue").getValue()
 				    << (comment.isDefaultValue() ? "" : ("\t # " + comment.getValue()))
@@ -413,7 +420,7 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 	//				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 	//					PUSHCOMMENT;
 	//
-	//				auto comment = parameter.second.getNode("CommentDescription");
+	//				auto comment = parameter.second.getNode(TableViewColumnInfo::COL_NAME_COMMENT);
 	//				OUT << parameter.second.getNode("daqParameterKey").getValue() <<
 	//						": " <<
 	//						parameter.second.getNode("daqParameterValue").getValue()

@@ -7,7 +7,7 @@
 #include "otsdaq-core/MessageFacility/MessageFacility.h"
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq-core/TableCore/TableGroupKey.h"
-#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
+#include "otsdaq-core/TablePlugins/XDAQContextTable.h"
 
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h"  //for WebUsers::RequestUserInfo
 

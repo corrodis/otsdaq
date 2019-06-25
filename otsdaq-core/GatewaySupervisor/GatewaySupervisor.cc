@@ -9,8 +9,8 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
 #include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
-#include "otsdaq-core/TablePluginDataFormats/DesktopIconTable.h"
-#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
+#include "otsdaq-core/TablePlugins/DesktopIconTable.h"
+#include "otsdaq-core/TablePlugins/XDAQContextTable.h"
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
 
 #include "otsdaq-core/NetworkUtilities/TransceiverSocket.h"  // for UDP state changer

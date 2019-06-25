@@ -5,13 +5,13 @@
 #include "otsdaq-core/NetworkUtilities/NetworkConverters.h"
 
 #include "otsdaq-core/ConfigurationDataFormats/FEInterfaceTableBase.h"
-#include "otsdaq-core/TablePluginDataFormats/DataBufferTable.h"
-#include "otsdaq-core/TablePluginDataFormats/DataManagerTable.h"
-#include "otsdaq-core/TablePluginDataFormats/DetectorTable.h"
-#include "otsdaq-core/TablePluginDataFormats/DetectorToFETable.h"
-#include "otsdaq-core/TablePluginDataFormats/FETable.h"
-#include "otsdaq-core/TablePluginDataFormats/UDPDataListenerProducerTable.h"
-#include "otsdaq-core/TablePluginDataFormats/UDPDataStreamerConsumerTable.h"
+#include "otsdaq-core/TablePlugins/DataBufferTable.h"
+#include "otsdaq-core/TablePlugins/DataManagerTable.h"
+#include "otsdaq-core/TablePlugins/DetectorTable.h"
+#include "otsdaq-core/TablePlugins/DetectorToFETable.h"
+#include "otsdaq-core/TablePlugins/FETable.h"
+#include "otsdaq-core/TablePlugins/UDPDataListenerProducerTable.h"
+#include "otsdaq-core/TablePlugins/UDPDataStreamerConsumerTable.h"
 //#include
 //"otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceTable.h"
 //#include

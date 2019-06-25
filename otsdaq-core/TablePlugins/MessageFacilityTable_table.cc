@@ -1,6 +1,6 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
-#include "otsdaq-core/TablePluginDataFormats/MessageFacilityTable.h"
+#include "otsdaq-core/TablePlugins/MessageFacilityTable.h"
 
 #include <stdio.h>
 #include <fstream>  // std::fstream
@@ -44,47 +44,19 @@ MessageFacilityTable::MessageFacilityTable(void) : TableBase("MessageFacilityTab
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
 	//////////////////////////////////////////////////////////////////////
-
-	//	<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-	//		<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	// xsi:noNamespaceSchemaLocation="TableInfo.xsd"> 			<TABLE
-	// Name="MessageFacilityTable">
-	//				<VIEW Name="MESSAGE_FACILITY_TABLE"
-	// Type="File,Database,DatabaseTest">
-	//					<COLUMN Type="UID" 	 Name="UID" 	 StorageName="UID"
-	// DataType="VARCHAR2"/> 					<COLUMN Type="OnOff" 	 Name="Status"
-	// StorageName="STATUS" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="TrueFalse" 	 Name="EnableUDPForwarding"
-	// StorageName="ENABLE_UDP_FORWARDING" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="YesNo" 	 Name="ForwardToWebConsoleGUI"
-	// StorageName="FORWARD_TO_WEB_CONSOLE_GUI" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="Data" 	 Name="WebConsoleForwardingIPAddress"
-	// StorageName="WEB_CONSOLE_FORWARDING_IP_ADDRESS" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="Data" 	 Name="WebConsoleForwardingPort0"
-	// StorageName="WEB_CONSOLE_FORWARDING_PORT0" 		DataType="NUMBER"/>
-	//					<COLUMN Type="Data" 	 Name="WebConsoleForwardingPort1"
-	// StorageName="WEB_CONSOLE_FORWARDING_PORT1" 		DataType="NUMBER"/>
-	//					<COLUMN Type="YesNo" 	 Name="ForwardToQTViewerGUI"
-	// StorageName="FORWARD_TO_QT_VIEWER_GUI" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="Data" 	 Name="QTViewerForwardingIPAddress"
-	// StorageName="QT_VIEWER_FORWARDING_IP_ADDRESS" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="Data" 	 Name="QTViewerForwardingPort"
-	// StorageName="QT_VIEWER_FORWARDING_PORT" 		DataType="NUMBER"/>
-	//					<COLUMN Type="Comment" 	 Name="CommentDescription"
-	// StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2"/>
-	//					<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR"
-	// DataType="VARCHAR2"/> 					<COLUMN Type="Timestamp"
-	// Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME"
-	// DataType="TIMESTAMP WITH TIMEZONE"/>
-	//				</VIEW>
-	//			</TABLE>
-	//		</ROOT>
 }
 
 MessageFacilityTable::~MessageFacilityTable(void) {}
 
 void MessageFacilityTable::init(ConfigurationManager* configManager)
 {
+	//use isFirstAppInContext to only run once per context, for example to avoid
+	//	generating files on local disk multiple times.
+	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
+
+	//__COUTV__(isFirstAppInContext);
+	if(!isFirstAppInContext) return;
+
 	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	//	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 

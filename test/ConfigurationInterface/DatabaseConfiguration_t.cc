@@ -13,9 +13,9 @@
 //<otsdaq_demo/otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceConfiguration.h>
 #include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-//#include "otsdaq-core/TablePluginDataFormats/Configurations.h"
-//#include "otsdaq-core/TablePluginDataFormats/ConfigurationAliases.h"
-//#include "otsdaq-core/TablePluginDataFormats/FETable.h"
+//#include "otsdaq-core/TablePlugins/Configurations.h"
+//#include "otsdaq-core/TablePlugins/ConfigurationAliases.h"
+//#include "otsdaq-core/TablePlugins/FETable.h"
 #include "artdaq-database/JsonDocument/JSONDocument.h"
 #include "artdaq-database/StorageProviders/FileSystemDB/provider_filedb_index.h"
 #include "otsdaq-core/PluginMakers/MakeInterface.h"

@@ -3,7 +3,7 @@
 
 #include <mutex>  //for std::mutex
 #include <string>
-#include "otsdaq-core/TablePluginDataFormats/IterateTable.h"
+#include "otsdaq-core/TablePlugins/IterateTable.h"
 #include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"

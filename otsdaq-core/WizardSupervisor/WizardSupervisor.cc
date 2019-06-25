@@ -156,24 +156,40 @@ void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
 	// filename, 0 for no image  5 - linkurl = url of the window to open  6 - folderPath =
 	// folder and subfolder location
 
+	// clang-format off
 	*out << "Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,/"
-	     << ",Table "
-	        "Editor,TBL,0,1,icon-ControlsDashboard.png,/urn:xdaq-application:lid=280/"
-	        "?configWindowName=tableEditor,/"
-	     << ",Icon "
-	        "Editor,ICON,0,1,icon-IconEditor.png,/WebPath/html/"
-	        "ConfigurationGUI_subset.html?urn=280&subsetBasePath=DesktopIconTable&"
-	        "recordAlias=Icons&"
-	        "groupingFieldList=Status%2CForceOnlyOneInstance%2CRequiredPermissionLevel,/"
-	     << ",Security "
-	        "Settings,SEC,1,1,icon-SecuritySettings.png,/WebPath/html/"
-	        "SecuritySettings.html,/User Settings"
-	     << ",Edit User "
-	        "Data,USER,1,1,icon-EditUserData.png,/WebPath/html/EditUserData.html,/User "
-	        "Settings"
-	     <<
 
-	    ",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" <<
+	     << ",Table Editor,TBL,0,1,icon-ControlsDashboard.png,"
+		 	"/urn:xdaq-application:lid=280/?configWindowName=tableEditor,/"
+
+	     << ",Icon Editor,ICON,0,1,icon-IconEditor.png,"
+		 	"/WebPath/html/ConfigurationGUI_subset.html?urn=280&subsetBasePath=DesktopIconTable&"
+	        "recordAlias=Icons&groupingFieldList=Status%2CForceOnlyOneInstance%2CRequiredPermissionLevel,/"
+
+	     << ",Security Settings,SEC,1,1,icon-SecuritySettings.png,"
+		 	"/WebPath/html/SecuritySettings.html,/User Settings"
+
+	     << ",Edit User Data,USER,1,1,icon-EditUserData.png,/WebPath/html/EditUserData.html,/User Settings"
+
+	     << ",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" 
+		 
+		 //Configuration Wizards ------------------
+		 << ",Front-end Wizard,CFG,0,1,icon-Configure.png,"
+		 	"/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Front%2Dend,Config Wizards"
+
+	     << ",Processor Wizard,CFG,0,1,icon-Configure.png,"
+		 	"/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Processor,Config Wizards"
+
+	     << ",Block Diagram,CFG,0,1,icon-Configure.png,"
+		 	"/WebPath/html/ConfigurationSubsetBlockDiagram.html?urn=280,Config Wizards"
+		 //end Configuration Wizards ------------------
+
+	     << ",Code Editor,CODE,0,1,icon-CodeEditor.png,/urn:xdaq-application:lid=240/,/"
+
+		 //Documentation ------------------
+	     << ",State Machine Screenshot,FSM-SS,1,1,icon-StateMachine.png,"
+		 	"/WebPath/images/windowContentImages/state_machine_screenshot.png,/Documentation"	
+		 //end Documentation ------------------
 
 	    //",Iterate,IT,0,1,icon-Iterate.png,/urn:xdaq-application:lid=280/?configWindowName=iterate,/"
 	    //<<
@@ -183,25 +199,17 @@ void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
 	    //<<
 	    //",Configure,CFG,0,1,icon-Configure.png,/urn:xdaq-application:lid=280/,myFolder/"
 	    //<<
-	    ",Front-end "
-	    "Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/"
-	    "RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Front%2Dend,Config Wizards"
-	     << ",Processor "
-	        "Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/"
-	        "RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Processor,Config Wizards"
-	     << ",Block "
-	        "Diagram,CFG,0,1,icon-Configure.png,/WebPath/html/"
-	        "ConfigurationSubsetBlockDiagram.html?urn=280,Config Wizards"
-	     <<
+
+	    
 	    //",Consumer
 	    // Wizard,CFG,0,1,icon-Configure.png,/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&subsetBasePath=FEInterfaceConfiguration&recordAlias=Consumer,Config
 	    // Wizards" <<
 
 	    //",DB Utilities,DB,1,1,0,http://127.0.0.1:8080/db/client.html" <<
-
-	    ",Code Editor,CODE,0,1,icon-CodeEditor.png,/urn:xdaq-application:lid=240/,/"
+        
 	     //",Code Editor,CODE,0,1,icon-CodeEditor.png,/WebPath/html/CodeEditor.html,/"
 	     << "";
+	// clang-format on
 	return;
 }  // end requestIcons()
 

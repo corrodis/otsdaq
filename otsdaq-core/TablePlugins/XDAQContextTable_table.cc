@@ -1,6 +1,6 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
-#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
+#include "otsdaq-core/TablePlugins/XDAQContextTable.h"
 
 #include <stdio.h>
 #include <fstream>  // std::fstream
@@ -52,38 +52,6 @@ XDAQContextTable::XDAQContextTable(void) : TableBase("XDAQContextTable")
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
 	//////////////////////////////////////////////////////////////////////
-
-	//	<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-	//	 <ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	// xsi:noNamespaceSchemaLocation="TableInfo.xsd"> 	   <TABLE
-	// Name="XDAQContextTable"> 	     <VIEW Name="XDAQ_CONTEXT_TABLE"
-	// Type="File,Database,DatabaseTest">
-	//           <COLUMN Type="UID" 	           Name="ContextUID"
-	//           StorageName="CONTEXT_UID" 		                 DataType="VARCHAR2"/>
-	//           <COLUMN Type="ChildLink-0" 	   Name="LinkToApplicationTable"
-	//           StorageName="LINK_TO_APPLICATION_TABLE" DataType="VARCHAR2"/>
-	//           <COLUMN Type="ChildLinkGroupID-0" Name="ApplicationGroupID"
-	//           StorageName="APPLICATION_GROUP_ID"              DataType="VARCHAR2"/>
-	//           <COLUMN Type="OnOff" 	           Name="Status"
-	//           StorageName="STATUS" 	   	                     DataType="VARCHAR2"/>
-	//           <COLUMN Type="Data" 	           Name="Id"
-	//           StorageName="ID" 		                         DataType="VARCHAR2"/>
-	//           <COLUMN Type="Data" 	           Name="Address"
-	//           StorageName="ADDRESS" 		                     DataType="VARCHAR2"/>
-	//           <COLUMN Type="Data" 	           Name="Port"
-	//           StorageName="PORT" 		                     DataType="VARCHAR2"/>
-	//           <COLUMN Type="Data" 	           Name="ARTDAQDataPort"
-	//           StorageName="ARTDAQ_DATA_PORT"  	             DataType="VARCHAR2"/>
-	//           <COLUMN Type="Comment" 	       Name="CommentDescription"
-	//           StorageName="COMMENT_DESCRIPTION" 	             DataType="VARCHAR2"/>
-	//           <COLUMN Type="Author" 	           Name="Author"
-	//           StorageName="AUTHOR" 		                     DataType="VARCHAR2"/>
-	//           <COLUMN Type="Timestamp" 	       Name="RecordInsertionTime"
-	//           StorageName="RECORD_INSERTION_TIME"             DataType="TIMESTAMP WITH
-	//           TIMEZONE"/>
-	//	     </VIEW>
-	//	   </TABLE>
-	//	 </ROOT>
 }
 
 //========================================================================================================================

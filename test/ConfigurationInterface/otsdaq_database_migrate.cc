@@ -9,9 +9,9 @@
 #include <string>
 #include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-//#include "otsdaq-core/TablePluginDataFormats/Configurations.h"
-//#include "otsdaq-core/TablePluginDataFormats/ConfigurationAliases.h"
-//#include "otsdaq-core/TablePluginDataFormats/FETable.h"
+//#include "otsdaq-core/TablePlugins/Configurations.h"
+//#include "otsdaq-core/TablePlugins/ConfigurationAliases.h"
+//#include "otsdaq-core/TablePlugins/FETable.h"
 //#include "otsdaq-core/PluginMakers/makeTable.h"
 //#include "otsdaq-core/PluginMakers/MakeInterface.h"
 #include "artdaq-database/JsonDocument/JSONDocument.h"

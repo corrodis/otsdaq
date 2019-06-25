@@ -1,6 +1,6 @@
 #include "otsdaq-core/Configurable/Configurable.h"
 
-#include "otsdaq-core/TablePluginDataFormats/XDAQContextTable.h"
+#include "otsdaq-core/TablePlugins/XDAQContextTable.h"
 
 using namespace ots;
 

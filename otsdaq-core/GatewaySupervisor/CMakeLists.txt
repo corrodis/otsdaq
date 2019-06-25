@@ -14,9 +14,9 @@ cet_make(LIBRARY_NAME GatewaySupervisor
          CodeEditor
          
 		 artdaq_ExternalComms
-		 otsdaq-core_TablePluginDataFormats_XDAQContextTable_table
-		 otsdaq-core_TablePluginDataFormats_IterateTable_table
-		 otsdaq-core_TablePluginDataFormats_DesktopIconTable_table
+		 otsdaq-core_TablePlugins_XDAQContextTable_table
+		 otsdaq-core_TablePlugins_IterateTable_table
+		 otsdaq-core_TablePlugins_DesktopIconTable_table
 )
 
 

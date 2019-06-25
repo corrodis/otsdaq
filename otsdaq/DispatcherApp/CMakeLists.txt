@@ -29,7 +29,7 @@ cet_make(LIBRARY_NAME DispatcherApp
 		 #SupervisorInfo
 		 #FiniteStateMachine
 		 #ConfigurationInterface
-		 #otsdaq-core_TablePluginDataFormats_XDAQContextTable_table
+		 #otsdaq-core_TablePlugins_XDAQContextTable_table
 		 
 		 
 

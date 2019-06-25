@@ -1,6 +1,6 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
-#include "otsdaq-core/TablePluginDataFormats/TemplateTable.h"
+#include "otsdaq-core/TablePlugins/TemplateTable.h"
 
 #include <iostream>
 #include <string>
@@ -21,6 +21,13 @@ TemplateTable::~TemplateTable(void) {}
 //==============================================================================
 void TemplateTable::init(ConfigurationManager* configManager)
 {
+	//use isFirstAppInContext to only run once per context, for example to avoid
+	//	generating files on local disk multiple times.
+	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
+
+	__COUTV__(isFirstAppInContext);
+	//if(!isFirstAppInContext) return;
+
 	// do something to validate or refactor table
 	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	__COUT__ << configManager->__SELF_NODE__ << std::endl;

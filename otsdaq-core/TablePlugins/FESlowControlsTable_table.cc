@@ -1,5 +1,5 @@
 #include "otsdaq-core/Macros/TablePluginMacros.h"
-#include "otsdaq-core/TablePluginDataFormats/FESlowControlsTable.h"
+#include "otsdaq-core/TablePlugins/FESlowControlsTable.h"
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 
@@ -20,6 +20,13 @@ FESlowControlsTable::~FESlowControlsTable(void) {}
 //	Validates user inputs for data type.
 void FESlowControlsTable::init(ConfigurationManager* configManager)
 {
+	//use isFirstAppInContext to only run once per context, for example to avoie
+	//	generating files on local disk multiple times.
+	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
+
+	__COUTV__(isFirstAppInContext);
+	if(!isFirstAppInContext) return;
+
 	// check for valid data types
 	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	__COUT__ << configManager->__SELF_NODE__ << std::endl;
@@ -29,7 +36,8 @@ void FESlowControlsTable::init(ConfigurationManager* configManager)
 
 
 	std::string childType;
-	auto        childrenMap = configManager->__SELF_NODE__.getChildren();
+	std::vector<std::pair<std::string, ConfigurationTree>> childrenMap =
+			configManager->__SELF_NODE__.getChildren();
 	for(auto& childPair : childrenMap)
 	{
 		// check each row in table
@@ -52,10 +60,12 @@ void FESlowControlsTable::init(ConfigurationManager* configManager)
 				__SS_THROW__;
 			}
 		}
-		else if(childType != "char" && childType != "short" && childType != "int" &&
-		        childType != "unsigned int" && childType != "long long " &&
-		        childType != "unsigned long long" && childType != "float" &&
-		        childType != "double")
+		else if(childType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT &&
+				childType != "char" && childType != "unsigned char" &&
+				childType != "short" && childType != "unsigned short" &&
+				childType != "int" && childType != "unsigned int" &&
+				childType != "long long " && childType != "unsigned long long" &&
+				childType != "float" && childType != "double")
 		{
 			__SS__ << "Data type '" << childType << "' for UID=" << childPair.first
 			       << " is invalid. "

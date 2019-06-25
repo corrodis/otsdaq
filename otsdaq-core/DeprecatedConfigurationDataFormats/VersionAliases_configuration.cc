@@ -1,6 +1,6 @@
 #include <iostream>
 #include "otsdaq-core/Macros/TablePluginMacros.h"
-#include "otsdaq-core/TablePluginDataFormats/VersionAliases.h"
+#include "otsdaq-core/TablePlugins/VersionAliases.h"
 
 using namespace ots;
 

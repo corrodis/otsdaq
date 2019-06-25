@@ -1,6 +1,6 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
-#include "otsdaq-core/TablePluginDataFormats/IterateTable.h"
+#include "otsdaq-core/TablePlugins/IterateTable.h"
 
 #include <iostream>
 #include <string>
