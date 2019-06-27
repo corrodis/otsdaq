@@ -2653,14 +2653,17 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
 	if(fp)
 	{  // file exists, so do NOT show tooltip
 		if(temporarySilence)
-			fprintf(fp, "%ld", time(0) + 7 /*days*/ * 24 /*hours*/ * 60 * 60);  // mute for a week
+			fprintf(fp,
+			        "%ld",
+			        time(0) + 7 /*days*/ * 24 /*hours*/ * 60 * 60);  // mute for a week
 		else if(doNeverShow && username == WebUsers::DEFAULT_ADMIN_USERNAME)
 		{
 			// admin could be shared account, so max out at 30 days
 			fprintf(fp, "%ld", time(0) + 30 /*days*/ * 24 /*hours*/ * 60 * 60);
 
 			__COUT__ << "User '" << username
-			         << "' may be a shared account, so max silence duration for tooltips is 30 days. Silencing now."
+			         << "' may be a shared account, so max silence duration for tooltips "
+			            "is 30 days. Silencing now."
 			         << __E__;
 		}
 		else

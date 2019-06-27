@@ -8,9 +8,7 @@
 using namespace ots;
 
 //==============================================================================
-FESlowControlsTable::FESlowControlsTable(void) : TableBase("FESlowControlsTable")
-{
-}
+FESlowControlsTable::FESlowControlsTable(void) : TableBase("FESlowControlsTable") {}
 
 //==============================================================================
 FESlowControlsTable::~FESlowControlsTable(void) {}
@@ -20,12 +18,13 @@ FESlowControlsTable::~FESlowControlsTable(void) {}
 //	Validates user inputs for data type.
 void FESlowControlsTable::init(ConfigurationManager* configManager)
 {
-	//use isFirstAppInContext to only run once per context, for example to avoie
+	// use isFirstAppInContext to only run once per context, for example to avoie
 	//	generating files on local disk multiple times.
 	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
 
 	__COUTV__(isFirstAppInContext);
-	if(!isFirstAppInContext) return;
+	if(!isFirstAppInContext)
+		return;
 
 	// check for valid data types
 	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
@@ -34,10 +33,9 @@ void FESlowControlsTable::init(ConfigurationManager* configManager)
 	//	__COUT__ << configManager->getNode(this->getTableName()).getValueAsString()
 	//		  											  << std::endl;
 
-
-	std::string childType;
+	std::string                                            childType;
 	std::vector<std::pair<std::string, ConfigurationTree>> childrenMap =
-			configManager->__SELF_NODE__.getChildren();
+	    configManager->__SELF_NODE__.getChildren();
 	for(auto& childPair : childrenMap)
 	{
 		// check each row in table
@@ -61,11 +59,11 @@ void FESlowControlsTable::init(ConfigurationManager* configManager)
 			}
 		}
 		else if(childType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT &&
-				childType != "char" && childType != "unsigned char" &&
-				childType != "short" && childType != "unsigned short" &&
-				childType != "int" && childType != "unsigned int" &&
-				childType != "long long " && childType != "unsigned long long" &&
-				childType != "float" && childType != "double")
+		        childType != "char" && childType != "unsigned char" &&
+		        childType != "short" && childType != "unsigned short" &&
+		        childType != "int" && childType != "unsigned int" &&
+		        childType != "long long " && childType != "unsigned long long" &&
+		        childType != "float" && childType != "double")
 		{
 			__SS__ << "Data type '" << childType << "' for UID=" << childPair.first
 			       << " is invalid. "

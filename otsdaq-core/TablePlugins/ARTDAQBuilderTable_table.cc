@@ -34,12 +34,13 @@ ARTDAQBuilderTable::~ARTDAQBuilderTable(void) {}
 //========================================================================================================================
 void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 {
-	//use isFirstAppInContext to only run once per context, for example to avoid
+	// use isFirstAppInContext to only run once per context, for example to avoid
 	//	generating files on local disk multiple times.
 	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
 
 	//__COUTV__(isFirstAppInContext);
-	if(!isFirstAppInContext) return;
+	if(!isFirstAppInContext)
+		return;
 
 	// make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
@@ -96,7 +97,7 @@ std::string ARTDAQBuilderTable::getFHICLFilename(const ConfigurationTree& builde
 	__COUT__ << "fcl: " << filename << __E__;
 
 	return filename;
-} // end getFHICLFilename()
+}  // end getFHICLFilename()
 
 //========================================================================================================================
 void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
@@ -1067,6 +1068,6 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 	//	__COUT__ << "No add-on parameters found" << __E__;
 
 	out.close();
-} // end outputFHICL()
+}  // end outputFHICL()
 
 DEFINE_OTS_TABLE(ARTDAQBuilderTable)

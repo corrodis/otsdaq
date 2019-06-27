@@ -50,12 +50,13 @@ MessageFacilityTable::~MessageFacilityTable(void) {}
 
 void MessageFacilityTable::init(ConfigurationManager* configManager)
 {
-	//use isFirstAppInContext to only run once per context, for example to avoid
+	// use isFirstAppInContext to only run once per context, for example to avoid
 	//	generating files on local disk multiple times.
 	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
 
 	//__COUTV__(isFirstAppInContext);
-	if(!isFirstAppInContext) return;
+	if(!isFirstAppInContext)
+		return;
 
 	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	//	__COUT__ << configManager->__SELF_NODE__ << std::endl;

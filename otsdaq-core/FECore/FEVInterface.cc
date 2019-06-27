@@ -212,8 +212,24 @@ bool FEVInterface::slowControlsRunning(void) try
 
 	time_t timeCounter = 0;
 
+	__FE_COUTV__(slowControlsWorkLoop_.getContinueWorkLoop());
+
+	{
+		unsigned int numOfReadChannels = 0;
+		for(const auto& channelPair : mapOfSlowControlsChannels_)
+		{
+			__FE_COUT__ << "SC Channel '" << channelPair.first
+			            << "' readAccess:" << channelPair.second.readAccess_ << __E__;
+			++numOfReadChannels;
+		}
+		if(numOfReadChannels == 0)
+			__MCOUT_WARN__("There are no slow controls channels with read access!");
+	}
+
 	while(slowControlsWorkLoop_.getContinueWorkLoop())
 	{
+		__FE_COUT__ << "..." << __E__;
+
 		sleep(1);  // seconds
 		++timeCounter;
 
@@ -310,6 +326,8 @@ bool FEVInterface::slowControlsRunning(void) try
 
 	if(fp)
 		fclose(fp);
+
+	__FE_COUT__ << "Slow controls workloop done." << __E__;
 
 	return false;
 }  // end slowControlsRunning()

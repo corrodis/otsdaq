@@ -7,12 +7,12 @@
 
 namespace ots
 {
-
 static bool MESSAGE_FACILITY_INITIALIZED;
 
 inline void INIT_MF(const char* name)
 {
-	if(MESSAGE_FACILITY_INITIALIZED) return;
+	if(MESSAGE_FACILITY_INITIALIZED)
+		return;
 
 	char* logRootString = getenv("OTSDAQ_LOG_ROOT");
 	if(logRootString == nullptr)
@@ -51,7 +51,7 @@ inline void INIT_MF(const char* name)
 
 	MESSAGE_FACILITY_INITIALIZED = true;
 
-} //end INIT_MF()
+}  // end INIT_MF()
 
 }  // namespace ots
 

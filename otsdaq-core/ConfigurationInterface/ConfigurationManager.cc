@@ -115,7 +115,7 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/,
 		                                       0));
 		colInfo->push_back(TableViewColumnInfo(
 		    TableViewColumnInfo::TYPE_COMMENT,  // just to make init() happy
-			TableViewColumnInfo::COL_NAME_COMMENT,
+		    TableViewColumnInfo::COL_NAME_COMMENT,
 		    "COMMENT_DESCRIPTION",
 		    TableViewColumnInfo::DATATYPE_STRING,
 		    "",
@@ -186,8 +186,8 @@ void ConfigurationManager::init(std::string* accumulatedErrors,
 			    // if write access, then load everything
 			    (username_ == ConfigurationManager::READONLY_USER)
 			        ? (!initForWriteAccess)  // important to consider initForWriteAccess
-			                                 // because this may be called before username_
-			                                 // is properly initialized
+			                                 // because this may be called before
+			                                 // username_ is properly initialized
 			        : false /*onlyLoadIfBackboneOrContext*/);
 		}
 		catch(std::runtime_error& e)
@@ -912,13 +912,16 @@ void ConfigurationManager::loadMemberMap(
 		}
 		catch(const std::runtime_error& e)
 		{
-			__SS__ << "Failed to load member table '" << memberPair.first <<
-					"' - here is the error: \n\n" <<
-					e.what() << __E__;
+			__SS__ << "Failed to load member table '" << memberPair.first
+			       << "' - here is the error: \n\n"
+			       << e.what() << __E__;
 
-			ss << "\nIf the table '" << memberPair.first <<
-					"' should not exist, then please remove it from the group. If it should exist, then it " <<
-					"seems to be missing; use the Table Editor to create it, or copy it from another source." << __E__;
+			ss << "\nIf the table '" << memberPair.first
+			   << "' should not exist, then please remove it from the group. If it "
+			      "should exist, then it "
+			   << "seems to be missing; use the Table Editor to create it, or copy it "
+			      "from another source."
+			   << __E__;
 
 			// if accumulating warnings and table view was created, then continue
 			if(accumulateWarnings)
@@ -928,12 +931,15 @@ void ConfigurationManager::loadMemberMap(
 		}
 		catch(...)
 		{
-			__SS__ << "Failed to load member table '" << memberPair.first <<
-					"' due to unknown error!" << __E__;
+			__SS__ << "Failed to load member table '" << memberPair.first
+			       << "' due to unknown error!" << __E__;
 
-			ss << "\nIf the table '" << memberPair.first <<
-					"' should not exist, then please remove it from the group. If it should exist, then it " <<
-					"seems to be missing; use the Table Editor to create it, or copy it from another source." << __E__;
+			ss << "\nIf the table '" << memberPair.first
+			   << "' should not exist, then please remove it from the group. If it "
+			      "should exist, then it "
+			   << "seems to be missing; use the Table Editor to create it, or copy it "
+			      "from another source."
+			   << __E__;
 
 			// if accumulating warnings and table view was created, then continue
 			if(accumulateWarnings)
@@ -942,11 +948,10 @@ void ConfigurationManager::loadMemberMap(
 				__SS_THROW__;
 		}
 
-
 		if(!tmpConfigBasePtr)
 		{
-			__SS__ << "Null pointer returned for table '" <<
-					memberPair.first << ".' Was the table info deleted?" << __E__;
+			__SS__ << "Null pointer returned for table '" << memberPair.first
+			       << ".' Was the table info deleted?" << __E__;
 			__COUT_ERR__ << ss.str();
 
 			nameToTableMap_.erase(memberPair.first);
