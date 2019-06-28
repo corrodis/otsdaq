@@ -14,10 +14,10 @@ ots::SlowControlsVInterface* ots::makeSlowControls(
 	static cet::BasicPluginFactory basicPluginInterfaceFactory("controls", "make");
 
 	return basicPluginInterfaceFactory.makePlugin<ots::SlowControlsVInterface*,
-	                                              const std::string&,
+	                                              const std::string&, const std::string&,
 	                                              const ots::ConfigurationTree&,
 	                                              const std::string&>(
-	    slowControlsPluginName,
+	    slowControlsPluginName,slowControlsPluginName,
 	    slowControlsUID,
 	    configurationTree,
 	    pathToControlsConfiguration);
