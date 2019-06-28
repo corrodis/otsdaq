@@ -38,7 +38,6 @@
 
 namespace ots
 {
-// class SlowControlsChannelInfo;
 class FEVInterfacesManager;
 
 // FEVInterface
@@ -52,83 +51,94 @@ class FEVInterfacesManager;
 // desired.
 class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 {
+	// clang-format off
+
 	friend class FEVInterfacesManager;
 
   public:
-	FEVInterface(const std::string&       interfaceUID,
-	             const ConfigurationTree& theXDAQContextConfigTree,
-	             const std::string&       configurationPath);
+	FEVInterface(
+		const std::string&       				interfaceUID,
+		const ConfigurationTree& 				theXDAQContextConfigTree,
+		const std::string&       				configurationPath);
 
 	virtual ~FEVInterface(void);
 
-	FEVInterfacesManager* parentInterfaceManager_;
 
-	const std::string&  getInterfaceUID(void) const { return interfaceUID_; }
-	virtual std::string getInterfaceType(void) const
+	FEVInterfacesManager* 				parentInterfaceManager_;
+
+	const std::string&  				getInterfaceUID				(void) const { return interfaceUID_; }
+	virtual std::string 				getInterfaceType			(void) const
 	{
 		return theXDAQContextConfigTree_.getBackNode(theConfigurationPath_)
 		    .getNode("FEInterfacePluginName")
 		    .getValue<std::string>();
-	}  // interfaceType_;}
+	}  // end getInterfaceType()
 
-	virtual void universalRead(
-	    char* address,
-	    char* returnValue) = 0;  // throw std::runtime_error exception on error/timeout
-	virtual void        universalWrite(char* address, char* writeValue) = 0;
-	const unsigned int& getUniversalAddressSize(void) { return universalAddressSize_; }
-	const unsigned int& getUniversalDataSize(void) { return universalDataSize_; }
+	virtual void 						universalRead				(char* address, char* returnValue) = 0;  // throw std::runtime_error exception on error/timeout
+	virtual void        				universalWrite				(char* address, char* writeValue) = 0;
+	const unsigned int& 				getUniversalAddressSize		(void) { return universalAddressSize_; }
+	const unsigned int& 				getUniversalDataSize		(void) { return universalDataSize_; }
 
-	void runSequenceOfCommands(const std::string& treeLinkName);
+	void 								runSequenceOfCommands		(const std::string& treeLinkName);
 
-	static void sendAsyncErrorToGateway(FEVInterface*      fe,
-	                                    const std::string& errMsg,
-	                                    bool               isSoftError);
+	static void 						sendAsyncErrorToGateway		(FEVInterface* fe, const std::string& errMsg, bool isSoftError);
 
 	/////////===========================
 	// start State Machine handlers
-	void configure(void)
+	void 								configure					(void)
 	{
 		__COUT__ << "\t Configure" << std::endl;
 		runSequenceOfCommands(
 		    "LinkToConfigureSequence"); /*Run Configure Sequence Commands*/
 	}
-	void start(std::string runNumber)
+	void 								start						(std::string runNumber)
 	{
 		__COUT__ << "\t Start" << std::endl;
 		runSequenceOfCommands("LinkToStartSequence"); /*Run Start Sequence Commands*/
 	}
-	void stop(void)
+	void 								stop						(void)
 	{
 		__COUT__ << "\t Stop" << std::endl;
 		runSequenceOfCommands("LinkToStopSequence"); /*Run Stop Sequence Commands*/
 	}
-	void halt(void) { stop(); }
-	void pause(void) { stop(); }
-	void resume(void) { start(""); }
-	bool running(void) { /*while(WorkLoop::continueWorkLoop_){;}*/ return false; }
+	void 								halt						(void) { stop(); }
+	void 								pause						(void) { stop(); }
+	void 								resume						(void) { start(""); }
+	bool 								running						(void) { /*while(WorkLoop::continueWorkLoop_){;}*/ return false; }
 	// end State Machine handlers
 	/////////
 
 	/////////===========================
 	// start Slow Controls
-	void configureSlowControls(void);
-	bool slowControlsRunning(void);  // slow controls workloop calls this
-	void startSlowControlsWorkLooop(void) { slowControlsWorkLoop_.startWorkLoop(); }
-	void stopSlowControlsWorkLooop(void) { slowControlsWorkLoop_.stopWorkLoop(); }
+	virtual void 						configureSlowControls		(void);
+	void								addSlowControlsChannels		(ConfigurationTree slowControlsGroupLink, const std::string& subInterfaceID, std::map<std::string /* ROC UID*/, FESlowControlsChannel>* mapOfSlowControlsChannels);
+
+	virtual void						resetSlowControlsChannelIterator (void);
+	virtual FESlowControlsChannel*		getNextSlowControlsChannel	(void);
+	virtual unsigned int				getSlowControlsChannelCount	(void);
+	virtual void						getSlowControlsValue		(FESlowControlsChannel& channel, std::string& readValue);
+	bool 								slowControlsRunning			(void);  // slow controls workloop calls this
+	void 								startSlowControlsWorkLoop	(void) { slowControlsWorkLoop_.startWorkLoop(); }
+	void 								stopSlowControlsWorkLoop	(void) { slowControlsWorkLoop_.stopWorkLoop(); }
+
+  protected:
+	// Slow Controls members
+	std::map<std::string, FESlowControlsChannel> 	mapOfSlowControlsChannels_;
+	std::map<std::string,
+		FESlowControlsChannel>::iterator			slowControlsChannelsIterator_;
+	FESlowControlsWorkLoop                       	slowControlsWorkLoop_;
 	// end Slow Controls
 	/////////
 
 	/////////===========================
 	// start FE Macros
-
+  public:
 	// public types and functions for map of FE macros
-	using frontEndMacroArg_t =
-	    std::pair<const std::string /* arg name */, std::string /* arg return value */>;
-	using frontEndMacroArgs_t      = std::vector<frontEndMacroArg_t>&;
-	using frontEndMacroConstArgs_t = const std::vector<frontEndMacroArg_t>&;
+	using frontEndMacroArg_t 		= std::pair<const std::string /* arg name */, std::string /* arg return value */>;
+	using frontEndMacroArgs_t      	= std::vector<frontEndMacroArg_t>&;
+	using frontEndMacroConstArgs_t 	= const std::vector<frontEndMacroArg_t>&;
 	struct frontEndMacroStruct_t;  // declare name for __ARGS__
-	using frontEndMacroFunction_t = void (ots::FEVInterface::*)(
-	    __ARGS__);                // void function (vector-of-inputs, vector-of-outputs)
+	using frontEndMacroFunction_t 	= void (ots::FEVInterface::*)(__ARGS__); // void function (vector-of-inputs, vector-of-outputs)
 	struct frontEndMacroStruct_t  // members fully define a front-end macro function
 	{
 		frontEndMacroStruct_t(
@@ -136,33 +146,31 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 		    const frontEndMacroFunction_t&  feMacroFunction,
 		    const std::vector<std::string>& namesOfInputArgs,
 		    const std::vector<std::string>& namesOfOutputArgs,
-		    const uint8_t      requiredUserPermissions = 1 /*1:=user,255:=admin*/,
-		    const std::string& allowedCallingFrontEnds =
-		        "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/)
-		    : feMacroName_(feMacroName)
-		    , macroFunction_(feMacroFunction)
-		    , namesOfInputArguments_(namesOfInputArgs)
-		    , namesOfOutputArguments_(namesOfOutputArgs)
-		    , requiredUserPermissions_(requiredUserPermissions)
-		    , allowedCallingFrontEnds_(allowedCallingFrontEnds)
+		    const uint8_t      				requiredUserPermissions = 1 /*1:=user,255:=admin*/,
+		    const std::string& 				allowedCallingFrontEnds = "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/)
+		    : feMacroName_					(feMacroName)
+		    , macroFunction_				(feMacroFunction)
+		    , namesOfInputArguments_		(namesOfInputArgs)
+		    , namesOfOutputArguments_		(namesOfOutputArgs)
+		    , requiredUserPermissions_		(requiredUserPermissions)
+		    , allowedCallingFrontEnds_		(allowedCallingFrontEnds)
 		{
 		}
 
-		const std::string feMacroName_;
-		const frontEndMacroFunction_t
-		                               macroFunction_;  // Note: must be called using this instance
-		const std::vector<std::string> namesOfInputArguments_, namesOfOutputArguments_;
-		const uint8_t                  requiredUserPermissions_;
-		const std::string              allowedCallingFrontEnds_;
-	};
+		const std::string 				feMacroName_;
+		const frontEndMacroFunction_t	macroFunction_;  // Note: must be called using this instance
+		const std::vector<std::string> 	namesOfInputArguments_, namesOfOutputArguments_;
+		const uint8_t                  	requiredUserPermissions_;
+		const std::string              	allowedCallingFrontEnds_;
+	}; //end frontEndMacroStruct_t
 	const std::map<std::string, frontEndMacroStruct_t>& getMapOfFEMacroFunctions(void)
 	{
 		return mapOfFEMacroFunctions_;
 	}
-	void runSelfFrontEndMacro(
-	    const std::string&                                   feMacroName,
-	    const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
-	    std::vector<FEVInterface::frontEndMacroArg_t>&       outputArgs);
+	void 								runSelfFrontEndMacro		(
+	    const std::string&                                   	feMacroName,
+	    const std::vector<FEVInterface::frontEndMacroArg_t>& 	inputArgs,
+	    std::vector<FEVInterface::frontEndMacroArg_t>&       	outputArgs);
 	// end FE Macros
 	/////////
 
@@ -205,16 +213,16 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 			std::string delayVarName_;
 		};  // end macroStruct_t::writeOp_t declaration
 
-		std::string macroName_;
+		std::string 							macroName_;
 		std::vector<std::pair<unsigned int /*op type*/,
 		                      unsigned int /*index in specific type vector*/> >
-		                                      operations_;
-		std::vector<macroStruct_t::readOp_t>  readOps_;
-		std::vector<macroStruct_t::writeOp_t> writeOps_;
-		std::vector<macroStruct_t::delayOp_t> delayOps_;
-		std::set<std::string> namesOfInputArguments_, namesOfOutputArguments_;
-		bool                  lsbf_;  // least significant byte first
-	};                                // end macroStruct_t declaration
+		                                      	operations_;
+		std::vector<macroStruct_t::readOp_t>  	readOps_;
+		std::vector<macroStruct_t::writeOp_t> 	writeOps_;
+		std::vector<macroStruct_t::delayOp_t> 	delayOps_;
+		std::set<std::string> 					namesOfInputArguments_, namesOfOutputArguments_;
+		bool                  					lsbf_;  // least significant byte first
+	}; // end macroStruct_t declaration
   protected:
 	void runMacro(FEVInterface::macroStruct_t&                        macro,
 	              std::map<std::string /*name*/, uint64_t /*value*/>& variableMap);
@@ -227,111 +235,79 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 	// start FE communication helpers
 
 	template<class T>
-	void sendToFrontEnd(const std::string& targetInterfaceID, const T& value) const;
-	void runFrontEndMacro(
-	    const std::string&                                   targetInterfaceID,
-	    const std::string&                                   feMacroName,
-	    const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs,
-	    std::vector<FEVInterface::frontEndMacroArg_t>&       outputArgs) const;
+	void 							sendToFrontEnd				(const std::string& targetInterfaceID, const T& value) const;
+	void 							runFrontEndMacro			(const std::string& targetInterfaceID,const std::string& feMacroName, const std::vector<FEVInterface::frontEndMacroArg_t>& inputArgs, std::vector<FEVInterface::frontEndMacroArg_t>& outputArgs) const;
 
 	/////////
 	// receiveFromFrontEnd
 	//	* can be used for source interface ID to accept a message from any front-end
 	// NOTE: can not overload functions based on return type, so T& passed as value
 	template<class T>
-	void receiveFromFrontEnd(const std::string& requester,
-	                         T&                 retValue,
-	                         unsigned int       timeoutInSeconds = 1) const;
+	void 							receiveFromFrontEnd			(const std::string& requester, T& retValue, unsigned int timeoutInSeconds = 1) const;
 	//	specialized template function for T=std::string
-	void receiveFromFrontEnd(const std::string& requester,
-	                         std::string&       retValue,
-	                         unsigned int       timeoutInSeconds = 1) const;
+	void 							receiveFromFrontEnd			(const std::string& requester, std::string& retValue, unsigned int timeoutInSeconds = 1) const;
 	// NOTE: can not overload functions based on return type, so calls function with T&
 	// passed as value
 	template<class T>
-	T receiveFromFrontEnd(const std::string& requester        = "*",
-	                      unsigned int       timeoutInSeconds = 1) const;
+	T 								receiveFromFrontEnd			(const std::string& requester = "*", unsigned int timeoutInSeconds = 1) const;
 	//	specialized template function for T=std::string
-	std::string receiveFromFrontEnd(const std::string& requester        = "*",
-	                                unsigned int       timeoutInSeconds = 1) const;
+	std::string 					receiveFromFrontEnd			(const std::string& requester = "*", unsigned int timeoutInSeconds = 1) const;
 
 	// end FE Communication helpers
 	/////////
 
   protected:
-	bool        workLoopThread(toolbox::task::WorkLoop* workLoop);
-	std::string interfaceUID_;
+	bool        					workLoopThread				(toolbox::task::WorkLoop* workLoop);
+	
+	std::string 									interfaceUID_;
 
-	unsigned int universalAddressSize_ = 0;
-	unsigned int universalDataSize_    = 0;
+	unsigned int 									universalAddressSize_ = 0;
+	unsigned int 									universalDataSize_    = 0;
 
-	// Controls members
-	std::map<std::string, FESlowControlsChannel> mapOfSlowControlsChannels_;
-	FESlowControlsWorkLoop                       slowControlsWorkLoop_;
 
 	// FE Macro Function members and helper functions:
 
-	std::map<std::string, frontEndMacroStruct_t>
-	     mapOfFEMacroFunctions_;  // Map of FE Macro functions members
-	void registerFEMacroFunction(
-	    const std::string&              feMacroName,
-	    frontEndMacroFunction_t         feMacroFunction,
-	    const std::vector<std::string>& namesOfInputArgs,
-	    const std::vector<std::string>& namesOfOutputArgs,
-	    uint8_t            requiredUserPermissions = 1 /*1:=user,255:=admin*/,
-	    const std::string& allowedCallingFEs =
-	        "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/);
+	std::map<std::string, frontEndMacroStruct_t>	mapOfFEMacroFunctions_;  // Map of FE Macro functions members
+	void 							registerFEMacroFunction		(
+	    const std::string&              							feMacroName,
+	    frontEndMacroFunction_t         							feMacroFunction,
+	    const std::vector<std::string>& 							namesOfInputArgs,
+	    const std::vector<std::string>& 							namesOfOutputArgs,
+	    uint8_t            											requiredUserPermissions = 1 /*1:=user,255:=admin*/,
+	    const std::string& 											allowedCallingFEs = "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/);
 
   public:  // for external specialized template access
-	static const std::string& getFEMacroConstArgument(frontEndMacroConstArgs_t args,
-	                                                  const std::string&       argName);
-	static std::string&       getFEMacroArgument(frontEndMacroArgs_t args,
-	                                             const std::string&  argName);
+	static const std::string& 		getFEMacroConstArgument		(frontEndMacroConstArgs_t args, const std::string& argName);
+	static std::string&       		getFEMacroArgument			(frontEndMacroArgs_t args, const std::string&  argName);
 
   protected:
 	template<class T>
-	std::string& setFEMacroArgumentValue(frontEndMacroArgs_t args,
-	                                     const std::string&  argName,
-	                                     const T&            value) const;
-	//	{
-	//		//modify existing pair
-	//		std::string& arg = getFEMacroArgument(args,argName);
-	//		std::stringstream ss; ss << value;
-	//		arg = ss.str();
-	//		return arg;
-	//	}
+	std::string& 					setFEMacroArgumentValue		(frontEndMacroArgs_t args, const std::string& argName, const T& value) const;
+
 	template<class T>
-	std::string& emplaceFEMacroArgumentValue(frontEndMacroArgs_t args,
-	                                         const std::string&  argName,
-	                                         const T&            value) const;
-	//	{
-	//		//insert new pair
-	//		std::stringstream ss; ss << value;
-	//		args.push_back(frontEndMacroArg_t(argName, ss.str()));
-	//		return args.back().second;
-	//	}
+	std::string& 					emplaceFEMacroArgumentValue	(frontEndMacroArgs_t args, const std::string&  argName, const T& value) const;
+
 
 };  // end FEVInterface class
 
 template<class T>
-T getFEMacroConstArgumentValue(FEVInterface::frontEndMacroConstArgs_t args,
-                               const std::string&                     argName);
+T 				getFEMacroConstArgumentValue					(FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName);
+
 // specialized template version of getFEMacroConstArgumentValue for string
 template<>
-std::string getFEMacroConstArgumentValue<std::string>(
-    FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName);
+std::string 	getFEMacroConstArgumentValue<std::string>		(FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName);
 
 template<class T>
-T getFEMacroArgumentValue(FEVInterface::frontEndMacroArgs_t args,
-                          const std::string&                argName);
+T 				getFEMacroArgumentValue							(FEVInterface::frontEndMacroArgs_t args, const std::string& argName);
 
 // specialized template version of getFEMacroArgumentValue for string
 template<>
-std::string getFEMacroArgumentValue<std::string>(FEVInterface::frontEndMacroArgs_t argsIn,
-                                                 const std::string& argName);
+std::string 	getFEMacroArgumentValue<std::string>			(FEVInterface::frontEndMacroArgs_t argsIn, const std::string& argName);
 
 // include template definitions required at include level for compiler
 #include "otsdaq-core/FECore/FEVInterface.icc"
+
+// clang-format on
 
 }  // namespace ots
 

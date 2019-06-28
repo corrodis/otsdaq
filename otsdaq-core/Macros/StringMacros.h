@@ -61,10 +61,12 @@ struct StringMacros
 
 	static std::string 			decodeURIComponent			(const std::string& data);
 	static std::string 			convertEnvironmentVariables	(const std::string& data);
-	static bool        			isNumber					(const std::string& stringToCheck);
 
+	static bool        			isNumber					(const std::string& stringToCheck);
+	static std::string  		getNumberType				(const std::string& stringToCheck);
 	template<class T>
 	static bool        			getNumber					(const std::string& s, T& retValue);  // defined in included .icc source
+
 	static std::string 			getTimestampString			(const std::string& linuxTimeInSeconds);
 	static std::string 			getTimestampString			(const time_t& linuxTimeInSeconds = time(0));
 

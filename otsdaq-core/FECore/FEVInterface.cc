@@ -15,12 +15,12 @@ FEVInterface::FEVInterface(const std::string&       interfaceUID,
                            const std::string&       configurationPath)
     : WorkLoop(interfaceUID)
     , Configurable(theXDAQContextConfigTree, configurationPath)
+	, slowControlsWorkLoop_(interfaceUID + "-SlowControls", this)
     , interfaceUID_(interfaceUID)
     //, interfaceType_
     //(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>())
     //, daqHardwareType_            	("NOT SET")
     //, firmwareType_               	("NOT SET")
-    , slowControlsWorkLoop_(interfaceUID + "-SlowControls", this)
 {
 	// NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the
 	// base class versions of function (e.g. getInterfaceType) are called because the
@@ -39,14 +39,28 @@ FEVInterface::~FEVInterface(void)
 //========================================================================================================================
 void FEVInterface::configureSlowControls(void)
 {
-	// START IT HERE
+	// Start artdaq metric manager here, if possible
 	if(metricMan && !metricMan->Running() && metricMan->Initialized())
 		metricMan->do_start();
 
-	ConfigurationTree slowControlsGroupLink =
-	    theXDAQContextConfigTree_.getBackNode(theConfigurationPath_)
-	        .getNode("LinkToSlowControlsChannelTable");
+	mapOfSlowControlsChannels_.clear(); //reset
 
+	addSlowControlsChannels(
+			theXDAQContextConfigTree_.getBackNode(theConfigurationPath_)
+	        .getNode("LinkToSlowControlsChannelTable"),
+			"" /*subInterfaceID*/,
+			&mapOfSlowControlsChannels_);
+
+} // end configureSlowControls()
+
+//========================================================================================================================
+// addSlowControlsChannels
+//	Usually subInterfaceID = "" and mapOfSlowControlsChannels = &mapOfSlowControlsChannels_
+void FEVInterface::addSlowControlsChannels(ConfigurationTree slowControlsGroupLink,
+		const std::string& subInterfaceID,
+		std::map<std::string /* ROC UID*/,
+			FESlowControlsChannel>* mapOfSlowControlsChannels)
+{
 	if(slowControlsGroupLink.isDisconnected())
 	{
 		__FE_COUT__
@@ -54,10 +68,9 @@ void FEVInterface::configureSlowControls(void)
 		    << __E__;
 		return;
 	}
-	__FE_COUT__ << "slowControlsGroupLink is valid! Configuring slow controls..."
+	__FE_COUT__ << "slowControlsGroupLink is valid! Adding slow controls channels..."
 	            << __E__;
 
-	mapOfSlowControlsChannels_.clear();
 	std::vector<std::pair<std::string, ConfigurationTree> > groupLinkChildren =
 	    slowControlsGroupLink.getChildren();
 	for(auto& groupLinkChild : groupLinkChildren)
@@ -67,14 +80,15 @@ void FEVInterface::configureSlowControls(void)
 		         .getValue<bool>()))
 			continue;
 
-		__FE_COUT__ << "Channel:" << getInterfaceUID() << "/" << groupLinkChild.first
+		__FE_COUT__ << "Channel:" << getInterfaceUID() << subInterfaceID <<
+					"/" << groupLinkChild.first
 		            << "\t Type:" << groupLinkChild.second.getNode("ChannelDataType")
 		            << __E__;
 
-		mapOfSlowControlsChannels_.insert(std::pair<std::string, FESlowControlsChannel>(
+		mapOfSlowControlsChannels->insert(std::pair<std::string, FESlowControlsChannel>(
 		    groupLinkChild.first,
 		    FESlowControlsChannel(
-		        getInterfaceUID(),
+		        getInterfaceUID() + subInterfaceID,
 		        groupLinkChild.first,
 		        groupLinkChild.second.getNode("ChannelDataType").getValue<std::string>(),
 		        universalDataSize_,
@@ -101,7 +115,39 @@ void FEVInterface::configureSlowControls(void)
 		        groupLinkChild.second.getNode("HighHighThreshold")
 		            .getValue<std::string>())));
 	}
-}  // end configureSlowControls()
+}  // end addSlowControlsChannels()
+
+//========================================================================================================================
+// virtual in case channels are handled in multiple maps, for example
+void FEVInterface::resetSlowControlsChannelIterator(void)
+{
+	slowControlsChannelsIterator_ = mapOfSlowControlsChannels_.begin();
+} //end resetSlowControlsChannelIterator()
+
+//========================================================================================================================
+// virtual in case channels are handled in multiple maps, for example
+FESlowControlsChannel* FEVInterface::getNextSlowControlsChannel(void)
+{
+	slowControlsChannelsIterator_++;
+	if(slowControlsChannelsIterator_ == mapOfSlowControlsChannels_.end())
+		return nullptr;
+	return &(slowControlsChannelsIterator_->second);
+} //end getNextSlowControlsChannel()
+
+//========================================================================================================================
+// virtual in case read should be different than universalread
+void FEVInterface::getSlowControlsValue(FESlowControlsChannel& channel, std::string& readValue)
+{
+	readValue.resize(universalDataSize_);
+	universalRead(channel.getUniversalAddress(), &readValue[0]);
+} //end getNextSlowControlsChannel()
+
+//========================================================================================================================
+// virtual in case channels are handled in multiple maps, for example
+unsigned int FEVInterface::getSlowControlsChannelCount(void)
+{
+	return mapOfSlowControlsChannels_.size();
+} //end getSlowControlsChannelCount()
 
 //========================================================================================================================
 bool FEVInterface::slowControlsRunning(void) try
@@ -212,19 +258,8 @@ bool FEVInterface::slowControlsRunning(void) try
 
 	time_t timeCounter = 0;
 
-	__FE_COUTV__(slowControlsWorkLoop_.getContinueWorkLoop());
-
-	{
-		unsigned int numOfReadChannels = 0;
-		for(const auto& channelPair : mapOfSlowControlsChannels_)
-		{
-			__FE_COUT__ << "SC Channel '" << channelPair.first
-			            << "' readAccess:" << channelPair.second.readAccess_ << __E__;
-			++numOfReadChannels;
-		}
-		if(numOfReadChannels == 0)
-			__MCOUT_WARN__("There are no slow controls channels with read access!");
-	}
+	unsigned int numOfReadAccessChannels = 0;
+	bool firstTime = true;
 
 	while(slowControlsWorkLoop_.getContinueWorkLoop())
 	{
@@ -241,23 +276,22 @@ bool FEVInterface::slowControlsRunning(void) try
 		//__FE_COUT__ << "timeCounter=" << timeCounter << __E__;
 		//__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
-		for(auto& slowControlsChannelPair : mapOfSlowControlsChannels_)
+		resetSlowControlsChannelIterator();
+		while((channel = getNextSlowControlsChannel()) != nullptr)
 		{
-			channel = &slowControlsChannelPair.second;
-
 			// skip if no read access
 			if(!channel->readAccess_)
 				continue;
+
+			if(firstTime) ++numOfReadAccessChannels;
 
 			// skip if not a sampling moment in time for channel
 			if(timeCounter % channel->delayBetweenSamples_)
 				continue;
 
-			__FE_COUT__ << "Channel:" << getInterfaceUID() << "/"
-			            << slowControlsChannelPair.first << __E__;
-			__FE_COUT__ << "Monitoring..." << __E__;
+			__FE_COUT__ << "Reading Channel:" << channel->fullChannelName_ << __E__;
 
-			universalRead(channel->getUniversalAddress(), &readVal[0]);
+			getSlowControlsValue(*channel, readVal);
 
 			//			{ //print
 			//				__FE_SS__ << "0x ";
@@ -273,12 +307,11 @@ bool FEVInterface::slowControlsRunning(void) try
 			if(txBuffer.size())
 				__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
-			//"Channel:" << getInterfaceUID() << "/"
-			//			            << slowControlsChannelPair.first << __E__;
-			// Value << readVal
 
-			// For example,
-			if(metricMan && universalAddressSize_ <= 8)
+			// Use artdaq Metric Manager if available,
+			if(channel->monitoringEnabled_ &&
+					metricMan && metricMan->Running() &&
+					universalAddressSize_ <= 8)
 			{
 				uint64_t val = 0;  // 64 bits!
 				for(size_t ii = 0; ii < universalAddressSize_; ++ii)
@@ -286,7 +319,7 @@ bool FEVInterface::slowControlsRunning(void) try
 
 				__FE_COUT__ << "Sending sample to Metric Manager..." << __E__;
 				metricMan->sendMetric(
-				    getInterfaceUID() + "/" + slowControlsChannelPair.first,
+					channel->fullChannelName_,
 				    val,
 				    "",
 				    3,
@@ -322,7 +355,22 @@ bool FEVInterface::slowControlsRunning(void) try
 
 		if(fp)
 			fflush(fp);  // flush anything in aggregate file for reading ease
-	}
+
+		if(firstTime)
+		{
+			if(numOfReadAccessChannels == 0)
+			{
+				__MCOUT_WARN__("There are no slow controls channels with read access!" << __E__);
+				break;
+			}
+			else
+				__COUT__ << "There are " << getSlowControlsChannelCount() <<
+					" slow controls channels and " << numOfReadAccessChannels <<
+					" of those have read access enabled." << __E__;
+
+		}
+		firstTime = false;
+	} //end main slow controls loop
 
 	if(fp)
 		fclose(fp);
