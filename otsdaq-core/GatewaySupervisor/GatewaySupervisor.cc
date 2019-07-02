@@ -904,7 +904,7 @@ xoap::MessageReference GatewaySupervisor::stateMachineXoapHandler(
 //		This asynchronously sends the xoap message to its own RunControlStateMachine
 //			(that the Gateway inherits from), which then calls the Gateway
 //			transition functions and eventually the broadcast to transition the global
-//state  machine.
+// state  machine.
 bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 {
 	stateMachineSemaphore_.take();

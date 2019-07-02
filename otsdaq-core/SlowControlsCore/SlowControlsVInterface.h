@@ -9,8 +9,8 @@ namespace ots
 class SlowControlsVInterface : public Configurable
 {
   public:
-	SlowControlsVInterface(const std::string& interfaceType,
-	   		const std::string&       interfaceUID,
+	SlowControlsVInterface(const std::string&       interfaceType,
+	                       const std::string&       interfaceUID,
 	                       const ConfigurationTree& theXDAQContextConfigTree,
 	                       const std::string&       configurationPath)
 	    : Configurable(theXDAQContextConfigTree, configurationPath)

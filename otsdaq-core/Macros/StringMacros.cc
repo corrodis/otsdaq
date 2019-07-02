@@ -257,7 +257,6 @@ bool StringMacros::isNumber(const std::string& s)
 	return true;
 }  // end isNumber()
 
-
 //==============================================================================
 // getNumberType ~~
 //	returns string of number type: "unsigned long long", "double"
@@ -804,8 +803,8 @@ std::string StringMacros::stackTrace()
 
 	free(messages);
 
-	//call ROOT's stack trace to get line numbers of ALL threads
-	//gSystem->StackTrace();
+	// call ROOT's stack trace to get line numbers of ALL threads
+	// gSystem->StackTrace();
 
 	return ss.str();
 }  // end stackTrace

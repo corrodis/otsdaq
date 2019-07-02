@@ -423,8 +423,8 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 	//					PUSHCOMMENT;
 	//
 	//				auto comment =
-	//parameter.second.getNode(TableViewColumnInfo::COL_NAME_COMMENT); 				OUT <<
-	//parameter.second.getNode("daqParameterKey").getValue() <<
+	// parameter.second.getNode(TableViewColumnInfo::COL_NAME_COMMENT); 				OUT
+	// <<  parameter.second.getNode("daqParameterKey").getValue() <<
 	//						": " <<
 	//						parameter.second.getNode("daqParameterValue").getValue()
 	//						<<

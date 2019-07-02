@@ -1,6 +1,6 @@
 #include "otsdaq-core/FECore/FESlowControlsChannel.h"
-#include "otsdaq-core/Macros/CoutMacros.h"
 #include "otsdaq-core/Macros/BinaryStringMacros.h"
+#include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <iostream>
 #include <sstream>
@@ -27,56 +27,57 @@ using namespace ots;
 ////////////////////////////////////
 
 //========================================================================================================================
-FESlowControlsChannel::FESlowControlsChannel(
-		const std::string& interfaceUID,
-		const std::string& channelName,
-		const std::string& dataType,
-		unsigned int       universalDataSize,
-		unsigned int       universalAddressSize,
-		const std::string& universalAddress,
-		unsigned int       universalDataBitOffset,
-		bool               readAccess,
-		bool               writeAccess,
-		bool               monitoringEnabled,
-		bool               recordChangesOnly,
-		time_t             delayBetweenSamples,
-		bool               saveEnabled,
-		const std::string& savePath,
-		const std::string& saveFileRadix,
-		bool               saveBinaryFormat,
-		bool               alarmsEnabled,
-		bool               latchAlarms,
-		const std::string& lolo,
-		const std::string& lo,
-		const std::string& hi,
-		const std::string& hihi)
-    : interfaceUID_				(interfaceUID)
-    , channelName_				(channelName)
-    , fullChannelName_			(interfaceUID_ + "/" + channelName_)
-    , dataType_					(dataType)
-    , universalDataBitOffset_	(universalDataBitOffset)
-    , txPacketSequenceNumber_	(0)
-    , readAccess_				(readAccess)
-    , writeAccess_				(writeAccess)
-    , monitoringEnabled_		(monitoringEnabled)
-    , recordChangesOnly_		(recordChangesOnly)
-    , delayBetweenSamples_		(delayBetweenSamples<1?1:delayBetweenSamples) // units of seconds, with 1 minimum
-    , saveEnabled_				(saveEnabled)
-    , savePath_					(savePath)
-    , saveFileRadix_			(saveFileRadix)
-    , saveBinaryFormat_			(saveBinaryFormat)
-    , alarmsEnabled_			(alarmsEnabled)
-    , latchAlarms_				(latchAlarms)
-    , lastSampleTime_			(0)
-    , loloAlarmed_				(false)
-    , loAlarmed_				(false)
-    , hiAlarmed_				(false)
-    , hihiAlarmed_				(false)
-    , saveFullFileName_			(savePath_ + "/" + saveFileRadix_ + "-" +
-									underscoreString(fullChannelName_) + "-" +
-									std::to_string(time(0)) + (saveBinaryFormat_ ? ".dat" : ".txt"))
+FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
+                                             const std::string& channelName,
+                                             const std::string& dataType,
+                                             unsigned int       universalDataSize,
+                                             unsigned int       universalAddressSize,
+                                             const std::string& universalAddress,
+                                             unsigned int       universalDataBitOffset,
+                                             bool               readAccess,
+                                             bool               writeAccess,
+                                             bool               monitoringEnabled,
+                                             bool               recordChangesOnly,
+                                             time_t             delayBetweenSamples,
+                                             bool               saveEnabled,
+                                             const std::string& savePath,
+                                             const std::string& saveFileRadix,
+                                             bool               saveBinaryFormat,
+                                             bool               alarmsEnabled,
+                                             bool               latchAlarms,
+                                             const std::string& lolo,
+                                             const std::string& lo,
+                                             const std::string& hi,
+                                             const std::string& hihi)
+    : interfaceUID_(interfaceUID)
+    , channelName_(channelName)
+    , fullChannelName_(interfaceUID_ + "/" + channelName_)
+    , dataType_(dataType)
+    , universalDataBitOffset_(universalDataBitOffset)
+    , txPacketSequenceNumber_(0)
+    , readAccess_(readAccess)
+    , writeAccess_(writeAccess)
+    , monitoringEnabled_(monitoringEnabled)
+    , recordChangesOnly_(recordChangesOnly)
+    , delayBetweenSamples_(delayBetweenSamples < 1
+                               ? 1
+                               : delayBetweenSamples)  // units of seconds, with 1 minimum
+    , saveEnabled_(saveEnabled)
+    , savePath_(savePath)
+    , saveFileRadix_(saveFileRadix)
+    , saveBinaryFormat_(saveBinaryFormat)
+    , alarmsEnabled_(alarmsEnabled)
+    , latchAlarms_(latchAlarms)
+    , lastSampleTime_(0)
+    , loloAlarmed_(false)
+    , loAlarmed_(false)
+    , hiAlarmed_(false)
+    , hihiAlarmed_(false)
+    , saveFullFileName_(savePath_ + "/" + saveFileRadix_ + "-" +
+                        underscoreString(fullChannelName_) + "-" +
+                        std::to_string(time(0)) + (saveBinaryFormat_ ? ".dat" : ".txt"))
 {
-	__COUT__ << "dataType_ = " << dataType_ << __E__;
+	__COUTV__(dataType_);
 	__COUT__ << "universalAddressSize = " << universalAddressSize << __E__;
 	__COUT__ << "universalAddress = " << universalAddress << __E__;
 
@@ -142,10 +143,16 @@ FESlowControlsChannel::FESlowControlsChannel(
 	}
 
 	universalAddress_.resize(universalAddressSize);
-	try {convertStringToBuffer(universalAddress, universalAddress_);} catch(const std::runtime_error& e)
+	try
 	{
-		__SS__ << "Failed to extract universalAddress '" << universalAddress << "'..." << __E__;
-		ss << e.what();	__SS_THROW__;
+		convertStringToBuffer(universalAddress, universalAddress_);
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "Failed to extract universalAddress '" << universalAddress << "'..."
+		       << __E__;
+		ss << e.what();
+		__SS_THROW__;
 	}
 
 	sizeOfDataTypeBytes_ =
@@ -158,25 +165,45 @@ FESlowControlsChannel::FESlowControlsChannel(
 
 	if(alarmsEnabled_)
 	{
-		try {convertStringToBuffer(lolo, lolo_, true);} catch(const std::runtime_error& e)
+		try
+		{
+			convertStringToBuffer(lolo, lolo_, true);
+		}
+		catch(const std::runtime_error& e)
 		{
 			__SS__ << "Failed to extract lolo '" << lolo << "'..." << __E__;
-			ss << e.what();	__SS_THROW__;
+			ss << e.what();
+			__SS_THROW__;
 		}
-		try {convertStringToBuffer(lo, lo_, true);} catch(const std::runtime_error& e)
+		try
+		{
+			convertStringToBuffer(lo, lo_, true);
+		}
+		catch(const std::runtime_error& e)
 		{
 			__SS__ << "Failed to extract lo '" << lo << "'..." << __E__;
-			ss << e.what();	__SS_THROW__;
+			ss << e.what();
+			__SS_THROW__;
 		}
-		try {convertStringToBuffer(hi, hi_, true);} catch(const std::runtime_error& e)
+		try
+		{
+			convertStringToBuffer(hi, hi_, true);
+		}
+		catch(const std::runtime_error& e)
 		{
 			__SS__ << "Failed to extract hi '" << hi << "'..." << __E__;
-			ss << e.what();	__SS_THROW__;
+			ss << e.what();
+			__SS_THROW__;
 		}
-		try {convertStringToBuffer(hihi, hihi_, true);} catch(const std::runtime_error& e)
+		try
+		{
+			convertStringToBuffer(hihi, hihi_, true);
+		}
+		catch(const std::runtime_error& e)
 		{
 			__SS__ << "Failed to extract hihi '" << hihi << "'..." << __E__;
-			ss << e.what();	__SS_THROW__;
+			ss << e.what();
+			__SS_THROW__;
 		}
 	}
 
@@ -184,8 +211,10 @@ FESlowControlsChannel::FESlowControlsChannel(
 	sample_.resize(sizeOfDataTypeBytes_);
 	lastSample_.resize(sizeOfDataTypeBytes_);
 
+	__COUT__;
+	print();
 	__COUT__ << "Constructed." << __E__;
-} //end constructor
+}  // end constructor
 
 //========================================================================================================================
 FESlowControlsChannel::~FESlowControlsChannel(void) {}
@@ -193,29 +222,47 @@ FESlowControlsChannel::~FESlowControlsChannel(void) {}
 //========================================================================================================================
 void FESlowControlsChannel::print(std::ostream& out) const
 {
-	out << "Slow Controls Channel for Interface '" << interfaceUID_ <<
-			"': " << channelName_ << __E__;
+	out << "Slow Controls Channel for Interface '" << interfaceUID_
+	    << "': " << channelName_ << __E__;
 
-	out << "\t" << "dataType_: " 				<< dataType_ << __E__;
-	out << "\t" << "sizeOfDataTypeBits_: " 		<< sizeOfDataTypeBits_ << __E__;
-	out << "\t" << "universalAddress_: " 		<< BinaryStringMacros::binaryTo8ByteHexString(
-			universalAddress_,"0x"," ") << __E__;
-	out << "\t" << "universalDataBitOffset_: " 	<< universalDataBitOffset_ << __E__;
-	out << "\t" << "readAccess_: " 				<< readAccess_ << __E__;
-	out << "\t" << "writeAccess_: " 			<< writeAccess_ << __E__;
-	out << "\t" << "monitoringEnabled_: " 		<< monitoringEnabled_ << __E__;
-	out << "\t" << "recordChangesOnly_: " 		<< recordChangesOnly_ << __E__;
-	out << "\t" << "delayBetweenSamples_: " 	<< delayBetweenSamples_ << __E__;
-	out << "\t" << "saveEnabled_: " 			<< saveEnabled_ << __E__;
-	out << "\t" << "savePath_: " 				<< savePath_ << __E__;
-	out << "\t" << "saveFileRadix_: " 			<< saveFileRadix_ << __E__;
-	out << "\t" << "saveBinaryFormat_: " 		<< saveBinaryFormat_ << __E__;
-	out << "\t" << "alarmsEnabled_: " 			<< alarmsEnabled_ << __E__;
-	out << "\t" << "latchAlarms_: " 			<< latchAlarms_ << __E__;
-	out << "\t" << "savePath_: " 				<< savePath_ << __E__;
-	out << "\t" << "saveFullFileName_: " 		<< saveFullFileName_ << __E__;
+	out << "\t"
+	    << "dataType_: " << dataType_ << __E__;
+	out << "\t"
+	    << "sizeOfDataTypeBits_: " << sizeOfDataTypeBits_ << __E__;
+	out << "\t"
+	    << "universalAddress_: "
+	    << BinaryStringMacros::binaryTo8ByteHexString(universalAddress_, "0x", " ")
+	    << __E__;
+	out << "\t"
+	    << "universalDataBitOffset_: " << universalDataBitOffset_ << __E__;
+	out << "\t"
+	    << "readAccess_: " << readAccess_ << __E__;
+	out << "\t"
+	    << "writeAccess_: " << writeAccess_ << __E__;
+	out << "\t"
+	    << "monitoringEnabled_: " << monitoringEnabled_ << __E__;
+	out << "\t"
+	    << "recordChangesOnly_: " << recordChangesOnly_ << __E__;
+	out << "\t"
+	    << "delayBetweenSamples_: " << delayBetweenSamples_ << __E__;
+	out << "\t"
+	    << "saveEnabled_: " << saveEnabled_ << __E__;
+	out << "\t"
+	    << "savePath_: " << savePath_ << __E__;
+	out << "\t"
+	    << "saveFileRadix_: " << saveFileRadix_ << __E__;
+	out << "\t"
+	    << "saveBinaryFormat_: " << saveBinaryFormat_ << __E__;
+	out << "\t"
+	    << "alarmsEnabled_: " << alarmsEnabled_ << __E__;
+	out << "\t"
+	    << "latchAlarms_: " << latchAlarms_ << __E__;
+	out << "\t"
+	    << "savePath_: " << savePath_ << __E__;
+	out << "\t"
+	    << "saveFullFileName_: " << saveFullFileName_ << __E__;
 
-} //end print()
+}  // end print()
 
 //========================================================================================================================
 // underscoreString
@@ -231,7 +278,7 @@ std::string FESlowControlsChannel::underscoreString(const std::string& str)
 		else
 			retStr.push_back('_');
 	return retStr;
-} //end underscoreString()
+}  // end underscoreString()
 
 //========================================================================================================================
 // convertStringToBuffer
@@ -240,7 +287,7 @@ std::string FESlowControlsChannel::underscoreString(const std::string& str)
 // 	Note: buffer is expected to sized properly in advance, e.g. buffer.resize(#)
 void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
                                                   std::string&       buffer,
-                                                  bool               useDataType /*  = false */)
+                                                  bool useDataType /*  = false */)
 {
 	__COUT__ << "Input Str Sz= \t" << inString.size() << __E__;
 	__COUT__ << "Input Str Val= \t'" << inString << "'" << __E__;
@@ -279,12 +326,13 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
 		return;
 	}
 
-	//at this point assume unsigned number that will be matched to buffer size
+	// at this point assume unsigned number that will be matched to buffer size
 	unsigned long long val;
-	if(!StringMacros::getNumber(inString,val))
+	if(!StringMacros::getNumber(inString, val))
 	{
 		__SS__ << "Invalid unsigned number format in string " << inString << __E__;
-		ss << __E__; print(ss);
+		ss << __E__;
+		print(ss);
 		__SS_THROW__;
 	}
 	// transfer the long long to the buffer
@@ -296,9 +344,8 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
 	for(; i < buffer.size(); ++i)
 		buffer[i] = 0;
 
-	__COUT__ << "Resulting Number Buffer: " <<
-					BinaryStringMacros::binaryTo8ByteHexString(
-							buffer,"0x"," ") << __E__;
+	__COUT__ << "Resulting Number Buffer: "
+	         << BinaryStringMacros::binaryTo8ByteHexString(buffer, "0x", " ") << __E__;
 	return;
 
 	// clear buffer
@@ -369,7 +416,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
 		ss << __E__;
 		__COUT__ << "\n" << ss.str();
 	}
-} //end convertStringToBuffer()
+}  // end convertStringToBuffer()
 
 //========================================================================================================================
 // handleSample
@@ -809,24 +856,22 @@ void FESlowControlsChannel::extractSample(const std::string& universalReadValue)
 			   << (int)((universalReadValue[i]) & 0xF) << " " << std::dec;
 		ss << __E__;
 		__COUT__ << "\n" << ss.str();
-		__COUT__ << "Universal Read: " <<
-				BinaryStringMacros::binaryTo8ByteHexString(
-						universalReadValue,"0x"," ") << __E__;
+		__COUT__ << "Universal Read: "
+		         << BinaryStringMacros::binaryTo8ByteHexString(
+		                universalReadValue, "0x", " ")
+		         << __E__;
 	}
 
 	sample_.resize(0);  // clear a la sample_ = "";
 	BinaryStringMacros::extractValueFromBinaryString(
-			universalReadValue,
-			sample_,
-			sizeOfDataTypeBits_);
+	    universalReadValue, sample_, sizeOfDataTypeBits_);
 
 	__COUT__ << "Sample size in bytes: " << sample_.size() << __E__;
 
-	__COUT__ << "sample: " <<
-					BinaryStringMacros::binaryTo8ByteHexString(
-							sample_,"0x"," ") << __E__;
+	__COUT__ << "sample: "
+	         << BinaryStringMacros::binaryTo8ByteHexString(sample_, "0x", " ") << __E__;
 
-} //end extractSample()
+}  // end extractSample()
 
 //========================================================================================================================
 // clearAlarms
@@ -842,7 +887,7 @@ void FESlowControlsChannel::clearAlarms(int targetAlarm)
 		hiAlarmed_ = false;
 	if(targetAlarm == -1 || targetAlarm == 3)
 		hihiAlarmed_ = false;
-} //end clearAlarms()
+}  // end clearAlarms()
 
 //========================================================================================================================
 // checkAlarms
@@ -1079,4 +1124,4 @@ char FESlowControlsChannel::checkAlarms(std::string& txBuffer)
 	}
 
 	return createPacketMask;
-} //end checkAlarms()
+}  // end checkAlarms()
