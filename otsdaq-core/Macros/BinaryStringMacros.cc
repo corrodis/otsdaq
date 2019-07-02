@@ -129,7 +129,7 @@ void BinaryStringMacros::extractValueFromBinaryString(const void*  binaryBufferV
 	{
 		__SS__ << "Can not extract value of size " << valueNumberOfBits
 		       << ", at position " << bitIndex << ", from buffer of size "
-		       << bufferNumberOfBytes * 8 << __E__;
+		       << bufferNumberOfBytes * 8 << "." << __E__;
 		__SS_THROW__;
 	}
 

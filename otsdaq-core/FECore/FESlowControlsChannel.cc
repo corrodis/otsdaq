@@ -484,14 +484,15 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 		txBuffer.push_back(txPacketSequenceNumber_++);  // sequence counter and increment
 
 		txBuffer.resize(txBuffer.size() + sizeof(lastSampleTime_));
-		memcpy(&txBuffer[txBuffer.size() - sizeof(lastSampleTime_)],
-		       &lastSampleTime_,
+		memcpy(&txBuffer[txBuffer.size() - sizeof(lastSampleTime_)] /*dest*/,
+		       &lastSampleTime_ /*src*/,
 		       sizeof(lastSampleTime_));
 
 		unsigned int tmpSz = fullChannelName_.size();
 
 		txBuffer.resize(txBuffer.size() + sizeof(tmpSz));
-		memcpy(&txBuffer[txBuffer.size() - sizeof(tmpSz)], &tmpSz, sizeof(tmpSz));
+		memcpy(&txBuffer[txBuffer.size() - sizeof(tmpSz)] /*dest*/,
+				&tmpSz /*src*/, sizeof(tmpSz));
 
 		txBuffer += fullChannelName_;
 
@@ -866,7 +867,8 @@ void FESlowControlsChannel::extractSample(const std::string& universalReadValue)
 	BinaryStringMacros::extractValueFromBinaryString(
 	    universalReadValue, sample_, sizeOfDataTypeBits_);
 
-	__COUT__ << "Sample size in bytes: " << sample_.size() << __E__;
+	__COUT__ << "Sample size in bytes: " << sample_.size() << "\t in bits: " <<
+			sizeOfDataTypeBits_ << __E__;
 
 	__COUT__ << "sample: "
 	         << BinaryStringMacros::binaryTo8ByteHexString(sample_, "0x", " ") << __E__;
@@ -1090,14 +1092,15 @@ char FESlowControlsChannel::checkAlarms(std::string& txBuffer)
 				    txPacketSequenceNumber_++);  // sequence counter and increment
 
 				txBuffer.resize(txBuffer.size() + sizeof(lastSampleTime_));
-				memcpy(&txBuffer[txBuffer.size() - sizeof(lastSampleTime_)],
-				       &lastSampleTime_,
+				memcpy(&txBuffer[txBuffer.size() - sizeof(lastSampleTime_)] /*dest*/,
+				       &lastSampleTime_ /*src*/,
 				       sizeof(lastSampleTime_));
 
 				unsigned int tmpSz = fullChannelName_.size();
 
 				txBuffer.resize(txBuffer.size() + sizeof(tmpSz));
-				memcpy(&txBuffer[txBuffer.size() - sizeof(tmpSz)], &tmpSz, sizeof(tmpSz));
+				memcpy(&txBuffer[txBuffer.size() - sizeof(tmpSz)] /*dest*/,
+						&tmpSz /*src*/, sizeof(tmpSz));
 
 				txBuffer += fullChannelName_;
 

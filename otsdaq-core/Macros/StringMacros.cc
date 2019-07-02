@@ -534,6 +534,30 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 }  // end getVectorFromString()
 
 //==============================================================================
+// getVectorFromString
+//	extracts the list of elements from string that uses a delimiter
+//		ignoring whitespace
+//	optionally returns the list of delimiters encountered, which may be useful
+//		for extracting which operator was used.
+//
+//
+//	Note: lists are returned as vectors
+//	Note: the size() of delimiters will be one less than the size() of the returned values
+//		unless there is a leading delimiter, in which case vectors will have the same
+// size.
+std::vector<std::string> StringMacros::getVectorFromString(
+		const std::string&        inputString,
+		const std::set<char>&     delimiter,
+		const std::set<char>&     whitespace,
+		std::vector<char>*        listOfDelimiters)
+{
+	std::vector<std::string> listToReturn;
+
+	StringMacros::getVectorFromString(inputString,listToReturn,delimiter,whitespace,listOfDelimiters);
+	return listToReturn;
+} // end getVectorFromString()
+
+//==============================================================================
 // getMapFromString
 //	extracts the map of name-value pairs from string that uses two s
 //		ignoring whitespace
