@@ -376,35 +376,74 @@ bool FEVInterface::slowControlsRunning(void) try
 
 	return false;
 }  // end slowControlsRunning()
-catch(const std::runtime_error& e)
+catch(...)  //
 {
-	__FE_COUT__ << "Error caught during slow controls running thread: " << e.what()
-	            << __E__;
+	// catch all, then rethrow with local variables needed
+	__FE_SS__;
+
+	bool isSoftError = false;
+
+	try
+	{
+		throw;
+	}
+	catch(const __OTS_SOFT_EXCEPTION__& e)
+	{
+		ss << "SOFT Error was caught during slow controls running thread: " << e.what() << std::endl;
+		isSoftError = true;
+	}
+	catch(const std::runtime_error& e)
+	{
+		ss << "Caught an error during slow controls running thread of FE Interface '"
+		   << Configurable::theConfigurationRecordName_ << "': " << e.what() << __E__;
+	}
+	catch(...)
+	{
+		ss << "Caught an unknown error during slow controls running thread." << __E__;
+	}
+
+	// At this point, an asynchronous error has occurred
+	//	during front-end running...
+	// Send async error to Gateway
+	//	Do this as thread so that workloop can end.
+
+	__FE_COUT_ERR__ << ss.str();
+
+	std::thread(
+		[](FEVInterface* fe, const std::string errorMessage, bool isSoftError) {
+			FEVInterface::sendAsyncErrorToGateway(fe, errorMessage, isSoftError);
+		},
+		// pass the values
+		this /*fe*/,
+		ss.str() /*errorMessage*/,
+		isSoftError)
+		.detach();
+
 	return false;
-}
-catch(...)
-{
-	__FE_COUT__ << "Unknown error caught during slow controls running thread." << __E__;
-	return false;
-}  // end slowControlsRunning()
+}// end slowControlsRunning()
 
 //========================================================================================================================
 // SendAsyncErrorToGateway
 //	Static -- thread
 //	Send async error or soft error to gateway
-//	Do this as thread so that workloop can end
+//	Call this as thread so that parent calling function (workloop) can end.
+//
+//	Note: be careful not to access fe pointer after HALT
+//		has potentially propagated.. because the pointer might be destructed!
 void FEVInterface::sendAsyncErrorToGateway(FEVInterface*      fe,
                                            const std::string& errorMessage,
                                            bool               isSoftError) try
 {
+   std::stringstream feHeader;
+   feHeader << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID()
+		  << ":" << fe->theConfigurationRecordName_ << "\t";
+
 	if(isSoftError)
-		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID()
-		             << ":" << fe->theConfigurationRecordName_ << ":"
+		__COUT_ERR__ << feHeader.str()
 		             << "Sending FE Async SOFT Running Error... \n"
 		             << errorMessage << __E__;
 	else
-		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID()
-		             << ":" << fe->theConfigurationRecordName_ << ":"
+		__COUT_ERR__ << feHeader.str()
 		             << "Sending FE Async Running Error... \n"
 		             << errorMessage << __E__;
 
@@ -421,14 +460,12 @@ void FEVInterface::sendAsyncErrorToGateway(FEVInterface*      fe,
 
 	std::stringstream replyMessageSStream;
 	replyMessageSStream << SOAPUtilities::translate(replyMessage);
-	__COUT__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":"
-	         << fe->theConfigurationRecordName_ << ":"
+	__COUT__ << feHeader.str()
 	         << "Received... " << replyMessageSStream.str() << std::endl;
 
 	if(replyMessageSStream.str().find("Fault") != std::string::npos)
 	{
-		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID()
-		             << ":" << fe->theConfigurationRecordName_ << ":"
+		__COUT_ERR__ << feHeader.str()
 		             << "Failure to indicate fault to Gateway..." << __E__;
 		throw;
 	}
@@ -495,6 +532,7 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 		// At this point, an asynchronous error has occurred
 		//	during front-end running...
 		// Send async error to Gateway
+		//	Do this as thread so that workloop can end.
 
 		__FE_COUT_ERR__ << ss.str();
 
@@ -503,8 +541,8 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 			    FEVInterface::sendAsyncErrorToGateway(fe, errorMessage, isSoftError);
 		    },
 		    // pass the values
-		    this,
-		    ss.str(),
+		    this /*fe*/,
+		    ss.str() /*errorMessage*/,
 		    isSoftError)
 		    .detach();
 
