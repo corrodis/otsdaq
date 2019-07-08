@@ -290,7 +290,7 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 		OUT << "scheduler: {\n";
 
 		PUSHTAB;
-		OUT << "fileMode: " << services.getNode("schedulerFileMode").getValue() << "\n";
+		//		OUT << "fileMode: " << services.getNode("schedulerFileMode").getValue() << "\n";
 		OUT << "errorOnFailureToPut: "
 		    << (services.getNode("schedulerErrorOnFailtureToPut").getValue<bool>()
 		            ? "true"
