@@ -465,7 +465,7 @@ fi
 
 
 #check for somewhat-antiquated(pre-configuration-to-table) artdaq database
-if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion ]; then
+if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2 ]; then
     echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConverting configuration to table for user data and databases..."
     
     #backup because we are scared
@@ -473,7 +473,7 @@ if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion 
     cp -r ${USER_DATA} ${USER_DATA}bk12345
     
     otsdaq_convert_config_to_table	
-    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion
+    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2
     echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
     
     if [ $ISCONFIG == 0 ]; then		
