@@ -476,11 +476,10 @@ if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion 
     echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion
     echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
     
-    if [ $ISCONFIG == 0 ]; then	
-	
-	echo -e "${Reset}"
-	echo -e "${Reset}"	
-	exit
+    if [ $ISCONFIG == 0 ]; then		
+		echo -e "${Reset}"
+		echo -e "${Reset}"	
+		exit
     fi
 fi
 if [ -d ${USER_DATA}/ConfigurationInfo ]; then
@@ -495,10 +494,29 @@ if [ -d ${USER_DATA}/ConfigurationInfo ]; then
     echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
     
     if [ $ISCONFIG == 0 ]; then		
-	
-	echo -e "${Reset}"
-	echo -e "${Reset}"
-	exit
+		echo -e "${Reset}"
+		echo -e "${Reset}"
+		exit
+    fi
+fi
+
+
+#check for somewhat-antiquated artdaq 'DAQ' tables and auto-fix
+if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion ]; then
+    echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConverting artdaq 'daq' tables in databases..."
+    
+    #backup because we are scared
+    cp -r ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}bk12346
+    cp -r ${USER_DATA} ${USER_DATA}bk12346
+    
+    otsdaq_convert_artdaq_daq_tables
+    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion
+    echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
+    
+    if [ $ISCONFIG == 0 ]; then		
+		echo -e "${Reset}"
+		echo -e "${Reset}"	
+		exit
     fi
 fi
 

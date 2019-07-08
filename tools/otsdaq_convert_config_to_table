@@ -37,7 +37,7 @@ fi
 	
 NEW_TABLE_DIR=$USER_DATA/TableInfo
 if [ -d $NEW_TABLE_DIR ]; then
-	echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t NEW_TABLE_DIR=${NEW_TABLE_DIR} path already exits. Perhaps you already did this conversion?"
+	echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t NEW_TABLE_DIR=${NEW_TABLE_DIR} path already exists. Perhaps you already did this conversion?"
 	#exit
 fi
 
@@ -113,7 +113,7 @@ echo
 cd $ARTDAQ_DATABASE_DIR
 
 echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Renaming Table database folders..."
-for f in *Configuration; do mv -n "$f" "${f/Configuration}Table"; done;
+for f in *Configuration; do mv -- "$f" "${f/Configuration}Table"; done;
 
 #hide index from transformation
 for f in *Table; do mv -n "$f/index.json" "$f/index.txt"; done; 

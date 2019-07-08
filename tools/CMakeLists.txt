@@ -12,6 +12,7 @@ cet_script(
 	StartOTS.sh
 	ots
 	otsdaq_convert_config_to_table
+	otsdaq_convert_artdaq_daq_tables
 )
 
 

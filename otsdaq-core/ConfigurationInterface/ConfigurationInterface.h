@@ -43,7 +43,8 @@ class ConfigurationInterface
 	         bool                                 dontFill            = false,
 	         TableVersion                         version             = TableVersion(),
 	         bool                                 resetConfiguration  = true,
-	         bool                                 looseColumnMatching = false)
+	         bool                                 looseColumnMatching = false,
+			 std::string*						  accumulatedErrors   = 0)
 	{
 		if(table == 0)
 		{
@@ -141,6 +142,26 @@ class ConfigurationInterface
 				table->setActiveView(version);
 
 			table->getViewP()->setLastAccessTime();
+
+			try
+			{
+				// sanitize for column info and dataTypes
+				table->getViewP()->init();
+			}
+			catch(const std::runtime_error& e)
+			{
+				__SS__ << "Error occurred while getting and filling Table \"" << tableName
+						<< "\" version:" << version << std::endl;
+				ss << "\n" << e.what() << __E__;
+				__COUT__ << StringMacros::stackTrace() << __E__;
+
+				//if accumulating errors, allow invalid data
+				if(accumulatedErrors)
+					*accumulatedErrors += ss.str();
+				else
+					throw;
+			}
+
 			return;
 		}
 
@@ -169,9 +190,9 @@ class ConfigurationInterface
 			// verify the new view
 			if(table->getViewP()->getVersion() != version)
 			{
-				__COUT__ << "Version mismatch!! " << table->getViewP()->getVersion()
+				__SS__ << "Version mismatch!! " << table->getViewP()->getVersion()
 				         << " vs " << version << std::endl;
-				throw;
+				__SS_THROW__;
 			}
 
 			// match key by ignoring '_'
@@ -206,23 +227,46 @@ class ConfigurationInterface
 			else  // table->getViewP()->getTableName() !=
 			      // table->getMockupViewP()->getTableName())
 			{
-				__COUT__ << "View Table Name mismatch!! "
+				__SS__ << "View Table Name mismatch!! "
 				         << table->getViewP()->getTableName() << " vs "
 				         << table->getMockupViewP()->getTableName() << std::endl;
-				throw;
+				__SS_THROW__;
 			}
-			table->getViewP()
-			    ->init();  // sanitize for column info (and possibly on dataType soon?)
+
+			try
+			{
+				// sanitize for column info and dataTypes
+				table->getViewP()->init();
+			}
+			catch(const std::runtime_error& e)
+			{
+				__SS__ << "Error occurred while getting and filling Table \"" << tableName
+						<< "\" version:" << version << std::endl;
+				ss << "\n" << e.what() << __E__;
+				__COUT__ << StringMacros::stackTrace() << __E__;
+
+				//if accumulating errors, allow invalid data
+				if(accumulatedErrors)
+					*accumulatedErrors += ss.str();
+				else
+					throw;
+			}
 
 			// at this point, view has been verified!
 			/////////////////////
 		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Error occurred while getting and filling Table \"" <<
+					tableName << "\" version:" << version << std::endl;
+			ss << "\n" << e.what() << __E__;
+			__SS_THROW__;
+		}
 		catch(...)
 		{
-			__COUT__ << "Error occurred while getting and filling Table \"" << tableName
-			         << "\" version:" << version << std::endl;
-			__COUT__ << "\t-Configuration interface mode=" << theMode_ << std::endl;
-			throw;
+			__SS__ << "Unknown error occurred while getting and filling Table \"" <<
+					tableName << "\" version:" << version << std::endl;
+			__SS_THROW__;
 		}
 
 	}  // end get()

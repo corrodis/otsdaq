@@ -82,7 +82,7 @@
 //////// ==============================================================
 
 #define __SS__            	std::stringstream ss; ss << ":" << __MF_SUBJECT__ << ":" << __COUT_HDR__
-#define __SS_THROW__        __COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
+#define __SS_THROW__        { __COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); } //put in {}'s to prevent surprises, e.g. if ... else __SS_THROW__;
 #define __SS_ONLY_THROW__ 	throw std::runtime_error(ss.str())
 #define __SSV__(X) 			__SS__ << QUOTE(X) << " = " << X
 
@@ -110,7 +110,7 @@
 #define __CFG_MCOUTV__(X) 		{ __CFG_MOUTV__(X); __CFG_COUTV__(X); }
 
 #define __CFG_SS__  			std::stringstream ss; ss << ":" << __MF_SUBJECT__ << ":" << theConfigurationRecordName_ << ":" << __COUT_HDR__
-#define __CFG_SS_THROW__        __CFG_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
+#define __CFG_SS_THROW__        { __CFG_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 //////// ==============================================================
 
@@ -136,7 +136,7 @@
 #define __FE_MCOUTV__(X) 		{ __FE_MOUTV__(X); __FE_COUTV__(X); }
 
 #define __FE_SS__          		std::stringstream ss; ss << ":FE:" << getInterfaceType() << ":" << getInterfaceUID() << ":" << theConfigurationRecordName_ << ":" << __COUT_HDR__
-#define __FE_SS_THROW__         __FE_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
+#define __FE_SS_THROW__         { __FE_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 //////// ==============================================================
 
@@ -162,7 +162,7 @@
 #define __GEN_MCOUTV__(X) 		{ __GEN_MOUTV__(X); __GEN_COUTV__(X); }
 
 #define __GEN_SS__        		std::stringstream ss; ss << ":" << mfSubject_ << ":" << __COUT_HDR__
-#define __GEN_SS_THROW__        __GEN_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
+#define __GEN_SS_THROW__        { __GEN_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 //////// ==============================================================
 
@@ -189,7 +189,7 @@
 #define __SUP_MCOUTV__(X) 		{ __SUP_MOUTV__(X); __SUP_COUTV__(X); }
 
 #define __SUP_SS__              std::stringstream ss; ss << ":" << supervisorClassNoNamespace_ << ":" << CorePropertySupervisorBase::getSupervisorUID() << ":" << __COUT_HDR__
-#define __SUP_SS_THROW__        __SUP_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str())
+#define __SUP_SS_THROW__        { __SUP_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 #define __ENV__(X) 				StringMacros::otsGetEnvironmentVarable(X, std::string(__SHORTFILE__), __LINE__)
 

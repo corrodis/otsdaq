@@ -885,7 +885,8 @@ void ConfigurationManager::loadMemberMap(
 	//		get()
 	for(auto& memberPair : memberMap)
 	{
-		//__COUT__ << "\tMember config " << memberPair.first << ":" <<
+		//if(accumulateWarnings)
+		//	__COUT__ << "\tMember config " << memberPair.first << ":" <<
 		//		memberPair.second << __E__;
 
 		// get the proper temporary pointer
@@ -919,8 +920,8 @@ void ConfigurationManager::loadMemberMap(
 			ss << "\nIf the table '" << memberPair.first
 			   << "' should not exist, then please remove it from the group. If it "
 			      "should exist, then it "
-			   << "seems to be missing; use the Table Editor to create it, or copy it "
-			      "from another source."
+			   << "seems to have a problem; use the Table Editor to fix the table definition, or "
+			   	  "edit the table content to match the table definition."
 			   << __E__;
 
 			// if accumulating warnings and table view was created, then continue
@@ -937,8 +938,8 @@ void ConfigurationManager::loadMemberMap(
 			ss << "\nIf the table '" << memberPair.first
 			   << "' should not exist, then please remove it from the group. If it "
 			      "should exist, then it "
-			   << "seems to be missing; use the Table Editor to create it, or copy it "
-			      "from another source."
+			   << "seems to have a problem; use the Table Editor to fix the table definition, or "
+			   	  "edit the table content to match the table definition."
 			   << __E__;
 
 			// if accumulating warnings and table view was created, then continue
@@ -948,6 +949,8 @@ void ConfigurationManager::loadMemberMap(
 				__SS_THROW__;
 		}
 
+
+		//__COUT__ << "Checking ptr.. " <<  (tmpConfigBasePtr?"GOOD":"BAD") << __E__;
 		if(!tmpConfigBasePtr)
 		{
 			__SS__ << "Null pointer returned for table '" << memberPair.first
@@ -1715,17 +1718,30 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 		for(auto& memberPair : *memberMap)
 		{
 			auto mapIt = nameToTableMap_.find(memberPair.first);
-			if(mapIt == nameToTableMap_.end())
+			try
 			{
-				__SS__ << "Get Children with member map requires a child '"
-				       << memberPair.first << "' that is not present!" << __E__;
-				__SS_THROW__;
+				if(mapIt == nameToTableMap_.end())
+				{
+					__SS__ << "Get Children with member map requires a child '"
+						   << memberPair.first << "' that is not present!" << __E__;
+					__SS_THROW__;
+				}
+				if(!(*mapIt).second->isActive())
+				{
+					__SS__ << "Get Children with member map requires a child '"
+						   << memberPair.first << "' that is not active!" << __E__;
+					__SS_THROW__;
+				}
 			}
-			if(!(*mapIt).second->isActive())
+			catch(const std::runtime_error& e)
 			{
-				__SS__ << "Get Children with member map requires a child '"
-				       << memberPair.first << "' that is not active!" << __E__;
-				__SS_THROW__;
+				if(accumulatedTreeErrors)
+				{
+					*accumulatedTreeErrors += e.what();
+					__COUT_ERR__ << "Skipping " << memberPair.first << " since the table "
+							"is not active." << __E__;
+					continue;
+				}
 			}
 
 			ConfigurationTree newNode(this, (*mapIt).second);
