@@ -106,10 +106,10 @@ struct StringMacros
 	    const std::set<char>&     								whitespace       	= {' ', '\t', '\n', '\r'},
 	    std::vector<char>*        								listOfDelimiters 	= 0);
 	static std::vector<std::string> getVectorFromString	 	(
-		    const std::string&        								inputString,
-		    const std::set<char>&     								delimiter        	= {',', '|', '&'},
-		    const std::set<char>&     								whitespace       	= {' ', '\t', '\n', '\r'},
-		    std::vector<char>*        								listOfDelimiters 	= 0);
+		const std::string&        								inputString,
+		const std::set<char>&     								delimiter        	= {',', '|', '&'},
+		const std::set<char>&     								whitespace       	= {' ', '\t', '\n', '\r'},
+		std::vector<char>*        								listOfDelimiters 	= 0);
 
 	//========================================================================================================================
 	// mapToString ~

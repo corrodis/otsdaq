@@ -749,7 +749,7 @@ launchOTSMacromaker() {
 			LAST_OTS_PID=$!
 			
 			#verify relaunch
-			sleep 4 #give time before relaunch test
+			sleep 8 #give time before relaunch test
 			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
 			
 		done
@@ -946,7 +946,7 @@ launchOTSWiz() {
 			LAST_OTS_PID=$!
 			
 			#test for relaunch
-			sleep 4 #give time before relaunch test
+			sleep 8 #give time before relaunch test
 			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
 	
 		done
@@ -1242,7 +1242,7 @@ launchOTS() {
 									LAST_OTS_PID=$!
 									
 									#verify relaunch
-									sleep 4 #give time before relaunch test
+									sleep 8 #give time before relaunch test
 									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
 									
 								done
@@ -1365,7 +1365,7 @@ launchOTS() {
 				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tNongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${Reset}"
 				
 				#test for relaunch
-				sleep 4 #give time before relaunch test
+				sleep 8 #give time before relaunch test
 				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
 				
 			done 		
