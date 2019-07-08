@@ -69,8 +69,8 @@ echo
 cd $TABLE_DIR
 
 echo -e `date +"%h%y %T"` "convert_artdaq_daq_tables.sh [${LINENO}]  \t Modifying Table Info file content..."
-sed -i s/ARTDAQDaq/ARTDAQ/g ARTDAQDaq*.xml
-sed -i s/ARTDAQ_DAQ/ARTDAQ/g ARTDAQDaq*.xml
+sed -i s/ARTDAQDaq/ARTDAQ/g *.xml
+sed -i s/ARTDAQ_DAQ/ARTDAQ/g *.xml
 
 echo -e `date +"%h%y %T"` "convert_artdaq_daq_tables.sh [${LINENO}]  \t Renaming Table Info files..."
   
