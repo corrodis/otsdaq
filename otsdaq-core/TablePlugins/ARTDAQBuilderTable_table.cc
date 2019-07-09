@@ -263,6 +263,34 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		out.close();
 		return;
 	}
+	
+	
+
+	//--------------------------------------
+	// handle preamble parameters
+	auto preambleParameterLink = builderNode.getNode("preambleParametersLink");
+	if(!preambleParameterLink.isDisconnected())
+	{
+		///////////////////////
+		auto otherParameters = preambleParameterLink.getChildren();
+
+		//__COUTV__(otherParameters.size());
+		for(auto& parameter : otherParameters)
+		{
+			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+			        .getValue<bool>())
+				PUSHCOMMENT;
+
+			OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
+			    << parameter.second.getNode("daqParameterValue").getValue() << "\n";
+
+			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+			        .getValue<bool>())
+				POPCOMMENT;
+		}
+	}
+	// else
+	//	__COUT__ << "No preamble parameters found" << __E__;
 
 	//--------------------------------------
 	// handle services
