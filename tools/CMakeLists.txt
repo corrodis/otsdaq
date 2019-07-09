@@ -1,9 +1,5 @@
 cet_script(
-	generateJSONDispatcher.rb
-	generateUDP.rb
-	ots_utilities.rb
 	setupOtsEnvironment.sh
-	xt_cmd.sh
 	StartOTS.sh
 	ots
 	otsdaq_convert_config_to_table
