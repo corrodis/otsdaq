@@ -274,15 +274,18 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		///////////////////////
 		auto otherParameters = preambleParameterLink.getChildren();
 
+		std::string key;
 		//__COUTV__(otherParameters.size());
 		for(auto& parameter : otherParameters)
 		{
 			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 			        .getValue<bool>())
 				PUSHCOMMENT;
-
-			OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
-			    << parameter.second.getNode("daqParameterValue").getValue() << "\n";
+			key = parameter.second.getNode("daqParameterKey").getValue();
+			
+			OUT << key;
+			if(key.find("#include") == std::string::npos) OUT << ":"; 			
+			OUT << parameter.second.getNode("daqParameterValue").getValue() << "\n";
 
 			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 			        .getValue<bool>())
@@ -1077,15 +1080,18 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		///////////////////////
 		auto otherParameters = otherParameterLink.getChildren();
 
+		std::string key;
 		//__COUTV__(otherParameters.size());
 		for(auto& parameter : otherParameters)
 		{
 			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 			        .getValue<bool>())
 				PUSHCOMMENT;
-
-			OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
-			    << parameter.second.getNode("daqParameterValue").getValue() << "\n";
+			key = parameter.second.getNode("daqParameterKey").getValue();
+			
+			OUT << key;
+			if(key.find("#include") == std::string::npos) OUT << ":"; 			
+			OUT << parameter.second.getNode("daqParameterValue").getValue() << "\n";
 
 			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 			        .getValue<bool>())
