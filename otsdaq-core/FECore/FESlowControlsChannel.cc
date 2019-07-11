@@ -1,4 +1,5 @@
 #include "otsdaq-core/FECore/FESlowControlsChannel.h"
+#include "otsdaq-core/Macros/BinaryStringMacros.h"
 #include "otsdaq-core/Macros/CoutMacros.h"
 
 #include <iostream>
@@ -6,6 +7,9 @@
 #include <stdexcept> /*runtime_error*/
 
 using namespace ots;
+
+#undef __MF_SUBJECT__
+#define __MF_SUBJECT__ (interfaceUID_ + "-" + channelName_)
 
 ////////////////////////////////////
 // Packet Types sent in txBuffer:
@@ -30,7 +34,6 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
                                              unsigned int       universalAddressSize,
                                              const std::string& universalAddress,
                                              unsigned int       universalDataBitOffset,
-
                                              bool               readAccess,
                                              bool               writeAccess,
                                              bool               monitoringEnabled,
@@ -52,22 +55,20 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
     , dataType_(dataType)
     , universalDataBitOffset_(universalDataBitOffset)
     , txPacketSequenceNumber_(0)
-    ,
-
-    readAccess_(readAccess)
+    , readAccess_(readAccess)
     , writeAccess_(writeAccess)
     , monitoringEnabled_(monitoringEnabled)
     , recordChangesOnly_(recordChangesOnly)
-    , delayBetweenSamples_(delayBetweenSamples)
+    , delayBetweenSamples_(delayBetweenSamples < 1
+                               ? 1
+                               : delayBetweenSamples)  // units of seconds, with 1 minimum
     , saveEnabled_(saveEnabled)
     , savePath_(savePath)
     , saveFileRadix_(saveFileRadix)
     , saveBinaryFormat_(saveBinaryFormat)
     , alarmsEnabled_(alarmsEnabled)
     , latchAlarms_(latchAlarms)
-    ,
-
-    lastSampleTime_(0)
+    , lastSampleTime_(0)
     , loloAlarmed_(false)
     , loAlarmed_(false)
     , hiAlarmed_(false)
@@ -76,9 +77,9 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
                         underscoreString(fullChannelName_) + "-" +
                         std::to_string(time(0)) + (saveBinaryFormat_ ? ".dat" : ".txt"))
 {
-	__COUT__ << "dataType_ = " << dataType_ << std::endl;
-	__COUT__ << "universalAddressSize = " << universalAddressSize << std::endl;
-	__COUT__ << "universalAddress = " << universalAddress << std::endl;
+	__COUTV__(dataType_);
+	__COUT__ << "universalAddressSize = " << universalAddressSize << __E__;
+	__COUT__ << "universalAddress = " << universalAddress << __E__;
 
 	// check for valid types:
 	//	if(dataType_ != "char" &&
@@ -106,7 +107,7 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 		sizeOfDataTypeBits_ = sizeof(double) * 8;
 	else
 	{
-		__SS__ << "Data type '" << dataType_ << "' is invalid. "
+		__SS__ << "ChannelDataType '" << dataType_ << "' is invalid. "
 		       << "Valid data types (w/size in bytes) are as follows: "
 		       << "#b (# bits)"
 		       << ", char (" << sizeof(char) << "B), unsigned char ("
@@ -115,7 +116,7 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 		       << sizeof(int) << "B), unsigned int (" << sizeof(unsigned int)
 		       << "B), long long (" << sizeof(long long) << "B), unsigned long long ("
 		       << sizeof(unsigned long long) << "B), float (" << sizeof(float)
-		       << "B), double (" << sizeof(double) << "B)." << std::endl;
+		       << "B), double (" << sizeof(double) << "B)." << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
@@ -125,7 +126,7 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 		__SS__ << "Invalid Data Type '" << dataType_ << "' (" << sizeOfDataTypeBits_
 		       << "-bits)"
 		          ". Size in bits must be less than or equal to 64-bits."
-		       << std::endl;
+		       << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
@@ -136,33 +137,132 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 		    << "Invalid Data Type '" << dataType_ << "' (" << sizeOfDataTypeBits_
 		    << "-bits) or Universal Data Size of " << universalDataSize * 8
 		    << "-bits. Data Type size must be less than or equal to Universal Data Size."
-		    << std::endl;
+		    << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 
 	universalAddress_.resize(universalAddressSize);
-	convertStringToBuffer(universalAddress, universalAddress_);
+	try
+	{
+		convertStringToBuffer(universalAddress, universalAddress_);
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "Failed to extract universalAddress '" << universalAddress << "'..."
+		       << __E__;
+		ss << e.what();
+		__SS_THROW__;
+	}
 
 	sizeOfDataTypeBytes_ =
 	    (sizeOfDataTypeBits_ / 8 + ((universalDataBitOffset_ % 8) ? 1 : 0));
 
 	lolo_.resize(sizeOfDataTypeBytes_);
-	convertStringToBuffer(lolo, lolo_, true);
 	lo_.resize(sizeOfDataTypeBytes_);
-	convertStringToBuffer(lo, lo_, true);
 	hi_.resize(sizeOfDataTypeBytes_);
-	convertStringToBuffer(hi, hi_, true);
 	hihi_.resize(sizeOfDataTypeBytes_);
-	convertStringToBuffer(hihi, hihi_, true);
+
+	if(alarmsEnabled_)
+	{
+		try
+		{
+			convertStringToBuffer(lolo, lolo_, true);
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Failed to extract lolo '" << lolo << "'..." << __E__;
+			ss << e.what();
+			__SS_THROW__;
+		}
+		try
+		{
+			convertStringToBuffer(lo, lo_, true);
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Failed to extract lo '" << lo << "'..." << __E__;
+			ss << e.what();
+			__SS_THROW__;
+		}
+		try
+		{
+			convertStringToBuffer(hi, hi_, true);
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Failed to extract hi '" << hi << "'..." << __E__;
+			ss << e.what();
+			__SS_THROW__;
+		}
+		try
+		{
+			convertStringToBuffer(hihi, hihi_, true);
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Failed to extract hihi '" << hihi << "'..." << __E__;
+			ss << e.what();
+			__SS_THROW__;
+		}
+	}
 
 	// prepare for data to come
 	sample_.resize(sizeOfDataTypeBytes_);
 	lastSample_.resize(sizeOfDataTypeBytes_);
-}
+
+	__COUT__;
+	print();
+	__COUT__ << "Constructed." << __E__;
+}  // end constructor
 
 //========================================================================================================================
 FESlowControlsChannel::~FESlowControlsChannel(void) {}
+
+//========================================================================================================================
+void FESlowControlsChannel::print(std::ostream& out) const
+{
+	out << "Slow Controls Channel for Interface '" << interfaceUID_
+	    << "': " << channelName_ << __E__;
+
+	out << "\t"
+	    << "dataType_: " << dataType_ << __E__;
+	out << "\t"
+	    << "sizeOfDataTypeBits_: " << sizeOfDataTypeBits_ << __E__;
+	out << "\t"
+	    << "universalAddress_: "
+	    << BinaryStringMacros::binaryTo8ByteHexString(universalAddress_, "0x", " ")
+	    << __E__;
+	out << "\t"
+	    << "universalDataBitOffset_: " << universalDataBitOffset_ << __E__;
+	out << "\t"
+	    << "readAccess_: " << readAccess_ << __E__;
+	out << "\t"
+	    << "writeAccess_: " << writeAccess_ << __E__;
+	out << "\t"
+	    << "monitoringEnabled_: " << monitoringEnabled_ << __E__;
+	out << "\t"
+	    << "recordChangesOnly_: " << recordChangesOnly_ << __E__;
+	out << "\t"
+	    << "delayBetweenSamples_: " << delayBetweenSamples_ << __E__;
+	out << "\t"
+	    << "saveEnabled_: " << saveEnabled_ << __E__;
+	out << "\t"
+	    << "savePath_: " << savePath_ << __E__;
+	out << "\t"
+	    << "saveFileRadix_: " << saveFileRadix_ << __E__;
+	out << "\t"
+	    << "saveBinaryFormat_: " << saveBinaryFormat_ << __E__;
+	out << "\t"
+	    << "alarmsEnabled_: " << alarmsEnabled_ << __E__;
+	out << "\t"
+	    << "latchAlarms_: " << latchAlarms_ << __E__;
+	out << "\t"
+	    << "savePath_: " << savePath_ << __E__;
+	out << "\t"
+	    << "saveFullFileName_: " << saveFullFileName_ << __E__;
+
+}  // end print()
 
 //========================================================================================================================
 // underscoreString
@@ -178,40 +278,39 @@ std::string FESlowControlsChannel::underscoreString(const std::string& str)
 		else
 			retStr.push_back('_');
 	return retStr;
-}
+}  // end underscoreString()
 
 //========================================================================================================================
 // convertStringToBuffer
-//	adds to txBuffer if sample should be sent to monitor server
 //	if useDataType == false, then assume unsigned long long
 //
 // 	Note: buffer is expected to sized properly in advance, e.g. buffer.resize(#)
 void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
                                                   std::string&       buffer,
-                                                  bool               useDataType)
+                                                  bool useDataType /*  = false */)
 {
-	__COUT__ << "Input Str Sz= \t" << inString.size() << std::endl;
-	__COUT__ << "Input Str Val= \t'" << inString << "'" << std::endl;
-	__COUT__ << "Output buffer Sz= \t" << buffer.size() << std::endl;
+	__COUT__ << "Input Str Sz= \t" << inString.size() << __E__;
+	__COUT__ << "Input Str Val= \t'" << inString << "'" << __E__;
+	__COUT__ << "Output buffer Sz= \t" << buffer.size() << __E__;
 
 	if(useDataType && (dataType_ == "float" || dataType_ == "double"))
 	{
-		__COUT__ << "Floating point spec'd" << std::endl;
+		__COUT__ << "Floating point spec'd" << __E__;
 		if(dataType_ == "float" && buffer.size() == sizeof(float))
 		{
 			sscanf(&inString[0], "%f", (float*)&buffer[0]);
-			__COUT__ << "float: " << *((float*)&buffer[0]) << std::endl;
+			__COUT__ << "float: " << *((float*)&buffer[0]) << __E__;
 		}
 		else if(dataType_ == "double" && buffer.size() == sizeof(double))
 		{
 			sscanf(&inString[0], "%lf", (double*)&buffer[0]);
-			__COUT__ << "double: " << *((double*)&buffer[0]) << std::endl;
+			__COUT__ << "double: " << *((double*)&buffer[0]) << __E__;
 		}
 		else
 		{
 			__SS__ << "Invalid floating point spec! "
 			       << "dataType_=" << dataType_ << " buffer.size()=" << buffer.size()
-			       << std::endl;
+			       << __E__;
 			__COUT_ERR__ << "\n" << ss.str();
 			__SS_THROW__;
 		}
@@ -221,11 +320,33 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
 			for(int i = (int)buffer.size() - 1; i >= 0; --i)
 				ss << std::hex << (int)((buffer[i] >> 4) & 0xF)
 				   << (int)((buffer[i]) & 0xF) << " " << std::dec;
-			ss << std::endl;
+			ss << __E__;
 			__COUT__ << "\n" << ss.str();
 		}
 		return;
 	}
+
+	// at this point assume unsigned number that will be matched to buffer size
+	unsigned long long val;
+	if(!StringMacros::getNumber(inString, val))
+	{
+		__SS__ << "Invalid unsigned number format in string " << inString << __E__;
+		ss << __E__;
+		print(ss);
+		__SS_THROW__;
+	}
+	// transfer the long long to the buffer
+	unsigned int i = 0;
+	for(; i < sizeof(long long) && i < buffer.size(); ++i)
+		buffer[i] = ((char*)&val)[i];
+
+	// clear remaining buffer
+	for(; i < buffer.size(); ++i)
+		buffer[i] = 0;
+
+	__COUT__ << "Resulting Number Buffer: "
+	         << BinaryStringMacros::binaryTo8ByteHexString(buffer, "0x", " ") << __E__;
+	return;
 
 	// clear buffer
 	for(unsigned int i = 0; i < buffer.size(); ++i)
@@ -236,7 +357,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
 	//		for(int i=(int)buffer.size()-1;i>=0;--i)
 	//			ss << std::hex << (int)((buffer[i]>>4)&0xF) <<
 	//			(int)((buffer[i])&0xF) << " " << std::dec;
-	//		ss << std::endl;
+	//		ss << __E__;
 	//		__COUT__ << "\n" << ss.str();
 	//	}
 
@@ -246,7 +367,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
 		{
 			// hex value
 
-			__COUT__ << "Hex." << std::endl;
+			__COUT__ << "Hex." << __E__;
 
 			unsigned int  j;
 			unsigned char val;
@@ -269,7 +390,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
 		{
 			// assume not bigger than 64 bits if decimal
 
-			__COUT__ << "Decimal." << std::endl;
+			__COUT__ << "Decimal." << __E__;
 			unsigned long long val;
 
 			if(!useDataType || dataType_[0] == 'u')  // then use unsigned long long
@@ -292,10 +413,10 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
 		for(int i = (int)buffer.size() - 1; i >= 0; --i)
 			ss << std::hex << (int)((buffer[i] >> 4) & 0xF) << (int)((buffer[i]) & 0xF)
 			   << " " << std::dec;
-		ss << std::endl;
+		ss << __E__;
 		__COUT__ << "\n" << ss.str();
 	}
-}
+}  // end convertStringToBuffer()
 
 //========================================================================================================================
 // handleSample
@@ -305,7 +426,7 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
                                          FILE*              fpAggregate,
                                          bool               aggregateIsBinaryFormat)
 {
-	__COUT__ << "txBuffer size=" << txBuffer.size() << std::endl;
+	__COUT__ << "txBuffer size=" << txBuffer.size() << __E__;
 
 	// extract sample from universalReadValue
 	//	considering bit size and offset
@@ -330,12 +451,12 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 	{
 		if(lastSampleTime_ && lastSample_ == sample_)
 		{
-			__COUT__ << "no change." << std::endl;
+			__COUT__ << "no change." << __E__;
 			return;  // no change
 		}
 	}
 
-	__COUT__ << "new value!" << std::endl;
+	__COUT__ << "new value!" << __E__;
 
 	// else we have an interesting value!
 	lastSampleTime_ = time(0);
@@ -358,19 +479,20 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 		//	1B sz of value in bits
 		//	value
 
-		__COUT__ << "before txBuffer sz=" << txBuffer.size() << std::endl;
+		__COUT__ << "before txBuffer sz=" << txBuffer.size() << __E__;
 		txBuffer.push_back(0);                          // value type
 		txBuffer.push_back(txPacketSequenceNumber_++);  // sequence counter and increment
 
 		txBuffer.resize(txBuffer.size() + sizeof(lastSampleTime_));
-		memcpy(&txBuffer[txBuffer.size() - sizeof(lastSampleTime_)],
-		       &lastSampleTime_,
+		memcpy(&txBuffer[txBuffer.size() - sizeof(lastSampleTime_)] /*dest*/,
+		       &lastSampleTime_ /*src*/,
 		       sizeof(lastSampleTime_));
 
 		unsigned int tmpSz = fullChannelName_.size();
 
 		txBuffer.resize(txBuffer.size() + sizeof(tmpSz));
-		memcpy(&txBuffer[txBuffer.size() - sizeof(tmpSz)], &tmpSz, sizeof(tmpSz));
+		memcpy(&txBuffer[txBuffer.size() - sizeof(tmpSz)] /*dest*/,
+				&tmpSz /*src*/, sizeof(tmpSz));
 
 		txBuffer += fullChannelName_;
 
@@ -378,7 +500,7 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 		txBuffer.push_back((unsigned char)sizeOfDataTypeBits_);  // size in bits
 
 		txBuffer += sample_;
-		__COUT__ << "after txBuffer sz=" << txBuffer.size() << std::endl;
+		__COUT__ << "after txBuffer sz=" << txBuffer.size() << __E__;
 
 		{  // print
 			__SS__ << "txBuffer: \n";
@@ -387,9 +509,9 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 				ss << std::hex << (int)((txBuffer[i] >> 4) & 0xF)
 				   << (int)((txBuffer[i]) & 0xF) << " " << std::dec;
 				if(i % 8 == 7)
-					ss << std::endl;
+					ss << __E__;
 			}
-			ss << std::endl;
+			ss << __E__;
 			__COUT__ << "\n" << ss.str();
 		}
 	}
@@ -418,7 +540,7 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 			//	value or alarm threshold
 
 			__COUT__ << "Aggregate Binary File Format: " << sizeof(lastSampleTime_) << " "
-			         << sample_.size() << std::endl;
+			         << sample_.size() << __E__;
 
 			{
 				fwrite(&lastSampleTime_,
@@ -480,7 +602,7 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 			//	name
 			//	value
 
-			__COUT__ << "Aggregate Text File Format: " << dataType_ << std::endl;
+			__COUT__ << "Aggregate Text File Format: " << dataType_ << __E__;
 
 			fprintf(fpAggregate, "%lu\n", lastSampleTime_);
 			fprintf(fpAggregate, "%s\n", fullChannelName_.c_str());
@@ -594,7 +716,7 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 		if(!fp)
 		{
 			__COUT_ERR__ << "Failed to open slow controls channel file: "
-			             << saveFullFileName_ << std::endl;
+			             << saveFullFileName_ << __E__;
 			return;
 		}
 
@@ -602,7 +724,7 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 		if(saveBinaryFormat_)
 		{
 			__COUT__ << "Binary File Format: " << sizeof(lastSampleTime_) << " "
-			         << sample_.size() << std::endl;
+			         << sample_.size() << __E__;
 			fwrite(&lastSampleTime_, sizeof(lastSampleTime_), 1, fp);
 			fwrite(&sample_[0], sample_.size(), 1, fp);
 
@@ -620,7 +742,7 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 		}
 		else
 		{
-			__COUT__ << "Text File Format: " << dataType_ << std::endl;
+			__COUT__ << "Text File Format: " << dataType_ << __E__;
 
 			fprintf(fp, "%lu\n", lastSampleTime_);
 
@@ -729,102 +851,29 @@ void FESlowControlsChannel::extractSample(const std::string& universalReadValue)
 	// procedure:
 
 	{  // print
-		__SS__ << "Univ Read: ";
+		__SS__ << "Universal Read: ";
 		for(unsigned int i = 0; i < universalReadValue.size(); ++i)
 			ss << std::hex << (int)((universalReadValue[i] >> 4) & 0xF)
 			   << (int)((universalReadValue[i]) & 0xF) << " " << std::dec;
-		ss << std::endl;
+		ss << __E__;
 		__COUT__ << "\n" << ss.str();
+		__COUT__ << "Universal Read: "
+		         << BinaryStringMacros::binaryTo8ByteHexString(
+		                universalReadValue, "0x", " ")
+		         << __E__;
 	}
-
-	unsigned int byteOffset = universalDataBitOffset_ / 8;
-	unsigned int bitOffset  = universalDataBitOffset_ % 8;
-	unsigned int bitsLeft   = sizeOfDataTypeBits_;
-
-	// copy to tmp (assume sample max size is 64 bits)
-	unsigned long long tmp = 0;
-
-	if(bitOffset)  // copy first partial byte
-	{
-		//		__COUT__ << "bitsLeft=" << bitsLeft <<
-		//				" byteOffset=" << byteOffset <<
-		//				" bitOffset=" << bitOffset <<
-		//				std::endl;
-
-		tmp      = ((unsigned long long)(universalReadValue[byteOffset++])) >> bitOffset;
-		bitsLeft = 8 - bitOffset;
-
-		//		{ //print
-		//			__SS__ << "Tmp: ";
-		//			for(unsigned int i=0; i<sizeof(tmp); ++i)
-		//				ss << std::hex << (int)((((char *)&tmp)[i]>>4)&0xF) <<
-		//				(int)((((char *)&tmp)[i])&0xF) << " " << std::dec;
-		//			ss << std::endl;
-		//			__COUT__ << "\n" << ss.str();
-		//		}
-	}
-
-	while(bitsLeft > 7)  // copy whole bytes
-	{
-		//		__COUT__ << "bitsLeft=" << bitsLeft <<
-		//				" byteOffset=" << byteOffset <<
-		//				" bitOffset=" << bitOffset <<
-		//				std::endl;
-
-		tmp |= ((unsigned long long)(universalReadValue[byteOffset++]))
-		       << (sizeOfDataTypeBits_ - bitsLeft);
-		bitsLeft -= 8;
-
-		//		{ //print
-		//			__SS__ << "Tmp: ";
-		//			for(unsigned int i=0; i<sizeof(tmp); ++i)
-		//				ss << std::hex << (int)((((char *)&tmp)[i]>>4)&0xF) <<
-		//				(int)((((char *)&tmp)[i])&0xF) << " " << std::dec;
-		//			ss << std::endl;
-		//			__COUT__ << "\n" << ss.str();
-		//		}
-	}
-
-	if(bitOffset)  // copy last partial byte
-	{
-		//		__COUT__ << "bitsLeft=" << bitsLeft <<
-		//				" byteOffset=" << byteOffset <<
-		//				" bitOffset=" << bitOffset <<
-		//				std::endl;
-
-		tmp |= (((unsigned long long)(universalReadValue[byteOffset])) &
-		        (0xFF >> (8 - bitsLeft)))
-		       << (sizeOfDataTypeBits_ - bitsLeft);
-
-		//		{ //print
-		//			__SS__ << "Tmp: ";
-		//			for(unsigned int i=0; i<sizeof(tmp); ++i)
-		//				ss << std::hex << (int)((((char *)&tmp)[i]>>4)&0xF) <<
-		//				(int)((((char *)&tmp)[i])&0xF) << " " << std::dec;
-		//			ss << std::endl;
-		//			__COUT__ << "\n" << ss.str();
-		//		}
-	}
-
-	__COUT__ << "Temp Long Long Sample: " << tmp << std::endl;
 
 	sample_.resize(0);  // clear a la sample_ = "";
-	for(unsigned int i = 0;
-	    i < (sizeOfDataTypeBits_ / 8 + ((universalDataBitOffset_ % 8) ? 1 : 0));
-	    ++i)
-		sample_.push_back(((char*)&tmp)[i]);
+	BinaryStringMacros::extractValueFromBinaryString(
+	    universalReadValue, sample_, sizeOfDataTypeBits_);
 
-	__COUT__ << "sample_.size()= " << sample_.size() << std::endl;
+	__COUT__ << "Sample size in bytes: " << sample_.size() << "\t in bits: " <<
+			sizeOfDataTypeBits_ << __E__;
 
-	{  // print
-		__SS__ << "Sample: ";
-		for(unsigned int i = 0; i < sample_.size(); ++i)
-			ss << std::hex << (int)((sample_[i] >> 4) & 0xF) << (int)((sample_[i]) & 0xF)
-			   << " " << std::dec;
-		ss << std::endl;
-		__COUT__ << "\n" << ss.str();
-	}
-}
+	__COUT__ << "sample: "
+	         << BinaryStringMacros::binaryTo8ByteHexString(sample_, "0x", " ") << __E__;
+
+}  // end extractSample()
 
 //========================================================================================================================
 // clearAlarms
@@ -840,7 +889,7 @@ void FESlowControlsChannel::clearAlarms(int targetAlarm)
 		hiAlarmed_ = false;
 	if(targetAlarm == -1 || targetAlarm == 3)
 		hihiAlarmed_ = false;
-}
+}  // end clearAlarms()
 
 //========================================================================================================================
 // checkAlarms
@@ -888,7 +937,7 @@ char FESlowControlsChannel::checkAlarms(std::string& txBuffer)
 
 	if(useType == 0)  // unsigned long long
 	{
-		__COUT__ << "Using unsigned long long for alarms." << std::endl;
+		__COUT__ << "Using unsigned long long for alarms." << __E__;
 		// lolo
 		if((!loloAlarmed_ || !latchAlarms_) &&
 		   *((unsigned long long*)&sample_[0]) <= *((unsigned long long*)&lolo_[0]))
@@ -920,7 +969,7 @@ char FESlowControlsChannel::checkAlarms(std::string& txBuffer)
 	}
 	else if(useType == 1)  // long long
 	{
-		__COUT__ << "Using long long for alarms." << std::endl;
+		__COUT__ << "Using long long for alarms." << __E__;
 		// lolo
 		if((!loloAlarmed_ || !latchAlarms_) &&
 		   *((long long*)&sample_[0]) <= *((long long*)&lolo_[0]))
@@ -952,7 +1001,7 @@ char FESlowControlsChannel::checkAlarms(std::string& txBuffer)
 	}
 	else if(useType == 2)  // float
 	{
-		__COUT__ << "Using float for alarms." << std::endl;
+		__COUT__ << "Using float for alarms." << __E__;
 		// lolo
 		if((!loloAlarmed_ || !latchAlarms_) &&
 		   *((float*)&sample_[0]) <= *((float*)&lolo_[0]))
@@ -982,7 +1031,7 @@ char FESlowControlsChannel::checkAlarms(std::string& txBuffer)
 	}
 	else if(useType == 3)  // double
 	{
-		__COUT__ << "Using double for alarms." << std::endl;
+		__COUT__ << "Using double for alarms." << __E__;
 		// lolo
 		if((!loloAlarmed_ || !latchAlarms_) &&
 		   *((double*)&sample_[0]) <= *((double*)&lolo_[0]))
@@ -1035,22 +1084,23 @@ char FESlowControlsChannel::checkAlarms(std::string& txBuffer)
 				//	alarm value
 
 				__COUT__ << "Create packet type " << i + 1
-				         << " alarm value = " << *alarmValueArray[i] << std::endl;
+				         << " alarm value = " << *alarmValueArray[i] << __E__;
 
-				__COUT__ << "before txBuffer sz=" << txBuffer.size() << std::endl;
+				__COUT__ << "before txBuffer sz=" << txBuffer.size() << __E__;
 				txBuffer.push_back(i + 1);  // alarm packet type
 				txBuffer.push_back(
 				    txPacketSequenceNumber_++);  // sequence counter and increment
 
 				txBuffer.resize(txBuffer.size() + sizeof(lastSampleTime_));
-				memcpy(&txBuffer[txBuffer.size() - sizeof(lastSampleTime_)],
-				       &lastSampleTime_,
+				memcpy(&txBuffer[txBuffer.size() - sizeof(lastSampleTime_)] /*dest*/,
+				       &lastSampleTime_ /*src*/,
 				       sizeof(lastSampleTime_));
 
 				unsigned int tmpSz = fullChannelName_.size();
 
 				txBuffer.resize(txBuffer.size() + sizeof(tmpSz));
-				memcpy(&txBuffer[txBuffer.size() - sizeof(tmpSz)], &tmpSz, sizeof(tmpSz));
+				memcpy(&txBuffer[txBuffer.size() - sizeof(tmpSz)] /*dest*/,
+						&tmpSz /*src*/, sizeof(tmpSz));
 
 				txBuffer += fullChannelName_;
 
@@ -1059,7 +1109,7 @@ char FESlowControlsChannel::checkAlarms(std::string& txBuffer)
 				txBuffer.push_back((unsigned char)sizeOfDataTypeBits_);  // size in bits
 
 				txBuffer += (*alarmValueArray[i]);
-				__COUT__ << "after txBuffer sz=" << txBuffer.size() << std::endl;
+				__COUT__ << "after txBuffer sz=" << txBuffer.size() << __E__;
 
 				{  // print
 					__SS__ << "txBuffer: \n";
@@ -1068,13 +1118,13 @@ char FESlowControlsChannel::checkAlarms(std::string& txBuffer)
 						ss << std::hex << (int)((txBuffer[i] >> 4) & 0xF)
 						   << (int)((txBuffer[i]) & 0xF) << " " << std::dec;
 						if(i % 8 == 7)
-							ss << std::endl;
+							ss << __E__;
 					}
-					ss << std::endl;
+					ss << __E__;
 					__COUT__ << "\n" << ss.str();
 				}
 			}
 	}
 
 	return createPacketMask;
-}
+}  // end checkAlarms()

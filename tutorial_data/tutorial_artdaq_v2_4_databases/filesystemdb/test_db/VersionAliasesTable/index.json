@@ -1,53 +1,32 @@
 {
 "ouid" : [
-"5e403542c2594c11a87c1237",
-"6ab1a227f2bc4174a642b03d"
+"703484ce90064035a7c46069",
+"d8d519e639ff4d9da57c85a0"
 ],
 "version" : {
-"0" : [
-"5e403542c2594c11a87c1237"
+"1" : [
+"d8d519e639ff4d9da57c85a0"
 ],
-"5" : [
-"6ab1a227f2bc4174a642b03d"
+"6" : [
+"703484ce90064035a7c46069"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"5e403542c2594c11a87c1237",
-"6ab1a227f2bc4174a642b03d"
-],
-"GroupAliasTreeEditWizBackbone_v0" : [
-"5e403542c2594c11a87c1237"
-],
-"GroupAliasTreeEditWizBackbone_v5" : [
-"6ab1a227f2bc4174a642b03d"
-],
-"GroupAliasWizBackbone_v0" : [
-"6ab1a227f2bc4174a642b03d"
-],
-"GroupAliasWizBackbone_v1" : [
-"6ab1a227f2bc4174a642b03d"
-],
-"TableEditWizBackbone_v0" : [
-"6ab1a227f2bc4174a642b03d"
-],
-"GroupAliasWizBackbone_v2" : [
-"6ab1a227f2bc4174a642b03d"
+"703484ce90064035a7c46069",
+"d8d519e639ff4d9da57c85a0"
 ],
 "TableEditWizBackbone_v1" : [
-"6ab1a227f2bc4174a642b03d"
+"d8d519e639ff4d9da57c85a0"
 ],
-"GroupAliasTreeEditWizBackbone_v6" : [
-"6ab1a227f2bc4174a642b03d"
-],
-"GroupAliasTreeEditWizBackbone_v7" : [
-"6ab1a227f2bc4174a642b03d"
+"TableEditWizBackbone_v6" : [
+"703484ce90064035a7c46069"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"5e403542c2594c11a87c1237",
-"6ab1a227f2bc4174a642b03d"
+"703484ce90064035a7c46069",
+"d8d519e639ff4d9da57c85a0"
 ]
 },
 "aliases.active.name" : {
@@ -58,35 +37,14 @@
 },
 "configurations.assigned" : {
 "notprovided" : [
-"2017-09-18T14:41:26.000-0500",
-"2017-09-18T14:41:29.000-0500"
-],
-"GroupAliasTreeEditWizBackbone_v0" : [
-"2017-09-18T14:41:26.000-0500"
-],
-"GroupAliasTreeEditWizBackbone_v5" : [
-"2017-09-18T14:41:29.000-0500"
-],
-"GroupAliasWizBackbone_v0" : [
-"2019-01-29T10:14:17.144-0600"
-],
-"GroupAliasWizBackbone_v1" : [
-"2019-01-29T13:31:23.584-0600"
-],
-"TableEditWizBackbone_v0" : [
-"2019-01-29T21:37:15.405-0600"
-],
-"GroupAliasWizBackbone_v2" : [
-"2019-01-29T21:42:06.496-0600"
+"2019-07-11T09:30:33.411-0500",
+"2019-07-11T09:30:42.630-0500"
 ],
 "TableEditWizBackbone_v1" : [
-"2019-01-29T21:44:28.177-0600"
+"2019-07-11T09:30:33.675-0500"
 ],
-"GroupAliasTreeEditWizBackbone_v6" : [
-"2019-01-29T21:53:48.202-0600"
-],
-"GroupAliasTreeEditWizBackbone_v7" : [
-"2019-01-29T22:19:33.279-0600"
+"TableEditWizBackbone_v6" : [
+"2019-07-11T09:30:42.729-0500"
 ]
 }
 }

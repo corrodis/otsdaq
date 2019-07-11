@@ -15,18 +15,18 @@ FEVInterface::FEVInterface(const std::string&       interfaceUID,
                            const std::string&       configurationPath)
     : WorkLoop(interfaceUID)
     , Configurable(theXDAQContextConfigTree, configurationPath)
-    , interfaceUID_(interfaceUID)
-    //, interfaceType_
-    //(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>())
-    //, daqHardwareType_            	("NOT SET")
-    //, firmwareType_               	("NOT SET")
     , slowControlsWorkLoop_(interfaceUID + "-SlowControls", this)
+    , interfaceUID_(interfaceUID)
+//, interfaceType_
+//(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>())
+//, daqHardwareType_            	("NOT SET")
+//, firmwareType_               	("NOT SET")
 {
 	// NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the
 	// base class versions of function (e.g. getInterfaceType) are called because the
 	// derived class has not been instantiate yet!
 	__COUT__ << "'" << interfaceUID << "' Constructed." << __E__;
-}
+}  // end constructor()
 
 //========================================================================================================================
 FEVInterface::~FEVInterface(void)
@@ -34,19 +34,33 @@ FEVInterface::~FEVInterface(void)
 	// NOTE:: be careful not to call __FE_COUT__ decoration because it uses the tree and
 	// it may already be destructed partially
 	__COUT__ << FEVInterface::interfaceUID_ << " Destructed." << __E__;
-}
+}  // end destructor()
 
 //========================================================================================================================
 void FEVInterface::configureSlowControls(void)
 {
-	// START IT HERE
+	// Start artdaq metric manager here, if possible
 	if(metricMan && !metricMan->Running() && metricMan->Initialized())
 		metricMan->do_start();
 
-	ConfigurationTree slowControlsGroupLink =
-	    theXDAQContextConfigTree_.getBackNode(theConfigurationPath_)
-	        .getNode("LinkToSlowControlsChannelTable");
+	mapOfSlowControlsChannels_.clear();  // reset
 
+	addSlowControlsChannels(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_)
+	                            .getNode("LinkToSlowControlsChannelTable"),
+	                        "" /*subInterfaceID*/,
+	                        &mapOfSlowControlsChannels_);
+
+}  // end configureSlowControls()
+
+//========================================================================================================================
+// addSlowControlsChannels
+//	Usually subInterfaceID = "" and mapOfSlowControlsChannels =
+//&mapOfSlowControlsChannels_
+void FEVInterface::addSlowControlsChannels(
+    ConfigurationTree                                          slowControlsGroupLink,
+    const std::string&                                         subInterfaceID,
+    std::map<std::string /* ROC UID*/, FESlowControlsChannel>* mapOfSlowControlsChannels)
+{
 	if(slowControlsGroupLink.isDisconnected())
 	{
 		__FE_COUT__
@@ -54,10 +68,9 @@ void FEVInterface::configureSlowControls(void)
 		    << __E__;
 		return;
 	}
-	__FE_COUT__ << "slowControlsGroupLink is valid! Configuring slow controls..."
+	__FE_COUT__ << "slowControlsGroupLink is valid! Adding slow controls channels..."
 	            << __E__;
 
-	mapOfSlowControlsChannels_.clear();
 	std::vector<std::pair<std::string, ConfigurationTree> > groupLinkChildren =
 	    slowControlsGroupLink.getChildren();
 	for(auto& groupLinkChild : groupLinkChildren)
@@ -67,14 +80,15 @@ void FEVInterface::configureSlowControls(void)
 		         .getValue<bool>()))
 			continue;
 
-		__FE_COUT__ << "Channel:" << getInterfaceUID() << "/" << groupLinkChild.first
+		__FE_COUT__ << "Channel:" << getInterfaceUID() << subInterfaceID << "/"
+		            << groupLinkChild.first
 		            << "\t Type:" << groupLinkChild.second.getNode("ChannelDataType")
 		            << __E__;
 
-		mapOfSlowControlsChannels_.insert(std::pair<std::string, FESlowControlsChannel>(
+		mapOfSlowControlsChannels->insert(std::pair<std::string, FESlowControlsChannel>(
 		    groupLinkChild.first,
 		    FESlowControlsChannel(
-		        getInterfaceUID(),
+		        getInterfaceUID() + subInterfaceID,
 		        groupLinkChild.first,
 		        groupLinkChild.second.getNode("ChannelDataType").getValue<std::string>(),
 		        universalDataSize_,
@@ -101,7 +115,41 @@ void FEVInterface::configureSlowControls(void)
 		        groupLinkChild.second.getNode("HighHighThreshold")
 		            .getValue<std::string>())));
 	}
-}  // end configureSlowControls()
+}  // end addSlowControlsChannels()
+
+//========================================================================================================================
+// virtual in case channels are handled in multiple maps, for example
+void FEVInterface::resetSlowControlsChannelIterator(void)
+{
+	slowControlsChannelsIterator_ = mapOfSlowControlsChannels_.begin();
+}  // end resetSlowControlsChannelIterator()
+
+//========================================================================================================================
+// virtual in case channels are handled in multiple maps, for example
+FESlowControlsChannel* FEVInterface::getNextSlowControlsChannel(void)
+{
+	if(slowControlsChannelsIterator_ == mapOfSlowControlsChannels_.end())
+		return nullptr;
+
+	return &(
+	    (slowControlsChannelsIterator_++)->second);  // return iterator, then increment
+}  // end getNextSlowControlsChannel()
+
+//========================================================================================================================
+// virtual in case read should be different than universalread
+void FEVInterface::getSlowControlsValue(FESlowControlsChannel& channel,
+                                        std::string&           readValue)
+{
+	readValue.resize(universalDataSize_);
+	universalRead(channel.getUniversalAddress(), &readValue[0]);
+}  // end getNextSlowControlsChannel()
+
+//========================================================================================================================
+// virtual in case channels are handled in multiple maps, for example
+unsigned int FEVInterface::getSlowControlsChannelCount(void)
+{
+	return mapOfSlowControlsChannels_.size();
+}  // end getSlowControlsChannelCount()
 
 //========================================================================================================================
 bool FEVInterface::slowControlsRunning(void) try
@@ -212,8 +260,13 @@ bool FEVInterface::slowControlsRunning(void) try
 
 	time_t timeCounter = 0;
 
+	unsigned int numOfReadAccessChannels = 0;
+	bool         firstTime               = true;
+
 	while(slowControlsWorkLoop_.getContinueWorkLoop())
 	{
+		__FE_COUT__ << "..." << __E__;
+
 		sleep(1);  // seconds
 		++timeCounter;
 
@@ -225,23 +278,23 @@ bool FEVInterface::slowControlsRunning(void) try
 		//__FE_COUT__ << "timeCounter=" << timeCounter << __E__;
 		//__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
-		for(auto& slowControlsChannelPair : mapOfSlowControlsChannels_)
+		resetSlowControlsChannelIterator();
+		while((channel = getNextSlowControlsChannel()) != nullptr)
 		{
-			channel = &slowControlsChannelPair.second;
-
 			// skip if no read access
 			if(!channel->readAccess_)
 				continue;
+
+			if(firstTime)
+				++numOfReadAccessChannels;
 
 			// skip if not a sampling moment in time for channel
 			if(timeCounter % channel->delayBetweenSamples_)
 				continue;
 
-			__FE_COUT__ << "Channel:" << getInterfaceUID() << "/"
-			            << slowControlsChannelPair.first << __E__;
-			__FE_COUT__ << "Monitoring..." << __E__;
+			__FE_COUT__ << "Reading Channel:" << channel->fullChannelName_ << __E__;
 
-			universalRead(channel->getUniversalAddress(), &readVal[0]);
+			getSlowControlsValue(*channel, readVal);
 
 			//			{ //print
 			//				__FE_SS__ << "0x ";
@@ -257,12 +310,9 @@ bool FEVInterface::slowControlsRunning(void) try
 			if(txBuffer.size())
 				__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
-			//"Channel:" << getInterfaceUID() << "/"
-			//			            << slowControlsChannelPair.first << __E__;
-			// Value << readVal
-
-			// For example,
-			if(metricMan && universalAddressSize_ <= 8)
+			// Use artdaq Metric Manager if available,
+			if(channel->monitoringEnabled_ && metricMan && metricMan->Running() &&
+			   universalAddressSize_ <= 8)
 			{
 				uint64_t val = 0;  // 64 bits!
 				for(size_t ii = 0; ii < universalAddressSize_; ++ii)
@@ -270,11 +320,7 @@ bool FEVInterface::slowControlsRunning(void) try
 
 				__FE_COUT__ << "Sending sample to Metric Manager..." << __E__;
 				metricMan->sendMetric(
-				    getInterfaceUID() + "/" + slowControlsChannelPair.first,
-				    val,
-				    "",
-				    3,
-				    artdaq::MetricMode::LastPoint);
+				    channel->fullChannelName_, val, "", 3, artdaq::MetricMode::LastPoint);
 			}
 
 			// make sure buffer hasn't exploded somehow
@@ -306,42 +352,98 @@ bool FEVInterface::slowControlsRunning(void) try
 
 		if(fp)
 			fflush(fp);  // flush anything in aggregate file for reading ease
-	}
+
+		if(firstTime)
+		{
+			if(numOfReadAccessChannels == 0)
+			{
+				__MCOUT_WARN__("There are no slow controls channels with read access!"
+				               << __E__);
+				break;
+			}
+			else
+				__COUT__ << "There are " << getSlowControlsChannelCount()
+				         << " slow controls channels total. " << numOfReadAccessChannels
+				         << " with read access enabled." << __E__;
+		}
+		firstTime = false;
+	}  // end main slow controls loop
 
 	if(fp)
 		fclose(fp);
 
+	__FE_COUT__ << "Slow controls workloop done." << __E__;
+
 	return false;
 }  // end slowControlsRunning()
-catch(const std::runtime_error& e)
+catch(...)  //
 {
-	__FE_COUT__ << "Error caught during slow controls running thread: " << e.what()
-	            << __E__;
+	// catch all, then rethrow with local variables needed
+	__FE_SS__;
+
+	bool isSoftError = false;
+
+	try
+	{
+		throw;
+	}
+	catch(const __OTS_SOFT_EXCEPTION__& e)
+	{
+		ss << "SOFT Error was caught during slow controls running thread: " << e.what() << std::endl;
+		isSoftError = true;
+	}
+	catch(const std::runtime_error& e)
+	{
+		ss << "Caught an error during slow controls running thread of FE Interface '"
+		   << Configurable::theConfigurationRecordName_ << "': " << e.what() << __E__;
+	}
+	catch(...)
+	{
+		ss << "Caught an unknown error during slow controls running thread." << __E__;
+	}
+
+	// At this point, an asynchronous error has occurred
+	//	during front-end running...
+	// Send async error to Gateway
+	//	Do this as thread so that workloop can end.
+
+	__FE_COUT_ERR__ << ss.str();
+
+	std::thread(
+		[](FEVInterface* fe, const std::string errorMessage, bool isSoftError) {
+			FEVInterface::sendAsyncErrorToGateway(fe, errorMessage, isSoftError);
+		},
+		// pass the values
+		this /*fe*/,
+		ss.str() /*errorMessage*/,
+		isSoftError)
+		.detach();
+
 	return false;
-}
-catch(...)
-{
-	__FE_COUT__ << "Unknown error caught during slow controls running thread." << __E__;
-	return false;
-}  // end slowControlsRunning()
+}// end slowControlsRunning()
 
 //========================================================================================================================
 // SendAsyncErrorToGateway
 //	Static -- thread
 //	Send async error or soft error to gateway
-//	Do this as thread so that workloop can end
+//	Call this as thread so that parent calling function (workloop) can end.
+//
+//	Note: be careful not to access fe pointer after HALT
+//		has potentially propagated.. because the pointer might be destructed!
 void FEVInterface::sendAsyncErrorToGateway(FEVInterface*      fe,
                                            const std::string& errorMessage,
                                            bool               isSoftError) try
 {
+   std::stringstream feHeader;
+   feHeader << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID()
+		  << ":" << fe->theConfigurationRecordName_ << "\t";
+
 	if(isSoftError)
-		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID()
-		             << ":" << fe->theConfigurationRecordName_ << ":"
+		__COUT_ERR__ << feHeader.str()
 		             << "Sending FE Async SOFT Running Error... \n"
 		             << errorMessage << __E__;
 	else
-		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID()
-		             << ":" << fe->theConfigurationRecordName_ << ":"
+		__COUT_ERR__ << feHeader.str()
 		             << "Sending FE Async Running Error... \n"
 		             << errorMessage << __E__;
 
@@ -358,14 +460,12 @@ void FEVInterface::sendAsyncErrorToGateway(FEVInterface*      fe,
 
 	std::stringstream replyMessageSStream;
 	replyMessageSStream << SOAPUtilities::translate(replyMessage);
-	__COUT__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":"
-	         << fe->theConfigurationRecordName_ << ":"
+	__COUT__ << feHeader.str()
 	         << "Received... " << replyMessageSStream.str() << std::endl;
 
 	if(replyMessageSStream.str().find("Fault") != std::string::npos)
 	{
-		__COUT_ERR__ << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID()
-		             << ":" << fe->theConfigurationRecordName_ << ":"
+		__COUT_ERR__ << feHeader.str()
 		             << "Failure to indicate fault to Gateway..." << __E__;
 		throw;
 	}
@@ -432,6 +532,7 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 		// At this point, an asynchronous error has occurred
 		//	during front-end running...
 		// Send async error to Gateway
+		//	Do this as thread so that workloop can end.
 
 		__FE_COUT_ERR__ << ss.str();
 
@@ -440,8 +541,8 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 			    FEVInterface::sendAsyncErrorToGateway(fe, errorMessage, isSoftError);
 		    },
 		    // pass the values
-		    this,
-		    ss.str(),
+		    this /*fe*/,
+		    ss.str() /*errorMessage*/,
 		    isSoftError)
 		    .detach();
 

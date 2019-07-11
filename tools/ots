@@ -465,7 +465,7 @@ fi
 
 
 #check for somewhat-antiquated(pre-configuration-to-table) artdaq database
-if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion ]; then
+if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2 ]; then
     echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConverting configuration to table for user data and databases..."
     
     #backup because we are scared
@@ -473,14 +473,13 @@ if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion 
     cp -r ${USER_DATA} ${USER_DATA}bk12345
     
     otsdaq_convert_config_to_table	
-    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion
+    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2
     echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
     
-    if [ $ISCONFIG == 0 ]; then	
-	
-	echo -e "${Reset}"
-	echo -e "${Reset}"	
-	exit
+    if [ $ISCONFIG == 0 ]; then		
+		echo -e "${Reset}"
+		echo -e "${Reset}"	
+		exit
     fi
 fi
 if [ -d ${USER_DATA}/ConfigurationInfo ]; then
@@ -495,10 +494,29 @@ if [ -d ${USER_DATA}/ConfigurationInfo ]; then
     echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
     
     if [ $ISCONFIG == 0 ]; then		
-	
-	echo -e "${Reset}"
-	echo -e "${Reset}"
-	exit
+		echo -e "${Reset}"
+		echo -e "${Reset}"
+		exit
+    fi
+fi
+
+
+#check for somewhat-antiquated artdaq 'DAQ' tables and auto-fix
+if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion ]; then
+    echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConverting artdaq 'daq' tables in databases..."
+    
+    #backup because we are scared
+    cp -r ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}bk12346
+    cp -r ${USER_DATA} ${USER_DATA}bk12346
+    
+    otsdaq_convert_artdaq_daq_tables
+    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion
+    echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
+    
+    if [ $ISCONFIG == 0 ]; then		
+		echo -e "${Reset}"
+		echo -e "${Reset}"	
+		exit
     fi
 fi
 
@@ -731,7 +749,7 @@ launchOTSMacromaker() {
 			LAST_OTS_PID=$!
 			
 			#verify relaunch
-			sleep 4 #give time before relaunch test
+			sleep 8 #give time before relaunch test
 			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
 			
 		done
@@ -928,7 +946,7 @@ launchOTSWiz() {
 			LAST_OTS_PID=$!
 			
 			#test for relaunch
-			sleep 4 #give time before relaunch test
+			sleep 8 #give time before relaunch test
 			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
 	
 		done
@@ -1224,7 +1242,7 @@ launchOTS() {
 									LAST_OTS_PID=$!
 									
 									#verify relaunch
-									sleep 4 #give time before relaunch test
+									sleep 8 #give time before relaunch test
 									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
 									
 								done
@@ -1347,7 +1365,7 @@ launchOTS() {
 				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tNongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${Reset}"
 				
 				#test for relaunch
-				sleep 4 #give time before relaunch test
+				sleep 8 #give time before relaunch test
 				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
 				
 			done 		

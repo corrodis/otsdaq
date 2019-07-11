@@ -38,97 +38,69 @@ struct GroupInfo
 // and is a "Friend" class of ConfigurationManager so has access to private members.
 class ConfigurationManagerRW : public ConfigurationManager
 {
+	// clang-format off
   public:
 	ConfigurationManagerRW(std::string username);
 
 	//==============================================================================
 	// Getters
-	const std::string&      getUsername(void) const { return username_; }
-	ConfigurationInterface* getConfigurationInterface(void) const
-	{
-		return theInterface_;
-	}
+	const std::string&      					getUsername						(void) const { return username_; }
+	ConfigurationInterface* 					getConfigurationInterface		(void) const { return theInterface_; }
 
-	const std::map<std::string, TableInfo>& getAllTableInfo(
-	    bool               refresh           = false,
-	    std::string*       accumulatedErrors = 0,
-	    const std::string& errorFilterName   = "");
+	const std::map<std::string, TableInfo>& 	getAllTableInfo					(bool refresh = false, std::string* accumulatedErrors = 0, const std::string& errorFilterName = "");
 	std::map<std::string /*tableName*/,
-	         std::map<std::string /*aliasName*/, TableVersion /*version*/> >
-	getVersionAliases(void) const;
+	         std::map<std::string /*aliasName*/, 
+	         TableVersion /*version*/> >		getVersionAliases				(void) const;
 
 	template<class T>
-	T* getConfigurationRW(std::string name)
-	{
-		return (T*)getTableByName(name);
-	}
-	TableBase*    getVersionedTableByName(const std::string& tableName,
-	                                      TableVersion       version,
-	                                      bool               looseColumnMatching = false);
-	TableBase*    getTableByName(const std::string& tableName);
-	TableGroupKey findTableGroup(
-	    const std::string&                                           groupName,
-	    const std::map<std::string, TableVersion>&                   groupMembers,
-	    const std::map<std::string /*name*/, std::string /*alias*/>& groupAliases =
-	        std::map<std::string /*name*/, std::string /*alias*/>());
-	TableBase* getMetadataTable(void)
-	{
-		return &groupMetadataTable_; /* created for use in otsdaq_flatten_system_aliases,
-		                                e.g. */
-	}
+	T* 											getConfigurationRW				(std::string name) { return (T*)getTableByName(name); }
+	TableBase*    								getVersionedTableByName			(const std::string& tableName, TableVersion version, bool looseColumnMatching = false, std::string* accumulatedErrors = 0);
+	TableBase*    								getTableByName					(const std::string& tableName);
+	TableGroupKey 								findTableGroup					(const std::string& groupName, 	const std::map<std::string, TableVersion>& 						groupMembers, 
+																												const std::map<std::string /*name*/, std::string /*alias*/>& 	groupAliases =	std::map<std::string /*name*/, std::string /*alias*/>());
+	TableBase* 									getMetadataTable				(void) { return &groupMetadataTable_; /* created for use in otsdaq_flatten_system_aliases, e.g. */ }
 
 	//==============================================================================
 	// modifiers of generic TableBase
-
-	TableVersion saveNewTable(
-	    const std::string& tableName,
-	    TableVersion       temporaryVersion = TableVersion(),
-	    bool makeTemporary = false);  //, bool saveToScratchVersion = false);
-	TableVersion copyViewToCurrentColumns(const std::string& tableName,
-	                                      TableVersion       sourceVersion);
-	void         eraseTemporaryVersion(const std::string& tableName,
-	                                   TableVersion       targetVersion = TableVersion());
-	void         clearCachedVersions(const std::string& tableName);
-	void         clearAllCachedVersions();
+	TableVersion 								saveNewTable					(const std::string& tableName, TableVersion temporaryVersion = TableVersion(), bool makeTemporary = false);  //, bool saveToScratchVersion = false);
+	TableVersion 								copyViewToCurrentColumns		(const std::string& tableName, TableVersion sourceVersion);
+	void         								eraseTemporaryVersion			(const std::string& tableName, TableVersion targetVersion = TableVersion());
+	void         								clearCachedVersions				(const std::string& tableName);
+	void         								clearAllCachedVersions			(void);
 
 	//==============================================================================
 	// modifiers of table groups
+	void 										activateTableGroup				(const std::string& configGroupName, TableGroupKey tableGroupKey, std::string* accumulatedTreeErrors = 0);
 
-	void activateTableGroup(const std::string& configGroupName,
-	                        TableGroupKey      tableGroupKey,
-	                        std::string*       accumulatedTreeErrors = 0);
-
-	TableVersion createTemporaryBackboneView(
-	    TableVersion sourceViewVersion =
-	        TableVersion());  //-1, from MockUp, else from valid backbone view version
-	TableVersion saveNewBackbone(TableVersion temporaryVersion = TableVersion());
+	TableVersion 								createTemporaryBackboneView		(TableVersion sourceViewVersion = TableVersion());  //-1, from MockUp, else from valid backbone view version
+	TableVersion 								saveNewBackbone					(TableVersion temporaryVersion 	= TableVersion());
 
 	//==============================================================================
 	// modifiers of a table group based on alias, e.g. "Physics"
-	TableGroupKey saveNewTableGroup(
-	    const std::string&                   groupName,
-	    std::map<std::string, TableVersion>& groupMembers,
-	    const std::string& groupComment = TableViewColumnInfo::DATATYPE_COMMENT_DEFAULT,
-	    std::map<std::string /*table*/, std::string /*alias*/>* groupAliases = 0);
+	TableGroupKey 								saveNewTableGroup				(const std::string& groupName, 	std::map<std::string, TableVersion>& 					groupMembers, 
+																												const std::string& 										groupComment = TableViewColumnInfo::DATATYPE_COMMENT_DEFAULT,
+	    																										std::map<std::string /*table*/, std::string /*alias*/>* groupAliases = 0);
 
 	//==============================================================================
 	// public group cache handling
-	const GroupInfo&                        getGroupInfo(const std::string& groupName);
-	const std::map<std::string, GroupInfo>& getAllGroupInfo() { return allGroupInfo_; }
+	const GroupInfo&                        	getGroupInfo					(const std::string& groupName);
+	const std::map<std::string, GroupInfo>& 	getAllGroupInfo					(void) { return allGroupInfo_; }
 
-	void testXDAQContext();  // for debugging
+	void 										testXDAQContext					(void);  // for debugging
 
   private:
 	//==============================================================================
 	// group cache handling
-	void cacheGroupKey(const std::string& groupName, TableGroupKey key);
+	void 										cacheGroupKey					(const std::string& groupName, TableGroupKey key);
 
 	//==============================================================================
 	// private members
-	std::map<std::string, TableInfo> allTableInfo_;
-	std::map<std::string, GroupInfo> allGroupInfo_;
+	std::map<std::string, TableInfo> 								allTableInfo_;
+	std::map<std::string, GroupInfo> 								allGroupInfo_;
 };
 
+//==============================================================================
+///// TableEditStruct public class
 /////
 struct TableEditStruct
 {
@@ -171,6 +143,7 @@ struct TableEditStruct
 	}
 };  // end TableEditStruct declaration
 
+// clang-format on
 }  // namespace ots
 
 #endif

@@ -14,52 +14,51 @@
 
 using namespace ots;
 
-#define WEB_LOGIN_BKUP_DB_PATH "bkup/"
+// clang-format off
+#define WEB_LOGIN_BKUP_DB_PATH 				"bkup/"
 
-#define SECURITY_FILE_NAME \
-	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
+#define SECURITY_FILE_NAME 					std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/security.dat"
 
-#define USERS_ACTIVE_SESSIONS_FILE USERS_DB_PATH + "/activeSessions.sv"
+#define USERS_ACTIVE_SESSIONS_FILE 			USERS_DB_PATH + "/activeSessions.sv"
 
-#define HASHES_DB_FILE HASHES_DB_PATH + "/hashes.xml"
-#define USERS_DB_FILE USERS_DB_PATH + "/users.xml"
-#define USERS_GLOBAL_HISTORY_FILE "__global"
-#define USERS_LOGIN_HISTORY_FILETYPE "hist"
-#define USERS_PREFERENCES_FILETYPE "pref"
-#define SYSTEM_PREFERENCES_PREFIX "system.preset"
-#define USER_WITH_LOCK_FILE WEB_LOGIN_DB_PATH + "/user_with_lock.dat"
-#define IP_BLACKLIST_FILE WEB_LOGIN_DB_PATH + "/ip_generated_blacklist.dat"
-#define IP_REJECT_FILE WEB_LOGIN_DB_PATH + "/ip_reject.dat"
-#define IP_ACCEPT_FILE WEB_LOGIN_DB_PATH + "/ip_accept.dat"
+#define HASHES_DB_FILE 						HASHES_DB_PATH + "/hashes.xml"
+#define USERS_DB_FILE 						USERS_DB_PATH + "/users.xml"
+#define USERS_GLOBAL_HISTORY_FILE 			"__global"
+#define USERS_LOGIN_HISTORY_FILETYPE 		"hist"
+#define USERS_PREFERENCES_FILETYPE 			"pref"
+#define SYSTEM_PREFERENCES_PREFIX 			"system.preset"
+#define USER_WITH_LOCK_FILE 				WEB_LOGIN_DB_PATH + "/user_with_lock.dat"
+#define IP_BLACKLIST_FILE 					WEB_LOGIN_DB_PATH + "/ip_generated_blacklist.dat"
+#define IP_REJECT_FILE 						WEB_LOGIN_DB_PATH + "/ip_reject.dat"
+#define IP_ACCEPT_FILE 						WEB_LOGIN_DB_PATH + "/ip_accept.dat"
 
-#define HASHES_DB_GLOBAL_STRING "hashData"
-#define HASHES_DB_ENTRY_STRING "hashEntry"
-#define USERS_DB_GLOBAL_STRING "userData"
-#define USERS_DB_ENTRY_STRING "userEntry"
-#define USERS_DB_NEXT_UID_STRING "nextUserId"
+#define HASHES_DB_GLOBAL_STRING 			"hashData"
+#define HASHES_DB_ENTRY_STRING 				"hashEntry"
+#define USERS_DB_GLOBAL_STRING 				"userData"
+#define USERS_DB_ENTRY_STRING 				"userEntry"
+#define USERS_DB_NEXT_UID_STRING 			"nextUserId"
 
 // defines for user preferences
-#define PREF_XML_BGCOLOR_FIELD "pref_bgcolor"    // -background color
-#define PREF_XML_DBCOLOR_FIELD "pref_dbcolor"    // -dashboard color
-#define PREF_XML_WINCOLOR_FIELD "pref_wincolor"  // -window color
-#define PREF_XML_LAYOUT_FIELD "pref_layout"  // -3 defaults window layouts(and current)
-#define PREF_XML_SYSLAYOUT_FIELD "pref_syslayout"  // -2 defaults window layouts
-#define PREF_XML_PERMISSIONS_FIELD \
-	"desktop_user_permissions"  // 0-255 permissions value (255 is admin super user)
-#define PREF_XML_USERLOCK_FIELD \
-	"username_with_lock"                         // user with lock (to lockout others)
-#define PREF_XML_USERNAME_FIELD "pref_username"  // user with lock (to lockout others)
+#define PREF_XML_BGCOLOR_FIELD 				"pref_bgcolor"    	// -background color
+#define PREF_XML_DBCOLOR_FIELD 				"pref_dbcolor"    	// -dashboard color
+#define PREF_XML_WINCOLOR_FIELD 			"pref_wincolor"  	// -window color
+#define PREF_XML_LAYOUT_FIELD 				"pref_layout"  		// -3 defaults window layouts(and current)
+#define PREF_XML_SYSLAYOUT_FIELD 			"pref_syslayout"  	// -2 defaults window layouts
+#define PREF_XML_PERMISSIONS_FIELD 			"desktop_user_permissions"  // 0-255 permissions value (255 is admin super user)
+#define PREF_XML_USERLOCK_FIELD 			"username_with_lock"        // user with lock (to lockout others)
+#define PREF_XML_USERNAME_FIELD 			"pref_username"  	// user with lock (to lockout others)
+#define PREF_XML_OTS_OWNER_FIELD 			"ots_owner"  		// e.g. the experiment name
 
-#define PREF_XML_BGCOLOR_DEFAULT "rgb(0,76,151)"           // -background color
-#define PREF_XML_DBCOLOR_DEFAULT "rgb(0,40,85)"            // -dashboard color
-#define PREF_XML_WINCOLOR_DEFAULT "rgba(196,229,255,0.9)"  // -window color
-#define PREF_XML_LAYOUT_DEFAULT "0;0;0;0"  // 3 default window layouts(and current)
-#define PREF_XML_SYSLAYOUT_DEFAULT "0;0"   // 2 system default window layouts
+#define PREF_XML_BGCOLOR_DEFAULT 			"rgb(0,76,151)"     // -background color
+#define PREF_XML_DBCOLOR_DEFAULT 			"rgb(0,40,85)"      // -dashboard color
+#define PREF_XML_WINCOLOR_DEFAULT 			"rgba(196,229,255,0.9)"  	// -window color
+#define PREF_XML_LAYOUT_DEFAULT 			"0;0;0;0"  			// 3 default window layouts(and current)
+#define PREF_XML_SYSLAYOUT_DEFAULT 			"0;0"   			// 2 system default window layouts
 
-#define PREF_XML_ACCOUNTS_FIELD "users_accounts"  // user accounts field for super users
-#define PREF_XML_LOGIN_HISTORY_FIELD \
-	"login_entry"  // login history field for user login history data
+#define PREF_XML_ACCOUNTS_FIELD 			"users_accounts"  	// user accounts field for super users
+#define PREF_XML_LOGIN_HISTORY_FIELD 		"login_entry"  		// login history field for user login history data
 
+const std::string WebUsers::OTS_OWNER					  =	getenv("OTS_OWNER")?getenv("OTS_OWNER"):"";
 const std::string WebUsers::DEFAULT_ADMIN_USERNAME        = "admin";
 const std::string WebUsers::DEFAULT_ADMIN_DISPLAY_NAME    = "Administrator";
 const std::string WebUsers::DEFAULT_ADMIN_EMAIL           = "root@otsdaq.fnal.gov";
@@ -79,6 +78,8 @@ const std::string WebUsers::SECURITY_TYPE_DIGEST_ACCESS = "DigestAccessAuthentic
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "WebUsers"
+
+// clang-format on
 
 WebUsers::WebUsers()
 {
@@ -2655,14 +2656,17 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
 	if(fp)
 	{  // file exists, so do NOT show tooltip
 		if(temporarySilence)
-			fprintf(fp, "%ld", time(0) + 7 /*days*/ * 24 /*hours*/ * 60 * 60);  // mute for a week
+			fprintf(fp,
+			        "%ld",
+			        time(0) + 7 /*days*/ * 24 /*hours*/ * 60 * 60);  // mute for a week
 		else if(doNeverShow && username == WebUsers::DEFAULT_ADMIN_USERNAME)
 		{
 			// admin could be shared account, so max out at 30 days
 			fprintf(fp, "%ld", time(0) + 30 /*days*/ * 24 /*hours*/ * 60 * 60);
 
 			__COUT__ << "User '" << username
-			         << "' may be a shared account, so max silence duration for tooltips is 30 days. Silencing now."
+			         << "' may be a shared account, so max silence duration for tooltips "
+			            "is 30 days. Silencing now."
 			         << __E__;
 		}
 		else
@@ -2895,6 +2899,9 @@ void WebUsers::insertSettingsForUser(uint64_t         uid,
 
 	// add user name
 	xmldoc->addTextElementToData(PREF_XML_USERNAME_FIELD, getUsersUsername(uid));
+
+	// add ots owner name
+	xmldoc->addTextElementToData(PREF_XML_OTS_OWNER_FIELD, WebUsers::OTS_OWNER);
 
 }  // end insertSettingsForUser()
 

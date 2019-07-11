@@ -21,12 +21,12 @@ TemplateTable::~TemplateTable(void) {}
 //==============================================================================
 void TemplateTable::init(ConfigurationManager* configManager)
 {
-	//use isFirstAppInContext to only run once per context, for example to avoid
+	// use isFirstAppInContext to only run once per context, for example to avoid
 	//	generating files on local disk multiple times.
 	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
 
 	__COUTV__(isFirstAppInContext);
-	//if(!isFirstAppInContext) return;
+	// if(!isFirstAppInContext) return;
 
 	// do something to validate or refactor table
 	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;

@@ -361,6 +361,32 @@ void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)
 		    __FUNCTION__ /*function*/
 		);
 	}
+	catch(const cet::exception& e)
+	{
+		__SUP_SS__ << "Error was caught while configuring: " << e.explain_self() << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+		    "Transition Error" /*name*/,
+		    ss.str() /* message*/,
+		    "DataLoggerApp::transitionConfiguring" /*module*/,
+		    __LINE__ /*line*/,
+		    __FUNCTION__ /*function*/
+		);
+	}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while configuring." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+		    "Transition Error" /*name*/,
+		    ss.str() /* message*/,
+		    "DataLoggerApp::transitionConfiguring" /*module*/,
+		    __LINE__ /*line*/,
+		    __FUNCTION__ /*function*/
+		);
+	}
 
 	__SUP_COUT__ << "Configured." << __E__;
 }  // end transitionConfiguring()

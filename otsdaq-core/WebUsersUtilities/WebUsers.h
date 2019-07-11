@@ -29,6 +29,7 @@ class HttpXmlDocument;
 //	and permissions.
 class WebUsers
 {
+	// clang-format off
   public:
 	WebUsers();
 
@@ -52,6 +53,8 @@ class WebUsers
 		PERMISSION_LEVEL_NOVICE   = 1,
 		PERMISSION_LEVEL_INACTIVE = 0,
 	};
+
+	static const std::string OTS_OWNER; //defined by environment variable, e.g. experiment name
 
 	static const std::string DEFAULT_ADMIN_USERNAME;
 	static const std::string DEFAULT_ADMIN_DISPLAY_NAME;
@@ -484,7 +487,7 @@ class WebUsers
 	};
 	std::map<std::string /*ip*/, uint32_t /*errorCount*/> ipBlacklistCounts_;
 };
-
+// clang-format on
 }  // namespace ots
 
 #endif

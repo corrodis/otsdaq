@@ -15,8 +15,10 @@ ots::SlowControlsVInterface* ots::makeSlowControls(
 
 	return basicPluginInterfaceFactory.makePlugin<ots::SlowControlsVInterface*,
 	                                              const std::string&,
+	                                              const std::string&,
 	                                              const ots::ConfigurationTree&,
 	                                              const std::string&>(
+	    slowControlsPluginName,
 	    slowControlsPluginName,
 	    slowControlsUID,
 	    configurationTree,

@@ -258,6 +258,86 @@ bool StringMacros::isNumber(const std::string& s)
 }  // end isNumber()
 
 //==============================================================================
+// getNumberType ~~
+//	returns string of number type: "unsigned long long", "double"
+//	or else "nan" for not-a-number
+//
+//	Numbers can be hex ("0x.."), binary("b..."), or base10.
+std::string StringMacros::getNumberType(const std::string& s)
+{
+	// extract set of potential numbers and operators
+	std::vector<std::string> numbers;
+	std::vector<char>        ops;
+
+	bool hasDecimal = false;
+
+	StringMacros::getVectorFromString(
+	    s,
+	    numbers,
+	    /*delimiter*/ std::set<char>({'+', '-', '*', '/'}),
+	    /*whitespace*/ std::set<char>({' ', '\t', '\n', '\r'}),
+	    &ops);
+
+	//__COUTV__(StringMacros::vectorToString(numbers));
+	//__COUTV__(StringMacros::vectorToString(ops));
+
+	for(const auto& number : numbers)
+	{
+		if(number.size() == 0)
+			continue;  // skip empty numbers
+
+		if(number.find("0x") == 0)  // indicates hex
+		{
+			//__COUT__ << "0x found" << std::endl;
+			for(unsigned int i = 2; i < number.size(); ++i)
+			{
+				if(!((number[i] >= '0' && number[i] <= '9') ||
+				     (number[i] >= 'A' && number[i] <= 'F') ||
+				     (number[i] >= 'a' && number[i] <= 'f')))
+				{
+					//__COUT__ << "prob " << number[i] << std::endl;
+					return "nan";
+				}
+			}
+			// return std::regex_match(number.substr(2), std::regex("^[0-90-9a-fA-F]+"));
+		}
+		else if(number[0] == 'b')  // indicates binary
+		{
+			//__COUT__ << "b found" << std::endl;
+
+			for(unsigned int i = 1; i < number.size(); ++i)
+			{
+				if(!((number[i] >= '0' && number[i] <= '1')))
+				{
+					//__COUT__ << "prob " << number[i] << std::endl;
+					return "nan";
+				}
+			}
+		}
+		else
+		{
+			//__COUT__ << "base 10 " << std::endl;
+			for(unsigned int i = 0; i < number.size(); ++i)
+				if(!((number[i] >= '0' && number[i] <= '9') || number[i] == '.' ||
+				     number[i] == '+' || number[i] == '-'))
+					return "nan";
+				else if(number[i] == '.')
+					hasDecimal = true;
+			// Note: std::regex crashes in unresolvable ways (says Ryan.. also, stop using
+			// libraries)  return std::regex_match(s,
+			// std::regex("^(\\-|\\+)?[0-9]*(\\.[0-9]+)?"));
+		}
+	}
+
+	//__COUT__ << "yes " << std::endl;
+
+	// all numbers are numbers
+	if(hasDecimal)
+		return "double";
+	return "unsigned long long";
+}  // end getNumberType()
+
+//==============================================================================
 // getTimestampString ~~
 //	returns ots style timestamp string
 //	of known fixed size: Thu Aug 23 14:55:02 2001 CST
@@ -454,6 +534,30 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 }  // end getVectorFromString()
 
 //==============================================================================
+// getVectorFromString
+//	extracts the list of elements from string that uses a delimiter
+//		ignoring whitespace
+//	optionally returns the list of delimiters encountered, which may be useful
+//		for extracting which operator was used.
+//
+//
+//	Note: lists are returned as vectors
+//	Note: the size() of delimiters will be one less than the size() of the returned values
+//		unless there is a leading delimiter, in which case vectors will have the same
+// size.
+std::vector<std::string> StringMacros::getVectorFromString(
+		const std::string&        inputString,
+		const std::set<char>&     delimiter,
+		const std::set<char>&     whitespace,
+		std::vector<char>*        listOfDelimiters)
+{
+	std::vector<std::string> listToReturn;
+
+	StringMacros::getVectorFromString(inputString,listToReturn,delimiter,whitespace,listOfDelimiters);
+	return listToReturn;
+} // end getVectorFromString()
+
+//==============================================================================
 // getMapFromString
 //	extracts the map of name-value pairs from string that uses two s
 //		ignoring whitespace
@@ -639,6 +743,7 @@ std::string StringMacros::exec(const char* cmd)
 //	https://gist.github.com/fmela/591333/c64f4eb86037bb237862a8283df70cdfc25f01d3
 #include <cxxabi.h>    //for abi::__cxa_demangle
 #include <execinfo.h>  //for back trace of stack
+//#include "TUnixSystem.h"
 std::string StringMacros::stackTrace()
 {
 	__SS__ << "ots::stackTrace:\n";
@@ -721,6 +826,9 @@ std::string StringMacros::stackTrace()
 	ss << std::endl;
 
 	free(messages);
+
+	// call ROOT's stack trace to get line numbers of ALL threads
+	// gSystem->StackTrace();
 
 	return ss.str();
 }  // end stackTrace

@@ -1,8 +1,8 @@
 ###########################################################
 #
 # artdaq aggregator fcl configuration file produced by otsdaq.
-# 	Creation timestamp: Tue Feb 26 09:14:15 2019 CST
-# 	Original filename: /home/rrivera/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/aggregator-aggregator0.fcl
+# 	Creation timestamp: Thu Jul 11 09:30:53 2019 CDT
+# 	Original filename: /home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/aggregator-aggregator0.fcl
 #	otsdaq-ARTDAQ Aggregator UID: aggregator0
 #
 ###########################################################
@@ -10,7 +10,6 @@
 
 services: {
 	scheduler: {
-		fileMode: NOMERGE
 		errorOnFailureToPut: false
 	}
 
@@ -37,7 +36,8 @@ daq: {
 			s4: {
 				transferPluginType: MPI
 				source_rank: 501
-				max_fragment_size_words: 2097152
+				max_fragment_size_bytes: 0
+				max_fragment_size_words: 0
 				host_map: [
 					{
 						rank: 501
@@ -100,7 +100,7 @@ source: {
 outputs: {
 	normalOutput: {
 		module_type: RootOutput
-		fileName: "/home/rrivera/ots/srcs/otsdaq_demo/NoGitData/OutputData/artdaqdemo_r%r_s%s_%#.root"
+		fileName: "/home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/OutputData/artdaqdemo_r%r_s%s_%#.root"
 	}
 
 }

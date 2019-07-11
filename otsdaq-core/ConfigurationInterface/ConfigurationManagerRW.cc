@@ -622,7 +622,8 @@ TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
 //	return null pointer on failure, on success return table pointer.
 TableBase* ConfigurationManagerRW::getVersionedTableByName(const std::string& tableName,
                                                            TableVersion       version,
-                                                           bool looseColumnMatching)
+                                                           bool 		      looseColumnMatching /* =false */,
+														   std::string*       accumulatedErrors /* =0 */)
 {
 	auto it = nameToTableMap_.find(tableName);
 	if(it == nameToTableMap_.end())
@@ -642,7 +643,8 @@ TableBase* ConfigurationManagerRW::getVersionedTableByName(const std::string& ta
 	                   false,  // fill w/version
 	                   version,
 	                   false,  // do not reset
-	                   looseColumnMatching);
+	                   looseColumnMatching,
+					   accumulatedErrors);
 	return table;
 }
 

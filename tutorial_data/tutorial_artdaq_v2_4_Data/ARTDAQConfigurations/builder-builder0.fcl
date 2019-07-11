@@ -1,8 +1,8 @@
 ###########################################################
 #
 # artdaq builder fcl configuration file produced by otsdaq.
-# 	Creation timestamp: Tue Feb 26 09:14:15 2019 CST
-# 	Original filename: /home/rrivera/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/builder-builder0.fcl
+# 	Creation timestamp: Thu Jul 11 09:30:53 2019 CDT
+# 	Original filename: /home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/builder-builder0.fcl
 #	otsdaq-ARTDAQ Builder UID: builder0
 #
 ###########################################################
@@ -10,30 +10,12 @@
 
 services: {
 	scheduler: {
-		fileMode: NOMERGE
 		errorOnFailureToPut: false
 	}
 
 	NetMonTransportServiceInterface: {
 		service_provider: NetMonTransportService
 		destinations: {
-			d4: {
-				transferPluginType: MPI
-				destination_rank: 502
-				max_fragment_size_words: 2097152
-				host_map: [
-					{
-						rank: 502
-						host: "correlator2.fnal.gov"
-						portOffset: 0
-					},
-					{
-						rank: 501
-						host: "correlator2.fnal.gov"
-						portOffset: 0
-					}
-				]
-			}
 		}
 
 	}
@@ -42,6 +24,9 @@ services: {
 
 daq: {
 	event_builder: {
+		max_fragment_size_bytes: 0
+		max_fragment_size_words: 0
+		buffer_count: 0
 		expected_fragments_per_event: 4
 		use_art: true
 		print_event_store_stats: true
@@ -54,7 +39,8 @@ daq: {
 			s1: {
 				transferPluginType: MPI
 				source_rank: 500
-				max_fragment_size_words: 2097152
+				max_fragment_size_bytes: 0
+				max_fragment_size_words: 0
 				host_map: [
 					{
 						rank: 500

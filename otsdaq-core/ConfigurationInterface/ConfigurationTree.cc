@@ -1568,12 +1568,12 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 
 				// must get column info differently for UID link column
 
-				//add link fields and recursively traverse for fields
+				// add link fields and recursively traverse for fields
 				if(!i)  // first uid record
 				{
 					// check field accept filter list
 					found = fieldAcceptList.size() ? false
-							: true;  // accept if no filter list
+					                               : true;  // accept if no filter list
 					for(const auto& fieldFilter : fieldAcceptList)
 						if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
 						{
@@ -1598,43 +1598,43 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 					// UIDs in same table)
 					if(found)
 					{
-						std::pair<unsigned int /*link col*/,
-						unsigned int /*link id col*/> linkPair;
+						std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>
+						     linkPair;
 						bool isGroupLink;
-						tableView_->getChildLink(tableView_->findCol(fieldNode.first),
-								isGroupLink,
-								linkPair);
+						tableView_->getChildLink(
+						    tableView_->findCol(fieldNode.first), isGroupLink, linkPair);
 
 						// add both link columns
 
 						fieldCandidateList.push_back(ConfigurationTree::RecordField(
-								table_->getTableName(),
-								recordList[i],
-								tableView_->getColumnInfo(linkPair.first).getName(),
-								"",  // relative path, not including columnName_
-								&tableView_->getColumnInfo(linkPair.first)));
+						    table_->getTableName(),
+						    recordList[i],
+						    tableView_->getColumnInfo(linkPair.first).getName(),
+						    "",  // relative path, not including columnName_
+						    &tableView_->getColumnInfo(linkPair.first)));
 						fieldCount.push_back(-1);  // mark guaranteed field
 
 						fieldCandidateList.push_back(ConfigurationTree::RecordField(
-								table_->getTableName(),
-								recordList[i],
-								tableView_->getColumnInfo(linkPair.second).getName(),
-								"",  // relative path, not including columnName_
-								&tableView_->getColumnInfo(linkPair.second)));
+						    table_->getTableName(),
+						    recordList[i],
+						    tableView_->getColumnInfo(linkPair.second).getName(),
+						    "",  // relative path, not including columnName_
+						    &tableView_->getColumnInfo(linkPair.second)));
 						fieldCount.push_back(-1);  // mark guaranteed field
 					}
 				}
 
-				//recursive field traversal is (currently) a bit different from first level in that it does not add the link fields
+				// recursive field traversal is (currently) a bit different from first
+				// level in that it does not add the link fields
 				if(!fieldNode.second.isDisconnected())
 					fieldNode.second.recursiveGetCommonFields(
-						fieldCandidateList,
-						fieldCount,
-						fieldAcceptList,
-						fieldRejectList,
-						depth,
-						fieldNode.first + "/",  // relativePathBase
-						!i                      // launch inFirstRecord (or not) depth search
+					    fieldCandidateList,
+					    fieldCount,
+					    fieldAcceptList,
+					    fieldRejectList,
+					    depth,
+					    fieldNode.first + "/",  // relativePathBase
+					    !i  // launch inFirstRecord (or not) depth search
 					);
 			}  // end unique link handling
 		}
@@ -1742,7 +1742,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 			if(fieldCandidateList[i].tableName_ == "")  // then erase
 			{
 				//				__COUT__ << "Erasing " <<
-				//fieldCandidateList[i].relativePath_
+				// fieldCandidateList[i].relativePath_
 				//<< 						fieldCandidateList[i].columnName_ << __E__;
 				fieldCandidateList.erase(fieldCandidateList.begin() + i);
 				--i;  // rewind to look at next after deleted
