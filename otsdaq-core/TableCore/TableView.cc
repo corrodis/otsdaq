@@ -708,9 +708,28 @@ void TableView::getValue(std::string& value,
 		__SS_THROW__;
 	}
 
+	if(columnsInfo_[col].getType() ==
+			            TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
+						theDataView_[row][col] == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+	{
+		//if type string, fixed choice and DEFAULT, then return string of first choice
+
+		std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
+
+		// consider arbitrary bool
+		bool skipOne = (choices.size() && choices[0].find("arbitraryBool=") == 0);
+		size_t index = (skipOne?1:0);
+		if(choices.size() > index)
+		{
+			value = validateValueForColumn(
+					choices[index], col, doConvertEnvironmentVariables);
+			return; //handled value from fixed choices
+		}
+	}
+
 	value = validateValueForColumn(
-	    theDataView_[row][col], col, doConvertEnvironmentVariables);
-}
+				theDataView_[row][col], col, doConvertEnvironmentVariables);
+} //end getValue()
 
 //==============================================================================
 // validateValueForColumn
