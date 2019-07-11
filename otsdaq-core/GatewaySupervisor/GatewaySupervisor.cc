@@ -118,6 +118,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	// xoap::bind(this, &GatewaySupervisor::supervisorHandleAsyncError,
 	// "FERunningError", XDAQ_NS_URI);
 
+
 	init();
 
 	// exit(1); //keep for syntax to exit ots
@@ -2720,6 +2721,16 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	                                   CgiDataUtilities::postData(cgiIn, "CookieCode"));
 
 	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
+	
+	//std::string cookieCode = CgiDataUtilities::postData(cgiIn, "CookieCode");
+	//uint64_t    uid;
+
+	//if(!theWebUsers_.cookieCodeIsActiveForRequest(
+	//       cookieCode, 0 /*userPermissions*/, &uid, "0" /*dummy ip*/, false /*refresh*/))
+	//{
+	//	*out << cookieCode;
+	//	return;
+	//}
 
 	if(!theWebUsers_.xmlRequestOnGateway(cgiIn, out, &xmlOut, userInfo))
 		return;  // access failed
@@ -2742,6 +2753,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	// getDesktopIcons
 
 	// resetUserTooltips
+	// silenceAllUserTooltips
 
 	// gatewayLaunchOTS
 	// gatewayLaunchWiz
@@ -3420,6 +3432,14 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		else if(requestType == "resetUserTooltips")
 		{
 			WebUsers::resetAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_));
+		}
+		else if(requestType == "silenceUserTooltips")
+		{
+			
+			WebUsers::silenceAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_),
+		                                  WebUsers::SILENCE_ALL_TOOLTIPS,
+		                                  "",
+		                                  "");
 		}
 		else
 		{
