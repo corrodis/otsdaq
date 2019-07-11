@@ -32,6 +32,7 @@ class WebUsers
   public:
 	WebUsers();
 
+
 	enum
 	{
 		SESSION_ID_LENGTH     = 512,
@@ -207,6 +208,7 @@ class WebUsers
 	                         WebUsers::RequestUserInfo& userInfo);
 
   public:
+
 	// used by gateway and other supervisors to verify requests consistently
 	static void initializeRequestUserInfo(cgicc::Cgicc&              cgi,
 	                                      WebUsers::RequestUserInfo& userInfo);
@@ -306,7 +308,9 @@ class WebUsers
 	std::string getSecurity(void);
 
 	static void deleteUserData(void);
+
 	static void resetAllUserTooltips(const std::string& userNeedle = "*");
+	static void silenceAllUserTooltips(const std::string& username);
 
 	static void NACDisplayThread(const std::string& nac, const std::string& user);
 
