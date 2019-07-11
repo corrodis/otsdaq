@@ -1,8 +1,8 @@
 ###########################################################
 #
 # artdaq reader fcl configuration file produced by otsdaq.
-# 	Creation timestamp: Tue Feb 26 09:14:15 2019 CST
-# 	Original filename: /home/rrivera/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/boardReader-reader0.fcl
+# 	Creation timestamp: Thu Jul 11 09:30:53 2019 CDT
+# 	Original filename: /home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/boardReader-reader0.fcl
 #	otsdaq-ARTDAQ Reader UID: reader0
 #
 ###########################################################
@@ -47,7 +47,8 @@ daq: {
 			d2: {
 				transferPluginType: MPI
 				destination_rank: 501
-				max_fragment_size_words: 2097152
+				max_fragment_size_bytes: 0
+				max_fragment_size_words: 0
 				host_map: [
 					{
 						rank: 501

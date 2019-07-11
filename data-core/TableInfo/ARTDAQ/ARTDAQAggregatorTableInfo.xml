@@ -16,7 +16,7 @@
 				<COLUMN Type="ChildLinkUID-physics" 	 Name="physicsLinkUID" 	 StorageName="PHYSICS_LINK_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-source" 	 Name="sourceLink" 	 StorageName="SOURCE_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQAggregatorSourceTable"/>
 				<COLUMN Type="ChildLinkUID-source" 	 Name="sourceLinkUID" 	 StorageName="SOURCE_LINK_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="ChildLink-aggregatorProcessName" 	 Name="ARTDAQGlobalTableForProcessNameLink" 	 StorageName="ARTDAQ_GLOBAL_TABLE_FOR_PROCESS_NAME_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,ARTDAQGlobalTable"/>
+				<COLUMN Type="ChildLink-aggregatorProcessName" 	 Name="ARTDAQGlobalTableForProcessNameLink" 	 StorageName="ARTDAQ_GLOBAL_TABLE_FOR_PROCESS_NAME_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQGlobalTable"/>
 				<COLUMN Type="ChildLinkUID-aggregatorProcessName" 	 Name="ARTDAQGlobalTableForProcessNameLinkUID" 	 StorageName="ARTDAQ_GLOBAL_TABLE_FOR_PROCESS_NAME_LINK_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
