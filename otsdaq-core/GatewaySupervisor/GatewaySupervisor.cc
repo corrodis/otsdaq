@@ -3434,12 +3434,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			WebUsers::resetAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_));
 		}
 		else if(requestType == "silenceUserTooltips")
-		{
-			
-			WebUsers::silenceAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_),
-		                                  WebUsers::SILENCE_ALL_TOOLTIPS,
-		                                  "",
-		                                  "");
+		{			
+		        WebUsers::silenceAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_));
 		}
 		else
 		{

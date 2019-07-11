@@ -32,6 +32,8 @@ using namespace ots;
 #define IP_REJECT_FILE 						WEB_LOGIN_DB_PATH + "/ip_reject.dat"
 #define IP_ACCEPT_FILE 						WEB_LOGIN_DB_PATH + "/ip_accept.dat"
 
+#define SILENCE_ALL_TOOLTIPS_FILENAME                   "silenceTooltips"
+
 #define HASHES_DB_GLOBAL_STRING 			"hashData"
 #define HASHES_DB_ENTRY_STRING 				"hashEntry"
 #define USERS_DB_GLOBAL_STRING 				"userData"
@@ -2706,7 +2708,7 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 
 	// if the silence file exists, silence all tooltips
 	std::string silencefilename = getTooltipFilename(username, 
-													SILENCE_ALL_TOOLTIPS, 
+													SILENCE_ALL_TOOLTIPS_FILENAME, 
 													"", 
 													"");
 	//__COUTV__(silencefilename);
@@ -2762,7 +2764,7 @@ void WebUsers::resetAllUserTooltips(const std::string& userNeedle)
 // creates a file
 void WebUsers::silenceAllUserTooltips(const std::string& username)
 {
-        std::string silencefilename = getTooltipFilename(username, "", "", ""); //srcFile, srcFunc, srcId);
+        std::string silencefilename = getTooltipFilename(username, SILENCE_ALL_TOOLTIPS_FILENAME, "", ""); //srcFile, srcFunc, srcId);
 	FILE*       silencefp       = fopen(silencefilename.c_str(), "w");
 	if (silencefp != NULL)
 	{
