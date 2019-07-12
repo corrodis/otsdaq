@@ -3,7 +3,7 @@
 using namespace ots;
 
 //========================================================================================================================
-// binaryStringToHexString
+// binaryToHexString
 //	convert a data buffer of <len> bytes to a hex string 2*len characters long
 //	Note: no preamble is applied by default (but "0x" could be nice)
 //
@@ -25,16 +25,15 @@ std::string BinaryStringMacros::binaryStringToHexString(const void*        binar
 		dest += hexstr;
 	}
 	return resultPreamble + dest;
-}  // end binaryStringToHexString
+}  // end binaryToHexString
 
 //========================================================================================================================
 // binaryNumberToHexString
 //	convert a data buffer string a hex string
 //		8 bytes at a time with the least significant byte last.
-//	Note: no preamble is applied by default (but "0x" could be nice)
 std::string BinaryStringMacros::binaryNumberToHexString(const std::string& binaryBuffer,
-                                                       const std::string& resultPreamble,
-                                                       const std::string& resultDelimiter)
+                                                       const std::string& resultPreamble /*"0x"*/,
+                                                       const std::string& resultDelimiter /*" "*/)
 {
 	return binaryNumberToHexString(&binaryBuffer[0],binaryBuffer.size(),
 		resultPreamble,resultDelimiter);
@@ -44,11 +43,10 @@ std::string BinaryStringMacros::binaryNumberToHexString(const std::string& binar
 // binaryNumberToHexString
 //	convert a data buffer string a hex string
 //		8 bytes at a time with the least significant byte last.
-//	Note: no preamble is applied by default (but "0x" could be nice)
 std::string BinaryStringMacros::binaryNumberToHexString(const void*        binaryBuffer,
                                                   	   unsigned int       numberOfBytes,
-                                                       const std::string& resultPreamble,
-                                                       const std::string& resultDelimiter)
+                                                       const std::string& resultPreamble /*"0x"*/,
+                                                       const std::string& resultDelimiter /*" "*/)
 {
 	std::string dest;
 	dest.reserve(numberOfBytes * 2 +
@@ -184,12 +182,12 @@ void BinaryStringMacros::extractValueFromBinaryString(const void*  binaryBufferV
 		}
 
 		//		__COUT__ << "value: " <<
-		//						BinaryStringMacros::binaryStringToHexString(
+		//						BinaryStringMacros::binaryToHexString(
 		//								(char *)value,valueBytes,"0x"," ") << __E__;
 	}
 
 	//	__COUT__ << "value: " <<
-	//					BinaryStringMacros::binaryStringToHexString(
+	//					BinaryStringMacros::binaryToHexString(
 	//							(char *)value,valueBytes,"0x"," ") << __E__;
 
 }  // end extractValueFromBinaryString()

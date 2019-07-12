@@ -33,6 +33,12 @@ struct BinaryStringMacros
 		unsigned int       							numberOfBytes,
 		const std::string& 							resultPreamble  = "",
 		const std::string& 							resultDelimiter = "");
+		
+	template<class T>
+	static std::string 	binaryNumberToHexString		(
+		const T& 									binaryBuffer,
+		const std::string& 							resultPreamble  = "0x",
+		const std::string& 							resultDelimiter = " ");
 	static std::string 	binaryNumberToHexString		(
 		const std::string& 							binaryBuffer,
 		const std::string& 							resultPreamble  = "0x",
