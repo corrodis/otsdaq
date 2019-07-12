@@ -152,10 +152,10 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 				else
 					notFirst = true;
 				icon->windowContentURL_ +=
-				    ConfigurationManager::encodeURIComponent(
+				    StringMacros::encodeURIComponent(
 				        param.second.getNode(COL_PARAMETER_KEY).getValue<std::string>()) +
 				    "=" +
-				    ConfigurationManager::encodeURIComponent(
+				    StringMacros::encodeURIComponent(
 				        param.second.getNode(COL_PARAMETER_VALUE)
 				            .getValue<std::string>());
 			}
@@ -244,11 +244,11 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 	//					fs << '&';
 	//				else
 	//					notFirst = true;
-	//				fs << ConfigurationManager::encodeURIComponent(
+	//				fs << StringMacros::encodeURIComponent(
 	//						param.second.getNode(COL_PARAMETER_KEY).getValue<std::string>())
 	//<<
 	//"="
-	//<< 								ConfigurationManager::encodeURIComponent(
+	//<< 								StringMacros::encodeURIComponent(
 	//										param.second.getNode(COL_PARAMETER_VALUE).getValue<std::string>());
 	//			}
 	//		}

@@ -3,7 +3,7 @@
 using namespace ots;
 
 //========================================================================================================================
-// binaryToHexString
+// binaryStringToHexString
 //	convert a data buffer of <len> bytes to a hex string 2*len characters long
 //	Note: no preamble is applied by default (but "0x" could be nice)
 //
@@ -25,7 +25,7 @@ std::string BinaryStringMacros::binaryStringToHexString(const void*        binar
 		dest += hexstr;
 	}
 	return resultPreamble + dest;
-}  // end binaryToHexString
+}  // end binaryStringToHexString
 
 //========================================================================================================================
 // binaryNumberToHexString
@@ -184,12 +184,12 @@ void BinaryStringMacros::extractValueFromBinaryString(const void*  binaryBufferV
 		}
 
 		//		__COUT__ << "value: " <<
-		//						BinaryStringMacros::binaryToHexString(
+		//						BinaryStringMacros::binaryStringToHexString(
 		//								(char *)value,valueBytes,"0x"," ") << __E__;
 	}
 
 	//	__COUT__ << "value: " <<
-	//					BinaryStringMacros::binaryToHexString(
+	//					BinaryStringMacros::binaryStringToHexString(
 	//							(char *)value,valueBytes,"0x"," ") << __E__;
 
 }  // end extractValueFromBinaryString()

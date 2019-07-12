@@ -2074,20 +2074,21 @@ std::shared_ptr<TableGroupKey> ConfigurationManager::makeTheTableGroupKey(
 }
 
 //==============================================================================
-std::string ConfigurationManager::encodeURIComponent(const std::string& sourceStr)
-{
-	std::string retStr = "";
-	char        encodeStr[4];
-	for(const auto& c : sourceStr)
-		if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
-			retStr += c;
-		else
-		{
-			sprintf(encodeStr, "%%%2.2X", c);
-			retStr += encodeStr;
-		}
-	return retStr;
-}
+////moved to StringMacros
+//std::string StringMacros::encodeURIComponent(const std::string& sourceStr)
+//{
+//	std::string retStr = "";
+//	char        encodeStr[4];
+//	for(const auto& c : sourceStr)
+//		if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+//			retStr += c;
+//		else
+//		{
+//			sprintf(encodeStr, "%%%2.2X", c);
+//			retStr += encodeStr;
+//		}
+//	return retStr;
+//}
 
 //==============================================================================
 const std::set<std::string>& ConfigurationManager::getContextMemberNames()

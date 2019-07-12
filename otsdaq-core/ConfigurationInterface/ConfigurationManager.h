@@ -63,7 +63,7 @@ class ConfigurationManager
 	static const std::set<std::string>& getBackboneMemberNames		(void);
 	static const std::set<std::string>& getIterateMemberNames		(void);
 
-	static std::string        			encodeURIComponent			(const std::string& sourceStr);
+	//static std::string        			encodeURIComponent			(const std::string& sourceStr);
 	static const std::string& 			convertGroupTypeIdToName	(int groupTypeId);
 	static int                			getTypeOfGroup				(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
 	static const std::string& 			getTypeNameOfGroup			(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);

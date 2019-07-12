@@ -22,8 +22,8 @@ struct BinaryStringMacros
   public:
 	// Here is the list of static helper functions:
 	//
-	//		binaryToHexString
-	//		binaryTo8ByteHexString
+	//		binaryStringToHexString
+	//		binaryNumberToHexString
 	//
 
 
