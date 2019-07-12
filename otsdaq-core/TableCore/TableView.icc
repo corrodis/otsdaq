@@ -23,7 +23,7 @@ unsigned int TableView::findRowInGroup(unsigned int       col,
 
 //==============================================================================
 // Philosophy: force type validation by passing value to fill by reference..
-//	don't allow string to be returned.. (at least not easily)
+//	do not allow string to be returned.. (at least not easily)
 // Since there is no environmental variable that can just be a number they will all be
 // converted no matter what.
 template<class T>

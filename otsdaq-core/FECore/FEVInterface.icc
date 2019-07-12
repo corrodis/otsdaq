@@ -127,12 +127,13 @@ T getFEMacroConstArgumentValue(FEVInterface::frontEndMacroConstArgs_t args,
 	const std::string& data = FEVInterface::getFEMacroConstArgument(args, argName);
 
 	T retValue;
+	
+	__COUT__ << StringMacros::demangleTypeName(typeid(retValue).name()) << __E__;
 
 	if(!StringMacros::getNumber(data, retValue))
 	{
 		__SS__ << "Error extracting value for input argument named '" << argName
-		       << ".' The value '" << data << "' is not a number!" << std::endl;
-		__COUT__ << "\n" << ss.str();
+		       << ".' The value '" << data << "' is not a number!" << std::endl;		
 		__SS_THROW__;
 	}
 

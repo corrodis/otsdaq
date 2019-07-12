@@ -69,9 +69,13 @@ T& StringMacros::getWildCardMatchFromMap(const std::string&        needle,
 
 //==============================================================================
 // static template function
+//	for all numbers, but not bools (bools has a specialized template definition)
+//	return false if string is not a number
 template<class T>
 bool StringMacros::getNumber(const std::string& s, T& retValue)
-{
+{	
+	//__COUTV__(s);
+
 	// extract set of potential numbers and operators
 	std::vector<std::string> numbers;
 	std::vector<char>        ops;
@@ -103,7 +107,9 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 		//	for all types allow base10
 
 		verified = false;
-
+		
+		//__COUTV__(number);
+		
 		// check integer types
 		if(typeid(unsigned int) == typeid(retValue) || typeid(int) == typeid(retValue) ||
 		   typeid(unsigned long long) == typeid(retValue) ||
@@ -111,7 +117,8 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 		   typeid(unsigned long) == typeid(retValue) ||
 		   typeid(long) == typeid(retValue) ||
 		   typeid(unsigned short) == typeid(retValue) ||
-		   typeid(short) == typeid(retValue) || typeid(uint8_t) == typeid(retValue))
+		   typeid(short) == typeid(retValue) || 
+		   typeid(uint8_t) == typeid(retValue))
 		{
 			if(number.find("0x") == 0)  // indicates hex
 			{
@@ -164,7 +171,8 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 		        typeid(unsigned long) == typeid(retValue) ||
 		        typeid(long) == typeid(retValue) ||
 		        typeid(unsigned short) == typeid(retValue) ||
-		        typeid(short) == typeid(retValue) || typeid(uint8_t) == typeid(retValue))
+		        typeid(short) == typeid(retValue) || 
+		        typeid(uint8_t) == typeid(retValue))
 		{
 			if(number.size() > 2 && number[1] == 'x')  // assume hex value
 				tmpValue = (T)strtol(number.c_str(), 0, 16);
@@ -240,11 +248,7 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 	return true;  // number was valid and is passed by reference in retValue
 }  // end static getNumber<T>()
 
-template<>
-inline bool StringMacros::getNumber(const std::string& s, bool& retValue)
-{
-	return false;
-}
+
 
 //==============================================================================
 // validateValueForDefaultStringDataType

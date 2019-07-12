@@ -231,7 +231,7 @@ void FESlowControlsChannel::print(std::ostream& out) const
 	    << "sizeOfDataTypeBits_: " << sizeOfDataTypeBits_ << __E__;
 	out << "\t"
 	    << "universalAddress_: "
-	    << BinaryStringMacros::binaryTo8ByteHexString(universalAddress_, "0x", " ")
+	    << BinaryStringMacros::binaryNumberToHexString(universalAddress_, "0x", " ")
 	    << __E__;
 	out << "\t"
 	    << "universalDataBitOffset_: " << universalDataBitOffset_ << __E__;
@@ -345,7 +345,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString,
 		buffer[i] = 0;
 
 	__COUT__ << "Resulting Number Buffer: "
-	         << BinaryStringMacros::binaryTo8ByteHexString(buffer, "0x", " ") << __E__;
+	         << BinaryStringMacros::binaryNumberToHexString(buffer, "0x", " ") << __E__;
 	return;
 
 	// clear buffer
@@ -858,7 +858,7 @@ void FESlowControlsChannel::extractSample(const std::string& universalReadValue)
 		ss << __E__;
 		__COUT__ << "\n" << ss.str();
 		__COUT__ << "Universal Read: "
-		         << BinaryStringMacros::binaryTo8ByteHexString(
+		         << BinaryStringMacros::binaryNumberToHexString(
 		                universalReadValue, "0x", " ")
 		         << __E__;
 	}
@@ -871,7 +871,7 @@ void FESlowControlsChannel::extractSample(const std::string& universalReadValue)
 			sizeOfDataTypeBits_ << __E__;
 
 	__COUT__ << "sample: "
-	         << BinaryStringMacros::binaryTo8ByteHexString(sample_, "0x", " ") << __E__;
+	         << BinaryStringMacros::binaryNumberToHexString(sample_, "0x", " ") << __E__;
 
 }  // end extractSample()
 
