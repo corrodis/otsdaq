@@ -114,11 +114,31 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(
 
 	__CFG_COUT__ << fileFclString << __E__;
 
-	fhicl::make_ParameterSet(fileFclString, fhiclConfiguration_);
+		
+	try
+	{
+		fhicl::make_ParameterSet(fileFclString, fhiclConfiguration_);
+	}
+	catch(const cet::coded_exception<fhicl::error, &fhicl::detail::translate>& e)
+	{
+		__CFG_SS__ << "Error was caught while configuring: " << e.what() << __E__;
+		__CFG_SS_THROW__;
+	}
+	catch(const cet::exception& e)
+	{
+		__CFG_SS__ << "Error was caught while configuring: " << e.explain_self() << __E__;
+		__CFG_SS_THROW__;
+	}
+	catch(...)
+	{
+		__CFG_SS__ << "Unknown error was caught while configuring." << __E__;
+		__CFG_SS_THROW__;
+	}
 
 	// fhicl::make_ParameterSet(theXDAQContextConfigTree.getNode(configurationPath).getNode("ConfigurationString").getValue<std::string>(),
 	// fhiclConfiguration_);
-}
+	
+} //end constructor()
 
 //========================================================================================================================
 // ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string interfaceID, MPI_Comm
