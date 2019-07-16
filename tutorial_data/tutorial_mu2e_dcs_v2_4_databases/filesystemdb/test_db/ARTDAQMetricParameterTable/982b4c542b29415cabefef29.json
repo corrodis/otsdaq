@@ -1,7 +1,7 @@
 {
 "document" : {
 "data" : {
-"NAME" : "ARTDAQ_DAQ_METRIC_PARAMETER_TABLE",
+"NAME" : "ARTDAQ_METRIC_PARAMETER_TABLE",
 "COMMENT" : "No comment.",
 "AUTHOR" : "admin",
 "CREATION_TIME" : 1551974342,
@@ -184,7 +184,7 @@
 "assigned" : "2019-07-03T15:20:24.848-0500"
 }
 ],
-"configurations" : [
+"tables" : [
 {
 "name" : "notprovided",
 "assigned" : "2019-07-03T15:20:24.848-0500"
@@ -200,7 +200,7 @@
 "isreadonly" : false,
 "updates" : [
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:24.848-0500",
 "value" : {
 "name" : "notprovided",
@@ -219,7 +219,7 @@
 "event" : "setCollection",
 "timestamp" : "2019-07-03T15:20:24.848-0500",
 "value" : {
-"name" : "ARTDAQDaqMetricParameterTable",
+"name" : "ARTDAQMetricParameterTable",
 "assigned" : "2019-07-03T15:20:24.848-0500"
 }
 },
@@ -232,7 +232,7 @@
 }
 },
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:28.089-0500",
 "value" : {
 "name" : "artdaqConfig_v1",
@@ -245,7 +245,7 @@
 "_id" : {
 "$oid" : "982b4c542b29415cabefef29"
 },
-"collection" : "ARTDAQDaqMetricParameterTable",
+"collection" : "ARTDAQMetricParameterTable",
 "aliases" : {
 "active" : [
 

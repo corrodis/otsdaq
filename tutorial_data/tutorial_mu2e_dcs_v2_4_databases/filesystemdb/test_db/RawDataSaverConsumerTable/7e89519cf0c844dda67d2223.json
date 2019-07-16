@@ -52,7 +52,7 @@
 "assigned" : "2019-07-03T15:20:26.959-0500"
 }
 ],
-"configurations" : [
+"tables" : [
 {
 "name" : "notprovided",
 "assigned" : "2019-07-03T15:20:26.958-0500"
@@ -72,7 +72,7 @@
 "isreadonly" : false,
 "updates" : [
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:26.958-0500",
 "value" : {
 "name" : "notprovided",
@@ -104,7 +104,7 @@
 }
 },
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:29.871-0500",
 "value" : {
 "name" : "artdaqConfig_v1",
@@ -112,11 +112,19 @@
 }
 },
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:32.827-0500",
 "value" : {
 "name" : "defaultConfig_v3",
 "assigned" : "2019-07-03T15:20:32.827-0500"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-07-16T10:42:31.320-0500",
+"value" : {
+"name" : "defaultConfig_v4",
+"assigned" : "2019-07-16T10:42:31.320-0500"
 }
 }
 ],
@@ -140,5 +148,11 @@
 "attachments" : [
 
 ],
-"configtype" : "notprovided"
+"configtype" : "notprovided",
+"configurations" : [
+{
+"name" : "defaultConfig_v4",
+"assigned" : "2019-07-16T10:42:31.320-0500"
+}
+]
 }

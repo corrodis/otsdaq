@@ -76,7 +76,7 @@
 "assigned" : "2019-07-03T15:20:24.097-0500"
 }
 ],
-"configurations" : [
+"tables" : [
 {
 "name" : "notprovided",
 "assigned" : "2019-07-03T15:20:24.097-0500"
@@ -92,7 +92,7 @@
 "isreadonly" : false,
 "updates" : [
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:24.097-0500",
 "value" : {
 "name" : "notprovided",
@@ -124,7 +124,7 @@
 }
 },
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:27.442-0500",
 "value" : {
 "name" : "artdaqConfig_v1",

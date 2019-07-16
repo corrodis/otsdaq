@@ -661,11 +661,188 @@ const std::string& ConfigurationManager::getTypeNameOfGroup(
 	return convertGroupTypeIdToName(getTypeOfGroup(memberMap));
 }
 
+
 //==============================================================================
-// loadMemberMap
-//	loads tables given by name/version pairs in memberMap
-//	Note: does not activate them.
+// dumpMacroMakerModeFhicl
+//	Generates functional configuration file for MacroMaker mode
+//	based on current configuration.
+
+// helpers
+#define OUT out << tabStr << commentStr
+#define PUSHTAB tabStr += "\t"
+#define POPTAB tabStr.resize(tabStr.size() - 1)
+#define PUSHCOMMENT commentStr += "# "
+#define POPCOMMENT commentStr.resize(commentStr.size() - 2)
+
+void ConfigurationManager::dumpMacroMakerModeFhicl()
+{
+	std::string filepath =
+			__ENV__("USER_DATA") + std::string("/") + "MacroMakerModeConfigurations";
+	mkdir(filepath.c_str(), 0755);
+	filepath += "/MacroMakerModeFhiclDump.fcl";
+	__COUT__ << "dumpMacroMakerModeFhicl: " << filepath << __E__;
+
+	/////////////////////////
+	// generate MacroMaker mode fhicl file
+	std::fstream out;
+
+	std::string tabStr     = "";
+	std::string commentStr = "";
+
+	out.open(filepath, std::fstream::out | std::fstream::trunc);
+	if(out.fail())
+	{
+		__SS__ << "Failed to open MacroMaker mode fcl file for configuration dump: " <<
+				filepath << __E__;
+		__SS_THROW__;
+	}
+
+	try
+	{
+		std::vector<std::pair<std::string,ConfigurationTree>> fes = 
+			getNode("FEInterfaceTable").getChildren();
+		
+		for(auto& fe: fes)
+		{
+			//skip status false
+			if(!fe.second.getNode("Status").getValue<bool>())
+				continue;
+
+			__COUTV__(fe.first);
+			
+			OUT << fe.first << ": {" << __E__;
+			PUSHTAB;
+			
+			//only do FEInterfacePluginName and LinkToFETypeTable at top level
+			
+			OUT << "FEInterfacePluginName" << ": \t" << "\"" <<
+				fe.second.getNode("FEInterfacePluginName").getValueAsString() <<
+				"\"" << __E__;
+			
+			recursiveTreeToFhicl(fe.second.getNode("LinkToFETypeTable"),
+					out,tabStr,commentStr);
+
+			POPTAB;
+			OUT << "} //end " << fe.first << __E__ << __E__;
+			
+		} //end fe handling
+
+	}
+	catch(...)
+	{
+		__COUT_ERR__ << "Failed to complete MacroMaker mode fcl "
+				"file configuration dump due to error." << __E__;
+	}
+
+	out.close();
+	//end fhicl output
+} // end dumpMacroMakerModeFhicl()
+
+//==============================================================================
+// recursiveTreeToFhicl
+//		Output from treeRecord to specified depth
+//		depth of -1 is translated to "a lot" (e.g. 10)
+//		to avoid infinite loops.
 //
+//		The node must be a UID or link node
+//
+//	e.g., out = std::cout, tabStr = "", commentStr = ""
+void ConfigurationManager::recursiveTreeToFhicl(
+		ConfigurationTree 	node,
+		std::ostream&		out /* = std::cout */,
+		std::string& 		tabStr /* = "" */,
+		std::string& 		commentStr /* = "" */,
+		unsigned int 		depth /* = -1 */)
+{
+	if(depth == 0)
+	{
+		__COUT__ << __COUT_HDR_P__ <<
+				"Depth limit reached. Ending recursion." << __E__;
+		return;
+	}
+
+	__COUT__ << __COUT_HDR_P__ << "Adding tree record '" <<
+			node.getValueAsString() << "' fields..."
+	         << __E__;
+
+	if(depth == (unsigned int )-1) depth = 10;
+
+	//decorate link node with link_table {} wrapper
+	if(node.isLinkNode())
+	{
+		if(node.isDisconnected())
+		{
+			__COUT__ << node.getFieldName() << " field is a disconnected link." << __E__;
+			return;
+		}
+
+		OUT << node.getFieldName() << "_" <<
+						node.getValueAsString(true /* returnLinkTableValue */) <<
+						" \t{" << __E__;
+		PUSHTAB;
+	} //end link preamble decoration
+
+	if(node.isGroupLinkNode())
+	{
+		//for group link, handle each as a UID record
+		std::vector<std::pair<std::string,ConfigurationTree>> children =
+						node.getChildren();
+		for(auto& child:children)
+			recursiveTreeToFhicl(child.second,out,tabStr,commentStr,depth-1);
+
+		return;
+	} //end group link handling
+
+
+	//treat as UID record now
+	//	give UID decoration, then contents
+
+	//open UID decoration
+	OUT << node.getValueAsString() << ": \t{" << __E__;
+	PUSHTAB;
+	{ // open UID content
+
+		std::vector<std::pair<std::string,ConfigurationTree>> fields =
+						node.getChildren();
+
+		//skip last 3 fields that are always common
+		for(unsigned int i=0;i<fields.size()-3;++i)
+		{
+			__COUT__ << fields[i].first << __E__;
+
+			if(fields[i].second.isLinkNode())
+			{
+				recursiveTreeToFhicl(
+						fields[i].second,out,tabStr,commentStr,depth-1);
+				continue;
+			}
+			//else a normal field
+
+			OUT << fields[i].second.getFieldName() << ": \t";
+			if(fields[i].second.isValueNumberDataType())
+				OUT << fields[i].second.getValueAsString() << __E__;
+			else
+				OUT << "\"" << fields[i].second.getValueAsString() << "\"" << __E__;
+
+		}	//end fe fields
+
+	} // close UID content
+	POPTAB; // close UID decoration
+	OUT << "} //end " << node.getValueAsString() << " record" << __E__;
+
+	//handle link closing decoration
+	if(node.isLinkNode())
+	{
+		POPTAB;
+		OUT << "} //end " <<
+				node.getValueAsString(true /* returnLinkTableValue */) <<
+				" link record" << __E__;
+	} //end link closing decoration
+
+} //end recursiveTreeToFhicl
+
+//==============================================================================
+// dumpActiveConfiguration
 //	if filePath == "", then output to cout
 void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath,
                                                    const std::string& dumpType)
@@ -2072,24 +2249,6 @@ std::shared_ptr<TableGroupKey> ConfigurationManager::makeTheTableGroupKey(
 	}
 	return std::shared_ptr<TableGroupKey>(new TableGroupKey(key));
 }
-
-//==============================================================================
-////moved to StringMacros
-//std::string StringMacros::encodeURIComponent(const std::string& sourceStr)
-//{
-//	std::string retStr = "";
-//	char        encodeStr[4];
-//	for(const auto& c : sourceStr)
-//		if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
-//			retStr += c;
-//		else
-//		{
-//			sprintf(encodeStr, "%%%2.2X", c);
-//			retStr += encodeStr;
-//		}
-//	return retStr;
-//}
-
 //==============================================================================
 const std::set<std::string>& ConfigurationManager::getContextMemberNames()
 {

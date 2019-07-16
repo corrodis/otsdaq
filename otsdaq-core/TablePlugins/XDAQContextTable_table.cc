@@ -363,9 +363,10 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 		child.second.getNode(colContext_.colId_).getValue(contexts_.back().id_);
 		child.second.getNode(colContext_.colAddress_).getValue(contexts_.back().address_);
 		child.second.getNode(colContext_.colPort_).getValue(contexts_.back().port_);
-		if(contexts_.back().port_ == 0) //convert 0 to ${OTS_MAIN_PORT}
-			contexts_.back().port_ = atoi(__ENV__("OTS_MAIN_PORT"));
-		else if(contexts_.back().port_ < 1024 ||
+		//conversion to default happens at TableView.icc
+//		if(contexts_.back().port_ == 0) //convert 0 to ${OTS_MAIN_PORT}
+//			contexts_.back().port_ = atoi(__ENV__("OTS_MAIN_PORT"));
+		if(contexts_.back().port_ < 1024 ||
 				contexts_.back().port_ > 49151)
 		{
 			__SS__ << "Illegal xdaq Context port: " << contexts_.back().port_ <<

@@ -1,7 +1,7 @@
 {
 "document" : {
 "data" : {
-"NAME" : "ARTDAQ_DAQ_SOURCE_TABLE",
+"NAME" : "ARTDAQ_SOURCE_TABLE",
 "COMMENT" : "",
 "AUTHOR" : "admin",
 "CREATION_TIME" : 1551981421,
@@ -73,7 +73,7 @@
 "assigned" : "2019-07-03T15:20:25.009-0500"
 }
 ],
-"configurations" : [
+"tables" : [
 {
 "name" : "notprovided",
 "assigned" : "2019-07-03T15:20:25.009-0500"
@@ -89,7 +89,7 @@
 "isreadonly" : false,
 "updates" : [
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:25.009-0500",
 "value" : {
 "name" : "notprovided",
@@ -108,7 +108,7 @@
 "event" : "setCollection",
 "timestamp" : "2019-07-03T15:20:25.009-0500",
 "value" : {
-"name" : "ARTDAQDaqSourceTable",
+"name" : "ARTDAQSourceTable",
 "assigned" : "2019-07-03T15:20:25.009-0500"
 }
 },
@@ -121,7 +121,7 @@
 }
 },
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:28.233-0500",
 "value" : {
 "name" : "artdaqConfig_v1",
@@ -134,7 +134,7 @@
 "_id" : {
 "$oid" : "f46df9cd21c945509c600118"
 },
-"collection" : "ARTDAQDaqSourceTable",
+"collection" : "ARTDAQSourceTable",
 "aliases" : {
 "active" : [
 

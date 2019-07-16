@@ -708,25 +708,6 @@ void TableView::getValue(std::string& value,
 		__SS_THROW__;
 	}
 
-	if(columnsInfo_[col].getType() ==
-			            TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
-						theDataView_[row][col] == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
-	{
-		//if type string, fixed choice and DEFAULT, then return string of first choice
-
-		std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
-
-		// consider arbitrary bool
-		bool skipOne = (choices.size() && choices[0].find("arbitraryBool=") == 0);
-		size_t index = (skipOne?1:0);
-		if(choices.size() > index)
-		{
-			value = validateValueForColumn(
-					choices[index], col, doConvertEnvironmentVariables);
-			return; //handled value from fixed choices
-		}
-	}
-
 	value = validateValueForColumn(
 				theDataView_[row][col], col, doConvertEnvironmentVariables);
 } //end getValue()
@@ -745,6 +726,25 @@ std::string TableView::validateValueForColumn(const std::string& value,
 		__SS__ << "Invalid col requested" << __E__;
 		__SS_THROW__;
 	}
+
+	if(columnsInfo_[col].getType() ==
+			TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
+			value == columnsInfo_[col].getDefaultValue())
+	{
+		//if type string, fixed choice and DEFAULT, then return string of first choice
+
+		std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
+
+		// consider arbitrary bool
+		bool skipOne = (choices.size() && choices[0].find("arbitraryBool=") == 0);
+		size_t index = (skipOne?1:0);
+		if(choices.size() > index)
+		{
+			return doConvertEnvironmentVariables
+					           ? StringMacros::convertEnvironmentVariables(choices[index])
+					           : choices[index]; //handled value from fixed choices
+		}
+	} // end handling default to fixed choice conversion
 
 	if(columnsInfo_[col].getDataType() == TableViewColumnInfo::DATATYPE_STRING)
 		return doConvertEnvironmentVariables
@@ -1882,7 +1882,7 @@ int TableView::fillFromJSON(const std::string& json)
 		CV_JSON_FILL_DATA_SET
 	};
 
-	//__COUTV__(json);
+	__COUTV__(json);
 
 	sourceColumnMismatchCount_ = 0;
 	sourceColumnMissingCount_  = 0;
@@ -2159,45 +2159,43 @@ int TableView::fillFromJSON(const std::string& json)
 		default:;
 		}
 
-		if(0)  // for debugging
-		{
-			std::cout << i << ":\t" << json[i] << " - ";
 
-			std::cout << "ExtKey=";
-			for(unsigned int k = 0; k < jsonPath.size(); ++k)
-				std::cout << jsonPath[k] << "/";
-			std::cout << " - ";
-			std::cout << lastPopType << " ";
-			std::cout << bracketCount << " ";
-			std::cout << sqBracketCount << " ";
-			std::cout << inQuotes << " ";
-			std::cout << newValue << "-";
-			std::cout << currKey << "-{" << currDepth << "}:";
-			std::cout << currVal << " ";
-			std::cout << startNumber << "-";
-			std::cout << endNumber << " ";
-			std::cout << "\n";
-		}
 
 		// continue;
 
 		// handle a new completed value
 		if(newValue)
 		{
-			//			std::cout << "ExtKey=";
-			//			for(unsigned int k=0;k<jsonPath.size();++k)
-			//	        	 std::cout << jsonPath[k] << "/";
-			//
-			//			std::cout << currKey << "-{" << currDepth << "}: - ";
-			//
-			//    		if(isDataArray)
-			//    			std::cout << "Array:: ";
-			//    		if(newString)
-			//				std::cout << "New String:: ";
-			//    		else
-			//				std::cout << "New Number:: ";
-			//
-			//    		std::cout << currVal << "\n";
+			if(tableName_ == "ARTDAQ_AGGREGATOR_TABLE")  // for debugging
+			{
+				std::cout << i << ":\t" << json[i] << " - ";
+
+				//    		if(isDataArray)
+				//    			std::cout << "Array:: ";
+				//    		if(newString)
+				//				std::cout << "New String:: ";
+				//    		else
+				//				std::cout << "New Number:: ";
+				//
+
+				std::cout << "ExtKey=";
+				for(unsigned int k = 0; k < jsonPath.size(); ++k)
+					std::cout << jsonPath[k] << "/";
+				std::cout << " - ";
+				std::cout << lastPopType << " ";
+				std::cout << bracketCount << " ";
+				std::cout << sqBracketCount << " ";
+				std::cout << inQuotes << " ";
+				std::cout << newValue << "-";
+				std::cout << currKey << "-{" << currDepth << "}:";
+				std::cout << currVal << " ";
+				std::cout << startNumber << "-";
+				std::cout << endNumber << " ";
+				std::cout << "\n";
+				__COUTV__(fillWithLooseColumnMatching_);
+			}
+
+
 
 			// extract only what we care about
 			// for TableView only care about matching depth 1
@@ -2212,8 +2210,8 @@ int TableView::fillFromJSON(const std::string& json)
 
 			if(matchedKey != (unsigned int)-1)
 			{
-				//				std::cout << "New Data for:: key[" << matchedKey << "]-"
-				//<< 						keys[matchedKey] << "\n";
+				std::cout << "New Data for:: key[" << matchedKey << "]-" <<
+						keys[matchedKey] << "\n";
 
 				switch(matchedKey)
 				{
@@ -2378,9 +2376,7 @@ int TableView::fillFromJSON(const std::string& json)
 							}
 						}
 
-						colSpeedup =
-						    (colSpeedup + 1) %
-						    noc;  // short cut to proper column hopefully in next search
+
 
 						if(ccnt >= getNumberOfColumns())
 						{
@@ -2393,7 +2389,7 @@ int TableView::fillFromJSON(const std::string& json)
 							// CHANGED on 11/10/2016
 							//	to.. try just not populating data instead of error
 							++sourceColumnMismatchCount_;  // but count errors
-							if(getNumberOfRows() == 1)     // only for first row
+							if(getNumberOfRows() == 1)     // only for first row, track source column names
 								sourceColumnNames_.emplace(currKey);
 
 							//__SS_THROW__;
@@ -2401,11 +2397,13 @@ int TableView::fillFromJSON(const std::string& json)
 							    << "Ignoring error, and not populating missing column."
 							    << __E__;
 						}
+						else // short cut to proper column hopefully in next search
+							colSpeedup = (colSpeedup + 1) % noc;
 					}
 					break;
 				default:;  // unknown match?
-				}
-			}
+				} //end switch statement to match json key
+			} //end matched key if statement
 
 			// clean up handling of new value
 
@@ -2420,7 +2418,7 @@ int TableView::fillFromJSON(const std::string& json)
 
 	//__COUT__ << "Done!" << __E__;
 
-	// print();
+	print();
 
 	return 0;  // success
 }  // end fillFromJSON()

@@ -2,9 +2,9 @@
 "document" : {
 "data" : {
 "NAME" : "ARTDAQ_METRIC_TABLE",
-"COMMENT" : "No comment.",
+"COMMENT" : "",
 "AUTHOR" : "admin",
-"CREATION_TIME" : 1560829248,
+"CREATION_TIME" : 1505746321,
 "COL_TYPES" : {
 "METRIC_GROUP_ID" : "VARCHAR2",
 "METRIC_UID" : "VARCHAR2",
@@ -26,11 +26,11 @@
 "METRIC_KEY" : "brFile",
 "METRIC_PLUGIN_TYPE" : "\"file\"",
 "METRIC_LEVEL" : "3",
-"METRIC_PARAMETERS_LINK" : "ARTDAQDaqMetricParameterTable",
+"METRIC_PARAMETERS_LINK" : "ARTDAQMetricParameterTable",
 "METRIC_PARAMETERS_LINK_GROUP_ID" : "reader0MetricPGroup",
 "COMMENT_DESCRIPTION" : "No Comment",
-"AUTHOR" : "admin",
-"RECORD_INSERTION_TIME" : "1560829248"
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
 },
 {
 "METRIC_GROUP_ID" : "builder0Metrics",
@@ -39,11 +39,11 @@
 "METRIC_KEY" : "evbFile",
 "METRIC_PLUGIN_TYPE" : "\"file\"",
 "METRIC_LEVEL" : "3",
-"METRIC_PARAMETERS_LINK" : "ARTDAQDaqMetricParameterTable",
+"METRIC_PARAMETERS_LINK" : "ARTDAQMetricParameterTable",
 "METRIC_PARAMETERS_LINK_GROUP_ID" : "builder0MetricPGroup",
 "COMMENT_DESCRIPTION" : "No Comment",
-"AUTHOR" : "admin",
-"RECORD_INSERTION_TIME" : "1560829248"
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
 },
 {
 "METRIC_GROUP_ID" : "aggreator0Metrics | builder0Metrics",
@@ -52,11 +52,11 @@
 "METRIC_KEY" : "ganglia",
 "METRIC_PLUGIN_TYPE" : "\"ganglia\"",
 "METRIC_LEVEL" : "%{ganglia_level}",
-"METRIC_PARAMETERS_LINK" : "ARTDAQDaqMetricParameterTable",
+"METRIC_PARAMETERS_LINK" : "ARTDAQMetricParameterTable",
 "METRIC_PARAMETERS_LINK_GROUP_ID" : "builder0GangliaPGroup",
 "COMMENT_DESCRIPTION" : "No Comment",
 "AUTHOR" : "admin",
-"RECORD_INSERTION_TIME" : "1560829248"
+"RECORD_INSERTION_TIME" : "1505746223"
 },
 {
 "METRIC_GROUP_ID" : "aggreator0Metrics | builder0Metrics",
@@ -65,11 +65,11 @@
 "METRIC_KEY" : "msgfac",
 "METRIC_PLUGIN_TYPE" : "\"msgFacility\"",
 "METRIC_LEVEL" : "%{mf_level}",
-"METRIC_PARAMETERS_LINK" : "ARTDAQDaqMetricParameterTable",
+"METRIC_PARAMETERS_LINK" : "ARTDAQMetricParameterTable",
 "METRIC_PARAMETERS_LINK_GROUP_ID" : "builder0MessageFacilityPGroup",
 "COMMENT_DESCRIPTION" : "No Comment",
 "AUTHOR" : "admin",
-"RECORD_INSERTION_TIME" : "1560829248"
+"RECORD_INSERTION_TIME" : "1505746313"
 },
 {
 "METRIC_GROUP_ID" : "aggreator0Metrics | builder0Metrics",
@@ -78,11 +78,11 @@
 "METRIC_KEY" : "graphite",
 "METRIC_PLUGIN_TYPE" : "\"graphite\"",
 "METRIC_LEVEL" : "%{graphite_level}",
-"METRIC_PARAMETERS_LINK" : "ARTDAQDaqMetricParameterTable",
+"METRIC_PARAMETERS_LINK" : "ARTDAQMetricParameterTable",
 "METRIC_PARAMETERS_LINK_GROUP_ID" : "builder0GraphiteMetricPGroup",
 "COMMENT_DESCRIPTION" : "No Comment",
 "AUTHOR" : "admin",
-"RECORD_INSERTION_TIME" : "1560829248"
+"RECORD_INSERTION_TIME" : "1505746316"
 },
 {
 "METRIC_GROUP_ID" : "aggreator0Metrics",
@@ -91,11 +91,11 @@
 "METRIC_KEY" : "aggFile",
 "METRIC_PLUGIN_TYPE" : "\"file\"",
 "METRIC_LEVEL" : "3",
-"METRIC_PARAMETERS_LINK" : "ARTDAQDaqMetricParameterTable",
+"METRIC_PARAMETERS_LINK" : "ARTDAQMetricParameterTable",
 "METRIC_PARAMETERS_LINK_GROUP_ID" : "aggregator0Metric0PGroup",
 "COMMENT_DESCRIPTION" : "No Comment",
-"AUTHOR" : "admin",
-"RECORD_INSERTION_TIME" : "1560829248"
+"AUTHOR" : "DEFAULT",
+"RECORD_INSERTION_TIME" : "0"
 }
 ]
 },
@@ -113,7 +113,7 @@
 "source" : "template",
 "name" : "notprovided",
 "format" : "json",
-"created" : "2019-07-03T15:20:25.319-0500",
+"created" : "2019-07-03T15:20:24.929-0500",
 "rawdata" : [
 
 ]
@@ -122,17 +122,17 @@
 "entities" : [
 {
 "name" : "OTSROOT",
-"assigned" : "2019-07-03T15:20:25.320-0500"
+"assigned" : "2019-07-03T15:20:24.930-0500"
 }
 ],
-"configurations" : [
+"tables" : [
 {
 "name" : "notprovided",
-"assigned" : "2019-07-03T15:20:25.320-0500"
+"assigned" : "2019-07-03T15:20:24.929-0500"
 },
 {
 "name" : "artdaqConfig_v1",
-"assigned" : "2019-07-03T15:20:28.506-0500"
+"assigned" : "2019-07-03T15:20:28.161-0500"
 }
 ],
 "changelog" : "notprovided",
@@ -141,50 +141,50 @@
 "isreadonly" : false,
 "updates" : [
 {
-"event" : "addConfiguration",
-"timestamp" : "2019-07-03T15:20:25.320-0500",
+"event" : "addTable",
+"timestamp" : "2019-07-03T15:20:24.929-0500",
 "value" : {
 "name" : "notprovided",
-"assigned" : "2019-07-03T15:20:25.320-0500"
+"assigned" : "2019-07-03T15:20:24.929-0500"
 }
 },
 {
 "event" : "setVersion",
-"timestamp" : "2019-07-03T15:20:25.320-0500",
+"timestamp" : "2019-07-03T15:20:24.929-0500",
 "value" : {
 "name" : "1",
-"assigned" : "2019-07-03T15:20:25.320-0500"
+"assigned" : "2019-07-03T15:20:24.929-0500"
 }
 },
 {
 "event" : "setCollection",
-"timestamp" : "2019-07-03T15:20:25.320-0500",
+"timestamp" : "2019-07-03T15:20:24.930-0500",
 "value" : {
 "name" : "ARTDAQMetricTable",
-"assigned" : "2019-07-03T15:20:25.320-0500"
+"assigned" : "2019-07-03T15:20:24.930-0500"
 }
 },
 {
 "event" : "addEntity",
-"timestamp" : "2019-07-03T15:20:25.320-0500",
+"timestamp" : "2019-07-03T15:20:24.930-0500",
 "value" : {
 "name" : "OTSROOT",
-"assigned" : "2019-07-03T15:20:25.320-0500"
+"assigned" : "2019-07-03T15:20:24.930-0500"
 }
 },
 {
-"event" : "addConfiguration",
-"timestamp" : "2019-07-03T15:20:28.506-0500",
+"event" : "addTable",
+"timestamp" : "2019-07-03T15:20:28.161-0500",
 "value" : {
 "name" : "artdaqConfig_v1",
-"assigned" : "2019-07-03T15:20:28.506-0500"
+"assigned" : "2019-07-03T15:20:28.161-0500"
 }
 }
 ],
-"created" : "2019-07-03T15:20:25.320-0500"
+"created" : "2019-07-03T15:20:24.929-0500"
 },
 "_id" : {
-"$oid" : "fe01554cd58147cbbcbcd39e"
+"$oid" : "a63962d15cc84bcf8efb32b8"
 },
 "collection" : "ARTDAQMetricTable",
 "aliases" : {

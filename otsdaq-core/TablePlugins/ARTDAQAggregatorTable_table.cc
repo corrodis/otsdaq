@@ -328,10 +328,29 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 		OUT << "aggregator: {\n";
 
 		PUSHTAB;
+
 		auto parametersLink = daq.getNode("daqAggregatorParametersLink");
 		if(!parametersLink.isDisconnected())
 		{
 			auto parameters = parametersLink.getChildren();
+
+			bool isDispatcher = false;
+			std::set<std::string> requiredParameterKeys;
+
+			for(auto& parameter : parameters)
+				if(parameter.second.getNode("daqParameterKey").getValue() == "is_dispatcher" &&
+						parameter.second.getNode("daqParameterValue").getValue().find("true") !=
+								std::string::npos)
+				{
+					isDispatcher = true;
+					__COUT__ << "Recognized as dispatcher!" << __E__;
+
+					requiredParameterKeys.emplace("buffer_count");
+					requiredParameterKeys.emplace("max_fragment_size_bytes");
+					requiredParameterKeys.emplace("expected_events_per_bunch");
+					break;
+				}
+
 			for(auto& parameter : parameters)
 			{
 				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
@@ -348,6 +367,27 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 				        .getValue<bool>())
 					POPCOMMENT;
+
+				if(requiredParameterKeys.size())
+					requiredParameterKeys.erase(
+								parameter.second.getNode("daqParameterKey").getValue());
+			} //end parameters output
+
+			if(requiredParameterKeys.size())
+			{
+				if(isDispatcher)
+				{
+					__SS__ << "Dispatcher modules required parameters missing: " <<
+							StringMacros::setToString(requiredParameterKeys) << __E__;
+					__SS_THROW__;
+				}
+				else
+				{
+					__SS__ << "Aggregator required parameters missing: " <<
+							StringMacros::setToString(requiredParameterKeys) << __E__;
+					__SS_THROW__;
+				}
+
 			}
 		}
 		OUT << "\n";  // end daq aggregator parameters

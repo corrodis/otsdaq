@@ -328,7 +328,7 @@
 "assigned" : "2019-07-03T15:20:33.256-0500"
 }
 ],
-"configurations" : [
+"tables" : [
 {
 "name" : "notprovided",
 "assigned" : "2019-07-03T15:20:33.255-0500"
@@ -344,7 +344,7 @@
 "isreadonly" : false,
 "updates" : [
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:33.256-0500",
 "value" : {
 "name" : "notprovided",
@@ -376,7 +376,7 @@
 }
 },
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:33.873-0500",
 "value" : {
 "name" : "testContext_v4",

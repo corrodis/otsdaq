@@ -1401,6 +1401,16 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	// check if configuration dump is enabled on configure transition
 	{
+		try
+		{
+			CorePropertySupervisorBase::theConfigurationManager_
+								->dumpMacroMakerModeFhicl();
+		}
+		catch(...) //ignore error for now
+		{
+			__COUT_ERR__ << "Failed to dump MacroMaker mode fhicl." << __E__;
+		}
+
 		ConfigurationTree configLinkNode =
 		    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(
 		        supervisorContextUID_, supervisorApplicationUID_);
@@ -1442,7 +1452,11 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 					                                  "_" + std::to_string(time(0)) +
 					                                  ".dump",
 					                              dumpFormat);
+
+					CorePropertySupervisorBase::theConfigurationManager_
+						->dumpMacroMakerModeFhicl();
 				}
+
 			}
 			catch(std::runtime_error& e)
 			{

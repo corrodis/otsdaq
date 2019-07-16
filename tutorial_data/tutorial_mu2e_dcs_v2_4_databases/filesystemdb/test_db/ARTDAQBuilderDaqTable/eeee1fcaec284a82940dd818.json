@@ -26,9 +26,9 @@
 "DAQ_EVENT_BUILDER_BUFFER_COUNT" : "20",
 "DAQ_EVENT_BUILDER_PARAMETERS_LINK" : "ARTDAQBuilderDaqParameterTable",
 "DAQ_EVENT_BUILDER_PARAMETERS_LINK_GROUP_ID" : "builder0PGroup",
-"DAQ_EVENT_BUILDER_SOURCES_LINK" : "ARTDAQDaqSourceTable",
+"DAQ_EVENT_BUILDER_SOURCES_LINK" : "ARTDAQSourceTable",
 "DAQ_EVENT_BUILDER_SOURCES_LINK_GROUP_ID" : "reader0sources",
-"DAQ_METRICS_LINK" : "ARTDAQDaqMetricTable",
+"DAQ_METRICS_LINK" : "ARTDAQMetricTable",
 "DAQ_METRICS_LINK_GROUP_ID" : "builder0Metrics",
 "COMMENT_DESCRIPTION" : "No Comment",
 "AUTHOR" : "admin",
@@ -62,7 +62,7 @@
 "assigned" : "2019-07-03T15:20:24.396-0500"
 }
 ],
-"configurations" : [
+"tables" : [
 {
 "name" : "notprovided",
 "assigned" : "2019-07-03T15:20:24.396-0500"
@@ -78,7 +78,7 @@
 "isreadonly" : false,
 "updates" : [
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:24.396-0500",
 "value" : {
 "name" : "notprovided",
@@ -110,7 +110,7 @@
 }
 },
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:27.705-0500",
 "value" : {
 "name" : "artdaqConfig_v1",
