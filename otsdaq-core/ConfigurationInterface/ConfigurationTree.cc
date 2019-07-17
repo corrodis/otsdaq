@@ -1409,7 +1409,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
     bool                                              autoSelectFilterFields) const
 {
 	// enforce that starting point is a table node
-	if(!isRootNode() && !isConfigurationNode())
+	if(!tableView_ ||
+			(!isRootNode() && !isConfigurationNode()))
 	{
 		__SS__ << "Can only get getCommonFields from a root or table node! "
 		       << "The node type is " << getNodeType() << __E__;
