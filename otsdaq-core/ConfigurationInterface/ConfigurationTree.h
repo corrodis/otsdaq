@@ -115,6 +115,8 @@ class ConfigurationTree
 	static const std::string NODE_TYPE_UID;
 	static const std::string NODE_TYPE_ROOT;
 
+	static const std::string ROOT_NAME;
+
 	struct BitMap
 	{
 		BitMap() : isDefault_(true), zero_(0) {}
@@ -216,8 +218,8 @@ class ConfigurationTree
   public:
 	// boolean info
 	bool 										isDefaultValue				(void) const;
-	bool 										isRootNode					(void) const;
-	bool 										isConfigurationNode			(void) const;
+	inline bool									isRootNode					(void) const;
+	inline bool									isTableNode					(void) const;
 	bool 										isValueNode					(void) const;
 	bool 										isValueBoolType				(void) const;
 	bool 										isValueNumberDataType		(void) const;
