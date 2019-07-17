@@ -1882,7 +1882,7 @@ int TableView::fillFromJSON(const std::string& json)
 		CV_JSON_FILL_DATA_SET
 	};
 
-	__COUTV__(json);
+	//__COUTV__(json);
 
 	sourceColumnMismatchCount_ = 0;
 	sourceColumnMissingCount_  = 0;
@@ -2166,7 +2166,7 @@ int TableView::fillFromJSON(const std::string& json)
 		// handle a new completed value
 		if(newValue)
 		{
-			if(tableName_ == "ARTDAQ_AGGREGATOR_TABLE")  // for debugging
+			if(0 && tableName_ == "ARTDAQ_AGGREGATOR_TABLE")  // for debugging
 			{
 				std::cout << i << ":\t" << json[i] << " - ";
 
@@ -2418,7 +2418,7 @@ int TableView::fillFromJSON(const std::string& json)
 
 	//__COUT__ << "Done!" << __E__;
 
-	print();
+	//print();
 
 	return 0;  // success
 }  // end fillFromJSON()
