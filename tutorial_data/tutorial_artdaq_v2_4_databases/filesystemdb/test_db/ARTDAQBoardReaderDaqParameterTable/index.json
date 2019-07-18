@@ -1,23 +1,23 @@
 {
 "ouid" : [
-"38b78385aaff4f73b6f8117a"
+"ea2d6b76c0dd4c359bc17e31"
 ],
 "version" : {
 "2" : [
-"38b78385aaff4f73b6f8117a"
+"ea2d6b76c0dd4c359bc17e31"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"38b78385aaff4f73b6f8117a"
+"ea2d6b76c0dd4c359bc17e31"
 ],
 "artdaqConfig_v2" : [
-"38b78385aaff4f73b6f8117a"
+"ea2d6b76c0dd4c359bc17e31"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"38b78385aaff4f73b6f8117a"
+"ea2d6b76c0dd4c359bc17e31"
 ]
 },
 "aliases.active.name" : {
@@ -28,10 +28,10 @@
 },
 "configurations.assigned" : {
 "notprovided" : [
-"2019-07-11T09:30:34.190-0500"
+"2019-07-17T15:46:25.467-0500"
 ],
 "artdaqConfig_v2" : [
-"2019-07-11T09:30:37.083-0500"
+"2019-07-17T15:46:28.473-0500"
 ]
 }
 }
