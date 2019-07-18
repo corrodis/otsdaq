@@ -37,11 +37,11 @@ simple_plugin(TCPDataListenerProducer "processor"
 	${CETLIB}
   )
 
-simple_plugin(TCPDataStreamerConsumer "processor"
-	DataManager
-	NetworkUtilities
-	${CETLIB}
-  )
+#simple_plugin(TCPDataStreamerConsumer "processor"
+#	DataManager
+#	NetworkUtilities
+#	${CETLIB}
+#  )
 
 simple_plugin(RawDataSaverConsumer "processor"
 	DataManager

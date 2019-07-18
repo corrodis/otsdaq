@@ -3,7 +3,7 @@
 
 #include "otsdaq-core/Configurable/Configurable.h"
 #include "otsdaq-core/DataManager/DataProducer.h"
-#include "otsdaq-core/NetworkUtilities/TCPSocket.h"  // Make sure this is always first because <sys/types.h> (defined in Socket.h) must be first
+#include "otsdaq-core/NetworkUtilities/TCPSubscribeClient.h"  // Make sure this is always first because <sys/types.h> (defined in Socket.h) must be first
 
 #include <string>
 
@@ -11,7 +11,7 @@ namespace ots
 {
 class ConfigurationTree;
 
-class TCPDataListenerProducer : public DataProducer, public Configurable, public TCPSocket
+class TCPDataListenerProducer : public DataProducer, public Configurable, public TCPSubscribeClient
 {
   public:
 	TCPDataListenerProducer(std::string              supervisorApplicationUID,
@@ -20,6 +20,8 @@ class TCPDataListenerProducer : public DataProducer, public Configurable, public
 	                        const ConfigurationTree& theXDAQContextConfigTree,
 	                        const std::string&       configurationPath);
 	virtual ~TCPDataListenerProducer(void);
+	virtual void startProcessingData(std::string runNumber) override;
+	virtual void stopProcessingData(void) override;
 
   protected:
 	bool workLoopThread(toolbox::task::WorkLoop* workLoop);
