@@ -87,9 +87,9 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	          &GatewaySupervisor::stateMachineIterationBreakpoint,
 	          "StateMachineIterationBreakpoint");
 
-	xgi::bind(this, &GatewaySupervisor::infoRequestHandler, "InfoRequestHandler");
-	xgi::bind(
-	    this, &GatewaySupervisor::infoRequestResultHandler, "InfoRequestResultHandler");
+	xgi::bind(this, &GatewaySupervisor::statusRequest, "StatusRequest");
+	// xgi::bind(
+	//     this, &GatewaySupervisor::infoRequestResultHandler, "InfoRequestResultHandler");
 	xgi::bind(this, &GatewaySupervisor::tooltipRequest, "TooltipRequest");
 
 	xoap::bind(this,
@@ -936,18 +936,18 @@ bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 }  // end stateMachineThread()
 
 //========================================================================================================================
-// infoRequestHandler ~~
+// statusRequest ~~
 //	Call from JS GUI
 //		parameter:
 //
-void GatewaySupervisor::infoRequestHandler(xgi::Input* in, xgi::Output* out)
+void GatewaySupervisor::statusRequest(xgi::Input* in, xgi::Output* out)
 
 {
 	__COUT__ << "Starting to Request!" << __E__;
 
 	cgicc::Cgicc cgiIn(in);
 	std::string  requestType =
-	    "infoRequestHandler";  // force request type to infoRequestHandler
+	    "statusRequest";  // force request type to statusRequest
 
 	HttpXmlDocument           xmlOut;
 	WebUsers::RequestUserInfo userInfo(requestType,
