@@ -124,7 +124,7 @@ void UDPDataListenerProducer::fastWrite(void)
 	//		             << __E__;
 	//
 	//		__CFG_COUT__ << "Buffer Data: "
-	//		             << BinaryStringMacros::binaryTo8ByteHexString(buffer) << __E__;
+	//		             << BinaryStringMacros::binaryNumberToHexString(buffer) << __E__;
 	//
 	//		__CFG_COUTV__(DataProcessor::theCircularBuffer_);
 	//

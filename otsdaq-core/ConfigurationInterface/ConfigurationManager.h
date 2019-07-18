@@ -63,7 +63,6 @@ class ConfigurationManager
 	static const std::set<std::string>& getBackboneMemberNames		(void);
 	static const std::set<std::string>& getIterateMemberNames		(void);
 
-	static std::string        			encodeURIComponent			(const std::string& sourceStr);
 	static const std::string& 			convertGroupTypeIdToName	(int groupTypeId);
 	static int                			getTypeOfGroup				(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
 	static const std::string& 			getTypeNameOfGroup			(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
@@ -109,7 +108,8 @@ class ConfigurationManager
 	const TableBase* 					getTableByName				(const std::string& configurationName) const;
 
 	void 								dumpActiveConfiguration		(const std::string& filePath, const std::string& dumpType);
-
+	void								dumpMacroMakerModeFhicl		(void);	
+	
 	std::map<std::string /*groupAlias*/,
 		 std::pair<std::string /*groupName*/,
 		 TableGroupKey>> 				getActiveGroupAliases		(void);
@@ -157,6 +157,7 @@ class ConfigurationManager
 
 	void 								initializeFromFhicl			(const std::string& fhiclPath);
 	void 								recursiveInitFromFhiclPSet	(const std::string& tableName, const fhicl::ParameterSet& pset, const std::string& recordName = "", const std::string& groupName = "", const std::string& groupLinkIndex = "");
+	void 								recursiveTreeToFhicl		(ConfigurationTree node, std::ostream& out, std::string& tabStr, std::string& commentStr, unsigned int depth = -1);
 
 	std::string 										username_;  // user of the configuration is READONLY_USER unless using ConfigurationManagerRW
 	ConfigurationInterface*        						theInterface_;

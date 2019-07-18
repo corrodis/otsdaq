@@ -32,7 +32,7 @@
 "DAQ_PARAMETERS_LINK_GROUP_ID" : "reader0PGroup",
 "DAQ_DESTINATIONS_LINK" : "ARTDAQDestinationTable",
 "DAQ_DESTINATIONS_LINK_GROUP_ID" : "reader0DestGroup",
-"DAQ_METRICS_LINK" : "ARTDAQDaqMetricTable",
+"DAQ_METRICS_LINK" : "ARTDAQMetricTable",
 "DAQ_METRICS_LINK_UID" : "reader0Metrics",
 "COMMENT_DESCRIPTION" : "No Comment",
 "AUTHOR" : "admin",
@@ -66,7 +66,7 @@
 "assigned" : "2019-07-03T15:20:24.250-0500"
 }
 ],
-"configurations" : [
+"tables" : [
 {
 "name" : "notprovided",
 "assigned" : "2019-07-03T15:20:24.250-0500"
@@ -82,7 +82,7 @@
 "isreadonly" : false,
 "updates" : [
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:24.250-0500",
 "value" : {
 "name" : "notprovided",
@@ -114,7 +114,7 @@
 }
 },
 {
-"event" : "addConfiguration",
+"event" : "addTable",
 "timestamp" : "2019-07-03T15:20:27.576-0500",
 "value" : {
 "name" : "artdaqConfig_v1",

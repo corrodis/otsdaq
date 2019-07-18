@@ -128,7 +128,24 @@ std::string StringMacros::decodeURIComponent(const std::string& data)
 	}
 	decodeURIString.resize(j);
 	return decodeURIString;
-}
+} //end decodeURIComponent()
+
+
+//==============================================================================
+std::string StringMacros::encodeURIComponent(const std::string& sourceStr)
+{
+	std::string retStr = "";
+	char        encodeStr[4];
+	for(const auto& c : sourceStr)
+		if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+			retStr += c;
+		else
+		{
+			sprintf(encodeStr, "%%%2.2X", c);
+			retStr += encodeStr;
+		}
+	return retStr;
+} //end encodeURIComponent()
 
 //==============================================================================
 // convertEnvironmentVariables ~
@@ -336,6 +353,45 @@ std::string StringMacros::getNumberType(const std::string& s)
 		return "double";
 	return "unsigned long long";
 }  // end getNumberType()
+
+//==============================================================================
+// static template function
+//	for bool, but not all other number types
+//	return false if string is not a bool
+//template<>
+//inline bool StringMacros::getNumber<bool>(const std::string& s, bool& retValue)
+bool StringMacros::getNumber(const std::string& s, bool& retValue)
+{
+	if(s.size() < 1) 
+	{
+		__COUT_ERR__ << "Invalid empty bool string " << s << __E__;
+		return false;
+	}
+	
+	//check true case
+	if(s.find("1") != std::string::npos || 
+		s == "true" ||
+		s == "True" ||
+		s == "TRUE")
+	{
+		retValue = true;
+		return true;
+	} 
+	
+	//check false case
+	if(s.find("0") != std::string::npos || 
+        s == "false" ||
+        s == "False" ||
+        s == "FALSE")
+	{
+		retValue = false;
+		return true;
+	} 
+	
+	__COUT_ERR__ << "Invalid bool string " << s << __E__;
+	return false;
+	
+} // end static getNumber<bool>
 
 //==============================================================================
 // getTimestampString ~~

@@ -5,7 +5,6 @@
 				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="UniqueData" 	 Name="OffsetPort" 	 StorageName="OFFSET_PORT" 		DataType="NUMBER" 		DataChoices=""/>
-				<COLUMN Type="Data" 	 Name="TableString" 	 StorageName="TABLE_STRING" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-services" 	 Name="servicesLink" 	 StorageName="SERVICES_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQAggregatorServicesTable"/>
 				<COLUMN Type="ChildLinkUID-services" 	 Name="servicesLinkUID" 	 StorageName="SERVICES_LINK_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-daq" 	 Name="daqLink" 	 StorageName="DAQ_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQAggregatorDaqTable"/>

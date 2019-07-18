@@ -1,4 +1,18 @@
 
+//========================================================================================================================
+// binaryNumberToHexString
+//	static template function
+//	convert a data buffer string a hex string
+//		8 bytes at a time with the least significant byte last.
+template<class T>
+std::string BinaryStringMacros::binaryNumberToHexString(const T& binaryBuffer,
+                                                       const std::string& resultPreamble /*"0x"*/,
+                                                       const std::string& resultDelimiter /*" "*/)
+{
+	return binaryNumberToHexString(&binaryBuffer,sizeof(T),
+		resultPreamble,resultDelimiter);
+} //end binaryNumberToHexString()
+
 
 //========================================================================================================================
 // insertValueInBinaryString

@@ -2197,7 +2197,8 @@ void FEVInterfacesManager::runFEMacro(const std::string& interfaceID,
 		{  // ignore error, assume not a number
 		}
 
-		outputArgs += argsOut[i].first + "," + argsOut[i].second;
+		outputArgs += argsOut[i].first + "," + 
+			StringMacros::encodeURIComponent(argsOut[i].second);
 	}
 
 	__CFG_COUT__ << "outputArgs = " << outputArgs << __E__;

@@ -22,19 +22,30 @@ struct BinaryStringMacros
   public:
 	// Here is the list of static helper functions:
 	//
-	//		binaryToHexString
-	//		binaryTo8ByteHexString
+	//		binaryStringToHexString
+	//		binaryNumberToHexString
 	//
 
 
 	//=======================================================
-	static std::string 	binaryToHexString			(
-		const char*        							binaryBuffer,
+	static std::string 	binaryStringToHexString			(
+		const void*        							binaryBuffer,
 		unsigned int       							numberOfBytes,
 		const std::string& 							resultPreamble  = "",
 		const std::string& 							resultDelimiter = "");
-	static std::string 	binaryTo8ByteHexString		(
+		
+	template<class T>
+	static std::string 	binaryNumberToHexString		(
+		const T& 									binaryBuffer,
+		const std::string& 							resultPreamble  = "0x",
+		const std::string& 							resultDelimiter = " ");
+	static std::string 	binaryNumberToHexString		(
 		const std::string& 							binaryBuffer,
+		const std::string& 							resultPreamble  = "0x",
+		const std::string& 							resultDelimiter = " ");
+	static std::string 	binaryNumberToHexString		(
+		const void*        							binaryBuffer,
+		unsigned int       							numberOfBytes,
 		const std::string& 							resultPreamble  = "0x",
 		const std::string& 							resultDelimiter = " ");
 

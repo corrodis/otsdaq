@@ -28,16 +28,12 @@ TCPDataListenerProducer::TCPDataListenerProducer(
                        .getValue<unsigned int>())
     //, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
     , Configurable(theXDAQContextConfigTree, configurationPath)
-    , TCPSocket(
-          theXDAQContextConfigTree.getNode(configurationPath)
-              .getNode("HostIPAddress")
-              .getValue<std::string>(),
-          theXDAQContextConfigTree.getNode(configurationPath)
-              .getNode("HostPort")
-              .getValue<unsigned int>(),
-          0x10000 /*theXDAQContextConfigTree.getNode(configurationPath).getNode("SocketReceiveBufferSize").getValue<unsigned
-                     int>()*/
-          )
+    , TCPSubscribeClient(theXDAQContextConfigTree.getNode(configurationPath)
+                             .getNode("HostIPAddress")  // THIS IS ACTUALLY THE SERVER IP
+                             .getValue<std::string>(),
+                         theXDAQContextConfigTree.getNode(configurationPath)
+                             .getNode("HostPort")  // THIS IS ACTUALLY THE SERVER PORT
+                             .getValue<unsigned int>())
     , dataP_(nullptr)
     , headerP_(nullptr)
     , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath)
@@ -51,6 +47,20 @@ TCPDataListenerProducer::TCPDataListenerProducer(
 
 //========================================================================================================================
 TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
+
+//========================================================================================================================
+void TCPDataListenerProducer::startProcessingData(std::string runNumber)
+{
+	TCPSubscribeClient::connect();
+	DataProducer::startProcessingData(runNumber);
+}
+
+//========================================================================================================================
+void TCPDataListenerProducer::stopProcessingData(void)
+{
+	TCPSubscribeClient::close();
+	DataProducer::stopProcessingData();
+}
 
 //========================================================================================================================
 bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
@@ -68,19 +78,17 @@ void TCPDataListenerProducer::slowWrite(void)
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<
 	// std::endl;
 
-	if(TCPSocket::receive(data_) != -1)
-	{
-		header_["IPAddress"] = ipAddress_;
-		header_["Port"]      = std::to_string(port_);
+	data_                = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+	header_["IPAddress"] = ipAddress_;
+	header_["Port"]      = std::to_string(port_);
 
-		while(DataProducer::write(data_, header_) < 0)
-		{
-			__COUT__ << "There are no available buffers! Retrying...after waiting 10 "
-			            "milliseconds!"
-			         << std::endl;
-			usleep(10000);
-			return;
-		}
+	while(DataProducer::write(data_, header_) < 0)
+	{
+		__COUT__ << "There are no available buffers! Retrying...after waiting 10 "
+		            "milliseconds!"
+		         << std::endl;
+		usleep(10000);
+		return;
 	}
 }
 
@@ -99,19 +107,17 @@ void TCPDataListenerProducer::fastWrite(void)
 		return;
 	}
 
-	if(TCPSocket::receive(*dataP_) != -1)
-	{
-		(*headerP_)["IPAddress"] = ipAddress_;
-		(*headerP_)["Port"]      = std::to_string(port_);
+//IT IS A BLOCKING CALL! SO NEEDS TO BE CHANGED
+	*dataP_                  = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+	(*headerP_)["IPAddress"] = ipAddress_;
+	(*headerP_)["Port"]      = std::to_string(port_);
 
-		// if (port_ == 40005)
-		//{
-		//	__COUT__ << "Got data: " << dataP_->length() << std::endl;
-		//}
+	// if (port_ == 40005)
+	//{
+	//	__COUT__ << "Got data: " << dataP_->length() << std::endl;
+	//}
 
-		DataProducer::setWrittenSubBuffer<std::string,
-		                                  std::map<std::string, std::string>>();
-	}
+	DataProducer::setWrittenSubBuffer<std::string, std::map<std::string, std::string>>();
 }
 
 DEFINE_OTS_PROCESSOR(TCPDataListenerProducer)

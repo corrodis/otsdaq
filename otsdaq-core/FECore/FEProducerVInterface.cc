@@ -88,7 +88,7 @@ FEProducerVInterface::~FEProducerVInterface(void)
 void FEProducerVInterface::copyToNextBuffer(const std::string& dataToWrite)
 {
 	__FE_COUT__ << "Write Data: "
-	            << BinaryStringMacros::binaryTo8ByteHexString(dataToWrite) << __E__;
+	            << BinaryStringMacros::binaryNumberToHexString(dataToWrite) << __E__;
 
 	DataProducerBase::write<std::string, std::map<std::string, std::string> >(
 	    dataToWrite);
@@ -112,7 +112,7 @@ void FEProducerVInterface::copyToNextBuffer(const std::string& dataToWrite)
 	//	__FE_COUT__ << "Data copied " << FEProducerVInterface::dataP_->size() << __E__;
 	//
 	//	__FE_COUT__ << "Copied Data: " <<
-	//			BinaryStringMacros::binaryTo8ByteHexString(*FEProducerVInterface::dataP_)
+	//			BinaryStringMacros::binaryNumberToHexString(*FEProducerVInterface::dataP_)
 	//<<
 	//__E__;
 	//

@@ -14,6 +14,7 @@ using namespace ots;
 const std::string ConfigurationTree::DISCONNECTED_VALUE      = "X";
 const std::string ConfigurationTree::VALUE_TYPE_DISCONNECTED = "Disconnected";
 const std::string ConfigurationTree::VALUE_TYPE_NODE         = "Node";
+const std::string ConfigurationTree::ROOT_NAME         		 = "/";
 
 //==============================================================================
 ConfigurationTree::ConfigurationTree()
@@ -237,7 +238,7 @@ void ConfigurationTree::getValue(std::string& value) const
 		tableView_->getValue(value, row_, col_);
 	}
 	else if(row_ == TableView::INVALID &&
-	        col_ == TableView::INVALID)  // this node is config node maybe with groupId
+	        col_ == TableView::INVALID)  // this node is table node maybe with groupId
 	{
 		if(isLinkNode() && isDisconnected())
 			value =
@@ -622,6 +623,9 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 //		not followed to destination table.
 const std::string& ConfigurationTree::getValueAsString(bool returnLinkTableValue) const
 {
+	//__COUTV__(col_);__COUTV__(row_);__COUTV__(table_);__COUTV__(tableView_);
+
+
 	if(isLinkNode())
 	{
 		if(returnLinkTableValue)
@@ -645,8 +649,13 @@ const std::string& ConfigurationTree::getValueAsString(bool returnLinkTableValue
 	        col_ != TableView::INVALID)  // this node is a value node
 		return tableView_->getDataView()[row_][col_];
 	else if(row_ == TableView::INVALID &&
-	        col_ == TableView::INVALID)  // this node is config node maybe with groupId
+	        col_ == TableView::INVALID)  // this node is table node maybe with groupId
+	{
+		//if root node, then no table defined
+		if(isRootNode()) return ConfigurationTree::ROOT_NAME;
+
 		return (groupId_ == "") ? table_->getTableName() : groupId_;
+	}
 	else if(row_ == TableView::INVALID)
 	{
 		__SS__ << "Malformed ConfigurationTree" << __E__;
@@ -920,7 +929,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(
 		if(!table_)
 		{
 			// root node
-			// so return config node
+			// so return table node
 			return recurse(configMgr_->getNode(nodeName),
 			               childPath,
 			               doNotThrowOnBrokenUIDLinks,
@@ -928,7 +937,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(
 		}
 		else if(row_ == TableView::INVALID && col_ == TableView::INVALID)
 		{
-			// config node
+			// table node
 
 			if(!tableView_)
 			{
@@ -940,7 +949,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(
 				__SS_THROW__;
 			}
 
-			// this node is config node, so return uid node considering groupid
+			// this node is table node, so return uid node considering groupid
 			return recurse(
 			    ConfigurationTree(
 			        configMgr_,
@@ -954,7 +963,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(
 			        "",  // ignored disconnected target name, not a link
 			        "",  // ignored disconnected link id, not a link
 			        "",
-			        // if this node is group config node, consider that when getting rows
+			        // if this node is group table node, consider that when getting rows
 			        (groupId_ == "")
 			            ? tableView_->findRow(tableView_->getColUID(), nodeName)
 			            : tableView_->findRowInGroup(tableView_->getColUID(),
@@ -983,7 +992,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(
 			// if the value is a unique link ..
 			// return a uid node!
 			// if the value is a group link
-			// return a config node with group string
+			// return a table node with group string
 			// else.. return value node
 
 			if(!tableView_)
@@ -1202,9 +1211,19 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(
 //	Useful for debugging a node failure, like when throwing an exception
 std::string ConfigurationTree::nodeDump(void) const
 {
-	__SS__ << "ConfigurationTree::nodeDump() "
-	          "=====================================\nConfigurationTree::nodeDump():"
-	       << __E__;
+	__SS__;
+
+	try
+	{
+		ss << "\n\n" << StringMacros::stackTrace() << __E__ << __E__;
+	}
+	catch(...)
+	{
+	}  // ignore errors
+
+	ss << "ConfigurationTree::nodeDump() "
+		          "=====================================\nConfigurationTree::nodeDump():"
+		       << __E__;
 
 	// try each level of debug.. and ignore errors
 	try
@@ -1242,13 +1261,7 @@ std::string ConfigurationTree::nodeDump(void) const
 	{
 	}  // ignore errors trying to show children
 
-	try
-	{
-		ss << "\n\n" << StringMacros::stackTrace() << __E__;
-	}
-	catch(...)
-	{
-	}  // ignore errors
+
 
 	ss << "end ConfigurationTree::nodeDump() ====================================="
 	   << __E__;
@@ -1348,9 +1361,9 @@ std::string ConfigurationTree::getNodeType(void) const
 {
 	if(!table_)
 		return ConfigurationTree::NODE_TYPE_ROOT;
-	if(isConfigurationNode() && groupId_ != "")
+	if(isTableNode() && groupId_ != "")
 		return ConfigurationTree::NODE_TYPE_GROUP_TABLE;
-	if(isConfigurationNode())
+	if(isTableNode())
 		return ConfigurationTree::NODE_TYPE_TABLE;
 	if(isGroupLinkNode())
 		return ConfigurationTree::NODE_TYPE_GROUP_LINK;
@@ -1409,7 +1422,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
     bool                                              autoSelectFilterFields) const
 {
 	// enforce that starting point is a table node
-	if(!isRootNode() && !isConfigurationNode())
+	if(!isRootNode() && !isTableNode())
 	{
 		__SS__ << "Can only get getCommonFields from a root or table node! "
 		       << "The node type is " << getNodeType() << __E__;
@@ -1465,8 +1478,11 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 	for(unsigned int i = 0; i < recordList.size(); ++i)
 	{
 		//__COUT__ << "Checking " << recordList[i] << __E__;
+		ConfigurationTree node = getNode(recordList[i]);
 
-		auto recordChildren = getNode(recordList[i]).getChildren();
+		std::vector<std::pair<std::string,ConfigurationTree>> recordChildren =
+				node.getChildren();
+
 		for(const auto& fieldNode : recordChildren)
 		{
 			//__COUT__ << "All... " << fieldNode.second.getNodeType() <<
@@ -1525,26 +1541,27 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 							          unsigned int /*link id col*/>
 							     linkPair;
 							bool isGroupLink;
-							tableView_->getChildLink(tableView_->findCol(fieldNode.first),
-							                         isGroupLink,
-							                         linkPair);
+							node.tableView_->getChildLink(
+									node.tableView_->findCol(fieldNode.first),
+									isGroupLink,
+									linkPair);
 
 							// add both link columns
 
 							fieldCandidateList.push_back(ConfigurationTree::RecordField(
-							    table_->getTableName(),
+								node.table_->getTableName(),
 							    recordList[i],
-							    tableView_->getColumnInfo(linkPair.first).getName(),
+								node.tableView_->getColumnInfo(linkPair.first).getName(),
 							    "",  // relative path, not including columnName_
-							    &tableView_->getColumnInfo(linkPair.first)));
+							    &node.tableView_->getColumnInfo(linkPair.first)));
 							fieldCount.push_back(-1);  // mark guaranteed field
 
 							fieldCandidateList.push_back(ConfigurationTree::RecordField(
-							    table_->getTableName(),
+								node.table_->getTableName(),
 							    recordList[i],
-							    tableView_->getColumnInfo(linkPair.second).getName(),
+								node.tableView_->getColumnInfo(linkPair.second).getName(),
 							    "",  // relative path, not including columnName_
-							    &tableView_->getColumnInfo(linkPair.second)));
+							    &node.tableView_->getColumnInfo(linkPair.second)));
 							fieldCount.push_back(-1);  // mark guaranteed field
 						}
 						else  // value node
@@ -1601,25 +1618,27 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 						std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>
 						     linkPair;
 						bool isGroupLink;
-						tableView_->getChildLink(
-						    tableView_->findCol(fieldNode.first), isGroupLink, linkPair);
+						//__COUTV__(node.tableView_);
+						//__COUTV__(fieldNode.first);
+						node.tableView_->getChildLink(
+							node.tableView_->findCol(fieldNode.first), isGroupLink, linkPair);
 
 						// add both link columns
 
 						fieldCandidateList.push_back(ConfigurationTree::RecordField(
-						    table_->getTableName(),
+							node.table_->getTableName(),
 						    recordList[i],
-						    tableView_->getColumnInfo(linkPair.first).getName(),
+							node.tableView_->getColumnInfo(linkPair.first).getName(),
 						    "",  // relative path, not including columnName_
-						    &tableView_->getColumnInfo(linkPair.first)));
+						    &node.tableView_->getColumnInfo(linkPair.first)));
 						fieldCount.push_back(-1);  // mark guaranteed field
 
 						fieldCandidateList.push_back(ConfigurationTree::RecordField(
-						    table_->getTableName(),
+							node.table_->getTableName(),
 						    recordList[i],
-						    tableView_->getColumnInfo(linkPair.second).getName(),
+							node.tableView_->getColumnInfo(linkPair.second).getName(),
 						    "",  // relative path, not including columnName_
-						    &tableView_->getColumnInfo(linkPair.second)));
+						    &node.tableView_->getColumnInfo(linkPair.second)));
 						fieldCount.push_back(-1);  // mark guaranteed field
 					}
 				}
@@ -1767,7 +1786,7 @@ std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForFiel
     const std::string&                                fieldName) const
 {
 	// enforce that starting point is a table node
-	if(!isConfigurationNode())
+	if(!isTableNode())
 	{
 		__SS__ << "Can only get getCommonFields from a table node! "
 		       << "The node type is " << getNodeType() << __E__;
@@ -2173,10 +2192,10 @@ std::map<std::string, ConfigurationTree> ConfigurationTree::getChildrenMap(void)
 }  // end getChildrenMap()
 
 //==============================================================================
-bool ConfigurationTree::isRootNode(void) const { return (!table_); }
+inline bool ConfigurationTree::isRootNode(void) const { return (!table_); }
 
 //==============================================================================
-bool ConfigurationTree::isConfigurationNode(void) const
+inline bool ConfigurationTree::isTableNode(void) const
 {
 	return (table_ && row_ == TableView::INVALID && col_ == TableView::INVALID);
 }
@@ -2203,7 +2222,7 @@ std::vector<std::vector<std::string>> ConfigurationTree::getChildrenNamesByPrior
 
 	if(row_ == TableView::INVALID && col_ == TableView::INVALID)
 	{
-		// this node is config node
+		// this node is table node
 		// so return all uid node strings that match groupId
 
 		bool tmpStatus;
@@ -2340,7 +2359,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority,
 
 	if(row_ == TableView::INVALID && col_ == TableView::INVALID)
 	{
-		// this node is config node
+		// this node is table node
 		// so return all uid node strings that match groupId
 
 		bool tmpStatus;
