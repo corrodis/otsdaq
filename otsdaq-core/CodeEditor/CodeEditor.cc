@@ -185,7 +185,7 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
-	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
+	path             = safePathString(StringMacros::decodeURIComponent(path));
 	__COUTV__(path);
 	__COUTV__(CodeEditor::SOURCE_BASE_PATH);
 
@@ -395,7 +395,7 @@ void CodeEditor::getPathContent(const std::string& basepath,
 void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
-	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
+	path             = safePathString(StringMacros::decodeURIComponent(path));
 	xmlOut->addTextElementToData("path", path);
 
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
@@ -530,7 +530,7 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
                                  const std::string& username)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
-	path             = safePathString(CgiDataUtilities::decodeURIComponent(path));
+	path             = safePathString(StringMacros::decodeURIComponent(path));
 	xmlOut->addTextElementToData("path", path);
 
 	std::string basepath = CodeEditor::SOURCE_BASE_PATH;
