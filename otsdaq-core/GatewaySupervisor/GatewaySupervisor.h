@@ -84,7 +84,7 @@ class GatewaySupervisor : public xdaq::Application,
 	bool stateMachineThread(toolbox::task::WorkLoop* workLoop);
 
 	// Status requests handlers
-	void infoRequestHandler(xgi::Input* in, xgi::Output* out);
+	void statusRequest(xgi::Input* in, xgi::Output* out);
 	void infoRequestResultHandler(xgi::Input* in, xgi::Output* out);
 	bool infoRequestThread(toolbox::task::WorkLoop* workLoop);
 

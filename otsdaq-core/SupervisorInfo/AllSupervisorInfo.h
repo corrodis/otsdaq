@@ -45,7 +45,7 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	void setSupervisorStatus(const unsigned int& id, const std::string& status);
 
 	// GETTERs (so searching and iterating is easier)
-	const std::map<unsigned int, SupervisorInfo>& getAllSupervisorInfo(void) const
+	const std::map<unsigned int /* lid */, SupervisorInfo>& getAllSupervisorInfo(void) const
 	{
 		return allSupervisorInfo_;
 	}
@@ -79,7 +79,7 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	SupervisorInfo* theSupervisorInfo_;
 	SupervisorInfo* theWizardInfo_;
 
-	std::map<unsigned int, SupervisorInfo> allSupervisorInfo_;
+	std::map<unsigned int /* lid */, SupervisorInfo> allSupervisorInfo_;
 	SupervisorInfoMap allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_,
 	    allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_;
 

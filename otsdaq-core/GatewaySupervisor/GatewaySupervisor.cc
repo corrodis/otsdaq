@@ -946,8 +946,7 @@ void GatewaySupervisor::statusRequest(xgi::Input* in, xgi::Output* out)
 	__COUT__ << "Starting to Request!" << __E__;
 
 	cgicc::Cgicc cgiIn(in);
-	std::string  requestType =
-	    "statusRequest";  // force request type to statusRequest
+	std::string  requestType = "statusRequest";  // force request type to statusRequest
 
 	HttpXmlDocument           xmlOut;
 	WebUsers::RequestUserInfo userInfo(requestType,
@@ -958,14 +957,16 @@ void GatewaySupervisor::statusRequest(xgi::Input* in, xgi::Output* out)
 	if(!theWebUsers_.xmlRequestOnGateway(cgiIn, out, &xmlOut, userInfo))
 		return;  // access failed
 
+	__COUT__ << "Starting to Request!" << __E__;
+
 	// If the thread is canceled when you are still in this method that activated it, then
 	// everything will freeze.  The way the workloop manager now works is safe since it
 	// cancel the thread only when the infoRequestResultHandler is called  and that method
 	// can be called ONLY when I am already out of here!
 
-	HttpXmlDocument tmpDoc = infoRequestWorkLoopManager_.processRequest(cgiIn);
+	//HttpXmlDocument tmpDoc = infoRequestWorkLoopManager_.processRequest(cgiIn);
 
-	xmlOut.copyDataChildren(tmpDoc);
+	//xmlOut.copyDataChildren(tmpDoc);
 
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false);
 }
@@ -2755,6 +2756,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	// accountSettings
 	// getAliasList
 	// getFecList
+	// getAppStatus
 	// getSystemMessages
 	// setUserWithLock
 	// getStateMachine
@@ -3028,16 +3030,63 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				fclose(fp);
 			}
 		}
-		else if(requestType == "getFecList")
+		else if(requestType == "getAppStatus")
 		{
-			xmlOut.addTextElementToData("fec_list", "");
+			std::string urlFilter = CgiDataUtilities::getOrPostData(cgiIn, "urlFilter");
+			std::string contextFilter = CgiDataUtilities::getOrPostData(cgiIn, "contextFilter");
+			std::string classFilter = CgiDataUtilities::getOrPostData(cgiIn, "classFilter");
 
-			for(auto it : allSupervisorInfo_.getAllFETypeSupervisorInfo())
+			__COUTV__(urlFilter);
+			__COUTV__(contextFilter);
+			__COUTV__(classFilter);
+
+			//each filter is comma-separated list of accept or reject wildcards
+
+			//classnameFilter = !FE*,!Gateway*
+			// std::vector<std::string> urlFilters, urlAcceptList, urlRejectList;
+			// StringMacros::getVectorFromString(urlFilter,urlFilters,{','});
+			// __COUTV__(StringMacros::vectorToString(urlFilters));
+
+
+			// for(auto& filterString: urlFilters)
+			// {
+			// 	if(filterString[0] == '!') 
+			// 	{
+			// 		urlRejectList.push_back(filterString.substr(1));
+			// 	} 
+			// 	else 
+			// 	{
+			// 		urlAcceptList.push_back(filterString);
+			// 	}
+			// }
+
+			// __COUTV__(StringMacros::vectorToString(urlAcceptList));
+			// __COUTV__(StringMacros::vectorToString(urlRejectList));
+
+			//StringMacros::wildCardMatch(needle,haystack)
+
+			//TODO filter on filter
+
+
+			for(auto it : allSupervisorInfo_.getAllSupervisorInfo())
 			{
-				xmlOut.addTextElementToParent("fec_url", it.second.getURL(), "fec_list");
-				xmlOut.addTextElementToParent(
-				    "fec_urn", std::to_string(it.second.getId()), "fec_list");
+				bool pass = true;
+
+				
+				//if in reject list pass = false;
+				//continue;
+
+				//if pass
+
+				xmlOut.addTextElementToData("name", it.second.getName()); // get application name
+				xmlOut.addTextElementToData("url", it.second.getURL()); // get application url
+				xmlOut.addTextElementToData("id", std::to_string(it.second.getId())); // get application id
+				xmlOut.addTextElementToData("status", it.second.getStatus()); // get status
+				xmlOut.addTextElementToData("class", it.second.getClass()); // get application class
+				xmlOut.addTextElementToData("progress", std::to_string(it.second.getProgress())); // get progress
+				xmlOut.addTextElementToData("context", it.second.getContextName()); // get context
 			}
+			
 		}
 		else if(requestType == "getSystemMessages")
 		{
@@ -3058,11 +3107,10 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			std::string lock     = CgiDataUtilities::postData(cgiIn, "lock");
 			std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
 
-			__COUT__ << requestType << __E__;
-			__COUT__ << "username " << username << __E__;
-			__COUT__ << "lock " << lock << __E__;
-			__COUT__ << "accounts " << accounts << __E__;
-			__COUT__ << "userInfo.uid_ " << userInfo.uid_ << __E__;
+			__COUTV__(username);
+			__COUTV__(lock);
+			__COUTV__(accounts);
+			__COUTV__(userInfo.uid_);
 
 			std::string tmpUserWithLock = theWebUsers_.getUserWithLock();
 			if(!theWebUsers_.setUserWithLock(userInfo.uid_, lock == "1", username))
