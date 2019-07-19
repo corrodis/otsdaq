@@ -584,7 +584,7 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 
 	std::string fsmName       = CgiDataUtilities::getData(cgiIn, "fsmName");
 	std::string fsmWindowName = CgiDataUtilities::getData(cgiIn, "fsmWindowName");
-	fsmWindowName             = CgiDataUtilities::decodeURIComponent(fsmWindowName);
+	fsmWindowName             = StringMacros::decodeURIComponent(fsmWindowName);
 	std::string currentState  = theStateMachine_.getCurrentStateName();
 
 	__COUT__ << "Check for Handled by theIterator_" << __E__;
