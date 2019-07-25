@@ -156,7 +156,7 @@ bool FEVInterface::slowControlsRunning(void) try
 {
 	__FE_COUT__ << "slowControlsRunning" << __E__;
 
-	if(mapOfSlowControlsChannels_.size() == 0)
+	if(getSlowControlsChannelCount() == 0)
 	{
 		__FE_COUT__
 		    << "No slow controls channels to monitor, exiting slow controls workloop."
