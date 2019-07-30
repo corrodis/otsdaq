@@ -81,6 +81,8 @@ FEDataManagerSupervisor::~FEDataManagerSupervisor(void)
 void FEDataManagerSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
+	
+	theDataManager_->parentSupervisorHasFrontends_ = true;
 
 	// Data Manager needs to be configured (instantiate buffers)
 	//	before FEVinterfaceManager configures (creates interfaces)

@@ -1,6 +1,6 @@
 #include "otsdaq-core/CoreSupervisors/ARTDAQFEDataManagerSupervisor.h"
 
-#include "../ARTDAQDataManager/ARTDAQDataManager.h"
+#include "otsdaq-core/ARTDAQDataManager/ARTDAQDataManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/DataManager/DataManagerSingleton.h"
 #include "otsdaq-core/FECore/FEVInterfacesManager.h"
@@ -10,7 +10,7 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(ARTDAQFEDataManagerSupervisor)
 
 //========================================================================================================================
-// The intention is that the artdaq Board Reader would be a onsumer
+// The intention is that the artdaq Board Reader would be a consumer
 //	extracting data that the front-end places in the buffer.
 ARTDAQFEDataManagerSupervisor::ARTDAQFEDataManagerSupervisor(xdaq::ApplicationStub* s)
     : FEDataManagerSupervisor(s, true /*artdaq Data Manager*/)

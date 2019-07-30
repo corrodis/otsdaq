@@ -922,6 +922,14 @@ void Iterator::startCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 		__SS_THROW__;
 	}
 
+	//save original duration
+	sscanf(iteratorStruct->commands_[iteratorStruct->commandIndex_]
+			           .params_[IterateTable::commandRunParams_.DurationInSeconds_]
+			           .c_str(),
+			       "%ld",
+			       &iteratorStruct->originalDurationInSeconds_);
+	__COUTV__(iteratorStruct->originalDurationInSeconds_);
+
 	// else successfully launched
 	__COUT__
 	    << "FSM in transition = "
@@ -1505,8 +1513,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 		                 .params_[IterateTable::commandRunParams_.WaitOnRunningThreads_])
 			waitOnRunningThreads = true;
 
-		time_t remainingDurationInSeconds;  // parameter converted during start to the
-		                                    // stop linux timestamp
+		time_t remainingDurationInSeconds;
 		sscanf(iteratorStruct->commands_[iteratorStruct->commandIndex_]
 		           .params_[IterateTable::commandRunParams_.DurationInSeconds_]
 		           .c_str(),
@@ -1623,9 +1630,15 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 				__SS_THROW__;
 			}
 
-			// write indication of run done into duration
+			// write indication of run done
 			iteratorStruct->runIsDone_ = true;
 
+			// write original duration back to string
+			char str[200];
+			sprintf(str, "%ld", iteratorStruct->originalDurationInSeconds_);
+			iteratorStruct->commands_[iteratorStruct->commandIndex_]
+				.params_[IterateTable::commandRunParams_.DurationInSeconds_] =
+				str;  // re-store as string
 			return false;
 		}
 	}
@@ -1636,7 +1649,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 		__SS_THROW__;
 	}
 	return false;
-}
+} // end checkCommandRun()
 
 //========================================================================================================================
 // return true if done

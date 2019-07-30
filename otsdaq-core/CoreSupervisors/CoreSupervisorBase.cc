@@ -933,3 +933,69 @@ void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
 		);
 	}
 }  // end transitionStopping()
+
+
+//========================================================================================================================
+// SendAsyncErrorToGateway
+//	Static -- thread
+//	Send async error or soft error to gateway
+//	Call this as thread so that parent calling function (workloop) can end.
+void CoreSupervisorBase::sendAsyncErrorToGateway(
+                                           const std::string& errorMessage,
+                                           bool               isSoftError) try
+{
+
+	if(isSoftError)
+		__SUP_COUT_ERR__ << "Sending Supervisor Async SOFT Running Error... \n"
+		             << errorMessage << __E__;
+	else
+		__SUP_COUT_ERR__ << "Sending Supervisor Async Running Error... \n"
+		             << errorMessage << __E__;
+
+
+	theStateMachine_.setErrorMessage(errorMessage);
+
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor =
+	    allSupervisorInfo_.getGatewayInfo().getDescriptor();
+
+	SOAPParameters parameters;
+	parameters.addParameter("ErrorMessage", errorMessage);
+
+	xoap::MessageReference replyMessage =
+	    SOAPMessenger::sendWithSOAPReply(
+	        gatewaySupervisor, isSoftError ? "AsyncSoftError" : "AsyncError", parameters);
+
+	std::stringstream replyMessageSStream;
+	replyMessageSStream << SOAPUtilities::translate(replyMessage);
+	__SUP_COUT__ << "Received... " << replyMessageSStream.str() << std::endl;
+
+	if(replyMessageSStream.str().find("Fault") != std::string::npos)
+	{
+		__SUP_COUT_ERR__ << "Failure to indicate fault to Gateway..." << __E__;
+		throw;
+	}
+}
+catch(const xdaq::exception::Exception& e)
+{
+	if(isSoftError)
+		__SUP_COUT__ << "SOAP message failure indicating Supervisor asynchronous running SOFT "
+		            "error back to Gateway: "
+		         << e.what() << __E__;
+	else
+		__SUP_COUT__ << "SOAP message failure indicating Supervisor asynchronous running "
+		            "error back to Gateway: "
+		         << e.what() << __E__;
+	throw; //rethrow and hope error is noticed
+}
+catch(...)
+{
+	if(isSoftError)
+		__SUP_COUT__ << "Unknown error encounter indicating Supervisor asynchronous running "
+		            "SOFT error back to Gateway."
+		         << __E__;
+	else
+		__SUP_COUT__ << "Unknown error encounter indicating Supervisor asynchronous running "
+		            "error back to Gateway."
+		         << __E__;
+	throw; //rethrow and hope error is noticed
+}  // end SendAsyncErrorToGateway()

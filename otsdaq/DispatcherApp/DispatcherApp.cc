@@ -1,30 +1,10 @@
 #include "otsdaq/DispatcherApp/DispatcherApp.h"
-//#include "otsdaq-core/Macros/CoutMacros.h"
-//#include "otsdaq-core/MessageFacility/MessageFacility.h"
-//#include "otsdaq-core/SOAPUtilities/SOAPCommand.h"
-//#include "otsdaq-core/SOAPUtilities/SOAPUtilities.h"
-//#include "otsdaq-core/XmlUtilities/HttpXmlDocument.h"
-//
-//#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-//#include "otsdaq-core/TablePlugins/XDAQContextTable.h"
-//
-//#include <toolbox/fsm/FailedEvent.h>
-//
-//#include <xdaq/NamespaceURI.h>
-//#include <xoap/Method.h>
 
-//#include <memory>
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "artdaq/DAQdata/Globals.hh"
 #include "cetlib_except/exception.h"
 #include "fhiclcpp/make_ParameterSet.h"
-//#include "messagefacility/MessageLogger/MessageLogger.h"
-
-//#include <cassert>
-//#include <fstream>
-//#include <iostream>
-//#include "otsdaq-core/TableCore/TableGroupKey.h"
 
 using namespace ots;
 
@@ -35,81 +15,12 @@ XDAQ_INSTANTIATOR_IMPL(DispatcherApp)
 
 //========================================================================================================================
 DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s) : CoreSupervisorBase(s)
-//   : xdaq::Application(s)
-//    , SOAPMessenger(this)
-//    , stateMachineWorkLoopManager_(
-//          toolbox::task::bind(this, &DispatcherApp::stateMachineThread, "StateMachine"))
-//    , stateMachineSemaphore_(toolbox::BSem::FULL)
-//    , theConfigurationManager_(
-//          new ConfigurationManager)  //(Singleton<ConfigurationManager>::getInstance())
-//                                     ////I always load the full config but if I want to
-//                                     // load a partial configuration (new
-//                                     // ConfigurationManager)
-//    , XDAQContextTableName_(
-//          theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)->getTableName())
-//    , supervisorConfigurationPath_(
-//          "INITIALIZED INSIDE THE CONTRUCTOR BECAUSE IT NEEDS supervisorContextUID_ and
-//          " "supervisorApplicationUID_")
-//    , supervisorContextUID_("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
-//    , supervisorApplicationUID_(
-//          "INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
 {
 	__SUP_COUT__ << "Constructor." << __E__;
 
 	INIT_MF("DispatcherApp");
 
-	//	xgi::bind(this, &DispatcherApp::Default, "Default");
-	//	xgi::bind(this, &DispatcherApp::stateMachineXgiHandler, "StateMachineXgiHandler");
-	//
-	//	xoap::bind(this,
-	//	           &DispatcherApp::stateMachineStateRequest,
-	//	           "StateMachineStateRequest",
-	//	           XDAQ_NS_URI);
-	//	xoap::bind(this,
-	//	           &DispatcherApp::stateMachineErrorMessageRequest,
-	//	           "StateMachineErrorMessageRequest",
-	//	           XDAQ_NS_URI);
-	//
-	//	try
-	//	{
-	//		supervisorContextUID_ =
-	//		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
-	//		        ->getContextUID(
-	//		            getApplicationContext()->getContextDescriptor()->getURL());
-	//	}
-	//	catch(...)
-	//	{
-	//		__COUT_ERR__
-	//		    << "XDAQ Supervisor could not access it's configuration through "
-	//		       "the Configuration Manager."
-	//		    << ". The getApplicationContext()->getContextDescriptor()->getURL() = "
-	//		    << getApplicationContext()->getContextDescriptor()->getURL() << __E__;
-	//		throw;
-	//	}
-	//	try
-	//	{
-	//		supervisorApplicationUID_ =
-	//		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
-	//		        ->getApplicationUID(
-	//		            getApplicationContext()->getContextDescriptor()->getURL(),
-	//		            getApplicationDescriptor()->getLocalId());
-	//	}
-	//	catch(...)
-	//	{
-	//		__COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
-	//		                "the Configuration Manager."
-	//		             << " The supervisorContextUID_ = " << supervisorContextUID_
-	//		             << ". The supervisorApplicationUID = " <<
-	// supervisorApplicationUID_
-	//		             << __E__;
-	//		throw;
-	//	}
-	//	supervisorConfigurationPath_ = "/" + supervisorContextUID_ +
-	//	                               "/LinkToApplicationTable/" +
-	//	                               supervisorApplicationUID_ +
-	//"/LinkToSupervisorTable";
-	//
-	//	setStateMachineName(supervisorApplicationUID_);
+
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
@@ -161,122 +72,6 @@ void DispatcherApp::destroy(void)
 	theDispatcherInterface_.reset(nullptr);
 	__SUP_COUT__ << "Destroyed." << __E__;
 }  // end destroy()
-//
-////========================================================================================================================
-// void DispatcherApp::Default(xgi::Input* in, xgi::Output* out)
-//{
-//	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame "
-//	        "src='/WebPath/html/DispatcherApp.html?urn="
-//	     << this->getApplicationDescriptor()->getLocalId() << "'></frameset></html>";
-//}
-//
-////========================================================================================================================
-// void DispatcherApp::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out) {}
-//
-////========================================================================================================================
-// void DispatcherApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out) {}
-//
-////========================================================================================================================
-// xoap::MessageReference DispatcherApp::stateMachineXoapHandler(
-//    xoap::MessageReference message)
-//{
-//	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << __E__;
-//	stateMachineWorkLoopManager_.removeProcessedRequests();
-//	stateMachineWorkLoopManager_.processRequest(message);
-//	std::cout << __COUT_HDR_FL__ << "Done - Soap Handler!" << __E__;
-//	return message;
-//}
-//
-////========================================================================================================================
-// xoap::MessageReference DispatcherApp::stateMachineResultXoapHandler(
-//    xoap::MessageReference message)
-//{
-//	std::cout << __COUT_HDR_FL__ << "Soap Handler!" << __E__;
-//	// stateMachineWorkLoopManager_.removeProcessedRequests();
-//	// stateMachineWorkLoopManager_.processRequest(message);
-//	std::cout << __COUT_HDR_FL__ << "Done - Soap Handler!" << __E__;
-//	return message;
-//}
-//
-////========================================================================================================================
-// bool DispatcherApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
-//{
-//	stateMachineSemaphore_.take();
-//	std::cout << __COUT_HDR_FL__ << "Re-sending message..."
-//	          << SOAPUtilities::translate(
-//	                 stateMachineWorkLoopManager_.getMessage(workLoop))
-//	                 .getCommand()
-//	          << __E__;
-//	std::string reply = send(this->getApplicationDescriptor(),
-//	                         stateMachineWorkLoopManager_.getMessage(workLoop));
-//	stateMachineWorkLoopManager_.report(workLoop, reply, 100, true);
-//	std::cout << __COUT_HDR_FL__ << "Done with message" << __E__;
-//	stateMachineSemaphore_.give();
-//	return false;  // execute once and automatically remove the workloop so in
-//	               // WorkLoopManager the try workLoop->remove(job_) could be commented
-//	               // out return true;//go on and then you must do the
-//	               // workLoop->remove(job_) in WorkLoopManager
-//}
-//
-////========================================================================================================================
-// xoap::MessageReference DispatcherApp::stateMachineStateRequest(
-//    xoap::MessageReference message)
-//{
-//	std::cout << __COUT_HDR_FL__ << theStateMachine_.getCurrentStateName() << __E__;
-//	return SOAPUtilities::makeSOAPMessageReference(
-//	    theStateMachine_.getCurrentStateName());
-//}
-//
-////========================================================================================================================
-// xoap::MessageReference DispatcherApp::stateMachineErrorMessageRequest(
-//    xoap::MessageReference message)
-//
-//{
-//	__COUT__ << "theStateMachine_.getErrorMessage() = "
-//	         << theStateMachine_.getErrorMessage() << __E__;
-//
-//	SOAPParameters retParameters;
-//	retParameters.addParameter("ErrorMessage", theStateMachine_.getErrorMessage());
-//	return SOAPUtilities::makeSOAPMessageReference("stateMachineErrorMessageRequestReply",
-//	                                               retParameters);
-//}
-//
-////========================================================================================================================
-// void DispatcherApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) {}
-//
-////========================================================================================================================
-// void DispatcherApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm) {}
-//
-////========================================================================================================================
-// void DispatcherApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm) {}
-//
-////========================================================================================================================
-// void DispatcherApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm) {}
-//
-////========================================================================================================================
-// void DispatcherApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm) {}
-//
-////========================================================================================================================
-// void DispatcherApp::inError(toolbox::fsm::FiniteStateMachine& fsm)
-//{
-//	std::cout << __COUT_HDR_FL__
-//	          << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-//	// rcmsStateNotifier_.stateChanged("Error", "");
-//}
-//
-////========================================================================================================================
-// void DispatcherApp::enteringError(toolbox::Event::Reference e)
-//{
-//	std::cout << __COUT_HDR_FL__
-//	          << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-//	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
-//	std::ostringstream         error;
-//	error << "Failure performing transition from " << failedEvent.getFromState() << " to "
-//	      << failedEvent.getToState()
-//	      << " exception: " << failedEvent.getException().what();
-//	std::cout << __COUT_HDR_FL__ << error.str() << __E__;
-//	// diagService_->reportError(errstr.str(),DIAGERROR);
-//}
 
 //========================================================================================================================
 void DispatcherApp::transitionConfiguring(toolbox::Event::Reference e)
@@ -461,6 +256,11 @@ void DispatcherApp::transitionStarting(toolbox::Event::Reference e)
 		__SUP_SS_THROW__;
 	}
 	__SUP_COUT__ << "Started." << __E__;
+
+	//register configured monitors
+	for(const auto& monitor: monitors_)
+		registerMonitor(monitor.second /*fcl*/);
+
 }  // end transitionStarting()
 
 //========================================================================================================================
@@ -470,3 +270,111 @@ void DispatcherApp::transitionStopping(toolbox::Event::Reference e)
 	theDispatcherInterface_->stop(45, 0);
 	__SUP_COUT__ << "Stopped." << __E__;
 }  // end transitionStopping()
+
+
+//========================================================================================================================
+//	request
+void DispatcherApp::request(const std::string&               requestType,
+                             cgicc::Cgicc&                    cgiIn,
+                             HttpXmlDocument&                 xmlOut,
+                             const WebUsers::RequestUserInfo& userInfo)
+{
+	// Commands:
+	//		 RegisterMonitor
+	//		 UnregisterMonitor
+
+	if(theStateMachine_.getCurrentStateName() != "Configured")
+	{
+		__SUP_SS__ << "Monitor requests can only take place while Dispatcher"
+				" is in Running state. The current state is '" <<
+				theStateMachine_.getCurrentStateName() << ".'" << __E__;
+		__SUP_SS_THROW__;
+	}
+
+	std::string fcl =
+	    StringMacros::decodeURIComponent(CgiDataUtilities::postData(cgiIn, "fcl"));  // from POST
+
+	__SUP_COUTV__(requestType);
+	__SUP_COUTV__(fcl);
+
+	if(requestType == "RegisterMonitor")
+		registerMonitor(fcl);
+	else if(requestType == "UnregisterMonitor")
+		unregisterMonitor(fcl);
+	else
+	{
+		__SUP_SS__ << "Unknown Dispatcher request '" <<
+				requestType << "' received." << __E__;
+		__SUP_SS_THROW__;
+	}
+
+
+} //end request
+
+//========================================================================================================================
+void DispatcherApp::registerMonitor(const std::string& fcl)
+{
+	__SUP_COUTV__(fcl);
+
+	// load fcl string from dedicated file
+	fhicl::ParameterSet pset;
+	try
+	{
+		fhicl::make_ParameterSet(fcl, pset);
+		theDispatcherInterface_->register_monitor(pset);
+	}
+	catch(const cet::coded_exception<fhicl::error, &fhicl::detail::translate>& e)
+	{
+		__SUP_SS__ << "Error was caught while configuring: " << e.what() << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+
+		sendAsyncErrorToGateway(ss.str(), false /*isSoftError*/);
+	}
+	catch(const cet::exception& e)
+	{
+		__SUP_SS__ << "Error was caught while configuring: " << e.explain_self() << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+
+		sendAsyncErrorToGateway(ss.str(), false /*isSoftError*/);
+	}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while configuring." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+
+		sendAsyncErrorToGateway(ss.str(), false /*isSoftError*/);
+	}
+
+}  // end registerMonitor()
+
+//========================================================================================================================
+void DispatcherApp::unregisterMonitor(const std::string& label)
+{
+	try
+	{
+		theDispatcherInterface_->unregister_monitor(label);
+	}
+	catch(const cet::coded_exception<fhicl::error, &fhicl::detail::translate>& e)
+	{
+		__SUP_SS__ << "Error was caught while configuring: " << e.what() << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+
+		sendAsyncErrorToGateway(ss.str(), false /*isSoftError*/);
+	}
+	catch(const cet::exception& e)
+	{
+		__SUP_SS__ << "Error was caught while configuring: " << e.explain_self() << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+
+		sendAsyncErrorToGateway(ss.str(), false /*isSoftError*/);
+	}
+	catch(...)
+	{
+		__SUP_SS__ << "Unknown error was caught while configuring." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+
+		sendAsyncErrorToGateway(ss.str(), false /*isSoftError*/);
+	}
+
+}  // end unregisterMonitor()
+
