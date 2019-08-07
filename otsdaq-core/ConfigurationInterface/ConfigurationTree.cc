@@ -2410,8 +2410,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority,
 			catch(std::runtime_error& e)
 			{
 				__COUT_WARN__ << "Priority configuration not found. Assuming all "
-				                 "children have equal priority (Error: "
-				              << e.what() << __E__;
+				                 "children have equal priority. " << __E__;
 				retVector.clear();
 			}
 		}

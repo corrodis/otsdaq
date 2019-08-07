@@ -1022,24 +1022,27 @@ const unsigned int TableView::getColStatus(void) const
 // getColPriority
 //	const version, so don't attempt to lookup
 //	if column not found throw error
+//
+//	Note: common for Priority column to not exist, so be quiet with printouts
+//	 so as to not scare people.
 const unsigned int TableView::getColPriority(void) const
 {
 	if(colPriority_ != INVALID)
 		return colPriority_;
 
-	__COUT__ << "Priority column was not found... \nColumn Types: " << __E__;
+	__SS__ << "Priority column was not found... \nColumn Types: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << "\t" << columnsInfo_[col].getType() << "() "
+		ss << "\t" << columnsInfo_[col].getType() << "() "
 		          << columnsInfo_[col].getName() << __E__;
-	std::cout << __E__;
+	ss << __E__;
 
-	__SS__ << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
+	ss << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
 	       << " Column in config named " << tableName_
 	       << ". (The Priority column is identified when TableView is initialized)"
 	       << __E__;  // this is the const call, so can not identify the column and set
 	                  // colPriority_ here
-	__SS_THROW__;
-}
+	__SS_ONLY_THROW__; //keep it quiet
+} //end getColPriority()
 
 //==============================================================================
 // addRowToGroup
