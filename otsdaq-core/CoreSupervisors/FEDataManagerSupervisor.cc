@@ -201,9 +201,7 @@ DataManager* FEDataManagerSupervisor::extractDataManager()
 			if(!theDataManager_)
 			{
 				// dynamic_cast returns null pointer on failure
-				__SUP_SS__ << "Dynamic cast failure!" << __E__;
-				__SUP_COUT_ERR__ << ss.str();
-				__SUP_SS_THROW__;
+				throw(std::runtime_error(""));
 			}
 			__SUP_COUT__ << "State Machine " << i << " WAS of type DataManager" << __E__;
 
