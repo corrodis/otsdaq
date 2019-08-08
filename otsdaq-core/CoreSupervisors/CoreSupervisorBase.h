@@ -88,12 +88,12 @@ class CoreSupervisorBase : public xdaq::Application,
 	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference message);
 
 	xoap::MessageReference stateMachineStateRequest(xoap::MessageReference message);
-	xoap::MessageReference stateMachineErrorMessageRequest(
-	    xoap::MessageReference message);
+	xoap::MessageReference stateMachineErrorMessageRequest(xoap::MessageReference message);
 
 	void 			sendAsyncErrorToGateway		(const std::string& errMsg, bool isSoftError);
 
 	virtual xoap::MessageReference workLoopStatusRequest(xoap::MessageReference message);
+	virtual xoap::MessageReference applicationStatusRequest(xoap::MessageReference message);
 
 	bool stateMachineThread(toolbox::task::WorkLoop* workLoop);
 

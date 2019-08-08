@@ -47,6 +47,10 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub* stub)
 	           &CoreSupervisorBase::workLoopStatusRequestWrapper,
 	           "WorkLoopStatusRequest",
 	           XDAQ_NS_URI);
+	xoap::bind(this,
+	           &CoreSupervisorBase::applicationStatusRequest,
+	           "ApplicationStatusRequest",
+	           XDAQ_NS_URI);
 
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor
@@ -316,8 +320,40 @@ xoap::MessageReference CoreSupervisorBase::workLoopStatusRequest(
 
 {
 	// this should have an override for monitoring work loops being done
-	return SOAPUtilities::makeSOAPMessageReference(CoreSupervisorBase::WORK_LOOP_DONE);
+	return SOAPUtilities::makeSOAPMessageReference(
+		CoreSupervisorBase::WORK_LOOP_DONE);
 }  // end workLoopStatusRequest()
+
+//========================================================================================================================
+xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(
+    xoap::MessageReference message)
+
+{
+	// send back status and progress parameters
+	std::string status = theStateMachine_.getCurrentStateName();
+	std::string progress = RunControlStateMachine::theProgressBar_.readPercentageString();
+
+	if(theStateMachine_.isInTransition())
+	{
+		// return the ProvenanceStateName
+		status = theStateMachine_.getProvenanceStateName();
+		// std::string transition = theStateMachine_.getTransitionName(theStateMachine_.getCurrentStateName(), //getProvenanceStateName
+		// 	SOAPUtilities::translate(theStateMachine_.theMessage_).getCommand());
+		// __COUTV__(transition);
+	}
+
+	else
+	{
+		status = theStateMachine_.getCurrentStateName();
+	}
+
+	SOAPParameters retParameters;
+	retParameters.addParameter("Status", status); 
+	retParameters.addParameter("Progress", progress);
+
+
+	return SOAPUtilities::makeSOAPMessageReference("applicationStatusRequestReply", retParameters); 
+}  // end applicationStatusRequest()
 
 //========================================================================================================================
 bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
