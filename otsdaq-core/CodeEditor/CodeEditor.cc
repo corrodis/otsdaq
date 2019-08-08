@@ -68,6 +68,7 @@ CodeEditor::CodeEditor()
 // xmlRequest
 //	all requests are handled here
 void CodeEditor::xmlRequest(const std::string& option,
+							bool readOnlyMode,
                             cgicc::Cgicc&      cgiIn,
                             HttpXmlDocument*   xmlOut,
                             const std::string& username) try
@@ -92,11 +93,11 @@ void CodeEditor::xmlRequest(const std::string& option,
 	{
 		getFileContent(cgiIn, xmlOut);
 	}
-	else if(option == "saveFileContent")
+	else if(!readOnlyMode && option == "saveFileContent")
 	{
 		saveFileContent(cgiIn, xmlOut, username);
 	}
-	else if(option == "build")
+	else if(!readOnlyMode && option == "build")
 	{
 		build(cgiIn, xmlOut, username);
 	}

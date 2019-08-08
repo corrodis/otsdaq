@@ -25,9 +25,10 @@ class CodeEditor
 
 	// request are handled here
 	void xmlRequest(const std::string& option,
-	                cgicc::Cgicc&      cgiIn,
-	                HttpXmlDocument*   xmlOut,
-	                const std::string& username);
+	                bool readOnlyMode,
+					 cgicc::Cgicc& cgiIn,
+	                HttpXmlDocument*                xmlOut,
+	                const std::string&              username);
 
   private:
 	void getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut);
