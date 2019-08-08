@@ -26,6 +26,7 @@
 
 #include <set>
 #include <string>
+#include <sstream>
 
 // defines used also by OtsConfigurationWizardSupervisor
 #define FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE \
@@ -142,6 +143,9 @@ class GatewaySupervisor : public xdaq::Application,
 	static void indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
 
 	static void StateChangerWorkLoop(GatewaySupervisor* supervisorPtr);
+	static void AppStatusWorkLoop(GatewaySupervisor* supervisorPtr);
+	
+
 	std::string attemptStateMachineTransition(HttpXmlDocument*    xmldoc,
 	                                          std::ostringstream* out,
 	                                          const std::string&  command,

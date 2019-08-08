@@ -174,17 +174,62 @@ void GatewaySupervisor::init(void)
 	//__COUT__ << "GatewaySupervisor UID:" << supervisorUID << __E__;
 
 	// setting up thread for UDP thread to drive state machine
-	bool enableStateChanges = false;
-	try
 	{
-		enableStateChanges = CorePropertySupervisorBase::getSupervisorTableNode()
-		                         .getNode("EnableStateChangesOverUDP")
-		                         .getValue<bool>();
-	}
-	catch(...)
+		bool enableStateChanges = false;
+		try
+		{
+			enableStateChanges = CorePropertySupervisorBase::getSupervisorTableNode()
+									.getNode("EnableStateChangesOverUDP")
+									.getValue<bool>();
+		}
+		catch(...)
+		{
+			;
+		}  // ignore errors
+
+
+		if(enableStateChanges)
+		{
+			__COUT__ << "Enabling state changes over UDP..." << __E__;
+			// start state changer UDP listener thread
+			std::thread(
+				[](GatewaySupervisor* s) { GatewaySupervisor::StateChangerWorkLoop(s); },
+				this)
+				.detach();
+		}
+		else
+			__COUT__ << "State changes over UDP are disabled." << __E__;
+	} // end setting up thread for UDP drive of state machine
+
+	
+	// setting up checking of App Status
 	{
-		;
-	}  // ignore errors
+		bool checkAppStatus = false;
+		try
+		{
+			checkAppStatus = CorePropertySupervisorBase::getSupervisorTableNode()
+									.getNode("EnableApplicationStatusMonitoring")
+									.getValue<bool>();
+		}
+		catch(...)
+		{
+			;
+		}  // ignore errors
+
+
+		if(checkAppStatus)
+		{
+			__COUT__ << "Enabling App Status checking..." << __E__;
+			// 
+			std::thread(
+				[](GatewaySupervisor* s) { GatewaySupervisor::AppStatusWorkLoop(s); },
+				this)
+				.detach();
+		}
+		else
+			__COUT__ << "App Status checking is disabled." << __E__;
+	} // end checking of Application Status
+
 
 	try
 	{
@@ -210,20 +255,105 @@ void GatewaySupervisor::init(void)
 	{
 		;
 	}  // ignore errors
-
-	if(enableStateChanges)
-	{
-		__COUT__ << "Enabling state changes over UDP..." << __E__;
-		// start state changer UDP listener thread
-		std::thread(
-		    [](GatewaySupervisor* s) { GatewaySupervisor::StateChangerWorkLoop(s); },
-		    this)
-		    .detach();
-	}
-	else
-		__COUT__ << "State changes over UDP are disabled." << __E__;
-
 }  // end init()
+
+//========================================================================================================================
+// AppStatusWorkLoop
+//	child thread
+void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
+{
+	sleep(5);
+	std::string status, progress, appName;
+	int progressInteger;
+	while(1)
+	{
+		// workloop procedure
+		//	Loop through all Apps and request status
+		//	sleep
+		// __COUT__ << "Just debugging App status checking" << __E__;
+		for(const auto& it : 
+			theSupervisor->allSupervisorInfo_.getAllSupervisorInfo())
+		{
+			auto appInfo = it.second;
+			appName = appInfo.getName();
+			 __COUT__ << "Getting Status "
+			       << " Supervisor instance = '" << appInfo.getName()
+			       << "' [LID=" << appInfo.getId() << "] in Context '"
+			       << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
+			       << "].\n\n";
+			// if the application is the gateway supervisor, we do not send a SOAP message
+			if (appName == "Supervisor")
+			{
+				// send back status and progress parameters
+				status = theSupervisor->theStateMachine_.getCurrentStateName();
+				progress = theSupervisor->theProgressBar_.readPercentageString();
+
+				if(theSupervisor->theStateMachine_.isInTransition())
+				{
+					// return the ProvenanceStateName
+					status = theSupervisor->theStateMachine_.getProvenanceStateName();
+				}
+				else
+				{
+					status = theSupervisor->theStateMachine_.getCurrentStateName();
+				}
+			}
+			else
+			{
+				// pass the application as a parameter to tempMessage
+				SOAPParameters appPointer;
+				appPointer.addParameter("ApplicationPointer");
+
+				xoap::MessageReference tempMessage = SOAPUtilities::makeSOAPMessageReference("ApplicationStatusRequest");
+				// print tempMessage
+				__COUT__ << "tempMessage... " << SOAPUtilities::translate(tempMessage) << std::endl;
+
+				try
+				{
+					xoap::MessageReference statusMessage =
+						theSupervisor->sendWithSOAPReply(appInfo.getDescriptor(),
+											tempMessage);
+					
+					__COUT__ << "statusMessage... " << SOAPUtilities::translate(statusMessage) << std::endl;
+					
+					SOAPParameters parameters;
+					parameters.addParameter("Status");
+					parameters.addParameter("Progress");
+					SOAPUtilities::receive(statusMessage, parameters);
+
+					status = parameters.getValue("Status");
+					if(status.empty()){
+						status = "Unknown";
+					}
+
+					progress = parameters.getValue("Progress");
+					if(progress.empty()){
+						progress = "0";
+					}
+					__COUTV__(status);
+					__COUTV__(progress);
+				}
+				catch(const xdaq::exception::Exception& e)
+				{
+					__COUT__ << "Failed to send SOAP Message... " << std::endl;
+				}
+			}
+			
+			//store status and progress in some struct..
+			//	in the APP STATUS structure
+			// set status and progress
+			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo,status);
+			// convert the progress string into an integer in order to call appInfo.setProgress() function
+			std::istringstream ssProgress (progress);
+			ssProgress >> progressInteger;
+			theSupervisor->allSupervisorInfo_.setSupervisorProgress(appInfo,progressInteger);
+
+		} // end of for loop
+		
+		sleep(5);
+	}
+}  // end AppStatusWorkLoop
+
 
 //========================================================================================================================
 // StateChangerWorkLoop
@@ -2757,6 +2887,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	// getAliasList
 	// getFecList
 	// getAppStatus
+	// getContextMemberNames
 	// getSystemMessages
 	// setUserWithLock
 	// getStateMachine
@@ -2783,6 +2914,9 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			__COUT__ << "Get Settings Request" << __E__;
 			__COUT__ << "accounts = " << accounts << __E__;
 			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
+		}
+		else if(requestType == "viewCodeContent"){
+				
 		}
 		else if(requestType == "setSettings")
 		{
@@ -3032,62 +3166,37 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		}
 		else if(requestType == "getAppStatus")
 		{
-			std::string urlFilter = CgiDataUtilities::getOrPostData(cgiIn, "urlFilter");
-			std::string contextFilter = CgiDataUtilities::getOrPostData(cgiIn, "contextFilter");
-			std::string classFilter = CgiDataUtilities::getOrPostData(cgiIn, "classFilter");
-
-			__COUTV__(urlFilter);
-			__COUTV__(contextFilter);
-			__COUTV__(classFilter);
-
-			//each filter is comma-separated list of accept or reject wildcards
-
-			//classnameFilter = !FE*,!Gateway*
-			// std::vector<std::string> urlFilters, urlAcceptList, urlRejectList;
-			// StringMacros::getVectorFromString(urlFilter,urlFilters,{','});
-			// __COUTV__(StringMacros::vectorToString(urlFilters));
-
-
-			// for(auto& filterString: urlFilters)
-			// {
-			// 	if(filterString[0] == '!') 
-			// 	{
-			// 		urlRejectList.push_back(filterString.substr(1));
-			// 	} 
-			// 	else 
-			// 	{
-			// 		urlAcceptList.push_back(filterString);
-			// 	}
-			// }
-
-			// __COUTV__(StringMacros::vectorToString(urlAcceptList));
-			// __COUTV__(StringMacros::vectorToString(urlRejectList));
-
-			//StringMacros::wildCardMatch(needle,haystack)
-
-			//TODO filter on filter
-
-
 			for(auto it : allSupervisorInfo_.getAllSupervisorInfo())
 			{
-				bool pass = true;
+				// bool pass = true;
 
-				
-				//if in reject list pass = false;
-				//continue;
+				auto appInfo = it.second;
 
-				//if pass
+				xmlOut.addTextElementToData("name", appInfo.getName()); // get application name
+				xmlOut.addTextElementToData("id", std::to_string(appInfo.getId())); // get application id
+				xmlOut.addTextElementToData("status", appInfo.getStatus()); // get status
+				xmlOut.addTextElementToData("time", StringMacros::getTimestampString(appInfo.getLastStatusTime())); // get time stamp
+				xmlOut.addTextElementToData("progress", std::to_string(appInfo.getProgress())); // get progress
+				xmlOut.addTextElementToData("class", appInfo.getClass()); // get application class
+				xmlOut.addTextElementToData("url", appInfo.getURL()); // get application url
+				xmlOut.addTextElementToData("context", appInfo.getContextName()); // get context
 
-				xmlOut.addTextElementToData("name", it.second.getName()); // get application name
-				xmlOut.addTextElementToData("url", it.second.getURL()); // get application url
-				xmlOut.addTextElementToData("id", std::to_string(it.second.getId())); // get application id
-				xmlOut.addTextElementToData("status", it.second.getStatus()); // get status
-				xmlOut.addTextElementToData("class", it.second.getClass()); // get application class
-				xmlOut.addTextElementToData("progress", std::to_string(it.second.getProgress())); // get progress
-				xmlOut.addTextElementToData("context", it.second.getContextName()); // get context
+			}
+		}
+
+		else if(requestType == "getContextMemberNames")
+		{
+			const XDAQContextTable* contextTable = 
+				CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextTable);
+			
+			auto  contexts = contextTable->getContexts();
+			for(const auto& context : contexts)
+			{
+				xmlOut.addTextElementToData("ContextMember", context.contextUID_); // get context member name
 			}
 			
 		}
+		
 		else if(requestType == "getSystemMessages")
 		{
 			xmlOut.addTextElementToData(
