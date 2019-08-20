@@ -2898,7 +2898,7 @@ const bool TableView::getChildLink(
 {
 	if(!(c < columnsInfo_.size()))
 	{
-		__SS__ << "Invalid col (" << (int)c << ") requested!" << __E__;
+		__SS__ << "Invalid col (" << (int)c << ") requested for child link!" << __E__;
 		__SS_THROW__;
 	}
 

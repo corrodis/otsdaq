@@ -227,6 +227,7 @@ class ConfigurationTree
 	bool 										isLinkNode					(void) const;
 	bool 										isGroupLinkNode				(void) const;
 	bool 										isUIDLinkNode				(void) const;
+	bool 										isGroupIDNode				(void) const;
 	bool 										isUIDNode					(void) const;
 
 	void 										print						(const unsigned int& depth = -1, std::ostream& out = std::cout) const;
@@ -275,10 +276,11 @@ class ConfigurationTree
 	    bool autoSelectFilterFields                             = false) const;
 	std::set<std::string /*unique-value*/> 		getUniqueValuesForField		(
 	    const std::vector<std::string /*relative-path*/>& recordList,
-	    const std::string&                                fieldName) const;
+	    const std::string&                                fieldName,
+		std::string*									  fieldGroupIDChildLinkIndex = 0) const;
 
   private:
-	// privately ONLY allow full access to member variables through constructor
+	// private constructor: ONLY privately allow full access to member variables through constructor
 	ConfigurationTree(const ConfigurationManager* const& configMgr,
 	                  const TableBase* const&            config,
 	                  const std::string&                 groupId,
@@ -313,21 +315,21 @@ class ConfigurationTree
 	//	- value node is a pointer to a cell in a config table
 	//
 	// Assumption: uid column is present
-	const ConfigurationManager* 			configMgr_;  // root node
-	const TableBase*            			table_;      // config node
-	const std::string           			groupId_;    // group config node
+	const ConfigurationManager* 			configMgr_;  		// root node
+	const TableBase*            			table_;      		// config node
+	const std::string           			groupId_;    		// group config node
 	const TableBase* 						linkParentConfig_;  // link node parent config pointer (could be used
 	                                     						// to traverse backwards through tree)
-	const std::string  						linkColName_;     // link node field name
-	const std::string  						linkColValue_;    // link node field value
-	const unsigned int 						linkBackRow_;     // source table link row
-	const unsigned int 						linkBackCol_;     // source table link col
-	const std::string  						disconnectedTargetName_;  // only used if disconnected to determine
-	                   						                          // target table name
-	const std::string  						disconnectedLinkID_;  // only used if disconnected to determine target link ID
-	const std::string  						childLinkIndex_;  // child link index
-	const unsigned int 						row_;             // uid node
-	const unsigned int 						col_;             // value node
+	const std::string  						linkColName_;     	// link node field name
+	const std::string  						linkColValue_;    	// link node field value
+	const unsigned int 						linkBackRow_;     	// source table link row
+	const unsigned int 						linkBackCol_;     	// source table link col
+	const std::string  						disconnectedTargetName_;  	// only used if disconnected to determine
+	                   						                          	// target table name
+	const std::string  						disconnectedLinkID_;  		// only used if disconnected to determine target link ID
+	const std::string  						childLinkIndex_;  			// child link index
+	const unsigned int 						row_;             			// uid node
+	const unsigned int 						col_;             			// value node
 	const TableView*   						tableView_;
 };
 
