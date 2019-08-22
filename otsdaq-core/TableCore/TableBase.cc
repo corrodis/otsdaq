@@ -473,8 +473,8 @@ const TableView& TableBase::getView(void) const
 {
 	if(!activeTableView_)
 	{
-		__SS__ << "activeTableView_ pointer is null! (...likely the active view was not "
-		          "setup properly. Check your system setup.)"
+		__SS__ << "activeTableView_ pointer is null! (...likely the active view has not "
+		          "been setup yet. Check your system setup.)"
 		       << __E__;
 		__SS_THROW__;
 	}
@@ -486,8 +486,8 @@ TableView* TableBase::getViewP(void)
 {
 	if(!activeTableView_)
 	{
-		__SS__ << "activeTableView_ pointer is null! (...likely the active view was not "
-		          "setup properly. Check your system setup.)"
+		__SS__ << "activeTableView_ pointer is null! (...likely the active view has not "
+		          "been setup yet. Check your system setup.)"
 		       << __E__;
 		__SS_THROW__;
 	}

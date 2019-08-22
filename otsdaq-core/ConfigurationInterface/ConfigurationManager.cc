@@ -1053,6 +1053,8 @@ void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath,
 // loadMemberMap
 //	loads tables given by name/version pairs in memberMap
 //	Note: does not activate them.
+//
+// if accumulateWarnings, then put in string, do not throw
 void ConfigurationManager::loadMemberMap(
     const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap,
     std::string* accumulateWarnings /* =0 */)
@@ -1183,12 +1185,12 @@ void ConfigurationManager::loadMemberMap(
 //	else NOTE: active views are changed! (when loading member map)
 //
 //	throws exception on failure.
-//   map<name       , TableVersion >
+// 	if accumulatedTreeErrors, then "ignore warnings"
 void ConfigurationManager::loadTableGroup(
     const std::string&                                     groupName,
     TableGroupKey                                          groupKey,
     bool                                                   doActivate /*=false*/,
-    std::map<std::string, TableVersion>*                   groupMembers,
+    std::map<std::string /*table name*/, TableVersion>*    groupMembers,
     ProgressBar*                                           progressBar,
     std::string*                                           accumulatedTreeErrors,
     std::string*                                           groupComment,
@@ -1479,7 +1481,7 @@ void ConfigurationManager::loadTableGroup(
 				             << "(" << groupKey << "). Aborting."
 				             << "\n"
 				             << *accumulatedTreeErrors << __E__;
-				return;  // memberMap; //return member name map to version
+				//return;  // memberMap; //return member name map to version
 			}
 		}
 
@@ -1507,7 +1509,11 @@ void ConfigurationManager::loadTableGroup(
 					__SS_THROW__;
 				}
 
-				//__COUTV__(memberPair.first);
+				if(accumulatedTreeErrors)
+				{
+					__COUTV__(memberPair.first);
+					__COUTV__(accumulatedTreeErrors);
+				}
 
 				// attempt to init using the configuration's specific init
 				//	this could be risky user code, try and catch

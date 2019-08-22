@@ -2397,7 +2397,7 @@ int TableView::fillFromJSON(const std::string& json)
 
 							//__SS_THROW__;
 							__COUT_WARN__
-							    << "Ignoring error, and not populating missing column."
+							    << "Trying to ignore error, and not populating missing column."
 							    << __E__;
 						}
 						else // short cut to proper column hopefully in next search
@@ -2420,6 +2420,56 @@ int TableView::fillFromJSON(const std::string& json)
 	}
 
 	//__COUT__ << "Done!" << __E__;
+	__COUTV__(fillWithLooseColumnMatching_);
+	if( !fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
+	{
+		__SS__ << "Can not ignore errors because not every column was found in the source data!"
+				<< ". Please see the details below:\n\n"
+				<< "The source column size was found to be "
+				<< getDataColumnSize()
+				<< ", and the current number of columns for this table is "
+				<< getNumberOfColumns() << ". This resulted in a count of "
+				<< getSourceColumnMismatch()
+				<< " source column mismatches, and a count of "
+				<< getSourceColumnMissing() << " table entries missing in "
+				<< getNumberOfRows() << " row(s) of data." << __E__;
+
+		const std::set<std::string> srcColNames = getSourceColumnNames();
+		ss << "\n\nSource column names in ALPHABETICAL order were as follows:\n";
+		char        index       = 'a';
+		std::string preIndexStr = "";
+		for(auto& srcColName : srcColNames)
+		{
+			ss << "\n\t" << preIndexStr << index << ". " << srcColName;
+			if(index == 'z')  // wrap-around
+			{
+				preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
+				index = 'a';
+			}
+			else
+				++index;
+		}
+		ss << __E__;
+
+		std::set<std::string> destColNames = getColumnStorageNames();
+		ss << "\n\nCurrent table column names in ALPHABETICAL order are as follows:\n";
+		index       = 'a';
+		preIndexStr = "";
+		for(auto& destColName : destColNames)
+		{
+			ss << "\n\t" << preIndexStr << index << ". " << destColName;
+			if(index == 'z')  // wrap-around
+			{
+				preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
+				index = 'a';
+			}
+			else
+				++index;
+		}
+		ss << __E__;
+		ss << StringMacros::stackTrace();
+		__SS_THROW__;
+	}
 
 	//print();
 
