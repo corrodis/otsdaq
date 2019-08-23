@@ -1022,24 +1022,27 @@ const unsigned int TableView::getColStatus(void) const
 // getColPriority
 //	const version, so don't attempt to lookup
 //	if column not found throw error
+//
+//	Note: common for Priority column to not exist, so be quiet with printouts
+//	 so as to not scare people.
 const unsigned int TableView::getColPriority(void) const
 {
 	if(colPriority_ != INVALID)
 		return colPriority_;
 
-	__COUT__ << "Priority column was not found... \nColumn Types: " << __E__;
+	__SS__ << "Priority column was not found... \nColumn Types: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << "\t" << columnsInfo_[col].getType() << "() "
+		ss << "\t" << columnsInfo_[col].getType() << "() "
 		          << columnsInfo_[col].getName() << __E__;
-	std::cout << __E__;
+	ss << __E__;
 
-	__SS__ << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
+	ss << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
 	       << " Column in config named " << tableName_
 	       << ". (The Priority column is identified when TableView is initialized)"
 	       << __E__;  // this is the const call, so can not identify the column and set
 	                  // colPriority_ here
-	__SS_THROW__;
-}
+	__SS_ONLY_THROW__; //keep it quiet
+} //end getColPriority()
 
 //==============================================================================
 // addRowToGroup
@@ -2394,7 +2397,7 @@ int TableView::fillFromJSON(const std::string& json)
 
 							//__SS_THROW__;
 							__COUT_WARN__
-							    << "Ignoring error, and not populating missing column."
+							    << "Trying to ignore error, and not populating missing column."
 							    << __E__;
 						}
 						else // short cut to proper column hopefully in next search
@@ -2417,6 +2420,56 @@ int TableView::fillFromJSON(const std::string& json)
 	}
 
 	//__COUT__ << "Done!" << __E__;
+	__COUTV__(fillWithLooseColumnMatching_);
+	if( !fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
+	{
+		__SS__ << "Can not ignore errors because not every column was found in the source data!"
+				<< ". Please see the details below:\n\n"
+				<< "The source column size was found to be "
+				<< getDataColumnSize()
+				<< ", and the current number of columns for this table is "
+				<< getNumberOfColumns() << ". This resulted in a count of "
+				<< getSourceColumnMismatch()
+				<< " source column mismatches, and a count of "
+				<< getSourceColumnMissing() << " table entries missing in "
+				<< getNumberOfRows() << " row(s) of data." << __E__;
+
+		const std::set<std::string> srcColNames = getSourceColumnNames();
+		ss << "\n\nSource column names in ALPHABETICAL order were as follows:\n";
+		char        index       = 'a';
+		std::string preIndexStr = "";
+		for(auto& srcColName : srcColNames)
+		{
+			ss << "\n\t" << preIndexStr << index << ". " << srcColName;
+			if(index == 'z')  // wrap-around
+			{
+				preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
+				index = 'a';
+			}
+			else
+				++index;
+		}
+		ss << __E__;
+
+		std::set<std::string> destColNames = getColumnStorageNames();
+		ss << "\n\nCurrent table column names in ALPHABETICAL order are as follows:\n";
+		index       = 'a';
+		preIndexStr = "";
+		for(auto& destColName : destColNames)
+		{
+			ss << "\n\t" << preIndexStr << index << ". " << destColName;
+			if(index == 'z')  // wrap-around
+			{
+				preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
+				index = 'a';
+			}
+			else
+				++index;
+		}
+		ss << __E__;
+		ss << StringMacros::stackTrace();
+		__SS_THROW__;
+	}
 
 	//print();
 
@@ -2895,7 +2948,7 @@ const bool TableView::getChildLink(
 {
 	if(!(c < columnsInfo_.size()))
 	{
-		__SS__ << "Invalid col (" << (int)c << ") requested!" << __E__;
+		__SS__ << "Invalid col (" << (int)c << ") requested for child link!" << __E__;
 		__SS_THROW__;
 	}
 

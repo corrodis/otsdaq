@@ -81,6 +81,8 @@ FEDataManagerSupervisor::~FEDataManagerSupervisor(void)
 void FEDataManagerSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
+	
+	theDataManager_->parentSupervisorHasFrontends_ = true;
 
 	// Data Manager needs to be configured (instantiate buffers)
 	//	before FEVinterfaceManager configures (creates interfaces)
@@ -199,9 +201,7 @@ DataManager* FEDataManagerSupervisor::extractDataManager()
 			if(!theDataManager_)
 			{
 				// dynamic_cast returns null pointer on failure
-				__SUP_SS__ << "Dynamic cast failure!" << __E__;
-				__SUP_COUT_ERR__ << ss.str();
-				__SUP_SS_THROW__;
+				throw(std::runtime_error(""));
 			}
 			__SUP_COUT__ << "State Machine " << i << " WAS of type DataManager" << __E__;
 

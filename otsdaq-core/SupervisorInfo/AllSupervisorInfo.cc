@@ -396,6 +396,25 @@ void AllSupervisorInfo::setSupervisorStatus(const unsigned int& id,
 	it->second.setStatus(status);
 }
 
+void AllSupervisorInfo::setSupervisorProgress(const SupervisorInfo& appInfo,
+                                            const unsigned int    progress)
+{
+	setSupervisorProgress(appInfo.getId(), progress);
+}
+
+void AllSupervisorInfo::setSupervisorProgress(const unsigned int& id,
+                                            const unsigned int  progress)
+{
+	auto it = allSupervisorInfo_.find(id);
+	if(it == allSupervisorInfo_.end())
+	{
+		__SS__ << "Could not find: " << id << std::endl;
+		__SS_THROW__;
+	}
+	it->second.setProgress(progress);
+}
+
+
 //========================================================================================================================
 const SupervisorInfo& AllSupervisorInfo::getGatewayInfo(void) const
 {

@@ -1421,16 +1421,13 @@ launchOTS() {
 		
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}WARNING${Reset}: There are no configured processes for hostname ${HOSTNAME}." 
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tAre you sure your configuration is written for ${Red}${Bold}${Blink}${HOSTNAME}${Reset}?" 
-		
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThis is the ONLY host configured to run ots applications: ${contextHostname[@]}"
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThis is the corresponding port for the ots application: ${contextPort[@]}"
-		
+		echo
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThese are the hosts configured to run ots applications: ${gatewayHostname} ${xdaqHost[@]}"
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThese are the corresponding ports for the applications: ${gatewayPort} ${xdaqPort[@]}"
-		
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tYou can change the configuration for ${HOSTNAME} in wiz mode by:"
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t	a) Go to Configure App click 'Tree-View' for Active-Context"
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t	b) Click on 'XDAQContextTable' < 'Address' to edit configurations."
+		echo
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tYou can change the configuration for ${HOSTNAME} in wiz mode by..."
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tGoing to the Configure App   -> click 'Tree-View' next to Active-Context"
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\t-> expand 'XDAQContextTable' -> change 'Address' to set desired host name."
 		
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}************************************************************************************${Reset}"
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Yellow}${Bold}************************************************************************************${Reset}"

@@ -128,7 +128,6 @@ std::string ARTDAQBuilderTable::getFlatFHICLFilename(const ConfigurationTree& bu
 
 void ARTDAQBuilderTable::flattenFHICL(const ConfigurationTree& builderNode)
 {
-	
 	__COUT__ << "flattenFHICL()" << __E__;
 	auto inFile  = getFHICLFilename(builderNode);
 	auto outFile = getFlatFHICLFilename(builderNode);
@@ -360,18 +359,17 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		PUSHTAB;
 		OUT << "scheduler: {\n";
 
+	#if ART_HEX_VERSION < 0x30200
 		PUSHTAB;
 		//		OUT << "fileMode: " << services.getNode("schedulerFileMode").getValue() <<
 		//"\n";
-	#if ART_HEX_VERSION < 0x30200
 		OUT << "errorOnFailureToPut: "
 		    << (services.getNode("schedulerErrorOnFailtureToPut").getValue<bool>()
 		            ? "true"
 		            : "false")
 		    << "\n";
-	#endif
 		POPTAB;
-
+	#endif
 		OUT << "}\n\n";
 
 		// NetMonTransportServiceInterface

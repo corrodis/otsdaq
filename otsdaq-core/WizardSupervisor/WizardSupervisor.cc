@@ -187,8 +187,15 @@ void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
 	     << ",Code Editor,CODE,0,1,icon-CodeEditor.png,/urn:xdaq-application:lid=240/,/"
 
 		 //Documentation ------------------
-	     << ",State Machine Screenshot,FSM-SS,1,1,icon-StateMachine.png,"
-		 	"/WebPath/images/windowContentImages/state_machine_screenshot.png,/Documentation"	
+	     << ",State Machine Screenshot,FSM-SS,1,1,icon-Physics.gif,"
+		 	"/WebPath/images/windowContentImages/state_machine_screenshot.png,/Documentation"
+
+		 	 //uniqueWin mode == 2 for new tab
+		 << ",Redmine Project for otsdaq,RED,2,1,../otsdaqIcons/android-icon-36x36.png,"
+		 	"https://cdcvs.fnal.gov/redmine/projects/otsdaq,/Documentation"
+		 	 //uniqueWin mode == 2 for new tab
+		 << ",Homepage for otsdaq,OTS,2,1,../otsdaqIcons/android-icon-36x36.png,"
+		 		 	"https://otsdaq.fnal.gov,/Documentation"
 		 //end Documentation ------------------
 
 	    //",Iterate,IT,0,1,icon-Iterate.png,/urn:xdaq-application:lid=280/?configWindowName=iterate,/"

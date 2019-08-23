@@ -470,24 +470,28 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupNa
                                                 TableGroupKey      tableGroupKey,
                                                 std::string*       accumulatedTreeErrors)
 {
-	loadTableGroup(configGroupName,
-	               tableGroupKey,
-	               true,                    // loads and activates
-	               0,                       // no members needed
-	               0,                       // no progress bar
-	               accumulatedTreeErrors);  // accumulate warnings or not
-
-	if(accumulatedTreeErrors && *accumulatedTreeErrors != "")
+	try
 	{
-		__COUT_ERR__ << "Errors were accumulated so de-activating group: "
+		__COUTV__(accumulatedTreeErrors);
+		loadTableGroup(configGroupName,
+					   tableGroupKey,
+					   true,                    // loads and activates
+					   0,                       // no members needed
+					   0,                       // no progress bar
+					   accumulatedTreeErrors);  // accumulate warnings or not
+	}
+	catch(...)
+	{
+		__COUT_ERR__ << "There were errors, so de-activating group: "
 		             << configGroupName << " (" << tableGroupKey << ")" << __E__;
-		try  // just in case any lingering pieces, lets deactivate
+		try  // just in case any lingering pieces, let's deactivate
 		{
 			destroyTableGroup(configGroupName, true);
 		}
 		catch(...)
 		{
 		}
+		throw; //re-throw original exception
 	}
 
 	__COUT_INFO__ << "Updating persistent active groups to "

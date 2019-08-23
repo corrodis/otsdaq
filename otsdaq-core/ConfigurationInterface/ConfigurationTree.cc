@@ -1211,7 +1211,10 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(
 //	Useful for debugging a node failure, like when throwing an exception
 std::string ConfigurationTree::nodeDump(void) const
 {
-	__SS__;
+	__SS__ << __E__ << __E__ ;
+
+	 ss << "Row=" << (int)row_ << ", Col=" << (int)col_ <<
+			 ", TablePointer=" << table_ << __E__;
 
 	try
 	{
@@ -1388,7 +1391,15 @@ bool ConfigurationTree::isGroupLinkNode(void) const
 bool ConfigurationTree::isUIDLinkNode(void) const
 {
 	return (isLinkNode() && groupId_ == "");
-}
+} //end isUIDLinkNode()
+
+//==============================================================================
+// isGroupIDNode
+//	if true, then this is a Group ID node
+bool ConfigurationTree::isGroupIDNode(void) const
+{
+	return (isValueNode() && tableView_->getColumnInfo(col_).isGroupID());
+} //end isGroupIDNode()
 
 //==============================================================================
 // isUIDNode
@@ -1783,7 +1794,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 //
 std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForField(
     const std::vector<std::string /*relative-path*/>& recordList,
-    const std::string&                                fieldName) const
+    const std::string&                                fieldName,
+	std::string* 									  fieldGroupIDChildLinkIndex /* =0 */) const
 {
 	// enforce that starting point is a table node
 	if(!isTableNode())
@@ -1812,8 +1824,22 @@ std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForFiel
 		//	so for links return actual value for field name specified
 		//	i.e. if Table of link is requested give that; if linkID is requested give
 		// that.  use TRUE in getValueAsString for proper behavior
+
+		ConfigurationTree node = getNode(recordList[i]).getNode(fieldName);
 		uniqueValues.emplace(
-		    getNode(recordList[i]).getNode(fieldName).getValueAsString(true));
+				node.getValueAsString(true));
+
+		if(i==0 && fieldGroupIDChildLinkIndex)
+		{
+			//first time, get field's GroupID Child Link Index, if applicable
+			if(node.isGroupIDNode())
+			{
+				__COUT__ << "GroupID field " << fieldName << __E__;
+				*fieldGroupIDChildLinkIndex = node.getColumnInfo().getChildLinkIndex();
+			}
+			else
+				*fieldGroupIDChildLinkIndex = "";
+		}
 	}
 
 	return uniqueValues;
@@ -2410,8 +2436,7 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority,
 			catch(std::runtime_error& e)
 			{
 				__COUT_WARN__ << "Priority configuration not found. Assuming all "
-				                 "children have equal priority (Error: "
-				              << e.what() << __E__;
+				                 "children have equal priority. " << __E__;
 				retVector.clear();
 			}
 		}

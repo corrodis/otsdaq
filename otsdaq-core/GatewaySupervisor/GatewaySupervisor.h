@@ -26,6 +26,7 @@
 
 #include <set>
 #include <string>
+#include <sstream>
 
 // defines used also by OtsConfigurationWizardSupervisor
 #define FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE \
@@ -84,7 +85,7 @@ class GatewaySupervisor : public xdaq::Application,
 	bool stateMachineThread(toolbox::task::WorkLoop* workLoop);
 
 	// Status requests handlers
-	void infoRequestHandler(xgi::Input* in, xgi::Output* out);
+	void statusRequest(xgi::Input* in, xgi::Output* out);
 	void infoRequestResultHandler(xgi::Input* in, xgi::Output* out);
 	bool infoRequestThread(toolbox::task::WorkLoop* workLoop);
 
@@ -142,6 +143,9 @@ class GatewaySupervisor : public xdaq::Application,
 	static void indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
 
 	static void StateChangerWorkLoop(GatewaySupervisor* supervisorPtr);
+	static void AppStatusWorkLoop(GatewaySupervisor* supervisorPtr);
+	
+
 	std::string attemptStateMachineTransition(HttpXmlDocument*    xmldoc,
 	                                          std::ostringstream* out,
 	                                          const std::string&  command,

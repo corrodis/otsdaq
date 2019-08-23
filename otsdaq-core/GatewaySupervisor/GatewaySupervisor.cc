@@ -87,9 +87,9 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	          &GatewaySupervisor::stateMachineIterationBreakpoint,
 	          "StateMachineIterationBreakpoint");
 
-	xgi::bind(this, &GatewaySupervisor::infoRequestHandler, "InfoRequestHandler");
-	xgi::bind(
-	    this, &GatewaySupervisor::infoRequestResultHandler, "InfoRequestResultHandler");
+	xgi::bind(this, &GatewaySupervisor::statusRequest, "StatusRequest");
+	// xgi::bind(
+	//     this, &GatewaySupervisor::infoRequestResultHandler, "InfoRequestResultHandler");
 	xgi::bind(this, &GatewaySupervisor::tooltipRequest, "TooltipRequest");
 
 	xoap::bind(this,
@@ -174,17 +174,62 @@ void GatewaySupervisor::init(void)
 	//__COUT__ << "GatewaySupervisor UID:" << supervisorUID << __E__;
 
 	// setting up thread for UDP thread to drive state machine
-	bool enableStateChanges = false;
-	try
 	{
-		enableStateChanges = CorePropertySupervisorBase::getSupervisorTableNode()
-		                         .getNode("EnableStateChangesOverUDP")
-		                         .getValue<bool>();
-	}
-	catch(...)
+		bool enableStateChanges = false;
+		try
+		{
+			enableStateChanges = CorePropertySupervisorBase::getSupervisorTableNode()
+									.getNode("EnableStateChangesOverUDP")
+									.getValue<bool>();
+		}
+		catch(...)
+		{
+			;
+		}  // ignore errors
+
+
+		if(enableStateChanges)
+		{
+			__COUT__ << "Enabling state changes over UDP..." << __E__;
+			// start state changer UDP listener thread
+			std::thread(
+				[](GatewaySupervisor* s) { GatewaySupervisor::StateChangerWorkLoop(s); },
+				this)
+				.detach();
+		}
+		else
+			__COUT__ << "State changes over UDP are disabled." << __E__;
+	} // end setting up thread for UDP drive of state machine
+
+	
+	// setting up checking of App Status
 	{
-		;
-	}  // ignore errors
+		bool checkAppStatus = false;
+		try
+		{
+			checkAppStatus = CorePropertySupervisorBase::getSupervisorTableNode()
+									.getNode("EnableApplicationStatusMonitoring")
+									.getValue<bool>();
+		}
+		catch(...)
+		{
+			;
+		}  // ignore errors
+
+
+		if(checkAppStatus)
+		{
+			__COUT__ << "Enabling App Status checking..." << __E__;
+			// 
+			std::thread(
+				[](GatewaySupervisor* s) { GatewaySupervisor::AppStatusWorkLoop(s); },
+				this)
+				.detach();
+		}
+		else
+			__COUT__ << "App Status checking is disabled." << __E__;
+	} // end checking of Application Status
+
 
 	try
 	{
@@ -210,20 +255,105 @@ void GatewaySupervisor::init(void)
 	{
 		;
 	}  // ignore errors
-
-	if(enableStateChanges)
-	{
-		__COUT__ << "Enabling state changes over UDP..." << __E__;
-		// start state changer UDP listener thread
-		std::thread(
-		    [](GatewaySupervisor* s) { GatewaySupervisor::StateChangerWorkLoop(s); },
-		    this)
-		    .detach();
-	}
-	else
-		__COUT__ << "State changes over UDP are disabled." << __E__;
-
 }  // end init()
+
+//========================================================================================================================
+// AppStatusWorkLoop
+//	child thread
+void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
+{
+	sleep(5);
+	std::string status, progress, appName;
+	int progressInteger;
+	while(1)
+	{
+		// workloop procedure
+		//	Loop through all Apps and request status
+		//	sleep
+		// __COUT__ << "Just debugging App status checking" << __E__;
+		for(const auto& it : 
+			theSupervisor->allSupervisorInfo_.getAllSupervisorInfo())
+		{
+			auto appInfo = it.second;
+			appName = appInfo.getName();
+			 __COUT__ << "Getting Status "
+			       << " Supervisor instance = '" << appInfo.getName()
+			       << "' [LID=" << appInfo.getId() << "] in Context '"
+			       << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
+			       << "].\n\n";
+			// if the application is the gateway supervisor, we do not send a SOAP message
+			if (appName == "Supervisor")
+			{
+				// send back status and progress parameters
+				status = theSupervisor->theStateMachine_.getCurrentStateName();
+				progress = theSupervisor->theProgressBar_.readPercentageString();
+
+				if(theSupervisor->theStateMachine_.isInTransition())
+				{
+					// return the ProvenanceStateName
+					status = theSupervisor->theStateMachine_.getProvenanceStateName();
+				}
+				else
+				{
+					status = theSupervisor->theStateMachine_.getCurrentStateName();
+				}
+			}
+			else
+			{
+				// pass the application as a parameter to tempMessage
+				SOAPParameters appPointer;
+				appPointer.addParameter("ApplicationPointer");
+
+				xoap::MessageReference tempMessage = SOAPUtilities::makeSOAPMessageReference("ApplicationStatusRequest");
+				// print tempMessage
+				__COUT__ << "tempMessage... " << SOAPUtilities::translate(tempMessage) << std::endl;
+
+				try
+				{
+					xoap::MessageReference statusMessage =
+						theSupervisor->sendWithSOAPReply(appInfo.getDescriptor(),
+											tempMessage);
+					
+					__COUT__ << "statusMessage... " << SOAPUtilities::translate(statusMessage) << std::endl;
+					
+					SOAPParameters parameters;
+					parameters.addParameter("Status");
+					parameters.addParameter("Progress");
+					SOAPUtilities::receive(statusMessage, parameters);
+
+					status = parameters.getValue("Status");
+					if(status.empty()){
+						status = "Unknown";
+					}
+
+					progress = parameters.getValue("Progress");
+					if(progress.empty()){
+						progress = "0";
+					}
+					__COUTV__(status);
+					__COUTV__(progress);
+				}
+				catch(const xdaq::exception::Exception& e)
+				{
+					__COUT__ << "Failed to send SOAP Message... " << std::endl;
+				}
+			}
+			
+			//store status and progress in some struct..
+			//	in the APP STATUS structure
+			// set status and progress
+			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo,status);
+			// convert the progress string into an integer in order to call appInfo.setProgress() function
+			std::istringstream ssProgress (progress);
+			ssProgress >> progressInteger;
+			theSupervisor->allSupervisorInfo_.setSupervisorProgress(appInfo,progressInteger);
+
+		} // end of for loop
+		
+		sleep(5);
+	}
+}  // end AppStatusWorkLoop
+
 
 //========================================================================================================================
 // StateChangerWorkLoop
@@ -584,7 +714,7 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 
 	std::string fsmName       = CgiDataUtilities::getData(cgiIn, "fsmName");
 	std::string fsmWindowName = CgiDataUtilities::getData(cgiIn, "fsmWindowName");
-	fsmWindowName             = CgiDataUtilities::decodeURIComponent(fsmWindowName);
+	fsmWindowName             = StringMacros::decodeURIComponent(fsmWindowName);
 	std::string currentState  = theStateMachine_.getCurrentStateName();
 
 	__COUT__ << "Check for Handled by theIterator_" << __E__;
@@ -936,18 +1066,17 @@ bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 }  // end stateMachineThread()
 
 //========================================================================================================================
-// infoRequestHandler ~~
+// statusRequest ~~
 //	Call from JS GUI
 //		parameter:
 //
-void GatewaySupervisor::infoRequestHandler(xgi::Input* in, xgi::Output* out)
+void GatewaySupervisor::statusRequest(xgi::Input* in, xgi::Output* out)
 
 {
 	__COUT__ << "Starting to Request!" << __E__;
 
 	cgicc::Cgicc cgiIn(in);
-	std::string  requestType =
-	    "infoRequestHandler";  // force request type to infoRequestHandler
+	std::string  requestType = "statusRequest";  // force request type to statusRequest
 
 	HttpXmlDocument           xmlOut;
 	WebUsers::RequestUserInfo userInfo(requestType,
@@ -958,14 +1087,16 @@ void GatewaySupervisor::infoRequestHandler(xgi::Input* in, xgi::Output* out)
 	if(!theWebUsers_.xmlRequestOnGateway(cgiIn, out, &xmlOut, userInfo))
 		return;  // access failed
 
+	__COUT__ << "Starting to Request!" << __E__;
+
 	// If the thread is canceled when you are still in this method that activated it, then
 	// everything will freeze.  The way the workloop manager now works is safe since it
 	// cancel the thread only when the infoRequestResultHandler is called  and that method
 	// can be called ONLY when I am already out of here!
 
-	HttpXmlDocument tmpDoc = infoRequestWorkLoopManager_.processRequest(cgiIn);
+	//HttpXmlDocument tmpDoc = infoRequestWorkLoopManager_.processRequest(cgiIn);
 
-	xmlOut.copyDataChildren(tmpDoc);
+	//xmlOut.copyDataChildren(tmpDoc);
 
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false);
 }
@@ -2755,6 +2886,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	// accountSettings
 	// getAliasList
 	// getFecList
+	// getAppStatus
+	// getContextMemberNames
 	// getSystemMessages
 	// setUserWithLock
 	// getStateMachine
@@ -2781,6 +2914,9 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			__COUT__ << "Get Settings Request" << __E__;
 			__COUT__ << "accounts = " << accounts << __E__;
 			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
+		}
+		else if(requestType == "viewCodeContent"){
+				
 		}
 		else if(requestType == "setSettings")
 		{
@@ -3028,17 +3164,39 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				fclose(fp);
 			}
 		}
-		else if(requestType == "getFecList")
+		else if(requestType == "getAppStatus")
 		{
-			xmlOut.addTextElementToData("fec_list", "");
-
-			for(auto it : allSupervisorInfo_.getAllFETypeSupervisorInfo())
+			for(auto it : allSupervisorInfo_.getAllSupervisorInfo())
 			{
-				xmlOut.addTextElementToParent("fec_url", it.second.getURL(), "fec_list");
-				xmlOut.addTextElementToParent(
-				    "fec_urn", std::to_string(it.second.getId()), "fec_list");
+				// bool pass = true;
+
+				auto appInfo = it.second;
+
+				xmlOut.addTextElementToData("name", appInfo.getName()); // get application name
+				xmlOut.addTextElementToData("id", std::to_string(appInfo.getId())); // get application id
+				xmlOut.addTextElementToData("status", appInfo.getStatus()); // get status
+				xmlOut.addTextElementToData("time", StringMacros::getTimestampString(appInfo.getLastStatusTime())); // get time stamp
+				xmlOut.addTextElementToData("progress", std::to_string(appInfo.getProgress())); // get progress
+				xmlOut.addTextElementToData("class", appInfo.getClass()); // get application class
+				xmlOut.addTextElementToData("url", appInfo.getURL()); // get application url
+				xmlOut.addTextElementToData("context", appInfo.getContextName()); // get context
+
 			}
 		}
+
+		else if(requestType == "getContextMemberNames")
+		{
+			const XDAQContextTable* contextTable = 
+				CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextTable);
+			
+			auto  contexts = contextTable->getContexts();
+			for(const auto& context : contexts)
+			{
+				xmlOut.addTextElementToData("ContextMember", context.contextUID_); // get context member name
+			}
+			
+		}
+		
 		else if(requestType == "getSystemMessages")
 		{
 			xmlOut.addTextElementToData(
@@ -3058,11 +3216,10 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			std::string lock     = CgiDataUtilities::postData(cgiIn, "lock");
 			std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
 
-			__COUT__ << requestType << __E__;
-			__COUT__ << "username " << username << __E__;
-			__COUT__ << "lock " << lock << __E__;
-			__COUT__ << "accounts " << accounts << __E__;
-			__COUT__ << "userInfo.uid_ " << userInfo.uid_ << __E__;
+			__COUTV__(username);
+			__COUTV__(lock);
+			__COUTV__(accounts);
+			__COUTV__(userInfo.uid_);
 
 			std::string tmpUserWithLock = theWebUsers_.getUserWithLock();
 			if(!theWebUsers_.setUserWithLock(userInfo.uid_, lock == "1", username))

@@ -156,7 +156,7 @@ bool FEVInterface::slowControlsRunning(void) try
 {
 	__FE_COUT__ << "slowControlsRunning" << __E__;
 
-	if(mapOfSlowControlsChannels_.size() == 0)
+	if(getSlowControlsChannelCount() == 0)
 	{
 		__FE_COUT__
 		    << "No slow controls channels to monitor, exiting slow controls workloop."
@@ -480,6 +480,7 @@ catch(const xdaq::exception::Exception& e)
 		__COUT__ << "SOAP message failure indicating front-end asynchronous running "
 		            "error back to Gateway: "
 		         << e.what() << __E__;
+	throw; //rethrow and hope error is noticed
 }
 catch(...)
 {
@@ -491,6 +492,7 @@ catch(...)
 		__COUT__ << "Unknown error encounter indicating front-end asynchronous running "
 		            "error back to Gateway."
 		         << __E__;
+	throw; //rethrow and hope error is noticed
 }  // end SendAsyncErrorToGateway()
 
 //========================================================================================================================
