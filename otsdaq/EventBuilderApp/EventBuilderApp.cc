@@ -154,6 +154,7 @@ void EventBuilderApp::init(void)
 	my_rank  = this->getApplicationDescriptor()->getLocalId();
 	theARTDAQEventBuilderInterface_.reset(new artdaq::EventBuilderApp());
 
+	__SUP_COUT__ << "$FHICL_FILE_PATH" << __ENV__("FHICL_FILE_PATH") << __E__;
 	__SUP_COUT__ << "Initialized." << __E__;
 }  // end init()
 
@@ -326,6 +327,7 @@ void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
 		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
 		   (uid[i] >= '0' && uid[i] <= '9'))  // only allow alpha numeric in file name
 			filename += uid[i];
+	filename += "_flattened";
 	filename += ".fcl";
 
 	__SUP_COUTV__(filename);
@@ -350,6 +352,7 @@ void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
 	}
 
 	__SUP_COUTV__(fileFclString);
+	__SUP_COUT__ << "$FHICL_FILE_PATH" << __ENV__("FHICL_FILE_PATH") << __E__;
 
 	try
 	{

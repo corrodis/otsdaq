@@ -25,6 +25,8 @@ class ARTDAQBuilderTable : public TableBase
 	                        unsigned int             selfPort,
 	                        const XDAQContextTable*  contextConfig);
 	std::string getFHICLFilename(const ConfigurationTree& builderNode);
+	std::string getFlatFHICLFilename(const ConfigurationTree& builderNode);
+	void        flattenFHICL(const ConfigurationTree& builderNode);
 };
 }  // namespace ots
 #endif

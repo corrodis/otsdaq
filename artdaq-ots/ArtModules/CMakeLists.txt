@@ -15,6 +15,7 @@ simple_plugin(ArtdaqOtsBuildInfo "module"
 )
 
 simple_plugin(UDPDump "module"
+  artdaq-core_Utilities
   ${FHICLCPP}
   ${CETLIB}
   ${CETLIB_EXCEPT}
@@ -22,6 +23,7 @@ simple_plugin(UDPDump "module"
 )
 
 simple_plugin(JSONDispatcher "module"
+  artdaq-core_Utilities
   ${Boost_SYSTEM_LIBRARY}
   ${CETLIB_EXCEPT}
   pthread

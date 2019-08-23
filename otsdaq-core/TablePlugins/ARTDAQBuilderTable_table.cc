@@ -1,3 +1,9 @@
+#include <fhiclcpp/ParameterSet.h>
+#include <fhiclcpp/detail/print_mode.h>
+#include <fhiclcpp/intermediate_table.h>
+#include <fhiclcpp/make_ParameterSet.h>
+#include <fhiclcpp/parse.h>
+
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
 #include "otsdaq-core/TablePlugins/ARTDAQBuilderTable.h"
@@ -78,6 +84,9 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 		    contextConfig->getContextAddress(builderContext->contextUID_),
 		    contextConfig->getARTDAQDataPort(configManager, builderContext->contextUID_),
 		    contextConfig);
+
+		flattenFHICL(builderConfigNode);
+
 	}
 }
 
@@ -98,6 +107,52 @@ std::string ARTDAQBuilderTable::getFHICLFilename(const ConfigurationTree& builde
 
 	return filename;
 }  // end getFHICLFilename()
+
+//========================================================================================================================
+std::string ARTDAQBuilderTable::getFlatFHICLFilename(const ConfigurationTree& builderNode)
+{
+	__COUT__ << "ARTDAQ Builder UID: " << builderNode.getValue() << __E__;
+	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
+	std::string uid      = builderNode.getValue();
+	for(unsigned int i = 0; i < uid.size(); ++i)
+		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
+		   (uid[i] >= '0' && uid[i] <= '9'))  // only allow alpha numeric in file name
+			filename += uid[i];
+
+	filename += "_flattened.fcl";
+
+	__COUT__ << "fcl: " << filename << __E__;
+
+	return filename;
+}  // end getFlatFHICLFilename()
+
+void ARTDAQBuilderTable::flattenFHICL(const ConfigurationTree& builderNode)
+{
+	
+	__COUT__ << "flattenFHICL()" << __E__;
+	auto inFile  = getFHICLFilename(builderNode);
+	auto outFile = getFlatFHICLFilename(builderNode);
+
+	cet::filepath_lookup_nonabsolute policy("FHICL_FILE_PATH");
+
+	fhicl::ParameterSet pset;
+
+	try
+	{
+		fhicl::intermediate_table tbl;
+		fhicl::parse_document(inFile, policy, tbl);
+		fhicl::ParameterSet pset;
+		fhicl::make_ParameterSet(tbl, pset);
+
+		std::ofstream ofs{outFile};
+		ofs << pset.to_indented_string(0, fhicl::detail::print_mode::annotated);
+	}
+	catch(cet::exception const& e)
+	{
+		__SS__ << "Failed to parse fhicl: " << e.what() << __E__;
+		__SS_THROW__;
+	}
+}
 
 //========================================================================================================================
 void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
@@ -263,8 +318,6 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		out.close();
 		return;
 	}
-	
-	
 
 	//--------------------------------------
 	// handle preamble parameters
@@ -282,9 +335,10 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			        .getValue<bool>())
 				PUSHCOMMENT;
 			key = parameter.second.getNode("daqParameterKey").getValue();
-			
+
 			OUT << key;
-			if(key.find("#include") == std::string::npos) OUT << ":"; 			
+			if(key.find("#include") == std::string::npos)
+				OUT << ":";
 			OUT << parameter.second.getNode("daqParameterValue").getValue() << "\n";
 
 			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
@@ -307,12 +361,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		OUT << "scheduler: {\n";
 
 		PUSHTAB;
-		//		OUT << "fileMode: " << services.getNode("schedulerFileMode").getValue() << "\n";
+		//		OUT << "fileMode: " << services.getNode("schedulerFileMode").getValue() <<
+		//"\n";
+	#if ART_HEX_VERSION < 0x30200
 		OUT << "errorOnFailureToPut: "
 		    << (services.getNode("schedulerErrorOnFailtureToPut").getValue<bool>()
 		            ? "true"
 		            : "false")
 		    << "\n";
+	#endif
 		POPTAB;
 
 		OUT << "}\n\n";
@@ -1088,9 +1145,10 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			        .getValue<bool>())
 				PUSHCOMMENT;
 			key = parameter.second.getNode("daqParameterKey").getValue();
-			
+
 			OUT << key;
-			if(key.find("#include") == std::string::npos) OUT << ":"; 			
+			if(key.find("#include") == std::string::npos)
+				OUT << ":";
 			OUT << parameter.second.getNode("daqParameterValue").getValue() << "\n";
 
 			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)

@@ -289,6 +289,7 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 		PUSHTAB;
 		OUT << "scheduler: {\n";
 
+#if ART_HEX_VERSION < 0x30200
 		PUSHTAB;
 		//		OUT << "fileMode: " << services.getNode("schedulerFileMode").getValue() << "\n";
 		OUT << "errorOnFailureToPut: "
@@ -297,6 +298,7 @@ void ARTDAQAggregatorTable::outputFHICL(ConfigurationManager*    configManager,
 		            : "false")
 		    << "\n";
 		POPTAB;
+#endif
 
 		OUT << "}\n\n";
 
