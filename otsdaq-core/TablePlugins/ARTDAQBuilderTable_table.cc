@@ -131,6 +131,8 @@ void ARTDAQBuilderTable::flattenFHICL(const ConfigurationTree& builderNode)
 	__COUT__ << "flattenFHICL()" << __E__;
 	auto inFile  = getFHICLFilename(builderNode);
 	auto outFile = getFlatFHICLFilename(builderNode);
+	
+	__COUTV__(__ENV__("FHICL_FILE_PATH"));
 
 	cet::filepath_lookup_nonabsolute policy("FHICL_FILE_PATH");
 

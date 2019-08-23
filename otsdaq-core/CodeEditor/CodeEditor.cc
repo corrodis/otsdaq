@@ -711,7 +711,7 @@ CodeEditor::getSpecialsMap(void)
                                     "DataProcessorPlugins",
                                     "UserTableDataFormats",
                                     "TablePlugins",
-                                    "TablePlugins",
+                                    "TablePluginDataFormats",
                                     "UserTablePlugins",
                                     "UserTablePluginDataFormats",
                                     "SlowControlsInterfacePlugins",
