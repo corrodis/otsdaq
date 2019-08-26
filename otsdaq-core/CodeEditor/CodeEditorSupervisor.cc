@@ -68,8 +68,8 @@ void CodeEditorSupervisor::request(const std::string&               requestType,
 	{
 		__SUP_COUT__ << "Code Editor" << __E__;
 
-		codeEditor_.xmlRequest(CgiDataUtilities::getData(cgiIn, "option"), 
-							  false,    //Indicates Edit mode
+		codeEditor_.xmlRequest(CgiDataUtilities::getData(cgiIn, "option"),
+		                       false,  // Indicates Edit mode
 		                       cgiIn,
 		                       &xmlOut,
 		                       userInfo.username_);
@@ -77,7 +77,7 @@ void CodeEditorSupervisor::request(const std::string&               requestType,
 	else if(requestType == "readOnlycodeEditor")
 	{
 		codeEditor_.xmlRequest(CgiDataUtilities::getData(cgiIn, "option"),
-							    true,  //Indicates read only mode
+		                       true,  // Indicates read only mode
 		                       cgiIn,
 		                       &xmlOut,
 		                       userInfo.username_);

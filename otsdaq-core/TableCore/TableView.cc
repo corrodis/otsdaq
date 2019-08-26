@@ -709,8 +709,8 @@ void TableView::getValue(std::string& value,
 	}
 
 	value = validateValueForColumn(
-				theDataView_[row][col], col, doConvertEnvironmentVariables);
-} //end getValue()
+	    theDataView_[row][col], col, doConvertEnvironmentVariables);
+}  // end getValue()
 
 //==============================================================================
 // validateValueForColumn
@@ -727,24 +727,23 @@ std::string TableView::validateValueForColumn(const std::string& value,
 		__SS_THROW__;
 	}
 
-	if(columnsInfo_[col].getType() ==
-			TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
-			value == columnsInfo_[col].getDefaultValue())
+	if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
+	   value == columnsInfo_[col].getDefaultValue())
 	{
-		//if type string, fixed choice and DEFAULT, then return string of first choice
+		// if type string, fixed choice and DEFAULT, then return string of first choice
 
 		std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
 
 		// consider arbitrary bool
-		bool skipOne = (choices.size() && choices[0].find("arbitraryBool=") == 0);
-		size_t index = (skipOne?1:0);
+		bool   skipOne = (choices.size() && choices[0].find("arbitraryBool=") == 0);
+		size_t index   = (skipOne ? 1 : 0);
 		if(choices.size() > index)
 		{
 			return doConvertEnvironmentVariables
-					           ? StringMacros::convertEnvironmentVariables(choices[index])
-					           : choices[index]; //handled value from fixed choices
+			           ? StringMacros::convertEnvironmentVariables(choices[index])
+			           : choices[index];  // handled value from fixed choices
 		}
-	} // end handling default to fixed choice conversion
+	}  // end handling default to fixed choice conversion
 
 	if(columnsInfo_[col].getDataType() == TableViewColumnInfo::DATATYPE_STRING)
 		return doConvertEnvironmentVariables
@@ -1032,17 +1031,17 @@ const unsigned int TableView::getColPriority(void) const
 
 	__SS__ << "Priority column was not found... \nColumn Types: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		ss << "\t" << columnsInfo_[col].getType() << "() "
-		          << columnsInfo_[col].getName() << __E__;
+		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
+		   << __E__;
 	ss << __E__;
 
 	ss << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
-	       << " Column in config named " << tableName_
-	       << ". (The Priority column is identified when TableView is initialized)"
-	       << __E__;  // this is the const call, so can not identify the column and set
-	                  // colPriority_ here
-	__SS_ONLY_THROW__; //keep it quiet
-} //end getColPriority()
+	   << " Column in config named " << tableName_
+	   << ". (The Priority column is identified when TableView is initialized)"
+	   << __E__;        // this is the const call, so can not identify the column and set
+	                    // colPriority_ here
+	__SS_ONLY_THROW__;  // keep it quiet
+}  // end getColPriority()
 
 //==============================================================================
 // addRowToGroup
@@ -2162,8 +2161,6 @@ int TableView::fillFromJSON(const std::string& json)
 		default:;
 		}
 
-
-
 		// continue;
 
 		// handle a new completed value
@@ -2198,8 +2195,6 @@ int TableView::fillFromJSON(const std::string& json)
 				__COUTV__(fillWithLooseColumnMatching_);
 			}
 
-
-
 			// extract only what we care about
 			// for TableView only care about matching depth 1
 
@@ -2213,7 +2208,7 @@ int TableView::fillFromJSON(const std::string& json)
 
 			if(matchedKey != (unsigned int)-1)
 			{
-				//std::cout << "New Data for:: key[" << matchedKey << "]-" <<
+				// std::cout << "New Data for:: key[" << matchedKey << "]-" <<
 				//		keys[matchedKey] << "\n";
 
 				switch(matchedKey)
@@ -2379,8 +2374,6 @@ int TableView::fillFromJSON(const std::string& json)
 							}
 						}
 
-
-
 						if(ccnt >= getNumberOfColumns())
 						{
 							__SS__
@@ -2392,21 +2385,22 @@ int TableView::fillFromJSON(const std::string& json)
 							// CHANGED on 11/10/2016
 							//	to.. try just not populating data instead of error
 							++sourceColumnMismatchCount_;  // but count errors
-							if(getNumberOfRows() == 1)     // only for first row, track source column names
+							if(getNumberOfRows() ==
+							   1)  // only for first row, track source column names
 								sourceColumnNames_.emplace(currKey);
 
 							//__SS_THROW__;
-							__COUT_WARN__
-							    << "Trying to ignore error, and not populating missing column."
-							    << __E__;
+							__COUT_WARN__ << "Trying to ignore error, and not populating "
+							                 "missing column."
+							              << __E__;
 						}
-						else // short cut to proper column hopefully in next search
+						else  // short cut to proper column hopefully in next search
 							colSpeedup = (colSpeedup + 1) % noc;
 					}
 					break;
 				default:;  // unknown match?
-				} //end switch statement to match json key
-			} //end matched key if statement
+				}          // end switch statement to match json key
+			}              // end matched key if statement
 
 			// clean up handling of new value
 
@@ -2421,18 +2415,18 @@ int TableView::fillFromJSON(const std::string& json)
 
 	//__COUT__ << "Done!" << __E__;
 	__COUTV__(fillWithLooseColumnMatching_);
-	if( !fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
+	if(!fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
 	{
-		__SS__ << "Can not ignore errors because not every column was found in the source data!"
-				<< ". Please see the details below:\n\n"
-				<< "The source column size was found to be "
-				<< getDataColumnSize()
-				<< ", and the current number of columns for this table is "
-				<< getNumberOfColumns() << ". This resulted in a count of "
-				<< getSourceColumnMismatch()
-				<< " source column mismatches, and a count of "
-				<< getSourceColumnMissing() << " table entries missing in "
-				<< getNumberOfRows() << " row(s) of data." << __E__;
+		__SS__ << "Can not ignore errors because not every column was found in the "
+		          "source data!"
+		       << ". Please see the details below:\n\n"
+		       << "The source column size was found to be " << getDataColumnSize()
+		       << ", and the current number of columns for this table is "
+		       << getNumberOfColumns() << ". This resulted in a count of "
+		       << getSourceColumnMismatch()
+		       << " source column mismatches, and a count of " << getSourceColumnMissing()
+		       << " table entries missing in " << getNumberOfRows() << " row(s) of data."
+		       << __E__;
 
 		const std::set<std::string> srcColNames = getSourceColumnNames();
 		ss << "\n\nSource column names in ALPHABETICAL order were as follows:\n";
@@ -2471,7 +2465,7 @@ int TableView::fillFromJSON(const std::string& json)
 		__SS_THROW__;
 	}
 
-	//print();
+	// print();
 
 	return 0;  // success
 }  // end fillFromJSON()

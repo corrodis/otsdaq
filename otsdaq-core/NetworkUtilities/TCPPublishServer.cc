@@ -12,27 +12,25 @@ TCPPublishServer::TCPPublishServer(int serverPort, unsigned int maxNumberOfClien
 }
 
 //========================================================================================================================
-TCPPublishServer::~TCPPublishServer(void)
-{
-}
+TCPPublishServer::~TCPPublishServer(void) {}
 
 void TCPPublishServer::acceptConnections()
 {
-    while(true)
-    {
-        try
-        {
-            TCPTransmitterSocket* clientSocket = acceptClient<TCPTransmitterSocket>();
-        }
-        catch (int e)
-        {
-            std::cout << __PRETTY_FUNCTION__ << "SHUTTING DOWN SOCKET" << std::endl;
-            std::cout << __PRETTY_FUNCTION__ << "SHUTTING DOWN SOCKET" << std::endl;
-            std::cout << __PRETTY_FUNCTION__ << "SHUTTING DOWN SOCKET" << std::endl;
+	while(true)
+	{
+		try
+		{
+			TCPTransmitterSocket* clientSocket = acceptClient<TCPTransmitterSocket>();
+		}
+		catch(int e)
+		{
+			std::cout << __PRETTY_FUNCTION__ << "SHUTTING DOWN SOCKET" << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "SHUTTING DOWN SOCKET" << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "SHUTTING DOWN SOCKET" << std::endl;
 
-            if (e == E_SHUTDOWN)
-                break;
-        }
-    }
+			if(e == E_SHUTDOWN)
+				break;
+		}
+	}
 	fAcceptPromise.set_value(true);
 }

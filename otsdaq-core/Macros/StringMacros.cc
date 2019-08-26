@@ -128,8 +128,7 @@ std::string StringMacros::decodeURIComponent(const std::string& data)
 	}
 	decodeURIString.resize(j);
 	return decodeURIString;
-} //end decodeURIComponent()
-
+}  // end decodeURIComponent()
 
 //==============================================================================
 std::string StringMacros::encodeURIComponent(const std::string& sourceStr)
@@ -145,7 +144,7 @@ std::string StringMacros::encodeURIComponent(const std::string& sourceStr)
 			retStr += encodeStr;
 		}
 	return retStr;
-} //end encodeURIComponent()
+}  // end encodeURIComponent()
 
 //==============================================================================
 // convertEnvironmentVariables ~
@@ -358,40 +357,34 @@ std::string StringMacros::getNumberType(const std::string& s)
 // static template function
 //	for bool, but not all other number types
 //	return false if string is not a bool
-//template<>
-//inline bool StringMacros::getNumber<bool>(const std::string& s, bool& retValue)
+// template<>
+// inline bool StringMacros::getNumber<bool>(const std::string& s, bool& retValue)
 bool StringMacros::getNumber(const std::string& s, bool& retValue)
 {
-	if(s.size() < 1) 
+	if(s.size() < 1)
 	{
 		__COUT_ERR__ << "Invalid empty bool string " << s << __E__;
 		return false;
 	}
-	
-	//check true case
-	if(s.find("1") != std::string::npos || 
-		s == "true" ||
-		s == "True" ||
-		s == "TRUE")
+
+	// check true case
+	if(s.find("1") != std::string::npos || s == "true" || s == "True" || s == "TRUE")
 	{
 		retValue = true;
 		return true;
-	} 
-	
-	//check false case
-	if(s.find("0") != std::string::npos || 
-        s == "false" ||
-        s == "False" ||
-        s == "FALSE")
+	}
+
+	// check false case
+	if(s.find("0") != std::string::npos || s == "false" || s == "False" || s == "FALSE")
 	{
 		retValue = false;
 		return true;
-	} 
-	
+	}
+
 	__COUT_ERR__ << "Invalid bool string " << s << __E__;
 	return false;
-	
-} // end static getNumber<bool>
+
+}  // end static getNumber<bool>
 
 //==============================================================================
 // getTimestampString ~~
@@ -602,16 +595,17 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 //		unless there is a leading delimiter, in which case vectors will have the same
 // size.
 std::vector<std::string> StringMacros::getVectorFromString(
-		const std::string&        inputString,
-		const std::set<char>&     delimiter,
-		const std::set<char>&     whitespace,
-		std::vector<char>*        listOfDelimiters)
+    const std::string&    inputString,
+    const std::set<char>& delimiter,
+    const std::set<char>& whitespace,
+    std::vector<char>*    listOfDelimiters)
 {
 	std::vector<std::string> listToReturn;
 
-	StringMacros::getVectorFromString(inputString,listToReturn,delimiter,whitespace,listOfDelimiters);
+	StringMacros::getVectorFromString(
+	    inputString, listToReturn, delimiter, whitespace, listOfDelimiters);
 	return listToReturn;
-} // end getVectorFromString()
+}  // end getVectorFromString()
 
 //==============================================================================
 // getMapFromString

@@ -397,13 +397,13 @@ void AllSupervisorInfo::setSupervisorStatus(const unsigned int& id,
 }
 
 void AllSupervisorInfo::setSupervisorProgress(const SupervisorInfo& appInfo,
-                                            const unsigned int    progress)
+                                              const unsigned int    progress)
 {
 	setSupervisorProgress(appInfo.getId(), progress);
 }
 
 void AllSupervisorInfo::setSupervisorProgress(const unsigned int& id,
-                                            const unsigned int  progress)
+                                              const unsigned int  progress)
 {
 	auto it = allSupervisorInfo_.find(id);
 	if(it == allSupervisorInfo_.end())
@@ -413,7 +413,6 @@ void AllSupervisorInfo::setSupervisorProgress(const unsigned int& id,
 	}
 	it->second.setProgress(progress);
 }
-
 
 //========================================================================================================================
 const SupervisorInfo& AllSupervisorInfo::getGatewayInfo(void) const

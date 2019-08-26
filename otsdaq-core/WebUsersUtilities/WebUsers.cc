@@ -87,7 +87,6 @@ WebUsers::WebUsers()
 {
 	// deleteUserData(); //leave for debugging to reset user data
 
-
 	usersNextUserId_       = 0;   // first UID, default to 0 but get from database
 	usersUsernameWithLock_ = "";  // init to no user with lock
 
@@ -2693,13 +2692,13 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
                                        const std::string& srcFunc,
                                        const std::string& srcId)
 {
-  if(srcId == "ALWAYS")
-    {
-      // ALWAYS shows tool tip
-      xmldoc->addTextElementToData("ShowTooltip", "1");
-      return;
-    }
-  
+	if(srcId == "ALWAYS")
+	{
+		// ALWAYS shows tool tip
+		xmldoc->addTextElementToData("ShowTooltip", "1");
+		return;
+	}
+
 	//	__COUT__ << "username " << username << __E__;
 	//	__COUT__ << "srcFile " << srcFile << __E__;
 	//	__COUT__ << "srcFunc " << srcFunc << __E__;
@@ -2707,20 +2706,18 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 	//__COUT__ << "Checking tooltip for user: " << username << __E__;
 
 	// if the silence file exists, silence all tooltips
-	std::string silencefilename = getTooltipFilename(username, 
-													SILENCE_ALL_TOOLTIPS_FILENAME, 
-													"", 
-													"");
+	std::string silencefilename =
+	    getTooltipFilename(username, SILENCE_ALL_TOOLTIPS_FILENAME, "", "");
 	//__COUTV__(silencefilename);
-	FILE*       silencefp       = fopen(silencefilename.c_str(), "r");
-	if (silencefp != NULL)
+	FILE* silencefp = fopen(silencefilename.c_str(), "r");
+	if(silencefp != NULL)
 	{
 		xmldoc->addTextElementToData("ShowTooltip", "0");
-		tooltipSetNeverShowForUsername(username, xmldoc, srcFile, srcFunc, srcId, true, true);
+		tooltipSetNeverShowForUsername(
+		    username, xmldoc, srcFile, srcFunc, srcId, true, true);
 		return;
 	}
 
-	
 	std::string filename = getTooltipFilename(username, srcFile, srcFunc, srcId);
 	FILE*       fp       = fopen(filename.c_str(), "r");
 	if(fp)
@@ -2743,8 +2740,6 @@ void WebUsers::tooltipCheckForUsername(const std::string& username,
 	{
 		xmldoc->addTextElementToData("ShowTooltip", "1");
 	}
-		
-
 
 }  // end tooltipCheckForUsername();
 
@@ -2756,25 +2751,23 @@ void WebUsers::resetAllUserTooltips(const std::string& userNeedle)
 	    ("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + TOOLTIP_DB_PATH + "/" + userNeedle)
 	        .c_str());
 	__COUT__ << "Successfully reset Tooltips for user " << userNeedle << __E__;
-}// end of resetAllUserTooltips()
-
+}  // end of resetAllUserTooltips()
 
 //========================================================================================================================
 // WebUsers::silenceAllUserTooltips
 // creates a file
 void WebUsers::silenceAllUserTooltips(const std::string& username)
 {
-        std::string silencefilename = getTooltipFilename(username, SILENCE_ALL_TOOLTIPS_FILENAME, "", ""); //srcFile, srcFunc, srcId);
-	FILE*       silencefp       = fopen(silencefilename.c_str(), "w");
-	if (silencefp != NULL)
+	std::string silencefilename = getTooltipFilename(
+	    username, SILENCE_ALL_TOOLTIPS_FILENAME, "", "");  // srcFile, srcFunc, srcId);
+	FILE* silencefp = fopen(silencefilename.c_str(), "w");
+	if(silencefp != NULL)
 	{
-		fputs("mute tool tips",silencefp);
+		fputs("mute tool tips", silencefp);
 		fclose(silencefp);
 	}
 
-} // end of silenceAllUserTooltips()
-
-
+}  // end of silenceAllUserTooltips()
 
 //========================================================================================================================
 // WebUsers::insertGetSettingsResponse

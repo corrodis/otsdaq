@@ -37,7 +37,8 @@ class ConfigurationInterface
 	//	Loose column matching can be used to ignore column names when filling.
 	//
 	//	if accumulatedErrors, then invalid data is allowed
-	//		(not the same as "warnings allowed", because could create invalid tree situations)
+	//		(not the same as "warnings allowed", because could create invalid tree
+	//situations)
 	void get(TableBase*&                          table,
 	         const std::string                    tableName,
 	         std::shared_ptr<const TableGroupKey> groupKey            = 0,
@@ -46,7 +47,7 @@ class ConfigurationInterface
 	         TableVersion                         version             = TableVersion(),
 	         bool                                 resetConfiguration  = true,
 	         bool                                 looseColumnMatching = false,
-			 std::string*						  accumulatedErrors   = 0)
+	         std::string*                         accumulatedErrors   = 0)
 	{
 		if(table == 0)
 		{
@@ -153,11 +154,11 @@ class ConfigurationInterface
 			catch(const std::runtime_error& e)
 			{
 				__SS__ << "Error occurred while getting and filling Table \"" << tableName
-						<< "\" version:" << version << std::endl;
+				       << "\" version:" << version << std::endl;
 				ss << "\n" << e.what() << __E__;
 				__COUT__ << StringMacros::stackTrace() << __E__;
 
-				//if accumulating errors, allow invalid data
+				// if accumulating errors, allow invalid data
 				if(accumulatedErrors)
 					*accumulatedErrors += ss.str();
 				else
@@ -193,7 +194,7 @@ class ConfigurationInterface
 			if(table->getViewP()->getVersion() != version)
 			{
 				__SS__ << "Version mismatch!! " << table->getViewP()->getVersion()
-				         << " vs " << version << std::endl;
+				       << " vs " << version << std::endl;
 				__SS_THROW__;
 			}
 
@@ -230,8 +231,8 @@ class ConfigurationInterface
 			      // table->getMockupViewP()->getTableName())
 			{
 				__SS__ << "View Table Name mismatch!! "
-				         << table->getViewP()->getTableName() << " vs "
-				         << table->getMockupViewP()->getTableName() << std::endl;
+				       << table->getViewP()->getTableName() << " vs "
+				       << table->getMockupViewP()->getTableName() << std::endl;
 				__SS_THROW__;
 			}
 
@@ -243,11 +244,11 @@ class ConfigurationInterface
 			catch(const std::runtime_error& e)
 			{
 				__SS__ << "Error occurred while getting and filling Table \"" << tableName
-						<< "\" version:" << version << std::endl;
+				       << "\" version:" << version << std::endl;
 				ss << "\n" << e.what() << __E__;
 				__COUT__ << StringMacros::stackTrace() << __E__;
 
-				//if accumulating errors, allow invalid data
+				// if accumulating errors, allow invalid data
 				if(accumulatedErrors)
 					*accumulatedErrors += ss.str();
 				else
@@ -259,15 +260,15 @@ class ConfigurationInterface
 		}
 		catch(const std::runtime_error& e)
 		{
-			__SS__ << "Error occurred while getting and filling Table \"" <<
-					tableName << "\" version:" << version << std::endl;
+			__SS__ << "Error occurred while getting and filling Table \"" << tableName
+			       << "\" version:" << version << std::endl;
 			ss << "\n" << e.what() << __E__;
 			__SS_THROW__;
 		}
 		catch(...)
 		{
-			__SS__ << "Unknown error occurred while getting and filling Table \"" <<
-					tableName << "\" version:" << version << std::endl;
+			__SS__ << "Unknown error occurred while getting and filling Table \""
+			       << tableName << "\" version:" << version << std::endl;
 			__SS_THROW__;
 		}
 

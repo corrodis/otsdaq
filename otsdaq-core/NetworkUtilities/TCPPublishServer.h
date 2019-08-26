@@ -5,16 +5,14 @@
 
 namespace ots
 {
-
 class TCPPublishServer : public TCPServerBase
 {
-public:
-	TCPPublishServer(int serverPort, unsigned int maxNumberOfClients=-1);
+  public:
+	TCPPublishServer(int serverPort, unsigned int maxNumberOfClients = -1);
 	virtual ~TCPPublishServer(void);
 
-protected:
+  protected:
 	void acceptConnections() override;
-
 };
 }
 #endif

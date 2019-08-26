@@ -927,37 +927,39 @@ CLEAN_UP:
 	         << std::endl;
 	__COUT__ << "\t otsdaq_flatten_system_aliases -1 " << moveToDir << "\n\n"
 	         << std::endl;
-	         
-	//make updated rebuild files
+
+	// make updated rebuild files
 	{
-		FILE *fp = fopen((currentDir + "/fromConfigurationToTableConversion").c_str(),"w");
+		FILE* fp =
+		    fopen((currentDir + "/fromConfigurationToTableConversion").c_str(), "w");
 		if(fp)
 		{
-			fprintf(fp,"converted");
+			fprintf(fp, "converted");
 			fclose(fp);
 		}
 	}
 	{
-		FILE *fp = fopen((currentDir + "/fromConfigurationToTableConversion2").c_str(),"w");
+		FILE* fp =
+		    fopen((currentDir + "/fromConfigurationToTableConversion2").c_str(), "w");
 		if(fp)
 		{
-			fprintf(fp,"converted");
+			fprintf(fp, "converted");
 			fclose(fp);
 		}
 	}
 	{
-		FILE *fp = fopen((currentDir + "/artdaqDaqTableConversion").c_str(),"w");
+		FILE* fp = fopen((currentDir + "/artdaqDaqTableConversion").c_str(), "w");
 		if(fp)
 		{
-			fprintf(fp,"converted");
+			fprintf(fp, "converted");
 			fclose(fp);
 		}
 	}
 	{
-		FILE *fp = fopen((currentDir + "/fromIndexRebuild").c_str(),"w");
+		FILE* fp = fopen((currentDir + "/fromIndexRebuild").c_str(), "w");
 		if(fp)
 		{
-			fprintf(fp,"rebuilt");
+			fprintf(fp, "rebuilt");
 			fclose(fp);
 		}
 	}

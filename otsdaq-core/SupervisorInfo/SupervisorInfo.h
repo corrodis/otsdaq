@@ -122,7 +122,11 @@ class SupervisorInfo
 	const uint16_t&     getPort(void) const { return port_; }
 
 	// Setters -------------------
-	void setStatus(const std::string& status) { status_ = status; lastStatusTime_ = time(0); }
+	void setStatus(const std::string& status)
+	{
+		status_         = status;
+		lastStatusTime_ = time(0);
+	}
 	void setProgress(const unsigned int progress) { progress_ = progress; }
 	void clear(void)
 	{
@@ -147,7 +151,7 @@ class SupervisorInfo
 	uint16_t                                 port_;
 	std::string                              status_;
 	unsigned int                             progress_;
-	time_t 									 lastStatusTime_;
+	time_t                                   lastStatusTime_;
 };
 
 }  // namespace ots

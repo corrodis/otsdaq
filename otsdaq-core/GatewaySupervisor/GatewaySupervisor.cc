@@ -89,7 +89,8 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 
 	xgi::bind(this, &GatewaySupervisor::statusRequest, "StatusRequest");
 	// xgi::bind(
-	//     this, &GatewaySupervisor::infoRequestResultHandler, "InfoRequestResultHandler");
+	//     this, &GatewaySupervisor::infoRequestResultHandler,
+	//     "InfoRequestResultHandler");
 	xgi::bind(this, &GatewaySupervisor::tooltipRequest, "TooltipRequest");
 
 	xoap::bind(this,
@@ -117,7 +118,6 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 
 	// xoap::bind(this, &GatewaySupervisor::supervisorHandleAsyncError,
 	// "FERunningError", XDAQ_NS_URI);
-
 
 	init();
 
@@ -179,57 +179,53 @@ void GatewaySupervisor::init(void)
 		try
 		{
 			enableStateChanges = CorePropertySupervisorBase::getSupervisorTableNode()
-									.getNode("EnableStateChangesOverUDP")
-									.getValue<bool>();
+			                         .getNode("EnableStateChangesOverUDP")
+			                         .getValue<bool>();
 		}
 		catch(...)
 		{
 			;
 		}  // ignore errors
-
 
 		if(enableStateChanges)
 		{
 			__COUT__ << "Enabling state changes over UDP..." << __E__;
 			// start state changer UDP listener thread
 			std::thread(
-				[](GatewaySupervisor* s) { GatewaySupervisor::StateChangerWorkLoop(s); },
-				this)
-				.detach();
+			    [](GatewaySupervisor* s) { GatewaySupervisor::StateChangerWorkLoop(s); },
+			    this)
+			    .detach();
 		}
 		else
 			__COUT__ << "State changes over UDP are disabled." << __E__;
-	} // end setting up thread for UDP drive of state machine
+	}  // end setting up thread for UDP drive of state machine
 
-	
 	// setting up checking of App Status
 	{
 		bool checkAppStatus = false;
 		try
 		{
 			checkAppStatus = CorePropertySupervisorBase::getSupervisorTableNode()
-									.getNode("EnableApplicationStatusMonitoring")
-									.getValue<bool>();
+			                     .getNode("EnableApplicationStatusMonitoring")
+			                     .getValue<bool>();
 		}
 		catch(...)
 		{
 			;
 		}  // ignore errors
 
-
 		if(checkAppStatus)
 		{
 			__COUT__ << "Enabling App Status checking..." << __E__;
-			// 
+			//
 			std::thread(
-				[](GatewaySupervisor* s) { GatewaySupervisor::AppStatusWorkLoop(s); },
-				this)
-				.detach();
+			    [](GatewaySupervisor* s) { GatewaySupervisor::AppStatusWorkLoop(s); },
+			    this)
+			    .detach();
 		}
 		else
 			__COUT__ << "App Status checking is disabled." << __E__;
-	} // end checking of Application Status
-
+	}  // end checking of Application Status
 
 	try
 	{
@@ -264,28 +260,27 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 {
 	sleep(5);
 	std::string status, progress, appName;
-	int progressInteger;
+	int         progressInteger;
 	while(1)
 	{
 		// workloop procedure
 		//	Loop through all Apps and request status
 		//	sleep
 		// __COUT__ << "Just debugging App status checking" << __E__;
-		for(const auto& it : 
-			theSupervisor->allSupervisorInfo_.getAllSupervisorInfo())
+		for(const auto& it : theSupervisor->allSupervisorInfo_.getAllSupervisorInfo())
 		{
 			auto appInfo = it.second;
-			appName = appInfo.getName();
-			 __COUT__ << "Getting Status "
-			       << " Supervisor instance = '" << appInfo.getName()
-			       << "' [LID=" << appInfo.getId() << "] in Context '"
-			       << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
-			       << "].\n\n";
+			appName      = appInfo.getName();
+			__COUT__ << "Getting Status "
+			         << " Supervisor instance = '" << appInfo.getName()
+			         << "' [LID=" << appInfo.getId() << "] in Context '"
+			         << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
+			         << "].\n\n";
 			// if the application is the gateway supervisor, we do not send a SOAP message
-			if (appName == "Supervisor")
+			if(appName == "Supervisor")
 			{
 				// send back status and progress parameters
-				status = theSupervisor->theStateMachine_.getCurrentStateName();
+				status   = theSupervisor->theStateMachine_.getCurrentStateName();
 				progress = theSupervisor->theProgressBar_.readPercentageString();
 
 				if(theSupervisor->theStateMachine_.isInTransition())
@@ -304,30 +299,35 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				SOAPParameters appPointer;
 				appPointer.addParameter("ApplicationPointer");
 
-				xoap::MessageReference tempMessage = SOAPUtilities::makeSOAPMessageReference("ApplicationStatusRequest");
+				xoap::MessageReference tempMessage =
+				    SOAPUtilities::makeSOAPMessageReference("ApplicationStatusRequest");
 				// print tempMessage
-				__COUT__ << "tempMessage... " << SOAPUtilities::translate(tempMessage) << std::endl;
+				__COUT__ << "tempMessage... " << SOAPUtilities::translate(tempMessage)
+				         << std::endl;
 
 				try
 				{
 					xoap::MessageReference statusMessage =
-						theSupervisor->sendWithSOAPReply(appInfo.getDescriptor(),
-											tempMessage);
-					
-					__COUT__ << "statusMessage... " << SOAPUtilities::translate(statusMessage) << std::endl;
-					
+					    theSupervisor->sendWithSOAPReply(appInfo.getDescriptor(),
+					                                     tempMessage);
+
+					__COUT__ << "statusMessage... "
+					         << SOAPUtilities::translate(statusMessage) << std::endl;
+
 					SOAPParameters parameters;
 					parameters.addParameter("Status");
 					parameters.addParameter("Progress");
 					SOAPUtilities::receive(statusMessage, parameters);
 
 					status = parameters.getValue("Status");
-					if(status.empty()){
+					if(status.empty())
+					{
 						status = "Unknown";
 					}
 
 					progress = parameters.getValue("Progress");
-					if(progress.empty()){
+					if(progress.empty())
+					{
 						progress = "0";
 					}
 					__COUTV__(status);
@@ -338,22 +338,23 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					__COUT__ << "Failed to send SOAP Message... " << std::endl;
 				}
 			}
-			
-			//store status and progress in some struct..
+
+			// store status and progress in some struct..
 			//	in the APP STATUS structure
 			// set status and progress
-			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo,status);
-			// convert the progress string into an integer in order to call appInfo.setProgress() function
-			std::istringstream ssProgress (progress);
+			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo, status);
+			// convert the progress string into an integer in order to call
+			// appInfo.setProgress() function
+			std::istringstream ssProgress(progress);
 			ssProgress >> progressInteger;
-			theSupervisor->allSupervisorInfo_.setSupervisorProgress(appInfo,progressInteger);
+			theSupervisor->allSupervisorInfo_.setSupervisorProgress(appInfo,
+			                                                        progressInteger);
 
-		} // end of for loop
-		
+		}  // end of for loop
+
 		sleep(5);
 	}
 }  // end AppStatusWorkLoop
-
 
 //========================================================================================================================
 // StateChangerWorkLoop
@@ -1094,9 +1095,9 @@ void GatewaySupervisor::statusRequest(xgi::Input* in, xgi::Output* out)
 	// cancel the thread only when the infoRequestResultHandler is called  and that method
 	// can be called ONLY when I am already out of here!
 
-	//HttpXmlDocument tmpDoc = infoRequestWorkLoopManager_.processRequest(cgiIn);
+	// HttpXmlDocument tmpDoc = infoRequestWorkLoopManager_.processRequest(cgiIn);
 
-	//xmlOut.copyDataChildren(tmpDoc);
+	// xmlOut.copyDataChildren(tmpDoc);
 
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false);
 }
@@ -1535,9 +1536,9 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		try
 		{
 			CorePropertySupervisorBase::theConfigurationManager_
-								->dumpMacroMakerModeFhicl();
+			    ->dumpMacroMakerModeFhicl();
 		}
-		catch(...) //ignore error for now
+		catch(...)  // ignore error for now
 		{
 			__COUT_ERR__ << "Failed to dump MacroMaker mode fhicl." << __E__;
 		}
@@ -1585,9 +1586,8 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 					                              dumpFormat);
 
 					CorePropertySupervisorBase::theConfigurationManager_
-						->dumpMacroMakerModeFhicl();
+					    ->dumpMacroMakerModeFhicl();
 				}
-
 			}
 			catch(std::runtime_error& e)
 			{
@@ -2866,12 +2866,13 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	                                   CgiDataUtilities::postData(cgiIn, "CookieCode"));
 
 	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
-	
-	//std::string cookieCode = CgiDataUtilities::postData(cgiIn, "CookieCode");
-	//uint64_t    uid;
 
-	//if(!theWebUsers_.cookieCodeIsActiveForRequest(
-	//       cookieCode, 0 /*userPermissions*/, &uid, "0" /*dummy ip*/, false /*refresh*/))
+	// std::string cookieCode = CgiDataUtilities::postData(cgiIn, "CookieCode");
+	// uint64_t    uid;
+
+	// if(!theWebUsers_.cookieCodeIsActiveForRequest(
+	//       cookieCode, 0 /*userPermissions*/, &uid, "0" /*dummy ip*/, false
+	//       /*refresh*/))
 	//{
 	//	*out << cookieCode;
 	//	return;
@@ -2915,8 +2916,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			__COUT__ << "accounts = " << accounts << __E__;
 			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
 		}
-		else if(requestType == "viewCodeContent"){
-				
+		else if(requestType == "viewCodeContent")
+		{
 		}
 		else if(requestType == "setSettings")
 		{
@@ -3172,31 +3173,40 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 				auto appInfo = it.second;
 
-				xmlOut.addTextElementToData("name", appInfo.getName()); // get application name
-				xmlOut.addTextElementToData("id", std::to_string(appInfo.getId())); // get application id
-				xmlOut.addTextElementToData("status", appInfo.getStatus()); // get status
-				xmlOut.addTextElementToData("time", StringMacros::getTimestampString(appInfo.getLastStatusTime())); // get time stamp
-				xmlOut.addTextElementToData("progress", std::to_string(appInfo.getProgress())); // get progress
-				xmlOut.addTextElementToData("class", appInfo.getClass()); // get application class
-				xmlOut.addTextElementToData("url", appInfo.getURL()); // get application url
-				xmlOut.addTextElementToData("context", appInfo.getContextName()); // get context
-
+				xmlOut.addTextElementToData("name",
+				                            appInfo.getName());  // get application name
+				xmlOut.addTextElementToData(
+				    "id", std::to_string(appInfo.getId()));  // get application id
+				xmlOut.addTextElementToData("status", appInfo.getStatus());  // get status
+				xmlOut.addTextElementToData(
+				    "time",
+				    StringMacros::getTimestampString(
+				        appInfo.getLastStatusTime()));  // get time stamp
+				xmlOut.addTextElementToData(
+				    "progress", std::to_string(appInfo.getProgress()));  // get progress
+				xmlOut.addTextElementToData("class",
+				                            appInfo.getClass());  // get application class
+				xmlOut.addTextElementToData("url",
+				                            appInfo.getURL());  // get application url
+				xmlOut.addTextElementToData("context",
+				                            appInfo.getContextName());  // get context
 			}
 		}
 
 		else if(requestType == "getContextMemberNames")
 		{
-			const XDAQContextTable* contextTable = 
-				CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextTable);
-			
-			auto  contexts = contextTable->getContexts();
+			const XDAQContextTable* contextTable =
+			    CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(
+			        XDAQContextTable);
+
+			auto contexts = contextTable->getContexts();
 			for(const auto& context : contexts)
 			{
-				xmlOut.addTextElementToData("ContextMember", context.contextUID_); // get context member name
+				xmlOut.addTextElementToData(
+				    "ContextMember", context.contextUID_);  // get context member name
 			}
-			
 		}
-		
+
 		else if(requestType == "getSystemMessages")
 		{
 			xmlOut.addTextElementToData(
@@ -3605,8 +3615,9 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			WebUsers::resetAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_));
 		}
 		else if(requestType == "silenceUserTooltips")
-		{			
-		        WebUsers::silenceAllUserTooltips(theWebUsers_.getUsersUsername(userInfo.uid_));
+		{
+			WebUsers::silenceAllUserTooltips(
+			    theWebUsers_.getUsersUsername(userInfo.uid_));
 		}
 		else
 		{

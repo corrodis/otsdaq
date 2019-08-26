@@ -114,7 +114,6 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(
 
 	__CFG_COUT__ << fileFclString << __E__;
 
-		
 	try
 	{
 		fhicl::make_ParameterSet(fileFclString, fhiclConfiguration_);
@@ -137,8 +136,8 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(
 
 	// fhicl::make_ParameterSet(theXDAQContextConfigTree.getNode(configurationPath).getNode("ConfigurationString").getValue<std::string>(),
 	// fhiclConfiguration_);
-	
-} //end constructor()
+
+}  // end constructor()
 
 //========================================================================================================================
 // ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string interfaceID, MPI_Comm
@@ -186,8 +185,8 @@ void ARTDAQReaderProcessorBase::configure(int rank)
 	{
 		__CFG_SS__ << "Error initializing '" << name_ << "' with ParameterSet = \n"
 		           << fhiclConfiguration_.to_string() << __E__;
-		ss << "Here is the Board Reader report: \n" <<
-				fragment_receiver_ptr_->report("" /* or "transition_status" */) << __E__;
+		ss << "Here is the Board Reader report: \n"
+		   << fragment_receiver_ptr_->report("" /* or "transition_status" */) << __E__;
 		__CFG_SS_THROW__;
 	}
 	__CFG_COUT__ << "Done Initializing." << __E__;

@@ -1,10 +1,5 @@
-#include <fhiclcpp/ParameterSet.h>
-#include <fhiclcpp/detail/print_mode.h>
-#include <fhiclcpp/intermediate_table.h>
-#include <fhiclcpp/make_ParameterSet.h>
-#include <fhiclcpp/parse.h>
 
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
+
 #include "otsdaq-core/Macros/TablePluginMacros.h"
 #include "otsdaq-core/TablePlugins/ARTDAQBuilderTable.h"
 #include "otsdaq-core/TablePlugins/XDAQContextTable.h"
@@ -16,18 +11,10 @@
 
 using namespace ots;
 
-#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE "builder"
 
-// helpers
-#define OUT out << tabStr << commentStr
-#define PUSHTAB tabStr += "\t"
-#define POPTAB tabStr.resize(tabStr.size() - 1)
-#define PUSHCOMMENT commentStr += "# "
-#define POPCOMMENT commentStr.resize(commentStr.size() - 2)
-
 //========================================================================================================================
-ARTDAQBuilderTable::ARTDAQBuilderTable(void) : TableBase("ARTDAQBuilderTable")
+ARTDAQBuilderTable::ARTDAQBuilderTable(void) : ARTDAQTableBase("ARTDAQBuilderTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -47,9 +34,6 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 	//__COUTV__(isFirstAppInContext);
 	if(!isFirstAppInContext)
 		return;
-
-	// make directory just in case
-	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
 	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
 	__COUT__ << configManager->__SELF_NODE__ << __E__;
@@ -85,75 +69,9 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 		    contextConfig->getARTDAQDataPort(configManager, builderContext->contextUID_),
 		    contextConfig);
 
-		flattenFHICL(builderConfigNode);
-
+		flattenFHICL(ARTDAQ_FILE_PREAMBLE, builderConfigNode.getValue());
 	}
-}
-
-//========================================================================================================================
-std::string ARTDAQBuilderTable::getFHICLFilename(const ConfigurationTree& builderNode)
-{
-	__COUT__ << "ARTDAQ Builder UID: " << builderNode.getValue() << __E__;
-	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
-	std::string uid      = builderNode.getValue();
-	for(unsigned int i = 0; i < uid.size(); ++i)
-		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
-		   (uid[i] >= '0' && uid[i] <= '9'))  // only allow alpha numeric in file name
-			filename += uid[i];
-
-	filename += ".fcl";
-
-	__COUT__ << "fcl: " << filename << __E__;
-
-	return filename;
-}  // end getFHICLFilename()
-
-//========================================================================================================================
-std::string ARTDAQBuilderTable::getFlatFHICLFilename(const ConfigurationTree& builderNode)
-{
-	__COUT__ << "ARTDAQ Builder UID: " << builderNode.getValue() << __E__;
-	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
-	std::string uid      = builderNode.getValue();
-	for(unsigned int i = 0; i < uid.size(); ++i)
-		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
-		   (uid[i] >= '0' && uid[i] <= '9'))  // only allow alpha numeric in file name
-			filename += uid[i];
-
-	filename += "_flattened.fcl";
-
-	__COUT__ << "fcl: " << filename << __E__;
-
-	return filename;
-}  // end getFlatFHICLFilename()
-
-void ARTDAQBuilderTable::flattenFHICL(const ConfigurationTree& builderNode)
-{
-	__COUT__ << "flattenFHICL()" << __E__;
-	auto inFile  = getFHICLFilename(builderNode);
-	auto outFile = getFlatFHICLFilename(builderNode);
-	
-	__COUTV__(__ENV__("FHICL_FILE_PATH"));
-
-	cet::filepath_lookup_nonabsolute policy("FHICL_FILE_PATH");
-
-	fhicl::ParameterSet pset;
-
-	try
-	{
-		fhicl::intermediate_table tbl;
-		fhicl::parse_document(inFile, policy, tbl);
-		fhicl::ParameterSet pset;
-		fhicl::make_ParameterSet(tbl, pset);
-
-		std::ofstream ofs{outFile};
-		ofs << pset.to_indented_string(0, fhicl::detail::print_mode::annotated);
-	}
-	catch(cet::exception const& e)
-	{
-		__SS__ << "Failed to parse fhicl: " << e.what() << __E__;
-		__SS_THROW__;
-	}
-}
+}  // end init()
 
 //========================================================================================================================
 void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
@@ -283,7 +201,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 	 */
 
-	std::string filename = getFHICLFilename(builderNode);
+	std::string filename = getFHICLFilename(ARTDAQ_FILE_PREAMBLE, builderNode.getValue());
 
 	/////////////////////////
 	// generate xdaq run parameter file
@@ -322,33 +240,13 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 	//--------------------------------------
 	// handle preamble parameters
-	auto preambleParameterLink = builderNode.getNode("preambleParametersLink");
-	if(!preambleParameterLink.isDisconnected())
-	{
-		///////////////////////
-		auto otherParameters = preambleParameterLink.getChildren();
-
-		std::string key;
-		//__COUTV__(otherParameters.size());
-		for(auto& parameter : otherParameters)
-		{
-			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-			        .getValue<bool>())
-				PUSHCOMMENT;
-			key = parameter.second.getNode("daqParameterKey").getValue();
-
-			OUT << key;
-			if(key.find("#include") == std::string::npos)
-				OUT << ":";
-			OUT << parameter.second.getNode("daqParameterValue").getValue() << "\n";
-
-			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-			        .getValue<bool>())
-				POPCOMMENT;
-		}
-	}
-	// else
-	//	__COUT__ << "No preamble parameters found" << __E__;
+	ARTDAQTableBase::insertParameters(out,
+	                                  tabStr,
+	                                  commentStr,
+	                                  builderNode.getNode("preambleParametersLink"),
+	                                  "daqParameter" /*parameterType*/,
+	                                  false /*onlyInsertAtTableParameters*/,
+	                                  true /*includeAtTableParameters*/);
 
 	//--------------------------------------
 	// handle services
@@ -357,11 +255,22 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 	{
 		OUT << "services: {\n";
 
-		// scheduler
 		PUSHTAB;
+
+		//--------------------------------------
+		// handle services @table:: parameters
+		ARTDAQTableBase::insertParameters(out,
+		                                  tabStr,
+		                                  commentStr,
+		                                  services.getNode("ServicesParametersLink"),
+		                                  "daqParameter" /*parameterType*/,
+		                                  true /*onlyInsertAtTableParameters*/,
+		                                  false /*includeAtTableParameters*/);
+
+		// scheduler
 		OUT << "scheduler: {\n";
 
-	#if ART_HEX_VERSION < 0x30200
+#if ART_HEX_VERSION < 0x30200
 		PUSHTAB;
 		//		OUT << "fileMode: " << services.getNode("schedulerFileMode").getValue() <<
 		//"\n";
@@ -371,7 +280,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		            : "false")
 		    << "\n";
 		POPTAB;
-	#endif
+#endif
 		OUT << "}\n\n";
 
 		// NetMonTransportServiceInterface
@@ -487,29 +396,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		POPTAB;
 		OUT << "}\n\n";  // end NetMonTransportServiceInterface
 
-		auto otherParameterLink = services.getNode("ServicesParametersLink");
-		if(!otherParameterLink.isDisconnected())
-		{
-			///////////////////////
-			auto servicesParameters = otherParameterLink.getChildren();
-
-			//__COUTV__(servicesParameters.size());
-			for(auto& parameter : servicesParameters)
-			{
-				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				        .getValue<bool>())
-					PUSHCOMMENT;
-
-				OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
-				    << parameter.second.getNode("daqParameterValue").getValue() << "\n";
-
-				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				        .getValue<bool>())
-					POPCOMMENT;
-			}
-		}
-		// else
-		//	__COUT__ << "No services parameters found" << __E__;
+		//--------------------------------------
+		// handle services NOT @table:: parameters
+		ARTDAQTableBase::insertParameters(out,
+		                                  tabStr,
+		                                  commentStr,
+		                                  services.getNode("ServicesParametersLink"),
+		                                  "daqParameter" /*parameterType*/,
+		                                  false /*onlyInsertAtTableParameters*/,
+		                                  false /*includeAtTableParameters*/);
 
 		POPTAB;
 		OUT << "}\n\n";  // end services
@@ -537,25 +432,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 		    << daq.getNode("daqEventBuilderBufferCount").getValue<unsigned long long>()
 		    << __E__;
 
-		auto parametersLink = daq.getNode("daqEventBuilderParametersLink");
-		if(!parametersLink.isDisconnected())
-		{
-			auto parameters = parametersLink.getChildren();
-			for(auto& parameter : parameters)
-			{
-				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				        .getValue<bool>())
-					PUSHCOMMENT;
-
-				OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
-				    << parameter.second.getNode("daqParameterValue").getValue() << "\n";
-
-				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				        .getValue<bool>())
-					POPCOMMENT;
-			}
-		}
-		OUT << "\n";  // end daq event builder parameters
+		//--------------------------------------
+		// handle ALL daq event builder parameters
+		ARTDAQTableBase::insertParameters(out,
+		                                  tabStr,
+		                                  commentStr,
+		                                  daq.getNode("daqEventBuilderParametersLink"),
+		                                  "daqParameter" /*parameterType*/,
+		                                  false /*onlyInsertAtTableParameters*/,
+		                                  true /*includeAtTableParameters*/);
 
 		OUT << "sources: {\n";
 
@@ -679,31 +564,17 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				OUT << "level: " << metric.second.getNode("metricLevel").getValue()
 				    << "\n";
 
-				auto metricParametersGroup =
-				    metric.second.getNode("metricParametersLink");
-				if(!metricParametersGroup.isDisconnected())
-				{
-					auto metricParameters = metricParametersGroup.getChildren();
-					for(auto& metricParameter : metricParameters)
-					{
-						if(!metricParameter.second
-						        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						        .getValue<bool>())
-							PUSHCOMMENT;
+				//--------------------------------------
+				// handle ALL metric parameters
+				ARTDAQTableBase::insertParameters(
+				    out,
+				    tabStr,
+				    commentStr,
+				    metric.second.getNode("metricParametersLink"),
+				    "metricParameter" /*parameterType*/,
+				    false /*onlyInsertAtTableParameters*/,
+				    true /*includeAtTableParameters*/);
 
-						OUT << metricParameter.second.getNode("metricParameterKey")
-						           .getValue()
-						    << ": "
-						    << metricParameter.second.getNode("metricParameterValue")
-						           .getValue()
-						    << "\n";
-
-						if(!metricParameter.second
-						        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						        .getValue<bool>())
-							POPCOMMENT;
-					}
-				}
 				POPTAB;
 				OUT << "}\n\n";  // end metric
 
@@ -743,30 +614,16 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 			OUT << "module_type: " << moduleType << "\n";
 
-			auto pluginParameterLink =
-			    outputPlugin.second.getNode("outputModuleParameterLink");
-			if(!pluginParameterLink.isDisconnected())
-			{
-				auto pluginParameters = pluginParameterLink.getChildren();
-				for(auto& pluginParameter : pluginParameters)
-				{
-					if(!pluginParameter.second
-					        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
-					        .getValue<bool>())
-						PUSHCOMMENT;
-
-					OUT << pluginParameter.second.getNode("outputParameterKey").getValue()
-					    << ": "
-					    << pluginParameter.second.getNode("outputParameterValue")
-					           .getValue()
-					    << "\n";
-
-					if(!pluginParameter.second
-					        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
-					        .getValue<bool>())
-						POPCOMMENT;
-				}
-			}
+			//--------------------------------------
+			// handle ALL output parameters
+			ARTDAQTableBase::insertParameters(
+			    out,
+			    tabStr,
+			    commentStr,
+			    outputPlugin.second.getNode("outputModuleParameterLink"),
+			    "outputParameter" /*parameterType*/,
+			    false /*onlyInsertAtTableParameters*/,
+			    true /*includeAtTableParameters*/);
 
 			// ONLY For output module type 'BinaryNetOuput,' allow destinations
 			auto destinationsGroup =
@@ -920,6 +777,16 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 
 		PUSHTAB;
 
+		//--------------------------------------
+		// handle only @table:: physics parameters
+		ARTDAQTableBase::insertParameters(out,
+		                                  tabStr,
+		                                  commentStr,
+		                                  physics.getNode("physicsOtherParametersLink"),
+		                                  "physicsParameter" /*parameterType*/,
+		                                  true /*onlyInsertAtTableParameters*/,
+		                                  false /*includeAtTableParameters*/);
+
 		auto analyzers = physics.getNode("analyzersLink");
 		if(!analyzers.isDisconnected())
 		{
@@ -938,31 +805,18 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				PUSHTAB;
 				OUT << "module_type: "
 				    << module.second.getNode("analyzerModuleType").getValue() << "\n";
-				auto moduleParameterLink =
-				    module.second.getNode("analyzerModuleParameterLink");
-				if(!moduleParameterLink.isDisconnected())
-				{
-					auto moduleParameters = moduleParameterLink.getChildren();
-					for(auto& moduleParameter : moduleParameters)
-					{
-						if(!moduleParameter.second
-						        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						        .getValue<bool>())
-							PUSHCOMMENT;
 
-						OUT << moduleParameter.second.getNode("analyzerParameterKey")
-						           .getValue()
-						    << ": "
-						    << moduleParameter.second.getNode("analyzerParameterValue")
-						           .getValue()
-						    << "\n";
+				//--------------------------------------
+				// handle ALL analyzer parameters
+				ARTDAQTableBase::insertParameters(
+				    out,
+				    tabStr,
+				    commentStr,
+				    module.second.getNode("analyzerModuleParameterLink"),
+				    "analyzerParameter" /*parameterType*/,
+				    false /*onlyInsertAtTableParameters*/,
+				    true /*includeAtTableParameters*/);
 
-						if(!moduleParameter.second
-						        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						        .getValue<bool>())
-							POPCOMMENT;
-					}
-				}
 				POPTAB;
 				OUT << "}\n\n";  // end analyzer module
 
@@ -992,31 +846,18 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				PUSHTAB;
 				OUT << "module_type: "
 				    << module.second.getNode("producerModuleType").getValue() << "\n";
-				auto moduleParameterLink =
-				    module.second.getNode("producerModuleParameterLink");
-				if(!moduleParameterLink.isDisconnected())
-				{
-					auto moduleParameters = moduleParameterLink.getChildren();
-					for(auto& moduleParameter : moduleParameters)
-					{
-						if(!moduleParameter.second
-						        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						        .getValue<bool>())
-							PUSHCOMMENT;
 
-						OUT << moduleParameter.second.getNode("producerParameterKey")
-						           .getValue()
-						    << ":"
-						    << moduleParameter.second.getNode("producerParameterValue")
-						           .getValue()
-						    << "\n";
+				//--------------------------------------
+				// handle ALL producer parameters
+				ARTDAQTableBase::insertParameters(
+				    out,
+				    tabStr,
+				    commentStr,
+				    module.second.getNode("producerModuleParameterLink"),
+				    "producerParameter" /*parameterType*/,
+				    false /*onlyInsertAtTableParameters*/,
+				    true /*includeAtTableParameters*/);
 
-						if(!moduleParameter.second
-						        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						        .getValue<bool>())
-							POPCOMMENT;
-					}
-				}
 				POPTAB;
 				OUT << "}\n\n";  // end producer module
 
@@ -1046,31 +887,18 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				PUSHTAB;
 				OUT << "module_type: "
 				    << module.second.getNode("filterModuleType").getValue() << "\n";
-				auto moduleParameterLink =
-				    module.second.getNode("filterModuleParameterLink");
-				if(!moduleParameterLink.isDisconnected())
-				{
-					auto moduleParameters = moduleParameterLink.getChildren();
-					for(auto& moduleParameter : moduleParameters)
-					{
-						if(!moduleParameter.second
-						        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						        .getValue<bool>())
-							PUSHCOMMENT;
 
-						OUT << moduleParameter.second.getNode("filterParameterKey")
-						           .getValue()
-						    << ": "
-						    << moduleParameter.second.getNode("filterParameterValue")
-						           .getValue()
-						    << "\n";
+				//--------------------------------------
+				// handle ALL filter parameters
+				ARTDAQTableBase::insertParameters(
+				    out,
+				    tabStr,
+				    commentStr,
+				    module.second.getNode("filterModuleParameterLink"),
+				    "filterParameter" /*parameterType*/,
+				    false /*onlyInsertAtTableParameters*/,
+				    true /*includeAtTableParameters*/);
 
-						if(!moduleParameter.second
-						        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						        .getValue<bool>())
-							POPCOMMENT;
-					}
-				}
 				POPTAB;
 				OUT << "}\n\n";  // end filter module
 
@@ -1082,26 +910,16 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			OUT << "}\n\n";  // end filter
 		}
 
-		auto otherParameterLink = physics.getNode("physicsOtherParametersLink");
-		if(!otherParameterLink.isDisconnected())
-		{
-			///////////////////////
-			auto physicsParameters = otherParameterLink.getChildren();
-			for(auto& parameter : physicsParameters)
-			{
-				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				        .getValue<bool>())
-					PUSHCOMMENT;
+		//--------------------------------------
+		// handle NOT @table:: physics parameters
+		ARTDAQTableBase::insertParameters(out,
+		                                  tabStr,
+		                                  commentStr,
+		                                  physics.getNode("physicsOtherParametersLink"),
+		                                  "physicsParameter" /*parameterType*/,
+		                                  false /*onlyInsertAtTableParameters*/,
+		                                  false /*includeAtTableParameters*/);
 
-				OUT << parameter.second.getNode("physicsParameterKey").getValue() << ": "
-				    << parameter.second.getNode("physicsParameterValue").getValue()
-				    << "\n";
-
-				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				        .getValue<bool>())
-					POPCOMMENT;
-			}
-		}
 		POPTAB;
 		OUT << "}\n\n";  // end physics
 	}
@@ -1131,33 +949,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 	           "ARTDAQGlobalTableForProcessNameLink/processNameForBuilders")
 	    << "\n";
 
-	auto otherParameterLink = builderNode.getNode("addOnParametersLink");
-	if(!otherParameterLink.isDisconnected())
-	{
-		///////////////////////
-		auto otherParameters = otherParameterLink.getChildren();
-
-		std::string key;
-		//__COUTV__(otherParameters.size());
-		for(auto& parameter : otherParameters)
-		{
-			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-			        .getValue<bool>())
-				PUSHCOMMENT;
-			key = parameter.second.getNode("daqParameterKey").getValue();
-
-			OUT << key;
-			if(key.find("#include") == std::string::npos)
-				OUT << ":";
-			OUT << parameter.second.getNode("daqParameterValue").getValue() << "\n";
-
-			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-			        .getValue<bool>())
-				POPCOMMENT;
-		}
-	}
-	// else
-	//	__COUT__ << "No add-on parameters found" << __E__;
+	//--------------------------------------
+	// handle ALL metric parameters
+	ARTDAQTableBase::insertParameters(out,
+	                                  tabStr,
+	                                  commentStr,
+	                                  builderNode.getNode("addOnParametersLink"),
+	                                  "daqParameter" /*parameterType*/,
+	                                  false /*onlyInsertAtTableParameters*/,
+	                                  true /*includeAtTableParameters*/);
 
 	out.close();
 }  // end outputFHICL()

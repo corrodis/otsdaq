@@ -18,6 +18,8 @@
 
 namespace ots
 {
+// clang-format off
+
 // CorePropertySupervisorBase
 //	This class provides supervisor property get and set functionality. It has member
 // variables 		generally useful to the configuration of client supervisors.
@@ -32,37 +34,29 @@ class CorePropertySupervisorBase
 	AllSupervisorInfo     allSupervisorInfo_;
 	ConfigurationManager* theConfigurationManager_;
 
-	virtual void setSupervisorPropertyDefaults(
-	    void);  // override to control supervisor specific defaults
-	virtual void forceSupervisorPropertyValues(void)
-	{
-		;
-	}  // override to force supervisor property values (and ignore user settings)
+	virtual void 					setSupervisorPropertyDefaults					(void);  // override to control supervisor specific defaults
+	virtual void 					forceSupervisorPropertyValues					(void){;}  // override to force supervisor property values (and ignore user settings)
 
-	void getRequestUserInfo(WebUsers::RequestUserInfo& requestUserInfo);
+	void 							getRequestUserInfo								(WebUsers::RequestUserInfo& requestUserInfo);
 
 	// supervisors should use these two static functions to standardize permissions
 	// access:
-	static void extractPermissionsMapFromString(
-	    const std::string&                                  permissionsString,
-	    std::map<std::string, WebUsers::permissionLevel_t>& permissionsMap);
-	static bool doPermissionsGrantAccess(
-	    std::map<std::string, WebUsers::permissionLevel_t>& permissionLevelsMap,
-	    std::map<std::string, WebUsers::permissionLevel_t>& permissionThresholdsMap);
+	static void 					extractPermissionsMapFromString					(const std::string& permissionsString, std::map<std::string, WebUsers::permissionLevel_t>& permissionsMap);
+	static bool 					doPermissionsGrantAccess						(std::map<std::string, WebUsers::permissionLevel_t>& permissionLevelsMap, std::map<std::string, WebUsers::permissionLevel_t>& permissionThresholdsMap);
 
-	ConfigurationTree getContextTreeNode(void) const
+	ConfigurationTree 				getContextTreeNode								(void) const
 	{
 		return theConfigurationManager_->getNode(
 		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)->getTableName());
 	}
-	ConfigurationTree getSupervisorTableNode(void) const
+	ConfigurationTree 				getSupervisorTableNode							(void) const
 	{
 		return getContextTreeNode().getNode(supervisorConfigurationPath_);
 	}
 
-	const std::string& getContextUID(void) const { return supervisorContextUID_; }
-	const std::string& getSupervisorUID(void) const { return supervisorApplicationUID_; }
-	const std::string& getSupervisorConfigurationPath(void) const
+	const std::string& 				getContextUID									(void) const { return supervisorContextUID_; }
+	const std::string& 				getSupervisorUID								(void) const { return supervisorApplicationUID_; }
+	const std::string& 				getSupervisorConfigurationPath					(void) const
 	{
 		return supervisorConfigurationPath_;
 	}
@@ -72,7 +66,7 @@ class CorePropertySupervisorBase
 	const std::string supervisorClassNoNamespace_;
 
   private:
-	static void indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
+	static void 					indicateOtsAlive								(const CorePropertySupervisorBase* properties = 0);
 
 	std::string supervisorContextUID_;
 	std::string supervisorApplicationUID_;
@@ -111,7 +105,7 @@ class CorePropertySupervisorBase
 
   private:
 	// property private members
-	void          checkSupervisorPropertySetup(void);
+	void          					checkSupervisorPropertySetup						(void);
 	volatile bool propertiesAreSetup_;
 
 	// for public access to property map,..
@@ -146,34 +140,36 @@ class CorePropertySupervisorBase
 	} propertyStruct_;
 
   public:
-	void resetPropertiesAreSetup(void)
+	void 							resetPropertiesAreSetup								(void)
 	{
 		propertiesAreSetup_ = false;
 	}  // forces reload of properties from configuration
 	ConfigurationTree getSupervisorTreeNode(void);
 
-	void loadUserSupervisorProperties(void);
+	void 							loadUserSupervisorProperties						(void);
 	template<class T>
-	void setSupervisorProperty(const std::string& propertyName, const T& propertyValue)
+	void 							setSupervisorProperty								(
+			const std::string& propertyName, const T& propertyValue)
 	{
 		std::stringstream ss;
 		ss << propertyValue;
 		setSupervisorProperty(propertyName, ss.str());
-	}
-	void setSupervisorProperty(const std::string& propertyName,
+	} //end setSupervisorProperty()
+	void 							setSupervisorProperty								(const std::string& propertyName,
 	                           const std::string& propertyValue);
 	template<class T>
-	void addSupervisorProperty(const std::string& propertyName, const T& propertyValue)
+	void 							addSupervisorProperty								(
+			const std::string& propertyName, const T& propertyValue)
 	{
 		// prepend new values.. since map/set extraction takes the first value encountered
 		std::stringstream ss;
 		ss << propertyValue << " | " << getSupervisorProperty(propertyName);
 		setSupervisorProperty(propertyName, ss.str());
-	}
-	void addSupervisorProperty(const std::string& propertyName,
-	                           const std::string& propertyValue);
+	} //end addSupervisorProperty()
+	void 							addSupervisorProperty								(const std::string& propertyName, const std::string& propertyValue);
 	template<class T>
-	T getSupervisorProperty(const std::string& propertyName)
+	T 								getSupervisorProperty								(
+			const std::string& propertyName)
 	{
 		// check if need to setup properties
 		checkSupervisorPropertySetup();
@@ -185,11 +181,28 @@ class CorePropertySupervisorBase
 			__SS_THROW__;
 		}
 		return StringMacros::validateValueForDefaultStringDataType<T>(it->second);
-	}
-	std::string                 getSupervisorProperty(const std::string& propertyName);
-	WebUsers::permissionLevel_t getSupervisorPropertyUserPermissionsThreshold(
-	    const std::string& requestType);
+	} //end getSupervisorProperty()
+	template<class T>
+	T 									getSupervisorProperty							(
+			const std::string& propertyName, const T& defaultValue)
+	{
+		// check if need to setup properties
+		checkSupervisorPropertySetup();
+
+		auto it = propertyMap_.find(propertyName);
+		if(it == propertyMap_.end())
+		{
+			//not found, so returning default value
+			return defaultValue;
+		}
+		return StringMacros::validateValueForDefaultStringDataType<T>(it->second);
+	} //end getSupervisorProperty()
+	std::string                 		getSupervisorProperty							(const std::string& propertyName);
+	std::string                 		getSupervisorProperty							(const std::string& propertyName, const std::string& defaultValue);
+	WebUsers::permissionLevel_t 		getSupervisorPropertyUserPermissionsThreshold	(const std::string& requestType);
 };
+
+// clang-format on
 
 }  // namespace ots
 

@@ -492,7 +492,8 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue,
 
 		txBuffer.resize(txBuffer.size() + sizeof(tmpSz));
 		memcpy(&txBuffer[txBuffer.size() - sizeof(tmpSz)] /*dest*/,
-				&tmpSz /*src*/, sizeof(tmpSz));
+		       &tmpSz /*src*/,
+		       sizeof(tmpSz));
 
 		txBuffer += fullChannelName_;
 
@@ -867,8 +868,8 @@ void FESlowControlsChannel::extractSample(const std::string& universalReadValue)
 	BinaryStringMacros::extractValueFromBinaryString(
 	    universalReadValue, sample_, sizeOfDataTypeBits_);
 
-	__COUT__ << "Sample size in bytes: " << sample_.size() << "\t in bits: " <<
-			sizeOfDataTypeBits_ << __E__;
+	__COUT__ << "Sample size in bytes: " << sample_.size()
+	         << "\t in bits: " << sizeOfDataTypeBits_ << __E__;
 
 	__COUT__ << "sample: "
 	         << BinaryStringMacros::binaryNumberToHexString(sample_, "0x", " ") << __E__;
@@ -1100,7 +1101,8 @@ char FESlowControlsChannel::checkAlarms(std::string& txBuffer)
 
 				txBuffer.resize(txBuffer.size() + sizeof(tmpSz));
 				memcpy(&txBuffer[txBuffer.size() - sizeof(tmpSz)] /*dest*/,
-						&tmpSz /*src*/, sizeof(tmpSz));
+				       &tmpSz /*src*/,
+				       sizeof(tmpSz));
 
 				txBuffer += fullChannelName_;
 

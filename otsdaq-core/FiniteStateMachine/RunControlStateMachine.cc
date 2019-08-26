@@ -366,15 +366,16 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 		theStateMachine_.setErrorMessage("", false /*append*/);  // clear error message
 		return SOAPUtilities::makeSOAPMessageReference(result);
 	}
-	
+
 	__COUTV__(command);
 	__COUTV__(currentState);
-	
+
 	if(command == "Halt" && currentState == "Initial")
 	{
-
-		__COUT__ << "Converting Halt command to Initialize, since currently in Initialized state." << std::endl;
-		command = "Initialize";	
+		__COUT__ << "Converting Halt command to Initialize, since currently in "
+		            "Initialized state."
+		         << std::endl;
+		command = "Initialize";
 		message = SOAPUtilities::makeSOAPMessageReference(command);
 	}
 

@@ -44,12 +44,13 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	void setSupervisorStatus(const SupervisorInfo& appInfo, const std::string& status);
 	void setSupervisorStatus(const unsigned int& id, const std::string& status);
 
-	void setSupervisorProgress(const SupervisorInfo& appInfo, const unsigned int progress);
+	void setSupervisorProgress(const SupervisorInfo& appInfo,
+	                           const unsigned int    progress);
 	void setSupervisorProgress(const unsigned int& id, const unsigned int progress);
 
-
 	// GETTERs (so searching and iterating is easier)
-	const std::map<unsigned int /* lid */, SupervisorInfo>& getAllSupervisorInfo(void) const
+	const std::map<unsigned int /* lid */, SupervisorInfo>& getAllSupervisorInfo(
+	    void) const
 	{
 		return allSupervisorInfo_;
 	}

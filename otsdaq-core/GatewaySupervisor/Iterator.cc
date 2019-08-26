@@ -922,12 +922,12 @@ void Iterator::startCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 		__SS_THROW__;
 	}
 
-	//save original duration
+	// save original duration
 	sscanf(iteratorStruct->commands_[iteratorStruct->commandIndex_]
-			           .params_[IterateTable::commandRunParams_.DurationInSeconds_]
-			           .c_str(),
-			       "%ld",
-			       &iteratorStruct->originalDurationInSeconds_);
+	           .params_[IterateTable::commandRunParams_.DurationInSeconds_]
+	           .c_str(),
+	       "%ld",
+	       &iteratorStruct->originalDurationInSeconds_);
 	__COUTV__(iteratorStruct->originalDurationInSeconds_);
 
 	// else successfully launched
@@ -1637,8 +1637,8 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 			char str[200];
 			sprintf(str, "%ld", iteratorStruct->originalDurationInSeconds_);
 			iteratorStruct->commands_[iteratorStruct->commandIndex_]
-				.params_[IterateTable::commandRunParams_.DurationInSeconds_] =
-				str;  // re-store as string
+			    .params_[IterateTable::commandRunParams_.DurationInSeconds_] =
+			    str;  // re-store as string
 			return false;
 		}
 	}
@@ -1649,7 +1649,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 		__SS_THROW__;
 	}
 	return false;
-} // end checkCommandRun()
+}  // end checkCommandRun()
 
 //========================================================================================================================
 // return true if done

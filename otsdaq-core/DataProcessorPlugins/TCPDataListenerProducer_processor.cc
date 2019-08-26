@@ -78,7 +78,8 @@ void TCPDataListenerProducer::slowWrite(void)
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<
 	// std::endl;
 
-	data_                = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+	data_ =
+	    TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 	header_["IPAddress"] = ipAddress_;
 	header_["Port"]      = std::to_string(port_);
 
@@ -107,8 +108,9 @@ void TCPDataListenerProducer::fastWrite(void)
 		return;
 	}
 
-//IT IS A BLOCKING CALL! SO NEEDS TO BE CHANGED
-	*dataP_                  = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+	// IT IS A BLOCKING CALL! SO NEEDS TO BE CHANGED
+	*dataP_ =
+	    TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 	(*headerP_)["IPAddress"] = ipAddress_;
 	(*headerP_)["Port"]      = std::to_string(port_);
 

@@ -3,6 +3,9 @@
 #		 TableCore
 #         ${CETLIB}
 #)
+
+add_subdirectory(ARTDAQTableBase)
+    
   
 simple_plugin(ARTDAQBoardReaderTable "table"
   TableCore 
@@ -23,6 +26,7 @@ simple_plugin(ARTDAQBuilderTable "table"
   ConfigurationInterface
   otsdaq-core_TablePlugins_XDAQContextTable_table
   ${CETLIB}
+  ARTDAQTableBase
   )
   
 simple_plugin(FESlowControlsTable "table"
