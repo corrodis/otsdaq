@@ -794,9 +794,22 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			OUT << "analyzers: {\n";
 
 			PUSHTAB;
+
+
 			auto modules = analyzers.getChildren();
 			for(auto& module : modules)
 			{
+				//--------------------------------------
+				// handle only @table:: analyzer parameters
+				ARTDAQTableBase::insertParameters(
+				    out,
+				    tabStr,
+				    commentStr,
+				    module.second.getNode("analyzerModuleParameterLink"),
+				    "analyzerParameter" /*parameterType*/,
+				    true /*onlyInsertAtTableParameters*/,
+				    false /*includeAtTableParameters*/);
+
 				if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 				        .getValue<bool>())
 					PUSHCOMMENT;
@@ -807,7 +820,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				    << module.second.getNode("analyzerModuleType").getValue() << "\n";
 
 				//--------------------------------------
-				// handle ALL analyzer parameters
+				// handle NOT @table:: producer parameters
 				ARTDAQTableBase::insertParameters(
 				    out,
 				    tabStr,
@@ -815,7 +828,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				    module.second.getNode("analyzerModuleParameterLink"),
 				    "analyzerParameter" /*parameterType*/,
 				    false /*onlyInsertAtTableParameters*/,
-				    true /*includeAtTableParameters*/);
+				    false /*includeAtTableParameters*/);
 
 				POPTAB;
 				OUT << "}\n\n";  // end analyzer module
@@ -835,9 +848,22 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			OUT << "producers: {\n";
 
 			PUSHTAB;
+
+
 			auto modules = producers.getChildren();
 			for(auto& module : modules)
 			{
+				//--------------------------------------
+				// handle only @table:: producer parameters
+				ARTDAQTableBase::insertParameters(
+				    out,
+				    tabStr,
+				    commentStr,
+				    module.second.getNode("producerModuleParameterLink"),
+				    "producerParameter" /*parameterType*/,
+				    true /*onlyInsertAtTableParameters*/,
+				    false /*includeAtTableParameters*/);
+
 				if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 				        .getValue<bool>())
 					PUSHCOMMENT;
@@ -848,7 +874,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				    << module.second.getNode("producerModuleType").getValue() << "\n";
 
 				//--------------------------------------
-				// handle ALL producer parameters
+				// handle NOT @table:: producer parameters
 				ARTDAQTableBase::insertParameters(
 				    out,
 				    tabStr,
@@ -856,7 +882,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				    module.second.getNode("producerModuleParameterLink"),
 				    "producerParameter" /*parameterType*/,
 				    false /*onlyInsertAtTableParameters*/,
-				    true /*includeAtTableParameters*/);
+				    false /*includeAtTableParameters*/);
 
 				POPTAB;
 				OUT << "}\n\n";  // end producer module
@@ -876,9 +902,22 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			OUT << "filters: {\n";
 
 			PUSHTAB;
+
+
 			auto modules = filters.getChildren();
 			for(auto& module : modules)
 			{
+				//--------------------------------------
+				// handle only @table:: filter parameters
+				ARTDAQTableBase::insertParameters(
+				    out,
+				    tabStr,
+				    commentStr,
+				    module.second.getNode("filterModuleParameterLink"),
+				    "filterParameter" /*parameterType*/,
+				    true /*onlyInsertAtTableParameters*/,
+				    false /*includeAtTableParameters*/);
+
 				if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 				        .getValue<bool>())
 					PUSHCOMMENT;
@@ -889,7 +928,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				    << module.second.getNode("filterModuleType").getValue() << "\n";
 
 				//--------------------------------------
-				// handle ALL filter parameters
+				// handle NOT @table:: filter parameters
 				ARTDAQTableBase::insertParameters(
 				    out,
 				    tabStr,
@@ -897,7 +936,7 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				    module.second.getNode("filterModuleParameterLink"),
 				    "filterParameter" /*parameterType*/,
 				    false /*onlyInsertAtTableParameters*/,
-				    true /*includeAtTableParameters*/);
+				    false /*includeAtTableParameters*/);
 
 				POPTAB;
 				OUT << "}\n\n";  // end filter module
