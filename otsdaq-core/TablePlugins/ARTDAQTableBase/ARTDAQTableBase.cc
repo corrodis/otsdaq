@@ -167,6 +167,8 @@ void ARTDAQTableBase::insertParameters(std::ostream&      out,
 				continue;
 			}
 			// else NOT @table:: keyword parameter
+			
+			if(onlyInsertAtTableParameters) continue; //skip all other types
 
 			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 			        .getValue<bool>())
@@ -189,3 +191,24 @@ void ARTDAQTableBase::insertParameters(std::ostream&      out,
 	//	__COUT__ << "No parameters found" << __E__;
 
 }  // end insertParameters
+
+
+
+//========================================================================================================================
+// insertModuleType
+//	Inserts module type field, with consideration for @table:: 
+std::string ARTDAQTableBase::insertModuleType(std::ostream&      out,
+                                       std::string&       tabStr,
+                                       std::string&       commentStr,
+                                       ConfigurationTree  moduleTypeNode)
+{
+	std::string value = moduleTypeNode.getValue();
+	
+	OUT;
+	if(value.find("@table::") == std::string::npos)
+		out << "module_type: ";
+	out << value << "\n";	
+	
+	return value;
+} //end 
+

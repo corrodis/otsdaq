@@ -28,6 +28,7 @@ class ARTDAQTableBase : public TableBase
 	void        				flattenFHICL				(const std::string& type, const std::string& name);
 
 	void						insertParameters			(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree parameterLink, const std::string& parameterPreamble, bool onlyInsertAtTableParameters = false, bool includeAtTableParameters =false);
+	std::string					insertModuleType			(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree moduleTypeNode);
 };
 // clang-format on
 }  // namespace ots

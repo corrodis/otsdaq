@@ -606,14 +606,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			        .getValue<bool>())
 				PUSHCOMMENT;
 
-			std::string moduleType =
-			    outputPlugin.second.getNode("outputModuleType").getValue();
-
 			OUT << outputPlugin.second.getNode("outputKey").getValue() << ": {\n";
 			PUSHTAB;
-
-			OUT << "module_type: " << moduleType << "\n";
-
+						
+			std::string moduleType = ARTDAQTableBase::insertModuleType(
+			    out,
+			    tabStr,
+			    commentStr,
+			    outputPlugin.second.getNode("outputModuleType"));
+			    
 			//--------------------------------------
 			// handle ALL output parameters
 			ARTDAQTableBase::insertParameters(
@@ -799,6 +800,11 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			auto modules = analyzers.getChildren();
 			for(auto& module : modules)
 			{
+
+				if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+				        .getValue<bool>())
+					PUSHCOMMENT;
+
 				//--------------------------------------
 				// handle only @table:: analyzer parameters
 				ARTDAQTableBase::insertParameters(
@@ -809,15 +815,14 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				    "analyzerParameter" /*parameterType*/,
 				    true /*onlyInsertAtTableParameters*/,
 				    false /*includeAtTableParameters*/);
-
-				if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				        .getValue<bool>())
-					PUSHCOMMENT;
-
+				    
 				OUT << module.second.getNode("analyzerKey").getValue() << ": {\n";
-				PUSHTAB;
-				OUT << "module_type: "
-				    << module.second.getNode("analyzerModuleType").getValue() << "\n";
+				PUSHTAB;							
+				ARTDAQTableBase::insertModuleType(
+				    out,
+				    tabStr,
+				    commentStr,
+				    module.second.getNode("analyzerModuleType"));
 
 				//--------------------------------------
 				// handle NOT @table:: producer parameters
@@ -853,6 +858,12 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			auto modules = producers.getChildren();
 			for(auto& module : modules)
 			{
+				
+
+				if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+				        .getValue<bool>())
+					PUSHCOMMENT;
+
 				//--------------------------------------
 				// handle only @table:: producer parameters
 				ARTDAQTableBase::insertParameters(
@@ -863,15 +874,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				    "producerParameter" /*parameterType*/,
 				    true /*onlyInsertAtTableParameters*/,
 				    false /*includeAtTableParameters*/);
-
-				if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				        .getValue<bool>())
-					PUSHCOMMENT;
-
+				    
 				OUT << module.second.getNode("producerKey").getValue() << ": {\n";
 				PUSHTAB;
-				OUT << "module_type: "
-				    << module.second.getNode("producerModuleType").getValue() << "\n";
+				
+				ARTDAQTableBase::insertModuleType(
+				    out,
+				    tabStr,
+				    commentStr,
+				    module.second.getNode("producerModuleType"));	
 
 				//--------------------------------------
 				// handle NOT @table:: producer parameters
@@ -907,6 +918,12 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 			auto modules = filters.getChildren();
 			for(auto& module : modules)
 			{
+				
+
+				if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+				        .getValue<bool>())
+					PUSHCOMMENT;
+
 				//--------------------------------------
 				// handle only @table:: filter parameters
 				ARTDAQTableBase::insertParameters(
@@ -917,15 +934,15 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 				    "filterParameter" /*parameterType*/,
 				    true /*onlyInsertAtTableParameters*/,
 				    false /*includeAtTableParameters*/);
-
-				if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				        .getValue<bool>())
-					PUSHCOMMENT;
-
+				    
 				OUT << module.second.getNode("filterKey").getValue() << ": {\n";
 				PUSHTAB;
-				OUT << "module_type: "
-				    << module.second.getNode("filterModuleType").getValue() << "\n";
+				
+				ARTDAQTableBase::insertModuleType(
+				    out,
+				    tabStr,
+				    commentStr,
+				    module.second.getNode("filterModuleType"));				
 
 				//--------------------------------------
 				// handle NOT @table:: filter parameters
@@ -970,8 +987,14 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 	{
 		OUT << "source: {\n";
 
-		PUSHTAB;
-		OUT << "module_type: " << source.getNode("sourceModuleType").getValue() << "\n";
+		PUSHTAB;	
+
+		ARTDAQTableBase::insertModuleType(
+		    out,
+		    tabStr,
+		    commentStr,
+		    source.getNode("sourceModuleType"));
+		    
 		OUT << "waiting_time: " << source.getNode("sourceWaitingTime").getValue() << "\n";
 		OUT << "resume_after_timeout: "
 		    << (source.getNode("sourceResumeAfterTimeout").getValue<bool>() ? "true"
