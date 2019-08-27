@@ -31,6 +31,8 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(
     : Configurable(theXDAQContextConfigTree, configurationPath)
     , name_("BoardReader_" + processorUID)
 {
+	INIT_MF(("BoardReader_" + processorUID).c_str());
+
 	__CFG_COUT__ << "Constructing..." << __E__;
 	//__CFG_COUT__ << "Configuration string:-" <<
 	// theXDAQContextConfigTree.getNode(configurationPath).getNode("ConfigurationString").getValue<std::string>()
