@@ -1,4 +1,4 @@
 add_subdirectory(DataLoggerApp)
 add_subdirectory(DispatcherApp)
 add_subdirectory(EventBuilderApp)
-
+add_subdirectory(ARTDAQSupervisor)

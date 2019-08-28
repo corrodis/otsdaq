@@ -1093,7 +1093,21 @@ launchOTS() {
 	########### end console & message facility handling ################
 	####################################################################
 	
+	####################################################################
+	######################## setup DAQInterface ########################
+	####################################################################
+
+	export DAQINTERFACE_PROCESS_MANAGEMENT_METHOD="direct"
+	export DAQINTERFACE_FHICL_DIRECTORY=$USER_DATA/ARTDAQConfigurations
+	export DAQINTERFACE_KNOWN_BOARDREADERS_LIST=$USER_DATA/ARTDAQConfigurations/known_boardreaders_list
+	export DAQINTERFACE_SETTINGS=$USER_DATA/ARTDAQConfigurations/daqinterface_settings
+	export DAQINTERFACE_USER_SOURCEFILE="IGNORED"
+	source $ARTDAQ_DAQINTERFACE_DIR/source_me
 			
+	####################################################################
+	###################### end DAQInterface setup ######################
+	####################################################################
+
 	envString="-genv OTSDAQ_LOG_ROOT ${OTSDAQ_LOG_DIR} -genv ARTDAQ_OUTPUT_DIR ${ARTDAQ_OUTPUT_DIR}"
 
 	#create argument to pass to xdaq executable
