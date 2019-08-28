@@ -2,6 +2,7 @@
 	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
 		<TABLE Name="ARTDAQAggregatorTable">
 			<VIEW Name="ARTDAQ_AGGREGATOR_TABLE" Type="File,Database,DatabaseTest" Description="No%20description.">
+				<COLUMN Type="GroupID-aggregators" 	 Name="AggregatorsGroupID" 	 StorageName="AGGREGATORS_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="UniqueData" 	 Name="OffsetPort" 	 StorageName="OFFSET_PORT" 		DataType="NUMBER" 		DataChoices=""/>
