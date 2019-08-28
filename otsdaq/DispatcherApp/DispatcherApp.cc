@@ -20,7 +20,6 @@ DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s) : CoreSupervisorBase(s)
 
 	INIT_MF("DispatcherApp");
 
-
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
@@ -257,8 +256,8 @@ void DispatcherApp::transitionStarting(toolbox::Event::Reference e)
 	}
 	__SUP_COUT__ << "Started." << __E__;
 
-	//register configured monitors
-	for(const auto& monitor: monitors_)
+	// register configured monitors
+	for(const auto& monitor : monitors_)
 		registerMonitor(monitor.second /*fcl*/);
 
 }  // end transitionStarting()
@@ -271,13 +270,12 @@ void DispatcherApp::transitionStopping(toolbox::Event::Reference e)
 	__SUP_COUT__ << "Stopped." << __E__;
 }  // end transitionStopping()
 
-
 //========================================================================================================================
 //	request
 void DispatcherApp::request(const std::string&               requestType,
-                             cgicc::Cgicc&                    cgiIn,
-                             HttpXmlDocument&                 xmlOut,
-                             const WebUsers::RequestUserInfo& userInfo)
+                            cgicc::Cgicc&                    cgiIn,
+                            HttpXmlDocument&                 xmlOut,
+                            const WebUsers::RequestUserInfo& userInfo)
 {
 	// Commands:
 	//		 RegisterMonitor
@@ -286,13 +284,13 @@ void DispatcherApp::request(const std::string&               requestType,
 	if(theStateMachine_.getCurrentStateName() != "Configured")
 	{
 		__SUP_SS__ << "Monitor requests can only take place while Dispatcher"
-				" is in Running state. The current state is '" <<
-				theStateMachine_.getCurrentStateName() << ".'" << __E__;
+		              " is in Running state. The current state is '"
+		           << theStateMachine_.getCurrentStateName() << ".'" << __E__;
 		__SUP_SS_THROW__;
 	}
 
-	std::string fcl =
-	    StringMacros::decodeURIComponent(CgiDataUtilities::postData(cgiIn, "fcl"));  // from POST
+	std::string fcl = StringMacros::decodeURIComponent(
+	    CgiDataUtilities::postData(cgiIn, "fcl"));  // from POST
 
 	__SUP_COUTV__(requestType);
 	__SUP_COUTV__(fcl);
@@ -303,13 +301,12 @@ void DispatcherApp::request(const std::string&               requestType,
 		unregisterMonitor(fcl);
 	else
 	{
-		__SUP_SS__ << "Unknown Dispatcher request '" <<
-				requestType << "' received." << __E__;
+		__SUP_SS__ << "Unknown Dispatcher request '" << requestType << "' received."
+		           << __E__;
 		__SUP_SS_THROW__;
 	}
 
-
-} //end request
+}  // end request
 
 //========================================================================================================================
 void DispatcherApp::registerMonitor(const std::string& fcl)
@@ -377,4 +374,3 @@ void DispatcherApp::unregisterMonitor(const std::string& label)
 	}
 
 }  // end unregisterMonitor()
-

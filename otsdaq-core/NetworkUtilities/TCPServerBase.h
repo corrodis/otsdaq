@@ -1,55 +1,51 @@
 #ifndef _ots_TCPServerBase_h_
 #define _ots_TCPServerBase_h_
 
-#include "otsdaq-core/NetworkUtilities/TCPSocket.h"
-#include <string>
-#include <vector>
 #include <future>
+#include <string>
 #include <unordered_map>
-
-
+#include <vector>
+#include "otsdaq-core/NetworkUtilities/TCPSocket.h"
 
 namespace ots
 {
-
 class TCPServerBase : public TCPSocket
 {
-public:
+  public:
 	TCPServerBase(int serverPort, unsigned int maxNumberOfClients);
 	virtual ~TCPServerBase(void);
-	
-	void startAccept(void);
-	void broadcastPacket (const std::string &message);
-	void broadcast       (const std::string &message);
-	void broadcast       (const std::vector<char> &message);
 
-protected:
+	void startAccept(void);
+	void broadcastPacket(const std::string& message);
+	void broadcast(const std::string& message);
+	void broadcast(const std::vector<char>& message);
+
+  protected:
 	virtual void acceptConnections() = 0;
 
-	void closeClientSocket (int socket);
-	template <class T>
-	T*  acceptClient(bool blocking = true)
+	void closeClientSocket(int socket);
+	template<class T>
+	T* acceptClient(bool blocking = true)
 	{
 		int socketId = accept(blocking);
 		fConnectedClients.emplace(socketId, new T(socketId));
 		return dynamic_cast<T*>(fConnectedClients[socketId]);
 	}
-	
+
 	std::promise<bool>                  fAcceptPromise;
 	std::unordered_map<int, TCPSocket*> fConnectedClients;
-	const int E_SHUTDOWN = 0;
+	const int                           E_SHUTDOWN = 0;
 
-private:
+  private:
 	void closeClientSockets(void);
-	int  accept            (bool blocking = true);
-	void shutdownAccept    (void);
+	int  accept(bool blocking = true);
+	void shutdownAccept(void);
 
 	const int         fMaxConnectionBacklog = 5;
 	unsigned int      fMaxNumberOfClients;
 	std::atomic_bool  fAccept;
 	std::future<bool> fAcceptFuture;
 };
-
 }
 
 #endif

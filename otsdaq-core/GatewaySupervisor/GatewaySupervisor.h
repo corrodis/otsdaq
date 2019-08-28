@@ -25,8 +25,8 @@
 #include <xgi/Method.h>
 
 #include <set>
-#include <string>
 #include <sstream>
+#include <string>
 
 // defines used also by OtsConfigurationWizardSupervisor
 #define FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE \
@@ -144,7 +144,6 @@ class GatewaySupervisor : public xdaq::Application,
 
 	static void StateChangerWorkLoop(GatewaySupervisor* supervisorPtr);
 	static void AppStatusWorkLoop(GatewaySupervisor* supervisorPtr);
-	
 
 	std::string attemptStateMachineTransition(HttpXmlDocument*    xmldoc,
 	                                          std::ostringstream* out,

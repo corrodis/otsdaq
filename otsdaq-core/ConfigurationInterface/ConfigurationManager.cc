@@ -661,7 +661,6 @@ const std::string& ConfigurationManager::getTypeNameOfGroup(
 	return convertGroupTypeIdToName(getTypeOfGroup(memberMap));
 }
 
-
 //==============================================================================
 // dumpMacroMakerModeFhicl
 //	Generates functional configuration file for MacroMaker mode
@@ -677,7 +676,7 @@ const std::string& ConfigurationManager::getTypeNameOfGroup(
 void ConfigurationManager::dumpMacroMakerModeFhicl()
 {
 	std::string filepath =
-			__ENV__("USER_DATA") + std::string("/") + "MacroMakerModeConfigurations";
+	    __ENV__("USER_DATA") + std::string("/") + "MacroMakerModeConfigurations";
 	mkdir(filepath.c_str(), 0755);
 	filepath += "/MacroMakerModeFhiclDump.fcl";
 	__COUT__ << "dumpMacroMakerModeFhicl: " << filepath << __E__;
@@ -692,51 +691,52 @@ void ConfigurationManager::dumpMacroMakerModeFhicl()
 	out.open(filepath, std::fstream::out | std::fstream::trunc);
 	if(out.fail())
 	{
-		__SS__ << "Failed to open MacroMaker mode fcl file for configuration dump: " <<
-				filepath << __E__;
+		__SS__ << "Failed to open MacroMaker mode fcl file for configuration dump: "
+		       << filepath << __E__;
 		__SS_THROW__;
 	}
 
 	try
 	{
-		std::vector<std::pair<std::string,ConfigurationTree>> fes = 
-			getNode("FEInterfaceTable").getChildren();
-		
-		for(auto& fe: fes)
+		std::vector<std::pair<std::string, ConfigurationTree>> fes =
+		    getNode("FEInterfaceTable").getChildren();
+
+		for(auto& fe : fes)
 		{
-			//skip status false
+			// skip status false
 			if(!fe.second.getNode("Status").getValue<bool>())
 				continue;
 
 			__COUTV__(fe.first);
-			
+
 			OUT << fe.first << ": {" << __E__;
 			PUSHTAB;
-			
-			//only do FEInterfacePluginName and LinkToFETypeTable at top level
-			
-			OUT << "FEInterfacePluginName" << ": \t" << "\"" <<
-				fe.second.getNode("FEInterfacePluginName").getValueAsString() <<
-				"\"" << __E__;
-			
-			recursiveTreeToFhicl(fe.second.getNode("LinkToFETypeTable"),
-					out,tabStr,commentStr);
+
+			// only do FEInterfacePluginName and LinkToFETypeTable at top level
+
+			OUT << "FEInterfacePluginName"
+			    << ": \t"
+			    << "\"" << fe.second.getNode("FEInterfacePluginName").getValueAsString()
+			    << "\"" << __E__;
+
+			recursiveTreeToFhicl(
+			    fe.second.getNode("LinkToFETypeTable"), out, tabStr, commentStr);
 
 			POPTAB;
 			OUT << "} //end " << fe.first << __E__ << __E__;
-			
-		} //end fe handling
 
+		}  // end fe handling
 	}
 	catch(...)
 	{
 		__COUT_ERR__ << "Failed to complete MacroMaker mode fcl "
-				"file configuration dump due to error." << __E__;
+		                "file configuration dump due to error."
+		             << __E__;
 	}
 
 	out.close();
-	//end fhicl output
-} // end dumpMacroMakerModeFhicl()
+	// end fhicl output
+}  // end dumpMacroMakerModeFhicl()
 
 //==============================================================================
 // recursiveTreeToFhicl
@@ -747,27 +747,25 @@ void ConfigurationManager::dumpMacroMakerModeFhicl()
 //		The node must be a UID or link node
 //
 //	e.g., out = std::cout, tabStr = "", commentStr = ""
-void ConfigurationManager::recursiveTreeToFhicl(
-		ConfigurationTree 	node,
-		std::ostream&		out /* = std::cout */,
-		std::string& 		tabStr /* = "" */,
-		std::string& 		commentStr /* = "" */,
-		unsigned int 		depth /* = -1 */)
+void ConfigurationManager::recursiveTreeToFhicl(ConfigurationTree node,
+                                                std::ostream&     out /* = std::cout */,
+                                                std::string&      tabStr /* = "" */,
+                                                std::string&      commentStr /* = "" */,
+                                                unsigned int      depth /* = -1 */)
 {
 	if(depth == 0)
 	{
-		__COUT__ << __COUT_HDR_P__ <<
-				"Depth limit reached. Ending recursion." << __E__;
+		__COUT__ << __COUT_HDR_P__ << "Depth limit reached. Ending recursion." << __E__;
 		return;
 	}
 
-	__COUT__ << __COUT_HDR_P__ << "Adding tree record '" <<
-			node.getValueAsString() << "' fields..."
-	         << __E__;
+	__COUT__ << __COUT_HDR_P__ << "Adding tree record '" << node.getValueAsString()
+	         << "' fields..." << __E__;
 
-	if(depth == (unsigned int )-1) depth = 10;
+	if(depth == (unsigned int)-1)
+		depth = 10;
 
-	//decorate link node with link_table {} wrapper
+	// decorate link node with link_table {} wrapper
 	if(node.isLinkNode())
 	{
 		if(node.isDisconnected())
@@ -776,47 +774,45 @@ void ConfigurationManager::recursiveTreeToFhicl(
 			return;
 		}
 
-		OUT << node.getFieldName() << "_" <<
-						node.getValueAsString(true /* returnLinkTableValue */) <<
-						" \t{" << __E__;
+		OUT << node.getFieldName() << "_"
+		    << node.getValueAsString(true /* returnLinkTableValue */) << " \t{" << __E__;
 		PUSHTAB;
-	} //end link preamble decoration
+	}  // end link preamble decoration
 
 	if(node.isGroupLinkNode())
 	{
-		//for group link, handle each as a UID record
-		std::vector<std::pair<std::string,ConfigurationTree>> children =
-						node.getChildren();
-		for(auto& child:children)
-			recursiveTreeToFhicl(child.second,out,tabStr,commentStr,depth-1);
+		// for group link, handle each as a UID record
+		std::vector<std::pair<std::string, ConfigurationTree>> children =
+		    node.getChildren();
+		for(auto& child : children)
+			recursiveTreeToFhicl(child.second, out, tabStr, commentStr, depth - 1);
 
 		return;
-	} //end group link handling
+	}  // end group link handling
 
-
-	//treat as UID record now
+	// treat as UID record now
 	//	give UID decoration, then contents
 
-	//open UID decoration
+	// open UID decoration
 	OUT << node.getValueAsString() << ": \t{" << __E__;
 	PUSHTAB;
-	{ // open UID content
+	{  // open UID content
 
-		std::vector<std::pair<std::string,ConfigurationTree>> fields =
-						node.getChildren();
+		std::vector<std::pair<std::string, ConfigurationTree>> fields =
+		    node.getChildren();
 
-		//skip last 3 fields that are always common
-		for(unsigned int i=0;i<fields.size()-3;++i)
+		// skip last 3 fields that are always common
+		for(unsigned int i = 0; i < fields.size() - 3; ++i)
 		{
 			__COUT__ << fields[i].first << __E__;
 
 			if(fields[i].second.isLinkNode())
 			{
 				recursiveTreeToFhicl(
-						fields[i].second,out,tabStr,commentStr,depth-1);
+				    fields[i].second, out, tabStr, commentStr, depth - 1);
 				continue;
 			}
-			//else a normal field
+			// else a normal field
 
 			OUT << fields[i].second.getFieldName() << ": \t";
 			if(fields[i].second.isValueNumberDataType())
@@ -824,22 +820,21 @@ void ConfigurationManager::recursiveTreeToFhicl(
 			else
 				OUT << "\"" << fields[i].second.getValueAsString() << "\"" << __E__;
 
-		}	//end fe fields
+		}  // end fe fields
 
-	} // close UID content
-	POPTAB; // close UID decoration
+	}        // close UID content
+	POPTAB;  // close UID decoration
 	OUT << "} //end " << node.getValueAsString() << " record" << __E__;
 
-	//handle link closing decoration
+	// handle link closing decoration
 	if(node.isLinkNode())
 	{
 		POPTAB;
-		OUT << "} //end " <<
-				node.getValueAsString(true /* returnLinkTableValue */) <<
-				" link record" << __E__;
-	} //end link closing decoration
+		OUT << "} //end " << node.getValueAsString(true /* returnLinkTableValue */)
+		    << " link record" << __E__;
+	}  // end link closing decoration
 
-} //end recursiveTreeToFhicl
+}  // end recursiveTreeToFhicl
 
 //==============================================================================
 // dumpActiveConfiguration
@@ -1064,7 +1059,7 @@ void ConfigurationManager::loadMemberMap(
 	//		get()
 	for(auto& memberPair : memberMap)
 	{
-		//if(accumulateWarnings)
+		// if(accumulateWarnings)
 		//	__COUT__ << "\tMember config " << memberPair.first << ":" <<
 		//		memberPair.second << __E__;
 
@@ -1099,8 +1094,9 @@ void ConfigurationManager::loadMemberMap(
 			ss << "\nIf the table '" << memberPair.first
 			   << "' should not exist, then please remove it from the group. If it "
 			      "should exist, then it "
-			   << "seems to have a problem; use the Table Editor to fix the table definition, or "
-			   	  "edit the table content to match the table definition."
+			   << "seems to have a problem; use the Table Editor to fix the table "
+			      "definition, or "
+			      "edit the table content to match the table definition."
 			   << __E__;
 
 			// if accumulating warnings and table view was created, then continue
@@ -1117,8 +1113,9 @@ void ConfigurationManager::loadMemberMap(
 			ss << "\nIf the table '" << memberPair.first
 			   << "' should not exist, then please remove it from the group. If it "
 			      "should exist, then it "
-			   << "seems to have a problem; use the Table Editor to fix the table definition, or "
-			   	  "edit the table content to match the table definition."
+			   << "seems to have a problem; use the Table Editor to fix the table "
+			      "definition, or "
+			      "edit the table content to match the table definition."
 			   << __E__;
 
 			// if accumulating warnings and table view was created, then continue
@@ -1127,7 +1124,6 @@ void ConfigurationManager::loadMemberMap(
 			else
 				__SS_THROW__;
 		}
-
 
 		//__COUT__ << "Checking ptr.. " <<  (tmpConfigBasePtr?"GOOD":"BAD") << __E__;
 		if(!tmpConfigBasePtr)
@@ -1481,7 +1477,7 @@ void ConfigurationManager::loadTableGroup(
 				             << "(" << groupKey << "). Aborting."
 				             << "\n"
 				             << *accumulatedTreeErrors << __E__;
-				//return;  // memberMap; //return member name map to version
+				// return;  // memberMap; //return member name map to version
 			}
 		}
 
@@ -1906,13 +1902,13 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 				if(mapIt == nameToTableMap_.end())
 				{
 					__SS__ << "Get Children with member map requires a child '"
-						   << memberPair.first << "' that is not present!" << __E__;
+					       << memberPair.first << "' that is not present!" << __E__;
 					__SS_THROW__;
 				}
 				if(!(*mapIt).second->isActive())
 				{
 					__SS__ << "Get Children with member map requires a child '"
-						   << memberPair.first << "' that is not active!" << __E__;
+					       << memberPair.first << "' that is not active!" << __E__;
 					__SS_THROW__;
 				}
 			}
@@ -1921,8 +1917,10 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 				if(accumulatedTreeErrors)
 				{
 					*accumulatedTreeErrors += e.what();
-					__COUT_ERR__ << "Skipping " << memberPair.first << " since the table "
-							"is not active." << __E__;
+					__COUT_ERR__ << "Skipping " << memberPair.first
+					             << " since the table "
+					                "is not active."
+					             << __E__;
 					continue;
 				}
 			}

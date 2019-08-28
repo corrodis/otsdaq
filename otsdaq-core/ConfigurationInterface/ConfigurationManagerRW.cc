@@ -474,16 +474,16 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupNa
 	{
 		__COUTV__(accumulatedTreeErrors);
 		loadTableGroup(configGroupName,
-					   tableGroupKey,
-					   true,                    // loads and activates
-					   0,                       // no members needed
-					   0,                       // no progress bar
-					   accumulatedTreeErrors);  // accumulate warnings or not
+		               tableGroupKey,
+		               true,                    // loads and activates
+		               0,                       // no members needed
+		               0,                       // no progress bar
+		               accumulatedTreeErrors);  // accumulate warnings or not
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "There were errors, so de-activating group: "
-		             << configGroupName << " (" << tableGroupKey << ")" << __E__;
+		__COUT_ERR__ << "There were errors, so de-activating group: " << configGroupName
+		             << " (" << tableGroupKey << ")" << __E__;
 		try  // just in case any lingering pieces, let's deactivate
 		{
 			destroyTableGroup(configGroupName, true);
@@ -491,7 +491,7 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupNa
 		catch(...)
 		{
 		}
-		throw; //re-throw original exception
+		throw;  // re-throw original exception
 	}
 
 	__COUT_INFO__ << "Updating persistent active groups to "
@@ -624,10 +624,11 @@ TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
 //	Used by table GUI to load a particular table-version pair as the active version.
 // 	This table instance must already exist and be owned by ConfigurationManager.
 //	return null pointer on failure, on success return table pointer.
-TableBase* ConfigurationManagerRW::getVersionedTableByName(const std::string& tableName,
-                                                           TableVersion       version,
-                                                           bool 		      looseColumnMatching /* =false */,
-														   std::string*       accumulatedErrors /* =0 */)
+TableBase* ConfigurationManagerRW::getVersionedTableByName(
+    const std::string& tableName,
+    TableVersion       version,
+    bool               looseColumnMatching /* =false */,
+    std::string*       accumulatedErrors /* =0 */)
 {
 	auto it = nameToTableMap_.find(tableName);
 	if(it == nameToTableMap_.end())
@@ -648,7 +649,7 @@ TableBase* ConfigurationManagerRW::getVersionedTableByName(const std::string& ta
 	                   version,
 	                   false,  // do not reset
 	                   looseColumnMatching,
-					   accumulatedErrors);
+	                   accumulatedErrors);
 	return table;
 }
 

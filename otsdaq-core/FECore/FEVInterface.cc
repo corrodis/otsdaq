@@ -389,7 +389,8 @@ catch(...)  //
 	}
 	catch(const __OTS_SOFT_EXCEPTION__& e)
 	{
-		ss << "SOFT Error was caught during slow controls running thread: " << e.what() << std::endl;
+		ss << "SOFT Error was caught during slow controls running thread: " << e.what()
+		   << std::endl;
 		isSoftError = true;
 	}
 	catch(const std::runtime_error& e)
@@ -410,17 +411,17 @@ catch(...)  //
 	__FE_COUT_ERR__ << ss.str();
 
 	std::thread(
-		[](FEVInterface* fe, const std::string errorMessage, bool isSoftError) {
-			FEVInterface::sendAsyncErrorToGateway(fe, errorMessage, isSoftError);
-		},
-		// pass the values
-		this /*fe*/,
-		ss.str() /*errorMessage*/,
-		isSoftError)
-		.detach();
+	    [](FEVInterface* fe, const std::string errorMessage, bool isSoftError) {
+		    FEVInterface::sendAsyncErrorToGateway(fe, errorMessage, isSoftError);
+	    },
+	    // pass the values
+	    this /*fe*/,
+	    ss.str() /*errorMessage*/,
+	    isSoftError)
+	    .detach();
 
 	return false;
-}// end slowControlsRunning()
+}  // end slowControlsRunning()
 
 //========================================================================================================================
 // SendAsyncErrorToGateway
@@ -434,17 +435,15 @@ void FEVInterface::sendAsyncErrorToGateway(FEVInterface*      fe,
                                            const std::string& errorMessage,
                                            bool               isSoftError) try
 {
-   std::stringstream feHeader;
-   feHeader << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID()
-		  << ":" << fe->theConfigurationRecordName_ << "\t";
+	std::stringstream feHeader;
+	feHeader << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":"
+	         << fe->theConfigurationRecordName_ << "\t";
 
 	if(isSoftError)
-		__COUT_ERR__ << feHeader.str()
-		             << "Sending FE Async SOFT Running Error... \n"
+		__COUT_ERR__ << feHeader.str() << "Sending FE Async SOFT Running Error... \n"
 		             << errorMessage << __E__;
 	else
-		__COUT_ERR__ << feHeader.str()
-		             << "Sending FE Async Running Error... \n"
+		__COUT_ERR__ << feHeader.str() << "Sending FE Async Running Error... \n"
 		             << errorMessage << __E__;
 
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor =
@@ -460,13 +459,13 @@ void FEVInterface::sendAsyncErrorToGateway(FEVInterface*      fe,
 
 	std::stringstream replyMessageSStream;
 	replyMessageSStream << SOAPUtilities::translate(replyMessage);
-	__COUT__ << feHeader.str()
-	         << "Received... " << replyMessageSStream.str() << std::endl;
+	__COUT__ << feHeader.str() << "Received... " << replyMessageSStream.str()
+	         << std::endl;
 
 	if(replyMessageSStream.str().find("Fault") != std::string::npos)
 	{
-		__COUT_ERR__ << feHeader.str()
-		             << "Failure to indicate fault to Gateway..." << __E__;
+		__COUT_ERR__ << feHeader.str() << "Failure to indicate fault to Gateway..."
+		             << __E__;
 		throw;
 	}
 }
@@ -480,7 +479,7 @@ catch(const xdaq::exception::Exception& e)
 		__COUT__ << "SOAP message failure indicating front-end asynchronous running "
 		            "error back to Gateway: "
 		         << e.what() << __E__;
-	throw; //rethrow and hope error is noticed
+	throw;  // rethrow and hope error is noticed
 }
 catch(...)
 {
@@ -492,7 +491,7 @@ catch(...)
 		__COUT__ << "Unknown error encounter indicating front-end asynchronous running "
 		            "error back to Gateway."
 		         << __E__;
-	throw; //rethrow and hope error is noticed
+	throw;  // rethrow and hope error is noticed
 }  // end SendAsyncErrorToGateway()
 
 //========================================================================================================================

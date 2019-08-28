@@ -1,8 +1,8 @@
 #ifndef _ots_ARTDAQDispatcherSupervisor_h
 #define _ots_ARTDAQDispatcherSupervisor_h
 
-#include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 #include "artdaq/Application/DispatcherApp.hh"
+#include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
 
 namespace ots
 {
@@ -33,9 +33,7 @@ class DispatcherApp : public CoreSupervisorBase
 	virtual void transitionStopping(toolbox::Event::Reference e) override;
 	//	void enteringError(toolbox::Event::Reference e);
 
-
   private:
-
 	void registerMonitor(const std::string& fcl);
 	void unregisterMonitor(const std::string& label);
 

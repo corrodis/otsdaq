@@ -3,17 +3,10 @@
 using namespace ots;
 
 //========================================================================================================================
-TCPTransceiverSocket::TCPTransceiverSocket(int socketId)
-: TCPSocket(socketId)
-{
-
-}
+TCPTransceiverSocket::TCPTransceiverSocket(int socketId) : TCPSocket(socketId) {}
 
 //========================================================================================================================
-TCPTransceiverSocket::~TCPTransceiverSocket(void)
-{
-
-}
+TCPTransceiverSocket::~TCPTransceiverSocket(void) {}
 
 //========================================================================================================================
 std::string TCPTransceiverSocket::sendAndReceivePacket(const std::string& sendBuffer)

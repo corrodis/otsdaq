@@ -398,8 +398,6 @@ void EventBuilderApp::transitionConfiguring(toolbox::Event::Reference e)
 		    __FUNCTION__ /*function*/
 		);
 	}
-	
-
 
 	__SUP_COUT__ << "Configured." << __E__;
 }  // end transitionConfiguring()

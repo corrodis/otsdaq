@@ -68,7 +68,7 @@ CodeEditor::CodeEditor()
 // xmlRequest
 //	all requests are handled here
 void CodeEditor::xmlRequest(const std::string& option,
-							bool readOnlyMode,
+                            bool               readOnlyMode,
                             cgicc::Cgicc&      cgiIn,
                             HttpXmlDocument*   xmlOut,
                             const std::string& username) try
@@ -324,25 +324,24 @@ void CodeEditor::getPathContent(const std::string& basepath,
 		//__COUT__ << type << " " << name << "\n" << std::endl;
 
 		if(name[0] != '.' &&
-		   (type == 0 ||  	// 0 == UNKNOWN (which can happen - seen in SL7 VM)
-		    type == 4 || 	// directory type
-			type == 8 || 	// file type
-			type == 10		// 10 == link (could be directory or file, treat as unknown)
-			))
+		   (type == 0 ||  // 0 == UNKNOWN (which can happen - seen in SL7 VM)
+		    type == 4 ||  // directory type
+		    type == 8 ||  // file type
+		    type == 10    // 10 == link (could be directory or file, treat as unknown)
+		    ))
 		{
 			isDir = false;
 
 			if(type == 0 || type == 10)
 			{
 				// unknown type .. determine if directory
-				DIR* pTmpDIR =
-				    opendir((basepath + path + "/" + name).c_str());
+				DIR* pTmpDIR = opendir((basepath + path + "/" + name).c_str());
 				if(pTmpDIR)
 				{
 					isDir = true;
 					closedir(pTmpDIR);
 				}
-				//else //assume file
+				// else //assume file
 				//	__COUT__ << "Unable to open path as directory: " <<
 				//		(basepath + path + "/" + name) << __E__;
 			}

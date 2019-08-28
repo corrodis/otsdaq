@@ -94,7 +94,7 @@ int CgiDataUtilities::getDataAsInt(cgicc::Cgicc& cgi, const std::string& needle)
 ////==============================================================================
 //// decodeURIComponent
 ////	converts all %## to the ascii character
-//std::string StringMacros::decodeURIComponent(const std::string& data)
+// std::string StringMacros::decodeURIComponent(const std::string& data)
 //{
 //	std::string  decodeURIString(data.size(), 0);  // init to same size
 //	unsigned int j = 0;

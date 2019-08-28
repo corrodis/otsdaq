@@ -335,7 +335,7 @@ class ConfigurationTree
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationTree.icc"  //define template functions
 
-	// clang-format on
+// clang-format on
 }  // namespace ots
 
 #endif

@@ -20,7 +20,8 @@ class CgiDataUtilities
 	static int postDataAsInt(cgicc::Cgicc& cgi, const std::string& needle);
 	static int getDataAsInt(cgicc::Cgicc& cgi, const std::string& needle);
 
-	//static std::string decodeURIComponent(const std::string& data); //moved to StringMacros
+	// static std::string decodeURIComponent(const std::string& data); //moved to
+	// StringMacros
 };
 
 }  // namespace ots
