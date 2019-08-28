@@ -26,12 +26,57 @@ XDAQ_INSTANTIATOR_IMPL(ARTDAQSupervisor)
 
 //========================================================================================================================
 ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
-    : CoreSupervisorBase(stub), partition_(0)
+    : CoreSupervisorBase(stub), partition_(getSupervisorProperty("partition", 0))
 {
 	__SUP_COUT__ << "Constructor." << __E__;
 
 	INIT_MF("ARTDAQSupervisor");
 
+	// Write out settings file
+	auto          settings_file = __ENV__("DAQINTERFACE_SETTINGS");
+	std::ofstream o(settings_file, std::ios::trunc);
+
+	o << "log_directory: "
+	  << getSupervisorProperty("log_directory", std::string(__ENV__("OTSDAQ_LOG_DIR")))
+	  << std::endl;
+	o << "record_directory: "
+	  << getSupervisorProperty("record_directory", ARTDAQ_FCL_PATH) << std::endl;
+	o << "package_hashes_to_save: "
+	  << getSupervisorProperty("package_hashes_to_save",
+	                           "[artdaq, otsdaq, otsdaq-utilities]")
+	  << std::endl;
+	o << "productsdir_for_bash_scripts: "
+	  << getSupervisorProperty("productsdir_for_bash_scripts",
+	                           std::string(__ENV__("PRODUCTS")))
+	  << std::endl;
+	o << "boardreader timeout: " << getSupervisorProperty("boardreader_timeout", 30)
+	  << std::endl;
+	o << "eventbuilder timeout: " << getSupervisorProperty("eventbuilder_timeout", 30)
+	  << std::endl;
+	o << "aggregator timeout: " << getSupervisorProperty("aggregator_timeout", 30)
+	  << std::endl;
+	o << "max_fragment_size_bytes: "
+	  << getSupervisorProperty("max_fragment_size_bytes", 1048576) << std::endl;
+	o << "transfer_plugin_to_use: "
+	  << getSupervisorProperty("transfer_plugin_to_use", "Autodetect") << std::endl;
+	o << "all_events_to_all_dispatchers: " << std::boolalpha
+	  << getSupervisorProperty("all_events_to_all_dispatchers", true) << std::endl;
+	o << "data_directory_override: "
+	  << getSupervisorProperty("data_directory_override",
+	                           std::string(__ENV__("ARTDAQ_OUTPUT_DIR")))
+	  << std::endl;
+	o << "max_configurations_to_list: "
+	  << getSupervisorProperty("max_configurations_to_list", 10) << std::endl;
+	o << "disable_unique_rootfile_labels: "
+	  << getSupervisorProperty("disable_unique_rootfile_labels", false) << std::endl;
+	o << "use_messageviewer: " << std::boolalpha
+	  << getSupervisorProperty("use_messageviewer", false) << std::endl;
+	o << "fake_messagefacility: " << std::boolalpha
+	  << getSupervisorProperty("fake_messagefacility", false) << std::endl;
+	o << "advanced_memory_usage: " << std::boolalpha
+	  << getSupervisorProperty("advanced_memory_usage", false) << std::endl;
+
+	o.close();
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 

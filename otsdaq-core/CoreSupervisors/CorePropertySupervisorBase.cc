@@ -489,6 +489,21 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
 }
 
+std::string CorePropertySupervisorBase::getSupervisorProperty(
+    const std::string& propertyName, const std::string& defaultValue)
+{
+	// check if need to setup properties
+	checkSupervisorPropertySetup();
+
+	auto it = propertyMap_.find(propertyName);
+	if(it == propertyMap_.end())
+	{
+		// not found, so returning default value
+		return defaultValue;
+	}
+	return StringMacros::validateValueForDefaultStringDataType(it->second);
+}
+
 //========================================================================================================================
 // getSupervisorPropertyUserPermissionsThreshold
 //	returns the threshold based on the requestType

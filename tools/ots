@@ -1100,6 +1100,18 @@ launchOTS() {
 	export DAQINTERFACE_PROCESS_MANAGEMENT_METHOD="direct"
 	export DAQINTERFACE_FHICL_DIRECTORY=$USER_DATA/ARTDAQConfigurations
 	export DAQINTERFACE_KNOWN_BOARDREADERS_LIST=$USER_DATA/ARTDAQConfigurations/known_boardreaders_list
+
+	# Make sure fhicl directory exists
+	if ! [ -d $DAQINTERFACE_FHICL_DIRECTORY ]; then
+		mkdir -p $DAQINTERFACE_FHICL_DIRECTORY
+	fi
+	
+	# Create a dummy boardreaders list. 
+	# ots will set the components directly, and will not use this file, but DAQInterface requires it to be present.
+	if ! [ -e $DAQINTERFACE_KNOWN_BOARDREADERS_LIST ]; then
+		echo "component01 localhost" >$DAQINTERFACE_KNOWN_BOARDREADERS_LIST
+	fi
+
 	export DAQINTERFACE_SETTINGS=$USER_DATA/ARTDAQConfigurations/daqinterface_settings
 	export DAQINTERFACE_USER_SOURCEFILE="IGNORED"
 	source $ARTDAQ_DAQINTERFACE_DIR/source_me
