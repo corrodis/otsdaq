@@ -1115,6 +1115,7 @@ launchOTS() {
 	export DAQINTERFACE_SETTINGS=$USER_DATA/ARTDAQConfigurations/daqinterface_settings
 	export DAQINTERFACE_USER_SOURCEFILE="IGNORED"
 	source $ARTDAQ_DAQINTERFACE_DIR/source_me
+	export DAQINTERFACE_SETUP_FHICLCPP=$USER_DATA/ARTDAQConfigurations/.setup_fhiclcpp
 			
 	####################################################################
 	###################### end DAQInterface setup ######################
