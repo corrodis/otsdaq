@@ -230,12 +230,21 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
 	OUT << "\n\n";
 
 	// no primary link to table tree for reader node!
-	if(builderNode.isDisconnected())
+	try
 	{
-		// create empty fcl
-		OUT << "{}\n\n";
-		out.close();
-		return;
+		if(builderNode.isDisconnected())
+		{
+			// create empty fcl
+			OUT << "{}\n\n";
+			out.close();
+			return;
+		}
+	}
+	catch(const std::runtime_error&)
+	{
+		__COUT__ << "Ignoring error, assume this a valid UID node." << __E__;
+		// error is expected here for UIDs.. so just ignore
+		// this check is valuable if source node is a unique-Link node, rather than UID
 	}
 
 	//--------------------------------------
