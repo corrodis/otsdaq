@@ -18,6 +18,7 @@ cet_make(LIBRARY_NAME ARTDAQSupervisor
 		 #${MF_UTILITIES}
 		 
 		 ${Boost_SYSTEM_LIBRARY}
+		 ${Boost_FILESYSTEM_LIBRARY}
 		 $ENV{PYTHON_LIB}/libpython2.7.so
 		 artdaq_Application
 		 artdaq-core_Utilities
@@ -30,7 +31,9 @@ cet_make(LIBRARY_NAME ARTDAQSupervisor
 		 #SupervisorInfo
 		 #FiniteStateMachine
 		 #ConfigurationInterface
-		 #otsdaq-core_TablePlugins_XDAQContextTable_table
+		 otsdaq-core_TablePlugins_ARTDAQAggregatorTable_table
+		 otsdaq-core_TablePlugins_ARTDAQBoardReaderTable_table
+		 otsdaq-core_TablePlugins_ARTDAQBuilderTable_table
 )
 
 install_headers()
