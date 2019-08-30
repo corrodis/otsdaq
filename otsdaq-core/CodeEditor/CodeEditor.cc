@@ -49,7 +49,8 @@ CodeEditor::CodeEditor()
                                 "js",
                                 "py",
                                 "fcl",
-                                "xml"})
+                                "xml",
+                                "cfg"})
 {
 	std::string path = CODE_EDITOR_DATA_PATH;
 	DIR*        dir  = opendir(path.c_str());
@@ -399,6 +400,7 @@ void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 	xmlOut->addTextElementToData("path", path);
 
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
+	if(extension == "ots") extension = ""; //special handling of ots extension (to get bash script properly)
 	if(!(path.length() > 4 && path.substr(path.length() - 4) == "/ots"))
 		extension = safeExtensionString(extension);
 	xmlOut->addTextElementToData("ext", extension);
