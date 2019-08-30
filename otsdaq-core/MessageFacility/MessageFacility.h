@@ -1,9 +1,11 @@
 #ifndef OTSDAQ_CORE_MESSAGEFACILITY_MESSAGEFACILITY_H
 #define OTSDAQ_CORE_MESSAGEFACILITY_MESSAGEFACILITY_H
 
+#include "otsdaq-core/Macros/CoutMacros.h"
+
 #include <messagefacility/MessageLogger/MessageLogger.h>
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
-#include "otsdaq-core/Macros/CoutMacros.h"
+
 
 namespace ots
 {

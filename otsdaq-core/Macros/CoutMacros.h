@@ -7,9 +7,7 @@
 #include <iostream>  //for cout
 #include <sstream>   //for stringstream, std::stringbuf
 
-#if MESSAGEFACILITY_HEX_VERSION > 0x20106
 #include "tracemf.h"
-#endif
 
 // take filename only after srcs/ (this gives by repo name)
 #define __SHORTFILE__ 		(strstr(&__FILE__[0], "/srcs/") ? strstr(&__FILE__[0], "/srcs/") + 6 : __FILE__)
@@ -18,21 +16,6 @@
 #define __FILENAME__ 		(strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
 #define __E__ 				std::endl
-
-#define __COUT_HDR_F__ 		__SHORTFILE__ << "\t"
-#define __COUT_HDR_L__ 		"[" << std::dec        << __LINE__ << "]\t"
-#define __COUT_HDR_P__ 		__PRETTY_FUNCTION__    << "\t"
-#define __COUT_HDR_FL__ 	__SHORTFILE__ << " "   << __COUT_HDR_L__
-#define __COUT_HDR_FP__ 	__SHORTFILE__ << " : " << __COUT_HDR_P__
-#define __COUT_HDR__ 		__COUT_HDR_FL__
-
-#define __COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":"
-
-#define __COUT_ERR__ 		__COUT_TYPE__(LogError) 	<< __COUT_HDR__
-#define __COUT_WARN__ 		__COUT_TYPE__(LogWarning) 	<< __COUT_HDR__
-#define __COUT_INFO__ 		__COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
-#define __COUT__ 			__COUT_TYPE__(LogDebug) 	<< __COUT_HDR__
-#define __COUTV__(X) 		__COUT__ << QUOTE(X) << " = " << X << __E__
 
 #define __THROW__(X) 		throw std::runtime_error(X)
 
@@ -49,25 +32,31 @@
 // mf::X (__MF_SUBJECT__) : std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":")
 
 #define __MF_HDR__ 			__COUT_HDR__
-#if MESSAGEFACILITY_HEX_VERSION > 0x20106
 
-#define __MF_TYPE__(X) 		TLOG(X, __MF_SUBJECT__)  // for latest artdaq
+#define __MF_TYPE__(X) 		TLOG(X, __MF_SUBJECT__) 
 #define __MOUT_ERR__ 		__MF_TYPE__(TLVL_ERROR) 	<< __MF_HDR__
 #define __MOUT_WARN__ 		__MF_TYPE__(TLVL_WARNING) 	<< __MF_HDR__
 #define __MOUT_INFO__ 		__MF_TYPE__(TLVL_INFO) 		<< __MF_HDR__
 #define __MOUT__ 			__MF_TYPE__(TLVL_DEBUG) 	<< __MF_HDR__
 
-#else
-
-#define __MF_TYPE__(X) 		mf::X(__MF_SUBJECT__)
-#define __MOUT_ERR__ 		__MF_TYPE__(LogError) 	<< __MF_HDR__
-#define __MOUT_WARN__ 		__MF_TYPE__(LogWarning) << __MF_HDR__
-#define __MOUT_INFO__ 		__MF_TYPE__(LogInfo) 	<< __MF_HDR__
-#define __MOUT__ 			__MF_TYPE__(LogDebug) 	<< __MF_HDR__
-
-#endif
 
 #define __MOUTV__(X) 		__MOUT__ << QUOTE(X) << " = " << X
+
+#define __COUT_HDR_F__ 		__SHORTFILE__ << "\t"
+#define __COUT_HDR_L__ 		"[" << std::dec        << __LINE__ << "]\t"
+#define __COUT_HDR_P__ 		__PRETTY_FUNCTION__    << "\t"
+#define __COUT_HDR_FL__ 	__SHORTFILE__ << " "   << __COUT_HDR_L__
+#define __COUT_HDR_FP__ 	__SHORTFILE__ << " : " << __COUT_HDR_P__
+#define __COUT_HDR__ 		__COUT_HDR_FL__
+
+#define __COUT_TYPE__(X) 	__MF_TYPE__(X) //std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":"
+
+#define __COUT_ERR__ 		__COUT_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
+#define __COUT_WARN__ 		__COUT_TYPE__(TLVL_WARNING) << __COUT_HDR__
+#define __COUT_INFO__ 		__COUT_TYPE__(TLVL_INFO) 	<< __COUT_HDR__
+#define __COUT__ 			__COUT_TYPE__(TLVL_DEBUG) 	<< __COUT_HDR__
+#define __COUTV__(X) 		__COUT__ << QUOTE(X) << " = " << X << __E__
+
 
 //////// ==============================================================
 //////// Use __MCOUT__ for cout and Message Facility use in one line (that compiler

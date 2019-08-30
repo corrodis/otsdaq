@@ -8,7 +8,7 @@
 using namespace ots;
 
 #undef __MF_SUBJECT__
-#define __MF_SUBJECT__ "producer-" << bufferUID_ << "-" << processorUID_
+#define __MF_SUBJECT__ (std::string("producer-") + bufferUID_ + "-" + processorUID_)
 
 //========================================================================================================================
 DataProducer::DataProducer(std::string  supervisorApplicationUID,
