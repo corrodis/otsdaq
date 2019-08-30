@@ -14,12 +14,18 @@ simple_plugin(ARTDAQBoardReaderTable "table"
   ${CETLIB}
   )
   
-simple_plugin(ARTDAQAggregatorTable "table"
+simple_plugin(ARTDAQDataLoggerTable "table"
   TableCore 
   ConfigurationInterface
   otsdaq-core_TablePlugins_XDAQContextTable_table
   ${CETLIB}
   )
+  simple_plugin(ARTDAQDispatcherTable "table"
+    TableCore 
+    ConfigurationInterface
+    otsdaq-core_TablePlugins_XDAQContextTable_table
+    ${CETLIB}
+    )
   
 simple_plugin(ARTDAQBuilderTable "table"
   TableCore 

@@ -31,7 +31,8 @@ cet_make(LIBRARY_NAME ARTDAQSupervisor
 		 #SupervisorInfo
 		 #FiniteStateMachine
 		 #ConfigurationInterface
-		 otsdaq-core_TablePlugins_ARTDAQAggregatorTable_table
+		 otsdaq-core_TablePlugins_ARTDAQDataLoggerTable_table
+		 otsdaq-core_TablePlugins_ARTDAQDispatcherTable_table
 		 otsdaq-core_TablePlugins_ARTDAQBoardReaderTable_table
 		 otsdaq-core_TablePlugins_ARTDAQBuilderTable_table
 )

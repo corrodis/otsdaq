@@ -34,86 +34,15 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(DataLoggerApp)
 
 #define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
-#define ARTDAQ_FILE_PREAMBLE "aggregator"
+#define ARTDAQ_FILE_PREAMBLE "datalogger"
 
 //========================================================================================================================
 DataLoggerApp::DataLoggerApp(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stub)
-//    : xdaq::Application(s)
-//    , SOAPMessenger(this)
-//	, RunControlStateMachine("UnnamedAggregator")
-//    , stateMachineWorkLoopManager_(
-//          toolbox::task::bind(this, &DataLoggerApp::stateMachineThread, "StateMachine"))
-//    , stateMachineSemaphore_(toolbox::BSem::FULL)
-//    , theConfigurationManager_(
-//          new ConfigurationManager)  //(Singleton<ConfigurationManager>::getInstance())
-//                                     ////I always load the full config but if I want to
-//                                     // load a partial configuration (new
-//                                     // ConfigurationManager)
-//    , XDAQContextTableName_(
-//          theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)->getTableName())
-//    , supervisorConfigurationPath_(
-//          "INITIALIZED INSIDE THE CONTRUCTOR BECAUSE IT NEEDS supervisorContextUID_ and
-//          " "supervisorApplicationUID_")
-//    , supervisorContextUID_("INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
-//    , supervisorApplicationUID_(
-//          "INITIALIZED INSIDE THE CONTRUCTOR TO LAUNCH AN EXCEPTION")
 {
 	__SUP_COUT__ << "Constructor." << __E__;
 
 	INIT_MF("DataLoggerApp");
 
-	//	xgi::bind(this, &DataLoggerApp::Default, "Default");
-	//	xgi::bind(this, &DataLoggerApp::stateMachineXgiHandler, "StateMachineXgiHandler");
-	//
-	//	xoap::bind(this,
-	//	           &DataLoggerApp::stateMachineStateRequest,
-	//	           "StateMachineStateRequest",
-	//	           XDAQ_NS_URI);
-	//	xoap::bind(this,
-	//	           &DataLoggerApp::stateMachineErrorMessageRequest,
-	//	           "StateMachineErrorMessageRequest",
-	//	           XDAQ_NS_URI);
-	//
-	//	try
-	//	{
-	//		supervisorContextUID_ =
-	//		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
-	//		        ->getContextUID(
-	//		            getApplicationContext()->getContextDescriptor()->getURL());
-	//	}
-	//	catch(...)
-	//	{
-	//		__SUP_COUT_ERR__
-	//		    << "XDAQ Supervisor could not access it's configuration through "
-	//		       "the Configuration Manager."
-	//		    << ". The getApplicationContext()->getContextDescriptor()->getURL() = "
-	//		    << getApplicationContext()->getContextDescriptor()->getURL() << __E__;
-	//		throw;
-	//	}
-	//	try
-	//	{
-	//		supervisorApplicationUID_ =
-	//		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
-	//		        ->getApplicationUID(
-	//		            getApplicationContext()->getContextDescriptor()->getURL(),
-	//		            getApplicationDescriptor()->getLocalId());
-	//	}
-	//	catch(...)
-	//	{
-	//		__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration
-	// through " 		                "the Configuration Manager."
-	//		             << " The supervisorContextUID_ = " << supervisorContextUID_
-	//		             << ". The supervisorApplicationUID = " <<
-	// supervisorApplicationUID_
-	//		             << __E__;
-	//		throw;
-	//	}
-	//	supervisorConfigurationPath_ = "/" + supervisorContextUID_ +
-	//	                               "/LinkToApplicationTable/" +
-	//	                               supervisorApplicationUID_ +
-	//"/LinkToSupervisorTable";
-	//
-	//	setStateMachineName(supervisorApplicationUID_);
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
@@ -165,122 +94,6 @@ void DataLoggerApp::destroy(void)
 	__SUP_COUT__ << "Destroyed." << __E__;
 }  // end destroy()
 //
-////========================================================================================================================
-// void DataLoggerApp::Default(xgi::Input* in, xgi::Output* out)
-//{
-//	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame "
-//	        "src='/WebPath/html/DataLoggerApp.html?urn="
-//	     << this->getApplicationDescriptor()->getLocalId() << "'></frameset></html>";
-//}
-//
-////========================================================================================================================
-// void DataLoggerApp::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out) {}
-//
-////========================================================================================================================
-// void DataLoggerApp::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out) {}
-//
-////========================================================================================================================
-// xoap::MessageReference DataLoggerApp::stateMachineXoapHandler(
-//    xoap::MessageReference message)
-//{
-//	__SUP_COUT__ << "Soap Handler!" << __E__;
-//	stateMachineWorkLoopManager_.removeProcessedRequests();
-//	stateMachineWorkLoopManager_.processRequest(message);
-//	__SUP_COUT__ << "Done - Soap Handler!" << __E__;
-//	return message;
-//}
-//
-////========================================================================================================================
-// xoap::MessageReference DataLoggerApp::stateMachineResultXoapHandler(
-//    xoap::MessageReference message)
-//{
-//	__SUP_COUT__ << "Soap Handler!" << __E__;
-//	// stateMachineWorkLoopManager_.removeProcessedRequests();
-//	// stateMachineWorkLoopManager_.processRequest(message);
-//	__SUP_COUT__ << "Done - Soap Handler!" << __E__;
-//	return message;
-//}
-//
-////========================================================================================================================
-// bool DataLoggerApp::stateMachineThread(toolbox::task::WorkLoop* workLoop)
-//{
-//	stateMachineSemaphore_.take();
-//	__SUP_COUT__ << "Re-sending message..."
-//	          << SOAPUtilities::translate(
-//	                 stateMachineWorkLoopManager_.getMessage(workLoop))
-//	                 .getCommand()
-//	          << __E__;
-//	std::string reply = send(this->getApplicationDescriptor(),
-//	                         stateMachineWorkLoopManager_.getMessage(workLoop));
-//	stateMachineWorkLoopManager_.report(workLoop, reply, 100, true);
-//	__SUP_COUT__ << "Done with message" << __E__;
-//	stateMachineSemaphore_.give();
-//	return false;  // execute once and automatically remove the workloop so in
-//	               // WorkLoopManager the try workLoop->remove(job_) could be commented
-//	               // out return true;//go on and then you must do the
-//	               // workLoop->remove(job_) in WorkLoopManager
-//}
-//
-////========================================================================================================================
-// xoap::MessageReference DataLoggerApp::stateMachineStateRequest(
-//    xoap::MessageReference message)
-//{
-//	__SUP_COUT__ << theStateMachine_.getCurrentStateName() << __E__;
-//	return SOAPUtilities::makeSOAPMessageReference(
-//	    theStateMachine_.getCurrentStateName());
-//}
-//
-////========================================================================================================================
-// xoap::MessageReference DataLoggerApp::stateMachineErrorMessageRequest(
-//    xoap::MessageReference message)
-//{
-//	__SUP_COUT__ << "theStateMachine_.getErrorMessage() = "
-//	         << theStateMachine_.getErrorMessage() << __E__;
-//
-//	SOAPParameters retParameters;
-//	retParameters.addParameter("ErrorMessage", theStateMachine_.getErrorMessage());
-//	return SOAPUtilities::makeSOAPMessageReference("stateMachineErrorMessageRequestReply",
-//	                                               retParameters);
-//}
-//
-////========================================================================================================================
-// void DataLoggerApp::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) {}
-//
-////========================================================================================================================
-// void DataLoggerApp::stateHalted(toolbox::fsm::FiniteStateMachine& fsm) {}
-//
-////========================================================================================================================
-// void DataLoggerApp::stateRunning(toolbox::fsm::FiniteStateMachine& fsm) {}
-//
-////========================================================================================================================
-// void DataLoggerApp::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm) {}
-//
-////========================================================================================================================
-// void DataLoggerApp::statePaused(toolbox::fsm::FiniteStateMachine& fsm) {}
-//
-////========================================================================================================================
-// void DataLoggerApp::inError(toolbox::fsm::FiniteStateMachine& fsm)
-//{
-//	__SUP_COUT__
-//	          << "Fsm current state: " << theStateMachine_.getCurrentStateName()
-//	          << __E__;
-//	// rcmsStateNotifier_.stateChanged("Error", "");
-//}
-//
-////========================================================================================================================
-// void DataLoggerApp::enteringError(toolbox::Event::Reference e)
-//{
-//	__SUP_COUT__
-//	          << "Fsm current state: " << theStateMachine_.getCurrentStateName()
-//	          << __E__;
-//	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
-//	std::ostringstream         error;
-//	error << "Failure performing transition from " << failedEvent.getFromState() << " to "
-//	      << failedEvent.getToState()
-//	      << " exception: " << failedEvent.getException().what();
-//	__SUP_COUT__ << error.str() << __E__;
-//	// diagService_->reportError(errstr.str(),DIAGERROR);
-//}
 
 //========================================================================================================================
 void DataLoggerApp::transitionConfiguring(toolbox::Event::Reference e)

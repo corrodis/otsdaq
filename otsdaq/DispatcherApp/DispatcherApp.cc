@@ -11,7 +11,7 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(DispatcherApp)
 
 #define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
-#define ARTDAQ_FILE_PREAMBLE "aggregator"
+#define ARTDAQ_FILE_PREAMBLE "dispatcher"
 
 //========================================================================================================================
 DispatcherApp::DispatcherApp(xdaq::ApplicationStub* s) : CoreSupervisorBase(s)

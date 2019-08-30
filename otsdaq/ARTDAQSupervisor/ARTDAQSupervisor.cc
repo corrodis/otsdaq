@@ -1,7 +1,8 @@
 
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisor.hh"
 
-#include "otsdaq-core/TablePlugins/ARTDAQAggregatorTable.h"
+#include "otsdaq-core/TablePlugins/ARTDAQDataLoggerTable.h"
+#include "otsdaq-core/TablePlugins/ARTDAQDispatcherTable.h"
 #include "otsdaq-core/TablePlugins/ARTDAQBoardReaderTable.h"
 #include "otsdaq-core/TablePlugins/ARTDAQBuilderTable.h"
 
@@ -42,9 +43,10 @@ static void signal_handler(int signum)
 	    << "A signal of type " << signum
 	    << " was caught by ARTDAQSupervisor. Shutting down DAQInterface, "
 	       "then proceeding with default handlers!";
-	
-	if(instance) instance->destroy();
-	
+
+	if(instance)
+		instance->destroy();
+
 	sigset_t set;
 	pthread_sigmask(SIG_UNBLOCK, NULL, &set);
 	pthread_sigmask(SIG_UNBLOCK, &set, NULL);
@@ -112,10 +114,11 @@ static void init_sighandler(ARTDAQSupervisor* inst)
 	}
 }
 
-
 //========================================================================================================================
 ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
-    : CoreSupervisorBase(stub), daqinterface_ptr_(NULL), partition_(getSupervisorProperty("partition", 0))
+    : CoreSupervisorBase(stub)
+    , daqinterface_ptr_(NULL)
+    , partition_(getSupervisorProperty("partition", 0))
 {
 	__SUP_COUT__ << "Constructor." << __E__;
 
@@ -137,8 +140,7 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	  << std::endl;
 	// Note that productsdir_for_bash_scripts is REQUIRED!
 	o << "productsdir_for_bash_scripts: "
-	  << getSupervisorProperty("productsdir_for_bash_scripts")
-	  << std::endl;
+	  << getSupervisorProperty("productsdir_for_bash_scripts") << std::endl;
 	o << "boardreader timeout: " << getSupervisorProperty("boardreader_timeout", 30)
 	  << std::endl;
 	o << "eventbuilder timeout: " << getSupervisorProperty("eventbuilder_timeout", 30)
@@ -409,78 +411,76 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	pb.step();
 
 	std::list<std::pair<std::string, std::string>> loggerInfo;
-	std::list<std::pair<std::string, std::string>> dispatcherInfo;
 	{
-		auto aggregatorsLink = theSupervisorNode.getNode("aggregatorsLink");
-		if(!aggregatorsLink.isDisconnected())
+		auto dataloggersLink = theSupervisorNode.getNode("dataloggersLink");
+		if(!dataloggersLink.isDisconnected())
 		{
-			auto aggregators = aggregatorsLink.getChildren();
+			auto dataloggers = dataloggersLink.getChildren();
 
-			for(auto& aggregator : aggregators)
+			for(auto& datalogger : dataloggers)
 			{
-				if(aggregator.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+				if(datalogger.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 				       .getValue<bool>())
 				{
-					auto daq          = aggregator.second.getNode("daqLink");
-					bool isDispatcher = false;
-					if(!daq.isDisconnected())
-					{
-						auto parametersLink = daq.getNode("daqAggregatorParametersLink");
-						if(!parametersLink.isDisconnected())
-						{
-							auto parameters = parametersLink.getChildren();
+					auto loggerHost =
+					    datalogger.second.getNode("DAQInterfaceHostname").getValue();
+					auto loggerUID =
+					    datalogger.second.getNode("SupervisorUID").getValue();
 
-							for(auto& parameter : parameters)
-							{
-								if(parameter.second.getNode("daqParameterKey")
-								           .getValue() == "is_dispatcher" &&
-								   parameter.second.getNode("daqParameterValue")
-								           .getValue()
-								           .find("true") != std::string::npos)
-								{
-									isDispatcher = true;
-									__COUT__ << "Recognized as dispatcher!" << __E__;
-
-									break;
-								}
-							}
-						}
-					}
-
-					auto aggHost =
-					    aggregator.second.getNode("DAQInterfaceHostname").getValue();
-					if(!isDispatcher)
-					{
-						auto loggerUID =
-						    aggregator.second.getNode("SupervisorUID").getValue();
-						    
-						__SUP_COUT__ << "Found DataLogger with UID " << loggerUID
-						             << " and DAQInterface Hostname " << aggHost
-						             << __E__;
-						loggerInfo.push_back(std::make_pair(loggerUID, aggHost));
-					}
-					else
-					{
-						auto dispUID =
-						    aggregator.second.getNode("SupervisorUID").getValue();
-						__SUP_COUT__ << "Found Dispatcher with UID " << dispUID
-						             << " and DAQInterface Hostname " << aggHost
-						             << __E__;
-						dispatcherInfo.push_back(std::make_pair(dispUID, aggHost));
-					}
-					ARTDAQAggregatorTable aat;
-					aat.outputFHICL(
+					__SUP_COUT__ << "Found DataLogger with UID " << loggerUID
+					             << " and DAQInterface Hostname " << loggerHost << __E__;
+					loggerInfo.push_back(std::make_pair(loggerUID, loggerHost));
+					ARTDAQDataLoggerTable dlt;
+					dlt.outputFHICL(
 					    theConfigurationManager_,
-					    aggregator.second,
+					    datalogger.second,
 					    0,
-					    aggHost,
+					    loggerHost,
 					    10000,
 					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable));
 				}
 				else
 				{
-					__SUP_COUT__ << "Aggregator "
-					             << aggregator.second.getNode("SupervisorUID").getValue()
+					__SUP_COUT__ << "DataLogger "
+					             << datalogger.second.getNode("SupervisorUID").getValue()
+					             << " is disabled." << __E__;
+				}
+			}
+		}
+	}
+
+	std::list<std::pair<std::string, std::string>> dispatcherInfo;
+	{
+		auto dispatchersLink = theSupervisorNode.getNode("dispatchersLink");
+		if(!dispatchersLink.isDisconnected())
+		{
+			auto dispatchers = dispatchersLink.getChildren();
+
+			for(auto& dispatcher : dispatchers)
+			{
+				if(dispatcher.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+				       .getValue<bool>())
+				{
+					auto dispHost =
+					    dispatcher.second.getNode("DAQInterfaceHostname").getValue();
+					auto dispUID = dispatcher.second.getNode("SupervisorUID").getValue();
+					__SUP_COUT__ << "Found Dispatcher with UID " << dispUID
+					             << " and DAQInterface Hostname " << dispHost << __E__;
+					dispatcherInfo.push_back(std::make_pair(dispUID, dispHost));
+
+					ARTDAQDispatcherTable adt;
+					adt.outputFHICL(
+					    theConfigurationManager_,
+					    dispatcher.second,
+					    0,
+					    dispHost,
+					    10000,
+					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable));
+				}
+				else
+				{
+					__SUP_COUT__ << "Dispatcher "
+					             << dispatcher.second.getNode("SupervisorUID").getValue()
 					             << " is disabled." << __E__;
 				}
 			}
@@ -488,11 +488,13 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	}
 
 	// Check lists
-	if (readerInfo.size() == 0) {
+	if(readerInfo.size() == 0)
+	{
 		__SUP_COUT_ERR__ << "There must be at least one enabled BoardReader!" << __E__;
 		return;
 	}
-	if (builderInfo.size() == 0) {
+	if(builderInfo.size() == 0)
+	{
 		__SUP_COUT_ERR__ << "There must be at least one enabled EventBuilder!" << __E__;
 		return;
 	}
@@ -532,12 +534,13 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	pb.step();
 
 	__SUP_COUT__ << "Building configuration directory" << __E__;
-	
+
 	boost::system::error_code ignored;
 	boost::filesystem::remove_all(ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME, ignored);
 	mkdir((ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME).c_str(), 0755);
 
-	for (auto& br : readerInfo) {
+	for(auto& br : readerInfo)
+	{
 		symlink((ARTDAQ_FCL_PATH + "boardReader-" + br.first + ".fcl").c_str(),
 		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + br.first + ".fcl").c_str());
 	}
@@ -548,15 +551,14 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	}
 	for(auto& dl : loggerInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "aggregator-" + dl.first + ".fcl").c_str(),
+		symlink((ARTDAQ_FCL_PATH + "datalogger-" + dl.first + ".fcl").c_str(),
 		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + dl.first + ".fcl").c_str());
 	}
 	for(auto& di : dispatcherInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "aggregator-" + di.first + ".fcl").c_str(),
+		symlink((ARTDAQ_FCL_PATH + "dispatcher-" + di.first + ".fcl").c_str(),
 		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + di.first + ".fcl").c_str());
 	}
-
 
 	pb.step();
 
@@ -567,7 +569,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	for(auto& reader : readerInfo)
 	{
 		PyObject* readerName = PyString_FromString(reader.first.c_str());
-		
+
 		PyObject* readerData = PyList_New(2);
 		PyObject* readerHost = PyString_FromString(reader.second.c_str());
 		PyObject* readerPort = PyString_FromString("-1");
