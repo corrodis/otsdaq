@@ -48,6 +48,19 @@ inline void INIT_MF(const char* name)
 	}
 
 	__COUT__ << "Configuring message facility with " << logFhiclCode << __E__;
+	{
+		FILE *fp = fopen(logFhiclCode,"r");
+		if(fp)
+		{
+			
+			char line[100];
+			while(fgets(line,100,fp))
+				std::cout << line;
+			std::cout << __E__;
+		
+			fclose(fp);
+		}
+	}
 	artdaq::configureMessageFacility(name /*application name*/,
 	                                 false /*cout display*/,
 	                                 true /*enable debug messages*/);
