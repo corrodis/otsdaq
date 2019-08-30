@@ -791,6 +791,40 @@ launchOTSWiz() {
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Purple}${REV} ***************************************************** ${Reset}"
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Purple}${REV}                                                       ${Reset}"
 	echo
+		
+	#setup wiz mode environment variables
+	export CODE_EDITOR_SUPERVISOR_ID=240
+	export CONSOLE_SUPERVISOR_ID=260
+	export CONFIGURATION_GUI_SUPERVISOR_ID=280
+	export WIZARD_SUPERVISOR_ID=290	
+	export OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID=290	
+	MAIN_PORT=2015
+
+	if [ "x$OTS_WIZ_MODE_MAIN_PORT" != "x" ]; then
+	  MAIN_PORT=${OTS_WIZ_MODE_MAIN_PORT}
+	elif [ "x$OTS_MAIN_PORT" != "x" ]; then
+	  MAIN_PORT=${OTS_MAIN_PORT}
+	elif [ $USER == rrivera ]; then
+	  MAIN_PORT=1983
+	elif [ $USER == lukhanin ]; then
+	  MAIN_PORT=2060
+	elif [ $USER == uplegger ]; then
+	  MAIN_PORT=1974
+	elif [ $USER == parilla ]; then
+	   MAIN_PORT=9000
+	elif [ $USER == eflumerf ]; then
+	   MAIN_PORT=1987
+	elif [ $USER == swu ]; then
+	   MAIN_PORT=1994
+	elif [ $USER == rrivera ]; then
+	   MAIN_PORT=1776
+	elif [ $USER == naodell ]; then
+	   MAIN_PORT=2030
+	elif [ $USER == bschneid ]; then
+	   MAIN_PORT=2050
+	fi
+	export PORT=${MAIN_PORT}	
+	
 	
 	
 	####################################################################
@@ -799,7 +833,15 @@ launchOTSWiz() {
 	#decide which MessageFacility console viewer to run
 	# and configure otsdaq MF library with MessageFacility*.fcl to use
 
-	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityGen.fcl
+	#use safe Message Facility fcl in wiz mode
+	
+	#modify the port to avoid wiz mode conflicts
+	cp ${USER_DATA}/MessageFacilityConfigurations/MessageFacility.fcl ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWiz.fcl 
+	PORTMFOFF=$((30000 + $PORT))
+	sed -i s/30000/${PORTMFOFF}/g ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWiz.fcl 
+	
+	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWiz.fcl 
+
 	#this fcl tells the MF library used by ots source how to behave
 	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
 	
@@ -818,6 +860,12 @@ launchOTSWiz() {
 		#start quiet forwarder with wiz receiving port and destination port parameter file
 		cp ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderWiz.cfg ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
 		
+		#modify the port to avoid wiz mode conflicts
+		PORTMFOFF1=$((30001 + $PORT)) #make port + 1
+		sed -i s/30001/${PORTMFOFF1}/g ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
+		sed -i s/30000/${PORTMFOFF}/g ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
+		
+	
 		if [ $QUIET == 1 ]; then
 
 			if [ $BACKUPLOGS == 1 ]; then
@@ -859,45 +907,10 @@ launchOTSWiz() {
 	
 	
 	
-	#setup wiz mode environment variables
-	export CODE_EDITOR_SUPERVISOR_ID=240
-	export CONSOLE_SUPERVISOR_ID=260
-	export CONFIGURATION_GUI_SUPERVISOR_ID=280
-	export WIZARD_SUPERVISOR_ID=290	
-	export OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID=290	
-	MAIN_PORT=2015
-
-	if [ "x$OTS_WIZ_MODE_MAIN_PORT" != "x" ]; then
-	  MAIN_PORT=${OTS_WIZ_MODE_MAIN_PORT}
-	elif [ "x$OTS_MAIN_PORT" != "x" ]; then
-	  MAIN_PORT=${OTS_MAIN_PORT}
-	elif [ $USER == rrivera ]; then
-	  MAIN_PORT=1983
-	elif [ $USER == lukhanin ]; then
-	  MAIN_PORT=2060
-	elif [ $USER == uplegger ]; then
-	  MAIN_PORT=1974
-	elif [ $USER == parilla ]; then
-	   MAIN_PORT=9000
-	elif [ $USER == eflumerf ]; then
-	   MAIN_PORT=1987
-	elif [ $USER == swu ]; then
-	   MAIN_PORT=1994
-	elif [ $USER == rrivera ]; then
-	   MAIN_PORT=1776
-	elif [ $USER == naodell ]; then
-	   MAIN_PORT=2030
-	elif [ $USER == bschneid ]; then
-	   MAIN_PORT=2050
-	fi
-	export PORT=${MAIN_PORT}	
-	
 		
 	#substitute environment variables into template wiz-mode xdaq config xml
 	envsubst <${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake.xml > ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfigurationNoRU_Wizard_CMake_Run.xml
 	
-	#use safe Message Facility fcl in config mode
-	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacility.fcl #MessageFacilityWithCout.fcl
 	
 	echo
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tStarting wiz mode on port ${PORT}; to change, please setup environment variable OTS_WIZ_MODE_MAIN_PORT."
