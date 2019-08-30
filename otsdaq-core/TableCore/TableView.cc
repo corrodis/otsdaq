@@ -2166,7 +2166,7 @@ int TableView::fillFromJSON(const std::string& json)
 		// handle a new completed value
 		if(newValue)
 		{
-			if(0 && tableName_ == "ARTDAQ_AGGREGATOR_TABLE")  // for debugging
+			if(0 && tableName_ == "ARTDAQ_DATALOGGER_TABLE")  // for debugging
 			{
 				std::cout << i << ":\t" << json[i] << " - ";
 

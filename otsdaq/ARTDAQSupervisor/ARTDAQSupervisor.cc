@@ -145,7 +145,9 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	  << std::endl;
 	o << "eventbuilder timeout: " << getSupervisorProperty("eventbuilder_timeout", 30)
 	  << std::endl;
-	o << "aggregator timeout: " << getSupervisorProperty("aggregator_timeout", 30)
+	o << "datalogger timeout: " << getSupervisorProperty("datalogger_timeout", 30)
+	  << std::endl;
+	o << "dispatcher timeout: " << getSupervisorProperty("dispatcher_timeout", 30)
 	  << std::endl;
 	o << "max_fragment_size_bytes: "
 	  << getSupervisorProperty("max_fragment_size_bytes", 1048576) << std::endl;

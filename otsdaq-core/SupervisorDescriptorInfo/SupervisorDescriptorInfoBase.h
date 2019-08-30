@@ -33,7 +33,8 @@ class SupervisorDescriptorInfoBase
 	const SupervisorDescriptors& getARTDAQFEDataManagerDescriptors(void) const;
 	const SupervisorDescriptors& getARTDAQDataManagerDescriptors(void) const;
 	const SupervisorDescriptors& getARTDAQBuilderDescriptors(void) const;
-	const SupervisorDescriptors& getARTDAQAggregatorDescriptors(void) const;
+	const SupervisorDescriptors& getARTDAQDataLoggerDescriptors(void) const;
+	const SupervisorDescriptors& getARTDAQDispatcherDescriptors(void) const;
 	const SupervisorDescriptors& getVisualDescriptors(void) const;
 
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getSupervisorDescriptor(void) const;
@@ -55,7 +56,9 @@ class SupervisorDescriptorInfoBase
 	    xdata::UnsignedIntegerT instance) const;
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getARTDAQBuilderDescriptor(
 	    xdata::UnsignedIntegerT instance) const;
-	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getARTDAQAggregatorDescriptor(
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getARTDAQDataLoggerDescriptor(
+	    xdata::UnsignedIntegerT instance) const;
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getARTDAQDispatcherDescriptor(
 	    xdata::UnsignedIntegerT instance) const;
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getVisualDescriptor(
 	    xdata::UnsignedIntegerT instance) const;
@@ -64,7 +67,8 @@ class SupervisorDescriptorInfoBase
 
 	//    std::string getARTDAQFEURL         (xdata::UnsignedIntegerT instance) const;
 	//    std::string getARTDAQBuilderURL    (xdata::UnsignedIntegerT instance) const;
-	//    std::string getARTDAQAggregatorURL (xdata::UnsignedIntegerT instance) const;
+	//    std::string getARTDAQDataLoggerURL (xdata::UnsignedIntegerT instance) const;
+	//    std::string getARTDAQDispatcherURL (xdata::UnsignedIntegerT instance) const;
 
   protected:
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* theSupervisor_;
@@ -79,7 +83,8 @@ class SupervisorDescriptorInfoBase
 	SupervisorDescriptors theARTDAQFEDataManagerSupervisors_;
 	SupervisorDescriptors theARTDAQDataManagerSupervisors_;
 	SupervisorDescriptors theARTDAQBuilderSupervisors_;
-	SupervisorDescriptors theARTDAQAggregatorSupervisors_;
+	SupervisorDescriptors theARTDAQDataLoggerSupervisors_;
+	SupervisorDescriptors theARTDAQDispatcherSupervisors_;
 };
 }  // namespace ots
 #endif

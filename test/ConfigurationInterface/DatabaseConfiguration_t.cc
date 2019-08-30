@@ -88,9 +88,7 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 		    TableVersion(TableVersion::DEFAULT));  // load version 0 for all
 
 		__COUT__ << "loaded " << configTables[i] << __E__;
-
-		// if(configTables[i]  != "ARTDAQAggregatorConfiguration") continue;
-
+		
 		// save the active version
 		__COUT__ << "Current version: " << base->getViewVersion() << __E__;
 

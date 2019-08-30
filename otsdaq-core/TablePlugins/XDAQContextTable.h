@@ -76,7 +76,8 @@ class XDAQContextTable : public TableBase
 	// artdaq specific get methods
 	std::vector<const XDAQContext*> getBoardReaderContexts() const;
 	std::vector<const XDAQContext*> getEventBuilderContexts() const;
-	std::vector<const XDAQContext*> getAggregatorContexts() const;
+	std::vector<const XDAQContext*> getDataLoggerContexts() const;
+	std::vector<const XDAQContext*> getDispatcherContexts() const;
 	unsigned int getARTDAQAppRank(const std::string& contextUID = "X") const;
 	std::map<std::string /*contextUID*/,
 	         std::pair<std::string /*host_name*/, unsigned int /*rank*/>>
@@ -93,7 +94,8 @@ class XDAQContextTable : public TableBase
 	//
 	std::vector<unsigned int> artdaqBoardReaders_;
 	std::vector<unsigned int> artdaqEventBuilders_;
-	std::vector<unsigned int> artdaqAggregators_;
+	std::vector<unsigned int> artdaqDataLoggers_;
+	std::vector<unsigned int> artdaqDispatchers_;
 
   public:
 	// XDAQ Context Column names

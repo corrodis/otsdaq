@@ -44,7 +44,7 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 	std::vector<const XDAQContextTable::XDAQContext*> builderContexts =
 	    contextConfig->getEventBuilderContexts();
 
-	// for each aggregator context
+	// for each builder context
 	//	output associated fcl config file
 	for(auto& builderContext : builderContexts)
 	{
@@ -57,7 +57,7 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 		    builderContext->contextUID_,
 		    builderContext->applications_[0].applicationUID_);
 
-		__COUT__ << "Path for this aggregator config is " << builderContext->contextUID_
+		__COUT__ << "Path for this EventBuilder config is " << builderContext->contextUID_
 		         << "/" << builderContext->applications_[0].applicationUID_ << "/"
 		         << builderConfigNode.getValueAsString() << __E__;
 

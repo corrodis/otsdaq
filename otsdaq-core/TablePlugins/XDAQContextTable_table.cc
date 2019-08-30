@@ -95,7 +95,7 @@ XDAQContextTable::getARTDAQAppRankMap() const
 	    returnMap;
 
 	if(artdaqBoardReaders_.size() == 0 && artdaqEventBuilders_.size() == 0 &&
-	   artdaqAggregators_.size() == 0)
+	   artdaqDataLoggers_.size() == 0 && artdaqDispatchers_.size() == 0)
 	{
 		__COUT_WARN__ << "Assuming since there are 0 active ARTDAQ context UID(s), we "
 		                 "can ignore empty rank map."
@@ -115,7 +115,12 @@ XDAQContextTable::getARTDAQAppRankMap() const
 		                   std::make_pair(contexts_[i].address_,
 		                                  getARTDAQAppRank(contexts_[i].contextUID_))));
 
-	for(auto& i : artdaqAggregators_)
+	for(auto& i : artdaqDataLoggers_)
+		returnMap.emplace(
+		    std::make_pair(contexts_[i].contextUID_,
+		                   std::make_pair(contexts_[i].address_,
+		                                  getARTDAQAppRank(contexts_[i].contextUID_))));
+	for(auto& i : artdaqDispatchers_)
 		returnMap.emplace(
 		    std::make_pair(contexts_[i].contextUID_,
 		                   std::make_pair(contexts_[i].address_,
@@ -134,7 +139,7 @@ XDAQContextTable::getARTDAQAppRankMap() const
 unsigned int XDAQContextTable::getARTDAQAppRank(const std::string& contextUID) const
 {
 	if(artdaqBoardReaders_.size() == 0 && artdaqEventBuilders_.size() == 0 &&
-	   artdaqAggregators_.size() == 0)
+	   artdaqDataLoggers_.size() == 0 && artdaqDispatchers_.size() == 0)
 	{
 		__COUT_WARN__ << "Assuming since there are 0 active ARTDAQ context UID(s), we "
 		                 "can ignore rank failure."
@@ -163,7 +168,11 @@ unsigned int XDAQContextTable::getARTDAQAppRank(const std::string& contextUID) c
 		if(contexts_[i].contextUID_ == contextUID)
 			return localGetRank(contexts_[i]);
 
-	for(auto& i : artdaqAggregators_)
+	for(auto& i : artdaqDataLoggers_)
+		if(contexts_[i].contextUID_ == contextUID)
+			return localGetRank(contexts_[i]);
+
+	for(auto& i : artdaqDispatchers_)
 		if(contexts_[i].contextUID_ == contextUID)
 			return localGetRank(contexts_[i]);
 
@@ -252,7 +261,7 @@ unsigned int XDAQContextTable::getARTDAQDataPort(
 				       << __E__;
 				__SS_THROW__;
 			}
-			// else, Builder or Aggregator
+			// else, Builder or DataLogger or Dispatcher
 			return getSupervisorConfigNode(configManager,
 			                               context.contextUID_,
 			                               context.applications_[0].applicationUID_)
@@ -283,10 +292,19 @@ XDAQContextTable::getEventBuilderContexts() const
 }
 //========================================================================================================================
 std::vector<const XDAQContextTable::XDAQContext*>
-XDAQContextTable::getAggregatorContexts() const
+XDAQContextTable::getDataLoggerContexts() const
 {
 	std::vector<const XDAQContext*> retVec;
-	for(auto& i : artdaqAggregators_)
+	for(auto& i : artdaqDataLoggers_)
+		retVec.push_back(&contexts_[i]);
+	return retVec;
+}
+//========================================================================================================================
+std::vector<const XDAQContextTable::XDAQContext*>
+XDAQContextTable::getDispatcherContexts() const
+{
+	std::vector<const XDAQContext*> retVec;
+	for(auto& i : artdaqDispatchers_)
 		retVec.push_back(&contexts_[i]);
 	return retVec;
 }
@@ -338,7 +356,8 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 
 	artdaqBoardReaders_.clear();
 	artdaqEventBuilders_.clear();
-	artdaqAggregators_.clear();
+	artdaqDataLoggers_.clear();
+	artdaqDispatchers_.clear();
 
 	// Enforce that app IDs do not repeat!
 	//	Note: this is important because there are maps in MacroMaker and
@@ -570,11 +589,12 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 			else if(contexts_.back().applications_[0].class_ ==  // if event builder
 			        "ots::EventBuilderApp")
 				artdaqEventBuilders_.push_back(contexts_.size() - 1);
-			else if(contexts_.back().applications_[0].class_ ==  // if aggregator
-			            "ots::DataLoggerApp" ||
-			        contexts_.back().applications_[0].class_ ==  // if aggregator
-			            "ots::DispatcherApp")
-				artdaqAggregators_.push_back(contexts_.size() - 1);
+			else if(contexts_.back().applications_[0].class_ ==  // if dataLogger
+			        "ots::DataLoggerApp")
+				artdaqDataLoggers_.push_back(contexts_.size() - 1);
+			else if(contexts_.back().applications_[0].class_ ==  // if dispatcher
+			        "ots::DispatcherApp")
+				artdaqDispatchers_.push_back(contexts_.size() - 1);
 			else
 			{
 				__SS__ << "ARTDAQ Context must be have Application of an allowed class "
@@ -582,8 +602,8 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				       << "\tots::ARTDAQDataManagerSupervisor (Board Reader)\n"
 				       << "\tots::ARTDAQFEDataManagerSupervisor (Board Reader)\n"
 				       << "\tots::EventBuilderApp (Event Builder)\n"
-				       << "\tots::DataLoggerApp (Aggregator)\n"
-				       << "\tots::DispatcherApp (Aggregator)\n"
+				       << "\tots::DataLoggerApp (Data Logger)\n"
+				       << "\tots::DispatcherApp (Dispatcher)\n"
 				       << "\nClass found was " << contexts_.back().applications_[0].class_
 				       << __E__;
 				__SS_THROW__;
@@ -591,231 +611,6 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 		}
 	}
 }
-
-//========================================================================================================================
-// void XDAQContextTable::outputXDAQScript(std::ostream &out)
-//{
-/*
-    the file will look something like this:
-            #!/bin/sh
-
-            echo
-            echo
-
-            echo "Launching XDAQ contexts..."
-
-            #for each XDAQ context
-            xdaq.exe -p ${CONTEXT_PORT} -e ${XDAQ_ARGS} &
-
-    */
-
-//	out << "#!/bin/sh\n\n";
-//
-//	out << "echo\necho\n\n";
-//
-//	out << "echo \"Launching XDAQ contexts...\"\n\n";
-//	out << "#for each XDAQ context\n";
-//
-//
-//	std::stringstream ss;
-//	int count = 0;
-//	//for each non-"ART" or "ARTDAQ" context make a xdaq entry
-//	for(XDAQContext &context:contexts_)
-//	{
-//		if(isARTDAQContext(context.contextUID_))
-//			continue;		//skip if UID does identify as artdaq
-//
-//		if(!context.status_)
-//			continue;		//skip if disabled
-//
-//		//at this point we have a xdaq context.. so make an xdaq entry
-//
-//		++count;
-//		ss << "echo \"xdaq.exe -p " <<
-//				context.port_ << " -e ${XDAQ_ARGS} &\"\n";
-//		ss << "xdaq.exe -p " <<
-//				context.port_ << " -e ${XDAQ_ARGS} & " <<
-//				"#" << context.contextUID_ << "\n";
-//	}
-//
-//
-//	if(count == 0) //if no artdaq contexts at all
-//	{
-//		out << "echo \"No XDAQ (non-artdaq) contexts found.\"\n\n";
-//		out << "echo\necho\n";
-//		return;
-//	}
-//
-//	out << ss.str();
-//
-//	out << "\n\n";
-//}
-
-////========================================================================================================================
-// void XDAQContextTable::outputARTDAQScript(std::ostream &out)
-//{
-/*
-        the file will look something like this:
-                #!/bin/sh
-
-
-                echo
-                echo
-                while [ 1 ]; do
-
-                    echo "Cleaning up old MPI instance..."
-                    killall mpirun
-
-
-                    echo "Starting mpi run..."
-                    echo "$1"
-                    echo
-                    echo
-
-                    echo mpirun $1 \
-                           -np 1 xdaq.exe -p ${ARTDAQ_BOARDREADER_PORT1} -e ${XDAQ_ARGS} :
-   \
-                           -np 1 xdaq.exe -p ${ARTDAQ_BOARDREADER_PORT2} -e ${XDAQ_ARGS} :
-   \
-                           -np 1 xdaq.exe -p ${ARTDAQ_BUILDER_PORT}      -e ${XDAQ_ARGS} :
-   \ -np 1 xdaq.exe -p ${ARTDAQ_AGGREGATOR_PORT}   -e ${XDAQ_ARGS} &
-
-                    echo
-                    echo
-
-                    ret=mpirun $1 \
-                        -np 1 xdaq.exe -p ${ARTDAQ_BOARDREADER_PORT1} -e ${XDAQ_ARGS} : \
-                        -np 1 xdaq.exe -p ${ARTDAQ_BOARDREADER_PORT2} -e ${XDAQ_ARGS} : \
-                        -np 1 xdaq.exe -p ${ARTDAQ_BUILDER_PORT}      -e ${XDAQ_ARGS} : \
-                        -np 1 xdaq.exe -p ${ARTDAQ_AGGREGATOR_PORT}   -e ${XDAQ_ARGS}
-
-                    if [ $ret -eq 0 ]; then
-                        exit
-                    fi
-
-                done
-         */
-
-//	__COUT__ << artdaqContexts_.size() << " total artdaq context(s)." << __E__;
-//	__COUT__ << artdaqBoardReaders_.size() << " active artdaq board reader(s)." <<
-// __E__;
-//	__COUT__ << artdaqEventBuilders_.size() << " active artdaq event builder(s)." <<
-// __E__;
-//	__COUT__ << artdaqAggregators_.size() << " active artdaq aggregator(s)." << __E__;
-//
-//	out << "#!/bin/sh\n\n";
-//
-//	out << "\techo\n\techo\n\n";
-//	//out << "while [ 1 ]; do\n\n";
-//
-//	//out << "\techo \"Cleaning up old MPI instance...\"\n";
-//
-//	out << "\techo \"" <<
-//			artdaqContexts_.size() << " artdaq Contexts." <<
-//			"\"\n";
-//	out << "\techo \"\t" <<
-//			artdaqBoardReaders_.size() << " artdaq board readers." <<
-//			"\"\n";
-//	out << "\techo \"\t" <<
-//			artdaqEventBuilders_.size() << " artdaq event builders." <<
-//			"\"\n";
-//	out << "\techo \"\t" <<
-//			artdaqAggregators_.size() << " artdaq aggregators_." <<
-//			"\"\n";
-//
-//	//out << "\tkillall mpirun\n";
-//	out << "\techo\n\techo\n\n";
-//
-//	out << "\techo \"Starting mpi run...\"\n";
-//	out << "\techo \"$1\"\n\techo\n\techo\n\n";
-//
-//
-//
-//	std::stringstream ss,ssUID;
-//	int count = 0;
-//
-//	//ss << "\tret=`mpirun $1 \\\n"; `
-//
-//	ss << "\tmpirun $1 \\\n";
-//
-//	//for each "ART" or "ARTDAQ" context make an mpi entry
-//	//make an mpi entry for board readers, then event builders, then aggregators
-//
-//	for(auto &i:artdaqBoardReaders_)
-//	{
-//		if(count++) //add line breaks if not first context
-//			ss << ": \\\n";
-//
-//		ss << "     -np 1 xdaq.exe -p " <<
-//				contexts_[i].port_ << " -e ${XDAQ_ARGS} ";
-//
-//		ssUID << "\n\t#board reader \t context.port_ \t " << contexts_[i].port_ <<
-//				": \t" << contexts_[i].contextUID_;
-//	}
-//
-//	for(auto &i:artdaqEventBuilders_)
-//	{
-//		if(count++) //add line breaks if not first context
-//			ss << ": \\\n";
-//
-//		ss << "     -np 1 xdaq.exe -p " <<
-//				contexts_[i].port_ << " -e ${XDAQ_ARGS} ";
-//
-//		ssUID << "\n\t#event builder \t context.port_ \t " << contexts_[i].port_ <<
-//				": \t" << contexts_[i].contextUID_;
-//	}
-//
-//	for(auto &i:artdaqAggregators_)
-//	{
-//		if(count++) //add line breaks if not first context
-//			ss << ": \\\n";
-//
-//		ss << "     -np 1 xdaq.exe -p " <<
-//				contexts_[i].port_ << " -e ${XDAQ_ARGS} ";
-//
-//		ssUID << "\n\t#aggregator \t context.port_ \t " << contexts_[i].port_ <<
-//				": \t" << contexts_[i].contextUID_;
-//	}
-//
-//
-//	if(count == 0) //if no artdaq contexts at all
-//	{
-//		out << "\techo \"No ARTDAQ contexts found. So no mpirun necessary.\"\n\n";
-//		out << "\techo\necho\n";
-//		return;
-//	}
-//
-//	out << "\techo \"" << ss.str() << "\""; //print mpirun
-//	out << "\t\n\techo\n\techo\n\n";
-//	out << ssUID.str() << "\n\n";
-//	out << ss.str();			//run mpirun
-//
-//	out << "\n\n";
-//	//out << ""\tif [ ${ret:-1} -eq 0 ]; then\n\t\texit\n\tfi\n";
-//	//out << "\ndone\n";
-//}
-//
-//
-////========================================================================================================================
-// void XDAQContextTable::outputAppPriority(std::ostream &out, const std::string&
-// stateMachineCommand)
-//{
-//	//output app ID and priority order [1:255] pairs.. new line separated
-//	//	0/undefined gets translated to 100
-//
-//	for (XDAQContext &context : contexts_)
-//		for (XDAQApplication &app : context.applications_)
-//		{
-//			out << app.id_ << "\n";
-//
-//			if(app.stateMachineCommandPriority_.find(stateMachineCommand) ==
-// app.stateMachineCommandPriority_.end()) 				out << 100; 			else
-//				out << ((app.stateMachineCommandPriority_[stateMachineCommand])?
-//					app.stateMachineCommandPriority_[stateMachineCommand]:100);
-//
-//			out << "\n";
-//		}
-//}
 
 //========================================================================================================================
 void XDAQContextTable::outputXDAQXML(std::ostream& out)
