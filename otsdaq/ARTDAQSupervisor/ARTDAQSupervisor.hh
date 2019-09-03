@@ -1,10 +1,14 @@
 #ifndef _ots_ARTDAQSupervisorr_h
 #define _ots_ARTDAQSupervisor_h
 
+#if __cplusplus > 201402L
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wregister"
 #include <Python.h>
 #pragma GCC diagnostic pop
+#else
+#include <Python.h>
+#endif
 
 #include "artdaq/ExternalComms/CommanderInterface.hh"
 #include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
