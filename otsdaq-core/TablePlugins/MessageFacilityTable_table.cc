@@ -155,10 +155,12 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				fs << "\t"
 				   << "threshold: \"DEBUG\"\n";
 				fs << "\t"
-				   << "noTimeStamps: true\n";
-				fs << "\t"
+				   << "format: {\n";
+				fs << "\t\t"
+				   << "timestamp: none\n";
+				fs << "\t\t"
 				   << "noLineBreaks: true\n";
-				fs << "}\n";
+				fs << "\t}\n}\n";
 				
 				// output quiet forwarder config file
 				std::fstream qtfs;
@@ -236,10 +238,12 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 			fs << "\t"
 			   << "threshold: \"DEBUG\"\n";
 			fs << "\t"
-			   << "noTimeStamps: true\n";
-			fs << "\t"
+			   << "format: {\n";
+			fs << "\t\t"
+			   << "timestamp: none\n";
+			fs << "\t\t"
 			   << "noLineBreaks: true\n";
-			fs << "}\n";
+			fs << "\t}\n}\n";
 		}
 
 		break;  // take first enable row only!

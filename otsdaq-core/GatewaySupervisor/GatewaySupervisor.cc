@@ -271,11 +271,11 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 		{
 			auto appInfo = it.second;
 			appName      = appInfo.getName();
-			__COUT__ << "Getting Status "
-			         << " Supervisor instance = '" << appInfo.getName()
-			         << "' [LID=" << appInfo.getId() << "] in Context '"
-			         << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
-			         << "].\n\n";
+//			__COUT__ << "Getting Status "
+//			         << " Supervisor instance = '" << appInfo.getName()
+//			         << "' [LID=" << appInfo.getId() << "] in Context '"
+//			         << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
+//			         << "].\n\n";
 			// if the application is the gateway supervisor, we do not send a SOAP message
 			if(appName == "Supervisor")
 			{
@@ -302,18 +302,18 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				xoap::MessageReference tempMessage =
 				    SOAPUtilities::makeSOAPMessageReference("ApplicationStatusRequest");
 				// print tempMessage
-				__COUT__ << "tempMessage... " << SOAPUtilities::translate(tempMessage)
-				         << std::endl;
-
+//				__COUT__ << "tempMessage... " << SOAPUtilities::translate(tempMessage)
+//				         << std::endl;
+//
 				try
 				{
 					xoap::MessageReference statusMessage =
 					    theSupervisor->sendWithSOAPReply(appInfo.getDescriptor(),
 					                                     tempMessage);
 
-					__COUT__ << "statusMessage... "
-					         << SOAPUtilities::translate(statusMessage) << std::endl;
-
+//					__COUT__ << "statusMessage... "
+//					         << SOAPUtilities::translate(statusMessage) << std::endl;
+//
 					SOAPParameters parameters;
 					parameters.addParameter("Status");
 					parameters.addParameter("Progress");
@@ -330,8 +330,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					{
 						progress = "0";
 					}
-					__COUTV__(status);
-					__COUTV__(progress);
+//					__COUTV__(status);
+//					__COUTV__(progress);
 				}
 				catch(const xdaq::exception::Exception& e)
 				{
