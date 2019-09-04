@@ -1511,7 +1511,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		__COUT__ << "Done loading Configuration Alias." << __E__;
 
 		// When configured, set the translated System Alias to be persistently active
-		ConfigurationManagerRW tmpCfgMgr("TheSupervisor");
+		ConfigurationManagerRW tmpCfgMgr("TheGatewaySupervisor");
 		tmpCfgMgr.activateTableGroup(theConfigurationTableGroup_.first,
 		                             theConfigurationTableGroup_.second);
 
@@ -2898,7 +2898,9 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	// cancelStateMachineTransition
 	// getIterationPlanStatus
 	// getErrorInStateMatchine
+
 	// getDesktopIcons
+	// addDesktopIcon
 
 	// resetUserTooltips
 	// silenceAllUserTooltips
@@ -3590,6 +3592,52 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			__COUTV__(iconString);
 
 			xmlOut.addTextElementToData("iconList", iconString);
+		}
+		else if(requestType == "addDesktopIcon")
+		{
+			std::string iconName =
+			    CgiDataUtilities::getData(cgiIn, "iconName");  // from GET
+			std::string iconImageURL =
+			    CgiDataUtilities::getData(cgiIn, "iconImageURL");  // from GET
+			std::string iconFolderPath =
+			    CgiDataUtilities::getData(cgiIn, "iconFolderPath");  // from GET
+			std::string iconCaption =
+			    CgiDataUtilities::getData(cgiIn, "iconCaption");  // from GET
+			std::string iconAlternateText =
+			    CgiDataUtilities::getData(cgiIn, "iconAlternateText");  // from GET
+			std::string iconPermissionsString =
+			    CgiDataUtilities::getData(cgiIn, "iconPermissionsString");  // from GET
+			bool iconEnforceOneWindowInstance =
+			    CgiDataUtilities::getData(cgiIn, "iconEnforceOneWindowInstance") == "1"?true:false;  // from GET
+
+			std::string iconParameters =
+			    CgiDataUtilities::postData(cgiIn, "iconParameters");  // from POST
+
+
+			__COUTV__(iconName);
+			__COUTV__(iconImageURL);
+			__COUTV__(iconFolderPath);
+			__COUTV__(iconCaption);
+			__COUTV__(iconAlternateText);
+			__COUTV__(iconPermissionsString);
+			__COUTV__(iconEnforceOneWindowInstance);
+
+			__COUTV__(iconParameters); // map: CSV list
+
+			//steps:
+			//	activate active context
+			//		modify desktop table and desktop parameters table
+			//		save, activate, and modify alias
+
+			ConfigurationManagerRW tmpCfgMgr("TheGatewaySupervisor");
+			tmpCfgMgr.activateTableGroup(
+					tmpCfgMgr.getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT),
+					tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+					);
+
+
+
+
 		}
 		else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{
