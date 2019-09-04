@@ -1116,7 +1116,11 @@ launchOTS() {
 
 	# Make sure fhicl directory exists
 	if ! [ -d $DAQINTERFACE_FHICL_DIRECTORY ]; then
-		mkdir -p $DAQINTERFACE_FHICL_DIRECTORY
+	     if [ ! -L ${DAQINTERFACE_FHICL_DIRECTORY} ]; then
+                mkdir -p ${DAQINTERFACE_FHICL_DIRECTORY}
+             else
+                mkdir -p `readlink -f ${DAQINTERFACE_FHICL_DIRECTORY}`
+             fi
 	fi
 	
 	# Create a dummy boardreaders list. 
