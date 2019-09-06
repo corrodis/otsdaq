@@ -1,10 +1,10 @@
 
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisor.hh"
 
-#include "otsdaq-core/TablePlugins/ARTDAQDataLoggerTable.h"
-#include "otsdaq-core/TablePlugins/ARTDAQDispatcherTable.h"
 #include "otsdaq-core/TablePlugins/ARTDAQBoardReaderTable.h"
 #include "otsdaq-core/TablePlugins/ARTDAQBuilderTable.h"
+#include "otsdaq-core/TablePlugins/ARTDAQDataLoggerTable.h"
+#include "otsdaq-core/TablePlugins/ARTDAQDispatcherTable.h"
 
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
@@ -564,7 +564,9 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	pb.step();
 
+	
 	__SUP_COUT__ << "Calling setdaqcomps" << __E__;
+	__SUP_COUT__ << "Status before setdaqcomps: " << getDAQState_() << __E__;
 	PyObject* pName1 = PyString_FromString("setdaqcomps");
 
 	PyObject* readerDict = PyDict_New();
@@ -586,11 +588,13 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	if(res1 == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling start transition" << __E__;
+		__SUP_COUT_ERR__ << "Error calling setdaqcomps transition" << __E__;
 	}
+	__SUP_COUT__ << "Status after setdaqcomps: " << getDAQState_() << __E__;
 
 	pb.step();
 	__SUP_COUT__ << "Calling do_boot" << __E__;
+	__SUP_COUT__ << "Status before boot: " << getDAQState_() << __E__;
 	PyObject* pName2      = PyString_FromString("do_boot");
 	PyObject* pStateArgs1 = PyString_FromString((ARTDAQ_FCL_PATH + "/boot.txt").c_str());
 	PyObject* res2 =
@@ -599,11 +603,13 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	if(res2 == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling start transition" << __E__;
+		__SUP_COUT_ERR__ << "Error calling boot transition" << __E__;
 	}
+	__SUP_COUT__ << "Status after boot: " << getDAQState_() << __E__;
 
 	pb.step();
 	__SUP_COUT__ << "Calling do_config" << __E__;
+	__SUP_COUT__ << "Status before config: " << getDAQState_() << __E__;
 	PyObject* pName3      = PyString_FromString("do_config");
 	PyObject* pStateArgs2 = Py_BuildValue("[s]", FAKE_CONFIG_NAME);
 	PyObject* res3 =
@@ -612,8 +618,9 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	if(res3 == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling start transition" << __E__;
+		__SUP_COUT_ERR__ << "Error calling config transition" << __E__;
 	}
+	__SUP_COUT__ << "Status after config: " << getDAQState_() << __E__;
 	pb.complete();
 	__SUP_COUT__ << "Configured." << __E__;
 }  // end transitionConfiguring()
@@ -622,6 +629,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Halting..." << __E__;
+	__SUP_COUT__ << "Status before halt: " << getDAQState_() << __E__;
+
 	PyObject* pName = PyString_FromString("do_command");
 	PyObject* pArg  = PyString_FromString("Shutdown");
 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pArg, NULL);
@@ -632,6 +641,7 @@ void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference e)
 		__SUP_COUT_ERR__ << "Error calling Shutdown transition" << __E__;
 	}
 
+	__SUP_COUT__ << "Status after halt: " << getDAQState_() << __E__;
 	__SUP_COUT__ << "Halted." << __E__;
 }  // end transitionHalting()
 
@@ -647,6 +657,9 @@ void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference e)
 void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Pausing..." << __E__;
+
+	__SUP_COUT__ << "Status before pause: " << getDAQState_() << __E__;
+
 	PyObject* pName = PyString_FromString("do_command");
 	PyObject* pArg  = PyString_FromString("Pause");
 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pArg, NULL);
@@ -656,6 +669,9 @@ void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference e)
 		PyErr_Print();
 		__SUP_COUT_ERR__ << "Error calling Pause transition" << __E__;
 	}
+
+	__SUP_COUT__ << "Status after pause: " << getDAQState_() << __E__;
+
 	__SUP_COUT__ << "Paused." << __E__;
 }  // end transitionPausing()
 
@@ -664,6 +680,7 @@ void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Resuming..." << __E__;
 
+	__SUP_COUT__ << "Status before resume: " << getDAQState_() << __E__;
 	PyObject* pName = PyString_FromString("do_command");
 	PyObject* pArg  = PyString_FromString("Resume");
 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pArg, NULL);
@@ -673,6 +690,7 @@ void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference e)
 		PyErr_Print();
 		__SUP_COUT_ERR__ << "Error calling Resume transition" << __E__;
 	}
+	__SUP_COUT__ << "Status after resume: " << getDAQState_() << __E__;
 	__SUP_COUT__ << "Resumed." << __E__;
 }  // end transitionResuming()
 
@@ -680,6 +698,7 @@ void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference e)
 void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Starting..." << __E__;
+	__SUP_COUT__ << "Status before start: " << getDAQState_() << __E__;
 	auto runNumber = SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
 	                     .getParameters()
 	                     .getValue("RunNumber");
@@ -695,6 +714,7 @@ void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference e)
 		PyErr_Print();
 		__SUP_COUT_ERR__ << "Error calling start transition" << __E__;
 	}
+	__SUP_COUT__ << "Status after start: " << getDAQState_() << __E__;
 	__SUP_COUT__ << "Started." << __E__;
 }  // end transitionStarting()
 
@@ -702,6 +722,7 @@ void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference e)
 void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
+	__SUP_COUT__ << "Status before stop: " << getDAQState_() << __E__;
 	PyObject* pName = PyString_FromString("do_stop_running");
 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
 
@@ -710,12 +731,14 @@ void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference e)
 		PyErr_Print();
 		__SUP_COUT_ERR__ << "Error calling stop transition" << __E__;
 	}
+	__SUP_COUT__ << "Status after stop: " << getDAQState_() << __E__;
 	__SUP_COUT__ << "Stopped." << __E__;
 }  // end transitionStopping()
 
 void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Entering error recovery state" << __E__;
+	__SUP_COUT__ << "Status before error: " << getDAQState_() << __E__;
 
 	PyObject* pName = PyString_FromString("do_recover");
 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
@@ -725,5 +748,25 @@ void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference e)
 		PyErr_Print();
 		__SUP_COUT_ERR__ << "Error calling recover transition" << __E__;
 	}
+	__SUP_COUT__ << "Status after error: " << getDAQState_() << __E__;
 	__SUP_COUT__ << "EnteringError DONE." << __E__;
+}
+
+std::string ots::ARTDAQSupervisor::getDAQState_()
+{
+	__SUP_COUT__ << "Getting DAQInterface state" << __E__;
+
+	PyObject* pName = PyString_FromString("state");
+	PyObject* pArg  = PyString_FromString("DAQInterface");
+	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pArg, NULL);
+
+	if(res == NULL)
+	{
+		PyErr_Print();
+		__SUP_COUT_ERR__ << "Error calling state function" << __E__;
+		return "ERROR";
+	}
+	std::string result = std::string(PyString_AsString(res));
+	__SUP_COUT__ << "getDAQState_ DONE: state=" << result << __E__;
+	return result;
 }
