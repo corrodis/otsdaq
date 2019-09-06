@@ -46,6 +46,8 @@ class ARTDAQSupervisor : public CoreSupervisorBase
   private:
 	PyObject* daqinterface_ptr_;
 	int       partition_;
+
+	std::string getDAQState_();
 	};
 
 }  // namespace ots

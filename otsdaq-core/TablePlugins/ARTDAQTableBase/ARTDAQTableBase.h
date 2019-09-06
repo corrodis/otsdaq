@@ -29,6 +29,28 @@ class ARTDAQTableBase : public TableBase
 
 	void						insertParameters			(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree parameterLink, const std::string& parameterPreamble, bool onlyInsertAtTableParameters = false, bool includeAtTableParameters =false);
 	std::string					insertModuleType			(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree moduleTypeNode);
+	
+	enum class DataReceiverAppType {
+		EventBuilder,
+		DataLogger,
+		Dispatcher
+	};
+
+	void outputDataReceiverFHICL(ConfigurationManager*    configManager,
+	                 const ConfigurationTree& appNode,
+	                 unsigned int             selfRank,
+	                 std::string              selfHost,
+	                 unsigned int             selfPort,
+	                 DataReceiverAppType appType);
+
+	std::string getPreamble(DataReceiverAppType type) {
+		switch (type) {
+			case DataReceiverAppType::EventBuilder: return "builder";
+			case DataReceiverAppType::DataLogger: return "datalogger";
+			case DataReceiverAppType::Dispatcher: return "dispatcher";
+		}
+		return "UNKNOWN";
+	}
 };
 // clang-format on
 }  // namespace ots

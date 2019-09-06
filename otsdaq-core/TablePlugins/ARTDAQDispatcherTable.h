@@ -4,13 +4,13 @@
 #include <string>
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq-core/TableCore/TableBase.h"
+#include "otsdaq-core/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
 
 namespace ots
 {
 class XDAQContextTable;
 
-class ARTDAQDispatcherTable : public TableBase
+class ARTDAQDispatcherTable : public ARTDAQTableBase
 {
   public:
 	ARTDAQDispatcherTable(void);
@@ -24,7 +24,6 @@ class ARTDAQDispatcherTable : public TableBase
 	                        std::string              selfHost,
 	                        unsigned int             selfPort,
 	                        const XDAQContextTable*  contextConfig);
-	std::string getFHICLFilename(const ConfigurationTree& builderNode);
 };
 }  // namespace ots
 #endif
