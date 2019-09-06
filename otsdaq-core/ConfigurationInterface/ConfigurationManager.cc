@@ -237,9 +237,18 @@ void ConfigurationManager::restoreActiveTableGroups(
 
 	__SS__;
 
-	while(fgets(tmp, 500, fp))  // for(int i=0;i<4;++i)
+	while(fgets(tmp, 500, fp))
 	{
-		// fgets(tmp,500,fp);
+		//do check for out of sync.. i.e. name is a number
+		{
+			int numberCheck = 0;
+			sscanf(tmp, "%d", &numberCheck);
+			if(numberCheck)
+			{
+				__COUT__ << "Out of sync with active groups file lines, attempting to resync." << __E__;
+				continue;
+			}
+		}
 
 		skip = false;
 		sscanf(tmp, "%s", strVal);  // sscanf to remove '\n'
@@ -249,7 +258,8 @@ void ConfigurationManager::restoreActiveTableGroups(
 			     (strVal[j] >= '0' && strVal[j] <= '9')))
 			{
 				strVal[j] = '\0';
-				__COUT_INFO__ << "Illegal character found, so skipping!" << __E__;
+				__COUT_INFO__ << "Illegal character found in group name '" << strVal << "', so skipping! Check active groups file: " <<
+						fn << __E__;
 
 				skip = true;
 				break;
@@ -269,8 +279,8 @@ void ConfigurationManager::restoreActiveTableGroups(
 
 				if(groupName.size() > 3)  // notify if seems like a real group name
 					__COUT_INFO__
-					    << "Skipping active group with illegal character in name."
-					    << __E__;
+					    << "Skipping active group with illegal character in group key '" << strVal << ".' Check active groups file: " <<
+						fn << __E__;
 
 				skip = true;
 				break;
@@ -285,8 +295,8 @@ void ConfigurationManager::restoreActiveTableGroups(
 		}
 		catch(...)
 		{
-			__COUT__ << "illegal group according to TableGroupKey::getFullGroupString..."
-			         << __E__;
+			__COUT__ << "illegal group according to TableGroupKey::getFullGroupString... Check active groups file: " <<
+					fn << __E__;
 			skip = true;
 		}
 
@@ -315,7 +325,8 @@ void ConfigurationManager::restoreActiveTableGroups(
 		catch(std::runtime_error& e)
 		{
 			ss << "Failed to load group in ConfigurationManager::init() with name '"
-			   << groupName << "(" << strVal << ")'" << __E__;
+			   << groupName << "(" << strVal << ")' specified active by active groups file: " <<
+						fn << __E__;
 			ss << e.what() << __E__;
 
 			errorStr += ss.str();
@@ -323,7 +334,8 @@ void ConfigurationManager::restoreActiveTableGroups(
 		catch(...)
 		{
 			ss << "Failed to load group in ConfigurationManager::init() with name '"
-			   << groupName << "(" << strVal << ")'" << __E__;
+			   << groupName << "(" << strVal << ")' specified active by active groups file: " <<
+						fn << __E__;
 
 			errorStr += ss.str();
 		}

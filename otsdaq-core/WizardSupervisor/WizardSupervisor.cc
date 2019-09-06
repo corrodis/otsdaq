@@ -557,9 +557,14 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 
 	try
 	{
+		// RequestType Commands:
+		// 	gatewayLaunchOTS
+		// 	gatewayLaunchWiz
+		// 	addDesktopIcon
+
 		if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{
-			// NOTE: similar to ConfigurationGUI version but DOES keep active sessions
+			// NOTE: similar to ConfigurationGUI version but DOES keep active login sessions
 
 			__COUT_WARN__ << requestType << " requestType received! " << __E__;
 			__MOUT_WARN__ << requestType << " requestType received! " << __E__;
@@ -571,9 +576,13 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 			else if(requestType == "gatewayLaunchWiz")
 				GatewaySupervisor::launchStartOTSCommand("LAUNCH_WIZ", &cfgMgr);
 		}
+		else if(requestType == "addDesktopIcon")
+		{
+			GatewaySupervisor::handleAddDesktopIconRequest(cgiIn,xmlOut);
+		}
 		else
 		{
-			__SS__ << "requestType Request, " << requestType << ", not recognized."
+			__SS__ << "requestType Request '" << requestType << "' not recognized."
 			       << __E__;
 			__SS_THROW__;
 		}

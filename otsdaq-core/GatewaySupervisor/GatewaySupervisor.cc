@@ -3595,53 +3595,11 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		}
 		else if(requestType == "addDesktopIcon")
 		{
-			std::string iconName =
-			    CgiDataUtilities::getData(cgiIn, "iconName");  // from GET
-			std::string iconImageURL =
-			    CgiDataUtilities::getData(cgiIn, "iconImageURL");  // from GET
-			std::string iconFolderPath =
-			    CgiDataUtilities::getData(cgiIn, "iconFolderPath");  // from GET
-			std::string iconCaption =
-			    CgiDataUtilities::getData(cgiIn, "iconCaption");  // from GET
-			std::string iconAlternateText =
-			    CgiDataUtilities::getData(cgiIn, "iconAlternateText");  // from GET
-			std::string iconPermissionsString =
-			    CgiDataUtilities::getData(cgiIn, "iconPermissionsString");  // from GET
-			bool iconEnforceOneWindowInstance =
-			    CgiDataUtilities::getData(cgiIn, "iconEnforceOneWindowInstance") == "1"?true:false;  // from GET
-
-			std::string iconParameters =
-			    CgiDataUtilities::postData(cgiIn, "iconParameters");  // from POST
-
-
-			__COUTV__(iconName);
-			__COUTV__(iconImageURL);
-			__COUTV__(iconFolderPath);
-			__COUTV__(iconCaption);
-			__COUTV__(iconAlternateText);
-			__COUTV__(iconPermissionsString);
-			__COUTV__(iconEnforceOneWindowInstance);
-
-			__COUTV__(iconParameters); // map: CSV list
-
-			//steps:
-			//	activate active context
-			//		modify desktop table and desktop parameters table
-			//		save, activate, and modify alias
-
-			ConfigurationManagerRW tmpCfgMgr("TheGatewaySupervisor");
-			tmpCfgMgr.activateTableGroup(
-					tmpCfgMgr.getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT),
-					tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
-					);
-
-
-
-
+			GatewaySupervisor::handleAddDesktopIconRequest(cgiIn, xmlOut);
 		}
 		else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{
-			// NOTE: similar to ConfigurationGUI version but DOES keep active sessions
+			// NOTE: similar to ConfigurationGUI version but DOES keep active login sessions
 
 			__COUT_WARN__ << requestType << " requestType received! " << __E__;
 			__MOUT_WARN__ << requestType << " requestType received! " << __E__;
@@ -4070,7 +4028,7 @@ GatewaySupervisor::loadGroupNameAndKey(const std::string& fileName,
 	         << " theGroup.second= " << theGroup.second << __E__;
 
 	return theGroup;
-}  // end loadGroupNameAndKey()
+}  //end loadGroupNameAndKey()
 
 //========================================================================================================================
 void GatewaySupervisor::saveGroupNameAndKey(
@@ -4090,41 +4048,57 @@ void GatewaySupervisor::saveGroupNameAndKey(
 	outss << theGroup.first << "\n" << theGroup.second << "\n" << time(0);
 	groupFile << outss.str().c_str();
 	groupFile.close();
-}  // end saveGroupNameAndKey()
+}  //end saveGroupNameAndKey()
 
-/////////////////////////////////////////////////////////////////////////////////////
-
-////========================================================================================================================
-////GatewaySupervisor::infoRequest ---
-// void GatewaySupervisor::infoRequest(xgi::Input * in, xgi::Output * out )
-//{
-//    __COUT__ << __LINE__ <<  __E__ << __E__;
-//    cgicc::Cgicc cgi(in);
-//    std::string Command=cgi.getElement("RequestType")->getValue();
-//
-//    if (Command=="FEWList")
-//   {
-//        *out << "<FEWList>" << __E__;
-//        for (std::set<xdaq::ApplicationDescriptor*>::iterator
-//        pxFESupervisorsIt=pxFESupervisors_.begin();
-//        pxFESupervisorsIt!=pxFESupervisors_.end(); pxFESupervisorsIt++)
-//       {
-//        	*out << "<FEWInterface id='1' alias='FPIX Disk 1' type='OtsUDPHardware'>" <<
-//        __E__
-//        	     << "<svg xmlns='http://www.w3.org/2000/svg' version='1.1'>" <<  __E__
-//                 << "<circle cx='100' cy='50' r='40' stroke='black' stroke-width='2'
-//                 fill='red' />" << __E__
-//                 << "</svg>" << __E__
-//                 << "</FEWInterface>" << __E__;
-//         	*out << "<FEWInterface id='2' alias='FPIX Disk 2' type='OtsUDPHardware'>" <<
-//         __E__
-//        	     << "<svg xmlns='http://www.w3.org/2000/svg' version='1.1'>" <<  __E__
-//                 << "<circle cx='100' cy='50' r='40' stroke='black' stroke-width='2'
-//                 fill='red' />" << __E__
-//                 << "</svg>" << __E__
-//                 << "</FEWInterface>" << __E__;
-//        }
-//        *out << "</FEWList>" << __E__;
-//    }
-//}
 //========================================================================================================================
+void GatewaySupervisor::handleAddDesktopIconRequest(cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut)
+{
+	std::string iconCaption =
+	    CgiDataUtilities::getData(cgiIn, "iconCaption");  // from GET
+	std::string iconAltText =
+	    CgiDataUtilities::getData(cgiIn, "iconAltText");  // from GET
+	std::string iconFolderPath =
+	    CgiDataUtilities::getData(cgiIn, "iconFolderPath");  // from GET
+	std::string iconImageURL =
+	    CgiDataUtilities::getData(cgiIn, "iconImageURL");  // from GET
+	std::string iconWindowURL =
+	    CgiDataUtilities::getData(cgiIn, "iconWindowURL");  // from GET
+	std::string iconPermissions =
+	    CgiDataUtilities::getData(cgiIn, "iconPermissions");  // from GET
+	bool iconEnforceOneWindowInstance =
+	    CgiDataUtilities::getData(cgiIn, "iconEnforceOneWindowInstance") == "1"?true:false;  // from GET
+
+
+	std::string iconParameters =
+	    CgiDataUtilities::postData(cgiIn, "iconParameters");  // from POST
+
+	__COUTV__(iconCaption);
+	__COUTV__(iconAltText);
+	__COUTV__(iconFolderPath);
+	__COUTV__(iconImageURL);
+	__COUTV__(iconWindowURL);
+	__COUTV__(iconPermissions);
+	__COUTV__(iconEnforceOneWindowInstance);
+
+	__COUTV__(iconParameters); // map: CSV list
+
+	//steps:
+	//	activate active context
+	//		modify desktop table and desktop parameters table
+	//		save, activate, and modify alias
+
+	ConfigurationManagerRW tmpCfgMgr("TheGatewaySupervisor");
+
+	ConfigurationManagerRW* cfgMgr = &tmpCfgMgr; // just to match syntax in ConfiguratGUI
+//	tmpCfgMgr.activateTableGroup(
+//			tmpCfgMgr.getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT),
+//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+//			);
+
+	cfgMgr->restoreActiveTableGroups(
+			true /*throwErrors*/,
+			"" /*pathToActiveGroupsFile*/,
+			true /*onlyLoadIfBackboneOrContext*/
+			);
+
+} //end handleAddDesktopIconRequest()

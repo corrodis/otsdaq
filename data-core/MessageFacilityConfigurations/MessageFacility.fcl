@@ -5,8 +5,8 @@ udp: {
 	host: "127.0.0.1" 
 }
 
-
-console: {
-	type: "cout"
-	threshold: "DEBUG"
+console : { 
+	type : OTS
+	threshold : DEBUG
+	filename_delimit: "/srcs/"
 }

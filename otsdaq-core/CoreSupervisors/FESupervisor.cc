@@ -2,6 +2,29 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/FECore/FEVInterfacesManager.h"
 
+#include "artdaq/DAQdata/Globals.hh" // instantiates artdaq::Globals::metricMan_
+
+//https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/DAQdata/Globals.hh
+	// for metric manager include
+//https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/Application/DataReceiverCore.cc
+	// for metric manager configuration example
+
+// get pset from Board Reader metric manager table
+//  try
+//        {
+//                metricMan->initialize(metric_pset, app_name);
+//        }
+//        catch (...)
+//        {
+//                ExceptionHandler(ExceptionHandlerRethrow::no,
+//                                                 "Error loading metrics in DataReceiverCore::initialize()");
+//        }
+//..
+//
+// metricMan->do_start();
+// ..
+//  metricMan->shutdown();
+
 using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(FESupervisor)
@@ -110,6 +133,9 @@ FESupervisor::~FESupervisor(void)
 	__SUP_COUT__ << "Destroying..." << __E__;
 	// theStateMachineImplementation_ is reset and the object it points to deleted in
 	// ~CoreSupervisorBase()
+
+	artdaq::Globals::CleanUpGlobals(); // destruct metricManager (among other things)
+
 	__SUP_COUT__ << "Destructed." << __E__;
 }  // end destructor
 

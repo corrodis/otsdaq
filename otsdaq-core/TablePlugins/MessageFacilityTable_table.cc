@@ -151,7 +151,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				
 				fs << "console: {\n";
 				fs << "\t"
-				   << "type: \"cout\"\n";
+				   << "type: \"OTS\"\n"; //\"cout\"\n";
 				fs << "\t"
 				   << "threshold: \"DEBUG\"\n";
 				fs << "\t"

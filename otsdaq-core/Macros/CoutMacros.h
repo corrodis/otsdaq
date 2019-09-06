@@ -31,25 +31,23 @@
 //#define __MF_TYPE__(X)	FIXME ?? how to do this ...(__ENV__("OTSDAQ_USING_MF")=="1"?
 // mf::X (__MF_SUBJECT__) : std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":")
 
-#define __MF_HDR__ 			__COUT_HDR__
-
-#define __MF_TYPE__(X) 		TLOG(X, __MF_SUBJECT__) 
-#define __MOUT_ERR__ 		__MF_TYPE__(TLVL_ERROR) 	<< __MF_HDR__
-#define __MOUT_WARN__ 		__MF_TYPE__(TLVL_WARNING) 	<< __MF_HDR__
-#define __MOUT_INFO__ 		__MF_TYPE__(TLVL_INFO) 		<< __MF_HDR__
-#define __MOUT__ 			__MF_TYPE__(TLVL_DEBUG) 	<< __MF_HDR__
-
-
-#define __MOUTV__(X) 		__MOUT__ << QUOTE(X) << " = " << X
-
 #define __COUT_HDR_F__ 		__SHORTFILE__ << "\t"
 #define __COUT_HDR_L__ 		"[" << std::dec        << __LINE__ << "]\t"
 #define __COUT_HDR_P__ 		__PRETTY_FUNCTION__    << "\t"
 #define __COUT_HDR_FL__ 	__SHORTFILE__ << " "   << __COUT_HDR_L__
 #define __COUT_HDR_FP__ 	__SHORTFILE__ << " : " << __COUT_HDR_P__
-#define __COUT_HDR__ 		__COUT_HDR_FL__
+#define __COUT_HDR__ 		""//__COUT_HDR_FL__
+#define __MF_HDR__ 			__COUT_HDR__
 
-#define __COUT_TYPE__(X) 	__MF_TYPE__(X) //std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":"
+//////// ==============================================================
+#define __COUT_TYPE__(X) 	__MF_TYPE__(X) << ":" << __MF_SUBJECT__ << ":"//std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":"
+#define __MF_TYPE__(X) 		TLOG(X, __MF_SUBJECT__) 
+
+#define __MOUT_ERR__ 		__MF_TYPE__(TLVL_ERROR) 	<< __MF_HDR__
+#define __MOUT_WARN__ 		__MF_TYPE__(TLVL_WARNING) 	<< __MF_HDR__
+#define __MOUT_INFO__ 		__MF_TYPE__(TLVL_INFO) 		<< __MF_HDR__
+#define __MOUT__ 			__MF_TYPE__(TLVL_DEBUG) 	<< __MF_HDR__
+#define __MOUTV__(X) 		__MOUT__ << QUOTE(X) << " = " << X
 
 #define __COUT_ERR__ 		__COUT_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
 #define __COUT_WARN__ 		__COUT_TYPE__(TLVL_WARNING) << __COUT_HDR__
@@ -76,20 +74,19 @@
 #define __SSV__(X) 			__SS__ << QUOTE(X) << " = " << X
 
 //////// ==============================================================
-
 // for configurable objects, add name to subject
-#define __CFG_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":" << theConfigurationRecordName_ << ":"
-#define __CFG_MF_TYPE__(X) 		mf::X(std::string(__MF_SUBJECT__) + "-" + theConfigurationRecordName_)
+#define __CFG_COUT_TYPE__(X) 	__MF_TYPE__(X) << ":" << __MF_SUBJECT__ << ":" << theConfigurationRecordName_ << ":"//std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":" << theConfigurationRecordName_ << ":"
+#define __CFG_MF_TYPE__(X) 		TLOG(X, std::string(__MF_SUBJECT__) + "-" + theConfigurationRecordName_) //mf::X(std::string(__MF_SUBJECT__) + "-" + theConfigurationRecordName_)
 
-#define __CFG_MOUT_ERR__ 		__CFG_MF_TYPE__(LogError) 		<< __COUT_HDR__
-#define __CFG_MOUT_WARN__ 		__CFG_MF_TYPE__(LogWarning) 	<< __COUT_HDR__
-#define __CFG_MOUT_INFO__ 		__CFG_MF_TYPE__(LogInfo) 		<< __COUT_HDR__
-#define __CFG_MOUT__ 			__CFG_MF_TYPE__(LogDebug) 		<< __COUT_HDR__
+#define __CFG_MOUT_ERR__ 		__CFG_MF_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
+#define __CFG_MOUT_WARN__ 		__CFG_MF_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
+#define __CFG_MOUT_INFO__ 		__CFG_MF_TYPE__(TLVL_INFO) 		<< __COUT_HDR__
+#define __CFG_MOUT__ 			__CFG_MF_TYPE__(TLVL_DEBUG) 		<< __COUT_HDR__
 #define __CFG_MOUTV__(X) 		__CFG_MOUT__ << QUOTE(X) << " = " << X
-#define __CFG_COUT_ERR__ 		__CFG_COUT_TYPE__(LogError) 	<< __COUT_HDR__
-#define __CFG_COUT_WARN__ 		__CFG_COUT_TYPE__(LogWarning) 	<< __COUT_HDR__
-#define __CFG_COUT_INFO__ 		__CFG_COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
-#define __CFG_COUT__ 			__CFG_COUT_TYPE__(LogDebug) 	<< __COUT_HDR__
+#define __CFG_COUT_ERR__ 		__CFG_COUT_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
+#define __CFG_COUT_WARN__ 		__CFG_COUT_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
+#define __CFG_COUT_INFO__ 		__CFG_COUT_TYPE__(TLVL_INFO) 		<< __COUT_HDR__
+#define __CFG_COUT__ 			__CFG_COUT_TYPE__(TLVL_DEBUG) 	<< __COUT_HDR__
 #define __CFG_COUTV__(X) 		__CFG_COUT__ << QUOTE(X) << " = " << X << __E__
 
 #define __CFG_MCOUT_ERR__(X)   	{ __CFG_MOUT_ERR__ 	<< X; __CFG_COUT_ERR__ 	<< X; }
@@ -104,18 +101,18 @@
 //////// ==============================================================
 
 // for front-end interface objects, add name to subject
-#define __FE_COUT_TYPE__(X)    	std::cout << QUOTE(X) << ":FE:" << getInterfaceType() << ":" << getInterfaceUID() << ":" << theConfigurationRecordName_ << ":"
-#define __FE_MF_TYPE__(X)      	mf::X(std::string("FE-") + getInterfaceType() + "-" + getInterfaceUID() + "-" + theConfigurationRecordName_)
+#define __FE_COUT_TYPE__(X)    	__MF_TYPE__(X) << ":FE:" << getInterfaceType() << ":" << getInterfaceUID() << ":" << theConfigurationRecordName_ << ":"//std::cout << QUOTE(X) << ":FE:" << getInterfaceType() << ":" << getInterfaceUID() << ":" << theConfigurationRecordName_ << ":"
+#define __FE_MF_TYPE__(X)      	TLOG(X, std::string("FE-") + getInterfaceType() + "-" + getInterfaceUID() + "-" + theConfigurationRecordName_) //mf::X(std::string("FE-") + getInterfaceType() + "-" + getInterfaceUID() + "-" + theConfigurationRecordName_)
 
-#define __FE_MOUT_ERR__ 		__FE_MF_TYPE__(LogError) 	<< __COUT_HDR__
-#define __FE_MOUT_WARN__ 		__FE_MF_TYPE__(LogWarning) 	<< __COUT_HDR__
-#define __FE_MOUT_INFO__ 		__FE_MF_TYPE__(LogInfo) 	<< __COUT_HDR__
-#define __FE_MOUT__ 			__FE_MF_TYPE__(LogDebug) 	<< __COUT_HDR__
+#define __FE_MOUT_ERR__ 		__FE_MF_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
+#define __FE_MOUT_WARN__ 		__FE_MF_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
+#define __FE_MOUT_INFO__ 		__FE_MF_TYPE__(TLVL_INFO) 	<< __COUT_HDR__
+#define __FE_MOUT__ 			__FE_MF_TYPE__(TLVL_DEBUG) 	<< __COUT_HDR__
 #define __FE_MOUTV__(X) 		__FE_MOUT__ << QUOTE(X) << " = " << X
-#define __FE_COUT_ERR__ 		__FE_COUT_TYPE__(LogError) 	<< __COUT_HDR__
-#define __FE_COUT_WARN__ 		__FE_COUT_TYPE__(LogWarning)<< __COUT_HDR__
-#define __FE_COUT_INFO__ 		__FE_COUT_TYPE__(LogInfo) 	<< __COUT_HDR__
-#define __FE_COUT__ 			__FE_COUT_TYPE__(LogDebug) 	<< __COUT_HDR__
+#define __FE_COUT_ERR__ 		__FE_COUT_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
+#define __FE_COUT_WARN__ 		__FE_COUT_TYPE__(TLVL_WARNING)<< __COUT_HDR__
+#define __FE_COUT_INFO__ 		__FE_COUT_TYPE__(TLVL_INFO) 	<< __COUT_HDR__
+#define __FE_COUT__ 			__FE_COUT_TYPE__(TLVL_DEBUG) 	<< __COUT_HDR__
 #define __FE_COUTV__(X) 		__FE_COUT__ << QUOTE(X) << " = " << X << __E__
 
 #define __FE_MCOUT_ERR__(X)   	{ __FE_MOUT_ERR__ 	<< X; __FE_COUT_ERR__ 	<< X; }
@@ -130,18 +127,18 @@
 //////// ==============================================================
 
 // for generic decoration override, just have mfSubject declared
-#define __GEN_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << mfSubject_ << ":"
-#define __GEN_MF_TYPE__(X) 		mf::X(mfSubject_)
+#define __GEN_COUT_TYPE__(X) 	__MF_TYPE__(X) << ":" << mfSubject_ << ":"//std::cout << QUOTE(X) << ":" << mfSubject_ << ":"
+#define __GEN_MF_TYPE__(X) 		TLOG(X, mfSubject_) //mf::X(mfSubject_)
 
-#define __GEN_MOUT_ERR__ 		__GEN_MF_TYPE__(LogError) 		<< __COUT_HDR__
-#define __GEN_MOUT_WARN__ 		__GEN_MF_TYPE__(LogWarning) 	<< __COUT_HDR__
-#define __GEN_MOUT_INFO__ 		__GEN_MF_TYPE__(LogInfo) 		<< __COUT_HDR__
-#define __GEN_MOUT__ 			__GEN_MF_TYPE__(LogDebug) 		<< __COUT_HDR__
+#define __GEN_MOUT_ERR__ 		__GEN_MF_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
+#define __GEN_MOUT_WARN__ 		__GEN_MF_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
+#define __GEN_MOUT_INFO__ 		__GEN_MF_TYPE__(TLVL_INFO) 		<< __COUT_HDR__
+#define __GEN_MOUT__ 			__GEN_MF_TYPE__(TLVL_DEBUG) 		<< __COUT_HDR__
 #define __GEN_MOUTV__(X) 		__GEN_MOUT__ << QUOTE(X) << " = " << X
-#define __GEN_COUT_ERR__ 		__GEN_COUT_TYPE__(LogError) 	<< __COUT_HDR__
-#define __GEN_COUT_WARN__ 		__GEN_COUT_TYPE__(LogWarning) 	<< __COUT_HDR__
-#define __GEN_COUT_INFO__ 		__GEN_COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
-#define __GEN_COUT__ 			__GEN_COUT_TYPE__(LogDebug) 	<< __COUT_HDR__
+#define __GEN_COUT_ERR__ 		__GEN_COUT_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
+#define __GEN_COUT_WARN__ 		__GEN_COUT_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
+#define __GEN_COUT_INFO__ 		__GEN_COUT_TYPE__(TLVL_INFO) 		<< __COUT_HDR__
+#define __GEN_COUT__ 			__GEN_COUT_TYPE__(TLVL_DEBUG) 	<< __COUT_HDR__
 #define __GEN_COUTV__(X) 		__GEN_COUT__ << QUOTE(X) << " = " << X << __E__
 
 #define __GEN_MCOUT_ERR__(X)   	{ __GEN_MOUT_ERR__ 	<< X; __GEN_COUT_ERR__ 	<< X; }
@@ -157,18 +154,19 @@
 
 // for core supervisor objects (with supervisorClassNoNamespace_ defined), add class to
 // subject
-#define __SUP_COUT_TYPE__(X)    std::cout << QUOTE(X) << ":" << supervisorClassNoNamespace_ << ":" << CorePropertySupervisorBase::getSupervisorUID() << ":"
-#define __SUP_MF_TYPE__(X)      mf::X(supervisorClassNoNamespace_ + "-" + CorePropertySupervisorBase::getSupervisorUID())
+#define __SUP_COUT_TYPE__(X)    __MF_TYPE__(X) << ":" << supervisorClassNoNamespace_ << "-" << CorePropertySupervisorBase::getSupervisorUID() << ":"//std::cout << QUOTE(X) << ":" << supervisorClassNoNamespace_ << ":" << CorePropertySupervisorBase::getSupervisorUID() << ":"
+#define __SUP_MF_TYPE__(X)      TLOG(X, supervisorClassNoNamespace_ + "-" + CorePropertySupervisorBase::getSupervisorUID()) //mf::X(supervisorClassNoNamespace_ + "-" + CorePropertySupervisorBase::getSupervisorUID())
 
-#define __SUP_MOUT_ERR__ 		__SUP_MF_TYPE__(LogError) 		<< __COUT_HDR__
-#define __SUP_MOUT_WARN__ 		__SUP_MF_TYPE__(LogWarning) 	<< __COUT_HDR__
-#define __SUP_MOUT_INFO__ 		__SUP_MF_TYPE__(LogInfo) 		<< __COUT_HDR__
-#define __SUP_MOUT__ 			__SUP_MF_TYPE__(LogDebug) 		<< __COUT_HDR__
+#define __SUP_MOUT_ERR__ 		__SUP_MF_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
+#define __SUP_MOUT_WARN__ 		__SUP_MF_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
+#define __SUP_MOUT_INFO__ 		__SUP_MF_TYPE__(TLVL_INFO) 		<< __COUT_HDR__
+#define __SUP_MOUT__ 			__SUP_MF_TYPE__(TLVL_DEBUG) 		<< __COUT_HDR__
 #define __SUP_MOUTV__(X) 		__SUP_MOUT__ << QUOTE(X) << " = " << X
-#define __SUP_COUT_ERR__ 		__SUP_COUT_TYPE__(LogError) 	<< __COUT_HDR__
-#define __SUP_COUT_WARN__ 		__SUP_COUT_TYPE__(LogWarning) 	<< __COUT_HDR__
-#define __SUP_COUT_INFO__ 		__SUP_COUT_TYPE__(LogInfo) 		<< __COUT_HDR__
-#define __SUP_COUT__ 			__SUP_COUT_TYPE__(LogDebug) 	<< __COUT_HDR__
+
+#define __SUP_COUT_ERR__ 		__SUP_COUT_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
+#define __SUP_COUT_WARN__ 		__SUP_COUT_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
+#define __SUP_COUT_INFO__ 		__SUP_COUT_TYPE__(TLVL_INFO) 		<< __COUT_HDR__
+#define __SUP_COUT__ 			__SUP_COUT_TYPE__(TLVL_DEBUG) 	<< __COUT_HDR__
 #define __SUP_COUTV__(X) 		__SUP_COUT__ << QUOTE(X) << " = " << X << __E__
 
 #define __SUP_MCOUT_ERR__(X)   	{ __SUP_MOUT_ERR__ << X; __SUP_COUT_ERR__ << X; }
