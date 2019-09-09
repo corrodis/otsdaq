@@ -33,11 +33,8 @@ class SupervisorDescriptorInfoBase
 	virtual void destroy();
 
 	const SupervisorDescriptors& getAllDescriptors(void) const;
-	
 
   protected:
-	
-
 	SupervisorDescriptors allSupervisors_;
 };
 }  // namespace ots

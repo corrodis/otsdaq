@@ -6,7 +6,6 @@
 #include <messagefacility/MessageLogger/MessageLogger.h>
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 
-
 namespace ots
 {
 static bool MESSAGE_FACILITY_INITIALIZED;
@@ -49,15 +48,14 @@ inline void INIT_MF(const char* name)
 
 	__COUT__ << "Configuring message facility with " << logFhiclCode << __E__;
 	{
-		FILE *fp = fopen(logFhiclCode,"r");
+		FILE* fp = fopen(logFhiclCode, "r");
 		if(fp)
 		{
-			
 			char line[100];
-			while(fgets(line,100,fp))
+			while(fgets(line, 100, fp))
 				std::cout << line;
 			std::cout << __E__;
-		
+
 			fclose(fp);
 		}
 	}

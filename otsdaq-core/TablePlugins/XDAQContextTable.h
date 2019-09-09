@@ -112,7 +112,7 @@ class XDAQContextTable : public TableBase
 	} colContext_;
 
 	// XDAQ App Column names
-	struct ColApplication
+	static struct ColApplication
 	{
 		std::string const colApplicationGroupID_    = "ApplicationGroupID";
 		std::string const colApplicationUID_        = "ApplicationUID";

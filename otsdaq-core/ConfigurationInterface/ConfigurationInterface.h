@@ -38,7 +38,7 @@ class ConfigurationInterface
 	//
 	//	if accumulatedErrors, then invalid data is allowed
 	//		(not the same as "warnings allowed", because could create invalid tree
-	//situations)
+	// situations)
 	void get(TableBase*&                          table,
 	         const std::string                    tableName,
 	         std::shared_ptr<const TableGroupKey> groupKey            = 0,

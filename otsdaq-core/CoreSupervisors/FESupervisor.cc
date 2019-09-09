@@ -2,12 +2,12 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/FECore/FEVInterfacesManager.h"
 
-#include "artdaq/DAQdata/Globals.hh" // instantiates artdaq::Globals::metricMan_
+#include "artdaq/DAQdata/Globals.hh"  // instantiates artdaq::Globals::metricMan_
 
-//https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/DAQdata/Globals.hh
-	// for metric manager include
-//https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/Application/DataReceiverCore.cc
-	// for metric manager configuration example
+// https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/DAQdata/Globals.hh
+// for metric manager include
+// https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/Application/DataReceiverCore.cc
+// for metric manager configuration example
 
 // get pset from Board Reader metric manager table
 //  try
@@ -17,7 +17,8 @@
 //        catch (...)
 //        {
 //                ExceptionHandler(ExceptionHandlerRethrow::no,
-//                                                 "Error loading metrics in DataReceiverCore::initialize()");
+//                                                 "Error loading metrics in
+//                                                 DataReceiverCore::initialize()");
 //        }
 //..
 //
@@ -134,7 +135,7 @@ FESupervisor::~FESupervisor(void)
 	// theStateMachineImplementation_ is reset and the object it points to deleted in
 	// ~CoreSupervisorBase()
 
-	artdaq::Globals::CleanUpGlobals(); // destruct metricManager (among other things)
+	artdaq::Globals::CleanUpGlobals();  // destruct metricManager (among other things)
 
 	__SUP_COUT__ << "Destructed." << __E__;
 }  // end destructor

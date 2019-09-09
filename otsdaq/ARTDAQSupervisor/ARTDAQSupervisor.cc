@@ -564,7 +564,6 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	pb.step();
 
-	
 	__SUP_COUT__ << "Calling setdaqcomps" << __E__;
 	__SUP_COUT__ << "Status before setdaqcomps: " << getDAQState_() << __E__;
 	PyObject* pName1 = PyString_FromString("setdaqcomps");

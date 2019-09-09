@@ -39,7 +39,7 @@ class ConfigurationManager;
 class TableGroupKey;
 class WorkLoopManager;
 
-	// clang-format off
+// clang-format off
 
 // GatewaySupervisor
 //	This class is the gateway server for all otsdaq requests in "Normal Mode." It
@@ -72,7 +72,7 @@ class GatewaySupervisor : public xdaq::Application,
 	void 						stateMachineXgiHandler			(xgi::Input* in, xgi::Output* out);
 	void 						stateMachineIterationBreakpoint	(xgi::Input* in, xgi::Output* out);
 
-	static void 				handleAddDesktopIconRequest		(cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
+	static void 				handleAddDesktopIconRequest		(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
 
 	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference msg);
 	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference msg);
@@ -312,7 +312,7 @@ class GatewaySupervisor : public xdaq::Application,
 	std::vector<int>   vectorTest_;
 	std::string        securityType_;
 };
-	// clang-format on
+// clang-format on
 
 }  // namespace ots
 

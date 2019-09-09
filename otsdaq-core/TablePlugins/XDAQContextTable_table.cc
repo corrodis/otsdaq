@@ -15,10 +15,6 @@ using namespace ots;
 	std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
 	    "xdaqAppStateMachinePriority"
 
-//#define XDAQ_SCRIPT				std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) +
-//"/"+ "StartXDAQ_gen.sh" #define ARTDAQ_MPI_SCRIPT
-// std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/"+ "StartMPI_gen.sh"
-
 const std::string XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS =
     "ots::Supervisor";  // still allowed for now, in StartOTS
 const std::string XDAQContextTable::GATEWAY_SUPERVISOR_CLASS = "ots::GatewaySupervisor";
@@ -45,6 +41,8 @@ const std::set<std::string> XDAQContextTable::ConfigurationGUITypeClassNames_ = 
 const std::string XDAQContextTable::ARTDAQ_OFFSET_PORT = "OffsetPort";
 
 const uint8_t XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY = 100;
+
+XDAQContextTable::ColApplication XDAQContextTable::colApplication_ = XDAQContextTable::ColApplication(); //initialize static member
 
 //========================================================================================================================
 XDAQContextTable::XDAQContextTable(void) : TableBase("XDAQContextTable")

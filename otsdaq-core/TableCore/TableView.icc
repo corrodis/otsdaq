@@ -5,8 +5,8 @@ unsigned int TableView::findRow(unsigned int col,
                                 const T&     value,
                                 unsigned int offsetRow /*=0*/) const
 {
-	std::istringstream s(value);
-	return findRow(col, s.str(), offsetRow);
+	std::stringstream ss; ss << value;
+	return findRow(col, ss.str(), offsetRow);
 }  // end findRow<T>()
 
 //==============================================================================
@@ -17,8 +17,8 @@ unsigned int TableView::findRowInGroup(unsigned int       col,
                                        const std::string& childLinkIndex,
                                        unsigned int       offsetRow /*=0*/) const
 {
-	std::istringstream s(value);
-	return findRowInGroup(col, s.str(), groupId, childLinkIndex, offsetRow);
+	std::stringstream ss(value); ss << value;
+	return findRowInGroup(col, ss.str(), groupId, childLinkIndex, offsetRow);
 }  // end findRowInGroup<T>()
 
 //==============================================================================
@@ -34,8 +34,7 @@ void TableView::getValue(T&           value,
 {
 	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 	{
-		__SS__ << "Invalid row col requested" << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		__SS__ << "Invalid row col requested" << __E__;
 		__SS_THROW__;
 	}
 

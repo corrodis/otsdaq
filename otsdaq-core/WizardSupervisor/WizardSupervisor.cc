@@ -564,7 +564,8 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 
 		if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{
-			// NOTE: similar to ConfigurationGUI version but DOES keep active login sessions
+			// NOTE: similar to ConfigurationGUI version but DOES keep active login
+			// sessions
 
 			__COUT_WARN__ << requestType << " requestType received! " << __E__;
 			__MOUT_WARN__ << requestType << " requestType received! " << __E__;
@@ -578,7 +579,7 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 		}
 		else if(requestType == "addDesktopIcon")
 		{
-			GatewaySupervisor::handleAddDesktopIconRequest(cgiIn,xmlOut);
+			GatewaySupervisor::handleAddDesktopIconRequest("admin", cgiIn, xmlOut);
 		}
 		else
 		{
@@ -601,6 +602,20 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 		       << "Please check the printouts to debug." << __E__;
 		__COUT__ << "\n" << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
+	}
+
+	// report any errors encountered
+	{
+		unsigned int occurance = 0;
+		std::string  err       = xmlOut.getMatchingValue("Error", occurance++);
+		while(err != "")
+		{
+			__COUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err
+					<< __E__;
+			__MOUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err
+					<< __E__;
+			err = xmlOut.getMatchingValue("Error", occurance++);
+		}
 	}
 
 	// return xml doc holding server response

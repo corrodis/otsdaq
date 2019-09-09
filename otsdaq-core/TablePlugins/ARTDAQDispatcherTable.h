@@ -17,13 +17,13 @@ class ARTDAQDispatcherTable : public ARTDAQTableBase
 	virtual ~ARTDAQDispatcherTable(void);
 
 	// Methods
-	void        init(ConfigurationManager* configManager);
-	void        outputFHICL(ConfigurationManager*    configManager,
-	                        const ConfigurationTree& builderNode,
-	                        unsigned int             selfRank,
-	                        std::string              selfHost,
-	                        unsigned int             selfPort,
-	                        const XDAQContextTable*  contextConfig);
+	void init(ConfigurationManager* configManager);
+	void outputFHICL(ConfigurationManager*    configManager,
+	                 const ConfigurationTree& builderNode,
+	                 unsigned int             selfRank,
+	                 std::string              selfHost,
+	                 unsigned int             selfPort,
+	                 const XDAQContextTable*  contextConfig);
 };
 }  // namespace ots
 #endif

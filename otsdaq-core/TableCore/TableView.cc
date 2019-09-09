@@ -7,11 +7,10 @@
 
 using namespace ots;
 
-#undef __MF_SUBJECT__
-#define __MF_SUBJECT__ "TableView-" + tableName_
-#undef __COUT_HDR__
-#define __COUT_HDR__ "v" << version_ << ":" << __COUT_HDR_FL__
-
+//#undef 	__MF_SUBJECT__
+//#define	__MF_SUBJECT__ "TableView-" + tableName_ + "v" + version_.toString()
+#undef 	__COUT_HDR__
+#define __COUT_HDR__ (std::string(":") + tableName_ + "v" + version_.toString() + ":\t")
 const unsigned int TableView::INVALID = -1;
 
 //==============================================================================
@@ -2415,6 +2414,7 @@ int TableView::fillFromJSON(const std::string& json)
 
 	//__COUT__ << "Done!" << __E__;
 	__COUTV__(fillWithLooseColumnMatching_);
+	__COUTV__(tableName_); //  << "tableName_ = " << tableName_
 	if(!fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
 	{
 		__SS__ << "Can not ignore errors because not every column was found in the "
@@ -2760,7 +2760,7 @@ void TableView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //	if baseNameAutoUID != "", creates a UID based on this base name
 //		and increments and appends an integer relative to the previous last row
 unsigned int TableView::addRow(const std::string& author,
-                               bool               incrementUniqueData,
+                               unsigned char               incrementUniqueData,
                                std::string        baseNameAutoUID,
                                unsigned int       rowToAdd)
 {
