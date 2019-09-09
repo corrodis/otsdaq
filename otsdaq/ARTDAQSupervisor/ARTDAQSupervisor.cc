@@ -277,6 +277,9 @@ void ARTDAQSupervisor::destroy(void)
 		PyObject* pName = PyString_FromString("recover");
 		PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
 
+		while(getDAQState_() != "stopped")
+			usleep(10000);
+
 		Py_XDECREF(daqinterface_ptr_);
 	}
 
@@ -754,7 +757,7 @@ void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference e)
 
 std::string ots::ARTDAQSupervisor::getDAQState_()
 {
-	__SUP_COUT__ << "Getting DAQInterface state" << __E__;
+	//__SUP_COUT__ << "Getting DAQInterface state" << __E__;
 
 	PyObject* pName = PyString_FromString("state");
 	PyObject* pArg  = PyString_FromString("DAQInterface");
@@ -767,6 +770,6 @@ std::string ots::ARTDAQSupervisor::getDAQState_()
 		return "ERROR";
 	}
 	std::string result = std::string(PyString_AsString(res));
-	__SUP_COUT__ << "getDAQState_ DONE: state=" << result << __E__;
+	//__SUP_COUT__ << "getDAQState_ DONE: state=" << result << __E__;
 	return result;
 }
