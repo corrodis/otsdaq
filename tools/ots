@@ -119,8 +119,8 @@ function setupTrace()
 	
 	${TRACE_BIN}/trace_cntl lvlset 0 0x1f 0	
 	
-	export TRACE_LIMIT_MS="0,50,50"
-	tinfo
+	export TRACE_LIMIT_MS="0,50,50" #unlimited trace messages
+	#tinfo #show trace info
 }
 
 export TRACE_FILE=/tmp/trace_buffer_${USER}

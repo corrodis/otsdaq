@@ -151,15 +151,14 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 
 				fs << "console: {\n";
 				fs << "\t"
-				   << "type: \"OTS\"\n";  //\"cout\"\n";
+				   << "type: \"OTS\"\n";
 				fs << "\t"
 				   << "threshold: \"DEBUG\"\n";
 				fs << "\t"
-				   << "format: {\n";
-				fs << "\t\t"
-				   << "timestamp: none\n";
-				fs << "\t\t"
-				   << "noLineBreaks: true\n";
+				   << "filename_delimit: \"/srcs/\"\n";
+				fs << "\t"
+				   << "format_string: \"|%L:%N:%f [%u]\t%m\n";
+
 				fs << "\t}\n}\n";
 
 				// output quiet forwarder config file

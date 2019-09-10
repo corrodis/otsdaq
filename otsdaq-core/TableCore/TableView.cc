@@ -7,10 +7,12 @@
 
 using namespace ots;
 
-//#undef 	__MF_SUBJECT__
-//#define	__MF_SUBJECT__ "TableView-" + tableName_ + "v" + version_.toString()
+#undef 	__MF_SUBJECT__
+#define	__MF_SUBJECT__ "TableView"
 #undef 	__COUT_HDR__
 #define __COUT_HDR__ (std::string(":") + tableName_ + "v" + version_.toString() + ":\t")
+
+
 const unsigned int TableView::INVALID = -1;
 
 //==============================================================================
