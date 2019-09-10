@@ -212,7 +212,8 @@ fi
 
 
 if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tSetting up TRACE defaults..."
+	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tSetting up TRACE defaults..."
+	
 	#=============================
 	#Trace setup and helpful commented lines:
 	export TRACE_MSGMAX=0 #Activating TRACE
@@ -249,11 +250,12 @@ OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${HOSTNAME
 OTSDAQ_STARTOTS_QUIT_FILE="${USER_DATA}/ServiceData/StartOTS_action_quit.cmd" #the global quit gives exit commonds to the non-gateway StartOTS scripts
 OTSDAQ_STARTOTS_LOCAL_QUIT_FILE=".StartOTS_action_quit.cmd" #the local quit is used to remove other StartOTS calls from the same directory (it catches the case when switching USER_DATA paths)
 
-echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots script path     = ${SCRIPT_DIR}/ots         "
-echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots action path     = ${OTSDAQ_STARTOTS_ACTION_FILE}    "
-echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots quit path       = ${OTSDAQ_STARTOTS_QUIT_FILE}      "
-echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots local quit path = ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE}"
-echo 
+#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots script path     = ${SCRIPT_DIR}/ots         "
+#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots action path     = ${OTSDAQ_STARTOTS_ACTION_FILE}    "
+#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots quit path       = ${OTSDAQ_STARTOTS_QUIT_FILE}      "
+#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots local quit path = ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE}"
+echo
+ 
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
 SAP_PATH=""
 for SAP_EL in ${SAP_ARR[@]}

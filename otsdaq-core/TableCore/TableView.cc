@@ -132,6 +132,7 @@ unsigned int TableView::copyRows(const std::string& author,
 // 	Note: this function also sanitizes yes/no, on/off, and true/false types
 void TableView::init(void)
 {
+	__COUT__ << "Starting table verification..." << __E__;
 	try
 	{
 		// verify column names are unique
@@ -951,16 +952,23 @@ const unsigned int TableView::getColUID(void) const
 //	if column not found throw error
 const unsigned int TableView::getOrInitColStatus(void)
 {
+	__COUT__ << "getOrInitColStatus " << colStatus_ <<  __E__;
+
 	if(colStatus_ != INVALID)
 		return colStatus_;
+
+	__COUT__ << "getOrInitColStatus " << colStatus_ <<  __E__;
 
 	// if doesn't exist throw error! each view must have a UID column
 	colStatus_ = findCol(TableViewColumnInfo::COL_NAME_STATUS);
 	if(colStatus_ == INVALID)
 	{
+		__COUT__ << "getOrInitColStatus " << colStatus_ <<  __E__;
 		colStatus_ = findCol(TableViewColumnInfo::COL_NAME_ENABLED);
 		if(colStatus_ == INVALID)
 		{
+			__COUT__ << "getOrInitColStatus " << colStatus_ <<  __E__;
+			std::cout << "?????" << __E__;
 			__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS
 					<< "' or '" << TableViewColumnInfo::COL_NAME_ENABLED
 					<< "' in table '" << tableName_ << ".'" << __E__;
@@ -972,6 +980,8 @@ const unsigned int TableView::getOrInitColStatus(void)
 			__SS_THROW__;
 		}
 	}
+	std::cout << "!!!! " <<  colStatus_ << __E__;
+	__COUTV__(colStatus_);
 	return colStatus_;
 }
 
@@ -1022,6 +1032,8 @@ const unsigned int TableView::getColStatus(void) const
 		<< columnsInfo_[col].getName() << __E__;
 
 	ss << __E__;
+
+	ss << StringMacros::stackTrace() << __E__;
 
 	__SS_THROW__;
 } //end getColStatus()
