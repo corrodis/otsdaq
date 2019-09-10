@@ -3,8 +3,8 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
+#include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
 
 // usage:
 // otsdaq_import_system_aliases <pathOfDatabaseToImport> <(optional) prependLabel>
@@ -90,7 +90,7 @@ void ImportSystemAliasTableGroups(int argc, char* argv[])
 	//	Note: normally these environment variables are set by StartOTS.sh
 
 	// These are needed by
-	// otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [207]
+	// otsdaq/otsdaq/ConfigurationDataFormats/ConfigurationInfoReader.cc [207]
 	setenv("CONFIGURATION_TYPE", "File", 1);  // Can be File, Database, DatabaseTest
 	setenv("CONFIGURATION_DATA_PATH",
 	       (std::string(__ENV__("USER_DATA")) + "/ConfigurationDataExamples").c_str(),

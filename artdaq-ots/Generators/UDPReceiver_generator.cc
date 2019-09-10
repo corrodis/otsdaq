@@ -6,7 +6,7 @@
 #include "artdaq/Generators/GeneratorMacros.hh"
 #include "canvas/Utilities/Exception.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq/Macros/CoutMacros.h"
 
 #include <sys/poll.h>
 #include <fstream>

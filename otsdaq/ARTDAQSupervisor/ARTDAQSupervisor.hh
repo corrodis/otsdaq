@@ -11,7 +11,7 @@
 #endif
 
 #include "artdaq/ExternalComms/CommanderInterface.hh"
-#include "otsdaq-core/CoreSupervisors/CoreSupervisorBase.h"
+#include "otsdaq/CoreSupervisors/CoreSupervisorBase.h"
 
 namespace ots
 {

@@ -100,7 +100,6 @@ include(CetTest)
 
 # source
 add_subdirectory(artdaq-ots)
-add_subdirectory(otsdaq-core)
 add_subdirectory(otsdaq)
 
 # tools
