@@ -8,7 +8,7 @@
 
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h"
-#include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
+//#include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 #include "otsdaq-core/TablePlugins/DesktopIconTable.h"
 #include "otsdaq-core/TablePlugins/XDAQContextTable.h"
 #include "otsdaq-core/WorkLoopManager/WorkLoopManager.h"
@@ -53,7 +53,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
     , CorePropertySupervisorBase(this)
     //, CorePropertySupervisorBase::theConfigurationManager_(new ConfigurationManager)
     //,theConfigurationTableGroupKey_    (nullptr)
-    , theArtdaqCommandable_(this)
+    //, theArtdaqCommandable_(this)
     , stateMachineWorkLoopManager_(toolbox::task::bind(
           this, &GatewaySupervisor::stateMachineThread, "StateMachine"))
     , stateMachineSemaphore_(toolbox::BSem::FULL)
@@ -227,30 +227,30 @@ void GatewaySupervisor::init(void)
 			__COUT__ << "App Status checking is disabled." << __E__;
 	}  // end checking of Application Status
 
-	try
-	{
-		auto artdaqStateChangeEnabled =
-		    CorePropertySupervisorBase::getSupervisorTableNode()
-		        .getNode("EnableARTDAQCommanderPlugin")
-		        .getValue<bool>();
-		if(artdaqStateChangeEnabled)
-		{
-			auto artdaqStateChangePort =
-			    CorePropertySupervisorBase::getSupervisorTableNode()
-			        .getNode("ARTDAQCommanderID")
-			        .getValue<int>();
-			auto artdaqStateChangePluginType =
-			    CorePropertySupervisorBase::getSupervisorTableNode()
-			        .getNode("ARTDAQCommanderType")
-			        .getValue<std::string>();
-			theArtdaqCommandable_.init(artdaqStateChangePort,
-			                           artdaqStateChangePluginType);
-		}
-	}
-	catch(...)
-	{
-		;
-	}  // ignore errors
+//	try
+//	{
+//		auto artdaqStateChangeEnabled =
+//		    CorePropertySupervisorBase::getSupervisorTableNode()
+//		        .getNode("EnableARTDAQCommanderPlugin")
+//		        .getValue<bool>();
+//		if(artdaqStateChangeEnabled)
+//		{
+//			auto artdaqStateChangePort =
+//			    CorePropertySupervisorBase::getSupervisorTableNode()
+//			        .getNode("ARTDAQCommanderID")
+//			        .getValue<int>();
+//			auto artdaqStateChangePluginType =
+//			    CorePropertySupervisorBase::getSupervisorTableNode()
+//			        .getNode("ARTDAQCommanderType")
+//			        .getValue<std::string>();
+//			theArtdaqCommandable_.init(artdaqStateChangePort,
+//			                           artdaqStateChangePluginType);
+//		}
+//	}
+//	catch(...)
+//	{
+//		;
+//	}  // ignore errors
 }  // end init()
 
 //========================================================================================================================
@@ -4130,6 +4130,7 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author,
 	                               cfgMgr);  // Table ready for editing!
 
 	// Create record in DesktopIconTable
+	try
 	{
 		unsigned int row;
 		std::string  iconUID;
@@ -4295,14 +4296,199 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author,
 
 
 			parameterTable.tableView_->print();
+			parameterTable.tableView_->init(); // verify new table (throws runtime_errors)
 
 		} //end create parameters link
 
 
 		iconTable.tableView_->print();
+		iconTable.tableView_->init(); // verify new table (throws runtime_errors)
 	}
+	catch(...)
+	{
+		__COUT__ << "Icon table errors while saving. Erasing all newly "
+				"created table versions."
+				<< __E__;
+		if(iconTable.createdTemporaryVersion_)  // if temporary version created here
+		{
+			__COUT__ << "Erasing temporary version " << iconTable.tableName_ << "-v"
+					<< iconTable.temporaryVersion_ << __E__;
+			// erase with proper version management
+			cfgMgr->eraseTemporaryVersion(iconTable.tableName_,
+					iconTable.temporaryVersion_);
+		}
+
+		if(parameterTable.createdTemporaryVersion_)  // if temporary version created here
+		{
+			__COUT__ << "Erasing temporary version " << parameterTable.tableName_ << "-v"
+					<< parameterTable.temporaryVersion_ << __E__;
+			// erase with proper version management
+			cfgMgr->eraseTemporaryVersion(parameterTable.tableName_,
+					parameterTable.temporaryVersion_);
+		}
+
+		if(appTable.createdTemporaryVersion_)  // if temporary version created here
+		{
+			__COUT__ << "Erasing temporary version " << appTable.tableName_ << "-v"
+					<< appTable.temporaryVersion_ << __E__;
+			// erase with proper version management
+			cfgMgr->eraseTemporaryVersion(appTable.tableName_,
+					appTable.temporaryVersion_);
+		}
+
+		throw; // re-throw
+	} //end catch
+
+	// all edits are complete and tables verified
+	//	need to save all edits properly
+	//	if not modified, discard
 
 	// getContextMemberNames
 	// saveNewTableGroup
 
+
+
 }  // end handleAddDesktopIconRequest()
+
+
+//========================================================================================================================
+// saveModifiedVersionXML
+//
+// once source version has been modified in temporary version
+//	this function finishes it off.
+TableVersion GatewaySupervisor::saveModifiedVersionXML(
+    HttpXmlDocument&        xmlOut,
+    ConfigurationManagerRW* cfgMgr,
+    const std::string&      tableName,
+    TableVersion            originalVersion,
+    bool                    makeTemporary,
+    TableBase*              table,
+    TableVersion            temporaryModifiedVersion,
+    bool                    ignoreDuplicates,
+    bool                    lookForEquivalent)
+{
+	bool needToEraseTemporarySource =
+	    (originalVersion.isTemporaryVersion() && !makeTemporary);
+
+	// check for duplicate tables already in cache
+	if(!ignoreDuplicates)
+	{
+		__COUT__ << "Checking for duplicate tables..." << __E__;
+
+		TableVersion duplicateVersion;
+
+		{
+			//"DEEP" checking
+			//	load into cache 'recent' versions for this table
+			//		'recent' := those already in cache, plus highest version numbers not
+			// in  cache
+			const std::map<std::string, TableInfo>& allTableInfo =
+			    cfgMgr->getAllTableInfo();  // do not refresh
+
+			auto versionReverseIterator =
+			    allTableInfo.at(tableName).versions_.rbegin();  // get reverse iterator
+			__COUT__ << "Filling up cached from " << table->getNumberOfStoredViews()
+			             << " to max count of " << table->MAX_VIEWS_IN_CACHE << __E__;
+			for(; table->getNumberOfStoredViews() < table->MAX_VIEWS_IN_CACHE &&
+			      versionReverseIterator != allTableInfo.at(tableName).versions_.rend();
+			    ++versionReverseIterator)
+			{
+				__COUT__ << "Versions in reverse order " << *versionReverseIterator
+				             << __E__;
+				try
+				{
+					cfgMgr->getVersionedTableByName(
+					    tableName, *versionReverseIterator);  // load to cache
+				}
+				catch(const std::runtime_error& e)
+				{
+					__COUT__
+					    << "Error loadiing historical version, but ignoring: " << e.what()
+					    << __E__;
+				}
+			}
+		}
+
+		__COUT__ << "Checking duplicate..." << __E__;
+
+		duplicateVersion = table->checkForDuplicate(
+		    temporaryModifiedVersion,
+		    (!originalVersion.isTemporaryVersion() && !makeTemporary)
+		        ? TableVersion()
+		        :  // if from persistent to persistent, then include original version in
+		           // search
+		        originalVersion);
+
+		if(lookForEquivalent && !duplicateVersion.isInvalid())
+		{
+			// found an equivalent!
+			__COUT__ << "Equivalent table found in version v" << duplicateVersion
+			             << __E__;
+
+			// if duplicate version was temporary, do not use
+			if(duplicateVersion.isTemporaryVersion() && !makeTemporary)
+			{
+				__COUT__ << "Need persistent. Duplicate version was temporary. "
+				                "Abandoning duplicate."
+				             << __E__;
+				duplicateVersion = TableVersion();  // set invalid
+			}
+			else
+			{
+				// erase and return equivalent version
+
+				// erase modified equivalent version
+				cfgMgr->eraseTemporaryVersion(tableName, temporaryModifiedVersion);
+
+				// erase original if needed
+				if(needToEraseTemporarySource)
+					cfgMgr->eraseTemporaryVersion(tableName, originalVersion);
+
+				xmlOut.addTextElementToData("savedName", tableName);
+				xmlOut.addTextElementToData("savedVersion", duplicateVersion.toString());
+				xmlOut.addTextElementToData("foundEquivalentVersion", "1");
+
+				__COUT__ << "\t\t equivalent AssignedVersion: " << duplicateVersion
+				             << __E__;
+
+				return duplicateVersion;
+			}
+		}
+
+		if(!duplicateVersion.isInvalid())
+		{
+			__SS__ << "This version of table '" << tableName
+			           << "' is identical to another version currently cached v"
+			           << duplicateVersion << ". No reason to save a duplicate." << __E__;
+			__COUT_ERR__ << "\n" << ss.str();
+
+			// delete temporaryModifiedVersion
+			table->eraseView(temporaryModifiedVersion);
+			__SS_THROW__;
+		}
+
+		__COUT__ << "Check for duplicate tables complete." << __E__;
+	}
+
+	if(makeTemporary)
+		__COUT__ << "\t\t**************************** Save as temporary table version"
+		             << __E__;
+	else
+		__COUT__ << "\t\t**************************** Save as new table version"
+		             << __E__;
+
+	TableVersion newAssignedVersion =
+	    cfgMgr->saveNewTable(tableName, temporaryModifiedVersion, makeTemporary);
+
+	if(needToEraseTemporarySource)
+		cfgMgr->eraseTemporaryVersion(tableName, originalVersion);
+
+	xmlOut.addTextElementToData("savedName", tableName);
+	xmlOut.addTextElementToData("savedVersion", newAssignedVersion.toString());
+
+	__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << __E__;
+	return newAssignedVersion;
+} //end saveModifiedVersionXML()
+
+
+

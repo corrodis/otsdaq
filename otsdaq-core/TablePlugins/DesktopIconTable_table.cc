@@ -174,6 +174,9 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 			bool notFirst      = false;
 			for(const auto param : paramGroupMap)
 			{
+				if(!param.second.isEnabled())
+					continue;
+
 				if(notFirst)
 					icon->windowContentURL_ += '&';
 				else

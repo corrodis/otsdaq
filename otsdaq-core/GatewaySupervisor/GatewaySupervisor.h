@@ -3,7 +3,7 @@
 
 #include "otsdaq-core/CoreSupervisors/CorePropertySupervisorBase.h"
 #include "otsdaq-core/FiniteStateMachine/RunControlStateMachine.h"
-#include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
+//#include "otsdaq-core/GatewaySupervisor/ARTDAQCommandable.h"
 #include "otsdaq-core/GatewaySupervisor/Iterator.h"
 #include "otsdaq-core/SOAPUtilities/SOAPMessenger.h"
 #include "otsdaq-core/SupervisorInfo/AllSupervisorInfo.h"
@@ -52,7 +52,7 @@ class GatewaySupervisor : public xdaq::Application,
 {
 	friend class WizardSupervisor;
 	friend class Iterator;
-	friend class ARTDAQCommandable;
+	//friend class ARTDAQCommandable;
 
   public:
 	XDAQ_INSTANTIATOR();
@@ -73,7 +73,15 @@ class GatewaySupervisor : public xdaq::Application,
 	void 						stateMachineIterationBreakpoint	(xgi::Input* in, xgi::Output* out);
 
 	static void 				handleAddDesktopIconRequest		(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
-
+	static TableVersion 		saveModifiedVersionXML(HttpXmlDocument&        xmldoc,
+	                                    ConfigurationManagerRW* cfgMgr,
+	                                    const std::string&      tableName,
+	                                    TableVersion            originalVersion,
+	                                    bool                    makeTemporary,
+	                                    TableBase*              config,
+	                                    TableVersion            temporaryModifiedVersion,
+	                                    bool                    ignoreDuplicates = false,
+	                                    bool lookForEquivalent                   = false);
 	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference msg);
 	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference msg);
 
@@ -269,7 +277,7 @@ class GatewaySupervisor : public xdaq::Application,
 
 	WebUsers          theWebUsers_;
 	SystemMessenger   theSystemMessenger_;
-	ARTDAQCommandable theArtdaqCommandable_;
+	//ARTDAQCommandable theArtdaqCommandable_;
 
 	WorkLoopManager stateMachineWorkLoopManager_;
 	toolbox::BSem   stateMachineSemaphore_;

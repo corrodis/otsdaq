@@ -121,7 +121,7 @@ unsigned int TableView::copyRows(const std::string& author,
 	}
 
 	return retRow;
-}
+} //end copyRows()
 
 //==============================================================================
 // init
@@ -958,14 +958,19 @@ const unsigned int TableView::getOrInitColStatus(void)
 	colStatus_ = findCol(TableViewColumnInfo::COL_NAME_STATUS);
 	if(colStatus_ == INVALID)
 	{
-		__SS__ << "\tMissing " << TableViewColumnInfo::COL_NAME_STATUS
-		       << " Column in table named '" << tableName_ << "'" << __E__;
-		ss << "Column Types: " << __E__;
-		for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-			ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-			   << __E__;
+		colStatus_ = findCol(TableViewColumnInfo::COL_NAME_ENABLED);
+		if(colStatus_ == INVALID)
+		{
+			__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS
+					<< "' or '" << TableViewColumnInfo::COL_NAME_ENABLED
+					<< "' in table '" << tableName_ << ".'" << __E__;
+			ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
+			for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
+				ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
+				<< __E__;
 
-		__SS_THROW__;
+			__SS_THROW__;
+		}
 	}
 	return colStatus_;
 }
@@ -983,9 +988,9 @@ const unsigned int TableView::getOrInitColPriority(void)
 	    findCol("*" + TableViewColumnInfo::COL_NAME_PRIORITY);  // wild card search
 	if(colPriority_ == INVALID)
 	{
-		__SS__ << "\tMissing " << TableViewColumnInfo::COL_NAME_PRIORITY
-		       << " Column in table named '" << tableName_ << "'" << __E__;
-		ss << "Column Types: " << __E__;
+		__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_PRIORITY
+		       << "' in table '" << tableName_ << ".'" << __E__;
+		ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 		for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
 			ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
 			   << __E__;
@@ -1004,19 +1009,22 @@ const unsigned int TableView::getColStatus(void) const
 	if(colStatus_ != INVALID)
 		return colStatus_;
 
-	__COUT__ << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
+
+
+	__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS
+			<< "' or '" << TableViewColumnInfo::COL_NAME_ENABLED
+			<< "' in table '" << tableName_ << ".'"
+	       << " (The Status column is identified when the TableView is initialized)" << __E__;
+
+	ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << "\t" << columnsInfo_[col].getType() << "() "
-		          << columnsInfo_[col].getName() << __E__;
+		ss << "\t" << columnsInfo_[col].getType() << "() "
+		<< columnsInfo_[col].getName() << __E__;
 
-	std::cout << __E__;
+	ss << __E__;
 
-	__SS__ << "Missing " << TableViewColumnInfo::COL_NAME_STATUS
-	       << " Column in config named " << tableName_
-	       << ". (Possibly TableView was just not initialized?"
-	       << "This is the const call so can not alter class members)" << __E__;
 	__SS_THROW__;
-}
+} //end getColStatus()
 
 //==============================================================================
 // getColPriority
@@ -1031,16 +1039,20 @@ const unsigned int TableView::getColPriority(void) const
 		return colPriority_;
 
 	__SS__ << "Priority column was not found... \nColumn Types: " << __E__;
+
+
+	ss << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
+	   << " Column in table named '" << tableName_
+	   << ".' (The Priority column is identified when the TableView is initialized)"
+	   << __E__;        // this is the const call, so can not identify the column and set
+	                    // colPriority_ here
+
+	ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
 		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
 		   << __E__;
 	ss << __E__;
 
-	ss << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
-	   << " Column in config named " << tableName_
-	   << ". (The Priority column is identified when TableView is initialized)"
-	   << __E__;        // this is the const call, so can not identify the column and set
-	                    // colPriority_ here
 	__SS_ONLY_THROW__;  // keep it quiet
 }  // end getColPriority()
 

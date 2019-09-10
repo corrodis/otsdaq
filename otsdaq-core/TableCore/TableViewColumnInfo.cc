@@ -56,6 +56,7 @@ const std::string TableViewColumnInfo::DATATYPE_TIME_DEFAULT    = "0";
 const std::string TableViewColumnInfo::DATATYPE_LINK_DEFAULT    = "NO_LINK";
 
 const std::string TableViewColumnInfo::COL_NAME_STATUS   = "Status";
+const std::string TableViewColumnInfo::COL_NAME_ENABLED  = "Enabled";
 const std::string TableViewColumnInfo::COL_NAME_PRIORITY = "Priority";
 const std::string TableViewColumnInfo::COL_NAME_COMMENT  = "CommentDescription";
 

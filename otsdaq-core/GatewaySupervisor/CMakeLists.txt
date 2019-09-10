@@ -13,7 +13,7 @@ cet_make(LIBRARY_NAME GatewaySupervisor
          NetworkUtilities
          CodeEditor
          
-		 artdaq_ExternalComms
+		 #artdaq_ExternalComms
 		 otsdaq-core_TablePlugins_XDAQContextTable_table
 		 otsdaq-core_TablePlugins_IterateTable_table
 		 otsdaq-core_TablePlugins_DesktopIconTable_table
