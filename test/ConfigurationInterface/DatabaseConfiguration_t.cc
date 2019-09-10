@@ -11,15 +11,15 @@
 //#include <otsdaq_demo/otsdaq-demo/FEInterfaces/FEWROtsUDPFSSRInterface.h>
 //#include
 //<otsdaq_demo/otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceConfiguration.h>
-#include "otsdaq-core/ConfigurationInterface/ConfigurationInterface.h"
-#include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
-//#include "otsdaq-core/TablePlugins/Configurations.h"
-//#include "otsdaq-core/TablePlugins/ConfigurationAliases.h"
-//#include "otsdaq-core/TablePlugins/FETable.h"
+#include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
+//#include "otsdaq/TablePlugins/Configurations.h"
+//#include "otsdaq/TablePlugins/ConfigurationAliases.h"
+//#include "otsdaq/TablePlugins/FETable.h"
 #include "artdaq-database/JsonDocument/JSONDocument.h"
 #include "artdaq-database/StorageProviders/FileSystemDB/provider_filedb_index.h"
-#include "otsdaq-core/PluginMakers/MakeInterface.h"
-#include "otsdaq-core/PluginMakers/MakeInterfaceTable.h"
+#include "otsdaq/PluginMakers/MakeInterface.h"
+#include "otsdaq/PluginMakers/MakeInterfaceTable.h"
 
 using namespace ots;
 
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(readxml_writedb_configurations)
 	std::string configDir = std::string(__ENV__("CONFIGURATION_DATA_PATH")) + '/';
 
 	// CONFIGURATION_TYPE needed by
-	// otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]  Can
+	// otsdaq/otsdaq/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]  Can
 	// be File, Database, DatabaseTest
 	setenv("CONFIGURATION_TYPE", "File", 1);
 
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(readdb_writexml_configurations)
 	std::string configDir = std::string(__ENV__("CONFIGURATION_DATA_PATH")) + '/';
 
 	// CONFIGURATION_TYPE needed by
-	// otsdaq/otsdaq-core/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]  Can
+	// otsdaq/otsdaq/ConfigurationDataFormats/ConfigurationInfoReader.cc [187]  Can
 	// be File, Database, DatabaseTest
 	setenv("CONFIGURATION_TYPE", "File", 1);
 

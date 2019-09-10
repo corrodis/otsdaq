@@ -9,7 +9,7 @@
 #include <memory>
 #include <string>
 
-#include "otsdaq-core/ConfigurationInterface/DatabaseConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/DatabaseConfigurationInterface.h"
 
 #include "artdaq-database/JsonDocument/JSONDocument.h"
 

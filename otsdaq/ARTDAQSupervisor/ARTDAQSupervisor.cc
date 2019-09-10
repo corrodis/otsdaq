@@ -1,10 +1,10 @@
 
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisor.hh"
 
-#include "otsdaq-core/TablePlugins/ARTDAQBoardReaderTable.h"
-#include "otsdaq-core/TablePlugins/ARTDAQBuilderTable.h"
-#include "otsdaq-core/TablePlugins/ARTDAQDataLoggerTable.h"
-#include "otsdaq-core/TablePlugins/ARTDAQDispatcherTable.h"
+#include "otsdaq/TablePlugins/ARTDAQBoardReaderTable.h"
+#include "otsdaq/TablePlugins/ARTDAQBuilderTable.h"
+#include "otsdaq/TablePlugins/ARTDAQDataLoggerTable.h"
+#include "otsdaq/TablePlugins/ARTDAQDispatcherTable.h"
 
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
@@ -20,7 +20,7 @@
 //#include <cassert>
 //#include <fstream>
 //#include <iostream>
-//#include "otsdaq-core/TableCore/TableGroupKey.h"
+//#include "otsdaq/TableCore/TableGroupKey.h"
 
 using namespace ots;
 

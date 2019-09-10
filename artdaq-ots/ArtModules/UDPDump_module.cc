@@ -13,7 +13,7 @@
 
 #include "artdaq-core/Data/Fragment.hh"
 #include "artdaq-ots/Overlays/UDPFragment.hh"
-#include "otsdaq-core/Macros/CoutMacros.h"
+#include "otsdaq/Macros/CoutMacros.h"
 
 #include <arpa/inet.h>
 #include <algorithm>
