@@ -129,38 +129,32 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
 		// bind it to the port we passed in to getaddrinfo():
 		if(bind(socketNumber_, res->ai_addr, res->ai_addrlen) == -1)
 		{
-			std::cout << __COUT_HDR_FL__
-			          << "Error********Error********Error********Error********Error******"
-			             "**Error"
-			          << std::endl;
-			std::cout << __COUT_HDR_FL__ << "FAILED BIND FOR PORT: " << port.str()
-			          << " ON IP: " << IPAddress_ << std::endl;
-			std::cout << __COUT_HDR_FL__
-			          << "Error********Error********Error********Error********Error******"
-			             "**Error"
-			          << std::endl;
+			__COUT__ << "Error********Error********Error********Error********Error******"
+			            "**Error"
+			         << std::endl;
+			__COUT__ << "FAILED BIND FOR PORT: " << port.str() << " ON IP: " << IPAddress_
+			         << std::endl;
+			__COUT__ << "Error********Error********Error********Error********Error******"
+			            "**Error"
+			         << std::endl;
 			socketNumber_ = 0;
 		}
 		else
 		{
-			std::cout << __COUT_HDR_FL__
-			          << ":):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):"
-			             "):):):)"
-			          << std::endl;
-			std::cout << __COUT_HDR_FL__
-			          << ":):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):"
-			             "):):):)"
-			          << std::endl;
-			std::cout << __COUT_HDR_FL__ << "SOCKET ON PORT: " << port.str()
-			          << " ON IP: " << IPAddress_ << " INITIALIZED OK!" << std::endl;
-			std::cout << __COUT_HDR_FL__
-			          << ":):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):"
-			             "):):):)"
-			          << std::endl;
-			std::cout << __COUT_HDR_FL__
-			          << ":):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):"
-			             "):):):)"
-			          << std::endl;
+			__COUT__ << ":):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):"
+			            "):):):)"
+			         << std::endl;
+			__COUT__ << ":):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):"
+			            "):):):)"
+			         << std::endl;
+			__COUT__ << "SOCKET ON PORT: " << port.str() << " ON IP: " << IPAddress_
+			         << " INITIALIZED OK!" << std::endl;
+			__COUT__ << ":):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):"
+			            "):):):)"
+			         << std::endl;
+			__COUT__ << ":):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):):"
+			            "):):):)"
+			         << std::endl;
 			char yes = '1';
 			setsockopt(socketNumber_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 			socketInitialized = true;

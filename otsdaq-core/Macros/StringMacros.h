@@ -191,7 +191,7 @@ struct StringMacros
 	    const std::string& 										secondaryDelimeter 	= ":");
 
 	static std::string 			demangleTypeName			(const char* name);
-	static std::string 			stackTrace					();
+	static std::string 			stackTrace					(void);
 	static std::string 			exec						(const char* cmd);
 
 	static char* 				otsGetEnvironmentVarable	(const char* name, const std::string&  location, const unsigned int& line);

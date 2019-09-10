@@ -48,7 +48,7 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	int       partition_;
 
 	std::string getDAQState_();
-	};
+};
 
 }  // namespace ots
 

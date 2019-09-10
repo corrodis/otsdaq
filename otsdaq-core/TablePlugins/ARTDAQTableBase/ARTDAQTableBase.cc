@@ -309,12 +309,11 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 		}
 
 		PUSHTAB;
-		
+
 		__COUT__ << "Getting max_fragment_size_bytes from Global table..." << __E__;
-		OUT << "max_fragment_size_bytes: " <<
-		    appNode.getNode(
-		        "ARTDAQGlobalTableForProcessNameLink/maxFragmentSizeBytes")
-		        << "\n";
+		OUT << "max_fragment_size_bytes: "
+		    << appNode.getNode("ARTDAQGlobalTableForProcessNameLink/maxFragmentSizeBytes")
+		    << "\n";
 
 		//--------------------------------------
 		// handle ALL daq parameters
@@ -755,14 +754,13 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 	//--------------------------------------
 	// handle ALL metric parameters
 	__COUT__ << "Inserting add-on parameters" << __E__;
-	ARTDAQTableBase::insertParameters(
-	    out,
-	    tabStr,
-	    commentStr,
-	    appNode.getNode("addOnParametersLink"),
-	    "daqParameter" /*parameterType*/,
-	    false /*onlyInsertAtTableParameters*/,
-	    true /*includeAtTableParameters*/);
+	ARTDAQTableBase::insertParameters(out,
+	                                  tabStr,
+	                                  commentStr,
+	                                  appNode.getNode("addOnParametersLink"),
+	                                  "daqParameter" /*parameterType*/,
+	                                  false /*onlyInsertAtTableParameters*/,
+	                                  true /*includeAtTableParameters*/);
 
 	__COUT__ << "outputDataReceiverFHICL DONE" << __E__;
 	out.close();

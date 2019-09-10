@@ -86,12 +86,14 @@ function defineColors ()
 }
 
 #trace helper functions
-function toffS () 
-{ 
-	${TRACE_BIN}/trace_cntl lvlclr 0 `bitN_to_mask "$@"` 0
-}
+source $TRACE_BIN/trace_functions.sh
 
-function muteTrace() 
+#function toffS () 
+#{ 
+#	${TRACE_BIN}/trace_cntl lvlclr 0 `bitN_to_mask "$@"` 0
+#}
+
+function setupTrace() 
 {
 	#source /data/ups/setup
 	#setup TRACE v3_13_04
@@ -116,13 +118,16 @@ function muteTrace()
 	toffS 0-63 -n FileDB:RDWRT_C
 	
 	${TRACE_BIN}/trace_cntl lvlset 0 0x1f 0	
+	
+	export TRACE_LIMIT_MS="0,50,50"
+	tinfo
 }
 
 export TRACE_FILE=/tmp/trace_buffer_${USER}
 
 
 defineColors
-muteTrace
+setupTrace
 		
 
 echo -e "${Reset}"

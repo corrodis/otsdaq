@@ -1,6 +1,7 @@
 #include "otsdaq-core/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq-core/Macros/TablePluginMacros.h"
 #include "otsdaq-core/TablePlugins/DesktopIconTable.h"
+
 #include "otsdaq-core/WebUsersUtilities/WebUsers.h"
 
 #include <stdio.h>
@@ -12,25 +13,51 @@ using namespace ots;
 	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
 
 // DesktopIconTable Column names
-#define COL_NAME "IconName"
-#define COL_STATUS TableViewColumnInfo::COL_NAME_STATUS
-#define COL_CAPTION "Caption"
-#define COL_ALTERNATE_TEXT "AlternateText"
-#define COL_FORCE_ONLY_ONE_INSTANCE "ForceOnlyOneInstance"
-#define COL_REQUIRED_PERMISSION_LEVEL "RequiredPermissionLevel"
-#define COL_IMAGE_URL "ImageURL"
-#define COL_WINDOW_CONTENT_URL "WindowContentURL"
-#define COL_APP_LINK "LinkToApplicationTable"
-#define COL_PARAMETER_LINK "LinkToParameterTable"
-#define COL_PARAMETER_KEY "windowParameterKey"
-#define COL_PARAMETER_VALUE "windowParameterValue"
-#define COL_FOLDER_PATH "FolderPath"
+
+const std::string DesktopIconTable::COL_NAME    = "IconName";
+const std::string DesktopIconTable::COL_STATUS  = TableViewColumnInfo::COL_NAME_STATUS;
+const std::string DesktopIconTable::COL_CAPTION = "Caption";
+const std::string DesktopIconTable::COL_ALTERNATE_TEXT          = "AlternateText";
+const std::string DesktopIconTable::COL_FORCE_ONLY_ONE_INSTANCE = "ForceOnlyOneInstance";
+const std::string DesktopIconTable::COL_PERMISSIONS        = "RequiredPermissionLevel";
+const std::string DesktopIconTable::COL_IMAGE_URL          = "ImageURL";
+const std::string DesktopIconTable::COL_WINDOW_CONTENT_URL = "WindowContentURL";
+const std::string DesktopIconTable::COL_APP_LINK           = "LinkToApplicationTable";
+const std::string DesktopIconTable::COL_APP_LINK_UID           = "LinkToApplicationUID";
+
+
+const std::string DesktopIconTable::COL_PARAMETER_LINK     = "LinkToParameterTable";
+const std::string DesktopIconTable::COL_PARAMETER_LINK_GID = "LinkToParameterGroupID";
+const std::string DesktopIconTable::COL_FOLDER_PATH        = "FolderPath";
+
+
+const std::string DesktopIconTable::COL_PARAMETER_GID   = "windowParameterGroupID";
+const std::string DesktopIconTable::COL_PARAMETER_KEY   = "windowParameterKey";
+const std::string DesktopIconTable::COL_PARAMETER_VALUE = "windowParameterValue";
+
+const std::string DesktopIconTable::ICON_TABLE      = "DesktopIconTable";
+const std::string DesktopIconTable::PARAMETER_TABLE = "DesktopWindowParameterTable";
+
+//#define COL_NAME "IconName"
+//#define COL_STATUS TableViewColumnInfo::COL_NAME_STATUS
+//#define COL_CAPTION "Caption"
+//#define COL_ALTERNATE_TEXT "AlternateText"
+//#define COL_FORCE_ONLY_ONE_INSTANCE "ForceOnlyOneInstance"
+//#define COL_REQUIRED_PERMISSION_LEVEL "RequiredPermissionLevel"
+//#define COL_IMAGE_URL "ImageURL"
+//#define COL_WINDOW_CONTENT_URL "WindowContentURL"
+//#define COL_APP_LINK "LinkToApplicationTable"
+//#define COL_PARAMETER_LINK "LinkToParameterTable"
+//#define COL_PARAMETER_KEY "windowParameterKey"
+//#define COL_PARAMETER_VALUE "windowParameterValue"
+//#define COL_FOLDER_PATH "FolderPath"
 
 // XDAQ App Column names
-#define COL_APP_ID "Id"
+const std::string DesktopIconTable::COL_APP_ID = "Id";
+//#define COL_APP_ID "Id"
 
 //==============================================================================
-DesktopIconTable::DesktopIconTable(void) : TableBase("DesktopIconTable")
+DesktopIconTable::DesktopIconTable(void) : TableBase(DesktopIconTable::ICON_TABLE)
 {
 	// Icon list no longer passes through file! so delete it from user's $USER_DATA
 	std::system(("rm -rf " + (std::string)DESKTOP_ICONS_FILE).c_str());
@@ -73,7 +100,7 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 		icon->enforceOneWindowInstance_ =
 		    child.second.getNode(COL_FORCE_ONLY_ONE_INSTANCE).getValue<bool>();
 		icon->permissionThresholdString_ =
-		    child.second.getNode(COL_REQUIRED_PERMISSION_LEVEL).getValue<std::string>();
+		    child.second.getNode(COL_PERMISSIONS).getValue<std::string>();
 		icon->imageURL_ = child.second.getNode(COL_IMAGE_URL).getValue<std::string>();
 		icon->windowContentURL_ =
 		    child.second.getNode(COL_WINDOW_CONTENT_URL).getValue<std::string>();
@@ -194,7 +221,7 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 	//		fs << (status?"1":"0");
 	//
 	//		fs << ",";
-	//		child.second.getNode(COL_REQUIRED_PERMISSION_LEVEL	).getValue(val);
+	//		child.second.getNode(COL_PERMISSIONS	).getValue(val);
 	//		fs << removeCommas(val);
 	//
 	//		fs << ",";

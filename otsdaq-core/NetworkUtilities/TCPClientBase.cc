@@ -81,24 +81,26 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMSeconds)
 		//		{
 		//			int       socketLength       = 0;
 		//			socklen_t sizeOfSocketLength = sizeof(socketLength);
-		//			status = getsockopt(getSocketId(), SOL_SOCKET, SO_SNDBUF, &socketLength,
-		//&sizeOfSocketLength); 			std::cout << __PRETTY_FUNCTION__ <<
-		//"TCPConnect sendBufferSize initial: " << socketLength << " status/errno=" <<
-		//status << "/" << errno << " sizeOfSocketLength=" << sizeOfSocketLength <<
-		//std::endl;
+		//			status = getsockopt(getSocketId(), SOL_SOCKET, SO_SNDBUF,
+		//&socketLength, &sizeOfSocketLength); 			std::cout << __PRETTY_FUNCTION__
+		//<< "TCPConnect sendBufferSize initial: " << socketLength << " status/errno=" <<
+		// status << "/" << errno << " sizeOfSocketLength=" << sizeOfSocketLength <<
+		// std::endl;
 		//
 		//			socketLength = sendBufferSize;
-		//			status = setsockopt(getSocketId(), SOL_SOCKET, SO_SNDBUF, &socketLength,
-		//sizeOfSocketLength); 			if (status == -1) 				std::cout <<
+		//			status = setsockopt(getSocketId(), SOL_SOCKET, SO_SNDBUF,
+		//&socketLength,  sizeOfSocketLength); 			if (status == -1)
+		// std::cout <<
 		//__PRETTY_FUNCTION__ <<  "Error with setsockopt sendBufferSize " << errno <<
-		//std::endl ; 			socketLength = 0;
-		//			status = getsockopt(getSocketId(), SOL_SOCKET, SO_SNDBUF, &socketLength,
-		//&sizeOfSocketLength); 			if (socketLength < (sendBufferSize * 2))
-		//				std::cout << __PRETTY_FUNCTION__ <<  "sendBufferSize " << socketLength
+		// std::endl ; 			socketLength = 0;
+		//			status = getsockopt(getSocketId(), SOL_SOCKET, SO_SNDBUF,
+		//&socketLength, &sizeOfSocketLength); 			if (socketLength < (sendBufferSize
+		//* 2)) 				std::cout << __PRETTY_FUNCTION__ <<  "sendBufferSize " <<
+		// socketLength
 		//<< " not expected (" << sendBufferSize << " status/errno=" << status << "/" <<
-		//errno << ")" << std::endl; 			else 				std::cout <<
+		// errno << ")" << std::endl; 			else 				std::cout <<
 		//__PRETTY_FUNCTION__ <<  "sendBufferSize " << socketLength << " status/errno=" <<
-		//status << "/" << errno << std::endl;
+		// status << "/" << errno << std::endl;
 		//		}
 		std::cout << __PRETTY_FUNCTION__ << "Succesfully connected to server "
 		          << fServerIP << " port: " << fServerPort << std::endl;

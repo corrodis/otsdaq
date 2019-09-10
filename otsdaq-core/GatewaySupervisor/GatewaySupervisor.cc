@@ -271,11 +271,12 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 		{
 			auto appInfo = it.second;
 			appName      = appInfo.getName();
-//			__COUT__ << "Getting Status "
-//			         << " Supervisor instance = '" << appInfo.getName()
-//			         << "' [LID=" << appInfo.getId() << "] in Context '"
-//			         << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
-//			         << "].\n\n";
+			//			__COUT__ << "Getting Status "
+			//			         << " Supervisor instance = '" << appInfo.getName()
+			//			         << "' [LID=" << appInfo.getId() << "] in Context '"
+			//			         << appInfo.getContextName() << "' [URL=" <<
+			// appInfo.getURL()
+			//			         << "].\n\n";
 			// if the application is the gateway supervisor, we do not send a SOAP message
 			if(appName == "Supervisor")
 			{
@@ -302,18 +303,20 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				xoap::MessageReference tempMessage =
 				    SOAPUtilities::makeSOAPMessageReference("ApplicationStatusRequest");
 				// print tempMessage
-//				__COUT__ << "tempMessage... " << SOAPUtilities::translate(tempMessage)
-//				         << std::endl;
-//
+				//				__COUT__ << "tempMessage... " <<
+				// SOAPUtilities::translate(tempMessage)
+				//				         << std::endl;
+				//
 				try
 				{
 					xoap::MessageReference statusMessage =
 					    theSupervisor->sendWithSOAPReply(appInfo.getDescriptor(),
 					                                     tempMessage);
 
-//					__COUT__ << "statusMessage... "
-//					         << SOAPUtilities::translate(statusMessage) << std::endl;
-//
+					//					__COUT__ << "statusMessage... "
+					//					         << SOAPUtilities::translate(statusMessage)
+					//<<  std::endl;
+					//
 					SOAPParameters parameters;
 					parameters.addParameter("Status");
 					parameters.addParameter("Progress");
@@ -330,8 +333,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					{
 						progress = "0";
 					}
-//					__COUTV__(status);
-//					__COUTV__(progress);
+					//					__COUTV__(status);
+					//					__COUTV__(progress);
 				}
 				catch(const xdaq::exception::Exception& e)
 				{
@@ -3595,11 +3598,13 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		}
 		else if(requestType == "addDesktopIcon")
 		{
-			GatewaySupervisor::handleAddDesktopIconRequest(cgiIn, xmlOut);
+			GatewaySupervisor::handleAddDesktopIconRequest(
+			    theWebUsers_.getUsersUsername(userInfo.uid_), cgiIn, xmlOut);
 		}
 		else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{
-			// NOTE: similar to ConfigurationGUI version but DOES keep active login sessions
+			// NOTE: similar to ConfigurationGUI version but DOES keep active login
+			// sessions
 
 			__COUT_WARN__ << requestType << " requestType received! " << __E__;
 			__MOUT_WARN__ << requestType << " requestType received! " << __E__;
@@ -4028,7 +4033,7 @@ GatewaySupervisor::loadGroupNameAndKey(const std::string& fileName,
 	         << " theGroup.second= " << theGroup.second << __E__;
 
 	return theGroup;
-}  //end loadGroupNameAndKey()
+}  // end loadGroupNameAndKey()
 
 //========================================================================================================================
 void GatewaySupervisor::saveGroupNameAndKey(
@@ -4048,10 +4053,12 @@ void GatewaySupervisor::saveGroupNameAndKey(
 	outss << theGroup.first << "\n" << theGroup.second << "\n" << time(0);
 	groupFile << outss.str().c_str();
 	groupFile.close();
-}  //end saveGroupNameAndKey()
+}  // end saveGroupNameAndKey()
 
 //========================================================================================================================
-void GatewaySupervisor::handleAddDesktopIconRequest(cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut)
+void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author,
+                                                    cgicc::Cgicc&      cgiIn,
+                                                    HttpXmlDocument&   xmlOut)
 {
 	std::string iconCaption =
 	    CgiDataUtilities::getData(cgiIn, "iconCaption");  // from GET
@@ -4065,40 +4072,237 @@ void GatewaySupervisor::handleAddDesktopIconRequest(cgicc::Cgicc& cgiIn, HttpXml
 	    CgiDataUtilities::getData(cgiIn, "iconWindowURL");  // from GET
 	std::string iconPermissions =
 	    CgiDataUtilities::getData(cgiIn, "iconPermissions");  // from GET
+	std::string iconLinkedApp =
+	    CgiDataUtilities::getData(cgiIn, "iconLinkedApp");  // from GET
+	unsigned int iconLinkedAppLID =
+	    CgiDataUtilities::getDataAsInt(cgiIn, "iconLinkedAppLID");  // from GET
 	bool iconEnforceOneWindowInstance =
-	    CgiDataUtilities::getData(cgiIn, "iconEnforceOneWindowInstance") == "1"?true:false;  // from GET
-
+	    CgiDataUtilities::getData(cgiIn, "iconEnforceOneWindowInstance") == "1"
+	        ? true
+	        : false;  // from GET
 
 	std::string iconParameters =
 	    CgiDataUtilities::postData(cgiIn, "iconParameters");  // from POST
 
+	__COUTV__(author);
 	__COUTV__(iconCaption);
 	__COUTV__(iconAltText);
 	__COUTV__(iconFolderPath);
 	__COUTV__(iconImageURL);
 	__COUTV__(iconWindowURL);
 	__COUTV__(iconPermissions);
+	__COUTV__(iconLinkedApp);
+	__COUTV__(iconLinkedAppLID);
 	__COUTV__(iconEnforceOneWindowInstance);
 
-	__COUTV__(iconParameters); // map: CSV list
+	__COUTV__(iconParameters);  // map: CSV list
 
-	//steps:
+	// steps:
 	//	activate active context
 	//		modify desktop table and desktop parameters table
 	//		save, activate, and modify alias
 
-	ConfigurationManagerRW tmpCfgMgr("TheGatewaySupervisor");
+	ConfigurationManagerRW tmpCfgMgr(author);
 
-	ConfigurationManagerRW* cfgMgr = &tmpCfgMgr; // just to match syntax in ConfiguratGUI
-//	tmpCfgMgr.activateTableGroup(
-//			tmpCfgMgr.getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT),
-//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
-//			);
+	ConfigurationManagerRW* cfgMgr = &tmpCfgMgr;  // just to match syntax in ConfiguratGUI
+	                                              //	tmpCfgMgr.activateTableGroup(
+	//			tmpCfgMgr.getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT),
+	//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+	//			);
 
-	cfgMgr->restoreActiveTableGroups(
-			true /*throwErrors*/,
-			"" /*pathToActiveGroupsFile*/,
-			true /*onlyLoadIfBackboneOrContext*/
-			);
+	cfgMgr->restoreActiveTableGroups(true /*throwErrors*/,
+	                                 "" /*pathToActiveGroupsFile*/,
+	                                 true /*onlyLoadIfBackboneOrContext*/
+	);
 
-} //end handleAddDesktopIconRequest()
+	// Steps:
+	//	- Create record in DesktopIconTable
+	//	- Create parameter records in DesktopWindowParameterTable
+	//	- Create new Context group
+	//	- Update Aliases from old Context group to new Context group
+	//	- Activate new group
+
+	TableEditStruct iconTable(DesktopIconTable::ICON_TABLE,
+	                          cfgMgr);  // Table ready for editing!
+	TableEditStruct parameterTable(DesktopIconTable::PARAMETER_TABLE,
+	                               cfgMgr);  // Table ready for editing!
+	TableEditStruct appTable(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
+	                               cfgMgr);  // Table ready for editing!
+
+	// Create record in DesktopIconTable
+	{
+		unsigned int row;
+		std::string  iconUID;
+
+		// create icon record
+		row = iconTable.tableView_->addRow(author, true /*incrementUniqueData*/, "generatedIcon");
+		iconUID =
+		    iconTable.tableView_->getDataView()[row][iconTable.tableView_->getColUID()];
+
+		__COUTV__(row);
+		__COUTV__(iconUID);
+
+		// set icon status true
+		iconTable.tableView_->setValueAsString(
+		    "1", row, iconTable.tableView_->getColStatus());
+
+		// set caption value
+		iconTable.tableView_->setURIEncodedValue(
+		    iconCaption,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_CAPTION));
+		// set alt text value
+		iconTable.tableView_->setURIEncodedValue(
+		    iconAltText,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_ALTERNATE_TEXT));
+		// set force one instance value
+		iconTable.tableView_->setValueAsString(
+		    iconEnforceOneWindowInstance ? "1" : "0",
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_FORCE_ONLY_ONE_INSTANCE));
+		// set permissions value
+		iconTable.tableView_->setURIEncodedValue(
+			iconPermissions,
+			row,
+			iconTable.tableView_->findCol(DesktopIconTable::COL_PERMISSIONS));
+		// set image URL value
+		iconTable.tableView_->setURIEncodedValue(
+			iconImageURL,
+			row,
+			iconTable.tableView_->findCol(DesktopIconTable::COL_IMAGE_URL));
+		// set window URL value
+		iconTable.tableView_->setURIEncodedValue(
+			iconWindowURL,
+			row,
+			iconTable.tableView_->findCol(DesktopIconTable::COL_WINDOW_CONTENT_URL));
+		// set folder value
+		iconTable.tableView_->setURIEncodedValue(
+			iconFolderPath,
+			row,
+			iconTable.tableView_->findCol(DesktopIconTable::COL_FOLDER_PATH));
+
+		// create link to icon app
+		if(iconLinkedAppLID > 0)
+		{
+			__COUTV__(iconLinkedAppLID);
+
+			int appRow = appTable.tableView_->findRow(
+					appTable.tableView_->findCol(XDAQContextTable::colApplication_.colId_),
+					iconLinkedAppLID
+					);
+			iconLinkedApp = appTable.tableView_->getDataView()
+				        [appRow][appTable.tableView_->getColUID()];
+			__COUT__ << "Found app by LID: " << iconLinkedApp << __E__;
+		} //end linked app LID handling
+
+		if(iconLinkedApp != "" &&
+				iconLinkedApp != "undefined" &&
+				iconLinkedApp != TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+		{
+			//first check that UID exists
+			//	if not, interpret as app class type and
+			//	check for unique 'enabled' app with class type
+			__COUTV__(iconLinkedApp);
+
+			if(!iconLinkedAppLID) //no need to check if LID lookup happened already
+			{
+				try
+				{
+					int appRow = appTable.tableView_->findRow(
+							appTable.tableView_->getColUID(),
+							iconLinkedApp);
+				}
+				catch(const std::runtime_error& e)
+				{
+					//attempt to treat like class, and take first match
+					try
+					{
+						int appRow = appTable.tableView_->findRow(
+								appTable.tableView_->findCol(XDAQContextTable::colApplication_.colClass_),
+								iconLinkedApp);
+						iconLinkedApp = appTable.tableView_->getDataView()
+							        [appRow][appTable.tableView_->getColUID()];
+					}
+					catch(...)
+					{
+						//failed to treat like class, so throw original
+						__SS__ << "Failed to create an icon linking to app '" <<
+								iconLinkedApp << ".' The following error occurred: " <<
+								e.what() << __E__;
+						__SS_THROW__;
+					}
+				}
+			}
+			__COUTV__(iconLinkedApp);
+
+			iconTable.tableView_->setValueAsString(
+				ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
+				row,
+				iconTable.tableView_->findCol(DesktopIconTable::COL_APP_LINK));
+			iconTable.tableView_->setValueAsString(
+				iconLinkedApp,
+				row,
+				iconTable.tableView_->findCol(DesktopIconTable::COL_APP_LINK_UID));
+		} //end create app link
+
+		// parse parameters
+		std::map<std::string,std::string> parameters;
+		StringMacros::getMapFromString(iconParameters, parameters);
+
+		// create link to icon parameters
+		if(parameters.size())
+		{
+			//set parameter link table
+			iconTable.tableView_->setValueAsString(
+				DesktopIconTable::PARAMETER_TABLE,
+				row,
+				iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_LINK));
+			//set parameter link Group ID
+			iconTable.tableView_->setValueAsString(
+				iconUID + "_Parameters",
+				row,
+				iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_LINK_GID));
+
+
+			__COUTV__(StringMacros::mapToString(parameters));
+
+			for(const auto& parameter: parameters)
+			{
+				// create parameter record
+				row = parameterTable.tableView_->addRow(author,
+						true /*incrementUniqueData*/, "generatedParameter");
+
+				// set parameter status true
+				parameterTable.tableView_->setValueAsString(
+				    "1", row, parameterTable.tableView_->getColStatus());
+				// set parameter Group ID
+				parameterTable.tableView_->setValueAsString(
+					iconUID + "_Parameters",
+					row,
+					parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_GID));
+				// set parameter key
+				parameterTable.tableView_->setURIEncodedValue(
+					parameter.first,
+					row,
+					parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_KEY));
+				// set parameter value
+				parameterTable.tableView_->setURIEncodedValue(
+					parameter.second,
+					row,
+					iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_VALUE));
+			} //end parameter loop
+
+
+			parameterTable.tableView_->print();
+
+		} //end create parameters link
+
+
+		iconTable.tableView_->print();
+	}
+
+	// getContextMemberNames
+	// saveNewTableGroup
+
+}  // end handleAddDesktopIconRequest()

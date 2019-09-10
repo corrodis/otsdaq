@@ -148,10 +148,10 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				fs << "\t"
 				   << "host: \"" << fwdIP << "\"\n";
 				fs << "}\n";
-				
+
 				fs << "console: {\n";
 				fs << "\t"
-				   << "type: \"OTS\"\n"; //\"cout\"\n";
+				   << "type: \"OTS\"\n";  //\"cout\"\n";
 				fs << "\t"
 				   << "threshold: \"DEBUG\"\n";
 				fs << "\t"
@@ -161,7 +161,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				fs << "\t\t"
 				   << "noLineBreaks: true\n";
 				fs << "\t}\n}\n";
-				
+
 				// output quiet forwarder config file
 				std::fstream qtfs;
 				qtfs.open(QUIET_CFG_FILE, std::fstream::out | std::fstream::trunc);

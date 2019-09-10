@@ -176,7 +176,7 @@ class TableView
 	void         resizeDataView(unsigned int nRows, unsigned int nCols);
 	unsigned int addRow(
 	    const std::string& author              = "",
-	    bool               incrementUniqueData = false,
+	    unsigned char      incrementUniqueData = false, //leave as unsigned char rather than bool, too many things (e.g. strings) evaluate successfully to bool values
 	    std::string        baseNameAutoUID     = "",
 	    unsigned int       rowToAdd =
 	        (unsigned int)-1);  // returns index of added row, default is last row
