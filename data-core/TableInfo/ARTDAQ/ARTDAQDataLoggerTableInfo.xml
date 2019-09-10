@@ -7,7 +7,8 @@
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="UniqueData" 	 Name="OffsetPort" 	 StorageName="OFFSET_PORT" 		DataType="NUMBER" 		DataChoices=""/>
         <COLUMN Type="Data" 	 Name="DAQInterfaceHostname" 	 StorageName="DAQINTERFACE_HOSTNAME" 		DataType="VARCHAR2" 		DataChoices=""/>
-        <COLUMN Type="FixedChoiceData"   Name="Subsystem"        StorageName="SUBSYSTEM"                DataType="NUMBER"               DataChoices="arbitraryBool=1,1"/>
+        <COLUMN Type="ChildLink-subsystem" 	 Name="SubsystemLink" 	 StorageName="SUBSYSTEM_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,NO_LINK,ARTDAQSubsystemTable"/>
+        <COLUMN Type="ChildLinkUID-subsystem" 	 Name="SubsystemLinkUID" 	 StorageName="SUBSYSTEM_LINK_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
         <COLUMN Type="ChildLink-services" 	 Name="servicesLink" 	 StorageName="SERVICES_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQServicesTable"/>
 				<COLUMN Type="ChildLinkUID-services" 	 Name="servicesLinkUID" 	 StorageName="SERVICES_LINK_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-daq" 	 Name="daqLink" 	 StorageName="DAQ_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQDaqTable"/>
