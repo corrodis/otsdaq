@@ -44,6 +44,26 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	virtual void enteringError(toolbox::Event::Reference e);
 
   private:
+	struct SubsystemInfo
+	{
+		int           destination;
+		std::set<int> sources;
+
+		SubsystemInfo() : destination(0), sources() {}
+	};
+
+	struct ProcessInfo
+	{
+		std::string label;
+		std::string hostname;
+		int         subsystem;
+
+		ProcessInfo(std::string l, std::string h, int s)
+		    : label(l), hostname(h), subsystem(s)
+		{
+		}
+	};
+
 	PyObject* daqinterface_ptr_;
 	int       partition_;
 

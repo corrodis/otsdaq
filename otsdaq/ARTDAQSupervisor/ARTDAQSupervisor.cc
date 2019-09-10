@@ -319,11 +319,12 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	__SUP_COUT__ << "Supervisor uid is " << uid << ", getting supervisor table node"
 	             << __E__;
 
-	auto theSupervisorNode = getSupervisorTableNode();
+	auto                                   theSupervisorNode = getSupervisorTableNode();
+	std::unordered_map<int, SubsystemInfo> subsystems;
 
 	pb.step();
 
-	std::list<std::pair<std::string, std::string>> readerInfo;
+	std::list<ProcessInfo> readerInfo;
 	{
 		__SUP_COUT__ << "Checking for BoardReaders" << __E__;
 		auto readersLink = theSupervisorNode.getNode("boardreadersLink");
@@ -341,9 +342,28 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 					auto readerUID = reader.second.getNode("SupervisorUID").getValue();
 					auto readerHost =
 					    reader.second.getNode("DAQInterfaceHostname").getValue();
+
+					auto readerSubsystem     = 1;
+					auto readerSubsystemLink = reader.second.getNode("SubsystemLink");
+					if(!readerSubsystemLink.isDisconnected())
+					{
+						readerSubsystem =
+						    readerSubsystemLink.getNode("SubsystemID").getValue<int>();
+						subsystems[readerSubsystem].destination =
+						    readerSubsystemLink.getNode("Destination").getValue<int>();
+						if(!subsystems.count(subsystems[readerSubsystem].destination) ||
+						   !subsystems[subsystems[readerSubsystem].destination]
+						        .sources.count(readerSubsystem))
+						{
+							subsystems[subsystems[readerSubsystem].destination]
+							    .sources.insert(readerSubsystem);
+						}
+					}
+
 					__SUP_COUT__ << "Found BoardReader with UID " << readerUID
-					             << " and DAQInterface Hostname " << readerHost << __E__;
-					readerInfo.push_back(std::make_pair(readerUID, readerHost));
+					             << ", DAQInterface Hostname " << readerHost
+					             << ", and Subsystem " << readerSubsystem << __E__;
+					readerInfo.emplace_back(readerUID, readerHost, readerSubsystem);
 
 					ARTDAQBoardReaderTable brt;
 					brt.outputFHICL(
@@ -370,7 +390,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	}
 	pb.step();
 
-	std::list<std::pair<std::string, std::string>> builderInfo;
+	std::list<ProcessInfo> builderInfo;
 	{
 		auto buildersLink = theSupervisorNode.getNode("eventbuildersLink");
 		if(!buildersLink.isDisconnected() && buildersLink.getChildren().size() > 0)
@@ -385,9 +405,28 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 					auto builderUID = builder.second.getNode("SupervisorUID").getValue();
 					auto builderHost =
 					    builder.second.getNode("DAQInterfaceHostname").getValue();
+
+					auto builderSubsystem     = 1;
+					auto builderSubsystemLink = builder.second.getNode("SubsystemLink");
+					if(!builderSubsystemLink.isDisconnected())
+					{
+						builderSubsystem =
+						    builderSubsystemLink.getNode("SubsystemID").getValue<int>();
+						subsystems[builderSubsystem].destination =
+						    builderSubsystemLink.getNode("Destination").getValue<int>();
+						if(!subsystems.count(subsystems[builderSubsystem].destination) ||
+						   !subsystems[subsystems[builderSubsystem].destination]
+						        .sources.count(builderSubsystem))
+						{
+							subsystems[subsystems[builderSubsystem].destination]
+							    .sources.insert(builderSubsystem);
+						}
+					}
+
 					__SUP_COUT__ << "Found EventBuilder with UID " << builderUID
-					             << " and DAQInterface Hostname " << builderHost << __E__;
-					builderInfo.push_back(std::make_pair(builderUID, builderHost));
+					             << ", DAQInterface Hostname " << builderHost
+					             << ", and Subsystem " << builderSubsystem << __E__;
+					builderInfo.emplace_back(builderUID, builderHost, builderSubsystem);
 
 					ARTDAQBuilderTable bt;
 					bt.outputFHICL(
@@ -415,7 +454,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	pb.step();
 
-	std::list<std::pair<std::string, std::string>> loggerInfo;
+	std::list<ProcessInfo> loggerInfo;
 	{
 		auto dataloggersLink = theSupervisorNode.getNode("dataloggersLink");
 		if(!dataloggersLink.isDisconnected())
@@ -432,9 +471,28 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 					auto loggerUID =
 					    datalogger.second.getNode("SupervisorUID").getValue();
 
+					auto loggerSubsystem     = 1;
+					auto loggerSubsystemLink = datalogger.second.getNode("SubsystemLink");
+					if(!loggerSubsystemLink.isDisconnected())
+					{
+						loggerSubsystem =
+						    loggerSubsystemLink.getNode("SubsystemID").getValue<int>();
+						subsystems[loggerSubsystem].destination =
+						    loggerSubsystemLink.getNode("Destination").getValue<int>();
+						if(!subsystems.count(subsystems[loggerSubsystem].destination) ||
+						   !subsystems[subsystems[loggerSubsystem].destination]
+						        .sources.count(loggerSubsystem))
+						{
+							subsystems[subsystems[loggerSubsystem].destination]
+							    .sources.insert(loggerSubsystem);
+						}
+					}
+
 					__SUP_COUT__ << "Found DataLogger with UID " << loggerUID
-					             << " and DAQInterface Hostname " << loggerHost << __E__;
-					loggerInfo.push_back(std::make_pair(loggerUID, loggerHost));
+					             << ", DAQInterface Hostname " << loggerHost
+					             << ", and Subsystem " << loggerSubsystem << __E__;
+					loggerInfo.emplace_back(loggerUID, loggerHost, loggerSubsystem);
+
 					ARTDAQDataLoggerTable dlt;
 					dlt.outputFHICL(
 					    theConfigurationManager_,
@@ -454,7 +512,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		}
 	}
 
-	std::list<std::pair<std::string, std::string>> dispatcherInfo;
+	std::list<ProcessInfo> dispatcherInfo;
 	{
 		auto dispatchersLink = theSupervisorNode.getNode("dispatchersLink");
 		if(!dispatchersLink.isDisconnected())
@@ -469,9 +527,28 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 					auto dispHost =
 					    dispatcher.second.getNode("DAQInterfaceHostname").getValue();
 					auto dispUID = dispatcher.second.getNode("SupervisorUID").getValue();
+
+					auto dispSubsystem     = 1;
+					auto dispSubsystemLink = dispatcher.second.getNode("SubsystemLink");
+					if(!dispSubsystemLink.isDisconnected())
+					{
+						dispSubsystem =
+						    dispSubsystemLink.getNode("SubsystemID").getValue<int>();
+						subsystems[dispSubsystem].destination =
+						    dispSubsystemLink.getNode("Destination").getValue<int>();
+						if(!subsystems.count(subsystems[dispSubsystem].destination) ||
+						   !subsystems[subsystems[dispSubsystem].destination]
+						        .sources.count(dispSubsystem))
+						{
+							subsystems[subsystems[dispSubsystem].destination]
+							    .sources.insert(dispSubsystem);
+						}
+					}
+
 					__SUP_COUT__ << "Found Dispatcher with UID " << dispUID
-					             << " and DAQInterface Hostname " << dispHost << __E__;
-					dispatcherInfo.push_back(std::make_pair(dispUID, dispHost));
+					             << ", DAQInterface Hostname " << dispHost
+					             << ", and Subsystem " << dispSubsystem << __E__;
+					dispatcherInfo.emplace_back(dispUID, dispHost, dispSubsystem);
 
 					ARTDAQDispatcherTable adt;
 					adt.outputFHICL(
@@ -516,22 +593,51 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	o << "debug level: " << debugLevel << std::endl;
 	o << std::endl;
 
+	if(subsystems.size() > 1)
+	{
+		for(auto& ss : subsystems)
+		{
+			o << "Subsystem id: " << ss.first << std::endl;
+			if(ss.second.destination != 0)
+			{
+				o << "Subsystem destination: " << ss.second.destination << std::endl;
+			}
+			for(auto& sss : ss.second.sources)
+			{
+				o << "Subsystem source: " << sss << std::endl;
+			}
+			o << std::endl;
+		}
+	}
+
 	for(auto& builder : builderInfo)
 	{
-		o << "EventBuilder host: " << builder.second << std::endl;
-		o << "EventBuilder label: " << builder.first << std::endl;
+		o << "EventBuilder host: " << builder.hostname << std::endl;
+		o << "EventBuilder label: " << builder.label << std::endl;
+		if(builder.subsystem != 1)
+		{
+			o << "EventBuilder subsystem: " << builder.subsystem << std::endl;
+		}
 		o << std::endl;
 	}
 	for(auto& logger : loggerInfo)
 	{
-		o << "DataLogger host: " << logger.second << std::endl;
-		o << "DataLogger label: " << logger.first << std::endl;
+		o << "DataLogger host: " << logger.hostname << std::endl;
+		o << "DataLogger label: " << logger.label << std::endl;
+		if(logger.subsystem != 1)
+		{
+			o << "DataLogger subsystem: " << logger.subsystem << std::endl;
+		}
 		o << std::endl;
 	}
 	for(auto& dispatcher : dispatcherInfo)
 	{
-		o << "Dispatcher host: " << dispatcher.second << std::endl;
-		o << "Dispatcher label: " << dispatcher.first << std::endl;
+		o << "Dispatcher host: " << dispatcher.hostname << std::endl;
+		o << "Dispatcher label: " << dispatcher.label << std::endl;
+		if(dispatcher.subsystem != 1)
+		{
+			o << "Dispatcher subsystem: " << dispatcher.subsystem << std::endl;
+		}
 		o << std::endl;
 	}
 	o.close();
@@ -546,23 +652,23 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	for(auto& br : readerInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "boardReader-" + br.first + ".fcl").c_str(),
-		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + br.first + ".fcl").c_str());
+		symlink((ARTDAQ_FCL_PATH + "boardReader-" + br.label + ".fcl").c_str(),
+		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + br.label + ".fcl").c_str());
 	}
 	for(auto& eb : builderInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "builder-" + eb.first + ".fcl").c_str(),
-		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + eb.first + ".fcl").c_str());
+		symlink((ARTDAQ_FCL_PATH + "builder-" + eb.label + ".fcl").c_str(),
+		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + eb.label + ".fcl").c_str());
 	}
 	for(auto& dl : loggerInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "datalogger-" + dl.first + ".fcl").c_str(),
-		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + dl.first + ".fcl").c_str());
+		symlink((ARTDAQ_FCL_PATH + "datalogger-" + dl.label + ".fcl").c_str(),
+		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + dl.label + ".fcl").c_str());
 	}
 	for(auto& di : dispatcherInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "dispatcher-" + di.first + ".fcl").c_str(),
-		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + di.first + ".fcl").c_str());
+		symlink((ARTDAQ_FCL_PATH + "dispatcher-" + di.label + ".fcl").c_str(),
+		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + di.label + ".fcl").c_str());
 	}
 
 	pb.step();
@@ -574,13 +680,15 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	PyObject* readerDict = PyDict_New();
 	for(auto& reader : readerInfo)
 	{
-		PyObject* readerName = PyString_FromString(reader.first.c_str());
+		PyObject* readerName = PyString_FromString(reader.label.c_str());
 
-		PyObject* readerData = PyList_New(2);
-		PyObject* readerHost = PyString_FromString(reader.second.c_str());
-		PyObject* readerPort = PyString_FromString("-1");
+		PyObject* readerData      = PyList_New(3);
+		PyObject* readerHost      = PyString_FromString(reader.hostname.c_str());
+		PyObject* readerPort      = PyString_FromString("-1");
+		PyObject* readerSubsystem = PyString_FromString(std::to_string(reader.subsystem).c_str());
 		PyList_SetItem(readerData, 0, readerHost);
 		PyList_SetItem(readerData, 1, readerPort);
+		PyList_SetItem(readerData, 2, readerSubsystem);
 		PyDict_SetItem(readerDict, readerName, readerData);
 	}
 	PyObject* res1 =
