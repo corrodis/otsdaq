@@ -148,7 +148,7 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 				            contextConfig->getContextAddress(thisContext->contextUID_),
 				            contextConfig->getARTDAQDataPort(configManager,
 				                                             thisContext->contextUID_),
-				            contextConfig);
+				            contextConfig, 0);
 			}
 		}
 	}
@@ -188,7 +188,7 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
                                          unsigned int             selfRank,
                                          std::string              selfHost,
                                          unsigned int             selfPort,
-                                         const XDAQContextTable*  contextConfig)
+                                         const XDAQContextTable*  contextConfig, size_t maxFragmentSizeBytes)
 {
 	/*
 	    the file will look something like this:
@@ -370,6 +370,7 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 	OUT << "fragment_receiver: {\n";
 
 	PUSHTAB;
+	OUT << "max_fragment_size_bytes: " << maxFragmentSizeBytes << "\n";
 	{
 		// plugin type and fragment data-type
 		OUT << "generator"

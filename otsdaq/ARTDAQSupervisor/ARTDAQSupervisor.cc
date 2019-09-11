@@ -372,7 +372,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 					    0,
 					    readerHost,
 					    10000,
-					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable));
+					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable),
+					    getSupervisorProperty("max_fragment_size_bytes", 1048576));
 				}
 				else
 				{
@@ -435,7 +436,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 					    0,
 					    builderHost,
 					    10000,
-					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable));
+					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable),
+					    getSupervisorProperty("max_fragment_size_bytes", 1048576));
 				}
 				else
 				{
@@ -500,7 +502,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 					    0,
 					    loggerHost,
 					    10000,
-					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable));
+					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable),
+					    getSupervisorProperty("max_fragment_size_bytes", 1048576));
 				}
 				else
 				{
@@ -557,7 +560,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 					    0,
 					    dispHost,
 					    10000,
-					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable));
+					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable),
+					    getSupervisorProperty("max_fragment_size_bytes", 1048576));
 				}
 				else
 				{
@@ -597,6 +601,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	{
 		for(auto& ss : subsystems)
 		{
+			if(ss.first == 0)
+				continue;
 			o << "Subsystem id: " << ss.first << std::endl;
 			if(ss.second.destination != 0)
 			{

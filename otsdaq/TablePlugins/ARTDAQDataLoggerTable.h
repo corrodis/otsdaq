@@ -23,7 +23,8 @@ class ARTDAQDataLoggerTable : public ARTDAQTableBase
 	                 unsigned int             selfRank,
 	                 std::string              selfHost,
 	                 unsigned int             selfPort,
-	                 const XDAQContextTable*  contextConfig);
+	                 const XDAQContextTable*  contextConfig,
+	                 size_t                   maxFragmentSizeBytes);
 };
 }  // namespace ots
 #endif
