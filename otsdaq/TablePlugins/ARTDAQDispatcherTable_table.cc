@@ -73,7 +73,7 @@ void ARTDAQDispatcherTable::init(ConfigurationManager* configManager)
 		    contextConfig->getARTDAQAppRank(dispContext->contextUID_),
 		    contextConfig->getContextAddress(dispContext->contextUID_),
 		    contextConfig->getARTDAQDataPort(configManager, dispContext->contextUID_),
-		    contextConfig);
+		    contextConfig, 0);
 	}
 }
 
@@ -83,14 +83,16 @@ void ARTDAQDispatcherTable::outputFHICL(ConfigurationManager*    configManager,
                                         unsigned int             selfRank,
                                         std::string              selfHost,
                                         unsigned int             selfPort,
-                                        const XDAQContextTable*  contextConfig)
+                                        const XDAQContextTable*  contextConfig,
+                                        size_t                   maxFragmentSizeBytes)
 {
 	outputDataReceiverFHICL(configManager,
 	                        dispatcherNode,
 	                        selfRank,
 	                        selfHost,
 	                        selfPort,
-	                        DataReceiverAppType::Dispatcher);
+	                        DataReceiverAppType::Dispatcher,
+	                        maxFragmentSizeBytes);
 }
 
 DEFINE_OTS_TABLE(ARTDAQDispatcherTable)

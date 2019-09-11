@@ -23,7 +23,8 @@ class ARTDAQBoardReaderTable : public TableBase
 	                        unsigned int             selfRank,
 	                        std::string              selfHost,
 	                        unsigned int             selfPort,
-	                        const XDAQContextTable*  contextConfig);
+	                        const XDAQContextTable*  contextConfig,
+		size_t maxFragmentSizeBytes);
 	std::string getFHICLFilename(const ConfigurationTree& readerNode);
 
 	// std::string	getBoardReaderApplication	(const ConfigurationTree &readerNode,

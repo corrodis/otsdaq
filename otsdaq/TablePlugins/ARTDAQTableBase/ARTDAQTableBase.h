@@ -41,7 +41,8 @@ class ARTDAQTableBase : public TableBase
 	                 unsigned int             selfRank,
 	                 std::string              selfHost,
 	                 unsigned int             selfPort,
-	                 DataReceiverAppType appType);
+	                 DataReceiverAppType appType,
+		size_t maxFragmentSizeBytes);
 
 	std::string getPreamble(DataReceiverAppType type) {
 		switch (type) {

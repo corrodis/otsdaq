@@ -218,7 +218,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
     unsigned int                         selfRank,
     std::string                          selfHost,
     unsigned int                         selfPort,
-    ARTDAQTableBase::DataReceiverAppType appType)
+    ARTDAQTableBase::DataReceiverAppType appType, size_t maxFragmentSizeBytes)
 {
 	std::string filename = getFHICLFilename(getPreamble(appType), appNode.getValue());
 
@@ -298,22 +298,19 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 		{
 			// both datalogger and dispatcher use aggregator for now
 			OUT << "aggregator: {\n";
-			if(appType == DataReceiverAppType::DataLogger)
-			{
-				OUT << "is_datalogger: true\n";
-			}
-			else if(appType == DataReceiverAppType::Dispatcher)
-			{
-				OUT << "is_dispatcher: true\n";
-			}
 		}
 
 		PUSHTAB;
 
-		__COUT__ << "Getting max_fragment_size_bytes from Global table..." << __E__;
-		OUT << "max_fragment_size_bytes: "
-		    << appNode.getNode("ARTDAQGlobalTableForProcessNameLink/maxFragmentSizeBytes")
-		    << "\n";
+		OUT << "max_fragment_size_bytes: " << maxFragmentSizeBytes << "\n";
+		if(appType == DataReceiverAppType::DataLogger)
+		{
+			OUT << "is_datalogger: true\n";
+		}
+		else if(appType == DataReceiverAppType::Dispatcher)
+		{
+			OUT << "is_dispatcher: true\n";
+		}
 
 		//--------------------------------------
 		// handle ALL daq parameters

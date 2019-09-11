@@ -67,7 +67,7 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 		    contextConfig->getARTDAQAppRank(builderContext->contextUID_),
 		    contextConfig->getContextAddress(builderContext->contextUID_),
 		    contextConfig->getARTDAQDataPort(configManager, builderContext->contextUID_),
-		    contextConfig);
+		    contextConfig, 0);
 
 		flattenFHICL(ARTDAQ_FILE_PREAMBLE, builderConfigNode.getValue());
 	}
@@ -79,14 +79,16 @@ void ARTDAQBuilderTable::outputFHICL(ConfigurationManager*    configManager,
                                      unsigned int             selfRank,
                                      std::string              selfHost,
                                      unsigned int             selfPort,
-                                     const XDAQContextTable*  contextConfig)
+                                     const XDAQContextTable*  contextConfig,
+                                     size_t                   maxFragmentSizeBytes)
 {
 	outputDataReceiverFHICL(configManager,
 	                        builderNode,
 	                        selfRank,
 	                        selfHost,
 	                        selfPort,
-	                        DataReceiverAppType::EventBuilder);
+	                        DataReceiverAppType::EventBuilder,
+	                        maxFragmentSizeBytes);
 }  // end outputFHICL()
 
 DEFINE_OTS_TABLE(ARTDAQBuilderTable)

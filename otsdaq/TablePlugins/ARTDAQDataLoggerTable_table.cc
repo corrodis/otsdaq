@@ -73,7 +73,7 @@ void ARTDAQDataLoggerTable::init(ConfigurationManager* configManager)
 		    contextConfig->getARTDAQAppRank(loggerContext->contextUID_),
 		    contextConfig->getContextAddress(loggerContext->contextUID_),
 		    contextConfig->getARTDAQDataPort(configManager, loggerContext->contextUID_),
-		    contextConfig);
+		    contextConfig, 0);
 	}
 }
 
@@ -83,14 +83,16 @@ void ARTDAQDataLoggerTable::outputFHICL(ConfigurationManager*    configManager,
                                         unsigned int             selfRank,
                                         std::string              selfHost,
                                         unsigned int             selfPort,
-                                        const XDAQContextTable*  contextConfig)
+                                        const XDAQContextTable*  contextConfig,
+                                        size_t                   maxFragmentSizeBytes)
 {
 	outputDataReceiverFHICL(configManager,
 	                        dataLoggerNode,
 	                        selfRank,
 	                        selfHost,
 	                        selfPort,
-	                        DataReceiverAppType::DataLogger);
+	                        DataReceiverAppType::DataLogger,
+	                        maxFragmentSizeBytes);
 }
 
 DEFINE_OTS_TABLE(ARTDAQDataLoggerTable)
