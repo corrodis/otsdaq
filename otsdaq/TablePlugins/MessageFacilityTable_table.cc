@@ -159,7 +159,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				fs << "\t"
 				   << "format_string: \"|%L:%N:%f [%u]\t%m\"\n";
 
-				fs << "\t}\n}\n";
+				fs << "\n}\n";
 
 				// output quiet forwarder config file
 				std::fstream qtfs;
