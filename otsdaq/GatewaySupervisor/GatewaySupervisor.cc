@@ -4082,7 +4082,8 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author,
 	        : false;  // from GET
 
 	std::string iconParameters =
-	    CgiDataUtilities::postData(cgiIn, "iconParameters");  // from POST
+			StringMacros::decodeURIComponent(
+					CgiDataUtilities::postData(cgiIn, "iconParameters"));  // from POST
 
 	__COUTV__(author);
 	__COUTV__(iconCaption);
@@ -4291,7 +4292,7 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author,
 				parameterTable.tableView_->setURIEncodedValue(
 					parameter.second,
 					row,
-					iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_VALUE));
+					parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_VALUE));
 			} //end parameter loop
 
 
