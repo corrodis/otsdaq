@@ -274,11 +274,19 @@ void ARTDAQSupervisor::destroy(void)
 
 	if(daqinterface_ptr_ != NULL)
 	{
-		PyObject* pName = PyString_FromString("recover");
+		__SUP_COUT__ << "Calling recover transition" << __E__;
+		PyObject* pName = PyString_FromString("do_recover");
 		PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
 
-		while(getDAQState_() != "stopped")
-			usleep(10000);
+		__SUP_COUT__ << "Making sure that correct state has been reached" << __E__;
+		std::string state = getDAQState_();
+		while(state != "stopped")
+		{
+			state = getDAQState_();
+			__SUP_COUT__ << "State is " << state << ", waiting 1s and retrying..."
+			             << __E__;
+			usleep(1000000);
+		}
 
 		Py_XDECREF(daqinterface_ptr_);
 	}

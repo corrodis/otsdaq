@@ -274,6 +274,26 @@ echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 #############################
 
 #############################
+
+function killproc
+{
+	pid=$1
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Rev}Killing PID${Reset} ${pid}"
+	count=5
+	kill -0 ${pid} >/dev/null 2>&1
+	while [ $? -eq 0 ]; do
+		kill ${pid} >/dev/null 2>&1
+		sleep 1
+		count=$(( $count - 1 ))
+		if [ $count -le 0 ]; then
+			kill -9 ${pid} >/dev/null 2>&1
+		fi
+		
+		kill -0 ${pid} >/dev/null 2>&1
+	done
+}
+export -f killproc
+
 #############################
 # function to kill all things ots
 function killprocs 
@@ -281,35 +301,36 @@ function killprocs
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tKilling processes $1..."
 
 	if [[ "x$1" == "x" ]]; then #kill all ots processes
-
-		killall ots.exe 	&>/dev/null 2>&1 #hide output
-		killall xdaq.exe 	&>/dev/null 2>&1 #hide output
-		killall otsConsoleFwd 	&>/dev/null 2>&1 #hide output #message viewer display without decoration
-		killall mf_rcv_n_fwd 			&>/dev/null 2>&1 #hide output #message viewer display without decoration #deprecated name		
-		killall art 		&>/dev/null 2>&1 #hide output
-		#killall -9 ots.exe 	&>/dev/null 2>&1 #hide output
-		#killall -9 xdaq.exe	&>/dev/null 2>&1 #hide output
-		#killall -9 otsConsoleFwd &>/dev/null 2>&1 #hide output #message viewer display without decoration
-		#killall -9 mf_rcv_n_fwd 		 &>/dev/null 2>&1 #hide output #message viewer display without decoration #deprecated name
-		#killall -9 art 		&>/dev/null 2>&1 #hide output
+		pids=`ps aux|grep [o]ts.exe|awk '{print $2}'`
+		for pid in $pids;do
+			killproc $pid
+		done
+		pids=`ps aux|grep [x]daq.exe|awk '{print $2}'`
+		for pid in $pids;do
+			killproc $pid
+		done
+		pids=`ps aux|grep [o]tsConsoleFwd|awk '{print $2}'`
+		for pid in $pids;do
+			killproc $pid
+		done
+		pids=`ps aux|grep [m]f_rcv_n_fwd|awk '{print $2}'`
+		for pid in $pids;do
+			killproc $pid
+		done
 		
 		usershort=`echo $USER|cut -c 1-10`
 		for key in `ipcs|grep $usershort|grep ' 0 '|awk '{print $1}'`;do ipcrm -M $key;done
 
 		
 	else #then killing only non-gateway contexts
-		
-		PIDS=""
+
 		for contextPID in "${ContextPIDArray[@]}"
 		do
 			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Rev}Killing Nongateway-PID${Reset} ${contextPID}"
-			PIDS+=" ${contextPID}"
-		done
-		
-		#echo Killing PIDs: $PIDS
-		kill    $PIDS &>/dev/null 2>&1 #hide output
-		#kill -9 $PIDS &>/dev/null 2>&1 #hide output
+			killproc ${contextPID}
 
+		done
+	
 		unset ContextPIDArray #done with array of PIDs, so clear
 	fi
 		
@@ -771,7 +792,7 @@ launchOTSMacromaker() {
 
 		while [ "x$OTS_IS_ALIVE" == "x" ]; do
 			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots Macro Maker mode context launch, relaunching ots Macro Maker mode context..."									
-			kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
+			killproc ${LAST_OTS_PID} 	
 			sleep 2
 			
 			if [ $QUIET == 1 ]; then
@@ -981,7 +1002,7 @@ launchOTSWiz() {
 	
 		while [ "x$OTS_IS_ALIVE" == "x" ]; do
 			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots wiz context launch, relaunching ots wiz context..."			
-			kill -9 ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
+			killproc ${LAST_OTS_PID} 
 			sleep 2
 			
 			if [ $QUIET == 1 ]; then
@@ -1322,7 +1343,7 @@ launchOTS() {
 	
 								while [ "x$OTS_IS_ALIVE" == "x" ]; do
 									echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots gateway context launch, relaunching ots gateway context..."									
-									kill ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
+									killproc ${LAST_OTS_PID} 
 									sleep 2
 									
 									if [ $QUIET == 1 ]; then
@@ -1444,8 +1465,7 @@ launchOTS() {
 			 
 			while [ "x$OTS_IS_ALIVE" == "x" ]; do
 				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots non-gateway context launch, relaunching non-gateway context..."
-				kill ${LAST_OTS_PID} 	>/dev/null 2>&1 #hide output
-				#kill -9 ${TempContextPIDArray[$j]} 	>/dev/null 2>&1 #hide output
+				killproc ${LAST_OTS_PID} 
 				sleep 2
 				
 				if [ $QUIET == 1 ]; then
