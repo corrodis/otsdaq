@@ -597,6 +597,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	{
 		for(auto& ss : subsystems)
 		{
+			if(ss.first == 0)
+				continue;
 			o << "Subsystem id: " << ss.first << std::endl;
 			if(ss.second.destination != 0)
 			{
