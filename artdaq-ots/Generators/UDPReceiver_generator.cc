@@ -1,3 +1,6 @@
+#include "artdaq/DAQdata/Globals.hh"
+#define TRACE_NAME "UDPReceiver"
+
 #include "artdaq-ots/Generators/UDPReceiver.hh"
 
 #include "artdaq-core/Utilities/SimpleLookupPolicy.hh"
@@ -27,7 +30,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const& ps)
     , fragmentWindow_(ps.get<double>("fragment_time_window_ms", 1000))
     , lastFrag_(std::chrono::high_resolution_clock::now())
 {
-	__COUT__ << "Constructor." << __E__;
+	TLOG(TLVL_DEBUG) << "Constructor.";
 
 	datasocket_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if(!datasocket_)
@@ -50,7 +53,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const& ps)
 	/*if(fcntl(datasocket_, F_SETFL, O_NONBLOCK) == -1) {
 
 	    throw art::Exception(art::errors::Configuration) << "UDPReceiver: Cannot set
-	  socket to nonblocking!" << TLOG_ENDL;
+	  socket to nonblocking!" ;
 	  }*/
 
 	if(rcvbuf_ > 0 &&
@@ -69,15 +72,15 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const& ps)
 		    << "UDPReceiver: Could not translate provided IP Address: " << ip_;
 		exit(1);
 	}
-	TLOG_INFO("UDPReceiver") << "UDP Receiver Construction Complete!" << TLOG_ENDL;
+	TLOG(TLVL_INFO) << "UDP Receiver Construction Complete!";
 
-	__COUT__ << "Constructed." << __E__;
+	TLOG(TLVL_DEBUG) << "Constructed.";
 }  // end constructor()
 
 //========================================================================================================================
 ots::UDPReceiver::~UDPReceiver()
 {
-	__COUT__ << "Destructor." << __E__;
+	TLOG(TLVL_DEBUG) << "Destructor.";
 
 	// join waits for thread to complete
 	if(receiverThread_.joinable())  // only join if thread has started
@@ -89,20 +92,20 @@ ots::UDPReceiver::~UDPReceiver()
 		datasocket_ = -1;
 	}
 
-	__COUT__ << "Destructed." << __E__;
+	TLOG(TLVL_DEBUG) << "Destructed.";
 }  // end destructor()
 
 //========================================================================================================================
 void ots::UDPReceiver::start()
 {
-	__COUT__ << "Starting..." << __E__;
+	TLOG(TLVL_DEBUG) << "Starting...";
 
-	TLOG_INFO("UDPReceiver") << "Starting..." << TLOG_ENDL;
+	TLOG(TLVL_INFO) << "Starting...";
 
 	receiverThread_ = std::thread(&UDPReceiver::receiveLoop_, this);
 	start_();
 
-	__COUT__ << "Started." << __E__;
+	TLOG(TLVL_DEBUG) << "Started.";
 }  // end start()
 
 //========================================================================================================================
@@ -117,8 +120,8 @@ void ots::UDPReceiver::receiveLoop_()
 		int rv = poll(ufds, 1, 1000);
 		if(rv > 0)
 		{
-			TLOG_TRACE("UDPReceiver") << "revents: " << ufds[0].revents << ", "
-			                          << TLOG_ENDL;  // ufds[1].revents << TLOG_ENDL;
+			TLOG(TLVL_TRACE) << "revents: " << ufds[0].revents
+			                 << ", ";  // ufds[1].revents ;
 			if(ufds[0].revents == POLLIN || ufds[0].revents == POLLPRI)
 			{
 				// FIXME -> IN THE STIB GENERATOR WE DON'T HAVE A HEADER
@@ -133,19 +136,17 @@ void ots::UDPReceiver::receiveLoop_()
 				         (struct sockaddr*)&si_data_,
 				         &dataSz);
 
-				TLOG_TRACE("UDPReceiver")
+				TLOG(TLVL_TRACE)
 				    << "Received UDP Datagram with sequence number " << std::hex << "0x"
-				    << static_cast<int>(peekBuffer[1]) << "!" << std::dec << TLOG_ENDL;
-				TLOG_TRACE("UDPReceiver")
-				    << "peekBuffer[1] == expectedPacketNumber_: " << std::hex
-				    << static_cast<int>(peekBuffer[1])
-				    << " =?= " << (int)expectedPacketNumber_ << TLOG_ENDL;
-				TLOG_TRACE("UDPReceiver")
+				    << static_cast<int>(peekBuffer[1]) << "!" << std::dec;
+				TLOG(TLVL_TRACE) << "peekBuffer[1] == expectedPacketNumber_: " << std::hex
+				                 << static_cast<int>(peekBuffer[1])
+				                 << " =?= " << (int)expectedPacketNumber_;
+				TLOG(TLVL_TRACE)
 				    << "peekBuffer: 0: " << std::hex << static_cast<int>(peekBuffer[0])
 				    << ", 1: " << std::hex << static_cast<int>(peekBuffer[1])
 				    << ", 2: " << std::hex << static_cast<int>(peekBuffer[2])
-				    << ", 3: " << std::hex << static_cast<int>(peekBuffer[3])
-				    << TLOG_ENDL;
+				    << ", 3: " << std::hex << static_cast<int>(peekBuffer[3]);
 
 				uint8_t seqNum = peekBuffer[1];
 				// ReturnCode dataCode = getReturnCode(peekBuffer[0]);
@@ -155,10 +156,10 @@ void ots::UDPReceiver::receiveLoop_()
 					if(seqNum != expectedPacketNumber_)
 					{
 						int delta = seqNum - expectedPacketNumber_;
-						TLOG_WARNING("UDPReceiver")
+						TLOG(TLVL_WARNING)
 						    << std::dec
 						    << "Sequence Number different than expected! (delta: "
-						    << delta << ")" << TLOG_ENDL;
+						    << delta << ")";
 						expectedPacketNumber_ = seqNum;
 					}
 
@@ -170,21 +171,21 @@ void ots::UDPReceiver::receiveLoop_()
 					                   0,
 					                   (struct sockaddr*)&si_data_,
 					                   &dataSz);
+					receiveBuffer.resize(sts);
+
 					if(sts == -1)
 					{
-						TLOG_WARNING("UDPReceiver")
-						    << "Error on socket: " << strerror(errno) << TLOG_ENDL;
+						TLOG(TLVL_WARNING) << "Error on socket: " << strerror(errno);
 					}
 					else
 					{
-						TLOG_TRACE("UDPReceiver")
-						    << "Received " << sts << " bytes." << TLOG_ENDL;
+						TLOG(TLVL_TRACE) << "Received " << sts << " bytes.";
 					}
 
 					std::unique_lock<std::mutex> lock(receiveBufferLock_);
-					TLOG_TRACE("UDPReceiver")
+					TLOG(TLVL_TRACE)
 					    << "Now placing UDP datagram with sequence number " << std::hex
-					    << (int)seqNum << " into buffer." << std::dec << TLOG_ENDL;
+					    << (int)seqNum << " into buffer." << std::dec;
 					receiveBuffers_.push_back(receiveBuffer);
 
 					++expectedPacketNumber_;
@@ -192,9 +193,9 @@ void ots::UDPReceiver::receiveLoop_()
 				else
 				{
 					// Receiving out-of-order datagram, then moving on...
-					TLOG_WARNING("UDPReceiver")
+					TLOG(TLVL_WARNING)
 					    << "Received out-of-order datagram: " << seqNum
-					    << " != " << expectedPacketNumber_ << " (expected)" << TLOG_ENDL;
+					    << " != " << expectedPacketNumber_ << " (expected)";
 					packetBuffer_t receiveBuffer;
 					receiveBuffer.resize(1500);
 					int sts = recvfrom(datasocket_,
@@ -203,11 +204,12 @@ void ots::UDPReceiver::receiveLoop_()
 					                   0,
 					                   (struct sockaddr*)&si_data_,
 					                   &dataSz);
+					receiveBuffer.resize(sts);
 				}
 			}
 		}
 	}
-	TLOG_INFO("UDPReceiver") << "receive Loop exiting..." << TLOG_ENDL;
+	TLOG(TLVL_INFO) << "receive Loop exiting...";
 }
 
 //========================================================================================================================
@@ -233,15 +235,13 @@ bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs& output)
 		{
 			packetBufferSize += buf.size();
 		}
-		TLOG_TRACE("UDPReceiver")
-		    << "Calling ProcessData, packetBuffers_.size() == "
-		    << std::to_string(packetBuffers_.size())
-		    << ", sz = " << std::to_string(packetBufferSize) << TLOG_ENDL;
-		ProcessData_(output);
+		TLOG(TLVL_TRACE) << "Calling ProcessData, packetBuffers_.size() == "
+		                 << std::to_string(packetBuffers_.size())
+		                 << ", sz = " << std::to_string(packetBufferSize);
+		ProcessData_(output, packetBufferSize);
 
 		packetBuffers_.clear();
-		TLOG_TRACE("UDPReceiver")
-		    << "Returning output of size " << output.size() << TLOG_ENDL;
+		TLOG(TLVL_TRACE) << "Returning output of size " << output.size();
 	}
 	else
 	{
@@ -252,27 +252,31 @@ bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs& output)
 }
 
 //========================================================================================================================
-void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs& output)
+void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs& output, size_t totalSize)
 {
+	TLOG(TLVL_TRACE) << "ProcessData_ start";
 	ots::UDPFragment::Metadata metadata;
 	metadata.port    = dataport_;
 	metadata.address = si_data_.sin_addr.s_addr;
 
 	std::size_t initial_payload_size = 0;
 
+	TLOG(TLVL_TRACE) << "Creating Fragment";
+
 	output.emplace_back(artdaq::Fragment::FragmentBytes(initial_payload_size,
 	                                                    ev_counter(),
 	                                                    fragment_id(),
 	                                                    ots::detail::FragmentType::UDP,
 	                                                    metadata));
+
+	TLOG(TLVL_TRACE) << "Creating UDPFragmentWriter";
 	// We now have a fragment to contain this event:
 	ots::UDPFragmentWriter thisFrag(*output.back());
 
-	TLOG_TRACE("UDPReceiver")
-	    << "Received data, now placing data with UDP sequence number " << std::hex
-	    << static_cast<int>((packetBuffers_.front()).at(1)) << " into UDPFragment"
-	    << TLOG_ENDL;
-	thisFrag.resize(64050 * packetBuffers_.size() + 1);
+	TLOG(TLVL_TRACE) << "Received data, now placing data with UDP sequence number "
+	                 << std::hex << static_cast<int>((packetBuffers_.front()).at(1))
+	                 << " into UDPFragment";
+	thisFrag.resize(totalSize + 1);
 	std::ofstream rawOutput;
 	if(rawOutput_)
 	{
@@ -286,7 +290,7 @@ void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs& output)
 	int pos = 0;
 	for(auto jj = packetBuffers_.begin(); jj != packetBuffers_.end(); ++jj)
 	{
-		for(int ii = 0; ii < 64050; ++ii)
+		for(size_t ii = 0; ii < jj->size(); ++ii)
 		{
 			// Null-terminate string types
 			if((jj)->at(ii) == 0 &&
@@ -341,7 +345,7 @@ bool ots::UDPReceiver::isTimerExpired_()
 //========================================================================================================================
 void ots::UDPReceiver::stop()
 {
-	__COUT__ << "Stopping..." << __E__;
+	TLOG(TLVL_DEBUG) << "Stopping...";
 	//#pragma message "Using default implementation of UDPReceiver::stop()"
 }
 
