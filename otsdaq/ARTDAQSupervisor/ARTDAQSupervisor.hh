@@ -9,6 +9,8 @@
 #else
 #include <Python.h>
 #endif
+#include <thread>
+#include <mutex>
 
 #include "artdaq/ExternalComms/CommanderInterface.hh"
 #include "otsdaq/CoreSupervisors/CoreSupervisorBase.h"
@@ -44,6 +46,7 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	virtual void enteringError(toolbox::Event::Reference e);
 
   private:
+
 	struct SubsystemInfo
 	{
 		int           destination;
@@ -65,9 +68,16 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	};
 
 	PyObject* daqinterface_ptr_;
+	std::mutex  daqinterface_mutex_;
 	int       partition_;
+	std::string daqinterface_state_;
+	std::unique_ptr<std::thread> runner_thread_;
+	std::atomic<bool> runner_running_;
 
-	std::string getDAQState_();
+	void getDAQState_();
+	void daqinterfaceRunner_();
+	void stop_runner_();
+	void start_runner_();
 };
 
 }  // namespace ots

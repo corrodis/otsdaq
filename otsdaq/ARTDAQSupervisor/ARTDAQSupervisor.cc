@@ -119,6 +119,8 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
     : CoreSupervisorBase(stub)
     , daqinterface_ptr_(NULL)
     , partition_(getSupervisorProperty("partition", 0))
+    , daqinterface_state_("notrunning")
+    , runner_thread_(nullptr)
 {
 	__SUP_COUT__ << "Constructor." << __E__;
 
@@ -185,85 +187,95 @@ ARTDAQSupervisor::~ARTDAQSupervisor(void)
 //========================================================================================================================
 void ARTDAQSupervisor::init(void)
 {
+	stop_runner_();
+
 	__SUP_COUT__ << "Initializing..." << __E__;
-
-	// allSupervisorInfo_.init(getApplicationContext());
-	artdaq::configureMessageFacility("ARTDAQSupervisor");
-	__SUP_COUT__ << "artdaq MF configured." << __E__;
-
-	// initialization
-	char* daqinterface_dir = getenv("ARTDAQ_DAQINTERFACE_DIR");
-	if(daqinterface_dir == NULL)
 	{
-		__SUP_COUT_ERR__ << "ARTDAQ_DAQINTERFACE_DIR environment variable not set! This "
-		                    "means that DAQInterface has not been setup!"
-		                 << __E__;
-	}
-	else
-	{
-		__SUP_COUT__ << "Initializing Python" << __E__;
-		Py_Initialize();
+		std::lock_guard<std::mutex> lk(daqinterface_mutex_);
 
-		__SUP_COUT__ << "Adding DAQInterface directory to PYTHON_PATH" << __E__;
-		PyObject* sysPath     = PySys_GetObject((char*)"path");
-		PyObject* programName = PyString_FromString(daqinterface_dir);
-		PyList_Append(sysPath, programName);
-		Py_DECREF(programName);
+		// allSupervisorInfo_.init(getApplicationContext());
+		artdaq::configureMessageFacility("ARTDAQSupervisor");
+		__SUP_COUT__ << "artdaq MF configured." << __E__;
 
-		__SUP_COUT__ << "Creating Module name" << __E__;
-		PyObject* pName = PyString_FromString("rc.control.daqinterface");
-		/* Error checking of pName left out */
-
-		__SUP_COUT__ << "Importing module" << __E__;
-		PyObject* pModule = PyImport_Import(pName);
-		Py_DECREF(pName);
-
-		if(pModule == NULL)
+		// initialization
+		char* daqinterface_dir = getenv("ARTDAQ_DAQINTERFACE_DIR");
+		if(daqinterface_dir == NULL)
 		{
-			PyErr_Print();
-			__SUP_COUT_ERR__ << "Failed to load rc.control.daqinterface" << __E__;
+			__SS__ << "ARTDAQ_DAQINTERFACE_DIR environment variable not set! This "
+			          "means that DAQInterface has not been setup!"
+			       << __E__;
+			__SUP_SS_THROW__;
 		}
 		else
 		{
-			__SUP_COUT__ << "Loading python module dictionary" << __E__;
-			PyObject* pDict = PyModule_GetDict(pModule);
-			if(pDict == NULL)
+			__SUP_COUT__ << "Initializing Python" << __E__;
+			Py_Initialize();
+
+			__SUP_COUT__ << "Adding DAQInterface directory to PYTHON_PATH" << __E__;
+			PyObject* sysPath     = PySys_GetObject((char*)"path");
+			PyObject* programName = PyString_FromString(daqinterface_dir);
+			PyList_Append(sysPath, programName);
+			Py_DECREF(programName);
+
+			__SUP_COUT__ << "Creating Module name" << __E__;
+			PyObject* pName = PyString_FromString("rc.control.daqinterface");
+			/* Error checking of pName left out */
+
+			__SUP_COUT__ << "Importing module" << __E__;
+			PyObject* pModule = PyImport_Import(pName);
+			Py_DECREF(pName);
+
+			if(pModule == NULL)
 			{
 				PyErr_Print();
-				__SUP_COUT_ERR__ << "Unable to load module dictionary" << __E__;
+				__SS__ << "Failed to load rc.control.daqinterface" << __E__;
+				__SUP_SS_THROW__;
 			}
 			else
 			{
-				Py_DECREF(pModule);
+				__SUP_COUT__ << "Loading python module dictionary" << __E__;
+				PyObject* pDict = PyModule_GetDict(pModule);
+				if(pDict == NULL)
+				{
+					PyErr_Print();
+					__SS__ << "Unable to load module dictionary" << __E__;
+					__SUP_SS_THROW__;
+				}
+				else
+				{
+					Py_DECREF(pModule);
 
-				__SUP_COUT__ << "Getting DAQInterface object pointer" << __E__;
-				PyObject* di_obj_ptr = PyDict_GetItemString(pDict, "DAQInterface");
+					__SUP_COUT__ << "Getting DAQInterface object pointer" << __E__;
+					PyObject* di_obj_ptr = PyDict_GetItemString(pDict, "DAQInterface");
 
-				__SUP_COUT__ << "Filling out DAQInterface args struct" << __E__;
-				PyObject* pArgs = PyTuple_New(0);
+					__SUP_COUT__ << "Filling out DAQInterface args struct" << __E__;
+					PyObject* pArgs = PyTuple_New(0);
 
-				PyObject* kwargs = Py_BuildValue("{s:s, s:s, s:i, s:i, s:s, s:s}",
-				                                 "logpath",
-				                                 ".daqint.log",
-				                                 "name",
-				                                 "DAQInterface",
-				                                 "partition_number",
-				                                 partition_,
-				                                 "rpc_port",
-				                                 DAQINTERFACE_PORT,
-				                                 "rpc_host",
-				                                 "localhost",
-				                                 "control_host",
-				                                 "localhost");
+					PyObject* kwargs = Py_BuildValue("{s:s, s:s, s:i, s:i, s:s, s:s}",
+					                                 "logpath",
+					                                 ".daqint.log",
+					                                 "name",
+					                                 "DAQInterface",
+					                                 "partition_number",
+					                                 partition_,
+					                                 "rpc_port",
+					                                 DAQINTERFACE_PORT,
+					                                 "rpc_host",
+					                                 "localhost",
+					                                 "control_host",
+					                                 "localhost");
 
-				__SUP_COUT__ << "Calling DAQInterface Object Constructor" << __E__;
-				daqinterface_ptr_ = PyObject_Call(di_obj_ptr, pArgs, kwargs);
+					__SUP_COUT__ << "Calling DAQInterface Object Constructor" << __E__;
+					daqinterface_ptr_ = PyObject_Call(di_obj_ptr, pArgs, kwargs);
 
-				Py_DECREF(di_obj_ptr);
+					Py_DECREF(di_obj_ptr);
+				}
 			}
 		}
-	}
 
+		getDAQState_();
+	}
+	start_runner_();
 	__SUP_COUT__ << "Initialized." << __E__;
 }  // end init()
 
@@ -275,20 +287,22 @@ void ARTDAQSupervisor::destroy(void)
 	if(daqinterface_ptr_ != NULL)
 	{
 		__SUP_COUT__ << "Calling recover transition" << __E__;
-		PyObject* pName = PyString_FromString("do_recover");
-		PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
+		std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+		PyObject*                   pName = PyString_FromString("do_recover");
+		PyObject* res = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
 
 		__SUP_COUT__ << "Making sure that correct state has been reached" << __E__;
-		std::string state = getDAQState_();
-		while(state != "stopped")
+		getDAQState_();
+		while(daqinterface_state_ != "stopped")
 		{
-			state = getDAQState_();
-			__SUP_COUT__ << "State is " << state << ", waiting 1s and retrying..."
-			             << __E__;
+			getDAQState_();
+			__SUP_COUT__ << "State is " << daqinterface_state_
+			             << ", waiting 1s and retrying..." << __E__;
 			usleep(1000000);
 		}
 
 		Py_XDECREF(daqinterface_ptr_);
+		daqinterface_ptr_ = NULL;
 	}
 
 	Py_Finalize();
@@ -393,7 +407,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		}
 		else
 		{
-			__SUP_COUT_ERR__ << "Error: There should be at least one BoardReader!";
+			__SS__ << "Error: There should be at least one BoardReader!";
+			__SUP_SS_THROW__;
 			return;
 		}
 	}
@@ -457,7 +472,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		}
 		else
 		{
-			__SUP_COUT_ERR__ << "Error: There should be at least one EventBuilder!";
+			__SS__ << "Error: There should be at least one EventBuilder!";
+			__SUP_SS_THROW__;
 			return;
 		}
 	}
@@ -584,12 +600,14 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	// Check lists
 	if(readerInfo.size() == 0)
 	{
-		__SUP_COUT_ERR__ << "There must be at least one enabled BoardReader!" << __E__;
+		__SS__ << "There must be at least one enabled BoardReader!" << __E__;
+		__SUP_SS_THROW__;
 		return;
 	}
 	if(builderInfo.size() == 0)
 	{
-		__SUP_COUT_ERR__ << "There must be at least one enabled EventBuilder!" << __E__;
+		__SS__ << "There must be at least one enabled EventBuilder!" << __E__;
+		__SUP_SS_THROW__;
 		return;
 	}
 
@@ -687,8 +705,17 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	pb.step();
 
+	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+	getDAQState_();
+	if(daqinterface_state_ != "stopped")
+	{
+		__SS__ << "Cannot configure DAQInterface because it is in the wrong state!"
+		       << __E__;
+		__SUP_SS_THROW__
+	}
+
 	__SUP_COUT__ << "Calling setdaqcomps" << __E__;
-	__SUP_COUT__ << "Status before setdaqcomps: " << getDAQState_() << __E__;
+	__SUP_COUT__ << "Status before setdaqcomps: " << daqinterface_state_ << __E__;
 	PyObject* pName1 = PyString_FromString("setdaqcomps");
 
 	PyObject* readerDict = PyDict_New();
@@ -696,10 +723,11 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	{
 		PyObject* readerName = PyString_FromString(reader.label.c_str());
 
-		PyObject* readerData      = PyList_New(3);
-		PyObject* readerHost      = PyString_FromString(reader.hostname.c_str());
-		PyObject* readerPort      = PyString_FromString("-1");
-		PyObject* readerSubsystem = PyString_FromString(std::to_string(reader.subsystem).c_str());
+		PyObject* readerData = PyList_New(3);
+		PyObject* readerHost = PyString_FromString(reader.hostname.c_str());
+		PyObject* readerPort = PyString_FromString("-1");
+		PyObject* readerSubsystem =
+		    PyString_FromString(std::to_string(reader.subsystem).c_str());
 		PyList_SetItem(readerData, 0, readerHost);
 		PyList_SetItem(readerData, 1, readerPort);
 		PyList_SetItem(readerData, 2, readerSubsystem);
@@ -712,13 +740,15 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	if(res1 == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling setdaqcomps transition" << __E__;
+		__SS__ << "Error calling setdaqcomps transition" << __E__;
+		__SUP_SS_THROW__;
 	}
-	__SUP_COUT__ << "Status after setdaqcomps: " << getDAQState_() << __E__;
+	getDAQState_();
+	__SUP_COUT__ << "Status after setdaqcomps: " << daqinterface_state_ << __E__;
 
 	pb.step();
 	__SUP_COUT__ << "Calling do_boot" << __E__;
-	__SUP_COUT__ << "Status before boot: " << getDAQState_() << __E__;
+	__SUP_COUT__ << "Status before boot: " << daqinterface_state_ << __E__;
 	PyObject* pName2      = PyString_FromString("do_boot");
 	PyObject* pStateArgs1 = PyString_FromString((ARTDAQ_FCL_PATH + "/boot.txt").c_str());
 	PyObject* res2 =
@@ -727,13 +757,21 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	if(res2 == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling boot transition" << __E__;
+		__SS__ << "Error calling boot transition" << __E__;
+		__SUP_SS_THROW__;
 	}
-	__SUP_COUT__ << "Status after boot: " << getDAQState_() << __E__;
+
+	getDAQState_();
+	if(daqinterface_state_ != "booted")
+	{
+		__SS__ << "DAQInterface boot transition failed!" << __E__;
+		__SUP_SS_THROW__
+	}
+	__SUP_COUT__ << "Status after boot: " << daqinterface_state_ << __E__;
 
 	pb.step();
 	__SUP_COUT__ << "Calling do_config" << __E__;
-	__SUP_COUT__ << "Status before config: " << getDAQState_() << __E__;
+	__SUP_COUT__ << "Status before config: " << daqinterface_state_ << __E__;
 	PyObject* pName3      = PyString_FromString("do_config");
 	PyObject* pStateArgs2 = Py_BuildValue("[s]", FAKE_CONFIG_NAME);
 	PyObject* res3 =
@@ -742,9 +780,16 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	if(res3 == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling config transition" << __E__;
+		__SS__ << "Error calling config transition" << __E__;
+		__SUP_SS_THROW__;
 	}
-	__SUP_COUT__ << "Status after config: " << getDAQState_() << __E__;
+	getDAQState_();
+	if(daqinterface_state_ != "ready")
+	{
+		__SS__ << "DAQInterface config transition failed!" << __E__;
+		__SUP_SS_THROW__;
+	}
+	__SUP_COUT__ << "Status after config: " << daqinterface_state_ << __E__;
 	pb.complete();
 	__SUP_COUT__ << "Configured." << __E__;
 }  // end transitionConfiguring()
@@ -753,7 +798,9 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Halting..." << __E__;
-	__SUP_COUT__ << "Status before halt: " << getDAQState_() << __E__;
+	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+	getDAQState_();
+	__SUP_COUT__ << "Status before halt: " << daqinterface_state_ << __E__;
 
 	PyObject* pName = PyString_FromString("do_command");
 	PyObject* pArg  = PyString_FromString("Shutdown");
@@ -762,10 +809,12 @@ void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference e)
 	if(res == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling Shutdown transition" << __E__;
+		__SS__ << "Error calling Shutdown transition" << __E__;
+		__SUP_SS_THROW__;
 	}
 
-	__SUP_COUT__ << "Status after halt: " << getDAQState_() << __E__;
+	getDAQState_();
+	__SUP_COUT__ << "Status after halt: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "Halted." << __E__;
 }  // end transitionHalting()
 
@@ -781,8 +830,10 @@ void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference e)
 void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Pausing..." << __E__;
+	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
 
-	__SUP_COUT__ << "Status before pause: " << getDAQState_() << __E__;
+	getDAQState_();
+	__SUP_COUT__ << "Status before pause: " << daqinterface_state_ << __E__;
 
 	PyObject* pName = PyString_FromString("do_command");
 	PyObject* pArg  = PyString_FromString("Pause");
@@ -791,10 +842,12 @@ void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference e)
 	if(res == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling Pause transition" << __E__;
+		__SS__ << "Error calling Pause transition" << __E__;
+		__SUP_SS_THROW__;
 	}
 
-	__SUP_COUT__ << "Status after pause: " << getDAQState_() << __E__;
+	getDAQState_();
+	__SUP_COUT__ << "Status after pause: " << daqinterface_state_ << __E__;
 
 	__SUP_COUT__ << "Paused." << __E__;
 }  // end transitionPausing()
@@ -803,8 +856,10 @@ void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference e)
 void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Resuming..." << __E__;
+	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
 
-	__SUP_COUT__ << "Status before resume: " << getDAQState_() << __E__;
+	getDAQState_();
+	__SUP_COUT__ << "Status before resume: " << daqinterface_state_ << __E__;
 	PyObject* pName = PyString_FromString("do_command");
 	PyObject* pArg  = PyString_FromString("Resume");
 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pArg, NULL);
@@ -812,9 +867,11 @@ void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference e)
 	if(res == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling Resume transition" << __E__;
+		__SS__ << "Error calling Resume transition" << __E__;
+		__SUP_SS_THROW__;
 	}
-	__SUP_COUT__ << "Status after resume: " << getDAQState_() << __E__;
+	getDAQState_();
+	__SUP_COUT__ << "Status after resume: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "Resumed." << __E__;
 }  // end transitionResuming()
 
@@ -822,23 +879,35 @@ void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference e)
 void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Starting..." << __E__;
-	__SUP_COUT__ << "Status before start: " << getDAQState_() << __E__;
-	auto runNumber = SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
-	                     .getParameters()
-	                     .getValue("RunNumber");
-
-	PyObject* pName      = PyString_FromString("do_start_running");
-	int       run_number = std::stoi(runNumber);
-	PyObject* pStateArgs = PyInt_FromLong(run_number);
-	PyObject* res =
-	    PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pStateArgs, NULL);
-
-	if(res == NULL)
 	{
-		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling start transition" << __E__;
+		std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+		getDAQState_();
+		__SUP_COUT__ << "Status before start: " << daqinterface_state_ << __E__;
+		auto runNumber = SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
+		                     .getParameters()
+		                     .getValue("RunNumber");
+
+		PyObject* pName      = PyString_FromString("do_start_running");
+		int       run_number = std::stoi(runNumber);
+		PyObject* pStateArgs = PyInt_FromLong(run_number);
+		PyObject* res =
+		    PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pStateArgs, NULL);
+
+		if(res == NULL)
+		{
+			PyErr_Print();
+			__SS__ << "Error calling start transition" << __E__;
+			__SUP_SS_THROW__;
+		}
+		getDAQState_();
+		__SUP_COUT__ << "Status after start: " << daqinterface_state_ << __E__;
+		if(daqinterface_state_ != "running")
+		{
+			__SS__ << "DAQInterface start transition failed!" << __E__;
+			__SUP_SS_THROW__;
+		}
 	}
-	__SUP_COUT__ << "Status after start: " << getDAQState_() << __E__;
+	start_runner_();
 	__SUP_COUT__ << "Started." << __E__;
 }  // end transitionStarting()
 
@@ -846,23 +915,29 @@ void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference e)
 void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
-	__SUP_COUT__ << "Status before stop: " << getDAQState_() << __E__;
+	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+	getDAQState_();
+	__SUP_COUT__ << "Status before stop: " << daqinterface_state_ << __E__;
 	PyObject* pName = PyString_FromString("do_stop_running");
 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
 
 	if(res == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling stop transition" << __E__;
+		__SS__ << "Error calling stop transition" << __E__;
+		__SUP_SS_THROW__;
 	}
-	__SUP_COUT__ << "Status after stop: " << getDAQState_() << __E__;
+	getDAQState_();
+	__SUP_COUT__ << "Status after stop: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "Stopped." << __E__;
 }  // end transitionStopping()
 
 void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Entering error recovery state" << __E__;
-	__SUP_COUT__ << "Status before error: " << getDAQState_() << __E__;
+	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+	getDAQState_();
+	__SUP_COUT__ << "Status before error: " << daqinterface_state_ << __E__;
 
 	PyObject* pName = PyString_FromString("do_recover");
 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
@@ -870,13 +945,15 @@ void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference e)
 	if(res == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling recover transition" << __E__;
+		__SS__ << "Error calling recover transition" << __E__;
+		__SUP_SS_THROW__;
 	}
-	__SUP_COUT__ << "Status after error: " << getDAQState_() << __E__;
+	getDAQState_();
+	__SUP_COUT__ << "Status after error: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "EnteringError DONE." << __E__;
 }
 
-std::string ots::ARTDAQSupervisor::getDAQState_()
+void ots::ARTDAQSupervisor::getDAQState_()
 {
 	//__SUP_COUT__ << "Getting DAQInterface state" << __E__;
 
@@ -887,10 +964,116 @@ std::string ots::ARTDAQSupervisor::getDAQState_()
 	if(res == NULL)
 	{
 		PyErr_Print();
-		__SUP_COUT_ERR__ << "Error calling state function" << __E__;
-		return "ERROR";
+		__SS__ << "Error calling state function" << __E__;
+		__SUP_SS_THROW__;
+		return;
 	}
-	std::string result = std::string(PyString_AsString(res));
+	daqinterface_state_ = std::string(PyString_AsString(res));
 	//__SUP_COUT__ << "getDAQState_ DONE: state=" << result << __E__;
-	return result;
+}
+void ots::ARTDAQSupervisor::daqinterfaceRunner_()
+{
+	TLOG(TLVL_TRACE) << "Runner thread starting";
+	runner_running_ = true;
+	while(runner_running_)
+	{
+		if(daqinterface_ptr_ != NULL)
+		{
+			std::unique_lock<std::mutex> lk(daqinterface_mutex_);
+			getDAQState_();
+			std::string state_before = daqinterface_state_;
+
+			if(daqinterface_state_ != "stopped" && daqinterface_state_ != "booting" &&
+			   daqinterface_state_ != "terminating")
+			{
+				try
+				{
+					TLOG(TLVL_TRACE) << "Calling DAQInterface::check_proc_heartbeats";
+					PyObject* pName = PyString_FromString("check_proc_heartbeats");
+					PyObject* res =
+					    PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
+					TLOG(TLVL_TRACE)
+					    << "Done with DAQInterface::check_proc_heartbeats call";
+
+					if(res == NULL)
+					{
+						runner_running_ = false;
+						lk.unlock();
+						PyErr_Print();
+						__SS__ << "Error calling check_proc_heartbeats function" << __E__;
+						__SUP_SS_THROW__;
+						break;
+					}
+				}
+				catch(cet::exception ex)
+				{
+					runner_running_ = false;
+					lk.unlock();
+					PyErr_Print();
+					__SS__ << "An cet::exception occurred while calling "
+					          "check_proc_heartbeats function: "
+					       << ex.explain_self() << __E__;
+					__SUP_SS_THROW__;
+					break;
+				}
+				catch(std::exception ex)
+				{
+					runner_running_ = false;
+					lk.unlock();
+					PyErr_Print();
+					__SS__ << "An std::exception occurred while calling "
+					          "check_proc_heartbeats function: "
+					       << ex.what() << __E__;
+					__SUP_SS_THROW__;
+					break;
+				}
+				catch(...)
+				{
+					runner_running_ = false;
+					lk.unlock();
+					PyErr_Print();
+					__SS__ << "An unknown Error occurred while calling runner function"
+					       << __E__;
+					__SUP_SS_THROW__;
+					break;
+				}
+
+				getDAQState_();
+				if(daqinterface_state_ != state_before)
+				{
+					runner_running_ = false;
+					lk.unlock();
+					__SS__ << "DAQInterface state unexpectedly changed from "
+					       << state_before << " to " << daqinterface_state_
+					       << ". Check supervisor log file for more info!" << __E__;
+					__SUP_SS_THROW__;
+					break;
+				}
+			}
+		}
+		else
+		{
+			break;
+		}
+		usleep(1000000);
+	}
+	runner_running_ = false;
+	TLOG(TLVL_TRACE) << "Runner thread complete";
+}
+
+void ots::ARTDAQSupervisor::stop_runner_()
+{
+	runner_running_ = false;
+	if(runner_thread_ && runner_thread_->joinable())
+	{
+		runner_thread_->join();
+		runner_thread_.reset(nullptr);
+	}
+}
+
+void ots::ARTDAQSupervisor::start_runner_()
+{
+	stop_runner_();
+	runner_thread_ =
+	    std::make_unique<std::thread>(&ots::ARTDAQSupervisor::daqinterfaceRunner_, this);
 }
