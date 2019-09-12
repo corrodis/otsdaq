@@ -491,8 +491,8 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 				    false /*onlyInsertAtTableParameters*/,
 				    true /*includeAtTableParameters*/);
 
-				if(moduleType.find("BinaryNetOuput") != std::string::npos ||
-				   moduleType.find("RootNetOuput") != std::string::npos)
+				if(moduleType.find("BinaryNetOutput") != std::string::npos ||
+				   moduleType.find("RootNetOutput") != std::string::npos)
 				{
 					OUT << "destinations: {\n"
 					    << "}\n\n";  // end destinations
