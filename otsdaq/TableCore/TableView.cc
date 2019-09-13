@@ -61,7 +61,10 @@ TableView& TableView::copy(const TableView&   src,
 	columnsInfo_       = src.columnsInfo_;
 	theDataView_       = src.theDataView_;
 	sourceColumnNames_ = src.sourceColumnNames_;
-	init();  // verify consistency
+
+	//RAR remove init() check, because usually copy() is only the first step
+	//	in a series of changes that result in another call to init()
+	//init();  // verify consistency
 	return *this;
 }
 
@@ -132,7 +135,8 @@ unsigned int TableView::copyRows(const std::string& author,
 // 	Note: this function also sanitizes yes/no, on/off, and true/false types
 void TableView::init(void)
 {
-	__COUT__ << "Starting table verification..." << __E__;
+	//__COUT__ << "Starting table verification..." << StringMacros::stackTrace() << __E__;
+
 	try
 	{
 		// verify column names are unique
@@ -164,17 +168,17 @@ void TableView::init(void)
 			__SS_THROW__;
 		}
 
-		getOrInitColUID();  // setup UID column
+		initColUID();  // setup UID column
 		try
 		{
-			getOrInitColStatus();  // setup Status column
+			initColStatus();  // setup Status column
 		}
 		catch(...)
 		{
 		}  // ignore no Status column
 		try
 		{
-			getOrInitColPriority();  // setup Priority column
+			initColPriority();  // setup Priority column
 		}
 		catch(...)
 		{
@@ -906,9 +910,9 @@ void TableView::setValueAsString(const std::string& value,
 }
 
 //==============================================================================
-// getOrInitColUID
+// initColUID
 //	if column not found throw error
-const unsigned int TableView::getOrInitColUID(void)
+const unsigned int TableView::initColUID(void)
 {
 	if(colUID_ != INVALID)
 		return colUID_;
@@ -948,9 +952,9 @@ const unsigned int TableView::getColUID(void) const
 }
 
 //==============================================================================
-// getOrInitColStatus
+// initColStatus
 //	if column not found throw error
-const unsigned int TableView::getOrInitColStatus(void)
+const unsigned int TableView::initColStatus(void)
 {
 	if(colStatus_ != INVALID)
 		return colStatus_;
@@ -981,12 +985,12 @@ const unsigned int TableView::getOrInitColStatus(void)
 
 	__SS_ONLY_THROW__;
 
-} //end getOrInitColStatus()
+} //end initColStatus()
 
 //==============================================================================
-// getOrInitColPriority
+// initColPriority
 //	if column not found throw error
-const unsigned int TableView::getOrInitColPriority(void)
+const unsigned int TableView::initColPriority(void)
 {
 	if(colPriority_ != INVALID)
 		return colPriority_;
@@ -2440,8 +2444,9 @@ int TableView::fillFromJSON(const std::string& json)
 	}
 
 	//__COUT__ << "Done!" << __E__;
-	__COUTV__(fillWithLooseColumnMatching_);
-	__COUTV__(tableName_); //  << "tableName_ = " << tableName_
+	//__COUTV__(fillWithLooseColumnMatching_);
+	//__COUTV__(tableName_); //  << "tableName_ = " << tableName_
+
 	if(!fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
 	{
 		__SS__ << "Can not ignore errors because not every column was found in the "

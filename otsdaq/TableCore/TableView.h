@@ -204,9 +204,9 @@ class TableView
 	                                  const std::string&  author = "");
 
   private:
-	const unsigned int getOrInitColUID(void);
-	const unsigned int getOrInitColStatus(void);
-	const unsigned int getOrInitColPriority(void);
+	const unsigned int initColUID(void);
+	const unsigned int initColStatus(void);
+	const unsigned int initColPriority(void);
 
 	TableView& operator=(const TableView src);  // operator= is purposely undefined and
 	                                            // private (DO NOT USE IT!) - should use

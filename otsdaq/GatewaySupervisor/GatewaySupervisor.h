@@ -2,8 +2,8 @@
 #define _ots_GatewaySupervisor_h
 
 #include "otsdaq/CoreSupervisors/CorePropertySupervisorBase.h"
+#include "otsdaq/CoreSupervisors/ConfigurationSupervisorBase.h"
 #include "otsdaq/FiniteStateMachine/RunControlStateMachine.h"
-//#include "otsdaq/GatewaySupervisor/ARTDAQCommandable.h"
 #include "otsdaq/GatewaySupervisor/Iterator.h"
 #include "otsdaq/SOAPUtilities/SOAPMessenger.h"
 #include "otsdaq/SupervisorInfo/AllSupervisorInfo.h"
@@ -48,11 +48,11 @@ class WorkLoopManager;
 class GatewaySupervisor : public xdaq::Application,
                           public SOAPMessenger,
                           public RunControlStateMachine,
-                          public CorePropertySupervisorBase
+                          public CorePropertySupervisorBase,
+						  public ConfigurationSupervisorBase
 {
 	friend class WizardSupervisor;
 	friend class Iterator;
-	//friend class ARTDAQCommandable;
 
   public:
 	XDAQ_INSTANTIATOR();
@@ -73,15 +73,7 @@ class GatewaySupervisor : public xdaq::Application,
 	void 						stateMachineIterationBreakpoint	(xgi::Input* in, xgi::Output* out);
 
 	static void 				handleAddDesktopIconRequest		(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
-	static TableVersion 		saveModifiedVersionXML(HttpXmlDocument&        xmldoc,
-	                                    ConfigurationManagerRW* cfgMgr,
-	                                    const std::string&      tableName,
-	                                    TableVersion            originalVersion,
-	                                    bool                    makeTemporary,
-	                                    TableBase*              config,
-	                                    TableVersion            temporaryModifiedVersion,
-	                                    bool                    ignoreDuplicates = false,
-	                                    bool lookForEquivalent                   = false);
+
 	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference msg);
 	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference msg);
 
@@ -277,7 +269,6 @@ class GatewaySupervisor : public xdaq::Application,
 
 	WebUsers          theWebUsers_;
 	SystemMessenger   theSystemMessenger_;
-	//ARTDAQCommandable theArtdaqCommandable_;
 
 	WorkLoopManager stateMachineWorkLoopManager_;
 	toolbox::BSem   stateMachineSemaphore_;

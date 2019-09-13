@@ -40,7 +40,7 @@ using namespace ots;
 
 //==============================================================================
 // ConfigurationManagerRW
-ConfigurationManagerRW::ConfigurationManagerRW(std::string username)
+ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username)
     : ConfigurationManager(username)  // for use as author of new views
 {
 	__COUT__ << "Using Config Mgr with Write Access! (for " << username << ")" << __E__;
@@ -199,7 +199,8 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	// if(accumulatedErrors)
 	//	*accumulatedErrors = "";
 
-	if(!refresh)
+	//if table and group info already populated, then just return
+	if(allTableInfo_.size() && allGroupInfo_.size() && !refresh)
 		return allTableInfo_;
 
 	// else refresh!
