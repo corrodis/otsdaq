@@ -22,6 +22,8 @@ cet_make(LIBRARY_NAME CoreSupervisors
          CgiDataUtilities         
          ${XDAQ_BASIC_LIB_LIST}
 		 
+		 otsdaq_TablePlugins_XDAQContextTable_table
+		 otsdaq_TablePlugins_DesktopIconTable_table
         )
 
 install_headers()

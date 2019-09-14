@@ -61,7 +61,10 @@ TableView& TableView::copy(const TableView&   src,
 	columnsInfo_       = src.columnsInfo_;
 	theDataView_       = src.theDataView_;
 	sourceColumnNames_ = src.sourceColumnNames_;
-	init();  // verify consistency
+
+	//RAR remove init() check, because usually copy() is only the first step
+	//	in a series of changes that result in another call to init()
+	//init();  // verify consistency
 	return *this;
 }
 
@@ -132,6 +135,8 @@ unsigned int TableView::copyRows(const std::string& author,
 // 	Note: this function also sanitizes yes/no, on/off, and true/false types
 void TableView::init(void)
 {
+	//__COUT__ << "Starting table verification..." << StringMacros::stackTrace() << __E__;
+
 	try
 	{
 		// verify column names are unique
@@ -163,17 +168,17 @@ void TableView::init(void)
 			__SS_THROW__;
 		}
 
-		getOrInitColUID();  // setup UID column
+		initColUID();  // setup UID column
 		try
 		{
-			getOrInitColStatus();  // setup Status column
+			initColStatus();  // setup Status column
 		}
 		catch(...)
 		{
 		}  // ignore no Status column
 		try
 		{
-			getOrInitColPriority();  // setup Priority column
+			initColPriority();  // setup Priority column
 		}
 		catch(...)
 		{
@@ -905,9 +910,9 @@ void TableView::setValueAsString(const std::string& value,
 }
 
 //==============================================================================
-// getOrInitColUID
+// initColUID
 //	if column not found throw error
-const unsigned int TableView::getOrInitColUID(void)
+const unsigned int TableView::initColUID(void)
 {
 	if(colUID_ != INVALID)
 		return colUID_;
@@ -947,38 +952,45 @@ const unsigned int TableView::getColUID(void) const
 }
 
 //==============================================================================
-// getOrInitColStatus
+// initColStatus
 //	if column not found throw error
-const unsigned int TableView::getOrInitColStatus(void)
+const unsigned int TableView::initColStatus(void)
 {
 	if(colStatus_ != INVALID)
 		return colStatus_;
 
 	// if doesn't exist throw error! each view must have a UID column
-	colStatus_ = findCol(TableViewColumnInfo::COL_NAME_STATUS);
-	if(colStatus_ == INVALID)
-	{
-		colStatus_ = findCol(TableViewColumnInfo::COL_NAME_ENABLED);
-		if(colStatus_ == INVALID)
+	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
+		if(columnsInfo_[col].getName() == TableViewColumnInfo::COL_NAME_STATUS)
 		{
-			__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS
-					<< "' or '" << TableViewColumnInfo::COL_NAME_ENABLED
-					<< "' in table '" << tableName_ << ".'" << __E__;
-			ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
-			for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-				ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-				<< __E__;
-
-			__SS_THROW__;
+			colStatus_ = col;
+			return colStatus_;
 		}
-	}
-	return colStatus_;
-}
+	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
+		if(columnsInfo_[col].getName() == TableViewColumnInfo::COL_NAME_ENABLED)
+		{
+			colStatus_ = col;
+			return colStatus_;
+		}
+
+	//at this point not found!
+
+	__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS
+			<< "' or '" << TableViewColumnInfo::COL_NAME_ENABLED
+			<< "' in table '" << tableName_ << ".'" << __E__;
+	ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
+	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
+		ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
+		<< __E__;
+
+	__SS_ONLY_THROW__;
+
+} //end initColStatus()
 
 //==============================================================================
-// getOrInitColPriority
+// initColPriority
 //	if column not found throw error
-const unsigned int TableView::getOrInitColPriority(void)
+const unsigned int TableView::initColPriority(void)
 {
 	if(colPriority_ != INVALID)
 		return colPriority_;
@@ -1009,8 +1021,6 @@ const unsigned int TableView::getColStatus(void) const
 	if(colStatus_ != INVALID)
 		return colStatus_;
 
-
-
 	__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS
 			<< "' or '" << TableViewColumnInfo::COL_NAME_ENABLED
 			<< "' in table '" << tableName_ << ".'"
@@ -1022,6 +1032,8 @@ const unsigned int TableView::getColStatus(void) const
 		<< columnsInfo_[col].getName() << __E__;
 
 	ss << __E__;
+
+	ss << StringMacros::stackTrace() << __E__;
 
 	__SS_THROW__;
 } //end getColStatus()
@@ -1052,6 +1064,8 @@ const unsigned int TableView::getColPriority(void) const
 		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
 		   << __E__;
 	ss << __E__;
+
+	ss << StringMacros::stackTrace() << __E__;
 
 	__SS_ONLY_THROW__;  // keep it quiet
 }  // end getColPriority()
@@ -1428,6 +1442,9 @@ unsigned int TableView::findCol(const std::string& wildCardName) const
 	ss << "Existing columns:\n";
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
 		ss << "\t" << columnsInfo_[col].getName() << "\n";
+
+	ss << StringMacros::stackTrace() << __E__;
+
 	// Note: findCol gets purposely called by configuration GUI a lot looking for
 	// exceptions 	so may not want to print out
 	__SS_ONLY_THROW__;
@@ -2427,8 +2444,9 @@ int TableView::fillFromJSON(const std::string& json)
 	}
 
 	//__COUT__ << "Done!" << __E__;
-	__COUTV__(fillWithLooseColumnMatching_);
-	__COUTV__(tableName_); //  << "tableName_ = " << tableName_
+	//__COUTV__(fillWithLooseColumnMatching_);
+	//__COUTV__(tableName_); //  << "tableName_ = " << tableName_
+
 	if(!fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
 	{
 		__SS__ << "Can not ignore errors because not every column was found in the "

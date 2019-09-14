@@ -8,7 +8,6 @@
 
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
-//#include "otsdaq/GatewaySupervisor/ARTDAQCommandable.h"
 #include "otsdaq/TablePlugins/DesktopIconTable.h"
 #include "otsdaq/TablePlugins/XDAQContextTable.h"
 #include "otsdaq/WorkLoopManager/WorkLoopManager.h"
@@ -51,9 +50,6 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
     , SOAPMessenger(this)
     , RunControlStateMachine("GatewaySupervisor")
     , CorePropertySupervisorBase(this)
-    //, CorePropertySupervisorBase::theConfigurationManager_(new ConfigurationManager)
-    //,theConfigurationTableGroupKey_    (nullptr)
-    //, theArtdaqCommandable_(this)
     , stateMachineWorkLoopManager_(toolbox::task::bind(
           this, &GatewaySupervisor::stateMachineThread, "StateMachine"))
     , stateMachineSemaphore_(toolbox::BSem::FULL)
@@ -88,9 +84,6 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	          "StateMachineIterationBreakpoint");
 
 	xgi::bind(this, &GatewaySupervisor::statusRequest, "StatusRequest");
-	// xgi::bind(
-	//     this, &GatewaySupervisor::infoRequestResultHandler,
-	//     "InfoRequestResultHandler");
 	xgi::bind(this, &GatewaySupervisor::tooltipRequest, "TooltipRequest");
 
 	xoap::bind(this,
@@ -105,8 +98,6 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	           &GatewaySupervisor::supervisorSystemMessage,
 	           "SupervisorSystemMessage",
 	           XDAQ_NS_URI);
-	// xoap::bind(this, &GatewaySupervisor::supervisorGetUserInfo,
-	// "SupervisorGetUserInfo",        	XDAQ_NS_URI);
 	xoap::bind(this,
 	           &GatewaySupervisor::supervisorSystemLogbookEntry,
 	           "SupervisorSystemLogbookEntry",
@@ -116,12 +107,9 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	           "SupervisorLastConfigGroupRequest",
 	           XDAQ_NS_URI);
 
-	// xoap::bind(this, &GatewaySupervisor::supervisorHandleAsyncError,
-	// "FERunningError", XDAQ_NS_URI);
-
 	init();
 
-	// exit(1); //keep for syntax to exit ots
+	// exit(1); //keep for valid syntax to exit ots
 
 }  // end constructor
 
@@ -4072,17 +4060,18 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author,
 	    CgiDataUtilities::getData(cgiIn, "iconWindowURL");  // from GET
 	std::string iconPermissions =
 	    CgiDataUtilities::getData(cgiIn, "iconPermissions");  // from GET
-	std::string iconLinkedApp =
+	std::string windowLinkedApp =
 	    CgiDataUtilities::getData(cgiIn, "iconLinkedApp");  // from GET
-	unsigned int iconLinkedAppLID =
+	unsigned int windowLinkedAppLID =
 	    CgiDataUtilities::getDataAsInt(cgiIn, "iconLinkedAppLID");  // from GET
-	bool iconEnforceOneWindowInstance =
+	bool enforceOneWindowInstance =
 	    CgiDataUtilities::getData(cgiIn, "iconEnforceOneWindowInstance") == "1"
 	        ? true
 	        : false;  // from GET
 
-	std::string iconParameters =
-	    CgiDataUtilities::postData(cgiIn, "iconParameters");  // from POST
+	std::string windowParameters =
+			StringMacros::decodeURIComponent(
+					CgiDataUtilities::postData(cgiIn, "iconParameters"));  // from POST
 
 	__COUTV__(author);
 	__COUTV__(iconCaption);
@@ -4091,404 +4080,32 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author,
 	__COUTV__(iconImageURL);
 	__COUTV__(iconWindowURL);
 	__COUTV__(iconPermissions);
-	__COUTV__(iconLinkedApp);
-	__COUTV__(iconLinkedAppLID);
-	__COUTV__(iconEnforceOneWindowInstance);
+	__COUTV__(windowLinkedApp);
+	__COUTV__(windowLinkedAppLID);
+	__COUTV__(enforceOneWindowInstance);
 
-	__COUTV__(iconParameters);  // map: CSV list
-
-	// steps:
-	//	activate active context
-	//		modify desktop table and desktop parameters table
-	//		save, activate, and modify alias
+	__COUTV__(windowParameters);  // map: CSV list
 
 	ConfigurationManagerRW tmpCfgMgr(author);
 
-	ConfigurationManagerRW* cfgMgr = &tmpCfgMgr;  // just to match syntax in ConfiguratGUI
-	                                              //	tmpCfgMgr.activateTableGroup(
-	//			tmpCfgMgr.getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT),
-	//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
-	//			);
-
-	cfgMgr->restoreActiveTableGroups(true /*throwErrors*/,
-	                                 "" /*pathToActiveGroupsFile*/,
-	                                 true /*onlyLoadIfBackboneOrContext*/
-	);
-
-	// Steps:
-	//	- Create record in DesktopIconTable
-	//	- Create parameter records in DesktopWindowParameterTable
-	//	- Create new Context group
-	//	- Update Aliases from old Context group to new Context group
-	//	- Activate new group
-
-	TableEditStruct iconTable(DesktopIconTable::ICON_TABLE,
-	                          cfgMgr);  // Table ready for editing!
-	TableEditStruct parameterTable(DesktopIconTable::PARAMETER_TABLE,
-	                               cfgMgr);  // Table ready for editing!
-	TableEditStruct appTable(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
-	                               cfgMgr);  // Table ready for editing!
-
-	// Create record in DesktopIconTable
-	try
-	{
-		unsigned int row;
-		std::string  iconUID;
-
-		// create icon record
-		row = iconTable.tableView_->addRow(author, true /*incrementUniqueData*/, "generatedIcon");
-		iconUID =
-		    iconTable.tableView_->getDataView()[row][iconTable.tableView_->getColUID()];
-
-		__COUTV__(row);
-		__COUTV__(iconUID);
-
-		// set icon status true
-		iconTable.tableView_->setValueAsString(
-		    "1", row, iconTable.tableView_->getColStatus());
-
-		// set caption value
-		iconTable.tableView_->setURIEncodedValue(
-		    iconCaption,
-		    row,
-		    iconTable.tableView_->findCol(DesktopIconTable::COL_CAPTION));
-		// set alt text value
-		iconTable.tableView_->setURIEncodedValue(
-		    iconAltText,
-		    row,
-		    iconTable.tableView_->findCol(DesktopIconTable::COL_ALTERNATE_TEXT));
-		// set force one instance value
-		iconTable.tableView_->setValueAsString(
-		    iconEnforceOneWindowInstance ? "1" : "0",
-		    row,
-		    iconTable.tableView_->findCol(DesktopIconTable::COL_FORCE_ONLY_ONE_INSTANCE));
-		// set permissions value
-		iconTable.tableView_->setURIEncodedValue(
-			iconPermissions,
-			row,
-			iconTable.tableView_->findCol(DesktopIconTable::COL_PERMISSIONS));
-		// set image URL value
-		iconTable.tableView_->setURIEncodedValue(
-			iconImageURL,
-			row,
-			iconTable.tableView_->findCol(DesktopIconTable::COL_IMAGE_URL));
-		// set window URL value
-		iconTable.tableView_->setURIEncodedValue(
-			iconWindowURL,
-			row,
-			iconTable.tableView_->findCol(DesktopIconTable::COL_WINDOW_CONTENT_URL));
-		// set folder value
-		iconTable.tableView_->setURIEncodedValue(
+	ConfigurationSupervisorBase::handleAddDesktopIconXML(xmlOut,
+			&tmpCfgMgr,
+			iconCaption,
+			iconAltText,
 			iconFolderPath,
-			row,
-			iconTable.tableView_->findCol(DesktopIconTable::COL_FOLDER_PATH));
-
-		// create link to icon app
-		if(iconLinkedAppLID > 0)
-		{
-			__COUTV__(iconLinkedAppLID);
-
-			int appRow = appTable.tableView_->findRow(
-					appTable.tableView_->findCol(XDAQContextTable::colApplication_.colId_),
-					iconLinkedAppLID
-					);
-			iconLinkedApp = appTable.tableView_->getDataView()
-				        [appRow][appTable.tableView_->getColUID()];
-			__COUT__ << "Found app by LID: " << iconLinkedApp << __E__;
-		} //end linked app LID handling
-
-		if(iconLinkedApp != "" &&
-				iconLinkedApp != "undefined" &&
-				iconLinkedApp != TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
-		{
-			//first check that UID exists
-			//	if not, interpret as app class type and
-			//	check for unique 'enabled' app with class type
-			__COUTV__(iconLinkedApp);
-
-			if(!iconLinkedAppLID) //no need to check if LID lookup happened already
-			{
-				try
-				{
-					int appRow = appTable.tableView_->findRow(
-							appTable.tableView_->getColUID(),
-							iconLinkedApp);
-				}
-				catch(const std::runtime_error& e)
-				{
-					//attempt to treat like class, and take first match
-					try
-					{
-						int appRow = appTable.tableView_->findRow(
-								appTable.tableView_->findCol(XDAQContextTable::colApplication_.colClass_),
-								iconLinkedApp);
-						iconLinkedApp = appTable.tableView_->getDataView()
-							        [appRow][appTable.tableView_->getColUID()];
-					}
-					catch(...)
-					{
-						//failed to treat like class, so throw original
-						__SS__ << "Failed to create an icon linking to app '" <<
-								iconLinkedApp << ".' The following error occurred: " <<
-								e.what() << __E__;
-						__SS_THROW__;
-					}
-				}
-			}
-			__COUTV__(iconLinkedApp);
-
-			iconTable.tableView_->setValueAsString(
-				ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
-				row,
-				iconTable.tableView_->findCol(DesktopIconTable::COL_APP_LINK));
-			iconTable.tableView_->setValueAsString(
-				iconLinkedApp,
-				row,
-				iconTable.tableView_->findCol(DesktopIconTable::COL_APP_LINK_UID));
-		} //end create app link
-
-		// parse parameters
-		std::map<std::string,std::string> parameters;
-		StringMacros::getMapFromString(iconParameters, parameters);
-
-		// create link to icon parameters
-		if(parameters.size())
-		{
-			//set parameter link table
-			iconTable.tableView_->setValueAsString(
-				DesktopIconTable::PARAMETER_TABLE,
-				row,
-				iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_LINK));
-			//set parameter link Group ID
-			iconTable.tableView_->setValueAsString(
-				iconUID + "_Parameters",
-				row,
-				iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_LINK_GID));
-
-
-			__COUTV__(StringMacros::mapToString(parameters));
-
-			for(const auto& parameter: parameters)
-			{
-				// create parameter record
-				row = parameterTable.tableView_->addRow(author,
-						true /*incrementUniqueData*/, "generatedParameter");
-
-				// set parameter status true
-				parameterTable.tableView_->setValueAsString(
-				    "1", row, parameterTable.tableView_->getColStatus());
-				// set parameter Group ID
-				parameterTable.tableView_->setValueAsString(
-					iconUID + "_Parameters",
-					row,
-					parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_GID));
-				// set parameter key
-				parameterTable.tableView_->setURIEncodedValue(
-					parameter.first,
-					row,
-					parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_KEY));
-				// set parameter value
-				parameterTable.tableView_->setURIEncodedValue(
-					parameter.second,
-					row,
-					iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_VALUE));
-			} //end parameter loop
-
-
-			parameterTable.tableView_->print();
-			parameterTable.tableView_->init(); // verify new table (throws runtime_errors)
-
-		} //end create parameters link
-
-
-		iconTable.tableView_->print();
-		iconTable.tableView_->init(); // verify new table (throws runtime_errors)
-	}
-	catch(...)
-	{
-		__COUT__ << "Icon table errors while saving. Erasing all newly "
-				"created table versions."
-				<< __E__;
-		if(iconTable.createdTemporaryVersion_)  // if temporary version created here
-		{
-			__COUT__ << "Erasing temporary version " << iconTable.tableName_ << "-v"
-					<< iconTable.temporaryVersion_ << __E__;
-			// erase with proper version management
-			cfgMgr->eraseTemporaryVersion(iconTable.tableName_,
-					iconTable.temporaryVersion_);
-		}
-
-		if(parameterTable.createdTemporaryVersion_)  // if temporary version created here
-		{
-			__COUT__ << "Erasing temporary version " << parameterTable.tableName_ << "-v"
-					<< parameterTable.temporaryVersion_ << __E__;
-			// erase with proper version management
-			cfgMgr->eraseTemporaryVersion(parameterTable.tableName_,
-					parameterTable.temporaryVersion_);
-		}
-
-		if(appTable.createdTemporaryVersion_)  // if temporary version created here
-		{
-			__COUT__ << "Erasing temporary version " << appTable.tableName_ << "-v"
-					<< appTable.temporaryVersion_ << __E__;
-			// erase with proper version management
-			cfgMgr->eraseTemporaryVersion(appTable.tableName_,
-					appTable.temporaryVersion_);
-		}
-
-		throw; // re-throw
-	} //end catch
-
-	// all edits are complete and tables verified
-	//	need to save all edits properly
-	//	if not modified, discard
-
-	// getContextMemberNames
-	// saveNewTableGroup
+			iconImageURL,
+			iconWindowURL,
+			iconPermissions,
+			windowLinkedApp /*= ""*/,
+			windowLinkedAppLID /*= 0*/,
+			enforceOneWindowInstance /*= false*/,
+			windowParameters /*= ""*/);
 
 
 
 }  // end handleAddDesktopIconRequest()
 
 
-//========================================================================================================================
-// saveModifiedVersionXML
-//
-// once source version has been modified in temporary version
-//	this function finishes it off.
-TableVersion GatewaySupervisor::saveModifiedVersionXML(
-    HttpXmlDocument&        xmlOut,
-    ConfigurationManagerRW* cfgMgr,
-    const std::string&      tableName,
-    TableVersion            originalVersion,
-    bool                    makeTemporary,
-    TableBase*              table,
-    TableVersion            temporaryModifiedVersion,
-    bool                    ignoreDuplicates,
-    bool                    lookForEquivalent)
-{
-	bool needToEraseTemporarySource =
-	    (originalVersion.isTemporaryVersion() && !makeTemporary);
-
-	// check for duplicate tables already in cache
-	if(!ignoreDuplicates)
-	{
-		__COUT__ << "Checking for duplicate tables..." << __E__;
-
-		TableVersion duplicateVersion;
-
-		{
-			//"DEEP" checking
-			//	load into cache 'recent' versions for this table
-			//		'recent' := those already in cache, plus highest version numbers not
-			// in  cache
-			const std::map<std::string, TableInfo>& allTableInfo =
-			    cfgMgr->getAllTableInfo();  // do not refresh
-
-			auto versionReverseIterator =
-			    allTableInfo.at(tableName).versions_.rbegin();  // get reverse iterator
-			__COUT__ << "Filling up cached from " << table->getNumberOfStoredViews()
-			             << " to max count of " << table->MAX_VIEWS_IN_CACHE << __E__;
-			for(; table->getNumberOfStoredViews() < table->MAX_VIEWS_IN_CACHE &&
-			      versionReverseIterator != allTableInfo.at(tableName).versions_.rend();
-			    ++versionReverseIterator)
-			{
-				__COUT__ << "Versions in reverse order " << *versionReverseIterator
-				             << __E__;
-				try
-				{
-					cfgMgr->getVersionedTableByName(
-					    tableName, *versionReverseIterator);  // load to cache
-				}
-				catch(const std::runtime_error& e)
-				{
-					__COUT__
-					    << "Error loadiing historical version, but ignoring: " << e.what()
-					    << __E__;
-				}
-			}
-		}
-
-		__COUT__ << "Checking duplicate..." << __E__;
-
-		duplicateVersion = table->checkForDuplicate(
-		    temporaryModifiedVersion,
-		    (!originalVersion.isTemporaryVersion() && !makeTemporary)
-		        ? TableVersion()
-		        :  // if from persistent to persistent, then include original version in
-		           // search
-		        originalVersion);
-
-		if(lookForEquivalent && !duplicateVersion.isInvalid())
-		{
-			// found an equivalent!
-			__COUT__ << "Equivalent table found in version v" << duplicateVersion
-			             << __E__;
-
-			// if duplicate version was temporary, do not use
-			if(duplicateVersion.isTemporaryVersion() && !makeTemporary)
-			{
-				__COUT__ << "Need persistent. Duplicate version was temporary. "
-				                "Abandoning duplicate."
-				             << __E__;
-				duplicateVersion = TableVersion();  // set invalid
-			}
-			else
-			{
-				// erase and return equivalent version
-
-				// erase modified equivalent version
-				cfgMgr->eraseTemporaryVersion(tableName, temporaryModifiedVersion);
-
-				// erase original if needed
-				if(needToEraseTemporarySource)
-					cfgMgr->eraseTemporaryVersion(tableName, originalVersion);
-
-				xmlOut.addTextElementToData("savedName", tableName);
-				xmlOut.addTextElementToData("savedVersion", duplicateVersion.toString());
-				xmlOut.addTextElementToData("foundEquivalentVersion", "1");
-
-				__COUT__ << "\t\t equivalent AssignedVersion: " << duplicateVersion
-				             << __E__;
-
-				return duplicateVersion;
-			}
-		}
-
-		if(!duplicateVersion.isInvalid())
-		{
-			__SS__ << "This version of table '" << tableName
-			           << "' is identical to another version currently cached v"
-			           << duplicateVersion << ". No reason to save a duplicate." << __E__;
-			__COUT_ERR__ << "\n" << ss.str();
-
-			// delete temporaryModifiedVersion
-			table->eraseView(temporaryModifiedVersion);
-			__SS_THROW__;
-		}
-
-		__COUT__ << "Check for duplicate tables complete." << __E__;
-	}
-
-	if(makeTemporary)
-		__COUT__ << "\t\t**************************** Save as temporary table version"
-		             << __E__;
-	else
-		__COUT__ << "\t\t**************************** Save as new table version"
-		             << __E__;
-
-	TableVersion newAssignedVersion =
-	    cfgMgr->saveNewTable(tableName, temporaryModifiedVersion, makeTemporary);
-
-	if(needToEraseTemporarySource)
-		cfgMgr->eraseTemporaryVersion(tableName, originalVersion);
-
-	xmlOut.addTextElementToData("savedName", tableName);
-	xmlOut.addTextElementToData("savedVersion", newAssignedVersion.toString());
-
-	__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << __E__;
-	return newAssignedVersion;
-} //end saveModifiedVersionXML()
 
 
 

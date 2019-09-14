@@ -173,11 +173,11 @@ class WebUsers
 			return permissionLevel_;
 		}  // end getGroupPermissionLevel()
 
-		inline bool isInactive()
+		inline bool isInactive() const
 		{
 			return permissionLevel_ == WebUsers::PERMISSION_LEVEL_INACTIVE;
 		}
-		inline bool isAdmin()
+		inline bool isAdmin() const
 		{
 			return permissionLevel_ == WebUsers::PERMISSION_LEVEL_ADMIN;
 		}

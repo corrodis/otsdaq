@@ -40,7 +40,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 {
 	// clang-format off
   public:
-	ConfigurationManagerRW(std::string username);
+	ConfigurationManagerRW(const std::string& username);
 
 	//==============================================================================
 	// Getters
