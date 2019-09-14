@@ -277,7 +277,7 @@ function killproc
 {
 	pid=$1
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Rev}Killing PID${Reset} ${pid}"
-	count=5
+	count=10
 	kill -0 ${pid} >/dev/null 2>&1
 	while [ $? -eq 0 ]; do
 		kill ${pid} >/dev/null 2>&1
