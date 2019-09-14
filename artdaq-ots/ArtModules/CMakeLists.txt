@@ -30,5 +30,24 @@ simple_plugin(JSONDispatcher "module"
   MF_MessageLogger
 )
 
+
+simple_plugin(OtsInput "source"
+  artdaq-ots_Overlays
+  artdaq-core_Core
+  artdaq-core_Utilities
+  rt
+  artdaq_DAQdata
+  artdaq-utilities_Plugins
+  artdaq_ArtModules
+  art_Framework_Core
+  art_Framework_IO_Sources
+  art_Framework_Principal
+  art_Persistency_Provenance
+  art_Utilities
+  MF_MessageLogger
+  ${CETLIB_EXCEPT}
+)
+
+
 install_headers()
 install_source()

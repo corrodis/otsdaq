@@ -5,11 +5,6 @@
 #include <string>
 #include <vector>
 
-namespace
-{
-static std::vector<std::string> const names{"MISSED", "UDP", "UNKNOWN"};
-}
-
 ots::FragmentType ots::toFragmentType(std::string t_string)
 {
 	std::transform(t_string.begin(), t_string.end(), t_string.begin(), toupper);
@@ -30,4 +25,14 @@ std::string ots::fragmentTypeToString(FragmentType val)
 	{
 		return "INVALID/UNKNOWN";
 	}
+}
+
+std::map<artdaq::Fragment::type_t, std::string> ots::makeFragmentTypeMap()
+{
+	auto output = artdaq::Fragment::MakeSystemTypeMap();
+	for(auto name : names)
+	{
+		output[toFragmentType(name)] = name;
+	}
+	return output;
 }

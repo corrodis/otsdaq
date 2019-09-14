@@ -269,6 +269,8 @@ void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs& output, size_t totalSi
 	                                                    ots::detail::FragmentType::UDP,
 	                                                    metadata));
 
+	ev_counter_inc();
+
 	TLOG(TLVL_TRACE) << "Creating UDPFragmentWriter";
 	// We now have a fragment to contain this event:
 	ots::UDPFragmentWriter thisFrag(*output.back());

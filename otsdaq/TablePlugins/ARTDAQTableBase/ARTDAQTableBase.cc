@@ -437,6 +437,9 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 			        .getValue()
 			    << "\n";
 
+				OUT << "destinations: {\n"
+				    << "}\n\n";  // end destinations
+
 			POPTAB;
 			OUT << "}\n\n";  // end NetMonTransportServiceInterface
 
@@ -490,13 +493,6 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 				    "outputParameter" /*parameterType*/,
 				    false /*onlyInsertAtTableParameters*/,
 				    true /*includeAtTableParameters*/);
-
-				if(moduleType.find("BinaryNetOutput") != std::string::npos ||
-				   moduleType.find("RootNetOutput") != std::string::npos)
-				{
-					OUT << "destinations: {\n"
-					    << "}\n\n";  // end destinations
-				}
 
 				POPTAB;
 				OUT << "}\n\n";  // end output module

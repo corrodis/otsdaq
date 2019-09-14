@@ -707,9 +707,10 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
 	getDAQState_();
-	if(daqinterface_state_ != "stopped")
+	if(daqinterface_state_ != "stopped" && daqinterface_state_ != "")
 	{
-		__SS__ << "Cannot configure DAQInterface because it is in the wrong state!"
+		__SS__ << "Cannot configure DAQInterface because it is in the wrong state"
+		       << " (" << daqinterface_state_ << " != stopped)!"
 		       << __E__;
 		__SUP_SS_THROW__
 	}
@@ -983,8 +984,7 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 			getDAQState_();
 			std::string state_before = daqinterface_state_;
 
-			if(daqinterface_state_ != "stopped" && daqinterface_state_ != "booting" &&
-			   daqinterface_state_ != "terminating")
+			if(daqinterface_state_ == "running" || daqinterface_state_ == "ready" || daqinterface_state_ =="booted")
 			{
 				try
 				{
