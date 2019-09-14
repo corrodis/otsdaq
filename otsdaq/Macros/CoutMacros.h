@@ -62,7 +62,9 @@
 #define __COUT_WARN__ 		__COUT_TYPE__(TLVL_WARNING) << __COUT_HDR__
 #define __COUT_INFO__ 		__COUT_TYPE__(TLVL_INFO) 	<< __COUT_HDR__
 #define __COUT__ 			__COUT_TYPE__(TLVL_DEBUG) 	<< __COUT_HDR__
+#define __COUTT__           __COUT_TYPE__(TLVL_TRACE) 	<< __COUT_HDR__
 #define __COUTV__(X) 		__COUT__ << QUOTE(X) << " = " << X << __E__
+#define __COUTTV__(X) 		__COUTT__ << QUOTE(X) << " = " << X << __E__
 
 
 //////// ==============================================================
