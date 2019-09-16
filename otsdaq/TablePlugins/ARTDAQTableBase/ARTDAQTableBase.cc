@@ -494,6 +494,12 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 				    false /*onlyInsertAtTableParameters*/,
 				    true /*includeAtTableParameters*/);
 
+				if (outputPlugin.second.getNode("outputModuleType").getValue() == "BinaryNetOutput")
+				{
+					OUT << "destinations: {\n"
+					    << "}\n\n";  // end destinations
+				}
+
 				POPTAB;
 				OUT << "}\n\n";  // end output module
 
