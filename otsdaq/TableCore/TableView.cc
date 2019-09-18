@@ -65,6 +65,23 @@ TableView& TableView::copy(const TableView&   src,
 	//RAR remove init() check, because usually copy() is only the first step
 	//	in a series of changes that result in another call to init()
 	//init();  // verify consistency
+
+	initColUID();  // setup UID column
+	try
+	{
+		initColStatus();  // setup Status column
+	}
+	catch(...)
+	{
+	}  // ignore no Status column
+	try
+	{
+		initColPriority();  // setup Priority column
+	}
+	catch(...)
+	{
+	}  // ignore no Priority column
+
 	return *this;
 }
 
@@ -946,8 +963,11 @@ const unsigned int TableView::getColUID(void) const
 
 	__SS__ << ("Missing UID Column in config named " + tableName_ +
 	           ". (Possibly TableView was just not initialized?" +
-	           "This is the const call so can not alter class members)")
+	           " This is the const call so can not alter class members)")
 	       << __E__;
+
+	ss << StringMacros::stackTrace() << __E__;
+
 	__SS_THROW__;
 }
 
@@ -2406,12 +2426,12 @@ int TableView::fillFromJSON(const std::string& json)
 
 						if(ccnt >= getNumberOfColumns())
 						{
-							__SS__
-							    << "\n\nInvalid column in JSON source data: " << currKey
+							__COUT__
+							    << "Invalid column in JSON source data: " << currKey
 							    << " not found in column names of table named "
 							    << getTableName() << "."
 							    << __E__;  // input data doesn't match config description
-							__COUT__ << "\n" << ss.str();
+
 							// CHANGED on 11/10/2016
 							//	to.. try just not populating data instead of error
 							++sourceColumnMismatchCount_;  // but count errors

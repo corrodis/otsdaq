@@ -13,6 +13,9 @@ namespace ots
 class ConfigurationSupervisorBase
 {
 public:
+
+	static void 				getConfigurationStatusXML(HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr);
+
 	static TableVersion 		saveModifiedVersionXML(HttpXmlDocument&        xmlOut,
 		                                    ConfigurationManagerRW* cfgMgr,
 		                                    const std::string&      tableName,

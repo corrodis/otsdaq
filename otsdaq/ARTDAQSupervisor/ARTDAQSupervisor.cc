@@ -1005,7 +1005,7 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 						break;
 					}
 				}
-				catch(cet::exception ex)
+				catch(cet::exception& ex)
 				{
 					runner_running_ = false;
 					lk.unlock();
@@ -1016,7 +1016,7 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 					__SUP_SS_THROW__;
 					break;
 				}
-				catch(std::exception ex)
+				catch(std::exception& ex)
 				{
 					runner_running_ = false;
 					lk.unlock();

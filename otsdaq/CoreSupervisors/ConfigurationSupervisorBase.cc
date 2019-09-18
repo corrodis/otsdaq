@@ -8,6 +8,30 @@ using namespace ots;
 
 
 //========================================================================================================================
+// getConfigurationStatusXML
+void ConfigurationSupervisorBase::getConfigurationStatusXML(HttpXmlDocument&        xmlOut,
+                                                      ConfigurationManagerRW* cfgMgr)
+{
+	std::map<std::string /*type*/, std::pair<std::string /*groupName*/, TableGroupKey>>
+	activeGroupMap = cfgMgr->getActiveTableGroups();
+
+	for(auto& type : activeGroupMap)
+	{
+		xmlOut.addTextElementToData(type.first + "-ActiveGroupName", type.second.first);
+		xmlOut.addTextElementToData(type.first + "-ActiveGroupKey",
+				type.second.second.toString());
+		//__SUP_COUT__ << "ActiveGroup " << type.first << " " << type.second.first << "("
+		//<< type.second.second << ")" << __E__;
+	}
+
+	// always add version tracking bool
+	xmlOut.addTextElementToData(
+			"versionTracking",
+			ConfigurationInterface::isVersionTrackingEnabled() ? "ON" : "OFF");
+
+}  //end getConfigurationStatusXML()
+
+//========================================================================================================================
 // handleCreateTableXML
 //
 //	Save the detail of specific table specified
@@ -277,6 +301,7 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(
 				xmlOut.addTextElementToData("savedName", tableName);
 				xmlOut.addTextElementToData("savedVersion", duplicateVersion.toString());
 				xmlOut.addTextElementToData("foundEquivalentVersion", "1");
+				xmlOut.addTextElementToData(tableName + "_foundEquivalentVersion", "1");
 
 				__COUT__ << "\t\t equivalent AssignedVersion: " << duplicateVersion
 				             << __E__;
@@ -899,6 +924,8 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 										const std::string&      windowParameters /*= ""*/)
 try
 {
+	cfgMgr->getAllTableInfo(true /*refresh*/);
+
 	const std::string& author = cfgMgr->getUsername();
 
 	__COUTV__(author);
@@ -935,14 +962,28 @@ try
 	{
 		std::map<std::string, TableVersion> activeTables = cfgMgr->getActiveVersions();
 		for(auto& table : cfgMgr->getContextMemberNames())
+		try
 		{
 			__COUT__ << table << " v" << activeTables.at(table) << __E__;
 			contextGroupMembers[table] = activeTables.at(table);
 		}
+		catch(...)
+		{
+			__SS__ << "Error! Could not find Context member table '" << table
+					<< ".' All Context members must be present to add a desktop icon." << __E__;
+			__SS_THROW__;
+		}
 		for(auto& table : cfgMgr->getBackboneMemberNames())
+		try
 		{
 			__COUT__ << table << " v" << activeTables.at(table) << __E__;
 			backboneGroupMembers[table] = activeTables.at(table);
+		}
+		catch(...)
+		{
+			__SS__ << "Error! Could not find Backbone member table '" << table
+					<< ".' All Backbone members must be present to add a desktop icon." << __E__;
+			__SS_THROW__;
 		}
 	}
 
@@ -1204,12 +1245,43 @@ try
 	// all edits are complete and tables verified
 
 	//Remaining steps:
+	//	save tables
 	//	save new context group and activate it
 	//	check for aliases ...
 	//		if tables aliased.. update table aliases in backbone
 	//		if context group aliased, update group aliases in backbone
 	//	if backbone modified, save group and activate it
 
+	__COUT__ << "Original version is " << iconTable.tableName_ << "-v"
+			<< iconTable.originalVersion_ << __E__;
+	__COUT__ << "Original version is " << parameterTable.tableName_ << "-v"
+			<< parameterTable.originalVersion_ <<  __E__;
+
+	contextGroupMembers[DesktopIconTable::ICON_TABLE] = ConfigurationSupervisorBase::saveModifiedVersionXML(
+			xmlOut,
+			cfgMgr,
+			iconTable.tableName_,
+			iconTable.originalVersion_,
+			true /*make temporary*/,
+			iconTable.table_,
+			iconTable.temporaryVersion_,
+			true /*ignoreDuplicates*/);  // save persistent version properly
+	contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] = ConfigurationSupervisorBase::saveModifiedVersionXML(
+			xmlOut,
+			cfgMgr,
+			parameterTable.tableName_,
+			parameterTable.originalVersion_,
+			true /*make temporary*/,
+			parameterTable.table_,
+			parameterTable.temporaryVersion_,
+			true /*ignoreDuplicates*/);  // save persistent version properly
+
+	__COUT__ << "Temporary target version is " << iconTable.tableName_ << "-v"
+			<< contextGroupMembers[DesktopIconTable::ICON_TABLE] << "-v"
+			<< iconTable.temporaryVersion_ << __E__;
+	__COUT__ << "Temporary target version is " << parameterTable.tableName_ << "-v"
+			<< contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] << "-v"
+			<< parameterTable.temporaryVersion_ <<  __E__;
 
 	contextGroupMembers[DesktopIconTable::ICON_TABLE] = ConfigurationSupervisorBase::saveModifiedVersionXML(
 		    xmlOut,
@@ -1219,7 +1291,8 @@ try
 		    false /*make temporary*/,
 			iconTable.table_,
 			iconTable.temporaryVersion_,
-			false /*ignoreDuplicates*/);  // save persistent version properly
+			false /*ignoreDuplicates*/,
+			true /*lookForEquivalent*/);  // save persistent version properly
 	contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] = ConfigurationSupervisorBase::saveModifiedVersionXML(
 		    xmlOut,
 		    cfgMgr,
@@ -1228,7 +1301,8 @@ try
 			false /*make temporary*/,
 			parameterTable.table_,
 			parameterTable.temporaryVersion_,
-			false /*ignoreDuplicates*/);  // save persistent version properly
+			false /*ignoreDuplicates*/,
+			true /*lookForEquivalent*/);  // save persistent version properly
 
 	__COUT__ << "Final target version is " << iconTable.tableName_ << "-v"
             << contextGroupMembers[DesktopIconTable::ICON_TABLE] << __E__;
@@ -1241,10 +1315,223 @@ try
 	}
 
 
+	__COUT__ << "Checking for duplicate Context groups..." << __E__;
+	TableGroupKey newContextKey =
+	    cfgMgr->findTableGroup(contextGroupName, contextGroupMembers);
 
-	//TableGroupKey newContextKey = cfgMgr->saveNewTableGroup(contextGroupName,contextGroupMembers);
+	if(!newContextKey.isInvalid())
+	{
+		__COUT__ << "Found equivalent group key (" << newContextKey << ") for "
+		             << contextGroupName << "." << __E__;
+		xmlOut.addTextElementToData(contextGroupName + "_foundEquivalentKey", "1");  // indicator
+	}
+	else
+	{
+		newContextKey = cfgMgr->saveNewTableGroup(contextGroupName,contextGroupMembers);
+		__COUT__ << "Saved new Context group key (" << newContextKey << ") for "
+				<< contextGroupName << "." << __E__;
+	}
 
-	//__COUTV__(newContextKey);
+	xmlOut.addTextElementToData("contextGroupName", contextGroupName);
+	xmlOut.addTextElementToData("contextGroupKey", newContextKey.toString());
+
+	//	check for aliases of original group key and original table version
+
+	__COUT__ << "Original version is " << iconTable.tableName_ << "-v"
+			<< iconTable.originalVersion_ << __E__;
+	__COUT__ << "Original version is " << parameterTable.tableName_ << "-v"
+			<< parameterTable.originalVersion_ <<  __E__;
+
+	bool groupAliasChange = false;
+	bool tableAliasChange = false;
+
+	{ //check group aliases ... a la ConfigurationGUISupervisor::handleSetGroupAliasInBackboneXML
+
+		TableBase*   table           	= cfgMgr->getTableByName(ConfigurationManager::GROUP_ALIASES_TABLE_NAME);
+		TableVersion originalVersion  	= backboneGroupMembers[ConfigurationManager::GROUP_ALIASES_TABLE_NAME];
+		TableVersion temporaryVersion 	= table->createTemporaryView(originalVersion);
+		TableView*   configView 		= table->getTemporaryView(temporaryVersion);
+
+		unsigned int col;
+		unsigned int row = 0;
+
+		std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
+				cfgMgr->getNode(ConfigurationManager::GROUP_ALIASES_TABLE_NAME).getChildren();
+		std::string groupName, groupKey;
+		for(auto& aliasNodePair : aliasNodePairs)
+		{
+			groupName = aliasNodePair.second.getNode("GroupName").getValueAsString();
+			groupKey  = aliasNodePair.second.getNode("GroupKey").getValueAsString();
+
+			__COUT__ << "Group Alias: " << aliasNodePair.first << " => " << groupName <<
+					"(" << groupKey << "); row=" << row << __E__;
+
+			if(groupName == contextGroupName && TableGroupKey(groupKey) == originalContextGroupKey)
+			{
+				__COUT__ << "Found alias! Changing group key." << __E__;
+
+				groupAliasChange = true;
+
+				configView->setValueAsString(
+						newContextKey.toString(),
+						row,
+						configView->findCol("GroupKey")
+						);
+			}
+
+			++row;
+		}
+
+		if(groupAliasChange)
+		{
+			std::stringstream ss;
+			configView->print(ss);
+			__COUT__ << ss.str();
+
+			// save or find equivalent
+			backboneGroupMembers[ConfigurationManager::GROUP_ALIASES_TABLE_NAME] =
+					ConfigurationSupervisorBase::saveModifiedVersionXML(xmlOut,
+						cfgMgr,
+						table->getTableName(),
+						originalVersion,
+						false /*makeTemporary*/,
+						table,
+						temporaryVersion,
+						false /*ignoreDuplicates*/,
+						true /*lookForEquivalent*/);
+
+			__COUT__ << "Original version is " << table->getTableName() << "-v"
+					<< originalVersion << " and new version is v" <<
+					backboneGroupMembers[ConfigurationManager::GROUP_ALIASES_TABLE_NAME] << __E__;
+		}
+
+	} //end group alias check
+
+	{ //check version aliases
+
+		TableBase*   table           	= cfgMgr->getTableByName(ConfigurationManager::VERSION_ALIASES_TABLE_NAME);
+		TableVersion originalVersion  	= backboneGroupMembers[ConfigurationManager::VERSION_ALIASES_TABLE_NAME];
+		TableVersion temporaryVersion 	= table->createTemporaryView(originalVersion);
+		TableView*   configView 		= table->getTemporaryView(temporaryVersion);
+
+		unsigned int col;
+		unsigned int row = 0;
+
+		std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
+				cfgMgr->getNode(ConfigurationManager::VERSION_ALIASES_TABLE_NAME).getChildren();
+		std::string tableName, tableVersion;
+		for(auto& aliasNodePair : aliasNodePairs)
+		{
+			tableName = aliasNodePair.second.getNode("TableName").getValueAsString();
+			tableVersion  = aliasNodePair.second.getNode("TableVersion").getValueAsString();
+
+			__COUT__ << "Table Alias: " << aliasNodePair.first << " => " << tableName <<
+					"-v" << tableVersion << "" << __E__;
+
+			if(tableName == DesktopIconTable::ICON_TABLE &&
+					TableVersion(tableVersion) == iconTable.originalVersion_)
+			{
+				__COUT__ << "Found alias! Changing icon table version alias." << __E__;
+
+				tableAliasChange = true;
+
+				configView->setValueAsString(
+						contextGroupMembers[DesktopIconTable::ICON_TABLE].toString(),
+						row,
+						configView->findCol("TableVersion")
+				);
+			}
+			else if(tableName == DesktopIconTable::PARAMETER_TABLE &&
+					TableVersion(tableVersion) == parameterTable.originalVersion_)
+			{
+				__COUT__ << "Found alias! Changing icon parameter table version alias." << __E__;
+
+				tableAliasChange = true;
+
+				configView->setValueAsString(
+						contextGroupMembers[DesktopIconTable::PARAMETER_TABLE].toString(),
+						row,
+						configView->findCol("TableVersion")
+				);
+			}
+
+			++row;
+
+		}
+
+		if(tableAliasChange)
+		{
+			std::stringstream ss;
+			configView->print(ss);
+			__COUT__ << ss.str();
+
+			// save or find equivalent
+			backboneGroupMembers[ConfigurationManager::VERSION_ALIASES_TABLE_NAME] =
+					ConfigurationSupervisorBase::saveModifiedVersionXML(xmlOut,
+							cfgMgr,
+							table->getTableName(),
+							originalVersion,
+							false /*makeTemporary*/,
+							table,
+							temporaryVersion,
+							false /*ignoreDuplicates*/,
+							true /*lookForEquivalent*/);
+
+			__COUT__ << "Original version is " << table->getTableName() << "-v"
+					<< originalVersion << " and new version is v" <<
+					backboneGroupMembers[ConfigurationManager::VERSION_ALIASES_TABLE_NAME] << __E__;
+		}
+
+	} //end table version alias check
+
+	//	if backbone modified, save group and activate it
+	if(groupAliasChange || tableAliasChange)
+	{
+		for(auto& table : backboneGroupMembers)
+		{
+			__COUT__ << table.first << " v" << table.second << __E__;
+		}
+	}
+
+	__COUT__ << "Checking for duplicate Backbone groups..." << __E__;
+	TableGroupKey newBackboneKey =
+			cfgMgr->findTableGroup(backboneGroupName, backboneGroupMembers);
+
+	if(!newBackboneKey.isInvalid())
+	{
+		__COUT__ << "Found equivalent group key (" << newBackboneKey << ") for "
+				<< backboneGroupName << "." << __E__;
+		xmlOut.addTextElementToData(backboneGroupName + "_foundEquivalentKey", "1");  // indicator
+	}
+	else
+	{
+		newBackboneKey = cfgMgr->saveNewTableGroup(backboneGroupName,backboneGroupMembers);
+		__COUT__ << "Saved new Backbone group key (" << newBackboneKey << ") for "
+				<< backboneGroupName << "." << __E__;
+	}
+
+	xmlOut.addTextElementToData("backboneGroupName", backboneGroupName);
+	xmlOut.addTextElementToData("backboneGroupKey", newBackboneKey.toString());
+
+
+	//Now need to activate Context and Backbone group
+	__COUT__ << "Activating Context group key (" << newContextKey << ") for "
+				<< contextGroupName << "." << __E__;
+	__COUT__ << "Activating Backbone group key (" << newBackboneKey << ") for "
+					<< backboneGroupName << "." << __E__;
+
+	//acquire all active groups and ignore errors, so that activateTableGroup does not erase other active groups
+	cfgMgr->restoreActiveTableGroups(false /*throwErrors*/,
+	                                 "" /*pathToActiveGroupsFile*/,
+	                                 false /*onlyLoadIfBackboneOrContext*/
+	);
+
+	//activate group
+	cfgMgr->activateTableGroup(contextGroupName, newContextKey);
+	cfgMgr->activateTableGroup(backboneGroupName, newBackboneKey);
+
+	// always add active table groups to xml response
+	ConfigurationSupervisorBase::getConfigurationStatusXML(xmlOut,cfgMgr);
 
 } //end handleAddDesktopIconXML()
 catch(std::runtime_error& e)

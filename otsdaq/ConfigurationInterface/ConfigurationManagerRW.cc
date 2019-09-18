@@ -199,8 +199,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	// if(accumulatedErrors)
 	//	*accumulatedErrors = "";
 
-	//if table and group info already populated, then just return
-	if(allTableInfo_.size() && allGroupInfo_.size() && !refresh)
+	if(!refresh)
 		return allTableInfo_;
 
 	// else refresh!
@@ -559,7 +558,8 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupNa
 	            ? theConfigurationTableGroupKey_->toString().c_str()
 	            : "-1");
 	fclose(fp);
-}
+
+} // end activateTableGroup()
 
 //==============================================================================
 // createTemporaryBackboneView
