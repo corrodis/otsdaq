@@ -97,7 +97,7 @@ class CorePropertySupervisorBase
 		const std::string RequireUserLockRequestTypes = "RequireUserLockRequestTypes";
 		const std::string AutomatedRequestTypes       = "AutomatedRequestTypes";
 		const std::string AllowNoLoginRequestTypes    = "AllowNoLoginRequestTypes";
-		const std::string RequireSecurityRequestTypes    = "RequireSecurityRequestTypes";
+		const std::string RequireSecurityRequestTypes = "RequireSecurityRequestTypes";
 
 		const std::string NoXmlWhiteSpaceRequestTypes = "NoXmlWhiteSpaceRequestTypes";
 		const std::string NonXMLRequestTypes          = "NonXMLRequestTypes";
