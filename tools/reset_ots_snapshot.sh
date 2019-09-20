@@ -22,7 +22,7 @@ echo " _|_"
 echo " \ /"
 echo "  - "
 echo -e `date +"%h%y %T"` "reset_ots_snapshot.sh [${LINENO}]  \t ========================================================"
-echo -e `date +"%h%y %T"` "reset_ots_snapshot.sh [${LINENO}]  \t\t usage: --snapshot <snapshot name>
+echo -e `date +"%h%y %T"` "reset_ots_snapshot.sh [${LINENO}]  \t\t usage: --snapshot <snapshot name>"
 echo -e `date +"%h%y %T"` "reset_ots_snapshot.sh [${LINENO}]  \t"
 echo -e `date +"%h%y %T"` "reset_ots_snapshot.sh [${LINENO}]  \t\t note: snapshot will default to '${SNAPSHOT}'"
 echo -e `date +"%h%y %T"` "reset_ots_snapshot.sh [${LINENO}]  \t"
@@ -77,4 +77,9 @@ ots  #launch normal mode and open firefox
 echo
 echo
 echo -e `date +"%h%y %T"` "reset_ots_snapshot.sh [${LINENO}]  \t Snapshot reset script complete."
+
+
+
+
+
 
