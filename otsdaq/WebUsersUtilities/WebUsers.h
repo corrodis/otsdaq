@@ -187,7 +187,7 @@ class WebUsers
 		std::string        cookieCode_;
 
 		bool automatedCommand_, NonXMLRequestType_, NoXmlWhiteSpace_;
-		bool checkLock_, requireLock_, allowNoUser_;
+		bool checkLock_, requireLock_, allowNoUser_, requireSecurity_;
 
 		std::set<std::string> groupsAllowed_, groupsDisallowed_;
 
@@ -219,7 +219,8 @@ class WebUsers
 	                               std::ostringstream*        out,
 	                               HttpXmlDocument*           xmldoc,
 	                               WebUsers::RequestUserInfo& userInfo,
-	                               bool                       isWizardMode = false);
+	                               bool                       isWizardMode = false,
+								   const std::string& 		  wizardModeSequence = "");
 
 	bool        createNewAccount(const std::string& username,
 	                             const std::string& displayName,

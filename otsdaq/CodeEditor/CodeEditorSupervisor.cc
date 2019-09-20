@@ -49,6 +49,9 @@ void CodeEditorSupervisor::forceSupervisorPropertyValues()
 	CorePropertySupervisorBase::setSupervisorProperty(
 	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireUserLockRequestTypes,
 	    "codeEditor");
+	CorePropertySupervisorBase::setSupervisorProperty(
+	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireSecurityRequestTypes,
+	    "codeEditor");
 
 }  // end forceSupervisorPropertyValues()
 

@@ -559,6 +559,8 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		    userInfo.requestType_, propertyStruct_.RequireUserLockRequestTypes);
 		userInfo.allowNoUser_ = StringMacros::inWildCardSet(
 		    userInfo.requestType_, propertyStruct_.AllowNoLoginRequestTypes);
+		userInfo.requireSecurity_ = StringMacros::inWildCardSet(
+		    userInfo.requestType_, propertyStruct_.RequireSecurityRequestTypes);
 
 		userInfo.permissionsThreshold_ = -1;  // default to max
 		try

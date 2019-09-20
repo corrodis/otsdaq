@@ -237,11 +237,45 @@ bool WebUsers::checkRequestAccess(cgicc::Cgicc&              cgi,
                                   std::ostringstream*        out,
                                   HttpXmlDocument*           xmldoc,
                                   WebUsers::RequestUserInfo& userInfo,
-                                  bool                       isWizardMode)
+                                  bool                       isWizardMode /* = false */,
+								  const std::string& 		 wizardModeSequence /* = "" */)
 {
 	// steps:
 	// - check access based on cookieCode and permission level
 	// - check user lock flags and status
+
+	if(userInfo.requireSecurity_)
+	{
+		//only allow if wiz mode with random code, or normal mode with security mode enabled
+
+		if(isWizardMode && wizardModeSequence.size() < 8)
+		{
+			//force wiz mode sequence to be "random and large"
+			*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
+			__COUT__ << "User (@" << userInfo.ip_
+					<< ") has attempted requestType '"
+					<< userInfo.requestType_
+					<< "' which requires sufficient security enabled. Please enable the random wizard mode"
+							" sequence of at least 8 characters." << __E__;
+			return false;  // invalid cookie and present sequence, but not correct sequence
+		}
+		else if(!isWizardMode && (
+				userInfo.username_ == WebUsers::DEFAULT_ADMIN_USERNAME ||
+				userInfo.username_ == WebUsers::DEFAULT_ITERATOR_USERNAME ||
+				userInfo.username_ == WebUsers::DEFAULT_STATECHANGER_USERNAME
+				))
+		{
+			//force non-admin user, which implies sufficient security
+			*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
+			__COUT__ << "User (@" << userInfo.ip_
+					<< ") has attempted requestType '"
+					<< userInfo.requestType_
+					<< "' which requires sufficient security enabled. Please enable individual user "
+							" logins." << __E__;
+			return false;  // invalid cookie and present sequence, but not correct sequence
+		}
+
+	} //end security required verification
 
 	if(!userInfo.automatedCommand_)
 	{
@@ -276,9 +310,9 @@ bool WebUsers::checkRequestAccess(cgicc::Cgicc&              cgi,
 
 	if(isWizardMode)
 	{
-		userInfo.username_               = "admin";
+		userInfo.username_               = WebUsers::DEFAULT_ADMIN_USERNAME;
 		userInfo.displayName_            = "Admin";
-		userInfo.usernameWithLock_       = "admin";
+		userInfo.usernameWithLock_       = userInfo.username_;
 		userInfo.activeUserSessionIndex_ = 0;
 		return true;  // done, wizard mode access granted
 	}

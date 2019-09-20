@@ -171,7 +171,7 @@ bool RemoteWebUsers::xmlRequestToGateway(cgicc::Cgicc&              cgi,
 		userInfo.setGroupPermissionLevels(parameters.getValue("Permissions"));
 
 		if(WebUsers::checkRequestAccess(
-		       cgi, out, xmldoc, userInfo, true /*isWizardMode*/))
+		       cgi, out, xmldoc, userInfo, true /*isWizardMode*/, sequence))
 			return true;
 		else
 			goto HANDLE_ACCESS_FAILURE;  // return false, access failed
@@ -243,32 +243,8 @@ bool RemoteWebUsers::xmlRequestToGateway(cgicc::Cgicc&              cgi,
 	// else successful access request!
 
 	return true;  // request granted
-	              //	if(!userInfo.checkLock_ && !userInfo.requireLock_)
-	              //		return true; //done, no need to get user info for this cookie
-	              // code
-	              //
 
 	/////////////////////////////////////////////////////
-	// get user info for cookie code and check lock (now that username is available)
-
-	//	parameters.clear();
-	//	parameters.addParameter("CookieCode",userInfo.cookieCode_);
-	//	retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
-	//			"SupervisorGetUserInfo", parameters);
-	//
-	//	parameters.clear();
-	//	parameters.addParameter("Username");
-	//	parameters.addParameter("DisplayName");
-	//	parameters.addParameter("ActiveSessionIndex");
-	//	SOAPUtilities::receive(retMsg, parameters);
-
-	//	if(WebUsers::finalizeRequestAccess(out,xmldoc,userInfo,
-	//			parameters.getValue("Username"),
-	//			parameters.getValue("DisplayName"),
-	//			strtoul(parameters.getValue("ActiveSessionIndex").c_str(),0,0)))
-	//		return true;
-	//	else
-	//		goto HANDLE_ACCESS_FAILURE; //return false, access failed
 
 HANDLE_ACCESS_FAILURE:
 
@@ -277,154 +253,7 @@ HANDLE_ACCESS_FAILURE:
 		__COUT_ERR__ << "Failed request (requestType = " << userInfo.requestType_
 		             << "): " << out->str() << __E__;
 	return false;  // access failed
-
-	//	tmpUserWithLock_ = parameters.getValue("UserWithLock");
-	//	tmpUserGroups_ = parameters.getValue("UserGroups");
-	//	sscanf(parameters.getValue("Permissions").c_str(),"%hhu",&userInfo.permissionLevel_);
-	////unsigned char 	userInfo.setUsernameWithLock(parameters.getValue("UserWithLock"));
-	//	userInfo.setGroupMemebership(parameters.getValue("UserGroups"));
-	//	tmpCookieCode_ = parameters.getValue("CookieCode");
-
-	// else access granted
-
-	//__COUT__ << "cookieCode=" << cookieCode << std::endl;
-	//
-	//	if(!allowNoUser && cookieCode.length() != WebUsers::COOKIE_CODE_LENGTH)
-	//	{
-	//		__COUT__ << "User (@" << ip << ") has invalid cookie code: " << cookieCode <<
-	// std::endl; 		*out << WebUsers::REQ_NO_LOGIN_RESPONSE; 		return false;
-	////invalid cookie and present sequence, but not correct sequence
-	//	}
-	//
-	//	if(!allowNoUser && tmpUserPermissions_ < permissionsThreshold)
-	//	{
-	//		*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-	//		__COUT__ << "User (@" << ip << ") has insufficient permissions: " <<
-	// tmpUserPermissions_ << "<" << 				permissionsThreshold << std::endl;
-	//		return false;
-	//	}
-
-	// check group membership
-	//	if(!allowNoUser)
-	//	{
-	//		//check groups allowed
-	//		//	i.e. if user is a member of one of the groups allowed
-	//		//			then grant access
-	//
-	//		std::set<std::string> userMembership;
-	//		StringMacros::getSetFromString(
-	//				tmpUserGroups_,
-	//				userMembership);
-	//
-	//		bool accept = false;
-	//		for(const auto& userGroup:userMembership)
-	//			if(StringMacros::inWildCardSet(
-	//					userGroup,
-	//					groupsAllowed))
-	//			{
-	//				accept = true;
-	//				break;
-	//			}
-	//
-	//		if(!accept && userMembership.size())
-	//		{
-	//			*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-	//			std::stringstream ss;
-	//			bool first = true;
-	//			for(const auto& group:groupsAllowed)
-	//				if(first && (first=false))
-	//					ss << group;
-	//				else
-	//					ss << " | " << group;
-	//
-	//			__COUT__ << "User (@" << ip << ") has insufficient group permissions: " <<
-	// tmpUserGroups_ << " != " << 					ss.str() << std::endl; 			return
-	// false;
-	//		}
-	//
-	//		//if no access groups specified, then check groups disallowed
-	//		if(!userMembership.size())
-	//		{
-	//			for(const auto& userGroup:userMembership)
-	//				if(StringMacros::inWildCardSet(
-	//						userGroup,
-	//						groupsDisallowed))
-	//				{
-	//					*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-	//					std::stringstream ss;
-	//					bool first = true;
-	//					for(const auto& group:groupsDisallowed)
-	//						if(first && (first=false))
-	//							ss << group;
-	//						else
-	//							ss << " | " << group;
-	//
-	//					__COUT__ << "User (@" << ip << ") is in in a disallowed group
-	// permissions:
-	//" << tmpUserGroups_ << " == " << 							ss.str() << std::endl;
-	//					return false;
-	//				}
-	//		}
-	//	} //end group membership check
-	//
-	//	if(xmldoc) //fill with cookie code tag
-	//	{
-	//		if(!allowNoUser)
-	//			xmldoc->setHeader(cookieCode);
-	//		else
-	//			xmldoc->setHeader(WebUsers::REQ_ALLOW_NO_USER);
-	//	}
-	//
-	//
-	//
-	//	if(!userName && !displayName && !activeSessionIndex && !checkLock &&
-	//! lockRequired) 		return true; //done, no need to get user info for cookie
-	//
-	//	//__COUT__ << "User with Lock: " << tmpUserWithLock_ << std::endl;
-	//
-	//
-	//	/////////////////////////////////////////////////////
-	//	//get user info
-	//	parameters.clear();
-	//	parameters.addParameter("CookieCode",cookieCode);
-	//	retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor,
-	//			"SupervisorGetUserInfo", parameters);
-	//
-	//	parameters.clear();
-	//	parameters.addParameter("Username");
-	//	parameters.addParameter("DisplayName");
-	//	parameters.addParameter("ActiveSessionIndex");
-	//	SOAPUtilities::receive(retMsg, parameters);
-	//
-	//
-	//
-	//
-	//	userInfo.setActiveUserSessionIndex(0);
-	//
-	//
-	//	tmpUsername_ = parameters.getValue("Username");
-	//	userInfo.setUsername(tmpUsername_);
-	//	userInfo.setDisplayName(parameters.getValue("DisplayName"));
-	//	userInfo.setActiveUserSessionIndex(
-	//			strtoul(parameters.getValue("ActiveSessionIndex").c_str(),0,0));
-	//
-	//	if(userInfo.checkLock_ && tmpUserWithLock_ != "" && tmpUserWithLock_ !=
-	// tmpUsername_)
-	//	{
-	//		*out << WebUsers::REQ_USER_LOCKOUT_RESPONSE;
-	//		__COUT__ << "User " << tmpUsername_ << " is locked out. " << tmpUserWithLock_
-	//<< " has lock." << std::endl; 		return false;
-	//	}
-	//
-	//	if(userInfo.lockRequired_ && tmpUserWithLock_ != tmpUsername_)
-	//	{
-	//		*out << WebUsers::REQ_LOCK_REQUIRED_RESPONSE;
-	//		__COUT__ << "User " << tmpUsername_ << " must have lock to proceed. (" <<
-	// tmpUserWithLock_ << " has lock.)" << std::endl; 		return false;
-	//	}
-	//
-	//	return true;
-}
+} //end xmlRequestToGateway()
 
 //========================================================================================================================
 // getActiveUserList

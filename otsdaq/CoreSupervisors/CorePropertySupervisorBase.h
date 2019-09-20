@@ -83,6 +83,7 @@ class CorePropertySupervisorBase
 		                    &RequireUserLockRequestTypes,
 		                    &AutomatedRequestTypes,
 		                    &AllowNoLoginRequestTypes,
+							&RequireSecurityRequestTypes,
 		                    &NoXmlWhiteSpaceRequestTypes,
 		                    &NonXMLRequestTypes})
 		{
@@ -96,6 +97,7 @@ class CorePropertySupervisorBase
 		const std::string RequireUserLockRequestTypes = "RequireUserLockRequestTypes";
 		const std::string AutomatedRequestTypes       = "AutomatedRequestTypes";
 		const std::string AllowNoLoginRequestTypes    = "AllowNoLoginRequestTypes";
+		const std::string RequireSecurityRequestTypes    = "RequireSecurityRequestTypes";
 
 		const std::string NoXmlWhiteSpaceRequestTypes = "NoXmlWhiteSpaceRequestTypes";
 		const std::string NonXMLRequestTypes          = "NonXMLRequestTypes";
@@ -119,6 +121,7 @@ class CorePropertySupervisorBase
 		                &RequireUserLockRequestTypes,
 		                &AutomatedRequestTypes,
 		                &AllowNoLoginRequestTypes,
+						&RequireSecurityRequestTypes,
 		                &NoXmlWhiteSpaceRequestTypes,
 		                &NonXMLRequestTypes})
 		{
@@ -132,6 +135,7 @@ class CorePropertySupervisorBase
 		std::set<std::string> RequireUserLockRequestTypes;
 		std::set<std::string> AutomatedRequestTypes;
 		std::set<std::string> AllowNoLoginRequestTypes;
+		std::set<std::string> RequireSecurityRequestTypes;
 
 		std::set<std::string> NoXmlWhiteSpaceRequestTypes;
 		std::set<std::string> NonXMLRequestTypes;
