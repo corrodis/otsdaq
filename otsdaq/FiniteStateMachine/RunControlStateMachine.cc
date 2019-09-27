@@ -19,7 +19,7 @@
 using namespace ots;
 
 const std::string RunControlStateMachine::FAILED_STATE_NAME = "Failed";
-const std::string RunControlStateMachine::HALTED_STATE_NAME = RunControlStateMachine::HALTED_STATE_NAME;
+const std::string RunControlStateMachine::HALTED_STATE_NAME = "Halted";
 
 //========================================================================================================================
 RunControlStateMachine::RunControlStateMachine(const std::string& name)
