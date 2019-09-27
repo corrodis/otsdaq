@@ -21,7 +21,7 @@ class ARTDAQDispatcherTable : public ARTDAQTableBase
 	void outputFHICL(ConfigurationManager*    configManager,
 	                 const ConfigurationTree& builderNode,
 	                 unsigned int             selfRank,
-					 const std::string&       selfHost,
+	                 const std::string&       selfHost,
 	                 unsigned int             selfPort,
 	                 const XDAQContextTable*  contextConfig,
 	                 size_t                   maxFragmentSizeBytes);

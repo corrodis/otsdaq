@@ -253,7 +253,7 @@ HANDLE_ACCESS_FAILURE:
 		__COUT_ERR__ << "Failed request (requestType = " << userInfo.requestType_
 		             << "): " << out->str() << __E__;
 	return false;  // access failed
-} //end xmlRequestToGateway()
+}  // end xmlRequestToGateway()
 
 //========================================================================================================================
 // getActiveUserList

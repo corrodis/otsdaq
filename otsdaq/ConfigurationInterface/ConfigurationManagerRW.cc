@@ -559,7 +559,7 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupNa
 	            : "-1");
 	fclose(fp);
 
-} // end activateTableGroup()
+}  // end activateTableGroup()
 
 //==============================================================================
 // createTemporaryBackboneView

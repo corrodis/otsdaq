@@ -30,8 +30,7 @@ ProgressBar::ProgressBar()
 	else if(-1 == mkdir(path.c_str(), 0755))
 	{
 		// lets create the service folder (for first time)
-		__SS__ << "Service directory creation failed: " << path
-		          << std::endl;
+		__SS__ << "Service directory creation failed: " << path << std::endl;
 		__SS_THROW__;
 	}
 }

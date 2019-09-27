@@ -228,7 +228,8 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 	CorePropertySupervisorBase::setSupervisorProperty(
 	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AllowNoLoginRequestTypes, "");
 	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireSecurityRequestTypes, "");
+	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireSecurityRequestTypes,
+	    "");
 
 	CorePropertySupervisorBase::setSupervisorProperty(
 	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NoXmlWhiteSpaceRequestTypes,
@@ -239,7 +240,7 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 	//	__SUP_COUT__ << "Done setting up Core Supervisor Base property defaults for
 	// supervisor" <<
 	//			"..." << __E__;
-} //end setSupervisorPropertyDefaults()
+}  // end setSupervisorPropertyDefaults()
 
 //========================================================================================================================
 // extractPermissionsMapFromString

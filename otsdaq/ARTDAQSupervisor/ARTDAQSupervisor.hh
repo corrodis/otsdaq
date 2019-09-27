@@ -10,13 +10,12 @@
 #include <Python.h>
 #endif
 
-#include <thread>
 #include <mutex>
+#include <thread>
 
 #include "artdaq/ExternalComms/CommanderInterface.hh"
 #include "otsdaq/CoreSupervisors/CoreSupervisorBase.h"
 #include "otsdaq/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
-
 
 namespace ots
 {

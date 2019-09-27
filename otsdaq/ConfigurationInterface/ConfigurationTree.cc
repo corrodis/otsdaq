@@ -2238,10 +2238,10 @@ bool ConfigurationTree::isEnabled(void) const
 	bool tmpStatus;
 	tableView_->getValue(tmpStatus, row_, tableView_->getColStatus());
 	return tmpStatus;
-} //end isEnabled()
+}  // end isEnabled()
 
 //==============================================================================
-inline bool ConfigurationTree::status(void) const { return isEnabled();}
+inline bool ConfigurationTree::status(void) const { return isEnabled(); }
 
 //==============================================================================
 // getChildrenNamesByPriority

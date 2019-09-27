@@ -254,7 +254,6 @@ void CoreSupervisorBase::request(const std::string&               requestType,
 	//	}
 	// END KEEP.
 
-
 }  // end request()
 
 //========================================================================================================================

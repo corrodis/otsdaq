@@ -215,30 +215,30 @@ void GatewaySupervisor::init(void)
 			__COUT__ << "App Status checking is disabled." << __E__;
 	}  // end checking of Application Status
 
-//	try
-//	{
-//		auto artdaqStateChangeEnabled =
-//		    CorePropertySupervisorBase::getSupervisorTableNode()
-//		        .getNode("EnableARTDAQCommanderPlugin")
-//		        .getValue<bool>();
-//		if(artdaqStateChangeEnabled)
-//		{
-//			auto artdaqStateChangePort =
-//			    CorePropertySupervisorBase::getSupervisorTableNode()
-//			        .getNode("ARTDAQCommanderID")
-//			        .getValue<int>();
-//			auto artdaqStateChangePluginType =
-//			    CorePropertySupervisorBase::getSupervisorTableNode()
-//			        .getNode("ARTDAQCommanderType")
-//			        .getValue<std::string>();
-//			theArtdaqCommandable_.init(artdaqStateChangePort,
-//			                           artdaqStateChangePluginType);
-//		}
-//	}
-//	catch(...)
-//	{
-//		;
-//	}  // ignore errors
+	//	try
+	//	{
+	//		auto artdaqStateChangeEnabled =
+	//		    CorePropertySupervisorBase::getSupervisorTableNode()
+	//		        .getNode("EnableARTDAQCommanderPlugin")
+	//		        .getValue<bool>();
+	//		if(artdaqStateChangeEnabled)
+	//		{
+	//			auto artdaqStateChangePort =
+	//			    CorePropertySupervisorBase::getSupervisorTableNode()
+	//			        .getNode("ARTDAQCommanderID")
+	//			        .getValue<int>();
+	//			auto artdaqStateChangePluginType =
+	//			    CorePropertySupervisorBase::getSupervisorTableNode()
+	//			        .getNode("ARTDAQCommanderType")
+	//			        .getValue<std::string>();
+	//			theArtdaqCommandable_.init(artdaqStateChangePort,
+	//			                           artdaqStateChangePluginType);
+	//		}
+	//	}
+	//	catch(...)
+	//	{
+	//		;
+	//	}  // ignore errors
 }  // end init()
 
 //========================================================================================================================
@@ -302,7 +302,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					                                     tempMessage);
 
 					//					__COUT__ << "statusMessage... "
-					//					         << SOAPUtilities::translate(statusMessage)
+					//					         <<
+					//SOAPUtilities::translate(statusMessage)
 					//<<  std::endl;
 					//
 					SOAPParameters parameters;
@@ -4071,9 +4072,8 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author,
 	        ? true
 	        : false;  // from GET
 
-	std::string windowParameters =
-			StringMacros::decodeURIComponent(
-					CgiDataUtilities::postData(cgiIn, "iconParameters"));  // from POST
+	std::string windowParameters = StringMacros::decodeURIComponent(
+	    CgiDataUtilities::postData(cgiIn, "iconParameters"));  // from POST
 
 	__COUTV__(author);
 	__COUTV__(iconCaption);
@@ -4090,24 +4090,18 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author,
 
 	ConfigurationManagerRW tmpCfgMgr(author);
 
-	ConfigurationSupervisorBase::handleAddDesktopIconXML(xmlOut,
-			&tmpCfgMgr,
-			iconCaption,
-			iconAltText,
-			iconFolderPath,
-			iconImageURL,
-			iconWindowURL,
-			iconPermissions,
-			windowLinkedApp /*= ""*/,
-			windowLinkedAppLID /*= 0*/,
-			enforceOneWindowInstance /*= false*/,
-			windowParameters /*= ""*/);
-
-
+	ConfigurationSupervisorBase::handleAddDesktopIconXML(
+	    xmlOut,
+	    &tmpCfgMgr,
+	    iconCaption,
+	    iconAltText,
+	    iconFolderPath,
+	    iconImageURL,
+	    iconWindowURL,
+	    iconPermissions,
+	    windowLinkedApp /*= ""*/,
+	    windowLinkedAppLID /*= 0*/,
+	    enforceOneWindowInstance /*= false*/,
+	    windowParameters /*= ""*/);
 
 }  // end handleAddDesktopIconRequest()
-
-
-
-
-

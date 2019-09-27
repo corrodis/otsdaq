@@ -27,12 +27,13 @@ const std::string package  = "ARTDAQSupervisor";
 const std::string versions = MYPACKAGE_FULL_VERSION_LIST;
 const std::string summary  = "ARTDAQSupervisor otsdaq supervisor base class";
 const std::string description =
-    "Used for ARTDAQSupervisor supervisor functionality including configuration and state "
+    "Used for ARTDAQSupervisor supervisor functionality including configuration and "
+    "state "
     "transitions.";
-const std::string                              authors = "Ryan Rivera, Lorenzo Uplegger, Eric Flumerfelt";
-const std::string                              link    = "http://xdaq.web.cern.ch";
-config::PackageInfo                            getPackageInfo();
-void                                           checkPackageDependencies();
+const std::string   authors = "Ryan Rivera, Lorenzo Uplegger, Eric Flumerfelt";
+const std::string   link    = "http://xdaq.web.cern.ch";
+config::PackageInfo getPackageInfo();
+void                checkPackageDependencies();
 std::set<std::string, std::less<std::string> > getPackageDependencies();
 }  // namespace ARTDAQSupervisor
 

@@ -7,11 +7,10 @@
 
 using namespace ots;
 
-#undef 	__MF_SUBJECT__
-#define	__MF_SUBJECT__ "TableView"
-#undef 	__COUT_HDR__
+#undef __MF_SUBJECT__
+#define __MF_SUBJECT__ "TableView"
+#undef __COUT_HDR__
 #define __COUT_HDR__ (std::string(":") + tableName_ + "v" + version_.toString() + ":\t")
-
 
 const unsigned int TableView::INVALID = -1;
 
@@ -62,9 +61,9 @@ TableView& TableView::copy(const TableView&   src,
 	theDataView_       = src.theDataView_;
 	sourceColumnNames_ = src.sourceColumnNames_;
 
-	//RAR remove init() check, because usually copy() is only the first step
+	// RAR remove init() check, because usually copy() is only the first step
 	//	in a series of changes that result in another call to init()
-	//init();  // verify consistency
+	// init();  // verify consistency
 
 	initColUID();  // setup UID column
 	try
@@ -141,7 +140,7 @@ unsigned int TableView::copyRows(const std::string& author,
 	}
 
 	return retRow;
-} //end copyRows()
+}  // end copyRows()
 
 //==============================================================================
 // init
@@ -993,19 +992,19 @@ const unsigned int TableView::initColStatus(void)
 			return colStatus_;
 		}
 
-	//at this point not found!
+	// at this point not found!
 
 	__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS
-			<< "' or '" << TableViewColumnInfo::COL_NAME_ENABLED
-			<< "' in table '" << tableName_ << ".'" << __E__;
+	       << "' or '" << TableViewColumnInfo::COL_NAME_ENABLED << "' in table '"
+	       << tableName_ << ".'" << __E__;
 	ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
 		ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-		<< __E__;
+		   << __E__;
 
 	__SS_ONLY_THROW__;
 
-} //end initColStatus()
+}  // end initColStatus()
 
 //==============================================================================
 // initColPriority
@@ -1042,21 +1041,22 @@ const unsigned int TableView::getColStatus(void) const
 		return colStatus_;
 
 	__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS
-			<< "' or '" << TableViewColumnInfo::COL_NAME_ENABLED
-			<< "' in table '" << tableName_ << ".'"
-	       << " (The Status column is identified when the TableView is initialized)" << __E__;
+	       << "' or '" << TableViewColumnInfo::COL_NAME_ENABLED << "' in table '"
+	       << tableName_ << ".'"
+	       << " (The Status column is identified when the TableView is initialized)"
+	       << __E__;
 
 	ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		ss << "\t" << columnsInfo_[col].getType() << "() "
-		<< columnsInfo_[col].getName() << __E__;
+		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
+		   << __E__;
 
 	ss << __E__;
 
 	ss << StringMacros::stackTrace() << __E__;
 
 	__SS_THROW__;
-} //end getColStatus()
+}  // end getColStatus()
 
 //==============================================================================
 // getColPriority
@@ -1072,12 +1072,11 @@ const unsigned int TableView::getColPriority(void) const
 
 	__SS__ << "Priority column was not found... \nColumn Types: " << __E__;
 
-
 	ss << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
 	   << " Column in table named '" << tableName_
 	   << ".' (The Priority column is identified when the TableView is initialized)"
-	   << __E__;        // this is the const call, so can not identify the column and set
-	                    // colPriority_ here
+	   << __E__;  // this is the const call, so can not identify the column and set
+	              // colPriority_ here
 
 	ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
@@ -2812,7 +2811,7 @@ void TableView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //	if baseNameAutoUID != "", creates a UID based on this base name
 //		and increments and appends an integer relative to the previous last row
 unsigned int TableView::addRow(const std::string& author,
-                               unsigned char               incrementUniqueData,
+                               unsigned char      incrementUniqueData,
                                std::string        baseNameAutoUID,
                                unsigned int       rowToAdd)
 {

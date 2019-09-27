@@ -6,7 +6,7 @@
 				<COLUMN Type="UID" 	 Name="UID" 	 StorageName="UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="FixedChoiceData" 	 Name="PropertyName" 	 StorageName="PROPERTY_NAME" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,UserPermissionsThreshold,UserGroupsAllowed,UserGroupsDisallowed,RequireUserLockRequestTypes,CheckUserLockRequestTypes,AutomatedRequestTypes,AllowNoLoginRequestTypes"/>
-				<COLUMN Type="FixedChoiceData" 	 Name="PropertyType" 	 StorageName="PROPERTY_TYPE" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,xsd%3Astring,xsd%3Ainteger,xsd%3AunsignedInt,xsd%3Aboolean,xsd%3AunsignedShort,ots%3A%3ASupervisorProperty"/>
+				<COLUMN Type="FixedChoiceData" 	 Name="PropertyType" 	 StorageName="PROPERTY_TYPE" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,ots%3A%3ASupervisorProperty,xsd%3Astring,xsd%3Ainteger,xsd%3AunsignedInt,xsd%3Aboolean,xsd%3AunsignedShort"/>
 				<COLUMN Type="Data" 	 Name="PropertyValue" 	 StorageName="PROPERTY_VALUE" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>

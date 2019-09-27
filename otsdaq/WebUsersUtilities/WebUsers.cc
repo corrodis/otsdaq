@@ -160,8 +160,6 @@ WebUsers::WebUsers()
 	srand(time(0));  // seed random for hash salt generation
 
 	__COUT__ << "Done with Web Users initialization!" << __E__;
-
-
 }
 
 //========================================================================================================================
@@ -238,7 +236,7 @@ bool WebUsers::checkRequestAccess(cgicc::Cgicc&              cgi,
                                   HttpXmlDocument*           xmldoc,
                                   WebUsers::RequestUserInfo& userInfo,
                                   bool                       isWizardMode /* = false */,
-								  const std::string& 		 wizardModeSequence /* = "" */)
+                                  const std::string& wizardModeSequence /* = "" */)
 {
 	// steps:
 	// - check access based on cookieCode and permission level
@@ -246,36 +244,40 @@ bool WebUsers::checkRequestAccess(cgicc::Cgicc&              cgi,
 
 	if(userInfo.requireSecurity_)
 	{
-		//only allow if wiz mode with random code, or normal mode with security mode enabled
+		// only allow if wiz mode with random code, or normal mode with security mode
+		// enabled
 
 		if(isWizardMode && wizardModeSequence.size() < 8)
 		{
-			//force wiz mode sequence to be "random and large"
+			// force wiz mode sequence to be "random and large"
 			*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-			__COUT__ << "User (@" << userInfo.ip_
-					<< ") has attempted requestType '"
-					<< userInfo.requestType_
-					<< "' which requires sufficient security enabled. Please enable the random wizard mode"
-							" sequence of at least 8 characters." << __E__;
-			return false;  // invalid cookie and present sequence, but not correct sequence
+			__COUT__ << "User (@" << userInfo.ip_ << ") has attempted requestType '"
+			         << userInfo.requestType_
+			         << "' which requires sufficient security enabled. Please enable the "
+			            "random wizard mode"
+			            " sequence of at least 8 characters."
+			         << __E__;
+			return false;  // invalid cookie and present sequence, but not correct
+			               // sequence
 		}
-		else if(!isWizardMode && (
-				userInfo.username_ == WebUsers::DEFAULT_ADMIN_USERNAME ||
-				userInfo.username_ == WebUsers::DEFAULT_ITERATOR_USERNAME ||
-				userInfo.username_ == WebUsers::DEFAULT_STATECHANGER_USERNAME
-				))
+		else if(!isWizardMode &&
+		        (userInfo.username_ == WebUsers::DEFAULT_ADMIN_USERNAME ||
+		         userInfo.username_ == WebUsers::DEFAULT_ITERATOR_USERNAME ||
+		         userInfo.username_ == WebUsers::DEFAULT_STATECHANGER_USERNAME))
 		{
-			//force non-admin user, which implies sufficient security
+			// force non-admin user, which implies sufficient security
 			*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
-			__COUT__ << "User (@" << userInfo.ip_
-					<< ") has attempted requestType '"
-					<< userInfo.requestType_
-					<< "' which requires sufficient security enabled. Please enable individual user "
-							" logins." << __E__;
-			return false;  // invalid cookie and present sequence, but not correct sequence
+			__COUT__ << "User (@" << userInfo.ip_ << ") has attempted requestType '"
+			         << userInfo.requestType_
+			         << "' which requires sufficient security enabled. Please enable "
+			            "individual user "
+			            " logins."
+			         << __E__;
+			return false;  // invalid cookie and present sequence, but not correct
+			               // sequence
 		}
 
-	} //end security required verification
+	}  // end security required verification
 
 	if(!userInfo.automatedCommand_)
 	{

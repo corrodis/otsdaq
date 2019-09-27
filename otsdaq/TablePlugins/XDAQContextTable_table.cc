@@ -42,7 +42,8 @@ const std::string XDAQContextTable::ARTDAQ_OFFSET_PORT = "OffsetPort";
 
 const uint8_t XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY = 100;
 
-XDAQContextTable::ColApplication XDAQContextTable::colApplication_ = XDAQContextTable::ColApplication(); //initialize static member
+XDAQContextTable::ColApplication XDAQContextTable::colApplication_ =
+    XDAQContextTable::ColApplication();  // initialize static member
 
 //========================================================================================================================
 XDAQContextTable::XDAQContextTable(void) : TableBase("XDAQContextTable")
@@ -84,9 +85,9 @@ bool XDAQContextTable::isARTDAQContext(const std::string& contextUID)
 }
 //
 ////========================================================================================================================
-//std::map<std::string /*contextUID*/,
+// std::map<std::string /*contextUID*/,
 //         std::pair<std::string /*host_name*/, unsigned int /*rank*/>>
-//XDAQContextTable::getARTDAQAppRankMap() const
+// XDAQContextTable::getARTDAQAppRankMap() const
 //{
 //	std::map<std::string /*contextUID*/,
 //	         std::pair<std::string /*host_name*/, unsigned int /*rank*/>>
@@ -134,7 +135,7 @@ bool XDAQContextTable::isARTDAQContext(const std::string& contextUID)
 ////
 ////	if contextUID == "X" (which happens automatically for broken link)
 ////		then highest possible rank plus 1 is returned
-//unsigned int XDAQContextTable::getARTDAQAppRank(const std::string& contextUID) const
+// unsigned int XDAQContextTable::getARTDAQAppRank(const std::string& contextUID) const
 //{
 //	if(artdaqBoardReaders_.size() == 0 && artdaqEventBuilders_.size() == 0 &&
 //	   artdaqDataLoggers_.size() == 0 && artdaqDispatchers_.size() == 0)
@@ -207,10 +208,10 @@ std::string XDAQContextTable::getContextAddress(const std::string& contextUID,
 		}
 	}
 	return "";
-} //end getContextAddress()
+}  // end getContextAddress()
 
 //
-//unsigned int XDAQContextTable::getARTDAQDataPort(
+// unsigned int XDAQContextTable::getARTDAQDataPort(
 //    const ConfigurationManager* configManager, const std::string& contextUID) const
 //{
 //	if(contextUID == "X")
@@ -290,8 +291,8 @@ XDAQContextTable::getBoardReaderContexts() const
 	return retVec;
 }
 ////========================================================================================================================
-//std::vector<const XDAQContextTable::XDAQContext*>
-//XDAQContextTable::getEventBuilderContexts() const
+// std::vector<const XDAQContextTable::XDAQContext*>
+// XDAQContextTable::getEventBuilderContexts() const
 //{
 //	std::vector<const XDAQContext*> retVec;
 //	for(auto& i : artdaqEventBuilders_)
@@ -299,8 +300,8 @@ XDAQContextTable::getBoardReaderContexts() const
 //	return retVec;
 //}
 ////========================================================================================================================
-//std::vector<const XDAQContextTable::XDAQContext*>
-//XDAQContextTable::getDataLoggerContexts() const
+// std::vector<const XDAQContextTable::XDAQContext*>
+// XDAQContextTable::getDataLoggerContexts() const
 //{
 //	std::vector<const XDAQContext*> retVec;
 //	for(auto& i : artdaqDataLoggers_)
@@ -308,8 +309,8 @@ XDAQContextTable::getBoardReaderContexts() const
 //	return retVec;
 //}
 ////========================================================================================================================
-//std::vector<const XDAQContextTable::XDAQContext*>
-//XDAQContextTable::getDispatcherContexts() const
+// std::vector<const XDAQContextTable::XDAQContext*>
+// XDAQContextTable::getDispatcherContexts() const
 //{
 //	std::vector<const XDAQContext*> retVec;
 //	for(auto& i : artdaqDispatchers_)
@@ -365,9 +366,9 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 	artdaqSupervisors_.clear();
 
 	artdaqBoardReaders_.clear();
-//	artdaqEventBuilders_.clear();
-//	artdaqDataLoggers_.clear();
-//	artdaqDispatchers_.clear();
+	//	artdaqEventBuilders_.clear();
+	//	artdaqDataLoggers_.clear();
+	//	artdaqDispatchers_.clear();
 
 	// Enforce that app IDs do not repeat!
 	//	Note: this is important because there are maps in MacroMaker and
@@ -596,30 +597,33 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 			   contexts_.back().applications_[0].class_ ==  // if board reader
 			       "ots::ARTDAQFEDataManagerSupervisor")
 				artdaqBoardReaders_.push_back(contexts_.size() - 1);
-			else if(contexts_.back().applications_[0].class_ ==  // if artdaq interface supervisor
-			       "ots::ARTDAQSupervisor")
+			else if(contexts_.back()
+			            .applications_[0]
+			            .class_ ==  // if artdaq interface supervisor
+			        "ots::ARTDAQSupervisor")
 				artdaqSupervisors_.push_back(contexts_.size() - 1);
-//			else if(contexts_.back().applications_[0].class_ ==  // if event builder
-//			        "ots::EventBuilderApp")
-//				artdaqEventBuilders_.push_back(contexts_.size() - 1);
-//			else if(contexts_.back().applications_[0].class_ ==  // if dataLogger
-//			        "ots::DataLoggerApp")
-//				artdaqDataLoggers_.push_back(contexts_.size() - 1);
-//			else if(contexts_.back().applications_[0].class_ ==  // if dispatcher
-//			        "ots::DispatcherApp")
-//				artdaqDispatchers_.push_back(contexts_.size() - 1);
+			//			else if(contexts_.back().applications_[0].class_ ==  // if event
+			//builder 			        "ots::EventBuilderApp")
+			//				artdaqEventBuilders_.push_back(contexts_.size() - 1);
+			//			else if(contexts_.back().applications_[0].class_ ==  // if
+			//dataLogger 			        "ots::DataLoggerApp")
+			//				artdaqDataLoggers_.push_back(contexts_.size() - 1);
+			//			else if(contexts_.back().applications_[0].class_ ==  // if
+			//dispatcher 			        "ots::DispatcherApp")
+			//				artdaqDispatchers_.push_back(contexts_.size() - 1);
 			else
 			{
-				__SS__ << "ARTDAQ Context must be have Application of an allowed class "
-				          "type:\n"
-				       << "\tots::ARTDAQDataManagerSupervisor (Board Reader)\n"
-				       << "\tots::ARTDAQFEDataManagerSupervisor (Board Reader)\n"
-				       << "\tots::ARTDAQSupervisor (artdaq Interace Supervisor)\n"
-//				       << "\tots::EventBuilderApp (Event Builder)\n"
-//				       << "\tots::DataLoggerApp (Data Logger)\n"
-//				       << "\tots::DispatcherApp (Dispatcher)\n"
-				       << "\nClass found was " << contexts_.back().applications_[0].class_
-				       << __E__;
+				__SS__
+				    << "ARTDAQ Context must be have Application of an allowed class "
+				       "type:\n"
+				    << "\tots::ARTDAQDataManagerSupervisor (Board Reader)\n"
+				    << "\tots::ARTDAQFEDataManagerSupervisor (Board Reader)\n"
+				    << "\tots::ARTDAQSupervisor (artdaq Interace Supervisor)\n"
+				    //				       << "\tots::EventBuilderApp (Event Builder)\n"
+				    //				       << "\tots::DataLoggerApp (Data Logger)\n"
+				    //				       << "\tots::DispatcherApp (Dispatcher)\n"
+				    << "\nClass found was " << contexts_.back().applications_[0].class_
+				    << __E__;
 				__SS_THROW__;
 			}
 		}

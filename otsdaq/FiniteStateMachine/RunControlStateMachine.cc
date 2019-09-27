@@ -483,9 +483,11 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(
 
 	if(!iterationWorkFlag_ && !subIterationWorkFlag_)
 		theProgressBar_.complete();
-
-	__COUTV__(theProgressBar_.read());
-	__COUTV__(theProgressBar_.isComplete());
+	else
+	{
+		__COUTV__(theProgressBar_.read());
+		__COUTV__(theProgressBar_.isComplete());
+	}
 
 	__COUT__ << "Ending state for " << theStateMachine_.getStateMachineName() << " is "
 	         << currentState << std::endl;

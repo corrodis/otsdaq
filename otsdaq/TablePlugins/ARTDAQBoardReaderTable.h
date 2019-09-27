@@ -17,15 +17,15 @@ class ARTDAQBoardReaderTable : public ARTDAQTableBase
 	virtual ~ARTDAQBoardReaderTable(void);
 
 	// Methods
-	void        init(ConfigurationManager* configManager);
-	void        outputFHICL(const ConfigurationManager*    configManager,
-	                        const ConfigurationTree& readerNode,
-	                        unsigned int             selfRank,
-							const std::string&       selfHost,
-	                        unsigned int             selfPort,
-	                        const XDAQContextTable*  contextConfig,
-		size_t maxFragmentSizeBytes);
-	//std::string getFHICLFilename(const ConfigurationTree& readerNode);
+	void init(ConfigurationManager* configManager);
+	void outputFHICL(const ConfigurationManager* configManager,
+	                 const ConfigurationTree&    readerNode,
+	                 unsigned int                selfRank,
+	                 const std::string&          selfHost,
+	                 unsigned int                selfPort,
+	                 const XDAQContextTable*     contextConfig,
+	                 size_t                      maxFragmentSizeBytes);
+	// std::string getFHICLFilename(const ConfigurationTree& readerNode);
 
 	// std::string	getBoardReaderApplication	(const ConfigurationTree &readerNode,
 	// const XDAQContextTable *contextConfig, const ConfigurationTree

@@ -610,10 +610,8 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 		std::string  err       = xmlOut.getMatchingValue("Error", occurance++);
 		while(err != "")
 		{
-			__COUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err
-					<< __E__;
-			__MOUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err
-					<< __E__;
+			__COUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << __E__;
+			__MOUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << __E__;
 			err = xmlOut.getMatchingValue("Error", occurance++);
 		}
 	}

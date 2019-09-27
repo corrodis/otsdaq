@@ -5,31 +5,29 @@
 
 using namespace ots;
 
-
-
 //========================================================================================================================
 // getConfigurationStatusXML
-void ConfigurationSupervisorBase::getConfigurationStatusXML(HttpXmlDocument&        xmlOut,
-                                                      ConfigurationManagerRW* cfgMgr)
+void ConfigurationSupervisorBase::getConfigurationStatusXML(
+    HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr)
 {
 	std::map<std::string /*type*/, std::pair<std::string /*groupName*/, TableGroupKey>>
-	activeGroupMap = cfgMgr->getActiveTableGroups();
+	    activeGroupMap = cfgMgr->getActiveTableGroups();
 
 	for(auto& type : activeGroupMap)
 	{
 		xmlOut.addTextElementToData(type.first + "-ActiveGroupName", type.second.first);
 		xmlOut.addTextElementToData(type.first + "-ActiveGroupKey",
-				type.second.second.toString());
+		                            type.second.second.toString());
 		//__SUP_COUT__ << "ActiveGroup " << type.first << " " << type.second.first << "("
 		//<< type.second.second << ")" << __E__;
 	}
 
 	// always add version tracking bool
 	xmlOut.addTextElementToData(
-			"versionTracking",
-			ConfigurationInterface::isVersionTrackingEnabled() ? "ON" : "OFF");
+	    "versionTracking",
+	    ConfigurationInterface::isVersionTrackingEnabled() ? "ON" : "OFF");
 
-}  //end getConfigurationStatusXML()
+}  // end getConfigurationStatusXML()
 
 //========================================================================================================================
 // handleCreateTableXML
@@ -40,16 +38,16 @@ void ConfigurationSupervisorBase::getConfigurationStatusXML(HttpXmlDocument&    
 //
 //	Note: if starting version is -1 start from mock-up
 void ConfigurationSupervisorBase::handleCreateTableXML(HttpXmlDocument&        xmlOut,
-                                                      ConfigurationManagerRW* cfgMgr,
-                                                      const std::string&      tableName,
-                                                      TableVersion            version,
-                                                      bool               makeTemporary,
-                                                      const std::string& data,
-                                                      const int&         dataOffset,
-                                                      const std::string& author,
-                                                      const std::string& comment,
-                                                      bool               sourceTableAsIs,
-                                                      bool lookForEquivalent) try
+                                                       ConfigurationManagerRW* cfgMgr,
+                                                       const std::string&      tableName,
+                                                       TableVersion            version,
+                                                       bool               makeTemporary,
+                                                       const std::string& data,
+                                                       const int&         dataOffset,
+                                                       const std::string& author,
+                                                       const std::string& comment,
+                                                       bool               sourceTableAsIs,
+                                                       bool lookForEquivalent) try
 {
 	//__COUT__ << "handleCreateTableXML: " << tableName << " version: " <<
 	// version
@@ -85,11 +83,11 @@ void ConfigurationSupervisorBase::handleCreateTableXML(HttpXmlDocument&        x
 		   table->getViewP()->getSourceColumnMismatch() != 0)
 		{
 			__COUT__ << "table->getViewP()->getNumberOfColumns() "
-			             << table->getViewP()->getNumberOfColumns() << __E__;
+			         << table->getViewP()->getNumberOfColumns() << __E__;
 			__COUT__ << "table->getMockupViewP()->getNumberOfColumns() "
-			             << table->getMockupViewP()->getNumberOfColumns() << __E__;
+			         << table->getMockupViewP()->getNumberOfColumns() << __E__;
 			__COUT__ << "table->getViewP()->getSourceColumnMismatch() "
-			             << table->getViewP()->getSourceColumnMismatch() << __E__;
+			         << table->getViewP()->getSourceColumnMismatch() << __E__;
 			__COUT_INFO__
 			    << "Source view v" << version
 			    << " has a mismatch in the number of columns, so using mockup as source."
@@ -142,9 +140,8 @@ void ConfigurationSupervisorBase::handleCreateTableXML(HttpXmlDocument&        x
 		   !version.isScratchVersion())  // if source version was scratch, then consider
 		                                 // it attempt to make it persistent
 		{
-			__SS__
-			    << "No rows were modified! No reason to fill a view with same content."
-			    << __E__;
+			__SS__ << "No rows were modified! No reason to fill a view with same content."
+			       << __E__;
 			__COUT_ERR__ << "\n" << ss.str();
 			// delete temporaryVersion
 			table->eraseView(temporaryVersion);
@@ -152,11 +149,11 @@ void ConfigurationSupervisorBase::handleCreateTableXML(HttpXmlDocument&        x
 		}
 		else if(version.isInvalid())
 			__COUT__ << "This was interpreted as an attempt to create a blank table."
-			             << __E__;
+			         << __E__;
 		else if(version.isScratchVersion())
 			__COUT__ << "This was interpreted as an attempt to make a persistent "
-			                "version of the scratch table."
-			             << __E__;
+			            "version of the scratch table."
+			         << __E__;
 		else
 		{
 			__SS__;
@@ -166,13 +163,12 @@ void ConfigurationSupervisorBase::handleCreateTableXML(HttpXmlDocument&        x
 	else if(retVal < 0 && (version.isTemporaryVersion() && !makeTemporary))
 	{
 		__COUT__ << "Allowing the static data because this is converting from "
-		                "temporary to persistent version."
-		             << __E__;
+		            "temporary to persistent version."
+		         << __E__;
 	}
 	else if(retVal < 0 && !ConfigurationInterface::isVersionTrackingEnabled())
 	{
-		__COUT__ << "Allowing the static data because version tracking is OFF."
-		             << __E__;
+		__COUT__ << "Allowing the static data because version tracking is OFF." << __E__;
 	}
 	else if(retVal < 0)
 	{
@@ -183,15 +179,16 @@ void ConfigurationSupervisorBase::handleCreateTableXML(HttpXmlDocument&        x
 	}
 
 	// note: if sourceTableAsIs, accept equivalent versions
-	ConfigurationSupervisorBase::saveModifiedVersionXML(xmlOut,
-	                       cfgMgr,
-	                       tableName,
-	                       version,
-	                       makeTemporary,
-	                       table,
-	                       temporaryVersion,
-	                       false /*ignoreDuplicates*/,
-	                       lookForEquivalent || sourceTableAsIs /*lookForEquivalent*/);
+	ConfigurationSupervisorBase::saveModifiedVersionXML(
+	    xmlOut,
+	    cfgMgr,
+	    tableName,
+	    version,
+	    makeTemporary,
+	    table,
+	    temporaryVersion,
+	    false /*ignoreDuplicates*/,
+	    lookForEquivalent || sourceTableAsIs /*lookForEquivalent*/);
 }  // end handleCreateTableXML()
 catch(std::runtime_error& e)
 {
@@ -203,7 +200,7 @@ catch(...)
 {
 	__COUT__ << "Error detected!\n\n " << __E__;
 	xmlOut.addTextElementToData("Error", "Error saving new view! ");
-} // end handleCreateTableXML() catch
+}  // end handleCreateTableXML() catch
 
 //========================================================================================================================
 // saveModifiedVersionXML
@@ -242,13 +239,13 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(
 			auto versionReverseIterator =
 			    allTableInfo.at(tableName).versions_.rbegin();  // get reverse iterator
 			__COUT__ << "Filling up cached from " << table->getNumberOfStoredViews()
-			             << " to max count of " << table->MAX_VIEWS_IN_CACHE << __E__;
+			         << " to max count of " << table->MAX_VIEWS_IN_CACHE << __E__;
 			for(; table->getNumberOfStoredViews() < table->MAX_VIEWS_IN_CACHE &&
 			      versionReverseIterator != allTableInfo.at(tableName).versions_.rend();
 			    ++versionReverseIterator)
 			{
 				__COUT__ << "Versions in reverse order " << *versionReverseIterator
-				             << __E__;
+				         << __E__;
 				try
 				{
 					cfgMgr->getVersionedTableByName(
@@ -256,9 +253,8 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(
 				}
 				catch(const std::runtime_error& e)
 				{
-					__COUT__
-					    << "Error loadiing historical version, but ignoring: " << e.what()
-					    << __E__;
+					__COUT__ << "Error loadiing historical version, but ignoring: "
+					         << e.what() << __E__;
 				}
 			}
 		}
@@ -277,14 +273,14 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(
 		{
 			// found an equivalent!
 			__COUT__ << "Equivalent table found in version v" << duplicateVersion
-			             << __E__;
+			         << __E__;
 
 			// if duplicate version was temporary, do not use
 			if(duplicateVersion.isTemporaryVersion() && !makeTemporary)
 			{
 				__COUT__ << "Need persistent. Duplicate version was temporary. "
-				                "Abandoning duplicate."
-				             << __E__;
+				            "Abandoning duplicate."
+				         << __E__;
 				duplicateVersion = TableVersion();  // set invalid
 			}
 			else
@@ -304,7 +300,7 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(
 				xmlOut.addTextElementToData(tableName + "_foundEquivalentVersion", "1");
 
 				__COUT__ << "\t\t equivalent AssignedVersion: " << duplicateVersion
-				             << __E__;
+				         << __E__;
 
 				return duplicateVersion;
 			}
@@ -313,8 +309,8 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(
 		if(!duplicateVersion.isInvalid())
 		{
 			__SS__ << "This version of table '" << tableName
-			           << "' is identical to another version currently cached v"
-			           << duplicateVersion << ". No reason to save a duplicate." << __E__;
+			       << "' is identical to another version currently cached v"
+			       << duplicateVersion << ". No reason to save a duplicate." << __E__;
 			__COUT_ERR__ << "\n" << ss.str();
 
 			// delete temporaryModifiedVersion
@@ -327,10 +323,9 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(
 
 	if(makeTemporary)
 		__COUT__ << "\t\t**************************** Save as temporary table version"
-		             << __E__;
+		         << __E__;
 	else
-		__COUT__ << "\t\t**************************** Save as new table version"
-		             << __E__;
+		__COUT__ << "\t\t**************************** Save as new table version" << __E__;
 
 	TableVersion newAssignedVersion =
 	    cfgMgr->saveNewTable(tableName, temporaryModifiedVersion, makeTemporary);
@@ -343,8 +338,7 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(
 
 	__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << __E__;
 	return newAssignedVersion;
-} //end saveModifiedVersionXML()
-
+}  // end saveModifiedVersionXML()
 
 //========================================================================================================================
 //	handleCreateTableGroupXML
@@ -434,17 +428,17 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(
 			   versionAliases[name].find(alias) != versionAliases[name].end())
 			{
 				version = versionAliases[name][alias];
-				__COUT__ << "version alias '" << alias
-				             << "'translated to: " << version << __E__;
+				__COUT__ << "version alias '" << alias << "'translated to: " << version
+				         << __E__;
 
 				groupAliases[name] = alias;
 			}
 			else
 			{
 				__SS__ << "version alias '"
-				           << versionStr.substr(
-				                  ConfigurationManager::ALIAS_VERSION_PREAMBLE.size())
-				           << "' was not found in active version aliases!" << __E__;
+				       << versionStr.substr(
+				              ConfigurationManager::ALIAS_VERSION_PREAMBLE.size())
+				       << "' was not found in active version aliases!" << __E__;
 				__COUT_ERR__ << "\n" << ss.str();
 				xmlOut.addTextElementToData("Error", ss.str());
 				return;
@@ -456,8 +450,8 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(
 		if(version.isTemporaryVersion())
 		{
 			__SS__ << "Groups can not be created using temporary member tables. "
-			           << "Table member '" << name << "' with temporary version '"
-			           << version << "' is illegal." << __E__;
+			       << "Table member '" << name << "' with temporary version '" << version
+			       << "' is illegal." << __E__;
 			xmlOut.addTextElementToData("Error", ss.str());
 			return;
 		}
@@ -466,8 +460,8 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(
 		if(allTableInfo.find(name) == allTableInfo.end())
 		{
 			__SS__ << "Groups can not be created using mock-up member tables of "
-			              "undefined tables. "
-			           << "Table member '" << name << "' is not defined." << __E__;
+			          "undefined tables. "
+			       << "Table member '" << name << "' is not defined." << __E__;
 			xmlOut.addTextElementToData("Error", ss.str());
 			return;
 		}
@@ -482,23 +476,23 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(
 
 			// if other versions exist check for another mockup, and use that instead
 			__COUT__ << "Creating version from mock-up for name: " << name
-			             << " inputVersionStr: " << versionStr << __E__;
+			         << " inputVersionStr: " << versionStr << __E__;
 
 			// set table comment
 			table->getTemporaryView(temporaryVersion)
 			    ->setComment("Auto-generated from mock-up.");
 
 			// finish off the version creation
-			version =
-					ConfigurationSupervisorBase::saveModifiedVersionXML(xmlOut,
-			                           cfgMgr,
-			                           name,
-			                           TableVersion() /*original source is mockup*/,
-			                           false /* makeTemporary */,
-			                           table,
-			                           temporaryVersion /*temporary modified version*/,
-			                           false /*ignore duplicates*/,
-			                           true /*look for equivalent*/);
+			version = ConfigurationSupervisorBase::saveModifiedVersionXML(
+			    xmlOut,
+			    cfgMgr,
+			    name,
+			    TableVersion() /*original source is mockup*/,
+			    false /* makeTemporary */,
+			    table,
+			    temporaryVersion /*temporary modified version*/,
+			    false /*ignore duplicates*/,
+			    true /*look for equivalent*/);
 
 			__COUT__ << "Using mockup version: " << version << __E__;
 		}
@@ -524,7 +518,7 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(
 			if(lookForEquivalent)
 			{
 				__COUT__ << "Found equivalent group key (" << foundKey << ") for "
-				             << groupName << "." << __E__;
+				         << groupName << "." << __E__;
 				// allow this equivalent group to be the response without an error
 				xmlOut.addTextElementToData("foundEquivalentKey", "1");  // indicator
 
@@ -537,8 +531,8 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(
 			{
 				__COUT__ << "Treating duplicate group as error." << __E__;
 				__SS__ << ("Failed to create table group: " + groupName +
-				               ". It is a duplicate of an existing group key (" +
-				               foundKey.toString() + ")");
+				           ". It is a duplicate of an existing group key (" +
+				           foundKey.toString() + ")");
 				__COUT_ERR__ << ss.str() << __E__;
 				xmlOut.addTextElementToData("Error", ss.str());
 				return;
@@ -563,19 +557,18 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(
 			       0)  // check for column size mismatch
 			{
 				__SS__ << "\n\nThere were errors found in loading a member table "
-				           << groupMemberPair.first << ":v" << cfgViewPtr->getVersion()
-				           << ". Please see the details below:\n\n"
-				           << "The source column size was found to be "
-				           << cfgViewPtr->getDataColumnSize()
-				           << ", and the current number of columns for this table is "
-				           << cfgViewPtr->getNumberOfColumns()
-				           << ". This resulted in a count of "
-				           << cfgViewPtr->getSourceColumnMismatch()
-				           << " source column mismatches, and a count of "
-				           << cfgViewPtr->getSourceColumnMissing()
-				           << " table entries missing in "
-				           << cfgViewPtr->getNumberOfRows() << " row(s) of data."
-				           << __E__;
+				       << groupMemberPair.first << ":v" << cfgViewPtr->getVersion()
+				       << ". Please see the details below:\n\n"
+				       << "The source column size was found to be "
+				       << cfgViewPtr->getDataColumnSize()
+				       << ", and the current number of columns for this table is "
+				       << cfgViewPtr->getNumberOfColumns()
+				       << ". This resulted in a count of "
+				       << cfgViewPtr->getSourceColumnMismatch()
+				       << " source column mismatches, and a count of "
+				       << cfgViewPtr->getSourceColumnMissing()
+				       << " table entries missing in " << cfgViewPtr->getNumberOfRows()
+				       << " row(s) of data." << __E__;
 
 				const std::set<std::string> srcColNames =
 				    cfgViewPtr->getSourceColumnNames();
@@ -601,8 +594,8 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(
 	catch(std::runtime_error& e)
 	{
 		__SS__ << "Failed to create table group: " << groupName
-		           << ".\nThere were problems loading the chosen members:\n\n"
-		           << e.what() << __E__;
+		       << ".\nThere were problems loading the chosen members:\n\n"
+		       << e.what() << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 		return;
@@ -668,7 +661,6 @@ catch(...)
 	xmlOut.addTextElementToData("Error", "Error saving table group! ");
 }  // end handleCreateTableGroupXML() catch
 
-
 //========================================================================================================================
 // handleGetTableGroupXML
 //
@@ -693,12 +685,12 @@ catch(...)
 //		...
 //		</table>
 void ConfigurationSupervisorBase::handleGetTableGroupXML(HttpXmlDocument&        xmlOut,
-                                                        ConfigurationManagerRW* cfgMgr,
-                                                        const std::string&      groupName,
-                                                        TableGroupKey           groupKey,
-                                                        bool ignoreWarnings) try
+                                                         ConfigurationManagerRW* cfgMgr,
+                                                         const std::string& groupName,
+                                                         TableGroupKey      groupKey,
+                                                         bool ignoreWarnings) try
 {
-	char        tmpIntStr[100];
+	char                 tmpIntStr[100];
 	xercesc::DOMElement *parentEl, *configEl;
 
 	// steps:
@@ -731,7 +723,7 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(HttpXmlDocument&       
 		if(sortedKeys.size())
 			groupKey = *sortedKeys.rbegin();
 		__COUT__ << "Group key requested was invalid or not found, going with latest "
-		             << groupKey << __E__;
+		         << groupKey << __E__;
 	}
 
 	xmlOut.addTextElementToData("TableGroupName", groupName);
@@ -789,8 +781,8 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(HttpXmlDocument&       
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Table group \"" + groupName + "(" + groupKey.toString() + ")" +
-		                  "\" members can not be loaded!\n\n" + e.what()
-		           << __E__;
+		              "\" members can not be loaded!\n\n" + e.what()
+		       << __E__;
 		__COUT_ERR__ << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 		// return;
@@ -798,8 +790,8 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(HttpXmlDocument&       
 	catch(...)
 	{
 		__SS__ << "Table group \"" + groupName + "(" + groupKey.toString() + ")" +
-		                  "\" members can not be loaded!"
-		           << __E__;
+		              "\" members can not be loaded!"
+		       << __E__;
 		__COUT_ERR__ << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 		// return;
@@ -910,19 +902,19 @@ catch(...)
 }  // end handleGetTableGroupXML() catch
 
 //========================================================================================================================
-void ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&        xmlOut,
-										ConfigurationManagerRW* cfgMgr,
-										const std::string&      iconCaption,
-										const std::string&      iconAltText,
-										const std::string&      iconFolderPath,
-										const std::string&      iconImageURL,
-										const std::string&      iconWindowURL,
-										const std::string&      iconPermissions,
-										std::string      		windowLinkedApp /*= ""*/,
-										unsigned int	      	windowLinkedAppLID /*= 0*/,
-										bool				    enforceOneWindowInstance /*= false*/,
-										const std::string&      windowParameters /*= ""*/)
-try
+void ConfigurationSupervisorBase::handleAddDesktopIconXML(
+    HttpXmlDocument&        xmlOut,
+    ConfigurationManagerRW* cfgMgr,
+    const std::string&      iconCaption,
+    const std::string&      iconAltText,
+    const std::string&      iconFolderPath,
+    const std::string&      iconImageURL,
+    const std::string&      iconWindowURL,
+    const std::string&      iconPermissions,
+    std::string             windowLinkedApp /*= ""*/,
+    unsigned int            windowLinkedAppLID /*= 0*/,
+    bool                    enforceOneWindowInstance /*= false*/,
+    const std::string&      windowParameters /*= ""*/) try
 {
 	cfgMgr->getAllTableInfo(true /*refresh*/);
 
@@ -945,8 +937,8 @@ try
 	//	activate active context
 	//		modify desktop table and desktop parameters table
 	//		save, activate, and modify alias
-  // just to match syntax in ConfiguratGUI
-	                                              //	tmpCfgMgr.activateTableGroup(
+	// just to match syntax in ConfiguratGUI
+	//	tmpCfgMgr.activateTableGroup(
 	//			tmpCfgMgr.getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT),
 	//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
 	//			);
@@ -962,53 +954,54 @@ try
 	{
 		std::map<std::string, TableVersion> activeTables = cfgMgr->getActiveVersions();
 		for(auto& table : cfgMgr->getContextMemberNames())
-		try
-		{
-			__COUT__ << table << " v" << activeTables.at(table) << __E__;
-			contextGroupMembers[table] = activeTables.at(table);
-		}
-		catch(...)
-		{
-			__SS__ << "Error! Could not find Context member table '" << table
-					<< ".' All Context members must be present to add a desktop icon." << __E__;
-			__SS_THROW__;
-		}
+			try
+			{
+				__COUT__ << table << " v" << activeTables.at(table) << __E__;
+				contextGroupMembers[table] = activeTables.at(table);
+			}
+			catch(...)
+			{
+				__SS__ << "Error! Could not find Context member table '" << table
+				       << ".' All Context members must be present to add a desktop icon."
+				       << __E__;
+				__SS_THROW__;
+			}
 		for(auto& table : cfgMgr->getBackboneMemberNames())
-		try
-		{
-			__COUT__ << table << " v" << activeTables.at(table) << __E__;
-			backboneGroupMembers[table] = activeTables.at(table);
-		}
-		catch(...)
-		{
-			__SS__ << "Error! Could not find Backbone member table '" << table
-					<< ".' All Backbone members must be present to add a desktop icon." << __E__;
-			__SS_THROW__;
-		}
+			try
+			{
+				__COUT__ << table << " v" << activeTables.at(table) << __E__;
+				backboneGroupMembers[table] = activeTables.at(table);
+			}
+			catch(...)
+			{
+				__SS__ << "Error! Could not find Backbone member table '" << table
+				       << ".' All Backbone members must be present to add a desktop icon."
+				       << __E__;
+				__SS_THROW__;
+			}
 	}
 
 	const std::string contextGroupName =
-			cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT);
+	    cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT);
 	const TableGroupKey originalContextGroupKey =
-			cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT);
+	    cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT);
 	const std::string backboneGroupName =
-			cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
+	    cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
 	const TableGroupKey originalBackboneGroupKey =
-			cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
+	    cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
 
 	__COUTV__(contextGroupName);
 	__COUTV__(originalContextGroupKey);
 	__COUTV__(backboneGroupName);
 	__COUTV__(originalBackboneGroupKey);
 
-	if(contextGroupName == "" ||
-			originalContextGroupKey.isInvalid())
+	if(contextGroupName == "" || originalContextGroupKey.isInvalid())
 	{
 		__SS__ << "Error! No active Context group found"
-				"There must be an active Context group to add a Desktop Icon." << __E__;
+		          "There must be an active Context group to add a Desktop Icon."
+		       << __E__;
 		__SS_THROW__;
 	}
-
 
 	// Steps:
 	//	- Create record in DesktopIconTable
@@ -1022,7 +1015,7 @@ try
 	TableEditStruct parameterTable(DesktopIconTable::PARAMETER_TABLE,
 	                               cfgMgr);  // Table ready for editing!
 	TableEditStruct appTable(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
-	                               cfgMgr);  // Table ready for editing!
+	                         cfgMgr);  // Table ready for editing!
 
 	// Create record in DesktopIconTable
 	try
@@ -1031,7 +1024,8 @@ try
 		std::string  iconUID;
 
 		// create icon record
-		row = iconTable.tableView_->addRow(author, true /*incrementUniqueData*/, "generatedIcon");
+		row = iconTable.tableView_->addRow(
+		    author, true /*incrementUniqueData*/, "generatedIcon");
 		iconUID =
 		    iconTable.tableView_->getDataView()[row][iconTable.tableView_->getColUID()];
 
@@ -1059,24 +1053,24 @@ try
 		    iconTable.tableView_->findCol(DesktopIconTable::COL_FORCE_ONLY_ONE_INSTANCE));
 		// set permissions value
 		iconTable.tableView_->setURIEncodedValue(
-			iconPermissions,
-			row,
-			iconTable.tableView_->findCol(DesktopIconTable::COL_PERMISSIONS));
+		    iconPermissions,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_PERMISSIONS));
 		// set image URL value
 		iconTable.tableView_->setURIEncodedValue(
-			iconImageURL,
-			row,
-			iconTable.tableView_->findCol(DesktopIconTable::COL_IMAGE_URL));
+		    iconImageURL,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_IMAGE_URL));
 		// set window URL value
 		iconTable.tableView_->setURIEncodedValue(
-			iconWindowURL,
-			row,
-			iconTable.tableView_->findCol(DesktopIconTable::COL_WINDOW_CONTENT_URL));
+		    iconWindowURL,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_WINDOW_CONTENT_URL));
 		// set folder value
 		iconTable.tableView_->setURIEncodedValue(
-			iconFolderPath,
-			row,
-			iconTable.tableView_->findCol(DesktopIconTable::COL_FOLDER_PATH));
+		    iconFolderPath,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_FOLDER_PATH));
 
 		// create link to icon app
 		if(windowLinkedAppLID > 0)
@@ -1084,48 +1078,49 @@ try
 			__COUTV__(windowLinkedAppLID);
 
 			int appRow = appTable.tableView_->findRow(
-					appTable.tableView_->findCol(XDAQContextTable::colApplication_.colId_),
-					windowLinkedAppLID
-					);
-			windowLinkedApp = appTable.tableView_->getDataView()
-				        [appRow][appTable.tableView_->getColUID()];
+			    appTable.tableView_->findCol(XDAQContextTable::colApplication_.colId_),
+			    windowLinkedAppLID);
+			windowLinkedApp =
+			    appTable.tableView_
+			        ->getDataView()[appRow][appTable.tableView_->getColUID()];
 			__COUT__ << "Found app by LID: " << windowLinkedApp << __E__;
-		} //end linked app LID handling
+		}  // end linked app LID handling
 
-		if(windowLinkedApp != "" &&
-				windowLinkedApp != "undefined" &&
-				windowLinkedApp != TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+		if(windowLinkedApp != "" && windowLinkedApp != "undefined" &&
+		   windowLinkedApp != TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
 		{
-			//first check that UID exists
+			// first check that UID exists
 			//	if not, interpret as app class type and
 			//	check for unique 'enabled' app with class type
 			__COUTV__(windowLinkedApp);
 
-			if(!windowLinkedAppLID) //no need to check if LID lookup happened already
+			if(!windowLinkedAppLID)  // no need to check if LID lookup happened already
 			{
 				try
 				{
 					int appRow = appTable.tableView_->findRow(
-							appTable.tableView_->getColUID(),
-							windowLinkedApp);
+					    appTable.tableView_->getColUID(), windowLinkedApp);
 				}
 				catch(const std::runtime_error& e)
 				{
-					//attempt to treat like class, and take first match
+					// attempt to treat like class, and take first match
 					try
 					{
 						int appRow = appTable.tableView_->findRow(
-								appTable.tableView_->findCol(XDAQContextTable::colApplication_.colClass_),
-								windowLinkedApp);
-						windowLinkedApp = appTable.tableView_->getDataView()
-							        [appRow][appTable.tableView_->getColUID()];
+						    appTable.tableView_->findCol(
+						        XDAQContextTable::colApplication_.colClass_),
+						    windowLinkedApp);
+						windowLinkedApp =
+						    appTable.tableView_
+						        ->getDataView()[appRow][appTable.tableView_->getColUID()];
 					}
 					catch(...)
 					{
-						//failed to treat like class, so throw original
-						__SS__ << "Failed to create an icon linking to app '" <<
-								windowLinkedApp << ".' The following error occurred: " <<
-								e.what() << __E__;
+						// failed to treat like class, so throw original
+						__SS__ << "Failed to create an icon linking to app '"
+						       << windowLinkedApp
+						       << ".' The following error occurred: " << e.what()
+						       << __E__;
 						__SS_THROW__;
 					}
 				}
@@ -1133,17 +1128,17 @@ try
 			__COUTV__(windowLinkedApp);
 
 			iconTable.tableView_->setValueAsString(
-				ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
-				row,
-				iconTable.tableView_->findCol(DesktopIconTable::COL_APP_LINK));
+			    ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
+			    row,
+			    iconTable.tableView_->findCol(DesktopIconTable::COL_APP_LINK));
 			iconTable.tableView_->setValueAsString(
-				windowLinkedApp,
-				row,
-				iconTable.tableView_->findCol(DesktopIconTable::COL_APP_LINK_UID));
-		} //end create app link
+			    windowLinkedApp,
+			    row,
+			    iconTable.tableView_->findCol(DesktopIconTable::COL_APP_LINK_UID));
+		}  // end create app link
 
 		// parse parameters
-		std::map<std::string,std::string> parameters;
+		std::map<std::string, std::string> parameters;
 
 		__COUTV__(windowParameters);
 		StringMacros::getMapFromString(windowParameters, parameters);
@@ -1151,100 +1146,104 @@ try
 		// create link to icon parameters
 		if(parameters.size())
 		{
-			//set parameter link table
+			// set parameter link table
 			iconTable.tableView_->setValueAsString(
-				DesktopIconTable::PARAMETER_TABLE,
-				row,
-				iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_LINK));
-			//set parameter link Group ID
+			    DesktopIconTable::PARAMETER_TABLE,
+			    row,
+			    iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_LINK));
+			// set parameter link Group ID
 			iconTable.tableView_->setValueAsString(
-				iconUID + "_Parameters",
-				row,
-				iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_LINK_GID));
-
+			    iconUID + "_Parameters",
+			    row,
+			    iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_LINK_GID));
 
 			__COUTV__(StringMacros::mapToString(parameters));
 
-			for(const auto& parameter: parameters)
+			for(const auto& parameter : parameters)
 			{
 				// create parameter record
-				row = parameterTable.tableView_->addRow(author,
-						true /*incrementUniqueData*/, "generatedParameter");
+				row = parameterTable.tableView_->addRow(
+				    author, true /*incrementUniqueData*/, "generatedParameter");
 
 				// set parameter status true
 				parameterTable.tableView_->setValueAsString(
 				    "1", row, parameterTable.tableView_->getColStatus());
 				// set parameter Group ID
 				parameterTable.tableView_->setValueAsString(
-					iconUID + "_Parameters",
-					row,
-					parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_GID));
+				    iconUID + "_Parameters",
+				    row,
+				    parameterTable.tableView_->findCol(
+				        DesktopIconTable::COL_PARAMETER_GID));
 				// set parameter key
 				parameterTable.tableView_->setURIEncodedValue(
-					parameter.first,
-					row,
-					parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_KEY));
+				    parameter.first,
+				    row,
+				    parameterTable.tableView_->findCol(
+				        DesktopIconTable::COL_PARAMETER_KEY));
 				// set parameter value
 				parameterTable.tableView_->setURIEncodedValue(
-					parameter.second,
-					row,
-					parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_VALUE));
-			} //end parameter loop
+				    parameter.second,
+				    row,
+				    parameterTable.tableView_->findCol(
+				        DesktopIconTable::COL_PARAMETER_VALUE));
+			}  // end parameter loop
 
 			std::stringstream ss;
 			parameterTable.tableView_->print(ss);
 			__COUT__ << ss.str();
 
-			parameterTable.tableView_->init(); // verify new table (throws runtime_errors)
+			parameterTable.tableView_
+			    ->init();  // verify new table (throws runtime_errors)
 
-		} //end create parameters link
+		}  // end create parameters link
 
 		std::stringstream ss;
 		iconTable.tableView_->print(ss);
 		__COUT__ << ss.str();
 
-		iconTable.tableView_->init(); // verify new table (throws runtime_errors)
+		iconTable.tableView_->init();  // verify new table (throws runtime_errors)
 	}
 	catch(...)
 	{
 		__COUT__ << "Icon table errors while saving. Erasing all newly "
-				"created table versions."
-				<< __E__;
+		            "created table versions."
+		         << __E__;
 		if(iconTable.createdTemporaryVersion_)  // if temporary version created here
 		{
 			__COUT__ << "Erasing temporary version " << iconTable.tableName_ << "-v"
-					<< iconTable.temporaryVersion_ << __E__;
+			         << iconTable.temporaryVersion_ << __E__;
 			// erase with proper version management
 			cfgMgr->eraseTemporaryVersion(iconTable.tableName_,
-					iconTable.temporaryVersion_);
+			                              iconTable.temporaryVersion_);
 		}
 
 		if(parameterTable.createdTemporaryVersion_)  // if temporary version created here
 		{
 			__COUT__ << "Erasing temporary version " << parameterTable.tableName_ << "-v"
-					<< parameterTable.temporaryVersion_ << __E__;
+			         << parameterTable.temporaryVersion_ << __E__;
 			// erase with proper version management
 			cfgMgr->eraseTemporaryVersion(parameterTable.tableName_,
-					parameterTable.temporaryVersion_);
+			                              parameterTable.temporaryVersion_);
 		}
 
 		if(appTable.createdTemporaryVersion_)  // if temporary version created here
 		{
 			__COUT__ << "Erasing temporary version " << appTable.tableName_ << "-v"
-					<< appTable.temporaryVersion_ << __E__;
+			         << appTable.temporaryVersion_ << __E__;
 			// erase with proper version management
 			cfgMgr->eraseTemporaryVersion(appTable.tableName_,
-					appTable.temporaryVersion_);
+			                              appTable.temporaryVersion_);
 		}
 
-		throw; // re-throw
-	} //end catch
+		throw;  // re-throw
+	}           // end catch
 
-	__COUT__ << "Edits complete for new desktop icon, now making persistent tables." << __E__;
+	__COUT__ << "Edits complete for new desktop icon, now making persistent tables."
+	         << __E__;
 
 	// all edits are complete and tables verified
 
-	//Remaining steps:
+	// Remaining steps:
 	//	save tables
 	//	save new context group and activate it
 	//	check for aliases ...
@@ -1253,67 +1252,70 @@ try
 	//	if backbone modified, save group and activate it
 
 	__COUT__ << "Original version is " << iconTable.tableName_ << "-v"
-			<< iconTable.originalVersion_ << __E__;
+	         << iconTable.originalVersion_ << __E__;
 	__COUT__ << "Original version is " << parameterTable.tableName_ << "-v"
-			<< parameterTable.originalVersion_ <<  __E__;
+	         << parameterTable.originalVersion_ << __E__;
 
-	contextGroupMembers[DesktopIconTable::ICON_TABLE] = ConfigurationSupervisorBase::saveModifiedVersionXML(
-			xmlOut,
-			cfgMgr,
-			iconTable.tableName_,
-			iconTable.originalVersion_,
-			true /*make temporary*/,
-			iconTable.table_,
-			iconTable.temporaryVersion_,
-			true /*ignoreDuplicates*/);  // save persistent version properly
-	contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] = ConfigurationSupervisorBase::saveModifiedVersionXML(
-			xmlOut,
-			cfgMgr,
-			parameterTable.tableName_,
-			parameterTable.originalVersion_,
-			true /*make temporary*/,
-			parameterTable.table_,
-			parameterTable.temporaryVersion_,
-			true /*ignoreDuplicates*/);  // save persistent version properly
+	contextGroupMembers[DesktopIconTable::ICON_TABLE] =
+	    ConfigurationSupervisorBase::saveModifiedVersionXML(
+	        xmlOut,
+	        cfgMgr,
+	        iconTable.tableName_,
+	        iconTable.originalVersion_,
+	        true /*make temporary*/,
+	        iconTable.table_,
+	        iconTable.temporaryVersion_,
+	        true /*ignoreDuplicates*/);  // save persistent version properly
+	contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] =
+	    ConfigurationSupervisorBase::saveModifiedVersionXML(
+	        xmlOut,
+	        cfgMgr,
+	        parameterTable.tableName_,
+	        parameterTable.originalVersion_,
+	        true /*make temporary*/,
+	        parameterTable.table_,
+	        parameterTable.temporaryVersion_,
+	        true /*ignoreDuplicates*/);  // save persistent version properly
 
 	__COUT__ << "Temporary target version is " << iconTable.tableName_ << "-v"
-			<< contextGroupMembers[DesktopIconTable::ICON_TABLE] << "-v"
-			<< iconTable.temporaryVersion_ << __E__;
+	         << contextGroupMembers[DesktopIconTable::ICON_TABLE] << "-v"
+	         << iconTable.temporaryVersion_ << __E__;
 	__COUT__ << "Temporary target version is " << parameterTable.tableName_ << "-v"
-			<< contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] << "-v"
-			<< parameterTable.temporaryVersion_ <<  __E__;
+	         << contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] << "-v"
+	         << parameterTable.temporaryVersion_ << __E__;
 
-	contextGroupMembers[DesktopIconTable::ICON_TABLE] = ConfigurationSupervisorBase::saveModifiedVersionXML(
-		    xmlOut,
-		    cfgMgr,
-			iconTable.tableName_,
-			iconTable.originalVersion_,
-		    false /*make temporary*/,
-			iconTable.table_,
-			iconTable.temporaryVersion_,
-			false /*ignoreDuplicates*/,
-			true /*lookForEquivalent*/);  // save persistent version properly
-	contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] = ConfigurationSupervisorBase::saveModifiedVersionXML(
-		    xmlOut,
-		    cfgMgr,
-			parameterTable.tableName_,
-			parameterTable.originalVersion_,
-			false /*make temporary*/,
-			parameterTable.table_,
-			parameterTable.temporaryVersion_,
-			false /*ignoreDuplicates*/,
-			true /*lookForEquivalent*/);  // save persistent version properly
+	contextGroupMembers[DesktopIconTable::ICON_TABLE] =
+	    ConfigurationSupervisorBase::saveModifiedVersionXML(
+	        xmlOut,
+	        cfgMgr,
+	        iconTable.tableName_,
+	        iconTable.originalVersion_,
+	        false /*make temporary*/,
+	        iconTable.table_,
+	        iconTable.temporaryVersion_,
+	        false /*ignoreDuplicates*/,
+	        true /*lookForEquivalent*/);  // save persistent version properly
+	contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] =
+	    ConfigurationSupervisorBase::saveModifiedVersionXML(
+	        xmlOut,
+	        cfgMgr,
+	        parameterTable.tableName_,
+	        parameterTable.originalVersion_,
+	        false /*make temporary*/,
+	        parameterTable.table_,
+	        parameterTable.temporaryVersion_,
+	        false /*ignoreDuplicates*/,
+	        true /*lookForEquivalent*/);  // save persistent version properly
 
 	__COUT__ << "Final target version is " << iconTable.tableName_ << "-v"
-            << contextGroupMembers[DesktopIconTable::ICON_TABLE] << __E__;
+	         << contextGroupMembers[DesktopIconTable::ICON_TABLE] << __E__;
 	__COUT__ << "Final target version is " << parameterTable.tableName_ << "-v"
-            << contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] << __E__;
+	         << contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] << __E__;
 
 	for(auto& table : contextGroupMembers)
 	{
 		__COUT__ << table.first << " v" << table.second << __E__;
 	}
-
 
 	__COUT__ << "Checking for duplicate Context groups..." << __E__;
 	TableGroupKey newContextKey =
@@ -1322,14 +1324,15 @@ try
 	if(!newContextKey.isInvalid())
 	{
 		__COUT__ << "Found equivalent group key (" << newContextKey << ") for "
-		             << contextGroupName << "." << __E__;
-		xmlOut.addTextElementToData(contextGroupName + "_foundEquivalentKey", "1");  // indicator
+		         << contextGroupName << "." << __E__;
+		xmlOut.addTextElementToData(contextGroupName + "_foundEquivalentKey",
+		                            "1");  // indicator
 	}
 	else
 	{
-		newContextKey = cfgMgr->saveNewTableGroup(contextGroupName,contextGroupMembers);
+		newContextKey = cfgMgr->saveNewTableGroup(contextGroupName, contextGroupMembers);
 		__COUT__ << "Saved new Context group key (" << newContextKey << ") for "
-				<< contextGroupName << "." << __E__;
+		         << contextGroupName << "." << __E__;
 	}
 
 	xmlOut.addTextElementToData("contextGroupName", contextGroupName);
@@ -1338,45 +1341,46 @@ try
 	//	check for aliases of original group key and original table version
 
 	__COUT__ << "Original version is " << iconTable.tableName_ << "-v"
-			<< iconTable.originalVersion_ << __E__;
+	         << iconTable.originalVersion_ << __E__;
 	__COUT__ << "Original version is " << parameterTable.tableName_ << "-v"
-			<< parameterTable.originalVersion_ <<  __E__;
+	         << parameterTable.originalVersion_ << __E__;
 
 	bool groupAliasChange = false;
 	bool tableAliasChange = false;
 
-	{ //check group aliases ... a la ConfigurationGUISupervisor::handleSetGroupAliasInBackboneXML
+	{  // check group aliases ... a la
+	   // ConfigurationGUISupervisor::handleSetGroupAliasInBackboneXML
 
-		TableBase*   table           	= cfgMgr->getTableByName(ConfigurationManager::GROUP_ALIASES_TABLE_NAME);
-		TableVersion originalVersion  	= backboneGroupMembers[ConfigurationManager::GROUP_ALIASES_TABLE_NAME];
-		TableVersion temporaryVersion 	= table->createTemporaryView(originalVersion);
-		TableView*   configView 		= table->getTemporaryView(temporaryVersion);
+		TableBase* table =
+		    cfgMgr->getTableByName(ConfigurationManager::GROUP_ALIASES_TABLE_NAME);
+		TableVersion originalVersion =
+		    backboneGroupMembers[ConfigurationManager::GROUP_ALIASES_TABLE_NAME];
+		TableVersion temporaryVersion = table->createTemporaryView(originalVersion);
+		TableView*   configView       = table->getTemporaryView(temporaryVersion);
 
 		unsigned int col;
 		unsigned int row = 0;
 
 		std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
-				cfgMgr->getNode(ConfigurationManager::GROUP_ALIASES_TABLE_NAME).getChildren();
+		    cfgMgr->getNode(ConfigurationManager::GROUP_ALIASES_TABLE_NAME).getChildren();
 		std::string groupName, groupKey;
 		for(auto& aliasNodePair : aliasNodePairs)
 		{
 			groupName = aliasNodePair.second.getNode("GroupName").getValueAsString();
 			groupKey  = aliasNodePair.second.getNode("GroupKey").getValueAsString();
 
-			__COUT__ << "Group Alias: " << aliasNodePair.first << " => " << groupName <<
-					"(" << groupKey << "); row=" << row << __E__;
+			__COUT__ << "Group Alias: " << aliasNodePair.first << " => " << groupName
+			         << "(" << groupKey << "); row=" << row << __E__;
 
-			if(groupName == contextGroupName && TableGroupKey(groupKey) == originalContextGroupKey)
+			if(groupName == contextGroupName &&
+			   TableGroupKey(groupKey) == originalContextGroupKey)
 			{
 				__COUT__ << "Found alias! Changing group key." << __E__;
 
 				groupAliasChange = true;
 
 				configView->setValueAsString(
-						newContextKey.toString(),
-						row,
-						configView->findCol("GroupKey")
-						);
+				    newContextKey.toString(), row, configView->findCol("GroupKey"));
 			}
 
 			++row;
@@ -1390,73 +1394,78 @@ try
 
 			// save or find equivalent
 			backboneGroupMembers[ConfigurationManager::GROUP_ALIASES_TABLE_NAME] =
-					ConfigurationSupervisorBase::saveModifiedVersionXML(xmlOut,
-						cfgMgr,
-						table->getTableName(),
-						originalVersion,
-						false /*makeTemporary*/,
-						table,
-						temporaryVersion,
-						false /*ignoreDuplicates*/,
-						true /*lookForEquivalent*/);
+			    ConfigurationSupervisorBase::saveModifiedVersionXML(
+			        xmlOut,
+			        cfgMgr,
+			        table->getTableName(),
+			        originalVersion,
+			        false /*makeTemporary*/,
+			        table,
+			        temporaryVersion,
+			        false /*ignoreDuplicates*/,
+			        true /*lookForEquivalent*/);
 
-			__COUT__ << "Original version is " << table->getTableName() << "-v"
-					<< originalVersion << " and new version is v" <<
-					backboneGroupMembers[ConfigurationManager::GROUP_ALIASES_TABLE_NAME] << __E__;
+			__COUT__
+			    << "Original version is " << table->getTableName() << "-v"
+			    << originalVersion << " and new version is v"
+			    << backboneGroupMembers[ConfigurationManager::GROUP_ALIASES_TABLE_NAME]
+			    << __E__;
 		}
 
-	} //end group alias check
+	}  // end group alias check
 
-	{ //check version aliases
+	{  // check version aliases
 
-		TableBase*   table           	= cfgMgr->getTableByName(ConfigurationManager::VERSION_ALIASES_TABLE_NAME);
-		TableVersion originalVersion  	= backboneGroupMembers[ConfigurationManager::VERSION_ALIASES_TABLE_NAME];
-		TableVersion temporaryVersion 	= table->createTemporaryView(originalVersion);
-		TableView*   configView 		= table->getTemporaryView(temporaryVersion);
+		TableBase* table =
+		    cfgMgr->getTableByName(ConfigurationManager::VERSION_ALIASES_TABLE_NAME);
+		TableVersion originalVersion =
+		    backboneGroupMembers[ConfigurationManager::VERSION_ALIASES_TABLE_NAME];
+		TableVersion temporaryVersion = table->createTemporaryView(originalVersion);
+		TableView*   configView       = table->getTemporaryView(temporaryVersion);
 
 		unsigned int col;
 		unsigned int row = 0;
 
 		std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
-				cfgMgr->getNode(ConfigurationManager::VERSION_ALIASES_TABLE_NAME).getChildren();
+		    cfgMgr->getNode(ConfigurationManager::VERSION_ALIASES_TABLE_NAME)
+		        .getChildren();
 		std::string tableName, tableVersion;
 		for(auto& aliasNodePair : aliasNodePairs)
 		{
 			tableName = aliasNodePair.second.getNode("TableName").getValueAsString();
-			tableVersion  = aliasNodePair.second.getNode("TableVersion").getValueAsString();
+			tableVersion =
+			    aliasNodePair.second.getNode("TableVersion").getValueAsString();
 
-			__COUT__ << "Table Alias: " << aliasNodePair.first << " => " << tableName <<
-					"-v" << tableVersion << "" << __E__;
+			__COUT__ << "Table Alias: " << aliasNodePair.first << " => " << tableName
+			         << "-v" << tableVersion << "" << __E__;
 
 			if(tableName == DesktopIconTable::ICON_TABLE &&
-					TableVersion(tableVersion) == iconTable.originalVersion_)
+			   TableVersion(tableVersion) == iconTable.originalVersion_)
 			{
 				__COUT__ << "Found alias! Changing icon table version alias." << __E__;
 
 				tableAliasChange = true;
 
 				configView->setValueAsString(
-						contextGroupMembers[DesktopIconTable::ICON_TABLE].toString(),
-						row,
-						configView->findCol("TableVersion")
-				);
+				    contextGroupMembers[DesktopIconTable::ICON_TABLE].toString(),
+				    row,
+				    configView->findCol("TableVersion"));
 			}
 			else if(tableName == DesktopIconTable::PARAMETER_TABLE &&
-					TableVersion(tableVersion) == parameterTable.originalVersion_)
+			        TableVersion(tableVersion) == parameterTable.originalVersion_)
 			{
-				__COUT__ << "Found alias! Changing icon parameter table version alias." << __E__;
+				__COUT__ << "Found alias! Changing icon parameter table version alias."
+				         << __E__;
 
 				tableAliasChange = true;
 
 				configView->setValueAsString(
-						contextGroupMembers[DesktopIconTable::PARAMETER_TABLE].toString(),
-						row,
-						configView->findCol("TableVersion")
-				);
+				    contextGroupMembers[DesktopIconTable::PARAMETER_TABLE].toString(),
+				    row,
+				    configView->findCol("TableVersion"));
 			}
 
 			++row;
-
 		}
 
 		if(tableAliasChange)
@@ -1467,22 +1476,25 @@ try
 
 			// save or find equivalent
 			backboneGroupMembers[ConfigurationManager::VERSION_ALIASES_TABLE_NAME] =
-					ConfigurationSupervisorBase::saveModifiedVersionXML(xmlOut,
-							cfgMgr,
-							table->getTableName(),
-							originalVersion,
-							false /*makeTemporary*/,
-							table,
-							temporaryVersion,
-							false /*ignoreDuplicates*/,
-							true /*lookForEquivalent*/);
+			    ConfigurationSupervisorBase::saveModifiedVersionXML(
+			        xmlOut,
+			        cfgMgr,
+			        table->getTableName(),
+			        originalVersion,
+			        false /*makeTemporary*/,
+			        table,
+			        temporaryVersion,
+			        false /*ignoreDuplicates*/,
+			        true /*lookForEquivalent*/);
 
-			__COUT__ << "Original version is " << table->getTableName() << "-v"
-					<< originalVersion << " and new version is v" <<
-					backboneGroupMembers[ConfigurationManager::VERSION_ALIASES_TABLE_NAME] << __E__;
+			__COUT__
+			    << "Original version is " << table->getTableName() << "-v"
+			    << originalVersion << " and new version is v"
+			    << backboneGroupMembers[ConfigurationManager::VERSION_ALIASES_TABLE_NAME]
+			    << __E__;
 		}
 
-	} //end table version alias check
+	}  // end table version alias check
 
 	//	if backbone modified, save group and activate it
 	if(groupAliasChange || tableAliasChange)
@@ -1495,45 +1507,47 @@ try
 
 	__COUT__ << "Checking for duplicate Backbone groups..." << __E__;
 	TableGroupKey newBackboneKey =
-			cfgMgr->findTableGroup(backboneGroupName, backboneGroupMembers);
+	    cfgMgr->findTableGroup(backboneGroupName, backboneGroupMembers);
 
 	if(!newBackboneKey.isInvalid())
 	{
 		__COUT__ << "Found equivalent group key (" << newBackboneKey << ") for "
-				<< backboneGroupName << "." << __E__;
-		xmlOut.addTextElementToData(backboneGroupName + "_foundEquivalentKey", "1");  // indicator
+		         << backboneGroupName << "." << __E__;
+		xmlOut.addTextElementToData(backboneGroupName + "_foundEquivalentKey",
+		                            "1");  // indicator
 	}
 	else
 	{
-		newBackboneKey = cfgMgr->saveNewTableGroup(backboneGroupName,backboneGroupMembers);
+		newBackboneKey =
+		    cfgMgr->saveNewTableGroup(backboneGroupName, backboneGroupMembers);
 		__COUT__ << "Saved new Backbone group key (" << newBackboneKey << ") for "
-				<< backboneGroupName << "." << __E__;
+		         << backboneGroupName << "." << __E__;
 	}
 
 	xmlOut.addTextElementToData("backboneGroupName", backboneGroupName);
 	xmlOut.addTextElementToData("backboneGroupKey", newBackboneKey.toString());
 
-
-	//Now need to activate Context and Backbone group
+	// Now need to activate Context and Backbone group
 	__COUT__ << "Activating Context group key (" << newContextKey << ") for "
-				<< contextGroupName << "." << __E__;
+	         << contextGroupName << "." << __E__;
 	__COUT__ << "Activating Backbone group key (" << newBackboneKey << ") for "
-					<< backboneGroupName << "." << __E__;
+	         << backboneGroupName << "." << __E__;
 
-	//acquire all active groups and ignore errors, so that activateTableGroup does not erase other active groups
+	// acquire all active groups and ignore errors, so that activateTableGroup does not
+	// erase other active groups
 	cfgMgr->restoreActiveTableGroups(false /*throwErrors*/,
 	                                 "" /*pathToActiveGroupsFile*/,
 	                                 false /*onlyLoadIfBackboneOrContext*/
 	);
 
-	//activate group
+	// activate group
 	cfgMgr->activateTableGroup(contextGroupName, newContextKey);
 	cfgMgr->activateTableGroup(backboneGroupName, newBackboneKey);
 
 	// always add active table groups to xml response
-	ConfigurationSupervisorBase::getConfigurationStatusXML(xmlOut,cfgMgr);
+	ConfigurationSupervisorBase::getConfigurationStatusXML(xmlOut, cfgMgr);
 
-} //end handleAddDesktopIconXML()
+}  // end handleAddDesktopIconXML()
 catch(std::runtime_error& e)
 {
 	__COUT__ << "Error detected!\n\n " << e.what() << __E__;
@@ -1545,7 +1559,3 @@ catch(...)
 	__COUT__ << "Unknown Error detected!\n\n " << __E__;
 	xmlOut.addTextElementToData("Error", "Error adding Desktop Icon! ");
 }  // end handleCreateTableGroupXML() catch
-
-
-
-

@@ -1,8 +1,8 @@
 ###########################################################
 #
 # artdaq builder fcl configuration file produced by otsdaq.
-# 	Creation timestamp: Mon Sep 16 10:41:17 2019 CDT
-# 	Original filename: /home/eflumerf/Desktop/otsdaq-mrb-base/LocalData/Data/ARTDAQConfigurations/builder-builder0.fcl
+# 	Creation timestamp: Fri Sep 27 15:21:24 2019 CDT
+# 	Original filename: /home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/builder-builder0.fcl
 #	otsdaq-ARTDAQ builder UID: builder0
 #
 ###########################################################
@@ -56,7 +56,6 @@ daq: {
 art: {
 	services: {
 		scheduler: {
-			errorOnFailureToPut: false
 		}
 
 		NetMonTransportServiceInterface: {

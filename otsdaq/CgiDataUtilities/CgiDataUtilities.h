@@ -22,7 +22,6 @@ class CgiDataUtilities
 
 	// decodeURIComponent moved to StringMacros::
 	// static std::string decodeURIComponent(const std::string& data);
-
 };
 
 }  // namespace ots

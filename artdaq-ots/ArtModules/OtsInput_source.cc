@@ -1,8 +1,8 @@
-#include "art/Framework/IO/Sources/Source.h"
-#include "artdaq/ArtModules/detail/SharedMemoryReader.hh"
-#include "artdaq-ots/Overlays/FragmentType.hh"
 #include "art/Framework/Core/InputSourceMacros.h"
+#include "art/Framework/IO/Sources/Source.h"
 #include "art/Framework/IO/Sources/SourceTraits.h"
+#include "artdaq-ots/Overlays/FragmentType.hh"
+#include "artdaq/ArtModules/detail/SharedMemoryReader.hh"
 
 #include <string>
 using std::string;

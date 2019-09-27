@@ -15,12 +15,11 @@ class ARTDAQBuilderTable : public ARTDAQTableBase
 
 	// Methods
 	void init(ConfigurationManager* configManager);
-	void outputFHICL(
-	                 const ConfigurationTree& builderNode,
+	void outputFHICL(const ConfigurationTree& builderNode,
 	                 unsigned int             selfRank,
-					 const std::string&       selfHost,
+	                 const std::string&       selfHost,
 	                 unsigned int             selfPort,
-					 size_t maxFragmentSizeBytes);
+	                 size_t                   maxFragmentSizeBytes);
 };
 }  // namespace ots
 #endif

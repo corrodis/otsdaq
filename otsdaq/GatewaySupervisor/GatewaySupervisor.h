@@ -1,8 +1,8 @@
 #ifndef _ots_GatewaySupervisor_h
 #define _ots_GatewaySupervisor_h
 
-#include "otsdaq/CoreSupervisors/CorePropertySupervisorBase.h"
 #include "otsdaq/CoreSupervisors/ConfigurationSupervisorBase.h"
+#include "otsdaq/CoreSupervisors/CorePropertySupervisorBase.h"
 #include "otsdaq/FiniteStateMachine/RunControlStateMachine.h"
 #include "otsdaq/GatewaySupervisor/Iterator.h"
 #include "otsdaq/SOAPUtilities/SOAPMessenger.h"

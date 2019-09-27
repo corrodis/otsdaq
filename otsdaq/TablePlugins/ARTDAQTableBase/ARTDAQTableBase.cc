@@ -18,9 +18,8 @@ using namespace ots;
 
 #define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 
-
-ARTDAQTableBase::ProcessTypes ARTDAQTableBase::processTypes_ = ARTDAQTableBase::ProcessTypes();
-
+ARTDAQTableBase::ProcessTypes ARTDAQTableBase::processTypes_ =
+    ARTDAQTableBase::ProcessTypes();
 
 //==============================================================================
 // TableBase
@@ -51,22 +50,29 @@ ARTDAQTableBase::~ARTDAQTableBase(void) {}  // end destructor()
 //========================================================================================================================
 const std::string& ARTDAQTableBase::getTypeString(ARTDAQTableBase::ARTDAQAppType type)
 {
-	switch (type) {
-	case ARTDAQTableBase::ARTDAQAppType::EventBuilder: 	return processTypes_.BUILDER;
-	case ARTDAQTableBase::ARTDAQAppType::DataLogger: 	return processTypes_.LOGGER;
-	case ARTDAQTableBase::ARTDAQAppType::Dispatcher: 	return processTypes_.DISPATCHER;
-	case ARTDAQTableBase::ARTDAQAppType::BoardReader: 	return processTypes_.READER;
+	switch(type)
+	{
+	case ARTDAQTableBase::ARTDAQAppType::EventBuilder:
+		return processTypes_.BUILDER;
+	case ARTDAQTableBase::ARTDAQAppType::DataLogger:
+		return processTypes_.LOGGER;
+	case ARTDAQTableBase::ARTDAQAppType::Dispatcher:
+		return processTypes_.DISPATCHER;
+	case ARTDAQTableBase::ARTDAQAppType::BoardReader:
+		return processTypes_.READER;
 	}
-	//return "UNKNOWN";
-	__SS__ << "Illegal translation attempt for type '" << (unsigned int)type << "'" << __E__;
+	// return "UNKNOWN";
+	__SS__ << "Illegal translation attempt for type '" << (unsigned int)type << "'"
+	       << __E__;
 	__SS_THROW__;
-} //end getTypeString()
+}  // end getTypeString()
 
 //========================================================================================================================
 std::string ARTDAQTableBase::getFHICLFilename(ARTDAQTableBase::ARTDAQAppType type,
-                                              const std::string& name)
+                                              const std::string&             name)
 {
-	__COUT__ << "Type: " << ARTDAQTableBase::getTypeString(type) << " Name: " << name << __E__;
+	__COUT__ << "Type: " << ARTDAQTableBase::getTypeString(type) << " Name: " << name
+	         << __E__;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQTableBase::getTypeString(type) + "-";
 	std::string uid      = name;
 	for(unsigned int i = 0; i < uid.size(); ++i)
@@ -83,9 +89,10 @@ std::string ARTDAQTableBase::getFHICLFilename(ARTDAQTableBase::ARTDAQAppType typ
 
 //========================================================================================================================
 std::string ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType type,
-                                                  const std::string& name)
+                                                  const std::string&             name)
 {
-	__COUT__ << "Type: " << ARTDAQTableBase::getTypeString(type) << " Name: " << name << __E__;
+	__COUT__ << "Type: " << ARTDAQTableBase::getTypeString(type) << " Name: " << name
+	         << __E__;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQTableBase::getTypeString(type) + "-";
 	std::string uid      = name;
 	for(unsigned int i = 0; i < uid.size(); ++i)
@@ -101,7 +108,8 @@ std::string ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType
 }  // end getFlatFHICLFilename()
 
 //========================================================================================================================
-void ARTDAQTableBase::flattenFHICL(ARTDAQTableBase::ARTDAQAppType type, const std::string& name)
+void ARTDAQTableBase::flattenFHICL(ARTDAQTableBase::ARTDAQAppType type,
+                                   const std::string&             name)
 {
 	__COUT__ << "flattenFHICL()" << __E__;
 	std::string inFile  = getFHICLFilename(type, name);
@@ -228,15 +236,14 @@ std::string ARTDAQTableBase::insertModuleType(std::ostream&     out,
 	return value;
 }  // end insertModuleType()
 
-
 //========================================================================================================================
-void ARTDAQTableBase::outputReaderFHICL(//const ConfigurationManager*    configManager,
-                                         const ConfigurationTree& boardReaderNode,
-                                         //unsigned int             selfRank,
-										 const std::string&       selfHost,
-                                         //unsigned int             selfPort,
-                                         //const XDAQContextTable*  contextConfig,
-										 size_t maxFragmentSizeBytes)
+void ARTDAQTableBase::outputReaderFHICL(  // const ConfigurationManager*    configManager,
+    const ConfigurationTree& boardReaderNode,
+    // unsigned int             selfRank,
+    const std::string& selfHost,
+    // unsigned int             selfPort,
+    // const XDAQContextTable*  contextConfig,
+    size_t maxFragmentSizeBytes)
 {
 	/*
 	    the file will look something like this:
@@ -364,8 +371,7 @@ void ARTDAQTableBase::outputReaderFHICL(//const ConfigurationManager*    configM
 	 */
 
 	std::string filename = ARTDAQTableBase::getFHICLFilename(
-			ARTDAQTableBase::ARTDAQAppType::BoardReader,
-			boardReaderNode.getValue());
+	    ARTDAQTableBase::ARTDAQAppType::BoardReader, boardReaderNode.getValue());
 
 	/////////////////////////
 	// generate xdaq run parameter file
@@ -529,18 +535,17 @@ void ARTDAQTableBase::outputReaderFHICL(//const ConfigurationManager*    configM
 	OUT << "}\n\n";  // end daq
 
 	out.close();
-} //end outputReaderFHICL()
+}  // end outputReaderFHICL()
 
 //========================================================================================================================
 // outputDataReceiverFHICL
 //	Note: currently selfRank and selfPort are unused by artdaq fcl
-void ARTDAQTableBase::outputDataReceiverFHICL(
-    const ConfigurationTree&             receiverNode,
-    //unsigned int                         selfRank,
-    const std::string&                   selfHost,
-    //unsigned int                         selfPort,
-    ARTDAQTableBase::ARTDAQAppType 		 appType,
-	size_t 								 maxFragmentSizeBytes)
+void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverNode,
+                                              // unsigned int selfRank,
+                                              const std::string& selfHost,
+                                              // unsigned int selfPort,
+                                              ARTDAQTableBase::ARTDAQAppType appType,
+                                              size_t maxFragmentSizeBytes)
 {
 	std::string filename = getFHICLFilename(appType, receiverNode.getValue());
 
@@ -566,8 +571,8 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 	    << " fcl configuration file produced by otsdaq." << __E__;
 	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
 	OUT << "# 	Original filename: " << filename << __E__;
-	OUT << "#	otsdaq-ARTDAQ " << getTypeString(appType) << " UID: " << receiverNode.getValue()
-	    << __E__;
+	OUT << "#	otsdaq-ARTDAQ " << getTypeString(appType)
+	    << " UID: " << receiverNode.getValue() << __E__;
 	OUT << "#" << __E__;
 	OUT << "###########################################################" << __E__;
 	OUT << "\n\n";
@@ -759,8 +764,8 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 			        .getValue()
 			    << "\n";
 
-				OUT << "destinations: {\n"
-				    << "}\n\n";  // end destinations
+			OUT << "destinations: {\n"
+			    << "}\n\n";  // end destinations
 
 			POPTAB;
 			OUT << "}\n\n";  // end NetMonTransportServiceInterface
@@ -816,7 +821,8 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 				    false /*onlyInsertAtTableParameters*/,
 				    true /*includeAtTableParameters*/);
 
-				if (outputPlugin.second.getNode("outputModuleType").getValue() == "BinaryNetOutput")
+				if(outputPlugin.second.getNode("outputModuleType").getValue() ==
+				   "BinaryNetOutput")
 				{
 					OUT << "destinations: {\n"
 					    << "}\n\n";  // end destinations
@@ -1090,17 +1096,18 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 
 //========================================================================================================================
 void ARTDAQTableBase::extractArtdaqInfo(
-		ConfigurationTree artdaqSupervisorNode,
-		std::unordered_map<int, ARTDAQTableBase::SubsystemInfo>& subsystems,
-		std::map<std::string /*type*/, std::list<ARTDAQTableBase::ProcessInfo>>& processes,
-		bool														doWriteFHiCL /* = false */,
-		size_t 		 maxFragmentSizeBytes /* = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE*/,
-		ProgressBar* progressBar /* =0 */)
+    ConfigurationTree                                        artdaqSupervisorNode,
+    std::unordered_map<int, ARTDAQTableBase::SubsystemInfo>& subsystems,
+    std::map<std::string /*type*/, std::list<ARTDAQTableBase::ProcessInfo>>& processes,
+    bool         doWriteFHiCL /* = false */,
+    size_t       maxFragmentSizeBytes /* = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE*/,
+    ProgressBar* progressBar /* =0 */)
 {
-	if(progressBar) progressBar->step();
+	if(progressBar)
+		progressBar->step();
 
 	std::list<ARTDAQTableBase::ProcessInfo>& readerInfo =
-			processes[ARTDAQTableBase::processTypes_.READER];
+	    processes[ARTDAQTableBase::processTypes_.READER];
 	{
 		__COUT__ << "Checking for BoardReaders" << __E__;
 		auto readersLink = artdaqSupervisorNode.getNode("boardreadersLink");
@@ -1108,54 +1115,54 @@ void ARTDAQTableBase::extractArtdaqInfo(
 		{
 			auto readers = readersLink.getChildren();
 			__COUT__ << "There are " << readers.size() << " configured BoardReaders"
-					<< __E__;
+			         << __E__;
 
 			for(auto& reader : readers)
 			{
 				if(reader.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						.getValue<bool>())
+				       .getValue<bool>())
 				{
 					auto readerUID = reader.second.getNode("SupervisorUID").getValue();
 					auto readerHost =
-							reader.second.getNode("DAQInterfaceHostname").getValue();
+					    reader.second.getNode("DAQInterfaceHostname").getValue();
 
 					auto readerSubsystem     = 1;
 					auto readerSubsystemLink = reader.second.getNode("SubsystemLink");
 					if(!readerSubsystemLink.isDisconnected())
 					{
 						readerSubsystem =
-								readerSubsystemLink.getNode("SubsystemID").getValue<int>();
+						    readerSubsystemLink.getNode("SubsystemID").getValue<int>();
 						subsystems[readerSubsystem].destination =
-								readerSubsystemLink.getNode("Destination").getValue<int>();
+						    readerSubsystemLink.getNode("Destination").getValue<int>();
 						if(!subsystems.count(subsystems[readerSubsystem].destination) ||
-								!subsystems[subsystems[readerSubsystem].destination]
-											.sources.count(readerSubsystem))
+						   !subsystems[subsystems[readerSubsystem].destination]
+						        .sources.count(readerSubsystem))
 						{
 							subsystems[subsystems[readerSubsystem].destination]
-									   .sources.insert(readerSubsystem);
+							    .sources.insert(readerSubsystem);
 						}
 					}
 
 					__COUT__ << "Found BoardReader with UID " << readerUID
-							<< ", DAQInterface Hostname " << readerHost
-							<< ", and Subsystem " << readerSubsystem << __E__;
+					         << ", DAQInterface Hostname " << readerHost
+					         << ", and Subsystem " << readerSubsystem << __E__;
 					readerInfo.emplace_back(readerUID, readerHost, readerSubsystem);
 
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputReaderFHICL(
-							//artdaqSupervisorNode.getConfigurationManager(),
-							reader.second,
-							//0,
-							readerHost,
-							//10000,
-							//artdaqSupervisorNode.getConfigurationManager()->__GET_CONFIG__(XDAQContextTable),
-							maxFragmentSizeBytes);
+						    // artdaqSupervisorNode.getConfigurationManager(),
+						    reader.second,
+						    // 0,
+						    readerHost,
+						    // 10000,
+						    // artdaqSupervisorNode.getConfigurationManager()->__GET_CONFIG__(XDAQContextTable),
+						    maxFragmentSizeBytes);
 				}
 				else
 				{
 					__COUT__ << "BoardReader "
-							<< reader.second.getNode("SupervisorUID").getValue()
-							<< " is disabled." << __E__;
+					         << reader.second.getNode("SupervisorUID").getValue()
+					         << " is disabled." << __E__;
 				}
 			}
 		}
@@ -1166,10 +1173,11 @@ void ARTDAQTableBase::extractArtdaqInfo(
 			return;
 		}
 	}
-	if(progressBar) progressBar->step();
+	if(progressBar)
+		progressBar->step();
 
 	std::list<ARTDAQTableBase::ProcessInfo>& builderInfo =
-			processes[ARTDAQTableBase::processTypes_.BUILDER];
+	    processes[ARTDAQTableBase::processTypes_.BUILDER];
 	{
 		auto buildersLink = artdaqSupervisorNode.getNode("eventbuildersLink");
 		if(!buildersLink.isDisconnected() && buildersLink.getChildren().size() > 0)
@@ -1179,49 +1187,48 @@ void ARTDAQTableBase::extractArtdaqInfo(
 			for(auto& builder : builders)
 			{
 				if(builder.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						.getValue<bool>())
+				       .getValue<bool>())
 				{
 					auto builderUID = builder.second.getNode("SupervisorUID").getValue();
 					auto builderHost =
-							builder.second.getNode("DAQInterfaceHostname").getValue();
+					    builder.second.getNode("DAQInterfaceHostname").getValue();
 
 					auto builderSubsystem     = 1;
 					auto builderSubsystemLink = builder.second.getNode("SubsystemLink");
 					if(!builderSubsystemLink.isDisconnected())
 					{
 						builderSubsystem =
-								builderSubsystemLink.getNode("SubsystemID").getValue<int>();
+						    builderSubsystemLink.getNode("SubsystemID").getValue<int>();
 						subsystems[builderSubsystem].destination =
-								builderSubsystemLink.getNode("Destination").getValue<int>();
+						    builderSubsystemLink.getNode("Destination").getValue<int>();
 						if(!subsystems.count(subsystems[builderSubsystem].destination) ||
-								!subsystems[subsystems[builderSubsystem].destination]
-											.sources.count(builderSubsystem))
+						   !subsystems[subsystems[builderSubsystem].destination]
+						        .sources.count(builderSubsystem))
 						{
 							subsystems[subsystems[builderSubsystem].destination]
-									   .sources.insert(builderSubsystem);
+							    .sources.insert(builderSubsystem);
 						}
 					}
 
 					__COUT__ << "Found EventBuilder with UID " << builderUID
-							<< ", DAQInterface Hostname " << builderHost
-							<< ", and Subsystem " << builderSubsystem << __E__;
+					         << ", DAQInterface Hostname " << builderHost
+					         << ", and Subsystem " << builderSubsystem << __E__;
 					builderInfo.emplace_back(builderUID, builderHost, builderSubsystem);
 
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
-							builder.second,
-							//0 /*rank handled by daq interface*/,
-							builderHost,
-							//10000 /*port handled by daq interface*/,
-							ARTDAQTableBase::ARTDAQAppType::EventBuilder,
-							maxFragmentSizeBytes);
-
+						    builder.second,
+						    // 0 /*rank handled by daq interface*/,
+						    builderHost,
+						    // 10000 /*port handled by daq interface*/,
+						    ARTDAQTableBase::ARTDAQAppType::EventBuilder,
+						    maxFragmentSizeBytes);
 				}
 				else
 				{
 					__COUT__ << "EventBuilder "
-							<< builder.second.getNode("SupervisorUID").getValue()
-							<< " is disabled." << __E__;
+					         << builder.second.getNode("SupervisorUID").getValue()
+					         << " is disabled." << __E__;
 				}
 			}
 		}
@@ -1233,10 +1240,11 @@ void ARTDAQTableBase::extractArtdaqInfo(
 		}
 	}
 
-	if(progressBar) progressBar->step();
+	if(progressBar)
+		progressBar->step();
 
 	std::list<ARTDAQTableBase::ProcessInfo>& loggerInfo =
-			processes[ARTDAQTableBase::processTypes_.LOGGER];
+	    processes[ARTDAQTableBase::processTypes_.LOGGER];
 	{
 		auto dataloggersLink = artdaqSupervisorNode.getNode("dataloggersLink");
 		if(!dataloggersLink.isDisconnected())
@@ -1246,56 +1254,56 @@ void ARTDAQTableBase::extractArtdaqInfo(
 			for(auto& datalogger : dataloggers)
 			{
 				if(datalogger.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						.getValue<bool>())
+				       .getValue<bool>())
 				{
 					auto loggerHost =
-							datalogger.second.getNode("DAQInterfaceHostname").getValue();
+					    datalogger.second.getNode("DAQInterfaceHostname").getValue();
 					auto loggerUID =
-							datalogger.second.getNode("SupervisorUID").getValue();
+					    datalogger.second.getNode("SupervisorUID").getValue();
 
 					auto loggerSubsystem     = 1;
 					auto loggerSubsystemLink = datalogger.second.getNode("SubsystemLink");
 					if(!loggerSubsystemLink.isDisconnected())
 					{
 						loggerSubsystem =
-								loggerSubsystemLink.getNode("SubsystemID").getValue<int>();
+						    loggerSubsystemLink.getNode("SubsystemID").getValue<int>();
 						subsystems[loggerSubsystem].destination =
-								loggerSubsystemLink.getNode("Destination").getValue<int>();
+						    loggerSubsystemLink.getNode("Destination").getValue<int>();
 						if(!subsystems.count(subsystems[loggerSubsystem].destination) ||
-								!subsystems[subsystems[loggerSubsystem].destination]
-											.sources.count(loggerSubsystem))
+						   !subsystems[subsystems[loggerSubsystem].destination]
+						        .sources.count(loggerSubsystem))
 						{
 							subsystems[subsystems[loggerSubsystem].destination]
-									   .sources.insert(loggerSubsystem);
+							    .sources.insert(loggerSubsystem);
 						}
 					}
 
 					__COUT__ << "Found DataLogger with UID " << loggerUID
-							<< ", DAQInterface Hostname " << loggerHost
-							<< ", and Subsystem " << loggerSubsystem << __E__;
+					         << ", DAQInterface Hostname " << loggerHost
+					         << ", and Subsystem " << loggerSubsystem << __E__;
 					loggerInfo.emplace_back(loggerUID, loggerHost, loggerSubsystem);
 
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
-							datalogger.second,
-							//0 /*rank handled by daq interface*/,
-							loggerHost,
-							//10000 /*port handled by daq interface*/,
-							ARTDAQTableBase::ARTDAQAppType::DataLogger,
-							maxFragmentSizeBytes);
+						    datalogger.second,
+						    // 0 /*rank handled by daq interface*/,
+						    loggerHost,
+						    // 10000 /*port handled by daq interface*/,
+						    ARTDAQTableBase::ARTDAQAppType::DataLogger,
+						    maxFragmentSizeBytes);
 				}
 				else
 				{
 					__COUT__ << "DataLogger "
-							<< datalogger.second.getNode("SupervisorUID").getValue()
-							<< " is disabled." << __E__;
+					         << datalogger.second.getNode("SupervisorUID").getValue()
+					         << " is disabled." << __E__;
 				}
 			}
 		}
 	}
 
 	std::list<ARTDAQTableBase::ProcessInfo>& dispatcherInfo =
-			processes[ARTDAQTableBase::processTypes_.DISPATCHER];
+	    processes[ARTDAQTableBase::processTypes_.DISPATCHER];
 	{
 		auto dispatchersLink = artdaqSupervisorNode.getNode("dispatchersLink");
 		if(!dispatchersLink.isDisconnected())
@@ -1305,10 +1313,10 @@ void ARTDAQTableBase::extractArtdaqInfo(
 			for(auto& dispatcher : dispatchers)
 			{
 				if(dispatcher.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-						.getValue<bool>())
+				       .getValue<bool>())
 				{
 					auto dispatcherHost =
-							dispatcher.second.getNode("DAQInterfaceHostname").getValue();
+					    dispatcher.second.getNode("DAQInterfaceHostname").getValue();
 					auto dispUID = dispatcher.second.getNode("SupervisorUID").getValue();
 
 					auto dispSubsystem     = 1;
@@ -1316,42 +1324,40 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					if(!dispSubsystemLink.isDisconnected())
 					{
 						dispSubsystem =
-								dispSubsystemLink.getNode("SubsystemID").getValue<int>();
+						    dispSubsystemLink.getNode("SubsystemID").getValue<int>();
 						subsystems[dispSubsystem].destination =
-								dispSubsystemLink.getNode("Destination").getValue<int>();
+						    dispSubsystemLink.getNode("Destination").getValue<int>();
 						if(!subsystems.count(subsystems[dispSubsystem].destination) ||
-								!subsystems[subsystems[dispSubsystem].destination]
-											.sources.count(dispSubsystem))
+						   !subsystems[subsystems[dispSubsystem].destination]
+						        .sources.count(dispSubsystem))
 						{
 							subsystems[subsystems[dispSubsystem].destination]
-									   .sources.insert(dispSubsystem);
+							    .sources.insert(dispSubsystem);
 						}
 					}
 
 					__COUT__ << "Found Dispatcher with UID " << dispUID
-							<< ", DAQInterface Hostname " << dispatcherHost
-							<< ", and Subsystem " << dispSubsystem << __E__;
+					         << ", DAQInterface Hostname " << dispatcherHost
+					         << ", and Subsystem " << dispSubsystem << __E__;
 					dispatcherInfo.emplace_back(dispUID, dispatcherHost, dispSubsystem);
 
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
-							dispatcher.second,
-							//0 /*rank handled by daq interface*/,
-							dispatcherHost,
-							//10000 /*port handled by daq interface*/,
-							ARTDAQTableBase::ARTDAQAppType::Dispatcher,
-							maxFragmentSizeBytes);
-
+						    dispatcher.second,
+						    // 0 /*rank handled by daq interface*/,
+						    dispatcherHost,
+						    // 10000 /*port handled by daq interface*/,
+						    ARTDAQTableBase::ARTDAQAppType::Dispatcher,
+						    maxFragmentSizeBytes);
 				}
 				else
 				{
 					__COUT__ << "Dispatcher "
-							<< dispatcher.second.getNode("SupervisorUID").getValue()
-							<< " is disabled." << __E__;
+					         << dispatcher.second.getNode("SupervisorUID").getValue()
+					         << " is disabled." << __E__;
 				}
 			}
 		}
 	}
 
-} //end extractArtdaqInfo()
-
+}  // end extractArtdaqInfo()

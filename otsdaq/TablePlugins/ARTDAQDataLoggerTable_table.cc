@@ -35,50 +35,51 @@ ARTDAQDataLoggerTable::~ARTDAQDataLoggerTable(void) {}
 //========================================================================================================================
 void ARTDAQDataLoggerTable::init(ConfigurationManager* configManager)
 {
-//	// use isFirstAppInContext to only run once per context, for example to avoid
-//	//	generating files on local disk multiple times.
-//	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
-//
-//	//__COUTV__(isFirstAppInContext);
-//	if(!isFirstAppInContext)
-//		return;
-//
-//	// make directory just in case
-//	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
-//
-//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-//	__COUT__ << configManager->__SELF_NODE__ << std::endl;
-//
-//	const XDAQContextTable* contextConfig =
-//	    configManager->__GET_CONFIG__(XDAQContextTable);
-//	std::vector<const XDAQContextTable::XDAQContext*> loggerContexts =
-//	    contextConfig->getDataLoggerContexts();
-//
-//	// for each datalogger context
-//	//	output associated fcl config file
-//	for(auto& loggerContext : loggerContexts)
-//	{
-//		ConfigurationTree aggConfigNode = contextConfig->getSupervisorConfigNode(
-//		    configManager,
-//		    loggerContext->contextUID_,
-//		    loggerContext->applications_[0].applicationUID_);
-//
-//		__COUT__ << "Path for this DataLogger config is " << loggerContext->contextUID_
-//		         << "/" << loggerContext->applications_[0].applicationUID_ << "/"
-//		         << aggConfigNode.getValueAsString() << std::endl;
-//
-//		outputFHICL(
-//		    configManager,
-//		    aggConfigNode,
-//		    contextConfig->getARTDAQAppRank(loggerContext->contextUID_),
-//		    contextConfig->getContextAddress(loggerContext->contextUID_),
-//		    contextConfig->getARTDAQDataPort(configManager, loggerContext->contextUID_),
-//		    contextConfig, 0);
-//	}
+	//	// use isFirstAppInContext to only run once per context, for example to avoid
+	//	//	generating files on local disk multiple times.
+	//	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
+	//
+	//	//__COUTV__(isFirstAppInContext);
+	//	if(!isFirstAppInContext)
+	//		return;
+	//
+	//	// make directory just in case
+	//	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
+	//
+	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	//	__COUT__ << configManager->__SELF_NODE__ << std::endl;
+	//
+	//	const XDAQContextTable* contextConfig =
+	//	    configManager->__GET_CONFIG__(XDAQContextTable);
+	//	std::vector<const XDAQContextTable::XDAQContext*> loggerContexts =
+	//	    contextConfig->getDataLoggerContexts();
+	//
+	//	// for each datalogger context
+	//	//	output associated fcl config file
+	//	for(auto& loggerContext : loggerContexts)
+	//	{
+	//		ConfigurationTree aggConfigNode = contextConfig->getSupervisorConfigNode(
+	//		    configManager,
+	//		    loggerContext->contextUID_,
+	//		    loggerContext->applications_[0].applicationUID_);
+	//
+	//		__COUT__ << "Path for this DataLogger config is " <<
+	//loggerContext->contextUID_
+	//		         << "/" << loggerContext->applications_[0].applicationUID_ << "/"
+	//		         << aggConfigNode.getValueAsString() << std::endl;
+	//
+	//		outputFHICL(
+	//		    configManager,
+	//		    aggConfigNode,
+	//		    contextConfig->getARTDAQAppRank(loggerContext->contextUID_),
+	//		    contextConfig->getContextAddress(loggerContext->contextUID_),
+	//		    contextConfig->getARTDAQDataPort(configManager,
+	//loggerContext->contextUID_), 		    contextConfig, 0);
+	//	}
 }
 
 ////========================================================================================================================
-//void ARTDAQDataLoggerTable::outputFHICL(ConfigurationManager*    configManager,
+// void ARTDAQDataLoggerTable::outputFHICL(ConfigurationManager*    configManager,
 //                                        const ConfigurationTree& dataLoggerNode,
 //                                        unsigned int             selfRank,
 //                                        std::string              selfHost,

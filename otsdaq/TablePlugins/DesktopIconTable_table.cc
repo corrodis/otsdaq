@@ -23,13 +23,11 @@ const std::string DesktopIconTable::COL_PERMISSIONS        = "RequiredPermission
 const std::string DesktopIconTable::COL_IMAGE_URL          = "ImageURL";
 const std::string DesktopIconTable::COL_WINDOW_CONTENT_URL = "WindowContentURL";
 const std::string DesktopIconTable::COL_APP_LINK           = "LinkToApplicationTable";
-const std::string DesktopIconTable::COL_APP_LINK_UID           = "LinkToApplicationUID";
-
+const std::string DesktopIconTable::COL_APP_LINK_UID       = "LinkToApplicationUID";
 
 const std::string DesktopIconTable::COL_PARAMETER_LINK     = "LinkToParameterTable";
 const std::string DesktopIconTable::COL_PARAMETER_LINK_GID = "LinkToParameterGroupID";
 const std::string DesktopIconTable::COL_FOLDER_PATH        = "FolderPath";
-
 
 const std::string DesktopIconTable::COL_PARAMETER_GID   = "windowParameterGroupID";
 const std::string DesktopIconTable::COL_PARAMETER_KEY   = "windowParameterKey";

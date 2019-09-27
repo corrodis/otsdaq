@@ -21,7 +21,8 @@ using namespace ots;
 #define POPCOMMENT commentStr.resize(commentStr.size() - 2)
 
 //========================================================================================================================
-ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void) : ARTDAQTableBase("ARTDAQBoardReaderTable")
+ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void)
+    : ARTDAQTableBase("ARTDAQBoardReaderTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -142,13 +143,17 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 			if(child.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
 			       .getValue<bool>())
 			{
-				outputFHICL(configManager,
-				            child.second,
-				            0 /*unused artdaq RANK*/, //contextConfig->getARTDAQAppRank(thisContext->contextUID_),
-				            contextConfig->getContextAddress(thisContext->contextUID_),
-				            10000 /*unused artdaq port*/, //contextConfig->getARTDAQDataPort(configManager,
-				                                             //thisContext->contextUID_),
-				            contextConfig, 0);
+				outputFHICL(
+				    configManager,
+				    child.second,
+				    0  /*unused artdaq RANK*/
+				    ,  // contextConfig->getARTDAQAppRank(thisContext->contextUID_),
+				    contextConfig->getContextAddress(thisContext->contextUID_),
+				    10000 /*unused artdaq port*/
+				    ,     // contextConfig->getARTDAQDataPort(configManager,
+				       // thisContext->contextUID_),
+				    contextConfig,
+				    0);
 			}
 		}
 	}
@@ -164,7 +169,7 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 //}
 
 ////========================================================================================================================
-//std::string ARTDAQBoardReaderTable::getFHICLFilename(
+// std::string ARTDAQBoardReaderTable::getFHICLFilename(
 //    const ConfigurationTree& boardReaderNode)
 //{
 //	__COUT__ << "ARTDAQ BoardReader UID: " << boardReaderNode.getValue() << __E__;
@@ -183,13 +188,13 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 //}
 
 //========================================================================================================================
-void ARTDAQBoardReaderTable::outputFHICL(const ConfigurationManager*    configManager,
-                                         const ConfigurationTree& boardReaderNode,
-                                         unsigned int             selfRank,
-										 const std::string&       selfHost,
-                                         unsigned int             selfPort,
-                                         const XDAQContextTable*  contextConfig,
-										 size_t maxFragmentSizeBytes)
+void ARTDAQBoardReaderTable::outputFHICL(const ConfigurationManager* configManager,
+                                         const ConfigurationTree&    boardReaderNode,
+                                         unsigned int                selfRank,
+                                         const std::string&          selfHost,
+                                         unsigned int                selfPort,
+                                         const XDAQContextTable*     contextConfig,
+                                         size_t                      maxFragmentSizeBytes)
 {
 	/*
 	    the file will look something like this:
@@ -316,7 +321,8 @@ void ARTDAQBoardReaderTable::outputFHICL(const ConfigurationManager*    configMa
 
 	 */
 
-	std::string filename = ARTDAQTableBase::getFHICLFilename(ARTDAQ_FILE_PREAMBLE, boardReaderNode.getValue());
+	std::string filename = ARTDAQTableBase::getFHICLFilename(ARTDAQ_FILE_PREAMBLE,
+	                                                         boardReaderNode.getValue());
 
 	/////////////////////////
 	// generate xdaq run parameter file

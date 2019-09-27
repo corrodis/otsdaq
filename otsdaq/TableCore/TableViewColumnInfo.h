@@ -82,7 +82,8 @@ class TableViewColumnInfo
 	static const std::string DATATYPE_TIME_DEFAULT;
 	static const std::string DATATYPE_LINK_DEFAULT;
 
-	static const std::string COL_NAME_STATUS, COL_NAME_ENABLED, COL_NAME_PRIORITY, COL_NAME_COMMENT;
+	static const std::string COL_NAME_STATUS, COL_NAME_ENABLED, COL_NAME_PRIORITY,
+	    COL_NAME_COMMENT;
 
   private:
 	TableViewColumnInfo();  // private constructor, only used in assignment operator

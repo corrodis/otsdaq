@@ -1,0 +1,138 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_SUBSYSTEM_TABLE",
+"COMMENT" : "Auto-generated from mock-up.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1568207872,
+"COL_TYPES" : {
+"SUBSYSTEM_UID" : "VARCHAR2",
+"SUBSYSTEM_ID" : "NUMBER",
+"DESTINATION" : "NUMBER",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"SUBSYSTEM_UID" : "subsystem1",
+"SUBSYSTEM_ID" : "1",
+"DESTINATION" : "2",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1568207872"
+},
+{
+"SUBSYSTEM_UID" : "subsystem2",
+"SUBSYSTEM_ID" : "2",
+"DESTINATION" : "0",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1568207872"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2019-09-27T15:25:50.876-0500",
+"rawdata" : [
+
+]
+},
+"version" : "2",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2019-09-27T15:25:50.877-0500"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "2019-09-27T15:25:50.876-0500"
+},
+{
+"name" : "artdaqConfig_v2",
+"assigned" : "2019-09-27T15:25:53.560-0500"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-09-27T15:25:50.876-0500",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2019-09-27T15:25:50.876-0500"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2019-09-27T15:25:50.876-0500",
+"value" : {
+"name" : "2",
+"assigned" : "2019-09-27T15:25:50.876-0500"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2019-09-27T15:25:50.876-0500",
+"value" : {
+"name" : "ARTDAQSubsystemTable",
+"assigned" : "2019-09-27T15:25:50.876-0500"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2019-09-27T15:25:50.877-0500",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2019-09-27T15:25:50.877-0500"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-09-27T15:25:53.560-0500",
+"value" : {
+"name" : "artdaqConfig_v2",
+"assigned" : "2019-09-27T15:25:53.560-0500"
+}
+}
+],
+"created" : "2019-09-27T15:25:50.876-0500"
+},
+"_id" : {
+"$oid" : "cbfaba47b66b40eda5615f4f"
+},
+"collection" : "ARTDAQSubsystemTable",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}
