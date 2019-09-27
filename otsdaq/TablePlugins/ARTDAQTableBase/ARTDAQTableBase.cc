@@ -10,14 +10,17 @@
 #include <iostream>  // std::cout
 #include <typeinfo>
 
-#include "otsdaq/TableCore/TableInfoReader.h"
+#include "otsdaq/ProgressBar/ProgressBar.h"
+
+//#include "otsdaq/TableCore/TableInfoReader.h"
 
 using namespace ots;
 
-#undef __MF_SUBJECT__
-#define __MF_SUBJECT__ "ARTDAQTableBase-" + getTableName()
-
 #define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
+
+
+ARTDAQTableBase::ProcessTypes ARTDAQTableBase::processTypes_ = ARTDAQTableBase::ProcessTypes();
+
 
 //==============================================================================
 // TableBase
@@ -46,11 +49,25 @@ ARTDAQTableBase::ARTDAQTableBase(void) : TableBase("ARTDAQTableBase")
 ARTDAQTableBase::~ARTDAQTableBase(void) {}  // end destructor()
 
 //========================================================================================================================
-std::string ARTDAQTableBase::getFHICLFilename(const std::string& type,
+const std::string& ARTDAQTableBase::getTypeString(ARTDAQTableBase::ARTDAQAppType type)
+{
+	switch (type) {
+	case ARTDAQTableBase::ARTDAQAppType::EventBuilder: 	return processTypes_.BUILDER;
+	case ARTDAQTableBase::ARTDAQAppType::DataLogger: 	return processTypes_.LOGGER;
+	case ARTDAQTableBase::ARTDAQAppType::Dispatcher: 	return processTypes_.DISPATCHER;
+	case ARTDAQTableBase::ARTDAQAppType::BoardReader: 	return processTypes_.READER;
+	}
+	//return "UNKNOWN";
+	__SS__ << "Illegal translation attempt for type '" << (unsigned int)type << "'" << __E__;
+	__SS_THROW__;
+} //end getTypeString()
+
+//========================================================================================================================
+std::string ARTDAQTableBase::getFHICLFilename(ARTDAQTableBase::ARTDAQAppType type,
                                               const std::string& name)
 {
-	__COUT__ << "Type: " << type << " Name: " << name << __E__;
-	std::string filename = ARTDAQ_FCL_PATH + type + "-";
+	__COUT__ << "Type: " << ARTDAQTableBase::getTypeString(type) << " Name: " << name << __E__;
+	std::string filename = ARTDAQ_FCL_PATH + ARTDAQTableBase::getTypeString(type) + "-";
 	std::string uid      = name;
 	for(unsigned int i = 0; i < uid.size(); ++i)
 		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
@@ -65,11 +82,11 @@ std::string ARTDAQTableBase::getFHICLFilename(const std::string& type,
 }  // end getFHICLFilename()
 
 //========================================================================================================================
-std::string ARTDAQTableBase::getFlatFHICLFilename(const std::string& type,
+std::string ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType type,
                                                   const std::string& name)
 {
-	__COUT__ << "Type: " << type << " Name: " << name << __E__;
-	std::string filename = ARTDAQ_FCL_PATH + type + "-";
+	__COUT__ << "Type: " << ARTDAQTableBase::getTypeString(type) << " Name: " << name << __E__;
+	std::string filename = ARTDAQ_FCL_PATH + ARTDAQTableBase::getTypeString(type) + "-";
 	std::string uid      = name;
 	for(unsigned int i = 0; i < uid.size(); ++i)
 		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
@@ -84,7 +101,7 @@ std::string ARTDAQTableBase::getFlatFHICLFilename(const std::string& type,
 }  // end getFlatFHICLFilename()
 
 //========================================================================================================================
-void ARTDAQTableBase::flattenFHICL(const std::string& type, const std::string& name)
+void ARTDAQTableBase::flattenFHICL(ARTDAQTableBase::ARTDAQAppType type, const std::string& name)
 {
 	__COUT__ << "flattenFHICL()" << __E__;
 	std::string inFile  = getFHICLFilename(type, name);
@@ -191,7 +208,7 @@ void ARTDAQTableBase::insertParameters(std::ostream&      out,
 	// else
 	//	__COUT__ << "No parameters found" << __E__;
 
-}  // end insertParameters
+}  // end insertParameters()
 
 //========================================================================================================================
 // insertModuleType
@@ -209,18 +226,323 @@ std::string ARTDAQTableBase::insertModuleType(std::ostream&     out,
 	out << value << "\n";
 
 	return value;
-}  // end
+}  // end insertModuleType()
+
 
 //========================================================================================================================
-void ARTDAQTableBase::outputDataReceiverFHICL(
-    ConfigurationManager*                configManager,
-    const ConfigurationTree&             appNode,
-    unsigned int                         selfRank,
-    std::string                          selfHost,
-    unsigned int                         selfPort,
-    ARTDAQTableBase::DataReceiverAppType appType, size_t maxFragmentSizeBytes)
+void ARTDAQTableBase::outputReaderFHICL(//const ConfigurationManager*    configManager,
+                                         const ConfigurationTree& boardReaderNode,
+                                         //unsigned int             selfRank,
+										 const std::string&       selfHost,
+                                         //unsigned int             selfPort,
+                                         //const XDAQContextTable*  contextConfig,
+										 size_t maxFragmentSizeBytes)
 {
-	std::string filename = getFHICLFilename(getPreamble(appType), appNode.getValue());
+	/*
+	    the file will look something like this:
+
+	      daq: {
+	          fragment_receiver: {
+	            mpi_sync_interval: 50
+
+	            # CommandableFragmentGenerator Table:
+	        fragment_ids: []
+	        fragment_id: -99 # Please define only one of these
+
+	        sleep_on_stop_us: 0
+
+	        requests_enabled: false # Whether to set up the socket for listening for
+	   trigger messages request_mode: "Ignored" # Possible values are: Ignored, Single,
+	   Buffer, Window
+
+	        data_buffer_depth_fragments: 1000
+	        data_buffer_depth_mb: 1000
+
+	        request_port: 3001
+	        request_address: "227.128.12.26" # Multicast request address
+
+	        request_window_offset: 0 # Request message contains tzero. Window will be from
+	   tzero - offset to tzero + width request_window_width: 0 stale_request_timeout:
+	   "0xFFFFFFFF" # How long to wait before discarding request messages that are outside
+	   the available data request_windows_are_unique: true # If request windows are
+	   unique, avoids a copy operation, but the same data point cannot be used for two
+	   requests. If this is not anticipated, leave set to "true"
+
+	        separate_data_thread: false # MUST be true for triggers to be applied! If
+	   triggering is not desired, but a separate readout thread is, set this to true,
+	   triggers_enabled to false and trigger_mode to ignored. separate_monitoring_thread:
+	   false # Whether a thread should be started which periodically calls checkHWStatus_,
+	   a user-defined function which should be used to check hardware status registers and
+	   report to MetricMan. poll_hardware_status: false # Whether checkHWStatus_ will be
+	   called, either through the thread or at the start of getNext
+	        hardware_poll_interval_us: 1000000 # If hardware monitoring thread is enabled,
+	   how often should it call checkHWStatus_
+
+
+	            # Generated Parameters:
+	            generator: ToySimulator
+	            fragment_type: TOY1
+	            fragment_id: 0
+	            board_id: 0
+	            starting_fragment_id: 0
+	            random_seed: 5780
+	            sleep_on_stop_us: 500000
+
+	            # Generator-Specific Table:
+
+	        nADCcounts: 40
+
+	        throttle_usecs: 100000
+
+	        distribution_type: 1
+
+	        timestamp_scale_factor: 1
+
+
+	            destinations: {
+	              d2: { transferPluginType: MPI
+	                      destination_rank: 2
+	                       max_fragment_size_bytes: 2097152
+	                       host_map: [
+	           {
+	              host: "mu2edaq01.fnal.gov"
+	              rank: 0
+	           },
+	           {
+	              host: "mu2edaq01.fnal.gov"
+	              rank: 1
+	           }]
+	                       }
+	               d3: { transferPluginType: MPI
+	                       destination_rank: 3
+	                       max_fragment_size_bytes: 2097152
+	                       host_map: [
+	           {
+	              host: "mu2edaq01.fnal.gov"
+	              rank: 0
+	           },
+	           {
+	              host: "mu2edaq01.fnal.gov"
+	              rank: 1
+	           }]
+	           }
+
+	            }
+	          }
+
+	          metrics: {
+	            brFile: {
+	              metricPluginType: "file"
+	              level: 3
+	              fileName: "/tmp/boardreader/br_%UID%_metrics.log"
+	              uniquify: true
+	            }
+	            # ganglia: {
+	            #   metricPluginType: "ganglia"
+	            #   level: %{ganglia_level}
+	            #   reporting_interval: 15.0
+	            #
+	            #   configFile: "/etc/ganglia/gmond.conf"
+	            #   group: "ARTDAQ"
+	            # }
+	            # msgfac: {
+	            #    level: %{mf_level}
+	            #    metricPluginType: "msgFacility"
+	            #    output_message_application_name: "ARTDAQ Metric"
+	            #    output_message_severity: 0
+	            # }
+	            # graphite: {
+	            #   level: %{graphite_level}
+	            #   metricPluginType: "graphite"
+	            #   host: "localhost"
+	            #   port: 20030
+	            #   namespace: "artdaq."
+	            # }
+	          }
+	        }
+
+	 */
+
+	std::string filename = ARTDAQTableBase::getFHICLFilename(
+			ARTDAQTableBase::ARTDAQAppType::BoardReader,
+			boardReaderNode.getValue());
+
+	/////////////////////////
+	// generate xdaq run parameter file
+	std::fstream out;
+
+	std::string tabStr     = "";
+	std::string commentStr = "";
+
+	out.open(filename, std::fstream::out | std::fstream::trunc);
+	if(out.fail())
+	{
+		__SS__ << "Failed to open ARTDAQ Builder fcl file: " << filename << __E__;
+		__SS_THROW__;
+	}
+
+	//--------------------------------------
+	// header
+	OUT << "###########################################################" << __E__;
+	OUT << "#" << __E__;
+	OUT << "# artdaq reader fcl configuration file produced by otsdaq." << __E__;
+	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename: " << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ Reader UID: " << boardReaderNode.getValue() << __E__;
+	OUT << "#" << __E__;
+	OUT << "###########################################################" << __E__;
+	OUT << "\n\n";
+
+	// no primary link to table tree for reader node!
+	try
+	{
+		if(boardReaderNode.isDisconnected())
+		{
+			// create empty fcl
+			OUT << "{}\n\n";
+			out.close();
+			return;
+		}
+	}
+	catch(const std::runtime_error&)
+	{
+		__COUT__ << "Ignoring error, assume this a valid UID node." << __E__;
+		// error is expected here for UIDs.. so just ignore
+		// this check is valuable if source node is a unique-Link node, rather than UID
+	}
+
+	//--------------------------------------
+	// handle daq
+	OUT << "daq: {\n";
+
+	// fragment_receiver
+	PUSHTAB;
+	OUT << "fragment_receiver: {\n";
+
+	PUSHTAB;
+	OUT << "max_fragment_size_bytes: " << maxFragmentSizeBytes << "\n";
+	{
+		// plugin type and fragment data-type
+		OUT << "generator"
+		    << ": " << boardReaderNode.getNode("daqGeneratorPluginType").getValue()
+		    << ("\t #daq generator plug-in type") << "\n";
+		OUT << "fragment_type"
+		    << ": " << boardReaderNode.getNode("daqGeneratorFragmentType").getValue()
+		    << ("\t #generator data fragment type") << "\n\n";
+
+		// shared and unique parameters
+		auto parametersLink = boardReaderNode.getNode("daqParametersLink");
+		if(!parametersLink.isDisconnected())
+		{
+			auto parameters = parametersLink.getChildren();
+			for(auto& parameter : parameters)
+			{
+				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+				        .getValue<bool>())
+					PUSHCOMMENT;
+
+				//				__COUT__ <<
+				// parameter.second.getNode("daqParameterKey").getValue() <<
+				//						": " <<
+				//						parameter.second.getNode("daqParameterValue").getValue()
+				//						<<
+				//						"\n";
+
+				auto comment =
+				    parameter.second.getNode(TableViewColumnInfo::COL_NAME_COMMENT);
+				OUT << parameter.second.getNode("daqParameterKey").getValue() << ": "
+				    << parameter.second.getNode("daqParameterValue").getValue()
+				    << (comment.isDefaultValue() ? "" : ("\t # " + comment.getValue()))
+				    << "\n";
+
+				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+				        .getValue<bool>())
+					POPCOMMENT;
+			}
+		}
+		OUT << "\n";  // end daq board reader parameters
+	}
+
+	OUT << "destinations: {\n";
+
+	OUT << "}\n\n";  // end destinations
+
+	POPTAB;
+	OUT << "}\n\n";  // end fragment_receiver
+
+	OUT << "metrics: {\n";
+
+	PUSHTAB;
+	auto metricsGroup = boardReaderNode.getNode("daqMetricsLink");
+	if(!metricsGroup.isDisconnected())
+	{
+		auto metrics = metricsGroup.getChildren();
+
+		for(auto& metric : metrics)
+		{
+			if(!metric.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+			        .getValue<bool>())
+				PUSHCOMMENT;
+
+			OUT << metric.second.getNode("metricKey").getValue() << ": {\n";
+			PUSHTAB;
+
+			OUT << "metricPluginType: "
+			    << metric.second.getNode("metricPluginType").getValue() << "\n";
+			OUT << "level: " << metric.second.getNode("metricLevel").getValue() << "\n";
+
+			auto metricParametersGroup = metric.second.getNode("metricParametersLink");
+			if(!metricParametersGroup.isDisconnected())
+			{
+				auto metricParameters = metricParametersGroup.getChildren();
+				for(auto& metricParameter : metricParameters)
+				{
+					if(!metricParameter.second
+					        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
+					        .getValue<bool>())
+						PUSHCOMMENT;
+
+					OUT << metricParameter.second.getNode("metricParameterKey").getValue()
+					    << ": "
+					    << metricParameter.second.getNode("metricParameterValue")
+					           .getValue()
+					    << "\n";
+
+					if(!metricParameter.second
+					        .getNode(TableViewColumnInfo::COL_NAME_STATUS)
+					        .getValue<bool>())
+						POPCOMMENT;
+				}
+			}
+			POPTAB;
+			OUT << "}\n\n";  // end metric
+
+			if(!metric.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+			        .getValue<bool>())
+				POPCOMMENT;
+		}
+	}
+	POPTAB;
+	OUT << "}\n\n";  // end metrics
+
+	POPTAB;
+	OUT << "}\n\n";  // end daq
+
+	out.close();
+} //end outputReaderFHICL()
+
+//========================================================================================================================
+// outputDataReceiverFHICL
+//	Note: currently selfRank and selfPort are unused by artdaq fcl
+void ARTDAQTableBase::outputDataReceiverFHICL(
+    const ConfigurationTree&             receiverNode,
+    //unsigned int                         selfRank,
+    const std::string&                   selfHost,
+    //unsigned int                         selfPort,
+    ARTDAQTableBase::ARTDAQAppType 		 appType,
+	size_t 								 maxFragmentSizeBytes)
+{
+	std::string filename = getFHICLFilename(appType, receiverNode.getValue());
 
 	/////////////////////////
 	// generate xdaq run parameter file
@@ -240,20 +562,20 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 	// header
 	OUT << "###########################################################" << __E__;
 	OUT << "#" << __E__;
-	OUT << "# artdaq " << getPreamble(appType)
+	OUT << "# artdaq " << getTypeString(appType)
 	    << " fcl configuration file produced by otsdaq." << __E__;
 	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
 	OUT << "# 	Original filename: " << filename << __E__;
-	OUT << "#	otsdaq-ARTDAQ " << getPreamble(appType) << " UID: " << appNode.getValue()
+	OUT << "#	otsdaq-ARTDAQ " << getTypeString(appType) << " UID: " << receiverNode.getValue()
 	    << __E__;
 	OUT << "#" << __E__;
 	OUT << "###########################################################" << __E__;
 	OUT << "\n\n";
 
-	// no primary link to table tree for reader node!
+	// no primary link to table tree for data receiver node!
 	try
 	{
-		if(appNode.isDisconnected())
+		if(receiverNode.isDisconnected())
 		{
 			// create empty fcl
 			OUT << "{}\n\n";
@@ -274,7 +596,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 	ARTDAQTableBase::insertParameters(out,
 	                                  tabStr,
 	                                  commentStr,
-	                                  appNode.getNode("preambleParametersLink"),
+	                                  receiverNode.getNode("preambleParametersLink"),
 	                                  "daqParameter" /*parameterType*/,
 	                                  false /*onlyInsertAtTableParameters*/,
 	                                  true /*includeAtTableParameters*/);
@@ -282,14 +604,14 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 	//--------------------------------------
 	// handle daq
 	__COUT__ << "Generating daq block..." << __E__;
-	auto daq = appNode.getNode("daqLink");
+	auto daq = receiverNode.getNode("daqLink");
 	if(!daq.isDisconnected())
 	{
 		///////////////////////
 		OUT << "daq: {\n";
 
 		PUSHTAB;
-		if(appType == DataReceiverAppType::EventBuilder)
+		if(appType == ARTDAQAppType::EventBuilder)
 		{
 			// event_builder
 			OUT << "event_builder: {\n";
@@ -303,11 +625,11 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 		PUSHTAB;
 
 		OUT << "max_fragment_size_bytes: " << maxFragmentSizeBytes << "\n";
-		if(appType == DataReceiverAppType::DataLogger)
+		if(appType == ARTDAQAppType::DataLogger)
 		{
 			OUT << "is_datalogger: true\n";
 		}
-		else if(appType == DataReceiverAppType::Dispatcher)
+		else if(appType == ARTDAQAppType::Dispatcher)
 		{
 			OUT << "is_dispatcher: true\n";
 		}
@@ -382,7 +704,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 	//--------------------------------------
 	// handle art
 	__COUT__ << "Filling art block..." << __E__;
-	auto art = appNode.getNode("artLink");
+	auto art = receiverNode.getNode("artLink");
 	if(!art.isDisconnected())
 	{
 		OUT << "art: {\n";
@@ -752,16 +1074,284 @@ void ARTDAQTableBase::outputDataReceiverFHICL(
 	}
 
 	//--------------------------------------
-	// handle ALL metric parameters
+	// handle ALL add-on parameters
 	__COUT__ << "Inserting add-on parameters" << __E__;
 	ARTDAQTableBase::insertParameters(out,
 	                                  tabStr,
 	                                  commentStr,
-	                                  appNode.getNode("addOnParametersLink"),
+	                                  receiverNode.getNode("addOnParametersLink"),
 	                                  "daqParameter" /*parameterType*/,
 	                                  false /*onlyInsertAtTableParameters*/,
 	                                  true /*includeAtTableParameters*/);
 
 	__COUT__ << "outputDataReceiverFHICL DONE" << __E__;
 	out.close();
-}  // end outputFHICL()
+}  // end outputDataReceiverFHICL()
+
+//========================================================================================================================
+void ARTDAQTableBase::extractArtdaqInfo(
+		ConfigurationTree artdaqSupervisorNode,
+		std::unordered_map<int, ARTDAQTableBase::SubsystemInfo>& subsystems,
+		std::map<std::string /*type*/, std::list<ARTDAQTableBase::ProcessInfo>>& processes,
+		bool														doWriteFHiCL /* = false */,
+		size_t 		 maxFragmentSizeBytes /* = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE*/,
+		ProgressBar* progressBar /* =0 */)
+{
+	if(progressBar) progressBar->step();
+
+	std::list<ARTDAQTableBase::ProcessInfo>& readerInfo =
+			processes[ARTDAQTableBase::processTypes_.READER];
+	{
+		__COUT__ << "Checking for BoardReaders" << __E__;
+		auto readersLink = artdaqSupervisorNode.getNode("boardreadersLink");
+		if(!readersLink.isDisconnected() && readersLink.getChildren().size() > 0)
+		{
+			auto readers = readersLink.getChildren();
+			__COUT__ << "There are " << readers.size() << " configured BoardReaders"
+					<< __E__;
+
+			for(auto& reader : readers)
+			{
+				if(reader.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+						.getValue<bool>())
+				{
+					auto readerUID = reader.second.getNode("SupervisorUID").getValue();
+					auto readerHost =
+							reader.second.getNode("DAQInterfaceHostname").getValue();
+
+					auto readerSubsystem     = 1;
+					auto readerSubsystemLink = reader.second.getNode("SubsystemLink");
+					if(!readerSubsystemLink.isDisconnected())
+					{
+						readerSubsystem =
+								readerSubsystemLink.getNode("SubsystemID").getValue<int>();
+						subsystems[readerSubsystem].destination =
+								readerSubsystemLink.getNode("Destination").getValue<int>();
+						if(!subsystems.count(subsystems[readerSubsystem].destination) ||
+								!subsystems[subsystems[readerSubsystem].destination]
+											.sources.count(readerSubsystem))
+						{
+							subsystems[subsystems[readerSubsystem].destination]
+									   .sources.insert(readerSubsystem);
+						}
+					}
+
+					__COUT__ << "Found BoardReader with UID " << readerUID
+							<< ", DAQInterface Hostname " << readerHost
+							<< ", and Subsystem " << readerSubsystem << __E__;
+					readerInfo.emplace_back(readerUID, readerHost, readerSubsystem);
+
+					if(doWriteFHiCL)
+						ARTDAQTableBase::outputReaderFHICL(
+							//artdaqSupervisorNode.getConfigurationManager(),
+							reader.second,
+							//0,
+							readerHost,
+							//10000,
+							//artdaqSupervisorNode.getConfigurationManager()->__GET_CONFIG__(XDAQContextTable),
+							maxFragmentSizeBytes);
+				}
+				else
+				{
+					__COUT__ << "BoardReader "
+							<< reader.second.getNode("SupervisorUID").getValue()
+							<< " is disabled." << __E__;
+				}
+			}
+		}
+		else
+		{
+			__SS__ << "Error: There should be at least one BoardReader!";
+			__SS_THROW__;
+			return;
+		}
+	}
+	if(progressBar) progressBar->step();
+
+	std::list<ARTDAQTableBase::ProcessInfo>& builderInfo =
+			processes[ARTDAQTableBase::processTypes_.BUILDER];
+	{
+		auto buildersLink = artdaqSupervisorNode.getNode("eventbuildersLink");
+		if(!buildersLink.isDisconnected() && buildersLink.getChildren().size() > 0)
+		{
+			auto builders = buildersLink.getChildren();
+
+			for(auto& builder : builders)
+			{
+				if(builder.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+						.getValue<bool>())
+				{
+					auto builderUID = builder.second.getNode("SupervisorUID").getValue();
+					auto builderHost =
+							builder.second.getNode("DAQInterfaceHostname").getValue();
+
+					auto builderSubsystem     = 1;
+					auto builderSubsystemLink = builder.second.getNode("SubsystemLink");
+					if(!builderSubsystemLink.isDisconnected())
+					{
+						builderSubsystem =
+								builderSubsystemLink.getNode("SubsystemID").getValue<int>();
+						subsystems[builderSubsystem].destination =
+								builderSubsystemLink.getNode("Destination").getValue<int>();
+						if(!subsystems.count(subsystems[builderSubsystem].destination) ||
+								!subsystems[subsystems[builderSubsystem].destination]
+											.sources.count(builderSubsystem))
+						{
+							subsystems[subsystems[builderSubsystem].destination]
+									   .sources.insert(builderSubsystem);
+						}
+					}
+
+					__COUT__ << "Found EventBuilder with UID " << builderUID
+							<< ", DAQInterface Hostname " << builderHost
+							<< ", and Subsystem " << builderSubsystem << __E__;
+					builderInfo.emplace_back(builderUID, builderHost, builderSubsystem);
+
+					if(doWriteFHiCL)
+						ARTDAQTableBase::outputDataReceiverFHICL(
+							builder.second,
+							//0 /*rank handled by daq interface*/,
+							builderHost,
+							//10000 /*port handled by daq interface*/,
+							ARTDAQTableBase::ARTDAQAppType::EventBuilder,
+							maxFragmentSizeBytes);
+
+				}
+				else
+				{
+					__COUT__ << "EventBuilder "
+							<< builder.second.getNode("SupervisorUID").getValue()
+							<< " is disabled." << __E__;
+				}
+			}
+		}
+		else
+		{
+			__SS__ << "Error: There should be at least one EventBuilder!";
+			__SS_THROW__;
+			return;
+		}
+	}
+
+	if(progressBar) progressBar->step();
+
+	std::list<ARTDAQTableBase::ProcessInfo>& loggerInfo =
+			processes[ARTDAQTableBase::processTypes_.LOGGER];
+	{
+		auto dataloggersLink = artdaqSupervisorNode.getNode("dataloggersLink");
+		if(!dataloggersLink.isDisconnected())
+		{
+			auto dataloggers = dataloggersLink.getChildren();
+
+			for(auto& datalogger : dataloggers)
+			{
+				if(datalogger.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+						.getValue<bool>())
+				{
+					auto loggerHost =
+							datalogger.second.getNode("DAQInterfaceHostname").getValue();
+					auto loggerUID =
+							datalogger.second.getNode("SupervisorUID").getValue();
+
+					auto loggerSubsystem     = 1;
+					auto loggerSubsystemLink = datalogger.second.getNode("SubsystemLink");
+					if(!loggerSubsystemLink.isDisconnected())
+					{
+						loggerSubsystem =
+								loggerSubsystemLink.getNode("SubsystemID").getValue<int>();
+						subsystems[loggerSubsystem].destination =
+								loggerSubsystemLink.getNode("Destination").getValue<int>();
+						if(!subsystems.count(subsystems[loggerSubsystem].destination) ||
+								!subsystems[subsystems[loggerSubsystem].destination]
+											.sources.count(loggerSubsystem))
+						{
+							subsystems[subsystems[loggerSubsystem].destination]
+									   .sources.insert(loggerSubsystem);
+						}
+					}
+
+					__COUT__ << "Found DataLogger with UID " << loggerUID
+							<< ", DAQInterface Hostname " << loggerHost
+							<< ", and Subsystem " << loggerSubsystem << __E__;
+					loggerInfo.emplace_back(loggerUID, loggerHost, loggerSubsystem);
+
+					if(doWriteFHiCL)
+						ARTDAQTableBase::outputDataReceiverFHICL(
+							datalogger.second,
+							//0 /*rank handled by daq interface*/,
+							loggerHost,
+							//10000 /*port handled by daq interface*/,
+							ARTDAQTableBase::ARTDAQAppType::DataLogger,
+							maxFragmentSizeBytes);
+				}
+				else
+				{
+					__COUT__ << "DataLogger "
+							<< datalogger.second.getNode("SupervisorUID").getValue()
+							<< " is disabled." << __E__;
+				}
+			}
+		}
+	}
+
+	std::list<ARTDAQTableBase::ProcessInfo>& dispatcherInfo =
+			processes[ARTDAQTableBase::processTypes_.DISPATCHER];
+	{
+		auto dispatchersLink = artdaqSupervisorNode.getNode("dispatchersLink");
+		if(!dispatchersLink.isDisconnected())
+		{
+			auto dispatchers = dispatchersLink.getChildren();
+
+			for(auto& dispatcher : dispatchers)
+			{
+				if(dispatcher.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
+						.getValue<bool>())
+				{
+					auto dispatcherHost =
+							dispatcher.second.getNode("DAQInterfaceHostname").getValue();
+					auto dispUID = dispatcher.second.getNode("SupervisorUID").getValue();
+
+					auto dispSubsystem     = 1;
+					auto dispSubsystemLink = dispatcher.second.getNode("SubsystemLink");
+					if(!dispSubsystemLink.isDisconnected())
+					{
+						dispSubsystem =
+								dispSubsystemLink.getNode("SubsystemID").getValue<int>();
+						subsystems[dispSubsystem].destination =
+								dispSubsystemLink.getNode("Destination").getValue<int>();
+						if(!subsystems.count(subsystems[dispSubsystem].destination) ||
+								!subsystems[subsystems[dispSubsystem].destination]
+											.sources.count(dispSubsystem))
+						{
+							subsystems[subsystems[dispSubsystem].destination]
+									   .sources.insert(dispSubsystem);
+						}
+					}
+
+					__COUT__ << "Found Dispatcher with UID " << dispUID
+							<< ", DAQInterface Hostname " << dispatcherHost
+							<< ", and Subsystem " << dispSubsystem << __E__;
+					dispatcherInfo.emplace_back(dispUID, dispatcherHost, dispSubsystem);
+
+					if(doWriteFHiCL)
+						ARTDAQTableBase::outputDataReceiverFHICL(
+							dispatcher.second,
+							//0 /*rank handled by daq interface*/,
+							dispatcherHost,
+							//10000 /*port handled by daq interface*/,
+							ARTDAQTableBase::ARTDAQAppType::Dispatcher,
+							maxFragmentSizeBytes);
+
+				}
+				else
+				{
+					__COUT__ << "Dispatcher "
+							<< dispatcher.second.getNode("SupervisorUID").getValue()
+							<< " is disabled." << __E__;
+				}
+			}
+		}
+	}
+
+} //end extractArtdaqInfo()
+

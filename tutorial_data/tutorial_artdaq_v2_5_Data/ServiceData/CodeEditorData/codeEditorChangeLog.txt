@@ -1,0 +1,14 @@
+time=1562354674 authoradmin old-size=6720 new-size=6707 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h
+time=1562354731 authoradmin old-size=6707 new-size=6616 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h
+time=1562354956 authoradmin old-size=6616 new-size=6521 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h
+time=1562354991 authoradmin old-size=6521 new-size=6472 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h
+time=1562355091 authoradmin old-size=6472 new-size=6481 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h
+time=1562355139 authoradmin old-size=6481 new-size=6517 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h
+time=1562355175 authoradmin old-size=6517 new-size=6534 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h
+time=1562355244 authoradmin old-size=6534 new-size=6712 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManagerRW.h
+time=1562355630 authoradmin old-size=8977 new-size=8827 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManager.h
+time=1562355909 authoradmin old-size=8827 new-size=8840 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManager.h
+time=1562355951 authoradmin old-size=8840 new-size=8784 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManager.h
+time=1562355972 authoradmin old-size=8784 new-size=8822 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManager.h
+time=1562356014 authoradmin old-size=8822 new-size=8825 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManager.h
+time=1562356044 authoradmin old-size=8825 new-size=8829 path=/home/rrivera/data/ots/srcs//otsdaq/otsdaq-core/ConfigurationInterface/ConfigurationManager.h

@@ -23,35 +23,76 @@ class ARTDAQTableBase : public TableBase
 
 	virtual ~ARTDAQTableBase(void);
 
-	std::string 				getFHICLFilename			(const std::string& type, const std::string& name);
-	std::string 				getFlatFHICLFilename		(const std::string& type, const std::string& name);
-	void        				flattenFHICL				(const std::string& type, const std::string& name);
 
-	void						insertParameters			(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree parameterLink, const std::string& parameterPreamble, bool onlyInsertAtTableParameters = false, bool includeAtTableParameters =false);
-	std::string					insertModuleType			(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree moduleTypeNode);
-	
-	enum class DataReceiverAppType {
+	enum class ARTDAQAppType {
+		BoardReader,
 		EventBuilder,
 		DataLogger,
 		Dispatcher
 	};
 
-	void outputDataReceiverFHICL(ConfigurationManager*    configManager,
-	                 const ConfigurationTree& appNode,
-	                 unsigned int             selfRank,
-	                 std::string              selfHost,
-	                 unsigned int             selfPort,
-	                 DataReceiverAppType appType,
-		size_t maxFragmentSizeBytes);
+	static struct ProcessTypes
+	{
+		std::string const READER 		= "reader";
+		std::string const BUILDER     	= "builder";
+		std::string const LOGGER        = "logger";
+		std::string const DISPATCHER    = "dispatcher";
+	} processTypes_;
 
-	std::string getPreamble(DataReceiverAppType type) {
-		switch (type) {
-			case DataReceiverAppType::EventBuilder: return "builder";
-			case DataReceiverAppType::DataLogger: return "datalogger";
-			case DataReceiverAppType::Dispatcher: return "dispatcher";
-		}
-		return "UNKNOWN";
-	}
+	enum {
+		DEFAULT_MAX_FRAGMENT_SIZE = 1048576
+	};
+
+	struct SubsystemInfo
+	{
+		int           destination;
+		std::set<int> sources;
+
+		SubsystemInfo() : destination(0), sources() {}
+	};
+
+	struct ProcessInfo
+	{
+		std::string label;
+		std::string hostname;
+		int         subsystem;
+
+		ProcessInfo(std::string l, std::string h, int s)
+		    : label(l), hostname(h), subsystem(s) {}
+	};
+
+
+	static const std::string&	getTypeString				(ARTDAQAppType type);
+	static std::string 			getFHICLFilename			(ARTDAQTableBase::ARTDAQAppType type, const std::string& name);
+	static std::string 			getFlatFHICLFilename		(ARTDAQTableBase::ARTDAQAppType type, const std::string& name);
+	static void        			flattenFHICL				(ARTDAQTableBase::ARTDAQAppType type, const std::string& name);
+
+	static void					insertParameters			(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree parameterLink, const std::string& parameterPreamble, bool onlyInsertAtTableParameters = false, bool includeAtTableParameters =false);
+	static std::string			insertModuleType			(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree moduleTypeNode);
+
+	static void 				outputReaderFHICL			(
+															const ConfigurationTree& readerNode,
+															const std::string&       selfHost,
+															size_t 				  	 maxFragmentSizeBytes);
+
+
+	static void 				outputDataReceiverFHICL		(
+															const ConfigurationTree& receiverNode,
+															//unsigned int             selfRank,
+															const std::string&       selfHost,
+															//unsigned int             selfPort,
+															ARTDAQTableBase::ARTDAQAppType 	 		 appType,
+															size_t 				  	 maxFragmentSizeBytes);
+
+	static void 				extractArtdaqInfo			(
+													ConfigurationTree 											artdaqSupervisorNode,
+													std::unordered_map<int, ARTDAQTableBase::SubsystemInfo>& 					subsystems,
+													std::map<std::string /*type*/, std::list<ARTDAQTableBase::ProcessInfo>>& 	processes,
+													bool														doWriteFHiCL = false,
+													size_t 														maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE,
+													ProgressBar* 												progressBar = 0);
+
+
 };
 // clang-format on
 }  // namespace ots

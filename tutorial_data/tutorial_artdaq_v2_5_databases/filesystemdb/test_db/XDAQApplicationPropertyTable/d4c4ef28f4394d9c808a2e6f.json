@@ -1,0 +1,136 @@
+{
+"document" : {
+"data" : {
+"NAME" : "XDAQ_APPLICATION_PROPERTY_TABLE",
+"COMMENT" : "Auto-generated from mock-up.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1567713222,
+"COL_TYPES" : {
+"PROPERTY_GROUP_ID" : "VARCHAR2",
+"UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"PROPERTY_NAME" : "VARCHAR2",
+"PROPERTY_TYPE" : "VARCHAR2",
+"PROPERTY_VALUE" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"PROPERTY_GROUP_ID" : "artdaqSupervisorApplicationPropertyGroup",
+"UID" : "productsDirForBashScripts",
+"STATUS" : "On",
+"PROPERTY_NAME" : "productsdir_for_bash_scripts",
+"PROPERTY_TYPE" : "xsd:string",
+"PROPERTY_VALUE" : "/home/eflumerf/products",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1567713215"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2019-09-22T14:46:20.497-0500",
+"rawdata" : [
+
+]
+},
+"version" : "3",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2019-09-22T14:46:20.498-0500"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "2019-09-22T14:46:20.498-0500"
+},
+{
+"name" : "artdaqContext_v3",
+"assigned" : "2019-09-22T14:46:21.086-0500"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-09-22T14:46:20.498-0500",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2019-09-22T14:46:20.498-0500"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2019-09-22T14:46:20.498-0500",
+"value" : {
+"name" : "3",
+"assigned" : "2019-09-22T14:46:20.498-0500"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2019-09-22T14:46:20.498-0500",
+"value" : {
+"name" : "XDAQApplicationPropertyTable",
+"assigned" : "2019-09-22T14:46:20.498-0500"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2019-09-22T14:46:20.498-0500",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2019-09-22T14:46:20.498-0500"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-09-22T14:46:21.086-0500",
+"value" : {
+"name" : "artdaqContext_v3",
+"assigned" : "2019-09-22T14:46:21.086-0500"
+}
+}
+],
+"created" : "2019-09-22T14:46:20.497-0500"
+},
+"_id" : {
+"$oid" : "d4c4ef28f4394d9c808a2e6f"
+},
+"collection" : "XDAQApplicationPropertyTable",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

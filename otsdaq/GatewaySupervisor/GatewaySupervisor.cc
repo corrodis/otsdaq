@@ -1908,6 +1908,8 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 		         << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
 		         << "] Command = " << command << __E__;
 
+		checkForAsyncError();
+
 		subIterationsDone = true;
 		RunControlStateMachine::theProgressBar_.step();
 

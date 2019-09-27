@@ -1,26 +1,22 @@
 
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisor.hh"
 
-#include "otsdaq/TablePlugins/ARTDAQBoardReaderTable.h"
-#include "otsdaq/TablePlugins/ARTDAQBuilderTable.h"
-#include "otsdaq/TablePlugins/ARTDAQDataLoggerTable.h"
-#include "otsdaq/TablePlugins/ARTDAQDispatcherTable.h"
 
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "artdaq/DAQdata/Globals.hh"
 #include "cetlib_except/exception.h"
 #include "fhiclcpp/make_ParameterSet.h"
-//#include "messagefacility/MessageLogger/MessageLogger.h"
+
+//#include "otsdaq/TablePlugins/ARTDAQBoardReaderTable.h"
+//#include "otsdaq/TablePlugins/ARTDAQBuilderTable.h"
+//#include "otsdaq/TablePlugins/ARTDAQDataLoggerTable.h"
+//#include "otsdaq/TablePlugins/ARTDAQDispatcherTable.h"
 
 #include <boost/exception/all.hpp>
 #include <boost/filesystem.hpp>
 
 #include <signal.h>
-//#include <cassert>
-//#include <fstream>
-//#include <iostream>
-//#include "otsdaq/TableCore/TableGroupKey.h"
 
 using namespace ots;
 
@@ -138,11 +134,11 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	  << getSupervisorProperty("record_directory", ARTDAQ_FCL_PATH) << std::endl;
 	o << "package_hashes_to_save: "
 	  << getSupervisorProperty("package_hashes_to_save",
-	                           "[artdaq, otsdaq, otsdaq-utilities]")
+	                           "[artdaq]")
 	  << std::endl;
 	// Note that productsdir_for_bash_scripts is REQUIRED!
 	o << "productsdir_for_bash_scripts: "
-	  << getSupervisorProperty("productsdir_for_bash_scripts") << std::endl;
+	  << getSupervisorProperty("productsdir_for_bash_scripts",std::string(__ENV__("OTS_PRODUCTS"))) << std::endl;
 	o << "boardreader timeout: " << getSupervisorProperty("boardreader_timeout", 30)
 	  << std::endl;
 	o << "eventbuilder timeout: " << getSupervisorProperty("eventbuilder_timeout", 30)
@@ -309,314 +305,139 @@ void ARTDAQSupervisor::destroy(void)
 	__SUP_COUT__ << "Destroyed." << __E__;
 }  // end destroy()
 
+
+
 //========================================================================================================================
 void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 {
-	__SUP_COUT__ << "Configuring..." << __E__;
-	__SUP_COUT__ << SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
-	             << __E__;
+	__SUP_COUT__ << "transitionConfiguring" << __E__;
 
-	ProgressBar pb;
-	pb.reset("ARTDAQSupervisor", "Configure");
+	// activate the configuration tree (the first iteration)
+	if(RunControlStateMachine::getIterationIndex() == 0 &&
+			RunControlStateMachine::getSubIterationIndex() == 0)
+	{
+		std::pair<std::string /*group name*/, TableGroupKey> theGroup(
+				SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
+		.getParameters()
+		.getValue("ConfigurationTableGroupName"),
+		TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
+		.getParameters()
+		.getValue("ConfigurationTableGroupKey")));
 
-	std::pair<std::string /*group name*/, TableGroupKey> theGroup(
-	    SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
-	        .getParameters()
-	        .getValue("ConfigurationTableGroupName"),
-	    TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
-	                      .getParameters()
-	                      .getValue("ConfigurationTableGroupKey")));
+		__SUP_COUT__ << "Configuration table group name: " << theGroup.first
+				<< " key: " << theGroup.second << __E__;
 
-	__SUP_COUT__ << "Configuration group name: " << theGroup.first
-	             << " key: " << theGroup.second << __E__;
+		theConfigurationManager_->loadTableGroup(
+				theGroup.first, theGroup.second, true /*doActivate*/);
 
-	theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true);
+
+		// start configuring thread
+		std::thread(
+				[](ARTDAQSupervisor* as) {
+			ARTDAQSupervisor::configuringThread(as);
+		},
+		this)
+		.detach();
+
+		__SUP_COUT__ << "Configuring thread started." << __E__;
+
+		RunControlStateMachine::indicateSubIterationWork();
+	}
+	else //not first time
+	{
+		std::string errorMessage = theStateMachine_.getErrorMessage();
+		__SUP_COUTV__(errorMessage);
+		__SUP_COUTV__(theProgressBar_.read());
+		__SUP_COUTV__(theProgressBar_.isComplete());
+
+		//check for done and error messages
+
+		if(errorMessage != "")
+		{
+			__SUP_SS__ << "Error was caught in configuring thread: " <<
+					errorMessage << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+
+			theStateMachine_.setErrorMessage(ss.str());
+			throw toolbox::fsm::exception::Exception(
+			    "Transition Error" /*name*/,
+			    ss.str() /* message*/,
+			    "CoreSupervisorBase::transitionConfiguring" /*module*/,
+			    __LINE__ /*line*/,
+			    __FUNCTION__ /*function*/
+			);
+		}
+
+		if(!theProgressBar_.isComplete())
+		{
+			RunControlStateMachine::indicateSubIterationWork();
+			sleep(1 /*seconds*/);
+		}
+		else
+			__SUP_COUT_INFO__ << "Complete configuring transition!" << __E__;
+	}
+
+	return;
+} //end transitionConfiguring()
+
+//========================================================================================================================
+void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor)
+try
+{
+	ProgressBar& progressBar = theArtdaqSupervisor->theProgressBar_;
 
 	const std::string& uid =
-	    theConfigurationManager_
+	    theArtdaqSupervisor->theConfigurationManager_
 	        ->getNode(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME + "/" +
-	                  CorePropertySupervisorBase::getSupervisorUID() + "/" +
+	        		theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorUID() + "/" +
 	                  "LinkToSupervisorTable")
 	        .getValueAsString();
-	__SUP_COUT__ << "Supervisor uid is " << uid << ", getting supervisor table node"
+
+	__COUT__ << "Supervisor uid is " << uid << ", getting supervisor table node"
 	             << __E__;
 
-	auto                                   theSupervisorNode = getSupervisorTableNode();
-	std::unordered_map<int, SubsystemInfo> subsystems;
+	const std::string mfSubject_ = theArtdaqSupervisor->supervisorClassNoNamespace_ + "-" + uid;
 
-	pb.step();
+	ConfigurationTree theSupervisorNode = theArtdaqSupervisor->getSupervisorTableNode();
 
-	std::list<ProcessInfo> readerInfo;
-	{
-		__SUP_COUT__ << "Checking for BoardReaders" << __E__;
-		auto readersLink = theSupervisorNode.getNode("boardreadersLink");
-		if(!readersLink.isDisconnected() && readersLink.getChildren().size() > 0)
-		{
-			auto readers = readersLink.getChildren();
-			__SUP_COUT__ << "There are " << readers.size() << " configured BoardReaders"
-			             << __E__;
+	std::unordered_map<int, ARTDAQTableBase::SubsystemInfo> subsystems;
+	std::map<std::string /*type*/, std::list<ARTDAQTableBase::ProcessInfo>> processes;
 
-			for(auto& reader : readers)
-			{
-				if(reader.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				       .getValue<bool>())
-				{
-					auto readerUID = reader.second.getNode("SupervisorUID").getValue();
-					auto readerHost =
-					    reader.second.getNode("DAQInterfaceHostname").getValue();
+	progressBar.step();
 
-					auto readerSubsystem     = 1;
-					auto readerSubsystemLink = reader.second.getNode("SubsystemLink");
-					if(!readerSubsystemLink.isDisconnected())
-					{
-						readerSubsystem =
-						    readerSubsystemLink.getNode("SubsystemID").getValue<int>();
-						subsystems[readerSubsystem].destination =
-						    readerSubsystemLink.getNode("Destination").getValue<int>();
-						if(!subsystems.count(subsystems[readerSubsystem].destination) ||
-						   !subsystems[subsystems[readerSubsystem].destination]
-						        .sources.count(readerSubsystem))
-						{
-							subsystems[subsystems[readerSubsystem].destination]
-							    .sources.insert(readerSubsystem);
-						}
-					}
+	ARTDAQTableBase::extractArtdaqInfo(
+			theSupervisorNode, subsystems, processes,
+			true /*doWriteFHiCL*/,
+			theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>(
+					"max_fragment_size_bytes",
+					ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE),
+			&progressBar);
 
-					__SUP_COUT__ << "Found BoardReader with UID " << readerUID
-					             << ", DAQInterface Hostname " << readerHost
-					             << ", and Subsystem " << readerSubsystem << __E__;
-					readerInfo.emplace_back(readerUID, readerHost, readerSubsystem);
-
-					ARTDAQBoardReaderTable brt;
-					brt.outputFHICL(
-					    theConfigurationManager_,
-					    reader.second,
-					    0,
-					    readerHost,
-					    10000,
-					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable),
-					    getSupervisorProperty("max_fragment_size_bytes", 1048576));
-				}
-				else
-				{
-					__SUP_COUT__ << "BoardReader "
-					             << reader.second.getNode("SupervisorUID").getValue()
-					             << " is disabled." << __E__;
-				}
-			}
-		}
-		else
-		{
-			__SS__ << "Error: There should be at least one BoardReader!";
-			__SUP_SS_THROW__;
-			return;
-		}
-	}
-	pb.step();
-
-	std::list<ProcessInfo> builderInfo;
-	{
-		auto buildersLink = theSupervisorNode.getNode("eventbuildersLink");
-		if(!buildersLink.isDisconnected() && buildersLink.getChildren().size() > 0)
-		{
-			auto builders = buildersLink.getChildren();
-
-			for(auto& builder : builders)
-			{
-				if(builder.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				       .getValue<bool>())
-				{
-					auto builderUID = builder.second.getNode("SupervisorUID").getValue();
-					auto builderHost =
-					    builder.second.getNode("DAQInterfaceHostname").getValue();
-
-					auto builderSubsystem     = 1;
-					auto builderSubsystemLink = builder.second.getNode("SubsystemLink");
-					if(!builderSubsystemLink.isDisconnected())
-					{
-						builderSubsystem =
-						    builderSubsystemLink.getNode("SubsystemID").getValue<int>();
-						subsystems[builderSubsystem].destination =
-						    builderSubsystemLink.getNode("Destination").getValue<int>();
-						if(!subsystems.count(subsystems[builderSubsystem].destination) ||
-						   !subsystems[subsystems[builderSubsystem].destination]
-						        .sources.count(builderSubsystem))
-						{
-							subsystems[subsystems[builderSubsystem].destination]
-							    .sources.insert(builderSubsystem);
-						}
-					}
-
-					__SUP_COUT__ << "Found EventBuilder with UID " << builderUID
-					             << ", DAQInterface Hostname " << builderHost
-					             << ", and Subsystem " << builderSubsystem << __E__;
-					builderInfo.emplace_back(builderUID, builderHost, builderSubsystem);
-
-					ARTDAQBuilderTable bt;
-					bt.outputFHICL(
-					    theConfigurationManager_,
-					    builder.second,
-					    0,
-					    builderHost,
-					    10000,
-					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable),
-					    getSupervisorProperty("max_fragment_size_bytes", 1048576));
-				}
-				else
-				{
-					__SUP_COUT__ << "EventBuilder "
-					             << builder.second.getNode("SupervisorUID").getValue()
-					             << " is disabled." << __E__;
-				}
-			}
-		}
-		else
-		{
-			__SS__ << "Error: There should be at least one EventBuilder!";
-			__SUP_SS_THROW__;
-			return;
-		}
-	}
-
-	pb.step();
-
-	std::list<ProcessInfo> loggerInfo;
-	{
-		auto dataloggersLink = theSupervisorNode.getNode("dataloggersLink");
-		if(!dataloggersLink.isDisconnected())
-		{
-			auto dataloggers = dataloggersLink.getChildren();
-
-			for(auto& datalogger : dataloggers)
-			{
-				if(datalogger.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				       .getValue<bool>())
-				{
-					auto loggerHost =
-					    datalogger.second.getNode("DAQInterfaceHostname").getValue();
-					auto loggerUID =
-					    datalogger.second.getNode("SupervisorUID").getValue();
-
-					auto loggerSubsystem     = 1;
-					auto loggerSubsystemLink = datalogger.second.getNode("SubsystemLink");
-					if(!loggerSubsystemLink.isDisconnected())
-					{
-						loggerSubsystem =
-						    loggerSubsystemLink.getNode("SubsystemID").getValue<int>();
-						subsystems[loggerSubsystem].destination =
-						    loggerSubsystemLink.getNode("Destination").getValue<int>();
-						if(!subsystems.count(subsystems[loggerSubsystem].destination) ||
-						   !subsystems[subsystems[loggerSubsystem].destination]
-						        .sources.count(loggerSubsystem))
-						{
-							subsystems[subsystems[loggerSubsystem].destination]
-							    .sources.insert(loggerSubsystem);
-						}
-					}
-
-					__SUP_COUT__ << "Found DataLogger with UID " << loggerUID
-					             << ", DAQInterface Hostname " << loggerHost
-					             << ", and Subsystem " << loggerSubsystem << __E__;
-					loggerInfo.emplace_back(loggerUID, loggerHost, loggerSubsystem);
-
-					ARTDAQDataLoggerTable dlt;
-					dlt.outputFHICL(
-					    theConfigurationManager_,
-					    datalogger.second,
-					    0,
-					    loggerHost,
-					    10000,
-					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable),
-					    getSupervisorProperty("max_fragment_size_bytes", 1048576));
-				}
-				else
-				{
-					__SUP_COUT__ << "DataLogger "
-					             << datalogger.second.getNode("SupervisorUID").getValue()
-					             << " is disabled." << __E__;
-				}
-			}
-		}
-	}
-
-	std::list<ProcessInfo> dispatcherInfo;
-	{
-		auto dispatchersLink = theSupervisorNode.getNode("dispatchersLink");
-		if(!dispatchersLink.isDisconnected())
-		{
-			auto dispatchers = dispatchersLink.getChildren();
-
-			for(auto& dispatcher : dispatchers)
-			{
-				if(dispatcher.second.getNode(TableViewColumnInfo::COL_NAME_STATUS)
-				       .getValue<bool>())
-				{
-					auto dispHost =
-					    dispatcher.second.getNode("DAQInterfaceHostname").getValue();
-					auto dispUID = dispatcher.second.getNode("SupervisorUID").getValue();
-
-					auto dispSubsystem     = 1;
-					auto dispSubsystemLink = dispatcher.second.getNode("SubsystemLink");
-					if(!dispSubsystemLink.isDisconnected())
-					{
-						dispSubsystem =
-						    dispSubsystemLink.getNode("SubsystemID").getValue<int>();
-						subsystems[dispSubsystem].destination =
-						    dispSubsystemLink.getNode("Destination").getValue<int>();
-						if(!subsystems.count(subsystems[dispSubsystem].destination) ||
-						   !subsystems[subsystems[dispSubsystem].destination]
-						        .sources.count(dispSubsystem))
-						{
-							subsystems[subsystems[dispSubsystem].destination]
-							    .sources.insert(dispSubsystem);
-						}
-					}
-
-					__SUP_COUT__ << "Found Dispatcher with UID " << dispUID
-					             << ", DAQInterface Hostname " << dispHost
-					             << ", and Subsystem " << dispSubsystem << __E__;
-					dispatcherInfo.emplace_back(dispUID, dispHost, dispSubsystem);
-
-					ARTDAQDispatcherTable adt;
-					adt.outputFHICL(
-					    theConfigurationManager_,
-					    dispatcher.second,
-					    0,
-					    dispHost,
-					    10000,
-					    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable),
-					    getSupervisorProperty("max_fragment_size_bytes", 1048576));
-				}
-				else
-				{
-					__SUP_COUT__ << "Dispatcher "
-					             << dispatcher.second.getNode("SupervisorUID").getValue()
-					             << " is disabled." << __E__;
-				}
-			}
-		}
-	}
+	std::list<ARTDAQTableBase::ProcessInfo>& readerInfo 		= processes[ARTDAQTableBase::processTypes_.READER];
+	std::list<ARTDAQTableBase::ProcessInfo>& builderInfo 		= processes[ARTDAQTableBase::processTypes_.BUILDER];
+	std::list<ARTDAQTableBase::ProcessInfo>& loggerInfo 		= processes[ARTDAQTableBase::processTypes_.LOGGER];
+	std::list<ARTDAQTableBase::ProcessInfo>& dispatcherInfo 	= processes[ARTDAQTableBase::processTypes_.DISPATCHER];
 
 	// Check lists
 	if(readerInfo.size() == 0)
 	{
-		__SS__ << "There must be at least one enabled BoardReader!" << __E__;
-		__SUP_SS_THROW__;
+		__GEN_SS__ << "There must be at least one enabled BoardReader!" << __E__;
+		__GEN_SS_THROW__;
 		return;
 	}
 	if(builderInfo.size() == 0)
 	{
-		__SS__ << "There must be at least one enabled EventBuilder!" << __E__;
-		__SUP_SS_THROW__;
+		__GEN_SS__ << "There must be at least one enabled EventBuilder!" << __E__;
+		__GEN_SS_THROW__;
 		return;
 	}
 
-	pb.step();
+	progressBar.step();
 
-	__SUP_COUT__ << "Writing boot.txt" << __E__;
+	__GEN_COUT__ << "Writing boot.txt" << __E__;
 
-	auto debugLevel = theSupervisorNode.getNode("DAQInterfaceDebugLevel").getValue<int>();
-	auto setupScript = theSupervisorNode.getNode("DAQSetupScript").getValue();
+	int debugLevel = theSupervisorNode.getNode("DAQInterfaceDebugLevel").getValue<int>();
+	std::string setupScript = theSupervisorNode.getNode("DAQSetupScript").getValue();
 
 	std::ofstream o(ARTDAQ_FCL_PATH + "/boot.txt", std::ios::trunc);
 	o << "DAQ setup script: " << setupScript << std::endl;
@@ -674,49 +495,51 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	}
 	o.close();
 
-	pb.step();
+	progressBar.step();
 
-	__SUP_COUT__ << "Building configuration directory" << __E__;
+	__GEN_COUT__ << "Building configuration directory" << __E__;
 
 	boost::system::error_code ignored;
 	boost::filesystem::remove_all(ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME, ignored);
 	mkdir((ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME).c_str(), 0755);
 
-	for(auto& br : readerInfo)
+	for(auto& reader : readerInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "boardReader-" + br.label + ".fcl").c_str(),
-		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + br.label + ".fcl").c_str());
+		symlink((ARTDAQ_FCL_PATH + "boardReader-" + reader.label + ".fcl").c_str(),
+		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + reader.label + ".fcl").c_str());
 	}
-	for(auto& eb : builderInfo)
+	for(auto& builder : builderInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "builder-" + eb.label + ".fcl").c_str(),
-		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + eb.label + ".fcl").c_str());
+		symlink((ARTDAQ_FCL_PATH + "builder-" + builder.label + ".fcl").c_str(),
+		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + builder.label + ".fcl").c_str());
 	}
-	for(auto& dl : loggerInfo)
+	for(auto& logger : loggerInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "datalogger-" + dl.label + ".fcl").c_str(),
-		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + dl.label + ".fcl").c_str());
+		symlink((ARTDAQ_FCL_PATH + "datalogger-" + logger.label + ".fcl").c_str(),
+		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + logger.label + ".fcl").c_str());
 	}
-	for(auto& di : dispatcherInfo)
+	for(auto& dispatcher : dispatcherInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "dispatcher-" + di.label + ".fcl").c_str(),
-		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + di.label + ".fcl").c_str());
+		symlink((ARTDAQ_FCL_PATH + "dispatcher-" + dispatcher.label + ".fcl").c_str(),
+		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + dispatcher.label + ".fcl").c_str());
 	}
 
-	pb.step();
+	progressBar.step();
 
-	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
-	getDAQState_();
-	if(daqinterface_state_ != "stopped" && daqinterface_state_ != "")
+	std::lock_guard<std::mutex> lk(theArtdaqSupervisor->daqinterface_mutex_);
+	theArtdaqSupervisor->getDAQState_();
+	if(theArtdaqSupervisor->daqinterface_state_ != "stopped" &&
+			theArtdaqSupervisor->daqinterface_state_ != "")
 	{
-		__SS__ << "Cannot configure DAQInterface because it is in the wrong state"
-		       << " (" << daqinterface_state_ << " != stopped)!"
+		__GEN_SS__ << "Cannot configure DAQInterface because it is in the wrong state"
+		       << " (" << theArtdaqSupervisor->daqinterface_state_ << " != stopped)!"
 		       << __E__;
-		__SUP_SS_THROW__
+		__GEN_SS_THROW__
 	}
 
-	__SUP_COUT__ << "Calling setdaqcomps" << __E__;
-	__SUP_COUT__ << "Status before setdaqcomps: " << daqinterface_state_ << __E__;
+	__GEN_COUT__ << "Calling setdaqcomps" << __E__;
+	__GEN_COUT__ << "Status before setdaqcomps: " <<
+			theArtdaqSupervisor->daqinterface_state_ << __E__;
 	PyObject* pName1 = PyString_FromString("setdaqcomps");
 
 	PyObject* readerDict = PyDict_New();
@@ -735,65 +558,82 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 		PyDict_SetItem(readerDict, readerName, readerData);
 	}
 	PyObject* res1 =
-	    PyObject_CallMethodObjArgs(daqinterface_ptr_, pName1, readerDict, NULL);
+	    PyObject_CallMethodObjArgs(
+	    		theArtdaqSupervisor->daqinterface_ptr_, pName1, readerDict, NULL);
 	Py_DECREF(readerDict);
 
 	if(res1 == NULL)
 	{
 		PyErr_Print();
-		__SS__ << "Error calling setdaqcomps transition" << __E__;
-		__SUP_SS_THROW__;
+		__GEN_SS__ << "Error calling setdaqcomps transition" << __E__;
+		__GEN_SS_THROW__;
 	}
-	getDAQState_();
-	__SUP_COUT__ << "Status after setdaqcomps: " << daqinterface_state_ << __E__;
+	theArtdaqSupervisor->getDAQState_();
+	__GEN_COUT__ << "Status after setdaqcomps: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
 
-	pb.step();
-	__SUP_COUT__ << "Calling do_boot" << __E__;
-	__SUP_COUT__ << "Status before boot: " << daqinterface_state_ << __E__;
+	progressBar.step();
+	__GEN_COUT__ << "Calling do_boot" << __E__;
+	__GEN_COUT__ << "Status before boot: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
 	PyObject* pName2      = PyString_FromString("do_boot");
 	PyObject* pStateArgs1 = PyString_FromString((ARTDAQ_FCL_PATH + "/boot.txt").c_str());
 	PyObject* res2 =
-	    PyObject_CallMethodObjArgs(daqinterface_ptr_, pName2, pStateArgs1, NULL);
+	    PyObject_CallMethodObjArgs(
+	    		theArtdaqSupervisor->daqinterface_ptr_, pName2, pStateArgs1, NULL);
 
 	if(res2 == NULL)
 	{
 		PyErr_Print();
-		__SS__ << "Error calling boot transition" << __E__;
-		__SUP_SS_THROW__;
+		__GEN_SS__ << "Error calling boot transition" << __E__;
+		__GEN_SS_THROW__;
 	}
 
-	getDAQState_();
-	if(daqinterface_state_ != "booted")
+	theArtdaqSupervisor->getDAQState_();
+	if(theArtdaqSupervisor->daqinterface_state_ != "booted")
 	{
-		__SS__ << "DAQInterface boot transition failed!" << __E__;
-		__SUP_SS_THROW__
+		__GEN_SS__ << "DAQInterface boot transition failed!" << __E__;
+		__GEN_SS_THROW__
 	}
-	__SUP_COUT__ << "Status after boot: " << daqinterface_state_ << __E__;
+	__GEN_COUT__ << "Status after boot: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
 
-	pb.step();
-	__SUP_COUT__ << "Calling do_config" << __E__;
-	__SUP_COUT__ << "Status before config: " << daqinterface_state_ << __E__;
+	progressBar.step();
+	__GEN_COUT__ << "Calling do_config" << __E__;
+	__GEN_COUT__ << "Status before config: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
 	PyObject* pName3      = PyString_FromString("do_config");
 	PyObject* pStateArgs2 = Py_BuildValue("[s]", FAKE_CONFIG_NAME);
 	PyObject* res3 =
-	    PyObject_CallMethodObjArgs(daqinterface_ptr_, pName3, pStateArgs2, NULL);
+	    PyObject_CallMethodObjArgs(theArtdaqSupervisor->daqinterface_ptr_, pName3, pStateArgs2, NULL);
 
 	if(res3 == NULL)
 	{
 		PyErr_Print();
-		__SS__ << "Error calling config transition" << __E__;
-		__SUP_SS_THROW__;
+		__GEN_SS__ << "Error calling config transition" << __E__;
+		__GEN_SS_THROW__;
 	}
-	getDAQState_();
-	if(daqinterface_state_ != "ready")
+	theArtdaqSupervisor->getDAQState_();
+	if(theArtdaqSupervisor->daqinterface_state_ != "ready")
 	{
-		__SS__ << "DAQInterface config transition failed!" << __E__;
-		__SUP_SS_THROW__;
+		__GEN_SS__ << "DAQInterface config transition failed!" << __E__;
+		__GEN_SS_THROW__;
 	}
-	__SUP_COUT__ << "Status after config: " << daqinterface_state_ << __E__;
-	pb.complete();
-	__SUP_COUT__ << "Configured." << __E__;
-}  // end transitionConfiguring()
+	__GEN_COUT__ << "Status after config: " <<
+			theArtdaqSupervisor->daqinterface_state_ << __E__;
+	progressBar.complete();
+	__GEN_COUT__ << "Configured." << __E__;
+
+}  // end configuringThread()
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Error was caught while configuring: " << e.what() << __E__;
+	__COUT_ERR__ << "\n" << ss.str();
+	theArtdaqSupervisor->theStateMachine_.setErrorMessage(ss.str());
+}
+catch(...)
+{
+	__SS__<< "Unknown error was caught while configuring. Please checked the logs."
+			<< __E__;
+	__COUT_ERR__ << "\n" << ss.str();
+	theArtdaqSupervisor->theStateMachine_.setErrorMessage(ss.str());
+} // end configuringThread() error handling
 
 //========================================================================================================================
 void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference e)
@@ -933,6 +773,7 @@ void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference e)
 	__SUP_COUT__ << "Stopped." << __E__;
 }  // end transitionStopping()
 
+//========================================================================================================================
 void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference e)
 {
 	__SUP_COUT__ << "Entering error recovery state" << __E__;
@@ -952,8 +793,9 @@ void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference e)
 	getDAQState_();
 	__SUP_COUT__ << "Status after error: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "EnteringError DONE." << __E__;
-}
+} //end enteringError()
 
+//========================================================================================================================
 void ots::ARTDAQSupervisor::getDAQState_()
 {
 	//__SUP_COUT__ << "Getting DAQInterface state" << __E__;
@@ -971,7 +813,9 @@ void ots::ARTDAQSupervisor::getDAQState_()
 	}
 	daqinterface_state_ = std::string(PyString_AsString(res));
 	//__SUP_COUT__ << "getDAQState_ DONE: state=" << result << __E__;
-}
+} //end getDAQState_()
+
+//========================================================================================================================
 void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 {
 	TLOG(TLVL_TRACE) << "Runner thread starting";
@@ -1059,8 +903,9 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 	}
 	runner_running_ = false;
 	TLOG(TLVL_TRACE) << "Runner thread complete";
-}
+} //end daqinterfaceRunner_()
 
+//========================================================================================================================
 void ots::ARTDAQSupervisor::stop_runner_()
 {
 	runner_running_ = false;
@@ -1069,11 +914,12 @@ void ots::ARTDAQSupervisor::stop_runner_()
 		runner_thread_->join();
 		runner_thread_.reset(nullptr);
 	}
-}
+} //end stop_runner_()
 
+//========================================================================================================================
 void ots::ARTDAQSupervisor::start_runner_()
 {
 	stop_runner_();
 	runner_thread_ =
 	    std::make_unique<std::thread>(&ots::ARTDAQSupervisor::daqinterfaceRunner_, this);
-}
+} //end start_runner_()

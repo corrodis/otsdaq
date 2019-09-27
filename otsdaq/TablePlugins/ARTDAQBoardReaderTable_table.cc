@@ -21,7 +21,7 @@ using namespace ots;
 #define POPCOMMENT commentStr.resize(commentStr.size() - 2)
 
 //========================================================================================================================
-ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void) : TableBase("ARTDAQBoardReaderTable")
+ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void) : ARTDAQTableBase("ARTDAQBoardReaderTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -144,10 +144,10 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 			{
 				outputFHICL(configManager,
 				            child.second,
-				            contextConfig->getARTDAQAppRank(thisContext->contextUID_),
+				            0 /*unused artdaq RANK*/, //contextConfig->getARTDAQAppRank(thisContext->contextUID_),
 				            contextConfig->getContextAddress(thisContext->contextUID_),
-				            contextConfig->getARTDAQDataPort(configManager,
-				                                             thisContext->contextUID_),
+				            10000 /*unused artdaq port*/, //contextConfig->getARTDAQDataPort(configManager,
+				                                             //thisContext->contextUID_),
 				            contextConfig, 0);
 			}
 		}
@@ -163,32 +163,33 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 //	contextNode.getNode()
 //}
 
+////========================================================================================================================
+//std::string ARTDAQBoardReaderTable::getFHICLFilename(
+//    const ConfigurationTree& boardReaderNode)
+//{
+//	__COUT__ << "ARTDAQ BoardReader UID: " << boardReaderNode.getValue() << __E__;
+//	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
+//	std::string uid      = boardReaderNode.getValue();
+//	for(unsigned int i = 0; i < uid.size(); ++i)
+//		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
+//		   (uid[i] >= '0' && uid[i] <= '9'))  // only allow alpha numeric in file name
+//			filename += uid[i];
+//
+//	filename += ".fcl";
+//
+//	__COUT__ << "fcl: " << filename << __E__;
+//
+//	return filename;
+//}
+
 //========================================================================================================================
-std::string ARTDAQBoardReaderTable::getFHICLFilename(
-    const ConfigurationTree& boardReaderNode)
-{
-	__COUT__ << "ARTDAQ BoardReader UID: " << boardReaderNode.getValue() << __E__;
-	std::string filename = ARTDAQ_FCL_PATH + ARTDAQ_FILE_PREAMBLE + "-";
-	std::string uid      = boardReaderNode.getValue();
-	for(unsigned int i = 0; i < uid.size(); ++i)
-		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
-		   (uid[i] >= '0' && uid[i] <= '9'))  // only allow alpha numeric in file name
-			filename += uid[i];
-
-	filename += ".fcl";
-
-	__COUT__ << "fcl: " << filename << __E__;
-
-	return filename;
-}
-
-//========================================================================================================================
-void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
+void ARTDAQBoardReaderTable::outputFHICL(const ConfigurationManager*    configManager,
                                          const ConfigurationTree& boardReaderNode,
                                          unsigned int             selfRank,
-                                         std::string              selfHost,
+										 const std::string&       selfHost,
                                          unsigned int             selfPort,
-                                         const XDAQContextTable*  contextConfig, size_t maxFragmentSizeBytes)
+                                         const XDAQContextTable*  contextConfig,
+										 size_t maxFragmentSizeBytes)
 {
 	/*
 	    the file will look something like this:
@@ -315,7 +316,7 @@ void ARTDAQBoardReaderTable::outputFHICL(ConfigurationManager*    configManager,
 
 	 */
 
-	std::string filename = getFHICLFilename(boardReaderNode);
+	std::string filename = ARTDAQTableBase::getFHICLFilename(ARTDAQ_FILE_PREAMBLE, boardReaderNode.getValue());
 
 	/////////////////////////
 	// generate xdaq run parameter file

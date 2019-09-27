@@ -30,9 +30,9 @@ ProgressBar::ProgressBar()
 	else if(-1 == mkdir(path.c_str(), 0755))
 	{
 		// lets create the service folder (for first time)
-		std::cout << __COUT_HDR_FL__ << "Service directory creation failed: " << path
+		__SS__ << "Service directory creation failed: " << path
 		          << std::endl;
-		assert(false);
+		__SS_THROW__;
 	}
 }
 
@@ -41,6 +41,8 @@ ProgressBar::ProgressBar()
 //		Resets progress bar to 0% complete
 void ProgressBar::reset(std::string file, std::string lineNumber, int id)
 {
+	std::lock_guard<std::mutex> lock(theMutex_);  // lock out for remainder of scope
+
 	stepCount_       = 0;
 	stepsToComplete_ = 0;
 
@@ -79,9 +81,19 @@ void ProgressBar::step()
 }
 
 //========================================================================================================================
+bool ProgressBar::isComplete()
+{
+	std::lock_guard<std::mutex> lock(theMutex_);  // lock out for remainder of scope
+	return !started_;
+}
+
+//========================================================================================================================
 void ProgressBar::complete()
 {
 	step();  // consider complete as a step
+
+	std::lock_guard<std::mutex> lock(theMutex_);  // lock out for remainder of scope
+
 	stepsToComplete_ = stepCount_;
 	started_         = false;
 
@@ -103,10 +115,11 @@ void ProgressBar::complete()
 // return percentage complete as integer
 int ProgressBar::read()
 {
+	std::lock_guard<std::mutex> lock(theMutex_);  // lock out for remainder of scope
+
 	if(!started_)
 		return 100;  // if no progress started, always return 100% complete
 
-	std::lock_guard<std::mutex> lock(theMutex_);  // lock out for remainder of scope
 	if(stepsToComplete_)
 		return stepCount_ * 100.0 / stepsToComplete_;
 

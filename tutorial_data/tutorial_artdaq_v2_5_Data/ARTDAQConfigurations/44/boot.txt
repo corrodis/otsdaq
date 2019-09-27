@@ -1,0 +1,24 @@
+DAQ setup script: /home/eflumerf/Desktop/otsdaq-mrb-base/setup_ots.sh
+debug level: 1
+
+Subsystem id: 1
+Subsystem destination: 2
+
+Subsystem id: 2
+Subsystem source: 1
+
+EventBuilder host: localhost
+EventBuilder label: builder0
+
+EventBuilder host: localhost
+EventBuilder label: builder1
+EventBuilder subsystem: 2
+
+DataLogger host: localhost
+DataLogger label: logger0
+DataLogger subsystem: 2
+
+Dispatcher host: localhost
+Dispatcher label: dispatcher0
+Dispatcher subsystem: 2
+
