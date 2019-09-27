@@ -305,7 +305,7 @@ void ARTDAQSupervisor::destroy(void)
 }  // end destroy()
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference e)
+void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
 
@@ -640,7 +640,8 @@ catch(...)
 }  // end configuringThread() error handling
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference e)
+void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event)
+try
 {
 	__SUP_COUT__ << "Halting..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -662,9 +663,67 @@ void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference e)
 	__SUP_COUT__ << "Status after halt: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "Halted." << __E__;
 }  // end transitionHalting()
+catch(const std::runtime_error& e)
+{
+	const std::string transitionName = "Halting";
+	// if halting from Failed state, then ignore errors
+	if(theStateMachine_.getProvenanceStateName() ==
+			RunControlStateMachine::FAILED_STATE_NAME ||
+			theStateMachine_.getProvenanceStateName() ==
+						RunControlStateMachine::HALTED_STATE_NAME)
+	{
+		__SUP_COUT_INFO__ << "Error was caught while halting (but ignoring because "
+				"previous state was '"
+				<< RunControlStateMachine::FAILED_STATE_NAME
+				<< "'): " << e.what() << __E__;
+	}
+	else  // if not previously in Failed state, then fail
+	{
+		__SUP_SS__ << "Error was caught while " << transitionName << ": " << e.what()
+			        		   << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"ARTDAQSupervisorBase::transition" + transitionName /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+}
+catch(...)
+{
+	const std::string transitionName = "Halting";
+	// if halting from Failed state, then ignore errors
+	if(theStateMachine_.getProvenanceStateName() ==
+			RunControlStateMachine::FAILED_STATE_NAME ||
+			theStateMachine_.getProvenanceStateName() ==
+						RunControlStateMachine::HALTED_STATE_NAME)
+	{
+		__SUP_COUT_INFO__ << "Unknown error was caught while halting (but ignoring "
+				"because previous state was '"
+				<< RunControlStateMachine::FAILED_STATE_NAME << "')."
+				<< __E__;
+	}
+	else  // if not previously in Failed state, then fail
+	{
+		__SUP_SS__ << "Unknown error was caught while " << transitionName
+				<< ". Please checked the logs." << __E__;
+		__SUP_COUT_ERR__ << "\n" << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/,
+				ss.str() /* message*/,
+				"ARTDAQSupervisorBase::transition" + transitionName /*module*/,
+				__LINE__ /*line*/,
+				__FUNCTION__ /*function*/
+		);
+	}
+} // end transitionHalting() exception handling
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference e)
+void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "Initializing..." << __E__;
 	init();
@@ -672,7 +731,7 @@ void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference e)
 }  // end transitionInitializing()
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference e)
+void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "Pausing..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -698,7 +757,7 @@ void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference e)
 }  // end transitionPausing()
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference e)
+void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "Resuming..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -721,7 +780,7 @@ void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference e)
 }  // end transitionResuming()
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference e)
+void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "Starting..." << __E__;
 	{
@@ -757,7 +816,7 @@ void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference e)
 }  // end transitionStarting()
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference e)
+void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -778,7 +837,7 @@ void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference e)
 }  // end transitionStopping()
 
 //========================================================================================================================
-void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference e)
+void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "Entering error recovery state" << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -797,6 +856,7 @@ void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference e)
 	getDAQState_();
 	__SUP_COUT__ << "Status after error: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "EnteringError DONE." << __E__;
+
 }  // end enteringError()
 
 //========================================================================================================================

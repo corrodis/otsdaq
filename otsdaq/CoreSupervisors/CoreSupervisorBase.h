@@ -34,6 +34,8 @@
 
 namespace ots
 {
+// clang-format off
+
 // CoreSupervisorBase
 //	This class should be the base class for all client otsdaq, XDAQ-based, supervisors.
 //	That is, all supervisors that need web requests through the ots desktop
@@ -53,10 +55,7 @@ class CoreSupervisorBase : public xdaq::Application,
 
 	void destroy(void);
 
-	const unsigned int getSupervisorLID(void) const
-	{
-		return getApplicationDescriptor()->getLocalId();
-	}
+	const unsigned int getSupervisorLID(void) const { return getApplicationDescriptor()->getLocalId(); }
 
 	// Here are the common web request handlers:
 	//	defaultPage returns the public html page
@@ -76,44 +75,42 @@ class CoreSupervisorBase : public xdaq::Application,
 	                           const WebUsers::RequestUserInfo& userInfo);
 
   private:
-	xoap::MessageReference workLoopStatusRequestWrapper(xoap::MessageReference message);
-	void                   defaultPageWrapper(xgi::Input* in, xgi::Output* out);
-	void                   requestWrapper(xgi::Input* in, xgi::Output* out);
+	xoap::MessageReference workLoopStatusRequestWrapper		(xoap::MessageReference message);
+	void                   defaultPageWrapper				(xgi::Input* in, xgi::Output* out);
+	void                   requestWrapper					(xgi::Input* in, xgi::Output* out);
 
   public:
 	// State Machine request handlers
-	void                   stateMachineXgiHandler(xgi::Input* in, xgi::Output* out);
-	void                   stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out);
-	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference message);
-	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference message);
+	void                   stateMachineXgiHandler			(xgi::Input* in, xgi::Output* out);
+	void                   stateMachineResultXgiHandler		(xgi::Input* in, xgi::Output* out);
+	xoap::MessageReference stateMachineXoapHandler			(xoap::MessageReference message);
+	xoap::MessageReference stateMachineResultXoapHandler	(xoap::MessageReference message);
 
-	xoap::MessageReference stateMachineStateRequest(xoap::MessageReference message);
-	xoap::MessageReference stateMachineErrorMessageRequest(
-	    xoap::MessageReference message);
+	xoap::MessageReference stateMachineStateRequest			(xoap::MessageReference message);
+	xoap::MessageReference stateMachineErrorMessageRequest	(xoap::MessageReference message);
 
-	void sendAsyncErrorToGateway(const std::string& errMsg, bool isSoftError);
+	void sendAsyncErrorToGateway		(const std::string& errMsg, bool isSoftError);
 
-	virtual xoap::MessageReference workLoopStatusRequest(xoap::MessageReference message);
-	virtual xoap::MessageReference applicationStatusRequest(
-	    xoap::MessageReference message);
+	virtual xoap::MessageReference workLoopStatusRequest		(xoap::MessageReference message);
+	virtual xoap::MessageReference applicationStatusRequest		(xoap::MessageReference message);
 
-	bool stateMachineThread(toolbox::task::WorkLoop* workLoop);
+	bool stateMachineThread				(toolbox::task::WorkLoop* workLoop);
 
-	virtual void stateInitial(toolbox::fsm::FiniteStateMachine& fsm);
-	virtual void statePaused(toolbox::fsm::FiniteStateMachine& fsm);
-	virtual void stateRunning(toolbox::fsm::FiniteStateMachine& fsm);
-	virtual void stateHalted(toolbox::fsm::FiniteStateMachine& fsm);
-	virtual void stateConfigured(toolbox::fsm::FiniteStateMachine& fsm);
-	virtual void inError(toolbox::fsm::FiniteStateMachine& fsm);
+	virtual void stateInitial			(toolbox::fsm::FiniteStateMachine& fsm);
+	virtual void statePaused			(toolbox::fsm::FiniteStateMachine& fsm);
+	virtual void stateRunning			(toolbox::fsm::FiniteStateMachine& fsm);
+	virtual void stateHalted			(toolbox::fsm::FiniteStateMachine& fsm);
+	virtual void stateConfigured		(toolbox::fsm::FiniteStateMachine& fsm);
+	virtual void inError				(toolbox::fsm::FiniteStateMachine& fsm);
 
-	virtual void transitionConfiguring(toolbox::Event::Reference e);
-	virtual void transitionHalting(toolbox::Event::Reference e);
-	virtual void transitionInitializing(toolbox::Event::Reference e);
-	virtual void transitionPausing(toolbox::Event::Reference e);
-	virtual void transitionResuming(toolbox::Event::Reference e);
-	virtual void transitionStarting(toolbox::Event::Reference e);
-	virtual void transitionStopping(toolbox::Event::Reference e);
-	virtual void enteringError(toolbox::Event::Reference e);
+	virtual void transitionConfiguring	(toolbox::Event::Reference event);
+	virtual void transitionHalting		(toolbox::Event::Reference event);
+	virtual void transitionInitializing	(toolbox::Event::Reference event);
+	virtual void transitionPausing		(toolbox::Event::Reference event);
+	virtual void transitionResuming		(toolbox::Event::Reference event);
+	virtual void transitionStarting		(toolbox::Event::Reference event);
+	virtual void transitionStopping		(toolbox::Event::Reference event);
+	virtual void enteringError			(toolbox::Event::Reference event);
 
 	static const std::string WORK_LOOP_DONE, WORK_LOOP_WORKING;
 
@@ -133,7 +130,7 @@ class CoreSupervisorBase : public xdaq::Application,
 
 	RemoteWebUsers theRemoteWebUsers_;
 };
-
+// clang-format on
 }  // namespace ots
 
 #endif

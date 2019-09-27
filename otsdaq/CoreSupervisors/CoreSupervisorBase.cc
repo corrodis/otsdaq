@@ -447,13 +447,13 @@ void CoreSupervisorBase::inError(toolbox::fsm::FiniteStateMachine& fsm)
 }
 
 //========================================================================================================================
-void CoreSupervisorBase::enteringError(toolbox::Event::Reference e)
+void CoreSupervisorBase::enteringError(toolbox::Event::Reference event)
 
 {
 	//	__SUP_COUT__<< "Fsm current state: " << theStateMachine_.getCurrentStateName()
 	//			<< "\n\nError Message: " <<
 	//			theStateMachine_.getErrorMessage() << __E__;
-	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
+	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*event);
 	std::ostringstream         error;
 	error << "Failure performing transition from " << failedEvent.getFromState() << " to "
 	      << failedEvent.getToState()
@@ -563,7 +563,7 @@ void CoreSupervisorBase::postStateMachineExecutionLoop(void)
 }
 
 //========================================================================================================================
-void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
+void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
 
@@ -646,7 +646,7 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference e)
 //========================================================================================================================
 // transitionHalting
 //	Ignore errors if coming from Failed state
-void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
+void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference event)
 {
 	const std::string transitionName = "Halting";
 	try
@@ -729,7 +729,7 @@ void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference e)
 //========================================================================================================================
 // Inheriting supervisor classes should not override this function, or should at least
 // also call it in the override 	to maintain property functionality.
-void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference e)
+void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionInitializing" << __E__;
 
@@ -744,7 +744,7 @@ void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference e)
 }  // end transitionInitializing()
 
 //========================================================================================================================
-void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
+void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference event)
 {
 	const std::string transitionName = "Pausing";
 	try
@@ -800,7 +800,7 @@ void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference e)
 }  // end transitionPausing()
 
 //========================================================================================================================
-void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
+void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference event)
 {
 	const std::string transitionName = "Resuming";
 	try
@@ -856,7 +856,7 @@ void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference e)
 }  // end transitionResuming()
 
 //========================================================================================================================
-void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
+void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference event)
 {
 	const std::string transitionName = "Starting";
 	const std::string runNumber =
@@ -917,7 +917,7 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference e)
 }  // end transitionStarting()
 
 //========================================================================================================================
-void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference e)
+void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference event)
 {
 	const std::string transitionName = "Stopping";
 	try

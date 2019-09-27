@@ -1399,6 +1399,8 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
 		   << __E__;
 
+	ss << StringMacros::stackTrace() << __E__;
+
 	__SS_THROW__;
 }  // end getColLinkGroupID()
 

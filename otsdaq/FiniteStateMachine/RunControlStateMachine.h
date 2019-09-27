@@ -110,6 +110,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 	xoap::MessageReference runControlMessageHandler(xoap::MessageReference message);
 
 	static const std::string FAILED_STATE_NAME;
+	static const std::string HALTED_STATE_NAME;
 
 	unsigned int getIterationIndex(void) { return iterationIndex_; }
 	unsigned int getSubIterationIndex(void) { return subIterationIndex_; }

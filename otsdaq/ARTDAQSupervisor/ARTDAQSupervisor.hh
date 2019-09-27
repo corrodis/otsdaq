@@ -37,14 +37,14 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	void 			init						(void);
 	void 			destroy						(void);
 
-	virtual void 	transitionConfiguring		(toolbox::Event::Reference e) override;
-	virtual void 	transitionHalting			(toolbox::Event::Reference e) override;
-	virtual void 	transitionInitializing		(toolbox::Event::Reference e) override;
-	virtual void 	transitionPausing			(toolbox::Event::Reference e) override;
-	virtual void 	transitionResuming			(toolbox::Event::Reference e) override;
-	virtual void 	transitionStarting			(toolbox::Event::Reference e) override;
-	virtual void 	transitionStopping			(toolbox::Event::Reference e) override;
-	virtual void 	enteringError				(toolbox::Event::Reference e);
+	virtual void 	transitionConfiguring		(toolbox::Event::Reference event) override;
+	virtual void 	transitionHalting			(toolbox::Event::Reference event) override;
+	virtual void 	transitionInitializing		(toolbox::Event::Reference event) override;
+	virtual void 	transitionPausing			(toolbox::Event::Reference event) override;
+	virtual void 	transitionResuming			(toolbox::Event::Reference event) override;
+	virtual void 	transitionStarting			(toolbox::Event::Reference event) override;
+	virtual void 	transitionStopping			(toolbox::Event::Reference event) override;
+	virtual void 	enteringError				(toolbox::Event::Reference event);
 
   private:
 	static void 	configuringThread(ARTDAQSupervisor* cs);
