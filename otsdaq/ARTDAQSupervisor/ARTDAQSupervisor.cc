@@ -393,8 +393,8 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 
 	ConfigurationTree theSupervisorNode = theArtdaqSupervisor->getSupervisorTableNode();
 
-	std::unordered_map<int, ARTDAQTableBase::SubsystemInfo>                 subsystems;
-	std::map<std::string /*type*/, std::list<ARTDAQTableBase::ProcessInfo>> processes;
+	std::unordered_map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>                 subsystems;
+	std::map<ARTDAQTableBase::ARTDAQAppType, std::list<ARTDAQTableBase::ProcessInfo>> processes;
 
 	progressBar.step();
 
@@ -408,13 +408,13 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 	    &progressBar);
 
 	std::list<ARTDAQTableBase::ProcessInfo>& readerInfo =
-	    processes[ARTDAQTableBase::processTypes_.READER];
+	    processes[ARTDAQTableBase::ARTDAQAppType::BoardReader];
 	std::list<ARTDAQTableBase::ProcessInfo>& builderInfo =
-	    processes[ARTDAQTableBase::processTypes_.BUILDER];
+	    processes[ARTDAQTableBase::ARTDAQAppType::EventBuilder];
 	std::list<ARTDAQTableBase::ProcessInfo>& loggerInfo =
-	    processes[ARTDAQTableBase::processTypes_.LOGGER];
+	    processes[ARTDAQTableBase::ARTDAQAppType::DataLogger];
 	std::list<ARTDAQTableBase::ProcessInfo>& dispatcherInfo =
-	    processes[ARTDAQTableBase::processTypes_.DISPATCHER];
+	    processes[ARTDAQTableBase::ARTDAQAppType::Dispatcher];
 
 	// Check lists
 	if(readerInfo.size() == 0)
@@ -691,7 +691,7 @@ catch(const std::runtime_error& e)
 				__FUNCTION__ /*function*/
 		);
 	}
-}
+} // end transitionHalting() std::runtime_error exception handling
 catch(...)
 {
 	const std::string transitionName = "Halting";

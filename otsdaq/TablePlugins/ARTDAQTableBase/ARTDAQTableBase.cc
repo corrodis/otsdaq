@@ -21,6 +21,8 @@ using namespace ots;
 ARTDAQTableBase::ProcessTypes ARTDAQTableBase::processTypes_ =
     ARTDAQTableBase::ProcessTypes();
 
+const std::string ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE = "ARTDAQSupervisorTable";
+
 //==============================================================================
 // TableBase
 //	If a valid string pointer is passed in accumulatedExceptions
@@ -1097,8 +1099,8 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 //========================================================================================================================
 void ARTDAQTableBase::extractArtdaqInfo(
     ConfigurationTree                                        artdaqSupervisorNode,
-    std::unordered_map<int, ARTDAQTableBase::SubsystemInfo>& subsystems,
-    std::map<std::string /*type*/, std::list<ARTDAQTableBase::ProcessInfo>>& processes,
+    std::unordered_map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>& subsystems,
+    std::map<ARTDAQTableBase::ARTDAQAppType, std::list<ARTDAQTableBase::ProcessInfo>>& processes,
     bool         doWriteFHiCL /* = false */,
     size_t       maxFragmentSizeBytes /* = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE*/,
     ProgressBar* progressBar /* =0 */)
@@ -1107,7 +1109,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 		progressBar->step();
 
 	std::list<ARTDAQTableBase::ProcessInfo>& readerInfo =
-	    processes[ARTDAQTableBase::processTypes_.READER];
+	    processes[ARTDAQTableBase::ARTDAQAppType::BoardReader];
 	{
 		__COUT__ << "Checking for BoardReaders" << __E__;
 		auto readersLink = artdaqSupervisorNode.getNode("boardreadersLink");
@@ -1150,13 +1152,9 @@ void ARTDAQTableBase::extractArtdaqInfo(
 
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputReaderFHICL(
-						    // artdaqSupervisorNode.getConfigurationManager(),
 						    reader.second,
-						    // 0,
 						    readerHost,
-						    // 10000,
-						    // artdaqSupervisorNode.getConfigurationManager()->__GET_CONFIG__(XDAQContextTable),
-						    maxFragmentSizeBytes);
+							maxFragmentSizeBytes);
 				}
 				else
 				{
@@ -1177,7 +1175,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 		progressBar->step();
 
 	std::list<ARTDAQTableBase::ProcessInfo>& builderInfo =
-	    processes[ARTDAQTableBase::processTypes_.BUILDER];
+	    processes[ARTDAQTableBase::ARTDAQAppType::EventBuilder];
 	{
 		auto buildersLink = artdaqSupervisorNode.getNode("eventbuildersLink");
 		if(!buildersLink.isDisconnected() && buildersLink.getChildren().size() > 0)
@@ -1218,9 +1216,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
 						    builder.second,
-						    // 0 /*rank handled by daq interface*/,
 						    builderHost,
-						    // 10000 /*port handled by daq interface*/,
 						    ARTDAQTableBase::ARTDAQAppType::EventBuilder,
 						    maxFragmentSizeBytes);
 				}
@@ -1244,7 +1240,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 		progressBar->step();
 
 	std::list<ARTDAQTableBase::ProcessInfo>& loggerInfo =
-	    processes[ARTDAQTableBase::processTypes_.LOGGER];
+	    processes[ARTDAQTableBase::ARTDAQAppType::DataLogger];
 	{
 		auto dataloggersLink = artdaqSupervisorNode.getNode("dataloggersLink");
 		if(!dataloggersLink.isDisconnected())
@@ -1286,9 +1282,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
 						    datalogger.second,
-						    // 0 /*rank handled by daq interface*/,
 						    loggerHost,
-						    // 10000 /*port handled by daq interface*/,
 						    ARTDAQTableBase::ARTDAQAppType::DataLogger,
 						    maxFragmentSizeBytes);
 				}
@@ -1303,7 +1297,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 	}
 
 	std::list<ARTDAQTableBase::ProcessInfo>& dispatcherInfo =
-	    processes[ARTDAQTableBase::processTypes_.DISPATCHER];
+	    processes[ARTDAQTableBase::ARTDAQAppType::Dispatcher];
 	{
 		auto dispatchersLink = artdaqSupervisorNode.getNode("dispatchersLink");
 		if(!dispatchersLink.isDisconnected())
@@ -1344,9 +1338,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
 						    dispatcher.second,
-						    // 0 /*rank handled by daq interface*/,
 						    dispatcherHost,
-						    // 10000 /*port handled by daq interface*/,
 						    ARTDAQTableBase::ARTDAQAppType::Dispatcher,
 						    maxFragmentSizeBytes);
 				}

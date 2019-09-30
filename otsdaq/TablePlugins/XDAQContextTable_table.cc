@@ -62,6 +62,13 @@ void XDAQContextTable::init(ConfigurationManager* configManager)
 	//__COUT__ << "init" << __E__;
 	extractContexts(configManager);
 
+	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
+
+	//__COUTV__(isFirstAppInContext);
+	if(!isFirstAppInContext)
+		return;
+
+
 	{
 		/////////////////////////
 		// generate xdaq run parameter file
@@ -76,13 +83,13 @@ void XDAQContextTable::init(ConfigurationManager* configManager)
 		fs.close();
 	}
 }
-
-//========================================================================================================================
-// isARTDAQContext
-bool XDAQContextTable::isARTDAQContext(const std::string& contextUID)
-{
-	return (contextUID.find("ART") == 0 || contextUID.find("ARTDAQ") == 0);
-}
+//
+////========================================================================================================================
+//// isARTDAQContext
+//bool XDAQContextTable::isARTDAQContext(const std::string& contextUID)
+//{
+//	return (contextUID.find("ART") == 0 || contextUID.find("ARTDAQ") == 0);
+//}
 //
 ////========================================================================================================================
 // std::map<std::string /*contextUID*/,
@@ -281,15 +288,15 @@ XDAQContextTable::getARTDAQSupervisorContexts() const
 		retVec.push_back(&contexts_[i]);
 	return retVec;
 }
-//========================================================================================================================
-std::vector<const XDAQContextTable::XDAQContext*>
-XDAQContextTable::getBoardReaderContexts() const
-{
-	std::vector<const XDAQContext*> retVec;
-	for(auto& i : artdaqBoardReaders_)
-		retVec.push_back(&contexts_[i]);
-	return retVec;
-}
+////========================================================================================================================
+//std::vector<const XDAQContextTable::XDAQContext*>
+//XDAQContextTable::getBoardReaderContexts() const
+//{
+//	std::vector<const XDAQContext*> retVec;
+//	for(auto& i : artdaqBoardReaders_)
+//		retVec.push_back(&contexts_[i]);
+//	return retVec;
+//}
 ////========================================================================================================================
 // std::vector<const XDAQContextTable::XDAQContext*>
 // XDAQContextTable::getEventBuilderContexts() const
@@ -576,32 +583,41 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 		}
 
 		// check artdaq type
-		if(isARTDAQContext(contexts_.back().contextUID_))
+		//if(isARTDAQContext(contexts_.back().contextUID_))
 		{
 			// artdaqContexts_.push_back(contexts_.size() - 1);
 
-			if(contexts_.back().applications_.size() != 1)
-			{
-				__SS__ << "ARTDAQ Context '" << contexts_.back().contextUID_
-				       << "' must have one Application! "
-				       << contexts_.back().applications_.size() << " were found. "
-				       << __E__;
-				__SS_THROW__;
-			}
+			//			if(contexts_.back().applications_.size() != 1)
+			//			{
+			//				__SS__ << "ARTDAQ Context '" << contexts_.back().contextUID_
+			//				       << "' must have one Application! "
+			//				       << contexts_.back().applications_.size() << " were found. "
+			//				       << __E__;
+			//				__SS_THROW__;
+			//			}
 
 			if(!contexts_.back().status_)
 				continue;  // skip if disabled
 
-			if(contexts_.back().applications_[0].class_ ==  // if board reader
-			       "ots::ARTDAQDataManagerSupervisor" ||
-			   contexts_.back().applications_[0].class_ ==  // if board reader
-			       "ots::ARTDAQFEDataManagerSupervisor")
-				artdaqBoardReaders_.push_back(contexts_.size() - 1);
-			else if(contexts_.back()
-			            .applications_[0]
-			            .class_ ==  // if artdaq interface supervisor
-			        "ots::ARTDAQSupervisor")
-				artdaqSupervisors_.push_back(contexts_.size() - 1);
+
+//			if(contexts_.back().applications_[0].class_ ==  // if board reader
+//			       "ots::ARTDAQDataManagerSupervisor" ||
+//			   contexts_.back().applications_[0].class_ ==  // if board reader
+//			       "ots::ARTDAQFEDataManagerSupervisor")
+//				artdaqBoardReaders_.push_back(contexts_.size() - 1);
+
+			for(auto& app : contexts_.back().applications_)
+			{
+				if(app.class_ ==  // if artdaq interface supervisor
+						"ots::ARTDAQSupervisor")
+				{
+					__COUT__ << "Found " << app.class_ << " in context '" <<
+							contexts_.back().id_ << "'" << __E__;
+					artdaqSupervisors_.push_back(contexts_.size() - 1);
+					break;
+				}
+			}
+
 			//			else if(contexts_.back().applications_[0].class_ ==  // if event
 			//builder 			        "ots::EventBuilderApp")
 			//				artdaqEventBuilders_.push_back(contexts_.size() - 1);
@@ -611,24 +627,25 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 			//			else if(contexts_.back().applications_[0].class_ ==  // if
 			//dispatcher 			        "ots::DispatcherApp")
 			//				artdaqDispatchers_.push_back(contexts_.size() - 1);
-			else
-			{
-				__SS__
-				    << "ARTDAQ Context must be have Application of an allowed class "
-				       "type:\n"
-				    << "\tots::ARTDAQDataManagerSupervisor (Board Reader)\n"
-				    << "\tots::ARTDAQFEDataManagerSupervisor (Board Reader)\n"
-				    << "\tots::ARTDAQSupervisor (artdaq Interace Supervisor)\n"
-				    //				       << "\tots::EventBuilderApp (Event Builder)\n"
-				    //				       << "\tots::DataLoggerApp (Data Logger)\n"
-				    //				       << "\tots::DispatcherApp (Dispatcher)\n"
-				    << "\nClass found was " << contexts_.back().applications_[0].class_
-				    << __E__;
-				__SS_THROW__;
-			}
-		}
-	}
-}
+//			else
+//			{
+//				__SS__
+//				    << "ARTDAQ Context must have one and only one Application of an allowed class "
+//				       "type:\n"
+//				    //<< "\tots::ARTDAQDataManagerSupervisor (Board Reader)\n"
+//				    //<< "\tots::ARTDAQFEDataManagerSupervisor (Board Reader)\n"
+//				    << "\tots::ARTDAQSupervisor (artdaq Interace Supervisor)\n"
+//				    //				       << "\tots::EventBuilderApp (Event Builder)\n"
+//				    //				       << "\tots::DataLoggerApp (Data Logger)\n"
+//				    //				       << "\tots::DispatcherApp (Dispatcher)\n"
+//				    << "\nClass found was " << contexts_.back().applications_[0].class_
+//				    << __E__;
+//				__SS_THROW__;
+//			}
+		} //end artdaq context handling
+
+	} //end primary context loop
+} //end extractContexts()
 
 //========================================================================================================================
 void XDAQContextTable::outputXDAQXML(std::ostream& out)

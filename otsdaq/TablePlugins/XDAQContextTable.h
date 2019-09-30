@@ -72,7 +72,7 @@ class XDAQContextTable : public TableBase
 
 	// artdaq specific get methods
 	std::vector<const XDAQContext*> getARTDAQSupervisorContexts	(void) const;
-	std::vector<const XDAQContext*> getBoardReaderContexts		(void) const;
+//	std::vector<const XDAQContext*> getBoardReaderContexts		(void) const;
 //	std::vector<const XDAQContext*> getEventBuilderContexts() const;
 //	std::vector<const XDAQContext*> getDataLoggerContexts() const;
 //	std::vector<const XDAQContext*> getDispatcherContexts() const;
@@ -83,7 +83,7 @@ class XDAQContextTable : public TableBase
 
 //	unsigned int getARTDAQDataPort(const ConfigurationManager* configManager,
 //	                               const std::string&          contextUID = "X") const;
-	static bool  					isARTDAQContext				(const std::string& contextUID);
+	//static bool  					isARTDAQContext				(const std::string& contextUID);
 
   private:
 	std::vector<XDAQContext> contexts_;

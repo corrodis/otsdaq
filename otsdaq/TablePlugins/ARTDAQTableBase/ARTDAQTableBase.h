@@ -23,6 +23,7 @@ class ARTDAQTableBase : public TableBase
 
 	virtual ~ARTDAQTableBase(void);
 
+	static const std::string		ARTDAQ_SUPERVISOR_TABLE;
 
 	enum class ARTDAQAppType {
 		BoardReader,
@@ -86,8 +87,8 @@ class ARTDAQTableBase : public TableBase
 
 	static void 				extractArtdaqInfo			(
 													ConfigurationTree 											artdaqSupervisorNode,
-													std::unordered_map<int, ARTDAQTableBase::SubsystemInfo>& 					subsystems,
-													std::map<std::string /*type*/, std::list<ARTDAQTableBase::ProcessInfo>>& 	processes,
+													std::unordered_map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>& 					subsystems,
+													std::map<ARTDAQTableBase::ARTDAQAppType, std::list<ARTDAQTableBase::ProcessInfo>>& 	processes,
 													bool														doWriteFHiCL = false,
 													size_t 														maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE,
 													ProgressBar* 												progressBar = 0);
