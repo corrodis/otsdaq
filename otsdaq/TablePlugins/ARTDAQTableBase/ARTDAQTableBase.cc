@@ -22,6 +22,7 @@ ARTDAQTableBase::ProcessTypes ARTDAQTableBase::processTypes_ =
     ARTDAQTableBase::ProcessTypes();
 
 const std::string ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE = "ARTDAQSupervisorTable";
+const int ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION = 0;
 
 //==============================================================================
 // TableBase
@@ -1099,7 +1100,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 //========================================================================================================================
 void ARTDAQTableBase::extractArtdaqInfo(
     ConfigurationTree                                        artdaqSupervisorNode,
-    std::unordered_map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>& subsystems,
+    std::map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>& subsystems,
     std::map<ARTDAQTableBase::ARTDAQAppType, std::list<ARTDAQTableBase::ProcessInfo>>& processes,
     bool         doWriteFHiCL /* = false */,
     size_t       maxFragmentSizeBytes /* = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE*/,
@@ -1107,6 +1108,9 @@ void ARTDAQTableBase::extractArtdaqInfo(
 {
 	if(progressBar)
 		progressBar->step();
+
+	subsystems[ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION].id = ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION;
+	subsystems[ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION].label = "nullDestinationSubsystem";
 
 	std::list<ARTDAQTableBase::ProcessInfo>& readerInfo =
 	    processes[ARTDAQTableBase::ARTDAQAppType::BoardReader];
@@ -1128,27 +1132,50 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					auto readerHost =
 					    reader.second.getNode("DAQInterfaceHostname").getValue();
 
-					auto readerSubsystem     = 1;
+					auto readerSubsystemID     = 1;
 					auto readerSubsystemLink = reader.second.getNode("SubsystemLink");
 					if(!readerSubsystemLink.isDisconnected())
 					{
-						readerSubsystem =
-						    readerSubsystemLink.getNode("SubsystemID").getValue<int>();
-						subsystems[readerSubsystem].destination =
-						    readerSubsystemLink.getNode("Destination").getValue<int>();
-						if(!subsystems.count(subsystems[readerSubsystem].destination) ||
-						   !subsystems[subsystems[readerSubsystem].destination]
-						        .sources.count(readerSubsystem))
+						readerSubsystemID = ARTDAQTableBase::getSubsytemId(readerSubsystemLink);
+						__COUTV__(readerSubsystemID);
+						subsystems[readerSubsystemID].id = readerSubsystemID;
+
+						const std::string& readerSubsystemName =
+								readerSubsystemLink.getUIDAsString();
+						__COUTV__(readerSubsystemName);
+
+						subsystems[readerSubsystemID].label = readerSubsystemName;
+
+						auto readerSubsystemDestinationLink =
+								readerSubsystemLink.getNode("SubsystemDestinationLink");
+						if(readerSubsystemDestinationLink.isDisconnected())
 						{
-							subsystems[subsystems[readerSubsystem].destination]
-							    .sources.insert(readerSubsystem);
+							//default to no destination when no link
+							subsystems[readerSubsystemID].destination = 0;
 						}
-					}
+						else
+						{
+							//get destination subsystem id
+							subsystems[readerSubsystemID].destination =
+									ARTDAQTableBase::getSubsytemId(readerSubsystemDestinationLink);
+						}
+						__COUTV__(subsystems[readerSubsystemID].destination);
+
+						//add this subsystem to destination subsystem's sources, if not there
+						if(!subsystems.count(subsystems[readerSubsystemID].destination) ||
+						   !subsystems[subsystems[readerSubsystemID].destination]
+						        .sources.count(readerSubsystemID))
+						{
+							subsystems[subsystems[readerSubsystemID].destination]
+							    .sources.insert(readerSubsystemID);
+						}
+
+					} //end subsystem instantiation
 
 					__COUT__ << "Found BoardReader with UID " << readerUID
 					         << ", DAQInterface Hostname " << readerHost
-					         << ", and Subsystem " << readerSubsystem << __E__;
-					readerInfo.emplace_back(readerUID, readerHost, readerSubsystem);
+					         << ", and Subsystem " << readerSubsystemID << __E__;
+					readerInfo.emplace_back(readerUID, readerHost, readerSubsystemID);
 
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputReaderFHICL(
@@ -1171,6 +1198,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 			return;
 		}
 	}
+
 	if(progressBar)
 		progressBar->step();
 
@@ -1191,27 +1219,51 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					auto builderHost =
 					    builder.second.getNode("DAQInterfaceHostname").getValue();
 
-					auto builderSubsystem     = 1;
+					auto builderSubsystemID     = 1;
 					auto builderSubsystemLink = builder.second.getNode("SubsystemLink");
 					if(!builderSubsystemLink.isDisconnected())
 					{
-						builderSubsystem =
-						    builderSubsystemLink.getNode("SubsystemID").getValue<int>();
-						subsystems[builderSubsystem].destination =
-						    builderSubsystemLink.getNode("Destination").getValue<int>();
-						if(!subsystems.count(subsystems[builderSubsystem].destination) ||
-						   !subsystems[subsystems[builderSubsystem].destination]
-						        .sources.count(builderSubsystem))
+						builderSubsystemID = ARTDAQTableBase::getSubsytemId(builderSubsystemLink);
+						__COUTV__(builderSubsystemID);
+
+						subsystems[builderSubsystemID].id = builderSubsystemID;
+
+						const std::string& builderSubsystemName =
+								builderSubsystemLink.getUIDAsString();
+						__COUTV__(builderSubsystemName);
+
+						subsystems[builderSubsystemID].label = builderSubsystemName;
+
+						auto builderSubsystemDestinationLink =
+								builderSubsystemLink.getNode("SubsystemDestinationLink");
+						if(builderSubsystemDestinationLink.isDisconnected())
 						{
-							subsystems[subsystems[builderSubsystem].destination]
-							    .sources.insert(builderSubsystem);
+							//default to no destination when no link
+							subsystems[builderSubsystemID].destination = 0;
 						}
-					}
+						else
+						{
+							//get destination subsystem id
+							subsystems[builderSubsystemID].destination =
+									ARTDAQTableBase::getSubsytemId(builderSubsystemDestinationLink);
+						}
+						__COUTV__(subsystems[builderSubsystemID].destination);
+
+						//add this subsystem to destination subsystem's sources, if not there
+						if(!subsystems.count(subsystems[builderSubsystemID].destination) ||
+						   !subsystems[subsystems[builderSubsystemID].destination]
+						        .sources.count(builderSubsystemID))
+						{
+							subsystems[subsystems[builderSubsystemID].destination]
+							    .sources.insert(builderSubsystemID);
+						}
+
+					} //end subsystem instantiation
 
 					__COUT__ << "Found EventBuilder with UID " << builderUID
 					         << ", DAQInterface Hostname " << builderHost
-					         << ", and Subsystem " << builderSubsystem << __E__;
-					builderInfo.emplace_back(builderUID, builderHost, builderSubsystem);
+					         << ", and Subsystem " << builderSubsystemID << __E__;
+					builderInfo.emplace_back(builderUID, builderHost, builderSubsystemID);
 
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
@@ -1257,27 +1309,50 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					auto loggerUID =
 					    datalogger.second.getNode("SupervisorUID").getValue();
 
-					auto loggerSubsystem     = 1;
+					auto loggerSubsystemID     = 1;
 					auto loggerSubsystemLink = datalogger.second.getNode("SubsystemLink");
 					if(!loggerSubsystemLink.isDisconnected())
 					{
-						loggerSubsystem =
-						    loggerSubsystemLink.getNode("SubsystemID").getValue<int>();
-						subsystems[loggerSubsystem].destination =
-						    loggerSubsystemLink.getNode("Destination").getValue<int>();
-						if(!subsystems.count(subsystems[loggerSubsystem].destination) ||
-						   !subsystems[subsystems[loggerSubsystem].destination]
-						        .sources.count(loggerSubsystem))
+						loggerSubsystemID = ARTDAQTableBase::getSubsytemId(loggerSubsystemLink);
+						__COUTV__(loggerSubsystemID);
+						subsystems[loggerSubsystemID].id = loggerSubsystemID;
+
+						const std::string& loggerSubsystemName =
+								loggerSubsystemLink.getUIDAsString();
+						__COUTV__(loggerSubsystemName);
+
+						subsystems[loggerSubsystemID].label = loggerSubsystemName;
+
+						auto loggerSubsystemDestinationLink =
+								loggerSubsystemLink.getNode("SubsystemDestinationLink");
+						if(loggerSubsystemDestinationLink.isDisconnected())
 						{
-							subsystems[subsystems[loggerSubsystem].destination]
-							    .sources.insert(loggerSubsystem);
+							//default to no destination when no link
+							subsystems[loggerSubsystemID].destination = 0;
 						}
-					}
+						else
+						{
+							//get destination subsystem id
+							subsystems[loggerSubsystemID].destination =
+									ARTDAQTableBase::getSubsytemId(loggerSubsystemDestinationLink);
+						}
+						__COUTV__(subsystems[loggerSubsystemID].destination);
+
+						//add this subsystem to destination subsystem's sources, if not there
+						if(!subsystems.count(subsystems[loggerSubsystemID].destination) ||
+						   !subsystems[subsystems[loggerSubsystemID].destination]
+						        .sources.count(loggerSubsystemID))
+						{
+							subsystems[subsystems[loggerSubsystemID].destination]
+							    .sources.insert(loggerSubsystemID);
+						}
+
+					} //end subsystem instantiation
 
 					__COUT__ << "Found DataLogger with UID " << loggerUID
 					         << ", DAQInterface Hostname " << loggerHost
-					         << ", and Subsystem " << loggerSubsystem << __E__;
-					loggerInfo.emplace_back(loggerUID, loggerHost, loggerSubsystem);
+					         << ", and Subsystem " << loggerSubsystemID << __E__;
+					loggerInfo.emplace_back(loggerUID, loggerHost, loggerSubsystemID);
 
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
@@ -1311,29 +1386,51 @@ void ARTDAQTableBase::extractArtdaqInfo(
 				{
 					auto dispatcherHost =
 					    dispatcher.second.getNode("DAQInterfaceHostname").getValue();
-					auto dispUID = dispatcher.second.getNode("SupervisorUID").getValue();
+					auto dispatcherUID = dispatcher.second.getNode("SupervisorUID").getValue();
 
-					auto dispSubsystem     = 1;
-					auto dispSubsystemLink = dispatcher.second.getNode("SubsystemLink");
-					if(!dispSubsystemLink.isDisconnected())
+					auto dispatcherSubsystemID     = 1;
+					auto dispatcherSubsystemLink = dispatcher.second.getNode("SubsystemLink");
+					if(!dispatcherSubsystemLink.isDisconnected())
 					{
-						dispSubsystem =
-						    dispSubsystemLink.getNode("SubsystemID").getValue<int>();
-						subsystems[dispSubsystem].destination =
-						    dispSubsystemLink.getNode("Destination").getValue<int>();
-						if(!subsystems.count(subsystems[dispSubsystem].destination) ||
-						   !subsystems[subsystems[dispSubsystem].destination]
-						        .sources.count(dispSubsystem))
+						dispatcherSubsystemID = ARTDAQTableBase::getSubsytemId(dispatcherSubsystemLink);
+						__COUTV__(dispatcherSubsystemID);
+						subsystems[dispatcherSubsystemID].id = dispatcherSubsystemID;
+
+						const std::string& dispatcherSubsystemName =
+								dispatcherSubsystemLink.getUIDAsString();
+						__COUTV__(dispatcherSubsystemName);
+
+						subsystems[dispatcherSubsystemID].label = dispatcherSubsystemName;
+
+						auto dispatcherSubsystemDestinationLink =
+								dispatcherSubsystemLink.getNode("SubsystemDestinationLink");
+						if(dispatcherSubsystemDestinationLink.isDisconnected())
 						{
-							subsystems[subsystems[dispSubsystem].destination]
-							    .sources.insert(dispSubsystem);
+							//default to no destination when no link
+							subsystems[dispatcherSubsystemID].destination = 0;
+						}
+						else
+						{
+							//get destination subsystem id
+							subsystems[dispatcherSubsystemID].destination =
+									ARTDAQTableBase::getSubsytemId(dispatcherSubsystemDestinationLink);
+						}
+						__COUTV__(subsystems[dispatcherSubsystemID].destination);
+
+						//add this subsystem to destination subsystem's sources, if not there
+						if(!subsystems.count(subsystems[dispatcherSubsystemID].destination) ||
+						   !subsystems[subsystems[dispatcherSubsystemID].destination]
+						        .sources.count(dispatcherSubsystemID))
+						{
+							subsystems[subsystems[dispatcherSubsystemID].destination]
+							    .sources.insert(dispatcherSubsystemID);
 						}
 					}
 
-					__COUT__ << "Found Dispatcher with UID " << dispUID
+					__COUT__ << "Found Dispatcher with UID " << dispatcherUID
 					         << ", DAQInterface Hostname " << dispatcherHost
-					         << ", and Subsystem " << dispSubsystem << __E__;
-					dispatcherInfo.emplace_back(dispUID, dispatcherHost, dispSubsystem);
+					         << ", and Subsystem " << dispatcherSubsystemID << __E__;
+					dispatcherInfo.emplace_back(dispatcherUID, dispatcherHost, dispatcherSubsystemID);
 
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
@@ -1353,3 +1450,17 @@ void ARTDAQTableBase::extractArtdaqInfo(
 	}
 
 }  // end extractArtdaqInfo()
+
+//==============================================================================
+int ARTDAQTableBase::getSubsytemId(ConfigurationTree subsystemNode)
+{
+	//using row forces a unique ID from 0 to rows-1
+	//	note: default no defined subsystem link to id=1; so add 2
+
+	return subsystemNode.getNodeRow() + 2;
+} //end getSubsytemId()
+
+
+
+
+

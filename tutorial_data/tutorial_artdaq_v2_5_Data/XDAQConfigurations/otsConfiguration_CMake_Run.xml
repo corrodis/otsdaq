@@ -3,7 +3,7 @@
 		xmlns:soapenc	= "http://schemas.xmlsoap.org/soap/encoding/"
 		xmlns:xc	= "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30">
 
-	<!-- ContextUID='mainContext' sourceConfig='XDAQContextTable_v3 @ 1567533409' -->
+	<!-- ContextUID='mainContext' sourceConfig='XDAQContextTable_v3 @ 1569950639' -->
 	<xc:Context id="0" url="http://correlator2.fnal.gov:2015">
 
 		<!-- Application GroupID = 'mainContext' UID='Supervisor' sourceConfig='XDAQApplicationTable_v3 @ 1567803057' -->
@@ -82,7 +82,7 @@
 
 	</xc:Context>
 
-	<!-- ContextUID='artdaqContext' sourceConfig='XDAQContextTable_v3 @ 1567533409' -->
+	<!-- ContextUID='artdaqContext' sourceConfig='XDAQContextTable_v3 @ 1569950639' -->
 	<xc:Context id="0" url="http://correlator2.fnal.gov:2016">
 
 		<!-- Application GroupID = 'artdaqContext' UID='ARTDAQSupervisor' sourceConfig='XDAQApplicationTable_v3 @ 1567803057' -->

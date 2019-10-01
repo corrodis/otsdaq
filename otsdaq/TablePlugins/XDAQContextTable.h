@@ -12,6 +12,8 @@ namespace ots
 class XDAQContextTable : public TableBase
 {
   public:
+	static const std::string XDAQ_CONTEXT_TABLE;
+
 	struct XDAQApplicationProperty
 	{
 		bool        status_;
@@ -65,9 +67,9 @@ class XDAQContextTable : public TableBase
 
 	const std::vector<XDAQContext>& getContexts					(void) const { return contexts_; }
 
-	ConfigurationTree 				getContextNode				(const ConfigurationManager* configManager, const std::string& contextUID) const;
-	ConfigurationTree 				getApplicationNode			(const ConfigurationManager* configManager, const std::string& contextUID, const std::string& appUID) const;
-	ConfigurationTree 				getSupervisorConfigNode		(const ConfigurationManager* configManager, const std::string& contextUID, const std::string& appUID) const;
+	static ConfigurationTree 		getContextNode				(const ConfigurationManager* configManager, const std::string& contextUID);
+	static ConfigurationTree 		getApplicationNode			(const ConfigurationManager* configManager, const std::string& contextUID, const std::string& appUID);
+	static ConfigurationTree 		getSupervisorConfigNode		(const ConfigurationManager* configManager, const std::string& contextUID, const std::string& appUID);
 	std::string  					getContextAddress			(const std::string& contextUID = "X", bool wantHttp = false) const;
 
 	// artdaq specific get methods
@@ -98,7 +100,7 @@ class XDAQContextTable : public TableBase
 
   public:
 	// XDAQ Context Column names
-	struct ColContext
+	static struct ColContext
 	{
 		std::string const colContextUID_               = "ContextUID";
 		std::string const colLinkToApplicationTable_   = "LinkToApplicationTable";
@@ -133,7 +135,7 @@ class XDAQContextTable : public TableBase
 	} colApplication_;
 
 	// XDAQ App Property Column names
-	struct ColApplicationProperty
+	static struct ColApplicationProperty
 	{
 		std::string const colPropertyGroupID_ = "PropertyGroupID";
 		std::string const colPropertyUID_     = "UID";
@@ -144,7 +146,6 @@ class XDAQContextTable : public TableBase
 
 	} colAppProperty_;
 
-	static const std::string ARTDAQ_OFFSET_PORT;
 
   public:
 	static const std::set<std::string> FETypeClassNames_, DMTypeClassNames_,

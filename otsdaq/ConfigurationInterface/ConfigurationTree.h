@@ -210,6 +210,7 @@ class ConfigurationTree
 	const std::string&       					getValueName				(void) const;
 	inline const std::string&					getFieldName				(void) const { return getValueName(); } //alias for getValueName
 	std::string              					getNodeType					(void) const;
+	const unsigned int&        					getNodeRow					(void) const;
 	const std::string&       					getDisconnectedTableName	(void) const;
 	const std::string&       					getDisconnectedLinkID		(void) const;
 	const std::string&       					getChildLinkIndex			(void) const;

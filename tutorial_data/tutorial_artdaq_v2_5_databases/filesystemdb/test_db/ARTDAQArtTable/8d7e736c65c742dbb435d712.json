@@ -1,0 +1,194 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ARTDAQ_ART_TABLE",
+"COMMENT" : "Auto-generated from mock-up.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1568643781,
+"COL_TYPES" : {
+"ART_CONFIG_UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"SERVICES_LINK" : "VARCHAR2",
+"SERVICES_LINK_UID" : "VARCHAR2",
+"OUTPUTS_LINK" : "VARCHAR2",
+"OUTPUTS_LINK_UID" : "VARCHAR2",
+"PHYSICS_LINK" : "VARCHAR2",
+"PHYSICS_LINK_UID" : "VARCHAR2",
+"SOURCE_LINK" : "VARCHAR2",
+"SOURCE_LINK_UID" : "VARCHAR2",
+"PROCESS_NAME" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"ART_CONFIG_UID" : "builderSubsystem1Config",
+"STATUS" : "On",
+"SERVICES_LINK" : "ARTDAQServicesTable",
+"SERVICES_LINK_UID" : "netMonTransportService",
+"OUTPUTS_LINK" : "ARTDAQOutputTable",
+"OUTPUTS_LINK_UID" : "builder0outputs",
+"PHYSICS_LINK" : "ARTDAQPhysicsTable",
+"PHYSICS_LINK_UID" : "builder0physics0",
+"SOURCE_LINK" : "ARTDAQSourceTable",
+"SOURCE_LINK_UID" : "artdaqInputSource",
+"PROCESS_NAME" : "DAQ",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1568215087"
+},
+{
+"ART_CONFIG_UID" : "builderSubsystem2Config",
+"STATUS" : "On",
+"SERVICES_LINK" : "ARTDAQServicesTable",
+"SERVICES_LINK_UID" : "netMonTransportService",
+"OUTPUTS_LINK" : "ARTDAQOutputTable",
+"OUTPUTS_LINK_UID" : "builder1outputs",
+"PHYSICS_LINK" : "ARTDAQPhysicsTable",
+"PHYSICS_LINK_UID" : "builder1physics0",
+"SOURCE_LINK" : "ARTDAQSourceTable",
+"SOURCE_LINK_UID" : "artdaqInputSource",
+"PROCESS_NAME" : "DAQ",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1568643733"
+},
+{
+"ART_CONFIG_UID" : "loggerConfig",
+"STATUS" : "On",
+"SERVICES_LINK" : "ARTDAQServicesTable",
+"SERVICES_LINK_UID" : "netMonTransportService",
+"OUTPUTS_LINK" : "ARTDAQOutputTable",
+"OUTPUTS_LINK_UID" : "aggregator0outputs",
+"PHYSICS_LINK" : "ARTDAQPhysicsTable",
+"PHYSICS_LINK_UID" : "aggregator0physics0",
+"SOURCE_LINK" : "ARTDAQSourceTable",
+"SOURCE_LINK_UID" : "netMonInputSource",
+"PROCESS_NAME" : "DAQDL",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1568215175"
+},
+{
+"ART_CONFIG_UID" : "dispatcherConfig",
+"STATUS" : "On",
+"SERVICES_LINK" : "ARTDAQServicesTable",
+"SERVICES_LINK_UID" : "netMonTransportService",
+"OUTPUTS_LINK" : "NO_LINK",
+"OUTPUTS_LINK_UID" : "DEFAULT",
+"PHYSICS_LINK" : "ARTDAQPhysicsTable",
+"PHYSICS_LINK_UID" : "dispatcher0physics",
+"SOURCE_LINK" : "ARTDAQSourceTable",
+"SOURCE_LINK_UID" : "netMonInputSource",
+"PROCESS_NAME" : "DAQDI",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1568215216"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2019-10-01T13:03:40.600-0500",
+"rawdata" : [
+
+]
+},
+"version" : "2",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2019-10-01T13:03:40.600-0500"
+}
+],
+"configurations" : [
+{
+"name" : "notprovided",
+"assigned" : "2019-10-01T13:03:40.600-0500"
+},
+{
+"name" : "artdaqConfig_v2",
+"assigned" : "2019-10-01T13:03:43.107-0500"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-10-01T13:03:40.600-0500",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2019-10-01T13:03:40.600-0500"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2019-10-01T13:03:40.600-0500",
+"value" : {
+"name" : "2",
+"assigned" : "2019-10-01T13:03:40.600-0500"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2019-10-01T13:03:40.600-0500",
+"value" : {
+"name" : "ARTDAQArtTable",
+"assigned" : "2019-10-01T13:03:40.600-0500"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2019-10-01T13:03:40.600-0500",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2019-10-01T13:03:40.600-0500"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-10-01T13:03:43.107-0500",
+"value" : {
+"name" : "artdaqConfig_v2",
+"assigned" : "2019-10-01T13:03:43.107-0500"
+}
+}
+],
+"created" : "2019-10-01T13:03:40.600-0500"
+},
+"_id" : {
+"$oid" : "8d7e736c65c742dbb435d712"
+},
+"collection" : "ARTDAQArtTable",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided"
+}

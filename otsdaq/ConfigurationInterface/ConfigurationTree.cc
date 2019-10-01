@@ -458,6 +458,31 @@ const std::string& ConfigurationTree::getTableName(void) const
 }  // end getTableName()
 
 //==============================================================================
+// getNodeRow
+const unsigned int& ConfigurationTree::getNodeRow(void) const
+{
+	if(isUIDNode() || isValueNode())
+		return row_;
+
+	__SS__ << "Can only get row from a UID or value node!" << __E__;
+	if(linkParentConfig_)
+	{
+		ss << "Error occurred traversing from " << linkParentConfig_->getTableName()
+						   << " UID '"
+						   << linkParentConfig_->getView().getValueAsString(
+								   linkBackRow_, linkParentConfig_->getView().getColUID())
+								   << "' at row " << linkBackRow_ << " col '"
+								   << linkParentConfig_->getView().getColumnInfo(linkBackCol_).getName()
+								   << ".'" << __E__;
+
+		ss << StringMacros::stackTrace() << __E__;
+	}
+
+	__SS_ONLY_THROW__;
+
+} //end getNodeRow()
+
+//==============================================================================
 // getFieldTableName
 //	returns the configuration name for the node's field.
 //		Note: for link nodes versus value nodes this has different functionality than

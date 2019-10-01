@@ -393,7 +393,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 
 	ConfigurationTree theSupervisorNode = theArtdaqSupervisor->getSupervisorTableNode();
 
-	std::unordered_map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>                 subsystems;
+	std::map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>                 	subsystems;
 	std::map<ARTDAQTableBase::ARTDAQAppType, std::list<ARTDAQTableBase::ProcessInfo>> processes;
 
 	progressBar.step();
