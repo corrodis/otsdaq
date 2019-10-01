@@ -8,45 +8,36 @@
 
 using namespace ots;
 
-#define XDAQ_RUN_FILE                                            \
-	std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
-	    std::string(__ENV__("XDAQ_CONFIGURATION_XML")) + ".xml"
-#define APP_PRIORITY_FILE                                        \
-	std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + \
-	    "xdaqAppStateMachinePriority"
+// clang-format off
 
-const std::string XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS =
-    "ots::Supervisor";  // still allowed for now, in StartOTS
-const std::string XDAQContextTable::GATEWAY_SUPERVISOR_CLASS = "ots::GatewaySupervisor";
-const std::string XDAQContextTable::WIZARD_SUPERVISOR_CLASS  = "ots::WizardSupervisor";
-const std::set<std::string> XDAQContextTable::FETypeClassNames_ = {
-    "ots::FESupervisor",
-    "ots::FEDataManagerSupervisor",
-    "ots::ARTDAQFEDataManagerSupervisor"};
-const std::set<std::string> XDAQContextTable::DMTypeClassNames_ = {
-    "ots::DataManagerSupervisor",
-    "ots::FEDataManagerSupervisor",
-    "ots::ARTDAQFEDataManagerSupervisor"};
-const std::set<std::string> XDAQContextTable::LogbookTypeClassNames_ = {
-    "ots::LogbookSupervisor"};
-const std::set<std::string> XDAQContextTable::MacroMakerTypeClassNames_ = {
-    "ots::MacroMakerSupervisor"};
-const std::set<std::string> XDAQContextTable::ChatTypeClassNames_ = {
-    "ots::ChatSupervisor"};
-const std::set<std::string> XDAQContextTable::ConsoleTypeClassNames_ = {
-    "ots::ConsoleSupervisor"};
-const std::set<std::string> XDAQContextTable::ConfigurationGUITypeClassNames_ = {
-    "ots::TableGUISupervisor"};
+#define XDAQ_RUN_FILE         std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + std::string(__ENV__("XDAQ_CONFIGURATION_XML")) + ".xml"
+#define APP_PRIORITY_FILE     std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + "xdaqAppStateMachinePriority"
 
-const std::string XDAQContextTable::ARTDAQ_OFFSET_PORT = "OffsetPort";
+const std::string XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS = "ots::Supervisor";  // still allowed for now, in StartOTS
+const std::string XDAQContextTable::GATEWAY_SUPERVISOR_CLASS 	= "ots::GatewaySupervisor";
+const std::string XDAQContextTable::WIZARD_SUPERVISOR_CLASS  	= "ots::WizardSupervisor";
+const std::set<std::string> XDAQContextTable::FETypeClassNames_ 		= { "ots::FESupervisor", "ots::FEDataManagerSupervisor", "ots::ARTDAQFEDataManagerSupervisor"};
+const std::set<std::string> XDAQContextTable::DMTypeClassNames_ 		= { "ots::DataManagerSupervisor", "ots::FEDataManagerSupervisor", "ots::ARTDAQFEDataManagerSupervisor"};
+const std::set<std::string> XDAQContextTable::LogbookTypeClassNames_ 	= { "ots::LogbookSupervisor"};
+const std::set<std::string> XDAQContextTable::MacroMakerTypeClassNames_ = { "ots::MacroMakerSupervisor"};
+const std::set<std::string> XDAQContextTable::ChatTypeClassNames_ 		= { "ots::ChatSupervisor"};
+const std::set<std::string> XDAQContextTable::ConsoleTypeClassNames_ 	= { "ots::ConsoleSupervisor"};
+const std::set<std::string> XDAQContextTable::ConfigurationGUITypeClassNames_ = { "ots::TableGUISupervisor"};
+
 
 const uint8_t XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY = 100;
 
-XDAQContextTable::ColApplication XDAQContextTable::colApplication_ =
-    XDAQContextTable::ColApplication();  // initialize static member
+XDAQContextTable::ColContext 				XDAQContextTable::colContext_ 		= XDAQContextTable::ColContext();  // initialize static member
+XDAQContextTable::ColApplication 			XDAQContextTable::colApplication_ 	= XDAQContextTable::ColApplication();  // initialize static member
+XDAQContextTable::ColApplicationProperty 	XDAQContextTable::colAppProperty_ 	= XDAQContextTable::ColApplicationProperty();  // initialize static member
+
+const std::string XDAQContextTable::XDAQ_CONTEXT_TABLE = "XDAQContextTable";
+
+
+// clang-format on
 
 //========================================================================================================================
-XDAQContextTable::XDAQContextTable(void) : TableBase("XDAQContextTable")
+XDAQContextTable::XDAQContextTable(void) : TableBase(XDAQContextTable::XDAQ_CONTEXT_TABLE)
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -83,112 +74,6 @@ void XDAQContextTable::init(ConfigurationManager* configManager)
 		fs.close();
 	}
 }
-//
-////========================================================================================================================
-//// isARTDAQContext
-//bool XDAQContextTable::isARTDAQContext(const std::string& contextUID)
-//{
-//	return (contextUID.find("ART") == 0 || contextUID.find("ARTDAQ") == 0);
-//}
-//
-////========================================================================================================================
-// std::map<std::string /*contextUID*/,
-//         std::pair<std::string /*host_name*/, unsigned int /*rank*/>>
-// XDAQContextTable::getARTDAQAppRankMap() const
-//{
-//	std::map<std::string /*contextUID*/,
-//	         std::pair<std::string /*host_name*/, unsigned int /*rank*/>>
-//	    returnMap;
-//
-//	if(artdaqBoardReaders_.size() == 0 && artdaqEventBuilders_.size() == 0 &&
-//	   artdaqDataLoggers_.size() == 0 && artdaqDispatchers_.size() == 0)
-//	{
-//		__COUT_WARN__ << "Assuming since there are 0 active ARTDAQ context UID(s), we "
-//		                 "can ignore empty rank map."
-//		              << __E__;
-//		return returnMap;
-//	}
-//
-//	for(auto& i : artdaqBoardReaders_)
-//		returnMap.emplace(
-//		    std::make_pair(contexts_[i].contextUID_,
-//		                   std::make_pair(contexts_[i].address_,
-//		                                  getARTDAQAppRank(contexts_[i].contextUID_))));
-//
-//	for(auto& i : artdaqEventBuilders_)
-//		returnMap.emplace(
-//		    std::make_pair(contexts_[i].contextUID_,
-//		                   std::make_pair(contexts_[i].address_,
-//		                                  getARTDAQAppRank(contexts_[i].contextUID_))));
-//
-//	for(auto& i : artdaqDataLoggers_)
-//		returnMap.emplace(
-//		    std::make_pair(contexts_[i].contextUID_,
-//		                   std::make_pair(contexts_[i].address_,
-//		                                  getARTDAQAppRank(contexts_[i].contextUID_))));
-//	for(auto& i : artdaqDispatchers_)
-//		returnMap.emplace(
-//		    std::make_pair(contexts_[i].contextUID_,
-//		                   std::make_pair(contexts_[i].address_,
-//		                                  getARTDAQAppRank(contexts_[i].contextUID_))));
-//
-//	return returnMap;
-//}  // end getARTDAQAppRankMap
-//
-////========================================================================================================================
-//// getARTDAQAppRank
-////	looks through all active artdaq contexts for UID
-////	throws exception if not found
-////
-////	if contextUID == "X" (which happens automatically for broken link)
-////		then highest possible rank plus 1 is returned
-// unsigned int XDAQContextTable::getARTDAQAppRank(const std::string& contextUID) const
-//{
-//	if(artdaqBoardReaders_.size() == 0 && artdaqEventBuilders_.size() == 0 &&
-//	   artdaqDataLoggers_.size() == 0 && artdaqDispatchers_.size() == 0)
-//	{
-//		__COUT_WARN__ << "Assuming since there are 0 active ARTDAQ context UID(s), we "
-//		                 "can ignore rank failure."
-//		              << __E__;
-//		return -1;
-//	}
-//
-//	// define local "lambda" getRank function
-//	auto localGetRank = [](const XDAQContext& context) -> unsigned int {
-//		if(context.applications_.size() != 1)
-//		{
-//			__SS__ << "Invalid number of ARTDAQ applications in context '"
-//			       << context.contextUID_ << ".' Must be 1. Currently is "
-//			       << context.applications_.size() << "." << __E__;
-//			__SS_THROW__;
-//		}
-//
-//		return context.applications_[0].id_;
-//	};
-//
-//	for(auto& i : artdaqBoardReaders_)
-//		if(contexts_[i].contextUID_ == contextUID)
-//			return localGetRank(contexts_[i]);
-//
-//	for(auto& i : artdaqEventBuilders_)
-//		if(contexts_[i].contextUID_ == contextUID)
-//			return localGetRank(contexts_[i]);
-//
-//	for(auto& i : artdaqDataLoggers_)
-//		if(contexts_[i].contextUID_ == contextUID)
-//			return localGetRank(contexts_[i]);
-//
-//	for(auto& i : artdaqDispatchers_)
-//		if(contexts_[i].contextUID_ == contextUID)
-//			return localGetRank(contexts_[i]);
-//
-//	// if (contextUID == "X")
-//	//	return -1; //assume disconnected link should not error?
-//
-//	__SS__ << "ARTDAQ rank could not be found for context UID '" << contextUID << ".'"
-//	       << __E__;
-//	__SS_THROW__;  // should never happen!
-//}  // end getARTDAQAppRank()
 
 //========================================================================================================================
 std::string XDAQContextTable::getContextAddress(const std::string& contextUID,
@@ -217,68 +102,6 @@ std::string XDAQContextTable::getContextAddress(const std::string& contextUID,
 	return "";
 }  // end getContextAddress()
 
-//
-// unsigned int XDAQContextTable::getARTDAQDataPort(
-//    const ConfigurationManager* configManager, const std::string& contextUID) const
-//{
-//	if(contextUID == "X")
-//		return 0;
-//	for(auto& context : contexts_)
-//	{
-//		if(context.contextUID_ == contextUID)
-//		{
-//			if(context.applications_.size() != 1)
-//			{
-//				__SS__ << "Invalid number of ARTDAQ applications in context '"
-//				       << contextUID << ".' Must be 1. Currently is "
-//				       << context.applications_.size() << "." << __E__;
-//				__SS_THROW__;
-//			}
-//
-//			// Board Reader port is through Processor table
-//			if(context.applications_[0].class_ == "ots::ARTDAQDataManagerSupervisor" ||
-//			   context.applications_[0].class_ == "ots::ARTDAQFEDataManagerSupervisor")
-//			{
-//				auto processors =
-//				    getSupervisorConfigNode(configManager,
-//				                            context.contextUID_,
-//				                            context.applications_[0].applicationUID_)
-//				        .getNode("LinkToDataBufferTable")
-//				        .getChildren()[0]
-//				        .second.getNode("LinkToDataProcessorTable")
-//				        .getChildren();
-//
-//				std::string processorType;
-//
-//				// take first board reader processor (could be Consumer or Producer)
-//				for(auto& processor : processors)
-//				{
-//					processorType = processor.second.getNode("ProcessorPluginName")
-//					                    .getValue<std::string>();
-//					__COUTV__(processorType);
-//
-//					if(processorType == "ARTDAQConsumer" ||
-//					   processorType == "ARTDAQProducer")
-//						return processor.second.getNode("LinkToProcessorTable")
-//						    .getNode(XDAQContextTable::ARTDAQ_OFFSET_PORT)
-//						    .getValue<unsigned int>();
-//				}
-//
-//				__SS__ << "No ARTDAQ processor was found while looking for data port."
-//				       << __E__;
-//				__SS_THROW__;
-//			}
-//			// else, Builder or DataLogger or Dispatcher
-//			return getSupervisorConfigNode(configManager,
-//			                               context.contextUID_,
-//			                               context.applications_[0].applicationUID_)
-//			    .getNode(XDAQContextTable::ARTDAQ_OFFSET_PORT)
-//			    .getValue<unsigned int>();
-//		}
-//	}
-//	return 0;
-//}
-
 //========================================================================================================================
 std::vector<const XDAQContextTable::XDAQContext*>
 XDAQContextTable::getARTDAQSupervisorContexts() const
@@ -288,57 +111,21 @@ XDAQContextTable::getARTDAQSupervisorContexts() const
 		retVec.push_back(&contexts_[i]);
 	return retVec;
 }
-////========================================================================================================================
-//std::vector<const XDAQContextTable::XDAQContext*>
-//XDAQContextTable::getBoardReaderContexts() const
-//{
-//	std::vector<const XDAQContext*> retVec;
-//	for(auto& i : artdaqBoardReaders_)
-//		retVec.push_back(&contexts_[i]);
-//	return retVec;
-//}
-////========================================================================================================================
-// std::vector<const XDAQContextTable::XDAQContext*>
-// XDAQContextTable::getEventBuilderContexts() const
-//{
-//	std::vector<const XDAQContext*> retVec;
-//	for(auto& i : artdaqEventBuilders_)
-//		retVec.push_back(&contexts_[i]);
-//	return retVec;
-//}
-////========================================================================================================================
-// std::vector<const XDAQContextTable::XDAQContext*>
-// XDAQContextTable::getDataLoggerContexts() const
-//{
-//	std::vector<const XDAQContext*> retVec;
-//	for(auto& i : artdaqDataLoggers_)
-//		retVec.push_back(&contexts_[i]);
-//	return retVec;
-//}
-////========================================================================================================================
-// std::vector<const XDAQContextTable::XDAQContext*>
-// XDAQContextTable::getDispatcherContexts() const
-//{
-//	std::vector<const XDAQContext*> retVec;
-//	for(auto& i : artdaqDispatchers_)
-//		retVec.push_back(&contexts_[i]);
-//	return retVec;
-//}
 
 //========================================================================================================================
 ConfigurationTree XDAQContextTable::getContextNode(
-    const ConfigurationManager* configManager, const std::string& contextUID) const
+    const ConfigurationManager* configManager, const std::string& contextUID)
 {
-	return configManager->__SELF_NODE__.getNode(contextUID);
+	return configManager->getNode(XDAQContextTable::XDAQ_CONTEXT_TABLE).getNode(contextUID);
 }
 
 //========================================================================================================================
 ConfigurationTree XDAQContextTable::getApplicationNode(
     const ConfigurationManager* configManager,
     const std::string&          contextUID,
-    const std::string&          appUID) const
+    const std::string&          appUID)
 {
-	return configManager->__SELF_NODE__.getNode(
+	return configManager->getNode(XDAQContextTable::XDAQ_CONTEXT_TABLE).getNode(
 	    contextUID + "/" + colContext_.colLinkToApplicationTable_ + "/" + appUID);
 }
 
@@ -346,11 +133,12 @@ ConfigurationTree XDAQContextTable::getApplicationNode(
 ConfigurationTree XDAQContextTable::getSupervisorConfigNode(
     const ConfigurationManager* configManager,
     const std::string&          contextUID,
-    const std::string&          appUID) const
+    const std::string&          appUID)
 {
-	return configManager->__SELF_NODE__.getNode(
-	    contextUID + "/" + colContext_.colLinkToApplicationTable_ + "/" + appUID + "/" +
-	    colApplication_.colLinkToSupervisorTable_);
+	return configManager->getNode(XDAQContextTable::XDAQ_CONTEXT_TABLE).getNode(
+	    contextUID + "/" + XDAQContextTable::colContext_.colLinkToApplicationTable_ +
+		"/" + appUID + "/" +
+		XDAQContextTable::colApplication_.colLinkToSupervisorTable_);
 }
 
 //========================================================================================================================

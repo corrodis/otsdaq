@@ -46,11 +46,15 @@ class ARTDAQTableBase : public TableBase
 
 	struct SubsystemInfo
 	{
-		int           destination;
-		std::set<int> sources;
+		int           	id;
+		std::string 	label;
 
-		SubsystemInfo() : destination(0), sources() {}
+		std::set<int> 	sources; //by subsystem id
+		int           	destination; //destination subsystem id, 0 := no destination
+
+		SubsystemInfo() : sources(),destination(0) {}
 	};
+	static const int 		 	NULL_SUBSYSTEM_DESTINATION;
 
 	struct ProcessInfo
 	{
@@ -87,12 +91,14 @@ class ARTDAQTableBase : public TableBase
 
 	static void 				extractArtdaqInfo			(
 													ConfigurationTree 											artdaqSupervisorNode,
-													std::unordered_map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>& 					subsystems,
+													std::map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>& 					subsystems,
 													std::map<ARTDAQTableBase::ARTDAQAppType, std::list<ARTDAQTableBase::ProcessInfo>>& 	processes,
 													bool														doWriteFHiCL = false,
 													size_t 														maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE,
 													ProgressBar* 												progressBar = 0);
 
+  private:
+	static int					getSubsytemId				(ConfigurationTree subsystemNode);
 
 };
 // clang-format on

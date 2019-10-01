@@ -1,0 +1,17 @@
+log_directory: /home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/Logs
+record_directory: /home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/
+package_hashes_to_save: [artdaq]
+productsdir_for_bash_scripts: /home/rrivera/data/ots/products
+boardreader timeout: 30
+eventbuilder timeout: 30
+datalogger timeout: 30
+dispatcher timeout: 30
+max_fragment_size_bytes: 1048576
+transfer_plugin_to_use: Autodetect
+all_events_to_all_dispatchers: true
+data_directory_override: /home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/ArtdaqData
+max_configurations_to_list: 10
+disable_unique_rootfile_labels: false
+use_messageviewer: false
+fake_messagefacility: false
+advanced_memory_usage: false

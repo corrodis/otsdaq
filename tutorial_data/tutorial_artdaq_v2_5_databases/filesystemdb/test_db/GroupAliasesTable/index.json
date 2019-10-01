@@ -1,32 +1,32 @@
 {
 "ouid" : [
-"1493ed9721c94242b1406876",
-"23a892e6eeb34fbb80891b13"
+"51e5b65d8f0f4ece84f156cd",
+"a2306187d4d94fa3aac80cba"
 ],
 "version" : {
 "1" : [
-"23a892e6eeb34fbb80891b13"
+"a2306187d4d94fa3aac80cba"
 ],
 "6" : [
-"1493ed9721c94242b1406876"
+"51e5b65d8f0f4ece84f156cd"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"1493ed9721c94242b1406876",
-"23a892e6eeb34fbb80891b13"
+"51e5b65d8f0f4ece84f156cd",
+"a2306187d4d94fa3aac80cba"
 ],
-"GroupAliasTreeEditWizBackbone_v1" : [
-"23a892e6eeb34fbb80891b13"
+"TableEditWizBackbone_v1" : [
+"a2306187d4d94fa3aac80cba"
 ],
-"GroupAliasTreeEditWizBackbone_v6" : [
-"1493ed9721c94242b1406876"
+"TableEditWizBackbone_v6" : [
+"51e5b65d8f0f4ece84f156cd"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"1493ed9721c94242b1406876",
-"23a892e6eeb34fbb80891b13"
+"51e5b65d8f0f4ece84f156cd",
+"a2306187d4d94fa3aac80cba"
 ]
 },
 "aliases.active.name" : {
@@ -37,14 +37,14 @@
 },
 "configurations.assigned" : {
 "notprovided" : [
-"2019-09-27T15:25:48.698-0500",
-"2019-09-27T15:25:58.114-0500"
+"2019-10-01T13:03:40.225-0500",
+"2019-10-01T13:03:48.597-0500"
 ],
-"GroupAliasTreeEditWizBackbone_v1" : [
-"2019-09-27T15:25:48.908-0500"
+"TableEditWizBackbone_v1" : [
+"2019-10-01T13:03:40.375-0500"
 ],
-"GroupAliasTreeEditWizBackbone_v6" : [
-"2019-09-27T15:25:58.227-0500"
+"TableEditWizBackbone_v6" : [
+"2019-10-01T13:03:48.704-0500"
 ]
 }
 }
