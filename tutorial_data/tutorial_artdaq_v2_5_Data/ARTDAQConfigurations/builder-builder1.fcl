@@ -1,0 +1,90 @@
+###########################################################
+#
+# artdaq builder fcl configuration file produced by otsdaq.
+# 	Creation timestamp: Fri Sep 27 15:21:24 2019 CDT
+# 	Original filename: /home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/ARTDAQConfigurations/builder-builder1.fcl
+#	otsdaq-ARTDAQ builder UID: builder1
+#
+###########################################################
+
+
+daq: {
+	event_builder: {
+		max_fragment_size_bytes: 1048576
+		expected_fragments_per_event		:		1
+		buffer_count		:		20
+		sources: {
+}
+
+	}
+
+	metrics: {
+		evbFile: {
+			metricPluginType: "file"
+			level: 3
+			fileName			:			"/tmp/eventbuilder/evb_%UID%_metrics.log"
+			uniquify			:			true
+		}
+
+		# ganglia: {
+			# metricPluginType: "ganglia"
+			# level: %{ganglia_level}
+			# reporting_interval			# :			# 15.0
+			# configFile			# :			# "/etc/ganglia/gmond.conf"
+			# group			# :			# "ARTDAQ"
+		# }
+
+		# msgfac: {
+			# metricPluginType: "msgFacility"
+			# level: %{mf_level}
+			# output_message_application_name			# :			# "ARTDAQ Metric"
+			# output_message_severity			# :			# 0
+		# }
+
+		# graphite: {
+			# metricPluginType: "graphite"
+			# level: %{graphite_level}
+			# DEFAULT			# :			# DEFAULT
+			# DEFAULT			# :			# DEFAULT
+			# DEFAULT			# :			# DEFAULT
+		# }
+
+	}
+
+}
+
+art: {
+	services: {
+		scheduler: {
+		}
+
+		NetMonTransportServiceInterface: {
+			service_provider: NetMonTransportService
+			destinations: {
+}
+
+		}
+
+	}
+
+	outputs: {
+		rootNetOutput: {
+			module_type: RootNetOutput
+			# SelectEvents			# :			# { SelectEvents: [ pmod2,pmod3 ] }
+		}
+
+	}
+
+	physics: {
+		my_output_modules		:		[ rootNetOutput ]
+	}
+
+	source: {
+		module_type: OtsInput
+		waiting_time: 15
+		resume_after_timeout: true
+	}
+
+	process_name: DAQ
+}
+

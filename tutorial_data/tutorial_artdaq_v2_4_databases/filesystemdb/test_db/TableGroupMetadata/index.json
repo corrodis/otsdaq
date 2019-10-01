@@ -1,149 +1,65 @@
 {
 "ouid" : [
-"03301ea412344c658a91e207",
-"0be56e81fe584027b95823b8",
-"1c6e3491a4604371b046b854",
-"22aeb14e132e43d78986a558",
-"6ee3d12c3fff4dd09a9f8a82",
-"74601a323c34457791547b21",
-"839deea25aa1412e8f5c1596",
-"8734551684ad4fb3b32dd45b",
-"87cbc3db902045c695f6c01d",
-"88b87176e35744d6b08eba7b",
-"8d7e0e04ed17429b9bf5341c",
-"a5020998a33240fbbd9ee01e",
-"b87456ba8e5841d1a1593f0a",
-"b92a804e3cf34f4b93bdd512",
-"dc6b80a33b434eecacf3f56f"
+"33d039ff10a544fdb5f8c9f2",
+"74d5d62b557f4f63ae2e8d5f",
+"79e5395c890a41dfbd738535",
+"a5305c65c88e40739e437676",
+"b731b37044ce437a86f6f6f2",
+"fc3a992430bf4bdb8c614599"
 ],
 "version" : {
 "0" : [
-"88b87176e35744d6b08eba7b"
+"b731b37044ce437a86f6f6f2"
 ],
 "1" : [
-"dc6b80a33b434eecacf3f56f"
+"33d039ff10a544fdb5f8c9f2"
 ],
 "2" : [
-"74601a323c34457791547b21"
+"74d5d62b557f4f63ae2e8d5f"
 ],
 "3" : [
-"b87456ba8e5841d1a1593f0a"
+"a5305c65c88e40739e437676"
 ],
 "4" : [
-"0be56e81fe584027b95823b8"
+"79e5395c890a41dfbd738535"
 ],
 "5" : [
-"8d7e0e04ed17429b9bf5341c"
-],
-"6" : [
-"87cbc3db902045c695f6c01d"
-],
-"7" : [
-"1c6e3491a4604371b046b854"
-],
-"8" : [
-"839deea25aa1412e8f5c1596"
-],
-"9" : [
-"03301ea412344c658a91e207"
-],
-"10" : [
-"a5020998a33240fbbd9ee01e"
-],
-"11" : [
-"6ee3d12c3fff4dd09a9f8a82"
-],
-"12" : [
-"8734551684ad4fb3b32dd45b"
-],
-"13" : [
-"22aeb14e132e43d78986a558"
-],
-"14" : [
-"b92a804e3cf34f4b93bdd512"
+"fc3a992430bf4bdb8c614599"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"03301ea412344c658a91e207",
-"0be56e81fe584027b95823b8",
-"1c6e3491a4604371b046b854",
-"22aeb14e132e43d78986a558",
-"6ee3d12c3fff4dd09a9f8a82",
-"74601a323c34457791547b21",
-"839deea25aa1412e8f5c1596",
-"8734551684ad4fb3b32dd45b",
-"87cbc3db902045c695f6c01d",
-"88b87176e35744d6b08eba7b",
-"8d7e0e04ed17429b9bf5341c",
-"a5020998a33240fbbd9ee01e",
-"b87456ba8e5841d1a1593f0a",
-"b92a804e3cf34f4b93bdd512",
-"dc6b80a33b434eecacf3f56f"
+"33d039ff10a544fdb5f8c9f2",
+"74d5d62b557f4f63ae2e8d5f",
+"79e5395c890a41dfbd738535",
+"a5305c65c88e40739e437676",
+"b731b37044ce437a86f6f6f2",
+"fc3a992430bf4bdb8c614599"
 ],
-"artdaqContext_v3" : [
-"88b87176e35744d6b08eba7b"
-],
-"testContext_v5" : [
-"dc6b80a33b434eecacf3f56f"
-],
-"GroupAliasWizBackbone_v0" : [
-"74601a323c34457791547b21"
-],
-"artdaqContext_v4" : [
-"b87456ba8e5841d1a1593f0a"
-],
-"GroupAliasWizBackbone_v1" : [
-"0be56e81fe584027b95823b8"
-],
-"defaultConfig_v4" : [
-"8d7e0e04ed17429b9bf5341c"
-],
-"TableEditWizBackbone_v0" : [
-"87cbc3db902045c695f6c01d"
+"GroupAliasTreeEditWizBackbone_v1" : [
+"33d039ff10a544fdb5f8c9f2"
 ],
 "artdaqConfig_v2" : [
-"1c6e3491a4604371b046b854"
+"74d5d62b557f4f63ae2e8d5f"
 ],
-"GroupAliasWizBackbone_v2" : [
-"839deea25aa1412e8f5c1596"
+"artdaqContext_v3" : [
+"a5305c65c88e40739e437676"
 ],
-"artdaqContext_v5" : [
-"03301ea412344c658a91e207"
+"defaultConfig_v4" : [
+"79e5395c890a41dfbd738535"
 ],
-"TableEditWizBackbone_v1" : [
-"a5020998a33240fbbd9ee01e"
-],
-"artdaqContext_v6" : [
-"6ee3d12c3fff4dd09a9f8a82"
-],
-"GroupAliasTreeEditWizBackbone_v6" : [
-"8734551684ad4fb3b32dd45b"
-],
-"artdaqConfig_v3" : [
-"22aeb14e132e43d78986a558"
-],
-"GroupAliasTreeEditWizBackbone_v7" : [
-"b92a804e3cf34f4b93bdd512"
+"testContext_v5" : [
+"fc3a992430bf4bdb8c614599"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"03301ea412344c658a91e207",
-"0be56e81fe584027b95823b8",
-"1c6e3491a4604371b046b854",
-"22aeb14e132e43d78986a558",
-"6ee3d12c3fff4dd09a9f8a82",
-"74601a323c34457791547b21",
-"839deea25aa1412e8f5c1596",
-"8734551684ad4fb3b32dd45b",
-"87cbc3db902045c695f6c01d",
-"88b87176e35744d6b08eba7b",
-"8d7e0e04ed17429b9bf5341c",
-"a5020998a33240fbbd9ee01e",
-"b87456ba8e5841d1a1593f0a",
-"b92a804e3cf34f4b93bdd512",
-"dc6b80a33b434eecacf3f56f"
+"33d039ff10a544fdb5f8c9f2",
+"74d5d62b557f4f63ae2e8d5f",
+"79e5395c890a41dfbd738535",
+"a5305c65c88e40739e437676",
+"b731b37044ce437a86f6f6f2",
+"fc3a992430bf4bdb8c614599"
 ]
 },
 "aliases.active.name" : {
@@ -154,66 +70,27 @@
 },
 "configurations.assigned" : {
 "notprovided" : [
-"2019-01-28T16:58:16.274-0600",
-"2019-01-29T10:13:53.735-0600",
-"2019-01-29T10:14:17.002-0600",
-"2019-01-29T13:31:12.852-0600",
-"2019-01-29T13:31:23.461-0600",
-"2019-01-29T21:37:13.971-0600",
-"2019-01-29T21:37:15.287-0600",
-"2019-01-29T21:41:41.041-0600",
-"2019-01-29T21:42:06.367-0600",
-"2019-01-29T21:44:26.774-0600",
-"2019-01-29T21:44:28.030-0600",
-"2019-01-29T21:53:46.952-0600",
-"2019-01-29T21:53:48.082-0600",
-"2019-01-29T22:19:29.670-0600",
-"2019-01-29T22:19:33.128-0600"
+"2019-07-17T15:46:24.356-0500",
+"2019-07-17T15:46:24.618-0500",
+"2019-07-17T15:46:28.142-0500",
+"2019-07-17T15:46:31.220-0500",
+"2019-07-17T15:46:32.089-0500",
+"2019-07-17T15:46:33.146-0500"
 ],
-"artdaqContext_v3" : [
-"2019-01-28T16:58:16.321-0600"
-],
-"testContext_v5" : [
-"2019-01-29T10:13:53.778-0600"
-],
-"GroupAliasWizBackbone_v0" : [
-"2019-01-29T10:14:17.045-0600"
-],
-"artdaqContext_v4" : [
-"2019-01-29T13:31:12.890-0600"
-],
-"GroupAliasWizBackbone_v1" : [
-"2019-01-29T13:31:23.499-0600"
-],
-"defaultConfig_v4" : [
-"2019-01-29T21:37:14.007-0600"
-],
-"TableEditWizBackbone_v0" : [
-"2019-01-29T21:37:15.328-0600"
+"GroupAliasTreeEditWizBackbone_v1" : [
+"2019-07-17T15:46:24.751-0500"
 ],
 "artdaqConfig_v2" : [
-"2019-01-29T21:41:42.872-0600"
+"2019-07-17T15:46:30.438-0500"
 ],
-"GroupAliasWizBackbone_v2" : [
-"2019-01-29T21:42:06.406-0600"
+"artdaqContext_v3" : [
+"2019-07-17T15:46:31.546-0500"
 ],
-"artdaqContext_v5" : [
-"2019-01-29T21:44:26.817-0600"
+"defaultConfig_v4" : [
+"2019-07-17T15:46:32.687-0500"
 ],
-"TableEditWizBackbone_v1" : [
-"2019-01-29T21:44:28.076-0600"
-],
-"artdaqContext_v6" : [
-"2019-01-29T21:53:46.993-0600"
-],
-"GroupAliasTreeEditWizBackbone_v6" : [
-"2019-01-29T21:53:48.118-0600"
-],
-"artdaqConfig_v3" : [
-"2019-01-29T22:19:31.534-0600"
-],
-"GroupAliasTreeEditWizBackbone_v7" : [
-"2019-01-29T22:19:33.173-0600"
+"testContext_v5" : [
+"2019-07-17T15:46:33.520-0500"
 ]
 }
 }

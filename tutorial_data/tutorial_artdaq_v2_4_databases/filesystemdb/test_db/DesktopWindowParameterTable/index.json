@@ -1,47 +1,32 @@
 {
 "ouid" : [
-"7b6143d16fbf4b48beb8f32c",
-"eef0b2faa95e486d97129692"
+"caf6387d2d7d4b408c515602",
+"d97a9149863c4184a158b9ee"
 ],
 "version" : {
-"4" : [
-"7b6143d16fbf4b48beb8f32c"
+"3" : [
+"caf6387d2d7d4b408c515602"
 ],
-"2" : [
-"eef0b2faa95e486d97129692"
+"5" : [
+"d97a9149863c4184a158b9ee"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"7b6143d16fbf4b48beb8f32c",
-"eef0b2faa95e486d97129692"
-],
-"testContext_v4" : [
-"7b6143d16fbf4b48beb8f32c"
-],
-"artdaqContext_v2" : [
-"eef0b2faa95e486d97129692"
+"caf6387d2d7d4b408c515602",
+"d97a9149863c4184a158b9ee"
 ],
 "artdaqContext_v3" : [
-"7b6143d16fbf4b48beb8f32c"
+"caf6387d2d7d4b408c515602"
 ],
 "testContext_v5" : [
-"7b6143d16fbf4b48beb8f32c"
-],
-"artdaqContext_v4" : [
-"7b6143d16fbf4b48beb8f32c"
-],
-"artdaqContext_v5" : [
-"eef0b2faa95e486d97129692"
-],
-"artdaqContext_v6" : [
-"eef0b2faa95e486d97129692"
+"d97a9149863c4184a158b9ee"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"7b6143d16fbf4b48beb8f32c",
-"eef0b2faa95e486d97129692"
+"caf6387d2d7d4b408c515602",
+"d97a9149863c4184a158b9ee"
 ]
 },
 "aliases.active.name" : {
@@ -52,29 +37,14 @@
 },
 "configurations.assigned" : {
 "notprovided" : [
-"2017-09-18T14:41:28.000-0500",
-"2017-09-18T14:41:29.000-0500"
-],
-"testContext_v4" : [
-"2017-09-18T14:41:29.000-0500"
-],
-"artdaqContext_v2" : [
-"2017-09-18T14:41:28.000-0500"
+"2019-07-17T15:46:30.749-0500",
+"2019-07-17T15:46:32.987-0500"
 ],
 "artdaqContext_v3" : [
-"2019-01-28T16:58:16.434-0600"
+"2019-07-17T15:46:31.328-0500"
 ],
 "testContext_v5" : [
-"2019-01-29T10:13:53.874-0600"
-],
-"artdaqContext_v4" : [
-"2019-01-29T13:31:12.980-0600"
-],
-"artdaqContext_v5" : [
-"2019-01-29T21:44:26.918-0600"
-],
-"artdaqContext_v6" : [
-"2019-01-29T21:53:47.095-0600"
+"2019-07-17T15:46:33.267-0500"
 ]
 }
 }

@@ -1,41 +1,32 @@
 {
 "ouid" : [
-"2d46d1377a8243a5b282b75d",
-"52f6af1962084c88aadb9a14"
+"0d6c551ea48f4ad49c8a73e7",
+"92eefc096a34468b9cdf7f6d"
 ],
 "version" : {
-"1" : [
-"2d46d1377a8243a5b282b75d"
+"2" : [
+"92eefc096a34468b9cdf7f6d"
 ],
-"3" : [
-"52f6af1962084c88aadb9a14"
+"4" : [
+"0d6c551ea48f4ad49c8a73e7"
 ]
 },
 "configurations.name" : {
 "notprovided" : [
-"2d46d1377a8243a5b282b75d",
-"52f6af1962084c88aadb9a14"
-],
-"artdaqConfig_v1" : [
-"2d46d1377a8243a5b282b75d"
-],
-"defaultConfig_v3" : [
-"52f6af1962084c88aadb9a14"
-],
-"defaultConfig_v4" : [
-"52f6af1962084c88aadb9a14"
+"0d6c551ea48f4ad49c8a73e7",
+"92eefc096a34468b9cdf7f6d"
 ],
 "artdaqConfig_v2" : [
-"2d46d1377a8243a5b282b75d"
+"92eefc096a34468b9cdf7f6d"
 ],
-"artdaqConfig_v3" : [
-"2d46d1377a8243a5b282b75d"
+"defaultConfig_v4" : [
+"0d6c551ea48f4ad49c8a73e7"
 ]
 },
 "entities.name" : {
 "OTSROOT" : [
-"2d46d1377a8243a5b282b75d",
-"52f6af1962084c88aadb9a14"
+"0d6c551ea48f4ad49c8a73e7",
+"92eefc096a34468b9cdf7f6d"
 ]
 },
 "aliases.active.name" : {
@@ -46,23 +37,14 @@
 },
 "configurations.assigned" : {
 "notprovided" : [
-"2017-09-18T14:41:27.000-0500",
-"2017-09-18T14:41:28.000-0500"
-],
-"artdaqConfig_v1" : [
-"2017-09-18T14:41:28.000-0500"
-],
-"defaultConfig_v3" : [
-"2017-09-18T14:41:28.000-0500"
-],
-"defaultConfig_v4" : [
-"2019-01-29T21:37:14.265-0600"
+"2019-07-17T15:46:27.589-0500",
+"2019-07-17T15:46:31.949-0500"
 ],
 "artdaqConfig_v2" : [
-"2019-01-29T21:41:43.218-0600"
+"2019-07-17T15:46:30.080-0500"
 ],
-"artdaqConfig_v3" : [
-"2019-01-29T22:19:31.863-0600"
+"defaultConfig_v4" : [
+"2019-07-17T15:46:32.362-0500"
 ]
 }
 }

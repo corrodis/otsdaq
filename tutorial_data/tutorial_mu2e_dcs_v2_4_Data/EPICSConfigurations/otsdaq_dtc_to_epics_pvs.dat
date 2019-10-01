@@ -1,0 +1,8 @@
+file "soft_ai.dbt" {
+	pattern  { Subsystem, loc, var, PREC, EGU, LOLO, LOW, HIGH, HIHI, MDEL, ADEL, DESC }
+		{ "TDAQ", "DTC0", "DTCTemperature", "0", "DEFAULT", "DEFAULT", "DEFAULT", "DEFAULT", "DEFAULT", "", "", "No Comment"  }
+}
+file "soft_ai.dbt" {
+	pattern  { Subsystem, loc, var, PREC, EGU, LOLO, LOW, HIGH, HIHI, MDEL, ADEL, DESC }
+		{ "TDAQ", "ROC0", "ROCCalorimeterTemperature", "0", "DEFAULT", "DEFAULT", "DEFAULT", "DEFAULT", "DEFAULT", "", "", "No Comment"  }
+}

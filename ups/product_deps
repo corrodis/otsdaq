@@ -1,6 +1,6 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent otsdaq	v2_04_01
+parent otsdaq	v2_04_02
 defaultqual	e15:s67
 
 # These optional lines define the installed directories where
@@ -18,12 +18,11 @@ fcldir      -
 
 #
 product		 version	optional
-artdaq              v3_05_00
-artdaq_database     v1_04_71
+artdaq              v3_06_01
+artdaq_database     v1_04_76
 xdaq                v14_12_0
-artdaq_mfextensions v1_03_04   	-        optional
-smc_compiler        v6_6_0      -        only_for_build
-cetbuildtools       v7_12_01    -        only_for_build
+artdaq_daqinterface v3_06_01
+cetbuildtools       v7_13_02    -        only_for_build
 end_product_list
 
 # e6  - with gcc 4.9.1 and -std=c++1y
@@ -31,19 +30,24 @@ end_product_list
 # s7  - with art v1_13_01
 # -nq- here means there is no qualifier
 # a "-" here means the dependent product is not required by the parent and will not be setup
-qualifier    	   artdaq	 	 artdaq_database	xdaq   	   artdaq_mfextensions 	notes
-e19:s82:prof       e19:s82:prof    	 e19:s82:prof 		e19:prof   e19:s82:prof 	-std=c++17
-e19:s82:debug      e19:s82:debug   	 e19:s82:debug		e19:debug  e19:s82:debug 	-std=c++17
-e17:s82:prof       e17:s82:prof    	 e17:s82:prof 		e17:prof   e17:s82:prof 	-std=c++17
-e17:s82:debug      e17:s82:debug   	 e17:s82:debug		e17:debug  e17:s82:debug 	-std=c++17
+qualifier    	   artdaq	 	 artdaq_database	xdaq   	    	artdaq_daqinterface		notes
+e19:s87:prof       e19:s87:prof    	 e19:s87:prof 		e19:prof   	-nq-					-std=c++17
+e19:s87:debug      e19:s87:debug   	 e19:s87:debug		e19:debug  	-nq-					-std=c++17
+e17:s87:prof       e17:s87:prof    	 e17:s87:prof 		e17:prof   	-nq-					-std=c++17
+e17:s87:debug      e17:s87:debug   	 e17:s87:debug		e17:debug  	-nq-					-std=c++17
 
-e17:s73:prof       e17:s73:prof    	 e17:s73:prof 		e17:prof   e17:s73:prof 	-std=c++17
-e17:s73:debug      e17:s73:debug   	 e17:s73:debug		e17:debug  e17:s73:debug 	-std=c++17
+e19:s82:prof       e19:s82:prof    	 e19:s82:prof 		e19:prof   	-nq-					-std=c++17
+e19:s82:debug      e19:s82:debug   	 e19:s82:debug		e19:debug  	-nq-					-std=c++17
+e17:s82:prof       e17:s82:prof    	 e17:s82:prof 		e17:prof   	-nq-					-std=c++17
+e17:s82:debug      e17:s82:debug   	 e17:s82:debug		e17:debug  	-nq-					-std=c++17
 
-e17:s67:prof       e17:s67:prof    	 e17:s67:prof 		e17:prof   e17:s67:prof 	-std=c++17
-e17:s67:debug      e17:s67:debug   	 e17:s67:debug		e17:debug  e17:s67:debug 	-std=c++17
-e15:s67:prof       e15:s67:prof    	 e15:s67:prof 		e15:prof   e15:s67:prof 	-std=c++14
-e15:s67:debug      e15:s67:debug   	 e15:s67:debug		e15:debug  e15:s67:debug 	-std=c++14
+e17:s73:prof       e17:s73:prof    	 e17:s73:prof 		e17:prof   	-nq-					-std=c++17
+e17:s73:debug      e17:s73:debug   	 e17:s73:debug		e17:debug  	-nq-					-std=c++17
+
+e17:s67:prof       e17:s67:prof    	 e17:s67:prof 		e17:prof   	-nq-					-std=c++17
+e17:s67:debug      e17:s67:debug   	 e17:s67:debug		e17:debug  	-nq-					-std=c++17
+e15:s67:prof       e15:s67:prof    	 e15:s67:prof 		e15:prof   	-nq-					-std=c++14
+e15:s67:debug      e15:s67:debug   	 e15:s67:debug		e15:debug  	-nq-					-std=c++14
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:

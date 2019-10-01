@@ -85,7 +85,7 @@ class UDPReceiver : public artdaq::CommandableFragmentGenerator
 	virtual void stop(void) override;
 	virtual void stopNoMutex(void) override;
 
-	virtual void ProcessData_(artdaq::FragmentPtrs& output);
+	virtual void ProcessData_(artdaq::FragmentPtrs& output, size_t totalSize);
 
 	DataType getDataType(uint8_t byte)
 	{

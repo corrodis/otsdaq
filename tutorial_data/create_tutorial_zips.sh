@@ -25,7 +25,7 @@
 
 echo
 echo
-echo -e `date +"%h%y %T"` "create_tutorial_zips.sh [${LINENO}]  \t Do not source this script, run it as ./create_zips_${TUTORIAL}_tutorial.sh"
+echo -e `date +"%h%y %T"` "create_tutorial_zips.sh [${LINENO}]  \t Do not source this script, run it as ./create_tutorial_zips.sh"
 return  >/dev/null 2>&1 #return is used if script is sourced
 		
 echo
@@ -50,11 +50,11 @@ if [[ "$5"  == "--repo" && "x$6" != "x" ]]; then
 	SRC="$6"
 fi
 
-if [[ "$7"  == "--user" && "x$8" != "x" ]]; then
+if [[ "$7"  == "--data" && "x$8" != "x" ]]; then
 	UDATA="$8"
 fi
 
-if [[ "$9"  == "--user" && "x$10" != "x" ]]; then
+if [[ "$9"  == "--database" && "x$10" != "x" ]]; then
 	UDATABASES="$10"
 fi
 

@@ -15,6 +15,7 @@ simple_plugin(ArtdaqOtsBuildInfo "module"
 )
 
 simple_plugin(UDPDump "module"
+  artdaq-core_Utilities
   ${FHICLCPP}
   ${CETLIB}
   ${CETLIB_EXCEPT}
@@ -22,11 +23,31 @@ simple_plugin(UDPDump "module"
 )
 
 simple_plugin(JSONDispatcher "module"
+  artdaq-core_Utilities
   ${Boost_SYSTEM_LIBRARY}
   ${CETLIB_EXCEPT}
   pthread
   MF_MessageLogger
 )
+
+
+simple_plugin(OtsInput "source"
+  artdaq-ots_Overlays
+  artdaq-core_Core
+  artdaq-core_Utilities
+  rt
+  artdaq_DAQdata
+  artdaq-utilities_Plugins
+  artdaq_ArtModules
+  art_Framework_Core
+  art_Framework_IO_Sources
+  art_Framework_Principal
+  art_Persistency_Provenance
+  art_Utilities
+  MF_MessageLogger
+  ${CETLIB_EXCEPT}
+)
+
 
 install_headers()
 install_source()

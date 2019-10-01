@@ -1,0 +1,7 @@
+        host   port         label  rank
+
+ironvirt7	10100	reader0	0
+ironvirt7	10101	builder0	1
+ironvirt7	10102	builder1	2
+ironvirt7	10103	logger0	3
+ironvirt7	10104	dispatcher0	4

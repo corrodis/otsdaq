@@ -1,0 +1,36 @@
+Config name: ots_config
+Component #0: reader0
+DAQInterface directory: /data/rrivera/ots
+
+# Two possible sets of fields provided below for code info, depending on if a git repo was available: 
+# <git commit hash> <LoCs added on top of commit> <LoCs removed on top of commit> <git commit comment> <git commit time> <git branch> <BuildInfo build time (if available)> <BuildInfo version (if available)>
+# <package version> <BuildInfo build time (if available)> <BuildInfo version (if available)>
+
+DAQInterface commit/version: v3_06_00 "time from BuildInfo undetermined" "version from BuildInfo undetermined"
+
+artdaq commit/version: v3_06_00 "01-Aug-2019 18:53:41 UTC" "v3_06_00"
+
+
+process management method: direct
+
+
+process manager logfiles: 
+
+boardreader logfiles: 
+correlator2.fnal.gov:/home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/Logs/reader0-correlator2-10100/reader0-correlator2-10100-20190927152230-54125.log
+
+eventbuilder logfiles: 
+correlator2.fnal.gov:/home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/Logs/builder0-correlator2-10101/builder0-correlator2-10101-20190927152230-54126.log
+correlator2.fnal.gov:/home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/Logs/builder1-correlator2-10102/builder1-correlator2-10102-20190927152230-54127.log
+
+datalogger logfiles: 
+correlator2.fnal.gov:/home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/Logs/logger0-correlator2-10103/logger0-correlator2-10103-20190927152230-54128.log
+
+dispatcher logfiles: 
+correlator2.fnal.gov:/home/rrivera/data/ots/srcs/otsdaq_demo/NoGitData/Logs/dispatcher0-correlator2-10104/dispatcher0-correlator2-10104-20190927152230-54129.log
+
+routingmaster logfiles: 
+
+DAQInterface start time: Fri Sep 27 20:23:41 UTC 2019
+
+DAQInterface stop time: Fri Sep 27 20:25:08 UTC 2019

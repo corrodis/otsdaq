@@ -1,0 +1,35 @@
+Config name: ots_config
+Component #0: reader0
+DAQInterface directory: /home/eflumerf/Desktop/otsdaq-mrb-base
+
+# Two possible sets of fields provided below for code info, depending on if a git repo was available: 
+# <git commit hash> <LoCs added on top of commit> <LoCs removed on top of commit> <git commit comment> <git commit time> <git branch> <BuildInfo build time (if available)> <BuildInfo version (if available)>
+# <package version> <BuildInfo build time (if available)> <BuildInfo version (if available)>
+
+DAQInterface commit/version: v3_06_00 "time from BuildInfo undetermined" "version from BuildInfo undetermined"
+
+artdaq commit/version: v3_06_00 "01-Aug-2019 18:56:24 UTC" "v3_06_00"
+
+otsdaq commit/version: a4329c2ba7c5b31b6a41fcb93894a33fbeaffe0b 8 44 "Add mutex around python calls. Add runner thread w..." "Thu Sep 12 14:08:36 2019 -0500" "develop" "time from BuildInfo undetermined" "version from BuildInfo undetermined"
+
+otsdaq-utilities commit/version: 4e276de1b08cef751ebb9a331e50d1850cede249 0 0 "Merge branch develop of ssh://cdcvs.fnal.gov/cvs/p..." "Wed Sep 11 14:48:12 2019 -0500" "develop" "time from BuildInfo undetermined" "version from BuildInfo undetermined"
+
+
+process management method: direct
+
+
+process manager logfiles: 
+
+boardreader logfiles: 
+
+eventbuilder logfiles: 
+
+datalogger logfiles: 
+
+dispatcher logfiles: 
+
+routingmaster logfiles: 
+
+DAQInterface start time: Sat Sep 14 14:59:34 UTC 2019
+
+DAQInterface stop time: Sat Sep 14 14:59:44 UTC 2019

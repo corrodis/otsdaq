@@ -1,0 +1,160 @@
+{
+"document" : {
+"data" : {
+"NAME" : "ROC_INTERFACE_TABLE",
+"COMMENT" : "Auto-generated from mock-up.",
+"AUTHOR" : "admin",
+"CREATION_TIME" : 1561316197,
+"COL_TYPES" : {
+"UID" : "VARCHAR2",
+"STATUS" : "VARCHAR2",
+"ROC_GROUP_ID" : "VARCHAR2",
+"ROC_INTERFACE_PLUGIN_NAME" : "VARCHAR2",
+"LINK_ID" : "NUMBER",
+"EVENT_WINDOW_DELAY_OFFSET" : "NUMBER",
+"EMULATE_IN_DTC_HARDWARE" : "VARCHAR2",
+"ROC_TYPE_LINK_TABLE" : "VARCHAR2",
+"ROC_TYPE_LINK_UID" : "VARCHAR2",
+"LINK_TO_SLOW_CONTROLS_CHANNEL_TABLE" : "VARCHAR2",
+"LINK_TO_SLOW_CONTROLS_CHANNEL_GROUP_ID" : "VARCHAR2",
+"COMMENT_DESCRIPTION" : "VARCHAR2",
+"AUTHOR" : "VARCHAR2",
+"RECORD_INSERTION_TIME" : "TIMESTAMP WITH TIMEZONE"
+},
+"DATA_SET" : [
+{
+"UID" : "ROC0",
+"STATUS" : "On",
+"ROC_GROUP_ID" : "DTC0_ROCGroup",
+"ROC_INTERFACE_PLUGIN_NAME" : "ROCCalorimeterInterface",
+"LINK_ID" : "0",
+"EVENT_WINDOW_DELAY_OFFSET" : "4",
+"EMULATE_IN_DTC_HARDWARE" : "False",
+"ROC_TYPE_LINK_TABLE" : "NO_LINK",
+"ROC_TYPE_LINK_UID" : "DEFAULT",
+"LINK_TO_SLOW_CONTROLS_CHANNEL_TABLE" : "FESlowControlsTable",
+"LINK_TO_SLOW_CONTROLS_CHANNEL_GROUP_ID" : "ROC0SlowControlsChannels",
+"COMMENT_DESCRIPTION" : "No Comment",
+"AUTHOR" : "admin",
+"RECORD_INSERTION_TIME" : "1561316116"
+}
+]
+},
+"metadata" : {
+
+},
+"search" : [
+
+]
+},
+"comments" : [
+
+],
+"origin" : {
+"source" : "template",
+"name" : "notprovided",
+"format" : "json",
+"created" : "2019-07-03T15:20:31.923-0500",
+"rawdata" : [
+
+]
+},
+"version" : "3",
+"entities" : [
+{
+"name" : "OTSROOT",
+"assigned" : "2019-07-03T15:20:31.924-0500"
+}
+],
+"tables" : [
+{
+"name" : "notprovided",
+"assigned" : "2019-07-03T15:20:31.924-0500"
+},
+{
+"name" : "defaultConfig_v3",
+"assigned" : "2019-07-03T15:20:32.770-0500"
+}
+],
+"changelog" : "notprovided",
+"bookkeeping" : {
+"isdeleted" : false,
+"isreadonly" : false,
+"updates" : [
+{
+"event" : "addTable",
+"timestamp" : "2019-07-03T15:20:31.924-0500",
+"value" : {
+"name" : "notprovided",
+"assigned" : "2019-07-03T15:20:31.924-0500"
+}
+},
+{
+"event" : "setVersion",
+"timestamp" : "2019-07-03T15:20:31.924-0500",
+"value" : {
+"name" : "3",
+"assigned" : "2019-07-03T15:20:31.924-0500"
+}
+},
+{
+"event" : "setCollection",
+"timestamp" : "2019-07-03T15:20:31.924-0500",
+"value" : {
+"name" : "ROCInterfaceTable",
+"assigned" : "2019-07-03T15:20:31.924-0500"
+}
+},
+{
+"event" : "addEntity",
+"timestamp" : "2019-07-03T15:20:31.924-0500",
+"value" : {
+"name" : "OTSROOT",
+"assigned" : "2019-07-03T15:20:31.924-0500"
+}
+},
+{
+"event" : "addTable",
+"timestamp" : "2019-07-03T15:20:32.770-0500",
+"value" : {
+"name" : "defaultConfig_v3",
+"assigned" : "2019-07-03T15:20:32.770-0500"
+}
+},
+{
+"event" : "addConfiguration",
+"timestamp" : "2019-07-16T10:42:31.231-0500",
+"value" : {
+"name" : "defaultConfig_v4",
+"assigned" : "2019-07-16T10:42:31.231-0500"
+}
+}
+],
+"created" : "2019-07-03T15:20:31.924-0500"
+},
+"_id" : {
+"$oid" : "32d72d5fb62340e7abf2e4f6"
+},
+"collection" : "ROCInterfaceTable",
+"aliases" : {
+"active" : [
+
+],
+"history" : [
+
+]
+},
+"runs" : [
+
+],
+"attachments" : [
+
+],
+"configtype" : "notprovided",
+"configurations" : [
+{
+"name" : "defaultConfig_v4",
+"assigned" : "2019-07-16T10:42:31.231-0500"
+}
+]
+}
