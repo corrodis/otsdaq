@@ -4,3 +4,6 @@ cet_make(LIBRARY_NAME ARTDAQTableBase
   		ConfigurationInterface
   		ProgressBar
 )
+
+install_headers()
+install_source()
