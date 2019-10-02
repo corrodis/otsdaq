@@ -73,30 +73,11 @@ class XDAQContextTable : public TableBase
 	std::string  					getContextAddress			(const std::string& contextUID = "X", bool wantHttp = false) const;
 
 	// artdaq specific get methods
-	std::vector<const XDAQContext*> getARTDAQSupervisorContexts	(void) const;
-//	std::vector<const XDAQContext*> getBoardReaderContexts		(void) const;
-//	std::vector<const XDAQContext*> getEventBuilderContexts() const;
-//	std::vector<const XDAQContext*> getDataLoggerContexts() const;
-//	std::vector<const XDAQContext*> getDispatcherContexts() const;
-//	unsigned int getARTDAQAppRank(const std::string& contextUID = "X") const;
-//	std::map<std::string /*contextUID*/,
-//	         std::pair<std::string /*host_name*/, unsigned int /*rank*/>>
-//	             getARTDAQAppRankMap() const;
-
-//	unsigned int getARTDAQDataPort(const ConfigurationManager* configManager,
-//	                               const std::string&          contextUID = "X") const;
-	//static bool  					isARTDAQContext				(const std::string& contextUID);
+	const XDAQContext* 				getTheARTDAQSupervisorContext	(void) const;
 
   private:
 	std::vector<XDAQContext> contexts_;
-	//		std::vector<unsigned int> artdaqContexts_;
-	//
-
-	std::vector<unsigned int /*contextIndex*/> artdaqSupervisors_;
-	std::vector<unsigned int /*contextIndex*/> artdaqBoardReaders_;
-//	std::vector<unsigned int> artdaqEventBuilders_;
-//	std::vector<unsigned int> artdaqDataLoggers_;
-//	std::vector<unsigned int> artdaqDispatchers_;
+	unsigned int /*contextIndex*/ artdaqSupervisorContext_;
 
   public:
 	// XDAQ Context Column names

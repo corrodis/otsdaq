@@ -38,6 +38,7 @@ const std::string XDAQContextTable::XDAQ_CONTEXT_TABLE = "XDAQContextTable";
 
 //========================================================================================================================
 XDAQContextTable::XDAQContextTable(void) : TableBase(XDAQContextTable::XDAQ_CONTEXT_TABLE)
+, artdaqSupervisorContext_((unsigned int)-1)
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -103,21 +104,19 @@ std::string XDAQContextTable::getContextAddress(const std::string& contextUID,
 }  // end getContextAddress()
 
 //========================================================================================================================
-std::vector<const XDAQContextTable::XDAQContext*>
-XDAQContextTable::getARTDAQSupervisorContexts() const
+const XDAQContextTable::XDAQContext* XDAQContextTable::getTheARTDAQSupervisorContext() const
 {
-	std::vector<const XDAQContext*> retVec;
-	for(auto& i : artdaqSupervisors_)
-		retVec.push_back(&contexts_[i]);
-	return retVec;
-}
+	if(artdaqSupervisorContext_ >= contexts_.size())
+		return nullptr;
+	return &contexts_[artdaqSupervisorContext_];
+} //end getTheARTDAQSupervisorContext()
 
 //========================================================================================================================
 ConfigurationTree XDAQContextTable::getContextNode(
     const ConfigurationManager* configManager, const std::string& contextUID)
 {
 	return configManager->getNode(XDAQContextTable::XDAQ_CONTEXT_TABLE).getNode(contextUID);
-}
+} //end getContextNode()
 
 //========================================================================================================================
 ConfigurationTree XDAQContextTable::getApplicationNode(
@@ -127,7 +126,7 @@ ConfigurationTree XDAQContextTable::getApplicationNode(
 {
 	return configManager->getNode(XDAQContextTable::XDAQ_CONTEXT_TABLE).getNode(
 	    contextUID + "/" + colContext_.colLinkToApplicationTable_ + "/" + appUID);
-}
+} //end getApplicationNode()
 
 //========================================================================================================================
 ConfigurationTree XDAQContextTable::getSupervisorConfigNode(
@@ -139,7 +138,7 @@ ConfigurationTree XDAQContextTable::getSupervisorConfigNode(
 	    contextUID + "/" + XDAQContextTable::colContext_.colLinkToApplicationTable_ +
 		"/" + appUID + "/" +
 		XDAQContextTable::colApplication_.colLinkToSupervisorTable_);
-}
+} //end getSupervisorConfigNode()
 
 //========================================================================================================================
 // extractContexts
@@ -156,14 +155,7 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 	auto children = configManager->__SELF_NODE__.getChildren();
 
 	contexts_.clear();  // reset
-	                    //	artdaqContexts_.clear();
-
-	artdaqSupervisors_.clear();
-
-	artdaqBoardReaders_.clear();
-	//	artdaqEventBuilders_.clear();
-	//	artdaqDataLoggers_.clear();
-	//	artdaqDispatchers_.clear();
+	artdaqSupervisorContext_ = (unsigned int)-1; //reset
 
 	// Enforce that app IDs do not repeat!
 	//	Note: this is important because there are maps in MacroMaker and
@@ -370,66 +362,34 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 			//	__COUT__ << "Disconnected." << __E__;
 		}
 
-		// check artdaq type
-		//if(isARTDAQContext(contexts_.back().contextUID_))
+		// check for artdaq Supervisor in context
 		{
-			// artdaqContexts_.push_back(contexts_.size() - 1);
-
-			//			if(contexts_.back().applications_.size() != 1)
-			//			{
-			//				__SS__ << "ARTDAQ Context '" << contexts_.back().contextUID_
-			//				       << "' must have one Application! "
-			//				       << contexts_.back().applications_.size() << " were found. "
-			//				       << __E__;
-			//				__SS_THROW__;
-			//			}
-
 			if(!contexts_.back().status_)
 				continue;  // skip if disabled
-
-
-//			if(contexts_.back().applications_[0].class_ ==  // if board reader
-//			       "ots::ARTDAQDataManagerSupervisor" ||
-//			   contexts_.back().applications_[0].class_ ==  // if board reader
-//			       "ots::ARTDAQFEDataManagerSupervisor")
-//				artdaqBoardReaders_.push_back(contexts_.size() - 1);
 
 			for(auto& app : contexts_.back().applications_)
 			{
 				if(app.class_ ==  // if artdaq interface supervisor
-						"ots::ARTDAQSupervisor")
+						"ots::ARTDAQSupervisor" &&
+						app.status_)
 				{
 					__COUT__ << "Found " << app.class_ << " in context '" <<
 							contexts_.back().id_ << "'" << __E__;
-					artdaqSupervisors_.push_back(contexts_.size() - 1);
-					break;
-				}
-			}
 
-			//			else if(contexts_.back().applications_[0].class_ ==  // if event
-			//builder 			        "ots::EventBuilderApp")
-			//				artdaqEventBuilders_.push_back(contexts_.size() - 1);
-			//			else if(contexts_.back().applications_[0].class_ ==  // if
-			//dataLogger 			        "ots::DataLoggerApp")
-			//				artdaqDataLoggers_.push_back(contexts_.size() - 1);
-			//			else if(contexts_.back().applications_[0].class_ ==  // if
-			//dispatcher 			        "ots::DispatcherApp")
-			//				artdaqDispatchers_.push_back(contexts_.size() - 1);
-//			else
-//			{
-//				__SS__
-//				    << "ARTDAQ Context must have one and only one Application of an allowed class "
-//				       "type:\n"
-//				    //<< "\tots::ARTDAQDataManagerSupervisor (Board Reader)\n"
-//				    //<< "\tots::ARTDAQFEDataManagerSupervisor (Board Reader)\n"
-//				    << "\tots::ARTDAQSupervisor (artdaq Interace Supervisor)\n"
-//				    //				       << "\tots::EventBuilderApp (Event Builder)\n"
-//				    //				       << "\tots::DataLoggerApp (Data Logger)\n"
-//				    //				       << "\tots::DispatcherApp (Dispatcher)\n"
-//				    << "\nClass found was " << contexts_.back().applications_[0].class_
-//				    << __E__;
-//				__SS_THROW__;
-//			}
+					if(artdaqSupervisorContext_ < contexts_.size())
+					{
+						__SS__ << "Error! Only one artdaq Supervisor is allowed to be active - " <<
+								"two encountered in context '" <<
+								contexts_[artdaqSupervisorContext_].id_ << "' and '" <<
+								contexts_.back().id_ << "'..." << __E__;
+						__SS_THROW__;
+					}
+
+					artdaqSupervisorContext_ = contexts_.size() - 1;
+					//break; //continue to look for invalid configuration
+				}
+			} //end artdaq app loop
+
 		} //end artdaq context handling
 
 	} //end primary context loop
