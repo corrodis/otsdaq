@@ -126,6 +126,8 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	auto          settings_file = __ENV__("DAQINTERFACE_SETTINGS");
 	std::ofstream o(settings_file, std::ios::trunc);
 
+	setenv("DAQINTERFACE_PARTITION_NUMBER", std::to_string(partition_).c_str(), 1);
+
 	o << "log_directory: "
 	  << getSupervisorProperty("log_directory", std::string(__ENV__("OTSDAQ_LOG_DIR")))
 	  << std::endl;
