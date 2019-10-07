@@ -271,7 +271,7 @@ bool WebUsers::checkRequestAccess(cgicc::Cgicc&              cgi,
 			         << userInfo.requestType_
 			         << "' which requires sufficient security enabled. Please enable "
 			            "individual user "
-			            " logins."
+			            " logins (Note: the user admin is disallowed in an attempt to force personal accountability for edits)."
 			         << __E__;
 			return false;  // invalid cookie and present sequence, but not correct
 			               // sequence
