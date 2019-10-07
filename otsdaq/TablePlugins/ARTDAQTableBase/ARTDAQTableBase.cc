@@ -1174,9 +1174,15 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					readerInfo.emplace_back(readerUID, readerHost, readerSubsystemID);
 
 					if(doWriteFHiCL)
+					{
 						ARTDAQTableBase::outputReaderFHICL(
-						    reader.second,
-							maxFragmentSizeBytes);
+								reader.second,
+								maxFragmentSizeBytes);
+
+						ARTDAQTableBase::flattenFHICL(
+								ARTDAQTableBase::ARTDAQAppType::BoardReader,
+								reader.second.getValue());
+					}
 				}
 				else
 				{
@@ -1264,10 +1270,16 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					builderInfo.emplace_back(builderUID, builderHost, builderSubsystemID);
 
 					if(doWriteFHiCL)
+					{
 						ARTDAQTableBase::outputDataReceiverFHICL(
-						    builder.second,
-						    ARTDAQTableBase::ARTDAQAppType::EventBuilder,
-						    maxFragmentSizeBytes);
+								builder.second,
+								ARTDAQTableBase::ARTDAQAppType::EventBuilder,
+								maxFragmentSizeBytes);
+
+						ARTDAQTableBase::flattenFHICL(
+								ARTDAQTableBase::ARTDAQAppType::EventBuilder,
+								builder.second.getValue());
+					}
 				}
 				else
 				{
@@ -1355,10 +1367,16 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					loggerInfo.emplace_back(loggerUID, loggerHost, loggerSubsystemID);
 
 					if(doWriteFHiCL)
+					{
 						ARTDAQTableBase::outputDataReceiverFHICL(
-						    datalogger.second,
-						    ARTDAQTableBase::ARTDAQAppType::DataLogger,
-						    maxFragmentSizeBytes);
+								datalogger.second,
+								ARTDAQTableBase::ARTDAQAppType::DataLogger,
+								maxFragmentSizeBytes);
+
+						ARTDAQTableBase::flattenFHICL(
+								ARTDAQTableBase::ARTDAQAppType::DataLogger,
+								datalogger.second.getValue());
+					}
 				}
 				else
 				{
@@ -1435,10 +1453,16 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					dispatcherInfo.emplace_back(dispatcherUID, dispatcherHost, dispatcherSubsystemID);
 
 					if(doWriteFHiCL)
+					{
 						ARTDAQTableBase::outputDataReceiverFHICL(
-						    dispatcher.second,
-						    ARTDAQTableBase::ARTDAQAppType::Dispatcher,
-						    maxFragmentSizeBytes);
+								dispatcher.second,
+								ARTDAQTableBase::ARTDAQAppType::Dispatcher,
+								maxFragmentSizeBytes);
+
+						ARTDAQTableBase::flattenFHICL(
+								ARTDAQTableBase::ARTDAQAppType::Dispatcher,
+								dispatcher.second.getValue());
+					}
 				}
 				else
 				{

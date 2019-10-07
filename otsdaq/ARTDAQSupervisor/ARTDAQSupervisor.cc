@@ -21,7 +21,6 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(ARTDAQSupervisor)
 
-#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 #define FAKE_CONFIG_NAME "ots_config"
 #define DAQINTERFACE_PORT                    \
 	std::atoi(__ENV__("ARTDAQ_BASE_PORT")) + \
@@ -132,7 +131,7 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	  << getSupervisorProperty("log_directory", std::string(__ENV__("OTSDAQ_LOG_DIR")))
 	  << std::endl;
 	o << "record_directory: "
-	  << getSupervisorProperty("record_directory", ARTDAQ_FCL_PATH) << std::endl;
+	  << getSupervisorProperty("record_directory", ARTDAQTableBase::ARTDAQ_FCL_PATH) << std::endl;
 	o << "package_hashes_to_save: "
 	  << getSupervisorProperty("package_hashes_to_save", "[artdaq]") << std::endl;
 	// Note that productsdir_for_bash_scripts is REQUIRED!
@@ -461,7 +460,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 	int debugLevel = theSupervisorNode.getNode("DAQInterfaceDebugLevel").getValue<int>();
 	std::string setupScript = theSupervisorNode.getNode("DAQSetupScript").getValue();
 
-	std::ofstream o(ARTDAQ_FCL_PATH + "/boot.txt", std::ios::trunc);
+	std::ofstream o(ARTDAQTableBase::ARTDAQ_FCL_PATH + "/boot.txt", std::ios::trunc);
 	o << "DAQ setup script: " << setupScript << std::endl;
 	o << "debug level: " << debugLevel << std::endl;
 	o << std::endl;
@@ -522,31 +521,40 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 	__GEN_COUT__ << "Building configuration directory" << __E__;
 
 	boost::system::error_code ignored;
-	boost::filesystem::remove_all(ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME, ignored);
-	mkdir((ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME).c_str(), 0755);
+	boost::filesystem::remove_all(ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME, ignored);
+	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME).c_str(), 0755);
 
 	for(auto& reader : readerInfo)
 	{
 		symlink(
-		    (ARTDAQ_FCL_PATH + "boardReader-" + reader.label + ".fcl").c_str(),
-		    (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + reader.label + ".fcl").c_str());
+				ARTDAQTableBase::getFlatFHICLFilename(
+						ARTDAQTableBase::ARTDAQAppType::BoardReader,
+						reader.label).c_str(),
+		    (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + reader.label + ".fcl").c_str());
 	}
 	for(auto& builder : builderInfo)
 	{
 		symlink(
-		    (ARTDAQ_FCL_PATH + "builder-" + builder.label + ".fcl").c_str(),
-		    (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + builder.label + ".fcl").c_str());
+				ARTDAQTableBase::getFlatFHICLFilename(
+						ARTDAQTableBase::ARTDAQAppType::EventBuilder,
+						builder.label).c_str(),
+		    (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + builder.label + ".fcl").c_str());
 	}
 	for(auto& logger : loggerInfo)
 	{
 		symlink(
-		    (ARTDAQ_FCL_PATH + "datalogger-" + logger.label + ".fcl").c_str(),
-		    (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + logger.label + ".fcl").c_str());
+				ARTDAQTableBase::getFlatFHICLFilename(
+						ARTDAQTableBase::ARTDAQAppType::DataLogger,
+						logger.label).c_str(),
+		    (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + logger.label + ".fcl").c_str());
 	}
 	for(auto& dispatcher : dispatcherInfo)
 	{
-		symlink((ARTDAQ_FCL_PATH + "dispatcher-" + dispatcher.label + ".fcl").c_str(),
-		        (ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + dispatcher.label + ".fcl")
+		symlink(
+				ARTDAQTableBase::getFlatFHICLFilename(
+						ARTDAQTableBase::ARTDAQAppType::Dispatcher,
+						dispatcher.label).c_str(),
+		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + dispatcher.label + ".fcl")
 		            .c_str());
 	}
 
@@ -602,7 +610,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 	__GEN_COUT__ << "Status before boot: " << theArtdaqSupervisor->daqinterface_state_
 	             << __E__;
 	PyObject* pName2      = PyString_FromString("do_boot");
-	PyObject* pStateArgs1 = PyString_FromString((ARTDAQ_FCL_PATH + "/boot.txt").c_str());
+	PyObject* pStateArgs1 = PyString_FromString((ARTDAQTableBase::ARTDAQ_FCL_PATH + "/boot.txt").c_str());
 	PyObject* res2        = PyObject_CallMethodObjArgs(
         theArtdaqSupervisor->daqinterface_ptr_, pName2, pStateArgs1, NULL);
 
