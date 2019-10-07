@@ -1125,6 +1125,9 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					auto readerHost =
 					    reader.second.getNode("ExecutionHostname").getValue();
 
+					if(readerHost == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+						readerHost = "localhost";
+
 					auto readerSubsystemID     = 1;
 					auto readerSubsystemLink = reader.second.getNode("SubsystemLink");
 					if(!readerSubsystemLink.isDisconnected())
@@ -1210,6 +1213,9 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					auto builderUID = builder.second.getNode("SupervisorUID").getValue();
 					auto builderHost =
 					    builder.second.getNode("ExecutionHostname").getValue();
+
+					if(builderHost == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+						builderHost = "localhost";
 
 					auto builderSubsystemID     = 1;
 					auto builderSubsystemLink = builder.second.getNode("SubsystemLink");
@@ -1300,6 +1306,9 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					auto loggerUID =
 					    datalogger.second.getNode("SupervisorUID").getValue();
 
+					if(loggerHost == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+						loggerHost = "localhost";
+
 					auto loggerSubsystemID     = 1;
 					auto loggerSubsystemLink = datalogger.second.getNode("SubsystemLink");
 					if(!loggerSubsystemLink.isDisconnected())
@@ -1377,6 +1386,9 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					auto dispatcherHost =
 					    dispatcher.second.getNode("ExecutionHostname").getValue();
 					auto dispatcherUID = dispatcher.second.getNode("SupervisorUID").getValue();
+
+					if(dispatcherHost == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+						dispatcherHost = "localhost";
 
 					auto dispatcherSubsystemID     = 1;
 					auto dispatcherSubsystemLink = dispatcher.second.getNode("SubsystemLink");
