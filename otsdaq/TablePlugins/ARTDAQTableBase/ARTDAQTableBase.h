@@ -23,6 +23,7 @@ class ARTDAQTableBase : public TableBase
 
 	virtual ~ARTDAQTableBase(void);
 
+	static const std::string		ARTDAQ_FCL_PATH;
 	static const std::string		ARTDAQ_SUPERVISOR_TABLE;
 
 	enum class ARTDAQAppType {
@@ -77,17 +78,13 @@ class ARTDAQTableBase : public TableBase
 
 	static void 				outputReaderFHICL			(
 															const ConfigurationTree& readerNode,
-															const std::string&       selfHost,
-															size_t 				  	 maxFragmentSizeBytes);
+															size_t 				  	 maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE);
 
 
 	static void 				outputDataReceiverFHICL		(
 															const ConfigurationTree& receiverNode,
-															//unsigned int             selfRank,
-															const std::string&       selfHost,
-															//unsigned int             selfPort,
 															ARTDAQTableBase::ARTDAQAppType 	 		 appType,
-															size_t 				  	 maxFragmentSizeBytes);
+															size_t 				  	 maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE);
 
 	static void 				extractArtdaqInfo			(
 													ConfigurationTree 											artdaqSupervisorNode,

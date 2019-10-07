@@ -16,11 +16,11 @@
 
 using namespace ots;
 
-#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 
 ARTDAQTableBase::ProcessTypes ARTDAQTableBase::processTypes_ =
     ARTDAQTableBase::ProcessTypes();
 
+const std::string ARTDAQTableBase::ARTDAQ_FCL_PATH = std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/";
 const std::string ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE = "ARTDAQSupervisorTable";
 const int ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION = 0;
 
@@ -240,13 +240,9 @@ std::string ARTDAQTableBase::insertModuleType(std::ostream&     out,
 }  // end insertModuleType()
 
 //========================================================================================================================
-void ARTDAQTableBase::outputReaderFHICL(  // const ConfigurationManager*    configManager,
+void ARTDAQTableBase::outputReaderFHICL(
     const ConfigurationTree& boardReaderNode,
-    // unsigned int             selfRank,
-    const std::string& selfHost,
-    // unsigned int             selfPort,
-    // const XDAQContextTable*  contextConfig,
-    size_t maxFragmentSizeBytes)
+    size_t maxFragmentSizeBytes /* = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE */)
 {
 	/*
 	    the file will look something like this:
@@ -544,9 +540,6 @@ void ARTDAQTableBase::outputReaderFHICL(  // const ConfigurationManager*    conf
 // outputDataReceiverFHICL
 //	Note: currently selfRank and selfPort are unused by artdaq fcl
 void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverNode,
-                                              // unsigned int selfRank,
-                                              const std::string& selfHost,
-                                              // unsigned int selfPort,
                                               ARTDAQTableBase::ARTDAQAppType appType,
                                               size_t maxFragmentSizeBytes)
 {
@@ -1130,7 +1123,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 				{
 					auto readerUID = reader.second.getNode("SupervisorUID").getValue();
 					auto readerHost =
-					    reader.second.getNode("DAQInterfaceHostname").getValue();
+					    reader.second.getNode("ExecutionHostname").getValue();
 
 					auto readerSubsystemID     = 1;
 					auto readerSubsystemLink = reader.second.getNode("SubsystemLink");
@@ -1180,7 +1173,6 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputReaderFHICL(
 						    reader.second,
-						    readerHost,
 							maxFragmentSizeBytes);
 				}
 				else
@@ -1217,7 +1209,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 				{
 					auto builderUID = builder.second.getNode("SupervisorUID").getValue();
 					auto builderHost =
-					    builder.second.getNode("DAQInterfaceHostname").getValue();
+					    builder.second.getNode("ExecutionHostname").getValue();
 
 					auto builderSubsystemID     = 1;
 					auto builderSubsystemLink = builder.second.getNode("SubsystemLink");
@@ -1261,14 +1253,13 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					} //end subsystem instantiation
 
 					__COUT__ << "Found EventBuilder with UID " << builderUID
-					         << ", DAQInterface Hostname " << builderHost
-					         << ", and Subsystem " << builderSubsystemID << __E__;
+					         << ", on Hostname " << builderHost
+					         << ", in Subsystem " << builderSubsystemID << __E__;
 					builderInfo.emplace_back(builderUID, builderHost, builderSubsystemID);
 
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
 						    builder.second,
-						    builderHost,
 						    ARTDAQTableBase::ARTDAQAppType::EventBuilder,
 						    maxFragmentSizeBytes);
 				}
@@ -1305,7 +1296,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 				       .getValue<bool>())
 				{
 					auto loggerHost =
-					    datalogger.second.getNode("DAQInterfaceHostname").getValue();
+					    datalogger.second.getNode("ExecutionHostname").getValue();
 					auto loggerUID =
 					    datalogger.second.getNode("SupervisorUID").getValue();
 
@@ -1357,7 +1348,6 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
 						    datalogger.second,
-						    loggerHost,
 						    ARTDAQTableBase::ARTDAQAppType::DataLogger,
 						    maxFragmentSizeBytes);
 				}
@@ -1385,7 +1375,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 				       .getValue<bool>())
 				{
 					auto dispatcherHost =
-					    dispatcher.second.getNode("DAQInterfaceHostname").getValue();
+					    dispatcher.second.getNode("ExecutionHostname").getValue();
 					auto dispatcherUID = dispatcher.second.getNode("SupervisorUID").getValue();
 
 					auto dispatcherSubsystemID     = 1;
@@ -1435,7 +1425,6 @@ void ARTDAQTableBase::extractArtdaqInfo(
 					if(doWriteFHiCL)
 						ARTDAQTableBase::outputDataReceiverFHICL(
 						    dispatcher.second,
-						    dispatcherHost,
 						    ARTDAQTableBase::ARTDAQAppType::Dispatcher,
 						    maxFragmentSizeBytes);
 				}

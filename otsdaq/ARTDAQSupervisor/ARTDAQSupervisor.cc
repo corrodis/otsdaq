@@ -313,6 +313,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 	if(RunControlStateMachine::getIterationIndex() == 0 &&
 	   RunControlStateMachine::getSubIterationIndex() == 0)
 	{
+		last_thread_progress_update_ = time(0); //initialize timeout timer
+
 		std::pair<std::string /*group name*/, TableGroupKey> theGroup(
 		    SOAPUtilities::translate(theStateMachine_.getCurrentMessage())
 		        .getParameters()
@@ -339,11 +341,23 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 	else  // not first time
 	{
 		std::string errorMessage = theStateMachine_.getErrorMessage();
+		int 		progress = theProgressBar_.read();
 		__SUP_COUTV__(errorMessage);
-		__SUP_COUTV__(theProgressBar_.read());
+		__SUP_COUTV__(progress);
 		__SUP_COUTV__(theProgressBar_.isComplete());
 
 		// check for done and error messages
+		if(errorMessage == "" && //if no update in 60 seconds, give up
+				time(0) - last_thread_progress_update_ > 60)
+		{
+
+			__SUP_SS__ << "There has been no update from the configuration thread for " <<
+				(time(0) - last_thread_progress_update_) <<
+				" seconds, assuming something is wrong and giving up! " <<
+				"Last progress received was " << theProgressBar_.read() << __E__;
+			errorMessage = ss.str();
+		}
+
 
 		if(errorMessage != "")
 		{
@@ -364,6 +378,13 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 		if(!theProgressBar_.isComplete())
 		{
 			RunControlStateMachine::indicateSubIterationWork();
+
+			if(last_thread_progress_read_ != progress)
+			{
+				last_thread_progress_read_ = progress;
+				last_thread_progress_update_ = time(0);
+			}
+
 			sleep(1 /*seconds*/);
 		}
 		else

@@ -18,13 +18,6 @@ class ARTDAQDispatcherTable : public ARTDAQTableBase
 
 	// Methods
 	void init(ConfigurationManager* configManager);
-	void outputFHICL(ConfigurationManager*    configManager,
-	                 const ConfigurationTree& builderNode,
-	                 unsigned int             selfRank,
-	                 const std::string&       selfHost,
-	                 unsigned int             selfPort,
-	                 const XDAQContextTable*  contextConfig,
-	                 size_t                   maxFragmentSizeBytes);
 };
 }  // namespace ots
 #endif
