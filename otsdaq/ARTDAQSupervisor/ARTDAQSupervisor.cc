@@ -313,6 +313,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 	if(RunControlStateMachine::getIterationIndex() == 0 &&
 	   RunControlStateMachine::getSubIterationIndex() == 0)
 	{
+		thread_progress_bar_.resetProgressBar(0);
 		last_thread_progress_update_ = time(0); //initialize timeout timer
 
 		std::pair<std::string /*group name*/, TableGroupKey> theGroup(
@@ -341,10 +342,10 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 	else  // not first time
 	{
 		std::string errorMessage = theStateMachine_.getErrorMessage();
-		int 		progress = theProgressBar_.read();
+		int 		progress = thread_progress_bar_.read();
 		__SUP_COUTV__(errorMessage);
 		__SUP_COUTV__(progress);
-		__SUP_COUTV__(theProgressBar_.isComplete());
+		__SUP_COUTV__(thread_progress_bar_.isComplete());
 
 		// check for done and error messages
 		if(errorMessage == "" && //if no update in 60 seconds, give up
@@ -354,7 +355,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 			__SUP_SS__ << "There has been no update from the configuration thread for " <<
 				(time(0) - last_thread_progress_update_) <<
 				" seconds, assuming something is wrong and giving up! " <<
-				"Last progress received was " << theProgressBar_.read() << __E__;
+				"Last progress received was " << progress << __E__;
 			errorMessage = ss.str();
 		}
 
@@ -375,7 +376,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 			);
 		}
 
-		if(!theProgressBar_.isComplete())
+		if(!thread_progress_bar_.isComplete())
 		{
 			RunControlStateMachine::indicateSubIterationWork();
 
@@ -397,7 +398,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 //========================================================================================================================
 void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) try
 {
-	ProgressBar& progressBar = theArtdaqSupervisor->theProgressBar_;
+	ProgressBar& progressBar = theArtdaqSupervisor->thread_progress_bar_;
 
 	const std::string& uid =
 	    theArtdaqSupervisor->theConfigurationManager_

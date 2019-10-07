@@ -87,7 +87,7 @@ class ProgressBar
 // void resetProgressBar(int id)
 //
 // then the pre-compiler directive:
-#define resetProgressBar(x) reset(__FILE__, S_(__LINE__), x)
+#define resetProgressBar(x) reset(__FILE__, std::to_string(__LINE__), x)
 	// will call this reset:
 	void reset(std::string file, std::string lineNumber, int id = 0);
 	//********************************************************************//

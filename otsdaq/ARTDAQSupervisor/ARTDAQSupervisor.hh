@@ -55,6 +55,8 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	std::string 					daqinterface_state_;
 	std::unique_ptr<std::thread> 	runner_thread_;
 	std::atomic<bool> 				runner_running_;
+
+	ProgressBar        				thread_progress_bar_;
 	int								last_thread_progress_read_;
 	time_t							last_thread_progress_update_;
 
