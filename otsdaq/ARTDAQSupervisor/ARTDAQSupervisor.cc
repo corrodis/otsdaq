@@ -314,6 +314,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 	if(RunControlStateMachine::getIterationIndex() == 0 &&
 	   RunControlStateMachine::getSubIterationIndex() == 0)
 	{
+		thread_error_message_ = "";
 		thread_progress_bar_.resetProgressBar(0);
 		last_thread_progress_update_ = time(0); //initialize timeout timer
 
@@ -342,7 +343,11 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 	}
 	else  // not first time
 	{
-		std::string errorMessage = theStateMachine_.getErrorMessage();
+		std::string errorMessage;
+		{
+			std::lock_guard<std::mutex> lock(thread_mutex_);  // lock out for remainder of scope
+			errorMessage = thread_error_message_;//theStateMachine_.getErrorMessage();
+		}
 		int 		progress = thread_progress_bar_.read();
 		__SUP_COUTV__(errorMessage);
 		__SUP_COUTV__(progress);
@@ -661,14 +666,16 @@ catch(const std::runtime_error& e)
 {
 	__SS__ << "Error was caught while configuring: " << e.what() << __E__;
 	__COUT_ERR__ << "\n" << ss.str();
-	theArtdaqSupervisor->theStateMachine_.setErrorMessage(ss.str());
+	std::lock_guard<std::mutex> lock(theArtdaqSupervisor->thread_mutex_);  // lock out for remainder of scope
+	theArtdaqSupervisor->thread_error_message_ = ss.str();
 }
 catch(...)
 {
 	__SS__ << "Unknown error was caught while configuring. Please checked the logs."
 	       << __E__;
 	__COUT_ERR__ << "\n" << ss.str();
-	theArtdaqSupervisor->theStateMachine_.setErrorMessage(ss.str());
+	std::lock_guard<std::mutex> lock(theArtdaqSupervisor->thread_mutex_);  // lock out for remainder of scope
+	theArtdaqSupervisor->thread_error_message_ = ss.str();
 }  // end configuringThread() error handling
 
 //========================================================================================================================

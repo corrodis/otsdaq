@@ -56,7 +56,10 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	std::unique_ptr<std::thread> 	runner_thread_;
 	std::atomic<bool> 				runner_running_;
 
+
+	std::mutex        				thread_mutex_;
 	ProgressBar        				thread_progress_bar_;
+	std::string						thread_error_message_;
 	int								last_thread_progress_read_;
 	time_t							last_thread_progress_update_;
 
