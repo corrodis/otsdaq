@@ -411,7 +411,7 @@ void ARTDAQTableBase::outputReaderFHICL(
 	}
 	catch(const std::runtime_error&)
 	{
-		__COUT__ << "Ignoring error, assume this a valid UID node." << __E__;
+		//__COUT__ << "Ignoring error, assume this a valid UID node." << __E__;
 		// error is expected here for UIDs.. so just ignore
 		// this check is valuable if source node is a unique-Link node, rather than UID
 	}
