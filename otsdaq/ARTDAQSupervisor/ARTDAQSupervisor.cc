@@ -354,8 +354,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 		__SUP_COUTV__(thread_progress_bar_.isComplete());
 
 		// check for done and error messages
-		if(errorMessage == "" && //if no update in 60 seconds, give up
-				time(0) - last_thread_progress_update_ > 60)
+		if(errorMessage == "" && //if no update in 600 seconds, give up
+				time(0) - last_thread_progress_update_ > 600)
 		{
 
 			__SUP_SS__ << "There has been no update from the configuration thread for " <<
@@ -651,11 +651,12 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		__GEN_SS_THROW__;
 	}
 	theArtdaqSupervisor->getDAQState_();
-	if(theArtdaqSupervisor->daqinterface_state_ != "ready")
-	{
-		__GEN_SS__ << "DAQInterface config transition failed!" << __E__;
-		__GEN_SS_THROW__;
-	}
+	// if(theArtdaqSupervisor->daqinterface_state_ != "ready")
+	// {
+	// 	__GEN_SS__ << "DAQInterface config transition failed!" << __E__
+	// 	           << "Supervisor state: "<< theArtdaqSupervisor->daqinterface_state_ << __E__;
+	// 	__GEN_SS_THROW__;
+	// }
 	__GEN_COUT__ << "Status after config: " << theArtdaqSupervisor->daqinterface_state_
 	             << __E__;
 	progressBar.complete();
