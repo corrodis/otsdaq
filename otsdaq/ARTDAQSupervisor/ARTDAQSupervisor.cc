@@ -904,6 +904,11 @@ void ots::ARTDAQSupervisor::getDAQState_()
 {
 	//__SUP_COUT__ << "Getting DAQInterface state" << __E__;
 
+	if(daqinterface_ptr_ == nullptr) {
+		daqinterface_state_ = "NOT RUNNING";
+		return;
+	}
+
 	PyObject* pName = PyString_FromString("state");
 	PyObject* pArg  = PyString_FromString("DAQInterface");
 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pArg, NULL);
