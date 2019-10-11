@@ -905,7 +905,7 @@ void ots::ARTDAQSupervisor::getDAQState_()
 	//__SUP_COUT__ << "Getting DAQInterface state" << __E__;
 
 	if(daqinterface_ptr_ == nullptr) {
-		daqinterface_state_ = "NOT RUNNING";
+		daqinterface_state_ = "";
 		return;
 	}
 
