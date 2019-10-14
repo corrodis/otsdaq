@@ -131,7 +131,7 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	  << getSupervisorProperty("log_directory", std::string(__ENV__("OTSDAQ_LOG_DIR")))
 	  << std::endl;
 	o << "record_directory: "
-	  << getSupervisorProperty("record_directory", ARTDAQTableBase::ARTDAQ_FCL_PATH) << std::endl;
+	  << getSupervisorProperty("record_directory", ARTDAQTableBase::ARTDAQ_FCL_PATH + "/run_records/") << std::endl;
 	o << "package_hashes_to_save: "
 	  << getSupervisorProperty("package_hashes_to_save", "[artdaq]") << std::endl;
 	// Note that productsdir_for_bash_scripts is REQUIRED!
