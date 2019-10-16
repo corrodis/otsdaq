@@ -73,11 +73,12 @@ class GatewaySupervisor : public xdaq::Application,
 	void 						stateMachineIterationBreakpoint	(xgi::Input* in, xgi::Output* out);
 
 	static void 				handleAddDesktopIconRequest		(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
+	static void 				handleGetApplicationIdRequest	(AllSupervisorInfo* applicationInfo, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
 
-	xoap::MessageReference stateMachineXoapHandler(xoap::MessageReference msg);
-	xoap::MessageReference stateMachineResultXoapHandler(xoap::MessageReference msg);
+	xoap::MessageReference 		stateMachineXoapHandler			(xoap::MessageReference msg);
+	xoap::MessageReference 		stateMachineResultXoapHandler	(xoap::MessageReference msg);
 
-	bool stateMachineThread(toolbox::task::WorkLoop* workLoop);
+	bool 						stateMachineThread				(toolbox::task::WorkLoop* workLoop);
 
 	// Status requests handlers
 	void statusRequest(xgi::Input* in, xgi::Output* out);

@@ -72,6 +72,9 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
 
 	INIT_MF("OtsConfigurationWizard");
 
+	// get all supervisor info, and wiz mode, macroMaker mode, or not
+	allSupervisorInfo_.init(getApplicationContext());
+
 	// attempt to make directory structure (just in case)
 	mkdir((std::string(__ENV__("SERVICE_DATA_PATH"))).c_str(), 0755);
 	mkdir((std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData").c_str(), 0755);
@@ -580,6 +583,10 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 		else if(requestType == "addDesktopIcon")
 		{
 			GatewaySupervisor::handleAddDesktopIconRequest("admin", cgiIn, xmlOut);
+		}
+		else if(requestType == "getAppId")
+		{
+			GatewaySupervisor::handleGetApplicationIdRequest(&allSupervisorInfo_, cgiIn, xmlOut);
 		}
 		else
 		{

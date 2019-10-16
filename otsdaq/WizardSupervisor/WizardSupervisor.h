@@ -20,11 +20,11 @@
 #include <map>
 #include <string>
 
-#include "otsdaq/CodeEditor/CodeEditor.h"
 #include "otsdaq/SupervisorInfo/AllSupervisorInfo.h"
 
 namespace ots
 {
+// clang-format off
 class HttpXmlDocument;
 
 // WizardSupervisor
@@ -44,16 +44,16 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 	WizardSupervisor(xdaq::ApplicationStub*);
 	virtual ~WizardSupervisor(void);
 
-	void init(void);
-	void destroy(void);
+	void 				init(void);
+	void 				destroy(void);
 
-	void        generateURL(void);
-	static void printURL(WizardSupervisor* ptr, std::string securityCode);
+	void        		generateURL(void);
+	static void 		printURL(WizardSupervisor* ptr, std::string securityCode);
 
-	void Default(xgi::Input* in, xgi::Output* out);
-	void verification(xgi::Input* in, xgi::Output* out);
-	void request(xgi::Input* in, xgi::Output* out);
-	void requestIcons(xgi::Input* in, xgi::Output* out);
+	void 				Default(xgi::Input* in, xgi::Output* out);
+	void 				verification(xgi::Input* in, xgi::Output* out);
+	void 				request(xgi::Input* in, xgi::Output* out);
+	void 				requestIcons(xgi::Input* in, xgi::Output* out);
 
 	void        editSecurity(xgi::Input* in, xgi::Output* out);
 	void        UserSettings(xgi::Input* in, xgi::Output* out);
@@ -78,6 +78,7 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 
 	std::string supervisorClass_;
 	std::string supervisorClassNoNamespace_;
+	AllSupervisorInfo	allSupervisorInfo_;
 
 	enum
 	{
@@ -87,7 +88,7 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 		USER_DATA_EXPIRATION_TIME   = 60 * 20,  // 20 minutes
 	};
 };
-
+// clang-format on
 }  // namespace ots
 
 #endif

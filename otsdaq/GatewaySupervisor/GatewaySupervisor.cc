@@ -2861,17 +2861,6 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
 
-	// std::string cookieCode = CgiDataUtilities::postData(cgiIn, "CookieCode");
-	// uint64_t    uid;
-
-	// if(!theWebUsers_.cookieCodeIsActiveForRequest(
-	//       cookieCode, 0 /*userPermissions*/, &uid, "0" /*dummy ip*/, false
-	//       /*refresh*/))
-	//{
-	//	*out << cookieCode;
-	//	return;
-	//}
-
 	if(!theWebUsers_.xmlRequestOnGateway(cgiIn, out, &xmlOut, userInfo))
 		return;  // access failed
 
@@ -2880,8 +2869,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	// setSettings
 	// accountSettings
 	// getAliasList
-	// getFecList
 	// getAppStatus
+	// getAppId
 	// getContextMemberNames
 	// getSystemMessages
 	// setUserWithLock
@@ -2985,7 +2974,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		{
 			std::string username = theWebUsers_.getUsersUsername(userInfo.uid_);
 			std::string fsmName  = CgiDataUtilities::getData(cgiIn, "fsmName");
-			__COUT__ << "fsmName = " << fsmName << __E__;
+			__SUP_COUTV__(fsmName);
 
 			std::string stateMachineAliasFilter = "*";  // default to all
 
@@ -3188,7 +3177,6 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				                            appInfo.getContextName());  // get context
 			}
 		}
-
 		else if(requestType == "getContextMemberNames")
 		{
 			const XDAQContextTable* contextTable =
@@ -4045,6 +4033,38 @@ void GatewaySupervisor::saveGroupNameAndKey(
 	groupFile << outss.str().c_str();
 	groupFile.close();
 }  // end saveGroupNameAndKey()
+
+
+
+//========================================================================================================================
+void GatewaySupervisor::handleGetApplicationIdRequest(AllSupervisorInfo* allSupervisorInfo,
+                                                    cgicc::Cgicc&      cgiIn,
+                                                    HttpXmlDocument&   xmlOut)
+{
+	std::string classNeedle  = CgiDataUtilities::getData(cgiIn, "classNeedle");
+	__COUTV__(classNeedle);
+
+	for(auto it : allSupervisorInfo->getAllSupervisorInfo())
+	{
+		// bool pass = true;
+
+		auto appInfo = it.second;
+
+		if(classNeedle != appInfo.getClass()) continue; //skip non-matches
+
+		xmlOut.addTextElementToData("name",
+				appInfo.getName());  // get application name
+		xmlOut.addTextElementToData(
+				"id", std::to_string(appInfo.getId()));  // get application id
+		xmlOut.addTextElementToData("class",
+				appInfo.getClass());  // get application class
+		xmlOut.addTextElementToData("url",
+				appInfo.getURL());  // get application url
+		xmlOut.addTextElementToData("context",
+				appInfo.getContextName());  // get context
+	}
+
+} //end handleGetApplicationIdRequest()
 
 //========================================================================================================================
 void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author,
