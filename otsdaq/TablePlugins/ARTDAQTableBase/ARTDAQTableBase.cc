@@ -74,8 +74,8 @@ const std::string& ARTDAQTableBase::getTypeString(ARTDAQTableBase::ARTDAQAppType
 std::string ARTDAQTableBase::getFHICLFilename(ARTDAQTableBase::ARTDAQAppType type,
                                               const std::string&             name)
 {
-	__COUT__ << "Type: " << ARTDAQTableBase::getTypeString(type) << " Name: " << name
-	         << __E__;
+	//__COUT__ << "Type: " << ARTDAQTableBase::getTypeString(type) << " Name: " << name
+	         //<< __E__;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQTableBase::getTypeString(type) + "-";
 	std::string uid      = name;
 	for(unsigned int i = 0; i < uid.size(); ++i)
@@ -85,7 +85,7 @@ std::string ARTDAQTableBase::getFHICLFilename(ARTDAQTableBase::ARTDAQAppType typ
 
 	filename += ".fcl";
 
-	__COUT__ << "fcl: " << filename << __E__;
+	//__COUT__ << "fcl: " << filename << __E__;
 
 	return filename;
 }  // end getFHICLFilename()
@@ -94,8 +94,8 @@ std::string ARTDAQTableBase::getFHICLFilename(ARTDAQTableBase::ARTDAQAppType typ
 std::string ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType type,
                                                   const std::string&             name)
 {
-	__COUT__ << "Type: " << ARTDAQTableBase::getTypeString(type) << " Name: " << name
-	         << __E__;
+	//__COUT__ << "Type: " << ARTDAQTableBase::getTypeString(type) << " Name: " << name
+	//         << __E__;
 	std::string filename = ARTDAQ_FCL_PATH + ARTDAQTableBase::getTypeString(type) + "-";
 	std::string uid      = name;
 	for(unsigned int i = 0; i < uid.size(); ++i)
@@ -105,7 +105,7 @@ std::string ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType
 
 	filename += "_flattened.fcl";
 
-	__COUT__ << "fcl: " << filename << __E__;
+	//__COUT__ << "fcl: " << filename << __E__;
 
 	return filename;
 }  // end getFlatFHICLFilename()
@@ -586,14 +586,14 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 	}
 	catch(const std::runtime_error&)
 	{
-		__COUT__ << "Ignoring error, assume this a valid UID node." << __E__;
+		//__COUT__ << "Ignoring error, assume this a valid UID node." << __E__;
 		// error is expected here for UIDs.. so just ignore
 		// this check is valuable if source node is a unique-Link node, rather than UID
 	}
 
 	//--------------------------------------
 	// handle preamble parameters
-	__COUT__ << "Inserting preamble parameters..." << __E__;
+	//_COUT__ << "Inserting preamble parameters..." << __E__;
 	ARTDAQTableBase::insertParameters(out,
 	                                  tabStr,
 	                                  commentStr,
@@ -604,7 +604,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 	//--------------------------------------
 	// handle daq
-	__COUT__ << "Generating daq block..." << __E__;
+	//__COUT__ << "Generating daq block..." << __E__;
 	auto daq = receiverNode.getNode("daqLink");
 	if(!daq.isDisconnected())
 	{
@@ -637,7 +637,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 		//--------------------------------------
 		// handle ALL daq parameters
-		__COUT__ << "Inserting DAQ Parameters..." << __E__;
+		//__COUT__ << "Inserting DAQ Parameters..." << __E__;
 		ARTDAQTableBase::insertParameters(out,
 		                                  tabStr,
 		                                  commentStr,
@@ -646,14 +646,14 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 		                                  false /*onlyInsertAtTableParameters*/,
 		                                  true /*includeAtTableParameters*/);
 
-		__COUT__ << "Adding sources placeholder" << __E__;
+		//__COUT__ << "Adding sources placeholder" << __E__;
 		OUT << "sources: {\n"
 		    << "}\n\n";  // end sources
 
 		POPTAB;
 		OUT << "}\n\n";  // end event builder
 
-		__COUT__ << "Filling in metrics" << __E__;
+		//__COUT__ << "Filling in metrics" << __E__;
 		OUT << "metrics: {\n";
 
 		PUSHTAB;
@@ -704,7 +704,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 	//--------------------------------------
 	// handle art
-	__COUT__ << "Filling art block..." << __E__;
+	//__COUT__ << "Filling art block..." << __E__;
 	auto art = receiverNode.getNode("artLink");
 	if(!art.isDisconnected())
 	{
@@ -714,7 +714,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 		//--------------------------------------
 		// handle services
-		__COUT__ << "Filling art.services" << __E__;
+		//__COUT__ << "Filling art.services" << __E__;
 		auto services = art.getNode("servicesLink");
 		if(!services.isDisconnected())
 		{
@@ -782,7 +782,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 		//--------------------------------------
 		// handle outputs
-		__COUT__ << "Filling art.outputs" << __E__;
+		//__COUT__ << "Filling art.outputs" << __E__;
 		auto outputs = art.getNode("outputsLink");
 		if(!outputs.isDisconnected())
 		{
@@ -838,7 +838,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 		//--------------------------------------
 		// handle physics
-		__COUT__ << "Filling art.physics" << __E__;
+		//__COUT__ << "Filling art.physics" << __E__;
 		auto physics = art.getNode("physicsLink");
 		if(!physics.isDisconnected())
 		{
@@ -1045,7 +1045,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 		//--------------------------------------
 		// handle source
-		__COUT__ << "Filling art.source" << __E__;
+		//__COUT__ << "Filling art.source" << __E__;
 		auto source = art.getNode("sourceLink");
 		if(!source.isDisconnected())
 		{
@@ -1068,7 +1068,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 		//--------------------------------------
 		// handle process_name
-		__COUT__ << "Writing art.process_name" << __E__;
+		//__COUT__ << "Writing art.process_name" << __E__;
 		OUT << "process_name: " << art.getNode("ProcessName") << "\n";
 
 		POPTAB;
@@ -1077,7 +1077,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 	//--------------------------------------
 	// handle ALL add-on parameters
-	__COUT__ << "Inserting add-on parameters" << __E__;
+	//__COUT__ << "Inserting add-on parameters" << __E__;
 	ARTDAQTableBase::insertParameters(out,
 	                                  tabStr,
 	                                  commentStr,
@@ -1086,7 +1086,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 	                                  false /*onlyInsertAtTableParameters*/,
 	                                  true /*includeAtTableParameters*/);
 
-	__COUT__ << "outputDataReceiverFHICL DONE" << __E__;
+	//__COUT__ << "outputDataReceiverFHICL DONE" << __E__;
 	out.close();
 }  // end outputDataReceiverFHICL()
 

@@ -1728,6 +1728,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 		    prioritySet;
 
 		unsigned int highestPriority = 0;
+		unsigned int priorityPenalty;
 		for(unsigned int i = 0; i < fieldCandidateList.size(); ++i)
 		{
 			//				__COUT__ << "Option " << fieldCandidateList[i].relativePath_
@@ -1736,31 +1737,39 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 			//						fieldCandidateList[i].columnInfo_->getDataType() <<
 			//__E__;
 
+			priorityPenalty = std::count(
+					fieldCandidateList[i].relativePath_.begin(),
+					fieldCandidateList[i].relativePath_.end(), '/') * 20; //penalize if not top level
+
 			if(fieldCandidateList[i].columnInfo_->isBoolType())
+			{
 				prioritySet.emplace(
-				    std::make_pair(0 /*fieldPriority*/, i /*fieldIndex*/));
+				    std::make_pair(0 + priorityPenalty /*fieldPriority*/, i /*fieldIndex*/));
+				if(highestPriority < 0 + priorityPenalty)
+					highestPriority = 0 + priorityPenalty;
+			}
 			else if(fieldCandidateList[i].columnInfo_->isGroupID())
 			{
 				prioritySet.emplace(
-				    std::make_pair(1 /*fieldPriority*/, i /*fieldIndex*/));
-				if(highestPriority < 1)
-					highestPriority = 1;
+				    std::make_pair(1 + priorityPenalty /*fieldPriority*/, i /*fieldIndex*/));
+				if(highestPriority < 1 + priorityPenalty)
+					highestPriority = 1 + priorityPenalty;
 			}
 			else if(fieldCandidateList[i].columnInfo_->getType() ==
 			        TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
 			{
 				prioritySet.emplace(
-				    std::make_pair(3 /*fieldPriority*/, i /*fieldIndex*/));
-				if(highestPriority < 3)
-					highestPriority = 3;
+				    std::make_pair(3 + priorityPenalty /*fieldPriority*/, i /*fieldIndex*/));
+				if(highestPriority < 3 + priorityPenalty)
+					highestPriority = 3 + priorityPenalty;
 			}
 			else if(fieldCandidateList[i].columnInfo_->getType() ==
 			        TableViewColumnInfo::TYPE_DATA)
 			{
 				prioritySet.emplace(
-				    std::make_pair(10 /*fieldPriority*/, i /*fieldIndex*/));
-				if(highestPriority < 10)
-					highestPriority = 10;
+				    std::make_pair(10 + priorityPenalty /*fieldPriority*/, i /*fieldIndex*/));
+				if(highestPriority < 10 + priorityPenalty)
+					highestPriority = 10 + priorityPenalty;
 			}
 			else  // skip other fields and mark for erasing
 			{

@@ -2745,12 +2745,12 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string& tableNa
 //==============================================================================
 bool ConfigurationManager::isOwnerFirstAppInContext()
 {
-	__COUT__ << "Checking if owner is first App in Context." << __E__;
+	//__COUT__ << "Checking if owner is first App in Context." << __E__;
 	if(ownerContextUID_ == "" || ownerAppUID_ == "")
 		return true;  // default to 'yes'
 
-	__COUTV__(ownerContextUID_);
-	__COUTV__(ownerAppUID_);
+	//__COUTV__(ownerContextUID_);
+	//__COUTV__(ownerAppUID_);
 
 	auto contextChildren =
 	    getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME + "/" + ownerContextUID_)
@@ -2759,7 +2759,7 @@ bool ConfigurationManager::isOwnerFirstAppInContext()
 	bool isFirstAppInContext =
 	    contextChildren.size() == 0 || contextChildren[0] == ownerAppUID_;
 
-	__COUTV__(isFirstAppInContext);
+	//__COUTV__(isFirstAppInContext);
 
 	return isFirstAppInContext;
 }  // end isOwnerFirstAppInContext()
