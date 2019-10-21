@@ -215,6 +215,7 @@ class ConfigurationTree
 	const std::string&       					getDisconnectedLinkID		(void) const;
 	const std::string&       					getChildLinkIndex			(void) const;
 	std::vector<std::string> 					getFixedChoices				(void) const;
+	std::set<std::string> 						getSetOfGroupIDs			(void) const;
 
   public:
 	// boolean info

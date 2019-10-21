@@ -567,6 +567,25 @@ const time_t& ConfigurationTree::getTableCreationTime(void) const
 	return tableView_->getCreationTime();
 }  // end getTableCreationTime()
 
+
+//==============================================================================
+// getSetOfGroupIDs
+//	returns set of group IDs if groupID value node
+std::set<std::string> ConfigurationTree::getSetOfGroupIDs(void) const
+{
+	if(!isGroupIDNode())
+	{
+		__SS__ << "Can not get set of group IDs of node with value type of '"
+				<< getNodeType() << ".' Node must be a GroupID node." << __E__;
+
+		ss << nodeDump() << __E__;
+		__SS_ONLY_THROW__;
+	}
+
+	return tableView_->getSetOfGroupIDs(col_,row_);
+
+} //end getSetOfGroupIDs()
+
 //==============================================================================
 // getFixedChoices
 //	returns vector of default + data choices
@@ -1825,12 +1844,15 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(
 // getUniqueValuesForField
 //
 //	returns sorted unique values for the specified records and field
+//	Note: treat GroupIDs special, parse the | out of the value to get the distinct values.
 //
 std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForField(
     const std::vector<std::string /*relative-path*/>& recordList,
     const std::string&                                fieldName,
     std::string* fieldGroupIDChildLinkIndex /* =0 */) const
 {
+	if(fieldGroupIDChildLinkIndex) *fieldGroupIDChildLinkIndex = "";
+
 	// enforce that starting point is a table node
 	if(!isTableNode())
 	{
@@ -1860,20 +1882,27 @@ std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForFiel
 		// that.  use TRUE in getValueAsString for proper behavior
 
 		ConfigurationTree node = getNode(recordList[i]).getNode(fieldName);
-		uniqueValues.emplace(node.getValueAsString(true));
 
-		if(i == 0 && fieldGroupIDChildLinkIndex)
+		if(node.isGroupIDNode())
 		{
+			//handle groupID node special
+
+			__COUT__ << "GroupID field " << fieldName << __E__;
+
 			// first time, get field's GroupID Child Link Index, if applicable
-			if(node.isGroupIDNode())
-			{
-				__COUT__ << "GroupID field " << fieldName << __E__;
+			if(i == 0 && fieldGroupIDChildLinkIndex)
 				*fieldGroupIDChildLinkIndex = node.getColumnInfo().getChildLinkIndex();
-			}
-			else
-				*fieldGroupIDChildLinkIndex = "";
+
+			//return set of groupIDs individually
+
+			std::set<std::string> setOfGroupIDs = node.getSetOfGroupIDs();
+			for(auto& groupID:setOfGroupIDs)
+				uniqueValues.emplace(groupID);
 		}
-	}
+		else //normal record, return value as string
+			uniqueValues.emplace(node.getValueAsString(true));
+
+	} //end record loop
 
 	return uniqueValues;
 }  // end getUniqueValuesForField()
@@ -2132,8 +2161,11 @@ ConfigurationTree::getChildrenByPriority(
 // getChildren
 //	returns them in order encountered in the table
 //	if filterMap criteria, then rejects any that do not meet all criteria
+//		filterMap-value can be comma-separated for OR of multiple values
 //
-//	value can be comma-separated for OR of multiple values
+//	Note: filterMap is handled special for groupID fields
+//		matches are considered after parsing | for set of groupIDs
+//
 std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationTree::getChildren(
     std::map<std::string /*relative-path*/, std::string /*value*/> filterMap,
     bool                                                           byPriority,
@@ -2162,6 +2194,8 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationTree::getChi
 			{
 				std::string filterPath = childName + "/" + filterPair.first;
 				__COUTV__(filterPath);
+
+				ConfigurationTree childNode = this->getNode(filterPath);
 				try
 				{
 					// extract field value list
@@ -2185,19 +2219,58 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationTree::getChi
 						// is requested give that; if linkID is requested give that.  use
 						// TRUE in getValueAsString for proper behavior
 
-						__COUT__
-						    << "\t\tCheck: " << filterPair.first << " == " << fieldValue
-						    << " => " << StringMacros::decodeURIComponent(fieldValue)
-						    << " ??? " << this->getNode(filterPath).getValueAsString(true)
-						    << __E__;
 
-						if(StringMacros::wildCardMatch(
-						       StringMacros::decodeURIComponent(fieldValue),
-						       this->getNode(filterPath).getValueAsString(true)))
+						if(childNode.isGroupIDNode())
 						{
-							// found a match for the field/value pair
-							skip = false;
-							break;
+							//handle groupID node special, check against set of groupIDs
+
+							bool groupIdFound = false;
+							std::set<std::string> setOfGroupIDs =
+									childNode.getSetOfGroupIDs();
+
+							for(auto& groupID:setOfGroupIDs)
+							{
+								__COUT__
+									<< "\t\tGroupID Check: " << filterPair.first << " == " << fieldValue
+									<< " => " << StringMacros::decodeURIComponent(fieldValue)
+									<< " ??? " << groupID
+									<< __E__;
+
+								if(StringMacros::wildCardMatch(
+										StringMacros::decodeURIComponent(fieldValue),
+										groupID))
+								{
+									// found a match for the field/groupId pair
+									__COUT__ << "Found match" << __E__;
+									groupIdFound = true;
+									break;
+								}
+							} //end groupID search
+
+							if(groupIdFound)
+							{
+								// found a match for the field/groupId-set pair
+								__COUT__ << "Found break match" << __E__;
+								skip = false;
+								break;
+							}
+						}
+						else //normal child node, check against value
+						{
+							__COUT__
+								<< "\t\tCheck: " << filterPair.first << " == " << fieldValue
+								<< " => " << StringMacros::decodeURIComponent(fieldValue)
+								<< " ??? " << childNode.getValueAsString(true)
+								<< __E__;
+
+							if(StringMacros::wildCardMatch(
+									StringMacros::decodeURIComponent(fieldValue),
+									childNode.getValueAsString(true)))
+							{
+								// found a match for the field/value pair
+								skip = false;
+								break;
+							}
 						}
 					}
 				}
