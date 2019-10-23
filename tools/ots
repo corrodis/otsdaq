@@ -566,7 +566,7 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 	fi
 else
 	ARTDAQ_DATABASE_FILESYSTEM_PATH=${USER_DATA}/ServiceData/artdaq_database_services
-	mkdir $ARTDAQ_DATABASE_FILESYSTEM_PATH
+	mkdir $ARTDAQ_DATABASE_FILESYSTEM_PATH &>/dev/null 2>&1 #hide output
 fi	
 		
 
