@@ -2,6 +2,7 @@
 #define _ots_ARTDAQTableBase_h_
 
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
 #include "otsdaq/TableCore/TableBase.h"
 
 // helpers
@@ -78,21 +79,29 @@ class ARTDAQTableBase : public TableBase
 
 	static void 				outputReaderFHICL			(
 															const ConfigurationTree& readerNode,
-															size_t 				  	 maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE);
+															size_t maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE);
 
 
 	static void 				outputDataReceiverFHICL		(
-															const ConfigurationTree& receiverNode,
-															ARTDAQTableBase::ARTDAQAppType 	 		 appType,
-															size_t 				  	 maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE);
+															const ConfigurationTree& 		receiverNode,
+															ARTDAQTableBase::ARTDAQAppType 	appType,
+															size_t 							maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE);
 
 	static void 				extractArtdaqInfo			(
-													ConfigurationTree 											artdaqSupervisorNode,
-													std::map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>& 					subsystems,
-													std::map<ARTDAQTableBase::ARTDAQAppType, std::list<ARTDAQTableBase::ProcessInfo>>& 	processes,
-													bool														doWriteFHiCL = false,
-													size_t 														maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE,
-													ProgressBar* 												progressBar = 0);
+															ConfigurationTree 				artdaqSupervisorNode,
+															std::map<int /*subsystem ID*/, ARTDAQTableBase::SubsystemInfo>& subsystems,
+															std::map<ARTDAQTableBase::ARTDAQAppType, std::list<ARTDAQTableBase::ProcessInfo>>& 	processes,
+															bool							doWriteFHiCL = false,
+															size_t 							maxFragmentSizeBytes = ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE,
+															ProgressBar* 					progressBar = 0);
+	static void					setAndActivateArtdaqSystem	(
+															ConfigurationManagerRW* 			cfgMgr,
+															const std::map<std::string /*type*/,
+																std::map<std::string /*record*/,
+																	std::vector<std::string /*property*/>>>& 			nodeTypeToObjectMap,
+															const std::map<std::string /*subsystemName*/,
+																			std::string /*destinationSubsystemName*/>& 	subsystemObjectMap
+															);
 
   private:
 	static int					getSubsytemId				(ConfigurationTree subsystemNode);

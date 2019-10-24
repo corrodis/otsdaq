@@ -1477,6 +1477,25 @@ void ARTDAQTableBase::extractArtdaqInfo(
 }  // end extractArtdaqInfo()
 
 //==============================================================================
+//	setAndActivateArtdaqSystem
+//
+//		static function to modify the active configuration based on
+//	node object and subsystem object.
+//
+void ARTDAQTableBase::setAndActivateArtdaqSystem(
+		ConfigurationManagerRW* 			cfgMgr,
+		const std::map<std::string /*type*/,
+			std::map<std::string /*record*/,
+				std::vector<std::string /*property*/>>>& 			nodeTypeToObjectMap,
+		const std::map<std::string /*subsystemName*/,
+						std::string /*destinationSubsystemName*/>& 	subsystemObjectMap)
+{
+
+	__COUT__ << "setAndActivateArtdaqSystem()" << __E__;
+
+} //end setAndActivateArtdaqSystem()
+
+//==============================================================================
 int ARTDAQTableBase::getSubsytemId(ConfigurationTree subsystemNode)
 {
 	//using row forces a unique ID from 0 to rows-1
