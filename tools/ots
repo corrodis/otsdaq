@@ -804,10 +804,28 @@ launchOTSMacromaker() {
 	if [ $RELAUNCHCHECK == 1 ]; then
 	
 		#test for relaunch
-		sleep 4
-		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
+		# 4 times quietly, then get louder
+		
+		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
 		#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
 
+		if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+			sleep 1
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+		fi	
+		if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+			sleep 1
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+		fi	
+		if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+			sleep 1
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+		fi	
+		if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+			sleep 1
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+		fi	
+		
 		while [ "x$OTS_IS_ALIVE" == "x" ]; do
 			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots Macro Maker mode context launch, relaunching ots Macro Maker mode context..."									
 			killproc ${LAST_OTS_PID} 	
@@ -1013,9 +1031,26 @@ launchOTSWiz() {
 	if [ $RELAUNCHCHECK == 1 ]; then
 		
 		#test for relaunch
-		sleep 4
+		# 4 times quietly, then get louder
+		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
 		
-		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
+		if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+			sleep 1
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+		fi
+		if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+			sleep 1
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+		fi
+		if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+			sleep 1
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+		fi
+		if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+			sleep 1
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+		fi
+		
 		#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
 	
 		while [ "x$OTS_IS_ALIVE" == "x" ]; do
@@ -1355,10 +1390,28 @@ launchOTS() {
 							if [ $RELAUNCHCHECK == 1 ]; then
 							
 								#test for relaunch
-								sleep 4
-								OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
+								# 4 times quietly, then get louder
+								
+								OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat 2>/dev/null)"  #hide error output
 								#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
 	
+								if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+									sleep 1
+									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat 2>/dev/null)"  #hide error output
+								fi
+								if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+									sleep 1
+									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat 2>/dev/null)"  #hide error output
+								fi
+								if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+									sleep 1
+									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat 2>/dev/null)"  #hide error output
+								fi
+								if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+									sleep 1
+									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat 2>/dev/null)"  #hide error output
+								fi
+									
 								while [ "x$OTS_IS_ALIVE" == "x" ]; do
 									echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots gateway context launch, relaunching ots gateway context..."									
 									killproc ${LAST_OTS_PID} 
@@ -1460,7 +1513,7 @@ launchOTS() {
 		###########  test for relaunch of non-Gateway contexts	############
 		####################################################################	
 		
-		sleep 4 #give time before relaunch test
+		sleep 1 #give time before relaunch test
 		
 		unset ContextPIDArray #reset  
 		i=0
@@ -1477,9 +1530,33 @@ launchOTS() {
 				continue
 			fi
 			
-			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat)"
-			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
 			LAST_OTS_PID=${TempContextPIDArray[$j]}
+			
+			#test for relaunch
+			# 4 times quietly, then get louder
+		
+			
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat 2>/dev/null)"  #hide error output
+			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
+			
+			
+			if [ "x$OTS_IS_ALIVE" == "x" ]; then	
+				sleep 1
+				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat 2>/dev/null)"  #hide error output
+			fi
+			if [ "x$OTS_IS_ALIVE" == "x" ]; then	
+				sleep 1
+				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat 2>/dev/null)"  #hide error output
+			fi
+			if [ "x$OTS_IS_ALIVE" == "x" ]; then	
+				sleep 1
+				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat 2>/dev/null)"  #hide error output
+			fi
+			if [ "x$OTS_IS_ALIVE" == "x" ]; then	
+				sleep 1
+				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat 2>/dev/null)"  #hide error output
+			fi
+		
 			 
 			while [ "x$OTS_IS_ALIVE" == "x" ]; do
 				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tCould not verify successful ots non-gateway context launch, relaunching non-gateway context..."

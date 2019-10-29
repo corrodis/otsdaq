@@ -57,8 +57,8 @@ class GatewaySupervisor : public xdaq::Application,
   public:
 	XDAQ_INSTANTIATOR();
 
-	GatewaySupervisor(xdaq::ApplicationStub* s);
-	virtual ~GatewaySupervisor(void);
+								GatewaySupervisor				(xdaq::ApplicationStub* s);
+	virtual 					~GatewaySupervisor				(void);
 
 	void 						init							(void);
 
@@ -81,17 +81,17 @@ class GatewaySupervisor : public xdaq::Application,
 	bool 						stateMachineThread				(toolbox::task::WorkLoop* workLoop);
 
 	// Status requests handlers
-	void statusRequest(xgi::Input* in, xgi::Output* out);
-	void infoRequestResultHandler(xgi::Input* in, xgi::Output* out);
-	bool infoRequestThread(toolbox::task::WorkLoop* workLoop);
+	void 						statusRequest					(xgi::Input* in, xgi::Output* out);
+	void 						infoRequestResultHandler		(xgi::Input* in, xgi::Output* out);
+	bool 						infoRequestThread				(toolbox::task::WorkLoop* workLoop);
 
 	// External GatewaySupervisor XOAP handlers
-	xoap::MessageReference supervisorCookieCheck(xoap::MessageReference msg);
-	xoap::MessageReference supervisorGetActiveUsers(xoap::MessageReference msg);
-	xoap::MessageReference supervisorSystemMessage(xoap::MessageReference msg);
-	xoap::MessageReference supervisorGetUserInfo(xoap::MessageReference msg);
-	xoap::MessageReference supervisorSystemLogbookEntry(xoap::MessageReference msg);
-	xoap::MessageReference supervisorLastConfigGroupRequest(xoap::MessageReference msg);
+	xoap::MessageReference 		supervisorCookieCheck			(xoap::MessageReference msg);
+	xoap::MessageReference 		supervisorGetActiveUsers		(xoap::MessageReference msg);
+	xoap::MessageReference 		supervisorSystemMessage			(xoap::MessageReference msg);
+	xoap::MessageReference 		supervisorGetUserInfo			(xoap::MessageReference msg);
+	xoap::MessageReference 		supervisorSystemLogbookEntry	(xoap::MessageReference msg);
+	xoap::MessageReference 		supervisorLastConfigGroupRequest(xoap::MessageReference msg);
 
 	// Finite State Machine States
 	void stateInitial(toolbox::fsm::FiniteStateMachine& fsm);
@@ -112,26 +112,24 @@ class GatewaySupervisor : public xdaq::Application,
 	void transitionStartingUp(toolbox::Event::Reference e);
 	void enteringError(toolbox::Event::Reference e);
 
-	void makeSystemLogbookEntry(std::string entryText);
+	void 						makeSystemLogbookEntry(std::string entryText);
 
-	void checkForAsyncError(void);
+	void 						checkForAsyncError(void);
 
 	// CorePropertySupervisorBase override functions
-	virtual void setSupervisorPropertyDefaults(
-	    void) override;  // override to control supervisor specific defaults
-	virtual void forceSupervisorPropertyValues(void) override;  // override to force
+	virtual void 				setSupervisorPropertyDefaults(void) override;  // override to control supervisor specific defaults
+	virtual void 				forceSupervisorPropertyValues(void) override;  // override to force
 	                                                            // supervisor property
 	                                                            // values (and ignore user
 	                                                            // settings)
 
   private:
-	unsigned int getNextRunNumber(const std::string& fsmName = "");
-	bool setNextRunNumber(unsigned int runNumber, const std::string& fsmName = "");
-	static std::pair<std::string /*group name*/, TableGroupKey> loadGroupNameAndKey(
-	    const std::string& fileName, std::string& returnedTimeString);
-	void saveGroupNameAndKey(
-	    const std::pair<std::string /*group name*/, TableGroupKey>& theGroup,
-	    const std::string&                                          fileName);
+	unsigned int 				getNextRunNumber(const std::string& fsmName = "");
+	bool 						setNextRunNumber(unsigned int runNumber, const std::string& fsmName = "");
+	static std::pair<
+		std::string /*group name*/,
+		TableGroupKey> 			loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString);
+	void 						saveGroupNameAndKey(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup,const std::string& fileName);
 	static xoap::MessageReference lastConfigGroupRequestHandler(
 	    const SOAPParameters& parameters);
 	static void launchStartOTSCommand(const std::string&    command,

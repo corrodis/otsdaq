@@ -63,6 +63,16 @@ class ConfigurationManagerRW : public ConfigurationManager
 	//==============================================================================
 	// modifiers of generic TableBase
 	TableVersion 								saveNewTable					(const std::string& tableName, TableVersion temporaryVersion = TableVersion(), bool makeTemporary = false);  //, bool saveToScratchVersion = false);
+	TableVersion 								saveModifiedVersion				(
+																				const std::string&      tableName,
+																				TableVersion            originalVersion,
+																				bool                    makeTemporary,
+																				TableBase*              config,
+																				TableVersion            temporaryModifiedVersion,
+																				bool                    ignoreDuplicates = false,
+																				bool 					lookForEquivalent = false,
+																				bool*					foundEquivalent = nullptr);
+
 	TableVersion 								copyViewToCurrentColumns		(const std::string& tableName, TableVersion sourceVersion);
 	void         								eraseTemporaryVersion			(const std::string& tableName, TableVersion targetVersion = TableVersion());
 	void         								clearCachedVersions				(const std::string& tableName);
@@ -100,8 +110,8 @@ class ConfigurationManagerRW : public ConfigurationManager
 };
 
 //==============================================================================
-///// TableEditStruct public class
-/////
+// TableEditStruct public class
+//
 struct TableEditStruct
 {
 	// everything needed for editing a table
@@ -142,6 +152,38 @@ struct TableEditStruct
 		tableView_ = table_->getViewP();
 	}
 };  // end TableEditStruct declaration
+
+
+//==============================================================================
+// GroupEditStruct public class
+//
+struct GroupEditStruct
+{
+	// everything needed for editing a group and its tables
+	std::map<std::string, TableVersion> 	groupMembers_;
+	std::map<std::string, TableEditStruct> 	groupTables_;
+	const ConfigurationManager::GroupType	groupType_;
+	const std::string 						originalGroupName_;
+	const TableGroupKey						originalGroupKey_;
+	ConfigurationManagerRW* 				cfgMgr_;
+
+	/////
+	GroupEditStruct()
+		: groupType_(ConfigurationManager::GroupType::CONFIGURATION_TYPE) {__SS__ << "impossible!" << __E__; __SS_THROW__;}
+	GroupEditStruct(const ConfigurationManager::GroupType& groupType, ConfigurationManagerRW* cfgMgr);
+
+	void dropChanges(void);
+	void saveChanges(
+			const std::string& groupNameToSave,
+			TableGroupKey& newGroupKey,
+			bool* foundEquivalentGroupKey = nullptr,
+			bool activateNewGroup = false,
+			bool updateGroupAliases = false,
+			bool updateTableAliases = false,
+			TableGroupKey* newBackboneKey = nullptr,
+			bool* foundEquivalentBackboneKey = nullptr);
+
+};  // end GroupEditStruct declaration
 
 // clang-format on
 }  // namespace ots

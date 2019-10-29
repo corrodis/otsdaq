@@ -5,6 +5,7 @@
 #include <fhiclcpp/parse.h>
 
 #include "otsdaq/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
+#include "otsdaq/TablePlugins/XDAQContextTable.h"
 
 #include <fstream>   // for std::ofstream
 #include <iostream>  // std::cout
@@ -63,6 +64,8 @@ const std::string& ARTDAQTableBase::getTypeString(ARTDAQTableBase::ARTDAQAppType
 		return processTypes_.DISPATCHER;
 	case ARTDAQTableBase::ARTDAQAppType::BoardReader:
 		return processTypes_.READER;
+	case ARTDAQTableBase::ARTDAQAppType::Monitor:
+		return processTypes_.MONITOR;
 	}
 	// return "UNKNOWN";
 	__SS__ << "Illegal translation attempt for type '" << (unsigned int)type << "'"
@@ -1482,6 +1485,8 @@ void ARTDAQTableBase::extractArtdaqInfo(
 //		static function to modify the active configuration based on
 //	node object and subsystem object.
 //
+//	Node properties: {originalName,hostname,subsystemName}
+//
 void ARTDAQTableBase::setAndActivateArtdaqSystem(
 		ConfigurationManagerRW* 			cfgMgr,
 		const std::map<std::string /*type*/,
@@ -1492,6 +1497,98 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 {
 
 	__COUT__ << "setAndActivateArtdaqSystem()" << __E__;
+
+	//Steps:
+	//	0. Check for one and only artdaq Supervisor
+	//	1. create/verify subsystems and destinations
+	//	2. for each node
+	//		create/verify records
+
+
+	//------------------------
+	//0. Check for one and only artdaq Supervisor
+
+	const XDAQContextTable* contextTable = cfgMgr->__GET_CONFIG__(XDAQContextTable);
+
+	const XDAQContextTable::XDAQContext* artdaqContext =
+	    contextTable->getTheARTDAQSupervisorContext();
+	if(!artdaqContext)
+	{
+		__COUT__ << "No artdaq Supervisor found! Creating..." << __E__;
+
+//		//create record in ARTDAQ Supervisor table
+//		//	connect to an App in a Context
+//
+//		TableEditStruct artdaqSupervisorTable(ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE,
+//		                          cfgMgr);  // Table ready for editing!
+//		TableEditStruct appTable(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
+//		                         cfgMgr);  // Table ready for editing!
+//		TableEditStruct contextTable(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,
+//		                         cfgMgr);  // Table ready for editing!
+//
+//		//open try for handling temporary table errors
+//		try
+//		{
+//
+//		}
+//		catch(...)
+//		{
+//			__COUT__ << "Table errors while saving. Erasing all newly "
+//			            "created table versions."
+//			         << __E__;
+//			if(artdaqSupervisorTable.createdTemporaryVersion_)  // if temporary version created here
+//			{
+//				__COUT__ << "Erasing temporary version " << artdaqSupervisorTable.tableName_ << "-v"
+//				         << artdaqSupervisorTable.temporaryVersion_ << __E__;
+//				// erase with proper version management
+//				cfgMgr->eraseTemporaryVersion(artdaqSupervisorTable.tableName_,
+//						artdaqSupervisorTable.temporaryVersion_);
+//			}
+//
+//			if(parameterTable.createdTemporaryVersion_)  // if temporary version created here
+//			{
+//				__COUT__ << "Erasing temporary version " << parameterTable.tableName_ << "-v"
+//				         << parameterTable.temporaryVersion_ << __E__;
+//				// erase with proper version management
+//				cfgMgr->eraseTemporaryVersion(parameterTable.tableName_,
+//				                              parameterTable.temporaryVersion_);
+//			}
+//
+//			if(appTable.createdTemporaryVersion_)  // if temporary version created here
+//			{
+//				__COUT__ << "Erasing temporary version " << appTable.tableName_ << "-v"
+//				         << appTable.temporaryVersion_ << __E__;
+//				// erase with proper version management
+//				cfgMgr->eraseTemporaryVersion(appTable.tableName_,
+//				                              appTable.temporaryVersion_);
+//			}
+//
+//			throw;  // re-throw
+//		}           // end catch
+
+		__COUT__ << "Edits complete for new artdaq Supervisor"
+		         << __E__;
+	} //end artdaq Supervisor verification
+
+	for(auto& subsystemPair:subsystemObjectMap)
+	{
+		__COUTV__(subsystemPair.first);
+
+
+	} //end subsystem loop
+
+	for(auto& nodeTypePair:nodeTypeToObjectMap)
+	{
+		__COUTV__(nodeTypePair.first);
+
+		for(auto& nodePair:nodeTypePair.second)
+		{
+			__COUTV__(nodePair.first);
+
+		}
+
+	} //end node type loop
+
 
 } //end setAndActivateArtdaqSystem()
 

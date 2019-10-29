@@ -788,10 +788,10 @@ void ImportSystemAliasTableGroups(int argc, char* argv[])
 		//	include new groups and tables
 
 		std::string activeBackboneGroupName =
-		    cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
+		    cfgMgr->getActiveGroupName(ConfigurationManager::GroupType::BACKBONE_TYPE);
 		cfgMgr->loadTableGroup(
 		    activeBackboneGroupName,
-		    cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE),
+		    cfgMgr->getActiveGroupKey(ConfigurationManager::GroupType::BACKBONE_TYPE),
 		    true,
 		    &memberMap,
 		    0,

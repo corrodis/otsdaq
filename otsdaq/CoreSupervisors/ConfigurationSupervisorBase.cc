@@ -218,126 +218,152 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(
     bool                    ignoreDuplicates,
     bool                    lookForEquivalent)
 {
-	bool needToEraseTemporarySource =
-	    (originalVersion.isTemporaryVersion() && !makeTemporary);
 
-	// check for duplicate tables already in cache
-	if(!ignoreDuplicates)
-	{
-		__COUT__ << "Checking for duplicate tables..." << __E__;
-
-		TableVersion duplicateVersion;
-
-		{
-			//"DEEP" checking
-			//	load into cache 'recent' versions for this table
-			//		'recent' := those already in cache, plus highest version numbers not
-			// in  cache
-			const std::map<std::string, TableInfo>& allTableInfo =
-			    cfgMgr->getAllTableInfo();  // do not refresh
-
-			auto versionReverseIterator =
-			    allTableInfo.at(tableName).versions_.rbegin();  // get reverse iterator
-			__COUT__ << "Filling up cached from " << table->getNumberOfStoredViews()
-			         << " to max count of " << table->MAX_VIEWS_IN_CACHE << __E__;
-			for(; table->getNumberOfStoredViews() < table->MAX_VIEWS_IN_CACHE &&
-			      versionReverseIterator != allTableInfo.at(tableName).versions_.rend();
-			    ++versionReverseIterator)
-			{
-				__COUT__ << "Versions in reverse order " << *versionReverseIterator
-				         << __E__;
-				try
-				{
-					cfgMgr->getVersionedTableByName(
-					    tableName, *versionReverseIterator);  // load to cache
-				}
-				catch(const std::runtime_error& e)
-				{
-					__COUT__ << "Error loadiing historical version, but ignoring: "
-					         << e.what() << __E__;
-				}
-			}
-		}
-
-		__COUT__ << "Checking duplicate..." << __E__;
-
-		duplicateVersion = table->checkForDuplicate(
+	bool foundEquivalent;
+	TableVersion newAssignedVersion = cfgMgr->saveModifiedVersion(
+		    tableName,
+		    originalVersion,
+		    makeTemporary,
+		    table,
 		    temporaryModifiedVersion,
-		    (!originalVersion.isTemporaryVersion() && !makeTemporary)
-		        ? TableVersion()
-		        :  // if from persistent to persistent, then include original version in
-		           // search
-		        originalVersion);
+		    ignoreDuplicates,
+		    lookForEquivalent,
+			&foundEquivalent
+			);
 
-		if(lookForEquivalent && !duplicateVersion.isInvalid())
-		{
-			// found an equivalent!
-			__COUT__ << "Equivalent table found in version v" << duplicateVersion
-			         << __E__;
-
-			// if duplicate version was temporary, do not use
-			if(duplicateVersion.isTemporaryVersion() && !makeTemporary)
-			{
-				__COUT__ << "Need persistent. Duplicate version was temporary. "
-				            "Abandoning duplicate."
-				         << __E__;
-				duplicateVersion = TableVersion();  // set invalid
-			}
-			else
-			{
-				// erase and return equivalent version
-
-				// erase modified equivalent version
-				cfgMgr->eraseTemporaryVersion(tableName, temporaryModifiedVersion);
-
-				// erase original if needed
-				if(needToEraseTemporarySource)
-					cfgMgr->eraseTemporaryVersion(tableName, originalVersion);
-
-				xmlOut.addTextElementToData("savedName", tableName);
-				xmlOut.addTextElementToData("savedVersion", duplicateVersion.toString());
-				xmlOut.addTextElementToData("foundEquivalentVersion", "1");
-				xmlOut.addTextElementToData(tableName + "_foundEquivalentVersion", "1");
-
-				__COUT__ << "\t\t equivalent AssignedVersion: " << duplicateVersion
-				         << __E__;
-
-				return duplicateVersion;
-			}
-		}
-
-		if(!duplicateVersion.isInvalid())
-		{
-			__SS__ << "This version of table '" << tableName
-			       << "' is identical to another version currently cached v"
-			       << duplicateVersion << ". No reason to save a duplicate." << __E__;
-			__COUT_ERR__ << "\n" << ss.str();
-
-			// delete temporaryModifiedVersion
-			table->eraseView(temporaryModifiedVersion);
-			__SS_THROW__;
-		}
-
-		__COUT__ << "Check for duplicate tables complete." << __E__;
-	}
-
-	if(makeTemporary)
-		__COUT__ << "\t\t**************************** Save as temporary table version"
-		         << __E__;
-	else
-		__COUT__ << "\t\t**************************** Save as new table version" << __E__;
-
-	TableVersion newAssignedVersion =
-	    cfgMgr->saveNewTable(tableName, temporaryModifiedVersion, makeTemporary);
-
-	if(needToEraseTemporarySource)
-		cfgMgr->eraseTemporaryVersion(tableName, originalVersion);
 
 	xmlOut.addTextElementToData("savedName", tableName);
 	xmlOut.addTextElementToData("savedVersion", newAssignedVersion.toString());
 
-	__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << __E__;
+	//xmlOut.addTextElementToData("savedName", tableName);
+	//xmlOut.addTextElementToData("savedVersion", duplicateVersion.toString());
+	if(foundEquivalent)
+	{
+		xmlOut.addTextElementToData("foundEquivalentVersion", "1");
+		xmlOut.addTextElementToData(tableName + "_foundEquivalentVersion", "1");
+	}
 	return newAssignedVersion;
+//
+//	bool needToEraseTemporarySource =
+//	    (originalVersion.isTemporaryVersion() && !makeTemporary);
+//
+//	// check for duplicate tables already in cache
+//	if(!ignoreDuplicates)
+//	{
+//		__COUT__ << "Checking for duplicate tables..." << __E__;
+//
+//		TableVersion duplicateVersion;
+//
+//		{
+//			//"DEEP" checking
+//			//	load into cache 'recent' versions for this table
+//			//		'recent' := those already in cache, plus highest version numbers not
+//			// in  cache
+//			const std::map<std::string, TableInfo>& allTableInfo =
+//			    cfgMgr->getAllTableInfo();  // do not refresh
+//
+//			auto versionReverseIterator =
+//			    allTableInfo.at(tableName).versions_.rbegin();  // get reverse iterator
+//			__COUT__ << "Filling up cached from " << table->getNumberOfStoredViews()
+//			         << " to max count of " << table->MAX_VIEWS_IN_CACHE << __E__;
+//			for(; table->getNumberOfStoredViews() < table->MAX_VIEWS_IN_CACHE &&
+//			      versionReverseIterator != allTableInfo.at(tableName).versions_.rend();
+//			    ++versionReverseIterator)
+//			{
+//				__COUT__ << "Versions in reverse order " << *versionReverseIterator
+//				         << __E__;
+//				try
+//				{
+//					cfgMgr->getVersionedTableByName(
+//					    tableName, *versionReverseIterator);  // load to cache
+//				}
+//				catch(const std::runtime_error& e)
+//				{
+//					__COUT__ << "Error loadiing historical version, but ignoring: "
+//					         << e.what() << __E__;
+//				}
+//			}
+//		}
+//
+//		__COUT__ << "Checking duplicate..." << __E__;
+//
+//		duplicateVersion = table->checkForDuplicate(
+//		    temporaryModifiedVersion,
+//		    (!originalVersion.isTemporaryVersion() && !makeTemporary)
+//		        ? TableVersion()
+//		        :  // if from persistent to persistent, then include original version in
+//		           // search
+//		        originalVersion);
+//
+//		if(lookForEquivalent && !duplicateVersion.isInvalid())
+//		{
+//			// found an equivalent!
+//			__COUT__ << "Equivalent table found in version v" << duplicateVersion
+//			         << __E__;
+//
+//			// if duplicate version was temporary, do not use
+//			if(duplicateVersion.isTemporaryVersion() && !makeTemporary)
+//			{
+//				__COUT__ << "Need persistent. Duplicate version was temporary. "
+//				            "Abandoning duplicate."
+//				         << __E__;
+//				duplicateVersion = TableVersion();  // set invalid
+//			}
+//			else
+//			{
+//				// erase and return equivalent version
+//
+//				// erase modified equivalent version
+//				cfgMgr->eraseTemporaryVersion(tableName, temporaryModifiedVersion);
+//
+//				// erase original if needed
+//				if(needToEraseTemporarySource)
+//					cfgMgr->eraseTemporaryVersion(tableName, originalVersion);
+//
+//				xmlOut.addTextElementToData("savedName", tableName);
+//				xmlOut.addTextElementToData("savedVersion", duplicateVersion.toString());
+//				xmlOut.addTextElementToData("foundEquivalentVersion", "1");
+//				xmlOut.addTextElementToData(tableName + "_foundEquivalentVersion", "1");
+//
+//				__COUT__ << "\t\t equivalent AssignedVersion: " << duplicateVersion
+//				         << __E__;
+//
+//				return duplicateVersion;
+//			}
+//		}
+//
+//		if(!duplicateVersion.isInvalid())
+//		{
+//			__SS__ << "This version of table '" << tableName
+//			       << "' is identical to another version currently cached v"
+//			       << duplicateVersion << ". No reason to save a duplicate." << __E__;
+//			__COUT_ERR__ << "\n" << ss.str();
+//
+//			// delete temporaryModifiedVersion
+//			table->eraseView(temporaryModifiedVersion);
+//			__SS_THROW__;
+//		}
+//
+//		__COUT__ << "Check for duplicate tables complete." << __E__;
+//	}
+//
+//	if(makeTemporary)
+//		__COUT__ << "\t\t**************************** Save as temporary table version"
+//		         << __E__;
+//	else
+//		__COUT__ << "\t\t**************************** Save as new table version" << __E__;
+//
+//	TableVersion newAssignedVersion =
+//	    cfgMgr->saveNewTable(tableName, temporaryModifiedVersion, makeTemporary);
+//
+//	if(needToEraseTemporarySource)
+//		cfgMgr->eraseTemporaryVersion(tableName, originalVersion);
+//
+//	xmlOut.addTextElementToData("savedName", tableName);
+//	xmlOut.addTextElementToData("savedVersion", newAssignedVersion.toString());
+//
+//	__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << __E__;
+//	return newAssignedVersion;
 }  // end saveModifiedVersionXML()
 
 //========================================================================================================================
@@ -982,13 +1008,13 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 	}
 
 	const std::string contextGroupName =
-	    cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT);
+	    cfgMgr->getActiveGroupName(ConfigurationManager::GroupType::CONTEXT_TYPE);
 	const TableGroupKey originalContextGroupKey =
-	    cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT);
+	    cfgMgr->getActiveGroupKey(ConfigurationManager::GroupType::CONTEXT_TYPE);
 	const std::string backboneGroupName =
-	    cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
+	    cfgMgr->getActiveGroupName(ConfigurationManager::GroupType::BACKBONE_TYPE);
 	const TableGroupKey originalBackboneGroupKey =
-	    cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
+	    cfgMgr->getActiveGroupKey(ConfigurationManager::GroupType::BACKBONE_TYPE);
 
 	__COUTV__(contextGroupName);
 	__COUTV__(originalContextGroupKey);
@@ -997,7 +1023,7 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 	if(contextGroupName == "" || originalContextGroupKey.isInvalid())
 	{
-		__SS__ << "Error! No active Context group found"
+		__SS__ << "Error! No active Context group found. "
 		          "There must be an active Context group to add a Desktop Icon."
 		       << __E__;
 		__SS_THROW__;
@@ -1265,7 +1291,7 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 	        true /*make temporary*/,
 	        iconTable.table_,
 	        iconTable.temporaryVersion_,
-	        true /*ignoreDuplicates*/);  // save persistent version properly
+	        true /*ignoreDuplicates*/);  // make temporary version to save persistent version properly
 	contextGroupMembers[DesktopIconTable::PARAMETER_TABLE] =
 	    ConfigurationSupervisorBase::saveModifiedVersionXML(
 	        xmlOut,
@@ -1275,7 +1301,7 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 	        true /*make temporary*/,
 	        parameterTable.table_,
 	        parameterTable.temporaryVersion_,
-	        true /*ignoreDuplicates*/);  // save persistent version properly
+	        true /*ignoreDuplicates*/);  // make temporary version to save persistent version properly
 
 	__COUT__ << "Temporary target version is " << iconTable.tableName_ << "-v"
 	         << contextGroupMembers[DesktopIconTable::ICON_TABLE] << "-v"
@@ -1356,7 +1382,7 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 		TableVersion originalVersion =
 		    backboneGroupMembers[ConfigurationManager::GROUP_ALIASES_TABLE_NAME];
 		TableVersion temporaryVersion = table->createTemporaryView(originalVersion);
-		TableView*   configView       = table->getTemporaryView(temporaryVersion);
+		TableView*   tableView       = table->getTemporaryView(temporaryVersion);
 
 		unsigned int col;
 		unsigned int row = 0;
@@ -1379,8 +1405,8 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 				groupAliasChange = true;
 
-				configView->setValueAsString(
-				    newContextKey.toString(), row, configView->findCol("GroupKey"));
+				tableView->setValueAsString(
+				    newContextKey.toString(), row, tableView->findCol("GroupKey"));
 			}
 
 			++row;
@@ -1389,7 +1415,7 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 		if(groupAliasChange)
 		{
 			std::stringstream ss;
-			configView->print(ss);
+			tableView->print(ss);
 			__COUT__ << ss.str();
 
 			// save or find equivalent
@@ -1421,7 +1447,7 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 		TableVersion originalVersion =
 		    backboneGroupMembers[ConfigurationManager::VERSION_ALIASES_TABLE_NAME];
 		TableVersion temporaryVersion = table->createTemporaryView(originalVersion);
-		TableView*   configView       = table->getTemporaryView(temporaryVersion);
+		TableView*   tableView       = table->getTemporaryView(temporaryVersion);
 
 		unsigned int col;
 		unsigned int row = 0;
@@ -1446,10 +1472,10 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 				tableAliasChange = true;
 
-				configView->setValueAsString(
+				tableView->setValueAsString(
 				    contextGroupMembers[DesktopIconTable::ICON_TABLE].toString(),
 				    row,
-				    configView->findCol("TableVersion"));
+				    tableView->findCol("TableVersion"));
 			}
 			else if(tableName == DesktopIconTable::PARAMETER_TABLE &&
 			        TableVersion(tableVersion) == parameterTable.originalVersion_)
@@ -1459,10 +1485,10 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 				tableAliasChange = true;
 
-				configView->setValueAsString(
+				tableView->setValueAsString(
 				    contextGroupMembers[DesktopIconTable::PARAMETER_TABLE].toString(),
 				    row,
-				    configView->findCol("TableVersion"));
+				    tableView->findCol("TableVersion"));
 			}
 
 			++row;
@@ -1471,7 +1497,7 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 		if(tableAliasChange)
 		{
 			std::stringstream ss;
-			configView->print(ss);
+			tableView->print(ss);
 			__COUT__ << ss.str();
 
 			// save or find equivalent
@@ -1558,4 +1584,4 @@ catch(...)
 {
 	__COUT__ << "Unknown Error detected!\n\n " << __E__;
 	xmlOut.addTextElementToData("Error", "Error adding Desktop Icon! ");
-}  // end handleCreateTableGroupXML() catch
+}  // end handleAddDesktopIconXML() catch

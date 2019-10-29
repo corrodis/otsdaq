@@ -1168,6 +1168,447 @@ TableVersion ConfigurationManagerRW::saveNewBackbone(TableVersion temporaryVersi
 	return newVersion;
 }
 
+
+//========================================================================================================================
+// saveModifiedVersionXML
+//
+// once source version has been modified in temporary version
+//	this function finishes it off.
+TableVersion ConfigurationManagerRW::saveModifiedVersion(
+    const std::string&      tableName,
+    TableVersion            originalVersion,
+    bool                    makeTemporary,
+    TableBase*              table,
+    TableVersion            temporaryModifiedVersion,
+    bool                    ignoreDuplicates /*= false*/,
+    bool                    lookForEquivalent /*= false*/,
+	bool*					foundEquivalent /*= nullptr*/)
+{
+	bool needToEraseTemporarySource =
+	    (originalVersion.isTemporaryVersion() && !makeTemporary);
+
+	if(foundEquivalent) *foundEquivalent = false; //initialize
+
+	// check for duplicate tables already in cache
+	if(!ignoreDuplicates)
+	{
+		__COUT__ << "Checking for duplicate tables..." << __E__;
+
+		TableVersion duplicateVersion;
+
+		{
+			//"DEEP" checking
+			//	load into cache 'recent' versions for this table
+			//		'recent' := those already in cache, plus highest version numbers not
+			// in  cache
+			const std::map<std::string, TableInfo>& allTableInfo =
+			    getAllTableInfo();  // do not refresh
+
+			auto versionReverseIterator =
+			    allTableInfo.at(tableName).versions_.rbegin();  // get reverse iterator
+			__COUT__ << "Filling up cached from " << table->getNumberOfStoredViews()
+			         << " to max count of " << table->MAX_VIEWS_IN_CACHE << __E__;
+			for(; table->getNumberOfStoredViews() < table->MAX_VIEWS_IN_CACHE &&
+			      versionReverseIterator != allTableInfo.at(tableName).versions_.rend();
+			    ++versionReverseIterator)
+			{
+				__COUT__ << "Versions in reverse order " << *versionReverseIterator
+				         << __E__;
+				try
+				{
+					getVersionedTableByName(
+					    tableName, *versionReverseIterator);  // load to cache
+				}
+				catch(const std::runtime_error& e)
+				{
+					__COUT__ << "Error loadiing historical version, but ignoring: "
+					         << e.what() << __E__;
+				}
+			}
+		}
+
+		__COUT__ << "Checking duplicate..." << __E__;
+
+		duplicateVersion = table->checkForDuplicate(
+		    temporaryModifiedVersion,
+		    (!originalVersion.isTemporaryVersion() && !makeTemporary)
+		        ? TableVersion()
+		        :  // if from persistent to persistent, then include original version in
+		           // search
+		        originalVersion);
+
+		if(lookForEquivalent && !duplicateVersion.isInvalid())
+		{
+			// found an equivalent!
+			__COUT__ << "Equivalent table found in version v" << duplicateVersion
+			         << __E__;
+
+			// if duplicate version was temporary, do not use
+			if(duplicateVersion.isTemporaryVersion() && !makeTemporary)
+			{
+				__COUT__ << "Need persistent. Duplicate version was temporary. "
+				            "Abandoning duplicate."
+				         << __E__;
+				duplicateVersion = TableVersion();  // set invalid
+			}
+			else
+			{
+				// erase and return equivalent version
+
+				// erase modified equivalent version
+				eraseTemporaryVersion(tableName, temporaryModifiedVersion);
+
+				// erase original if needed
+				if(needToEraseTemporarySource)
+					eraseTemporaryVersion(tableName, originalVersion);
+
+				if(foundEquivalent) *foundEquivalent = true;
+
+				//				xmlOut.addTextElementToData("savedName", tableName);
+				//				xmlOut.addTextElementToData("savedVersion", duplicateVersion.toString());
+				//				xmlOut.addTextElementToData("foundEquivalentVersion", "1");
+				//				xmlOut.addTextElementToData(tableName + "_foundEquivalentVersion", "1");
+
+				__COUT__ << "\t\t equivalent AssignedVersion: " << duplicateVersion
+				         << __E__;
+
+				return duplicateVersion;
+			}
+		}
+
+		if(!duplicateVersion.isInvalid())
+		{
+			__SS__ << "This version of table '" << tableName
+			       << "' is identical to another version currently cached v"
+			       << duplicateVersion << ". No reason to save a duplicate." << __E__;
+			__COUT_ERR__ << "\n" << ss.str();
+
+			// delete temporaryModifiedVersion
+			table->eraseView(temporaryModifiedVersion);
+			__SS_THROW__;
+		}
+
+		__COUT__ << "Check for duplicate tables complete." << __E__;
+	}
+
+	if(makeTemporary)
+		__COUT__ << "\t\t**************************** Save as temporary table version"
+		         << __E__;
+	else
+		__COUT__ << "\t\t**************************** Save as new table version" << __E__;
+
+	TableVersion newAssignedVersion =
+	    saveNewTable(tableName, temporaryModifiedVersion, makeTemporary);
+
+	if(needToEraseTemporarySource)
+		eraseTemporaryVersion(tableName, originalVersion);
+
+//	xmlOut.addTextElementToData("savedName", tableName);
+//	xmlOut.addTextElementToData("savedVersion", newAssignedVersion.toString());
+
+	__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << __E__;
+	return newAssignedVersion;
+}  // end saveModifiedVersion()
+
+
+//==============================================================================
+GroupEditStruct::GroupEditStruct(
+		const ConfigurationManager::GroupType& groupType,
+		ConfigurationManagerRW* cfgMgr)
+: groupType_(groupType)
+, originalGroupName_(cfgMgr->getActiveGroupName(groupType))
+, originalGroupKey_(cfgMgr->getActiveGroupKey(groupType))
+, cfgMgr_(cfgMgr)
+{
+
+	if(originalGroupName_ == "" || originalGroupKey_.isInvalid())
+	{
+		__SS__ << "Error! No active group found for type '" <<
+				ConfigurationManager::convertGroupTypeToName(groupType) <<
+		          ".' There must be an active group to edit the group."
+		       << __E__;
+		__SS_THROW__;
+	}
+
+	__COUT__ << "Extracting Group-Edit Struct for type " <<
+			ConfigurationManager::convertGroupTypeToName(groupType) << __E__;
+
+	std::map<std::string, TableVersion> activeTables = cfgMgr->getActiveVersions();
+
+	const std::set<std::string>& memberNames =
+			groupType == ConfigurationManager::GroupType::CONTEXT_TYPE?
+					ConfigurationManager::getContextMemberNames():(
+							groupType == ConfigurationManager::GroupType::BACKBONE_TYPE?
+									ConfigurationManager::getBackboneMemberNames():(
+											groupType == ConfigurationManager::GroupType::ITERATE_TYPE?
+													ConfigurationManager::getIterateMemberNames():
+													cfgMgr->getConfigurationMemberNames()));
+
+	for(auto& memberName:memberNames)
+		try
+		{
+			__COUT__ << memberName << " v" << activeTables.at(memberName) << __E__;
+			groupMembers_.emplace(
+					std::make_pair(memberName,
+							activeTables.at(memberName)));
+
+			groupTables_.emplace(
+					std::make_pair(memberName,
+							TableEditStruct(memberName,cfgMgr))); // Table ready for editing!
+
+		}
+		catch(...)
+		{
+			__SS__ << "Error! Could not find group member table '" << memberName
+			       << "' for group type '" <<  ConfigurationManager::convertGroupTypeToName(groupType)
+					<< ".' All group members must be present to create the group editing structure."
+			       << __E__;
+			__SS_THROW__;
+		}
+
+} //end GroupEditStruct constructor()
+
+//==============================================================================
+void GroupEditStruct::dropChanges()
+{
+	__COUT__ << "Dropping changes..." << __E__;
+
+	ConfigurationManagerRW* cfgMgr = cfgMgr_;
+
+	//drop all temporary versions
+	for(auto& groupTable:groupTables_)
+		if(groupTable.second.createdTemporaryVersion_) // if temporary version created here
+		{
+			__COUT__ << "Erasing temporary version " << groupTable.second.tableName_ << "-v"
+			         << groupTable.second.temporaryVersion_ << __E__;
+			// erase with proper version management
+			cfgMgr->eraseTemporaryVersion(
+					groupTable.second.tableName_,
+					groupTable.second.temporaryVersion_);
+		}
+
+	__COUT__ << "Changes dropped." << __E__;
+} //end GroupEditStruct::dropChanges()
+
+//==============================================================================
+void GroupEditStruct::saveChanges(
+		const std::string& groupNameToSave,
+		TableGroupKey& newGroupKey,
+		bool* foundEquivalentGroupKey /*= nullptr*/,
+		bool activateNewGroup /*= false*/,
+		bool updateGroupAliases /*= false*/,
+		bool updateTableAliases /*= false*/,
+		TableGroupKey* newBackboneKey /*= nullptr*/,
+		bool* foundEquivalentBackboneKey /*= nullptr*/)
+{
+
+	__COUT__ << "Saving changes..." << __E__;
+
+	newGroupKey = TableGroupKey(); //invalidate reference parameter
+	if(newBackboneKey) *newBackboneKey = TableGroupKey(); //invalidate reference parameter
+	if(foundEquivalentBackboneKey) *foundEquivalentBackboneKey = false; //clear to start
+	ConfigurationManagerRW* cfgMgr = cfgMgr_;
+
+	//drop all temporary versions
+	for(auto& groupTable:groupTables_)
+	{
+		__COUT__ << "Original version is " << groupTable.second.tableName_ << "-v"
+				<< groupTable.second.originalVersion_ << __E__;
+
+		groupMembers_[groupTable.first] =
+				cfgMgr->saveModifiedVersion(
+						groupTable.second.tableName_,
+						groupTable.second.originalVersion_,
+						true /*make temporary*/,
+						groupTable.second.table_,
+						groupTable.second.temporaryVersion_,
+						true /*ignoreDuplicates*/);  // make temporary version to save persistent version properly
+
+		__COUT__ << "Temporary target version is " << groupTable.second.tableName_ << "-v"
+				<< groupMembers_[groupTable.first] << "-v"
+				<< groupTable.second.temporaryVersion_ << __E__;
+
+		groupMembers_[groupTable.first] =
+				cfgMgr->saveModifiedVersion(
+						groupTable.second.tableName_,
+						groupTable.second.originalVersion_,
+						false /*make temporary*/,
+						groupTable.second.table_,
+						groupTable.second.temporaryVersion_,
+						false /*ignoreDuplicates*/,
+		        true /*lookForEquivalent*/);  // save persistent version properly
+
+		__COUT__ << "Final target version is " << groupTable.second.tableName_ << "-v"
+		         << groupMembers_[groupTable.first] << __E__;
+	}
+
+	for(auto& table : groupMembers_)
+	{
+		__COUT__ << table.first << " v" << table.second << __E__;
+	}
+
+	__COUT__ << "Checking for duplicate groups..." << __E__;
+	newGroupKey =
+	    cfgMgr->findTableGroup(groupNameToSave, groupMembers_);
+
+	if(!newGroupKey.isInvalid())
+	{
+		__COUT__ << "Found equivalent group key (" << newGroupKey << ") for "
+		         << groupNameToSave << "." << __E__;
+		if(foundEquivalentGroupKey) *foundEquivalentGroupKey = true;
+	}
+	else
+	{
+		newGroupKey = cfgMgr->saveNewTableGroup(groupNameToSave, groupMembers_);
+		__COUT__ << "Saved new Context group key (" << newGroupKey << ") for "
+		         << groupNameToSave << "." << __E__;
+	}
+
+	bool groupAliasChange = false;
+	bool tableAliasChange = false;
+
+	GroupEditStruct backboneGroupEdit(ConfigurationManager::GroupType::BACKBONE_TYPE,cfgMgr);
+
+	if(updateGroupAliases)
+	{
+		// check group aliases ... a la
+		// ConfigurationGUISupervisor::handleSetGroupAliasInBackboneXML
+
+		TableView* tableView = backboneGroupEdit.groupTables_[ConfigurationManager::GROUP_ALIASES_TABLE_NAME].tableView_;
+
+		unsigned int col;
+		unsigned int row = 0;
+
+		std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
+		    cfgMgr->getNode(ConfigurationManager::GROUP_ALIASES_TABLE_NAME).getChildren();
+		std::string groupName, groupKey;
+		for(auto& aliasNodePair : aliasNodePairs)
+		{
+			groupName = aliasNodePair.second.getNode("GroupName").getValueAsString();
+			groupKey  = aliasNodePair.second.getNode("GroupKey").getValueAsString();
+
+			__COUT__ << "Group Alias: " << aliasNodePair.first << " => " << groupName
+			         << "(" << groupKey << "); row=" << row << __E__;
+
+			if(groupName == originalGroupName_ &&
+			   TableGroupKey(groupKey) == originalGroupKey_)
+			{
+				__COUT__ << "Found alias! Changing group key." << __E__;
+
+				groupAliasChange = true;
+
+				tableView->setValueAsString(
+				    newGroupKey.toString(), row, tableView->findCol("GroupKey"));
+			}
+
+			++row;
+		}
+
+		if(groupAliasChange)
+		{
+			std::stringstream ss;
+			backboneGroupEdit.groupTables_[ConfigurationManager::GROUP_ALIASES_TABLE_NAME].tableView_->print(ss);
+			__COUT__ << ss.str();
+
+			// save or find equivalent
+			backboneGroupEdit.groupMembers_[ConfigurationManager::GROUP_ALIASES_TABLE_NAME] =
+					cfgMgr->saveModifiedVersion(
+							groupTables_[ConfigurationManager::GROUP_ALIASES_TABLE_NAME].table_->getTableName(),
+							backboneGroupEdit.groupTables_[ConfigurationManager::GROUP_ALIASES_TABLE_NAME].originalVersion_,
+							false /*makeTemporary*/,
+							backboneGroupEdit.groupTables_[ConfigurationManager::GROUP_ALIASES_TABLE_NAME].table_,
+							backboneGroupEdit.groupTables_[ConfigurationManager::GROUP_ALIASES_TABLE_NAME].temporaryVersion_,
+							false /*ignoreDuplicates*/,
+							true /*lookForEquivalent*/);
+
+			__COUT__
+			    << "Original version is "
+				<< backboneGroupEdit.groupTables_[ConfigurationManager::GROUP_ALIASES_TABLE_NAME].table_->getTableName() << "-v"
+			    << backboneGroupEdit.groupTables_[ConfigurationManager::GROUP_ALIASES_TABLE_NAME].originalVersion_ << " and new version is v"
+			    << backboneGroupEdit.groupMembers_[ConfigurationManager::GROUP_ALIASES_TABLE_NAME]
+			    << __E__;
+		}
+	} //end updateGroupAliases handling
+
+	if(updateTableAliases)
+	{
+		//update all table version aliases
+		TableView* tableView = backboneGroupEdit.groupTables_[ConfigurationManager::VERSION_ALIASES_TABLE_NAME].tableView_;
+
+		for(auto& groupTable:groupTables_)
+		{
+			__COUT__ << "Original version is " << groupTable.second.tableName_ << "-v"
+				         << groupTable.second.originalVersion_ << __E__;
+
+			unsigned int col;
+			unsigned int row = 0;
+
+			std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
+			    cfgMgr->getNode(ConfigurationManager::VERSION_ALIASES_TABLE_NAME)
+			        .getChildren();
+			std::string tableName, tableVersion;
+			for(auto& aliasNodePair : aliasNodePairs)
+			{
+				tableName = aliasNodePair.second.getNode("TableName").getValueAsString();
+				tableVersion =
+				    aliasNodePair.second.getNode("TableVersion").getValueAsString();
+
+				__COUT__ << "Table Alias: " << aliasNodePair.first << " => " << tableName
+				         << "-v" << tableVersion << "" << __E__;
+
+				if(tableName == groupTable.second.tableName_ &&
+				   TableVersion(tableVersion) == groupTable.second.originalVersion_)
+				{
+					__COUT__ << "Found alias! Changing icon table version alias." << __E__;
+
+					tableAliasChange = true;
+
+					tableView->setValueAsString(
+					    groupMembers_[groupTable.second.tableName_].toString(),
+					    row,
+					    tableView->findCol("TableVersion"));
+				}
+
+				++row;
+			}
+		}
+	} //end updateTableAliases handling
+
+	//	if backbone modified, save group and activate it
+
+	TableGroupKey localNewBackboneKey;
+	if(groupAliasChange || tableAliasChange)
+	{
+		for(auto& table : backboneGroupEdit.groupMembers_)
+		{
+			__COUT__ << table.first << " v" << table.second << __E__;
+		}
+		backboneGroupEdit.saveChanges(
+				backboneGroupEdit.originalGroupName_,
+				localNewBackboneKey,
+				foundEquivalentBackboneKey?foundEquivalentBackboneKey:nullptr);
+
+		if(newBackboneKey) *newBackboneKey = localNewBackboneKey;
+	}
+
+	// acquire all active groups and ignore errors, so that activateTableGroup does not
+	// erase other active groups
+	cfgMgr->restoreActiveTableGroups(false /*throwErrors*/,
+			"" /*pathToActiveGroupsFile*/,
+			false /*onlyLoadIfBackboneOrContext*/
+	);
+
+	//activate new groups
+	if(!localNewBackboneKey.isInvalid())
+		cfgMgr->activateTableGroup(backboneGroupEdit.originalGroupName_, localNewBackboneKey);
+
+	if(activateNewGroup)
+		cfgMgr->activateTableGroup(groupNameToSave, newGroupKey);
+
+	__COUT__ << "Changes saved." << __E__;
+} // end GroupEditStruct::saveChanges()
+
+
 //==============================================================================
 void ConfigurationManagerRW::testXDAQContext()
 {

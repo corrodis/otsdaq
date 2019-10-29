@@ -483,16 +483,16 @@ void ConfigurationManager::destroy(void)
 //		0 for context
 //		1 for backbone
 //		2 for configuration (others)
-const std::string& ConfigurationManager::convertGroupTypeIdToName(int groupTypeId)
+const std::string& ConfigurationManager::convertGroupTypeToName(const ConfigurationManager::GroupType& groupTypeId)
 {
-	return groupTypeId == CONTEXT_TYPE
+	return groupTypeId == ConfigurationManager::GroupType::CONTEXT_TYPE
 	           ? ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT
-	           : (groupTypeId == BACKBONE_TYPE
+	           : (groupTypeId == ConfigurationManager::GroupType::BACKBONE_TYPE
 	                  ? ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE
-	                  : (groupTypeId == ITERATE_TYPE
+	                  : (groupTypeId == ConfigurationManager::GroupType::ITERATE_TYPE
 	                         ? ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE
 	                         : ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION));
-}
+} //end convertGroupTypeToName()
 
 //==============================================================================
 // getTypeOfGroup
@@ -501,7 +501,7 @@ const std::string& ConfigurationManager::convertGroupTypeIdToName(int groupTypeI
 //		BACKBONE_TYPE for backbone
 //		ITERATE_TYPE for iterate
 //		CONFIGURATION_TYPE for configuration (others)
-int ConfigurationManager::getTypeOfGroup(
+ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(
     const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap)
 {
 	bool         isContext  = true;
@@ -663,10 +663,11 @@ int ConfigurationManager::getTypeOfGroup(
 		__SS_THROW__;
 	}
 
-	return isContext ? CONTEXT_TYPE
-	                 : (isBackbone ? BACKBONE_TYPE
-	                               : (isIterate ? ITERATE_TYPE : CONFIGURATION_TYPE));
-}
+	return isContext ? ConfigurationManager::GroupType::CONTEXT_TYPE
+	                 : (isBackbone ? ConfigurationManager::GroupType::BACKBONE_TYPE
+	                               : (isIterate ? ConfigurationManager::GroupType::ITERATE_TYPE :
+	                            		   ConfigurationManager::GroupType::CONFIGURATION_TYPE));
+} //end getTypeOfGroup()
 
 //==============================================================================
 // getTypeNameOfGroup
@@ -674,8 +675,8 @@ int ConfigurationManager::getTypeOfGroup(
 const std::string& ConfigurationManager::getTypeNameOfGroup(
     const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap)
 {
-	return convertGroupTypeIdToName(getTypeOfGroup(memberMap));
-}
+	return convertGroupTypeToName(getTypeOfGroup(memberMap));
+} //end getTypeNameOfGroup()
 
 //==============================================================================
 // dumpMacroMakerModeFhicl
@@ -1311,12 +1312,9 @@ void ConfigurationManager::loadTableGroup(
 			if(groupCreateTime)
 				*groupCreateTime = "0";
 
-			int groupType = -1;
 			if(groupTypeString)  // do before exit case
-			{
-				groupType        = getTypeOfGroup(memberMap);
-				*groupTypeString = convertGroupTypeIdToName(groupType);
-			}
+				*groupTypeString = convertGroupTypeToName(getTypeOfGroup(memberMap));
+
 			return;  // memberMap;
 		}
 
@@ -1389,13 +1387,13 @@ void ConfigurationManager::loadTableGroup(
 
 	//__COUT__ << "memberMap loaded size = " << memberMap.size() << __E__;
 
-	int groupType = -1;
+	ConfigurationManager::GroupType groupType = ConfigurationManager::GroupType::CONFIGURATION_TYPE;
 	try
 	{
 		if(groupTypeString)  // do before exit case
 		{
 			groupType        = getTypeOfGroup(memberMap);
-			*groupTypeString = convertGroupTypeIdToName(groupType);
+			*groupTypeString = convertGroupTypeToName(groupType);
 		}
 
 		//	if(groupName == "defaultConfig")
@@ -1418,30 +1416,30 @@ void ConfigurationManager::loadTableGroup(
 			groupType = getTypeOfGroup(memberMap);
 
 		if(onlyLoadIfBackboneOrContext &&
-		   groupType != ConfigurationManager::CONTEXT_TYPE &&
-		   groupType != ConfigurationManager::BACKBONE_TYPE)
+		   groupType != ConfigurationManager::GroupType::CONTEXT_TYPE &&
+		   groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
 		{
 			__COUT_WARN__ << "Not loading group because it is not of type Context or "
 			                 "Backbone (it is type '"
-			              << convertGroupTypeIdToName(groupType) << "')." << __E__;
+			              << convertGroupTypeToName(groupType) << "')." << __E__;
 			return;
 		}
 
 		if(doActivate)
 			__COUT__ << "------------------------------------- init start    \t [for all "
 			            "plug-ins in "
-			         << convertGroupTypeIdToName(groupType) << " group '" << groupName
+			         << convertGroupTypeToName(groupType) << " group '" << groupName
 			         << "(" << groupKey << ")"
 			         << "']" << __E__;
 
 		if(doActivate)
 		{
 			std::string groupToDeactivate =
-			    groupType == ConfigurationManager::CONTEXT_TYPE
+			    groupType == ConfigurationManager::GroupType::CONTEXT_TYPE
 			        ? theContextTableGroup_
-			        : (groupType == ConfigurationManager::BACKBONE_TYPE
+			        : (groupType == ConfigurationManager::GroupType::BACKBONE_TYPE
 			               ? theBackboneTableGroup_
-			               : (groupType == ConfigurationManager::ITERATE_TYPE
+			               : (groupType == ConfigurationManager::GroupType::ITERATE_TYPE
 			                      ? theIterateTableGroup_
 			                      : theConfigurationTableGroup_));
 
@@ -1573,7 +1571,7 @@ void ConfigurationManager::loadTableGroup(
 
 		if(doActivate)
 		{
-			if(groupType == ConfigurationManager::CONTEXT_TYPE)  //
+			if(groupType == ConfigurationManager::GroupType::CONTEXT_TYPE)  //
 			{
 				//			__COUT_INFO__ << "Type=Context, Group loaded: " <<
 				// groupName
@@ -1583,7 +1581,7 @@ void ConfigurationManager::loadTableGroup(
 				theContextTableGroupKey_ =
 				    std::shared_ptr<TableGroupKey>(new TableGroupKey(groupKey));
 			}
-			else if(groupType == ConfigurationManager::BACKBONE_TYPE)
+			else if(groupType == ConfigurationManager::GroupType::BACKBONE_TYPE)
 			{
 				//			__COUT_INFO__ << "Type=Backbone, Group loaded: " <<
 				// groupName <<
@@ -1592,7 +1590,7 @@ void ConfigurationManager::loadTableGroup(
 				theBackboneTableGroupKey_ =
 				    std::shared_ptr<TableGroupKey>(new TableGroupKey(groupKey));
 			}
-			else if(groupType == ConfigurationManager::ITERATE_TYPE)
+			else if(groupType == ConfigurationManager::GroupType::ITERATE_TYPE)
 			{
 				//			__COUT_INFO__ << "Type=Iterate, Group loaded: " <<
 				// groupName
@@ -1619,14 +1617,14 @@ void ConfigurationManager::loadTableGroup(
 		if(doActivate)
 			__COUT__ << "------------------------------------- init complete \t [for all "
 			            "plug-ins in "
-			         << convertGroupTypeIdToName(groupType) << " group '" << groupName
+			         << convertGroupTypeToName(groupType) << " group '" << groupName
 			         << "(" << groupKey << ")"
 			         << "']" << __E__;
 	}  // end failed group load try
 	catch(...)
 	{
 		// save group name and key of failed load attempt
-		lastFailedGroupLoad_[convertGroupTypeIdToName(groupType)] =
+		lastFailedGroupLoad_[convertGroupTypeToName(groupType)] =
 		    std::pair<std::string, TableGroupKey>(groupName, TableGroupKey(groupKey));
 
 		try
@@ -1721,39 +1719,37 @@ ConfigurationManager::getActiveTableGroups(void) const
 }  // end getActiveTableGroups()
 
 //==============================================================================
-const std::string& ConfigurationManager::getActiveGroupName(const std::string& type) const
+const std::string& ConfigurationManager::getActiveGroupName(const ConfigurationManager::GroupType& type) const
 {
-	if(type == "" || type == ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
+	if(type == ConfigurationManager::GroupType::CONFIGURATION_TYPE)
 		return theConfigurationTableGroup_;
-	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+	else if(type == ConfigurationManager::GroupType::CONTEXT_TYPE)
 		return theContextTableGroup_;
-	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE)
+	else if(type == ConfigurationManager::GroupType::BACKBONE_TYPE)
 		return theBackboneTableGroup_;
-	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE)
+	else if(type == ConfigurationManager::GroupType::ITERATE_TYPE)
 		return theIterateTableGroup_;
 
-	__SS__ << "Invalid type requested '" << type << "'" << __E__;
-	__COUT_ERR__ << ss.str();
+	__SS__ << "IMPOSSIBLE! Invalid type requested '" << (int)type << "'" << __E__;
 	__SS_THROW__;
-}
+} //end getActiveGroupName()
 
 //==============================================================================
-TableGroupKey ConfigurationManager::getActiveGroupKey(const std::string& type) const
+TableGroupKey ConfigurationManager::getActiveGroupKey(const ConfigurationManager::GroupType& type) const
 {
-	if(type == "" || type == ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
+	if(type == ConfigurationManager::GroupType::CONFIGURATION_TYPE)
 		return theConfigurationTableGroupKey_ ? *theConfigurationTableGroupKey_
 		                                      : TableGroupKey();
-	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+	else if(type == ConfigurationManager::GroupType::CONTEXT_TYPE)
 		return theContextTableGroupKey_ ? *theContextTableGroupKey_ : TableGroupKey();
-	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE)
+	else if(type == ConfigurationManager::GroupType::BACKBONE_TYPE)
 		return theBackboneTableGroupKey_ ? *theBackboneTableGroupKey_ : TableGroupKey();
-	if(type == ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE)
+	else if(type == ConfigurationManager::GroupType::ITERATE_TYPE)
 		return theIterateTableGroupKey_ ? *theIterateTableGroupKey_ : TableGroupKey();
 
-	__SS__ << "Invalid type requested '" << type << "'" << __E__;
-	__COUT_ERR__ << ss.str();
+	__SS__ << "IMPOSSIBLE! Invalid type requested '" << (int)type << "'" << __E__;
 	__SS_THROW__;
-}
+} //end getActiveGroupKey()
 
 //==============================================================================
 ConfigurationTree ConfigurationManager::getContextNode(
@@ -1761,7 +1757,7 @@ ConfigurationTree ConfigurationManager::getContextNode(
 {
 	return getNode("/" + getTableByName(XDAQ_CONTEXT_TABLE_NAME)->getTableName() + "/" +
 	               contextUID);
-}
+} //end getContextNode()
 
 //==============================================================================
 ConfigurationTree ConfigurationManager::getSupervisorNode(
@@ -2268,22 +2264,44 @@ std::shared_ptr<TableGroupKey> ConfigurationManager::makeTheTableGroupKey(
 			return theConfigurationTableGroupKey_;
 	}
 	return std::shared_ptr<TableGroupKey>(new TableGroupKey(key));
-}
+} //end makeTheTableGroupKey()
+
 //==============================================================================
 const std::set<std::string>& ConfigurationManager::getContextMemberNames()
 {
 	return ConfigurationManager::contextMemberNames_;
-}
+} //end getContextMemberNames()
+
 //==============================================================================
 const std::set<std::string>& ConfigurationManager::getBackboneMemberNames()
 {
 	return ConfigurationManager::backboneMemberNames_;
-}
+} //end getBackboneMemberNames()
+
 //==============================================================================
 const std::set<std::string>& ConfigurationManager::getIterateMemberNames()
 {
 	return ConfigurationManager::iterateMemberNames_;
-}
+} //end getIterateMemberNames()
+
+const std::set<std::string>& ConfigurationManager::getConfigurationMemberNames(void)
+{
+	configurationMemberNames_.clear();
+
+	std::map<std::string, TableVersion> activeTables = getActiveVersions();
+
+	for(auto& tablePair:activeTables)
+		if(ConfigurationManager::contextMemberNames_.find(tablePair.first) ==
+				ConfigurationManager::contextMemberNames_.end() &&
+				ConfigurationManager::backboneMemberNames_.find(tablePair.first) ==
+						ConfigurationManager::backboneMemberNames_.end() &&
+						ConfigurationManager::iterateMemberNames_.find(tablePair.first) ==
+								ConfigurationManager::iterateMemberNames_.end())
+			configurationMemberNames_.emplace(tablePair.first);
+
+	return configurationMemberNames_;
+} //end getConfigurationMemberNames()
+
 
 //==============================================================================
 void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)

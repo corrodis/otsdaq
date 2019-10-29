@@ -31,7 +31,8 @@ class ARTDAQTableBase : public TableBase
 		BoardReader,
 		EventBuilder,
 		DataLogger,
-		Dispatcher
+		Dispatcher,
+		Monitor
 	};
 
 	static struct ProcessTypes
@@ -40,6 +41,7 @@ class ARTDAQTableBase : public TableBase
 		std::string const BUILDER     	= "builder";
 		std::string const LOGGER        = "logger";
 		std::string const DISPATCHER    = "dispatcher";
+		std::string const MONITOR    	= "monitor";
 	} processTypes_;
 
 	enum {
