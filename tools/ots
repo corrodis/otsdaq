@@ -281,7 +281,7 @@ echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 function killproc
 {
 	pid=$1
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Rev}Killing PID${Reset} ${pid}"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Rev}Killing process ID ${Reset}${pid}"
 	count=10
 	kill -0 ${pid} >/dev/null 2>&1
 	while [ $? -eq 0 ]; do
@@ -329,7 +329,7 @@ function killprocs
 
 		for contextPID in "${ContextPIDArray[@]}"
 		do
-			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Rev}Killing Nongateway-PID${Reset} ${contextPID}"
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Rev}Killing Non-gateway process ID ${Reset} ${contextPID}"
 			killproc ${contextPID}
 
 		done

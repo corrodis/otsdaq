@@ -125,10 +125,11 @@ struct TableEditStruct
 	TableEditStruct()
 	{
 		__SS__ << "impossible!" << std::endl;
+		ss << StringMacros::stackTrace();
 		__SS_THROW__;
 	}
-	TableEditStruct(const std::string& tableName, ConfigurationManagerRW* cfgMgr)
-	    : createdTemporaryVersion_(false), modified_(false), tableName_(tableName)
+	TableEditStruct(const std::string& tableName, ConfigurationManagerRW* cfgMgr, bool markModified = false)
+	    : createdTemporaryVersion_(false), modified_(markModified), tableName_(tableName)
 	{
 		__COUT__ << "Creating Table-Edit Struct for " << tableName_ << std::endl;
 		table_ = cfgMgr->getTableByName(tableName_);
@@ -160,28 +161,35 @@ struct TableEditStruct
 struct GroupEditStruct
 {
 	// everything needed for editing a group and its tables
+private:
 	std::map<std::string, TableVersion> 	groupMembers_;
 	std::map<std::string, TableEditStruct> 	groupTables_;
+public:
 	const ConfigurationManager::GroupType	groupType_;
 	const std::string 						originalGroupName_;
 	const TableGroupKey						originalGroupKey_;
+private:
 	ConfigurationManagerRW* 				cfgMgr_;
-
+public:
 	/////
 	GroupEditStruct()
 		: groupType_(ConfigurationManager::GroupType::CONFIGURATION_TYPE) {__SS__ << "impossible!" << __E__; __SS_THROW__;}
 	GroupEditStruct(const ConfigurationManager::GroupType& groupType, ConfigurationManagerRW* cfgMgr);
 
-	void dropChanges(void);
-	void saveChanges(
-			const std::string& groupNameToSave,
-			TableGroupKey& newGroupKey,
-			bool* foundEquivalentGroupKey = nullptr,
-			bool activateNewGroup = false,
-			bool updateGroupAliases = false,
-			bool updateTableAliases = false,
-			TableGroupKey* newBackboneKey = nullptr,
-			bool* foundEquivalentBackboneKey = nullptr);
+	~GroupEditStruct();
+
+	void 				dropChanges				(void);
+	void 				saveChanges				(
+												const std::string& groupNameToSave,
+												TableGroupKey& newGroupKey,
+												bool* foundEquivalentGroupKey = nullptr,
+												bool activateNewGroup = false,
+												bool updateGroupAliases = false,
+												bool updateTableAliases = false,
+												TableGroupKey* newBackboneKey = nullptr,
+												bool* foundEquivalentBackboneKey = nullptr);
+
+	TableEditStruct& 	getTableEditStruct		(const std::string& tableName, bool markModified = false);
 
 };  // end GroupEditStruct declaration
 

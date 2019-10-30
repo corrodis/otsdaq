@@ -974,6 +974,266 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 	                                 true /*onlyLoadIfBackboneOrContext*/
 	);
 
+	const std::string backboneGroupName =
+	    cfgMgr->getActiveGroupName(ConfigurationManager::GroupType::BACKBONE_TYPE);
+
+
+	GroupEditStruct contextGroupEdit(ConfigurationManager::GroupType::CONTEXT_TYPE,cfgMgr);
+
+	// Steps:
+	//	- Create record in DesktopIconTable
+	//	- Create parameter records in DesktopWindowParameterTable
+	//	- Create new Context group
+	//	- Update Aliases from old Context group to new Context group
+	//	- Activate new group
+
+	TableEditStruct& iconTable = contextGroupEdit.getTableEditStruct(
+			DesktopIconTable::ICON_TABLE, true /*markModified*/);
+	TableEditStruct& parameterTable = contextGroupEdit.getTableEditStruct(
+			DesktopIconTable::PARAMETER_TABLE, true /*markModified*/);
+	TableEditStruct& appTable = contextGroupEdit.getTableEditStruct(
+			ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME);
+
+	// Create record in DesktopIconTable
+	try
+	{
+		unsigned int row;
+		std::string  iconUID;
+
+		// create icon record
+		row = iconTable.tableView_->addRow(
+		    author, true /*incrementUniqueData*/, "generatedIcon");
+		iconUID =
+		    iconTable.tableView_->getDataView()[row][iconTable.tableView_->getColUID()];
+
+		__COUTV__(row);
+		__COUTV__(iconUID);
+
+		// set icon status true
+		iconTable.tableView_->setValueAsString(
+		    "1", row, iconTable.tableView_->getColStatus());
+
+		// set caption value
+		iconTable.tableView_->setURIEncodedValue(
+		    iconCaption,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_CAPTION));
+		// set alt text value
+		iconTable.tableView_->setURIEncodedValue(
+		    iconAltText,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_ALTERNATE_TEXT));
+		// set force one instance value
+		iconTable.tableView_->setValueAsString(
+		    enforceOneWindowInstance ? "1" : "0",
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_FORCE_ONLY_ONE_INSTANCE));
+		// set permissions value
+		iconTable.tableView_->setURIEncodedValue(
+		    iconPermissions,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_PERMISSIONS));
+		// set image URL value
+		iconTable.tableView_->setURIEncodedValue(
+		    iconImageURL,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_IMAGE_URL));
+		// set window URL value
+		iconTable.tableView_->setURIEncodedValue(
+		    iconWindowURL,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_WINDOW_CONTENT_URL));
+		// set folder value
+		iconTable.tableView_->setURIEncodedValue(
+		    iconFolderPath,
+		    row,
+		    iconTable.tableView_->findCol(DesktopIconTable::COL_FOLDER_PATH));
+
+		// create link to icon app
+		if(windowLinkedAppLID > 0)
+		{
+			__COUTV__(windowLinkedAppLID);
+
+			int appRow = appTable.tableView_->findRow(
+			    appTable.tableView_->findCol(XDAQContextTable::colApplication_.colId_),
+			    windowLinkedAppLID);
+			windowLinkedApp =
+			    appTable.tableView_
+			        ->getDataView()[appRow][appTable.tableView_->getColUID()];
+			__COUT__ << "Found app by LID: " << windowLinkedApp << __E__;
+		}  // end linked app LID handling
+
+		if(windowLinkedApp != "" && windowLinkedApp != "undefined" &&
+		   windowLinkedApp != TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+		{
+			// first check that UID exists
+			//	if not, interpret as app class type and
+			//	check for unique 'enabled' app with class type
+			__COUTV__(windowLinkedApp);
+
+			if(!windowLinkedAppLID)  // no need to check if LID lookup happened already
+			{
+				try
+				{
+					int appRow = appTable.tableView_->findRow(
+					    appTable.tableView_->getColUID(), windowLinkedApp);
+				}
+				catch(const std::runtime_error& e)
+				{
+					// attempt to treat like class, and take first match
+					try
+					{
+						int appRow = appTable.tableView_->findRow(
+						    appTable.tableView_->findCol(
+						        XDAQContextTable::colApplication_.colClass_),
+						    windowLinkedApp);
+						windowLinkedApp =
+						    appTable.tableView_
+						        ->getDataView()[appRow][appTable.tableView_->getColUID()];
+					}
+					catch(...)
+					{
+						// failed to treat like class, so throw original
+						__SS__ << "Failed to create an icon linking to app '"
+						       << windowLinkedApp
+						       << ".' The following error occurred: " << e.what()
+						       << __E__;
+						__SS_THROW__;
+					}
+				}
+			}
+			__COUTV__(windowLinkedApp);
+
+			iconTable.tableView_->setValueAsString(
+			    ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
+			    row,
+			    iconTable.tableView_->findCol(DesktopIconTable::COL_APP_LINK));
+			iconTable.tableView_->setValueAsString(
+			    windowLinkedApp,
+			    row,
+			    iconTable.tableView_->findCol(DesktopIconTable::COL_APP_LINK_UID));
+		}  // end create app link
+
+		// parse parameters
+		std::map<std::string, std::string> parameters;
+
+		__COUTV__(windowParameters);
+		StringMacros::getMapFromString(windowParameters, parameters);
+
+		// create link to icon parameters
+		if(parameters.size())
+		{
+			// set parameter link table
+			iconTable.tableView_->setValueAsString(
+			    DesktopIconTable::PARAMETER_TABLE,
+			    row,
+			    iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_LINK));
+			// set parameter link Group ID
+			iconTable.tableView_->setValueAsString(
+			    iconUID + "_Parameters",
+			    row,
+			    iconTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_LINK_GID));
+
+			__COUTV__(StringMacros::mapToString(parameters));
+
+			for(const auto& parameter : parameters)
+			{
+				// create parameter record
+				row = parameterTable.tableView_->addRow(
+				    author, true /*incrementUniqueData*/, "generatedParameter");
+
+				// set parameter status true
+				parameterTable.tableView_->setValueAsString(
+				    "1", row, parameterTable.tableView_->getColStatus());
+				// set parameter Group ID
+				parameterTable.tableView_->setValueAsString(
+				    iconUID + "_Parameters",
+				    row,
+				    parameterTable.tableView_->findCol(
+				        DesktopIconTable::COL_PARAMETER_GID));
+				// set parameter key
+				parameterTable.tableView_->setURIEncodedValue(
+				    parameter.first,
+				    row,
+				    parameterTable.tableView_->findCol(
+				        DesktopIconTable::COL_PARAMETER_KEY));
+				// set parameter value
+				parameterTable.tableView_->setURIEncodedValue(
+				    parameter.second,
+				    row,
+				    parameterTable.tableView_->findCol(
+				        DesktopIconTable::COL_PARAMETER_VALUE));
+			}  // end parameter loop
+
+			std::stringstream ss;
+			parameterTable.tableView_->print(ss);
+			__COUT__ << ss.str();
+
+			parameterTable.tableView_
+			    ->init();  // verify new table (throws runtime_errors)
+
+		}  // end create parameters link
+
+		std::stringstream ss;
+		iconTable.tableView_->print(ss);
+		__COUT__ << ss.str();
+
+		iconTable.tableView_->init();  // verify new table (throws runtime_errors)
+	}
+	catch(...)
+	{
+		__COUT__ << "Icon table errors while saving. Erasing all newly "
+		            "created table versions."
+		         << __E__;
+
+		throw;  // re-throw
+	}           // end catch
+
+	__COUT__ << "Edits complete for new desktop icon, now making persistent tables."
+	         << __E__;
+
+	// all edits are complete and tables verified
+
+	// Remaining steps:
+	//	save tables
+	//	save new context group and activate it
+	//	check for aliases ...
+	//		if tables aliased.. update table aliases in backbone
+	//		if context group aliased, update group aliases in backbone
+	//	if backbone modified, save group and activate it
+
+	TableGroupKey newContextKey;
+	bool foundEquivalentContextKey;
+	TableGroupKey newBackboneKey;
+	bool foundEquivalentBackboneKey;
+
+	contextGroupEdit.saveChanges(
+			contextGroupEdit.originalGroupName_,
+			newContextKey,
+			&foundEquivalentContextKey,
+			true /*activateNewGroup*/,
+			true /*updateGroupAliases*/,
+			true /*updateTableAliases*/,
+			&newBackboneKey,
+			&foundEquivalentBackboneKey
+			);
+
+
+	xmlOut.addTextElementToData("contextGroupName", contextGroupEdit.originalGroupName_);
+	xmlOut.addTextElementToData("contextGroupKey", newContextKey.toString());
+
+	xmlOut.addTextElementToData("backboneGroupName", backboneGroupName);
+	xmlOut.addTextElementToData("backboneGroupKey", newBackboneKey.toString());
+
+	// always add active table groups to xml response
+	ConfigurationSupervisorBase::getConfigurationStatusXML(xmlOut, cfgMgr);
+
+	return;
+	//---------------------------------------------------
+
+	if(0)
+	{
+
 	//	save map of group members get context members active table versions
 	std::map<std::string, TableVersion> contextGroupMembers;
 	std::map<std::string, TableVersion> backboneGroupMembers;
@@ -1572,6 +1832,8 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 	// always add active table groups to xml response
 	ConfigurationSupervisorBase::getConfigurationStatusXML(xmlOut, cfgMgr);
+
+	}
 
 }  // end handleAddDesktopIconXML()
 catch(std::runtime_error& e)
