@@ -12,7 +12,6 @@ namespace ots
 class XDAQContextTable : public TableBase
 {
   public:
-	static const std::string XDAQ_CONTEXT_TABLE;
 
 	struct XDAQApplicationProperty
 	{

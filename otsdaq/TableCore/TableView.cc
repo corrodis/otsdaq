@@ -903,14 +903,16 @@ void TableView::setValue(const std::string& value, unsigned int row, unsigned in
 		       << StringMacros::demangleTypeName(typeid(value).name()) << "'" << __E__;
 		__SS_THROW__;
 	}
-}
+} //end setValue()
+
+//==============================================================================
 void TableView::setValue(const char* value, unsigned int row, unsigned int col)
 {
 	setValue(std::string(value), row, col);
-}
+} //end setValue()
 
 //==============================================================================
-// setValue
+// setValueAsString
 //	string version
 void TableView::setValueAsString(const std::string& value,
                                  unsigned int       row,
@@ -923,7 +925,149 @@ void TableView::setValueAsString(const std::string& value,
 	}
 
 	theDataView_[row][col] = value;
-}
+} //end setValueAsString()
+
+//==============================================================================
+// setUniqueColumnValue
+//	Auto-generates a unique value for the specified column and places
+//	 value at row,col position (a la add row unique value handling)
+//
+//	Note: doMathAppendStrategy enables appending with a match string
+//		e.g. ${PORT} + 1 .. then + 2, etc. (i.e. baseValueAsString = "${PORT}")
+const std::string& TableView::setUniqueColumnValue(
+                                 unsigned int       row,
+                                 unsigned int       col,
+								 std::string baseValueAsString /*= "" */,
+								 bool doMathAppendStrategy /*= false*/)
+{
+	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
+	{
+		__SS__ << "Invalid row (" << row << ") col (" << col << ") requested!" << __E__;
+		__SS_THROW__;
+	}
+
+
+	//			__COUT__ << "Current unique data entry is data[" << rowToAdd
+	//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col]
+	//<<
+	//"'"
+	//			         << __E__;
+
+	int maxUniqueData = -1;
+	std::string  tmpString     = "";
+	bool         foundAny;
+	unsigned int index;
+	std::string  numString;
+	std::string  opString; // for doMathAppendStrategy
+	char         indexString[1000];
+
+	// find max in rows
+
+	// this->print();
+
+	for(unsigned int r = 0; r < getNumberOfRows(); ++r)
+	{
+		if(r == row)
+			continue;  // skip row to add
+
+		// find last non numeric character
+
+		foundAny  = false;
+		tmpString = theDataView_[r][col];
+
+		//__COUT__ << "tmpString " << tmpString << __E__;
+
+		for(index = tmpString.length() - 1; index < tmpString.length(); --index)
+		{
+			//__COUT__ << index << " tmpString[index] " << tmpString[index] <<
+			//__E__;
+			if(!(tmpString[index] >= '0' && tmpString[index] <= '9'))
+				break;  // if not numeric, break
+			foundAny = true;
+		}
+
+		//__COUT__ << "index " << index << __E__;
+
+		if(tmpString.length() && foundAny)  // then found a numeric substring
+		{
+			// create numeric substring
+			numString = tmpString.substr(index + 1);
+
+			//and alpha basestring
+			tmpString = tmpString.substr(0, index + 1);
+
+			if(doMathAppendStrategy && tmpString.size())
+			{
+				//look for op string
+				foundAny = false;
+				for(index = tmpString.length() - 1; index < tmpString.length(); --index)
+				{
+					//__COUT__ << index << " tmpString[index] " << tmpString[index] <<
+					//__E__;
+					if(!(tmpString[index] == '+' ||
+							tmpString[index] == ' '))
+						break;  // if not plus op, break
+					foundAny = true;
+				}
+
+				if(foundAny)
+				{
+					// create numeric substring
+					opString = tmpString.substr(index + 1);
+
+					//and alpha basestring
+					tmpString = tmpString.substr(0, index + 1);
+
+				}
+			}
+
+			if(baseValueAsString != "" && tmpString != baseValueAsString)
+				continue; //skip max unique number if basestring does not match
+
+			//__COUT__ << "Found unique data base string '" <<
+			//		tmpString << "' and number string '" << numString <<
+			//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
+
+			// extract number
+			sscanf(numString.c_str(), "%u", &index);
+
+			if((int)index > maxUniqueData)
+			{
+				maxUniqueData = (int)index;
+
+				if(baseValueAsString == "")
+					baseValueAsString = tmpString; //assume a value for base string
+			}
+		}
+		else if(maxUniqueData < 0 &&
+				(baseValueAsString == "" || tmpString == baseValueAsString))
+			maxUniqueData = 0; //start a number if basestring conflict
+	}
+
+	if(maxUniqueData == -1) //if no conflicts, then do not add number
+		theDataView_[row][col] = baseValueAsString;
+	else
+	{
+		++maxUniqueData;  // increment
+
+		sprintf(indexString, "%u", maxUniqueData);
+
+		//__COUTV__(indexString);
+		//__COUTV__(baseValueAsString);
+
+		if(doMathAppendStrategy)
+			theDataView_[row][col] = baseValueAsString + " + " + indexString;
+		else
+			theDataView_[row][col] = baseValueAsString + indexString;
+	}
+
+	__COUT__ << "New unique data entry is data[" << row << "][" << col
+	         << "] = '" << theDataView_[row][col] << "'" << __E__;
+
+	// this->print();
+
+	return theDataView_[row][col];
+} //end setUniqueColumnValue()
 
 //==============================================================================
 // initColUID
@@ -2515,7 +2659,7 @@ int TableView::fillFromJSON(const std::string& json)
 		}
 		ss << __E__;
 		ss << StringMacros::stackTrace();
-		__SS_THROW__;
+		__SS_ONLY_THROW__;
 	}
 
 	// print();
@@ -2813,9 +2957,9 @@ void TableView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //	if baseNameAutoUID != "", creates a UID based on this base name
 //		and increments and appends an integer relative to the previous last row
 unsigned int TableView::addRow(const std::string& author,
-                               unsigned char      incrementUniqueData,
-                               std::string        baseNameAutoUID,
-                               unsigned int       rowToAdd)
+                               unsigned char      incrementUniqueData /*= false */,
+                               const std::string& baseNameAutoUID /*= "" */,
+                               unsigned int       rowToAdd /*= -1 */)
 {
 	// default to last row
 	if(rowToAdd == (unsigned int)-1)
@@ -2859,85 +3003,95 @@ unsigned int TableView::addRow(const std::string& author,
 		      columnsInfo_[col].getType() ==
 		          TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))))
 		{
-			//			__COUT__ << "Current unique data entry is data[" << rowToAdd
-			//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col]
-			//<<
-			//"'"
-			//			         << __E__;
-
-			maxUniqueData = 0;
-			tmpString     = "";
-			baseString    = "";
-
-			// find max in rows
-
-			// this->print();
-
-			for(unsigned int r = 0; r < getNumberOfRows(); ++r)
-			{
-				if(r == rowToAdd)
-					continue;  // skip row to add
-
-				// find last non numeric character
-
-				foundAny  = false;
-				tmpString = theDataView_[r][col];
-
-				//__COUT__ << "tmpString " << tmpString << __E__;
-
-				for(index = tmpString.length() - 1; index < tmpString.length(); --index)
-				{
-					//__COUT__ << index << " tmpString[index] " << tmpString[index] <<
-					//__E__;
-					if(!(tmpString[index] >= '0' && tmpString[index] <= '9'))
-						break;  // if not numeric, break
-					foundAny = true;
-				}
-
-				//__COUT__ << "index " << index << __E__;
-
-				if(tmpString.length() && foundAny)  // then found a numeric substring
-				{
-					// create numeric substring
-					numString = tmpString.substr(index + 1);
-					tmpString = tmpString.substr(0, index + 1);
-
-					//__COUT__ << "Found unique data base string '" <<
-					//		tmpString << "' and number string '" << numString <<
-					//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
-
-					// extract number
-					sscanf(numString.c_str(), "%u", &index);
-
-					if(index > maxUniqueData)
-					{
-						maxUniqueData = index;
-						baseString    = tmpString;
-					}
-				}
-			}
-
-			++maxUniqueData;  // increment
-
-			sprintf(indexString, "%u", maxUniqueData);
-			//__COUT__ << "indexString " << indexString << __E__;
-
-			//__COUT__ << "baseNameAutoUID " << baseNameAutoUID << __E__;
 			if(col == getColUID())
-			{
-				// handle UID case
-				if(baseNameAutoUID != "")
-					theDataView_[rowToAdd][col] = baseNameAutoUID + indexString;
-				else
-					theDataView_[rowToAdd][col] = baseString + indexString;
-			}
+				setUniqueColumnValue(
+						rowToAdd,
+						col,
+						baseNameAutoUID /*baseValueAsString*/);
 			else
-				theDataView_[rowToAdd][col] = baseString + indexString;
-
-			__COUT__ << "New unique data entry is data[" << rowToAdd << "][" << col
-			         << "] = '" << theDataView_[rowToAdd][col] << "'" << __E__;
-
-			// this->print();
+				setUniqueColumnValue(
+						rowToAdd,
+						col);
+//
+//			//			__COUT__ << "Current unique data entry is data[" << rowToAdd
+//			//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col]
+//			//<<
+//			//"'"
+//			//			         << __E__;
+//
+//			maxUniqueData = 0;
+//			tmpString     = "";
+//			baseString    = "";
+//
+//			// find max in rows
+//
+//			// this->print();
+//
+//			for(unsigned int r = 0; r < getNumberOfRows(); ++r)
+//			{
+//				if(r == rowToAdd)
+//					continue;  // skip row to add
+//
+//				// find last non numeric character
+//
+//				foundAny  = false;
+//				tmpString = theDataView_[r][col];
+//
+//				//__COUT__ << "tmpString " << tmpString << __E__;
+//
+//				for(index = tmpString.length() - 1; index < tmpString.length(); --index)
+//				{
+//					//__COUT__ << index << " tmpString[index] " << tmpString[index] <<
+//					//__E__;
+//					if(!(tmpString[index] >= '0' && tmpString[index] <= '9'))
+//						break;  // if not numeric, break
+//					foundAny = true;
+//				}
+//
+//				//__COUT__ << "index " << index << __E__;
+//
+//				if(tmpString.length() && foundAny)  // then found a numeric substring
+//				{
+//					// create numeric substring
+//					numString = tmpString.substr(index + 1);
+//					tmpString = tmpString.substr(0, index + 1);
+//
+//					//__COUT__ << "Found unique data base string '" <<
+//					//		tmpString << "' and number string '" << numString <<
+//					//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
+//
+//					// extract number
+//					sscanf(numString.c_str(), "%u", &index);
+//
+//					if(index > maxUniqueData)
+//					{
+//						maxUniqueData = index;
+//						baseString    = tmpString;
+//					}
+//				}
+//			}
+//
+//			++maxUniqueData;  // increment
+//
+//			sprintf(indexString, "%u", maxUniqueData);
+//			//__COUT__ << "indexString " << indexString << __E__;
+//
+//			//__COUT__ << "baseNameAutoUID " << baseNameAutoUID << __E__;
+//			if(col == getColUID())
+//			{
+//				// handle UID case
+//				if(baseNameAutoUID != "")
+//					theDataView_[rowToAdd][col] = baseNameAutoUID + indexString;
+//				else
+//					theDataView_[rowToAdd][col] = baseString + indexString;
+//			}
+//			else
+//				theDataView_[rowToAdd][col] = baseString + indexString;
+//
+//			__COUT__ << "New unique data entry is data[" << rowToAdd << "][" << col
+//			         << "] = '" << theDataView_[rowToAdd][col] << "'" << __E__;
+//
+//			// this->print();
 		}
 		else
 			theDataView_[rowToAdd][col] = defaultRowValues[col];

@@ -1498,6 +1498,8 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 
 	__COUT__ << "setAndActivateArtdaqSystem()" << __E__;
 
+	const std::string& author = cfgMgr->getUsername();
+
 	//Steps:
 	//	0. Check for one and only artdaq Supervisor
 	//	1. create/verify subsystems and destinations
@@ -1512,62 +1514,237 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 
 	const XDAQContextTable::XDAQContext* artdaqContext =
 	    contextTable->getTheARTDAQSupervisorContext();
-	if(!artdaqContext)
+	if(1 || !artdaqContext)
 	{
 		__COUT__ << "No artdaq Supervisor found! Creating..." << __E__;
 
-//		//create record in ARTDAQ Supervisor table
-//		//	connect to an App in a Context
-//
-//		TableEditStruct artdaqSupervisorTable(ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE,
-//		                          cfgMgr);  // Table ready for editing!
-//		TableEditStruct appTable(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
-//		                         cfgMgr);  // Table ready for editing!
-//		TableEditStruct contextTable(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,
-//		                         cfgMgr);  // Table ready for editing!
-//
-//		//open try for handling temporary table errors
-//		try
-//		{
-//
-//		}
-//		catch(...)
-//		{
-//			__COUT__ << "Table errors while saving. Erasing all newly "
-//			            "created table versions."
-//			         << __E__;
-//			if(artdaqSupervisorTable.createdTemporaryVersion_)  // if temporary version created here
-//			{
-//				__COUT__ << "Erasing temporary version " << artdaqSupervisorTable.tableName_ << "-v"
-//				         << artdaqSupervisorTable.temporaryVersion_ << __E__;
-//				// erase with proper version management
-//				cfgMgr->eraseTemporaryVersion(artdaqSupervisorTable.tableName_,
-//						artdaqSupervisorTable.temporaryVersion_);
-//			}
-//
-//			if(parameterTable.createdTemporaryVersion_)  // if temporary version created here
-//			{
-//				__COUT__ << "Erasing temporary version " << parameterTable.tableName_ << "-v"
-//				         << parameterTable.temporaryVersion_ << __E__;
-//				// erase with proper version management
-//				cfgMgr->eraseTemporaryVersion(parameterTable.tableName_,
-//				                              parameterTable.temporaryVersion_);
-//			}
-//
-//			if(appTable.createdTemporaryVersion_)  // if temporary version created here
-//			{
-//				__COUT__ << "Erasing temporary version " << appTable.tableName_ << "-v"
-//				         << appTable.temporaryVersion_ << __E__;
-//				// erase with proper version management
-//				cfgMgr->eraseTemporaryVersion(appTable.tableName_,
-//				                              appTable.temporaryVersion_);
-//			}
-//
-//			throw;  // re-throw
-//		}           // end catch
+		//create record in ARTDAQ Supervisor table
+		//	connect to an App in a Context
 
-		__COUT__ << "Edits complete for new artdaq Supervisor"
+
+		GroupEditStruct contextGroupEdit(ConfigurationManager::GroupType::CONTEXT_TYPE,cfgMgr);
+
+		TableEditStruct& contextTable = contextGroupEdit.getTableEditStruct(
+				ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME, true /*markModified*/);
+		TableEditStruct& appTable = contextGroupEdit.getTableEditStruct(
+				ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME, true /*markModified*/);
+		TableEditStruct& appPropertyTable = contextGroupEdit.getTableEditStruct(
+				ConfigurationManager::XDAQ_APP_PROPERTY_TABLE_NAME, true /*markModified*/);
+
+		//open try for decorating errors and for clean code scope
+		try
+		{
+			std::string  contextUID;
+			std::string  contextAppGroupID;
+
+			{
+				unsigned int row;
+
+				// create artdaq Supervisor context record
+				row = contextTable.tableView_->addRow(
+						author, true /*incrementUniqueData*/, "artdaqContext");
+				// set context status true
+				contextTable.tableView_->setValueAsString(
+						"1", row, contextTable.tableView_->getColStatus());
+
+				contextUID = contextTable.tableView_->getDataView()[row][contextTable.tableView_->getColUID()];
+
+				__COUTV__(row);
+				__COUTV__(contextUID);
+
+				//set address/port
+				contextTable.tableView_->setValueAsString(
+						"http://${HOSTNAME}",
+						row,
+						contextTable.tableView_->findCol(
+								XDAQContextTable::colContext_.colAddress_));
+				contextTable.tableView_->setUniqueColumnValue(
+						row,
+						contextTable.tableView_->findCol(
+								XDAQContextTable::colContext_.colPort_),
+								"${OTS_MAIN_PORT}",
+								true /*doMathAppendStrategy*/);
+
+				//create group link to artdaq Supervisor app
+				contextTable.tableView_->setValueAsString(
+						ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
+						row,
+						contextTable.tableView_->findCol(
+								XDAQContextTable::colContext_.colLinkToApplicationTable_));
+				contextAppGroupID = contextTable.tableView_->setUniqueColumnValue(
+						row,
+						contextTable.tableView_->findCol(
+								XDAQContextTable::colContext_.colLinkToApplicationGroupID_),
+								"artdaqContextApps");
+
+				__COUTV__(contextAppGroupID);
+
+			} //end create context entry
+
+			//create artdaq Supervisor app
+			std::string  appUID;
+			std::string  appPropertiesGroupID;
+
+			{
+				unsigned int row;
+
+				// create artdaq Supervisor context record
+				row = appTable.tableView_->addRow(
+						author, true /*incrementUniqueData*/, "artdaqSupervisor");
+				// set app status true
+				appTable.tableView_->setValueAsString(
+						"1", row, appTable.tableView_->getColStatus());
+
+				appUID = appTable.tableView_->getDataView()[row][appTable.tableView_->getColUID()];
+
+				__COUTV__(row);
+				__COUTV__(appUID);
+
+				//set class
+				appTable.tableView_->setValueAsString(
+						"ots::ARTDAQSupervisor",
+						row,
+						appTable.tableView_->findCol(
+								XDAQContextTable::colApplication_.colClass_));
+				//set module
+				appTable.tableView_->setValueAsString(
+						"${OTSDAQ_LIB}/libARTDAQSupervisor.so",
+						row,
+						appTable.tableView_->findCol(
+								XDAQContextTable::colApplication_.colModule_));
+				//set groupid
+				appTable.tableView_->setValueAsString(
+						contextAppGroupID,
+						row,
+						appTable.tableView_->findCol(
+								XDAQContextTable::colApplication_.colApplicationGroupID_));
+
+				//create group link to artdaq Supervisor app properties
+				appTable.tableView_->setValueAsString(
+						ConfigurationManager::XDAQ_APP_PROPERTY_TABLE_NAME,
+						row,
+						appTable.tableView_->findCol(
+								XDAQContextTable::colApplication_.colLinkToPropertyTable_));
+				appPropertiesGroupID = appTable.tableView_->setUniqueColumnValue(
+						row,
+						appTable.tableView_->findCol(
+								XDAQContextTable::colApplication_.colLinkToPropertyGroupID_),
+								appUID + "Properties");
+
+				__COUTV__(appPropertiesGroupID);
+			} //end create app entry
+
+			//create artdaq Supervisor properties
+			{
+				unsigned int row;
+
+				const std::vector<std::string> propertyUIDs = {
+						"Partition0",
+						"ProductsDir",
+						"FragmentSize",
+						"BoardReaderTimeout",
+						"EventBuilderTimeout",
+						"DataLoggerTimeout",
+						"DispatcherTimeout"
+				};
+				const std::vector<std::string> propertyNames = {
+						"partition",					//"Partition0",
+						"productsdir_for_bash_scripts",	//"ProductsDir",
+						"max_fragment_size_bytes",		//"FragmentSize",
+						"boardreader_timeout",			//"BoardReaderTimeout",
+						"eventbuilder_timeout",			//"EventBuilderTimeout",
+						"datalogger_timeout",			//"DataLoggerTimeout",
+						"dispatcher_timeout"			//"DispatcherTimeout"
+				};
+				const std::vector<std::string> propertyValues = {
+						"0", 				//"Partition0",
+						"${OTS_PRODUCTS}",	//"ProductsDir",
+						"1284180560",		//"FragmentSize",
+						"600",				//"BoardReaderTimeout",
+						"600",				//"EventBuilderTimeout",
+						"600",				//"DataLoggerTimeout",
+						"600"				//"DispatcherTimeout"
+				};
+
+				for(unsigned int i=0;i<propertyNames.size();++i)
+				{
+					// create artdaq Supervisor context record
+					row = appPropertyTable.tableView_->addRow(
+							author, true /*incrementUniqueData*/,
+							appUID + propertyUIDs[i]);
+					// set app status true
+					appPropertyTable.tableView_->setValueAsString(
+							"1", row, appTable.tableView_->getColStatus());
+
+					//set type
+					appPropertyTable.tableView_->setValueAsString(
+							"ots::SupervisorProperty",
+							row,
+							appPropertyTable.tableView_->findCol(
+									XDAQContextTable::colAppProperty_.colPropertyType_));
+					//set name
+					appPropertyTable.tableView_->setValueAsString(
+							propertyNames[i],
+							row,
+							appPropertyTable.tableView_->findCol(
+									XDAQContextTable::colAppProperty_.colPropertyName_));
+					//set value
+					appPropertyTable.tableView_->setValueAsString(
+							propertyValues[i],
+							row,
+							appPropertyTable.tableView_->findCol(
+									XDAQContextTable::colAppProperty_.colPropertyValue_));
+					//set groupid
+					appPropertyTable.tableView_->setValueAsString(
+							appPropertiesGroupID,
+							row,
+							appPropertyTable.tableView_->findCol(
+									XDAQContextTable::colAppProperty_.colPropertyGroupID_));
+				} //end property create loop
+			} //end create app property entries
+
+
+			{
+				std::stringstream ss;
+				contextTable.tableView_->print(ss);
+				__COUT__ << ss.str();
+			}
+			{
+				std::stringstream ss;
+				appTable.tableView_->print(ss);
+				__COUT__ << ss.str();
+			}
+			{
+				std::stringstream ss;
+				appPropertyTable.tableView_->print(ss);
+				__COUT__ << ss.str();
+			}
+
+			contextTable.tableView_->init();  // verify new table (throws runtime_errors)
+			appTable.tableView_->init();  // verify new table (throws runtime_errors)
+			appPropertyTable.tableView_->init();  // verify new table (throws runtime_errors)
+		}
+		catch(...)
+		{
+			__COUT__ << "Table errors while creating ARTDAQ Supervisor. Erasing all newly "
+					"created table versions."
+					<< __E__;
+			throw;  // re-throw
+		}           // end catch
+
+
+		__COUT__ << "Edits complete for new artdaq Supervisor!"
 		         << __E__;
+
+		TableGroupKey newContextGroupKey;
+		contextGroupEdit.saveChanges(
+				contextGroupEdit.originalGroupName_,
+				newContextGroupKey,
+				nullptr /*foundEquivalentGroupKey*/,
+				true /*activateNewGroup*/,
+				true /*updateGroupAliases*/,
+				true /*updateTableAliases*/);
+
 	} //end artdaq Supervisor verification
 
 	for(auto& subsystemPair:subsystemObjectMap)

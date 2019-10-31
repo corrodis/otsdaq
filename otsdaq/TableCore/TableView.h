@@ -16,6 +16,7 @@
 
 namespace ots
 {
+// clang-format off
 class TableView
 {
   public:
@@ -146,17 +147,17 @@ class TableView
 	                                    bool convertEnvironmentVariables = true) const;
 	bool        isURIEncodedCommentTheSame(const std::string& comment) const;
 
-	const DataView&                         getDataView(void) const;
-	const std::vector<TableViewColumnInfo>& getColumnsInfo(void) const;
-	std::vector<TableViewColumnInfo>*       getColumnsInfoP(void);
-	const TableViewColumnInfo&              getColumnInfo(unsigned int column) const;
+	const DataView&                         	getDataView					(void) const;
+	const std::vector<TableViewColumnInfo>& 	getColumnsInfo				(void) const;
+	std::vector<TableViewColumnInfo>*       	getColumnsInfoP				(void);
+	const TableViewColumnInfo&             		getColumnInfo				(unsigned int column) const;
 
 	// Setters
 
-	void setUniqueStorageIdentifier(const std::string& storageUID);
-	void setTableName(const std::string& name);
-	void setComment(const std::string& comment);
-	void setURIEncodedComment(const std::string& uriComment);
+	void 										setUniqueStorageIdentifier	(const std::string& storageUID);
+	void 										setTableName				(const std::string& name);
+	void 										setComment					(const std::string& comment);
+	void 										setURIEncodedComment		(const std::string& uriComment);
 	void setAuthor(const std::string& author);
 	void setCreationTime(time_t t);
 	void setLastAccessTime(time_t t = time(0));
@@ -172,6 +173,7 @@ class TableView
 	// Careful: The setValueAsString method is used to set the value without any
 	// consistency check with the data type
 	void setValueAsString(const std::string& value, unsigned int row, unsigned int col);
+	const std::string&							setUniqueColumnValue(unsigned int row, unsigned int col, std::string baseValueAsString = "", bool doMathAppendStrategy = false);
 
 	void         resizeDataView(unsigned int nRows, unsigned int nCols);
 	unsigned int addRow(
@@ -179,7 +181,7 @@ class TableView
 	    unsigned char      incrementUniqueData = false,  // leave as unsigned char rather than
 	                                                // bool, too many things (e.g. strings)
 	                                                // evaluate successfully to bool values
-	    std::string  baseNameAutoUID = "",
+		const std::string&  baseNameAutoUID = "",
 	    unsigned int rowToAdd =
 	        (unsigned int)-1);  // returns index of added row, default is last row
 	void deleteRow(int r);
@@ -238,6 +240,7 @@ class TableView
 
 #include "otsdaq/TableCore/TableView.icc"  //define template functions
 
+// clang-format on
 }  // namespace ots
 
 #endif

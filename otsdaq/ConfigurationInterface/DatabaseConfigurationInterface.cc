@@ -100,8 +100,8 @@ void DatabaseConfigurationInterface::fill(TableBase*   configuration,
 	       << "' version '" << versionstring << "' - are you sure this version exists?\n"
 	       << "Here is the error:\n\n"
 	       << result.second << __E__;
-	__SS_THROW__;
-}
+	__SS_ONLY_THROW__;
+} //end fill()
 
 //==============================================================================
 // write configuration to database
@@ -129,7 +129,6 @@ void DatabaseConfigurationInterface::saveActiveVersion(const TableBase* configur
 		return;
 
 	__SS__ << "DBI Error:" << result.second << __E__;
-	__COUT__ << "\n" << ss.str();
 	__SS_THROW__;
 }
 
@@ -229,13 +228,11 @@ catch(std::exception const& e)
 {
 	__SS__ << "Filter string '" << filterString << "' yielded DBI Exception:" << e.what()
 	       << "\n";
-	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 catch(...)
 {
 	__SS__ << "Filter string '" << filterString << "' yielded DBI Unknown exception.\n";
-	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 

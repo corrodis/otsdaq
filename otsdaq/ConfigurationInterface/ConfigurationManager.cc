@@ -17,6 +17,8 @@ const std::string ConfigurationManager::READONLY_USER = "READONLY_USER";
 const std::string ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME = "XDAQContextTable";
 const std::string ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME =
     "XDAQApplicationTable";
+const std::string ConfigurationManager::XDAQ_APP_PROPERTY_TABLE_NAME =
+    "XDAQApplicationPropertyTable";
 const std::string ConfigurationManager::GROUP_ALIASES_TABLE_NAME = "GroupAliasesTable";
 const std::string ConfigurationManager::VERSION_ALIASES_TABLE_NAME =
     "VersionAliasesTable";

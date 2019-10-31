@@ -31,13 +31,11 @@ XDAQContextTable::ColContext 				XDAQContextTable::colContext_ 		= XDAQContextTa
 XDAQContextTable::ColApplication 			XDAQContextTable::colApplication_ 	= XDAQContextTable::ColApplication();  // initialize static member
 XDAQContextTable::ColApplicationProperty 	XDAQContextTable::colAppProperty_ 	= XDAQContextTable::ColApplicationProperty();  // initialize static member
 
-const std::string XDAQContextTable::XDAQ_CONTEXT_TABLE = "XDAQContextTable";
-
 
 // clang-format on
 
 //========================================================================================================================
-XDAQContextTable::XDAQContextTable(void) : TableBase(XDAQContextTable::XDAQ_CONTEXT_TABLE)
+XDAQContextTable::XDAQContextTable(void) : TableBase(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME)
 , artdaqSupervisorContext_((unsigned int)-1)
 {
 	//////////////////////////////////////////////////////////////////////
@@ -115,7 +113,7 @@ const XDAQContextTable::XDAQContext* XDAQContextTable::getTheARTDAQSupervisorCon
 ConfigurationTree XDAQContextTable::getContextNode(
     const ConfigurationManager* configManager, const std::string& contextUID)
 {
-	return configManager->getNode(XDAQContextTable::XDAQ_CONTEXT_TABLE).getNode(contextUID);
+	return configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME).getNode(contextUID);
 } //end getContextNode()
 
 //========================================================================================================================
@@ -124,7 +122,7 @@ ConfigurationTree XDAQContextTable::getApplicationNode(
     const std::string&          contextUID,
     const std::string&          appUID)
 {
-	return configManager->getNode(XDAQContextTable::XDAQ_CONTEXT_TABLE).getNode(
+	return configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME).getNode(
 	    contextUID + "/" + colContext_.colLinkToApplicationTable_ + "/" + appUID);
 } //end getApplicationNode()
 
@@ -134,7 +132,7 @@ ConfigurationTree XDAQContextTable::getSupervisorConfigNode(
     const std::string&          contextUID,
     const std::string&          appUID)
 {
-	return configManager->getNode(XDAQContextTable::XDAQ_CONTEXT_TABLE).getNode(
+	return configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME).getNode(
 	    contextUID + "/" + XDAQContextTable::colContext_.colLinkToApplicationTable_ +
 		"/" + appUID + "/" +
 		XDAQContextTable::colApplication_.colLinkToSupervisorTable_);
@@ -374,14 +372,14 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 						app.status_)
 				{
 					__COUT__ << "Found " << app.class_ << " in context '" <<
-							contexts_.back().id_ << "'" << __E__;
+							contexts_.back().contextUID_ << "'" << __E__;
 
 					if(artdaqSupervisorContext_ < contexts_.size())
 					{
 						__SS__ << "Error! Only one artdaq Supervisor is allowed to be active - " <<
 								"two encountered in context '" <<
-								contexts_[artdaqSupervisorContext_].id_ << "' and '" <<
-								contexts_.back().id_ << "'..." << __E__;
+								contexts_[artdaqSupervisorContext_].contextUID_ << "' and '" <<
+								contexts_.back().contextUID_ << "'..." << __E__;
 						__SS_THROW__;
 					}
 

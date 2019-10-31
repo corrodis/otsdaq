@@ -1225,9 +1225,11 @@ TableVersion ConfigurationManagerRW::saveModifiedVersion(
 				}
 				catch(const std::runtime_error& e)
 				{
-					__COUT__ << "Error loading historical '" << tableName <<
-							"' version, but ignoring: "
-					         << e.what() << __E__;
+					//ignore error
+
+					//__COUT__ << "Error loading historical '" << tableName <<
+					//		"' version, but ignoring: "
+					//         << e.what() << __E__;
 				}
 			}
 		}
@@ -1376,9 +1378,13 @@ GroupEditStruct::GroupEditStruct(
 //==============================================================================
 GroupEditStruct::~GroupEditStruct()
 {
-	__COUT__ << "Desctructing..." << __E__;
+	__COUT__ << "GroupEditStruct from editing '" <<
+			originalGroupName_ << "(" <<
+			originalGroupKey_ << ")' Destructing..." << __E__;
 	dropChanges();
-	__COUT__ << "Desctructed." << __E__;
+	__COUT__ << "GroupEditStruct from editing '" <<
+			originalGroupName_ << "(" <<
+			originalGroupKey_ << ")' Desctructed." << __E__;
 } //end GroupEditStruct destructor()
 
 //==============================================================================
@@ -1388,7 +1394,9 @@ TableEditStruct& GroupEditStruct::getTableEditStruct(const std::string& tableNam
 	auto it = groupTables_.find(tableName);
 	if(it == groupTables_.end())
 	{
-		__SS__ << "Table '" << tableName << "' not found in table members!" << __E__;
+		__SS__ << "Table '" << tableName << "' not found in table members from editing '" <<
+			originalGroupName_ << "(" <<
+			originalGroupKey_ << ")!'" << __E__;
 		__SS_THROW__;
 	}
 	it->second.modified_ = markModified; //could indicate 'dirty' immediately in user code, which will cause a save of table
@@ -1415,6 +1423,7 @@ void GroupEditStruct::dropChanges()
 					groupTable.second.tableName_,
 					groupTable.second.temporaryVersion_);
 			groupTable.second.createdTemporaryVersion_ = false;
+			groupTable.second.modified_ = false;
 		}
 
 	__COUT__ << "Unsaved changes dropped from editing '" <<
