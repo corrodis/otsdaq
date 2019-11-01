@@ -528,6 +528,21 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 	    #	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromIndexRebuild file exists, so not rebuilding indices."
 	fi
 
+	
+	#convert XDAQ_Context table column	
+	cd $ARTDAQ_DATABASE_FILESYSTEM_PATH
+	sed -i s/ApplicationGroupID/LinkToApplicationGroupID/g XDAQContextTable/*.json #*/ end C++ comment coloring
+	sed -i s/APPLICATION_GROUP_ID/LINK_TO_APPLICATION_GROUP_ID/g XDAQContextTable/*.json #*/ end C++ comment coloring	
+	sed -i s/LinkToLinkToApplicationGroupID/LinkToApplicationGroupID/g XDAQContextTable/*.json #*/ end C++ comment coloring
+	sed -i s/LINK_TO_LINK_TO_APPLICATION_GROUP_ID/LINK_TO_APPLICATION_GROUP_ID/g XDAQContextTable/*.json #*/ end C++ comment coloring		
+	cd - >/dev/null 2>&1
+	cd $USER_DATA/TableInfo
+	sed -i s/ApplicationGroupID/LinkToApplicationGroupID/g XDAQContextTableInfo.xml
+	sed -i s/APPLICATION_GROUP_ID/LINK_TO_APPLICATION_GROUP_ID/g XDAQContextTableInfo.xml
+	sed -i s/LinkToLinkToApplicationGroupID/LinkToApplicationGroupID/g XDAQContextTableInfo.xml
+	sed -i s/LINK_TO_LINK_TO_APPLICATION_GROUP_ID/LINK_TO_APPLICATION_GROUP_ID/g XDAQContextTableInfo.xml	
+	cd - >/dev/null 2>&1
+	
 
 	#check for somewhat-antiquated(pre-configuration-to-table) artdaq database
 	if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2 ]; then

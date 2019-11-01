@@ -131,12 +131,13 @@ struct TableEditStruct
 	TableEditStruct(const std::string& tableName, ConfigurationManagerRW* cfgMgr, bool markModified = false)
 	    : createdTemporaryVersion_(false), modified_(markModified), tableName_(tableName)
 	{
-		__COUT__ << "Creating Table-Edit Struct for " << tableName_ << std::endl;
+		//__COUT__ << "Creating Table-Edit Struct for " << tableName_ << std::endl;
 		table_ = cfgMgr->getTableByName(tableName_);
 
 		if(!(originalVersion_ = table_->getView().getVersion()).isTemporaryVersion())
 		{
-			__COUT__ << "Original '" << tableName_ << "' version is v" << originalVersion_ << std::endl;
+			//__COUT__ << "Original '" << tableName_ << "' version is v" << originalVersion_ << std::endl;
+
 			// create temporary version for editing
 			temporaryVersion_ = table_->createTemporaryView(originalVersion_);
 			cfgMgr->saveNewTable(
@@ -144,11 +145,11 @@ struct TableEditStruct
 			    temporaryVersion_,
 			    true);  // proper bookkeeping for temporary version with the new version
 
-			__COUT__ << "Created '" << tableName_ << "' temporary version " << temporaryVersion_ << std::endl;
+			//__COUT__ << "Created '" << tableName_ << "' temporary version " << temporaryVersion_ << std::endl;
 			createdTemporaryVersion_ = true;
 		}
-		else  // else table is already temporary version
-			__COUT__ << "Using '" << tableName_ << "' temporary version " << temporaryVersion_ << std::endl;
+		//else  // else table is already temporary version
+			//__COUT__ << "Using '" << tableName_ << "' temporary version " << temporaryVersion_ << std::endl;
 
 		tableView_ = table_->getViewP();
 	}

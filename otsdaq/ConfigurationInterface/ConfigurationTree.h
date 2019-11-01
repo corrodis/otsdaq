@@ -18,6 +18,7 @@ class ConfigurationTree
 {
 	friend class ConfigurationGUISupervisor;
 	friend class Iterator;
+	friend class ARTDAQTableBase;
 
 	// clang-format off
   public:

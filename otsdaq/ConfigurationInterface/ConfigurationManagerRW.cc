@@ -713,7 +713,7 @@ TableVersion ConfigurationManagerRW::saveNewTable(const std::string& tableName,
 	// update allTableInfo_ with the new version
 	allTableInfo_[tableName].versions_.insert(newVersion);
 
-	__COUT__ << "New version added to info " << newVersion << __E__;
+	//__COUT__ << "New '" << tableName << "' version added to info " << newVersion << __E__;
 
 	// table->getView().print();
 	return newVersion;
@@ -754,7 +754,7 @@ void ConfigurationManagerRW::eraseTemporaryVersion(const std::string& tableName,
 	}
 	else  // erase target version only
 	{
-		__COUT__ << "Removing '" << tableName << "' version info: " << targetVersion << __E__;
+		//__COUT__ << "Removing '" << tableName << "' version info: " << targetVersion << __E__;
 		auto it = allTableInfo_[tableName].versions_.find(targetVersion);
 		if(it == allTableInfo_[tableName].versions_.end())
 		{
@@ -764,8 +764,8 @@ void ConfigurationManagerRW::eraseTemporaryVersion(const std::string& tableName,
 		}
 		allTableInfo_[tableName].versions_.erase(
 		    allTableInfo_[tableName].versions_.find(targetVersion));
-		__COUT__ << "Target '" << tableName << "' version v" <<
-					targetVersion << " was erased from info." << __E__;
+		//__COUT__ << "Target '" << tableName << "' version v" <<
+		//			targetVersion << " was erased from info." << __E__;
 	}
 } //end eraseTemporaryVersion()
 
@@ -1354,7 +1354,7 @@ GroupEditStruct::GroupEditStruct(
 	for(auto& memberName:memberNames)
 		try
 		{
-			__COUT__ << memberName << " v" << activeTables.at(memberName) << __E__;
+			//__COUT__ << memberName << " v" << activeTables.at(memberName) << __E__;
 			groupMembers_.emplace(
 					std::make_pair(memberName,
 							activeTables.at(memberName)));
@@ -1416,8 +1416,8 @@ void GroupEditStruct::dropChanges()
 	for(auto& groupTable:groupTables_)
 		if(groupTable.second.createdTemporaryVersion_) // if temporary version created here
 		{
-			__COUT__ << "Erasing temporary version " << groupTable.second.tableName_ << "-v"
-			         << groupTable.second.temporaryVersion_ << __E__;
+			//__COUT__ << "Erasing temporary version " << groupTable.second.tableName_ << "-v"
+			//         << groupTable.second.temporaryVersion_ << __E__;
 			// erase with proper version management
 			cfgMgr->eraseTemporaryVersion(
 					groupTable.second.tableName_,

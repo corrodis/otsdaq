@@ -192,7 +192,7 @@ void TableBase::trimTemporary(TableVersion targetVersion)
 		{
 			if(it->first.isTemporaryVersion())
 			{
-				__COUT__ << "Trimming temporary version: " << it->first << __E__;
+				//__COUT__ << "Trimming temporary version: " << it->first << __E__;
 				if(activeTableView_ &&
 				   getViewVersion() == it->first)  // if activeVersion is being erased!
 					deactivate();  // deactivate active view, instead of guessing at next
@@ -205,7 +205,7 @@ void TableBase::trimTemporary(TableVersion targetVersion)
 	}
 	else if(targetVersion.isTemporaryVersion())  // erase target
 	{
-		__COUT__ << "Trimming temporary version: " << targetVersion << __E__;
+		//__COUT__ << "Trimming temporary version: " << targetVersion << __E__;
 		eraseView(targetVersion);
 	}
 	else
@@ -1216,11 +1216,11 @@ TableVersion TableBase::copyView(const TableView&   sourceView,
 TableVersion TableBase::createTemporaryView(TableVersion sourceViewVersion,
                                             TableVersion destTemporaryViewVersion)
 {
-	__COUT__ << "Table: " << getTableName() << __E__;
+	//__COUT__ << "Table: " << getTableName() << __E__;
 
-	__COUT__ << "Num of Views: " << tableViews_.size()
-	         << " (Temporary Views: " << (tableViews_.size() - getNumberOfStoredViews())
-	         << ")" << __E__;
+	//__COUT__ << "Num of Views: " << tableViews_.size()
+	//         << " (Temporary Views: " << (tableViews_.size() - getNumberOfStoredViews())
+	//         << ")" << __E__;
 
 	TableVersion tmpVersion = destTemporaryViewVersion;
 	if(tmpVersion.isInvalid())

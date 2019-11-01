@@ -26,6 +26,23 @@ class ARTDAQTableBase : public TableBase
 
 	static const std::string		ARTDAQ_FCL_PATH;
 	static const std::string		ARTDAQ_SUPERVISOR_TABLE;
+	static const std::string		ARTDAQ_READER_TABLE, ARTDAQ_BUILDER_TABLE, ARTDAQ_LOGGER_TABLE, ARTDAQ_DISPATCHER_TABLE, ARTDAQ_MONITOR_TABLE;
+
+	// ARTDAQ Supervisor Column names
+	static struct ColARTDAQSupervisor
+	{
+		std::string const colDAQInterfaceDebugLevel_      	= "DAQInterfaceDebugLevel";
+		std::string const colDAQSetupScript_               	= "DAQSetupScript";
+
+		std::string const colLinkToBoardReaders_   			= "boardreadersLink";
+		std::string const colLinkToBoardReadersGroupID_ 	= "boardreadersLinkGroupID";
+		std::string const colLinkToEventBuilders_   		= "eventbuildersLink";
+		std::string const colLinkToEventBuildersGroupID_ 	= "eventbuildersLinkGroupID";
+		std::string const colLinkToDataLoggers_   			= "dataloggersLink";
+		std::string const colLinkToDataLoggersGroupID_ 		= "dataloggersLinkGroupID";
+		std::string const colLinkToDispatchers_   			= "dispatchersLink";
+		std::string const colLinkToDispatchersGroupID_ 		= "dispatchersLinkGroupID";
+	} colARTDAQSupervisor_;
 
 	enum class ARTDAQAppType {
 		BoardReader,

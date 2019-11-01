@@ -89,7 +89,6 @@ class XDAQContextTable : public TableBase
 		std::string const colId_      = "Id";
 		std::string const colAddress_ = "Address";
 		std::string const colPort_    = "Port";
-		// std::string const colARTDAQDataPort_					= "ARTDAQDataPort";
 	} colContext_;
 
 	// XDAQ App Column names
