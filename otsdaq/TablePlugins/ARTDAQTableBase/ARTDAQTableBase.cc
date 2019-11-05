@@ -1611,7 +1611,7 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 							artdaqSupervisorUID + "DataLoggers");
 			//create group link to dispatchers
 			artdaqSupervisorTable.tableView_->setValueAsString(
-					ARTDAQTableBase::ARTDAQ_LOGGER_TABLE,
+					ARTDAQTableBase::ARTDAQ_DISPATCHER_TABLE,
 					row,
 					artdaqSupervisorTable.tableView_->findCol(
 							ARTDAQTableBase::colARTDAQSupervisor_.colLinkToDispatchers_));
@@ -1621,6 +1621,11 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 							ARTDAQTableBase::colARTDAQSupervisor_.colLinkToDispatchersGroupID_),
 							artdaqSupervisorUID + "DataLoggers");
 
+			{
+				std::stringstream ss;
+				artdaqSupervisorTable.tableView_->print(ss);
+				__COUT__ << ss.str();
+			}
 		} //end create artdaq Supervisor in configuration group
 
 		//now create artdaq Supervisor parents in context group
@@ -1734,19 +1739,20 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 									XDAQContextTable::colApplication_.colLinkToPropertyGroupID_),
 									appUID + "Properties");
 
+					__COUTV__(appPropertiesGroupID);
+
 					//create group link to artdaq Supervisor app properties
 					appTable.tableView_->setValueAsString(
 							ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE,
 							row,
 							appTable.tableView_->findCol(
 									XDAQContextTable::colApplication_.colLinkToSupervisorTable_));
-					appPropertiesGroupID = appTable.tableView_->setUniqueColumnValue(
+					appTable.tableView_->setValueAsString(
+							artdaqSupervisorUID,
 							row,
 							appTable.tableView_->findCol(
-									XDAQContextTable::colApplication_.colLinkToSupervisorUID_),
-									appUID + "Properties");
+									XDAQContextTable::colApplication_.colLinkToSupervisorUID_));
 
-					__COUTV__(appPropertiesGroupID);
 				} //end create app entry
 
 				//create artdaq Supervisor properties
@@ -1789,7 +1795,7 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 								appUID + propertyUIDs[i]);
 						// set app status true
 						appPropertyTable.tableView_->setValueAsString(
-								"1", row, appTable.tableView_->getColStatus());
+								"1", row, appPropertyTable.tableView_->getColStatus());
 
 						//set type
 						appPropertyTable.tableView_->setValueAsString(
@@ -1876,8 +1882,6 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 
 	}
 
-	//at this point artdaqSupervisor is verified and we have row
-	__COUTV__(artdaqSupervisorRow);
 
 	for(auto& subsystemPair:subsystemObjectMap)
 	{
@@ -1898,9 +1902,52 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 
 	} //end node type loop
 
-	//Step	1. create/verify subsystems and destinations
 
+	//==================================
+	//at this point artdaqSupervisor is verified and we have row
+	__COUTV__(artdaqSupervisorRow);
+
+	//Remaining steps:
+	//Step	1. create/verify subsystems and destinations
 	//Step	2. for each node, create/verify records
+
+	//open try for decorating configuration group errors and for clean code scope
+	try
+	{
+
+		TableEditStruct& artdaqSupervisorTable = configGroupEdit.getTableEditStruct(
+				ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE, true /*markModified*/);
+		{
+			std::stringstream ss;
+			artdaqSupervisorTable.tableView_->print(ss);
+			__COUT__ << ss.str();
+		}
+
+		//Step	1. create/verify subsystems and destinations
+
+		//Step	2. for each node, create/verify records
+
+		artdaqSupervisorTable.tableView_->init();  // verify new table (throws runtime_errors)
+	}
+	catch(...)
+	{
+		__COUT__ << "Table errors while creating ARTDAQ nodes. Erasing all newly "
+				"created table versions."
+				<< __E__;
+		throw;  // re-throw
+	}           // end catch
+
+	__COUT__ << "Edits complete for artdaq nodes and subsystems!"
+			<< __E__;
+
+	TableGroupKey newConfigurationGroupKey;
+	configGroupEdit.saveChanges(
+			configGroupEdit.originalGroupName_,
+			newConfigurationGroupKey,
+			nullptr /*foundEquivalentGroupKey*/,
+			true /*activateNewGroup*/,
+			true /*updateGroupAliases*/,
+			true /*updateTableAliases*/);
 
 } //end setAndActivateArtdaqSystem()
 
