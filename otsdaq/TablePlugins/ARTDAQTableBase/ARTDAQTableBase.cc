@@ -1973,6 +1973,7 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 						artdaqSubsystemTable.tableView_->findCol(
 								ARTDAQTableBase::colARTDAQSubsystem_.colLinkToDestinationUID_));
 			}
+			//else leave disconnected link
 
 		} //end subsystem loop
 
