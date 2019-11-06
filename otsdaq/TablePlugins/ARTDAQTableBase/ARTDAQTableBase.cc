@@ -34,7 +34,8 @@ const std::string ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK 		= "Subsyst
 const std::string ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID 	= "SubsystemLinkUID";
 
 
-const int ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION 			= 0;
+const int ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION 						= 0;
+const std::string ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION_LABEL			= "nullDestinationSubsystem";
 
 ARTDAQTableBase::ColARTDAQSupervisor 	ARTDAQTableBase::colARTDAQSupervisor_ 		= ARTDAQTableBase::ColARTDAQSupervisor();
 ARTDAQTableBase::ColARTDAQSubsystem 	ARTDAQTableBase::colARTDAQSubsystem_ 		= ARTDAQTableBase::ColARTDAQSubsystem();
@@ -1127,7 +1128,7 @@ void ARTDAQTableBase::extractArtdaqInfo(
 		progressBar->step();
 
 	subsystems[ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION].id = ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION;
-	subsystems[ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION].label = "nullDestinationSubsystem";
+	subsystems[ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION].label = ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION_LABEL;
 
 	std::list<ARTDAQTableBase::ProcessInfo>& readerInfo =
 	    processes[ARTDAQTableBase::ARTDAQAppType::BoardReader];
@@ -1957,7 +1958,8 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 					subsystemPair.first);
 
 			if(subsystemPair.second != "" &&
-					subsystemPair.second != TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+					subsystemPair.second != TableViewColumnInfo::DATATYPE_STRING_DEFAULT &&
+					subsystemPair.second != ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION_LABEL)
 			{
 				//set subsystem link
 				artdaqSubsystemTable.tableView_->setValueAsString(

@@ -54,6 +54,7 @@ class ARTDAQTableBase : public TableBase
 		SubsystemInfo() : sources(),destination(0) {}
 	};
 	static const int 		 	NULL_SUBSYSTEM_DESTINATION;
+	static const std::string	NULL_SUBSYSTEM_DESTINATION_LABEL;
 
 	struct ProcessInfo
 	{
