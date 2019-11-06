@@ -1,6 +1,6 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/Macros/TablePluginMacros.h"
-#include "otsdaq/TablePlugins/ARTDAQBoardReaderTable.h"
+#include "otsdaq/TablePlugins/ARTDAQRoutingMasterTable.h"
 #include "otsdaq/TablePlugins/XDAQContextTable.h"
 
 #include <stdio.h>
@@ -11,7 +11,7 @@
 using namespace ots;
 
 //========================================================================================================================
-ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void) : ARTDAQTableBase("ARTDAQBoardReaderTable")
+ARTDAQRoutingMasterTable::ARTDAQRoutingMasterTable(void) : ARTDAQTableBase("ARTDAQRoutingMasterTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -19,10 +19,10 @@ ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void) : ARTDAQTableBase("ARTDAQBo
 }
 
 //========================================================================================================================
-ARTDAQBoardReaderTable::~ARTDAQBoardReaderTable(void) {}
+ARTDAQRoutingMasterTable::~ARTDAQRoutingMasterTable(void) {}
 
 //========================================================================================================================
-void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
+void ARTDAQRoutingMasterTable::init(ConfigurationManager* configManager)
 {
 	// use isFirstAppInContext to only run once per context, for example to avoid
 	//	generating files on local disk multiple times.
@@ -40,14 +40,16 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 
 	// handle fcl file generation, wherever the level of this table
 
-	auto readers = configManager->__SELF_NODE__.getChildren(
+	auto routingMasters = configManager->__SELF_NODE__.getChildren(
 	    /*default filterMap*/ std::map<std::string /*relative-path*/, std::string /*value*/>(),
 	    /*default byPriority*/ false,
 	    /*TRUE! onlyStatusTrue*/ true);
 
-	for(auto& reader : readers)
-		ARTDAQTableBase::outputBoardReaderFHICL(reader.second);
+	for(auto& routingMaster : routingMasters)
+	{
+		ARTDAQTableBase::outputRoutingMasterFHICL(routingMaster.second);
+	}
 
 }  // end init()
 
-DEFINE_OTS_TABLE(ARTDAQBoardReaderTable)
+DEFINE_OTS_TABLE(ARTDAQRoutingMasterTable)

@@ -38,6 +38,13 @@ simple_plugin(ARTDAQBuilderTable "table"
   ARTDAQTableBase
   )
   
+simple_plugin(ARTDAQRoutingMasterTable "table"
+#  TableCore 
+#  ConfigurationInterface
+#  otsdaq_TablePlugins_XDAQContextTable_table
+#  ${CETLIB}
+  ARTDAQTableBase
+  )
 simple_plugin(FESlowControlsTable "table"
   TableCore 
   ConfigurationInterface
