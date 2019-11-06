@@ -42,10 +42,12 @@ class TableView
 	template<class T>  // in included .icc source
 	unsigned int findRow(unsigned int col,
 	                     const T&     value,
-	                     unsigned int offsetRow = 0) const;
+	                     unsigned int offsetRow = 0,
+						 bool			   doNotThrow = false) const;
 	unsigned int findRow(unsigned int       col,
 	                     const std::string& value,
-	                     unsigned int       offsetRow = 0) const;
+	                     unsigned int       offsetRow = 0,
+						 bool			   doNotThrow = false) const;
 
 	template<class T>  // in included .icc source
 	unsigned int findRowInGroup(unsigned int       col,
@@ -185,6 +187,8 @@ class TableView
 	    unsigned int rowToAdd =
 	        (unsigned int)-1);  // returns index of added row, default is last row
 	void deleteRow(int r);
+	void deleteAllRows(void) {theDataView_.clear();}
+
 
 	// Lore did not like this.. wants special access through separate Supervisor for
 	// "Database Management" int		addColumn(std::string name, std::string viewName,

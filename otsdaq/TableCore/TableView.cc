@@ -1551,13 +1551,15 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 //==============================================================================
 unsigned int TableView::findRow(unsigned int       col,
                                 const std::string& value,
-                                unsigned int       offsetRow) const
+                                unsigned int       offsetRow,
+								bool			   doNotThrow /*= false*/) const
 {
 	for(unsigned int row = offsetRow; row < theDataView_.size(); ++row)
 	{
 		if(theDataView_[row][col] == value)
 			return row;
 	}
+	if(doNotThrow) return TableView::INVALID;
 
 	__SS__ << "\tIn view: " << tableName_ << ", Can't find value=" << value
 	       << " in column named " << columnsInfo_[col].getName()

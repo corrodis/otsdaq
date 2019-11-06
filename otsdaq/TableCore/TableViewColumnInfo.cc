@@ -11,6 +11,8 @@
 
 using namespace ots;
 
+// clang-format off
+
 // NOTE: Do NOT put '-' in static const TYPEs because it will mess up javascript handling
 // in the web gui
 const std::string TableViewColumnInfo::TYPE_UID = "UID";
@@ -26,10 +28,9 @@ const std::string TableViewColumnInfo::TYPE_ON_OFF     = "OnOff";
 const std::string TableViewColumnInfo::TYPE_TRUE_FALSE = "TrueFalse";
 const std::string TableViewColumnInfo::TYPE_YES_NO     = "YesNo";
 
-const std::string TableViewColumnInfo::TYPE_START_CHILD_LINK     = "ChildLink";
-const std::string TableViewColumnInfo::TYPE_START_CHILD_LINK_UID = "ChildLinkUID";
-const std::string TableViewColumnInfo::TYPE_START_CHILD_LINK_GROUP_ID =
-    "ChildLinkGroupID";
+const std::string TableViewColumnInfo::TYPE_START_CHILD_LINK     		= "ChildLink";
+const std::string TableViewColumnInfo::TYPE_START_CHILD_LINK_UID 		= "ChildLinkUID";
+const std::string TableViewColumnInfo::TYPE_START_CHILD_LINK_GROUP_ID 	= "ChildLinkGroupID";
 const std::string TableViewColumnInfo::TYPE_START_GROUP_ID = "GroupID";
 const std::string TableViewColumnInfo::TYPE_COMMENT        = "Comment";
 const std::string TableViewColumnInfo::TYPE_AUTHOR         = "Author";
@@ -59,6 +60,8 @@ const std::string TableViewColumnInfo::COL_NAME_STATUS   = "Status";
 const std::string TableViewColumnInfo::COL_NAME_ENABLED  = "Enabled";
 const std::string TableViewColumnInfo::COL_NAME_PRIORITY = "Priority";
 const std::string TableViewColumnInfo::COL_NAME_COMMENT  = "CommentDescription";
+
+// clang-format on
 
 //==============================================================================
 // TableViewColumnInfo

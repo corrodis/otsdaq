@@ -17,10 +17,10 @@ using namespace ots;
 
 // clang-format off
 
-ARTDAQTableBase::ProcessTypes ARTDAQTableBase::processTypes_	= ARTDAQTableBase::ProcessTypes();
-
 const std::string ARTDAQTableBase::ARTDAQ_FCL_PATH 				= std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/";
+
 const std::string ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE 		= "ARTDAQSupervisorTable";
+
 const std::string ARTDAQTableBase::ARTDAQ_READER_TABLE 			= "ARTDAQBoardReaderTable";
 const std::string ARTDAQTableBase::ARTDAQ_BUILDER_TABLE 		= "ARTDAQEventBuilderTable";
 const std::string ARTDAQTableBase::ARTDAQ_LOGGER_TABLE 			= "ARTDAQDataLoggerTable";
@@ -28,12 +28,23 @@ const std::string ARTDAQTableBase::ARTDAQ_DISPATCHER_TABLE 		= "ARTDAQDispatcher
 const std::string ARTDAQTableBase::ARTDAQ_MONITOR_TABLE 		= "ARTDAQMonitorTable";
 const std::string ARTDAQTableBase::ARTDAQ_ROUTING_MASTER_TABLE = "ARTDAQRoutingMasterTable";
 
+const std::string ARTDAQTableBase::ARTDAQ_SUBSYSTEM_TABLE 		= "ARTDAQSubsystemTable";
+
+const std::string ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME 				= "ExecutionHostname";
+const std::string ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK 		= "SubsystemLink";
+const std::string ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID 	= "SubsystemLinkUID";
+
 
 const int ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION 			= 0;
+const std::string ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION_LABEL			= "nullDestinationSubsystem";
 
 ARTDAQTableBase::ArtdaqInfo ARTDAQTableBase::info_;
 
 ARTDAQTableBase::ColARTDAQSupervisor ARTDAQTableBase::colARTDAQSupervisor_ 		= ARTDAQTableBase::ColARTDAQSupervisor();
+ARTDAQTableBase::ColARTDAQSubsystem 	ARTDAQTableBase::colARTDAQSubsystem_ 		= ARTDAQTableBase::ColARTDAQSubsystem();
+
+//Note: processTypes_ must be instantiate after the static artdaq table names (to construct map in constructor)
+ARTDAQTableBase::ProcessTypes ARTDAQTableBase::processTypes_	= ARTDAQTableBase::ProcessTypes();
 
 // clang-format on
 
@@ -1221,7 +1232,7 @@ ARTDAQTableBase::ArtdaqInfo ARTDAQTableBase::extractArtdaqInfo(ConfigurationTree
 	}
 
 	info_.subsystems[NULL_SUBSYSTEM_DESTINATION].id    = NULL_SUBSYSTEM_DESTINATION;
-	info_.subsystems[NULL_SUBSYSTEM_DESTINATION].label = "nullDestinationSubsystem";
+	info_.subsystems[NULL_SUBSYSTEM_DESTINATION].label = NULL_SUBSYSTEM_DESTINATION_LABEL;
 
 	// We do RoutingMasters first so we can properly fill in routing tables later
 	extractRoutingMastersInfo(artdaqSupervisorNode, doWriteFHiCL, routingTimeoutMs, routingRetryCount);
@@ -1358,7 +1369,7 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 					readerHost = "localhost";
 
 				auto readerSubsystemID   = 1;
-				auto readerSubsystemLink = reader.second.getNode("SubsystemLink");
+				auto readerSubsystemLink = reader.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
 				if(!readerSubsystemLink.isDisconnected())
 				{
 					readerSubsystemID = getSubsytemId(readerSubsystemLink);
@@ -1370,7 +1381,7 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 
 					info_.subsystems[readerSubsystemID].label = readerSubsystemName;
 
-					auto readerSubsystemDestinationLink = readerSubsystemLink.getNode("SubsystemDestinationLink");
+					auto readerSubsystemDestinationLink = readerSubsystemLink.getNode(colARTDAQSubsystem_.colLinkToDestination_);
 					if(readerSubsystemDestinationLink.isDisconnected())
 					{
 						// default to no destination when no link
@@ -1436,7 +1447,7 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 					builderHost = "localhost";
 
 				auto builderSubsystemID   = 1;
-				auto builderSubsystemLink = builder.second.getNode("SubsystemLink");
+				auto builderSubsystemLink = builder.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
 				if(!builderSubsystemLink.isDisconnected())
 				{
 					builderSubsystemID = getSubsytemId(builderSubsystemLink);
@@ -1449,7 +1460,7 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 
 					info_.subsystems[builderSubsystemID].label = builderSubsystemName;
 
-					auto builderSubsystemDestinationLink = builderSubsystemLink.getNode("SubsystemDestinationLink");
+					auto builderSubsystemDestinationLink = builderSubsystemLink.getNode(colARTDAQSubsystem_.colLinkToDestination_);
 					if(builderSubsystemDestinationLink.isDisconnected())
 					{
 						// default to no destination when no link
@@ -1514,7 +1525,7 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 					loggerHost = "localhost";
 
 				auto loggerSubsystemID   = 1;
-				auto loggerSubsystemLink = datalogger.second.getNode("SubsystemLink");
+				auto loggerSubsystemLink = datalogger.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
 				if(!loggerSubsystemLink.isDisconnected())
 				{
 					loggerSubsystemID = getSubsytemId(loggerSubsystemLink);
@@ -1526,7 +1537,7 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 
 					info_.subsystems[loggerSubsystemID].label = loggerSubsystemName;
 
-					auto loggerSubsystemDestinationLink = loggerSubsystemLink.getNode("SubsystemDestinationLink");
+					auto loggerSubsystemDestinationLink = loggerSubsystemLink.getNode(colARTDAQSubsystem_.colLinkToDestination_);
 					if(loggerSubsystemDestinationLink.isDisconnected())
 					{
 						// default to no destination when no link
@@ -1586,7 +1597,7 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 					dispatcherHost = "localhost";
 
 				auto dispatcherSubsystemID   = 1;
-				auto dispatcherSubsystemLink = dispatcher.second.getNode("SubsystemLink");
+				auto dispatcherSubsystemLink = dispatcher.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
 				if(!dispatcherSubsystemLink.isDisconnected())
 				{
 					dispatcherSubsystemID = getSubsytemId(dispatcherSubsystemLink);
@@ -1598,7 +1609,7 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 
 					info_.subsystems[dispatcherSubsystemID].label = dispatcherSubsystemName;
 
-					auto dispatcherSubsystemDestinationLink = dispatcherSubsystemLink.getNode("SubsystemDestinationLink");
+					auto dispatcherSubsystemDestinationLink = dispatcherSubsystemLink.getNode(colARTDAQSubsystem_.colLinkToDestination_);
 					if(dispatcherSubsystemDestinationLink.isDisconnected())
 					{
 						// default to no destination when no link
@@ -1645,6 +1656,7 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 //		static function to modify the active configuration based on
 //	node object and subsystem object.
 //
+//	Subsystem map to destination subsystem name.
 //	Node properties: {originalName,hostname,subsystemName}
 //
 void ARTDAQTableBase::setAndActivateArtdaqSystem(
@@ -1708,22 +1720,36 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 			artdaqSupervisorTable.tableView_->setValueAsString(
 			    ARTDAQ_READER_TABLE, row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToBoardReaders_));
 			artdaqSupervisorTable.tableView_->setUniqueColumnValue(
-			    row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToBoardReadersGroupID_), artdaqSupervisorUID + "BoardReaders");
+
+			    row,
+			    artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToBoardReadersGroupID_),
+			    artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.READER));
 			// create group link to event builders
 			artdaqSupervisorTable.tableView_->setValueAsString(
 			    ARTDAQ_BUILDER_TABLE, row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToEventBuilders_));
 			artdaqSupervisorTable.tableView_->setUniqueColumnValue(
-			    row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToEventBuildersGroupID_), artdaqSupervisorUID + "EventBuilders");
+			    row,
+			    artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToEventBuildersGroupID_),
+			    artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.BUILDER));
 			// create group link to data loggers
 			artdaqSupervisorTable.tableView_->setValueAsString(
 			    ARTDAQ_LOGGER_TABLE, row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDataLoggers_));
-			artdaqSupervisorTable.tableView_->setUniqueColumnValue(
-			    row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDataLoggersGroupID_), artdaqSupervisorUID + "DataLoggers");
+			artdaqSupervisorTable.tableView_->setUniqueColumnValue(row,
+			                                                       artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDataLoggersGroupID_),
+			                                                       artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.LOGGER));
 			// create group link to dispatchers
 			artdaqSupervisorTable.tableView_->setValueAsString(
 			    ARTDAQ_DISPATCHER_TABLE, row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDispatchers_));
-			artdaqSupervisorTable.tableView_->setUniqueColumnValue(
-			    row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDispatchersGroupID_), artdaqSupervisorUID + "DataLoggers");
+			artdaqSupervisorTable.tableView_->setUniqueColumnValue(row,
+			                                                       artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDispatchersGroupID_),
+			                                                       artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.DISPATCHER));
+
+			// create group link to routing masters
+			artdaqSupervisorTable.tableView_->setValueAsString(
+			    ARTDAQ_ROUTING_MASTER_TABLE, row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMasters_));
+			artdaqSupervisorTable.tableView_->setUniqueColumnValue(row,
+			                                                       artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMastersGroupID_),
+			                                                       artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.ROUTINGMASTER));
 
 			{
 				std::stringstream ss;
@@ -1944,18 +1970,148 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 	// open try for decorating configuration group errors and for clean code scope
 	try
 	{
+		unsigned int row;
+
 		TableEditStruct& artdaqSupervisorTable = configGroupEdit.getTableEditStruct(ARTDAQ_SUPERVISOR_TABLE, true /*markModified*/);
+
+		// Step	1. create/verify subsystems and destinations
+		TableEditStruct& artdaqSubsystemTable = configGroupEdit.getTableEditStruct(ARTDAQ_SUBSYSTEM_TABLE, true /*markModified*/);
+
+		// clear all records
+		artdaqSubsystemTable.tableView_->deleteAllRows();
+
+		for(auto& subsystemPair : subsystemObjectMap)
+		{
+			__COUTV__(subsystemPair.first);
+			__COUTV__(subsystemPair.second);
+
+			// create artdaq Subsystem record
+			row = artdaqSubsystemTable.tableView_->addRow(author, true /*incrementUniqueData*/, subsystemPair.first);
+
+			if(subsystemPair.second != "" && subsystemPair.second != TableViewColumnInfo::DATATYPE_STRING_DEFAULT &&
+			   subsystemPair.second != NULL_SUBSYSTEM_DESTINATION_LABEL)
+			{
+				// set subsystem link
+				artdaqSubsystemTable.tableView_->setValueAsString(
+				    ARTDAQ_SUBSYSTEM_TABLE, row, artdaqSubsystemTable.tableView_->findCol(colARTDAQSubsystem_.colLinkToDestination_));
+				artdaqSubsystemTable.tableView_->setValueAsString(
+				    subsystemPair.second, row, artdaqSubsystemTable.tableView_->findCol(colARTDAQSubsystem_.colLinkToDestinationUID_));
+			}
+
+		}  // end subsystem loop
+
+		// Step	2. for each node, create/verify records
+		for(auto& nodeTypePair : nodeTypeToObjectMap)
+		{
+			if(nodeTypePair.second.size() == 0)
+				continue;  // skip empty types (table might not be included in config, which is not an error)
+
+			__COUTV__(nodeTypePair.first);
+
+			//__COUTV__(StringMacros::mapToString(processTypes_.mapToTable_));
+
+			auto it = processTypes_.mapToTable_.find(nodeTypePair.first);
+			if(it == processTypes_.mapToTable_.end())
+			{
+				__SS__ << "Invalid artdaq node type '" << nodeTypePair.first << "' attempted!" << __E__;
+				__SS_THROW__;
+			}
+			__COUTV__(it->second);
+
+			TableEditStruct& typeTable = configGroupEdit.getTableEditStruct(it->second, true /*markModified*/);
+
+			for(auto& nodePair : nodeTypePair.second)
+			{
+				__COUTV__(nodePair.first);
+
+				// if original record is found, then commandeer that record
+				//	else create a new record
+				// Node properties: {originalName,hostname,subsystemName}
+				for(unsigned int i = 0; i < nodePair.second.size(); ++i)
+				{
+					__COUTV__(nodePair.second[i]);
+
+					if(i == 0)  // original UID
+					{
+						row = typeTable.tableView_->findRow(typeTable.tableView_->getColUID(), nodePair.second[i], 0 /*offsetRow*/, true /*doNotThrow*/
+						);
+						__COUTV__(row);
+
+						if(row == TableView::INVALID)
+						{
+							// create artdaq type instance record
+							row = typeTable.tableView_->addRow(author, true /*incrementUniqueData*/, nodePair.first);
+							__COUTV__(row);
+						}
+						else  // set UID
+						{
+							typeTable.tableView_->setValueAsString(nodePair.first, row, typeTable.tableView_->getColUID());
+						}
+
+						__COUTV__(StringMacros::mapToString(processTypes_.mapToLinkGroupIDColumn_));
+
+						// set GroupID
+						typeTable.tableView_->setValueAsString(
+						    artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
+						        processTypes_.mapToLinkGroupIDColumn_.at(nodeTypePair.first))],
+						    row,
+						    typeTable.tableView_->findCol(processTypes_.mapToGroupIDColumn_.at(nodeTypePair.first)));
+					}
+					else if(i == 1)  // hostname
+					{
+						// set hostname
+						typeTable.tableView_->setValueAsString(nodePair.second[i], row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_HOSTNAME));
+					}
+					else if(i == 2)  // subsystemName
+					{
+						// set subsystemName
+						if(nodePair.second[i] != "" && nodePair.second[i] != TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+						{
+							// real subsystem?
+							if(subsystemObjectMap.find(nodePair.second[i]) == subsystemObjectMap.end())
+							{
+								__SS__ << "Illegal subsystem '" << nodePair.second[i] << "' mismatch!" << __E__;
+								__SS_THROW__;
+							}
+
+							typeTable.tableView_->setValueAsString(
+							    ARTDAQ_SUBSYSTEM_TABLE, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK));
+							typeTable.tableView_->setValueAsString(
+							    nodePair.second[i], row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID));
+						}
+						else  // no subsystem (i.e. default subsystem)
+						{
+							typeTable.tableView_->setValueAsString(
+							    TableViewColumnInfo::DATATYPE_LINK_DEFAULT, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK));
+						}
+					}
+				}  // end node parameter loop
+
+			}  // end node record loop
+
+			{
+				std::stringstream ss;
+				typeTable.tableView_->print(ss);
+				__COUT__ << ss.str();
+			}
+
+			typeTable.tableView_->init();  // verify new table (throws runtime_errors)
+
+		}  // end node type loop
+
 		{
 			std::stringstream ss;
 			artdaqSupervisorTable.tableView_->print(ss);
 			__COUT__ << ss.str();
 		}
-
-		// Step	1. create/verify subsystems and destinations
-
-		// Step	2. for each node, create/verify records
+		{
+			std::stringstream ss;
+			artdaqSubsystemTable.tableView_->print(ss);
+			__COUT__ << ss.str();
+		}
 
 		artdaqSupervisorTable.tableView_->init();  // verify new table (throws runtime_errors)
+		artdaqSubsystemTable.tableView_->init();   // verify new table (throws runtime_errors)
 	}
 	catch(...)
 	{
