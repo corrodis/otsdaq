@@ -3,11 +3,12 @@
 template<class T>
 unsigned int TableView::findRow(unsigned int col,
                                 const T&     value,
-                                unsigned int offsetRow /*=0*/) const
+                                unsigned int offsetRow /*=0*/,
+								bool			   doNotThrow /*= false*/) const
 {
 	std::stringstream ss;
 	ss << value;
-	return findRow(col, ss.str(), offsetRow);
+	return findRow(col, ss.str(), offsetRow, doNotThrow);
 }  // end findRow<T>()
 
 //==============================================================================
