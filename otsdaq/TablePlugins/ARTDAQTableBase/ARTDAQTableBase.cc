@@ -251,7 +251,7 @@ std::string ARTDAQTableBase::insertModuleType(std::ostream& out, std::string& ta
 
 void ots::ARTDAQTableBase::insertMetricsBlock(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree daqNode)
 {
-	OUT << "metrics: {\n";
+	OUT << "\n\nmetrics: {\n";
 
 	PUSHTAB;
 	auto metricsGroup = daqNode.getNode("daqMetricsLink");
@@ -1143,7 +1143,7 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	auto policyName = routingMasterNode.getNode("routingPolicyPluginType").getValue();
 	if(policyName == "DEFAULT")
 		policyName = "NoOp";
-	OUT << "policy: " << policyName;
+	OUT << "policy: " << policyName << "\n";
 	OUT << "receiver_ranks: BOOKKEEP_ME\n";
 
 	// shared and unique parameters
@@ -1195,16 +1195,16 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	auto tableUpdateIntervalMs = routingMasterNode.getNode("tableUpdateIntervalMs").getValue();
 	if(tableUpdateIntervalMs != "DEFAULT")
 	{
-		OUT << "table_update_interval_ms: " << tableUpdateIntervalMs;
+		OUT << "table_update_interval_ms: " << tableUpdateIntervalMs << "\n";
 	}
 	auto tableAckRetryCount = routingMasterNode.getNode("tableAckRetryCount").getValue();
 	if(tableAckRetryCount != "DEFAULT")
 	{
-		OUT << "table_ack_retry_count: " << tableAckRetryCount;
+		OUT << "table_ack_retry_count: " << tableAckRetryCount << "\n";
 	}
 
-	OUT << "routing_timeout_ms: " << routingTimeoutMs;
-	OUT << "routing_retry_count: " << routingRetryCount;
+	OUT << "routing_timeout_ms: " << routingTimeoutMs << "\n";
+	OUT << "routing_retry_count: " << routingRetryCount << "\n";
 
 	insertMetricsBlock(OUT, tabStr, commentStr, routingMasterNode);
 
