@@ -42,15 +42,19 @@ void ARTDAQDataLoggerTable::init(ConfigurationManager* configManager)
 
 	// handle fcl file generation, wherever the level of this table
 
-	auto        loggers = configManager->__SELF_NODE__.getChildren(
+	auto        dataloggers = configManager->__SELF_NODE__.getChildren(
 			/*default filterMap*/ 		std::map<std::string /*relative-path*/, std::string /*value*/>(),
 		    /*default byPriority*/ 		false,
 		    /*TRUE! onlyStatusTrue*/ 	true);
 
-	for(auto& logger : loggers)
+	for (auto& datalogger : dataloggers)
+	{
 		ARTDAQTableBase::outputDataReceiverFHICL(
-				logger.second,
-				ARTDAQTableBase::ARTDAQAppType::DataLogger);
+			datalogger.second,
+			ARTDAQTableBase::ARTDAQAppType::DataLogger);
+
+		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::DataLogger, datalogger.second.getValue());
+	}
 
 }
 

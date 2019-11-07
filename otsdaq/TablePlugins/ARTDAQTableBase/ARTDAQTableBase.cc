@@ -152,7 +152,7 @@ void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 		fhicl::make_ParameterSet(tbl, pset);
 
 		std::ofstream ofs{outFile};
-		ofs << pset.to_indented_string(0, fhicl::detail::print_mode::annotated);
+		ofs << pset.to_indented_string(0);// , fhicl::detail::print_mode::annotated); // Only really useful for debugging
 	}
 	catch(cet::exception const& e)
 	{

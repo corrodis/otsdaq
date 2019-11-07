@@ -45,8 +45,11 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 	    /*default byPriority*/ false,
 	    /*TRUE! onlyStatusTrue*/ true);
 
-	for(auto& reader : readers)
+	for (auto& reader : readers)
+	{
 		ARTDAQTableBase::outputBoardReaderFHICL(reader.second);
+		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::BoardReader, reader.second.getValue());
+	}
 
 }  // end init()
 

@@ -48,6 +48,7 @@ void ARTDAQRoutingMasterTable::init(ConfigurationManager* configManager)
 	for(auto& routingMaster : routingMasters)
 	{
 		ARTDAQTableBase::outputRoutingMasterFHICL(routingMaster.second);
+		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::RoutingMaster, routingMaster.second.getValue());
 	}
 
 }  // end init()

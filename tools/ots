@@ -366,6 +366,7 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	killall -9 eventbuilder &>/dev/null 2>&1 #hide output
 	killall -9 datalogger &>/dev/null 2>&1 #hide output
 	killall -9 dispatcher &>/dev/null 2>&1 #hide output
+	killall -9 routing_master &>/dev/null 2>&1 #hide output
 	ipcrm -a &>/dev/null 2>&1 #hide output #clean-up shared memory
 	
     echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tDone with ots killall." 

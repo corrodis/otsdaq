@@ -48,10 +48,13 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 		    /*default byPriority*/ 		false,
 		    /*TRUE! onlyStatusTrue*/ 	true);
 
-	for(auto& buider : buiders)
+	for (auto& builder : buiders)
+	{
 		ARTDAQTableBase::outputDataReceiverFHICL(
-				buider.second,
-				ARTDAQTableBase::ARTDAQAppType::EventBuilder);
+			builder.second,
+			ARTDAQTableBase::ARTDAQAppType::EventBuilder);
+		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::EventBuilder, builder.second.getValue());
+	}
 
 }  // end init()
 
