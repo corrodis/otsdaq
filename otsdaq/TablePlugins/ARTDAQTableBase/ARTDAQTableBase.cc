@@ -535,13 +535,13 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 	if(info_.subsystems[readerSubsystemID].hasRoutingMaster)
 	{
 		OUT << "use_routing_master: true\n";
-		OUT << "routing_master_hostname: BOOKKEEP_ME\n";
-		OUT << "table_update_port: BOOKKEEP_ME\n";
-		OUT << "table_update_address: \"BOOKKEEP_ME\"\n";
-		OUT << "table_update_multicast_interface: \"BOOKKEEP_ME\"\n";
-		OUT << "table_acknowledge_port : BOOKKEEP_ME\n";
-		OUT << "routing_timeout_ms: " << routingTimeoutMs;
-		OUT << "routing_retry_count: " << routingRetryCount;
+		OUT << "routing_master_hostname: localhost\n";
+		OUT << "table_update_port: 0\n";
+		OUT << "table_update_address: \"0.0.0.0\"\n";
+		OUT << "table_update_multicast_interface: \"0.0.0.0\"\n";
+		OUT << "table_acknowledge_port : 0\n";
+		OUT << "routing_timeout_ms: " << routingTimeoutMs << "\n";
+		OUT << "routing_retry_count: " << routingRetryCount << "\n";
 	}
 	else
 	{
@@ -687,8 +687,8 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 			if(info_.subsystems[builderSubsystemID].hasRoutingMaster)
 			{
 				OUT << "use_routing_master: true\n";
-				OUT << "routing_master_hostname: BOOKKEEP_ME\n";
-				OUT << "routing_token_port: BOOKKEEP_ME\n";
+				OUT << "routing_master_hostname: localhost\n";
+				OUT << "routing_token_port: 0\n";
 			}
 			else
 			{
@@ -831,13 +831,13 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 					if(info_.subsystems[builderSubsystemID].hasRoutingMaster)
 					{
 						OUT << "use_routing_master: true\n";
-						OUT << "routing_master_hostname: BOOKKEEP_ME\n";
-						OUT << "table_update_port: BOOKKEEP_ME\n";
-						OUT << "table_update_address: \"BOOKKEEP_ME\"\n";
-						OUT << "table_update_multicast_interface: \"BOOKKEEP_ME\"\n";
-						OUT << "table_acknowledge_port : BOOKKEEP_ME\n";
-						OUT << "routing_timeout_ms: " << routingTimeoutMs;
-						OUT << "routing_retry_count: " << routingRetryCount;
+						OUT << "routing_master_hostname: localhost\n";
+						OUT << "table_update_port: 0\n";
+						OUT << "table_update_address: \"0.0.0.0\"\n";
+						OUT << "table_update_multicast_interface: \"0.0.0.0\"\n";
+						OUT << "table_acknowledge_port : 0\n";
+						OUT << "routing_timeout_ms: " << routingTimeoutMs << "\n";
+						OUT << "routing_retry_count: " << routingRetryCount << "\n";
 					}
 					else
 					{
@@ -1144,7 +1144,7 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	if(policyName == "DEFAULT")
 		policyName = "NoOp";
 	OUT << "policy: " << policyName << "\n";
-	OUT << "receiver_ranks: BOOKKEEP_ME\n";
+	OUT << "receiver_ranks: []\n";
 
 	// shared and unique parameters
 	auto parametersLink = routingMasterNode.getNode("routingPolicyParametersLink");
@@ -1178,15 +1178,15 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	OUT << "use_routing_master: true\n";
 
 	// Bookkept parameters
-	OUT << "routing_master_hostname: \"BOOKKEEP_ME\"\n";
-	OUT << "sender_ranks: BOOKKEEP_ME\n";
-	OUT << "table_update_port: BOOKKEEP_ME\n";
-	OUT << "table_update_address: \"BOOKKEEP_ME\"\n";
-	OUT << "table_acknowledge_port: BOOKEEP_ME\n";
+	OUT << "routing_master_hostname: localhost\n";
+	OUT << "sender_ranks: []\n";
+	OUT << "table_update_port: 0\n";
+	OUT << "table_update_address: \"0.0.0.0\"\n";
+	OUT << "table_acknowledge_port: 0\n";
 	OUT << "token_receiver: {\n";
 	PUSHTAB;
 
-	OUT << "routing_token_port: BOOKKEEP_ME\n";
+	OUT << "routing_token_port: 0\n";
 
 	POPTAB;
 	OUT << "}\n";

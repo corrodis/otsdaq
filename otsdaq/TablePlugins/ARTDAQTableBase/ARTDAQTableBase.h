@@ -182,8 +182,8 @@ class ARTDAQTableBase : public TableBase
 		std::string const colLinkToDataLoggersGroupID_    = "dataloggersLinkGroupID";
 		std::string const colLinkToDispatchers_           = "dispatchersLink";
 		std::string const colLinkToDispatchersGroupID_    = "dispatchersLinkGroupID";
-		std::string const colLinkToRoutingMasters_        = "routingMastersLink";
-		std::string const colLinkToRoutingMastersGroupID_ = "routingMastersLinkGroupID";
+		std::string const colLinkToRoutingMasters_        = "routingmastersLink";
+		std::string const colLinkToRoutingMastersGroupID_ = "routingmastersLinkGroupID";
 	} colARTDAQSupervisor_;
 
 	// ARTDAQ Supervisor Column names
