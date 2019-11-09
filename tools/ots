@@ -910,11 +910,14 @@ launchOTSMacromaker() {
 	
 	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$MACROMAKER_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	
+
+	echo -e "${Reset}"
+	echo -e "${Reset}"	
+	
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tots Macro Maker access code = $(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
+	
 	printMainURL &
 	
-	
-	echo -e "${Reset}"
-	echo -e "${Reset}"
 	
 } #end launchOTSMacromaker
 export -f launchOTSMacromaker
@@ -1150,13 +1153,12 @@ launchOTSWiz() {
 	
 	MAIN_URL="http://${HOSTNAME}:${PORT}/urn:xdaq-application:lid=$WIZARD_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	
+	echo -e "${Reset}"
+	echo -e "${Reset}"	
+	
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tots Wiz Mode access code = $(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
+
 	printMainURL &
-
-
-	
-	
-	echo -e "${Reset}"
-	echo -e "${Reset}"
 	
 } #end launchOTSWiz
 export -f launchOTSWiz
@@ -1715,7 +1717,7 @@ printMainURL() {
 	
 	echo
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOpen the URL below in your Google Chrome or Mozilla Firefox web browser:"	
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t(Note: This URL may be on a local network. The URL may change depending on your network configuration)"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\t(Note: This URL may need to be modified by the user depending on their network configuration)"
 
 	if [ $MAIN_URL == "unknown_url" ]; then
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tINFO: No gateway supervisor found for node {${HOSTNAME}}.${Reset}"
@@ -1730,7 +1732,7 @@ printMainURL() {
 		#exit
 		#fi		
 		
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${BICyan}${EUNDERLINE}${MAIN_URL}${Reset}"
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}${EUNDERLINE}${MAIN_URL}${Reset}"
 
 		echo -e "${Reset}"
 		
@@ -1747,7 +1749,7 @@ export -f printMainURL
 otsActionHandler() {
 
     echo		
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Starting action handler...${Reset}"
+	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tStarting action handler...${Reset}"
 
 	#clear file initially
 	echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
