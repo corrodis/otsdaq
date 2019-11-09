@@ -11,8 +11,7 @@
 using namespace ots;
 
 //========================================================================================================================
-ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void)
-    : ARTDAQTableBase("ARTDAQBoardReaderTable")
+ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void) : ARTDAQTableBase("ARTDAQBoardReaderTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -36,22 +35,22 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 	// make directory just in case
 	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH).c_str(), 0755);
 
-//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
-//	__COUT__ << configManager->__SELF_NODE__ << __E__;
-
+	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	//	__COUT__ << configManager->__SELF_NODE__ << __E__;
 
 	// handle fcl file generation, wherever the level of this table
 
-	auto        readers = configManager->__SELF_NODE__.getChildren(
-			/*default filterMap*/ 		std::map<std::string /*relative-path*/, std::string /*value*/>(),
-		    /*default byPriority*/ 		false,
-		    /*TRUE! onlyStatusTrue*/ 	true);
+	auto readers = configManager->__SELF_NODE__.getChildren(
+	    /*default filterMap*/ std::map<std::string /*relative-path*/, std::string /*value*/>(),
+	    /*default byPriority*/ false,
+	    /*TRUE! onlyStatusTrue*/ true);
 
-	for(auto& reader : readers)
-			ARTDAQTableBase::outputReaderFHICL(
-					reader.second);
+	for (auto& reader : readers)
+	{
+		ARTDAQTableBase::outputBoardReaderFHICL(reader.second);
+		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::BoardReader, reader.second.getValue());
+	}
 
-} // end init()
-
+}  // end init()
 
 DEFINE_OTS_TABLE(ARTDAQBoardReaderTable)

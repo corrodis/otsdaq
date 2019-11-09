@@ -48,10 +48,13 @@ void ARTDAQDispatcherTable::init(ConfigurationManager* configManager)
 		    /*default byPriority*/ 		false,
 		    /*TRUE! onlyStatusTrue*/ 	true);
 
-	for(auto& dispatcher : dispatchers)
+	for (auto& dispatcher : dispatchers)
+	{
 		ARTDAQTableBase::outputDataReceiverFHICL(
-				dispatcher.second,
-				ARTDAQTableBase::ARTDAQAppType::Dispatcher);
+			dispatcher.second,
+			ARTDAQTableBase::ARTDAQAppType::Dispatcher);
+		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::Dispatcher, dispatcher.second.getValue());
+	}
 
 }  // end init()
 

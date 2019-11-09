@@ -1,7 +1,6 @@
-
-
+#include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/Macros/TablePluginMacros.h"
-#include "otsdaq/TablePlugins/ARTDAQBuilderTable.h"
+#include "otsdaq/TablePlugins/ARTDAQRoutingMasterTable.h"
 #include "otsdaq/TablePlugins/XDAQContextTable.h"
 
 #include <stdio.h>
@@ -11,9 +10,8 @@
 
 using namespace ots;
 
-
 //========================================================================================================================
-ARTDAQBuilderTable::ARTDAQBuilderTable(void) : ARTDAQTableBase("ARTDAQBuilderTable")
+ARTDAQRoutingMasterTable::ARTDAQRoutingMasterTable(void) : ARTDAQTableBase("ARTDAQRoutingMasterTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -21,10 +19,10 @@ ARTDAQBuilderTable::ARTDAQBuilderTable(void) : ARTDAQTableBase("ARTDAQBuilderTab
 }
 
 //========================================================================================================================
-ARTDAQBuilderTable::~ARTDAQBuilderTable(void) {}
+ARTDAQRoutingMasterTable::~ARTDAQRoutingMasterTable(void) {}
 
 //========================================================================================================================
-void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
+void ARTDAQRoutingMasterTable::init(ConfigurationManager* configManager)
 {
 	// use isFirstAppInContext to only run once per context, for example to avoid
 	//	generating files on local disk multiple times.
@@ -37,25 +35,22 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 	// make directory just in case
 	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH).c_str(), 0755);
 
-//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
-//	__COUT__ << configManager->__SELF_NODE__ << __E__;
-
+	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	//	__COUT__ << configManager->__SELF_NODE__ << __E__;
 
 	// handle fcl file generation, wherever the level of this table
 
-	auto        buiders = configManager->__SELF_NODE__.getChildren(
-			/*default filterMap*/ 		std::map<std::string /*relative-path*/, std::string /*value*/>(),
-		    /*default byPriority*/ 		false,
-		    /*TRUE! onlyStatusTrue*/ 	true);
+	auto routingMasters = configManager->__SELF_NODE__.getChildren(
+	    /*default filterMap*/ std::map<std::string /*relative-path*/, std::string /*value*/>(),
+	    /*default byPriority*/ false,
+	    /*TRUE! onlyStatusTrue*/ true);
 
-	for (auto& builder : buiders)
+	for(auto& routingMaster : routingMasters)
 	{
-		ARTDAQTableBase::outputDataReceiverFHICL(
-			builder.second,
-			ARTDAQTableBase::ARTDAQAppType::EventBuilder);
-		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::EventBuilder, builder.second.getValue());
+		ARTDAQTableBase::outputRoutingMasterFHICL(routingMaster.second);
+		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::RoutingMaster, routingMaster.second.getValue());
 	}
 
 }  // end init()
 
-DEFINE_OTS_TABLE(ARTDAQBuilderTable)
+DEFINE_OTS_TABLE(ARTDAQRoutingMasterTable)
