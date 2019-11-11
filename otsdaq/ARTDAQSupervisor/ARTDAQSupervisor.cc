@@ -372,7 +372,7 @@ try
 
 	progressBar.step();
 
-	auto info = ARTDAQTableBase::extractArtdaqInfo(
+	const ARTDAQTableBase::ARTDAQInfo& info = ARTDAQTableBase::extractARTDAQInfo(
 	    theSupervisorNode,
 	    true /*doWriteFHiCL*/,
 	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("max_fragment_size_bytes", ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE),
@@ -380,11 +380,11 @@ try
 	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_retry_count", ARTDAQTableBase::DEFAULT_ROUTING_RETRY_COUNT),
 	    &progressBar);
 
-	std::list<ARTDAQTableBase::ProcessInfo>& readerInfo        = info.processes[ARTDAQTableBase::ARTDAQAppType::BoardReader];
-	std::list<ARTDAQTableBase::ProcessInfo>& builderInfo       = info.processes[ARTDAQTableBase::ARTDAQAppType::EventBuilder];
-	std::list<ARTDAQTableBase::ProcessInfo>& loggerInfo        = info.processes[ARTDAQTableBase::ARTDAQAppType::DataLogger];
-	std::list<ARTDAQTableBase::ProcessInfo>& dispatcherInfo    = info.processes[ARTDAQTableBase::ARTDAQAppType::Dispatcher];
-	std::list<ARTDAQTableBase::ProcessInfo>& routingMasterInfo = info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingMaster];
+	const std::list<ARTDAQTableBase::ProcessInfo>& readerInfo        = info.processes.at(ARTDAQTableBase::ARTDAQAppType::BoardReader);
+	const std::list<ARTDAQTableBase::ProcessInfo>& builderInfo       = info.processes.at(ARTDAQTableBase::ARTDAQAppType::EventBuilder);
+	const std::list<ARTDAQTableBase::ProcessInfo>& loggerInfo        = info.processes.at(ARTDAQTableBase::ARTDAQAppType::DataLogger);
+	const std::list<ARTDAQTableBase::ProcessInfo>& dispatcherInfo    = info.processes.at(ARTDAQTableBase::ARTDAQAppType::Dispatcher);
+	const std::list<ARTDAQTableBase::ProcessInfo>& routingMasterInfo = info.processes.at(ARTDAQTableBase::ARTDAQAppType::RoutingMaster);
 
 	// Check lists
 	if(readerInfo.size() == 0)

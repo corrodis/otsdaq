@@ -84,6 +84,20 @@ T ConfigurationTree::getValue(void) const
 }  // end T getValue()
 
 //==============================================================================
+// getValueWithDefault (not std::string value)
+//	throw exception unless it value node
+// NOTE: can not overload functions based on return type, so calls function with T& passed
+// as value
+template<class T>
+T ConfigurationTree::getValueWithDefault(const T& defaultValue) const
+{
+	if(isDefaultValue()) 
+		return defaultValue;
+	else
+		return ConfigurationTree::getValue<T>();
+}  // end T getValueWithDefault()
+
+//==============================================================================
 template<typename T>
 T ConfigurationTree::handleValidateValueForColumn(const TableView* configView,
                                                   std::string      value,

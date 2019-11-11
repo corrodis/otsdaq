@@ -1521,22 +1521,16 @@ void ConfigurationManager::loadTableGroup(
 					__SS_THROW__;
 				}
 
-				if(accumulatedTreeErrors)
-				{
-					__COUTV__(memberPair.first);
-					__COUTV__(accumulatedTreeErrors);
-				}
-
 				// attempt to init using the configuration's specific init
 				//	this could be risky user code, try and catch
 				try
 				{
-					nameToTableMap_[memberPair.first]->init(this);
+					nameToTableMap_.at(memberPair.first)->init(this);
 				}
 				catch(std::runtime_error& e)
 				{
 					__SS__ << "Error detected calling "
-					       << nameToTableMap_[memberPair.first]->getTableName()
+					       << memberPair.first
 					       << ".init()!\n\n " << e.what() << __E__;
 
 					//__SS_THROW__;
@@ -1551,7 +1545,7 @@ void ConfigurationManager::loadTableGroup(
 				catch(...)
 				{
 					__SS__ << "Unknown Error detected calling "
-					       << nameToTableMap_[memberPair.first]->getTableName()
+					       << memberPair.first
 					       << ".init()!\n\n " << __E__;
 					//__SS_THROW__;
 					if(accumulatedTreeErrors)

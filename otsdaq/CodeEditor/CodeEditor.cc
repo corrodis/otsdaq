@@ -527,8 +527,8 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 	if(path.length() > 1 && path[1] == '/')
 		pathMatchPrepend += '/';
 
-	__COUTV__(path);
-	__COUTV__(pathMatchPrepend);
+	//__COUTV__(path);
+	//__COUTV__(pathMatchPrepend);
 
 	// fix path for special environment variables
 	if(path.substr(0, (pathMatchPrepend + "$USER_DATA/").size()) ==
@@ -545,8 +545,8 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 		path     = CodeEditor::OTSDAQ_DATA_PATH + "/" +
 		       path.substr((pathMatchPrepend + "$OTSDAQ_DATA/").size());
 	}
-	__COUTV__(path);
-	__COUTV__(basepath);
+	//__COUTV__(path);
+	//__COUTV__(basepath);
 
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
 	if(!(path.length() > 4 && path.substr(path.length() - 4) == "/ots"))

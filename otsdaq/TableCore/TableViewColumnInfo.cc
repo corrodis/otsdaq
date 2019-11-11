@@ -39,7 +39,7 @@ const std::string TableViewColumnInfo::TYPE_TIMESTAMP      = "Timestamp";
 // in the web gui
 
 const std::string TableViewColumnInfo::DATATYPE_NUMBER = "NUMBER";
-const std::string TableViewColumnInfo::DATATYPE_STRING = "VARCHAR2";
+const std::string TableViewColumnInfo::DATATYPE_STRING = "STRING";
 const std::string TableViewColumnInfo::DATATYPE_TIME   = "TIMESTAMP WITH TIMEZONE";
 
 const std::string TableViewColumnInfo::TYPE_VALUE_YES   = "Yes";
@@ -109,11 +109,11 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 		if(!((type_[i] >= 'A' && type_[i] <= 'Z') ||
 		     (type_[i] >= 'a' && type_[i] <= 'z') ||
 		     (type_[i] >= '0' && type_[i] <= '9') ||
-		     (type_[i] == '-' || type_[i] <= '_' || type_[i] <= '.')))
+		     (type_[i] == '-' || type_[i] == '_' || type_[i] == '.' || type_[i] == ' ')))
 		{
-			__SS__ << "The data type for column " << name_ << " is '" << type_
-			       << "'. Data types must contain only letters, numbers,"
-			       << "dashes, underscores, and periods." << std::endl;
+			__SS__ << "The column type for column " << name_ << " is '" << type_
+			       << "'. Column types must contain only letters, numbers, "
+			       << "dashes, underscores, periods, and spaces." << std::endl;
 			if(capturedExceptionString)
 				*capturedExceptionString += ss.str();
 			else
@@ -121,6 +121,10 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 		}
 
 	// verify data type
+	
+	//first, convert antiquated
+	if(dataType_ == "VARCHAR2") dataType_ = DATATYPE_STRING;
+	
 	if((dataType_ != DATATYPE_NUMBER) && (dataType_ != DATATYPE_STRING) &&
 	   (dataType_ != DATATYPE_TIME))
 	{
@@ -149,11 +153,11 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 		if(!((dataType_[i] >= 'A' && dataType_[i] <= 'Z') ||
 		     (dataType_[i] >= 'a' && dataType_[i] <= 'z') ||
 		     (dataType_[i] >= '0' && dataType_[i] <= '9') ||
-		     (dataType_[i] == '-' || dataType_[i] <= '_')))
+		     (dataType_[i] == '-' || dataType_[i] == '_' || dataType_[i] == ' ')))
 		{
 			__SS__ << "The data type for column " << name_ << " is '" << dataType_
-			       << "'. Data types must contain only letters, numbers,"
-			       << "dashes, and underscores." << std::endl;
+			       << "'. Data types must contain only letters, numbers, "
+			       << "dashes, underscores, and spaces." << std::endl;
 			if(capturedExceptionString)
 				*capturedExceptionString += ss.str();
 			else
@@ -176,10 +180,10 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 		if(!((name_[i] >= 'A' && name_[i] <= 'Z') ||
 		     (name_[i] >= 'a' && name_[i] <= 'z') ||
 		     (name_[i] >= '0' && name_[i] <= '9') ||
-		     (name_[i] == '-' || name_[i] <= '_')))
+		     (name_[i] == '-' || name_[i] == '_')))
 		{
 			__SS__ << "There is a column named " << name_
-			       << "'. Column names must contain only letters, numbers,"
+			       << "'. Column names must contain only letters, numbers, "
 			       << "dashes, and underscores." << std::endl;
 			if(capturedExceptionString)
 				*capturedExceptionString += ss.str();
@@ -202,7 +206,7 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 	for(unsigned int i = 0; i < storageName_.size(); ++i)
 		if(!((storageName_[i] >= 'A' && storageName_[i] <= 'Z') ||
 		     (storageName_[i] >= '0' && storageName_[i] <= '9') ||
-		     (storageName_[i] == '-' || storageName_[i] <= '_')))
+		     (storageName_[i] == '-' || storageName_[i] == '_')))
 		{
 			__SS__ << "The storage name for column " << name_ << " is '" << storageName_
 			       << "'. Storage names must contain only capital letters, numbers,"

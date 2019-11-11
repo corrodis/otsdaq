@@ -540,53 +540,10 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 	    #	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromIndexRebuild file exists, so not rebuilding indices."
 	fi
 
-	if [ ! -e ${USER_DATA}/ServiceData/.updateDB_nov2019.cmd ]; then
-	
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tUpdating DB to comply with November 2019 changes..."
-	    
-		#convert XDAQ_Context table column	
-		cd $ARTDAQ_DATABASE_FILESYSTEM_PATH
-		
-		sed -i s/ApplicationGroupID/LinkToApplicationGroupID/g XDAQContextTable/*.json #*/ end C++ comment coloring
-		sed -i s/APPLICATION_GROUP_ID/LINK_TO_APPLICATION_GROUP_ID/g XDAQContextTable/*.json #*/ end C++ comment coloring	
-		sed -i s/LinkToLinkToApplicationGroupID/LinkToApplicationGroupID/g XDAQContextTable/*.json #*/ end C++ comment coloring
-		sed -i s/LINK_TO_LINK_TO_APPLICATION_GROUP_ID/LINK_TO_APPLICATION_GROUP_ID/g XDAQContextTable/*.json #*/ end C++ comment coloring		
-		
-		mv ARTDAQBuilderTable ARTDAQEventBuilderTable >/dev/null 2>&1
-		sed -i s/ARTDAQBuilderTable/ARTDAQEventBuilderTable/g *Table/*.json #*/ end C++ comment coloring
-		sed -i s/ARTDAQ_BUILDER_TABLE/ARTDAQ_EVENT_BUILDER_TABLE/g *Table/*.json #*/ end C++ comment coloring	
-			
-		#fix first letter capitalization
-		sed -i s/boardReadersGroupID/BoardReadersGroupID/g *Table/*.json #*/ end C++ comment coloring
-		sed -i s/eventBuildersGroupID/EventBuildersGroupID/g *Table/*.json #*/ end C++ comment coloring
-		sed -i s/dataLoggersGroupID/DataLoggersGroupID/g *Table/*.json #*/ end C++ comment coloring
-		sed -i s/dispatchersGroupID/DispatchersGroupID/g *Table/*.json #*/ end C++ comment coloring
-		sed -i s/monitorsGroupID/MonitorsGroupID/g *Table/*.json #*/ end C++ comment coloring
-			
-		cd - >/dev/null 2>&1
-		
-		cd $USER_DATA/TableInfo
-		
-		sed -i s/ApplicationGroupID/LinkToApplicationGroupID/g XDAQContextTableInfo.xml
-		sed -i s/APPLICATION_GROUP_ID/LINK_TO_APPLICATION_GROUP_ID/g XDAQContextTableInfo.xml
-		sed -i s/LinkToLinkToApplicationGroupID/LinkToApplicationGroupID/g XDAQContextTableInfo.xml
-		sed -i s/LINK_TO_LINK_TO_APPLICATION_GROUP_ID/LINK_TO_APPLICATION_GROUP_ID/g XDAQContextTableInfo.xml	
-		
-		mv ARTDAQBuilderTableInfo.xml ARTDAQEventBuilderTableInfo.xml >/dev/null 2>&1
-		sed -i s/ARTDAQBuilderTable/ARTDAQEventBuilderTable/g *ableInfo.x* 
-		sed -i s/ARTDAQ_BUILDER_TABLE/ARTDAQ_EVENT_BUILDER_TABLE/g *ableInfo.x*	
-		
-		#fix first letter capitalization
-		sed -i s/boardReadersGroupID/BoardReadersGroupID/g *ableInfo.x*	
-		sed -i s/eventBuildersGroupID/EventBuildersGroupID/g *ableInfo.x*	
-		sed -i s/dataLoggersGroupID/DataLoggersGroupID/g *ableInfo.x*	
-		sed -i s/dispatchersGroupID/DispatchersGroupID/g *ableInfo.x*	
-		sed -i s/monitorsGroupID/MonitorsGroupID/g *ableInfo.x*	
-		
-		cd - >/dev/null 2>&1
-		
-		echo "done" > ${USER_DATA}/ServiceData/.updateDB_nov2019.cmd
-	
+	if [ ! -e ${USER_DATA}/ServiceData/.updateDB_nov9_2019a.cmd ]; then	
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tUpdating DB to comply with November 2019 changes..."		
+		otsdaq_beautify_artdaq_tables		
+		echo "done" > ${USER_DATA}/ServiceData/.updateDB_nov9_2019a.cmd	
 	fi
 
 	#check for somewhat-antiquated(pre-configuration-to-table) artdaq database
@@ -1020,8 +977,8 @@ launchOTSWiz() {
 		sed -i s/30001/${PORTMFOFF1}/g ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
 		sed -i s/30000/${PORTMFOFF}/g ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
 		
-	
-		if [ $QUIET == 1 ]; then
+		#RAR nov 2019 -- always send forwarder to file (with new trace, verbose mode is handled by trace, no need to printout twice)
+		#if [ $QUIET == 1 ]; then
 
 			if [ $BACKUPLOGS == 1 ]; then
 				DATESTRING=`date +'%s'`
@@ -1031,9 +988,10 @@ launchOTSWiz() {
 			
 			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. '${Bold}Message Facility${Reset}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt${Reset}"
 			otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
-		else
-			otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
-		fi		 	
+		#else
+		#	otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
+		#fi		 	 	
+		echo	
 	fi
 	
 	if [[ $USE_QT_VIEWER == "1" ]]; then
@@ -1240,7 +1198,8 @@ launchOTS() {
 			#start quiet forwarder with receiving port and destination port parameter file
 			cp ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
 			
-			if [[ $QUIET == 1 ]]; then
+			#RAR nov 2019 -- always send forwarder to file (with new trace, verbose mode is handled by trace, no need to printout twice)
+			#if [[ $QUIET == 1 ]]; then
 
 				if [ $BACKUPLOGS == 1 ]; then
 					DATESTRING=`date +'%s'`
@@ -1250,9 +1209,9 @@ launchOTS() {
 				
 				#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}Quiet mode${Reset}. '${Bold}Message Facility${Reset}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt${Reset}"
 				otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${HOSTNAME}.txt &
-			else
-				otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
-			fi		 	
+			#else
+			#	otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
+			#fi		 	
 			echo
 		fi
 		

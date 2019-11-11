@@ -281,6 +281,26 @@ std::string ConfigurationTree::getValue() const
 	ConfigurationTree::getValue(value);
 	return value;
 }  // end getValue()
+//==============================================================================
+// getValueWithDefault
+//	Only std::string value will work.
+//		If this is a value node, and not type string, configView->getValue should
+//		throw exception.
+//
+//	NOTE: getValueAsString() method should be preferred if getting the Link UID
+//		because when disconnected will return "X". getValue() would return the
+//		column name of the link when disconnected.
+//
+////special version of getValue for string type
+//	Note: if called without template, necessary because types of std::basic_string<char>
+// cause compiler problems if no string specific function
+std::string ConfigurationTree::getValueWithDefault(const std::string& defaultValue) const
+{
+	if(isDefaultValue())
+		return defaultValue;
+	else
+		return ConfigurationTree::getValue();
+}  // end getValueWithDefault()
 
 //==============================================================================
 // getValue (only ConfigurationTree::BitMap value)
@@ -777,6 +797,46 @@ bool ConfigurationTree::isDefaultValue(void) const
 		return getValueAsString() == TableViewColumnInfo::DATATYPE_TIME_DEFAULT;
 	else
 		return false;
+}  // end isDefaultValue()
+
+//==============================================================================
+// getDefaultValue
+//	returns default value if is value node
+const std::string& ConfigurationTree::getDefaultValue(void) const
+{
+	if(!isValueNode())
+	{
+		__SS__ << "Can only get default value from a value node! "
+				<< "The node type is " << getNodeType() << __E__;
+
+		ss << nodeDump() << __E__;
+		__SS_THROW__;
+	}
+
+	if(getValueDataType() == TableViewColumnInfo::DATATYPE_STRING)
+	{
+		if(getValueType() == TableViewColumnInfo::TYPE_ON_OFF ||
+		   getValueType() == TableViewColumnInfo::TYPE_TRUE_FALSE ||
+		   getValueType() == TableViewColumnInfo::TYPE_YES_NO)
+			return TableViewColumnInfo::DATATYPE_BOOL_DEFAULT;  // default to OFF, NO,
+			                                                    // FALSE
+		else if(getValueType() == TableViewColumnInfo::TYPE_COMMENT)
+			return TableViewColumnInfo::DATATYPE_COMMENT_DEFAULT;  // in case people delete default comment, allow blank also
+		else
+			return TableViewColumnInfo::DATATYPE_STRING_DEFAULT;
+	}
+	else if(getValueDataType() == TableViewColumnInfo::DATATYPE_NUMBER)
+		return TableViewColumnInfo::DATATYPE_NUMBER_DEFAULT;
+	else if(getValueDataType() == TableViewColumnInfo::DATATYPE_TIME)
+		return TableViewColumnInfo::DATATYPE_TIME_DEFAULT;
+
+	{
+		__SS__ << "Can only get default value from a value node! "
+				<< "The node type is " << getNodeType() << __E__;
+
+		ss << nodeDump() << __E__;
+		__SS_THROW__;
+	}
 }  // end isDefaultValue()
 
 //==============================================================================
