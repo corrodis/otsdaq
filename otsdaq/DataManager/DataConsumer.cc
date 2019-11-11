@@ -7,23 +7,24 @@
 using namespace ots;
 
 #undef __MF_SUBJECT__
-#define __MF_SUBJECT__ (std::string("Consumer-") + DataProcessor::processorUID_)
+#define __MF_SUBJECT__ "Consumer"
+#define mfSubject_ (std::string("Consumer-") + DataProcessor::processorUID_)
 
 //========================================================================================================================
 DataConsumer::DataConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, ConsumerPriority priority)
     : WorkLoop(processorUID), DataProcessor(supervisorApplicationUID, bufferUID, processorUID), priority_(priority)
 {
-	__COUT__ << "Constructor." << __E__;
+	__GEN_COUT__ << "Constructor." << __E__;
 	registerToBuffer();
-	__COUT__ << "Constructed." << __E__;
+	__GEN_COUT__ << "Constructed." << __E__;
 }
 
 //========================================================================================================================
 DataConsumer::~DataConsumer(void)
 {
-	__COUT__ << "Destructor." << __E__;
+	__GEN_COUT__ << "Destructor." << __E__;
 	// unregisterFromBuffer();
-	__COUT__ << "Destructed." << __E__;
+	__GEN_COUT__ << "Destructed." << __E__;
 }
 
 //========================================================================================================================
@@ -33,7 +34,7 @@ DataConsumer::ConsumerPriority DataConsumer::getPriority(void) { return priority
 // mirror DataProducerBase::registerToBuffer
 void DataConsumer::registerToBuffer(void)
 {
-	__COUT__ << "Consumer '" << DataProcessor::processorUID_ << "' is registering to DataManager Supervisor Buffer '"
+	__GEN_COUT__ << "Consumer '" << DataProcessor::processorUID_ << "' is registering to DataManager Supervisor Buffer '"
 	         << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
 
 	DataManager* dataManager = (DataManagerSingleton::getInstance(supervisorApplicationUID_));
@@ -41,16 +42,16 @@ void DataConsumer::registerToBuffer(void)
 	dataManager->registerConsumer(bufferUID_, this);
 
 	{
-		__SS__;
+		__GEN_SS__;
 		dataManager->dumpStatus(&ss);
 		std::cout << ss.str() << __E__;
 	}
 
-	__COUT__ << "Consumer '" << DataProcessor::processorUID_ << "' Registered." << __E__;
+	__GEN_COUT__ << "Consumer '" << DataProcessor::processorUID_ << "' Registered." << __E__;
 
 	//
 	//
-	//	__COUT__ << "Registering to DataManager Supervisor '" <<
+	//	__GEN_COUT__ << "Registering to DataManager Supervisor '" <<
 	//			DataProcessor::supervisorApplicationUID_ << "' and buffer '" <<
 	//			DataProcessor::bufferUID_ << "'" << std::endl;
 	//
@@ -58,14 +59,14 @@ void DataConsumer::registerToBuffer(void)
 	//			supervisorApplicationUID_))->registerConsumer(
 	//					bufferUID_,this);
 	//
-	//	__COUT__ << "Registered." << __E__;
+	//	__GEN_COUT__ << "Registered." << __E__;
 }  // end registerToBuffer()
 
 ////========================================================================================================================
 ////mirror DataProducerBase::unregisterFromBuffer
 // void DataConsumer::unregisterFromBuffer(void)
 //{
-//	__COUT__ << "Consumer '" << DataProcessor::processorUID_ <<
+//	__GEN_COUT__ << "Consumer '" << DataProcessor::processorUID_ <<
 //			"' is unregistering to DataManager Supervisor Buffer '" <<
 //			DataProcessor::supervisorApplicationUID_ << ":" <<
 //			DataProcessor::bufferUID_ << ".'" << std::endl;
@@ -78,12 +79,12 @@ void DataConsumer::registerToBuffer(void)
 //						bufferUID_,DataProcessor::processorUID_);
 //
 //	{
-//		__SS__;
+//		__GEN_SS__;
 //		dataManager->dumpStatus(&ss);
 //		std::cout << ss.str() << __E__;
 //	}
 //
-//	__COUT__ << "Consumer '" << DataProcessor::processorUID_ <<
+//	__GEN_COUT__ << "Consumer '" << DataProcessor::processorUID_ <<
 //			"' Unregistered." << __E__;
 //} //end unregisterFromBuffer()
 

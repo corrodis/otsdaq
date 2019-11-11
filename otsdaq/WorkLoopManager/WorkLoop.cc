@@ -10,7 +10,9 @@
 using namespace ots;
 
 #undef __MF_SUBJECT__
-#define __MF_SUBJECT__ (std::string("Workloop-") + WorkLoop::workLoopName_)
+#define __MF_SUBJECT__ "Workloop"
+#undef __COUT_HDR__
+#define __COUT_HDR__ (std::string("Workloop-") + WorkLoop::workLoopName_ + "\t<>")
 
 //========================================================================================================================
 WorkLoop::WorkLoop(const std::string& name)

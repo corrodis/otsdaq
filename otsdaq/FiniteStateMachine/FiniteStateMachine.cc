@@ -9,13 +9,14 @@
 using namespace ots;
 
 #undef __MF_SUBJECT__
-#define __MF_SUBJECT__ std::string("FSM-") + getStateMachineName()
+#define __MF_SUBJECT__ "FSM"
+#define mfSubject_ 		std::string("FSM-") + getStateMachineName()
 
 //========================================================================================================================
 FiniteStateMachine::FiniteStateMachine(const std::string& stateMachineName)
     : stateEntranceTime_(0), inTransition_(false), provenanceState_('X'), theErrorMessage_(""), stateMachineName_(stateMachineName)
 {
-	__COUT__ << "Constructing FiniteStateMachine" << std::endl;
+	__GEN_COUT__ << "Constructing FiniteStateMachine" << std::endl;
 }
 
 //========================================================================================================================
@@ -110,15 +111,15 @@ bool FiniteStateMachine::execTransition(const std::string& transition)
 //		These are different (higher level) than the members of VStateMachine.
 bool FiniteStateMachine::execTransition(const std::string& transition, const xoap::MessageReference& message)
 {
-	__COUTV__(transition);
+	__GEN_COUTV__(transition);
 
 	if(transition == "fail")
 	{
-		__COUT_INFO__ << "Failing now!!" << __E__;
+		__GEN_COUT_INFO__ << "Failing now!!" << __E__;
 
 		while(inTransition_)
 		{
-			__COUT__ << "Currently in a transition executed from current state " << getProvenanceStateName()
+			__GEN_COUT__ << "Currently in a transition executed from current state " << getProvenanceStateName()
 			         << ". Attempting to wait for the transition to complete." << __E__;
 			sleep(1);
 		}
@@ -131,7 +132,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		std::map<std::string, toolbox::fsm::State> transitions = getTransitions(getCurrentState());
 		for(const auto& transitionPair : transitions)
 		{
-			__COUT__ << "Taking transition to indirect failure: " << transitionPair.first << __E__;
+			__GEN_COUT__ << "Taking transition to indirect failure: " << transitionPair.first << __E__;
 			toolbox::Event::Reference event(new toolbox::Event(transitionPair.first, this));
 
 			try
@@ -143,7 +144,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 				std::ostringstream error;
 				error << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState())
 				      << ". There was an error: " << e.what();
-				__COUT_ERR__ << error.str() << std::endl;
+				__GEN_COUT_ERR__ << error.str() << std::endl;
 			}
 			inTransition_      = false;
 			stateEntranceTime_ = time(0);
@@ -157,7 +158,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 
 	if(inTransition_)
 	{
-		__COUT_WARN__ << "In transition, and received another transition: " << transition << ". Ignoring..." << __E__;
+		__GEN_COUT_WARN__ << "In transition, and received another transition: " << transition << ". Ignoring..." << __E__;
 
 		return false;
 	}
@@ -171,10 +172,10 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		inTransition_ = false;
 		std::ostringstream error;
 		error << transition << " is not in the list of the transitions from current state " << getStateName(getCurrentState());
-		__COUT_ERR__ << error.str() << std::endl;
+		__GEN_COUT_ERR__ << error.str() << std::endl;
 		XCEPT_RAISE(toolbox::fsm::exception::Exception, error.str());
-		//__COUT__ << error << std::endl;
-		//		__COUT__ << "Transition?" << inTransition_ << std::endl;
+		//__GEN_COUT__ << error << std::endl;
+		//		__GEN_COUT__ << "Transition?" << inTransition_ << std::endl;
 		return false;
 	}
 
@@ -194,9 +195,9 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		inTransition_        = false;
 		transitionSuccessful = false;
 		std::ostringstream error;
-		__SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState())
+		__GEN_SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState())
 		       << ". There was an error: " << e.what();
-		__COUT_ERR__ << ss.str() << std::endl;
+		__GEN_COUT_ERR__ << ss.str() << std::endl;
 		// diagService_->reportError(err.str(),DIAGERROR);
 
 		// send state machine to error
@@ -206,8 +207,8 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 	{
 		inTransition_        = false;
 		transitionSuccessful = false;
-		__SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState()) << ". There was an unknown error.";
-		__COUT_ERR__ << ss.str() << std::endl;
+		__GEN_SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState()) << ". There was an unknown error.";
+		__GEN_COUT_ERR__ << ss.str() << std::endl;
 		// diagService_->reportError(err.str(),DIAGERROR);
 
 		// send state machine to error

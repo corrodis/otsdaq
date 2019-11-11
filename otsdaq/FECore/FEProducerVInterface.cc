@@ -5,7 +5,8 @@
 using namespace ots;
 
 #undef __MF_SUBJECT__
-#define __MF_SUBJECT__ (std::string("FEProducer-") + DataProcessor::processorUID_)
+#define __MF_SUBJECT__ "FEProducer"
+#define mfSubject_ (std::string("FEProducer-") + DataProcessor::processorUID_)
 
 //========================================================================================================================
 FEProducerVInterface::FEProducerVInterface(const std::string&       interfaceUID,
@@ -20,12 +21,12 @@ FEProducerVInterface::FEProducerVInterface(const std::string&       interfaceUID
 	// NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the
 	// base class versions of function (e.g. getInterfaceType) are called because the
 	// derived class has not been instantiate yet!
-	__COUT__ << "'" << interfaceUID << "' Constructed." << __E__;
+	__GEN_COUT__ << "'" << interfaceUID << "' Constructed." << __E__;
 
-	__COUTV__(interfaceConfigurationPath);
+	__GEN_COUTV__(interfaceConfigurationPath);
 	ConfigurationTree appNode = theXDAQContextConfigTree.getBackNode(interfaceConfigurationPath, 2);
 
-	__COUTV__(appNode.getValueAsString());
+	__GEN_COUTV__(appNode.getValueAsString());
 
 }  // end constructor()
 
@@ -34,7 +35,7 @@ FEProducerVInterface::~FEProducerVInterface(void)
 	__FE_COUT__ << "Destructor." << __E__;
 	// Take out of DataManager vector!
 
-	__COUT__ << "FEProducer '" << DataProcessor::processorUID_ << "' is unregistering from DataManager Supervisor Buffer '"
+	__GEN_COUT__ << "FEProducer '" << DataProcessor::processorUID_ << "' is unregistering from DataManager Supervisor Buffer '"
 	         << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
 
 	DataManager* dataManager = (DataManagerSingleton::getInstance(supervisorApplicationUID_));
@@ -42,12 +43,12 @@ FEProducerVInterface::~FEProducerVInterface(void)
 	dataManager->unregisterFEProducer(bufferUID_, DataProcessor::processorUID_);
 
 	{
-		__SS__;
+		__GEN_SS__;
 		dataManager->dumpStatus(&ss);
 		std::cout << ss.str() << __E__;
 	}
 
-	__COUT__ << "FEProducer '" << DataProcessor::processorUID_ << "' unregistered." << __E__;
+	__GEN_COUT__ << "FEProducer '" << DataProcessor::processorUID_ << "' unregistered." << __E__;
 
 	__FE_COUT__ << "Destructed." << __E__;
 }
@@ -124,8 +125,8 @@ std::string* FEProducerVInterface::getNextBuffer(void)
 {
 	if(DataProducerBase::attachToEmptySubBuffer(FEProducerVInterface::dataP_, FEProducerVInterface::headerP_) < 0)
 	{
-		__SS__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
-		__SS_THROW__;
+		__GEN_SS__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
+		__GEN_SS_THROW__;
 	}
 
 	return FEProducerVInterface::dataP_;

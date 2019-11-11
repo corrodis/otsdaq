@@ -14,7 +14,8 @@
 #include <iostream>
 
 #undef __MF_SUBJECT__
-#define __MF_SUBJECT__ std::string("FSM-") + theStateMachine_.getStateMachineName()
+#define __MF_SUBJECT__ "FSM"
+#define mfSubject_ std::string("FSM-") + theStateMachine_.getStateMachineName()
 
 using namespace ots;
 
@@ -93,7 +94,7 @@ RunControlStateMachine::~RunControlStateMachine(void) {}
 //========================================================================================================================
 void RunControlStateMachine::reset(void)
 {
-	__COUT__ << "Resetting RunControlStateMachine with name '" << theStateMachine_.getStateMachineName() << "'..." << __E__;
+	__GEN_COUT__ << "Resetting RunControlStateMachine with name '" << theStateMachine_.getStateMachineName() << "'..." << __E__;
 	theStateMachine_.setInitialState('I');
 	theStateMachine_.reset();
 
@@ -111,7 +112,7 @@ void RunControlStateMachine::reset(void)
 //	auto itFrom = stateTransitionFunctionTable_.find(from);
 //	if(itFrom == stateTransitionFunctionTable_.end())
 //	{
-//		__SS__ <<	"Cannot find transition function from '" << from <<
+//		__GEN_SS__ <<	"Cannot find transition function from '" << from <<
 //				"' with transition '" << transition << "!'" << __E__;
 //		XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());
 //	}
@@ -119,7 +120,7 @@ void RunControlStateMachine::reset(void)
 //	auto itTrans = itFrom->second.find(transition);
 //	if(itTrans == itFrom->second.end())
 //	{
-//		__SS__ <<	"Cannot find transition function from '" << from <<
+//		__GEN_SS__ <<	"Cannot find transition function from '" << from <<
 //				"' with transition '" << transition << "!'" << __E__;
 //		XCEPT_RAISE (toolbox::fsm::exception::Exception, ss.str());
 //	}
@@ -135,7 +136,7 @@ void RunControlStateMachine::reset(void)
 xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::MessageReference message)
 
 {
-	__COUT__ << "Received... \t" << SOAPUtilities::translate(message) << std::endl;
+	__GEN_COUT__ << "Received... \t" << SOAPUtilities::translate(message) << std::endl;
 
 	std::string command = SOAPUtilities::translate(message).getCommand();
 
@@ -146,7 +147,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	}
 	catch(...)  // ignore errors and set iteration index to 0
 	{
-		__COUT__ << "Defaulting iteration index to 0." << __E__;
+		__GEN_COUT__ << "Defaulting iteration index to 0." << __E__;
 		iterationIndex_ = 0;
 	}
 	// get subIteration index
@@ -156,7 +157,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	}
 	catch(...)  // ignore errors and set subIteration index to 0
 	{
-		__COUT__ << "Defaulting subIterationIndex_ index to 0." << __E__;
+		__GEN_COUT__ << "Defaulting subIterationIndex_ index to 0." << __E__;
 		subIterationIndex_ = 0;
 	}
 
@@ -170,12 +171,12 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 			// attempt to stop an error if last command was same
 			if(lastIterationCommand_ == command && lastIterationIndex_ == iterationIndex_ && lastSubIterationIndex_ == subIterationIndex_)
 			{
-				__COUT__ << "Assuming a timeout occurred at Gateway waiting for a response. "
+				__GEN_COUT__ << "Assuming a timeout occurred at Gateway waiting for a response. "
 				         << "Attempting to avoid error, by giving last result for command '" << command << "': " << lastIterationResult_ << __E__;
 				return SOAPUtilities::makeSOAPMessageReference(lastIterationResult_);
 			}
 			else
-				__COUT__ << "Looks like Gateway command '" << command << "' was lost - attempting to handle retransmission." << __E__;
+				__GEN_COUT__ << "Looks like Gateway command '" << command << "' was lost - attempting to handle retransmission." << __E__;
 		}
 	}
 	catch(...)  // ignore errors for retransmission indicator (assume it is not a
@@ -192,13 +193,13 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 		// this is the first iteration attempt for this transition
 		theProgressBar_.reset(command, theStateMachine_.getStateMachineName());
 		currentState = theStateMachine_.getCurrentStateName();
-		__COUT__ << "Starting state for " << theStateMachine_.getStateMachineName() << " is " << currentState << " and attempting to " << command << std::endl;
+		__GEN_COUT__ << "Starting state for " << theStateMachine_.getStateMachineName() << " is " << currentState << " and attempting to " << command << std::endl;
 	}
 	else
 	{
 		currentState = theStateMachine_.getStateName(lastIterationState_);
 
-		__COUT__ << "Iteration index " << iterationIndex_ << "." << subIterationIndex_ << " for " << theStateMachine_.getStateMachineName() << " from "
+		__GEN_COUT__ << "Iteration index " << iterationIndex_ << "." << subIterationIndex_ << " for " << theStateMachine_.getStateMachineName() << " from "
 		         << currentState << " attempting to " << command << std::endl;
 	}
 
@@ -211,8 +212,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	//	likely error was sent by central FSM or external xoap
 	if(command == "Error" || command == "Fail")
 	{
-		__SS__ << command << " was received! Halting immediately." << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		__GEN_SS__ << command << " was received! Halting immediately." << std::endl;
+		__GEN_COUT_ERR__ << "\n" << ss.str();
 
 		try
 		{
@@ -223,7 +224,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 		}
 		catch(...)
 		{
-			__COUT_ERR__ << "Halting failed in reaction to " << command << "... ignoring." << __E__;
+			__GEN_COUT_ERR__ << "Halting failed in reaction to " << command << "... ignoring." << __E__;
 		}
 		return SOAPUtilities::makeSOAPMessageReference(result);
 	}
@@ -231,8 +232,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	{
 		std::string errorMessage = SOAPUtilities::translate(message).getParameters().getValue("ErrorMessage");
 
-		__SS__ << command << " was received! Error'ing immediately: " << errorMessage << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		__GEN_SS__ << command << " was received! Error'ing immediately: " << errorMessage << std::endl;
+		__GEN_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 
 		asyncFailureReceived_ = true;  // mark flag, to be used to abort next transition
@@ -246,8 +247,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	{
 		std::string errorMessage = SOAPUtilities::translate(message).getParameters().getValue("ErrorMessage");
 
-		__SS__ << command << " was received! Pause'ing immediately: " << errorMessage << std::endl;
-		__COUT_ERR__ << "\n" << ss.str();
+		__GEN_SS__ << command << " was received! Pause'ing immediately: " << errorMessage << std::endl;
+		__GEN_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 
 		if(!asyncSoftFailureReceived_)  // launch pause only first time
@@ -265,18 +266,18 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	//	(this avoids race conditions involved with artdaq mpi reset)
 	if(command == "Initialize" && currentState == RunControlStateMachine::HALTED_STATE_NAME)
 	{
-		__COUT__ << "Already Initialized.. ignoring Initialize command." << std::endl;
+		__GEN_COUT__ << "Already Initialized.. ignoring Initialize command." << std::endl;
 
 		theStateMachine_.setErrorMessage("", false /*append*/);  // clear error message
 		return SOAPUtilities::makeSOAPMessageReference(result);
 	}
 
-	__COUTV__(command);
-	__COUTV__(currentState);
+	__GEN_COUTV__(command);
+	__GEN_COUTV__(currentState);
 
 	if(command == "Halt" && currentState == "Initial")
 	{
-		__COUT__ << "Converting Halt command to Initialize, since currently in "
+		__GEN_COUT__ << "Converting Halt command to Initialize, since currently in "
 		            "Initialized state."
 		         << std::endl;
 		command = "Initialize";
@@ -292,27 +293,27 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 		subIterationWorkFlag_ = false;
 		if(iterationIndex_ || subIterationIndex_)
 		{
-			__COUT__ << command << " iteration " << iterationIndex_ << "." << subIterationIndex_ << __E__;
+			__GEN_COUT__ << command << " iteration " << iterationIndex_ << "." << subIterationIndex_ << __E__;
 			toolbox::Event::Reference event(new toolbox::Event(command, this));
 
 			// call inheriting transition function based on last state and command
 			{
 				// e.g. transitionConfiguring(event);
-				__COUT__ << "Iterating on the transition function from " << currentState << " through " << lastIterationCommand_ << __E__;
+				__GEN_COUT__ << "Iterating on the transition function from " << currentState << " through " << lastIterationCommand_ << __E__;
 
 				auto itFrom = stateTransitionFunctionTable_.find(lastIterationState_);
 				if(itFrom == stateTransitionFunctionTable_.end())
 				{
-					__SS__ << "Cannot find transition function from '" << currentState << "' with transition '" << lastIterationCommand_ << "!'" << __E__;
-					__COUT_ERR__ << ss.str();
+					__GEN_SS__ << "Cannot find transition function from '" << currentState << "' with transition '" << lastIterationCommand_ << "!'" << __E__;
+					__GEN_COUT_ERR__ << ss.str();
 					XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				}
 
 				auto itTransition = itFrom->second.find(lastIterationCommand_);
 				if(itTransition == itFrom->second.end())
 				{
-					__SS__ << "Cannot find transition function from '" << currentState << "' with transition '" << lastIterationCommand_ << "!'" << __E__;
-					__COUT_ERR__ << ss.str();
+					__GEN_SS__ << "Cannot find transition function from '" << currentState << "' with transition '" << lastIterationCommand_ << "!'" << __E__;
+					__GEN_COUT_ERR__ << ss.str();
 					XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				}
 
@@ -331,27 +332,27 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 
 		if(subIterationWorkFlag_)  // sub-iteration has priority over 'Working'
 		{
-			__COUTV__(subIterationWorkFlag_);
+			__GEN_COUTV__(subIterationWorkFlag_);
 			result = command + "SubIterate";  // indicate another sub-iteration back to Gateway
 		}
 		else if(iterationWorkFlag_)
 		{
-			__COUTV__(iterationWorkFlag_);
+			__GEN_COUTV__(iterationWorkFlag_);
 			result = command + "Iterate";  // indicate another iteration back to Gateway
 		}
 	}
 	catch(toolbox::fsm::exception::Exception& e)
 	{
-		__SS__ << "Run Control Message Handling Failed: " << e.what() << " " << theStateMachine_.getErrorMessage() << __E__;
-		__COUT_ERR__ << ss.str();
+		__GEN_SS__ << "Run Control Message Handling Failed: " << e.what() << " " << theStateMachine_.getErrorMessage() << __E__;
+		__GEN_COUT_ERR__ << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 
 		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " + theStateMachine_.getErrorMessage();
 	}
 	catch(...)
 	{
-		__SS__ << "Run Control Message Handling encountered an unknown error." << theStateMachine_.getErrorMessage() << __E__;
-		__COUT_ERR__ << ss.str();
+		__GEN_SS__ << "Run Control Message Handling encountered an unknown error." << theStateMachine_.getErrorMessage() << __E__;
+		__GEN_COUT_ERR__ << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 
 		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " + theStateMachine_.getErrorMessage();
@@ -364,8 +365,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	if(currentState == RunControlStateMachine::FAILED_STATE_NAME)
 	{
 		result = command + " " + RunControlStateMachine::FAILED_STATE_NAME + ": " + theStateMachine_.getErrorMessage();
-		__COUT_ERR__ << "Unexpected Failure state for " << theStateMachine_.getStateMachineName() << " is " << currentState << std::endl;
-		__COUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
+		__GEN_COUT_ERR__ << "Unexpected Failure state for " << theStateMachine_.getStateMachineName() << " is " << currentState << std::endl;
+		__GEN_COUT_ERR__ << "Error message was as follows: " << theStateMachine_.getErrorMessage() << std::endl;
 	}
 
 	RunControlStateMachine::theProgressBar_.step();
@@ -374,12 +375,12 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 		theProgressBar_.complete();
 	else
 	{
-		__COUTV__(theProgressBar_.read());
-		__COUTV__(theProgressBar_.isComplete());
+		__GEN_COUTV__(theProgressBar_.read());
+		__GEN_COUTV__(theProgressBar_.isComplete());
 	}
 
-	__COUT__ << "Ending state for " << theStateMachine_.getStateMachineName() << " is " << currentState << std::endl;
-	__COUT__ << "result = " << result << std::endl;
+	__GEN_COUT__ << "Ending state for " << theStateMachine_.getStateMachineName() << " is " << currentState << std::endl;
+	__GEN_COUT__ << "result = " << result << std::endl;
 	lastIterationResult_ = result;
 	return SOAPUtilities::makeSOAPMessageReference(result);
 }

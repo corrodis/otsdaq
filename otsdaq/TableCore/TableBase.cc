@@ -8,7 +8,10 @@
 using namespace ots;
 
 #undef __MF_SUBJECT__
-#define __MF_SUBJECT__ "TableBase-" + getTableName()
+#define __MF_SUBJECT__ "TableBase"
+#undef __COUT_HDR__
+#define __COUT_HDR__ ("TableBase-" + getTableName() + "\t<>")
+
 
 //==============================================================================
 // TableBase
@@ -121,8 +124,7 @@ void TableBase::setupMockupView(TableVersion version)
 		trimCache();
 		if(!isStored(version))  // the trim cache is misbehaving!
 		{
-			__SS__ << __COUT_HDR_P__
-			       << "IMPOSSIBLE ERROR: trimCache() is deleting the "
+			__SS__ << "IMPOSSIBLE ERROR: trimCache() is deleting the "
 			          "latest view version "
 			       << version << "!" << __E__;
 			__SS_THROW__;
@@ -130,7 +132,7 @@ void TableBase::setupMockupView(TableVersion version)
 	}
 	else
 	{
-		__SS__ << __COUT_HDR_P__ << "View to fill with mockup already exists: " << version << ". Cannot overwrite!" << __E__;
+		__SS__ << "View to fill with mockup already exists: " << version << ". Cannot overwrite!" << __E__;
 		ss << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
