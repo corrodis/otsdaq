@@ -18,18 +18,16 @@ using namespace ots;
 #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
 //========================================================================================================================
-ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(
-    std::string              supervisorApplicationUID,
-    std::string              bufferUID,
-    std::string              processorUID,
-    const ConfigurationTree& theXDAQContextConfigTree,
-    const std::string&       configurationPath)
+ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string              supervisorApplicationUID,
+                                                     std::string              bufferUID,
+                                                     std::string              processorUID,
+                                                     const ConfigurationTree& theXDAQContextConfigTree,
+                                                     const std::string&       configurationPath)
     // : WorkLoop(processorUID)
     // , DataProducer(supervisorApplicationUID, bufferUID, processorUID)
     // theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned
     // int>())
-    : Configurable(theXDAQContextConfigTree, configurationPath)
-    , name_("BoardReader_" + processorUID)
+    : Configurable(theXDAQContextConfigTree, configurationPath), name_("BoardReader_" + processorUID)
 {
 	INIT_MF(("BoardReader_" + processorUID).c_str());
 
@@ -43,8 +41,7 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(
 
 	__CFG_COUT__ << "uid: " << uid << __E__;
 	for(unsigned int i = 0; i < uid.size(); ++i)
-		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') ||
-		   (uid[i] >= '0' && uid[i] <= '9'))  // only allow alpha numeric in file name
+		if((uid[i] >= 'a' && uid[i] <= 'z') || (uid[i] >= 'A' && uid[i] <= 'Z') || (uid[i] >= '0' && uid[i] <= '9'))  // only allow alpha numeric in file name
 			filename += uid[i];
 	filename += ".fcl";
 
@@ -72,12 +69,10 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(
 	//	SupervisorApplicationUID:"ARTDataManager0"
 	//	BufferUID:"ART_S0_DM0_DataBuffer0"
 	//	ProcessorUID:"ART_S0_DM0_DB0_ARTConsumer0"
-	size_t fcli =
-	    fileFclString.find("fragment_receiver: {") + +strlen("fragment_receiver: {");
+	size_t fcli = fileFclString.find("fragment_receiver: {") + +strlen("fragment_receiver: {");
 	if(fcli == std::string::npos)
 	{
-		__SS__ << "Could not find 'fragment_receiver: {' in Board Reader fcl string!"
-		       << __E__;
+		__SS__ << "Could not find 'fragment_receiver: {' in Board Reader fcl string!" << __E__;
 		__CFG_COUT__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
@@ -109,10 +104,8 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(
 	}
 
 	// insert parent IDs into fcl string
-	fileFclString = fileFclString.substr(0, fcli) + "\n\t\t" +
-	                "SupervisorApplicationUID: \"" + appID + "\"\n\t\t" +
-	                "BufferUID: \"" + bufferID + "\"\n\t\t" + "ProcessorUID: \"" +
-	                consumerID + "\"\n" + fileFclString.substr(fcli);
+	fileFclString = fileFclString.substr(0, fcli) + "\n\t\t" + "SupervisorApplicationUID: \"" + appID + "\"\n\t\t" + "BufferUID: \"" + bufferID + "\"\n\t\t" +
+	                "ProcessorUID: \"" + consumerID + "\"\n" + fileFclString.substr(fcli);
 
 	__CFG_COUT__ << fileFclString << __E__;
 
@@ -180,15 +173,12 @@ void ARTDAQReaderProcessorBase::configure(int rank)
 	//	should they come from the Configuration Tree?
 	uint64_t timeout   = 45;
 	uint64_t timestamp = 184467440737095516;
-	__CFG_COUT__ << "Initializing '" << name_ << "'"
-	             << __E__;  //<< fhiclConfiguration_.to_string() << __E__;
+	__CFG_COUT__ << "Initializing '" << name_ << "'" << __E__;  //<< fhiclConfiguration_.to_string() << __E__;
 
 	if(!fragment_receiver_ptr_->initialize(fhiclConfiguration_, timeout, timestamp))
 	{
-		__CFG_SS__ << "Error initializing '" << name_ << "' with ParameterSet = \n"
-		           << fhiclConfiguration_.to_string() << __E__;
-		ss << "Here is the Board Reader report: \n"
-		   << fragment_receiver_ptr_->report("" /* or "transition_status" */) << __E__;
+		__CFG_SS__ << "Error initializing '" << name_ << "' with ParameterSet = \n" << fhiclConfiguration_.to_string() << __E__;
+		ss << "Here is the Board Reader report: \n" << fragment_receiver_ptr_->report("" /* or "transition_status" */) << __E__;
 		__CFG_SS_THROW__;
 	}
 	__CFG_COUT__ << "Done Initializing." << __E__;
@@ -269,8 +259,7 @@ void ARTDAQReaderProcessorBase::start(const std::string& runNumber)
 	__CFG_COUT__ << "Start run: " << runId << __E__;
 	if(!fragment_receiver_ptr_->start(runId, timeout, timestamp))
 	{
-		__CFG_SS__ << "Error starting '" << name_ << "' for run number '" << runId << ",'"
-		           << __E__;
+		__CFG_SS__ << "Error starting '" << name_ << "' for run number '" << runId << ",'" << __E__;
 		__CFG_SS_THROW__;
 	}
 

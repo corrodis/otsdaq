@@ -4,18 +4,12 @@
 using namespace ots;
 
 //========================================================================================================================
-OtsDataSaverConsumer::OtsDataSaverConsumer(
-    std::string              supervisorApplicationUID,
-    std::string              bufferUID,
-    std::string              processorUID,
-    const ConfigurationTree& theXDAQContextConfigTree,
-    const std::string&       configurationPath)
-    : WorkLoop(processorUID)
-    , RawDataSaverConsumerBase(supervisorApplicationUID,
-                               bufferUID,
-                               processorUID,
-                               theXDAQContextConfigTree,
-                               configurationPath)
+OtsDataSaverConsumer::OtsDataSaverConsumer(std::string              supervisorApplicationUID,
+                                           std::string              bufferUID,
+                                           std::string              processorUID,
+                                           const ConfigurationTree& theXDAQContextConfigTree,
+                                           const std::string&       configurationPath)
+    : WorkLoop(processorUID), RawDataSaverConsumerBase(supervisorApplicationUID, bufferUID, processorUID, theXDAQContextConfigTree, configurationPath)
 {
 }
 
@@ -40,8 +34,7 @@ void OtsDataSaverConsumer::writePacketHeader(const std::string& data)
 		unsigned char seqId = data[1];
 		if(!(lastSeqId_ + 1 == seqId || (lastSeqId_ == 255 && seqId == 0)))
 		{
-			__COUT__ << "?????? NOOOO Missing Packets: " << (unsigned int)lastSeqId_
-			         << " v " << (unsigned int)seqId << __E__;
+			__COUT__ << "?????? NOOOO Missing Packets: " << (unsigned int)lastSeqId_ << " v " << (unsigned int)seqId << __E__;
 		}
 		lastSeqId_ = seqId;
 	}

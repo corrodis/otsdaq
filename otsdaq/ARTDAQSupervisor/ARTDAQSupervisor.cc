@@ -354,8 +354,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 }  // end transitionConfiguring()
 
 //========================================================================================================================
-void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor)
-try
+void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) try
 {
 	ProgressBar& progressBar = theArtdaqSupervisor->thread_progress_bar_;
 
@@ -612,8 +611,7 @@ catch(...)
 }  // end configuringThread() error handling
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Halting..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);

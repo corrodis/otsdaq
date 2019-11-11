@@ -25,8 +25,7 @@
 using namespace ots;
 
 //========================================================================================================================
-NetworkDevice::NetworkDevice(std::string IPAddress, unsigned int IPPort)
-    : communicationInterface_(NULL)
+NetworkDevice::NetworkDevice(std::string IPAddress, unsigned int IPPort) : communicationInterface_(NULL)
 {
 	// network stuff
 	deviceAddress_.sin_family = AF_INET;        // use IPv4 host byte order
@@ -46,8 +45,7 @@ NetworkDevice::NetworkDevice(std::string IPAddress, unsigned int IPPort)
 //========================================================================================================================
 NetworkDevice::~NetworkDevice(void)
 {
-	for(std::map<int, int>::iterator it = openSockets_.begin(); it != openSockets_.end();
-	    it++)
+	for(std::map<int, int>::iterator it = openSockets_.begin(); it != openSockets_.end(); it++)
 	{
 		__COUT__ << "Closing socket for port " << it->second << std::endl;
 		close(it->first);
@@ -107,8 +105,7 @@ int NetworkDevice::initSocket(std::string socketPort)
 			setsockopt(socketOut, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 			socketInitialized       = true;
 			openSockets_[socketOut] = p;
-			__COUT__ << "Socket Number: " << socketOut << " for port: " << p
-			         << " initialized." << std::endl;
+			__COUT__ << "Socket Number: " << socketOut << " for port: " << p << " initialized." << std::endl;
 		}
 
 		freeaddrinfo(res);  // free the linked-list
@@ -129,12 +126,7 @@ int NetworkDevice::initSocket(unsigned int socketPort)
 //========================================================================================================================
 int NetworkDevice::send(int socketDescriptor, const std::string& buffer)
 {
-	if(sendto(socketDescriptor,
-	          buffer.c_str(),
-	          buffer.size(),
-	          0,
-	          (struct sockaddr*)&(deviceAddress_),
-	          sizeof(deviceAddress_)) < (int)(buffer.size()))
+	if(sendto(socketDescriptor, buffer.c_str(), buffer.size(), 0, (struct sockaddr*)&(deviceAddress_), sizeof(deviceAddress_)) < (int)(buffer.size()))
 	{
 		__COUT__ << "Error writing buffer" << std::endl;
 		return -1;
@@ -160,12 +152,7 @@ int NetworkDevice::receive(int socketDescriptor, std::string& buffer)
 		socklen_t          addressLength = sizeof(tmpAddress);
 		int                nOfBytes;
 		char               readBuffer[maxSocketSize];
-		if((nOfBytes = recvfrom(socketDescriptor,
-		                        readBuffer,
-		                        maxSocketSize,
-		                        0,
-		                        (struct sockaddr*)&tmpAddress,
-		                        &addressLength)) == -1)
+		if((nOfBytes = recvfrom(socketDescriptor, readBuffer, maxSocketSize, 0, (struct sockaddr*)&tmpAddress, &addressLength)) == -1)
 		{
 			__COUT__ << "Error reading buffer" << std::endl;
 			return -1;
@@ -202,12 +189,7 @@ int NetworkDevice::listen(int socketDescriptor, std::string& buffer)
 		socklen_t          addressLength = sizeof(tmpAddress);
 		int                nOfBytes;
 		char               readBuffer[maxSocketSize];
-		if((nOfBytes = recvfrom(socketDescriptor,
-		                        readBuffer,
-		                        maxSocketSize,
-		                        0,
-		                        (struct sockaddr*)&tmpAddress,
-		                        &addressLength)) == -1)
+		if((nOfBytes = recvfrom(socketDescriptor, readBuffer, maxSocketSize, 0, (struct sockaddr*)&tmpAddress, &addressLength)) == -1)
 		{
 			__COUT__ << "Error reading buffer" << std::endl;
 			return -1;
@@ -275,8 +257,7 @@ std::string NetworkDevice::getFullIPAddress(std::string partialIpAddress)
 	if(getInterface(partialIpAddress))
 	{
 		char *p, addr[32];
-		p = inet_ntoa(
-		    ((struct sockaddr_in*)(communicationInterface_->ifa_addr))->sin_addr);
+		p = inet_ntoa(((struct sockaddr_in*)(communicationInterface_->ifa_addr))->sin_addr);
 		strncpy(addr, p, sizeof(addr) - 1);
 		addr[sizeof(addr) - 1] = '\0';
 
@@ -328,11 +309,9 @@ int NetworkDevice::getInterface(std::string ipAddress)
 	{
 		s = getnameinfo(communicationInterface_->ifa_addr,
 
-		                (communicationInterface_->ifa_addr->sa_family == AF_INET)
-		                    ? sizeof(struct sockaddr_in)
-		                    :
+		                (communicationInterface_->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) :
 
-		                    sizeof(struct sockaddr_in6),
+		                                                                          sizeof(struct sockaddr_in6),
 		                host,
 		                NI_MAXHOST,
 		                NULL,
@@ -367,9 +346,7 @@ int NetworkDevice::getInterface(std::string ipAddress)
 	{
 		perror("getifaddrs");
 		// FIXME substitute with try catch solution !!
-		__COUT__
-		    << "FIXME substitute with try catch solution !!\n\nFailed to get ifaddress!"
-		    << std::endl;
+		__COUT__ << "FIXME substitute with try catch solution !!\n\nFailed to get ifaddress!" << std::endl;
 		__SS__ << "Error!" << __E__;
 		__SS_THROW__;
 	}
@@ -461,8 +438,7 @@ std::string NetworkDevice::getMacAddress(std::string interfaceName)
 	{
 		for(ifaddrs* cur = iflist; cur; cur = cur->ifa_next)
 		{
-			if((cur->ifa_addr->sa_family == AF_LINK) &&
-			   (strcmp(cur->ifa_name, interfaceName.c_str()) == 0) && cur->ifa_addr)
+			if((cur->ifa_addr->sa_family == AF_LINK) && (strcmp(cur->ifa_name, interfaceName.c_str()) == 0) && cur->ifa_addr)
 			{
 				sockaddr_dl* sdl = (sockaddr_dl*)cur->ifa_addr;
 				memcpy(mac, LLADDR(sdl), sdl->sdl_alen);

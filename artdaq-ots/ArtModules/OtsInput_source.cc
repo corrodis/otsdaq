@@ -16,8 +16,7 @@ namespace art
 template<>
 struct Source_generator<artdaq::detail::SharedMemoryReader<ots::makeFragmentTypeMap>>
 {
-	static constexpr bool value =
-	    true;  ///< Used to suppress use of file services on art Source
+	static constexpr bool value = true;  ///< Used to suppress use of file services on art Source
 };
 }  // namespace art
 
@@ -29,8 +28,7 @@ namespace ots
 /**
  * \brief DemoInput is an art::Source using the detail::RawEventQueueReader class
  */
-typedef art::Source<artdaq::detail::SharedMemoryReader<ots::makeFragmentTypeMap>>
-    OtsInput;
+typedef art::Source<artdaq::detail::SharedMemoryReader<ots::makeFragmentTypeMap>> OtsInput;
 }  // namespace demo
 
 DEFINE_ART_INPUT_SOURCE(ots::OtsInput)

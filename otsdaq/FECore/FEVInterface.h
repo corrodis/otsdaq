@@ -25,10 +25,7 @@
 
 #include "otsdaq/Macros/CoutMacros.h"
 
-#define __ARGS__                                              \
-	const frontEndMacroStruct_t &              feMacroStruct, \
-	    FEVInterface::frontEndMacroConstArgs_t argsIn,        \
-	    FEVInterface::frontEndMacroArgs_t      argsOut
+#define __ARGS__ const frontEndMacroStruct_t &feMacroStruct, FEVInterface::frontEndMacroConstArgs_t argsIn, FEVInterface::frontEndMacroArgs_t argsOut
 
 #define __GET_ARG_IN__(X, Y) getFEMacroConstArgumentValue<Y>(argsIn, X)
 #define __GET_ARG_OUT__(X, Y) getFEMacroArgumentValue<Y>(argsOut, X)

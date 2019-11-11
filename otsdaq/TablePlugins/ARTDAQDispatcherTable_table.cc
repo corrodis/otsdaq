@@ -10,10 +10,8 @@
 
 using namespace ots;
 
-
 //========================================================================================================================
-ARTDAQDispatcherTable::ARTDAQDispatcherTable(void)
-    : ARTDAQTableBase("ARTDAQDispatcherTable")
+ARTDAQDispatcherTable::ARTDAQDispatcherTable(void) : ARTDAQTableBase("ARTDAQDispatcherTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -37,22 +35,19 @@ void ARTDAQDispatcherTable::init(ConfigurationManager* configManager)
 	// make directory just in case
 	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH).c_str(), 0755);
 
-//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
-//	__COUT__ << configManager->__SELF_NODE__ << __E__;
-
+	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	//	__COUT__ << configManager->__SELF_NODE__ << __E__;
 
 	// handle fcl file generation, wherever the level of this table
 
-	auto        dispatchers = configManager->__SELF_NODE__.getChildren(
-			/*default filterMap*/ 		std::map<std::string /*relative-path*/, std::string /*value*/>(),
-		    /*default byPriority*/ 		false,
-		    /*TRUE! onlyStatusTrue*/ 	true);
+	auto dispatchers = configManager->__SELF_NODE__.getChildren(
+	    /*default filterMap*/ std::map<std::string /*relative-path*/, std::string /*value*/>(),
+	    /*default byPriority*/ false,
+	    /*TRUE! onlyStatusTrue*/ true);
 
-	for (auto& dispatcher : dispatchers)
+	for(auto& dispatcher : dispatchers)
 	{
-		ARTDAQTableBase::outputDataReceiverFHICL(
-			dispatcher.second,
-			ARTDAQTableBase::ARTDAQAppType::Dispatcher);
+		ARTDAQTableBase::outputDataReceiverFHICL(dispatcher.second, ARTDAQTableBase::ARTDAQAppType::Dispatcher);
 		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::Dispatcher, dispatcher.second.getValue());
 	}
 

@@ -8,13 +8,12 @@
 
 #include "otsdaq/PluginMakers/MakeTable.h"
 #include "otsdaq/TableCore/TableBase.h"
-#include "otsdaq/TableCore/TableView.h"
 #include "otsdaq/TableCore/TableGroupKey.h"
 #include "otsdaq/TableCore/TableVersion.h"
+#include "otsdaq/TableCore/TableView.h"
 
 namespace ots
 {
-
 // clang-format off
 
 class ConfigurationHandlerBase;

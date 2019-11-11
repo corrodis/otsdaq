@@ -14,7 +14,6 @@
 
 namespace ots
 {
-	
 // clang-format off
 class ARTDAQTableBase : public TableBase
 {

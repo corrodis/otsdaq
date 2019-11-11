@@ -18,12 +18,9 @@ inline void INIT_MF(const char* name)
 	char* logRootString = getenv("OTSDAQ_LOG_ROOT");
 	if(logRootString == nullptr)
 	{
-		__COUT_ERR__ << "\n**********************************************************"
-		             << std::endl;
-		__COUT_ERR__ << "WARNING: OTSDAQ_LOG_ROOT environment variable was not set!"
-		             << std::endl;
-		__COUT_ERR__ << "**********************************************************\n"
-		             << std::endl;
+		__COUT_ERR__ << "\n**********************************************************" << std::endl;
+		__COUT_ERR__ << "WARNING: OTSDAQ_LOG_ROOT environment variable was not set!" << std::endl;
+		__COUT_ERR__ << "**********************************************************\n" << std::endl;
 		// exit(0);
 	}
 	else
@@ -32,12 +29,9 @@ inline void INIT_MF(const char* name)
 	char* logFhiclCode = getenv("OTSDAQ_LOG_FHICL");
 	if(logFhiclCode == nullptr)
 	{
-		__COUT_ERR__ << "\n***********************************************************"
-		             << std::endl;
-		__COUT_ERR__ << "WARNING: OTSDAQ_LOG_FHICL environment variable was not set!"
-		             << std::endl;
-		__COUT_ERR__ << "***********************************************************\n"
-		             << std::endl;
+		__COUT_ERR__ << "\n***********************************************************" << std::endl;
+		__COUT_ERR__ << "WARNING: OTSDAQ_LOG_FHICL environment variable was not set!" << std::endl;
+		__COUT_ERR__ << "***********************************************************\n" << std::endl;
 		// exit(0);
 	}
 	else
@@ -59,9 +53,7 @@ inline void INIT_MF(const char* name)
 			fclose(fp);
 		}
 	}
-	artdaq::configureMessageFacility(name /*application name*/,
-	                                 false /*cout display*/,
-	                                 true /*enable debug messages*/);
+	artdaq::configureMessageFacility(name /*application name*/, false /*cout display*/, true /*enable debug messages*/);
 
 	artdaq::setMsgFacAppName(name, 0);
 

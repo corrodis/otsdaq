@@ -11,9 +11,7 @@ namespace ots
 {
 class ConfigurationTree;
 
-class UDPDataListenerProducer : public DataProducer,
-                                public Configurable,
-                                public ReceiverSocket
+class UDPDataListenerProducer : public DataProducer, public Configurable, public ReceiverSocket
 {
   public:
 	UDPDataListenerProducer(std::string              supervisorApplicationUID,

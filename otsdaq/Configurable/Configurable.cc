@@ -5,12 +5,10 @@
 using namespace ots;
 
 //==============================================================================
-Configurable::Configurable(const ConfigurationTree& theXDAQContextConfigTree,
-                           const std::string&       theConfigurationPath)
+Configurable::Configurable(const ConfigurationTree& theXDAQContextConfigTree, const std::string& theConfigurationPath)
     : theXDAQContextConfigTree_(theXDAQContextConfigTree)
     , theConfigurationPath_(theConfigurationPath)
-    , theConfigurationRecordName_(
-          theXDAQContextConfigTree_.getNode(theConfigurationPath_).getValueAsString())
+    , theConfigurationRecordName_(theXDAQContextConfigTree_.getNode(theConfigurationPath_).getValueAsString())
 {
 	__CFG_COUT__ << " Configurable class constructed. " << __E__;
 }
@@ -27,36 +25,26 @@ ConfigurationTree Configurable::getSelfNode() const
 }
 
 //==============================================================================
-const ConfigurationManager* Configurable::getConfigurationManager() const
-{
-	return theXDAQContextConfigTree_.getConfigurationManager();
-}
+const ConfigurationManager* Configurable::getConfigurationManager() const { return theXDAQContextConfigTree_.getConfigurationManager(); }
 
 //==============================================================================
 const std::string& Configurable::getContextUID() const
 {
-	return theXDAQContextConfigTree_
-	    .getForwardNode(theConfigurationPath_, 1 /*steps to xdaq node*/)
-	    .getValueAsString();
+	return theXDAQContextConfigTree_.getForwardNode(theConfigurationPath_, 1 /*steps to xdaq node*/).getValueAsString();
 }
 
 //==============================================================================
 const std::string& Configurable::getApplicationUID() const
 {
-	return theXDAQContextConfigTree_
-	    .getForwardNode(theConfigurationPath_, 3 /*steps to app node*/)
-	    .getValueAsString();
+	return theXDAQContextConfigTree_.getForwardNode(theConfigurationPath_, 3 /*steps to app node*/).getValueAsString();
 }
 
 //==============================================================================
 unsigned int Configurable::getApplicationLID() const
 {
-	const XDAQContextTable* contextConfig =
-	    getConfigurationManager()->__GET_CONFIG__(XDAQContextTable);
+	const XDAQContextTable* contextConfig = getConfigurationManager()->__GET_CONFIG__(XDAQContextTable);
 
-	return contextConfig
-	    ->getApplicationNode(
-	        getConfigurationManager(), getContextUID(), getApplicationUID())
+	return contextConfig->getApplicationNode(getConfigurationManager(), getContextUID(), getApplicationUID())
 	    .getNode(contextConfig->colApplication_.colId_)
 	    .getValue<unsigned int>();
 }
@@ -64,21 +52,15 @@ unsigned int Configurable::getApplicationLID() const
 //==============================================================================
 std::string Configurable::getContextAddress() const
 {
-	const XDAQContextTable* contextConfig =
-	    getConfigurationManager()->__GET_CONFIG__(XDAQContextTable);
+	const XDAQContextTable* contextConfig = getConfigurationManager()->__GET_CONFIG__(XDAQContextTable);
 
-	return contextConfig->getContextNode(getConfigurationManager(), getContextUID())
-	    .getNode(contextConfig->colContext_.colAddress_)
-	    .getValue<std::string>();
+	return contextConfig->getContextNode(getConfigurationManager(), getContextUID()).getNode(contextConfig->colContext_.colAddress_).getValue<std::string>();
 }
 
 //==============================================================================
 unsigned int Configurable::getContextPort() const
 {
-	const XDAQContextTable* contextConfig =
-	    getConfigurationManager()->__GET_CONFIG__(XDAQContextTable);
+	const XDAQContextTable* contextConfig = getConfigurationManager()->__GET_CONFIG__(XDAQContextTable);
 
-	return contextConfig->getContextNode(getConfigurationManager(), getContextUID())
-	    .getNode(contextConfig->colContext_.colPort_)
-	    .getValue<unsigned int>();
+	return contextConfig->getContextNode(getConfigurationManager(), getContextUID()).getNode(contextConfig->colContext_.colPort_).getValue<unsigned int>();
 }

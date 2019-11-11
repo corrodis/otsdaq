@@ -8,7 +8,4 @@
 
 using namespace ots;
 
-bool FESlowControlsWorkLoop::workLoopThread(toolbox::task::WorkLoop* workLoop)
-{
-	return interface_->slowControlsRunning();
-}
+bool FESlowControlsWorkLoop::workLoopThread(toolbox::task::WorkLoop* workLoop) { return interface_->slowControlsRunning(); }

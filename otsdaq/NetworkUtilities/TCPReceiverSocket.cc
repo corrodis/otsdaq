@@ -7,10 +7,7 @@
 
 using namespace ots;
 //========================================================================================================================
-TCPReceiverSocket::TCPReceiverSocket(int socketId) : TCPSocket(socketId)
-{
-	fPacket.reset();
-}
+TCPReceiverSocket::TCPReceiverSocket(int socketId) : TCPSocket(socketId) { fPacket.reset(); }
 
 //========================================================================================================================
 TCPReceiverSocket::~TCPReceiverSocket(void) {}
@@ -43,10 +40,7 @@ std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize)
 		switch(errno)
 		{
 		case EBADF:
-			error
-			    << "Socket file descriptor " << getSocketId()
-			    << " is not a valid file descriptor or is not open for reading...Errno: "
-			    << errno;
+			error << "Socket file descriptor " << getSocketId() << " is not a valid file descriptor or is not open for reading...Errno: " << errno;
 			break;
 		case EFAULT:
 			error << "Buffer is outside your accessible address space...Errno: " << errno;

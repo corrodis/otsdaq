@@ -27,8 +27,7 @@ TableGroupKey::TableGroupKey(char* const& groupString)
 	//	key consists of numeric, dash, underscore, and period
 	int i = strlen(groupString) - 1;
 	for(; i >= 0; --i)
-		if((groupString[i] < '0' || groupString[i] > '9') && groupString[i] != '-' &&
-		   groupString[i] != '_' && groupString[i] != '.')
+		if((groupString[i] < '0' || groupString[i] > '9') && groupString[i] != '-' && groupString[i] != '_' && groupString[i] != '.')
 			break;  // not part of key,... likely a 'v' if using "_v" syntax for version
 
 	if(i == (int)strlen(groupString) - 1)  // no key characters found
@@ -46,10 +45,7 @@ TableGroupKey::TableGroupKey(char* const& groupString)
 }
 
 //==============================================================================
-TableGroupKey::TableGroupKey(const std::string& groupString)
-    : TableGroupKey((char*)groupString.c_str())
-{
-}
+TableGroupKey::TableGroupKey(const std::string& groupString) : TableGroupKey((char*)groupString.c_str()) {}
 
 //==============================================================================
 TableGroupKey::~TableGroupKey(void) {}
@@ -60,10 +56,7 @@ unsigned int TableGroupKey::key(void) const { return key_; }
 //==============================================================================
 // operator==
 bool TableGroupKey::operator==(unsigned int key) const { return (key_ == key); }
-bool TableGroupKey::operator==(const TableGroupKey& key) const
-{
-	return (key_ == key.key_);
-}
+bool TableGroupKey::operator==(const TableGroupKey& key) const { return (key_ == key.key_); }
 
 //==============================================================================
 // toString
@@ -83,24 +76,15 @@ TableGroupKey& TableGroupKey::operator=(const unsigned int key)
 
 //==============================================================================
 bool TableGroupKey::operator!=(unsigned int key) const { return (key_ != key); }
-bool TableGroupKey::operator!=(const TableGroupKey& key) const
-{
-	return (key_ != key.key_);
-}
+bool TableGroupKey::operator!=(const TableGroupKey& key) const { return (key_ != key.key_); }
 
 //==============================================================================
 // operator<
-bool TableGroupKey::operator<(const TableGroupKey& key) const
-{
-	return (key_ < key.key_);
-}
+bool TableGroupKey::operator<(const TableGroupKey& key) const { return (key_ < key.key_); }
 
 //==============================================================================
 // operator>
-bool TableGroupKey::operator>(const TableGroupKey& key) const
-{
-	return (key_ > key.key_);
-}
+bool TableGroupKey::operator>(const TableGroupKey& key) const { return (key_ > key.key_); }
 
 //==============================================================================
 // isInvalid
@@ -115,7 +99,7 @@ bool TableGroupKey::isInvalid() const { return (key_ == INVALID); }
 TableGroupKey TableGroupKey::getNextKey(const TableGroupKey& key)
 {
 	TableGroupKey retKey(key.key_ + 1);  // DEFAULT := INVALID + 1
-	return retKey;  // if retKey is invalid, then INVALID is returned already
+	return retKey;                       // if retKey is invalid, then INVALID is returned already
 }
 
 //==============================================================================
@@ -130,8 +114,7 @@ const unsigned int TableGroupKey::getInvalidKey(void) { return INVALID; }
 //		if given nothing returns DEFAULT as first key
 //		if given 0, returns 1, etc.
 //	if no available keys left return INVALID
-std::string TableGroupKey::getFullGroupString(const std::string&   groupName,
-                                              const TableGroupKey& key)
+std::string TableGroupKey::getFullGroupString(const std::string& groupName, const TableGroupKey& key)
 {
 	if(groupName.size() == 0)
 	{
@@ -155,8 +138,7 @@ std::string TableGroupKey::getFullGroupString(const std::string&   groupName,
 		for(unsigned int i = 0; i < groupName.size(); ++i)
 		{
 			if(!(  // alphaNumeric
-			       (groupName[i] >= 'A' && groupName[i] <= 'Z') ||
-			       (groupName[i] >= 'a' && groupName[i] <= 'z') ||
+			       (groupName[i] >= 'A' && groupName[i] <= 'Z') || (groupName[i] >= 'a' && groupName[i] <= 'z') ||
 			       (groupName[i] >= '0' && groupName[i] <= '9')))
 			{
 				__SS__ << ("TableGroupKey::getFullGroupString() Illegal Group Name! "
@@ -173,9 +155,7 @@ std::string TableGroupKey::getFullGroupString(const std::string&   groupName,
 }
 
 //==============================================================================
-void TableGroupKey::getGroupNameAndKey(const std::string& fullGroupString,
-                                       std::string&       groupName,
-                                       TableGroupKey&     key)
+void TableGroupKey::getGroupNameAndKey(const std::string& fullGroupString, std::string& groupName, TableGroupKey& key)
 {
 	auto i    = fullGroupString.rfind("_v");
 	groupName = fullGroupString.substr(0, i);

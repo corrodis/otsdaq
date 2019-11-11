@@ -12,26 +12,17 @@
 using namespace ots;
 
 //========================================================================================================================
-UDPDataListenerProducer::UDPDataListenerProducer(
-    std::string              supervisorApplicationUID,
-    std::string              bufferUID,
-    std::string              processorUID,
-    const ConfigurationTree& theXDAQContextConfigTree,
-    const std::string&       configurationPath)
+UDPDataListenerProducer::UDPDataListenerProducer(std::string              supervisorApplicationUID,
+                                                 std::string              bufferUID,
+                                                 std::string              processorUID,
+                                                 const ConfigurationTree& theXDAQContextConfigTree,
+                                                 const std::string&       configurationPath)
     : WorkLoop(processorUID)
-    , Socket(theXDAQContextConfigTree.getNode(configurationPath)
-                 .getNode("HostIPAddress")
-                 .getValue<std::string>(),
-             theXDAQContextConfigTree.getNode(configurationPath)
-                 .getNode("HostPort")
-                 .getValue<unsigned int>())
+    , Socket(theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>(),
+             theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>())
     //, Socket       ("192.168.133.100", 40000)
-    , DataProducer(supervisorApplicationUID,
-                   bufferUID,
-                   processorUID,
-                   theXDAQContextConfigTree.getNode(configurationPath)
-                       .getNode("BufferSize")
-                       .getValue<unsigned int>())
+    , DataProducer(
+          supervisorApplicationUID, bufferUID, processorUID, theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
     //, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
     , Configurable(theXDAQContextConfigTree, configurationPath)
     , dataP_(nullptr)
@@ -40,9 +31,7 @@ UDPDataListenerProducer::UDPDataListenerProducer(
 	unsigned int socketReceiveBufferSize;
 	try  // if socketReceiveBufferSize is defined in configuration, use it
 	{
-		socketReceiveBufferSize = theXDAQContextConfigTree.getNode(configurationPath)
-		                              .getNode("SocketReceiveBufferSize")
-		                              .getValue<unsigned int>();
+		socketReceiveBufferSize = theXDAQContextConfigTree.getNode(configurationPath).getNode("SocketReceiveBufferSize").getValue<unsigned int>();
 	}
 	catch(...)
 	{
@@ -101,9 +90,7 @@ void UDPDataListenerProducer::fastWrite(void)
 
 	if(DataProducer::attachToEmptySubBuffer(dataP_, headerP_) < 0)
 	{
-		__CFG_COUT__
-		    << "There are no available buffers! Retrying...after waiting 10 milliseconds!"
-		    << std::endl;
+		__CFG_COUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
 		usleep(10000);
 		return;
 	}
@@ -135,8 +122,7 @@ void UDPDataListenerProducer::fastWrite(void)
 
 	if(ReceiverSocket::receive(*dataP_, ipAddress_, port_, 1, 0, true) != -1)
 	{
-		DataProducer::setWrittenSubBuffer<std::string,
-		                                  std::map<std::string, std::string> >();
+		DataProducer::setWrittenSubBuffer<std::string, std::map<std::string, std::string> >();
 	}
 }
 

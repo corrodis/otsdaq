@@ -7,8 +7,7 @@
 using namespace ots;
 
 //========================================================================================================================
-TCPServer::TCPServer(int serverPort, unsigned int maxNumberOfClients)
-    : TCPServerBase(serverPort, maxNumberOfClients)
+TCPServer::TCPServer(int serverPort, unsigned int maxNumberOfClients) : TCPServerBase(serverPort, maxNumberOfClients)
 {
 	// fAcceptFuture = std::async(std::launch::async, &TCPServer::acceptConnections,
 	// this);
@@ -30,9 +29,7 @@ void TCPServer::connectClient(TCPTransceiverSocket* socket)
 	// std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 	while(1)
 	{
-		std::cout << __PRETTY_FUNCTION__
-		          << "Waiting for message for socket  #: " << socket->getSocketId()
-		          << std::endl;
+		std::cout << __PRETTY_FUNCTION__ << "Waiting for message for socket  #: " << socket->getSocketId() << std::endl;
 		std::string message;
 		try
 		{
@@ -47,8 +44,7 @@ void TCPServer::connectClient(TCPTransceiverSocket* socket)
 
 		std::cout << __PRETTY_FUNCTION__
 		          //<< "Received message:-" << message << "-"
-		          << "Message Length=" << message.length()
-		          << " From socket #: " << socket->getSocketId() << std::endl;
+		          << "Message Length=" << message.length() << " From socket #: " << socket->getSocketId() << std::endl;
 		message = interpretMessage(message);
 
 		if(message != "")
@@ -59,16 +55,12 @@ void TCPServer::connectClient(TCPTransceiverSocket* socket)
 			socket->sendPacket(message);
 		}
 		else
-			std::cout << __PRETTY_FUNCTION__ << "Not sending anything back to socket  #: "
-			          << socket->getSocketId() << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "Not sending anything back to socket  #: " << socket->getSocketId() << std::endl;
 
-		std::cout << __PRETTY_FUNCTION__
-		          << "After message sent now checking for more... socket #: "
-		          << socket->getSocketId() << std::endl;
+		std::cout << __PRETTY_FUNCTION__ << "After message sent now checking for more... socket #: " << socket->getSocketId() << std::endl;
 	}
 
-	std::cout << __PRETTY_FUNCTION__
-	          << "Thread done for socket  #: " << socket->getSocketId() << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "Thread done for socket  #: " << socket->getSocketId() << std::endl;
 }
 
 //========================================================================================================================
@@ -79,8 +71,7 @@ void TCPServer::acceptConnections()
 	{
 		try
 		{
-			std::thread thread(
-			    &TCPServer::connectClient, this, acceptClient<TCPTransceiverSocket>());
+			std::thread thread(&TCPServer::connectClient, this, acceptClient<TCPTransceiverSocket>());
 			thread.detach();
 		}
 		catch(int e)

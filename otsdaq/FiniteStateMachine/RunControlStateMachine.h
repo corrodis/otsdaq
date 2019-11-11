@@ -17,15 +17,9 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 	RunControlStateMachine(const std::string& name = "Undefined Name");
 	virtual ~RunControlStateMachine(void);
 
-	void reset(void);
-	void setStateMachineName(const std::string& name)
-	{
-		theStateMachine_.setStateMachineName(name);
-	}
-	const std::string& getErrorMessage(void) const
-	{
-		return theStateMachine_.getErrorMessage();
-	}
+	void               reset(void);
+	void               setStateMachineName(const std::string& name) { theStateMachine_.setStateMachineName(name); }
+	const std::string& getErrorMessage(void) const { return theStateMachine_.getErrorMessage(); }
 
 	template<class OBJECT>
 	void addStateTransition(toolbox::fsm::State from,
@@ -51,8 +45,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 
 	{
 		stateTransitionFunctionTable_[from][input] = func;
-		theStateMachine_.addStateTransition(
-		    from, to, input, transitionName, transitionParameter, obj, func);
+		theStateMachine_.addStateTransition(from, to, input, transitionName, transitionParameter, obj, func);
 	}
 
 	// using	stateMachineFunction_t = void (ots::RunControlStateMachine::*
@@ -135,10 +128,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 	std::string         lastIterationResult_;
 	unsigned int        lastIterationIndex_, lastSubIterationIndex_;
 
-	std::map<toolbox::fsm::State,
-	         std::map<std::string,
-	                  void (RunControlStateMachine::*)(toolbox::Event::Reference),
-	                  std::less<std::string> > >
+	std::map<toolbox::fsm::State, std::map<std::string, void (RunControlStateMachine::*)(toolbox::Event::Reference), std::less<std::string> > >
 	    stateTransitionFunctionTable_;
 };
 

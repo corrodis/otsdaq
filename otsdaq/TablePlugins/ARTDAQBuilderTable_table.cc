@@ -11,7 +11,6 @@
 
 using namespace ots;
 
-
 //========================================================================================================================
 ARTDAQBuilderTable::ARTDAQBuilderTable(void) : ARTDAQTableBase("ARTDAQBuilderTable")
 {
@@ -37,22 +36,19 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 	// make directory just in case
 	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH).c_str(), 0755);
 
-//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
-//	__COUT__ << configManager->__SELF_NODE__ << __E__;
-
+	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	//	__COUT__ << configManager->__SELF_NODE__ << __E__;
 
 	// handle fcl file generation, wherever the level of this table
 
-	auto        buiders = configManager->__SELF_NODE__.getChildren(
-			/*default filterMap*/ 		std::map<std::string /*relative-path*/, std::string /*value*/>(),
-		    /*default byPriority*/ 		false,
-		    /*TRUE! onlyStatusTrue*/ 	true);
+	auto buiders = configManager->__SELF_NODE__.getChildren(
+	    /*default filterMap*/ std::map<std::string /*relative-path*/, std::string /*value*/>(),
+	    /*default byPriority*/ false,
+	    /*TRUE! onlyStatusTrue*/ true);
 
-	for (auto& builder : buiders)
+	for(auto& builder : buiders)
 	{
-		ARTDAQTableBase::outputDataReceiverFHICL(
-			builder.second,
-			ARTDAQTableBase::ARTDAQAppType::EventBuilder);
+		ARTDAQTableBase::outputDataReceiverFHICL(builder.second, ARTDAQTableBase::ARTDAQAppType::EventBuilder);
 		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::EventBuilder, builder.second.getValue());
 	}
 

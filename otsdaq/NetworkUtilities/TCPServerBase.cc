@@ -14,9 +14,7 @@ using namespace ots;
 
 //========================================================================================================================
 TCPServerBase::TCPServerBase(int serverPort, unsigned int maxNumberOfClients)
-    : fMaxNumberOfClients(maxNumberOfClients)
-    , fAccept(true)
-    , fAcceptFuture(fAcceptPromise.get_future())
+    : fMaxNumberOfClients(maxNumberOfClients), fAccept(true), fAcceptFuture(fAcceptPromise.get_future())
 {
 	int opt = 1;  // SO_REUSEADDR - man socket(7)
 	if(::setsockopt(getSocketId(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) != 0)
@@ -48,20 +46,14 @@ TCPServerBase::TCPServerBase(int serverPort, unsigned int maxNumberOfClients)
 //========================================================================================================================
 TCPServerBase::~TCPServerBase(void)
 {
-	std::cout << __PRETTY_FUNCTION__
-	          << "Closing the network server socket: " << getSocketId() << std::endl;
-	std::cout << __PRETTY_FUNCTION__
-	          << "SHUTDOWN Closing the network server socket: " << getSocketId()
-	          << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "Closing the network server socket: " << getSocketId() << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "SHUTDOWN Closing the network server socket: " << getSocketId() << std::endl;
 	shutdownAccept();
-	std::cout << __PRETTY_FUNCTION__
-	          << "Closing the network server socket: " << getSocketId() << std::endl;
-	while(fAcceptFuture.wait_for(std::chrono::milliseconds(100)) !=
-	      std::future_status::ready)
+	std::cout << __PRETTY_FUNCTION__ << "Closing the network server socket: " << getSocketId() << std::endl;
+	while(fAcceptFuture.wait_for(std::chrono::milliseconds(100)) != std::future_status::ready)
 		std::cout << __PRETTY_FUNCTION__ << "Still running" << std::endl;
 	closeClientSockets();
-	std::cout << __PRETTY_FUNCTION__
-	          << "Closed all sockets connected to server: " << getSocketId() << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "Closed all sockets connected to server: " << getSocketId() << std::endl;
 }
 
 //========================================================================================================================
@@ -75,13 +67,10 @@ void TCPServerBase::startAccept(void)
 //========================================================================================================================
 int TCPServerBase::accept(bool blocking)
 {
-	std::cout << __PRETTY_FUNCTION__
-	          << "Now server accept connections on socket: " << getSocketId()
-	          << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "Now server accept connections on socket: " << getSocketId() << std::endl;
 	if(getSocketId() == invalidSocketId)
 	{
-		throw std::logic_error(
-		    "Accept called on a bad socket object (this object was moved)");
+		throw std::logic_error("Accept called on a bad socket object (this object was moved)");
 	}
 
 	struct sockaddr_storage serverStorage;
@@ -89,8 +78,7 @@ int TCPServerBase::accept(bool blocking)
 	int                     clientSocket = invalidSocketId;
 	if(blocking)
 	{
-		clientSocket =
-		    ::accept(getSocketId(), (struct sockaddr*)&serverStorage, &addr_size);
+		clientSocket = ::accept(getSocketId(), (struct sockaddr*)&serverStorage, &addr_size);
 		if(!fAccept)
 		{
 			fAccept = true;
@@ -98,13 +86,10 @@ int TCPServerBase::accept(bool blocking)
 		}
 		if(clientSocket == invalidSocketId)
 		{
-			std::cout << __PRETTY_FUNCTION__ << "New socket invalid?: " << clientSocket
-			          << " errno: " << errno << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "New socket invalid?: " << clientSocket << " errno: " << errno << std::endl;
 			throw std::runtime_error(std::string("Accept: ") + strerror(errno));
 		}
-		std::cout << __PRETTY_FUNCTION__
-		          << "Server just accepted a connection on socket: " << getSocketId()
-		          << " Client socket: " << clientSocket << std::endl;
+		std::cout << __PRETTY_FUNCTION__ << "Server just accepted a connection on socket: " << getSocketId() << " Client socket: " << clientSocket << std::endl;
 		return clientSocket;
 	}
 	else
@@ -136,9 +121,7 @@ int TCPServerBase::accept(bool blocking)
 				                                       // timeout if there is nothing
 				if(clientSocket == invalidSocketId)
 				{
-					std::cout << __PRETTY_FUNCTION__
-					          << "New socket invalid?: " << clientSocket
-					          << " errno: " << errno << std::endl;
+					std::cout << __PRETTY_FUNCTION__ << "New socket invalid?: " << clientSocket << " errno: " << errno << std::endl;
 					throw std::runtime_error(std::string("Accept: ") + strerror(errno));
 				}
 				return clientSocket;

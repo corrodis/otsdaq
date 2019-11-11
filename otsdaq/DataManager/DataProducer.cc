@@ -11,12 +11,8 @@ using namespace ots;
 #define __MF_SUBJECT__ (std::string("producer-") + bufferUID_ + "-" + processorUID_)
 
 //========================================================================================================================
-DataProducer::DataProducer(std::string  supervisorApplicationUID,
-                           std::string  bufferUID,
-                           std::string  processorUID,
-                           unsigned int bufferSize)
-    : WorkLoop(processorUID)
-    , DataProducerBase(supervisorApplicationUID, bufferUID, processorUID, bufferSize)
+DataProducer::DataProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, unsigned int bufferSize)
+    : WorkLoop(processorUID), DataProducerBase(supervisorApplicationUID, bufferUID, processorUID, bufferSize)
 {
 	__COUT__ << "Constructed." << __E__;
 }

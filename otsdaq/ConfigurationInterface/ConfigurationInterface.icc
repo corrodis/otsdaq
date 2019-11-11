@@ -7,7 +7,7 @@
 //	if accumulatedErrors, then invalid data is allowed
 //		(not the same as "warnings allowed", because could create invalid tree
 // situations)
-//void ConfigurationInterface::get(
+// void ConfigurationInterface::get(
 //		TableBase*&                          table,
 //		const std::string                    tableName,
 //		std::shared_ptr<const TableGroupKey> groupKey            /*= 0*/,
@@ -18,221 +18,121 @@
 //		bool                                 looseColumnMatching /*= false*/,
 //		std::string*                         accumulatedErrors   /*= 0*/)
 
-
-
-
-	//==============================================================================
-	// get
-	//	Note: If filling, assume, new view becomes active view.
-	//
-	//	Loose column matching can be used to ignore column names when filling.
-	//
-	//	if accumulatedErrors, then invalid data is allowed
-	//		(not the same as "warnings allowed", because could create invalid tree situations)
-	void 									get								(
-			TableBase*&                          table,
-			const std::string                    tableName,
-			std::shared_ptr<const TableGroupKey> groupKey            = 0,
-			const std::string*                   groupName           = 0,
-			bool                                 dontFill            = false,
-			TableVersion                         version             = TableVersion(),
-			bool                                 resetConfiguration  = true,
-			bool                                 looseColumnMatching = false,
-			std::string*                         accumulatedErrors   = 0)
+//==============================================================================
+// get
+//	Note: If filling, assume, new view becomes active view.
+//
+//	Loose column matching can be used to ignore column names when filling.
+//
+//	if accumulatedErrors, then invalid data is allowed
+//		(not the same as "warnings allowed", because could create invalid tree situations)
+void get(TableBase*&                          table,
+         const std::string                    tableName,
+         std::shared_ptr<const TableGroupKey> groupKey            = 0,
+         const std::string*                   groupName           = 0,
+         bool                                 dontFill            = false,
+         TableVersion                         version             = TableVersion(),
+         bool                                 resetConfiguration  = true,
+         bool                                 looseColumnMatching = false,
+         std::string*                         accumulatedErrors   = 0)
+{
+	if(table == 0)
 	{
+		// try making table table plugin, if fails use TableBase
+		try
+		{
+			table = makeTable(tableName);
+		}
+		catch(...)
+		{
+		}
+
 		if(table == 0)
 		{
-			// try making table table plugin, if fails use TableBase
+			//__COUT__ << "Using TableBase object with table name " <<
+			// tableName << std::endl;
+
+			// try making table base..
+			//	if it fails, then probably something wrong with Info file
 			try
 			{
-				table = makeTable(tableName);
+				table = new TableBase(tableName);
 			}
-			catch(...)
+			catch(...)  // failure so cleanup any halfway complete table work
 			{
+				__COUT_WARN__ << "Failed to even use TableBase!" << std::endl;
+				if(table)
+					delete table;
+				table = 0;
+				throw;
 			}
-
-			if(table == 0)
-			{
-				//__COUT__ << "Using TableBase object with table name " <<
-				// tableName << std::endl;
-
-				// try making table base..
-				//	if it fails, then probably something wrong with Info file
-				try
-				{
-					table = new TableBase(tableName);
-				}
-				catch(...)  // failure so cleanup any halfway complete table work
-				{
-					__COUT_WARN__ << "Failed to even use TableBase!" << std::endl;
-					if(table)
-						delete table;
-					table = 0;
-					throw;
-				}
-			}
-			//__COUT__ << "Table constructed!" << std::endl;
 		}
+		//__COUT__ << "Table constructed!" << std::endl;
+	}
 
-		if(groupKey != 0 && groupName != 0)
-		{  // FIXME -- new TableGroup and TableGroupKey should be used!
-			// version = configurations->getConditionVersion(*groupKey,
-			// table->getTableName());
-			__SS__ << "FATAL ERROR: new TableGroup and TableGroupKey should be used!"
-					<< std::endl;
+	if(groupKey != 0 && groupName != 0)
+	{  // FIXME -- new TableGroup and TableGroupKey should be used!
+		// version = configurations->getConditionVersion(*groupKey,
+		// table->getTableName());
+		__SS__ << "FATAL ERROR: new TableGroup and TableGroupKey should be used!" << std::endl;
+		__SS_THROW__;
+	}
+	else if(!dontFill)
+	{
+		// check version choice
+		if(version == TableVersion::INVALID && (version = findLatestVersion(table)) == TableVersion::INVALID)
+		{
+			__COUT__ << "FATAL ERROR: Can't ask to fill a table object with "
+			            "a negative version! "
+			         << tableName << std::endl;
+			__SS__ << "FATAL ERROR: Invalid latest version." << std::endl
+			       << std::endl
+			       << std::endl
+			       << "*******************" << std::endl
+			       << "Suggestion: If you expect a version to exist for this "
+			          "table, perhaps this is your first time running with "
+			          "the artdaq database. (and your old configurations have not "
+			          "been transferred?) "
+			       << std::endl
+			       << "Try running this once:\n\n\totsdaq_database_migrate" << std::endl
+			       << std::endl
+			       << "This will migrate the old ots file system table to "
+			          "the artdaq database approach."
+			       << std::endl
+			       << std::endl
+			       << std::endl;
 			__SS_THROW__;
 		}
-		else if(!dontFill)
-		{
-			// check version choice
-			if(version == TableVersion::INVALID &&
-					(version = findLatestVersion(table)) == TableVersion::INVALID)
-			{
-				__COUT__ << "FATAL ERROR: Can't ask to fill a table object with "
-						"a negative version! "
-						<< tableName << std::endl;
-				__SS__ << "FATAL ERROR: Invalid latest version." << std::endl
-						<< std::endl
-						<< std::endl
-						<< "*******************" << std::endl
-						<< "Suggestion: If you expect a version to exist for this "
-						"table, perhaps this is your first time running with "
-						"the artdaq database. (and your old configurations have not "
-						"been transferred?) "
-						<< std::endl
-						<< "Try running this once:\n\n\totsdaq_database_migrate"
-						<< std::endl
-						<< std::endl
-						<< "This will migrate the old ots file system table to "
-						"the artdaq database approach."
-						<< std::endl
-						<< std::endl
-						<< std::endl;
-				__SS_THROW__;
-			}
-		}
+	}
 
-		if(resetConfiguration)  // reset to empty table views and no active view
-		{  // EXCEPT, keep temporary views! (call TableBase::reset to really reset all)
-			table->deactivate();
-			std::set<TableVersion> versions = table->getStoredVersions();
-			for(auto& version : versions)
-				if(!version.isTemporaryVersion())  // if not temporary
-					table->eraseView(version);
-		}
-
-		if(dontFill)
-			return;
-
-		// Note: assume new view becomes active view
-
-		// take advantage of version possibly being cached
-		if(table->isStored(version))
-		{
-			if(looseColumnMatching) //clear cached version
+	if(resetConfiguration)  // reset to empty table views and no active view
+	{                       // EXCEPT, keep temporary views! (call TableBase::reset to really reset all)
+		table->deactivate();
+		std::set<TableVersion> versions = table->getStoredVersions();
+		for(auto& version : versions)
+			if(!version.isTemporaryVersion())  // if not temporary
 				table->eraseView(version);
-			else //use cached version
-			{
+	}
 
+	if(dontFill)
+		return;
 
-				//__COUT__ << "Using archived version: " << version << std::endl;
+	// Note: assume new view becomes active view
 
-				// Make sure this version is not already active
-				if(!table->isActive() || version != table->getViewVersion())
-					table->setActiveView(version);
-
-				table->getViewP()->setLastAccessTime();
-
-				try
-				{
-					// sanitize for column info and dataTypes
-					table->getViewP()->init();
-				}
-				catch(const std::runtime_error& e)
-				{
-					__SS__ << "Error occurred while getting and filling Table \"" << tableName
-							<< "\" version:" << version << std::endl;
-					ss << "\n" << e.what() << __E__;
-					__COUT__ << StringMacros::stackTrace() << __E__;
-
-					// if accumulating errors, allow invalid data
-					if(accumulatedErrors)
-						*accumulatedErrors += ss.str();
-					else
-						throw;
-				}
-
-				return;
-			}
-		} //end cache handling
-
-		try  // to fill
+	// take advantage of version possibly being cached
+	if(table->isStored(version))
+	{
+		if(looseColumnMatching)  // clear cached version
+			table->eraseView(version);
+		else  // use cached version
 		{
-			if(version.isTemporaryVersion())
-			{
-				__SS__ << "FATAL ERROR: Can not use interface to fill a "
-						"table object with a temporary version!"
-						<< std::endl;
-				ss << "FATAL ERROR: Invalid temporary version v" << version << std::endl;
-				__SS_THROW__;
-			}
+			//__COUT__ << "Using archived version: " << version << std::endl;
 
-			table->setupMockupView(version);
-			table->setActiveView(version);
+			// Make sure this version is not already active
+			if(!table->isActive() || version != table->getViewVersion())
+				table->setActiveView(version);
 
-			// loose column matching can be used to ignore column names
-			table->getViewP()->setLooseColumnMatching(looseColumnMatching);
-			fill(table, version);
-			if(looseColumnMatching)
-				table->getViewP()->setLooseColumnMatching(false);
 			table->getViewP()->setLastAccessTime();
-
-			/////////////////////
-			// verify the new view
-			if(table->getViewP()->getVersion() != version)
-			{
-				__SS__ << "Version mismatch!! " << table->getViewP()->getVersion()
-					    				   << " vs " << version << std::endl;
-				__SS_THROW__;
-			}
-
-			// match key by ignoring '_'
-			bool         nameIsMatch = true;
-			unsigned int nameIsMatchIndex, nameIsMatchStorageIndex;
-			for(nameIsMatchIndex = 0, nameIsMatchStorageIndex = 0;
-					nameIsMatchIndex < table->getViewP()->getTableName().size();
-					++nameIsMatchIndex)
-			{
-				if(table->getMockupViewP()->getTableName()[nameIsMatchStorageIndex] ==
-						'_')
-					++nameIsMatchStorageIndex;  // skip to next storage character
-				if(table->getViewP()->getTableName()[nameIsMatchIndex] == '_')
-					continue;  // skip to next character
-
-				// match to storage name
-				if(nameIsMatchStorageIndex >=
-						table->getMockupViewP()->getTableName().size() ||
-						table->getViewP()->getTableName()[nameIsMatchIndex] !=
-								table->getMockupViewP()->getTableName()[nameIsMatchStorageIndex])
-				{
-					// size mismatch or character mismatch
-					nameIsMatch = false;
-					break;
-				}
-				++nameIsMatchStorageIndex;
-			}
-
-			if(nameIsMatch)  // if name is considered match by above rule, then force
-				// matchup
-				table->getViewP()->setTableName(table->getMockupViewP()->getTableName());
-			else  // table->getViewP()->getTableName() !=
-				// table->getMockupViewP()->getTableName())
-			{
-				__SS__ << "View Table Name mismatch!! "
-						<< table->getViewP()->getTableName() << " vs "
-						<< table->getMockupViewP()->getTableName() << std::endl;
-				__SS_THROW__;
-			}
 
 			try
 			{
@@ -241,8 +141,7 @@
 			}
 			catch(const std::runtime_error& e)
 			{
-				__SS__ << "Error occurred while getting and filling Table \"" << tableName
-						<< "\" version:" << version << std::endl;
+				__SS__ << "Error occurred while getting and filling Table \"" << tableName << "\" version:" << version << std::endl;
 				ss << "\n" << e.what() << __E__;
 				__COUT__ << StringMacros::stackTrace() << __E__;
 
@@ -253,21 +152,101 @@
 					throw;
 			}
 
-			// at this point, view has been verified!
-			/////////////////////
+			return;
 		}
-		catch(const std::runtime_error& e)
+	}  // end cache handling
+
+	try  // to fill
+	{
+		if(version.isTemporaryVersion())
 		{
-			__SS__ << "Error occurred while getting and filling Table \"" << tableName
-					<< "\" version:" << version << std::endl;
-			ss << "\n" << e.what() << __E__;
-			__SS_THROW__;
-		}
-		catch(...)
-		{
-			__SS__ << "Unknown error occurred while getting and filling Table \""
-					<< tableName << "\" version:" << version << std::endl;
+			__SS__ << "FATAL ERROR: Can not use interface to fill a "
+			          "table object with a temporary version!"
+			       << std::endl;
+			ss << "FATAL ERROR: Invalid temporary version v" << version << std::endl;
 			__SS_THROW__;
 		}
 
-	}  // end get()
+		table->setupMockupView(version);
+		table->setActiveView(version);
+
+		// loose column matching can be used to ignore column names
+		table->getViewP()->setLooseColumnMatching(looseColumnMatching);
+		fill(table, version);
+		if(looseColumnMatching)
+			table->getViewP()->setLooseColumnMatching(false);
+		table->getViewP()->setLastAccessTime();
+
+		/////////////////////
+		// verify the new view
+		if(table->getViewP()->getVersion() != version)
+		{
+			__SS__ << "Version mismatch!! " << table->getViewP()->getVersion() << " vs " << version << std::endl;
+			__SS_THROW__;
+		}
+
+		// match key by ignoring '_'
+		bool         nameIsMatch = true;
+		unsigned int nameIsMatchIndex, nameIsMatchStorageIndex;
+		for(nameIsMatchIndex = 0, nameIsMatchStorageIndex = 0; nameIsMatchIndex < table->getViewP()->getTableName().size(); ++nameIsMatchIndex)
+		{
+			if(table->getMockupViewP()->getTableName()[nameIsMatchStorageIndex] == '_')
+				++nameIsMatchStorageIndex;  // skip to next storage character
+			if(table->getViewP()->getTableName()[nameIsMatchIndex] == '_')
+				continue;  // skip to next character
+
+			// match to storage name
+			if(nameIsMatchStorageIndex >= table->getMockupViewP()->getTableName().size() ||
+			   table->getViewP()->getTableName()[nameIsMatchIndex] != table->getMockupViewP()->getTableName()[nameIsMatchStorageIndex])
+			{
+				// size mismatch or character mismatch
+				nameIsMatch = false;
+				break;
+			}
+			++nameIsMatchStorageIndex;
+		}
+
+		if(nameIsMatch)  // if name is considered match by above rule, then force
+			// matchup
+			table->getViewP()->setTableName(table->getMockupViewP()->getTableName());
+		else  // table->getViewP()->getTableName() !=
+		      // table->getMockupViewP()->getTableName())
+		{
+			__SS__ << "View Table Name mismatch!! " << table->getViewP()->getTableName() << " vs " << table->getMockupViewP()->getTableName() << std::endl;
+			__SS_THROW__;
+		}
+
+		try
+		{
+			// sanitize for column info and dataTypes
+			table->getViewP()->init();
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Error occurred while getting and filling Table \"" << tableName << "\" version:" << version << std::endl;
+			ss << "\n" << e.what() << __E__;
+			__COUT__ << StringMacros::stackTrace() << __E__;
+
+			// if accumulating errors, allow invalid data
+			if(accumulatedErrors)
+				*accumulatedErrors += ss.str();
+			else
+				throw;
+		}
+
+		// at this point, view has been verified!
+		/////////////////////
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "Error occurred while getting and filling Table \"" << tableName << "\" version:" << version << std::endl;
+		ss << "\n" << e.what() << __E__;
+		__SS_THROW__;
+	}
+	catch(...)
+	{
+		__SS__ << "Unknown error occurred while getting and filling Table \"" << tableName << "\" version:" << version << std::endl;
+		__SS_THROW__;
+	}
+
+}  // end get()

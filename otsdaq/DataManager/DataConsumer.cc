@@ -10,13 +10,8 @@ using namespace ots;
 #define __MF_SUBJECT__ (std::string("Consumer-") + DataProcessor::processorUID_)
 
 //========================================================================================================================
-DataConsumer::DataConsumer(std::string      supervisorApplicationUID,
-                           std::string      bufferUID,
-                           std::string      processorUID,
-                           ConsumerPriority priority)
-    : WorkLoop(processorUID)
-    , DataProcessor(supervisorApplicationUID, bufferUID, processorUID)
-    , priority_(priority)
+DataConsumer::DataConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, ConsumerPriority priority)
+    : WorkLoop(processorUID), DataProcessor(supervisorApplicationUID, bufferUID, processorUID), priority_(priority)
 {
 	__COUT__ << "Constructor." << __E__;
 	registerToBuffer();
@@ -38,13 +33,10 @@ DataConsumer::ConsumerPriority DataConsumer::getPriority(void) { return priority
 // mirror DataProducerBase::registerToBuffer
 void DataConsumer::registerToBuffer(void)
 {
-	__COUT__ << "Consumer '" << DataProcessor::processorUID_
-	         << "' is registering to DataManager Supervisor Buffer '"
-	         << DataProcessor::supervisorApplicationUID_ << ":"
-	         << DataProcessor::bufferUID_ << ".'" << std::endl;
+	__COUT__ << "Consumer '" << DataProcessor::processorUID_ << "' is registering to DataManager Supervisor Buffer '"
+	         << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
 
-	DataManager* dataManager =
-	    (DataManagerSingleton::getInstance(supervisorApplicationUID_));
+	DataManager* dataManager = (DataManagerSingleton::getInstance(supervisorApplicationUID_));
 
 	dataManager->registerConsumer(bufferUID_, this);
 
@@ -96,10 +88,7 @@ void DataConsumer::registerToBuffer(void)
 //} //end unregisterFromBuffer()
 
 //========================================================================================================================
-void DataConsumer::startProcessingData(std::string runNumber)
-{
-	WorkLoop::startWorkLoop();
-}
+void DataConsumer::startProcessingData(std::string runNumber) { WorkLoop::startWorkLoop(); }
 
 //========================================================================================================================
 void DataConsumer::stopProcessingData(void) { WorkLoop::stopWorkLoop(); }
