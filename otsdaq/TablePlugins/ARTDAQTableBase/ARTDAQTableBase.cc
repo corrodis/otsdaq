@@ -295,7 +295,7 @@ void ots::ARTDAQTableBase::insertMetricsBlock(std::ostream& out, std::string& ta
 	}
 	POPTAB;
 	OUT << "}\n\n";  // end metrics
-}
+} //end insertMetricsBlock()
 
 //========================================================================================================================
 void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReaderNode,
@@ -449,9 +449,9 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 	OUT << "###########################################################" << __E__;
 	OUT << "#" << __E__;
 	OUT << "# artdaq reader fcl configuration file produced by otsdaq." << __E__;
-	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
-	OUT << "# 	Original filename: " << filename << __E__;
-	OUT << "#	otsdaq-ARTDAQ Reader UID: " << boardReaderNode.getValue() << __E__;
+	OUT << "# 	Creation time:           \t" << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename:       \t" << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ Reader UID:\t" << boardReaderNode.getValue() << __E__;
 	OUT << "#" << __E__;
 	OUT << "###########################################################" << __E__;
 	OUT << "\n\n";
@@ -592,9 +592,9 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 	OUT << "###########################################################" << __E__;
 	OUT << "#" << __E__;
 	OUT << "# artdaq " << getTypeString(appType) << " fcl configuration file produced by otsdaq." << __E__;
-	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
-	OUT << "# 	Original filename: " << filename << __E__;
-	OUT << "#	otsdaq-ARTDAQ " << getTypeString(appType) << " UID: " << receiverNode.getValue() << __E__;
+	OUT << "# 	Creation time:                  \t" << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename:              \t" << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ " << getTypeString(appType) << " UID:\t" << receiverNode.getValue() << __E__;
 	OUT << "#" << __E__;
 	OUT << "###########################################################" << __E__;
 	OUT << "\n\n";
@@ -1108,9 +1108,9 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	OUT << "###########################################################" << __E__;
 	OUT << "#" << __E__;
 	OUT << "# artdaq routingMaster fcl configuration file produced by otsdaq." << __E__;
-	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
-	OUT << "# 	Original filename: " << filename << __E__;
-	OUT << "#	otsdaq-ARTDAQ RoutingMaster UID: " << routingMasterNode.getValue() << __E__;
+	OUT << "# 	Creation time:                  \t" << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename:              \t" << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ RoutingMaster UID:\t" << routingMasterNode.getValue() << __E__;
 	OUT << "#" << __E__;
 	OUT << "###########################################################" << __E__;
 	OUT << "\n\n";
@@ -1652,7 +1652,7 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 //	node object and subsystem object.
 //
 //	Subsystem map to destination subsystem name.
-//	Node properties: {originalName,hostname,subsystemName}
+//	Node properties: {originalName,hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
 //
 void ARTDAQTableBase::setAndActivateARTDAQSystem(
     ConfigurationManagerRW*                                                                                        cfgMgr,
@@ -2023,7 +2023,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 				// if original record is found, then commandeer that record
 				//	else create a new record
-				// Node properties: {originalName,hostname,subsystemName}
+				// Node properties: {originalName,hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
 				for(unsigned int i = 0; i < nodePair.second.size(); ++i)
 				{
 					__COUTV__(nodePair.second[i]);
@@ -2081,6 +2081,12 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							typeTable.tableView_->setValueAsString(
 							    TableViewColumnInfo::DATATYPE_LINK_DEFAULT, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK));
 						}
+					}
+					else
+					{
+						__SS__ << "Unexpected parameter[" << i << " '" << nodePair.second[i] <<
+								"' for node " << nodePair.first << "!" << __E__;
+						__SS_THROW__;
 					}
 				}  // end node parameter loop
 

@@ -138,7 +138,14 @@ class ARTDAQTableBase : public TableBase
 		std::string const ROUTER		= "router";
 
 		ProcessTypes()
-		    : mapToTable_({		    	
+			: mapToType_({
+				std::make_pair(READER, 		ARTDAQTableBase::ARTDAQAppType::BoardReader),
+				std::make_pair(BUILDER, 	ARTDAQTableBase::ARTDAQAppType::EventBuilder),
+				std::make_pair(LOGGER, 		ARTDAQTableBase::ARTDAQAppType::DataLogger),
+				std::make_pair(DISPATCHER, 	ARTDAQTableBase::ARTDAQAppType::Dispatcher),
+				std::make_pair(MONITOR, 	ARTDAQTableBase::ARTDAQAppType::Monitor),
+				std::make_pair(ROUTER, 		ARTDAQTableBase::ARTDAQAppType::RoutingMaster)})
+			, mapToTable_({
 				std::make_pair(READER, 		ARTDAQTableBase::ARTDAQ_READER_TABLE),
 				std::make_pair(BUILDER, 	ARTDAQTableBase::ARTDAQ_BUILDER_TABLE),
 				std::make_pair(LOGGER, 		ARTDAQTableBase::ARTDAQ_LOGGER_TABLE),
@@ -167,7 +174,8 @@ class ARTDAQTableBase : public TableBase
 				std::make_pair(ROUTER, 		"RoutingMasterGroupID")})
 		{}
 
-		const std::map<std::string /*processType*/, std::string /*typeTable*/> mapToTable_, mapToGroupIDAppend_, mapToLinkGroupIDColumn_, mapToGroupIDColumn_;
+		const std::map<std::string /*processType*/, ARTDAQTableBase::ARTDAQAppType> mapToType_;
+		const std::map<std::string /*processType*/, std::string /*typeTable*/> 		mapToTable_, mapToGroupIDAppend_, mapToLinkGroupIDColumn_, mapToGroupIDColumn_;
 	} processTypes_;
 
 	// ARTDAQ Supervisor Column names
