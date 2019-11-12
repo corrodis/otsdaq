@@ -2082,6 +2082,58 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							    TableViewColumnInfo::DATATYPE_LINK_DEFAULT, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK));
 						}
 					}
+					else if(i == 3 || i == 4 || i == 5)
+					{
+						__COUT__ << "Handling printer syntax i=" <<
+								i << __E__;
+
+						std::vector<std::string> printerSyntaxArr =
+								StringMacros::getVectorFromString(
+								nodePair.second[i],
+								{','} /*delimiter*/);
+
+						unsigned int count = 0;
+						for(auto& printerSyntaxValue : printerSyntaxArr)
+						{
+							__COUTV__(printerSyntaxValue);
+
+							std::vector<std::string> printerSyntaxRange =
+									StringMacros::getVectorFromString(
+											printerSyntaxValue,
+											{'-'} /*delimiter*/);
+							if(printerSyntaxRange.size() == 0 ||
+									printerSyntaxRange.size() > 2)
+							{
+								__SS__ << "Illegal multi-node printer syntax string '" <<
+										printerSyntaxValue << "!'" << __E__;
+								__SS_THROW__;
+							}
+							else if(printerSyntaxRange.size() == 1)
+							{
+								unsigned int index;
+								__COUTV__(printerSyntaxRange[0]);
+								sscanf(printerSyntaxRange[0].c_str(),
+										"%u",&index);
+								__COUTV__(index);
+							}
+							else // == 2
+							{
+								unsigned int lo,hi;
+								sscanf(printerSyntaxRange[0].c_str(),
+										"%u",&lo);
+								sscanf(printerSyntaxRange[1].c_str(),
+										"%u",&hi);
+								if(hi < lo) //swap
+								{
+									lo = hi;
+									sscanf(printerSyntaxRange[0].c_str(),
+											"%u",&hi);
+								}
+								for(;lo<=hi;++lo)
+									__COUTV__(lo);
+							}
+						}
+					}
 					else
 					{
 						__SS__ << "Unexpected parameter[" << i << " '" << nodePair.second[i] <<

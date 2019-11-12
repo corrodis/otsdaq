@@ -7,14 +7,15 @@
 #include <iostream>  //for cout
 #include <sstream>   //for stringstream, std::stringbuf
 
-#define TRACEMF_USE_VERBATIM 1
+#define TRACEMF_USE_VERBATIM 1 //for trace longer path filenames
 #include "tracemf.h"
 
 // take filename only after srcs/ (this gives by repo name)
-#define __SHORTFILE__ 		(strstr(&__FILE__[0], "/srcs/") ? strstr(&__FILE__[0], "/srcs/") + 6 : __FILE__)
+// use 'builtin' to try to define at compile time
+#define __SHORTFILE__ 		(__builtin_strstr(&__FILE__[0], "/srcs/") ? __builtin_strstr(&__FILE__[0], "/srcs/") + 6 : __FILE__)
 
 // take only file name
-#define __FILENAME__ 		(strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define __FILENAME__ 		(__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 
 #define __E__ 				std::endl
 
