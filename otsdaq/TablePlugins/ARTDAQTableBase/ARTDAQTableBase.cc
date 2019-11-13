@@ -15,6 +15,10 @@
 
 using namespace ots;
 
+
+#undef __MF_SUBJECT__
+#define __MF_SUBJECT__ "ARTDAQTableBase"
+
 // clang-format off
 
 const std::string 	ARTDAQTableBase::ARTDAQ_FCL_PATH 				= std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/";
@@ -1225,7 +1229,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(Configurat
 	if(progressBar)
 		progressBar->step();
 
-	// reset info
+	// reset info every time, because it could be called after configuration manipulations
 	info_.subsystems.clear();
 	info_.processes.clear();
 
@@ -2021,9 +2025,16 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			{
 				__COUTV__(nodePair.first);
 
+				//default multi-node and array hostname info to empty
+				std::vector<unsigned int> nodeIndices, hostnameIndices;
+				unsigned int hostnameFixedWidth = 0;
+				std::string hostname;
+
 				// if original record is found, then commandeer that record
 				//	else create a new record
 				// Node properties: {originalName,hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
+
+				//node parameter loop
 				for(unsigned int i = 0; i < nodePair.second.size(); ++i)
 				{
 					__COUTV__(nodePair.second[i]);
@@ -2057,7 +2068,9 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 					else if(i == 1)  // hostname
 					{
 						// set hostname
-						typeTable.tableView_->setValueAsString(nodePair.second[i], row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_HOSTNAME));
+						hostname = nodePair.second[i];
+						typeTable.tableView_->setValueAsString(
+								hostname, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_HOSTNAME));
 					}
 					else if(i == 2)  // subsystemName
 					{
@@ -2082,8 +2095,11 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							    TableViewColumnInfo::DATATYPE_LINK_DEFAULT, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK));
 						}
 					}
-					else if(i == 3 || i == 4 || i == 5)
+					else if(i == 3 || i == 4 || i == 5) //(nodeArrString),(hostnameArrString),(hostnameFixedWidth)
 					{
+						//fill multi-node and array hostname info to empty
+						// then handle after all parameters in hand.
+
 						__COUT__ << "Handling printer syntax i=" <<
 								i << __E__;
 
@@ -2115,8 +2131,18 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								sscanf(printerSyntaxRange[0].c_str(),
 										"%u",&index);
 								__COUTV__(index);
+
+								if(i == 3) nodeIndices.push_back(index);
+								else if(i == 4) hostnameIndices.push_back(index);
+								else if(i == 5) hostnameFixedWidth = index;
 							}
-							else // == 2
+							else if(i == 5)
+							{
+								__SS__ << "Illegal fixed-width value '" <<
+										printerSyntaxValue << "' - must be a positive integer!" << __E__;
+								__SS_THROW__;
+							}
+							else // printerSyntaxRange.size() == 2
 							{
 								unsigned int lo,hi;
 								sscanf(printerSyntaxRange[0].c_str(),
@@ -2130,7 +2156,11 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 											"%u",&hi);
 								}
 								for(;lo<=hi;++lo)
+								{
 									__COUTV__(lo);
+									if(i == 3) nodeIndices.push_back(lo);
+									else if(i == 4) hostnameIndices.push_back(lo);
+								}
 							}
 						}
 					}
@@ -2141,6 +2171,123 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 						__SS_THROW__;
 					}
 				}  // end node parameter loop
+
+				if(hostnameIndices.size()) //handle hostname array
+				{
+					if(hostnameIndices.size() !=
+							nodeIndices.size())
+					{
+						__SS__ << "Illegal associated hostname array has count " <<
+								hostnameIndices.size() <<
+								" which is not equal to the node count " <<
+								nodeIndices.size() << "!" << __E__;
+						__SS_THROW__;
+					}
+
+				}
+
+				if(nodeIndices.size()) //handle multi-node instances
+				{
+					unsigned int hostnameCol =
+							typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_HOSTNAME);
+					//Steps:
+					//	first instance takes current row,
+					//	then copy for remaining instances
+
+					std::vector<std::string> namePieces =
+							StringMacros::getVectorFromString(
+							nodePair.first,
+							{'*'} /*delimiter*/);
+					__COUTV__(StringMacros::vectorToString(namePieces));
+
+					if(namePieces.size() < 2)
+					{
+						__SS__ << "Illegal multi-node name template - please use * to indicate where the multi-node index should be inserted!" << __E__;
+						__SS_THROW__;
+					}
+
+					std::vector<std::string> hostnamePieces;
+					if(hostnameIndices.size()) //handle hostname array
+					{
+						hostnamePieces =
+								StringMacros::getVectorFromString(
+										hostname,
+										{'*'} /*delimiter*/);
+						__COUTV__(StringMacros::vectorToString(hostnamePieces));
+
+						if(hostnamePieces.size() < 2)
+						{
+							__SS__ << "Illegal hostname array template - please use * to indicate where the hostname index should be inserted!" << __E__;
+							__SS_THROW__;
+						}
+					}
+
+
+					bool isFirst = true;
+					for(unsigned int i=0;i<nodeIndices.size();++i)
+					{
+						std::string name = namePieces[0];
+						for(unsigned int p=1;p<namePieces.size();++p)
+							name += std::to_string(nodeIndices[i]) + namePieces[p];
+						__COUTV__(name);
+
+						if(hostnamePieces.size())
+						{
+							hostname = hostnamePieces[0];
+							std::string hostnameIndex;
+							for(unsigned int p=1;p<hostnamePieces.size();++p)
+							{
+								hostnameIndex = std::to_string(hostnameIndices[i]);
+								if(hostnameFixedWidth > 1)
+								{
+									if(hostnameIndex.size() > hostnameFixedWidth)
+									{
+										__SS__ << "Illegal hostname index '" <<
+												hostnameIndex << "' - length is longer than fixed width requirement of " <<
+												hostnameFixedWidth << "!" << __E__;
+										__SS_THROW__;
+									}
+
+									//0 prepend as needed
+									while(hostnameIndex.size() < hostnameFixedWidth)
+										hostnameIndex = "0" + hostnameIndex;
+								} //end fixed width handling
+
+								hostname += hostnameIndex + hostnamePieces[p];
+							}
+							__COUTV__(hostname);
+						}
+						// else use hostname from above
+
+
+						if(isFirst) //take current row
+						{
+							typeTable.tableView_->setValueAsString(
+									name, row, typeTable.tableView_->getColUID());
+
+							typeTable.tableView_->setValueAsString(
+									hostname, row, hostnameCol);
+						}
+						else //copy row
+						{
+							unsigned int copyRow =
+									typeTable.tableView_->copyRows(
+											author,
+											*(typeTable.tableView_),
+											row,
+											1 /*srcRowsToCopy*/,
+											-1 /*destOffsetRow*/,
+											true /*generateUniqueDataColumns*/);
+							typeTable.tableView_->setValueAsString(
+									name, copyRow, typeTable.tableView_->getColUID());
+							typeTable.tableView_->setValueAsString(
+									hostname, copyRow, hostnameCol);
+						}
+
+						isFirst = false;
+					} //end multi-node handling
+
+				}
 
 			}  // end node record loop
 
