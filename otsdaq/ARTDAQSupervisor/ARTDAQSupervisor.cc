@@ -351,7 +351,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 }  // end transitionConfiguring()
 
 //========================================================================================================================
-void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) try
+void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor)
+try
 {
 	ProgressBar& progressBar = theArtdaqSupervisor->thread_progress_bar_;
 
@@ -368,7 +369,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 
 	progressBar.step();
 
-	const ARTDAQTableBase::ARTDAQInfo& info = ARTDAQTableBase::extractARTDAQInfo(
+	auto info = ARTDAQTableBase::extractARTDAQInfo(
 	    theSupervisorNode,
 	    true /*doWriteFHiCL*/,
 	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("max_fragment_size_bytes", ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE),
@@ -376,20 +377,14 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_retry_count", ARTDAQTableBase::DEFAULT_ROUTING_RETRY_COUNT),
 	    &progressBar);
 
-	const std::list<ARTDAQTableBase::ProcessInfo>& readerInfo        = info.processes.at(ARTDAQTableBase::ARTDAQAppType::BoardReader);
-	const std::list<ARTDAQTableBase::ProcessInfo>& builderInfo       = info.processes.at(ARTDAQTableBase::ARTDAQAppType::EventBuilder);
-	const std::list<ARTDAQTableBase::ProcessInfo>& loggerInfo        = info.processes.at(ARTDAQTableBase::ARTDAQAppType::DataLogger);
-	const std::list<ARTDAQTableBase::ProcessInfo>& dispatcherInfo    = info.processes.at(ARTDAQTableBase::ARTDAQAppType::Dispatcher);
-	const std::list<ARTDAQTableBase::ProcessInfo>& routingMasterInfo = info.processes.at(ARTDAQTableBase::ARTDAQAppType::RoutingMaster);
-
 	// Check lists
-	if(readerInfo.size() == 0)
+	if(info.processes.count(ARTDAQTableBase::ARTDAQAppType::BoardReader) == 0)
 	{
 		__GEN_SS__ << "There must be at least one enabled BoardReader!" << __E__;
 		__GEN_SS_THROW__;
 		return;
 	}
-	if(builderInfo.size() == 0)
+	if(info.processes.count(ARTDAQTableBase::ARTDAQAppType::EventBuilder) == 0)
 	{
 		__GEN_SS__ << "There must be at least one enabled EventBuilder!" << __E__;
 		__GEN_SS_THROW__;
@@ -427,7 +422,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		}
 	}
 
-	for(auto& builder : builderInfo)
+	for(auto& builder : info.processes[ARTDAQTableBase::ARTDAQAppType::EventBuilder])
 	{
 		o << "EventBuilder host: " << builder.hostname << std::endl;
 		o << "EventBuilder label: " << builder.label << std::endl;
@@ -437,7 +432,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		}
 		o << std::endl;
 	}
-	for(auto& logger : loggerInfo)
+	for(auto& logger : info.processes[ARTDAQTableBase::ARTDAQAppType::DataLogger])
 	{
 		o << "DataLogger host: " << logger.hostname << std::endl;
 		o << "DataLogger label: " << logger.label << std::endl;
@@ -447,7 +442,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		}
 		o << std::endl;
 	}
-	for(auto& dispatcher : dispatcherInfo)
+	for(auto& dispatcher : info.processes[ARTDAQTableBase::ARTDAQAppType::Dispatcher])
 	{
 		o << "Dispatcher host: " << dispatcher.hostname << std::endl;
 		o << "Dispatcher label: " << dispatcher.label << std::endl;
@@ -457,7 +452,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		}
 		o << std::endl;
 	}
-	for(auto& rmaster : routingMasterInfo)
+	for(auto& rmaster : info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingMaster])
 	{
 		o << "RoutingMaster host: " << rmaster.hostname << std::endl;
 		o << "RoutingMaster label: " << rmaster.label << std::endl;
@@ -477,27 +472,27 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 	boost::filesystem::remove_all(ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME, ignored);
 	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME).c_str(), 0755);
 
-	for(auto& reader : readerInfo)
+	for(auto& reader : info.processes[ARTDAQTableBase::ARTDAQAppType::BoardReader])
 	{
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::BoardReader, reader.label).c_str(),
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + reader.label + ".fcl").c_str());
 	}
-	for(auto& builder : builderInfo)
+	for(auto& builder : info.processes[ARTDAQTableBase::ARTDAQAppType::EventBuilder])
 	{
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::EventBuilder, builder.label).c_str(),
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + builder.label + ".fcl").c_str());
 	}
-	for(auto& logger : loggerInfo)
+	for(auto& logger : info.processes[ARTDAQTableBase::ARTDAQAppType::DataLogger])
 	{
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::DataLogger, logger.label).c_str(),
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + logger.label + ".fcl").c_str());
 	}
-	for(auto& dispatcher : dispatcherInfo)
+	for(auto& dispatcher : info.processes[ARTDAQTableBase::ARTDAQAppType::Dispatcher])
 	{
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::Dispatcher, dispatcher.label).c_str(),
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + dispatcher.label + ".fcl").c_str());
 	}
-	for(auto& rmaster : routingMasterInfo)
+	for(auto& rmaster : info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingMaster])
 	{
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::RoutingMaster, rmaster.label).c_str(),
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + rmaster.label + ".fcl").c_str());
@@ -519,7 +514,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 	PyObject* pName1 = PyString_FromString("setdaqcomps");
 
 	PyObject* readerDict = PyDict_New();
-	for(auto& reader : readerInfo)
+	for(auto& reader : info.processes[ARTDAQTableBase::ARTDAQAppType::BoardReader])
 	{
 		PyObject* readerName = PyString_FromString(reader.label.c_str());
 
@@ -611,7 +606,8 @@ catch(...)
 }  // end configuringThread() error handling
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event) try
+void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event)
+try
 {
 	__SUP_COUT__ << "Halting..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
