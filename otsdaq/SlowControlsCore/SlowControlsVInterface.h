@@ -34,7 +34,7 @@ class SlowControlsVInterface : public Configurable
 	virtual void                                       unsubscribe(std::string Name)     = 0;
 	virtual std::string                                getList(std::string format)       = 0;
 	virtual std::array<std::string, 4>                 getCurrentValue(std::string Name) = 0;
-	virtual std::array<std::array<std::string, 5>, 10> getPVHistory(std::string Name)    = 0;
+	virtual std::vector<std::vector<std::string>> 	   getPVHistory(std::string Name)    = 0;
 	virtual std::array<std::string, 9>                 getSettings(std::string Name)     = 0;
 
   protected:

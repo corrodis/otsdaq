@@ -24,7 +24,7 @@ class ARTDAQTableBase : public TableBase
 	virtual ~ARTDAQTableBase(void);
 
 	static const std::string ARTDAQ_FCL_PATH;
-	static const std::string ARTDAQ_SUPERVISOR_TABLE;
+	static const std::string ARTDAQ_SUPERVISOR_CLASS, ARTDAQ_SUPERVISOR_TABLE;
 	static const std::string ARTDAQ_READER_TABLE, ARTDAQ_BUILDER_TABLE, ARTDAQ_LOGGER_TABLE, ARTDAQ_DISPATCHER_TABLE, ARTDAQ_MONITOR_TABLE, ARTDAQ_ROUTER_TABLE;
 	static const std::string ARTDAQ_SUBSYSTEM_TABLE;
 	static const std::string ARTDAQ_TYPE_TABLE_HOSTNAME, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID;
@@ -113,9 +113,19 @@ class ARTDAQTableBase : public TableBase
 	                  						                 			 size_t            routingTimeoutMs     = DEFAULT_ROUTING_TIMEOUT_MS,
 	                  						                 			 size_t            routingRetryCount    = DEFAULT_ROUTING_RETRY_COUNT,
 	                  						                 			 ProgressBar*      progressBar          = 0);
-	static void       						setAndActivateARTDAQSystem	(ConfigurationManagerRW*                                                                                        cfgMgr,
-																         const std::map<std::string /*type*/, std::map<std::string /*record*/, std::vector<std::string /*property*/>>>& nodeTypeToObjectMap,
-																         const std::map<std::string /*subsystemName*/, std::string /*destinationSubsystemName*/>&                       subsystemObjectMap);
+	static const ARTDAQInfo&       			getARTDAQSystem				(ConfigurationManagerRW* cfgMgr,
+																         std::map<std::string /*type*/,
+																		 	 std::map<std::string /*record*/,
+																			 	 std::vector<std::string /*property*/>>>& 	nodeTypeToObjectMap,
+																         std::map<std::string /*subsystemName*/,
+																		 	 std::string /*destinationSubsystemName*/>& 	subsystemObjectMap,
+																			 std::vector<std::string /*property*/>& 		artdaqSupervisoInfo);
+	static void       						setAndActivateARTDAQSystem	(ConfigurationManagerRW* cfgMgr,
+																         const std::map<std::string /*type*/,
+																		 	 std::map<std::string /*record*/,
+																			 	 std::vector<std::string /*property*/>>>& 	nodeTypeToObjectMap,
+																         const std::map<std::string /*subsystemName*/,
+																		 	 std::string /*destinationSubsystemName*/>&   	subsystemObjectMap);
 
   private:
 	static int  							getSubsytemId				(ConfigurationTree subsystemNode);

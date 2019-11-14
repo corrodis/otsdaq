@@ -23,6 +23,8 @@ using namespace ots;
 
 const std::string 	ARTDAQTableBase::ARTDAQ_FCL_PATH 				= std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/";
 
+
+const std::string 	ARTDAQTableBase::ARTDAQ_SUPERVISOR_CLASS 		= "ots::ARTDAQSupervisor";
 const std::string 	ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE 		= "ARTDAQSupervisorTable";
 
 const std::string 	ARTDAQTableBase::ARTDAQ_READER_TABLE 			= "ARTDAQBoardReaderTable";
@@ -1649,6 +1651,210 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 	}
 }  // end extractDispatchersInfo()
 
+
+//==============================================================================
+//	getARTDAQSystem
+//
+//		static function to retrive the active ARTDAQ system configuration.
+//
+//	Subsystem map to destination subsystem name.
+//	Node properties: {hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
+//	artdaqSupervisoInfo: {name, context address, context port}
+//
+const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
+    ConfigurationManagerRW*                                                                                        cfgMgr,
+    std::map<std::string /*type*/,
+		std::map<std::string /*record*/,
+		std::vector<std::string /*property*/>>>& nodeTypeToObjectMap,
+    std::map<std::string /*subsystemName*/, std::string /*destinationSubsystemName*/>&                       subsystemObjectMap,
+	std::vector<std::string /*property*/>& 		artdaqSupervisoInfo)
+{
+	__COUT__ << "getARTDAQSystem()" << __E__;
+
+	artdaqSupervisoInfo.clear(); //init
+
+	const XDAQContextTable* contextTable = cfgMgr->__GET_CONFIG__(XDAQContextTable);
+
+	// for each artdaq context, output all artdaq apps
+
+	const XDAQContextTable::XDAQContext* artdaqContext =
+			contextTable->getTheARTDAQSupervisorContext();
+
+	//return empty info
+	if(!artdaqContext) return ARTDAQTableBase::info_;
+
+
+	__COUTV__(artdaqContext->contextUID_);
+	__COUTV__(artdaqContext->applications_.size());
+
+	for(auto& artdaqApp : artdaqContext->applications_)
+	{
+		if(artdaqApp.class_ != ARTDAQ_SUPERVISOR_CLASS)
+			continue;
+
+		__COUTV__(artdaqApp.applicationUID_);
+		artdaqSupervisoInfo.push_back(artdaqApp.applicationUID_);
+		artdaqSupervisoInfo.push_back(artdaqContext->address_);
+		artdaqSupervisoInfo.push_back(std::to_string(artdaqContext->port_));
+
+		const ARTDAQTableBase::ARTDAQInfo& info = ARTDAQTableBase::extractARTDAQInfo(
+				XDAQContextTable::getSupervisorConfigNode(
+						cfgMgr, artdaqContext->contextUID_, artdaqApp.applicationUID_));
+
+		__COUT__ << "========== "
+				<< "Found " << info.subsystems.size() << " subsystems." << __E__;
+
+		for(auto& subsystem : info.subsystems)
+		{
+			const std::string subtypeString = "subsystem";
+
+			subsystemObjectMap.emplace(
+					std::make_pair(
+							subsystem.second.label,
+							std::to_string(subsystem.second.destination)));
+
+		}  // end subsystem handling
+
+		__COUT__ << "========== "
+				<< "Found " << info.processes.size() << " process types."
+				<< __E__;
+
+		for(auto& nameTypePair : ARTDAQTableBase::processTypes_.mapToType_)
+		{
+			const std::string& typeString = nameTypePair.first;
+			__COUTV__(typeString);
+
+			nodeTypeToObjectMap.emplace(
+					std::make_pair(typeString,
+							std::map<std::string /*record*/,
+								std::vector<std::string /*property*/>>()));
+
+			auto it = info.processes.find(nameTypePair.second);
+			if(it == info.processes.end())
+			{
+				__COUT__ << "\t"
+						<< "Found 0 " << typeString << __E__;
+				continue;
+			}
+			__COUT__ << "\t"
+					<< "Found " << it->second.size() << " " << typeString
+					<< "(s)" << __E__;
+
+			auto tableIt = processTypes_.mapToTable_.find(typeString);
+			if(tableIt == processTypes_.mapToTable_.end())
+			{
+				__SS__ << "Invalid artdaq node type '" << typeString << "' attempted!" << __E__;
+				__SS_THROW__;
+			}
+			__COUTV__(tableIt->second);
+
+			auto allNodes = cfgMgr->getNode(tableIt->second).getChildren();
+
+			std::set<std::string /*nodeName*/> skipMap; //use to skip nodes when constructing multi-nodes
+			
+			const std::set<std::string /*colName*/> skipColumns({
+				ARTDAQ_TYPE_TABLE_HOSTNAME, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK	
+			}); //note: also skip UID and Status
+			
+			//loop through all nodes of this type
+			for(auto& artdaqNode : it->second) 
+			{
+				//check skip map
+				if(skipMap.find(artdaqNode.label) != skipMap.end()) continue;
+
+				__COUT__ << "\t\t"
+						<< "Found '" << artdaqNode.label << "' "
+						<< typeString << __E__;
+
+				std::string nodeName = artdaqNode.label;
+				std::string hostname = artdaqNode.hostname;
+				std::string subsystem = std::to_string(artdaqNode.subsystem);
+				
+				ConfigurationTree thisNode = cfgMgr->getNode(tableIt->second).getNode(nodeName);
+				auto thisNodeColumns = thisNode.getChildren();
+				
+				//check for multi-node
+				//	Steps:
+				//		search for other records with same values/links except hostname/name
+
+				std::set<std::string> multiNodeIndices, hostnameIndices;
+				unsigned int hostnameFixedWidth = 0;
+				
+				for(auto& otherNode : allNodes)
+				{
+					if(otherNode.first == nodeName)
+						continue; //skip unless 'other'
+					if(subsystem == 
+						otherNode.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID).getValue())
+					{
+						//possible multi-node situation
+						__COUT__ << "Checking for multi-node..." << __E__;
+						
+						__COUTV__(thisNode.getNodeRow());
+						__COUTV__(otherNode.second.getNodeRow());
+						
+						auto otherNodeColumns = otherNode.second.getChildren();
+						
+						bool isMultiNode = true;
+						for(unsigned int i=0;i<thisNodeColumns.size() && i<otherNodeColumns.size();++i)
+						{
+							if(skipColumns.find(thisNodeColumns[i].first) != skipColumns.end() ||
+								thisNodeColumns[i].second.isStatusNode())
+								continue; //skip columns that do not need to be checked for multi-node consideration
+							
+							//at this point must match for multinode
+							
+							__COUTV__(thisNodeColumns[i].first);
+							__COUTV__(otherNodeColumns[i].first);
+
+							__COUTV__(thisNodeColumns[i].second.getValue());
+							__COUTV__(otherNodeColumns[i].second.getValue());
+							
+							
+						}
+						
+						if(isMultiNode)
+						{
+							__COUT__ << "Found multi-node member!" << __E__;
+						}
+						
+					}
+				} //end loop to search for multi-node members
+				
+				if(multiNodeIndices.size())
+				{
+					__COUT__ << "Handling multi-node printer syntax" << __E__;
+					
+				}
+
+				nodeTypeToObjectMap.at(
+						typeString).emplace(
+						std::make_pair(
+								nodeName,
+								std::vector<std::string /*property*/>()));
+
+				nodeTypeToObjectMap.at(
+						typeString).at(
+								nodeName).push_back(
+										hostname);
+
+				nodeTypeToObjectMap.at(
+						typeString).at(
+								nodeName).push_back(
+										subsystem);
+
+			}
+		}  // end processor type handling
+
+	}  // end artdaq app loop
+
+
+	__COUT__ << "Done getting artdaq nodes." << __E__;
+
+
+	return ARTDAQTableBase::info_;
+} // end getARTDAQSystem()
+
 //==============================================================================
 //	setAndActivateARTDAQSystem
 //
@@ -1663,7 +1869,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
     const std::map<std::string /*type*/, std::map<std::string /*record*/, std::vector<std::string /*property*/>>>& nodeTypeToObjectMap,
     const std::map<std::string /*subsystemName*/, std::string /*destinationSubsystemName*/>&                       subsystemObjectMap)
 {
-	__COUT__ << "setAndActivateArtdaqSystem()" << __E__;
+	__COUT__ << "setAndActivateARTDAQSystem()" << __E__;
 
 	const std::string& author = cfgMgr->getUsername();
 
@@ -1819,7 +2025,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 					// set class
 					appTable.tableView_->setValueAsString(
-					    "ots::ARTDAQSupervisor", row, appTable.tableView_->findCol(XDAQContextTable::colApplication_.colClass_));
+					    ARTDAQ_SUPERVISOR_CLASS, row, appTable.tableView_->findCol(XDAQContextTable::colApplication_.colClass_));
 					// set module
 					appTable.tableView_->setValueAsString(
 					    "${OTSDAQ_LIB}/libARTDAQSupervisor.so", row, appTable.tableView_->findCol(XDAQContextTable::colApplication_.colModule_));

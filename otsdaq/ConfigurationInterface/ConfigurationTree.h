@@ -236,6 +236,7 @@ class ConfigurationTree
 	bool 										isUIDLinkNode				(void) const;
 	bool 										isGroupIDNode				(void) const;
 	bool 										isUIDNode					(void) const;
+	bool 										isStatusNode				(void) const;
 	bool										isEnabled					(void) const; //same as status()
 	inline bool									status						(void) const; //same as isEnabled()
 

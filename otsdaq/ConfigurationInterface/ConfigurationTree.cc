@@ -2214,6 +2214,18 @@ bool ConfigurationTree::isEnabled(void) const
 inline bool ConfigurationTree::status(void) const { return isEnabled(); }
 
 //==============================================================================
+bool ConfigurationTree::isStatusNode(void) const 
+{ 
+	if(!isValueNode())
+	{
+		__SS__ << "Can only check that a value node is a status node!" << __E__;
+		__SS_THROW__;
+	}
+
+	return col_ == tableView_->getColStatus();
+} // end isStatusNode()
+
+//==============================================================================
 // getChildrenNamesByPriority
 //	returns them in priority order encountered in the table
 std::vector<std::vector<std::string>> ConfigurationTree::getChildrenNamesByPriority(bool onlyStatusTrue) const
