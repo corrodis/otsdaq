@@ -17,10 +17,7 @@ class DQMHistosBase
 	virtual ~DQMHistosBase(void);
 
 	virtual void book(void) { ; }
-	virtual void fill(std::string& buffer, std::map<std::string, std::string> header)
-	{
-		;
-	}
+	virtual void fill(std::string& buffer, std::map<std::string, std::string> header) { ; }
 	virtual void load(std::string fileName) { ; }
 
 	TObject* get(std::string name);

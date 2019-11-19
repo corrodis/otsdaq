@@ -7,15 +7,9 @@
 #include <iostream>
 using namespace ots;
 
-#define MF_CFG_FILE                     \
-	std::string(__ENV__("USER_DATA")) + \
-	    "/MessageFacilityConfigurations/MessageFacilityGen.fcl"
-#define QT_CFG_FILE                     \
-	std::string(__ENV__("USER_DATA")) + \
-	    "/MessageFacilityConfigurations/QTMessageViewerGen.fcl"
-#define QUIET_CFG_FILE                  \
-	std::string(__ENV__("USER_DATA")) + \
-	    "/MessageFacilityConfigurations/QuietForwarderGen.cfg"
+#define MF_CFG_FILE std::string(__ENV__("USER_DATA")) + "/MessageFacilityConfigurations/MessageFacilityGen.fcl"
+#define QT_CFG_FILE std::string(__ENV__("USER_DATA")) + "/MessageFacilityConfigurations/QTMessageViewerGen.fcl"
+#define QUIET_CFG_FILE std::string(__ENV__("USER_DATA")) + "/MessageFacilityConfigurations/QuietForwarderGen.cfg"
 #define USE_WEB_BOOL_FILE                 \
 	std::string(__ENV__("USER_DATA")) +   \
 	    "/MessageFacilityConfigurations/" \
@@ -72,8 +66,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 	fs.open(MF_CFG_FILE, std::fstream::out | std::fstream::trunc);
 	if(fs.fail())
 	{
-		__SS__ << "Failed to open Message Facility table file: " << MF_CFG_FILE
-		       << std::endl;
+		__SS__ << "Failed to open Message Facility table file: " << MF_CFG_FILE << std::endl;
 		__SS_THROW__;
 	}
 	else
@@ -107,8 +100,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 		if(bfs.fail())
 		{
 			fs.close();
-			__SS__ << "Failed to open boolean Use of Web Console table file: "
-			       << USE_WEB_BOOL_FILE << std::endl;
+			__SS__ << "Failed to open boolean Use of Web Console table file: " << USE_WEB_BOOL_FILE << std::endl;
 			__SS_THROW__;
 		}
 		bfs << (useWeb ? 1 : 0);
@@ -119,8 +111,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 		if(bfs.fail())
 		{
 			fs.close();
-			__SS__ << "Failed to open boolean Use of QT Viewer table file: "
-			       << USE_QT_BOOL_FILE << std::endl;
+			__SS__ << "Failed to open boolean Use of QT Viewer table file: " << USE_QT_BOOL_FILE << std::endl;
 			__SS_THROW__;
 		}
 		bfs << (useQT ? 1 : 0);
@@ -206,8 +197,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				if(qtfs.fail())
 				{
 					fs.close();
-					__SS__ << "Failed to open QT Message Viewer table file: "
-					       << QT_CFG_FILE << std::endl;
+					__SS__ << "Failed to open QT Message Viewer table file: " << QT_CFG_FILE << std::endl;
 					__SS_THROW__;
 				}
 				qtfs << "receivers: \n{\n";

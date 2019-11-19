@@ -2,8 +2,8 @@
 	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
 		<TABLE Name="ARTDAQRoutingMasterTable">
 			<VIEW Name="ARTDAQ_ROUTING_MASTER_TABLE" Type="File,Database,DatabaseTest" Description="No%20description.">
-				<COLUMN Type="GroupID-routingmasters" 	 Name="RoutingMastersGroupID" 	 StorageName="ROUTING_MASTERS_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="GroupID-RoutingMasters" 	 Name="RoutingMasterGroupID" 	 StorageName="ROUTING_MASTER_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="UID" 	 Name="RoutingMasterUID" 	 StorageName="ROUTING_MASTER_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="ExecutionHostname" 	 StorageName="EXECUTION_HOSTNAME" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-subsystem" 	 Name="SubsystemLink" 	 StorageName="SUBSYSTEM_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQSubsystemTable"/>

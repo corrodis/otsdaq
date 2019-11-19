@@ -19,8 +19,7 @@ ConfigurationInterface* ConfigurationInterface::theInstance_               = 0;
 bool                    ConfigurationInterface::theMode_                   = true;
 bool                    ConfigurationInterface::theVersionTrackingEnabled_ = true;
 
-const std::string ConfigurationInterface::GROUP_METADATA_TABLE_NAME =
-    "TableGroupMetadata";
+const std::string ConfigurationInterface::GROUP_METADATA_TABLE_NAME = "TableGroupMetadata";
 
 //==============================================================================
 ConfigurationInterface::ConfigurationInterface() {}
@@ -30,8 +29,7 @@ ConfigurationInterface* ConfigurationInterface::getInstance(bool mode)
 {
 	if(mode == true)
 	{
-		if(theInstance_ != 0 &&
-		   dynamic_cast<FileConfigurationInterface*>(theInstance_) == 0)
+		if(theInstance_ != 0 && dynamic_cast<FileConfigurationInterface*>(theInstance_) == 0)
 		{
 			delete theInstance_;
 			theInstance_ = 0;
@@ -42,8 +40,7 @@ ConfigurationInterface* ConfigurationInterface::getInstance(bool mode)
 	}
 	else
 	{
-		if(theInstance_ != 0 &&
-		   dynamic_cast<DatabaseConfigurationInterface*>(theInstance_) == 0)
+		if(theInstance_ != 0 && dynamic_cast<DatabaseConfigurationInterface*>(theInstance_) == 0)
 		{
 			delete theInstance_;
 			theInstance_ = 0;
@@ -59,16 +56,10 @@ ConfigurationInterface* ConfigurationInterface::getInstance(bool mode)
 }
 
 //==============================================================================
-bool ConfigurationInterface::isVersionTrackingEnabled()
-{
-	return ConfigurationInterface::theVersionTrackingEnabled_;
-}
+bool ConfigurationInterface::isVersionTrackingEnabled() { return ConfigurationInterface::theVersionTrackingEnabled_; }
 
 //==============================================================================
-void ConfigurationInterface::setVersionTrackingEnabled(bool setValue)
-{
-	ConfigurationInterface::theVersionTrackingEnabled_ = setValue;
-}
+void ConfigurationInterface::setVersionTrackingEnabled(bool setValue) { ConfigurationInterface::theVersionTrackingEnabled_ = setValue; }
 
 //==============================================================================
 // saveNewVersion
@@ -77,16 +68,11 @@ void ConfigurationInterface::setVersionTrackingEnabled(bool setValue)
 //		save using the interface, and return the new version number
 //	If newVersion is non 0, attempt to save as given newVersion number, else throw
 // exception. 	return TableVersion::INVALID on failure
-TableVersion ConfigurationInterface::saveNewVersion(TableBase*   configuration,
-                                                    TableVersion temporaryVersion,
-                                                    TableVersion newVersion)
+TableVersion ConfigurationInterface::saveNewVersion(TableBase* configuration, TableVersion temporaryVersion, TableVersion newVersion)
 {
-	if(!temporaryVersion.isTemporaryVersion() ||
-	   !configuration->isStored(temporaryVersion))
+	if(!temporaryVersion.isTemporaryVersion() || !configuration->isStored(temporaryVersion))
 	{
-		std::cout << __COUT_HDR_FL__
-		          << "Invalid temporary version number: " << temporaryVersion
-		          << std::endl;
+		std::cout << __COUT_HDR_FL__ << "Invalid temporary version number: " << temporaryVersion << std::endl;
 		return TableVersion();  // return INVALID
 	}
 
@@ -99,17 +85,14 @@ TableVersion ConfigurationInterface::saveNewVersion(TableBase*   configuration,
 	std::set<TableVersion> versions = getVersions(configuration);
 	if(newVersion == TableVersion::INVALID)
 	{
-		if(versions
-		       .size() &&  // 1 more than last version, if any non-scratch versions exist
+		if(versions.size() &&  // 1 more than last version, if any non-scratch versions exist
 		   *(versions.rbegin()) != TableVersion(TableVersion::SCRATCH))
 			newVersion = TableVersion::getNextVersion(*(versions.rbegin()));
-		else if(versions.size() >
-		        1)  // if scratch exists, take 1 more than second to last version
+		else if(versions.size() > 1)  // if scratch exists, take 1 more than second to last version
 			newVersion = TableVersion::getNextVersion(*(--(versions.rbegin())));
 		else
 			newVersion = TableVersion::DEFAULT;
-		std::cout << __COUT_HDR_FL__ << "Next available version number is " << newVersion
-		          << std::endl;
+		std::cout << __COUT_HDR_FL__ << "Next available version number is " << newVersion << std::endl;
 		//
 		//		//for sanity check, compare with config's idea of next version
 		//		TableVersion baseNextVersion = configuration->getNextVersion();
@@ -122,8 +105,7 @@ TableVersion ConfigurationInterface::saveNewVersion(TableBase*   configuration,
 	}
 	else if(versions.find(newVersion) != versions.end())
 	{
-		std::cout << __COUT_HDR_FL__ << "newVersion(" << newVersion << ") already exists!"
-		          << std::endl;
+		std::cout << __COUT_HDR_FL__ << "newVersion(" << newVersion << ") already exists!" << std::endl;
 		rewriteableExists = newVersion == TableVersion::SCRATCH;
 
 		// throw error if version already exists and this is not the rewriteable version
@@ -135,8 +117,7 @@ TableVersion ConfigurationInterface::saveNewVersion(TableBase*   configuration,
 		}
 	}
 
-	std::cout << __COUT_HDR_FL__ << "Version number to save is " << newVersion
-	          << std::endl;
+	std::cout << __COUT_HDR_FL__ << "Version number to save is " << newVersion << std::endl;
 
 	// copy to new version
 	configuration->changeVersionAndActivateView(temporaryVersion, newVersion);
@@ -144,9 +125,7 @@ TableVersion ConfigurationInterface::saveNewVersion(TableBase*   configuration,
 	// save to disk
 	//	only allow overwrite if version tracking is disabled AND the rewriteable version
 	//		already exists.
-	saveActiveVersion(
-	    configuration,
-	    !ConfigurationInterface::isVersionTrackingEnabled() && rewriteableExists);
+	saveActiveVersion(configuration, !ConfigurationInterface::isVersionTrackingEnabled() && rewriteableExists);
 
 	return newVersion;
 }

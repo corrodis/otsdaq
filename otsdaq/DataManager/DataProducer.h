@@ -12,10 +12,7 @@ namespace ots
 class DataProducer : public DataProducerBase, public virtual WorkLoop
 {
   public:
-	DataProducer(std::string  supervisorApplicationUID,
-	             std::string  bufferUID,
-	             std::string  processorUID,
-	             unsigned int bufferSize = 100);
+	DataProducer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, unsigned int bufferSize = 100);
 	virtual ~DataProducer(void);
 
 	virtual void startProcessingData(std::string runNumber);

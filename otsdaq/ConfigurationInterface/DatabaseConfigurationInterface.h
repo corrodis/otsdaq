@@ -26,8 +26,7 @@ class DatabaseConfigurationInterface : public ConfigurationInterface
 	void fill(TableBase* /*configuration*/, TableVersion /*version*/) const;
 
 	// write configuration to database
-	void saveActiveVersion(const TableBase* /*configuration*/,
-	                       bool overwrite = false) const;
+	void saveActiveVersion(const TableBase* /*configuration*/, bool overwrite = false) const;
 
 	// find the latest configuration version by configuration type
 	TableVersion findLatestVersion(const TableBase* /*configuration*/) const noexcept;
@@ -38,18 +37,15 @@ class DatabaseConfigurationInterface : public ConfigurationInterface
 	std::set<TableVersion> getVersions(const TableBase* /*configuration*/) const noexcept;
 
 	// find all configuration groups in database
-	std::set<std::string /*name+version*/> getAllTableGroupNames(
-	    const std::string& filterString = "") const;
-	std::set<TableGroupKey> getKeys(const std::string& groupName) const;
-	TableGroupKey findLatestGroupKey(const std::string& groupName) const noexcept;
+	std::set<std::string /*name+version*/> getAllTableGroupNames(const std::string& filterString = "") const;
+	std::set<TableGroupKey>                getKeys(const std::string& groupName) const;
+	TableGroupKey                          findLatestGroupKey(const std::string& groupName) const noexcept;
 
 	// return the contents of a configuration group
-	config_version_map_t getTableGroupMembers(std::string const& /*configurationGroup*/,
-	                                          bool includeMetaDataTable = false) const;
+	config_version_map_t getTableGroupMembers(std::string const& /*configurationGroup*/, bool includeMetaDataTable = false) const;
 
 	// create a new configuration group from the contents map
-	void saveTableGroup(config_version_map_t const& /*configurationMap*/,
-	                    std::string const& /*configurationGroup*/) const;
+	void saveTableGroup(config_version_map_t const& /*configurationMap*/, std::string const& /*configurationGroup*/) const;
 
   private:
 };

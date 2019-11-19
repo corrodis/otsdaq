@@ -11,9 +11,7 @@ namespace ots
 {
 class ConfigurationTree;
 
-class TCPDataListenerProducer : public DataProducer,
-                                public Configurable,
-                                public TCPSubscribeClient
+class TCPDataListenerProducer : public DataProducer, public Configurable, public TCPSubscribeClient
 {
   public:
 	TCPDataListenerProducer(std::string              supervisorApplicationUID,

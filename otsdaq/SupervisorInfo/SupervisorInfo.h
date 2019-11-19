@@ -19,9 +19,7 @@ class SupervisorInfo
   public:
 	// when no configuration, e.g. Wizard Mode, then
 	// name and contextName are derived from the class name and LID
-	SupervisorInfo(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* descriptor,
-	               const std::string&                           name,
-	               const std::string&                           contextName)
+	SupervisorInfo(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* descriptor, const std::string& name, const std::string& contextName)
 	    : descriptor_(descriptor)
 	    , contextDescriptor_(descriptor ? descriptor->getContextDescriptor() : 0)
 	    , name_(name)
@@ -56,70 +54,36 @@ class SupervisorInfo
 	~SupervisorInfo(void) { ; }
 
 	// BOOLs	-------------------
-	bool isGatewaySupervisor(void) const
-	{
-		return class_ == XDAQContextTable::GATEWAY_SUPERVISOR_CLASS;
-	}
-	bool isWizardSupervisor(void) const
-	{
-		return class_ == XDAQContextTable::WIZARD_SUPERVISOR_CLASS;
-	}
-	bool isTypeFESupervisor(void) const
-	{
-		return XDAQContextTable::FETypeClassNames_.find(class_) !=
-		       XDAQContextTable::FETypeClassNames_.end();
-	}
-	bool isTypeDMSupervisor(void) const
-	{
-		return XDAQContextTable::DMTypeClassNames_.find(class_) !=
-		       XDAQContextTable::DMTypeClassNames_.end();
-	}
-	bool isTypeLogbookSupervisor(void) const
-	{
-		return XDAQContextTable::LogbookTypeClassNames_.find(class_) !=
-		       XDAQContextTable::LogbookTypeClassNames_.end();
-	}
+	bool isGatewaySupervisor(void) const { return class_ == XDAQContextTable::GATEWAY_SUPERVISOR_CLASS; }
+	bool isWizardSupervisor(void) const { return class_ == XDAQContextTable::WIZARD_SUPERVISOR_CLASS; }
+	bool isTypeFESupervisor(void) const { return XDAQContextTable::FETypeClassNames_.find(class_) != XDAQContextTable::FETypeClassNames_.end(); }
+	bool isTypeDMSupervisor(void) const { return XDAQContextTable::DMTypeClassNames_.find(class_) != XDAQContextTable::DMTypeClassNames_.end(); }
+	bool isTypeLogbookSupervisor(void) const { return XDAQContextTable::LogbookTypeClassNames_.find(class_) != XDAQContextTable::LogbookTypeClassNames_.end(); }
 	bool isTypeMacroMakerSupervisor(void) const
 	{
-		return XDAQContextTable::MacroMakerTypeClassNames_.find(class_) !=
-		       XDAQContextTable::MacroMakerTypeClassNames_.end();
+		return XDAQContextTable::MacroMakerTypeClassNames_.find(class_) != XDAQContextTable::MacroMakerTypeClassNames_.end();
 	}
 	bool isTypeConfigurationGUISupervisor(void) const
 	{
-		return XDAQContextTable::ConfigurationGUITypeClassNames_.find(class_) !=
-		       XDAQContextTable::ConfigurationGUITypeClassNames_.end();
+		return XDAQContextTable::ConfigurationGUITypeClassNames_.find(class_) != XDAQContextTable::ConfigurationGUITypeClassNames_.end();
 	}
-	bool isTypeChatSupervisor(void) const
-	{
-		return XDAQContextTable::ChatTypeClassNames_.find(class_) !=
-		       XDAQContextTable::ChatTypeClassNames_.end();
-	}
-	bool isTypeConsoleSupervisor(void) const
-	{
-		return XDAQContextTable::ConsoleTypeClassNames_.find(class_) !=
-		       XDAQContextTable::ConsoleTypeClassNames_.end();
-	}
+	bool isTypeChatSupervisor(void) const { return XDAQContextTable::ChatTypeClassNames_.find(class_) != XDAQContextTable::ChatTypeClassNames_.end(); }
+	bool isTypeConsoleSupervisor(void) const { return XDAQContextTable::ConsoleTypeClassNames_.find(class_) != XDAQContextTable::ConsoleTypeClassNames_.end(); }
 
 	// Getters -------------------
-	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDescriptor(void) const
-	{
-		return descriptor_;
-	}
-	const xdaq::ContextDescriptor* getContextDescriptor(void) const
-	{
-		return contextDescriptor_;
-	}
-	const std::string&  getName(void) const { return name_; }
-	const std::string&  getContextName(void) const { return contextName_; }
-	const unsigned int& getId(void) const { return id_; }
-	const std::string&  getClass(void) const { return class_; }
-	const std::string&  getStatus(void) const { return status_; }
-	const time_t        getLastStatusTime(void) { return lastStatusTime_; }
-	const unsigned int& getProgress(void) const { return progress_; }
-	const std::string&  getURL(void) const { return contextURL_; }
-	const std::string&  getURN(void) const { return URN_; }
-	const std::string&  getFullURL(void) const { return URL_; }
-	const uint16_t&     getPort(void) const { return port_; }
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDescriptor(void) const { return descriptor_; }
+	const xdaq::ContextDescriptor*               getContextDescriptor(void) const { return contextDescriptor_; }
+	const std::string&                           getName(void) const { return name_; }
+	const std::string&                           getContextName(void) const { return contextName_; }
+	const unsigned int&                          getId(void) const { return id_; }
+	const std::string&                           getClass(void) const { return class_; }
+	const std::string&                           getStatus(void) const { return status_; }
+	const time_t                                 getLastStatusTime(void) { return lastStatusTime_; }
+	const unsigned int&                          getProgress(void) const { return progress_; }
+	const std::string&                           getURL(void) const { return contextURL_; }
+	const std::string&                           getURN(void) const { return URN_; }
+	const std::string&                           getFullURL(void) const { return URL_; }
+	const uint16_t&                              getPort(void) const { return port_; }
 
 	// Setters -------------------
 	void setStatus(const std::string& status)

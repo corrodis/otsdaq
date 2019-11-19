@@ -7,10 +7,7 @@
 #include "cetlib_except/exception.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
-//#include "otsdaq/TablePlugins/ARTDAQBoardReaderTable.h"
-//#include "otsdaq/TablePlugins/ARTDAQBuilderTable.h"
-//#include "otsdaq/TablePlugins/ARTDAQDataLoggerTable.h"
-//#include "otsdaq/TablePlugins/ARTDAQDispatcherTable.h"
+#include "artdaq-core/Utilities/ExceptionHandler.hh" /*for artdaq::ExceptionHandler*/
 
 #include <boost/exception/all.hpp>
 #include <boost/filesystem.hpp>
@@ -372,7 +369,7 @@ try
 
 	progressBar.step();
 
-	auto info = ARTDAQTableBase::extractArtdaqInfo(
+	auto info = ARTDAQTableBase::extractARTDAQInfo(
 	    theSupervisorNode,
 	    true /*doWriteFHiCL*/,
 	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("max_fragment_size_bytes", ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE),
@@ -380,20 +377,14 @@ try
 	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_retry_count", ARTDAQTableBase::DEFAULT_ROUTING_RETRY_COUNT),
 	    &progressBar);
 
-	std::list<ARTDAQTableBase::ProcessInfo>& readerInfo        = info.processes[ARTDAQTableBase::ARTDAQAppType::BoardReader];
-	std::list<ARTDAQTableBase::ProcessInfo>& builderInfo       = info.processes[ARTDAQTableBase::ARTDAQAppType::EventBuilder];
-	std::list<ARTDAQTableBase::ProcessInfo>& loggerInfo        = info.processes[ARTDAQTableBase::ARTDAQAppType::DataLogger];
-	std::list<ARTDAQTableBase::ProcessInfo>& dispatcherInfo    = info.processes[ARTDAQTableBase::ARTDAQAppType::Dispatcher];
-	std::list<ARTDAQTableBase::ProcessInfo>& routingMasterInfo = info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingMaster];
-
 	// Check lists
-	if(readerInfo.size() == 0)
+	if(info.processes.count(ARTDAQTableBase::ARTDAQAppType::BoardReader) == 0)
 	{
 		__GEN_SS__ << "There must be at least one enabled BoardReader!" << __E__;
 		__GEN_SS_THROW__;
 		return;
 	}
-	if(builderInfo.size() == 0)
+	if(info.processes.count(ARTDAQTableBase::ARTDAQAppType::EventBuilder) == 0)
 	{
 		__GEN_SS__ << "There must be at least one enabled EventBuilder!" << __E__;
 		__GEN_SS_THROW__;
@@ -431,7 +422,7 @@ try
 		}
 	}
 
-	for(auto& builder : builderInfo)
+	for(auto& builder : info.processes[ARTDAQTableBase::ARTDAQAppType::EventBuilder])
 	{
 		o << "EventBuilder host: " << builder.hostname << std::endl;
 		o << "EventBuilder label: " << builder.label << std::endl;
@@ -441,7 +432,7 @@ try
 		}
 		o << std::endl;
 	}
-	for(auto& logger : loggerInfo)
+	for(auto& logger : info.processes[ARTDAQTableBase::ARTDAQAppType::DataLogger])
 	{
 		o << "DataLogger host: " << logger.hostname << std::endl;
 		o << "DataLogger label: " << logger.label << std::endl;
@@ -451,7 +442,7 @@ try
 		}
 		o << std::endl;
 	}
-	for(auto& dispatcher : dispatcherInfo)
+	for(auto& dispatcher : info.processes[ARTDAQTableBase::ARTDAQAppType::Dispatcher])
 	{
 		o << "Dispatcher host: " << dispatcher.hostname << std::endl;
 		o << "Dispatcher label: " << dispatcher.label << std::endl;
@@ -461,7 +452,7 @@ try
 		}
 		o << std::endl;
 	}
-	for(auto& rmaster : routingMasterInfo)
+	for(auto& rmaster : info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingMaster])
 	{
 		o << "RoutingMaster host: " << rmaster.hostname << std::endl;
 		o << "RoutingMaster label: " << rmaster.label << std::endl;
@@ -481,27 +472,27 @@ try
 	boost::filesystem::remove_all(ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME, ignored);
 	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME).c_str(), 0755);
 
-	for(auto& reader : readerInfo)
+	for(auto& reader : info.processes[ARTDAQTableBase::ARTDAQAppType::BoardReader])
 	{
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::BoardReader, reader.label).c_str(),
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + reader.label + ".fcl").c_str());
 	}
-	for(auto& builder : builderInfo)
+	for(auto& builder : info.processes[ARTDAQTableBase::ARTDAQAppType::EventBuilder])
 	{
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::EventBuilder, builder.label).c_str(),
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + builder.label + ".fcl").c_str());
 	}
-	for(auto& logger : loggerInfo)
+	for(auto& logger : info.processes[ARTDAQTableBase::ARTDAQAppType::DataLogger])
 	{
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::DataLogger, logger.label).c_str(),
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + logger.label + ".fcl").c_str());
 	}
-	for(auto& dispatcher : dispatcherInfo)
+	for(auto& dispatcher : info.processes[ARTDAQTableBase::ARTDAQAppType::Dispatcher])
 	{
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::Dispatcher, dispatcher.label).c_str(),
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + dispatcher.label + ".fcl").c_str());
 	}
-	for(auto& rmaster : routingMasterInfo)
+	for(auto& rmaster : info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingMaster])
 	{
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::RoutingMaster, rmaster.label).c_str(),
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + rmaster.label + ".fcl").c_str());
@@ -523,7 +514,7 @@ try
 	PyObject* pName1 = PyString_FromString("setdaqcomps");
 
 	PyObject* readerDict = PyDict_New();
-	for(auto& reader : readerInfo)
+	for(auto& reader : info.processes[ARTDAQTableBase::ARTDAQAppType::BoardReader])
 	{
 		PyObject* readerName = PyString_FromString(reader.label.c_str());
 
@@ -607,6 +598,9 @@ catch(...)
 {
 	__SS__ << "Unknown error was caught while configuring. Please checked the logs." << __E__;
 	__COUT_ERR__ << "\n" << ss.str();
+
+	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
+
 	std::lock_guard<std::mutex> lock(theArtdaqSupervisor->thread_mutex_);  // lock out for remainder of scope
 	theArtdaqSupervisor->thread_error_message_ = ss.str();
 }  // end configuringThread() error handling
@@ -675,6 +669,9 @@ catch(...)
 		__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
+
+		artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
+
 		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
 		                                         ss.str() /* message*/,
 		                                         "ARTDAQSupervisorBase::transition" + transitionName /*module*/,
@@ -686,14 +683,27 @@ catch(...)
 
 //========================================================================================================================
 void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference event)
+try
 {
 	__SUP_COUT__ << "Initializing..." << __E__;
 	init();
 	__SUP_COUT__ << "Initialized." << __E__;
 }  // end transitionInitializing()
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Error was caught while Initializing: " << e.what() << __E__;
+	__SS_THROW__;
+}
+catch(...)
+{
+	__SS__ << "Unknown error was caught while Initializing. Please checked the logs." << __E__;
+	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
+	__SS_THROW__;
+}  // end transitionInitializing() error handling
 
 //========================================================================================================================
 void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference event)
+try
 {
 	__SUP_COUT__ << "Pausing..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -717,9 +727,21 @@ void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference event)
 
 	__SUP_COUT__ << "Paused." << __E__;
 }  // end transitionPausing()
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Error was caught while Pausing: " << e.what() << __E__;
+	__SS_THROW__;
+}
+catch(...)
+{
+	__SS__ << "Unknown error was caught while Pausing. Please checked the logs." << __E__;
+	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
+	__SS_THROW__;
+} // end transitionPausing() error handling
 
 //========================================================================================================================
 void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference event)
+try
 {
 	__SUP_COUT__ << "Resuming..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -740,9 +762,21 @@ void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference event)
 	__SUP_COUT__ << "Status after resume: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "Resumed." << __E__;
 }  // end transitionResuming()
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Error was caught while Resuming: " << e.what() << __E__;
+	__SS_THROW__;
+}
+catch(...)
+{
+	__SS__ << "Unknown error was caught while Resuming. Please checked the logs." << __E__;
+	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
+	__SS_THROW__;
+} // end transitionResuming() error handling
 
 //========================================================================================================================
 void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference event)
+try
 {
 	__SUP_COUT__ << "Starting..." << __E__;
 	{
@@ -773,9 +807,21 @@ void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference event)
 	start_runner_();
 	__SUP_COUT__ << "Started." << __E__;
 }  // end transitionStarting()
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Error was caught while Starting: " << e.what() << __E__;
+	__SS_THROW__;
+}
+catch(...)
+{
+	__SS__ << "Unknown error was caught while Starting. Please checked the logs." << __E__;
+	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
+	__SS_THROW__;
+} // end transitionStarting() error handling
 
 //========================================================================================================================
 void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference event)
+try
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -794,6 +840,17 @@ void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference event)
 	__SUP_COUT__ << "Status after stop: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "Stopped." << __E__;
 }  // end transitionStopping()
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Error was caught while Stopping: " << e.what() << __E__;
+	__SS_THROW__;
+}
+catch(...)
+{
+	__SS__ << "Unknown error was caught while Stopping. Please checked the logs." << __E__;
+	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
+	__SS_THROW__;
+} // end transitionStopping() error handling
 
 //========================================================================================================================
 void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference event)

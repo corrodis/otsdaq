@@ -11,8 +11,7 @@
 using namespace ots;
 
 //========================================================================================================================
-ARTDAQDataLoggerTable::ARTDAQDataLoggerTable(void)
-    : ARTDAQTableBase("ARTDAQDataLoggerTable")
+ARTDAQDataLoggerTable::ARTDAQDataLoggerTable(void) : ARTDAQTableBase("ARTDAQDataLoggerTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -36,27 +35,22 @@ void ARTDAQDataLoggerTable::init(ConfigurationManager* configManager)
 	// make directory just in case
 	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH).c_str(), 0755);
 
-//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
-//	__COUT__ << configManager->__SELF_NODE__ << __E__;
-
+	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	//	__COUT__ << configManager->__SELF_NODE__ << __E__;
 
 	// handle fcl file generation, wherever the level of this table
 
-	auto        dataloggers = configManager->__SELF_NODE__.getChildren(
-			/*default filterMap*/ 		std::map<std::string /*relative-path*/, std::string /*value*/>(),
-		    /*default byPriority*/ 		false,
-		    /*TRUE! onlyStatusTrue*/ 	true);
+	auto dataloggers = configManager->__SELF_NODE__.getChildren(
+	    /*default filterMap*/ std::map<std::string /*relative-path*/, std::string /*value*/>(),
+	    /*default byPriority*/ false,
+	    /*TRUE! onlyStatusTrue*/ true);
 
-	for (auto& datalogger : dataloggers)
+	for(auto& datalogger : dataloggers)
 	{
-		ARTDAQTableBase::outputDataReceiverFHICL(
-			datalogger.second,
-			ARTDAQTableBase::ARTDAQAppType::DataLogger);
+		ARTDAQTableBase::outputDataReceiverFHICL(datalogger.second, ARTDAQTableBase::ARTDAQAppType::DataLogger);
 
 		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::DataLogger, datalogger.second.getValue());
 	}
-
 }
-
 
 DEFINE_OTS_TABLE(ARTDAQDataLoggerTable)

@@ -17,10 +17,8 @@ class TableViewColumnInfo
 	                    const std::string& dataType,
 	                    const std::string& dataChoicesCSV,
 	                    std::string*       capturedExceptionString);
-	TableViewColumnInfo(
-	    const TableViewColumnInfo& c);  // copy constructor because of bitmap pointer
-	TableViewColumnInfo& operator=(
-	    const TableViewColumnInfo& c);  // assignment operator because of bitmap pointer
+	TableViewColumnInfo(const TableViewColumnInfo& c);             // copy constructor because of bitmap pointer
+	TableViewColumnInfo& operator=(const TableViewColumnInfo& c);  // assignment operator because of bitmap pointer
 
 	virtual ~TableViewColumnInfo(void);
 
@@ -41,13 +39,11 @@ class TableViewColumnInfo
 		std::string  absMinColor_, absMaxColor_;
 		bool         rowsAscending_, colsAscending_, snakeRows_, snakeCols_;
 	};
-	const BitMapInfo& getBitMapInfo(
-	    void) const;  // uses dataChoices CSV fields if type is TYPE_BITMAP_DATA
+	const BitMapInfo& getBitMapInfo(void) const;  // uses dataChoices CSV fields if type is TYPE_BITMAP_DATA
 
-	static std::vector<std::string> getAllTypesForGUI(void);
-	static std::map<std::pair<std::string, std::string>, std::string>
-	                                getAllDefaultsForGUI(void);
-	static std::vector<std::string> getAllDataTypesForGUI(void);
+	static std::vector<std::string>                                   getAllTypesForGUI(void);
+	static std::map<std::pair<std::string, std::string>, std::string> getAllDefaultsForGUI(void);
+	static std::vector<std::string>                                   getAllDataTypesForGUI(void);
 
 	const bool isChildLink(void) const;
 	const bool isChildLinkUID(void) const;
@@ -60,12 +56,10 @@ class TableViewColumnInfo
 	std::string getChildLinkIndex(void) const;
 
 	static const std::string TYPE_UID;
-	static const std::string TYPE_DATA, TYPE_UNIQUE_DATA, TYPE_UNIQUE_GROUP_DATA,
-	    TYPE_MULTILINE_DATA, TYPE_FIXED_CHOICE_DATA, TYPE_BITMAP_DATA;
+	static const std::string TYPE_DATA, TYPE_UNIQUE_DATA, TYPE_UNIQUE_GROUP_DATA, TYPE_MULTILINE_DATA, TYPE_FIXED_CHOICE_DATA, TYPE_BITMAP_DATA;
 	static const std::string TYPE_ON_OFF, TYPE_TRUE_FALSE, TYPE_YES_NO;
 	static const std::string TYPE_COMMENT, TYPE_AUTHOR, TYPE_TIMESTAMP;
-	static const std::string TYPE_START_CHILD_LINK, TYPE_START_CHILD_LINK_UID,
-	    TYPE_START_CHILD_LINK_GROUP_ID, TYPE_START_GROUP_ID;
+	static const std::string TYPE_START_CHILD_LINK, TYPE_START_CHILD_LINK_UID, TYPE_START_CHILD_LINK_GROUP_ID, TYPE_START_GROUP_ID;
 	static const std::string DATATYPE_NUMBER, DATATYPE_STRING, DATATYPE_TIME;
 
 	static const std::string TYPE_VALUE_YES;
@@ -82,8 +76,7 @@ class TableViewColumnInfo
 	static const std::string DATATYPE_TIME_DEFAULT;
 	static const std::string DATATYPE_LINK_DEFAULT;
 
-	static const std::string COL_NAME_STATUS, COL_NAME_ENABLED, COL_NAME_PRIORITY,
-	    COL_NAME_COMMENT;
+	static const std::string COL_NAME_STATUS, COL_NAME_ENABLED, COL_NAME_PRIORITY, COL_NAME_COMMENT;
 
   private:
 	TableViewColumnInfo();  // private constructor, only used in assignment operator

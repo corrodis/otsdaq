@@ -10,8 +10,7 @@ using namespace ots;
 //========================================================================================================================
 TCPSocket::TCPSocket(int socketId) : fSocketId(socketId)
 {
-	if(socketId == invalidSocketId &&
-	   (fSocketId = ::socket(PF_INET, SOCK_STREAM, 0)) == invalidSocketId)
+	if(socketId == invalidSocketId && (fSocketId = ::socket(PF_INET, SOCK_STREAM, 0)) == invalidSocketId)
 		throw std::runtime_error(std::string("Bad socket: ") + strerror(errno));
 	// std::cout << __PRETTY_FUNCTION__ << "New socket: " << fSocketId << std::endl;
 }
@@ -45,8 +44,7 @@ void TCPSocket::close()
 		throw std::logic_error("Bad socket object (this object was moved)");
 	}
 	int state = ::close(fSocketId);
-	std::cout << __PRETTY_FUNCTION__ << "Socket id: " << getSocketId()
-	          << " close state: " << state << " errno: " << errno << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "Socket id: " << getSocketId() << " close state: " << state << " errno: " << errno << std::endl;
 	if(state == 0)  // 0 means socket closed correctly
 		fSocketId = invalidSocketId;
 	else
@@ -54,11 +52,9 @@ void TCPSocket::close()
 		switch(errno)
 		{
 		case EBADF:
-			throw std::domain_error(std::string("Close: EBADF: ") +
-			                        std::to_string(fSocketId) + " " + strerror(errno));
+			throw std::domain_error(std::string("Close: EBADF: ") + std::to_string(fSocketId) + " " + strerror(errno));
 		case EIO:
-			throw std::runtime_error(std::string("Close: EIO: ") +
-			                         std::to_string(fSocketId) + " " + strerror(errno));
+			throw std::runtime_error(std::string("Close: EIO: ") + std::to_string(fSocketId) + " " + strerror(errno));
 		case EINTR:
 		{
 			// TODO: Check for user interrupt flags.
@@ -67,8 +63,7 @@ void TCPSocket::close()
 			return;
 		}
 		default:
-			throw std::runtime_error(std::string("Close: ???: ") +
-			                         std::to_string(fSocketId) + " " + strerror(errno));
+			throw std::runtime_error(std::string("Close: ???: ") + std::to_string(fSocketId) + " " + strerror(errno));
 		}
 	}
 }
@@ -95,7 +90,6 @@ void TCPSocket::sendClose()
 {
 	if(::shutdown(getSocketId(), SHUT_WR) != 0)
 	{
-		throw std::domain_error(std::string("Shutdown: critical error: ") +
-		                        strerror(errno));
+		throw std::domain_error(std::string("Shutdown: critical error: ") + strerror(errno));
 	}
 }

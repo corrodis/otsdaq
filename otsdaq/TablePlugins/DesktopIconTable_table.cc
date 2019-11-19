@@ -9,21 +9,20 @@
 #include <iostream>
 using namespace ots;
 
-#define DESKTOP_ICONS_FILE \
-	std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
+#define DESKTOP_ICONS_FILE std::string(__ENV__("SERVICE_DATA_PATH")) + "/OtsWizardData/iconList.dat"
 
 // DesktopIconTable Column names
 
-const std::string DesktopIconTable::COL_NAME    = "IconName";
-const std::string DesktopIconTable::COL_STATUS  = TableViewColumnInfo::COL_NAME_STATUS;
-const std::string DesktopIconTable::COL_CAPTION = "Caption";
+const std::string DesktopIconTable::COL_NAME                    = "IconName";
+const std::string DesktopIconTable::COL_STATUS                  = TableViewColumnInfo::COL_NAME_STATUS;
+const std::string DesktopIconTable::COL_CAPTION                 = "Caption";
 const std::string DesktopIconTable::COL_ALTERNATE_TEXT          = "AlternateText";
 const std::string DesktopIconTable::COL_FORCE_ONLY_ONE_INSTANCE = "ForceOnlyOneInstance";
-const std::string DesktopIconTable::COL_PERMISSIONS        = "RequiredPermissionLevel";
-const std::string DesktopIconTable::COL_IMAGE_URL          = "ImageURL";
-const std::string DesktopIconTable::COL_WINDOW_CONTENT_URL = "WindowContentURL";
-const std::string DesktopIconTable::COL_APP_LINK           = "LinkToApplicationTable";
-const std::string DesktopIconTable::COL_APP_LINK_UID       = "LinkToApplicationUID";
+const std::string DesktopIconTable::COL_PERMISSIONS             = "RequiredPermissionLevel";
+const std::string DesktopIconTable::COL_IMAGE_URL               = "ImageURL";
+const std::string DesktopIconTable::COL_WINDOW_CONTENT_URL      = "WindowContentURL";
+const std::string DesktopIconTable::COL_APP_LINK                = "LinkToApplicationTable";
+const std::string DesktopIconTable::COL_APP_LINK_UID            = "LinkToApplicationUID";
 
 const std::string DesktopIconTable::COL_PARAMETER_LINK     = "LinkToParameterTable";
 const std::string DesktopIconTable::COL_PARAMETER_LINK_GID = "LinkToParameterGroupID";
@@ -92,30 +91,23 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 		activeDesktopIcons_.push_back(DesktopIconTable::DesktopIcon());
 		icon = &(activeDesktopIcons_.back());
 
-		icon->caption_ = child.second.getNode(COL_CAPTION).getValue<std::string>();
-		icon->alternateText_ =
-		    child.second.getNode(COL_ALTERNATE_TEXT).getValue<std::string>();
-		icon->enforceOneWindowInstance_ =
-		    child.second.getNode(COL_FORCE_ONLY_ONE_INSTANCE).getValue<bool>();
-		icon->permissionThresholdString_ =
-		    child.second.getNode(COL_PERMISSIONS).getValue<std::string>();
-		icon->imageURL_ = child.second.getNode(COL_IMAGE_URL).getValue<std::string>();
-		icon->windowContentURL_ =
-		    child.second.getNode(COL_WINDOW_CONTENT_URL).getValue<std::string>();
-		icon->folderPath_ = child.second.getNode(COL_FOLDER_PATH).getValue<std::string>();
+		icon->caption_                   = child.second.getNode(COL_CAPTION).getValue<std::string>();
+		icon->alternateText_             = child.second.getNode(COL_ALTERNATE_TEXT).getValue<std::string>();
+		icon->enforceOneWindowInstance_  = child.second.getNode(COL_FORCE_ONLY_ONE_INSTANCE).getValue<bool>();
+		icon->permissionThresholdString_ = child.second.getNode(COL_PERMISSIONS).getValue<std::string>();
+		icon->imageURL_                  = child.second.getNode(COL_IMAGE_URL).getValue<std::string>();
+		icon->windowContentURL_          = child.second.getNode(COL_WINDOW_CONTENT_URL).getValue<std::string>();
+		icon->folderPath_                = child.second.getNode(COL_FOLDER_PATH).getValue<std::string>();
 
 		if(icon->folderPath_ == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
 			icon->folderPath_ = "";  // convert DEFAULT to empty string
 
-		if(icon->permissionThresholdString_ ==
-		   TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
-			icon->permissionThresholdString_ =
-			    "1";  // convert DEFAULT to standard user allow
+		if(icon->permissionThresholdString_ == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+			icon->permissionThresholdString_ = "1";  // convert DEFAULT to standard user allow
 
 		numeric = true;
 		for(i = 0; i < icon->permissionThresholdString_.size(); ++i)
-			if(!(icon->permissionThresholdString_[i] >= '0' &&
-			     icon->permissionThresholdString_[i] <= '9'))
+			if(!(icon->permissionThresholdString_[i] >= '0' && icon->permissionThresholdString_[i] <= '9'))
 			{
 				numeric = false;
 				break;
@@ -123,20 +115,15 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 		// for backwards compatibility, if permissions threshold is a single number
 		//	assume it is the threshold intended for the WebUsers::DEFAULT_USER_GROUP group
 		if(numeric)
-			icon->permissionThresholdString_ =
-			    WebUsers::DEFAULT_USER_GROUP + ":" + icon->permissionThresholdString_;
+			icon->permissionThresholdString_ = WebUsers::DEFAULT_USER_GROUP + ":" + icon->permissionThresholdString_;
 
 		// remove all commas from member strings because desktop icons are served to
 		// client in comma-separated string
-		icon->caption_ = removeCommas(
-		    icon->caption_, false /*andHexReplace*/, true /*andHTMLReplace*/);
-		icon->alternateText_ = removeCommas(
-		    icon->alternateText_, false /*andHexReplace*/, true /*andHTMLReplace*/);
-		icon->imageURL_ = removeCommas(icon->imageURL_, true /*andHexReplace*/);
-		icon->windowContentURL_ =
-		    removeCommas(icon->windowContentURL_, true /*andHexReplace*/);
-		icon->folderPath_ = removeCommas(
-		    icon->folderPath_, false /*andHexReplace*/, true /*andHTMLReplace*/);
+		icon->caption_          = removeCommas(icon->caption_, false /*andHexReplace*/, true /*andHTMLReplace*/);
+		icon->alternateText_    = removeCommas(icon->alternateText_, false /*andHexReplace*/, true /*andHTMLReplace*/);
+		icon->imageURL_         = removeCommas(icon->imageURL_, true /*andHexReplace*/);
+		icon->windowContentURL_ = removeCommas(icon->windowContentURL_, true /*andHexReplace*/);
+		icon->folderPath_       = removeCommas(icon->folderPath_, false /*andHexReplace*/, true /*andHTMLReplace*/);
 
 		// add URN/LID to windowContentURL_, if link is given
 		addedAppId = false;
@@ -162,9 +149,7 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 			//	then assume need to add "?"
 			if(icon->windowContentURL_.find('?') == std::string::npos)
 				icon->windowContentURL_ += '?';
-			else if(addedAppId ||
-			        icon->windowContentURL_[icon->windowContentURL_.size() - 1] !=
-			            '?')  // if not first parameter, add &
+			else if(addedAppId || icon->windowContentURL_[icon->windowContentURL_.size() - 1] != '?')  // if not first parameter, add &
 				icon->windowContentURL_ += '&';
 
 			// now add each paramter separated by &
@@ -179,13 +164,8 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 					icon->windowContentURL_ += '&';
 				else
 					notFirst = true;
-				icon->windowContentURL_ +=
-				    StringMacros::encodeURIComponent(
-				        param.second.getNode(COL_PARAMETER_KEY).getValue<std::string>()) +
-				    "=" +
-				    StringMacros::encodeURIComponent(
-				        param.second.getNode(COL_PARAMETER_VALUE)
-				            .getValue<std::string>());
+				icon->windowContentURL_ += StringMacros::encodeURIComponent(param.second.getNode(COL_PARAMETER_KEY).getValue<std::string>()) + "=" +
+				                           StringMacros::encodeURIComponent(param.second.getNode(COL_PARAMETER_VALUE).getValue<std::string>());
 			}
 		}
 	}  // end main icon extraction loop
@@ -291,9 +271,7 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 	//	fs.close();
 }
 
-std::string DesktopIconTable::removeCommas(const std::string& str,
-                                           bool               andHexReplace,
-                                           bool               andHTMLReplace)
+std::string DesktopIconTable::removeCommas(const std::string& str, bool andHexReplace, bool andHTMLReplace)
 {
 	std::string retStr = "";
 	retStr.reserve(str.length());

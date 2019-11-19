@@ -2,8 +2,8 @@
 	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
 		<TABLE Name="ARTDAQEventBuilderTable">
 			<VIEW Name="ARTDAQ_EVENT_BUILDER_TABLE" Type="File,Database,DatabaseTest" Description="No%20description.">
-				<COLUMN Type="GroupID-eventbuilders" 	 Name="EventBuildersGroupID" 	 StorageName="EVENT_BUILDERS_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="GroupID-EventBuilders" 	 Name="EventBuilderGroupID" 	 StorageName="EVENT_BUILDER_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="UID" 	 Name="EventBuilderUID" 	 StorageName="EVENT_BUILDER_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="ExecutionHostname" 	 StorageName="EXECUTION_HOSTNAME" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-subsystem" 	 Name="SubsystemLink" 	 StorageName="SUBSYSTEM_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQSubsystemTable"/>

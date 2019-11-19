@@ -48,20 +48,17 @@ class FiniteStateMachine : public toolbox::fsm::FiniteStateMachine
 	std::string        getCurrentStateName(void);
 	time_t             getTimeInState(void);
 	std::string        getCurrentTransitionName(const std::string& transition);
-	std::string        getTransitionName(const toolbox::fsm::State from,
-	                                     const std::string&        transition);
-	std::string        getTransitionParameter(const toolbox::fsm::State from,
-	                                          const std::string&        transition);
+	std::string        getTransitionName(const toolbox::fsm::State from, const std::string& transition);
+	std::string        getTransitionParameter(const toolbox::fsm::State from, const std::string& transition);
 	std::string        getTransitionFinalStateName(const std::string& transition);
 	const std::string& getErrorMessage() const;
 	const std::string& getStateMachineName(void) const { return stateMachineName_; }
-	void setStateMachineName(const std::string& name) { stateMachineName_ = name; }
+	void               setStateMachineName(const std::string& name) { stateMachineName_ = name; }
 
 	const xoap::MessageReference& getCurrentMessage(void);
 
 	bool execTransition(const std::string& transition);
-	bool execTransition(const std::string&            transition,
-	                    const xoap::MessageReference& message);
+	bool execTransition(const std::string& transition, const xoap::MessageReference& message);
 	bool isInTransition(void);
 	void setInitialState(toolbox::fsm::State state);
 	void setErrorMessage(const std::string& errMessage, bool append = true);
@@ -78,14 +75,10 @@ class FiniteStateMachine : public toolbox::fsm::FiniteStateMachine
 	// visibility between threads...  just because an operation is executed in one CPU
 	// cycle (atomic) it doesn't mean that the result will be visible to the other threads
 	// unless the value is marked volatile
-	volatile bool       inTransition_;
-	toolbox::fsm::State provenanceState_;
-	std::map<toolbox::fsm::State,
-	         std::map<std::string, std::string, std::less<std::string> > >
-	    stateTransitionNameTable_;
-	std::map<toolbox::fsm::State,
-	         std::map<std::string, std::string, std::less<std::string> > >
-	    stateTransitionParameterTable_;
+	volatile bool                                                                               inTransition_;
+	toolbox::fsm::State                                                                         provenanceState_;
+	std::map<toolbox::fsm::State, std::map<std::string, std::string, std::less<std::string> > > stateTransitionNameTable_;
+	std::map<toolbox::fsm::State, std::map<std::string, std::string, std::less<std::string> > > stateTransitionParameterTable_;
 
 	xoap::MessageReference theMessage_;
 	std::string            theErrorMessage_;

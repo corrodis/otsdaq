@@ -160,10 +160,13 @@ class ConfigurationTree
 	// passed as value
 	template<class T>
 	T 											getValue					(void) const;  // defined in included .icc source
+	template<class T>
+	T 											getValueWithDefault			(const T& defaultValue) const;  // defined in included .icc source
 	// special version of getValue for string type
 	//	Note: necessary because types of std::basic_string<char> cause compiler problems
 	// if no string specific function
 	std::string               					getValue					(void) const;
+	std::string               					getValueWithDefault			(const std::string& defaultValue) const;
 	ConfigurationTree::BitMap 					getValueAsBitMap			(void) const;
 
   private:
@@ -209,6 +212,7 @@ class ConfigurationTree
 	const std::string&       					getValueDataType			(void) const;
 	const std::string&       					getValueType				(void) const;
 	const std::string&       					getValueName				(void) const;
+	const std::string&							getDefaultValue				(void) const;
 	inline const std::string&					getFieldName				(void) const { return getValueName(); } //alias for getValueName
 	std::string              					getNodeType					(void) const;
 	const unsigned int&        					getNodeRow					(void) const;
@@ -232,6 +236,7 @@ class ConfigurationTree
 	bool 										isUIDLinkNode				(void) const;
 	bool 										isGroupIDNode				(void) const;
 	bool 										isUIDNode					(void) const;
+	bool 										isStatusNode				(void) const;
 	bool										isEnabled					(void) const; //same as status()
 	inline bool									status						(void) const; //same as isEnabled()
 

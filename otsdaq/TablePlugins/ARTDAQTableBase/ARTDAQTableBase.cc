@@ -15,36 +15,42 @@
 
 using namespace ots;
 
+
+#undef __MF_SUBJECT__
+#define __MF_SUBJECT__ "ARTDAQTableBase"
+
 // clang-format off
 
-const std::string ARTDAQTableBase::ARTDAQ_FCL_PATH 				= std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/";
-
-const std::string ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE 		= "ARTDAQSupervisorTable";
-
-const std::string ARTDAQTableBase::ARTDAQ_READER_TABLE 			= "ARTDAQBoardReaderTable";
-const std::string ARTDAQTableBase::ARTDAQ_BUILDER_TABLE 		= "ARTDAQEventBuilderTable";
-const std::string ARTDAQTableBase::ARTDAQ_LOGGER_TABLE 			= "ARTDAQDataLoggerTable";
-const std::string ARTDAQTableBase::ARTDAQ_DISPATCHER_TABLE 		= "ARTDAQDispatcherTable";
-const std::string ARTDAQTableBase::ARTDAQ_MONITOR_TABLE 		= "ARTDAQMonitorTable";
-const std::string ARTDAQTableBase::ARTDAQ_ROUTING_MASTER_TABLE = "ARTDAQRoutingMasterTable";
-
-const std::string ARTDAQTableBase::ARTDAQ_SUBSYSTEM_TABLE 		= "ARTDAQSubsystemTable";
-
-const std::string ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME 				= "ExecutionHostname";
-const std::string ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK 		= "SubsystemLink";
-const std::string ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID 	= "SubsystemLinkUID";
+const std::string 	ARTDAQTableBase::ARTDAQ_FCL_PATH 				= std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/";
 
 
-const int ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION 			= 0;
-const std::string ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION_LABEL			= "nullDestinationSubsystem";
+const std::string 	ARTDAQTableBase::ARTDAQ_SUPERVISOR_CLASS 		= "ots::ARTDAQSupervisor";
+const std::string 	ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE 		= "ARTDAQSupervisorTable";
 
-ARTDAQTableBase::ArtdaqInfo ARTDAQTableBase::info_;
+const std::string 	ARTDAQTableBase::ARTDAQ_READER_TABLE 			= "ARTDAQBoardReaderTable";
+const std::string 	ARTDAQTableBase::ARTDAQ_BUILDER_TABLE 			= "ARTDAQEventBuilderTable";
+const std::string 	ARTDAQTableBase::ARTDAQ_LOGGER_TABLE 			= "ARTDAQDataLoggerTable";
+const std::string 	ARTDAQTableBase::ARTDAQ_DISPATCHER_TABLE 		= "ARTDAQDispatcherTable";
+const std::string 	ARTDAQTableBase::ARTDAQ_MONITOR_TABLE 			= "ARTDAQMonitorTable";
+const std::string 	ARTDAQTableBase::ARTDAQ_ROUTER_TABLE 			= "ARTDAQRoutingMasterTable";
 
-ARTDAQTableBase::ColARTDAQSupervisor ARTDAQTableBase::colARTDAQSupervisor_ 		= ARTDAQTableBase::ColARTDAQSupervisor();
-ARTDAQTableBase::ColARTDAQSubsystem 	ARTDAQTableBase::colARTDAQSubsystem_ 		= ARTDAQTableBase::ColARTDAQSubsystem();
+const std::string 	ARTDAQTableBase::ARTDAQ_SUBSYSTEM_TABLE 		= "ARTDAQSubsystemTable";
+
+const std::string 	ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME 			= "ExecutionHostname";
+const std::string 	ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK 		= "SubsystemLink";
+const std::string 	ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID 	= "SubsystemLinkUID";
+
+
+const int 			ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION 			= 0;
+const std::string 	ARTDAQTableBase::NULL_SUBSYSTEM_DESTINATION_LABEL		= "nullDestinationSubsystem";
+
+ARTDAQTableBase::ARTDAQInfo 			ARTDAQTableBase::info_;
+
+ARTDAQTableBase::ColARTDAQSupervisor 	ARTDAQTableBase::colARTDAQSupervisor_;
+ARTDAQTableBase::ColARTDAQSubsystem 	ARTDAQTableBase::colARTDAQSubsystem_;
 
 //Note: processTypes_ must be instantiate after the static artdaq table names (to construct map in constructor)
-ARTDAQTableBase::ProcessTypes ARTDAQTableBase::processTypes_	= ARTDAQTableBase::ProcessTypes();
+ARTDAQTableBase::ProcessTypes 			ARTDAQTableBase::processTypes_;
 
 // clang-format on
 
@@ -88,7 +94,7 @@ const std::string& ARTDAQTableBase::getTypeString(ARTDAQAppType type)
 	case ARTDAQAppType::Monitor:
 		return processTypes_.MONITOR;
 	case ARTDAQAppType::RoutingMaster:
-		return processTypes_.ROUTINGMASTER;
+		return processTypes_.ROUTER;
 	}
 	// return "UNKNOWN";
 	__SS__ << "Illegal translation attempt for type '" << (unsigned int)type << "'" << __E__;
@@ -152,7 +158,7 @@ void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 		fhicl::make_ParameterSet(tbl, pset);
 
 		std::ofstream ofs{outFile};
-		ofs << pset.to_indented_string(0);// , fhicl::detail::print_mode::annotated); // Only really useful for debugging
+		ofs << pset.to_indented_string(0);  // , fhicl::detail::print_mode::annotated); // Only really useful for debugging
 	}
 	catch(cet::exception const& e)
 	{
@@ -295,7 +301,7 @@ void ots::ARTDAQTableBase::insertMetricsBlock(std::ostream& out, std::string& ta
 	}
 	POPTAB;
 	OUT << "}\n\n";  // end metrics
-}
+} //end insertMetricsBlock()
 
 //========================================================================================================================
 void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReaderNode,
@@ -449,9 +455,9 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 	OUT << "###########################################################" << __E__;
 	OUT << "#" << __E__;
 	OUT << "# artdaq reader fcl configuration file produced by otsdaq." << __E__;
-	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
-	OUT << "# 	Original filename: " << filename << __E__;
-	OUT << "#	otsdaq-ARTDAQ Reader UID: " << boardReaderNode.getValue() << __E__;
+	OUT << "# 	Creation time:           \t" << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename:       \t" << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ Reader UID:\t" << boardReaderNode.getValue() << __E__;
 	OUT << "#" << __E__;
 	OUT << "###########################################################" << __E__;
 	OUT << "\n\n";
@@ -592,9 +598,9 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 	OUT << "###########################################################" << __E__;
 	OUT << "#" << __E__;
 	OUT << "# artdaq " << getTypeString(appType) << " fcl configuration file produced by otsdaq." << __E__;
-	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
-	OUT << "# 	Original filename: " << filename << __E__;
-	OUT << "#	otsdaq-ARTDAQ " << getTypeString(appType) << " UID: " << receiverNode.getValue() << __E__;
+	OUT << "# 	Creation time:                  \t" << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename:              \t" << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ " << getTypeString(appType) << " UID:\t" << receiverNode.getValue() << __E__;
 	OUT << "#" << __E__;
 	OUT << "###########################################################" << __E__;
 	OUT << "\n\n";
@@ -1108,9 +1114,9 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	OUT << "###########################################################" << __E__;
 	OUT << "#" << __E__;
 	OUT << "# artdaq routingMaster fcl configuration file produced by otsdaq." << __E__;
-	OUT << "# 	Creation timestamp: " << StringMacros::getTimestampString() << __E__;
-	OUT << "# 	Original filename: " << filename << __E__;
-	OUT << "#	otsdaq-ARTDAQ RoutingMaster UID: " << routingMasterNode.getValue() << __E__;
+	OUT << "# 	Creation time:                  \t" << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename:              \t" << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ RoutingMaster UID:\t" << routingMasterNode.getValue() << __E__;
 	OUT << "#" << __E__;
 	OUT << "###########################################################" << __E__;
 	OUT << "\n\n";
@@ -1215,21 +1221,22 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 }  // end outputReaderFHICL()
 
 //========================================================================================================================
-ARTDAQTableBase::ArtdaqInfo ARTDAQTableBase::extractArtdaqInfo(ConfigurationTree artdaqSupervisorNode,
-                                                               bool              doWriteFHiCL /* = false */,
-                                                               size_t            maxFragmentSizeBytes /* = DEFAULT_MAX_FRAGMENT_SIZE*/,
-
-                                                               size_t       routingTimeoutMs /* = DEFAULT_ROUTING_TIMEOUT_MS */,
-                                                               size_t       routingRetryCount /* = DEFAULT_ROUTING_RETRY_COUNT */,
-                                                               ProgressBar* progressBar /* =0 */)
+const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(ConfigurationTree artdaqSupervisorNode,
+                                                                      bool              doWriteFHiCL /* = false */,
+                                                                      size_t            maxFragmentSizeBytes /* = DEFAULT_MAX_FRAGMENT_SIZE*/,
+                                                                      size_t            routingTimeoutMs /* = DEFAULT_ROUTING_TIMEOUT_MS */,
+                                                                      size_t            routingRetryCount /* = DEFAULT_ROUTING_RETRY_COUNT */,
+                                                                      ProgressBar*      progressBar /* =0 */)
 {
 	if(progressBar)
 		progressBar->step();
 
-	if(info_.processes.size() > 0)
-	{
-		return info_;
-	}
+	// reset info every time, because it could be called after configuration manipulations
+	info_.subsystems.clear();
+	info_.processes.clear();
+
+	if(progressBar)
+		progressBar->step();
 
 	info_.subsystems[NULL_SUBSYSTEM_DESTINATION].id    = NULL_SUBSYSTEM_DESTINATION;
 	info_.subsystems[NULL_SUBSYSTEM_DESTINATION].label = NULL_SUBSYSTEM_DESTINATION_LABEL;
@@ -1261,30 +1268,28 @@ ARTDAQTableBase::ArtdaqInfo ARTDAQTableBase::extractArtdaqInfo(ConfigurationTree
 		progressBar->step();
 
 	return info_;
+}  // end extractARTDAQInfo()
 
-}  // end extractArtdaqInfo()
-
+//========================================================================================================================
 void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t routingTimeoutMs, size_t routingRetryCount)
 {
-	__COUT__ << "Checking for RoutingMasters" << __E__;
-	auto rmsLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToRoutingMasters_);
+	__COUT__ << "Checking for Routing Masters" << __E__;
+	ConfigurationTree rmsLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToRoutingMasters_);
 	if(!rmsLink.isDisconnected() && rmsLink.getChildren().size() > 0)
 	{
-		auto routingMasters = rmsLink.getChildren();
-		__COUT__ << "There are " << routingMasters.size() << " configured RoutingMasters" << __E__;
+		std::vector<std::pair<std::string, ConfigurationTree>> routingMasters = rmsLink.getChildren();
+
+		__COUT__ << "There are " << routingMasters.size() << " configured Routing Masters" << __E__;
 
 		for(auto& routingMaster : routingMasters)
 		{
 			if(routingMaster.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				auto rmUID  = routingMaster.second.getNode("SupervisorUID").getValue();
-				auto rmHost = routingMaster.second.getNode("ExecutionHostname").getValue();
+				std::string& rmUID  = routingMaster.first;
+				std::string  rmHost = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
-				if(rmHost == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
-					rmHost = "localhost";
-
-				auto routingMasterSubsystemID   = 1;
-				auto routingMasterSubsystemLink = routingMaster.second.getNode("SubsystemLink");
+				int               routingMasterSubsystemID   = 1;
+				ConfigurationTree routingMasterSubsystemLink = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
 				if(!routingMasterSubsystemLink.isDisconnected())
 				{
 					routingMasterSubsystemID = getSubsytemId(routingMasterSubsystemLink);
@@ -1299,12 +1304,12 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 
 					if(info_.subsystems[routingMasterSubsystemID].hasRoutingMaster)
 					{
-						__SS__ << "Error: You cannot have multiple RoutingMasters in a subsystem!";
+						__SS__ << "Error: You cannot have multiple Routing Masters in a subsystem!";
 						__SS_THROW__;
 						return;
 					}
 
-					auto routingMasterSubsystemDestinationLink = routingMasterSubsystemLink.getNode("SubsystemDestinationLink");
+					auto routingMasterSubsystemDestinationLink = routingMasterSubsystemLink.getNode(colARTDAQSubsystem_.colLinkToDestination_);
 					if(routingMasterSubsystemDestinationLink.isDisconnected())
 					{
 						// default to no destination when no link
@@ -1327,7 +1332,7 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 
 				}  // end subsystem instantiation
 
-				__COUT__ << "Found RoutingMaster with UID " << rmUID << ", DAQInterface Hostname " << rmHost << ", and Subsystem " << routingMasterSubsystemID
+				__COUT__ << "Found Routing Master with UID " << rmUID << ", DAQInterface Hostname " << rmHost << ", and Subsystem " << routingMasterSubsystemID
 				         << __E__;
 				info_.processes[ARTDAQAppType::RoutingMaster].emplace_back(rmUID, rmHost, routingMasterSubsystemID, ARTDAQAppType::RoutingMaster);
 
@@ -1342,34 +1347,32 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 			}
 			else
 			{
-				__COUT__ << "RoutingMaster " << routingMaster.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
+				__COUT__ << "Routing Master " << routingMaster.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
 			}
 		}
 	}
-}
+}  // end extractRoutingMastersInfo()
 
+//========================================================================================================================
 void ARTDAQTableBase::extractBoardReadersInfo(
     ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes, size_t routingTimeoutMs, size_t routingRetryCount)
 {
-	__COUT__ << "Checking for BoardReaders" << __E__;
-	auto readersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToBoardReaders_);
+	__COUT__ << "Checking for Board Readers" << __E__;
+	ConfigurationTree readersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToBoardReaders_);
 	if(!readersLink.isDisconnected() && readersLink.getChildren().size() > 0)
 	{
-		auto readers = readersLink.getChildren();
-		__COUT__ << "There are " << readers.size() << " configured BoardReaders" << __E__;
+		std::vector<std::pair<std::string, ConfigurationTree>> readers = readersLink.getChildren();
+		__COUT__ << "There are " << readers.size() << " configured Board Readers." << __E__;
 
 		for(auto& reader : readers)
 		{
 			if(reader.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				auto readerUID  = reader.second.getNode("SupervisorUID").getValue();
-				auto readerHost = reader.second.getNode("ExecutionHostname").getValue();
+				std::string& readerUID  = reader.first;
+				std::string  readerHost = reader.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
-				if(readerHost == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
-					readerHost = "localhost";
-
-				auto readerSubsystemID   = 1;
-				auto readerSubsystemLink = reader.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
+				int               readerSubsystemID   = 1;
+				ConfigurationTree readerSubsystemLink = reader.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
 				if(!readerSubsystemLink.isDisconnected())
 				{
 					readerSubsystemID = getSubsytemId(readerSubsystemLink);
@@ -1404,7 +1407,7 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 
 				}  // end subsystem instantiation
 
-				__COUT__ << "Found BoardReader with UID " << readerUID << ", DAQInterface Hostname " << readerHost << ", and Subsystem " << readerSubsystemID
+				__COUT__ << "Found Board Reader with UID " << readerUID << ", DAQInterface Hostname " << readerHost << ", and Subsystem " << readerSubsystemID
 				         << __E__;
 				info_.processes[ARTDAQAppType::BoardReader].emplace_back(readerUID, readerHost, readerSubsystemID, ARTDAQAppType::BoardReader);
 
@@ -1417,37 +1420,36 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 			}
 			else
 			{
-				__COUT__ << "BoardReader " << reader.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
+				__COUT__ << "Board Reader " << reader.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
 			}
 		}
 	}
 	else
 	{
-		__SS__ << "Error: There should be at least one BoardReader!";
+		__SS__ << "Error: There should be at least one Board Reader!";
 		__SS_THROW__;
 		return;
 	}
-}
+}  // end extractBoardReadersInfo()
 
+//========================================================================================================================
 void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
-	auto buildersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToEventBuilders_);
+	__COUT__ << "Checking for Event Builders" << __E__;
+	ConfigurationTree buildersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToEventBuilders_);
 	if(!buildersLink.isDisconnected() && buildersLink.getChildren().size() > 0)
 	{
-		auto builders = buildersLink.getChildren();
+		std::vector<std::pair<std::string, ConfigurationTree>> builders = buildersLink.getChildren();
 
 		for(auto& builder : builders)
 		{
 			if(builder.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				auto builderUID  = builder.second.getNode("SupervisorUID").getValue();
-				auto builderHost = builder.second.getNode("ExecutionHostname").getValue();
+				std::string& builderUID  = builder.first;
+				std::string  builderHost = builder.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
-				if(builderHost == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
-					builderHost = "localhost";
-
-				auto builderSubsystemID   = 1;
-				auto builderSubsystemLink = builder.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
+				int               builderSubsystemID   = 1;
+				ConfigurationTree builderSubsystemLink = builder.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
 				if(!builderSubsystemLink.isDisconnected())
 				{
 					builderSubsystemID = getSubsytemId(builderSubsystemLink);
@@ -1483,7 +1485,8 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 
 				}  // end subsystem instantiation
 
-				__COUT__ << "Found EventBuilder with UID " << builderUID << ", on Hostname " << builderHost << ", in Subsystem " << builderSubsystemID << __E__;
+				__COUT__ << "Found Event Builder with UID " << builderUID << ", on Hostname " << builderHost << ", in Subsystem " << builderSubsystemID
+				         << __E__;
 				info_.processes[ARTDAQAppType::EventBuilder].emplace_back(builderUID, builderHost, builderSubsystemID, ARTDAQAppType::EventBuilder);
 
 				if(doWriteFHiCL)
@@ -1495,37 +1498,36 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 			}
 			else
 			{
-				__COUT__ << "EventBuilder " << builder.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
+				__COUT__ << "Event Builder " << builder.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
 			}
 		}
 	}
 	else
 	{
-		__SS__ << "Error: There should be at least one EventBuilder!";
+		__SS__ << "Error: There should be at least one Event Builder!";
 		__SS_THROW__;
 		return;
 	}
-}
+}  // end extractEventBuildersInfo()
 
+//========================================================================================================================
 void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
-	auto dataloggersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToDataLoggers_);
+	__COUT__ << "Checking for Data Loggers" << __E__;
+	ConfigurationTree dataloggersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToDataLoggers_);
 	if(!dataloggersLink.isDisconnected())
 	{
-		auto dataloggers = dataloggersLink.getChildren();
+		std::vector<std::pair<std::string, ConfigurationTree>> dataloggers = dataloggersLink.getChildren();
 
 		for(auto& datalogger : dataloggers)
 		{
 			if(datalogger.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				auto loggerHost = datalogger.second.getNode("ExecutionHostname").getValue();
-				auto loggerUID  = datalogger.second.getNode("SupervisorUID").getValue();
+				std::string& loggerUID  = datalogger.first;
+				std::string  loggerHost = datalogger.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
-				if(loggerHost == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
-					loggerHost = "localhost";
-
-				auto loggerSubsystemID   = 1;
-				auto loggerSubsystemLink = datalogger.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
+				int               loggerSubsystemID   = 1;
+				ConfigurationTree loggerSubsystemLink = datalogger.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
 				if(!loggerSubsystemLink.isDisconnected())
 				{
 					loggerSubsystemID = getSubsytemId(loggerSubsystemLink);
@@ -1560,7 +1562,7 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 
 				}  // end subsystem instantiation
 
-				__COUT__ << "Found DataLogger with UID " << loggerUID << ", DAQInterface Hostname " << loggerHost << ", and Subsystem " << loggerSubsystemID
+				__COUT__ << "Found Data Logger with UID " << loggerUID << ", DAQInterface Hostname " << loggerHost << ", and Subsystem " << loggerSubsystemID
 				         << __E__;
 				info_.processes[ARTDAQAppType::DataLogger].emplace_back(loggerUID, loggerHost, loggerSubsystemID, ARTDAQAppType::DataLogger);
 
@@ -1573,31 +1575,30 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 			}
 			else
 			{
-				__COUT__ << "DataLogger " << datalogger.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
+				__COUT__ << "Data Logger " << datalogger.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
 			}
 		}
 	}
-}
+}  // end extractDataLoggersInfo()
 
+//========================================================================================================================
 void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
-	auto dispatchersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToDispatchers_);
+	__COUT__ << "Checking for Dispatchers" << __E__;
+	ConfigurationTree dispatchersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToDispatchers_);
 	if(!dispatchersLink.isDisconnected())
 	{
-		auto dispatchers = dispatchersLink.getChildren();
+		std::vector<std::pair<std::string, ConfigurationTree>> dispatchers = dispatchersLink.getChildren();
 
 		for(auto& dispatcher : dispatchers)
 		{
 			if(dispatcher.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				auto dispatcherHost = dispatcher.second.getNode("ExecutionHostname").getValue();
-				auto dispatcherUID  = dispatcher.second.getNode("SupervisorUID").getValue();
+				std::string& dispatcherUID  = dispatcher.first;
+				std::string  dispatcherHost = dispatcher.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
-				if(dispatcherHost == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
-					dispatcherHost = "localhost";
-
-				auto dispatcherSubsystemID   = 1;
-				auto dispatcherSubsystemLink = dispatcher.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
+				auto              dispatcherSubsystemID   = 1;
+				ConfigurationTree dispatcherSubsystemLink = dispatcher.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
 				if(!dispatcherSubsystemLink.isDisconnected())
 				{
 					dispatcherSubsystemID = getSubsytemId(dispatcherSubsystemLink);
@@ -1648,23 +1649,227 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 			}
 		}
 	}
-}
+}  // end extractDispatchersInfo()
+
 
 //==============================================================================
-//	setAndActivateArtdaqSystem
+//	getARTDAQSystem
+//
+//		static function to retrive the active ARTDAQ system configuration.
+//
+//	Subsystem map to destination subsystem name.
+//	Node properties: {hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
+//	artdaqSupervisoInfo: {name, context address, context port}
+//
+const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
+    ConfigurationManagerRW*                                                                                        cfgMgr,
+    std::map<std::string /*type*/,
+		std::map<std::string /*record*/,
+		std::vector<std::string /*property*/>>>& nodeTypeToObjectMap,
+    std::map<std::string /*subsystemName*/, std::string /*destinationSubsystemName*/>&                       subsystemObjectMap,
+	std::vector<std::string /*property*/>& 		artdaqSupervisoInfo)
+{
+	__COUT__ << "getARTDAQSystem()" << __E__;
+
+	artdaqSupervisoInfo.clear(); //init
+
+	const XDAQContextTable* contextTable = cfgMgr->__GET_CONFIG__(XDAQContextTable);
+
+	// for each artdaq context, output all artdaq apps
+
+	const XDAQContextTable::XDAQContext* artdaqContext =
+			contextTable->getTheARTDAQSupervisorContext();
+
+	//return empty info
+	if(!artdaqContext) return ARTDAQTableBase::info_;
+
+
+	__COUTV__(artdaqContext->contextUID_);
+	__COUTV__(artdaqContext->applications_.size());
+
+	for(auto& artdaqApp : artdaqContext->applications_)
+	{
+		if(artdaqApp.class_ != ARTDAQ_SUPERVISOR_CLASS)
+			continue;
+
+		__COUTV__(artdaqApp.applicationUID_);
+		artdaqSupervisoInfo.push_back(artdaqApp.applicationUID_);
+		artdaqSupervisoInfo.push_back(artdaqContext->address_);
+		artdaqSupervisoInfo.push_back(std::to_string(artdaqContext->port_));
+
+		const ARTDAQTableBase::ARTDAQInfo& info = ARTDAQTableBase::extractARTDAQInfo(
+				XDAQContextTable::getSupervisorConfigNode(
+						cfgMgr, artdaqContext->contextUID_, artdaqApp.applicationUID_));
+
+		__COUT__ << "========== "
+				<< "Found " << info.subsystems.size() << " subsystems." << __E__;
+
+		for(auto& subsystem : info.subsystems)
+		{
+			const std::string subtypeString = "subsystem";
+
+			subsystemObjectMap.emplace(
+					std::make_pair(
+							subsystem.second.label,
+							std::to_string(subsystem.second.destination)));
+
+		}  // end subsystem handling
+
+		__COUT__ << "========== "
+				<< "Found " << info.processes.size() << " process types."
+				<< __E__;
+
+		for(auto& nameTypePair : ARTDAQTableBase::processTypes_.mapToType_)
+		{
+			const std::string& typeString = nameTypePair.first;
+			__COUTV__(typeString);
+
+			nodeTypeToObjectMap.emplace(
+					std::make_pair(typeString,
+							std::map<std::string /*record*/,
+								std::vector<std::string /*property*/>>()));
+
+			auto it = info.processes.find(nameTypePair.second);
+			if(it == info.processes.end())
+			{
+				__COUT__ << "\t"
+						<< "Found 0 " << typeString << __E__;
+				continue;
+			}
+			__COUT__ << "\t"
+					<< "Found " << it->second.size() << " " << typeString
+					<< "(s)" << __E__;
+
+			auto tableIt = processTypes_.mapToTable_.find(typeString);
+			if(tableIt == processTypes_.mapToTable_.end())
+			{
+				__SS__ << "Invalid artdaq node type '" << typeString << "' attempted!" << __E__;
+				__SS_THROW__;
+			}
+			__COUTV__(tableIt->second);
+
+			auto allNodes = cfgMgr->getNode(tableIt->second).getChildren();
+
+			std::set<std::string /*nodeName*/> skipMap; //use to skip nodes when constructing multi-nodes
+			
+			const std::set<std::string /*colName*/> skipColumns({
+				ARTDAQ_TYPE_TABLE_HOSTNAME, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK	
+			}); //note: also skip UID and Status
+			
+			//loop through all nodes of this type
+			for(auto& artdaqNode : it->second) 
+			{
+				//check skip map
+				if(skipMap.find(artdaqNode.label) != skipMap.end()) continue;
+
+				__COUT__ << "\t\t"
+						<< "Found '" << artdaqNode.label << "' "
+						<< typeString << __E__;
+
+				std::string nodeName = artdaqNode.label;
+				std::string hostname = artdaqNode.hostname;
+				std::string subsystem = std::to_string(artdaqNode.subsystem);
+				
+				ConfigurationTree thisNode = cfgMgr->getNode(tableIt->second).getNode(nodeName);
+				auto thisNodeColumns = thisNode.getChildren();
+				
+				//check for multi-node
+				//	Steps:
+				//		search for other records with same values/links except hostname/name
+
+				std::set<std::string> multiNodeIndices, hostnameIndices;
+				unsigned int hostnameFixedWidth = 0;
+				
+				for(auto& otherNode : allNodes)
+				{
+					if(otherNode.first == nodeName)
+						continue; //skip unless 'other'
+					if(subsystem == 
+						otherNode.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID).getValue())
+					{
+						//possible multi-node situation
+						__COUT__ << "Checking for multi-node..." << __E__;
+						
+						__COUTV__(thisNode.getNodeRow());
+						__COUTV__(otherNode.second.getNodeRow());
+						
+						auto otherNodeColumns = otherNode.second.getChildren();
+						
+						bool isMultiNode = true;
+						for(unsigned int i=0;i<thisNodeColumns.size() && i<otherNodeColumns.size();++i)
+						{
+							if(skipColumns.find(thisNodeColumns[i].first) != skipColumns.end() ||
+								thisNodeColumns[i].second.isStatusNode())
+								continue; //skip columns that do not need to be checked for multi-node consideration
+							
+							//at this point must match for multinode
+							
+							__COUTV__(thisNodeColumns[i].first);
+							__COUTV__(otherNodeColumns[i].first);
+
+							__COUTV__(thisNodeColumns[i].second.getValue());
+							__COUTV__(otherNodeColumns[i].second.getValue());
+							
+							
+						}
+						
+						if(isMultiNode)
+						{
+							__COUT__ << "Found multi-node member!" << __E__;
+						}
+						
+					}
+				} //end loop to search for multi-node members
+				
+				if(multiNodeIndices.size())
+				{
+					__COUT__ << "Handling multi-node printer syntax" << __E__;
+					
+				}
+
+				nodeTypeToObjectMap.at(
+						typeString).emplace(
+						std::make_pair(
+								nodeName,
+								std::vector<std::string /*property*/>()));
+
+				nodeTypeToObjectMap.at(
+						typeString).at(
+								nodeName).push_back(
+										hostname);
+
+				nodeTypeToObjectMap.at(
+						typeString).at(
+								nodeName).push_back(
+										subsystem);
+
+			}
+		}  // end processor type handling
+
+	}  // end artdaq app loop
+
+
+	__COUT__ << "Done getting artdaq nodes." << __E__;
+
+
+	return ARTDAQTableBase::info_;
+} // end getARTDAQSystem()
+
+//==============================================================================
+//	setAndActivateARTDAQSystem
 //
 //		static function to modify the active configuration based on
 //	node object and subsystem object.
 //
 //	Subsystem map to destination subsystem name.
-//	Node properties: {originalName,hostname,subsystemName}
+//	Node properties: {originalName,hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
 //
-void ARTDAQTableBase::setAndActivateArtdaqSystem(
+void ARTDAQTableBase::setAndActivateARTDAQSystem(
     ConfigurationManagerRW*                                                                                        cfgMgr,
     const std::map<std::string /*type*/, std::map<std::string /*record*/, std::vector<std::string /*property*/>>>& nodeTypeToObjectMap,
     const std::map<std::string /*subsystemName*/, std::string /*destinationSubsystemName*/>&                       subsystemObjectMap)
 {
-	__COUT__ << "setAndActivateArtdaqSystem()" << __E__;
+	__COUT__ << "setAndActivateARTDAQSystem()" << __E__;
 
 	const std::string& author = cfgMgr->getUsername();
 
@@ -1746,10 +1951,11 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 
 			// create group link to routing masters
 			artdaqSupervisorTable.tableView_->setValueAsString(
-			    ARTDAQ_ROUTING_MASTER_TABLE, row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMasters_));
-			artdaqSupervisorTable.tableView_->setUniqueColumnValue(row,
-			                                                       artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMastersGroupID_),
-			                                                       artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.ROUTINGMASTER));
+			    ARTDAQ_ROUTER_TABLE, row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMasters_));
+			artdaqSupervisorTable.tableView_->setUniqueColumnValue(
+			    row,
+			    artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMastersGroupID_),
+			    artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.ROUTER));
 
 			{
 				std::stringstream ss;
@@ -1819,7 +2025,7 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 
 					// set class
 					appTable.tableView_->setValueAsString(
-					    "ots::ARTDAQSupervisor", row, appTable.tableView_->findCol(XDAQContextTable::colApplication_.colClass_));
+					    ARTDAQ_SUPERVISOR_CLASS, row, appTable.tableView_->findCol(XDAQContextTable::colApplication_.colClass_));
 					// set module
 					appTable.tableView_->setValueAsString(
 					    "${OTSDAQ_LIB}/libARTDAQSupervisor.so", row, appTable.tableView_->findCol(XDAQContextTable::colApplication_.colModule_));
@@ -1997,7 +2203,7 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 				artdaqSubsystemTable.tableView_->setValueAsString(
 				    subsystemPair.second, row, artdaqSubsystemTable.tableView_->findCol(colARTDAQSubsystem_.colLinkToDestinationUID_));
 			}
-			//else leave disconnected link
+			// else leave disconnected link
 
 		}  // end subsystem loop
 
@@ -2025,9 +2231,16 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 			{
 				__COUTV__(nodePair.first);
 
+				//default multi-node and array hostname info to empty
+				std::vector<unsigned int> nodeIndices, hostnameIndices;
+				unsigned int hostnameFixedWidth = 0;
+				std::string hostname;
+
 				// if original record is found, then commandeer that record
 				//	else create a new record
-				// Node properties: {originalName,hostname,subsystemName}
+				// Node properties: {originalName,hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
+
+				//node parameter loop
 				for(unsigned int i = 0; i < nodePair.second.size(); ++i)
 				{
 					__COUTV__(nodePair.second[i]);
@@ -2061,7 +2274,9 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 					else if(i == 1)  // hostname
 					{
 						// set hostname
-						typeTable.tableView_->setValueAsString(nodePair.second[i], row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_HOSTNAME));
+						hostname = nodePair.second[i];
+						typeTable.tableView_->setValueAsString(
+								hostname, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_HOSTNAME));
 					}
 					else if(i == 2)  // subsystemName
 					{
@@ -2086,7 +2301,199 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 							    TableViewColumnInfo::DATATYPE_LINK_DEFAULT, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK));
 						}
 					}
+					else if(i == 3 || i == 4 || i == 5) //(nodeArrString),(hostnameArrString),(hostnameFixedWidth)
+					{
+						//fill multi-node and array hostname info to empty
+						// then handle after all parameters in hand.
+
+						__COUT__ << "Handling printer syntax i=" <<
+								i << __E__;
+
+						std::vector<std::string> printerSyntaxArr =
+								StringMacros::getVectorFromString(
+								nodePair.second[i],
+								{','} /*delimiter*/);
+
+						unsigned int count = 0;
+						for(auto& printerSyntaxValue : printerSyntaxArr)
+						{
+							__COUTV__(printerSyntaxValue);
+
+							std::vector<std::string> printerSyntaxRange =
+									StringMacros::getVectorFromString(
+											printerSyntaxValue,
+											{'-'} /*delimiter*/);
+							if(printerSyntaxRange.size() == 0 ||
+									printerSyntaxRange.size() > 2)
+							{
+								__SS__ << "Illegal multi-node printer syntax string '" <<
+										printerSyntaxValue << "!'" << __E__;
+								__SS_THROW__;
+							}
+							else if(printerSyntaxRange.size() == 1)
+							{
+								unsigned int index;
+								__COUTV__(printerSyntaxRange[0]);
+								sscanf(printerSyntaxRange[0].c_str(),
+										"%u",&index);
+								__COUTV__(index);
+
+								if(i == 3) nodeIndices.push_back(index);
+								else if(i == 4) hostnameIndices.push_back(index);
+								else if(i == 5) hostnameFixedWidth = index;
+							}
+							else if(i == 5)
+							{
+								__SS__ << "Illegal fixed-width value '" <<
+										printerSyntaxValue << "' - must be a positive integer!" << __E__;
+								__SS_THROW__;
+							}
+							else // printerSyntaxRange.size() == 2
+							{
+								unsigned int lo,hi;
+								sscanf(printerSyntaxRange[0].c_str(),
+										"%u",&lo);
+								sscanf(printerSyntaxRange[1].c_str(),
+										"%u",&hi);
+								if(hi < lo) //swap
+								{
+									lo = hi;
+									sscanf(printerSyntaxRange[0].c_str(),
+											"%u",&hi);
+								}
+								for(;lo<=hi;++lo)
+								{
+									__COUTV__(lo);
+									if(i == 3) nodeIndices.push_back(lo);
+									else if(i == 4) hostnameIndices.push_back(lo);
+								}
+							}
+						}
+					}
+					else
+					{
+						__SS__ << "Unexpected parameter[" << i << " '" << nodePair.second[i] <<
+								"' for node " << nodePair.first << "!" << __E__;
+						__SS_THROW__;
+					}
 				}  // end node parameter loop
+
+				if(hostnameIndices.size()) //handle hostname array
+				{
+					if(hostnameIndices.size() !=
+							nodeIndices.size())
+					{
+						__SS__ << "Illegal associated hostname array has count " <<
+								hostnameIndices.size() <<
+								" which is not equal to the node count " <<
+								nodeIndices.size() << "!" << __E__;
+						__SS_THROW__;
+					}
+
+				}
+
+				if(nodeIndices.size()) //handle multi-node instances
+				{
+					unsigned int hostnameCol =
+							typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_HOSTNAME);
+					//Steps:
+					//	first instance takes current row,
+					//	then copy for remaining instances
+
+					std::vector<std::string> namePieces =
+							StringMacros::getVectorFromString(
+							nodePair.first,
+							{'*'} /*delimiter*/);
+					__COUTV__(StringMacros::vectorToString(namePieces));
+
+					if(namePieces.size() < 2)
+					{
+						__SS__ << "Illegal multi-node name template - please use * to indicate where the multi-node index should be inserted!" << __E__;
+						__SS_THROW__;
+					}
+
+					std::vector<std::string> hostnamePieces;
+					if(hostnameIndices.size()) //handle hostname array
+					{
+						hostnamePieces =
+								StringMacros::getVectorFromString(
+										hostname,
+										{'*'} /*delimiter*/);
+						__COUTV__(StringMacros::vectorToString(hostnamePieces));
+
+						if(hostnamePieces.size() < 2)
+						{
+							__SS__ << "Illegal hostname array template - please use * to indicate where the hostname index should be inserted!" << __E__;
+							__SS_THROW__;
+						}
+					}
+
+
+					bool isFirst = true;
+					for(unsigned int i=0;i<nodeIndices.size();++i)
+					{
+						std::string name = namePieces[0];
+						for(unsigned int p=1;p<namePieces.size();++p)
+							name += std::to_string(nodeIndices[i]) + namePieces[p];
+						__COUTV__(name);
+
+						if(hostnamePieces.size())
+						{
+							hostname = hostnamePieces[0];
+							std::string hostnameIndex;
+							for(unsigned int p=1;p<hostnamePieces.size();++p)
+							{
+								hostnameIndex = std::to_string(hostnameIndices[i]);
+								if(hostnameFixedWidth > 1)
+								{
+									if(hostnameIndex.size() > hostnameFixedWidth)
+									{
+										__SS__ << "Illegal hostname index '" <<
+												hostnameIndex << "' - length is longer than fixed width requirement of " <<
+												hostnameFixedWidth << "!" << __E__;
+										__SS_THROW__;
+									}
+
+									//0 prepend as needed
+									while(hostnameIndex.size() < hostnameFixedWidth)
+										hostnameIndex = "0" + hostnameIndex;
+								} //end fixed width handling
+
+								hostname += hostnameIndex + hostnamePieces[p];
+							}
+							__COUTV__(hostname);
+						}
+						// else use hostname from above
+
+
+						if(isFirst) //take current row
+						{
+							typeTable.tableView_->setValueAsString(
+									name, row, typeTable.tableView_->getColUID());
+
+							typeTable.tableView_->setValueAsString(
+									hostname, row, hostnameCol);
+						}
+						else //copy row
+						{
+							unsigned int copyRow =
+									typeTable.tableView_->copyRows(
+											author,
+											*(typeTable.tableView_),
+											row,
+											1 /*srcRowsToCopy*/,
+											-1 /*destOffsetRow*/,
+											true /*generateUniqueDataColumns*/);
+							typeTable.tableView_->setValueAsString(
+									name, copyRow, typeTable.tableView_->getColUID());
+							typeTable.tableView_->setValueAsString(
+									hostname, copyRow, hostnameCol);
+						}
+
+						isFirst = false;
+					} //end multi-node handling
+
+				}
 
 			}  // end node record loop
 
@@ -2132,7 +2539,7 @@ void ARTDAQTableBase::setAndActivateArtdaqSystem(
 	                            true /*updateGroupAliases*/,
 	                            true /*updateTableAliases*/);
 
-}  // end setAndActivateArtdaqSystem()
+}  // end setAndActivateARTDAQSystem()
 
 //==============================================================================
 int ARTDAQTableBase::getSubsytemId(ConfigurationTree subsystemNode)
