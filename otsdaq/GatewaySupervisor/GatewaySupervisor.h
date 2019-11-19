@@ -71,6 +71,7 @@ class GatewaySupervisor : public xdaq::Application,
 	void 						stateMachineXgiHandler			(xgi::Input* in, xgi::Output* out);
 	void 						stateMachineIterationBreakpoint	(xgi::Input* in, xgi::Output* out);
 
+	static std::string			getIconHeaderString				(void);
 	static void 				handleAddDesktopIconRequest		(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
 	static void 				handleGetApplicationIdRequest	(AllSupervisorInfo* applicationInfo, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
 

@@ -2216,11 +2216,7 @@ inline bool ConfigurationTree::status(void) const { return isEnabled(); }
 //==============================================================================
 bool ConfigurationTree::isStatusNode(void) const 
 { 
-	if(!isValueNode())
-	{
-		__SS__ << "Can only check that a value node is a status node!" << __E__;
-		__SS_THROW__;
-	}
+	if(!isValueNode()) return false;
 
 	return col_ == tableView_->getColStatus();
 } // end isStatusNode()

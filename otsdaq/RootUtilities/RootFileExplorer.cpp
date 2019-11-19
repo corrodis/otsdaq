@@ -1,10 +1,12 @@
 #include "otsdaq/RootUtilities/RootFileExplorer.h"
-#include "otsdaq_cmsoutertracker/otsdaq-cmsoutertracker/Ph2_ACF/Utils/MessageTools.h"
+//#include "otsdaq_cmsoutertracker/otsdaq-cmsoutertracker/Ph2_ACF/Utils/MessageTools.h"
+
+#define STDLINE(X,Y) __COUT_WARN__ << X << __E__;
 
 //================================================================================================
 RootFileExplorer::RootFileExplorer(
-                                   string filePath, 
-                                   string rootPath, 
+		std::string filePath,
+		std::string rootPath,
                                    HttpXmlDocument & xmlOut
                                   ) : rootTagName_("ROOT")
 {
@@ -36,7 +38,7 @@ xercesc::DOMDocument * RootFileExplorer::initialize(void)
  }
  catch(xercesc::XMLException& e)
  {
-  string msg = xercesc::XMLString::transcode(e.getMessage()) ;
+	 std::string msg = xercesc::XMLString::transcode(e.getMessage()) ;
   STDLINE(string("XML toolkit initialization error: ")+msg,ACRed) ;
  }
 
@@ -67,7 +69,7 @@ xercesc::DOMDocument * RootFileExplorer::initialize(void)
   }
   catch(const xercesc::XMLException& e)
   {
-   STDLINE(string("Error Message: ")+xercesc::XMLString::transcode(e.getMessage()),ACRed) ;
+   STDLINE(std::string("Error Message: ")+xercesc::XMLString::transcode(e.getMessage()),ACRed) ;
   }
   catch(...)
   {

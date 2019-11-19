@@ -1273,7 +1273,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(Configurat
 //========================================================================================================================
 void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t routingTimeoutMs, size_t routingRetryCount)
 {
-	__COUT__ << "Checking for Routing Masters" << __E__;
+	__COUT__ << "Checking for Routing Masters..." << __E__;
 	ConfigurationTree rmsLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToRoutingMasters_);
 	if(!rmsLink.isDisconnected() && rmsLink.getChildren().size() > 0)
 	{
@@ -1357,7 +1357,7 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 void ARTDAQTableBase::extractBoardReadersInfo(
     ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes, size_t routingTimeoutMs, size_t routingRetryCount)
 {
-	__COUT__ << "Checking for Board Readers" << __E__;
+	__COUT__ << "Checking for Board Readers..." << __E__;
 	ConfigurationTree readersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToBoardReaders_);
 	if(!readersLink.isDisconnected() && readersLink.getChildren().size() > 0)
 	{
@@ -1435,7 +1435,7 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 //========================================================================================================================
 void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
-	__COUT__ << "Checking for Event Builders" << __E__;
+	__COUT__ << "Checking for Event Builders..." << __E__;
 	ConfigurationTree buildersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToEventBuilders_);
 	if(!buildersLink.isDisconnected() && buildersLink.getChildren().size() > 0)
 	{
@@ -1513,7 +1513,7 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 //========================================================================================================================
 void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
-	__COUT__ << "Checking for Data Loggers" << __E__;
+	__COUT__ << "Checking for Data Loggers..." << __E__;
 	ConfigurationTree dataloggersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToDataLoggers_);
 	if(!dataloggersLink.isDisconnected())
 	{
@@ -1584,7 +1584,7 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 //========================================================================================================================
 void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
-	__COUT__ << "Checking for Dispatchers" << __E__;
+	__COUT__ << "Checking for Dispatchers..." << __E__;
 	ConfigurationTree dispatchersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToDispatchers_);
 	if(!dispatchersLink.isDisconnected())
 	{
@@ -1704,17 +1704,14 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 		__COUT__ << "========== "
 				<< "Found " << info.subsystems.size() << " subsystems." << __E__;
 
+		//build subsystem desintation map
 		for(auto& subsystem : info.subsystems)
-		{
-			const std::string subtypeString = "subsystem";
-
 			subsystemObjectMap.emplace(
 					std::make_pair(
 							subsystem.second.label,
 							std::to_string(subsystem.second.destination)));
 
-		}  // end subsystem handling
-
+		
 		__COUT__ << "========== "
 				<< "Found " << info.processes.size() << " process types."
 				<< __E__;
@@ -1768,23 +1765,30 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 
 				std::string nodeName = artdaqNode.label;
 				std::string hostname = artdaqNode.hostname;
-				std::string subsystem = std::to_string(artdaqNode.subsystem);
+				std::string subsystemId = std::to_string(artdaqNode.subsystem);
+				std::string subsystemName = info.subsystems.at(artdaqNode.subsystem).label;
 				
 				ConfigurationTree thisNode = cfgMgr->getNode(tableIt->second).getNode(nodeName);
 				auto thisNodeColumns = thisNode.getChildren();
+				
 				
 				//check for multi-node
 				//	Steps:
 				//		search for other records with same values/links except hostname/name
 
-				std::set<std::string> multiNodeIndices, hostnameIndices;
+				std::vector<std::string> multiNodeNames, hostnameArray;
 				unsigned int hostnameFixedWidth = 0;
 				
+				__COUTV__(allNodes.size());
 				for(auto& otherNode : allNodes)
 				{
 					if(otherNode.first == nodeName)
 						continue; //skip unless 'other'
-					if(subsystem == 
+						
+					__COUTV__(subsystemName);
+					__COUTV__(otherNode.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID).getValue());
+					
+					if(subsystemName == 
 						otherNode.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID).getValue())
 					{
 						//possible multi-node situation
@@ -1810,22 +1814,225 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 							__COUTV__(thisNodeColumns[i].second.getValue());
 							__COUTV__(otherNodeColumns[i].second.getValue());
 							
+							if(thisNodeColumns[i].second.getValue() != 
+								otherNodeColumns[i].second.getValue())
+							{
+								isMultiNode = false;
+								break;
+							}
 							
 						}
 						
 						if(isMultiNode)
 						{
-							__COUT__ << "Found multi-node member!" << __E__;
+							__COUT__ << "Found multi-node member '" << 
+								otherNode.first << "' with '" << 
+								nodeName <<
+								"!'" << __E__;
+							if(!multiNodeNames.size()) //add this node first!
+							{
+								multiNodeNames.push_back(nodeName);
+								hostnameArray.push_back(hostname);								
+							}
+							multiNodeNames.push_back(otherNode.first);
+							hostnameArray.push_back(otherNode.second.getNode(
+								ARTDAQ_TYPE_TABLE_HOSTNAME).getValue());
+							skipMap.emplace(otherNode.first);
 						}
-						
 					}
 				} //end loop to search for multi-node members
 				
-				if(multiNodeIndices.size())
+				unsigned int nodeFixedWildcardLength = 0,
+						hostFixedWildcardLength = 0;
+				std::string multiNodeString = "",
+						hostArrayString = "";
+
+				if(multiNodeNames.size() > 1)
 				{
 					__COUT__ << "Handling multi-node printer syntax" << __E__;
 					
-				}
+					__COUTV__(StringMacros::vectorToString(multiNodeNames));
+					__COUTV__(StringMacros::vectorToString(hostnameArray));
+
+
+					//from set of nodename wildcards, make printer syntax
+					{
+						std::vector<std::string> commonChunks;
+						std::set<std::string> wildcards;
+
+						StringMacros::extractCommonChunks(multiNodeNames,
+								commonChunks,wildcards,nodeFixedWildcardLength);
+
+						nodeName = "";
+						bool first = true;
+						for(auto& commonChunk:commonChunks)
+						{
+							nodeName += (!first?"*":"") + commonChunk;
+							if(first) first = false;
+						}
+
+						__COUTV__(nodeName);
+
+						//steps:
+						//	determine if all unsigned ints
+						//	if int, then order and attempt to hyphenate
+						//	if not ints, then comma separated
+
+						bool allIntegers = true;
+						for(auto& wildcard:wildcards)
+							for(unsigned int i=0;i<wildcard.size();++i)
+								if(!(wildcard[i] >= '0' && wildcard[i] <= '9'))
+								{
+									allIntegers = false;
+									break;
+								}
+
+						__COUTV__(allIntegers);
+						if(allIntegers)
+						{
+							std::set<unsigned int> intSortWildcards;
+							unsigned int tmpInt;
+							for(auto& wildcard:wildcards)
+								intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
+
+							//need ints in vector for random access to for hyphenating
+							std::vector<unsigned int> intWildcards;
+							for(auto& wildcard:intSortWildcards)
+								intWildcards.push_back(wildcard);
+
+							__COUTV__(StringMacros::vectorToString(intWildcards));
+
+							unsigned int hyphenLo = -1;
+							bool isFirst = true;
+							for(unsigned int i=0;i<intWildcards.size();++i)
+							{
+								if(i+1 < intWildcards.size() &&
+										intWildcards[i] + 1 ==
+												intWildcards[i+1])
+								{
+									if(i < hyphenLo)
+										hyphenLo = i; //start hyphen
+								}
+								else //new comma
+								{
+									if(i < hyphenLo)
+									{
+										//single number
+										multiNodeString += (isFirst?"":",") +
+												std::to_string(intWildcards[i]);
+									}
+									else
+									{
+										//hyphen numbers
+										multiNodeString += (isFirst?"":",") +
+												std::to_string(intWildcards[hyphenLo]) + "-" +
+												std::to_string(intWildcards[i]);
+										hyphenLo = -1; //reset for next
+									}
+									isFirst = false;
+								}
+
+							}
+						} //end all integer handling
+						else //not all integers, so csv
+						{
+							multiNodeString = StringMacros::setToString(wildcards);
+						} //end not-all integer handling
+
+						__COUTV__(multiNodeString);
+						__COUTV__(nodeFixedWildcardLength);
+					} //end node name printer syntax handling
+
+					if(hostnameArray.size() > 1)
+					{
+						std::vector<std::string> commonChunks;
+						std::set<std::string> wildcards;
+
+						StringMacros::extractCommonChunks(hostnameArray,
+								commonChunks,wildcards,hostFixedWildcardLength);
+
+						hostname = "";
+						bool first = true;
+						for(auto& commonChunk:commonChunks)
+						{
+							hostname += (!first?"*":"") + commonChunk;
+							if(first) first = false;
+						}
+
+						__COUTV__(hostname);
+						//steps:
+						//	determine if all unsigned ints
+						//	if int, then order and attempt to hyphenate
+						//	if not ints, then comma separated
+
+						bool allIntegers = true;
+						for(auto& wildcard:wildcards)
+							for(unsigned int i=0;i<wildcard.size();++i)
+								if(!(wildcard[i] >= '0' && wildcard[i] <= '9'))
+								{
+									allIntegers = false;
+									break;
+								}
+
+						__COUTV__(allIntegers);
+						if(allIntegers)
+						{
+							std::set<unsigned int> intSortWildcards;
+							unsigned int tmpInt;
+							for(auto& wildcard:wildcards)
+								intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
+
+							//need ints in vector for random access to for hyphenating
+							std::vector<unsigned int> intWildcards;
+							for(auto& wildcard:intSortWildcards)
+								intWildcards.push_back(wildcard);
+
+							__COUTV__(StringMacros::vectorToString(intWildcards));
+
+							unsigned int hyphenLo = -1;
+							bool isFirst = true;
+							for(unsigned int i=0;i<intWildcards.size();++i)
+							{
+								if(i+1 < intWildcards.size() &&
+										intWildcards[i] + 1 ==
+												intWildcards[i+1])
+								{
+									if(i < hyphenLo)
+										hyphenLo = i; //start hyphen
+								}
+								else //new comma
+								{
+									if(i < hyphenLo)
+									{
+										//single number
+										hostArrayString += (isFirst?"":",") +
+												std::to_string(intWildcards[i]);
+									}
+									else
+									{
+										//hyphen numbers
+										hostArrayString += (isFirst?"":",") +
+												std::to_string(intWildcards[hyphenLo]) + "-" +
+												std::to_string(intWildcards[i]);
+										hyphenLo = -1; //reset for next
+									}
+									isFirst = false;
+								}
+
+							}
+						} //end all integer handling
+						else //not all integers, so csv
+						{
+							hostArrayString = StringMacros::setToString(wildcards);
+						} //end not-all integer handling
+
+						__COUTV__(hostArrayString);
+						__COUTV__(hostFixedWildcardLength);
+					} //end node name printer syntax handling
+
+
+				 } //end multi node printer syntax handling
+
 
 				nodeTypeToObjectMap.at(
 						typeString).emplace(
@@ -1835,14 +2042,45 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 
 				nodeTypeToObjectMap.at(
 						typeString).at(
-								nodeName).push_back(
+								nodeName
+								).push_back(
 										hostname);
 
 				nodeTypeToObjectMap.at(
 						typeString).at(
-								nodeName).push_back(
-										subsystem);
+								nodeName
+								).push_back(
+										subsystemId);
+				if(multiNodeNames.size() > 1)
+				{
 
+					nodeTypeToObjectMap.at(
+							typeString).at(
+									nodeName
+							).push_back(
+									multiNodeString);
+
+					nodeTypeToObjectMap.at(
+							typeString).at(
+									nodeName
+							).push_back(
+									std::to_string(nodeFixedWildcardLength));
+
+					if(hostnameArray.size() > 1)
+					{
+						nodeTypeToObjectMap.at(
+								typeString).at(
+										nodeName
+								).push_back(
+										hostArrayString);
+
+						nodeTypeToObjectMap.at(
+								typeString).at(
+										nodeName
+								).push_back(
+										std::to_string(hostFixedWildcardLength));
+					}
+				} //done adding multinode parameters
 			}
 		}  // end processor type handling
 
