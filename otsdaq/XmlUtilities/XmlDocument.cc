@@ -3,7 +3,7 @@
 #include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/XmlUtilities/ConvertFromXML.h"
 #include "otsdaq/XmlUtilities/ConvertToXML.h"
-#include "otsdaq_cmsoutertracker/otsdaq-cmsoutertracker/Ph2_ACF/Utils/MessageTools.h"
+//#include "otsdaq_cmsoutertracker/otsdaq-cmsoutertracker/Ph2_ACF/Utils/MessageTools.h"
 
 #include <stdexcept>
 #include <xercesc/dom/DOM.hpp>
@@ -902,7 +902,7 @@ void XmlDocument::makeDirectoryBinaryTree(const char                * name     ,
 
  DIR   * dir          ;
  struct  dirent *entry;
- string fullPath = "" ;
+ std::string fullPath = "" ;
  char fchar      = '.';
  char schar      = '.';
 
@@ -912,7 +912,7 @@ void XmlDocument::makeDirectoryBinaryTree(const char                * name     ,
 
  while ((entry = readdir(dir)) != NULL) 
  {
-  string sName = string(entry->d_name) ;
+  std::string sName = std::string(entry->d_name) ;
   fchar = sName.at(0) ;
   if( sName.size() == 2 ) schar = sName.at(1) ;
   if (((sName.size() == 1) && fchar == '.') || 
@@ -924,13 +924,13 @@ void XmlDocument::makeDirectoryBinaryTree(const char                * name     ,
   fSystemPath_    =        rootPath       ;
   if (entry->d_type == DT_DIR) 
   {
-   fullPath = string(name) + string("/") + string(entry->d_name) ;
-   foldersPath_ += string(entry->d_name) + "/";
+   fullPath = std::string(name) + std::string("/") + std::string(entry->d_name) ;
+   foldersPath_ += std::string(entry->d_name) + "/";
    xercesc::DOMElement * node = this->populateBinaryTreeNode(
                                                              anchorNode                , 
                                                              std::string(entry->d_name), 
                                                              indent                    ,
-                                                             string(name)              ,
+                                                             std::string(name)              ,
                                                              "false"
                                                             ) ;
    this->makeDirectoryBinaryTree(fullPath.c_str(), rootPath, indent + 1, node);
@@ -938,17 +938,17 @@ void XmlDocument::makeDirectoryBinaryTree(const char                * name     ,
   } 
   else 
   {
-   fullPath = string(name) + string("/") + string(entry->d_name) ;
+   fullPath = std::string(name) + std::string("/") + std::string(entry->d_name) ;
    boost::smatch what ;
    boost::regex re{".*\\.root$"} ;
    if(boost::regex_search(fullPath, what, re))
    {
-    simpleNamePath_ = string(entry->d_name) ;
+    simpleNamePath_ = std::string(entry->d_name) ;
     xercesc::DOMElement * node = this->populateBinaryTreeNode(
                                                               anchorNode                , 
                                                               std::string(entry->d_name), 
                                                               indent                    ,
-                                                              string(name)              ,
+                                                              std::string(name)              ,
                                                               "true"
                                                              ) ;
    }
