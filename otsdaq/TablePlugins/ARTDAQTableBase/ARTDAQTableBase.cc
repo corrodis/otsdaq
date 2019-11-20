@@ -2471,12 +2471,12 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 				//default multi-node and array hostname info to empty
 				std::vector<unsigned int> nodeIndices, hostnameIndices;
-				unsigned int hostnameFixedWidth = 0;
+				unsigned int hostnameFixedWidth = 0, nodeNameFixedWidth = 0;
 				std::string hostname;
 
 				// if original record is found, then commandeer that record
 				//	else create a new record
-				// Node properties: {originalName,hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
+				// Node properties: {originalName,hostname,subsystemName,(nodeArrString),(nodeNameFixedWidth),(hostnameArrString),(hostnameFixedWidth)}
 
 				//node parameter loop
 				for(unsigned int i = 0; i < nodePair.second.size(); ++i)
@@ -2539,7 +2539,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							    TableViewColumnInfo::DATATYPE_LINK_DEFAULT, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK));
 						}
 					}
-					else if(i == 3 || i == 4 || i == 5) //(nodeArrString),(hostnameArrString),(hostnameFixedWidth)
+					else if(i == 3 || i == 4 || i == 5 || i == 6) //(nodeArrString),(nodeNameFixedWidth),(hostnameArrString),(hostnameFixedWidth)
 					{
 						//fill multi-node and array hostname info to empty
 						// then handle after all parameters in hand.
@@ -2551,6 +2551,24 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								StringMacros::getVectorFromString(
 								nodePair.second[i],
 								{','} /*delimiter*/);
+
+						if(printerSyntaxArr.size() == 2) //consider if fixed value
+						{
+							if(printerSyntaxArr[0] == "nnfw") //then node name fixed width
+							{
+								sscanf(printerSyntaxArr[1].c_str(),
+										"%u",&nodeNameFixedWidth);
+								__COUTV__(nodeNameFixedWidth);
+								continue;
+							}
+							else if(printerSyntaxArr[0] == "hnfw") //then hostname fixed width
+							{
+								sscanf(printerSyntaxArr[1].c_str(),
+										"%u",&hostnameFixedWidth);
+								__COUTV__(hostnameFixedWidth);
+								continue;
+							}
+						}
 
 						unsigned int count = 0;
 						for(auto& printerSyntaxValue : printerSyntaxArr)
@@ -2577,14 +2595,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								__COUTV__(index);
 
 								if(i == 3) nodeIndices.push_back(index);
-								else if(i == 4) hostnameIndices.push_back(index);
-								else if(i == 5) hostnameFixedWidth = index;
-							}
-							else if(i == 5)
-							{
-								__SS__ << "Illegal fixed-width value '" <<
-										printerSyntaxValue << "' - must be a positive integer!" << __E__;
-								__SS_THROW__;
+								else hostnameIndices.push_back(index);
 							}
 							else // printerSyntaxRange.size() == 2
 							{
@@ -2671,8 +2682,27 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 					for(unsigned int i=0;i<nodeIndices.size();++i)
 					{
 						std::string name = namePieces[0];
+						std::string nodeNameIndex;
 						for(unsigned int p=1;p<namePieces.size();++p)
-							name += std::to_string(nodeIndices[i]) + namePieces[p];
+						{
+							nodeNameIndex = std::to_string(nodeIndices[i]);
+							if(nodeNameFixedWidth > 1)
+							{
+								if(nodeNameIndex.size() > nodeNameFixedWidth)
+								{
+									__SS__ << "Illegal node name index '" <<
+											nodeNameIndex << "' - length is longer than fixed width requirement of " <<
+											nodeNameFixedWidth << "!" << __E__;
+									__SS_THROW__;
+								}
+
+								//0 prepend as needed
+								while(nodeNameIndex.size() < nodeNameFixedWidth)
+									nodeNameIndex = "0" + nodeNameIndex;
+							} //end fixed width handling
+
+							name += nodeNameIndex + namePieces[p];
+						}
 						__COUTV__(name);
 
 						if(hostnamePieces.size())
