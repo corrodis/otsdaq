@@ -1,8 +1,6 @@
 #include "otsdaq/RootUtilities/RootFileExplorer.h"
 //#include "otsdaq_cmsoutertracker/otsdaq-cmsoutertracker/Ph2_ACF/Utils/MessageTools.h"
 
-#define STDLINE(X,Y) __COUT_WARN__ << X << __E__;
-
 //================================================================================================
 RootFileExplorer::RootFileExplorer(
 		std::string filePath,
@@ -20,13 +18,13 @@ RootFileExplorer::RootFileExplorer(
   
  rootFile_ = new TFile(fullPath_.c_str()) ;
 
- if( debug_ ) 
- {
-  STDLINE(rootPath_,ACYellow) ; 
-  STDLINE(filePath_,ACCyan  ) ; 
-  STDLINE(fullPath_,ACWhite ) ;
-  rootFile_->ls() ;
- }
+//  if( debug_ ) 
+//  {
+//   STDLINE(rootPath_,ACYellow) ; 
+//   STDLINE(filePath_,ACCyan  ) ; 
+//   STDLINE(fullPath_,ACWhite ) ;
+//   rootFile_->ls() ;
+//  }
 }
 
 //================================================================================================
@@ -38,8 +36,8 @@ xercesc::DOMDocument * RootFileExplorer::initialize(void)
  }
  catch(xercesc::XMLException& e)
  {
-	 std::string msg = xercesc::XMLString::transcode(e.getMessage()) ;
-  STDLINE(string("XML toolkit initialization error: ")+msg,ACRed) ;
+  string msg = xercesc::XMLString::transcode(e.getMessage()) ;
+  //STDLINE(string("XML toolkit initialization error: ")+msg,ACRed) ;
  }
 
  theImplementation_ = xercesc::DOMImplementationRegistry::getDOMImplementation(xercesc::XMLString::transcode("Core"));
@@ -69,7 +67,7 @@ xercesc::DOMDocument * RootFileExplorer::initialize(void)
   }
   catch(const xercesc::XMLException& e)
   {
-   STDLINE(std::string("Error Message: ")+xercesc::XMLString::transcode(e.getMessage()),ACRed) ;
+   //STDLINE(string("Error Message: ")+xercesc::XMLString::transcode(e.getMessage()),ACRed) ;
   }
   catch(...)
   {
@@ -158,8 +156,8 @@ void RootFileExplorer::makeDirectoryBinaryTree(TDirectory          * currentDire
   if( what == "TNtuple"     ) continue ;
   if( what == "TGeoManager" ) continue ;
   if( what == "TGeoVolume" ) continue ;
-  if( debug_ ) STDLINE(string("currentDirectory: ")+string(currentDirectory->GetName()),ACCyan) ;
-  if( debug_ ) STDLINE(string("Object type     : ")+what,ACRed) ;
+  //if( debug_ ) STDLINE(string("currentDirectory: ")+string(currentDirectory->GetName()),ACCyan) ;
+  //if( debug_ ) STDLINE(string("Object type     : ")+what,ACRed) ;
   if( keyH->IsFolder() ) 
   {
    currentDirectory->cd(hName.c_str());
@@ -168,14 +166,14 @@ void RootFileExplorer::makeDirectoryBinaryTree(TDirectory          * currentDire
    {
     theHierarchy_[level] = subDir->GetName() ;
    }
-   if( debug_ ) STDLINE(fullHPath_,ACBlue) ;
-   if( debug_ ) STDLINE(subDir->GetName(),ACCyan) ;
+   //if( debug_ ) STDLINE(fullHPath_,ACBlue) ;
+   //if( debug_ ) STDLINE(subDir->GetName(),ACCyan) ;
    xercesc::DOMElement * node = this->populateBinaryTreeNode(anchorNode, hName, level, "false" ) ;
    this->makeDirectoryBinaryTree(subDir,level+1,node) ;
   }
   else
   {
-   if( debug_ ) STDLINE(hName,"") ;
+   //if( debug_ ) STDLINE(hName,"") ;
    fullHPath_ = "" ;
    for(int i=0; i<level; i++)
    {
