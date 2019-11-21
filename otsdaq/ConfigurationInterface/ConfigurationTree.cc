@@ -2211,9 +2211,6 @@ bool ConfigurationTree::isEnabled(void) const
 }  // end isEnabled()
 
 //==============================================================================
-inline bool ConfigurationTree::status(void) const { return isEnabled(); }
-
-//==============================================================================
 bool ConfigurationTree::isStatusNode(void) const 
 { 
 	if(!isValueNode()) return false;

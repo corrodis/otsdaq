@@ -201,7 +201,7 @@ void ARTDAQTableBase::insertParameters(std::ostream&      out,
 				// include @table::
 				if(onlyInsertAtTableParameters || includeAtTableParameters)
 				{
-					if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+					if(!parameter.second.status())
 						PUSHCOMMENT;
 
 					OUT << key;
@@ -209,7 +209,7 @@ void ARTDAQTableBase::insertParameters(std::ostream&      out,
 					// skip connecting : if special keywords found
 					OUT << parameter.second.getNode(parameterPreamble + "Value").getValue() << "\n";
 
-					if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+					if(!parameter.second.status())
 						POPCOMMENT;
 				}
 				// else skip it
@@ -221,7 +221,7 @@ void ARTDAQTableBase::insertParameters(std::ostream&      out,
 			if(onlyInsertAtTableParameters)
 				continue;  // skip all other types
 
-			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(!parameter.second.status())
 				PUSHCOMMENT;
 
 			OUT << key;
@@ -231,7 +231,7 @@ void ARTDAQTableBase::insertParameters(std::ostream&      out,
 				OUT << ":";
 			OUT << parameter.second.getNode(parameterPreamble + "Value").getValue() << "\n";
 
-			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(!parameter.second.status())
 				POPCOMMENT;
 		}
 	}
@@ -267,7 +267,7 @@ void ots::ARTDAQTableBase::insertMetricsBlock(std::ostream& out, std::string& ta
 
 		for(auto& metric : metrics)
 		{
-			if(!metric.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(!metric.second.status())
 				PUSHCOMMENT;
 
 			OUT << metric.second.getNode("metricKey").getValue() << ": {\n";
@@ -282,20 +282,20 @@ void ots::ARTDAQTableBase::insertMetricsBlock(std::ostream& out, std::string& ta
 				auto metricParameters = metricParametersGroup.getChildren();
 				for(auto& metricParameter : metricParameters)
 				{
-					if(!metricParameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+					if(!metricParameter.second.status())
 						PUSHCOMMENT;
 
 					OUT << metricParameter.second.getNode("metricParameterKey").getValue() << ": "
 					    << metricParameter.second.getNode("metricParameterValue").getValue() << "\n";
 
-					if(!metricParameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+					if(!metricParameter.second.status())
 						POPCOMMENT;
 				}
 			}
 			POPTAB;
 			OUT << "}\n\n";  // end metric
 
-			if(!metric.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(!metric.second.status())
 				POPCOMMENT;
 		}
 	}
@@ -504,7 +504,7 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 			auto parameters = parametersLink.getChildren();
 			for(auto& parameter : parameters)
 			{
-				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+				if(!parameter.second.status())
 					PUSHCOMMENT;
 
 				//				__COUT__ <<
@@ -518,7 +518,7 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 				OUT << parameter.second.getNode("daqParameterKey").getValue() << ": " << parameter.second.getNode("daqParameterValue").getValue()
 				    << (comment.isDefaultValue() ? "" : ("\t # " + comment.getValue())) << "\n";
 
-				if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+				if(!parameter.second.status())
 					POPCOMMENT;
 			}
 		}
@@ -802,7 +802,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 			auto outputPlugins = outputs.getChildren();
 			for(auto& outputPlugin : outputPlugins)
 			{
-				if(!outputPlugin.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+				if(!outputPlugin.second.status())
 					PUSHCOMMENT;
 
 				OUT << outputPlugin.second.getNode("outputKey").getValue() << ": {\n";
@@ -857,7 +857,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 				POPTAB;
 				OUT << "}\n\n";  // end output module
 
-				if(!outputPlugin.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+				if(!outputPlugin.second.status())
 					POPCOMMENT;
 			}
 
@@ -897,7 +897,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 				auto modules = analyzers.getChildren();
 				for(auto& module : modules)
 				{
-					if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+					if(!module.second.status())
 						PUSHCOMMENT;
 
 					//--------------------------------------
@@ -927,7 +927,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 					POPTAB;
 					OUT << "}\n\n";  // end analyzer module
 
-					if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+					if(!module.second.status())
 						POPCOMMENT;
 				}
 				POPTAB;
@@ -945,7 +945,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 				auto modules = producers.getChildren();
 				for(auto& module : modules)
 				{
-					if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+					if(!module.second.status())
 						PUSHCOMMENT;
 
 					//--------------------------------------
@@ -976,7 +976,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 					POPTAB;
 					OUT << "}\n\n";  // end producer module
 
-					if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+					if(!module.second.status())
 						POPCOMMENT;
 				}
 				POPTAB;
@@ -994,7 +994,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 				auto modules = filters.getChildren();
 				for(auto& module : modules)
 				{
-					if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+					if(!module.second.status())
 						PUSHCOMMENT;
 
 					//--------------------------------------
@@ -1025,7 +1025,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 					POPTAB;
 					OUT << "}\n\n";  // end filter module
 
-					if(!module.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+					if(!module.second.status())
 						POPCOMMENT;
 				}
 				POPTAB;
@@ -1159,7 +1159,7 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 		auto parameters = parametersLink.getChildren();
 		for(auto& parameter : parameters)
 		{
-			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(!parameter.second.status())
 				PUSHCOMMENT;
 
 			//				__COUT__ <<
@@ -1173,7 +1173,7 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 			OUT << parameter.second.getNode("daqParameterKey").getValue() << ": " << parameter.second.getNode("daqParameterValue").getValue()
 			    << (comment.isDefaultValue() ? "" : ("\t # " + comment.getValue())) << "\n";
 
-			if(!parameter.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(!parameter.second.status())
 				POPCOMMENT;
 		}
 	}
@@ -1285,7 +1285,7 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 		{
 			const std::string& rmUID  = routingMaster.first;
 
-			if(routingMaster.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(routingMaster.second.status())
 			{
 				std::string  rmHost = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
@@ -1369,7 +1369,7 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 		{
 			const std::string& readerUID  = reader.first;
 
-			if(reader.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(reader.second.status())
 			{
 				std::string  readerHost = reader.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
@@ -1447,7 +1447,7 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 		{
 			const std::string& builderUID  = builder.first;
 
-			if(builder.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(builder.second.status())
 			{
 				std::string  builderHost = builder.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
@@ -1526,7 +1526,7 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 		{
 			const std::string& loggerUID  = datalogger.first;
 
-			if(datalogger.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(datalogger.second.status())
 			{
 
 				std::string  loggerHost = datalogger.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
@@ -1599,7 +1599,7 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 		{
 			const std::string& dispatcherUID  = dispatcher.first;
 
-			if(dispatcher.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
+			if(dispatcher.second.status())
 			{
 				std::string  dispatcherHost = dispatcher.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
@@ -2491,20 +2491,179 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 					if(i == 0)  // original UID
 					{
-						row = typeTable.tableView_->findRow(typeTable.tableView_->getColUID(), nodePair.second[i], 0 /*offsetRow*/, true /*doNotThrow*/
-						);
-						__COUTV__(row);
+						std::string nodeName;
+						//Steps:
+						//	if original was multi-node,
+						//		then delete all but one
+						//	else
+						//		take over the row, or create new
+						if(nodePair.second[i][0] == ':')
+						{
+							__COUT__ << "Handling original multi-node." << __E__;
+
+							//format:
+							//	:<nodeNameFixedWidth>:<nodeVectorIndexString>:<nodeNameTemplate>
+
+							std::vector<std::string> originalParameterArr =
+									StringMacros::getVectorFromString(
+											&(nodePair.second[i].c_str()[1]),
+											{':'} /*delimiter*/);
+
+							if(originalParameterArr.size() != 3)
+							{
+								__SS__ << "Illegal original name parameter string '" <<
+										nodePair.second[i] << "!'" << __E__;
+								__SS_THROW__;
+							}
+
+							unsigned int fixedWidth;
+							sscanf(originalParameterArr[0].c_str(),
+									"%u",&fixedWidth);
+							__COUTV__(fixedWidth);
+
+							std::vector<std::string> printerSyntaxArr =
+									StringMacros::getVectorFromString(
+											originalParameterArr[1],
+											{','} /*delimiter*/);
+
+							unsigned int count = 0;
+							std::vector<unsigned int> originalNodeIndices;
+							for(auto& printerSyntaxValue : printerSyntaxArr)
+							{
+								__COUTV__(printerSyntaxValue);
+
+								std::vector<std::string> printerSyntaxRange =
+										StringMacros::getVectorFromString(
+												printerSyntaxValue,
+												{'-'} /*delimiter*/);
+
+								if(printerSyntaxRange.size() == 0 ||
+										printerSyntaxRange.size() > 2)
+								{
+									__SS__ << "Illegal multi-node printer syntax string '" <<
+											printerSyntaxValue << "!'" << __E__;
+									__SS_THROW__;
+								}
+								else if(printerSyntaxRange.size() == 1)
+								{
+									unsigned int index;
+									__COUTV__(printerSyntaxRange[0]);
+									sscanf(printerSyntaxRange[0].c_str(),
+											"%u",&index);
+									__COUTV__(index);
+
+									originalNodeIndices.push_back(index);
+								}
+								else // printerSyntaxRange.size() == 2
+								{
+									unsigned int lo,hi;
+									sscanf(printerSyntaxRange[0].c_str(),
+											"%u",&lo);
+									sscanf(printerSyntaxRange[1].c_str(),
+											"%u",&hi);
+									if(hi < lo) //swap
+									{
+										lo = hi;
+										sscanf(printerSyntaxRange[0].c_str(),
+												"%u",&hi);
+									}
+									for(;lo<=hi;++lo)
+									{
+										__COUTV__(lo);
+										originalNodeIndices.push_back(lo);
+									}
+								}
+							} //end printer syntax loop
+
+							std::vector<std::string> originalNamePieces =
+									StringMacros::getVectorFromString(
+											originalParameterArr[2],
+											{'*'} /*delimiter*/);
+							__COUTV__(StringMacros::vectorToString(originalNamePieces));
+
+							if(originalNamePieces.size() < 2)
+							{
+								__SS__ << "Illegal original multi-node name template - please use * to indicate where the multi-node index should be inserted!" << __E__;
+								__SS_THROW__;
+							}
+
+							bool isFirst = true;
+							unsigned int originalRow = TableView::INVALID, lastOriginalRow = TableView::INVALID;
+							for(unsigned int i=0;i<originalNodeIndices.size();++i)
+							{
+								std::string originalName = originalNamePieces[0];
+								std::string nodeNameIndex;
+								for(unsigned int p=1;p<originalNamePieces.size();++p)
+								{
+									nodeNameIndex = std::to_string(originalNodeIndices[i]);
+									if(fixedWidth > 1)
+									{
+										if(nodeNameIndex.size() > fixedWidth)
+										{
+											__SS__ << "Illegal original node name index '" <<
+													nodeNameIndex << "' - length is longer than fixed width requirement of " <<
+													fixedWidth << "!" << __E__;
+											__SS_THROW__;
+										}
+
+										//0 prepend as needed
+										while(nodeNameIndex.size() < fixedWidth)
+											nodeNameIndex = "0" + nodeNameIndex;
+									} //end fixed width handling
+
+									originalName += nodeNameIndex + originalNamePieces[p];
+								}
+								__COUTV__(originalName);
+								originalRow = typeTable.tableView_->findRow(
+										typeTable.tableView_->getColUID(),
+										originalName, 0 /*offsetRow*/, true /*doNotThrow*/);
+								__COUTV__(originalRow);
+
+								//if have a new valid row, then delete last valid row
+								if(originalRow != TableView::INVALID &&
+										lastOriginalRow != TableView::INVALID)
+								{
+									typeTable.tableView_->deleteRow(lastOriginalRow);
+									if(originalRow > lastOriginalRow) --originalRow; //modify after delete
+								}
+
+								if(originalRow != TableView::INVALID)
+								{
+									lastOriginalRow = originalRow; //save last valid row for future deletion
+									nodeName = originalName;
+								}
+
+							} //end loop through multi-node instances
+
+							row = lastOriginalRow; //take last valid row to proceed
+
+							__COUTV__(nodeName);
+							__COUTV__(row);
+
+						} //end handling of original multinode
+						else
+						{
+							nodeName = nodePair.second[i];
+
+							row = typeTable.tableView_->findRow(
+								typeTable.tableView_->getColUID(),
+								nodePair.second[i], 0 /*offsetRow*/, true /*doNotThrow*/);
+							__COUTV__(row);
+						}
 
 						if(row == TableView::INVALID)
 						{
 							// create artdaq type instance record
-							row = typeTable.tableView_->addRow(author, true /*incrementUniqueData*/, nodePair.first);
+							row = typeTable.tableView_->addRow(author, true /*incrementUniqueData*/, nodeName);
 							__COUTV__(row);
 						}
 						else  // set UID
 						{
-							typeTable.tableView_->setValueAsString(nodePair.first, row, typeTable.tableView_->getColUID());
+							typeTable.tableView_->setValueAsString(nodeName, row, typeTable.tableView_->getColUID());
 						}
+
+						//enable the target row
+						typeTable.tableView_->setValueAsString("1", row, typeTable.tableView_->getColStatus());
 
 						__COUTV__(StringMacros::mapToString(processTypes_.mapToLinkGroupIDColumn_));
 
@@ -2620,7 +2779,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								{
 									__COUTV__(lo);
 									if(i == 3) nodeIndices.push_back(lo);
-									else if(i == 4) hostnameIndices.push_back(lo);
+									else hostnameIndices.push_back(lo);
 								}
 							}
 						}
@@ -2632,6 +2791,9 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 						__SS_THROW__;
 					}
 				}  // end node parameter loop
+
+				__COUTV__(nodeIndices.size());
+				__COUTV__(hostnameIndices.size());
 
 				if(hostnameIndices.size()) //handle hostname array
 				{
