@@ -1283,9 +1283,10 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 
 		for(auto& routingMaster : routingMasters)
 		{
+			const std::string& rmUID  = routingMaster.first;
+
 			if(routingMaster.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				std::string& rmUID  = routingMaster.first;
 				std::string  rmHost = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
 				int               routingMasterSubsystemID   = 1;
@@ -1345,9 +1346,9 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 					flattenFHICL(ARTDAQAppType::RoutingMaster, routingMaster.second.getValue());
 				}
 			}
-			else
+			else //disabled
 			{
-				__COUT__ << "Routing Master " << routingMaster.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
+				__COUT__ << "Routing Master " << rmUID << " is disabled." << __E__;
 			}
 		}
 	}
@@ -1366,9 +1367,10 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 
 		for(auto& reader : readers)
 		{
+			const std::string& readerUID  = reader.first;
+
 			if(reader.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				std::string& readerUID  = reader.first;
 				std::string  readerHost = reader.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
 				int               readerSubsystemID   = 1;
@@ -1418,9 +1420,9 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 					flattenFHICL(ARTDAQAppType::BoardReader, reader.second.getValue());
 				}
 			}
-			else
+			else //disabled
 			{
-				__COUT__ << "Board Reader " << reader.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
+				__COUT__ << "Board Reader " << readerUID << " is disabled." << __E__;
 			}
 		}
 	}
@@ -1443,9 +1445,10 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 
 		for(auto& builder : builders)
 		{
+			const std::string& builderUID  = builder.first;
+
 			if(builder.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				std::string& builderUID  = builder.first;
 				std::string  builderHost = builder.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
 				int               builderSubsystemID   = 1;
@@ -1496,9 +1499,9 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 					flattenFHICL(ARTDAQAppType::EventBuilder, builder.second.getValue());
 				}
 			}
-			else
+			else //disabled
 			{
-				__COUT__ << "Event Builder " << builder.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
+				__COUT__ << "Event Builder " << builderUID << " is disabled." << __E__;
 			}
 		}
 	}
@@ -1521,9 +1524,11 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 
 		for(auto& datalogger : dataloggers)
 		{
+			const std::string& loggerUID  = datalogger.first;
+
 			if(datalogger.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				std::string& loggerUID  = datalogger.first;
+
 				std::string  loggerHost = datalogger.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
 				int               loggerSubsystemID   = 1;
@@ -1573,9 +1578,9 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 					flattenFHICL(ARTDAQAppType::DataLogger, datalogger.second.getValue());
 				}
 			}
-			else
+			else //disabled
 			{
-				__COUT__ << "Data Logger " << datalogger.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
+				__COUT__ << "Data Logger " << loggerUID << " is disabled." << __E__;
 			}
 		}
 	}
@@ -1592,9 +1597,10 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 
 		for(auto& dispatcher : dispatchers)
 		{
+			const std::string& dispatcherUID  = dispatcher.first;
+
 			if(dispatcher.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>())
 			{
-				std::string& dispatcherUID  = dispatcher.first;
 				std::string  dispatcherHost = dispatcher.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
 				auto              dispatcherSubsystemID   = 1;
@@ -1643,9 +1649,9 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 					flattenFHICL(ARTDAQAppType::Dispatcher, dispatcher.second.getValue());
 				}
 			}
-			else
+			else //disabled
 			{
-				__COUT__ << "Dispatcher " << dispatcher.second.getNode("SupervisorUID").getValue() << " is disabled." << __E__;
+				__COUT__ << "Dispatcher " << dispatcherUID << " is disabled." << __E__;
 			}
 		}
 	}
