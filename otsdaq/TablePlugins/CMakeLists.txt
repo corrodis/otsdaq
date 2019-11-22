@@ -8,43 +8,25 @@ add_subdirectory(ARTDAQTableBase)
     
   
 simple_plugin(ARTDAQBoardReaderTable "table"
-#  TableCore 
-#  ConfigurationInterface
-#  otsdaq_TablePlugins_XDAQContextTable_table
-#  ${CETLIB}
   ARTDAQTableBase
   )
   
 simple_plugin(ARTDAQDataLoggerTable "table"
-#  TableCore 
-#  ConfigurationInterface
-#  otsdaq_TablePlugins_XDAQContextTable_table
-#  ${CETLIB}
-  ARTDAQTableBase
-  )
-simple_plugin(ARTDAQDispatcherTable "table"
-#  TableCore 
-#  ConfigurationInterface
-#  otsdaq_TablePlugins_XDAQContextTable_table
-#  ${CETLIB}
   ARTDAQTableBase
   )
   
-simple_plugin(ARTDAQBuilderTable "table"
-#  TableCore 
-#  ConfigurationInterface
-#  otsdaq_TablePlugins_XDAQContextTable_table
-#  ${CETLIB}
+simple_plugin(ARTDAQDispatcherTable "table"
+  ARTDAQTableBase
+  )
+  
+simple_plugin(ARTDAQEventBuilderTable "table"
   ARTDAQTableBase
   )
   
 simple_plugin(ARTDAQRoutingMasterTable "table"
-#  TableCore 
-#  ConfigurationInterface
-#  otsdaq_TablePlugins_XDAQContextTable_table
-#  ${CETLIB}
   ARTDAQTableBase
   )
+  
 simple_plugin(FESlowControlsTable "table"
   TableCore 
   ConfigurationInterface

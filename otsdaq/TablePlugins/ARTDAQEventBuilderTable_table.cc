@@ -1,7 +1,7 @@
 
 
 #include "otsdaq/Macros/TablePluginMacros.h"
-#include "otsdaq/TablePlugins/ARTDAQBuilderTable.h"
+#include "otsdaq/TablePlugins/ARTDAQEventBuilderTable.h"
 #include "otsdaq/TablePlugins/XDAQContextTable.h"
 
 #include <stdio.h>
@@ -12,7 +12,7 @@
 using namespace ots;
 
 //========================================================================================================================
-ARTDAQBuilderTable::ARTDAQBuilderTable(void) : ARTDAQTableBase("ARTDAQBuilderTable")
+ARTDAQEventBuilderTable::ARTDAQEventBuilderTable(void) : ARTDAQTableBase("ARTDAQEventBuilderTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -20,10 +20,10 @@ ARTDAQBuilderTable::ARTDAQBuilderTable(void) : ARTDAQTableBase("ARTDAQBuilderTab
 }
 
 //========================================================================================================================
-ARTDAQBuilderTable::~ARTDAQBuilderTable(void) {}
+ARTDAQEventBuilderTable::~ARTDAQEventBuilderTable(void) {}
 
 //========================================================================================================================
-void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
+void ARTDAQEventBuilderTable::init(ConfigurationManager* configManager)
 {
 	// use isFirstAppInContext to only run once per context, for example to avoid
 	//	generating files on local disk multiple times.
@@ -54,4 +54,4 @@ void ARTDAQBuilderTable::init(ConfigurationManager* configManager)
 
 }  // end init()
 
-DEFINE_OTS_TABLE(ARTDAQBuilderTable)
+DEFINE_OTS_TABLE(ARTDAQEventBuilderTable)
