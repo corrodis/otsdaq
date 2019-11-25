@@ -5,6 +5,7 @@ cet_script(
 	otsdaq_convert_config_to_table
 	otsdaq_convert_artdaq_daq_tables
 	otsdaq_beautify_artdaq_tables
+	otsdaq_add_artdaq_tables
 )
 
 

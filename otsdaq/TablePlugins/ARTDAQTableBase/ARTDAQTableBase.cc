@@ -1430,9 +1430,9 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 	}
 	else
 	{
-		__SS__ << "Error: There should be at least one Board Reader!";
-		__SS_THROW__;
-		return;
+		__COUT_WARN__ << "There should be at least one Board Reader!";
+		//__SS_THROW__;
+		//return;
 	}
 }  // end extractBoardReadersInfo()
 
@@ -1509,9 +1509,9 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 	}
 	else
 	{
-		__SS__ << "Error: There should be at least one Event Builder!";
-		__SS_THROW__;
-		return;
+		__COUT_WARN__ << "There should be at least one Event Builder!";
+		//__SS_THROW__;
+		//return;
 	}
 }  // end extractEventBuildersInfo()
 
@@ -1586,6 +1586,10 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 			}
 		}
 	}
+	else
+	{
+		__COUT_WARN__ << "There were no Data Loggers found!";
+	}
 }  // end extractDataLoggersInfo()
 
 //========================================================================================================================
@@ -1657,8 +1661,11 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 			}
 		}
 	}
+	else
+	{
+		__COUT_WARN__ << "There were no Dispatchers found!";
+	}
 }  // end extractDispatchersInfo()
-
 
 //==============================================================================
 //	getARTDAQSystem
