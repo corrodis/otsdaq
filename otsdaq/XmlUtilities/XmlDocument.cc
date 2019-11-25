@@ -954,10 +954,6 @@ void XmlDocument::makeDirectoryBinaryTree(std::string           fSystemPath,
                                                              false
                                                             ) ;
    this->makeDirectoryBinaryTree(fSystemPath, fRootPath, indent + 1, node);
-
-
-
-   
 //    fFoldersPath_ = "" ;
   } 
   else 
@@ -1045,13 +1041,13 @@ xercesc::DOMElement * XmlDocument::populateBinaryTreeNode(xercesc::DOMElement * 
  xercesc::DOMText    * fileOrDirNameVal  = NULL ;   
  xercesc::DOMText    * thisFolderNameVal = NULL ; 
   
- fThisFolderPath      = theDocument_->createElement( xercesc::XMLString::transcode("fDisplayName"         ));    
-
- if( isLeaf )    
- {    
- 	fFileOrHistName   = theDocument_->createElement( xercesc::XMLString::transcode("fHistName"            ));    
-   	fileOrDirNameVal  = theDocument_->createTextNode(xercesc::XMLString::transcode(name.c_str()           ));
-    thisFolderNameVal = theDocument_->createTextNode(xercesc::XMLString::transcode(name.c_str()           ));
+ fThisFolderPath      = theDocument_->createElement( xercesc::XMLString::transcode("fDisplayName"          ));    
+ 
+ if( isLeaf )     
+ {     
+ 	fFileOrHistName   = theDocument_->createElement( xercesc::XMLString::transcode("fFileName"             ));    
+   	fileOrDirNameVal  = theDocument_->createTextNode(xercesc::XMLString::transcode(name.c_str()            ));
+    thisFolderNameVal = theDocument_->createTextNode(xercesc::XMLString::transcode(name.c_str()            ));
 }    
  else    
  {  
