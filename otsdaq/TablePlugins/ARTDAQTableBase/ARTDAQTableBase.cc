@@ -140,13 +140,13 @@ std::string ARTDAQTableBase::getFlatFHICLFilename(ARTDAQAppType type, const std:
 //========================================================================================================================
 void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 {
-	__COUT__ << "flattenFHICL()" << __ENV__("FHICL_FILE_PATH") << __E__;
+	//__COUT__ << "flattenFHICL()" << __ENV__("FHICL_FILE_PATH") << __E__;
 
 	std::string inFile  = getFHICLFilename(type, name);
 	std::string outFile = getFlatFHICLFilename(type, name);
 
-	__COUTV__(inFile);
-	__COUTV__(outFile);
+	//__COUTV__(inFile);
+	//__COUTV__(outFile);
 
 	cet::filepath_lookup_nonabsolute policy("FHICL_FILE_PATH");
 
