@@ -533,7 +533,7 @@ TableVersion ConfigurationManagerRW::createTemporaryBackboneView(TableVersion so
 	}
 
 	return tmpVersion;
-}
+} //end createTemporaryBackboneView()
 
 //==============================================================================
 TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
@@ -550,7 +550,7 @@ TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
 		__SS_THROW__;
 	}
 	return nameToTableMap_[tableName];
-}
+} //end getTableByName()
 
 //==============================================================================
 // getVersionedTableByName
@@ -1234,11 +1234,29 @@ GroupEditStruct::~GroupEditStruct()
 }  // end GroupEditStruct destructor()
 
 //==============================================================================
+// Note: if markModified, and table not found in group, this function will try to add it to group
 TableEditStruct& GroupEditStruct::getTableEditStruct(const std::string& tableName, bool markModified /*= false*/)
 {
 	auto it = groupTables_.find(tableName);
 	if(it == groupTables_.end())
 	{
+		if(groupType_ == ConfigurationManager::GroupType::CONFIGURATION_TYPE &&
+				markModified)
+		{
+			__COUT__ << "Table '" << tableName << "' not found in configuration table members from editing '" << originalGroupName_ << "(" << originalGroupKey_ << ")..." <<
+						" Attempting to add it!" << __E__;
+
+			//emplace returns pair<object,bool wasAdded>
+			auto newIt = groupTables_.emplace(std::make_pair(tableName, TableEditStruct(tableName, cfgMgr_)));  // Table ready for editing!
+			if(newIt.second)
+			{
+				newIt.first->second.modified_ = markModified;  // could indicate 'dirty' immediately in user code, which will cause a save of table
+				groupMembers_.emplace(std::make_pair(tableName, newIt.first->second.temporaryVersion_));
+				return newIt.first->second;
+			}
+			__COUT_ERR__ << "Failed to emplace new table..." << __E__;
+		}
+
 		__SS__ << "Table '" << tableName << "' not found in table members from editing '" << originalGroupName_ << "(" << originalGroupKey_ << ")!'" << __E__;
 		__SS_THROW__;
 	}

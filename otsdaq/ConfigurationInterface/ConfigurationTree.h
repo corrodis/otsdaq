@@ -236,8 +236,9 @@ class ConfigurationTree
 	bool 										isUIDLinkNode				(void) const;
 	bool 										isGroupIDNode				(void) const;
 	bool 										isUIDNode					(void) const;
+	bool 										isStatusNode				(void) const;
 	bool										isEnabled					(void) const; //same as status()
-	inline bool									status						(void) const; //same as isEnabled()
+	inline bool									status						(void) const { return isEnabled(); } //same as isEnabled()
 
 	void 										print						(const unsigned int& depth = -1, std::ostream& out = std::cout) const;
 	std::string 								nodeDump					(void) const;  // used for debugging (when throwing exception)

@@ -190,6 +190,8 @@ struct StringMacros
 	    const std::string& 										primaryDelimeter   	= "; ",
 	    const std::string& 										secondaryDelimeter 	= ":");
 
+	static void 				extractCommonChunks			(const std::vector<std::string>& haystack, std::vector<std::string>& commonChunks, std::set<std::string>& wildcardStrings, unsigned int& fixedWildcardLength);
+
 	static std::string 			demangleTypeName			(const char* name);
 	static std::string 			stackTrace					(void);
 	static std::string 			exec						(const char* cmd);

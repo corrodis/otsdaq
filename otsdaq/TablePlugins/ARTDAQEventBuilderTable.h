@@ -1,5 +1,5 @@
-#ifndef _ots_ARTDAQBuilderTable_h_
-#define _ots_ARTDAQBuilderTable_h_
+#ifndef _ots_ARTDAQEventBuilderTable_h_
+#define _ots_ARTDAQEventBuilderTable_h_
 
 #include "otsdaq/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
 
@@ -7,11 +7,11 @@ namespace ots
 {
 class XDAQContextTable;
 
-class ARTDAQBuilderTable : public ARTDAQTableBase
+class ARTDAQEventBuilderTable : public ARTDAQTableBase
 {
   public:
-	ARTDAQBuilderTable(void);
-	virtual ~ARTDAQBuilderTable(void);
+	ARTDAQEventBuilderTable(void);
+	virtual ~ARTDAQEventBuilderTable(void);
 
 	// Methods
 	void init(ConfigurationManager* configManager);

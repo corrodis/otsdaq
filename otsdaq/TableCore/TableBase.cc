@@ -10,7 +10,7 @@ using namespace ots;
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "TableBase"
 #undef __COUT_HDR__
-#define __COUT_HDR__ ("TableBase-" + getTableName() + "\t<>")
+#define __COUT_HDR__ ("TableBase-" + getTableName() + "\t<> ")
 
 
 //==============================================================================

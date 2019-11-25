@@ -29,13 +29,15 @@ class SlowControlsVInterface : public Configurable
 
 	virtual void initialize() = 0;
 
-	virtual void                       subscribe(std::string Name)       = 0;
-	virtual void                       subscribeJSON(std::string List)   = 0;
-	virtual void                       unsubscribe(std::string Name)     = 0;
-	virtual std::string                getList(std::string format)       = 0;
-	virtual std::array<std::string, 4> getCurrentValue(std::string Name) = 0;
-	virtual std::vector<std::vector<std::string>> getPVHistory(std::string Name) = 0;
-	virtual std::array<std::string, 9> getSettings(std::string Name)     = 0;
+
+	virtual void                                       subscribe(std::string Name)       = 0;
+	virtual void                                       subscribeJSON(std::string List)   = 0;
+	virtual void                                       unsubscribe(std::string Name)     = 0;
+	virtual std::string                                getList(std::string format)       = 0;
+	virtual std::array<std::string, 4>                 getCurrentValue(std::string Name) = 0;
+	virtual std::vector<std::vector<std::string>> 	   getPVHistory(std::string Name)    = 0;
+	virtual std::array<std::string, 9>                 getSettings(std::string Name)     = 0;
+
 
   protected:
 	const std::string interfaceUID_;
