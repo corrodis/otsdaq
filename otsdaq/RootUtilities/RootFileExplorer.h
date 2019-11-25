@@ -66,8 +66,10 @@ class RootFileExplorer
 {
  public:
 
-                         RootFileExplorer       (string filePath                       ,
-                                                 string rootPath                       ,
+                         RootFileExplorer       (string fSystemPath                    ,
+                                                 string fRootPath                      ,
+                                                 string fFoldersPath                   ,
+                                                 string fHistName                      ,
                                                  HttpXmlDocument     & xmlOut           )  ;
                         ~RootFileExplorer       (void                                   ) {;}
   xercesc::DOMDocument * initialize             (void                                   )  ;
@@ -82,10 +84,12 @@ class RootFileExplorer
  private:
 
   bool                                    debug_            ;
-  string                                  filePath_         ;
-  string                                  rootPath_         ;
-  string                                  fullPath_         ;
-  string                                  fullHPath_        ;
+  string                                  fSystemPath_      ;
+  string                                  fRootPath_        ;
+  string                                  fFoldersPath_     ;
+  string                                  fFileName_        ;
+  string                                  fRFoldersPath_    ;
+  string                                  fHistName_        ;
   xercesc::DOMImplementation            * theImplementation_;
   xercesc::DOMDocument                  * theDocument_      ;
   xercesc::DOMElement                   * rootElement_      ;

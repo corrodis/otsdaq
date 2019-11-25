@@ -138,8 +138,7 @@ void HttpXmlDocument::setHeader(std::string cookieCode, std::string displayName)
 //==============================================================================
 xercesc::DOMElement* HttpXmlDocument::addTextElementToData(const std::string& childName, const std::string& childValue)
 {
-	// std::cout << __COUT_HDR_FL__ << "in - " << childName << " value: " << childValue
-	// <<std::endl << std::endl;
+	// std::cout << __COUT_HDR_FL__ << "in - " << childName << " value: " << childValue <<std::endl << std::endl;
 	return addTextElementToParent(childName, childValue, dataElement_);
 }
 

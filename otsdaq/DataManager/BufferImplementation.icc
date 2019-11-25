@@ -193,14 +193,9 @@ int BufferImplementation<D, H>::setWrittenSubBuffer(void)  // Must be used in co
                                                            // because it attach to the
                                                            // nextWritePointer buffer
 {
-	__GEN_COUT__ << "-1---" << __E__;
 	writePointer_ = nextWritePointer();  // Already protected in nextWritePointer with %numSubBuffers_
-	__GEN_COUT__ << "-2---" << __E__;
 	__GEN_COUTV__(writePointer_);
 	setWritten(writePointer_);
-	__GEN_COUT__ << "-3---" << __E__;
-	//__GEN_COUT__ << __PRETTY_FUNCTION__ << "Write pointer:" << writePointer_ <<
-	// std::endl;
 	return writePointer_;
 }
 
@@ -415,7 +410,6 @@ H& BufferImplementation<D, H>::getHeader(unsigned int subBuffer)
 template<class D, class H>
 void BufferImplementation<D, H>::setWritten(unsigned int subBuffer)
 {
-	__GEN_COUT__ << "-5---" << __E__;
 	__GEN_COUTV__(subBuffer);
 
 	__GEN_COUT__;
@@ -429,7 +423,6 @@ void BufferImplementation<D, H>::setWritten(unsigned int subBuffer)
 		it.second.subBuffersStatus_[subBuffer] = !bufferFree_;
 	}
 
-	__GEN_COUT__ << "-6---" << __E__;
 	// As soon as this one is set to full then the consumers try to read it
 	subBuffersStatus_[subBuffer] = !bufferFree_;
 }
