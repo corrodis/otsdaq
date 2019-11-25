@@ -70,6 +70,7 @@ class RootFileExplorer
                                                  string fRootPath                      ,
                                                  string fFoldersPath                   ,
                                                  string fHistName                      ,
+                                                 string fFileName                      ,
                                                  HttpXmlDocument     & xmlOut           )  ;
                         ~RootFileExplorer       (void                                   ) {;}
   xercesc::DOMDocument * initialize             (void                                   )  ;
