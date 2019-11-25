@@ -85,6 +85,11 @@ std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize)
 		}
 		throw std::runtime_error(error.str());
 	}
+	else if (dataRead == static_cast<std::size_t>(0))
+	{
+		std::cout << __PRETTY_FUNCTION__ << "Connection closed!" << std::endl;
+		throw std::runtime_error("Connection closed");
+	}
 	// std::cout << __PRETTY_FUNCTION__ << "Message received with no errors for socket: "
 	// << getSocketId() << std::endl;
 	return dataRead;

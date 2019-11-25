@@ -79,7 +79,7 @@ class RootFileExplorer
   xercesc::DOMElement  * populateBinaryTreeNode (xercesc::DOMElement * anchorNode      ,
                                                  std::string           name            ,
                                                  int                   level           ,
-                                                 std::string           isLeaf           )  ;
+                                                 bool                  isLeaf           )  ;
  
  private:
 
@@ -90,11 +90,13 @@ class RootFileExplorer
   string                                  fFileName_        ;
   string                                  fRFoldersPath_    ;
   string                                  fHistName_        ;
+  std::string                             fThisFolderPath_  ;
   xercesc::DOMImplementation            * theImplementation_;
   xercesc::DOMDocument                  * theDocument_      ;
   xercesc::DOMElement                   * rootElement_      ;
   std::map<int, xercesc::DOMElement *>    theNodes_         ;
   std::map<int, std::string>              theHierarchy_     ;
+  std::map<bool,std::string>              isALeaf_          ;
   const std::string                       rootTagName_      ;
   TFile                                 * rootFile_         ;
   int                                     level_            ;
