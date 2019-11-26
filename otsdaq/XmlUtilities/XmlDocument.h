@@ -99,6 +99,7 @@ namespace ots
    std::stringstream                      ss_               ;
    std::map<int, xercesc::DOMElement *>   theNodes_         ;
    std::map<int, std::string>             theNames_         ;
+   std::vector<std::string>               hierarchyPaths_   ;
    xercesc::DOMImplementation           * impl              ;
    xercesc::DOMLSSerializer             * pSerializer       ;
    xercesc::DOMConfiguration            * pDomConfiguration ;
