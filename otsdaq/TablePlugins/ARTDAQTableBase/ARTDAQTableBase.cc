@@ -1243,6 +1243,9 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(Configurat
 	info_.subsystems[NULL_SUBSYSTEM_DESTINATION].id    = NULL_SUBSYSTEM_DESTINATION;
 	info_.subsystems[NULL_SUBSYSTEM_DESTINATION].label = NULL_SUBSYSTEM_DESTINATION_LABEL;
 
+	//if no supervisor, then done
+	if(artdaqSupervisorNode.isDisconnected()) return info_;
+
 	// We do RoutingMasters first so we can properly fill in routing tables later
 	extractRoutingMastersInfo(artdaqSupervisorNode, doWriteFHiCL, routingTimeoutMs, routingRetryCount);
 
@@ -2137,11 +2140,32 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 	GroupEditStruct configGroupEdit(ConfigurationManager::GroupType::CONFIGURATION_TYPE, cfgMgr);
 
-	unsigned int artdaqSupervisorRow;
+	unsigned int artdaqSupervisorRow = TableView::INVALID;
 
 	const XDAQContextTable* contextTable = cfgMgr->__GET_CONFIG__(XDAQContextTable);
 
 	const XDAQContextTable::XDAQContext* artdaqContext = contextTable->getTheARTDAQSupervisorContext();
+
+	bool needArtdaqSupervisorParents = true;
+	bool needArtdaqSupervisorCreation = false;
+
+	if(artdaqContext) //check for full connection to supervisor
+	{
+		ConfigurationTree artdaqSupervisorNode = cfgMgr->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME)
+			  .getNode(artdaqContext->contextUID_)
+			  .getNode(XDAQContextTable::colContext_.colLinkToApplicationTable_)
+			  .getNode(artdaqContext->applications_[0].applicationUID_)
+			  .getNode(XDAQContextTable::colApplication_.colLinkToSupervisorTable_);
+
+		if(artdaqSupervisorNode.isDisconnected())
+			needArtdaqSupervisorCreation = true;
+		else
+			artdaqSupervisorRow = artdaqSupervisorNode.getRow();
+
+		needArtdaqSupervisorParents = false;
+		__SS__ << "FIXME";
+		__SS_THROW__;
+	}
 
 	if(!artdaqContext)
 	{
@@ -2421,6 +2445,12 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 	//==================================
 	// at this point artdaqSupervisor is verified and we have row
 	__COUTV__(artdaqSupervisorRow);
+	if(artdaqSupervisorRow >= TableView::INVALID)
+	{
+		__SS__ << "Invalid artdaq Supervisor row " << artdaqSupervisorRow <<
+				" found!" << __E__;
+		__SS_THROW__;
+	}
 
 	// Remaining steps:
 	// Step	1. create/verify subsystems and destinations
