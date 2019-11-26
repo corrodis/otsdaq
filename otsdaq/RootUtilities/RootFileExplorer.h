@@ -62,15 +62,16 @@
 using namespace std ;
 using namespace ots ;
 
+// clang-format off
 class RootFileExplorer
 {
  public:
 
-                         RootFileExplorer       (string fSystemPath                    ,
-                                                 string fRootPath                      ,
-                                                 string fFoldersPath                   ,
-                                                 string fHistName                      ,
-                                                 string fFileName                      ,
+                         RootFileExplorer       (string                fSystemPath     ,
+                                                 string                fRootPath       ,
+                                                 string                fFoldersPath    ,
+                                                 string                fHistName       ,
+                                                 string                fFileName       ,
                                                  HttpXmlDocument     & xmlOut           )  ;
                         ~RootFileExplorer       (void                                   ) {;}
   xercesc::DOMDocument * initialize             (void                                   )  ;
@@ -104,5 +105,5 @@ class RootFileExplorer
   stringstream                            ss_               ;
   HttpXmlDocument                         xmlOut_           ;
 } ;
-
+// clang-format on
 #endif

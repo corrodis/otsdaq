@@ -1,13 +1,13 @@
 #include "otsdaq/RootUtilities/RootFileExplorer.h"
 #include "otsdaq/otsdaq/Macros/MessageTools.h"
-
+// clang-format off
 //================================================================================================
 RootFileExplorer::RootFileExplorer(
-		                            std::string fSystemPath ,
-		                            std::string fRootPath   ,
-                                    std::string fFoldersPath,
-                                    std::string fHistName   ,
-                                    std::string fFileName   ,
+		                            std::string       fSystemPath ,
+		                            std::string       fRootPath   ,
+                                    std::string       fFoldersPath,
+                                    std::string       fHistName   ,
+                                    std::string       fFileName   ,
                                     HttpXmlDocument & xmlOut
                                   ) : rootTagName_("ROOT")
 {
@@ -31,9 +31,10 @@ RootFileExplorer::RootFileExplorer(
   STDLINE(string("fFileName_   : ")+fFileName_   ,ACWhite) ;
  }
  
- rootFile_ = new TFile((fSystemPath_+string("/") +
-                        fRootPath_  +string("/") +
-                        fFileName).c_str()        ) ;
+ rootFile_ = new TFile((fSystemPath_ +string("/") +
+                        fRootPath_   +string("/") +
+                        fFoldersPath_+string("/") +
+                        fFileName).c_str()         ) ;
  
  if( debug_) rootFile_->ls() ;
 
@@ -201,7 +202,8 @@ void RootFileExplorer::makeDirectoryBinaryTree(TDirectory          * currentDire
                                                xercesc::DOMElement * anchorNode       )
 {
     if( !anchorNode) anchorNode = rootElement_ ;
-
+    ss_.str("") ; ss_ << "Exploring root folder " << currentDirectory->GetName() ;
+    if( debug_ ) STDLINE(ss_.str(), ACRed) ;
     TKey * keyH = NULL ;
     TIter hList(currentDirectory->GetListOfKeys());
     while((keyH = (TKey*)hList()))
@@ -228,15 +230,23 @@ void RootFileExplorer::makeDirectoryBinaryTree(TDirectory          * currentDire
             if( debug_ ) STDLINE(fFoldersPath_,ACBlue) ;
             if( debug_ ) STDLINE(subDir->GetName(),ACCyan) ;
             fFileName_ = hName ;
+            fFoldersPath_ = "" ;
+            ss_.str(""); ss_ << "theHierarchy_.size(): " << theHierarchy_.size() ;
+            STDLINE(ss_.str(),ACCyan) ;
+            for(int i=0; i<(int)theHierarchy_.size(); i++)
+            {
+                fFoldersPath_ += theHierarchy_.find(i)->second ;
+                STDLINE(string("fFoldersPath_: ")+fFoldersPath_,ACWhite) ;
+            }
             xercesc::DOMElement * node = this->populateBinaryTreeNode(anchorNode, hName, level, false) ;
             this->makeDirectoryBinaryTree(subDir,level+1,node) ;
-            theHierarchy_.erase(level) ;
+//            theHierarchy_.erase(level) ;
         }
         else
         {
             fFoldersPath_ = "" ;
             if( debug_ ) STDLINE(hName,"") ;
-            for(int i=0; i<(int)theHierarchy_.size()-1; i++)
+            for(int i=0; i<level; i++)
             {
                 fFoldersPath_ += theHierarchy_[i] + string("/") ;
                 ss_.str("") ; ss_ << "fFoldersPath_: " << fFoldersPath_  ;
@@ -249,3 +259,4 @@ void RootFileExplorer::makeDirectoryBinaryTree(TDirectory          * currentDire
         }
     }
 }
+// clang-format on

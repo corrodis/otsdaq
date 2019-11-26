@@ -894,6 +894,7 @@ bool XmlDocument::loadXmlDocument(std::string filePath)
 
 	return true;
 }
+// clang-format off
 //============================================================================
 void XmlDocument::setAnchors(std::string fSystemPath, 
                              std::string fRootPath  )
@@ -1094,6 +1095,7 @@ void XmlDocument::setDarioStyle(bool darioStyle)
 {
  darioXMLStyle_ = darioStyle ;
 } 
+// clang-format on
 //==============================================================================
 // XmlDocument::recursiveOutputXmlDocument
 //	recursively printout XML theDocument_ to std out and output stream if not null
