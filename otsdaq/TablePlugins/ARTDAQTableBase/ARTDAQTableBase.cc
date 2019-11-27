@@ -2443,6 +2443,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 		                          .getRow();
 	}
 
+	__COUT__ << "------------------------- artdaq nodes to save:" << __E__;
 	for(auto& subsystemPair : subsystemObjectMap)
 	{
 		__COUTV__(subsystemPair.first);
@@ -2459,6 +2460,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 		}
 
 	}  // end node type loop
+	__COUT__ << "------------------------- end artdaq nodes to save." << __E__;
 
 	//==================================
 	// at this point artdaqSupervisor is verified and we have row
@@ -2511,9 +2513,6 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 		// Step	2. for each node, create/verify records
 		for(auto& nodeTypePair : nodeTypeToObjectMap)
 		{
-			if(nodeTypePair.second.size() == 0)
-				continue;  // skip empty types (table might not be included in config, which is not an error)
-
 			__COUTV__(nodeTypePair.first);
 
 			//__COUTV__(StringMacros::mapToString(processTypes_.mapToTable_));
@@ -2526,7 +2525,28 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			}
 			__COUTV__(it->second);
 
+			//test the table before getting for real
+			try
+			{
+				TableEditStruct& tmpTypeTable = configGroupEdit.getTableEditStruct(it->second, true /*markModified*/);
+			}
+			catch(...)
+			{
+				if(nodeTypePair.second.size()) throw; //do not ignore if user was trying to save records
+
+				__COUT__ << "Ignoring missing table '" << it->second <<
+						"' since there were no user records attempted of type '" <<
+						nodeTypePair.first << ".'" << __E__;
+				continue;
+			}
 			TableEditStruct& typeTable = configGroupEdit.getTableEditStruct(it->second, true /*markModified*/);
+
+			//keep track of records to delete, initialize to all in current table
+			std::map<std::string /*type record uid*/,bool /*doDelete*/> deleteRecordMap;
+			for(unsigned int i = 0; i < typeTable.tableView_->getNumberOfRows(); ++i)
+				deleteRecordMap.emplace(std::make_pair(
+						typeTable.tableView_->getDataView()[row][typeTable.tableView_->getColUID()],
+						true)); //init to delete
 
 			for(auto& nodePair : nodeTypePair.second)
 			{
@@ -2720,6 +2740,9 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							typeTable.tableView_->setValueAsString(nodeName, row, typeTable.tableView_->getColUID());
 						}
 						__COUTV__(row);
+
+						//remove from delete map
+						deleteRecordMap[nodeName] = false;
 
 						//enable the target row
 						typeTable.tableView_->setValueAsString("1", row, typeTable.tableView_->getColStatus());
@@ -2985,12 +3008,39 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 									hostname, copyRow, hostnameCol);
 						}
 
+						//remove from delete map
+						deleteRecordMap[name] = false;
+
 						isFirst = false;
-					} //end multi-node handling
-
-				}
-
+					} //end multi-node loop
+				} //end multi-node handling
 			}  // end node record loop
+
+
+			{ //delete record handling
+				__COUT__ << "Deleting '" << nodeTypePair.first <<
+						"' records not specified..." << __E__;
+				__COUTV__(StringMacros::mapToString(deleteRecordMap));
+
+				unsigned int row;
+				for(auto& deletePair : deleteRecordMap)
+				{
+					if(!deletePair.second) continue; //only delete if true
+
+					__COUTV__(deletePair.first);
+
+					row = typeTable.tableView_->findRow(
+							typeTable.tableView_->getColUID(),
+							deletePair.first, 0 /*offsetRow*/, true /*doNotThrow*/);
+
+					if(row == TableView::INVALID) continue; //skip if already gone
+
+					__COUTV__(row);
+
+					typeTable.tableView_->deleteRow(row);
+
+				} //end delete record loop
+			} //end delete record handling
 
 			{
 				std::stringstream ss;

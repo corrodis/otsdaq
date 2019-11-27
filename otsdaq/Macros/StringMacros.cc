@@ -576,7 +576,7 @@ std::vector<std::string> StringMacros::getVectorFromString(const std::string&   
 
 //==============================================================================
 // getMapFromString
-//	extracts the map of name-value pairs from string that uses two s
+//	extracts the map of name-value pairs from string that uses two delimiters
 //		ignoring whitespace
 void StringMacros::getMapFromString(const std::string&                  inputString,
                                     std::map<std::string, std::string>& mapToReturn,
@@ -619,9 +619,9 @@ void StringMacros::getMapFromString(const std::string&                  inputStr
 			    nameValueDelimiter.find(inputString[j]) != nameValueDelimiter.end()) &&
 			   i == j)
 				++i;
-			else if((whitespace.find(inputString[j]) != whitespace.end() ||  // trailing white space or delimiter indicates end
-			         pairPairDelimiter.find(inputString[j]) != pairPairDelimiter.end()) &&
-			        i != j)  // assume end of value name
+			else if(whitespace.find(inputString[j]) != whitespace.end() ||  // trailing white space or delimiter indicates end
+			         pairPairDelimiter.find(inputString[j]) != pairPairDelimiter.end())// &&
+			      //  i != j)  // assume end of value name
 			{
 				//__COUT__ << "Map value found: " <<
 				//		inputString.substr(i,j-i) << std::endl;
