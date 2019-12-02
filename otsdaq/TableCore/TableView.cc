@@ -191,6 +191,12 @@ void TableView::init(void)
 		{
 		}  // ignore no Priority column
 
+		//fix source columns if not already populated
+		if(sourceColumnNames_.size() == 0) // setup sourceColumnNames_ to be correct
+			for(unsigned int i = 0; i < getNumberOfColumns(); ++i)
+				sourceColumnNames_.emplace(getColumnsInfo()[i].getStorageName());
+
+
 		// require one comment column
 		unsigned int colPos;
 		if((colPos = findColByType(TableViewColumnInfo::TYPE_COMMENT)) != INVALID)
@@ -1359,7 +1365,12 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 	   colLinkGroupIDs_.end())
 		return it->second;
 
-	__SS__ << "Incompatible table for this group link. Table '" << tableName_ << "' is missing a GroupID column with data type '"
+	//otherwise search (perhaps init() was not called)
+	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
+		if(needleChildLinkIndex == columnsInfo_[col].getChildLinkIndex())
+			return col;
+
+	__SS__ << "Error! Incompatible table for this group link! Table '" << tableName_ << "' is missing a GroupID column with data type '"
 	       << TableViewColumnInfo::TYPE_START_GROUP_ID << "-" << needleChildLinkIndex << "'.\n\n"
 	       << "Note: you can separate the child GroupID column data type from "
 	       << "the parent GroupLink column data type; this is accomplished by using a space "

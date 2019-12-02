@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include "otsdaq/NetworkUtilities/TCPSocket.h"
 
 namespace ots
@@ -19,14 +20,19 @@ class TCPTransmitterSocket : public virtual TCPSocket
 	void send(char const* buffer, std::size_t size);
 	void send(const std::string& buffer);
 	void send(const std::vector<char>& buffer);
-	template<typename T>
 
+	template<typename T>
 	void send(const std::vector<T>& buffer)
 	{
+		if(buffer.size() == 0)
+		{
+			std::cout << __PRETTY_FUNCTION__ << "I am sorry but I won't send an empty packet!" << std::endl;
+			return;
+		}
 		send(reinterpret_cast<const char*>(&buffer.at(0)), buffer.size() * sizeof(T));
 	}
 
 	void sendPacket(const std::string& buffer);
 };
-}
+}  // namespace ots
 #endif

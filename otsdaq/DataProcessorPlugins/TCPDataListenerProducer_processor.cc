@@ -24,15 +24,15 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
     //, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
     , Configurable(theXDAQContextConfigTree, configurationPath)
     , TCPSubscribeClient(theXDAQContextConfigTree.getNode(configurationPath)
-                             .getNode("HostIPAddress")  // THIS IS ACTUALLY THE SERVER IP
+                             .getNode("ServerIPAddress")
                              .getValue<std::string>(),
                          theXDAQContextConfigTree.getNode(configurationPath)
-                             .getNode("HostPort")  // THIS IS ACTUALLY THE SERVER PORT
+                             .getNode("ServerPort")
                              .getValue<unsigned int>())
     , dataP_(nullptr)
     , headerP_(nullptr)
-    , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("HostIPAddress").getValue<std::string>())
-    , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("HostPort").getValue<unsigned int>())
+    , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>())
+    , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
 {
 }
 

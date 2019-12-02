@@ -62,12 +62,16 @@
 using namespace std ;
 using namespace ots ;
 
+// clang-format off
 class RootFileExplorer
 {
  public:
 
-                         RootFileExplorer       (string filePath                       ,
-                                                 string rootPath                       ,
+                         RootFileExplorer       (string                fSystemPath     ,
+                                                 string                fRootPath       ,
+                                                 string                fFoldersPath    ,
+                                                 string                fHistName       ,
+                                                 string                fFileName       ,
                                                  HttpXmlDocument     & xmlOut           )  ;
                         ~RootFileExplorer       (void                                   ) {;}
   xercesc::DOMDocument * initialize             (void                                   )  ;
@@ -77,25 +81,29 @@ class RootFileExplorer
   xercesc::DOMElement  * populateBinaryTreeNode (xercesc::DOMElement * anchorNode      ,
                                                  std::string           name            ,
                                                  int                   level           ,
-                                                 std::string           isLeaf           )  ;
+                                                 bool                  isLeaf           )  ;
  
  private:
 
   bool                                    debug_            ;
-  string                                  filePath_         ;
-  string                                  rootPath_         ;
-  string                                  fullPath_         ;
-  string                                  fullHPath_        ;
+  string                                  fSystemPath_      ;
+  string                                  fRootPath_        ;
+  string                                  fFoldersPath_     ;
+  string                                  fFileName_        ;
+  string                                  fRFoldersPath_    ;
+  string                                  fHistName_        ;
+  std::string                             fThisFolderPath_  ;
   xercesc::DOMImplementation            * theImplementation_;
   xercesc::DOMDocument                  * theDocument_      ;
   xercesc::DOMElement                   * rootElement_      ;
   std::map<int, xercesc::DOMElement *>    theNodes_         ;
   std::map<int, std::string>              theHierarchy_     ;
+  std::map<bool,std::string>              isALeaf_          ;
   const std::string                       rootTagName_      ;
   TFile                                 * rootFile_         ;
   int                                     level_            ;
   stringstream                            ss_               ;
   HttpXmlDocument                         xmlOut_           ;
 } ;
-
+// clang-format on
 #endif

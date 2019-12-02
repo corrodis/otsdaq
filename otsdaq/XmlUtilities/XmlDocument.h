@@ -11,6 +11,7 @@
 #include <string>
 #include <unistd.h>
 #include <vector>
+#include <map>
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/dom/DOMElement.hpp>
@@ -52,16 +53,17 @@ namespace ots
    bool loadXmlDocument                               (std::string                  filePath                     );
    void outputXmlDocument                             (std::ostringstream         * out, 
                                                        bool                         dispStdOut = false           );
-   void                        makeDirectoryBinaryTree(const char                 * name                        ,
+   void                        makeDirectoryBinaryTree(std::string                  name                        ,
                                                        std::string                  rootPath                    ,
                                                        int                          indent                      ,
                                                        xercesc::DOMElement        * anchorNode                   );
    xercesc::DOMElement       * populateBinaryTreeNode (xercesc::DOMElement        * anchorNode                  ,  
                                                        std::string                  name                        ,  
                                                        int                          indent                      ,
-                                                       std::string                  fullPath                    ,
-                                                       std::string                  isLeaf                       );
-   void setDocument                                   (xercesc::DOMDocument       * doc                          );
+                                                       bool                         isLeaf                       );
+   void                        setAnchors             (std::string                  fSystemPath                 ,
+                                                       std::string                  fRootPath                    );
+   void                        setDocument            (xercesc::DOMDocument       * doc                          );
    void                        setDarioStyle          (bool                         darioStyle                   );
    void                        setRootPath            (std::string                  rootPath                     ) {fRootPath_ = rootPath;}
   //---------------------------------------------------------------------------------------------------------------
@@ -95,7 +97,9 @@ namespace ots
    std::string                            fullPath          ;
    std::string                            fullFPath         ;
    std::stringstream                      ss_               ;
-   std::map<int, xercesc::DOMElement *>   theNodes          ;
+   std::map<int, xercesc::DOMElement *>   theNodes_         ;
+   std::map<int, std::string>             theNames_         ;
+   std::vector<std::string>               hierarchyPaths_   ;
    xercesc::DOMImplementation           * impl              ;
    xercesc::DOMLSSerializer             * pSerializer       ;
    xercesc::DOMConfiguration            * pDomConfiguration ;
@@ -103,9 +107,11 @@ namespace ots
    
    std::string                            fSystemPath_      ;
    std::string                            fRootPath_        ;
-   std::string                            foldersPath_      ;
-   std::string                            simpleNamePath_   ;
-
+   std::string                            fFoldersPath_     ;
+   std::string                            fFileName_        ;
+   std::string                            fThisFolderPath_  ;
+   int                                    indent_           ;
+   std::map<bool,std::string>             isALeaf_          ;
  };
 }  // namespace ots
 
