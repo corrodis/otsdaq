@@ -79,7 +79,7 @@ class ConfigurationManager
 	
 	
 
-	void 								init						(std::string* accumulatedErrors = 0, bool initForWriteAccess = false);
+	void 								init						(std::string* accumulatedErrors = 0, bool initForWriteAccess = false, std::string* accumulatedWarnings = 0);
 	void 								destroy						(void);
 	void 								destroyTableGroup			(const std::string& theGroup = "", bool onlyDeactivate = false);
 
@@ -150,7 +150,7 @@ class ConfigurationManager
 	//==============================================================================
 	// Setters/Modifiers
 	std::shared_ptr<TableGroupKey> 		makeTheTableGroupKey		(TableGroupKey key);
-	void                           		restoreActiveTableGroups	(bool throwErrors = false, const std::string& pathToActiveGroupsFile = "", bool onlyLoadIfBackboneOrContext = false);
+	void                           		restoreActiveTableGroups	(bool throwErrors = false, const std::string& pathToActiveGroupsFile = "", bool onlyLoadIfBackboneOrContext = false, std::string* accumulatedWarnings = 0);
 
 	void 								setOwnerContext				(const std::string& contextUID) { ownerContextUID_ = contextUID; }
 	void 								setOwnerApp					(const std::string& appUID) { ownerAppUID_ = appUID; }

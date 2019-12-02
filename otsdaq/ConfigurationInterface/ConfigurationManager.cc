@@ -143,7 +143,11 @@ ConfigurationManager::~ConfigurationManager() { destroy(); }
 // init
 //	if accumulatedErrors is not null.. fill it with errors
 //	else throw errors (but do not ask restoreActiveTableGroups to throw errors)
-void ConfigurationManager::init(std::string* accumulatedErrors, bool initForWriteAccess /*= false*/)
+//	Notes: Errors are handled separately from Warnings. Errors are used to monitor
+//		errors but do not allow, and warnings are used to allow warnings and monitor.
+void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/,
+		bool initForWriteAccess /*= false*/,
+		std::string* accumulatedWarnings /*=0*/)
 {
 	// if(accumulatedErrors)
 	//	*accumulatedErrors = "";
@@ -156,14 +160,21 @@ void ConfigurationManager::init(std::string* accumulatedErrors, bool initForWrit
 		try
 		{
 			__COUTV__(username_);
-
+// clang-format off
 			restoreActiveTableGroups(accumulatedErrors ? true : false /*throwErrors*/,
-			                         "" /*pathToActiveGroupsFile*/,
-			                         // if write access, then load everything
-			                         (username_ == ConfigurationManager::READONLY_USER) ? (!initForWriteAccess)  // important to consider initForWriteAccess
-			                                                                                                     // because this may be called before
-			                                                                                                     // username_ is properly initialized
-			                                                                            : false /*onlyLoadIfBackboneOrContext*/);
+				 "" /*pathToActiveGroupsFile*/,
+
+				 // if write access, then load all specified table groups (including configuration group),
+				 //	otherwise skip configuration group.
+				 (username_ == ConfigurationManager::READONLY_USER) ?
+						 (!initForWriteAccess)  // important to consider initForWriteAccess
+						 // because this may be called before
+						 // username_ is properly initialized
+							: false /*onlyLoadIfBackboneOrContext*/,
+
+				 accumulatedWarnings
+			);
+// clang-format on
 		}
 		catch(std::runtime_error& e)
 		{
@@ -180,7 +191,10 @@ void ConfigurationManager::init(std::string* accumulatedErrors, bool initForWrit
 //	load the active groups from file
 //	Note: this should be used by the Supervisor to maintain
 //		the same configurationGroups surviving software system restarts
-void ConfigurationManager::restoreActiveTableGroups(bool throwErrors, const std::string& pathToActiveGroupsFile, bool onlyLoadIfBackboneOrContext /*= false*/)
+void ConfigurationManager::restoreActiveTableGroups(bool throwErrors /*=false*/,
+		const std::string& pathToActiveGroupsFile /*=""*/,
+		bool onlyLoadIfBackboneOrContext /*= false*/,
+		std::string* accumulatedWarnings /*=0*/)
 {
 	destroyTableGroup("", true);  // deactivate all
 
@@ -272,12 +286,18 @@ void ConfigurationManager::restoreActiveTableGroups(bool throwErrors, const std:
 		try
 		{
 			// load and doActivate
+			std::string groupAccumulatedErrors = "";
+
+			if(accumulatedWarnings)
+				__COUT__ << "Ignoring warnings while loading and activating group '" << groupName <<
+					"(" << strVal << ")'" << __E__;
+
 			loadTableGroup(groupName,
 			               TableGroupKey(strVal),
 			               true /*doActivate*/,
 			               0 /*groupMembers*/,
 			               0 /*progressBar*/,
-			               0 /*accumulateWarnings = 0*/,
+						   (accumulatedWarnings?&groupAccumulatedErrors:0) /*accumulateWarnings = 0*/,
 			               0 /*groupComment       = 0*/,
 			               0 /*groupAuthor        = 0*/,
 			               0 /*groupCreateTime    = 0*/,
@@ -286,6 +306,8 @@ void ConfigurationManager::restoreActiveTableGroups(bool throwErrors, const std:
 			               0 /*groupAliases       = 0*/,
 			               onlyLoadIfBackboneOrContext /*onlyLoadIfBackboneOrContext = false*/
 			);
+
+			if(accumulatedWarnings) *accumulatedWarnings += groupAccumulatedErrors;
 		}
 		catch(std::runtime_error& e)
 		{
@@ -308,11 +330,11 @@ void ConfigurationManager::restoreActiveTableGroups(bool throwErrors, const std:
 
 	if(throwErrors && errorStr != "")
 	{
-		__COUT_INFO__ << "\n" << ss.str();
+		__COUT_INFO__ << "\n" << errorStr;
 		__THROW__(errorStr);
 	}
 	else if(errorStr != "")
-		__COUT_INFO__ << "\n" << ss.str();
+		__COUT_INFO__ << "\n" << errorStr;
 
 }  // end restoreActiveTableGroups()
 
@@ -1113,7 +1135,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
                                           bool                                                   doActivate /*=false*/,
                                           std::map<std::string /*table name*/, TableVersion>*    groupMembers,
                                           ProgressBar*                                           progressBar,
-                                          std::string*                                           accumulatedTreeErrors,
+                                          std::string*                                           accumulatedWarnings,
                                           std::string*                                           groupComment,
                                           std::string*                                           groupAuthor,
                                           std::string*                                           groupCreateTime,
@@ -1361,23 +1383,23 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 
 		//__COUT__ << "Loading member map..." << __E__;
 
-		loadMemberMap(memberMap, accumulatedTreeErrors);
+		loadMemberMap(memberMap, accumulatedWarnings);
 
 		//__COUT__ << "Member map loaded..." << __E__;
 
 		if(progressBar)
 			progressBar->step();
 
-		if(accumulatedTreeErrors)
+		if(accumulatedWarnings)
 		{
 			//__COUT__ << "Checking chosen group for tree errors..." << __E__;
 
-			getChildren(&memberMap, accumulatedTreeErrors);
-			if(*accumulatedTreeErrors != "")
+			getChildren(&memberMap, accumulatedWarnings);
+			if(*accumulatedWarnings != "")
 			{
 				__COUT_ERR__ << "Errors detected while loading Table Group: " << groupName << "(" << groupKey << "). Aborting."
 				             << "\n"
-				             << *accumulatedTreeErrors << __E__;
+				             << *accumulatedWarnings << __E__;
 				// return;  // memberMap; //return member name map to version
 			}
 		}
@@ -1414,20 +1436,23 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 
 					//__SS_THROW__;
 
-					if(accumulatedTreeErrors)
+					if(accumulatedWarnings)
 					{
-						*accumulatedTreeErrors += ss.str();
+						*accumulatedWarnings += ss.str();
 					}
 					else
+					{
+						ss << StringMacros::stackTrace();
 						__SS_THROW__;  //__COUT_WARN__ << ss.str();
+					}
 				}
 				catch(...)
 				{
 					__SS__ << "Unknown Error detected calling " << memberPair.first << ".init()!\n\n " << __E__;
 					//__SS_THROW__;
-					if(accumulatedTreeErrors)
+					if(accumulatedWarnings)
 					{
-						*accumulatedTreeErrors += ss.str();
+						*accumulatedWarnings += ss.str();
 					}
 					else  // ignore error
 						__COUT_WARN__ << ss.str();
@@ -1502,8 +1527,8 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		{
 			__SS__ << "Error occurred while loading table group '" << groupName << "(" << groupKey << ")': \n" << e.what() << __E__;
 			__COUT_WARN__ << ss.str();
-			if(accumulatedTreeErrors)
-				*accumulatedTreeErrors += ss.str();
+			if(accumulatedWarnings)
+				*accumulatedWarnings += ss.str();
 			else
 				__SS_THROW__;
 		}
@@ -1511,8 +1536,8 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		{
 			__SS__ << "An unknown error occurred while loading table group '" << groupName << "(" << groupKey << ")." << __E__;
 			__COUT_WARN__ << ss.str();
-			if(accumulatedTreeErrors)
-				*accumulatedTreeErrors += ss.str();
+			if(accumulatedWarnings)
+				*accumulatedWarnings += ss.str();
 			else
 				__SS_THROW__;
 		}
@@ -1533,8 +1558,8 @@ catch(...)
 	{
 		__SS__ << "Error occurred while loading table group: " << e.what() << __E__;
 		__COUT_WARN__ << ss.str();
-		if(accumulatedTreeErrors)
-			*accumulatedTreeErrors += ss.str();
+		if(accumulatedWarnings)
+			*accumulatedWarnings += ss.str();
 		else
 			__SS_THROW__;
 	}
@@ -1542,8 +1567,8 @@ catch(...)
 	{
 		__SS__ << "An unknown error occurred while loading table group." << __E__;
 		__COUT_WARN__ << ss.str();
-		if(accumulatedTreeErrors)
-			*accumulatedTreeErrors += ss.str();
+		if(accumulatedWarnings)
+			*accumulatedWarnings += ss.str();
 		else
 			__SS_THROW__;
 	}

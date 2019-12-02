@@ -46,7 +46,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 	const std::string&      					getUsername						(void) const { return username_; }
 	ConfigurationInterface* 					getConfigurationInterface		(void) const { return theInterface_; }
 
-	const std::map<std::string, TableInfo>& 	getAllTableInfo					(bool refresh = false, std::string* accumulatedErrors = 0, const std::string& errorFilterName = "");
+	const std::map<std::string, TableInfo>& 	getAllTableInfo					(bool refresh = false, std::string* accumulatedWarnings = 0, const std::string& errorFilterName = "");
 	std::map<std::string /*tableName*/,
 	         std::map<std::string /*aliasName*/, 
 	         TableVersion /*version*/> >		getVersionAliases				(void) const;

@@ -1468,9 +1468,85 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(c
 	// auto tableName = isRootNode()?"/":getTableName();  //all records will share this
 	// table name
 
+	//if no records, just return table fields
+	if(!recordList.size() && tableView_)
+	{
+		const std::vector<TableViewColumnInfo>& colInfo =
+				tableView_->getColumnsInfo();
+
+		for(unsigned int col=0;col<colInfo.size();++col)
+		{
+			// check field accept filter list
+			found = fieldAcceptList.size() ? false : true;  // accept if no filter
+			// list
+			for(const auto& fieldFilter : fieldAcceptList)
+				if(StringMacros::wildCardMatch(fieldFilter, colInfo[col].getName()))
+				{
+					found = true;
+					break;
+				}
+
+			if(found)
+			{
+				// check field reject filter list
+
+				found = true;  // accept if no filter list
+				for(const auto& fieldFilter : fieldRejectList)
+					if(StringMacros::wildCardMatch(fieldFilter, colInfo[col].getName()))
+					{
+						found = false;  // reject if match
+						break;
+					}
+			}
+
+			// if found, new field (since this is first record)
+			if(found)
+			{
+				__COUT__ << "FOUND field " <<
+						colInfo[col].getName() << __E__;
+
+				if(colInfo[col].isChildLink())
+				{
+					//__COUT__ << "isGroupLinkNode " << fieldNode.first << __E__;
+
+					// must get column info differently for group link column
+
+					std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
+					bool                                                               isGroupLink;
+					tableView_->getChildLink(col, isGroupLink, linkPair);
+
+					// add both link columns
+
+					fieldCandidateList.push_back(ConfigurationTree::RecordField(table_->getTableName(),
+							"", //uid
+							tableView_->getColumnInfo(linkPair.first).getName(),
+							"",  // relative path, not including columnName_
+							&tableView_->getColumnInfo(linkPair.first)));
+					fieldCount.push_back(-1);  // mark guaranteed field
+
+					fieldCandidateList.push_back(ConfigurationTree::RecordField(table_->getTableName(),
+							"", //uid
+							tableView_->getColumnInfo(linkPair.second).getName(),
+							"",  // relative path, not including columnName_
+							&tableView_->getColumnInfo(linkPair.second)));
+					fieldCount.push_back(-1);  // mark guaranteed field
+				}
+				else  // value node
+				{
+					fieldCandidateList.push_back(ConfigurationTree::RecordField(table_->getTableName(),
+							"", //uid
+							colInfo[col].getName(),
+							"",  // relative path, not including columnName_
+							&colInfo[col]));
+					fieldCount.push_back(1);  // init count to 1
+				}
+			}
+		} //end table column loop
+	} //end no record handling
+
 	for(unsigned int i = 0; i < recordList.size(); ++i)
 	{
-		//__COUT__ << "Checking " << recordList[i] << __E__;
+		__COUT__ << "Checking " << recordList[i] << __E__;
 		ConfigurationTree node = getNode(recordList[i]);
 
 		node.recursiveGetCommonFields(fieldCandidateList,
@@ -1658,7 +1734,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(c
 		//__COUT__ << "Checking " << fieldCandidateList[i].relativePath_ <<
 		//		fieldCandidateList[i].columnName_ << " = " <<
 		//		fieldCount[i] << __E__;
-		if(fieldCount[i] != -1 && fieldCount[i] != (int)recordList.size())
+		if(recordList.size() != 0 &&
+				fieldCount[i] != -1 && fieldCount[i] != (int)recordList.size())
 		{
 			//__COUT__ << "Erasing " << fieldCandidateList[i].relativePath_ <<
 			//		fieldCandidateList[i].columnName_ << __E__;
@@ -1669,8 +1746,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(c
 		}
 	}
 
-	//	for(unsigned int i=0;i<fieldCandidateList.size();++i)
-	//		__COUT__ << "Pre-Final " << fieldCandidateList[i].relativePath_ <<
+	//for(unsigned int i=0;i<fieldCandidateList.size();++i)
+	//	__COUT__ << "Pre-Final " << fieldCandidateList[i].relativePath_ <<
 	//			fieldCandidateList[i].columnName_ << __E__;
 
 	if(autoSelectFilterFields)
@@ -1793,6 +1870,20 @@ std::set<std::string /*unique-value*/> ConfigurationTree::getUniqueValuesForFiel
 	//
 	// return result
 
+	//if no records, just return fieldGroupIDChildLinkIndex
+	if(!recordList.size() && tableView_ &&
+			fieldGroupIDChildLinkIndex)
+	{
+		const TableViewColumnInfo& colInfo =
+				tableView_->getColumnInfo(
+						tableView_->findCol(fieldName));
+
+		if(colInfo.isGroupID())
+			*fieldGroupIDChildLinkIndex =
+					colInfo.getChildLinkIndex();
+
+	} //end no records
+
 	for(unsigned int i = 0; i < recordList.size(); ++i)
 	{
 		__COUT__ << "Checking " << recordList[i] << __E__;
@@ -1842,7 +1933,8 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
                                                  bool                                              inFirstRecord) const
 {
 	--depth;
-	__COUT__ << "relativePathBase " << relativePathBase << __E__;
+	__COUT__ << "relativePathBase " << relativePathBase <<
+			" + " << inFirstRecord <<__E__;
 
 	//	=====================
 	//	Start recursiveGetCommonFields()
@@ -1871,7 +1963,8 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 	for(const auto& fieldNode : recordChildren)
 	{
 		__COUT__ << "All... " << fieldNode.second.getNodeType() <<
-				" -- " << (relativePathBase + fieldNode.first) << __E__;
+				" -- " << (relativePathBase + fieldNode.first) <<
+				" + " << inFirstRecord <<__E__;
 
 		if(fieldNode.second.isValueNode() || fieldNode.second.isGroupLinkNode())
 		{
@@ -1888,14 +1981,24 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 			if(inFirstRecord)  // first uid record
 			{
 				__COUT__ << "Checking... " << fieldNode.second.getNodeType() <<
-						" -- " << fieldNode.first <<
+						" -- " << (relativePathBase + fieldNode.first) <<
 						"-- depth=" << depth << __E__;
 
 				// check field accept filter list
 				found = fieldAcceptList.size() ? false : true;  // accept if no filter
 				                                                // list
 				for(const auto& fieldFilter : fieldAcceptList)
-					if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
+					if(fieldFilter.find('/') != std::string::npos)
+					{
+						//filter is for full path, so add relative path base
+						if(StringMacros::wildCardMatch(fieldFilter,
+								relativePathBase + fieldNode.first))
+						{
+							found = true;
+							break;
+						}
+					}
+					else if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
 					{
 						found = true;
 						break;
@@ -1907,7 +2010,17 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 
 					found = true;  // accept if no filter list
 					for(const auto& fieldFilter : fieldRejectList)
-						if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
+						if(fieldFilter.find('/') != std::string::npos)
+						{
+							//filter is for full path, so add relative path base
+							if(StringMacros::wildCardMatch(fieldFilter,
+									relativePathBase + fieldNode.first))
+							{
+								found = false;  // reject if match
+								break;
+							}
+						}
+						else if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
 						{
 							found = false;  // reject if match
 							break;
@@ -1948,7 +2061,6 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 					}
 					else  // value node
 					{
-
 						fieldCandidateList.push_back(ConfigurationTree::RecordField(tableName,
 								uid,
 								fieldNode.first,
@@ -1974,11 +2086,11 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 					}
 				}
 			}
-		}
+		} //end value and group link node handling
 		else if(depth > 0 && fieldNode.second.isUIDLinkNode())
 		{
 			__COUT__ << "isUIDLinkNode " << (relativePathBase + fieldNode.first) <<
-					__E__;
+					" + " << inFirstRecord << __E__;
 
 			if(inFirstRecord)  // first uid record
 			{
@@ -1986,7 +2098,17 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 				// check field accept filter list
 				found = fieldAcceptList.size() ? false : true;  // accept if no filter list
 				for(const auto& fieldFilter : fieldAcceptList)
-					if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
+					if(fieldFilter.find('/') != std::string::npos)
+					{
+						//filter is for full path, so add relative path base
+						if(StringMacros::wildCardMatch(fieldFilter,
+								relativePathBase + fieldNode.first))
+						{
+							found = true;
+							break;
+						}
+					}
+					else if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
 					{
 						found = true;
 						break;
@@ -1998,12 +2120,25 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 
 					found = true;  // accept if no filter list
 					for(const auto& fieldFilter : fieldRejectList)
-						if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
+						if(fieldFilter.find('/') != std::string::npos)
+						{
+							//filter is for full path, so add relative path base
+							if(StringMacros::wildCardMatch(fieldFilter,
+									relativePathBase + fieldNode.first))
+							{
+								found = false; //reject if match
+								break;
+							}
+						}
+						else if(StringMacros::wildCardMatch(fieldFilter, fieldNode.first))
 						{
 							found = false;  // reject if match
 							break;
 						}
 				}
+
+				__COUTV__(found);
+
 
 				// if found, guaranteed field (all UID link fields must be common for
 				// UIDs in same table)
@@ -2011,8 +2146,8 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 				{
 					std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
 					bool                                                               isGroupLink;
-					//__COUTV__(node.tableView_);
-					//__COUTV__(fieldNode.first);
+
+					__COUTV__(fieldNode.first);
 					tableView_->getChildLink(tableView_->findCol(fieldNode.first), isGroupLink, linkPair);
 
 					// add both link columns
@@ -2043,8 +2178,8 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 			                                          (relativePathBase + fieldNode.first) + "/",  // relativePathBase
 			                                          inFirstRecord                                // continue inFirstRecord (or not) depth search
 			);
-		}
-	}
+		} //end handle unique link node
+	} //end field node loop
 }  // end recursiveGetCommonFields()
 
 //==============================================================================

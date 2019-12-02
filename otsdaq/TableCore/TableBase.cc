@@ -62,7 +62,7 @@ TableBase::TableBase(std::string  tableName,
 		else
 			throw;
 	}
-}
+} //end constructor()
 
 //==============================================================================
 // TableBase
@@ -267,8 +267,6 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 
 		// viewPairReverseIterator->second.print();
 
-		// match = true;
-
 		// if column source names do not match then skip
 		//	source names are potentially different from
 		// getColumnsInfo()/getColumnStorageNames
@@ -279,7 +277,7 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 			for(auto& haystackColName : viewPairReverseIterator->second.getSourceColumnNames())
 				if(needleView->getSourceColumnNames().find(haystackColName) == needleView->getSourceColumnNames().end())
 				{
-					__COUT__ << "Found column name mismach for '" << haystackColName << "'... So allowing same data!" << __E__;
+					__COUT__ << "Found column name mismatch for '" << haystackColName << "'... So allowing same data!" << __E__;
 
 					match = false;
 					break;
@@ -308,19 +306,19 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 				{
 					match = false;
 
-					//					__COUT__ << "Value name mismatch " << col << ":"
-					//<<
-					//							viewPairReverseIterator->second.getDataView()[row][col]
-					//<< "[" <<
-					//							viewPairReverseIterator->second.getDataView()[row][col].size()
-					//<< "]" << 							" vs " <<
-					//							needleView->getDataView()[row][col] << "["
-					//<<
-					//							needleView->getDataView()[row][col].size()
-					//<<
-					//"]"
-					//<<
-					//							__E__;
+//					__COUT__ << "Value name mismatch " << col << ":"
+//							<<
+//							viewPairReverseIterator->second.getDataView()[row][col]
+//																			   << "[" <<
+//																			   viewPairReverseIterator->second.getDataView()[row][col].size()
+//																			   << "]" << 							" vs " <<
+//																			   needleView->getDataView()[row][col] << "["
+//																			   <<
+//																			   needleView->getDataView()[row][col].size()
+//																			   <<
+//																			   "]"
+//																			   <<
+//																			   __E__;
 
 					break;
 				}
@@ -330,11 +328,11 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 			__COUT_INFO__ << "Duplicate version found: " << viewPairReverseIterator->first << __E__;
 			return viewPairReverseIterator->first;
 		}
-	}
+	} //end table version loop
 
 	__COUT__ << "No duplicates found in " << potentialMatchCount << " potential matches." << __E__;
 	return TableVersion();  // return invalid if no matches
-}
+} //end checkForDuplicate()
 
 //==============================================================================
 void TableBase::changeVersionAndActivateView(TableVersion temporaryVersion, TableVersion version)
@@ -434,15 +432,14 @@ unsigned int TableBase::getNumberOfStoredViews(void) const
 		else
 			++sz;
 	return sz;
-}
+} //end getNumberOfStoredViews()
 
 //==============================================================================
 const TableView& TableBase::getView(void) const
 {
 	if(!activeTableView_)
 	{
-		__SS__ << "activeTableView_ pointer is null! (...likely the active view has not "
-		          "been setup yet. Check your system setup.)"
+		__SS__ << "There is no active table view setup! Please check your system configuration."
 		       << __E__;
 		__SS_THROW__;
 	}
@@ -454,8 +451,7 @@ TableView* TableBase::getViewP(void)
 {
 	if(!activeTableView_)
 	{
-		__SS__ << "activeTableView_ pointer is null! (...likely the active view has not "
-		          "been setup yet. Check your system setup.)"
+		__SS__ << "There is no active table view setup! Please check your system configuration."
 		       << __E__;
 		__SS_THROW__;
 	}

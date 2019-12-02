@@ -183,16 +183,14 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 // getAllTableInfo()
 //	Used by ConfigurationGUISupervisor to get all the info for the existing configurations
 //
-// if(accumulatedErrors)
+// if(accumulatedWarnings)
 //	this implies allowing column errors and accumulating such errors in given string
-const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(bool               refresh,
-                                                                                std::string*       accumulatedErrors,
-                                                                                const std::string& errorFilterName)
+const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
+		bool               refresh,
+		std::string*       accumulatedWarnings /*=0*/,
+			const std::string& errorFilterName /*=""*/)
 {
 	// allTableInfo_ is container to be returned
-
-	// if(accumulatedErrors)
-	//	*accumulatedErrors = "";
 
 	if(!refresh)
 		return allTableInfo_;
@@ -260,14 +258,14 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 				// for a runtime_error, it is likely that columns are the problem
 				//	the Table Editor needs to still fix these.. so attempt to
 				// 	proceed.
-				if(accumulatedErrors)
+				if(accumulatedWarnings)
 				{
 					if(errorFilterName == "" || errorFilterName == entry->d_name)
 					{
-						*accumulatedErrors += std::string("\nIn table '") + entry->d_name + "'..." + e.what();  // global accumulate
+						*accumulatedWarnings += std::string("\nIn table '") + entry->d_name + "'..." + e.what();  // global accumulate
 
 						__SS__ << "Attempting to allow illegal columns!" << __E__;
-						*accumulatedErrors += ss.str();
+						*accumulatedWarnings += ss.str();
 					}
 
 					// attempt to recover and build a mock-up
@@ -288,7 +286,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 					__COUT__ << "Error (but allowed): " << returnedAccumulatedErrors << __E__;
 
 					if(errorFilterName == "" || errorFilterName == entry->d_name)
-						*accumulatedErrors += std::string("\nIn table '") + entry->d_name + "'..." + returnedAccumulatedErrors;  // global accumulate
+						*accumulatedWarnings += std::string("\nIn table '") + entry->d_name + "'..." + returnedAccumulatedErrors;  // global accumulate
 				}
 				else
 					continue;
@@ -342,8 +340,9 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	}
 	__COUT__ << "Extracting list of tables complete. Now initializing..." << __E__;
 
-	// call init to load active versions by default
-	init(accumulatedErrors);
+	// call init to load active versions by default, activate with warnings allowed (assuming development going on)
+	init(0 /*accumulatedErrors*/,false /*initForWriteAccess*/,
+			accumulatedWarnings);
 
 	__COUT__ << "======================================================== getAllTableInfo end" << __E__;
 
@@ -394,8 +393,8 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	{
 		__SS__ << "A fatal error occurred reading the info for all table groups. Error: " << e.what() << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
-		if(accumulatedErrors)
-			*accumulatedErrors += ss.str();
+		if(accumulatedWarnings)
+			*accumulatedWarnings += ss.str();
 		else
 			throw;
 	}
@@ -403,8 +402,8 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	{
 		__SS__ << "An unknown fatal error occurred reading the info for all table groups." << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
-		if(accumulatedErrors)
-			*accumulatedErrors += ss.str();
+		if(accumulatedWarnings)
+			*accumulatedWarnings += ss.str();
 		else
 			throw;
 	}
@@ -1117,13 +1116,13 @@ TableVersion ConfigurationManagerRW::saveModifiedVersion(const std::string& tabl
 		if(lookForEquivalent && !duplicateVersion.isInvalid())
 		{
 			// found an equivalent!
-			__COUT__ << "Equivalent '" << tableName << "'table found in version v" << duplicateVersion << __E__;
+			__COUT__ << "Equivalent '" << tableName << "' table found in version v" << duplicateVersion << __E__;
 
 			// if duplicate version was temporary, do not use
 			if(duplicateVersion.isTemporaryVersion() && !makeTemporary)
 			{
 				__COUT__ << "Need persistent. Duplicate '" << tableName
-				         << "'version was temporary. "
+				         << "' version was temporary. "
 				            "Abandoning duplicate."
 				         << __E__;
 				duplicateVersion = TableVersion();  // set invalid

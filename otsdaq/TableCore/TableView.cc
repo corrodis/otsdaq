@@ -191,6 +191,12 @@ void TableView::init(void)
 		{
 		}  // ignore no Priority column
 
+		//fix source columns if not already populated
+		if(sourceColumnNames_.size() == 0) // setup sourceColumnNames_ to be correct
+			for(unsigned int i = 0; i < getNumberOfColumns(); ++i)
+				sourceColumnNames_.emplace(getColumnsInfo()[i].getStorageName());
+
+
 		// require one comment column
 		unsigned int colPos;
 		if((colPos = findColByType(TableViewColumnInfo::TYPE_COMMENT)) != INVALID)

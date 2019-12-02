@@ -370,8 +370,10 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 	xmlOut.addTextElementToData("AttemptedNewGroupName", groupName);
 
 	// make sure not using partial tables or anything weird when creating the group
-	//	so start from scratch and load backbone
-	const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true);
+	//	so start from scratch and load backbone, but allow errors
+	std::string accumulatedWarnings;
+	const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true,&accumulatedWarnings);
+	__COUT_WARN__ << "Ignoring these errors: " << accumulatedWarnings << __E__;
 	cfgMgr->loadConfigurationBackbone();
 
 	std::map<std::string /*tableName*/, std::map<std::string /*aliasName*/, TableVersion /*version*/>> versionAliases = cfgMgr->getVersionAliases();
