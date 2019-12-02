@@ -1740,17 +1740,21 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 								// <<  __E__;
 								if(twoDeepChild.second.isLinkNode() && twoDeepChild.second.isDisconnected() &&
 								   twoDeepChild.second.getDisconnectedTableName() != TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
-									*accumulatedTreeErrors += "\n\nAt node '" + configPair.first + "' with entry UID '" + newNodeChild.first +
+								{
+									__SS__ << "At node '" + configPair.first + "' with entry UID '" + newNodeChild.first +
 									                          "' there is a disconnected child node at link "
 									                          "column '" +
 									                          twoDeepChild.first + "'" + " that points to table named '" +
 									                          twoDeepChild.second.getDisconnectedTableName() + "' ...";
+									*accumulatedTreeErrors += ss.str();
+								}
 							}
 						}
 					}
 					catch(std::runtime_error& e)
 					{
-						*accumulatedTreeErrors += "\n\nAt node '" + configPair.first + "' error detected descending through children:\n" + e.what();
+						__SS__ << "At node '" + configPair.first + "' error detected descending through children:\n" + e.what();
+						*accumulatedTreeErrors += ss.str();
 					}
 				}
 
@@ -1809,11 +1813,12 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 							if(twoDeepChild.second.isLinkNode() && twoDeepChild.second.isDisconnected() &&
 							   twoDeepChild.second.getDisconnectedTableName() != TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 							{
-								*accumulatedTreeErrors += "\n\nAt node '" + memberPair.first + "' with entry UID '" + newNodeChild.first +
+								__SS__ << "At node '" + memberPair.first + "' with entry UID '" + newNodeChild.first +
 								                          "' there is a disconnected child node at link column "
 								                          "'" +
 								                          twoDeepChild.first + "'" + " that points to table named '" +
 								                          twoDeepChild.second.getDisconnectedTableName() + "' ...";
+								*accumulatedTreeErrors += ss.str();
 
 								// check if disconnected table is in group, if not
 								// software error
