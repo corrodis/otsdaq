@@ -9,7 +9,7 @@ ots::SlowControlsVInterface* ots::makeSlowControls(const std::string& slowContro
                                                    const ots::ConfigurationTree& configurationTree,  // Pass the big tree
                                                    const std::string&            pathToControlsConfiguration)   // Path to SlowControlsDashboard Table
 {
-	static cet::BasicPluginFactory basicPluginInterfaceFactory("controls", "make");
+	static cet::BasicPluginFactory basicPluginInterfaceFactory("slowcontrols", "make");
 
 	return basicPluginInterfaceFactory
 	    .makePlugin<ots::SlowControlsVInterface*, const std::string&, const std::string&, const ots::ConfigurationTree&, const std::string&>(
