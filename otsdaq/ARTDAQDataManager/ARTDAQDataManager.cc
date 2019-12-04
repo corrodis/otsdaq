@@ -14,7 +14,8 @@ using namespace ots;
 ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath)
     : DataManager(theXDAQContextConfigTree, supervisorConfigurationPath)
 {
-	INIT_MF("BoardReaderDataManager");
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
+
 	__CFG_COUT__ << "Constructor." << __E__;
 
 	std::string name = "BoardReader";
@@ -22,8 +23,6 @@ ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConf
 	__CFG_MCOUT__("artdaq version " <<
 	              artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion() << ", built "
 	                                << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp());
-
-	INIT_MF((name + "App").c_str());
 
 	// artdaq::configureMessageFacility("boardreader");
 	// artdaq::configureMessageFacility(name.c_str());

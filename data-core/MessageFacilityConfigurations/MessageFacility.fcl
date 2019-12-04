@@ -11,3 +11,5 @@ console: {
 	filename_delimit: 		"/srcs/"
 	format_string: 			"|%L:%N:%f [%u]\t%m"
 }
+
+file: {}

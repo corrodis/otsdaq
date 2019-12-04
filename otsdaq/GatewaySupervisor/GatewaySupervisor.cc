@@ -59,7 +59,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
     , broadcastIterationBreakpoint_(-1)  // for standard transitions, ignore the breakpoint
     , counterTest_(0)
 {
-	INIT_MF("GatewaySupervisor");
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 	__COUT__ << __E__;
 
 	// attempt to make directory structure (just in case)

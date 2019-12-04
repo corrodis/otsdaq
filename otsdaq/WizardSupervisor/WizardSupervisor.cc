@@ -66,7 +66,7 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
 {
 	__COUT__ << "Constructor started." << __E__;
 
-	INIT_MF("OtsConfigurationWizard");
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
 	// get all supervisor info, and wiz mode, macroMaker mode, or not
 	allSupervisorInfo_.init(getApplicationContext());
@@ -307,7 +307,6 @@ void WizardSupervisor::generateURL()
 
 void WizardSupervisor::printURL(WizardSupervisor* ptr, std::string securityCode)
 {
-	INIT_MF("ConfigurationWizard");
 	// child process
 	int i = 0;
 	for(; i < 5; ++i)

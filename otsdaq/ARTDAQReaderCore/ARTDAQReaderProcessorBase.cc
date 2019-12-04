@@ -29,7 +29,7 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string              su
     // int>())
     : Configurable(theXDAQContextConfigTree, configurationPath), name_("BoardReader_" + processorUID)
 {
-	INIT_MF(("BoardReader_" + processorUID).c_str());
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
 	__CFG_COUT__ << "Constructing..." << __E__;
 	//__CFG_COUT__ << "Configuration string:-" <<

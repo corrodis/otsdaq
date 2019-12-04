@@ -25,7 +25,7 @@ const std::string RunControlStateMachine::HALTED_STATE_NAME = "Halted";
 //========================================================================================================================
 RunControlStateMachine::RunControlStateMachine(const std::string& name) : theStateMachine_(name), asyncFailureReceived_(false), asyncSoftFailureReceived_(false)
 {
-	INIT_MF("RunControlStateMachine");
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
 	theStateMachine_.addState('I', "Initial", this, &RunControlStateMachine::stateInitial);
 	theStateMachine_.addState('H', RunControlStateMachine::HALTED_STATE_NAME, this, &RunControlStateMachine::stateHalted);

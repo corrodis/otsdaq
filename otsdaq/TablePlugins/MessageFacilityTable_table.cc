@@ -152,6 +152,9 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 
 				fs << "\n}\n";
 
+
+				fs << "file: {}\n";
+
 				// output quiet forwarder config file
 				std::fstream qtfs;
 				qtfs.open(QUIET_CFG_FILE, std::fstream::out | std::fstream::trunc);

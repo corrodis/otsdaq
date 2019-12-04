@@ -22,7 +22,7 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
                                                                                  // on bad conditions
     , propertiesAreSetup_(false)
 {
-	INIT_MF("CorePropertySupervisorBase");
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
 	__SUP_COUTV__(application->getApplicationContext()->getContextDescriptor()->getURL());
 	__SUP_COUTV__(application->getApplicationDescriptor()->getLocalId());

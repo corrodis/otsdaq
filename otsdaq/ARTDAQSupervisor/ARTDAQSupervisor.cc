@@ -101,7 +101,7 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 {
 	__SUP_COUT__ << "Constructor." << __E__;
 
-	INIT_MF("ARTDAQSupervisor");
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 	init_sighandler(this);
 
 	// Write out settings file

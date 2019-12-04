@@ -24,7 +24,7 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub* stub)
 {
 	__SUP_COUT__ << "Constructor." << __E__;
 
-	INIT_MF("CoreSupervisorBase");
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
 	xgi::bind(this, &CoreSupervisorBase::defaultPageWrapper, "Default");
 	xgi::bind(this, &CoreSupervisorBase::requestWrapper, "Request");

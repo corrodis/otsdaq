@@ -2892,7 +2892,7 @@ void WebUsers::loadSecuritySelection()
 //========================================================================================================================
 void WebUsers::NACDisplayThread(const std::string& nac, const std::string& user)
 {
-	INIT_MF("WebUsers_NAC");
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 	//////////////////////////////////////////////////////////////////////
 	// thread notifying the user about the admin new account code
 	// notify for 10 seconds (e.g.)
