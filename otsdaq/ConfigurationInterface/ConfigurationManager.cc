@@ -19,6 +19,7 @@ const std::string ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME  = "XDAQAppl
 const std::string ConfigurationManager::XDAQ_APP_PROPERTY_TABLE_NAME = "XDAQApplicationPropertyTable";
 const std::string ConfigurationManager::GROUP_ALIASES_TABLE_NAME     = "GroupAliasesTable";
 const std::string ConfigurationManager::VERSION_ALIASES_TABLE_NAME   = "VersionAliasesTable";
+const std::string ConfigurationManager::ARTDAQ_TOP_TABLE_NAME  		 = "ARTDAQSupervisorTable";
 
 // added env check for otsdaq_flatten_active_to_version to function
 const std::string ConfigurationManager::ACTIVE_GROUPS_FILENAME =

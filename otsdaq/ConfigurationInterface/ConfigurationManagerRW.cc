@@ -42,11 +42,7 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 {
 	__COUT__ << "Using Config Mgr with Write Access! (for " << username << ")" << __E__;
 
-	// FIXME only necessarily temporarily while Lore is still using fileSystem xml
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
-	                                                             // FIXME -- can delete this change of
-	                                                             // interface once RW and regular use
-	                                                             // same interface instance
 
 	//=========================
 	// dump names of core tables (so UpdateOTS.sh can copy core tables for user)
@@ -58,7 +54,7 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 
 		FILE* fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "r");
 
-		__COUT__ << "Updating core tables table..." << __E__;
+		__COUT__ << "Updating core tables file..." << __E__;
 
 		if(fp)  // check for all core table names in file, and force their presence
 		{
@@ -539,12 +535,28 @@ TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
 {
 	if(nameToTableMap_.find(tableName) == nameToTableMap_.end())
 	{
+		if(tableName == ConfigurationManager::ARTDAQ_TOP_TABLE_NAME)
+		{
+			__COUT_WARN__ << "Since target table was the artdaq top configuration level, "
+					"attempting to help user by appending to core tables file: " <<
+					CORE_TABLE_INFO_FILENAME << __E__;
+			FILE* fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "a");
+			if(fp)
+			{
+				fprintf(fp, "\nARTDAQ/*");
+				fclose(fp);
+			}
+		}
+
 		__SS__ << "Table not found with name: " << tableName << __E__;
 		size_t f;
 		if((f = tableName.find(' ')) != std::string::npos)
 			ss << "There was a space character found in the table name needle at "
 			      "position "
 			   << f << " in the string (was this intended?). " << __E__;
+
+		ss << "\nIf you think this table should exist in the core set of tables, try running 'UpdateOTS.sh --tables' to update your tables, then relaunch ots." << __E__;
+		ss << "\nTables must be defined in $USER_DATA/TableInfo to exist in ots. Please verify your table definitions, and then restart ots." << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}

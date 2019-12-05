@@ -34,6 +34,7 @@ class ConfigurationManager
 	static const std::string XDAQ_APP_PROPERTY_TABLE_NAME;
 	static const std::string GROUP_ALIASES_TABLE_NAME;
 	static const std::string VERSION_ALIASES_TABLE_NAME;
+	static const std::string ARTDAQ_TOP_TABLE_NAME;
 
 	static const std::string ACTIVE_GROUP_NAME_CONTEXT;
 	static const std::string ACTIVE_GROUP_NAME_BACKBONE;
