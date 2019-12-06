@@ -1835,10 +1835,10 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						auto otherNodeColumns = otherNode.second.getChildren();
 						
 						bool isMultiNode = true;
-						for(unsigned int i=0;i<thisNodeColumns.size() && i<otherNodeColumns.size();++i)
+						for(unsigned int i=0;i<thisNodeColumns.size() &&
+							i<otherNodeColumns.size();++i)
 						{
-							if(skipColumns.find(thisNodeColumns[i].first) != skipColumns.end() ||
-								thisNodeColumns[i].second.isStatusNode())
+							if(skipColumns.find(thisNodeColumns[i].first) != skipColumns.end())
 								continue; //skip columns that do not need to be checked for multi-node consideration
 							
 							//at this point must match for multinode
@@ -2141,7 +2141,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 //	node object and subsystem object.
 //
 //	Subsystem map to destination subsystem name.
-//	Node properties: {originalName,hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
+//	Node properties: {originalName,status,hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
 //
 void ARTDAQTableBase::setAndActivateARTDAQSystem(
     ConfigurationManagerRW*                                                                                        cfgMgr,
@@ -2565,10 +2565,10 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			TableEditStruct& typeTable = configGroupEdit.getTableEditStruct(it->second, true /*markModified*/);
 
 			//keep track of records to delete, initialize to all in current table
-			std::map<std::string /*type record uid*/,bool /*doDelete*/> deleteRecordMap;
+			std::map<std::string /*type record uid*/, bool /*doDelete*/> deleteRecordMap;
 			for(unsigned int i = 0; i < typeTable.tableView_->getNumberOfRows(); ++i)
 				deleteRecordMap.emplace(std::make_pair(
-						typeTable.tableView_->getDataView()[row][typeTable.tableView_->getColUID()],
+						typeTable.tableView_->getDataView()[i][typeTable.tableView_->getColUID()],
 						true)); //init to delete
 
 			for(auto& nodePair : nodeTypePair.second)
@@ -2579,6 +2579,12 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 				std::vector<unsigned int> nodeIndices, hostnameIndices;
 				unsigned int hostnameFixedWidth = 0, nodeNameFixedWidth = 0;
 				std::string hostname;
+
+				//keep a map original multinode values, to maintain node specific links
+				//	(emplace when original node is delete)
+				std::map<std::string /*originalMultiNode name*/,
+					std::map<unsigned int /*col*/,
+					std::string /*value*/>> originalMultinodeValues;
 
 				// if original record is found, then commandeer that record
 				//	else create a new record
@@ -2723,6 +2729,21 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								if(originalRow != TableView::INVALID &&
 										lastOriginalRow != TableView::INVALID)
 								{
+									//before deleting, record all customizing values and maintain when saving
+									originalMultinodeValues.emplace(
+											std::make_pair(originalName,
+													std::map<unsigned int /*col*/,
+														std::string /*value*/>()));
+									//save all link values
+									for(unsigned int col=0;i<typeTable.tableView_->getNumberOfColumns();++col)
+										if(typeTable.tableView_->getColumnInfo(col).isChildLink() ||
+												typeTable.tableView_->getColumnInfo(col).isChildLinkGroupID() ||
+												typeTable.tableView_->getColumnInfo(col).isChildLinkUID())
+											originalMultinodeValues.at(originalName).emplace(
+												std::make_pair(col,
+													typeTable.tableView_->getDataView()[row][col]));
+
+
 									typeTable.tableView_->deleteRow(lastOriginalRow);
 									if(originalRow > lastOriginalRow) --originalRow; //modify after delete
 								}
@@ -2767,9 +2788,6 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 						//remove from delete map
 						deleteRecordMap[nodeName] = false;
 
-						//enable the target row
-						typeTable.tableView_->setValueAsString("1", row, typeTable.tableView_->getColStatus());
-
 						__COUTV__(StringMacros::mapToString(processTypes_.mapToLinkGroupIDColumn_));
 
 						// set GroupID
@@ -2779,14 +2797,20 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 						    row,
 						    typeTable.tableView_->findCol(processTypes_.mapToGroupIDColumn_.at(nodeTypePair.first)));
 					}
-					else if(i == 1)  // hostname
+					else if(i == 1)  // status
+					{
+						//enable/disable the target row
+						typeTable.tableView_->setValueAsString(nodePair.second[i],
+								row, typeTable.tableView_->getColStatus());
+					}
+					else if(i == 2)  // hostname
 					{
 						// set hostname
 						hostname = nodePair.second[i];
 						typeTable.tableView_->setValueAsString(
 								hostname, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_HOSTNAME));
 					}
-					else if(i == 2)  // subsystemName
+					else if(i == 3)  // subsystemName
 					{
 						// set subsystemName
 						if(nodePair.second[i] != "" && nodePair.second[i] != TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
@@ -2809,7 +2833,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							    TableViewColumnInfo::DATATYPE_LINK_DEFAULT, row, typeTable.tableView_->findCol(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK));
 						}
 					}
-					else if(i == 3 || i == 4 || i == 5 || i == 6) //(nodeArrString),(nodeNameFixedWidth),(hostnameArrString),(hostnameFixedWidth)
+					else if(i == 4 || i == 5 || i == 6 || i == 7) //(nodeArrString),(nodeNameFixedWidth),(hostnameArrString),(hostnameFixedWidth)
 					{
 						//fill multi-node and array hostname info to empty
 						// then handle after all parameters in hand.
@@ -2864,7 +2888,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 										"%u",&index);
 								__COUTV__(index);
 
-								if(i == 3) nodeIndices.push_back(index);
+								if(i == 4 /*nodeArrayString*/) nodeIndices.push_back(index);
 								else hostnameIndices.push_back(index);
 							}
 							else // printerSyntaxRange.size() == 2
@@ -2883,7 +2907,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								for(;lo<=hi;++lo)
 								{
 									__COUTV__(lo);
-									if(i == 3) nodeIndices.push_back(lo);
+									if(i == 4 /*nodeArrayString*/) nodeIndices.push_back(lo);
 									else hostnameIndices.push_back(lo);
 								}
 							}
@@ -3029,7 +3053,18 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 									name, copyRow, typeTable.tableView_->getColUID());
 							typeTable.tableView_->setValueAsString(
 									hostname, copyRow, hostnameCol);
-						}
+
+							//customize row if in original value map
+							if(originalMultinodeValues.find(name) != originalMultinodeValues.end())
+							{
+								__COUT__ << "Customizing node: " <<
+										StringMacros::mapToString<unsigned int>(
+												(/*cast becaust std lib is bad*/ const std::map<std::string,unsigned int>&)originalMultinodeValues.at(name)) << __E__;
+								for(const auto& valuePair:originalMultinodeValues.at(name))
+									typeTable.tableView_->setValueAsString(
+											valuePair.second, copyRow, valuePair.first);
+							}
+						} //end copy and customize row handling
 
 						//remove from delete map
 						deleteRecordMap[name] = false;
