@@ -724,8 +724,8 @@ std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn
 //	a vector of wildcards that would replace the *
 void StringMacros::extractCommonChunks(
 		const std::vector<std::string>& haystack,
-		std::vector<std::string>& commonChunks,
-		std::set<std::string>& wildcardStrings,
+		std::vector<std::string>& commonChunksToReturn,
+		std::set<std::string>& wildcardStringsToReturn,
 		unsigned int& fixedWildcardLength)
 {
 	fixedWildcardLength = 0; //default
@@ -798,9 +798,11 @@ void StringMacros::extractCommonChunks(
 
 
 	//add first common chunk
-	commonChunks.push_back(
+	commonChunksToReturn.push_back(
 			haystack[0].substr(0,wildcardBounds.first));
 
+	if(wildcardBounds.first == (unsigned int)-1) //done, all are the same
+		return;
 
 	//  - use start and end to determine if there is more than one *
 	for(int i=(wildcardBounds.first+wildcardBounds.second)/2+1;
@@ -849,7 +851,7 @@ void StringMacros::extractCommonChunks(
 			for(unsigned int w=0;
 					w<wildCardInstances.size()-1;++w)
 			{
-				commonChunks.push_back(
+				commonChunksToReturn.push_back(
 						haystack[0].substr(
 						wildCardInstances[w] +
 						wildCardInstances.size(),
@@ -863,8 +865,8 @@ void StringMacros::extractCommonChunks(
 	//check if all common chunks end in 0 to add fixed length
 
 
-	for(unsigned int i=0;i<commonChunks[0].size();++i)
-		if(commonChunks[0][commonChunks[0].size()-1-i] == '0')
+	for(unsigned int i=0;i<commonChunksToReturn[0].size();++i)
+		if(commonChunksToReturn[0][commonChunksToReturn[0].size()-1-i] == '0')
 			++fixedWildcardLength;
 		else
 			break;
@@ -872,11 +874,11 @@ void StringMacros::extractCommonChunks(
 
 
 	bool allHave0 = true;
-	for(unsigned int c=0;c<commonChunks.size();++c)
+	for(unsigned int c=0;c<commonChunksToReturn.size();++c)
 	{
 		unsigned int cnt = 0;
-		for(unsigned int i=0;i<commonChunks[c].size();++i)
-			if(commonChunks[c][commonChunks[c].size()-1-i] == '0')
+		for(unsigned int i=0;i<commonChunksToReturn[c].size();++i)
+			if(commonChunksToReturn[c][commonChunksToReturn[c].size()-1-i] == '0')
 				++cnt;
 			else
 				break;
@@ -886,19 +888,19 @@ void StringMacros::extractCommonChunks(
 		else if(fixedWildcardLength > cnt)
 		{
 			__SS__ << "Invalid fixed length found, please simplify indexing between these common chunks: " <<
-					StringMacros::vectorToString(commonChunks) << __E__;
+					StringMacros::vectorToString(commonChunksToReturn) << __E__;
 			__SS_THROW__;
 		}
 	}
 	__COUTV__(fixedWildcardLength);
 
 	if(fixedWildcardLength) //take trailing 0s out of common chunks
-		for(unsigned int c=0;c<commonChunks.size();++c)
-			commonChunks[c] = commonChunks[c].substr(0,
-					commonChunks[c].size()-fixedWildcardLength);
+		for(unsigned int c=0;c<commonChunksToReturn.size();++c)
+			commonChunksToReturn[c] = commonChunksToReturn[c].substr(0,
+					commonChunksToReturn[c].size()-fixedWildcardLength);
 
 	//add last common chunk
-	commonChunks.push_back(haystack[0].substr(wildcardBounds.second));
+	commonChunksToReturn.push_back(haystack[0].substr(wildcardBounds.second));
 
 
 	//(do not, just assume) verify common chunks
@@ -910,11 +912,11 @@ void StringMacros::extractCommonChunks(
 	{
 		std::string wildcard = "";
 		k = 0;
-		i = ioff + commonChunks[0].size();
+		i = ioff + commonChunksToReturn[0].size();
 
-		for(unsigned int c=1;c<commonChunks.size();++c)
+		for(unsigned int c=1;c<commonChunksToReturn.size();++c)
 		{
-			k = haystack[n].find(commonChunks[c],i+1);
+			k = haystack[n].find(commonChunksToReturn[c],i+1);
 
 			if(wildcard == "")
 			{
@@ -940,15 +942,15 @@ void StringMacros::extractCommonChunks(
 			}
 
 			i = k;
-		} //end commonChunks loop
+		} //end commonChunksToReturn loop
 
-		wildcardStrings.emplace(wildcard);
+		wildcardStringsToReturn.emplace(wildcard);
 
 	} //end name loop
 
 
-	__COUTV__(StringMacros::vectorToString(commonChunks));
-	__COUTV__(StringMacros::setToString(wildcardStrings));
+	__COUTV__(StringMacros::vectorToString(commonChunksToReturn));
+	__COUTV__(StringMacros::setToString(wildcardStringsToReturn));
 
 
 } //end extractCommonChunks()

@@ -1784,7 +1784,11 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 			std::set<std::string /*nodeName*/> skipMap; //use to skip nodes when constructing multi-nodes
 			
 			const std::set<std::string /*colName*/> skipColumns({
-				ARTDAQ_TYPE_TABLE_HOSTNAME, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK	
+				ARTDAQ_TYPE_TABLE_HOSTNAME,
+				ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK,
+				TableViewColumnInfo::COL_NAME_COMMENT,
+				TableViewColumnInfo::COL_NAME_AUTHOR,
+				TableViewColumnInfo::COL_NAME_CREATION
 			}); //note: also skip UID and Status
 			
 			//loop through all nodes of this type
@@ -1829,8 +1833,8 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						//possible multi-node situation
 						__COUT__ << "Checking for multi-node..." << __E__;
 						
-						//__COUTV__(thisNode.getNodeRow());
-						//__COUTV__(otherNode.second.getNodeRow());
+						__COUTV__(thisNode.getNodeRow());
+						__COUTV__(otherNode.second.getNodeRow());
 						
 						auto otherNodeColumns = otherNode.second.getChildren();
 						
@@ -1838,20 +1842,23 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						for(unsigned int i=0;i<thisNodeColumns.size() &&
 							i<otherNodeColumns.size();++i)
 						{
-							if(skipColumns.find(thisNodeColumns[i].first) != skipColumns.end())
-								continue; //skip columns that do not need to be checked for multi-node consideration
+							//skip columns that do not need to be checked for multi-node consideration
+							if(skipColumns.find(thisNodeColumns[i].first) != skipColumns.end() ||
+								thisNodeColumns[i].second.isLinkNode())
+								continue;
 							
 							//at this point must match for multinode
 							
-							//__COUTV__(thisNodeColumns[i].first);
-							//__COUTV__(otherNodeColumns[i].first);
+							__COUTV__(thisNodeColumns[i].first);
+							__COUTV__(otherNodeColumns[i].first);
 
-							//__COUTV__(thisNodeColumns[i].second.getValue());
-							//__COUTV__(otherNodeColumns[i].second.getValue());
+							__COUTV__(thisNodeColumns[i].second.getValue());
+							__COUTV__(otherNodeColumns[i].second.getValue());
 							
 							if(thisNodeColumns[i].second.getValue() != 
 								otherNodeColumns[i].second.getValue())
 							{
+								__COUT__ << "Mismatch, not multinode member." << __E__;
 								isMultiNode = false;
 								break;
 							}
