@@ -1224,11 +1224,12 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 
 //========================================================================================================================
 const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(ConfigurationTree artdaqSupervisorNode,
+																	  bool				getStatusFalseNodes /* = false */,
                                                                       bool              doWriteFHiCL /* = false */,
                                                                       size_t            maxFragmentSizeBytes /* = DEFAULT_MAX_FRAGMENT_SIZE*/,
                                                                       size_t            routingTimeoutMs /* = DEFAULT_ROUTING_TIMEOUT_MS */,
                                                                       size_t            routingRetryCount /* = DEFAULT_ROUTING_RETRY_COUNT */,
-                                                                      ProgressBar*      progressBar /* =0 */)
+                                                                      ProgressBar*      progressBar /* = 0 */)
 {
 	if(progressBar)
 		progressBar->step();
@@ -1247,27 +1248,27 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(Configurat
 	if(artdaqSupervisorNode.isDisconnected()) return info_;
 
 	// We do RoutingMasters first so we can properly fill in routing tables later
-	extractRoutingMastersInfo(artdaqSupervisorNode, doWriteFHiCL, routingTimeoutMs, routingRetryCount);
+	extractRoutingMastersInfo(artdaqSupervisorNode, getStatusFalseNodes, doWriteFHiCL, routingTimeoutMs, routingRetryCount);
 
 	if(progressBar)
 		progressBar->step();
 
-	extractBoardReadersInfo(artdaqSupervisorNode, doWriteFHiCL, maxFragmentSizeBytes, routingTimeoutMs, routingRetryCount);
+	extractBoardReadersInfo(artdaqSupervisorNode, getStatusFalseNodes, doWriteFHiCL, maxFragmentSizeBytes, routingTimeoutMs, routingRetryCount);
 
 	if(progressBar)
 		progressBar->step();
 
-	extractEventBuildersInfo(artdaqSupervisorNode, doWriteFHiCL, maxFragmentSizeBytes);
+	extractEventBuildersInfo(artdaqSupervisorNode, getStatusFalseNodes, doWriteFHiCL, maxFragmentSizeBytes);
 
 	if(progressBar)
 		progressBar->step();
 
-	extractDataLoggersInfo(artdaqSupervisorNode, doWriteFHiCL, maxFragmentSizeBytes);
+	extractDataLoggersInfo(artdaqSupervisorNode, getStatusFalseNodes, doWriteFHiCL, maxFragmentSizeBytes);
 
 	if(progressBar)
 		progressBar->step();
 
-	extractDispatchersInfo(artdaqSupervisorNode, doWriteFHiCL, maxFragmentSizeBytes);
+	extractDispatchersInfo(artdaqSupervisorNode, getStatusFalseNodes, doWriteFHiCL, maxFragmentSizeBytes);
 
 	if(progressBar)
 		progressBar->step();
@@ -1276,7 +1277,8 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(Configurat
 }  // end extractARTDAQInfo()
 
 //========================================================================================================================
-void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t routingTimeoutMs, size_t routingRetryCount)
+void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes,
+		bool doWriteFHiCL, size_t routingTimeoutMs, size_t routingRetryCount)
 {
 	__COUT__ << "Checking for Routing Masters..." << __E__;
 	ConfigurationTree rmsLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToRoutingMasters_);
@@ -1290,7 +1292,7 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 		{
 			const std::string& rmUID  = routingMaster.first;
 
-			if(routingMaster.second.status())
+			if(getStatusFalseNodes || routingMaster.second.status())
 			{
 				std::string  rmHost = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
@@ -1300,11 +1302,11 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 				{
 					routingMasterSubsystemID = getSubsytemId(routingMasterSubsystemLink);
 
-					__COUTV__(routingMasterSubsystemID);
+					//__COUTV__(routingMasterSubsystemID);
 					info_.subsystems[routingMasterSubsystemID].id = routingMasterSubsystemID;
 
 					const std::string& routingMasterSubsystemName = routingMasterSubsystemLink.getUIDAsString();
-					__COUTV__(routingMasterSubsystemName);
+					//__COUTV__(routingMasterSubsystemName);
 
 					info_.subsystems[routingMasterSubsystemID].label = routingMasterSubsystemName;
 
@@ -1326,7 +1328,7 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 						// get destination subsystem id
 						info_.subsystems[routingMasterSubsystemID].destination = getSubsytemId(routingMasterSubsystemDestinationLink);
 					}
-					__COUTV__(info_.subsystems[routingMasterSubsystemID].destination);
+					//__COUTV__(info_.subsystems[routingMasterSubsystemID].destination);
 
 					// add this subsystem to destination subsystem's sources, if not
 					// there
@@ -1340,7 +1342,9 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 
 				__COUT__ << "Found Routing Master with UID " << rmUID << ", DAQInterface Hostname " << rmHost << ", and Subsystem " << routingMasterSubsystemID
 				         << __E__;
-				info_.processes[ARTDAQAppType::RoutingMaster].emplace_back(rmUID, rmHost, routingMasterSubsystemID, ARTDAQAppType::RoutingMaster);
+				info_.processes[ARTDAQAppType::RoutingMaster].emplace_back(
+						rmUID, rmHost, routingMasterSubsystemID, ARTDAQAppType::RoutingMaster,
+						routingMaster.second.status());
 
 				info_.subsystems[routingMasterSubsystemID].hasRoutingMaster = true;
 
@@ -1355,13 +1359,13 @@ void ARTDAQTableBase::extractRoutingMastersInfo(ConfigurationTree artdaqSupervis
 			{
 				__COUT__ << "Routing Master " << rmUID << " is disabled." << __E__;
 			}
-		}
+		} //end routing master loop
 	}
 }  // end extractRoutingMastersInfo()
 
 //========================================================================================================================
-void ARTDAQTableBase::extractBoardReadersInfo(
-    ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes, size_t routingTimeoutMs, size_t routingRetryCount)
+void ARTDAQTableBase::extractBoardReadersInfo(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes,
+	bool doWriteFHiCL, size_t maxFragmentSizeBytes, size_t routingTimeoutMs, size_t routingRetryCount)
 {
 	__COUT__ << "Checking for Board Readers..." << __E__;
 	ConfigurationTree readersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToBoardReaders_);
@@ -1374,7 +1378,7 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 		{
 			const std::string& readerUID  = reader.first;
 
-			if(reader.second.status())
+			if(getStatusFalseNodes || reader.second.status())
 			{
 				std::string  readerHost = reader.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
@@ -1383,11 +1387,11 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 				if(!readerSubsystemLink.isDisconnected())
 				{
 					readerSubsystemID = getSubsytemId(readerSubsystemLink);
-					__COUTV__(readerSubsystemID);
+					//__COUTV__(readerSubsystemID);
 					info_.subsystems[readerSubsystemID].id = readerSubsystemID;
 
 					const std::string& readerSubsystemName = readerSubsystemLink.getUIDAsString();
-					__COUTV__(readerSubsystemName);
+					//__COUTV__(readerSubsystemName);
 
 					info_.subsystems[readerSubsystemID].label = readerSubsystemName;
 
@@ -1402,7 +1406,7 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 						// get destination subsystem id
 						info_.subsystems[readerSubsystemID].destination = getSubsytemId(readerSubsystemDestinationLink);
 					}
-					__COUTV__(info_.subsystems[readerSubsystemID].destination);
+					//__COUTV__(info_.subsystems[readerSubsystemID].destination);
 
 					// add this subsystem to destination subsystem's sources, if not
 					// there
@@ -1416,7 +1420,9 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 
 				__COUT__ << "Found Board Reader with UID " << readerUID << ", DAQInterface Hostname " << readerHost << ", and Subsystem " << readerSubsystemID
 				         << __E__;
-				info_.processes[ARTDAQAppType::BoardReader].emplace_back(readerUID, readerHost, readerSubsystemID, ARTDAQAppType::BoardReader);
+				info_.processes[ARTDAQAppType::BoardReader].emplace_back(
+						readerUID, readerHost, readerSubsystemID, ARTDAQAppType::BoardReader,
+						reader.second.status());
 
 				if(doWriteFHiCL)
 				{
@@ -1429,7 +1435,7 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 			{
 				__COUT__ << "Board Reader " << readerUID << " is disabled." << __E__;
 			}
-		}
+		} //end reader loop
 	}
 	else
 	{
@@ -1440,7 +1446,8 @@ void ARTDAQTableBase::extractBoardReadersInfo(
 }  // end extractBoardReadersInfo()
 
 //========================================================================================================================
-void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
+void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes,
+		bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
 	__COUT__ << "Checking for Event Builders..." << __E__;
 	ConfigurationTree buildersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToEventBuilders_);
@@ -1452,7 +1459,7 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 		{
 			const std::string& builderUID  = builder.first;
 
-			if(builder.second.status())
+			if(getStatusFalseNodes || builder.second.status())
 			{
 				std::string  builderHost = builder.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
@@ -1461,12 +1468,12 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 				if(!builderSubsystemLink.isDisconnected())
 				{
 					builderSubsystemID = getSubsytemId(builderSubsystemLink);
-					__COUTV__(builderSubsystemID);
+					//__COUTV__(builderSubsystemID);
 
 					info_.subsystems[builderSubsystemID].id = builderSubsystemID;
 
 					const std::string& builderSubsystemName = builderSubsystemLink.getUIDAsString();
-					__COUTV__(builderSubsystemName);
+					//__COUTV__(builderSubsystemName);
 
 					info_.subsystems[builderSubsystemID].label = builderSubsystemName;
 
@@ -1481,7 +1488,7 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 						// get destination subsystem id
 						info_.subsystems[builderSubsystemID].destination = getSubsytemId(builderSubsystemDestinationLink);
 					}
-					__COUTV__(info_.subsystems[builderSubsystemID].destination);
+					//__COUTV__(info_.subsystems[builderSubsystemID].destination);
 
 					// add this subsystem to destination subsystem's sources, if not
 					// there
@@ -1495,7 +1502,9 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 
 				__COUT__ << "Found Event Builder with UID " << builderUID << ", on Hostname " << builderHost << ", in Subsystem " << builderSubsystemID
 				         << __E__;
-				info_.processes[ARTDAQAppType::EventBuilder].emplace_back(builderUID, builderHost, builderSubsystemID, ARTDAQAppType::EventBuilder);
+				info_.processes[ARTDAQAppType::EventBuilder].emplace_back(
+						builderUID, builderHost, builderSubsystemID, ARTDAQAppType::EventBuilder,
+						builder.second.status());
 
 				if(doWriteFHiCL)
 				{
@@ -1508,7 +1517,7 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 			{
 				__COUT__ << "Event Builder " << builderUID << " is disabled." << __E__;
 			}
-		}
+		} //end builder loop
 	}
 	else
 	{
@@ -1519,7 +1528,8 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 }  // end extractEventBuildersInfo()
 
 //========================================================================================================================
-void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
+void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes,
+		bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
 	__COUT__ << "Checking for Data Loggers..." << __E__;
 	ConfigurationTree dataloggersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToDataLoggers_);
@@ -1531,9 +1541,8 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 		{
 			const std::string& loggerUID  = datalogger.first;
 
-			if(datalogger.second.status())
+			if(getStatusFalseNodes || datalogger.second.status())
 			{
-
 				std::string  loggerHost = datalogger.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
 				int               loggerSubsystemID   = 1;
@@ -1541,11 +1550,11 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 				if(!loggerSubsystemLink.isDisconnected())
 				{
 					loggerSubsystemID = getSubsytemId(loggerSubsystemLink);
-					__COUTV__(loggerSubsystemID);
+					//__COUTV__(loggerSubsystemID);
 					info_.subsystems[loggerSubsystemID].id = loggerSubsystemID;
 
 					const std::string& loggerSubsystemName = loggerSubsystemLink.getUIDAsString();
-					__COUTV__(loggerSubsystemName);
+					//__COUTV__(loggerSubsystemName);
 
 					info_.subsystems[loggerSubsystemID].label = loggerSubsystemName;
 
@@ -1560,7 +1569,7 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 						// get destination subsystem id
 						info_.subsystems[loggerSubsystemID].destination = getSubsytemId(loggerSubsystemDestinationLink);
 					}
-					__COUTV__(info_.subsystems[loggerSubsystemID].destination);
+					//__COUTV__(info_.subsystems[loggerSubsystemID].destination);
 
 					// add this subsystem to destination subsystem's sources, if not
 					// there
@@ -1574,7 +1583,9 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 
 				__COUT__ << "Found Data Logger with UID " << loggerUID << ", DAQInterface Hostname " << loggerHost << ", and Subsystem " << loggerSubsystemID
 				         << __E__;
-				info_.processes[ARTDAQAppType::DataLogger].emplace_back(loggerUID, loggerHost, loggerSubsystemID, ARTDAQAppType::DataLogger);
+				info_.processes[ARTDAQAppType::DataLogger].emplace_back(
+						loggerUID, loggerHost, loggerSubsystemID, ARTDAQAppType::DataLogger,
+						datalogger.second.status());
 
 				if(doWriteFHiCL)
 				{
@@ -1587,7 +1598,7 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 			{
 				__COUT__ << "Data Logger " << loggerUID << " is disabled." << __E__;
 			}
-		}
+		} //end logger loop
 	}
 	else
 	{
@@ -1596,7 +1607,8 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 }  // end extractDataLoggersInfo()
 
 //========================================================================================================================
-void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
+void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes,
+		bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
 	__COUT__ << "Checking for Dispatchers..." << __E__;
 	ConfigurationTree dispatchersLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToDispatchers_);
@@ -1608,7 +1620,7 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 		{
 			const std::string& dispatcherUID  = dispatcher.first;
 
-			if(dispatcher.second.status())
+			if(getStatusFalseNodes || dispatcher.second.status())
 			{
 				std::string  dispatcherHost = dispatcher.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 
@@ -1617,11 +1629,11 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 				if(!dispatcherSubsystemLink.isDisconnected())
 				{
 					dispatcherSubsystemID = getSubsytemId(dispatcherSubsystemLink);
-					__COUTV__(dispatcherSubsystemID);
+					//__COUTV__(dispatcherSubsystemID);
 					info_.subsystems[dispatcherSubsystemID].id = dispatcherSubsystemID;
 
 					const std::string& dispatcherSubsystemName = dispatcherSubsystemLink.getUIDAsString();
-					__COUTV__(dispatcherSubsystemName);
+					//__COUTV__(dispatcherSubsystemName);
 
 					info_.subsystems[dispatcherSubsystemID].label = dispatcherSubsystemName;
 
@@ -1636,7 +1648,7 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 						// get destination subsystem id
 						info_.subsystems[dispatcherSubsystemID].destination = getSubsytemId(dispatcherSubsystemDestinationLink);
 					}
-					__COUTV__(info_.subsystems[dispatcherSubsystemID].destination);
+					//__COUTV__(info_.subsystems[dispatcherSubsystemID].destination);
 
 					// add this subsystem to destination subsystem's sources, if not
 					// there
@@ -1649,7 +1661,9 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 
 				__COUT__ << "Found Dispatcher with UID " << dispatcherUID << ", DAQInterface Hostname " << dispatcherHost << ", and Subsystem "
 				         << dispatcherSubsystemID << __E__;
-				info_.processes[ARTDAQAppType::Dispatcher].emplace_back(dispatcherUID, dispatcherHost, dispatcherSubsystemID, ARTDAQAppType::Dispatcher);
+				info_.processes[ARTDAQAppType::Dispatcher].emplace_back(dispatcherUID,
+						dispatcherHost, dispatcherSubsystemID, ARTDAQAppType::Dispatcher,
+						dispatcher.second.status());
 
 				if(doWriteFHiCL)
 				{
@@ -1662,7 +1676,7 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 			{
 				__COUT__ << "Dispatcher " << dispatcherUID << " is disabled." << __E__;
 			}
-		}
+		} //end dispatcher loop
 	}
 	else
 	{
@@ -1676,8 +1690,8 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 //		static function to retrive the active ARTDAQ system configuration.
 //
 //	Subsystem map to destination subsystem name.
-//	Node properties: {hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
-//	artdaqSupervisoInfo: {name, context address, context port}
+//	Node properties: {status,hostname,subsystemName,(nodeArrString),(hostnameArrString),(hostnameFixedWidth)}
+//	artdaqSupervisoInfo: {name, status, context address, context port}
 //
 const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
     ConfigurationManagerRW*                                                                                        cfgMgr,
@@ -1712,12 +1726,14 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 
 		__COUTV__(artdaqApp.applicationUID_);
 		artdaqSupervisoInfo.push_back(artdaqApp.applicationUID_);
+		artdaqSupervisoInfo.push_back((artdaqContext->status_ && artdaqApp.status_)?"1":"0");
 		artdaqSupervisoInfo.push_back(artdaqContext->address_);
 		artdaqSupervisoInfo.push_back(std::to_string(artdaqContext->port_));
 
 		const ARTDAQTableBase::ARTDAQInfo& info = ARTDAQTableBase::extractARTDAQInfo(
-				XDAQContextTable::getSupervisorConfigNode(
-						cfgMgr, artdaqContext->contextUID_, artdaqApp.applicationUID_));
+				XDAQContextTable::getSupervisorConfigNode( /*artdaqSupervisorNode*/
+						cfgMgr, artdaqContext->contextUID_, artdaqApp.applicationUID_),
+						true /*getStatusFalseNodes*/);
 
 		__COUT__ << "========== "
 				<< "Found " << info.subsystems.size() << " subsystems." << __E__;
@@ -1782,6 +1798,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						<< typeString << __E__;
 
 				std::string nodeName = artdaqNode.label;
+				bool 	    status   = artdaqNode.status;
 				std::string hostname = artdaqNode.hostname;
 				std::string subsystemId = std::to_string(artdaqNode.subsystem);
 				std::string subsystemName = info.subsystems.at(artdaqNode.subsystem).label;
@@ -1812,8 +1829,8 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						//possible multi-node situation
 						__COUT__ << "Checking for multi-node..." << __E__;
 						
-						__COUTV__(thisNode.getNodeRow());
-						__COUTV__(otherNode.second.getNodeRow());
+						//__COUTV__(thisNode.getNodeRow());
+						//__COUTV__(otherNode.second.getNodeRow());
 						
 						auto otherNodeColumns = otherNode.second.getChildren();
 						
@@ -1826,11 +1843,11 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 							
 							//at this point must match for multinode
 							
-							__COUTV__(thisNodeColumns[i].first);
-							__COUTV__(otherNodeColumns[i].first);
+							//__COUTV__(thisNodeColumns[i].first);
+							//__COUTV__(otherNodeColumns[i].first);
 
-							__COUTV__(thisNodeColumns[i].second.getValue());
-							__COUTV__(otherNodeColumns[i].second.getValue());
+							//__COUTV__(thisNodeColumns[i].second.getValue());
+							//__COUTV__(otherNodeColumns[i].second.getValue());
 							
 							if(thisNodeColumns[i].second.getValue() != 
 								otherNodeColumns[i].second.getValue())
@@ -2057,6 +2074,12 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						std::make_pair(
 								nodeName,
 								std::vector<std::string /*property*/>()));
+
+				nodeTypeToObjectMap.at(
+						typeString).at(
+								nodeName
+								).push_back(
+										status?"1":"0");
 
 				nodeTypeToObjectMap.at(
 						typeString).at(

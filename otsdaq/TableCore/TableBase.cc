@@ -441,7 +441,7 @@ const TableView& TableBase::getView(void) const
 	{
 		__SS__ << "There is no active table view setup! Please check your system configuration."
 		       << __E__;
-		__SS_THROW__;
+		__SS_ONLY_THROW__;
 	}
 	return *activeTableView_;
 }
@@ -453,7 +453,7 @@ TableView* TableBase::getViewP(void)
 	{
 		__SS__ << "There is no active table view setup! Please check your system configuration."
 		       << __E__;
-		__SS_THROW__;
+		__SS_ONLY_THROW__;
 	}
 	return activeTableView_;
 }

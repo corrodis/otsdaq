@@ -371,6 +371,7 @@ try
 
 	auto info = ARTDAQTableBase::extractARTDAQInfo(
 	    theSupervisorNode,
+		false /*getStatusFalseNodes*/,
 	    true /*doWriteFHiCL*/,
 	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("max_fragment_size_bytes", ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE),
 	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_timeout_ms", ARTDAQTableBase::DEFAULT_ROUTING_TIMEOUT_MS),

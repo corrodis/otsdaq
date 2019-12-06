@@ -1398,10 +1398,11 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 			getChildren(&memberMap, accumulatedWarnings);
 			if(*accumulatedWarnings != "")
 			{
-				__COUT_ERR__ << "Errors detected while loading Table Group: " << groupName << "(" << groupKey << "). Aborting."
+				__COUT_ERR__ << "Errors detected while loading Table Group: " <<
+							groupName << "(" << groupKey <<
+							"). Ignoring the following errors: "
 				             << "\n"
 				             << *accumulatedWarnings << __E__;
-				// return;  // memberMap; //return member name map to version
 			}
 		}
 
