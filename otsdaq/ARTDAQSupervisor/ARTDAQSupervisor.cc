@@ -557,8 +557,9 @@ try
 	theArtdaqSupervisor->getDAQState_();
 	if(theArtdaqSupervisor->daqinterface_state_ != "booted")
 	{
-		__GEN_SS__ << "DAQInterface boot transition failed!" << __E__;
-		__GEN_SS_THROW__
+		__GEN_SS__ << "DAQInterface boot transition failed! " <<
+				"Status after boot attempt: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
+		__GEN_SS_THROW__;
 	}
 	__GEN_COUT__ << "Status after boot: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
 
