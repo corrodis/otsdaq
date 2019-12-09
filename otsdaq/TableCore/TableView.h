@@ -37,7 +37,11 @@ class TableView
 	                      unsigned int       srcOffsetRow              = 0,
 	                      unsigned int       srcRowsToCopy             = (unsigned int)-1,
 	                      unsigned int       destOffsetRow             = (unsigned int)-1,
-	                      bool               generateUniqueDataColumns = false);
+	                      unsigned char      generateUniqueDataColumns = false, // leave as unsigned char rather than
+                          // bool, too many things (e.g. strings)
+                          // evaluate successfully to bool values
+						  const std::string& baseNameAutoUID		   = ""
+						  );
 
 	template<class T>  // in included .icc source
 	unsigned int findRow(unsigned int col,

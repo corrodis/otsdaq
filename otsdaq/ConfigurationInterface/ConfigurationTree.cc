@@ -1546,7 +1546,7 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(c
 
 	for(unsigned int i = 0; i < recordList.size(); ++i)
 	{
-		__COUT__ << "Checking " << recordList[i] << __E__;
+		//__COUT__ << "Checking " << recordList[i] << __E__;
 		ConfigurationTree node = getNode(recordList[i]);
 
 		node.recursiveGetCommonFields(fieldCandidateList,
@@ -1933,8 +1933,8 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
                                                  bool                                              inFirstRecord) const
 {
 	--depth;
-	__COUT__ << "relativePathBase " << relativePathBase <<
-			" + " << inFirstRecord <<__E__;
+	//__COUT__ << "relativePathBase " << relativePathBase <<
+	//	" + " << inFirstRecord <<__E__;
 
 	//	=====================
 	//	Start recursiveGetCommonFields()
@@ -1962,9 +1962,9 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 	auto recordChildren = getChildren();
 	for(const auto& fieldNode : recordChildren)
 	{
-		__COUT__ << "All... " << fieldNode.second.getNodeType() <<
-				" -- " << (relativePathBase + fieldNode.first) <<
-				" + " << inFirstRecord <<__E__;
+		//__COUT__ << "All... " << fieldNode.second.getNodeType() <<
+		//		" -- " << (relativePathBase + fieldNode.first) <<
+		//		" + " << inFirstRecord <<__E__;
 
 		if(fieldNode.second.isValueNode() || fieldNode.second.isGroupLinkNode())
 		{
@@ -1980,9 +1980,9 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 
 			if(inFirstRecord)  // first uid record
 			{
-				__COUT__ << "Checking... " << fieldNode.second.getNodeType() <<
-						" -- " << (relativePathBase + fieldNode.first) <<
-						"-- depth=" << depth << __E__;
+				//__COUT__ << "Checking... " << fieldNode.second.getNodeType() <<
+				//		" -- " << (relativePathBase + fieldNode.first) <<
+				//		"-- depth=" << depth << __E__;
 
 				// check field accept filter list
 				found = fieldAcceptList.size() ? false : true;  // accept if no filter
@@ -2030,12 +2030,12 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 				// if found, new field (since this is first record)
 				if(found)
 				{
-					__COUT__ << "FOUND field " <<
-							(relativePathBase + fieldNode.first) << __E__;
+					//__COUT__ << "FOUND field " <<
+					//		(relativePathBase + fieldNode.first) << __E__;
 
 					if(fieldNode.second.isGroupLinkNode())
 					{
-						__COUT__ << "isGroupLinkNode " << fieldNode.first << __E__;
+						//__COUT__ << "isGroupLinkNode " << fieldNode.first << __E__;
 
 						// must get column info differently for group link column
 
@@ -2089,8 +2089,8 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 		} //end value and group link node handling
 		else if(depth > 0 && fieldNode.second.isUIDLinkNode())
 		{
-			__COUT__ << "isUIDLinkNode " << (relativePathBase + fieldNode.first) <<
-					" + " << inFirstRecord << __E__;
+			//__COUT__ << "isUIDLinkNode " << (relativePathBase + fieldNode.first) <<
+			//		" + " << inFirstRecord << __E__;
 
 			if(inFirstRecord)  // first uid record
 			{
@@ -2137,7 +2137,7 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 						}
 				}
 
-				__COUTV__(found);
+				//__COUTV__(found);
 
 
 				// if found, guaranteed field (all UID link fields must be common for
@@ -2147,7 +2147,7 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 					std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
 					bool                                                               isGroupLink;
 
-					__COUTV__(fieldNode.first);
+					//__COUTV__(fieldNode.first);
 					tableView_->getChildLink(tableView_->findCol(fieldNode.first), isGroupLink, linkPair);
 
 					// add both link columns

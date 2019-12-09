@@ -916,14 +916,18 @@ void StringMacros::extractCommonChunks(
 
 		for(unsigned int c=1;c<commonChunksToReturn.size();++c)
 		{
-			k = haystack[n].find(commonChunksToReturn[c],i+1);
+			if(c == commonChunksToReturn.size()-1) //for last, do reverse find
+				k = haystack[n].rfind(commonChunksToReturn[c]);
+			else
+				k = haystack[n].find(commonChunksToReturn[c],i+1);
 
 			if(wildcard == "")
 			{
 				//set wildcard for first time
 				__COUTV__(i);
-								__COUTV__(k);
-												__COUTV__(k-i);
+				__COUTV__(k);
+				__COUTV__(k-i);
+
 				wildcard = haystack[n].substr(i,k-i);
 				if(fixedWildcardLength && n == 0)
 					fixedWildcardLength += wildcard.size();

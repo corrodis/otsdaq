@@ -87,10 +87,11 @@ TableView& TableView::copy(const TableView& src, TableVersion destinationVersion
 //	return row offset of first row copied in
 unsigned int TableView::copyRows(const std::string& author,
                                  const TableView&   src,
-                                 unsigned int       srcOffsetRow,
-                                 unsigned int       srcRowsToCopy,
-                                 unsigned int       destOffsetRow,
-                                 bool               generateUniqueDataColumns)
+                                 unsigned int       srcOffsetRow /* = 0 */,
+                                 unsigned int       srcRowsToCopy /* = -1 */,
+                                 unsigned int       destOffsetRow /* = -1 */,
+                                 unsigned char      generateUniqueDataColumns /* = false */,
+								 const std::string& baseNameAutoUID /*= "" */)
 {
 	//__COUTV__(destOffsetRow);
 	//__COUTV__(srcOffsetRow);
@@ -113,15 +114,18 @@ unsigned int TableView::copyRows(const std::string& author,
 		if(r + srcOffsetRow >= srcRows)
 			break;  // end when no more source rows to copy (past bounds)
 
-		destOffsetRow = addRow(author, generateUniqueDataColumns /*incrementUniqueData*/, "" /*baseNameAutoUID*/,
-		                       destOffsetRow);  // add and get row created
+		destOffsetRow = addRow(author,
+				generateUniqueDataColumns /*incrementUniqueData*/,
+				baseNameAutoUID /*baseNameAutoUID*/,
+		        destOffsetRow);  // add and get row created
 
 		if(retRow == (unsigned int)-1)
 			retRow = destOffsetRow;  // save row of first copied entry
 
 		// copy data
 		for(unsigned int col = 0; col < getNumberOfColumns(); ++col)
-			if(generateUniqueDataColumns && (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
+			if(generateUniqueDataColumns && (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UID ||
+											 columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
 			                                 columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))
 				continue;  // if leaving unique data, then skip copy
 			else
@@ -828,6 +832,12 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 	//"'"
 	//			         << __E__;
 
+	//if baseValueAsString ends in number, then add _ to keep naming similar
+	if(baseValueAsString.size() &&
+			baseValueAsString[baseValueAsString.size()-1] >= '0' &&
+			baseValueAsString[baseValueAsString.size()-1] <= '9')
+		baseValueAsString += '_';
+
 	int          maxUniqueData = -1;
 	std::string  tmpString     = "";
 	bool         foundAny;
@@ -838,7 +848,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 
 	// find max in rows
 
-	// this->print();
+	this->print();
 
 	for(unsigned int r = 0; r < getNumberOfRows(); ++r)
 	{
@@ -850,7 +860,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 		foundAny  = false;
 		tmpString = theDataView_[r][col];
 
-		//__COUT__ << "tmpString " << tmpString << __E__;
+		__COUT__ << "tmpString " << tmpString << __E__;
 
 		for(index = tmpString.length() - 1; index < tmpString.length(); --index)
 		{
@@ -861,7 +871,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			foundAny = true;
 		}
 
-		//__COUT__ << "index " << index << __E__;
+		__COUT__ << "index " << index << " foundAny " << foundAny << __E__;
 
 		if(tmpString.length() && foundAny)  // then found a numeric substring
 		{
@@ -894,12 +904,14 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 				}
 			}
 
+			__COUT__ << tmpString << " vs " << baseValueAsString << __E__;
+
 			if(baseValueAsString != "" && tmpString != baseValueAsString)
 				continue;  // skip max unique number if basestring does not match
 
-			//__COUT__ << "Found unique data base string '" <<
-			//		tmpString << "' and number string '" << numString <<
-			//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
+			__COUT__ << "Found unique data base string '" <<
+				tmpString << "' and number string '" << numString <<
+					"' in last record '" << theDataView_[r][col] << "'" << __E__;
 
 			// extract number
 			sscanf(numString.c_str(), "%u", &index);
@@ -916,6 +928,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			maxUniqueData = 0;  // start a number if basestring conflict
 	}
 
+	__COUTV__(maxUniqueData);
+
 	if(maxUniqueData == -1)  // if no conflicts, then do not add number
 		theDataView_[row][col] = baseValueAsString;
 	else
@@ -924,8 +938,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 
 		sprintf(indexString, "%u", maxUniqueData);
 
-		//__COUTV__(indexString);
-		//__COUTV__(baseValueAsString);
+		__COUTV__(indexString);
+		__COUTV__(baseValueAsString);
 
 		if(doMathAppendStrategy)
 			theDataView_[row][col] = baseValueAsString + " + " + indexString;
@@ -2716,7 +2730,9 @@ void TableView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //	if baseNameAutoUID != "", creates a UID based on this base name
 //		and increments and appends an integer relative to the previous last row
 unsigned int TableView::addRow(const std::string& author,
-                               unsigned char      incrementUniqueData /*= false */,
+                               unsigned char      incrementUniqueData /*= false */, // leave as unsigned char rather than
+                               // bool, too many things (e.g. strings)
+                               // evaluate successfully to bool values
                                const std::string& baseNameAutoUID /*= "" */,
                                unsigned int       rowToAdd /*= -1 */)
 {
@@ -2850,6 +2866,7 @@ unsigned int TableView::addRow(const std::string& author,
 	if(author != "")
 	{
 		__COUT__ << "Row=" << rowToAdd << " was created!" << __E__;
+
 		int authorCol    = findColByType(TableViewColumnInfo::TYPE_AUTHOR);
 		int timestampCol = findColByType(TableViewColumnInfo::TYPE_TIMESTAMP);
 		setValue(author, rowToAdd, authorCol);
