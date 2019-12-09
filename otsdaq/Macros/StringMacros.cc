@@ -722,10 +722,13 @@ std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn
 //	string like reader*_east*, this function will return
 //	a vector of size 3 := {"reader","_east",""} and
 //	a vector of wildcards that would replace the *
-void StringMacros::extractCommonChunks(
+//
+//	Returns true if common chunks and wildcards found,
+//	returns false if all inputs were the same (i.e. no wildcards needed)
+bool StringMacros::extractCommonChunks(
 		const std::vector<std::string>& haystack,
 		std::vector<std::string>& commonChunksToReturn,
-		std::set<std::string>& wildcardStringsToReturn,
+		std::vector<std::string>& wildcardStringsToReturn,
 		unsigned int& fixedWildcardLength)
 {
 	fixedWildcardLength = 0; //default
@@ -801,112 +804,113 @@ void StringMacros::extractCommonChunks(
 	commonChunksToReturn.push_back(
 			haystack[0].substr(0,wildcardBounds.first));
 
-	if(wildcardBounds.first == (unsigned int)-1) //done, all are the same
-		return;
-
-	//  - use start and end to determine if there is more than one *
-	for(int i=(wildcardBounds.first+wildcardBounds.second)/2+1;
-			i<(int)wildcardBounds.second;++i)
-		if(haystack[0][wildcardBounds.first] ==
-				haystack[0][i] &&
-				haystack[0].substr(wildcardBounds.first,
-						wildcardBounds.second-i) ==
-				haystack[0].substr(i,
-						wildcardBounds.second-i))
-		{
-			std::string multiWildcardString = haystack[0].substr(i,
-					wildcardBounds.second-i);
-			__COUT__ << "Multi-wildcard found: " <<
-					multiWildcardString << __E__;
-
-			std::vector<unsigned int /*lo index*/> wildCardInstances;
-			//add front one now, and back one later
-			wildCardInstances.push_back(wildcardBounds.first);
-
-			unsigned int offset = wildCardInstances[0] +
-					multiWildcardString.size() + 1;
-			std::string middleString = haystack[0].substr(
-					offset,
-					(i-1) - offset);
-			__COUTV__(middleString);
-
-			//search for more wildcard instances in new common area
-			size_t k;
-			while((k = middleString.find(multiWildcardString)) != std::string::npos)
-			{
-				__COUT__ << "Multi-wildcard found at " << k << __E__;
-
-				wildCardInstances.push_back(offset + k);
-
-				middleString = middleString.substr(k +
-						multiWildcardString.size() + 1);
-				offset += k +
-						multiWildcardString.size() + 1;
-				__COUTV__(middleString);
-			}
-
-			//add back one last
-			wildCardInstances.push_back(i);
-
-			for(unsigned int w=0;
-					w<wildCardInstances.size()-1;++w)
-			{
-				commonChunksToReturn.push_back(
-						haystack[0].substr(
-						wildCardInstances[w] +
-						wildCardInstances.size(),
-						wildCardInstances[w+1] - (
-							wildCardInstances[w] +
-							wildCardInstances.size())));
-			}
-
-		}
-
-	//check if all common chunks end in 0 to add fixed length
-
-
-	for(unsigned int i=0;i<commonChunksToReturn[0].size();++i)
-		if(commonChunksToReturn[0][commonChunksToReturn[0].size()-1-i] == '0')
-			++fixedWildcardLength;
-		else
-			break;
-
-
-
-	bool allHave0 = true;
-	for(unsigned int c=0;c<commonChunksToReturn.size();++c)
+	if(wildcardBounds.first != (unsigned int)-1) //potentially more chunks if not end
 	{
-		unsigned int cnt = 0;
-		for(unsigned int i=0;i<commonChunksToReturn[c].size();++i)
-			if(commonChunksToReturn[c][commonChunksToReturn[c].size()-1-i] == '0')
-				++cnt;
+
+		//  - use start and end to determine if there is more than one *
+		for(int i=(wildcardBounds.first+wildcardBounds.second)/2+1;
+				i<(int)wildcardBounds.second;++i)
+			if(haystack[0][wildcardBounds.first] ==
+					haystack[0][i] &&
+					haystack[0].substr(wildcardBounds.first,
+							wildcardBounds.second-i) ==
+					haystack[0].substr(i,
+							wildcardBounds.second-i))
+			{
+				std::string multiWildcardString = haystack[0].substr(i,
+						wildcardBounds.second-i);
+				__COUT__ << "Multi-wildcard found: " <<
+						multiWildcardString << __E__;
+
+				std::vector<unsigned int /*lo index*/> wildCardInstances;
+				//add front one now, and back one later
+				wildCardInstances.push_back(wildcardBounds.first);
+
+				unsigned int offset = wildCardInstances[0] +
+						multiWildcardString.size() + 1;
+				std::string middleString = haystack[0].substr(
+						offset,
+						(i-1) - offset);
+				__COUTV__(middleString);
+
+				//search for more wildcard instances in new common area
+				size_t k;
+				while((k = middleString.find(multiWildcardString)) != std::string::npos)
+				{
+					__COUT__ << "Multi-wildcard found at " << k << __E__;
+
+					wildCardInstances.push_back(offset + k);
+
+					middleString = middleString.substr(k +
+							multiWildcardString.size() + 1);
+					offset += k +
+							multiWildcardString.size() + 1;
+					__COUTV__(middleString);
+				}
+
+				//add back one last
+				wildCardInstances.push_back(i);
+
+				for(unsigned int w=0;
+						w<wildCardInstances.size()-1;++w)
+				{
+					commonChunksToReturn.push_back(
+							haystack[0].substr(
+							wildCardInstances[w] +
+							wildCardInstances.size(),
+							wildCardInstances[w+1] - (
+								wildCardInstances[w] +
+								wildCardInstances.size())));
+				}
+
+			}
+
+		//check if all common chunks end in 0 to add fixed length
+
+
+		for(unsigned int i=0;i<commonChunksToReturn[0].size();++i)
+			if(commonChunksToReturn[0][commonChunksToReturn[0].size()-1-i] == '0')
+				++fixedWildcardLength;
 			else
 				break;
 
-		if(fixedWildcardLength < cnt)
-			fixedWildcardLength = cnt;
-		else if(fixedWildcardLength > cnt)
-		{
-			__SS__ << "Invalid fixed length found, please simplify indexing between these common chunks: " <<
-					StringMacros::vectorToString(commonChunksToReturn) << __E__;
-			__SS_THROW__;
-		}
-	}
-	__COUTV__(fixedWildcardLength);
 
-	if(fixedWildcardLength) //take trailing 0s out of common chunks
+
+		bool allHave0 = true;
 		for(unsigned int c=0;c<commonChunksToReturn.size();++c)
-			commonChunksToReturn[c] = commonChunksToReturn[c].substr(0,
-					commonChunksToReturn[c].size()-fixedWildcardLength);
+		{
+			unsigned int cnt = 0;
+			for(unsigned int i=0;i<commonChunksToReturn[c].size();++i)
+				if(commonChunksToReturn[c][commonChunksToReturn[c].size()-1-i] == '0')
+					++cnt;
+				else
+					break;
 
-	//add last common chunk
-	commonChunksToReturn.push_back(haystack[0].substr(wildcardBounds.second));
+			if(fixedWildcardLength < cnt)
+				fixedWildcardLength = cnt;
+			else if(fixedWildcardLength > cnt)
+			{
+				__SS__ << "Invalid fixed length found, please simplify indexing between these common chunks: " <<
+						StringMacros::vectorToString(commonChunksToReturn) << __E__;
+				__SS_THROW__;
+			}
+		}
+		__COUTV__(fixedWildcardLength);
 
+		if(fixedWildcardLength) //take trailing 0s out of common chunks
+			for(unsigned int c=0;c<commonChunksToReturn.size();++c)
+				commonChunksToReturn[c] = commonChunksToReturn[c].substr(0,
+						commonChunksToReturn[c].size()-fixedWildcardLength);
 
-	//(do not, just assume) verify common chunks
+		//add last common chunk
+		commonChunksToReturn.push_back(haystack[0].substr(wildcardBounds.second));
+	} //end handling more chunks
+
+	//now determine wildcard strings
 	size_t k;
 	unsigned int i;
 	unsigned int ioff = fixedWildcardLength;
+	bool wildcardsNeeded = false;
 
 	for(unsigned int n=0;n<haystack.size();++n)
 	{
@@ -914,6 +918,9 @@ void StringMacros::extractCommonChunks(
 		k = 0;
 		i = ioff + commonChunksToReturn[0].size();
 
+		if(commonChunksToReturn.size() == 1) //just get end
+			wildcard = haystack[n].substr(i);
+		else
 		for(unsigned int c=1;c<commonChunksToReturn.size();++c)
 		{
 			if(c == commonChunksToReturn.size()-1) //for last, do reverse find
@@ -948,14 +955,22 @@ void StringMacros::extractCommonChunks(
 			i = k;
 		} //end commonChunksToReturn loop
 
-		wildcardStringsToReturn.emplace(wildcard);
+		if(wildcard.size()) wildcardsNeeded = true;
+		wildcardStringsToReturn.push_back(wildcard);
 
 	} //end name loop
 
 
 	__COUTV__(StringMacros::vectorToString(commonChunksToReturn));
-	__COUTV__(StringMacros::setToString(wildcardStringsToReturn));
+	__COUTV__(StringMacros::vectorToString(wildcardStringsToReturn));
 
+	if(wildcardStringsToReturn.size() != haystack.size())
+	{
+		__SS__ << "There was a problem during common chunk extraction!" << __E__;
+		__SS_THROW__;
+	}
+
+	return wildcardsNeeded;
 
 } //end extractCommonChunks()
 

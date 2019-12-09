@@ -1781,7 +1781,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 
 			auto allNodes = cfgMgr->getNode(tableIt->second).getChildren();
 
-			std::set<std::string /*nodeName*/> skipMap; //use to skip nodes when constructing multi-nodes
+			std::set<std::string /*nodeName*/> skipSet; //use to skip nodes when constructing multi-nodes
 			
 			const std::set<std::string /*colName*/> skipColumns({
 				ARTDAQ_TYPE_TABLE_HOSTNAME,
@@ -1794,8 +1794,8 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 			//loop through all nodes of this type
 			for(auto& artdaqNode : it->second) 
 			{
-				//check skip map
-				if(skipMap.find(artdaqNode.label) != skipMap.end()) continue;
+				//check skip set
+				if(skipSet.find(artdaqNode.label) != skipSet.end()) continue;
 
 				__COUT__ << "\t\t"
 						<< "Found '" << artdaqNode.label << "' "
@@ -1821,20 +1821,21 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 				__COUTV__(allNodes.size());
 				for(auto& otherNode : allNodes)
 				{
-					if(otherNode.first == nodeName)
-						continue; //skip unless 'other'
+					if(otherNode.first == nodeName ||
+							skipSet.find(otherNode.first) != skipSet.end())
+						continue; //skip unless 'other' and not in skip set
 						
-					__COUTV__(subsystemName);
-					__COUTV__(otherNode.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID).getValue());
+					//__COUTV__(subsystemName);
+					//__COUTV__(otherNode.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID).getValue());
 					
 					if(subsystemName == 
 						otherNode.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID).getValue())
 					{
 						//possible multi-node situation
-						__COUT__ << "Checking for multi-node..." << __E__;
+						//__COUT__ << "Checking for multi-node..." << __E__;
 						
-						__COUTV__(thisNode.getNodeRow());
-						__COUTV__(otherNode.second.getNodeRow());
+						//__COUTV__(thisNode.getNodeRow());
+						//__COUTV__(otherNode.second.getNodeRow());
 						
 						auto otherNodeColumns = otherNode.second.getChildren();
 						
@@ -1849,16 +1850,16 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 							
 							//at this point must match for multinode
 							
-							__COUTV__(thisNodeColumns[i].first);
-							__COUTV__(otherNodeColumns[i].first);
+							//__COUTV__(thisNodeColumns[i].first);
+							//__COUTV__(otherNodeColumns[i].first);
 
-							__COUTV__(thisNodeColumns[i].second.getValue());
-							__COUTV__(otherNodeColumns[i].second.getValue());
+							//__COUTV__(thisNodeColumns[i].second.getValue());
+							//__COUTV__(otherNodeColumns[i].second.getValue());
 							
 							if(thisNodeColumns[i].second.getValue() != 
 								otherNodeColumns[i].second.getValue())
 							{
-								__COUT__ << "Mismatch, not multinode member." << __E__;
+								__COUT__ << "Mismatch, not multi-node member." << __E__;
 								isMultiNode = false;
 								break;
 							}
@@ -1867,10 +1868,10 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						
 						if(isMultiNode)
 						{
-							__COUT__ << "Found multi-node member '" << 
-								otherNode.first << "' with '" << 
-								nodeName <<
-								"!'" << __E__;
+							__COUT__ << "Found '" <<
+								nodeName << "' multi-node member candidate '" <<
+								otherNode.first << "'" << __E__;
+
 							if(!multiNodeNames.size()) //add this node first!
 							{
 								multiNodeNames.push_back(nodeName);
@@ -1879,7 +1880,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 							multiNodeNames.push_back(otherNode.first);
 							hostnameArray.push_back(otherNode.second.getNode(
 								ARTDAQ_TYPE_TABLE_HOSTNAME).getValue());
-							skipMap.emplace(otherNode.first);
+							skipSet.emplace(otherNode.first);
 						}
 					}
 				} //end loop to search for multi-node members
@@ -1895,15 +1896,151 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 					
 					__COUTV__(StringMacros::vectorToString(multiNodeNames));
 					__COUTV__(StringMacros::vectorToString(hostnameArray));
+					__COUTV__(StringMacros::setToString(skipSet));
 
+					{
+						//check for alpha-based similarity groupings (ignore numbers and special characters)
+						unsigned int maxScore = 0;
+						unsigned int score;
+						unsigned int numberAtMaxScore = 0;
+						unsigned int minScore = -1;
+						unsigned int numberAtMinScore = 0;
+						std::vector<unsigned int> scoreVector;
+						scoreVector.push_back(-1); //for 0 index (it's perfect)
+						for(unsigned int i=1;i<multiNodeNames.size();++i)
+						{
+							score = 0;
+
+							//__COUT__ << multiNodeNames[0] << " vs " << multiNodeNames[i] << __E__;
+
+							//start forward score loop
+							for(unsigned int j=0,k=0;
+									j < multiNodeNames[0].size() &&
+									k < multiNodeNames[i].size(); ++j,++k)
+							{
+								while(j < multiNodeNames[0].size() &&
+										!(multiNodeNames[0][j] >= 'a' && multiNodeNames[0][j] <= 'z') &&
+										!(multiNodeNames[0][j] >= 'A' && multiNodeNames[0][j] <= 'Z'))
+									++j; //skip non-alpha characters
+								while(k < multiNodeNames[i].size() &&
+										!(multiNodeNames[i][k] >= 'a' && multiNodeNames[i][k] <= 'z') &&
+										!(multiNodeNames[i][k] >= 'A' && multiNodeNames[i][k] <= 'Z'))
+									++k; //skip non-alpha characters
+
+
+								while(k < multiNodeNames[i].size() &&
+										multiNodeNames[0][j] != multiNodeNames[i][k])
+									++k; //skip non-matching alpha characters
+
+								//__COUT__ << j << "-" << k << " of " <<
+								//		multiNodeNames[0].size() << "-" <<
+								//		multiNodeNames[i].size() << __E__;
+
+								if(j < multiNodeNames[0].size() &&
+										k < multiNodeNames[i].size())
+									++score; //found a matching letter!
+							} //end forward score loop
+
+							//__COUTV__(score);
+
+							//start backward score loop
+							for(unsigned int j=multiNodeNames[0].size()-1,
+									k=multiNodeNames[i].size()-1;
+									j < multiNodeNames[0].size() &&
+											k < multiNodeNames[i].size(); --j,--k)
+							{
+								while(j < multiNodeNames[0].size() &&
+										!(multiNodeNames[0][j] >= 'a' && multiNodeNames[0][j] <= 'z') &&
+										!(multiNodeNames[0][j] >= 'A' && multiNodeNames[0][j] <= 'Z'))
+									--j; //skip non-alpha characters
+								while(k < multiNodeNames[i].size() &&
+										!(multiNodeNames[i][k] >= 'a' && multiNodeNames[i][k] <= 'z') &&
+										!(multiNodeNames[i][k] >= 'A' && multiNodeNames[i][k] <= 'Z'))
+									--k; //skip non-alpha characters
+
+								while(k < multiNodeNames[i].size() &&
+										multiNodeNames[0][j] != multiNodeNames[i][k])
+									--k; //skip non-matching alpha characters
+
+								//__COUT__ << "BACK" << j << "-" << k << " of " <<
+								//		multiNodeNames[0].size() << "-" <<
+								//		multiNodeNames[i].size() << __E__;
+
+								if(j < multiNodeNames[0].size() &&
+										k < multiNodeNames[i].size())
+									++score; //found a matching letter!
+							} //end backward score loop
+
+							//__COUTV__(score/2.0);
+
+							scoreVector.push_back(score);
+
+							if(score > maxScore)
+							{
+								maxScore = score;
+								numberAtMaxScore = 1;
+							}
+							else if(score == maxScore)
+								++numberAtMaxScore;
+
+							if(score < minScore)
+							{
+								minScore = score;
+								numberAtMinScore = 1;
+							}
+							else if(score == minScore)
+								++numberAtMinScore;
+
+						} //end multi-node member scoring loop
+
+						//__COUTV__(minScore);
+						//__COUTV__(maxScore);
+						//__COUTV__(numberAtMaxScore);
+						//__COUTV__(numberAtMinScore);
+
+						__COUT__ << "Trimming multi-node members with low match score..." << __E__;
+
+						//go backwards, to not mess up indices as deleted
+						//	do not delete index 0
+						for(unsigned int i=multiNodeNames.size()-1;
+								i > 0 &&
+								i < multiNodeNames.size();--i)
+						{
+							//__COUTV__(scoreVector[i]);
+							//__COUTV__(i);
+							if(maxScore > multiNodeNames[0].size() &&
+									scoreVector[i] >= maxScore) continue;
+
+							//else trim
+							__COUT__ << "Trimming " << multiNodeNames[i] << __E__;
+
+							skipSet.erase(multiNodeNames[i]);
+							multiNodeNames.erase(multiNodeNames.begin() + i);
+							hostnameArray.erase(hostnameArray.begin() + i);
+
+						} //end multi-node trim loop
+
+
+					} //done with multi-node member trim
+
+					__COUTV__(StringMacros::vectorToString(multiNodeNames));
+					__COUTV__(StringMacros::vectorToString(hostnameArray));
+					__COUTV__(StringMacros::setToString(skipSet));
 
 					//from set of nodename wildcards, make printer syntax
+					if(multiNodeNames.size() > 1)
 					{
 						std::vector<std::string> commonChunks;
-						std::set<std::string> wildcards;
+						std::vector<std::string> wildcards;
 
-						StringMacros::extractCommonChunks(multiNodeNames,
+						bool wildcardsNeeded = StringMacros::extractCommonChunks(multiNodeNames,
 								commonChunks,wildcards,nodeFixedWildcardLength);
+
+						if(!wildcardsNeeded)
+						{
+							__SS__ << "Impossible extractCommonChunks result! Please notify admins or try to simplify record naming convention." << __E__;
+							__SS_THROW__;
+						}
 
 						nodeName = "";
 						bool first = true;
@@ -1912,8 +2049,10 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 							nodeName += (!first?"*":"") + commonChunk;
 							if(first) first = false;
 						}
+						if(commonChunks.size() == 1) nodeName += '*';
 
 						__COUTV__(nodeName);
+
 
 						//steps:
 						//	determine if all unsigned ints
@@ -1922,12 +2061,19 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 
 						bool allIntegers = true;
 						for(auto& wildcard:wildcards)
-							for(unsigned int i=0;i<wildcard.size();++i)
-								if(!(wildcard[i] >= '0' && wildcard[i] <= '9'))
-								{
-									allIntegers = false;
-									break;
-								}
+							if(!allIntegers) break;
+							else if (wildcard.size() == 0) //emtpy string is not a number
+							{
+								allIntegers = false;
+								break;
+							}
+							else
+								for(unsigned int i=0;i<wildcard.size();++i)
+									if(!(wildcard[i] >= '0' && wildcard[i] <= '9'))
+									{
+										allIntegers = false;
+										break;
+									}
 
 						__COUTV__(allIntegers);
 						if(allIntegers)
@@ -1978,7 +2124,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						} //end all integer handling
 						else //not all integers, so csv
 						{
-							multiNodeString = StringMacros::setToString(wildcards);
+							multiNodeString = StringMacros::vectorToString(wildcards);
 						} //end not-all integer handling
 
 						__COUTV__(multiNodeString);
@@ -1988,9 +2134,9 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 					if(hostnameArray.size() > 1)
 					{
 						std::vector<std::string> commonChunks;
-						std::set<std::string> wildcards;
+						std::vector<std::string> wildcards;
 
-						StringMacros::extractCommonChunks(hostnameArray,
+						bool wildcardsNeeded = StringMacros::extractCommonChunks(hostnameArray,
 								commonChunks,wildcards,hostFixedWildcardLength);
 
 						hostname = "";
@@ -2000,74 +2146,81 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 							hostname += (!first?"*":"") + commonChunk;
 							if(first) first = false;
 						}
+						if(wildcardsNeeded && commonChunks.size())
+							hostname += '*';
 
 						__COUTV__(hostname);
-						//steps:
-						//	determine if all unsigned ints
-						//	if int, then order and attempt to hyphenate
-						//	if not ints, then comma separated
 
-						bool allIntegers = true;
-						for(auto& wildcard:wildcards)
-							for(unsigned int i=0;i<wildcard.size();++i)
-								if(!(wildcard[i] >= '0' && wildcard[i] <= '9'))
-								{
-									allIntegers = false;
-									break;
-								}
-
-						__COUTV__(allIntegers);
-						if(allIntegers)
+						if(wildcardsNeeded)
+							//else if not wildcards needed, then do not make hostname array string
 						{
-							std::set<unsigned int> intSortWildcards;
-							unsigned int tmpInt;
+							//steps:
+							//	determine if all unsigned ints
+							//	if int, then order and attempt to hyphenate
+							//	if not ints, then comma separated
+
+							bool allIntegers = true;
 							for(auto& wildcard:wildcards)
-								intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
+								for(unsigned int i=0;i<wildcard.size();++i)
+									if(!(wildcard[i] >= '0' && wildcard[i] <= '9'))
+									{
+										allIntegers = false;
+										break;
+									}
 
-							//need ints in vector for random access to for hyphenating
-							std::vector<unsigned int> intWildcards;
-							for(auto& wildcard:intSortWildcards)
-								intWildcards.push_back(wildcard);
+							__COUTV__(allIntegers);
 
-							__COUTV__(StringMacros::vectorToString(intWildcards));
-
-							unsigned int hyphenLo = -1;
-							bool isFirst = true;
-							for(unsigned int i=0;i<intWildcards.size();++i)
+							if(allIntegers)
 							{
-								if(i+1 < intWildcards.size() &&
-										intWildcards[i] + 1 ==
-												intWildcards[i+1])
-								{
-									if(i < hyphenLo)
-										hyphenLo = i; //start hyphen
-								}
-								else //new comma
-								{
-									if(i < hyphenLo)
-									{
-										//single number
-										hostArrayString += (isFirst?"":",") +
-												std::to_string(intWildcards[i]);
-									}
-									else
-									{
-										//hyphen numbers
-										hostArrayString += (isFirst?"":",") +
-												std::to_string(intWildcards[hyphenLo]) + "-" +
-												std::to_string(intWildcards[i]);
-										hyphenLo = -1; //reset for next
-									}
-									isFirst = false;
-								}
+								std::set<unsigned int> intSortWildcards;
+								unsigned int tmpInt;
+								for(auto& wildcard:wildcards)
+									intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
 
-							}
-						} //end all integer handling
-						else //not all integers, so csv
-						{
-							hostArrayString = StringMacros::setToString(wildcards);
-						} //end not-all integer handling
+								//need ints in vector for random access to for hyphenating
+								std::vector<unsigned int> intWildcards;
+								for(auto& wildcard:intSortWildcards)
+									intWildcards.push_back(wildcard);
 
+								__COUTV__(StringMacros::vectorToString(intWildcards));
+
+								unsigned int hyphenLo = -1;
+								bool isFirst = true;
+								for(unsigned int i=0;i<intWildcards.size();++i)
+								{
+									if(i+1 < intWildcards.size() &&
+											intWildcards[i] + 1 ==
+													intWildcards[i+1])
+									{
+										if(i < hyphenLo)
+											hyphenLo = i; //start hyphen
+									}
+									else //new comma
+									{
+										if(i < hyphenLo)
+										{
+											//single number
+											hostArrayString += (isFirst?"":",") +
+													std::to_string(intWildcards[i]);
+										}
+										else
+										{
+											//hyphen numbers
+											hostArrayString += (isFirst?"":",") +
+													std::to_string(intWildcards[hyphenLo]) + "-" +
+													std::to_string(intWildcards[i]);
+											hyphenLo = -1; //reset for next
+										}
+										isFirst = false;
+									}
+
+								}
+							} //end all integer handling
+							else //not all integers, so csv
+							{
+								hostArrayString = StringMacros::vectorToString(wildcards);
+							} //end not-all integer handling
+						} //end wildcard need handling
 						__COUTV__(hostArrayString);
 						__COUTV__(hostFixedWildcardLength);
 					} //end node name printer syntax handling
