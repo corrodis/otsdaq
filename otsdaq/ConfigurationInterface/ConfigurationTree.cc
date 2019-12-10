@@ -1502,8 +1502,8 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(c
 			// if found, new field (since this is first record)
 			if(found)
 			{
-				__COUT__ << "FOUND field " <<
-						colInfo[col].getName() << __E__;
+				//__COUT__ << "FOUND field " <<
+				//		colInfo[col].getName() << __E__;
 
 				if(colInfo[col].isChildLink())
 				{

@@ -1436,8 +1436,6 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 				{
 					__SS__ << "Error detected calling " << memberPair.first << ".init()!\n\n " << e.what() << __E__;
 
-					//__SS_THROW__;
-
 					if(accumulatedWarnings)
 					{
 						*accumulatedWarnings += ss.str();
@@ -1445,7 +1443,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 					else
 					{
 						ss << StringMacros::stackTrace();
-						__SS_THROW__;  //__COUT_WARN__ << ss.str();
+						__SS_ONLY_THROW__;
 					}
 				}
 				catch(...)
@@ -1528,7 +1526,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		catch(const std::runtime_error& e)
 		{
 			__SS__ << "Error occurred while loading table group '" << groupName << "(" << groupKey << ")': \n" << e.what() << __E__;
-			__COUT_WARN__ << ss.str();
+
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
 			else
@@ -1537,7 +1535,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		catch(...)
 		{
 			__SS__ << "An unknown error occurred while loading table group '" << groupName << "(" << groupKey << ")." << __E__;
-			__COUT_WARN__ << ss.str();
+
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
 			else
@@ -1559,7 +1557,7 @@ catch(...)
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Error occurred while loading table group: " << e.what() << __E__;
-		__COUT_WARN__ << ss.str();
+
 		if(accumulatedWarnings)
 			*accumulatedWarnings += ss.str();
 		else
@@ -1568,7 +1566,7 @@ catch(...)
 	catch(...)
 	{
 		__SS__ << "An unknown error occurred while loading table group." << __E__;
-		__COUT_WARN__ << ss.str();
+
 		if(accumulatedWarnings)
 			*accumulatedWarnings += ss.str();
 		else
@@ -2013,7 +2011,7 @@ std::map<std::string /*table name*/, std::map<std::string /*version alias*/, Tab
 		return retMap;
 	}
 
-	__COUT__ << "activeVersions[\"" << versionAliasesTableName << "\"]=" << activeVersions[versionAliasesTableName] << __E__;
+	//__COUT__ << "activeVersions[\"" << versionAliasesTableName << "\"]=" << activeVersions[versionAliasesTableName] << __E__;
 
 	std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs = getNode(versionAliasesTableName).getChildren();
 
