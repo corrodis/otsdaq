@@ -763,6 +763,9 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 #endif
 			OUT << "}\n\n";
 
+			#if 1 // artdaq v3_07_00+
+			OUT << "ArtdaqSharedMemoryServiceInterface: { service_provider: ArtdaqSharedMemoryService }\n\n";
+			#else
 			// NetMonTransportServiceInterface
 			OUT << "NetMonTransportServiceInterface: {\n";
 
@@ -776,6 +779,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 			POPTAB;
 			OUT << "}\n\n";  // end NetMonTransportServiceInterface
+			#endif
 
 			//--------------------------------------
 			// handle services NOT @table:: parameters
@@ -822,7 +826,8 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 				                 false /*onlyInsertAtTableParameters*/,
 				                 true /*includeAtTableParameters*/);
 
-				if(outputPlugin.second.getNode("outputModuleType").getValue() == "BinaryNetOutput")
+				if(outputPlugin.second.getNode("outputModuleType").getValue() == "BinaryNetOutput" ||
+				   outputPlugin.second.getNode("outputModuleType").getValue() == "RootNetOutput")
 				{
 					OUT << "destinations: {\n"
 					    << "}\n\n";  // end destinations
