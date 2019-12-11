@@ -1828,7 +1828,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 				{
 					if(otherNode.first == nodeName ||
 							skipSet.find(otherNode.first) != skipSet.end() ||
-							otherNode.status != status) //skip if status mismatch
+							otherNode.second.status() != status) //skip if status mismatch
 						continue; //skip unless 'other' and not in skip set
 						
 					//__COUTV__(subsystemName);
