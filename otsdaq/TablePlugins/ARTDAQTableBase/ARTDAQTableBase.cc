@@ -1824,10 +1824,11 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 				unsigned int hostnameFixedWidth = 0;
 				
 				__COUTV__(allNodes.size());
-				for(auto& otherNode : allNodes)
+				for(auto& otherNode : allNodes) //start multi-node search loop
 				{
 					if(otherNode.first == nodeName ||
-							skipSet.find(otherNode.first) != skipSet.end())
+							skipSet.find(otherNode.first) != skipSet.end() ||
+							otherNode.status != status) //skip if status mismatch
 						continue; //skip unless 'other' and not in skip set
 						
 					//__COUTV__(subsystemName);
