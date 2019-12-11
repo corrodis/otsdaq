@@ -113,11 +113,10 @@ void XmlDocument::initDocument(void)
 		}
 	}
 	else
-		XERCES_STD_QUALIFIER cerr << "Requested theImplementation_ is not supported"
-		                          << XERCES_STD_QUALIFIER endl;
-        darioXMLStyle_  = false  ;
- 		isALeaf_[true]  = "true" ;
- 		isALeaf_[false] = "false";
+		XERCES_STD_QUALIFIER cerr << "Requested theImplementation_ is not supported" << XERCES_STD_QUALIFIER endl;
+	darioXMLStyle_  = false;
+	isALeaf_[true]  = "true";
+	isALeaf_[false] = "false";
 }
 
 //==============================================================================
@@ -217,15 +216,13 @@ xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, 
 }
 
 //==============================================================================
-void XmlDocument::copyDocument(const xercesc::DOMDocument* toCopy,
-                                     xercesc::DOMDocument* copy)
+void XmlDocument::copyDocument(const xercesc::DOMDocument* toCopy, xercesc::DOMDocument* copy)
 {
 	recursiveElementCopy(toCopy->getDocumentElement(), copy->getDocumentElement());
 }
 
 //==============================================================================
-void XmlDocument::recursiveElementCopy(const xercesc::DOMElement* toCopy,
-                                             xercesc::DOMElement* copy)
+void XmlDocument::recursiveElementCopy(const xercesc::DOMElement* toCopy, xercesc::DOMElement* copy)
 {
 	xercesc::DOMNodeList* nodeListToCopy = toCopy->getChildNodes();  // get all children of the list to copy
 	xercesc::DOMNode*     iNode;
@@ -235,18 +232,16 @@ void XmlDocument::recursiveElementCopy(const xercesc::DOMElement* toCopy,
 		iNode                      = nodeListToCopy->item(i);
 		xercesc::DOMElement* child = copyDocument->createElement(iNode->getNodeName());
 		copy->appendChild(child);
-                if( child->getFirstChild() != NULL )
-                {
-		 if(iNode->getFirstChild() != 0 &&
-		    iNode->getFirstChild()->getNodeType() ==
-		        xercesc::DOMNode::TEXT_NODE)  // if has a text node first, insert as value
-		                                      // attribute
-		 {
-		         child->appendChild(
-		             copyDocument->createTextNode(child->getFirstChild()->getNodeValue()));
-		 }
-		 recursiveElementCopy((xercesc::DOMElement*)(iNode), child);
-                }
+		if(child->getFirstChild() != NULL)
+		{
+			if(iNode->getFirstChild() != 0 &&
+			   iNode->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)  // if has a text node first, insert as value
+			                                                                          // attribute
+			{
+				child->appendChild(copyDocument->createTextNode(child->getFirstChild()->getNodeValue()));
+			}
+			recursiveElementCopy((xercesc::DOMElement*)(iNode), child);
+		}
 	}
 }
 
@@ -436,10 +431,7 @@ void XmlDocument::outputXmlDocument(std::ostringstream* out, bool dispStdOut)
 }
 
 //==============================================================================
-void XmlDocument::setDocument(xercesc::DOMDocument * doc)
-{
- theDocument_ = doc ;
-}
+void XmlDocument::setDocument(xercesc::DOMDocument* doc) { theDocument_ = doc; }
 //==============================================================================
 // XmlDocument::recursiveOutputXmlDocument
 //	recursively printout XML theDocument_ to std out and output stream if not null
@@ -447,13 +439,13 @@ void XmlDocument::recursiveOutputXmlDocument(xercesc::DOMElement* currEl, std::o
 {
 	// open field tag
 	if(dispStdOut)
-        {
+	{
 		__COUT__ << tabStr << "<" << XML_TO_CHAR(currEl->getNodeName());
-        }
+	}
 	if(out)
-        {
+	{
 		*out << tabStr << "<" << XML_TO_CHAR(currEl->getNodeName());
-        }
+	}
 
 	// insert value if text node child
 	if(currEl->getFirstChild() != NULL && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)  // if has a text node first, insert as value
@@ -472,8 +464,7 @@ void XmlDocument::recursiveOutputXmlDocument(xercesc::DOMElement* currEl, std::o
 		std::cout << ((nodeList->getLength() == 0 || (nodeList->getLength() == 1 && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE))
 		                  ? "/"
 		                  : "")
-		          << ">"
-		          << std::endl;
+		          << ">" << std::endl;
 	if(out)
 		*out << ((nodeList->getLength() == 0 || (nodeList->getLength() == 1 && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)) ? "/"
 		                                                                                                                                               : "")
@@ -1093,7 +1084,7 @@ xercesc::DOMElement * XmlDocument::populateBinaryTreeNode(xercesc::DOMElement * 
 void XmlDocument::setDarioStyle(bool darioStyle)
 {
  darioXMLStyle_ = darioStyle ;
-} 
+}
 // clang-format on
 //==============================================================================
 // XmlDocument::recursiveOutputXmlDocument

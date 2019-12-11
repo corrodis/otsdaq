@@ -31,7 +31,7 @@ DataProducerBase::~DataProducerBase(void) { __GEN_COUT__ << "Destructed." << __E
 void DataProducerBase::registerToBuffer(void)
 {
 	__GEN_COUT__ << "Producer '" << DataProcessor::processorUID_ << "' is registering to DataManager Supervisor Buffer '"
-	         << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
+	             << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
 
 	DataManager* dataManager = (DataManagerSingleton::getInstance(supervisorApplicationUID_));
 

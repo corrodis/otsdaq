@@ -1,9 +1,9 @@
 #ifndef _ots_TCPTransmitterSocket_h_
 #define _ots_TCPTransmitterSocket_h_
 
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 #include "otsdaq/NetworkUtilities/TCPSocket.h"
 
 namespace ots

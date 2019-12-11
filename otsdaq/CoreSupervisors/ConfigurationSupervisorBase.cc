@@ -371,8 +371,8 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 
 	// make sure not using partial tables or anything weird when creating the group
 	//	so start from scratch and load backbone, but allow errors
-	std::string accumulatedWarnings;
-	const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true,&accumulatedWarnings);
+	std::string                             accumulatedWarnings;
+	const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
 	__COUT_WARN__ << "Ignoring these errors: " << accumulatedWarnings << __E__;
 	cfgMgr->loadConfigurationBackbone();
 

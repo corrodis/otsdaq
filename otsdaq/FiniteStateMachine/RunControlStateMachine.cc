@@ -172,7 +172,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 			if(lastIterationCommand_ == command && lastIterationIndex_ == iterationIndex_ && lastSubIterationIndex_ == subIterationIndex_)
 			{
 				__GEN_COUT__ << "Assuming a timeout occurred at Gateway waiting for a response. "
-				         << "Attempting to avoid error, by giving last result for command '" << command << "': " << lastIterationResult_ << __E__;
+				             << "Attempting to avoid error, by giving last result for command '" << command << "': " << lastIterationResult_ << __E__;
 				return SOAPUtilities::makeSOAPMessageReference(lastIterationResult_);
 			}
 			else
@@ -193,14 +193,15 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 		// this is the first iteration attempt for this transition
 		theProgressBar_.reset(command, theStateMachine_.getStateMachineName());
 		currentState = theStateMachine_.getCurrentStateName();
-		__GEN_COUT__ << "Starting state for " << theStateMachine_.getStateMachineName() << " is " << currentState << " and attempting to " << command << std::endl;
+		__GEN_COUT__ << "Starting state for " << theStateMachine_.getStateMachineName() << " is " << currentState << " and attempting to " << command
+		             << std::endl;
 	}
 	else
 	{
 		currentState = theStateMachine_.getStateName(lastIterationState_);
 
 		__GEN_COUT__ << "Iteration index " << iterationIndex_ << "." << subIterationIndex_ << " for " << theStateMachine_.getStateMachineName() << " from "
-		         << currentState << " attempting to " << command << std::endl;
+		             << currentState << " attempting to " << command << std::endl;
 	}
 
 	RunControlStateMachine::theProgressBar_.step();
@@ -278,8 +279,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	if(command == "Halt" && currentState == "Initial")
 	{
 		__GEN_COUT__ << "Converting Halt command to Initialize, since currently in "
-		            "Initialized state."
-		         << std::endl;
+		                "Initialized state."
+		             << std::endl;
 		command = "Initialize";
 		message = SOAPUtilities::makeSOAPMessageReference(command);
 	}

@@ -237,9 +237,7 @@ void WizardSupervisor::verification(xgi::Input* in, xgi::Output* out)
 		}
 	}
 
-	*out << "<!DOCTYPE HTML><html lang='en'><head><title>ots wiz</title>" <<
-			GatewaySupervisor::getIconHeaderString()
-	     <<
+	*out << "<!DOCTYPE HTML><html lang='en'><head><title>ots wiz</title>" << GatewaySupervisor::getIconHeaderString() <<
 	    // end show ots icon
 	    "</head>"
 	     << "<frameset col='100%' row='100%'><frame src='/WebPath/html/Wizard.html?urn=" << this->getApplicationDescriptor()->getLocalId() << securityWarning

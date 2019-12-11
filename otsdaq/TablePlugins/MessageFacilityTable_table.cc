@@ -152,7 +152,6 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 
 				fs << "\n}\n";
 
-
 				fs << "file: {}\n";
 
 				// output quiet forwarder config file

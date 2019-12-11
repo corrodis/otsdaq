@@ -51,12 +51,12 @@ using namespace ots;
 //			--optional data elements with value and any field name
 //
 HttpXmlDocument::HttpXmlDocument(std::string cookieCode, std::string displayName)
-    : XmlDocument        ("ROOT"       )
-    , headerElement_     (0            )
-    , dataElement_       (0            )
-    , headerTagName_     ("HEADER"     )
-    , dataTagName_       ("DATA"       )
-    , cookieCodeTagName_ ("CookieCode" )
+    : XmlDocument("ROOT")
+    , headerElement_(0)
+    , dataElement_(0)
+    , headerTagName_("HEADER")
+    , dataTagName_("DATA")
+    , cookieCodeTagName_("CookieCode")
     , displayNameTagName_("DisplayName")
 {
 	// std::cout << __COUT_HDR_FL__ << "in" << std::endl;
@@ -95,18 +95,14 @@ HttpXmlDocument::HttpXmlDocument(const HttpXmlDocument& doc)
 //==============================================================================
 HttpXmlDocument& HttpXmlDocument::operator=(const HttpXmlDocument& doc)
 {
-	//std::cout << __COUT_HDR_FL__ << "in" << std::endl;
+	// std::cout << __COUT_HDR_FL__ << "in" << std::endl;
 	recursiveElementCopy(doc.rootElement_, rootElement_);
-	//std::cout << __COUT_HDR_FL__ << "in" << std::endl;
+	// std::cout << __COUT_HDR_FL__ << "in" << std::endl;
 	if(doc.headerElement_ != 0)
-		headerElement_ = (xercesc::DOMElement*)rootElement_
-		                     ->getElementsByTagName(CONVERT_TO_XML(headerTagName_))
-		                     ->item(0);
-	//std::cout << __COUT_HDR_FL__ << "in" << std::endl;
-	dataElement_ = (xercesc::DOMElement*)rootElement_
-	                   ->getElementsByTagName(CONVERT_TO_XML(dataTagName_))
-	                   ->item(0);
-	//std::cout << __COUT_HDR_FL__ << "out" << std::endl;
+		headerElement_ = (xercesc::DOMElement*)rootElement_->getElementsByTagName(CONVERT_TO_XML(headerTagName_))->item(0);
+	// std::cout << __COUT_HDR_FL__ << "in" << std::endl;
+	dataElement_ = (xercesc::DOMElement*)rootElement_->getElementsByTagName(CONVERT_TO_XML(dataTagName_))->item(0);
+	// std::cout << __COUT_HDR_FL__ << "out" << std::endl;
 	return *this;
 }
 
@@ -260,45 +256,34 @@ void HttpXmlDocument::recursiveOutputXmlDocument(
 		          << ">"
 		          << " len:" << nodeList->getLength() << std::endl;
 	if(out)
-        {
-//  		*out << ((nodeList->getLength() == 0 ||
-// 		          (nodeList->getLength() == 1 &&
-// 		           currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE))
-// 		             ? "/"
-// 		             : "")
-// 		     << ">" << std::endl;
-// Dario-style...
-                std::string outText = "" ;
-	        if(currEl->getFirstChild()                != NULL &&
-	           currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE) 
-                   outText = escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()),allowWhiteSpace) ;
-                {
-                 if( darioXMLStyle_                                              && 
-                    !(std::string(XML_TO_CHAR(currEl->getNodeName())) == "ROOT"   || 
-                      std::string(XML_TO_CHAR(currEl->getNodeName())) == "HEADER" || 
-                      std::string(XML_TO_CHAR(currEl->getNodeName())) == "DATA"   || 
-                      std::string(XML_TO_CHAR(currEl->getNodeName())) == "node"   || 
-                      std::string(XML_TO_CHAR(currEl->getNodeName())) == "nodes"  ))
-                 {  
-                  *out << ">" 
-                       << outText
-                       << "</"
-                       << XML_TO_CHAR(currEl->getNodeName()) 
-                       << ">"
-                       << std::endl;
-                 }
-                 else
-                 {
-                  *out << ((nodeList->getLength() == 0 ||
-                           (nodeList->getLength() == 1 &&
-                            currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE))
-                               ? "/"
-                               : "")
-                       << ">" << std::endl;
-                 }
-                }
-// Dario-style...
-        }
+	{
+		//  		*out << ((nodeList->getLength() == 0 ||
+		// 		          (nodeList->getLength() == 1 &&
+		// 		           currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE))
+		// 		             ? "/"
+		// 		             : "")
+		// 		     << ">" << std::endl;
+		// Dario-style...
+		std::string outText = "";
+		if(currEl->getFirstChild() != NULL && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)
+			outText = escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()), allowWhiteSpace);
+		{
+			if(darioXMLStyle_ && !(std::string(XML_TO_CHAR(currEl->getNodeName())) == "ROOT" || std::string(XML_TO_CHAR(currEl->getNodeName())) == "HEADER" ||
+			                       std::string(XML_TO_CHAR(currEl->getNodeName())) == "DATA" || std::string(XML_TO_CHAR(currEl->getNodeName())) == "node" ||
+			                       std::string(XML_TO_CHAR(currEl->getNodeName())) == "nodes"))
+			{
+				*out << ">" << outText << "</" << XML_TO_CHAR(currEl->getNodeName()) << ">" << std::endl;
+			}
+			else
+			{
+				*out << ((nodeList->getLength() == 0 || (nodeList->getLength() == 1 && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE))
+				             ? "/"
+				             : "")
+				     << ">" << std::endl;
+			}
+		}
+		// Dario-style...
+	}
 	// insert children
 	std::string newTabStr = tabStr + "\t";
 	for(unsigned int i = 0; i < nodeList->getLength(); ++i)

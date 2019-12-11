@@ -351,8 +351,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 }  // end transitionConfiguring()
 
 //========================================================================================================================
-void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor)
-try
+void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) try
 {
 	ProgressBar& progressBar = theArtdaqSupervisor->thread_progress_bar_;
 
@@ -371,7 +370,7 @@ try
 
 	auto info = ARTDAQTableBase::extractARTDAQInfo(
 	    theSupervisorNode,
-		false /*getStatusFalseNodes*/,
+	    false /*getStatusFalseNodes*/,
 	    true /*doWriteFHiCL*/,
 	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("max_fragment_size_bytes", ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE),
 	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_timeout_ms", ARTDAQTableBase::DEFAULT_ROUTING_TIMEOUT_MS),
@@ -557,8 +556,8 @@ try
 	theArtdaqSupervisor->getDAQState_();
 	if(theArtdaqSupervisor->daqinterface_state_ != "booted")
 	{
-		__GEN_SS__ << "DAQInterface boot transition failed! " <<
-				"Status after boot attempt: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
+		__GEN_SS__ << "DAQInterface boot transition failed! "
+		           << "Status after boot attempt: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
 		__GEN_SS_THROW__;
 	}
 	__GEN_COUT__ << "Status after boot: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
@@ -608,8 +607,7 @@ catch(...)
 }  // end configuringThread() error handling
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Halting..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -684,8 +682,7 @@ catch(...)
 }  // end transitionHalting() exception handling
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Initializing..." << __E__;
 	init();
@@ -704,8 +701,7 @@ catch(...)
 }  // end transitionInitializing() error handling
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Pausing..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -739,11 +735,10 @@ catch(...)
 	__SS__ << "Unknown error was caught while Pausing. Please checked the logs." << __E__;
 	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
 	__SS_THROW__;
-} // end transitionPausing() error handling
+}  // end transitionPausing() error handling
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Resuming..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -774,11 +769,10 @@ catch(...)
 	__SS__ << "Unknown error was caught while Resuming. Please checked the logs." << __E__;
 	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
 	__SS_THROW__;
-} // end transitionResuming() error handling
+}  // end transitionResuming() error handling
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Starting..." << __E__;
 	{
@@ -819,11 +813,10 @@ catch(...)
 	__SS__ << "Unknown error was caught while Starting. Please checked the logs." << __E__;
 	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
 	__SS_THROW__;
-} // end transitionStarting() error handling
+}  // end transitionStarting() error handling
 
 //========================================================================================================================
-void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
 	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
@@ -852,7 +845,7 @@ catch(...)
 	__SS__ << "Unknown error was caught while Stopping. Please checked the logs." << __E__;
 	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
 	__SS_THROW__;
-} // end transitionStopping() error handling
+}  // end transitionStopping() error handling
 
 //========================================================================================================================
 void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference event)

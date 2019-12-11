@@ -12,7 +12,6 @@ using namespace ots;
 #undef __COUT_HDR__
 #define __COUT_HDR__ ("TableBase-" + getTableName() + "\t<> ")
 
-
 //==============================================================================
 // TableBase
 //	If a valid string pointer is passed in accumulatedExceptions
@@ -62,7 +61,7 @@ TableBase::TableBase(std::string  tableName,
 		else
 			throw;
 	}
-} //end constructor()
+}  // end constructor()
 
 //==============================================================================
 // TableBase
@@ -306,19 +305,19 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 				{
 					match = false;
 
-//					__COUT__ << "Value name mismatch " << col << ":"
-//							<<
-//							viewPairReverseIterator->second.getDataView()[row][col]
-//																			   << "[" <<
-//																			   viewPairReverseIterator->second.getDataView()[row][col].size()
-//																			   << "]" << 							" vs " <<
-//																			   needleView->getDataView()[row][col] << "["
-//																			   <<
-//																			   needleView->getDataView()[row][col].size()
-//																			   <<
-//																			   "]"
-//																			   <<
-//																			   __E__;
+					//					__COUT__ << "Value name mismatch " << col << ":"
+					//							<<
+					//							viewPairReverseIterator->second.getDataView()[row][col]
+					//																			   << "[" <<
+					//																			   viewPairReverseIterator->second.getDataView()[row][col].size()
+					//																			   << "]" << 							" vs " <<
+					//																			   needleView->getDataView()[row][col] << "["
+					//																			   <<
+					//																			   needleView->getDataView()[row][col].size()
+					//																			   <<
+					//																			   "]"
+					//																			   <<
+					//																			   __E__;
 
 					break;
 				}
@@ -328,11 +327,11 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 			__COUT_INFO__ << "Duplicate version found: " << viewPairReverseIterator->first << __E__;
 			return viewPairReverseIterator->first;
 		}
-	} //end table version loop
+	}  // end table version loop
 
 	__COUT__ << "No duplicates found in " << potentialMatchCount << " potential matches." << __E__;
 	return TableVersion();  // return invalid if no matches
-} //end checkForDuplicate()
+}  // end checkForDuplicate()
 
 //==============================================================================
 void TableBase::changeVersionAndActivateView(TableVersion temporaryVersion, TableVersion version)
@@ -432,15 +431,14 @@ unsigned int TableBase::getNumberOfStoredViews(void) const
 		else
 			++sz;
 	return sz;
-} //end getNumberOfStoredViews()
+}  // end getNumberOfStoredViews()
 
 //==============================================================================
 const TableView& TableBase::getView(void) const
 {
 	if(!activeTableView_)
 	{
-		__SS__ << "There is no active table view setup! Please check your system configuration."
-		       << __E__;
+		__SS__ << "There is no active table view setup! Please check your system configuration." << __E__;
 		__SS_ONLY_THROW__;
 	}
 	return *activeTableView_;
@@ -451,8 +449,7 @@ TableView* TableBase::getViewP(void)
 {
 	if(!activeTableView_)
 	{
-		__SS__ << "There is no active table view setup! Please check your system configuration."
-		       << __E__;
+		__SS__ << "There is no active table view setup! Please check your system configuration." << __E__;
 		__SS_ONLY_THROW__;
 	}
 	return activeTableView_;

@@ -106,12 +106,12 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 	else
 	{
 		__GEN_SS__ << "ChannelDataType '" << dataType_ << "' is invalid. "
-		       << "Valid data types (w/size in bytes) are as follows: "
-		       << "#b (# bits)"
-		       << ", char (" << sizeof(char) << "B), unsigned char (" << sizeof(unsigned char) << "B), short (" << sizeof(short) << "B), unsigned short ("
-		       << sizeof(unsigned short) << "B), int (" << sizeof(int) << "B), unsigned int (" << sizeof(unsigned int) << "B), long long (" << sizeof(long long)
-		       << "B), unsigned long long (" << sizeof(unsigned long long) << "B), float (" << sizeof(float) << "B), double (" << sizeof(double) << "B)."
-		       << __E__;
+		           << "Valid data types (w/size in bytes) are as follows: "
+		           << "#b (# bits)"
+		           << ", char (" << sizeof(char) << "B), unsigned char (" << sizeof(unsigned char) << "B), short (" << sizeof(short) << "B), unsigned short ("
+		           << sizeof(unsigned short) << "B), int (" << sizeof(int) << "B), unsigned int (" << sizeof(unsigned int) << "B), long long ("
+		           << sizeof(long long) << "B), unsigned long long (" << sizeof(unsigned long long) << "B), float (" << sizeof(float) << "B), double ("
+		           << sizeof(double) << "B)." << __E__;
 		__GEN_COUT_ERR__ << "\n" << ss.str();
 		__GEN_SS_THROW__;
 	}
@@ -119,9 +119,9 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 	if(sizeOfDataTypeBits_ > 64)
 	{
 		__GEN_SS__ << "Invalid Data Type '" << dataType_ << "' (" << sizeOfDataTypeBits_
-		       << "-bits)"
-		          ". Size in bits must be less than or equal to 64-bits."
-		       << __E__;
+		           << "-bits)"
+		              ". Size in bits must be less than or equal to 64-bits."
+		           << __E__;
 		__GEN_COUT_ERR__ << "\n" << ss.str();
 		__GEN_SS_THROW__;
 	}
@@ -129,7 +129,7 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 	if(universalDataSize * 8 < sizeOfDataTypeBits_)
 	{
 		__GEN_SS__ << "Invalid Data Type '" << dataType_ << "' (" << sizeOfDataTypeBits_ << "-bits) or Universal Data Size of " << universalDataSize * 8
-		       << "-bits. Data Type size must be less than or equal to Universal Data Size." << __E__;
+		           << "-bits. Data Type size must be less than or equal to Universal Data Size." << __E__;
 		__GEN_COUT_ERR__ << "\n" << ss.str();
 		__GEN_SS_THROW__;
 	}
@@ -293,7 +293,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString, s
 		else
 		{
 			__GEN_SS__ << "Invalid floating point spec! "
-			       << "dataType_=" << dataType_ << " buffer.size()=" << buffer.size() << __E__;
+			           << "dataType_=" << dataType_ << " buffer.size()=" << buffer.size() << __E__;
 			__GEN_COUT_ERR__ << "\n" << ss.str();
 			__GEN_SS_THROW__;
 		}

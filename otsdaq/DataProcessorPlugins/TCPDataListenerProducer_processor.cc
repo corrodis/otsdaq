@@ -23,12 +23,8 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
           supervisorApplicationUID, bufferUID, processorUID, theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
     //, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
     , Configurable(theXDAQContextConfigTree, configurationPath)
-    , TCPSubscribeClient(theXDAQContextConfigTree.getNode(configurationPath)
-                             .getNode("ServerIPAddress")
-                             .getValue<std::string>(),
-                         theXDAQContextConfigTree.getNode(configurationPath)
-                             .getNode("ServerPort")
-                             .getValue<unsigned int>())
+    , TCPSubscribeClient(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>(),
+                         theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
     , dataP_(nullptr)
     , headerP_(nullptr)
     , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>())

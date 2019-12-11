@@ -19,7 +19,7 @@ const std::string ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME  = "XDAQAppl
 const std::string ConfigurationManager::XDAQ_APP_PROPERTY_TABLE_NAME = "XDAQApplicationPropertyTable";
 const std::string ConfigurationManager::GROUP_ALIASES_TABLE_NAME     = "GroupAliasesTable";
 const std::string ConfigurationManager::VERSION_ALIASES_TABLE_NAME   = "VersionAliasesTable";
-const std::string ConfigurationManager::ARTDAQ_TOP_TABLE_NAME  		 = "ARTDAQSupervisorTable";
+const std::string ConfigurationManager::ARTDAQ_TOP_TABLE_NAME        = "ARTDAQSupervisorTable";
 
 // added env check for otsdaq_flatten_active_to_version to function
 const std::string ConfigurationManager::ACTIVE_GROUPS_FILENAME =
@@ -146,9 +146,7 @@ ConfigurationManager::~ConfigurationManager() { destroy(); }
 //	else throw errors (but do not ask restoreActiveTableGroups to throw errors)
 //	Notes: Errors are handled separately from Warnings. Errors are used to monitor
 //		errors but do not allow, and warnings are used to allow warnings and monitor.
-void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/,
-		bool initForWriteAccess /*= false*/,
-		std::string* accumulatedWarnings /*=0*/)
+void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/, bool initForWriteAccess /*= false*/, std::string* accumulatedWarnings /*=0*/)
 {
 	// if(accumulatedErrors)
 	//	*accumulatedErrors = "";
@@ -161,7 +159,7 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/,
 		try
 		{
 			__COUTV__(username_);
-// clang-format off
+			// clang-format off
 			restoreActiveTableGroups(accumulatedErrors ? true : false /*throwErrors*/,
 				 "" /*pathToActiveGroupsFile*/,
 
@@ -175,7 +173,7 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/,
 
 				 accumulatedWarnings
 			);
-// clang-format on
+			// clang-format on
 		}
 		catch(std::runtime_error& e)
 		{
@@ -192,10 +190,10 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/,
 //	load the active groups from file
 //	Note: this should be used by the Supervisor to maintain
 //		the same configurationGroups surviving software system restarts
-void ConfigurationManager::restoreActiveTableGroups(bool throwErrors /*=false*/,
-		const std::string& pathToActiveGroupsFile /*=""*/,
-		bool onlyLoadIfBackboneOrContext /*= false*/,
-		std::string* accumulatedWarnings /*=0*/)
+void ConfigurationManager::restoreActiveTableGroups(bool               throwErrors /*=false*/,
+                                                    const std::string& pathToActiveGroupsFile /*=""*/,
+                                                    bool               onlyLoadIfBackboneOrContext /*= false*/,
+                                                    std::string*       accumulatedWarnings /*=0*/)
 {
 	destroyTableGroup("", true);  // deactivate all
 
@@ -290,15 +288,14 @@ void ConfigurationManager::restoreActiveTableGroups(bool throwErrors /*=false*/,
 			std::string groupAccumulatedErrors = "";
 
 			if(accumulatedWarnings)
-				__COUT__ << "Ignoring warnings while loading and activating group '" << groupName <<
-					"(" << strVal << ")'" << __E__;
+				__COUT__ << "Ignoring warnings while loading and activating group '" << groupName << "(" << strVal << ")'" << __E__;
 
 			loadTableGroup(groupName,
 			               TableGroupKey(strVal),
 			               true /*doActivate*/,
 			               0 /*groupMembers*/,
 			               0 /*progressBar*/,
-						   (accumulatedWarnings?&groupAccumulatedErrors:0) /*accumulateWarnings = 0*/,
+			               (accumulatedWarnings ? &groupAccumulatedErrors : 0) /*accumulateWarnings = 0*/,
 			               0 /*groupComment       = 0*/,
 			               0 /*groupAuthor        = 0*/,
 			               0 /*groupCreateTime    = 0*/,
@@ -308,7 +305,8 @@ void ConfigurationManager::restoreActiveTableGroups(bool throwErrors /*=false*/,
 			               onlyLoadIfBackboneOrContext /*onlyLoadIfBackboneOrContext = false*/
 			);
 
-			if(accumulatedWarnings) *accumulatedWarnings += groupAccumulatedErrors;
+			if(accumulatedWarnings)
+				*accumulatedWarnings += groupAccumulatedErrors;
 		}
 		catch(std::runtime_error& e)
 		{
@@ -1398,9 +1396,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 			getChildren(&memberMap, accumulatedWarnings);
 			if(*accumulatedWarnings != "")
 			{
-				__COUT_ERR__ << "Errors detected while loading Table Group: " <<
-							groupName << "(" << groupKey <<
-							"). Ignoring the following errors: "
+				__COUT_ERR__ << "Errors detected while loading Table Group: " << groupName << "(" << groupKey << "). Ignoring the following errors: "
 				             << "\n"
 				             << *accumulatedWarnings << __E__;
 			}
@@ -1742,10 +1738,10 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 								   twoDeepChild.second.getDisconnectedTableName() != TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 								{
 									__SS__ << "At node '" + configPair.first + "' with entry UID '" + newNodeChild.first +
-									                          "' there is a disconnected child node at link "
-									                          "column '" +
-									                          twoDeepChild.first + "'" + " that points to table named '" +
-									                          twoDeepChild.second.getDisconnectedTableName() + "' ...";
+									              "' there is a disconnected child node at link "
+									              "column '" +
+									              twoDeepChild.first + "'" + " that points to table named '" + twoDeepChild.second.getDisconnectedTableName() +
+									              "' ...";
 									*accumulatedTreeErrors += ss.str();
 								}
 							}
@@ -1814,10 +1810,10 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 							   twoDeepChild.second.getDisconnectedTableName() != TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 							{
 								__SS__ << "At node '" + memberPair.first + "' with entry UID '" + newNodeChild.first +
-								                          "' there is a disconnected child node at link column "
-								                          "'" +
-								                          twoDeepChild.first + "'" + " that points to table named '" +
-								                          twoDeepChild.second.getDisconnectedTableName() + "' ...";
+								              "' there is a disconnected child node at link column "
+								              "'" +
+								              twoDeepChild.first + "'" + " that points to table named '" + twoDeepChild.second.getDisconnectedTableName() +
+								              "' ...";
 								*accumulatedTreeErrors += ss.str();
 
 								// check if disconnected table is in group, if not

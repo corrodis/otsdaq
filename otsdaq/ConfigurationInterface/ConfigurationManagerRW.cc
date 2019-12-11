@@ -181,10 +181,9 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 //
 // if(accumulatedWarnings)
 //	this implies allowing column errors and accumulating such errors in given string
-const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
-		bool               refresh,
-		std::string*       accumulatedWarnings /*=0*/,
-			const std::string& errorFilterName /*=""*/)
+const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(bool               refresh,
+                                                                                std::string*       accumulatedWarnings /*=0*/,
+                                                                                const std::string& errorFilterName /*=""*/)
 {
 	// allTableInfo_ is container to be returned
 
@@ -337,8 +336,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	__COUT__ << "Extracting list of tables complete. Now initializing..." << __E__;
 
 	// call init to load active versions by default, activate with warnings allowed (assuming development going on)
-	init(0 /*accumulatedErrors*/,false /*initForWriteAccess*/,
-			accumulatedWarnings);
+	init(0 /*accumulatedErrors*/, false /*initForWriteAccess*/, accumulatedWarnings);
 
 	__COUT__ << "======================================================== getAllTableInfo end" << __E__;
 
@@ -528,7 +526,7 @@ TableVersion ConfigurationManagerRW::createTemporaryBackboneView(TableVersion so
 	}
 
 	return tmpVersion;
-} //end createTemporaryBackboneView()
+}  // end createTemporaryBackboneView()
 
 //==============================================================================
 TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
@@ -538,8 +536,8 @@ TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
 		if(tableName == ConfigurationManager::ARTDAQ_TOP_TABLE_NAME)
 		{
 			__COUT_WARN__ << "Since target table was the artdaq top configuration level, "
-					"attempting to help user by appending to core tables file: " <<
-					CORE_TABLE_INFO_FILENAME << __E__;
+			                 "attempting to help user by appending to core tables file: "
+			              << CORE_TABLE_INFO_FILENAME << __E__;
 			FILE* fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "a");
 			if(fp)
 			{
@@ -555,13 +553,14 @@ TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
 			      "position "
 			   << f << " in the string (was this intended?). " << __E__;
 
-		ss << "\nIf you think this table should exist in the core set of tables, try running 'UpdateOTS.sh --tables' to update your tables, then relaunch ots." << __E__;
+		ss << "\nIf you think this table should exist in the core set of tables, try running 'UpdateOTS.sh --tables' to update your tables, then relaunch ots."
+		   << __E__;
 		ss << "\nTables must be defined in $USER_DATA/TableInfo to exist in ots. Please verify your table definitions, and then restart ots." << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 	return nameToTableMap_[tableName];
-} //end getTableByName()
+}  // end getTableByName()
 
 //==============================================================================
 // getVersionedTableByName
@@ -1251,13 +1250,13 @@ TableEditStruct& GroupEditStruct::getTableEditStruct(const std::string& tableNam
 	auto it = groupTables_.find(tableName);
 	if(it == groupTables_.end())
 	{
-		if(groupType_ == ConfigurationManager::GroupType::CONFIGURATION_TYPE &&
-				markModified)
+		if(groupType_ == ConfigurationManager::GroupType::CONFIGURATION_TYPE && markModified)
 		{
-			__COUT__ << "Table '" << tableName << "' not found in configuration table members from editing '" << originalGroupName_ << "(" << originalGroupKey_ << ")..." <<
-						" Attempting to add it!" << __E__;
+			__COUT__ << "Table '" << tableName << "' not found in configuration table members from editing '" << originalGroupName_ << "(" << originalGroupKey_
+			         << ")..."
+			         << " Attempting to add it!" << __E__;
 
-			//emplace returns pair<object,bool wasAdded>
+			// emplace returns pair<object,bool wasAdded>
 			auto newIt = groupTables_.emplace(std::make_pair(tableName, TableEditStruct(tableName, cfgMgr_)));  // Table ready for editing!
 			if(newIt.second)
 			{

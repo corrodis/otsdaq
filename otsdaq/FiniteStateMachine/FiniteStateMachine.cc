@@ -10,7 +10,7 @@ using namespace ots;
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "FSM"
-#define mfSubject_ 		std::string("FSM-") + getStateMachineName()
+#define mfSubject_ std::string("FSM-") + getStateMachineName()
 
 //========================================================================================================================
 FiniteStateMachine::FiniteStateMachine(const std::string& stateMachineName)
@@ -120,7 +120,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		while(inTransition_)
 		{
 			__GEN_COUT__ << "Currently in a transition executed from current state " << getProvenanceStateName()
-			         << ". Attempting to wait for the transition to complete." << __E__;
+			             << ". Attempting to wait for the transition to complete." << __E__;
 			sleep(1);
 		}
 		sleep(1);
@@ -196,7 +196,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		transitionSuccessful = false;
 		std::ostringstream error;
 		__GEN_SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState())
-		       << ". There was an error: " << e.what();
+		           << ". There was an error: " << e.what();
 		__GEN_COUT_ERR__ << ss.str() << std::endl;
 		// diagService_->reportError(err.str(),DIAGERROR);
 
@@ -207,7 +207,8 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 	{
 		inTransition_        = false;
 		transitionSuccessful = false;
-		__GEN_SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState()) << ". There was an unknown error.";
+		__GEN_SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState())
+		           << ". There was an unknown error.";
 		__GEN_COUT_ERR__ << ss.str() << std::endl;
 		// diagService_->reportError(err.str(),DIAGERROR);
 

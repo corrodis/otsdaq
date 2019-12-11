@@ -37,11 +37,11 @@ void TCPServer::connectClient(TCPTransceiverSocket* socket)
 		}
 		catch(const std::exception& e)
 		{
-			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;//Client connection must have closed
+			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;  // Client connection must have closed
 			std::cerr << __PRETTY_FUNCTION__ << e.what() << '\n';
 			TCPServerBase::closeClientSocket(socket->getSocketId());
 			interpretMessage("Error: " + std::string(e.what()));
-			return;//the pointer to socket has been deleted in closeClientSocket
+			return;  // the pointer to socket has been deleted in closeClientSocket
 		}
 
 		// std::cout << __PRETTY_FUNCTION__

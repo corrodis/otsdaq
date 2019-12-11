@@ -502,22 +502,20 @@ void GatewaySupervisor::Default(xgi::Input* in, xgi::Output* out)
 	if(!supervisorGuiHasBeenLoaded_ && (supervisorGuiHasBeenLoaded_ = true))  // make system logbook entry that ots has been started
 		makeSystemLogbookEntry("ots started.");
 
-	*out << "<!DOCTYPE HTML><html lang='en'><head><title>ots</title>" <<
-			GatewaySupervisor::getIconHeaderString()
-	     <<
+	*out << "<!DOCTYPE HTML><html lang='en'><head><title>ots</title>" << GatewaySupervisor::getIconHeaderString() <<
 	    // end show ots icon
 	    "</head>"
 	     << "<frameset col='100%' row='100%'>"
 	     << "<frame src='/WebPath/html/Desktop.html?urn=" << this->getApplicationDescriptor()->getLocalId() << "&securityType=" << securityType_
 	     << "'></frameset></html>";
-} //end Default()
+}  // end Default()
 
 //========================================================================================================================
 std::string GatewaySupervisor::getIconHeaderString(void)
 {
-    // show ots icon
-    //	from http://www.favicon-generator.org/
-    return "<link rel='apple-touch-icon' sizes='57x57' href='/WebPath/images/otsdaqIcons/apple-icon-57x57.png'>\
+	// show ots icon
+	//	from http://www.favicon-generator.org/
+	return "<link rel='apple-touch-icon' sizes='57x57' href='/WebPath/images/otsdaqIcons/apple-icon-57x57.png'>\
 	<link rel='apple-touch-icon' sizes='60x60' href='/WebPath/images/otsdaqIcons/apple-icon-60x60.png'>\
 	<link rel='apple-touch-icon' sizes='72x72' href='/WebPath/images/otsdaqIcons/apple-icon-72x72.png'>\
 	<link rel='apple-touch-icon' sizes='76x76' href='/WebPath/images/otsdaqIcons/apple-icon-76x76.png'>\
@@ -538,7 +536,7 @@ std::string GatewaySupervisor::getIconHeaderString(void)
 	<meta name='msapplication-TileImage' content='/WebPath/images/otsdaqIcons/ms-icon-144x144.png'>\
 	<meta name='theme-color' content='#ffffff'>";
 
-} //end getIconHeaderString()
+}  // end getIconHeaderString()
 
 //========================================================================================================================
 // stateMachineIterationBreakpoint

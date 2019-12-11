@@ -146,8 +146,8 @@ void TCPServerBase::closeClientSockets(void)
 //========================================================================================================================
 void TCPServerBase::closeClientSocket(int socket)
 {
-	for (auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
-		if (it->second->getSocketId() == socket)
+	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
+		if(it->second->getSocketId() == socket)
 		{
 			it->second->sendClose();
 			delete it->second;
@@ -158,13 +158,13 @@ void TCPServerBase::closeClientSocket(int socket)
 //========================================================================================================================
 void TCPServerBase::broadcastPacket(const std::string& message)
 {
-	for (auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
+	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
 	{
 		try
 		{
-			dynamic_cast<TCPTransmitterSocket *>(it->second)->sendPacket(message);
+			dynamic_cast<TCPTransmitterSocket*>(it->second)->sendPacket(message);
 		}
-		catch (const std::exception &e)
+		catch(const std::exception& e)
 		{
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
 			delete it->second;
@@ -176,13 +176,13 @@ void TCPServerBase::broadcastPacket(const std::string& message)
 //========================================================================================================================
 void TCPServerBase::broadcast(const std::string& message)
 {
-	for (auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
+	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
 	{
 		try
 		{
-			dynamic_cast<TCPTransmitterSocket *>(it->second)->send(message);
+			dynamic_cast<TCPTransmitterSocket*>(it->second)->send(message);
 		}
-		catch (const std::exception &e)
+		catch(const std::exception& e)
 		{
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
 			delete it->second;
@@ -194,13 +194,13 @@ void TCPServerBase::broadcast(const std::string& message)
 //========================================================================================================================
 void TCPServerBase::broadcast(const std::vector<char>& message)
 {
-	for (auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
+	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
 	{
 		try
 		{
-			dynamic_cast<TCPTransmitterSocket *>(it->second)->send(message);
+			dynamic_cast<TCPTransmitterSocket*>(it->second)->send(message);
 		}
-		catch (const std::exception &e)
+		catch(const std::exception& e)
 		{
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
 			delete it->second;

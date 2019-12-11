@@ -91,7 +91,7 @@ unsigned int TableView::copyRows(const std::string& author,
                                  unsigned int       srcRowsToCopy /* = -1 */,
                                  unsigned int       destOffsetRow /* = -1 */,
                                  unsigned char      generateUniqueDataColumns /* = false */,
-								 const std::string& baseNameAutoUID /*= "" */)
+                                 const std::string& baseNameAutoUID /*= "" */)
 {
 	//__COUTV__(destOffsetRow);
 	//__COUTV__(srcOffsetRow);
@@ -115,18 +115,18 @@ unsigned int TableView::copyRows(const std::string& author,
 			break;  // end when no more source rows to copy (past bounds)
 
 		destOffsetRow = addRow(author,
-				generateUniqueDataColumns /*incrementUniqueData*/,
-				baseNameAutoUID /*baseNameAutoUID*/,
-		        destOffsetRow);  // add and get row created
+		                       generateUniqueDataColumns /*incrementUniqueData*/,
+		                       baseNameAutoUID /*baseNameAutoUID*/,
+		                       destOffsetRow);  // add and get row created
 
 		if(retRow == (unsigned int)-1)
 			retRow = destOffsetRow;  // save row of first copied entry
 
 		// copy data
 		for(unsigned int col = 0; col < getNumberOfColumns(); ++col)
-			if(generateUniqueDataColumns && (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UID ||
-											 columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
-			                                 columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))
+			if(generateUniqueDataColumns &&
+			   (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UID || columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
+			    columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))
 				continue;  // if leaving unique data, then skip copy
 			else
 				theDataView_[destOffsetRow][col] = src.theDataView_[r + srcOffsetRow][col];
@@ -195,11 +195,10 @@ void TableView::init(void)
 		{
 		}  // ignore no Priority column
 
-		//fix source columns if not already populated
-		if(sourceColumnNames_.size() == 0) // setup sourceColumnNames_ to be correct
+		// fix source columns if not already populated
+		if(sourceColumnNames_.size() == 0)  // setup sourceColumnNames_ to be correct
 			for(unsigned int i = 0; i < getNumberOfColumns(); ++i)
 				sourceColumnNames_.emplace(getColumnsInfo()[i].getStorageName());
-
 
 		// require one comment column
 		unsigned int colPos;
@@ -832,10 +831,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 	//"'"
 	//			         << __E__;
 
-	//if baseValueAsString ends in number, then add _ to keep naming similar
-	if(baseValueAsString.size() &&
-			baseValueAsString[baseValueAsString.size()-1] >= '0' &&
-			baseValueAsString[baseValueAsString.size()-1] <= '9')
+	// if baseValueAsString ends in number, then add _ to keep naming similar
+	if(baseValueAsString.size() && baseValueAsString[baseValueAsString.size() - 1] >= '0' && baseValueAsString[baseValueAsString.size() - 1] <= '9')
 		baseValueAsString += '_';
 
 	int          maxUniqueData = -1;
@@ -909,9 +906,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			if(baseValueAsString != "" && tmpString != baseValueAsString)
 				continue;  // skip max unique number if basestring does not match
 
-			__COUT__ << "Found unique data base string '" <<
-				tmpString << "' and number string '" << numString <<
-					"' in last record '" << theDataView_[r][col] << "'" << __E__;
+			__COUT__ << "Found unique data base string '" << tmpString << "' and number string '" << numString << "' in last record '" << theDataView_[r][col]
+			         << "'" << __E__;
 
 			// extract number
 			sscanf(numString.c_str(), "%u", &index);
@@ -1379,7 +1375,7 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 	   colLinkGroupIDs_.end())
 		return it->second;
 
-	//otherwise search (perhaps init() was not called)
+	// otherwise search (perhaps init() was not called)
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
 		if(needleChildLinkIndex == columnsInfo_[col].getChildLinkIndex())
 			return col;
@@ -2730,7 +2726,7 @@ void TableView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //	if baseNameAutoUID != "", creates a UID based on this base name
 //		and increments and appends an integer relative to the previous last row
 unsigned int TableView::addRow(const std::string& author,
-                               unsigned char      incrementUniqueData /*= false */, // leave as unsigned char rather than
+                               unsigned char      incrementUniqueData /*= false */,  // leave as unsigned char rather than
                                // bool, too many things (e.g. strings)
                                // evaluate successfully to bool values
                                const std::string& baseNameAutoUID /*= "" */,

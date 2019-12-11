@@ -21,24 +21,24 @@ void TCPTransmitterSocket::sendPacket(const std::string& buffer) { send(TCPPacke
 void TCPTransmitterSocket::send(char const* buffer, std::size_t size)
 {
 	std::size_t sentBytes = ::send(getSocketId(), buffer, size, MSG_NOSIGNAL);
-	if (sentBytes == static_cast<std::size_t>(-1))
+	if(sentBytes == static_cast<std::size_t>(-1))
 	{
-		switch (errno)
+		switch(errno)
 		{
-		//case EINVAL:
-		//case EBADF:
-		//case ECONNRESET:
-		//case ENXIO:
+		// case EINVAL:
+		// case EBADF:
+		// case ECONNRESET:
+		// case ENXIO:
 		case EPIPE:
 		{
 			// Fatal error. Programming bug
 			throw std::runtime_error(std::string("Write: critical error: ") + strerror(errno));
 		}
-		//case EDQUOT:
-		//case EFBIG:
-		//case EIO:
-		//case ENETDOWN:
-		//case ENETUNREACH:
+		// case EDQUOT:
+		// case EFBIG:
+		// case EIO:
+		// case ENETDOWN:
+		// case ENETUNREACH:
 		case ENOSPC:
 		{
 			// Resource acquisition failure or device error
@@ -62,8 +62,8 @@ void TCPTransmitterSocket::send(char const* buffer, std::size_t size)
 }
 
 //========================================================================================================================
-void TCPTransmitterSocket::send(const std::string& buffer) 
-{ 
+void TCPTransmitterSocket::send(const std::string& buffer)
+{
 	if(buffer.size() == 0)
 	{
 		std::cout << __PRETTY_FUNCTION__ << "I am sorry but I won't send an empty packet!" << std::endl;
@@ -73,8 +73,8 @@ void TCPTransmitterSocket::send(const std::string& buffer)
 }
 
 //========================================================================================================================
-void TCPTransmitterSocket::send(const std::vector<char>& buffer) 
-{ 
+void TCPTransmitterSocket::send(const std::vector<char>& buffer)
+{
 	if(buffer.size() == 0)
 	{
 		std::cout << __PRETTY_FUNCTION__ << "I am sorry but I won't send an empty packet!" << std::endl;

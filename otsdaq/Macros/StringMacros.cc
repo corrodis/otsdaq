@@ -619,9 +619,9 @@ void StringMacros::getMapFromString(const std::string&                  inputStr
 			    nameValueDelimiter.find(inputString[j]) != nameValueDelimiter.end()) &&
 			   i == j)
 				++i;
-			else if(whitespace.find(inputString[j]) != whitespace.end() ||  // trailing white space or delimiter indicates end
-			         pairPairDelimiter.find(inputString[j]) != pairPairDelimiter.end())// &&
-			      //  i != j)  // assume end of value name
+			else if(whitespace.find(inputString[j]) != whitespace.end() ||              // trailing white space or delimiter indicates end
+			        pairPairDelimiter.find(inputString[j]) != pairPairDelimiter.end())  // &&
+			                                                                            //  i != j)  // assume end of value name
 			{
 				//__COUT__ << "Map value found: " <<
 				//		inputString.substr(i,j-i) << std::endl;
@@ -679,7 +679,7 @@ std::string StringMacros::mapToString(const std::map<std::string, uint8_t>& mapT
 		ss << mapPair.first << secondaryDelimeter << (unsigned int)mapPair.second;
 	}
 	return ss.str();
-} //end mapToString()
+}  // end mapToString()
 
 //==============================================================================
 // setToString
@@ -696,7 +696,7 @@ std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn, cons
 		ss << (unsigned int)setValue;
 	}
 	return ss.str();
-} //end setToString()
+}  // end setToString()
 
 //==============================================================================
 // vectorToString
@@ -713,7 +713,7 @@ std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn
 		ss << (unsigned int)setValue;
 	}
 	return ss.str();
-} //end vectorToString()
+}  // end vectorToString()
 
 //==============================================================================
 // extractCommonChunks
@@ -725,115 +725,94 @@ std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn
 //
 //	Returns true if common chunks and wildcards found,
 //	returns false if all inputs were the same (i.e. no wildcards needed)
-bool StringMacros::extractCommonChunks(
-		const std::vector<std::string>& haystack,
-		std::vector<std::string>& commonChunksToReturn,
-		std::vector<std::string>& wildcardStringsToReturn,
-		unsigned int& fixedWildcardLength)
+bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
+                                       std::vector<std::string>&       commonChunksToReturn,
+                                       std::vector<std::string>&       wildcardStringsToReturn,
+                                       unsigned int&                   fixedWildcardLength)
 {
-	fixedWildcardLength = 0; //default
+	fixedWildcardLength = 0;  // default
 
-	//Steps:
+	// Steps:
 	//	- find start and end common chunks first in haystack strings
 	//  - use start and end to determine if there is more than one *
 	//	- decide if fixed width was specified (based on prepended 0s to numbers)
 	//	- search for more instances of * value
-//
-//
-//	// Note: lambda recursive function to find chunks
-//	std::function<void(
-//			const std::vector<std::string>&,
-//			const std::string&,
-//			const unsigned int, const int)> localRecurse =
-//	    [&specialFolders, &specialMapTypes, &retMap, &localRecurse](
-//	    		const std::vector<std::string>& haystack,
-//			const std::string& offsetPath,
-//			const unsigned int depth,
-//			const int specialIndex)
-//			{
-//
-//		    //__COUTV__(path);
-//		    //__COUTV__(depth);
-//	}
-	std::pair<unsigned int /*lo*/, unsigned int /*hi*/> wildcardBounds(
-			std::make_pair(-1,0)); //initialize to illegal wildcard
+	//
+	//
+	//	// Note: lambda recursive function to find chunks
+	//	std::function<void(
+	//			const std::vector<std::string>&,
+	//			const std::string&,
+	//			const unsigned int, const int)> localRecurse =
+	//	    [&specialFolders, &specialMapTypes, &retMap, &localRecurse](
+	//	    		const std::vector<std::string>& haystack,
+	//			const std::string& offsetPath,
+	//			const unsigned int depth,
+	//			const int specialIndex)
+	//			{
+	//
+	//		    //__COUTV__(path);
+	//		    //__COUTV__(depth);
+	//	}
+	std::pair<unsigned int /*lo*/, unsigned int /*hi*/> wildcardBounds(std::make_pair(-1, 0));  // initialize to illegal wildcard
 
-	//look for starting matching segment
-	for(unsigned int n=1;n<haystack.size();++n)
-		for(unsigned int i=0,j=0;i<haystack[0].length() &&
-		j<haystack[n].length();++i,++j)
+	// look for starting matching segment
+	for(unsigned int n = 1; n < haystack.size(); ++n)
+		for(unsigned int i = 0, j = 0; i < haystack[0].length() && j < haystack[n].length(); ++i, ++j)
 		{
 			if(i < wildcardBounds.first)
 			{
 				if(haystack[0][i] != haystack[1][j])
 				{
-					wildcardBounds.first = i; //found lo side of wildcard
+					wildcardBounds.first = i;  // found lo side of wildcard
 					break;
 				}
 			}
 			else
 				break;
 		}
-	__COUT__ << "Low side = " << wildcardBounds.first << " " <<
-			haystack[0].substr(0,wildcardBounds.first) << __E__;
+	__COUT__ << "Low side = " << wildcardBounds.first << " " << haystack[0].substr(0, wildcardBounds.first) << __E__;
 
-	//look for end matching segment
-	for(unsigned int n=1;n<haystack.size();++n)
-		for(int i=haystack[0].length()-1,
-				j=haystack[n].length()-1;i>=(int)wildcardBounds.first &&
-				j>=(int)wildcardBounds.first;--i,--j)
+	// look for end matching segment
+	for(unsigned int n = 1; n < haystack.size(); ++n)
+		for(int i = haystack[0].length() - 1, j = haystack[n].length() - 1; i >= (int)wildcardBounds.first && j >= (int)wildcardBounds.first; --i, --j)
 		{
-			if(i > (int)wildcardBounds.second)//looking for hi side
+			if(i > (int)wildcardBounds.second)  // looking for hi side
 			{
 				if(haystack[0][i] != haystack[n][j])
 				{
-					wildcardBounds.second = i+1; //found hi side of wildcard
+					wildcardBounds.second = i + 1;  // found hi side of wildcard
 					break;
 				}
 			}
 			else
 				break;
-
 		}
 
-	__COUT__ << "High side = " << wildcardBounds.second << " " <<
-			haystack[0].substr(wildcardBounds.second) << __E__;
+	__COUT__ << "High side = " << wildcardBounds.second << " " << haystack[0].substr(wildcardBounds.second) << __E__;
 
+	// add first common chunk
+	commonChunksToReturn.push_back(haystack[0].substr(0, wildcardBounds.first));
 
-	//add first common chunk
-	commonChunksToReturn.push_back(
-			haystack[0].substr(0,wildcardBounds.first));
-
-	if(wildcardBounds.first != (unsigned int)-1) //potentially more chunks if not end
+	if(wildcardBounds.first != (unsigned int)-1)  // potentially more chunks if not end
 	{
-
 		//  - use start and end to determine if there is more than one *
-		for(int i=(wildcardBounds.first+wildcardBounds.second)/2+1;
-				i<(int)wildcardBounds.second;++i)
-			if(haystack[0][wildcardBounds.first] ==
-					haystack[0][i] &&
-					haystack[0].substr(wildcardBounds.first,
-							wildcardBounds.second-i) ==
-					haystack[0].substr(i,
-							wildcardBounds.second-i))
+		for(int i = (wildcardBounds.first + wildcardBounds.second) / 2 + 1; i < (int)wildcardBounds.second; ++i)
+			if(haystack[0][wildcardBounds.first] == haystack[0][i] &&
+			   haystack[0].substr(wildcardBounds.first, wildcardBounds.second - i) == haystack[0].substr(i, wildcardBounds.second - i))
 			{
-				std::string multiWildcardString = haystack[0].substr(i,
-						wildcardBounds.second-i);
-				__COUT__ << "Multi-wildcard found: " <<
-						multiWildcardString << __E__;
+				std::string multiWildcardString = haystack[0].substr(i, wildcardBounds.second - i);
+				__COUT__ << "Multi-wildcard found: " << multiWildcardString << __E__;
 
 				std::vector<unsigned int /*lo index*/> wildCardInstances;
-				//add front one now, and back one later
+				// add front one now, and back one later
 				wildCardInstances.push_back(wildcardBounds.first);
 
-				unsigned int offset = wildCardInstances[0] +
-						multiWildcardString.size() + 1;
-				std::string middleString = haystack[0].substr(
-						offset,
-						(i-1) - offset);
+				unsigned int offset       = wildCardInstances[0] + multiWildcardString.size() + 1;
+				std::string  middleString = haystack[0].substr(offset, (i - 1) - offset);
 				__COUTV__(middleString);
 
-				//search for more wildcard instances in new common area
+				// search for more wildcard instances in new common area
 				size_t k;
 				while((k = middleString.find(multiWildcardString)) != std::string::npos)
 				{
@@ -841,47 +820,35 @@ bool StringMacros::extractCommonChunks(
 
 					wildCardInstances.push_back(offset + k);
 
-					middleString = middleString.substr(k +
-							multiWildcardString.size() + 1);
-					offset += k +
-							multiWildcardString.size() + 1;
+					middleString = middleString.substr(k + multiWildcardString.size() + 1);
+					offset += k + multiWildcardString.size() + 1;
 					__COUTV__(middleString);
 				}
 
-				//add back one last
+				// add back one last
 				wildCardInstances.push_back(i);
 
-				for(unsigned int w=0;
-						w<wildCardInstances.size()-1;++w)
+				for(unsigned int w = 0; w < wildCardInstances.size() - 1; ++w)
 				{
-					commonChunksToReturn.push_back(
-							haystack[0].substr(
-							wildCardInstances[w] +
-							wildCardInstances.size(),
-							wildCardInstances[w+1] - (
-								wildCardInstances[w] +
-								wildCardInstances.size())));
+					commonChunksToReturn.push_back(haystack[0].substr(wildCardInstances[w] + wildCardInstances.size(),
+					                                                  wildCardInstances[w + 1] - (wildCardInstances[w] + wildCardInstances.size())));
 				}
-
 			}
 
-		//check if all common chunks end in 0 to add fixed length
+		// check if all common chunks end in 0 to add fixed length
 
-
-		for(unsigned int i=0;i<commonChunksToReturn[0].size();++i)
-			if(commonChunksToReturn[0][commonChunksToReturn[0].size()-1-i] == '0')
+		for(unsigned int i = 0; i < commonChunksToReturn[0].size(); ++i)
+			if(commonChunksToReturn[0][commonChunksToReturn[0].size() - 1 - i] == '0')
 				++fixedWildcardLength;
 			else
 				break;
 
-
-
 		bool allHave0 = true;
-		for(unsigned int c=0;c<commonChunksToReturn.size();++c)
+		for(unsigned int c = 0; c < commonChunksToReturn.size(); ++c)
 		{
 			unsigned int cnt = 0;
-			for(unsigned int i=0;i<commonChunksToReturn[c].size();++i)
-				if(commonChunksToReturn[c][commonChunksToReturn[c].size()-1-i] == '0')
+			for(unsigned int i = 0; i < commonChunksToReturn[c].size(); ++i)
+				if(commonChunksToReturn[c][commonChunksToReturn[c].size() - 1 - i] == '0')
 					++cnt;
 				else
 					break;
@@ -890,76 +857,73 @@ bool StringMacros::extractCommonChunks(
 				fixedWildcardLength = cnt;
 			else if(fixedWildcardLength > cnt)
 			{
-				__SS__ << "Invalid fixed length found, please simplify indexing between these common chunks: " <<
-						StringMacros::vectorToString(commonChunksToReturn) << __E__;
+				__SS__ << "Invalid fixed length found, please simplify indexing between these common chunks: "
+				       << StringMacros::vectorToString(commonChunksToReturn) << __E__;
 				__SS_THROW__;
 			}
 		}
 		__COUTV__(fixedWildcardLength);
 
-		if(fixedWildcardLength) //take trailing 0s out of common chunks
-			for(unsigned int c=0;c<commonChunksToReturn.size();++c)
-				commonChunksToReturn[c] = commonChunksToReturn[c].substr(0,
-						commonChunksToReturn[c].size()-fixedWildcardLength);
+		if(fixedWildcardLength)  // take trailing 0s out of common chunks
+			for(unsigned int c = 0; c < commonChunksToReturn.size(); ++c)
+				commonChunksToReturn[c] = commonChunksToReturn[c].substr(0, commonChunksToReturn[c].size() - fixedWildcardLength);
 
-		//add last common chunk
+		// add last common chunk
 		commonChunksToReturn.push_back(haystack[0].substr(wildcardBounds.second));
-	} //end handling more chunks
+	}  // end handling more chunks
 
-	//now determine wildcard strings
-	size_t k;
+	// now determine wildcard strings
+	size_t       k;
 	unsigned int i;
-	unsigned int ioff = fixedWildcardLength;
-	bool wildcardsNeeded = false;
+	unsigned int ioff            = fixedWildcardLength;
+	bool         wildcardsNeeded = false;
 
-	for(unsigned int n=0;n<haystack.size();++n)
+	for(unsigned int n = 0; n < haystack.size(); ++n)
 	{
 		std::string wildcard = "";
-		k = 0;
-		i = ioff + commonChunksToReturn[0].size();
+		k                    = 0;
+		i                    = ioff + commonChunksToReturn[0].size();
 
-		if(commonChunksToReturn.size() == 1) //just get end
+		if(commonChunksToReturn.size() == 1)  // just get end
 			wildcard = haystack[n].substr(i);
 		else
-		for(unsigned int c=1;c<commonChunksToReturn.size();++c)
-		{
-			if(c == commonChunksToReturn.size()-1) //for last, do reverse find
-				k = haystack[n].rfind(commonChunksToReturn[c]);
-			else
-				k = haystack[n].find(commonChunksToReturn[c],i+1);
-
-			if(wildcard == "")
+			for(unsigned int c = 1; c < commonChunksToReturn.size(); ++c)
 			{
-				//set wildcard for first time
-				__COUTV__(i);
-				__COUTV__(k);
-				__COUTV__(k-i);
+				if(c == commonChunksToReturn.size() - 1)  // for last, do reverse find
+					k = haystack[n].rfind(commonChunksToReturn[c]);
+				else
+					k = haystack[n].find(commonChunksToReturn[c], i + 1);
 
-				wildcard = haystack[n].substr(i,k-i);
-				if(fixedWildcardLength && n == 0)
-					fixedWildcardLength += wildcard.size();
+				if(wildcard == "")
+				{
+					// set wildcard for first time
+					__COUTV__(i);
+					__COUTV__(k);
+					__COUTV__(k - i);
 
-				__COUT__ << "name[" << n << "] = " << wildcard <<
-						" fixed @ " << fixedWildcardLength << __E__;
+					wildcard = haystack[n].substr(i, k - i);
+					if(fixedWildcardLength && n == 0)
+						fixedWildcardLength += wildcard.size();
 
-				break;
-			}
-			else if(0 /*skip validation in favor of speed*/ && wildcard != haystack[n].substr(i,k-i))
-			{
-				__SS__ << "Invalid wildcard! for name[" << n <<
-						"] = " << haystack[n] <<
-						" - the extraction algorithm is confused, please simplify your naming convention." << __E__;
-				__SS_THROW__;
-			}
+					__COUT__ << "name[" << n << "] = " << wildcard << " fixed @ " << fixedWildcardLength << __E__;
 
-			i = k;
-		} //end commonChunksToReturn loop
+					break;
+				}
+				else if(0 /*skip validation in favor of speed*/ && wildcard != haystack[n].substr(i, k - i))
+				{
+					__SS__ << "Invalid wildcard! for name[" << n << "] = " << haystack[n]
+					       << " - the extraction algorithm is confused, please simplify your naming convention." << __E__;
+					__SS_THROW__;
+				}
 
-		if(wildcard.size()) wildcardsNeeded = true;
+				i = k;
+			}  // end commonChunksToReturn loop
+
+		if(wildcard.size())
+			wildcardsNeeded = true;
 		wildcardStringsToReturn.push_back(wildcard);
 
-	} //end name loop
-
+	}  // end name loop
 
 	__COUTV__(StringMacros::vectorToString(commonChunksToReturn));
 	__COUTV__(StringMacros::vectorToString(wildcardStringsToReturn));
@@ -972,7 +936,7 @@ bool StringMacros::extractCommonChunks(
 
 	return wildcardsNeeded;
 
-} //end extractCommonChunks()
+}  // end extractCommonChunks()
 
 //========================================================================================================================
 // exec

@@ -20,8 +20,7 @@ ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConf
 
 	std::string name = "BoardReader";
 
-	__CFG_MCOUT__("artdaq version " <<
-	              artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion() << ", built "
+	__CFG_MCOUT__("artdaq version " << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getPackageVersion() << ", built "
 	                                << artdaq::GetPackageBuildInfo::getPackageBuildInfo().getBuildTimestamp());
 
 	// artdaq::configureMessageFacility("boardreader");

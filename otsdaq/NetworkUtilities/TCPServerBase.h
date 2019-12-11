@@ -2,8 +2,8 @@
 #define _ots_TCPServerBase_h_
 
 #include <future>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 #include "otsdaq/NetworkUtilities/TCPSocket.h"
 
