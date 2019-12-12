@@ -37,7 +37,7 @@ class DatabaseConfigurationInterface : public ConfigurationInterface
 	std::set<TableVersion> getVersions(const TableBase* /*configuration*/) const noexcept;
 
 	// find all configuration groups in database
-	std::set<std::string /*name+version*/> getAllTableGroupNames(const std::string& filterString = "") const;
+	std::set<std::string /*name+version*/> getAllTableGroupNames(std::string const& filterString = "") const;
 	std::set<TableGroupKey>                getKeys(const std::string& groupName) const;
 	TableGroupKey                          findLatestGroupKey(const std::string& groupName) const noexcept;
 
