@@ -18,8 +18,11 @@ fcldir      -
 
 #
 product		 version	optional
-artdaq              v3_07_01
-artdaq_database     v1_04_80
+artdaq              v3_07_01 s83
+artdaq              v3_07_01 s85
+artdaq              v3_07_01 s87
+artdaq              v3_07_01a s89
+artdaq_database     v1_04_81
 xdaq                v14_12_0
 artdaq_daqinterface v3_07_00
 smc_compiler        v6_6_0      -nq-      only_for_build
@@ -32,25 +35,23 @@ end_product_list
 # -nq- here means there is no qualifier
 # a "-" here means the dependent product is not required by the parent and will not be setup
 qualifier    	   artdaq	 	 artdaq_database	xdaq   	    	artdaq_daqinterface		notes
+e19:s89:prof       e19:s89:prof    	 e19:s89:prof 		e19:prof   	-nq-					-std=c++17
+e19:s89:debug      e19:s89:debug   	 e19:s89:debug		e19:debug  	-nq-					-std=c++17
+e17:s89:prof       e17:s89:prof    	 e17:s89:prof 		e17:prof   	-nq-					-std=c++17
+e17:s89:debug      e17:s89:debug   	 e17:s89:debug		e17:debug  	-nq-					-std=c++17
+
 e19:s87:prof       e19:s87:prof    	 e19:s87:prof 		e19:prof   	-nq-					-std=c++17
 e19:s87:debug      e19:s87:debug   	 e19:s87:debug		e19:debug  	-nq-					-std=c++17
 e17:s87:prof       e17:s87:prof    	 e17:s87:prof 		e17:prof   	-nq-					-std=c++17
 e17:s87:debug      e17:s87:debug   	 e17:s87:debug		e17:debug  	-nq-					-std=c++17
+
 e17:s85:prof       e17:s85:prof    	 e17:s85:prof 		e17:prof   	-nq-					-std=c++17
 e17:s85:debug      e17:s85:debug   	 e17:s85:debug		e17:debug  	-nq-					-std=c++17
 
-e19:s82:prof       e19:s82:prof    	 e19:s82:prof 		e19:prof   	-nq-					-std=c++17
-e19:s82:debug      e19:s82:debug   	 e19:s82:debug		e19:debug  	-nq-					-std=c++17
-e17:s82:prof       e17:s82:prof    	 e17:s82:prof 		e17:prof   	-nq-					-std=c++17
-e17:s82:debug      e17:s82:debug   	 e17:s82:debug		e17:debug  	-nq-					-std=c++17
-
-e17:s73:prof       e17:s73:prof    	 e17:s73:prof 		e17:prof   	-nq-					-std=c++17
-e17:s73:debug      e17:s73:debug   	 e17:s73:debug		e17:debug  	-nq-					-std=c++17
-
-e17:s67:prof       e17:s67:prof    	 e17:s67:prof 		e17:prof   	-nq-					-std=c++17
-e17:s67:debug      e17:s67:debug   	 e17:s67:debug		e17:debug  	-nq-					-std=c++17
-e15:s67:prof       e15:s67:prof    	 e15:s67:prof 		e15:prof   	-nq-					-std=c++14
-e15:s67:debug      e15:s67:debug   	 e15:s67:debug		e15:debug  	-nq-					-std=c++14
+e19:s83:prof       e19:s83:prof    	 e19:s83:prof 		e19:prof   	-nq-					-std=c++17
+e19:s83:debug      e19:s83:debug   	 e19:s83:debug		e19:debug  	-nq-					-std=c++17
+e17:s83:prof       e17:s83:prof    	 e17:s83:prof 		e17:prof   	-nq-					-std=c++17
+e17:s83:debug      e17:s83:debug   	 e17:s83:debug		e17:debug  	-nq-					-std=c++17
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
