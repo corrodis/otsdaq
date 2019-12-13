@@ -2124,7 +2124,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 							if(first)
 								first = false;
 						}
-						if(wildcardsNeeded && commonChunks.size())
+						if(wildcardsNeeded && commonChunks.size() == 1)
 							hostname += '*';
 
 						__COUTV__(hostname);
