@@ -3,7 +3,7 @@
 #include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/XmlUtilities/ConvertFromXML.h"
 #include "otsdaq/XmlUtilities/ConvertToXML.h"
-#include "otsdaq/otsdaq/Macros/MessageTools.h"
+#include "otsdaq/Macros/MessageTools.h"
 
 #include <stdexcept>
 #include <xercesc/dom/DOM.hpp>
