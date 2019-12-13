@@ -139,6 +139,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 						<< "format_string: \"|%L:%N:%f [%u]\t%m\"\n";
 
 				fclSs << "\n}\n";
+
 				
 				// output quiet forwarder config file
 				std::fstream qtfs;
@@ -223,7 +224,6 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 		break;  // take first enable row only!
 	} //end record loop
 
-
 	// generate MF_CFG_FILE file
 	std::fstream fs;
 	fs.open(MF_CFG_FILE, std::fstream::out | std::fstream::trunc);
@@ -248,8 +248,8 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 		__COUT__ << "Opened.. " << MF_CFG_FILE << __E__;
 
 	// close MF config files
-	fs << fclSs.str();
 	artdaqfs << fclSs.str();
+	fs << fclSs.str() << "\nfile: {}";
 	fs.close();
 	artdaqfs.close();
 
