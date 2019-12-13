@@ -131,11 +131,12 @@ TableVersion DatabaseConfigurationInterface::findLatestVersion(const TableBase* 
 {
 	auto versions = getVersions(table);
 
-	__COUT__ << "Config Name: " << table->getTableName() << __E__;
-	__COUT__ << "All Versions: ";
+	__COUT__ << "Table Name: " << table->getTableName() << __E__;
+	__SS__ << "All Versions: ";
 	for(auto& v : versions)
-		std::cout << v << " ";
-	std::cout << __E__;
+		ss << v << " ";
+	ss << __E__;
+	__COUT__ << ss.str();
 
 	if(!versions.size())
 		return TableVersion();  // return INVALID

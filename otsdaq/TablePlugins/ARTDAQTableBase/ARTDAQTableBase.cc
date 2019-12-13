@@ -2670,7 +2670,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 				__COUTV__(nodePair.first);
 
 				// default multi-node and array hostname info to empty
-				std::vector<unsigned int> nodeIndices, hostnameIndices;
+				std::vector<std::string> nodeIndices, hostnameIndices;
 				unsigned int              hostnameFixedWidth = 0, nodeNameFixedWidth = 0;
 				std::string               hostname;
 
@@ -2718,7 +2718,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							std::vector<std::string> printerSyntaxArr = StringMacros::getVectorFromString(originalParameterArr[1], {','} /*delimiter*/);
 
 							unsigned int              count = 0;
-							std::vector<unsigned int> originalNodeIndices;
+							std::vector<std::string> originalNodeIndices;
 							for(auto& printerSyntaxValue : printerSyntaxArr)
 							{
 								__COUTV__(printerSyntaxValue);
@@ -2732,12 +2732,8 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								}
 								else if(printerSyntaxRange.size() == 1)
 								{
-									unsigned int index;
 									__COUTV__(printerSyntaxRange[0]);
-									sscanf(printerSyntaxRange[0].c_str(), "%u", &index);
-									__COUTV__(index);
-
-									originalNodeIndices.push_back(index);
+									originalNodeIndices.push_back(printerSyntaxRange[0]);
 								}
 								else  // printerSyntaxRange.size() == 2
 								{
@@ -2752,7 +2748,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 									for(; lo <= hi; ++lo)
 									{
 										__COUTV__(lo);
-										originalNodeIndices.push_back(lo);
+										originalNodeIndices.push_back(std::to_string(lo));
 									}
 								}
 							}  // end printer syntax loop
@@ -2775,7 +2771,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								std::string nodeNameIndex;
 								for(unsigned int p = 1; p < originalNamePieces.size(); ++p)
 								{
-									nodeNameIndex = std::to_string(originalNodeIndices[i]);
+									nodeNameIndex = originalNodeIndices[i];
 									if(fixedWidth > 1)
 									{
 										if(nodeNameIndex.size() > fixedWidth)
@@ -2801,14 +2797,26 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								if(originalRow != TableView::INVALID && lastOriginalRow != TableView::INVALID)
 								{
 									// before deleting, record all customizing values and maintain when saving
-									originalMultinodeValues.emplace(std::make_pair(originalName, std::map<unsigned int /*col*/, std::string /*value*/>()));
+									originalMultinodeValues.emplace(std::make_pair(
+											nodeName, std::map<unsigned int /*col*/, std::string /*value*/>()));
+
+									__COUT__ << "Saving multinode value " << nodeName << "[" <<
+											lastOriginalRow << "][*] with row count = " <<
+											typeTable.tableView_->getNumberOfRows() << __E__;
+
 									// save all link values
-									for(unsigned int col = 0; i < typeTable.tableView_->getNumberOfColumns(); ++col)
-										if(typeTable.tableView_->getColumnInfo(col).isChildLink() ||
+									for(unsigned int col = 0; col < typeTable.tableView_->getNumberOfColumns(); ++col)
+										if(typeTable.tableView_->getColumnInfo(col).getName() ==
+												ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK ||
+												typeTable.tableView_->getColumnInfo(col).getName() ==
+														ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID)
+											continue; //skip subsystem link
+										else if(typeTable.tableView_->getColumnInfo(col).isChildLink() ||
 										   typeTable.tableView_->getColumnInfo(col).isChildLinkGroupID() ||
 										   typeTable.tableView_->getColumnInfo(col).isChildLinkUID())
-											originalMultinodeValues.at(originalName)
-											    .emplace(std::make_pair(col, typeTable.tableView_->getDataView()[row][col]));
+											originalMultinodeValues.at(nodeName)
+											    .emplace(std::make_pair(col,
+											    		typeTable.tableView_->getDataView()[lastOriginalRow][col]));
 
 									typeTable.tableView_->deleteRow(lastOriginalRow);
 									if(originalRow > lastOriginalRow)
@@ -2934,15 +2942,15 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							}
 							else if(printerSyntaxRange.size() == 1)
 							{
-								unsigned int index;
+								//unsigned int index;
 								__COUTV__(printerSyntaxRange[0]);
-								sscanf(printerSyntaxRange[0].c_str(), "%u", &index);
-								__COUTV__(index);
+								//sscanf(printerSyntaxRange[0].c_str(), "%u", &index);
+								//__COUTV__(index);
 
 								if(i == 4 /*nodeArrayString*/)
-									nodeIndices.push_back(index);
+									nodeIndices.push_back(printerSyntaxRange[0]);
 								else
-									hostnameIndices.push_back(index);
+									hostnameIndices.push_back(printerSyntaxRange[0]);
 							}
 							else  // printerSyntaxRange.size() == 2
 							{
@@ -2958,9 +2966,9 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								{
 									__COUTV__(lo);
 									if(i == 4 /*nodeArrayString*/)
-										nodeIndices.push_back(lo);
+										nodeIndices.push_back(std::to_string(lo));
 									else
-										hostnameIndices.push_back(lo);
+										hostnameIndices.push_back(std::to_string(lo));
 								}
 							}
 						}
@@ -3021,7 +3029,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 						std::string nodeNameIndex;
 						for(unsigned int p = 1; p < namePieces.size(); ++p)
 						{
-							nodeNameIndex = std::to_string(nodeIndices[i]);
+							nodeNameIndex = nodeIndices[i];
 							if(nodeNameFixedWidth > 1)
 							{
 								if(nodeNameIndex.size() > nodeNameFixedWidth)
@@ -3046,7 +3054,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							std::string hostnameIndex;
 							for(unsigned int p = 1; p < hostnamePieces.size(); ++p)
 							{
-								hostnameIndex = std::to_string(hostnameIndices[i]);
+								hostnameIndex = hostnameIndices[i];
 								if(hostnameFixedWidth > 1)
 								{
 									if(hostnameIndex.size() > hostnameFixedWidth)
@@ -3083,12 +3091,12 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							// customize row if in original value map
 							if(originalMultinodeValues.find(name) != originalMultinodeValues.end())
 							{
-								__COUT__ << "Customizing node: "
-								         << StringMacros::mapToString<unsigned int>(
-								                (/*cast becaust std lib is bad*/ const std::map<std::string, unsigned int>&)originalMultinodeValues.at(name))
-								         << __E__;
 								for(const auto& valuePair : originalMultinodeValues.at(name))
+								{
+									__COUT__ << "Customizing node: " << name << "[" << copyRow <<
+											"][" << valuePair.first << "] = " << valuePair.second << __E__;
 									typeTable.tableView_->setValueAsString(valuePair.second, copyRow, valuePair.first);
+								}
 							}
 						}  // end copy and customize row handling
 
@@ -3156,15 +3164,21 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 		throw;  // re-throw
 	}           // end catch
 
-	__COUT__ << "Edits complete for artdaq nodes and subsystems!" << __E__;
+	__COUT__ << "Edits complete for artdaq nodes and subsystems.. now save and activate groups, and update aliases!" << __E__;
 
 	TableGroupKey newConfigurationGroupKey;
-	configGroupEdit.saveChanges(configGroupEdit.originalGroupName_,
+	{
+		std::string localAccumulatedWarnings;
+		configGroupEdit.saveChanges(configGroupEdit.originalGroupName_,
 	                            newConfigurationGroupKey,
 	                            nullptr /*foundEquivalentGroupKey*/,
 	                            true /*activateNewGroup*/,
 	                            true /*updateGroupAliases*/,
-	                            true /*updateTableAliases*/);
+	                            true /*updateTableAliases*/,
+								nullptr /*newBackboneKey*/,
+								nullptr /*foundEquivalentBackboneKey*/,
+								&localAccumulatedWarnings);
+	}
 
 }  // end setAndActivateARTDAQSystem()
 

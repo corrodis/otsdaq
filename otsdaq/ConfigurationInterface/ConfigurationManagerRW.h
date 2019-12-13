@@ -182,14 +182,15 @@ public:
 
 	void 				dropChanges				(void);
 	void 				saveChanges				(
-												const std::string& groupNameToSave,
-												TableGroupKey& newGroupKey,
-												bool* foundEquivalentGroupKey = nullptr,
-												bool activateNewGroup = false,
-												bool updateGroupAliases = false,
-												bool updateTableAliases = false,
-												TableGroupKey* newBackboneKey = nullptr,
-												bool* foundEquivalentBackboneKey = nullptr);
+												const std::string& 	groupNameToSave,
+												TableGroupKey& 		newGroupKey,
+												bool* 				foundEquivalentGroupKey 	= nullptr,
+												bool 				activateNewGroup 			= false,
+												bool 				updateGroupAliases 			= false,
+												bool				updateTableAliases 			= false,
+												TableGroupKey* 		newBackboneKey 				= nullptr,
+												bool* 				foundEquivalentBackboneKey 	= nullptr,
+												std::string* 		accumulatedWarnings 		= nullptr);
 
 	TableEditStruct& 	getTableEditStruct		(const std::string& tableName, bool markModified = false);
 
