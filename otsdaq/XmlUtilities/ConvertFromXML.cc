@@ -7,10 +7,7 @@
 using namespace ots;
 
 //==============================================================================
-ConvertFromXML::ConvertFromXML(const XMLCh* const toTranscode)
-{
-	xmlTranscoded_ = xercesc::XMLString::transcode(toTranscode);
-}
+ConvertFromXML::ConvertFromXML(const XMLCh* const toTranscode) { xmlTranscoded_ = xercesc::XMLString::transcode(toTranscode); }
 
 //==============================================================================
 ConvertFromXML::~ConvertFromXML() { xercesc::XMLString::release(&xmlTranscoded_); }

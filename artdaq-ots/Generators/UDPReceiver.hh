@@ -87,10 +87,7 @@ class UDPReceiver : public artdaq::CommandableFragmentGenerator
 
 	virtual void ProcessData_(artdaq::FragmentPtrs& output, size_t totalSize);
 
-	DataType getDataType(uint8_t byte)
-	{
-		return static_cast<DataType>((byte & 0xF0) >> 4);
-	}
+	DataType   getDataType(uint8_t byte) { return static_cast<DataType>((byte & 0xF0) >> 4); }
 	ReturnCode getReturnCode(uint8_t byte) { return static_cast<ReturnCode>(byte & 0xF); }
 	void       send(CommandType flag);
 
@@ -118,9 +115,11 @@ class UDPReceiver : public artdaq::CommandableFragmentGenerator
 	void receiveLoop_();
 	bool isTimerExpired_();
 
-	std::thread         receiverThread_;
+	std::unique_ptr<std::thread>        receiverThread_;
 	std::mutex          receiveBufferLock_;
 	packetBuffer_list_t receiveBuffers_;
+
+	bool fakeDataMode_;
 
 	// Number of milliseconds per fragment
 	double                                         fragmentWindow_;

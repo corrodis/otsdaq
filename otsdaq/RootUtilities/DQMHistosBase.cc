@@ -11,10 +11,7 @@
 using namespace ots;
 
 //========================================================================================================================
-DQMHistosBase::DQMHistosBase(void) : theFile_(0), myDirectory_(0)
-{
-	gStyle->SetPalette(1);
-}
+DQMHistosBase::DQMHistosBase(void) : theFile_(0), myDirectory_(0) { gStyle->SetPalette(1); }
 
 //========================================================================================================================
 DQMHistosBase::~DQMHistosBase(void) { closeFile(); }

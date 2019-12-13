@@ -20,8 +20,7 @@ struct TableInfo
 struct GroupInfo
 {
 	std::set<TableGroupKey> keys_;
-	std::string             latestKeyGroupAuthor_, latestKeyGroupComment_,
-	    latestKeyGroupCreationTime_, latestKeyGroupTypeString_;
+	std::string             latestKeyGroupAuthor_, latestKeyGroupComment_, latestKeyGroupCreationTime_, latestKeyGroupTypeString_;
 	std::map<std::string /*name*/, TableVersion /*version*/> latestKeyMemberMap_;
 
 	TableGroupKey getLatestKey() { return *(keys_.rbegin()); }
@@ -47,7 +46,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 	const std::string&      					getUsername						(void) const { return username_; }
 	ConfigurationInterface* 					getConfigurationInterface		(void) const { return theInterface_; }
 
-	const std::map<std::string, TableInfo>& 	getAllTableInfo					(bool refresh = false, std::string* accumulatedErrors = 0, const std::string& errorFilterName = "");
+	const std::map<std::string, TableInfo>& 	getAllTableInfo					(bool refresh = false, std::string* accumulatedWarnings = 0, const std::string& errorFilterName = "");
 	std::map<std::string /*tableName*/,
 	         std::map<std::string /*aliasName*/, 
 	         TableVersion /*version*/> >		getVersionAliases				(void) const;
@@ -63,6 +62,16 @@ class ConfigurationManagerRW : public ConfigurationManager
 	//==============================================================================
 	// modifiers of generic TableBase
 	TableVersion 								saveNewTable					(const std::string& tableName, TableVersion temporaryVersion = TableVersion(), bool makeTemporary = false);  //, bool saveToScratchVersion = false);
+	TableVersion 								saveModifiedVersion				(
+																				const std::string&      tableName,
+																				TableVersion            originalVersion,
+																				bool                    makeTemporary,
+																				TableBase*              config,
+																				TableVersion            temporaryModifiedVersion,
+																				bool                    ignoreDuplicates = false,
+																				bool 					lookForEquivalent = false,
+																				bool*					foundEquivalent = nullptr);
+
 	TableVersion 								copyViewToCurrentColumns		(const std::string& tableName, TableVersion sourceVersion);
 	void         								eraseTemporaryVersion			(const std::string& tableName, TableVersion targetVersion = TableVersion());
 	void         								clearCachedVersions				(const std::string& tableName);
@@ -100,8 +109,8 @@ class ConfigurationManagerRW : public ConfigurationManager
 };
 
 //==============================================================================
-///// TableEditStruct public class
-/////
+// TableEditStruct public class
+//
 struct TableEditStruct
 {
 	// everything needed for editing a table
@@ -115,17 +124,21 @@ struct TableEditStruct
 	TableEditStruct()
 	{
 		__SS__ << "impossible!" << std::endl;
+		ss << StringMacros::stackTrace();
 		__SS_THROW__;
 	}
-	TableEditStruct(const std::string& tableName, ConfigurationManagerRW* cfgMgr)
-	    : createdTemporaryVersion_(false), modified_(false), tableName_(tableName)
+	TableEditStruct(const std::string& tableName, ConfigurationManagerRW* cfgMgr, bool markModified = false)
+	    : createdTemporaryVersion_(false), modified_(markModified), tableName_(tableName)
 	{
-		__COUT__ << "Creating Table-Edit Struct for " << tableName_ << std::endl;
+		//__COUT__ << "Creating Table-Edit Struct for " << tableName_ << std::endl;
 		table_ = cfgMgr->getTableByName(tableName_);
 
-		if(!(originalVersion_ = table_->getView().getVersion()).isTemporaryVersion())
+		//if no active version or if not temporary, setup new temporary version
+		if(!table_->isActive() ||
+				!(originalVersion_ = table_->getView().getVersion()).isTemporaryVersion())
 		{
-			__COUT__ << "Start version " << originalVersion_ << std::endl;
+			//__COUT__ << "Original '" << tableName_ << "' version is v" << originalVersion_ << std::endl;
+
 			// create temporary version for editing
 			temporaryVersion_ = table_->createTemporaryView(originalVersion_);
 			cfgMgr->saveNewTable(
@@ -133,15 +146,55 @@ struct TableEditStruct
 			    temporaryVersion_,
 			    true);  // proper bookkeeping for temporary version with the new version
 
-			__COUT__ << "Created temporary version " << temporaryVersion_ << std::endl;
+			__COUT__ << "Created '" << tableName_ << "' temporary version " << temporaryVersion_ << std::endl;
 			createdTemporaryVersion_ = true;
 		}
-		else  // else table is already temporary version
-			__COUT__ << "Using temporary version " << temporaryVersion_ << std::endl;
+		//else  // else table is already temporary version
+			//__COUT__ << "Using '" << tableName_ << "' temporary version " << temporaryVersion_ << std::endl;
 
 		tableView_ = table_->getViewP();
 	}
 };  // end TableEditStruct declaration
+
+
+//==============================================================================
+// GroupEditStruct public class
+//
+struct GroupEditStruct
+{
+	// everything needed for editing a group and its tables
+private:
+	std::map<std::string, TableVersion> 	groupMembers_;
+	std::map<std::string, TableEditStruct> 	groupTables_;
+public:
+	const ConfigurationManager::GroupType	groupType_;
+	const std::string 						originalGroupName_;
+	const TableGroupKey						originalGroupKey_;
+private:
+	ConfigurationManagerRW* 				cfgMgr_;
+public:
+	/////
+	GroupEditStruct()
+		: groupType_(ConfigurationManager::GroupType::CONFIGURATION_TYPE) {__SS__ << "impossible!" << __E__; __SS_THROW__;}
+	GroupEditStruct(const ConfigurationManager::GroupType& groupType, ConfigurationManagerRW* cfgMgr);
+
+	~GroupEditStruct();
+
+	void 				dropChanges				(void);
+	void 				saveChanges				(
+												const std::string& 	groupNameToSave,
+												TableGroupKey& 		newGroupKey,
+												bool* 				foundEquivalentGroupKey 	= nullptr,
+												bool 				activateNewGroup 			= false,
+												bool 				updateGroupAliases 			= false,
+												bool				updateTableAliases 			= false,
+												TableGroupKey* 		newBackboneKey 				= nullptr,
+												bool* 				foundEquivalentBackboneKey 	= nullptr,
+												std::string* 		accumulatedWarnings 		= nullptr);
+
+	TableEditStruct& 	getTableEditStruct		(const std::string& tableName, bool markModified = false);
+
+};  // end GroupEditStruct declaration
 
 // clang-format on
 }  // namespace ots

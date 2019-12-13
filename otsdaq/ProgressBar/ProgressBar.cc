@@ -15,8 +15,7 @@ using namespace ots;
 
 //========================================================================================================================
 ProgressBar::ProgressBar()
-    : cProgressBarFilePath_(std::string(__ENV__("SERVICE_DATA_PATH")) +
-                            "/ProgressBarData/")
+    : cProgressBarFilePath_(std::string(__ENV__("SERVICE_DATA_PATH")) + "/ProgressBarData/")
     , cProgressBarFileExtension_(".txt")
     , totalStepsFileName_("")
     , stepCount_(0)
@@ -50,8 +49,7 @@ void ProgressBar::reset(std::string file, std::string lineNumber, int id)
 	sprintf(fn, "%s_%s_%d", file.c_str(), lineNumber.c_str(), id);
 
 	for(unsigned int c = 0; c < strlen(fn); ++c)
-		if(!((fn[c] >= '0' && fn[c] <= '9') || (fn[c] >= 'a' && fn[c] <= 'z') ||
-		     (fn[c] >= 'A' && fn[c] <= 'Z')))
+		if(!((fn[c] >= '0' && fn[c] <= '9') || (fn[c] >= 'a' && fn[c] <= 'z') || (fn[c] >= 'A' && fn[c] <= 'Z')))
 			fn[c] = '_';
 	totalStepsFileName_ = cProgressBarFilePath_ + fn + cProgressBarFileExtension_;
 	//	std::cout << __COUT_HDR_FL__ << totalStepsFileName_ << std::endl;

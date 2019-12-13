@@ -10,7 +10,9 @@
 using namespace ots;
 
 #undef __MF_SUBJECT__
-#define __MF_SUBJECT__ (std::string("Workloop-") + WorkLoop::workLoopName_)
+#define __MF_SUBJECT__ "Workloop"
+#undef __COUT_HDR__
+#define __COUT_HDR__ (std::string("Workloop-") + WorkLoop::workLoopName_ + "\t<>")
 
 //========================================================================================================================
 WorkLoop::WorkLoop(const std::string& name)
@@ -39,8 +41,7 @@ void WorkLoop::startWorkLoop(void)
 	continueWorkLoop_ = true;
 	try
 	{
-		workLoop_ = toolbox::task::getWorkLoopFactory()->getWorkLoop(workLoopName_,
-		                                                             workLoopType_);
+		workLoop_ = toolbox::task::getWorkLoopFactory()->getWorkLoop(workLoopName_, workLoopType_);
 	}
 	catch(xcept::Exception& e)
 	{
@@ -68,8 +69,7 @@ void WorkLoop::startWorkLoop(void)
 	}
 	catch(xcept::Exception& e)
 	{
-		__COUT__ << "ERROR: Can't activate WorkLoop job for " << workLoopName_
-		         << " Very likely because the name " << workLoopName_ << " is not unique!"
+		__COUT__ << "ERROR: Can't activate WorkLoop job for " << workLoopName_ << " Very likely because the name " << workLoopName_ << " is not unique!"
 		         << __E__;
 		stopWorkLoop();
 	}
@@ -83,15 +83,11 @@ bool WorkLoop::stopWorkLoop()
 	continueWorkLoop_ = false;
 	if(workLoop_ == 0)
 	{
-		__COUT__
-		    << "MEASSAGE: WorkLoop " << workLoopName_
-		    << " was not created at all! This message will be commented in the future"
-		    << __E__;
+		__COUT__ << "MEASSAGE: WorkLoop " << workLoopName_ << " was not created at all! This message will be commented in the future" << __E__;
 		return false;
 	}
 
-	__COUT__ << "initially workLoop_->isActive() "
-	         << (workLoop_->isActive() ? "yes" : "no") << __E__;
+	__COUT__ << "initially workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no") << __E__;
 
 	try
 	{
@@ -100,11 +96,9 @@ bool WorkLoop::stopWorkLoop()
 	}
 	catch(xcept::Exception& e)
 	{
-		__COUT__ << "WARNING: Can't cancel WorkLoop job for " << workLoopName_
-		         << " because probably it has never been activated!" << __E__;
+		__COUT__ << "WARNING: Can't cancel WorkLoop job for " << workLoopName_ << " because probably it has never been activated!" << __E__;
 
-		__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no")
-		         << __E__;
+		__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no") << __E__;
 		return true;
 	}
 
@@ -120,18 +114,13 @@ bool WorkLoop::stopWorkLoop()
 		// allows me to be general in the job threads so I can return true (repeat loop)
 		// or false ( loop only once) without crashing
 		__COUT__ << "WARNING: Can't remove request WorkLoop: " << workLoopName_ << __E__;
-		__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no")
-		         << __E__;
+		__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no") << __E__;
 	}
 
 	__COUT__ << "Stopped WorkLoop: " << workLoopName_ << __E__;
-	__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no")
-	         << __E__;
+	__COUT__ << "workLoop_->isActive() " << (workLoop_->isActive() ? "yes" : "no") << __E__;
 	return true;
 }  // end stopWorkLoop()
 
 //========================================================================================================================
-bool WorkLoop::isActive(void) const
-{
-	return workLoop_->isActive() && continueWorkLoop_;
-}  // end isActive
+bool WorkLoop::isActive(void) const { return workLoop_->isActive() && continueWorkLoop_; }  // end isActive

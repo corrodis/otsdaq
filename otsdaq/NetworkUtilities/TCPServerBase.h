@@ -2,8 +2,8 @@
 #define _ots_TCPServerBase_h_
 
 #include <future>
+#include <map>
 #include <string>
-#include <unordered_map>
 #include <vector>
 #include "otsdaq/NetworkUtilities/TCPSocket.h"
 
@@ -32,9 +32,9 @@ class TCPServerBase : public TCPSocket
 		return dynamic_cast<T*>(fConnectedClients[socketId]);
 	}
 
-	std::promise<bool>                  fAcceptPromise;
-	std::unordered_map<int, TCPSocket*> fConnectedClients;
-	const int                           E_SHUTDOWN = 0;
+	std::promise<bool>        fAcceptPromise;
+	std::map<int, TCPSocket*> fConnectedClients;
+	const int                 E_SHUTDOWN = 0;
 
   private:
 	void closeClientSockets(void);

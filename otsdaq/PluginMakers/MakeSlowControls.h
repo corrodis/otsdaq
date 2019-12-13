@@ -10,14 +10,13 @@ namespace ots
 class SlowControlsVInterface;
 class ConfigurationTree;
 
-SlowControlsVInterface* makeSlowControls(
-    const std::string& slowControlsPluginName,
-    const std::string& slowControlsUID  // Key value for (eventual) ControlsDashboard
-                                        // Table in Configuration
-    ,
-    const ConfigurationTree& configurationTree  // Pass the big tree
-    ,
-    const std::string& pathToControlsConfiguration);  // Path to ControlsDashboard Table
+SlowControlsVInterface* makeSlowControls(const std::string& slowControlsPluginName,
+                                         const std::string& slowControlsUID  // Key value for (eventual) ControlsDashboard
+                                                                             // Table in Configuration
+                                         ,
+                                         const ConfigurationTree& configurationTree  // Pass the big tree
+                                         ,
+                                         const std::string& pathToControlsConfiguration);  // Path to ControlsDashboard Table
 
 }  // namespace ots
 

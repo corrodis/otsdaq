@@ -1,7 +1,0 @@
-        host   port         label  rank
-
-correlator2.fnal.gov	10100	reader0	0
-correlator2.fnal.gov	10101	builder0	1
-correlator2.fnal.gov	10102	builder1	2
-correlator2.fnal.gov	10103	logger0	3
-correlator2.fnal.gov	10104	dispatcher0	4

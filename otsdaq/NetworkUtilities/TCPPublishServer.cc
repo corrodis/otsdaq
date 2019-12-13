@@ -6,10 +6,7 @@
 using namespace ots;
 
 //========================================================================================================================
-TCPPublishServer::TCPPublishServer(int serverPort, unsigned int maxNumberOfClients)
-    : TCPServerBase(serverPort, maxNumberOfClients)
-{
-}
+TCPPublishServer::TCPPublishServer(int serverPort, unsigned int maxNumberOfClients) : TCPServerBase(serverPort, maxNumberOfClients) {}
 
 //========================================================================================================================
 TCPPublishServer::~TCPPublishServer(void) {}

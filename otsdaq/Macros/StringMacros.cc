@@ -13,9 +13,7 @@ using namespace ots;
 //			- 3: next highest is partial LEADING-wildcard match
 //			- 4: lowest priority is partial full-wildcard match
 //		return priority found by reference
-bool StringMacros::wildCardMatch(const std::string& needle,
-                                 const std::string& haystack,
-                                 unsigned int*      priorityIndex) try
+bool StringMacros::wildCardMatch(const std::string& needle, const std::string& haystack, unsigned int* priorityIndex) try
 {
 	//	__COUT__ << "\t\t wildCardMatch: " << needle <<
 	//			" =in= " << haystack << " ??? " <<
@@ -46,8 +44,7 @@ bool StringMacros::wildCardMatch(const std::string& needle,
 	}
 
 	// trailing wildcard
-	if(needle[needle.size() - 1] == '*' &&
-	   needle.substr(0, needle.size() - 1) == haystack.substr(0, needle.size() - 1))
+	if(needle[needle.size() - 1] == '*' && needle.substr(0, needle.size() - 1) == haystack.substr(0, needle.size() - 1))
 	{
 		if(priorityIndex)
 			*priorityIndex = 2;  // trailing wildcard match
@@ -55,8 +52,7 @@ bool StringMacros::wildCardMatch(const std::string& needle,
 	}
 
 	// leading wildcard
-	if(needle[0] == '*' &&
-	   needle.substr(1) == haystack.substr(haystack.size() - (needle.size() - 1)))
+	if(needle[0] == '*' && needle.substr(1) == haystack.substr(haystack.size() - (needle.size() - 1)))
 	{
 		if(priorityIndex)
 			*priorityIndex = 3;  // leading wildcard match
@@ -64,8 +60,7 @@ bool StringMacros::wildCardMatch(const std::string& needle,
 	}
 
 	// leading wildcard and trailing wildcard
-	if(needle[0] == '*' && needle[needle.size() - 1] == '*' &&
-	   std::string::npos != haystack.find(needle.substr(1, needle.size() - 2)))
+	if(needle[0] == '*' && needle[needle.size() - 1] == '*' && std::string::npos != haystack.find(needle.substr(1, needle.size() - 2)))
 	{
 		if(priorityIndex)
 			*priorityIndex = 4;  // leading and trailing wildcard match
@@ -87,8 +82,7 @@ catch(...)
 //========================================================================================================================
 // inWildCardSet ~
 //	returns true if needle is in haystack (considering wildcards)
-bool StringMacros::inWildCardSet(const std::string&           needle,
-                                 const std::set<std::string>& haystack)
+bool StringMacros::inWildCardSet(const std::string& needle, const std::set<std::string>& haystack)
 {
 	for(const auto& haystackString : haystack)
 		// use wildcard match, flip needle parameter.. because we want haystack to have
@@ -170,10 +164,8 @@ std::string StringMacros::convertEnvironmentVariables(const std::string& data)
 		{
 			// end is first non environment variable character
 			for(end = begin + 1; end < data.size(); ++end)
-				if(!((data[end] >= '0' && data[end] <= '9') ||
-				     (data[end] >= 'A' && data[end] <= 'Z') ||
-				     (data[end] >= 'a' && data[end] <= 'z') || data[end] == '-' ||
-				     data[end] == '_' || data[end] == '.' || data[end] == ':'))
+				if(!((data[end] >= '0' && data[end] <= '9') || (data[end] >= 'A' && data[end] <= 'Z') || (data[end] >= 'a' && data[end] <= 'z') ||
+				     data[end] == '-' || data[end] == '_' || data[end] == '.' || data[end] == ':'))
 					break;  // found end
 			envVariable = data.substr(begin + 1, end - begin - 1);
 		}
@@ -184,14 +176,11 @@ std::string StringMacros::convertEnvironmentVariables(const std::string& data)
 		if(envResult)
 		{
 			// proceed recursively
-			return convertEnvironmentVariables(
-			    converted.replace(begin, end - begin, envResult));
+			return convertEnvironmentVariables(converted.replace(begin, end - begin, envResult));
 		}
 		else
 		{
-			__SS__ << ("The environmental variable '" + envVariable +
-			           "' is not set! Please make sure you set it before continuing!")
-			       << std::endl;
+			__SS__ << ("The environmental variable '" + envVariable + "' is not set! Please make sure you set it before continuing!") << std::endl;
 			__SS_THROW__;
 		}
 	}
@@ -211,12 +200,11 @@ bool StringMacros::isNumber(const std::string& s)
 	std::vector<std::string> numbers;
 	std::vector<char>        ops;
 
-	StringMacros::getVectorFromString(
-	    s,
-	    numbers,
-	    /*delimiter*/ std::set<char>({'+', '-', '*', '/'}),
-	    /*whitespace*/ std::set<char>({' ', '\t', '\n', '\r'}),
-	    &ops);
+	StringMacros::getVectorFromString(s,
+	                                  numbers,
+	                                  /*delimiter*/ std::set<char>({'+', '-', '*', '/'}),
+	                                  /*whitespace*/ std::set<char>({' ', '\t', '\n', '\r'}),
+	                                  &ops);
 
 	//__COUTV__(StringMacros::vectorToString(numbers));
 	//__COUTV__(StringMacros::vectorToString(ops));
@@ -231,9 +219,7 @@ bool StringMacros::isNumber(const std::string& s)
 			//__COUT__ << "0x found" << std::endl;
 			for(unsigned int i = 2; i < number.size(); ++i)
 			{
-				if(!((number[i] >= '0' && number[i] <= '9') ||
-				     (number[i] >= 'A' && number[i] <= 'F') ||
-				     (number[i] >= 'a' && number[i] <= 'f')))
+				if(!((number[i] >= '0' && number[i] <= '9') || (number[i] >= 'A' && number[i] <= 'F') || (number[i] >= 'a' && number[i] <= 'f')))
 				{
 					//__COUT__ << "prob " << number[i] << std::endl;
 					return false;
@@ -258,8 +244,7 @@ bool StringMacros::isNumber(const std::string& s)
 		{
 			//__COUT__ << "base 10 " << std::endl;
 			for(unsigned int i = 0; i < number.size(); ++i)
-				if(!((number[i] >= '0' && number[i] <= '9') || number[i] == '.' ||
-				     number[i] == '+' || number[i] == '-'))
+				if(!((number[i] >= '0' && number[i] <= '9') || number[i] == '.' || number[i] == '+' || number[i] == '-'))
 					return false;
 			// Note: std::regex crashes in unresolvable ways (says Ryan.. also, stop using
 			// libraries)  return std::regex_match(s,
@@ -287,12 +272,11 @@ std::string StringMacros::getNumberType(const std::string& s)
 
 	bool hasDecimal = false;
 
-	StringMacros::getVectorFromString(
-	    s,
-	    numbers,
-	    /*delimiter*/ std::set<char>({'+', '-', '*', '/'}),
-	    /*whitespace*/ std::set<char>({' ', '\t', '\n', '\r'}),
-	    &ops);
+	StringMacros::getVectorFromString(s,
+	                                  numbers,
+	                                  /*delimiter*/ std::set<char>({'+', '-', '*', '/'}),
+	                                  /*whitespace*/ std::set<char>({' ', '\t', '\n', '\r'}),
+	                                  &ops);
 
 	//__COUTV__(StringMacros::vectorToString(numbers));
 	//__COUTV__(StringMacros::vectorToString(ops));
@@ -307,9 +291,7 @@ std::string StringMacros::getNumberType(const std::string& s)
 			//__COUT__ << "0x found" << std::endl;
 			for(unsigned int i = 2; i < number.size(); ++i)
 			{
-				if(!((number[i] >= '0' && number[i] <= '9') ||
-				     (number[i] >= 'A' && number[i] <= 'F') ||
-				     (number[i] >= 'a' && number[i] <= 'f')))
+				if(!((number[i] >= '0' && number[i] <= '9') || (number[i] >= 'A' && number[i] <= 'F') || (number[i] >= 'a' && number[i] <= 'f')))
 				{
 					//__COUT__ << "prob " << number[i] << std::endl;
 					return "nan";
@@ -334,8 +316,7 @@ std::string StringMacros::getNumberType(const std::string& s)
 		{
 			//__COUT__ << "base 10 " << std::endl;
 			for(unsigned int i = 0; i < number.size(); ++i)
-				if(!((number[i] >= '0' && number[i] <= '9') || number[i] == '.' ||
-				     number[i] == '+' || number[i] == '-'))
+				if(!((number[i] >= '0' && number[i] <= '9') || number[i] == '.' || number[i] == '+' || number[i] == '-'))
 					return "nan";
 				else if(number[i] == '.')
 					hasDecimal = true;
@@ -415,17 +396,13 @@ std::string StringMacros::getTimestampString(const time_t& linuxTimeInSeconds)
 //==============================================================================
 // validateValueForDefaultStringDataType
 //
-std::string StringMacros::validateValueForDefaultStringDataType(
-    const std::string& value, bool doConvertEnvironmentVariables) try
+std::string StringMacros::validateValueForDefaultStringDataType(const std::string& value, bool doConvertEnvironmentVariables) try
 {
-	return doConvertEnvironmentVariables
-	           ? StringMacros::convertEnvironmentVariables(value)
-	           : value;
+	return doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables(value) : value;
 }
 catch(const std::runtime_error& e)
 {
-	__SS__ << "Failed to validate value for default string data type. " << __E__
-	       << e.what() << __E__;
+	__SS__ << "Failed to validate value for default string data type. " << __E__ << e.what() << __E__;
 	__SS_THROW__;
 }
 
@@ -444,14 +421,11 @@ void StringMacros::getSetFromString(const std::string&     inputString,
 	// go through the full string extracting elements
 	// add each found element to set
 	for(; j < inputString.size(); ++j)
-		if((whitespace.find(inputString[j]) !=
-		        whitespace.end() ||  // ignore leading white space or delimiter
+		if((whitespace.find(inputString[j]) != whitespace.end() ||  // ignore leading white space or delimiter
 		    delimiter.find(inputString[j]) != delimiter.end()) &&
 		   i == j)
 			++i;
-		else if((whitespace.find(inputString[j]) !=
-		             whitespace
-		                 .end() ||  // trailing white space or delimiter indicates end
+		else if((whitespace.find(inputString[j]) != whitespace.end() ||  // trailing white space or delimiter indicates end
 		         delimiter.find(inputString[j]) != delimiter.end()) &&
 		        i != j)  // assume end of element
 		{
@@ -509,8 +483,7 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 		//__COUT__ << (char)inputString[c] << " " << isDelimiter <<
 		//__E__;//char)lastDelimiter << __E__;
 
-		if(whitespace.find(inputString[c]) !=
-		       whitespace.end()  // ignore leading white space
+		if(whitespace.find(inputString[c]) != whitespace.end()  // ignore leading white space
 		   && i == j)
 		{
 			++i;
@@ -518,8 +491,7 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 			// if(isDelimiter)
 			//	foundLeadingDelimiter = true;
 		}
-		else if(whitespace.find(inputString[c]) != whitespace.end() &&
-		        i != j)  // trailing white space, assume possible end of element
+		else if(whitespace.find(inputString[c]) != whitespace.end() && i != j)  // trailing white space, assume possible end of element
 		{
 			// do not change j or i
 		}
@@ -568,15 +540,12 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 	}
 
 	// assert that there is one less delimiter than values
-	if(listOfDelimiters && listToReturn.size() - 1 != listOfDelimiters->size() &&
-	   listToReturn.size() != listOfDelimiters->size())
+	if(listOfDelimiters && listToReturn.size() - 1 != listOfDelimiters->size() && listToReturn.size() != listOfDelimiters->size())
 	{
 		__SS__ << "There is a mismatch in delimiters to entries (should be equal or one "
 		          "less delimiter): "
-		       << listOfDelimiters->size() << " vs " << listToReturn.size() << __E__
-		       << "Entries: " << StringMacros::vectorToString(listToReturn) << __E__
-		       << "Delimiters: " << StringMacros::vectorToString(*listOfDelimiters)
-		       << __E__;
+		       << listOfDelimiters->size() << " vs " << listToReturn.size() << __E__ << "Entries: " << StringMacros::vectorToString(listToReturn) << __E__
+		       << "Delimiters: " << StringMacros::vectorToString(*listOfDelimiters) << __E__;
 		__SS_THROW__;
 	}
 
@@ -594,28 +563,26 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 //	Note: the size() of delimiters will be one less than the size() of the returned values
 //		unless there is a leading delimiter, in which case vectors will have the same
 // size.
-std::vector<std::string> StringMacros::getVectorFromString(
-    const std::string&    inputString,
-    const std::set<char>& delimiter,
-    const std::set<char>& whitespace,
-    std::vector<char>*    listOfDelimiters)
+std::vector<std::string> StringMacros::getVectorFromString(const std::string&    inputString,
+                                                           const std::set<char>& delimiter,
+                                                           const std::set<char>& whitespace,
+                                                           std::vector<char>*    listOfDelimiters)
 {
 	std::vector<std::string> listToReturn;
 
-	StringMacros::getVectorFromString(
-	    inputString, listToReturn, delimiter, whitespace, listOfDelimiters);
+	StringMacros::getVectorFromString(inputString, listToReturn, delimiter, whitespace, listOfDelimiters);
 	return listToReturn;
 }  // end getVectorFromString()
 
 //==============================================================================
 // getMapFromString
-//	extracts the map of name-value pairs from string that uses two s
+//	extracts the map of name-value pairs from string that uses two delimiters
 //		ignoring whitespace
 void StringMacros::getMapFromString(const std::string&                  inputString,
                                     std::map<std::string, std::string>& mapToReturn,
                                     const std::set<char>&               pairPairDelimiter,
-                                    const std::set<char>& nameValueDelimiter,
-                                    const std::set<char>& whitespace) try
+                                    const std::set<char>&               nameValueDelimiter,
+                                    const std::set<char>&               whitespace) try
 {
 	unsigned int i = 0;
 	unsigned int j = 0;
@@ -627,16 +594,12 @@ void StringMacros::getMapFromString(const std::string&                  inputStr
 	for(; j < inputString.size(); ++j)
 		if(!needValue)  // finding name
 		{
-			if((whitespace.find(inputString[j]) !=
-			        whitespace.end() ||  // ignore leading white space or delimiter
+			if((whitespace.find(inputString[j]) != whitespace.end() ||  // ignore leading white space or delimiter
 			    pairPairDelimiter.find(inputString[j]) != pairPairDelimiter.end()) &&
 			   i == j)
 				++i;
-			else if((whitespace.find(inputString[j]) !=
-			             whitespace
-			                 .end() ||  // trailing white space or delimiter indicates end
-			         nameValueDelimiter.find(inputString[j]) !=
-			             nameValueDelimiter.end()) &&
+			else if((whitespace.find(inputString[j]) != whitespace.end() ||  // trailing white space or delimiter indicates end
+			         nameValueDelimiter.find(inputString[j]) != nameValueDelimiter.end()) &&
 			        i != j)  // assume end of map name
 			{
 				//__COUT__ << "Map name found: " <<
@@ -652,32 +615,24 @@ void StringMacros::getMapFromString(const std::string&                  inputStr
 		}
 		else  // finding value
 		{
-			if((whitespace.find(inputString[j]) !=
-			        whitespace.end() ||  // ignore leading white space or delimiter
+			if((whitespace.find(inputString[j]) != whitespace.end() ||  // ignore leading white space or delimiter
 			    nameValueDelimiter.find(inputString[j]) != nameValueDelimiter.end()) &&
 			   i == j)
 				++i;
-			else if((whitespace.find(inputString[j]) !=
-			             whitespace
-			                 .end() ||  // trailing white space or delimiter indicates end
-			         pairPairDelimiter.find(inputString[j]) != pairPairDelimiter.end()) &&
-			        i != j)  // assume end of value name
+			else if(whitespace.find(inputString[j]) != whitespace.end() ||              // trailing white space or delimiter indicates end
+			        pairPairDelimiter.find(inputString[j]) != pairPairDelimiter.end())  // &&
+			                                                                            //  i != j)  // assume end of value name
 			{
 				//__COUT__ << "Map value found: " <<
 				//		inputString.substr(i,j-i) << std::endl;
 
 				auto /*pair<it,success>*/ emplaceReturn =
-				    mapToReturn.emplace(std::pair<std::string, std::string>(
-				        name,
-				        validateValueForDefaultStringDataType(
-				            inputString.substr(i, j - i))  // value
-				        ));
+				    mapToReturn.emplace(std::pair<std::string, std::string>(name, validateValueForDefaultStringDataType(inputString.substr(i, j - i))  // value
+				                                                            ));
 
 				if(!emplaceReturn.second)
 				{
-					__COUT__ << "Ignoring repetitive value ('"
-					         << inputString.substr(i, j - i)
-					         << "') and keeping current value ('"
+					__COUT__ << "Ignoring repetitive value ('" << inputString.substr(i, j - i) << "') and keeping current value ('"
 					         << emplaceReturn.first->second << "'). " << __E__;
 				}
 
@@ -691,32 +646,27 @@ void StringMacros::getMapFromString(const std::string&                  inputStr
 	if(i != j)  // last value (for case when no concluding ' ' or delimiter)
 	{
 		auto /*pair<it,success>*/ emplaceReturn =
-		    mapToReturn.emplace(std::pair<std::string, std::string>(
-		        name,
-		        validateValueForDefaultStringDataType(
-		            inputString.substr(i, j - i))  // value
-		        ));
+		    mapToReturn.emplace(std::pair<std::string, std::string>(name, validateValueForDefaultStringDataType(inputString.substr(i, j - i))  // value
+		                                                            ));
 
 		if(!emplaceReturn.second)
 		{
-			__COUT__ << "Ignoring repetitive value ('" << inputString.substr(i, j - i)
-			         << "') and keeping current value ('" << emplaceReturn.first->second
+			__COUT__ << "Ignoring repetitive value ('" << inputString.substr(i, j - i) << "') and keeping current value ('" << emplaceReturn.first->second
 			         << "'). " << __E__;
 		}
 	}
 }
 catch(const std::runtime_error& e)
 {
-	__SS__ << "Error while extracting a map from the string '" << inputString
-	       << "'... is it a valid map?" << __E__ << e.what() << __E__;
+	__SS__ << "Error while extracting a map from the string '" << inputString << "'... is it a valid map?" << __E__ << e.what() << __E__;
 	__SS_THROW__;
 }
 
 //==============================================================================
 // mapToString
 std::string StringMacros::mapToString(const std::map<std::string, uint8_t>& mapToReturn,
-                                      const std::string& primaryDelimeter,
-                                      const std::string& secondaryDelimeter)
+                                      const std::string&                    primaryDelimeter,
+                                      const std::string&                    secondaryDelimeter)
 {
 	std::stringstream ss;
 	bool              first = true;
@@ -729,12 +679,11 @@ std::string StringMacros::mapToString(const std::map<std::string, uint8_t>& mapT
 		ss << mapPair.first << secondaryDelimeter << (unsigned int)mapPair.second;
 	}
 	return ss.str();
-}
+}  // end mapToString()
 
 //==============================================================================
 // setToString
-std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn,
-                                      const std::string&       delimeter)
+std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn, const std::string& delimeter)
 {
 	std::stringstream ss;
 	bool              first = true;
@@ -747,12 +696,11 @@ std::string StringMacros::setToString(const std::set<uint8_t>& setToReturn,
 		ss << (unsigned int)setValue;
 	}
 	return ss.str();
-}
+}  // end setToString()
 
 //==============================================================================
 // vectorToString
-std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn,
-                                         const std::string&          delimeter)
+std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn, const std::string& delimeter)
 {
 	std::stringstream ss;
 	bool              first = true;
@@ -765,7 +713,230 @@ std::string StringMacros::vectorToString(const std::vector<uint8_t>& setToReturn
 		ss << (unsigned int)setValue;
 	}
 	return ss.str();
-}
+}  // end vectorToString()
+
+//==============================================================================
+// extractCommonChunks
+//	return the common chunks from the vector of strings
+//		e.g. if the strings were created from a template
+//	string like reader*_east*, this function will return
+//	a vector of size 3 := {"reader","_east",""} and
+//	a vector of wildcards that would replace the *
+//
+//	Returns true if common chunks and wildcards found,
+//	returns false if all inputs were the same (i.e. no wildcards needed)
+bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
+                                       std::vector<std::string>&       commonChunksToReturn,
+                                       std::vector<std::string>&       wildcardStringsToReturn,
+                                       unsigned int&                   fixedWildcardLength)
+{
+	fixedWildcardLength = 0;  // default
+
+	// Steps:
+	//	- find start and end common chunks first in haystack strings
+	//  - use start and end to determine if there is more than one *
+	//	- decide if fixed width was specified (based on prepended 0s to numbers)
+	//	- search for more instances of * value
+	//
+	//
+	//	// Note: lambda recursive function to find chunks
+	//	std::function<void(
+	//			const std::vector<std::string>&,
+	//			const std::string&,
+	//			const unsigned int, const int)> localRecurse =
+	//	    [&specialFolders, &specialMapTypes, &retMap, &localRecurse](
+	//	    		const std::vector<std::string>& haystack,
+	//			const std::string& offsetPath,
+	//			const unsigned int depth,
+	//			const int specialIndex)
+	//			{
+	//
+	//		    //__COUTV__(path);
+	//		    //__COUTV__(depth);
+	//	}
+	std::pair<unsigned int /*lo*/, unsigned int /*hi*/> wildcardBounds(std::make_pair(-1, 0));  // initialize to illegal wildcard
+
+	// look for starting matching segment
+	for(unsigned int n = 1; n < haystack.size(); ++n)
+		for(unsigned int i = 0, j = 0; i < haystack[0].length() && j < haystack[n].length(); ++i, ++j)
+		{
+			if(i < wildcardBounds.first)
+			{
+				if(haystack[0][i] != haystack[1][j])
+				{
+					wildcardBounds.first = i;  // found lo side of wildcard
+					break;
+				}
+			}
+			else
+				break;
+		}
+	__COUT__ << "Low side = " << wildcardBounds.first << " " << haystack[0].substr(0, wildcardBounds.first) << __E__;
+
+	// look for end matching segment
+	for(unsigned int n = 1; n < haystack.size(); ++n)
+		for(int i = haystack[0].length() - 1, j = haystack[n].length() - 1; i >= (int)wildcardBounds.first && j >= (int)wildcardBounds.first; --i, --j)
+		{
+			if(i > (int)wildcardBounds.second)  // looking for hi side
+			{
+				if(haystack[0][i] != haystack[n][j])
+				{
+					wildcardBounds.second = i + 1;  // found hi side of wildcard
+					break;
+				}
+			}
+			else
+				break;
+		}
+
+	__COUT__ << "High side = " << wildcardBounds.second << " " << haystack[0].substr(wildcardBounds.second) << __E__;
+
+	// add first common chunk
+	commonChunksToReturn.push_back(haystack[0].substr(0, wildcardBounds.first));
+
+	if(wildcardBounds.first != (unsigned int)-1)  // potentially more chunks if not end
+	{
+		//  - use start and end to determine if there is more than one *
+		for(int i = (wildcardBounds.first + wildcardBounds.second) / 2 + 1; i < (int)wildcardBounds.second; ++i)
+			if(haystack[0][wildcardBounds.first] == haystack[0][i] &&
+			   haystack[0].substr(wildcardBounds.first, wildcardBounds.second - i) == haystack[0].substr(i, wildcardBounds.second - i))
+			{
+				std::string multiWildcardString = haystack[0].substr(i, wildcardBounds.second - i);
+				__COUT__ << "Multi-wildcard found: " << multiWildcardString << __E__;
+
+				std::vector<unsigned int /*lo index*/> wildCardInstances;
+				// add front one now, and back one later
+				wildCardInstances.push_back(wildcardBounds.first);
+
+				unsigned int offset       = wildCardInstances[0] + multiWildcardString.size() + 1;
+				std::string  middleString = haystack[0].substr(offset, (i - 1) - offset);
+				__COUTV__(middleString);
+
+				// search for more wildcard instances in new common area
+				size_t k;
+				while((k = middleString.find(multiWildcardString)) != std::string::npos)
+				{
+					__COUT__ << "Multi-wildcard found at " << k << __E__;
+
+					wildCardInstances.push_back(offset + k);
+
+					middleString = middleString.substr(k + multiWildcardString.size() + 1);
+					offset += k + multiWildcardString.size() + 1;
+					__COUTV__(middleString);
+				}
+
+				// add back one last
+				wildCardInstances.push_back(i);
+
+				for(unsigned int w = 0; w < wildCardInstances.size() - 1; ++w)
+				{
+					commonChunksToReturn.push_back(haystack[0].substr(wildCardInstances[w] + wildCardInstances.size(),
+					                                                  wildCardInstances[w + 1] - (wildCardInstances[w] + wildCardInstances.size())));
+				}
+			}
+
+		// check if all common chunks end in 0 to add fixed length
+
+		for(unsigned int i = 0; i < commonChunksToReturn[0].size(); ++i)
+			if(commonChunksToReturn[0][commonChunksToReturn[0].size() - 1 - i] == '0')
+				++fixedWildcardLength;
+			else
+				break;
+
+		bool allHave0 = true;
+		for(unsigned int c = 0; c < commonChunksToReturn.size(); ++c)
+		{
+			unsigned int cnt = 0;
+			for(unsigned int i = 0; i < commonChunksToReturn[c].size(); ++i)
+				if(commonChunksToReturn[c][commonChunksToReturn[c].size() - 1 - i] == '0')
+					++cnt;
+				else
+					break;
+
+			if(fixedWildcardLength < cnt)
+				fixedWildcardLength = cnt;
+			else if(fixedWildcardLength > cnt)
+			{
+				__SS__ << "Invalid fixed length found, please simplify indexing between these common chunks: "
+				       << StringMacros::vectorToString(commonChunksToReturn) << __E__;
+				__SS_THROW__;
+			}
+		}
+		__COUTV__(fixedWildcardLength);
+
+		if(fixedWildcardLength)  // take trailing 0s out of common chunks
+			for(unsigned int c = 0; c < commonChunksToReturn.size(); ++c)
+				commonChunksToReturn[c] = commonChunksToReturn[c].substr(0, commonChunksToReturn[c].size() - fixedWildcardLength);
+
+		// add last common chunk
+		commonChunksToReturn.push_back(haystack[0].substr(wildcardBounds.second));
+	}  // end handling more chunks
+
+	// now determine wildcard strings
+	size_t       k;
+	unsigned int i;
+	unsigned int ioff            = fixedWildcardLength;
+	bool         wildcardsNeeded = false;
+
+	for(unsigned int n = 0; n < haystack.size(); ++n)
+	{
+		std::string wildcard = "";
+		k                    = 0;
+		i                    = ioff + commonChunksToReturn[0].size();
+
+		if(commonChunksToReturn.size() == 1)  // just get end
+			wildcard = haystack[n].substr(i);
+		else
+			for(unsigned int c = 1; c < commonChunksToReturn.size(); ++c)
+			{
+				if(c == commonChunksToReturn.size() - 1)  // for last, do reverse find
+					k = haystack[n].rfind(commonChunksToReturn[c]);
+				else
+					k = haystack[n].find(commonChunksToReturn[c], i + 1);
+
+				if(wildcard == "")
+				{
+					// set wildcard for first time
+					__COUTV__(i);
+					__COUTV__(k);
+					__COUTV__(k - i);
+
+					wildcard = haystack[n].substr(i, k - i);
+					if(fixedWildcardLength && n == 0)
+						fixedWildcardLength += wildcard.size();
+
+					__COUT__ << "name[" << n << "] = " << wildcard << " fixed @ " << fixedWildcardLength << __E__;
+
+					break;
+				}
+				else if(0 /*skip validation in favor of speed*/ && wildcard != haystack[n].substr(i, k - i))
+				{
+					__SS__ << "Invalid wildcard! for name[" << n << "] = " << haystack[n]
+					       << " - the extraction algorithm is confused, please simplify your naming convention." << __E__;
+					__SS_THROW__;
+				}
+
+				i = k;
+			}  // end commonChunksToReturn loop
+
+		if(wildcard.size())
+			wildcardsNeeded = true;
+		wildcardStringsToReturn.push_back(wildcard);
+
+	}  // end name loop
+
+	__COUTV__(StringMacros::vectorToString(commonChunksToReturn));
+	__COUTV__(StringMacros::vectorToString(wildcardStringsToReturn));
+
+	if(wildcardStringsToReturn.size() != haystack.size())
+	{
+		__SS__ << "There was a problem during common chunk extraction!" << __E__;
+		__SS_THROW__;
+	}
+
+	return wildcardsNeeded;
+
+}  // end extractCommonChunks()
 
 //========================================================================================================================
 // exec
@@ -785,7 +956,7 @@ std::string StringMacros::exec(const char* cmd)
 			result += buffer.data();
 	}
 	return result;
-}  // end exec
+}  // end exec()
 
 //==============================================================================
 // stackTrace
@@ -856,14 +1027,12 @@ std::string StringMacros::stackTrace()
 			// if demangling is successful, output the demangled function name
 			if(status == 0)
 			{
-				ss << "[" << i << "] " << messages[i] << " : " << real_name << "+"
-				   << offset_begin << offset_end << std::endl;
+				ss << "[" << i << "] " << messages[i] << " : " << real_name << "+" << offset_begin << offset_end << std::endl;
 			}
 			// otherwise, output the mangled function name
 			else
 			{
-				ss << "[" << i << "] " << messages[i] << " : " << mangled_name << "+"
-				   << offset_begin << offset_end << std::endl;
+				ss << "[" << i << "] " << messages[i] << " : " << mangled_name << "+" << offset_begin << offset_end << std::endl;
 			}
 			free(real_name);
 		}
@@ -888,15 +1057,12 @@ std::string StringMacros::stackTrace()
 // 		declare special ots environment variable get,
 //		that throws exception instead of causing crashes with null pointer.
 //		Note: usually called with __ENV__(X) in CoutMacros.h
-char* StringMacros::otsGetEnvironmentVarable(const char*         name,
-                                             const std::string&  location,
-                                             const unsigned int& line)
+char* StringMacros::otsGetEnvironmentVarable(const char* name, const std::string& location, const unsigned int& line)
 {
 	char* environmentVariablePtr = getenv(name);
 	if(!environmentVariablePtr)
 	{
-		__SS__ << "Environment variable '" << name << "' not defined at " << location
-		       << "[" << line << "]" << __E__;
+		__SS__ << "Environment variable '" << name << "' not defined at " << location << "[" << line << "]" << __E__;
 		ss << "\n\n" << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
@@ -915,8 +1081,7 @@ std::string StringMacros::demangleTypeName(const char* name)
 	int status = -4;  // some arbitrary value to eliminate the compiler warning
 
 	// enable c++11 by passing the flag -std=c++11 to g++
-	std::unique_ptr<char, void (*)(void*)> res{
-	    abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
+	std::unique_ptr<char, void (*)(void*)> res{abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
 
 	return (status == 0) ? res.get() : name;
 }  // end demangleTypeName()

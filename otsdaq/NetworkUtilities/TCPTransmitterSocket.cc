@@ -15,16 +15,13 @@ TCPTransmitterSocket::TCPTransmitterSocket(int socketId) : TCPSocket(socketId) {
 TCPTransmitterSocket::~TCPTransmitterSocket(void) {}
 
 //========================================================================================================================
-void TCPTransmitterSocket::sendPacket(const std::string& buffer)
-{
-	send(TCPPacket::encode(buffer));
-}
+void TCPTransmitterSocket::sendPacket(const std::string& buffer) { send(TCPPacket::encode(buffer)); }
 
 //========================================================================================================================
 void TCPTransmitterSocket::send(char const* buffer, std::size_t size)
 {
-	std::size_t put = write(getSocketId(), buffer, size);
-	if(put == static_cast<std::size_t>(-1))
+	std::size_t sentBytes = ::send(getSocketId(), buffer, size, MSG_NOSIGNAL);
+	if(sentBytes == static_cast<std::size_t>(-1))
 	{
 		switch(errno)
 		{
@@ -35,8 +32,7 @@ void TCPTransmitterSocket::send(char const* buffer, std::size_t size)
 		case EPIPE:
 		{
 			// Fatal error. Programming bug
-			throw std::domain_error(std::string("Write: critical error: ") +
-			                        strerror(errno));
+			throw std::runtime_error(std::string("Write: critical error: ") + strerror(errno));
 		}
 		// case EDQUOT:
 		// case EFBIG:
@@ -46,24 +42,20 @@ void TCPTransmitterSocket::send(char const* buffer, std::size_t size)
 		case ENOSPC:
 		{
 			// Resource acquisition failure or device error
-			throw std::runtime_error(std::string("Write: resource failure: ") +
-			                         strerror(errno));
+			throw std::runtime_error(std::string("Write: resource failure: ") + strerror(errno));
 		}
 		case EINTR:
-			break;
 			// TODO: Check for user interrupt flags.
 			//       Beyond the scope of this project
 			//       so continue normal operations.
 		case EAGAIN:
 		{
 			// Temporary error.
-			throw std::runtime_error(std::string("Write: temporary error: ") +
-			                         strerror(errno));
+			throw std::runtime_error(std::string("Write: temporary error: ") + strerror(errno));
 		}
 		default:
 		{
-			throw std::runtime_error(std::string("Write: returned -1: ") +
-			                         strerror(errno));
+			throw std::runtime_error(std::string("Write: returned -1: ") + strerror(errno));
 		}
 		}
 	}
@@ -72,11 +64,21 @@ void TCPTransmitterSocket::send(char const* buffer, std::size_t size)
 //========================================================================================================================
 void TCPTransmitterSocket::send(const std::string& buffer)
 {
+	if(buffer.size() == 0)
+	{
+		std::cout << __PRETTY_FUNCTION__ << "I am sorry but I won't send an empty packet!" << std::endl;
+		return;
+	}
 	send(&buffer.at(0), buffer.size());
 }
 
 //========================================================================================================================
 void TCPTransmitterSocket::send(const std::vector<char>& buffer)
 {
+	if(buffer.size() == 0)
+	{
+		std::cout << __PRETTY_FUNCTION__ << "I am sorry but I won't send an empty packet!" << std::endl;
+		return;
+	}
 	send(&buffer.at(0), buffer.size());
 }

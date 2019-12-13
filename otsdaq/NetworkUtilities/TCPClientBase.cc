@@ -11,20 +11,15 @@
 using namespace ots;
 
 //========================================================================================================================
-TCPClientBase::TCPClientBase(const std::string& serverIP, int serverPort)
-    : fServerIP(serverIP), fServerPort(serverPort), fConnected(false)
-{
-}
+TCPClientBase::TCPClientBase(const std::string& serverIP, int serverPort) : fServerIP(serverIP), fServerPort(serverPort), fConnected(false) {}
 
 //========================================================================================================================
 TCPClientBase::~TCPClientBase(void)
 {
-	std::cout << __PRETTY_FUNCTION__ << "Closing TCPSocket #" << getSocketId()
-	          << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "Closing TCPSocket #" << getSocketId() << std::endl;
 	if(fConnected)
 		close();
-	std::cout << __PRETTY_FUNCTION__ << "TCPSocket #" << getSocketId() << " closed."
-	          << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "TCPSocket #" << getSocketId() << " closed." << std::endl;
 }
 
 //========================================================================================================================
@@ -32,19 +27,15 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMSeconds)
 {
 	if(fConnected)
 	{
-		std::cout << __PRETTY_FUNCTION__ << "I am already connected...what is going on?"
-		          << std::endl;
-		throw std::runtime_error(
-		    std::string("I am already connected...what is going on?"));
+		std::cout << __PRETTY_FUNCTION__ << "I am already connected...what is going on?" << std::endl;
+		throw std::runtime_error(std::string("I am already connected...what is going on?"));
 		abort();
 	}
 
-	std::cout << __PRETTY_FUNCTION__ << "Connecting Client socket to server name-"
-	          << fServerIP << "-serverPort: " << fServerPort << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "Connecting Client socket to server name-" << fServerIP << "-serverPort: " << fServerPort << std::endl;
 	std::string serverName = fServerIP;
 	resolveServer(fServerIP);
-	std::cout << __PRETTY_FUNCTION__ << "Connecting Client socket to server ip  -"
-	          << fServerIP << "-serverPort: " << fServerPort << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "Connecting Client socket to server ip  -" << fServerIP << "-serverPort: " << fServerPort << std::endl;
 	int                status = invalidSocketId;
 	struct sockaddr_in serverSocketAddress;
 	serverSocketAddress.sin_family      = AF_INET;
@@ -54,25 +45,20 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMSeconds)
 	while(!fConnected && (unsigned int)retry-- > 0)
 	{
 		// std::cout << __PRETTY_FUNCTION__ << "Trying to connect" << std::endl;
-		status = ::connect(getSocketId(),
-		                   (struct sockaddr*)&serverSocketAddress,
-		                   sizeof(serverSocketAddress));
+		status = ::connect(getSocketId(), (struct sockaddr*)&serverSocketAddress, sizeof(serverSocketAddress));
 		// std::cout << __PRETTY_FUNCTION__ << "Done Connect" << std::endl;
 		if(status == -1)
 		{
 			if((unsigned int)retry > 0)
 			{
-				std::cout << __PRETTY_FUNCTION__ << "WARNING: Can't connect to "
-				          << serverName << ". The server might still be down...Sleeping "
-				          << sleepMSeconds << "ms and then retry " << (unsigned int)retry
-				          << " more times." << std::endl;
+				std::cout << __PRETTY_FUNCTION__ << "WARNING: Can't connect to " << serverName << ". The server might still be down...Sleeping "
+				          << sleepMSeconds << "ms and then retry " << (unsigned int)retry << " more times." << std::endl;
 				std::this_thread::sleep_for(std::chrono::milliseconds(sleepMSeconds));
 				continue;
 			}
 			else
 			{
-				std::cout << __PRETTY_FUNCTION__ << "ERROR: Can't connect to "
-				          << serverName << " aborting!" << std::endl;
+				std::cout << __PRETTY_FUNCTION__ << "ERROR: Can't connect to " << serverName << " aborting!" << std::endl;
 				break;
 			}
 		}
@@ -102,8 +88,7 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMSeconds)
 		//__PRETTY_FUNCTION__ <<  "sendBufferSize " << socketLength << " status/errno=" <<
 		// status << "/" << errno << std::endl;
 		//		}
-		std::cout << __PRETTY_FUNCTION__ << "Succesfully connected to server "
-		          << fServerIP << " port: " << fServerPort << std::endl;
+		std::cout << __PRETTY_FUNCTION__ << "Succesfully connected to server " << fServerIP << " port: " << fServerPort << std::endl;
 		fConnected = true;
 	}
 

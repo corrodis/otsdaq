@@ -20,8 +20,7 @@ void usage()
 	std::cout << "\n\nusage: Two arguments:\n\n\t otsdaq_import_system_aliases "
 	             "<path_to_import_database_folder> <path_to_active_groups_file> "
 	             "<import_prepend_base_name (optional)> \n\n"
-	          << "\t\t Default values: \n\t\t\timport_prepend_base_name = \""
-	          << prependBaseName << "\" "
+	          << "\t\t Default values: \n\t\t\timport_prepend_base_name = \"" << prependBaseName << "\" "
 	          << "\n\n"
 	          << "\t\tfor example:\n\n"
 	          << "\t\t\totsdaq_import_system_aliases "
@@ -46,15 +45,12 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	__COUT__ << "=================================================\n";
 	__COUT__ << "Importing External System Aliases!" << std::endl;
 
-	std::string       prependBaseName = pset.get<std::string>("prepend_name", "Imported");
-	const std::string groupAliasesTableName =
-	    ConfigurationManager::GROUP_ALIASES_TABLE_NAME;
-	const std::string versionAliasesTableName =
-	    ConfigurationManager::VERSION_ALIASES_TABLE_NAME;
+	std::string       prependBaseName         = pset.get<std::string>("prepend_name", "Imported");
+	const std::string groupAliasesTableName   = ConfigurationManager::GROUP_ALIASES_TABLE_NAME;
+	const std::string versionAliasesTableName = ConfigurationManager::VERSION_ALIASES_TABLE_NAME;
 
 	// determine if help was requested
-	if(pset.get<bool>("do_help", false) || !pset.has_key("current_database_path") ||
-	   !pset.has_key("active_groups_file"))
+	if(pset.get<bool>("do_help", false) || !pset.has_key("current_database_path") || !pset.has_key("active_groups_file"))
 	{
 		usage();
 		return;
@@ -74,17 +70,12 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	// These are needed by
 	// otsdaq/otsdaq/ConfigurationDataFormats/ConfigurationInfoReader.cc [207]
 	setenv("CONFIGURATION_TYPE", "File", 1);  // Can be File, Database, DatabaseTest
-	setenv("CONFIGURATION_DATA_PATH",
-	       (std::string(__ENV__("USER_DATA")) + "/ConfigurationDataExamples").c_str(),
-	       1);
-	setenv(
-	    "TABLE_INFO_PATH", (std::string(__ENV__("USER_DATA")) + "/TableInfo").c_str(), 1);
+	setenv("CONFIGURATION_DATA_PATH", (std::string(__ENV__("USER_DATA")) + "/ConfigurationDataExamples").c_str(), 1);
+	setenv("TABLE_INFO_PATH", (std::string(__ENV__("USER_DATA")) + "/TableInfo").c_str(), 1);
 	////////////////////////////////////////////////////
 
 	// Some configuration plug-ins use __ENV__("SERVICE_DATA_PATH") in init() so define it
-	setenv("SERVICE_DATA_PATH",
-	       (std::string(__ENV__("USER_DATA")) + "/ServiceData").c_str(),
-	       1);
+	setenv("SERVICE_DATA_PATH", (std::string(__ENV__("USER_DATA")) + "/ServiceData").c_str(), 1);
 
 	// Some configuration plug-ins use __ENV__("OTSDAQ_LIB") and
 	// __ENV__("OTSDAQ_UTILITIES_LIB") in init() so define it 	to a non-sense place is ok
@@ -95,9 +86,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	setenv("OTS_MAIN_PORT", "2015", 1);
 
 	// also xdaq envs for XDAQContextTable
-	setenv("XDAQ_CONFIGURATION_DATA_PATH",
-	       (std::string(__ENV__("USER_DATA")) + "/XDAQConfigurations").c_str(),
-	       1);
+	setenv("XDAQ_CONFIGURATION_DATA_PATH", (std::string(__ENV__("USER_DATA")) + "/XDAQConfigurations").c_str(), 1);
 	setenv("XDAQ_CONFIGURATION_XML", "otsConfigurationNoRU_CMake", 1);
 	////////////////////////////////////////////////////
 
@@ -175,9 +164,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	         /*new*/ TableVersion>
 	    newTableVersionMap;
 
-	std::map</*original*/ std::pair<std::string, TableGroupKey>,
-	         std::string /*error string*/>
-	    groupErrors;
+	std::map</*original*/ std::pair<std::string, TableGroupKey>, std::string /*error string*/> groupErrors;
 
 	// get prepared with initial source db
 
@@ -200,8 +187,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	}
 
 	currentDir = currentDir.substr(std::string("filesystemdb://").length());
-	while(currentDir.length() &&
-	      currentDir[currentDir.length() - 1] == '/')  // remove trailing '/'s
+	while(currentDir.length() && currentDir[currentDir.length() - 1] == '/')  // remove trailing '/'s
 		currentDir = currentDir.substr(0, currentDir.length() - 1);
 
 	__COUTV__(currentDir);
@@ -212,21 +198,17 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	// std::string tmpImportDir = pathToImportDatabase + "_tmp_" + nowTime;
 
 	//	-- get set of existing aliases
-	std::map<std::string /*table name*/,
-	         std::map<std::string /*version alias*/, TableVersion /*aliased version*/>>
-	    existingTableAliases = cfgMgr->ConfigurationManager::getVersionAliases();
-	std::map<std::string /*alias*/, std::pair<std::string /*group name*/, TableGroupKey>>
-	    existingGroupAliases = cfgMgr->getActiveGroupAliases();
+	std::map<std::string /*table name*/, std::map<std::string /*version alias*/, TableVersion /*aliased version*/>> existingTableAliases =
+	    cfgMgr->ConfigurationManager::getVersionAliases();
+	std::map<std::string /*alias*/, std::pair<std::string /*group name*/, TableGroupKey>> existingGroupAliases = cfgMgr->getActiveGroupAliases();
 
 	//	-- swap to import-db and clear cache
 	{
 		// back up current directory now
-		__COUT__ << "Backing up current database at '" << currentDir << "' to '"
-		         << backupDir << "'" << __E__;
+		__COUT__ << "Backing up current database at '" << currentDir << "' to '" << backupDir << "'" << __E__;
 		std::system(("cp -r " + currentDir + " " + backupDir).c_str());
 
-		__COUT__ << "Backing up current database at '" << pathToImportDatabase << "' to '"
-		         << importDir << "'" << __E__;
+		__COUT__ << "Backing up current database at '" << pathToImportDatabase << "' to '" << importDir << "'" << __E__;
 		std::system(("cp -r " + pathToImportDatabase + " " + importDir).c_str());
 
 		cfgMgr->destroy();
@@ -251,8 +233,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 		cfgMgr->restoreActiveTableGroups(true /*throwErrors*/, pathToImportActiveGroups);
 
 		// add active groups to set
-		std::map<std::string, std::pair<std::string, TableGroupKey>> activeGroupsMap =
-		    cfgMgr->getActiveTableGroups();
+		std::map<std::string, std::pair<std::string, TableGroupKey>> activeGroupsMap = cfgMgr->getActiveTableGroups();
 
 		for(const auto& activeGroup : activeGroupsMap)
 		{
@@ -264,41 +245,32 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 			__COUTV__(activeGroup.second.first);
 			__COUTV__(activeGroup.second.second);
 
-			groupSet.insert(
-			    std::pair<std::pair<std::string, TableGroupKey>, TableGroupKey>(
-			        std::pair<std::string, TableGroupKey>(activeGroup.second.first,
-			                                              activeGroup.second.second),
-			        TableGroupKey()));
+			groupSet.insert(std::pair<std::pair<std::string, TableGroupKey>, TableGroupKey>(
+			    std::pair<std::string, TableGroupKey>(activeGroup.second.first, activeGroup.second.second), TableGroupKey()));
 		}
 
 		// add system alias groups to set
 		std::map<std::string, TableVersion> activeVersions = cfgMgr->getActiveVersions();
 		if(activeVersions.find(groupAliasesTableName) == activeVersions.end())
 		{
-			__SS__ << "\nActive version of " << groupAliasesTableName << " missing! "
-			       << groupAliasesTableName
+			__SS__ << "\nActive version of " << groupAliasesTableName << " missing! " << groupAliasesTableName
 			       << " is a required member of the Backbone configuration group."
-			       << "\n\nLikely you need to activate a valid Backbone group."
-			       << std::endl;
+			       << "\n\nLikely you need to activate a valid Backbone group." << std::endl;
 			__SS_THROW__;
 		}
 		if(activeVersions.find(versionAliasesTableName) == activeVersions.end())
 		{
-			__SS__ << "\nActive version of " << versionAliasesTableName << " missing! "
-			       << versionAliasesTableName
+			__SS__ << "\nActive version of " << versionAliasesTableName << " missing! " << versionAliasesTableName
 			       << " is a required member of the Backbone configuration group."
-			       << "\n\nLikely you need to activate a valid Backbone group."
-			       << std::endl;
+			       << "\n\nLikely you need to activate a valid Backbone group." << std::endl;
 			__SS_THROW__;
 		}
 
-		std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
-		    cfgMgr->getNode(groupAliasesTableName).getChildren();
-		std::string aliasName;
+		std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs = cfgMgr->getNode(groupAliasesTableName).getChildren();
+		std::string                                            aliasName;
 		for(auto& aliasPair : aliasNodePairs)
 		{
-			if(TableGroupKey(aliasPair.second.getNode("GroupKey").getValueAsString())
-			       .isInvalid())
+			if(TableGroupKey(aliasPair.second.getNode("GroupKey").getValueAsString()).isInvalid())
 				continue;
 			if(aliasPair.second.getNode("GroupName").getValueAsString() == "")
 				continue;
@@ -322,24 +294,19 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 				__SS_THROW__;
 			}
 
-			groupSet.insert(
-			    std::pair<std::pair<std::string, TableGroupKey>, TableGroupKey>(
-			        std::pair<std::string, TableGroupKey>(
-			            aliasPair.second.getNode("GroupName").getValueAsString(),
-			            TableGroupKey(
-			                aliasPair.second.getNode("GroupKey").getValueAsString())),
-			        TableGroupKey()));
+			groupSet.insert(std::pair<std::pair<std::string, TableGroupKey>, TableGroupKey>(
+			    std::pair<std::string, TableGroupKey>(aliasPair.second.getNode("GroupName").getValueAsString(),
+			                                          TableGroupKey(aliasPair.second.getNode("GroupKey").getValueAsString())),
+			    TableGroupKey()));
 
-			originalGroupAliasMap[aliasName] = std::pair<std::string, TableGroupKey>(
-			    aliasPair.second.getNode("GroupName").getValueAsString(),
-			    TableGroupKey(aliasPair.second.getNode("GroupKey").getValueAsString()));
+			originalGroupAliasMap[aliasName] = std::pair<std::string, TableGroupKey>(aliasPair.second.getNode("GroupName").getValueAsString(),
+			                                                                         TableGroupKey(aliasPair.second.getNode("GroupKey").getValueAsString()));
 		}  // end group aliases loop
 
 		aliasNodePairs = cfgMgr->getNode(versionAliasesTableName).getChildren();
 		for(auto& aliasPair : aliasNodePairs)
 		{
-			if(TableVersion(aliasPair.second.getNode("Version").getValueAsString())
-			       .isInvalid())
+			if(TableVersion(aliasPair.second.getNode("Version").getValueAsString()).isInvalid())
 				continue;
 			if(aliasPair.second.getNode("TableName").getValueAsString() == "")
 				continue;
@@ -358,24 +325,20 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 			// and  throw error if collision
 			if(existingTableAliases.find(aliasName) != existingTableAliases.end())
 			{
-				__SS__ << "Conflicting table version alias '" << aliasName << "' found!"
-				       << __E__;
+				__SS__ << "Conflicting table version alias '" << aliasName << "' found!" << __E__;
 				__SS_THROW__;
 			}
 
-			originalTableAliasMap[aliasName] = std::pair<std::string, TableVersion>(
-			    aliasPair.second.getNode("TableName").getValueAsString(),
-			    TableVersion(aliasPair.second.getNode("Version").getValueAsString()));
+			originalTableAliasMap[aliasName] = std::pair<std::string, TableVersion>(aliasPair.second.getNode("TableName").getValueAsString(),
+			                                                                        TableVersion(aliasPair.second.getNode("Version").getValueAsString()));
 		}  // end table aliases loop
 	}      // end extract group set
 	catch(const std::runtime_error& e)
 	{
 		__COUT_ERR__ << "There was a fatal error: " << e.what() << __E__;
 
-		__COUT__ << "Run the following to return to your previous database structure:"
-		         << std::endl;
-		__COUT__ << "\t otsdaq_flatten_system_aliases -1 " << backupDir << "\n\n"
-		         << std::endl;
+		__COUT__ << "Run the following to return to your previous database structure:" << std::endl;
+		__COUT__ << "\t otsdaq_flatten_system_aliases -1 " << backupDir << "\n\n" << std::endl;
 
 		return;
 	}
@@ -389,18 +352,16 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 
 	__COUT__ << "Identified group aliases:" << std::endl;
 	for(auto& groupAlias : originalGroupAliasMap)
-		__COUT__ << "\t" << groupAlias.first << " ==> " << groupAlias.second.first << "-"
-		         << groupAlias.second.second << std::endl;
+		__COUT__ << "\t" << groupAlias.first << " ==> " << groupAlias.second.first << "-" << groupAlias.second.second << std::endl;
 
 	//==============================================================================
 	//	-- for each group in set
 
-	ConfigurationInterface* theInterface_ = ConfigurationInterface::getInstance(
-	    false);  // true for File interface, false for artdaq database;
-	TableView*    cfgView;
-	TableBase*    config;
-	TableVersion  newVersion;
-	TableGroupKey newKey;
+	ConfigurationInterface* theInterface_ = ConfigurationInterface::getInstance(false);  // true for File interface, false for artdaq database;
+	TableView*              cfgView;
+	TableBase*              config;
+	TableVersion            newVersion;
+	TableGroupKey           newKey;
 
 	bool        errDetected;
 	std::string accumulateErrors = "";
@@ -412,7 +373,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	std::string                                           groupAuthor;
 	std::string                                           groupCreateTime;
 	time_t                                                groupCreateTime_t;
-	TableBase* groupMetadataTable = cfgMgr->getMetadataTable();
+	TableBase*                                            groupMetadataTable = cfgMgr->getMetadataTable();
 
 	__COUT__ << "Proceeding with handling of identified groups..." << __E__;
 
@@ -448,8 +409,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 		// /*throwErrors*/,pathToImportActiveGroups);
 
 		__COUT__ << "****************************" << std::endl;
-		__COUT__ << "Loading members for " << groupPair.first.first << "("
-		         << groupPair.first.second << ")" << std::endl;
+		__COUT__ << "Loading members for " << groupPair.first.first << "(" << groupPair.first.second << ")" << std::endl;
 		__COUTV__(count);
 
 		//=========================
@@ -471,15 +431,13 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 		}
 		catch(std::runtime_error& e)
 		{
-			__COUT__ << "Error was caught loading members for " << groupPair.first.first
-			         << "(" << groupPair.first.second << ")" << std::endl;
+			__COUT__ << "Error was caught loading members for " << groupPair.first.first << "(" << groupPair.first.second << ")" << std::endl;
 			__COUT__ << e.what() << std::endl;
 			errDetected = true;
 		}
 		catch(...)
 		{
-			__COUT__ << "Error was caught loading members for " << groupPair.first.first
-			         << "(" << groupPair.first.second << ")" << std::endl;
+			__COUT__ << "Error was caught loading members for " << groupPair.first.first << "(" << groupPair.first.second << ")" << std::endl;
 			errDetected = true;
 		}
 
@@ -495,11 +453,8 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 			// power on if group failed
 			//	and record error
 
-			groupErrors.insert(
-			    std::pair<std::pair<std::string, TableGroupKey>, std::string>(
-			        std::pair<std::string, TableGroupKey>(groupPair.first.first,
-			                                              groupPair.first.second),
-			        "Error caught loading the group."));
+			groupErrors.insert(std::pair<std::pair<std::string, TableGroupKey>, std::string>(
+			    std::pair<std::string, TableGroupKey>(groupPair.first.first, groupPair.first.second), "Error caught loading the group."));
 			continue;
 		}
 
@@ -531,15 +486,11 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 
 				// check if table has already been modified by a previous group
 				//	(i.e. two groups using the same version of a table)
-				if(newTableVersionMap.find(std::pair<std::string, TableVersion>(
-				       memberPair.first, memberPair.second)) != newTableVersionMap.end())
+				if(newTableVersionMap.find(std::pair<std::string, TableVersion>(memberPair.first, memberPair.second)) != newTableVersionMap.end())
 				{
 					__COUT__ << "Table was already modified!" << std::endl;
-					memberPair.second =
-					    newTableVersionMap[std::pair<std::string, TableVersion>(
-					        memberPair.first, memberPair.second)];
-					__COUT__ << "\t to...\t" << memberPair.first << ":v"
-					         << memberPair.second << std::endl;
+					memberPair.second = newTableVersionMap[std::pair<std::string, TableVersion>(memberPair.first, memberPair.second)];
+					__COUT__ << "\t to...\t" << memberPair.first << ":v" << memberPair.second << std::endl;
 					continue;
 				}
 
@@ -548,8 +499,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 				config  = cfgMgr->getTableByName(memberPair.first);
 				cfgView = config->getViewP();
 				// newVersion = theInterface_->saveNewVersion(config, temporaryVersion);
-				newVersion = TableVersion::getNextVersion(
-				    theInterface_->findLatestVersion(config));
+				newVersion = TableVersion::getNextVersion(theInterface_->findLatestVersion(config));
 				__COUTV__(newVersion);
 				cfgView->setVersion(newVersion);
 				theInterface_->saveActiveVersion(config);
@@ -561,16 +511,12 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 				// cfgView->setVersion(memberPair.second); //IMPORTANT
 
 				// save new version to modifiedTables
-				newTableVersionMap.insert(
-				    std::pair<std::pair<std::string, TableVersion>, TableVersion>(
-				        std::pair<std::string, TableVersion>(memberPair.first,
-				                                             memberPair.second),
-				        newVersion));
+				newTableVersionMap.insert(std::pair<std::pair<std::string, TableVersion>, TableVersion>(
+				    std::pair<std::string, TableVersion>(memberPair.first, memberPair.second), newVersion));
 
 				memberPair.second = newVersion;  // change version in the member map
 
-				__COUT__ << "\t to...\t" << memberPair.first << ":v" << memberPair.second
-				         << std::endl;
+				__COUT__ << "\t to...\t" << memberPair.first << ":v" << memberPair.second << std::endl;
 			}  // end member map loop
 
 			__COUT__ << "Member map completed" << __E__;
@@ -596,65 +542,46 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 			// columns are uid,comment,author,time
 			// ConfigurationManager::METADATA_COL_ALIASES TODO
 			groupMetadataTable->getViewP()->setValue(
-			    StringMacros::mapToString(
-			        groupAliases, "," /*primary delimiter*/, ":" /*secondary delimeter*/),
-			    0,
-			    ConfigurationManager::METADATA_COL_ALIASES);
-			groupMetadataTable->getViewP()->setValue(
-			    groupComment, 0, ConfigurationManager::METADATA_COL_COMMENT);
-			groupMetadataTable->getViewP()->setValue(
-			    groupAuthor, 0, ConfigurationManager::METADATA_COL_AUTHOR);
-			groupMetadataTable->getViewP()->setValue(
-			    groupCreateTime_t, 0, ConfigurationManager::METADATA_COL_TIMESTAMP);
+			    StringMacros::mapToString(groupAliases, "," /*primary delimiter*/, ":" /*secondary delimeter*/), 0, ConfigurationManager::METADATA_COL_ALIASES);
+			groupMetadataTable->getViewP()->setValue(groupComment, 0, ConfigurationManager::METADATA_COL_COMMENT);
+			groupMetadataTable->getViewP()->setValue(groupAuthor, 0, ConfigurationManager::METADATA_COL_AUTHOR);
+			groupMetadataTable->getViewP()->setValue(groupCreateTime_t, 0, ConfigurationManager::METADATA_COL_TIMESTAMP);
 
 			// set version of metadata table
-			newVersion = TableVersion::getNextVersion(
-			    theInterface_->findLatestVersion(groupMetadataTable));
+			newVersion = TableVersion::getNextVersion(theInterface_->findLatestVersion(groupMetadataTable));
 			__COUTV__(newVersion);
 			groupMetadataTable->getViewP()->setVersion(newVersion);
 			theInterface_->saveActiveVersion(groupMetadataTable);
 
 			// force groupMetadataTable_ to be a member for the group
-			memberMap[groupMetadataTable->getTableName()] =
-			    groupMetadataTable->getViewVersion();
+			memberMap[groupMetadataTable->getTableName()] = groupMetadataTable->getViewVersion();
 
 			// memberMap should now consist of members with new flat version, so save
 			// group
-			newKey = TableGroupKey::getNextKey(
-			    theInterface_->findLatestGroupKey(groupPair.first.first));
+			newKey = TableGroupKey::getNextKey(theInterface_->findLatestGroupKey(groupPair.first.first));
 
 			__COUTV__(newKey);
 
 			// memberMap should now consist of members with new flat version, so save
-			theInterface_->saveTableGroup(
-			    memberMap,
-			    TableGroupKey::getFullGroupString(groupPair.first.first, newKey));
+			theInterface_->saveTableGroup(memberMap, TableGroupKey::getFullGroupString(groupPair.first.first, newKey));
 
 			// and modify groupSet and activeGroupKeys keys
 			groupPair.second = newKey;
 		}
 		catch(std::runtime_error& e)
 		{
-			__COUT__ << "Error was caught saving group " << groupPair.first.first << " ("
-			         << groupPair.first.second << ") " << std::endl;
+			__COUT__ << "Error was caught saving group " << groupPair.first.first << " (" << groupPair.first.second << ") " << std::endl;
 			__COUT__ << e.what() << std::endl;
 
-			groupErrors.insert(
-			    std::pair<std::pair<std::string, TableGroupKey>, std::string>(
-			        std::pair<std::string, TableGroupKey>(groupPair.first.first,
-			                                              groupPair.first.second),
-			        "Error caught saving the group."));
+			groupErrors.insert(std::pair<std::pair<std::string, TableGroupKey>, std::string>(
+			    std::pair<std::string, TableGroupKey>(groupPair.first.first, groupPair.first.second), "Error caught saving the group."));
 		}
 		catch(...)
 		{
-			__COUT__ << "Error was caught saving group " << groupPair.first.first << " ("
-			         << groupPair.first.second << ") " << std::endl;
+			__COUT__ << "Error was caught saving group " << groupPair.first.first << " (" << groupPair.first.second << ") " << std::endl;
 
-			groupErrors.insert(
-			    std::pair<std::pair<std::string, TableGroupKey>, std::string>(
-			        std::pair<std::string, TableGroupKey>(groupPair.first.first,
-			                                              groupPair.first.second),
-			        "Error caught saving the group."));
+			groupErrors.insert(std::pair<std::pair<std::string, TableGroupKey>, std::string>(
+			    std::pair<std::string, TableGroupKey>(groupPair.first.first, groupPair.first.second), "Error caught saving the group."));
 		}
 		//=========================
 
@@ -665,13 +592,11 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	__COUT__ << "Completed group and table saving for " << count << " groups." << __E__;
 	__COUT__ << "Created tables:" << std::endl;
 	for(auto& tablePair : newTableVersionMap)
-		__COUT__ << "\t" << tablePair.first.first << "-v" << tablePair.first.second
-		         << " ==> " << tablePair.second << std::endl;
+		__COUT__ << "\t" << tablePair.first.first << "-v" << tablePair.first.second << " ==> " << tablePair.second << std::endl;
 
 	__COUT__ << "Created groups:" << std::endl;
 	for(auto& group : groupSet)
-		__COUT__ << "\t" << group.first.first << "(" << group.first.second << ") ==> "
-		         << group.second << std::endl;
+		__COUT__ << "\t" << group.first.first << "(" << group.first.second << ") ==> " << group.second << std::endl;
 
 	//	-- in current-db after loop...
 	//	-- swap to current-db
@@ -740,15 +665,9 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 		// modify Group Aliases Table and Version Aliases Table to
 		//	include new groups and tables
 
-		std::string activeBackboneGroupName =
-		    cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
+		std::string activeBackboneGroupName = cfgMgr->getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE);
 		cfgMgr->loadTableGroup(
-		    activeBackboneGroupName,
-		    cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE),
-		    true,
-		    &memberMap,
-		    0,
-		    &accumulateErrors);
+		    activeBackboneGroupName, cfgMgr->getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE), true, &memberMap, 0, &accumulateErrors);
 
 		std::map<std::string, TableVersion> activeMap = cfgMgr->getActiveVersions();
 
@@ -771,15 +690,12 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 			// groupName & groupKey
 			for(auto& aliasPair : originalGroupAliasMap)
 			{
-				auto groupIt = groupSet.find(std::pair<std::string, TableGroupKey>(
-				    aliasPair.second.first, aliasPair.second.second));
+				auto groupIt = groupSet.find(std::pair<std::string, TableGroupKey>(aliasPair.second.first, aliasPair.second.second));
 
 				if(groupIt == groupSet.end())
 				{
-					__COUT__
-					    << "Error! Could not find the new entry for the original group "
-					    << aliasPair.second.first << "(" << aliasPair.second.second << ")"
-					    << __E__;
+					__COUT__ << "Error! Could not find the new entry for the original group " << aliasPair.second.first << "(" << aliasPair.second.second << ")"
+					         << __E__;
 					continue;
 				}
 				row = cfgView->addRow("import_aliases", true /*incrementUniqueData*/);
@@ -810,16 +726,12 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 			// tableName & tableVersion
 			for(auto& aliasPair : originalTableAliasMap)
 			{
-				auto tableIt =
-				    newTableVersionMap.find(std::pair<std::string, TableVersion>(
-				        aliasPair.second.first, aliasPair.second.second));
+				auto tableIt = newTableVersionMap.find(std::pair<std::string, TableVersion>(aliasPair.second.first, aliasPair.second.second));
 
 				if(tableIt == newTableVersionMap.end())
 				{
-					__COUT__
-					    << "Error! Could not find the new entry for the original table "
-					    << aliasPair.second.first << "(" << aliasPair.second.second << ")"
-					    << __E__;
+					__COUT__ << "Error! Could not find the new entry for the original table " << aliasPair.second.first << "(" << aliasPair.second.second << ")"
+					         << __E__;
 					continue;
 				}
 				row = cfgView->addRow("import_aliases", true /*incrementUniqueData*/);
@@ -834,10 +746,9 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 		// save new Group Aliases Table and Version Aliases Table
 
 		// change the version of the active view to flatVersion and save it
-		config  = cfgMgr->getTableByName(groupAliasesTableName);
-		cfgView = config->getViewP();
-		newVersion =
-		    TableVersion::getNextVersion(theInterface_->findLatestVersion(config));
+		config     = cfgMgr->getTableByName(groupAliasesTableName);
+		cfgView    = config->getViewP();
+		newVersion = TableVersion::getNextVersion(theInterface_->findLatestVersion(config));
 		__COUTV__(newVersion);
 		cfgView->setVersion(newVersion);
 		theInterface_->saveActiveVersion(config);
@@ -845,45 +756,35 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 		memberMap[groupAliasesTableName] = newVersion;  // change version in the member
 		                                                // map
 
-		__COUT__ << "\t to...\t" << groupAliasesTableName << ":v"
-		         << memberMap[groupAliasesTableName] << std::endl;
+		__COUT__ << "\t to...\t" << groupAliasesTableName << ":v" << memberMap[groupAliasesTableName] << std::endl;
 
-		__COUT__ << versionAliasesTableName << ":v" << memberMap[versionAliasesTableName]
-		         << std::endl;
+		__COUT__ << versionAliasesTableName << ":v" << memberMap[versionAliasesTableName] << std::endl;
 		// change the version of the active view to flatVersion and save it
-		config  = cfgMgr->getTableByName(versionAliasesTableName);
-		cfgView = config->getViewP();
-		newVersion =
-		    TableVersion::getNextVersion(theInterface_->findLatestVersion(config));
+		config     = cfgMgr->getTableByName(versionAliasesTableName);
+		cfgView    = config->getViewP();
+		newVersion = TableVersion::getNextVersion(theInterface_->findLatestVersion(config));
 		__COUTV__(newVersion);
 		cfgView->setVersion(newVersion);
 		theInterface_->saveActiveVersion(config);
 
-		memberMap[versionAliasesTableName] =
-		    newVersion;  // change version in the member map
+		memberMap[versionAliasesTableName] = newVersion;  // change version in the member map
 
-		__COUT__ << "\t to...\t" << versionAliasesTableName << ":v"
-		         << memberMap[versionAliasesTableName] << std::endl;
+		__COUT__ << "\t to...\t" << versionAliasesTableName << ":v" << memberMap[versionAliasesTableName] << std::endl;
 
 		__COUT__ << "Backbone member map completed" << __E__;
 		__COUTV__(StringMacros::mapToString(memberMap));
 
-		newKey = TableGroupKey::getNextKey(
-		    theInterface_->findLatestGroupKey(activeBackboneGroupName));
+		newKey = TableGroupKey::getNextKey(theInterface_->findLatestGroupKey(activeBackboneGroupName));
 
 		__COUTV__(newKey);
 
 		// memberMap should now consist of members with new flat version, so save
-		theInterface_->saveTableGroup(
-		    memberMap,
-		    TableGroupKey::getFullGroupString(activeBackboneGroupName, newKey));
+		theInterface_->saveTableGroup(memberMap, TableGroupKey::getFullGroupString(activeBackboneGroupName, newKey));
 
-		std::string renameFile =
-		    ConfigurationManager::ACTIVE_GROUPS_FILENAME + "." + nowTime;
+		std::string renameFile = ConfigurationManager::ACTIVE_GROUPS_FILENAME + "." + nowTime;
 		rename(ConfigurationManager::ACTIVE_GROUPS_FILENAME.c_str(), renameFile.c_str());
 
-		__COUT__ << "Backing up '" << ConfigurationManager::ACTIVE_GROUPS_FILENAME
-		         << "' to ... '" << renameFile << "'" << std::endl;
+		__COUT__ << "Backing up '" << ConfigurationManager::ACTIVE_GROUPS_FILENAME << "' to ... '" << renameFile << "'" << std::endl;
 
 		cfgMgr->activateTableGroup(activeBackboneGroupName,
 		                           newKey);  // and write to active group file
@@ -891,8 +792,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 	}  // end try
 	catch(const std::runtime_error& e)
 	{
-		__COUT_ERR__ << "There was a fatal error during backbone modification: "
-		             << e.what() << __E__;
+		__COUT_ERR__ << "There was a fatal error during backbone modification: " << e.what() << __E__;
 
 		goto CLEAN_UP;
 	}
@@ -901,8 +801,7 @@ void ImportSystemAliasTableGroups(fhicl::ParameterSet pset)
 
 	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Groups:" << std::endl;
 	for(const auto& group : groupSet)
-		__COUT__ << "\t" << group.first.first << ": " << group.first.second << " => "
-		         << group.second << std::endl;
+		__COUT__ << "\t" << group.first.first << ": " << group.first.second << " => " << group.second << std::endl;
 	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Groups end." << std::endl;
 
 CLEAN_UP:
@@ -910,28 +809,22 @@ CLEAN_UP:
 	__COUT__ << "End of Importing Active Table Groups!\n\n\n" << std::endl;
 
 	__COUT__ << "****************************" << std::endl;
-	__COUT__ << "There were " << groupSet.size() << " groups considered, and there were "
-	         << groupErrors.size() << " errors found handling those groups." << std::endl;
+	__COUT__ << "There were " << groupSet.size() << " groups considered, and there were " << groupErrors.size() << " errors found handling those groups."
+	         << std::endl;
 	__COUT__ << "The following errors were found handling the groups:" << std::endl;
 	for(auto& groupErr : groupErrors)
-		__COUT__ << "\t" << groupErr.first.first << " " << groupErr.first.second << ": \t"
-		         << groupErr.second << std::endl;
+		__COUT__ << "\t" << groupErr.first.first << " " << groupErr.first.second << ": \t" << groupErr.second << std::endl;
 	__COUT__ << "End of errors.\n\n" << std::endl;
 
-	__COUT__ << "Run the following to return to your previous database structure:"
-	         << std::endl;
-	__COUT__ << "\t otsdaq_flatten_system_aliases -1 " << backupDir << "\n\n"
-	         << std::endl;
+	__COUT__ << "Run the following to return to your previous database structure:" << std::endl;
+	__COUT__ << "\t otsdaq_flatten_system_aliases -1 " << backupDir << "\n\n" << std::endl;
 
 	return;
 }
 
 int main(int argc, char* argv[])
 {
-	auto pset = artdaq::LoadParameterSet(argc,
-	                                     argv,
-	                                     "otsdaq_import_fhicl",
-	                                     "Import a ParameterSet to the otsdaq database");
+	auto pset = artdaq::LoadParameterSet(argc, argv, "otsdaq_import_fhicl", "Import a ParameterSet to the otsdaq database");
 	ImportSystemAliasTableGroups(pset);
 	return 0;
 }

@@ -6,6 +6,8 @@
 #include <messagefacility/MessageLogger/MessageLogger.h>
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 
+
+
 namespace ots
 {
 static bool MESSAGE_FACILITY_INITIALIZED;
@@ -18,12 +20,9 @@ inline void INIT_MF(const char* name)
 	char* logRootString = getenv("OTSDAQ_LOG_ROOT");
 	if(logRootString == nullptr)
 	{
-		__COUT_ERR__ << "\n**********************************************************"
-		             << std::endl;
-		__COUT_ERR__ << "WARNING: OTSDAQ_LOG_ROOT environment variable was not set!"
-		             << std::endl;
-		__COUT_ERR__ << "**********************************************************\n"
-		             << std::endl;
+		__COUT_ERR__ << "\n**********************************************************" << std::endl;
+		__COUT_ERR__ << "WARNING: OTSDAQ_LOG_ROOT environment variable was not set!" << std::endl;
+		__COUT_ERR__ << "**********************************************************\n" << std::endl;
 		// exit(0);
 	}
 	else
@@ -32,18 +31,29 @@ inline void INIT_MF(const char* name)
 	char* logFhiclCode = getenv("OTSDAQ_LOG_FHICL");
 	if(logFhiclCode == nullptr)
 	{
-		__COUT_ERR__ << "\n***********************************************************"
-		             << std::endl;
-		__COUT_ERR__ << "WARNING: OTSDAQ_LOG_FHICL environment variable was not set!"
-		             << std::endl;
-		__COUT_ERR__ << "***********************************************************\n"
-		             << std::endl;
+		__COUT_ERR__ << "\n***********************************************************" << std::endl;
+		__COUT_ERR__ << "WARNING: OTSDAQ_LOG_FHICL environment variable was not set!" << std::endl;
+		__COUT_ERR__ << "***********************************************************\n" << std::endl;
 		// exit(0);
 	}
 	else
 	{
 		setenv("ARTDAQ_LOG_FHICL", logFhiclCode, 1);
-		setenv("DAQINTERFACE_MESSAGEFACILITY_FHICL", logFhiclCode, 1);
+
+		char* userDataString = getenv("USER_DATA");
+		if(userDataString == nullptr)
+		{
+
+			__COUT_ERR__ << "\n***********************************************************" << std::endl;
+			__COUT_ERR__ << "WARNING: USER_DATA environment variable was not set!" << std::endl;
+			__COUT_ERR__ << "***********************************************************\n" << std::endl;
+			__SS__ << "WARNING: USER_DATA environment variable was not set!" << std::endl;
+			__SS_THROW__;
+		}
+
+		setenv("DAQINTERFACE_MESSAGEFACILITY_FHICL", //make sure fcl always allows logging
+				(std::string(userDataString) +
+				"/MessageFacilityConfigurations/ARTDAQInterfaceMessageFacilityGen.fcl").c_str(), 1);
 	}
 
 	__COUT__ << "Configuring message facility with " << logFhiclCode << __E__;
@@ -59,9 +69,7 @@ inline void INIT_MF(const char* name)
 			fclose(fp);
 		}
 	}
-	artdaq::configureMessageFacility(name /*application name*/,
-	                                 false /*cout display*/,
-	                                 true /*enable debug messages*/);
+	artdaq::configureMessageFacility(name /*application name*/, false /*cout display*/, true /*enable debug messages*/);
 
 	artdaq::setMsgFacAppName(name, 0);
 

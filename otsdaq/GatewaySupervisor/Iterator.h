@@ -26,9 +26,7 @@ class Iterator
 	void haltIterationPlan(HttpXmlDocument& xmldoc);
 	void getIterationPlanStatus(HttpXmlDocument& xmldoc);
 
-	bool handleCommandRequest(HttpXmlDocument&   xmldoc,
-	                          const std::string& command,
-	                          const std::string& parameter);
+	bool handleCommandRequest(HttpXmlDocument& xmldoc, const std::string& command, const std::string& parameter);
 
   private:
 	// begin declaration of iterator workloop members
@@ -77,12 +75,10 @@ class Iterator
 	static void startCommand(IteratorWorkLoopStruct* iteratorStruct);
 	static bool checkCommand(IteratorWorkLoopStruct* iteratorStruct);
 
-	static void startCommandChooseFSM(IteratorWorkLoopStruct* iteratorStruct,
-	                                  const std::string&      fsmName);
+	static void startCommandChooseFSM(IteratorWorkLoopStruct* iteratorStruct, const std::string& fsmName);
 
 	static void startCommandConfigureActive(IteratorWorkLoopStruct* iteratorStruct);
-	static void startCommandConfigureAlias(IteratorWorkLoopStruct* iteratorStruct,
-	                                       const std::string&      systemAlias);
+	static void startCommandConfigureAlias(IteratorWorkLoopStruct* iteratorStruct, const std::string& systemAlias);
 	static void startCommandConfigureGroup(IteratorWorkLoopStruct* iteratorStruct);
 	static bool checkCommandConfigure(IteratorWorkLoopStruct* iteratorStruct);
 
@@ -97,10 +93,8 @@ class Iterator
 	static void startCommandRun(IteratorWorkLoopStruct* iteratorStruct);
 	static bool checkCommandRun(IteratorWorkLoopStruct* iteratorStruct);
 
-	static bool haltIterator(
-	    Iterator*               iterator,
-	    IteratorWorkLoopStruct* iteratorStruct =
-	        0);  //(GatewaySupervisor* theSupervisor, const std::string& fsmName);
+	static bool haltIterator(Iterator*               iterator,
+	                         IteratorWorkLoopStruct* iteratorStruct = 0);  //(GatewaySupervisor* theSupervisor, const std::string& fsmName);
 
 	std::mutex    accessMutex_;
 	volatile bool workloopRunning_;
@@ -110,8 +104,8 @@ class Iterator
 	    commandHalt_;  // commands are set by
 	                   // supervisor thread, and
 	                   // cleared by iterator thread
-	std::string           activePlanName_, lastStartedPlanName_, lastFinishedPlanName_;
-	volatile unsigned int activeCommandIndex_, activeCommandIteration_;
+	std::string               activePlanName_, lastStartedPlanName_, lastFinishedPlanName_;
+	volatile unsigned int     activeCommandIndex_, activeCommandIteration_;
 	std::vector<unsigned int> depthIterationStack_;
 	volatile time_t           activeCommandStartTime_;
 	std::string               lastFsmName_;
@@ -120,9 +114,7 @@ class Iterator
 	GatewaySupervisor* theSupervisor_;
 
 	template<class T>  // defined in included .icc source
-	static void helpCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct,
-	                                    const T&                setValue,
-	                                    bool                    doTrackGroupChanges);
+	static void helpCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct, const T& setValue, bool doTrackGroupChanges);
 };
 
 #include "otsdaq/GatewaySupervisor/Iterator.icc"  //for template definitions

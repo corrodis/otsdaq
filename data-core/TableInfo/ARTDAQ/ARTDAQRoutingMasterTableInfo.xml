@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
+		<TABLE Name="ARTDAQRoutingMasterTable">
+			<VIEW Name="ARTDAQ_ROUTING_MASTER_TABLE" Type="File,Database,DatabaseTest" Description="No%20description.">
+				<COLUMN Type="GroupID-RoutingMasters" 	 Name="RoutingMasterGroupID" 	 StorageName="ROUTING_MASTER_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="UID" 	 Name="RoutingMasterUID" 	 StorageName="ROUTING_MASTER_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="ExecutionHostname" 	 StorageName="EXECUTION_HOSTNAME" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-subsystem" 	 Name="SubsystemLink" 	 StorageName="SUBSYSTEM_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQSubsystemTable"/>
+				<COLUMN Type="ChildLinkUID-subsystem" 	 Name="SubsystemLinkUID" 	 StorageName="SUBSYSTEM_LINK_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="FixedChoiceData" 	 Name="routingPolicyPluginType" 	 StorageName="ROUTING_POLICY_PLUGIN_TYPE" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,NoOp,RoundRobin,CapacityTest"/>
+				<COLUMN Type="Data" 	 Name="tableUpdateIntervalMs" 	 StorageName="TABLE_UPDATE_INTERVAL_MS" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="tableAckRetryCount" 	 StorageName="TABLE_ACK_RETRY_COUNT" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-policyParameters" 	 Name="routingPolicyParametersLink" 	 StorageName="POLICY_PARAMETERS_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQDaqParameterTable"/>
+				<COLUMN Type="ChildLinkGroupID-policyParameters" 	 Name="routingPolicyParametersLinkGroupID" 	 StorageName="POLICY_PARAMETERS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-metrics" 	 Name="daqMetricsLink" 	 StorageName="DAQ_METRICS_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQMetricTable"/>
+				<COLUMN Type="ChildLinkGroupID-metrics" 	 Name="daqMetricsLinkGroupID" 	 StorageName="DAQ_METRICS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
+			</VIEW>
+		</TABLE>
+	</ROOT>

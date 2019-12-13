@@ -17,9 +17,7 @@ void SystemMessenger::addSystemMessage(std::string targetUser, std::string msg)
 	// for(uint64_t i=0;i<sysMsgTargetUser_.size();++i)
 	// if(sysMsgTargetUser_[i] == targetUser && sysMsgMessage_[i] == msg) return;
 	// reject only if last message
-	if(sysMsgTargetUser_.size() &&
-	   sysMsgTargetUser_[sysMsgTargetUser_.size() - 1] == targetUser &&
-	   sysMsgMessage_[sysMsgTargetUser_.size() - 1] == msg)
+	if(sysMsgTargetUser_.size() && sysMsgTargetUser_[sysMsgTargetUser_.size() - 1] == targetUser && sysMsgMessage_[sysMsgTargetUser_.size() - 1] == msg)
 		return;
 
 	sysMsgSetLock(true);  // set lock
@@ -29,9 +27,7 @@ void SystemMessenger::addSystemMessage(std::string targetUser, std::string msg)
 	sysMsgDelivered_.push_back(false);
 	sysMsgSetLock(false);  // unset lock
 
-	std::cout << __COUT_HDR_FL__
-	          << "Current System Messages: " << sysMsgTargetUser_.size() << std::endl
-	          << std::endl;
+	std::cout << __COUT_HDR_FL__ << "Current System Messages: " << sysMsgTargetUser_.size() << std::endl << std::endl;
 }
 
 //========================================================================================================================

@@ -18,13 +18,6 @@ class ARTDAQDataLoggerTable : public ARTDAQTableBase
 
 	// Methods
 	void init(ConfigurationManager* configManager);
-	void outputFHICL(ConfigurationManager*    configManager,
-	                 const ConfigurationTree& builderNode,
-	                 unsigned int             selfRank,
-	                 std::string              selfHost,
-	                 unsigned int             selfPort,
-	                 const XDAQContextTable*  contextConfig,
-	                 size_t                   maxFragmentSizeBytes);
 };
 }  // namespace ots
 #endif

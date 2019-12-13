@@ -7,13 +7,15 @@
 #include <iostream>  //for cout
 #include <sstream>   //for stringstream, std::stringbuf
 
+#define TRACEMF_USE_VERBATIM 1 //for trace longer path filenames
 #include "tracemf.h"
 
 // take filename only after srcs/ (this gives by repo name)
-#define __SHORTFILE__ 		(strstr(&__FILE__[0], "/srcs/") ? strstr(&__FILE__[0], "/srcs/") + 6 : __FILE__)
+// use 'builtin' to try to define at compile time
+#define __SHORTFILE__ 		(__builtin_strstr(&__FILE__[0], "/srcs/") ? __builtin_strstr(&__FILE__[0], "/srcs/") + 6 : __FILE__)
 
 // take only file name
-#define __FILENAME__ 		(strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define __FILENAME__ 		(__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 
 #define __E__ 				std::endl
 
@@ -26,7 +28,7 @@
 //////// Use __MOUT__ for Message Facility use (easy to switch to cout for debugging):
 ////////
 
-#define __MF_SUBJECT__ "ots"  // default subject.. others can #undef and re-#define
+#define __MF_SUBJECT__ __FILENAME__  // default subject.. others can #undef and re-#define
 // Note: to turn off MF everywhere, just replace with std::cout here at __MF_TYPE__(X)!
 
 #define Q(X) #X
@@ -79,20 +81,20 @@
 
 //////// ==============================================================
 
-#define __SS__            	std::stringstream ss; ss << ":" << __MF_DECOR__ << ":" << __COUT_HDR_FL__
+#define __SS__            	std::stringstream ss; ss << ":" << __MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
 #define __SS_THROW__        { __COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); } //put in {}'s to prevent surprises, e.g. if ... else __SS_THROW__;
 #define __SS_ONLY_THROW__ 	throw std::runtime_error(ss.str())
 #define __SSV__(X) 			__SS__ << QUOTE(X) << " = " << X
 
 //////// ==============================================================
 // for configurable objects, add name to subject
-#define __CFG_MF_DECOR__		(__MF_SUBJECT__ + std::string(":") + theConfigurationRecordName_)
-#define __CFG_MF_TYPE__(X) 		TLOG(X, __CFG_MF_DECOR__)
+#define __CFG_MF_DECOR__		(theConfigurationRecordName_ + "\t<> ")
+#define __CFG_MF_TYPE__(X) 		TLOG(X, __MF_SUBJECT__) << __CFG_MF_DECOR__
 
 #ifndef __COUT_TO_STD__
 #define __CFG_COUT_TYPE__(X) 	__CFG_MF_TYPE__(X)
 #else
-#define __CFG_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __CFG_MF_DECOR__ << ":" << __COUT_HDR_FL__
+#define __CFG_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __CFG_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
 #endif
 
 #define __CFG_MOUT_ERR__ 		__CFG_MF_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
@@ -112,19 +114,19 @@
 #define __CFG_MCOUT__(X)   		{ __CFG_MOUT__ 		<< X; __CFG_COUT__ 		<< X; }
 #define __CFG_MCOUTV__(X) 		{ __CFG_MOUTV__(X); __CFG_COUTV__(X); }
 
-#define __CFG_SS__  			std::stringstream ss; ss << ":" << __CFG_MF_DECOR__ << ":" << __COUT_HDR_FL__
+#define __CFG_SS__  			std::stringstream ss; ss << ":" << __CFG_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
 #define __CFG_SS_THROW__        { __CFG_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 //////// ==============================================================
 
 // for front-end interface objects, add name to subject
-#define __FE_MF_DECOR__			("FE:" + getInterfaceType() + std::string(":") + getInterfaceUID() + ":" + theConfigurationRecordName_)
-#define __FE_MF_TYPE__(X)      	TLOG(X, __FE_MF_DECOR__)
+#define __FE_MF_DECOR__			("FE:" + getInterfaceType() + std::string(":") + getInterfaceUID() + ":" + theConfigurationRecordName_ + "\t<> ")
+#define __FE_MF_TYPE__(X)      	TLOG(X, __MF_SUBJECT__) << __FE_MF_DECOR__
 
 #ifndef __COUT_TO_STD__
 #define __FE_COUT_TYPE__(X) 	__FE_MF_TYPE__(X)
 #else
-#define __FE_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __FE_MF_DECOR__ << ":" << __COUT_HDR_FL__
+#define __FE_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __FE_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
 #endif
 
 #define __FE_MOUT_ERR__ 		__FE_MF_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
@@ -144,30 +146,30 @@
 #define __FE_MCOUT__(X)   		{ __FE_MOUT__ 		<< X; __FE_COUT__ 		<< X; }
 #define __FE_MCOUTV__(X) 		{ __FE_MOUTV__(X); __FE_COUTV__(X); }
 
-#define __FE_SS__          		std::stringstream ss; ss << ":" << __FE_MF_DECOR__ << ":" << __COUT_HDR_FL__
+#define __FE_SS__          		std::stringstream ss; ss << ":" << __FE_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
 #define __FE_SS_THROW__         { __FE_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 //////// ==============================================================
 
 // for generic decoration override, just have mfSubject declared
-#define __GEN_MF_DECOR__		(mfSubject_)
-#define __GEN_MF_TYPE__(X) 		TLOG(X, __GEN_MF_DECOR__)
+#define __GEN_MF_DECOR__		(mfSubject_ + "\t<> ")
+#define __GEN_MF_TYPE__(X) 		TLOG(X, __MF_SUBJECT__) << __GEN_MF_DECOR__
 
 #ifndef __COUT_TO_STD__
 #define __GEN_COUT_TYPE__(X) 	__GEN_MF_TYPE__(X)
 #else
-#define __GEN_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __GEN_MF_DECOR__ << ":" << __COUT_HDR_FL__
+#define __GEN_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __GEN_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
 #endif
 
 #define __GEN_MOUT_ERR__ 		__GEN_MF_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
-#define __GEN_MOUT_WARN__ 		__GEN_MF_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
-#define __GEN_MOUT_INFO__ 		__GEN_MF_TYPE__(TLVL_INFO) 		<< __COUT_HDR__
+#define __GEN_MOUT_WARN__ 		__GEN_MF_TYPE__(TLVL_WARNING) 		<< __COUT_HDR__
+#define __GEN_MOUT_INFO__ 		__GEN_MF_TYPE__(TLVL_INFO) 			<< __COUT_HDR__
 #define __GEN_MOUT__ 			__GEN_MF_TYPE__(TLVL_DEBUG) 		<< __COUT_HDR__
 #define __GEN_MOUTV__(X) 		__GEN_MOUT__ << QUOTE(X) << " = " << X
-#define __GEN_COUT_ERR__ 		__GEN_COUT_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
+#define __GEN_COUT_ERR__ 		__GEN_COUT_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
 #define __GEN_COUT_WARN__ 		__GEN_COUT_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
 #define __GEN_COUT_INFO__ 		__GEN_COUT_TYPE__(TLVL_INFO) 		<< __COUT_HDR__
-#define __GEN_COUT__ 			__GEN_COUT_TYPE__(TLVL_DEBUG) 	<< __COUT_HDR__
+#define __GEN_COUT__ 			__GEN_COUT_TYPE__(TLVL_DEBUG) 		<< __COUT_HDR__
 #define __GEN_COUTV__(X) 		__GEN_COUT__ << QUOTE(X) << " = " << X << __E__
 
 #define __GEN_MCOUT_ERR__(X)   	{ __GEN_MOUT_ERR__ 	<< X; __GEN_COUT_ERR__ 	<< X; }
@@ -176,32 +178,32 @@
 #define __GEN_MCOUT__(X)   		{ __GEN_MOUT__ 		<< X; __GEN_COUT__ 		<< X; }
 #define __GEN_MCOUTV__(X) 		{ __GEN_MOUTV__(X); __GEN_COUTV__(X); }
 
-#define __GEN_SS__        		std::stringstream ss; ss << ":" << __GEN_MF_DECOR__ << ":" << __COUT_HDR_FL__
+#define __GEN_SS__        		std::stringstream ss; ss << ":" << __GEN_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
 #define __GEN_SS_THROW__        { __GEN_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 //////// ==============================================================
 
 // for core supervisor objects (with supervisorClassNoNamespace_ defined), add class to
 // subject
-#define __SUP_MF_DECOR__		(supervisorClassNoNamespace_ + std::string("-") + CorePropertySupervisorBase::getSupervisorUID())
-#define __SUP_MF_TYPE__(X)      TLOG(X, __SUP_MF_DECOR__) //mf::X(supervisorClassNoNamespace_ + "-" + CorePropertySupervisorBase::getSupervisorUID())
+#define __SUP_MF_DECOR__		(supervisorClassNoNamespace_ + std::string("-") + CorePropertySupervisorBase::getSupervisorUID() + "\t<> ")
+#define __SUP_MF_TYPE__(X)      TLOG(X, __MF_SUBJECT__) << __SUP_MF_DECOR__ //mf::X(supervisorClassNoNamespace_ + "-" + CorePropertySupervisorBase::getSupervisorUID())
 
 #ifndef __COUT_TO_STD__
 #define __SUP_COUT_TYPE__(X) 	__SUP_MF_TYPE__(X)
 #else
-#define __SUP_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __SUP_MF_DECOR__ << ":" << __COUT_HDR_FL__
+#define __SUP_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __SUP_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
 #endif
 
 #define __SUP_MOUT_ERR__ 		__SUP_MF_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
-#define __SUP_MOUT_WARN__ 		__SUP_MF_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
-#define __SUP_MOUT_INFO__ 		__SUP_MF_TYPE__(TLVL_INFO) 		<< __COUT_HDR__
+#define __SUP_MOUT_WARN__ 		__SUP_MF_TYPE__(TLVL_WARNING) 		<< __COUT_HDR__
+#define __SUP_MOUT_INFO__ 		__SUP_MF_TYPE__(TLVL_INFO) 			<< __COUT_HDR__
 #define __SUP_MOUT__ 			__SUP_MF_TYPE__(TLVL_DEBUG) 		<< __COUT_HDR__
 #define __SUP_MOUTV__(X) 		__SUP_MOUT__ << QUOTE(X) << " = " << X
 
-#define __SUP_COUT_ERR__ 		__SUP_COUT_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
+#define __SUP_COUT_ERR__ 		__SUP_COUT_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
 #define __SUP_COUT_WARN__ 		__SUP_COUT_TYPE__(TLVL_WARNING) 	<< __COUT_HDR__
 #define __SUP_COUT_INFO__ 		__SUP_COUT_TYPE__(TLVL_INFO) 		<< __COUT_HDR__
-#define __SUP_COUT__ 			__SUP_COUT_TYPE__(TLVL_DEBUG) 	<< __COUT_HDR__
+#define __SUP_COUT__ 			__SUP_COUT_TYPE__(TLVL_DEBUG) 		<< __COUT_HDR__
 #define __SUP_COUTV__(X) 		__SUP_COUT__ << QUOTE(X) << " = " << X << __E__
 
 #define __SUP_MCOUT_ERR__(X)   	{ __SUP_MOUT_ERR__ << X; __SUP_COUT_ERR__ << X; }
@@ -210,7 +212,7 @@
 #define __SUP_MCOUT__(X)   		{ __SUP_MOUT__ << X; __SUP_COUT__ << X; }
 #define __SUP_MCOUTV__(X) 		{ __SUP_MOUTV__(X); __SUP_COUTV__(X); }
 
-#define __SUP_SS__              std::stringstream ss; ss << ":" << __SUP_MF_DECOR__ << ":" << __COUT_HDR_FL__
+#define __SUP_SS__              std::stringstream ss; ss << ":" << __SUP_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
 #define __SUP_SS_THROW__        { __SUP_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 #define __ENV__(X) 				StringMacros::otsGetEnvironmentVarable(X, std::string(__SHORTFILE__), __LINE__)

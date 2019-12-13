@@ -10,19 +10,8 @@
 
 using namespace ots;
 
-#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
-#define ARTDAQ_FILE_PREAMBLE "dispatcher"
-
-// helpers
-#define OUT out << tabStr << commentStr
-#define PUSHTAB tabStr += "\t"
-#define POPTAB tabStr.resize(tabStr.size() - 1)
-#define PUSHCOMMENT commentStr += "# "
-#define POPCOMMENT commentStr.resize(commentStr.size() - 2)
-
 //========================================================================================================================
-ARTDAQDispatcherTable::ARTDAQDispatcherTable(void)
-    : ARTDAQTableBase("ARTDAQDispatcherTable")
+ARTDAQDispatcherTable::ARTDAQDispatcherTable(void) : ARTDAQTableBase("ARTDAQDispatcherTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -35,64 +24,33 @@ ARTDAQDispatcherTable::~ARTDAQDispatcherTable(void) {}
 //========================================================================================================================
 void ARTDAQDispatcherTable::init(ConfigurationManager* configManager)
 {
-	//	// use isFirstAppInContext to only run once per context, for example to avoid
-	//	//	generating files on local disk multiple times.
-	//	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
-	//
-	//	//__COUTV__(isFirstAppInContext);
-	//	if(!isFirstAppInContext)
-	//		return;
-	//
-	//	// make directory just in case
-	//	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
-	//
-	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	//	__COUT__ << configManager->__SELF_NODE__ << std::endl;
-	//
-	//	const XDAQContextTable* contextConfig =
-	//	    configManager->__GET_CONFIG__(XDAQContextTable);
-	//	std::vector<const XDAQContextTable::XDAQContext*> dispContexts =
-	//	    contextConfig->getDispatcherContexts();
-	//
-	//	// for each dispatcher context
-	//	//	output associated fcl config file
-	//	for(auto& dispContext : dispContexts)
-	//	{
-	//		ConfigurationTree dispConfigNode = contextConfig->getSupervisorConfigNode(
-	//		    configManager,
-	//		    dispContext->contextUID_,
-	//		    dispContext->applications_[0].applicationUID_);
-	//
-	//		__COUT__ << "Path for this dispatcher config is " << dispContext->contextUID_
-	//		         << "/" << dispContext->applications_[0].applicationUID_ << "/"
-	//		         << dispConfigNode.getValueAsString() << std::endl;
-	//
-	//		outputFHICL(
-	//		    configManager,
-	//		    dispConfigNode,
-	//		    contextConfig->getARTDAQAppRank(dispContext->contextUID_),
-	//		    contextConfig->getContextAddress(dispContext->contextUID_),
-	//		    contextConfig->getARTDAQDataPort(configManager, dispContext->contextUID_),
-	//		    contextConfig, 0);
-	//	}
-}  // end init()
+	// use isFirstAppInContext to only run once per context, for example to avoid
+	//	generating files on local disk multiple times.
+	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
 
-////========================================================================================================================
-// void ARTDAQDispatcherTable::outputFHICL(ConfigurationManager*    configManager,
-//                                        const ConfigurationTree& dispatcherNode,
-//                                        unsigned int             selfRank,
-//										const std::string&       selfHost,
-//                                        unsigned int             selfPort,
-//                                        const XDAQContextTable*  contextConfig,
-//                                        size_t                   maxFragmentSizeBytes)
-//{
-//	ARTDAQTableBase::outputDataReceiverFHICL(configManager,
-//	                        dispatcherNode,
-//	                        selfRank,
-//	                        selfHost,
-//	                        selfPort,
-//	                        DataReceiverAppType::Dispatcher,
-//	                        maxFragmentSizeBytes);
-//} //end outputFHICL()
+	//__COUTV__(isFirstAppInContext);
+	if(!isFirstAppInContext)
+		return;
+
+	// make directory just in case
+	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH).c_str(), 0755);
+
+	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	//	__COUT__ << configManager->__SELF_NODE__ << __E__;
+
+	// handle fcl file generation, wherever the level of this table
+
+	auto dispatchers = configManager->__SELF_NODE__.getChildren(
+	    /*default filterMap*/ std::map<std::string /*relative-path*/, std::string /*value*/>(),
+	    /*default byPriority*/ false,
+	    /*TRUE! onlyStatusTrue*/ true);
+
+	for(auto& dispatcher : dispatchers)
+	{
+		ARTDAQTableBase::outputDataReceiverFHICL(dispatcher.second, ARTDAQTableBase::ARTDAQAppType::Dispatcher);
+		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::Dispatcher, dispatcher.second.getValue());
+	}
+
+}  // end init()
 
 DEFINE_OTS_TABLE(ARTDAQDispatcherTable)

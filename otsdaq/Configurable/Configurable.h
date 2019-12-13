@@ -8,8 +8,7 @@ namespace ots
 class Configurable
 {
   public:
-	Configurable(const ConfigurationTree& theXDAQContextConfigTree,
-	             const std::string&       theConfigurationPath);
+	Configurable(const ConfigurationTree& theXDAQContextConfigTree, const std::string& theConfigurationPath);
 	virtual ~Configurable();
 
 	ConfigurationTree           getSelfNode() const;

@@ -24,10 +24,7 @@ class DesktopIconTable : public TableBase
 		                                         // pairs separated by ',' '&' or '|'
 	};
 
-	const std::vector<DesktopIconTable::DesktopIcon>& getAllDesktopIcons() const
-	{
-		return activeDesktopIcons_;
-	}  // activeDesktopIcons_ is setup in init
+	const std::vector<DesktopIconTable::DesktopIcon>& getAllDesktopIcons() const { return activeDesktopIcons_; }  // activeDesktopIcons_ is setup in init
 
 	static const std::string COL_NAME;
 	static const std::string COL_STATUS;
@@ -53,12 +50,9 @@ class DesktopIconTable : public TableBase
 	static const std::string COL_APP_ID;
 
   private:
-	std::string removeCommas(const std::string& str,
-	                         bool               andHexReplace  = false,
-	                         bool               andHTMLReplace = false);
+	std::string removeCommas(const std::string& str, bool andHexReplace = false, bool andHTMLReplace = false);
 
-	std::vector<DesktopIconTable::DesktopIcon>
-	    activeDesktopIcons_;  // only icons with status=true
+	std::vector<DesktopIconTable::DesktopIcon> activeDesktopIcons_;  // only icons with status=true
 };
 }  // namespace ots
 #endif

@@ -31,8 +31,10 @@ class ConfigurationManager
 
 	static const std::string XDAQ_CONTEXT_TABLE_NAME;
 	static const std::string XDAQ_APPLICATION_TABLE_NAME;
+	static const std::string XDAQ_APP_PROPERTY_TABLE_NAME;
 	static const std::string GROUP_ALIASES_TABLE_NAME;
 	static const std::string VERSION_ALIASES_TABLE_NAME;
+	static const std::string ARTDAQ_TOP_TABLE_NAME;
 
 	static const std::string ACTIVE_GROUP_NAME_CONTEXT;
 	static const std::string ACTIVE_GROUP_NAME_BACKBONE;
@@ -45,11 +47,12 @@ class ConfigurationManager
 	static const uint8_t METADATA_COL_AUTHOR;
 	static const uint8_t METADATA_COL_TIMESTAMP;
 
-	static const std::set<std::string> contextMemberNames_;   // list of context members
-	static const std::set<std::string> backboneMemberNames_;  // list of backbone members
-	static const std::set<std::string> iterateMemberNames_;   // list of iterate members
+	static const std::set<std::string> contextMemberNames_;        // list of context members
+	static const std::set<std::string> backboneMemberNames_;       // list of backbone members
+	static const std::set<std::string> iterateMemberNames_;        // list of iterate members
+	std::set<std::string>              configurationMemberNames_;  // list of 'active' configuration members
 
-	enum
+	enum class GroupType
 	{
 		CONTEXT_TYPE,
 		BACKBONE_TYPE,
@@ -62,9 +65,10 @@ class ConfigurationManager
 	static const std::set<std::string>& getContextMemberNames		(void);
 	static const std::set<std::string>& getBackboneMemberNames		(void);
 	static const std::set<std::string>& getIterateMemberNames		(void);
+	const std::set<std::string>& 		getConfigurationMemberNames	(void);
 
-	static const std::string& 			convertGroupTypeIdToName	(int groupTypeId);
-	static int                			getTypeOfGroup				(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
+	static const std::string& 			convertGroupTypeToName		(const ConfigurationManager::GroupType& groupTypeId);
+	static ConfigurationManager::GroupType getTypeOfGroup			(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
 	static const std::string& 			getTypeNameOfGroup			(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap);
 
 	//==============================================================================
@@ -76,7 +80,7 @@ class ConfigurationManager
 	
 	
 
-	void 								init						(std::string* accumulatedErrors = 0, bool initForWriteAccess = false);
+	void 								init						(std::string* accumulatedErrors = 0, bool initForWriteAccess = false, std::string* accumulatedWarnings = 0);
 	void 								destroy						(void);
 	void 								destroyTableGroup			(const std::string& theGroup = "", bool onlyDeactivate = false);
 
@@ -126,8 +130,8 @@ class ConfigurationManager
 	const std::map<std::string /*groupType*/,
 		std::pair<std::string /*groupName*/,
 		TableGroupKey>>& 				getFailedTableGroups		(void) const {return lastFailedGroupLoad_;}
-	const std::string& 					getActiveGroupName			(const std::string& type = "") const;
-	TableGroupKey      					getActiveGroupKey			(const std::string& type = "") const;
+	const std::string& 					getActiveGroupName			(const ConfigurationManager::GroupType& type = ConfigurationManager::GroupType::CONFIGURATION_TYPE) const;
+	TableGroupKey      					getActiveGroupKey			(const ConfigurationManager::GroupType& type = ConfigurationManager::GroupType::CONFIGURATION_TYPE) const;
 
 	ConfigurationTree 					getNode						(const std::string& nodeString, bool doNotThrowOnBrokenUIDLinks = false) const;  //"root/parent/parent/"
 	ConfigurationTree 					getContextNode				(const std::string& contextUID, const std::string& applicationUID) const;
@@ -147,7 +151,7 @@ class ConfigurationManager
 	//==============================================================================
 	// Setters/Modifiers
 	std::shared_ptr<TableGroupKey> 		makeTheTableGroupKey		(TableGroupKey key);
-	void                           		restoreActiveTableGroups	(bool throwErrors = false, const std::string& pathToActiveGroupsFile = "", bool onlyLoadIfBackboneOrContext = false);
+	void                           		restoreActiveTableGroups	(bool throwErrors = false, const std::string& pathToActiveGroupsFile = "", bool onlyLoadIfBackboneOrContext = false, std::string* accumulatedWarnings = 0);
 
 	void 								setOwnerContext				(const std::string& contextUID) { ownerContextUID_ = contextUID; }
 	void 								setOwnerApp					(const std::string& appUID) { ownerAppUID_ = appUID; }

@@ -20,10 +20,7 @@ TimeFormatter::TimeFormatter(std::string source)
 	if(!USE_TIMER)
 		return;
 	origin_ = source;
-	std::cout << __COUT_HDR_FL__
-	          << "[TimeFormatter::TimeFormatter()]\t\t    Time counter started for "
-	          << origin_ << std::endl
-	          << std::endl;
+	std::cout << __COUT_HDR_FL__ << "[TimeFormatter::TimeFormatter()]\t\t    Time counter started for " << origin_ << std::endl << std::endl;
 	startTime_ = getImSecTime();
 }
 
@@ -35,9 +32,7 @@ void TimeFormatter::stopTimer(void)
 	endTime_     = getImSecTime();
 	double start = startTime_.tv_sec + startTime_.tv_usec / 1000000.;
 	double stop  = endTime_.tv_sec + endTime_.tv_usec / 1000000.;
-	std::cout << __COUT_HDR_FL__
-	          << "[TimeFormatter::stopTimer()]\t\t\t    Elapsed time: " << stop - start
-	          << " seconds for " << origin_ << std::endl
+	std::cout << __COUT_HDR_FL__ << "[TimeFormatter::stopTimer()]\t\t\t    Elapsed time: " << stop - start << " seconds for " << origin_ << std::endl
 	          << std::endl;
 }
 
@@ -82,8 +77,7 @@ std::string getmSecTime(void)
 	struct timeval msecTime;
 	gettimeofday(&msecTime, (struct timezone*)0);
 
-	sprintf(
-	    theDate, "%d-%d", (unsigned int)msecTime.tv_sec, (unsigned int)msecTime.tv_usec);
+	sprintf(theDate, "%d-%d", (unsigned int)msecTime.tv_sec, (unsigned int)msecTime.tv_usec);
 	return std::string(theDate);
 }
 

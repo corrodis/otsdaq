@@ -9,8 +9,7 @@
 
 using namespace ots;
 
-#define CODE_EDITOR_DATA_PATH \
-	std::string(__ENV__("SERVICE_DATA_PATH")) + "/" + "CodeEditorData"
+#define CODE_EDITOR_DATA_PATH std::string(__ENV__("SERVICE_DATA_PATH")) + "/" + "CodeEditorData"
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "CodeEditor"
@@ -25,15 +24,13 @@ const std::string CodeEditor::SPECIAL_TYPE_OutputData        = "OutputData";
 
 const std::string CodeEditor::SOURCE_BASE_PATH = std::string(__ENV__("MRB_SOURCE")) + "/";
 const std::string CodeEditor::USER_DATA_PATH   = std::string(__ENV__("USER_DATA")) + "/";
-const std::string CodeEditor::OTSDAQ_DATA_PATH =
-    std::string(__ENV__("OTSDAQ_DATA")) + "/";
+const std::string CodeEditor::OTSDAQ_DATA_PATH = std::string(__ENV__("OTSDAQ_DATA")) + "/";
 
 //========================================================================================================================
 // CodeEditor
 CodeEditor::CodeEditor()
-    : ALLOWED_FILE_EXTENSIONS_({"h",   "hh",  "hpp", "hxx", "c",   "cc",  "cpp",
-                                "cxx", "icc", "dat", "txt", "sh",  "css", "html",
-                                "htm", "js",  "py",  "fcl", "xml", "cfg"})
+    : ALLOWED_FILE_EXTENSIONS_(
+          {"h", "hh", "hpp", "hxx", "c", "cc", "cpp", "cxx", "icc", "dat", "txt", "sh", "css", "html", "htm", "js", "py", "fcl", "xml", "cfg"})
 {
 	std::string path = CODE_EDITOR_DATA_PATH;
 	DIR*        dir  = opendir(path.c_str());
@@ -51,11 +48,7 @@ CodeEditor::CodeEditor()
 //========================================================================================================================
 // xmlRequest
 //	all requests are handled here
-void CodeEditor::xmlRequest(const std::string& option,
-                            bool               readOnlyMode,
-                            cgicc::Cgicc&      cgiIn,
-                            HttpXmlDocument*   xmlOut,
-                            const std::string& username) try
+void CodeEditor::xmlRequest(const std::string& option, bool readOnlyMode, cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::string& username) try
 {
 	__COUTV__(option);
 
@@ -87,9 +80,7 @@ void CodeEditor::xmlRequest(const std::string& option,
 	}
 	else if(option == "getAllowedExtensions")
 	{
-		xmlOut->addTextElementToData(
-		    "AllowedExtensions",
-		    StringMacros::setToString(ALLOWED_FILE_EXTENSIONS_, ","));
+		xmlOut->addTextElementToData("AllowedExtensions", StringMacros::setToString(ALLOWED_FILE_EXTENSIONS_, ","));
 	}
 	else
 	{
@@ -99,14 +90,12 @@ void CodeEditor::xmlRequest(const std::string& option,
 }
 catch(const std::runtime_error& e)
 {
-	__SS__ << "Error encountered while handling the Code Editor request option '"
-	       << option << "': " << e.what() << __E__;
+	__SS__ << "Error encountered while handling the Code Editor request option '" << option << "': " << e.what() << __E__;
 	xmlOut->addTextElementToData("Error", ss.str());
 }
 catch(...)
 {
-	__SS__ << "Unknown error encountered while handling the Code Editor request option '"
-	       << option << "!'" << __E__;
+	__SS__ << "Unknown error encountered while handling the Code Editor request option '" << option << "!'" << __E__;
 	xmlOut->addTextElementToData("Error", ss.str());
 }  // end xmlRequest()
 
@@ -118,8 +107,7 @@ std::string CodeEditor::safePathString(const std::string& path)
 	// remove all non ascii and non /, -, _,, space
 	std::string fullpath = "";
 	for(unsigned int i = 0; i < path.length(); ++i)
-		if((path[i] >= 'a' && path[i] <= 'z') || (path[i] >= 'A' && path[i] <= 'Z') ||
-		   path[i] >= '_' || path[i] >= '-' || path[i] >= ' ' || path[i] >= '/')
+		if((path[i] >= 'a' && path[i] <= 'z') || (path[i] >= 'A' && path[i] <= 'Z') || path[i] >= '_' || path[i] >= '-' || path[i] >= ' ' || path[i] >= '/')
 			fullpath += path[i];
 	//__COUTV__(fullpath);
 	if(!fullpath.length())
@@ -148,15 +136,13 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 			retExt += extension[i] + 32;  // make lowercase
 		else if(i > 0 || extension[i] != '.')
 		{
-			__SS__ << "Invalid extension non-alpha " << int(extension[i]) << " found!"
-			       << __E__;
+			__SS__ << "Invalid extension non-alpha " << int(extension[i]) << " found!" << __E__;
 			__SS_ONLY_THROW__;
 		}
 
 	//__COUTV__(retExt);
 
-	if(ALLOWED_FILE_EXTENSIONS_.find(
-	       retExt) ==  // should match get directory content restrictions
+	if(ALLOWED_FILE_EXTENSIONS_.find(retExt) ==  // should match get directory content restrictions
 	   ALLOWED_FILE_EXTENSIONS_.end())
 	{
 		__SS__ << "Invalid extension '" << retExt << "' found!" << __E__;
@@ -215,9 +201,7 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 				return;
 			}
 
-			std::map<std::string /*special type*/,
-			         std::set<std::string> /*special file paths*/>
-			    retMap = CodeEditor::getSpecialsMap();
+			std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/> retMap = CodeEditor::getSpecialsMap();
 			if(retMap.find(specialTypes[i]) != retMap.end())
 			{
 				for(const auto& specialTypeFile : retMap[specialTypes[i]])
@@ -227,8 +211,7 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 			}
 			else
 			{
-				__SS__ << "No files for type '" << specialTypeNames[i] << "' were found."
-				       << __E__;
+				__SS__ << "No files for type '" << specialTypeNames[i] << "' were found." << __E__;
 				__SS_THROW__;
 			}
 			return;
@@ -241,16 +224,10 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 
 	std::string contents;
 	size_t      i;
-	if((i = path.find("$USER_DATA/")) == 0 ||
-	   (i == 1 && path[0] == '/'))  // if leading / or without
-		getPathContent(CodeEditor::USER_DATA_PATH,
-		               path.substr(std::string("/$USER_DATA/").size()),
-		               xmlOut);
-	else if((i = path.find("$OTSDAQ_DATA/")) == 0 ||
-	        (i == 1 && path[0] == '/'))  // if leading / or without
-		getPathContent(CodeEditor::OTSDAQ_DATA_PATH,
-		               path.substr(std::string("/$OTSDAQ_DATA/").size()),
-		               xmlOut);
+	if((i = path.find("$USER_DATA/")) == 0 || (i == 1 && path[0] == '/'))  // if leading / or without
+		getPathContent(CodeEditor::USER_DATA_PATH, path.substr(std::string("/$USER_DATA/").size()), xmlOut);
+	else if((i = path.find("$OTSDAQ_DATA/")) == 0 || (i == 1 && path[0] == '/'))  // if leading / or without
+		getPathContent(CodeEditor::OTSDAQ_DATA_PATH, path.substr(std::string("/$OTSDAQ_DATA/").size()), xmlOut);
 	else
 		getPathContent(CodeEditor::SOURCE_BASE_PATH, path, xmlOut);
 
@@ -258,9 +235,7 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 
 //========================================================================================================================
 // getPathContent
-void CodeEditor::getPathContent(const std::string& basepath,
-                                const std::string& path,
-                                HttpXmlDocument*   xmlOut)
+void CodeEditor::getPathContent(const std::string& basepath, const std::string& path, HttpXmlDocument* xmlOut)
 {
 	DIR*           pDIR;
 	struct dirent* entry;
@@ -307,12 +282,11 @@ void CodeEditor::getPathContent(const std::string& basepath,
 
 		//__COUT__ << type << " " << name << "\n" << std::endl;
 
-		if(name[0] != '.' &&
-		   (type == 0 ||  // 0 == UNKNOWN (which can happen - seen in SL7 VM)
-		    type == 4 ||  // directory type
-		    type == 8 ||  // file type
-		    type == 10    // 10 == link (could be directory or file, treat as unknown)
-		    ))
+		if(name[0] != '.' && (type == 0 ||  // 0 == UNKNOWN (which can happen - seen in SL7 VM)
+		                      type == 4 ||  // directory type
+		                      type == 8 ||  // file type
+		                      type == 10    // 10 == link (could be directory or file, treat as unknown)
+		                      ))
 		{
 			isDir = false;
 
@@ -356,8 +330,7 @@ void CodeEditor::getPathContent(const std::string& basepath,
 				}
 				catch(...)
 				{
-					__COUT__ << "Invalid file extension, skipping '" << name << "' ..."
-					         << __E__;
+					__COUT__ << "Invalid file extension, skipping '" << name << "' ..." << __E__;
 				}
 			}
 		}
@@ -392,22 +365,14 @@ void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 
 	std::string contents;
 	size_t      i;
-	if((i = path.find("$USER_DATA/")) == 0 ||
-	   (i == 1 && path[0] == '/'))  // if leading / or without
-		CodeEditor::readFile(CodeEditor::USER_DATA_PATH,
-		                     path.substr(i + std::string("$USER_DATA/").size()) +
-		                         (extension.size() ? "." : "") + extension,
-		                     contents);
-	else if((i = path.find("$OTSDAQ_DATA/")) == 0 ||
-	        (i == 1 && path[0] == '/'))  // if leading / or without
-		CodeEditor::readFile(CodeEditor::OTSDAQ_DATA_PATH,
-		                     path.substr(std::string("/$OTSDAQ_DATA/").size()) +
-		                         (extension.size() ? "." : "") + extension,
-		                     contents);
+	if((i = path.find("$USER_DATA/")) == 0 || (i == 1 && path[0] == '/'))  // if leading / or without
+		CodeEditor::readFile(
+		    CodeEditor::USER_DATA_PATH, path.substr(i + std::string("$USER_DATA/").size()) + (extension.size() ? "." : "") + extension, contents);
+	else if((i = path.find("$OTSDAQ_DATA/")) == 0 || (i == 1 && path[0] == '/'))  // if leading / or without
+		CodeEditor::readFile(
+		    CodeEditor::OTSDAQ_DATA_PATH, path.substr(std::string("/$OTSDAQ_DATA/").size()) + (extension.size() ? "." : "") + extension, contents);
 	else
-		CodeEditor::readFile(CodeEditor::SOURCE_BASE_PATH,
-		                     path + (extension.size() ? "." : "") + extension,
-		                     contents);
+		CodeEditor::readFile(CodeEditor::SOURCE_BASE_PATH, path + (extension.size() ? "." : "") + extension, contents);
 
 	xmlOut->addTextElementToData("content", contents);
 
@@ -415,9 +380,7 @@ void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 
 //========================================================================================================================
 // readFile
-void CodeEditor::readFile(const std::string& basepath,
-                          const std::string& path,
-                          std::string&       contents)
+void CodeEditor::readFile(const std::string& basepath, const std::string& path, std::string& contents)
 {
 	std::string fullpath = basepath + "/" + path;
 	__COUTV__(fullpath);
@@ -492,8 +455,7 @@ void CodeEditor::writeFile(const std::string&        basepath,
 		fp                  = fopen(logpath.c_str(), "a");
 		if(!fp)
 		{
-			__SS__ << "Could not open change log for change tracking at " << logpath
-			       << __E__;
+			__SS__ << "Could not open change log for change tracking at " << logpath << __E__;
 			__SS_THROW__;
 		}
 		fprintf(fp,
@@ -512,9 +474,7 @@ void CodeEditor::writeFile(const std::string&        basepath,
 
 //========================================================================================================================
 // saveFileContent
-void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
-                                 HttpXmlDocument*   xmlOut,
-                                 const std::string& username)
+void CodeEditor::saveFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::string& username)
 {
 	std::string path = CgiDataUtilities::getData(cgiIn, "path");
 	path             = safePathString(StringMacros::decodeURIComponent(path));
@@ -527,26 +487,22 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 	if(path.length() > 1 && path[1] == '/')
 		pathMatchPrepend += '/';
 
-	__COUTV__(path);
-	__COUTV__(pathMatchPrepend);
+	//__COUTV__(path);
+	//__COUTV__(pathMatchPrepend);
 
 	// fix path for special environment variables
-	if(path.substr(0, (pathMatchPrepend + "$USER_DATA/").size()) ==
-	   pathMatchPrepend + "$USER_DATA/")
+	if(path.substr(0, (pathMatchPrepend + "$USER_DATA/").size()) == pathMatchPrepend + "$USER_DATA/")
 	{
 		basepath = "/";
-		path     = CodeEditor::USER_DATA_PATH + "/" +
-		       path.substr((pathMatchPrepend + "$USER_DATA/").size());
+		path     = CodeEditor::USER_DATA_PATH + "/" + path.substr((pathMatchPrepend + "$USER_DATA/").size());
 	}
-	else if(path.substr(0, (pathMatchPrepend + "$OTSDAQ_DATA/").size()) ==
-	        pathMatchPrepend + "$OTSDAQ_DATA/")
+	else if(path.substr(0, (pathMatchPrepend + "$OTSDAQ_DATA/").size()) == pathMatchPrepend + "$OTSDAQ_DATA/")
 	{
 		basepath = "/";
-		path     = CodeEditor::OTSDAQ_DATA_PATH + "/" +
-		       path.substr((pathMatchPrepend + "$OTSDAQ_DATA/").size());
+		path     = CodeEditor::OTSDAQ_DATA_PATH + "/" + path.substr((pathMatchPrepend + "$OTSDAQ_DATA/").size());
 	}
-	__COUTV__(path);
-	__COUTV__(basepath);
+	//__COUTV__(path);
+	//__COUTV__(basepath);
 
 	std::string extension = CgiDataUtilities::getData(cgiIn, "ext");
 	if(!(path.length() > 4 && path.substr(path.length() - 4) == "/ots"))
@@ -557,22 +513,18 @@ void CodeEditor::saveFileContent(cgicc::Cgicc&      cgiIn,
 	//__COUTV__(contents);
 	contents = StringMacros::decodeURIComponent(contents);
 
-	CodeEditor::writeFile(
-	    basepath, path + (extension.size() ? "." : "") + extension, contents, username);
+	CodeEditor::writeFile(basepath, path + (extension.size() ? "." : "") + extension, contents, username);
 
 }  // end saveFileContent
 
 //========================================================================================================================
 // build
 //	cleanBuild and incrementalBuild
-void CodeEditor::build(cgicc::Cgicc&      cgiIn,
-                       HttpXmlDocument*   xmlOut,
-                       const std::string& username)
+void CodeEditor::build(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::string& username)
 {
 	bool clean = CgiDataUtilities::getDataAsInt(cgiIn, "clean") ? true : false;
 
-	__MCOUT_INFO__("Build (clean=" << clean << ") launched by '" << username << "'..."
-	                               << __E__);
+	__MCOUT_INFO__("Build (clean=" << clean << ") launched by '" << username << "'..." << __E__);
 
 	// launch as thread so it does not lock up rest of code
 	std::thread(
@@ -683,12 +635,10 @@ void CodeEditor::build(cgicc::Cgicc&      cgiIn,
 }  // end build()
 
 //========================================================================================================================
-std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/>
-CodeEditor::getSpecialsMap(void)
+std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/> CodeEditor::getSpecialsMap(void)
 {
-	std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/>
-	            retMap;
-	std::string path = std::string(__ENV__("MRB_SOURCE"));
+	std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/> retMap;
+	std::string                                                                          path = std::string(__ENV__("MRB_SOURCE"));
 
 	__COUTV__(path);
 
@@ -719,13 +669,9 @@ CodeEditor::getSpecialsMap(void)
 	// Note: can not do lambda recursive function if using auto to declare the function,
 	//	and must capture reference to the function. Also, must capture specialFolders
 	//	reference for use internally (const values already are captured).
-	std::function<void(
-	    const std::string&, const std::string&, const unsigned int, const int)>
-	    localRecurse = [&specialFolders, &specialMapTypes, &retMap, &localRecurse](
-	                       const std::string& path,
-	                       const std::string& offsetPath,
-	                       const unsigned int depth,
-	                       const int          specialIndex) {
+	std::function<void(const std::string&, const std::string&, const unsigned int, const int)> localRecurse =
+	    [&specialFolders, &specialMapTypes, &retMap, &localRecurse](
+	        const std::string& path, const std::string& offsetPath, const unsigned int depth, const int specialIndex) {
 
 		    //__COUTV__(path);
 		    //__COUTV__(depth);
@@ -735,8 +681,7 @@ CodeEditor::getSpecialsMap(void)
 		    bool           isDir;
 		    if(!(pDIR = opendir(path.c_str())))
 		    {
-			    __SS__ << "Plugin base path '" << path << "' could not be opened!"
-			           << __E__;
+			    __SS__ << "Plugin base path '" << path << "' could not be opened!" << __E__;
 			    __SS_THROW__;
 		    }
 
@@ -751,9 +696,8 @@ CodeEditor::getSpecialsMap(void)
 
 			    //__COUT__ << type << " " << name << "\n" << std::endl;
 
-			    if(name[0] != '.' &&
-			       (type == 0 ||  // 0 == UNKNOWN (which can happen - seen in SL7 VM)
-			        type == 4 || type == 8))
+			    if(name[0] != '.' && (type == 0 ||  // 0 == UNKNOWN (which can happen - seen in SL7 VM)
+			                          type == 4 || type == 8))
 			    {
 				    isDir = false;
 
@@ -792,28 +736,21 @@ CodeEditor::getSpecialsMap(void)
 
 					    // recurse deeper!
 					    if(depth < 4)  // limit search depth
-						    localRecurse(path + "/" + name,
-						                 offsetPath + "/" + name,
-						                 depth + 1,
-						                 childSpecialIndex);
+						    localRecurse(path + "/" + name, offsetPath + "/" + name, depth + 1, childSpecialIndex);
 				    }
 				    else if(specialIndex >= 0)
 				    {
 					    // get special files!!
 
-					    if(name.find(".h") == name.length() - 2 ||
-					       name.find(".cc") == name.length() - 3 ||
-					       name.find(".txt") == name.length() - 4 ||
-					       name.find(".sh") == name.length() - 3 ||
-					       name.find(".py") == name.length() - 3)
+					    if(name.find(".h") == name.length() - 2 || name.find(".cc") == name.length() - 3 || name.find(".txt") == name.length() - 4 ||
+					       name.find(".sh") == name.length() - 3 || name.find(".py") == name.length() - 3)
 					    {
 						    //__COUT__ << "Found special '" <<
 						    // specialFolders[specialIndex] <<
 						    //		"' file '" << name << "' at path " <<
 						    //		path << " " << specialIndex << __E__;
 
-						    retMap[specialMapTypes[specialIndex]].emplace(offsetPath +
-						                                                  "/" + name);
+						    retMap[specialMapTypes[specialIndex]].emplace(offsetPath + "/" + name);
 					    }
 				    }
 			    }
@@ -821,7 +758,7 @@ CodeEditor::getSpecialsMap(void)
 
 		    closedir(pDIR);
 
-	    };  //end localRecurse() definition
+	    };  // end localRecurse() definition
 
 	// start recursive traversal to find special folders
 	localRecurse(path, "" /*offsetPath*/, 0 /*depth*/, -1 /*specialIndex*/);

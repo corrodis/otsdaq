@@ -76,8 +76,7 @@ DatabaseConfigurationInterface::DatabaseConfigurationInterface()
 //==============================================================================
 // read configuration from database
 // version = -1 means latest version
-void DatabaseConfigurationInterface::fill(TableBase*   configuration,
-                                          TableVersion version) const
+void DatabaseConfigurationInterface::fill(TableBase* configuration, TableVersion version) const
 
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
@@ -87,8 +86,7 @@ void DatabaseConfigurationInterface::fill(TableBase*   configuration,
 	//__COUTV__(versionstring);
 	// configuration->getViewP()->setUniqueStorageIdentifier(storageUID);
 
-	auto result = ifc.template loadVersion<decltype(configuration), JsonData>(
-	    configuration, versionstring, default_entity);
+	auto result = ifc.template loadVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity);
 
 	if(result.first)
 	{
@@ -96,17 +94,15 @@ void DatabaseConfigurationInterface::fill(TableBase*   configuration,
 		configuration->getViewP()->setVersion(version);
 		return;
 	}
-	__SS__ << "\n\nDBI Error while filling '" << configuration->getTableName()
-	       << "' version '" << versionstring << "' - are you sure this version exists?\n"
+	__SS__ << "\n\nDBI Error while filling '" << configuration->getTableName() << "' version '" << versionstring << "' - are you sure this version exists?\n"
 	       << "Here is the error:\n\n"
 	       << result.second << __E__;
-	__SS_THROW__;
-}
+	__SS_ONLY_THROW__;
+}  // end fill()
 
 //==============================================================================
 // write configuration to database
-void DatabaseConfigurationInterface::saveActiveVersion(const TableBase* configuration,
-                                                       bool             overwrite) const
+void DatabaseConfigurationInterface::saveActiveVersion(const TableBase* configuration, bool overwrite) const
 
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
@@ -119,32 +115,28 @@ void DatabaseConfigurationInterface::saveActiveVersion(const TableBase* configur
 	// auto result =
 	//	ifc.template storeVersion<decltype(configuration), JsonData>(configuration,
 	// versionstring, default_entity);
-	auto result = overwrite
-	                  ? ifc.template overwriteVersion<decltype(configuration), JsonData>(
-	                        configuration, versionstring, default_entity)
-	                  : ifc.template storeVersion<decltype(configuration), JsonData>(
-	                        configuration, versionstring, default_entity);
+	auto result = overwrite ? ifc.template overwriteVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity)
+	                        : ifc.template storeVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity);
 
 	if(result.first)
 		return;
 
 	__SS__ << "DBI Error:" << result.second << __E__;
-	__COUT__ << "\n" << ss.str();
 	__SS_THROW__;
 }
 
 //==============================================================================
 // find the latest configuration version by configuration type
-TableVersion DatabaseConfigurationInterface::findLatestVersion(
-    const TableBase* table) const noexcept
+TableVersion DatabaseConfigurationInterface::findLatestVersion(const TableBase* table) const noexcept
 {
 	auto versions = getVersions(table);
 
-	__COUT__ << "Config Name: " << table->getTableName() << __E__;
-	__COUT__ << "All Versions: ";
+	__COUT__ << "Table Name: " << table->getTableName() << __E__;
+	__SS__ << "All Versions: ";
 	for(auto& v : versions)
-		std::cout << v << " ";
-	std::cout << __E__;
+		ss << v << " ";
+	ss << __E__;
+	__COUT__ << ss.str();
 
 	if(!versions.size())
 		return TableVersion();  // return INVALID
@@ -154,8 +146,7 @@ TableVersion DatabaseConfigurationInterface::findLatestVersion(
 
 //==============================================================================
 // find all configuration versions by configuration type
-std::set<TableVersion> DatabaseConfigurationInterface::getVersions(
-    const TableBase* table) const noexcept try
+std::set<TableVersion> DatabaseConfigurationInterface::getVersions(const TableBase* table) const noexcept try
 {
 	auto ifc    = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.template getVersions<decltype(table)>(table, default_entity);
@@ -187,8 +178,7 @@ catch(std::exception const& e)
 
 //==============================================================================
 // returns a list of all configuration names
-std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableNames() const
-    try
+std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableNames() const try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
@@ -210,7 +200,7 @@ catch(...)
 //==============================================================================
 // find all configuration groups in database
 std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableGroupNames(
-    const std::string& filterString) const try
+		 std::string const& filterString) const try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
@@ -227,23 +217,19 @@ std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableGroupN
 }
 catch(std::exception const& e)
 {
-	__SS__ << "Filter string '" << filterString << "' yielded DBI Exception:" << e.what()
-	       << "\n";
-	__COUT_ERR__ << ss.str();
+	__SS__ << "Filter string '" << filterString << "' yielded DBI Exception:" << e.what() << "\n";
 	__SS_THROW__;
 }
 catch(...)
 {
 	__SS__ << "Filter string '" << filterString << "' yielded DBI Unknown exception.\n";
-	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 
 //==============================================================================
 // find the latest configuration group key by group name
 // 	if not found, return invalid
-TableGroupKey DatabaseConfigurationInterface::findLatestGroupKey(
-    const std::string& groupName) const noexcept
+TableGroupKey DatabaseConfigurationInterface::findLatestGroupKey(const std::string& groupName) const noexcept
 {
 	std::set<TableGroupKey> keys = DatabaseConfigurationInterface::getKeys(groupName);
 	if(keys.size())  // if keys exist, bump the last
@@ -255,8 +241,7 @@ TableGroupKey DatabaseConfigurationInterface::findLatestGroupKey(
 
 //==============================================================================
 // find all configuration groups in database
-std::set<TableGroupKey /*key*/> DatabaseConfigurationInterface::getKeys(
-    const std::string& groupName) const
+std::set<TableGroupKey /*key*/> DatabaseConfigurationInterface::getKeys(const std::string& groupName) const
 {
 	std::set<TableGroupKey>        retSet;
 	std::set<std::string /*name*/> names = getAllTableGroupNames();
@@ -268,8 +253,7 @@ std::set<TableGroupKey /*key*/> DatabaseConfigurationInterface::getKeys(
 
 //==============================================================================
 // return the contents of a configuration group
-config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(
-    std::string const& tableGroup, bool includeMetaDataTable) const try
+config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(std::string const& tableGroup, bool includeMetaDataTable) const try
 {
 	auto ifc    = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.loadGlobalConfiguration(tableGroup);
@@ -281,9 +265,7 @@ config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(
 	auto to_map = [](auto const& inputList, bool includeMetaDataTable) {
 		auto resultMap = config_version_map_t{};
 
-		std::for_each(inputList.begin(), inputList.end(), [&resultMap](auto const& info) {
-			resultMap[info.configuration] = std::stol(info.version, 0, 10);
-		});
+		std::for_each(inputList.begin(), inputList.end(), [&resultMap](auto const& info) { resultMap[info.configuration] = std::stol(info.version, 0, 10); });
 
 		if(!includeMetaDataTable)
 		{
@@ -299,44 +281,33 @@ config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(
 }  // end getTableGroupMembers()
 catch(std::exception const& e)
 {
-	__SS__ << "DBI Exception getting Group's member tables for '" << tableGroup
-	       << "':\n\n"
-	       << e.what() << "\n";
+	__SS__ << "DBI Exception getting Group's member tables for '" << tableGroup << "':\n\n" << e.what() << "\n";
 	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 catch(...)
 {
-	__SS__ << "DBI Unknown exception getting Group's member tables for '" << tableGroup
-	       << ".'\n";
+	__SS__ << "DBI Unknown exception getting Group's member tables for '" << tableGroup << ".'\n";
 	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 
 //==============================================================================
 // create a new configuration group from the contents map
-void DatabaseConfigurationInterface::saveTableGroup(
-    config_version_map_t const& configurationMap,
-    std::string const&          configurationGroup) const try
+void DatabaseConfigurationInterface::saveTableGroup(config_version_map_t const& configurationMap, std::string const& configurationGroup) const try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
 	auto to_list = [](auto const& inputMap) {
 		auto resultList = VersionInfoList_t{};
-		std::transform(
-		    inputMap.begin(),
-		    inputMap.end(),
-		    std::back_inserter(resultList),
-		    [](auto const& mapEntry) {
-			    return VersionInfoList_t::value_type{
-			        mapEntry.first, mapEntry.second.toString(), default_entity};
-		    });
+		std::transform(inputMap.begin(), inputMap.end(), std::back_inserter(resultList), [](auto const& mapEntry) {
+			return VersionInfoList_t::value_type{mapEntry.first, mapEntry.second.toString(), default_entity};
+		});
 
 		return resultList;
 	};
 
-	auto result =
-	    ifc.storeGlobalConfiguration(to_list(configurationMap), configurationGroup);
+	auto result = ifc.storeGlobalConfiguration(to_list(configurationMap), configurationGroup);
 
 	if(result.first)
 		return;

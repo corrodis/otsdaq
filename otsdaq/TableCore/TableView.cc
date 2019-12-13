@@ -10,7 +10,7 @@ using namespace ots;
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "TableView"
 #undef __COUT_HDR__
-#define __COUT_HDR__ (std::string(":") + tableName_ + "v" + version_.toString() + ":\t")
+#define __COUT_HDR__ (tableName_ + "v" + version_.toString() + "\t<> ")
 
 const unsigned int TableView::INVALID = -1;
 
@@ -47,9 +47,7 @@ TableView& TableView::operator=(const TableView src)
 }
 
 //==============================================================================
-TableView& TableView::copy(const TableView&   src,
-                           TableVersion       destinationVersion,
-                           const std::string& author)
+TableView& TableView::copy(const TableView& src, TableVersion destinationVersion, const std::string& author)
 {
 	tableName_ = src.tableName_;
 	version_   = destinationVersion;
@@ -89,10 +87,11 @@ TableView& TableView::copy(const TableView&   src,
 //	return row offset of first row copied in
 unsigned int TableView::copyRows(const std::string& author,
                                  const TableView&   src,
-                                 unsigned int       srcOffsetRow,
-                                 unsigned int       srcRowsToCopy,
-                                 unsigned int       destOffsetRow,
-                                 bool               generateUniqueDataColumns)
+                                 unsigned int       srcOffsetRow /* = 0 */,
+                                 unsigned int       srcRowsToCopy /* = -1 */,
+                                 unsigned int       destOffsetRow /* = -1 */,
+                                 unsigned char      generateUniqueDataColumns /* = false */,
+                                 const std::string& baseNameAutoUID /*= "" */)
 {
 	//__COUTV__(destOffsetRow);
 	//__COUTV__(srcOffsetRow);
@@ -104,8 +103,7 @@ unsigned int TableView::copyRows(const std::string& author,
 	if(src.getNumberOfColumns() != getNumberOfColumns())
 	{
 		__SS__ << "Error! Number of Columns of source view must match destination view."
-		       << "Dimension of source is [" << src.getNumberOfColumns()
-		       << "] and of destination is [" << getNumberOfColumns() << "]." << __E__;
+		       << "Dimension of source is [" << src.getNumberOfColumns() << "] and of destination is [" << getNumberOfColumns() << "]." << __E__;
 		__SS_THROW__;
 	}
 
@@ -118,7 +116,7 @@ unsigned int TableView::copyRows(const std::string& author,
 
 		destOffsetRow = addRow(author,
 		                       generateUniqueDataColumns /*incrementUniqueData*/,
-		                       "" /*baseNameAutoUID*/,
+		                       baseNameAutoUID /*baseNameAutoUID*/,
 		                       destOffsetRow);  // add and get row created
 
 		if(retRow == (unsigned int)-1)
@@ -127,13 +125,11 @@ unsigned int TableView::copyRows(const std::string& author,
 		// copy data
 		for(unsigned int col = 0; col < getNumberOfColumns(); ++col)
 			if(generateUniqueDataColumns &&
-			   (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
-			    columnsInfo_[col].getType() ==
-			        TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))
+			   (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UID || columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
+			    columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))
 				continue;  // if leaving unique data, then skip copy
 			else
-				theDataView_[destOffsetRow][col] =
-				    src.theDataView_[r + srcOffsetRow][col];
+				theDataView_[destOffsetRow][col] = src.theDataView_[r + srcOffsetRow][col];
 
 		// prepare for next row
 		++destOffsetRow;
@@ -178,8 +174,7 @@ void TableView::init(void)
 		if(colNameSet.size() != columnsInfo_.size())
 		{
 			__SS__ << "Table Error:\t"
-			       << " Columns names must be unique! There are " << columnsInfo_.size()
-			       << " columns and the unique name count is " << colNameSet.size()
+			       << " Columns names must be unique! There are " << columnsInfo_.size() << " columns and the unique name count is " << colNameSet.size()
 			       << __E__;
 			__SS_THROW__;
 		}
@@ -200,39 +195,39 @@ void TableView::init(void)
 		{
 		}  // ignore no Priority column
 
+		// fix source columns if not already populated
+		if(sourceColumnNames_.size() == 0)  // setup sourceColumnNames_ to be correct
+			for(unsigned int i = 0; i < getNumberOfColumns(); ++i)
+				sourceColumnNames_.emplace(getColumnsInfo()[i].getStorageName());
+
 		// require one comment column
 		unsigned int colPos;
 		if((colPos = findColByType(TableViewColumnInfo::TYPE_COMMENT)) != INVALID)
 		{
 			if(columnsInfo_[colPos].getName() != TableViewColumnInfo::COL_NAME_COMMENT)
 			{
-				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT
-				       << " data type column must have name="
-				       << TableViewColumnInfo::COL_NAME_COMMENT << __E__;
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT << " data type column must have name=" << TableViewColumnInfo::COL_NAME_COMMENT
+				       << __E__;
 				__SS_THROW__;
 			}
 
-			if(findColByType(TableViewColumnInfo::TYPE_COMMENT, colPos + 1) !=
-			   INVALID)  // found two!
+			if(findColByType(TableViewColumnInfo::TYPE_COMMENT, colPos + 1) != INVALID)  // found two!
 			{
-				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT
-				       << " data type in column " << columnsInfo_[colPos].getName()
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT << " data type in column " << columnsInfo_[colPos].getName()
 				       << " is repeated. This is not allowed." << __E__;
 				__SS_THROW__;
 			}
 
 			if(colPos != getNumberOfColumns() - 3)
 			{
-				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT
-				       << " data type column must be 3rd to last (in column "
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT << " data type column must be 3rd to last (in column "
 				       << getNumberOfColumns() - 3 << ")." << __E__;
 				__SS_THROW__;
 			}
 		}
 		else
 		{
-			__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT
-			       << " data type column "
+			__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_COMMENT << " data type column "
 			       << " is missing. This is not allowed." << __E__;
 			__SS_THROW__;
 		}
@@ -240,27 +235,23 @@ void TableView::init(void)
 		// require one author column
 		if((colPos = findColByType(TableViewColumnInfo::TYPE_AUTHOR)) != INVALID)
 		{
-			if(findColByType(TableViewColumnInfo::TYPE_AUTHOR, colPos + 1) !=
-			   INVALID)  // found two!
+			if(findColByType(TableViewColumnInfo::TYPE_AUTHOR, colPos + 1) != INVALID)  // found two!
 			{
-				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_AUTHOR
-				       << " data type in column " << columnsInfo_[colPos].getName()
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_AUTHOR << " data type in column " << columnsInfo_[colPos].getName()
 				       << " is repeated. This is not allowed." << __E__;
 				__SS_THROW__;
 			}
 
 			if(colPos != getNumberOfColumns() - 2)
 			{
-				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_AUTHOR
-				       << " data type column must be 2nd to last (in column "
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_AUTHOR << " data type column must be 2nd to last (in column "
 				       << getNumberOfColumns() - 2 << ")." << __E__;
 				__SS_THROW__;
 			}
 		}
 		else
 		{
-			__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_AUTHOR
-			       << " data type column "
+			__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_AUTHOR << " data type column "
 			       << " is missing. This is not allowed." << __E__;
 			__SS_THROW__;
 		}
@@ -268,28 +259,24 @@ void TableView::init(void)
 		// require one timestamp column
 		if((colPos = findColByType(TableViewColumnInfo::TYPE_TIMESTAMP)) != INVALID)
 		{
-			if(findColByType(TableViewColumnInfo::TYPE_TIMESTAMP, colPos + 1) !=
-			   INVALID)  // found two!
+			if(findColByType(TableViewColumnInfo::TYPE_TIMESTAMP, colPos + 1) != INVALID)  // found two!
 			{
-				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP
-				       << " data type in column " << columnsInfo_[colPos].getName()
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP << " data type in column " << columnsInfo_[colPos].getName()
 				       << " is repeated. This is not allowed." << __E__;
 				__SS_THROW__;
 			}
 
 			if(colPos != getNumberOfColumns() - 1)
 			{
-				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP
-				       << " data type column must be last (in column "
-				       << getNumberOfColumns() - 1 << ")." << __E__;
+				__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP << " data type column must be last (in column " << getNumberOfColumns() - 1
+				       << ")." << __E__;
 				__COUT_ERR__ << "\n" << ss.str();
 				__SS_THROW__;
 			}
 		}
 		else
 		{
-			__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP
-			       << " data type column "
+			__SS__ << "Table Error:\t" << TableViewColumnInfo::TYPE_TIMESTAMP << " data type column "
 			       << " is missing. This is not allowed." << __E__;
 			__SS_THROW__;
 		}
@@ -302,29 +289,22 @@ void TableView::init(void)
 		{
 			if(uidSet.find(theDataView_[row][colUID_]) != uidSet.end())
 			{
-				__SS__ << ("Entries in UID are not unique. Specifically at row=" +
-				           std::to_string(row) + " value=" + theDataView_[row][colUID_])
-				       << __E__;
+				__SS__ << ("Entries in UID are not unique. Specifically at row=" + std::to_string(row) + " value=" + theDataView_[row][colUID_]) << __E__;
 				__SS_THROW__;
 			}
 
 			if(theDataView_[row][colUID_].size() == 0)
 			{
 				__SS__ << "An invalid UID '" << theDataView_[row][colUID_] << "' "
-				       << " was identified. UIDs must contain at least 1 character."
-				       << __E__;
+				       << " was identified. UIDs must contain at least 1 character." << __E__;
 				__SS_THROW__;
 			}
 
 			for(unsigned int i = 0; i < theDataView_[row][colUID_].size(); ++i)
-				if(!((theDataView_[row][colUID_][i] >= 'A' &&
-				      theDataView_[row][colUID_][i] <= 'Z') ||
-				     (theDataView_[row][colUID_][i] >= 'a' &&
-				      theDataView_[row][colUID_][i] <= 'z') ||
-				     (theDataView_[row][colUID_][i] >= '0' &&
-				      theDataView_[row][colUID_][i] <= '9') ||
-				     (theDataView_[row][colUID_][i] == '-' ||
-				      theDataView_[row][colUID_][i] <= '_')))
+				if(!((theDataView_[row][colUID_][i] >= 'A' && theDataView_[row][colUID_][i] <= 'Z') ||
+				     (theDataView_[row][colUID_][i] >= 'a' && theDataView_[row][colUID_][i] <= 'z') ||
+				     (theDataView_[row][colUID_][i] >= '0' && theDataView_[row][colUID_][i] <= '9') ||
+				     (theDataView_[row][colUID_][i] == '-' || theDataView_[row][colUID_][i] == '_')))
 				{
 					__SS__ << "An invalid UID '" << theDataView_[row][colUID_] << "' "
 					       << " was identified. UIDs must contain only letters, numbers,"
@@ -337,38 +317,29 @@ void TableView::init(void)
 		if(uidSet.size() != getNumberOfRows())
 		{
 			__SS__ << "Entries in UID are not unique!"
-			       << "There are " << getNumberOfRows()
-			       << " records and the unique UID count is " << uidSet.size() << __E__;
+			       << "There are " << getNumberOfRows() << " records and the unique UID count is " << uidSet.size() << __E__;
 			__SS_THROW__;
 		}
 
 		// check that any TYPE_UNIQUE_DATA columns are really unique (no repeats)
 		colPos = (unsigned int)-1;
-		while((colPos = findColByType(TableViewColumnInfo::TYPE_UNIQUE_DATA,
-		                              colPos + 1)) != INVALID)
+		while((colPos = findColByType(TableViewColumnInfo::TYPE_UNIQUE_DATA, colPos + 1)) != INVALID)
 		{
 			std::set<std::string /*unique data*/> uDataSet;
 			for(unsigned int row = 0; row < getNumberOfRows(); ++row)
 			{
 				if(uDataSet.find(theDataView_[row][colPos]) != uDataSet.end())
 				{
-					__SS__ << "Entries in Unique Data column "
-					       << columnsInfo_[colPos].getName()
-					       << (" are not unique. Specifically at row=" +
-					           std::to_string(row) +
-					           " value=" + theDataView_[row][colPos])
-					       << __E__;
+					__SS__ << "Entries in Unique Data column " << columnsInfo_[colPos].getName()
+					       << (" are not unique. Specifically at row=" + std::to_string(row) + " value=" + theDataView_[row][colPos]) << __E__;
 					__SS_THROW__;
 				}
 				uDataSet.insert(theDataView_[row][colPos]);
 			}
 			if(uDataSet.size() != getNumberOfRows())
 			{
-				__SS__ << "Entries in  Unique Data column "
-				       << columnsInfo_[colPos].getName() << " are not unique!"
-				       << "There are " << getNumberOfRows()
-				       << " records and the unique data count is " << uDataSet.size()
-				       << __E__;
+				__SS__ << "Entries in  Unique Data column " << columnsInfo_[colPos].getName() << " are not unique!"
+				       << "There are " << getNumberOfRows() << " records and the unique data count is " << uDataSet.size() << __E__;
 				__SS_THROW__;
 			}
 		}
@@ -376,20 +347,15 @@ void TableView::init(void)
 		// check that any TYPE_UNIQUE_GROUP_DATA columns are really unique fpr groups (no
 		// repeats)
 		colPos = (unsigned int)-1;
-		while((colPos = findColByType(TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA,
-		                              colPos + 1)) != INVALID)
+		while((colPos = findColByType(TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA, colPos + 1)) != INVALID)
 		{
 			// colPos is a unique group data column
 			// now, for each groupId column
 			//	check that data is unique for all groups
-			for(unsigned int groupIdColPos = 0; groupIdColPos < columnsInfo_.size();
-			    ++groupIdColPos)
+			for(unsigned int groupIdColPos = 0; groupIdColPos < columnsInfo_.size(); ++groupIdColPos)
 				if(columnsInfo_[groupIdColPos].isGroupID())
 				{
-					std::map<std::string /*group name*/,
-					         std::pair<unsigned int /*memberCount*/,
-					                   std::set<std::string /*unique data*/> > >
-					    uGroupDataSets;
+					std::map<std::string /*group name*/, std::pair<unsigned int /*memberCount*/, std::set<std::string /*unique data*/> > > uGroupDataSets;
 
 					for(unsigned int row = 0; row < getNumberOfRows(); ++row)
 					{
@@ -399,34 +365,24 @@ void TableView::init(void)
 						{
 							uGroupDataSets[groupId].first++;  // add to member count
 
-							if(uGroupDataSets[groupId].second.find(
-							       theDataView_[row][colPos]) !=
-							   uGroupDataSets[groupId].second.end())
+							if(uGroupDataSets[groupId].second.find(theDataView_[row][colPos]) != uGroupDataSets[groupId].second.end())
 							{
-								__SS__ << "Entries in Unique Group Data column " << colPos
-								       << ":" << columnsInfo_[colPos].getName()
-								       << " are not unique for group ID '" << groupId
-								       << ".' Specifically at row=" << std::to_string(row)
+								__SS__ << "Entries in Unique Group Data column " << colPos << ":" << columnsInfo_[colPos].getName()
+								       << " are not unique for group ID '" << groupId << ".' Specifically at row=" << std::to_string(row)
 								       << " value=" << theDataView_[row][colPos] << __E__;
 								__SS_THROW__;
 							}
-							uGroupDataSets[groupId].second.insert(
-							    theDataView_[row][colPos]);
+							uGroupDataSets[groupId].second.insert(theDataView_[row][colPos]);
 						}
 					}
 
 					for(const auto& groupPair : uGroupDataSets)
-						if(uGroupDataSets[groupPair.first].second.size() !=
-						   uGroupDataSets[groupPair.first].first)
+						if(uGroupDataSets[groupPair.first].second.size() != uGroupDataSets[groupPair.first].first)
 						{
-							__SS__
-							    << "Entries in  Unique Data column "
-							    << columnsInfo_[colPos].getName()
-							    << " are not unique for group '" << groupPair.first
-							    << "!'"
-							    << "There are " << uGroupDataSets[groupPair.first].first
-							    << " records and the unique data count is "
-							    << uGroupDataSets[groupPair.first].second.size() << __E__;
+							__SS__ << "Entries in  Unique Data column " << columnsInfo_[colPos].getName() << " are not unique for group '" << groupPair.first
+							       << "!'"
+							       << "There are " << uGroupDataSets[groupPair.first].first << " records and the unique data count is "
+							       << uGroupDataSets[groupPair.first].second.size() << __E__;
 							__SS_THROW__;
 						}
 				}
@@ -439,9 +395,8 @@ void TableView::init(void)
 		//	- sanitize booleans
 		//	- check that child link I are unique
 		//		note: childLinkId refers to childLinkGroupIDs AND childLinkUIDs
-		std::set<std::string> groupIdIndexes, childLinkIndexes, childLinkIdLabels;
-		unsigned int          groupIdIndexesCount = 0, childLinkIndexesCount = 0,
-		             childLinkIdLabelsCount = 0;
+		std::set<std::string>                                              groupIdIndexes, childLinkIndexes, childLinkIdLabels;
+		unsigned int                                                       groupIdIndexesCount = 0, childLinkIndexesCount = 0, childLinkIdLabelsCount = 0;
 		bool                                                               tmpIsGroup;
 		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> tmpLinkPair;
 
@@ -449,8 +404,7 @@ void TableView::init(void)
 		{
 			if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
 			{
-				const std::vector<std::string>& theDataChoices =
-				    columnsInfo_[col].getDataChoices();
+				const std::vector<std::string>& theDataChoices = columnsInfo_[col].getDataChoices();
 
 				// check if arbitrary values allowed
 				if(theDataChoices.size() && theDataChoices[0] == "arbitraryBool=1")
@@ -474,14 +428,11 @@ void TableView::init(void)
 					}
 					if(!found)
 					{
-						__SS__ << getTableName() << " Error:\t'" << theDataView_[row][col]
-						       << "' in column " << columnsInfo_[col].getName()
+						__SS__ << getTableName() << " Error:\t'" << theDataView_[row][col] << "' in column " << columnsInfo_[col].getName()
 						       << " is not a valid Fixed Choice option. "
 						       << "Possible values are as follows: ";
 
-						for(unsigned int i = 0;
-						    i < columnsInfo_[col].getDataChoices().size();
-						    ++i)
+						for(unsigned int i = 0; i < columnsInfo_[col].getDataChoices().size(); ++i)
 						{
 							if(i)
 								ss << ", ";
@@ -496,16 +447,14 @@ void TableView::init(void)
 			{
 				// check if forcing fixed choices
 
-				const std::vector<std::string>& theDataChoices =
-				    columnsInfo_[col].getDataChoices();
+				const std::vector<std::string>& theDataChoices = columnsInfo_[col].getDataChoices();
 
 				// check if arbitrary values allowed
 				if(!theDataChoices.size() || theDataChoices[0] == "arbitraryBool=1")
 					continue;  // arbitrary values allowed
 
 				// skip one if arbitrary setting is embedded as first value
-				bool skipOne =
-				    (theDataChoices.size() && theDataChoices[0] == "arbitraryBool=0");
+				bool skipOne = (theDataChoices.size() && theDataChoices[0] == "arbitraryBool=0");
 				bool hasSkipped;
 
 				bool found;
@@ -530,18 +479,14 @@ void TableView::init(void)
 					}
 					if(!found)
 					{
-						__SS__ << getTableName() << " Error:\t the value '"
-						       << theDataView_[row][col] << "' in column "
-						       << columnsInfo_[col].getName()
+						__SS__ << getTableName() << " Error:\t the value '" << theDataView_[row][col] << "' in column " << columnsInfo_[col].getName()
 						       << " is not a valid Fixed Choice option. "
 						       << "Possible values are as follows: ";
 
 						// ss <<
 						// StringMacros::vectorToString(columnsInfo_[col].getDataChoices())
 						// << __E__;
-						for(unsigned int i = skipOne ? 1 : 0;
-						    i < columnsInfo_[col].getDataChoices().size();
-						    ++i)
+						for(unsigned int i = skipOne ? 1 : 0; i < columnsInfo_[col].getDataChoices().size(); ++i)
 						{
 							if(i > (skipOne ? 1 : 0))
 								ss << ", ";
@@ -555,19 +500,14 @@ void TableView::init(void)
 			else if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_ON_OFF)
 				for(unsigned int row = 0; row < getNumberOfRows(); ++row)
 				{
-					if(theDataView_[row][col] == "1" || theDataView_[row][col] == "on" ||
-					   theDataView_[row][col] == "On" || theDataView_[row][col] == "ON")
+					if(theDataView_[row][col] == "1" || theDataView_[row][col] == "on" || theDataView_[row][col] == "On" || theDataView_[row][col] == "ON")
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_ON;
-					else if(theDataView_[row][col] == "0" ||
-					        theDataView_[row][col] == "off" ||
-					        theDataView_[row][col] == "Off" ||
+					else if(theDataView_[row][col] == "0" || theDataView_[row][col] == "off" || theDataView_[row][col] == "Off" ||
 					        theDataView_[row][col] == "OFF")
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_OFF;
 					else
 					{
-						__SS__ << getTableName() << " Error:\t the value '"
-						       << theDataView_[row][col] << "' in column "
-						       << columnsInfo_[col].getName()
+						__SS__ << getTableName() << " Error:\t the value '" << theDataView_[row][col] << "' in column " << columnsInfo_[col].getName()
 						       << " is not a valid Type (On/Off) std::string. Possible "
 						          "values are 1, on, On, ON, 0, off, Off, OFF."
 						       << __E__;
@@ -577,21 +517,15 @@ void TableView::init(void)
 			else if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_TRUE_FALSE)
 				for(unsigned int row = 0; row < getNumberOfRows(); ++row)
 				{
-					if(theDataView_[row][col] == "1" ||
-					   theDataView_[row][col] == "true" ||
-					   theDataView_[row][col] == "True" ||
+					if(theDataView_[row][col] == "1" || theDataView_[row][col] == "true" || theDataView_[row][col] == "True" ||
 					   theDataView_[row][col] == "TRUE")
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_TRUE;
-					else if(theDataView_[row][col] == "0" ||
-					        theDataView_[row][col] == "false" ||
-					        theDataView_[row][col] == "False" ||
+					else if(theDataView_[row][col] == "0" || theDataView_[row][col] == "false" || theDataView_[row][col] == "False" ||
 					        theDataView_[row][col] == "FALSE")
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_FALSE;
 					else
 					{
-						__SS__ << getTableName() << " Error:\t the value '"
-						       << theDataView_[row][col] << "' in column "
-						       << columnsInfo_[col].getName()
+						__SS__ << getTableName() << " Error:\t the value '" << theDataView_[row][col] << "' in column " << columnsInfo_[col].getName()
 						       << " is not a valid Type (True/False) std::string. "
 						          "Possible values are 1, true, True, TRUE, 0, false, "
 						          "False, FALSE."
@@ -602,19 +536,13 @@ void TableView::init(void)
 			else if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_YES_NO)
 				for(unsigned int row = 0; row < getNumberOfRows(); ++row)
 				{
-					if(theDataView_[row][col] == "1" || theDataView_[row][col] == "yes" ||
-					   theDataView_[row][col] == "Yes" || theDataView_[row][col] == "YES")
+					if(theDataView_[row][col] == "1" || theDataView_[row][col] == "yes" || theDataView_[row][col] == "Yes" || theDataView_[row][col] == "YES")
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_YES;
-					else if(theDataView_[row][col] == "0" ||
-					        theDataView_[row][col] == "no" ||
-					        theDataView_[row][col] == "No" ||
-					        theDataView_[row][col] == "NO")
+					else if(theDataView_[row][col] == "0" || theDataView_[row][col] == "no" || theDataView_[row][col] == "No" || theDataView_[row][col] == "NO")
 						theDataView_[row][col] = TableViewColumnInfo::TYPE_VALUE_NO;
 					else
 					{
-						__SS__ << getTableName() << " Error:\t the value '"
-						       << theDataView_[row][col] << "' in column "
-						       << columnsInfo_[col].getName()
+						__SS__ << getTableName() << " Error:\t the value '" << theDataView_[row][col] << "' in column " << columnsInfo_[col].getName()
 						       << " is not a valid Type (Yes/No) std::string. Possible "
 						          "values are 1, yes, Yes, YES, 0, no, No, NO."
 						       << __E__;
@@ -623,8 +551,7 @@ void TableView::init(void)
 				}
 			else if(columnsInfo_[col].isGroupID())  // GroupID type
 			{
-				colLinkGroupIDs_[columnsInfo_[col].getChildLinkIndex()] =
-				    col;  // add to groupid map
+				colLinkGroupIDs_[columnsInfo_[col].getChildLinkIndex()] = col;  // add to groupid map
 				// check uniqueness
 				groupIdIndexes.emplace(columnsInfo_[col].getChildLinkIndex());
 				++groupIdIndexesCount;
@@ -633,31 +560,22 @@ void TableView::init(void)
 			{
 				// sanitize no link to default
 				for(unsigned int row = 0; row < getNumberOfRows(); ++row)
-					if(theDataView_[row][col] == "NoLink" ||
-					   theDataView_[row][col] == "No_Link" ||
-					   theDataView_[row][col] == "NOLINK" ||
-					   theDataView_[row][col] == "NO_LINK" ||
-					   theDataView_[row][col] == "Nolink" ||
-					   theDataView_[row][col] == "nolink" ||
+					if(theDataView_[row][col] == "NoLink" || theDataView_[row][col] == "No_Link" || theDataView_[row][col] == "NOLINK" ||
+					   theDataView_[row][col] == "NO_LINK" || theDataView_[row][col] == "Nolink" || theDataView_[row][col] == "nolink" ||
 					   theDataView_[row][col] == "noLink")
-						theDataView_[row][col] =
-						    TableViewColumnInfo::DATATYPE_LINK_DEFAULT;
+						theDataView_[row][col] = TableViewColumnInfo::DATATYPE_LINK_DEFAULT;
 
 				// check uniqueness
 				childLinkIndexes.emplace(columnsInfo_[col].getChildLinkIndex());
 				++childLinkIndexesCount;
 
 				// force data type to TableViewColumnInfo::DATATYPE_STRING
-				if(columnsInfo_[col].getDataType() !=
-				   TableViewColumnInfo::DATATYPE_STRING)
+				if(columnsInfo_[col].getDataType() != TableViewColumnInfo::DATATYPE_STRING)
 				{
 					__SS__ << getTableName() << " Error:\t"
-					       << "Column " << col << " with name '"
-					       << columnsInfo_[col].getName()
-					       << "' is a Child Link column and has an illegal data type of '"
-					       << columnsInfo_[col].getDataType()
-					       << "'. The data type for Child Link columns must be "
-					       << TableViewColumnInfo::DATATYPE_STRING << __E__;
+					       << "Column " << col << " with name '" << columnsInfo_[col].getName() << "' is a Child Link column and has an illegal data type of '"
+					       << columnsInfo_[col].getDataType() << "'. The data type for Child Link columns must be " << TableViewColumnInfo::DATATYPE_STRING
+					       << __E__;
 					__SS_THROW__;
 				}
 
@@ -684,32 +602,26 @@ void TableView::init(void)
 		// verify child link index uniqueness
 		if(groupIdIndexes.size() != groupIdIndexesCount)
 		{
-			__SS__ << ("GroupId Labels are not unique!") << "There are "
-			       << groupIdIndexesCount << " GroupId Labels and the unique count is "
+			__SS__ << ("GroupId Labels are not unique!") << "There are " << groupIdIndexesCount << " GroupId Labels and the unique count is "
 			       << groupIdIndexes.size() << __E__;
 			__SS_THROW__;
 		}
 		if(childLinkIndexes.size() != childLinkIndexesCount)
 		{
-			__SS__ << ("Child Link Labels are not unique!") << "There are "
-			       << childLinkIndexesCount
-			       << " Child Link Labels and the unique count is "
+			__SS__ << ("Child Link Labels are not unique!") << "There are " << childLinkIndexesCount << " Child Link Labels and the unique count is "
 			       << childLinkIndexes.size() << __E__;
 			__SS_THROW__;
 		}
 		if(childLinkIdLabels.size() != childLinkIdLabelsCount)
 		{
-			__SS__ << ("Child Link ID Labels are not unique!") << "There are "
-			       << childLinkIdLabelsCount
-			       << " Child Link ID Labels and the unique count is "
+			__SS__ << ("Child Link ID Labels are not unique!") << "There are " << childLinkIdLabelsCount << " Child Link ID Labels and the unique count is "
 			       << childLinkIdLabels.size() << __E__;
 			__SS_THROW__;
 		}
 	}
 	catch(...)
 	{
-		__COUT__ << "Error occured in TableView::init() for version=" << version_
-		         << __E__;
+		__COUT__ << "Error occured in TableView::init() for version=" << version_ << __E__;
 		throw;
 	}
 }  // end init()
@@ -719,10 +631,7 @@ void TableView::init(void)
 //	string version
 //	Note: necessary because types of std::basic_string<char> cause compiler problems if no
 // string specific function
-void TableView::getValue(std::string& value,
-                         unsigned int row,
-                         unsigned int col,
-                         bool         doConvertEnvironmentVariables) const
+void TableView::getValue(std::string& value, unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
 	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 	{
@@ -730,8 +639,7 @@ void TableView::getValue(std::string& value,
 		__SS_THROW__;
 	}
 
-	value = validateValueForColumn(
-	    theDataView_[row][col], col, doConvertEnvironmentVariables);
+	value = validateValueForColumn(theDataView_[row][col], col, doConvertEnvironmentVariables);
 }  // end getValue()
 
 //==============================================================================
@@ -739,9 +647,7 @@ void TableView::getValue(std::string& value,
 //	string version
 //	Note: necessary because types of std::basic_string<char>
 //	cause compiler problems if no string specific function
-std::string TableView::validateValueForColumn(const std::string& value,
-                                              unsigned int       col,
-                                              bool doConvertEnvironmentVariables) const
+std::string TableView::validateValueForColumn(const std::string& value, unsigned int col, bool doConvertEnvironmentVariables) const
 {
 	if(col >= columnsInfo_.size())
 	{
@@ -749,8 +655,7 @@ std::string TableView::validateValueForColumn(const std::string& value,
 		__SS_THROW__;
 	}
 
-	if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA &&
-	   value == columnsInfo_[col].getDefaultValue())
+	if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA && value == columnsInfo_[col].getDefaultValue())
 	{
 		// if type string, fixed choice and DEFAULT, then return string of first choice
 
@@ -761,22 +666,16 @@ std::string TableView::validateValueForColumn(const std::string& value,
 		size_t index   = (skipOne ? 1 : 0);
 		if(choices.size() > index)
 		{
-			return doConvertEnvironmentVariables
-			           ? StringMacros::convertEnvironmentVariables(choices[index])
-			           : choices[index];  // handled value from fixed choices
+			return doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables(choices[index])
+			                                     : choices[index];  // handled value from fixed choices
 		}
 	}  // end handling default to fixed choice conversion
 
 	if(columnsInfo_[col].getDataType() == TableViewColumnInfo::DATATYPE_STRING)
-		return doConvertEnvironmentVariables
-		           ? StringMacros::convertEnvironmentVariables(value)
-		           : value;
+		return doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables(value) : value;
 	else if(columnsInfo_[col].getDataType() == TableViewColumnInfo::DATATYPE_TIME)
 	{
-		return StringMacros::getTimestampString(
-		    doConvertEnvironmentVariables
-		        ? StringMacros::convertEnvironmentVariables(value)
-		        : value);
+		return StringMacros::getTimestampString(doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables(value) : value);
 
 		//		retValue.resize(30); //known fixed size: Thu Aug 23 14:55:02 2001 CST
 		//		time_t timestamp(
@@ -789,12 +688,9 @@ std::string TableView::validateValueForColumn(const std::string& value,
 	}
 	else
 	{
-		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
-		       << " in configuration " << tableName_
-		       << " at column=" << columnsInfo_[col].getName()
-		       << " for getValue with type '"
-		       << StringMacros::demangleTypeName(typeid(std::string).name()) << "'"
-		       << __E__;
+		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType() << " in configuration " << tableName_
+		       << " at column=" << columnsInfo_[col].getName() << " for getValue with type '" << StringMacros::demangleTypeName(typeid(std::string).name())
+		       << "'" << __E__;
 		__SS_THROW__;
 	}
 
@@ -805,9 +701,7 @@ std::string TableView::validateValueForColumn(const std::string& value,
 // getValueAsString
 //	gets the value with the proper data type and converts to string
 //	as though getValue was called.
-std::string TableView::getValueAsString(unsigned int row,
-                                        unsigned int col,
-                                        bool         doConvertEnvironmentVariables) const
+std::string TableView::getValueAsString(unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
 	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 	{
@@ -819,33 +713,28 @@ std::string TableView::getValueAsString(unsigned int row,
 
 	if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_ON_OFF)
 	{
-		if(theDataView_[row][col] == "1" || theDataView_[row][col] == "on" ||
-		   theDataView_[row][col] == "On" || theDataView_[row][col] == "ON")
+		if(theDataView_[row][col] == "1" || theDataView_[row][col] == "on" || theDataView_[row][col] == "On" || theDataView_[row][col] == "ON")
 			return TableViewColumnInfo::TYPE_VALUE_ON;
 		else
 			return TableViewColumnInfo::TYPE_VALUE_OFF;
 	}
 	else if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_TRUE_FALSE)
 	{
-		if(theDataView_[row][col] == "1" || theDataView_[row][col] == "true" ||
-		   theDataView_[row][col] == "True" || theDataView_[row][col] == "TRUE")
+		if(theDataView_[row][col] == "1" || theDataView_[row][col] == "true" || theDataView_[row][col] == "True" || theDataView_[row][col] == "TRUE")
 			return TableViewColumnInfo::TYPE_VALUE_TRUE;
 		else
 			return TableViewColumnInfo::TYPE_VALUE_FALSE;
 	}
 	else if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_YES_NO)
 	{
-		if(theDataView_[row][col] == "1" || theDataView_[row][col] == "yes" ||
-		   theDataView_[row][col] == "Yes" || theDataView_[row][col] == "YES")
+		if(theDataView_[row][col] == "1" || theDataView_[row][col] == "yes" || theDataView_[row][col] == "Yes" || theDataView_[row][col] == "YES")
 			return TableViewColumnInfo::TYPE_VALUE_YES;
 		else
 			return TableViewColumnInfo::TYPE_VALUE_NO;
 	}
 
 	//__COUT__ << __E__;
-	return doConvertEnvironmentVariables
-	           ? StringMacros::convertEnvironmentVariables(theDataView_[row][col])
-	           : theDataView_[row][col];
+	return doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables(theDataView_[row][col]) : theDataView_[row][col];
 }
 
 //==============================================================================
@@ -854,9 +743,7 @@ std::string TableView::getValueAsString(unsigned int row,
 //	as though getValue was called.
 //	then escapes all special characters with slash.
 //	Note: this should be useful for values placed in double quotes, i.e. JSON.
-std::string TableView::getEscapedValueAsString(unsigned int row,
-                                               unsigned int col,
-                                               bool doConvertEnvironmentVariables) const
+std::string TableView::getEscapedValueAsString(unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
 	std::string val    = getValueAsString(row, col, doConvertEnvironmentVariables);
 	std::string retVal = "";
@@ -896,25 +783,20 @@ void TableView::setValue(const std::string& value, unsigned int row, unsigned in
 	else  // dont allow TableViewColumnInfo::DATATYPE_TIME to be set as string.. force use
 	      // as time_t to standardize string result
 	{
-		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType()
-		       << " in configuration " << tableName_
-		       << " at column=" << columnsInfo_[col].getName()
-		       << " for setValue with type '"
-		       << StringMacros::demangleTypeName(typeid(value).name()) << "'" << __E__;
+		__SS__ << "\tUnrecognized column data type: " << columnsInfo_[col].getDataType() << " in configuration " << tableName_
+		       << " at column=" << columnsInfo_[col].getName() << " for setValue with type '" << StringMacros::demangleTypeName(typeid(value).name()) << "'"
+		       << __E__;
 		__SS_THROW__;
 	}
-}
-void TableView::setValue(const char* value, unsigned int row, unsigned int col)
-{
-	setValue(std::string(value), row, col);
-}
+}  // end setValue()
 
 //==============================================================================
-// setValue
+void TableView::setValue(const char* value, unsigned int row, unsigned int col) { setValue(std::string(value), row, col); }  // end setValue()
+
+//==============================================================================
+// setValueAsString
 //	string version
-void TableView::setValueAsString(const std::string& value,
-                                 unsigned int       row,
-                                 unsigned int       col)
+void TableView::setValueAsString(const std::string& value, unsigned int row, unsigned int col)
 {
 	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
 	{
@@ -923,7 +805,173 @@ void TableView::setValueAsString(const std::string& value,
 	}
 
 	theDataView_[row][col] = value;
-}
+}  // end setValueAsString()
+
+//==============================================================================
+// setUniqueColumnValue
+//	Auto-generates a unique value for the specified column and places
+//	 value at row,col position (a la add row unique value handling)
+//
+//	Note: doMathAppendStrategy enables appending with a match string
+//		e.g. ${PORT} + 1 .. then + 2, etc. (i.e. baseValueAsString = "${PORT}")
+const std::string& TableView::setUniqueColumnValue(unsigned int row,
+                                                   unsigned int col,
+                                                   std::string  baseValueAsString /*= "" */,
+                                                   bool         doMathAppendStrategy /*= false*/)
+{
+	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
+	{
+		__SS__ << "Invalid row (" << row << ") col (" << col << ") requested!" << __E__;
+		__SS_THROW__;
+	}
+
+	//			__COUT__ << "Current unique data entry is data[" << rowToAdd
+	//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col]
+	//<<
+	//"'"
+	//			         << __E__;
+
+
+	bool		 firstConflict = true;
+	int          maxUniqueData = -1;
+	std::string  tmpString     = "";
+	bool         foundAny;
+	unsigned int index;
+	std::string  numString;
+	std::string  opString;  // for doMathAppendStrategy
+	char         indexString[1000];
+
+	// find max in rows
+
+	//this->print();
+
+	for(unsigned int r = 0; r < getNumberOfRows(); ++r)
+	{
+		if(r == row)
+			continue;  // skip row to add
+
+		// find last non numeric character
+
+		foundAny  = false;
+		tmpString = theDataView_[r][col];
+
+		//__COUT__ << "tmpString " << tmpString << __E__;
+
+		for(index = tmpString.length() - 1; index < tmpString.length(); --index)
+		{
+			//__COUT__ << index << " tmpString[index] " << tmpString[index] <<
+			//__E__;
+			if(!(tmpString[index] >= '0' && tmpString[index] <= '9'))
+				break;  // if not numeric, break
+			foundAny = true;
+		}
+
+		//__COUT__ << "index " << index << " foundAny " << foundAny << __E__;
+
+		if(tmpString.length() && foundAny)  // then found a numeric substring
+		{
+			// create numeric substring
+			numString = tmpString.substr(index + 1);
+
+			// and alpha basestring
+			tmpString = tmpString.substr(0, index + 1);
+
+			if(doMathAppendStrategy && tmpString.size())
+			{
+				// look for op string
+				foundAny = false;
+				for(index = tmpString.length() - 1; index < tmpString.length(); --index)
+				{
+					//__COUT__ << index << " tmpString[index] " << tmpString[index] <<
+					//__E__;
+					if(!(tmpString[index] == '+' || tmpString[index] == ' '))
+						break;  // if not plus op, break
+					foundAny = true;
+				}
+
+				if(foundAny)
+				{
+					// create numeric substring
+					opString = tmpString.substr(index + 1);
+
+					// and alpha basestring
+					tmpString = tmpString.substr(0, index + 1);
+				}
+			}
+
+			//__COUT__ << tmpString << " vs " << baseValueAsString << __E__;
+
+			if(baseValueAsString != "" && tmpString != baseValueAsString)
+				continue;  // skip max unique number if basestring does not match
+
+			//__COUT__ << "Found unique data base string '" << tmpString << "' and number string '" << numString << "' in last record '" << theDataView_[r][col]
+			 //        << "'" << __E__;
+
+			if(firstConflict)
+			{
+				// if baseValueAsString ends in number, then add _ to keep naming similar
+				if(baseValueAsString.size() &&
+						baseValueAsString[baseValueAsString.size() - 1] >= '0' &&
+						baseValueAsString[baseValueAsString.size() - 1] <= '9')
+					baseValueAsString += '_';
+
+				firstConflict = false;
+			}
+
+			// extract number
+			sscanf(numString.c_str(), "%u", &index);
+
+			if((int)index > maxUniqueData)
+			{
+				maxUniqueData = (int)index;
+
+				if(baseValueAsString == "")
+					baseValueAsString = tmpString;  // assume a value for base string
+			}
+		}
+		else if(maxUniqueData < 0 && (baseValueAsString == "" || tmpString == baseValueAsString))
+		{
+			if(firstConflict)
+			{
+				// if baseValueAsString ends in number, then add _ to keep naming similar
+				if(baseValueAsString.size() &&
+						baseValueAsString[baseValueAsString.size() - 1] >= '0' &&
+						baseValueAsString[baseValueAsString.size() - 1] <= '9')
+					baseValueAsString += '_';
+
+				firstConflict = false;
+			}
+
+			maxUniqueData = 0;  // start a number if basestring conflict
+		}
+	}
+
+	//__COUTV__(maxUniqueData);
+
+	if(maxUniqueData == -1)  // if no conflicts, then do not add number
+		theDataView_[row][col] = baseValueAsString;
+	else
+	{
+		++maxUniqueData;  // increment
+
+		sprintf(indexString, "%u", maxUniqueData);
+
+		//__COUTV__(indexString);
+		//__COUTV__(baseValueAsString);
+
+		if(doMathAppendStrategy)
+			theDataView_[row][col] = baseValueAsString + " + " + indexString;
+		else
+			theDataView_[row][col] = baseValueAsString + indexString;
+	}
+
+	__COUT__ << "New unique data entry is data[" << row <<
+			"][" << col << "] = '" << theDataView_[row][col] << "'" << __E__;
+
+	// this->print();
+
+	return theDataView_[row][col];
+}  // end setUniqueColumnValue()
 
 //==============================================================================
 // initColUID
@@ -939,8 +987,7 @@ const unsigned int TableView::initColUID(void)
 	{
 		__COUT__ << "Column Types: " << __E__;
 		for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-			std::cout << columnsInfo_[col].getType() << "() "
-			          << columnsInfo_[col].getName() << __E__;
+			std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
 		__SS__ << "\tMissing UID Column in table named '" << tableName_ << "'" << __E__;
 		__SS_THROW__;
 	}
@@ -957,11 +1004,9 @@ const unsigned int TableView::getColUID(void) const
 
 	__COUT__ << "Column Types: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-		          << __E__;
+		std::cout << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
 
-	__SS__ << ("Missing UID Column in config named " + tableName_ +
-	           ". (Possibly TableView was just not initialized?" +
+	__SS__ << ("Missing UID Column in config named " + tableName_ + ". (Possibly TableView was just not initialized?" +
 	           " This is the const call so can not alter class members)")
 	       << __E__;
 
@@ -994,13 +1039,11 @@ const unsigned int TableView::initColStatus(void)
 
 	// at this point not found!
 
-	__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS
-	       << "' or '" << TableViewColumnInfo::COL_NAME_ENABLED << "' in table '"
+	__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS << "' or '" << TableViewColumnInfo::COL_NAME_ENABLED << "' in table '"
 	       << tableName_ << ".'" << __E__;
 	ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-		   << __E__;
+		ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
 
 	__SS_ONLY_THROW__;
 
@@ -1015,16 +1058,13 @@ const unsigned int TableView::initColPriority(void)
 		return colPriority_;
 
 	// if doesn't exist throw error! each view must have a UID column
-	colPriority_ =
-	    findCol("*" + TableViewColumnInfo::COL_NAME_PRIORITY);  // wild card search
+	colPriority_ = findCol("*" + TableViewColumnInfo::COL_NAME_PRIORITY);  // wild card search
 	if(colPriority_ == INVALID)
 	{
-		__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_PRIORITY
-		       << "' in table '" << tableName_ << ".'" << __E__;
+		__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_PRIORITY << "' in table '" << tableName_ << ".'" << __E__;
 		ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 		for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-			ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-			   << __E__;
+			ss << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
 
 		__SS_THROW__;
 	}
@@ -1040,16 +1080,13 @@ const unsigned int TableView::getColStatus(void) const
 	if(colStatus_ != INVALID)
 		return colStatus_;
 
-	__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS
-	       << "' or '" << TableViewColumnInfo::COL_NAME_ENABLED << "' in table '"
+	__SS__ << "\tMissing column named '" << TableViewColumnInfo::COL_NAME_STATUS << "' or '" << TableViewColumnInfo::COL_NAME_ENABLED << "' in table '"
 	       << tableName_ << ".'"
-	       << " (The Status column is identified when the TableView is initialized)"
-	       << __E__;
+	       << " (The Status column is identified when the TableView is initialized)" << __E__;
 
 	ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-		   << __E__;
+		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
 
 	ss << __E__;
 
@@ -1072,16 +1109,14 @@ const unsigned int TableView::getColPriority(void) const
 
 	__SS__ << "Priority column was not found... \nColumn Types: " << __E__;
 
-	ss << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY
-	   << " Column in table named '" << tableName_
+	ss << "Missing " << TableViewColumnInfo::COL_NAME_PRIORITY << " Column in table named '" << tableName_
 	   << ".' (The Priority column is identified when the TableView is initialized)"
 	   << __E__;  // this is the const call, so can not identify the column and set
 	              // colPriority_ here
 
 	ss << "\n\nTable '" << tableName_ << "' Columns: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-		   << __E__;
+		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
 	ss << __E__;
 
 	ss << StringMacros::stackTrace() << __E__;
@@ -1092,16 +1127,14 @@ const unsigned int TableView::getColPriority(void) const
 //==============================================================================
 // addRowToGroup
 //	Group entry can include | to place a record in multiple groups
-void TableView::addRowToGroup(
-    const unsigned int& row,
-    const unsigned int& col,
-    const std::string&  groupID)  //,
-                                 // const std::string &colDefault)
+void TableView::addRowToGroup(const unsigned int& row,
+                              const unsigned int& col,
+                              const std::string&  groupID)  //,
+                                                           // const std::string &colDefault)
 {
 	if(isEntryInGroupCol(row, col, groupID))
 	{
-		__SS__ << "GroupID (" << groupID << ") added to row (" << row
-		       << " is already present!" << __E__;
+		__SS__ << "GroupID (" << groupID << ") added to row (" << row << " is already present!" << __E__;
 		__SS_THROW__;
 	}
 
@@ -1110,8 +1143,7 @@ void TableView::addRowToGroup(
 	//		set groupid
 	//	if other groups
 	//		prepend groupId |
-	if(getDataView()[row][col] == "" ||
-	   getDataView()[row][col] == getDefaultRowValues()[col])  // colDefault)
+	if(getDataView()[row][col] == "" || getDataView()[row][col] == getDefaultRowValues()[col])  // colDefault)
 		setValue(groupID, row, col);
 	else
 		setValue(groupID + " | " + getDataView()[row][col], row, col);
@@ -1124,17 +1156,13 @@ void TableView::addRowToGroup(
 //	Group entry can include | to place a record in multiple groups
 //
 //	returns true if row was deleted because it had no group left
-bool TableView::removeRowFromGroup(const unsigned int& row,
-                                   const unsigned int& col,
-                                   const std::string&  groupNeedle,
-                                   bool                deleteRowIfNoGroupLeft)
+bool TableView::removeRowFromGroup(const unsigned int& row, const unsigned int& col, const std::string& groupNeedle, bool deleteRowIfNoGroupLeft)
 {
 	__COUT__ << "groupNeedle " << groupNeedle << __E__;
 	std::set<std::string> groupIDList;
 	if(!isEntryInGroupCol(row, col, groupNeedle, &groupIDList))
 	{
-		__SS__ << "GroupID (" << groupNeedle << ") removed from row (" << row
-		       << ") was already removed!" << __E__;
+		__SS__ << "GroupID (" << groupNeedle << ") removed from row (" << row << ") was already removed!" << __E__;
 		__SS_THROW__;
 	}
 
@@ -1176,9 +1204,7 @@ bool TableView::removeRowFromGroup(const unsigned int& row,
 // 	so that handling is consistent
 //
 //	Group entry can include | to place a record in multiple groups
-bool TableView::isEntryInGroup(const unsigned int& r,
-                               const std::string&  childLinkIndex,
-                               const std::string&  groupNeedle) const
+bool TableView::isEntryInGroup(const unsigned int& r, const std::string& childLinkIndex, const std::string& groupNeedle) const
 {
 	unsigned int c = getColLinkGroupID(childLinkIndex);  // column in question
 
@@ -1194,10 +1220,7 @@ bool TableView::isEntryInGroup(const unsigned int& r,
 //	Group entry can include | to place a record in multiple groups
 //
 // Note: should mirror what happens in TableView::getSetOfGroupIDs
-bool TableView::isEntryInGroupCol(const unsigned int&    r,
-                                  const unsigned int&    c,
-                                  const std::string&     groupNeedle,
-                                  std::set<std::string>* groupIDList) const
+bool TableView::isEntryInGroupCol(const unsigned int& r, const unsigned int& c, const std::string& groupNeedle, std::set<std::string>* groupIDList) const
 {
 	unsigned int i     = 0;
 	unsigned int j     = 0;
@@ -1211,8 +1234,7 @@ bool TableView::isEntryInGroupCol(const unsigned int&    r,
 		    theDataView_[r][c][j] == '|') &&
 		   i == j)
 			++i;
-		else if((theDataView_[r][c][j] ==
-		             ' ' ||  // trailing white space or | indicates group
+		else if((theDataView_[r][c][j] == ' ' ||  // trailing white space or | indicates group
 		         theDataView_[r][c][j] == '|') &&
 		        i != j)  // assume end of group name
 		{
@@ -1253,13 +1275,11 @@ bool TableView::isEntryInGroupCol(const unsigned int&    r,
 //		associate with childLinkIndex
 //
 // Note: should mirror what happens in TableView::isEntryInGroupCol
-std::set<std::string> TableView::getSetOfGroupIDs(const std::string& childLinkIndex,
-                                                  unsigned int       r) const
+std::set<std::string> TableView::getSetOfGroupIDs(const std::string& childLinkIndex, unsigned int r) const
 {
 	return getSetOfGroupIDs(getColLinkGroupID(childLinkIndex), r);
 }
-std::set<std::string> TableView::getSetOfGroupIDs(const unsigned int& c,
-                                                  unsigned int        r) const
+std::set<std::string> TableView::getSetOfGroupIDs(const unsigned int& c, unsigned int r) const
 {
 	//__COUT__ << "GroupID col=" << (int)c << __E__;
 
@@ -1367,37 +1387,36 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 	// allow space syntax to target a childLinkIndex from a different parentLinkIndex
 	// e.g. "parentLinkIndex childLinkIndex"
 	size_t spacePos = childLinkIndex.find(' ');
-	if(spacePos != std::string::npos &&
-	   spacePos + 1 < childLinkIndex.size())  // make sure there are more characters
+	if(spacePos != std::string::npos && spacePos + 1 < childLinkIndex.size())  // make sure there are more characters
 	{
 		// found space syntax for targeting childLinkIndex
 		needleChildLinkIndex = &childLinkIndex[spacePos + 1];
 	}
 
-	std::map<std::string, unsigned int>::const_iterator it =
-	    colLinkGroupIDs_.find(needleChildLinkIndex);
+	std::map<std::string, unsigned int>::const_iterator it = colLinkGroupIDs_.find(needleChildLinkIndex);
 	if(it !=  // if already known, return it
 	   colLinkGroupIDs_.end())
 		return it->second;
 
-	__SS__
-	    << "Incompatible table for this group link. Table '" << tableName_
-	    << "' is missing a GroupID column with data type '"
-	    << TableViewColumnInfo::TYPE_START_GROUP_ID << "-" << needleChildLinkIndex
-	    << "'.\n\n"
-	    << "Note: you can separate the child GroupID column data type from "
-	    << "the parent GroupLink column data type; this is accomplished by using a space "
-	    << "character at the parent level - the string after the space will be treated "
-	       "as the "
-	    << "child GroupID column data type." << __E__;
+	// otherwise search (perhaps init() was not called)
+	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
+		if(needleChildLinkIndex == columnsInfo_[col].getChildLinkIndex())
+			return col;
+
+	__SS__ << "Error! Incompatible table for this group link! Table '" << tableName_ << "' is missing a GroupID column with data type '"
+	       << TableViewColumnInfo::TYPE_START_GROUP_ID << "-" << needleChildLinkIndex << "'.\n\n"
+	       << "Note: you can separate the child GroupID column data type from "
+	       << "the parent GroupLink column data type; this is accomplished by using a space "
+	       << "character at the parent level - the string after the space will be treated "
+	          "as the "
+	       << "child GroupID column data type." << __E__;
 	ss << "Existing Column GroupIDs: " << __E__;
 	for(auto& groupIdColPair : colLinkGroupIDs_)
 		ss << "\t" << groupIdColPair.first << " : col-" << groupIdColPair.second << __E__;
 
 	ss << "Existing Column Types: " << __E__;
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName()
-		   << __E__;
+		ss << "\t" << columnsInfo_[col].getType() << "() " << columnsInfo_[col].getName() << __E__;
 
 	ss << StringMacros::stackTrace() << __E__;
 
@@ -1405,18 +1424,17 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 }  // end getColLinkGroupID()
 
 //==============================================================================
-unsigned int TableView::findRow(unsigned int       col,
-                                const std::string& value,
-                                unsigned int       offsetRow) const
+unsigned int TableView::findRow(unsigned int col, const std::string& value, unsigned int offsetRow, bool doNotThrow /*= false*/) const
 {
 	for(unsigned int row = offsetRow; row < theDataView_.size(); ++row)
 	{
 		if(theDataView_[row][col] == value)
 			return row;
 	}
+	if(doNotThrow)
+		return TableView::INVALID;
 
-	__SS__ << "\tIn view: " << tableName_ << ", Can't find value=" << value
-	       << " in column named " << columnsInfo_[col].getName()
+	__SS__ << "\tIn view: " << tableName_ << ", Can't find value=" << value << " in column named " << columnsInfo_[col].getName()
 	       << " with type=" << columnsInfo_[col].getType() << __E__;
 	// Note: findRow gets purposely called by configuration GUI a lot looking for
 	// exceptions 	so may not want to print out
@@ -1425,11 +1443,8 @@ unsigned int TableView::findRow(unsigned int       col,
 }  // end findRow()
 
 //==============================================================================
-unsigned int TableView::findRowInGroup(unsigned int       col,
-                                       const std::string& value,
-                                       const std::string& groupId,
-                                       const std::string& childLinkIndex,
-                                       unsigned int       offsetRow) const
+unsigned int TableView::findRowInGroup(
+    unsigned int col, const std::string& value, const std::string& groupId, const std::string& childLinkIndex, unsigned int offsetRow) const
 {
 	unsigned int groupIdCol = getColLinkGroupID(childLinkIndex);
 	for(unsigned int row = offsetRow; row < theDataView_.size(); ++row)
@@ -1438,10 +1453,8 @@ unsigned int TableView::findRowInGroup(unsigned int       col,
 			return row;
 	}
 
-	__SS__ << "\tIn view: " << tableName_ << ", Can't find in group the value=" << value
-	       << " in column named '" << columnsInfo_[col].getName()
-	       << "' with type=" << columnsInfo_[col].getType() << " and GroupID: '"
-	       << groupId << "' in column '" << groupIdCol
+	__SS__ << "\tIn view: " << tableName_ << ", Can't find in group the value=" << value << " in column named '" << columnsInfo_[col].getName()
+	       << "' with type=" << columnsInfo_[col].getType() << " and GroupID: '" << groupId << "' in column '" << groupIdCol
 	       << "' with GroupID child link index '" << childLinkIndex << "'" << __E__;
 	// Note: findRowInGroup gets purposely called by configuration GUI a lot looking for
 	// exceptions 	so may not want to print out
@@ -1454,12 +1467,10 @@ unsigned int TableView::findRowInGroup(unsigned int       col,
 unsigned int TableView::findCol(const std::string& wildCardName) const
 {
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		if(StringMacros::wildCardMatch(wildCardName /*needle*/,
-		                               columnsInfo_[col].getName() /*haystack*/))
+		if(StringMacros::wildCardMatch(wildCardName /*needle*/, columnsInfo_[col].getName() /*haystack*/))
 			return col;
 
-	__SS__ << "\tIn view: " << tableName_ << ", Can't find column named '" << wildCardName
-	       << "'" << __E__;
+	__SS__ << "\tIn view: " << tableName_ << ", Can't find column named '" << wildCardName << "'" << __E__;
 	ss << "Existing columns:\n";
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
 		ss << "\t" << columnsInfo_[col].getName() << "\n";
@@ -1485,10 +1496,7 @@ unsigned int TableView::findColByType(const std::string& type, int startingCol) 
 
 // Getters
 //==============================================================================
-const std::string& TableView::getUniqueStorageIdentifier(void) const
-{
-	return uniqueStorageIdentifier_;
-}
+const std::string& TableView::getUniqueStorageIdentifier(void) const { return uniqueStorageIdentifier_; }
 
 //==============================================================================
 const std::string& TableView::getTableName(void) const { return tableName_; }
@@ -1509,10 +1517,7 @@ const time_t& TableView::getCreationTime(void) const { return creationTime_; }
 const time_t& TableView::getLastAccessTime(void) const { return lastAccessTime_; }
 
 //==============================================================================
-const bool& TableView::getLooseColumnMatching(void) const
-{
-	return fillWithLooseColumnMatching_;
-}
+const bool& TableView::getLooseColumnMatching(void) const { return fillWithLooseColumnMatching_; }
 
 //==============================================================================
 // getDataColumnSize
@@ -1527,26 +1532,17 @@ const unsigned int TableView::getDataColumnSize(void) const
 //==============================================================================
 // getSourceColumnMismatch
 //	The source information is only valid after modifying the table with ::fillFromJSON
-const unsigned int& TableView::getSourceColumnMismatch(void) const
-{
-	return sourceColumnMismatchCount_;
-}
+const unsigned int& TableView::getSourceColumnMismatch(void) const { return sourceColumnMismatchCount_; }
 
 //==============================================================================
 // getSourceColumnMissing
 //	The source information is only valid after modifying the table with ::fillFromJSON
-const unsigned int& TableView::getSourceColumnMissing(void) const
-{
-	return sourceColumnMissingCount_;
-}
+const unsigned int& TableView::getSourceColumnMissing(void) const { return sourceColumnMissingCount_; }
 
 //==============================================================================
 // getSourceColumnNames
 //	The source information is only valid after modifying the table with ::fillFromJSON
-const std::set<std::string>& TableView::getSourceColumnNames(void) const
-{
-	return sourceColumnNames_;
-}
+const std::set<std::string>& TableView::getSourceColumnNames(void) const { return sourceColumnNames_; }
 
 //==============================================================================
 std::set<std::string> TableView::getColumnNames(void) const
@@ -1591,8 +1587,7 @@ std::vector<std::string> TableView::getDefaultRowValues(void) const
 
 		if(columnsInfo_[col].isChildLink())
 		{
-			const std::vector<std::string>& theDataChoices =
-			    columnsInfo_[col].getDataChoices();
+			const std::vector<std::string>& theDataChoices = columnsInfo_[col].getDataChoices();
 
 			// check if arbitrary values allowed
 			if(!theDataChoices.size() ||  // if so, use default
@@ -1600,8 +1595,7 @@ std::vector<std::string> TableView::getDefaultRowValues(void) const
 				retVec.push_back(columnsInfo_[col].getDefaultValue());
 			else
 			{
-				bool skipOne =
-				    (theDataChoices.size() && theDataChoices[0] == "arbitraryBool=0");
+				bool skipOne = (theDataChoices.size() && theDataChoices[0] == "arbitraryBool=0");
 				bool hasSkipped;
 
 				// look for default value in list
@@ -1650,37 +1644,28 @@ const TableView::DataView& TableView::getDataView(void) const { return theDataVi
 //}
 
 //==============================================================================
-const std::vector<TableViewColumnInfo>& TableView::getColumnsInfo(void) const
-{
-	return columnsInfo_;
-}
+const std::vector<TableViewColumnInfo>& TableView::getColumnsInfo(void) const { return columnsInfo_; }
 
 //==============================================================================
-std::vector<TableViewColumnInfo>* TableView::getColumnsInfoP(void)
-{
-	return &columnsInfo_;
-}
+std::vector<TableViewColumnInfo>* TableView::getColumnsInfoP(void) { return &columnsInfo_; }
 //==============================================================================
 const TableViewColumnInfo& TableView::getColumnInfo(unsigned int column) const
 {
 	if(column >= columnsInfo_.size())
 	{
-		std::stringstream errMsg;
-		errMsg << __COUT_HDR_FL__ << "\nCan't find column " << column
+		__SS__ << "\nCan't find column " << column
 		       << "\n\n\n\nThe column info is likely missing due to incomplete "
 		          "Configuration View filling.\n\n"
 		       << __E__;
-		__THROW__(errMsg.str().c_str());
+		ss << StringMacros::stackTrace() << __E__;
+		__SS_THROW__;
 	}
 	return columnsInfo_[column];
 }  // end getColumnInfo()
 
 // Setters
 //==============================================================================
-void TableView::setUniqueStorageIdentifier(const std::string& storageUID)
-{
-	uniqueStorageIdentifier_ = storageUID;
-}
+void TableView::setUniqueStorageIdentifier(const std::string& storageUID) { uniqueStorageIdentifier_ = storageUID; }
 
 //==============================================================================
 void TableView::setTableName(const std::string& name) { tableName_ = name; }
@@ -1689,10 +1674,7 @@ void TableView::setTableName(const std::string& name) { tableName_ = name; }
 void TableView::setComment(const std::string& comment) { comment_ = comment; }
 
 //==============================================================================
-void TableView::setURIEncodedComment(const std::string& uriComment)
-{
-	comment_ = StringMacros::decodeURIComponent(uriComment);
-}
+void TableView::setURIEncodedComment(const std::string& uriComment) { comment_ = StringMacros::decodeURIComponent(uriComment); }
 
 //==============================================================================
 void TableView::setAuthor(const std::string& author) { author_ = author; }
@@ -1704,10 +1686,7 @@ void TableView::setCreationTime(time_t t) { creationTime_ = t; }
 void TableView::setLastAccessTime(time_t t) { lastAccessTime_ = t; }
 
 //==============================================================================
-void TableView::setLooseColumnMatching(bool setValue)
-{
-	fillWithLooseColumnMatching_ = setValue;
-}
+void TableView::setLooseColumnMatching(bool setValue) { fillWithLooseColumnMatching_ = setValue; }
 
 //==============================================================================
 void TableView::reset(void)
@@ -1725,15 +1704,14 @@ void TableView::print(std::ostream& out) const
 	out << "============================================================================="
 	       "="
 	    << __E__;
-	out << "Print: " << tableName_ << " Version: " << version_ << " Comment: " << comment_
-	    << " Author: " << author_ << " Creation Time: " << ctime(&creationTime_) << __E__;
+	out << "Print: " << tableName_ << " Version: " << version_ << " Comment: " << comment_ << " Author: " << author_
+	    << " Creation Time: " << ctime(&creationTime_) << __E__;
 	out << "\t\tNumber of Cols " << getNumberOfColumns() << __E__;
 	out << "\t\tNumber of Rows " << getNumberOfRows() << __E__;
 
 	out << "Columns:\t";
 	for(int i = 0; i < (int)columnsInfo_.size(); ++i)
-		out << i << ":" << columnsInfo_[i].getName() << ":"
-		    << columnsInfo_[i].getStorageName() << ":" << columnsInfo_[i].getType() << ":"
+		out << i << ":" << columnsInfo_[i].getName() << ":" << columnsInfo_[i].getStorageName() << ":" << columnsInfo_[i].getType() << ":"
 		    << columnsInfo_[i].getDataType() << "\t ";
 	out << __E__;
 
@@ -1752,7 +1730,7 @@ void TableView::print(std::ostream& out) const
 			{
 				int                      choiceIndex = -1;
 				std::vector<std::string> choices     = columnsInfo_[c].getDataChoices();
-				val = StringMacros::convertEnvironmentVariables(theDataView_[r][c]);
+				val                                  = StringMacros::convertEnvironmentVariables(theDataView_[r][c]);
 
 				if(val == columnsInfo_[c].getDefaultValue())
 					choiceIndex = 0;
@@ -1843,8 +1821,7 @@ void TableView::printJSON(std::ostream& out) const
 		{
 			out << "\t\t\"" << columnsInfo_[c].getStorageName() << "\" : ";
 
-			out << "\"" << getEscapedValueAsString(r, c, false)
-			    << "\"";  // do not convert env variables
+			out << "\"" << getEscapedValueAsString(r, c, false) << "\"";  // do not convert env variables
 
 			if(c + 1 < (int)getNumberOfColumns())
 				out << ",";
@@ -1980,9 +1957,8 @@ int TableView::fillFromJSON(const std::string& json)
 				startString = i;
 			else
 			{
-				extractedString = restoreJSONStringEntities(
-				    json.substr(startString + 1, i - startString - 1));
-				newString = 1;  // have new string!
+				extractedString = restoreJSONStringEntities(json.substr(startString + 1, i - startString - 1));
+				newString       = 1;  // have new string!
 			}
 			break;
 		case ':':
@@ -1990,8 +1966,7 @@ int TableView::fillFromJSON(const std::string& json)
 				break;  // skip if in quote
 
 			// must be a json object level to have a key
-			if(jsonPathType[jsonPathType.size() - 1] != '{' ||
-			   !newString)  // and must have a string for key
+			if(jsonPathType[jsonPathType.size() - 1] != '{' || !newString)  // and must have a string for key
 			{
 				__COUT__ << "Invalid ':' position" << __E__;
 				return -1;
@@ -2056,12 +2031,10 @@ int TableView::fillFromJSON(const std::string& json)
 				jsonPath.pop_back();
 				jsonPathType.pop_back();
 			}
-			else if(jsonPathType[jsonPathType.size() - 1] ==
-			        '[')  // this is a value in array
+			else if(jsonPathType[jsonPathType.size() - 1] == '[')  // this is a value in array
 			{
 				// key is last key
-				for(unsigned int k = jsonPathType.size() - 2; k < jsonPathType.size();
-				    --k)
+				for(unsigned int k = jsonPathType.size() - 2; k < jsonPathType.size(); --k)
 					if(jsonPathType[k] == 'K')
 					{
 						currKey = jsonPath[k];
@@ -2103,7 +2076,7 @@ int TableView::fillFromJSON(const std::string& json)
 			if(inQuotes)
 				break;  // skip if in quote
 
-			if(lastPopType != '{' &&  // don't need value again of nested object
+			if(lastPopType != '{' &&                          // don't need value again of nested object
 			   jsonPathType[jsonPathType.size() - 1] == 'K')  // this is the value to key
 			{
 				currDepth = bracketCount;
@@ -2119,8 +2092,7 @@ int TableView::fillFromJSON(const std::string& json)
 					if(endNumber <= startNumber)  // empty data, could be {}
 						currVal = "";
 					else
-						currVal =
-						    json.substr(startNumber + 1, endNumber - startNumber - 1);
+						currVal = json.substr(startNumber + 1, endNumber - startNumber - 1);
 				}
 				newValue = 1;  // new value to consider!
 				// pop key
@@ -2253,8 +2225,7 @@ int TableView::fillFromJSON(const std::string& json)
 
 			matchedKey = -1;  // init to unfound
 			for(unsigned int k = 0; k < keys.size(); ++k)
-				if((currDepth == 1 && keys[k] == currKey) ||
-				   (currDepth > 1 && keys[k] == jsonPath[1]))
+				if((currDepth == 1 && keys[k] == currKey) || (currDepth > 1 && keys[k] == jsonPath[1]))
 					matchedKey = k;
 
 			if(matchedKey != (unsigned int)-1)
@@ -2323,17 +2294,15 @@ int TableView::fillFromJSON(const std::string& json)
 
 								if(row >= getNumberOfRows())
 								{
-									__SS__ << "Invalid row"
-									       << __E__;  // should be impossible?
+									__SS__ << "Invalid row" << __E__;  // should be impossible?
 									std::cout << ss.str();
 									__SS_THROW__;
 									return -1;
 								}
 
-								theDataView_[row][col] =
-								    currVal;  // THERE IS NO CHECK FOR WHAT IS READ FROM
-								              // THE DATABASE. IT SHOULD BE ALREADY
-								              // CONSISTENT
+								theDataView_[row][col] = currVal;  // THERE IS NO CHECK FOR WHAT IS READ FROM
+								                                   // THE DATABASE. IT SHOULD BE ALREADY
+								                                   // CONSISTENT
 								break;
 							}
 							else
@@ -2345,26 +2314,18 @@ int TableView::fillFromJSON(const std::string& json)
 								//	(this is for backwards compatibility..)
 								keyIsMatch   = true;
 								keyIsComment = true;
-								for(keyIsMatchIndex    = 0,
-								keyIsMatchStorageIndex = 0,
-								keyIsMatchCommentIndex = 0;
-								    keyIsMatchIndex < currKey.size();
+								for(keyIsMatchIndex = 0, keyIsMatchStorageIndex = 0, keyIsMatchCommentIndex = 0; keyIsMatchIndex < currKey.size();
 								    ++keyIsMatchIndex)
 								{
-									if(columnsInfo_[col]
-									       .getStorageName()[keyIsMatchStorageIndex] ==
-									   '_')
+									if(columnsInfo_[col].getStorageName()[keyIsMatchStorageIndex] == '_')
 										++keyIsMatchStorageIndex;  // skip to next storage
 										                           // character
 									if(currKey[keyIsMatchIndex] == '_')
 										continue;  // skip to next character
 
 									// match to storage name
-									if(keyIsMatchStorageIndex >=
-									       columnsInfo_[col].getStorageName().size() ||
-									   currKey[keyIsMatchIndex] !=
-									       columnsInfo_[col]
-									           .getStorageName()[keyIsMatchStorageIndex])
+									if(keyIsMatchStorageIndex >= columnsInfo_[col].getStorageName().size() ||
+									   currKey[keyIsMatchIndex] != columnsInfo_[col].getStorageName()[keyIsMatchStorageIndex])
 									{
 										// size mismatch or character mismatch
 										keyIsMatch = false;
@@ -2373,11 +2334,9 @@ int TableView::fillFromJSON(const std::string& json)
 									}
 
 									// check also if alternate comment is matched
-									if(keyIsComment &&
-									   keyIsMatchCommentIndex < COMMENT_ALT_KEY.size())
+									if(keyIsComment && keyIsMatchCommentIndex < COMMENT_ALT_KEY.size())
 									{
-										if(currKey[keyIsMatchIndex] !=
-										   COMMENT_ALT_KEY[keyIsMatchCommentIndex])
+										if(currKey[keyIsMatchIndex] != COMMENT_ALT_KEY[keyIsMatchCommentIndex])
 										{
 											// character mismatch with COMMENT
 											keyIsComment = false;
@@ -2387,17 +2346,15 @@ int TableView::fillFromJSON(const std::string& json)
 									++keyIsMatchStorageIndex;  // go to next character
 								}
 
-								if(keyIsMatch ||
-								   keyIsComment)  // currKey ==
-								                  // columnsInfo_[c].getStorageName())
+								if(keyIsMatch || keyIsComment)  // currKey ==
+								                                // columnsInfo_[c].getStorageName())
 								{
 									// matched
 									if(col <= lastCol)  // add row (use lastCol in case
 									                    // new column-0 was added
 									{
 										if(getNumberOfRows())  // skip first time
-											sourceColumnMissingCount_ +=
-											    getNumberOfColumns() - colFoundCount;
+											sourceColumnMissingCount_ += getNumberOfColumns() - colFoundCount;
 
 										colFoundCount = 0;  // reset column found count
 										row           = addRow();
@@ -2412,8 +2369,7 @@ int TableView::fillFromJSON(const std::string& json)
 
 									if(row >= getNumberOfRows())
 									{
-										__SS__ << "Invalid row"
-										       << __E__;  // should be impossible?!
+										__SS__ << "Invalid row" << __E__;  // should be impossible?!
 										__COUT__ << "\n" << ss.str();
 										__SS_THROW__;
 										return -1;  // never gets here
@@ -2427,17 +2383,13 @@ int TableView::fillFromJSON(const std::string& json)
 
 						if(ccnt >= getNumberOfColumns())
 						{
-							__COUT__
-							    << "Invalid column in JSON source data: " << currKey
-							    << " not found in column names of table named "
-							    << getTableName() << "."
-							    << __E__;  // input data doesn't match config description
+							__COUT__ << "Invalid column in JSON source data: " << currKey << " not found in column names of table named " << getTableName()
+							         << "." << __E__;  // input data doesn't match config description
 
 							// CHANGED on 11/10/2016
 							//	to.. try just not populating data instead of error
 							++sourceColumnMismatchCount_;  // but count errors
-							if(getNumberOfRows() ==
-							   1)  // only for first row, track source column names
+							if(getNumberOfRows() == 1)     // only for first row, track source column names
 								sourceColumnNames_.emplace(currKey);
 
 							//__SS_THROW__;
@@ -2473,13 +2425,9 @@ int TableView::fillFromJSON(const std::string& json)
 		__SS__ << "Can not ignore errors because not every column was found in the "
 		          "source data!"
 		       << ". Please see the details below:\n\n"
-		       << "The source column size was found to be " << getDataColumnSize()
-		       << ", and the current number of columns for this table is "
-		       << getNumberOfColumns() << ". This resulted in a count of "
-		       << getSourceColumnMismatch()
-		       << " source column mismatches, and a count of " << getSourceColumnMissing()
-		       << " table entries missing in " << getNumberOfRows() << " row(s) of data."
-		       << __E__;
+		       << "The source column size was found to be " << getDataColumnSize() << ", and the current number of columns for this table is "
+		       << getNumberOfColumns() << ". This resulted in a count of " << getSourceColumnMismatch() << " source column mismatches, and a count of "
+		       << getSourceColumnMissing() << " table entries missing in " << getNumberOfRows() << " row(s) of data." << __E__;
 
 		const std::set<std::string> srcColNames = getSourceColumnNames();
 		ss << "\n\nSource column names in ALPHABETICAL order were as follows:\n";
@@ -2515,7 +2463,7 @@ int TableView::fillFromJSON(const std::string& json)
 		}
 		ss << __E__;
 		ss << StringMacros::stackTrace();
-		__SS_THROW__;
+		__SS_ONLY_THROW__;
 	}
 
 	// print();
@@ -2586,9 +2534,7 @@ bool TableView::isURIEncodedCommentTheSame(const std::string& comment) const
 //	Returns 1 if data was same, but columns are different
 //	otherwise 0
 //
-int TableView::fillFromCSV(const std::string& data,
-                           const int&         dataOffset,
-                           const std::string& author)
+int TableView::fillFromCSV(const std::string& data, const int& dataOffset, const std::string& author)
 {
 	int retVal = 0;
 
@@ -2674,11 +2620,9 @@ int TableView::fillFromCSV(const std::string& data,
 		if(match)
 		{
 			for(auto& destColName : getColumnStorageNames())
-				if(getSourceColumnNames().find(destColName) ==
-				   getSourceColumnNames().end())
+				if(getSourceColumnNames().find(destColName) == getSourceColumnNames().end())
 				{
-					__COUT__ << "Found column name mismach for '" << destColName
-					         << "'... So allowing same data!" << __E__;
+					__COUT__ << "Found column name mismach for '" << destColName << "'... So allowing same data!" << __E__;
 
 					match = false;
 					break;
@@ -2687,8 +2631,7 @@ int TableView::fillFromCSV(const std::string& data,
 		// if still a match, do not allow!
 		if(match)
 		{
-			__SS__ << "No rows were modified! No reason to fill a view with same content."
-			       << __E__;
+			__SS__ << "No rows were modified! No reason to fill a view with same content." << __E__;
 			__COUT__ << "\n" << ss.str();
 			return -1;
 		}
@@ -2722,23 +2665,18 @@ int TableView::fillFromCSV(const std::string& data,
 //	if author == "", do nothing special for author and timestamp column
 //	if author != "", assign author for any row that has been modified, and assign now as
 // timestamp
-bool TableView::setURIEncodedValue(const std::string&  value,
-                                   const unsigned int& r,
-                                   const unsigned int& c,
-                                   const std::string&  author)
+bool TableView::setURIEncodedValue(const std::string& value, const unsigned int& r, const unsigned int& c, const std::string& author)
 {
 	if(!(c < columnsInfo_.size() && r < getNumberOfRows()))
 	{
 		__SS__ << "Invalid row (" << (int)r << ") col (" << (int)c << ") requested!"
-		       << "Number of Rows = " << getNumberOfRows()
-		       << "Number of Columns = " << columnsInfo_.size() << __E__;
+		       << "Number of Rows = " << getNumberOfRows() << "Number of Columns = " << columnsInfo_.size() << __E__;
 		print(ss);
 		__SS_THROW__;
 	}
 
-	std::string valueStr = StringMacros::decodeURIComponent(value);
-	std::string originalValueStr =
-	    getValueAsString(r, c, false);  // do not convert env variables
+	std::string valueStr         = StringMacros::decodeURIComponent(value);
+	std::string originalValueStr = getValueAsString(r, c, false);  // do not convert env variables
 
 	//__COUT__ << "valueStr " << valueStr << __E__;
 	//__COUT__ << "originalValueStr " << originalValueStr << __E__;
@@ -2780,9 +2718,7 @@ bool TableView::setURIEncodedValue(const std::string&  value,
 	else
 		theDataView_[r][c] = valueStr;
 
-	bool rowWasModified =
-	    (originalValueStr !=
-	     getValueAsString(r, c, false));  // do not convert env variables
+	bool rowWasModified = (originalValueStr != getValueAsString(r, c, false));  // do not convert env variables
 
 	// if row was modified, assign author and timestamp
 	if(author != "" && rowWasModified)
@@ -2813,16 +2749,17 @@ void TableView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //	if baseNameAutoUID != "", creates a UID based on this base name
 //		and increments and appends an integer relative to the previous last row
 unsigned int TableView::addRow(const std::string& author,
-                               unsigned char      incrementUniqueData,
-                               std::string        baseNameAutoUID,
-                               unsigned int       rowToAdd)
+                               unsigned char      incrementUniqueData /*= false */,  // leave as unsigned char rather than
+                               // bool, too many things (e.g. strings)
+                               // evaluate successfully to bool values
+                               const std::string& baseNameAutoUID /*= "" */,
+                               unsigned int       rowToAdd /*= -1 */)
 {
 	// default to last row
 	if(rowToAdd == (unsigned int)-1)
 		rowToAdd = getNumberOfRows();
 
-	theDataView_.resize(getNumberOfRows() + 1,
-	                    std::vector<std::string>(getNumberOfColumns()));
+	theDataView_.resize(getNumberOfRows() + 1, std::vector<std::string>(getNumberOfColumns()));
 
 	// shift data down the table if necessary
 	for(unsigned int r = getNumberOfRows() - 2; r >= rowToAdd; --r)
@@ -2853,91 +2790,93 @@ unsigned int TableView::addRow(const std::string& author,
 		// baseNameAutoUID indicates to attempt to make row unique
 		//	add index to max number
 		if(incrementUniqueData &&
-		   (col == getColUID() ||
-		    (getNumberOfRows() > 1 &&
-		     (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
-		      columnsInfo_[col].getType() ==
-		          TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))))
+		   (col == getColUID() || (getNumberOfRows() > 1 && (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
+		                                                     columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))))
 		{
-			//			__COUT__ << "Current unique data entry is data[" << rowToAdd
-			//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col]
-			//<<
-			//"'"
-			//			         << __E__;
-
-			maxUniqueData = 0;
-			tmpString     = "";
-			baseString    = "";
-
-			// find max in rows
-
-			// this->print();
-
-			for(unsigned int r = 0; r < getNumberOfRows(); ++r)
-			{
-				if(r == rowToAdd)
-					continue;  // skip row to add
-
-				// find last non numeric character
-
-				foundAny  = false;
-				tmpString = theDataView_[r][col];
-
-				//__COUT__ << "tmpString " << tmpString << __E__;
-
-				for(index = tmpString.length() - 1; index < tmpString.length(); --index)
-				{
-					//__COUT__ << index << " tmpString[index] " << tmpString[index] <<
-					//__E__;
-					if(!(tmpString[index] >= '0' && tmpString[index] <= '9'))
-						break;  // if not numeric, break
-					foundAny = true;
-				}
-
-				//__COUT__ << "index " << index << __E__;
-
-				if(tmpString.length() && foundAny)  // then found a numeric substring
-				{
-					// create numeric substring
-					numString = tmpString.substr(index + 1);
-					tmpString = tmpString.substr(0, index + 1);
-
-					//__COUT__ << "Found unique data base string '" <<
-					//		tmpString << "' and number string '" << numString <<
-					//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
-
-					// extract number
-					sscanf(numString.c_str(), "%u", &index);
-
-					if(index > maxUniqueData)
-					{
-						maxUniqueData = index;
-						baseString    = tmpString;
-					}
-				}
-			}
-
-			++maxUniqueData;  // increment
-
-			sprintf(indexString, "%u", maxUniqueData);
-			//__COUT__ << "indexString " << indexString << __E__;
-
-			//__COUT__ << "baseNameAutoUID " << baseNameAutoUID << __E__;
 			if(col == getColUID())
-			{
-				// handle UID case
-				if(baseNameAutoUID != "")
-					theDataView_[rowToAdd][col] = baseNameAutoUID + indexString;
-				else
-					theDataView_[rowToAdd][col] = baseString + indexString;
-			}
+				setUniqueColumnValue(rowToAdd, col, baseNameAutoUID /*baseValueAsString*/);
 			else
-				theDataView_[rowToAdd][col] = baseString + indexString;
-
-			__COUT__ << "New unique data entry is data[" << rowToAdd << "][" << col
-			         << "] = '" << theDataView_[rowToAdd][col] << "'" << __E__;
-
-			// this->print();
+				setUniqueColumnValue(rowToAdd, col);
+			//
+			//			//			__COUT__ << "Current unique data entry is data[" << rowToAdd
+			//			//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col]
+			//			//<<
+			//			//"'"
+			//			//			         << __E__;
+			//
+			//			maxUniqueData = 0;
+			//			tmpString     = "";
+			//			baseString    = "";
+			//
+			//			// find max in rows
+			//
+			//			// this->print();
+			//
+			//			for(unsigned int r = 0; r < getNumberOfRows(); ++r)
+			//			{
+			//				if(r == rowToAdd)
+			//					continue;  // skip row to add
+			//
+			//				// find last non numeric character
+			//
+			//				foundAny  = false;
+			//				tmpString = theDataView_[r][col];
+			//
+			//				//__COUT__ << "tmpString " << tmpString << __E__;
+			//
+			//				for(index = tmpString.length() - 1; index < tmpString.length(); --index)
+			//				{
+			//					//__COUT__ << index << " tmpString[index] " << tmpString[index] <<
+			//					//__E__;
+			//					if(!(tmpString[index] >= '0' && tmpString[index] <= '9'))
+			//						break;  // if not numeric, break
+			//					foundAny = true;
+			//				}
+			//
+			//				//__COUT__ << "index " << index << __E__;
+			//
+			//				if(tmpString.length() && foundAny)  // then found a numeric substring
+			//				{
+			//					// create numeric substring
+			//					numString = tmpString.substr(index + 1);
+			//					tmpString = tmpString.substr(0, index + 1);
+			//
+			//					//__COUT__ << "Found unique data base string '" <<
+			//					//		tmpString << "' and number string '" << numString <<
+			//					//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
+			//
+			//					// extract number
+			//					sscanf(numString.c_str(), "%u", &index);
+			//
+			//					if(index > maxUniqueData)
+			//					{
+			//						maxUniqueData = index;
+			//						baseString    = tmpString;
+			//					}
+			//				}
+			//			}
+			//
+			//			++maxUniqueData;  // increment
+			//
+			//			sprintf(indexString, "%u", maxUniqueData);
+			//			//__COUT__ << "indexString " << indexString << __E__;
+			//
+			//			//__COUT__ << "baseNameAutoUID " << baseNameAutoUID << __E__;
+			//			if(col == getColUID())
+			//			{
+			//				// handle UID case
+			//				if(baseNameAutoUID != "")
+			//					theDataView_[rowToAdd][col] = baseNameAutoUID + indexString;
+			//				else
+			//					theDataView_[rowToAdd][col] = baseString + indexString;
+			//			}
+			//			else
+			//				theDataView_[rowToAdd][col] = baseString + indexString;
+			//
+			//			__COUT__ << "New unique data entry is data[" << rowToAdd << "][" << col
+			//			         << "] = '" << theDataView_[rowToAdd][col] << "'" << __E__;
+			//
+			//			// this->print();
 		}
 		else
 			theDataView_[rowToAdd][col] = defaultRowValues[col];
@@ -2946,6 +2885,7 @@ unsigned int TableView::addRow(const std::string& author,
 	if(author != "")
 	{
 		__COUT__ << "Row=" << rowToAdd << " was created!" << __E__;
+
 		int authorCol    = findColByType(TableViewColumnInfo::TYPE_AUTHOR);
 		int timestampCol = findColByType(TableViewColumnInfo::TYPE_TIMESTAMP);
 		setValue(author, rowToAdd, authorCol);
@@ -2963,9 +2903,7 @@ void TableView::deleteRow(int r)
 	if(r >= (int)getNumberOfRows())
 	{
 		// out of bounds
-		__SS__ << "Row " << (int)r
-		       << " is out of bounds (Row Count = " << getNumberOfRows()
-		       << ") and can not be deleted." << __E__;
+		__SS__ << "Row " << (int)r << " is out of bounds (Row Count = " << getNumberOfRows() << ") and can not be deleted." << __E__;
 		__SS_THROW__;
 	}
 
@@ -2988,10 +2926,7 @@ void TableView::deleteRow(int r)
 //  TYPE_START_CHILD_LINK_GROUP_ID
 //
 //	returns true if column is member of a group or unique link.
-const bool TableView::getChildLink(
-    const unsigned int&                                                 c,
-    bool&                                                               isGroup,
-    std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>& linkPair) const
+const bool TableView::getChildLink(const unsigned int& c, bool& isGroup, std::pair<unsigned int /*link col*/, unsigned int /*link id col*/>& linkPair) const
 {
 	if(!(c < columnsInfo_.size()))
 	{
@@ -3003,8 +2938,7 @@ const bool TableView::getChildLink(
 	//		columnsInfo_[c].getType() << "-" << columnsInfo_[c].getName() << __E__;
 
 	// check if column is a child link UID
-	if((isGroup = columnsInfo_[c].isChildLinkGroupID()) ||
-	   columnsInfo_[c].isChildLinkUID())
+	if((isGroup = columnsInfo_[c].isChildLinkGroupID()) || columnsInfo_[c].isChildLinkUID())
 	{
 		// must be part of unique link, (or invalid table?)
 		//__COUT__ << "col: " << (int)c << __E__;
@@ -3020,8 +2954,7 @@ const bool TableView::getChildLink(
 			// columnsInfo_[col].getName() << __E__;
 			if(col == c)
 				continue;  // skip column c that we know
-			else if(columnsInfo_[col].isChildLink() &&
-			        index == columnsInfo_[col].getChildLinkIndex())
+			else if(columnsInfo_[col].isChildLink() && index == columnsInfo_[col].getChildLinkIndex())
 			{
 				// found match!
 				//__COUT__ << "getChildLink Found match for col: " << (int)c << " at " <<
@@ -3032,9 +2965,7 @@ const bool TableView::getChildLink(
 		}
 
 		// if here then invalid table!
-		__SS__ << "\tIn view: " << tableName_
-		       << ", Can't find complete child link for column name "
-		       << columnsInfo_[c].getName() << __E__;
+		__SS__ << "\tIn view: " << tableName_ << ", Can't find complete child link for column name " << columnsInfo_[c].getName() << __E__;
 		__SS_THROW__;
 	}
 
@@ -3065,8 +2996,7 @@ const bool TableView::getChildLink(
 		//		if(columnsInfo_[col].isChildLinkGroupID())
 		//			__COUT__ << "-L" << columnsInfo_[col].getChildLinkIndex() << __E__;
 
-		if(((columnsInfo_[col].isChildLinkUID() && !(isGroup = false)) ||
-		    (columnsInfo_[col].isChildLinkGroupID() && (isGroup = true))) &&
+		if(((columnsInfo_[col].isChildLinkUID() && !(isGroup = false)) || (columnsInfo_[col].isChildLinkGroupID() && (isGroup = true))) &&
 		   index == columnsInfo_[col].getChildLinkIndex())
 		{
 			// found match!
@@ -3078,8 +3008,6 @@ const bool TableView::getChildLink(
 	}
 
 	// if here then invalid table!
-	__SS__ << "\tIn view: " << tableName_
-	       << ", Can't find complete child link id for column name "
-	       << columnsInfo_[c].getName() << __E__;
+	__SS__ << "\tIn view: " << tableName_ << ", Can't find complete child link id for column name " << columnsInfo_[c].getName() << __E__;
 	__SS_THROW__;
 }  // end getChildLink()

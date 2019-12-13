@@ -2,33 +2,27 @@
 
 using namespace ots;
 
-const CorePropertySupervisorBase::SupervisorProperties
-    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES =
-        CorePropertySupervisorBase::SupervisorProperties();
+const CorePropertySupervisorBase::SupervisorProperties CorePropertySupervisorBase::SUPERVISOR_PROPERTIES = CorePropertySupervisorBase::SupervisorProperties();
 
 //========================================================================================================================
 CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* application)
     : theConfigurationManager_(0)  // new ConfigurationManager)
     , supervisorClass_(application->getApplicationDescriptor()->getClassName())
-    , supervisorClassNoNamespace_(supervisorClass_.substr(
-          supervisorClass_.find_last_of(":") + 1,
-          supervisorClass_.length() - supervisorClass_.find_last_of(":")))
-    , supervisorContextUID_(
-          "UNINITIALIZED_supervisorContextUID")  // MUST BE INITIALIZED
-                                                 // INSIDE THE CONTRUCTOR
-                                                 // TO THROW EXCEPTIONS
-                                                 // on bad conditions
-    , supervisorApplicationUID_(
-          "UNINITIALIZED_supervisorApplicationUID")  // MUST BE INITIALIZED INSIDE THE
-                                                     // CONTRUCTOR TO THROW EXCEPTIONS on
-                                                     // bad conditions
-    , supervisorConfigurationPath_(
-          "UNINITIALIZED_supervisorConfigurationPath")  // MUST BE INITIALIZED INSIDE THE
-                                                        // CONTRUCTOR TO THROW EXCEPTIONS
-                                                        // on bad conditions
+    , supervisorClassNoNamespace_(
+          supervisorClass_.substr(supervisorClass_.find_last_of(":") + 1, supervisorClass_.length() - supervisorClass_.find_last_of(":")))
+    , supervisorContextUID_("UNINITIALIZED_supervisorContextUID")                // MUST BE INITIALIZED
+                                                                                 // INSIDE THE CONTRUCTOR
+                                                                                 // TO THROW EXCEPTIONS
+                                                                                 // on bad conditions
+    , supervisorApplicationUID_("UNINITIALIZED_supervisorApplicationUID")        // MUST BE INITIALIZED INSIDE THE
+                                                                                 // CONTRUCTOR TO THROW EXCEPTIONS on
+                                                                                 // bad conditions
+    , supervisorConfigurationPath_("UNINITIALIZED_supervisorConfigurationPath")  // MUST BE INITIALIZED INSIDE THE
+                                                                                 // CONTRUCTOR TO THROW EXCEPTIONS
+                                                                                 // on bad conditions
     , propertiesAreSetup_(false)
 {
-	INIT_MF("CorePropertySupervisorBase");
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
 	__SUP_COUTV__(application->getApplicationContext()->getContextDescriptor()->getURL());
 	__SUP_COUTV__(application->getApplicationDescriptor()->getLocalId());
@@ -40,20 +34,15 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 
 	if(allSupervisorInfo_.isMacroMakerMode())
 	{
-		theConfigurationManager_ = new ConfigurationManager(false /*initForWriteAccess*/,
-		                                                    true /*initializeFromFhicl*/);
-		__SUP_COUT__
-		    << "Macro Maker mode detected. So skipping configuration location work for "
-		       "supervisor of class '"
-		    << supervisorClass_ << "'" << __E__;
+		theConfigurationManager_ = new ConfigurationManager(false /*initForWriteAccess*/, true /*initializeFromFhicl*/);
+		__SUP_COUT__ << "Macro Maker mode detected. So skipping configuration location work for "
+		                "supervisor of class '"
+		             << supervisorClass_ << "'" << __E__;
 
-		supervisorContextUID_     = "MacroMakerFEContext";
-		supervisorApplicationUID_ = "MacroMakerFESupervisor";
-		supervisorConfigurationPath_ =
-		    CorePropertySupervisorBase::supervisorContextUID_ +
-		    "/LinkToApplicationTable/" +
-		    CorePropertySupervisorBase::supervisorApplicationUID_ +
-		    "/LinkToSupervisorTable";
+		supervisorContextUID_        = "MacroMakerFEContext";
+		supervisorApplicationUID_    = "MacroMakerFESupervisor";
+		supervisorConfigurationPath_ = CorePropertySupervisorBase::supervisorContextUID_ + "/LinkToApplicationTable/" +
+		                               CorePropertySupervisorBase::supervisorApplicationUID_ + "/LinkToSupervisorTable";
 
 		__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
 		__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
@@ -68,9 +57,8 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 		__SUP_COUT__ << "Wiz mode detected. So skipping configuration location work for "
 		                "supervisor of class '"
 		             << supervisorClass_ << "'" << __E__;
-		supervisorContextUID_ = "NO CONTEXT ID IN WIZ MODE";
-		supervisorApplicationUID_ =
-		    std::to_string(application->getApplicationDescriptor()->getLocalId());
+		supervisorContextUID_        = "NO CONTEXT ID IN WIZ MODE";
+		supervisorApplicationUID_    = std::to_string(application->getApplicationDescriptor()->getLocalId());
 		supervisorConfigurationPath_ = "NO APP PATH IN WIZ MODE";
 
 		__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
@@ -80,9 +68,8 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 		return;
 	}
 
-	__SUP_COUT__ << "Getting configuration specific info for supervisor '"
-	             << (allSupervisorInfo_.getSupervisorInfo(application).getName())
-	             << "' of class " << supervisorClass_ << "." << __E__;
+	__SUP_COUT__ << "Getting configuration specific info for supervisor '" << (allSupervisorInfo_.getSupervisorInfo(application).getName()) << "' of class "
+	             << supervisorClass_ << "." << __E__;
 
 	// get configuration specific info for the application supervisor
 
@@ -90,46 +77,34 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	{
 		theConfigurationManager_ = new ConfigurationManager();
 		CorePropertySupervisorBase::supervisorContextUID_ =
-		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
-		        ->getContextUID(application->getApplicationContext()
-		                            ->getContextDescriptor()
-		                            ->getURL());
-	}
-	catch(...)
-	{
-		__SUP_COUT_ERR__
-		    << "XDAQ Supervisor could not access it's configuration through "
-		       "the Configuration Manager."
-		    << ". The getApplicationContext()->getContextDescriptor()->getURL() = "
-		    << application->getApplicationContext()->getContextDescriptor()->getURL()
-		    << __E__;
-		throw;
-	}
-
-	try
-	{
-		CorePropertySupervisorBase::supervisorApplicationUID_ =
-		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
-		        ->getApplicationUID(
-		            application->getApplicationContext()
-		                ->getContextDescriptor()
-		                ->getURL(),
-		            application->getApplicationDescriptor()->getLocalId());
+		    theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)->getContextUID(application->getApplicationContext()->getContextDescriptor()->getURL());
 	}
 	catch(...)
 	{
 		__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
 		                    "the Configuration Manager."
-		                 << " The supervisorContextUID_ = " << supervisorContextUID_
-		                 << ". The supervisorApplicationUID = "
-		                 << supervisorApplicationUID_ << __E__;
+		                 << ". The getApplicationContext()->getContextDescriptor()->getURL() = "
+		                 << application->getApplicationContext()->getContextDescriptor()->getURL() << __E__;
 		throw;
 	}
 
-	CorePropertySupervisorBase::supervisorConfigurationPath_ =
-	    "/" + CorePropertySupervisorBase::supervisorContextUID_ +
-	    "/LinkToApplicationTable/" +
-	    CorePropertySupervisorBase::supervisorApplicationUID_ + "/LinkToSupervisorTable";
+	try
+	{
+		CorePropertySupervisorBase::supervisorApplicationUID_ = theConfigurationManager_->__GET_CONFIG__(XDAQContextTable)
+		                                                            ->getApplicationUID(application->getApplicationContext()->getContextDescriptor()->getURL(),
+		                                                                                application->getApplicationDescriptor()->getLocalId());
+	}
+	catch(...)
+	{
+		__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration through "
+		                    "the Configuration Manager."
+		                 << " The supervisorContextUID_ = " << supervisorContextUID_ << ". The supervisorApplicationUID = " << supervisorApplicationUID_
+		                 << __E__;
+		throw;
+	}
+
+	CorePropertySupervisorBase::supervisorConfigurationPath_ = "/" + CorePropertySupervisorBase::supervisorContextUID_ + "/LinkToApplicationTable/" +
+	                                                           CorePropertySupervisorBase::supervisorApplicationUID_ + "/LinkToSupervisorTable";
 
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorContextUID_);
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
@@ -137,10 +112,8 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 
 	CorePropertySupervisorBase::indicateOtsAlive(this);
 
-	theConfigurationManager_->setOwnerContext(
-	    CorePropertySupervisorBase::supervisorContextUID_);
-	theConfigurationManager_->setOwnerApp(
-	    CorePropertySupervisorBase::supervisorApplicationUID_);
+	theConfigurationManager_->setOwnerContext(CorePropertySupervisorBase::supervisorContextUID_);
+	theConfigurationManager_->setOwnerApp(CorePropertySupervisorBase::supervisorApplicationUID_);
 
 }  // end constructor
 
@@ -152,8 +125,7 @@ CorePropertySupervisorBase::~CorePropertySupervisorBase(void)
 }  // end destructor
 
 //========================================================================================================================
-void CorePropertySupervisorBase::indicateOtsAlive(
-    const CorePropertySupervisorBase* properties)
+void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBase* properties)
 {
 	char        portStr[100] = "0";
 	std::string hostname     = "wiz";
@@ -163,16 +135,10 @@ void CorePropertySupervisorBase::indicateOtsAlive(
 
 	if(properties)
 	{
-		unsigned int port = properties->getContextTreeNode()
-		                        .getNode(properties->supervisorContextUID_)
-		                        .getNode("Port")
-		                        .getValue<unsigned int>();
+		unsigned int port = properties->getContextTreeNode().getNode(properties->supervisorContextUID_).getNode("Port").getValue<unsigned int>();
 		sprintf(portStr, "%u", port);
 
-		hostname = properties->getContextTreeNode()
-		               .getNode(properties->supervisorContextUID_)
-		               .getNode("Address")
-		               .getValue<std::string>();
+		hostname = properties->getContextTreeNode().getNode(properties->supervisorContextUID_).getNode("Address").getValue<std::string>();
 
 		size_t i = hostname.find("//");
 		if(i != std::string::npos)
@@ -182,9 +148,8 @@ void CorePropertySupervisorBase::indicateOtsAlive(
 	}
 
 	// indicate ots is alive (for StartOTS.sh to verify launch was successful)
-	std::string filename = std::string(__ENV__("OTSDAQ_LOG_DIR")) + "/otsdaq_is_alive-" +
-	                       hostname + "-" + portStr + ".dat";
-	FILE* fp = fopen(filename.c_str(), "w");
+	std::string filename = std::string(__ENV__("OTSDAQ_LOG_DIR")) + "/otsdaq_is_alive-" + hostname + "-" + portStr + ".dat";
+	FILE*       fp       = fopen(filename.c_str(), "w");
 	if(!fp)
 	{
 		__SS__ << "Failed to open the ots-is-alive file: " << filename << __E__;
@@ -210,32 +175,18 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 	//		"..." << __E__;
 
 	// set core Supervisor base class defaults
-	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,
-	    "*=1");
-	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsAllowed, "");
-	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsDisallowed, "");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold, "*=1");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsAllowed, "");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsDisallowed, "");
 
-	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.CheckUserLockRequestTypes, "");
-	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireUserLockRequestTypes,
-	    "");
-	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AutomatedRequestTypes, "");
-	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AllowNoLoginRequestTypes, "");
-	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireSecurityRequestTypes,
-	    "");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.CheckUserLockRequestTypes, "");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireUserLockRequestTypes, "");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AutomatedRequestTypes, "");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AllowNoLoginRequestTypes, "");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireSecurityRequestTypes, "");
 
-	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NoXmlWhiteSpaceRequestTypes,
-	    "");
-	CorePropertySupervisorBase::setSupervisorProperty(
-	    CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NonXMLRequestTypes, "");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NoXmlWhiteSpaceRequestTypes, "");
+	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NonXMLRequestTypes, "");
 
 	//	__SUP_COUT__ << "Done setting up Core Supervisor Base property defaults for
 	// supervisor" <<
@@ -255,9 +206,8 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 //
 //	Use with CorePropertySupervisorBase::doPermissionsGrantAccess to determine
 //		if access is allowed.
-void CorePropertySupervisorBase::extractPermissionsMapFromString(
-    const std::string&                                  permissionsString,
-    std::map<std::string, WebUsers::permissionLevel_t>& permissionsMap)
+void CorePropertySupervisorBase::extractPermissionsMapFromString(const std::string&                                  permissionsString,
+                                                                 std::map<std::string, WebUsers::permissionLevel_t>& permissionsMap)
 {
 	permissionsMap.clear();
 	StringMacros::getMapFromString(permissionsString, permissionsMap);
@@ -281,9 +231,8 @@ void CorePropertySupervisorBase::extractPermissionsMapFromString(
 //		<groupName>:<permissionsThreshold> pairs separated by ',' '&' or '|'
 //		for example, to give access admins and pixel team but not calorimeter team:
 //			allUsers:255 | pixelTeam:1 | calorimeterTeam:0
-bool CorePropertySupervisorBase::doPermissionsGrantAccess(
-    std::map<std::string, WebUsers::permissionLevel_t>& permissionLevelsMap,
-    std::map<std::string, WebUsers::permissionLevel_t>& permissionThresholdsMap)
+bool CorePropertySupervisorBase::doPermissionsGrantAccess(std::map<std::string, WebUsers::permissionLevel_t>& permissionLevelsMap,
+                                                          std::map<std::string, WebUsers::permissionLevel_t>& permissionThresholdsMap)
 {
 	// return true if a permission level group name is found with a permission level
 	//	greater than or equal to the permission level at a matching group name entry in
@@ -301,8 +250,7 @@ bool CorePropertySupervisorBase::doPermissionsGrantAccess(
 		{
 			//__COUTV__(permissionThresholdGroupPair.first);
 			//__COUTV__(permissionThresholdGroupPair.second);
-			if(permissionLevelGroupPair.first == permissionThresholdGroupPair.first &&
-			   permissionThresholdGroupPair.second &&  // not explicitly disallowed
+			if(permissionLevelGroupPair.first == permissionThresholdGroupPair.first && permissionThresholdGroupPair.second &&  // not explicitly disallowed
 			   permissionLevelGroupPair.second >= permissionThresholdGroupPair.second)
 				return true;  // access granted!
 		}
@@ -340,10 +288,9 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 		                "supervisor of class '"
 		             << supervisorClass_ << "'" << __E__;
 	else if(allSupervisorInfo_.isMacroMakerMode())
-		__SUP_COUT__
-		    << "Maker Maker mode detected. Skipping setup of supervisor properties for "
-		       "supervisor of class '"
-		    << supervisorClass_ << "'" << __E__;
+		__SUP_COUT__ << "Maker Maker mode detected. Skipping setup of supervisor properties for "
+		                "supervisor of class '"
+		             << supervisorClass_ << "'" << __E__;
 	else
 		CorePropertySupervisorBase::loadUserSupervisorProperties();  // loads user
 		                                                             // settings from
@@ -357,26 +304,19 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 	                                  //			"." << __E__;
 
 	CorePropertySupervisorBase::extractPermissionsMapFromString(
-	    getSupervisorProperty(
-	        CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold),
-	    propertyStruct_.UserPermissionsThreshold);
+	    getSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold), propertyStruct_.UserPermissionsThreshold);
 
 	propertyStruct_.UserGroupsAllowed.clear();
-	StringMacros::getMapFromString(
-	    getSupervisorProperty(
-	        CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsAllowed),
-	    propertyStruct_.UserGroupsAllowed);
+	StringMacros::getMapFromString(getSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsAllowed),
+	                               propertyStruct_.UserGroupsAllowed);
 
 	propertyStruct_.UserGroupsDisallowed.clear();
-	StringMacros::getMapFromString(
-	    getSupervisorProperty(
-	        CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsDisallowed),
-	    propertyStruct_.UserGroupsDisallowed);
+	StringMacros::getMapFromString(getSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserGroupsDisallowed),
+	                               propertyStruct_.UserGroupsDisallowed);
 
 	auto nameIt = SUPERVISOR_PROPERTIES.allSetNames_.begin();
 	auto setIt  = propertyStruct_.allSets_.begin();
-	while(nameIt != SUPERVISOR_PROPERTIES.allSetNames_.end() &&
-	      setIt != propertyStruct_.allSets_.end())
+	while(nameIt != SUPERVISOR_PROPERTIES.allSetNames_.end() && setIt != propertyStruct_.allSets_.end())
 	{
 		(*setIt)->clear();
 		StringMacros::getSetFromString(getSupervisorProperty(*(*nameIt)), *(*setIt));
@@ -397,21 +337,17 @@ ConfigurationTree CorePropertySupervisorBase::getSupervisorTreeNode(void) try
 {
 	if(supervisorContextUID_ == "" || supervisorApplicationUID_ == "")
 	{
-		__SUP_SS__ << "Empty supervisorContextUID_ or supervisorApplicationUID_."
-		           << __E__;
+		__SUP_SS__ << "Empty supervisorContextUID_ or supervisorApplicationUID_." << __E__;
 		__SUP_SS_THROW__;
 	}
-	return theConfigurationManager_->getSupervisorNode(supervisorContextUID_,
-	                                                   supervisorApplicationUID_);
+	return theConfigurationManager_->getSupervisorNode(supervisorContextUID_, supervisorApplicationUID_);
 }
 catch(...)
 {
-	__SUP_COUT_ERR__
-	    << "XDAQ Supervisor could not access it's configuration node through "
-	       "theConfigurationManager_ "
-	    << "(Did you remember to initialize using CorePropertySupervisorBase::init()?)."
-	    << " The supervisorContextUID_ = " << supervisorContextUID_
-	    << ". The supervisorApplicationUID = " << supervisorApplicationUID_ << __E__;
+	__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration node through "
+	                    "theConfigurationManager_ "
+	                 << "(Did you remember to initialize using CorePropertySupervisorBase::init()?)."
+	                 << " The supervisorContextUID_ = " << supervisorContextUID_ << ". The supervisorApplicationUID = " << supervisorApplicationUID_ << __E__;
 	throw;
 }
 
@@ -429,8 +365,7 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 
 	try
 	{
-		auto /*map<name,node>*/ children =
-		    supervisorNode.getNode("LinkToPropertyTable").getChildren();
+		auto /*map<name,node>*/ children = supervisorNode.getNode("LinkToPropertyTable").getChildren();
 
 		for(auto& child : children)
 		{
@@ -438,9 +373,7 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 				continue;  // skip OFF properties
 
 			auto propertyName = child.second.getNode("PropertyName").getValue();
-			setSupervisorProperty(
-			    propertyName,
-			    child.second.getNode("PropertyValue").getValue<std::string>());
+			setSupervisorProperty(propertyName, child.second.getNode("PropertyValue").getValue<std::string>());
 		}
 	}
 	catch(...)
@@ -456,8 +389,7 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 }
 
 //========================================================================================================================
-void CorePropertySupervisorBase::setSupervisorProperty(const std::string& propertyName,
-                                                       const std::string& propertyValue)
+void CorePropertySupervisorBase::setSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
 {
 	propertyMap_[propertyName] = propertyValue;
 	//	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
@@ -465,11 +397,9 @@ void CorePropertySupervisorBase::setSupervisorProperty(const std::string& proper
 }
 
 //========================================================================================================================
-void CorePropertySupervisorBase::addSupervisorProperty(const std::string& propertyName,
-                                                       const std::string& propertyValue)
+void CorePropertySupervisorBase::addSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
 {
-	propertyMap_[propertyName] =
-	    propertyValue + " | " + getSupervisorProperty(propertyName);
+	propertyMap_[propertyName] = propertyValue + " | " + getSupervisorProperty(propertyName);
 	//	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
 	//			"] = " << propertyMap_[propertyName] << __E__;
 }
@@ -477,8 +407,7 @@ void CorePropertySupervisorBase::addSupervisorProperty(const std::string& proper
 //========================================================================================================================
 // getSupervisorProperty
 //		string version of template function
-std::string CorePropertySupervisorBase::getSupervisorProperty(
-    const std::string& propertyName)
+std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string& propertyName)
 {
 	// check if need to setup properties
 	checkSupervisorPropertySetup();
@@ -492,8 +421,7 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
 }
 
-std::string CorePropertySupervisorBase::getSupervisorProperty(
-    const std::string& propertyName, const std::string& defaultValue)
+std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string& propertyName, const std::string& defaultValue)
 {
 	// check if need to setup properties
 	checkSupervisorPropertySetup();
@@ -510,15 +438,12 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(
 //========================================================================================================================
 // getSupervisorPropertyUserPermissionsThreshold
 //	returns the threshold based on the requestType
-WebUsers::permissionLevel_t
-CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshold(
-    const std::string& requestType)
+WebUsers::permissionLevel_t CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshold(const std::string& requestType)
 {
 	// check if need to setup properties
 	checkSupervisorPropertySetup();
 
-	return StringMacros::getWildCardMatchFromMap(
-	    requestType, propertyStruct_.UserPermissionsThreshold);
+	return StringMacros::getWildCardMatchFromMap(requestType, propertyStruct_.UserPermissionsThreshold);
 
 	//	auto it = propertyStruct_.UserPermissionsThreshold.find(requestType);
 	//	if(it == propertyStruct_.UserPermissionsThreshold.end())
@@ -540,45 +465,34 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 	//__SUP_COUT__ << "userInfo.requestType_ " << userInfo.requestType_ << " files: " <<
 	// cgiIn.getFiles().size() << __E__;
 
-	userInfo.automatedCommand_ = StringMacros::inWildCardSet(
-	    userInfo.requestType_,
-	    propertyStruct_.AutomatedRequestTypes);  // automatic commands should not refresh
-	                                             // cookie code.. only user initiated
-	                                             // commands should!
-	userInfo.NonXMLRequestType_ = StringMacros::inWildCardSet(
-	    userInfo.requestType_, propertyStruct_.NonXMLRequestTypes);  // non-xml request
-	                                                                 // types just return
-	                                                                 // the request return
-	                                                                 // string to client
-	userInfo.NoXmlWhiteSpace_ = StringMacros::inWildCardSet(
-	    userInfo.requestType_, propertyStruct_.NoXmlWhiteSpaceRequestTypes);
+	userInfo.automatedCommand_ = StringMacros::inWildCardSet(userInfo.requestType_,
+	                                                         propertyStruct_.AutomatedRequestTypes);  // automatic commands should not refresh
+	                                                                                                  // cookie code.. only user initiated
+	                                                                                                  // commands should!
+	userInfo.NonXMLRequestType_ = StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.NonXMLRequestTypes);  // non-xml request
+	                                                                                                                       // types just return
+	                                                                                                                       // the request return
+	                                                                                                                       // string to client
+	userInfo.NoXmlWhiteSpace_ = StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.NoXmlWhiteSpaceRequestTypes);
 
 	//**** start LOGIN GATEWAY CODE ***//
 	// check cookieCode, sequence, userWithLock, and permissions access all in one shot!
 	{
-		userInfo.checkLock_ = StringMacros::inWildCardSet(
-		    userInfo.requestType_, propertyStruct_.CheckUserLockRequestTypes);
-		userInfo.requireLock_ = StringMacros::inWildCardSet(
-		    userInfo.requestType_, propertyStruct_.RequireUserLockRequestTypes);
-		userInfo.allowNoUser_ = StringMacros::inWildCardSet(
-		    userInfo.requestType_, propertyStruct_.AllowNoLoginRequestTypes);
-		userInfo.requireSecurity_ = StringMacros::inWildCardSet(
-		    userInfo.requestType_, propertyStruct_.RequireSecurityRequestTypes);
+		userInfo.checkLock_       = StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.CheckUserLockRequestTypes);
+		userInfo.requireLock_     = StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.RequireUserLockRequestTypes);
+		userInfo.allowNoUser_     = StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.AllowNoLoginRequestTypes);
+		userInfo.requireSecurity_ = StringMacros::inWildCardSet(userInfo.requestType_, propertyStruct_.RequireSecurityRequestTypes);
 
 		userInfo.permissionsThreshold_ = -1;  // default to max
 		try
 		{
-			userInfo.permissionsThreshold_ =
-			    CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshold(
-			        userInfo.requestType_);
+			userInfo.permissionsThreshold_ = CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshold(userInfo.requestType_);
 		}
 		catch(std::runtime_error& e)
 		{
 			if(!userInfo.automatedCommand_)
-				__SUP_COUT__ << "No explicit permissions threshold for request '"
-				             << userInfo.requestType_
-				             << "'... Defaulting to max threshold = "
-				             << (unsigned int)userInfo.permissionsThreshold_ << __E__;
+				__SUP_COUT__ << "No explicit permissions threshold for request '" << userInfo.requestType_
+				             << "'... Defaulting to max threshold = " << (unsigned int)userInfo.permissionsThreshold_ << __E__;
 		}
 
 		//		__COUTV__(userInfo.requestType_);
@@ -589,10 +503,8 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 
 		try
 		{
-			StringMacros::getSetFromString(
-			    StringMacros::getWildCardMatchFromMap(userInfo.requestType_,
-			                                          propertyStruct_.UserGroupsAllowed),
-			    userInfo.groupsAllowed_);
+			StringMacros::getSetFromString(StringMacros::getWildCardMatchFromMap(userInfo.requestType_, propertyStruct_.UserGroupsAllowed),
+			                               userInfo.groupsAllowed_);
 		}
 		catch(std::runtime_error& e)
 		{
@@ -605,10 +517,8 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 		}
 		try
 		{
-			StringMacros::getSetFromString(
-			    StringMacros::getWildCardMatchFromMap(
-			        userInfo.requestType_, propertyStruct_.UserGroupsDisallowed),
-			    userInfo.groupsDisallowed_);
+			StringMacros::getSetFromString(StringMacros::getWildCardMatchFromMap(userInfo.requestType_, propertyStruct_.UserGroupsDisallowed),
+			                               userInfo.groupsDisallowed_);
 		}
 		catch(std::runtime_error& e)
 		{

@@ -12,36 +12,23 @@
 using namespace ots;
 
 //========================================================================================================================
-TCPDataListenerProducer::TCPDataListenerProducer(
-    std::string              supervisorApplicationUID,
-    std::string              bufferUID,
-    std::string              processorUID,
-    const ConfigurationTree& theXDAQContextConfigTree,
-    const std::string&       configurationPath)
+TCPDataListenerProducer::TCPDataListenerProducer(std::string              supervisorApplicationUID,
+                                                 std::string              bufferUID,
+                                                 std::string              processorUID,
+                                                 const ConfigurationTree& theXDAQContextConfigTree,
+                                                 const std::string&       configurationPath)
     : WorkLoop(processorUID)
     //, Socket       ("192.168.133.100", 40000)
-    , DataProducer(supervisorApplicationUID,
-                   bufferUID,
-                   processorUID,
-                   theXDAQContextConfigTree.getNode(configurationPath)
-                       .getNode("BufferSize")
-                       .getValue<unsigned int>())
+    , DataProducer(
+          supervisorApplicationUID, bufferUID, processorUID, theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
     //, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
     , Configurable(theXDAQContextConfigTree, configurationPath)
-    , TCPSubscribeClient(theXDAQContextConfigTree.getNode(configurationPath)
-                             .getNode("HostIPAddress")  // THIS IS ACTUALLY THE SERVER IP
-                             .getValue<std::string>(),
-                         theXDAQContextConfigTree.getNode(configurationPath)
-                             .getNode("HostPort")  // THIS IS ACTUALLY THE SERVER PORT
-                             .getValue<unsigned int>())
+    , TCPSubscribeClient(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>(),
+                         theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
     , dataP_(nullptr)
     , headerP_(nullptr)
-    , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath)
-                     .getNode("HostIPAddress")
-                     .getValue<std::string>())
-    , port_(theXDAQContextConfigTree.getNode(configurationPath)
-                .getNode("HostPort")
-                .getValue<unsigned int>())
+    , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>())
+    , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
 {
 }
 
@@ -78,8 +65,7 @@ void TCPDataListenerProducer::slowWrite(void)
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<
 	// std::endl;
 
-	data_ =
-	    TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+	data_                = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 	header_["IPAddress"] = ipAddress_;
 	header_["Port"]      = std::to_string(port_);
 
@@ -101,16 +87,13 @@ void TCPDataListenerProducer::fastWrite(void)
 
 	if(DataProducer::attachToEmptySubBuffer(dataP_, headerP_) < 0)
 	{
-		__COUT__
-		    << "There are no available buffers! Retrying...after waiting 10 milliseconds!"
-		    << std::endl;
+		__COUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
 		usleep(10000);
 		return;
 	}
 
 	// IT IS A BLOCKING CALL! SO NEEDS TO BE CHANGED
-	*dataP_ =
-	    TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+	*dataP_                  = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 	(*headerP_)["IPAddress"] = ipAddress_;
 	(*headerP_)["Port"]      = std::to_string(port_);
 
