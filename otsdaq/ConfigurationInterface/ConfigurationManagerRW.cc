@@ -1304,7 +1304,8 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
                                   bool               updateGroupAliases /*= false*/,
                                   bool               updateTableAliases /*= false*/,
                                   TableGroupKey*     newBackboneKey /*= nullptr*/,
-                                  bool*              foundEquivalentBackboneKey /*= nullptr*/)
+                                  bool*              foundEquivalentBackboneKey /*= nullptr*/,
+								  std::string*		 accumulatedWarnings /*= nullptr*/)
 {
 	__COUT__ << "Saving changes..." << __E__;
 
@@ -1520,15 +1521,25 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
 
 	// acquire all active groups and ignore errors, so that activateTableGroup does not
 	// erase other active groups
-	cfgMgr->restoreActiveTableGroups(false /*throwErrors*/, "" /*pathToActiveGroupsFile*/, false /*onlyLoadIfBackboneOrContext*/
-	);
+	{
+		__COUT__ << "Restoring active table groups, before activating new groups..." << __E__;
+
+		std::string localAccumulatedWarnings;
+		cfgMgr->restoreActiveTableGroups(
+			false /*throwErrors*/,
+			"" /*pathToActiveGroupsFile*/,
+			false /*onlyLoadIfBackboneOrContext*/,
+			&localAccumulatedWarnings);
+	}
 
 	// activate new groups
 	if(!localNewBackboneKey.isInvalid())
-		cfgMgr->activateTableGroup(backboneGroupEdit.originalGroupName_, localNewBackboneKey);
+		cfgMgr->activateTableGroup(backboneGroupEdit.originalGroupName_, localNewBackboneKey,
+				accumulatedWarnings?accumulatedWarnings:nullptr);
 
 	if(activateNewGroup)
-		cfgMgr->activateTableGroup(groupNameToSave, newGroupKey);
+		cfgMgr->activateTableGroup(groupNameToSave, newGroupKey,
+				accumulatedWarnings?accumulatedWarnings:nullptr);
 
 	__COUT__ << "Changes saved." << __E__;
 }  // end GroupEditStruct::saveChanges()

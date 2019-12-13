@@ -831,10 +831,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 	//"'"
 	//			         << __E__;
 
-	// if baseValueAsString ends in number, then add _ to keep naming similar
-	if(baseValueAsString.size() && baseValueAsString[baseValueAsString.size() - 1] >= '0' && baseValueAsString[baseValueAsString.size() - 1] <= '9')
-		baseValueAsString += '_';
 
+	bool		 firstConflict = true;
 	int          maxUniqueData = -1;
 	std::string  tmpString     = "";
 	bool         foundAny;
@@ -845,7 +843,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 
 	// find max in rows
 
-	this->print();
+	//this->print();
 
 	for(unsigned int r = 0; r < getNumberOfRows(); ++r)
 	{
@@ -857,7 +855,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 		foundAny  = false;
 		tmpString = theDataView_[r][col];
 
-		__COUT__ << "tmpString " << tmpString << __E__;
+		//__COUT__ << "tmpString " << tmpString << __E__;
 
 		for(index = tmpString.length() - 1; index < tmpString.length(); --index)
 		{
@@ -868,7 +866,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			foundAny = true;
 		}
 
-		__COUT__ << "index " << index << " foundAny " << foundAny << __E__;
+		//__COUT__ << "index " << index << " foundAny " << foundAny << __E__;
 
 		if(tmpString.length() && foundAny)  // then found a numeric substring
 		{
@@ -901,13 +899,24 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 				}
 			}
 
-			__COUT__ << tmpString << " vs " << baseValueAsString << __E__;
+			//__COUT__ << tmpString << " vs " << baseValueAsString << __E__;
 
 			if(baseValueAsString != "" && tmpString != baseValueAsString)
 				continue;  // skip max unique number if basestring does not match
 
-			__COUT__ << "Found unique data base string '" << tmpString << "' and number string '" << numString << "' in last record '" << theDataView_[r][col]
-			         << "'" << __E__;
+			//__COUT__ << "Found unique data base string '" << tmpString << "' and number string '" << numString << "' in last record '" << theDataView_[r][col]
+			 //        << "'" << __E__;
+
+			if(firstConflict)
+			{
+				// if baseValueAsString ends in number, then add _ to keep naming similar
+				if(baseValueAsString.size() &&
+						baseValueAsString[baseValueAsString.size() - 1] >= '0' &&
+						baseValueAsString[baseValueAsString.size() - 1] <= '9')
+					baseValueAsString += '_';
+
+				firstConflict = false;
+			}
 
 			// extract number
 			sscanf(numString.c_str(), "%u", &index);
@@ -921,10 +930,23 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			}
 		}
 		else if(maxUniqueData < 0 && (baseValueAsString == "" || tmpString == baseValueAsString))
+		{
+			if(firstConflict)
+			{
+				// if baseValueAsString ends in number, then add _ to keep naming similar
+				if(baseValueAsString.size() &&
+						baseValueAsString[baseValueAsString.size() - 1] >= '0' &&
+						baseValueAsString[baseValueAsString.size() - 1] <= '9')
+					baseValueAsString += '_';
+
+				firstConflict = false;
+			}
+
 			maxUniqueData = 0;  // start a number if basestring conflict
+		}
 	}
 
-	__COUTV__(maxUniqueData);
+	//__COUTV__(maxUniqueData);
 
 	if(maxUniqueData == -1)  // if no conflicts, then do not add number
 		theDataView_[row][col] = baseValueAsString;
@@ -934,8 +956,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 
 		sprintf(indexString, "%u", maxUniqueData);
 
-		__COUTV__(indexString);
-		__COUTV__(baseValueAsString);
+		//__COUTV__(indexString);
+		//__COUTV__(baseValueAsString);
 
 		if(doMathAppendStrategy)
 			theDataView_[row][col] = baseValueAsString + " + " + indexString;
@@ -943,7 +965,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			theDataView_[row][col] = baseValueAsString + indexString;
 	}
 
-	__COUT__ << "New unique data entry is data[" << row << "][" << col << "] = '" << theDataView_[row][col] << "'" << __E__;
+	__COUT__ << "New unique data entry is data[" << row <<
+			"][" << col << "] = '" << theDataView_[row][col] << "'" << __E__;
 
 	// this->print();
 
@@ -1630,12 +1653,12 @@ const TableViewColumnInfo& TableView::getColumnInfo(unsigned int column) const
 {
 	if(column >= columnsInfo_.size())
 	{
-		std::stringstream errMsg;
-		errMsg << __COUT_HDR_FL__ << "\nCan't find column " << column
+		__SS__ << "\nCan't find column " << column
 		       << "\n\n\n\nThe column info is likely missing due to incomplete "
 		          "Configuration View filling.\n\n"
 		       << __E__;
-		__THROW__(errMsg.str().c_str());
+		ss << StringMacros::stackTrace() << __E__;
+		__SS_THROW__;
 	}
 	return columnsInfo_[column];
 }  // end getColumnInfo()
