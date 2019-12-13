@@ -69,8 +69,9 @@ class ARTDAQTableBase : public TableBase
 		int           destination;  // destination subsystem id, 0 := no destination
 
 		bool hasRoutingMaster;
+		std::string routingMasterHost;
 
-		SubsystemInfo() : sources(), destination(0), hasRoutingMaster(false) {}
+		SubsystemInfo() : sources(), destination(0), hasRoutingMaster(false), routingMasterHost("") {}
 	};
 
 	struct ARTDAQInfo

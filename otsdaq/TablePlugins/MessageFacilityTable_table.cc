@@ -139,9 +139,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 						<< "format_string: \"|%L:%N:%f [%u]\t%m\"\n";
 
 				fclSs << "\n}\n";
-
-				fclSs << "file: {}\n";
-
+				
 				// output quiet forwarder config file
 				std::fstream qtfs;
 				qtfs.open(QUIET_CFG_FILE, std::fstream::out | std::fstream::trunc);
@@ -179,7 +177,6 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				fclSs << "\t"
 						<< "host: \"" << fwdIP << "\"\n";
 				fclSs << "}\n";
-				fclSs << "file: {}\n";
 
 				// output QT Viewer config file
 				std::fstream qtfs;
@@ -221,8 +218,6 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 					<< "format_string: \"|%L:%N:%f [%u]\t%m\"\n";
 
 			fclSs << "\n}\n";
-
-			fclSs << "file: {}\n";
 		}
 
 		break;  // take first enable row only!

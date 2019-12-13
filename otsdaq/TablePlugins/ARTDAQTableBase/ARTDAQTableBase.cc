@@ -542,7 +542,7 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 	if(info_.subsystems[readerSubsystemID].hasRoutingMaster)
 	{
 		OUT << "use_routing_master: true\n";
-		OUT << "routing_master_hostname: localhost\n";
+		OUT << "routing_master_hostname: \"" << info_.subsystems[readerSubsystemID].routingMasterHost << "\"\n";
 		OUT << "table_update_port: 0\n";
 		OUT << "table_update_address: \"0.0.0.0\"\n";
 		OUT << "table_update_multicast_interface: \"0.0.0.0\"\n";
@@ -694,7 +694,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 			if(info_.subsystems[builderSubsystemID].hasRoutingMaster)
 			{
 				OUT << "use_routing_master: true\n";
-				OUT << "routing_master_hostname: localhost\n";
+				OUT << "routing_master_hostname: \"" << info_.subsystems[builderSubsystemID].routingMasterHost << "\"\n";
 				OUT << "routing_token_port: 0\n";
 			}
 			else
@@ -843,7 +843,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 					if(info_.subsystems[builderSubsystemID].hasRoutingMaster)
 					{
 						OUT << "use_routing_master: true\n";
-						OUT << "routing_master_hostname: localhost\n";
+						OUT << "routing_master_hostname: \"" << info_.subsystems[builderSubsystemID].routingMasterHost << "\"\n";
 						OUT << "table_update_port: 0\n";
 						OUT << "table_update_address: \"0.0.0.0\"\n";
 						OUT << "table_update_multicast_interface: \"0.0.0.0\"\n";
@@ -1189,8 +1189,22 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 
 	OUT << "use_routing_master: true\n";
 
+	auto routingMasterSubsystemID = 1;
+	auto routingMasterSubsystemLink = routingMasterNode.getNode("SubsystemLink");
+	std::string rmHost = "localhost";
+	if (!routingMasterSubsystemLink.isDisconnected())
+	{
+		routingMasterSubsystemID = getSubsytemId(routingMasterSubsystemLink);
+		rmHost = info_.subsystems[routingMasterSubsystemID].routingMasterHost;
+	}
+	if (rmHost == "localhost" || rmHost == "127.0.0.1") {
+		char hostbuf[HOST_NAME_MAX + 1];
+		gethostname(hostbuf, HOST_NAME_MAX);
+		rmHost = std::string(hostbuf);
+	}
+
 	// Bookkept parameters
-	OUT << "routing_master_hostname: localhost\n";
+	OUT << "routing_master_hostname: \"" << rmHost << "\"\n";
 	OUT << "sender_ranks: []\n";
 	OUT << "table_update_port: 0\n";
 	OUT << "table_update_address: \"0.0.0.0\"\n";
@@ -1300,6 +1314,11 @@ void ARTDAQTableBase::extractRoutingMastersInfo(
 			if(getStatusFalseNodes || routingMaster.second.status())
 			{
 				std::string rmHost = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
+				if (rmHost == "localhost" || rmHost == "127.0.0.1") {
+					char hostbuf[HOST_NAME_MAX + 1];
+					gethostname(hostbuf, HOST_NAME_MAX);
+					rmHost = std::string(hostbuf);
+				}
 
 				int               routingMasterSubsystemID   = 1;
 				ConfigurationTree routingMasterSubsystemLink = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
@@ -1351,6 +1370,7 @@ void ARTDAQTableBase::extractRoutingMastersInfo(
 				    rmUID, rmHost, routingMasterSubsystemID, ARTDAQAppType::RoutingMaster, routingMaster.second.status());
 
 				info_.subsystems[routingMasterSubsystemID].hasRoutingMaster = true;
+				info_.subsystems[routingMasterSubsystemID].routingMasterHost = rmHost;
 
 				if(doWriteFHiCL)
 				{
