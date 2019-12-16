@@ -18,7 +18,6 @@ cet_make(LIBRARY_NAME CoreSupervisors
          SupervisorInfo
          SOAPUtilities
          XmlUtilities
-         #MessageFacility
          CgiDataUtilities         
          ${XDAQ_BASIC_LIB_LIST}
 		 

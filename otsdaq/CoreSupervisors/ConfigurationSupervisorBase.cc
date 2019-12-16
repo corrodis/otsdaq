@@ -1,6 +1,5 @@
 #include "otsdaq/CoreSupervisors/ConfigurationSupervisorBase.h"
 
-#include "otsdaq/TablePlugins/DesktopIconTable.h"
 #include "otsdaq/TablePlugins/XDAQContextTable.h"
 
 using namespace ots;
@@ -850,7 +849,8 @@ catch(...)
 }  // end handleGetTableGroupXML() catch
 
 //========================================================================================================================
-void ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&        xmlOut,
+bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
+														  HttpXmlDocument&        xmlOut,
                                                           ConfigurationManagerRW* cfgMgr,
                                                           const std::string&      iconCaption,
                                                           const std::string&      iconAltText,
@@ -1002,6 +1002,22 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 
 			__COUTV__(StringMacros::mapToString(parameters));
 
+			unsigned int gidCol = parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_GID);
+
+			//remove all existing records from groupID (e.g. parameters leftover from manual manipulations)
+			std::vector<unsigned int /*row*/> rowsInGroup =
+					parameterTable.tableView_->getGroupRows(
+							gidCol,iconUID + "_Parameters" /*groupID*/);
+
+			__COUTV__(StringMacros::vectorToString(rowsInGroup));
+
+			//go through vector backwards to maintain row integrity
+			for(unsigned int r = rowsInGroup.size()-1; r < rowsInGroup.size(); --r)
+				parameterTable.tableView_->removeRowFromGroup(
+						rowsInGroup[r],gidCol,iconUID + "_Parameters" /*groupID*/,
+						true /*deleteRowIfNoGroupLeft*/);
+
+			//create new parameters
 			for(const auto& parameter : parameters)
 			{
 				// create parameter record
@@ -1011,7 +1027,7 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 				parameterTable.tableView_->setValueAsString("1", row, parameterTable.tableView_->getColStatus());
 				// set parameter Group ID
 				parameterTable.tableView_->setValueAsString(
-				    iconUID + "_Parameters", row, parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_GID));
+				    iconUID + "_Parameters", row, gidCol);
 				// set parameter key
 				parameterTable.tableView_->setURIEncodedValue(parameter.first, row, parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_KEY));
 				// set parameter value
@@ -1076,7 +1092,7 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 	// always add active table groups to xml response
 	ConfigurationSupervisorBase::getConfigurationStatusXML(xmlOut, cfgMgr);
 
-	return;
+	return true;
 	//---------------------------------------------------
 
 	if(0)
@@ -1533,7 +1549,7 @@ void ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 		{
 			__COUT__ << "Found equivalent group key (" << newBackboneKey << ") for " << backboneGroupName << "." << __E__;
 			xmlOut.addTextElementToData(backboneGroupName + "_foundEquivalentKey",
-			                            "1");  // indicator
+			                            "1" /*indicator*/);
 		}
 		else
 		{
@@ -1566,9 +1582,11 @@ catch(std::runtime_error& e)
 {
 	__COUT__ << "Error detected!\n\n " << e.what() << __E__;
 	xmlOut.addTextElementToData("Error", "Error adding Desktop Icon! " + std::string(e.what()));
+	return false;
 }
 catch(...)
 {
 	__COUT__ << "Unknown Error detected!\n\n " << __E__;
 	xmlOut.addTextElementToData("Error", "Error adding Desktop Icon! ");
+	return false;
 }  // end handleAddDesktopIconXML() catch
