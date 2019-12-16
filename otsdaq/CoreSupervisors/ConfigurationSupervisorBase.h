@@ -4,6 +4,8 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
 #include "otsdaq/XmlUtilities/HttpXmlDocument.h"
 
+#include "otsdaq/TablePlugins/DesktopIconTable.h"
+
 namespace ots
 {
 // clang-format off
@@ -53,7 +55,8 @@ public:
 										TableGroupKey           groupKey,
 										bool                    ignoreWarnings = false);
 
-	static void 				handleAddDesktopIconXML(HttpXmlDocument&        xmlOut,
+	static bool					handleAddDesktopIconXML(
+										HttpXmlDocument&        xmlOut,
 										ConfigurationManagerRW* cfgMgr,
 										const std::string&      iconCaption,
 										const std::string&      iconAltText,

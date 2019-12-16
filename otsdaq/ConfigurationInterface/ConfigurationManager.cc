@@ -6,6 +6,7 @@
 #include <fstream>  // std::ofstream
 
 #include "otsdaq/TableCore/TableGroupKey.h"
+#include "otsdaq/TablePlugins/DesktopIconTable.h" //for dynamic desktop icon change
 
 using namespace ots;
 
@@ -20,6 +21,7 @@ const std::string ConfigurationManager::XDAQ_APP_PROPERTY_TABLE_NAME = "XDAQAppl
 const std::string ConfigurationManager::GROUP_ALIASES_TABLE_NAME     = "GroupAliasesTable";
 const std::string ConfigurationManager::VERSION_ALIASES_TABLE_NAME   = "VersionAliasesTable";
 const std::string ConfigurationManager::ARTDAQ_TOP_TABLE_NAME        = "ARTDAQSupervisorTable";
+const std::string ConfigurationManager::DESKTOP_ICON_TABLE_NAME      = "DesktopIconTable";
 
 // added env check for otsdaq_flatten_active_to_version to function
 const std::string ConfigurationManager::ACTIVE_GROUPS_FILENAME =
@@ -42,7 +44,7 @@ const uint8_t ConfigurationManager::METADATA_COL_TIMESTAMP = 4;
 const std::set<std::string> ConfigurationManager::contextMemberNames_  = {ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,
                                                                          ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
                                                                          "XDAQApplicationPropertyTable",
-                                                                         "DesktopIconTable",
+																		 ConfigurationManager::DESKTOP_ICON_TABLE_NAME,
                                                                          "MessageFacilityTable",
                                                                          "GatewaySupervisorTable",
                                                                          "StateMachineTable",
@@ -2381,7 +2383,7 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 
 			if(groupName != "")  // then set groupID for this record
 			{
-				int groupIDCol = view->getColLinkGroupID(groupLinkIndex);
+				int groupIDCol = view->getLinkGroupIDColumn(groupLinkIndex);
 				__COUT__ << "Setting group ID for group link ID '" << groupLinkIndex << "' at column " << groupIDCol << " to '" << groupName << ".'" << __E__;
 
 				view->setValue(groupName, r, groupIDCol);
@@ -2558,3 +2560,51 @@ bool ConfigurationManager::isOwnerFirstAppInContext()
 
 	return isFirstAppInContext;
 }  // end isOwnerFirstAppInContext()
+
+
+//==============================================================================
+// allow for just the desktop icons of the Context to be changed during run-time
+TableBase* ConfigurationManager::getDesktopIconTable(void)
+{
+	if(nameToTableMap_.find(DESKTOP_ICON_TABLE_NAME) ==
+			nameToTableMap_.end())
+	{
+		__SS__ << "Desktop icon table not found!" << __E__;
+		ss << StringMacros::stackTrace() << __E__;
+		__SS_THROW__;
+	}
+
+	return nameToTableMap_.at(DESKTOP_ICON_TABLE_NAME);
+} //end dynamicDesktopIconChange()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

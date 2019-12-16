@@ -8,10 +8,11 @@
 #include "otsdaq/SOAPUtilities/SOAPMessenger.h"
 #include "otsdaq/SupervisorInfo/AllSupervisorInfo.h"
 #include "otsdaq/SystemMessenger/SystemMessenger.h"
-#include "otsdaq/TableCore/TableGroupKey.h"
+//#include "otsdaq/TableCore/TableGroupKey.h"
 #include "otsdaq/WebUsersUtilities/WebUsers.h"
 #include "otsdaq/WorkLoopManager/WorkLoopManager.h"
 
+#include "otsdaq/TablePlugins/DesktopIconTable.h"
 #include "otsdaq/CodeEditor/CodeEditor.h"
 
 #pragma GCC diagnostic push
@@ -72,7 +73,7 @@ class GatewaySupervisor : public xdaq::Application,
 	void 						stateMachineIterationBreakpoint	(xgi::Input* in, xgi::Output* out);
 
 	static std::string			getIconHeaderString				(void);
-	static void 				handleAddDesktopIconRequest		(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
+	static bool					handleAddDesktopIconRequest		(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut, std::vector<DesktopIconTable::DesktopIcon>* newIcons = nullptr);
 	static void 				handleGetApplicationIdRequest	(AllSupervisorInfo* applicationInfo, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
 
 	xoap::MessageReference 		stateMachineXoapHandler			(xoap::MessageReference msg);
@@ -94,59 +95,57 @@ class GatewaySupervisor : public xdaq::Application,
 	xoap::MessageReference 		supervisorLastConfigGroupRequest(xoap::MessageReference msg);
 
 	// Finite State Machine States
-	void stateInitial(toolbox::fsm::FiniteStateMachine& fsm);
-	void statePaused(toolbox::fsm::FiniteStateMachine& fsm);
-	void stateRunning(toolbox::fsm::FiniteStateMachine& fsm);
-	void stateHalted(toolbox::fsm::FiniteStateMachine& fsm);
-	void stateConfigured(toolbox::fsm::FiniteStateMachine& fsm);
-	void inError(toolbox::fsm::FiniteStateMachine& fsm);
+	void 						stateInitial					(toolbox::fsm::FiniteStateMachine& fsm);
+	void 						statePaused						(toolbox::fsm::FiniteStateMachine& fsm);
+	void 						stateRunning					(toolbox::fsm::FiniteStateMachine& fsm);
+	void 						stateHalted						(toolbox::fsm::FiniteStateMachine& fsm);
+	void 						stateConfigured					(toolbox::fsm::FiniteStateMachine& fsm);
+	void 						inError							(toolbox::fsm::FiniteStateMachine& fsm);
 
-	void transitionConfiguring(toolbox::Event::Reference e);
-	void transitionHalting(toolbox::Event::Reference e);
-	void transitionInitializing(toolbox::Event::Reference e);
-	void transitionPausing(toolbox::Event::Reference e);
-	void transitionResuming(toolbox::Event::Reference e);
-	void transitionStarting(toolbox::Event::Reference e);
-	void transitionStopping(toolbox::Event::Reference e);
-	void transitionShuttingDown(toolbox::Event::Reference e);
-	void transitionStartingUp(toolbox::Event::Reference e);
-	void enteringError(toolbox::Event::Reference e);
+	void 						transitionConfiguring			(toolbox::Event::Reference e);
+	void 						transitionHalting				(toolbox::Event::Reference e);
+	void 						transitionInitializing			(toolbox::Event::Reference e);
+	void 						transitionPausing				(toolbox::Event::Reference e);
+	void 						transitionResuming				(toolbox::Event::Reference e);
+	void 						transitionStarting				(toolbox::Event::Reference e);
+	void 						transitionStopping				(toolbox::Event::Reference e);
+	void 						transitionShuttingDown			(toolbox::Event::Reference e);
+	void 						transitionStartingUp			(toolbox::Event::Reference e);
+	void 						enteringError					(toolbox::Event::Reference e);
 
-	void 						makeSystemLogbookEntry(std::string entryText);
+	void 						makeSystemLogbookEntry			(std::string entryText);
 
-	void 						checkForAsyncError(void);
+	void 						checkForAsyncError				(void);
 
 	// CorePropertySupervisorBase override functions
-	virtual void 				setSupervisorPropertyDefaults(void) override;  // override to control supervisor specific defaults
-	virtual void 				forceSupervisorPropertyValues(void) override;  // override to force
+	virtual void 				setSupervisorPropertyDefaults	(void) override;  // override to control supervisor specific defaults
+	virtual void 				forceSupervisorPropertyValues	(void) override;  // override to force
 	                                                            // supervisor property
 	                                                            // values (and ignore user
 	                                                            // settings)
 
   private:
-	unsigned int 				getNextRunNumber(const std::string& fsmName = "");
-	bool 						setNextRunNumber(unsigned int runNumber, const std::string& fsmName = "");
+	unsigned int 				getNextRunNumber				(const std::string& fsmName = "");
+	bool 						setNextRunNumber				(unsigned int runNumber, const std::string& fsmName = "");
 	static std::pair<
 		std::string /*group name*/,
-		TableGroupKey> 			loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString);
-	void 						saveGroupNameAndKey(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup,const std::string& fileName);
-	static xoap::MessageReference lastConfigGroupRequestHandler(
-	    const SOAPParameters& parameters);
-	static void launchStartOTSCommand(const std::string&    command,
-	                                  ConfigurationManager* cfgMgr);
-	static void indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
+		TableGroupKey> 			loadGroupNameAndKey				(const std::string& fileName, std::string& returnedTimeString);
+	void 						saveGroupNameAndKey				(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup,const std::string& fileName);
+	static xoap::MessageReference lastConfigGroupRequestHandler	(const SOAPParameters& parameters);
+	static void 				launchStartOTSCommand			(const std::string& command, ConfigurationManager* cfgMgr);
+	static void 				indicateOtsAlive				(const CorePropertySupervisorBase* properties = 0);
 
-	static void StateChangerWorkLoop(GatewaySupervisor* supervisorPtr);
-	static void AppStatusWorkLoop(GatewaySupervisor* supervisorPtr);
+	static void 				StateChangerWorkLoop			(GatewaySupervisor* supervisorPtr);
+	static void 				AppStatusWorkLoop				(GatewaySupervisor* supervisorPtr);
 
-	std::string attemptStateMachineTransition(HttpXmlDocument*    xmldoc,
-	                                          std::ostringstream* out,
-	                                          const std::string&  command,
-	                                          const std::string&  fsmName,
-	                                          const std::string&  fsmWindowName,
-	                                          const std::string&  username,
-	                                          const std::vector<std::string>& parameters);
-	void        broadcastMessage(xoap::MessageReference msg);
+	std::string 				attemptStateMachineTransition	(HttpXmlDocument*    xmldoc,
+																  std::ostringstream* out,
+																  const std::string&  command,
+																  const std::string&  fsmName,
+																  const std::string&  fsmWindowName,
+																  const std::string&  username,
+																  const std::vector<std::string>& parameters);
+	void        				broadcastMessage				(xoap::MessageReference msg);
 
 	struct BroadcastMessageIterationsDoneStruct
 	{
