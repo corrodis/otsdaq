@@ -1,27 +1,5 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
 
-// backbone includes
-//#include "otsdaq/TablePlugins/ConfigurationAliases.h"
-//#include "otsdaq/TablePlugins/Configurations.h"
-//#include "otsdaq/TablePlugins/DefaultConfigurations.h"
-//#include "otsdaq/TablePlugins/VersionAliases.h"
-
-//#include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"//All configurable
-// objects are included here
-
-//
-//#include "otsdaq/TablePlugins/DetectorTable.h"
-//#include "otsdaq/TablePlugins/MaskTable.h"
-//#include "otsdaq/TablePlugins/DetectorToFETable.h"
-//
-
-//#include "otsdaq/ConfigurationInterface/DACStream.h"
-//#include "otsdaq/ConfigurationDataFormats/TableGroupKey.h"
-//
-//#include "otsdaq/ConfigurationInterface/FileConfigurationInterface.h"
-//
-//#include <cassert>
-
 #include <dirent.h>
 
 using namespace ots;
@@ -42,11 +20,7 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 {
 	__COUT__ << "Using Config Mgr with Write Access! (for " << username << ")" << __E__;
 
-	// FIXME only necessarily temporarily while Lore is still using fileSystem xml
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
-	                                                             // FIXME -- can delete this change of
-	                                                             // interface once RW and regular use
-	                                                             // same interface instance
 
 	//=========================
 	// dump names of core tables (so UpdateOTS.sh can copy core tables for user)
@@ -58,7 +32,7 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 
 		FILE* fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "r");
 
-		__COUT__ << "Updating core tables table..." << __E__;
+		__COUT__ << "Updating core tables file..." << __E__;
 
 		if(fp)  // check for all core table names in file, and force their presence
 		{
@@ -185,10 +159,9 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 //
 // if(accumulatedWarnings)
 //	this implies allowing column errors and accumulating such errors in given string
-const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
-		bool               refresh,
-		std::string*       accumulatedWarnings /*=0*/,
-			const std::string& errorFilterName /*=""*/)
+const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(bool               refresh,
+                                                                                std::string*       accumulatedWarnings /*=0*/,
+                                                                                const std::string& errorFilterName /*=""*/)
 {
 	// allTableInfo_ is container to be returned
 
@@ -341,8 +314,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	__COUT__ << "Extracting list of tables complete. Now initializing..." << __E__;
 
 	// call init to load active versions by default, activate with warnings allowed (assuming development going on)
-	init(0 /*accumulatedErrors*/,false /*initForWriteAccess*/,
-			accumulatedWarnings);
+	init(0 /*accumulatedErrors*/, false /*initForWriteAccess*/, accumulatedWarnings);
 
 	__COUT__ << "======================================================== getAllTableInfo end" << __E__;
 
@@ -532,24 +504,41 @@ TableVersion ConfigurationManagerRW::createTemporaryBackboneView(TableVersion so
 	}
 
 	return tmpVersion;
-} //end createTemporaryBackboneView()
+}  // end createTemporaryBackboneView()
 
 //==============================================================================
 TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
 {
 	if(nameToTableMap_.find(tableName) == nameToTableMap_.end())
 	{
+		if(tableName == ConfigurationManager::ARTDAQ_TOP_TABLE_NAME)
+		{
+			__COUT_WARN__ << "Since target table was the artdaq top configuration level, "
+			                 "attempting to help user by appending to core tables file: "
+			              << CORE_TABLE_INFO_FILENAME << __E__;
+			FILE* fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "a");
+			if(fp)
+			{
+				fprintf(fp, "\nARTDAQ/*");
+				fclose(fp);
+			}
+		}
+
 		__SS__ << "Table not found with name: " << tableName << __E__;
 		size_t f;
 		if((f = tableName.find(' ')) != std::string::npos)
 			ss << "There was a space character found in the table name needle at "
 			      "position "
 			   << f << " in the string (was this intended?). " << __E__;
+
+		ss << "\nIf you think this table should exist in the core set of tables, try running 'UpdateOTS.sh --tables' to update your tables, then relaunch ots."
+		   << __E__;
+		ss << "\nTables must be defined in $USER_DATA/TableInfo to exist in ots. Please verify your table definitions, and then restart ots." << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 	return nameToTableMap_[tableName];
-} //end getTableByName()
+}  // end getTableByName()
 
 //==============================================================================
 // getVersionedTableByName
@@ -1239,13 +1228,13 @@ TableEditStruct& GroupEditStruct::getTableEditStruct(const std::string& tableNam
 	auto it = groupTables_.find(tableName);
 	if(it == groupTables_.end())
 	{
-		if(groupType_ == ConfigurationManager::GroupType::CONFIGURATION_TYPE &&
-				markModified)
+		if(groupType_ == ConfigurationManager::GroupType::CONFIGURATION_TYPE && markModified)
 		{
-			__COUT__ << "Table '" << tableName << "' not found in configuration table members from editing '" << originalGroupName_ << "(" << originalGroupKey_ << ")..." <<
-						" Attempting to add it!" << __E__;
+			__COUT__ << "Table '" << tableName << "' not found in configuration table members from editing '" << originalGroupName_ << "(" << originalGroupKey_
+			         << ")..."
+			         << " Attempting to add it!" << __E__;
 
-			//emplace returns pair<object,bool wasAdded>
+			// emplace returns pair<object,bool wasAdded>
 			auto newIt = groupTables_.emplace(std::make_pair(tableName, TableEditStruct(tableName, cfgMgr_)));  // Table ready for editing!
 			if(newIt.second)
 			{
@@ -1293,7 +1282,8 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
                                   bool               updateGroupAliases /*= false*/,
                                   bool               updateTableAliases /*= false*/,
                                   TableGroupKey*     newBackboneKey /*= nullptr*/,
-                                  bool*              foundEquivalentBackboneKey /*= nullptr*/)
+                                  bool*              foundEquivalentBackboneKey /*= nullptr*/,
+								  std::string*		 accumulatedWarnings /*= nullptr*/)
 {
 	__COUT__ << "Saving changes..." << __E__;
 
@@ -1509,15 +1499,25 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
 
 	// acquire all active groups and ignore errors, so that activateTableGroup does not
 	// erase other active groups
-	cfgMgr->restoreActiveTableGroups(false /*throwErrors*/, "" /*pathToActiveGroupsFile*/, false /*onlyLoadIfBackboneOrContext*/
-	);
+	{
+		__COUT__ << "Restoring active table groups, before activating new groups..." << __E__;
+
+		std::string localAccumulatedWarnings;
+		cfgMgr->restoreActiveTableGroups(
+			false /*throwErrors*/,
+			"" /*pathToActiveGroupsFile*/,
+			false /*onlyLoadIfBackboneOrContext*/,
+			&localAccumulatedWarnings);
+	}
 
 	// activate new groups
 	if(!localNewBackboneKey.isInvalid())
-		cfgMgr->activateTableGroup(backboneGroupEdit.originalGroupName_, localNewBackboneKey);
+		cfgMgr->activateTableGroup(backboneGroupEdit.originalGroupName_, localNewBackboneKey,
+				accumulatedWarnings?accumulatedWarnings:nullptr);
 
 	if(activateNewGroup)
-		cfgMgr->activateTableGroup(groupNameToSave, newGroupKey);
+		cfgMgr->activateTableGroup(groupNameToSave, newGroupKey,
+				accumulatedWarnings?accumulatedWarnings:nullptr);
 
 	__COUT__ << "Changes saved." << __E__;
 }  // end GroupEditStruct::saveChanges()

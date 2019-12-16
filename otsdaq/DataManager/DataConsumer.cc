@@ -35,7 +35,7 @@ DataConsumer::ConsumerPriority DataConsumer::getPriority(void) { return priority
 void DataConsumer::registerToBuffer(void)
 {
 	__GEN_COUT__ << "Consumer '" << DataProcessor::processorUID_ << "' is registering to DataManager Supervisor Buffer '"
-	         << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
+	             << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
 
 	DataManager* dataManager = (DataManagerSingleton::getInstance(supervisorApplicationUID_));
 

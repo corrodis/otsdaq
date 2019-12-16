@@ -54,8 +54,10 @@ class ARTDAQTableBase : public TableBase
 		std::string label;
 		std::string hostname;
 		int         subsystem;
+		bool		status;
 
-		ProcessInfo(std::string l, std::string h, int s, ARTDAQAppType t) : label(l), hostname(h), subsystem(s) {}
+		ProcessInfo(std::string l, std::string h, int s, ARTDAQAppType t, bool onOff)
+		: label(l), hostname(h), subsystem(s), status(onOff) {}
 	};
 
 	struct SubsystemInfo
@@ -67,8 +69,9 @@ class ARTDAQTableBase : public TableBase
 		int           destination;  // destination subsystem id, 0 := no destination
 
 		bool hasRoutingMaster;
+		std::string routingMasterHost;
 
-		SubsystemInfo() : sources(), destination(0), hasRoutingMaster(false) {}
+		SubsystemInfo() : sources(), destination(0), hasRoutingMaster(false), routingMasterHost("") {}
 	};
 
 	struct ARTDAQInfo
@@ -108,11 +111,13 @@ class ARTDAQTableBase : public TableBase
 	            							                        	 size_t                   routingRetryCount = DEFAULT_ROUTING_RETRY_COUNT);
 
 	static const ARTDAQInfo& 				extractARTDAQInfo			(ConfigurationTree artdaqSupervisorNode,
+			 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 bool			   getStatusFalseNodes  = false,
 	                  						                 			 bool              doWriteFHiCL         = false,
 	                  						                 			 size_t            maxFragmentSizeBytes = DEFAULT_MAX_FRAGMENT_SIZE,
 	                  						                 			 size_t            routingTimeoutMs     = DEFAULT_ROUTING_TIMEOUT_MS,
 	                  						                 			 size_t            routingRetryCount    = DEFAULT_ROUTING_RETRY_COUNT,
 	                  						                 			 ProgressBar*      progressBar          = 0);
+
 	static const ARTDAQInfo&       			getARTDAQSystem				(ConfigurationManagerRW* cfgMgr,
 																         std::map<std::string /*type*/,
 																		 	 std::map<std::string /*record*/,
@@ -120,6 +125,7 @@ class ARTDAQTableBase : public TableBase
 																         std::map<std::string /*subsystemName*/,
 																		 	 std::string /*destinationSubsystemName*/>& 	subsystemObjectMap,
 																			 std::vector<std::string /*property*/>& 		artdaqSupervisoInfo);
+
 	static void       						setAndActivateARTDAQSystem	(ConfigurationManagerRW* cfgMgr,
 																         const std::map<std::string /*type*/,
 																		 	 std::map<std::string /*record*/,
@@ -129,11 +135,11 @@ class ARTDAQTableBase : public TableBase
 
   private:
 	static int  							getSubsytemId				(ConfigurationTree subsystemNode);
-	static void 							extractRoutingMastersInfo	(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t routingTimeoutMs, size_t routingRetryCount);
-	static void 							extractBoardReadersInfo		(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes, size_t routingTimeoutMs, size_t routingRetryCount);
-	static void       						extractEventBuildersInfo	(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes);
-	static void       						extractDataLoggersInfo		(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes);
-	static void       						extractDispatchersInfo		(ConfigurationTree artdaqSupervisorNode, bool doWriteFHiCL, size_t maxFragmentSizeBytes);
+	static void 							extractRoutingMastersInfo	(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t routingTimeoutMs, size_t routingRetryCount);
+	static void 							extractBoardReadersInfo		(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t maxFragmentSizeBytes, size_t routingTimeoutMs, size_t routingRetryCount);
+	static void       						extractEventBuildersInfo	(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t maxFragmentSizeBytes);
+	static void       						extractDataLoggersInfo		(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t maxFragmentSizeBytes);
+	static void       						extractDispatchersInfo		(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t maxFragmentSizeBytes);
 		
 	static ARTDAQInfo 						info_;
 

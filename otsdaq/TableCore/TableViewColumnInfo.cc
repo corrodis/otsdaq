@@ -60,6 +60,8 @@ const std::string TableViewColumnInfo::COL_NAME_STATUS   = "Status";
 const std::string TableViewColumnInfo::COL_NAME_ENABLED  = "Enabled";
 const std::string TableViewColumnInfo::COL_NAME_PRIORITY = "Priority";
 const std::string TableViewColumnInfo::COL_NAME_COMMENT  = "CommentDescription";
+const std::string TableViewColumnInfo::COL_NAME_AUTHOR   = "Author";
+const std::string TableViewColumnInfo::COL_NAME_CREATION = "RecordInsertionTime";
 
 // clang-format on
 

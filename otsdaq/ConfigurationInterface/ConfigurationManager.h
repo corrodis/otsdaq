@@ -20,6 +20,7 @@ class ConfigurationManager
 	// ConfigurationManagerRW is a "Friend" class of ConfigurationManager so has access to
 	// private members.
 	friend class ConfigurationManagerRW;
+	friend class GatewaySupervisor;
 
   public:
 	//==============================================================================
@@ -34,6 +35,8 @@ class ConfigurationManager
 	static const std::string XDAQ_APP_PROPERTY_TABLE_NAME;
 	static const std::string GROUP_ALIASES_TABLE_NAME;
 	static const std::string VERSION_ALIASES_TABLE_NAME;
+	static const std::string ARTDAQ_TOP_TABLE_NAME;
+	static const std::string DESKTOP_ICON_TABLE_NAME;
 
 	static const std::string ACTIVE_GROUP_NAME_CONTEXT;
 	static const std::string ACTIVE_GROUP_NAME_BACKBONE;
@@ -155,12 +158,16 @@ class ConfigurationManager
 	void 								setOwnerContext				(const std::string& contextUID) { ownerContextUID_ = contextUID; }
 	void 								setOwnerApp					(const std::string& appUID) { ownerAppUID_ = appUID; }
 
+
   private:
-	ConfigurationManager(const std::string& userName);  // private constructor called by ConfigurationManagerRW
+										ConfigurationManager		(const std::string& userName);  // private constructor called by ConfigurationManagerRW
+
+	TableBase*							getDesktopIconTable			(void); //to dynamically affect desktop icons in otherwise readonly environment (e.g. GatewaySupervisor add icon behavior)
 
 	void 								initializeFromFhicl			(const std::string& fhiclPath);
 	void 								recursiveInitFromFhiclPSet	(const std::string& tableName, const fhicl::ParameterSet& pset, const std::string& recordName = "", const std::string& groupName = "", const std::string& groupLinkIndex = "");
 	void 								recursiveTreeToFhicl		(ConfigurationTree node, std::ostream& out, std::string& tabStr, std::string& commentStr, unsigned int depth = -1);
+
 
 	std::string 										username_;  // user of the configuration is READONLY_USER unless using ConfigurationManagerRW
 	ConfigurationInterface*        						theInterface_;

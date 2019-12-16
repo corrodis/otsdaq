@@ -3,8 +3,8 @@
 
 #include "otsdaq/NetworkUtilities/TCPSocket.h"
 #include <future>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace ots

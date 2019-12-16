@@ -36,7 +36,7 @@ FEProducerVInterface::~FEProducerVInterface(void)
 	// Take out of DataManager vector!
 
 	__GEN_COUT__ << "FEProducer '" << DataProcessor::processorUID_ << "' is unregistering from DataManager Supervisor Buffer '"
-	         << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
+	             << DataProcessor::supervisorApplicationUID_ << ":" << DataProcessor::bufferUID_ << ".'" << std::endl;
 
 	DataManager* dataManager = (DataManagerSingleton::getInstance(supervisorApplicationUID_));
 

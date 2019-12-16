@@ -41,7 +41,7 @@ echo
 
 if [[ "$1"  == "--snapshot" && "x$2" != "x" ]]; then
 	SNAPSHOT="$2"
-elif [[ "x$1" != "x" ]]; then
+elif [[ "x$1" == "x" ]]; then
 
 	echo -e `date +"%h%y %T"` "reset_ots_snapshot.sh [${LINENO}]  \t Illegal parameters.. See above for usage."
 	return  >/dev/null 2>&1 #return is used if script is sourced

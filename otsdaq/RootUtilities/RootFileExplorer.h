@@ -3,17 +3,17 @@
 
 #include <dirent.h>
 #include <errno.h>
-#include <iostream>
-#include <list>
-#include <map> 
-#include <sstream>
-#include <stdexcept>
 #include <stdio.h>
-#include <string>
 #include <string.h>
-#include <sys/stat.h> 
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <iostream>
+#include <list>
+#include <map>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "otsdaq/Macros/CoutMacros.h"
@@ -21,12 +21,12 @@
 //#include "otsdaq/XmlUtilities/ConvertFromXML.h"
 //#include "otsdaq/XmlUtilities/ConvertToXML.h"
 
+#include <xercesc/dom/DOM.hpp>
+#include <xercesc/framework/LocalFileFormatTarget.hpp>
+#include <xercesc/framework/StdOutFormatTarget.hpp>
+#include <xercesc/util/OutOfMemoryException.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/util/XMLString.hpp>
-#include <xercesc/dom/DOM.hpp>
-#include <xercesc/util/OutOfMemoryException.hpp>
-#include <xercesc/framework/StdOutFormatTarget.hpp>
-#include <xercesc/framework/LocalFileFormatTarget.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/dom/DOMDocument.hpp>
@@ -41,8 +41,8 @@
 #include <xercesc/framework/LocalFileFormatTarget.hpp>
 #include <xercesc/parsers/XercesDOMParser.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
-#include <xercesc/util/XercesDefs.hpp>
 #include <xercesc/util/XMLUni.hpp>
+#include <xercesc/util/XercesDefs.hpp>
 #include <xercesc/validators/common/Grammar.hpp>
 //#include <xercesc/dom/DOMLSSerializer.hpp>
 //#include <xercesc/dom/DOMLSOutput.hpp>
@@ -59,8 +59,8 @@
 #include <TFile.h>
 #include <TKey.h>
 
-using namespace std ;
-using namespace ots ;
+using namespace std;
+using namespace ots;
 
 // clang-format off
 class RootFileExplorer

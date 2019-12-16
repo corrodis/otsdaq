@@ -559,9 +559,9 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 	    echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
 	    
 	    if [ $ISCONFIG == 0 ]; then		
-		echo -e "${Reset}"
-		echo -e "${Reset}"	
-		exit
+			echo -e "${Reset}"
+			echo -e "${Reset}"	
+			exit
 	    fi
 	fi
 	if [ -d ${USER_DATA}/ConfigurationInfo ]; then
@@ -576,9 +576,9 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 	    echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
 	    
 	    if [ $ISCONFIG == 0 ]; then		
-		echo -e "${Reset}"
-		echo -e "${Reset}"
-		exit
+			echo -e "${Reset}"
+			echo -e "${Reset}"
+			exit
 	    fi
 	fi
 else

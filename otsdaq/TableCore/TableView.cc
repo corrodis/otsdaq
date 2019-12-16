@@ -87,10 +87,11 @@ TableView& TableView::copy(const TableView& src, TableVersion destinationVersion
 //	return row offset of first row copied in
 unsigned int TableView::copyRows(const std::string& author,
                                  const TableView&   src,
-                                 unsigned int       srcOffsetRow,
-                                 unsigned int       srcRowsToCopy,
-                                 unsigned int       destOffsetRow,
-                                 bool               generateUniqueDataColumns)
+                                 unsigned int       srcOffsetRow /* = 0 */,
+                                 unsigned int       srcRowsToCopy /* = -1 */,
+                                 unsigned int       destOffsetRow /* = -1 */,
+                                 unsigned char      generateUniqueDataColumns /* = false */,
+                                 const std::string& baseNameAutoUID /*= "" */)
 {
 	//__COUTV__(destOffsetRow);
 	//__COUTV__(srcOffsetRow);
@@ -113,7 +114,9 @@ unsigned int TableView::copyRows(const std::string& author,
 		if(r + srcOffsetRow >= srcRows)
 			break;  // end when no more source rows to copy (past bounds)
 
-		destOffsetRow = addRow(author, generateUniqueDataColumns /*incrementUniqueData*/, "" /*baseNameAutoUID*/,
+		destOffsetRow = addRow(author,
+		                       generateUniqueDataColumns /*incrementUniqueData*/,
+		                       baseNameAutoUID /*baseNameAutoUID*/,
 		                       destOffsetRow);  // add and get row created
 
 		if(retRow == (unsigned int)-1)
@@ -121,8 +124,9 @@ unsigned int TableView::copyRows(const std::string& author,
 
 		// copy data
 		for(unsigned int col = 0; col < getNumberOfColumns(); ++col)
-			if(generateUniqueDataColumns && (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
-			                                 columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))
+			if(generateUniqueDataColumns &&
+			   (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UID || columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
+			    columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))
 				continue;  // if leaving unique data, then skip copy
 			else
 				theDataView_[destOffsetRow][col] = src.theDataView_[r + srcOffsetRow][col];
@@ -191,11 +195,10 @@ void TableView::init(void)
 		{
 		}  // ignore no Priority column
 
-		//fix source columns if not already populated
-		if(sourceColumnNames_.size() == 0) // setup sourceColumnNames_ to be correct
+		// fix source columns if not already populated
+		if(sourceColumnNames_.size() == 0)  // setup sourceColumnNames_ to be correct
 			for(unsigned int i = 0; i < getNumberOfColumns(); ++i)
 				sourceColumnNames_.emplace(getColumnsInfo()[i].getStorageName());
-
 
 		// require one comment column
 		unsigned int colPos;
@@ -828,6 +831,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 	//"'"
 	//			         << __E__;
 
+
+	bool		 firstConflict = true;
 	int          maxUniqueData = -1;
 	std::string  tmpString     = "";
 	bool         foundAny;
@@ -838,7 +843,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 
 	// find max in rows
 
-	// this->print();
+	//this->print();
 
 	for(unsigned int r = 0; r < getNumberOfRows(); ++r)
 	{
@@ -861,7 +866,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			foundAny = true;
 		}
 
-		//__COUT__ << "index " << index << __E__;
+		//__COUT__ << "index " << index << " foundAny " << foundAny << __E__;
 
 		if(tmpString.length() && foundAny)  // then found a numeric substring
 		{
@@ -894,12 +899,24 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 				}
 			}
 
+			//__COUT__ << tmpString << " vs " << baseValueAsString << __E__;
+
 			if(baseValueAsString != "" && tmpString != baseValueAsString)
 				continue;  // skip max unique number if basestring does not match
 
-			//__COUT__ << "Found unique data base string '" <<
-			//		tmpString << "' and number string '" << numString <<
-			//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
+			//__COUT__ << "Found unique data base string '" << tmpString << "' and number string '" << numString << "' in last record '" << theDataView_[r][col]
+			 //        << "'" << __E__;
+
+			if(firstConflict)
+			{
+				// if baseValueAsString ends in number, then add _ to keep naming similar
+				if(baseValueAsString.size() &&
+						baseValueAsString[baseValueAsString.size() - 1] >= '0' &&
+						baseValueAsString[baseValueAsString.size() - 1] <= '9')
+					baseValueAsString += '_';
+
+				firstConflict = false;
+			}
 
 			// extract number
 			sscanf(numString.c_str(), "%u", &index);
@@ -913,8 +930,23 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			}
 		}
 		else if(maxUniqueData < 0 && (baseValueAsString == "" || tmpString == baseValueAsString))
+		{
+			if(firstConflict)
+			{
+				// if baseValueAsString ends in number, then add _ to keep naming similar
+				if(baseValueAsString.size() &&
+						baseValueAsString[baseValueAsString.size() - 1] >= '0' &&
+						baseValueAsString[baseValueAsString.size() - 1] <= '9')
+					baseValueAsString += '_';
+
+				firstConflict = false;
+			}
+
 			maxUniqueData = 0;  // start a number if basestring conflict
+		}
 	}
+
+	//__COUTV__(maxUniqueData);
 
 	if(maxUniqueData == -1)  // if no conflicts, then do not add number
 		theDataView_[row][col] = baseValueAsString;
@@ -933,7 +965,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			theDataView_[row][col] = baseValueAsString + indexString;
 	}
 
-	__COUT__ << "New unique data entry is data[" << row << "][" << col << "] = '" << theDataView_[row][col] << "'" << __E__;
+	__COUT__ << "New unique data entry is data[" << row <<
+			"][" << col << "] = '" << theDataView_[row][col] << "'" << __E__;
 
 	// this->print();
 
@@ -1116,7 +1149,108 @@ void TableView::addRowToGroup(const unsigned int& row,
 		setValue(groupID + " | " + getDataView()[row][col], row, col);
 
 	//__COUT__ << getDataView()[row][col] << __E__;
-}
+} //end addRowToGroup()
+
+//==============================================================================
+// getGroupRows
+//	Get the rows of all records with groupID
+//	with consideration for status on/off and priority, if enabled with flags
+//
+//	Note: empty group id of "" or '*' will return all rows
+std::vector<unsigned int /*group row*/> TableView::getGroupRows(const unsigned int groupIdCol,
+		const std::string& groupID, bool onlyStatusTrue /*=false*/,
+		bool orderedByPriority /*=false*/) const
+{
+	std::vector<unsigned int /*group row*/>                     retVector;
+	std::vector<std::vector<unsigned int /*group row*/>> groupRowVectors =
+			getGroupRowsInVectors(
+					groupIdCol,
+					groupID,
+					onlyStatusTrue,
+					orderedByPriority);
+
+	for(const auto& groupRowVector: groupRowVectors)
+		for(const auto& groupRow: groupRowVector)
+			retVector.push_back(groupRow);
+
+	return retVector;
+} //end getGroupRows()
+
+//==============================================================================
+// getGroupRowsByPriority
+//	Get the rows of all records with groupID
+//	with consideration for status on/off and priority, if enabled with flags
+//
+//	Note: empty group id of "" or '*' will return all rows
+std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsByPriority(
+		const unsigned int groupIdCol,
+		const std::string& groupID, bool onlyStatusTrue /*=false*/) const
+{
+	return getGroupRowsInVectors(groupIdCol,groupID,onlyStatusTrue,true /*orderedByPriority*/);
+} //end getGroupRowsByPriority()
+
+//==============================================================================
+// getGroupRowsInVectors
+//	Private function to allows byPriority switch.
+//
+//	Get the rows of all records with groupID
+//	with consideration for status on/off and priority, if enabled with flags
+//
+//	Note: empty group id of "" or '*' will return all rows
+std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsInVectors(
+		const unsigned int groupIdCol,
+		const std::string& groupID, bool onlyStatusTrue,
+		bool orderedByPriority) const
+{
+	std::map<uint64_t /*priority*/, std::vector<unsigned int /*child row*/>> mapByPriority;
+	std::vector<std::vector<unsigned int /*group row*/>>                     retVector;
+	uint64_t tmpPriority;
+	bool tmpStatus;
+
+	if(!(orderedByPriority && colPriority_ != INVALID)) //if no priority column, all at same priorty [0]
+		retVector.push_back(std::vector<unsigned int /*group row*/>());
+
+	for(unsigned int r = 0; r < getNumberOfRows(); ++r)
+		if(groupID == "" || groupID == "*" ||
+				groupIdCol == INVALID ||
+				isEntryInGroupCol(r, groupIdCol, groupID))
+		{
+			// check status if needed
+			if(onlyStatusTrue && colStatus_ != INVALID)
+			{
+				getValue(tmpStatus, r, colStatus_);
+
+				if(!tmpStatus)
+					continue;  // skip those with status false
+			}
+
+			if(orderedByPriority && colPriority_ != INVALID)
+			{
+				getValue(tmpPriority, r, colPriority_);
+				// do not accept DEFAULT value of 0.. convert to 100
+				mapByPriority[tmpPriority ? tmpPriority : 100].push_back(r);
+			}
+			else //assume equal priority
+				retVector[0].push_back(r);
+		}
+
+	if(orderedByPriority && colPriority_ != INVALID)
+	{
+		// at this point have priority map (which automatically sorts by priority)
+		// now build return vector
+		for(const auto& priorityChildRowVector : mapByPriority)
+		{
+			retVector.push_back(std::vector<unsigned int /*group row*/>());
+			for(const auto& priorityChildRow : priorityChildRowVector.second)
+				retVector[retVector.size() - 1].push_back(priorityChildRow);
+		}
+
+		__COUT__ << "Returning priority children list." << __E__;
+	}
+	//else equal priority vector already constructed
+
+	return retVector;
+} //end getGroupRowsInVectors()
 
 //==============================================================================
 // removeRowFromGroup
@@ -1129,7 +1263,9 @@ bool TableView::removeRowFromGroup(const unsigned int& row, const unsigned int& 
 	std::set<std::string> groupIDList;
 	if(!isEntryInGroupCol(row, col, groupNeedle, &groupIDList))
 	{
-		__SS__ << "GroupID (" << groupNeedle << ") removed from row (" << row << ") was already removed!" << __E__;
+		__SS__ << "GroupID (" << groupNeedle << ") removed from row (" <<
+				row << ") was already removed!" << __E__;
+		print();
 		__SS_THROW__;
 	}
 
@@ -1163,7 +1299,7 @@ bool TableView::removeRowFromGroup(const unsigned int& row, const unsigned int& 
 	//__COUT__ << getDataView()[row][col] << __E__;
 
 	return wasDeleted;
-}
+} //end removeRowFromGroup()
 
 //==============================================================================
 // isEntryInGroup
@@ -1173,10 +1309,10 @@ bool TableView::removeRowFromGroup(const unsigned int& row, const unsigned int& 
 //	Group entry can include | to place a record in multiple groups
 bool TableView::isEntryInGroup(const unsigned int& r, const std::string& childLinkIndex, const std::string& groupNeedle) const
 {
-	unsigned int c = getColLinkGroupID(childLinkIndex);  // column in question
+	unsigned int c = getLinkGroupIDColumn(childLinkIndex);  // column in question
 
 	return isEntryInGroupCol(r, c, groupNeedle);
-}
+} //end isEntryInGroup()
 
 //==============================================================================
 //	isEntryInGroupCol
@@ -1189,6 +1325,13 @@ bool TableView::isEntryInGroup(const unsigned int& r, const std::string& childLi
 // Note: should mirror what happens in TableView::getSetOfGroupIDs
 bool TableView::isEntryInGroupCol(const unsigned int& r, const unsigned int& c, const std::string& groupNeedle, std::set<std::string>* groupIDList) const
 {
+	if(r >= getNumberOfRows() || c >= getNumberOfColumns())
+	{
+		__SS__ << "Invalid row/col requested!" << __E__;
+		ss << StringMacros::stackTrace() << __E__;
+		__SS_THROW__;
+	}
+
 	unsigned int i     = 0;
 	unsigned int j     = 0;
 	bool         found = false;
@@ -1232,7 +1375,7 @@ bool TableView::isEntryInGroupCol(const unsigned int& r, const unsigned int& c, 
 	}
 
 	return found;
-}
+} //end isEntryInGroupCol()
 
 //==============================================================================
 // getSetOfGroupIDs
@@ -1244,7 +1387,7 @@ bool TableView::isEntryInGroupCol(const unsigned int& r, const unsigned int& c, 
 // Note: should mirror what happens in TableView::isEntryInGroupCol
 std::set<std::string> TableView::getSetOfGroupIDs(const std::string& childLinkIndex, unsigned int r) const
 {
-	return getSetOfGroupIDs(getColLinkGroupID(childLinkIndex), r);
+	return getSetOfGroupIDs(getLinkGroupIDColumn(childLinkIndex), r);
 }
 std::set<std::string> TableView::getSetOfGroupIDs(const unsigned int& c, unsigned int r) const
 {
@@ -1341,11 +1484,12 @@ std::set<std::string> TableView::getSetOfGroupIDs(const unsigned int& c, unsigne
 //==============================================================================
 // getColOfLinkGroupID
 //	const version, if column not found throw error
-const unsigned int TableView::getColLinkGroupID(const std::string& childLinkIndex) const
+const unsigned int TableView::getLinkGroupIDColumn(const std::string& childLinkIndex) const
 {
 	if(!childLinkIndex.size())
 	{
 		__SS__ << "Empty childLinkIndex string parameter!" << __E__;
+		ss << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
 
@@ -1365,7 +1509,7 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 	   colLinkGroupIDs_.end())
 		return it->second;
 
-	//otherwise search (perhaps init() was not called)
+	// otherwise search (perhaps init() was not called)
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
 		if(needleChildLinkIndex == columnsInfo_[col].getChildLinkIndex())
 			return col;
@@ -1388,7 +1532,7 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 	ss << StringMacros::stackTrace() << __E__;
 
 	__SS_THROW__;
-}  // end getColLinkGroupID()
+}  // end getLinkGroupIDColumn()
 
 //==============================================================================
 unsigned int TableView::findRow(unsigned int col, const std::string& value, unsigned int offsetRow, bool doNotThrow /*= false*/) const
@@ -1413,7 +1557,7 @@ unsigned int TableView::findRow(unsigned int col, const std::string& value, unsi
 unsigned int TableView::findRowInGroup(
     unsigned int col, const std::string& value, const std::string& groupId, const std::string& childLinkIndex, unsigned int offsetRow) const
 {
-	unsigned int groupIdCol = getColLinkGroupID(childLinkIndex);
+	unsigned int groupIdCol = getLinkGroupIDColumn(childLinkIndex);
 	for(unsigned int row = offsetRow; row < theDataView_.size(); ++row)
 	{
 		if(theDataView_[row][col] == value && isEntryInGroupCol(row, groupIdCol, groupId))
@@ -1620,12 +1764,12 @@ const TableViewColumnInfo& TableView::getColumnInfo(unsigned int column) const
 {
 	if(column >= columnsInfo_.size())
 	{
-		std::stringstream errMsg;
-		errMsg << __COUT_HDR_FL__ << "\nCan't find column " << column
+		__SS__ << "\nCan't find column " << column
 		       << "\n\n\n\nThe column info is likely missing due to incomplete "
 		          "Configuration View filling.\n\n"
 		       << __E__;
-		__THROW__(errMsg.str().c_str());
+		ss << StringMacros::stackTrace() << __E__;
+		__SS_THROW__;
 	}
 	return columnsInfo_[column];
 }  // end getColumnInfo()
@@ -2716,7 +2860,9 @@ void TableView::resizeDataView(unsigned int nRows, unsigned int nCols)
 //	if baseNameAutoUID != "", creates a UID based on this base name
 //		and increments and appends an integer relative to the previous last row
 unsigned int TableView::addRow(const std::string& author,
-                               unsigned char      incrementUniqueData /*= false */,
+                               unsigned char      incrementUniqueData /*= false */,  // leave as unsigned char rather than
+                               // bool, too many things (e.g. strings)
+                               // evaluate successfully to bool values
                                const std::string& baseNameAutoUID /*= "" */,
                                unsigned int       rowToAdd /*= -1 */)
 {
@@ -2850,6 +2996,7 @@ unsigned int TableView::addRow(const std::string& author,
 	if(author != "")
 	{
 		__COUT__ << "Row=" << rowToAdd << " was created!" << __E__;
+
 		int authorCol    = findColByType(TableViewColumnInfo::TYPE_AUTHOR);
 		int timestampCol = findColByType(TableViewColumnInfo::TYPE_TIMESTAMP);
 		setValue(author, rowToAdd, authorCol);

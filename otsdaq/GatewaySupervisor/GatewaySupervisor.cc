@@ -8,7 +8,6 @@
 
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
-#include "otsdaq/TablePlugins/DesktopIconTable.h"
 #include "otsdaq/TablePlugins/XDAQContextTable.h"
 #include "otsdaq/WorkLoopManager/WorkLoopManager.h"
 
@@ -502,22 +501,20 @@ void GatewaySupervisor::Default(xgi::Input* in, xgi::Output* out)
 	if(!supervisorGuiHasBeenLoaded_ && (supervisorGuiHasBeenLoaded_ = true))  // make system logbook entry that ots has been started
 		makeSystemLogbookEntry("ots started.");
 
-	*out << "<!DOCTYPE HTML><html lang='en'><head><title>ots</title>" <<
-			GatewaySupervisor::getIconHeaderString()
-	     <<
+	*out << "<!DOCTYPE HTML><html lang='en'><head><title>ots</title>" << GatewaySupervisor::getIconHeaderString() <<
 	    // end show ots icon
 	    "</head>"
 	     << "<frameset col='100%' row='100%'>"
 	     << "<frame src='/WebPath/html/Desktop.html?urn=" << this->getApplicationDescriptor()->getLocalId() << "&securityType=" << securityType_
 	     << "'></frameset></html>";
-} //end Default()
+}  // end Default()
 
 //========================================================================================================================
 std::string GatewaySupervisor::getIconHeaderString(void)
 {
-    // show ots icon
-    //	from http://www.favicon-generator.org/
-    return "<link rel='apple-touch-icon' sizes='57x57' href='/WebPath/images/otsdaqIcons/apple-icon-57x57.png'>\
+	// show ots icon
+	//	from http://www.favicon-generator.org/
+	return "<link rel='apple-touch-icon' sizes='57x57' href='/WebPath/images/otsdaqIcons/apple-icon-57x57.png'>\
 	<link rel='apple-touch-icon' sizes='60x60' href='/WebPath/images/otsdaqIcons/apple-icon-60x60.png'>\
 	<link rel='apple-touch-icon' sizes='72x72' href='/WebPath/images/otsdaqIcons/apple-icon-72x72.png'>\
 	<link rel='apple-touch-icon' sizes='76x76' href='/WebPath/images/otsdaqIcons/apple-icon-76x76.png'>\
@@ -538,7 +535,7 @@ std::string GatewaySupervisor::getIconHeaderString(void)
 	<meta name='msapplication-TileImage' content='/WebPath/images/otsdaqIcons/ms-icon-144x144.png'>\
 	<meta name='theme-color' content='#ffffff'>";
 
-} //end getIconHeaderString()
+}  // end getIconHeaderString()
 
 //========================================================================================================================
 // stateMachineIterationBreakpoint
@@ -3246,7 +3243,22 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		}
 		else if(requestType == "addDesktopIcon")
 		{
-			GatewaySupervisor::handleAddDesktopIconRequest(theWebUsers_.getUsersUsername(userInfo.uid_), cgiIn, xmlOut);
+			std::vector<DesktopIconTable::DesktopIcon> newIcons;
+
+			bool success = GatewaySupervisor::handleAddDesktopIconRequest(
+					theWebUsers_.getUsersUsername(userInfo.uid_), cgiIn, xmlOut,
+					&newIcons);
+
+			if(success)
+			{
+				__COUT__ << "Attempting dynamic icon change..." << __E__;
+
+				DesktopIconTable* iconTable =
+						(DesktopIconTable*)CorePropertySupervisorBase::theConfigurationManager_->getDesktopIconTable();
+				iconTable->setAllDesktopIcons(newIcons);
+			}
+			else
+				__COUT__ << "Failed icon add." << __E__;
 		}
 		else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{
@@ -3688,7 +3700,8 @@ void GatewaySupervisor::handleGetApplicationIdRequest(AllSupervisorInfo* allSupe
 }  // end handleGetApplicationIdRequest()
 
 //========================================================================================================================
-void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut)
+bool GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut,
+		std::vector<DesktopIconTable::DesktopIcon>* newIcons /* = nullptr*/)
 {
 	std::string  iconCaption              = CgiDataUtilities::getData(cgiIn, "iconCaption");                                         // from GET
 	std::string  iconAltText              = CgiDataUtilities::getData(cgiIn, "iconAltText");                                         // from GET
@@ -3717,7 +3730,9 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, c
 
 	ConfigurationManagerRW tmpCfgMgr(author);
 
-	ConfigurationSupervisorBase::handleAddDesktopIconXML(xmlOut,
+
+	bool success =
+			ConfigurationSupervisorBase::handleAddDesktopIconXML(xmlOut,
 	                                                     &tmpCfgMgr,
 	                                                     iconCaption,
 	                                                     iconAltText,
@@ -3730,4 +3745,17 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, c
 	                                                     enforceOneWindowInstance /*= false*/,
 	                                                     windowParameters /*= ""*/);
 
+	if(newIcons && success)
+	{
+		__COUT__ << "Passing new icons back to caller..." << __E__;
+
+		const std::vector<DesktopIconTable::DesktopIcon>& tmpNewIcons =
+				tmpCfgMgr.__GET_CONFIG__(DesktopIconTable)->getAllDesktopIcons();
+
+		newIcons->clear();
+		for(const auto& tmpNewIcon:tmpNewIcons)
+			newIcons->push_back(tmpNewIcon);
+	}
+
+	return success;
 }  // end handleAddDesktopIconRequest()

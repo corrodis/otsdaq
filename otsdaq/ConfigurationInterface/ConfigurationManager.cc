@@ -6,6 +6,7 @@
 #include <fstream>  // std::ofstream
 
 #include "otsdaq/TableCore/TableGroupKey.h"
+#include "otsdaq/TablePlugins/DesktopIconTable.h" //for dynamic desktop icon change
 
 using namespace ots;
 
@@ -19,6 +20,8 @@ const std::string ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME  = "XDAQAppl
 const std::string ConfigurationManager::XDAQ_APP_PROPERTY_TABLE_NAME = "XDAQApplicationPropertyTable";
 const std::string ConfigurationManager::GROUP_ALIASES_TABLE_NAME     = "GroupAliasesTable";
 const std::string ConfigurationManager::VERSION_ALIASES_TABLE_NAME   = "VersionAliasesTable";
+const std::string ConfigurationManager::ARTDAQ_TOP_TABLE_NAME        = "ARTDAQSupervisorTable";
+const std::string ConfigurationManager::DESKTOP_ICON_TABLE_NAME      = "DesktopIconTable";
 
 // added env check for otsdaq_flatten_active_to_version to function
 const std::string ConfigurationManager::ACTIVE_GROUPS_FILENAME =
@@ -41,7 +44,7 @@ const uint8_t ConfigurationManager::METADATA_COL_TIMESTAMP = 4;
 const std::set<std::string> ConfigurationManager::contextMemberNames_  = {ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,
                                                                          ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
                                                                          "XDAQApplicationPropertyTable",
-                                                                         "DesktopIconTable",
+																		 ConfigurationManager::DESKTOP_ICON_TABLE_NAME,
                                                                          "MessageFacilityTable",
                                                                          "GatewaySupervisorTable",
                                                                          "StateMachineTable",
@@ -145,9 +148,7 @@ ConfigurationManager::~ConfigurationManager() { destroy(); }
 //	else throw errors (but do not ask restoreActiveTableGroups to throw errors)
 //	Notes: Errors are handled separately from Warnings. Errors are used to monitor
 //		errors but do not allow, and warnings are used to allow warnings and monitor.
-void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/,
-		bool initForWriteAccess /*= false*/,
-		std::string* accumulatedWarnings /*=0*/)
+void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/, bool initForWriteAccess /*= false*/, std::string* accumulatedWarnings /*=0*/)
 {
 	// if(accumulatedErrors)
 	//	*accumulatedErrors = "";
@@ -160,7 +161,7 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/,
 		try
 		{
 			__COUTV__(username_);
-// clang-format off
+			// clang-format off
 			restoreActiveTableGroups(accumulatedErrors ? true : false /*throwErrors*/,
 				 "" /*pathToActiveGroupsFile*/,
 
@@ -174,7 +175,7 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/,
 
 				 accumulatedWarnings
 			);
-// clang-format on
+			// clang-format on
 		}
 		catch(std::runtime_error& e)
 		{
@@ -191,10 +192,10 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/,
 //	load the active groups from file
 //	Note: this should be used by the Supervisor to maintain
 //		the same configurationGroups surviving software system restarts
-void ConfigurationManager::restoreActiveTableGroups(bool throwErrors /*=false*/,
-		const std::string& pathToActiveGroupsFile /*=""*/,
-		bool onlyLoadIfBackboneOrContext /*= false*/,
-		std::string* accumulatedWarnings /*=0*/)
+void ConfigurationManager::restoreActiveTableGroups(bool               throwErrors /*=false*/,
+                                                    const std::string& pathToActiveGroupsFile /*=""*/,
+                                                    bool               onlyLoadIfBackboneOrContext /*= false*/,
+                                                    std::string*       accumulatedWarnings /*=0*/)
 {
 	destroyTableGroup("", true);  // deactivate all
 
@@ -289,15 +290,14 @@ void ConfigurationManager::restoreActiveTableGroups(bool throwErrors /*=false*/,
 			std::string groupAccumulatedErrors = "";
 
 			if(accumulatedWarnings)
-				__COUT__ << "Ignoring warnings while loading and activating group '" << groupName <<
-					"(" << strVal << ")'" << __E__;
+				__COUT__ << "Ignoring warnings while loading and activating group '" << groupName << "(" << strVal << ")'" << __E__;
 
 			loadTableGroup(groupName,
 			               TableGroupKey(strVal),
 			               true /*doActivate*/,
 			               0 /*groupMembers*/,
 			               0 /*progressBar*/,
-						   (accumulatedWarnings?&groupAccumulatedErrors:0) /*accumulateWarnings = 0*/,
+			               (accumulatedWarnings ? &groupAccumulatedErrors : 0) /*accumulateWarnings = 0*/,
 			               0 /*groupComment       = 0*/,
 			               0 /*groupAuthor        = 0*/,
 			               0 /*groupCreateTime    = 0*/,
@@ -307,7 +307,8 @@ void ConfigurationManager::restoreActiveTableGroups(bool throwErrors /*=false*/,
 			               onlyLoadIfBackboneOrContext /*onlyLoadIfBackboneOrContext = false*/
 			);
 
-			if(accumulatedWarnings) *accumulatedWarnings += groupAccumulatedErrors;
+			if(accumulatedWarnings)
+				*accumulatedWarnings += groupAccumulatedErrors;
 		}
 		catch(std::runtime_error& e)
 		{
@@ -1397,10 +1398,9 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 			getChildren(&memberMap, accumulatedWarnings);
 			if(*accumulatedWarnings != "")
 			{
-				__COUT_ERR__ << "Errors detected while loading Table Group: " << groupName << "(" << groupKey << "). Aborting."
+				__COUT_ERR__ << "Errors detected while loading Table Group: " << groupName << "(" << groupKey << "). Ignoring the following errors: "
 				             << "\n"
 				             << *accumulatedWarnings << __E__;
-				// return;  // memberMap; //return member name map to version
 			}
 		}
 
@@ -1434,8 +1434,6 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 				{
 					__SS__ << "Error detected calling " << memberPair.first << ".init()!\n\n " << e.what() << __E__;
 
-					//__SS_THROW__;
-
 					if(accumulatedWarnings)
 					{
 						*accumulatedWarnings += ss.str();
@@ -1443,7 +1441,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 					else
 					{
 						ss << StringMacros::stackTrace();
-						__SS_THROW__;  //__COUT_WARN__ << ss.str();
+						__SS_ONLY_THROW__;
 					}
 				}
 				catch(...)
@@ -1526,7 +1524,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		catch(const std::runtime_error& e)
 		{
 			__SS__ << "Error occurred while loading table group '" << groupName << "(" << groupKey << ")': \n" << e.what() << __E__;
-			__COUT_WARN__ << ss.str();
+
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
 			else
@@ -1535,7 +1533,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		catch(...)
 		{
 			__SS__ << "An unknown error occurred while loading table group '" << groupName << "(" << groupKey << ")." << __E__;
-			__COUT_WARN__ << ss.str();
+
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
 			else
@@ -1557,7 +1555,7 @@ catch(...)
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Error occurred while loading table group: " << e.what() << __E__;
-		__COUT_WARN__ << ss.str();
+
 		if(accumulatedWarnings)
 			*accumulatedWarnings += ss.str();
 		else
@@ -1566,7 +1564,7 @@ catch(...)
 	catch(...)
 	{
 		__SS__ << "An unknown error occurred while loading table group." << __E__;
-		__COUT_WARN__ << ss.str();
+
 		if(accumulatedWarnings)
 			*accumulatedWarnings += ss.str();
 		else
@@ -1742,10 +1740,10 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 								   twoDeepChild.second.getDisconnectedTableName() != TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 								{
 									__SS__ << "At node '" + configPair.first + "' with entry UID '" + newNodeChild.first +
-									                          "' there is a disconnected child node at link "
-									                          "column '" +
-									                          twoDeepChild.first + "'" + " that points to table named '" +
-									                          twoDeepChild.second.getDisconnectedTableName() + "' ...";
+									              "' there is a disconnected child node at link "
+									              "column '" +
+									              twoDeepChild.first + "'" + " that points to table named '" + twoDeepChild.second.getDisconnectedTableName() +
+									              "' ...";
 									*accumulatedTreeErrors += ss.str();
 								}
 							}
@@ -1814,10 +1812,10 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 							   twoDeepChild.second.getDisconnectedTableName() != TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 							{
 								__SS__ << "At node '" + memberPair.first + "' with entry UID '" + newNodeChild.first +
-								                          "' there is a disconnected child node at link column "
-								                          "'" +
-								                          twoDeepChild.first + "'" + " that points to table named '" +
-								                          twoDeepChild.second.getDisconnectedTableName() + "' ...";
+								              "' there is a disconnected child node at link column "
+								              "'" +
+								              twoDeepChild.first + "'" + " that points to table named '" + twoDeepChild.second.getDisconnectedTableName() +
+								              "' ...";
 								*accumulatedTreeErrors += ss.str();
 
 								// check if disconnected table is in group, if not
@@ -2011,7 +2009,7 @@ std::map<std::string /*table name*/, std::map<std::string /*version alias*/, Tab
 		return retMap;
 	}
 
-	__COUT__ << "activeVersions[\"" << versionAliasesTableName << "\"]=" << activeVersions[versionAliasesTableName] << __E__;
+	//__COUT__ << "activeVersions[\"" << versionAliasesTableName << "\"]=" << activeVersions[versionAliasesTableName] << __E__;
 
 	std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs = getNode(versionAliasesTableName).getChildren();
 
@@ -2385,7 +2383,7 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 
 			if(groupName != "")  // then set groupID for this record
 			{
-				int groupIDCol = view->getColLinkGroupID(groupLinkIndex);
+				int groupIDCol = view->getLinkGroupIDColumn(groupLinkIndex);
 				__COUT__ << "Setting group ID for group link ID '" << groupLinkIndex << "' at column " << groupIDCol << " to '" << groupName << ".'" << __E__;
 
 				view->setValue(groupName, r, groupIDCol);
@@ -2562,3 +2560,51 @@ bool ConfigurationManager::isOwnerFirstAppInContext()
 
 	return isFirstAppInContext;
 }  // end isOwnerFirstAppInContext()
+
+
+//==============================================================================
+// allow for just the desktop icons of the Context to be changed during run-time
+TableBase* ConfigurationManager::getDesktopIconTable(void)
+{
+	if(nameToTableMap_.find(DESKTOP_ICON_TABLE_NAME) ==
+			nameToTableMap_.end())
+	{
+		__SS__ << "Desktop icon table not found!" << __E__;
+		ss << StringMacros::stackTrace() << __E__;
+		__SS_THROW__;
+	}
+
+	return nameToTableMap_.at(DESKTOP_ICON_TABLE_NAME);
+} //end dynamicDesktopIconChange()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
