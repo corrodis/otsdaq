@@ -1,5 +1,5 @@
 #include "otsdaq/RootUtilities/RootFileExplorer.h"
-#include "otsdaq/otsdaq/Macros/MessageTools.h"
+#include "otsdaq/Macros/MessageTools.h"
 // clang-format off
 //================================================================================================
 RootFileExplorer::RootFileExplorer(
