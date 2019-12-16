@@ -156,6 +156,7 @@ sed -i s/configuration/table/g TableGroupMetadata/*.json #*/ end C++ comment col
 
 #revert things that have gone too far!
 sed -i s/TableGUI/ConfigurationGUI/g TableGroupMetadata/*.json #*/ end C++ comment coloring
+sed -i s/TableSubset/ConfigurationSubset/g TableGroupMetadata/*.json #*/ end C++ comment coloring
 
 
 #return index after transformation

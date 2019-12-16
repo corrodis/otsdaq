@@ -170,107 +170,9 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 		}
 	}  // end main icon extraction loop
 
-	//
-	//	//generate icons file
-	//	std::fstream fs;
-	//	fs.open(DESKTOP_ICONS_FILE, std::fstream::out | std::fstream::trunc);
-	//	if(fs.fail())
-	//	{
-	//		__SS__ << "Failed to open Desktop Icons run file: " << DESKTOP_ICONS_FILE <<
-	// std::endl;
-	//		__SS_THROW__;
-	//	}
-	//
-	//	for(auto &child:childrenMap)
-	//	{
-	//		child.second.getNode(COL_STATUS	).getValue(status);
-	//		if(!status) continue;
-	//
-	//		if(first) first = false;
-	//		else fs << ",";
-	//
-	//		child.second.getNode(COL_CAPTION	).getValue(val);
-	//		fs << removeCommas(val, false, true);
-	//		//__COUT__ << "Icon caption: " << val << std::endl;
-	//
-	//		fs << ",";
-	//		child.second.getNode(COL_ALTERNATE_TEXT	).getValue(val);
-	//		fs << removeCommas(val, false, true);
-	//
-	//		fs << ",";
-	//		child.second.getNode(COL_FORCE_ONLY_ONE_INSTANCE	).getValue(status);
-	//		fs << (status?"1":"0");
-	//
-	//		fs << ",";
-	//		child.second.getNode(COL_PERMISSIONS	).getValue(val);
-	//		fs << removeCommas(val);
-	//
-	//		fs << ",";
-	//		child.second.getNode(COL_IMAGE_URL	).getValue(val);
-	//		fs << removeCommas(val,true);
-	//
-	//		fs << ",";
-	//		child.second.getNode(COL_WINDOW_CONTENT_URL	).getValue(val);
-	//		val = removeCommas(val,true);
-	//		fs << val;
-	//
-	//		bool addedAppId = false;
-	//		//add URN/LID if link is given
-	//		if(!child.second.getNode(COL_APP_LINK	).isDisconnected())
-	//		{
-	//			//if last character is not '='
-	//			//	then assume need to add "?urn="
-	//			if(val[val.size()-1] != '=')
-	//				fs << "?urn=";
-	//
-	//			//__COUT__ << "Following Application link." << std::endl;
-	//			child.second.getNode(COL_APP_LINK	).getNode(COL_APP_ID
-	//).getValue(intVal);
-	//
-	//			//__COUT__ << "URN/LID=" << intVal << std::endl;
-	//			fs << intVal; //append number
-	//			addedAppId = true;
-	//		}
-	//
-	//		//add parameters if link is given
-	//		if(!child.second.getNode(COL_PARAMETER_LINK	).isDisconnected())
-	//		{
-	//			//if there is no '?' found
-	//			//	then assume need to add "?"
-	//			if(val.find('?') == std::string::npos)
-	//				fs << '?';
-	//			else if(addedAppId ||
-	//					val[val.size()-1] != '?') //if not first parameter, add &
-	//				fs << '&';
-	//
-	//			//now add each paramter separated by &
-	//			auto paramGroupMap = child.second.getNode(COL_PARAMETER_LINK
-	//).getChildren(); 			bool notFirst = false; 			for(const auto
-	// param:paramGroupMap)
-	//			{
-	//				if(notFirst)
-	//					fs << '&';
-	//				else
-	//					notFirst = true;
-	//				fs << StringMacros::encodeURIComponent(
-	//						param.second.getNode(COL_PARAMETER_KEY).getValue<std::string>())
-	//<<
-	//"="
-	//<< 								StringMacros::encodeURIComponent(
-	//										param.second.getNode(COL_PARAMETER_VALUE).getValue<std::string>());
-	//			}
-	//		}
-	//
-	//		fs << ",";
-	//		child.second.getNode(COL_FOLDER_PATH	).getValue(val);
-	//		if(val == TableViewColumnInfo::DATATYPE_STRING_DEFAULT) val = "";
-	// 		fs << removeCommas(val,true);
-	//	}
-	//
-	//	//close icons file
-	//	fs.close();
-}
+} //end init()
 
+//==============================================================================
 std::string DesktopIconTable::removeCommas(const std::string& str, bool andHexReplace, bool andHTMLReplace)
 {
 	std::string retStr = "";
@@ -285,6 +187,16 @@ std::string DesktopIconTable::removeCommas(const std::string& str, bool andHexRe
 			retStr += "&#44;";
 
 	return retStr;
-}
+} //end removeCommas()
+
+//==============================================================================
+void DesktopIconTable::setAllDesktopIcons(const std::vector<DesktopIconTable::DesktopIcon>& newIcons)
+{
+	activeDesktopIcons_.clear();
+	for(const auto& newIcon:newIcons)
+		activeDesktopIcons_.push_back(newIcon);
+
+} //end setAllDesktopIcons
+
 
 DEFINE_OTS_TABLE(DesktopIconTable)

@@ -8,7 +8,6 @@
 
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
-#include "otsdaq/TablePlugins/DesktopIconTable.h"
 #include "otsdaq/TablePlugins/XDAQContextTable.h"
 #include "otsdaq/WorkLoopManager/WorkLoopManager.h"
 
@@ -3244,7 +3243,22 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		}
 		else if(requestType == "addDesktopIcon")
 		{
-			GatewaySupervisor::handleAddDesktopIconRequest(theWebUsers_.getUsersUsername(userInfo.uid_), cgiIn, xmlOut);
+			std::vector<DesktopIconTable::DesktopIcon> newIcons;
+
+			bool success = GatewaySupervisor::handleAddDesktopIconRequest(
+					theWebUsers_.getUsersUsername(userInfo.uid_), cgiIn, xmlOut,
+					&newIcons);
+
+			if(success)
+			{
+				__COUT__ << "Attempting dynamic icon change..." << __E__;
+
+				DesktopIconTable* iconTable =
+						(DesktopIconTable*)CorePropertySupervisorBase::theConfigurationManager_->getDesktopIconTable();
+				iconTable->setAllDesktopIcons(newIcons);
+			}
+			else
+				__COUT__ << "Failed icon add." << __E__;
 		}
 		else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{
@@ -3686,7 +3700,8 @@ void GatewaySupervisor::handleGetApplicationIdRequest(AllSupervisorInfo* allSupe
 }  // end handleGetApplicationIdRequest()
 
 //========================================================================================================================
-void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut)
+bool GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut,
+		std::vector<DesktopIconTable::DesktopIcon>* newIcons /* = nullptr*/)
 {
 	std::string  iconCaption              = CgiDataUtilities::getData(cgiIn, "iconCaption");                                         // from GET
 	std::string  iconAltText              = CgiDataUtilities::getData(cgiIn, "iconAltText");                                         // from GET
@@ -3715,7 +3730,9 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, c
 
 	ConfigurationManagerRW tmpCfgMgr(author);
 
-	ConfigurationSupervisorBase::handleAddDesktopIconXML(xmlOut,
+
+	bool success =
+			ConfigurationSupervisorBase::handleAddDesktopIconXML(xmlOut,
 	                                                     &tmpCfgMgr,
 	                                                     iconCaption,
 	                                                     iconAltText,
@@ -3728,4 +3745,17 @@ void GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, c
 	                                                     enforceOneWindowInstance /*= false*/,
 	                                                     windowParameters /*= ""*/);
 
+	if(newIcons && success)
+	{
+		__COUT__ << "Passing new icons back to caller..." << __E__;
+
+		const std::vector<DesktopIconTable::DesktopIcon>& tmpNewIcons =
+				tmpCfgMgr.__GET_CONFIG__(DesktopIconTable)->getAllDesktopIcons();
+
+		newIcons->clear();
+		for(const auto& tmpNewIcon:tmpNewIcons)
+			newIcons->push_back(tmpNewIcon);
+	}
+
+	return success;
 }  // end handleAddDesktopIconRequest()

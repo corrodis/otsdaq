@@ -598,7 +598,7 @@ TableVersion TableBase::mergeViews(
 				__SS_THROW__;
 			}
 
-			// getColLinkGroupID(childLinkIndex)
+			// getLinkGroupIDColumn(childLinkIndex)
 
 			std::vector<std::string /*converted uidB*/> localConvertedIds;  // used for conflict completeness check
 

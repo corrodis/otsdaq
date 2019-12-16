@@ -1149,7 +1149,108 @@ void TableView::addRowToGroup(const unsigned int& row,
 		setValue(groupID + " | " + getDataView()[row][col], row, col);
 
 	//__COUT__ << getDataView()[row][col] << __E__;
-}
+} //end addRowToGroup()
+
+//==============================================================================
+// getGroupRows
+//	Get the rows of all records with groupID
+//	with consideration for status on/off and priority, if enabled with flags
+//
+//	Note: empty group id of "" or '*' will return all rows
+std::vector<unsigned int /*group row*/> TableView::getGroupRows(const unsigned int groupIdCol,
+		const std::string& groupID, bool onlyStatusTrue /*=false*/,
+		bool orderedByPriority /*=false*/) const
+{
+	std::vector<unsigned int /*group row*/>                     retVector;
+	std::vector<std::vector<unsigned int /*group row*/>> groupRowVectors =
+			getGroupRowsInVectors(
+					groupIdCol,
+					groupID,
+					onlyStatusTrue,
+					orderedByPriority);
+
+	for(const auto& groupRowVector: groupRowVectors)
+		for(const auto& groupRow: groupRowVector)
+			retVector.push_back(groupRow);
+
+	return retVector;
+} //end getGroupRows()
+
+//==============================================================================
+// getGroupRowsByPriority
+//	Get the rows of all records with groupID
+//	with consideration for status on/off and priority, if enabled with flags
+//
+//	Note: empty group id of "" or '*' will return all rows
+std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsByPriority(
+		const unsigned int groupIdCol,
+		const std::string& groupID, bool onlyStatusTrue /*=false*/) const
+{
+	return getGroupRowsInVectors(groupIdCol,groupID,onlyStatusTrue,true /*orderedByPriority*/);
+} //end getGroupRowsByPriority()
+
+//==============================================================================
+// getGroupRowsInVectors
+//	Private function to allows byPriority switch.
+//
+//	Get the rows of all records with groupID
+//	with consideration for status on/off and priority, if enabled with flags
+//
+//	Note: empty group id of "" or '*' will return all rows
+std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsInVectors(
+		const unsigned int groupIdCol,
+		const std::string& groupID, bool onlyStatusTrue,
+		bool orderedByPriority) const
+{
+	std::map<uint64_t /*priority*/, std::vector<unsigned int /*child row*/>> mapByPriority;
+	std::vector<std::vector<unsigned int /*group row*/>>                     retVector;
+	uint64_t tmpPriority;
+	bool tmpStatus;
+
+	if(!(orderedByPriority && colPriority_ != INVALID)) //if no priority column, all at same priorty [0]
+		retVector.push_back(std::vector<unsigned int /*group row*/>());
+
+	for(unsigned int r = 0; r < getNumberOfRows(); ++r)
+		if(groupID == "" || groupID == "*" ||
+				groupIdCol == INVALID ||
+				isEntryInGroupCol(r, groupIdCol, groupID))
+		{
+			// check status if needed
+			if(onlyStatusTrue && colStatus_ != INVALID)
+			{
+				getValue(tmpStatus, r, colStatus_);
+
+				if(!tmpStatus)
+					continue;  // skip those with status false
+			}
+
+			if(orderedByPriority && colPriority_ != INVALID)
+			{
+				getValue(tmpPriority, r, colPriority_);
+				// do not accept DEFAULT value of 0.. convert to 100
+				mapByPriority[tmpPriority ? tmpPriority : 100].push_back(r);
+			}
+			else //assume equal priority
+				retVector[0].push_back(r);
+		}
+
+	if(orderedByPriority && colPriority_ != INVALID)
+	{
+		// at this point have priority map (which automatically sorts by priority)
+		// now build return vector
+		for(const auto& priorityChildRowVector : mapByPriority)
+		{
+			retVector.push_back(std::vector<unsigned int /*group row*/>());
+			for(const auto& priorityChildRow : priorityChildRowVector.second)
+				retVector[retVector.size() - 1].push_back(priorityChildRow);
+		}
+
+		__COUT__ << "Returning priority children list." << __E__;
+	}
+	//else equal priority vector already constructed
+
+	return retVector;
+} //end getGroupRowsInVectors()
 
 //==============================================================================
 // removeRowFromGroup
@@ -1162,7 +1263,9 @@ bool TableView::removeRowFromGroup(const unsigned int& row, const unsigned int& 
 	std::set<std::string> groupIDList;
 	if(!isEntryInGroupCol(row, col, groupNeedle, &groupIDList))
 	{
-		__SS__ << "GroupID (" << groupNeedle << ") removed from row (" << row << ") was already removed!" << __E__;
+		__SS__ << "GroupID (" << groupNeedle << ") removed from row (" <<
+				row << ") was already removed!" << __E__;
+		print();
 		__SS_THROW__;
 	}
 
@@ -1196,7 +1299,7 @@ bool TableView::removeRowFromGroup(const unsigned int& row, const unsigned int& 
 	//__COUT__ << getDataView()[row][col] << __E__;
 
 	return wasDeleted;
-}
+} //end removeRowFromGroup()
 
 //==============================================================================
 // isEntryInGroup
@@ -1206,10 +1309,10 @@ bool TableView::removeRowFromGroup(const unsigned int& row, const unsigned int& 
 //	Group entry can include | to place a record in multiple groups
 bool TableView::isEntryInGroup(const unsigned int& r, const std::string& childLinkIndex, const std::string& groupNeedle) const
 {
-	unsigned int c = getColLinkGroupID(childLinkIndex);  // column in question
+	unsigned int c = getLinkGroupIDColumn(childLinkIndex);  // column in question
 
 	return isEntryInGroupCol(r, c, groupNeedle);
-}
+} //end isEntryInGroup()
 
 //==============================================================================
 //	isEntryInGroupCol
@@ -1222,6 +1325,13 @@ bool TableView::isEntryInGroup(const unsigned int& r, const std::string& childLi
 // Note: should mirror what happens in TableView::getSetOfGroupIDs
 bool TableView::isEntryInGroupCol(const unsigned int& r, const unsigned int& c, const std::string& groupNeedle, std::set<std::string>* groupIDList) const
 {
+	if(r >= getNumberOfRows() || c >= getNumberOfColumns())
+	{
+		__SS__ << "Invalid row/col requested!" << __E__;
+		ss << StringMacros::stackTrace() << __E__;
+		__SS_THROW__;
+	}
+
 	unsigned int i     = 0;
 	unsigned int j     = 0;
 	bool         found = false;
@@ -1265,7 +1375,7 @@ bool TableView::isEntryInGroupCol(const unsigned int& r, const unsigned int& c, 
 	}
 
 	return found;
-}
+} //end isEntryInGroupCol()
 
 //==============================================================================
 // getSetOfGroupIDs
@@ -1277,7 +1387,7 @@ bool TableView::isEntryInGroupCol(const unsigned int& r, const unsigned int& c, 
 // Note: should mirror what happens in TableView::isEntryInGroupCol
 std::set<std::string> TableView::getSetOfGroupIDs(const std::string& childLinkIndex, unsigned int r) const
 {
-	return getSetOfGroupIDs(getColLinkGroupID(childLinkIndex), r);
+	return getSetOfGroupIDs(getLinkGroupIDColumn(childLinkIndex), r);
 }
 std::set<std::string> TableView::getSetOfGroupIDs(const unsigned int& c, unsigned int r) const
 {
@@ -1374,11 +1484,12 @@ std::set<std::string> TableView::getSetOfGroupIDs(const unsigned int& c, unsigne
 //==============================================================================
 // getColOfLinkGroupID
 //	const version, if column not found throw error
-const unsigned int TableView::getColLinkGroupID(const std::string& childLinkIndex) const
+const unsigned int TableView::getLinkGroupIDColumn(const std::string& childLinkIndex) const
 {
 	if(!childLinkIndex.size())
 	{
 		__SS__ << "Empty childLinkIndex string parameter!" << __E__;
+		ss << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
 
@@ -1421,7 +1532,7 @@ const unsigned int TableView::getColLinkGroupID(const std::string& childLinkInde
 	ss << StringMacros::stackTrace() << __E__;
 
 	__SS_THROW__;
-}  // end getColLinkGroupID()
+}  // end getLinkGroupIDColumn()
 
 //==============================================================================
 unsigned int TableView::findRow(unsigned int col, const std::string& value, unsigned int offsetRow, bool doNotThrow /*= false*/) const
@@ -1446,7 +1557,7 @@ unsigned int TableView::findRow(unsigned int col, const std::string& value, unsi
 unsigned int TableView::findRowInGroup(
     unsigned int col, const std::string& value, const std::string& groupId, const std::string& childLinkIndex, unsigned int offsetRow) const
 {
-	unsigned int groupIdCol = getColLinkGroupID(childLinkIndex);
+	unsigned int groupIdCol = getLinkGroupIDColumn(childLinkIndex);
 	for(unsigned int row = offsetRow; row < theDataView_.size(); ++row)
 	{
 		if(theDataView_[row][col] == value && isEntryInGroupCol(row, groupIdCol, groupId))

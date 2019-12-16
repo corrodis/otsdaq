@@ -1,27 +1,5 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
 
-// backbone includes
-//#include "otsdaq/TablePlugins/ConfigurationAliases.h"
-//#include "otsdaq/TablePlugins/Configurations.h"
-//#include "otsdaq/TablePlugins/DefaultConfigurations.h"
-//#include "otsdaq/TablePlugins/VersionAliases.h"
-
-//#include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"//All configurable
-// objects are included here
-
-//
-//#include "otsdaq/TablePlugins/DetectorTable.h"
-//#include "otsdaq/TablePlugins/MaskTable.h"
-//#include "otsdaq/TablePlugins/DetectorToFETable.h"
-//
-
-//#include "otsdaq/ConfigurationInterface/DACStream.h"
-//#include "otsdaq/ConfigurationDataFormats/TableGroupKey.h"
-//
-//#include "otsdaq/ConfigurationInterface/FileConfigurationInterface.h"
-//
-//#include <cassert>
-
 #include <dirent.h>
 
 using namespace ots;
