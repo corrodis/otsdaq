@@ -23,7 +23,7 @@ TCPClientBase::~TCPClientBase(void)
 }
 
 //========================================================================================================================
-bool TCPClientBase::connect(int retry, unsigned int sleepMSeconds)
+bool TCPClientBase::connect(int retry, unsigned int sleepMilliSeconds)
 {
 	if(fConnected)
 	{
@@ -45,6 +45,7 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMSeconds)
 	while(!fConnected && (unsigned int)retry-- > 0)
 	{
 		// std::cout << __PRETTY_FUNCTION__ << "Trying to connect" << std::endl;
+		TCPSocket::open();
 		status = ::connect(getSocketId(), (struct sockaddr*)&serverSocketAddress, sizeof(serverSocketAddress));
 		// std::cout << __PRETTY_FUNCTION__ << "Done Connect" << std::endl;
 		if(status == -1)
@@ -52,8 +53,8 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMSeconds)
 			if((unsigned int)retry > 0)
 			{
 				std::cout << __PRETTY_FUNCTION__ << "WARNING: Can't connect to " << serverName << ". The server might still be down...Sleeping "
-				          << sleepMSeconds << "ms and then retry " << (unsigned int)retry << " more times." << std::endl;
-				std::this_thread::sleep_for(std::chrono::milliseconds(sleepMSeconds));
+				          << sleepMilliSeconds << "ms and then retry " << (unsigned int)retry << " more times." << std::endl;
+				std::this_thread::sleep_for(std::chrono::milliseconds(sleepMilliSeconds));
 				continue;
 			}
 			else
@@ -93,6 +94,17 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMSeconds)
 	}
 
 	return true;
+}
+//========================================================================================================================
+bool TCPClientBase::disconnect(void)
+{
+	if(fConnected)
+	{
+		TCPSocket::sendClose();
+		TCPSocket::close();
+		fConnected = false;
+	}
+	return !fConnected;
 }
 
 //========================================================================================================================

@@ -15,23 +15,25 @@ class TCPReceiverSocket : public virtual TCPSocket
 	// TCPReceiverSocket(TCPReceiverSocket const&)  = delete ;
 	TCPReceiverSocket(TCPReceiverSocket&& theTCPReceiverSocket) = default;
 
-	std::size_t receive(char* buffer, std::size_t bufferSize = maxSocketSize);
 	template<class T>
-	T receive()
+	T receive(void)
 	{
 		T buffer;
 		buffer.resize(maxSocketSize);
 		int length = receive(static_cast<char*>(&buffer.at(0)), maxSocketSize);
+		if(length == -1) length = 0;
 		buffer.resize(length);
 		// std::cout << __PRETTY_FUNCTION__ << "Message received-" << fBuffer << "-" <<
 		// std::endl;
 		return buffer;  // c++11 doesn't make a copy anymore when returned
 	}
 	std::string receivePacket(void);
+	void setReceiveTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds);
 
   private:
+	std::size_t receive(char* buffer, std::size_t bufferSize = maxSocketSize, int timeoutMicroSeconds = -1);
 	static constexpr unsigned int maxSocketSize = 65536;
-	TCPPacket                     fPacket;
+	TCPPacket      fPacket;
 };
 }
 #endif

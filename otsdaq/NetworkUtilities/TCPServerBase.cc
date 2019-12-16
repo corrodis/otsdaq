@@ -64,7 +64,7 @@ void TCPServerBase::startAccept(void)
 
 // An accepts waits for a connection and returns the opened socket number
 //========================================================================================================================
-int TCPServerBase::accept(bool blocking)
+int TCPServerBase::accept(void)
 {
 	std::cout << __PRETTY_FUNCTION__ << "Now server accept connections on socket: " << getSocketId() << std::endl;
 	if(getSocketId() == invalidSocketId)
@@ -75,61 +75,18 @@ int TCPServerBase::accept(bool blocking)
 	struct sockaddr_storage serverStorage;
 	socklen_t               addr_size    = sizeof serverStorage;
 	int                     clientSocket = invalidSocketId;
-	if(blocking)
+	while (fAccept)
 	{
-		clientSocket = ::accept(getSocketId(), (struct sockaddr*)&serverStorage, &addr_size);
-		if(!fAccept)
+		clientSocket = ::accept(getSocketId(), (struct sockaddr *)&serverStorage, &addr_size);
+		if (clientSocket != invalidSocketId)
+			return clientSocket;
+		else
 		{
-			fAccept = true;
-			throw E_SHUTDOWN;
+			std::cout << __PRETTY_FUNCTION__ << "Accept: " << fAccept << " New socket invalid?: " << clientSocket << " errno: " << errno << std::endl;
 		}
-		if(clientSocket == invalidSocketId)
-		{
-			std::cout << __PRETTY_FUNCTION__ << "New socket invalid?: " << clientSocket << " errno: " << errno << std::endl;
-			throw std::runtime_error(std::string("Accept: ") + strerror(errno));
-		}
-		std::cout << __PRETTY_FUNCTION__ << "Server just accepted a connection on socket: " << getSocketId() << " Client socket: " << clientSocket << std::endl;
-		return clientSocket;
 	}
-	else
-	{
-		constexpr int  sleepMSeconds   = 5;
-		constexpr int  timeoutSeconds  = 0;
-		constexpr int  timeoutUSeconds = 1000;
-		struct timeval timeout;
-		timeout.tv_sec  = timeoutSeconds;
-		timeout.tv_usec = timeoutUSeconds;
-
-		fd_set fdSet;
-
-		while(fAccept)
-		{
-			FD_ZERO(&fdSet);
-			FD_SET(getSocketId(), &fdSet);
-			select(getSocketId() + 1, &fdSet, 0, 0, &timeout);
-
-			if(FD_ISSET(getSocketId(), &fdSet))
-			{
-				struct sockaddr_in clientAddress;
-				socklen_t          socketSize = sizeof(clientAddress);
-				// int newSocketFD = ::accept4(fdServerSocket_,(struct
-				// sockaddr*)&clientAddress,&socketSize, (pushOnly_ ? SOCK_NONBLOCK : 0));
-				clientSocket = ::accept(getSocketId(),
-				                        (struct sockaddr*)&clientAddress,
-				                        &socketSize);  // Blocking since select goes in
-				                                       // timeout if there is nothing
-				if(clientSocket == invalidSocketId)
-				{
-					std::cout << __PRETTY_FUNCTION__ << "New socket invalid?: " << clientSocket << " errno: " << errno << std::endl;
-					throw std::runtime_error(std::string("Accept: ") + strerror(errno));
-				}
-				return clientSocket;
-			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(sleepMSeconds));
-		}
-		fAccept = true;
-		throw E_SHUTDOWN;
-	}
+	fAccept = true;
+	throw E_SHUTDOWN;
 }
 
 //========================================================================================================================

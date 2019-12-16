@@ -22,14 +22,15 @@ class TCPSocket
 	TCPSocket& operator=(TCPSocket const&) = delete;
 
 	int  getSocketId(void) const { return fSocketId; }
-	void close(void);
-	void sendClose(void);
+	void open       (void);
+	void close      (void);
+	void sendClose  (void);
 
   protected:
 	static constexpr int invalidSocketId = -1;
 
   private:
-	int fSocketId;
+	int  fSocketId;
 };
 }
 #endif

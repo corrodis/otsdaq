@@ -1,9 +1,9 @@
 #include "otsdaq/NetworkUtilities/TCPTransmitterSocket.h"
+#include "otsdaq/NetworkUtilities/TCPPacket.h"
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <stdexcept>
-#include "otsdaq/NetworkUtilities/TCPPacket.h"
 //#include <iostream>
 
 using namespace ots;
@@ -81,4 +81,14 @@ void TCPTransmitterSocket::send(const std::vector<char>& buffer)
 		return;
 	}
 	send(&buffer.at(0), buffer.size());
+}
+
+//========================================================================================================================
+void TCPTransmitterSocket::setSendTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds)
+{
+	struct timeval tv;
+	tv.tv_sec  = timeoutSeconds;
+	tv.tv_usec = timeoutMicroSeconds;
+	setsockopt(getSocketId(), SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof tv);
+
 }

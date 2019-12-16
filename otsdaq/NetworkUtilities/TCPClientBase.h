@@ -1,9 +1,8 @@
 #ifndef _ots_TCPClientBase_h_
 #define _ots_TCPClientBase_h_
 
-#include <netinet/in.h>
-#include <string>
 #include "otsdaq/NetworkUtilities/TCPTransceiverSocket.h"
+#include <string>
 
 namespace ots
 {
@@ -14,7 +13,8 @@ class TCPClientBase : public virtual TCPSocket
 	TCPClientBase(const std::string& serverIP, int serverPort);
 	virtual ~TCPClientBase(void);
 
-	bool connect(int retry = -1, unsigned int sleepMSeconds = 1000);
+	bool connect   (int retry = -1, unsigned int sleepMilliSeconds = 1000);
+	bool disconnect(void);
 
   private:
 	std::string fServerIP;

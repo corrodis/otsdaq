@@ -80,8 +80,8 @@ class CircularBuffer : public CircularBufferBase
 	BufferImplementation<D, H>& getLastReadBuffer(const std::string& consumerID) { return lastReadBuffer_[consumerID]->second; }
 	BufferImplementation<D, H>& getBuffer(const std::string& producerID)
 	{
-		__COUTV__(producerID);
-		__COUTV__(int(theBuffer_.find(producerID) == theBuffer_.end()));
+		// __COUTV__(producerID);
+		// __COUTV__(int(theBuffer_.find(producerID) == theBuffer_.end()));
 		return theBuffer_[producerID];
 	}
 

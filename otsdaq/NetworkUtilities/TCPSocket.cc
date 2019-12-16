@@ -1,6 +1,7 @@
 #include "otsdaq/NetworkUtilities/TCPSocket.h"
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <iostream>
 #include <stdexcept>
@@ -10,9 +11,7 @@ using namespace ots;
 //========================================================================================================================
 TCPSocket::TCPSocket(int socketId) : fSocketId(socketId)
 {
-	if(socketId == invalidSocketId && (fSocketId = ::socket(PF_INET, SOCK_STREAM, 0)) == invalidSocketId)
-		throw std::runtime_error(std::string("Bad socket: ") + strerror(errno));
-	// std::cout << __PRETTY_FUNCTION__ << "New socket: " << fSocketId << std::endl;
+	open();
 }
 
 //========================================================================================================================
@@ -37,7 +36,14 @@ TCPSocket::~TCPSocket()
 }
 
 //========================================================================================================================
-void TCPSocket::close()
+void TCPSocket::open(void)
+{
+	if(fSocketId == invalidSocketId && (fSocketId = ::socket(PF_INET, SOCK_STREAM, 0)) == invalidSocketId)
+		throw std::runtime_error(std::string("Bad socket: ") + strerror(errno));
+}
+
+//========================================================================================================================
+void TCPSocket::close(void)
 {
 	if(fSocketId == invalidSocketId)
 	{

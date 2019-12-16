@@ -1,11 +1,11 @@
 #ifndef _ots_TCPServerBase_h_
 #define _ots_TCPServerBase_h_
 
+#include "otsdaq/NetworkUtilities/TCPSocket.h"
 #include <future>
 #include <string>
 #include <map>
 #include <vector>
-#include "otsdaq/NetworkUtilities/TCPSocket.h"
 
 namespace ots
 {
@@ -25,9 +25,9 @@ class TCPServerBase : public TCPSocket
 
 	void closeClientSocket(int socket);
 	template<class T>
-	T* acceptClient(bool blocking = true)
+	T* acceptClient()
 	{
-		int socketId = accept(blocking);
+		int socketId = accept();
 		fConnectedClients.emplace(socketId, new T(socketId));
 		return dynamic_cast<T*>(fConnectedClients[socketId]);
 	}
@@ -38,7 +38,7 @@ class TCPServerBase : public TCPSocket
 
   private:
 	void closeClientSockets(void);
-	int  accept(bool blocking = true);
+	int  accept(void);
 	void shutdownAccept(void);
 
 	const int         fMaxConnectionBacklog = 5;
