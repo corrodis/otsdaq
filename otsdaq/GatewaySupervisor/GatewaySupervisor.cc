@@ -3186,8 +3186,16 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			//	note: each icon has own permission threshold, so each user can have
 			//		a unique desktop icon experience.
 
-			const DesktopIconTable*                    iconTable = CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(DesktopIconTable);
-			std::vector<DesktopIconTable::DesktopIcon> icons     = iconTable->getAllDesktopIcons();
+
+			//use latest context always from temporary configuration manager,
+			//	to get updated icons every time...
+			//(so icon changes do no require an ots restart)
+
+			ConfigurationManagerRW tmpCfgMgr(theWebUsers_.getUsersUsername(userInfo.uid_)); //constructor will activate latest context, note: not CorePropertySupervisorBase::theConfigurationManager_
+			const DesktopIconTable* iconTable =
+					tmpCfgMgr.__GET_CONFIG__(DesktopIconTable);
+			const std::vector<DesktopIconTable::DesktopIcon>& icons =
+					iconTable->getAllDesktopIcons();
 
 			std::string iconString = "";  // comma-separated icon string, 7 fields:
 			//				0 - caption 		= text below icon
