@@ -108,34 +108,6 @@ void GatewaySupervisor::init(void)
 {
 	supervisorGuiHasBeenLoaded_ = false;
 
-	//	const XDAQContextTable* contextTable =
-	// CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextTable);
-	//
-	//	CorePropertySupervisorBase::supervisorContextUID_ =
-	// contextTable->getContextUID(
-	//		getApplicationContext()->getContextDescriptor()->getURL()
-	//	);
-	//	__COUT__ << "Context UID:" << supervisorContextUID_ << __E__;
-	//
-	//	CorePropertySupervisorBase::supervisorApplicationUID_ =
-	// contextTable->getApplicationUID(
-	//		getApplicationContext()->getContextDescriptor()->getURL(),
-	//		getApplicationDescriptor()->getLocalId()
-	//	);
-	//
-	//	__COUT__ << "Application UID:" << supervisorApplicationUID_ << __E__;
-	//
-	//	ConfigurationTree configLinkNode =
-	// CorePropertySupervisorBase::getSupervisorTreeNode();
-	//
-	//	std::string supervisorUID;
-	//	if (!configLinkNode.isDisconnected())
-	//		supervisorUID = configLinkNode.getValue();
-	//	else
-	//		supervisorUID = TableViewColumnInfo::DATATYPE_LINK_DEFAULT;
-	//
-	//__COUT__ << "GatewaySupervisor UID:" << supervisorUID << __E__;
-
 	// setting up thread for UDP thread to drive state machine
 	{
 		bool enableStateChanges = false;
@@ -180,30 +152,6 @@ void GatewaySupervisor::init(void)
 			__COUT__ << "App Status checking is disabled." << __E__;
 	}  // end checking of Application Status
 
-	//	try
-	//	{
-	//		auto artdaqStateChangeEnabled =
-	//		    CorePropertySupervisorBase::getSupervisorTableNode()
-	//		        .getNode("EnableARTDAQCommanderPlugin")
-	//		        .getValue<bool>();
-	//		if(artdaqStateChangeEnabled)
-	//		{
-	//			auto artdaqStateChangePort =
-	//			    CorePropertySupervisorBase::getSupervisorTableNode()
-	//			        .getNode("ARTDAQCommanderID")
-	//			        .getValue<int>();
-	//			auto artdaqStateChangePluginType =
-	//			    CorePropertySupervisorBase::getSupervisorTableNode()
-	//			        .getNode("ARTDAQCommanderType")
-	//			        .getValue<std::string>();
-	//			theArtdaqCommandable_.init(artdaqStateChangePort,
-	//			                           artdaqStateChangePluginType);
-	//		}
-	//	}
-	//	catch(...)
-	//	{
-	//		;
-	//	}  // ignore errors
 }  // end init()
 
 //========================================================================================================================
@@ -211,14 +159,16 @@ void GatewaySupervisor::init(void)
 //	child thread
 void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 {
-	sleep(5);
 	std::string status, progress, appName;
 	int         progressInteger;
 	while(1)
 	{
+		sleep(5);
+
 		// workloop procedure
 		//	Loop through all Apps and request status
 		//	sleep
+
 		// __COUT__ << "Just debugging App status checking" << __E__;
 		for(const auto& it : theSupervisor->allSupervisorInfo_.getAllSupervisorInfo())
 		{
@@ -305,7 +255,6 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 
 		}  // end of for loop
 
-		sleep(5);
 	}
 }  // end AppStatusWorkLoop
 
@@ -2892,8 +2841,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				                            appInfo.getName());                      // get application name
 				xmlOut.addTextElementToData("id", std::to_string(appInfo.getId()));  // get application id
 				xmlOut.addTextElementToData("status", appInfo.getStatus());          // get status
-				xmlOut.addTextElementToData("time",
-				                            StringMacros::getTimestampString(appInfo.getLastStatusTime()));  // get time stamp
+				xmlOut.addTextElementToData("time",appInfo.getLastStatusTime()?
+				                            StringMacros::getTimestampString(appInfo.getLastStatusTime()):0);  // get time stamp
 				xmlOut.addTextElementToData("progress", std::to_string(appInfo.getProgress()));              // get progress
 				xmlOut.addTextElementToData("class",
 				                            appInfo.getClass());  // get application class
@@ -2902,6 +2851,10 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				xmlOut.addTextElementToData("context",
 				                            appInfo.getContextName());  // get context
 			}
+		}
+		else if(requestType == "getAppId")
+		{
+			GatewaySupervisor::handleGetApplicationIdRequest(&allSupervisorInfo_, cgiIn, xmlOut);
 		}
 		else if(requestType == "getContextMemberNames")
 		{
@@ -3218,8 +3171,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			bool firstIcon = true;
 			for(const auto& icon : icons)
 			{
-				__COUTV__(icon.caption_);
-				__COUTV__(icon.permissionThresholdString_);
+				//__COUTV__(icon.caption_);
+				//__COUTV__(icon.permissionThresholdString_);
 
 				CorePropertySupervisorBase::extractPermissionsMapFromString(icon.permissionThresholdString_, iconPermissionThresholdsMap);
 
@@ -3245,7 +3198,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				iconString += "," + icon.windowContentURL_;
 				iconString += "," + icon.folderPath_;
 			}
-			__COUTV__(iconString);
+			//__COUTV__(iconString);
 
 			xmlOut.addTextElementToData("iconList", iconString);
 		}
@@ -3266,7 +3219,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				iconTable->setAllDesktopIcons(newIcons);
 			}
 			else
-				__COUT__ << "Failed icon add." << __E__;
+				__COUT__ << "Failed dynamic icon add." << __E__;
 		}
 		else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{

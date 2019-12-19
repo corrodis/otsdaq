@@ -18,7 +18,7 @@ using namespace ots;
 // ConfigurationManagerRW
 ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : ConfigurationManager(username)  // for use as author of new views
 {
-	__COUT__ << "Using Config Mgr with Write Access! (for " << username << ")" << __E__;
+	__COUT__ << "Instantiating Config Manager with Write Access! (for " << username << ")" << __E__;
 
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
 
@@ -32,7 +32,7 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 
 		FILE* fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "r");
 
-		__COUT__ << "Updating core tables file..." << __E__;
+		//__COUT__ << "Updating core tables file..." << __E__;
 
 		if(fp)  // check for all core table names in file, and force their presence
 		{
