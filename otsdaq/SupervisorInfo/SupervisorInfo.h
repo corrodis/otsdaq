@@ -12,6 +12,7 @@
 #pragma GCC diagnostic pop
 #include "otsdaq/Macros/XDAQApplicationMacros.h"
 
+// clang-format off
 namespace ots
 {
 class SupervisorInfo
@@ -71,19 +72,19 @@ class SupervisorInfo
 	bool isTypeConsoleSupervisor(void) const { return XDAQContextTable::ConsoleTypeClassNames_.find(class_) != XDAQContextTable::ConsoleTypeClassNames_.end(); }
 
 	// Getters -------------------
-	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDescriptor(void) const { return descriptor_; }
-	const xdaq::ContextDescriptor*               getContextDescriptor(void) const { return contextDescriptor_; }
-	const std::string&                           getName(void) const { return name_; }
-	const std::string&                           getContextName(void) const { return contextName_; }
-	const unsigned int&                          getId(void) const { return id_; }
-	const std::string&                           getClass(void) const { return class_; }
-	const std::string&                           getStatus(void) const { return status_; }
-	const time_t                                 getLastStatusTime(void) { return lastStatusTime_; }
-	const unsigned int&                          getProgress(void) const { return progress_; }
-	const std::string&                           getURL(void) const { return contextURL_; }
-	const std::string&                           getURN(void) const { return URN_; }
-	const std::string&                           getFullURL(void) const { return URL_; }
-	const uint16_t&                              getPort(void) const { return port_; }
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDescriptor					(void) const { return descriptor_; }
+	const xdaq::ContextDescriptor*               getContextDescriptor			(void) const { return contextDescriptor_; }
+	const std::string&                           getName						(void) const { return name_; }
+	const std::string&                           getContextName					(void) const { return contextName_; }
+	const unsigned int&                          getId							(void) const { return id_; }
+	const std::string&                           getClass						(void) const { return class_; }
+	const std::string&                           getStatus						(void) const { return status_; }
+	const time_t                                 getLastStatusTime				(void) const { return lastStatusTime_; }
+	const unsigned int&                          getProgress					(void) const { return progress_; }
+	const std::string&                           getURL							(void) const { return contextURL_; }
+	const std::string&                           getURN							(void) const { return URN_; }
+	const std::string&                           getFullURL						(void) const { return URL_; }
+	const uint16_t&                              getPort						(void) const { return port_; }
 
 	// Setters -------------------
 	void setStatus(const std::string& status)
@@ -117,7 +118,7 @@ class SupervisorInfo
 	unsigned int                             progress_;
 	time_t                                   lastStatusTime_;
 };
-
+// clang-format on
 }  // namespace ots
 
 #endif

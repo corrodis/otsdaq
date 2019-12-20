@@ -135,7 +135,8 @@ void GatewaySupervisor::init(void)
 		bool checkAppStatus = false;
 		try
 		{
-			checkAppStatus = CorePropertySupervisorBase::getSupervisorTableNode().getNode("EnableApplicationStatusMonitoring").getValue<bool>();
+			checkAppStatus = CorePropertySupervisorBase::getSupervisorTableNode().getNode(
+					"EnableApplicationStatusMonitoring").getValue<bool>();
 		}
 		catch(...)
 		{
@@ -2831,18 +2832,18 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		}
 		else if(requestType == "getAppStatus")
 		{
-			for(auto it : allSupervisorInfo_.getAllSupervisorInfo())
+			for(const auto& it : allSupervisorInfo_.getAllSupervisorInfo())
 			{
-				// bool pass = true;
-
-				auto appInfo = it.second;
+				const auto& appInfo = it.second;
 
 				xmlOut.addTextElementToData("name",
 				                            appInfo.getName());                      // get application name
 				xmlOut.addTextElementToData("id", std::to_string(appInfo.getId()));  // get application id
 				xmlOut.addTextElementToData("status", appInfo.getStatus());          // get status
 				xmlOut.addTextElementToData("time",appInfo.getLastStatusTime()?
-				                            StringMacros::getTimestampString(appInfo.getLastStatusTime()):0);  // get time stamp
+				                            StringMacros::getTimestampString(appInfo.getLastStatusTime()):"0");  // get time stamp
+				xmlOut.addTextElementToData("stale",
+						std::to_string(time(0) - appInfo.getLastStatusTime())); //time since update
 				xmlOut.addTextElementToData("progress", std::to_string(appInfo.getProgress()));              // get progress
 				xmlOut.addTextElementToData("class",
 				                            appInfo.getClass());  // get application class
@@ -3670,7 +3671,8 @@ bool GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, c
 	std::string  iconImageURL             = CgiDataUtilities::getData(cgiIn, "iconImageURL");                                        // from GET
 	std::string  iconWindowURL            = CgiDataUtilities::getData(cgiIn, "iconWindowURL");                                       // from GET
 	std::string  iconPermissions          = CgiDataUtilities::getData(cgiIn, "iconPermissions");                                     // from GET
-	std::string  windowLinkedApp          = CgiDataUtilities::getData(cgiIn, "iconLinkedApp");                                       // from GET
+	//windowLinkedApp is one of the only fields that needs to be decoded before write into table cells, because the app class name might be here
+	std::string  windowLinkedApp          = StringMacros::decodeURIComponent(CgiDataUtilities::getData(cgiIn, "iconLinkedApp"));     // from GET
 	unsigned int windowLinkedAppLID       = CgiDataUtilities::getDataAsInt(cgiIn, "iconLinkedAppLID");                               // from GET
 	bool         enforceOneWindowInstance = CgiDataUtilities::getData(cgiIn, "iconEnforceOneWindowInstance") == "1" ? true : false;  // from GET
 
