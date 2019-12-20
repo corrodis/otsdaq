@@ -633,19 +633,16 @@ void WizardSupervisor::editSecurity(xgi::Input* in, xgi::Output* out)
 
 	// Always return the file
 	std::ifstream securityFile;
-	std::string   line;
-	std::string   security   = "";
+	std::string   security;
 
 	securityFile.open(securityFileName.c_str());
-
-	if(!securityFile)
-		security = WebUsers::SECURITY_TYPE_DEFAULT;  // default security when no file exists
-
 	if(securityFile.is_open())
 	{
-		std::getline(securityFile, line);
+		std::getline(securityFile, security);
 		securityFile.close();
 	}
+	else
+		security = WebUsers::SECURITY_TYPE_DEFAULT;  // default security when no file exists
 
 	*out << security;
 } //end editSecurity()
