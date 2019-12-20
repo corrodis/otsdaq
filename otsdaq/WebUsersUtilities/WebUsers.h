@@ -71,6 +71,7 @@ class WebUsers
 
 	static const std::string SECURITY_TYPE_NONE;
 	static const std::string SECURITY_TYPE_DIGEST_ACCESS;
+	static const std::string SECURITY_TYPE_DEFAULT;
 
 	struct RequestUserInfo
 	{

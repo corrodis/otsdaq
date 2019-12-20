@@ -610,7 +610,8 @@ void WizardSupervisor::editSecurity(xgi::Input* in, xgi::Output* out)
 			*out << submittedSecurity;
 			return;
 		}
-		else if(submittedSecurity == "DigestAccessAuthentication" || submittedSecurity == "NoSecurity")
+		else if(submittedSecurity == WebUsers::SECURITY_TYPE_DIGEST_ACCESS ||
+				submittedSecurity == WebUsers::SECURITY_TYPE_NONE)
 		{
 			std::ofstream writeSecurityFile;
 
@@ -634,35 +635,21 @@ void WizardSupervisor::editSecurity(xgi::Input* in, xgi::Output* out)
 	std::ifstream securityFile;
 	std::string   line;
 	std::string   security   = "";
-	int           lineNumber = 0;
 
 	securityFile.open(securityFileName.c_str());
 
 	if(!securityFile)
-	{
-		//__SS__ << "Error opening file: "<< securityFileName << std::endl;
-		//__COUT_ERR__ << "\n" << ss.str();
+		security = WebUsers::SECURITY_TYPE_DEFAULT;  // default security when no file exists
 
-		//__SS_THROW__;
-		// return;
-		security = "DigestAccessAuthentication";  // default security when no file exists
-	}
 	if(securityFile.is_open())
 	{
-		//__COUT__ << "Opened File: " << securityFileName << std::endl;
-		while(std::getline(securityFile, line))
-		{
-			security += line;
-			lineNumber++;
-		}
-		//__COUT__ << std::to_string(lineNumber) << ":" << iconList << std::endl;
-
-		// Close file
+		std::getline(securityFile, line);
 		securityFile.close();
 	}
 
 	*out << security;
-}
+} //end editSecurity()
+
 //========================================================================================================================
 void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)
 {

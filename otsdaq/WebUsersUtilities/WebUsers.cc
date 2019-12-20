@@ -76,6 +76,7 @@ const std::string WebUsers::REQ_ALLOW_NO_USER          = "AllowNoUser";
 
 const std::string WebUsers::SECURITY_TYPE_NONE          = "NoSecurity";
 const std::string WebUsers::SECURITY_TYPE_DIGEST_ACCESS = "DigestAccessAuthentication";
+const std::string WebUsers::SECURITY_TYPE_DEFAULT 		= WebUsers::SECURITY_TYPE_NONE; // default to NO SECURITY
 
 
 #undef __MF_SUBJECT__
@@ -2874,7 +2875,7 @@ void WebUsers::loadSecuritySelection()
 	if(strcmp(line, SECURITY_TYPE_NONE.c_str()) == 0 || strcmp(line, SECURITY_TYPE_DIGEST_ACCESS.c_str()) == 0)
 		securityType_ = line;
 	else
-		securityType_ = SECURITY_TYPE_NONE;  // default to NO SECURITY
+		securityType_ = SECURITY_TYPE_DEFAULT;
 
 	__COUT__ << "The current security type is " << securityType_ << __E__;
 
