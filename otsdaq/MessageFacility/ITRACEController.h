@@ -1,31 +1,51 @@
+#ifndef OTSDAQ_MESSAGEFACILITY_ITRACECONTROLLER_H
+#define OTSDAQ_MESSAGEFACILITY_ITRACECONTROLLER_H
+
+#include <limits.h>
+#include <unistd.h>
 #include <deque>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
-namespace ots {
-    class ITRACEController {
-    public:
-        struct TraceLevel {
-            std::string name;
-            uint64_t lvlM;
-            uint64_t lvlS;
-            uint64_t lvlT;
-        };
+namespace ots
+{
+class ITRACEController
+{
+  public:
+	struct TraceMasks
+	{
+		uint64_t M;
+		uint64_t S;
+		uint64_t T;
+	};
+	typedef std::unordered_map<std::string, TraceMasks>    TraceLevelMap;
+	typedef std::unordered_map<std::string, TraceLevelMap> HostTraceLevelMap;
 
-        ITRACEController() {}
-        virtual ~ITRACEController() = default;
+	ITRACEController() {}
+	virtual ~ITRACEController() = default;
 
-        virtual std::unordered_map<std::string /*hostname*/, std::deque<TraceLevel>> GetTraceLevels() = 0;
-        virtual void SetTraceLevelMask(TraceLevel const& lvl) = 0;
-    };
+	virtual HostTraceLevelMap GetTraceLevels()                                                                                 = 0;
+	virtual void              SetTraceLevelMask(std::string trace_name, TraceMasks const& lvl, std::string host = "localhost") = 0;
 
-    class NullTRACEController : public ITRACEController {
-    public:
-        NullTRACEController() {}
-        virtual ~NullTRACEController() = default;
+  protected:
+	std::string GetHostnameString()
+	{
+		char hostname_c[HOST_NAME_MAX];
+		gethostname(hostname_c, HOST_NAME_MAX);
+		return std::string(hostname_c);
+	}
+};
 
-        std::unordered_map<std::string, std::deque<TraceLevel>> GetTraceLevels() final { return std::unordered_map<std::string, std::deque<TraceLevel>>(); }
-        void SetTraceLevelMask(TraceLevel const&) final {}
-    };
+class NullTRACEController : public ITRACEController
+{
+  public:
+	NullTRACEController() {}
+	virtual ~NullTRACEController() = default;
 
-}
+	HostTraceLevelMap GetTraceLevels() final { return HostTraceLevelMap(); }
+	void              SetTraceLevelMask(std::string, TraceMasks const&, std::string) final {}
+};
+
+}  // namespace ots
+
+#endif  // OTSDAQ_MESSAGEFACILITY_ITRACECONTROLLER_H

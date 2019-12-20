@@ -1,3 +1,6 @@
+#ifndef OTSDAQ_MESSAGEFACILITY_TRACECONTROLLER_H
+#define OTSDAQ_MESSAGEFACILITY_TRACECONTROLLER_H
+
 #include "otsdaq/MessageFacility/ITRACEController.h"
 
 namespace ots {
@@ -6,7 +9,9 @@ namespace ots {
 		TRACEController();
 		virtual ~TRACEController() = default;
 
-		virtual std::unordered_map<std::string /*hostname*/, std::deque<TraceLevel>> GetTraceLevels();
-		virtual void SetTraceLevelMask(TraceLevel const& lvl);
+		virtual HostTraceLevelMap GetTraceLevels();
+		virtual void SetTraceLevelMask(std::string name, TraceMasks const& lvl, std::string hostname = "localhost");
 	};
 }
+
+#endif  // OTSDAQ_MESSAGEFACILITY_TRACECONTROLLER_H

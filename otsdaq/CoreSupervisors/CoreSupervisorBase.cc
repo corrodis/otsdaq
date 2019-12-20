@@ -36,6 +36,7 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub* stub)
 	xoap::bind(this, &CoreSupervisorBase::workLoopStatusRequestWrapper, "WorkLoopStatusRequest", XDAQ_NS_URI);
 	xoap::bind(this, &CoreSupervisorBase::applicationStatusRequest, "ApplicationStatusRequest", XDAQ_NS_URI);
 
+	theTRACEController_ = new NullTRACEController();
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor
 

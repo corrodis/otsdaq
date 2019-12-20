@@ -46,6 +46,9 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	virtual void 	transitionStopping			(toolbox::Event::Reference event) override;
 	virtual void 	enteringError				(toolbox::Event::Reference event);
 
+	std::string GetTraceLevels() { return "NOT IMPLEMENTED";}
+	void SetTraceLevel(std::string name, uint64_t tlvlM, uint64_t tlvlS, uint64_t tlvlT, std::string hostname = "localhost") {}
+
   private:
 	static void 	configuringThread(ARTDAQSupervisor* cs);
 
