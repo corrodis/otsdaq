@@ -1485,7 +1485,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 			for(auto& aliasNodePair : aliasNodePairs)
 			{
 				tableName    = aliasNodePair.second.getNode("TableName").getValueAsString();
-				tableVersion = aliasNodePair.second.getNode("TableVersion").getValueAsString();
+				tableVersion = aliasNodePair.second.getNode("Version").getValueAsString();
 
 				__COUT__ << "Table Alias: " << aliasNodePair.first << " => " << tableName << "-v" << tableVersion << "" << __E__;
 
@@ -1495,7 +1495,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 					tableAliasChange = true;
 
-					tableView->setValueAsString(contextGroupMembers[DesktopIconTable::ICON_TABLE].toString(), row, tableView->findCol("TableVersion"));
+					tableView->setValueAsString(contextGroupMembers[DesktopIconTable::ICON_TABLE].toString(), row, tableView->findCol("Version"));
 				}
 				else if(tableName == DesktopIconTable::PARAMETER_TABLE && TableVersion(tableVersion) == parameterTable.originalVersion_)
 				{
@@ -1503,7 +1503,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 					tableAliasChange = true;
 
-					tableView->setValueAsString(contextGroupMembers[DesktopIconTable::PARAMETER_TABLE].toString(), row, tableView->findCol("TableVersion"));
+					tableView->setValueAsString(contextGroupMembers[DesktopIconTable::PARAMETER_TABLE].toString(), row, tableView->findCol("Version"));
 				}
 
 				++row;

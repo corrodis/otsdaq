@@ -1456,7 +1456,7 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
 			for(auto& aliasNodePair : aliasNodePairs)
 			{
 				tableName    = aliasNodePair.second.getNode("TableName").getValueAsString();
-				tableVersion = aliasNodePair.second.getNode("TableVersion").getValueAsString();
+				tableVersion = aliasNodePair.second.getNode("Version").getValueAsString();
 
 				__COUT__ << "Table Alias: " << aliasNodePair.first << " => " << tableName << "-v" << tableVersion << "" << __E__;
 
@@ -1466,7 +1466,7 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
 
 					tableAliasChange = true;
 
-					tableView->setValueAsString(groupMembers_.at(groupTable.second.tableName_).toString(), row, tableView->findCol("TableVersion"));
+					tableView->setValueAsString(groupMembers_.at(groupTable.second.tableName_).toString(), row, tableView->findCol("Version"));
 				}
 
 				++row;
