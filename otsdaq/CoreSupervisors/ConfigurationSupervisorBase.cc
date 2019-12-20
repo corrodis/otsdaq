@@ -1576,7 +1576,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 		// always add active table groups to xml response
 		ConfigurationSupervisorBase::getConfigurationStatusXML(xmlOut, cfgMgr);
 	}
-
+	return true;
 }  // end handleAddDesktopIconXML()
 catch(std::runtime_error& e)
 {
