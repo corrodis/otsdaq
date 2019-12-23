@@ -14,6 +14,7 @@
 #include "otsdaq/FiniteStateMachine/VStateMachine.h"
 
 #include "otsdaq/WebUsersUtilities/RemoteWebUsers.h"
+#include "otsdaq/MessageFacility/ITRACEController.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -114,6 +115,8 @@ class CoreSupervisorBase : public xdaq::Application,
 
 	static const std::string WORK_LOOP_DONE, WORK_LOOP_WORKING;
 
+	void SetTraceController(ITRACEController* tc) { theTRACEController_ = tc;}
+
   protected:
 	WorkLoopManager             stateMachineWorkLoopManager_;
 	toolbox::BSem               stateMachineSemaphore_;
@@ -129,6 +132,8 @@ class CoreSupervisorBase : public xdaq::Application,
 	void              postStateMachineExecutionLoop(void);
 
 	RemoteWebUsers theRemoteWebUsers_;
+
+	ITRACEController* theTRACEController_;
 };
 // clang-format on
 }  // namespace ots
