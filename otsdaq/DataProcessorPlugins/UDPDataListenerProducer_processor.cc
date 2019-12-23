@@ -11,7 +11,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 UDPDataListenerProducer::UDPDataListenerProducer(std::string              supervisorApplicationUID,
                                                  std::string              bufferUID,
                                                  std::string              processorUID,
@@ -42,10 +42,10 @@ UDPDataListenerProducer::UDPDataListenerProducer(std::string              superv
 	Socket::initialize(socketReceiveBufferSize);
 }
 
-//========================================================================================================================
+//==============================================================================
 UDPDataListenerProducer::~UDPDataListenerProducer(void) {}
 
-//========================================================================================================================
+//==============================================================================
 bool UDPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 // bool UDPDataListenerProducer::getNextFragment(void)
 {
@@ -55,7 +55,7 @@ bool UDPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 	return WorkLoop::continueWorkLoop_;
 }
 
-//========================================================================================================================
+//==============================================================================
 void UDPDataListenerProducer::slowWrite(void)
 {
 	//__CFG_COUT__name_ << " running!" << std::endl;
@@ -83,7 +83,7 @@ void UDPDataListenerProducer::slowWrite(void)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void UDPDataListenerProducer::fastWrite(void)
 {
 	//__CFG_COUT__ << " running!" << std::endl;

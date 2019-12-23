@@ -91,7 +91,7 @@ static void init_sighandler(ARTDAQSupervisor* inst)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
     : CoreSupervisorBase(stub)
     , daqinterface_ptr_(NULL)
@@ -136,7 +136,7 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQSupervisor::~ARTDAQSupervisor(void)
 {
 	__SUP_COUT__ << "Destructor." << __E__;
@@ -144,7 +144,7 @@ ARTDAQSupervisor::~ARTDAQSupervisor(void)
 	__SUP_COUT__ << "Destructed." << __E__;
 }  // end destructor()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::init(void)
 {
 	stop_runner_();
@@ -239,7 +239,7 @@ void ARTDAQSupervisor::init(void)
 	__SUP_COUT__ << "Initialized." << __E__;
 }  // end init()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::destroy(void)
 {
 	__SUP_COUT__ << "Destroying..." << __E__;
@@ -268,7 +268,7 @@ void ARTDAQSupervisor::destroy(void)
 	__SUP_COUT__ << "Destroyed." << __E__;
 }  // end destroy()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
@@ -350,7 +350,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 	return;
 }  // end transitionConfiguring()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) try
 {
 	ProgressBar& progressBar = theArtdaqSupervisor->thread_progress_bar_;
@@ -606,7 +606,7 @@ catch(...)
 	theArtdaqSupervisor->thread_error_message_ = ss.str();
 }  // end configuringThread() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Halting..." << __E__;
@@ -681,7 +681,7 @@ catch(...)
 	}
 }  // end transitionHalting() exception handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Initializing..." << __E__;
@@ -700,7 +700,7 @@ catch(...)
 	__SS_THROW__;
 }  // end transitionInitializing() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Pausing..." << __E__;
@@ -737,7 +737,7 @@ catch(...)
 	__SS_THROW__;
 }  // end transitionPausing() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Resuming..." << __E__;
@@ -771,7 +771,7 @@ catch(...)
 	__SS_THROW__;
 }  // end transitionResuming() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Starting..." << __E__;
@@ -815,7 +815,7 @@ catch(...)
 	__SS_THROW__;
 }  // end transitionStarting() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
@@ -847,7 +847,7 @@ catch(...)
 	__SS_THROW__;
 }  // end transitionStopping() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "Entering error recovery state" << __E__;
@@ -870,7 +870,7 @@ void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference event)
 
 }  // end enteringError()
 
-//========================================================================================================================
+//==============================================================================
 void ots::ARTDAQSupervisor::getDAQState_()
 {
 	//__SUP_COUT__ << "Getting DAQInterface state" << __E__;
@@ -896,7 +896,7 @@ void ots::ARTDAQSupervisor::getDAQState_()
 	//__SUP_COUT__ << "getDAQState_ DONE: state=" << result << __E__;
 }  // end getDAQState_()
 
-//========================================================================================================================
+//==============================================================================
 void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 {
 	TLOG(TLVL_TRACE) << "Runner thread starting";
@@ -982,7 +982,7 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 	TLOG(TLVL_TRACE) << "Runner thread complete";
 }  // end daqinterfaceRunner_()
 
-//========================================================================================================================
+//==============================================================================
 void ots::ARTDAQSupervisor::stop_runner_()
 {
 	runner_running_ = false;
@@ -993,7 +993,7 @@ void ots::ARTDAQSupervisor::stop_runner_()
 	}
 }  // end stop_runner_()
 
-//========================================================================================================================
+//==============================================================================
 void ots::ARTDAQSupervisor::start_runner_()
 {
 	stop_runner_();

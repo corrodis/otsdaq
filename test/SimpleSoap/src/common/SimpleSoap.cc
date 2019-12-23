@@ -14,7 +14,7 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(SimpleSoap)
 
-//========================================================================================================================
+//==============================================================================
 SimpleSoap::SimpleSoap(xdaq::ApplicationStub* s) : xdaq::Application(s), SOAPMessenger(this)
 {
 	xgi::bind(this, &SimpleSoap::Default, "Default");
@@ -26,7 +26,7 @@ SimpleSoap::SimpleSoap(xdaq::ApplicationStub* s) : xdaq::Application(s), SOAPMes
 	fsm_.addStateTransition('I', 'H', "Initialize");
 }
 
-//========================================================================================================================
+//==============================================================================
 void SimpleSoap::Default(xgi::Input* in, xgi::Output* out)
 {
 	std::string url = "/" + getApplicationDescriptor()->getURN();
@@ -51,7 +51,7 @@ void SimpleSoap::Default(xgi::Input* in, xgi::Output* out)
 	*out << "</body>" << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 void SimpleSoap::StateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
@@ -107,14 +107,14 @@ void SimpleSoap::StateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 	this->Default(in, out);
 }
 
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference SimpleSoap::Start(xoap::MessageReference msg)
 {
 	std::cout << __COUT_HDR_FL__ << "Starting" << std::endl;
 	return SOAPUtilities::makeSOAPMessageReference("StartDone");
 }
 
-//========================================================================================================================
+//==============================================================================
 void SimpleSoap::stateInitial(toolbox::fsm::FiniteStateMachine& fsm)
 {
 	std::cout << __COUT_HDR_FL__ << "--- SimpleWeb is in its Initial state ---" << std::endl;
@@ -125,7 +125,7 @@ void SimpleSoap::stateInitial(toolbox::fsm::FiniteStateMachine& fsm)
 	// "+calibWorkloop_->getType(),DIAGINFO);
 }
 
-//========================================================================================================================
+//==============================================================================
 void SimpleSoap::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
 {
 	std::cout << __COUT_HDR_FL__ << "--- SimpleWeb is in its Halted state ---" << std::endl;

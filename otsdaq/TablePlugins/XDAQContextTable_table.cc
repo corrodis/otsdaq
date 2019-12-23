@@ -33,7 +33,7 @@ XDAQContextTable::ColApplicationProperty 	XDAQContextTable::colAppProperty_ 	= X
 
 // clang-format on
 
-//========================================================================================================================
+//==============================================================================
 XDAQContextTable::XDAQContextTable(void) : TableBase(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME), artdaqSupervisorContext_((unsigned int)-1)
 {
 	//////////////////////////////////////////////////////////////////////
@@ -41,10 +41,10 @@ XDAQContextTable::XDAQContextTable(void) : TableBase(ConfigurationManager::XDAQ_
 	//////////////////////////////////////////////////////////////////////
 }
 
-//========================================================================================================================
+//==============================================================================
 XDAQContextTable::~XDAQContextTable(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void XDAQContextTable::init(ConfigurationManager* configManager)
 {
 	//__COUT__ << "init" << __E__;
@@ -71,7 +71,7 @@ void XDAQContextTable::init(ConfigurationManager* configManager)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string XDAQContextTable::getContextAddress(const std::string& contextUID, bool wantHttp) const
 {
 	if(contextUID == "X")
@@ -97,7 +97,7 @@ std::string XDAQContextTable::getContextAddress(const std::string& contextUID, b
 	return "";
 }  // end getContextAddress()
 
-//========================================================================================================================
+//==============================================================================
 const XDAQContextTable::XDAQContext* XDAQContextTable::getTheARTDAQSupervisorContext() const
 {
 	if(artdaqSupervisorContext_ >= contexts_.size())
@@ -105,20 +105,20 @@ const XDAQContextTable::XDAQContext* XDAQContextTable::getTheARTDAQSupervisorCon
 	return &contexts_[artdaqSupervisorContext_];
 }  // end getTheARTDAQSupervisorContext()
 
-//========================================================================================================================
+//==============================================================================
 ConfigurationTree XDAQContextTable::getContextNode(const ConfigurationManager* configManager, const std::string& contextUID)
 {
 	return configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME).getNode(contextUID);
 }  // end getContextNode()
 
-//========================================================================================================================
+//==============================================================================
 ConfigurationTree XDAQContextTable::getApplicationNode(const ConfigurationManager* configManager, const std::string& contextUID, const std::string& appUID)
 {
 	return configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME)
 	    .getNode(contextUID + "/" + colContext_.colLinkToApplicationTable_ + "/" + appUID);
 }  // end getApplicationNode()
 
-//========================================================================================================================
+//==============================================================================
 ConfigurationTree XDAQContextTable::getSupervisorConfigNode(const ConfigurationManager* configManager, const std::string& contextUID, const std::string& appUID)
 {
 	return configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME)
@@ -126,7 +126,7 @@ ConfigurationTree XDAQContextTable::getSupervisorConfigNode(const ConfigurationM
 	             XDAQContextTable::colApplication_.colLinkToSupervisorTable_);
 }  // end getSupervisorConfigNode()
 
-//========================================================================================================================
+//==============================================================================
 // extractContexts
 //	Could be called by other tables if they need to access the context.
 //		This doesn't re-write config files, it just re-makes constructs in software.
@@ -336,7 +336,7 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 	}  // end primary context loop
 }  // end extractContexts()
 
-//========================================================================================================================
+//==============================================================================
 void XDAQContextTable::outputXDAQXML(std::ostream& out)
 {
 	// each generated context will look something like this:
@@ -459,7 +459,7 @@ void XDAQContextTable::outputXDAQXML(std::ostream& out)
 	out << "</xc:Partition>\n\n\n";
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string XDAQContextTable::getContextUID(const std::string& url) const
 {
 	for(auto context : contexts_)
@@ -473,7 +473,7 @@ std::string XDAQContextTable::getContextUID(const std::string& url) const
 	return "";
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string XDAQContextTable::getApplicationUID(const std::string& url, unsigned int id) const
 {
 	//__COUTV__(url); __COUTV__(id);

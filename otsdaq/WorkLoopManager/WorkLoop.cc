@@ -14,7 +14,7 @@ using namespace ots;
 #undef __COUT_HDR__
 #define __COUT_HDR__ (std::string("Workloop-") + WorkLoop::workLoopName_ + "\t<>")
 
-//========================================================================================================================
+//==============================================================================
 WorkLoop::WorkLoop(const std::string& name)
     : continueWorkLoop_(false)
     , workLoopName_(name)
@@ -25,7 +25,7 @@ WorkLoop::WorkLoop(const std::string& name)
 	__COUT__ << "Constructed." << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 WorkLoop::~WorkLoop(void)
 {
 	__COUT__ << "Destructor." << __E__;
@@ -34,7 +34,7 @@ WorkLoop::~WorkLoop(void)
 	__COUT__ << "Destructed." << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 void WorkLoop::startWorkLoop(void)
 {
 	__COUT__ << "Starting WorkLoop: " << workLoopName_ << __E__;
@@ -75,7 +75,7 @@ void WorkLoop::startWorkLoop(void)
 	}
 }  // end startWorkLoop()
 
-//========================================================================================================================
+//==============================================================================
 bool WorkLoop::stopWorkLoop()
 {
 	__COUT__ << "Stopping WorkLoop: " << workLoopName_ << __E__;
@@ -122,5 +122,5 @@ bool WorkLoop::stopWorkLoop()
 	return true;
 }  // end stopWorkLoop()
 
-//========================================================================================================================
+//==============================================================================
 bool WorkLoop::isActive(void) const { return workLoop_->isActive() && continueWorkLoop_; }  // end isActive

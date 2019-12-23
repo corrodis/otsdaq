@@ -56,7 +56,7 @@ XDAQ_INSTANTIATOR_IMPL(WizardSupervisor)
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "Wizard"
 
-//========================================================================================================================
+//==============================================================================
 WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
     : xdaq::Application(s)
     , SOAPMessenger(this)
@@ -93,10 +93,10 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
 	__COUT__ << "Constructor complete." << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 WizardSupervisor::~WizardSupervisor(void) { destroy(); }
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::init(void)
 {
 	// getApplicationContext();
@@ -118,7 +118,7 @@ void WizardSupervisor::init(void)
 	matchingFileUploadTypes_.push_back("txt");
 }
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
@@ -209,7 +209,7 @@ void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
 	return;
 }  // end requestIcons()
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::verification(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
@@ -244,7 +244,7 @@ void WizardSupervisor::verification(xgi::Input* in, xgi::Output* out)
 	     << "'></frameset></html>";
 }  // end verification()
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::generateURL()
 {
 	defaultSequence_ = true;
@@ -315,13 +315,13 @@ void WizardSupervisor::printURL(WizardSupervisor* ptr, std::string securityCode)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::destroy(void)
 {
 	// called by destructor
 }
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::tooltipRequest(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
@@ -369,7 +369,7 @@ void WizardSupervisor::tooltipRequest(xgi::Input* in, xgi::Output* out)
 	xmldoc.outputXmlDocument((std::ostringstream*)out, false, true);
 }  // end tooltipRequest()
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::toggleSecurityCodeGeneration(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgi(in);
@@ -418,7 +418,7 @@ void WizardSupervisor::toggleSecurityCodeGeneration(xgi::Input* in, xgi::Output*
 	xmldoc.outputXmlDocument((std::ostringstream*)out, false, true);
 }
 
-//========================================================================================================================
+//==============================================================================
 // xoap::supervisorSequenceCheck
 //	verify cookie
 xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(xoap::MessageReference message)
@@ -466,14 +466,14 @@ xoap::MessageReference WizardSupervisor::supervisorLastConfigGroupRequest(xoap::
 	return GatewaySupervisor::lastConfigGroupRequestHandler(parameters);
 }
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::Default(xgi::Input* in, xgi::Output* out)
 {
 	__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
 	*out << "Unauthorized Request.";
 }
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 {
 	cgicc::Cgicc cgiIn(in);
@@ -564,7 +564,7 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 
 }  // end request()
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::editSecurity(xgi::Input* in, xgi::Output* out)
 {
 	// if sequence doesn't match up -> return
@@ -647,7 +647,7 @@ void WizardSupervisor::editSecurity(xgi::Input* in, xgi::Output* out)
 	*out << security;
 } //end editSecurity()
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)
 {
 	// if sequence doesn't match up -> return
@@ -787,7 +787,7 @@ void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)
 	*out << "test";
 	return;
 }
-//========================================================================================================================
+//==============================================================================
 //	validateUploadFileType
 //      returns "" if file type is invalid, else returns file extension to use
 std::string WizardSupervisor::validateUploadFileType(const std::string fileType)
@@ -798,7 +798,7 @@ std::string WizardSupervisor::validateUploadFileType(const std::string fileType)
 
 	return "";  // not valid, return ""
 }
-//========================================================================================================================
+//==============================================================================
 //	cleanUpPreviews
 //      cleanup logbook preview directory
 //      all names have time_t creation time + "_" + incremented index
@@ -845,7 +845,7 @@ void WizardSupervisor::cleanUpPreviews()
 	closedir(dir);
 }
 
-//========================================================================================================================
+//==============================================================================
 //	savePostPreview
 //      save post to preview directory named with time and incremented index
 void WizardSupervisor::savePostPreview(

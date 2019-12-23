@@ -3,7 +3,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 RawDataSaverConsumer::RawDataSaverConsumer(std::string              supervisorApplicationUID,
                                            std::string              bufferUID,
                                            std::string              processorUID,
@@ -13,7 +13,7 @@ RawDataSaverConsumer::RawDataSaverConsumer(std::string              supervisorAp
 {
 }
 
-//========================================================================================================================
+//==============================================================================
 RawDataSaverConsumer::~RawDataSaverConsumer(void) {}
 
 DEFINE_OTS_PROCESSOR(RawDataSaverConsumer)

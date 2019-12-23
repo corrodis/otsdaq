@@ -5,7 +5,7 @@
 
 GETPACKAGEINFO(WizardSupervisor)
 
-//========================================================================================================================
+//==============================================================================
 void WizardSupervisor::checkPackageDependencies()
 {
 	CHECKDEPENDENCY(config);
@@ -13,7 +13,7 @@ void WizardSupervisor::checkPackageDependencies()
 	CHECKDEPENDENCY(xdaq);
 }
 
-//========================================================================================================================
+//==============================================================================
 std::set<std::string, std::less<std::string> > WizardSupervisor::getPackageDependencies()
 {
 	std::set<std::string, std::less<std::string> > dependencies;

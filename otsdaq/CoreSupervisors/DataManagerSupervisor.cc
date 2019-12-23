@@ -7,7 +7,7 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(DataManagerSupervisor)
 
-//========================================================================================================================
+//==============================================================================
 DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub* s) : CoreSupervisorBase(s)
 {
 	__SUP_COUT__ << "Constructor." << __E__;
@@ -20,7 +20,7 @@ DataManagerSupervisor::DataManagerSupervisor(xdaq::ApplicationStub* s) : CoreSup
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
-//========================================================================================================================
+//==============================================================================
 DataManagerSupervisor::~DataManagerSupervisor(void)
 {
 	__SUP_COUT__ << "Destroying..." << std::endl;

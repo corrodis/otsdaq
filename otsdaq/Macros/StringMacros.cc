@@ -79,7 +79,7 @@ catch(...)
 	return false;            // if out of range
 }
 
-//========================================================================================================================
+//==============================================================================
 // inWildCardSet ~
 //	returns true if needle is in haystack (considering wildcards)
 bool StringMacros::inWildCardSet(const std::string& needle, const std::set<std::string>& haystack)
@@ -938,7 +938,7 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 
 }  // end extractCommonChunks()
 
-//========================================================================================================================
+//==============================================================================
 // exec
 //	run linux command and get result back in string
 std::string StringMacros::exec(const char* cmd)

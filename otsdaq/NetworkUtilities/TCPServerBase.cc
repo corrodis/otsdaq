@@ -12,7 +12,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TCPServerBase::TCPServerBase(int serverPort, unsigned int maxNumberOfClients)
     : fMaxNumberOfClients(maxNumberOfClients), fAccept(true), fAcceptFuture(fAcceptPromise.get_future())
 {
@@ -43,7 +43,7 @@ TCPServerBase::TCPServerBase(int serverPort, unsigned int maxNumberOfClients)
 	startAccept();
 }
 
-//========================================================================================================================
+//==============================================================================
 TCPServerBase::~TCPServerBase(void)
 {
 	std::cout << __PRETTY_FUNCTION__ << "Shutting down accept for socket: " << getSocketId() << std::endl;
@@ -55,7 +55,7 @@ TCPServerBase::~TCPServerBase(void)
 	std::cout << __PRETTY_FUNCTION__ << "Closed all sockets connected to server: " << getSocketId() << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServerBase::startAccept(void)
 {
 	std::thread thread(&TCPServerBase::acceptConnections, this);
@@ -63,7 +63,7 @@ void TCPServerBase::startAccept(void)
 }
 
 // An accepts waits for a connection and returns the opened socket number
-//========================================================================================================================
+//==============================================================================
 int TCPServerBase::accept(void)
 {
 	std::cout << __PRETTY_FUNCTION__ << "Now server accept connections on socket: " << getSocketId() << std::endl;
@@ -89,7 +89,7 @@ int TCPServerBase::accept(void)
 	throw E_SHUTDOWN;
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServerBase::closeClientSockets(void)
 {
 	for(auto& socket : fConnectedClients)
@@ -100,7 +100,7 @@ void TCPServerBase::closeClientSockets(void)
 	fConnectedClients.clear();
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServerBase::closeClientSocket(int socket)
 {
 	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
@@ -112,7 +112,7 @@ void TCPServerBase::closeClientSocket(int socket)
 		}
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServerBase::broadcastPacket(const std::string& message)
 {
 	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
@@ -130,7 +130,7 @@ void TCPServerBase::broadcastPacket(const std::string& message)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServerBase::broadcast(const std::string& message)
 {
 	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
@@ -148,7 +148,7 @@ void TCPServerBase::broadcast(const std::string& message)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServerBase::broadcast(const std::vector<char>& message)
 {
 	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
@@ -166,7 +166,7 @@ void TCPServerBase::broadcast(const std::vector<char>& message)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServerBase::shutdownAccept()
 {
 	fAccept = false;

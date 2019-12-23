@@ -6,7 +6,7 @@
 #include <iostream>
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TCPServer::TCPServer(int serverPort, unsigned int maxNumberOfClients) : TCPServerBase(serverPort, maxNumberOfClients)
 {
 	fReceiveTimeout.tv_sec  = 0;
@@ -17,14 +17,14 @@ TCPServer::TCPServer(int serverPort, unsigned int maxNumberOfClients) : TCPServe
 	// this);
 }
 
-//========================================================================================================================
+//==============================================================================
 TCPServer::~TCPServer(void) {}
 
 // void TCPServer::StartAcceptConnections()
 // {
 
 // }
-//========================================================================================================================
+//==============================================================================
 // time out or protection for this receive method?
 // void TCPServer::connectClient(int fdClientSocket)
 void TCPServer::connectClient(TCPTransceiverSocket* socket)
@@ -69,7 +69,7 @@ void TCPServer::connectClient(TCPTransceiverSocket* socket)
 	std::cout << __PRETTY_FUNCTION__ << "Thread done for socket  #: " << socket->getSocketId() << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServer::acceptConnections()
 {
 	// std::pair<std::unordered_map<int, TCPTransceiverSocket>::iterator, bool> element;
@@ -93,14 +93,14 @@ void TCPServer::acceptConnections()
 	fAcceptPromise.set_value(true);
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServer::setReceiveTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroseconds)
 {
 	fReceiveTimeout.tv_sec  = timeoutSeconds;
 	fReceiveTimeout.tv_usec = timeoutMicroseconds;
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServer::setSendTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroseconds)
 {
 	fSendTimeout.tv_sec  = timeoutSeconds;

@@ -33,7 +33,7 @@ class SupervisorInfo
 	    , URN_(descriptor ? descriptor->getURN() : "")
 	    , URL_(contextURL_ + "/" + URN_)
 	    , port_(0)
-	    , status_("Unknown")
+	    , status_(SupervisorInfo::APP_STATUS_UNKNOWN)
 	{
 		// when no configuration, e.g. Wizard Mode, then
 		// name and contextName are derived from the class name and LID
@@ -54,20 +54,17 @@ class SupervisorInfo
 
 	~SupervisorInfo(void) { ; }
 
+
+	static const std::string APP_STATUS_UNKNOWN;
+
 	// BOOLs	-------------------
 	bool isGatewaySupervisor(void) const { return class_ == XDAQContextTable::GATEWAY_SUPERVISOR_CLASS; }
 	bool isWizardSupervisor(void) const { return class_ == XDAQContextTable::WIZARD_SUPERVISOR_CLASS; }
 	bool isTypeFESupervisor(void) const { return XDAQContextTable::FETypeClassNames_.find(class_) != XDAQContextTable::FETypeClassNames_.end(); }
 	bool isTypeDMSupervisor(void) const { return XDAQContextTable::DMTypeClassNames_.find(class_) != XDAQContextTable::DMTypeClassNames_.end(); }
 	bool isTypeLogbookSupervisor(void) const { return XDAQContextTable::LogbookTypeClassNames_.find(class_) != XDAQContextTable::LogbookTypeClassNames_.end(); }
-	bool isTypeMacroMakerSupervisor(void) const
-	{
-		return XDAQContextTable::MacroMakerTypeClassNames_.find(class_) != XDAQContextTable::MacroMakerTypeClassNames_.end();
-	}
-	bool isTypeConfigurationGUISupervisor(void) const
-	{
-		return XDAQContextTable::ConfigurationGUITypeClassNames_.find(class_) != XDAQContextTable::ConfigurationGUITypeClassNames_.end();
-	}
+	bool isTypeMacroMakerSupervisor(void) const	{ return XDAQContextTable::MacroMakerTypeClassNames_.find(class_) != XDAQContextTable::MacroMakerTypeClassNames_.end(); }
+	bool isTypeConfigurationGUISupervisor(void) const { return XDAQContextTable::ConfigurationGUITypeClassNames_.find(class_) != XDAQContextTable::ConfigurationGUITypeClassNames_.end(); }
 	bool isTypeChatSupervisor(void) const { return XDAQContextTable::ChatTypeClassNames_.find(class_) != XDAQContextTable::ChatTypeClassNames_.end(); }
 	bool isTypeConsoleSupervisor(void) const { return XDAQContextTable::ConsoleTypeClassNames_.find(class_) != XDAQContextTable::ConsoleTypeClassNames_.end(); }
 
@@ -87,21 +84,8 @@ class SupervisorInfo
 	const uint16_t&                              getPort						(void) const { return port_; }
 
 	// Setters -------------------
-	void setStatus(const std::string& status)
-	{
-		status_         = status;
-		lastStatusTime_ = time(0);
-	}
-	void setProgress(const unsigned int progress) { progress_ = progress; }
-	void clear(void)
-	{
-		descriptor_        = 0;
-		contextDescriptor_ = 0;
-		name_              = "";
-		id_                = 0;
-		contextName_       = "";
-		status_            = "Unknown";
-	}
+	void setStatus(const std::string& status, const unsigned int progress);
+	void clear(void);
 
   private:
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* descriptor_;

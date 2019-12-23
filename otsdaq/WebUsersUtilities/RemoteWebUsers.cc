@@ -17,7 +17,7 @@ using namespace ots;
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "RemoteWebUsers"
 
-//========================================================================================================================
+//==============================================================================
 // User Notes:
 //	- use xmlRequestGateway to check security from outside the Supervisor and Wizard
 //
@@ -89,7 +89,7 @@ using namespace ots;
 //			}
 //
 //
-//========================================================================================================================
+//==============================================================================
 
 RemoteWebUsers::RemoteWebUsers(xdaq::Application* application) : SOAPMessenger(application)
 {
@@ -97,7 +97,7 @@ RemoteWebUsers::RemoteWebUsers(xdaq::Application* application) : SOAPMessenger(a
 	ActiveUserList_           = "";  // init to empty
 }
 
-//========================================================================================================================
+//==============================================================================
 // xmlRequestGateway
 //	if false, user code should just return.. out is handled on false; on true, out is
 // untouched
@@ -244,7 +244,7 @@ HANDLE_ACCESS_FAILURE:
 	return false;  // access failed
 }  // end xmlRequestToGateway()
 
-//========================================================================================================================
+//==============================================================================
 // getActiveUserList
 //	if lastUpdateTime is not too recent as spec'd by ACTIVE_USERS_UPDATE_THRESHOLD
 //	if server responds with
@@ -266,7 +266,7 @@ std::string RemoteWebUsers::getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationD
 		return ActiveUserList_;
 }
 
-//========================================================================================================================
+//==============================================================================
 // getLastConfigGroup
 //	request last "Configured" or "Started" group, for example
 //	returns empty "" for actionTimeString on failure
@@ -302,7 +302,7 @@ std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastConf
 	return theGroup;
 }
 
-//========================================================================================================================
+//==============================================================================
 // getUserInfoForCookie
 //	get username and display name for user based on cookie code
 //	return true, if user info gotten successfully
@@ -338,7 +338,7 @@ bool RemoteWebUsers::getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescr
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 // cookieCodeIsActiveForRequest
 //	for external supervisors to check with Supervisor for login
 bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
@@ -378,7 +378,7 @@ bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::Applicat
 	return cookieCode.length() == WebUsers::COOKIE_CODE_LENGTH;  // proper cookieCode has length
 	                                                             // WebUsers::COOKIE_CODE_LENGTH
 }
-//========================================================================================================================
+//==============================================================================
 // sendSystemMessage
 //	send system message to toUser through Supervisor
 //	toUser wild card * is to all users
@@ -391,7 +391,7 @@ void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescript
 	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorSystemMessage", parameters);
 }
 
-//========================================================================================================================
+//==============================================================================
 // makeSystemLogbookEntry
 //	make system logbook through Supervisor
 void RemoteWebUsers::makeSystemLogbookEntry(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText)

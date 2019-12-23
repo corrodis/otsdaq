@@ -9,7 +9,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 FEVInterface::FEVInterface(const std::string& interfaceUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
     : WorkLoop(interfaceUID)
     , Configurable(theXDAQContextConfigTree, configurationPath)
@@ -26,7 +26,7 @@ FEVInterface::FEVInterface(const std::string& interfaceUID, const ConfigurationT
 	__COUT__ << "'" << interfaceUID << "' Constructed." << __E__;
 }  // end constructor()
 
-//========================================================================================================================
+//==============================================================================
 FEVInterface::~FEVInterface(void)
 {
 	// NOTE:: be careful not to call __FE_COUT__ decoration because it uses the tree and
@@ -34,7 +34,7 @@ FEVInterface::~FEVInterface(void)
 	__COUT__ << FEVInterface::interfaceUID_ << " Destructed." << __E__;
 }  // end destructor()
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterface::configureSlowControls(void)
 {
 	// Start artdaq metric manager here, if possible
@@ -49,7 +49,7 @@ void FEVInterface::configureSlowControls(void)
 
 }  // end configureSlowControls()
 
-//========================================================================================================================
+//==============================================================================
 // addSlowControlsChannels
 //	Usually subInterfaceID = "" and mapOfSlowControlsChannels =
 //&mapOfSlowControlsChannels_
@@ -101,14 +101,14 @@ void FEVInterface::addSlowControlsChannels(ConfigurationTree                    
 	}
 }  // end addSlowControlsChannels()
 
-//========================================================================================================================
+//==============================================================================
 // virtual in case channels are handled in multiple maps, for example
 void FEVInterface::resetSlowControlsChannelIterator(void)
 {
 	slowControlsChannelsIterator_ = mapOfSlowControlsChannels_.begin();
 }  // end resetSlowControlsChannelIterator()
 
-//========================================================================================================================
+//==============================================================================
 // virtual in case channels are handled in multiple maps, for example
 FESlowControlsChannel* FEVInterface::getNextSlowControlsChannel(void)
 {
@@ -118,7 +118,7 @@ FESlowControlsChannel* FEVInterface::getNextSlowControlsChannel(void)
 	return &((slowControlsChannelsIterator_++)->second);  // return iterator, then increment
 }  // end getNextSlowControlsChannel()
 
-//========================================================================================================================
+//==============================================================================
 // virtual in case read should be different than universalread
 void FEVInterface::getSlowControlsValue(FESlowControlsChannel& channel, std::string& readValue)
 {
@@ -126,11 +126,11 @@ void FEVInterface::getSlowControlsValue(FESlowControlsChannel& channel, std::str
 	universalRead(channel.getUniversalAddress(), &readValue[0]);
 }  // end getNextSlowControlsChannel()
 
-//========================================================================================================================
+//==============================================================================
 // virtual in case channels are handled in multiple maps, for example
 unsigned int FEVInterface::getSlowControlsChannelCount(void) { return mapOfSlowControlsChannels_.size(); }  // end getSlowControlsChannelCount()
 
-//========================================================================================================================
+//==============================================================================
 bool FEVInterface::slowControlsRunning(void) try
 {
 	__FE_COUT__ << "slowControlsRunning" << __E__;
@@ -371,7 +371,7 @@ catch(...)  //
 	return false;
 }  // end slowControlsRunning()
 
-//========================================================================================================================
+//==============================================================================
 // SendAsyncErrorToGateway
 //	Static -- thread
 //	Send async error or soft error to gateway
@@ -432,7 +432,7 @@ catch(...)
 	throw;  // rethrow and hope error is noticed
 }  // end SendAsyncErrorToGateway()
 
-//========================================================================================================================
+//==============================================================================
 // override WorkLoop::workLoopThread
 //	return false to stop the workloop from calling the thread again
 bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
@@ -487,7 +487,7 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 	return continueWorkLoop_;
 }  // end workLoopThread()
 
-//========================================================================================================================
+//==============================================================================
 // registerFEMacroFunction
 //	used by user-defined front-end interface implementations of this
 //	virtual interface class to register their macro functions.
@@ -513,7 +513,7 @@ void FEVInterface::registerFEMacroFunction(const std::string&              feMac
 	    feMacroName, frontEndMacroStruct_t(feMacroName, feMacroFunction, namesOfInputArgs, namesOfOutputArgs, requiredUserPermissions, allowedCallingFEs)));
 }
 
-//========================================================================================================================
+//==============================================================================
 // getFEMacroConstArgument
 //	helper function for getting the value of an argument
 //
@@ -532,7 +532,7 @@ const std::string& FEVInterface::getFEMacroConstArgument(frontEndMacroConstArgs_
 	__SS_THROW__;
 }
 
-//========================================================================================================================
+//==============================================================================
 // getFEMacroConstArgumentValue
 //	helper function for getting the copy of the value of an argument
 template<>
@@ -541,7 +541,7 @@ std::string ots::getFEMacroConstArgumentValue<std::string>(FEVInterface::frontEn
 	return FEVInterface::getFEMacroConstArgument(args, argName);
 }
 
-//========================================================================================================================
+//==============================================================================
 // getFEMacroArgumentValue
 //	helper function for getting the copy of the value of an argument
 template<>
@@ -550,7 +550,7 @@ std::string ots::getFEMacroArgumentValue<std::string>(FEVInterface::frontEndMacr
 	return FEVInterface::getFEMacroArgument(args, argName);
 }
 
-//========================================================================================================================
+//==============================================================================
 // getFEMacroOutputArgument
 //	helper function for getting the value of an argument
 //
@@ -566,7 +566,7 @@ std::string& FEVInterface::getFEMacroArgument(frontEndMacroArgs_t& args, const s
 	__SS_THROW__;
 }
 
-//========================================================================================================================
+//==============================================================================
 // runSequenceOfCommands
 //	runs a sequence of write commands from a linked section of the configuration tree
 //		based on these fields:
@@ -646,7 +646,7 @@ void FEVInterface::runSequenceOfCommands(const std::string& treeLinkName)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 // runFrontEndMacro
 //	Helper function to run this FEInterface's own front-end macro
 // and gets the output arguments back.
@@ -710,7 +710,7 @@ void FEVInterface::runSelfFrontEndMacro(const std::string& feMacroName,
 
 }  // end runSelfFrontEndMacro()
 
-//========================================================================================================================
+//==============================================================================
 // runFrontEndMacro
 //	run a front-end macro in the target interface plug-in and gets the output arguments
 // back
@@ -774,7 +774,7 @@ void FEVInterface::runFrontEndMacro(const std::string&                          
 
 }  // end runFrontEndMacro()
 
-//========================================================================================================================
+//==============================================================================
 // receiveFromFrontEnd
 //	specialized template function for T=std::string
 //
@@ -843,7 +843,7 @@ void FEVInterface::receiveFromFrontEnd(const std::string& requester, std::string
 	// should never get here
 }  // end receiveFromFrontEnd()
 
-//========================================================================================================================
+//==============================================================================
 // receiveFromFrontEnd
 //	specialized template function for T=std::string
 //	Note: if called without template <T> syntax, necessary because types of
@@ -855,7 +855,7 @@ std::string FEVInterface::receiveFromFrontEnd(const std::string& requester, unsi
 	return retValue;
 }  // end receiveFromFrontEnd()
 
-//========================================================================================================================
+//==============================================================================
 // macroStruct_t constructor
 FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 {
@@ -1117,7 +1117,7 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 
 }  // end macroStruct_t constructor
 
-//========================================================================================================================
+//==============================================================================
 // runMacro
 void FEVInterface::runMacro(FEVInterface::macroStruct_t& macro, std::map<std::string /*name*/, uint64_t /*value*/>& variableMap)
 {

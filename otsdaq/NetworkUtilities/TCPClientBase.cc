@@ -10,10 +10,10 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TCPClientBase::TCPClientBase(const std::string& serverIP, int serverPort) : fServerIP(serverIP), fServerPort(serverPort), fConnected(false) {}
 
-//========================================================================================================================
+//==============================================================================
 TCPClientBase::~TCPClientBase(void)
 {
 	std::cout << __PRETTY_FUNCTION__ << "Closing TCPSocket #" << getSocketId() << std::endl;
@@ -22,7 +22,7 @@ TCPClientBase::~TCPClientBase(void)
 	std::cout << __PRETTY_FUNCTION__ << "TCPSocket #" << getSocketId() << " closed." << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool TCPClientBase::connect(int retry, unsigned int sleepMilliSeconds)
 {
 	if(fConnected)
@@ -95,7 +95,7 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMilliSeconds)
 
 	return true;
 }
-//========================================================================================================================
+//==============================================================================
 bool TCPClientBase::disconnect(void)
 {
 	if(fConnected)
@@ -107,7 +107,7 @@ bool TCPClientBase::disconnect(void)
 	return !fConnected;
 }
 
-//========================================================================================================================
+//==============================================================================
 // private
 void TCPClientBase::resolveServer(std::string& serverIP)
 {

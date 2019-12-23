@@ -9,7 +9,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 UDPDataStreamerConsumer::UDPDataStreamerConsumer(std::string              supervisorApplicationUID,
                                                  std::string              bufferUID,
                                                  std::string              processorUID,
@@ -32,17 +32,17 @@ UDPDataStreamerConsumer::UDPDataStreamerConsumer(std::string              superv
 	__COUT__ << "done!" << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 UDPDataStreamerConsumer::~UDPDataStreamerConsumer(void) {}
 
-//========================================================================================================================
+//==============================================================================
 bool UDPDataStreamerConsumer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 {
 	fastRead();
 	return WorkLoop::continueWorkLoop_;
 }
 
-//========================================================================================================================
+//==============================================================================
 void UDPDataStreamerConsumer::fastRead(void)
 {
 	//__COUT__ << processorUID_ << " running!" << std::endl;
@@ -63,7 +63,7 @@ void UDPDataStreamerConsumer::fastRead(void)
 	DataConsumer::setReadSubBuffer<std::string, std::map<std::string, std::string>>();
 }
 
-//========================================================================================================================
+//==============================================================================
 void UDPDataStreamerConsumer::slowRead(void)
 {
 	//__COUT__ << processorUID_ << " running!" << std::endl;

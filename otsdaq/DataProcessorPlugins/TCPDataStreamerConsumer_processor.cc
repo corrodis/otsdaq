@@ -9,7 +9,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TCPDataStreamerConsumer::TCPDataStreamerConsumer(std::string              supervisorApplicationUID,
                                                  std::string              bufferUID,
                                                  std::string              processorUID,
@@ -33,17 +33,17 @@ TCPDataStreamerConsumer::TCPDataStreamerConsumer(std::string              superv
 	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "done!" << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 TCPDataStreamerConsumer::~TCPDataStreamerConsumer(void) {}
 
-//========================================================================================================================
+//==============================================================================
 bool TCPDataStreamerConsumer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 {
 	fastRead();
 	return WorkLoop::continueWorkLoop_;
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPDataStreamerConsumer::fastRead(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " running!"
@@ -65,7 +65,7 @@ void TCPDataStreamerConsumer::fastRead(void)
 	DataConsumer::setReadSubBuffer<std::string, std::map<std::string, std::string>>();
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPDataStreamerConsumer::slowRead(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " running!"

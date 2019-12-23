@@ -4,7 +4,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 // getConfigurationStatusXML
 void ConfigurationSupervisorBase::getConfigurationStatusXML(HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr)
 {
@@ -23,7 +23,7 @@ void ConfigurationSupervisorBase::getConfigurationStatusXML(HttpXmlDocument& xml
 
 }  // end getConfigurationStatusXML()
 
-//========================================================================================================================
+//==============================================================================
 // handleCreateTableXML
 //
 //	Save the detail of specific table specified
@@ -183,7 +183,7 @@ catch(...)
 	xmlOut.addTextElementToData("Error", "Error saving new view! ");
 }  // end handleCreateTableXML() catch
 
-//========================================================================================================================
+//==============================================================================
 // saveModifiedVersionXML
 //
 // once source version has been modified in temporary version
@@ -336,7 +336,7 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(HttpXmlDocument
 	//	return newAssignedVersion;
 }  // end saveModifiedVersionXML()
 
-//========================================================================================================================
+//==============================================================================
 //	handleCreateTableGroupXML
 //
 //		Save a new TableGroup:
@@ -627,7 +627,7 @@ catch(...)
 	xmlOut.addTextElementToData("Error", "Error saving table group! ");
 }  // end handleCreateTableGroupXML() catch
 
-//========================================================================================================================
+//==============================================================================
 // handleGetTableGroupXML
 //
 //	give the detail of specific table specified
@@ -848,7 +848,7 @@ catch(...)
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end handleGetTableGroupXML() catch
 
-//========================================================================================================================
+//==============================================================================
 bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 														  HttpXmlDocument&        xmlOut,
                                                           ConfigurationManagerRW* cfgMgr,

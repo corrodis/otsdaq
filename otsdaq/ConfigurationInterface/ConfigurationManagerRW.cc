@@ -1039,7 +1039,7 @@ TableVersion ConfigurationManagerRW::saveNewBackbone(TableVersion temporaryVersi
 	return newVersion;
 }
 
-//========================================================================================================================
+//==============================================================================
 // saveModifiedVersionXML
 //
 // once source version has been modified in temporary version

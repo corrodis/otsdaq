@@ -77,7 +77,7 @@ ARTDAQTableBase::ARTDAQTableBase(void) : TableBase("ARTDAQTableBase")
 //==============================================================================
 ARTDAQTableBase::~ARTDAQTableBase(void) {}  // end destructor()
 
-//========================================================================================================================
+//==============================================================================
 const std::string& ARTDAQTableBase::getTypeString(ARTDAQAppType type)
 {
 	switch(type)
@@ -100,7 +100,7 @@ const std::string& ARTDAQTableBase::getTypeString(ARTDAQAppType type)
 	__SS_THROW__;
 }  // end getTypeString()
 
-//========================================================================================================================
+//==============================================================================
 std::string ARTDAQTableBase::getFHICLFilename(ARTDAQAppType type, const std::string& name)
 {
 	//__COUT__ << "Type: " << getTypeString(type) << " Name: " << name
@@ -118,7 +118,7 @@ std::string ARTDAQTableBase::getFHICLFilename(ARTDAQAppType type, const std::str
 	return filename;
 }  // end getFHICLFilename()
 
-//========================================================================================================================
+//==============================================================================
 std::string ARTDAQTableBase::getFlatFHICLFilename(ARTDAQAppType type, const std::string& name)
 {
 	//__COUT__ << "Type: " << getTypeString(type) << " Name: " << name
@@ -136,7 +136,7 @@ std::string ARTDAQTableBase::getFlatFHICLFilename(ARTDAQAppType type, const std:
 	return filename;
 }  // end getFlatFHICLFilename()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 {
 	//__COUT__ << "flattenFHICL()" << __ENV__("FHICL_FILE_PATH") << __E__;
@@ -168,7 +168,7 @@ void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 	}
 }  // end flattenFHICL()
 
-//========================================================================================================================
+//==============================================================================
 // insertParameters
 //	Inserts parameters in FHiCL outputs stream.
 //
@@ -241,7 +241,7 @@ void ARTDAQTableBase::insertParameters(std::ostream&      out,
 
 }  // end insertParameters()
 
-//========================================================================================================================
+//==============================================================================
 // insertModuleType
 //	Inserts module type field, with consideration for @table::
 std::string ARTDAQTableBase::insertModuleType(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree moduleTypeNode)
@@ -304,7 +304,7 @@ void ots::ARTDAQTableBase::insertMetricsBlock(std::ostream& out, std::string& ta
 	OUT << "}\n\n";  // end metrics
 }  // end insertMetricsBlock()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReaderNode,
                                              size_t                   maxFragmentSizeBytes /* = DEFAULT_MAX_FRAGMENT_SIZE */,
                                              size_t                   routingTimeoutMs /* = DEFAULT_ROUTING_TIMEOUT_MS */,
@@ -569,7 +569,7 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 	out.close();
 }  // end outputReaderFHICL()
 
-//========================================================================================================================
+//==============================================================================
 // outputDataReceiverFHICL
 //	Note: currently selfRank and selfPort are unused by artdaq fcl
 void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverNode,
@@ -1094,7 +1094,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 	out.close();
 }  // end outputDataReceiverFHICL()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingMasterNode,
                                                size_t                   routingTimeoutMs /* = DEFAULT_ROUTING_TIMEOUT_MS */,
                                                size_t                   routingRetryCount /* = DEFAULT_ROUTING_RETRY_COUNT */)
@@ -1240,7 +1240,7 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	out.close();
 }  // end outputReaderFHICL()
 
-//========================================================================================================================
+//==============================================================================
 const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(ConfigurationTree artdaqSupervisorNode,
                                                                       bool              getStatusFalseNodes /* = false */,
                                                                       bool              doWriteFHiCL /* = false */,
@@ -1295,7 +1295,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(Configurat
 	return info_;
 }  // end extractARTDAQInfo()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQTableBase::extractRoutingMastersInfo(
     ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t routingTimeoutMs, size_t routingRetryCount)
 {
@@ -1387,7 +1387,7 @@ void ARTDAQTableBase::extractRoutingMastersInfo(
 	}
 }  // end extractRoutingMastersInfo()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQTableBase::extractBoardReadersInfo(ConfigurationTree artdaqSupervisorNode,
                                               bool              getStatusFalseNodes,
                                               bool              doWriteFHiCL,
@@ -1472,7 +1472,7 @@ void ARTDAQTableBase::extractBoardReadersInfo(ConfigurationTree artdaqSupervisor
 	}
 }  // end extractBoardReadersInfo()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
 	__COUT__ << "Checking for Event Builders..." << __E__;
@@ -1552,7 +1552,7 @@ void ARTDAQTableBase::extractEventBuildersInfo(ConfigurationTree artdaqSuperviso
 	}
 }  // end extractEventBuildersInfo()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
 	__COUT__ << "Checking for Data Loggers..." << __E__;
@@ -1629,7 +1629,7 @@ void ARTDAQTableBase::extractDataLoggersInfo(ConfigurationTree artdaqSupervisorN
 	}
 }  // end extractDataLoggersInfo()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t maxFragmentSizeBytes)
 {
 	__COUT__ << "Checking for Dispatchers..." << __E__;

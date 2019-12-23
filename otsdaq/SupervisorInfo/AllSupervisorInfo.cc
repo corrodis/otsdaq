@@ -14,16 +14,17 @@ const bool AllSupervisorInfo::MACROMAKER_MODE = ((getenv("MACROMAKER_MODE") == N
                                                      ? (false)
                                                      : ((std::string(__ENV__("MACROMAKER_MODE")) == "1") ? true : false));
 
-//========================================================================================================================
+
+//==============================================================================
 AllSupervisorInfo::AllSupervisorInfo(void) : theSupervisorInfo_(0), theWizardInfo_(0) {}
 
-//========================================================================================================================
+//==============================================================================
 AllSupervisorInfo::AllSupervisorInfo(xdaq::ApplicationContext* applicationContext) : AllSupervisorInfo() { init(applicationContext); }
 
-//========================================================================================================================
+//==============================================================================
 AllSupervisorInfo::~AllSupervisorInfo(void) { destroy(); }
 
-//========================================================================================================================
+//==============================================================================
 void AllSupervisorInfo::destroy(void)
 {
 	allSupervisorInfo_.clear();
@@ -34,9 +35,9 @@ void AllSupervisorInfo::destroy(void)
 	theWizardInfo_     = 0;
 
 	SupervisorDescriptorInfoBase::destroy();
-}
+} //end destroy()
 
-//========================================================================================================================
+//==============================================================================
 void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 {
 	__COUT__ << "Initializing info based on XDAQ context..." << __E__;
@@ -182,119 +183,6 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 
 	}  // end main extraction loop
 
-	//} //end wiz mode extraction
-	// else
-	//	{
-	//		__COUT__ << "Initializing info for Normal mode XDAQ context..." << __E__;
-	//
-	//
-	//		ConfigurationManager cfgMgr;
-	//		const XDAQContextTable* contextConfig =
-	//				cfgMgr.__GET_CONFIG__(XDAQContextTable);
-	//
-	//
-	//		//second pass, organize supervisors
-	//		auto allDescriptors = SupervisorDescriptorInfoBase::getAllDescriptors();
-	//		for(const auto& descriptor:allDescriptors)
-	//		{
-	//			auto /*<iterator,bool>*/ emplacePair =
-	// allSupervisorInfo_.emplace(std::pair<unsigned int, SupervisorInfo>(
-	//					descriptor.second->getLocalId(),//descriptor.first,
-	//					SupervisorInfo(
-	//							descriptor.second /* descriptor */,
-	//							contextConfig->getApplicationUID
-	//							(
-	//									descriptor.second->getContextDescriptor()->getURL(),
-	//									descriptor.second->getLocalId()
-	//							) /* name */,
-	//							contextConfig->getContextUID(
-	//									descriptor.second->getContextDescriptor()->getURL())
-	///*  xdaq  parent context */
-	//					)));
-	//			if(!emplacePair.second)
-	//			{
-	//				__SS__ << "Error! Duplicate Application IDs are not allowed. ID =" <<
-	//						descriptor.second->getLocalId() << __E__;
-	//				__SS_THROW__;
-	//			}
-	//
-	//			/////////////////////////////////////////////
-	//			// now organize new descriptor by class...
-	//
-	//			//check for gateway supervisor
-	//			// note: necessarily exclusive to other Supervisor types
-	//			if(emplacePair.first->second.isGatewaySupervisor())
-	//			{
-	//				if(theSupervisorInfo_)
-	//				{
-	//					__SS__ << "Error! Multiple Gateway Supervisors of class " <<
-	// XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << 							"
-	// found. There can only be one. ID =" <<
-	//							descriptor.second->getLocalId() << __E__;
-	//					__SS_THROW__;
-	//				}
-	//				//copy and erase from map
-	//				theSupervisorInfo_ = &(emplacePair.first->second);
-	//				continue;
-	//			}
-	//
-	//			//check for wizard supervisor
-	//			// note: necessarily exclusive to other Supervisor types
-	//			if(emplacePair.first->second.isWizardSupervisor())
-	//			{
-	//				if(theWizardInfo_)
-	//				{
-	//					__SS__ << "Error! Multiple Wizard Supervisors of class " <<
-	// XDAQContextTable::WIZARD_SUPERVISOR_CLASS <<
-	//							" found. There can only be one. ID =" <<
-	//							descriptor.second->getLocalId() << __E__;
-	//					__SS_THROW__;
-	//				}
-	//				//copy and erase from map
-	//				theWizardInfo_ = &(emplacePair.first->second);
-	//				continue;
-	//			}
-	//
-	//
-	//			//check for FE type, then add to FE group
-	//			// note: not necessarily exclusive to other Supervisor types
-	//			if(emplacePair.first->second.isTypeFESupervisor())
-	//			{
-	//				allFETypeSupervisorInfo_.emplace(std::pair<unsigned int, const
-	// SupervisorInfo&>( 						emplacePair.first->second.getId(),
-	//						emplacePair.first->second));
-	//			}
-	//
-	//			//check for DM type, then add to DM group
-	//			// note: not necessarily exclusive to other Supervisor types
-	//			if(emplacePair.first->second.isTypeDMSupervisor())
-	//			{
-	//				allDMTypeSupervisorInfo_.emplace(std::pair<unsigned int, const
-	// SupervisorInfo&>( 						emplacePair.first->second.getId(),
-	//						emplacePair.first->second));
-	//			}
-	//
-	//			//check for Logbook type, then add to Logbook group
-	//			// note: not necessarily exclusive to other Supervisor types
-	//			if(emplacePair.first->second.isTypeLogbookSupervisor())
-	//			{
-	//				allLogbookTypeSupervisorInfo_.emplace(std::pair<unsigned int, const
-	// SupervisorInfo&>( 						emplacePair.first->second.getId(),
-	//						emplacePair.first->second));
-	//			}
-	//
-	//			//check for MacroMaker type, then add to MacroMaker group
-	//			// note: not necessarily exclusive to other Supervisor types
-	//			if(emplacePair.first->second.isTypeMacroMakerSupervisor())
-	//			{
-	//				allMacroMakerTypeSupervisorInfo_.emplace(std::pair<unsigned int, const
-	// SupervisorInfo&>( 						emplacePair.first->second.getId(),
-	//						emplacePair.first->second));
-	//			}
-	//
-	//		} //end main extraction loop
-	//	} //end normal mode extraction
-
 	if(AllSupervisorInfo::MACROMAKER_MODE)
 	{
 		if(theWizardInfo_ || theSupervisorInfo_)
@@ -321,7 +209,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	// getOrderedSupervisorDescriptors("Configure");
 }  // end init()
 
-//========================================================================================================================
+//==============================================================================
 const SupervisorInfo& AllSupervisorInfo::getSupervisorInfo(xdaq::Application* app) const
 {
 	auto it = allSupervisorInfo_.find(app->getApplicationDescriptor()->getLocalId());
@@ -333,28 +221,15 @@ const SupervisorInfo& AllSupervisorInfo::getSupervisorInfo(xdaq::Application* ap
 	return it->second;
 }
 
-//========================================================================================================================
-void AllSupervisorInfo::setSupervisorStatus(xdaq::Application* app, const std::string& status)
+//==============================================================================
+void AllSupervisorInfo::setSupervisorStatus(xdaq::Application* app, const std::string& status, const unsigned int progress)
 {
-	setSupervisorStatus(app->getApplicationDescriptor()->getLocalId(), status);
+	setSupervisorStatus(app->getApplicationDescriptor()->getLocalId(), status, progress);
 }
-//========================================================================================================================
-void AllSupervisorInfo::setSupervisorStatus(const SupervisorInfo& appInfo, const std::string& status) { setSupervisorStatus(appInfo.getId(), status); }
-//========================================================================================================================
-void AllSupervisorInfo::setSupervisorStatus(const unsigned int& id, const std::string& status)
-{
-	auto it = allSupervisorInfo_.find(id);
-	if(it == allSupervisorInfo_.end())
-	{
-		__SS__ << "Could not find: " << id << std::endl;
-		__SS_THROW__;
-	}
-	it->second.setStatus(status);
-}
-
-void AllSupervisorInfo::setSupervisorProgress(const SupervisorInfo& appInfo, const unsigned int progress) { setSupervisorProgress(appInfo.getId(), progress); }
-
-void AllSupervisorInfo::setSupervisorProgress(const unsigned int& id, const unsigned int progress)
+//==============================================================================
+void AllSupervisorInfo::setSupervisorStatus(const SupervisorInfo& appInfo, const std::string& status, const unsigned int progress) { setSupervisorStatus(appInfo.getId(), status, progress); }
+//==============================================================================
+void AllSupervisorInfo::setSupervisorStatus(const unsigned int& id, const std::string& status, const unsigned int progress)
 {
 	auto it = allSupervisorInfo_.find(id);
 	if(it == allSupervisorInfo_.end())
@@ -362,10 +237,11 @@ void AllSupervisorInfo::setSupervisorProgress(const unsigned int& id, const unsi
 		__SS__ << "Could not find: " << id << std::endl;
 		__SS_THROW__;
 	}
-	it->second.setProgress(progress);
-}
+	it->second.setStatus(status, progress);
+} //end setSupervisorStatus()
 
-//========================================================================================================================
+
+//==============================================================================
 const SupervisorInfo& AllSupervisorInfo::getGatewayInfo(void) const
 {
 	if(!theSupervisorInfo_)
@@ -375,10 +251,10 @@ const SupervisorInfo& AllSupervisorInfo::getGatewayInfo(void) const
 	}
 	return *theSupervisorInfo_;
 }
-//========================================================================================================================
+//==============================================================================
 XDAQ_CONST_CALL xdaq::ApplicationDescriptor* AllSupervisorInfo::getGatewayDescriptor(void) const { return getGatewayInfo().getDescriptor(); }
 
-//========================================================================================================================
+//==============================================================================
 const SupervisorInfo& AllSupervisorInfo::getWizardInfo(void) const
 {
 	if(!theWizardInfo_)
@@ -388,10 +264,10 @@ const SupervisorInfo& AllSupervisorInfo::getWizardInfo(void) const
 	}
 	return *theWizardInfo_;
 }
-//========================================================================================================================
+//==============================================================================
 XDAQ_CONST_CALL xdaq::ApplicationDescriptor* AllSupervisorInfo::getWizardDescriptor(void) const { return getWizardInfo().getDescriptor(); }
 
-//========================================================================================================================
+//==============================================================================
 std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSupervisorDescriptors(const std::string& stateMachineCommand) const
 {
 	__COUT__ << "getOrderedSupervisorDescriptors" << __E__;

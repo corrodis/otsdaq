@@ -20,13 +20,13 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 SOAPUtilities::SOAPUtilities(void) {}
 
-//========================================================================================================================
+//==============================================================================
 SOAPUtilities::~SOAPUtilities(void) {}
 
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(SOAPCommand soapCommand)
 {
 	if(soapCommand.hasParameters())
@@ -35,7 +35,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(SOAPCommand soapC
 		return makeSOAPMessageReference(soapCommand.getCommand());
 }
 
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string command)
 {
 	xoap::MessageReference message  = xoap::createMessage();
@@ -46,7 +46,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 	return message;
 }
 
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string command, SOAPParameters parameters)
 {
 	//__COUT__ << "Command: " << command << " par size: " << parameters.size() <<
@@ -68,7 +68,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 	return message;
 }
 
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string command, std::string fileName)
 {
 	__COUT__ << "SOAP XML file path : " << fileName << std::endl;
@@ -87,7 +87,7 @@ xoap::MessageReference SOAPUtilities::makeSOAPMessageReference(std::string comma
 	return message;
 }
 
-//========================================================================================================================
+//==============================================================================
 void SOAPUtilities::addParameters(xoap::MessageReference& message, SOAPParameters parameters)
 {
 	//__COUT__ << "adding parameters!!!!!!" << std::endl;
@@ -111,7 +111,7 @@ void SOAPUtilities::addParameters(xoap::MessageReference& message, SOAPParameter
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 SOAPCommand SOAPUtilities::translate(const xoap::MessageReference& message)
 {
 	SOAPCommand                           soapCommand;
@@ -127,10 +127,10 @@ SOAPCommand SOAPUtilities::translate(const xoap::MessageReference& message)
 	return soapCommand;
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string SOAPUtilities::receive(const xoap::MessageReference& message, SOAPCommand& soapCommand) { return receive(message, soapCommand.getParametersRef()); }
 
-//========================================================================================================================
+//==============================================================================
 std::string SOAPUtilities::receive(const xoap::MessageReference& message)
 {
 	// NOTE it is assumed that there is only 1 command for each message (that's why we use
@@ -138,7 +138,7 @@ std::string SOAPUtilities::receive(const xoap::MessageReference& message)
 	return (message->getSOAPPart().getEnvelope().getBody().getChildElements()).begin()->getElementName().getLocalName();
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string SOAPUtilities::receive(const xoap::MessageReference& message, SOAPParameters& parameters)
 {
 	xoap::SOAPEnvelope             envelope    = message->getSOAPPart().getEnvelope();

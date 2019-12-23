@@ -26,7 +26,7 @@ const std::string CodeEditor::SOURCE_BASE_PATH = std::string(__ENV__("MRB_SOURCE
 const std::string CodeEditor::USER_DATA_PATH   = std::string(__ENV__("USER_DATA")) + "/";
 const std::string CodeEditor::OTSDAQ_DATA_PATH = std::string(__ENV__("OTSDAQ_DATA")) + "/";
 
-//========================================================================================================================
+//==============================================================================
 // CodeEditor
 CodeEditor::CodeEditor()
     : ALLOWED_FILE_EXTENSIONS_(
@@ -45,7 +45,7 @@ CodeEditor::CodeEditor()
 
 }  // end CodeEditor()
 
-//========================================================================================================================
+//==============================================================================
 // xmlRequest
 //	all requests are handled here
 void CodeEditor::xmlRequest(const std::string& option, bool readOnlyMode, cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::string& username) try
@@ -99,7 +99,7 @@ catch(...)
 	xmlOut->addTextElementToData("Error", ss.str());
 }  // end xmlRequest()
 
-//========================================================================================================================
+//==============================================================================
 // safePathString
 std::string CodeEditor::safePathString(const std::string& path)
 {
@@ -118,7 +118,7 @@ std::string CodeEditor::safePathString(const std::string& path)
 	return fullpath;
 }  // end safePathString()
 
-//========================================================================================================================
+//==============================================================================
 // safeExtensionString
 //	remove all non ascii and make lower case
 std::string CodeEditor::safeExtensionString(const std::string& extension)
@@ -151,7 +151,7 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 	return retExt;
 }  // end safeExtensionString()
 
-//========================================================================================================================
+//==============================================================================
 // getDirectoryContent
 void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 {
@@ -233,7 +233,7 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 
 }  // end getDirectoryContent()
 
-//========================================================================================================================
+//==============================================================================
 // getPathContent
 void CodeEditor::getPathContent(const std::string& basepath, const std::string& path, HttpXmlDocument* xmlOut)
 {
@@ -347,7 +347,7 @@ void CodeEditor::getPathContent(const std::string& basepath, const std::string& 
 		xmlOut->addTextElementToData("file", name);
 }  // end getPathContent()
 
-//========================================================================================================================
+//==============================================================================
 // getFileContent
 void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 {
@@ -378,7 +378,7 @@ void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 
 }  // end getFileContent()
 
-//========================================================================================================================
+//==============================================================================
 // readFile
 void CodeEditor::readFile(const std::string& basepath, const std::string& path, std::string& contents)
 {
@@ -399,7 +399,7 @@ void CodeEditor::readFile(const std::string& basepath, const std::string& path, 
 	std::fclose(fp);
 }  // end readFile
 
-//========================================================================================================================
+//==============================================================================
 // writeFile
 void CodeEditor::writeFile(const std::string&        basepath,
                            const std::string&        path,
@@ -472,7 +472,7 @@ void CodeEditor::writeFile(const std::string&        basepath,
 
 }  // end writeFile
 
-//========================================================================================================================
+//==============================================================================
 // saveFileContent
 void CodeEditor::saveFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::string& username)
 {
@@ -517,7 +517,7 @@ void CodeEditor::saveFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, c
 
 }  // end saveFileContent
 
-//========================================================================================================================
+//==============================================================================
 // build
 //	cleanBuild and incrementalBuild
 void CodeEditor::build(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::string& username)
@@ -634,7 +634,7 @@ void CodeEditor::build(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::
 
 }  // end build()
 
-//========================================================================================================================
+//==============================================================================
 std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/> CodeEditor::getSpecialsMap(void)
 {
 	std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/> retMap;

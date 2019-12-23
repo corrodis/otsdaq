@@ -18,7 +18,7 @@ using namespace ots;
 //#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" +
 //"ARTDAQConfigurations/" #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQConsumer::ARTDAQConsumer(std::string              supervisorApplicationUID,
                                std::string              bufferUID,
                                std::string              processorUID,
@@ -122,20 +122,20 @@ ARTDAQConsumer::ARTDAQConsumer(std::string              supervisorApplicationUID
 	//	// fhiclConfiguration_);
 }
 
-//========================================================================================================================
+//==============================================================================
 // ARTDAQConsumer::ARTDAQConsumer(std::string interfaceID, MPI_Comm local_group_comm,
 // std::string name) :FEVInterface     (feId, 0) ,local_group_comm_(local_group_comm)
 //,name_            (name)
 //{}
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQConsumer::~ARTDAQConsumer(void)
 {
 	halt();
 	__COUT__ << "Destructed." << __E__;
 }
 //
-////========================================================================================================================
+////==============================================================================
 // void ARTDAQConsumer::initLocalGroup(int rank)
 //{
 //	name_ = "BoardReader_" + DataConsumer::processorUID_;
@@ -145,7 +145,7 @@ ARTDAQConsumer::~ARTDAQConsumer(void)
 //#define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" +
 //"ARTDAQConfigurations/" #define ARTDAQ_FILE_PREAMBLE "boardReader"
 //
-////========================================================================================================================
+////==============================================================================
 // void ARTDAQConsumer::configure(int rank)
 //{
 //	__COUT__ << "\tConfigure" << __E__;
@@ -181,7 +181,7 @@ ARTDAQConsumer::~ARTDAQConsumer(void)
 //	__COUT__ << "\tDone Configure" << __E__;
 //}
 //
-////========================================================================================================================
+////==============================================================================
 // void ARTDAQConsumer::halt(void)
 //{
 //	__COUT__ << "\tHalt" << __E__;
@@ -197,7 +197,7 @@ ARTDAQConsumer::~ARTDAQConsumer(void)
 //	}
 //}
 //
-//========================================================================================================================
+//==============================================================================
 void ARTDAQConsumer::pauseProcessingData(void) { ARTDAQReaderProcessorBase::pause(); }
 //	__COUT__ << "\tPause" << __E__;
 //	// FIXME These are passed as parameters
@@ -212,7 +212,7 @@ void ARTDAQConsumer::pauseProcessingData(void) { ARTDAQReaderProcessorBase::paus
 //	}
 //}
 //
-//========================================================================================================================
+//==============================================================================
 void ARTDAQConsumer::resumeProcessingData(void) { ARTDAQReaderProcessorBase::resume(); }
 //	__COUT__ << "\tResume" << __E__;
 //	// FIXME These are passed as parameters
@@ -227,7 +227,7 @@ void ARTDAQConsumer::resumeProcessingData(void) { ARTDAQReaderProcessorBase::res
 //	}
 //}
 //
-//========================================================================================================================
+//==============================================================================
 void ARTDAQConsumer::startProcessingData(std::string runNumber) { ARTDAQReaderProcessorBase::start(runNumber); }
 //	__COUT__ << "\tStart" << __E__;
 //
@@ -257,7 +257,7 @@ void ARTDAQConsumer::startProcessingData(std::string runNumber) { ARTDAQReaderPr
 //	__COUT__ << "STARTING BOARD READER THREAD" << __E__;
 //}
 //
-//========================================================================================================================
+//==============================================================================
 void ARTDAQConsumer::stopProcessingData(void) { ARTDAQReaderProcessorBase::stop(); }
 //	__COUT__ << "\tStop" << __E__;
 //	// FIXME These are passed as parameters

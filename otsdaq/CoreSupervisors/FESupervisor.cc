@@ -30,7 +30,7 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(FESupervisor)
 
-//========================================================================================================================
+//==============================================================================
 FESupervisor::FESupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stub)
 {
 	__SUP_COUT__ << "Constructing..." << __E__;
@@ -115,7 +115,7 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stu
 	}  // end Macro Maker mode initial configure
 }  // end constructor
 
-//========================================================================================================================
+//==============================================================================
 FESupervisor::~FESupervisor(void)
 {
 	__SUP_COUT__ << "Destroying..." << __E__;
@@ -127,7 +127,7 @@ FESupervisor::~FESupervisor(void)
 	__SUP_COUT__ << "Destructed." << __E__;
 }  // end destructor
 
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference FESupervisor::frontEndCommunicationRequest(xoap::MessageReference message) try
 {
 	__SUP_COUT__ << "FE Request received: " << SOAPUtilities::translate(message) << __E__;
@@ -414,7 +414,7 @@ catch(...)
 	return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "FailFECommunicationRequest", parameters);
 }  // end frontEndCommunicationRequest()
 
-//========================================================================================================================
+//==============================================================================
 // macroMakerSupervisorRequest
 //	 Handles all MacroMaker Requests:
 //		- GetInterfaces (returns interface type and id)
@@ -798,7 +798,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 
 }  // end macroMakerSupervisorRequest()
 
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference FESupervisor::workLoopStatusRequest(xoap::MessageReference message)
 {
 	if(!theFEInterfacesManager_)
@@ -813,7 +813,7 @@ xoap::MessageReference FESupervisor::workLoopStatusRequest(xoap::MessageReferenc
 	    (theFEInterfacesManager_->allFEWorkloopsAreDone() ? CoreSupervisorBase::WORK_LOOP_DONE : CoreSupervisorBase::WORK_LOOP_WORKING));
 }  // end workLoopStatusRequest()
 
-//========================================================================================================================
+//==============================================================================
 // extractFEInterfaceManager
 //
 //	locates theFEInterfacesManager in state machines vector and

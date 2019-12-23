@@ -8,7 +8,7 @@ using namespace ots;
 #define __MF_SUBJECT__ "FEProducer"
 #define mfSubject_ (std::string("FEProducer-") + DataProcessor::processorUID_)
 
-//========================================================================================================================
+//==============================================================================
 FEProducerVInterface::FEProducerVInterface(const std::string&       interfaceUID,
                                            const ConfigurationTree& theXDAQContextConfigTree,
                                            const std::string&       interfaceConfigurationPath)
@@ -53,7 +53,7 @@ FEProducerVInterface::~FEProducerVInterface(void)
 	__FE_COUT__ << "Destructed." << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 // copyToNextBuffer
 //	This function copies a data string into the next
 //		available buffer.
@@ -110,7 +110,7 @@ void FEProducerVInterface::copyToNextBuffer(const std::string& dataToWrite)
 
 }  // end copyToNextBuffer()
 
-//========================================================================================================================
+//==============================================================================
 // getNextBuffer
 //	This function retrieves the next buffer data string.
 
@@ -132,7 +132,7 @@ std::string* FEProducerVInterface::getNextBuffer(void)
 	return FEProducerVInterface::dataP_;
 }  // end getNextBuffer()
 
-//========================================================================================================================
+//==============================================================================
 // writeCurrentBuffer
 //	This function writes the current buffer data string to the buffer.
 //

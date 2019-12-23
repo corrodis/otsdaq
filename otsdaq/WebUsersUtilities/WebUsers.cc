@@ -155,7 +155,7 @@ WebUsers::WebUsers()
 	__COUT__ << "Done with Web Users initialization!" << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 // xmlRequestOnGateway
 //	check the validity of an xml request at the server side, i.e. at the Gateway
 // supervisor, which is the owner 		of the web users instance. 	if false, gateway
@@ -197,7 +197,7 @@ HANDLE_ACCESS_FAILURE:
 
 }  // end xmlRequestOnGateway()
 
-//========================================================================================================================
+//==============================================================================
 // initializeRequestUserInfo
 //	initialize user info parameters to failed results
 void WebUsers::initializeRequestUserInfo(cgicc::Cgicc& cgi, WebUsers::RequestUserInfo& userInfo)
@@ -212,7 +212,7 @@ void WebUsers::initializeRequestUserInfo(cgicc::Cgicc& cgi, WebUsers::RequestUse
 	userInfo.setGroupPermissionLevels("");  // always init to inactive
 }
 
-//========================================================================================================================
+//==============================================================================
 // checkRequestAccess
 //	check user permission parameters based on cookie code, user permission level
 //(extracted previous from group membership) 	Note: assumes
@@ -339,7 +339,7 @@ bool WebUsers::checkRequestAccess(cgicc::Cgicc&              cgi,
 
 }  // end checkRequestAccess()
 
-//========================================================================================================================
+//==============================================================================
 // saveActiveSessions
 //	save active sessions structure so that they can survive restart
 void WebUsers::saveActiveSessions()
@@ -452,7 +452,7 @@ void WebUsers::loadActiveSessions()
 		fclose(fp);
 }
 
-//========================================================================================================================
+//==============================================================================
 // loadDatabaseFromFile
 //	load Hashes and Users from file
 //	create database if non-existent
@@ -742,7 +742,7 @@ bool WebUsers::loadDatabases()
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 // saveToDatabase
 void WebUsers::saveToDatabase(FILE* fp, const std::string& field, const std::string& value, uint8_t type, bool addNewLine)
 {
@@ -759,7 +759,7 @@ void WebUsers::saveToDatabase(FILE* fp, const std::string& field, const std::str
 		fprintf(fp, "</%s>%s", field.c_str(), newLine.c_str());
 }
 
-//========================================================================================================================
+//==============================================================================
 // saveDatabaseToFile
 //	returns true if saved database successfully
 //		db: DB_USERS or DB_HASHES
@@ -888,7 +888,7 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 // createNewAccount
 //	adds a new valid user to database
 //		inputs: username and name to display
@@ -933,7 +933,7 @@ bool WebUsers::createNewAccount(const std::string& username, const std::string& 
 	return saveDatabaseToFile(DB_USERS);
 }
 
-//========================================================================================================================
+//==============================================================================
 // deleteAccount
 //	private function, deletes user account
 //		inputs: username and name to display
@@ -965,7 +965,7 @@ bool WebUsers::deleteAccount(const std::string& username, const std::string& dis
 	return saveDatabaseToFile(DB_USERS);
 }
 
-//========================================================================================================================
+//==============================================================================
 unsigned int WebUsers::hexByteStrToInt(const char* h)
 {
 	unsigned int rv;
@@ -974,10 +974,10 @@ unsigned int WebUsers::hexByteStrToInt(const char* h)
 	return rv;
 }
 
-//========================================================================================================================
+//==============================================================================
 void WebUsers::intToHexStr(unsigned char i, char* h) { sprintf(h, "%2.2X", i); }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::attemptActiveSession ---
 //	Attempts login.
 //
@@ -1149,7 +1149,7 @@ uint64_t WebUsers::attemptActiveSession(
 	return UsersUserIdVector[i];                  // return user Id
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::attemptActiveSessionWithCert ---
 //	Attempts login using certificate.
 //
@@ -1283,7 +1283,7 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 	return UsersUserIdVector[i];              // return user Id
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchActiveSessionDatabaseForUID ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchActiveSessionDatabaseForCookie(const std::string& cookieCode) const
@@ -1295,7 +1295,7 @@ uint64_t WebUsers::searchActiveSessionDatabaseForCookie(const std::string& cooki
 	return (i == ActiveSessionCookieCodeVector.size()) ? NOT_FOUND_IN_DATABASE : i;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::isUsernameActive ---
 //	returns true if found, else false
 bool WebUsers::isUsernameActive(const std::string& username) const
@@ -1306,7 +1306,7 @@ bool WebUsers::isUsernameActive(const std::string& username) const
 	return isUserIdActive(UsersUserIdVector[u]);
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::isUserIdActive ---
 //	returns true if found, else false
 bool WebUsers::isUserIdActive(uint64_t uid) const
@@ -1318,7 +1318,7 @@ bool WebUsers::isUserIdActive(uint64_t uid) const
 	return false;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchUsersDatabaseForUsername ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchUsersDatabaseForUsername(const std::string& username) const
@@ -1330,7 +1330,7 @@ uint64_t WebUsers::searchUsersDatabaseForUsername(const std::string& username) c
 	return (i == UsersUsernameVector.size()) ? NOT_FOUND_IN_DATABASE : i;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchUsersDatabaseForUserEmail ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchUsersDatabaseForUserEmail(const std::string& useremail) const
@@ -1342,7 +1342,7 @@ uint64_t WebUsers::searchUsersDatabaseForUserEmail(const std::string& useremail)
 	return (i == UsersUserEmailVector.size()) ? NOT_FOUND_IN_DATABASE : i;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchUsersDatabaseForUserId ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchUsersDatabaseForUserId(uint64_t uid) const
@@ -1354,7 +1354,7 @@ uint64_t WebUsers::searchUsersDatabaseForUserId(uint64_t uid) const
 	return (i == UsersUserIdVector.size()) ? NOT_FOUND_IN_DATABASE : i;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchLoginSessionDatabaseForUUID ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchLoginSessionDatabaseForUUID(const std::string& uuid) const
@@ -1366,7 +1366,7 @@ uint64_t WebUsers::searchLoginSessionDatabaseForUUID(const std::string& uuid) co
 	return (i == LoginSessionUUIDVector.size()) ? NOT_FOUND_IN_DATABASE : i;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchHashesDatabaseForHash ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchHashesDatabaseForHash(const std::string& hash)
@@ -1387,7 +1387,7 @@ uint64_t WebUsers::searchHashesDatabaseForHash(const std::string& hash)
 	return (i == HashesVector.size()) ? NOT_FOUND_IN_DATABASE : i;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::addToHashesDatabase ---
 //	returns false if hash already exists
 //	else true for success
@@ -1405,7 +1405,7 @@ bool WebUsers::addToHashesDatabase(const std::string& hash)
 	return saveDatabaseToFile(DB_HASHES);
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::genCookieCode ---
 std::string WebUsers::genCookieCode()
 {
@@ -1419,7 +1419,7 @@ std::string WebUsers::genCookieCode()
 	return cc;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::removeLoginSessionEntry ---
 void WebUsers::removeLoginSessionEntry(unsigned int i)
 {
@@ -1430,7 +1430,7 @@ void WebUsers::removeLoginSessionEntry(unsigned int i)
 	LoginSessionAttemptsVector.erase(LoginSessionAttemptsVector.begin() + i);
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::createNewActiveSession ---
 //	if asIndex is not specified (0), new session receives max(ActiveSessionIndex) for user
 //+1.. always skipping 0. 	In this ActiveSessionIndex should link a thread of cookieCodes
@@ -1458,7 +1458,7 @@ std::string WebUsers::createNewActiveSession(uint64_t uid, const std::string& ip
 	return ActiveSessionCookieCodeVector[ActiveSessionCookieCodeVector.size() - 1];
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::removeActiveSession ---
 void WebUsers::removeActiveSessionEntry(unsigned int i)
 {
@@ -1469,7 +1469,7 @@ void WebUsers::removeActiveSessionEntry(unsigned int i)
 	ActiveSessionIndex.erase(ActiveSessionIndex.begin() + i);
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::refreshCookieCode ---
 // Basic idea is to return valid cookieCode to user for future commands
 // There are two issues that arise due to "same user - multiple location":
@@ -1522,7 +1522,7 @@ std::string WebUsers::refreshCookieCode(unsigned int i, bool enableRefresh)
 	return "0";  // failure, should be impossible since i is already validated
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::IsCookieActive ---
 //	returns User Id on success, returns by reference refreshed cookieCode and displayName
 // if cookieCode/user combo is still active 	displayName is returned in username
@@ -1577,7 +1577,7 @@ uint64_t WebUsers::isCookieCodeActiveForLogin(const std::string& uuid, std::stri
 	return UsersUserIdVector[j];             // return user ID
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getActiveSessionCountForUser ---
 //	Returns count of unique ActiveSessionIndex entries for user's uid
 uint64_t WebUsers::getActiveSessionCountForUser(uint64_t uid)
@@ -1608,7 +1608,7 @@ uint64_t WebUsers::getActiveSessionCountForUser(uint64_t uid)
 	return uniqueAsi.size();
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::checkIpAccess ---
 //	checks user defined accept,
 //	then checks reject IP file
@@ -1674,7 +1674,7 @@ bool WebUsers::checkIpAccess(const std::string& ip)
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::incrementIpBlacklistCount ---
 void WebUsers::incrementIpBlacklistCount(const std::string& ip)
 {
@@ -1707,7 +1707,7 @@ void WebUsers::incrementIpBlacklistCount(const std::string& ip)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getUsersDisplayName ---
 std::string WebUsers::getUsersDisplayName(uint64_t uid)
 {
@@ -1717,7 +1717,7 @@ std::string WebUsers::getUsersDisplayName(uint64_t uid)
 	return UsersDisplayNameVector[i];
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getUsersUsername ---
 std::string WebUsers::getUsersUsername(uint64_t uid)
 {
@@ -1727,7 +1727,7 @@ std::string WebUsers::getUsersUsername(uint64_t uid)
 	return UsersUsernameVector[i];
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::cookieCodeLogout ---
 //	Used to logout user based on cookieCode and ActiveSessionIndex
 //		logoutOtherUserSessions true logs out all of user's other sessions by uid
@@ -1792,7 +1792,7 @@ uint64_t WebUsers::cookieCodeLogout(const std::string& cookieCode, bool logoutOt
 	return logoutCount;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getUserInfoForCookie ---
 bool WebUsers::getUserInfoForCookie(std::string& cookieCode, std::string* userName, std::string* displayName, uint64_t* activeSessionIndex)
 {
@@ -1838,7 +1838,7 @@ bool WebUsers::getUserInfoForCookie(std::string& cookieCode, std::string* userNa
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::isCookieCodeActiveForRequest ---
 //	Used to verify cookie code for all general user requests
 //  cookieCode/ip must be active to pass
@@ -1949,7 +1949,7 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string&                        
 	return true;
 }  // end cookieCodeIsActiveForRequest()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::cleanupExpiredEntries ---
 //	cleanup expired entries form Login Session and Active Session databases
 //	check if usersUsernameWithLock_ is still active
@@ -2033,7 +2033,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 		usersUsernameWithLock_ = "";
 }
 
-//========================================================================================================================
+//==============================================================================
 // createNewLoginSession
 //	adds a new login session id to database
 //		inputs: UUID
@@ -2075,7 +2075,7 @@ std::string WebUsers::createNewLoginSession(const std::string& UUID, const std::
 	return sid;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::sha512
 //	performs SHA-512 encoding using openssl linux library crypto on context+user+password
 //	if context is empty std::string "", context is generated and returned by reference
@@ -2134,7 +2134,7 @@ std::string WebUsers::sha512(const std::string& user, const std::string& passwor
 	return retHash;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::dejumble
 //	the client sends username and pw jumbled for http transmission
 //	this function dejumbles
@@ -2171,7 +2171,7 @@ std::string WebUsers::dejumble(const std::string& u, const std::string& s)
 	return user;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getPermissionForUser
 // return WebUsers::PERMISSION_LEVEL_INACTIVE if invalid index
 std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> WebUsers::getPermissionsForUser(uint64_t uid)
@@ -2188,7 +2188,7 @@ std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> WebUsers::getPe
 	return retErrorMap;
 }
 
-//========================================================================================================================
+//==============================================================================
 WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
                                                                  const std::string&                                                groupName)
 {
@@ -2201,19 +2201,19 @@ WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(std::map<std::s
 	return it->second;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool WebUsers::isInactiveForGroup(std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName)
 {
 	return getPermissionLevelForGroup(permissionMap, groupName) == WebUsers::PERMISSION_LEVEL_INACTIVE;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool WebUsers::isAdminForGroup(std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName)
 {
 	return getPermissionLevelForGroup(permissionMap, groupName) == WebUsers::PERMISSION_LEVEL_ADMIN;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getPermissionForUser
 // return 0 if invalid index
 std::string WebUsers::getTooltipFilename(const std::string& username, const std::string& srcFile, const std::string& srcFunc, const std::string& srcId)
@@ -2276,7 +2276,7 @@ std::string ots::WebUsers::getUserEmailFromFingerprint(const std::string& finger
 	return "";
 }  // end getUserEmailFromFingerprint()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::tooltipSetNeverShowForUsername
 //	temporarySilence has priority over the neverShow setting
 void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
@@ -2313,7 +2313,7 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
 		__COUT_ERR__ << "Big problem with tooltips! File not accessible: " << filename << __E__;
 }  // end tooltipSetNeverShowForUsername()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::tooltipCheckForUsername
 //	read file for tooltip
 //		if not 1 then never show
@@ -2371,7 +2371,7 @@ void WebUsers::tooltipCheckForUsername(
 
 }  // end tooltipCheckForUsername();
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::resetAllUserTooltips
 void WebUsers::resetAllUserTooltips(const std::string& userNeedle)
 {
@@ -2379,7 +2379,7 @@ void WebUsers::resetAllUserTooltips(const std::string& userNeedle)
 	__COUT__ << "Successfully reset Tooltips for user " << userNeedle << __E__;
 }  // end of resetAllUserTooltips()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::silenceAllUserTooltips
 // creates a file
 void WebUsers::silenceAllUserTooltips(const std::string& username)
@@ -2394,7 +2394,7 @@ void WebUsers::silenceAllUserTooltips(const std::string& username)
 
 }  // end of silenceAllUserTooltips()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::insertGetSettingsResponse
 //  add settings to xml document
 //  all active users have permissions of at least 1 so have web preferences:
@@ -2511,7 +2511,7 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument* xmldoc, bool
 
 }  // end insertSettingsForUser()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::setGenericPreference
 //	each generic preference has its own directory, and each user has their own file
 void WebUsers::setGenericPreference(uint64_t uid, const std::string& preferenceName, const std::string& preferenceValue)
@@ -2545,7 +2545,7 @@ void WebUsers::setGenericPreference(uint64_t uid, const std::string& preferenceN
 		__COUT_ERR__ << "Preferences file could not be opened for writing!" << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getGenericPreference
 //	each generic preference has its own directory, and each user has their own file
 //	default preference is empty string.
@@ -2593,7 +2593,7 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 	return "";
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::changeSettingsForUser
 void WebUsers::changeSettingsForUser(
     uint64_t uid, const std::string& bgcolor, const std::string& dbcolor, const std::string& wincolor, const std::string& layout, const std::string& syslayout)
@@ -2632,7 +2632,7 @@ void WebUsers::changeSettingsForUser(
 	sysPrefXml.saveXmlDocument(fn);
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::setUserWithLock
 // if lock is true, set lock user specified
 // if lock is false, attempt to unlock user specified
@@ -2693,7 +2693,7 @@ bool WebUsers::setUserWithLock(uint64_t actingUid, bool lock, const std::string&
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::modifyAccountSettings
 void WebUsers::modifyAccountSettings(
     uint64_t actingUid, uint8_t cmd_type, const std::string& username, const std::string& displayname, const std::string& email, const std::string& permissions)
@@ -2774,7 +2774,7 @@ void WebUsers::modifyAccountSettings(
 
 	saveDatabaseToFile(DB_USERS);
 }
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getActiveUsersString
 //	return comma separated list of active Display Names
 std::string WebUsers::getActiveUsersString()
@@ -2800,7 +2800,7 @@ std::string WebUsers::getActiveUsersString()
 		ret.erase(ret.length() - 1);  // get rid of last comma
 	return ret;
 }
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getAdminUserID
 //
 uint64_t WebUsers::getAdminUserID()
@@ -2809,7 +2809,7 @@ uint64_t WebUsers::getAdminUserID()
 	return uid;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::loadUserWithLock
 //	//load username with lock from file
 void WebUsers::loadUserWithLock()
@@ -2851,11 +2851,11 @@ void WebUsers::loadUserWithLock()
 	setUserWithLock(UsersUserIdVector[i], true, username);
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getSecurity
 //
 std::string WebUsers::getSecurity() { return securityType_; }
-//========================================================================================================================
+//==============================================================================
 // WebUsers::loadSecuritySelection
 //
 void WebUsers::loadSecuritySelection()
@@ -2890,7 +2890,7 @@ void WebUsers::loadSecuritySelection()
 	__COUT__ << "CareAboutCookieCodes_: " << CareAboutCookieCodes_ << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 void WebUsers::NACDisplayThread(const std::string& nac, const std::string& user)
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
@@ -2911,7 +2911,7 @@ void WebUsers::NACDisplayThread(const std::string& nac, const std::string& user)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void WebUsers::deleteUserData()
 {
 	// delete Login data

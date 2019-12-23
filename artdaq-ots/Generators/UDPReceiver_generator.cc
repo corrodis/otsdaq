@@ -17,7 +17,7 @@
 #include <iostream>
 #include <iterator>
 
-//========================================================================================================================
+//==============================================================================
 ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const& ps)
 	: CommandableFragmentGenerator(ps)
 	, rawOutput_(ps.get<bool>("raw_output_enabled", false))
@@ -77,7 +77,7 @@ ots::UDPReceiver::UDPReceiver(fhicl::ParameterSet const& ps)
 	TLOG(TLVL_DEBUG) << "Constructed.";
 }  // end constructor()
 
-//========================================================================================================================
+//==============================================================================
 ots::UDPReceiver::~UDPReceiver()
 {
 	TLOG(TLVL_DEBUG) << "Destructor.";
@@ -98,7 +98,7 @@ ots::UDPReceiver::~UDPReceiver()
 	TLOG(TLVL_DEBUG) << "Destructed.";
 }  // end destructor()
 
-//========================================================================================================================
+//==============================================================================
 void ots::UDPReceiver::start()
 {
 	TLOG(TLVL_DEBUG) << "Starting...";
@@ -113,7 +113,7 @@ void ots::UDPReceiver::start()
 	TLOG(TLVL_DEBUG) << "Started.";
 }  // end start()
 
-//========================================================================================================================
+//==============================================================================
 void ots::UDPReceiver::receiveLoop_()
 {
 	while (!should_stop())
@@ -187,7 +187,7 @@ void ots::UDPReceiver::receiveLoop_()
 	TLOG(TLVL_INFO) << "receive Loop exiting...";
 }
 
-//========================================================================================================================
+//==============================================================================
 bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs& output)
 {
 	if (should_stop())
@@ -234,7 +234,7 @@ bool ots::UDPReceiver::getNext_(artdaq::FragmentPtrs& output)
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs& output, size_t totalSize)
 {
 	TLOG(TLVL_TRACE) << "ProcessData_ start";
@@ -295,7 +295,7 @@ void ots::UDPReceiver::ProcessData_(artdaq::FragmentPtrs& output, size_t totalSi
 		rawOutput.close();
 }
 
-//========================================================================================================================
+//==============================================================================
 void ots::UDPReceiver::send(CommandType command)
 {
 	if (sendCommands_)
@@ -307,7 +307,7 @@ void ots::UDPReceiver::send(CommandType command)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 bool ots::UDPReceiver::isTimerExpired_()
 {
 	auto now = std::chrono::high_resolution_clock::now();
@@ -315,20 +315,20 @@ bool ots::UDPReceiver::isTimerExpired_()
 	return diff > fragmentWindow_;
 }
 
-//========================================================================================================================
+//==============================================================================
 void ots::UDPReceiver::stop()
 {
 	TLOG(TLVL_DEBUG) << "Stopping...";
 	//#pragma message "Using default implementation of UDPReceiver::stop()"
 }
 
-//========================================================================================================================
+//==============================================================================
 void ots::UDPReceiver::stopNoMutex()
 {
 	//#pragma message "Using default implementation of UDPReceiver::stopNoMutex()"
 }
 
-//========================================================================================================================
+//==============================================================================
 void ots::UDPReceiver::start_()
 {
 	//#pragma message "Using default implementation of UDPReceiver::start_()"

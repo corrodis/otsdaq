@@ -4,7 +4,7 @@ using namespace ots;
 
 const CorePropertySupervisorBase::SupervisorProperties CorePropertySupervisorBase::SUPERVISOR_PROPERTIES = CorePropertySupervisorBase::SupervisorProperties();
 
-//========================================================================================================================
+//==============================================================================
 CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* application)
     : theConfigurationManager_(0)  // new ConfigurationManager)
     , supervisorClass_(application->getApplicationDescriptor()->getClassName())
@@ -117,14 +117,14 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 
 }  // end constructor
 
-//========================================================================================================================
+//==============================================================================
 CorePropertySupervisorBase::~CorePropertySupervisorBase(void)
 {
 	if(theConfigurationManager_)
 		delete theConfigurationManager_;
 }  // end destructor
 
-//========================================================================================================================
+//==============================================================================
 void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBase* properties)
 {
 	char        portStr[100] = "0";
@@ -161,7 +161,7 @@ void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBa
 	__COUT__ << "Marked alive: " << filename << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 // When overriding, setup default property values here
 // called by CorePropertySupervisorBase constructor before loading user defined property
 // values
@@ -193,7 +193,7 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 	//			"..." << __E__;
 }  // end setSupervisorPropertyDefaults()
 
-//========================================================================================================================
+//==============================================================================
 // extractPermissionsMapFromString
 //	Static function that extract map function to standardize approach
 //		in case needed by supervisors for special permissions handling.
@@ -213,7 +213,7 @@ void CorePropertySupervisorBase::extractPermissionsMapFromString(const std::stri
 	StringMacros::getMapFromString(permissionsString, permissionsMap);
 }
 
-//========================================================================================================================
+//==============================================================================
 // doPermissionsGrantAccess
 //	Static function that checks permissionLevelsMap against permissionThresholdsMap and
 // returns true if 	access requirements are met.
@@ -262,7 +262,7 @@ bool CorePropertySupervisorBase::doPermissionsGrantAccess(std::map<std::string, 
 	return false;
 }  // end doPermissionsGrantAccess
 
-//========================================================================================================================
+//==============================================================================
 void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 {
 	if(propertiesAreSetup_)
@@ -330,7 +330,7 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 		__SUP_COUT__ << "\t" << property.first << " = " << property.second << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 // getSupervisorTreeNode ~
 //	try to get this Supervisors configuration tree node
 ConfigurationTree CorePropertySupervisorBase::getSupervisorTreeNode(void) try
@@ -351,7 +351,7 @@ catch(...)
 	throw;
 }
 
-//========================================================================================================================
+//==============================================================================
 // loadUserSupervisorProperties ~
 //	try to get user supervisor properties
 void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
@@ -388,7 +388,7 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 	//			"'" << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 void CorePropertySupervisorBase::setSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
 {
 	propertyMap_[propertyName] = propertyValue;
@@ -396,7 +396,7 @@ void CorePropertySupervisorBase::setSupervisorProperty(const std::string& proper
 	//			"] = " << propertyMap_[propertyName] << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 void CorePropertySupervisorBase::addSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
 {
 	propertyMap_[propertyName] = propertyValue + " | " + getSupervisorProperty(propertyName);
@@ -404,7 +404,7 @@ void CorePropertySupervisorBase::addSupervisorProperty(const std::string& proper
 	//			"] = " << propertyMap_[propertyName] << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 // getSupervisorProperty
 //		string version of template function
 std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string& propertyName)
@@ -435,7 +435,7 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string&
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
 }
 
-//========================================================================================================================
+//==============================================================================
 // getSupervisorPropertyUserPermissionsThreshold
 //	returns the threshold based on the requestType
 WebUsers::permissionLevel_t CorePropertySupervisorBase::getSupervisorPropertyUserPermissionsThreshold(const std::string& requestType)
@@ -455,7 +455,7 @@ WebUsers::permissionLevel_t CorePropertySupervisorBase::getSupervisorPropertyUse
 	//	return it->second;
 }
 
-//========================================================================================================================
+//==============================================================================
 // getRequestUserInfo ~
 //	extract user info for request based on property configuration
 void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& userInfo)

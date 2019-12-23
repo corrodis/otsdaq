@@ -9,7 +9,7 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(ARTDAQDataManagerSupervisor)
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub* s) : CoreSupervisorBase(s)
 {
 	__SUP_COUT__ << "Constructor." << __E__;
@@ -22,7 +22,7 @@ ARTDAQDataManagerSupervisor::ARTDAQDataManagerSupervisor(xdaq::ApplicationStub* 
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQDataManagerSupervisor::~ARTDAQDataManagerSupervisor(void)
 {
 	__SUP_COUT__ << "Destructor." << __E__;

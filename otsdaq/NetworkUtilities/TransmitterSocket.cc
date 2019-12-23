@@ -8,19 +8,19 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TransmitterSocket::TransmitterSocket(void) { __COUT__ << "TransmitterSocket constructor " << __E__; }
 
-//========================================================================================================================
+//==============================================================================
 TransmitterSocket::TransmitterSocket(const std::string& IPAddress, unsigned int port) : Socket(IPAddress, port)
 {
 	__COUT__ << "TransmitterSocket constructor " << IPAddress << ":" << port << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 TransmitterSocket::~TransmitterSocket(void) {}
 
-//========================================================================================================================
+//==============================================================================
 int TransmitterSocket::send(Socket& toSocket, const std::string& buffer, bool verbose)
 {
 	// lockout other senders for the remainder of the scope
@@ -74,7 +74,7 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer, bool ve
 	return 0;
 }
 
-//========================================================================================================================
+//==============================================================================
 int TransmitterSocket::send(Socket& toSocket, const std::vector<uint16_t>& buffer, bool verbose)
 {
 	// lockout other senders for the remainder of the scope
@@ -103,7 +103,7 @@ int TransmitterSocket::send(Socket& toSocket, const std::vector<uint16_t>& buffe
 	return 0;
 }
 
-//========================================================================================================================
+//==============================================================================
 int TransmitterSocket::send(Socket& toSocket, const std::vector<uint32_t>& buffer, bool verbose)
 {
 	// lockout other senders for the remainder of the scope

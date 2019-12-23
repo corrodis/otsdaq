@@ -17,7 +17,7 @@ using namespace ots;
 #define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string              supervisorApplicationUID,
                                                      std::string              bufferUID,
                                                      std::string              processorUID,
@@ -134,27 +134,27 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string              su
 
 }  // end constructor()
 
-//========================================================================================================================
+//==============================================================================
 // ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string interfaceID, MPI_Comm
 // local_group_comm, std::string name) :FEVInterface     (feId, 0)
 // ,local_group_comm_(local_group_comm)
 //,name_            (name)
 //{}
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQReaderProcessorBase::~ARTDAQReaderProcessorBase(void)
 {
 	halt();
 	__CFG_COUT__ << "DONE DELETING!" << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQReaderProcessorBase::initLocalGroup(int rank) { configure(rank); }
 
 #define ARTDAQ_FCL_PATH std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQReaderProcessorBase::configure(int rank)
 {
 	__CFG_COUT__ << "Configuring..." << __E__;
@@ -188,7 +188,7 @@ void ARTDAQReaderProcessorBase::configure(int rank)
 	__CFG_COUT__ << "Configured." << __E__;
 }  // end configure()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQReaderProcessorBase::halt(void)
 {
 	__CFG_COUT__ << "Halting..." << __E__;
@@ -206,7 +206,7 @@ void ARTDAQReaderProcessorBase::halt(void)
 	__CFG_COUT__ << "Halted." << __E__;
 }  // end halt()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQReaderProcessorBase::pause(void)
 {
 	__CFG_COUT__ << "Pausing..." << __E__;
@@ -225,7 +225,7 @@ void ARTDAQReaderProcessorBase::pause(void)
 	__CFG_COUT__ << "Paused." << __E__;
 }  // end pause()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQReaderProcessorBase::resume(void)
 {
 	__CFG_COUT__ << "Resuming..." << __E__;
@@ -244,7 +244,7 @@ void ARTDAQReaderProcessorBase::resume(void)
 	__CFG_COUT__ << "Resumed." << __E__;
 }  // end resume ()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQReaderProcessorBase::start(const std::string& runNumber)
 {
 	__CFG_COUT__ << "Starting..." << __E__;
@@ -266,7 +266,7 @@ void ARTDAQReaderProcessorBase::start(const std::string& runNumber)
 	__CFG_COUT__ << "Started." << __E__;
 }  // end start()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQReaderProcessorBase::stop(void)
 {
 	__CFG_COUT__ << "Stop" << __E__;

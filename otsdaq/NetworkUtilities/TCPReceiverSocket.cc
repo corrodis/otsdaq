@@ -7,13 +7,13 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TCPReceiverSocket::TCPReceiverSocket(int socketId) : TCPSocket(socketId) { fPacket.reset(); }
 
-//========================================================================================================================
+//==============================================================================
 TCPReceiverSocket::~TCPReceiverSocket(void) {}
 
-//========================================================================================================================
+//==============================================================================
 std::string TCPReceiverSocket::receivePacket(void)
 {
 	while(true)
@@ -25,7 +25,7 @@ std::string TCPReceiverSocket::receivePacket(void)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int timeoutMicroSeconds)
 {
 	// std::cout << __PRETTY_FUNCTION__ << "Receiving Message for socket: " <<
@@ -92,7 +92,7 @@ std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int
 	return dataRead;
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPReceiverSocket::setReceiveTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds)
 {
 	struct timeval tv;

@@ -11,7 +11,7 @@ using namespace ots;
 #define __MF_SUBJECT__ "Producer"
 #define mfSubject_ (std::string("Producer-") + DataProcessor::processorUID_)
 
-//========================================================================================================================
+//==============================================================================
 DataProducerBase::DataProducerBase(const std::string& supervisorApplicationUID,
                                    const std::string& bufferUID,
                                    const std::string& processorUID,
@@ -23,10 +23,10 @@ DataProducerBase::DataProducerBase(const std::string& supervisorApplicationUID,
 	__GEN_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
-//========================================================================================================================
+//==============================================================================
 DataProducerBase::~DataProducerBase(void) { __GEN_COUT__ << "Destructed." << __E__; }  // end destructor()
 
-//========================================================================================================================
+//==============================================================================
 // mirror DataConsumer::registerToBuffer
 void DataProducerBase::registerToBuffer(void)
 {
@@ -46,7 +46,7 @@ void DataProducerBase::registerToBuffer(void)
 	__GEN_COUT__ << "Producer '" << DataProcessor::processorUID_ << "' Registered." << __E__;
 }  // end registerToBuffer()
 //
-////========================================================================================================================
+////==============================================================================
 ////mirror DataConsumer::unregisterFromBuffer
 // void DataProducerBase::unregisterFromBuffer(void)
 //{

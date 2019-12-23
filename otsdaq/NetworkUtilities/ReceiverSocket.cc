@@ -12,30 +12,30 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 ReceiverSocket::ReceiverSocket(std::string IPAddress, unsigned int port)
     : Socket(IPAddress, port), addressLength_(sizeof(fromAddress_)), numberOfBytes_(0), readCounter_(0)
 {
 	__COUT__ << "ReceiverSocket constructor " << IPAddress << ":" << port << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 // protected constructor
 ReceiverSocket::ReceiverSocket(void) : addressLength_(sizeof(fromAddress_)), numberOfBytes_(0), readCounter_(0)
 {
 	__COUT__ << "ReceiverSocket constructor" << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 ReceiverSocket::~ReceiverSocket(void) {}
 
-//========================================================================================================================
+//==============================================================================
 int ReceiverSocket::receive(std::string& buffer, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
 {
 	return receive(buffer, dummyIPAddress_, dummyPort_, timeoutSeconds, timeoutUSeconds, verbose);
 }
 
-//========================================================================================================================
+//==============================================================================
 // receive ~~
 //	returns 0 on success, -1 on failure
 //	NOTE: must call Socket::initialize before receiving!
@@ -129,13 +129,13 @@ int ReceiverSocket::receive(
 	return 0;
 }
 
-//========================================================================================================================
+//==============================================================================
 int ReceiverSocket::receive(std::vector<uint32_t>& buffer, unsigned int timeoutSeconds, unsigned int timeoutUSeconds, bool verbose)
 {
 	return receive(buffer, dummyIPAddress_, dummyPort_, timeoutSeconds, timeoutUSeconds, verbose);
 }
 
-//========================================================================================================================
+//==============================================================================
 // receive ~~
 //	returns 0 on success, -1 on failure
 //	NOTE: must call Socket::initialize before receiving!

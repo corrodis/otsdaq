@@ -13,7 +13,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 Iterator::Iterator(GatewaySupervisor* supervisor)
     : workloopRunning_(false)
     , activePlanIsRunning_(false)
@@ -30,10 +30,10 @@ Iterator::Iterator(GatewaySupervisor* supervisor)
 	__COUT__ << "Iterator constructed." << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 Iterator::~Iterator(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::IteratorWorkLoop(Iterator* iterator) try
 {
 	__MOUT__ << "Iterator work loop starting..." << __E__;
@@ -418,7 +418,7 @@ catch(...)
 	iterator->errorMessage_    = ss.str();
 }  // end IteratorWorkLoop()
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::startCommand(IteratorWorkLoopStruct* iteratorStruct) try
 {
 	{
@@ -515,7 +515,7 @@ catch(...)
 	throw;
 }  // end startCommand()
 
-//========================================================================================================================
+//==============================================================================
 // checkCommand
 //	when busy for a while, start to sleep
 //		use sleep() or nanosleep()
@@ -591,7 +591,7 @@ catch(...)
 	throw;
 }  // end checkCommand()
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct* iteratorStruct, const std::string& fsmName)
 {
 	__COUT__ << "fsmName " << fsmName << __E__;
@@ -650,7 +650,7 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct* iteratorStruct, con
 	__COUT__ << "fsmNextRunNumber_  = " << iteratorStruct->fsmNextRunNumber_ << __E__;
 }  // end startCommandChooseFSM()
 
-//========================================================================================================================
+//==============================================================================
 // return true if an action was attempted
 bool Iterator::haltIterator(Iterator* iterator, IteratorWorkLoopStruct* iteratorStruct)
 //(GatewaySupervisor* theSupervisor, const std::string& fsmName)
@@ -735,7 +735,7 @@ bool Iterator::haltIterator(Iterator* iterator, IteratorWorkLoopStruct* iterator
 	return haltAttempted;
 }  // end haltIterator()
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::startCommandBeginLabel(IteratorWorkLoopStruct* iteratorStruct)
 {
 	__COUT__ << "Entering label '" << iteratorStruct->commands_[iteratorStruct->commandIndex_].params_[IterateTable::commandBeginLabelParams_.Label_] << "'..."
@@ -745,7 +745,7 @@ void Iterator::startCommandBeginLabel(IteratorWorkLoopStruct* iteratorStruct)
 	iteratorStruct->stepIndexStack_.push_back(0);
 }  // end startCommandBeginLabel()
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct* iteratorStruct)
 {
 	// search for first matching label backward and set command to there
@@ -791,7 +791,7 @@ void Iterator::startCommandRepeatLabel(IteratorWorkLoopStruct* iteratorStruct)
 	__COUT__ << "Jumping back to commandIndex " << iteratorStruct->commandIndex_ << __E__;
 }  // end startCommandRepeatLabel()
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::startCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 {
 	iteratorStruct->runIsDone_ = false;
@@ -830,7 +830,7 @@ void Iterator::startCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 	__COUT__ << "startCommandRun success." << __E__;
 }  // end startCommandRun()
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::startCommandConfigureActive(IteratorWorkLoopStruct* iteratorStruct)
 {
 	__COUT__ << "startCommandConfigureActive " << __E__;
@@ -852,7 +852,7 @@ void Iterator::startCommandConfigureActive(IteratorWorkLoopStruct* iteratorStruc
 	startCommandConfigureAlias(iteratorStruct, systemAlias.str());
 }  // end startCommandConfigureActive()
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::startCommandConfigureGroup(IteratorWorkLoopStruct* iteratorStruct)
 {
 	__COUT__ << "startCommandConfigureGroup " << __E__;
@@ -873,7 +873,7 @@ void Iterator::startCommandConfigureGroup(IteratorWorkLoopStruct* iteratorStruct
 	startCommandConfigureAlias(iteratorStruct, systemAlias.str());
 }  // end startCommandConfigureGroup()
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct* iteratorStruct, const std::string& systemAlias)
 {
 	__COUT__ << "systemAlias " << systemAlias << __E__;
@@ -926,7 +926,7 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct* iteratorStruct
 	__COUT__ << "startCommandConfigureAlias success." << __E__;
 }  // end startCommandConfigureAlias()
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::startCommandMacro(IteratorWorkLoopStruct* iteratorStruct, bool isFrontEndMacro)
 {
 	// Steps:
@@ -1005,7 +1005,7 @@ void Iterator::startCommandMacro(IteratorWorkLoopStruct* iteratorStruct, bool is
 
 }  // end startCommandMacro()
 
-//========================================================================================================================
+//==============================================================================
 bool Iterator::checkCommandMacro(IteratorWorkLoopStruct* iteratorStruct, bool isFrontEndMacro)
 {
 	sleep(1);
@@ -1077,7 +1077,7 @@ bool Iterator::checkCommandMacro(IteratorWorkLoopStruct* iteratorStruct, bool is
 	return true;
 }  // end checkCommandMacro()
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::startCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct)
 {
 	// Steps:
@@ -1165,7 +1165,7 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct)
 
 }  // end startCommandModifyActive()
 
-//========================================================================================================================
+//==============================================================================
 // checkCommandRun
 //	return true if done
 //
@@ -1438,7 +1438,7 @@ bool Iterator::checkCommandRun(IteratorWorkLoopStruct* iteratorStruct)
 	return false;
 }  // end checkCommandRun()
 
-//========================================================================================================================
+//==============================================================================
 // return true if done
 bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct* iteratorStruct)
 {
@@ -1501,7 +1501,7 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct* iteratorStruct)
 	return false;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool Iterator::handleCommandRequest(HttpXmlDocument& xmldoc, const std::string& command, const std::string& parameter)
 {
 	//__COUTV__(command);
@@ -1554,7 +1554,7 @@ bool Iterator::handleCommandRequest(HttpXmlDocument& xmldoc, const std::string& 
 	return false;
 }
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::playIterationPlan(HttpXmlDocument& xmldoc, const std::string& planName)
 {
 	__MOUT__ << "Attempting to play iteration plan '" << planName << ".'" << __E__;
@@ -1598,7 +1598,7 @@ void Iterator::playIterationPlan(HttpXmlDocument& xmldoc, const std::string& pla
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::pauseIterationPlan(HttpXmlDocument& xmldoc)
 {
 	__MOUT__ << "Attempting to pause iteration plan '" << activePlanName_ << ".'" << __E__;
@@ -1630,7 +1630,7 @@ void Iterator::pauseIterationPlan(HttpXmlDocument& xmldoc)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void Iterator::haltIterationPlan(HttpXmlDocument& xmldoc)
 {
 	__MOUT__ << "Attempting to halt iteration plan '" << activePlanName_ << ".'" << __E__;
@@ -1694,7 +1694,7 @@ void Iterator::haltIterationPlan(HttpXmlDocument& xmldoc)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 //	return state machine and iterator status
 void Iterator::getIterationPlanStatus(HttpXmlDocument& xmldoc)
 {

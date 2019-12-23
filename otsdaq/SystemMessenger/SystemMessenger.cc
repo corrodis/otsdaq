@@ -7,7 +7,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 // addSystemMessage
 void SystemMessenger::addSystemMessage(std::string targetUser, std::string msg)
 {
@@ -30,7 +30,7 @@ void SystemMessenger::addSystemMessage(std::string targetUser, std::string msg)
 	std::cout << __COUT_HDR_FL__ << "Current System Messages: " << sysMsgTargetUser_.size() << std::endl << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 // getSystemMessage
 //	Deliver | separated system messages (time | msg | time | msg...etc),
 //		if there is any in vector set for user or for wildcard *
@@ -61,7 +61,7 @@ std::string SystemMessenger::getSystemMessage(std::string targetUser)
 	return retStr;
 }
 
-//========================================================================================================================
+//==============================================================================
 // sysMsgSetLock
 //	ALWAYS calling thread with true, must also call with false to release lock
 void SystemMessenger::sysMsgSetLock(bool set)
@@ -71,7 +71,7 @@ void SystemMessenger::sysMsgSetLock(bool set)
 	sysMsgLock_ = set;
 }
 
-//========================================================================================================================
+//==============================================================================
 // sysMsgCleanup
 //	Cleanup messages if delivered, and targetUser != wildcard *
 //	For all remaining messages, wait some time before removing (e.g. 30 sec)

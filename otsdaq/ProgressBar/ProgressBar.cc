@@ -13,7 +13,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 ProgressBar::ProgressBar()
     : cProgressBarFilePath_(std::string(__ENV__("SERVICE_DATA_PATH")) + "/ProgressBarData/")
     , cProgressBarFileExtension_(".txt")
@@ -34,7 +34,7 @@ ProgressBar::ProgressBar()
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 //		reset() ~~
 //		Resets progress bar to 0% complete
 void ProgressBar::reset(std::string file, std::string lineNumber, int id)
@@ -68,7 +68,7 @@ void ProgressBar::reset(std::string file, std::string lineNumber, int id)
 	started_ = true;
 }
 
-//========================================================================================================================
+//==============================================================================
 void ProgressBar::step()
 {
 	std::lock_guard<std::mutex> lock(theMutex_);  // lock out for remainder of scope
@@ -77,14 +77,14 @@ void ProgressBar::step()
 	// readPercentageString() << "% complete" << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool ProgressBar::isComplete()
 {
 	std::lock_guard<std::mutex> lock(theMutex_);  // lock out for remainder of scope
 	return !started_;
 }
 
-//========================================================================================================================
+//==============================================================================
 void ProgressBar::complete()
 {
 	step();  // consider complete as a step
@@ -108,7 +108,7 @@ void ProgressBar::complete()
 		std::cout << __COUT_HDR_FL__ << "Critical ERROR!" << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 // return percentage complete as integer
 int ProgressBar::read()
 {
@@ -123,7 +123,7 @@ int ProgressBar::read()
 	return stepCount_ ? 50 : 0;
 }
 
-//========================================================================================================================
+//==============================================================================
 // return percentage complete as std::string
 std::string ProgressBar::readPercentageString()
 {

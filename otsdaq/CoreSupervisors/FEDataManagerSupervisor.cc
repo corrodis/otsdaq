@@ -11,7 +11,7 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(FEDataManagerSupervisor)
 
-//========================================================================================================================
+//==============================================================================
 FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub* s, bool artdaqDataManager) : FESupervisor(s)
 {
 	__SUP_COUT__ << "Constructor." << __E__;
@@ -55,7 +55,7 @@ FEDataManagerSupervisor::FEDataManagerSupervisor(xdaq::ApplicationStub* s, bool 
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
-//========================================================================================================================
+//==============================================================================
 FEDataManagerSupervisor::~FEDataManagerSupervisor(void)
 {
 	__SUP_COUT__ << "Destroying..." << __E__;
@@ -70,7 +70,7 @@ FEDataManagerSupervisor::~FEDataManagerSupervisor(void)
 	__SUP_COUT__ << "Destructed." << __E__;
 }  // end destructor()
 
-//========================================================================================================================
+//==============================================================================
 // transitionConfiguring
 //	swap order of state machine vector for configuring
 //		so that DataManager gets configured first.
@@ -112,7 +112,7 @@ void FEDataManagerSupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 }  // end transitionConfiguring()
 
-//========================================================================================================================
+//==============================================================================
 // transitionStarting
 //	swap order of state machine vector for starting
 //		so that DataManager gets configured first.
@@ -141,7 +141,7 @@ void FEDataManagerSupervisor::transitionStarting(toolbox::Event::Reference e)
 
 }  // end transitionStarting()
 
-//========================================================================================================================
+//==============================================================================
 // transitionResuming
 //	swap order of state machine vector for resuming
 //		so that DataManager gets configured first.
@@ -170,7 +170,7 @@ void FEDataManagerSupervisor::transitionResuming(toolbox::Event::Reference e)
 
 }  // end transitionResuming()
 
-//========================================================================================================================
+//==============================================================================
 // extractDataManager
 //
 //	locates theDataManager in state machines vector and

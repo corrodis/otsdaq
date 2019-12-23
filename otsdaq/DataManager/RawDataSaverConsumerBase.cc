@@ -11,7 +11,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 RawDataSaverConsumerBase::RawDataSaverConsumerBase(std::string              supervisorApplicationUID,
                                                    std::string              bufferUID,
                                                    std::string              processorUID,
@@ -30,10 +30,10 @@ RawDataSaverConsumerBase::RawDataSaverConsumerBase(std::string              supe
 	// if(fp)fclose(fp);
 }
 
-//========================================================================================================================
+//==============================================================================
 RawDataSaverConsumerBase::~RawDataSaverConsumerBase(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void RawDataSaverConsumerBase::startProcessingData(std::string runNumber)
 {
 	if(runNumber != "")  // If there is no number it means it was paused
@@ -44,14 +44,14 @@ void RawDataSaverConsumerBase::startProcessingData(std::string runNumber)
 	DataConsumer::startProcessingData(runNumber);
 }
 
-//========================================================================================================================
+//==============================================================================
 void RawDataSaverConsumerBase::stopProcessingData(void)
 {
 	DataConsumer::stopProcessingData();
 	closeFile();
 }
 
-//========================================================================================================================
+//==============================================================================
 void RawDataSaverConsumerBase::openFile(std::string runNumber)
 {
 	currentRunNumber_ = runNumber;
@@ -73,7 +73,7 @@ void RawDataSaverConsumerBase::openFile(std::string runNumber)
 	writeHeader();  // write start of file header
 }
 
-//========================================================================================================================
+//==============================================================================
 void RawDataSaverConsumerBase::closeFile(void)
 {
 	if(outFile_.is_open())
@@ -83,7 +83,7 @@ void RawDataSaverConsumerBase::closeFile(void)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void RawDataSaverConsumerBase::save(const std::string& data)
 {
 	std::ofstream output;
@@ -145,7 +145,7 @@ void RawDataSaverConsumerBase::save(const std::string& data)
 	writePacketFooter(data);  // write start of packet footer
 }
 
-//========================================================================================================================
+//==============================================================================
 bool RawDataSaverConsumerBase::workLoopThread(toolbox::task::WorkLoop* workLoop)
 {
 	//__CFG_COUT__ << DataProcessor::processorUID_ << " running, because workloop: "
@@ -154,7 +154,7 @@ bool RawDataSaverConsumerBase::workLoopThread(toolbox::task::WorkLoop* workLoop)
 	return WorkLoop::continueWorkLoop_;
 }
 
-//========================================================================================================================
+//==============================================================================
 void RawDataSaverConsumerBase::fastRead(void)
 {
 	//__CFG_COUT__ << processorUID_ << " running!" << std::endl;
@@ -175,7 +175,7 @@ void RawDataSaverConsumerBase::fastRead(void)
 	DataConsumer::setReadSubBuffer<std::string, std::map<std::string, std::string> >();
 }
 
-//========================================================================================================================
+//==============================================================================
 void RawDataSaverConsumerBase::slowRead(void)
 {
 	//__CFG_COUT__ << processorUID_ << " running!" << std::endl;

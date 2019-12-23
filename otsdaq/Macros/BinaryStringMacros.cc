@@ -2,7 +2,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 // binaryToHexString
 //	convert a data buffer of <len> bytes to a hex string 2*len characters long
 //	Note: no preamble is applied by default (but "0x" could be nice)
@@ -27,7 +27,7 @@ std::string BinaryStringMacros::binaryStringToHexString(const void*        binar
 	return resultPreamble + dest;
 }  // end binaryToHexString
 
-//========================================================================================================================
+//==============================================================================
 // binaryNumberToHexString
 //	convert a data buffer string a hex string
 //		8 bytes at a time with the least significant byte last.
@@ -38,7 +38,7 @@ std::string BinaryStringMacros::binaryNumberToHexString(const std::string& binar
 	return binaryNumberToHexString(&binaryBuffer[0], binaryBuffer.size(), resultPreamble, resultDelimiter);
 }  // end binaryNumberToHexString()
 
-//========================================================================================================================
+//==============================================================================
 // binaryNumberToHexString
 //	convert a data buffer string a hex string
 //		8 bytes at a time with the least significant byte last.
@@ -75,7 +75,7 @@ std::string BinaryStringMacros::binaryNumberToHexString(const void*        binar
 	return dest;
 }  // end binaryNumberToHexString()
 
-//========================================================================================================================
+//==============================================================================
 // insertValueInBinaryString
 // 	static and specialized for string value
 void BinaryStringMacros::insertValueInBinaryString(std::string& binaryBuffer, const std::string& value, unsigned int bitIndex /* = 0 */)
@@ -109,7 +109,7 @@ void BinaryStringMacros::insertValueInBinaryString(std::string& binaryBuffer, co
 	}
 }  // end insertValueInBinaryString()
 
-//========================================================================================================================
+//==============================================================================
 // extractValueFromBinaryString
 //	static template function
 //	Extract value from buffer starting at bitIndex position
@@ -180,7 +180,7 @@ void BinaryStringMacros::extractValueFromBinaryString(
 
 }  // end extractValueFromBinaryString()
 
-//========================================================================================================================
+//==============================================================================
 // extractValueFromBinaryString
 //	static template function
 //	Extract value from buffer starting at bitIndex position

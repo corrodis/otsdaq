@@ -12,20 +12,20 @@ using namespace ots;
 #define __MF_SUBJECT__ "FSM"
 #define mfSubject_ std::string("FSM-") + getStateMachineName()
 
-//========================================================================================================================
+//==============================================================================
 FiniteStateMachine::FiniteStateMachine(const std::string& stateMachineName)
     : stateEntranceTime_(0), inTransition_(false), provenanceState_('X'), theErrorMessage_(""), stateMachineName_(stateMachineName)
 {
 	__GEN_COUT__ << "Constructing FiniteStateMachine" << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 FiniteStateMachine::~FiniteStateMachine(void) {}
 
-//========================================================================================================================
+//==============================================================================
 toolbox::fsm::State FiniteStateMachine::getProvenanceState(void) { return provenanceState_; }
 
-//========================================================================================================================
+//==============================================================================
 toolbox::fsm::State FiniteStateMachine::getTransitionFinalState(const std::string& transition)
 {
 	if(stateTransitionTable_[currentState_].find(transition) != stateTransitionTable_[currentState_].end())
@@ -38,20 +38,20 @@ toolbox::fsm::State FiniteStateMachine::getTransitionFinalState(const std::strin
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string FiniteStateMachine::getProvenanceStateName(void) { return getStateName(getProvenanceState()); }
 
-//========================================================================================================================
+//==============================================================================
 std::string FiniteStateMachine::getCurrentStateName(void) { return getStateName(getCurrentState()); }
 
-//========================================================================================================================
+//==============================================================================
 // getTimeInState
 //	returns number of seconds elapsed while in current state
 //	returns 0 if invalid (i.e. stateEntranceTime_ is not set - stateEntranceTime_ is
 // initialized to 0)
 time_t FiniteStateMachine::getTimeInState(void) { return stateEntranceTime_ ? (time(0) - stateEntranceTime_) : 0; }
 
-//========================================================================================================================
+//==============================================================================
 std::string FiniteStateMachine::getCurrentTransitionName(const std::string& transition)
 {
 	if(stateTransitionNameTable_[currentState_].find(transition) != stateTransitionNameTable_[currentState_].end())
@@ -66,7 +66,7 @@ std::string FiniteStateMachine::getCurrentTransitionName(const std::string& tran
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from, const std::string& transition)
 {
 	if(stateTransitionNameTable_[from].find(transition) != stateTransitionNameTable_[from].end())
@@ -81,7 +81,7 @@ std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string FiniteStateMachine::getTransitionParameter(const toolbox::fsm::State from, const std::string& transition)
 {
 	if(stateTransitionParameterTable_[from].find(transition) != stateTransitionParameterTable_[from].end())
@@ -91,17 +91,17 @@ std::string FiniteStateMachine::getTransitionParameter(const toolbox::fsm::State
 	return "";
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string FiniteStateMachine::getTransitionFinalStateName(const std::string& transition) { return getStateName(getTransitionFinalState(transition)); }
 
-//========================================================================================================================
+//==============================================================================
 bool FiniteStateMachine::execTransition(const std::string& transition)
 {
 	const xoap::MessageReference message;
 	return execTransition(transition, message);
 }
 
-//========================================================================================================================
+//==============================================================================
 // execTransition
 //
 //	Returns true if transition is successfully executed
@@ -221,10 +221,10 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 	return transitionSuccessful;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool FiniteStateMachine::isInTransition(void) { return inTransition_; }
 
-//========================================================================================================================
+//==============================================================================
 void FiniteStateMachine::setErrorMessage(const std::string& errMessage, bool append)
 {
 	if(append)
@@ -233,10 +233,10 @@ void FiniteStateMachine::setErrorMessage(const std::string& errMessage, bool app
 		theErrorMessage_ = errMessage;
 }
 
-//========================================================================================================================
+//==============================================================================
 const std::string& FiniteStateMachine::getErrorMessage() const { return theErrorMessage_; }
 
-//========================================================================================================================
+//==============================================================================
 void FiniteStateMachine::setInitialState(toolbox::fsm::State state)
 {
 	toolbox::fsm::FiniteStateMachine::setInitialState(state);
@@ -244,5 +244,5 @@ void FiniteStateMachine::setInitialState(toolbox::fsm::State state)
 	stateEntranceTime_ = time(0);
 }
 
-//========================================================================================================================
+//==============================================================================
 const xoap::MessageReference& FiniteStateMachine::getCurrentMessage(void) { return theMessage_; }

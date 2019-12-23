@@ -15,7 +15,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 FEVInterfacesManager::FEVInterfacesManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath)
     : Configurable(theXDAQContextConfigTree, supervisorConfigurationPath)
 {
@@ -23,17 +23,17 @@ FEVInterfacesManager::FEVInterfacesManager(const ConfigurationTree& theXDAQConte
 	__CFG_COUT__ << "Constructed." << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 FEVInterfacesManager::~FEVInterfacesManager(void)
 {
 	destroy();
 	__CFG_COUT__ << "Destructed." << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::init(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::destroy(void)
 {
 	for(auto& it : theFEInterfaces_)
@@ -43,7 +43,7 @@ void FEVInterfacesManager::destroy(void)
 	theFENamesByPriority_.clear();
 }
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::createInterfaces(void)
 {
 	const std::string COL_NAME_feGroupLink = "LinkToFEInterfaceTable";
@@ -129,7 +129,7 @@ void FEVInterfacesManager::createInterfaces(void)
 	__CFG_COUT__ << "Done creating interfaces" << __E__;
 }  // end createInterfaces()
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::configure(void)
 {
 	const std::string transitionName = "Configuring";
@@ -179,7 +179,7 @@ void FEVInterfacesManager::configure(void)
 	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
 }  // end configure()
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::halt(void)
 {
 	const std::string transitionName = "Halting";
@@ -251,7 +251,7 @@ void FEVInterfacesManager::halt(void)
 	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
 }  // end halt()
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::pause(void)
 {
 	const std::string transitionName = "Pausing";
@@ -289,7 +289,7 @@ void FEVInterfacesManager::pause(void)
 	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
 }  // end pause()
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::resume(void)
 {
 	const std::string transitionName = "Resuming";
@@ -329,7 +329,7 @@ void FEVInterfacesManager::resume(void)
 
 }  // end resume()
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::start(std::string runNumber)
 {
 	const std::string transitionName = "Starting";
@@ -369,7 +369,7 @@ void FEVInterfacesManager::start(std::string runNumber)
 
 }  // end start()
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::stop(void)
 {
 	const std::string transitionName = "Starting";
@@ -408,7 +408,7 @@ void FEVInterfacesManager::stop(void)
 
 }  // end stop()
 
-//========================================================================================================================
+//==============================================================================
 // getFEInterfaceP
 FEVInterface* FEVInterfacesManager::getFEInterfaceP(const std::string& interfaceID)
 {
@@ -423,7 +423,7 @@ FEVInterface* FEVInterfacesManager::getFEInterfaceP(const std::string& interface
 	}
 }  // end getFEInterfaceP()
 
-//========================================================================================================================
+//==============================================================================
 // getFEInterface
 const FEVInterface& FEVInterfacesManager::getFEInterface(const std::string& interfaceID) const
 {
@@ -438,7 +438,7 @@ const FEVInterface& FEVInterfacesManager::getFEInterface(const std::string& inte
 	}
 }  // end getFEInterface()
 
-//========================================================================================================================
+//==============================================================================
 // universalRead
 //	used by MacroMaker
 //	throw std::runtime_error on error/timeout
@@ -447,7 +447,7 @@ void FEVInterfacesManager::universalRead(const std::string& interfaceID, char* a
 	getFEInterfaceP(interfaceID)->universalRead(address, returnValue);
 }  // end universalRead()
 
-//========================================================================================================================
+//==============================================================================
 // getInterfaceUniversalAddressSize
 //	used by MacroMaker
 unsigned int FEVInterfacesManager::getInterfaceUniversalAddressSize(const std::string& interfaceID)
@@ -455,7 +455,7 @@ unsigned int FEVInterfacesManager::getInterfaceUniversalAddressSize(const std::s
 	return getFEInterfaceP(interfaceID)->getUniversalAddressSize();
 }  // end getInterfaceUniversalAddressSize()
 
-//========================================================================================================================
+//==============================================================================
 // getInterfaceUniversalDataSize
 //	used by MacroMaker
 unsigned int FEVInterfacesManager::getInterfaceUniversalDataSize(const std::string& interfaceID)
@@ -463,7 +463,7 @@ unsigned int FEVInterfacesManager::getInterfaceUniversalDataSize(const std::stri
 	return getFEInterfaceP(interfaceID)->getUniversalDataSize();
 }  // end getInterfaceUniversalDataSize()
 
-//========================================================================================================================
+//==============================================================================
 // universalWrite
 //	used by MacroMaker
 void FEVInterfacesManager::universalWrite(const std::string& interfaceID, char* address, char* writeValue)
@@ -471,7 +471,7 @@ void FEVInterfacesManager::universalWrite(const std::string& interfaceID, char* 
 	getFEInterfaceP(interfaceID)->universalWrite(address, writeValue);
 }  // end universalWrite()
 
-//========================================================================================================================
+//==============================================================================
 // getFEListString
 //	returns string with each new line for each FE
 //	each line:
@@ -489,7 +489,7 @@ std::string FEVInterfacesManager::getFEListString(const std::string& supervisorL
 	return retList;
 }  // end getFEListString()
 
-//========================================================================================================================
+//==============================================================================
 // startMacroMultiDimensional
 //	Launches a thread that manages the multi-dimensional loop
 //		running the Macro on the specified FE interface.
@@ -987,7 +987,7 @@ void FEVInterfacesManager::startMacroMultiDimensional(const std::string& request
 
 }  // end startMacroMultiDimensional()
 
-//========================================================================================================================
+//==============================================================================
 // startFEMacroMultiDimensional
 //	Launches a thread that manages the multi-dimensional loop
 //		running the FE Macro in the specified FE interface.
@@ -1528,7 +1528,7 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string& reque
 
 }  // end startFEMacroMultiDimensional()
 
-//========================================================================================================================
+//==============================================================================
 // checkFEMacroMultiDimensional
 //	Checks for the completion of the thread that manages the multi-dimensional loop
 //		running the FE Macro or MacroMaker Macro in the specified FE interface.
@@ -1568,7 +1568,7 @@ bool FEVInterfacesManager::checkMacroMultiDimensional(const std::string& interfa
 
 }  // end checkMacroMultiDimensional()
 
-//========================================================================================================================
+//==============================================================================
 // runFEMacroByFE
 //	Runs the FE Macro in the specified FE interface. Called by another FE.
 //
@@ -1631,7 +1631,7 @@ void FEVInterfacesManager::runFEMacroByFE(const std::string& callingInterfaceID,
 
 }  // end runFEMacroByFE()
 
-//========================================================================================================================
+//==============================================================================
 // runMacro
 //	Runs the MacroMaker Macro in the specified FE interface.
 //
@@ -1764,7 +1764,7 @@ void FEVInterfacesManager::runMacro(const std::string& interfaceID, const std::s
 
 }  // end runMacro()
 
-//========================================================================================================================
+//==============================================================================
 // runFEMacro
 //	Runs the FE Macro in the specified FE interface.
 //
@@ -1793,7 +1793,7 @@ void FEVInterfacesManager::runFEMacro(const std::string& interfaceID, const std:
 
 }  // end runFEMacro()
 
-//========================================================================================================================
+//==============================================================================
 // runFEMacro
 //	Runs the FE Macro in the specified FE interface.
 //
@@ -1943,7 +1943,7 @@ void FEVInterfacesManager::runFEMacro(const std::string&                        
 
 }  // end runFEMacro()
 
-//========================================================================================================================
+//==============================================================================
 // getFEMacrosString
 //	returns string with each new line indicating the macros for a FE
 //	each line:
@@ -1979,7 +1979,7 @@ std::string FEVInterfacesManager::getFEMacrosString(const std::string& superviso
 	return retList;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool FEVInterfacesManager::allFEWorkloopsAreDone(void)
 {
 	bool allFEWorkloopsAreDone = true;
@@ -2002,7 +2002,7 @@ bool FEVInterfacesManager::allFEWorkloopsAreDone(void)
 	return allFEWorkloopsAreDone;
 }  // end allFEWorkloopsAreDone()
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::preStateMachineExecutionLoop(void)
 {
 	VStateMachine::clearIterationWork();
@@ -2027,7 +2027,7 @@ void FEVInterfacesManager::preStateMachineExecutionLoop(void)
 		             << subIterationWorkStateMachineIndex_ << ")" << __E__;
 }  // end preStateMachineExecutionLoop()
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::preStateMachineExecution(unsigned int i)
 {
 	if(i >= theFENamesByPriority_.size())
@@ -2050,7 +2050,7 @@ void FEVInterfacesManager::preStateMachineExecution(unsigned int i)
 	             << __E__;
 }  // end preStateMachineExecution()
 
-//========================================================================================================================
+//==============================================================================
 // postStateMachineExecution
 //	return false to indicate state machine is NOT done with transition
 bool FEVInterfacesManager::postStateMachineExecution(unsigned int i)
@@ -2093,7 +2093,7 @@ bool FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 	return true;  // to indicate state machine is done with transition
 }  // end postStateMachineExecution()
 
-//========================================================================================================================
+//==============================================================================
 void FEVInterfacesManager::postStateMachineExecutionLoop(void)
 {
 	if(VStateMachine::getSubIterationWork())

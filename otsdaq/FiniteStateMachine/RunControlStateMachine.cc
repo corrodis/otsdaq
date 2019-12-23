@@ -22,7 +22,7 @@ using namespace ots;
 const std::string RunControlStateMachine::FAILED_STATE_NAME = "Failed";
 const std::string RunControlStateMachine::HALTED_STATE_NAME = "Halted";
 
-//========================================================================================================================
+//==============================================================================
 RunControlStateMachine::RunControlStateMachine(const std::string& name) : theStateMachine_(name), asyncFailureReceived_(false), asyncSoftFailureReceived_(false)
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
@@ -88,10 +88,10 @@ RunControlStateMachine::RunControlStateMachine(const std::string& name) : theSta
 	reset();
 }
 
-//========================================================================================================================
+//==============================================================================
 RunControlStateMachine::~RunControlStateMachine(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void RunControlStateMachine::reset(void)
 {
 	__GEN_COUT__ << "Resetting RunControlStateMachine with name '" << theStateMachine_.getStateMachineName() << "'..." << __E__;
@@ -104,7 +104,7 @@ void RunControlStateMachine::reset(void)
 	asyncSoftFailureReceived_ = false;
 }
 
-////========================================================================================================================
+////==============================================================================
 //(RunControlStateMachine::stateMachineFunction_t)
 // RunControlStateMachine::getTransitionName( 		const toolbox::fsm::State from,
 //		const std::string& transition)
@@ -128,7 +128,7 @@ void RunControlStateMachine::reset(void)
 //	return itTrans->second;
 //}
 
-//========================================================================================================================
+//==============================================================================
 // runControlMessageHandler
 //	Handles the command broadcast message from the Gateway Supervisor
 //	and maps the command to a transition function, allowing for multiple iteration

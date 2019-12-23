@@ -12,7 +12,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TCPDataListenerProducer::TCPDataListenerProducer(std::string              supervisorApplicationUID,
                                                  std::string              bufferUID,
                                                  std::string              processorUID,
@@ -33,10 +33,10 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
 {
 }
 
-//========================================================================================================================
+//==============================================================================
 TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 {
 	TCPSubscribeClient::connect();
@@ -44,14 +44,14 @@ void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 	DataProducer::startProcessingData(runNumber);
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPDataListenerProducer::stopProcessingData(void)
 {
 	DataProducer::stopProcessingData();
 	TCPSubscribeClient::disconnect();
 }
 
-//========================================================================================================================
+//==============================================================================
 bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 // bool TCPDataListenerProducer::getNextFragment(void)
 {
@@ -61,7 +61,7 @@ bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 	return WorkLoop::continueWorkLoop_;
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPDataListenerProducer::slowWrite(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<
@@ -94,7 +94,7 @@ void TCPDataListenerProducer::slowWrite(void)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPDataListenerProducer::fastWrite(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<

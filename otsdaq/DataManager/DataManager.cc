@@ -29,14 +29,14 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 DataManager::DataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath)
     : Configurable(theXDAQContextConfigTree, supervisorConfigurationPath), parentSupervisorHasFrontends_(false)
 {
 	__CFG_COUT__ << "Constructed." << __E__;
 }  // end constructor
 
-//========================================================================================================================
+//==============================================================================
 DataManager::~DataManager(void)
 {
 	__CFG_COUT__ << "Destructor." << __E__;
@@ -44,7 +44,7 @@ DataManager::~DataManager(void)
 	__CFG_COUT__ << "Destructed." << __E__;
 }  // end destructor
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::dumpStatus(std::ostream* out) const
 {
 	*out << "Buffer count: " << buffers_.size() << __E__;
@@ -70,7 +70,7 @@ void DataManager::dumpStatus(std::ostream* out) const
 	}
 }  // end dumpStatus()
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::configure(void)
 {
 	const std::string transitionName = "Configuring";
@@ -307,7 +307,7 @@ void DataManager::configure(void)
 	}
 }  // end configure()
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::halt(void)
 {
 	const std::string transitionName = "Halting";
@@ -332,7 +332,7 @@ void DataManager::halt(void)
 	                                // Buffer struct
 }  // end halt()
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::pause(void)
 {
 	const std::string transitionName = "Pausing";
@@ -342,7 +342,7 @@ void DataManager::pause(void)
 	DataManager::pauseAllBuffers();
 }  // end pause()
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::resume(void)
 {
 	const std::string transitionName = "Resuming";
@@ -352,7 +352,7 @@ void DataManager::resume(void)
 	DataManager::resumeAllBuffers();
 }  // end resume()
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::start(std::string runNumber)
 {
 	const std::string transitionName = "Starting";
@@ -362,7 +362,7 @@ void DataManager::start(std::string runNumber)
 	DataManager::startAllBuffers(runNumber);
 }  // end start()
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::stop()
 {
 	const std::string transitionName = "Stopping";
@@ -372,7 +372,7 @@ void DataManager::stop()
 	DataManager::stopAllBuffers();
 }  // end stop()
 
-//========================================================================================================================
+//==============================================================================
 // destroyBuffers
 //	Stop all Buffers, deletes all pointers, and delete Buffer struct
 void DataManager::destroyBuffers(void)
@@ -397,14 +397,14 @@ void DataManager::destroyBuffers(void)
 	buffers_.clear();
 }  // end destroyBuffers()
 
-////========================================================================================================================
+////==============================================================================
 // void DataManager::eraseBuffer(const std::string& bufferUID)
 //{
 //	if (deleteBuffer(bufferUID))
 //		buffers_.erase(bufferUID);
 //} //end eraseBuffer()
 //
-////========================================================================================================================
+////==============================================================================
 //
 // bool DataManager::deleteBuffer(const std::string& bufferUID)
 //{
@@ -431,7 +431,7 @@ void DataManager::destroyBuffers(void)
 //	return false;
 //} //end deleteBuffer()
 //
-////========================================================================================================================
+////==============================================================================
 ////unregisterConsumer
 ////	Unregister consumer from its DataBuffer buffers. And destroy the processor!
 ////	Assumes that the DataManager has ownership of processor object.
@@ -527,7 +527,7 @@ void DataManager::destroyBuffers(void)
 //	__CFG_SS_THROW__;
 //} //end unregisterConsumer()
 //
-////========================================================================================================================
+////==============================================================================
 // void DataManager::unregisterProducer(const std::string& bufferID, const std::string&
 // producerID)
 //{
@@ -550,7 +550,7 @@ void DataManager::destroyBuffers(void)
 //	{__CFG_SS__; dumpStatus((std::ostream*)&ss); __CFG_COUT__ << ss.str() << __E__;}
 //} //end unregisterProducer()
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::unregisterFEProducer(const std::string& bufferID, const std::string& feProducerID)
 {
 	__CFG_COUT__ << "Un-Registering FE-producer '" << feProducerID << "' from buffer '" << bufferID << "'..." << __E__;
@@ -587,7 +587,7 @@ void DataManager::unregisterFEProducer(const std::string& bufferID, const std::s
 
 }  // end unregisterFEProducer()
 
-//========================================================================================================================
+//==============================================================================
 // registerProducer
 //	DataManager takes ownership of producer pointer
 //		and is now responsible for destructing.
@@ -628,7 +628,7 @@ void DataManager::registerProducer(const std::string& bufferUID, DataProducerBas
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::registerConsumer(const std::string& bufferUID, DataConsumer* consumer)
 {
 	__CFG_COUT__ << "Registering consumer '" << consumer->getProcessorID() << "' to buffer '" << bufferUID << "'..." << __E__;
@@ -662,35 +662,35 @@ void DataManager::registerConsumer(const std::string& bufferUID, DataConsumer* c
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::startAllBuffers(const std::string& runNumber)
 {
 	for(auto it = buffers_.begin(); it != buffers_.end(); it++)
 		startBuffer(it->first, runNumber);
 }
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::stopAllBuffers(void)
 {
 	for(auto it = buffers_.begin(); it != buffers_.end(); it++)
 		stopBuffer(it->first);
 }
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::resumeAllBuffers(void)
 {
 	for(auto it = buffers_.begin(); it != buffers_.end(); it++)
 		resumeBuffer(it->first);
 }
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::pauseAllBuffers(void)
 {
 	for(auto it = buffers_.begin(); it != buffers_.end(); it++)
 		pauseBuffer(it->first);
 }
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::startBuffer(const std::string& bufferUID, std::string runNumber)
 {
 	__CFG_COUT__ << "Starting... " << bufferUID << __E__;
@@ -728,7 +728,7 @@ void DataManager::startBuffer(const std::string& bufferUID, std::string runNumbe
 
 }  // end startBuffer()
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::stopBuffer(const std::string& bufferUID)
 {
 	__CFG_COUT__ << "Stopping... " << bufferUID << __E__;
@@ -786,7 +786,7 @@ void DataManager::stopBuffer(const std::string& bufferUID)
 	buffers_[bufferUID].status_ = Initialized;
 }  // end stopBuffer()
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::resumeBuffer(const std::string& bufferUID)
 {
 	__CFG_COUT__ << "Resuming... " << bufferUID << __E__;
@@ -799,7 +799,7 @@ void DataManager::resumeBuffer(const std::string& bufferUID)
 	buffers_[bufferUID].status_ = Running;
 }  // end resumeBuffer()
 
-//========================================================================================================================
+//==============================================================================
 void DataManager::pauseBuffer(const std::string& bufferUID)
 {
 	__CFG_COUT__ << "Pausing... " << bufferUID << __E__;
