@@ -18,6 +18,7 @@ class ARTDAQSupervisorTRACEController : public ITRACEController
 	void SetSupervisorPtr(ARTDAQSupervisor* ptr) { theSupervisor_ = ptr; }
 
   private:
+
 	ARTDAQSupervisor* theSupervisor_;
 };
 }  // namespace ots

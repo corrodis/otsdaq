@@ -24,7 +24,7 @@ cet_make(LIBRARY_NAME ARTDAQSupervisor
 		 artdaq-core_Utilities
 		 artdaq_DAQdata
 		 artdaq_BuildInfo
-		 
+		 artdaq_ExternalComms
 		 CoreSupervisors
 		 
 		 #WorkLoopManager

@@ -29,6 +29,15 @@ class ARTDAQSupervisor : public CoreSupervisorBase
   public:
 	XDAQ_INSTANTIATOR();
 
+	struct DAQInterfaceProcessInfo {
+		std::string label;
+		std::string host;
+		int port;
+		int subsystem;
+		int rank;
+			std::string state;
+	};
+
 	ARTDAQSupervisor							(xdaq::ApplicationStub* s);
 	virtual ~ARTDAQSupervisor					(void);
 
@@ -46,14 +55,14 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	virtual void 	transitionStopping			(toolbox::Event::Reference event) override;
 	virtual void 	enteringError				(toolbox::Event::Reference event);
 
-	std::string GetTraceLevels() { return "NOT IMPLEMENTED";}
-	void SetTraceLevel(std::string name, uint64_t tlvlM, uint64_t tlvlS, uint64_t tlvlT, std::string hostname = "localhost") {}
-
+	std::list<std::pair<DAQInterfaceProcessInfo, std::unique_ptr<artdaq::CommanderInterface>>> makeCommandersFromProcessInfo();
+	
+	static std::list<std::string> tokenize_(std::string const& input);
   private:
-	static void 	configuringThread(ARTDAQSupervisor* cs);
+	void 	configuringThread();
 
 	PyObject* 						daqinterface_ptr_;
-	std::mutex  					daqinterface_mutex_;
+	std::recursive_mutex  					daqinterface_mutex_;
 	int       						partition_;
 	std::string 					daqinterface_state_;
 	std::unique_ptr<std::thread> 	runner_thread_;
@@ -68,6 +77,8 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 
 
 	void 			getDAQState_				(void);
+	std::string getProcessInfo_(void);
+	std::list<DAQInterfaceProcessInfo> getAndParseProcessInfo_();
 	void 			daqinterfaceRunner_			(void);
 	void 			stop_runner_				(void);
 	void 			start_runner_				(void);
