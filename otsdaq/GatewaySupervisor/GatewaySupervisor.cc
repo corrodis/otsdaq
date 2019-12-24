@@ -50,13 +50,10 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
     , CorePropertySupervisorBase(this)
     , stateMachineWorkLoopManager_(toolbox::task::bind(this, &GatewaySupervisor::stateMachineThread, "StateMachine"))
     , stateMachineSemaphore_(toolbox::BSem::FULL)
-    , infoRequestWorkLoopManager_(toolbox::task::bind(this, &GatewaySupervisor::infoRequestThread, "InfoRequest"))
-    , infoRequestSemaphore_(toolbox::BSem::FULL)
     , activeStateMachineName_("")
     , theIterator_(this)
     , broadcastCommandMessageIndex_(0)
     , broadcastIterationBreakpoint_(-1)  // for standard transitions, ignore the breakpoint
-    , counterTest_(0)
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 	__COUT__ << __E__;
@@ -75,8 +72,6 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	xgi::bind(this, &GatewaySupervisor::request, "Request");
 	xgi::bind(this, &GatewaySupervisor::stateMachineXgiHandler, "StateMachineXgiHandler");
 	xgi::bind(this, &GatewaySupervisor::stateMachineIterationBreakpoint, "StateMachineIterationBreakpoint");
-
-	xgi::bind(this, &GatewaySupervisor::statusRequest, "StatusRequest");
 	xgi::bind(this, &GatewaySupervisor::tooltipRequest, "TooltipRequest");
 
 	xoap::bind(this, &GatewaySupervisor::supervisorCookieCheck, "SupervisorCookieCheck", XDAQ_NS_URI);
@@ -186,18 +181,13 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 			if(appInfo.isGatewaySupervisor()) //get gateway status
 			{
 				// send back status and progress parameters
-				status   = theSupervisor->theStateMachine_.getCurrentStateName();
+				const std::string& err = theSupervisor->theStateMachine_.getErrorMessage();
+				status = err == ""?
+						(theSupervisor->theStateMachine_.isInTransition()?
+							theSupervisor->theStateMachine_.getProvenanceStateName():
+							theSupervisor->theStateMachine_.getCurrentStateName()):
+						"Failed:::" + err;
 				progress = theSupervisor->theProgressBar_.readPercentageString();
-
-				if(theSupervisor->theStateMachine_.isInTransition())
-				{
-					// return the ProvenanceStateName
-					status = theSupervisor->theStateMachine_.getProvenanceStateName();
-				}
-				else
-				{
-					status = theSupervisor->theStateMachine_.getCurrentStateName();
-				}
 			}
 			else //get non-gateway status
 			{
@@ -251,8 +241,6 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 			//					__COUTV__(status);
 			//					__COUTV__(progress);
 
-			// store status and progress in some struct..
-			//	in the APP STATUS structure
 			// set status and progress
 			// convert the progress string into an integer in order to call
 			// appInfo.setProgress() function
@@ -261,9 +249,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 
 			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo, status, progressInteger);
 
-		}  // end of for loop
-
-	}
+		}  // end of app loop
+	} //end of infinite status checking loop
 }  // end AppStatusWorkLoop
 
 //==============================================================================
@@ -388,7 +375,7 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 		else
 			sleep(1);
 	}
-}  // end StateChangerWorkLoop
+}  // end StateChangerWorkLoop()
 
 //==============================================================================
 // makeSystemLogbookEntry
@@ -448,13 +435,11 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 
 		__COUT__ << "Returned Status: " << retParameters.getValue("Status") << __E__;  // retParameters[0].getValue() << __E__ << __E__;
 	}
-}
+} //end makeSystemLogbookEntry()
 
 //==============================================================================
 void GatewaySupervisor::Default(xgi::Input* in, xgi::Output* out)
-
 {
-	//
 	if(!supervisorGuiHasBeenLoaded_ && (supervisorGuiHasBeenLoaded_ = true))  // make system logbook entry that ots has been started
 		makeSystemLogbookEntry("ots started.");
 
@@ -816,58 +801,6 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 	return errorStr;
 }  // end attemptStateMachineTransition()
 
-////==============================================================================
-////FIXME -- delete? is this ever used by anything? ever?
-// void GatewaySupervisor::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out)
-// throw (xgi::exception::Exception)
-//{
-//	cgicc::Cgicc cgiIn(in);
-//	__COUT__ << "Xgi Request!" << __E__;
-//
-//	uint8_t userPermissions; // uint64_t uid;
-//	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
-//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode,
-//			&userPermissions))
-//	{
-//		*out << cookieCode;
-//		return;
-//	}
-//
-//	HttpXmlDocument xmldoc(cookieCode);
-//
-//	std::string command = CgiDataUtilities::getData(cgi, "StateMachine");
-//
-//	SOAPParameters parameters;
-//	/*
-//	 //FIXME I don't think that there should be this if statement and I guess it has been
-// copied from the stateMachineXgiHandler method 	 if (command == "Configure")
-//
-//{
-//	 parameters.addParameter("RUN_KEY", CgiDataUtilities::postData(cgi,
-//"ConfigurationAlias"));
-//	 __COUT__ << "Configure --> Name: RUN_KEY Value: " << parameters.getValue("RUN_KEY")
-//<< __E__;
-//	 }
-//	 else if (command == "Start")
-//
-//{
-//	 unsigned int runNumber = getNextRunNumber();
-//	 std::stringstream runNumberStream;
-//	 runNumberStream << runNumber;
-//	 parameters.addParameter("RUN_NUMBER", runNumberStream.str().c_str());
-//	 setNextRunNumber(++runNumber);
-//	 }
-//	 */
-//	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(
-//			CgiDataUtilities::getData(cgi, "StateMachine"), parameters);
-//	//Maybe we return an aknowledgment that the message has been received and processed
-//	xoap::MessageReference reply = stateMachineResultXoapHandler(message);
-//	//stateMachineWorkLoopManager_.removeProcessedRequests();
-//	//stateMachineWorkLoopManager_.processRequest(message);
-//	//xmldoc.outputXmlDocument((ostringstream*)out,false);
-//	__COUT__ << "Done - Xgi Request!" << __E__;
-//}
-
 //==============================================================================
 xoap::MessageReference GatewaySupervisor::stateMachineXoapHandler(xoap::MessageReference message)
 
@@ -877,19 +810,7 @@ xoap::MessageReference GatewaySupervisor::stateMachineXoapHandler(xoap::MessageR
 	stateMachineWorkLoopManager_.processRequest(message);
 	__COUT__ << "Done - Soap Handler!" << __E__;
 	return message;
-}
-
-////==============================================================================
-// xoap::MessageReference GatewaySupervisor::stateMachineResultXoapHandler(
-//    xoap::MessageReference message)
-//
-//{
-//	__COUT__ << "Soap Handler!" << __E__;
-//	// stateMachineWorkLoopManager_.removeProcessedRequests();
-//	// stateMachineWorkLoopManager_.processRequest(message);
-//	__COUT__ << "Done - Soap Handler!" << __E__;
-//	return message;
-//}
+} //end stateMachineXoapHandler()
 
 //==============================================================================
 // stateMachineThread
@@ -923,183 +844,27 @@ bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 }  // end stateMachineThread()
 
 //==============================================================================
-// statusRequest ~~
-//	Call from JS GUI
-//		parameter:
-//
-void GatewaySupervisor::statusRequest(xgi::Input* in, xgi::Output* out)
-
-{
-	__COUT__ << "Starting to Request!" << __E__;
-
-	cgicc::Cgicc cgiIn(in);
-	std::string  requestType = "statusRequest";  // force request type to statusRequest
-
-	HttpXmlDocument           xmlOut;
-	WebUsers::RequestUserInfo userInfo(requestType, CgiDataUtilities::postData(cgiIn, "CookieCode"));
-
-	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
-
-	if(!theWebUsers_.xmlRequestOnGateway(cgiIn, out, &xmlOut, userInfo))
-		return;  // access failed
-
-	__COUT__ << "Starting to Request!" << __E__;
-
-	// If the thread is canceled when you are still in this method that activated it, then
-	// everything will freeze.  The way the workloop manager now works is safe since it
-	// cancel the thread only when the infoRequestResultHandler is called  and that method
-	// can be called ONLY when I am already out of here!
-
-	// HttpXmlDocument tmpDoc = infoRequestWorkLoopManager_.processRequest(cgiIn);
-
-	// xmlOut.copyDataChildren(tmpDoc);
-
-	xmlOut.outputXmlDocument((std::ostringstream*)out, false);
-}
-
-//==============================================================================
-void GatewaySupervisor::infoRequestResultHandler(xgi::Input* in, xgi::Output* out)
-
-{
-	__COUT__ << "Starting ask!" << __E__;
-	cgicc::Cgicc cgi(in);
-
-	cgicc::Cgicc cgiIn(in);
-	std::string  requestType = "infoRequestResultHandler";  // force request type to infoRequestResultHandler
-
-	HttpXmlDocument           xmlOut;
-	WebUsers::RequestUserInfo userInfo(requestType, CgiDataUtilities::postData(cgiIn, "CookieCode"));
-
-	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
-
-	if(!theWebUsers_.xmlRequestOnGateway(cgiIn, out, &xmlOut, userInfo))
-		return;  // access failed
-
-	//	//**** start LOGIN GATEWAY CODE ***//
-	//	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers
-	// optionally for uint8_t userPermissions, uint64_t uid
-	//	//Else, error message is returned in cookieCode
-	//	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
-	//	uint8_t userPermissions;// uint64_t uid;
-	//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions))
-	//	{
-	//		*out << cookieCode;
-	//		return;
-	//	}
-	//	//**** end LOGIN GATEWAY CODE ***//
-	//
-	//	HttpXmlDocument xmldoc(cookieCode);
-
-	infoRequestWorkLoopManager_.getRequestResult(cgiIn, xmlOut);
-
-	// return xml doc holding server response
-	xmlOut.outputXmlDocument((std::ostringstream*)out, false);
-
-	__COUT__ << "Done asking!" << __E__;
-}
-
-//==============================================================================
-bool GatewaySupervisor::infoRequestThread(toolbox::task::WorkLoop* workLoop)
-{
-	//    std::string workLoopName = workLoop->getName();
-	//    __COUT__ << " Starting WorkLoop: " << workLoopName << __E__;
-	//    __COUT__ << " Ready to lock" << __E__;
-	infoRequestSemaphore_.take();
-	//    __COUT__ << " Locked" << __E__;
-	vectorTest_.clear();
-
-	for(unsigned long long i = 0; i < 100000000; i++)
-	{
-		counterTest_ += 2;
-		vectorTest_.push_back(counterTest_);
-	}
-
-	infoRequestWorkLoopManager_.report(workLoop, "RESULT: This is the best result ever", 50, false);
-	std::string workLoopName = workLoop->getName();
-	__COUT__ << workLoopName << " test: " << counterTest_ << " vector size: " << vectorTest_.size() << __E__;
-	wait(400, "InfoRequestThread ----- locked");
-	infoRequestSemaphore_.give();
-	//    __COUT__ << " Lock released" << __E__;
-	wait(200, "InfoRequestThread");
-	//    __COUT__ << " Ready to lock again" << __E__;
-	infoRequestSemaphore_.take();
-	//    __COUT__ << " Locked again" << __E__;
-	vectorTest_.clear();
-
-	for(unsigned long long i = 0; i < 100000000; i++)
-	{
-		counterTest_ += 2;
-		vectorTest_.push_back(counterTest_);
-	}
-
-	wait(400, "InfoRequestThread ----- locked");
-	__COUT__ << workLoopName << " test: " << counterTest_ << " vector size: " << vectorTest_.size() << __E__;
-	infoRequestSemaphore_.give();
-	//    __COUT__ << " Lock released again" << __E__;
-	// infoRequestWorkLoopManager_->report(workLoop,"RESULT: This is the best result
-	// ever");
-	infoRequestWorkLoopManager_.report(workLoop, theStateMachine_.getCurrentStateName(), 100, true);
-	//    __COUT__ << " Done with WorkLoop: " << workLoopName << __E__;
-	return false;  // execute once and automatically remove the workloop so in
-	               // WorkLoopManager the try workLoop->remove(job_) could be commented
-	               // out return true;//go on and then you must do the
-	               // workLoop->remove(job_) in WorkLoopManager
-}
-
-//==============================================================================
 void GatewaySupervisor::stateInitial(toolbox::fsm::FiniteStateMachine& fsm)
 
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-	// diagService_->reportError("--- GatewaySupervisor is in its Initial state
-	// ---",DIAGINFO);  diagService_->reportError("GatewaySupervisor::stateInitial:
-	// workloop active: "+stringF(calibWorkloop_->isActive())+", workloop type:
-	// "+calibWorkloop_->getType(),DIAGINFO);
-}
+
+} //end stateInitial()
 
 //==============================================================================
 void GatewaySupervisor::statePaused(toolbox::fsm::FiniteStateMachine& fsm)
 
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-	/*
-	 try
-{
-	 rcmsStateNotifier_.stateChanged("Paused", "");
-	 }
-	 catch(xcept::Exception &e)
-{
-	 diagService_->reportError("Failed to notify state change : "+
-xcept::stdformat_exception_history(e),DIAGERROR);
-	 }
 
-	 diagService_->reportError("GatewaySupervisor::statePaused: workloop active:
-"+stringF(calibWorkloop_->isActive())+", workloop type:
-"+calibWorkloop_->getType(),DIAGINFO);
-	 */
-}
+} //end statePaused()
 
 //==============================================================================
 void GatewaySupervisor::stateRunning(toolbox::fsm::FiniteStateMachine& fsm)
-
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-	/*
-	 try
-{
-	 rcmsStateNotifier_.stateChanged("Running", "");
-	 }
-	 catch(xcept::Exception &e)
-{
-	 diagService_->reportError("Failed to notify state change : "+
-xcept::stdformat_exception_history(e),DIAGERROR);
-	 }
 
-	 diagService_->reportError("GatewaySupervisor::stateRunning: workloop active:
-"+stringF(calibWorkloop_->isActive())+", workloop type:
-"+calibWorkloop_->getType(),DIAGINFO);
-	 */
-}
+} //end stateRunning()
 
 //==============================================================================
 void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
@@ -1107,106 +872,14 @@ void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 	__COUT__ << "Fsm is in transition? " << (theStateMachine_.isInTransition() ? "yes" : "no") << __E__;
-
-	/*
-	 percentageConfigured_=0.0;
-	 aliasesAndKeys_=PixelConfigInterface::getAliases();
-	 diagService_->reportError("GatewaySupervisor::stateHalted: aliases and keys
-reloaded",DIAGINFO); previousState_ = theStateMachine_.getCurrentStateName();
-	 diagService_->reportError("GatewaySupervisor::stateHalted: workloop active:
-"+stringF(calibWorkloop_->isActive())+", workloop type:
-"+calibWorkloop_->getType(),DIAGINFO);
-
-	 //(hopefully) make RCMS aware of successful Recovery
-	 //need to test that: (a) this works and (b) this does not break anything (regular
-Halt transition)
-	 //update -- condition (b) seems to be satisfied. not yet sure about condition (a)
-	 try
-{
-	 rcmsStateNotifier_.stateChanged("Halted", "");
-	 }
-	 catch(xcept::Exception &e)
-
-{
-	 diagService_->reportError("Failed to notify state change : "+
-xcept::stdformat_exception_history(e),DIAGERROR);
-	 }
-	 */
-}
+} //end stateHalted()
 
 //==============================================================================
 void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm)
-
 {
-	/*
-	 // Notify RCMS of having entered the Configured state
-	 try
-
-{
-	 //rcmsStateNotifier_.stateChanged(previousState_.toString(), "");
-	 rcmsStateNotifier_.stateChanged("Configured", std::stringF(theGlobalKey_->key()) );
-	 }
-	 catch(xcept::Exception &e)
-
-{
-	 diagService_->reportError("Failed to notify state change : "+
-xcept::stdformat_exception_history(e),DIAGERROR);
-	 }
-
-	 PixelTimer debugTimer;
-	 if (extratimers_)
-{
-	 debugTimer.setName("GatewaySupervisor::stateConfigured");
-	 debugTimer.printTime("RCMS notified of Configured state");
-	 }
-	 if (configurationTimer_.started() )
-{
-	 configurationTimer_.stop();
-
-	 std::string confsource(__ENV__("PIXELCONFIGURATIONBASE"));
-	 if (confsource != "DB") confsource = "files";
-
-	 diagService_->reportError("Total configuration time ["+confsource+"] =
-"+stringF(configurationTimer_.tottime()),DIAGUSERINFO); configurationTimer_.reset();
-	 }
-
-	 diagService_->reportError( "GatewaySupervisor::stateConfigured: workloop active:
-"+stringF(calibWorkloop_->isActive())+", workloop type:
-"+calibWorkloop_->getType(),DIAGDEBUG);
-	 */
-}
-
-// void GatewaySupervisor::stateTTSTestMode (toolbox::fsm::FiniteStateMachine & fsm)
-//{
-//  previousState_ = theStateMachine_.getCurrentStateName();
-//}
-
-// void GatewaySupervisor::inError (toolbox::fsm::FiniteStateMachine & fsm)
-//{
-//  previousState_ = theStateMachine_.getCurrentStateName();
-// rcmsStateNotifier_.stateChanged("Error", "");
-//}
-
-/*
- xoap::MessageReference GatewaySupervisor::reset (xoap::MessageReference message)
-
-{
- //diagService_->reportError("New state before reset is: " +
-theStateMachine_.getCurrentStateName(),DIAGINFO);
-
- theStateMachine_.reset();
-
- xoap::MessageReference reply = xoap::createMessage();
- xoap::SOAPEnvelope envelope = reply->getSOAPPart().getEnvelope();
- xoap::SOAPName responseName = envelope.createName("ResetResponse", "xdaq", XDAQ_NS_URI);
- (void) envelope.getBody().addBodyElement ( responseName );
-
- diagService_->reportError("New state after reset is: " +
-theStateMachine_.getCurrentStateName(),DIAGINFO);
-
- return reply;
- }
- */
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+	__COUT__ << "Fsm is in transition? " << (theStateMachine_.isInTransition() ? "yes" : "no") << __E__;
+} //end stateConfigured()
 
 //==============================================================================
 void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& fsm)
@@ -1217,8 +890,7 @@ void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& fsm)
 	         // theStateMachine_.getCurrentStateName() //There may be a race condition here
 	         //	when async errors occur (e.g. immediately in running)
 	         << __E__;
-	// rcmsStateNotifier_.stateChanged("Error", "");
-}
+} //end inError()
 
 //==============================================================================
 void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
@@ -1487,7 +1159,6 @@ void GatewaySupervisor::transitionHalting(toolbox::Event::Reference e)
 
 //==============================================================================
 void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference e)
-
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
@@ -1506,11 +1177,10 @@ void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference e)
 		sleep(1);
 		RunControlStateMachine::theProgressBar_.step();
 	}
-}
+} //end transitionShuttingDown()
 
 //==============================================================================
 void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference e)
-
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
@@ -1529,7 +1199,7 @@ void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference e)
 		sleep(1);
 		RunControlStateMachine::theProgressBar_.step();
 	}
-}
+} //end transitionStartingUp()
 
 //==============================================================================
 void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
@@ -1542,7 +1212,7 @@ void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 	__COUT__ << "Fsm current transition: " << theStateMachine_.getCurrentTransitionName(e->type()) << __E__;
 	__COUT__ << "Fsm final state: " << theStateMachine_.getTransitionFinalStateName(e->type()) << __E__;
-}
+} //end transitionInitializing()
 
 //==============================================================================
 void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
@@ -1561,7 +1231,7 @@ void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
 	}
 	else
 		broadcastMessage(theStateMachine_.getCurrentMessage());
-}
+} //end transitionPausing()
 
 //==============================================================================
 void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
@@ -1660,7 +1330,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 
 	// save last started group name/key
 	saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_STARTED_GROUP_ALIAS_FILE);
-}
+} //end transitionStarting()
 
 //==============================================================================
 void GatewaySupervisor::transitionStopping(toolbox::Event::Reference e)
@@ -1672,7 +1342,7 @@ void GatewaySupervisor::transitionStopping(toolbox::Event::Reference e)
 	makeSystemLogbookEntry("Run stopping.");
 
 	broadcastMessage(theStateMachine_.getCurrentMessage());
-}
+} //end transitionStopping()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //////////////      MESSAGES ///////////////////////////////////////////////
@@ -2235,18 +1905,6 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 
 	__COUT__ << "Broadcast complete." << __E__;
 }  // end broadcastMessage()
-
-//==============================================================================
-void GatewaySupervisor::wait(int milliseconds, std::string who) const
-{
-	for(int s = 1; s <= milliseconds; s++)
-	{
-		usleep(1000);
-
-		if(s % 100 == 0)
-			__COUT__ << s << " msecs " << who << __E__;
-	}
-}
 
 //==============================================================================
 // LoginRequest
@@ -3409,7 +3067,7 @@ xoap::MessageReference GatewaySupervisor::supervisorCookieCheck(xoap::MessageRef
 	//__COUT__ << __E__;
 
 	return SOAPUtilities::makeSOAPMessageReference("CookieResponse", retParameters);
-}
+} //end supervisorCookieCheck()
 
 //==============================================================================
 // xoap::supervisorGetActiveUsers

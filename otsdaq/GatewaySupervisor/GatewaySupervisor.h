@@ -270,8 +270,6 @@ class GatewaySupervisor : public xdaq::Application,
 
 	WorkLoopManager stateMachineWorkLoopManager_;
 	toolbox::BSem   stateMachineSemaphore_;
-	WorkLoopManager infoRequestWorkLoopManager_;
-	toolbox::BSem   infoRequestSemaphore_;
 
 	std::string activeStateMachineName_;  // when multiple state machines, this is the
 	                                      // name of the state machine which executed the
@@ -303,10 +301,6 @@ class GatewaySupervisor : public xdaq::Application,
 	// temporary member variable to avoid redeclaration in repetitive functions
 	char tmpStringForConversions_[100];
 
-	// Trash tests
-	void               wait(int milliseconds, std::string who = "") const;
-	unsigned long long counterTest_;
-	std::vector<int>   vectorTest_;
 	std::string        securityType_;
 };
 // clang-format on

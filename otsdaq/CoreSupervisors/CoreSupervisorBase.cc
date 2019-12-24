@@ -289,24 +289,14 @@ xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::Messag
 
 {
 	// send back status and progress parameters
-	std::string status   = theStateMachine_.getCurrentStateName();
+
+	const std::string& err = theStateMachine_.getErrorMessage();
+	std::string status   = err == ""?
+			(theStateMachine_.isInTransition()?
+				theStateMachine_.getProvenanceStateName():
+				theStateMachine_.getCurrentStateName()):
+			"Error:::" + err;
 	std::string progress = RunControlStateMachine::theProgressBar_.readPercentageString();
-
-	if(theStateMachine_.isInTransition())
-	{
-		// return the ProvenanceStateName
-		status = theStateMachine_.getProvenanceStateName();
-		// std::string transition =
-		// theStateMachine_.getTransitionName(theStateMachine_.getCurrentStateName(),
-		// //getProvenanceStateName
-		// 	SOAPUtilities::translate(theStateMachine_.theMessage_).getCommand());
-		// __COUTV__(transition);
-	}
-
-	else
-	{
-		status = theStateMachine_.getCurrentStateName();
-	}
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("Status", status);
