@@ -3337,7 +3337,7 @@ bool GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, c
 	std::string  iconWindowURL            = CgiDataUtilities::getData(cgiIn, "iconWindowURL");                                       // from GET
 	std::string  iconPermissions          = CgiDataUtilities::getData(cgiIn, "iconPermissions");                                     // from GET
 	//windowLinkedApp is one of the only fields that needs to be decoded before write into table cells, because the app class name might be here
-	std::string  windowLinkedApp          = StringMacros::decodeURIComponent(CgiDataUtilities::getData(cgiIn, "iconLinkedApp"));     // from GET
+	std::string  windowLinkedApp          = CgiDataUtilities::getData(cgiIn, "iconLinkedApp");     // from GET
 	unsigned int windowLinkedAppLID       = CgiDataUtilities::getDataAsInt(cgiIn, "iconLinkedAppLID");                               // from GET
 	bool         enforceOneWindowInstance = CgiDataUtilities::getData(cgiIn, "iconEnforceOneWindowInstance") == "1" ? true : false;  // from GET
 

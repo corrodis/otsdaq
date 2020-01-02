@@ -651,7 +651,8 @@ catch(...)
 //		...
 //		</table>
 void ConfigurationSupervisorBase::handleGetTableGroupXML(
-    HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr, const std::string& groupName, TableGroupKey groupKey, bool ignoreWarnings) try
+    HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr,
+	const std::string& groupName, TableGroupKey groupKey, bool ignoreWarnings) try
 {
 	char                 tmpIntStr[100];
 	xercesc::DOMElement *parentEl, *configEl;
@@ -683,9 +684,30 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(
 	if(groupKey.isInvalid() ||  // if invalid or not found, get latest
 	   sortedKeys.find(groupKey) == sortedKeys.end())
 	{
-		if(sortedKeys.size())
-			groupKey = *sortedKeys.rbegin();
-		__COUT__ << "Group key requested was invalid or not found, going with latest " << groupKey << __E__;
+		//report error if group key not found
+		if(!groupKey.isInvalid())
+		{
+			//attempt to reload all group info and power through
+			std::string                             accumulatedWarnings;
+			const std::map<std::string, TableInfo>& allTableInfo =
+					cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
+			__COUT_WARN__ << "Attempting info refresh. Ignoring these errors: " <<
+					accumulatedWarnings << __E__;
+
+			__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;
+			//xmlOut.addTextElementToData("Error", ss.str());
+
+			ss << "Found keys: " << __E__;
+			for(auto& key:sortedKeys)
+				ss << "\t" << key << __E__;
+			__COUT__ << ss.str() << __E__;
+		}
+		else
+		{
+			if(sortedKeys.size())
+				groupKey = *sortedKeys.rbegin();
+			__COUT__ << "Group key requested was invalid or not found, going with latest " << groupKey << __E__;
+		}
 	}
 
 	xmlOut.addTextElementToData("TableGroupName", groupName);
@@ -961,6 +983,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 			{
 				try
 				{
+					windowLinkedApp = StringMacros::decodeURIComponent(windowLinkedApp);
 					int appRow = appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
 				}
 				catch(const std::runtime_error& e)
@@ -975,6 +998,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 					{
 						// failed to treat like class, so throw original
 						__SS__ << "Failed to create an icon linking to app '" << windowLinkedApp << ".' The following error occurred: " << e.what() << __E__;
+						appTable.tableView_->print(ss);
 						__SS_THROW__;
 					}
 				}

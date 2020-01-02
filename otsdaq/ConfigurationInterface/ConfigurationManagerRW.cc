@@ -721,7 +721,15 @@ TableVersion ConfigurationManagerRW::copyViewToCurrentColumns(const std::string&
 
 //==============================================================================
 // cacheGroupKey
-void ConfigurationManagerRW::cacheGroupKey(const std::string& groupName, TableGroupKey key) { allGroupInfo_[groupName].keys_.emplace(key); }
+void ConfigurationManagerRW::cacheGroupKey(const std::string& groupName, TableGroupKey key)
+{
+	allGroupInfo_[groupName].keys_.emplace(key);
+
+	__SS__ << "Now keys are: " << __E__;
+	for(auto& key:allGroupInfo_[groupName].keys_)
+		ss << "\t" << key << __E__;
+	__COUT__ << ss.str() << __E__;
+}
 
 //==============================================================================
 // getGroupInfo
@@ -744,7 +752,7 @@ const GroupInfo& ConfigurationManagerRW::getGroupInfo(const std::string& groupNa
 		return allGroupInfo_[groupName];
 	}
 	return it->second;
-}
+} //end getGroupInfo()
 
 //==============================================================================
 // findTableGroup
@@ -999,7 +1007,7 @@ TableGroupKey ConfigurationManagerRW::saveNewTableGroup(const std::string&      
 
 	// at this point succeeded!
 	return newKey;
-}
+} //end saveNewTableGroup()
 
 //==============================================================================
 // saveNewBackbone
@@ -1037,7 +1045,7 @@ TableVersion ConfigurationManagerRW::saveNewBackbone(TableVersion temporaryVersi
 	}
 
 	return newVersion;
-}
+} //end saveNewBackbone()
 
 //==============================================================================
 // saveModifiedVersionXML
