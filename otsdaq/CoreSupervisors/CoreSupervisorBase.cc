@@ -72,15 +72,13 @@ void CoreSupervisorBase::defaultPage(xgi::Input* in, xgi::Output* out)
 	__SUP_COUT__ << "Default page = " << pagess.str() << __E__;
 
 	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='" << pagess.str() << "'></frameset></html>";
-}
+} //end defaultPage()
 
 //==============================================================================
 // requestWrapper ~
 //	wrapper for inheritance Supervisor request call
 void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 {
-	// checkSupervisorPropertySetup();
-
 	cgicc::Cgicc cgiIn(in);
 	std::string  requestType = CgiDataUtilities::getData(cgiIn, "RequestType");
 
@@ -158,7 +156,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 
 	// return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*print to cout*/, !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
-}
+} //end requestWrapper()
 
 //==============================================================================
 // request
@@ -237,40 +235,24 @@ void CoreSupervisorBase::nonXmlRequest(const std::string& requestType, cgicc::Cg
 	out << "This is the empty Core Supervisor non-xml request. Supervisors should "
 	       "override this function."
 	    << __E__;
-}
+} //end nonXmlRequest()
 
 //==============================================================================
 void CoreSupervisorBase::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out) {}
 
 //==============================================================================
-void CoreSupervisorBase::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out) {}
-
-//==============================================================================
 xoap::MessageReference CoreSupervisorBase::stateMachineXoapHandler(xoap::MessageReference message)
-
 {
 	__SUP_COUT__ << "Soap Handler!" << __E__;
 	stateMachineWorkLoopManager_.removeProcessedRequests();
 	stateMachineWorkLoopManager_.processRequest(message);
 	__SUP_COUT__ << "Done - Soap Handler!" << __E__;
 	return message;
-}
-
-//==============================================================================
-xoap::MessageReference CoreSupervisorBase::stateMachineResultXoapHandler(xoap::MessageReference message)
-
-{
-	__SUP_COUT__ << "Soap Handler!" << __E__;
-	// stateMachineWorkLoopManager_.removeProcessedRequests();
-	// stateMachineWorkLoopManager_.processRequest(message);
-	__SUP_COUT__ << "Done - Soap Handler!" << __E__;
-	return message;
-}
+} //end stateMachineXoapHandler()
 
 //==============================================================================
 // indirection to allow for overriding handler
 xoap::MessageReference CoreSupervisorBase::workLoopStatusRequestWrapper(xoap::MessageReference message)
-
 {
 	// this should have an override for monitoring work loops being done
 	return workLoopStatusRequest(message);
@@ -278,7 +260,6 @@ xoap::MessageReference CoreSupervisorBase::workLoopStatusRequestWrapper(xoap::Me
 
 //==============================================================================
 xoap::MessageReference CoreSupervisorBase::workLoopStatusRequest(xoap::MessageReference message)
-
 {
 	// this should have an override for monitoring work loops being done
 	return SOAPUtilities::makeSOAPMessageReference(CoreSupervisorBase::WORK_LOOP_DONE);
@@ -286,7 +267,6 @@ xoap::MessageReference CoreSupervisorBase::workLoopStatusRequest(xoap::MessageRe
 
 //==============================================================================
 xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::MessageReference message)
-
 {
 	// send back status and progress parameters
 
@@ -296,14 +276,36 @@ xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::Messag
 				theStateMachine_.getProvenanceStateName():
 				theStateMachine_.getCurrentStateName()):
 			"Error:::" + err;
-	std::string progress = RunControlStateMachine::theProgressBar_.readPercentageString();
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("Status", status);
-	retParameters.addParameter("Progress", progress);
+	retParameters.addParameter("Progress", RunControlStateMachine::theProgressBar_.readPercentageString());
+	retParameters.addParameter("Detail", getStatusProgressDetail()); //call virtual progress detail string generation
 
 	return SOAPUtilities::makeSOAPMessageReference("applicationStatusRequestReply", retParameters);
 }  // end applicationStatusRequest()
+
+//==============================================================================
+// virtual progress string that can be overridden with more info
+//	e.g. steps and sub-steps
+//	however integer 0-100 should be first number, then separated by : colons
+//	e.g. 94:FE0:1:2
+std::string CoreSupervisorBase::getStatusProgressDetail(void)
+{
+	std::string detail;
+	unsigned int cnt = 0;
+	for(const auto& fsm : CoreSupervisorBase::theStateMachineImplementation_)
+	{
+		std::string fsmProgressDetail = fsm->getStatusProgressDetail();
+		if(fsmProgressDetail.size())
+			detail += ((cnt++)?":":"") + fsmProgressDetail;//StringMacros::encodeURIComponent(fsmProgressDetail);
+	}
+
+	if(detail.size())
+		__SUP_COUTV__(detail);
+
+	return detail;
+} // end getStatusProgressDetail()
 
 //==============================================================================
 bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
@@ -318,11 +320,10 @@ bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 	               // WorkLoopManager the try workLoop->remove(job_) could be commented
 	               // out return true;//go on and then you must do the
 	               // workLoop->remove(job_) in WorkLoopManager
-}
+} //end stateMachineThread()
 
 //==============================================================================
 xoap::MessageReference CoreSupervisorBase::stateMachineStateRequest(xoap::MessageReference message)
-
 {
 	__SUP_COUT__ << "theStateMachine_.getCurrentStateName() = " << theStateMachine_.getCurrentStateName() << __E__;
 	return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getCurrentStateName());

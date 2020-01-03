@@ -10,7 +10,7 @@
 // clang-format off
 namespace ots
 {
-class SlowControlsVInterface : public VStateMachine, public Configurable
+class SlowControlsVInterface : public Configurable, public VStateMachine
 {
   public:
 	SlowControlsVInterface(const std::string&       interfaceType,
@@ -18,6 +18,7 @@ class SlowControlsVInterface : public VStateMachine, public Configurable
 	                       const ConfigurationTree& theXDAQContextConfigTree,
 	                       const std::string&       configurationPath)
 	    : Configurable(theXDAQContextConfigTree, configurationPath)
+  	    , VStateMachine(Configurable::theConfigurationRecordName_)
 	    , interfaceUID_(interfaceUID)
 	    , interfaceType_(interfaceType)
 	    , mfSubject_("controls-" + interfaceType_ + "-" + interfaceUID_)

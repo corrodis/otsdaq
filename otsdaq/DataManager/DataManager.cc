@@ -7,34 +7,22 @@
 #include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/PluginMakers/MakeDataProcessor.h"
 
-/*
-#include "otsdaq/TablePlugins/ARTDAQConsumerTable.h"
-#include "otsdaq/TablePlugins/DataBufferTable.h"
-#include "otsdaq/TablePlugins/DataManagerTable.h"
-#include
-"otsdaq/TablePlugins/UDPDataListenerProducerTable.h"
-#include "otsdaq/DataProcessorPlugins/ARTDAQConsumer.h"
-#include "otsdaq/DataProcessorPlugins/DQMHistosConsumer.h"
-#include "otsdaq/DataProcessorPlugins/DataListenerProducer.h"
-#include "otsdaq/DataProcessorPlugins/DataStreamer.h"
-#include "otsdaq/DataProcessorPlugins/RawDataSaverConsumer.h"
-#include "otsdaq/EventBuilder/AssociativeMemoryEventBuilder.h"
-#include "otsdaq/EventBuilder/Event.h"
-#include "otsdaq/EventBuilder/EventDataSaver.h"
-*/
-
 #include <unistd.h>  //usleep
 #include <iostream>
 #include <vector>
 
 using namespace ots;
 
+// clang-format off
 //==============================================================================
 DataManager::DataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath)
-    : Configurable(theXDAQContextConfigTree, supervisorConfigurationPath), parentSupervisorHasFrontends_(false)
+    : Configurable(theXDAQContextConfigTree, supervisorConfigurationPath)
+	, VStateMachine(Configurable::theConfigurationRecordName_)
+	, parentSupervisorHasFrontends_(false)
 {
 	__CFG_COUT__ << "Constructed." << __E__;
 }  // end constructor
+// clang-format on
 
 //==============================================================================
 DataManager::~DataManager(void)

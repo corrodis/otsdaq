@@ -222,24 +222,26 @@ const SupervisorInfo& AllSupervisorInfo::getSupervisorInfo(xdaq::Application* ap
 }
 
 //==============================================================================
-void AllSupervisorInfo::setSupervisorStatus(xdaq::Application* app, const std::string& status, const unsigned int progress)
+void AllSupervisorInfo::setSupervisorStatus(xdaq::Application* app, const std::string& status, const unsigned int progress, const std::string& detail)
 {
-	setSupervisorStatus(app->getApplicationDescriptor()->getLocalId(), status, progress);
+	setSupervisorStatus(app->getApplicationDescriptor()->getLocalId(), status, progress, detail);
 }
 //==============================================================================
-void AllSupervisorInfo::setSupervisorStatus(const SupervisorInfo& appInfo, const std::string& status, const unsigned int progress) { setSupervisorStatus(appInfo.getId(), status, progress); }
+void AllSupervisorInfo::setSupervisorStatus(const SupervisorInfo& appInfo, const std::string& status, const unsigned int progress, const std::string& detail)
+{
+	setSupervisorStatus(appInfo.getId(), status, progress, detail);
+}
 //==============================================================================
-void AllSupervisorInfo::setSupervisorStatus(const unsigned int& id, const std::string& status, const unsigned int progress)
+void AllSupervisorInfo::setSupervisorStatus(const unsigned int& id, const std::string& status, const unsigned int progress, const std::string& detail)
 {
 	auto it = allSupervisorInfo_.find(id);
 	if(it == allSupervisorInfo_.end())
 	{
-		__SS__ << "Could not find: " << id << std::endl;
+		__SS__ << "Could not find: " << id << __E__;
 		__SS_THROW__;
 	}
-	it->second.setStatus(status, progress);
+	it->second.setStatus(status, progress, detail);
 } //end setSupervisorStatus()
-
 
 //==============================================================================
 const SupervisorInfo& AllSupervisorInfo::getGatewayInfo(void) const

@@ -18,6 +18,7 @@ using namespace ots;
 //==============================================================================
 FEVInterfacesManager::FEVInterfacesManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath)
     : Configurable(theXDAQContextConfigTree, supervisorConfigurationPath)
+	, VStateMachine(Configurable::theConfigurationRecordName_)
 {
 	init();
 	__CFG_COUT__ << "Constructed." << __E__;
@@ -130,6 +131,33 @@ void FEVInterfacesManager::createInterfaces(void)
 }  // end createInterfaces()
 
 //==============================================================================
+// virtual progress string that can be overridden with more info
+//	e.g. steps and substeps
+//	however integer 0-100 should be first number, then separated by : colons
+//	e.g. 94:FE0:1:2
+std::string FEVInterfacesManager::getStatusProgressDetail(void)
+{
+	std::string progress = "";
+	unsigned int cnt = 0;
+	for(unsigned int i = 0; i < theFENamesByPriority_.size(); ++i)
+		try
+		{
+			const std::string& name = theFENamesByPriority_[i];
+			FEVInterface* fe = getFEInterfaceP(name);
+			std::string feProgress = fe->getStatusProgressDetail();
+			if(feProgress.size())
+				progress += ((cnt++)?",":"") +
+					StringMacros::encodeURIComponent(feProgress);
+		}
+		catch(...){} //ignore errors
+
+	if(progress.size())
+		__CFG_COUTV__(progress);
+
+	return progress;
+} // end getStatusProgressString()
+
+//==============================================================================
 void FEVInterfacesManager::configure(void)
 {
 	const std::string transitionName = "Configuring";
@@ -161,7 +189,7 @@ void FEVInterfacesManager::configure(void)
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 
-		preStateMachineExecution(i);
+		preStateMachineExecution(i,transitionName);
 		fe->configure();
 		postStateMachineExecution(i);
 
@@ -203,7 +231,7 @@ void FEVInterfacesManager::halt(void)
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 
-		preStateMachineExecution(i);
+		preStateMachineExecution(i,transitionName);
 
 		// since halting also occurs on errors, ignore more errors
 		try
@@ -275,7 +303,7 @@ void FEVInterfacesManager::pause(void)
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 
-		preStateMachineExecution(i);
+		preStateMachineExecution(i,transitionName);
 		fe->stopWorkLoop();
 		fe->pause();
 		postStateMachineExecution(i);
@@ -313,7 +341,7 @@ void FEVInterfacesManager::resume(void)
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 
-		preStateMachineExecution(i);
+		preStateMachineExecution(i,transitionName);
 		fe->resume();
 		// only start workloop once transition is done
 		if(postStateMachineExecution(i))
@@ -353,7 +381,7 @@ void FEVInterfacesManager::start(std::string runNumber)
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 
-		preStateMachineExecution(i);
+		preStateMachineExecution(i,transitionName);
 		fe->start(runNumber);
 		// only start workloop once transition is done
 		if(postStateMachineExecution(i))
@@ -393,7 +421,7 @@ void FEVInterfacesManager::stop(void)
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 		__CFG_COUT__ << transitionName << " interface " << name << __E__;
 
-		preStateMachineExecution(i);
+		preStateMachineExecution(i,transitionName);
 		fe->stopWorkLoop();
 		fe->stop();
 		postStateMachineExecution(i);
@@ -2024,11 +2052,11 @@ void FEVInterfacesManager::preStateMachineExecutionLoop(void)
 	}
 	else
 		__CFG_COUT__ << "Iteration " << VStateMachine::getIterationIndex() << "." << VStateMachine::getSubIterationIndex() << "("
-		             << subIterationWorkStateMachineIndex_ << ")" << __E__;
+		             << (int)subIterationWorkStateMachineIndex_ << ")" << __E__;
 }  // end preStateMachineExecutionLoop()
 
 //==============================================================================
-void FEVInterfacesManager::preStateMachineExecution(unsigned int i)
+void FEVInterfacesManager::preStateMachineExecution(unsigned int i, const std::string& transitionName)
 {
 	if(i >= theFENamesByPriority_.size())
 	{
@@ -2040,6 +2068,7 @@ void FEVInterfacesManager::preStateMachineExecution(unsigned int i)
 
 	FEVInterface* fe = getFEInterfaceP(name);
 
+	fe->VStateMachine::setTransitionName(transitionName);
 	fe->VStateMachine::setIterationIndex(VStateMachine::getIterationIndex());
 	fe->VStateMachine::setSubIterationIndex(VStateMachine::getSubIterationIndex());
 
@@ -2090,6 +2119,8 @@ bool FEVInterfacesManager::postStateMachineExecution(unsigned int i)
 			return false;                            // to indicate state machine is NOT done with transition
 		}
 	}
+
+	fe->VStateMachine::setTransitionName(""); //clear transition
 	return true;  // to indicate state machine is done with transition
 }  // end postStateMachineExecution()
 

@@ -9,7 +9,7 @@ using namespace ots;
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "Producer"
-#define mfSubject_ (std::string("Producer-") + DataProcessor::processorUID_)
+#define mfSubject_ (std::string("ProducerBase:") + DataProcessor::processorUID_)
 
 //==============================================================================
 DataProducerBase::DataProducerBase(const std::string& supervisorApplicationUID,

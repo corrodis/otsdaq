@@ -78,13 +78,14 @@ class SupervisorInfo
 	const std::string&                           getStatus						(void) const { return status_; }
 	const time_t                                 getLastStatusTime				(void) const { return lastStatusTime_; }
 	const unsigned int&                          getProgress					(void) const { return progress_; }
+	const std::string&                           getDetail						(void) const { return detail_; }
 	const std::string&                           getURL							(void) const { return contextURL_; }
 	const std::string&                           getURN							(void) const { return URN_; }
 	const std::string&                           getFullURL						(void) const { return URL_; }
 	const uint16_t&                              getPort						(void) const { return port_; }
 
 	// Setters -------------------
-	void setStatus(const std::string& status, const unsigned int progress);
+	void setStatus(const std::string& status, const unsigned int progress, const std::string& detail = "");
 	void clear(void);
 
   private:
@@ -100,6 +101,7 @@ class SupervisorInfo
 	uint16_t                                 port_;
 	std::string                              status_;
 	unsigned int                             progress_;
+	std::string                              detail_;
 	time_t                                   lastStatusTime_;
 };
 // clang-format on

@@ -185,7 +185,7 @@
 
 // for core supervisor objects (with supervisorClassNoNamespace_ defined), add class to
 // subject
-#define __SUP_MF_DECOR__		(supervisorClassNoNamespace_ + std::string("-") + CorePropertySupervisorBase::getSupervisorUID() + "\t<> ")
+#define __SUP_MF_DECOR__		(supervisorClassNoNamespace_ + std::string(":") + CorePropertySupervisorBase::getSupervisorUID() + "\t<> ")
 #define __SUP_MF_TYPE__(X)      TLOG(X, __MF_SUBJECT__) << __SUP_MF_DECOR__ //mf::X(supervisorClassNoNamespace_ + "-" + CorePropertySupervisorBase::getSupervisorUID())
 
 #ifndef __COUT_TO_STD__

@@ -15,7 +15,7 @@ namespace ots
 // FEVInterfacesManager
 //	This class is a virtual class that handles a collection of front-end interface
 // plugins.
-class FEVInterfacesManager : public VStateMachine, public Configurable
+class FEVInterfacesManager : public Configurable, public VStateMachine
 {
   public:
 	FEVInterfacesManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath);
@@ -27,13 +27,13 @@ class FEVInterfacesManager : public VStateMachine, public Configurable
 	void createInterfaces(void);
 
 	// State Machine Methods
-	void configure(void);
-	void halt(void);
-	void initialize(void);
-	void pause(void);
-	void resume(void);
-	void start(std::string runNumber);
-	void stop(void);
+	virtual void configure(void) override;
+	virtual void halt(void) override;
+	virtual void pause(void) override;
+	virtual void resume(void) override;
+	virtual void start(std::string runNumber) override;
+	virtual void stop(void) override;
+	virtual std::string getStatusProgressDetail	(void) override; //overriding VStateMachine::getStatusProgressDetail
 
 	void        universalRead(const std::string& interfaceID, char* address,
 	                          char* returnValue);  // used by MacroMaker
@@ -107,7 +107,7 @@ class FEVInterfacesManager : public VStateMachine, public Configurable
 	std::map<std::string /*name*/, bool /*isDone*/> stateMachinesIterationDone_;
 	unsigned int                                    stateMachinesIterationWorkCount_;
 	unsigned int                                    subIterationWorkStateMachineIndex_;
-	void                                            preStateMachineExecution(unsigned int i);
+	void                                            preStateMachineExecution(unsigned int i, const std::string& transitionName);
 	bool                                            postStateMachineExecution(unsigned int i);
 	void                                            preStateMachineExecutionLoop(void);
 	void                                            postStateMachineExecutionLoop(void);

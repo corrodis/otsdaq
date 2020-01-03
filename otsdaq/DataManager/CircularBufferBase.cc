@@ -5,7 +5,7 @@
 using namespace ots;
 
 //==============================================================================
-CircularBufferBase::CircularBufferBase(const std::string& bufferID) : dataBufferId_(bufferID), mfSubject_("CircularBuffer-" + dataBufferId_) {}
+CircularBufferBase::CircularBufferBase(const std::string& bufferID) : dataBufferId_(bufferID), mfSubject_("CircularBuffer:" + dataBufferId_) {}
 
 //==============================================================================
 CircularBufferBase::~CircularBufferBase(void) {}

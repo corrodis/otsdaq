@@ -22,7 +22,7 @@ class CircularBufferBase;
 // DataManager
 //	This class is the base class that handles a collection of Buffers and associated Data
 // Processor plugins.
-class DataManager : public VStateMachine, public Configurable
+class DataManager : public Configurable, public VStateMachine
 {
   public:
 	DataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath);
@@ -74,13 +74,6 @@ class DataManager : public VStateMachine, public Configurable
 	void resumeBuffer(const std::string& bufferUID);
 	void pauseBuffer(const std::string& bufferUID);
 
-	//    void startProducer   (const std::string& bufferUID, std::string producerID);
-	//    void stopProducer    (const std::string& bufferUID, std::string producerID);
-	//    void startConsumer   (const std::string& bufferUID, std::string consumerID);
-	//    void stopConsumer    (const std::string& bufferUID, std::string consumerID);
-
-	//#include "otsdaq/DataTypes/DataStructs.h"
-	//    void setConsumerParameters(const std::string& name);
 
 	enum BufferStatus
 	{

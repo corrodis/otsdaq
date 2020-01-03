@@ -1175,7 +1175,7 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 
 	if(email == "")
 	{
-		__COUT__ << "Rejecting logon with blank fingerprint" << __E__;
+		__COUT__ << "Rejecting cert logon with blank fingerprint" << __E__;
 
 		incrementIpBlacklistCount(ip);  // increment ip blacklist counter
 
@@ -1281,7 +1281,7 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 	cookieCode = createNewActiveSession(UsersUserIdVector[i],
 	                                    ip);  // return cookie code by reference
 	return UsersUserIdVector[i];              // return user Id
-}
+} //end attemptActiveSessionWithCert()
 
 //==============================================================================
 // WebUsers::searchActiveSessionDatabaseForUID ---

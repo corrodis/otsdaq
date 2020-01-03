@@ -633,9 +633,11 @@ void TableView::init(void)
 // string specific function
 void TableView::getValue(std::string& value, unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
-	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
+	if(!(row < getNumberOfRows() && col < theDataView_[row].size()))
 	{
-		__SS__ << "Invalid row col requested" << __E__;
+		__SS__ << "Invalid row col requested " << row << "," << col <<
+				" vs " << getNumberOfRows() << "," <<
+				columnsInfo_.size() << "/" << theDataView_[row].size() << __E__;
 		__SS_THROW__;
 	}
 

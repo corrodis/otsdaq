@@ -46,7 +46,7 @@ class FEVInterfacesManager;
 //	It inherits workloop as 'public virtual' for the case that other classes like
 // DataProducer 	 will also be inherited by child class and only one workloop is
 // desired.
-class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
+class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 {
 	// clang-format off
 
@@ -82,26 +82,26 @@ class FEVInterface : public VStateMachine, public WorkLoop, public Configurable
 
 	/////////===========================
 	// start State Machine handlers
-	void 								configure					(void)
+	virtual void 								configure					(void)
 	{
 		__COUT__ << "\t Configure" << std::endl;
 		runSequenceOfCommands(
 		    "LinkToConfigureSequence"); /*Run Configure Sequence Commands*/
 	}
-	void 								start						(std::string runNumber)
+	virtual void 								start						(std::string runNumber)
 	{
 		__COUT__ << "\t Start" << std::endl;
 		runSequenceOfCommands("LinkToStartSequence"); /*Run Start Sequence Commands*/
 	}
-	void 								stop						(void)
+	virtual void 								stop						(void)
 	{
 		__COUT__ << "\t Stop" << std::endl;
 		runSequenceOfCommands("LinkToStopSequence"); /*Run Stop Sequence Commands*/
 	}
-	void 								halt						(void) { stop(); }
-	void 								pause						(void) { stop(); }
-	void 								resume						(void) { start(""); }
-	bool 								running						(void) { /*while(WorkLoop::continueWorkLoop_){;}*/ return false; }
+	virtual void 								halt						(void) { stop(); }
+	virtual void 								pause						(void) { stop(); }
+	virtual void 								resume						(void) { start(""); }
+	virtual bool 								running						(void) { /*while(WorkLoop::continueWorkLoop_){;}*/ return false; }
 	// end State Machine handlers
 	/////////
 

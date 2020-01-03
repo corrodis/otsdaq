@@ -5,10 +5,11 @@ using namespace ots;
 const std::string SupervisorInfo::APP_STATUS_UNKNOWN = "Unknown";
 
 //=====================================================================================
-void SupervisorInfo::setStatus(const std::string& status, const unsigned int progress)
+void SupervisorInfo::setStatus(const std::string& status, const unsigned int progress, const std::string& detail)
 {
 	status_         = status;
 	progress_ 		= progress;
+	detail_ 		= detail;
 	if(status != SupervisorInfo::APP_STATUS_UNKNOWN) //if unknown, then do not consider it a status update
 		lastStatusTime_ = time(0);
 } //end setStatus()

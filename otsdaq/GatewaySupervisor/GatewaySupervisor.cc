@@ -155,7 +155,7 @@ void GatewaySupervisor::init(void)
 //	child thread
 void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 {
-	std::string status, progress, appName;
+	std::string status, progress, detail, appName;
 	int         progressInteger;
 	while(1)
 	{
@@ -188,6 +188,15 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 							theSupervisor->theStateMachine_.getCurrentStateName()):
 						"Failed:::" + err;
 				progress = theSupervisor->theProgressBar_.readPercentageString();
+
+				try
+				{
+					detail = (theSupervisor->theStateMachine_.isInTransition()?
+						theSupervisor->theStateMachine_.getCurrentTransitionName(
+								theSupervisor->stateMachineLastCommandInput_):
+						"");
+				}
+				catch(...) { detail = ""; }
 			}
 			else //get non-gateway status
 			{
@@ -213,6 +222,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					SOAPParameters parameters;
 					parameters.addParameter("Status");
 					parameters.addParameter("Progress");
+					parameters.addParameter("Detail");
 					SOAPUtilities::receive(statusMessage, parameters);
 
 					status = parameters.getValue("Status");
@@ -222,6 +232,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					progress = parameters.getValue("Progress");
 					if(progress.empty())
 						progress = "100";
+
+					detail = parameters.getValue("Detail");
 				}
 				catch(const xdaq::exception::Exception& e)
 				{
@@ -229,12 +241,14 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 							e.what() << __E__;
 					status = SupervisorInfo::APP_STATUS_UNKNOWN;
 					progress = "0";
+					detail = "SOAP Message Error";
 				}
 				catch(...)
 				{
 					__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error." << __E__;
 					status = SupervisorInfo::APP_STATUS_UNKNOWN;
 					progress = "0";
+					detail = "SOAP Message Error";
 				}
 			} //end with non-gateway status request handling
 
@@ -247,7 +261,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 			std::istringstream ssProgress(progress);
 			ssProgress >> progressInteger;
 
-			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo, status, progressInteger);
+			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo, status, progressInteger, detail);
 
 		}  // end of app loop
 	} //end of infinite status checking loop
@@ -2181,7 +2195,7 @@ void GatewaySupervisor::tooltipRequest(xgi::Input* in, xgi::Output* out)
 	xmldoc.outputXmlDocument((std::ostringstream*)out, false, true);
 
 	__COUT__ << "Done" << __E__;
-}  // end tooltipRequest
+}  // end tooltipRequest()
 
 //==============================================================================
 // setSupervisorPropertyDefaults
@@ -2191,7 +2205,7 @@ void GatewaySupervisor::setSupervisorPropertyDefaults()
 {
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,
 	                                                  std::string() + "*=1 | gatewayLaunchOTS=-1 | gatewayLaunchWiz=-1");
-}
+}  // end setSupervisorPropertyDefaults()
 
 //==============================================================================
 // forceSupervisorPropertyValues
@@ -2203,17 +2217,18 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 	//	stateMachineXgiHandler() -- prepend StateMachine to request type
 
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AutomatedRequestTypes,
-	                                                  "getSystemMessages | getCurrentState | getIterationPlanStatus");
+	                                                  "getSystemMessages | getCurrentState | getIterationPlanStatus"
+	                                                  " | getAppStatus");
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireUserLockRequestTypes,
 	                                                  "gatewayLaunchOTS | gatewayLaunchWiz");
 	//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedUsernameRequestTypes,
 	//			"StateMachine*"); //for all stateMachineXgiHandler requests
-}
+}  // end forceSupervisorPropertyValues()
 
 //==============================================================================
 void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 {
-	//__COUT__ << "Start" << __E__;
+	//__COUT__ << "request()" << __E__;
 
 	// for simplicity assume all commands should be mutually exclusive with iterator
 	// thread state machine accesses (really should just be careful with
@@ -2510,6 +2525,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				xmlOut.addTextElementToData("stale",
 						std::to_string(time(0) - appInfo.getLastStatusTime())); //time since update
 				xmlOut.addTextElementToData("progress", std::to_string(appInfo.getProgress()));              // get progress
+				xmlOut.addTextElementToData("detail", appInfo.getDetail());              // get detail
 				xmlOut.addTextElementToData("class",
 				                            appInfo.getClass());  // get application class
 				xmlOut.addTextElementToData("url",

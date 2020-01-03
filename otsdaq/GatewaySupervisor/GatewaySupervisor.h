@@ -77,7 +77,6 @@ class GatewaySupervisor : public xdaq::Application,
 	static void 				handleGetApplicationIdRequest	(AllSupervisorInfo* applicationInfo, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
 
 	xoap::MessageReference 		stateMachineXoapHandler			(xoap::MessageReference msg);
-	xoap::MessageReference 		stateMachineResultXoapHandler	(xoap::MessageReference msg);
 
 	bool 						stateMachineThread				(toolbox::task::WorkLoop* workLoop);
 

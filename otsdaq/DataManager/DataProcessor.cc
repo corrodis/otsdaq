@@ -4,7 +4,7 @@ using namespace ots;
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "Processor"
-#define mfSubject_ (std::string("Processor-") + DataProcessor::processorUID_)
+#define mfSubject_ (std::string("Processor:") + DataProcessor::processorUID_)
 
 //==============================================================================
 DataProcessor::DataProcessor(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID)

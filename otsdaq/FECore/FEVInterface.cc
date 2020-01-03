@@ -13,6 +13,7 @@ using namespace ots;
 FEVInterface::FEVInterface(const std::string& interfaceUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
     : WorkLoop(interfaceUID)
     , Configurable(theXDAQContextConfigTree, configurationPath)
+	, VStateMachine(interfaceUID)
     , slowControlsWorkLoop_(interfaceUID + "-SlowControls", this)
     , interfaceUID_(interfaceUID)
 //, interfaceType_
