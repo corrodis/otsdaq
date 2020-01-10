@@ -2270,18 +2270,25 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 	if(artdaqContext)  // check for full connection to supervisor
 	{
-		ConfigurationTree artdaqSupervisorNode = cfgMgr->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME)
-		                                             .getNode(artdaqContext->contextUID_)
-		                                             .getNode(XDAQContextTable::colContext_.colLinkToApplicationTable_)
-		                                             .getNode(artdaqContext->applications_[0].applicationUID_)
-		                                             .getNode(XDAQContextTable::colApplication_.colLinkToSupervisorTable_);
+		try
+		{
+			ConfigurationTree artdaqSupervisorNode = cfgMgr->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME)
+														 .getNode(artdaqContext->contextUID_)
+														 .getNode(XDAQContextTable::colContext_.colLinkToApplicationTable_)
+														 .getNode(artdaqContext->applications_[0].applicationUID_)
+														 .getNode(XDAQContextTable::colApplication_.colLinkToSupervisorTable_);
 
-		if(artdaqSupervisorNode.isDisconnected())
+			if(artdaqSupervisorNode.isDisconnected())
+				needArtdaqSupervisorCreation = true;
+			else
+				artdaqSupervisorRow = artdaqSupervisorNode.getRow();
+
+			needArtdaqSupervisorParents = false;
+		}
+		catch(...) //parents are a problem if error
+		{
 			needArtdaqSupervisorCreation = true;
-		else
-			artdaqSupervisorRow = artdaqSupervisorNode.getRow();
-
-		needArtdaqSupervisorParents = false;
+		}
 	}
 
 	if(!artdaqContext || needArtdaqSupervisorCreation)
@@ -2411,6 +2418,20 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 					if(needArtdaqSupervisorParents)
 					{
+						//first disable any existing artdaq supervisor apps
+						{
+							unsigned int c = appTable.tableView_->findCol(XDAQContextTable::colApplication_.colClass_);
+							for(unsigned int r=0;r<appTable.tableView_->getNumberOfRows();++r)
+								if(appTable.tableView_->getDataView()[r][c] ==
+										ARTDAQ_SUPERVISOR_CLASS)
+								{
+									__COUT_WARN__ << "Found partially existing artdaq Supervisor application '" <<
+											appTable.tableView_->getDataView()[r][appTable.tableView_->getColUID()] <<
+											"'... Disabling it." << __E__;
+									appTable.tableView_->setValueAsString("0", r, appTable.tableView_->getColStatus());
+								}
+						}
+
 						// create artdaq Supervisor context record
 						row = appTable.tableView_->addRow(author, true /*incrementUniqueData*/, "artdaqSupervisor");
 						// set app status true
@@ -2660,9 +2681,9 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			TableEditStruct& typeTable = configGroupEdit.getTableEditStruct(it->second, true /*markModified*/);
 
 			// keep track of records to delete, initialize to all in current table
-			std::map<std::string /*type record uid*/, bool /*doDelete*/> deleteRecordMap;
-			for(unsigned int i = 0; i < typeTable.tableView_->getNumberOfRows(); ++i)
-				deleteRecordMap.emplace(std::make_pair(typeTable.tableView_->getDataView()[i][typeTable.tableView_->getColUID()],
+			std::map<unsigned int /*type record row*/, bool /*doDelete*/> deleteRecordMap;
+			for(unsigned int r = 0; r < typeTable.tableView_->getNumberOfRows(); ++r)
+				deleteRecordMap.emplace(std::make_pair(r,//typeTable.tableView_->getDataView()[i][typeTable.tableView_->getColUID()],
 				                                       true));  // init to delete
 
 			for(auto& nodePair : nodeTypePair.second)
@@ -2859,7 +2880,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 						__COUTV__(row);
 
 						// remove from delete map
-						deleteRecordMap[nodeName] = false;
+						deleteRecordMap[row] = false;
 
 						__COUTV__(StringMacros::mapToString(processTypes_.mapToLinkGroupIDColumn_));
 
@@ -3080,6 +3101,10 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							typeTable.tableView_->setValueAsString(name, row, typeTable.tableView_->getColUID());
 
 							typeTable.tableView_->setValueAsString(hostname, row, hostnameCol);
+
+
+							// remove from delete map
+							deleteRecordMap[row] = false;
 						}
 						else  // copy row
 						{
@@ -3098,10 +3123,11 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 									typeTable.tableView_->setValueAsString(valuePair.second, copyRow, valuePair.first);
 								}
 							}
+
+							// remove from delete map
+							deleteRecordMap[copyRow] = false;
 						}  // end copy and customize row handling
 
-						// remove from delete map
-						deleteRecordMap[name] = false;
 
 						isFirst = false;
 					}  // end multi-node loop
@@ -3110,26 +3136,24 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 			{  // delete record handling
 				__COUT__ << "Deleting '" << nodeTypePair.first << "' records not specified..." << __E__;
-				__COUTV__(StringMacros::mapToString(deleteRecordMap));
 
 				unsigned int row;
+				std::set<unsigned int> orderedRowSet; //need to delete in reverse order
 				for(auto& deletePair : deleteRecordMap)
 				{
+					__COUTV__(deletePair.first);
 					if(!deletePair.second)
 						continue;  // only delete if true
 
 					__COUTV__(deletePair.first);
+					orderedRowSet.emplace(deletePair.first);
+				}
 
-					row = typeTable.tableView_->findRow(typeTable.tableView_->getColUID(), deletePair.first, 0 /*offsetRow*/, true /*doNotThrow*/);
+				// delete elements in reverse order
+				for (std::set<unsigned int>::reverse_iterator rit = orderedRowSet.rbegin();
+						rit != orderedRowSet.rend(); rit++)
+					typeTable.tableView_->deleteRow(*rit);
 
-					if(row == TableView::INVALID)
-						continue;  // skip if already gone
-
-					__COUTV__(row);
-
-					typeTable.tableView_->deleteRow(row);
-
-				}  // end delete record loop
 			}      // end delete record handling
 
 			{

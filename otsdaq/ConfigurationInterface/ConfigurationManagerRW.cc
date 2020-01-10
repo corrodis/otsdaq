@@ -570,7 +570,7 @@ TableBase* ConfigurationManagerRW::getVersionedTableByName(const std::string& ta
 	                   looseColumnMatching,
 	                   accumulatedErrors);
 	return table;
-}
+} //end getVersionedTableByName()
 
 //==============================================================================
 // saveNewTable
@@ -629,7 +629,7 @@ TableVersion ConfigurationManagerRW::saveNewTable(const std::string& tableName, 
 
 	// table->getView().print();
 	return newVersion;
-}
+} //end saveNewTable()
 
 //==============================================================================
 // eraseTemporaryVersion
@@ -687,7 +687,7 @@ void ConfigurationManagerRW::clearCachedVersions(const std::string& tableName)
 	TableBase* table = getTableByName(tableName);
 
 	table->trimCache(0);
-}
+} //end clearCachedVersions()
 
 //==============================================================================
 // clearAllCachedVersions
@@ -698,7 +698,7 @@ void ConfigurationManagerRW::clearAllCachedVersions()
 {
 	for(auto configInfo : allTableInfo_)
 		configInfo.second.tablePtr_->trimCache(0);
-}
+} //end clearAllCachedVersions()
 
 //==============================================================================
 // copyViewToCurrentColumns
@@ -717,7 +717,7 @@ TableVersion ConfigurationManagerRW::copyViewToCurrentColumns(const std::string&
 	allTableInfo_[tableName].versions_.insert(newTemporaryVersion);
 
 	return newTemporaryVersion;
-}
+} //end copyViewToCurrentColumns()
 
 //==============================================================================
 // cacheGroupKey
@@ -725,11 +725,11 @@ void ConfigurationManagerRW::cacheGroupKey(const std::string& groupName, TableGr
 {
 	allGroupInfo_[groupName].keys_.emplace(key);
 
-	__SS__ << "Now keys are: " << __E__;
-	for(auto& key:allGroupInfo_[groupName].keys_)
-		ss << "\t" << key << __E__;
-	__COUT__ << ss.str() << __E__;
-}
+//	__SS__ << "Now keys are: " << __E__;
+//	for(auto& key:allGroupInfo_[groupName].keys_)
+//		ss << "\t" << key << __E__;
+//	__COUT__ << ss.str() << __E__;
+} //end cacheGroupKey()
 
 //==============================================================================
 // getGroupInfo

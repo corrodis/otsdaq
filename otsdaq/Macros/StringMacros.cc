@@ -655,7 +655,7 @@ void StringMacros::getMapFromString(const std::string&                  inputStr
 			         << "'). " << __E__;
 		}
 	}
-}
+} //end getMapFromString()
 catch(const std::runtime_error& e)
 {
 	__SS__ << "Error while extracting a map from the string '" << inputString << "'... is it a valid map?" << __E__ << e.what() << __E__;

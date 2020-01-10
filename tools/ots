@@ -340,8 +340,7 @@ function killprocs
 		
 	sleep 1 #give time for cleanup to occur
 	
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tDone killing processes $1"
-	echo -e "${Reset}"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tDone killing processes $1 ${Reset}"
 	
 } #end killprocs
 export -f killprocs
