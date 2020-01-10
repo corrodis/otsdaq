@@ -3317,7 +3317,7 @@ void GatewaySupervisor::saveGroupNameAndKey(const std::pair<std::string /*group 
 //==============================================================================
 void GatewaySupervisor::handleGetApplicationIdRequest(AllSupervisorInfo* allSupervisorInfo, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut)
 {
-	std::string classNeedle = CgiDataUtilities::getData(cgiIn, "classNeedle");
+	std::string classNeedle = StringMacros::decodeURIComponent(CgiDataUtilities::getData(cgiIn, "classNeedle"));
 	__COUTV__(classNeedle);
 
 	for(auto it : allSupervisorInfo->getAllSupervisorInfo())
