@@ -275,7 +275,8 @@ xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::Messag
 			(theStateMachine_.isInTransition()?
 				theStateMachine_.getProvenanceStateName():
 				theStateMachine_.getCurrentStateName()):
-			"Error:::" + err;
+				(theStateMachine_.getCurrentStateName() == "Paused"?
+						"Soft-Error:::":"Error:::") + err;
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("Status", status);

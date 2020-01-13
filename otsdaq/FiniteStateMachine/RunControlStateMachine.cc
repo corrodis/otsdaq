@@ -288,7 +288,8 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	// handle normal transitions here
 	try
 	{
-		theStateMachine_.setErrorMessage("", false /*append*/);  // clear error message
+		if(!(asyncSoftFailureReceived_ && command == "Pause")) //only clear if not soft error
+			theStateMachine_.setErrorMessage("", false /*append*/);  // clear error message
 
 		iterationWorkFlag_    = false;
 		subIterationWorkFlag_ = false;

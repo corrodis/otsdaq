@@ -323,6 +323,9 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 						__SS__ << "Error! Only one artdaq Supervisor is allowed to be active - "
 						       << "two encountered in context '" << contexts_[artdaqSupervisorContext_].contextUID_ << "' and '" << contexts_.back().contextUID_
 						       << "'..." << __E__;
+
+						artdaqSupervisorContext_ = (unsigned int)-1;  // reset
+
 						__SS_THROW__;
 					}
 

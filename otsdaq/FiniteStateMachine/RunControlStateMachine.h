@@ -20,6 +20,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 	void               reset(void);
 	void               setStateMachineName(const std::string& name) { theStateMachine_.setStateMachineName(name); }
 	const std::string& getErrorMessage(void) const { return theStateMachine_.getErrorMessage(); }
+	void			   setAsyncSoftErrorMessage(const std::string& error) { asyncSoftFailureReceived_ = true; theStateMachine_.setErrorMessage(error); }
 
 	template<class OBJECT>
 	void addStateTransition(toolbox::fsm::State from,

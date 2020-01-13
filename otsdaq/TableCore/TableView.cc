@@ -2008,6 +2008,7 @@ std::string restoreJSONStringEntities(const std::string& str)
 //		DATA_SET
 int TableView::fillFromJSON(const std::string& json)
 {
+	std::map<std::string /*key*/,unsigned int /*entries/rows*/> keyEntryCountMap;
 	std::vector<std::string> keys;
 	keys.push_back("NAME");
 	keys.push_back("COMMENT");
@@ -2462,9 +2463,16 @@ int TableView::fillFromJSON(const std::string& json)
 								if(keyIsMatch || keyIsComment)  // currKey ==
 								                                // columnsInfo_[c].getStorageName())
 								{
-									// matched
-									if(col <= lastCol)  // add row (use lastCol in case
-									                    // new column-0 was added
+									if(keyEntryCountMap.find(currKey) ==
+											keyEntryCountMap.end())
+										keyEntryCountMap[currKey] = 0; //show follow row count
+									else
+										++keyEntryCountMap.at(currKey);
+
+									// add row (based on entry counts)
+									if(keyEntryCountMap.size() == 1 ||
+											(keyEntryCountMap.at(currKey) &&
+											keyEntryCountMap.at(currKey) > row)) //if(col <= lastCol)
 									{
 										if(getNumberOfRows())  // skip first time
 											sourceColumnMissingCount_ += getNumberOfColumns() - colFoundCount;

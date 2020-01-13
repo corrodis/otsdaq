@@ -186,7 +186,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 						(theSupervisor->theStateMachine_.isInTransition()?
 							theSupervisor->theStateMachine_.getProvenanceStateName():
 							theSupervisor->theStateMachine_.getCurrentStateName()):
-						"Failed:::" + err;
+						(theSupervisor->theStateMachine_.getCurrentStateName() == "Paused"?
+								"Soft-Error:::":"Failed:::") + err;
 				progress = theSupervisor->theProgressBar_.readPercentageString();
 
 				try
@@ -1213,6 +1214,7 @@ void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference e)
 		sleep(1);
 		RunControlStateMachine::theProgressBar_.step();
 	}
+
 } //end transitionStartingUp()
 
 //==============================================================================

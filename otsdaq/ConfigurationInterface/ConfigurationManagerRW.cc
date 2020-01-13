@@ -560,7 +560,11 @@ TableBase* ConfigurationManagerRW::getVersionedTableByName(const std::string& ta
 		__SS_THROW__;
 	}
 	TableBase* table = it->second;
-	theInterface_->get(table,
+
+	if(version.isTemporaryVersion())
+		table->setActiveView(version);
+	else
+		theInterface_->get(table,
 	                   tableName,
 	                   0,
 	                   0,

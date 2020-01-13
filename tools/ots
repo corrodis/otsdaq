@@ -1115,7 +1115,11 @@ launchOTSWiz() {
 	echo -e "${Reset}"
 	echo -e "${Reset}"	
 	
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tots Wiz Mode access code = $(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tots Wiz Mode access code = $(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"	
+
+	echo -e "${Reset}"	
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tFor more wiz mode security, set the access code length; For example,... \n\t\t\t\t\t\t\t\t8 > ${SERVICE_DATA_PATH}/OtsWizardData/sequence.dat"
+
 
 	printMainURL &
 	

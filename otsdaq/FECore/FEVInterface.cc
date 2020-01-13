@@ -386,11 +386,16 @@ void FEVInterface::sendAsyncErrorToGateway(FEVInterface* fe, const std::string& 
 	feHeader << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << "\t";
 
 	if(isSoftError)
+	{
 		__COUT_ERR__ << feHeader.str() << "Sending FE Async SOFT Running Error... \n" << errorMessage << __E__;
+		fe->VStateMachine::parentSupervisor_->setAsyncSoftErrorMessage(errorMessage);
+	}
 	else
 		__COUT_ERR__ << feHeader.str() << "Sending FE Async Running Error... \n" << errorMessage << __E__;
 
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor = fe->VStateMachine::parentSupervisor_->allSupervisorInfo_.getGatewayInfo().getDescriptor();
+
+
 
 	SOAPParameters parameters;
 	parameters.addParameter("ErrorMessage", errorMessage);
@@ -455,7 +460,7 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
 		}
 		catch(const __OTS_SOFT_EXCEPTION__& e)
 		{
-			ss << "SOFT Error was caught while configuring: " << e.what() << std::endl;
+			ss << "SOFT Error was caught while running: " << e.what() << std::endl;
 			isSoftError = true;
 		}
 		catch(const std::runtime_error& e)
@@ -645,7 +650,7 @@ void FEVInterface::runSequenceOfCommands(const std::string& treeLinkName)
 		__FE_COUT__ << "Unable to access sequence of commands through configuration tree. "
 		            << "Assuming no sequence. " << __E__;
 	}
-}
+} //end runSequenceOfCommands()
 
 //==============================================================================
 // runFrontEndMacro
