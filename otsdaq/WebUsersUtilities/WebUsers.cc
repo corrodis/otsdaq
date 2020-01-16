@@ -526,7 +526,7 @@ bool WebUsers::loadDatabases()
 					if(f == 0)  // hash
 					{
 						Hashes_.push_back(Hash());
-						Hashes_.back().hash_ = line[si];
+						Hashes_.back().hash_ = &line[si];
 					}
 					else if(f == 1)  // lastAccessTime
 						sscanf(&line[si], "%ld", &Hashes_.back().accessTime_);
@@ -705,8 +705,17 @@ bool WebUsers::loadDatabases()
 				"\tNAC: " << std::left << std::setfill(' ') << std::setw(5) << Users_[ii].getNewAccountCode() <<
 				"\tFailedCount: " << (int)Users_[ii].loginFailureCount_ <<
 				"\tPermissions: " << StringMacros::mapToString(Users_[ii].permissions_) <<
+				//"\tSalt: " << Users_[ii].salt_.size() << " " <<  Users_[ii].salt_ <<
 				__E__;
 	}
+//	__COUT__ << Hashes_.size() << " Hashes found." << __E__;
+//	for(size_t ii = 0; ii < Hashes_.size(); ++ii)
+//	{
+//		std::cout << //do not send to message facility
+//				"Hash [" << ii <<
+//				"]: " << Hashes_[ii].hash_ <<
+//				__E__;
+//	}
 	return true;
 } //end loadDatabases()
 
@@ -1041,7 +1050,7 @@ uint64_t WebUsers::attemptActiveSession(
 	else
 	{
 		std::string salt = Users_[i].salt_;  // don't want to modify saved salt
-		//__COUT__ << salt << " " << i << __E__;
+		//__COUT__ << salt.size() << " " << salt << " " << i << __E__;
 		if(searchHashesDatabaseForHash(sha512(user, pw, salt)) == NOT_FOUND_IN_DATABASE)
 		{
 			__COUT__ << "Failed login for " << user << " with permissions " <<
@@ -1345,8 +1354,7 @@ uint64_t WebUsers::searchLoginSessionDatabaseForUUID(const std::string& uuid) co
 uint64_t WebUsers::searchHashesDatabaseForHash(const std::string& hash)
 {
 	uint64_t i = 0;
-	//__COUT__ << i << " " << HashesVector.size() << " " << HashesAccessTimeVector.size()
-	//<< 		hash << __E__;
+	//__COUT__ << i << " " << Hashes_.size() << " " << hash << __E__;
 	for(; i < Hashes_.size(); ++i)
 		if(Hashes_[i].hash_ == hash)
 			break;
@@ -1355,6 +1363,8 @@ uint64_t WebUsers::searchHashesDatabaseForHash(const std::string& hash)
 	//__COUT__ << i << __E__;
 	if(i < Hashes_.size())  // if found, means login successful, so update access time
 		Hashes_[i].accessTime_ = ((time(0) + (rand() % 2 ? 1 : -1) * (rand() % 30 * 24 * 60 * 60)) & 0x0FFFFFFFFFE000000);
+	//else
+	//	__COUT__ << "No matching hash..." << __E__;
 
 	//__COUT__ << i << __E__;
 	return (i == Hashes_.size()) ? NOT_FOUND_IN_DATABASE : i;
@@ -2423,6 +2433,12 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument* xmldoc, bool
 
 		xmldoc->addTextElementToData(PREF_XML_ACCOUNTS_FIELD, "");
 
+		if(Users_.size() == 0)
+		{
+			__COUT__ << "Missing users? Attempting to load database" << __E__;
+			loadDatabases();
+		}
+
 		// get all accounts
 		for(uint64_t i = 0; i < Users_.size(); ++i)
 		{
@@ -2668,21 +2684,32 @@ void WebUsers::modifyAccountSettings(
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> permissionMap = getPermissionsForUser(actingUid);
 	if(!isAdminForGroup(permissionMap))
 	{
-		__MCOUT_ERR__("Only admins can modify user settings." << __E__);
-		return;  // not an admin
+		  // not an admin
+		__SS__ << "Only admins can modify user settings." << __E__;
+		__SS_THROW__;
 	}
 
+	uint64_t i = searchUsersDatabaseForUserId(actingUid);
 	uint64_t modi = searchUsersDatabaseForUsername(username);
 	if(modi == 0)
 	{
-		__MCOUT_ERR__("Cannot modify first user" << __E__);
-		return;
+		if(i == 0)
+		{
+			__COUT_INFO__ << "Admin password reset." << __E__;
+			Users_[modi].setModifier(Users_[i].username_);
+			Users_[modi].salt_ = "";
+			Users_[modi].loginFailureCount_ = 0;
+			saveDatabaseToFile(DB_USERS);
+			return;
+		}
+		__SS__ << "Cannot modify first user" << __E__;
+		__SS_THROW__;
 	}
 
 	if(username.length() < USERNAME_LENGTH || displayname.length() < DISPLAY_NAME_LENGTH)
 	{
-		__MCOUT_ERR__("Invalid Username or Display Name must be length " << USERNAME_LENGTH << " or " << DISPLAY_NAME_LENGTH << __E__);
-		return;
+		__SS__ << "Invalid Username or Display Name must be length " << USERNAME_LENGTH << " or " << DISPLAY_NAME_LENGTH << __E__;
+		__SS_THROW__;
 	}
 
 	__COUT__ << "Input Permissions: " << permissions << __E__;
@@ -2696,8 +2723,8 @@ void WebUsers::modifyAccountSettings(
 
 		if(modi == NOT_FOUND_IN_DATABASE)
 		{
-			__COUT__ << "User not found!? Should not happen." << __E__;
-			return;
+			__SS__ << "User not found!? Should not happen." << __E__;
+			__SS_THROW__;
 		}
 
 		Users_[modi].displayName_ = displayname;
@@ -2739,7 +2766,6 @@ void WebUsers::modifyAccountSettings(
 
 		// save information about modifier
 		{
-			uint64_t i = searchUsersDatabaseForUserId(actingUid);
 			if(i == NOT_FOUND_IN_DATABASE)
 			{
 				__SS__ << "Master User not found!? Should not happen." << __E__;
@@ -2754,7 +2780,6 @@ void WebUsers::modifyAccountSettings(
 		createNewAccount(username, displayname, email);
 		// save information about modifier
 		{
-			uint64_t i = searchUsersDatabaseForUserId(actingUid);
 			if(i == NOT_FOUND_IN_DATABASE)
 			{
 				__SS__ << "Master User not found!? Should not happen." << __E__;
@@ -2774,7 +2799,8 @@ void WebUsers::modifyAccountSettings(
 		deleteAccount(username, displayname);
 		break;
 	default:
-		__COUT__ << "Undefined command - do nothing " << username << __E__;
+		__SS__ << "Undefined command - do nothing " << username << __E__;
+		__SS_THROW__;
 	}
 
 	saveDatabaseToFile(DB_USERS);

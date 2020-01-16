@@ -102,7 +102,8 @@ class WebUsers
 		//		- Preferences (e.g. color scheme, etc)  Username appends to preferences file, and login history file
 		//		- UsersLastModifierUsernameVector - is username of last admin user to modify something about account
 		//		- UsersLastModifierTimeVector - is time of last modify by an admin user
-		User():lastLoginAttempt_(0),accountCreationTime_(0),loginFailureCount_(0),lastModifierTime_(0) {}
+		User():lastLoginAttempt_(0),accountCreationTime_(0),loginFailureCount_(0),
+				lastModifierTime_(time(0)*100000 + (clock()%100000)) {}
 
 		void setModifier(const std::string& modifierUsername)
 		{
