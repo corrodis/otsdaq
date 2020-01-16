@@ -116,7 +116,7 @@ void WizardSupervisor::init(void)
 	matchingFileUploadTypes_.push_back("zip");
 	allowedFileUploadTypes_.push_back("text/plain");
 	matchingFileUploadTypes_.push_back("txt");
-}
+} //end init()
 
 //==============================================================================
 void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
@@ -155,10 +155,16 @@ void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
 		 	"/WebPath/html/ConfigurationGUI_subset.html?urn=280&subsetBasePath=DesktopIconTable&"
 	        "recordAlias=Icons&groupingFieldList=Status%2CForceOnlyOneInstance%2CRequiredPermissionLevel,/"
 
-	     << ",Security Settings,SEC,1,1,icon-SecuritySettings.png,"
+		 //User Settings ------------------
+		 << ",Edit User Accounts,USER,1,1,"
+		 				 "/WebPath/images/dashboardImages/icon-Settings.png,/WebPath/html/UserSettings.html,/User Settings"
+
+		 << ",Security Settings,SEC,1,1,icon-SecuritySettings.png,"
 		 	"/WebPath/html/SecuritySettings.html,/User Settings"
 
 	     << ",Edit User Data,USER,1,1,icon-EditUserData.png,/WebPath/html/EditUserData.html,/User Settings"
+
+		 //end User Settings ------------------
 
 	     << ",Console,C,1,1,icon-Console.png,/urn:xdaq-application:lid=260/,/" 
 		 
@@ -203,7 +209,7 @@ void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
 
 	    //",DB Utilities,DB,1,1,0,http://127.0.0.1:8080/db/client.html" <<
         
-	     //",Code Editor,CODE,0,1,icon-CodeEditor.png,/WebPath/html/CodeEditor.html,/"
+
 	     << "";
 	// clang-format on
 	return;
@@ -484,6 +490,7 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 	if(securityCode_.compare(submittedSequence) != 0)
 	{
 		__COUT__ << "Unauthorized Request made, security sequence doesn't match! " << time(0) << std::endl;
+		*out << WebUsers::REQ_NO_PERMISSION_RESPONSE.c_str();
 		return;
 	}
 	else
@@ -503,6 +510,8 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 		// 	gatewayLaunchOTS
 		// 	gatewayLaunchWiz
 		// 	addDesktopIcon
+		//	getSettings
+		//	accountSettings
 
 		if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{
@@ -526,6 +535,46 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 		else if(requestType == "getAppId")
 		{
 			GatewaySupervisor::handleGetApplicationIdRequest(&allSupervisorInfo_, cgiIn, xmlOut);
+		}
+		else if(requestType == "getSettings")
+		{
+			std::string accounts = CgiDataUtilities::getData(cgiIn, "accounts");
+
+			__COUT__ << "Get Settings Request" << __E__;
+			__COUT__ << "accounts = " << accounts << __E__;
+			GatewaySupervisor::theWebUsers_.insertSettingsForUser(0 /*admin UID*/, &xmlOut, accounts == "1");
+		}
+		else if(requestType == "accountSettings")
+		{
+			std::string type     = CgiDataUtilities::postData(cgiIn, "type");  // updateAccount, createAccount, deleteAccount
+			int         type_int = -1;
+
+			if(type == "updateAccount")
+				type_int = GatewaySupervisor::theWebUsers_.MOD_TYPE_UPDATE;
+			else if(type == "createAccount")
+				type_int = GatewaySupervisor::theWebUsers_.MOD_TYPE_ADD;
+			else if(type == "deleteAccount")
+				type_int = GatewaySupervisor::theWebUsers_.MOD_TYPE_DELETE;
+
+
+			std::string username    = CgiDataUtilities::postData(cgiIn, "username");
+			std::string displayname = CgiDataUtilities::postData(cgiIn, "displayname");
+			std::string email       = CgiDataUtilities::postData(cgiIn, "useremail");
+			std::string permissions = CgiDataUtilities::postData(cgiIn, "permissions");
+			std::string accounts    = CgiDataUtilities::getData(cgiIn, "accounts");
+
+			__COUT__ << "accountSettings Request" << __E__;
+			__COUT__ << "type = " << type << " - " << type_int << __E__;
+			__COUT__ << "username = " << username << __E__;
+			__COUT__ << "useremail = " << email << __E__;
+			__COUT__ << "displayname = " << displayname << __E__;
+			__COUT__ << "permissions = " << permissions << __E__;
+
+			GatewaySupervisor::theWebUsers_.modifyAccountSettings(0 /*admin UID*/, type_int, username, displayname, email, permissions);
+
+			__COUT__ << "accounts = " << accounts << __E__;
+
+			GatewaySupervisor::theWebUsers_.insertSettingsForUser(0 /*admin UID*/, &xmlOut, accounts == "1");
 		}
 		else
 		{
