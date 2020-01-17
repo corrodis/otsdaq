@@ -7,6 +7,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wcatch-value"
 #include "xdaq/Application.h"       /* for  xdaq::ApplicationDescriptor */
 #include "xdaq/ContextDescriptor.h" /* for  xdaq::ContextDescriptor */
 #pragma GCC diagnostic pop
