@@ -1080,7 +1080,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 		insertParameters(out,
 				tabStr,
 				commentStr,
-				physics.getNode("AddOnParametersLink"),
+				art.getNode("AddOnParametersLink"),
 				"artParameter" /*parameterType*/,
 				false /*onlyInsertAtTableParameters*/,
 				true /*includeAtTableParameters*/);
