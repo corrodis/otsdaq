@@ -828,8 +828,8 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 				if(outputPlugin.second.getNode("outputModuleType").getValue() == "BinaryNetOutput" ||
 				   outputPlugin.second.getNode("outputModuleType").getValue() == "RootNetOutput")
 				{
-					OUT << "destinations: {\n"
-					    << "}\n\n";  // end destinations
+					OUT << "destinations: {\n";
+					OUT << "}\n\n";  // end destinations
 					OUT << "routing_table_config: {\n";
 					PUSHTAB;
 
@@ -1074,6 +1074,18 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 		// handle process_name
 		//__COUT__ << "Writing art.process_name" << __E__;
 		OUT << "process_name: " << art.getNode("ProcessName") << "\n";
+
+		//--------------------------------------
+		// handle art @table:: art add on parameters
+		insertParameters(out,
+				tabStr,
+				commentStr,
+				physics.getNode("AddOnParametersLink"),
+				"artParameter" /*parameterType*/,
+				false /*onlyInsertAtTableParameters*/,
+				true /*includeAtTableParameters*/);
+
+
 
 		POPTAB;
 		OUT << "}\n\n";  // end art
