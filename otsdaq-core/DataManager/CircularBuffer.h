@@ -76,7 +76,12 @@ public:
 	}
 
 	BufferImplementation<D,H>& getLastReadBuffer(const std::string& consumerID){return lastReadBuffer_[consumerID]->second;}
-	BufferImplementation<D,H>& getBuffer        (const std::string& producerID){ __COUTV__(producerID); __COUTV__(int(theBuffer_.find(producerID) == theBuffer_.end())); return theBuffer_[producerID];}
+	BufferImplementation<D,H>& getBuffer        (const std::string& producerID)
+			{
+		//__COUTV__(producerID);
+		//__COUTV__(int(theBuffer_.find(producerID) == theBuffer_.end()));
+		return theBuffer_[producerID];
+			}
 
 	//void unregisterConsumer   (const std::string& consumerID);
 	//void unregisterProducer   (const std::string& producerID);

@@ -51,10 +51,10 @@ void UDPDataStreamerConsumer::fastRead(void)
 		usleep(100);
 		return;
 	}
-	//unsigned int reconverted = (((*headerP_)["IPAddress"][0]&0xff)<<24) + (((*headerP_)["IPAddress"][1]&0xff)<<16) + (((*headerP_)["IPAddress"][2]&0xff)<<8) + ((*headerP_)["IPAddress"][3]&0xff);
+	unsigned int reconverted = (((*headerP_)["IPAddress"][0]&0xff)<<24) + (((*headerP_)["IPAddress"][1]&0xff)<<16) + (((*headerP_)["IPAddress"][2]&0xff)<<8) + ((*headerP_)["IPAddress"][3]&0xff);
 	//__COUT__ << processorUID_ << " -> Got some data. From: "  << std::hex << reconverted << std::dec << std::endl;
 
-	//std::cout << __COUT_HDR_FL__ << dataP_->length() << std::endl;
+	//std::cout << __COUT_HDR_FL__ << dataP_->length() << " stream to: -" << streamToSocket_.getPort() << "-" << std::endl;
 	TransmitterSocket::send(streamToSocket_, *dataP_);
 	DataConsumer::setReadSubBuffer<std::string, std::map<std::string, std::string>>();
 }
