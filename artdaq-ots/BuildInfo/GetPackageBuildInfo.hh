@@ -5,13 +5,13 @@
 
 #include <string>
 
-namespace ots {
+namespace ots
+{
+struct GetPackageBuildInfo
+{
+	static artdaq::PackageBuildInfo getPackageBuildInfo();
+};
 
-  struct GetPackageBuildInfo {
-
-    static artdaq::PackageBuildInfo getPackageBuildInfo();
-  };
-
-}
+}  // namespace ots
 
 #endif /* artdaq_ots_BuildInfo_GetPackageBuildInfo_hh */

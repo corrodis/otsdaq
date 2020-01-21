@@ -59,6 +59,8 @@ find_ups_product( fhiclcpp v2_16_00 )
 find_ups_product( messagefacility v1_10_00 )
 find_ups_product( cetlib v1_03_00 )
 find_ups_product( artdaq_database v1_03_07 )
+find_ups_product( python v2_7_14)
+include_directories($ENV{PYTHON_INCLUDE})
 find_ups_xdaq( v11_2_7 )
 find_ups_root( v5_34_00 )
 find_ups_boost( v1_50_0 filesystem
@@ -91,14 +93,13 @@ add_definitions(-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}
 ##find_package(MPI QUIET)
 
 # macros for art_dictionary and simple_plugin
-include(ArtDictionary)
+
 include(ArtMake)
 include(BuildPlugins)
 include(CetTest)
 
 # source
 add_subdirectory(artdaq-ots)
-add_subdirectory(otsdaq-core)
 add_subdirectory(otsdaq)
 
 # tools
@@ -108,8 +109,8 @@ add_subdirectory(tools)
 FILE(COPY tools DESTINATION .)
 INSTALL(DIRECTORY tools DESTINATION ${product}/${version})
 
-# Documentation
-add_subdirectory(doc)
+# Documentation (to comment out if not needed DOXYGEN locally)
+#add_subdirectory(doc)
 
 # test programs
 add_subdirectory(test)

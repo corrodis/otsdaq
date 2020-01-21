@@ -1,0 +1,17 @@
+include_directories($ENV{XERCES_C_INC})
+cet_make(LIBRARY_NAME WizardSupervisor
+		 LIBRARIES
+		 ${XDAQ_BASIC_LIB_LIST}
+		 ConfigurationInterface
+		 TableCore
+		 SupervisorInfo
+		 GatewaySupervisor
+		 CgiDataUtilities
+		 WebUsersUtilities
+		 CodeEditor
+)
+
+install_headers()
+install_source()
+
+

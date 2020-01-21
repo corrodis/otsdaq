@@ -1,16 +1,11 @@
 cet_script(
-	generateAggregatorMain.rb
-	generateAggregator.rb
-	generateBoardReaderMain.rb
-	generateEventBuilderMain.rb
-	generateEventBuilder.rb
-	generateJSONDispatcher.rb
-	generateUDP.rb
-	ots_utilities.rb
 	setupOtsEnvironment.sh
-	xt_cmd.sh
 	StartOTS.sh
 	ots
+	otsdaq_convert_config_to_table
+	otsdaq_convert_artdaq_daq_tables
+	otsdaq_beautify_artdaq_tables
+	otsdaq_add_artdaq_tables
 )
 
 
@@ -23,11 +18,10 @@ cet_enable_asserts()
 
 link_libraries(
 	    ConfigurationInterface
-#        FECore
         ${CETLIB}
         ${FHICLCPP}
-  ${BSONCXXLIB}
-  ${MONGOCXXLIB}
+	    ${BSONCXXLIB}
+	    ${MONGOCXXLIB}
     	${artdaq-database_ConfigurationDB}
 		$ENV{XDAQ_LIB}/liblog4cplus.so
 		$ENV{XDAQ_LIB}/libasyncresolv
@@ -47,6 +41,10 @@ link_libraries(
 		/usr/lib64/libuuid.so
 		${Boost_SYSTEM_LIBRARY}
 )
+
 #cet_make_exec(otsdaq_flatten_active_to_version)
 cet_make_exec(otsdaq_flatten_system_aliases)
 cet_make_exec(otsdaq_import_system_aliases)
+cet_make_exec(otsdaq_fix_new_table_fields_tool)
+
+

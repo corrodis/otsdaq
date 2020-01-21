@@ -1,0 +1,198 @@
+
+//========================================================================================================================
+// helpCommandModifyActive
+//	static function definition
+//	set the value to all targets
+template<class T>
+void Iterator::helpCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct, const T& setValue, bool doTrackGroupChanges) try
+{
+	__COUT__ << "Set value " << setValue << __E__;
+	__COUT__ << "doTrackGroupChanges " << doTrackGroupChanges << __E__;
+
+	const std::string& pathToField =
+	    iteratorStruct->commands_[iteratorStruct->commandIndex_].params_[IterateTable::commandModifyActiveParams_.RelativePathToField_];
+
+	__COUT__ << "pathToField " << pathToField << std::endl;
+
+	ConfigurationManagerRW* cfgMgr = iteratorStruct->cfgMgr_;
+
+	std::stringstream valSS;
+	valSS << setValue;
+
+	std::string   groupName   = cfgMgr->getActiveGroupName();
+	TableGroupKey originalKey = cfgMgr->getActiveGroupKey();
+
+	__COUT__ << "Active group is '" << groupName << " (" << originalKey << ")'" << __E__;
+
+	// track member names and versions of active table group
+	//	modify versions as tables are modified..
+	//	then save new group at end
+	std::map<std::string /*name*/, TableVersion /*version*/> memberMap;
+	try
+	{
+		cfgMgr->loadTableGroup(groupName,
+		                       originalKey,
+		                       0,
+		                       &memberMap,
+		                       0,
+		                       0,
+		                       0,
+		                       0,
+		                       0,      // defaults
+		                       true);  // doNotLoadMember
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "Failed to load the active configuration group. Is there a valid one "
+		          "activated? "
+		       << e.what() << __E__;
+		__SS_THROW__;
+	}
+
+	for(const auto& member : memberMap)
+		__COUT__ << "newGroup " << member.first << "-v" << member.second << __E__;
+
+	for(const auto& target : iteratorStruct->commands_[iteratorStruct->commandIndex_].targets_)
+	{
+		__COUT__ << "target " << target.table_ << ":" << target.UID_ << __E__;
+		ConfigurationTree node = cfgMgr->getNode(target.table_).getNode(target.UID_).getNode(pathToField);
+
+		if(!node.isValueNode())
+		{
+			__SS__ << "Invalid target node. The target path '" << pathToField << "' must be a value node." << __E__;
+			__SS_THROW__;
+		}
+
+		__COUT__ << "value node table: " << node.getTableName() << __E__;
+		__COUT__ << "value node UID: " << node.getUIDAsString() << __E__;
+
+		__COUT__ << "value node row: " << node.getFieldRow() << __E__;
+		__COUT__ << "value node column: " << node.getFieldColumn() << __E__;
+
+		TableEditStruct valueTable(node.getTableName(),
+		                           cfgMgr);  // Table ready for editing!
+
+		try
+		{
+			valueTable.tableView_->setValueAsString(valSS.str(), node.getFieldRow(), node.getFieldColumn());
+
+			valueTable.tableView_->print();
+			valueTable.tableView_->init();  // verify new table (throws runtime_errors)
+		}
+		catch(...)
+		{
+			__COUT__ << "Handling command table errors while saving. Erasing all newly "
+			            "created versions."
+			         << std::endl;
+
+			if(valueTable.createdTemporaryVersion_)  // if temporary version created here
+			{
+				__COUT__ << "Erasing temporary version " << valueTable.tableName_ << "-v" << valueTable.temporaryVersion_ << std::endl;
+				// erase with proper version management
+				cfgMgr->eraseTemporaryVersion(valueTable.tableName_, valueTable.temporaryVersion_);
+			}
+
+			throw;  // re-throw
+		}
+
+		// at this point valid edited table.. so save
+
+		TableVersion newAssignedVersion;
+
+		// start save table code
+		//	do not check for duplicates if not tracking changes
+		{
+			const std::string& tableName                = valueTable.tableName_;
+			TableBase*         table                    = valueTable.table_;
+			TableVersion&      temporaryModifiedVersion = valueTable.temporaryVersion_;
+
+			// check for duplicate tables already in cache
+			if(doTrackGroupChanges)  // check for duplicates if tracking changes
+			{
+				__COUT__ << "Checking for duplicate tables..." << std::endl;
+
+				{
+					//"DEEP" checking
+					//	load into cache 'recent' versions for this table
+					//		'recent' := those already in cache, plus highest version
+					// numbers  not in cache
+					const std::map<std::string, TableInfo>& allCfgInfo = cfgMgr->getAllTableInfo();  // do not refresh
+
+					auto versionReverseIterator = allCfgInfo.at(tableName).versions_.rbegin();  // get reverse iterator
+					__COUT__ << "Filling up cached from " << table->getNumberOfStoredViews() << " to max count of " << table->MAX_VIEWS_IN_CACHE << std::endl;
+					for(; table->getNumberOfStoredViews() < table->MAX_VIEWS_IN_CACHE && versionReverseIterator != allCfgInfo.at(tableName).versions_.rend();
+					    ++versionReverseIterator)
+					{
+						__COUT__ << "Versions in reverse order " << *versionReverseIterator << std::endl;
+						cfgMgr->getVersionedTableByName(tableName, *versionReverseIterator);  // load to cache
+					}
+				}
+
+				// check for duplicates (including original version)
+				newAssignedVersion = table->checkForDuplicate(temporaryModifiedVersion);
+
+				__COUT__ << "Check for duplicate tables complete." << std::endl;
+			}
+
+			if(!newAssignedVersion.isInvalid())
+			{
+				// found an equivalent!
+				__COUT__ << "Equivalent table found in version v" << newAssignedVersion << std::endl;
+
+				// erase modified temporary version
+				cfgMgr->eraseTemporaryVersion(tableName, temporaryModifiedVersion);
+			}
+			else
+			{
+				// save as new table version
+
+				__COUT__ << "\t\t**************************** Save v" << temporaryModifiedVersion << " as new table version" << std::endl;
+
+				newAssignedVersion = cfgMgr->saveNewTable(tableName, temporaryModifiedVersion, false /*makeTemporary*/);
+			}
+
+			__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << std::endl;
+
+		}  // end save table code
+
+		// now have newAssignedVersion
+
+		__COUT__ << "Final plan version is " << valueTable.tableName_ << "-v" << newAssignedVersion << std::endl;
+
+		// record new version in modified tables map
+		memberMap[valueTable.tableName_] = newAssignedVersion;
+
+	}  // end target loop
+
+	// member map should now be modified
+	for(const auto& member : memberMap)
+		__COUT__ << "newGroup " << member.first << "-v" << member.second << __E__;
+
+	__COUT__ << "Checking for duplicate groups..." << std::endl;
+	TableGroupKey theKey = cfgMgr->findTableGroup(groupName, memberMap);
+
+	if(!theKey.isInvalid())
+	{
+		__COUT__ << "Found equivalent group key (" << theKey << ") for " << groupName << "." << std::endl;
+	}
+	else
+	{
+		__COUT__ << "Saving new group..." << __E__;
+
+		// save new group
+		theKey = cfgMgr->saveNewTableGroup(groupName, memberMap, "Created by Iterator modify active configuration command.");
+	}
+
+	__COUT__ << "Final group key is " << groupName << "(" << theKey << ")" << std::endl;
+
+	// now active new group
+	__COUT__ << "Activating new group..." << __E__;
+	cfgMgr->activateTableGroup(groupName, theKey);
+
+}  // end helpCommandModifyActive()
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Modify command failed! " << e.what() << __E__;
+
+	__SS_THROW__;
+}
