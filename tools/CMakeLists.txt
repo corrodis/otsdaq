@@ -1,6 +1,6 @@
 cet_script(
-	setupOtsEnvironment.sh
-	StartOTS.sh
+	#setupOtsEnvironment.sh
+	#StartOTS.sh
 	ots
 	otsdaq_convert_config_to_table
 	otsdaq_convert_artdaq_daq_tables
