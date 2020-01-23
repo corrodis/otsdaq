@@ -3,7 +3,7 @@
 
 #include "otsdaq/Configurable/Configurable.h"
 #include "otsdaq/DataManager/DataConsumer.h"
-#include "otsdaq/NetworkUtilities/TCPDataStreamerBase.h"
+#include "otsdaq/NetworkUtilities/TCPPublishServer.h"
 
 #include <string>
 
@@ -11,7 +11,7 @@ namespace ots
 {
 class ConfigurationTree;
 
-class TCPDataStreamerConsumer : public TCPDataStreamerBase, public DataConsumer, public Configurable
+class TCPDataStreamerConsumer : public TCPublishServer, public DataConsumer, public Configurable
 {
   public:
 	TCPDataStreamerConsumer(std::string              supervisorApplicationUID,
