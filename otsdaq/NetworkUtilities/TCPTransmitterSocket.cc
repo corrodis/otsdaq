@@ -84,6 +84,17 @@ void TCPTransmitterSocket::send(const std::vector<char>& buffer)
 }
 
 //==============================================================================
+void TCPTransmitterSocket::send(const std::vector<uint16_t>& buffer)
+{
+	if(buffer.size() == 0)
+	{
+		std::cout << __PRETTY_FUNCTION__ << "I am sorry but I won't send an empty packet!" << std::endl;
+		return;
+	}
+	send((const char*)&buffer.at(0), buffer.size());
+}
+
+//==============================================================================
 void TCPTransmitterSocket::setSendTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds)
 {
 	struct timeval tv;

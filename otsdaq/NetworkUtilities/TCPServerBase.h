@@ -16,9 +16,10 @@ class TCPServerBase : public TCPSocket
 	virtual ~TCPServerBase(void);
 
 	void startAccept(void);
-	void broadcastPacket(const std::string& message);
-	void broadcast(const std::string& message);
-	void broadcast(const std::vector<char>& message);
+	void broadcastPacket(const std::string&           message);
+	void broadcast      (const std::string&           message);
+	void broadcast      (const std::vector<char>&     message);
+	void broadcast      (const std::vector<uint16_t>& message);
 
   protected:
 	virtual void acceptConnections() = 0;
