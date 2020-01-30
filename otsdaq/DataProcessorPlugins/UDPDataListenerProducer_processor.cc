@@ -122,6 +122,9 @@ void UDPDataListenerProducer::fastWrite(void)
 
 	if(ReceiverSocket::receive(*dataP_, ipAddress_, port_, 1, 0, true) != -1)
 	{
+		header_["IPAddress"] = NetworkConverters::networkToStringIP(ipAddress_);
+		header_["Port"]      = NetworkConverters::networkToStringPort(port_);
+		__CFG_COUT__ << "Received data IP: " <<  header_["IPAddress"] << " port: " << header_["Port"] << __E__;
 		DataProducer::setWrittenSubBuffer<std::string, std::map<std::string, std::string> >();
 	}
 }

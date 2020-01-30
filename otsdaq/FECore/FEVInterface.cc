@@ -192,27 +192,32 @@ bool FEVInterface::slowControlsRunning(void) try
 
 	FILE* fp                          = 0;
 	bool  aggregateFileIsBinaryFormat = false;
-	if(FEInterfaceNode.getNode("SlowControlsLocalAggregateSavingEnabled").getValue<bool>())
+	try
 	{
-		aggregateFileIsBinaryFormat = FEInterfaceNode.getNode("SlowControlsSaveBinaryFile").getValue<bool>();
-
-		__FE_COUT_INFO__ << "Slow Controls Aggregate Saving turned On BinaryFormat=" << aggregateFileIsBinaryFormat << __E__;
-
-		std::string saveFullFileName = FEInterfaceNode.getNode("SlowControlsLocalFilePath").getValue<std::string>() + "/" +
-		                               FEInterfaceNode.getNode("SlowControlsRadixFileName").getValue<std::string>() + "-" +
-		                               FESlowControlsChannel::underscoreString(getInterfaceUID()) + "-" + std::to_string(time(0)) +
-		                               (aggregateFileIsBinaryFormat ? ".dat" : ".txt");
-
-		fp = fopen(saveFullFileName.c_str(), aggregateFileIsBinaryFormat ? "ab" : "a");
-		if(!fp)
+		if(FEInterfaceNode.getNode("SlowControlsLocalAggregateSavingEnabled").getValue<bool>())
 		{
-			__FE_COUT_ERR__ << "Failed to open slow controls channel file: " << saveFullFileName << __E__;
-			// continue on, just nothing will be saved
+			aggregateFileIsBinaryFormat = FEInterfaceNode.getNode("SlowControlsSaveBinaryFile").getValue<bool>();
+
+			__FE_COUT_INFO__ << "Slow Controls Aggregate Saving turned On BinaryFormat=" << aggregateFileIsBinaryFormat << __E__;
+
+			std::string saveFullFileName = FEInterfaceNode.getNode("SlowControlsLocalFilePath").getValue<std::string>() + "/" +
+					FEInterfaceNode.getNode("SlowControlsRadixFileName").getValue<std::string>() + "-" +
+					FESlowControlsChannel::underscoreString(getInterfaceUID()) + "-" + std::to_string(time(0)) +
+					(aggregateFileIsBinaryFormat ? ".dat" : ".txt");
+
+			fp = fopen(saveFullFileName.c_str(), aggregateFileIsBinaryFormat ? "ab" : "a");
+			if(!fp)
+			{
+				__FE_COUT_ERR__ << "Failed to open slow controls channel file: " << saveFullFileName << __E__;
+				// continue on, just nothing will be saved
+			}
+			else
+				__FE_COUT_INFO__ << "Slow controls aggregate file opened: " << saveFullFileName << __E__;
 		}
-		else
-			__FE_COUT_INFO__ << "Slow controls aggregate file opened: " << saveFullFileName << __E__;
 	}
-	else
+	catch(...) {} //do nothing
+
+	if(!aggregateFileIsBinaryFormat)
 		__FE_COUT_INFO__ << "Slow Controls Aggregate Saving turned off." << __E__;
 
 	time_t timeCounter = 0;
