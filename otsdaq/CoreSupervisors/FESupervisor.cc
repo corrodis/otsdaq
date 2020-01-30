@@ -4,6 +4,10 @@
 
 #include "artdaq/DAQdata/Globals.hh"  // instantiates artdaq::Globals::metricMan_
 
+#include "artdaq-core/Utilities/ExceptionHandler.hh" /*for artdaq::ExceptionHandler*/
+
+#include "fhiclcpp/make_ParameterSet.h"
+
 // https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/DAQdata/Globals.hh
 // for metric manager include
 // https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/Application/DataReceiverCore.cc
@@ -850,3 +854,40 @@ FEVInterfacesManager* FESupervisor::extractFEInterfacesManager()
 
 	return theFEInterfacesManager_;
 }  // end extractFEInterfaceManager()
+
+//==============================================================================
+void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
+{
+	__SUP_COUT__ << "transitionConfiguring" << __E__;
+
+	// get pset from Board Reader metric manager table
+	try
+	{
+		std::string metric_string = "epics: {metricPluginType:epics level:3 channel_name_prefix:Mu2e}";
+		fhicl::ParameterSet metric_pset;
+		fhicl::make_ParameterSet(metric_string, metric_pset);
+
+		metricMan->initialize(metric_pset, "TDAQ_mu2eshift");
+	}
+	catch (...)
+	{
+		__SS__ << "Error loading metrics in FESupervisor::transitionConfiguring()" << __E__;
+		__COUT_ERR__ << ss.str();
+		//ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
+
+		//__SS_THROW_ONLY__;
+		__SS_THROW__;
+	}
+
+	CoreSupervisorBase::transitionConfiguring(event);
+
+} //end transitionConfiguring()
+
+//==============================================================================
+void FESupervisor::transitionHalting(toolbox::Event::Reference event)
+{
+	__SUP_COUT__ << "transitionHalting" << __E__;
+	CoreSupervisorBase::transitionHalting(event);
+
+	metricMan->shutdown();
+} //end transitionHalting()
