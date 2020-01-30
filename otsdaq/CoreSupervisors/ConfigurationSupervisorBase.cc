@@ -536,14 +536,14 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 			if(cfgViewPtr->getDataColumnSize() != cfgViewPtr->getNumberOfColumns() ||
 			   cfgViewPtr->getSourceColumnMismatch() != 0)  // check for column size mismatch
 			{
+				const std::set<std::string> srcColNames = cfgViewPtr->getSourceColumnNames();
 				__SS__ << "\n\nThere were errors found in loading a member table " << groupMemberPair.first << ":v" << cfgViewPtr->getVersion()
 				       << ". Please see the details below:\n\n"
-				       << "The source column size was found to be " << cfgViewPtr->getDataColumnSize()
+				       << "The source column size was found to be " << srcColNames.size()
 				       << ", and the current number of columns for this table is " << cfgViewPtr->getNumberOfColumns() << ". This resulted in a count of "
 				       << cfgViewPtr->getSourceColumnMismatch() << " source column mismatches, and a count of " << cfgViewPtr->getSourceColumnMissing()
 				       << " table entries missing in " << cfgViewPtr->getNumberOfRows() << " row(s) of data." << __E__;
 
-				const std::set<std::string> srcColNames = cfgViewPtr->getSourceColumnNames();
 				ss << "\n\nSource column names were as follows:\n";
 				char index = 'a';
 				for(auto& srcColName : srcColNames)

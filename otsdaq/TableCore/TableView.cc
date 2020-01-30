@@ -2543,14 +2543,14 @@ int TableView::fillFromJSON(const std::string& json)
 
 	if(!fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
 	{
+		const std::set<std::string> srcColNames = getSourceColumnNames();
 		__SS__ << "Can not ignore errors because not every column was found in the "
 		          "source data!"
 		       << ". Please see the details below:\n\n"
-		       << "The source column size was found to be " << getDataColumnSize() << ", and the current number of columns for this table is "
+		       << "The source column size was found to be " << srcColNames.size() << ", and the current number of columns for this table is "
 		       << getNumberOfColumns() << ". This resulted in a count of " << getSourceColumnMismatch() << " source column mismatches, and a count of "
 		       << getSourceColumnMissing() << " table entries missing in " << getNumberOfRows() << " row(s) of data." << __E__;
 
-		const std::set<std::string> srcColNames = getSourceColumnNames();
 		ss << "\n\nSource column names in ALPHABETICAL order were as follows:\n";
 		char        index       = 'a';
 		std::string preIndexStr = "";

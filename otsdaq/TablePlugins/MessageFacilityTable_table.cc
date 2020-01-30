@@ -245,7 +245,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 		__SS_THROW__;
 	}
 	else
-		__COUT__ << "Opened.. " << MF_CFG_FILE << __E__;
+		__COUT__ << "Opened for artdaq.. " << MF_ARTDAQ_INTERFACE_CFG_FILE << __E__;
 
 	// close MF config files
 	artdaqfs << fclSs.str();

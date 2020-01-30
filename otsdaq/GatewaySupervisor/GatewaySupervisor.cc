@@ -42,6 +42,9 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(GatewaySupervisor)
 
+
+WebUsers GatewaySupervisor::theWebUsers_ = WebUsers();
+
 //==============================================================================
 GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
     : xdaq::Application(s)
@@ -56,6 +59,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
     , broadcastIterationBreakpoint_(-1)  // for standard transitions, ignore the breakpoint
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
+
 	__COUT__ << __E__;
 
 	// attempt to make directory structure (just in case)
@@ -63,7 +67,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	mkdir((FSM_LAST_GROUP_ALIAS_PATH).c_str(), 0755);
 	mkdir((RUN_NUMBER_PATH).c_str(), 0755);
 
-	securityType_ = theWebUsers_.getSecurity();
+	securityType_ = GatewaySupervisor::theWebUsers_.getSecurity();
 
 	__COUT__ << "Security: " << securityType_ << __E__;
 
@@ -2035,12 +2039,14 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		                                                 newAccountCode,
 		                                                 cgi.getEnvironment().getRemoteAddr());  // after call jumbledUser holds displayName on success
 
-		if(uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
+		if(uid >= theWebUsers_.ACCOUNT_ERROR_THRESHOLD)
 		{
 			__COUT__ << "Login invalid." << __E__;
 			jumbledUser = "";          // clear display name if failure
 			if(newAccountCode != "1")  // indicates uuid not found
 				newAccountCode = "0";  // clear cookie code if failure
+
+
 		}
 		else  // Log login in logbook for active experiment
 			makeSystemLogbookEntry(theWebUsers_.getUsersUsername(uid) + " logged in.");
@@ -2048,6 +2054,12 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		//__COUT__ << "new cookieCode = " << newAccountCode.substr(0, 10) << __E__;
 
 		HttpXmlDocument xmldoc(newAccountCode, jumbledUser);
+
+		//include extra error detail
+		if(uid == theWebUsers_.ACCOUNT_INACTIVE)
+			xmldoc.addTextElementToData("Error", "Account is inactive. Notify admins.");
+		else if(uid == theWebUsers_.ACCOUNT_BLACKLISTED)
+			xmldoc.addTextElementToData("Error", "Account is blacklisted. Notify admins.");
 
 		theWebUsers_.insertSettingsForUser(uid, &xmldoc);  // insert settings
 
@@ -2290,9 +2302,6 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			__COUT__ << "accounts = " << accounts << __E__;
 			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
 		}
-		else if(requestType == "viewCodeContent")
-		{
-		}
 		else if(requestType == "setSettings")
 		{
 			std::string bgcolor   = CgiDataUtilities::postData(cgiIn, "bgcolor");
@@ -2317,11 +2326,11 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			int         type_int = -1;
 
 			if(type == "updateAccount")
-				type_int = 0;
+				type_int = theWebUsers_.MOD_TYPE_UPDATE;
 			else if(type == "createAccount")
-				type_int = 1;
+				type_int = theWebUsers_.MOD_TYPE_ADD;
 			else if(type == "deleteAccount")
-				type_int = 2;
+				type_int = theWebUsers_.MOD_TYPE_DELETE;
 
 			std::string username    = CgiDataUtilities::postData(cgiIn, "username");
 			std::string displayname = CgiDataUtilities::postData(cgiIn, "displayname");

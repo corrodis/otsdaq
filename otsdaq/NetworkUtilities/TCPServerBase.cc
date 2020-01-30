@@ -167,6 +167,24 @@ void TCPServerBase::broadcast(const std::vector<char>& message)
 }
 
 //==============================================================================
+void TCPServerBase::broadcast(const std::vector<uint16_t>& message)
+{
+	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
+	{
+		try
+		{
+			dynamic_cast<TCPTransmitterSocket*>(it->second)->send(message);
+		}
+		catch(const std::exception& e)
+		{
+			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
+			delete it->second;
+			fConnectedClients.erase(it--);
+		}
+	}
+}
+
+//==============================================================================
 void TCPServerBase::shutdownAccept()
 {
 	fAccept = false;

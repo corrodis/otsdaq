@@ -12,6 +12,8 @@
 				<COLUMN Type="ChildLink-physics" 	 Name="physicsLink" 	 StorageName="PHYSICS_LINK" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQPhysicsTable"/>
 				<COLUMN Type="ChildLinkUID-physics" 	 Name="physicsLinkUID" 	 StorageName="PHYSICS_LINK_UID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="ProcessName" 	 StorageName="PROCESS_NAME" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-addOnParameters parameters" 	 Name="AddOnParametersLink" 	 StorageName="ADD_ON_PARAMETERS_LINK" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQDaqParameterTable"/>
+				<COLUMN Type="ChildLinkGroupID-addOnParameters parameters" 	 Name="AddOnParametersLinkGroupID" 	 StorageName="ADD_ON_PARAMETERS_LINK_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>

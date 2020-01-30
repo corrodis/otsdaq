@@ -7,6 +7,9 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#if __GNUC__ >= 8
+#pragma GCC diagnostic ignored "-Wcatch-value"
+#endif
 #include "xdaq/Application.h"       /* for  xdaq::ApplicationDescriptor */
 #include "xdaq/ContextDescriptor.h" /* for  xdaq::ContextDescriptor */
 #pragma GCC diagnostic pop
