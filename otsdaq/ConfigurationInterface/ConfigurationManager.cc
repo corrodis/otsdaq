@@ -179,10 +179,14 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/, bool init
 		}
 		catch(std::runtime_error& e)
 		{
+			__COUT_ERR__ << "Error caught in init(): " << e.what();
 			if(accumulatedErrors)
 				*accumulatedErrors += e.what();
 			else
-				throw;
+			{
+				__SS__ << e.what(); //add line number of rethrow
+				__SS_ONLY_THROW__;
+			}
 		}
 	}
 }  // end init()
@@ -331,8 +335,8 @@ void ConfigurationManager::restoreActiveTableGroups(bool               throwErro
 
 	if(throwErrors && errorStr != "")
 	{
-		__COUT_INFO__ << "\n" << errorStr;
-		__THROW__(errorStr);
+		__SS__ << "\n" << errorStr;
+		__SS_ONLY_THROW__;
 	}
 	else if(errorStr != "")
 		__COUT_INFO__ << "\n" << errorStr;
@@ -1015,9 +1019,9 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 	//		get()
 	for(auto& memberPair : memberMap)
 	{
-		// if(accumulateWarnings)
-		//	__COUT__ << "\tMember config " << memberPair.first << ":" <<
-		//		memberPair.second << __E__;
+		//		if(accumulateWarnings)
+		//			__COUT__ << "\tMember config " << memberPair.first << ":" <<
+		//				memberPair.second << __E__;
 
 		// get the proper temporary pointer
 		//	use 0 if doesn't exist yet.
@@ -1057,7 +1061,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 			if(accumulateWarnings)
 				getError = ss.str();
 			else
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 		}
 		catch(...)
 		{
@@ -1091,7 +1095,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 				continue;
 			}
 			else
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 		}
 
 		nameToTableMap_[memberPair.first] = tmpConfigBasePtr;
@@ -1112,7 +1116,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 			__SS__ << nameToTableMap_[memberPair.first]->getTableName() << ": View version not activated properly!";
 			__SS_THROW__;
 		}
-	}
+	} //end member map loop
 }  // end loadMemberMap()
 
 //==============================================================================
@@ -1284,7 +1288,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 					{
 						__SS__ << "Group '" << groupName << "(" << groupKey << ")' requires table version alias '" << aliasPair.first << ":" << aliasPair.second
 						       << ",' which was not found in the active Backbone!" << __E__;
-						__SS_THROW__;
+						__SS_ONLY_THROW__;
 					}
 
 					memberMap[aliasPair.first] = versionAliases[aliasPair.first][aliasPair.second];
@@ -1420,8 +1424,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 					       << " are not allowed! Please only use unique, persistent "
 					          "versions when version tracking is enabled."
 					       << __E__;
-					__COUT_ERR__ << "\n" << ss.str();
-					__SS_THROW__;
+					__SS_ONLY_THROW__;
 				}
 
 				// attempt to init using the configuration's specific init
@@ -1528,7 +1531,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
 			else
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 		}
 		catch(...)
 		{
@@ -1537,7 +1540,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
 			else
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 		}
 	}
 
@@ -1559,7 +1562,7 @@ catch(...)
 		if(accumulatedWarnings)
 			*accumulatedWarnings += ss.str();
 		else
-			__SS_THROW__;
+			__SS_ONLY_THROW__;
 	}
 	catch(...)
 	{
@@ -1568,7 +1571,7 @@ catch(...)
 		if(accumulatedWarnings)
 			*accumulatedWarnings += ss.str();
 		else
-			__SS_THROW__;
+			__SS_ONLY_THROW__;
 	}
 }  // end loadTableGroup()
 

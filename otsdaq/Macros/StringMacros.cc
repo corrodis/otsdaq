@@ -939,6 +939,52 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 }  // end extractCommonChunks()
 
 //==============================================================================
+// IgnoreCaseCompareStruct operator used to order
+//	std::set, etc ignoring letter case
+// e.g. used here: void ConfigurationGUISupervisor::handleTablesXML
+bool StringMacros::IgnoreCaseCompareStruct::operator()(const std::string& lhs, const std::string& rhs) const
+{
+	//__COUTV__(lhs);
+	//__COUTV__(rhs);
+	//return true if lhs < rhs (lhs will be ordered first)
+
+	for(unsigned int i=0;i<lhs.size() && i<rhs.size(); ++i)
+	{
+
+		//__COUT__ << i << "\t" << lhs[i] << "\t" << rhs[i] << __E__;
+		if((lhs[i] >= 'A' && lhs[i] <= 'Z' &&
+				rhs[i] >= 'A' && rhs[i] <= 'Z') ||
+				(lhs[i] >= 'a' && lhs[i] <= 'z' &&
+						rhs[i] >= 'a' && rhs[i] <= 'z'))
+		{ //same case
+			if(lhs[i] == rhs[i]) continue;
+			return (lhs[i] < rhs[i]);
+			//{ retVal = false; break;} //return false;
+		}
+		else if(lhs[i] >= 'A' && lhs[i] <= 'Z') //rhs lower case
+		{
+			if(lhs[i]+32 == rhs[i])  //lower case is higher by 32
+				return false; //in tie return lower case first
+			return (lhs[i]+32 < rhs[i]);
+		}
+		else if(rhs[i] >= 'A' && rhs[i] <= 'Z')
+		{
+			if(lhs[i] == rhs[i]+32)  //lower case is higher by 32
+				return true; //in tie return lower case first
+			return (lhs[i] < rhs[i]+32);
+		}
+		else //not letters case (should only be for numbers)
+		{
+			if(lhs[i] == rhs[i]) continue;
+			return (lhs[i] < rhs[i]);
+		}
+	} //end case insensitive compare loop
+
+	//lhs and rhs are equivalent to character[i], so return false if rhs.size() was the limit reached
+	return lhs.size() < rhs.size();
+} //end IgnoreCaseCompareStruct::operator() comparison handler
+
+//==============================================================================
 // exec
 //	run linux command and get result back in string
 std::string StringMacros::exec(const char* cmd)

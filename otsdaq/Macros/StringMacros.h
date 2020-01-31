@@ -198,6 +198,12 @@ struct StringMacros
 
 	static char* 				otsGetEnvironmentVarable	(const char* name, const std::string&  location, const unsigned int& line);
 
+
+
+	struct IgnoreCaseCompareStruct { //get string in order ignoring letter case
+		bool 					operator() 					(const std::string& lhs, const std::string& rhs) const; //comparison handler
+	}; //end IgnoreCaseCompareStruct
+
 	// clang-format on
 };  // end StringMarcos static class
 
