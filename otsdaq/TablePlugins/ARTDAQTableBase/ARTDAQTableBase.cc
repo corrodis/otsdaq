@@ -256,7 +256,9 @@ std::string ARTDAQTableBase::insertModuleType(std::ostream& out, std::string& ta
 	return value;
 }  // end insertModuleType()
 
-void ots::ARTDAQTableBase::insertMetricsBlock(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree daqNode)
+//==============================================================================
+// insertMetricsBlock
+void ARTDAQTableBase::insertMetricsBlock(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree daqNode)
 {
 	OUT << "\n\nmetrics: {\n";
 
