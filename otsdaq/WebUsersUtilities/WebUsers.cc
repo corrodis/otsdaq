@@ -164,6 +164,8 @@ WebUsers::WebUsers()
 // request code should just return.. out is handled on false; on true, out is untouched
 bool WebUsers::xmlRequestOnGateway(cgicc::Cgicc& cgi, std::ostringstream* out, HttpXmlDocument* xmldoc, WebUsers::RequestUserInfo& userInfo)
 {
+	std::lock_guard<std::mutex> lock(webUserMutex_);
+
 	// initialize user info parameters to failed results
 	WebUsers::initializeRequestUserInfo(cgi, userInfo);
 

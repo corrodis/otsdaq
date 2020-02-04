@@ -598,6 +598,8 @@ class WebUsers
 		IP_BLACKLIST_COUNT_THRESHOLD = 200,
 	};
 	std::map<std::string /*ip*/, uint32_t /*errorCount*/> ipBlacklistCounts_;
+
+	std::mutex				webUserMutex_;
 };
 // clang-format on
 }  // namespace ots
