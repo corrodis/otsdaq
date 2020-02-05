@@ -860,14 +860,19 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
 
-	// get pset from Board Reader metric manager table
+	// get pset from Board Reader metric manager table      
 	try
 	{
+	  //FIXME -- this should be enabled and named by configuration!
+	  if(1)
+	    {
 		std::string metric_string = "epics: {metricPluginType:epics level:3 channel_name_prefix:Mu2e}";
 		fhicl::ParameterSet metric_pset;
 		fhicl::make_ParameterSet(metric_string, metric_pset);
 
 		metricMan->initialize(metric_pset, "TDAQ_mu2eshift");
+		__SUP_COUT__ << "transitionConfiguring metric manager initialized." << __E__;
+	    }
 	}
 	catch (...)
 	{
@@ -881,13 +886,14 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
 
 	CoreSupervisorBase::transitionConfiguring(event);
 
+	__SUP_COUT__ << "transitionConfiguring done." << __E__;
 } //end transitionConfiguring()
 
 //==============================================================================
 void FESupervisor::transitionHalting(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionHalting" << __E__;
+	metricMan->shutdown(); //will set initilized_ to false with mutex, which should prevent races
 	CoreSupervisorBase::transitionHalting(event);
-
-	metricMan->shutdown();
+	__SUP_COUT__ << "transitionHalting done." << __E__;
 } //end transitionHalting()

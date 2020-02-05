@@ -16,6 +16,7 @@ FEVInterface::FEVInterface(const std::string& interfaceUID, const ConfigurationT
 	, VStateMachine(interfaceUID)
     , slowControlsWorkLoop_(interfaceUID + "-SlowControls", this)
     , interfaceUID_(interfaceUID)
+    , mfSubject_(interfaceUID)
 //, interfaceType_
 //(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>())
 //, daqHardwareType_            	("NOT SET")
@@ -24,15 +25,17 @@ FEVInterface::FEVInterface(const std::string& interfaceUID, const ConfigurationT
 	// NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the
 	// base class versions of function (e.g. getInterfaceType) are called because the
 	// derived class has not been instantiate yet!
-	__COUT__ << "'" << interfaceUID << "' Constructed." << __E__;
+        // Instead use __GEN_COUT__ which decorates using mfSubject_
+  __GEN_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
 //==============================================================================
 FEVInterface::~FEVInterface(void)
 {
-	// NOTE:: be careful not to call __FE_COUT__ decoration because it uses the tree and
-	// it may already be destructed partially
-	__COUT__ << FEVInterface::interfaceUID_ << " Destructed." << __E__;
+	// NOTE:: be careful not to call __FE_COUT__ decoration because it might use the tree 
+        // depending on child class overrides, and it may already be destructed partially.
+        // Instead use __GEN_COUT__ which decorates using mfSubject_
+  __GEN_COUT__ << "Destructed." << __E__;
 }  // end destructor()
 
 //==============================================================================

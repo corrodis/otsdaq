@@ -257,6 +257,7 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 	bool        					workLoopThread				(toolbox::task::WorkLoop* workLoop);
 	
 	std::string 									interfaceUID_;
+	std::string                                                                     mfSubject_; // for __GEN_COUT__ decorations which would be safe in destructors, e.g. mirror interfaceUID_ 
 
 	unsigned int 									universalAddressSize_ = 0;
 	unsigned int 									universalDataSize_    = 0;
