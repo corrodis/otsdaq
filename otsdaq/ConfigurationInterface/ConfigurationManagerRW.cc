@@ -314,8 +314,16 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	__COUT__ << "Extracting list of tables complete. Now initializing..." << __E__;
 
 	// call init to load active versions by default, activate with warnings allowed (assuming development going on)
-	init(0 /*accumulatedErrors*/, false /*initForWriteAccess*/, accumulatedWarnings);
+	{
+		//if there is a filter name, do not include init warnings (it just scares people in the table editor)
+		std::string tmpAccumulateWarnings;
+		init(0 /*accumulatedErrors*/, false /*initForWriteAccess*/,
+				accumulatedWarnings?&tmpAccumulateWarnings:nullptr
+				);
 
+		if(accumulatedWarnings && errorFilterName == "")
+			*accumulatedWarnings += tmpAccumulateWarnings;
+	}
 	__COUT__ << "======================================================== getAllTableInfo end" << __E__;
 
 	// get Group Info too!

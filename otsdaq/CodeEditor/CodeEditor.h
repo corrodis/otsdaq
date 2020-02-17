@@ -37,7 +37,7 @@ class CodeEditor
 	std::string safeExtensionString(const std::string& extension);
 
   public:
-	static const std::string SPECIAL_TYPE_FEInterface, SPECIAL_TYPE_DataProcessor, SPECIAL_TYPE_Table, SPECIAL_TYPE_ControlsInterface, SPECIAL_TYPE_Tools,
+	static const std::string SPECIAL_TYPE_FEInterface, SPECIAL_TYPE_DataProcessor, SPECIAL_TYPE_Table, SPECIAL_TYPE_SlowControls, SPECIAL_TYPE_Tools,
 	    SPECIAL_TYPE_UserData, SPECIAL_TYPE_OutputData;
 
 	static const std::string SOURCE_BASE_PATH, USER_DATA_PATH, OTSDAQ_DATA_PATH;
