@@ -9,10 +9,7 @@
 using namespace ots;
 
 //==============================================================================
-TCPSocket::TCPSocket(int socketId) : fSocketId(socketId)
-{
-	open();
-}
+TCPSocket::TCPSocket(int socketId) : fSocketId(socketId) { open(); }
 
 //==============================================================================
 TCPSocket::~TCPSocket()

@@ -72,7 +72,7 @@ void CoreSupervisorBase::defaultPage(xgi::Input* in, xgi::Output* out)
 	__SUP_COUT__ << "Default page = " << pagess.str() << __E__;
 
 	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame src='" << pagess.str() << "'></frameset></html>";
-} //end defaultPage()
+}  // end defaultPage()
 
 //==============================================================================
 // requestWrapper ~
@@ -155,7 +155,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 
 	// return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*print to cout*/, !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
-} //end requestWrapper()
+}  // end requestWrapper()
 
 //==============================================================================
 // request
@@ -234,7 +234,7 @@ void CoreSupervisorBase::nonXmlRequest(const std::string& requestType, cgicc::Cg
 	out << "This is the empty Core Supervisor non-xml request. Supervisors should "
 	       "override this function."
 	    << __E__;
-} //end nonXmlRequest()
+}  // end nonXmlRequest()
 
 //==============================================================================
 void CoreSupervisorBase::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out) {}
@@ -247,7 +247,7 @@ xoap::MessageReference CoreSupervisorBase::stateMachineXoapHandler(xoap::Message
 	stateMachineWorkLoopManager_.processRequest(message);
 	__SUP_COUT__ << "Done - Soap Handler!" << __E__;
 	return message;
-} //end stateMachineXoapHandler()
+}  // end stateMachineXoapHandler()
 
 //==============================================================================
 // indirection to allow for overriding handler
@@ -270,17 +270,13 @@ xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::Messag
 	// send back status and progress parameters
 
 	const std::string& err = theStateMachine_.getErrorMessage();
-	std::string status   = err == ""?
-			(theStateMachine_.isInTransition()?
-				theStateMachine_.getProvenanceStateName():
-				theStateMachine_.getCurrentStateName()):
-				(theStateMachine_.getCurrentStateName() == "Paused"?
-						"Soft-Error:::":"Error:::") + err;
+	std::string status = err == "" ? (theStateMachine_.isInTransition() ? theStateMachine_.getProvenanceStateName() : theStateMachine_.getCurrentStateName())
+	                               : (theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Error:::") + err;
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("Status", status);
 	retParameters.addParameter("Progress", RunControlStateMachine::theProgressBar_.readPercentageString());
-	retParameters.addParameter("Detail", getStatusProgressDetail()); //call virtual progress detail string generation
+	retParameters.addParameter("Detail", getStatusProgressDetail());  // call virtual progress detail string generation
 
 	return SOAPUtilities::makeSOAPMessageReference("applicationStatusRequestReply", retParameters);
 }  // end applicationStatusRequest()
@@ -292,20 +288,20 @@ xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::Messag
 //	e.g. 94:FE0:1:2
 std::string CoreSupervisorBase::getStatusProgressDetail(void)
 {
-	std::string detail;
+	std::string  detail;
 	unsigned int cnt = 0;
 	for(const auto& fsm : CoreSupervisorBase::theStateMachineImplementation_)
 	{
 		std::string fsmProgressDetail = fsm->getStatusProgressDetail();
 		if(fsmProgressDetail.size())
-			detail += ((cnt++)?":":"") + fsmProgressDetail;//StringMacros::encodeURIComponent(fsmProgressDetail);
+			detail += ((cnt++) ? ":" : "") + fsmProgressDetail;  // StringMacros::encodeURIComponent(fsmProgressDetail);
 	}
 
 	if(detail.size())
 		__SUP_COUTV__(detail);
 
 	return detail;
-} // end getStatusProgressDetail()
+}  // end getStatusProgressDetail()
 
 //==============================================================================
 bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
@@ -320,7 +316,7 @@ bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 	               // WorkLoopManager the try workLoop->remove(job_) could be commented
 	               // out return true;//go on and then you must do the
 	               // workLoop->remove(job_) in WorkLoopManager
-} //end stateMachineThread()
+}  // end stateMachineThread()
 
 //==============================================================================
 xoap::MessageReference CoreSupervisorBase::stateMachineStateRequest(xoap::MessageReference message)

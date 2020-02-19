@@ -4,9 +4,9 @@
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "artdaq/DAQdata/Globals.hh"
+#include "artdaq/ExternalComms/MakeCommanderPlugin.hh"
 #include "cetlib_except/exception.h"
 #include "fhiclcpp/make_ParameterSet.h"
-#include "artdaq/ExternalComms/MakeCommanderPlugin.hh"
 
 #include "artdaq-core/Utilities/ExceptionHandler.hh" /*for artdaq::ExceptionHandler*/
 
@@ -112,7 +112,6 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	setenv("DAQINTERFACE_PARTITION_NUMBER", std::to_string(partition_).c_str(), 1);
 	auto logfileName = std::string(__ENV__("OTSDAQ_LOG_DIR")) + "/DAQInteface/DAQInterface_partition" + std::to_string(partition_) + ".log";
 	setenv("DAQINTERFACE_LOGFILE", logfileName.c_str(), 1);
-
 
 	o << "log_directory: " << getSupervisorProperty("log_directory", std::string(__ENV__("OTSDAQ_LOG_DIR"))) << std::endl;
 
@@ -362,8 +361,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 }  // end transitionConfiguring()
 
 //==============================================================================
-void ARTDAQSupervisor::configuringThread()
-try
+void ARTDAQSupervisor::configuringThread() try
 {
 	const std::string& uid =
 	    theConfigurationManager_
@@ -617,8 +615,7 @@ catch(...)
 }  // end configuringThread() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Halting..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -693,8 +690,7 @@ catch(...)
 }  // end transitionHalting() exception handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Initializing..." << __E__;
 	init();
@@ -713,8 +709,7 @@ catch(...)
 }  // end transitionInitializing() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Pausing..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -751,8 +746,7 @@ catch(...)
 }  // end transitionPausing() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Resuming..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -786,8 +780,7 @@ catch(...)
 }  // end transitionResuming() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Starting..." << __E__;
 	{
@@ -831,8 +824,7 @@ catch(...)
 }  // end transitionStarting() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference event)
-try
+void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -973,29 +965,30 @@ std::list<ots::ARTDAQSupervisor::DAQInterfaceProcessInfo> ots::ARTDAQSupervisor:
 		}
 	}
 	return output;
-} //end getAndParseProcessInfo_()
+}  // end getAndParseProcessInfo_()
 
 //==============================================================================
-std::list<std::pair<ots::ARTDAQSupervisor::DAQInterfaceProcessInfo,
-std::unique_ptr<artdaq::CommanderInterface>>> ots::ARTDAQSupervisor::makeCommandersFromProcessInfo()
+std::list<std::pair<ots::ARTDAQSupervisor::DAQInterfaceProcessInfo, std::unique_ptr<artdaq::CommanderInterface>>>
+ots::ARTDAQSupervisor::makeCommandersFromProcessInfo()
 {
 	std::list<std::pair<DAQInterfaceProcessInfo, std::unique_ptr<artdaq::CommanderInterface>>> output;
-	auto                                                 infos = getAndParseProcessInfo_();
+	auto                                                                                       infos = getAndParseProcessInfo_();
 
 	for(auto& info : infos)
 	{
 		artdaq::Commandable cm;
-		fhicl::ParameterSet  ps;
+		fhicl::ParameterSet ps;
 
 		ps.put<std::string>("commanderPluginType", "xmlrpc");
 		ps.put<int>("id", info.port);
 		ps.put<std::string>("server_url", info.host);
 
-		output.emplace_back(std::make_pair<DAQInterfaceProcessInfo, std::unique_ptr<artdaq::CommanderInterface>>(std::move(info), artdaq::MakeCommanderPlugin(ps, cm)));
+		output.emplace_back(
+		    std::make_pair<DAQInterfaceProcessInfo, std::unique_ptr<artdaq::CommanderInterface>>(std::move(info), artdaq::MakeCommanderPlugin(ps, cm)));
 	}
 
 	return output;
-} //end makeCommandersFromProcessInfo()
+}  // end makeCommandersFromProcessInfo()
 
 //==============================================================================
 std::list<std::string> ots::ARTDAQSupervisor::tokenize_(std::string const& input)
@@ -1020,7 +1013,7 @@ std::list<std::string> ots::ARTDAQSupervisor::tokenize_(std::string const& input
 		}
 	}
 	return output;
-} //end tokenize_()
+}  // end tokenize_()
 
 //==============================================================================
 void ots::ARTDAQSupervisor::daqinterfaceRunner_()

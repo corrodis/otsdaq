@@ -98,7 +98,6 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
 	// get all supervisor info, and wiz mode, macroMaker mode, or not
 	allSupervisorInfo_.init(getApplicationContext());
 
-
 	xgi::bind(this, &WizardSupervisor::Default, "Default");
 	xgi::bind(this, &WizardSupervisor::verification, "Verify");
 	xgi::bind(this, &WizardSupervisor::request, "Request");
@@ -115,7 +114,7 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
 	GatewaySupervisor::indicateOtsAlive();
 
 	__COUT__ << "Constructor complete." << __E__;
-} //end constructor()
+}  // end constructor()
 
 //==============================================================================
 WizardSupervisor::~WizardSupervisor(void) { destroy(); }
@@ -123,13 +122,11 @@ WizardSupervisor::~WizardSupervisor(void) { destroy(); }
 //==============================================================================
 void WizardSupervisor::init(void)
 {
-
 	// attempt to make directory structure (just in case)
 	mkdir((WizardSupervisor::SERVICE_DATA_PATH).c_str(), 0755);
 	mkdir((WizardSupervisor::SERVICE_DATA_PATH + "/OtsWizardData").c_str(), 0755);
 
-
-} //end init()
+}  // end init()
 
 //==============================================================================
 void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
@@ -332,7 +329,7 @@ void WizardSupervisor::printURL(WizardSupervisor* ptr, std::string securityCode)
 		__COUT__ << WizardSupervisor::WIZ_SUPERVISOR << ":" << WizardSupervisor::WIZ_PORT
 		         << "/urn:xdaq-application:lid=" << ptr->getApplicationDescriptor()->getLocalId() << "/Verify?code=" << securityCode << std::endl;
 	}
-} //end printURL()
+}  // end printURL()
 
 //==============================================================================
 void WizardSupervisor::destroy(void)
@@ -563,7 +560,6 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 			else if(type == "deleteAccount")
 				type_int = GatewaySupervisor::theWebUsers_.MOD_TYPE_DELETE;
 
-
 			std::string username    = CgiDataUtilities::postData(cgiIn, "username");
 			std::string displayname = CgiDataUtilities::postData(cgiIn, "displayname");
 			std::string email       = CgiDataUtilities::postData(cgiIn, "useremail");
@@ -665,10 +661,8 @@ void WizardSupervisor::editSecurity(xgi::Input* in, xgi::Output* out)
 			*out << submittedSecurity;
 			return;
 		}
-		else if(submittedSecurity == WebUsers::SECURITY_TYPE_DIGEST_ACCESS ||
-				submittedSecurity == WebUsers::SECURITY_TYPE_NONE)
+		else if(submittedSecurity == WebUsers::SECURITY_TYPE_DIGEST_ACCESS || submittedSecurity == WebUsers::SECURITY_TYPE_NONE)
 		{
-
 			// attempt to make directory structure (just in case)
 			mkdir((WizardSupervisor::SERVICE_DATA_PATH).c_str(), 0755);
 			mkdir((WizardSupervisor::SERVICE_DATA_PATH + "/OtsWizardData").c_str(), 0755);
@@ -712,7 +706,7 @@ void WizardSupervisor::editSecurity(xgi::Input* in, xgi::Output* out)
 		*out << security;
 	}
 
-} //end editSecurity()
+}  // end editSecurity()
 
 //==============================================================================
 void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)

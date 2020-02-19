@@ -13,8 +13,8 @@
 
 #include "otsdaq/FiniteStateMachine/VStateMachine.h"
 
-#include "otsdaq/WebUsersUtilities/RemoteWebUsers.h"
 #include "otsdaq/MessageFacility/ITRACEController.h"
+#include "otsdaq/WebUsersUtilities/RemoteWebUsers.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

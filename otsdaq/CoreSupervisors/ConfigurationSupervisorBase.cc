@@ -371,8 +371,7 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 	// make sure not using partial tables or anything weird when creating the group
 	//	so start from scratch and load backbone, but allow errors
 	std::string                             accumulatedWarnings;
-	const std::map<std::string, TableInfo>& allTableInfo =
-			cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
+	const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
 	__COUT_WARN__ << "Ignoring these errors: " << accumulatedWarnings << __E__;
 	cfgMgr->loadConfigurationBackbone();
 
@@ -539,10 +538,10 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 				const std::set<std::string> srcColNames = cfgViewPtr->getSourceColumnNames();
 				__SS__ << "\n\nThere were errors found in loading a member table " << groupMemberPair.first << ":v" << cfgViewPtr->getVersion()
 				       << ". Please see the details below:\n\n"
-				       << "The source column size was found to be " << srcColNames.size()
-				       << ", and the current number of columns for this table is " << cfgViewPtr->getNumberOfColumns() << ". This resulted in a count of "
-				       << cfgViewPtr->getSourceColumnMismatch() << " source column mismatches, and a count of " << cfgViewPtr->getSourceColumnMissing()
-				       << " table entries missing in " << cfgViewPtr->getNumberOfRows() << " row(s) of data." << __E__;
+				       << "The source column size was found to be " << srcColNames.size() << ", and the current number of columns for this table is "
+				       << cfgViewPtr->getNumberOfColumns() << ". This resulted in a count of " << cfgViewPtr->getSourceColumnMismatch()
+				       << " source column mismatches, and a count of " << cfgViewPtr->getSourceColumnMissing() << " table entries missing in "
+				       << cfgViewPtr->getNumberOfRows() << " row(s) of data." << __E__;
 
 				ss << "\n\nSource column names were as follows:\n";
 				char index = 'a';
@@ -651,8 +650,7 @@ catch(...)
 //		...
 //		</table>
 void ConfigurationSupervisorBase::handleGetTableGroupXML(
-    HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr,
-	const std::string& groupName, TableGroupKey groupKey, bool ignoreWarnings) try
+    HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr, const std::string& groupName, TableGroupKey groupKey, bool ignoreWarnings) try
 {
 	char                 tmpIntStr[100];
 	xercesc::DOMElement *parentEl, *configEl;
@@ -684,21 +682,19 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(
 	if(groupKey.isInvalid() ||  // if invalid or not found, get latest
 	   sortedKeys.find(groupKey) == sortedKeys.end())
 	{
-		//report error if group key not found
+		// report error if group key not found
 		if(!groupKey.isInvalid())
 		{
-			//attempt to reload all group info and power through
+			// attempt to reload all group info and power through
 			std::string                             accumulatedWarnings;
-			const std::map<std::string, TableInfo>& allTableInfo =
-					cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
-			__COUT_WARN__ << "Attempting info refresh. Ignoring these errors: " <<
-					accumulatedWarnings << __E__;
+			const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
+			__COUT_WARN__ << "Attempting info refresh. Ignoring these errors: " << accumulatedWarnings << __E__;
 
 			__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;
-			//xmlOut.addTextElementToData("Error", ss.str());
+			// xmlOut.addTextElementToData("Error", ss.str());
 
 			ss << "Found keys: " << __E__;
-			for(auto& key:sortedKeys)
+			for(auto& key : sortedKeys)
 				ss << "\t" << key << __E__;
 			__COUT__ << ss.str() << __E__;
 		}
@@ -871,8 +867,7 @@ catch(...)
 }  // end handleGetTableGroupXML() catch
 
 //==============================================================================
-bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
-														  HttpXmlDocument&        xmlOut,
+bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&        xmlOut,
                                                           ConfigurationManagerRW* cfgMgr,
                                                           const std::string&      iconCaption,
                                                           const std::string&      iconAltText,
@@ -984,7 +979,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 				try
 				{
 					windowLinkedApp = StringMacros::decodeURIComponent(windowLinkedApp);
-					int appRow = appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
+					int appRow      = appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
 				}
 				catch(const std::runtime_error& e)
 				{
@@ -1028,20 +1023,16 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 			unsigned int gidCol = parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_GID);
 
-			//remove all existing records from groupID (e.g. parameters leftover from manual manipulations)
-			std::vector<unsigned int /*row*/> rowsInGroup =
-					parameterTable.tableView_->getGroupRows(
-							gidCol,iconUID + "_Parameters" /*groupID*/);
+			// remove all existing records from groupID (e.g. parameters leftover from manual manipulations)
+			std::vector<unsigned int /*row*/> rowsInGroup = parameterTable.tableView_->getGroupRows(gidCol, iconUID + "_Parameters" /*groupID*/);
 
 			__COUTV__(StringMacros::vectorToString(rowsInGroup));
 
-			//go through vector backwards to maintain row integrity
-			for(unsigned int r = rowsInGroup.size()-1; r < rowsInGroup.size(); --r)
-				parameterTable.tableView_->removeRowFromGroup(
-						rowsInGroup[r],gidCol,iconUID + "_Parameters" /*groupID*/,
-						true /*deleteRowIfNoGroupLeft*/);
+			// go through vector backwards to maintain row integrity
+			for(unsigned int r = rowsInGroup.size() - 1; r < rowsInGroup.size(); --r)
+				parameterTable.tableView_->removeRowFromGroup(rowsInGroup[r], gidCol, iconUID + "_Parameters" /*groupID*/, true /*deleteRowIfNoGroupLeft*/);
 
-			//create new parameters
+			// create new parameters
 			for(const auto& parameter : parameters)
 			{
 				// create parameter record
@@ -1050,8 +1041,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 				// set parameter status true
 				parameterTable.tableView_->setValueAsString("1", row, parameterTable.tableView_->getColStatus());
 				// set parameter Group ID
-				parameterTable.tableView_->setValueAsString(
-				    iconUID + "_Parameters", row, gidCol);
+				parameterTable.tableView_->setValueAsString(iconUID + "_Parameters", row, gidCol);
 				// set parameter key
 				parameterTable.tableView_->setURIEncodedValue(parameter.first, row, parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_KEY));
 				// set parameter value
@@ -1572,8 +1562,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 		if(!newBackboneKey.isInvalid())
 		{
 			__COUT__ << "Found equivalent group key (" << newBackboneKey << ") for " << backboneGroupName << "." << __E__;
-			xmlOut.addTextElementToData(backboneGroupName + "_foundEquivalentKey",
-			                            "1" /*indicator*/);
+			xmlOut.addTextElementToData(backboneGroupName + "_foundEquivalentKey", "1" /*indicator*/);
 		}
 		else
 		{

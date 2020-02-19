@@ -14,13 +14,13 @@ using namespace ots;
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "CodeEditor"
 
-const std::string CodeEditor::SPECIAL_TYPE_FEInterface       = "FEInterface";
-const std::string CodeEditor::SPECIAL_TYPE_DataProcessor     = "DataProcessor";
-const std::string CodeEditor::SPECIAL_TYPE_Table             = "Table";
-const std::string CodeEditor::SPECIAL_TYPE_SlowControls = "SlowControls";
-const std::string CodeEditor::SPECIAL_TYPE_Tools             = "Tools";
-const std::string CodeEditor::SPECIAL_TYPE_UserData          = "UserData";
-const std::string CodeEditor::SPECIAL_TYPE_OutputData        = "OutputData";
+const std::string CodeEditor::SPECIAL_TYPE_FEInterface   = "FEInterface";
+const std::string CodeEditor::SPECIAL_TYPE_DataProcessor = "DataProcessor";
+const std::string CodeEditor::SPECIAL_TYPE_Table         = "Table";
+const std::string CodeEditor::SPECIAL_TYPE_SlowControls  = "SlowControls";
+const std::string CodeEditor::SPECIAL_TYPE_Tools         = "Tools";
+const std::string CodeEditor::SPECIAL_TYPE_UserData      = "UserData";
+const std::string CodeEditor::SPECIAL_TYPE_OutputData    = "OutputData";
 
 const std::string CodeEditor::SOURCE_BASE_PATH = std::string(__ENV__("MRB_SOURCE")) + "/";
 const std::string CodeEditor::USER_DATA_PATH   = std::string(__ENV__("USER_DATA")) + "/";
@@ -201,9 +201,7 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 				return;
 			}
 
-			std::map<std::string /*special type*/,
-				std::set<std::string> /*special file paths*/> retMap =
-						CodeEditor::getSpecialsMap();
+			std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/> retMap = CodeEditor::getSpecialsMap();
 			if(retMap.find(specialTypes[i]) != retMap.end())
 			{
 				for(const auto& specialTypeFile : retMap[specialTypes[i]])
@@ -644,28 +642,28 @@ std::map<std::string /*special type*/, std::set<std::string> /*special file path
 
 	__COUTV__(path);
 
-	std::vector<std::string>        specialFolders({"FEInterfaces",
-                                    "DataProcessorPlugins",
-                                    "UserTableDataFormats",
-                                    "TablePlugins",
-                                    "TablePluginDataFormats",
-                                    "UserTablePlugins",
-                                    "UserTablePluginDataFormats",
-                                    "SlowControlsInterfacePlugins",
-                                    "ControlsInterfacePlugins",
-                                    "FEInterfacePlugins",
-                                    "tools"});
-	std::vector<std::string>       specialMapTypes({CodeEditor::SPECIAL_TYPE_FEInterface,
-                                     CodeEditor::SPECIAL_TYPE_DataProcessor,
-                                     CodeEditor::SPECIAL_TYPE_Table,
-                                     CodeEditor::SPECIAL_TYPE_Table,
-                                     CodeEditor::SPECIAL_TYPE_Table,
-                                     CodeEditor::SPECIAL_TYPE_Table,
-                                     CodeEditor::SPECIAL_TYPE_Table,
-                                     CodeEditor::SPECIAL_TYPE_SlowControls,
-                                     CodeEditor::SPECIAL_TYPE_SlowControls,
-                                     CodeEditor::SPECIAL_TYPE_FEInterface,
-                                     CodeEditor::SPECIAL_TYPE_Tools});
+	std::vector<std::string> specialFolders({"FEInterfaces",
+	                                         "DataProcessorPlugins",
+	                                         "UserTableDataFormats",
+	                                         "TablePlugins",
+	                                         "TablePluginDataFormats",
+	                                         "UserTablePlugins",
+	                                         "UserTablePluginDataFormats",
+	                                         "SlowControlsInterfacePlugins",
+	                                         "ControlsInterfacePlugins",
+	                                         "FEInterfacePlugins",
+	                                         "tools"});
+	std::vector<std::string> specialMapTypes({CodeEditor::SPECIAL_TYPE_FEInterface,
+	                                          CodeEditor::SPECIAL_TYPE_DataProcessor,
+	                                          CodeEditor::SPECIAL_TYPE_Table,
+	                                          CodeEditor::SPECIAL_TYPE_Table,
+	                                          CodeEditor::SPECIAL_TYPE_Table,
+	                                          CodeEditor::SPECIAL_TYPE_Table,
+	                                          CodeEditor::SPECIAL_TYPE_Table,
+	                                          CodeEditor::SPECIAL_TYPE_SlowControls,
+	                                          CodeEditor::SPECIAL_TYPE_SlowControls,
+	                                          CodeEditor::SPECIAL_TYPE_FEInterface,
+	                                          CodeEditor::SPECIAL_TYPE_Tools});
 
 	// Note: can not do lambda recursive function if using auto to declare the function,
 	//	and must capture reference to the function. Also, must capture specialFolders

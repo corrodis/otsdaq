@@ -655,7 +655,7 @@ void StringMacros::getMapFromString(const std::string&                  inputStr
 			         << "'). " << __E__;
 		}
 	}
-} //end getMapFromString()
+}  // end getMapFromString()
 catch(const std::runtime_error& e)
 {
 	__SS__ << "Error while extracting a map from the string '" << inputString << "'... is it a valid map?" << __E__ << e.what() << __E__;
@@ -946,43 +946,41 @@ bool StringMacros::IgnoreCaseCompareStruct::operator()(const std::string& lhs, c
 {
 	//__COUTV__(lhs);
 	//__COUTV__(rhs);
-	//return true if lhs < rhs (lhs will be ordered first)
+	// return true if lhs < rhs (lhs will be ordered first)
 
-	for(unsigned int i=0;i<lhs.size() && i<rhs.size(); ++i)
+	for(unsigned int i = 0; i < lhs.size() && i < rhs.size(); ++i)
 	{
-
 		//__COUT__ << i << "\t" << lhs[i] << "\t" << rhs[i] << __E__;
-		if((lhs[i] >= 'A' && lhs[i] <= 'Z' &&
-				rhs[i] >= 'A' && rhs[i] <= 'Z') ||
-				(lhs[i] >= 'a' && lhs[i] <= 'z' &&
-						rhs[i] >= 'a' && rhs[i] <= 'z'))
-		{ //same case
-			if(lhs[i] == rhs[i]) continue;
+		if((lhs[i] >= 'A' && lhs[i] <= 'Z' && rhs[i] >= 'A' && rhs[i] <= 'Z') || (lhs[i] >= 'a' && lhs[i] <= 'z' && rhs[i] >= 'a' && rhs[i] <= 'z'))
+		{  // same case
+			if(lhs[i] == rhs[i])
+				continue;
 			return (lhs[i] < rhs[i]);
 			//{ retVal = false; break;} //return false;
 		}
-		else if(lhs[i] >= 'A' && lhs[i] <= 'Z') //rhs lower case
+		else if(lhs[i] >= 'A' && lhs[i] <= 'Z')  // rhs lower case
 		{
-			if(lhs[i]+32 == rhs[i])  //lower case is higher by 32
-				return false; //in tie return lower case first
-			return (lhs[i]+32 < rhs[i]);
+			if(lhs[i] + 32 == rhs[i])  // lower case is higher by 32
+				return false;          // in tie return lower case first
+			return (lhs[i] + 32 < rhs[i]);
 		}
 		else if(rhs[i] >= 'A' && rhs[i] <= 'Z')
 		{
-			if(lhs[i] == rhs[i]+32)  //lower case is higher by 32
-				return true; //in tie return lower case first
-			return (lhs[i] < rhs[i]+32);
+			if(lhs[i] == rhs[i] + 32)  // lower case is higher by 32
+				return true;           // in tie return lower case first
+			return (lhs[i] < rhs[i] + 32);
 		}
-		else //not letters case (should only be for numbers)
+		else  // not letters case (should only be for numbers)
 		{
-			if(lhs[i] == rhs[i]) continue;
+			if(lhs[i] == rhs[i])
+				continue;
 			return (lhs[i] < rhs[i]);
 		}
-	} //end case insensitive compare loop
+	}  // end case insensitive compare loop
 
-	//lhs and rhs are equivalent to character[i], so return false if rhs.size() was the limit reached
+	// lhs and rhs are equivalent to character[i], so return false if rhs.size() was the limit reached
 	return lhs.size() < rhs.size();
-} //end IgnoreCaseCompareStruct::operator() comparison handler
+}  // end IgnoreCaseCompareStruct::operator() comparison handler
 
 //==============================================================================
 // exec

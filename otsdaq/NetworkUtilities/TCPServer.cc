@@ -79,7 +79,7 @@ void TCPServer::acceptConnections()
 		{
 			TCPTransceiverSocket* clientSocket = acceptClient<TCPTransceiverSocket>();
 			clientSocket->setReceiveTimeout(fReceiveTimeout.tv_sec, fReceiveTimeout.tv_usec);
-			clientSocket->setSendTimeout   (fSendTimeout.tv_sec, fSendTimeout.tv_usec);
+			clientSocket->setSendTimeout(fSendTimeout.tv_sec, fSendTimeout.tv_usec);
 			std::thread thread(&TCPServer::connectClient, this, clientSocket);
 			thread.detach();
 		}

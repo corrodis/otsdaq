@@ -1,9 +1,9 @@
 #include "otsdaq/NetworkUtilities/TCPTransmitterSocket.h"
-#include "otsdaq/NetworkUtilities/TCPPacket.h"
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <stdexcept>
+#include "otsdaq/NetworkUtilities/TCPPacket.h"
 //#include <iostream>
 
 using namespace ots;
@@ -101,5 +101,4 @@ void TCPTransmitterSocket::setSendTimeout(unsigned int timeoutSeconds, unsigned 
 	tv.tv_sec  = timeoutSeconds;
 	tv.tv_usec = timeoutMicroSeconds;
 	setsockopt(getSocketId(), SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof tv);
-
 }

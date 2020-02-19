@@ -35,14 +35,14 @@ class SlowControlsVInterface : public Configurable, public VStateMachine
 	virtual void initialize() = 0;
 
 
-	virtual void                                       	subscribe(std::string Name)       	= 0;
-	virtual void                                       	subscribeJSON(std::string List)   	= 0;
-	virtual void                                       	unsubscribe(std::string Name)     	= 0;
-	virtual std::vector<std::string /*Name*/>           getChannelList()                  	= 0;
-	virtual std::string                                	getList(std::string format)       	= 0;
-	virtual std::array<std::string, 4>                 	getCurrentValue(std::string Name) 	= 0;
-	virtual std::vector<std::vector<std::string>> 	   	getChannelHistory(std::string Name)	= 0;
-	virtual std::array<std::string, 9>                 	getSettings(std::string Name)     	= 0;
+	virtual void                                       	subscribe(const std::string& Name)  = 0;
+	virtual void                                       	subscribeJSON(const std::string& JSONNameString)   	= 0;
+	virtual void                                       	unsubscribe(const std::string& Name)= 0;
+	virtual std::vector<std::string /*Name*/>           getChannelList(void)                = 0;
+	virtual std::string                                	getList(const std::string& format)       	= 0;
+	virtual std::array<std::string, 4>                 	getCurrentValue(const std::string& Name) 	= 0;
+	virtual std::vector<std::vector<std::string>> 	   	getChannelHistory(const std::string& Name)	= 0;
+	virtual std::array<std::string, 9>                 	getSettings(const std::string& Name)     	= 0;
 
 
 

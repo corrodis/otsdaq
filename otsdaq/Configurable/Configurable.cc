@@ -9,13 +9,12 @@ Configurable::Configurable(const ConfigurationTree& theXDAQContextConfigTree, co
     : theXDAQContextConfigTree_(theXDAQContextConfigTree)
     , theConfigurationPath_(theConfigurationPath)
     , theConfigurationRecordName_(
-    		(theXDAQContextConfigTree_.getNode(theConfigurationPath_).isLinkNode() &&
-    				theXDAQContextConfigTree_.getNode(theConfigurationPath_).isDisconnected())?
-    		theXDAQContextConfigTree_.getNode(theConfigurationPath_).getDisconnectedLinkID()
-    		:theXDAQContextConfigTree_.getNode(theConfigurationPath_).getValueAsString())
+          (theXDAQContextConfigTree_.getNode(theConfigurationPath_).isLinkNode() && theXDAQContextConfigTree_.getNode(theConfigurationPath_).isDisconnected())
+              ? theXDAQContextConfigTree_.getNode(theConfigurationPath_).getDisconnectedLinkID()
+              : theXDAQContextConfigTree_.getNode(theConfigurationPath_).getValueAsString())
 {
 	__CFG_COUT__ << " Configurable class constructed. " << __E__;
-} //end constructor()
+}  // end constructor()
 
 //==============================================================================
 Configurable::~Configurable(void) {}
@@ -26,7 +25,7 @@ ConfigurationTree Configurable::getSelfNode() const
 	// Note: do not save self node as member, because it may change as configuration is
 	// activated
 	return theXDAQContextConfigTree_.getNode(theConfigurationPath_);
-} //end getSelfNode()
+}  // end getSelfNode()
 
 //==============================================================================
 const ConfigurationManager* Configurable::getConfigurationManager() const { return theXDAQContextConfigTree_.getConfigurationManager(); }

@@ -199,8 +199,7 @@ catch(...)
 
 //==============================================================================
 // find all configuration groups in database
-std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableGroupNames(
-		 std::string const& filterString) const try
+std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableGroupNames(std::string const& filterString) const try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 

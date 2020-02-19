@@ -315,11 +315,9 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 
 	// call init to load active versions by default, activate with warnings allowed (assuming development going on)
 	{
-		//if there is a filter name, do not include init warnings (it just scares people in the table editor)
+		// if there is a filter name, do not include init warnings (it just scares people in the table editor)
 		std::string tmpAccumulateWarnings;
-		init(0 /*accumulatedErrors*/, false /*initForWriteAccess*/,
-				accumulatedWarnings?&tmpAccumulateWarnings:nullptr
-				);
+		init(0 /*accumulatedErrors*/, false /*initForWriteAccess*/, accumulatedWarnings ? &tmpAccumulateWarnings : nullptr);
 
 		if(accumulatedWarnings && errorFilterName == "")
 			*accumulatedWarnings += tmpAccumulateWarnings;
@@ -573,16 +571,16 @@ TableBase* ConfigurationManagerRW::getVersionedTableByName(const std::string& ta
 		table->setActiveView(version);
 	else
 		theInterface_->get(table,
-	                   tableName,
-	                   0,
-	                   0,
-	                   false,  // fill w/version
-	                   version,
-	                   false,  // do not reset
-	                   looseColumnMatching,
-	                   accumulatedErrors);
+		                   tableName,
+		                   0,
+		                   0,
+		                   false,  // fill w/version
+		                   version,
+		                   false,  // do not reset
+		                   looseColumnMatching,
+		                   accumulatedErrors);
 	return table;
-} //end getVersionedTableByName()
+}  // end getVersionedTableByName()
 
 //==============================================================================
 // saveNewTable
@@ -641,7 +639,7 @@ TableVersion ConfigurationManagerRW::saveNewTable(const std::string& tableName, 
 
 	// table->getView().print();
 	return newVersion;
-} //end saveNewTable()
+}  // end saveNewTable()
 
 //==============================================================================
 // eraseTemporaryVersion
@@ -699,7 +697,7 @@ void ConfigurationManagerRW::clearCachedVersions(const std::string& tableName)
 	TableBase* table = getTableByName(tableName);
 
 	table->trimCache(0);
-} //end clearCachedVersions()
+}  // end clearCachedVersions()
 
 //==============================================================================
 // clearAllCachedVersions
@@ -710,7 +708,7 @@ void ConfigurationManagerRW::clearAllCachedVersions()
 {
 	for(auto configInfo : allTableInfo_)
 		configInfo.second.tablePtr_->trimCache(0);
-} //end clearAllCachedVersions()
+}  // end clearAllCachedVersions()
 
 //==============================================================================
 // copyViewToCurrentColumns
@@ -729,7 +727,7 @@ TableVersion ConfigurationManagerRW::copyViewToCurrentColumns(const std::string&
 	allTableInfo_[tableName].versions_.insert(newTemporaryVersion);
 
 	return newTemporaryVersion;
-} //end copyViewToCurrentColumns()
+}  // end copyViewToCurrentColumns()
 
 //==============================================================================
 // cacheGroupKey
@@ -737,11 +735,11 @@ void ConfigurationManagerRW::cacheGroupKey(const std::string& groupName, TableGr
 {
 	allGroupInfo_[groupName].keys_.emplace(key);
 
-//	__SS__ << "Now keys are: " << __E__;
-//	for(auto& key:allGroupInfo_[groupName].keys_)
-//		ss << "\t" << key << __E__;
-//	__COUT__ << ss.str() << __E__;
-} //end cacheGroupKey()
+	//	__SS__ << "Now keys are: " << __E__;
+	//	for(auto& key:allGroupInfo_[groupName].keys_)
+	//		ss << "\t" << key << __E__;
+	//	__COUT__ << ss.str() << __E__;
+}  // end cacheGroupKey()
 
 //==============================================================================
 // getGroupInfo
@@ -764,7 +762,7 @@ const GroupInfo& ConfigurationManagerRW::getGroupInfo(const std::string& groupNa
 		return allGroupInfo_[groupName];
 	}
 	return it->second;
-} //end getGroupInfo()
+}  // end getGroupInfo()
 
 //==============================================================================
 // findTableGroup
@@ -1019,7 +1017,7 @@ TableGroupKey ConfigurationManagerRW::saveNewTableGroup(const std::string&      
 
 	// at this point succeeded!
 	return newKey;
-} //end saveNewTableGroup()
+}  // end saveNewTableGroup()
 
 //==============================================================================
 // saveNewBackbone
@@ -1057,7 +1055,7 @@ TableVersion ConfigurationManagerRW::saveNewBackbone(TableVersion temporaryVersi
 	}
 
 	return newVersion;
-} //end saveNewBackbone()
+}  // end saveNewBackbone()
 
 //==============================================================================
 // saveModifiedVersionXML
@@ -1303,7 +1301,7 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
                                   bool               updateTableAliases /*= false*/,
                                   TableGroupKey*     newBackboneKey /*= nullptr*/,
                                   bool*              foundEquivalentBackboneKey /*= nullptr*/,
-								  std::string*		 accumulatedWarnings /*= nullptr*/)
+                                  std::string*       accumulatedWarnings /*= nullptr*/)
 {
 	__COUT__ << "Saving changes..." << __E__;
 
@@ -1524,20 +1522,15 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
 
 		std::string localAccumulatedWarnings;
 		cfgMgr->restoreActiveTableGroups(
-			false /*throwErrors*/,
-			"" /*pathToActiveGroupsFile*/,
-			false /*onlyLoadIfBackboneOrContext*/,
-			&localAccumulatedWarnings);
+		    false /*throwErrors*/, "" /*pathToActiveGroupsFile*/, false /*onlyLoadIfBackboneOrContext*/, &localAccumulatedWarnings);
 	}
 
 	// activate new groups
 	if(!localNewBackboneKey.isInvalid())
-		cfgMgr->activateTableGroup(backboneGroupEdit.originalGroupName_, localNewBackboneKey,
-				accumulatedWarnings?accumulatedWarnings:nullptr);
+		cfgMgr->activateTableGroup(backboneGroupEdit.originalGroupName_, localNewBackboneKey, accumulatedWarnings ? accumulatedWarnings : nullptr);
 
 	if(activateNewGroup)
-		cfgMgr->activateTableGroup(groupNameToSave, newGroupKey,
-				accumulatedWarnings?accumulatedWarnings:nullptr);
+		cfgMgr->activateTableGroup(groupNameToSave, newGroupKey, accumulatedWarnings ? accumulatedWarnings : nullptr);
 
 	__COUT__ << "Changes saved." << __E__;
 }  // end GroupEditStruct::saveChanges()

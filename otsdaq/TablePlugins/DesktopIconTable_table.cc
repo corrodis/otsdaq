@@ -170,7 +170,7 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 		}
 	}  // end main icon extraction loop
 
-} //end init()
+}  // end init()
 
 //==============================================================================
 std::string DesktopIconTable::removeCommas(const std::string& str, bool andHexReplace, bool andHTMLReplace)
@@ -187,16 +187,15 @@ std::string DesktopIconTable::removeCommas(const std::string& str, bool andHexRe
 			retStr += "&#44;";
 
 	return retStr;
-} //end removeCommas()
+}  // end removeCommas()
 
 //==============================================================================
 void DesktopIconTable::setAllDesktopIcons(const std::vector<DesktopIconTable::DesktopIcon>& newIcons)
 {
 	activeDesktopIcons_.clear();
-	for(const auto& newIcon:newIcons)
+	for(const auto& newIcon : newIcons)
 		activeDesktopIcons_.push_back(newIcon);
 
-} //end setAllDesktopIcons
-
+}  // end setAllDesktopIcons
 
 DEFINE_OTS_TABLE(DesktopIconTable)

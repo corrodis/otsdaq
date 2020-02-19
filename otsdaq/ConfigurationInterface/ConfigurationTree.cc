@@ -2472,87 +2472,85 @@ std::vector<std::vector<std::string>> ConfigurationTree::getChildrenNamesByPrior
 		// this node is table node
 		// so return all uid node strings that match groupId
 
-		//bool tmpStatus;
+		// bool tmpStatus;
 
-		std::vector<std::vector<unsigned int /*group row*/>> groupRowsByPriority =
-				tableView_->getGroupRowsByPriority(
-						groupId_ == ""?
-								TableView::INVALID: //if no group ID, take all rows and ignore column, do not attempt link lookup
-								tableView_->getLinkGroupIDColumn(childLinkIndex_),
-						groupId_,
-						onlyStatusTrue);
+		std::vector<std::vector<unsigned int /*group row*/>> groupRowsByPriority = tableView_->getGroupRowsByPriority(
+		    groupId_ == "" ? TableView::INVALID :  // if no group ID, take all rows and ignore column, do not attempt link lookup
+		        tableView_->getLinkGroupIDColumn(childLinkIndex_),
+		    groupId_,
+		    onlyStatusTrue);
 
-		//now build vector of vector names by priority
+		// now build vector of vector names by priority
 		for(const auto& priorityChildRowVector : groupRowsByPriority)
 		{
 			retVector.push_back(std::vector<std::string /*child name*/>());
 			for(const auto& priorityChildRow : priorityChildRowVector)
 				retVector[retVector.size() - 1].push_back(tableView_->getDataView()[priorityChildRow][tableView_->getColUID()]);
 		}
-//		if(1)  // reshuffle by priority
-//		{
-//			try
-//			{
-//				std::map<uint64_t /*priority*/, std::vector<unsigned int /*child row*/>> orderedByPriority;
-//				std::vector<std::string /*child name*/>                                  retPrioritySet;
-//
-//				unsigned int col = tableView_->getColPriority();
-//
-//				uint64_t tmpPriority;
-//
-//				for(unsigned int r = 0; r < tableView_->getNumberOfRows(); ++r)
-//					if(groupId_ == "" || tableView_->isEntryInGroup(r, childLinkIndex_, groupId_))
-//					{
-//						// check status if needed
-//						if(onlyStatusTrue)
-//						{
-//							tableView_->getValue(tmpStatus, r, tableView_->getColStatus());
-//							if(!tmpStatus)
-//								continue;  // skip those with status false
-//						}
-//
-//						tableView_->getValue(tmpPriority, r, col);
-//						// do not accept DEFAULT value of 0.. convert to 100
-//						orderedByPriority[tmpPriority ? tmpPriority : 100].push_back(r);
-//					}
-//
-//				// at this point have priority map
-//				// now build return vector
-//
-//				for(const auto& priorityChildRowVector : orderedByPriority)
-//				{
-//					retVector.push_back(std::vector<std::string /*child name*/>());
-//					for(const auto& priorityChildRow : priorityChildRowVector.second)
-//						retVector[retVector.size() - 1].push_back(tableView_->getDataView()[priorityChildRow][tableView_->getColUID()]);
-//				}
-//
-//				__COUT__ << "Returning priority children list." << __E__;
-//				return retVector;
-//			}
-//			catch(std::runtime_error& e)
-//			{
-//				__COUT_WARN__ << "Error identifying priority. Assuming all children have "
-//				                 "equal priority (Error: "
-//				              << e.what() << __E__;
-//				retVector.clear();
-//			}
-//		}
-//		// else not by priority
-//
-//		for(unsigned int r = 0; r < tableView_->getNumberOfRows(); ++r)
-//			if(groupId_ == "" || tableView_->isEntryInGroup(r, childLinkIndex_, groupId_))
-//			{
-//				// check status if needed
-//				if(onlyStatusTrue)
-//				{
-//					tableView_->getValue(tmpStatus, r, tableView_->getColStatus());
-//					if(!tmpStatus)
-//						continue;  // skip those with status false
-//				}
-//
-//				retVector.push_back(std::vector<std::string /*child name*/>());
-//				retVector[retVector.size() - 1].push_back(tableView_->getDataView()[r][tableView_->getColUID()]);
-//			}
+		//		if(1)  // reshuffle by priority
+		//		{
+		//			try
+		//			{
+		//				std::map<uint64_t /*priority*/, std::vector<unsigned int /*child row*/>> orderedByPriority;
+		//				std::vector<std::string /*child name*/>                                  retPrioritySet;
+		//
+		//				unsigned int col = tableView_->getColPriority();
+		//
+		//				uint64_t tmpPriority;
+		//
+		//				for(unsigned int r = 0; r < tableView_->getNumberOfRows(); ++r)
+		//					if(groupId_ == "" || tableView_->isEntryInGroup(r, childLinkIndex_, groupId_))
+		//					{
+		//						// check status if needed
+		//						if(onlyStatusTrue)
+		//						{
+		//							tableView_->getValue(tmpStatus, r, tableView_->getColStatus());
+		//							if(!tmpStatus)
+		//								continue;  // skip those with status false
+		//						}
+		//
+		//						tableView_->getValue(tmpPriority, r, col);
+		//						// do not accept DEFAULT value of 0.. convert to 100
+		//						orderedByPriority[tmpPriority ? tmpPriority : 100].push_back(r);
+		//					}
+		//
+		//				// at this point have priority map
+		//				// now build return vector
+		//
+		//				for(const auto& priorityChildRowVector : orderedByPriority)
+		//				{
+		//					retVector.push_back(std::vector<std::string /*child name*/>());
+		//					for(const auto& priorityChildRow : priorityChildRowVector.second)
+		//						retVector[retVector.size() - 1].push_back(tableView_->getDataView()[priorityChildRow][tableView_->getColUID()]);
+		//				}
+		//
+		//				__COUT__ << "Returning priority children list." << __E__;
+		//				return retVector;
+		//			}
+		//			catch(std::runtime_error& e)
+		//			{
+		//				__COUT_WARN__ << "Error identifying priority. Assuming all children have "
+		//				                 "equal priority (Error: "
+		//				              << e.what() << __E__;
+		//				retVector.clear();
+		//			}
+		//		}
+		//		// else not by priority
+		//
+		//		for(unsigned int r = 0; r < tableView_->getNumberOfRows(); ++r)
+		//			if(groupId_ == "" || tableView_->isEntryInGroup(r, childLinkIndex_, groupId_))
+		//			{
+		//				// check status if needed
+		//				if(onlyStatusTrue)
+		//				{
+		//					tableView_->getValue(tmpStatus, r, tableView_->getColStatus());
+		//					if(!tmpStatus)
+		//						continue;  // skip those with status false
+		//				}
+		//
+		//				retVector.push_back(std::vector<std::string /*child name*/>());
+		//				retVector[retVector.size() - 1].push_back(tableView_->getDataView()[r][tableView_->getColUID()]);
+		//			}
 	}
 	else if(row_ == TableView::INVALID)
 	{
@@ -2612,84 +2610,80 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority, bo
 		// this node is table node
 		// so return all uid node strings that match groupId
 		std::vector<unsigned int /*group row*/> groupRows =
-				tableView_->getGroupRows(
-						(groupId_ == ""?
-								TableView::INVALID: //if no group ID, take all rows, do not attempt link lookup
-								tableView_->getLinkGroupIDColumn(childLinkIndex_)),
-						groupId_,
-						onlyStatusTrue,
-						byPriority);
+		    tableView_->getGroupRows((groupId_ == "" ? TableView::INVALID :  // if no group ID, take all rows, do not attempt link lookup
+		                                  tableView_->getLinkGroupIDColumn(childLinkIndex_)),
+		                             groupId_,
+		                             onlyStatusTrue,
+		                             byPriority);
 
-		//now build vector of vector names by priority
+		// now build vector of vector names by priority
 		for(const auto& groupRow : groupRows)
 			retVector.push_back(tableView_->getDataView()[groupRow][tableView_->getColUID()]);
 
-
-
-//		bool tmpStatus;
-//
-//		if(byPriority)  // reshuffle by priority
-//		{
-//			try
-//			{
-//				std::map<uint64_t /*priority*/, std::vector<unsigned int /*child row*/>> orderedByPriority;
-//				std::vector<std::string /*child name*/>                                  retPrioritySet;
-//
-//				unsigned int col = tableView_->getColPriority();
-//
-//				uint64_t tmpPriority;
-//
-//				for(unsigned int r = 0; r < tableView_->getNumberOfRows(); ++r)
-//					if(groupId_ == "" || tableView_->isEntryInGroup(r, childLinkIndex_, groupId_))
-//					{
-//						// check status if needed
-//						if(onlyStatusTrue)
-//						{
-//							tableView_->getValue(tmpStatus, r, tableView_->getColStatus());
-//
-//							if(!tmpStatus)
-//								continue;  // skip those with status false
-//						}
-//
-//						tableView_->getValue(tmpPriority, r, col);
-//						// do not accept DEFAULT value of 0.. convert to 100
-//						orderedByPriority[tmpPriority ? tmpPriority : 100].push_back(r);
-//					}
-//
-//				// at this point have priority map
-//				// now build return vector
-//
-//				for(const auto& priorityChildRowVector : orderedByPriority)
-//					for(const auto& priorityChildRow : priorityChildRowVector.second)
-//						retVector.push_back(tableView_->getDataView()[priorityChildRow][tableView_->getColUID()]);
-//
-//				__COUT__ << "Returning priority children list." << __E__;
-//				return retVector;
-//			}
-//			catch(std::runtime_error& e)
-//			{
-//				__COUT_WARN__ << "Priority configuration not found. Assuming all "
-//						"children have equal priority. "
-//						<< __E__;
-//				retVector.clear();
-//			}
-//		}
-//		// else not by priority
-//
-//		for(unsigned int r = 0; r < tableView_->getNumberOfRows(); ++r)
-//			if(groupId_ == "" || tableView_->isEntryInGroup(r, childLinkIndex_, groupId_))
-//			{
-//				// check status if needed
-//				if(onlyStatusTrue)
-//				{
-//					tableView_->getValue(tmpStatus, r, tableView_->getColStatus());
-//
-//					if(!tmpStatus)
-//						continue;  // skip those with status false
-//				}
-//
-//				retVector.push_back(tableView_->getDataView()[r][tableView_->getColUID()]);
-//			}
+		//		bool tmpStatus;
+		//
+		//		if(byPriority)  // reshuffle by priority
+		//		{
+		//			try
+		//			{
+		//				std::map<uint64_t /*priority*/, std::vector<unsigned int /*child row*/>> orderedByPriority;
+		//				std::vector<std::string /*child name*/>                                  retPrioritySet;
+		//
+		//				unsigned int col = tableView_->getColPriority();
+		//
+		//				uint64_t tmpPriority;
+		//
+		//				for(unsigned int r = 0; r < tableView_->getNumberOfRows(); ++r)
+		//					if(groupId_ == "" || tableView_->isEntryInGroup(r, childLinkIndex_, groupId_))
+		//					{
+		//						// check status if needed
+		//						if(onlyStatusTrue)
+		//						{
+		//							tableView_->getValue(tmpStatus, r, tableView_->getColStatus());
+		//
+		//							if(!tmpStatus)
+		//								continue;  // skip those with status false
+		//						}
+		//
+		//						tableView_->getValue(tmpPriority, r, col);
+		//						// do not accept DEFAULT value of 0.. convert to 100
+		//						orderedByPriority[tmpPriority ? tmpPriority : 100].push_back(r);
+		//					}
+		//
+		//				// at this point have priority map
+		//				// now build return vector
+		//
+		//				for(const auto& priorityChildRowVector : orderedByPriority)
+		//					for(const auto& priorityChildRow : priorityChildRowVector.second)
+		//						retVector.push_back(tableView_->getDataView()[priorityChildRow][tableView_->getColUID()]);
+		//
+		//				__COUT__ << "Returning priority children list." << __E__;
+		//				return retVector;
+		//			}
+		//			catch(std::runtime_error& e)
+		//			{
+		//				__COUT_WARN__ << "Priority configuration not found. Assuming all "
+		//						"children have equal priority. "
+		//						<< __E__;
+		//				retVector.clear();
+		//			}
+		//		}
+		//		// else not by priority
+		//
+		//		for(unsigned int r = 0; r < tableView_->getNumberOfRows(); ++r)
+		//			if(groupId_ == "" || tableView_->isEntryInGroup(r, childLinkIndex_, groupId_))
+		//			{
+		//				// check status if needed
+		//				if(onlyStatusTrue)
+		//				{
+		//					tableView_->getValue(tmpStatus, r, tableView_->getColStatus());
+		//
+		//					if(!tmpStatus)
+		//						continue;  // skip those with status false
+		//				}
+		//
+		//				retVector.push_back(tableView_->getDataView()[r][tableView_->getColUID()]);
+		//			}
 	}
 	else if(row_ == TableView::INVALID)
 	{

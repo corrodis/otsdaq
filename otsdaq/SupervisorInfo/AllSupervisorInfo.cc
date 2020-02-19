@@ -14,7 +14,6 @@ const bool AllSupervisorInfo::MACROMAKER_MODE = ((getenv("MACROMAKER_MODE") == N
                                                      ? (false)
                                                      : ((std::string(__ENV__("MACROMAKER_MODE")) == "1") ? true : false));
 
-
 //==============================================================================
 AllSupervisorInfo::AllSupervisorInfo(void) : theSupervisorInfo_(0), theWizardInfo_(0) {}
 
@@ -35,7 +34,7 @@ void AllSupervisorInfo::destroy(void)
 	theWizardInfo_     = 0;
 
 	SupervisorDescriptorInfoBase::destroy();
-} //end destroy()
+}  // end destroy()
 
 //==============================================================================
 void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
@@ -241,7 +240,7 @@ void AllSupervisorInfo::setSupervisorStatus(const unsigned int& id, const std::s
 		__SS_THROW__;
 	}
 	it->second.setStatus(status, progress, detail);
-} //end setSupervisorStatus()
+}  // end setSupervisorStatus()
 
 //==============================================================================
 const SupervisorInfo& AllSupervisorInfo::getGatewayInfo(void) const

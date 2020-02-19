@@ -10,10 +10,10 @@ class CoreSupervisorBase;
 class VStateMachine
 {
   public:
-	VStateMachine(const std::string& name) :
-		iterationIndex_(0), subIterationIndex_(0),
-		iterationWorkFlag_(false), subIterationWorkFlag_(false),
-		name_(name) { ; }
+	VStateMachine(const std::string& name) : iterationIndex_(0), subIterationIndex_(0), iterationWorkFlag_(false), subIterationWorkFlag_(false), name_(name)
+	{
+		;
+	}
 	virtual ~VStateMachine(void) { ; }
 
 	// Transitions
@@ -36,59 +36,52 @@ class VStateMachine
 	//==============================================================================
 	// virtual progress detail string that can be overridden with more info
 	//	e.g. step and sub-step aliases, etc
-	virtual std::string getStatusProgressDetail	(void)
+	virtual std::string getStatusProgressDetail(void)
 	{
 		std::string progress = "";
 
 		if(VStateMachine::getSubIterationWork())
 		{
-			//sub-steps going on
+			// sub-steps going on
 			progress += name_ + ":";
 
-			//check for iteration alias
-			if(iterationAliasMap_.find(transitionName_) !=
-					iterationAliasMap_.end() &&
-					iterationAliasMap_.at(transitionName_).find(VStateMachine::getIterationIndex()) !=
-							iterationAliasMap_.at(transitionName_).end())
+			// check for iteration alias
+			if(iterationAliasMap_.find(transitionName_) != iterationAliasMap_.end() &&
+			   iterationAliasMap_.at(transitionName_).find(VStateMachine::getIterationIndex()) != iterationAliasMap_.at(transitionName_).end())
 				progress += iterationAliasMap_.at(transitionName_).at(VStateMachine::getIterationIndex());
 			else
-				progress += std::to_string(VStateMachine::getIterationIndex()); //just index
+				progress += std::to_string(VStateMachine::getIterationIndex());  // just index
 
 			progress += ":";
 
-			//check for sib-iteration alias
-			if(subIterationAliasMap_.find(transitionName_) !=
-					subIterationAliasMap_.end() &&
-					subIterationAliasMap_.at(transitionName_).find(VStateMachine::getSubIterationIndex()) !=
-							subIterationAliasMap_.at(transitionName_).end())
+			// check for sib-iteration alias
+			if(subIterationAliasMap_.find(transitionName_) != subIterationAliasMap_.end() &&
+			   subIterationAliasMap_.at(transitionName_).find(VStateMachine::getSubIterationIndex()) != subIterationAliasMap_.at(transitionName_).end())
 				progress += subIterationAliasMap_.at(transitionName_).at(VStateMachine::getSubIterationIndex());
 			else
-				progress += std::to_string(VStateMachine::getSubIterationIndex()); //just index
+				progress += std::to_string(VStateMachine::getSubIterationIndex());  // just index
 		}
 		else if(VStateMachine::getIterationWork())
 		{
-			//steps going on
+			// steps going on
 			progress += name_ + ":";
 
-			//check for iteration alias
-			if(iterationAliasMap_.find(transitionName_) !=
-					iterationAliasMap_.end() &&
-					iterationAliasMap_.at(transitionName_).find(VStateMachine::getIterationIndex()) !=
-							iterationAliasMap_.at(transitionName_).end())
+			// check for iteration alias
+			if(iterationAliasMap_.find(transitionName_) != iterationAliasMap_.end() &&
+			   iterationAliasMap_.at(transitionName_).find(VStateMachine::getIterationIndex()) != iterationAliasMap_.at(transitionName_).end())
 				progress += iterationAliasMap_.at(transitionName_).at(VStateMachine::getIterationIndex());
 			else
-				progress += std::to_string(VStateMachine::getIterationIndex()); //just index
+				progress += std::to_string(VStateMachine::getIterationIndex());  // just index
 		}
 		else if(transitionName_ != "")
 			progress += name_ + ":" + transitionName_;
-		//else Done
+		// else Done
 
 		if(progress.size())
 			__COUTV__(progress);
 
 		return progress;
-	} // end getStatusProgressDetail()
-
+	}  // end getStatusProgressDetail()
 
 	void         setTransitionName(const std::string& transitionName) { transitionName_ = transitionName; }
 	void         setIterationIndex(unsigned int i) { iterationIndex_ = i; }
@@ -105,15 +98,14 @@ class VStateMachine
 	CoreSupervisorBase* parentSupervisor_;  // e.g. to communicate error fault and start
 	                                        // transition to error for entire system
   protected:
-	std::map<std::string /*transition*/,
-		std::map<unsigned int /*step index*/, std::string /*step alias*/>>	 iterationAliasMap_;
-	std::map<std::string /*transition*/,
-		std::map<unsigned int /*step index*/, std::string /*step alias*/>>	 subIterationAliasMap_;
+	std::map<std::string /*transition*/, std::map<unsigned int /*step index*/, std::string /*step alias*/>> iterationAliasMap_;
+	std::map<std::string /*transition*/, std::map<unsigned int /*step index*/, std::string /*step alias*/>> subIterationAliasMap_;
+
   private:
-	unsigned int iterationIndex_, subIterationIndex_;
-	bool         iterationWorkFlag_, subIterationWorkFlag_;
+	unsigned int      iterationIndex_, subIterationIndex_;
+	bool              iterationWorkFlag_, subIterationWorkFlag_;
 	const std::string name_;
-	std::string transitionName_;
+	std::string       transitionName_;
 };
 
 }  // namespace ots

@@ -6,9 +6,9 @@
 
 #include <string.h>
 #include <cassert>
+#include <chrono>
 #include <iostream>
 #include <thread>
-#include <chrono>
 
 using namespace ots;
 
@@ -40,7 +40,7 @@ TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
 void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 {
 	TCPSubscribeClient::connect();
-	TCPSubscribeClient::setReceiveTimeout(0,1000);
+	TCPSubscribeClient::setReceiveTimeout(0, 1000);
 	DataProducer::startProcessingData(runNumber);
 }
 
@@ -70,7 +70,7 @@ void TCPDataListenerProducer::slowWrite(void)
 	try
 	{
 		data_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
-		if (data_.size() == 0)
+		if(data_.size() == 0)
 		{
 			std::this_thread::sleep_for(std::chrono::microseconds(1000));
 			return;
@@ -78,7 +78,8 @@ void TCPDataListenerProducer::slowWrite(void)
 	}
 	catch(const std::exception& e)
 	{
-		__COUT__ << "Error: " << e.what() << std::endl;;
+		__COUT__ << "Error: " << e.what() << std::endl;
+		;
 		return;
 	}
 	header_["IPAddress"] = ipAddress_;
@@ -89,7 +90,7 @@ void TCPDataListenerProducer::slowWrite(void)
 		__COUT__ << "There are no available buffers! Retrying...after waiting 10 "
 		            "milliseconds!"
 		         << std::endl;
-			std::this_thread::sleep_for(std::chrono::microseconds(1000));
+		std::this_thread::sleep_for(std::chrono::microseconds(1000));
 		return;
 	}
 }
@@ -103,19 +104,20 @@ void TCPDataListenerProducer::fastWrite(void)
 	if(DataProducer::attachToEmptySubBuffer(dataP_, headerP_) < 0)
 	{
 		__COUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
-			std::this_thread::sleep_for(std::chrono::microseconds(1000));
+		std::this_thread::sleep_for(std::chrono::microseconds(1000));
 		return;
 	}
 
 	try
 	{
 		*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
-		if (dataP_->size() == 0)
+		if(dataP_->size() == 0)
 			return;
 	}
 	catch(const std::exception& e)
 	{
-		__COUT__ << "Error: " << e.what() << std::endl;;
+		__COUT__ << "Error: " << e.what() << std::endl;
+		;
 		return;
 	}
 	(*headerP_)["IPAddress"] = ipAddress_;

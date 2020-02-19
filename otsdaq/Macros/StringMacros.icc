@@ -319,7 +319,7 @@ void StringMacros::getMapFromString(const std::string&    inputString,
 				if(!emplaceReturn.second)
 				{
 					__COUT_WARN__ << "Ignoring repetitive value ('" << inputString.substr(i, j - i) << "') and keeping current value ('"
-					         << emplaceReturn.first->second << "'). " << __E__;
+					              << emplaceReturn.first->second << "'). " << __E__;
 				}
 
 				needValue = false;  // need name now
@@ -333,7 +333,7 @@ void StringMacros::getMapFromString(const std::string&    inputString,
 	{
 		//__COUT__ << "Map value found: " <<
 		//		inputString.substr(i,j-i) << __E__;
-		
+
 		auto /*pair<it,success>*/ emplaceReturn =
 		    mapToReturn.emplace(std::pair<S, T>(name, validateValueForDefaultStringDataType<T>(inputString.substr(i, j - i))  // value
 		                                        ));
@@ -341,14 +341,13 @@ void StringMacros::getMapFromString(const std::string&    inputString,
 		if(!emplaceReturn.second)
 		{
 			__COUT_WARN__ << "Ignoring repetitive value ('" << inputString.substr(i, j - i) << "') and keeping current value ('" << emplaceReturn.first->second
-			         << "'). " << __E__;
+			              << "'). " << __E__;
 		}
 	}
 }  // end getMapFromString<T>()
 catch(const std::runtime_error& e)
 {
-	__SS__ << "Error while extracting a map from the string '" << inputString << 
-			"'... is it a valid map?" << __E__ << e.what() << __E__;
+	__SS__ << "Error while extracting a map from the string '" << inputString << "'... is it a valid map?" << __E__ << e.what() << __E__;
 	__SS_THROW__;
 }  // end getMapFromString
 

@@ -12,8 +12,8 @@
 #include "otsdaq/WebUsersUtilities/WebUsers.h"
 #include "otsdaq/WorkLoopManager/WorkLoopManager.h"
 
-#include "otsdaq/TablePlugins/DesktopIconTable.h"
 #include "otsdaq/CodeEditor/CodeEditor.h"
+#include "otsdaq/TablePlugins/DesktopIconTable.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

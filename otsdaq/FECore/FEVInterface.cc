@@ -13,7 +13,7 @@ using namespace ots;
 FEVInterface::FEVInterface(const std::string& interfaceUID, const ConfigurationTree& theXDAQContextConfigTree, const std::string& configurationPath)
     : WorkLoop(interfaceUID)
     , Configurable(theXDAQContextConfigTree, configurationPath)
-	, VStateMachine(interfaceUID)
+    , VStateMachine(interfaceUID)
     , slowControlsWorkLoop_(interfaceUID + "-SlowControls", this)
     , interfaceUID_(interfaceUID)
     , mfSubject_(interfaceUID)
@@ -25,17 +25,17 @@ FEVInterface::FEVInterface(const std::string& interfaceUID, const ConfigurationT
 	// NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the
 	// base class versions of function (e.g. getInterfaceType) are called because the
 	// derived class has not been instantiate yet!
-        // Instead use __GEN_COUT__ which decorates using mfSubject_
-  __GEN_COUT__ << "Constructed." << __E__;
+	// Instead use __GEN_COUT__ which decorates using mfSubject_
+	__GEN_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
 //==============================================================================
 FEVInterface::~FEVInterface(void)
 {
-	// NOTE:: be careful not to call __FE_COUT__ decoration because it might use the tree 
-        // depending on child class overrides, and it may already be destructed partially.
-        // Instead use __GEN_COUT__ which decorates using mfSubject_
-  __GEN_COUT__ << "Destructed." << __E__;
+	// NOTE:: be careful not to call __FE_COUT__ decoration because it might use the tree
+	// depending on child class overrides, and it may already be destructed partially.
+	// Instead use __GEN_COUT__ which decorates using mfSubject_
+	__GEN_COUT__ << "Destructed." << __E__;
 }  // end destructor()
 
 //==============================================================================
@@ -204,9 +204,9 @@ bool FEVInterface::slowControlsRunning(void) try
 			__FE_COUT_INFO__ << "Slow Controls Aggregate Saving turned On BinaryFormat=" << aggregateFileIsBinaryFormat << __E__;
 
 			std::string saveFullFileName = FEInterfaceNode.getNode("SlowControlsLocalFilePath").getValue<std::string>() + "/" +
-					FEInterfaceNode.getNode("SlowControlsRadixFileName").getValue<std::string>() + "-" +
-					FESlowControlsChannel::underscoreString(getInterfaceUID()) + "-" + std::to_string(time(0)) +
-					(aggregateFileIsBinaryFormat ? ".dat" : ".txt");
+			                               FEInterfaceNode.getNode("SlowControlsRadixFileName").getValue<std::string>() + "-" +
+			                               FESlowControlsChannel::underscoreString(getInterfaceUID()) + "-" + std::to_string(time(0)) +
+			                               (aggregateFileIsBinaryFormat ? ".dat" : ".txt");
 
 			fp = fopen(saveFullFileName.c_str(), aggregateFileIsBinaryFormat ? "ab" : "a");
 			if(!fp)
@@ -218,7 +218,9 @@ bool FEVInterface::slowControlsRunning(void) try
 				__FE_COUT_INFO__ << "Slow controls aggregate file opened: " << saveFullFileName << __E__;
 		}
 	}
-	catch(...) {} //do nothing
+	catch(...)
+	{
+	}  // do nothing
 
 	if(!aggregateFileIsBinaryFormat)
 		__FE_COUT_INFO__ << "Slow Controls Aggregate Saving turned off." << __E__;
@@ -402,8 +404,6 @@ void FEVInterface::sendAsyncErrorToGateway(FEVInterface* fe, const std::string& 
 		__COUT_ERR__ << feHeader.str() << "Sending FE Async Running Error... \n" << errorMessage << __E__;
 
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor = fe->VStateMachine::parentSupervisor_->allSupervisorInfo_.getGatewayInfo().getDescriptor();
-
-
 
 	SOAPParameters parameters;
 	parameters.addParameter("ErrorMessage", errorMessage);
@@ -658,7 +658,7 @@ void FEVInterface::runSequenceOfCommands(const std::string& treeLinkName)
 		__FE_COUT__ << "Unable to access sequence of commands through configuration tree. "
 		            << "Assuming no sequence. " << __E__;
 	}
-} //end runSequenceOfCommands()
+}  // end runSequenceOfCommands()
 
 //==============================================================================
 // runFrontEndMacro

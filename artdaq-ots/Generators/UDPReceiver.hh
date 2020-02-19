@@ -115,9 +115,9 @@ class UDPReceiver : public artdaq::CommandableFragmentGenerator
 	void receiveLoop_();
 	bool isTimerExpired_();
 
-	std::unique_ptr<std::thread>        receiverThread_;
-	std::mutex          receiveBufferLock_;
-	packetBuffer_list_t receiveBuffers_;
+	std::unique_ptr<std::thread> receiverThread_;
+	std::mutex                   receiveBufferLock_;
+	packetBuffer_list_t          receiveBuffers_;
 
 	bool fakeDataMode_;
 

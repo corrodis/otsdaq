@@ -1080,14 +1080,12 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 		//--------------------------------------
 		// handle art @table:: art add on parameters
 		insertParameters(out,
-				tabStr,
-				commentStr,
-				art.getNode("AddOnParametersLink"),
-				"artParameter" /*parameterType*/,
-				false /*onlyInsertAtTableParameters*/,
-				true /*includeAtTableParameters*/);
-
-
+		                 tabStr,
+		                 commentStr,
+		                 art.getNode("AddOnParametersLink"),
+		                 "artParameter" /*parameterType*/,
+		                 false /*onlyInsertAtTableParameters*/,
+		                 true /*includeAtTableParameters*/);
 
 		POPTAB;
 		OUT << "}\n\n";  // end art
@@ -1203,15 +1201,16 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 
 	OUT << "use_routing_master: true\n";
 
-	auto routingMasterSubsystemID = 1;
-	auto routingMasterSubsystemLink = routingMasterNode.getNode("SubsystemLink");
-	std::string rmHost = "localhost";
-	if (!routingMasterSubsystemLink.isDisconnected())
+	auto        routingMasterSubsystemID   = 1;
+	auto        routingMasterSubsystemLink = routingMasterNode.getNode("SubsystemLink");
+	std::string rmHost                     = "localhost";
+	if(!routingMasterSubsystemLink.isDisconnected())
 	{
 		routingMasterSubsystemID = getSubsytemId(routingMasterSubsystemLink);
-		rmHost = info_.subsystems[routingMasterSubsystemID].routingMasterHost;
+		rmHost                   = info_.subsystems[routingMasterSubsystemID].routingMasterHost;
 	}
-	if (rmHost == "localhost" || rmHost == "127.0.0.1") {
+	if(rmHost == "localhost" || rmHost == "127.0.0.1")
+	{
 		char hostbuf[HOST_NAME_MAX + 1];
 		gethostname(hostbuf, HOST_NAME_MAX);
 		rmHost = std::string(hostbuf);
@@ -1328,7 +1327,8 @@ void ARTDAQTableBase::extractRoutingMastersInfo(
 			if(getStatusFalseNodes || routingMaster.second.status())
 			{
 				std::string rmHost = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
-				if (rmHost == "localhost" || rmHost == "127.0.0.1") {
+				if(rmHost == "localhost" || rmHost == "127.0.0.1")
+				{
 					char hostbuf[HOST_NAME_MAX + 1];
 					gethostname(hostbuf, HOST_NAME_MAX);
 					rmHost = std::string(hostbuf);
@@ -1383,7 +1383,7 @@ void ARTDAQTableBase::extractRoutingMastersInfo(
 				info_.processes[ARTDAQAppType::RoutingMaster].emplace_back(
 				    rmUID, rmHost, routingMasterSubsystemID, ARTDAQAppType::RoutingMaster, routingMaster.second.status());
 
-				info_.subsystems[routingMasterSubsystemID].hasRoutingMaster = true;
+				info_.subsystems[routingMasterSubsystemID].hasRoutingMaster  = true;
 				info_.subsystems[routingMasterSubsystemID].routingMasterHost = rmHost;
 
 				if(doWriteFHiCL)
@@ -2287,10 +2287,10 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 		try
 		{
 			ConfigurationTree artdaqSupervisorNode = cfgMgr->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME)
-														 .getNode(artdaqContext->contextUID_)
-														 .getNode(XDAQContextTable::colContext_.colLinkToApplicationTable_)
-														 .getNode(artdaqContext->applications_[0].applicationUID_)
-														 .getNode(XDAQContextTable::colApplication_.colLinkToSupervisorTable_);
+			                                             .getNode(artdaqContext->contextUID_)
+			                                             .getNode(XDAQContextTable::colContext_.colLinkToApplicationTable_)
+			                                             .getNode(artdaqContext->applications_[0].applicationUID_)
+			                                             .getNode(XDAQContextTable::colApplication_.colLinkToSupervisorTable_);
 
 			if(artdaqSupervisorNode.isDisconnected())
 				needArtdaqSupervisorCreation = true;
@@ -2299,7 +2299,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 			needArtdaqSupervisorParents = false;
 		}
-		catch(...) //parents are a problem if error
+		catch(...)  // parents are a problem if error
 		{
 			needArtdaqSupervisorCreation = true;
 		}
@@ -2432,16 +2432,14 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 					if(needArtdaqSupervisorParents)
 					{
-						//first disable any existing artdaq supervisor apps
+						// first disable any existing artdaq supervisor apps
 						{
 							unsigned int c = appTable.tableView_->findCol(XDAQContextTable::colApplication_.colClass_);
-							for(unsigned int r=0;r<appTable.tableView_->getNumberOfRows();++r)
-								if(appTable.tableView_->getDataView()[r][c] ==
-										ARTDAQ_SUPERVISOR_CLASS)
+							for(unsigned int r = 0; r < appTable.tableView_->getNumberOfRows(); ++r)
+								if(appTable.tableView_->getDataView()[r][c] == ARTDAQ_SUPERVISOR_CLASS)
 								{
-									__COUT_WARN__ << "Found partially existing artdaq Supervisor application '" <<
-											appTable.tableView_->getDataView()[r][appTable.tableView_->getColUID()] <<
-											"'... Disabling it." << __E__;
+									__COUT_WARN__ << "Found partially existing artdaq Supervisor application '"
+									              << appTable.tableView_->getDataView()[r][appTable.tableView_->getColUID()] << "'... Disabling it." << __E__;
 									appTable.tableView_->setValueAsString("0", r, appTable.tableView_->getColStatus());
 								}
 						}
@@ -2697,7 +2695,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			// keep track of records to delete, initialize to all in current table
 			std::map<unsigned int /*type record row*/, bool /*doDelete*/> deleteRecordMap;
 			for(unsigned int r = 0; r < typeTable.tableView_->getNumberOfRows(); ++r)
-				deleteRecordMap.emplace(std::make_pair(r,//typeTable.tableView_->getDataView()[i][typeTable.tableView_->getColUID()],
+				deleteRecordMap.emplace(std::make_pair(r,       // typeTable.tableView_->getDataView()[i][typeTable.tableView_->getColUID()],
 				                                       true));  // init to delete
 
 			for(auto& nodePair : nodeTypePair.second)
@@ -2706,8 +2704,8 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 				// default multi-node and array hostname info to empty
 				std::vector<std::string> nodeIndices, hostnameIndices;
-				unsigned int              hostnameFixedWidth = 0, nodeNameFixedWidth = 0;
-				std::string               hostname;
+				unsigned int             hostnameFixedWidth = 0, nodeNameFixedWidth = 0;
+				std::string              hostname;
 
 				// keep a map original multinode values, to maintain node specific links
 				//	(emplace when original node is delete)
@@ -2752,7 +2750,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 							std::vector<std::string> printerSyntaxArr = StringMacros::getVectorFromString(originalParameterArr[1], {','} /*delimiter*/);
 
-							unsigned int              count = 0;
+							unsigned int             count = 0;
 							std::vector<std::string> originalNodeIndices;
 							for(auto& printerSyntaxValue : printerSyntaxArr)
 							{
@@ -2832,26 +2830,21 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								if(originalRow != TableView::INVALID && lastOriginalRow != TableView::INVALID)
 								{
 									// before deleting, record all customizing values and maintain when saving
-									originalMultinodeValues.emplace(std::make_pair(
-											nodeName, std::map<unsigned int /*col*/, std::string /*value*/>()));
+									originalMultinodeValues.emplace(std::make_pair(nodeName, std::map<unsigned int /*col*/, std::string /*value*/>()));
 
-									__COUT__ << "Saving multinode value " << nodeName << "[" <<
-											lastOriginalRow << "][*] with row count = " <<
-											typeTable.tableView_->getNumberOfRows() << __E__;
+									__COUT__ << "Saving multinode value " << nodeName << "[" << lastOriginalRow
+									         << "][*] with row count = " << typeTable.tableView_->getNumberOfRows() << __E__;
 
 									// save all link values
 									for(unsigned int col = 0; col < typeTable.tableView_->getNumberOfColumns(); ++col)
-										if(typeTable.tableView_->getColumnInfo(col).getName() ==
-												ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK ||
-												typeTable.tableView_->getColumnInfo(col).getName() ==
-														ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID)
-											continue; //skip subsystem link
+										if(typeTable.tableView_->getColumnInfo(col).getName() == ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK ||
+										   typeTable.tableView_->getColumnInfo(col).getName() == ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID)
+											continue;  // skip subsystem link
 										else if(typeTable.tableView_->getColumnInfo(col).isChildLink() ||
-										   typeTable.tableView_->getColumnInfo(col).isChildLinkGroupID() ||
-										   typeTable.tableView_->getColumnInfo(col).isChildLinkUID())
-											originalMultinodeValues.at(nodeName)
-											    .emplace(std::make_pair(col,
-											    		typeTable.tableView_->getDataView()[lastOriginalRow][col]));
+										        typeTable.tableView_->getColumnInfo(col).isChildLinkGroupID() ||
+										        typeTable.tableView_->getColumnInfo(col).isChildLinkUID())
+											originalMultinodeValues.at(nodeName).emplace(
+											    std::make_pair(col, typeTable.tableView_->getDataView()[lastOriginalRow][col]));
 
 									typeTable.tableView_->deleteRow(lastOriginalRow);
 									if(originalRow > lastOriginalRow)
@@ -2977,9 +2970,9 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							}
 							else if(printerSyntaxRange.size() == 1)
 							{
-								//unsigned int index;
+								// unsigned int index;
 								__COUTV__(printerSyntaxRange[0]);
-								//sscanf(printerSyntaxRange[0].c_str(), "%u", &index);
+								// sscanf(printerSyntaxRange[0].c_str(), "%u", &index);
 								//__COUTV__(index);
 
 								if(i == 4 /*nodeArrayString*/)
@@ -3116,7 +3109,6 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 							typeTable.tableView_->setValueAsString(hostname, row, hostnameCol);
 
-
 							// remove from delete map
 							deleteRecordMap[row] = false;
 						}
@@ -3132,8 +3124,8 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							{
 								for(const auto& valuePair : originalMultinodeValues.at(name))
 								{
-									__COUT__ << "Customizing node: " << name << "[" << copyRow <<
-											"][" << valuePair.first << "] = " << valuePair.second << __E__;
+									__COUT__ << "Customizing node: " << name << "[" << copyRow << "][" << valuePair.first << "] = " << valuePair.second
+									         << __E__;
 									typeTable.tableView_->setValueAsString(valuePair.second, copyRow, valuePair.first);
 								}
 							}
@@ -3141,7 +3133,6 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							// remove from delete map
 							deleteRecordMap[copyRow] = false;
 						}  // end copy and customize row handling
-
 
 						isFirst = false;
 					}  // end multi-node loop
@@ -3151,8 +3142,8 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			{  // delete record handling
 				__COUT__ << "Deleting '" << nodeTypePair.first << "' records not specified..." << __E__;
 
-				unsigned int row;
-				std::set<unsigned int> orderedRowSet; //need to delete in reverse order
+				unsigned int           row;
+				std::set<unsigned int> orderedRowSet;  // need to delete in reverse order
 				for(auto& deletePair : deleteRecordMap)
 				{
 					__COUTV__(deletePair.first);
@@ -3164,11 +3155,10 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 				}
 
 				// delete elements in reverse order
-				for (std::set<unsigned int>::reverse_iterator rit = orderedRowSet.rbegin();
-						rit != orderedRowSet.rend(); rit++)
+				for(std::set<unsigned int>::reverse_iterator rit = orderedRowSet.rbegin(); rit != orderedRowSet.rend(); rit++)
 					typeTable.tableView_->deleteRow(*rit);
 
-			}      // end delete record handling
+			}  // end delete record handling
 
 			{
 				std::stringstream ss;
@@ -3208,14 +3198,14 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 	{
 		std::string localAccumulatedWarnings;
 		configGroupEdit.saveChanges(configGroupEdit.originalGroupName_,
-	                            newConfigurationGroupKey,
-	                            nullptr /*foundEquivalentGroupKey*/,
-	                            true /*activateNewGroup*/,
-	                            true /*updateGroupAliases*/,
-	                            true /*updateTableAliases*/,
-								nullptr /*newBackboneKey*/,
-								nullptr /*foundEquivalentBackboneKey*/,
-								&localAccumulatedWarnings);
+		                            newConfigurationGroupKey,
+		                            nullptr /*foundEquivalentGroupKey*/,
+		                            true /*activateNewGroup*/,
+		                            true /*updateGroupAliases*/,
+		                            true /*updateTableAliases*/,
+		                            nullptr /*newBackboneKey*/,
+		                            nullptr /*foundEquivalentBackboneKey*/,
+		                            &localAccumulatedWarnings);
 	}
 
 }  // end setAndActivateARTDAQSystem()

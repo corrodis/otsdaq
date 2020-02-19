@@ -1,9 +1,9 @@
 #include "otsdaq/NetworkUtilities/TCPReceiverSocket.h"
 #include <sys/socket.h>
+#include <unistd.h>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <unistd.h>
 
 using namespace ots;
 
@@ -34,7 +34,7 @@ std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int
 	{
 		throw std::logic_error("Bad socket object (this object was moved)");
 	}
-	//std::cout << __PRETTY_FUNCTION__ << "WAITING: " << std::endl;
+	// std::cout << __PRETTY_FUNCTION__ << "WAITING: " << std::endl;
 	std::size_t dataRead = ::read(getSocketId(), buffer, bufferSize);
 	if(dataRead == static_cast<std::size_t>(-1))
 	{

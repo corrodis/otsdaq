@@ -75,10 +75,10 @@ int TCPServerBase::accept(void)
 	struct sockaddr_storage serverStorage;
 	socklen_t               addr_size    = sizeof serverStorage;
 	int                     clientSocket = invalidSocketId;
-	while (fAccept)
+	while(fAccept)
 	{
-		clientSocket = ::accept(getSocketId(), (struct sockaddr *)&serverStorage, &addr_size);
-		if (clientSocket != invalidSocketId)
+		clientSocket = ::accept(getSocketId(), (struct sockaddr*)&serverStorage, &addr_size);
+		if(clientSocket != invalidSocketId)
 			return clientSocket;
 		else
 		{

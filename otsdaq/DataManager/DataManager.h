@@ -74,7 +74,6 @@ class DataManager : public Configurable, public VStateMachine
 	void resumeBuffer(const std::string& bufferUID);
 	void pauseBuffer(const std::string& bufferUID);
 
-
 	enum BufferStatus
 	{
 		Initialized,

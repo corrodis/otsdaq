@@ -27,13 +27,13 @@ class FEVInterfacesManager : public Configurable, public VStateMachine
 	void createInterfaces(void);
 
 	// State Machine Methods
-	virtual void configure(void) override;
-	virtual void halt(void) override;
-	virtual void pause(void) override;
-	virtual void resume(void) override;
-	virtual void start(std::string runNumber) override;
-	virtual void stop(void) override;
-	virtual std::string getStatusProgressDetail	(void) override; //overriding VStateMachine::getStatusProgressDetail
+	virtual void        configure(void) override;
+	virtual void        halt(void) override;
+	virtual void        pause(void) override;
+	virtual void        resume(void) override;
+	virtual void        start(std::string runNumber) override;
+	virtual void        stop(void) override;
+	virtual std::string getStatusProgressDetail(void) override;  // overriding VStateMachine::getStatusProgressDetail
 
 	void        universalRead(const std::string& interfaceID, char* address,
 	                          char* returnValue);  // used by MacroMaker

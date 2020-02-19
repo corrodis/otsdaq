@@ -6,7 +6,7 @@
 #include <fstream>  // std::ofstream
 
 #include "otsdaq/TableCore/TableGroupKey.h"
-#include "otsdaq/TablePlugins/DesktopIconTable.h" //for dynamic desktop icon change
+#include "otsdaq/TablePlugins/DesktopIconTable.h"  //for dynamic desktop icon change
 
 using namespace ots;
 
@@ -44,11 +44,12 @@ const uint8_t ConfigurationManager::METADATA_COL_TIMESTAMP = 4;
 const std::set<std::string> ConfigurationManager::contextMemberNames_  = {ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,
                                                                          ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
                                                                          "XDAQApplicationPropertyTable",
-																		 ConfigurationManager::DESKTOP_ICON_TABLE_NAME,
+                                                                         ConfigurationManager::DESKTOP_ICON_TABLE_NAME,
                                                                          "MessageFacilityTable",
                                                                          "GatewaySupervisorTable",
                                                                          "StateMachineTable",
-                                                                         "DesktopWindowParameterTable"};
+                                                                         "DesktopWindowParameterTable",
+                                                                         "SlowControlsDashboardSupervisorTable"};
 const std::set<std::string> ConfigurationManager::backboneMemberNames_ = {ConfigurationManager::GROUP_ALIASES_TABLE_NAME,
                                                                           ConfigurationManager::VERSION_ALIASES_TABLE_NAME};
 const std::set<std::string> ConfigurationManager::iterateMemberNames_  = {"IterateTable",
@@ -184,7 +185,7 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/, bool init
 				*accumulatedErrors += e.what();
 			else
 			{
-				__SS__ << e.what(); //add line number of rethrow
+				__SS__ << e.what();  // add line number of rethrow
 				__SS_ONLY_THROW__;
 			}
 		}
@@ -1116,7 +1117,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 			__SS__ << nameToTableMap_[memberPair.first]->getTableName() << ": View version not activated properly!";
 			__SS_THROW__;
 		}
-	} //end member map loop
+	}  // end member map loop
 }  // end loadMemberMap()
 
 //==============================================================================
@@ -2564,13 +2565,11 @@ bool ConfigurationManager::isOwnerFirstAppInContext()
 	return isFirstAppInContext;
 }  // end isOwnerFirstAppInContext()
 
-
 //==============================================================================
 // allow for just the desktop icons of the Context to be changed during run-time
 TableBase* ConfigurationManager::getDesktopIconTable(void)
 {
-	if(nameToTableMap_.find(DESKTOP_ICON_TABLE_NAME) ==
-			nameToTableMap_.end())
+	if(nameToTableMap_.find(DESKTOP_ICON_TABLE_NAME) == nameToTableMap_.end())
 	{
 		__SS__ << "Desktop icon table not found!" << __E__;
 		ss << StringMacros::stackTrace() << __E__;
@@ -2578,36 +2577,4 @@ TableBase* ConfigurationManager::getDesktopIconTable(void)
 	}
 
 	return nameToTableMap_.at(DESKTOP_ICON_TABLE_NAME);
-} //end dynamicDesktopIconChange()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}  // end dynamicDesktopIconChange()
