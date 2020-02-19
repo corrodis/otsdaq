@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
+		<TABLE Name="SlowControlsDashboardSupervisorTable">
+			<VIEW Name="SLOW_CONTROLS_DASHBOARD_SUPERVISOR_TABLE" Type="File,Database,DatabaseTest" Description="No%20description.">
+				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="FixedChoiceData" 	 Name="SlowControlsInterfacePluginType" 	 StorageName="SLOW_CONTROLS_INTERFACE_PLUGIN_TYPE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,ControlsOtsInterface,EpicsInterface"/>
+				<COLUMN Type="ChildLink-configureAlarms alarms" 	 Name="LinkToConfigureAlarmsToMonitorTable" 	 StorageName="LINK_TO_CONFIGURE_ALARMS_TO_MONITOR_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,SlowControlsAlarmsToMonitorTable"/>
+				<COLUMN Type="ChildLinkGroupID-configureAlarms alarms" 	 Name="LinkToConfigureAlarmsToMonitorGroupID" 	 StorageName="LINK_TO_CONFIGURE_ALARMS_TO_MONITOR_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-haltAlarms alarms" 	 Name="LinkToHaltAlarmsToMonitorTable" 	 StorageName="LINK_TO_HALT_ALARMS_TO_MONITOR_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,SlowControlsAlarmsToMonitorTable"/>
+				<COLUMN Type="ChildLinkGroupID-haltAlarms alarms" 	 Name="LinkToHaltAlarmsToMonitorGroupID" 	 StorageName="LINK_TO_HALT_ALARMS_TO_MONITOR_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-pauseAlarms alarms" 	 Name="LinkToPauseAlarmsToMonitorTable" 	 StorageName="LINK_TO_PAUSE_ALARMS_TO_MONITOR_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,SlowControlsAlarmsToMonitorTable"/>
+				<COLUMN Type="ChildLinkGroupID-pauseAlarms alarms" 	 Name="LinkToPauseAlarmsToMonitorGroupID" 	 StorageName="LINK_TO_PAUSE_ALARMS_TO_MONITOR_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-resumeAlarms alarms" 	 Name="LinkToResumeAlarmsToMonitorTable" 	 StorageName="LINK_TO_RESUME_ALARMS_TO_MONITOR_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,SlowControlsAlarmsToMonitorTable"/>
+				<COLUMN Type="ChildLinkGroupID-resumeAlarms alarms" 	 Name="LinkToResumeAlarmsToMonitorGroupID" 	 StorageName="LINK_TO_RESUME_ALARMS_TO_MONITOR_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-startAlarms alarms" 	 Name="LinkToStartAlarmsToMonitorTable" 	 StorageName="LINK_TO_START_ALARMS_TO_MONITOR_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,SlowControlsAlarmsToMonitorTable"/>
+				<COLUMN Type="ChildLinkGroupID-startAlarms alarms" 	 Name="LinkToStartAlarmsToMonitorGroupID" 	 StorageName="LINK_TO_START_ALARMS_TO_MONITOR_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-stopAlarms alarms" 	 Name="LinkToStopAlarmsToMonitorTable" 	 StorageName="LINK_TO_STOP_ALARMS_TO_MONITOR_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,SlowControlsAlarmsToMonitorTable"/>
+				<COLUMN Type="ChildLinkGroupID-stopAlarms alarms" 	 Name="LinkToStopAlarmsToMonitorGroupID" 	 StorageName="LINK_TO_STOP_ALARMS_TO_MONITOR_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-runningAlarms alarms" 	 Name="LinkToRunningAlarmsToMonitorTable" 	 StorageName="LINK_TO_RUNNING_ALARMS_TO_MONITOR_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,SlowControlsAlarmsToMonitorTable"/>
+				<COLUMN Type="ChildLinkGroupID-runningAlarms alarms" 	 Name="LinkToRunningAlarmsToMonitorGroupID" 	 StorageName="LINK_TO_RUNNING_ALARMS_TO_MONITOR_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
+			</VIEW>
+		</TABLE>
+	</ROOT>
