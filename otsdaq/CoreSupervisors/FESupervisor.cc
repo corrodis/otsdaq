@@ -870,7 +870,7 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
 			fhicl::ParameterSet metric_pset;
 			fhicl::make_ParameterSet(metric_string, metric_pset);
 
-			metricMan->initialize(metric_pset, "TDAQ_mu2eshift");
+			metricMan->initialize(metric_pset, std::string("TDAQ_") + __ENV__("MU2E_OWNER"));
 			__SUP_COUT__ << "transitionConfiguring metric manager initialized." << __E__;
 		}
 	}

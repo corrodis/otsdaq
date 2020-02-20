@@ -1035,11 +1035,22 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 		__COUT__ << "Done activating Configuration Alias." << __E__;
 	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "\nTransition to Configuring interrupted! System Alias " << systemAlias << " was translated to " << theConfigurationTableGroup_.first << " ("
+		       << theConfigurationTableGroup_.second << ") but could not be loaded and initialized." << __E__;		    
+		ss << "\n\nHere was the error: " << e.what() << "\n\nTo help debug this problem, try activating this group in the Configuration "
+		      "GUI "
+		   << " and detailed errors will be shown." << __E__;
+		__COUT_ERR__ << "\n" << ss.str();
+		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+		return;
+	}
 	catch(...)
 	{
 		__SS__ << "\nTransition to Configuring interrupted! System Alias " << systemAlias << " was translated to " << theConfigurationTableGroup_.first << " ("
 		       << theConfigurationTableGroup_.second << ") but could not be loaded and initialized." << __E__;
-		ss << "\n\nTo debug this problem, try activating this group in the Configuration "
+		ss << "\n\nTo help debug this problem, try activating this group in the Configuration "
 		      "GUI "
 		   << " and detailed errors will be shown." << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
