@@ -127,7 +127,7 @@ echo
 
 cd ${SCRIPT_DIR}/../../../
 echo ${PWD}
-echo "$(ls)"
+#echo "$(ls)"
 source ${SCRIPT_DIR}/../../../setup_ots.sh
 ots -s #disable remote launch to avoid infinite loop
 
