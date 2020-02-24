@@ -1701,12 +1701,12 @@ launchOTS() {
 			  	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 				#echo
 				  
-				if [[ ${contextHostname[$i]} != ${HOSTNAME} ]]; then
+				#if [[ ${contextHostname[$i]} != ${HOSTNAME} ]]; then
 				
 					#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tChecking remote launch ${contextHostname[$i]}:${port}"
 				
 									
-				fi
+				#fi
 				i=$(( $i + 1 ))
 			done
 			
