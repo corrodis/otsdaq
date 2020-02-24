@@ -208,7 +208,7 @@ if [[ "$1"  == "--backup" || "$2"  == "--backup" || "$1"  == "-b" || "$2"  == "-
 fi
 
 if [[ "$1"  == "--relaunch" || "$2"  == "--relaunch" || "$1"  == "-r" || "$2"  == "-r"  ]]; then
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t************* ${RED}RELUANCH CHECK ENABLED!${Reset} ************"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t************* ${RED}RELUANCH CHECK DISABLED!${Reset} ************"
 	RELAUNCHCHECK=0
 fi
 #end check for options
@@ -379,7 +379,17 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	exit
 fi
 
-if [[ ISMACROMAKER == 0 && $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPLOGS == 0 && $RELAUNCHCHECK == 0 && "$1x" != "x" ]]; then
+#KEEP for debugging of defaults
+#echo "ISMACROMAKER $ISMACROMAKER"
+#echo "ISCONFIG $ISCONFIG"
+#echo "QUIET $QUIET"
+#echo "CHROME $CHROME"
+#echo "FIREFOX $FIREFOX"
+#echo "BACKUPLOGS $BACKUPLOGS"
+#echo "RELAUNCHCHECK $RELAUNCHCHECK"
+
+#if all defaults, but also an option, then show usage (i.e. unknown option)
+if [[ $ISMACROMAKER == 0 && $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPLOGS == 0 && $RELAUNCHCHECK == 1 && "$1x" != "x" ]]; then
 	echo 
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${Bold}${Blink}Unrecognized parameter(s)${Reset} ${BIBlue}$1 $2${Reset} [Note: only two parameters are considered, others are ignored]. "
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${BIGreen}Usage${Reset}:"
@@ -1401,7 +1411,7 @@ launchOTS() {
 							rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${HOSTNAME}-${port}.dat >/dev/null 2>&1 #hide output #remove alive file
 
 							if [ $QUIET == 1 ]; then
-								echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching the Gateway Application on host {${HOSTNAME}}...${Reset}"								
+								echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching the Gateway context process on host {${HOSTNAME}}...${Reset}"								
 
 								if [ $BACKUPLOGS == 1 ]; then
 									DATESTRING=`date +'%s'`
@@ -1495,7 +1505,7 @@ launchOTS() {
 	########### 		launch non-Gateway contexts 		############
 	####################################################################
 		
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching all otsdaq Applications for host {${HOSTNAME}}...${Reset}"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching ${#xdaqPort[@]} otsdaq Context procesess for host {${HOSTNAME}}...${Reset}"
 	i=0	
 	for port in "${xdaqPort[@]}"
 	do
@@ -1503,9 +1513,8 @@ launchOTS() {
 	  	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 		#echo
 		  
-
 		if [[ ${xdaqHost[$i]} != ${HOSTNAME} ]]; then
-			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tskipping context no on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tskipping context on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"			
 			i=$(( $i + 1 ))
 			continue
 		fi
@@ -1621,6 +1630,27 @@ launchOTS() {
 		done #end test for relaunch loop
 		####################################################################
 		
+		
+		if [[ (${#contextHostname[@]} > 1) ]]; then
+			remoteHostCount=$((${#contextHostname[@]} -1))
+			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess...${Reset}"
+			i=0	
+			for port in "${contextPort[@]}"
+			do
+			  : 
+			  	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+				#echo
+				  
+				if [[ ${contextHostname[$i]} != ${HOSTNAME} ]]; then
+					echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tLaunching ots context process on remote host ots.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+					echo
+							
+				fi
+				i=$(( $i + 1 ))
+			done
+			
+			
+		fi
 	fi
 	
 	
@@ -1631,13 +1661,20 @@ launchOTS() {
 		
 	echo
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tNote: This host is ${HOSTNAME}."
-	if [[ (${#xdaqPort[@]} == 0) && "x${gatewayHostname}" != "x" ]]; then #${#contextHostname[@]} == 1 ]]; then 
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThis is the ONLY host configured to run ots applications: ${contextHostname[@]}"
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThis is the corresponding port for the ots application: ${contextPort[@]}"
-	  else
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThese are the hosts configured to run ots applications: ${gatewayHostname} ${xdaqHost[@]}"
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThese are the corresponding ports for the applications: ${gatewayPort} ${xdaqPort[@]}"
+	
+	if [[ (${#xdaqPort[@]} == 0) && "x${gatewayHostname}" != "x" ]]; then
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThese are the hosts configured to run ots Context processes: ${contextHostname[@]}"
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThese are the corresponding ports for the Context processes: ${contextPort[@]}"
+	  	 
+		#if [[ ${#contextHostname[@]} == 1 ]]; then 
+		#	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThis is the ONLY host configured to run an ots process: ${contextHostname[@]}"
+		#	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThis is the corresponding port for the ots process: ${contextPort[@]}"
+	  	#else
+		#	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThese are the hosts configured to run ots processes: ${gatewayHostname} ${xdaqHost[@]}"
+		#	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tThese are the corresponding ports for the processes: ${gatewayPort} ${xdaqPort[@]}"
+		#fi
 	fi
+	
 	echo
 	  
 	if [[ (${#xdaqPort[@]} == 0) && $gatewayHostname != ${HOSTNAME} ]]; then
