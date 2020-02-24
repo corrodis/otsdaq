@@ -59,7 +59,8 @@ ARTDAQTableBase::ProcessTypes 			ARTDAQTableBase::processTypes_;
 //	then allowIllegalColumns is set for InfoReader
 //	If accumulatedExceptions pointer = 0, then illegal columns throw std::runtime_error
 // exception
-ARTDAQTableBase::ARTDAQTableBase(std::string tableName, std::string* accumulatedExceptions /* =0 */) : TableBase(tableName, accumulatedExceptions)
+ARTDAQTableBase::ARTDAQTableBase(std::string tableName, std::string* accumulatedExceptions /* =0 */) 
+: TableBase(tableName, accumulatedExceptions)
 {
 	// make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
@@ -68,7 +69,8 @@ ARTDAQTableBase::ARTDAQTableBase(std::string tableName, std::string* accumulated
 //==============================================================================
 // ARTDAQTableBase
 //	Default constructor should never be used because table type is lost
-ARTDAQTableBase::ARTDAQTableBase(void) : TableBase("ARTDAQTableBase")
+ARTDAQTableBase::ARTDAQTableBase(void) 
+: TableBase("ARTDAQTableBase")
 {
 	__SS__ << "Should not call void constructor, table type is lost!" << __E__;
 	__SS_THROW__;

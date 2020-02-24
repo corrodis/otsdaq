@@ -1869,7 +1869,7 @@ const TableBase* ConfigurationManager::getTableByName(const std::string& tableNa
 	std::map<std::string, TableBase*>::const_iterator it;
 	if((it = nameToTableMap_.find(tableName)) == nameToTableMap_.end())
 	{
-		__SS__ << "\n\nCan not find configuration named '" << tableName << "'\n\n\n\nYou need to load the configuration before it can be used."
+		__SS__ << "Can not find table named '" << tableName << "' - you need to load the table before it can be used."
 		       << " It probably is missing from the member list of the Table "
 		          "Group that was loaded.\n"
 		       << "\nYou may need to enter wiz mode to remedy the situation, use the "
