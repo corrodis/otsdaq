@@ -243,6 +243,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
 					progress = "0";
 					detail   = "SOAP Message Error";
+					sleep(5); //sleep to not overwhelm server with errors
 				}
 				catch(...)
 				{
@@ -250,6 +251,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
 					progress = "0";
 					detail   = "SOAP Message Error";
+					sleep(5); //sleep to not overwhelm server with errors
 				}
 			}  // end with non-gateway status request handling
 
@@ -407,13 +409,11 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 	if(logbookInfoMap.size() == 0)
 	{
 		__COUT__ << "No logbooks found! Here is entry: " << entryText << __E__;
-		__MOUT__ << "No logbooks found! Here is entry: " << entryText << __E__;
 		return;
 	}
 	else
 	{
 		__COUT__ << "Making logbook entry: " << entryText << __E__;
-		__MOUT__ << "Making logbook entry: " << entryText << __E__;
 	}
 
 	//__COUT__ << "before: " << entryText << __E__;
@@ -441,14 +441,23 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 
 	for(auto& logbookInfo : logbookInfoMap)
 	{
-		xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(logbookInfo.second.getDescriptor(), "MakeSystemLogbookEntry", parameters);
+		try
+		{
+			xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(logbookInfo.second.getDescriptor(), "MakeSystemLogbookEntry", parameters);
 
-		SOAPParameters retParameters("Status");
-		// SOAPParametersV retParameters(1);
-		// retParameters[0].setName("Status");
-		SOAPUtilities::receive(retMsg, retParameters);
+			SOAPParameters retParameters("Status");
+			// SOAPParametersV retParameters(1);
+			// retParameters[0].setName("Status");
+			SOAPUtilities::receive(retMsg, retParameters);
 
-		__COUT__ << "Returned Status: " << retParameters.getValue("Status") << __E__;  // retParameters[0].getValue() << __E__ << __E__;
+			__COUT__ << "Returned Status: " << retParameters.getValue("Status") << __E__;  // retParameters[0].getValue() << __E__ << __E__;
+		}
+		catch(...)
+		{
+			__COUT_ERR__ << "Failed to send logbook SOAP entry to " <<
+					logbookInfo.first << ":" << logbookInfo.second.getContextName() <<
+					":" << logbookInfo.second.getName() << __E__;
+		}
 	}
 }  // end makeSystemLogbookEntry()
 

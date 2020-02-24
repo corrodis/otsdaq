@@ -214,7 +214,7 @@ if [[ "$1"  == "--relaunch" || "$2"  == "--relaunch" || "$1"  == "-r" || "$2"  =
 fi
 
 if [[ "$1"  == "--startremote" || "$2"  == "--startremote" || "$1"  == "-s" || "$2"  == "-s"  ]]; then
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t************* ${RED}REMOTE START DISABLED!${Reset} ************"
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t************* ${RED}REMOTE START PROPAGATION DISABLED!${Reset} ************"
 	REMOTELAUNCH=0
 fi
 #end check for options

@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
 		<TABLE Name="FESupervisorTable">
-			<VIEW Name="FE_SUPERVISOR_TABLE" Type="File,Database,DatabaseTest" Description="%3Cb%3ENote%20on%20Slow%20Controls%3C%2Fb%3E%3A%20Metric%20Manager%20is%20artdaq%20toolkit%20tool%20that%20allows%20sampling%20of%20slow%20controls%20style%20data%20in%20a%20configurable%20way.%20The%20%3Ci%3Eartdaq%3C%2Fi%3E%20toolkit%20has%20a%20Metric%20Manager%20plugin%20to%20send%20samples%20to%20EPICS%2C%20for%20example.%20To%20enable%2C%20set%20%3Cb%3EEnableSlowControlsMetricManager%3C%2Fb%3E%20ON%2C%20and%20choose%20a%20channel%20name%20preamble%2C%20used%20to%20identify%20channels%20created%20in%20the%20FESupervisor.">
-				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="STRING" 		DataChoices=""/>
-				<COLUMN Type="ChildLink-FE" 	 Name="LinkToFEInterfaceTable" 	 StorageName="LINK_TO_FE_INTERFACE_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,FEInterfaceTable"/>
-				<COLUMN Type="ChildLinkGroupID-FE" 	 Name="LinkToFEInterfaceGroupID" 	 StorageName="LINK_TO_FE_INTERFACE_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
-				<COLUMN Type="OnOff" 	 Name="EnableSlowControlsMetricManager" 	 StorageName="ENABLE_SLOW_CONTROLS_METRIC_MANAGER" 		DataType="STRING" 		DataChoices=""/>
-				<COLUMN Type="Data" 	 Name="SlowControlsMetricManagerChannelNamePreamble" 	 StorageName="SLOW_CONTROLS_METRIC_MANAGER_CHANNEL_NAME_PREAMBLE" 		DataType="STRING" 		DataChoices=""/>
-				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>
-				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="STRING" 		DataChoices=""/>
+			<VIEW Name="FE_SUPERVISOR_TABLE" Type="File,Database,DatabaseTest" Description="No%20description.">
+				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-FE" 	 Name="LinkToFEInterfaceTable" 	 StorageName="LINK_TO_FE_INTERFACE_TABLE" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,FEInterfaceTable"/>
+				<COLUMN Type="ChildLinkGroupID-FE" 	 Name="LinkToFEInterfaceGroupID" 	 StorageName="LINK_TO_FE_INTERFACE_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
 			</VIEW>
 		</TABLE>
