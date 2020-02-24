@@ -193,6 +193,8 @@ struct StringMacros
 	static bool 				extractCommonChunks			(const std::vector<std::string>& haystack, std::vector<std::string>& commonChunksToReturn, std::vector<std::string>& wildcardStrings, unsigned int& fixedWildcardLength);
 
 	static std::string 			demangleTypeName			(const char* name);
+	template<class T>
+	static std::string          getTypeName					(void) {return StringMacros::demangleTypeName(typeid(T).name());}
 	static std::string 			stackTrace					(void);
 	static std::string 			exec						(const char* cmd);
 
