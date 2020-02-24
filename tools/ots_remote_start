@@ -112,7 +112,7 @@ STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another
 echo -e "${Reset}${STARTTIME}  <==  ots started on {${HOSTNAME}}"
 echo 
 
-echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}=========================== ots ============================="
+echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots_remote [${Cyan}${LINENO}${Reset}]\t${Green}=========================== ots ============================="
 
 SCRIPT_DIR="$( 
  cd "$(dirname "$(readlink "$0" || printf %s "$0")")"
@@ -121,7 +121,7 @@ SCRIPT_DIR="$(
 		
 
 
-echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots script path     = ${SCRIPT_DIR}/ots         "
+echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots_remote [${Cyan}${LINENO}${Reset}]\tots script path     = ${SCRIPT_DIR}/ots_remote_start         "
 echo
  
 

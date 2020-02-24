@@ -860,6 +860,8 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
 
+	CoreSupervisorBase::transitionConfiguring(event);
+
 	// get pset from Board Reader metric manager table
 	try
 	{
@@ -870,7 +872,10 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
 			fhicl::ParameterSet metric_pset;
 			fhicl::make_ParameterSet(metric_string, metric_pset);
 
-			metricMan->initialize(metric_pset, std::string("TDAQ_") + __ENV__("MU2E_OWNER"));
+			metricMan->initialize(metric_pset,
+					theConfigurationManager_->getNode(CorePropertySupervisorBase::getSupervisorConfigurationPath() +
+							"/SlowControlChannelNamePreamble").getValue<std::string>());
+						//std::string("TDAQ_") + __ENV__("LOGNAME"));
 			__SUP_COUT__ << "transitionConfiguring metric manager initialized." << __E__;
 		}
 	}
@@ -883,8 +888,6 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
 		//__SS_THROW_ONLY__;
 		__SS_THROW__;
 	}
-
-	CoreSupervisorBase::transitionConfiguring(event);
 
 	__SUP_COUT__ << "transitionConfiguring done." << __E__;
 }  // end transitionConfiguring()
