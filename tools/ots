@@ -72,17 +72,17 @@ function defineColors ()
   On_ICyan='\033[0;106m'    # Cyan
   On_IWhite='\033[0;107m'   # White
 
-  Bold=`tput bold`          # Select bold mode                  
-  DIM=`tput dim`            # Select dim (half-bright) mode     
-  Blink=`tput blink`        # Select dim (half-bright) mode 
-  EUNDERLINE=`tput smul`    # Enable underline mode             
-  DUNDERLINE=`tput rmul`    # Disable underline mode            
-  REV=`tput rev`            # Turn on reverse video mode        
-#Reset=`tput sgr0`         # Reset all
-#Reset=`tput init`         # Reset all
-  Reset=`tput init;tput sgr0`         # Reset all
-  EBold=`tput smso`         # Enter standout (bold) mode        
-  DBold=`tput rmso`         # Exit standout mode                
+  Bold=`tput bold -T xterm`          # Select bold mode                  
+  DIM=`tput dim -T xterm`            # Select dim (half-bright) mode     
+  Blink=`tput blink -T xterm`        # Select dim (half-bright) mode 
+  EUNDERLINE=`tput smul -T xterm`    # Enable underline mode             
+  DUNDERLINE=`tput rmul -T xterm`    # Disable underline mode            
+  REV=`tput rev -T xterm`            # Turn on reverse video mode        
+#Reset=`tput sgr0 -T xterm`         # Reset all
+#Reset=`tput init -T xterm`         # Reset all
+  Reset=`tput init -T xterm;tput sgr0 -T xterm`         # Reset all
+  EBold=`tput smso -T xterm`         # Enter standout (bold) mode        
+  DBold=`tput rmso -T xterm`         # Exit standout mode              
 }
 
 #trace helper functions
@@ -1675,8 +1675,8 @@ launchOTS() {
 					fi
 				
 					echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
-					
-					#ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start
+					echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
+					ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start &
 					
 					
 					#add host to remote launch host list
