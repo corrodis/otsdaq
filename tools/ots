@@ -1651,84 +1651,85 @@ launchOTS() {
 		done #end test for relaunch loop
 		####################################################################
 		
+		
+	fi #end local relaunch checking
+	####################################################################
+	
+	if [[ $REMOTELAUNCH == 1 && (${#contextHostname[@]} > 1) ]]; then
 		############################################################################
 		########### 	   Lunch of remote non-Gateway contexts			############
 		############################################################################	
 		
-		if [[ (${#contextHostname[@]} > 1) ]]; then
-			remoteHostCount=$((${#contextHostname[@]} -1))
-			
-			unset remoteLaunchHosts
-			
-			echo
-			echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess...${Reset}"
-			i=0	
-			for port in "${contextPort[@]}"
-			do
-			  : 
-			  	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
-				#echo
-				  
-				if [[ ${contextHostname[$i]} != ${HOSTNAME} ]]; then
-				
-					#first check that we have not done a remote launch on host already
-					j=0
-					alreadyLaunched=0
-					for host in "${remoteLaunchHosts[@]}"
-					do						
-						if [[ ${contextHostname[$i]} == ${host} ]]; then
-							alreadyLaunched=1
-							break
-						fi
-					done	
-				
-					#skip all repeating hostnames
-					if [[ $alreadyLaunched == 1 ]]; then
-						i=$(( $i + 1 ))
-						continue;
-					fi
-				
-					echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
-					echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
-					ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start
-					
-					
-					#add host to remote launch host list
-					remoteLaunchHosts+=(${contextHostname[$i]})					
-				fi
-				i=$(( $i + 1 ))
-			done
-			
-			
-			############################################################################
-			###########  test for relaunch of remote non-Gateway contexts	############
-			############################################################################	
-			
-			sleep 1 #give time before relaunch test
-			
-			echo
-			#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess...${Reset}"
-			i=0	
-			for port in "${contextPort[@]}"
-			do
-			  : 
-			  	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
-				#echo
-				  
-				#if [[ ${contextHostname[$i]} != ${HOSTNAME} ]]; then
-				
-					#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tChecking remote launch ${contextHostname[$i]}:${port}"
-				
-									
-				#fi
-				i=$(( $i + 1 ))
-			done
-			
-		fi #end remote launch handling
-		####################################################################
+		remoteHostCount=$((${#contextHostname[@]} -1))
 		
-	fi #end relaunch checking
-		####################################################################
+		unset remoteLaunchHosts
+		
+		echo
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess...${Reset}"
+		i=0	
+		for port in "${contextPort[@]}"
+		do
+		  : 
+		  	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+			#echo
+			  
+			if [[ ${contextHostname[$i]} != ${HOSTNAME} ]]; then
+			
+				#first check that we have not done a remote launch on host already
+				j=0
+				alreadyLaunched=0
+				for host in "${remoteLaunchHosts[@]}"
+				do						
+					if [[ ${contextHostname[$i]} == ${host} ]]; then
+						alreadyLaunched=1
+						break
+					fi
+				done	
+			
+				#skip all repeating hostnames
+				if [[ $alreadyLaunched == 1 ]]; then
+					i=$(( $i + 1 ))
+					continue;
+				fi
+			
+				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
+				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
+				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start
+				
+				
+				#add host to remote launch host list
+				remoteLaunchHosts+=(${contextHostname[$i]})					
+			fi
+			i=$(( $i + 1 ))
+		done
+		
+		
+		############################################################################
+		###########  test for relaunch of remote non-Gateway contexts	############
+		############################################################################	
+		
+		sleep 1 #give time before relaunch test
+		
+		echo
+		#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess...${Reset}"
+		i=0	
+		for port in "${contextPort[@]}"
+		do
+		  : 
+		  	#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tots.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+			#echo
+			  
+			#if [[ ${contextHostname[$i]} != ${HOSTNAME} ]]; then
+			
+				#echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tChecking remote launch ${contextHostname[$i]}:${port}"
+			
+								
+			#fi
+			i=$(( $i + 1 ))
+		done			
+	
+	fi #end remote launch handling
+	####################################################################
 	
 	echo
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tDone launching ots Context processes."
