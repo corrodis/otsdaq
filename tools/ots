@@ -167,6 +167,9 @@ alias ots.exe='xdaq.exe' &>/dev/null #hide output
 export OTS_PRODUCTS=`echo $PRODUCTS|tr ':' '\n'|grep -v localProducts|head -1`
 
 
+#############################
+# setup defaults:
+#
 ISMACROMAKER=0
 ISCONFIG=0
 QUIET=1
@@ -176,7 +179,8 @@ BACKUPLOGS=0
 RELAUNCHCHECK=1
 REMOTELAUNCH=1
 export MACROMAKER_MODE=0
-
+#
+#############################
 #check for options
 if [[ "$1"  == "--macromaker" || "$2"  == "--macromaker" || "$1"  == "-mm" || "$2"  == "-mm"  ]]; then
 	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t************* ${RED}MACRO-MAKER ONLY MODE!${Reset} ************"
@@ -218,6 +222,7 @@ if [[ "$1"  == "--startremote" || "$2"  == "--startremote" || "$1"  == "-s" || "
 	REMOTELAUNCH=0
 fi
 #end check for options
+#############################
 
 
 
@@ -1694,7 +1699,7 @@ launchOTS() {
 			
 				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
 				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
-				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start
+				ssh -XY ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start
 				
 				
 				#add host to remote launch host list
