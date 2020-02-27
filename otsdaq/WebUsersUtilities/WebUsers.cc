@@ -1117,6 +1117,14 @@ uint64_t WebUsers::attemptActiveSession(
 	jumbledUser    = Users_[i].displayName_;  // pass by reference displayName
 	newAccountCode = createNewActiveSession(Users_[i].userId_,
 	                                        ip);  // return cookie code by reference
+
+	if(ActiveSessions_.size() == 1) //if only one user, then attempt to take lock for user friendliness
+	{
+		__COUT__ << "Attempting to auto-lock for first login user '" <<
+				Users_[i].username_ << "'... " << __E__;
+		setUserWithLock(Users_[i].userId_, true /*lock*/, Users_[i].username_);
+	}
+
 	return Users_[i].userId_;                     // return user Id
 }  // end attemptActiveSession()
 
