@@ -108,7 +108,7 @@ FILE(COPY tools DESTINATION .)
 INSTALL(DIRECTORY tools DESTINATION ${product}/${version})
 
 # Documentation (to comment out if not needed DOXYGEN locally)
-#add_subdirectory(doc)
+add_subdirectory(doc)
 
 # test programs
 add_subdirectory(test)
