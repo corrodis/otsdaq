@@ -2225,23 +2225,31 @@ std::string WebUsers::getTooltipFilename(const std::string& username, const std:
 
 std::string ots::WebUsers::getUserEmailFromFingerprint(const std::string& fingerprint)
 {
+	__COUT__ << "Checking if user fingerprint " << fingerprint << " is in memory database" << __E__;
+	if(certFingerprints_.count(fingerprint)) { return certFingerprints_[fingerprint]; }
+	
+	__COUT__ << "Going to read credential database " << WEB_LOGIN_CERTDATA_PATH << __E__;
 	std::ifstream f(WEB_LOGIN_CERTDATA_PATH);
-	if(f.is_open())
+	bool open =false;	
+	while(f)
 	{
+		open = true;
 		std::string email;
 		std::string fp;
-		getline(f, email);
-		getline(f, fp);
-		certFingerprints_[email] = fp;
+		f >> email >> fp;
+		if(fp != "NOKEY" && fp != "") {
+		__COUT__ << "Adding user " << email << " to list with fingerprint " << fp << __E__; 
+		certFingerprints_[fp] = email; }
+	}
+	if(open) {
 		f.close();
 		remove(WEB_LOGIN_CERTDATA_PATH.c_str());
 	}
 
-	for(auto fp : certFingerprints_)
-	{
-		if(fp.second == fingerprint)
-			return fp.first;
-	}
+	__COUT__ << "Checking again if fingerprint is in memory database" << __E__;
+	if(certFingerprints_.count(fingerprint)) { return certFingerprints_[fingerprint]; }
+
+	__COUT__ << "Could not match fingerprint, returning null email" << __E__;
 	return "";
 }  // end getUserEmailFromFingerprint()
 
