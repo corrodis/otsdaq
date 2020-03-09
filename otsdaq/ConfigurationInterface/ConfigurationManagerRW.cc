@@ -22,6 +22,9 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
 
+	//make table group history directory here and at Gateway Supervisor (just in case)
+	mkdir((ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH).c_str(), 0755);
+
 	//=========================
 	// dump names of core tables (so UpdateOTS.sh can copy core tables for user)
 	// only if table does not exist
@@ -415,12 +418,12 @@ std::map<std::string /*table name*/, std::map<std::string /*version alias*/, Tab
 // setActiveGlobalConfiguration
 //	load table group and activate
 //	deactivates previous table group of same type if necessary
-void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupName, TableGroupKey tableGroupKey, std::string* accumulatedTreeErrors)
+void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupName, TableGroupKey tableGroupKey, std::string* accumulatedTreeErrors)
 {
 	try
 	{
 		//__COUTV__(accumulatedTreeErrors);
-		loadTableGroup(configGroupName,
+		loadTableGroup(tableGroupName,
 		               tableGroupKey,
 		               true,                    // loads and activates
 		               0,                       // no members needed
@@ -429,10 +432,10 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupNa
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "There were errors, so de-activating group: " << configGroupName << " (" << tableGroupKey << ")" << __E__;
+		__COUT_ERR__ << "There were errors, so de-activating group: " << tableGroupName << " (" << tableGroupKey << ")" << __E__;
 		try  // just in case any lingering pieces, let's deactivate
 		{
-			destroyTableGroup(configGroupName, true);
+			destroyTableGroup(tableGroupName, true);
 		}
 		catch(...)
 		{
@@ -473,6 +476,23 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& configGroupNa
 	fprintf(fp, "%s\n", theConfigurationTableGroup_.c_str());
 	fprintf(fp, "%s\n", theConfigurationTableGroupKey_ ? theConfigurationTableGroupKey_->toString().c_str() : "-1");
 	fclose(fp);
+
+	//save last activated group
+	{
+		std::pair<std::string /*group name*/, TableGroupKey> activatedGroup(std::string(tableGroupName),tableGroupKey);
+		if(theConfigurationTableGroupKey_ && theConfigurationTableGroup_ == tableGroupName &&
+				*theConfigurationTableGroupKey_ == tableGroupKey)
+			ConfigurationManager::saveGroupNameAndKey(activatedGroup, LAST_ACTIVATED_CONFIG_GROUP_FILE);
+		else if(theContextTableGroupKey_ && theContextTableGroup_ == tableGroupName &&
+				*theContextTableGroupKey_ == tableGroupKey)
+			ConfigurationManager::saveGroupNameAndKey(activatedGroup, LAST_ACTIVATED_CONTEXT_GROUP_FILE);
+		else if(theBackboneTableGroupKey_ && theBackboneTableGroup_ == tableGroupName &&
+				*theBackboneTableGroupKey_ == tableGroupKey)
+			ConfigurationManager::saveGroupNameAndKey(activatedGroup, LAST_ACTIVATED_BACKBONE_GROUP_FILE);
+		else if(theIterateTableGroupKey_ && theIterateTableGroup_ == tableGroupName &&
+				*theIterateTableGroupKey_ == tableGroupKey)
+			ConfigurationManager::saveGroupNameAndKey(activatedGroup, LAST_ACTIVATED_ITERATOR_GROUP_FILE);
+	} //end save last activated group
 
 }  // end activateTableGroup()
 

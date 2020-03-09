@@ -91,7 +91,7 @@ class GatewaySupervisor : public xdaq::Application,
 	xoap::MessageReference 		supervisorSystemMessage			(xoap::MessageReference msg);
 	xoap::MessageReference 		supervisorGetUserInfo			(xoap::MessageReference msg);
 	xoap::MessageReference 		supervisorSystemLogbookEntry	(xoap::MessageReference msg);
-	xoap::MessageReference 		supervisorLastConfigGroupRequest(xoap::MessageReference msg);
+	xoap::MessageReference 		supervisorLastTableGroupRequest(xoap::MessageReference msg);
 
 	// Finite State Machine States
 	void 						stateInitial					(toolbox::fsm::FiniteStateMachine& fsm);
@@ -126,11 +126,8 @@ class GatewaySupervisor : public xdaq::Application,
   private:
 	unsigned int 				getNextRunNumber				(const std::string& fsmName = "");
 	bool 						setNextRunNumber				(unsigned int runNumber, const std::string& fsmName = "");
-	static std::pair<
-		std::string /*group name*/,
-		TableGroupKey> 			loadGroupNameAndKey				(const std::string& fileName, std::string& returnedTimeString);
-	void 						saveGroupNameAndKey				(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup,const std::string& fileName);
-	static xoap::MessageReference lastConfigGroupRequestHandler	(const SOAPParameters& parameters);
+
+	static xoap::MessageReference lastTableGroupRequestHandler	(const SOAPParameters& parameters);
 	static void 				launchStartOTSCommand			(const std::string& command, ConfigurationManager* cfgMgr);
 	static void 				indicateOtsAlive				(const CorePropertySupervisorBase* properties = 0);
 

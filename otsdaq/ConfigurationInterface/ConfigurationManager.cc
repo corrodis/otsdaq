@@ -13,6 +13,14 @@ using namespace ots;
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "ConfigurationManager"
 
+
+const std::string ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH 			= std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunControlData/";
+const std::string ConfigurationManager::LAST_ACTIVATED_CONFIG_GROUP_FILE 	= "CFGLastActivatedConfigGroup.hist";
+const std::string ConfigurationManager::LAST_ACTIVATED_CONTEXT_GROUP_FILE 	= "CFGLastActivatedContextGroup.hist";
+const std::string ConfigurationManager::LAST_ACTIVATED_BACKBONE_GROUP_FILE 	= "CFGLastActivatedBackboneGroup.hist";
+const std::string ConfigurationManager::LAST_ACTIVATED_ITERATOR_GROUP_FILE 	= "CFGLastActivatedIteratorGroup.hist";
+
+
 const std::string ConfigurationManager::READONLY_USER = "READONLY_USER";
 
 const std::string ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME      = "XDAQContextTable";
@@ -66,6 +74,7 @@ const std::set<std::string> ConfigurationManager::iterateMemberNames_  = {"Itera
                                                                          "IterationCommandModifyGroupTable",
                                                                          "IterationCommandRepeatLabelTable",
                                                                          "IterationCommandRunTable"};
+
 
 //==============================================================================
 ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, bool doInitializeFromFhicl /*=false*/)
@@ -2578,3 +2587,74 @@ TableBase* ConfigurationManager::getDesktopIconTable(void)
 
 	return nameToTableMap_.at(DESKTOP_ICON_TABLE_NAME);
 }  // end dynamicDesktopIconChange()
+
+//==============================================================================
+void ConfigurationManager::saveGroupNameAndKey(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup, const std::string& fileName)
+{
+	std::string fullPath = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH +
+			"/" + fileName;
+
+	std::ofstream groupFile(fullPath.c_str());
+	if(!groupFile.is_open())
+	{
+		__SS__ << "Error. Can't open file to save group activity: " << fullPath << __E__;
+		__SS_THROW__;
+	}
+	std::stringstream outss;
+	outss << theGroup.first << "\n" << theGroup.second << "\n" << time(0);
+	groupFile << outss.str().c_str();
+	groupFile.close();
+}  // end saveGroupNameAndKey()
+
+//==============================================================================
+// loadGroupNameAndKey
+//	loads group name and key (and time) from specified file
+//	returns time string in returnedTimeString
+//
+//	Note: this is static so the GatewaySupervisor and WizardSupervisor can call it
+std::pair<std::string /*group name*/, TableGroupKey> ConfigurationManager::loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString)
+{
+	std::string fullPath = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH +
+			"/" + fileName;
+
+	FILE* groupFile = fopen(fullPath.c_str(), "r");
+	if(!groupFile)
+	{
+		__COUT__ << "Can't open file: " << fullPath << __E__;
+
+		__COUT__ << "Returning empty groupName and key -1" << __E__;
+
+		return std::pair<std::string /*group name*/, TableGroupKey>("", TableGroupKey());
+	}
+
+	char line[500];  // assuming no group names longer than 500 chars
+	// name and then key
+	std::pair<std::string /*group name*/, TableGroupKey> theGroup;
+
+	fgets(line, 500, groupFile);  // name
+	if(strlen(line) && line[strlen(line)-1] == '\n')
+		line[strlen(line)-1] = '\0'; //remove trailing newline
+	theGroup.first = line;
+
+	fgets(line, 500, groupFile);  // key
+	int key;
+	sscanf(line, "%d", &key);
+	theGroup.second = key;
+
+	fgets(line, 500, groupFile);  // time
+	time_t timestamp;
+	sscanf(line, "%ld", &timestamp);                                   // type long int
+	                                                                   //	struct tm tmstruct;
+	                                                                   //	::localtime_r(&timestamp, &tmstruct);
+	                                                                   //	::strftime(line, 30, "%c %Z", &tmstruct);
+	returnedTimeString = StringMacros::getTimestampString(timestamp);  // line;
+	fclose(groupFile);
+
+	__COUT__ << "theGroup.first= " << theGroup.first << " theGroup.second= " << theGroup.second << __E__;
+
+	return theGroup;
+}  // end loadGroupNameAndKey()
+
+
+
+
