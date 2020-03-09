@@ -18,11 +18,8 @@ fcldir      -
 
 #
 product		 version	optional
-artdaq              v3_07_01 s83
-artdaq              v3_07_01 s85
-artdaq              v3_07_01 s87
-artdaq              v3_07_01a s89
-artdaq_database     v1_04_81
+artdaq              v3_07_02
+artdaq_database     v1_04_83
 xdaq                v14_12_0
 artdaq_daqinterface v3_07_00
 smc_compiler        v6_6_0      -nq-      only_for_build
@@ -35,6 +32,11 @@ end_product_list
 # -nq- here means there is no qualifier
 # a "-" here means the dependent product is not required by the parent and will not be setup
 qualifier    	   artdaq	 	 artdaq_database	xdaq   	    	artdaq_daqinterface		notes
+e19:s94:prof       e19:s94:prof    	 e19:s94:prof 		e19:prof   	-nq-					-std=c++17
+e19:s94:debug      e19:s94:debug   	 e19:s94:debug		e19:debug  	-nq-					-std=c++17
+e19:s94:py2:prof       e19:s94:py2:prof    	 e19:s94:py2:prof 		e19:prof   	-nq-					-std=c++17
+e19:s94:py2:debug      e19:s94:py2:debug   	 e19:s94:py2:debug		e19:debug  	-nq-					-std=c++17
+
 e19:s89:prof       e19:s89:prof    	 e19:s89:prof 		e19:prof   	-nq-					-std=c++17
 e19:s89:debug      e19:s89:debug   	 e19:s89:debug		e19:debug  	-nq-					-std=c++17
 e17:s89:prof       e17:s89:prof    	 e17:s89:prof 		e17:prof   	-nq-					-std=c++17

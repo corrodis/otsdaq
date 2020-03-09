@@ -1,4 +1,5 @@
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisorTRACEController.h"
+#include <string>
 
 ots::ARTDAQSupervisorTRACEController::ARTDAQSupervisorTRACEController() {}
 
@@ -45,9 +46,9 @@ void ots::ARTDAQSupervisorTRACEController::SetTraceLevelMask(std::string trace_n
 		{
 			if(comm.first.host == host)
 			{
-				comm.second->send_trace_set(trace_name, "M", lvl.M);
-				comm.second->send_trace_set(trace_name, "S", lvl.S);
-				comm.second->send_trace_set(trace_name, "T", lvl.T);
+				comm.second->send_trace_set(trace_name, "M", std::to_string(lvl.M));
+				comm.second->send_trace_set(trace_name, "S", std::to_string(lvl.S));
+				comm.second->send_trace_set(trace_name, "T", std::to_string(lvl.T));
 				break;
 			}
 		}
