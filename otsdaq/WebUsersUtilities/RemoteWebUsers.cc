@@ -267,18 +267,18 @@ std::string RemoteWebUsers::getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationD
 }
 
 //==============================================================================
-// getLastConfigGroup
+// getLastTableGroup
 //	request last "Configured" or "Started" group, for example
 //	returns empty "" for actionTimeString on failure
 //	returns "Wed Dec 31 18:00:01 1969 CST" for actionTimeString (in CST) if action never
 // has occurred
-std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastConfigGroup(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
+std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastTableGroup(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
                                                                                         const std::string&                           actionOfLastGroup,
                                                                                         std::string&                                 actionTimeString)
 {
 	actionTimeString = "";
 	xoap::MessageReference retMsg =
-	    ots::SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorLastConfigGroupRequest", SOAPParameters("ActionOfLastGroup", actionOfLastGroup));
+	    ots::SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorLastTableGroupRequest", SOAPParameters("ActionOfLastGroup", actionOfLastGroup));
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("GroupName");
@@ -300,7 +300,7 @@ std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastConf
 	theGroup.second  = strtol(retParameters.getValue("GroupKey").c_str(), 0, 0);
 	actionTimeString = retParameters.getValue("GroupActionTime");
 	return theGroup;
-}
+} //end getLastTableGroup()
 
 //==============================================================================
 // getUserInfoForCookie

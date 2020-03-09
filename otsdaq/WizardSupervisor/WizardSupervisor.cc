@@ -107,7 +107,7 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
 	xgi::bind(this, &WizardSupervisor::tooltipRequest, "TooltipRequest");
 	xgi::bind(this, &WizardSupervisor::toggleSecurityCodeGeneration, "ToggleSecurityCodeGeneration");
 	xoap::bind(this, &WizardSupervisor::supervisorSequenceCheck, "SupervisorSequenceCheck", XDAQ_NS_URI);
-	xoap::bind(this, &WizardSupervisor::supervisorLastConfigGroupRequest, "SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
+	xoap::bind(this, &WizardSupervisor::supervisorLastTableGroupRequest, "SupervisorLastTableGroupRequest", XDAQ_NS_URI);
 
 	init();
 	generateURL();
@@ -462,17 +462,17 @@ xoap::MessageReference WizardSupervisor::supervisorSequenceCheck(xoap::MessageRe
 }
 
 //===================================================================================================================
-// xoap::supervisorLastConfigGroupRequest
+// xoap::supervisorLastTableGroupRequest
 //	return the group name and key for the last state machine activity
 //
-//	Note: same as Supervisor::supervisorLastConfigGroupRequest
-xoap::MessageReference WizardSupervisor::supervisorLastConfigGroupRequest(xoap::MessageReference message)
+//	Note: same as Supervisor::supervisorLastTableGroupRequest
+xoap::MessageReference WizardSupervisor::supervisorLastTableGroupRequest(xoap::MessageReference message)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ActionOfLastGroup");
 	SOAPUtilities::receive(message, parameters);
 
-	return GatewaySupervisor::lastConfigGroupRequestHandler(parameters);
+	return GatewaySupervisor::lastTableGroupRequestHandler(parameters);
 }
 
 //==============================================================================

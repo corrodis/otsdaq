@@ -2636,6 +2636,97 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 		TableEditStruct& artdaqSupervisorTable = configGroupEdit.getTableEditStruct(ARTDAQ_SUPERVISOR_TABLE, true /*markModified*/);
 
+		//for any NO_LINK links in artdaqSupervisor record, fix them
+		{
+			std::string artdaqSupervisorUID =
+					artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->getColUID()];
+
+			// create group link to board readers
+			if(artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
+					colARTDAQSupervisor_.colLinkToBoardReaders_)] ==
+							TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
+			{
+
+				__COUT__ << "Fixing missing link to Readers" << __E__;
+				artdaqSupervisorTable.tableView_->setValueAsString(
+						ARTDAQ_READER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToBoardReaders_));
+				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
+						artdaqSupervisorRow,
+						artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToBoardReadersGroupID_),
+						artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.READER));
+			}
+
+			// create group link to event builders
+			if(artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
+					colARTDAQSupervisor_.colLinkToEventBuilders_)] ==
+							TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
+			{
+				__COUT__ << "Fixing missing link to Builders" << __E__;
+				artdaqSupervisorTable.tableView_->setValueAsString(
+						ARTDAQ_BUILDER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(
+								colARTDAQSupervisor_.colLinkToEventBuilders_));
+				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
+						artdaqSupervisorRow,
+						artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToEventBuildersGroupID_),
+						artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.BUILDER));
+			}
+
+			// create group link to data loggers
+			if(artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
+					colARTDAQSupervisor_.colLinkToDataLoggers_)] ==
+							TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
+			{
+				__COUT__ << "Fixing missing link to Loggers" << __E__;
+				artdaqSupervisorTable.tableView_->setValueAsString(
+						ARTDAQ_LOGGER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(
+								colARTDAQSupervisor_.colLinkToDataLoggers_));
+				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
+						artdaqSupervisorRow,
+						artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDataLoggersGroupID_),
+						artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.LOGGER));
+			}
+
+			// create group link to dispatchers
+			if(artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
+					colARTDAQSupervisor_.colLinkToDispatchers_)] ==
+							TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
+			{
+				__COUT__ << "Fixing missing link to Dispatchers" << __E__;
+				artdaqSupervisorTable.tableView_->setValueAsString(
+						ARTDAQ_DISPATCHER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(
+								colARTDAQSupervisor_.colLinkToDispatchers_));
+				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
+						artdaqSupervisorRow,
+						artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDispatchersGroupID_),
+						artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.DISPATCHER));
+			}
+
+			// create group link to routing masters
+			if(artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
+					colARTDAQSupervisor_.colLinkToRoutingMasters_)] ==
+							TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
+			{
+				__COUT__ << "Fixing missing link to Routers" << __E__;
+				artdaqSupervisorTable.tableView_->setValueAsString(
+						ARTDAQ_ROUTER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(
+								colARTDAQSupervisor_.colLinkToRoutingMasters_));
+				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
+						artdaqSupervisorRow,
+						artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMastersGroupID_),
+						artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.ROUTER));
+			}
+
+			{
+				std::stringstream ss;
+				artdaqSupervisorTable.tableView_->print(ss);
+				__COUT__ << ss.str();
+			}
+		} //end fixing links
+
+
+
+
+
 		// Step	1. create/verify subsystems and destinations
 		TableEditStruct& artdaqSubsystemTable = configGroupEdit.getTableEditStruct(ARTDAQ_SUBSYSTEM_TABLE, true /*markModified*/);
 

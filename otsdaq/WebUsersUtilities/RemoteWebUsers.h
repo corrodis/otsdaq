@@ -46,7 +46,7 @@ class RemoteWebUsers : public SOAPMessenger
 	std::string getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor);
 	void        sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg);
 	void        makeSystemLogbookEntry(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText);
-	std::pair<std::string /*group name*/, TableGroupKey> getLastConfigGroup(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
+	std::pair<std::string /*group name*/, TableGroupKey> getLastTableGroup(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 	                                                                        const std::string&                           actionOfLastGroup,
 	                                                                        std::string& actionTimeString);  // actionOfLastGroup = "Configured" or "Started",
 	                                                                                                         // for example

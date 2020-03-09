@@ -69,7 +69,7 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 
 	// External Supervisor XOAP handlers
 	xoap::MessageReference supervisorSequenceCheck(xoap::MessageReference msg);
-	xoap::MessageReference supervisorLastConfigGroupRequest(xoap::MessageReference msg);
+	xoap::MessageReference supervisorLastTableGroupRequest(xoap::MessageReference msg);
 
   private:
 	std::string              				securityCode_;

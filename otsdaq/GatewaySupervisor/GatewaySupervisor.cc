@@ -33,9 +33,9 @@ using namespace ots;
 
 #define RUN_NUMBER_PATH std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunNumber/"
 #define RUN_NUMBER_FILE_NAME "NextRunNumber.txt"
-#define FSM_LAST_GROUP_ALIAS_PATH std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunControlData/"
 #define FSM_LAST_GROUP_ALIAS_FILE_START std::string("FSMLastGroupAlias-")
 #define FSM_USERS_PREFERENCES_FILETYPE "pref"
+
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "GatewaySupervisor"
@@ -63,7 +63,9 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 
 	// attempt to make directory structure (just in case)
 	mkdir((std::string(__ENV__("SERVICE_DATA_PATH"))).c_str(), 0755);
-	mkdir((FSM_LAST_GROUP_ALIAS_PATH).c_str(), 0755);
+
+	//make table group history directory here and at ConfigurationManagerRW (just in case)
+	mkdir((ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH).c_str(), 0755);
 	mkdir((RUN_NUMBER_PATH).c_str(), 0755);
 
 	securityType_ = GatewaySupervisor::theWebUsers_.getSecurity();
@@ -81,7 +83,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	xoap::bind(this, &GatewaySupervisor::supervisorGetActiveUsers, "SupervisorGetActiveUsers", XDAQ_NS_URI);
 	xoap::bind(this, &GatewaySupervisor::supervisorSystemMessage, "SupervisorSystemMessage", XDAQ_NS_URI);
 	xoap::bind(this, &GatewaySupervisor::supervisorSystemLogbookEntry, "SupervisorSystemLogbookEntry", XDAQ_NS_URI);
-	xoap::bind(this, &GatewaySupervisor::supervisorLastConfigGroupRequest, "SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
+	xoap::bind(this, &GatewaySupervisor::supervisorLastTableGroupRequest, "SupervisorLastTableGroupRequest", XDAQ_NS_URI);
 
 	init();
 
@@ -757,8 +759,10 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 		std::string configurationAlias = parameters.getValue("ConfigurationAlias");
 		__COUT__ << "Configure --> Name: ConfigurationAlias Value: " << configurationAlias << __E__;
 
-		// save last used config alias
-		std::string fn = FSM_LAST_GROUP_ALIAS_PATH + FSM_LAST_GROUP_ALIAS_FILE_START + username + "." + FSM_USERS_PREFERENCES_FILETYPE;
+		// save last used config alias by user
+		std::string fn = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH + "/" +
+				FSM_LAST_GROUP_ALIAS_FILE_START +
+				username + "." + FSM_USERS_PREFERENCES_FILETYPE;
 
 		__COUT__ << "Save FSM preferences: " << fn << __E__;
 		FILE* fp = fopen(fn.c_str(), "w");
@@ -1174,7 +1178,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	// diagService_->reportError("GatewaySupervisor::stateConfiguring: Exiting",DIAGINFO);
 
 	// save last configured group name/key
-	saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
+	ConfigurationManager::saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
 
 	__COUT__ << "Done configuring." << __E__;
 	RunControlStateMachine::theProgressBar_.complete();
@@ -1365,7 +1369,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 	broadcastMessage(theStateMachine_.getCurrentMessage());
 
 	// save last started group name/key
-	saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_STARTED_GROUP_ALIAS_FILE);
+	ConfigurationManager::saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_STARTED_GROUP_ALIAS_FILE);
 }  // end transitionStarting()
 
 //==============================================================================
@@ -2521,8 +2525,10 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				}
 			}
 
-			// return last group alias
-			std::string fn = FSM_LAST_GROUP_ALIAS_PATH + FSM_LAST_GROUP_ALIAS_FILE_START + username + "." + FSM_USERS_PREFERENCES_FILETYPE;
+			// return last group alias by user
+			std::string fn = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH + "/" +
+					FSM_LAST_GROUP_ALIAS_FILE_START + username + "." +
+					FSM_USERS_PREFERENCES_FILETYPE;
 			__COUT__ << "Load preferences: " << fn << __E__;
 			FILE* fp = fopen(fn.c_str(), "r");
 			if(fp)
@@ -3154,27 +3160,27 @@ xoap::MessageReference GatewaySupervisor::supervisorSystemLogbookEntry(xoap::Mes
 }
 
 //===================================================================================================================
-// supervisorLastConfigGroupRequest
+// supervisorLastTableGroupRequest
 //	return the group name and key for the last state machine activity
 //
-//	Note: same as OtsConfigurationWizardSupervisor::supervisorLastConfigGroupRequest
-xoap::MessageReference GatewaySupervisor::supervisorLastConfigGroupRequest(xoap::MessageReference message)
+//	Note: same as OtsConfigurationWizardSupervisor::supervisorLastTableGroupRequest
+xoap::MessageReference GatewaySupervisor::supervisorLastTableGroupRequest(xoap::MessageReference message)
 
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ActionOfLastGroup");
 	SOAPUtilities::receive(message, parameters);
 
-	return GatewaySupervisor::lastConfigGroupRequestHandler(parameters);
+	return GatewaySupervisor::lastTableGroupRequestHandler(parameters);
 }
 
 //===================================================================================================================
-// xoap::lastConfigGroupRequestHandler
+// xoap::lastTableGroupRequestHandler
 //	handles last config group request.
 //	called by both:
-//		GatewaySupervisor::supervisorLastConfigGroupRequest
-//		OtsConfigurationWizardSupervisor::supervisorLastConfigGroupRequest
-xoap::MessageReference GatewaySupervisor::lastConfigGroupRequestHandler(const SOAPParameters& parameters)
+//		GatewaySupervisor::supervisorLastTableGroupRequest
+//		OtsConfigurationWizardSupervisor::supervisorLastTableGroupRequest
+xoap::MessageReference GatewaySupervisor::lastTableGroupRequestHandler(const SOAPParameters& parameters)
 {
 	std::string action = parameters.getValue("ActionOfLastGroup");
 	__COUT__ << "ActionOfLastGroup: " << action.substr(0, 10) << __E__;
@@ -3184,13 +3190,22 @@ xoap::MessageReference GatewaySupervisor::lastConfigGroupRequestHandler(const SO
 		fileName = FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE;
 	else if(action == "Started")
 		fileName = FSM_LAST_STARTED_GROUP_ALIAS_FILE;
+	else if(action == "ActivatedConfig")
+		fileName = ConfigurationManager::LAST_ACTIVATED_CONFIG_GROUP_FILE;
+	else if(action == "ActivatedContext")
+		fileName = ConfigurationManager::LAST_ACTIVATED_CONTEXT_GROUP_FILE;
+	else if(action == "ActivatedBackbone")
+		fileName = ConfigurationManager::LAST_ACTIVATED_BACKBONE_GROUP_FILE;
+	else if(action == "ActivatedIterator")
+		fileName = ConfigurationManager::LAST_ACTIVATED_ITERATOR_GROUP_FILE;
 	else
 	{
 		__COUT_ERR__ << "Invalid last group action requested." << __E__;
 		return SOAPUtilities::makeSOAPMessageReference("LastConfigGroupResponseFailure");
 	}
 	std::string                                          timeString;
-	std::pair<std::string /*group name*/, TableGroupKey> theGroup = loadGroupNameAndKey(fileName, timeString);
+	std::pair<std::string /*group name*/, TableGroupKey> theGroup =
+			ConfigurationManager::loadGroupNameAndKey(fileName, timeString);
 
 	// fill return parameters
 	SOAPParameters retParameters;
@@ -3268,71 +3283,7 @@ bool GatewaySupervisor::setNextRunNumber(unsigned int runNumber, const std::stri
 	runNumberFile << runNumberStream.str().c_str();
 	runNumberFile.close();
 	return true;
-}
-
-//==============================================================================
-// loadGroupNameAndKey
-//	loads group name and key (and time) from specified file
-//	returns time string in returnedTimeString
-//
-//	Note: this is static so the OtsConfigurationWizardSupervisor can call it
-std::pair<std::string /*group name*/, TableGroupKey> GatewaySupervisor::loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString)
-{
-	std::string fullPath = FSM_LAST_GROUP_ALIAS_PATH + "/" + fileName;
-
-	FILE* groupFile = fopen(fullPath.c_str(), "r");
-	if(!groupFile)
-	{
-		__COUT__ << "Can't open file: " << fullPath << __E__;
-
-		__COUT__ << "Returning empty groupName and key -1" << __E__;
-
-		return std::pair<std::string /*group name*/, TableGroupKey>("", TableGroupKey());
-	}
-
-	char line[500];  // assuming no group names longer than 500 chars
-	// name and then key
-	std::pair<std::string /*group name*/, TableGroupKey> theGroup;
-
-	fgets(line, 500, groupFile);  // name
-	theGroup.first = line;
-
-	fgets(line, 500, groupFile);  // key
-	int key;
-	sscanf(line, "%d", &key);
-	theGroup.second = key;
-
-	fgets(line, 500, groupFile);  // time
-	time_t timestamp;
-	sscanf(line, "%ld", &timestamp);                                   // type long int
-	                                                                   //	struct tm tmstruct;
-	                                                                   //	::localtime_r(&timestamp, &tmstruct);
-	                                                                   //	::strftime(line, 30, "%c %Z", &tmstruct);
-	returnedTimeString = StringMacros::getTimestampString(timestamp);  // line;
-	fclose(groupFile);
-
-	__COUT__ << "theGroup.first= " << theGroup.first << " theGroup.second= " << theGroup.second << __E__;
-
-	return theGroup;
-}  // end loadGroupNameAndKey()
-
-//==============================================================================
-void GatewaySupervisor::saveGroupNameAndKey(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup, const std::string& fileName)
-{
-	std::string fullPath = FSM_LAST_GROUP_ALIAS_PATH + "/" + fileName;
-
-	std::ofstream groupFile(fullPath.c_str());
-	if(!groupFile.is_open())
-	{
-		__SS__ << "Error. Can't open file: " << fullPath << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
-	}
-	std::stringstream outss;
-	outss << theGroup.first << "\n" << theGroup.second << "\n" << time(0);
-	groupFile << outss.str().c_str();
-	groupFile.close();
-}  // end saveGroupNameAndKey()
+} //end setNextRunNumber()
 
 //==============================================================================
 void GatewaySupervisor::handleGetApplicationIdRequest(AllSupervisorInfo* allSupervisorInfo, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut)
