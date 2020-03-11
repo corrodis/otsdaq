@@ -1,6 +1,7 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/Macros/TablePluginMacros.h"
 #include "otsdaq/TablePlugins/DesktopIconTable.h"
+#include "otsdaq/TablePlugins/XDAQContextTable.h"
 
 #include "otsdaq/WebUsersUtilities/WebUsers.h"
 
@@ -77,6 +78,8 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
+	ConfigurationTree contextTableNode = configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
+
 	activeDesktopIcons_.clear();
 
 	DesktopIconTable::DesktopIcon* icon;
@@ -125,20 +128,52 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 		icon->windowContentURL_ = removeCommas(icon->windowContentURL_, true /*andHexReplace*/);
 		icon->folderPath_       = removeCommas(icon->folderPath_, false /*andHexReplace*/, true /*andHTMLReplace*/);
 
-		// add URN/LID to windowContentURL_, if link is given
+		// add application origin and URN/LID to windowContentURL_, if link is given
 		addedAppId = false;
-		if(!child.second.getNode(COL_APP_LINK).isDisconnected())
+		ConfigurationTree appLink = child.second.getNode(COL_APP_LINK);
+		if(!appLink.isDisconnected())
 		{
+
+			//first check app origin
+			if(icon->windowContentURL_.size() && icon->windowContentURL_[0] == '/')
+			{
+				//if starting with opening slash, then assume app should come from
+				//	appLink context's origin (to avoid cross-origin issues communicating
+				//	with app/supervisor)
+
+				const XDAQContextTable* contextTable =
+						configManager->getTable<XDAQContextTable>(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
+
+				ConfigurationTree contextNode =
+						contextTableNode.getNode(
+								contextTable->getContextOfApplication(configManager,
+										appLink.getValueAsString()));
+
+				//__COUTV__(contextUID);
+
+				std::string contextAddress =  contextNode.getNode(
+						XDAQContextTable::colContext_.colAddress_).getValueAsString();
+				unsigned int contextPort =  contextNode.getNode(
+						XDAQContextTable::colContext_.colPort_).getValue<unsigned int>();
+
+				//__COUTV__(contextAddress);
+				icon->windowContentURL_ = contextAddress + ":" +
+						std::to_string(contextPort) +
+						icon->windowContentURL_;
+				__COUTV__(icon->windowContentURL_);
+			} //end app origin check
+
+
 			// if last character is not '='
 			//	then assume need to add "?urn="
 			if(icon->windowContentURL_[icon->windowContentURL_.size() - 1] != '=')
 				icon->windowContentURL_ += "?urn=";
 
-			//__COUT__ << "Following Application link." << std::endl;
-			child.second.getNode(COL_APP_LINK).getNode(COL_APP_ID).getValue(intVal);
+			__COUT__ << "Following Application link." << std::endl;
+			appLink.getNode(COL_APP_ID).getValue(intVal);
 			icon->windowContentURL_ += std::to_string(intVal);
 
-			//__COUT__ << "URN/LID=" << intVal << std::endl;
+			__COUT__ << "URN/LID=" << intVal << std::endl;
 			addedAppId = true;
 		}
 

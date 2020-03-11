@@ -116,7 +116,7 @@ class ConfigurationManager
 	// getTable
 	//	get configuration * with specific configuration type
 	template<class T>
-	const T* 							getTable					(std::string name) const { const T* retPtr = dynamic_cast<const T*>(getTableByName(name)); if(retPtr == nullptr) { __SS__ << "Illegal cast of '" << name << "' to type " << StringMacros::getTypeName<T>() << __E__; __SS_THROW__ } return retPtr;}
+	const T* 							getTable					(const std::string& tableName) const { const T* retPtr = dynamic_cast<const T*>(getTableByName(tableName)); if(retPtr == nullptr) { __SS__ << "Illegal cast of '" << tableName << "' to type " << StringMacros::getTypeName<T>() << __E__; __SS_THROW__ } return retPtr;}
 	const TableBase* 					getTableByName				(const std::string& configurationName) const;
 
 	void 								dumpActiveConfiguration		(const std::string& filePath, const std::string& dumpType);

@@ -1670,7 +1670,7 @@ launchOTS() {
 		unset remoteLaunchHosts
 		
 		echo
-		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess...${Reset}"
+		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess (to disable remote start, use ots -s)...${Reset}"
 		i=0	
 		for port in "${contextPort[@]}"
 		do
@@ -1699,7 +1699,7 @@ launchOTS() {
 			
 				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
 				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
-				ssh -XY ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start
+				ssh -XY ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start &
 				
 				
 				#add host to remote launch host list

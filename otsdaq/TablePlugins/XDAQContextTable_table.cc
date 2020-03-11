@@ -34,7 +34,8 @@ XDAQContextTable::ColApplicationProperty 	XDAQContextTable::colAppProperty_ 	= X
 // clang-format on
 
 //==============================================================================
-XDAQContextTable::XDAQContextTable(void) : TableBase(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME), artdaqSupervisorContext_((unsigned int)-1)
+XDAQContextTable::XDAQContextTable(void)
+: TableBase(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME), artdaqSupervisorContext_((unsigned int)-1)
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
@@ -69,7 +70,7 @@ void XDAQContextTable::init(ConfigurationManager* configManager)
 		outputXDAQXML((std::ostream&)fs);
 		fs.close();
 	}
-}
+} //end init()
 
 //==============================================================================
 std::string XDAQContextTable::getContextAddress(const std::string& contextUID, bool wantHttp) const
@@ -337,6 +338,7 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 		}  // end artdaq context handling
 
 	}  // end primary context loop
+
 }  // end extractContexts()
 
 //==============================================================================
@@ -505,6 +507,37 @@ std::string XDAQContextTable::getApplicationUID(const std::string& url, unsigned
 			}
 	}
 	return "";
-}
+} //end getApplicationUID()
+
+//==============================================================================
+// only considers ON contexts and applications
+std::string XDAQContextTable::getContextOfApplication(ConfigurationManager* configManager, const std::string& appUID) const
+{
+	//look through all contexts until first appUID foud
+
+	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+
+	for(auto& context : childrenMap)
+	{
+		if(!context.second.getNode(XDAQContextTable::colContext_.colStatus_).getValue<bool>())
+			continue;
+
+		ConfigurationTree appLink = context.second.getNode(XDAQContextTable::colContext_.colLinkToApplicationTable_);
+		if(appLink.isDisconnected()) continue;
+
+		auto appMap = appLink.getChildren();
+		for(auto& app : appMap)
+		{
+			if(!app.second.getNode(XDAQContextTable::colApplication_.colStatus_).getValue<bool>())
+				continue;
+
+			if(app.first == appUID)
+				return context.first; //return context UID
+		} //end app search loop
+	} //end context search loop
+
+	__SS__ << "Application '" << appUID << "' search found no parent context!" << __E__;
+	__SS_THROW__;
+} //end getContextOfApplication()
 
 DEFINE_OTS_TABLE(XDAQContextTable)
