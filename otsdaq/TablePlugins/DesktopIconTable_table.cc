@@ -79,6 +79,13 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
 	ConfigurationTree contextTableNode = configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
+	const XDAQContextTable* contextTable =
+			configManager->getTable<XDAQContextTable>(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
+
+	//find gateway host origin string, to avoid modifying icons with same host
+	std::string gatewayContextUID = contextTable->getContextOfGateway(configManager);
+
+
 
 	activeDesktopIcons_.clear();
 
@@ -141,26 +148,28 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 				//	appLink context's origin (to avoid cross-origin issues communicating
 				//	with app/supervisor)
 
-				const XDAQContextTable* contextTable =
-						configManager->getTable<XDAQContextTable>(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
+				std::string contextUID = contextTable->getContextOfApplication(configManager,
+						appLink.getValueAsString());
 
-				ConfigurationTree contextNode =
-						contextTableNode.getNode(
-								contextTable->getContextOfApplication(configManager,
-										appLink.getValueAsString()));
 
-				//__COUTV__(contextUID);
+				//only prepend address if not same as gateway
+				if(contextUID != gatewayContextUID)
+				{
+					//__COUTV__(contextUID);
+					ConfigurationTree contextNode =
+							contextTableNode.getNode(contextUID);
 
-				std::string contextAddress =  contextNode.getNode(
-						XDAQContextTable::colContext_.colAddress_).getValueAsString();
-				unsigned int contextPort =  contextNode.getNode(
-						XDAQContextTable::colContext_.colPort_).getValue<unsigned int>();
+					std::string contextAddress =  contextNode.getNode(
+							XDAQContextTable::colContext_.colAddress_).getValue<std::string>();
+					unsigned int contextPort =  contextNode.getNode(
+							XDAQContextTable::colContext_.colPort_).getValue<unsigned int>();
 
-				//__COUTV__(contextAddress);
-				icon->windowContentURL_ = contextAddress + ":" +
-						std::to_string(contextPort) +
-						icon->windowContentURL_;
-				__COUTV__(icon->windowContentURL_);
+					//__COUTV__(contextAddress);
+					icon->windowContentURL_ = contextAddress + ":" +
+							std::to_string(contextPort) +
+							icon->windowContentURL_;
+					//__COUTV__(icon->windowContentURL_);
+				}
 			} //end app origin check
 
 

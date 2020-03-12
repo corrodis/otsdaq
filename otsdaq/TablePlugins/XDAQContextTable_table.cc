@@ -513,7 +513,7 @@ std::string XDAQContextTable::getApplicationUID(const std::string& url, unsigned
 // only considers ON contexts and applications
 std::string XDAQContextTable::getContextOfApplication(ConfigurationManager* configManager, const std::string& appUID) const
 {
-	//look through all contexts until first appUID foud
+	//look through all contexts until first appUID found
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
@@ -539,5 +539,38 @@ std::string XDAQContextTable::getContextOfApplication(ConfigurationManager* conf
 	__SS__ << "Application '" << appUID << "' search found no parent context!" << __E__;
 	__SS_THROW__;
 } //end getContextOfApplication()
+
+//==============================================================================
+// only considers ON contexts and applications
+std::string XDAQContextTable::getContextOfGateway(ConfigurationManager* configManager) const
+{
+	//look through all contexts until first gateway found
+
+	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+
+	for(auto& context : childrenMap)
+	{
+		if(!context.second.getNode(XDAQContextTable::colContext_.colStatus_).getValue<bool>())
+			continue;
+
+		ConfigurationTree appLink = context.second.getNode(XDAQContextTable::colContext_.colLinkToApplicationTable_);
+		if(appLink.isDisconnected()) continue;
+
+		auto appMap = appLink.getChildren();
+		for(auto& app : appMap)
+		{
+			if(!app.second.getNode(XDAQContextTable::colApplication_.colStatus_).getValue<bool>())
+				continue;
+
+			std::string className = app.second.getNode(XDAQContextTable::colApplication_.colClass_).getValue<std::string>();
+			if(className ==XDAQContextTable::GATEWAY_SUPERVISOR_CLASS ||
+					className == XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS)
+				return context.first; //return context UID
+		} //end app search loop
+	} //end context search loop
+
+	__SS__ << "Gateway Application search found no parent context!" << __E__;
+	__SS_THROW__;
+} //end getContextOfGateway()
 
 DEFINE_OTS_TABLE(XDAQContextTable)
