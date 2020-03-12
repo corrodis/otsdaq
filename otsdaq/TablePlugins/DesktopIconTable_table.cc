@@ -155,20 +155,27 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 				//only prepend address if not same as gateway
 				if(contextUID != gatewayContextUID)
 				{
-					//__COUTV__(contextUID);
-					ConfigurationTree contextNode =
-							contextTableNode.getNode(contextUID);
+					try
+					{
+						//__COUTV__(contextUID);
+						ConfigurationTree contextNode =
+								contextTableNode.getNode(contextUID);
 
-					std::string contextAddress =  contextNode.getNode(
-							XDAQContextTable::colContext_.colAddress_).getValue<std::string>();
-					unsigned int contextPort =  contextNode.getNode(
-							XDAQContextTable::colContext_.colPort_).getValue<unsigned int>();
+						std::string contextAddress =  contextNode.getNode(
+								XDAQContextTable::colContext_.colAddress_).getValue<std::string>();
+						unsigned int contextPort =  contextNode.getNode(
+								XDAQContextTable::colContext_.colPort_).getValue<unsigned int>();
 
-					//__COUTV__(contextAddress);
-					icon->windowContentURL_ = contextAddress + ":" +
-							std::to_string(contextPort) +
-							icon->windowContentURL_;
-					//__COUTV__(icon->windowContentURL_);
+						//__COUTV__(contextAddress);
+						icon->windowContentURL_ = contextAddress + ":" +
+								std::to_string(contextPort) +
+								icon->windowContentURL_;
+						//__COUTV__(icon->windowContentURL_);
+					}
+					catch(const std::runtime_error& e)
+					{
+						__COUT__ << "Ignoring error finding App origin: " << e.what() << __E__;
+					}
 				}
 			} //end app origin check
 
