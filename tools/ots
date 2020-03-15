@@ -1699,7 +1699,7 @@ launchOTS() {
 			
 				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
 				echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
-				ssh -XY ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start &
+				ssh -XY ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t${Red}${REV} ***************** Remote start failed (check local permissions and remote installation)! ********************* ${Reset}" &
 				
 				
 				#add host to remote launch host list
@@ -1801,15 +1801,15 @@ printMainURL() {
 		sleep 3 #give a little time for other StartOTS printouts to occur (so this one is last)  
 	fi
 	
-	echo
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOpen the URL below in your Google Chrome or Mozilla Firefox web browser:"	
-	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\t(Note: This URL may need to be modified by the user depending on their network configuration)"
-
 	if [ $MAIN_URL == "unknown_url" ]; then
 		echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tINFO: No gateway supervisor found for node {${HOSTNAME}}.${Reset}"
 		exit
 	fi
 	
+	echo
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\tOpen the URL below in your Google Chrome or Mozilla Firefox web browser:"	
+	echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${Reset}]\t\t(Note: This URL may need to be modified by the user depending on their network configuration)"
+		
 	for i in {1..5}
 	do
 		#check if ots was aborted

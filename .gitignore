@@ -10,4 +10,6 @@ otsdaq-core/Junk/
 bin/*
 obj/*
 *.vcxproj*
-*_action_quit*
+*_action_quit**.tmp
+*.bk
+*.tmp
