@@ -1941,9 +1941,9 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 		if(LoginSessions_[i].startTime_ + LOGIN_SESSION_EXPIRATION_TIME < time(0) ||  // expired
 		   LoginSessions_[i].loginAttempts_ > LOGIN_SESSION_ATTEMPTS_MAX)
 		{
-			//__COUT__ << "Found expired userId: " << LoginSessionUUIDVector[i] <<
-			//	" at time " << LoginSessionStartTimeVector[i] << " with attempts " <<
-			// LoginSessionAttemptsVector[i] << __E__;
+			__COUT__ << "Found expired login sessions: " << i << " of " << LoginSessions_.size() << __E__;
+				//" at time " << LoginSessionStartTimeVector[i] << " with attempts " <<
+			 	//LoginSessionAttemptsVector[i] << __E__;
 
 			removeLoginSessionEntry(i);
 			--i;  // rewind loop
@@ -1967,6 +1967,10 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 			//	" start time " << tstr << " i: " << i << " size: " <<
 			// ActiveSessionStartTimeVector.size()
 			//	<< __E__;
+			
+			
+			__COUT__ << "Found expired active sessions: " << i << " of " << ActiveSessions_.size() << __E__;
+			
 			tmpUid = ActiveSessions_[i].userId_;
 			removeActiveSessionEntry(i);
 
@@ -1995,8 +1999,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 	//
 	//		}
 
-	//__COUT__ << "Found usersUsernameWithLock_: " << usersUsernameWithLock_ << " - " <<
-	// userWithLockVerified << __E__;
+	__COUT__ << "Found usersUsernameWithLock_: " << usersUsernameWithLock_ << __E__;
 	if(CareAboutCookieCodes_ && !isUsernameActive(usersUsernameWithLock_))  // unlock if user no longer logged in
 		usersUsernameWithLock_ = "";
 }  // end cleanupExpiredEntries()
