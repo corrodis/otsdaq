@@ -3133,9 +3133,12 @@ xoap::MessageReference GatewaySupervisor::supervisorSystemMessage(xoap::MessageR
 	SOAPParameters parameters;
 	parameters.addParameter("ToUser");
 	parameters.addParameter("Message");
+	parameters.addParameter("DoEmail");
 	SOAPUtilities::receive(message, parameters);
 
-	__COUT__ << "toUser: " << parameters.getValue("ToUser").substr(0, 10) << ", message: " << parameters.getValue("Message").substr(0, 10) << __E__;
+	__COUT__ << "toUser: " << parameters.getValue("ToUser").substr(0, 10) <<
+			", doEmail: " << parameters.getValue("DoEmail").substr(0, 10) <<
+			", message: " << parameters.getValue("Message").substr(0, 10) << __E__;
 
 	theSystemMessenger_.addSystemMessage(parameters.getValue("ToUser"), parameters.getValue("Message"));
 	return SOAPUtilities::makeSOAPMessageReference("SystemMessageResponse");

@@ -382,11 +382,12 @@ bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::Applicat
 // sendSystemMessage
 //	send system message to toUser through Supervisor
 //	toUser wild card * is to all users
-void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg)
+void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg, bool doEmail /*=false*/)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ToUser", toUser);
 	parameters.addParameter("Message", msg);
+	parameters.addParameter("DoEmail", doEmail?"1":"0");
 
 	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorSystemMessage", parameters);
 }
