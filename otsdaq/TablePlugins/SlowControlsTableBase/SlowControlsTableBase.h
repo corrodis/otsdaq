@@ -16,7 +16,7 @@ class SlowControlsTableBase : public TableBase
 	virtual ~SlowControlsTableBase(void);
 
 	virtual bool	slowControlsChannelListHasChanged 	(void) const = 0;
-	virtual void	getSlowControlsChannelList			(std::vector<std::string /*channelName*/>& channelList) const = 0;
+	virtual void	getSlowControlsChannelList			(std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>& channelList) const = 0;
 	
 };
 // clang-format on
