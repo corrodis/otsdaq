@@ -475,6 +475,14 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference event)
 		theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true /*doActivate*/);
 	}
 
+	CoreSupervisorBase::transitionConfiguringFSMs();
+
+	__SUP_COUT__ << "Configured." << __E__;
+} //end transitionConfiguring()
+
+//==============================================================================
+void CoreSupervisorBase::transitionConfiguringFSMs()
+{
 	// Now that the configuration manager has all the necessary configurations,
 	//	create all objects that depend on the configuration (the first iteration)
 
@@ -524,7 +532,7 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference event)
 		                                         __FUNCTION__ /*function*/
 		);
 	}
-}  // end transitionConfiguring()
+}  // end transitionConfiguringFSMs()
 
 //==============================================================================
 // transitionHalting

@@ -104,6 +104,9 @@ class CoreSupervisorBase : public xdaq::Application,
 	virtual void inError				(toolbox::fsm::FiniteStateMachine& fsm);
 
 	virtual void transitionConfiguring	(toolbox::Event::Reference event);
+  protected:
+	void 		 transitionConfiguringFSMs(void);
+  public:
 	virtual void transitionHalting		(toolbox::Event::Reference event);
 	virtual void transitionInitializing	(toolbox::Event::Reference event);
 	virtual void transitionPausing		(toolbox::Event::Reference event);
