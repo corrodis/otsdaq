@@ -2876,13 +2876,110 @@ void WebUsers::loadUserWithLock()
 	setUserWithLock(Users_[i].userId_, true, username);
 }  // end loadUserWithLock()
 
+
+//==============================================================================
+// addSystemMessage
+//	targetUser can be "*" for all users
+void SystemMessenger::addSystemMessage(std::string targetUsersCSM, std::string msg, bool doEmail)
+{
+	addSystemMessage
+} //end addSystemMessage()
+
+//==============================================================================
+// addSystemMessage
+//	targetUser can be "*" for all users
+void WebUsers::addSystemMessage(std::vector<std::string> targetUsers, std::string msg, bool doEmail)
+{
+	systemMessageCleanup();
+
+	// reject if same message is already in vector set
+	// for(uint64_t i=0;i<systemMessageTargetUser_.size();++i)
+	// if(systemMessageTargetUser_[i] == targetUser && systemMessageMessage_[i] == msg) return;
+	// reject only if last message
+	if(systemMessageTargetUser_.size() && systemMessageTargetUser_[systemMessageTargetUser_.size() - 1] == targetUser && systemMessageMessage_[systemMessageTargetUser_.size() - 1] == msg)
+		return;
+
+	systemMessageSetLock(true);  // set lock
+	systemMessageTargetUser_.push_back(targetUser);
+	systemMessageMessage_.push_back(msg);
+	systemMessageTime_.push_back(time(0));
+	systemMessageDelivered_.push_back(false);
+	systemMessageSetLock(false);  // unset lock
+
+	__COUT__ << "Current System Messages count = " << systemMessageTargetUser_.size() << __E__;
+} //end addSystemMessage()
+
+//==============================================================================
+// getSystemMessage
+//	Deliver | separated system messages (time | msg | time | msg...etc),
+//		if there is any in vector set for user or for wildcard *
+//	Empty std::string "" returned if no message for targetUser
+//	Note: | is an illegal character and will cause GUI craziness
+std::string WebUsers::getSystemMessage(std::string targetUser)
+{
+	// __COUT__ << "Current System Messages: " << targetUser <<
+	// std::endl << std::endl;
+	std::string retStr = "";
+	int         cnt    = 0;
+	char        tmp[100];
+	for(uint64_t i = 0; i < systemMessageTargetUser_.size(); ++i)
+		if(systemMessageTargetUser_[i] == targetUser || systemMessageTargetUser_[i] == "*")
+		{
+			// deliver system message
+			if(cnt)
+				retStr += "|";
+			sprintf(tmp, "%lu", systemMessageTime_[i]);
+			retStr += std::string(tmp) + "|" + systemMessageMessage_[i];
+
+			if(systemMessageTargetUser_[i] != "*")  // mark delivered
+				systemMessageDelivered_[i] = true;
+			++cnt;
+		}
+
+	systemMessageCleanup();
+	return retStr;
+} //end getSystemMessage()
+
+//==============================================================================
+// systemMessageSetLock
+//	ALWAYS calling thread with true, must also call with false to release lock
+void WebUsers::systemMessageSetLock(bool set)
+{
+	while(set && systemMessageLock_)
+		usleep(1000);  // wait for other thread to unlock
+	systemMessageLock_ = set;
+} //end systemMessageSetLock()
+
+//==============================================================================
+// systemMessageCleanup
+//	Cleanup messages if delivered, and targetUser != wildcard *
+//	For all remaining messages, wait some time before removing (e.g. 30 sec)
+void WebUsers::systemMessageCleanup()
+{
+	// __COUT__ << "Current System Messages: " <<
+	// systemMessageTargetUser_.size() <<  std::endl << std::endl;
+	for(uint64_t i = 0; i < systemMessageTargetUser_.size(); ++i)
+		if((systemMessageDelivered_[i] && systemMessageTargetUser_[i] != "*") ||  // delivered and != *
+		   systemMessageTime_[i] + SYS_CLEANUP_WILDCARD_TIME < time(0))    // expired
+		{
+			// remove
+			systemMessageSetLock(true);  // set lock
+			systemMessageTargetUser_.erase(systemMessageTargetUser_.begin() + i);
+			systemMessageMessage_.erase(systemMessageMessage_.begin() + i);
+			systemMessageTime_.erase(systemMessageTime_.begin() + i);
+			systemMessageDelivered_.erase(systemMessageDelivered_.begin() + i);
+			systemMessageSetLock(false);  // unset lock
+			--i;                   // rewind
+		}
+	// __COUT__ << "Remaining System Messages: " <<
+	// systemMessageTargetUser_.size() <<  std::endl << std::endl;
+} //end systemMessageCleanup()
+
 //==============================================================================
 // WebUsers::getSecurity
-//
 std::string WebUsers::getSecurity() { return securityType_; }
 //==============================================================================
 // WebUsers::loadSecuritySelection
-//
 void WebUsers::loadSecuritySelection()
 {
 	std::string securityFileName = SECURITY_FILE_NAME;
@@ -2913,7 +3010,7 @@ void WebUsers::loadSecuritySelection()
 		CareAboutCookieCodes_ = true;
 
 	__COUT__ << "CareAboutCookieCodes_: " << CareAboutCookieCodes_ << __E__;
-}
+} //end loadSecuritySelection()()
 
 //==============================================================================
 void WebUsers::NACDisplayThread(const std::string& nac, const std::string& user)
@@ -2934,11 +3031,13 @@ void WebUsers::NACDisplayThread(const std::string& nac, const std::string& user)
 		__COUT__ << "\n******************************************************************** " << __E__;
 		__COUT__ << "\n******************************************************************** " << __E__;
 	}
-}
+} //end NACDisplayThread()
 
 //==============================================================================
 void WebUsers::deleteUserData()
 {
+	__COUT__ << "$$$$$$$$$$$$$$ Deleting ALL service user data... $$$$$$$$$$$$" << __E__;
+
 	// delete Login data
 	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + HASHES_DB_PATH + "/*").c_str());
 	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + USERS_DB_PATH + "/*").c_str());
@@ -2978,5 +3077,5 @@ void WebUsers::deleteUserData()
 	// delete Logbook folders
 	std::system(("rm -rf " + std::string(__ENV__("LOGBOOK_DATA_PATH")) + "/").c_str());
 
-	std::cout << __COUT_HDR_FL__ << "$$$$$$$$$$$$$$ Successfully deleted ALL service user data $$$$$$$$$$$$" << __E__;
-}
+	__COUT__ << "$$$$$$$$$$$$$$ Successfully deleted ALL service user data $$$$$$$$$$$$" << __E__;
+} //end deleteUserData()
