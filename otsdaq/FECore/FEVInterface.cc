@@ -43,7 +43,15 @@ void FEVInterface::configureSlowControls(void)
 {
 	// Start artdaq metric manager here, if possible
 	if(metricMan && !metricMan->Running() && metricMan->Initialized())
+	{		
+		__GEN_COUT__ << "Metric manager starting..." << __E__;
 		metricMan->do_start();
+		__GEN_COUT__ << "Metric manager started." << __E__;
+	}
+	else if(!metricMan || !metricMan->Initialized())
+		__GEN_COUT__ << "Metric manager could not be started!" << __E__;
+	else
+		__GEN_COUT__ << "Metric manager already started." << __E__;
 
 	mapOfSlowControlsChannels_.clear();  // reset
 
@@ -278,7 +286,8 @@ bool FEVInterface::slowControlsRunning(void) try
 				__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 			// Use artdaq Metric Manager if available,
-			if(channel->monitoringEnabled_ && metricMan && metricMan->Running() && universalAddressSize_ <= 8)
+			if(channel->monitoringEnabled_ && metricMan && metricMan->Running() && 
+				universalAddressSize_ <= 8)
 			{
 				uint64_t val = 0;  // 64 bits!
 				for(size_t ii = 0; ii < universalAddressSize_; ++ii)
@@ -287,6 +296,12 @@ bool FEVInterface::slowControlsRunning(void) try
 				__FE_COUT__ << "Sending sample to Metric Manager..." << __E__;
 				metricMan->sendMetric(channel->fullChannelName_, val, "", 3, artdaq::MetricMode::LastPoint);
 			}
+			else
+				__FE_COUT__ << "Skipping sample to Metric Manager: " <<
+					" channel->monitoringEnabled_=" << channel->monitoringEnabled_ <<
+					" metricMan=" << metricMan <<
+					" metricMan->Running()=" << metricMan->Running() << __E__;
+					
 
 			// make sure buffer hasn't exploded somehow
 			if(txBuffer.size() > txBufferSz)
