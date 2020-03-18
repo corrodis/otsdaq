@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
 		<TABLE Name="FESupervisorTable">
-			<VIEW Name="FE_SUPERVISOR_TABLE" Type="File,Database,DatabaseTest" Description="No%20description.">
-				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="ChildLink-FE" 	 Name="LinkToFEInterfaceTable" 	 StorageName="LINK_TO_FE_INTERFACE_TABLE" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,FEInterfaceTable"/>
-				<COLUMN Type="ChildLinkGroupID-FE" 	 Name="LinkToFEInterfaceGroupID" 	 StorageName="LINK_TO_FE_INTERFACE_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
+			<VIEW Name="FE_SUPERVISOR_TABLE" Type="File,Database,DatabaseTest" Description="Metric%20Manager%20is%20the%20artdaq%20solution%20to%20forwarding%20slow%20controls%20samples%20using%20a%20Metric%20Manager%20plugin.%20EPICS%20is%20one%20such%20plugin.%20To%20enable%20Metric%20Manager%20sample%20forwarding%2C%20set%20EnableSlowControlsMetricManager%20to%20true%2C%20and%20set%20the%20string%20SlowControlsMetricManagerChannelNamePreamble%20to%20prepend%20to%20all%20channel%20names%20(this%20is%20useful%20if%20you%20have%20multiple%20parallel%20test%20stands%2C%20but%20EPICS%20expects%20unique%20channel%20names).">
+				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-FE" 	 Name="LinkToFEInterfaceTable" 	 StorageName="LINK_TO_FE_INTERFACE_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,FEInterfaceTable"/>
+				<COLUMN Type="ChildLinkGroupID-FE" 	 Name="LinkToFEInterfaceGroupID" 	 StorageName="LINK_TO_FE_INTERFACE_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="EnableSlowControlsMetricManager" 	 StorageName="ENABLE_SLOW_CONTROLS_METRIC_MANAGER" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="SlowControlsMetricManagerChannelNamePreamble" 	 StorageName="SLOW_CONTROLS_METRIC_MANAGER_CHANNEL_NAME_PREAMBLE" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
 			</VIEW>
 		</TABLE>
