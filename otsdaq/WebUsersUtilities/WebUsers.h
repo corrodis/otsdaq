@@ -183,6 +183,51 @@ class WebUsers
 		time_t					accessTime_; // last login month resolution, blurred by 1/2 month
 	}; //end Hash struct
 
+	enum
+	{
+		SYS_CLEANUP_WILDCARD_TIME = 30,  // 30 seconds
+	};
+
+	struct SystemMessage
+	{
+		// Members for system messages ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		//	Set of vectors to delivers system messages to active users of the Web Gui
+		//		When a message is generated, systemMessageLock is set,
+		//			message is added and the vector set deliveredFlag = false,
+		//			and systemMessageLock is unset.
+		//		When a message is delivered deliveredFlag = true,
+		//		During systemMessageCleanup(), systemMessageLock is set, delivered messages are removed,
+		//			and systemMessageLock is unset.
+		//"SystemMessage" database associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Maintain list of user system messages:
+		//	time, message, deliveredFlag
+
+		SystemMessage(const std::string& message)
+		: message_			(message)
+		, creationTime_		(time(0))
+		, delivered_		(false)
+		{
+			__COUT__ << __E__;
+		} //end constructor
+
+		std::string 			message_;
+		time_t					creationTime_;
+		bool					delivered_; //flag
+	}; //end SystemMessage struct
+
+	void        			addSystemMessage			(const std::string& targetUsersCSV, const std::string& message);
+	void        			addSystemMessage			(const std::string& targetUsersCSV, const std::string& subject, const std::string& message, bool doEmail);
+	void        			addSystemMessage			(const std::vector<std::string>& targetUsers, const std::string& subject, const std::string& message, bool doEmail);
+	std::string 			getSystemMessage			(const std::string& targetUser);
+
+  private:
+	void                   	systemMessageCleanup		(void);
+	std::mutex				systemMessageLock_;
+	std::map<std::string /*toUser*/,std::vector<SystemMessage>> systemMessages_;
+
+
+  public:
+
 
 	struct RequestUserInfo
 	{
@@ -458,8 +503,6 @@ class WebUsers
 	bool         addToHashesDatabase(const std::string& hash);
 	std::string  genCookieCode(void);
 	std::string  refreshCookieCode(unsigned int i, bool enableRefresh = true);
-	void         removeActiveSessionEntry(unsigned int i);
-	void         removeLoginSessionEntry(unsigned int i);
 	bool deleteAccount(const std::string& username, const std::string& displayName);
 	void incrementIpBlacklistCount(const std::string& ip);
 

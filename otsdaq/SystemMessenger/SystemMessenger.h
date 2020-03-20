@@ -15,7 +15,8 @@ class SystemMessenger
   public:
 	SystemMessenger() : sysMsgLock_(false){};  // constructor
 
-	void        addSystemMessage(std::string targetUser, std::string msg);
+	void        addSystemMessage(std::string targetUsersCSV, std::string msg, bool doEmail);
+	void        addSystemMessage(std::vector<std::string> targetUsers, std::string msg, bool doEmail);
 	std::string getSystemMessage(std::string targetUser);
 
   private:

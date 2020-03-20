@@ -377,20 +377,31 @@ bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::Applicat
 
 	return cookieCode.length() == WebUsers::COOKIE_CODE_LENGTH;  // proper cookieCode has length
 	                                                             // WebUsers::COOKIE_CODE_LENGTH
-}
+} //end cookieCodeIsActiveForRequest()
+
 //==============================================================================
 // sendSystemMessage
 //	send system message to toUser through Supervisor
 //	toUser wild card * is to all users
-void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg, bool doEmail /*=false*/)
+void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& message, bool doEmail /*=false*/)
+{
+	sendSystemMessage(supervisorDescriptor, toUser, "" /*subject*/, message, doEmail);
+} //end sendSystemMessage)
+
+//==============================================================================
+// sendSystemMessage
+//	send system message to toUser comma separate variable (CSV) list through Supervisor
+//	toUser wild card * is to all users
+void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& subject, const std::string& message, bool doEmail /*=false*/)
 {
 	SOAPParameters parameters;
-	parameters.addParameter("ToUser", toUser);
-	parameters.addParameter("Message", msg);
+	parameters.addParameter("ToUser", toUser); // CSV list or *
+	parameters.addParameter("Subject", subject);
+	parameters.addParameter("Message", message);
 	parameters.addParameter("DoEmail", doEmail?"1":"0");
 
 	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorSystemMessage", parameters);
-}
+} //end sendSystemMessage)
 
 //==============================================================================
 // makeSystemLogbookEntry
@@ -401,4 +412,4 @@ void RemoteWebUsers::makeSystemLogbookEntry(XDAQ_CONST_CALL xdaq::ApplicationDes
 	parameters.addParameter("EntryText", entryText);
 
 	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorSystemLogbookEntry", parameters);
-}
+} //end makeSystemLogbookEntry()

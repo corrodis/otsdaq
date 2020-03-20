@@ -3,7 +3,6 @@ cet_make(LIBRARY_NAME GatewaySupervisor
 		 ${XDAQ_BASIC_LIB_LIST}
 		 ConfigurationInterface
 		 SupervisorInfo
-		 SystemMessenger
          WorkLoopManager
          FiniteStateMachine
          CgiDataUtilities
@@ -11,7 +10,6 @@ cet_make(LIBRARY_NAME GatewaySupervisor
          CodeEditor         
          CoreSupervisors
          NetworkUtilities
-         CodeEditor
          
 		 otsdaq_TablePlugins_XDAQContextTable_table
 		 otsdaq_TablePlugins_IterateTable_table

@@ -999,6 +999,7 @@ std::string StringMacros::exec(const char* cmd)
 		if(fgets(buffer.data(), 128, pipe.get()) != nullptr)
 			result += buffer.data();
 	}
+	__COUTV__(result);
 	return result;
 }  // end exec()
 

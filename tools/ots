@@ -140,6 +140,7 @@ echo " \ /"
 echo "  V "
 echo 
 
+ulimit -c unlimited
 
 HOSTNAME_ARR=($(echo "${HOSTNAME}" | tr '.' " "))
 #for i in "${!HOSTNAME_ARR[@]}"

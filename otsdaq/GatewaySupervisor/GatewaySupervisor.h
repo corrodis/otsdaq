@@ -262,7 +262,6 @@ class GatewaySupervisor : public xdaq::Application,
 	// Member Variables
 
 	static WebUsers   theWebUsers_;
-	SystemMessenger   theSystemMessenger_;
 
 	WorkLoopManager stateMachineWorkLoopManager_;
 	toolbox::BSem   stateMachineSemaphore_;

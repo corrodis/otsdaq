@@ -32,7 +32,7 @@ using namespace ots;
 #define IP_REJECT_FILE 						WEB_LOGIN_DB_PATH + "/ip_reject.dat"
 #define IP_ACCEPT_FILE 						WEB_LOGIN_DB_PATH + "/ip_accept.dat"
 
-#define SILENCE_ALL_TOOLTIPS_FILENAME                   "silenceTooltips"
+#define SILENCE_ALL_TOOLTIPS_FILENAME       "silenceTooltips"
 
 #define HASHES_DB_GLOBAL_STRING 			"hashData"
 #define HASHES_DB_ENTRY_STRING 				"hashEntry"
@@ -1401,10 +1401,6 @@ std::string WebUsers::genCookieCode()
 }  // end genCookieCode()
 
 //==============================================================================
-// WebUsers::removeLoginSessionEntry ---
-void WebUsers::removeLoginSessionEntry(unsigned int i) { LoginSessions_.erase(LoginSessions_.begin() + i); }  // end removeLoginSessionEntry()
-
-//==============================================================================
 // WebUsers::createNewActiveSession ---
 //	if asIndex is not specified (0), new session receives max(ActiveSessionIndex) for user
 //+1.. always skipping 0. 	In this ActiveSessionIndex should link a thread of cookieCodes
@@ -1432,10 +1428,6 @@ std::string WebUsers::createNewActiveSession(uint64_t uid, const std::string& ip
 
 	return ActiveSessions_.back().cookieCode_;
 }  // end createNewActiveSession()
-
-//==============================================================================
-// WebUsers::removeActiveSession ---
-void WebUsers::removeActiveSessionEntry(unsigned int i) { ActiveSessions_.erase(ActiveSessions_.begin() + i); }  // end removeActiveSessionEntry()
 
 //==============================================================================
 // WebUsers::refreshCookieCode ---
@@ -1748,12 +1740,12 @@ uint64_t WebUsers::cookieCodeLogout(const std::string& cookieCode, bool logoutOt
 		   (!logoutOtherUserSessions && ActiveSessions_[i].userId_ == uid && ActiveSessions_[i].sessionIndex_ == asi))
 		{
 			__COUT__ << "Logging out of active session " << ActiveSessions_[i].userId_ << "-" << ActiveSessions_[i].sessionIndex_ << __E__;
-			removeActiveSessionEntry(i);
+			ActiveSessions_.erase(ActiveSessions_.begin() + i);
 			++logoutCount;
 		}
-		else  // only increment if no delete
+		else  // only increment if no delete, for effectively erase rewind
 			++i;
-	}
+	} //end cleanup active sessioins loop
 
 	__COUT__ << "Found and removed active session count = " << logoutCount << __E__;
 
@@ -1945,7 +1937,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 				//" at time " << LoginSessionStartTimeVector[i] << " with attempts " <<
 			 	//LoginSessionAttemptsVector[i] << __E__;
 
-			removeLoginSessionEntry(i);
+			LoginSessions_.erase(LoginSessions_.begin() + i);
 			--i;  // rewind loop
 		}
 
@@ -1972,7 +1964,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 			__COUT__ << "Found expired active sessions: " << i << " of " << ActiveSessions_.size() << __E__;
 			
 			tmpUid = ActiveSessions_[i].userId_;
-			removeActiveSessionEntry(i);
+			ActiveSessions_.erase(ActiveSessions_.begin() + i);
 
 			if(!isUserIdActive(tmpUid))  // if uid no longer active, then user was
 			                             // completely logged out
@@ -1999,7 +1991,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 	//
 	//		}
 
-	__COUT__ << "Found usersUsernameWithLock_: " << usersUsernameWithLock_ << __E__;
+	//__COUT__ << "Found usersUsernameWithLock_: " << usersUsernameWithLock_ << __E__;
 	if(CareAboutCookieCodes_ && !isUsernameActive(usersUsernameWithLock_))  // unlock if user no longer logged in
 		usersUsernameWithLock_ = "";
 }  // end cleanupExpiredEntries()
@@ -2883,33 +2875,144 @@ void WebUsers::loadUserWithLock()
 //==============================================================================
 // addSystemMessage
 //	targetUser can be "*" for all users
-void SystemMessenger::addSystemMessage(std::string targetUsersCSM, std::string msg, bool doEmail)
+void WebUsers::addSystemMessage(const std::string& targetUsersCSV,const std::string& message)
 {
-	addSystemMessage
+	addSystemMessage(targetUsersCSV,"" /*subject*/,message,false /*doEmail*/);
 } //end addSystemMessage()
 
 //==============================================================================
 // addSystemMessage
 //	targetUser can be "*" for all users
-void WebUsers::addSystemMessage(std::vector<std::string> targetUsers, std::string msg, bool doEmail)
+void WebUsers::addSystemMessage(const std::string& targetUsersCSV, const std::string& subject, const std::string& message, bool doEmail)
 {
+	std::vector<std::string> targetUsers;
+	StringMacros::getVectorFromString(targetUsersCSV,targetUsers);
+	addSystemMessage(targetUsers,subject,message,doEmail);
+} //end addSystemMessage()
+
+//==============================================================================
+// addSystemMessage
+//	targetUser can be "*" for all users
+void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers,
+		const std::string& subject, const std::string& message, bool doEmail)
+{
+	__COUT__ << "Before number of users with system messages: " << systemMessages_.size() << __E__;
+
+	//lock for remainder of scope
+	std::lock_guard<std::mutex> lock(systemMessageLock_);
+
 	systemMessageCleanup();
 
-	// reject if same message is already in vector set
-	// for(uint64_t i=0;i<systemMessageTargetUser_.size();++i)
-	// if(systemMessageTargetUser_[i] == targetUser && systemMessageMessage_[i] == msg) return;
-	// reject only if last message
-	if(systemMessageTargetUser_.size() && systemMessageTargetUser_[systemMessageTargetUser_.size() - 1] == targetUser && systemMessageMessage_[systemMessageTargetUser_.size() - 1] == msg)
-		return;
+	std::string fullMessage = (subject == ""?"":(subject + ": ")) +
+			message;
 
-	systemMessageSetLock(true);  // set lock
-	systemMessageTargetUser_.push_back(targetUser);
-	systemMessageMessage_.push_back(msg);
-	systemMessageTime_.push_back(time(0));
-	systemMessageDelivered_.push_back(false);
-	systemMessageSetLock(false);  // unset lock
+	__COUTV__(fullMessage);
+	__COUTV__(StringMacros::vectorToString(targetUsers));
 
-	__COUT__ << "Current System Messages count = " << systemMessageTargetUser_.size() << __E__;
+	for(const auto& targetUser : targetUsers)
+	{
+		// reject if message is a repeat for user
+
+		if(targetUser == "" || (targetUser != "*" && targetUser.size() < USERNAME_LENGTH))
+		{
+			__COUT__ << "Illegal username '" << targetUser << "'" << __E__;
+			continue;
+		}
+		__COUTV__(targetUser);
+
+		auto it = systemMessages_.find(targetUser);
+
+		if(it != systemMessages_.end() &&
+				it->second.size() &&
+				it->second[it->second.size() - 1].message_ == fullMessage)
+			continue; //skip user add
+
+		if(it == systemMessages_.end()) //create first message for user
+		{
+			systemMessages_.emplace(
+					std::pair<std::string /*toUser*/,std::vector<SystemMessage>>(
+							targetUser,
+							std::vector<SystemMessage>()
+					));
+			__COUT__ << targetUser << " Current System Messages count = " << 1 << __E__;
+		}
+		else //add message
+		{
+			__COUT__ << __E__;
+			it->second.push_back(SystemMessage(fullMessage));
+			__COUT__ << it->first << " Current System Messages count = " << it->second.size() << __E__;
+		}
+
+	}
+
+	__COUT__ << "After number of users with system messages: " << systemMessages_.size() << __E__;
+
+	if(doEmail)
+	{
+		__COUTV__(doEmail);
+
+		std::string toList = "";
+		bool first = true;
+		for(const auto& targetUser : targetUsers)
+		{
+			//for each user, look up email and append
+			if(targetUser == "*")
+			{
+				//add every user
+				for(const auto& user : Users_)
+				{
+					if(user.email_.size() > 5 && //few simple valid email checks
+							user.email_.find('@') != std::string::npos &&
+							user.email_.find('.') != std::string::npos)
+					{
+						if(!first) toList += ", ";
+						toList += user.email_;
+						first = false;
+
+						__COUT__ << "Adding " << user.username_ << " email: " << user.email_ << __E__;
+					}
+				} //end add every user loop
+				continue;
+			}
+
+			//find user
+			for(const auto& user : Users_)
+			{
+				if(user.username_ == targetUser)
+				{
+					if(user.email_.size() > 5 && //few simple valid email checks
+							user.email_.find('@') != std::string::npos &&
+							user.email_.find('.') != std::string::npos)
+					{
+						if(!first) toList += ", ";
+						toList += user.email_;
+						first = false;
+
+						__COUT__ << "Adding " << user.username_ << " email: " << user.email_ << __E__;
+					}
+					break;
+				}
+			} //end user loop
+		} //end target user email lookup loop
+
+		std::string filename = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_DB_PATH + "/.tmp_email.txt";
+		FILE* fp = fopen(filename.c_str(),"w");
+		if(!fp)
+		{
+			__SS__ << "Could not open email file: " << filename << __E__;
+			__SS_THROW__;
+		}
+
+		fprintf(fp,"From: %s\n",(WebUsers::OTS_OWNER==""?"ots":(
+				StringMacros::decodeURIComponent(WebUsers::OTS_OWNER) + "_ots")).c_str());
+		fprintf(fp,"To: %s\n",toList.c_str());
+		fprintf(fp,"Subject: %s\n",subject.c_str());
+		fprintf(fp,"%s",message.c_str());
+		fclose(fp);
+
+		StringMacros::exec(("sendmail \"" + toList + "\" < " + filename).c_str());
+	}
+	__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
 } //end addSystemMessage()
 
 //==============================================================================
@@ -2918,40 +3021,49 @@ void WebUsers::addSystemMessage(std::vector<std::string> targetUsers, std::strin
 //		if there is any in vector set for user or for wildcard *
 //	Empty std::string "" returned if no message for targetUser
 //	Note: | is an illegal character and will cause GUI craziness
-std::string WebUsers::getSystemMessage(std::string targetUser)
+std::string WebUsers::getSystemMessage(const std::string& targetUser)
 {
+	__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+
+	//lock for remainder of scope
+	std::lock_guard<std::mutex> lock(systemMessageLock_);
+
 	// __COUT__ << "Current System Messages: " << targetUser <<
 	// std::endl << std::endl;
+
 	std::string retStr = "";
 	int         cnt    = 0;
-	char        tmp[100];
-	for(uint64_t i = 0; i < systemMessageTargetUser_.size(); ++i)
-		if(systemMessageTargetUser_[i] == targetUser || systemMessageTargetUser_[i] == "*")
-		{
-			// deliver system message
-			if(cnt)
-				retStr += "|";
-			sprintf(tmp, "%lu", systemMessageTime_[i]);
-			retStr += std::string(tmp) + "|" + systemMessageMessage_[i];
+	char        tmp[32];
 
-			if(systemMessageTargetUser_[i] != "*")  // mark delivered
-				systemMessageDelivered_[i] = true;
-			++cnt;
-		}
+	auto it = systemMessages_.find(targetUser);
+	for(uint64_t i = 0; it != systemMessages_.end() && i < it->second.size(); ++i)
+	{
+		// deliver user specific system message
+		if(cnt)
+			retStr += "|";
+		sprintf(tmp, "%lu", it->second[i].creationTime_);
+		retStr += std::string(tmp) + "|" + it->second[i].message_;
+
+		it->second[i].delivered_ = true;
+		++cnt;
+	}
+
+	it = systemMessages_.find("*");
+	for(uint64_t i = 0; it != systemMessages_.end() && i < it->second.size(); ++i)
+	{
+		// deliver "*" system message
+		if(cnt)
+			retStr += "|";
+		sprintf(tmp, "%lu", it->second[i].creationTime_);
+		retStr += std::string(tmp) + "|" + it->second[i].message_;
+
+		++cnt;
+	}
 
 	systemMessageCleanup();
+	__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
 	return retStr;
 } //end getSystemMessage()
-
-//==============================================================================
-// systemMessageSetLock
-//	ALWAYS calling thread with true, must also call with false to release lock
-void WebUsers::systemMessageSetLock(bool set)
-{
-	while(set && systemMessageLock_)
-		usleep(1000);  // wait for other thread to unlock
-	systemMessageLock_ = set;
-} //end systemMessageSetLock()
 
 //==============================================================================
 // systemMessageCleanup
@@ -2959,23 +3071,25 @@ void WebUsers::systemMessageSetLock(bool set)
 //	For all remaining messages, wait some time before removing (e.g. 30 sec)
 void WebUsers::systemMessageCleanup()
 {
-	// __COUT__ << "Current System Messages: " <<
-	// systemMessageTargetUser_.size() <<  std::endl << std::endl;
-	for(uint64_t i = 0; i < systemMessageTargetUser_.size(); ++i)
-		if((systemMessageDelivered_[i] && systemMessageTargetUser_[i] != "*") ||  // delivered and != *
-		   systemMessageTime_[i] + SYS_CLEANUP_WILDCARD_TIME < time(0))    // expired
-		{
-			// remove
-			systemMessageSetLock(true);  // set lock
-			systemMessageTargetUser_.erase(systemMessageTargetUser_.begin() + i);
-			systemMessageMessage_.erase(systemMessageMessage_.begin() + i);
-			systemMessageTime_.erase(systemMessageTime_.begin() + i);
-			systemMessageDelivered_.erase(systemMessageDelivered_.begin() + i);
-			systemMessageSetLock(false);  // unset lock
-			--i;                   // rewind
-		}
-	// __COUT__ << "Remaining System Messages: " <<
-	// systemMessageTargetUser_.size() <<  std::endl << std::endl;
+	__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+	for(auto& userMessagesPair : systemMessages_)
+	{
+		__COUT__ << userMessagesPair.first << " system messages: " <<
+				userMessagesPair.second.size() << __E__;
+
+		for(uint64_t i = 0; i < userMessagesPair.second.size(); ++i)
+			if((userMessagesPair.first != "*" && userMessagesPair.second[i].delivered_) ||  // delivered and != *
+					userMessagesPair.second[i].creationTime_ + SYS_CLEANUP_WILDCARD_TIME < time(0))    // expired
+			{
+				// remove
+				userMessagesPair.second.erase(userMessagesPair.second.begin() + i);
+				--i;                   // rewind
+			}
+
+		__COUT__ << userMessagesPair.first << " remaining system messages: " <<
+				userMessagesPair.second.size() << __E__;
+	}
+	__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
 } //end systemMessageCleanup()
 
 //==============================================================================

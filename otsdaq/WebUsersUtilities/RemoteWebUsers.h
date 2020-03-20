@@ -44,7 +44,8 @@ class RemoteWebUsers : public SOAPMessenger
 	//			uint64_t* 						activeSessionIndex = 0);
 
 	std::string getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor);
-	void        sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg, bool doEmail = false);
+	void        sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& message, bool doEmail = false);
+	void        sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& subject, const std::string& message, bool doEmail = false);
 	void        makeSystemLogbookEntry(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText);
 	std::pair<std::string /*group name*/, TableGroupKey> getLastTableGroup(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
 	                                                                        const std::string&                           actionOfLastGroup,

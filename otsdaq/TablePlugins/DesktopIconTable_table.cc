@@ -174,7 +174,11 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 					}
 					catch(const std::runtime_error& e)
 					{
-						__COUT__ << "Ignoring error finding App origin: " << e.what() << __E__;
+						__SS__ << "Error finding App origin which was linked to Desktop Icon '" <<
+								child.first <<
+								"': " << e.what() << __E__;
+						ss << "\n\nPlease fix by disabling the Icon, enabling the App or fixing the link in the Configurate Tree." << __E__;
+						__SS_THROW__;
 					}
 				}
 			} //end app origin check
@@ -185,11 +189,11 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 			if(icon->windowContentURL_[icon->windowContentURL_.size() - 1] != '=')
 				icon->windowContentURL_ += "?urn=";
 
-			__COUT__ << "Following Application link." << std::endl;
+			//__COUT__ << "Following Application link." << std::endl;
 			appLink.getNode(COL_APP_ID).getValue(intVal);
 			icon->windowContentURL_ += std::to_string(intVal);
 
-			__COUT__ << "URN/LID=" << intVal << std::endl;
+			//__COUT__ << "URN/LID=" << intVal << std::endl;
 			addedAppId = true;
 		}
 

@@ -356,7 +356,7 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 				++commaCounter;
 			}
 
-			// set scope of mutext
+			// set scope of mutex
 			{
 				// should be mutually exclusive with GatewaySupervisor main thread state
 				// machine accesses  lockout the messages array for the remainder of the
@@ -2579,10 +2579,9 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				xmlOut.addTextElementToData("ContextMember", context.contextUID_);  // get context member name
 			}
 		}
-
 		else if(requestType == "getSystemMessages")
 		{
-			xmlOut.addTextElementToData("systemMessages", theSystemMessenger_.getSystemMessage(theWebUsers_.getUsersDisplayName(userInfo.uid_)));
+			xmlOut.addTextElementToData("systemMessages", theWebUsers_.getSystemMessage(theWebUsers_.getUsersDisplayName(userInfo.uid_)));
 
 			xmlOut.addTextElementToData("username_with_lock",
 			                            theWebUsers_.getUserWithLock());  // always give system lock update
@@ -2610,7 +2609,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
 
 			if(tmpUserWithLock != theWebUsers_.getUserWithLock())  // if there was a change, broadcast system message
-				theSystemMessenger_.addSystemMessage(
+				theWebUsers_.addSystemMessage(
 				    "*", theWebUsers_.getUserWithLock() == "" ? tmpUserWithLock + " has unlocked ots." : theWebUsers_.getUserWithLock() + " has locked ots.");
 		}
 		else if(requestType == "getStateMachine")
@@ -3115,41 +3114,51 @@ xoap::MessageReference GatewaySupervisor::supervisorCookieCheck(xoap::MessageRef
 // xoap::supervisorGetActiveUsers
 //	get display names for all active users
 xoap::MessageReference GatewaySupervisor::supervisorGetActiveUsers(xoap::MessageReference message)
-
 {
 	__COUT__ << __E__;
 
 	SOAPParameters parameters("UserList", theWebUsers_.getActiveUsersString());
 	return SOAPUtilities::makeSOAPMessageReference("ActiveUserResponse", parameters);
-}
+} //end supervisorGetActiveUsers()
 
 //==============================================================================
 // xoap::supervisorSystemMessage
 //	SOAPUtilities::receive a new system Message from a supervisor
 //	ToUser wild card * is to all users
+//	or comma-separated variable  (CSV) to multiple users
 xoap::MessageReference GatewaySupervisor::supervisorSystemMessage(xoap::MessageReference message)
-
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ToUser");
+	parameters.addParameter("Subject");
 	parameters.addParameter("Message");
 	parameters.addParameter("DoEmail");
 	SOAPUtilities::receive(message, parameters);
 
-	__COUT__ << "toUser: " << parameters.getValue("ToUser").substr(0, 10) <<
-			", doEmail: " << parameters.getValue("DoEmail").substr(0, 10) <<
-			", message: " << parameters.getValue("Message").substr(0, 10) << __E__;
+	std::string toUserCSV = parameters.getValue("ToUser");
+	std::string subject = parameters.getValue("Subject");
+	std::string systemMessage = parameters.getValue("Message");
+	std::string doEmail = parameters.getValue("DoEmail");
 
-	theSystemMessenger_.addSystemMessage(parameters.getValue("ToUser"), parameters.getValue("Message"));
+	__COUTV__(toUserCSV);
+	__COUTV__(subject);
+	__COUTV__(systemMessage);
+	__COUTV__(doEmail);
+
+	theWebUsers_.addSystemMessage(
+			toUserCSV,
+			subject,
+			systemMessage,
+			doEmail == "1");
+
 	return SOAPUtilities::makeSOAPMessageReference("SystemMessageResponse");
-}
+} //end supervisorSystemMessage()
 
 //===================================================================================================================
 // xoap::supervisorSystemLogbookEntry
 //	SOAPUtilities::receive a new system Message from a supervisor
 //	ToUser wild card * is to all users
 xoap::MessageReference GatewaySupervisor::supervisorSystemLogbookEntry(xoap::MessageReference message)
-
 {
 	SOAPParameters parameters;
 	parameters.addParameter("EntryText");

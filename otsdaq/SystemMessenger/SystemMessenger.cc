@@ -10,7 +10,14 @@ using namespace ots;
 //==============================================================================
 // addSystemMessage
 //	targetUser can be "*" for all users
-void SystemMessenger::addSystemMessage(std::string targetUser, std::string msg)
+void SystemMessenger::addSystemMessage(std::string targetUsersCSM, std::string msg, bool doEmail)
+{
+	addSystemMessage
+} //end addSystemMessage()
+//==============================================================================
+// addSystemMessage
+//	targetUser can be "*" for all users
+void SystemMessenger::addSystemMessage(std::vector<std::string> targetUsers, std::string msg, bool doEmail)
 {
 	sysMsgCleanup();
 
