@@ -859,9 +859,21 @@ FEVInterfacesManager* FESupervisor::extractFEInterfacesManager()
 void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
-
-	CoreSupervisorBase::transitionConfiguring(event);
-
+	
+	{ //do like start of CoreSupervisorBase::transitionConfiguring
+		// activate the configuration tree (the first iteration)
+		if(RunControlStateMachine::getIterationIndex() == 0 && RunControlStateMachine::getSubIterationIndex() == 0)
+		{
+			std::pair<std::string /*group name*/, TableGroupKey> theGroup(
+					SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("ConfigurationTableGroupName"),
+					TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("ConfigurationTableGroupKey")));
+			
+			__SUP_COUT__ << "Configuration table group name: " << theGroup.first << " key: " << theGroup.second << __E__;
+			
+			theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true /*doActivate*/);
+		}
+	} //end start like CoreSupervisorBase::transitionConfiguring
+	
 	// get pset from Board Reader metric manager table
 	try
 	{
@@ -882,7 +894,11 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
 		
 		if(enableMetricManager)
 		{
-			
+			if(!metricMan) 
+			{
+				__SUP_COUT__ << "Metric manager is not instantiated! Attempting to fix." << __E__;
+				metricMan = std::make_unique<artdaq::MetricManager>();
+			}
 			std::string			metricNamePreamble = feSupervisorNode.getNode(
 							"/SlowControlsMetricManagerChannelNamePreamble").getValue<std::string>();
 			__COUTV__(metricNamePreamble);
@@ -892,8 +908,9 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
 			fhicl::make_ParameterSet(metric_string, metric_pset);
 
 			metricMan->initialize(metric_pset,metricNamePreamble);
-						
-			__SUP_COUT__ << "transitionConfiguring metric manager initialized." << __E__;
+			
+			__SUP_COUT__ << "transitionConfiguring metric manager(" << metricMan <<
+				") initialized = " << metricMan->Initialized() << __E__;
 		}
 		else
 			__SUP_COUT__ << "Metric Manager disabled." << __E__;
@@ -929,6 +946,8 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
 		);
 	}
 
+	CoreSupervisorBase::transitionConfiguringFSMs();
+
 	__SUP_COUT__ << "transitionConfiguring done." << __E__;
 }  // end transitionConfiguring()
 
@@ -939,7 +958,13 @@ void FESupervisor::transitionHalting(toolbox::Event::Reference event)
 	
 	try
 	{
-		metricMan->shutdown();  // will set initilized_ to false with mutex, which should prevent races	
+		
+		if(metricMan && metricMan->Initialized()) {
+			metricMan->shutdown();  //will set initilized_ to false with mutex, which should prevent races
+			metricMan.reset(nullptr);
+		}
+		else
+			__SUP_COUT__ << "Metric manager(" << metricMan << ") already shutdown." << __E__;
 	}
 	catch(...)
 	{

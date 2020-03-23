@@ -138,6 +138,8 @@ std::string FEVInterfacesManager::getStatusProgressDetail(void)
 {
 	std::string  progress = "";
 	unsigned int cnt      = 0;
+	//__CFG_COUTV__(theFENamesByPriority_.size());
+	//__CFG_COUTV__(VStateMachine::getTransitionName());
 	for(unsigned int i = 0; i < theFENamesByPriority_.size(); ++i)
 		try
 		{
