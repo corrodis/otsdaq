@@ -241,7 +241,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				}
 				catch(const xdaq::exception::Exception& e)
 				{
-					__COUT__ << "Failed to send getStatus SOAP Message: " << e.what() << __E__;
+					//__COUT__ << "Failed to send getStatus SOAP Message: " << e.what() << __E__;
 					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
 					progress = "0";
 					detail   = "SOAP Message Error";
@@ -249,10 +249,10 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				}
 				catch(...)
 				{
-					__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error." << __E__;
+					//__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error." << __E__;
 					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
 					progress = "0";
-					detail   = "SOAP Message Error";
+					detail   = "Unknown SOAP Message Error";
 					sleep(5); //sleep to not overwhelm server with errors
 				}
 			}  // end with non-gateway status request handling
@@ -2053,12 +2053,16 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		//		__COUT__ << "uuid = " << uuid << __E__;
 		//		__COUT__ << "nac =-" << newAccountCode << "-" << __E__;
 
+		__COUT__ << clock() << __E__;
+
 		uint64_t uid = theWebUsers_.attemptActiveSession(uuid,
 		                                                 jumbledUser,
 		                                                 jumbledPw,
 		                                                 newAccountCode,
 		                                                 cgi.getEnvironment().getRemoteAddr());  // after call jumbledUser holds displayName on success
 
+
+		__COUT__ << clock() << __E__;
 		if(uid >= theWebUsers_.ACCOUNT_ERROR_THRESHOLD)
 		{
 			__COUT__ << "Login invalid." << __E__;
@@ -2071,6 +2075,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 
 		//__COUT__ << "new cookieCode = " << newAccountCode.substr(0, 10) << __E__;
 
+		__COUT__ << clock() << __E__;
 		HttpXmlDocument xmldoc(newAccountCode, jumbledUser);
 
 		// include extra error detail
@@ -2091,7 +2096,9 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 			xmldoc.addTextElementToData("user_active_session_count", asStr);
 		}
 
+		__COUT__ << clock() << __E__;
 		xmldoc.outputXmlDocument((std::ostringstream*)out);
+		__COUT__ << clock() << __E__;
 	}
 	else if(Command == "cert")
 	{
@@ -2173,7 +2180,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		*out << "0";
 	}
 
-	__COUT__ << "Done" << __E__;
+	__COUT__ << "Done " << clock() << __E__;
 }  // end loginRequest()
 
 //==============================================================================
@@ -2581,7 +2588,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		}
 		else if(requestType == "getSystemMessages")
 		{
-			xmlOut.addTextElementToData("systemMessages", theWebUsers_.getSystemMessage(theWebUsers_.getUsersDisplayName(userInfo.uid_)));
+			xmlOut.addTextElementToData("systemMessages",
+					theWebUsers_.getSystemMessage(userInfo.username_));
 
 			xmlOut.addTextElementToData("username_with_lock",
 			                            theWebUsers_.getUserWithLock());  // always give system lock update
