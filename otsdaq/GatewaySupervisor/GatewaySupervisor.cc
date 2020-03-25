@@ -174,12 +174,12 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 		{
 			auto appInfo = it.second;
 			appName      = appInfo.getName();
-			//			__COUT__ << "Getting Status "
-			//			         << " Supervisor instance = '" << appInfo.getName()
-			//			         << "' [LID=" << appInfo.getId() << "] in Context '"
-			//			         << appInfo.getContextName() << "' [URL=" <<
-			// appInfo.getURL()
-			//			         << "].\n\n";
+//						__COUT__ << "Getting Status "
+//						         << " Supervisor instance = '" << appInfo.getName()
+//						         << "' [LID=" << appInfo.getId() << "] in Context '"
+//						         << appInfo.getContextName() << "' [URL=" <<
+//			 					appInfo.getURL()
+//						         << "].\n\n";
 
 			// if the application is the gateway supervisor, we do not send a SOAP message
 			if(appInfo.isGatewaySupervisor())  // get gateway status
@@ -213,16 +213,16 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				//				__COUT__ << "tempMessage... " <<
 				// SOAPUtilities::translate(tempMessage)
 				//				         << std::endl;
-				//
+
 				try
 				{
 					xoap::MessageReference statusMessage = theSupervisor->sendWithSOAPReply(appInfo.getDescriptor(), tempMessage);
 
-					//					__COUT__ << "statusMessage... "
-					//					         <<
-					// SOAPUtilities::translate(statusMessage)
-					//<<  std::endl;
-					//
+//					__COUT__ << "statusMessage... "
+//					     <<
+//						 SOAPUtilities::translate(statusMessage)
+//						<<  std::endl;
+					
 					SOAPParameters parameters;
 					parameters.addParameter("Status");
 					parameters.addParameter("Progress");

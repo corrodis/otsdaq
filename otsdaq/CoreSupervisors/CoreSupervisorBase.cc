@@ -290,6 +290,26 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 {
 	std::string  detail;
 	unsigned int cnt = 0;
+	
+	
+	
+	//__SUP_COUT__ << "Checking..." << CoreSupervisorBase::theStateMachineImplementation_.size() << __E__;
+	for(const auto& fsm : CoreSupervisorBase::theStateMachineImplementation_)
+	{
+		//__SUP_COUT__ << "Checking..." << __E__;
+		try 
+		{
+			VStateMachine* testFSM = dynamic_cast<VStateMachine*>(fsm);
+		}
+		catch(...)
+		{
+			__SUP_COUT__ << "getStatusProgressDetail() VStateMachine testFSM Failed..." << __E__;
+			throw;
+		}
+	}
+	
+	if(theStateMachine_.getCurrentStateName() == "Halted") return detail;
+	
 	for(const auto& fsm : CoreSupervisorBase::theStateMachineImplementation_)
 	{
 		std::string fsmProgressDetail = fsm->getStatusProgressDetail();

@@ -49,7 +49,7 @@ void FEVInterface::configureSlowControls(void)
 		__GEN_COUT__ << "Metric manager started." << __E__;
 	}
 	else if(!metricMan || !metricMan->Initialized())
-		__GEN_COUT__ << "Metric manager could not be started!" << __E__;
+		__GEN_COUT__ << "Metric manager could not be started! metricMan: " << metricMan << " Initialized()= " << metricMan->Initialized() << __E__;
 	else
 		__GEN_COUT__ << "Metric manager already started." << __E__;
 
@@ -300,7 +300,7 @@ bool FEVInterface::slowControlsRunning(void) try
 				__FE_COUT__ << "Skipping sample to Metric Manager: " <<
 					" channel->monitoringEnabled_=" << channel->monitoringEnabled_ <<
 					" metricMan=" << metricMan <<
-					" metricMan->Running()=" << metricMan->Running() << __E__;
+				  " metricMan->Running()=" << (metricMan && metricMan->Running()) << __E__;
 					
 
 			// make sure buffer hasn't exploded somehow

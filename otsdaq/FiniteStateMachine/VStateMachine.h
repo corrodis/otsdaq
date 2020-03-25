@@ -83,10 +83,11 @@ class VStateMachine
 		return progress;
 	}  // end getStatusProgressDetail()
 
-	void         setTransitionName(const std::string& transitionName) { transitionName_ = transitionName; }
-	void         setIterationIndex(unsigned int i) { iterationIndex_ = i; }
-	void         setSubIterationIndex(unsigned int i) { subIterationIndex_ = i; }
-	unsigned int getIterationIndex(void) { return iterationIndex_; }
+	void         			setTransitionName			(const std::string& transitionName) { transitionName_ = transitionName; }
+	const std::string&      getTransitionName			(void) {return transitionName_;}
+	void         setIterationIndex			(unsigned int i) { iterationIndex_ = i; }
+	void         setSubIterationIndex		(unsigned int i) { subIterationIndex_ = i; }
+	unsigned int getIterationIndex			(void) { return iterationIndex_; }
 	unsigned int getSubIterationIndex(void) { return subIterationIndex_; }
 	void         indicateIterationWork(void) { iterationWorkFlag_ = true; }
 	void         clearIterationWork(void) { iterationWorkFlag_ = false; }
