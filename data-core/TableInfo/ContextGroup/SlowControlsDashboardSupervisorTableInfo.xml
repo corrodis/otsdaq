@@ -19,7 +19,7 @@
 				<COLUMN Type="ChildLinkGroupID-stopAlarms alarms" 	 Name="LinkToStopAlarmsToMonitorGroupID" 	 StorageName="LINK_TO_STOP_ALARMS_TO_MONITOR_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-runningAlarms alarms" 	 Name="LinkToRunningAlarmsToMonitorTable" 	 StorageName="LINK_TO_RUNNING_ALARMS_TO_MONITOR_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,SlowControlsAlarmsToMonitorTable"/>
 				<COLUMN Type="ChildLinkGroupID-runningAlarms alarms" 	 Name="LinkToRunningAlarmsToMonitorGroupID" 	 StorageName="LINK_TO_RUNNING_ALARMS_TO_MONITOR_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
-				<COLUMN Type="ChildLink-alarmAlertGroups" 	 Name="LinkToAlarmAlertNotificationsTable" 	 StorageName="LINK_TO_ALARM_ALERT_NOTIFICATIONS_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK"/>
+				<COLUMN Type="ChildLink-alarmAlertGroups" 	 Name="LinkToAlarmAlertNotificationsTable" 	 StorageName="LINK_TO_ALARM_ALERT_NOTIFICATIONS_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,SlowControlsAlarmNotificationsTable"/>
 				<COLUMN Type="ChildLinkGroupID-alarmAlertGroups" 	 Name="LinkToAlarmAlertNotificationsGroupID" 	 StorageName="LINK_TO_ALARM_ALERT_NOTIFICATIONS_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="STRING" 		DataChoices=""/>
