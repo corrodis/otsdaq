@@ -59,7 +59,7 @@ HttpXmlDocument::HttpXmlDocument(std::string cookieCode, std::string displayName
     , cookieCodeTagName_("CookieCode")
     , displayNameTagName_("DisplayName")
 {
-	// std::cout << __COUT_HDR_FL__ << "in" << std::endl;
+	// __COUT__ << "in" << std::endl;
 	//<HEADER>
 	if(cookieCode != "" || displayName != "")  // add header
 	{
@@ -74,7 +74,7 @@ HttpXmlDocument::HttpXmlDocument(std::string cookieCode, std::string displayName
 	//<DATA>
 	dataElement_ = theDocument_->createElement(CONVERT_TO_XML(dataTagName_));
 	rootElement_->appendChild(dataElement_);
-	// std::cout << __COUT_HDR_FL__ << "out" << std::endl;
+	// __COUT__ << "out" << std::endl;
 }
 
 //==============================================================================
@@ -87,22 +87,22 @@ HttpXmlDocument::HttpXmlDocument(const HttpXmlDocument& doc)
     , cookieCodeTagName_(doc.cookieCodeTagName_)
     , displayNameTagName_(doc.displayNameTagName_)
 {
-	// std::cout << __COUT_HDR_FL__ << "in" << std::endl;
+	// __COUT__ << "in" << std::endl;
 	*this = doc;
-	// std::cout << __COUT_HDR_FL__ << "out" << std::endl;
+	// __COUT__ << "out" << std::endl;
 }
 
 //==============================================================================
 HttpXmlDocument& HttpXmlDocument::operator=(const HttpXmlDocument& doc)
 {
-	// std::cout << __COUT_HDR_FL__ << "in" << std::endl;
+	// __COUT__ << "in" << std::endl;
 	recursiveElementCopy(doc.rootElement_, rootElement_);
-	// std::cout << __COUT_HDR_FL__ << "in" << std::endl;
+	// __COUT__ << "in" << std::endl;
 	if(doc.headerElement_ != 0)
 		headerElement_ = (xercesc::DOMElement*)rootElement_->getElementsByTagName(CONVERT_TO_XML(headerTagName_))->item(0);
-	// std::cout << __COUT_HDR_FL__ << "in" << std::endl;
+	// __COUT__ << "in" << std::endl;
 	dataElement_ = (xercesc::DOMElement*)rootElement_->getElementsByTagName(CONVERT_TO_XML(dataTagName_))->item(0);
-	// std::cout << __COUT_HDR_FL__ << "out" << std::endl;
+	// __COUT__ << "out" << std::endl;
 	return *this;
 }
 
@@ -134,7 +134,7 @@ void HttpXmlDocument::setHeader(std::string cookieCode, std::string displayName)
 //==============================================================================
 xercesc::DOMElement* HttpXmlDocument::addTextElementToData(const std::string& childName, const std::string& childValue)
 {
-	// std::cout << __COUT_HDR_FL__ << "in - " << childName << " value: " << childValue <<std::endl << std::endl;
+	// __COUT__ << "in - " << childName << " value: " << childValue <<std::endl << std::endl;
 	return addTextElementToParent(childName, childValue, dataElement_);
 }
 
@@ -232,7 +232,7 @@ void HttpXmlDocument::recursiveOutputXmlDocument(
 {
 	// open field tag
 	if(dispStdOut)
-		std::cout << __COUT_HDR_FL__ << tabStr << "<" << XML_TO_CHAR(currEl->getNodeName());
+		__COUT__ << tabStr << "<" << XML_TO_CHAR(currEl->getNodeName());
 	if(out)
 		*out << tabStr << "<" << XML_TO_CHAR(currEl->getNodeName());
 
@@ -294,7 +294,7 @@ void HttpXmlDocument::recursiveOutputXmlDocument(
 	if(nodeList->getLength() > 1 || (nodeList->getLength() == 1 && currEl->getFirstChild()->getNodeType() != xercesc::DOMNode::TEXT_NODE))
 	{
 		if(dispStdOut)
-			std::cout << __COUT_HDR_FL__ << tabStr << "</" << XML_TO_CHAR(currEl->getNodeName()) << ">" << std::endl;
+			__COUT__ << tabStr << "</" << XML_TO_CHAR(currEl->getNodeName()) << ">" << std::endl;
 		if(out)
 			*out << tabStr << "</" << XML_TO_CHAR(currEl->getNodeName()) << ">" << std::endl;
 	}
@@ -434,7 +434,7 @@ void HttpXmlDocument::recursiveAddElementToParent(xercesc::DOMElement* child, xe
 		if(html)
 			childText = escapeString(childText);
 	}
-	// std::cout << __COUT_HDR_FL__<< "childName " << childName <<  " childText " <<
+	// __COUT__<< "childName " << childName <<  " childText " <<
 	// childText << std::endl;
 
 	// insert child
@@ -510,18 +510,19 @@ before quotes inString.replace(i+5,1,1,';');        // replace special character
 */
 //==============================================================================
 // loadXmlDocument
-//	returns false if xml doc could not be opened
+//	returns false if file does not exist
 bool HttpXmlDocument::loadXmlDocument(const std::string& filePath)
 {
-	// std::cout << __COUT_HDR_FL__<< "Loading theDocument_ from file: " << filePath <<
+	// __COUT__<< "Loading theDocument_ from file: " << filePath <<
 	// std::endl;
 
 	struct stat fileStatus;
 
 	if(stat(filePath.c_str(), &fileStatus) != 0)
 	{
-		std::cout << __COUT_HDR_FL__ << "File not accessible." << std::endl;
-		return false;
+		//__SS__ << "File not accessible: " << filePath << std::endl;
+		//__SS_THROW__;
+		return false; //not an error for file to not exist
 	}
 
 	// reset xml platform and theDocument_
@@ -547,7 +548,11 @@ bool HttpXmlDocument::loadXmlDocument(const std::string& filePath)
 		// Get the top-level element: Name is "root". No attributes for "root"
 		rootElement_ = theDocument_->getDocumentElement();
 		if(!rootElement_)
+		{
+			__SS__ << "empty XML theDocument_: " << filePath << std::endl;
+			__SS_THROW__;
 			throw(std::runtime_error("empty XML theDocument_"));
+		}
 
 		recursiveFixTextFields(rootElement_);  // remove space and new lines from value attribute
 
@@ -561,7 +566,9 @@ bool HttpXmlDocument::loadXmlDocument(const std::string& filePath)
 	}
 	catch(xercesc::XMLException& e)
 	{
-		std::cout << __COUT_HDR_FL__ << "Error parsing file." << std::endl;
+		__SS__ << "Error parsing file: " << filePath << std::endl;
+		__SS_THROW__;
+		__COUT__ << "Error parsing file." << std::endl;
 		return false;
 	}
 	delete parser;
@@ -601,14 +608,14 @@ xercesc::DOMElement* HttpXmlDocument::addDataElement ( std::string field, std::s
 value, unsigned int *parentIndexArray, unsigned int parentIndexArraySize)
 {
 
-    //std::cout << __COUT_HDR_FL__ << "field: " << field << ", value: " << value << ",
+    //__COUT__ << "field: " << field << ", value: " << value << ",
 parent: " << parentIndexArraySize << std::endl;
 
     xercesc::DOMElement* parentEl = dataElement_; // initialize parent to <DATA>
 
     if(parentIndexArray) //if there passed an array find parent relative to data element
     {
-        //std::cout << __COUT_HDR_FL__<< "Using Parent Index Array" << std::endl;
+        //__COUT__<< "Using Parent Index Array" << std::endl;
 
         xercesc::DOMNodeList *nodeList;
 
@@ -635,7 +642,7 @@ parentEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE) ++tmpi;
 
             if(tmpi >= nodeList->getLength())
             {
-                std::cout << __COUT_HDR_FL__ << "illegal child index attempted in nested
+                __COUT__ << "illegal child index attempted in nested
 parents: " << parentIndexArray[i] << ", depth: " << i << ", tmpi: " << tmpi << std::endl;
                 return 0; //illegal child index attempted in nested parents
             }

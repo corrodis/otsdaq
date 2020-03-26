@@ -36,14 +36,14 @@ class WebUsers
 
 	enum
 	{
-		SESSION_ID_LENGTH     = 512,
-		COOKIE_CODE_LENGTH    = 512,
-		NOT_FOUND_IN_DATABASE = uint64_t(-1),
-		ACCOUNT_INACTIVE = uint64_t(-2),
-		ACCOUNT_BLACKLISTED = uint64_t(-3),
-		ACCOUNT_ERROR_THRESHOLD = uint64_t(-5),
-		USERNAME_LENGTH       = 4,
-		DISPLAY_NAME_LENGTH   = 4,
+		SESSION_ID_LENGTH     		= 512,
+		COOKIE_CODE_LENGTH    		= 512,
+		NOT_FOUND_IN_DATABASE 		= uint64_t(-1),
+		ACCOUNT_INACTIVE 			= uint64_t(-2),
+		ACCOUNT_BLACKLISTED 		= uint64_t(-3),
+		ACCOUNT_ERROR_THRESHOLD 	= uint64_t(-5),
+		USERNAME_LENGTH       		= 4,
+		DISPLAY_NAME_LENGTH   		= 4,
 	};
 
 	enum
@@ -56,12 +56,11 @@ class WebUsers
 	using permissionLevel_t = uint8_t;
 	enum
 	{
-		PERMISSION_LEVEL_ADMIN =
-		    WebUsers::permissionLevel_t(-1),  // max permission level!
-		PERMISSION_LEVEL_EXPERT   = 100,
-		PERMISSION_LEVEL_USER     = 10,
-		PERMISSION_LEVEL_NOVICE   = 1,
-		PERMISSION_LEVEL_INACTIVE = 0,
+		PERMISSION_LEVEL_ADMIN 		= WebUsers::permissionLevel_t(-1),  // max permission level!
+		PERMISSION_LEVEL_EXPERT   	= 100,
+		PERMISSION_LEVEL_USER     	= 10,
+		PERMISSION_LEVEL_NOVICE   	= 1,
+		PERMISSION_LEVEL_INACTIVE 	= 0,
 	};
 
 	static const std::string OTS_OWNER; //defined by environment variable, e.g. experiment name
@@ -206,9 +205,7 @@ class WebUsers
 		: message_			(message)
 		, creationTime_		(time(0))
 		, delivered_		(false)
-		{
-			__COUT__ << __E__;
-		} //end constructor
+		{} //end constructor
 
 		std::string 			message_;
 		time_t					creationTime_;
@@ -221,9 +218,10 @@ class WebUsers
 	std::string 			getSystemMessage			(const std::string& targetUser);
 
   private:
+	void					addSystemMessageToMap		(const std::string& targetUser, const std::string& fullMessage); //private because target already vetted
 	void                   	systemMessageCleanup		(void);
 	std::mutex				systemMessageLock_;
-	std::map<std::string /*toUser*/,std::vector<SystemMessage>> systemMessages_;
+	std::map<std::string /*toUserDisplayName*/,std::vector<SystemMessage>> systemMessages_;
 
 
   public:
@@ -480,13 +478,13 @@ class WebUsers
 
   private:
 	inline WebUsers::permissionLevel_t getPermissionLevelForGroup(
-	    std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
+	    const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
 	    const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 	inline bool isInactiveForGroup(
-	    std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
+			const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
 	    const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 	inline bool isAdminForGroup(
-	    std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
+			const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
 	    const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 
 	void         loadSecuritySelection(void);
@@ -514,12 +512,13 @@ class WebUsers
 	bool saveDatabaseToFile(uint8_t db);
 	bool loadDatabases(void);
 
-	uint64_t searchUsersDatabaseForUsername(const std::string& username) const;
-	uint64_t searchUsersDatabaseForUserEmail(const std::string& useremail) const;
-	uint64_t searchUsersDatabaseForUserId(uint64_t uid) const;
-	uint64_t searchLoginSessionDatabaseForUUID(const std::string& uuid) const;
-	uint64_t searchHashesDatabaseForHash(const std::string& hash);
-	uint64_t searchActiveSessionDatabaseForCookie(const std::string& cookieCode) const;
+	uint64_t searchUsersDatabaseForUsername			(const std::string& username) const;
+	uint64_t searchUsersDatabaseForDisplayName		(const std::string& displayName) const;
+	uint64_t searchUsersDatabaseForUserEmail		(const std::string& useremail) const;
+	uint64_t searchUsersDatabaseForUserId			(uint64_t uid) const;
+	uint64_t searchLoginSessionDatabaseForUUID		(const std::string& uuid) const;
+	uint64_t searchHashesDatabaseForHash			(const std::string& hash);
+	uint64_t searchActiveSessionDatabaseForCookie	(const std::string& cookieCode) const;
 
 	static std::string getTooltipFilename(const std::string& username,
 	                                      const std::string& srcFile,

@@ -17,6 +17,7 @@ using namespace ots;
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "RemoteWebUsers"
 
+// clang-format off
 //==============================================================================
 // User Notes:
 //	- use xmlRequestGateway to check security from outside the Supervisor and Wizard
@@ -89,13 +90,17 @@ using namespace ots;
 //			}
 //
 //
-//==============================================================================
+// clang-format on
 
-RemoteWebUsers::RemoteWebUsers(xdaq::Application* application) : SOAPMessenger(application)
+//==============================================================================
+RemoteWebUsers::RemoteWebUsers(xdaq::Application* application,
+		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisorDescriptor)
+: SOAPMessenger(application)
+, gatewaySupervisorDescriptor_(gatewaySupervisorDescriptor)
 {
 	ActiveUserLastUpdateTime_ = 0;   // init to never
 	ActiveUserList_           = "";  // init to empty
-}
+} //end constructor()
 
 //==============================================================================
 // xmlRequestGateway
@@ -108,11 +113,6 @@ bool RemoteWebUsers::xmlRequestToGateway(
 	// initialize user info parameters to failed results
 	WebUsers::initializeRequestUserInfo(cgi, userInfo);
 
-	// const_cast away the const
-	//	so that this line is compatible with slf6 and slf7 versions of xdaq
-	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
-	//
-	// XDAQ_CONST_CALL is defined in "otsdaq/Macros/CoutMacros.h"
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisor;
 
 	SOAPParameters         parameters;
@@ -248,13 +248,14 @@ HANDLE_ACCESS_FAILURE:
 // getActiveUserList
 //	if lastUpdateTime is not too recent as spec'd by ACTIVE_USERS_UPDATE_THRESHOLD
 //	if server responds with
-std::string RemoteWebUsers::getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor)
+std::string RemoteWebUsers::getActiveUserList()
 {
-	if(1 || time(0) - ActiveUserLastUpdateTime_ > ACTIVE_USERS_UPDATE_THRESHOLD)  // need to update
+	if(time(0) - ActiveUserLastUpdateTime_ > ACTIVE_USERS_UPDATE_THRESHOLD)  // need to update
 	{
 		__COUT__ << "Need to update " << std::endl;
 
-		xoap::MessageReference retMsg = ots::SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorGetActiveUsers");
+		xoap::MessageReference retMsg = ots::SOAPMessenger::sendWithSOAPReply(
+				gatewaySupervisorDescriptor_, "SupervisorGetActiveUsers");
 
 		SOAPParameters retParameters("UserList");
 		SOAPUtilities::receive(retMsg, retParameters);
@@ -264,7 +265,7 @@ std::string RemoteWebUsers::getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationD
 	}
 	else
 		return ActiveUserList_;
-}
+} //end getActiveUserList()
 
 //==============================================================================
 // getLastTableGroup
@@ -272,13 +273,16 @@ std::string RemoteWebUsers::getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationD
 //	returns empty "" for actionTimeString on failure
 //	returns "Wed Dec 31 18:00:01 1969 CST" for actionTimeString (in CST) if action never
 // has occurred
-std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastTableGroup(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-                                                                                        const std::string&                           actionOfLastGroup,
+std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastTableGroup( const std::string&                           actionOfLastGroup,
                                                                                         std::string&                                 actionTimeString)
 {
 	actionTimeString = "";
 	xoap::MessageReference retMsg =
-	    ots::SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorLastTableGroupRequest", SOAPParameters("ActionOfLastGroup", actionOfLastGroup));
+	    ots::SOAPMessenger::sendWithSOAPReply(
+	    		gatewaySupervisorDescriptor_,
+				"SupervisorLastTableGroupRequest",
+				SOAPParameters("ActionOfLastGroup",
+				actionOfLastGroup));
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("GroupName");
@@ -303,96 +307,19 @@ std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastTabl
 } //end getLastTableGroup()
 
 //==============================================================================
-// getUserInfoForCookie
-//	get username and display name for user based on cookie code
-//	return true, if user info gotten successfully
-//	else false
-bool RemoteWebUsers::getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-                                          std::string&                                 cookieCode,
-                                          std::string*                                 userName,
-                                          std::string*                                 displayName,
-                                          uint64_t*                                    activeSessionIndex)
-{
-	__COUT__ << std::endl;
-	if(cookieCode.length() != WebUsers::COOKIE_CODE_LENGTH)
-		return false;  // return if invalid cookie code
-
-	//	SOAPParametersV parameters(1);
-	//	parameters[0].setName("CookieCode"); parameters[0].setValue(cookieCode);
-	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorGetUserInfo", SOAPParameters("CookieCode", cookieCode));
-
-	SOAPParameters retParameters;
-	retParameters.addParameter("Username");
-	retParameters.addParameter("DisplayName");
-	retParameters.addParameter("ActiveSessionIndex");
-	SOAPUtilities::receive(retMsg, retParameters);
-	if(userName)
-		*userName = retParameters.getValue("Username");
-	if(displayName)
-		*displayName = retParameters.getValue("DisplayName");
-	if(activeSessionIndex)
-		*activeSessionIndex = strtoul(retParameters.getValue("ActiveSessionIndex").c_str(), 0, 0);
-
-	__COUT__ << "userName " << *userName << std::endl;
-
-	return true;
-}
-
-//==============================================================================
-// cookieCodeIsActiveForRequest
-//	for external supervisors to check with Supervisor for login
-bool RemoteWebUsers::cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-                                                  std::string&                                 cookieCode,
-                                                  uint8_t*                                     userPermissions,
-                                                  std::string                                  ip,
-                                                  bool                                         refreshCookie,
-                                                  std::string*                                 userWithLock)
-{
-	//__COUT__ << "CookieCode: " << cookieCode << " " << cookieCode.length() << std::endl;
-	if(cookieCode.length() != WebUsers::COOKIE_CODE_LENGTH)
-		return false;  // return if invalid cookie code
-
-	//
-
-	SOAPParameters parameters;
-	parameters.addParameter("CookieCode", cookieCode);
-	parameters.addParameter("RefreshOption", refreshCookie ? "1" : "0");
-
-	//__COUT__ << "CookieCode: " << cookieCode << std::endl;
-	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorCookieCheck", parameters);
-
-	SOAPParameters retParameters;
-	retParameters.addParameter("CookieCode");
-	retParameters.addParameter("Permissions");
-	retParameters.addParameter("UserWithLock");
-	SOAPUtilities::receive(retMsg, retParameters);
-
-	if(userWithLock)
-		*userWithLock = retParameters.getValue("UserWithLock");
-	if(userPermissions)
-		sscanf(retParameters.getValue("Permissions").c_str(), "%hhu",
-		       userPermissions);  // unsigned char
-
-	cookieCode = retParameters.getValue("CookieCode");
-
-	return cookieCode.length() == WebUsers::COOKIE_CODE_LENGTH;  // proper cookieCode has length
-	                                                             // WebUsers::COOKIE_CODE_LENGTH
-} //end cookieCodeIsActiveForRequest()
-
-//==============================================================================
 // sendSystemMessage
 //	send system message to toUser through Supervisor
 //	toUser wild card * is to all users
-void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& message, bool doEmail /*=false*/)
+void RemoteWebUsers::sendSystemMessage(const std::string& toUser, const std::string& message, bool doEmail /*=false*/)
 {
-	sendSystemMessage(supervisorDescriptor, toUser, "" /*subject*/, message, doEmail);
+	sendSystemMessage(toUser, "" /*subject*/, message, doEmail);
 } //end sendSystemMessage)
 
 //==============================================================================
 // sendSystemMessage
 //	send system message to toUser comma separate variable (CSV) list through Supervisor
 //	toUser wild card * is to all users
-void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& subject, const std::string& message, bool doEmail /*=false*/)
+void RemoteWebUsers::sendSystemMessage(const std::string& toUser, const std::string& subject, const std::string& message, bool doEmail /*=false*/)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ToUser", toUser); // CSV list or *
@@ -400,16 +327,22 @@ void RemoteWebUsers::sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescript
 	parameters.addParameter("Message", message);
 	parameters.addParameter("DoEmail", doEmail?"1":"0");
 
-	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorSystemMessage", parameters);
+	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(
+			gatewaySupervisorDescriptor_, "SupervisorSystemMessage", parameters);
+
+	//__COUT__ << SOAPUtilities::translate(retMsg) << __E__;
 } //end sendSystemMessage)
 
 //==============================================================================
 // makeSystemLogbookEntry
 //	make system logbook through Supervisor
-void RemoteWebUsers::makeSystemLogbookEntry(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText)
+void RemoteWebUsers::makeSystemLogbookEntry(const std::string& entryText)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("EntryText", entryText);
 
-	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(supervisorDescriptor, "SupervisorSystemLogbookEntry", parameters);
+	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(
+			gatewaySupervisorDescriptor_, "SupervisorSystemLogbookEntry", parameters);
+
+	//__COUT__ << SOAPUtilities::translate(retMsg) << __E__;
 } //end makeSystemLogbookEntry()

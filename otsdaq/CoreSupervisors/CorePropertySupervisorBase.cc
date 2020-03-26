@@ -159,7 +159,15 @@ void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBa
 	fclose(fp);
 
 	__COUT__ << "Marked alive: " << filename << __E__;
-}
+} //end indicateOtsAlive()
+
+//==============================================================================
+//will be wizard supervisor in wiz mode, otherwise Gateway Supervisor descriptor
+XDAQ_CONST_CALL xdaq::ApplicationDescriptor* CorePropertySupervisorBase::getGatewaySupervisorDescriptor(void)
+{
+	return allSupervisorInfo_.isWizardMode() ? allSupervisorInfo_.getWizardDescriptor()
+			: allSupervisorInfo_.getGatewayDescriptor();
+} //end getGatewaySupervisorDescriptor()
 
 //==============================================================================
 // When overriding, setup default property values here

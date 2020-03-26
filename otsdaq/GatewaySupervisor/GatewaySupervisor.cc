@@ -1953,10 +1953,9 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 //      System logbook messages are generated for login and logout
 void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 {
-	__COUT__ << "Start" << __E__;
 	cgicc::Cgicc cgi(in);
 	std::string  Command = CgiDataUtilities::getData(cgi, "RequestType");
-	__COUT__ << "*** Login RequestType = " << Command << __E__;
+	__COUT__ << "*** Login RequestType = " << Command << " clock=" << clock() << __E__;
 
 	// RequestType Commands:
 	// login
@@ -2053,7 +2052,6 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		//		__COUT__ << "uuid = " << uuid << __E__;
 		//		__COUT__ << "nac =-" << newAccountCode << "-" << __E__;
 
-		__COUT__ << clock() << __E__;
 
 		uint64_t uid = theWebUsers_.attemptActiveSession(uuid,
 		                                                 jumbledUser,
@@ -2062,7 +2060,6 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		                                                 cgi.getEnvironment().getRemoteAddr());  // after call jumbledUser holds displayName on success
 
 
-		__COUT__ << clock() << __E__;
 		if(uid >= theWebUsers_.ACCOUNT_ERROR_THRESHOLD)
 		{
 			__COUT__ << "Login invalid." << __E__;
@@ -2075,7 +2072,6 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 
 		//__COUT__ << "new cookieCode = " << newAccountCode.substr(0, 10) << __E__;
 
-		__COUT__ << clock() << __E__;
 		HttpXmlDocument xmldoc(newAccountCode, jumbledUser);
 
 		// include extra error detail
@@ -2096,9 +2092,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 			xmldoc.addTextElementToData("user_active_session_count", asStr);
 		}
 
-		__COUT__ << clock() << __E__;
 		xmldoc.outputXmlDocument((std::ostringstream*)out);
-		__COUT__ << clock() << __E__;
 	}
 	else if(Command == "cert")
 	{
@@ -2180,17 +2174,16 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		*out << "0";
 	}
 
-	__COUT__ << "Done " << clock() << __E__;
+	__COUT__ << "Done clock=" << clock() << __E__;
 }  // end loginRequest()
 
 //==============================================================================
 void GatewaySupervisor::tooltipRequest(xgi::Input* in, xgi::Output* out)
 {
-	__COUT__ << "Start" << __E__;
 	cgicc::Cgicc cgi(in);
 
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
-	__COUT__ << "Tooltip RequestType = " << Command << __E__;
+	//__COUT__ << "Tooltip RequestType = " << Command << __E__;
 
 	//**** start LOGIN GATEWAY CODE ***//
 	// If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers
@@ -2233,7 +2226,7 @@ void GatewaySupervisor::tooltipRequest(xgi::Input* in, xgi::Output* out)
 
 	xmldoc.outputXmlDocument((std::ostringstream*)out, false, true);
 
-	__COUT__ << "Done" << __E__;
+	//__COUT__ << "Done" << __E__;
 }  // end tooltipRequest()
 
 //==============================================================================
@@ -2589,7 +2582,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		else if(requestType == "getSystemMessages")
 		{
 			xmlOut.addTextElementToData("systemMessages",
-					theWebUsers_.getSystemMessage(userInfo.username_));
+					theWebUsers_.getSystemMessage(userInfo.displayName_));
 
 			xmlOut.addTextElementToData("username_with_lock",
 			                            theWebUsers_.getUserWithLock());  // always give system lock update

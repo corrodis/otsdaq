@@ -91,11 +91,11 @@ xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::Ap
 	}
 	catch(xdaq::exception::Exception& e)
 	{
-		__COUT__ << "This application failed to send a SOAP message to " << d->getClassName() << " instance " << d->getInstance()
-		         << " re-throwing exception = " << xcept::stdformat_exception_history(e);
+		//__COUT__ << "This application failed to send a SOAP message to " << d->getClassName() << " instance " << d->getInstance()
+		//         << " re-throwing exception = " << xcept::stdformat_exception_history(e);
 		std::string mystring;
 		message->writeTo(mystring);
-		__COUT_ERR__ << mystring << std::endl;
+		//__COUT_ERR__ << mystring << std::endl;
 		XCEPT_RETHROW(xdaq::exception::Exception, "Failed to send SOAP command.", e);
 	}
 }

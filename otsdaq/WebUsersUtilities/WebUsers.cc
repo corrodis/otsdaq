@@ -743,7 +743,7 @@ void WebUsers::saveToDatabase(FILE* fp, const std::string& field, const std::str
 
 bool WebUsers::saveDatabaseToFile(uint8_t db)
 {
-	__COUT__ << "Save Database: " << (int)db << __E__;
+	//__COUT__ << "Save Database: " << (int)db << __E__;
 
 	std::string fn = (std::string)WEB_LOGIN_DB_PATH + ((db == DB_USERS) ? (std::string)USERS_DB_FILE : (std::string)HASHES_DB_FILE);
 
@@ -871,6 +871,7 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 //		initializes database entry with minimal permissions
 //			and salt starts as "" until password is set
 //		Special case if first user name!! max permissions given (super user made)
+// //Note: username, userId, AND displayName must be unique!
 void WebUsers::createNewAccount(const std::string& username, const std::string& displayName, const std::string& email)
 {
 	__COUT__ << "Creating account: " << username << __E__;
@@ -880,7 +881,15 @@ void WebUsers::createNewAccount(const std::string& username, const std::string& 
 	   username == WebUsers::DEFAULT_STATECHANGER_USERNAME)  // prevent reserved usernames
 	                                                         // from being created!
 	{
-		__SS__ << "Username '" << username << "' already exists" << __E__;
+		__SS__ << "Username '" << username << "' already exists! Please choose a unique username." << __E__;
+		__SS_THROW__;
+	}
+
+	//enforce unique Display Name
+	if((i = searchUsersDatabaseForDisplayName(displayName)) != NOT_FOUND_IN_DATABASE)
+		// from being created!
+	{
+		__SS__ << "Display Name '" << displayName << "' already exists! Please choose a unique display name." << __E__;
 		__SS_THROW__;
 	}
 
@@ -1305,6 +1314,18 @@ uint64_t WebUsers::searchUsersDatabaseForUsername(const std::string& username) c
 	uint64_t i = 0;
 	for(; i < Users_.size(); ++i)
 		if(Users_[i].username_ == username)
+			break;
+	return (i == Users_.size()) ? NOT_FOUND_IN_DATABASE : i;
+}  // end searchUsersDatabaseForUsername()
+
+//==============================================================================
+// WebUsers::searchUsersDatabaseForDisplayName ---
+//	returns index if found, else -1
+uint64_t WebUsers::searchUsersDatabaseForDisplayName(const std::string& displayName) const
+{
+	uint64_t i = 0;
+	for(; i < Users_.size(); ++i)
+		if(Users_[i].displayName_ == displayName)
 			break;
 	return (i == Users_.size()) ? NOT_FOUND_IN_DATABASE : i;
 }  // end searchUsersDatabaseForUsername()
@@ -2153,7 +2174,9 @@ std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> WebUsers::getPe
 }  // end getPermissionsForUser()
 
 //==============================================================================
-WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
+// WebUsers::getPermissionLevelForGroup
+// return WebUsers::PERMISSION_LEVEL_INACTIVE if group not found in permission map
+WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
                                                                  const std::string&                                                groupName)
 {
 	auto it = permissionMap.find(groupName);
@@ -2166,13 +2189,13 @@ WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(std::map<std::s
 }  // end getPermissionLevelForGroup()
 
 //==============================================================================
-bool WebUsers::isInactiveForGroup(std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName)
+bool WebUsers::isInactiveForGroup(const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName)
 {
 	return getPermissionLevelForGroup(permissionMap, groupName) == WebUsers::PERMISSION_LEVEL_INACTIVE;
 }
 
 //==============================================================================
-bool WebUsers::isAdminForGroup(std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName)
+bool WebUsers::isAdminForGroup(const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName)
 {
 	return getPermissionLevelForGroup(permissionMap, groupName) == WebUsers::PERMISSION_LEVEL_ADMIN;
 }
@@ -2390,7 +2413,7 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument* xmldoc, bool
 {
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> permissionMap = getPermissionsForUser(uid);
 
-	__COUTV__(StringMacros::mapToString(permissionMap));
+	//__COUTV__(StringMacros::mapToString(permissionMap));
 	if(isInactiveForGroup(permissionMap))
 		return;  // not an active user
 
@@ -2696,9 +2719,14 @@ void WebUsers::modifyAccountSettings(
 		__SS_THROW__;
 	}
 
-	if(username.length() < USERNAME_LENGTH || displayname.length() < DISPLAY_NAME_LENGTH)
+	if(username.length() < USERNAME_LENGTH)
 	{
-		__SS__ << "Invalid Username or Display Name must be length " << USERNAME_LENGTH << " or " << DISPLAY_NAME_LENGTH << __E__;
+		__SS__ << "Invalid Username, must be length " << USERNAME_LENGTH << __E__;
+		__SS_THROW__;
+	}
+	if(displayname.length() < DISPLAY_NAME_LENGTH)
+	{
+		__SS__ << "Invalid Display Name; must be length " << DISPLAY_NAME_LENGTH << __E__;
 		__SS_THROW__;
 	}
 
@@ -2715,6 +2743,17 @@ void WebUsers::modifyAccountSettings(
 		{
 			__SS__ << "User not found!? Should not happen." << __E__;
 			__SS_THROW__;
+		}
+
+		//enforce unique Display Name
+		{
+			for(uint64_t i=0; i < Users_.size(); ++i)
+				if(i == modi) continue; //skip target user
+				else if(Users_[i].displayName_ == displayname)
+				{
+					__SS__ << "Display Name '" << displayname << "' already exists! Please choose a unique display name." << __E__;
+					__SS_THROW__;
+				}
 		}
 
 		Users_[modi].displayName_ = displayname;
@@ -2762,6 +2801,8 @@ void WebUsers::modifyAccountSettings(
 		}
 		break;
 	case MOD_TYPE_ADD:
+		//Note: username, userId, AND displayName must be unique!
+
 		__COUT__ << "MOD_TYPE_ADD " << username << " - " << displayname << __E__;
 
 		createNewAccount(username, displayname, email);
@@ -2798,25 +2839,22 @@ void WebUsers::modifyAccountSettings(
 //	return comma separated list of active Display Names
 std::string WebUsers::getActiveUsersString()
 {
-	std::string ret = "";
-	uint64_t    u;
-	bool        repeat;
+	std::set<unsigned int>	activeUserIndices;
 	for(uint64_t i = 0; i < ActiveSessions_.size(); ++i)
-	{
-		repeat = false;
-		// check for no repeat
-		for(uint64_t j = 0; j < i; ++j)
-			if(ActiveSessions_[i].userId_ == ActiveSessions_[j].userId_)
-			{
-				repeat = true;
-				break;
-			}  // found repeat!
+		activeUserIndices.emplace(searchUsersDatabaseForUserId(ActiveSessions_[i].userId_));
 
-		if(!repeat && (u = searchUsersDatabaseForUserId(ActiveSessions_[i].userId_)) != NOT_FOUND_IN_DATABASE)  // if found, add displayName
-			ret += Users_[i].displayName_ + ",";
+	std::string ret = "";
+	bool addComma = false;
+	for(const auto& i:activeUserIndices)
+	{
+		if(i >= Users_.size()) continue; //skip not found
+
+		if(addComma) ret += ",";
+		else addComma = true;
+
+		ret += Users_[i].displayName_;
 	}
-	if(ret.length() > 1)
-		ret.erase(ret.length() - 1);  // get rid of last comma
+	__COUTV__(ret);
 	return ret;
 }  // end getActiveUsersString()
 
@@ -2903,97 +2941,130 @@ void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers,
 
 	systemMessageCleanup();
 
-	std::string fullMessage = (subject == ""?"":(subject + ": ")) +
-			message;
+	std::string fullMessage = StringMacros::encodeURIComponent((subject == ""?"":(subject + ": ")) +
+			message);
 
 	__COUTV__(fullMessage);
 	__COUTV__(StringMacros::vectorToString(targetUsers));
+
+	std::set<std::string> targetEmails;
 
 	for(const auto& targetUser : targetUsers)
 	{
 		// reject if message is a repeat for user
 
-		if(targetUser == "" || (targetUser != "*" && targetUser.size() < USERNAME_LENGTH))
+		if(targetUser == "" || (targetUser != "*" && targetUser.size() < 3))
 		{
 			__COUT__ << "Illegal username '" << targetUser << "'" << __E__;
 			continue;
 		}
 		__COUTV__(targetUser);
+		//target user might * or <group name>:<permission threshold> or just <username>
 
-		auto it = systemMessages_.find(targetUser);
 
-		if(it != systemMessages_.end() &&
-				it->second.size() &&
-				it->second[it->second.size() - 1].message_ == fullMessage)
-			continue; //skip user add
-
-		if(it == systemMessages_.end()) //create first message for user
-		{
-			systemMessages_.emplace(
-					std::pair<std::string /*toUser*/,std::vector<SystemMessage>>(
-							targetUser,
-							std::vector<SystemMessage>()
-					));
-			__COUT__ << targetUser << " Current System Messages count = " << 1 << __E__;
-		}
-		else //add message
-		{
-			__COUT__ << __E__;
-			it->second.push_back(SystemMessage(fullMessage));
-			__COUT__ << it->first << " Current System Messages count = " << it->second.size() << __E__;
-		}
-
-	}
-
-	__COUT__ << "After number of users with system messages: " << systemMessages_.size() << __E__;
-
-	if(doEmail)
-	{
-		__COUTV__(doEmail);
-
-		std::string toList = "";
-		bool first = true;
-		for(const auto& targetUser : targetUsers)
+		//do special ALL email handling
+		if(doEmail && targetUser == "*")
 		{
 			//for each user, look up email and append
-			if(targetUser == "*")
-			{
-				//add every user
-				for(const auto& user : Users_)
-				{
-					if(user.email_.size() > 5 && //few simple valid email checks
-							user.email_.find('@') != std::string::npos &&
-							user.email_.find('.') != std::string::npos)
-					{
-						if(!first) toList += ", ";
-						toList += user.email_;
-						first = false;
-
-						__COUT__ << "Adding " << user.username_ << " email: " << user.email_ << __E__;
-					}
-				} //end add every user loop
-				continue;
-			}
-
-			//find user
 			for(const auto& user : Users_)
 			{
-				if(user.username_ == targetUser)
+				if(user.email_.size() > 5 && //few simple valid email checks
+						user.email_.find('@') != std::string::npos &&
+						user.email_.find('.') != std::string::npos)
+				{
+					__COUT__ << "Adding " << user.displayName_ << " email: " << user.email_ << __E__;
+					targetEmails.emplace(user.email_);
+				}
+			} //end add every user loop
+
+		} //end all email handling
+		else if(targetUser.find(':') != std::string::npos)
+		{
+			//special group handling.. convert to individual users
+			__COUT__ << "Treating as group email target: " << targetUser << __E__;
+
+			std::map<std::string, WebUsers::permissionLevel_t> targetGroupMap;
+			StringMacros::getMapFromString(  // re-factor membership string to map
+					targetUser,
+					targetGroupMap);
+
+			__COUTV__(StringMacros::mapToString(targetGroupMap));
+
+			if(targetGroupMap.size() == 1)
+			{
+				//add users to targetUsers, so the loop will catch them at end
+
+				//loop through all users, and add users that match group spec
+				for(const auto& user : Users_)
+				{
+					WebUsers::permissionLevel_t userLevel =
+							getPermissionLevelForGroup(getPermissionsForUser(user.userId_),
+									targetGroupMap.begin()->first);
+
+					__COUTV__(StringMacros::mapToString(getPermissionsForUser(user.userId_)));
+					__COUTV__((int)userLevel);
+					__COUTV__(targetGroupMap.begin()->first);
+
+					if(userLevel != WebUsers::PERMISSION_LEVEL_INACTIVE &&
+							userLevel >= targetGroupMap.begin()->second &&
+							user.email_.size() > 5 && //few simple valid email checks
+							user.email_.find('@') != std::string::npos &&
+							user.email_.find('.') != std::string::npos)
+					{
+						if(doEmail)
+						{
+							targetEmails.emplace(user.email_);
+							__COUT__ << "Adding " << user.displayName_ << " email: " << user.email_ << __E__;
+						}
+						addSystemMessageToMap(user.displayName_,fullMessage);
+					}
+				}
+			}
+			else
+				__COUT__ << "target Group Map from '" << targetUser << "' is empty." << __E__;
+
+			continue; //proceed with user loop, do not add group target message
+		}
+
+		//at this point add to system message map (similar to group individual add, but might be '*')
+
+		addSystemMessageToMap(targetUser,fullMessage);
+
+		if(doEmail)//find user for email
+		{
+			for(const auto& user : Users_)
+			{
+				if(user.displayName_ == targetUser)
 				{
 					if(user.email_.size() > 5 && //few simple valid email checks
 							user.email_.find('@') != std::string::npos &&
 							user.email_.find('.') != std::string::npos)
 					{
-						if(!first) toList += ", ";
-						toList += user.email_;
-						first = false;
-
-						__COUT__ << "Adding " << user.username_ << " email: " << user.email_ << __E__;
+						targetEmails.emplace(user.email_);
+						__COUT__ << "Adding " << user.displayName_ << " email: " << user.email_ << __E__;
 					}
-					break;
+					break; //user found, exit search loop
 				}
-			} //end user loop
-		} //end target user email lookup loop
+			} //end user search loop
+		}
+
+	} //end target user message add loop
+
+	__COUT__ << "After number of users with system messages: " << systemMessages_.size() << __E__;
+	__COUTV__(targetEmails.size());
+
+	if(doEmail && targetEmails.size())
+	{
+		__COUTV__(StringMacros::setToString(targetEmails));
+
+		std::string toList = "";
+		bool addComma = false;
+		for(const auto& email : targetEmails)
+		{
+			if(addComma) toList += ", ";
+			else addComma = true;
+			toList += email;
+		}
 
 		std::string filename = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_DB_PATH + "/.tmp_email.txt";
 		FILE* fp = fopen(filename.c_str(),"w");
@@ -3012,18 +3083,51 @@ void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers,
 
 		StringMacros::exec(("sendmail \"" + toList + "\" < " + filename).c_str());
 	}
-	__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+	else if(doEmail)
+		__COUT_WARN__ << "Do email was attempted, but no target users had email addresses specified!" << __E__;
+
 } //end addSystemMessage()
 
+//==============================================================================
+// addSystemMessageToMap
+// 	Manages map and adds message for user, does not add repeat messages for target user.
+//	targetUser should be display name of user or "*"
+void WebUsers::addSystemMessageToMap(const std::string& targetUser, const std::string& fullMessage)
+{
+	auto it = systemMessages_.find(targetUser);
+
+	//check for repeat messages
+	if(it != systemMessages_.end() &&
+			it->second.size() &&
+			it->second[it->second.size() - 1].message_ == fullMessage)
+		return; //skip user add
+
+	if(it == systemMessages_.end()) //create first message for target user
+	{
+		systemMessages_.emplace(
+				std::pair<std::string /*toUser*/,std::vector<SystemMessage>>(
+						targetUser,
+						std::vector<SystemMessage>({SystemMessage(fullMessage)})
+				));
+		__COUT__ << targetUser << " Current System Messages count = " << 1 << __E__;
+	}
+	else //add message
+	{
+		__COUT__ << __E__;
+		it->second.push_back(SystemMessage(fullMessage));
+		__COUT__ << it->first << " Current System Messages count = " << it->second.size() << __E__;
+	}
+} //end addSystemMessageToMap
 //==============================================================================
 // getSystemMessage
 //	Deliver | separated system messages (time | msg | time | msg...etc),
 //		if there is any in vector set for user or for wildcard *
 //	Empty std::string "" returned if no message for targetUser
 //	Note: | is an illegal character and will cause GUI craziness
+// 	Note: targetUser is by display name
 std::string WebUsers::getSystemMessage(const std::string& targetUser)
 {
-	__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
 
 	//lock for remainder of scope
 	std::lock_guard<std::mutex> lock(systemMessageLock_);
@@ -3035,7 +3139,14 @@ std::string WebUsers::getSystemMessage(const std::string& targetUser)
 	int         cnt    = 0;
 	char        tmp[32];
 
+	//__COUTV__(targetUser);
 	auto it = systemMessages_.find(targetUser);
+	//for(auto systemMessagePair:systemMessages_)
+	//	__COUT__ << systemMessagePair.first << " " << systemMessagePair.second.size() << " "
+	//		<< (systemMessagePair.second.size()?systemMessagePair.second[0].message_:"") << __E__;
+	//if(it != systemMessages_.end())
+	//	__COUTV__(it->second.size());
+
 	for(uint64_t i = 0; it != systemMessages_.end() && i < it->second.size(); ++i)
 	{
 		// deliver user specific system message
@@ -3047,7 +3158,6 @@ std::string WebUsers::getSystemMessage(const std::string& targetUser)
 		it->second[i].delivered_ = true;
 		++cnt;
 	}
-
 	it = systemMessages_.find("*");
 	for(uint64_t i = 0; it != systemMessages_.end() && i < it->second.size(); ++i)
 	{
@@ -3059,9 +3169,10 @@ std::string WebUsers::getSystemMessage(const std::string& targetUser)
 
 		++cnt;
 	}
+	//__COUTV__(retStr);
 
 	systemMessageCleanup();
-	__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
 	return retStr;
 } //end getSystemMessage()
 
@@ -3071,11 +3182,11 @@ std::string WebUsers::getSystemMessage(const std::string& targetUser)
 //	For all remaining messages, wait some time before removing (e.g. 30 sec)
 void WebUsers::systemMessageCleanup()
 {
-	__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
 	for(auto& userMessagesPair : systemMessages_)
 	{
-		__COUT__ << userMessagesPair.first << " system messages: " <<
-				userMessagesPair.second.size() << __E__;
+		//__COUT__ << userMessagesPair.first << " system messages: " <<
+		//		userMessagesPair.second.size() << __E__;
 
 		for(uint64_t i = 0; i < userMessagesPair.second.size(); ++i)
 			if((userMessagesPair.first != "*" && userMessagesPair.second[i].delivered_) ||  // delivered and != *
@@ -3086,10 +3197,10 @@ void WebUsers::systemMessageCleanup()
 				--i;                   // rewind
 			}
 
-		__COUT__ << userMessagesPair.first << " remaining system messages: " <<
-				userMessagesPair.second.size() << __E__;
+		//__COUT__ << userMessagesPair.first << " remaining system messages: " <<
+		//		userMessagesPair.second.size() << __E__;
 	}
-	__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
 } //end systemMessageCleanup()
 
 //==============================================================================

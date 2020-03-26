@@ -20,7 +20,7 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub* stub)
                                  : CorePropertySupervisorBase::supervisorClassNoNamespace_ + ":" + CorePropertySupervisorBase::getSupervisorUID())
     , stateMachineWorkLoopManager_(toolbox::task::bind(this, &CoreSupervisorBase::stateMachineThread, "StateMachine"))
     , stateMachineSemaphore_(toolbox::BSem::FULL)
-    , theRemoteWebUsers_(this)
+    , theRemoteWebUsers_(this, CorePropertySupervisorBase::getGatewaySupervisorDescriptor())
 {
 	__SUP_COUT__ << "Constructor." << __E__;
 
