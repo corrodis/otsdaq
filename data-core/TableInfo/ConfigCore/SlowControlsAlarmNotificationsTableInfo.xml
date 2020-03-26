@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
+		<TABLE Name="SlowControlsAlarmNotificationsTable">
+			<VIEW Name="SLOW_CONTROLS_ALARM_NOTIFICATIONS_TABLE" Type="File,Database,DatabaseTest" Description="Each%20record%20in%20the%20SlowControlsAlarmNotificationsTable%20represents%20a%20group%20of%20users%20to%20notify%20if%20one%20or%20many%20associated%20slow%20controls%20alarms%20occur.">
+				<COLUMN Type="GroupID-alarmAlertGroups" 	 Name="AlarmNotificationsGroupID" 	 StorageName="ALARM_NOTIFICATIONS_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="UID" 	 Name="AlarmNotificationsUID" 	 StorageName="ALARM_NOTIFICATIONS_UID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="WhoToNotify" 	 StorageName="WHO_TO_NOTIFY" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="YesNo" 	 Name="DoSendEmail" 	 StorageName="DO_SEND_EMAIL" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-alertAlarms alarms" 	 Name="LinkToAlarmsToMonitorTable" 	 StorageName="LINK_TO_ALARMS_TO_MONITOR_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,SlowControlsAlarmsToMonitorTable"/>
+				<COLUMN Type="ChildLinkGroupID-alertAlarms alarms" 	 Name="LinkToAlarmsToMonitorGroupID" 	 StorageName="LINK_TO_ALARMS_TO_MONITOR_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
+			</VIEW>
+		</TABLE>
+	</ROOT>
