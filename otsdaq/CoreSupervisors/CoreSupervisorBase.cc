@@ -93,6 +93,14 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 	if(!theRemoteWebUsers_.xmlRequestToGateway(cgiIn, out, &xmlOut, CorePropertySupervisorBase::allSupervisorInfo_, userInfo))
 		return;  // access failed
 
+	if(requestType == "GetUserDisplayName")
+	{
+		__COUTV__(userInfo.displayName_);
+		xmlOut.addTextElementToData("DisplayName", userInfo.displayName_);
+		xmlOut.outputXmlDocument((std::ostringstream*)out, false /*print to cout*/, !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
+		return;
+	}
+
 	// done checking cookieCode, sequence, userWithLock, and permissions access all in one
 	// shot!
 	//**** end LOGIN GATEWAY CODE ***//
