@@ -2262,6 +2262,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 {
 	//__COUT__ << "request()" << __E__;
 
+	out->getHTTPResponseHeader().addHeader("Access-Control-Allow-Origin","*"); //to avoid block by blocked by CORS policy of browser
+
 	// for simplicity assume all commands should be mutually exclusive with iterator
 	// thread state machine accesses (really should just be careful with
 	// RunControlStateMachine access)
