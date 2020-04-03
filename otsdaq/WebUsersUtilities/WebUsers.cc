@@ -3078,7 +3078,8 @@ void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers,
 				StringMacros::decodeURIComponent(WebUsers::OTS_OWNER) + "_ots")).c_str());
 		fprintf(fp,"To: %s\n",toList.c_str());
 		fprintf(fp,"Subject: %s\n",subject.c_str());
-		fprintf(fp,"%s",message.c_str());
+		fprintf(fp,"Content-Type: text/html\n");
+		fprintf(fp,"\n<html><pre>%s</pre></html>",message.c_str());
 		fclose(fp);
 
 		StringMacros::exec(("sendmail \"" + toList + "\" < " + filename).c_str());
