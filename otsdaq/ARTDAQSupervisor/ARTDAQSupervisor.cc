@@ -105,6 +105,10 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 	init_sighandler(this);
 
+	// Only use system Python
+	unsetenv("PYTHONPATH");
+	unsetenv("PYTHONHOME");
+
 	// Write out settings file
 	auto          settings_file = __ENV__("DAQINTERFACE_SETTINGS");
 	std::ofstream o(settings_file, std::ios::trunc);
